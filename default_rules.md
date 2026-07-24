@@ -73,3 +73,14 @@ Every data table MUST feature a filter icon next to each column title in the tab
 
 ## 🚫 8. Data Integrity: No Grade 0 Defaults
 - **No Grade 0 Entries**: Unentered or missing grades must NEVER be recorded as numeric `0` or `0.0`. Missing grades are recorded as `NULL` so they do not artificially drag down student averages.
+
+---
+
+## ⚡ 9. Zero-Blur GPU Performance Standard
+- **No CSS Blur Effects (`backdrop-blur` / `blur-*`)**: CSS blur filters create severe GPU rendering and compositing bottlenecks on scrollable lists, review cards, and large data tables. All elements MUST use crisp, solid high-contrast dark theme surfaces (`bg-[#0c0f1d]`, `bg-[#121626]`, `bg-[#0d1018]`) without any `backdrop-blur` or `blur-*` classes.
+
+---
+
+## 🚀 10. High-Performance Table & List Rendering Rule
+- **High-Performance Component Memoization**: All table rows (`QuestionTableRow`, `VocabTableRow`, `StudentTableRow`) and review card items MUST be extracted into standalone `React.memo()` components with pre-memoized text parsers (`useMemo`) to prevent unnecessary row re-renders on hover, checkbox selection, or filter updates.
+

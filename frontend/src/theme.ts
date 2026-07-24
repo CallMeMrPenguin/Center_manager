@@ -64,8 +64,8 @@ export const applyTheme = (theme: any) => {
   styleEl.innerHTML = `
     ${glassClasses.join(',\n')} {
       background-color: rgba(${theme?.bgColorRGB || '255, 255, 255'}, ${opacity}) !important;
-      backdrop-filter: blur(${blur}px) saturate(${saturate}%) !important;
-      -webkit-backdrop-filter: blur(${blur}px) saturate(${saturate}%) !important;
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
       border-color: rgba(255, 255, 255, ${borderOpacity}) !important;
     }
   `;

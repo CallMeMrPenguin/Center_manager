@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { 
   FileCheck, Upload, Play, RefreshCw, CheckCircle2, XCircle, 
   Clock, Shuffle, Save, ArrowLeft, ArrowRight, Highlighter, Eye, EyeOff, Printer,
-  ChevronLeft, ChevronRight, Bookmark, Maximize2, Minimize2, MoreVertical, Sparkles, RotateCcw, Check
+  ChevronLeft, ChevronRight, Bookmark, Flag, Maximize2, Minimize2, MoreVertical, Sparkles, RotateCcw, Check
 } from 'lucide-react';
 import { api } from '../api';
 import { showToast } from '../components/Toast';
@@ -610,7 +610,7 @@ export default function KiemTraPage() {
                         : 'bg-[#14192b] border-white/10 text-slate-300 hover:text-white'
                     }`}
                   >
-                    <Bookmark size={14} className={bookmarkedQuestions[activeQuestions[currentIndex]?.id] ? "fill-rose-500 text-rose-500" : ""} />
+                    <Flag size={14} className={bookmarkedQuestions[activeQuestions[currentIndex]?.id] ? "fill-rose-500 text-rose-500" : ""} />
                     <span>{bookmarkedQuestions[activeQuestions[currentIndex]?.id] ? 'BỎ ĐÁNH DẤU' : 'ĐÁNH DẤU CÂU HỎI'}</span>
                   </button>
 
@@ -618,7 +618,6 @@ export default function KiemTraPage() {
                     onClick={handleFinishTest}
                     className="w-full flex items-center justify-center gap-2 bg-[#5c36f5] hover:bg-[#7351f7] text-white py-3 px-3 rounded-xl font-black text-xs shadow-[0_4px_16px_rgba(92,54,245,0.45)] transition cursor-pointer border border-white/20 active:scale-95"
                   >
-                    <Sparkles size={14} />
                     <span>NỘP BÀI</span>
                   </button>
                 </div>
@@ -648,7 +647,7 @@ export default function KiemTraPage() {
                             isBookmarked ? 'text-rose-400' : 'text-slate-400 hover:text-slate-200'
                           }`}
                         >
-                          <Bookmark size={14} className={isBookmarked ? "fill-rose-500 text-rose-500" : ""} />
+                          <Flag size={14} className={isBookmarked ? "fill-rose-500 text-rose-500" : ""} />
                           <span>{isBookmarked ? 'Đã đánh dấu' : 'Đánh dấu câu hỏi'}</span>
                         </button>
                       </div>
@@ -740,7 +739,6 @@ export default function KiemTraPage() {
                           onClick={handleFinishTest}
                           className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black shadow-[0_4px_16px_rgba(16,185,129,0.4)] transition cursor-pointer border border-white/20 active:scale-95"
                         >
-                          <CheckCircle2 size={16} />
                           <span>Nộp Bài</span>
                         </button>
                       )}
