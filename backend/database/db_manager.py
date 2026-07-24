@@ -1311,7 +1311,7 @@ def get_class_sessions(class_id: int, month_year: str = "") -> List[Dict[str, An
 
     # 1. Get explicit sessions
     query = """
-        SELECT s.*, c.class_name, COALESCE(s.color, c.color, '#7c3aed') as color, t.full_name as teacher_name 
+        SELECT s.*, c.class_name, COALESCE(s.color, c.color) as color, t.full_name as teacher_name 
         FROM class_sessions s 
         LEFT JOIN classes c ON s.class_id = c.id
         LEFT JOIN teachers_cm t ON s.teacher_id = t.id
@@ -1334,7 +1334,7 @@ def get_class_sessions(class_id: int, month_year: str = "") -> List[Dict[str, An
     # 2. Get weekly slots
     if not is_all_classes:
         cursor.execute("""
-            SELECT w.*, c.class_name, COALESCE(c.color, '#7c3aed') as class_color, c.teacher_id as class_teacher_id, t.full_name as class_teacher_name
+            SELECT w.*, c.class_name, c.color as class_color, c.teacher_id as class_teacher_id, t.full_name as class_teacher_name
             FROM class_schedule_weekly w
             JOIN classes c ON w.class_id = c.id
             LEFT JOIN teachers_cm t ON c.teacher_id = t.id
@@ -1342,7 +1342,7 @@ def get_class_sessions(class_id: int, month_year: str = "") -> List[Dict[str, An
         """, (class_id,))
     else:
         cursor.execute("""
-            SELECT w.*, c.class_name, COALESCE(c.color, '#7c3aed') as class_color, c.teacher_id as class_teacher_id, t.full_name as class_teacher_name
+            SELECT w.*, c.class_name, c.color as class_color, c.teacher_id as class_teacher_id, t.full_name as class_teacher_name
             FROM class_schedule_weekly w
             JOIN classes c ON w.class_id = c.id
             LEFT JOIN teachers_cm t ON c.teacher_id = t.id

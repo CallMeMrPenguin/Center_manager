@@ -77,8 +77,8 @@ function getSessionColor(sess: ClassSession): string {
   if (sess.color && sess.color.startsWith('#')) return sess.color;
   const match = (sess.notes || '').match(/#COLOR:(#[0-9a-fA-F]{6})/);
   if (match) return match[1];
-  const seed = ((sess.class_id || 1) * 7 + (sess.id || 1) * 13) % PALETTE_20.length;
-  return PALETTE_20[seed];
+  const cid = sess.class_id || 1;
+  return PALETTE_20[(cid * 3 + 1) % PALETTE_20.length];
 }
 
 function calcEndTime(start: string, mins: number): string {
@@ -181,8 +181,9 @@ export default function SchedulePage() {
   const openAdd = (dateStr?: string) => {
     setEditing(null);
     setMode(dateStr ? 'single' : 'weekdays');
-    setColor('#7c3aed');
-    setForm({ class_id: classesList[0]?.id, date: dateStr || today, start_time: '18:00', duration: 90, status: 'Sắp diễn ra', notes: '' });
+    const firstCid = classesList[0]?.id || 1;
+    setColor(PALETTE_20[(firstCid * 3 + 1) % PALETTE_20.length]);
+    setForm({ class_id: firstCid, date: dateStr || today, start_time: '18:00', duration: 90, status: 'Sắp diễn ra', notes: '' });
     setDayCfgs(defaultDayCfgs());
     setModalOpen(true);
   };
