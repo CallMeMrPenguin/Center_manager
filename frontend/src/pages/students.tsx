@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { ColumnDef, VisibilityState } from '@tanstack/react-table';
 import { 
   Users, UserPlus, Search, Edit3, Trash2, CheckCircle2, XCircle, 
   Phone, Home, GraduationCap, Calendar, RefreshCw, X, AlertCircle, Eye, SlidersHorizontal, Upload
@@ -10,6 +11,7 @@ import { VietnameseInput } from '../components/VietnameseInput';
 import { CustomDatePicker } from '../components/CustomDatePicker';
 import { CustomSelect } from '../components/CustomSelect';
 import { Student } from '../types';
+import { DataTable } from '../components/DataTable';
 
 export default function StudentsPage() {
   const confirm = useConfirm();
@@ -24,59 +26,45 @@ export default function StudentsPage() {
   const [duplicateWarningMsg, setDuplicateWarningMsg] = useState<string | null>(null);
   const [highlightMissingFields, setHighlightMissingFields] = useState<boolean>(false);
 
-  // Column visibility state
+  // Column Visibility State
   const [showColPicker, setShowColPicker] = useState(false);
   const colPickerRef = useRef<HTMLDivElement>(null);
-  const [visibleCols, setVisibleCols] = useState<{ [key: string]: boolean }>(() => {
-    const saved = localStorage.getItem('student_visible_cols');
-    if (saved) {
-      try { return JSON.parse(saved); } catch (e) {}
-    }
-    return {
-      name: true,
-      classes: true,
-      info: true,
-      school: true,
-      parents: true,
-      enrollDate: true,
-      status: true,
-      actions: true
-    };
+  const [visibleCols, setVisibleCols] = useState<Record<string, boolean>>({
+    name: true,
+    classes: true,
+    grade: true,
+    gender: true,
+    school: true,
+    parents: true,
+    enrollDate: true,
+    status: true,
+    actions: true
   });
 
-  useEffect(() => {
-    localStorage.setItem('student_visible_cols', JSON.stringify(visibleCols));
-  }, [visibleCols]);
-
-  useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
-      if (colPickerRef.current && !colPickerRef.current.contains(e.target as Node)) {
-        setShowColPicker(false);
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  // Modal state
   const [modalOpen, setModalOpen] = useState(false);
   const [editingStudent, setEditingStudent] = useState<Student | null>(null);
   const [formData, setFormData] = useState<Partial<Student>>({
     full_name: '',
     nickname: '',
-    gender: 'Nam',
     grade: 'Lớp 6',
+    gender: 'Nam',
+    school: '',
     date_of_birth: '',
     enroll_date: new Date().toISOString().split('T')[0],
-    school: '',
-    status: 'Đang học',
     father_name: '',
     father_phone: '',
     mother_name: '',
     mother_phone: '',
     address: '',
-    notes: ''
+    notes: '',
+    status: 'Đang học'
   });
+
+  // CSV Import Preview Modal State
+  const [csvModalOpen, setCsvModalOpen] = useState(false);
+  const [csvFile, setCsvFile] = useState<File | null>(null);
+  const [csvPreview, setCsvPreview] = useState<any[]>([]);
+  const [csvImporting, setCsvImporting] = useState(false);
 
   const loadData = async () => {
     setLoading(true);
@@ -94,47 +82,45 @@ export default function StudentsPage() {
     loadData();
   }, [search, statusFilter]);
 
+  // Click outside listener for Column Menu
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (colPickerRef.current && !colPickerRef.current.contains(event.target as Node)) {
+        setShowColPicker(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   const handleOpenAdd = () => {
     setEditingStudent(null);
+    setDuplicateWarningMsg(null);
     setHighlightMissingFields(false);
     setFormData({
       full_name: '',
       nickname: '',
-      gender: 'Nam',
       grade: 'Lớp 6',
+      gender: 'Nam',
+      school: '',
       date_of_birth: '',
       enroll_date: new Date().toISOString().split('T')[0],
-      school: '',
-      status: 'Đang học',
       father_name: '',
       father_phone: '',
       mother_name: '',
       mother_phone: '',
       address: '',
-      notes: ''
+      notes: '',
+      status: 'Đang học'
     });
     setModalOpen(true);
   };
 
   const handleOpenEdit = (st: Student) => {
     setEditingStudent(st);
+    setDuplicateWarningMsg(null);
     setHighlightMissingFields(false);
-    setFormData({
-      full_name: st.full_name,
-      nickname: st.nickname || '',
-      gender: st.gender || 'Nam',
-      grade: st.grade || 'Lớp 6',
-      date_of_birth: st.date_of_birth || '',
-      enroll_date: st.enroll_date || '',
-      school: st.school || '',
-      status: st.status || 'Đang học',
-      father_name: st.father_name || '',
-      father_phone: st.father_phone || '',
-      mother_name: st.mother_name || '',
-      mother_phone: st.mother_phone || '',
-      address: st.address || '',
-      notes: st.notes || ''
-    });
+    setFormData({ ...st });
     setModalOpen(true);
   };
 
@@ -212,6 +198,126 @@ export default function StudentsPage() {
   const toggleCol = (colKey: string) => {
     setVisibleCols(prev => ({ ...prev, [colKey]: !prev[colKey] }));
   };
+
+  const columns = useMemo<ColumnDef<Student>[]>(() => [
+    {
+      id: 'stt',
+      header: () => <div className="text-center w-full">STT</div>,
+      cell: ({ row }) => <div className="text-center font-bold text-slate-400">{row.index + 1}</div>,
+    },
+    {
+      id: 'name',
+      accessorKey: 'full_name',
+      header: 'Họ và Tên (Biệt danh)',
+      cell: ({ row }) => {
+        const st = row.original;
+        return (
+          <div className="font-extrabold text-white text-xs">
+            {st.full_name}{st.nickname ? ` - ${st.nickname}` : ''}
+          </div>
+        );
+      },
+    },
+    {
+      id: 'classes',
+      accessorKey: 'enrolled_classes',
+      header: 'Lớp Học',
+      cell: ({ row }) => {
+        const classes = row.original.enrolled_classes;
+        return classes ? (
+          <span className="inline-block px-2.5 py-0.5 rounded-lg text-[10px] font-black bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+            {classes}
+          </span>
+        ) : (
+          <span className="text-slate-500 text-[10px]">Chưa xếp lớp</span>
+        );
+      },
+    },
+    {
+      id: 'grade',
+      accessorKey: 'grade',
+      header: 'Khối',
+      cell: ({ row }) => (
+        <span className="inline-block px-2.5 py-0.5 rounded-lg text-xs font-extrabold bg-[#222b48] text-indigo-300 border border-indigo-500/20">
+          {row.original.grade || 'Lớp 6'}
+        </span>
+      ),
+    },
+    {
+      id: 'gender',
+      accessorKey: 'gender',
+      header: 'Giới Tính',
+      cell: ({ row }) => {
+        const st = row.original;
+        return (
+          <div className="text-slate-300 font-bold text-xs">
+            <span>{st.gender || 'Nam'}</span>
+            {st.date_of_birth && <div className="text-[10px] text-slate-400 font-medium mt-0.5">Ns: {st.date_of_birth}</div>}
+          </div>
+        );
+      },
+    },
+    {
+      id: 'school',
+      accessorKey: 'school',
+      header: 'Trường Học',
+      cell: (info) => <span className="text-slate-300">{info.getValue<string>() || '-'}</span>,
+    },
+    {
+      id: 'parents',
+      header: 'Phụ Huynh',
+      cell: ({ row }) => {
+        const st = row.original;
+        return (
+          <div className="text-slate-300 text-xs">
+            {st.father_name && <div>Bố: {st.father_name} ({st.father_phone || 'Chưa có SĐT'})</div>}
+            {st.mother_name && <div>Mẹ: {st.mother_name} ({st.mother_phone || 'Chưa có SĐT'})</div>}
+            {!st.father_name && !st.mother_name && <span className="text-slate-500">-</span>}
+          </div>
+        );
+      },
+    },
+    {
+      id: 'enrollDate',
+      accessorKey: 'enroll_date',
+      header: 'Ngày Nhập Học',
+      cell: (info) => <span className="text-slate-400">{info.getValue<string>() || '-'}</span>,
+    },
+    {
+      id: 'status',
+      accessorKey: 'status',
+      header: () => <div className="text-center w-full">Trạng Thái</div>,
+      cell: (info) => {
+        const st = info.getValue<string>();
+        return (
+          <div className="text-center">
+            <span className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-black ${
+              st === 'Đang học'
+                ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                : 'bg-rose-500/20 text-rose-400 border border-rose-500/30'
+            }`}>
+              {st || 'Đang học'}
+            </span>
+          </div>
+        );
+      },
+    },
+    {
+      id: 'actions',
+      header: () => <div className="text-center w-full">Thao Tác</div>,
+      cell: ({ row }) => (
+        <div className="text-center">
+          <button
+            onClick={() => handleOpenEdit(row.original)}
+            className="p-1.5 rounded-lg bg-indigo-500/20 hover:bg-indigo-500/40 text-indigo-300 border border-indigo-500/30 transition cursor-pointer"
+            title="Chỉnh sửa hồ sơ học sinh"
+          >
+            <Edit3 size={13} />
+          </button>
+        </div>
+      ),
+    },
+  ], []);
 
   return (
     <div className="h-full w-full overflow-y-auto p-6 space-y-6 select-none bg-[#0d101d] font-sans scrollbar-thin">
@@ -346,159 +452,16 @@ export default function StudentsPage() {
       </div>
 
       {/* STUDENTS TABLE */}
-      <div className="bg-[#14192b] border border-[#28334e] rounded-2xl overflow-hidden shadow-2xl">
-        {loading ? (
-          <div className="p-12 text-center text-slate-400 font-bold flex flex-col items-center gap-3">
-            <RefreshCw size={24} className="animate-spin text-indigo-400" />
-            <span>Đang tải danh sách học sinh...</span>
-          </div>
-        ) : students.length === 0 ? (
-          <div className="p-12 text-center text-slate-400 font-bold">
-            Không tìm thấy học sinh nào phù hợp với bộ lọc.
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse text-xs">
-              <thead className="bg-[#1c243c] text-slate-300 uppercase text-[10px] font-black tracking-wider border-b border-[#303d62]">
-                <tr>
-                  <th className="py-3.5 px-4 w-12 text-center">STT</th>
-                  {visibleCols.name && <th className="py-3.5 px-4">Họ và Tên (Biệt danh)</th>}
-                  {visibleCols.classes && <th className="py-3.5 px-4">Lớp Học</th>}
-                  {visibleCols.grade && <th className="py-3.5 px-4">Khối</th>}
-                  {visibleCols.gender && <th className="py-3.5 px-4">Giới Tính</th>}
-                  {visibleCols.school && <th className="py-3.5 px-4">Trường Học</th>}
-                  {visibleCols.parents && <th className="py-3.5 px-4">Phụ Huynh</th>}
-                  {visibleCols.enrollDate && <th className="py-3.5 px-4">Ngày Nhập Học</th>}
-                  {visibleCols.status && <th className="py-3.5 px-4 text-center">Trạng Thái</th>}
-                  {visibleCols.actions && <th className="py-3.5 px-4 text-center w-20">Thao Tác</th>}
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#222b45] font-medium bg-[#14192b]">
-                {students.slice((currentPage - 1) * pageSize, currentPage * pageSize).map((st, idx) => (
-                  <tr key={st.id} className="hover:bg-[#1a223a] transition-colors">
-                    <td className="py-3.5 px-4 text-center font-bold text-slate-400">
-                      {(currentPage - 1) * pageSize + idx + 1}
-                    </td>
-
-                    {visibleCols.name && (
-                      <td className="py-3.5 px-4">
-                        <div className="font-extrabold text-white text-xs">
-                          {st.full_name}{st.nickname ? ` - ${st.nickname}` : ''}
-                        </div>
-                      </td>
-                    )}
-
-                    {visibleCols.classes && (
-                      <td className="py-3.5 px-4">
-                        {st.enrolled_classes ? (
-                          <span className="inline-block px-2.5 py-0.5 rounded-lg text-[10px] font-black bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
-                            {st.enrolled_classes}
-                          </span>
-                        ) : (
-                          <span className="text-slate-500 text-[10px]">Chưa xếp lớp</span>
-                        )}
-                      </td>
-                    )}
-
-                    {/* Grade Column */}
-                    {visibleCols.grade && (
-                      <td className="py-3.5 px-4">
-                        <span className="inline-block px-2.5 py-0.5 rounded-lg text-xs font-extrabold bg-[#222b48] text-indigo-300 border border-indigo-500/20">
-                          {st.grade || 'Lớp 6'}
-                        </span>
-                      </td>
-                    )}
-
-                    {/* Gender Column */}
-                    {visibleCols.gender && (
-                      <td className="py-3.5 px-4">
-                        <div className="text-slate-300 font-bold text-xs">
-                          <span>{st.gender || 'Nam'}</span>
-                          {st.date_of_birth && <div className="text-[10px] text-slate-400 font-medium mt-0.5">Ns: {st.date_of_birth}</div>}
-                        </div>
-                      </td>
-                    )}
-
-                    {visibleCols.school && (
-                      <td className="py-3.5 px-4 text-slate-300">
-                        {st.school || '-'}
-                      </td>
-                    )}
-
-                    {visibleCols.parents && (
-                      <td className="py-3.5 px-4">
-                        <div className="text-slate-300">
-                          {st.father_name && <div>Bố: {st.father_name} ({st.father_phone || 'Chưa có SĐT'})</div>}
-                          {st.mother_name && <div>Mẹ: {st.mother_name} ({st.mother_phone || 'Chưa có SĐT'})</div>}
-                          {!st.father_name && !st.mother_name && <span className="text-slate-500">-</span>}
-                        </div>
-                      </td>
-                    )}
-
-                    {visibleCols.enrollDate && (
-                      <td className="py-3.5 px-4 text-slate-400">
-                        {st.enroll_date || '-'}
-                      </td>
-                    )}
-
-                    {visibleCols.status && (
-                      <td className="py-3.5 px-4 text-center">
-                        <span className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-black ${
-                          st.status === 'Đang học'
-                            ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                            : 'bg-rose-500/20 text-rose-400 border border-rose-500/30'
-                        }`}>
-                          {st.status || 'Đang học'}
-                        </span>
-                      </td>
-                    )}
-
-                    {/* Merged Action Button: Keep ONLY Pen (Edit) Button */}
-                    {visibleCols.actions && (
-                      <td className="py-3.5 px-4 text-center">
-                        <button
-                          onClick={() => handleOpenEdit(st)}
-                          className="p-1.5 rounded-lg bg-[#222b48] hover:bg-indigo-600 text-indigo-300 hover:text-white transition cursor-pointer"
-                          title="Chỉnh sửa hồ sơ học sinh"
-                        >
-                          <Edit3 size={14} />
-                        </button>
-                      </td>
-                    )}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-
-            {/* Pagination Controls */}
-            {students.length > pageSize && (
-              <div className="px-6 py-4 bg-[#14192b] border-t border-[#28334e] flex items-center justify-between">
-                <span className="text-xs text-slate-400">
-                  Hiển thị {(currentPage - 1) * pageSize + 1} - {Math.min(currentPage * pageSize, students.length)} trong tổng số {students.length} học sinh
-                </span>
-                <div className="flex items-center gap-2">
-                  <button
-                    disabled={currentPage === 1}
-                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                    className="px-3 py-1.5 rounded-xl bg-[#1e2540] hover:bg-[#283254] disabled:opacity-30 text-white text-xs font-bold border border-[#343e68] transition cursor-pointer"
-                  >
-                    Trước
-                  </button>
-                  <span className="px-3 text-xs text-indigo-300 font-black">
-                    Trang {currentPage} / {Math.ceil(students.length / pageSize)}
-                  </span>
-                  <button
-                    disabled={currentPage >= Math.ceil(students.length / pageSize)}
-                    onClick={() => setCurrentPage(p => Math.min(Math.ceil(students.length / pageSize), p + 1))}
-                    className="px-3 py-1.5 rounded-xl bg-[#1e2540] hover:bg-[#283254] disabled:opacity-30 text-white text-xs font-bold border border-[#343e68] transition cursor-pointer"
-                  >
-                    Sau
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-        )}
+      <div className="bg-[#14192b] border border-[#28334e] rounded-2xl overflow-hidden shadow-2xl flex flex-col">
+        <DataTable
+          data={students}
+          columns={columns}
+          loading={loading}
+          columnVisibility={visibleCols}
+          loadingMessage="Đang tải danh sách học sinh..."
+          emptyMessage="Không tìm thấy học sinh nào phù hợp với bộ lọc."
+          pageSize={pageSize}
+        />
       </div>
 
       {/* DUPLICATE NAME WARNING MODAL */}

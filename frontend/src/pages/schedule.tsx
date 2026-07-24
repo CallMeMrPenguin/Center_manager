@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { ColumnDef } from '@tanstack/react-table';
 import {
   Calendar as CalendarIcon, Clock, CheckCircle2, Plus, RefreshCw,
   ChevronLeft, ChevronRight, X, Edit3, Trash2, Palette
@@ -8,6 +9,7 @@ import { showToast } from '../components/Toast';
 import { useConfirm } from '../components/ConfirmDialog';
 import { CustomDatePicker } from '../components/CustomDatePicker';
 import { CustomSelect } from '../components/CustomSelect';
+import { DataTable } from '../components/DataTable';
 
 interface ClassSession {
   id: number;
@@ -529,37 +531,94 @@ export default function SchedulePage() {
 
       {/* LIST VIEW */}
       {viewMode === 'list' && (
-        <div className="calendar-container-depth flex-1 min-h-0 overflow-auto">
+        <div className="calendar-container-depth flex-1 min-h-0 overflow-auto flex flex-col">
           <div className="glowing-timeline-bar w-full" />
-          <table className="w-full text-left border-collapse text-xs">
-            <thead>
-              <tr className="bg-[#1a2032] text-slate-400 uppercase text-[10px] font-black tracking-wider border-b border-[#2a3550]">
-                {['Ngày Học', 'Lớp Học', 'Giờ / Thời Lượng', 'Giáo Viên', 'Trạng Thái', ''].map(h => <th key={h} className="py-3 px-3">{h}</th>)}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[#28334e]">
-              {sessions.map(s => {
-                const hex = getSessionColor(s);
-                return (
-                  <tr key={s.id} className="hover:bg-[#1c2438] bg-[#151b2a] transition-colors">
-                    <td className="py-3 px-3 font-bold text-white">{s.date}</td>
-                    <td className="py-3 px-3 font-extrabold" style={{ color: hex }}>{s.class_name}</td>
-                    <td className="py-3 px-3 text-slate-300">{s.start_time} – {calcEndTime(s.start_time, s.duration)} ({s.duration}p)</td>
-                    <td className="py-3 px-3 text-slate-400">{s.teacher_name || 'Mặc định'}</td>
-                    <td className="py-3 px-3">
-                      <span className={`inline-block px-2 py-0.5 rounded-xl text-[10px] font-black border ${s.status === 'Đã học' ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' : s.status === 'Hủy' ? 'bg-rose-500/10 border-rose-500/30 text-rose-400' : 'bg-indigo-500/10 border-indigo-500/30 text-indigo-400'}`}>{s.status}</span>
-                    </td>
-                    <td className="py-3 px-3 text-right">
-                      <div className="flex items-center justify-end gap-1.5">
-                        <button onClick={() => openEdit(s)} className="p-1.5 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/20 transition cursor-pointer"><Edit3 size={12} /></button>
-                        <button onClick={() => del(s)} className="p-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 transition cursor-pointer"><Trash2 size={12} /></button>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+          {(() => {
+            const sessionColumns: ColumnDef<ClassSession>[] = [
+              {
+                accessorKey: 'date',
+                header: 'Ngày Học',
+                cell: (info) => <span className="font-bold text-white">{info.getValue<string>()}</span>,
+              },
+              {
+                accessorKey: 'class_name',
+                header: 'Lớp Học',
+                cell: ({ row }) => {
+                  const s = row.original;
+                  const hex = getSessionColor(s);
+                  return <span className="font-extrabold" style={{ color: hex }}>{s.class_name}</span>;
+                },
+              },
+              {
+                id: 'time',
+                header: 'Giờ / Thời Lượng',
+                cell: ({ row }) => {
+                  const s = row.original;
+                  return (
+                    <span className="text-slate-300">
+                      {s.start_time} – {calcEndTime(s.start_time, s.duration)} ({s.duration}p)
+                    </span>
+                  );
+                },
+              },
+              {
+                accessorKey: 'teacher_name',
+                header: 'Giáo Viên',
+                cell: (info) => <span className="text-slate-400">{info.getValue<string>() || 'Mặc định'}</span>,
+              },
+              {
+                accessorKey: 'status',
+                header: 'Trạng Thái',
+                cell: (info) => {
+                  const st = info.getValue<string>();
+                  return (
+                    <span className={`inline-block px-2 py-0.5 rounded-xl text-[10px] font-black border ${
+                      st === 'Đã học'
+                        ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
+                        : st === 'Hủy'
+                        ? 'bg-rose-500/10 border-rose-500/30 text-rose-400'
+                        : 'bg-indigo-500/10 border-indigo-500/30 text-indigo-400'
+                    }`}>
+                      {st}
+                    </span>
+                  );
+                },
+              },
+              {
+                id: 'actions',
+                header: () => <div className="text-right w-full">Thao Tác</div>,
+                cell: ({ row }) => (
+                  <div className="flex items-center justify-end gap-1.5">
+                    <button
+                      onClick={() => openEdit(row.original)}
+                      className="p-1.5 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/20 transition cursor-pointer"
+                      title="Sửa"
+                    >
+                      <Edit3 size={12} />
+                    </button>
+                    <button
+                      onClick={() => del(row.original)}
+                      className="p-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 transition cursor-pointer"
+                      title="Xóa"
+                    >
+                      <Trash2 size={12} />
+                    </button>
+                  </div>
+                ),
+              },
+            ];
+
+            return (
+              <DataTable
+                data={sessions}
+                columns={sessionColumns}
+                loading={loading}
+                loadingMessage="Đang tải lịch học..."
+                emptyMessage="Không có buổi học nào."
+                pageSize={20}
+              />
+            );
+          })()}
         </div>
       )}
 

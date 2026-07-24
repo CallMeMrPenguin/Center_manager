@@ -1,7 +1,15 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
+import {
+  useReactTable,
+  getCoreRowModel,
+  getPaginationRowModel,
+  flexRender,
+  ColumnDef
+} from '@tanstack/react-table';
 import { api } from '../../api';
 import { Settings, Save, Search, RefreshCw, BookOpen, Check, X, FileText } from 'lucide-react';
 import { showToast } from '../../components/Toast';
+import { DataTable } from '../../components/DataTable';
 
 const EXERCISE_TYPE_LABELS: Record<string, string> = {
   "pr": "Pronunciation (Phát âm)",
@@ -234,82 +242,87 @@ export default function UnitConfig() {
               </div>
             </div>
 
-            {/* Table */}
-            <div className="border border-slate-900 rounded-xl overflow-auto max-h-[500px] table-scroll-container-nested">
-              <table className="w-full border-collapse text-left text-xs">
-                <thead>
-                  <tr className="bg-slate-950/90 border-b border-slate-900 text-[0.66rem] text-slate-500 font-extrabold uppercase tracking-wider sticky top-0 z-10">
-                    <th className="py-4 px-4 w-32">Unit_Grade</th>
-                    <th className="py-4 px-4 w-24">Unit</th>
-                    <th className="py-4 px-4">Tên Unit</th>
-                    <th className="py-4 px-4 w-28 text-center">Hành động</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-900/40">
-                  {rows.length === 0 ? (
-                    <tr>
-                      <td colSpan={4} className="py-8 text-center text-slate-500">
-                        Không tìm thấy bài học nào phù hợp.
-                      </td>
-                    </tr>
-                  ) : (
-                    rows.map((row) => {
-                      const isEditing = editingKey?.grade === row.grade && editingKey?.unit === row.unit;
-                      return (
-                        <tr 
-                          key={row.key}
-                          className="hover:bg-slate-900/10 transition"
-                        >
-                          <td className="py-3 px-4 font-mono font-bold text-slate-450">{row.key}</td>
-                          <td className="py-3 px-4 font-bold text-white">Unit {row.unit}</td>
-                          <td className="py-3 px-4">
-                            {isEditing ? (
-                              <input
-                                type="text"
-                                value={editValue}
-                                onChange={(e) => setEditValue(e.target.value)}
-                                className="w-full px-3 py-1 bg-[#080b12] border border-slate-800 rounded-lg focus:outline-none focus:border-blue-500 text-xs text-white"
-                                autoFocus
-                                onKeyDown={(e) => {
-                                  if (e.key === 'Enter') handleSave(row.grade, row.unit, editValue);
-                                  if (e.key === 'Escape') setEditingKey(null);
-                                }}
-                              />
-                            ) : (
-                              <span className="font-semibold text-slate-200">{row.name || '-'}</span>
-                            )}
-                          </td>
-                          <td className="py-2 px-4 text-center">
-                            {isEditing ? (
-                              <div className="flex gap-2 justify-center">
-                                <button
-                                  onClick={() => handleSave(row.grade, row.unit, editValue)}
-                                  className="px-2 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded font-bold text-[0.66rem] flex items-center gap-1 cursor-pointer"
-                                >
-                                  <Save size={10} /> Lưu
-                                </button>
-                                <button
-                                  onClick={() => setEditingKey(null)}
-                                  className="px-2 py-1 bg-[#151f32] hover:bg-slate-800 text-slate-400 rounded font-bold text-[0.66rem] cursor-pointer"
-                                >
-                                  Hủy
-                                </button>
-                              </div>
-                            ) : (
-                              <button
-                                onClick={() => startEditing(row.grade, row.unit, row.name)}
-                                className="px-3 py-1 bg-slate-900 border border-slate-800 hover:bg-gradient-to-tr hover:from-blue-600/10 hover:to-indigo-600/10 hover:border-blue-500/30 text-slate-350 hover:text-white rounded-lg font-bold text-[0.66rem] cursor-pointer transition-all duration-300 shadow-sm"
-                              >
-                                Chỉnh sửa
-                              </button>
-                            )}
-                          </td>
-                        </tr>
+            {/* Table 1: Units */}
+            <div className="border border-slate-900 rounded-xl overflow-hidden max-h-[500px] flex flex-col">
+              {(() => {
+                const unitColumns: ColumnDef<any>[] = [
+                  {
+                    accessorKey: 'key',
+                    header: 'Unit_Grade',
+                    cell: (info) => <span className="font-mono font-bold text-slate-450">{info.getValue<string>()}</span>,
+                  },
+                  {
+                    accessorKey: 'unit',
+                    header: 'Unit',
+                    cell: (info) => <span className="font-bold text-white">Unit {info.getValue<string>()}</span>,
+                  },
+                  {
+                    accessorKey: 'name',
+                    header: 'Tên Unit',
+                    cell: ({ row }) => {
+                      const rowItem = row.original;
+                      const isEditing = editingKey?.grade === rowItem.grade && editingKey?.unit === rowItem.unit;
+                      return isEditing ? (
+                        <input
+                          type="text"
+                          value={editValue}
+                          onChange={(e) => setEditValue(e.target.value)}
+                          className="w-full px-3 py-1 bg-[#080b12] border border-slate-800 rounded-lg focus:outline-none focus:border-blue-500 text-xs text-white"
+                          autoFocus
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') handleSave(rowItem.grade, rowItem.unit, editValue);
+                            if (e.key === 'Escape') setEditingKey(null);
+                          }}
+                        />
+                      ) : (
+                        <span className="font-semibold text-slate-200">{rowItem.name || '-'}</span>
                       );
-                    })
-                  )}
-                </tbody>
-              </table>
+                    },
+                  },
+                  {
+                    id: 'actions',
+                    header: () => <div className="text-center w-full">Hành động</div>,
+                    cell: ({ row }) => {
+                      const rowItem = row.original;
+                      const isEditing = editingKey?.grade === rowItem.grade && editingKey?.unit === rowItem.unit;
+                      return isEditing ? (
+                        <div className="flex gap-2 justify-center">
+                          <button
+                            onClick={() => handleSave(rowItem.grade, rowItem.unit, editValue)}
+                            className="px-2 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded font-bold text-[0.66rem] flex items-center gap-1 cursor-pointer"
+                          >
+                            <Save size={10} /> Lưu
+                          </button>
+                          <button
+                            onClick={() => setEditingKey(null)}
+                            className="px-2 py-1 bg-[#151f32] hover:bg-slate-800 text-slate-400 rounded font-bold text-[0.66rem] cursor-pointer"
+                          >
+                            Hủy
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="text-center">
+                          <button
+                            onClick={() => startEditing(rowItem.grade, rowItem.unit, rowItem.name)}
+                            className="px-3 py-1 bg-slate-900 border border-slate-800 hover:bg-gradient-to-tr hover:from-blue-600/10 hover:to-indigo-600/10 hover:border-blue-500/30 text-slate-350 hover:text-white rounded-lg font-bold text-[0.66rem] cursor-pointer transition-all duration-300 shadow-sm"
+                          >
+                            Chỉnh sửa
+                          </button>
+                        </div>
+                      );
+                    },
+                  },
+                ];
+
+                return (
+                  <DataTable
+                    data={rows}
+                    columns={unitColumns}
+                    emptyMessage="Không tìm thấy bài học nào phù hợp."
+                    pageSize={20}
+                  />
+                );
+              })()}
             </div>
 
           </div>
@@ -328,74 +341,94 @@ export default function UnitConfig() {
             </span>
           </div>
 
-          <div className="border border-slate-900 rounded-xl overflow-auto max-h-[500px] table-scroll-container-nested">
-            <table className="w-full border-collapse text-left text-xs">
-              <thead>
-                <tr className="bg-slate-950/90 border-b border-slate-900 text-[0.66rem] text-slate-500 font-extrabold uppercase tracking-wider sticky top-0 z-10">
-                  <th className="py-4 px-4 w-28">Ký hiệu (Code)</th>
-                  <th className="py-4 px-4 w-60">Tên dạng bài</th>
-                  <th className="py-4 px-4">Nội dung hướng dẫn dạng bài (Instruction Text)</th>
-                  <th className="py-4 px-4 w-32 text-center">Hành động</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-900/40">
-                {Object.entries(EXERCISE_TYPE_LABELS).map(([key, label]) => {
-                  const currentVal = exerciseConfig[key] || '';
-                  const isEditing = editingExerciseKey === key;
-                  return (
-                    <tr key={key} className="hover:bg-slate-900/10 transition">
-                      <td className="py-3 px-4 font-mono font-bold text-blue-450">{key}</td>
-                      <td className="py-3 px-4 font-bold text-white">{label}</td>
-                      <td className="py-3 px-4">
-                        {isEditing ? (
-                          <input
-                            type="text"
-                            value={editExerciseValue}
-                            onChange={(e) => setEditExerciseValue(e.target.value)}
-                            className="w-full px-3 py-1 bg-[#080b12] border border-slate-800 rounded-lg focus:outline-none focus:border-blue-500 text-xs text-white"
-                            autoFocus
-                            onKeyDown={(e) => {
-                              if (e.key === 'Enter') handleSaveExercise(key, editExerciseValue);
-                              if (e.key === 'Escape') setEditingExerciseKey(null);
-                            }}
-                          />
-                        ) : (
-                          <span className="font-semibold text-slate-300 break-words leading-relaxed">{currentVal || '-'}</span>
-                        )}
-                      </td>
-                      <td className="py-2 px-4 text-center">
-                        {isEditing ? (
-                          <div className="flex gap-2 justify-center">
-                            <button
-                              onClick={() => handleSaveExercise(key, editExerciseValue)}
-                              className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded font-bold text-[0.66rem] flex items-center gap-1 cursor-pointer"
-                            >
-                              <Save size={10} /> Lưu
-                            </button>
-                            <button
-                              onClick={() => setEditingExerciseKey(null)}
-                              className="px-2 py-1 bg-[#151f32] hover:bg-slate-800 text-slate-400 rounded font-bold text-[0.66rem] cursor-pointer"
-                            >
-                              Hủy
-                            </button>
-                          </div>
-                        ) : (
-                          <button
-                            onClick={() => {
-                              setEditingExerciseKey(key);
-                              setEditExerciseValue(currentVal);
-                            }}
-                            className="px-3 py-1 bg-slate-900 border border-slate-800 hover:bg-gradient-to-tr hover:from-blue-600/10 hover:to-indigo-600/10 hover:border-blue-500/30 text-slate-350 hover:text-white rounded-lg font-bold text-[0.66rem] cursor-pointer transition-all duration-300 shadow-sm"
-                          >
-                            Chỉnh sửa
-                          </button>
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+          <div className="border border-slate-900 rounded-xl overflow-hidden max-h-[500px] flex flex-col">
+            {(() => {
+              const exerciseData = Object.entries(EXERCISE_TYPE_LABELS).map(([key, label]) => ({
+                key,
+                label,
+                instruction: exerciseConfig[key] || '',
+              }));
+
+              const exerciseColumns: ColumnDef<any>[] = [
+                {
+                  accessorKey: 'key',
+                  header: 'Ký hiệu (Code)',
+                  cell: (info) => <span className="font-mono font-bold text-blue-450">{info.getValue<string>()}</span>,
+                },
+                {
+                  accessorKey: 'label',
+                  header: 'Tên dạng bài',
+                  cell: (info) => <span className="font-bold text-white">{info.getValue<string>()}</span>,
+                },
+                {
+                  accessorKey: 'instruction',
+                  header: 'Nội dung hướng dẫn dạng bài (Instruction Text)',
+                  cell: ({ row }) => {
+                    const key = row.original.key;
+                    const isEditing = editingExerciseKey === key;
+                    return isEditing ? (
+                      <input
+                        type="text"
+                        value={editExerciseValue}
+                        onChange={(e) => setEditExerciseValue(e.target.value)}
+                        className="w-full px-3 py-1 bg-[#080b12] border border-slate-800 rounded-lg focus:outline-none focus:border-blue-500 text-xs text-white"
+                        autoFocus
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') handleSaveExercise(key, editExerciseValue);
+                          if (e.key === 'Escape') setEditingExerciseKey(null);
+                        }}
+                      />
+                    ) : (
+                      <span className="font-semibold text-slate-300 break-words leading-relaxed">{row.original.instruction || '-'}</span>
+                    );
+                  },
+                },
+                {
+                  id: 'actions',
+                  header: () => <div className="text-center w-full">Hành động</div>,
+                  cell: ({ row }) => {
+                    const key = row.original.key;
+                    const isEditing = editingExerciseKey === key;
+                    return isEditing ? (
+                      <div className="flex gap-2 justify-center">
+                        <button
+                          onClick={() => handleSaveExercise(key, editExerciseValue)}
+                          className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded font-bold text-[0.66rem] flex items-center gap-1 cursor-pointer"
+                        >
+                          <Save size={10} /> Lưu
+                        </button>
+                        <button
+                          onClick={() => setEditingExerciseKey(null)}
+                          className="px-2 py-1 bg-[#151f32] hover:bg-slate-800 text-slate-400 rounded font-bold text-[0.66rem] cursor-pointer"
+                        >
+                          Hủy
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="text-center">
+                        <button
+                          onClick={() => {
+                            setEditingExerciseKey(key);
+                            setEditExerciseValue(row.original.instruction);
+                          }}
+                          className="px-3 py-1 bg-slate-900 border border-slate-800 hover:bg-gradient-to-tr hover:from-blue-600/10 hover:to-indigo-600/10 hover:border-blue-500/30 text-slate-350 hover:text-white rounded-lg font-bold text-[0.66rem] cursor-pointer transition-all duration-300 shadow-sm"
+                        >
+                          Chỉnh sửa
+                        </button>
+                      </div>
+                    );
+                  },
+                },
+              ];
+
+              return (
+                <DataTable
+                  data={exerciseData}
+                  columns={exerciseColumns}
+                  pageSize={20}
+                />
+              );
+            })()}
           </div>
         </div>
       )}

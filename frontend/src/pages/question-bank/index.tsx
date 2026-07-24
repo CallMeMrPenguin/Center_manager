@@ -1,8 +1,16 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import {
+  useReactTable,
+  getCoreRowModel,
+  getPaginationRowModel,
+  flexRender,
+  ColumnDef
+} from '@tanstack/react-table';
 import { api } from '../../api';
 import { DbQuestion } from '../../types';
 import PromptManager, { PromptItem } from '../../components/PromptManager';
 import { useConfirm } from '../../components/ConfirmDialog';
+import { DataTable } from '../../components/DataTable';
 
 const DEFAULT_QUESTION_BANK_PROMPTS: PromptItem[] = [
   {
@@ -1961,55 +1969,65 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
             </div>
 
             {/* Items scrollable list */}
-            <div className="flex-1 overflow-auto bg-slate-950/20">
-              <table className="w-full text-left border-collapse text-xs">
-                <thead>
-                  <tr className="bg-slate-950 border-b border-slate-900 text-[0.66rem] text-slate-500 font-extrabold uppercase sticky top-0 z-10">
-                    <th className="py-3.5 px-5 w-16">Lớp</th>
-                    <th className="py-3.5 px-3 w-16">Unit</th>
-                    <th className="py-3.5 px-3 w-24">Dạng</th>
-                    <th className="py-3.5 px-4 min-w-[18.66rem]">Nội dung câu hỏi</th>
-                    <th className="py-3.5 px-4 w-60">Trạng thái kiểm tra</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-900/30">
-                  {csvPreviewModal.items.map((item, index) => (
-                    <tr 
-                      key={index}
-                      className={`hover:bg-slate-900/10 transition ${
-                        item.is_duplicate 
-                          ? 'bg-rose-950/10 text-slate-400' 
-                          : item.is_similar 
-                          ? 'bg-amber-500/10 text-slate-200 border-l-2 border-amber-500' 
-                          : 'text-slate-200'
-                      }`}
-                    >
-                      <td className="py-3.5 px-5 font-bold">{item.grade}</td>
-                      <td className="py-3.5 px-3 font-bold">{item.unit}</td>
-                      <td className="py-3.5 px-3 font-semibold">{TYPE_MAP[item.t] || item.t}</td>
-                      <td className="py-3.5 px-4 truncate max-w-md">{item.x}</td>
-                      <td className="py-3.5 px-4 font-semibold">
-                        {item.is_duplicate ? (
-                          <span className="flex items-center gap-1.5 text-rose-450 text-[0.66rem] bg-rose-500/10 px-2 py-0.5 rounded border border-rose-500/20" title={item.duplicate_reason}>
-                            <AlertTriangle size={12} />
-                            <span>Trùng lặp</span>
-                          </span>
-                        ) : item.is_similar ? (
-                          <span className="flex items-center gap-1.5 text-amber-400 text-[0.66rem] bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20" title={item.duplicate_reason}>
-                            <AlertTriangle size={12} />
-                            <span>Tương đồng ({Math.round((item.similarity_ratio || 0) * 100)}%)</span>
-                          </span>
-                        ) : (
-                          <span className="flex items-center gap-1.5 text-emerald-400 text-[0.66rem] bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
-                            <CheckCircle2 size={12} />
-                            <span>Mới hợp lệ</span>
-                          </span>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            <div className="flex-1 overflow-auto bg-slate-950/20 flex flex-col">
+              {(() => {
+                const csvPreviewColumns: ColumnDef<any>[] = [
+                  {
+                    accessorKey: 'grade',
+                    header: 'Lớp',
+                    cell: (info) => <span className="font-bold">{info.getValue<string>()}</span>,
+                  },
+                  {
+                    accessorKey: 'unit',
+                    header: 'Unit',
+                    cell: (info) => <span className="font-bold">{info.getValue<string>()}</span>,
+                  },
+                  {
+                    accessorKey: 't',
+                    header: 'Dạng',
+                    cell: (info) => {
+                      const t = info.getValue<string>();
+                      return <span className="font-semibold">{TYPE_MAP[t] || t}</span>;
+                    },
+                  },
+                  {
+                    accessorKey: 'x',
+                    header: 'Nội dung câu hỏi',
+                    cell: (info) => <span className="truncate max-w-md block">{info.getValue<string>()}</span>,
+                  },
+                  {
+                    id: 'status',
+                    header: 'Trạng thái kiểm tra',
+                    cell: ({ row }) => {
+                      const item = row.original;
+                      return item.is_duplicate ? (
+                        <span className="flex items-center gap-1.5 text-rose-450 text-[0.66rem] bg-rose-500/10 px-2 py-0.5 rounded border border-rose-500/20" title={item.duplicate_reason}>
+                          <AlertTriangle size={12} />
+                          <span>Trùng lặp</span>
+                        </span>
+                      ) : item.is_similar ? (
+                        <span className="flex items-center gap-1.5 text-amber-400 text-[0.66rem] bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20" title={item.duplicate_reason}>
+                          <AlertTriangle size={12} />
+                          <span>Tương đồng ({Math.round((item.similarity_ratio || 0) * 100)}%)</span>
+                        </span>
+                      ) : (
+                        <span className="flex items-center gap-1.5 text-emerald-400 text-[0.66rem] bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+                          <CheckCircle2 size={12} />
+                          <span>Mới hợp lệ</span>
+                        </span>
+                      );
+                    },
+                  },
+                ];
+
+                return (
+                  <DataTable
+                    data={csvPreviewModal.items}
+                    columns={csvPreviewColumns}
+                    pageSize={20}
+                  />
+                );
+              })()}
             </div>
 
             {/* Footer actions */}

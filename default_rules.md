@@ -114,3 +114,10 @@ Every data table MUST feature a filter icon next to each column title in the tab
 ## ✏️ 16. Single Pen Action Button (Merged Delete inside Edit Modal)
 - **Merged Single Pen Button**: Cards and tables MUST NOT display a separate Trash Bin icon (`<Trash2 />`) alongside an Edit Pen icon (`<Edit3 />`). Cards/rows MUST feature a single clean Pen action button (`<Edit3 />`). Deletion functionality MUST be provided as a red Delete button inside the Edit modal popup.
 
+---
+
+## 📊 17. TanStack Table Standard (`@tanstack/react-table`)
+- **Mandatory TanStack Table (`@tanstack/react-table`)**: Every data table across all features and pages MUST be built using TanStack Table (`useReactTable`, `flexRender`, `getCoreRowModel`, `getPaginationRowModel`, `getSortedRowModel`, `getFilteredRowModel`, etc.). Direct un-managed HTML `<table>` rendering without TanStack Table state and column definitions (`ColumnDef<T>`) is strictly forbidden.
+- **Rules Compatibility**: TanStack Table implementations MUST preserve the strict 20 rows/page limit (Rule 2), column heading filters (Rule 3), case-insensitive search (Rule 4), zero-blur backgrounds (Rule 9), and memoized row components (Rule 10).
+
+

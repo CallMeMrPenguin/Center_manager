@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { ColumnDef } from '@tanstack/react-table';
 import { 
   UserCheck, UserPlus, Search, Edit3, Trash2, Phone, Calendar, RefreshCw, X, AlertCircle
 } from 'lucide-react';
@@ -6,6 +7,7 @@ import { api } from '../api';
 import { showToast } from '../components/Toast';
 import { useConfirm } from '../components/ConfirmDialog';
 import { CustomDatePicker } from '../components/CustomDatePicker';
+import { DataTable } from '../components/DataTable';
 
 interface TeacherCM {
   id: number;
@@ -106,6 +108,91 @@ export default function TeachersPage() {
     }
   };
 
+  const columns = useMemo<ColumnDef<TeacherCM>[]>(() => [
+    {
+      accessorKey: 'full_name',
+      header: 'Họ và Tên',
+      cell: (info) => (
+        <span className="font-extrabold text-white text-xs">{info.getValue<string>()}</span>
+      ),
+    },
+    {
+      accessorKey: 'role',
+      header: 'Vai trò',
+      cell: (info) => {
+        const val = info.getValue<string>();
+        return (
+          <span className={`inline-block px-2.5 py-1 rounded-xl text-[10px] font-black border ${
+            val === 'Giáo viên'
+              ? 'bg-[#1e2540] border-[#343e68] text-[#a5b4fc]'
+              : 'bg-[#132a22] border-[#059669] text-[#34d399]'
+          }`}>
+            {val}
+          </span>
+        );
+      },
+    },
+    {
+      accessorKey: 'date_of_birth',
+      header: 'Ngày sinh',
+      cell: (info) => {
+        const dob = info.getValue<string>();
+        return dob ? (
+          <span className="flex items-center gap-1 text-slate-400">
+            <Calendar size={11} className="text-slate-500" />
+            <span>{dob}</span>
+          </span>
+        ) : (
+          '—'
+        );
+      },
+    },
+    {
+      accessorKey: 'phone',
+      header: 'Số điện thoại',
+      cell: (info) => {
+        const phone = info.getValue<string>();
+        return phone ? (
+          <a href={`tel:${phone}`} className="text-indigo-400 font-mono flex items-center gap-1 hover:underline">
+            <Phone size={11} />
+            <span>{phone}</span>
+          </a>
+        ) : (
+          <span className="text-slate-600">—</span>
+        );
+      },
+    },
+    {
+      accessorKey: 'notes',
+      header: 'Ghi chú',
+      cell: (info) => (
+        <span className="text-slate-400 max-w-xs truncate">{info.getValue<string>() || '—'}</span>
+      ),
+    },
+    {
+      id: 'actions',
+      header: () => <div className="text-right w-full">Thao tác</div>,
+      cell: ({ row }) => (
+        <div className="flex items-center justify-end gap-1.5">
+          <button
+            onClick={() => handleOpenEdit(row.original)}
+            className="p-1.5 rounded-lg bg-[#1a213a] hover:bg-[#252e50] text-indigo-300 border border-[#374368] transition cursor-pointer"
+            title="Sửa"
+          >
+            <Edit3 size={13} />
+          </button>
+          <button
+            onClick={() => handleDelete(row.original)}
+            className="p-1.5 rounded-lg bg-[#2c151c] hover:bg-[#3d1c27] text-rose-300 border border-[#dc2626]/50 transition cursor-pointer"
+            title="Xóa"
+          >
+            <Trash2 size={13} />
+          </button>
+        </div>
+      ),
+    },
+  ], []);
+
   const totalTeachers = teachers.filter(t => t.role === 'Giáo viên').length;
   const totalTAs = teachers.filter(t => t.role === 'Trợ giảng').length;
 
@@ -204,92 +291,14 @@ export default function TeachersPage() {
 
       {/* TABLE */}
       <div className="flex-1 min-h-[380px] bg-[#0f1320] border border-[#28334e] rounded-2xl overflow-hidden flex flex-col">
-        {loading ? (
-          <div className="flex-1 flex flex-col items-center justify-center text-slate-400 gap-3 py-16">
-            <RefreshCw className="h-7 w-7 text-indigo-400 animate-spin" />
-            <span className="text-xs font-bold">Đang tải dữ liệu nhân sự...</span>
-          </div>
-        ) : teachers.length === 0 ? (
-          <div className="flex-1 flex flex-col items-center justify-center text-slate-400 gap-3 py-16 text-center">
-            <AlertCircle className="h-10 w-10 text-indigo-400/60" />
-            <p className="text-sm font-black text-white">Chưa có thông tin giáo viên nào</p>
-            <p className="text-xs text-slate-400">Hãy click nút thêm mới phía trên.</p>
-          </div>
-        ) : (
-          <div className="overflow-auto flex-1">
-            <table className="w-full text-left border-collapse text-xs">
-              <thead className="sticky top-0 z-10 bg-[#161b2e] text-slate-300 uppercase text-[10px] font-black tracking-wider border-b border-[#28334e] shadow-sm">
-                <tr>
-                  <th className="py-3.5 px-4">Họ và Tên</th>
-                  <th className="py-3.5 px-3">Vai trò</th>
-                  <th className="py-3.5 px-3">Ngày sinh</th>
-                  <th className="py-3.5 px-3">Số điện thoại</th>
-                  <th className="py-3.5 px-3">Ghi chú</th>
-                  <th className="py-3.5 px-4 text-right">Thao tác</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#28334e] font-medium bg-[#101422]">
-                {teachers.map((t) => (
-                  <tr key={t.id} className="hover:bg-[#1a2034] transition-colors">
-                    <td className="py-3.5 px-4 font-extrabold text-white text-xs">
-                      {t.full_name}
-                    </td>
-                    <td className="py-3.5 px-3">
-                      <span className={`inline-block px-2.5 py-1 rounded-xl text-[10px] font-black border ${
-                        t.role === 'Giáo viên'
-                          ? 'bg-[#1e2540] border-[#343e68] text-[#a5b4fc]'
-                          : 'bg-[#132a22] border-[#059669] text-[#34d399]'
-                      }`}>
-                        {t.role}
-                      </span>
-                    </td>
-                    <td className="py-3.5 px-3 text-slate-400">
-                      {t.date_of_birth ? (
-                        <span className="flex items-center gap-1">
-                          <Calendar size={11} className="text-slate-500" />
-                          <span>{t.date_of_birth}</span>
-                        </span>
-                      ) : (
-                        '—'
-                      )}
-                    </td>
-                    <td className="py-3.5 px-3">
-                      {t.phone ? (
-                        <a href={`tel:${t.phone}`} className="text-indigo-400 font-mono flex items-center gap-1 hover:underline">
-                          <Phone size={11} />
-                          <span>{t.phone}</span>
-                        </a>
-                      ) : (
-                        <span className="text-slate-600">—</span>
-                      )}
-                    </td>
-                    <td className="py-3.5 px-3 text-slate-400 max-w-xs truncate">
-                      {t.notes || '—'}
-                    </td>
-                    <td className="py-3.5 px-4 text-right">
-                      <div className="flex items-center justify-end gap-1.5">
-                        <button
-                          onClick={() => handleOpenEdit(t)}
-                          className="p-1.5 rounded-lg bg-[#1a213a] hover:bg-[#252e50] text-indigo-300 border border-[#374368] transition cursor-pointer"
-                          title="Sửa"
-                        >
-                          <Edit3 size={13} />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(t)}
-                          className="p-1.5 rounded-lg bg-[#2c151c] hover:bg-[#3d1c27] text-rose-300 border border-[#dc2626]/50 transition cursor-pointer"
-                          title="Xóa"
-                        >
-                          <Trash2 size={13} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+        <DataTable
+          data={teachers}
+          columns={columns}
+          loading={loading}
+          loadingMessage="Đang tải dữ liệu nhân sự..."
+          emptyMessage="Chưa có thông tin giáo viên nào"
+          pageSize={20}
+        />
       </div>
 
       {/* MODAL */}
