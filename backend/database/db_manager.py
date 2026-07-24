@@ -190,6 +190,26 @@ def init_db():
     except sqlite3.OperationalError:
         pass
 
+    # Auto-assign distinct colors to existing classes with default #7c3aed color
+    palette = [
+        '#7c3aed', '#0ea5e9', '#10b981', '#f59e0b', '#ec4899',
+        '#06b6d4', '#f97316', '#84cc16', '#a78bfa', '#fb7185',
+        '#6366f1', '#8b5cf6', '#14b8a6', '#eab308', '#22c55e',
+        '#60a5fa', '#c084fc', '#f472b6', '#38bdf8', '#e879f9'
+    ]
+    try:
+        cursor.execute("SELECT id, color FROM classes")
+        existing_classes = cursor.fetchall()
+        for row in existing_classes:
+            cid = row["id"]
+            c_color = row["color"]
+            if not c_color or c_color == '#7c3aed':
+                assigned_color = palette[(cid * 3 + 1) % len(palette)]
+                cursor.execute("UPDATE classes SET color = ? WHERE id = ?", (assigned_color, cid))
+        conn.commit()
+    except Exception:
+        pass
+
     # 9. Class Students enrollment junction
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS class_students (
@@ -1192,12 +1212,23 @@ def get_classes(search: str = "") -> List[Dict[str, Any]]:
 def create_class(data: Dict[str, Any]) -> int:
     conn = get_connection()
     cursor = conn.cursor()
+    palette = [
+        '#7c3aed', '#0ea5e9', '#10b981', '#f59e0b', '#ec4899',
+        '#06b6d4', '#f97316', '#84cc16', '#a78bfa', '#fb7185',
+        '#6366f1', '#8b5cf6', '#14b8a6', '#eab308', '#22c55e',
+        '#60a5fa', '#c084fc', '#f472b6', '#38bdf8', '#e879f9'
+    ]
+    cursor.execute("SELECT COUNT(*) FROM classes")
+    cls_cnt = cursor.fetchone()[0]
+    auto_color = palette[(cls_cnt * 3 + 1) % len(palette)]
+    chosen_color = data.get("color") or auto_color
+
     cursor.execute("""
         INSERT INTO classes (class_name, teacher_id, grade, subject, room, status, color, notes)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     """, (
         data.get("class_name"), data.get("teacher_id"), data.get("grade", "Lớp 6"), data.get("subject"),
-        data.get("room"), data.get("status", "Đang hoạt động"), data.get("color", "#7c3aed"), data.get("notes")
+        data.get("room"), data.get("status", "Đang hoạt động"), chosen_color, data.get("notes")
     ))
     conn.commit()
     cid = cursor.lastrowid
@@ -1207,15 +1238,18 @@ def create_class(data: Dict[str, Any]) -> int:
 def update_class(class_id: int, data: Dict[str, Any]):
     conn = get_connection()
     cursor = conn.cursor()
+    new_color = data.get("color")
     cursor.execute("""
         UPDATE classes SET
-            class_name = ?, teacher_id = ?, grade = ?, subject = ?, room = ?, status = ?, color = ?, notes = ?,
+            class_name = ?, teacher_id = ?, grade = ?, subject = ?, room = ?, status = ?, color = COALESCE(?, color), notes = ?,
             updated_at = CURRENT_TIMESTAMP
         WHERE id = ?
     """, (
         data.get("class_name"), data.get("teacher_id"), data.get("grade", "Lớp 6"), data.get("subject"),
-        data.get("room"), data.get("status"), data.get("color", "#7c3aed"), data.get("notes"), class_id
+        data.get("room"), data.get("status"), new_color, data.get("notes"), class_id
     ))
+    if new_color:
+        cursor.execute("UPDATE class_sessions SET color = ? WHERE class_id = ?", (new_color, class_id))
     conn.commit()
     conn.close()
 
@@ -1409,9 +1443,37 @@ def add_class_session(class_id: int, date: str, start_time: str, duration: int, 
     conn.close()
     return sid
 
-def update_class_session(session_id: int, data: Dict[str, Any]):
+def update_class_session(session_id: int, data: Dict[str, Any], class_id: int = None):
     conn = get_connection()
     cursor = conn.cursor()
+    
+    target_cid = class_id or data.get("class_id")
+
+    # If session_id is negative (virtual session generated from weekly slots)
+    if session_id < 0:
+        dt = data.get("date")
+        st = data.get("start_time")
+        if target_cid and dt and st:
+            cursor.execute(
+                "SELECT id FROM class_sessions WHERE class_id = ? AND date = ? AND start_time = ?",
+                (target_cid, dt, st)
+            )
+            row = cursor.fetchone()
+            if row:
+                session_id = row["id"]
+            else:
+                cursor.execute("""
+                    INSERT INTO class_sessions (class_id, date, start_time, duration, status, teacher_id, notes, color)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                """, (
+                    target_cid, dt, st, data.get("duration", 90),
+                    data.get("status", "Sắp diễn ra"), data.get("teacher_id"),
+                    data.get("notes", ""), data.get("color")
+                ))
+                conn.commit()
+                conn.close()
+                return
+
     cursor.execute("""
         UPDATE class_sessions SET
             class_id = COALESCE(?, class_id),
@@ -1426,20 +1488,6 @@ def update_class_session(session_id: int, data: Dict[str, Any]):
     """, (
         data.get("class_id"), data.get("date"), data.get("start_time"), data.get("duration"),
         data.get("status"), data.get("teacher_id"), data.get("notes"), data.get("color"), session_id
-    ))
-    conn.commit()
-    conn.close()
-
-def update_class_session(session_id: int, data: Dict[str, Any]):
-    conn = get_connection()
-    cursor = conn.cursor()
-    cursor.execute("""
-        UPDATE class_sessions SET
-            date = ?, start_time = ?, duration = ?, status = ?, teacher_id = ?, notes = ?
-        WHERE id = ?
-    """, (
-        data.get("date"), data.get("start_time"), data.get("duration"),
-        data.get("status"), data.get("teacher_id"), data.get("notes"), session_id
     ))
     conn.commit()
     conn.close()

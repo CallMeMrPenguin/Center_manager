@@ -216,8 +216,8 @@ def api_add_session(class_id: int, payload: ClassSessionPayload):
     return {"id": sid, "status": "success"}
 
 @router.put("/api/classes/{class_id}/schedule/sessions/{session_id}")
-def api_update_session(session_id: int, payload: ClassSessionPayload):
-    update_class_session(session_id, payload.dict())
+def api_update_session(class_id: int, session_id: int, payload: ClassSessionPayload):
+    update_class_session(session_id, payload.dict(), class_id=class_id)
     return {"status": "success"}
 
 @router.delete("/api/classes/{class_id}/schedule/sessions/{session_id}")

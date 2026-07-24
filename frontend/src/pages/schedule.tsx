@@ -181,8 +181,10 @@ export default function SchedulePage() {
   const openAdd = (dateStr?: string) => {
     setEditing(null);
     setMode(dateStr ? 'single' : 'weekdays');
-    const firstCid = classesList[0]?.id || 1;
-    setColor(PALETTE_20[(firstCid * 3 + 1) % PALETTE_20.length]);
+    const firstCls = classesList[0];
+    const firstCid = firstCls?.id || 1;
+    const initialColor = firstCls?.color || PALETTE_20[(firstCid * 3 + 1) % PALETTE_20.length];
+    setColor(initialColor);
     setForm({ class_id: firstCid, date: dateStr || today, start_time: '18:00', duration: 90, status: 'Sắp diễn ra', notes: '' });
     setDayCfgs(defaultDayCfgs());
     setModalOpen(true);
@@ -200,33 +202,37 @@ export default function SchedulePage() {
   const checkSingleConflict = (target: { id?: number; class_id: number; date: string; start_time: string; duration: number }) => {
     const targetStart = timeToMin(target.start_time);
     const targetEnd = targetStart + target.duration;
-    const targetClass = classesList.find(c => c.id === target.class_id);
-    const targetName = targetClass?.class_name || '';
-    const targetRoom = targetClass?.room || '';
+    const targetCls = classesList.find(c => c.id === target.class_id);
+    const targetTeacherId = form.teacher_id || targetCls?.teacher_id;
+    const targetRoom = form.room || targetCls?.room;
 
     for (const s of sessions) {
       if (target.id && s.id === target.id) continue;
-      if (s.date !== target.date || s.status === 'Hủy') continue;
+      if (s.date !== target.date) continue;
+      if (s.status === 'Hủy') continue;
 
       const sStart = timeToMin(s.start_time);
       const sEnd = sStart + s.duration;
-      const isOverlapping = targetStart < sEnd && targetEnd > sStart;
+      const overlaps = (targetStart < sEnd && targetEnd > sStart);
 
-      // 1. Same class name overlap
-      if ((s.class_id === target.class_id || s.class_name === targetName) && isOverlapping) {
-        return {
-          error: `Xung đột lịch học: Lớp "${targetName}" đã có buổi học trùng khung giờ (${s.start_time} - ${calcEndTime(s.start_time, s.duration)}) ngày ${s.date}!`
-        };
-      }
-
-      // 2. Same room conflict & 15-minute buffer
-      const sRoom = s.room || classesList.find(c => c.id === s.class_id)?.room || '';
-      if (targetRoom && sRoom && targetRoom.trim().toLowerCase() === sRoom.trim().toLowerCase()) {
-        if (isOverlapping) {
+      if (overlaps) {
+        const sTeacherId = s.teacher_id || classesList.find(c => c.id === s.class_id)?.teacher_id;
+        if (targetTeacherId && sTeacherId && targetTeacherId === sTeacherId) {
+          const tName = s.teacher_name || 'Giáo viên';
           return {
-            error: `Xung đột phòng học: Phòng "${targetRoom}" đã xếp lớp "${s.class_name}" trùng khung giờ (${s.start_time} - ${calcEndTime(s.start_time, s.duration)}) ngày ${s.date}!`
+            error: `Trùng lịch giáo viên: ${tName} đã có ca dạy lớp "${s.class_name}" (${s.start_time} - ${calcEndTime(s.start_time, s.duration)})`
           };
         }
+
+        const sRoom = s.room || classesList.find(c => c.id === s.class_id)?.room;
+        if (targetRoom && sRoom && targetRoom.trim().toLowerCase() === sRoom.trim().toLowerCase()) {
+          return {
+            error: `Trùng phòng học: Phòng "${targetRoom}" đã được dùng bởi lớp "${s.class_name}" (${s.start_time} - ${calcEndTime(s.start_time, s.duration)})`
+          };
+        }
+      } else {
+        const sRoom = s.room || classesList.find(c => c.id === s.class_id)?.room;
+        if (!targetRoom || !sRoom || targetRoom.trim().toLowerCase() !== sRoom.trim().toLowerCase()) continue;
 
         const gap1 = sStart - targetEnd;
         const gap2 = targetStart - sEnd;
@@ -238,7 +244,6 @@ export default function SchedulePage() {
         }
       }
     }
-
     return null;
   };
 
@@ -248,6 +253,13 @@ export default function SchedulePage() {
     const notes = `#COLOR:${color} ${(form.notes || '').replace(/#COLOR:#[0-9a-fA-F]{6}/g, '').trim()}`.trim();
 
     try {
+      // Sync class color so all future & current sessions of this class use updated color
+      if (form.class_id && color) {
+        try {
+          await api.updateClass(form.class_id, { color });
+        } catch (_) {}
+      }
+
       if (editing) {
         const conflict = checkSingleConflict({ id: editing.id, class_id: form.class_id, date: form.date!, start_time: form.start_time!, duration: form.duration! });
         if (conflict?.error) { showToast(conflict.error, 'error'); return; }
@@ -647,7 +659,14 @@ export default function SchedulePage() {
                 <label className="block text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1.5">Lớp Học *</label>
                 <CustomSelect
                   value={form.class_id || ''}
-                  onChange={val => setForm({ ...form, class_id: Number(val) })}
+                  onChange={val => {
+                    const cid = Number(val);
+                    const selectedCls = classesList.find(c => c.id === cid);
+                    setForm({ ...form, class_id: cid });
+                    if (selectedCls?.color) {
+                      setColor(selectedCls.color);
+                    }
+                  }}
                   options={[
                     { value: '', label: '-- Chọn Lớp --' },
                     ...classesList.map(c => ({ value: c.id, label: c.class_name }))
@@ -717,11 +736,15 @@ export default function SchedulePage() {
 
               <div>
                 <label className="block text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1.5">Trạng Thái</label>
-                <select value={form.status || 'Sắp diễn ra'} onChange={e => setForm({ ...form, status: e.target.value })} className="w-full bg-[#181d2e] border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500 cursor-pointer">
-                  <option value="Sắp diễn ra">Sắp diễn ra</option>
-                  <option value="Đã học">Đã học</option>
-                  <option value="Hủy">Hủy</option>
-                </select>
+                <CustomSelect
+                  value={form.status || 'Sắp diễn ra'}
+                  onChange={val => setForm({ ...form, status: val })}
+                  options={[
+                    { value: 'Sắp diễn ra', label: 'Sắp diễn ra' },
+                    { value: 'Đã học', label: 'Đã học' },
+                    { value: 'Hủy', label: 'Hủy' }
+                  ]}
+                />
               </div>
 
               <div className="flex items-center justify-end gap-3 pt-2 border-t border-white/10">

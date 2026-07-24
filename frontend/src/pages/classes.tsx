@@ -1263,6 +1263,7 @@ export default function ClassesPage() {
                 }
                 setClassModalOpen(false);
                 loadClasses();
+                window.dispatchEvent(new CustomEvent('data-changed'));
               } catch (err: any) {
                 showToast("Lỗi khi lưu: " + err.message, "error");
               }
