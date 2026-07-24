@@ -1881,18 +1881,25 @@ def calculate_performance_analytics(session_records: List[Dict[str, Any]]) -> Di
     academic_score = academic_10 * 10
 
     def calc_regression(vals: List[float]):
-        N = len(vals)
-        if N < 2:
-            return 0.2, (vals[0] + 0.2 if vals else 8.0)
+        valid_vals = [max(0.0, min(10.0, float(v))) for v in vals if v is not None and v > 0]
+        N = len(valid_vals)
+        if N == 0:
+            return 0.0, 8.0
+        if N == 1:
+            return 0.1, min(10.0, max(0.0, valid_vals[0]))
+        
         x_vals = list(range(1, N + 1))
         mean_x = sum(x_vals) / N
-        mean_y = sum(vals) / N
-        num = sum((x_vals[i] - mean_x) * (vals[i] - mean_y) for i in range(N))
+        mean_y = sum(valid_vals) / N
+        num = sum((x_vals[i] - mean_x) * (valid_vals[i] - mean_y) for i in range(N))
         den = sum((x_vals[i] - mean_x) ** 2 for i in range(N))
         slope = num / den if den != 0 else 0
         intercept = mean_y - (slope * mean_x)
-        predicted = max(0.0, min(10.0, slope * (N + 1) + intercept))
-        return slope, predicted
+        # Next session prediction at index N + 1:
+        raw_pred = slope * (N + 1) + intercept
+        # STRICT CLAMP: Grade prediction MUST NEVER exceed 10.0 or fall below 0.0
+        predicted = max(0.0, min(10.0, raw_pred))
+        return slope, round(predicted, 1)
 
     slope_overall, pred_overall = calc_regression(overall_session_scores)
     slope_c1, pred_c1 = calc_regression(c1_list if c1_list else [7.5])

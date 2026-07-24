@@ -259,10 +259,9 @@ export default function ReportsPage() {
     return students.find(s => String(s.id) === selectedStudentId) || null;
   }, [selectedStudentId, students]);
 
-  // Analytics Engine math
+  // Analytics Engine math with strict [0.0, 10.0] grade clamping
   const engine = useMemo(() => {
-    if (analyticsSummary) return analyticsSummary;
-    return {
+    const raw = analyticsSummary || {
       academic_score: 82.0,
       trend_slope: 0.38,
       trend_label: "Đang cải thiện",
@@ -281,6 +280,19 @@ export default function ReportsPage() {
         "Duy trì tiến độ học tập hiện tại",
         "Dự đoán buổi tới: Check 1 (8.8), Check 2 (7.5), Homework (9.5)."
       ]
+    };
+
+    const c1 = Math.min(10.0, Math.max(0.0, Math.round((raw.pred_c1 ?? 8.8) * 10) / 10));
+    const c2 = Math.min(10.0, Math.max(0.0, Math.round((raw.pred_c2 ?? 7.5) * 10) / 10));
+    const hw = Math.min(10.0, Math.max(0.0, Math.round((raw.pred_hw ?? 9.5) * 10) / 10));
+    const predNext = Math.min(10.0, Math.max(0.0, Math.round((raw.predicted_next ?? 8.9) * 10) / 10));
+
+    return {
+      ...raw,
+      pred_c1: c1,
+      pred_c2: c2,
+      pred_hw: hw,
+      predicted_next: predNext
     };
   }, [analyticsSummary]);
 
