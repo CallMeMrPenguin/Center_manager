@@ -7,6 +7,7 @@ import { api } from '../api';
 import { showToast } from '../components/Toast';
 import { useConfirm } from '../components/ConfirmDialog';
 import { CustomDatePicker } from '../components/CustomDatePicker';
+import { CustomSelect } from '../components/CustomSelect';
 
 interface ClassSession {
   id: number;
@@ -346,10 +347,15 @@ export default function SchedulePage() {
       <div className="flex flex-wrap items-center justify-between gap-3 bg-[#0f1320] border border-white/10 p-3 rounded-2xl shrink-0">
         <div className="flex items-center gap-2">
           <input type="month" value={selectedMonth} onChange={e => setSelectedMonth(e.target.value)} className="bg-[#161a29] border border-white/10 text-white text-xs font-bold rounded-xl px-3 py-2 focus:outline-none focus:border-indigo-500 cursor-pointer" />
-          <select value={classFilter} onChange={e => setClassFilter(e.target.value)} className="bg-[#161a29] border border-white/10 text-white text-xs font-bold rounded-xl px-3 py-2 focus:outline-none focus:border-indigo-500 cursor-pointer">
-            <option value="">Tất cả lớp học</option>
-            {classesList.map(c => <option key={c.id} value={c.id}>{c.class_name}</option>)}
-          </select>
+          <CustomSelect
+            value={classFilter}
+            onChange={val => setClassFilter(val)}
+            options={[
+              { value: '', label: 'Tất cả lớp học' },
+              ...classesList.map(c => ({ value: String(c.id), label: c.class_name }))
+            ]}
+            className="w-48"
+          />
         </div>
         <div className="flex items-center gap-2">
           <div className="relative flex bg-[#0d1018] border border-white/10 p-1 rounded-xl text-[10px] font-black select-none w-64 shrink-0">
@@ -577,10 +583,14 @@ export default function SchedulePage() {
             <form onSubmit={save} className="p-5 space-y-4 overflow-y-auto max-h-[80vh]">
               <div>
                 <label className="block text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1.5">Lớp Học *</label>
-                <select required value={form.class_id || ''} onChange={e => setForm({ ...form, class_id: Number(e.target.value) })} className="w-full bg-[#181d2e] border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500 font-semibold cursor-pointer">
-                  <option value="">-- Chọn Lớp --</option>
-                  {classesList.map(c => <option key={c.id} value={c.id}>{c.class_name}</option>)}
-                </select>
+                <CustomSelect
+                  value={form.class_id || ''}
+                  onChange={val => setForm({ ...form, class_id: Number(val) })}
+                  options={[
+                    { value: '', label: '-- Chọn Lớp --' },
+                    ...classesList.map(c => ({ value: c.id, label: c.class_name }))
+                  ]}
+                />
               </div>
 
               <div>

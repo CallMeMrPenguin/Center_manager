@@ -8,6 +8,7 @@ import { showToast } from '../components/Toast';
 import { useConfirm } from '../components/ConfirmDialog';
 import { VietnameseInput } from '../components/VietnameseInput';
 import { CustomDatePicker } from '../components/CustomDatePicker';
+import { CustomSelect } from '../components/CustomSelect';
 import { Student } from '../types';
 
 export default function StudentsPage() {
@@ -288,15 +289,16 @@ export default function StudentsPage() {
             />
           </div>
 
-          <select
+          <CustomSelect
             value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="bg-[#1c243c] border border-[#303d62] text-white text-xs font-bold rounded-xl px-3 py-2 focus:outline-none focus:border-indigo-500 cursor-pointer"
-          >
-            <option value="">Tất cả trạng thái</option>
-            <option value="Đang học">Đang học</option>
-            <option value="Đã nghỉ">Đã nghỉ</option>
-          </select>
+            onChange={(val) => setStatusFilter(val)}
+            options={[
+              { value: '', label: 'Tất cả trạng thái' },
+              { value: 'Đang học', label: 'Đang học' },
+              { value: 'Đã nghỉ', label: 'Đã nghỉ' }
+            ]}
+            className="w-44"
+          />
         </div>
 
         {/* COLUMN PICKER BUTTON */}
@@ -589,17 +591,15 @@ export default function StudentsPage() {
                   }`}>
                     Giới Tính {highlightMissingFields && <span className="text-rose-400">* (Định danh)</span>}
                   </label>
-                  <select
+                  <CustomSelect
                     value={formData.gender || 'Nam'}
-                    onChange={(e) => setFormData({ ...formData, gender: e.target.value as any })}
-                    className={`w-full bg-[#181d2e] rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none font-semibold cursor-pointer border ${
-                      highlightMissingFields && !formData.gender ? 'border-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.5)]' : 'border-white/10 focus:border-indigo-500'
-                    }`}
-                  >
-                    <option value="Nam">Nam</option>
-                    <option value="Nữ">Nữ</option>
-                    <option value="Khác">Khác</option>
-                  </select>
+                    onChange={(val) => setFormData({ ...formData, gender: val })}
+                    options={[
+                      { value: 'Nam', label: 'Nam' },
+                      { value: 'Nữ', label: 'Nữ' },
+                      { value: 'Khác', label: 'Khác' }
+                    ]}
+                  />
                 </div>
 
                 <div>
@@ -608,17 +608,11 @@ export default function StudentsPage() {
                   }`}>
                     Khối Lớp {highlightMissingFields && <span className="text-rose-400">* (Định danh)</span>}
                   </label>
-                  <select
+                  <CustomSelect
                     value={formData.grade || 'Lớp 6'}
-                    onChange={(e) => setFormData({ ...formData, grade: e.target.value })}
-                    className={`w-full bg-[#181d2e] rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none font-semibold cursor-pointer border ${
-                      highlightMissingFields && !formData.grade ? 'border-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.5)]' : 'border-white/10 focus:border-indigo-500'
-                    }`}
-                  >
-                    {['Lớp 1', 'Lớp 2', 'Lớp 3', 'Lớp 4', 'Lớp 5', 'Lớp 6', 'Lớp 7', 'Lớp 8', 'Lớp 9', 'Lớp 10', 'Lớp 11', 'Lớp 12'].map(g => (
-                      <option key={g} value={g}>{g}</option>
-                    ))}
-                  </select>
+                    onChange={(val) => setFormData({ ...formData, grade: val })}
+                    options={['Lớp 1', 'Lớp 2', 'Lớp 3', 'Lớp 4', 'Lớp 5', 'Lớp 6', 'Lớp 7', 'Lớp 8', 'Lớp 9', 'Lớp 10', 'Lớp 11', 'Lớp 12'].map(g => ({ value: g, label: g }))}
+                  />
                 </div>
 
                 <div>

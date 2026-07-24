@@ -10,6 +10,7 @@ import { useConfirm } from '../components/ConfirmDialog';
 import RelationshipsTab from '../components/seating/RelationshipsTab';
 import BlossomResultModal from '../components/seating/BlossomResultModal';
 import { CustomDatePicker } from '../components/CustomDatePicker';
+import { CustomSelect } from '../components/CustomSelect';
 
 interface ClassItem {
   id: number;
@@ -1281,25 +1282,23 @@ export default function ClassesPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-[11px] font-extrabold text-slate-300 uppercase tracking-wider mb-1.5">Khối Lớp</label>
-                  <select
+                  <CustomSelect
                     value={classForm.grade || 'Lớp 6'}
-                    onChange={(e) => setClassForm({ ...classForm, grade: e.target.value })}
-                    className="w-full bg-[#181d2e] border border-white/10 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-indigo-500 font-semibold cursor-pointer"
-                  >
-                    {GRADE_LIST.map(g => <option key={g} value={g}>{g}</option>)}
-                  </select>
+                    onChange={(val) => setClassForm({ ...classForm, grade: val })}
+                    options={GRADE_LIST.map(g => ({ value: g, label: g }))}
+                  />
                 </div>
 
                 <div>
                   <label className="block text-[11px] font-extrabold text-slate-300 uppercase tracking-wider mb-1.5">Giáo Viên Phụ Trách</label>
-                  <select
+                  <CustomSelect
                     value={classForm.teacher_id || ''}
-                    onChange={(e) => setClassForm({ ...classForm, teacher_id: e.target.value ? Number(e.target.value) : undefined })}
-                    className="w-full bg-[#181d2e] border border-white/10 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-indigo-500 font-semibold cursor-pointer"
-                  >
-                    <option value="">-- Chưa phân công --</option>
-                    {teachers.map(t => <option key={t.id} value={t.id}>{t.full_name}</option>)}
-                  </select>
+                    onChange={(val) => setClassForm({ ...classForm, teacher_id: val ? Number(val) : undefined })}
+                    options={[
+                      { value: '', label: '-- Chưa phân công --' },
+                      ...teachers.map(t => ({ value: t.id, label: t.full_name }))
+                    ]}
+                  />
                 </div>
               </div>
 

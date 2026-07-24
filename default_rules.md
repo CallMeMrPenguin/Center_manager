@@ -86,8 +86,8 @@ Every data table MUST feature a filter icon next to each column title in the tab
 
 ---
 
-## 🎨 11. Dropdown Menu Theme Standard
-- **Dark Theme Dropdown Styling**: All `<select>` and `<option>` elements across every tab MUST match the app's dark UI theme (`bg-[#0f1322]`, `text-white`, `select option { background-color: #0f1322 !important; color: #ffffff !important; }`). Native browser light grey options are strictly forbidden.
+## 🎨 11. Custom Dark Theme Dropdown Select Standard
+- **Custom Dark Theme Select Component Required (`<CustomSelect />`)**: Native HTML `<select>` elements are strictly forbidden because OS-level popovers override CSS styles and display ugly light grey options. All dropdown selection MUST use the custom `<CustomSelect />` component matching the app's dark indigo space theme (`#0c0f1e` background, `#212c4b` border, `#5c36f5` selected highlight, white text, and chevron animation).
 
 ---
 
