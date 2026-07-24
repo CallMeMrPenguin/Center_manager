@@ -1872,13 +1872,40 @@ def calculate_performance_analytics(session_records: List[Dict[str, Any]]) -> Di
             overall_session_scores.append(sum(valid_in_session) / len(valid_in_session))
 
     if not overall_session_scores:
-        overall_session_scores = [7.5]
+        overall_session_scores = [8.0]
 
-    avg_c1 = sum(c1_list) / len(c1_list) if c1_list else 7.5
-    avg_c2 = sum(c2_list) / len(c2_list) if c2_list else 7.0
-    avg_hw = sum(hw_list) / len(hw_list) if hw_list else 8.5
-    academic_10 = (avg_hw * 0.40) + (avg_c1 * 0.30) + (avg_c2 * 0.30)
-    academic_score = academic_10 * 10
+    # Proportional weighted academic average based on available score types
+    weighted_sum = 0.0
+    weight_total = 0.0
+
+    if hw_list:
+        avg_hw = sum(hw_list) / len(hw_list)
+        weighted_sum += avg_hw * 0.40
+        weight_total += 0.40
+    else:
+        avg_hw = 0.0
+
+    if c1_list:
+        avg_c1 = sum(c1_list) / len(c1_list)
+        weighted_sum += avg_c1 * 0.30
+        weight_total += 0.30
+    else:
+        avg_c1 = 0.0
+
+    if c2_list:
+        avg_c2 = sum(c2_list) / len(c2_list)
+        weighted_sum += avg_c2 * 0.30
+        weight_total += 0.30
+    else:
+        avg_c2 = 0.0
+
+    if weight_total > 0:
+        academic_10 = weighted_sum / weight_total
+    else:
+        academic_10 = sum(overall_session_scores) / len(overall_session_scores)
+
+    academic_10 = max(0.0, min(10.0, academic_10))
+    academic_score = academic_10 * 10.0
 
     def calc_regression(vals: List[float]):
         valid_vals = [max(0.0, min(10.0, float(v))) for v in vals if v is not None and v > 0]
@@ -1886,7 +1913,7 @@ def calculate_performance_analytics(session_records: List[Dict[str, Any]]) -> Di
         if N == 0:
             return 0.0, 8.0
         if N == 1:
-            return 0.1, min(10.0, max(0.0, valid_vals[0]))
+            return 0.0, min(10.0, max(0.0, valid_vals[0]))
         
         x_vals = list(range(1, N + 1))
         mean_x = sum(x_vals) / N
@@ -1902,9 +1929,9 @@ def calculate_performance_analytics(session_records: List[Dict[str, Any]]) -> Di
         return slope, round(predicted, 1)
 
     slope_overall, pred_overall = calc_regression(overall_session_scores)
-    slope_c1, pred_c1 = calc_regression(c1_list if c1_list else [7.5])
-    slope_c2, pred_c2 = calc_regression(c2_list if c2_list else [7.0])
-    slope_hw, pred_hw = calc_regression(hw_list if hw_list else [8.5])
+    slope_c1, pred_c1 = calc_regression(c1_list) if c1_list else (0.0, round(academic_10, 1))
+    slope_c2, pred_c2 = calc_regression(c2_list) if c2_list else (0.0, round(academic_10, 1))
+    slope_hw, pred_hw = calc_regression(hw_list) if hw_list else (0.0, round(academic_10, 1))
 
     if slope_overall > 0.3:
         trend_label = "Tăng trưởng mạnh ↗"
@@ -1937,12 +1964,13 @@ def calculate_performance_analytics(session_records: List[Dict[str, Any]]) -> Di
     alpha = 0.5
     for s in overall_session_scores[1:]:
         ema = alpha * s + (1 - alpha) * ema
-    ema_score = ema * 10
+    ema_score = max(0.0, min(100.0, ema * 10.0))
 
     total_rec_count = len(session_records)
     att_pct = (present_count / total_rec_count * 100) if total_rec_count > 0 else 100.0
 
     performance_index = (academic_score * 0.40) + (trend_score * 0.20) + (consistency_score * 0.15) + (ema_score * 0.15) + (att_pct * 0.10)
+    performance_index = max(0.0, min(100.0, performance_index))
 
     if performance_index >= 90:
         rating_label = "Xuất Sắc"
@@ -1958,7 +1986,7 @@ def calculate_performance_analytics(session_records: List[Dict[str, Any]]) -> Di
     recs = []
     if slope_overall < -0.1:
         recs.append("Cảnh báo: Học sinh đang có xu hướng giảm điểm, cần giáo viên trao đổi trực tiếp.")
-    if avg_hw < 7.0:
+    if hw_list and avg_hw < 7.0:
         recs.append("Khuyên dùng: Cho học sinh luyện tập thêm bài tập về nhà để củng cố kiến thức cơ bản.")
     if att_pct < 85:
         recs.append(f"Cảnh báo: Tỷ lệ vắng mặt cao ({att_pct:.0f}%), ảnh hưởng đến khả năng tiếp thu.")
