@@ -788,11 +788,10 @@ export default function ClassesPage() {
               </button>
               <button
                 onClick={() => setActiveSubTab('relationships')}
-                className={`flex-1 relative z-10 py-1.5 px-3 text-center transition-colors cursor-pointer flex items-center justify-center gap-1.5 ${
+                className={`flex-1 relative z-10 py-1.5 px-3 text-center transition-colors cursor-pointer whitespace-nowrap ${
                   activeSubTab === 'relationships' ? 'text-white font-black' : 'text-slate-400 hover:text-white'
                 }`}
               >
-                <Users size={13} />
                 <span>Nhóm Bạn & Xung Đột</span>
               </button>
             </div>
@@ -911,8 +910,8 @@ export default function ClassesPage() {
                       <table className="w-full text-left border-collapse text-xs">
                         <thead className="sticky top-0 z-10 bg-[#161b2e] text-slate-300 uppercase text-[10px] font-black tracking-wider border-b border-[#28334e] select-none shadow-sm">
                           <tr>
-                            <th className="py-3 px-4 w-12 text-center">STT</th>
-                            <th className="py-3 px-4 relative">
+                            <th className="py-3.5 px-4 w-14 text-center">STT</th>
+                            <th className="py-3.5 px-6 w-2/5 relative">
                               <div className="flex items-center gap-1.5 cursor-pointer" onClick={() => setActiveFilterCol(activeFilterCol === 'name' ? null : 'name')}>
                                 <span>Họ và Tên Học Sinh</span>
                                 <Filter size={11} className={colFilterName ? "text-indigo-400 font-bold" : "text-slate-500"} />
@@ -933,13 +932,13 @@ export default function ClassesPage() {
                                 </div>
                               )}
                             </th>
-                            <th className="py-3 px-3 w-36 relative">
-                              <div className="flex items-center gap-1.5 cursor-pointer" onClick={() => setActiveFilterCol(activeFilterCol === 'status' ? null : 'status')}>
+                            <th className="py-3.5 px-4 w-44 text-center relative">
+                              <div className="flex items-center justify-center gap-1.5 cursor-pointer" onClick={() => setActiveFilterCol(activeFilterCol === 'status' ? null : 'status')}>
                                 <span>Điểm Danh</span>
                                 <Filter size={11} className={colFilterStatus !== 'ALL' ? "text-indigo-400 font-bold" : "text-slate-500"} />
                               </div>
                               {activeFilterCol === 'status' && (
-                                <div className="absolute left-2 top-10 z-20 bg-[#161a29] border border-white/20 p-2 rounded-xl shadow-xl space-y-1.5 min-w-[140px] normal-case">
+                                <div className="absolute left-1/2 -translate-x-1/2 top-10 z-20 bg-[#161a29] border border-white/20 p-2 rounded-xl shadow-xl space-y-1.5 min-w-[140px] normal-case">
                                   {['ALL', 'Có mặt', 'Vắng mặt'].map((st) => (
                                     <button
                                       key={st}
@@ -952,10 +951,10 @@ export default function ClassesPage() {
                                 </div>
                               )}
                             </th>
-                            <th className="py-3 px-3 w-28">Check 1</th>
-                            <th className="py-3 px-3 w-28">Check 2</th>
-                            <th className="py-3 px-3 w-32">Homework</th>
-                            <th className="py-3 px-4 text-center w-20">Thao Tác</th>
+                            <th className="py-3.5 px-4 w-36 text-center">Check 1</th>
+                            <th className="py-3.5 px-4 w-36 text-center">Check 2</th>
+                            <th className="py-3.5 px-4 w-40 text-center">Homework</th>
+                            <th className="py-3.5 px-4 text-center w-24">Thao Tác</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-[#28334e] font-medium bg-[#101422]">
@@ -1626,69 +1625,72 @@ const AttendanceTableRow = React.memo(({
   const predHW = rec.pred_hw !== undefined ? rec.pred_hw : Math.min(10.0, Math.max(0.0, (Number(localHomework) || 9.0)));
 
   return (
-    <tr className="hover:bg-white/[0.03]">
+    <tr className="hover:bg-white/[0.03] transition-colors">
       <td className="py-3 px-4 text-center font-bold text-slate-400">{displayIndex}</td>
-      <td className="py-3 px-4">
-        <span className="font-extrabold text-white text-xs">{rec.student_name}</span>
-        <div className="text-[10px] text-indigo-400 font-bold mt-0.5">
-          Dự đoán: C1: {predC1} | C2: {predC2} | HW: {predHW}
-        </div>
+      <td className="py-3 px-6">
+        <span className="font-extrabold text-white text-xs block truncate">{rec.student_name}</span>
       </td>
-      <td className="py-3 px-3">
-        <button
-          type="button"
-          onClick={() => {
-            const newStatus = rec.status === 'Vắng mặt' ? 'Có mặt' : 'Vắng mặt';
-            onUpdateRecord(originalIndex, 'status', newStatus);
-          }}
-          className={`px-3 py-1.5 rounded-xl font-black text-xs transition cursor-pointer border flex items-center justify-center gap-1.5 ${rec.status === 'Vắng mặt'
-              ? 'bg-rose-500/20 border-rose-500/50 text-rose-300 hover:bg-rose-500/30'
-              : 'bg-emerald-500/20 border-emerald-500/50 text-emerald-300 hover:bg-emerald-500/30'
-            }`}
-        >
-          <span className={`w-2 h-2 rounded-full ${rec.status === 'Vắng mặt' ? 'bg-rose-400' : 'bg-emerald-400'}`}></span>
-          <span>{rec.status || 'Có mặt'}</span>
-        </button>
-      </td>
-
-      <td className="py-3 px-3">
-        <input
-          type="text"
-          value={localCheck1}
-          onChange={(e) => setLocalCheck1(e.target.value)}
-          onBlur={(e) => {
-            const formatted = parseAndFormatScore(e.target.value);
-            setLocalCheck1(formatted);
-            onUpdateRecord(originalIndex, 'check_1', formatted);
-          }}
-          placeholder="0-10"
-          className="w-20 bg-[#161a29] border border-white/10 rounded-lg px-2.5 py-1 text-white font-extrabold text-xs focus:outline-none focus:border-indigo-500 text-center"
-        />
-        <div className="text-[9px] text-indigo-300 font-bold text-center mt-1" title="Dự đoán điểm Check 1">
-          Dự đoán: {predC1}
+      <td className="py-3 px-4 text-center">
+        <div className="flex items-center justify-center">
+          <button
+            type="button"
+            onClick={() => {
+              const newStatus = rec.status === 'Vắng mặt' ? 'Có mặt' : 'Vắng mặt';
+              onUpdateRecord(originalIndex, 'status', newStatus);
+            }}
+            className={`px-3 py-1.5 rounded-xl font-black text-xs transition cursor-pointer border flex items-center justify-center gap-1.5 ${rec.status === 'Vắng mặt'
+                ? 'bg-rose-500/20 border-rose-500/50 text-rose-300 hover:bg-rose-500/30'
+                : 'bg-emerald-500/20 border-emerald-500/50 text-emerald-300 hover:bg-emerald-500/30'
+              }`}
+          >
+            <span className={`w-2 h-2 rounded-full ${rec.status === 'Vắng mặt' ? 'bg-rose-400' : 'bg-emerald-400'}`}></span>
+            <span>{rec.status || 'Có mặt'}</span>
+          </button>
         </div>
       </td>
 
-      <td className="py-3 px-3">
-        <input
-          type="text"
-          value={localCheck2}
-          onChange={(e) => setLocalCheck2(e.target.value)}
-          onBlur={(e) => {
-            const formatted = parseAndFormatScore(e.target.value);
-            setLocalCheck2(formatted);
-            onUpdateRecord(originalIndex, 'check_2', formatted);
-          }}
-          placeholder="0-10"
-          className="w-20 bg-[#161a29] border border-white/10 rounded-lg px-2.5 py-1 text-white font-extrabold text-xs focus:outline-none focus:border-indigo-500 text-center"
-        />
-        <div className="text-[9px] text-purple-300 font-bold text-center mt-1" title="Dự đoán điểm Check 2">
-          Dự đoán: {predC2}
+      <td className="py-3 px-4 text-center">
+        <div className="flex flex-col items-center justify-center gap-0.5">
+          <input
+            type="text"
+            value={localCheck1}
+            onChange={(e) => setLocalCheck1(e.target.value)}
+            onBlur={(e) => {
+              const formatted = parseAndFormatScore(e.target.value);
+              setLocalCheck1(formatted);
+              onUpdateRecord(originalIndex, 'check_1', formatted);
+            }}
+            placeholder="0-10"
+            className="w-20 bg-[#161a29] border border-white/10 rounded-lg px-2.5 py-1 text-white font-extrabold text-xs focus:outline-none focus:border-indigo-500 text-center"
+          />
+          <div className="text-[9px] text-indigo-300 font-bold text-center mt-0.5" title="Dự đoán điểm Check 1">
+            Dự đoán: {predC1}
+          </div>
         </div>
       </td>
 
-      <td className="py-3 px-3">
-        <div className="flex flex-col items-center gap-1">
+      <td className="py-3 px-4 text-center">
+        <div className="flex flex-col items-center justify-center gap-0.5">
+          <input
+            type="text"
+            value={localCheck2}
+            onChange={(e) => setLocalCheck2(e.target.value)}
+            onBlur={(e) => {
+              const formatted = parseAndFormatScore(e.target.value);
+              setLocalCheck2(formatted);
+              onUpdateRecord(originalIndex, 'check_2', formatted);
+            }}
+            placeholder="0-10"
+            className="w-20 bg-[#161a29] border border-white/10 rounded-lg px-2.5 py-1 text-white font-extrabold text-xs focus:outline-none focus:border-indigo-500 text-center"
+          />
+          <div className="text-[9px] text-purple-300 font-bold text-center mt-0.5" title="Dự đoán điểm Check 2">
+            Dự đoán: {predC2}
+          </div>
+        </div>
+      </td>
+
+      <td className="py-3 px-4 text-center">
+        <div className="flex flex-col items-center justify-center gap-0.5">
           <input
             type="text"
             value={localHomework}
