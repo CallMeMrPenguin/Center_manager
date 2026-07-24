@@ -45,6 +45,7 @@ Every data table MUST feature a filter icon next to each column title in the tab
 
 ## 📈 5. Graph & Chart Visual Standards
 - **Liquid Circular Glow**: SVG data point glow filters MUST use expansive filter bounds (`x="-100%" y="-100%" width="300%" height="300%"`) or SVG radial gradients so that point glows are perfectly circular with ZERO clipped square edges.
+- **SVG Circle Scale Center Origin**: Any SVG data point `<circle>` with hover scaling MUST specify `style={{ transformBox: 'fill-box', transformOrigin: 'center' }}` so hover scaling expands symmetrically from the dot's exact center rather than jumping to the top-left origin (0,0).
 - **Data Point Hover Values**: Hovering over any data point on line/progress charts MUST render an interactive tooltip card displaying the exact numerical score values (`Check 1`, `Check 2`, `Homework`).
 - **Generous Vertical Spacing**: Progress charts must maintain generous height (min 560px) to provide clear vertical separation between score grid lines.
 

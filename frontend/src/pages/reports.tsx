@@ -1023,16 +1023,16 @@ export default function ReportsPage() {
                   />
 
                   {/* Check 1 Point */}
-                  <circle cx={x} cy={y1} r="7" fill="#3b82f6" filter="url(#glow-blue)" className="transition-transform group-hover:scale-125" />
-                  <circle cx={x} cy={y1} r="3.5" fill="#ffffff" />
+                  <circle cx={x} cy={y1} r="7" fill="#3b82f6" filter="url(#glow-blue)" style={{ transformBox: 'fill-box', transformOrigin: 'center' }} className="transition-transform duration-200 group-hover:scale-125" />
+                  <circle cx={x} cy={y1} r="3.5" fill="#ffffff" style={{ transformBox: 'fill-box', transformOrigin: 'center' }} className="transition-transform duration-200 group-hover:scale-125" />
 
                   {/* Check 2 Point */}
-                  <circle cx={x} cy={y2} r="7" fill="#a855f7" filter="url(#glow-purple)" className="transition-transform group-hover:scale-125" />
-                  <circle cx={x} cy={y2} r="3.5" fill="#ffffff" />
+                  <circle cx={x} cy={y2} r="7" fill="#a855f7" filter="url(#glow-purple)" style={{ transformBox: 'fill-box', transformOrigin: 'center' }} className="transition-transform duration-200 group-hover:scale-125" />
+                  <circle cx={x} cy={y2} r="3.5" fill="#ffffff" style={{ transformBox: 'fill-box', transformOrigin: 'center' }} className="transition-transform duration-200 group-hover:scale-125" />
 
                   {/* Homework Point */}
-                  <circle cx={x} cy={yHw} r="7" fill="#10b981" filter="url(#glow-emerald)" className="transition-transform group-hover:scale-125" />
-                  <circle cx={x} cy={yHw} r="3.5" fill="#ffffff" />
+                  <circle cx={x} cy={yHw} r="7" fill="#10b981" filter="url(#glow-emerald)" style={{ transformBox: 'fill-box', transformOrigin: 'center' }} className="transition-transform duration-200 group-hover:scale-125" />
+                  <circle cx={x} cy={yHw} r="3.5" fill="#ffffff" style={{ transformBox: 'fill-box', transformOrigin: 'center' }} className="transition-transform duration-200 group-hover:scale-125" />
 
                   {/* X-axis Session Date */}
                   <text x={x} y={chartHeight - 12} fill={hoveredPoint?.index === i ? "#ffffff" : "#94a3b8"} fontSize="11" fontWeight="extrabold" textAnchor="middle">
