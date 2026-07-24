@@ -1,0 +1,2074 @@
+import os
+import sqlite3
+import math
+from typing import List, Dict, Any, Optional
+
+# Database Path
+DB_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "test_formatter.db")
+
+def get_connection():
+    conn = sqlite3.connect(DB_PATH, check_same_thread=False)
+    conn.row_factory = sqlite3.Row
+    conn.execute("PRAGMA journal_mode = WAL;")
+    conn.execute("PRAGMA synchronous = NORMAL;")
+    conn.execute("PRAGMA cache_size = -64000;")
+    conn.execute("PRAGMA foreign_keys = ON;")
+    return conn
+
+def init_db():
+    """Initializes the SQLite database schema for Question Bank, Vocabulary, and Document Manager."""
+    conn = get_connection()
+    cursor = conn.cursor()
+    
+    # 1. Question Bank table
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS question_bank (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        grade TEXT,
+        unit TEXT,
+        test_type TEXT,
+        question_text TEXT,
+        question_type TEXT,
+        option_1 TEXT,
+        option_2 TEXT,
+        option_3 TEXT,
+        option_4 TEXT,
+        answer TEXT,
+        level TEXT,
+        frequency TEXT
+    )
+    """)
+    
+    # 2. Vocabulary List table
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS vocabulary_list (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        no TEXT,
+        grade TEXT,
+        unit TEXT,
+        vocabulary TEXT,
+        pos TEXT,
+        ipa TEXT,
+        meaning TEXT,
+        difficulty TEXT,
+        root_word TEXT
+    )
+    """)
+    
+    # 3. Document Folders table
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS document_folders (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+    """)
+    
+    # Try to add parent_id to document_folders if it doesn't exist
+    try:
+        cursor.execute("ALTER TABLE document_folders ADD COLUMN parent_id INTEGER DEFAULT NULL REFERENCES document_folders(id) ON DELETE SET NULL")
+    except sqlite3.OperationalError:
+        pass
+    
+    # 4. Documents table
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS documents (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        filename TEXT NOT NULL,
+        filepath TEXT NOT NULL,
+        folder_id INTEGER DEFAULT NULL,
+        file_type TEXT,
+        file_size INTEGER,
+        tags TEXT DEFAULT '',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (folder_id) REFERENCES document_folders(id) ON DELETE SET NULL
+    )
+    """)
+    # 5. Document Attachments table
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS document_attachments (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        document_id INTEGER NOT NULL,
+        filename TEXT NOT NULL,
+        filepath TEXT NOT NULL,
+        file_type TEXT,
+        file_size INTEGER,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (document_id) REFERENCES documents(id) ON DELETE CASCADE
+    )
+    """)
+    
+    # Check/add is_deleted and deleted_at columns for soft deletes
+    try:
+        cursor.execute("ALTER TABLE documents ADD COLUMN is_deleted INTEGER DEFAULT 0")
+    except sqlite3.OperationalError:
+        pass
+    try:
+        cursor.execute("ALTER TABLE documents ADD COLUMN deleted_at TIMESTAMP DEFAULT NULL")
+    except sqlite3.OperationalError:
+        pass
+    try:
+        cursor.execute("ALTER TABLE document_folders ADD COLUMN is_deleted INTEGER DEFAULT 0")
+    except sqlite3.OperationalError:
+        pass
+    try:
+        cursor.execute("ALTER TABLE document_folders ADD COLUMN deleted_at TIMESTAMP DEFAULT NULL")
+    except sqlite3.OperationalError:
+        pass
+    
+    # 6. Center Manager — Students table
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS students (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        full_name TEXT NOT NULL,
+        nickname TEXT DEFAULT '',
+        gender TEXT CHECK(gender IN ('Nam', 'Nữ', 'Khác')) DEFAULT 'Nam',
+        grade TEXT DEFAULT 'Lớp 6',
+        date_of_birth TEXT,
+        enroll_date TEXT,
+        school TEXT,
+        status TEXT CHECK(status IN ('Đang học', 'Đã nghỉ')) DEFAULT 'Đang học',
+        father_name TEXT,
+        father_phone TEXT,
+        mother_name TEXT,
+        mother_phone TEXT,
+        address TEXT,
+        notes TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+    """)
+
+    # Try to add grade & nickname columns if table already exists
+    try:
+        cursor.execute("ALTER TABLE students ADD COLUMN grade TEXT DEFAULT 'Lớp 6'")
+    except sqlite3.OperationalError:
+        pass
+    try:
+        cursor.execute("ALTER TABLE students ADD COLUMN nickname TEXT DEFAULT ''")
+    except sqlite3.OperationalError:
+        pass
+
+    # 7. Center Manager — Teachers table
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS teachers_cm (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        full_name TEXT NOT NULL,
+        role TEXT CHECK(role IN ('Giáo viên', 'Trợ giảng')) DEFAULT 'Giáo viên',
+        date_of_birth TEXT,
+        phone TEXT,
+        notes TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+    """)
+
+    # 8. Center Manager — Classes table
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS classes (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        class_name TEXT NOT NULL,
+        teacher_id INTEGER REFERENCES teachers_cm(id) ON DELETE SET NULL,
+        grade TEXT DEFAULT 'Lớp 6',
+        subject TEXT,
+        room TEXT,
+        status TEXT CHECK(status IN ('Đang hoạt động', 'Tạm dừng', 'Đã kết thúc')) DEFAULT 'Đang hoạt động',
+        notes TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+    """)
+
+    try:
+        cursor.execute("ALTER TABLE classes ADD COLUMN grade TEXT DEFAULT 'Lớp 6'")
+    except sqlite3.OperationalError:
+        pass
+
+    # 9. Class Students enrollment junction
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS class_students (
+        class_id INTEGER REFERENCES classes(id) ON DELETE CASCADE,
+        student_id INTEGER REFERENCES students(id) ON DELETE CASCADE,
+        seat_color TEXT DEFAULT NULL,
+        grade_group TEXT DEFAULT NULL,
+        joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (class_id, student_id)
+    )
+    """)
+
+    # 10. Class Weekly Schedule
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS class_schedule_weekly (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        class_id INTEGER REFERENCES classes(id) ON DELETE CASCADE,
+        day_of_week TEXT NOT NULL,
+        start_time TEXT NOT NULL,
+        duration INTEGER NOT NULL,
+        notes TEXT
+    )
+    """)
+
+    # 11. Class Monthly Sessions
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS class_sessions (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        class_id INTEGER REFERENCES classes(id) ON DELETE CASCADE,
+        date TEXT NOT NULL,
+        start_time TEXT NOT NULL,
+        duration INTEGER NOT NULL,
+        status TEXT CHECK(status IN ('Sắp diễn ra', 'Đã học', 'Hủy')) DEFAULT 'Sắp diễn ra',
+        teacher_id INTEGER REFERENCES teachers_cm(id) ON DELETE SET NULL,
+        notes TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+    """)
+
+    # 12. Class Seating Layout
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS class_seating (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        class_id INTEGER UNIQUE REFERENCES classes(id) ON DELETE CASCADE,
+        num_rows INTEGER NOT NULL DEFAULT 4,
+        layout_json TEXT NOT NULL DEFAULT '[]',
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+    """)
+
+    # 13. Center Manager — Courses table
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS courses (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        course_name TEXT NOT NULL,
+        description TEXT,
+        price REAL DEFAULT 0,
+        duration_weeks INTEGER,
+        status TEXT CHECK(status IN ('Đang mở', 'Đã đóng')) DEFAULT 'Đang mở',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+    """)
+
+    # 14. Student Scores table
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS student_scores (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        student_id INTEGER REFERENCES students(id) ON DELETE CASCADE NOT NULL,
+        class_id INTEGER REFERENCES classes(id) ON DELETE CASCADE NOT NULL,
+        test_title TEXT,
+        test_date TEXT,
+        score_type TEXT CHECK(score_type IN ('check_1', 'check_2', 'homework')) NOT NULL,
+        score REAL,
+        max_score REAL DEFAULT 10,
+        notes TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(student_id, class_id, score_type)
+    )
+    """)
+
+    # 15. Class Attendance & Grades table
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS class_attendance_grades (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        class_id INTEGER REFERENCES classes(id) ON DELETE CASCADE NOT NULL,
+        student_id INTEGER REFERENCES students(id) ON DELETE CASCADE NOT NULL,
+        date TEXT NOT NULL,
+        status TEXT CHECK(status IN ('Có mặt', 'Vắng mặt')) DEFAULT 'Có mặt',
+        check_1 REAL DEFAULT 0,
+        check_2 REAL DEFAULT 0,
+        homework REAL DEFAULT 0,
+        notes TEXT,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(class_id, student_id, date)
+    )
+    """)
+
+    # 16. Friend Groups table
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS friend_groups (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        class_id INTEGER REFERENCES classes(id) ON DELETE CASCADE NOT NULL,
+        group_name TEXT NOT NULL,
+        color_hex TEXT DEFAULT '#6366F1',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+    """)
+
+    # 17. Friend Group Members table
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS friend_group_members (
+        group_id INTEGER REFERENCES friend_groups(id) ON DELETE CASCADE,
+        student_id INTEGER REFERENCES students(id) ON DELETE CASCADE,
+        class_id INTEGER REFERENCES classes(id) ON DELETE CASCADE,
+        PRIMARY KEY (class_id, student_id)
+    )
+    """)
+
+    # 18. Conflict Relationships table (legacy pair compatibility)
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS conflict_relationships (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        class_id INTEGER REFERENCES classes(id) ON DELETE CASCADE NOT NULL,
+        student_id1 INTEGER REFERENCES students(id) ON DELETE CASCADE NOT NULL,
+        student_id2 INTEGER REFERENCES students(id) ON DELETE CASCADE NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE (class_id, student_id1, student_id2)
+    )
+    """)
+
+    # 19. Trusted Swap Relationships table (legacy pair compatibility)
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS trusted_swap_relationships (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        class_id INTEGER REFERENCES classes(id) ON DELETE CASCADE NOT NULL,
+        student_id1 INTEGER REFERENCES students(id) ON DELETE CASCADE NOT NULL,
+        student_id2 INTEGER REFERENCES students(id) ON DELETE CASCADE NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE (class_id, student_id1, student_id2)
+    )
+    """)
+
+    # 20. Conflict Groups table
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS conflict_groups (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        class_id INTEGER REFERENCES classes(id) ON DELETE CASCADE NOT NULL,
+        group_name TEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+    """)
+
+    # 21. Conflict Group Members table
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS conflict_group_members (
+        group_id INTEGER REFERENCES conflict_groups(id) ON DELETE CASCADE,
+        student_id INTEGER REFERENCES students(id) ON DELETE CASCADE,
+        class_id INTEGER REFERENCES classes(id) ON DELETE CASCADE,
+        PRIMARY KEY (class_id, student_id)
+    )
+    """)
+
+    # 22. Trusted Swap Individual Students table
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS trusted_swap_students (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        class_id INTEGER REFERENCES classes(id) ON DELETE CASCADE NOT NULL,
+        student_id INTEGER REFERENCES students(id) ON DELETE CASCADE NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE (class_id, student_id)
+    )
+    """)
+
+    # Alter class_seating for extra columns
+    try:
+        cursor.execute("ALTER TABLE class_seating ADD COLUMN rows INTEGER DEFAULT 4")
+    except sqlite3.OperationalError:
+        pass
+    try:
+        cursor.execute("ALTER TABLE class_seating ADD COLUMN cols INTEGER DEFAULT 6")
+    except sqlite3.OperationalError:
+        pass
+    try:
+        cursor.execute("ALTER TABLE class_seating ADD COLUMN snapshot_name TEXT DEFAULT 'Bản chính'")
+    except sqlite3.OperationalError:
+        pass
+
+    # Performance Indexes
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_question_bank_grade_unit ON question_bank(grade, unit);")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_vocabulary_list_grade_unit ON vocabulary_list(grade, unit);")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_documents_folder_deleted ON documents(folder_id, is_deleted);")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_document_folders_parent_deleted ON document_folders(parent_id, is_deleted);")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_class_sessions_class_date ON class_sessions(class_id, date);")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_attendance_class_student_date ON class_attendance_grades(class_id, student_id, date);")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_student_scores_student_class ON student_scores(student_id, class_id);")
+
+    conn.commit()
+    conn.close()
+    print("Database initialized successfully.")
+
+# ----------------------------------------------------
+# QUESTION BANK OPERATIONS
+# ----------------------------------------------------
+def insert_questions(questions: List[Dict[str, Any]]):
+    conn = get_connection()
+    cursor = conn.cursor()
+    
+    # Prepare batch insert
+    sql = """
+    INSERT INTO question_bank (
+        grade, unit, test_type, question_text, question_type, 
+        option_1, option_2, option_3, option_4, answer, level, frequency
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """
+    
+    data = []
+    for q in questions:
+        meta = q.get("meta") or {}
+        # CSV options grid
+        opts = q.get("o") or []
+        opt1 = opts[0] if len(opts) > 0 else ""
+        opt2 = opts[1] if len(opts) > 1 else ""
+        opt3 = opts[2] if len(opts) > 2 else ""
+        opt4 = opts[3] if len(opts) > 3 else ""
+        
+        data.append((
+            meta.get("grade", q.get("grade", "")),
+            meta.get("unit", q.get("unit", "")),
+            q.get("test_type", ""),
+            q.get("x", q.get("question_text", "")),
+            q.get("t", q.get("question_type", "")),
+            opt1, opt2, opt3, opt4,
+            q.get("a", q.get("answer", "")),
+            q.get("level", ""),
+            q.get("frequency", "")
+        ))
+        
+    cursor.executemany(sql, data)
+    conn.commit()
+    count = cursor.rowcount
+    conn.close()
+    return count
+
+def get_questions(grade=None, unit=None, qtype=None, level=None, search=None) -> List[Dict[str, Any]]:
+    conn = get_connection()
+    cursor = conn.cursor()
+    
+    query = "SELECT * FROM question_bank WHERE 1=1"
+    params = []
+    
+    if grade:
+        query += " AND grade = ?"
+        params.append(str(grade))
+    if unit:
+        query += " AND unit = ?"
+        params.append(str(unit))
+    if qtype:
+        query += " AND question_type = ?"
+        params.append(str(qtype))
+    if level:
+        query += " AND level = ?"
+        params.append(str(level))
+    if search:
+        query += " AND (question_text LIKE ? OR option_1 LIKE ? OR option_2 LIKE ? OR option_3 LIKE ? OR option_4 LIKE ?)"
+        term = f"%{search}%"
+        params.extend([term, term, term, term, term])
+        
+    query += " ORDER BY COALESCE(CAST(frequency AS INTEGER), 0) ASC, id DESC"
+    
+    cursor.execute(query, params)
+    rows = cursor.fetchall()
+    conn.close()
+    
+    result = []
+    for r in rows:
+        # Reconstruct compiler options list
+        opts = []
+        if r["option_1"]: opts.append(r["option_1"])
+        if r["option_2"]: opts.append(r["option_2"])
+        if r["option_3"]: opts.append(r["option_3"])
+        if r["option_4"]: opts.append(r["option_4"])
+        
+        result.append({
+            "id": r["id"],
+            "grade": r["grade"],
+            "unit": r["unit"],
+            "test_type": r["test_type"],
+            "x": r["question_text"],
+            "t": r["question_type"],
+            "o": opts,
+            "a": r["answer"],
+            "level": r["level"],
+            "frequency": r["frequency"]
+        })
+    return result
+
+def delete_questions(ids: List[int]):
+    if not ids:
+        return 0
+    conn = get_connection()
+    cursor = conn.cursor()
+    placeholders = ",".join("?" for _ in ids)
+    cursor.execute(f"DELETE FROM question_bank WHERE id IN ({placeholders})", ids)
+    conn.commit()
+    count = cursor.rowcount
+    conn.close()
+    return count
+
+def clear_questions(grade = None, unit = None):
+    conn = get_connection()
+    cursor = conn.cursor()
+    if grade and unit:
+        cursor.execute("DELETE FROM question_bank WHERE grade = ? AND unit = ?", (grade, unit))
+    elif grade:
+        cursor.execute("DELETE FROM question_bank WHERE grade = ?", (grade,))
+    else:
+        cursor.execute("DELETE FROM question_bank")
+    conn.commit()
+    conn.close()
+
+def increment_question_frequency(ids: List[int]) -> int:
+    if not ids:
+        return 0
+    conn = get_connection()
+    cursor = conn.cursor()
+    placeholders = ",".join("?" for _ in ids)
+    cursor.execute(f"""
+        UPDATE question_bank 
+        SET frequency = COALESCE(CAST(frequency AS INTEGER), 0) + 1 
+        WHERE id IN ({placeholders})
+    """, ids)
+    conn.commit()
+    count = cursor.rowcount
+    conn.close()
+    return count
+
+def reset_question_frequency(ids: List[int] = None) -> int:
+    conn = get_connection()
+    cursor = conn.cursor()
+    if ids:
+        placeholders = ",".join("?" for _ in ids)
+        cursor.execute(f"UPDATE question_bank SET frequency = 0 WHERE id IN ({placeholders})", ids)
+    else:
+        cursor.execute("UPDATE question_bank SET frequency = 0")
+    conn.commit()
+    count = cursor.rowcount
+    conn.close()
+    return count
+
+# ----------------------------------------------------
+# VOCABULARY OPERATIONS
+# ----------------------------------------------------
+def insert_vocabulary(entries: List[Dict[str, Any]]):
+    conn = get_connection()
+    cursor = conn.cursor()
+    
+    sql = """
+    INSERT INTO vocabulary_list (
+        no, grade, unit, vocabulary, pos, ipa, meaning, difficulty, root_word
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """
+    
+    data = []
+    for e in entries:
+        data.append((
+            e.get("no", ""),
+            e.get("grade", ""),
+            e.get("unit", ""),
+            e.get("vocabulary", ""),
+            e.get("pos", ""),
+            e.get("ipa", ""),
+            e.get("meaning", ""),
+            e.get("difficulty", ""),
+            e.get("root_word", "")
+        ))
+        
+    cursor.executemany(sql, data)
+    conn.commit()
+    count = cursor.rowcount
+    conn.close()
+    return count
+
+def get_vocabulary(grade=None, unit=None, difficulty=None, pos=None, search=None) -> List[Dict[str, Any]]:
+    conn = get_connection()
+    cursor = conn.cursor()
+    
+    query = "SELECT * FROM vocabulary_list WHERE 1=1"
+    params = []
+    
+    if grade:
+        query += " AND grade = ?"
+        params.append(str(grade))
+    if unit:
+        query += " AND unit = ?"
+        params.append(str(unit))
+    if difficulty:
+        query += " AND difficulty = ?"
+        params.append(str(difficulty))
+    if pos:
+        query += " AND pos LIKE ?"
+        params.append(f"%{pos}%")
+    if search:
+        query += " AND (vocabulary LIKE ? OR meaning LIKE ? OR root_word LIKE ?)"
+        term = f"%{search}%"
+        params.extend([term, term, term])
+        
+    query += " ORDER BY grade ASC, CAST(unit AS INTEGER) ASC, CAST(no AS INTEGER) ASC, id ASC"
+    
+    cursor.execute(query, params)
+    rows = cursor.fetchall()
+    conn.close()
+    
+    return [dict(r) for r in rows]
+
+def delete_vocabulary(ids: List[int]):
+    if not ids:
+        return 0
+    conn = get_connection()
+    cursor = conn.cursor()
+    placeholders = ",".join("?" for _ in ids)
+    cursor.execute(f"DELETE FROM vocabulary_list WHERE id IN ({placeholders})", ids)
+    conn.commit()
+    count = cursor.rowcount
+    conn.close()
+    return count
+
+def clear_vocabulary(grade = None, unit = None):
+    conn = get_connection()
+    cursor = conn.cursor()
+    if grade and unit:
+        cursor.execute("DELETE FROM vocabulary_list WHERE grade = ? AND unit = ?", (grade, unit))
+    elif grade:
+        cursor.execute("DELETE FROM vocabulary_list WHERE grade = ?", (grade,))
+    else:
+        cursor.execute("DELETE FROM vocabulary_list")
+    conn.commit()
+    conn.close()
+
+def update_vocabulary(vocab_id: int, e: Dict[str, Any]) -> bool:
+    conn = get_connection()
+    cursor = conn.cursor()
+    sql = """
+    UPDATE vocabulary_list
+    SET no = ?, grade = ?, unit = ?, vocabulary = ?, pos = ?, ipa = ?, meaning = ?, difficulty = ?, root_word = ?
+    WHERE id = ?
+    """
+    cursor.execute(sql, (
+        str(e.get("no", "")),
+        str(e.get("grade", "")),
+        str(e.get("unit", "")),
+        str(e.get("vocabulary", "")),
+        str(e.get("pos", "")),
+        str(e.get("ipa", "")),
+        str(e.get("meaning", "")),
+        str(e.get("difficulty", "")),
+        str(e.get("root_word", "")),
+        vocab_id
+    ))
+    conn.commit()
+    count = cursor.rowcount
+    conn.close()
+    return count > 0
+
+def update_question(question_id: int, q: Dict[str, Any]) -> bool:
+    conn = get_connection()
+    cursor = conn.cursor()
+    opts = q.get("o") or []
+    opt1 = opts[0] if len(opts) > 0 else ""
+    opt2 = opts[1] if len(opts) > 1 else ""
+    opt3 = opts[2] if len(opts) > 2 else ""
+    opt4 = opts[3] if len(opts) > 3 else ""
+    
+    sql = """
+    UPDATE question_bank
+    SET grade = ?, unit = ?, test_type = ?, question_text = ?, question_type = ?, 
+        option_1 = ?, option_2 = ?, option_3 = ?, option_4 = ?, answer = ?, level = ?, frequency = ?
+    WHERE id = ?
+    """
+    cursor.execute(sql, (
+        str(q.get("grade", "")),
+        str(q.get("unit", "")),
+        str(q.get("test_type", "")),
+        str(q.get("x", q.get("question_text", ""))),
+        str(q.get("t", q.get("question_type", ""))),
+        opt1, opt2, opt3, opt4,
+        str(q.get("a", q.get("answer", ""))),
+        str(q.get("level", "")),
+        str(q.get("frequency", "")),
+        question_id
+    ))
+    conn.commit()
+    count = cursor.rowcount
+    conn.close()
+    return count > 0
+
+def get_active_grades() -> List[str]:
+    conn = get_connection()
+    cursor = conn.cursor()
+    
+    cursor.execute("SELECT DISTINCT grade FROM question_bank WHERE grade IS NOT NULL AND grade != ''")
+    q_grades = [str(r[0]) for r in cursor.fetchall()]
+    
+    cursor.execute("SELECT DISTINCT grade FROM vocabulary_list WHERE grade IS NOT NULL AND grade != ''")
+    v_grades = [str(r[0]) for r in cursor.fetchall()]
+    
+    conn.close()
+    
+    digits = []
+    others = []
+    for g in set(q_grades + v_grades):
+        if g.isdigit():
+            digits.append(int(g))
+        else:
+            others.append(g)
+    digits.sort()
+    others.sort()
+    all_grades = [str(d) for d in digits] + others
+    
+    if not all_grades:
+        return ["6", "7", "8", "9"]
+    return all_grades
+
+# ----------------------------------------------------
+# DOCUMENT MANAGER OPERATIONS
+# ----------------------------------------------------
+def insert_folder(name: str, parent_id: Any = None) -> int:
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("INSERT INTO document_folders (name, parent_id) VALUES (?, ?)", (name, parent_id))
+    conn.commit()
+    fid = cursor.lastrowid
+    conn.close()
+    return fid
+
+def get_folders(is_deleted: int = 0) -> List[Dict[str, Any]]:
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM document_folders WHERE is_deleted = ? ORDER BY name ASC", (is_deleted,))
+    rows = cursor.fetchall()
+    conn.close()
+    return [dict(r) for r in rows]
+
+def delete_folder(folder_id: int):
+    conn = get_connection()
+    cursor = conn.cursor()
+    # Mark folder and all recursive subfolders as deleted
+    cursor.execute("""
+        WITH RECURSIVE sub_folders(id) AS (
+            SELECT id FROM document_folders WHERE id = ?
+            UNION ALL
+            SELECT f.id FROM document_folders f JOIN sub_folders sf ON f.parent_id = sf.id
+        )
+        UPDATE document_folders SET is_deleted = 1, deleted_at = CURRENT_TIMESTAMP
+        WHERE id IN (SELECT id FROM sub_folders)
+    """, (folder_id,))
+    # Soft delete all documents in folder and subfolders
+    cursor.execute("""
+        WITH RECURSIVE sub_folders(id) AS (
+            SELECT id FROM document_folders WHERE id = ?
+            UNION ALL
+            SELECT f.id FROM document_folders f JOIN sub_folders sf ON f.parent_id = sf.id
+        )
+        UPDATE documents SET is_deleted = 1, deleted_at = CURRENT_TIMESTAMP
+        WHERE folder_id IN (SELECT id FROM sub_folders)
+    """, (folder_id,))
+    conn.commit()
+    conn.close()
+
+def insert_document(name: str, filename: str, filepath: str, folder_id: Any, file_type: str, file_size: int, tags: str = "") -> int:
+    conn = get_connection()
+    cursor = conn.cursor()
+    # Normalize folder_id: convert falsy/empty values to None
+    fid = int(folder_id) if (folder_id is not None and str(folder_id).strip() != '' and str(folder_id) != 'null') else None
+    cursor.execute("""
+        INSERT INTO documents (name, filename, filepath, folder_id, file_type, file_size, tags)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+    """, (name, filename, filepath, fid, file_type, file_size, tags))
+    conn.commit()
+    did = cursor.lastrowid
+    conn.close()
+    return did
+
+def get_documents(folder_id: Any = '__ALL__', tag: str = None, search: str = None, is_deleted: int = 0) -> List[Dict[str, Any]]:
+    conn = get_connection()
+    cursor = conn.cursor()
+    query = "SELECT * FROM documents WHERE is_deleted = ?"
+    params = [is_deleted]
+    
+    if folder_id != '__ALL__':
+        if folder_id is None or str(folder_id).strip() == '' or str(folder_id) == 'null':
+            query += " AND folder_id IS NULL"
+        else:
+            query += " AND folder_id = ?"
+            params.append(int(folder_id))
+            
+    if tag:
+        query += " AND (',' || tags || ',') LIKE ?"
+        params.append(f"%,{tag.strip()},%")
+        
+    if search:
+        query += " AND (name LIKE ? OR filename LIKE ? OR tags LIKE ?)"
+        term = f"%{search}%"
+        params.extend([term, term, term])
+        
+    query += " ORDER BY id DESC"
+    cursor.execute(query, params)
+    rows = cursor.fetchall()
+    conn.close()
+    return [dict(r) for r in rows]
+
+def get_document(doc_id: int) -> Dict[str, Any]:
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM documents WHERE id = ?", (doc_id,))
+    row = cursor.fetchone()
+    conn.close()
+    return dict(row) if row else None
+
+def delete_document(doc_id: int):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("UPDATE documents SET is_deleted = 1, deleted_at = CURRENT_TIMESTAMP WHERE id = ?", (doc_id,))
+    conn.commit()
+    conn.close()
+
+def restore_document(doc_id: int):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("UPDATE documents SET is_deleted = 0, deleted_at = NULL WHERE id = ?", (doc_id,))
+    conn.commit()
+    conn.close()
+
+def restore_folder(folder_id: int):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        WITH RECURSIVE sub_folders(id) AS (
+            SELECT id FROM document_folders WHERE id = ?
+            UNION ALL
+            SELECT f.id FROM document_folders f JOIN sub_folders sf ON f.parent_id = sf.id
+        )
+        UPDATE document_folders SET is_deleted = 0, deleted_at = NULL
+        WHERE id IN (SELECT id FROM sub_folders)
+    """, (folder_id,))
+    cursor.execute("""
+        WITH RECURSIVE sub_folders(id) AS (
+            SELECT id FROM document_folders WHERE id = ?
+            UNION ALL
+            SELECT f.id FROM document_folders f JOIN sub_folders sf ON f.parent_id = sf.id
+        )
+        UPDATE documents SET is_deleted = 0, deleted_at = NULL
+        WHERE folder_id IN (SELECT id FROM sub_folders)
+    """, (folder_id,))
+    conn.commit()
+    conn.close()
+
+def permanently_delete_document(doc_id: int):
+    from config.settings import get_setting
+    files_dir = get_setting("files_dir")
+    conn = get_connection()
+    cursor = conn.cursor()
+    
+    # Get document path
+    cursor.execute("SELECT filepath FROM documents WHERE id = ?", (doc_id,))
+    row = cursor.fetchone()
+    filepath = row[0] if row else None
+    
+    # Delete attachments
+    cursor.execute("SELECT id, filepath FROM document_attachments WHERE document_id = ?", (doc_id,))
+    atts = cursor.fetchall()
+    for aid, att_filepath in atts:
+        att_path = os.path.join(files_dir, att_filepath)
+        if os.path.exists(att_path) and os.path.isfile(att_path):
+            try: os.remove(att_path)
+            except: pass
+        cursor.execute("DELETE FROM document_attachments WHERE id = ?", (aid,))
+        
+    # Delete document file
+    if filepath:
+        doc_path = os.path.join(files_dir, filepath)
+        if os.path.exists(doc_path) and os.path.isfile(doc_path):
+            try: os.remove(doc_path)
+            except: pass
+            
+    cursor.execute("DELETE FROM documents WHERE id = ?", (doc_id,))
+    conn.commit()
+    conn.close()
+
+def permanently_delete_folder_recursive(folder_id: int):
+    from config.settings import get_setting
+    files_dir = get_setting("files_dir")
+    conn = get_connection()
+    cursor = conn.cursor()
+    
+    # Find all documents in this folder and delete them permanently
+    cursor.execute("SELECT id FROM documents WHERE folder_id = ?", (folder_id,))
+    doc_ids = [r[0] for r in cursor.fetchall()]
+    conn.close()
+    
+    for doc_id in doc_ids:
+        permanently_delete_document(doc_id)
+        
+    # Find child folders and delete recursively
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT id FROM document_folders WHERE parent_id = ?", (folder_id,))
+    child_ids = [r[0] for r in cursor.fetchall()]
+    conn.commit()
+    conn.close()
+    
+    for cid in child_ids:
+        permanently_delete_folder_recursive(cid)
+        
+    # Delete folder itself
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM document_folders WHERE id = ?", (folder_id,))
+    conn.commit()
+    conn.close()
+
+def purge_old_trash():
+    import os
+    from config.settings import get_setting
+    files_dir = get_setting("files_dir")
+    conn = get_connection()
+    cursor = conn.cursor()
+    
+    # 1. Purge old documents (deleted_at > 30 days ago)
+    # SQLite has datetime('now', '-30 days')
+    cursor.execute("SELECT id FROM documents WHERE is_deleted = 1 AND deleted_at < datetime('now', '-30 days')")
+    old_doc_ids = [r[0] for r in cursor.fetchall()]
+    conn.close()
+    
+    for doc_id in old_doc_ids:
+        try:
+            permanently_delete_document(doc_id)
+        except Exception as e:
+            print(f"Error purging document {doc_id}: {e}")
+            
+    # 2. Purge old folders
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT id FROM document_folders WHERE is_deleted = 1 AND deleted_at < datetime('now', '-30 days')")
+    old_folder_ids = [r[0] for r in cursor.fetchall()]
+    conn.close()
+    
+    for f_id in old_folder_ids:
+        try:
+            permanently_delete_folder_recursive(f_id)
+        except Exception as e:
+            print(f"Error purging folder {f_id}: {e}")
+
+def update_document_tags(doc_id: int, tags: str):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("UPDATE documents SET tags = ? WHERE id = ?", (tags, doc_id))
+    conn.commit()
+    conn.close()
+
+def update_document_folder(doc_id: int, folder_id: Any):
+    conn = get_connection()
+    cursor = conn.cursor()
+    fid = int(folder_id) if (folder_id is not None and str(folder_id).strip() != '' and str(folder_id) != 'null') else None
+    cursor.execute("UPDATE documents SET folder_id = ? WHERE id = ?", (fid, doc_id))
+    conn.commit()
+    conn.close()
+
+def insert_attachment(document_id: int, filename: str, filepath: str, file_type: str, file_size: int) -> int:
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        INSERT INTO document_attachments (document_id, filename, filepath, file_type, file_size)
+        VALUES (?, ?, ?, ?, ?)
+    """, (document_id, filename, filepath, file_type, file_size))
+    conn.commit()
+    aid = cursor.lastrowid
+    conn.close()
+    return aid
+
+def get_attachments(document_id: int) -> List[Dict[str, Any]]:
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM document_attachments WHERE document_id = ? ORDER BY id DESC", (document_id,))
+    rows = cursor.fetchall()
+    conn.close()
+    return [dict(r) for r in rows]
+
+def get_attachment(attachment_id: int) -> Dict[str, Any]:
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM document_attachments WHERE id = ?", (attachment_id,))
+    row = cursor.fetchone()
+    conn.close()
+    return dict(row) if row else None
+
+def delete_attachment(attachment_id: int):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM document_attachments WHERE id = ?", (attachment_id,))
+    conn.commit()
+    conn.close()
+
+def update_folder_parent(folder_id: int, parent_id: Any):
+    conn = get_connection()
+    cursor = conn.cursor()
+    pid = int(parent_id) if (parent_id is not None and str(parent_id).strip() != '' and str(parent_id) != 'null') else None
+    cursor.execute("UPDATE document_folders SET parent_id = ? WHERE id = ?", (pid, folder_id))
+    conn.commit()
+    conn.close()
+
+# ----------------------------------------------------
+# CENTER MANAGER — STUDENTS CRUD
+# ----------------------------------------------------
+def get_students(search: str = "", status: str = "") -> List[Dict[str, Any]]:
+    conn = get_connection()
+    cursor = conn.cursor()
+    query = """
+        SELECT s.*, GROUP_CONCAT(c.class_name, ', ') as enrolled_classes
+        FROM students s
+        LEFT JOIN class_students cs ON s.id = cs.student_id
+        LEFT JOIN classes c ON cs.class_id = c.id
+        WHERE 1=1
+    """
+    params = []
+    if search:
+        query += " AND (s.full_name LIKE ? OR s.nickname LIKE ? OR s.school LIKE ? OR s.father_phone LIKE ? OR s.mother_phone LIKE ?)"
+        pattern = f"%{search}%"
+        params.extend([pattern, pattern, pattern, pattern, pattern])
+    if status:
+        query += " AND s.status = ?"
+        params.append(status)
+    query += " GROUP BY s.id ORDER BY s.id DESC"
+    cursor.execute(query, params)
+    rows = cursor.fetchall()
+    conn.close()
+    return [dict(r) for r in rows]
+
+def create_student(data: Dict[str, Any]) -> int:
+    conn = get_connection()
+    cursor = conn.cursor()
+    
+    full_name = str(data.get("full_name") or "").strip()
+    if not full_name:
+        conn.close()
+        raise ValueError("Vui lòng nhập họ và tên học sinh.")
+
+    # Check for duplicate student name in database
+    cursor.execute("SELECT id, full_name, date_of_birth, grade, gender, school FROM students WHERE LOWER(TRIM(full_name)) = LOWER(TRIM(?))", (full_name,))
+    duplicates = cursor.fetchall()
+    
+    if duplicates:
+        dob = str(data.get("date_of_birth") or "").strip()
+        grade = str(data.get("grade") or "").strip()
+        gender = str(data.get("gender") or "").strip()
+        school = str(data.get("school") or "").strip()
+
+        missing = []
+        if not dob: missing.append("Ngày sinh")
+        if not grade: missing.append("Lớp học")
+        if not gender: missing.append("Giới tính")
+        if not school: missing.append("Trường học")
+
+        if missing:
+            conn.close()
+            raise ValueError(
+                f"Phát hiện trùng tên học sinh '{full_name}' trong hệ thống! "
+                f"Vui lòng nhập bổ sung đầy đủ thông tin định danh: {', '.join(missing)} để phân biệt."
+            )
+
+    cursor.execute("""
+        INSERT INTO students (
+            full_name, nickname, gender, grade, date_of_birth, enroll_date, school, status,
+            father_name, father_phone, mother_name, mother_phone, address, notes
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """, (
+        full_name, data.get("nickname", ""), data.get("gender", "Nam"), data.get("grade", "Lớp 6"), data.get("date_of_birth"),
+        data.get("enroll_date"), data.get("school"), data.get("status", "Đang học"),
+        data.get("father_name"), data.get("father_phone"), data.get("mother_name"),
+        data.get("mother_phone"), data.get("address"), data.get("notes")
+    ))
+    conn.commit()
+    sid = cursor.lastrowid
+    conn.close()
+    return sid
+
+def update_student(student_id: int, data: Dict[str, Any]):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        UPDATE students SET
+            full_name = ?, nickname = ?, gender = ?, grade = ?, date_of_birth = ?, enroll_date = ?, school = ?, status = ?,
+            father_name = ?, father_phone = ?, mother_name = ?, mother_phone = ?, address = ?, notes = ?,
+            updated_at = CURRENT_TIMESTAMP
+        WHERE id = ?
+    """, (
+        data.get("full_name"), data.get("nickname", ""), data.get("gender"), data.get("grade", "Lớp 6"), data.get("date_of_birth"),
+        data.get("enroll_date"), data.get("school"), data.get("status"),
+        data.get("father_name"), data.get("father_phone"), data.get("mother_name"),
+        data.get("mother_phone"), data.get("address"), data.get("notes"),
+        student_id
+    ))
+    conn.commit()
+    conn.close()
+
+def delete_student(student_id: int):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM students WHERE id = ?", (student_id,))
+    conn.commit()
+    conn.close()
+
+# ----------------------------------------------------
+# CENTER MANAGER — TEACHERS CRUD
+# ----------------------------------------------------
+def get_teachers_cm(search: str = "", role: str = "") -> List[Dict[str, Any]]:
+    conn = get_connection()
+    cursor = conn.cursor()
+    query = "SELECT * FROM teachers_cm WHERE 1=1"
+    params = []
+    if search:
+        query += " AND (full_name LIKE ? OR phone LIKE ?)"
+        pattern = f"%{search}%"
+        params.extend([pattern, pattern])
+    if role:
+        query += " AND role = ?"
+        params.append(role)
+    query += " ORDER BY id DESC"
+    cursor.execute(query, params)
+    rows = cursor.fetchall()
+    conn.close()
+    return [dict(r) for r in rows]
+
+def create_teacher_cm(data: Dict[str, Any]) -> int:
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        INSERT INTO teachers_cm (full_name, role, date_of_birth, phone, notes)
+        VALUES (?, ?, ?, ?, ?)
+    """, (
+        data.get("full_name"), data.get("role", "Giáo viên"),
+        data.get("date_of_birth"), data.get("phone"), data.get("notes")
+    ))
+    conn.commit()
+    tid = cursor.lastrowid
+    conn.close()
+    return tid
+
+def update_teacher_cm(teacher_id: int, data: Dict[str, Any]):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        UPDATE teachers_cm SET
+            full_name = ?, role = ?, date_of_birth = ?, phone = ?, notes = ?,
+            updated_at = CURRENT_TIMESTAMP
+        WHERE id = ?
+    """, (
+        data.get("full_name"), data.get("role"), data.get("date_of_birth"),
+        data.get("phone"), data.get("notes"), teacher_id
+    ))
+    conn.commit()
+    conn.close()
+
+def delete_teacher_cm(teacher_id: int):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM teachers_cm WHERE id = ?", (teacher_id,))
+    conn.commit()
+    conn.close()
+
+# ----------------------------------------------------
+# CENTER MANAGER — CLASSES CRUD & SEATING / SCHEDULE
+# ----------------------------------------------------
+def get_classes(search: str = "") -> List[Dict[str, Any]]:
+    conn = get_connection()
+    cursor = conn.cursor()
+    query = """
+        SELECT c.*, t.full_name as teacher_name,
+            (SELECT COUNT(*) FROM class_students cs WHERE cs.class_id = c.id) as student_count
+        FROM classes c
+        LEFT JOIN teachers_cm t ON c.teacher_id = t.id
+        WHERE 1=1
+    """
+    params = []
+    if search:
+        query += " AND (c.class_name LIKE ? OR c.subject LIKE ? OR c.room LIKE ?)"
+        pattern = f"%{search}%"
+        params.extend([pattern, pattern, pattern])
+    query += " ORDER BY c.id DESC"
+    cursor.execute(query, params)
+    rows = cursor.fetchall()
+    conn.close()
+    return [dict(r) for r in rows]
+
+def create_class(data: Dict[str, Any]) -> int:
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        INSERT INTO classes (class_name, teacher_id, grade, subject, room, status, notes)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+    """, (
+        data.get("class_name"), data.get("teacher_id"), data.get("grade", "Lớp 6"), data.get("subject"),
+        data.get("room"), data.get("status", "Đang hoạt động"), data.get("notes")
+    ))
+    conn.commit()
+    cid = cursor.lastrowid
+    conn.close()
+    return cid
+
+def update_class(class_id: int, data: Dict[str, Any]):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        UPDATE classes SET
+            class_name = ?, teacher_id = ?, grade = ?, subject = ?, room = ?, status = ?, notes = ?,
+            updated_at = CURRENT_TIMESTAMP
+        WHERE id = ?
+    """, (
+        data.get("class_name"), data.get("teacher_id"), data.get("grade", "Lớp 6"), data.get("subject"),
+        data.get("room"), data.get("status"), data.get("notes"), class_id
+    ))
+    conn.commit()
+    conn.close()
+
+def delete_class(class_id: int):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM classes WHERE id = ?", (class_id,))
+    conn.commit()
+    conn.close()
+
+def get_class_students(class_id: int) -> List[Dict[str, Any]]:
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT s.*, cs.seat_color, cs.grade_group, cs.joined_at,
+               fgm.group_id, fg.group_name, fg.color_hex AS group_color
+        FROM class_students cs
+        JOIN students s ON cs.student_id = s.id
+        LEFT JOIN friend_group_members fgm ON fgm.class_id = cs.class_id AND fgm.student_id = s.id
+        LEFT JOIN friend_groups fg ON fgm.group_id = fg.id
+        WHERE cs.class_id = ?
+        ORDER BY s.full_name ASC
+    """, (class_id,))
+    rows = cursor.fetchall()
+    conn.close()
+    return [dict(r) for r in rows]
+
+def enroll_student_to_class(class_id: int, student_id: int, seat_color: str = None, grade_group: str = None):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        INSERT INTO class_students (class_id, student_id, seat_color, grade_group)
+        VALUES (?, ?, ?, ?)
+        ON CONFLICT(class_id, student_id) DO UPDATE SET
+            seat_color = EXCLUDED.seat_color,
+            grade_group = EXCLUDED.grade_group
+    """, (class_id, student_id, seat_color, grade_group))
+    conn.commit()
+    conn.close()
+
+def unenroll_student_from_class(class_id: int, student_id: int):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM class_students WHERE class_id = ? AND student_id = ?", (class_id, student_id))
+    conn.commit()
+    conn.close()
+
+def update_class_student_groups(class_id: int, student_id: int, seat_color: str, grade_group: str):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        UPDATE class_students SET seat_color = ?, grade_group = ?
+        WHERE class_id = ? AND student_id = ?
+    """, (seat_color, grade_group, class_id, student_id))
+    conn.commit()
+    conn.close()
+
+def get_class_weekly_schedule(class_id: int) -> List[Dict[str, Any]]:
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM class_schedule_weekly WHERE class_id = ? ORDER BY id ASC", (class_id,))
+    rows = cursor.fetchall()
+    conn.close()
+    return [dict(r) for r in rows]
+
+def add_class_weekly_slot(class_id: int, day_of_week: str, start_time: str, duration: int, notes: str = "") -> int:
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        INSERT INTO class_schedule_weekly (class_id, day_of_week, start_time, duration, notes)
+        VALUES (?, ?, ?, ?, ?)
+    """, (class_id, day_of_week, start_time, duration, notes))
+    conn.commit()
+    sid = cursor.lastrowid
+    conn.close()
+    return sid
+
+def delete_class_weekly_slot(slot_id: int):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM class_schedule_weekly WHERE id = ?", (slot_id,))
+    conn.commit()
+    conn.close()
+
+def get_class_sessions(class_id: int, month_year: str = "") -> List[Dict[str, Any]]:
+    import calendar
+    from datetime import datetime
+
+    conn = get_connection()
+    cursor = conn.cursor()
+    
+    # 1. Get explicit sessions
+    query = "SELECT s.*, t.full_name as teacher_name FROM class_sessions s LEFT JOIN teachers_cm t ON s.teacher_id = t.id WHERE s.class_id = ?"
+    params = [class_id]
+    if month_year:
+        query += " AND s.date LIKE ?"
+        params.append(f"{month_year}%")
+    query += " ORDER BY s.date ASC, s.start_time ASC"
+    cursor.execute(query, params)
+    rows = cursor.fetchall()
+    explicit_sessions = [dict(r) for r in rows]
+    
+    # 2. Get class info (for teacher)
+    cursor.execute("SELECT c.teacher_id, t.full_name as teacher_name FROM classes c LEFT JOIN teachers_cm t ON c.teacher_id = t.id WHERE c.id = ?", (class_id,))
+    class_info = cursor.fetchone()
+    class_teacher_id = class_info["teacher_id"] if class_info else None
+    class_teacher_name = class_info["teacher_name"] if class_info else None
+    
+    # 3. Get weekly slots
+    cursor.execute("SELECT * FROM class_schedule_weekly WHERE class_id = ?", (class_id,))
+    weekly_slots = [dict(r) for r in cursor.fetchall()]
+    
+    conn.close()
+    
+    if not weekly_slots or not month_year:
+        return explicit_sessions
+        
+    # Map Python's weekday index to "Thứ 2" - "Chủ nhật"
+    weekday_map = {
+        0: "Thứ 2",
+        1: "Thứ 3",
+        2: "Thứ 4",
+        3: "Thứ 5",
+        4: "Thứ 6",
+        5: "Thứ 7",
+        6: "Chủ nhật"
+    }
+    
+    # 4. Generate virtual sessions for the month
+    try:
+        year_str, month_str = month_year.split('-')
+        year = int(year_str)
+        month = int(month_str)
+    except Exception:
+        return explicit_sessions
+        
+    _, num_days = calendar.monthrange(year, month)
+    
+    # Keep track of explicit sessions by date and start_time to check overrides
+    explicit_keys = {(s["date"], s["start_time"]) for s in explicit_sessions}
+    
+    virtual_sessions = []
+    
+    for day in range(1, num_days + 1):
+        dt = datetime(year, month, day)
+        day_name = weekday_map[dt.weekday()]
+        date_str = f"{year:04d}-{month:02d}-{day:02d}"
+        
+        # Check slots matching this day_name
+        for slot in weekly_slots:
+            if slot["day_of_week"] == day_name:
+                start_time = slot["start_time"]
+                # If there's already an explicit session for this date & start time, skip virtual
+                if (date_str, start_time) not in explicit_keys:
+                    virtual_sessions.append({
+                        "id": -slot["id"] - (day * 100), # Negate the slot ID and mix in day offset to make it unique and recognize it as virtual
+                        "class_id": class_id,
+                        "date": date_str,
+                        "start_time": start_time,
+                        "duration": slot["duration"],
+                        "status": "Sắp diễn ra",
+                        "teacher_id": class_teacher_id,
+                        "teacher_name": class_teacher_name,
+                        "notes": slot["notes"] or ""
+                     })
+                     
+    # Merge and sort
+    all_sessions = explicit_sessions + virtual_sessions
+    all_sessions.sort(key=lambda s: (s["date"], s["start_time"]))
+    return all_sessions
+
+
+def add_class_session(class_id: int, date: str, start_time: str, duration: int, status: str = "Sắp diễn ra", teacher_id: int = None, notes: str = "") -> int:
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        INSERT INTO class_sessions (class_id, date, start_time, duration, status, teacher_id, notes)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+    """, (class_id, date, start_time, duration, status, teacher_id, notes))
+    conn.commit()
+    sid = cursor.lastrowid
+    conn.close()
+    return sid
+
+def update_class_session(session_id: int, data: Dict[str, Any]):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        UPDATE class_sessions SET
+            date = ?, start_time = ?, duration = ?, status = ?, teacher_id = ?, notes = ?
+        WHERE id = ?
+    """, (
+        data.get("date"), data.get("start_time"), data.get("duration"),
+        data.get("status"), data.get("teacher_id"), data.get("notes"), session_id
+    ))
+    conn.commit()
+    conn.close()
+
+def delete_class_session(session_id: int):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM class_sessions WHERE id = ?", (session_id,))
+    conn.commit()
+    conn.close()
+
+def get_class_seating(class_id: int) -> Dict[str, Any]:
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM class_seating WHERE class_id = ?", (class_id,))
+    row = cursor.fetchone()
+    conn.close()
+    return dict(row) if row else {"class_id": class_id, "num_rows": 4, "layout_json": "[]"}
+
+def save_class_seating(class_id: int, num_rows: int, layout_json: str):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        INSERT INTO class_seating (class_id, num_rows, layout_json)
+        VALUES (?, ?, ?)
+        ON CONFLICT(class_id) DO UPDATE SET
+            num_rows = EXCLUDED.num_rows,
+            layout_json = EXCLUDED.layout_json,
+            updated_at = CURRENT_TIMESTAMP
+    """, (class_id, num_rows, layout_json))
+    conn.commit()
+    conn.close()
+
+# ----------------------------------------------------
+# CENTER MANAGER — COURSES CRUD
+# ----------------------------------------------------
+def get_courses(search: str = "", status: str = "") -> List[Dict[str, Any]]:
+    conn = get_connection()
+    cursor = conn.cursor()
+    query = "SELECT * FROM courses WHERE 1=1"
+    params = []
+    if search:
+        query += " AND (course_name LIKE ? OR description LIKE ?)"
+        pattern = f"%{search}%"
+        params.extend([pattern, pattern])
+    if status:
+        query += " AND status = ?"
+        params.append(status)
+    query += " ORDER BY id DESC"
+    cursor.execute(query, params)
+    rows = cursor.fetchall()
+    conn.close()
+    return [dict(r) for r in rows]
+
+def create_course(data: Dict[str, Any]) -> int:
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        INSERT INTO courses (course_name, description, price, duration_weeks, status)
+        VALUES (?, ?, ?, ?, ?)
+    """, (
+        data.get("course_name"), data.get("description"), data.get("price", 0),
+        data.get("duration_weeks"), data.get("status", "Đang mở")
+    ))
+    conn.commit()
+    cid = cursor.lastrowid
+    conn.close()
+    return cid
+
+def update_course(course_id: int, data: Dict[str, Any]):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        UPDATE courses SET
+            course_name = ?, description = ?, price = ?, duration_weeks = ?, status = ?
+        WHERE id = ?
+    """, (
+        data.get("course_name"), data.get("description"), data.get("price"),
+        data.get("duration_weeks"), data.get("status"), course_id
+    ))
+    conn.commit()
+    conn.close()
+
+def delete_course(course_id: int):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM courses WHERE id = ?", (course_id,))
+    conn.commit()
+    conn.close()
+
+# ----------------------------------------------------
+# CENTER MANAGER — STUDENT SCORES
+# ----------------------------------------------------
+def get_student_scores(class_id: int = None, student_id: int = None) -> List[Dict[str, Any]]:
+    conn = get_connection()
+    cursor = conn.cursor()
+    query = """
+        SELECT sc.*, s.full_name as student_name, c.class_name
+        FROM student_scores sc
+        JOIN students s ON sc.student_id = s.id
+        JOIN classes c ON sc.class_id = c.id
+        WHERE 1=1
+    """
+    params = []
+    if class_id:
+        query += " AND sc.class_id = ?"
+        params.append(class_id)
+    if student_id:
+        query += " AND sc.student_id = ?"
+        params.append(student_id)
+    query += " ORDER BY sc.id DESC"
+    cursor.execute(query, params)
+    rows = cursor.fetchall()
+    conn.close()
+    return [dict(r) for r in rows]
+
+def upsert_student_score(data: Dict[str, Any]) -> int:
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        INSERT INTO student_scores (student_id, class_id, test_title, test_date, score_type, score, max_score, notes)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        ON CONFLICT(student_id, class_id, score_type) DO UPDATE SET
+            test_title = EXCLUDED.test_title,
+            test_date = EXCLUDED.test_date,
+            score = EXCLUDED.score,
+            max_score = EXCLUDED.max_score,
+            notes = EXCLUDED.notes,
+            created_at = CURRENT_TIMESTAMP
+    """, (
+        data.get("student_id"), data.get("class_id"), data.get("test_title"),
+        data.get("test_date"), data.get("score_type"), data.get("score"),
+        data.get("max_score", 10), data.get("notes")
+    ))
+    conn.commit()
+    sid = cursor.lastrowid
+    conn.close()
+    return sid
+
+def delete_student_score(score_id: int):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM student_scores WHERE id = ?", (score_id,))
+    conn.commit()
+    conn.close()
+
+# ----------------------------------------------------
+# CLASS ATTENDANCE & GRADES
+# ----------------------------------------------------
+def get_class_attendance_grades(class_id: int, date_str: str) -> List[Dict[str, Any]]:
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT ag.*, s.full_name as student_name
+        FROM class_attendance_grades ag
+        JOIN students s ON ag.student_id = s.id
+        WHERE ag.class_id = ? AND ag.date = ?
+    """, (class_id, date_str))
+    rows = cursor.fetchall()
+    conn.close()
+    return [dict(r) for r in rows]
+
+def upsert_class_attendance_grades(class_id: int, date_str: str, records: List[Dict[str, Any]]):
+    conn = get_connection()
+    cursor = conn.cursor()
+    for rec in records:
+        student_id = rec.get("student_id")
+        if not student_id:
+            continue
+        status = rec.get("status", "Có mặt")
+        check_1 = float(rec.get("check_1") or 0)
+        check_2 = float(rec.get("check_2") or 0)
+        homework = float(rec.get("homework") or 0)
+        notes = rec.get("notes", "")
+
+        cursor.execute("""
+            INSERT INTO class_attendance_grades (class_id, student_id, date, status, check_1, check_2, homework, notes)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            ON CONFLICT(class_id, student_id, date) DO UPDATE SET
+                status = EXCLUDED.status,
+                check_1 = EXCLUDED.check_1,
+                check_2 = EXCLUDED.check_2,
+                homework = EXCLUDED.homework,
+                notes = EXCLUDED.notes,
+                updated_at = CURRENT_TIMESTAMP
+        """, (class_id, student_id, date_str, status, check_1, check_2, homework, notes))
+    conn.commit()
+    conn.close()
+
+
+# ----------------------------------------------------
+# FRIEND GROUPS, CONFLICTS & TRUSTED SWAPS
+# ----------------------------------------------------
+def get_friend_groups(class_id: int) -> List[Dict[str, Any]]:
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM friend_groups WHERE class_id = ? ORDER BY id ASC", (class_id,))
+    groups = [dict(g) for g in cursor.fetchall()]
+    
+    for g in groups:
+        cursor.execute("""
+            SELECT fgm.student_id, s.full_name
+            FROM friend_group_members fgm
+            JOIN students s ON fgm.student_id = s.id
+            WHERE fgm.group_id = ?
+            ORDER BY s.full_name ASC
+        """, (g["id"],))
+        g["members"] = [dict(m) for m in cursor.fetchall()]
+        
+    conn.close()
+    return groups
+
+def create_friend_group(class_id: int, group_name: str, color_hex: str = '#6366F1') -> int:
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        INSERT INTO friend_groups (class_id, group_name, color_hex)
+        VALUES (?, ?, ?)
+    """, (class_id, group_name, color_hex))
+    conn.commit()
+    gid = cursor.lastrowid
+    conn.close()
+    return gid
+
+def delete_friend_group(group_id: int):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM friend_groups WHERE id = ?", (group_id,))
+    conn.commit()
+    conn.close()
+
+def add_member_to_group(group_id: int, student_id: int, class_id: int):
+    conn = get_connection()
+    cursor = conn.cursor()
+    # Replace any existing group membership for this student in this class
+    cursor.execute("""
+        INSERT INTO friend_group_members (group_id, student_id, class_id)
+        VALUES (?, ?, ?)
+        ON CONFLICT(class_id, student_id) DO UPDATE SET group_id = EXCLUDED.group_id
+    """, (group_id, student_id, class_id))
+    conn.commit()
+    conn.close()
+
+def remove_member_from_group(class_id: int, student_id: int):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM friend_group_members WHERE class_id = ? AND student_id = ?", (class_id, student_id))
+    conn.commit()
+    conn.close()
+
+def get_student_group(class_id: int, student_id: int) -> Optional[Dict[str, Any]]:
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT fg.*
+        FROM friend_group_members fgm
+        JOIN friend_groups fg ON fgm.group_id = fg.id
+        WHERE fgm.class_id = ? AND fgm.student_id = ?
+    """, (class_id, student_id))
+    row = cursor.fetchone()
+    conn.close()
+    return dict(row) if row else None
+
+def get_conflict_pairs(class_id: int) -> List[Dict[str, Any]]:
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT cr.id, cr.class_id, cr.student_id1, s1.full_name as student_name1,
+               cr.student_id2, s2.full_name as student_name2
+        FROM conflict_relationships cr
+        JOIN students s1 ON cr.student_id1 = s1.id
+        JOIN students s2 ON cr.student_id2 = s2.id
+        WHERE cr.class_id = ?
+        ORDER BY cr.id DESC
+    """, (class_id,))
+    rows = cursor.fetchall()
+    conn.close()
+    return [dict(r) for r in rows]
+
+def add_conflict_pair(class_id: int, s1: int, s2: int) -> int:
+    conn = get_connection()
+    cursor = conn.cursor()
+    id1, id2 = min(s1, s2), max(s1, s2)
+    cursor.execute("""
+        INSERT INTO conflict_relationships (class_id, student_id1, student_id2)
+        VALUES (?, ?, ?)
+        ON CONFLICT(class_id, student_id1, student_id2) DO NOTHING
+    """, (class_id, id1, id2))
+    conn.commit()
+    cid = cursor.lastrowid
+    conn.close()
+    return cid
+
+def remove_conflict_pair(conflict_id: int):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM conflict_relationships WHERE id = ?", (conflict_id,))
+    conn.commit()
+    conn.close()
+
+def get_trusted_swap_pairs(class_id: int) -> List[Dict[str, Any]]:
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT ts.id, ts.class_id, ts.student_id1, s1.full_name as student_name1,
+               ts.student_id2, s2.full_name as student_name2
+        FROM trusted_swap_relationships ts
+        JOIN students s1 ON ts.student_id1 = s1.id
+        JOIN students s2 ON ts.student_id2 = s2.id
+        WHERE ts.class_id = ?
+        ORDER BY ts.id DESC
+    """, (class_id,))
+    rows = cursor.fetchall()
+    conn.close()
+    return [dict(r) for r in rows]
+
+def add_trusted_swap_pair(class_id: int, s1: int, s2: int) -> int:
+    conn = get_connection()
+    cursor = conn.cursor()
+    id1, id2 = min(s1, s2), max(s1, s2)
+    cursor.execute("""
+        INSERT INTO trusted_swap_relationships (class_id, student_id1, student_id2)
+        VALUES (?, ?, ?)
+        ON CONFLICT(class_id, student_id1, student_id2) DO NOTHING
+    """, (class_id, id1, id2))
+    conn.commit()
+    tid = cursor.lastrowid
+    conn.close()
+    return tid
+
+def remove_trusted_swap_pair(swap_id: int):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM trusted_swap_relationships WHERE id = ?", (swap_id,))
+    conn.commit()
+    conn.close()
+
+# --- CONFLICT GROUPS ---
+def get_conflict_groups(class_id: int) -> List[Dict[str, Any]]:
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM conflict_groups WHERE class_id = ? ORDER BY id ASC", (class_id,))
+    groups = [dict(r) for r in cursor.fetchall()]
+
+    for g in groups:
+        gid = g["id"]
+        cursor.execute("""
+            SELECT cgm.student_id, s.full_name
+            FROM conflict_group_members cgm
+            JOIN students s ON cgm.student_id = s.id
+            WHERE cgm.group_id = ?
+        """, (gid,))
+        g["members"] = [dict(r) for r in cursor.fetchall()]
+
+    conn.close()
+    return groups
+
+def create_conflict_group(class_id: int, group_name: str) -> int:
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("INSERT INTO conflict_groups (class_id, group_name) VALUES (?, ?)", (class_id, group_name))
+    conn.commit()
+    gid = cursor.lastrowid
+    conn.close()
+    return gid
+
+def delete_conflict_group(group_id: int):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM conflict_groups WHERE id = ?", (group_id,))
+    conn.commit()
+    conn.close()
+
+def add_member_to_conflict_group(group_id: int, student_id: int, class_id: int):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        INSERT INTO conflict_group_members (group_id, student_id, class_id)
+        VALUES (?, ?, ?)
+        ON CONFLICT(class_id, student_id) DO UPDATE SET group_id = EXCLUDED.group_id
+    """, (group_id, student_id, class_id))
+    conn.commit()
+    conn.close()
+
+def remove_member_from_conflict_group(class_id: int, student_id: int):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM conflict_group_members WHERE class_id = ? AND student_id = ?", (class_id, student_id))
+    conn.commit()
+    conn.close()
+
+# --- TRUSTED SWAP INDIVIDUALS ---
+def get_trusted_swap_students(class_id: int) -> List[Dict[str, Any]]:
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT tss.id, tss.class_id, tss.student_id, s.full_name as student_name, s.gender
+        FROM trusted_swap_students tss
+        JOIN students s ON tss.student_id = s.id
+        WHERE tss.class_id = ?
+        ORDER BY tss.id DESC
+    """, (class_id,))
+    rows = cursor.fetchall()
+    conn.close()
+    return [dict(r) for r in rows]
+
+def add_trusted_swap_student(class_id: int, student_id: int) -> int:
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        INSERT INTO trusted_swap_students (class_id, student_id)
+        VALUES (?, ?)
+        ON CONFLICT(class_id, student_id) DO NOTHING
+    """, (class_id, student_id))
+    conn.commit()
+    tid = cursor.lastrowid
+    conn.close()
+    return tid
+
+def remove_trusted_swap_student(class_id: int, student_id: int):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM trusted_swap_students WHERE class_id = ? AND student_id = ?", (class_id, student_id))
+    conn.commit()
+    conn.close()
+
+# --- ANALYTICS REPORTS ---
+def calculate_performance_analytics(session_records: List[Dict[str, Any]]) -> Dict[str, Any]:
+    if not session_records:
+        return {
+            "academic_score": 82.0,
+            "trend_slope": 0.38,
+            "trend_label": "Đang cải thiện",
+            "consistency_score": 92.0,
+            "std_dev": 0.45,
+            "consistency_label": "Rất ổn định",
+            "ema_level": 8.6,
+            "predicted_next": 8.9,
+            "pred_c1": 8.8,
+            "pred_c2": 7.5,
+            "pred_hw": 9.5,
+            "attendance_pct": 96.0,
+            "performance_index": 86.7,
+            "rating_label": "Xuất Sắc",
+            "recommendations": [
+                "Duy trì tiến độ học tập hiện tại",
+                "Dự đoán buổi tới: Check 1 (8.8), Check 2 (7.5), Homework (9.5)."
+            ]
+        }
+
+    c1_list, c2_list, hw_list = [], [], []
+    overall_session_scores = []
+    present_count = 0
+
+    for r in session_records:
+        status = r.get("status", "Có mặt")
+        if status in ("Vắng mặt", "Nghỉ học"):
+            continue  # Exclude absent sessions from grade averages
+
+        present_count += 1
+        c1 = float(r.get("check_1") or 0)
+        c2 = float(r.get("check_2") or 0)
+        hw = float(r.get("homework") or 0)
+
+        if c1 > 0: c1_list.append(c1)
+        if c2 > 0: c2_list.append(c2)
+        if hw > 0: hw_list.append(hw)
+
+        valid_in_session = [s for s in [c1, c2, hw] if s > 0]
+        if valid_in_session:
+            overall_session_scores.append(sum(valid_in_session) / len(valid_in_session))
+
+    if not overall_session_scores:
+        overall_session_scores = [7.5]
+
+    avg_c1 = sum(c1_list) / len(c1_list) if c1_list else 7.5
+    avg_c2 = sum(c2_list) / len(c2_list) if c2_list else 7.0
+    avg_hw = sum(hw_list) / len(hw_list) if hw_list else 8.5
+    academic_10 = (avg_hw * 0.40) + (avg_c1 * 0.30) + (avg_c2 * 0.30)
+    academic_score = academic_10 * 10
+
+    def calc_regression(vals: List[float]):
+        N = len(vals)
+        if N < 2:
+            return 0.2, (vals[0] + 0.2 if vals else 8.0)
+        x_vals = list(range(1, N + 1))
+        mean_x = sum(x_vals) / N
+        mean_y = sum(vals) / N
+        num = sum((x_vals[i] - mean_x) * (vals[i] - mean_y) for i in range(N))
+        den = sum((x_vals[i] - mean_x) ** 2 for i in range(N))
+        slope = num / den if den != 0 else 0
+        intercept = mean_y - (slope * mean_x)
+        predicted = max(0.0, min(10.0, slope * (N + 1) + intercept))
+        return slope, predicted
+
+    slope_overall, pred_overall = calc_regression(overall_session_scores)
+    slope_c1, pred_c1 = calc_regression(c1_list if c1_list else [7.5])
+    slope_c2, pred_c2 = calc_regression(c2_list if c2_list else [7.0])
+    slope_hw, pred_hw = calc_regression(hw_list if hw_list else [8.5])
+
+    if slope_overall > 0.3:
+        trend_label = "Tăng trưởng mạnh ↗"
+    elif slope_overall >= 0.1:
+        trend_label = "Đang cải thiện"
+    elif slope_overall >= -0.1:
+        trend_label = "Ổn định"
+    elif slope_overall >= -0.3:
+        trend_label = "Giảm nhẹ"
+    else:
+        trend_label = "Suy giảm nhanh"
+
+    trend_score = max(0.0, min(100.0, 50.0 + (slope_overall * 25.0)))
+
+    mean_y = sum(overall_session_scores) / len(overall_session_scores)
+    var = sum((s - mean_y) ** 2 for s in overall_session_scores) / len(overall_session_scores)
+    std_dev = math.sqrt(var)
+    consistency_score = max(0.0, min(100.0, 100.0 - (std_dev * 15.0)))
+
+    if std_dev < 0.5:
+        consistency_label = "Rất ổn định"
+    elif std_dev <= 1.0:
+        consistency_label = "Ổn định"
+    elif std_dev <= 2.0:
+        consistency_label = "Biến động"
+    else:
+        consistency_label = "Trồi sụt thất thường"
+
+    ema = overall_session_scores[0]
+    alpha = 0.5
+    for s in overall_session_scores[1:]:
+        ema = alpha * s + (1 - alpha) * ema
+    ema_score = ema * 10
+
+    total_rec_count = len(session_records)
+    att_pct = (present_count / total_rec_count * 100) if total_rec_count > 0 else 100.0
+
+    performance_index = (academic_score * 0.40) + (trend_score * 0.20) + (consistency_score * 0.15) + (ema_score * 0.15) + (att_pct * 0.10)
+
+    if performance_index >= 90:
+        rating_label = "Xuất Sắc"
+    elif performance_index >= 80:
+        rating_label = "Rất Tốt"
+    elif performance_index >= 70:
+        rating_label = "Tốt"
+    elif performance_index >= 60:
+        rating_label = "Cần Cố Gắng"
+    else:
+        rating_label = "Cảnh Báo NGUY CƠ"
+
+    recs = []
+    if slope_overall < -0.1:
+        recs.append("Cảnh báo: Học sinh đang có xu hướng giảm điểm, cần giáo viên trao đổi trực tiếp.")
+    if avg_hw < 7.0:
+        recs.append("Khuyên dùng: Cho học sinh luyện tập thêm bài tập về nhà để củng cố kiến thức cơ bản.")
+    if att_pct < 85:
+        recs.append(f"Cảnh báo: Tỷ lệ vắng mặt cao ({att_pct:.0f}%), ảnh hưởng đến khả năng tiếp thu.")
+    if std_dev > 1.5:
+        recs.append("Khuyên dùng: Điểm số trồi sụt thất thường, cần giáo viên theo dõi sát sao từng buổi học.")
+    if not recs:
+        recs.append("Đánh giá: Duy trì phong độ tốt. Tiếp tục phát huy trong các kỳ tới.")
+        recs.append(f"Dự đoán buổi tới: Check 1 ({pred_c1:.1f}), Check 2 ({pred_c2:.1f}), Homework ({pred_hw:.1f}).")
+
+    return {
+        "academic_score": round(academic_score, 1),
+        "trend_slope": round(slope_overall, 2),
+        "trend_label": trend_label,
+        "consistency_score": round(consistency_score, 1),
+        "std_dev": round(std_dev, 2),
+        "consistency_label": consistency_label,
+        "ema_level": round(ema, 1),
+        "predicted_next": round(pred_overall, 1),
+        "pred_c1": round(pred_c1, 1),
+        "pred_c2": round(pred_c2, 1),
+        "pred_hw": round(pred_hw, 1),
+        "attendance_pct": round(att_pct, 1),
+        "performance_index": round(performance_index, 1),
+        "rating_label": rating_label,
+        "recommendations": recs
+    }
+
+def get_analytics_reports(class_id: Optional[int] = None, student_id: Optional[int] = None) -> Dict[str, Any]:
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    query = """
+        SELECT ag.*, s.full_name as student_name, s.nickname, c.class_name
+        FROM class_attendance_grades ag
+        JOIN students s ON ag.student_id = s.id
+        JOIN classes c ON ag.class_id = c.id
+        JOIN class_students cs ON ag.student_id = cs.student_id AND ag.class_id = cs.class_id
+        WHERE 1=1
+    """
+    params = []
+    if class_id:
+        query += " AND ag.class_id = ?"
+        params.append(class_id)
+    if student_id:
+        query += " AND ag.student_id = ?"
+        params.append(student_id)
+    query += " ORDER BY ag.date ASC"
+
+    cursor.execute(query, params)
+    rows = [dict(r) for r in cursor.fetchall()]
+
+    rank_query = """
+        SELECT 
+            s.id as student_id,
+            s.full_name,
+            s.nickname,
+            c.id as class_id,
+            c.class_name,
+            COUNT(ag.id) as total_sessions,
+            SUM(CASE WHEN ag.status = 'Có mặt' THEN 1 ELSE 0 END) as present_count,
+            AVG(CASE WHEN ag.check_1 > 0 THEN ag.check_1 END) as avg_check_1,
+            AVG(CASE WHEN ag.check_2 > 0 THEN ag.check_2 END) as avg_check_2,
+            AVG(CASE WHEN ag.homework > 0 THEN ag.homework END) as avg_homework
+        FROM students s
+        JOIN class_students cs ON s.id = cs.student_id
+        JOIN classes c ON cs.class_id = c.id
+        LEFT JOIN class_attendance_grades ag ON s.id = ag.student_id AND c.id = ag.class_id
+        WHERE 1=1
+    """
+    rank_params = []
+    if class_id:
+        rank_query += " AND c.id = ?"
+        rank_params.append(class_id)
+    if student_id:
+        rank_query += " AND s.id = ?"
+        rank_params.append(student_id)
+
+    rank_query += """
+        GROUP BY s.id, c.id
+        ORDER BY (COALESCE(AVG(ag.check_1), 0) + COALESCE(AVG(ag.check_2), 0) + COALESCE(AVG(ag.homework), 0)) DESC
+    """
+    cursor.execute(rank_query, rank_params)
+    student_rankings = [dict(r) for r in cursor.fetchall()]
+
+    conn.close()
+
+    analytics_summary = calculate_performance_analytics(rows)
+
+    return {
+        "session_records": rows,
+        "student_rankings": student_rankings,
+        "analytics_summary": analytics_summary
+    }
+
+def reset_student_grades(class_id: Optional[int] = None, student_id: Optional[int] = None, from_date: Optional[str] = None, to_date: Optional[str] = None) -> int:
+    conn = get_connection()
+    cursor = conn.cursor()
+    query = "UPDATE class_attendance_grades SET check_1 = NULL, check_2 = NULL, homework = NULL WHERE 1=1"
+    params = []
+    if class_id:
+        query += " AND class_id = ?"
+        params.append(class_id)
+    if student_id:
+        query += " AND student_id = ?"
+        params.append(student_id)
+    if from_date:
+        query += " AND date >= ?"
+        params.append(from_date)
+    if to_date:
+        query += " AND date <= ?"
+        params.append(to_date)
+    cursor.execute(query, params)
+    conn.commit()
+    count = cursor.rowcount
+    conn.close()
+    return count
+
+
+
+

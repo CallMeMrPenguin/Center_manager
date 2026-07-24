@@ -1,0 +1,476 @@
+import { useState, useEffect } from 'react';
+import { api } from '../../api';
+import { AppSettings, SystemCheck } from '../../types';
+import { 
+  Settings as SettingsIcon, Database, RefreshCw, 
+  Trash2, ShieldCheck, Cpu, HardDrive, CheckCircle2, AlertTriangle, Save, Upload
+} from 'lucide-react';
+import { applyTheme } from '../../theme';
+import { showToast } from '../../components/Toast';
+import { useConfirm } from '../../components/ConfirmDialog';
+
+export default function Settings() {
+  const confirm = useConfirm();
+  const [settings, setSettings] = useState<AppSettings | null>(null);
+  const [profiles, setProfiles] = useState<Record<string, any>>({});
+  const [systemCheck, setSystemCheck] = useState<SystemCheck | null>(null);
+  const [loadingDiagnostics, setLoadingDiagnostics] = useState(false);
+  const [filesDirInput, setFilesDirInput] = useState("");
+
+  // Theme & Glass effect state
+  const [themeSettings, setThemeSettings] = useState(() => {
+    const defaults = {
+      bgImage: 'none',
+      opacity: 0.08,
+      blur: 24,
+      borderOpacity: 0.15,
+      saturate: 180
+    };
+    const saved = localStorage.getItem('app_theme_settings');
+    if (saved) {
+      try {
+        return { ...defaults, ...JSON.parse(saved) };
+      } catch (e) {}
+    }
+    return defaults;
+  });
+
+  const handleLocalBgUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        const maxDim = 2560;
+        let width = img.width;
+        let height = img.height;
+        if (width > maxDim || height > maxDim) {
+          if (width > height) {
+            height = Math.round((height * maxDim) / width);
+            width = maxDim;
+          } else {
+            width = Math.round((width * maxDim) / height);
+            height = maxDim;
+          }
+        }
+
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          ctx.drawImage(img, 0, 0, width, height);
+          const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+          try {
+            updateThemeSetting('bgImage', dataUrl);
+            showToast("Đã áp dụng hình nền cục bộ từ máy tính!", "success");
+          } catch (err) {
+            showToast("Lỗi bộ nhớ: Hình ảnh quá lớn. Hãy thử ảnh khác nhỏ hơn.", "error");
+          }
+        }
+      };
+      img.src = event.target?.result as string;
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const updateThemeSetting = (key: string, value: any) => {
+    const newSettings = { ...themeSettings, [key]: value };
+    setThemeSettings(newSettings);
+    
+    try {
+      localStorage.setItem('app_theme_settings', JSON.stringify(newSettings));
+    } catch (err) {
+      console.error("Failed to save theme setting to localStorage:", err);
+    }
+
+    // Save to backend configuration
+    api.saveSettings({ theme: newSettings }).catch(err => {
+      console.error("Failed to save theme settings to backend:", err);
+    });
+    
+    applyTheme(newSettings);
+
+    // Sync theme settings with iframe
+    const iframe = document.querySelector('iframe');
+    if (iframe && iframe.contentWindow) {
+      iframe.contentWindow.postMessage({ type: 'THEME_UPDATE', theme: newSettings }, '*');
+    }
+  };
+
+  useEffect(() => {
+    loadSettings();
+    loadProfiles();
+    runDiagnostics();
+  }, []);
+
+  const loadSettings = async () => {
+    try {
+      const data = await api.getSettings();
+      setSettings(data);
+      setFilesDirInput(data.files_dir);
+      if (data && (data as any).theme) {
+        setThemeSettings((data as any).theme);
+        applyTheme((data as any).theme);
+      }
+    } catch (e) {
+      showToast("Không thể tải cấu hình hệ thống: " + e, "error");
+    }
+  };
+
+  const loadProfiles = async () => {
+    try {
+      const data = await api.getProfiles();
+      setProfiles(data);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const runDiagnostics = async () => {
+    try {
+      setLoadingDiagnostics(true);
+      const data = await api.getSystemCheck();
+      setSystemCheck(data);
+    } catch (e) {
+      showToast("Lỗi chẩn đoán môi trường: " + e, "error");
+    } finally {
+      setLoadingDiagnostics(false);
+    }
+  };
+
+  const handleSaveSettings = async () => {
+    if (!filesDirInput.trim()) {
+      showToast("Đường dẫn lưu trữ không được để trống", "warning");
+      return;
+    }
+    try {
+      await api.saveSettings({
+        files_dir: filesDirInput.trim()
+      });
+      showToast("Đã lưu thiết lập cấu hình hệ thống!", "success");
+      loadSettings();
+    } catch (e) {
+      showToast("Không thể lưu thiết lập: " + e, "error");
+    }
+  };
+
+  const handleBrowseDirectory = async () => {
+    try {
+      const res = await api.selectDirectory();
+      if (res.success && res.directory) {
+        setFilesDirInput(res.directory);
+        // Automatically save settings
+        await api.saveSettings({
+          files_dir: res.directory.trim()
+        });
+        showToast("Đã chọn và lưu thư mục mới!", "success");
+        loadSettings();
+      }
+    } catch (e: any) {
+      showToast("Lỗi chọn thư mục: " + (e.message || e), "error");
+    }
+  };
+
+  const handleDeleteProfile = async (name: string) => {
+    if (name === "Default Settings") return;
+    const isConfirmed = await confirm({
+      title: "Xóa cấu hình",
+      message: `Bạn có chắc muốn xóa hồ sơ cấu hình '${name}'?`,
+      confirmText: "Xóa",
+      cancelText: "Hủy bỏ",
+      type: "danger"
+    });
+    if (!isConfirmed) return;
+    try {
+      await api.deleteProfile(name);
+      showToast(`Đã xóa hồ sơ '${name}'`, "success");
+      loadProfiles();
+    } catch (e) {
+      showToast("Lỗi xóa cấu hình: " + e, "error");
+    }
+  };
+
+  return (
+    <div className="h-full w-full bg-transparent overflow-y-auto px-8 py-6 select-none text-slate-200 flex flex-col gap-6">
+      
+      {/* Page Title */}
+      <div className="pb-2">
+        <h1 className="text-xl font-bold tracking-tight text-white mb-1 flex items-center gap-2">
+          <SettingsIcon size={20} className="text-blue-500" />
+          Cấu Hình Hệ Thống
+        </h1>
+        <p className="text-xs text-slate-400">
+          Chẩn đoán kết nối Microsoft Word local, cấu hình thư mục lưu trữ tệp tin và quản lý các hồ sơ định dạng mẫu.
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        {/* Left Column: Diagnostics and Directory Config */}
+        <div className="lg:col-span-2 flex flex-col gap-6">
+          
+          {/* System Diagnostics Box */}
+          <div className="glass-panel rounded-2xl p-6 flex flex-col gap-4">
+            <div className="flex justify-between items-center border-b border-slate-900/60 pb-3">
+              <h3 className="text-xs font-extrabold text-white uppercase tracking-wider flex items-center gap-2">
+                <Cpu size={14} className="text-blue-400" /> Chẩn đoán môi trường chạy máy tính
+              </h3>
+              <button
+                onClick={runDiagnostics}
+                disabled={loadingDiagnostics}
+                className="group p-1.5 bg-[#0b0f19] border border-slate-850 hover:bg-gradient-to-tr hover:from-blue-600/10 hover:to-indigo-600/10 hover:border-blue-500/30 rounded-lg text-slate-400 hover:text-white transition-all duration-300 flex items-center gap-0 hover:gap-1 text-[10px] font-bold cursor-pointer"
+              >
+                <RefreshCw size={10} className={loadingDiagnostics ? "animate-spin" : ""} />
+                <span className="max-w-0 overflow-hidden group-hover:max-w-[100px] transition-all duration-300 whitespace-nowrap block">Kiểm tra lại</span>
+              </button>
+            </div>
+
+            {systemCheck ? (
+              <div className="flex flex-col gap-4">
+                
+                {/* Word status indicator */}
+                <div className="flex items-start gap-3 p-4 rounded-xl bg-[#0b0f19]/60 border border-slate-900/50">
+                  {systemCheck.word_installed ? (
+                    <div className="p-2 bg-emerald-500/10 text-emerald-400 rounded-xl mt-0.5">
+                      <CheckCircle2 size={18} />
+                    </div>
+                  ) : (
+                    <div className="p-2 bg-rose-500/10 text-rose-450 rounded-xl mt-0.5">
+                      <AlertTriangle size={18} />
+                    </div>
+                  )}
+                  <div className="flex-1">
+                    <h4 className="text-xs font-bold text-white">Kết nối Microsoft Word (COM API)</h4>
+                    <p className="text-[10px] text-slate-400 mt-1 leading-relaxed">
+                      {systemCheck.word_installed 
+                        ? "Đã phát hiện thấy Microsoft Word trên hệ điều hành của bạn. Chế độ xuất PDF xem trước và gộp từ vựng hoạt động đầy đủ."
+                        : "Không tìm thấy Microsoft Word hoặc COM Dispatch API bị lỗi. Bạn vẫn có thể biên dịch đề thi Word .docx bình thường nhưng tính năng xuất PDF xem trước trực tiếp sẽ tạm thời bị vô hiệu."}
+                    </p>
+                    {systemCheck.win32_com_error && (
+                      <div className="mt-2.5 p-2.5 rounded-lg bg-rose-950/20 border border-rose-900/30 text-[10px] text-rose-400 font-mono overflow-x-auto max-w-full">
+                        Details: {systemCheck.win32_com_error}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* System technical stats */}
+                <div className="grid grid-cols-2 gap-4 text-xs font-semibold text-slate-300 pl-2">
+                  <div className="flex flex-col gap-1">
+                    <span className="text-[10px] text-slate-500 font-bold uppercase">Môi trường Python</span>
+                    <span className="truncate">{systemCheck.python_version ? systemCheck.python_version.split(" ")[0] : "Python 3.13"}</span>
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <span className="text-[10px] text-slate-500 font-bold uppercase">Thư viện python-docx</span>
+                    <span className="text-emerald-400 flex items-center gap-1">
+                      <CheckCircle2 size={12} /> Đã sẵn sàng
+                    </span>
+                  </div>
+                </div>
+
+              </div>
+            ) : (
+              <p className="text-xs text-slate-500 py-4 text-center">Không có dữ liệu chẩn đoán.</p>
+            )}
+          </div>
+
+          {/* Directory Configuration Box */}
+          <div className="glass-panel rounded-2xl p-6 flex flex-col gap-4">
+            <h3 className="text-xs font-extrabold text-white uppercase tracking-wider border-b border-slate-900/60 pb-3 flex items-center gap-2">
+              <HardDrive size={14} className="text-blue-400" /> Thiết lập hệ thống tệp tin
+            </h3>
+
+            {settings && (
+              <div className="flex flex-col gap-4">
+                
+                {/* Files dir input */}
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[10px] font-bold text-slate-450 uppercase">Đường dẫn thư mục quản lý tệp</label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={filesDirInput}
+                      onChange={(e) => setFilesDirInput(e.target.value)}
+                      onBlur={() => {
+                        if (filesDirInput.trim() && settings && filesDirInput.trim() !== settings.files_dir) {
+                          handleSaveSettings();
+                        }
+                      }}
+                      className="bg-[#0b0f19] border border-slate-850 px-3.5 py-2 rounded-xl text-xs text-white focus:outline-none focus:border-slate-700 flex-1 font-mono"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleBrowseDirectory}
+                      className="px-4 py-2 bg-slate-900 border border-slate-850 hover:border-slate-700 text-slate-350 hover:text-white font-extrabold text-[10px] rounded-xl cursor-pointer transition whitespace-nowrap"
+                    >
+                      Duyệt...
+                    </button>
+                  </div>
+                  <p className="text-[9px] text-slate-500">Thư mục dùng để lưu trữ tệp đề JSON, file word docx hoàn thiện.</p>
+                </div>
+
+                <div className="border-t border-slate-900/60 pt-4 flex justify-between items-center">
+                  <span className="text-[10px] text-slate-500 font-mono">ID thiết bị máy chủ: {settings.machine_id}</span>
+                  <button
+                    onClick={handleSaveSettings}
+                    className="group px-3.5 py-2 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-xs transition-all duration-300 flex items-center gap-0 hover:gap-1.5 cursor-pointer shadow-md shadow-blue-500/10"
+                  >
+                    <Save size={13} />
+                    <span className="max-w-0 overflow-hidden group-hover:max-w-[150px] transition-all duration-300 whitespace-nowrap block">Lưu cấu hình hệ thống</span>
+                  </button>
+                </div>
+
+              </div>
+            )}
+          </div>
+
+          {/* Glassmorphism & Background Theme Box */}
+          <div className="glass-panel rounded-2xl p-6 flex flex-col gap-5">
+            <h3 className="text-xs font-extrabold text-white uppercase tracking-wider border-b border-slate-900/60 pb-3 flex items-center gap-2">
+              <SettingsIcon size={14} className="text-blue-400" /> Tùy biến giao diện & Hiệu ứng kính (Glassmorphism)
+            </h3>
+
+            {/* Background Image Selection */}
+            <div className="flex flex-col gap-3">
+              <label className="text-[10px] font-bold text-slate-450 uppercase">Hình nền ứng dụng</label>
+              
+              {/* Custom Image Chooser */}
+              <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 items-end">
+                <div className="sm:col-span-2 flex flex-col gap-1.5">
+                  <span className="text-[9px] text-slate-400">Nhập URL hình nền tùy chỉnh:</span>
+                  <input
+                    type="text"
+                    value={themeSettings.bgImage !== 'none' && !themeSettings.bgImage.startsWith('data:') ? themeSettings.bgImage : ''}
+                    onChange={(e) => updateThemeSetting('bgImage', e.target.value || 'none')}
+                    placeholder="https://example.com/background.jpg"
+                    className="bg-[#0b0f19] border border-slate-850 px-3.5 py-2.5 rounded-xl text-xs text-white focus:outline-none focus:border-slate-700 font-mono w-full"
+                  />
+                </div>
+                <div>
+                  <label className="group w-full px-3.5 py-2.5 bg-slate-900 border border-slate-850 hover:bg-gradient-to-tr hover:from-blue-600/10 hover:to-indigo-600/10 hover:border-blue-500/30 text-slate-350 hover:text-white font-extrabold text-xs rounded-xl cursor-pointer transition-all duration-300 whitespace-nowrap flex items-center justify-center gap-0 hover:gap-1.5 h-10">
+                    <Upload size={12} />
+                    <span className="max-w-0 overflow-hidden group-hover:max-w-[100px] transition-all duration-300 whitespace-nowrap block">Chọn tệp ảnh...</span>
+                    <input 
+                      type="file" 
+                      accept="image/*" 
+                      onChange={handleLocalBgUpload} 
+                      className="hidden" 
+                    />
+                  </label>
+                </div>
+                <div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      updateThemeSetting('bgImage', 'none');
+                      showToast("Đã khôi phục hình nền mặc định!", "success");
+                    }}
+                    className="group w-full px-3.5 py-2.5 bg-slate-900 border border-slate-850 hover:bg-gradient-to-tr hover:from-blue-600/10 hover:to-indigo-600/10 hover:border-blue-500/30 text-slate-350 hover:text-white font-extrabold text-xs rounded-xl cursor-pointer transition-all duration-300 whitespace-nowrap flex items-center justify-center gap-0 hover:gap-1.5 h-10"
+                  >
+                    <Trash2 size={12} className="text-rose-450" />
+                    <span className="max-w-0 overflow-hidden group-hover:max-w-[150px] transition-all duration-300 whitespace-nowrap block">Khôi phục mặc định</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Glass Effect Adjusters */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 pt-2 border-t border-slate-900/60">
+              {/* Opacity Slider */}
+              <div className="flex flex-col gap-1.5">
+                <div className="flex justify-between items-center text-[10px] font-bold">
+                  <span className="text-slate-400 uppercase">Độ đục nền kính (Opacity)</span>
+                  <span className="text-blue-400 font-mono">{Math.round(themeSettings.opacity * 100)}%</span>
+                </div>
+                <input
+                  type="range"
+                  min="0.01"
+                  max="0.5"
+                  step="0.01"
+                  value={themeSettings.opacity}
+                  onChange={(e) => updateThemeSetting('opacity', parseFloat(e.target.value))}
+                  className="w-full h-1 bg-slate-900 rounded-lg appearance-none cursor-pointer accent-blue-500"
+                />
+              </div>
+
+              {/* Blur Slider */}
+              <div className="flex flex-col gap-1.5">
+                <div className="flex justify-between items-center text-[10px] font-bold">
+                  <span className="text-slate-400 uppercase">Độ nhòe kính (Blur)</span>
+                  <span className="text-blue-400 font-mono">{themeSettings.blur}px</span>
+                </div>
+                <input
+                  type="range"
+                  min="0"
+                  max="40"
+                  step="1"
+                  value={themeSettings.blur}
+                  onChange={(e) => updateThemeSetting('blur', parseInt(e.target.value))}
+                  className="w-full h-1 bg-slate-900 rounded-lg appearance-none cursor-pointer accent-blue-500"
+                />
+              </div>
+
+              {/* Border Opacity Slider */}
+              <div className="flex flex-col gap-1.5">
+                <div className="flex justify-between items-center text-[10px] font-bold">
+                  <span className="text-slate-400 uppercase">Độ rõ viền kính (Border Opacity)</span>
+                  <span className="text-blue-400 font-mono">{Math.round(themeSettings.borderOpacity * 100)}%</span>
+                </div>
+                <input
+                  type="range"
+                  min="0.0"
+                  max="0.3"
+                  step="0.01"
+                  value={themeSettings.borderOpacity}
+                  onChange={(e) => updateThemeSetting('borderOpacity', parseFloat(e.target.value))}
+                  className="w-full h-1 bg-slate-900 rounded-lg appearance-none cursor-pointer accent-blue-500"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Column: Profiles CRUD List */}
+        <div className="glass-panel rounded-2xl p-6 flex flex-col gap-4 self-start">
+          <h3 className="text-xs font-extrabold text-white uppercase tracking-wider border-b border-slate-900/60 pb-3 flex items-center gap-2">
+            <ShieldCheck size={14} className="text-blue-400" /> Hồ sơ định dạng đã lưu
+          </h3>
+
+          <div className="flex flex-col gap-2.5 max-h-[480px] overflow-y-auto">
+            {Object.keys(profiles).length === 0 ? (
+              <p className="text-xs text-slate-500 py-6 text-center">Chưa có hồ sơ định dạng nào được lưu.</p>
+            ) : (
+              Object.keys(profiles).map(name => {
+                const isDefault = name === "Default Settings";
+                return (
+                  <div 
+                    key={name} 
+                    className="flex justify-between items-center p-3 rounded-xl bg-[#0b0f19]/50 border border-slate-900/50 hover:border-slate-800 transition"
+                  >
+                    <span className="text-xs font-bold text-slate-300 truncate max-w-[160px]">{name}</span>
+                    {!isDefault ? (
+                      <button
+                        onClick={() => handleDeleteProfile(name)}
+                        className="p-1.5 text-slate-500 hover:text-rose-500 transition cursor-pointer"
+                        title="Xóa hồ sơ này"
+                      >
+                        <Trash2 size={12} />
+                      </button>
+                    ) : (
+                      <span className="text-[9px] font-bold text-slate-500 bg-[#0b0f19] px-2 py-0.5 rounded border border-slate-900">Mặc định</span>
+                    )}
+                  </div>
+                );
+              })
+            )}
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  );
+}

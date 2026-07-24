@@ -1,0 +1,524 @@
+{
+  "defs": {
+    "types": {
+      "pr": "Pronunciation",
+      "mq": "Multiple Choice",
+      "er": "Error Identification"
+    },
+    "keys": {
+      "t": "type_of_exercise",
+      "q": "question_number",
+      "x": "context_or_sentence_text",
+      "o": "options_array",
+      "a": "correct_answer"
+    }
+  },
+  "data": [
+    {
+      "t": "pr",
+      "q": "1",
+      "o": [
+        "pass[ed]",
+        "check[ed]",
+        "stopp[ed]",
+        "want[ed]"
+      ],
+      "a": "D"
+    },
+    {
+      "t": "pr",
+      "q": "2",
+      "o": [
+        "dr[i]ve",
+        "dr[i]nk",
+        "l[i]ke",
+        "r[i]de"
+      ],
+      "a": "B"
+    },
+    {
+      "t": "mq",
+      "q": "3",
+      "x": "We have English lessons _______ Tuesday and Friday.",
+      "o": [
+        "on",
+        "up",
+        "at",
+        "in"
+      ],
+      "a": "A"
+    },
+    {
+      "t": "mq",
+      "q": "4",
+      "x": "Anna is planning to travel around _______ world next summer.",
+      "o": [
+        "an",
+        "Ø (no article)",
+        "the",
+        "a"
+      ],
+      "a": "C"
+    },
+    {
+      "t": "mq",
+      "q": "5",
+      "x": "My grandmother asked me _______ to use a smart phone and I was happy to show her.",
+      "o": [
+        "what",
+        "which",
+        "who",
+        "how"
+      ],
+      "a": "D"
+    },
+    {
+      "t": "sg",
+      "q": "6",
+      "x": "What does the sign say?",
+      "l": "no_parking",
+      "o": [
+        "You should not park your car here.",
+        "You can park your car here.",
+        "You must not park your car here.",
+        "You may park your car here."
+      ],
+      "a": "C"
+    },
+    {
+      "t": "mq",
+      "q": "7",
+      "x": "Because of his hard work and determination, he will become a _______ businessman.",
+      "o": [
+        "succeed",
+        "successfully",
+        "success",
+        "successful"
+      ],
+      "a": "D"
+    },
+    {
+      "t": "mq",
+      "q": "8",
+      "x": "My sister enjoys _______ in the park every afternoon.",
+      "o": [
+        "jog",
+        "to jog",
+        "to jogging",
+        "jogging"
+      ],
+      "a": "D"
+    },
+    {
+      "t": "mq",
+      "q": "9",
+      "x": "Hoa doesn't play the violin well. She wishes she _______ it better.",
+      "o": [
+        "is playing",
+        "played",
+        "plays",
+        "will play"
+      ],
+      "a": "B"
+    },
+    {
+      "t": "mq",
+      "q": "10",
+      "x": "If it _______, we will cancel the football match tomorrow.",
+      "o": [
+        "rains",
+        "was raining",
+        "will rain",
+        "rained"
+      ],
+      "a": "A"
+    },
+    {
+      "t": "mq",
+      "q": "11",
+      "x": "Some animals are in danger of extinction because people continue to _______ their habitats.",
+      "o": [
+        "destroy",
+        "preserve",
+        "explore",
+        "protect"
+      ],
+      "a": "A"
+    },
+    {
+      "t": "nt",
+      "q": "12",
+      "x": "What does the notice say?",
+      "b": "Always keep your bus ticket. Transport officers may request to see it at any time.",
+      "o": [
+        "Transport officers have to keep your bus ticket.",
+        "There may be ticket checks during your bus journey.",
+        "Transport officers get you to buy a bus ticket.",
+        "You can buy your bus ticket from the transport officers."
+      ],
+      "a": "B"
+    },
+    {
+      "t": "mq",
+      "q": "13",
+      "x": "Nam _______ an interesting film on TV with his family yesterday.",
+      "o": [
+        "is watching",
+        "will watch",
+        "watched",
+        "watches"
+      ],
+      "a": "C"
+    },
+    {
+      "t": "mq",
+      "q": "14",
+      "x": "Two men _______ the bank and robbed a million dollars last month.",
+      "o": [
+        "broke into",
+        "looked after",
+        "went off",
+        "turned off"
+      ],
+      "a": "A"
+    },
+    {
+      "t": "mq",
+      "q": "15",
+      "x": "Doing household chores is necessary for children to develop a sense of _______.",
+      "o": [
+        "responsibility",
+        "humor",
+        "identity",
+        "security"
+      ],
+      "a": "A"
+    },
+    {
+      "t": "cz",
+      "b": [
+        "Choosing a career is an important life decision, but (16)_______ people decide one just based on the opinions from their friends and family. Dr. John Holland created a famous test to help you find your dream career. He believes that every person works best in an environment that (17)_______ their personalities. Take a look at some of the following personality types:",
+        "• **Investigative**:\nPeople of this personality type welcome new ideas and are strong at tasks (18)_______ allow them to investigate facts and figure out complex problems. They fit jobs like computer programmers or surgeons.",
+        "• **Social**:\nSocial personalities love helping people in the community, (19)_______ they are suitable to work as teachers or counselors.",
+        "• **Enterprising**:\nMany great leaders and business people have enterprising personalities. These are persuasive people who are good at making decisions and leading teams. Why not (20)_______ a test online to find what jobs might be right for you?"
+      ],
+      "k": [
+        {
+          "q": "16",
+          "o": [
+            "little",
+            "a little",
+            "much",
+            "many"
+          ],
+          "a": "D"
+        },
+        {
+          "q": "17",
+          "o": [
+            "matches",
+            "equals",
+            "meets",
+            "tallies"
+          ],
+          "a": "A"
+        },
+        {
+          "q": "18",
+          "o": [
+            "whom",
+            "which",
+            "who",
+            "whose"
+          ],
+          "a": "B"
+        },
+        {
+          "q": "19",
+          "o": [
+            "when",
+            "but",
+            "because",
+            "so"
+          ],
+          "a": "D"
+        },
+        {
+          "q": "20",
+          "o": [
+            "learn",
+            "reach",
+            "make",
+            "take"
+          ],
+          "a": "D"
+        }
+      ]
+    },
+    {
+      "t": "ro",
+      "q": "21",
+      "i": [
+        "a. In addition, package tours can help travelers save time and feel safer when they visit unfamiliar places.",
+        "b. Package tours are becoming more popular because they are more convenient and cheaper than planning a trip independently.",
+        "c. To conclude, package tours are a good choice for inexperienced travelers while self-guided tours may be more suitable for adventurous people.",
+        "d. Tourists do not need to worry about booking hotels, transportation, or tickets because everything is arranged in advance.",
+        "e. However, some young people who love adventure dislike this type of travel because the schedule is usually fixed and there is little freedom to explore on their own."
+      ],
+      "o": [
+        "b - d - a - e - c",
+        "d - a - b - e - c",
+        "d - b - a - e - c",
+        "b - e - a - d - c"
+      ],
+      "a": "A"
+    },
+    {
+      "t": "ro",
+      "q": "22",
+      "i": [
+        "a. I'm thinking of organizing a small farewell party before I leave, and it will be great if you can come.",
+        "b. I hope you are doing well! I'm writing to let you know that I am going to study abroad in Australia next month.",
+        "c. It's a bit scary to move so far away, but I believe it will be an amazing opportunity for my future career.",
+        "d. Let me know if you are free next Saturday, and I'll send you the details!"
+      ],
+      "o": [
+        "a - c - b - d",
+        "b - d - a - c",
+        "b - c - a - d",
+        "a - b - d - c"
+      ],
+      "a": "C"
+    },
+    {
+      "t": "ro",
+      "q": "23",
+      "i": [
+        "a. Mary: I'm going to the zoo. Do you want to join me?",
+        "b. James: I'd love to, but I have to finish my English assignment first.",
+        "c. James: Hi, Mary. What are your plans for this weekend?"
+      ],
+      "o": [
+        "b - a - c",
+        "a - b - c",
+        "c - a - b",
+        "b - c - a"
+      ],
+      "a": "C"
+    },
+    {
+      "t": "rd",
+      "b": [
+        "Today, online shopping is extremely popular among teenagers. This trend is not only convenient but also exciting for many young people.",
+        "One of the reasons why teenagers prefer online shopping is the wide variety of choices. They can easily browse through hundreds of websites to find the latest fashion trends or the coolest gadgets. Online stores often offer discounts and promotions, which attract young shoppers who are always looking for a good deal.",
+        "Another unique aspect of online shopping for teenagers is the **influence** of social media. Many teenagers follow fashion influencers and celebrities on platforms like Instagram or TikTok. When they see their favorite influencers wearing certain brands, they want to buy the same items. This has made online shopping a social activity on social sites where teens [discuss and share their shopping experiences with their friends].",
+        "However, there are also some concerns. Teenagers may spend too much time shopping online or waste money on things [they] don't really need. Despite these challenges, online shopping continues to grow in popularity among teenagers, shaping the way they shop in the modern world."
+      ],
+      "k": [
+        {
+          "q": "24",
+          "x": "What is the passage mainly about?",
+          "o": [
+            "Some negative impacts of online shopping on teenagers",
+            "The trend of shopping online among teenagers",
+            "Some concerns about shopping online among teenagers",
+            "The positive effects of online shopping on teenagers"
+          ],
+          "a": "B"
+        },
+        {
+          "q": "25",
+          "x": "According to paragraph 2, which of the following statements is NOT TRUE?",
+          "o": [
+            "Promotions from online stores attract young shoppers.",
+            "Shopping online offers a wide variety of choices.",
+            "Online stores often give discounts.",
+            "Teenagers cannot find the latest fashion trends online."
+          ],
+          "a": "D"
+        },
+        {
+          "q": "26",
+          "x": "The word **[influence]** in paragraph 3 is CLOSEST in meaning to _______.",
+          "o": [
+            "similarity",
+            "effect",
+            "drawback",
+            "inconvenience"
+          ],
+          "a": "B"
+        },
+        {
+          "q": "27",
+          "x": "According to paragraph 3, who can teenagers [discuss and share their shopping experiences with]?",
+          "o": [
+            "Their friends",
+            "Celebrities",
+            "Store assistants",
+            "Fashion influencers"
+          ],
+          "a": "A"
+        },
+        {
+          "q": "28",
+          "x": "The word **[they]** in paragraph 4 refers to _______.",
+          "o": [
+            "concerns",
+            "challenges",
+            "things",
+            "teenagers"
+          ],
+          "a": "D"
+        }
+      ]
+    },
+    {
+      "t": "rd",
+      "b": [
+        "Jessii, a popular YouTuber has some advice for teenagers who dream of becoming famous on YouTube. She believes that popularity comes from being genuine rather than trying to impress others. Jessii encourages beginners to be themselves and **create** content they truly enjoy. When she first started making videos, she felt self-conscious and tried too hard to act in ways that people would like. Over time, however, she became more confident and started showing her real personality, which helped her connect better with viewers.",
+        "Jessii also believes that creators should build their channels around topics [they] are truly passionate about rather than simply following trends. In her opinion, viewers can easily recognize when someone is forcing content just to become popular. She says that people are more likely to succeed when they focus on creating videos that inspire others and reflect their genuine interests.",
+        "Before starting a YouTube channel, creators should also think carefully about **privacy** and safety. They do not need to reveal their real names or share where they live. For example, DanTDM, a famous 26-year-old English YouTuber, began his career by playing Minecraft and telling stories about the game's characters without showing his face. Some creators even turn off comments to avoid negative messages from online \"haters\".",
+        "Today, many YouTube stars have gone far beyond the platform itself. Some have written books, appeared on television, and travelled around the world performing live shows. In 2017, DanTDM toured America, Australia, and the UK, and tickets sold out within minutes with almost no advertising except YouTube. His videos have been viewed nearly 11 billion times, far more than the audiences of major TV programs such as Idols or even the 2008 Beijing Olympics."
+      ],
+      "k": [
+        {
+          "q": "29",
+          "x": "What is the main idea of the passage?",
+          "o": [
+            "The differences between YouTube and television programs",
+            "The difficulties for YouTubers to gain success",
+            "Tips for becoming a successful YouTuber",
+            "Methods to achieve dreams through social media"
+          ],
+          "a": "C"
+        },
+        {
+          "q": "30",
+          "x": "The word **[create]** in paragraph 1 is CLOSEST in meaning to _______.",
+          "o": [
+            "copy",
+            "produce",
+            "repeat",
+            "manage"
+          ],
+          "a": "B"
+        },
+        {
+          "q": "31",
+          "x": "The word **[they]** in paragraph 2 refers to _______.",
+          "o": [
+            "creators",
+            "viewers",
+            "topics",
+            "channels"
+          ],
+          "a": "A"
+        },
+        {
+          "q": "32",
+          "x": "The word **[privacy]** in paragraph 3 is OPPOSITE in meaning to _______.",
+          "o": [
+            "popularity",
+            "publicity",
+            "personality",
+            "protection"
+          ],
+          "a": "B"
+        },
+        {
+          "q": "33",
+          "x": "Which of the following statements is TRUE according to the passage?",
+          "o": [
+            "DanTDM became famous after appearing on television programs in countries like America and the UK.",
+            "Jessii thinks that producing inspirational contents for viewers helps creators obtain success more easily.",
+            "Jessii encourages beginners to follow popular trends closely instead of inventing fascinating videos.",
+            "Most successful YouTubers depend heavily on traditional advertising campaigns that support them most."
+          ],
+          "a": "B"
+        },
+        {
+          "q": "34",
+          "x": "Which of the following can be best inferred from the passage?",
+          "o": [
+            "Teenagers mainly watch YouTube because television programs are disappearing quickly.",
+            "Some YouTube creators today can become as influential as famous footballers.",
+            "Many viewers don't know the true identity of some successful YouTube creators.",
+            "Most online viewers prefer creators who imitate current social media trends."
+          ],
+          "a": "C"
+        },
+        {
+          "q": "35",
+          "x": "In which paragraph does the writer mention the live shows of YouTube stars?",
+          "o": [
+            "Paragraph 3",
+            "Paragraph 1",
+            "Paragraph 4",
+            "Paragraph 2"
+          ],
+          "a": "C"
+        }
+      ]
+    },
+    {
+      "t": "mq",
+      "q": "36",
+      "x": "Despite the heavy snow, the Christmas celebration took place last weekend.",
+      "o": [
+        "Though it snowing heavily, the Christmas celebration took place last weekend.",
+        "Although it snowed heavy, the Christmas celebration took place last weekend.",
+        "Although the snow was heavy, the Christmas celebration took place last weekend.",
+        "In spite of it snowed heavily, the Christmas celebration took place last weekend."
+      ],
+      "a": "C"
+    },
+    {
+      "t": "mq",
+      "q": "37",
+      "x": "The dictionary was so expensive that I didn't buy it.",
+      "o": [
+        "It was too expensive a dictionary that I didn't buy it.",
+        "The dictionary was too expensive for me to buy it.",
+        "The dictionary was not cheap enough for me to buy.",
+        "It was such a cheap dictionary that I didn't buy it."
+      ],
+      "a": "C"
+    },
+    {
+      "t": "mq",
+      "q": "38",
+      "x": "\"Where will you stay during your vacation to London next week, Nam?\" she asked.",
+      "o": [
+        "She asked where Nam would stay during his vacation to London next week.",
+        "She asked Nam where he would stay during his vacation to London the following week.",
+        "She asked Nam where he stayed during his vacation to London the following week.",
+        "She asked where would Nam stay during his vacation to London the next week."
+      ],
+      "a": "B"
+    },
+    {
+      "t": "mq",
+      "q": "39",
+      "x": "It is a good idea that tourists book hotels early for their trip.",
+      "o": [
+        "Tourists should book hotels early for their trip.",
+        "Tourists mustn't book hotels early for their trip.",
+        "Tourists can't book hotels early for their trip.",
+        "Tourists might book hotels early for their trip."
+      ],
+      "a": "A"
+    },
+    {
+      "t": "mq",
+      "q": "40",
+      "x": "Ben is the tallest member in his football team.",
+      "o": [
+        "Some members in Ben's football team are taller than him.",
+        "All members in Ben's football team are taller than him.",
+        "Ben is not as tall as some members in his football team.",
+        "No one in Ben's football team is as tall as him."
+      ],
+      "a": "D"
+    }
+  ]
+}

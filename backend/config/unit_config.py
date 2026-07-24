@@ -1,0 +1,139 @@
+import os
+import json
+
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+UNIT_CONFIG_FILE = os.path.join(BASE_DIR, "unit_config.json")
+
+DEFAULT_UNIT_NAMES = {
+    "6": {
+        "1": "My New School",
+        "2": "My House",
+        "3": "My Friends",
+        "4": "My Neighbourhood",
+        "5": "Natural Wonders of Viet Nam",
+        "6": "Our Tet Holiday",
+        "7": "Television",
+        "8": "Sports and Games",
+        "9": "Cities of the World",
+        "10": "Our Houses in the Future",
+        "11": "Our Greener World",
+        "12": "Robots"
+    },
+    "7": {
+        "1": "Hobbies",
+        "2": "Healthy Living",
+        "3": "Community Service",
+        "4": "Music and Arts",
+        "5": "Food and Drink",
+        "6": "A Visit to a School",
+        "7": "Traffic",
+        "8": "Films",
+        "9": "Festivals around the World",
+        "10": "Energy Sources",
+        "11": "Travelling in the Future",
+        "12": "English-speaking Countries"
+    },
+    "8": {
+        "1": "Leisure Time",
+        "2": "Life in the Countryside",
+        "3": "Teenagers",
+        "4": "Ethnic Groups of Viet Nam",
+        "5": "Our Customs and Traditions",
+        "6": "Lifestyles",
+        "7": "Environmental Protection",
+        "8": "Shopping",
+        "9": "Natural Disasters",
+        "10": "Communication in the Future",
+        "11": "Science and Technology",
+        "12": "Life on Other Planets"
+    },
+    "9": {
+        "1": "Local Community",
+        "2": "City Life",
+        "3": "Healthy Living for Teens",
+        "4": "Remembering the Past",
+        "5": "Our Experiences",
+        "6": "Vietnamese Lifestyle: Then and Now",
+        "7": "Natural Wonders of the World",
+        "8": "Tourism",
+        "9": "World Englishes",
+        "10": "Planet Earth",
+        "11": "Electronic Devices",
+        "12": "Career Choices"
+    },
+    "10": {
+        "1": "Family Life",
+        "2": "Humans and the Environment",
+        "3": "Music",
+        "4": "For a Better Community",
+        "5": "Inventions",
+        "6": "Gender Equality",
+        "7": "Viet Nam and International Organisations",
+        "8": "New Ways to Learn",
+        "9": "Protecting the Environment",
+        "10": "Ecotourism"
+    },
+    "11": {
+        "1": "A Long and Healthy Life",
+        "2": "The Generation Gap",
+        "3": "Cities of the Future",
+        "4": "ASEAN and Viet Nam",
+        "5": "Global Warming",
+        "6": "Preserving Our Heritage",
+        "7": "Education Options for School-leavers",
+        "8": "Becoming Independent",
+        "9": "Social Issues",
+        "10": "The Ecosystem"
+    },
+    "12": {
+        "1": "Life Stories We Admire",
+        "2": "A Multicultural World",
+        "3": "Green Living",
+        "4": "Urbanisation",
+        "5": "The World of Work",
+        "6": "Artificial Intelligence",
+        "7": "The World of Mass Media",
+        "8": "Wildlife Conservation",
+        "9": "Career Paths",
+        "10": "Lifelong Learning"
+    }
+}
+
+def load_unit_config():
+    if not os.path.exists(UNIT_CONFIG_FILE):
+        try:
+            with open(UNIT_CONFIG_FILE, "w", encoding="utf-8") as f:
+                json.dump(DEFAULT_UNIT_NAMES, f, indent=4, ensure_ascii=False)
+            return DEFAULT_UNIT_NAMES
+        except Exception as e:
+            print(f"Error initializing unit config: {e}")
+            return DEFAULT_UNIT_NAMES
+    try:
+        with open(UNIT_CONFIG_FILE, "r", encoding="utf-8") as f:
+            data = json.load(f)
+            # Ensure all default grades and units exist
+            updated = False
+            for grade, units in DEFAULT_UNIT_NAMES.items():
+                if grade not in data:
+                    data[grade] = {}
+                    updated = True
+                for unit_num, name in units.items():
+                    if unit_num not in data[grade]:
+                        data[grade][unit_num] = name
+                        updated = True
+            if updated:
+                with open(UNIT_CONFIG_FILE, "w", encoding="utf-8") as f:
+                    json.dump(data, f, indent=4, ensure_ascii=False)
+            return data
+    except Exception as e:
+        print(f"Error loading unit config: {e}")
+        return DEFAULT_UNIT_NAMES
+
+def save_unit_config(config_data):
+    try:
+        with open(UNIT_CONFIG_FILE, "w", encoding="utf-8") as f:
+            json.dump(config_data, f, indent=4, ensure_ascii=False)
+        return True
+    except Exception as e:
+        print(f"Error saving unit config: {e}")
+        return False
