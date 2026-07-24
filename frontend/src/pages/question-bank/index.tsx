@@ -1384,8 +1384,8 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
         </div>
       </div>
 
-      {/* TABLE WORKSPACE */}
-      <div className="flex-auto glass-panel overflow-hidden flex flex-col min-h-0">
+      {/* TABLE WORKSPACE WITH SOLID DARK BACKGROUND (NO TRANSPARENCY) */}
+      <div className="flex-auto bg-[#0c0f1d] border border-[#1e2744] rounded-2xl shadow-2xl overflow-hidden opacity-100 backdrop-blur-none flex flex-col min-h-0">
         {loading ? (
           <div className="flex-1 flex flex-col items-center justify-center gap-2">
             <RefreshCw className="animate-spin text-blue-500" size={28} />
@@ -1406,7 +1406,7 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
             <div className="overflow-auto table-scroll-container">
               <table className="w-full border-collapse text-left">
                 <thead>
-                  <tr className="bg-slate-950/60 border-b border-slate-900 text-[0.66rem] text-slate-500 font-extrabold uppercase tracking-wider sticky top-0 z-10">
+                  <tr className="bg-[#121626] border-b border-[#232d4e] text-[0.66rem] text-slate-400 font-extrabold uppercase tracking-wider sticky top-0 z-10 opacity-100">
                     <th className="py-4 px-5 w-12 text-center">
                       <button
                         onClick={handleSelectAllOnPage}

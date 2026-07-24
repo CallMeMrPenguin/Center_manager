@@ -267,22 +267,40 @@ export default function KiemTraPage() {
   return (
     <div className={`h-full flex flex-col ${isFullscreen ? 'fixed inset-0 z-[100] bg-[#080b14] p-6 overflow-y-auto' : 'p-6 space-y-6 overflow-y-auto'}`}>
       
+      {/* PERSISTENT HEADER BAR WITH ALWAYS AVAILABLE FULLSCREEN FOCUS BUTTON */}
+      <div className="flex items-center justify-between bg-[#0d101d] border border-[#1e263d] px-6 py-3.5 rounded-2xl shadow-xl shrink-0">
+        <div className="flex items-center gap-3">
+          <div className="p-2 rounded-xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-400">
+            <FileCheck size={20} />
+          </div>
+          <div>
+            <h1 className="text-base font-black tracking-tight text-white flex items-center gap-2">
+              Kiểm Tra & Quiz Runner
+            </h1>
+            <p className="text-[11px] text-slate-400 font-semibold">
+              {testData?.title || 'Đánh giá năng lực học sinh'}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3">
+          {/* ALWAYS AVAILABLE FULLSCREEN FOCUS BUTTON */}
+          <button
+            onClick={() => setIsFullscreen(!isFullscreen)}
+            className={`flex items-center gap-2 px-3.5 py-2 rounded-xl border text-xs font-black transition cursor-pointer ${
+              isFullscreen ? 'bg-indigo-600 text-white border-indigo-400 shadow-md' : 'bg-[#121626] text-slate-300 hover:text-white border-[#263152]'
+            }`}
+            title={isFullscreen ? "Thoát toàn màn hình" : "Chế độ làm bài tập trung (Toàn màn hình)"}
+          >
+            {isFullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
+            <span>{isFullscreen ? 'Thoát Toàn Màn Hình' : 'Toàn Màn Hình'}</span>
+          </button>
+        </div>
+      </div>
+
       {/* STEP 1: IMPORT FILE */}
       {step === 'import' && (
         <div className="space-y-6 max-w-4xl mx-auto w-full flex-1 flex flex-col justify-center">
-          {/* HEADER */}
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-black tracking-tight text-white flex items-center gap-3">
-                <FileCheck className="h-7 w-7 text-indigo-400" />
-                Kiểm Tra & Quiz Runner
-              </h1>
-              <p className="text-xs text-slate-400 font-semibold mt-1">
-                Nhập đề từ `.docx`, `.json`, `.csv`, cài đặt bộ đếm giờ và nộp điểm trực tiếp cho học sinh.
-              </p>
-            </div>
-          </div>
-
           <div className="p-10 bg-[#0d1018] border border-dashed border-white/20 rounded-2xl text-center space-y-5 shadow-2xl">
             <div className="h-20 w-20 rounded-2xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-indigo-400 shadow-[0_0_30px_rgba(92,54,245,0.3)] mx-auto">
               <Upload size={36} />
@@ -441,10 +459,10 @@ export default function KiemTraPage() {
 
       {/* STEP 3: RUNNING QUIZ MODE (MATCHING REFERENCE UI WITH COLLAPSIBLE SIDEBAR & FULLSCREEN) */}
       {step === 'running' && activeQuestions.length > 0 && (
-        <div className="flex-1 flex flex-col space-y-4 w-full select-none">
+        <div className="flex-1 flex flex-col space-y-4 w-full select-none min-h-0">
           
           {/* TOP BAR (MATCHING SCREENSHOT NAVBAR) */}
-          <div className="bg-[#0d101d] border border-[#1e263d] px-6 py-3.5 rounded-2xl flex items-center justify-between shadow-xl">
+          <div className="bg-[#0d101d] border border-[#1e263d] px-6 py-3.5 rounded-2xl flex items-center justify-between shadow-xl shrink-0">
             <div className="flex items-center gap-3">
               <button
                 onClick={() => setStep('settings')}
@@ -455,10 +473,10 @@ export default function KiemTraPage() {
               </button>
               <div>
                 <h1 className="text-base font-black text-white flex items-center gap-2">
-                  <span>Kiểm Tra & Quiz Runner</span>
+                  <span>{testData?.title || 'Bài Kiểm Tra'}</span>
                 </h1>
                 <p className="text-[11px] text-indigo-400 font-bold">
-                  {testData?.title || 'Đánh giá năng lực • Tiếng Anh'}
+                  Câu {currentIndex + 1} / {totalQuestions}
                 </p>
               </div>
             </div>
@@ -480,17 +498,6 @@ export default function KiemTraPage() {
                   <span className="text-base font-black text-amber-400 font-mono">{questionTimer}s</span>
                 </div>
               )}
-
-              {/* FULLSCREEN FOCUS BUTTON */}
-              <button
-                onClick={() => setIsFullscreen(!isFullscreen)}
-                className={`p-2.5 rounded-xl border transition cursor-pointer ${
-                  isFullscreen ? 'bg-indigo-600 text-white border-indigo-400' : 'bg-[#121626] text-slate-300 hover:text-white border-[#263152]'
-                }`}
-                title={isFullscreen ? "Thoát chế độ toàn màn hình" : "Chế độ làm bài tập trung (Toàn màn hình)"}
-              >
-                {isFullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
-              </button>
 
               {/* COLLAPSE SIDEBAR TOGGLE */}
               <button
@@ -618,7 +625,7 @@ export default function KiemTraPage() {
               </div>
             )}
 
-            {/* RIGHT QUESTION CANVAS (MATCHING SCREENSHOT DESIGN) */}
+            {/* RIGHT QUESTION CANVAS (MATCHING SCREENSHOT DESIGN WITH RESPONSIVE FLUID TYPOGRAPHY) */}
             <div className="flex-1 bg-[#0d101d] border border-[#1e263d] p-6 sm:p-8 rounded-2xl flex flex-col justify-between shadow-2xl overflow-y-auto">
               {(() => {
                 const q = activeQuestions[currentIndex];
@@ -653,12 +660,12 @@ export default function KiemTraPage() {
                         </div>
                       )}
 
-                      {/* QUESTION STEM WITH FORMATTED [WORD] UNDERLINING */}
-                      <h2 className="text-xl sm:text-2xl font-black text-white leading-relaxed tracking-tight">
+                      {/* QUESTION STEM WITH IDENTICAL RESPONSIVE FLUID FONT SIZE */}
+                      <h2 className="text-[clamp(1.15rem,1.5vw,1.45rem)] font-black text-white leading-relaxed tracking-tight">
                         {renderFormattedText(q.question)}
                       </h2>
 
-                      {/* MCQ OPTIONS */}
+                      {/* MCQ OPTIONS WITH IDENTICAL RESPONSIVE FLUID FONT SIZE */}
                       {q.type === 'mcq' && q.options && (
                         <div className="grid grid-cols-1 gap-3.5 pt-2">
                           {q.options.map((opt, oIdx) => {
@@ -667,7 +674,7 @@ export default function KiemTraPage() {
                               <button
                                 key={oIdx}
                                 onClick={() => handleAnswerSelect(q.id, opt)}
-                                className={`p-4 sm:p-5 rounded-2xl border text-left text-base font-bold transition-all duration-200 cursor-pointer flex items-center gap-4 ${
+                                className={`p-4 sm:p-5 rounded-2xl border text-left text-[clamp(1.15rem,1.5vw,1.45rem)] font-extrabold transition-all duration-200 cursor-pointer flex items-center gap-4 ${
                                   isSelected
                                     ? 'bg-indigo-600/20 border-indigo-500 text-white shadow-[0_0_24px_rgba(92,54,245,0.4)] ring-1 ring-indigo-400'
                                     : 'bg-[#121626] border-white/10 text-slate-200 hover:bg-white/5 hover:border-white/20'
@@ -693,7 +700,7 @@ export default function KiemTraPage() {
                             value={currentAns}
                             onChange={(e) => handleAnswerSelect(q.id, e.target.value)}
                             placeholder="Nhập câu trả lời của bạn..."
-                            className="w-full bg-[#161a29] border border-white/20 text-white text-base sm:text-lg font-bold rounded-2xl p-4 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 shadow-inner"
+                            className="w-full bg-[#161a29] border border-white/20 text-white text-[clamp(1.15rem,1.5vw,1.45rem)] font-bold rounded-2xl p-4 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 shadow-inner"
                           />
                         </div>
                       )}
