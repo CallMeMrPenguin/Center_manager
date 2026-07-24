@@ -1361,7 +1361,7 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
 
       {/* TABLE WORKSPACE WITH SOLID DARK BACKGROUND (NO TRANSPARENCY) */}
       <div className="flex-auto bg-[#0c0f1d] border border-[#1e2744] rounded-2xl shadow-2xl overflow-hidden opacity-100 backdrop-blur-none flex flex-col min-h-0">
-        {loading ? (
+        {loading && questions.length === 0 ? (
           <div className="flex-1 flex flex-col items-center justify-center gap-2">
             <RefreshCw className="animate-spin text-blue-500" size={28} />
             <span className="text-xs text-slate-500 font-semibold">Đang xử lý dữ liệu...</span>

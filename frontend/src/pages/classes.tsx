@@ -682,7 +682,7 @@ export default function ClassesPage() {
 
           {/* CLASS GRID LIST */}
           <div className="flex-1 min-h-[360px]">
-            {loading ? (
+            {loading && classes.length === 0 ? (
               <div className="flex flex-col items-center justify-center text-slate-400 gap-3 py-20">
                 <RefreshCw className="h-7 w-7 text-indigo-400 animate-spin" />
                 <span className="text-xs font-bold">Đang tải danh sách lớp...</span>

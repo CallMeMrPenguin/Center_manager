@@ -611,11 +611,6 @@ export function DataTable<TData>({
         </div>
       ) : (
         <div className="relative flex-1 min-h-0 flex flex-col">
-          {loading && (
-            <div className="absolute inset-x-0 top-0 z-30 h-0.5 bg-indigo-500 overflow-hidden">
-              <div className="h-full bg-indigo-400 animate-pulse w-full" />
-            </div>
-          )}
           {/* Scroll container */}
           <div
             ref={tableScrollRef}
