@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { showToast } from '../components/Toast';
 import { CustomDatePicker } from '../components/CustomDatePicker';
+import { CustomSelect } from '../components/CustomSelect';
 import { DataTable } from '../components/DataTable';
 
 export default function ReportsPage() {
@@ -476,6 +477,20 @@ export default function ReportsPage() {
 
         {/* Action Controls Bar */}
         <div className="flex flex-wrap items-center gap-3">
+          {/* Class Selector Dropdown */}
+          <div className="flex items-center gap-2 bg-[#121626] border border-[#202842] px-3.5 py-1.5 rounded-xl shadow-sm">
+            <GraduationCap size={15} className="text-indigo-400 shrink-0" />
+            <CustomSelect
+              value={selectedClassId}
+              onChange={(val) => { setSelectedClassId(String(val)); setSelectedStudentId(''); }}
+              options={[
+                { value: '', label: 'Tất cả lớp học' },
+                ...classes.map(c => ({ value: String(c.id), label: `${c.class_name} (${c.grade || 'Lớp 6'})` }))
+              ]}
+              className="w-52"
+            />
+          </div>
+
           <button
             onClick={() => setResetModalOpen(true)}
             className="group flex items-center gap-0 hover:gap-1.5 px-3 py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 hover:text-white border border-rose-500/30 text-xs font-bold transition-all duration-300 cursor-pointer shadow-sm active:scale-95"
@@ -1129,21 +1144,19 @@ export default function ReportsPage() {
               BẢNG XẾP HẠNG VÀ CHI TIẾT ĐIỂM SỐ HỌC SINH
             </h3>
           </div>
-          <div className="flex items-center gap-2 bg-[#121626] border border-[#202842] px-3.5 py-1.5 rounded-xl">
-            <GraduationCap size={14} className="text-indigo-400 shrink-0" />
-            <select
+          <div className="flex items-center gap-2">
+            <GraduationCap size={15} className="text-indigo-400 shrink-0" />
+            <CustomSelect
               value={selectedClassId}
-              onChange={(e) => { setSelectedClassId(e.target.value); setSelectedStudentId(''); }}
-              className="bg-transparent text-white text-xs font-extrabold focus:outline-none cursor-pointer"
-            >
-              <option value="" className="bg-[#121626] text-white">Tất cả lớp học</option>
-              {classes.map(c => (
-                <option key={c.id} value={c.id} className="bg-[#121626] text-white">
-                  {c.class_name} ({c.grade || 'Lớp 6'})
-                </option>
-              ))}
-            </select>
+              onChange={(val) => { setSelectedClassId(String(val)); setSelectedStudentId(''); }}
+              options={[
+                { value: '', label: 'Tất cả lớp học' },
+                ...classes.map(c => ({ value: String(c.id), label: `${c.class_name} (${c.grade || 'Lớp 6'})` }))
+              ]}
+              className="w-52"
+            />
           </div>
+
         </div>
         <DataTable
           data={filteredRankings}

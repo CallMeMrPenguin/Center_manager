@@ -318,7 +318,7 @@ export default function StudentsPage() {
 
       {/* KPI METRICS */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-[#14192b] border border-[#28334e] p-5 rounded-2xl flex items-center justify-between shadow-lg">
+        <div className="kpi-card-purple p-5 flex items-center justify-between">
           <div>
             <span className="text-[10px] font-black uppercase tracking-widest text-purple-400 block">Tổng Học Sinh</span>
             <span className="text-2xl font-black text-white">{students.length}</span>
@@ -328,7 +328,7 @@ export default function StudentsPage() {
           </div>
         </div>
 
-        <div className="bg-[#14192b] border border-[#28334e] p-5 rounded-2xl flex items-center justify-between shadow-lg">
+        <div className="kpi-card-green p-5 flex items-center justify-between">
           <div>
             <span className="text-[10px] font-black uppercase tracking-widest text-emerald-400 block">Đang Học</span>
             <span className="text-2xl font-black text-emerald-400">{totalActive}</span>
@@ -338,7 +338,7 @@ export default function StudentsPage() {
           </div>
         </div>
 
-        <div className="bg-[#14192b] border border-[#28334e] p-5 rounded-2xl flex items-center justify-between shadow-lg">
+        <div className="kpi-card-amber p-5 flex items-center justify-between">
           <div>
             <span className="text-[10px] font-black uppercase tracking-widest text-rose-400 block">Đã Nghỉ Học</span>
             <span className="text-2xl font-black text-rose-400">{totalQuit}</span>

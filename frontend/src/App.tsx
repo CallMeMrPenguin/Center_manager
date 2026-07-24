@@ -310,6 +310,7 @@ function AppContent() {
                         draggable="true"
                         onDragStart={() => handleDragStart(idx)}
                         onDragOver={handleDragOver}
+                        onDragEnd={() => setDraggedIndex(null)}
                         onDrop={() => handleDrop(idx)}
                         onClick={() => setActiveTab(item.id)}
                         className={`flex items-center rounded-xl text-xs transition-all relative group cursor-pointer active:scale-95 ${
