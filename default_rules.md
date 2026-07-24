@@ -116,8 +116,292 @@ Every data table MUST feature a filter icon next to each column title in the tab
 
 ---
 
-## 📊 17. TanStack Table Standard (`@tanstack/react-table`)
-- **Mandatory TanStack Table (`@tanstack/react-table`)**: Every data table across all features and pages MUST be built using TanStack Table (`useReactTable`, `flexRender`, `getCoreRowModel`, `getPaginationRowModel`, `getSortedRowModel`, `getFilteredRowModel`, etc.). Direct un-managed HTML `<table>` rendering without TanStack Table state and column definitions (`ColumnDef<T>`) is strictly forbidden.
-- **Rules Compatibility**: TanStack Table implementations MUST preserve the strict 20 rows/page limit (Rule 2), column heading filters (Rule 3), case-insensitive search (Rule 4), zero-blur backgrounds (Rule 9), and memoized row components (Rule 10).
+## 📊 17. TanStack Table Standard — MANDATORY FOR ALL TABLES
 
+> **THIS IS A HARD RULE. ANY TABLE IN ANY PAGE OR COMPONENT MUST USE TANSTACK TABLE VIA THE `<DataTable />` WRAPPER. NO EXCEPTIONS.**
 
+### 17.1 — Core Mandate
+
+- **ALWAYS use `<DataTable />`** from `src/components/DataTable.tsx` for every data table. Never write a raw `<table>` with manual filtering, sorting, or pagination.
+- The `DataTable` component is a **self-contained TanStack Table wrapper** with all 15 features built-in. Pages only define `data` and `columns`; they never manage table state.
+- **Never add manual search state** (e.g. `const [search, setSearch] = useState('')`) in a page that uses `<DataTable />`. TanStack's `globalFilter` handles it internally.
+- **Never add manual pagination state** (e.g. `currentPage`, `pageSize`) in a page that uses `<DataTable />`. TanStack's `getPaginationRowModel()` handles it internally.
+- **Never add manual sort state** (e.g. `sortConfig`, `sortField`, `setSortDirection`) in a page that uses `<DataTable />`.
+- **Never add manual column visibility state** (e.g. `visibleCols`, `showColPicker`) in a page. The built-in `ColumnVisibilityDropdown` handles it.
+
+---
+
+### 17.2 — Required Packages
+
+These packages MUST be installed and used:
+
+```bash
+npm install @tanstack/react-table @tanstack/react-virtual @dnd-kit/core @dnd-kit/sortable @dnd-kit/utilities xlsx jspdf jspdf-autotable
+```
+
+| Package | Purpose |
+|---|---|
+| `@tanstack/react-table` | Core table engine |
+| `@tanstack/react-virtual` | Virtual scrolling for 500+ rows |
+| `@dnd-kit/core` + `@dnd-kit/sortable` + `@dnd-kit/utilities` | Drag-and-drop column reorder |
+| `xlsx` | Excel (.xlsx) export |
+| `jspdf` + `jspdf-autotable` | PDF export |
+
+---
+
+### 17.3 — `DataTableProps<TData>` — Full API Reference
+
+```tsx
+import { DataTable } from '@/components/DataTable';
+
+<DataTable<MyType>
+  // ── Core (required) ──────────────────────────────────────────
+  data={rows}                         // TData[]
+  columns={columns}                   // ColumnDef<TData, any>[]
+
+  // ── Loading & Empty ──────────────────────────────────────────
+  loading={false}                     // shows spinner
+  loadingMessage="Đang tải..."
+  emptyMessage="Không có dữ liệu"     // string | ReactNode
+
+  // ── Pagination ───────────────────────────────────────────────
+  pageSize={20}                       // default 20 rows/page
+  showPagination={true}               // hides pagination bar if false
+
+  // ── Feature Toggles (all default to sensible values) ─────────
+  enableGlobalSearch={true}           // 🔍 search input in toolbar
+  enableColumnVisibility={true}       // 👁 show/hide columns dropdown
+  enableRowSelection={false}          // ☑️ checkbox column
+  enableColumnResizing={true}         // ↔️ drag-to-resize column borders
+  enableColumnReorder={true}          // ↕️ drag column headers to reorder
+  enableGrouping={false}              // grouping rows by column value
+  enableRowExpansion={false}          // expand rows with sub-content
+  enableColumnPinning={false}         // pin columns left/right
+  enableMultiSort={true}              // 🎯 click multiple headers to sort
+  enableVirtualization={undefined}    // ⚡ auto-on when data.length > 500
+  enableExport={true}                 // 📤 Excel + PDF export dropdown
+
+  // ── Sticky Layout ─────────────────────────────────────────────
+  stickyHeader={true}                 // 📌 header stays on scroll
+  stickyFirstColumn={false}           // 📌 pin first column sticky
+
+  // ── Initial State ─────────────────────────────────────────────
+  initialSorting={[{ id: 'name', desc: false }]}
+  initialColumnVisibility={{ phone: false }}
+  initialColumnPinning={{ left: ['name'] }}
+
+  // ── Callbacks ─────────────────────────────────────────────────
+  onRowClick={(row) => handleSelect(row)}
+  onSelectionChange={(rows) => setSelected(rows)}
+  renderSubComponent={({ row }) => <Detail row={row} />}
+
+  // ── Toolbar Slots (inject custom buttons beside search) ───────
+  toolbarLeft={<MyCustomFilter />}
+  toolbarRight={<RefreshButton />}
+  searchPlaceholder="Tìm theo tên..."
+
+  // ── Export ────────────────────────────────────────────────────
+  exportFilename="students_export"
+/>
+```
+
+---
+
+### 17.4 — Column Definition Patterns (`ColumnDef<T>`)
+
+**Always define columns with `useMemo` in the page component:**
+
+```tsx
+import { ColumnDef } from '@tanstack/react-table';
+
+const columns = useMemo<ColumnDef<Student>[]>(() => [
+  // Simple accessor column
+  {
+    accessorKey: 'full_name',
+    header: 'Họ và Tên',
+    cell: (info) => <span className="font-bold">{info.getValue<string>()}</span>,
+  },
+
+  // Computed accessor column (not a raw field)
+  {
+    id: 'attendance_pct',
+    header: () => <div className="text-center w-full">Điểm Danh %</div>,
+    accessorFn: (row) => row.present / row.total * 100,
+    cell: ({ getValue }) => <div className="text-center">{getValue<number>().toFixed(0)}%</div>,
+  },
+
+  // Disable sorting/filtering on a column
+  {
+    id: 'actions',
+    header: 'Thao Tác',
+    enableSorting: false,
+    enableGlobalFilter: false,
+    cell: ({ row }) => <ActionButtons row={row.original} />,
+  },
+], [/* reactive deps like callbacks */]);
+```
+
+---
+
+### 17.5 — TanStack APIs Used Inside `DataTable.tsx`
+
+The `DataTable` component internally uses **all** of these TanStack Table APIs. Never re-implement them in pages:
+
+**Row Models:**
+- `getCoreRowModel()` — base model (required)
+- `getSortedRowModel()` — column sort
+- `getFilteredRowModel()` — global + column filter
+- `getPaginationRowModel()` — page slicing
+- `getGroupedRowModel()` — row grouping
+- `getExpandedRowModel()` — expanded rows / sub-rows
+
+**State managed internally:**
+- `globalFilter` / `onGlobalFilterChange` — global text search
+- `sorting` / `onSortingChange` — sort state (supports multi-column)
+- `columnFilters` / `onColumnFiltersChange` — per-column filters
+- `columnVisibility` / `onColumnVisibilityChange` — show/hide columns
+- `rowSelection` / `onRowSelectionChange` — checkbox selection
+- `grouping` / `onGroupingChange` — grouping state
+- `expanded` / `onExpandedChange` — row expansion
+- `columnPinning` / `onColumnPinningChange` — sticky columns
+- `columnOrder` / `onColumnOrderChange` — drag reorder order
+
+**Column resize:**
+- `columnResizeMode: 'onChange'` — live resize as you drag
+- `header.getResizeHandler()` — mouse + touch resize handler
+- `header.column.getIsResizing()` — resize active indicator
+- `table.getTotalSize()` — total table width for resize layout
+
+**Render helpers:**
+- `flexRender(header.column.columnDef.header, header.getContext())` — header render
+- `flexRender(cell.column.columnDef.cell, cell.getContext())` — cell render
+- `table.getHeaderGroups()` — header rows
+- `table.getRowModel().rows` — current visible rows (after filter+sort+page)
+- `table.getFilteredRowModel().rows` — all filtered rows (for export count)
+
+**Sort helpers (per column):**
+- `header.column.getCanSort()` — is sortable?
+- `header.column.getToggleSortingHandler()` — click handler
+- `header.column.getIsSorted()` — `'asc' | 'desc' | false`
+
+**Visibility helpers (per column):**
+- `col.getIsVisible()` — is column visible?
+- `col.getToggleVisibilityHandler()` — toggle handler
+- `table.toggleAllColumnsVisible(bool)` — show/hide all
+
+**Pinning helpers:**
+- `header.column.getIsPinned()` — `'left' | 'right' | false`
+- `header.column.getStart('left')` — sticky left offset
+- `cell.column.getAfter('right')` — sticky right offset
+
+**Pagination helpers:**
+- `table.getState().pagination.pageIndex` — current page (0-indexed)
+- `table.getPageCount()` — total pages
+- `table.getCanPreviousPage()` / `table.getCanNextPage()`
+- `table.previousPage()` / `table.nextPage()`
+- `table.setPageIndex(n)` / `table.setPageSize(n)`
+
+**Selection helpers:**
+- `table.getIsAllPageRowsSelected()` — all on page selected?
+- `table.getIsSomePageRowsSelected()` — some selected?
+- `table.getToggleAllPageRowsSelectedHandler()` — toggle all handler
+- `row.getIsSelected()` / `row.getIsSomeSelected()`
+- `row.getToggleSelectedHandler()`
+
+**Virtual scroll (`@tanstack/react-virtual`):**
+- `useVirtualizer({ count, getScrollElement, estimateSize, overscan })`
+- `virtualizer.getVirtualItems()` — only render these indices
+- `virtualizer.getTotalSize()` — total scrollable height
+- Auto-activates when `data.length > 500`
+
+**DnD column reorder (`@dnd-kit`):**
+- `DndContext` + `SortableContext` wraps the table header
+- `useSortable({ id: header.id })` on each `<DraggableHeader>`
+- `onDragEnd` → `arrayMove(columnOrder, oldIndex, newIndex)` → `setColumnOrder`
+- `GripVertical` icon on each header as the drag handle
+
+---
+
+### 17.6 — 15 Built-In Features Checklist
+
+When any new table is created, ALL of the following are available by default via `<DataTable />`:
+
+| # | Feature | How |
+|---|---|---|
+| 1 | ✨ Smooth row hover | `transition-colors duration-150` + alternating row bg |
+| 2 | 🎨 Rounded header & cells | `border-separate` + `rounded-tl/tr/bl/br-xl` on corners |
+| 3 | 🌙 Custom dark theme | `#0d1018` / `#111827` / `#090c16` palette |
+| 4 | 📌 Sticky header | `sticky top-0 z-20` on `<thead>` |
+| 5 | 📌 Sticky first column | `stickyFirstColumn` prop → auto column pin |
+| 6 | ↔️ Drag-to-resize | Resize handle on `<th>` right edge |
+| 7 | ↕️ Drag column reorder | `@dnd-kit` + `GripVertical` handle on headers |
+| 8 | 👁️ Show/hide columns | `ColumnVisibilityDropdown` in toolbar |
+| 9 | 🔍 Global search | Search input in toolbar, TanStack `globalFilter` |
+| 10 | 🎯 Multi-column sort | `enableMultiSort: true`, numbered priority badges |
+| 11 | 📄 Pagination | Page pills, prev/next/first/last, page-size selector |
+| 12 | ⚡ Virtual scrolling | `@tanstack/react-virtual`, auto-on at 500+ rows |
+| 13 | 📤 Excel/PDF export | `xlsx` + `jspdf-autotable`, exports filtered data |
+| 14 | ☑️ Row selection | Indeterminate checkboxes, selection badge, clear |
+| 15 | 📱 Responsive layout | Toolbar wraps, table scrolls, labels collapse on mobile |
+
+---
+
+### 17.7 — Strict Anti-Patterns (FORBIDDEN)
+
+```tsx
+// ❌ FORBIDDEN — raw HTML table without TanStack
+<table>
+  <thead><tr><th>Name</th></tr></thead>
+  <tbody>{data.map(row => <tr>...</tr>)}</tbody>
+</table>
+
+// ❌ FORBIDDEN — manual search state in a page with DataTable
+const [search, setSearch] = useState('');
+const filtered = data.filter(d => d.name.includes(search));
+<DataTable data={filtered} ... />
+
+// ❌ FORBIDDEN — manual pagination in a page with DataTable
+const [page, setPage] = useState(1);
+const paged = data.slice((page-1)*20, page*20);
+<DataTable data={paged} ... />
+
+// ❌ FORBIDDEN — manual sort in a page with DataTable
+const [sortKey, setSortKey] = useState('name');
+const sorted = [...data].sort((a,b) => a[sortKey].localeCompare(b[sortKey]));
+<DataTable data={sorted} ... />
+
+// ❌ FORBIDDEN — custom column visibility in a page with DataTable
+const [visibleCols, setVisibleCols] = useState({ name: true, phone: false });
+// ... custom dropdown UI ...
+<DataTable data={data} columnVisibility={visibleCols} ... />
+
+// ❌ FORBIDDEN — useReactTable called directly in a page
+const table = useReactTable({ data, columns, getCoreRowModel: getCoreRowModel() });
+// ... manual table rendering ...
+
+// ✅ CORRECT — page passes raw data, DataTable handles everything
+<DataTable
+  data={students}          // raw, unfiltered, unsorted, unpaged
+  columns={columns}        // just ColumnDef definitions
+  searchPlaceholder="Tìm học sinh..."
+  pageSize={20}
+  enableRowSelection={true}
+  onSelectionChange={setSelected}
+/>
+```
+
+---
+
+### 17.8 — When Adding a New Table (Checklist)
+
+When any agent session adds a new table to any page:
+
+1. ✅ Import `DataTable` from `src/components/DataTable`
+2. ✅ Import `ColumnDef` from `@tanstack/react-table`
+3. ✅ Define `columns` with `useMemo<ColumnDef<T>[]>(() => [...], [deps])`
+4. ✅ Load data once with no server-side search/sort/page parameters
+5. ✅ Pass raw `data` array directly — never pre-filter/sort/page it
+6. ✅ Use `toolbarLeft` / `toolbarRight` for any page-specific controls (e.g. role filter dropdown, refresh button)
+7. ✅ Set `exportFilename` to a descriptive name
+8. ✅ Run `npm run build` — 0 TypeScript errors required
+9. ✅ Commit with `git add . && git commit -m "feat: ..." && git push origin main`
