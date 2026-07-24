@@ -512,11 +512,13 @@ export default function ReportsPage() {
         <div className="flex flex-wrap items-center gap-3">
           <button
             onClick={() => setResetModalOpen(true)}
-            className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 hover:text-white border border-rose-500/30 text-xs font-bold transition cursor-pointer shadow-sm active:scale-95"
-            title="Đặt lại (Xóa) điểm số theo khoảng thời gian"
+            className="group flex items-center gap-0 hover:gap-1.5 px-3 py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 hover:text-white border border-rose-500/30 text-xs font-bold transition-all duration-300 cursor-pointer shadow-sm active:scale-95"
+            title="Đặt Lại Điểm Số"
           >
-            <RotateCcw size={14} />
-            <span>Đặt Lại Điểm Số</span>
+            <RotateCcw size={14} className="shrink-0" />
+            <span className="max-w-0 opacity-0 group-hover:max-w-[140px] group-hover:opacity-100 transition-all duration-300 ease-in-out whitespace-nowrap overflow-hidden block">
+              Đặt Lại Điểm Số
+            </span>
           </button>
 
           <button
@@ -1191,11 +1193,11 @@ export default function ReportsPage() {
             {(Object.values(columnFilters).some(f => f.search !== '' || f.selectedValues.length > 0) || sortConfig !== null) && (
               <button
                 onClick={resetFilters}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 rounded-xl text-xs font-bold border border-rose-500/30 transition cursor-pointer"
-                title="Xóa tất cả bộ lọc cột"
+                className="group flex items-center gap-0 hover:gap-1.5 px-3 py-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 rounded-xl text-xs font-bold border border-rose-500/30 transition-all duration-300 cursor-pointer"
+                title="Xóa Bộ Lọc"
               >
-                <RefreshCw size={12} />
-                <span>Xóa Bộ Lọc</span>
+                <RefreshCw size={12} className="shrink-0" />
+                <span className="max-w-0 opacity-0 group-hover:max-w-[100px] group-hover:opacity-100 transition-all duration-300 ease-in-out whitespace-nowrap overflow-hidden block">Xóa Bộ Lọc</span>
               </button>
             )}
           </div>

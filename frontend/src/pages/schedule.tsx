@@ -317,8 +317,11 @@ export default function SchedulePage() {
           <h1 className="text-xl font-black text-white flex items-center gap-2.5"><CalendarIcon className="h-6 w-6 text-indigo-400" />BẢNG LỊCH HỌC</h1>
           <p className="text-[11px] text-slate-400 font-semibold mt-0.5">Quản lý và theo dõi lịch học toàn trung tâm.</p>
         </div>
-        <button onClick={() => openAdd()} className="flex items-center gap-2 bg-[#5c36f5] hover:bg-[#7351f7] text-white px-4 py-2.5 rounded-xl font-extrabold text-xs shadow-[0_4px_16px_rgba(92,54,245,0.45)] transition cursor-pointer border border-white/20 active:scale-95">
-          <Plus size={14} />Thêm Lịch Học
+        <button onClick={() => openAdd()} className="group flex items-center gap-0 hover:gap-2 bg-[#5c36f5] hover:bg-[#7351f7] text-white px-3.5 py-2.5 rounded-xl font-extrabold text-xs shadow-[0_4px_16px_rgba(92,54,245,0.45)] transition-all duration-300 cursor-pointer border border-white/20 active:scale-95" title="Thêm Lịch Học">
+          <Plus size={14} className="shrink-0" />
+          <span className="max-w-0 opacity-0 group-hover:max-w-[140px] group-hover:opacity-100 transition-all duration-300 ease-in-out whitespace-nowrap overflow-hidden block">
+            Thêm Lịch Học
+          </span>
         </button>
       </div>
 
@@ -348,9 +351,9 @@ export default function SchedulePage() {
           </select>
         </div>
         <div className="flex items-center gap-2">
-          <div className="flex bg-[#0d1018] border border-white/10 p-1 rounded-xl">
+          <div className="flex bg-[#0d1018] border border-white/10 p-1 rounded-xl gap-1">
             {(['month', 'week', 'list'] as const).map(m => (
-              <button key={m} onClick={() => setViewMode(m)} className={`px-3 py-1.5 text-[10px] font-black rounded-xl transition cursor-pointer ${viewMode === m ? 'bg-[#5c36f5] text-white shadow-[0_0_12px_rgba(92,54,245,0.5)]' : 'text-slate-400 hover:text-white'}`}>
+              <button key={m} onClick={() => setViewMode(m)} className={`px-3 py-1.5 text-[10px] font-black rounded-xl cursor-pointer transition-all duration-200 ease-in-out ${viewMode === m ? 'bg-[#5c36f5] text-white shadow-[0_0_12px_rgba(92,54,245,0.5)] scale-[1.02]' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}>
                 {m === 'month' ? 'LỊCH THÁNG' : m === 'week' ? 'LỊCH TUẦN' : 'DANH SÁCH'}
               </button>
             ))}

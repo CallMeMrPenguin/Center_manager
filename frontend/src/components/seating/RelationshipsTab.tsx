@@ -314,10 +314,13 @@ export default function RelationshipsTab({ classId, enrolledStudents, onRefreshC
 
           <button
             onClick={() => setCreatingFriendGroup(true)}
-            className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white px-3.5 py-2 rounded-xl text-xs font-extrabold transition cursor-pointer border border-white/10"
+            className="group flex items-center gap-0 hover:gap-1.5 bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-2 rounded-xl text-xs font-extrabold transition-all duration-300 cursor-pointer border border-white/10 shadow-md"
+            title="Tạo Nhóm Bạn"
           >
-            <Plus size={14} />
-            <span>Tạo Nhóm Bạn</span>
+            <Plus size={14} className="shrink-0" />
+            <span className="max-w-0 opacity-0 group-hover:max-w-[140px] group-hover:opacity-100 transition-all duration-300 ease-in-out whitespace-nowrap overflow-hidden block">
+              Tạo Nhóm Bạn
+            </span>
           </button>
         </div>
 
@@ -444,10 +447,13 @@ export default function RelationshipsTab({ classId, enrolledStudents, onRefreshC
 
           <button
             onClick={() => setCreatingConflictGroup(true)}
-            className="flex items-center gap-2 bg-rose-600 hover:bg-rose-500 text-white px-3.5 py-2 rounded-xl text-xs font-extrabold transition cursor-pointer border border-white/10"
+            className="group flex items-center gap-0 hover:gap-1.5 bg-rose-600 hover:bg-rose-500 text-white px-3 py-2 rounded-xl text-xs font-extrabold transition-all duration-300 cursor-pointer border border-white/10 shadow-md"
+            title="Tạo Nhóm Xung Đột"
           >
-            <Plus size={14} />
-            <span>Tạo Nhóm Xung Đột</span>
+            <Plus size={14} className="shrink-0" />
+            <span className="max-w-0 opacity-0 group-hover:max-w-[140px] group-hover:opacity-100 transition-all duration-300 ease-in-out whitespace-nowrap overflow-hidden block">
+              Tạo Nhóm Xung Đột
+            </span>
           </button>
         </div>
 
@@ -574,10 +580,13 @@ export default function RelationshipsTab({ classId, enrolledStudents, onRefreshC
 
           <button
             onClick={handleOpenAddTrustedModal}
-            className="flex items-center gap-2 bg-amber-600 hover:bg-amber-500 text-white px-3.5 py-2 rounded-xl text-xs font-extrabold transition cursor-pointer border border-white/10 shadow-lg"
+            className="group flex items-center gap-0 hover:gap-1.5 bg-amber-600 hover:bg-amber-500 text-white px-3 py-2 rounded-xl text-xs font-extrabold transition-all duration-300 cursor-pointer border border-white/10 shadow-lg"
+            title="Thêm Học Sinh Tin Cậy"
           >
-            <UserCheck size={14} />
-            <span>+ Thêm nhiều học sinh tin cậy (Chọn nhiều)</span>
+            <UserCheck size={14} className="shrink-0" />
+            <span className="max-w-0 opacity-0 group-hover:max-w-[180px] group-hover:opacity-100 transition-all duration-300 ease-in-out whitespace-nowrap overflow-hidden block">
+              Thêm Học Sinh Tin Cậy
+            </span>
           </button>
         </div>
 

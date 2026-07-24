@@ -124,10 +124,13 @@ export default function TeachersPage() {
 
         <button
           onClick={handleOpenAdd}
-          className="flex items-center gap-2 bg-[#5c36f5] hover:bg-[#7351f7] text-white px-4 py-2.5 rounded-xl font-bold text-xs shadow-[0_4px_16px_rgba(92,54,245,0.4)] transition-all cursor-pointer border border-white/20 active:scale-95"
+          className="group flex items-center gap-0 hover:gap-2 bg-[#5c36f5] hover:bg-[#7351f7] text-white px-3.5 py-2.5 rounded-xl font-bold text-xs shadow-[0_4px_16px_rgba(92,54,245,0.4)] transition-all duration-300 cursor-pointer border border-white/20 active:scale-95"
+          title="Thêm Nhân Sự Mới"
         >
-          <UserPlus size={16} />
-          <span>Thêm Nhân Nhân Sự Mới</span>
+          <UserPlus size={16} className="shrink-0" />
+          <span className="max-w-0 opacity-0 group-hover:max-w-[200px] group-hover:opacity-100 transition-all duration-300 ease-in-out whitespace-nowrap overflow-hidden block">
+            Thêm Nhân Sự Mới
+          </span>
         </button>
       </div>
 

@@ -636,10 +636,13 @@ export default function ClassesPage() {
 
             <button
               onClick={handleOpenCreateClass}
-              className="flex items-center gap-2 bg-[#5c36f5] hover:bg-[#7351f7] text-white px-4 py-2.5 rounded-xl font-bold text-xs shadow-[0_4px_16px_rgba(92,54,245,0.4)] transition-all cursor-pointer border border-white/20 active:scale-95"
+              className="group flex items-center gap-0 hover:gap-2 bg-[#5c36f5] hover:bg-[#7351f7] text-white px-3.5 py-2.5 rounded-xl font-bold text-xs shadow-[0_4px_16px_rgba(92,54,245,0.4)] transition-all duration-300 cursor-pointer border border-white/20 active:scale-95"
+              title="Tạo Lớp Học Mới"
             >
-              <Plus size={16} />
-              <span>Tạo Lớp Học Mới</span>
+              <Plus size={16} className="shrink-0" />
+              <span className="max-w-0 opacity-0 group-hover:max-w-[200px] group-hover:opacity-100 transition-all duration-300 ease-in-out whitespace-nowrap overflow-hidden block">
+                Tạo Lớp Học Mới
+              </span>
             </button>
           </div>
 
@@ -760,24 +763,24 @@ export default function ClassesPage() {
             </div>
 
             {/* SUB TAB SELECTOR */}
-            <div className="flex bg-[#0d1018] border border-white/10 p-1 rounded-xl">
+            <div className="flex bg-[#0d1018] border border-white/10 p-1 rounded-xl gap-1">
               <button
                 onClick={() => setActiveSubTab('grades')}
-                className={`px-4 py-1.5 text-xs font-bold rounded-lg transition cursor-pointer ${activeSubTab === 'grades' ? 'bg-[#5c36f5] text-white shadow-[0_0_12px_rgba(92,54,245,0.4)]' : 'text-slate-400 hover:text-white'
+                className={`px-4 py-1.5 text-xs font-bold rounded-lg cursor-pointer transition-all duration-200 ease-in-out ${activeSubTab === 'grades' ? 'bg-[#5c36f5] text-white shadow-[0_0_12px_rgba(92,54,245,0.4)] scale-[1.02]' : 'text-slate-400 hover:text-white hover:bg-white/5'
                   }`}
               >
                 Điểm Danh & Điểm ({enrolledStudents.length})
               </button>
               <button
                 onClick={() => setActiveSubTab('seating')}
-                className={`px-4 py-1.5 text-xs font-bold rounded-lg transition cursor-pointer ${activeSubTab === 'seating' ? 'bg-[#5c36f5] text-white shadow-[0_0_12px_rgba(92,54,245,0.4)]' : 'text-slate-400 hover:text-white'
+                className={`px-4 py-1.5 text-xs font-bold rounded-lg cursor-pointer transition-all duration-200 ease-in-out ${activeSubTab === 'seating' ? 'bg-[#5c36f5] text-white shadow-[0_0_12px_rgba(92,54,245,0.4)] scale-[1.02]' : 'text-slate-400 hover:text-white hover:bg-white/5'
                   }`}
               >
                 Sơ Đồ Lớp
               </button>
               <button
                 onClick={() => setActiveSubTab('relationships')}
-                className={`px-4 py-1.5 text-xs font-bold rounded-lg transition cursor-pointer flex items-center gap-1.5 ${activeSubTab === 'relationships' ? 'bg-[#5c36f5] text-white shadow-[0_0_12px_rgba(92,54,245,0.4)]' : 'text-slate-400 hover:text-white'
+                className={`px-4 py-1.5 text-xs font-bold rounded-lg cursor-pointer flex items-center gap-1.5 transition-all duration-200 ease-in-out ${activeSubTab === 'relationships' ? 'bg-[#5c36f5] text-white shadow-[0_0_12px_rgba(92,54,245,0.4)] scale-[1.02]' : 'text-slate-400 hover:text-white hover:bg-white/5'
                   }`}
               >
                 <Users size={13} />
@@ -817,10 +820,11 @@ export default function ClassesPage() {
                   </div>
                   <button
                     onClick={() => handleOpenEditClass(selectedClass)}
-                    className="flex items-center gap-1.5 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/20 px-3 py-1.5 rounded-xl font-bold text-xs transition cursor-pointer"
+                    className="group flex items-center gap-0 hover:gap-1.5 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/20 px-3 py-1.5 rounded-xl font-bold text-xs transition-all duration-300 cursor-pointer"
+                    title="Sửa Thông Tin"
                   >
-                    <Edit3 size={13} />
-                    <span>Sửa thông tin</span>
+                    <Edit3 size={13} className="shrink-0" />
+                    <span className="max-w-0 opacity-0 group-hover:max-w-[140px] group-hover:opacity-100 transition-all duration-300 ease-in-out whitespace-nowrap overflow-hidden block">Sửa Thông Tin</span>
                   </button>
                 </div>
               </div>
@@ -843,35 +847,39 @@ export default function ClassesPage() {
                 <div className="flex items-center gap-2">
                   <button
                     onClick={handleOpenEnrollModal}
-                    className="flex items-center gap-1.5 bg-indigo-500/15 hover:bg-indigo-500/25 text-indigo-300 border border-indigo-500/30 px-3.5 py-1.5 rounded-xl font-bold text-xs transition cursor-pointer"
+                    className="group flex items-center gap-0 hover:gap-1.5 bg-indigo-500/15 hover:bg-indigo-500/25 text-indigo-300 border border-indigo-500/30 px-3.5 py-1.5 rounded-xl font-bold text-xs transition-all duration-300 cursor-pointer"
+                    title="Ghi Danh Học Sinh"
                   >
-                    <UserPlus size={14} />
-                    <span>Ghi Danh Học Sinh</span>
+                    <UserPlus size={14} className="shrink-0" />
+                    <span className="max-w-0 opacity-0 group-hover:max-w-[160px] group-hover:opacity-100 transition-all duration-300 ease-in-out whitespace-nowrap overflow-hidden block">Ghi Danh Học Sinh</span>
                   </button>
 
                   <button
                     onClick={handleExportExcel}
-                    className="flex items-center gap-1.5 bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/30 px-3.5 py-1.5 rounded-xl font-bold text-xs transition cursor-pointer"
+                    className="group flex items-center gap-0 hover:gap-1.5 bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/30 px-3.5 py-1.5 rounded-xl font-bold text-xs transition-all duration-300 cursor-pointer"
+                    title="Xuất Excel"
                   >
-                    <FileSpreadsheet size={14} />
-                    <span>Xuất Excel</span>
+                    <FileSpreadsheet size={14} className="shrink-0" />
+                    <span className="max-w-0 opacity-0 group-hover:max-w-[120px] group-hover:opacity-100 transition-all duration-300 ease-in-out whitespace-nowrap overflow-hidden block">Xuất Excel</span>
                   </button>
 
                   <button
                     onClick={handleExportDocx}
-                    className="flex items-center gap-1.5 bg-blue-500/15 hover:bg-blue-500/25 text-blue-300 border border-blue-500/30 px-3.5 py-1.5 rounded-xl font-bold text-xs transition cursor-pointer"
+                    className="group flex items-center gap-0 hover:gap-1.5 bg-blue-500/15 hover:bg-blue-500/25 text-blue-300 border border-blue-500/30 px-3.5 py-1.5 rounded-xl font-bold text-xs transition-all duration-300 cursor-pointer"
+                    title="Xuất Word"
                   >
-                    <FileText size={14} />
-                    <span>Xuất Word</span>
+                    <FileText size={14} className="shrink-0" />
+                    <span className="max-w-0 opacity-0 group-hover:max-w-[120px] group-hover:opacity-100 transition-all duration-300 ease-in-out whitespace-nowrap overflow-hidden block">Xuất Word</span>
                   </button>
 
                   <button
                     onClick={handleSaveAttendance}
                     disabled={savingAttendance}
-                    className="flex items-center gap-1.5 bg-[#5c36f5] hover:bg-[#7351f7] text-white px-4 py-1.5 rounded-xl font-extrabold text-xs shadow-[0_4px_12px_rgba(92,54,245,0.4)] transition cursor-pointer border border-white/20"
+                    className="group flex items-center gap-0 hover:gap-1.5 bg-[#5c36f5] hover:bg-[#7351f7] text-white px-3.5 py-1.5 rounded-xl font-extrabold text-xs shadow-[0_4px_12px_rgba(92,54,245,0.4)] transition-all duration-300 cursor-pointer border border-white/20"
+                    title="Lưu Bảng Điểm"
                   >
-                    <Save size={14} />
-                    <span>{savingAttendance ? 'Đang lưu...' : 'Lưu Bảng Điểm'}</span>
+                    <Save size={14} className="shrink-0" />
+                    <span className="max-w-0 opacity-0 group-hover:max-w-[140px] group-hover:opacity-100 transition-all duration-300 ease-in-out whitespace-nowrap overflow-hidden block">{savingAttendance ? 'Đang lưu...' : 'Lưu Bảng Điểm'}</span>
                   </button>
                 </div>
               </div>
@@ -1028,38 +1036,39 @@ export default function ClassesPage() {
                 <div className="flex items-center gap-2 flex-wrap">
                   <button
                     onClick={handleAutoMixSeating}
-                    className="flex items-center gap-1.5 bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 border border-indigo-500/40 px-3 py-1.5 rounded-xl font-extrabold text-xs transition cursor-pointer"
-                    title="Xếp chỗ ngẫu nhiên nhanh"
+                    className="group flex items-center gap-0 hover:gap-1.5 bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 border border-indigo-500/40 px-3 py-1.5 rounded-xl font-extrabold text-xs transition-all duration-300 cursor-pointer"
+                    title="Trộn Ngẫu Nhiên"
                   >
-                    <Shuffle size={14} />
-                    <span>Trộn Ngẫu Nhiên</span>
+                    <Shuffle size={14} className="shrink-0" />
+                    <span className="max-w-0 opacity-0 group-hover:max-w-[140px] group-hover:opacity-100 transition-all duration-300 ease-in-out whitespace-nowrap overflow-hidden block">Trộn Ngẫu Nhiên</span>
                   </button>
 
                   <button
                     onClick={handleGeneticMixSeating}
                     disabled={mixingGA}
-                    className="flex items-center gap-1.5 bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/40 px-3 py-1.5 rounded-xl font-extrabold text-xs transition cursor-pointer disabled:opacity-50"
-                    title="Chạy thuật toán di truyền (Genetic Algorithm) tối ưu vi phạm xung đột & nhóm bạn"
+                    className="group flex items-center gap-0 hover:gap-1.5 bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/40 px-3 py-1.5 rounded-xl font-extrabold text-xs transition-all duration-300 cursor-pointer disabled:opacity-50"
+                    title="Trộn Thông Minh (AI/GA)"
                   >
-                    <RefreshCw size={14} className={mixingGA ? "animate-spin" : ""} />
-                    <span>{mixingGA ? "Đang chạy GA..." : "Trộn Thông Minh (GA)"}</span>
+                    <RefreshCw size={14} className={`shrink-0 ${mixingGA ? "animate-spin" : ""}`} />
+                    <span className="max-w-0 opacity-0 group-hover:max-w-[160px] group-hover:opacity-100 transition-all duration-300 ease-in-out whitespace-nowrap overflow-hidden block">{mixingGA ? "Đang chạy GA..." : "Trộn Thông Minh"}</span>
                   </button>
 
                   <button
                     onClick={handleBlossomSwap}
-                    className="flex items-center gap-1.5 bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-500/40 px-3 py-1.5 rounded-xl font-extrabold text-xs transition cursor-pointer"
-                    title="Chạy thuật toán Blossom Matching để phân công đổi bài chấm 1-đối-1"
+                    className="group flex items-center gap-0 hover:gap-1.5 bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-500/40 px-3 py-1.5 rounded-xl font-extrabold text-xs transition-all duration-300 cursor-pointer"
+                    title="Đổi Bàn (Blossom)"
                   >
-                    <FileCheck2 size={14} />
-                    <span>Đổi Bài (Blossom)</span>
+                    <FileCheck2 size={14} className="shrink-0" />
+                    <span className="max-w-0 opacity-0 group-hover:max-w-[120px] group-hover:opacity-100 transition-all duration-300 ease-in-out whitespace-nowrap overflow-hidden block">Đổi Bàn</span>
                   </button>
 
                   <button
                     onClick={handleSaveSeating}
-                    className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-1.5 rounded-xl font-extrabold text-xs shadow-[0_4px_12px_rgba(16,185,129,0.3)] transition cursor-pointer border border-white/10"
+                    className="group flex items-center gap-0 hover:gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white px-3.5 py-1.5 rounded-xl font-extrabold text-xs shadow-[0_4px_12px_rgba(16,185,129,0.3)] transition-all duration-300 cursor-pointer border border-white/10"
+                    title="Lưu Sơ Đồ"
                   >
-                    <Save size={14} />
-                    <span>Lưu Sơ Đồ</span>
+                    <Save size={14} className="shrink-0" />
+                    <span className="max-w-0 opacity-0 group-hover:max-w-[120px] group-hover:opacity-100 transition-all duration-300 ease-in-out whitespace-nowrap overflow-hidden block">Lưu Sơ Đồ</span>
                   </button>
                 </div>
               </div>

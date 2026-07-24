@@ -229,10 +229,13 @@ export default function StudentsPage() {
         <div className="flex items-center gap-3">
           <button
             onClick={handleOpenAdd}
-            className="flex items-center gap-2 bg-[#5c36f5] hover:bg-[#7351f7] text-white px-4 py-2.5 rounded-xl font-bold text-xs shadow-[0_4px_16px_rgba(92,54,245,0.4)] transition-all cursor-pointer border border-white/20 active:scale-95"
+            className="group flex items-center gap-0 hover:gap-2 bg-[#5c36f5] hover:bg-[#7351f7] text-white px-3.5 py-2.5 rounded-xl font-bold text-xs shadow-[0_4px_16px_rgba(92,54,245,0.4)] transition-all duration-300 cursor-pointer border border-white/20 active:scale-95"
+            title="Thêm Học Sinh Mới"
           >
-            <UserPlus size={16} />
-            <span>Thêm Học Sinh Mới</span>
+            <UserPlus size={16} className="shrink-0" />
+            <span className="max-w-0 opacity-0 group-hover:max-w-[200px] group-hover:opacity-100 transition-all duration-300 ease-in-out whitespace-nowrap overflow-hidden block">
+              Thêm Học Sinh Mới
+            </span>
           </button>
         </div>
       </div>
@@ -301,10 +304,13 @@ export default function StudentsPage() {
         <div className="relative" ref={colPickerRef}>
           <button
             onClick={() => setShowColPicker(!showColPicker)}
-            className="flex items-center gap-2 bg-[#1c243c] hover:bg-[#283458] border border-[#344268] text-indigo-300 px-3.5 py-2 rounded-xl text-xs font-bold transition cursor-pointer"
+            className="group flex items-center gap-0 hover:gap-2 bg-[#1c243c] hover:bg-[#283458] border border-[#344268] text-indigo-300 hover:text-white px-3.5 py-2 rounded-xl text-xs font-bold transition-all duration-300 cursor-pointer shadow-sm"
+            title="Hiển Thị Cột"
           >
-            <Eye size={14} />
-            <span>Hiển Thị Cột</span>
+            <Eye size={14} className="shrink-0" />
+            <span className="max-w-0 opacity-0 group-hover:max-w-[140px] group-hover:opacity-100 transition-all duration-300 ease-in-out whitespace-nowrap overflow-hidden block">
+              Hiển Thị Cột
+            </span>
           </button>
 
           {showColPicker && (
