@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { api } from '../../api';
 import { DbVocab } from '../../types';
 import PromptManager, { PromptItem } from '../../components/PromptManager';
@@ -93,9 +93,11 @@ const ColumnHeaderFilter = ({
     }
   }, [isOpen]);
 
-  const filteredValues = uniqueValues.filter(val => 
-    val.toLowerCase().includes(localSearch.toLowerCase())
-  );
+  const filteredValues = useMemo(() => {
+    if (!localSearch.trim()) return uniqueValues;
+    const sLower = localSearch.toLowerCase();
+    return uniqueValues.filter(val => val.toLowerCase().includes(sLower));
+  }, [uniqueValues, localSearch]);
 
   const displayedValues = filteredValues.slice(0, 50);
 
@@ -858,27 +860,35 @@ export default function VocabularyBank({ isActive }: { isActive?: boolean }) {
     }
   };
 
-  const getUniqueValues = (key: string) => {
-    const vals = vocabList.map(v => {
-      if (key === 'grade') return v.grade || '';
-      if (key === 'unit') return v.unit || '';
-      if (key === 'vocabulary') return v.vocabulary || '';
-      if (key === 'pos') return v.pos || '';
-      if (key === 'ipa') return v.ipa || '';
-      if (key === 'meaning') return v.meaning || '';
-      if (key === 'difficulty') return v.difficulty || '';
-      if (key === 'rootWord') return v.root_word || 'Chưa phân loại';
-      return String((v as any)[key] || '');
-    }).filter(Boolean);
-    return Array.from(new Set(vals)).sort((a, b) => {
-      const numA = parseInt(a);
-      const numB = parseInt(b);
-      if (!isNaN(numA) && !isNaN(numB)) {
-        return numA - numB;
-      }
-      return a.localeCompare(b);
+  const uniqueValuesMap = useMemo(() => {
+    const map: Record<string, string[]> = {};
+    const keys = ['grade', 'unit', 'vocabulary', 'pos', 'ipa', 'meaning', 'difficulty', 'rootWord'];
+    keys.forEach(key => {
+      const vals = vocabList.map(v => {
+        if (key === 'grade') return v.grade || '';
+        if (key === 'unit') return v.unit || '';
+        if (key === 'vocabulary') return v.vocabulary || '';
+        if (key === 'pos') return v.pos || '';
+        if (key === 'ipa') return v.ipa || '';
+        if (key === 'meaning') return v.meaning || '';
+        if (key === 'difficulty') return v.difficulty || '';
+        if (key === 'rootWord') return v.root_word || 'Chưa phân loại';
+        return String((v as any)[key] || '');
+      }).filter(Boolean);
+
+      map[key] = Array.from(new Set(vals)).sort((a, b) => {
+        const numA = parseInt(a);
+        const numB = parseInt(b);
+        if (!isNaN(numA) && !isNaN(numB)) return numA - numB;
+        return a.localeCompare(b);
+      });
     });
-  };
+    return map;
+  }, [vocabList]);
+
+  const getUniqueValues = useCallback((key: string) => {
+    return uniqueValuesMap[key] || [];
+  }, [uniqueValuesMap]);
 
   const toggleCol = (colKey: string) => {
     setVisibleCols(prev => ({ ...prev, [colKey]: !prev[colKey] }));
@@ -1131,7 +1141,7 @@ export default function VocabularyBank({ isActive }: { isActive?: boolean }) {
                       </th>
                     )}
                     {visibleCols.grade && (
-                      <th className={`py-4 px-3 w-18 whitespace-nowrap relative ${activeHeaderMenu === 'grade' ? 'z-50' : ''}`}>
+                      <th className={`py-4 px-3 w-24 min-w-[5.5rem] whitespace-nowrap relative ${activeHeaderMenu === 'grade' ? 'z-50' : ''}`}>
                         <div className="flex items-center gap-1 justify-between">
                           <span>Grade</span>
                           <ColumnHeaderFilter 
@@ -1149,7 +1159,7 @@ export default function VocabularyBank({ isActive }: { isActive?: boolean }) {
                       </th>
                     )}
                     {visibleCols.unit && (
-                      <th className={`py-4 px-3 w-18 whitespace-nowrap relative ${activeHeaderMenu === 'unit' ? 'z-50' : ''}`}>
+                      <th className={`py-4 px-3 w-24 min-w-[5.5rem] whitespace-nowrap relative ${activeHeaderMenu === 'unit' ? 'z-50' : ''}`}>
                         <div className="flex items-center gap-1 justify-between">
                           <span>Unit</span>
                           <ColumnHeaderFilter 
@@ -1167,7 +1177,7 @@ export default function VocabularyBank({ isActive }: { isActive?: boolean }) {
                       </th>
                     )}
                     {visibleCols.vocabulary && (
-                      <th className={`py-4 px-4 min-w-[10rem] relative ${activeHeaderMenu === 'vocabulary' ? 'z-50' : ''}`}>
+                      <th className={`py-4 px-4 min-w-[12rem] relative ${activeHeaderMenu === 'vocabulary' ? 'z-50' : ''}`}>
                         <div className="flex items-center gap-1 justify-between">
                           <span>Từ vựng</span>
                           <ColumnHeaderFilter 
@@ -1185,7 +1195,7 @@ export default function VocabularyBank({ isActive }: { isActive?: boolean }) {
                       </th>
                     )}
                     {visibleCols.pos && (
-                      <th className={`py-4 px-3 w-20 whitespace-nowrap relative ${activeHeaderMenu === 'pos' ? 'z-50' : ''}`}>
+                      <th className={`py-4 px-3 w-28 min-w-[6.5rem] whitespace-nowrap relative ${activeHeaderMenu === 'pos' ? 'z-50' : ''}`}>
                         <div className="flex items-center gap-1 justify-between">
                           <span>POS</span>
                           <ColumnHeaderFilter 
@@ -1203,7 +1213,7 @@ export default function VocabularyBank({ isActive }: { isActive?: boolean }) {
                       </th>
                     )}
                     {visibleCols.ipa && (
-                      <th className={`py-4 px-4 w-28 whitespace-nowrap relative ${activeHeaderMenu === 'ipa' ? 'z-50' : ''}`}>
+                      <th className={`py-4 px-4 w-36 min-w-[8.5rem] whitespace-nowrap relative ${activeHeaderMenu === 'ipa' ? 'z-50' : ''}`}>
                         <div className="flex items-center gap-1 justify-between">
                           <span>IPA</span>
                           <ColumnHeaderFilter 
@@ -1221,7 +1231,7 @@ export default function VocabularyBank({ isActive }: { isActive?: boolean }) {
                       </th>
                     )}
                     {visibleCols.meaning && (
-                      <th className={`py-4 px-5 min-w-[13.33rem] relative ${activeHeaderMenu === 'meaning' ? 'z-50' : ''}`}>
+                      <th className={`py-4 px-5 min-w-[16rem] relative ${activeHeaderMenu === 'meaning' ? 'z-50' : ''}`}>
                         <div className="flex items-center gap-1 justify-between">
                           <span>Dịch nghĩa</span>
                           <ColumnHeaderFilter 
@@ -1239,7 +1249,7 @@ export default function VocabularyBank({ isActive }: { isActive?: boolean }) {
                       </th>
                     )}
                     {visibleCols.difficulty && (
-                      <th className={`py-4 px-3 w-20 whitespace-nowrap relative ${activeHeaderMenu === 'difficulty' ? 'z-50' : ''}`}>
+                      <th className={`py-4 px-3 w-28 min-w-[6.5rem] whitespace-nowrap relative ${activeHeaderMenu === 'difficulty' ? 'z-50' : ''}`}>
                         <div className="flex items-center gap-1 justify-between">
                           <span>Độ khó</span>
                           <ColumnHeaderFilter 
@@ -1257,7 +1267,7 @@ export default function VocabularyBank({ isActive }: { isActive?: boolean }) {
                       </th>
                     )}
                     {visibleCols.rootWord && (
-                      <th className={`py-4 px-4 w-36 whitespace-nowrap relative ${activeHeaderMenu === 'rootWord' ? 'z-50' : ''}`}>
+                      <th className={`py-4 px-4 w-36 min-w-[9rem] whitespace-nowrap relative ${activeHeaderMenu === 'rootWord' ? 'z-50' : ''}`}>
                         <div className="flex items-center gap-1 justify-between">
                           <span>Từ gốc</span>
                           <ColumnHeaderFilter 

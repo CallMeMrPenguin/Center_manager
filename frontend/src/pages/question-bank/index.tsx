@@ -1420,7 +1420,7 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
                       </button>
                     </th>
                     {visibleCols.grade && (
-                      <th className={`py-4 px-3 w-16 whitespace-nowrap relative ${activeHeaderMenu === 'grade' ? 'z-50' : ''}`}>
+                      <th className={`py-4 px-3 w-24 min-w-[5.5rem] whitespace-nowrap relative ${activeHeaderMenu === 'grade' ? 'z-50' : ''}`}>
                         <div className="flex items-center gap-1 justify-between">
                           <span>Khối</span>
                           <ColumnHeaderFilter 
@@ -1438,7 +1438,7 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
                       </th>
                     )}
                     {visibleCols.unit && (
-                      <th className={`py-4 px-3 w-16 whitespace-nowrap relative ${activeHeaderMenu === 'unit' ? 'z-50' : ''}`}>
+                      <th className={`py-4 px-3 w-24 min-w-[5.5rem] whitespace-nowrap relative ${activeHeaderMenu === 'unit' ? 'z-50' : ''}`}>
                         <div className="flex items-center gap-1 justify-between">
                           <span>Unit</span>
                           <ColumnHeaderFilter 
@@ -1456,7 +1456,7 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
                       </th>
                     )}
                     {visibleCols['type'] && (
-                      <th className={`py-4 px-3 w-28 whitespace-nowrap relative ${activeHeaderMenu === 'type' ? 'z-50' : ''}`}>
+                      <th className={`py-4 px-3 w-36 min-w-[8.5rem] whitespace-nowrap relative ${activeHeaderMenu === 'type' ? 'z-50' : ''}`}>
                         <div className="flex items-center gap-1 justify-between">
                           <span>Dạng</span>
                           <ColumnHeaderFilter 
@@ -1474,7 +1474,7 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
                       </th>
                     )}
                     {visibleCols.content && (
-                      <th className={`py-4 px-4 min-w-[18.66rem] relative ${activeHeaderMenu === 'content' ? 'z-50' : ''}`}>
+                      <th className={`py-4 px-4 min-w-[20rem] relative ${activeHeaderMenu === 'content' ? 'z-50' : ''}`}>
                         <div className="flex items-center gap-1 justify-between">
                           <span>Nội dung câu hỏi</span>
                           <ColumnHeaderFilter 
@@ -1492,7 +1492,7 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
                       </th>
                     )}
                     {visibleCols.options && (
-                      <th className={`py-4 px-4 w-72 relative ${activeHeaderMenu === 'options' ? 'z-50' : ''}`}>
+                      <th className={`py-4 px-4 min-w-[16rem] relative ${activeHeaderMenu === 'options' ? 'z-50' : ''}`}>
                         <div className="flex items-center gap-1 justify-between">
                           <span>Tùy chọn trả lời</span>
                           <ColumnHeaderFilter 
@@ -1510,7 +1510,7 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
                       </th>
                     )}
                     {visibleCols.answer && (
-                      <th className={`py-4 px-3 w-16 text-center whitespace-nowrap relative ${activeHeaderMenu === 'answer' ? 'z-50' : ''}`}>
+                      <th className={`py-4 px-3 w-24 min-w-[5.5rem] text-center whitespace-nowrap relative ${activeHeaderMenu === 'answer' ? 'z-50' : ''}`}>
                         <div className="flex items-center gap-1 justify-between">
                           <span>Đáp án</span>
                           <ColumnHeaderFilter 
@@ -1528,7 +1528,7 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
                       </th>
                     )}
                     {visibleCols.level && (
-                      <th className={`py-4 px-3 w-24 text-center whitespace-nowrap relative ${activeHeaderMenu === 'level' ? 'z-50' : ''}`}>
+                      <th className={`py-4 px-3 w-32 min-w-[7.5rem] text-center whitespace-nowrap relative ${activeHeaderMenu === 'level' ? 'z-50' : ''}`}>
                         <div className="flex items-center gap-1 justify-between">
                           <span>Độ khó</span>
                           <ColumnHeaderFilter 

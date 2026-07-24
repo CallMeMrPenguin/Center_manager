@@ -349,3 +349,14 @@ input:focus, select:focus, textarea:not(.code-editor-textarea):focus {
   border-color: rgba(92, 54, 245, 0.7) !important;
   box-shadow: 0 0 0 2px rgba(92, 54, 245, 0.25) !important;
 }
+
+.filter-dropdown-menu {
+  background-color: #12172a !important;
+  background: #12172a !important;
+  border: 1px solid #28345a !important;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.75), 0 0 20px rgba(92, 54, 245, 0.15) !important;
+  border-radius: 16px !important;
+  opacity: 1 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
