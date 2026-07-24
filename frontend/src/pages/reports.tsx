@@ -88,13 +88,14 @@ export default function ReportsPage() {
       setClasses(classList);
       const studentList = await api.getStudents();
       setStudents(studentList);
-    } catch (e) {
-      console.error(e);
+    } catch (err: any) {
+      showToast("Không thể tải danh sách lớp/học sinh: " + err.message, "error");
     }
   };
 
-  const loadAnalyticsData = async () => {
-    setLoading(true);
+  const loadAnalyticsData = async (silent?: boolean | any) => {
+    const isSilent = silent === true;
+    if (!isSilent) setLoading(true);
     try {
       const cid = selectedClassId ? parseInt(selectedClassId) : undefined;
       const sid = selectedStudentId ? parseInt(selectedStudentId) : undefined;
@@ -103,9 +104,9 @@ export default function ReportsPage() {
       setStudentRankings(res.student_rankings || []);
       setAnalyticsSummary(res.analytics_summary || null);
     } catch (e: any) {
-      showToast("Lỗi tải báo cáo thống kê: " + (e.message || e), "error");
+      if (!isSilent) showToast("Lỗi tải báo cáo thống kê: " + (e.message || e), "error");
     } finally {
-      setLoading(false);
+      if (!isSilent) setLoading(false);
     }
   };
 

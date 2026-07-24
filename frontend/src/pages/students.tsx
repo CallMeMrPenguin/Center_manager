@@ -49,21 +49,22 @@ export default function StudentsPage() {
   const [csvPreview, setCsvPreview] = useState<any[]>([]);
   const [csvImporting, setCsvImporting] = useState(false);
 
-  const loadData = async () => {
-    setLoading(true);
+  const loadData = async (silent?: boolean | any) => {
+    const isSilent = silent === true;
+    if (!isSilent) setLoading(true);
     try {
       const data = await api.getStudents();
       setStudents(data);
     } catch (err: any) {
-      showToast("Không thể tải danh sách học sinh: " + err.message, "error");
+      if (!isSilent) showToast("Không thể tải danh sách học sinh: " + err.message, "error");
     } finally {
-      setLoading(false);
+      if (!isSilent) setLoading(false);
     }
   };
 
   useEffect(() => {
     loadData();
-    const handleDataChanged = () => loadData();
+    const handleDataChanged = () => loadData(true);
     window.addEventListener('data-changed', handleDataChanged);
     return () => window.removeEventListener('data-changed', handleDataChanged);
   }, []);

@@ -1,16 +1,11 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
-import {
-  useReactTable,
-  getCoreRowModel,
-  getPaginationRowModel,
-  flexRender,
-  ColumnDef
-} from '@tanstack/react-table';
+import { ColumnDef } from '@tanstack/react-table';
 import { api } from '../../api';
 import { DbQuestion } from '../../types';
 import PromptManager, { PromptItem } from '../../components/PromptManager';
 import { useConfirm } from '../../components/ConfirmDialog';
 import { DataTable } from '../../components/DataTable';
+import { notifyDataChanged } from '../../utils';
 
 const DEFAULT_QUESTION_BANK_PROMPTS: PromptItem[] = [
   {
@@ -515,56 +510,28 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
   // Extract all unique question types in database to help in Auto-Gen splits
   const uniqueTypes = Array.from(new Set(questions.map(q => q.t).filter(Boolean)));
 
-  useEffect(() => {
-    fetchActiveGrades();
-  }, []);
-
-  useEffect(() => {
-    fetchQuestions();
-  }, []); // Fetch all on mount
-
-  useEffect(() => {
-    if (isActive) {
-      fetchQuestions();
-    }
-  }, [isActive]);
-
-  // Close menus on click outside
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      const target = event.target as HTMLElement;
-      if (target && !document.body.contains(target)) {
-        return;
-      }
-      if (colMenuRef.current && !colMenuRef.current.contains(target)) {
-        setShowColMenu(false);
-      }
-      if (actionsMenuRef.current && !actionsMenuRef.current.contains(target)) {
-        setShowActionsMenu(false);
-      }
-      if (!target.closest('.header-filter-container')) {
-        setActiveHeaderMenu(null);
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  const fetchQuestions = async () => {
-    setLoading(true);
+  const fetchQuestions = async (silent?: boolean | any) => {
+    const isSilent = silent === true;
+    if (!isSilent) setLoading(true);
     try {
       const res = await api.getDbQuestions({});
       if (res.success) {
         setQuestions(res.questions);
-        setCurrentPage(1); // Reset to first page
       }
     } catch (e) {
-      console.error(e);
-      showToast("Không thể tải ngân hàng câu hỏi", "error");
+      if (!isSilent) showToast("Không thể tải ngân hàng câu hỏi", "error");
     } finally {
-      setLoading(false);
+      if (!isSilent) setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchActiveGrades();
+    fetchQuestions();
+    const handleDataChanged = () => fetchQuestions(true);
+    window.addEventListener('data-changed', handleDataChanged);
+    return () => window.removeEventListener('data-changed', handleDataChanged);
+  }, []);
 
   // CSV upload: Validate first before saving!
   const handleImportCsv = async (e: React.ChangeEvent<HTMLInputElement>) => {

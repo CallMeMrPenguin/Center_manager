@@ -119,8 +119,9 @@ export default function ClassesPage() {
   const [tablePage, setTablePage] = useState(1);
   const tablePageSize = 20;
 
-  const loadClasses = async () => {
-    setLoading(true);
+  const loadClasses = async (silent?: boolean | any) => {
+    const isSilent = silent === true;
+    if (!isSilent) setLoading(true);
     try {
       const data = await api.getClasses(search);
       setClasses(data);
@@ -129,9 +130,9 @@ export default function ClassesPage() {
       const st = await api.getStudents();
       setAllStudents(st);
     } catch (err: any) {
-      showToast("Không thể tải danh sách lớp học: " + err.message, "error");
+      if (!isSilent) showToast("Không thể tải danh sách lớp học: " + err.message, "error");
     } finally {
-      setLoading(false);
+      if (!isSilent) setLoading(false);
     }
   };
 
@@ -154,7 +155,7 @@ export default function ClassesPage() {
   useEffect(() => {
     loadClasses();
     const handleDataChanged = () => {
-      loadClasses();
+      loadClasses(true);
       if (selectedClass) {
         loadClassDetailData(selectedClass);
       }

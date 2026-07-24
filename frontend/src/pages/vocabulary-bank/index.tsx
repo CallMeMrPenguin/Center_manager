@@ -1,16 +1,11 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
-import {
-  useReactTable,
-  getCoreRowModel,
-  getPaginationRowModel,
-  flexRender,
-  ColumnDef
-} from '@tanstack/react-table';
+import { ColumnDef } from '@tanstack/react-table';
 import { api } from '../../api';
 import { DbVocab } from '../../types';
 import PromptManager, { PromptItem } from '../../components/PromptManager';
 import { useConfirm } from '../../components/ConfirmDialog';
 import { DataTable } from '../../components/DataTable';
+import { notifyDataChanged } from '../../utils';
 
 const DEFAULT_VOCABULARY_BANK_PROMPTS: PromptItem[] = [
   {
@@ -455,53 +450,28 @@ export default function VocabularyBank({ isActive }: { isActive?: boolean }) {
   const difficultiesList = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2', '1', '2', '3'];
   const posList = ['n', 'v', 'adj', 'adv', 'prep', 'v phr', 'n phr', 'n/adj', 'v/n'];
 
-  useEffect(() => {
-    fetchActiveGrades();
-  }, []);
-
-  useEffect(() => {
-    fetchVocab();
-  }, []); // Fetch all on mount
-
-  useEffect(() => {
-    if (isActive) {
-      fetchVocab();
-    }
-  }, [isActive]);
-
-  // Close menus on click outside
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      const target = event.target as HTMLElement;
-      if (target && !document.body.contains(target)) {
-        return;
-      }
-      if (colMenuRef.current && !colMenuRef.current.contains(target)) {
-        setShowColMenu(false);
-      }
-      if (!target.closest('.header-filter-container')) {
-        setActiveHeaderMenu(null);
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  const fetchVocab = async () => {
-    setLoading(true);
+  const fetchVocab = async (silent?: boolean | any) => {
+    const isSilent = silent === true;
+    if (!isSilent) setLoading(true);
     try {
       const res = await api.getDbVocab({});
       if (res.success) {
         setVocabList(res.vocab);
-        setCurrentPage(1); // Reset to first page
       }
     } catch (e) {
-      console.error(e);
-      showToast("Không thể tải danh sách từ vựng", "error");
+      if (!isSilent) showToast("Không thể tải danh sách từ vựng", "error");
     } finally {
-      setLoading(false);
+      if (!isSilent) setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchActiveGrades();
+    fetchVocab();
+    const handleDataChanged = () => fetchVocab(true);
+    window.addEventListener('data-changed', handleDataChanged);
+    return () => window.removeEventListener('data-changed', handleDataChanged);
+  }, []);
 
   // CSV Import duplicate checking
   const handleImportCsv = async (e: React.ChangeEvent<HTMLInputElement>) => {

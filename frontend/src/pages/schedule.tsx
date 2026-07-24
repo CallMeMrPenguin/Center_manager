@@ -130,8 +130,9 @@ export default function SchedulePage() {
   const defaultDayCfgs = () => DAYS.reduce((a, d) => { a[d] = { checked: d === 'Thứ 2' || d === 'Thứ 4', time: '18:00', duration: 90 }; return a; }, {} as Record<string, DayCfg>);
   const [dayCfgs, setDayCfgs] = useState<Record<string, DayCfg>>(defaultDayCfgs());
 
-  const loadData = async () => {
-    setLoading(true);
+  const loadData = async (silent?: boolean | any) => {
+    const isSilent = silent === true;
+    if (!isSilent) setLoading(true);
     try {
       const cls = await api.getClasses();
       setClassesList(cls);
@@ -144,13 +145,16 @@ export default function SchedulePage() {
       }
       all.sort((a, b) => (a.date + a.start_time).localeCompare(b.date + b.start_time));
       setSessions(all);
-    } catch (e: any) { showToast('Không thể tải lịch học: ' + e.message, 'error'); }
-    finally { setLoading(false); }
+    } catch (e: any) {
+      if (!isSilent) showToast('Không thể tải lịch học: ' + e.message, 'error');
+    } finally {
+      if (!isSilent) setLoading(false);
+    }
   };
 
   useEffect(() => {
     loadData();
-    const h = () => loadData();
+    const h = () => loadData(true);
     window.addEventListener('data-changed', h);
     return () => window.removeEventListener('data-changed', h);
   }, [selectedMonth, classFilter]);
