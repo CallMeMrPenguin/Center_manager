@@ -13,6 +13,8 @@ import { CustomSelect } from '../components/CustomSelect';
 import { Student } from '../types';
 import { DataTable } from '../components/DataTable';
 
+import { getLocalDateStr, notifyDataChanged } from '../utils';
+
 export default function StudentsPage() {
   const confirm = useConfirm();
   const [students, setStudents] = useState<Student[]>([]);
@@ -31,7 +33,7 @@ export default function StudentsPage() {
     gender: 'Nam',
     school: '',
     date_of_birth: '',
-    enroll_date: new Date().toISOString().split('T')[0],
+    enroll_date: getLocalDateStr(),
     father_name: '',
     father_phone: '',
     mother_name: '',
@@ -61,9 +63,10 @@ export default function StudentsPage() {
 
   useEffect(() => {
     loadData();
+    const handleDataChanged = () => loadData();
+    window.addEventListener('data-changed', handleDataChanged);
+    return () => window.removeEventListener('data-changed', handleDataChanged);
   }, []);
-
-
 
   const handleOpenAdd = () => {
     setEditingStudent(null);
@@ -76,7 +79,7 @@ export default function StudentsPage() {
       gender: 'Nam',
       school: '',
       date_of_birth: '',
-      enroll_date: new Date().toISOString().split('T')[0],
+      enroll_date: getLocalDateStr(),
       father_name: '',
       father_phone: '',
       mother_name: '',
@@ -138,6 +141,7 @@ export default function StudentsPage() {
       setModalOpen(false);
       setHighlightMissingFields(false);
       loadData();
+      notifyDataChanged();
     } catch (err: any) {
       showToast("Không thể lưu dữ liệu: " + err.message, "error");
     }
@@ -159,6 +163,7 @@ export default function StudentsPage() {
       showToast("Đã xóa học sinh!", "success");
       setModalOpen(false);
       loadData();
+      notifyDataChanged();
     } catch (err: any) {
       showToast("Không thể xóa: " + err.message, "error");
     }

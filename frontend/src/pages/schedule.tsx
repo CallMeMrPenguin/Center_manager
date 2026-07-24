@@ -11,6 +11,8 @@ import { CustomDatePicker } from '../components/CustomDatePicker';
 import { CustomSelect } from '../components/CustomSelect';
 import { DataTable } from '../components/DataTable';
 
+import { getLocalDateStr, notifyDataChanged } from '../utils';
+
 interface ClassSession {
   id: number;
   class_id: number;
@@ -122,7 +124,7 @@ export default function SchedulePage() {
   const [mode, setMode] = useState<'single' | 'weekdays'>('weekdays');
   const [color, setColor] = useState('#7c3aed');
   const [form, setForm] = useState<Partial<ClassSession>>({
-    class_id: undefined, date: new Date().toISOString().split('T')[0],
+    class_id: undefined, date: getLocalDateStr(),
     start_time: '18:00', duration: 90, status: 'Sắp diễn ra', notes: ''
   });
   const defaultDayCfgs = () => DAYS.reduce((a, d) => { a[d] = { checked: d === 'Thứ 2' || d === 'Thứ 4', time: '18:00', duration: 90 }; return a; }, {} as Record<string, DayCfg>);
@@ -159,7 +161,7 @@ export default function SchedulePage() {
     return () => window.removeEventListener('click', close);
   }, []);
 
-  const today = new Date().toISOString().split('T')[0];
+  const today = getLocalDateStr();
   const [yr, mo] = selectedMonth.split('-').map(Number);
   const firstDay = new Date(yr, mo - 1, 1);
   const daysInMonth = new Date(yr, mo, 0).getDate();
@@ -169,7 +171,7 @@ export default function SchedulePage() {
   const weekDays = Array.from({ length: 7 }, (_, i) => {
     const d = new Date(weekStart);
     d.setDate(weekStart.getDate() + i);
-    return { header: DAY_HDRS[i], dateStr: d.toISOString().split('T')[0], dayNum: d.getDate() };
+    return { header: DAY_HDRS[i], dateStr: getLocalDateStr(d), dayNum: d.getDate() };
   });
 
   const changeWeek = (dir: number) => {

@@ -9,6 +9,7 @@ import { showToast } from '../components/Toast';
 import { CustomDatePicker } from '../components/CustomDatePicker';
 import { CustomSelect } from '../components/CustomSelect';
 import { DataTable } from '../components/DataTable';
+import { notifyDataChanged } from '../utils';
 
 export default function ReportsPage() {
   const [loading, setLoading] = useState(false);
@@ -69,6 +70,12 @@ export default function ReportsPage() {
   useEffect(() => {
     loadClassesAndStudents();
     loadAnalyticsData();
+    const handleDataChanged = () => {
+      loadClassesAndStudents();
+      loadAnalyticsData();
+    };
+    window.addEventListener('data-changed', handleDataChanged);
+    return () => window.removeEventListener('data-changed', handleDataChanged);
   }, []);
 
   useEffect(() => {
@@ -116,6 +123,7 @@ export default function ReportsPage() {
       showToast(`Đã đặt lại điểm số thành công cho ${res.reset_count} bản ghi!`, "success");
       setResetModalOpen(false);
       loadAnalyticsData();
+      notifyDataChanged();
     } catch (err: any) {
       showToast("Không thể đặt lại điểm: " + err.message, "error");
     }

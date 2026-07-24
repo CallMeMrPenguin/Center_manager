@@ -8,6 +8,8 @@ import { api } from '../api';
 import { showToast } from '../components/Toast';
 import { VietnameseInput } from '../components/VietnameseInput';
 
+import { getLocalDateStr, notifyDataChanged } from '../utils';
+
 interface Question {
   id: number;
   type: 'mcq' | 'fill';
@@ -66,6 +68,9 @@ export default function KiemTraPage() {
 
   useEffect(() => {
     loadClasses();
+    const handleDataChanged = () => loadClasses();
+    window.addEventListener('data-changed', handleDataChanged);
+    return () => window.removeEventListener('data-changed', handleDataChanged);
   }, []);
 
   const loadClasses = async () => {
@@ -207,7 +212,7 @@ export default function KiemTraPage() {
         student_id: Number(selectedStudentId),
         class_id: Number(selectedClassId),
         test_title: testData?.title || 'Bài kiểm tra',
-        test_date: new Date().toISOString().split('T')[0],
+        test_date: getLocalDateStr(),
         score_type: scoreSlot,
         score: calculatedScore,
         max_score: 10,
@@ -215,6 +220,7 @@ export default function KiemTraPage() {
       });
       setIsScoreSaved(true);
       showToast("Đã lưu điểm thành công vào hệ thống!", "success");
+      notifyDataChanged();
     } catch (err: any) {
       showToast("Lỗi lưu điểm: " + err.message, "error");
     }

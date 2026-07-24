@@ -9,6 +9,7 @@ import { useConfirm } from '../components/ConfirmDialog';
 import { CustomDatePicker } from '../components/CustomDatePicker';
 import { CustomSelect } from '../components/CustomSelect';
 import { DataTable } from '../components/DataTable';
+import { notifyDataChanged } from '../utils';
 
 interface TeacherCM {
   id: number;
@@ -48,6 +49,9 @@ export default function TeachersPage() {
 
   useEffect(() => {
     loadData();
+    const handleDataChanged = () => loadData();
+    window.addEventListener('data-changed', handleDataChanged);
+    return () => window.removeEventListener('data-changed', handleDataChanged);
   }, []);
 
   const handleOpenAdd = () => {
@@ -84,6 +88,7 @@ export default function TeachersPage() {
       }
       setModalOpen(false);
       loadData();
+      notifyDataChanged();
     } catch (err: any) {
       showToast("Lỗi khi lưu: " + err.message, "error");
     }
@@ -101,6 +106,7 @@ export default function TeachersPage() {
         await api.deleteTeacherCM(t.id);
         showToast("Đã xóa giáo viên!", "success");
         loadData();
+        notifyDataChanged();
       } catch (err: any) {
         showToast("Không thể xóa: " + err.message, "error");
       }

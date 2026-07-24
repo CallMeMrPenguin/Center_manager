@@ -11,6 +11,7 @@ import RelationshipsTab from '../components/seating/RelationshipsTab';
 import BlossomResultModal from '../components/seating/BlossomResultModal';
 import { CustomDatePicker } from '../components/CustomDatePicker';
 import { CustomSelect } from '../components/CustomSelect';
+import { getLocalDateStr, notifyDataChanged } from '../utils';
 
 interface ClassItem {
   id: number;
@@ -62,7 +63,7 @@ export default function ClassesPage() {
   const [allStudents, setAllStudents] = useState<any[]>([]);
 
   // Attendance & Daily Grades state
-  const [attendanceDate, setAttendanceDate] = useState(() => new Date().toISOString().split('T')[0]);
+  const [attendanceDate, setAttendanceDate] = useState(() => getLocalDateStr());
   const [attendanceRecords, setAttendanceRecords] = useState<any[]>([]);
   const [savingAttendance, setSavingAttendance] = useState(false);
 
@@ -152,7 +153,15 @@ export default function ClassesPage() {
 
   useEffect(() => {
     loadClasses();
-  }, [search]);
+    const handleDataChanged = () => {
+      loadClasses();
+      if (selectedClass) {
+        loadClassDetailData(selectedClass);
+      }
+    };
+    window.addEventListener('data-changed', handleDataChanged);
+    return () => window.removeEventListener('data-changed', handleDataChanged);
+  }, [search, selectedClass?.id]);
 
   useEffect(() => {
     const handleOpenClassEvent = (e: any) => {
