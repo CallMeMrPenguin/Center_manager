@@ -99,3 +99,18 @@ Every data table MUST feature a filter icon next to each column title in the tab
 ## ⚡ 13. Lightweight Modal Overlays (Zero Blur Lag)
 - **Solid Dark Backdrop Overlays**: Small pop-up modal windows and context menus MUST NOT use `backdrop-blur-sm` or `backdrop-blur-xl`. All modal backdrops MUST use solid dark overlays (`bg-black/85`) to ensure 0-lag input typing and instant responsiveness.
 
+---
+
+## 📅 14. Custom Dark Theme DatePicker Component Standard
+- **Custom Dark Theme DatePicker Required**: Native browser `<input type="date">` elements are strictly forbidden as OS-native widgets violate the dark UI theme with grey popovers. All date selection MUST use the custom `<CustomDatePicker />` component matching the app's dark indigo space theme (`#0c0f1e` background, `#212c4b` border, `#5c36f5` highlight, white text, and white calendar icon).
+
+---
+
+## 📐 15. Professional Data Separators (No Bullet Dots)
+- **Vertical Pipe Separators (`|`)**: Bullet dot characters (`•`) MUST NOT be used to separate text items or metadata fields. Data items MUST be separated using clean vertical pipe lines (`|`) or structured flex badges.
+
+---
+
+## ✏️ 16. Single Pen Action Button (Merged Delete inside Edit Modal)
+- **Merged Single Pen Button**: Cards and tables MUST NOT display a separate Trash Bin icon (`<Trash2 />`) alongside an Edit Pen icon (`<Edit3 />`). Cards/rows MUST feature a single clean Pen action button (`<Edit3 />`). Deletion functionality MUST be provided as a red Delete button inside the Edit modal popup.
+

@@ -5,6 +5,7 @@ import {
 import { api } from '../api';
 import { showToast } from '../components/Toast';
 import { useConfirm } from '../components/ConfirmDialog';
+import { CustomDatePicker } from '../components/CustomDatePicker';
 
 interface TeacherCM {
   id: number;
@@ -341,11 +342,9 @@ export default function TeachersPage() {
                 <label className="block text-[11px] font-extrabold text-slate-300 uppercase tracking-wider mb-1.5">
                   Ngày Sinh
                 </label>
-                <input
-                  type="date"
+                <CustomDatePicker
                   value={formData.date_of_birth || ''}
-                  onChange={(e) => setFormData({ ...formData, date_of_birth: e.target.value })}
-                  className="w-full bg-[#181d2e] border border-white/10 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-indigo-500 font-semibold cursor-pointer"
+                  onChange={(val) => setFormData({ ...formData, date_of_birth: val })}
                 />
               </div>
 

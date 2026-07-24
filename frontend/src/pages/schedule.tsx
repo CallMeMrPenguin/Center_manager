@@ -6,6 +6,7 @@ import {
 import { api } from '../api';
 import { showToast } from '../components/Toast';
 import { useConfirm } from '../components/ConfirmDialog';
+import { CustomDatePicker } from '../components/CustomDatePicker';
 
 interface ClassSession {
   id: number;
@@ -627,7 +628,7 @@ export default function SchedulePage() {
                 <>
                   <div>
                     <label className="block text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1.5">Ngày Học *</label>
-                    <input type="date" required value={form.date || ''} onChange={e => setForm({ ...form, date: e.target.value })} className="w-full bg-[#181d2e] border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500 cursor-pointer" />
+                    <CustomDatePicker value={form.date || ''} onChange={val => setForm({ ...form, date: val })} />
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div>

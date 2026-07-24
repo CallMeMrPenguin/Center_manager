@@ -7,6 +7,7 @@ import { api } from '../api';
 import { showToast } from '../components/Toast';
 import { useConfirm } from '../components/ConfirmDialog';
 import { VietnameseInput } from '../components/VietnameseInput';
+import { CustomDatePicker } from '../components/CustomDatePicker';
 import { Student } from '../types';
 
 export default function StudentsPage() {
@@ -626,13 +627,9 @@ export default function StudentsPage() {
                   }`}>
                     Ngày Sinh {highlightMissingFields && <span className="text-rose-400">* (Định danh)</span>}
                   </label>
-                  <input
-                    type="date"
+                  <CustomDatePicker
                     value={formData.date_of_birth || ''}
-                    onChange={(e) => setFormData({ ...formData, date_of_birth: e.target.value })}
-                    className={`w-full bg-[#181d2e] rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none font-semibold border ${
-                      highlightMissingFields && !formData.date_of_birth ? 'border-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.5)]' : 'border-white/10 focus:border-indigo-500'
-                    }`}
+                    onChange={(val) => setFormData({ ...formData, date_of_birth: val })}
                   />
                 </div>
 
@@ -640,11 +637,9 @@ export default function StudentsPage() {
                   <label className="block text-[11px] font-extrabold text-slate-300 uppercase tracking-wider mb-1.5">
                     Ngày Nhập Học
                   </label>
-                  <input
-                    type="date"
+                  <CustomDatePicker
                     value={formData.enroll_date || ''}
-                    onChange={(e) => setFormData({ ...formData, enroll_date: e.target.value })}
-                    className="w-full bg-[#181d2e] border border-white/10 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-indigo-500 font-semibold"
+                    onChange={(val) => setFormData({ ...formData, enroll_date: val })}
                   />
                 </div>
 

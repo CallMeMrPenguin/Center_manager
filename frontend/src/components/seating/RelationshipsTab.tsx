@@ -704,7 +704,7 @@ export default function RelationshipsTab({ classId, enrolledStudents, onRefreshC
                           <div>
                             <span className="font-extrabold text-sm text-white block">{s.full_name}</span>
                             <span className="text-[11px] text-slate-400 font-medium">
-                              {s.grade || 'Lớp 6'} • {s.gender || 'Nam'}
+                              {s.grade || 'Lớp 6'} | {s.gender || 'Nam'}
                             </span>
                           </div>
                         </div>

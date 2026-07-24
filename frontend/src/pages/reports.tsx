@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { showToast } from '../components/Toast';
 import { VietnameseInput } from '../components/VietnameseInput';
+import { CustomDatePicker } from '../components/CustomDatePicker';
 
 export default function ReportsPage() {
   const [loading, setLoading] = useState(false);
@@ -566,7 +567,7 @@ export default function ReportsPage() {
                   </button>
                 </div>
                 <p className="text-xs text-slate-400 font-semibold mt-0.5">
-                  {selectedStudentObj.grade || 'Lớp 6'} • {selectedStudentObj.school || 'Trung tâm'} • Theo dõi tiến độ học tập qua các kỳ đánh giá
+                  {selectedStudentObj.grade || 'Lớp 6'} | {selectedStudentObj.school || 'Trung tâm'} | Theo dõi tiến độ học tập qua các kỳ đánh giá
                 </p>
               </div>
             </div>
@@ -1513,24 +1514,14 @@ export default function ReportsPage() {
                 <label className="block text-[11px] font-extrabold text-slate-300 uppercase tracking-wider mb-1.5">
                   Từ Ngày (From Date)
                 </label>
-                <input
-                  type="date"
-                  value={resetFromDate}
-                  onChange={(e) => setResetFromDate(e.target.value)}
-                  className="w-full bg-[#181d2e] border border-white/10 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-indigo-500 font-semibold"
-                />
+                <CustomDatePicker value={resetFromDate} onChange={setResetFromDate} />
               </div>
 
               <div>
                 <label className="block text-[11px] font-extrabold text-slate-300 uppercase tracking-wider mb-1.5">
                   Đến Ngày (To Date)
                 </label>
-                <input
-                  type="date"
-                  value={resetToDate}
-                  onChange={(e) => setResetToDate(e.target.value)}
-                  className="w-full bg-[#181d2e] border border-white/10 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-indigo-500 font-semibold"
-                />
+                <CustomDatePicker value={resetToDate} onChange={setResetToDate} />
               </div>
 
               <div className="flex items-center justify-end gap-3 pt-2">

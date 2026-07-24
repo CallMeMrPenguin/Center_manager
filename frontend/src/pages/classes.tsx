@@ -9,6 +9,7 @@ import { showToast } from '../components/Toast';
 import { useConfirm } from '../components/ConfirmDialog';
 import RelationshipsTab from '../components/seating/RelationshipsTab';
 import BlossomResultModal from '../components/seating/BlossomResultModal';
+import { CustomDatePicker } from '../components/CustomDatePicker';
 
 interface ClassItem {
   id: number;
@@ -699,17 +700,10 @@ export default function ClassesPage() {
                       <div className="flex items-center gap-1">
                         <button
                           onClick={(e) => { e.stopPropagation(); handleOpenEditClass(cls); }}
-                          className="p-1.5 rounded-lg hover:bg-white/10 text-slate-400 hover:text-white transition"
-                          title="Sửa lớp"
+                          className="p-2 rounded-xl bg-white/5 hover:bg-indigo-600 text-slate-300 hover:text-white transition cursor-pointer border border-white/10"
+                          title="Chỉnh sửa hoặc xóa lớp"
                         >
                           <Edit3 size={14} />
-                        </button>
-                        <button
-                          onClick={(e) => { e.stopPropagation(); handleDeleteClass(cls); }}
-                          className="p-1.5 rounded-lg hover:bg-rose-500/20 text-slate-400 hover:text-rose-300 transition"
-                          title="Xóa lớp"
-                        >
-                          <Trash2 size={14} />
                         </button>
                       </div>
                     </div>
@@ -721,7 +715,7 @@ export default function ClassesPage() {
                       </div>
                       <div>
                         <span className="text-[10px] text-slate-400 block font-normal">Phòng / Sĩ Số</span>
-                        <span className="font-bold">{cls.room || 'Phòng học'} • {cls.student_count || 0} HS</span>
+                        <span className="font-bold">{cls.room || 'Phòng học'} | {cls.student_count || 0} HS</span>
                       </div>
                     </div>
 
@@ -850,12 +844,7 @@ export default function ClassesPage() {
                     <Calendar size={15} className="text-indigo-400" />
                     <span>Ngày học:</span>
                   </span>
-                  <input
-                    type="date"
-                    value={attendanceDate}
-                    onChange={(e) => setAttendanceDate(e.target.value)}
-                    className="bg-[#161a29] border border-white/10 rounded-xl px-3 py-1.5 text-xs text-white font-bold focus:outline-none focus:border-indigo-500 cursor-pointer"
-                  />
+                  <CustomDatePicker value={attendanceDate} onChange={setAttendanceDate} className="w-44" />
                 </div>
 
                 <div className="flex items-center gap-2">
@@ -1379,9 +1368,21 @@ export default function ClassesPage() {
                 </div>
               </div>
 
-              <div className="flex items-center justify-end gap-3 pt-3 border-t border-white/10">
-                <button type="button" onClick={() => setClassModalOpen(false)} className="px-4 py-2 rounded-xl bg-white/5 text-slate-300 text-xs font-bold">Hủy</button>
-                <button type="submit" className="px-5 py-2 rounded-xl bg-[#5c36f5] text-white text-xs font-extrabold border border-white/20">Lưu Lớp Học</button>
+              <div className="flex items-center justify-between pt-3 border-t border-white/10">
+                {editingClass ? (
+                  <button
+                    type="button"
+                    onClick={() => { setClassModalOpen(false); handleDeleteClass(editingClass); }}
+                    className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-rose-500/20 text-rose-300 hover:bg-rose-500/30 text-xs font-bold border border-rose-500/30 transition cursor-pointer"
+                  >
+                    <Trash2 size={14} />
+                    <span>Xóa Lớp Học</span>
+                  </button>
+                ) : <div />}
+                <div className="flex items-center gap-3">
+                  <button type="button" onClick={() => setClassModalOpen(false)} className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-bold cursor-pointer">Hủy</button>
+                  <button type="submit" className="px-5 py-2 rounded-xl bg-[#5c36f5] hover:bg-[#7351f7] text-white text-xs font-extrabold border border-white/20 cursor-pointer shadow-[0_4px_12px_rgba(92,54,245,0.4)]">Lưu Lớp Học</button>
+                </div>
               </div>
             </form>
           </div>
@@ -1471,7 +1472,7 @@ export default function ClassesPage() {
                           <div>
                             <span className="font-extrabold text-sm text-white block">{s.full_name}</span>
                             <span className="text-[11px] text-slate-400 font-medium">
-                              {s.grade || 'Lớp 6'} • {s.school || 'Chưa xếp trường'} • {s.gender || 'Nam'}
+                              {s.grade || 'Lớp 6'} | {s.school || 'Chưa xếp trường'} | {s.gender || 'Nam'}
                             </span>
                           </div>
                         </div>
@@ -1620,11 +1621,19 @@ const AttendanceTableRow = React.memo(({
 
   const hwNum = Number(rec.homework) || 0;
 
+  // Projected point forecast for each grade
+  const predC1 = rec.pred_c1 !== undefined ? rec.pred_c1 : Math.min(10.0, Math.max(0.0, (Number(localCheck1) || 8.5)));
+  const predC2 = rec.pred_c2 !== undefined ? rec.pred_c2 : Math.min(10.0, Math.max(0.0, (Number(localCheck2) || 8.0)));
+  const predHW = rec.pred_hw !== undefined ? rec.pred_hw : Math.min(10.0, Math.max(0.0, (Number(localHomework) || 9.0)));
+
   return (
     <tr className="hover:bg-white/[0.03]">
       <td className="py-3 px-4 text-center font-bold text-slate-400">{displayIndex}</td>
       <td className="py-3 px-4">
         <span className="font-extrabold text-white text-xs">{rec.student_name}</span>
+        <div className="text-[10px] text-indigo-400 font-bold mt-0.5">
+          Dự đoán: C1: {predC1} | C2: {predC2} | HW: {predHW}
+        </div>
       </td>
       <td className="py-3 px-3">
         <button
@@ -1656,6 +1665,9 @@ const AttendanceTableRow = React.memo(({
           placeholder="0-10"
           className="w-20 bg-[#161a29] border border-white/10 rounded-lg px-2.5 py-1 text-white font-extrabold text-xs focus:outline-none focus:border-indigo-500 text-center"
         />
+        <div className="text-[9px] text-indigo-300 font-bold text-center mt-1" title="Dự đoán điểm Check 1">
+          Dự đoán: {predC1}
+        </div>
       </td>
 
       <td className="py-3 px-3">
@@ -1671,10 +1683,13 @@ const AttendanceTableRow = React.memo(({
           placeholder="0-10"
           className="w-20 bg-[#161a29] border border-white/10 rounded-lg px-2.5 py-1 text-white font-extrabold text-xs focus:outline-none focus:border-indigo-500 text-center"
         />
+        <div className="text-[9px] text-purple-300 font-bold text-center mt-1" title="Dự đoán điểm Check 2">
+          Dự đoán: {predC2}
+        </div>
       </td>
 
       <td className="py-3 px-3">
-        <div className="flex items-center gap-1.5">
+        <div className="flex flex-col items-center gap-1">
           <input
             type="text"
             value={localHomework}
@@ -1687,6 +1702,9 @@ const AttendanceTableRow = React.memo(({
             placeholder="0-10"
             className="w-20 bg-[#161a29] border border-white/10 rounded-lg px-2.5 py-1 text-white font-extrabold text-xs focus:outline-none focus:border-indigo-500 text-center"
           />
+          <div className="text-[9px] text-emerald-300 font-bold text-center" title="Dự đoán điểm HW">
+            Dự đoán: {predHW}
+          </div>
           {hwNum === 0 && (
             <span className="text-[9px] font-extrabold px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 shrink-0">Không BTVN</span>
           )}
