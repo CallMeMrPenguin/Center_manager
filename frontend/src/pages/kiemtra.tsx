@@ -265,10 +265,10 @@ export default function KiemTraPage() {
   }, [timerRemaining]);
 
   return (
-    <div className={`h-full flex flex-col ${isFullscreen ? 'fixed inset-0 z-[100] bg-[#080b14] p-6 overflow-y-auto' : 'p-6 space-y-6 overflow-y-auto'}`}>
+    <div className={`h-full flex flex-col bg-[#070913] ${isFullscreen ? 'fixed inset-0 z-[100] p-6 overflow-y-auto' : 'p-6 space-y-6 overflow-y-auto'}`}>
       
       {/* PERSISTENT HEADER BAR WITH ALWAYS AVAILABLE FULLSCREEN FOCUS BUTTON */}
-      <div className="flex items-center justify-between bg-[#0d101d] border border-[#1e263d] px-6 py-3.5 rounded-2xl shadow-xl shrink-0">
+      <div className="flex items-center justify-between bg-[#0c0f1e] border border-[#1d2744] px-6 py-3.5 rounded-2xl shadow-2xl shrink-0">
         <div className="flex items-center gap-3">
           <div className="p-2 rounded-xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-400">
             <FileCheck size={20} />

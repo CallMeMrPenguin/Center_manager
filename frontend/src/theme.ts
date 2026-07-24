@@ -26,47 +26,15 @@ export const applyTheme = (theme: any) => {
   const glassClasses = [
     '.glass-panel',
     '.glass-panel-dark',
-    '.premium-card',
-    '.bg-\\[\\#06070a\\]',
-    '.bg-\\[\\#08090e\\]',
-    '.bg-\\[\\#0d1018\\]',
-    '.bg-\\[\\#0f121a\\]',
-    '.bg-\\[\\#141824\\]',
-    '.bg-\\[\\#181d2f\\]',
-    '.bg-\\[\\#0c101d\\]', 
-    '.bg-\\[\\#080b12\\]', 
-    '.bg-\\[\\#090b11\\]', 
-    '.bg-\\[\\#0a0d16\\]', 
-    '.bg-\\[\\#0B0F19\\]', 
-    '.bg-\\[\\#070b14\\]', 
-    '.bg-\\[\\#070B14\\]', 
-    '.bg-\\[\\#0b0f19\\]', 
-    '.bg-\\[\\#0a0d15\\]', 
-    '.bg-\\[\\#0A0D1A\\]', 
-    '.bg-\\[\\#101b2e\\]', 
-    '.bg-\\[\\#101B2E\\]', 
-    '.bg-\\[\\#111827\\]', 
-    '.bg-\\[\\#151f32\\]', 
-    '.bg-\\[\\#0F172A\\]', 
-    '.bg-slate-900\\/50',
-    '.bg-slate-900\\/60',
-    '.bg-slate-900\\/80',
-    '.bg-slate-900\\/90',
-    '.bg-slate-950\\/80',
-    '.bg-slate-950\\/90',
-    '.bg-slate-950\\/50',
-    '.bg-slate-900',
-    '.bg-slate-950',
-    '.bg-slate-850',
-    '.bg-slate-800'
+    '.premium-card'
   ];
 
   styleEl.innerHTML = `
     ${glassClasses.join(',\n')} {
-      background-color: rgba(${theme?.bgColorRGB || '255, 255, 255'}, ${opacity}) !important;
-      backdrop-filter: none !important;
-      -webkit-backdrop-filter: none !important;
-      border-color: rgba(255, 255, 255, ${borderOpacity}) !important;
+      background-color: rgba(${theme?.bgColorRGB || '255, 255, 255'}, ${opacity});
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+      border-color: rgba(255, 255, 255, ${borderOpacity});
     }
   `;
 };
