@@ -762,26 +762,40 @@ export default function ClassesPage() {
               </div>
             </div>
 
-            {/* SUB TAB SELECTOR */}
-            <div className="flex bg-[#0d1018] border border-white/10 p-1 rounded-xl gap-1">
+            {/* SUB TAB SELECTOR WITH SMOOTH SLIDING PILL ANIMATION */}
+            <div className="relative flex bg-[#0d1018] border border-white/10 p-1 rounded-xl text-xs font-bold select-none min-w-[460px]">
+              <div
+                className="absolute top-1 bottom-1 rounded-lg bg-[#5c36f5] shadow-[0_0_14px_rgba(92,54,245,0.5)] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] pointer-events-none"
+                style={{
+                  left: activeSubTab === 'grades'
+                    ? '4px'
+                    : activeSubTab === 'seating'
+                    ? 'calc(33.333% + 1px)'
+                    : 'calc(66.666% + 1px)',
+                  width: 'calc(33.333% - 4px)',
+                }}
+              />
               <button
                 onClick={() => setActiveSubTab('grades')}
-                className={`px-4 py-1.5 text-xs font-bold rounded-lg cursor-pointer transition-all duration-200 ease-in-out ${activeSubTab === 'grades' ? 'bg-[#5c36f5] text-white shadow-[0_0_12px_rgba(92,54,245,0.4)] scale-[1.02]' : 'text-slate-400 hover:text-white hover:bg-white/5'
-                  }`}
+                className={`flex-1 relative z-10 py-1.5 px-3 text-center transition-colors cursor-pointer ${
+                  activeSubTab === 'grades' ? 'text-white font-black' : 'text-slate-400 hover:text-white'
+                }`}
               >
                 Điểm Danh & Điểm ({enrolledStudents.length})
               </button>
               <button
                 onClick={() => setActiveSubTab('seating')}
-                className={`px-4 py-1.5 text-xs font-bold rounded-lg cursor-pointer transition-all duration-200 ease-in-out ${activeSubTab === 'seating' ? 'bg-[#5c36f5] text-white shadow-[0_0_12px_rgba(92,54,245,0.4)] scale-[1.02]' : 'text-slate-400 hover:text-white hover:bg-white/5'
-                  }`}
+                className={`flex-1 relative z-10 py-1.5 px-3 text-center transition-colors cursor-pointer ${
+                  activeSubTab === 'seating' ? 'text-white font-black' : 'text-slate-400 hover:text-white'
+                }`}
               >
                 Sơ Đồ Lớp
               </button>
               <button
                 onClick={() => setActiveSubTab('relationships')}
-                className={`px-4 py-1.5 text-xs font-bold rounded-lg cursor-pointer flex items-center gap-1.5 transition-all duration-200 ease-in-out ${activeSubTab === 'relationships' ? 'bg-[#5c36f5] text-white shadow-[0_0_12px_rgba(92,54,245,0.4)] scale-[1.02]' : 'text-slate-400 hover:text-white hover:bg-white/5'
-                  }`}
+                className={`flex-1 relative z-10 py-1.5 px-3 text-center transition-colors cursor-pointer flex items-center justify-center gap-1.5 ${
+                  activeSubTab === 'relationships' ? 'text-white font-black' : 'text-slate-400 hover:text-white'
+                }`}
               >
                 <Users size={13} />
                 <span>Nhóm Bạn & Xung Đột</span>

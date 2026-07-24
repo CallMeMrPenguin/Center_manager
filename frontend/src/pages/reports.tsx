@@ -706,7 +706,20 @@ export default function ReportsPage() {
               </span>
             </div>
 
-            <div className="flex items-center bg-[#141b32] p-1 rounded-xl border border-[#232d4e] gap-1">
+            <div className="relative flex bg-[#141b32] border border-[#232d4e] p-1 rounded-xl text-xs font-extrabold select-none w-72 shrink-0">
+              <div
+                className="absolute top-1 bottom-1 rounded-lg bg-indigo-600 shadow-[0_0_14px_rgba(99,102,241,0.5)] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] pointer-events-none"
+                style={{
+                  left: timeView === '1m'
+                    ? '4px'
+                    : timeView === '2m'
+                    ? 'calc(25% + 1px)'
+                    : timeView === '3m'
+                    ? 'calc(50% + 1px)'
+                    : 'calc(75% + 1px)',
+                  width: 'calc(25% - 4px)',
+                }}
+              />
               {[
                 { id: '1m', label: '1 Tháng' },
                 { id: '2m', label: '2 Tháng' },
@@ -716,10 +729,8 @@ export default function ReportsPage() {
                 <button
                   key={t.id}
                   onClick={() => setTimeView(t.id as any)}
-                  className={`px-3 py-1 rounded-lg text-xs font-extrabold cursor-pointer transition-all duration-200 ease-in-out ${
-                    timeView === t.id
-                      ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/25 scale-[1.02]'
-                      : 'text-slate-400 hover:text-white hover:bg-white/5'
+                  className={`flex-1 relative z-10 py-1 text-center transition-colors cursor-pointer ${
+                    timeView === t.id ? 'text-white font-black' : 'text-slate-400 hover:text-white'
                   }`}
                 >
                   {t.label}

@@ -56,9 +56,17 @@ Every data table MUST feature a filter icon next to each column title in the tab
 
 ---
 
-## 🎨 7. Summary Card & Segmented Control UI Design System
+## 🎨 7. Segmented Control UI & Sliding Indicator Standard
 - **Unified Summary Card Aesthetics**: All KPI summary cards must use glowing glassmorphic backdrops with curated gradient glow borders (`.kpi-card-blue`, `.kpi-card-purple`, `.kpi-card-green`, `.kpi-card-amber`).
-- **Smooth Segmented Controls**: All segmented control option buttons (e.g., period view filters `1 Tháng`, `2 Tháng`, `3 Tháng`, `Tất Cả`) MUST feature smooth CSS transitions (`transition-all duration-200 ease-in-out`).
+- **Sliding Pill Indicator Segmented Control**:
+  All Segmented Control option groups (e.g. `Điểm Danh & Điểm / Sơ Đồ Lớp / Nhóm Bạn & Xung Đột`, `Lịch Tháng / Lịch Tuần / Danh Sách`, `1 Tháng / 2 Tháng / 3 Tháng / Tất Cả`) MUST implement an absolute sliding indicator pill backdrop (matching the `FlowTab.tsx` reference standard):
+  1. **Outer Container**: `relative flex bg-[#0d1018] p-1 rounded-xl border border-white/10 text-xs shrink-0 font-bold select-none`.
+  2. **Sliding Indicator Backdrop**:
+     - Class: `absolute top-1 bottom-1 rounded-lg bg-[#5c36f5] shadow-[0_0_14px_rgba(92,54,245,0.5)] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] pointer-events-none`
+     - Inline style for smooth physical sliding animation:
+       - `left`: `calc( (100% / N) * index + 1px )` (or `4px` for index 0).
+       - `width`: `calc( (100% / N) - 4px )`.
+  3. **Option Buttons**: `flex-1 relative z-10 py-1 text-center transition-colors cursor-pointer`. Text transitions cleanly: `active ? 'text-white font-black' : 'text-slate-400 hover:text-white'`.
 
 ---
 
