@@ -1,13 +1,9 @@
 import { useState, useEffect, useMemo } from 'react';
 import {
-  useReactTable,
-  getCoreRowModel,
-  getPaginationRowModel,
-  flexRender,
   ColumnDef
 } from '@tanstack/react-table';
 import { api } from '../../api';
-import { Settings, Save, Search, RefreshCw, BookOpen, Check, X, FileText } from 'lucide-react';
+import { Settings, Save, RefreshCw, BookOpen, Check, X, FileText } from 'lucide-react';
 import { showToast } from '../../components/Toast';
 import { DataTable } from '../../components/DataTable';
 
@@ -29,7 +25,6 @@ export default function UnitConfig() {
   const [config, setConfig] = useState<Record<string, Record<string, string>>>({});
   const [loading, setLoading] = useState(false);
   const [selectedGrade, setSelectedGrade] = useState('6');
-  const [searchQuery, setSearchQuery] = useState('');
   const [editingKey, setEditingKey] = useState<{ grade: string; unit: string } | null>(null);
   const [editValue, setEditValue] = useState('');
   const [activeGrades, setActiveGrades] = useState<string[]>([]);
@@ -118,15 +113,13 @@ export default function UnitConfig() {
     setEditValue(currentValue);
   };
 
-  // Build the list of rows for the current view
+  // Build the list of rows for the current view (no manual search — DataTable handles it)
   const rows: { key: string; grade: string; unit: string; name: string }[] = [];
   Object.entries(config).forEach(([grade, units]) => {
     if (grade === selectedGrade) {
       Object.entries(units).forEach(([unit, name]) => {
         const key = `U${unit}_G${grade}`;
-        if (!searchQuery || key.toLowerCase().includes(searchQuery.toLowerCase()) || name.toLowerCase().includes(searchQuery.toLowerCase())) {
-          rows.push({ key, grade, unit, name });
-        }
+        rows.push({ key, grade, unit, name });
       });
     }
   });
@@ -223,25 +216,6 @@ export default function UnitConfig() {
           {/* Right Side: Unit Table */}
           <div className="lg:col-span-3 flex flex-col gap-4 glass-panel p-5">
             
-            {/* Search bar inside right side */}
-            <div className="flex flex-col sm:flex-row gap-3 items-center justify-between">
-              <div className="relative w-full sm:max-w-xs">
-                <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
-                  <Search size={13} />
-                </span>
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Tìm Unit_Grade hoặc tên..."
-                  className="w-full pl-9 pr-4 py-2 bg-[#080b12] border border-slate-855 focus:border-slate-700 text-xs rounded-xl outline-none placeholder-slate-600 transition"
-                />
-              </div>
-              <div className="text-[0.66rem] text-slate-500 font-extrabold uppercase">
-                Đang hiển thị {rows.length} Unit của Lớp {selectedGrade}
-              </div>
-            </div>
-
             {/* Table 1: Units */}
             <div className="border border-slate-900 rounded-xl overflow-hidden max-h-[500px] flex flex-col">
               {(() => {

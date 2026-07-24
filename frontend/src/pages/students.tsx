@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { ColumnDef, VisibilityState } from '@tanstack/react-table';
+import React, { useState, useEffect, useMemo } from 'react';
+import { ColumnDef } from '@tanstack/react-table';
 import { 
-  Users, UserPlus, Search, Edit3, Trash2, CheckCircle2, XCircle, 
-  Phone, Home, GraduationCap, Calendar, RefreshCw, X, AlertCircle, Eye, SlidersHorizontal, Upload
+  Users, UserPlus, Edit3, Trash2, CheckCircle2, XCircle, 
+  Phone, Home, GraduationCap, Calendar, RefreshCw, X, AlertCircle, Upload
 } from 'lucide-react';
 import { api } from '../api';
 import { showToast } from '../components/Toast';
@@ -17,29 +17,10 @@ export default function StudentsPage() {
   const confirm = useConfirm();
   const [students, setStudents] = useState<Student[]>([]);
   const [loading, setLoading] = useState(true);
-  const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 20;
-  const [search, setSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
   
   // Duplicate Name Warning Modal State
   const [duplicateWarningMsg, setDuplicateWarningMsg] = useState<string | null>(null);
   const [highlightMissingFields, setHighlightMissingFields] = useState<boolean>(false);
-
-  // Column Visibility State
-  const [showColPicker, setShowColPicker] = useState(false);
-  const colPickerRef = useRef<HTMLDivElement>(null);
-  const [visibleCols, setVisibleCols] = useState<Record<string, boolean>>({
-    name: true,
-    classes: true,
-    grade: true,
-    gender: true,
-    school: true,
-    parents: true,
-    enrollDate: true,
-    status: true,
-    actions: true
-  });
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editingStudent, setEditingStudent] = useState<Student | null>(null);
@@ -69,7 +50,7 @@ export default function StudentsPage() {
   const loadData = async () => {
     setLoading(true);
     try {
-      const data = await api.getStudents(search, statusFilter);
+      const data = await api.getStudents();
       setStudents(data);
     } catch (err: any) {
       showToast("Không thể tải danh sách học sinh: " + err.message, "error");
@@ -80,18 +61,9 @@ export default function StudentsPage() {
 
   useEffect(() => {
     loadData();
-  }, [search, statusFilter]);
-
-  // Click outside listener for Column Menu
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (colPickerRef.current && !colPickerRef.current.contains(event.target as Node)) {
-        setShowColPicker(false);
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+
 
   const handleOpenAdd = () => {
     setEditingStudent(null);
@@ -194,10 +166,6 @@ export default function StudentsPage() {
 
   const totalActive = students.filter(s => s.status === 'Đang học').length;
   const totalQuit = students.filter(s => s.status === 'Đã nghỉ').length;
-
-  const toggleCol = (colKey: string) => {
-    setVisibleCols(prev => ({ ...prev, [colKey]: !prev[colKey] }));
-  };
 
   const columns = useMemo<ColumnDef<Student>[]>(() => [
     {
@@ -381,73 +349,16 @@ export default function StudentsPage() {
         </div>
       </div>
 
-      {/* FILTER & COLUMN PICKER TOOLBAR */}
+      {/* FILTER TOOLBAR */}
       <div className="flex flex-wrap items-center justify-between gap-3 bg-[#14192b] border border-[#28334e] p-3.5 rounded-2xl shadow-xl">
         <div className="flex flex-wrap items-center gap-3 flex-1">
-          <div className="relative flex-1 min-w-[240px] max-w-md">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={15} />
-            <VietnameseInput
-              type="text"
-              placeholder="Tìm theo tên, SĐT, biệt danh, trường..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-[#1c243c] border border-[#303d62] text-white text-xs rounded-xl pl-9 pr-4 py-2 focus:outline-none focus:border-indigo-500 font-medium"
-            />
-          </div>
-
-          <CustomSelect
-            value={statusFilter}
-            onChange={(val) => setStatusFilter(val)}
-            options={[
-              { value: '', label: 'Tất cả trạng thái' },
-              { value: 'Đang học', label: 'Đang học' },
-              { value: 'Đã nghỉ', label: 'Đã nghỉ' }
-            ]}
-            className="w-44"
-          />
-        </div>
-
-        {/* COLUMN PICKER BUTTON */}
-        <div className="relative" ref={colPickerRef}>
           <button
-            onClick={() => setShowColPicker(!showColPicker)}
-            className="group flex items-center gap-2 bg-[#1c243c] hover:bg-[#253050] text-slate-200 hover:text-white py-2 px-3 rounded-xl font-bold text-xs border border-[#303d62] transition-all duration-300 ease-in-out cursor-pointer overflow-hidden"
-            title="Hiển Thị Cột"
+            onClick={loadData}
+            className="p-2 rounded-xl bg-[#1c243c] hover:bg-[#253050] text-slate-300 border border-[#303d62] transition cursor-pointer"
+            title="Làm mới"
           >
-            <Eye size={15} className="shrink-0 text-indigo-400" />
-            <span className="max-w-0 opacity-0 group-hover:max-w-[120px] group-hover:opacity-100 transition-all duration-300 ease-in-out whitespace-nowrap overflow-hidden block">
-              Hiển Thị Cột
-            </span>
+            <RefreshCw size={14} className={loading ? 'animate-spin text-indigo-400' : ''} />
           </button>
-
-          {showColPicker && (
-            <div className="absolute right-0 mt-2 w-52 bg-[#161d33] border border-[#2d3a60] rounded-xl p-3 shadow-2xl z-30 space-y-2">
-              <div className="text-[10px] font-black uppercase text-indigo-400 tracking-wider border-b border-white/10 pb-1.5">
-                Cấu hình hiển thị cột
-              </div>
-              {[
-                { key: 'name', label: 'Họ tên & Biệt danh' },
-                { key: 'classes', label: 'Lớp Học' },
-                { key: 'grade', label: 'Khối Học' },
-                { key: 'gender', label: 'Giới Tính' },
-                { key: 'school', label: 'Trường Học' },
-                { key: 'parents', label: 'Thông tin phụ huynh' },
-                { key: 'enrollDate', label: 'Ngày nhập học' },
-                { key: 'status', label: 'Trạng thái' },
-                { key: 'actions', label: 'Thao tác' }
-              ].map(col => (
-                <label key={col.key} className="flex items-center gap-2.5 text-xs text-slate-200 cursor-pointer hover:text-white px-1 py-1 rounded hover:bg-[#222b48]">
-                  <input
-                    type="checkbox"
-                    checked={!!visibleCols[col.key]}
-                    onChange={() => toggleCol(col.key)}
-                    className="accent-indigo-500 rounded cursor-pointer"
-                  />
-                  <span>{col.label}</span>
-                </label>
-              ))}
-            </div>
-          )}
         </div>
       </div>
 
@@ -457,10 +368,12 @@ export default function StudentsPage() {
           data={students}
           columns={columns}
           loading={loading}
-          columnVisibility={visibleCols}
+          enableColumnVisibility={true}
+          enableRowSelection={true}
+          searchPlaceholder="Tìm theo tên, SĐT, biệt danh, trường..."
           loadingMessage="Đang tải danh sách học sinh..."
-          emptyMessage="Không tìm thấy học sinh nào phù hợp với bộ lọc."
-          pageSize={pageSize}
+          emptyMessage="Không tìm thấy học sinh nào phù hợp."
+          pageSize={20}
         />
       </div>
 

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
 import { 
-  Briefcase, Plus, Search, Edit3, Trash2, DollarSign, Clock, RefreshCw, X, AlertCircle
+  Briefcase, Plus, Edit3, Trash2, DollarSign, Clock, RefreshCw, X
 } from 'lucide-react';
 import { api } from '../api';
 import { showToast } from '../components/Toast';
@@ -25,8 +25,6 @@ export default function CoursesPage() {
   const confirm = useConfirm();
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editingCourse, setEditingCourse] = useState<Course | null>(null);
@@ -41,7 +39,7 @@ export default function CoursesPage() {
   const loadData = async () => {
     setLoading(true);
     try {
-      const data = await api.getCourses(search, statusFilter);
+      const data = await api.getCourses();
       setCourses(data);
     } catch (err: any) {
       showToast("Không thể tải danh sách khóa học: " + err.message, "error");
@@ -52,7 +50,7 @@ export default function CoursesPage() {
 
   useEffect(() => {
     loadData();
-  }, [search, statusFilter]);
+  }, []);
 
   const handleOpenAdd = () => {
     setEditingCourse(null);
@@ -219,43 +217,6 @@ export default function CoursesPage() {
         </button>
       </div>
 
-      {/* FILTER BAR */}
-      <div className="flex flex-wrap items-center justify-between gap-3 bg-[#0d1018] border border-white/10 p-4 rounded-2xl shadow-lg">
-        <div className="flex items-center gap-3 flex-1 min-w-[280px]">
-          <div className="relative flex-1">
-            <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Tìm theo tên khóa học, mô tả..."
-              className="w-full pl-10 pr-4 py-2 bg-[#121624] border border-white/10 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition font-medium"
-            />
-          </div>
-
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-3.5 py-2 bg-[#121624] border border-white/10 rounded-xl text-xs text-slate-200 focus:outline-none focus:border-indigo-500 font-semibold cursor-pointer shrink-0"
-          >
-            <option value="">Tất cả trạng thái</option>
-            <option value="Đang mở">Đang mở</option>
-            <option value="Đã đóng">Đã đóng</option>
-          </select>
-        </div>
-
-        <div className="flex items-center gap-2 text-xs font-bold text-slate-400">
-          <span>Tổng: <strong className="text-white">{courses.length}</strong> khóa học</span>
-          <button
-            onClick={loadData}
-            className="p-2 rounded-xl bg-[#121624] hover:bg-[#1a2034] text-slate-300 border border-white/10 transition cursor-pointer"
-            title="Tải lại"
-          >
-            <RefreshCw size={14} className={loading ? "animate-spin text-indigo-400" : ""} />
-          </button>
-        </div>
-      </div>
-
       {/* TABLE */}
       <div className="flex-1 min-h-[380px] bg-[#0d1018] border border-white/10 rounded-2xl overflow-hidden flex flex-col">
         <DataTable
@@ -263,8 +224,18 @@ export default function CoursesPage() {
           columns={columns}
           loading={loading}
           loadingMessage="Đang tải dữ liệu khóa học..."
-          emptyMessage="Chưa có khóa học nào. Hãy tạo khóa học mới để bắt đầu tuyển sinh."
+          emptyMessage="Chưa có khóa học nào."
+          searchPlaceholder="Tìm theo tên khóa học, mô tả..."
           pageSize={20}
+          toolbarRight={
+            <button
+              onClick={loadData}
+              className="p-2 rounded-xl bg-[#1c243c] hover:bg-[#253050] text-slate-300 border border-[#303d62] transition cursor-pointer"
+              title="Tải lại"
+            >
+              <RefreshCw size={13} className={loading ? 'animate-spin text-indigo-400' : ''} />
+            </button>
+          }
         />
       </div>
 

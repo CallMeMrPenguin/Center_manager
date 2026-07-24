@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
 import { 
-  UserCheck, UserPlus, Search, Edit3, Trash2, Phone, Calendar, RefreshCw, X, AlertCircle
+  UserCheck, UserPlus, Edit3, Trash2, Phone, Calendar, RefreshCw, X
 } from 'lucide-react';
 import { api } from '../api';
 import { showToast } from '../components/Toast';
@@ -22,8 +22,6 @@ export default function TeachersPage() {
   const confirm = useConfirm();
   const [teachers, setTeachers] = useState<TeacherCM[]>([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState('');
-  const [roleFilter, setRoleFilter] = useState('');
   
   const [modalOpen, setModalOpen] = useState(false);
   const [editingTeacher, setEditingTeacher] = useState<TeacherCM | null>(null);
@@ -38,7 +36,7 @@ export default function TeachersPage() {
   const loadData = async () => {
     setLoading(true);
     try {
-      const data = await api.getTeachersCM(search, roleFilter);
+      const data = await api.getTeachersCM();
       setTeachers(data);
     } catch (err: any) {
       showToast("Không thể tải danh sách giáo viên: " + err.message, "error");
@@ -49,7 +47,7 @@ export default function TeachersPage() {
 
   useEffect(() => {
     loadData();
-  }, [search, roleFilter]);
+  }, []);
 
   const handleOpenAdd = () => {
     setEditingTeacher(null);
@@ -255,40 +253,6 @@ export default function TeachersPage() {
         </div>
       </div>
 
-      {/* FILTER & SEARCH */}
-      <div className="flex flex-wrap items-center justify-between gap-4 bg-[#0f131f] border border-white/10 p-3.5 rounded-2xl">
-        <div className="relative flex-1 min-w-[240px]">
-          <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Tìm theo tên giáo viên, số điện thoại..."
-            className="w-full bg-[#161a29] border border-white/10 text-white text-xs rounded-xl pl-10 pr-4 py-2 focus:outline-none focus:border-indigo-500 placeholder:text-slate-500 font-medium"
-          />
-        </div>
-
-        <div className="flex items-center gap-3">
-          <select
-            value={roleFilter}
-            onChange={(e) => setRoleFilter(e.target.value)}
-            className="bg-[#161a29] border border-white/10 text-white text-xs font-bold rounded-xl px-3.5 py-2 focus:outline-none focus:border-indigo-500 cursor-pointer"
-          >
-            <option value="">Tất cả vai trò</option>
-            <option value="Giáo viên">Giáo viên</option>
-            <option value="Trợ giảng">Trợ giảng</option>
-          </select>
-
-          <button
-            onClick={loadData}
-            className="p-2 rounded-xl bg-[#161a29] hover:bg-[#20263a] text-slate-300 hover:text-white border border-white/10 transition cursor-pointer"
-            title="Làm mới"
-          >
-            <RefreshCw size={14} className={loading ? "animate-spin text-indigo-400" : ""} />
-          </button>
-        </div>
-      </div>
-
       {/* TABLE */}
       <div className="flex-1 min-h-[380px] bg-[#0f1320] border border-[#28334e] rounded-2xl overflow-hidden flex flex-col">
         <DataTable
@@ -297,7 +261,17 @@ export default function TeachersPage() {
           loading={loading}
           loadingMessage="Đang tải dữ liệu nhân sự..."
           emptyMessage="Chưa có thông tin giáo viên nào"
+          searchPlaceholder="Tìm theo tên, SĐT..."
           pageSize={20}
+          toolbarRight={
+            <button
+              onClick={loadData}
+              className="p-2 rounded-xl bg-[#1c243c] hover:bg-[#253050] text-slate-300 border border-[#303d62] transition cursor-pointer"
+              title="Làm mới"
+            >
+              <RefreshCw size={13} className={loading ? 'animate-spin text-indigo-400' : ''} />
+            </button>
+          }
         />
       </div>
 

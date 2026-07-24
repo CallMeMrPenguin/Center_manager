@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { ColumnDef } from '@tanstack/react-table';
 import { api } from '../api';
 import { 
   BarChart3, RefreshCw, Calendar, 
-  AlertCircle, Users, GraduationCap, ChevronRight, Info, Search, Filter, RotateCcw, ArrowUpDown, ChevronLeft, X
+  AlertCircle, Users, GraduationCap, ChevronRight, Info, RotateCcw, X
 } from 'lucide-react';
 import { showToast } from '../components/Toast';
-import { VietnameseInput } from '../components/VietnameseInput';
 import { CustomDatePicker } from '../components/CustomDatePicker';
+import { DataTable } from '../components/DataTable';
 
 export default function ReportsPage() {
   const [loading, setLoading] = useState(false);
@@ -14,16 +15,6 @@ export default function ReportsPage() {
   const [selectedClassId, setSelectedClassId] = useState<string>('');
   const [students, setStudents] = useState<any[]>([]);
   const [selectedStudentId, setSelectedStudentId] = useState<string>('');
-  
-  // Table Pagination & Search
-  const [tableSearch, setTableSearch] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 20;
-
-  // Table Column Sort & Popover Filter state matching Ngân Hàng Câu Hỏi standard
-  const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' } | null>({ key: 'overallAvg', direction: 'desc' });
-  const [columnFilters, setColumnFilters] = useState<Record<string, { search: string; selectedValues: string[] }>>({});
-  const [activeHeaderMenu, setActiveHeaderMenu] = useState<string | null>(null);
 
   // Hovered Data Point for Graph Tooltip
   const [hoveredPoint, setHoveredPoint] = useState<{
@@ -129,19 +120,6 @@ export default function ReportsPage() {
     }
   };
 
-  const handleUpdateFilter = (columnKey: string, searchVal: string, selectedVals: string[]) => {
-    setColumnFilters(prev => ({
-      ...prev,
-      [columnKey]: { search: searchVal, selectedValues: selectedVals }
-    }));
-    setCurrentPage(1);
-  };
-
-  const resetFilters = () => {
-    setColumnFilters({});
-    setSortConfig(null);
-    setCurrentPage(1);
-  };
 
   // Filter rankings strictly by selectedClassId
   const filteredRankings = useMemo(() => {
@@ -149,110 +127,85 @@ export default function ReportsPage() {
     return studentRankings.filter(r => String(r.class_id) === selectedClassId);
   }, [studentRankings, selectedClassId]);
 
-  // Unique values caching for table column popovers
-  const uniqueValuesMap = useMemo(() => {
-    const map: Record<string, string[]> = {};
-    const keys = ['full_name', 'class_name', 'total_sessions', 'present_count', 'avg_check_1', 'avg_check_2', 'avg_homework', 'overallAvg'];
-    
-    keys.forEach(key => {
-      const vals = filteredRankings.map(r => {
-        if (key === 'full_name') return r.full_name || '';
-        if (key === 'class_name') return r.class_name || 'Lớp học';
-        if (key === 'total_sessions') return `${r.total_sessions || 0} buổi`;
-        if (key === 'present_count') return `${r.total_sessions > 0 ? Math.round((r.present_count / r.total_sessions) * 100) : 100}%`;
-        if (key === 'avg_check_1') return Number(r.avg_check_1 || 0).toFixed(1);
-        if (key === 'avg_check_2') return Number(r.avg_check_2 || 0).toFixed(1);
-        if (key === 'avg_homework') return Number(r.avg_homework || 0).toFixed(1);
-        if (key === 'overallAvg') {
-          const c1 = Number(r.avg_check_1 || 0); const c2 = Number(r.avg_check_2 || 0); const hw = Number(r.avg_homework || 0);
-          const avg = (c1 + c2 + hw) / 3;
-          if (avg >= 8.5) return 'Xuất Sắc';
-          if (avg >= 7.0) return 'Giỏi';
-          if (avg >= 5.0) return 'Khá';
-          return 'Cần Cố Gắng';
-        }
-        return String(r[key] || '');
-      }).filter(Boolean);
-
-      map[key] = Array.from(new Set(vals)).sort((a, b) => a.localeCompare(b));
-    });
-    return map;
-  }, [filteredRankings]);
-
-  // Case-insensitive search filter & popover filtering for rankings table
-  const searchedRankings = useMemo(() => {
-    let result = [...filteredRankings];
-
-    // Global Search
-    if (tableSearch.trim()) {
-      const q = tableSearch.toLowerCase().trim();
-      result = result.filter(r => 
-        (r.full_name && r.full_name.toLowerCase().includes(q)) ||
-        (r.nickname && r.nickname.toLowerCase().includes(q)) ||
-        (r.class_name && r.class_name.toLowerCase().includes(q))
-      );
-    }
-
-    // Column Popover Filters
-    Object.entries(columnFilters).forEach(([key, filter]) => {
-      const { search: sVal, selectedValues } = filter;
-
-      if (sVal.trim() !== '') {
-        const sLower = sVal.toLowerCase();
-        result = result.filter(r => {
-          let val = '';
-          if (key === 'full_name') val = r.full_name || '';
-          else if (key === 'class_name') val = r.class_name || '';
-          else if (key === 'avg_check_1') val = Number(r.avg_check_1 || 0).toFixed(1);
-          else if (key === 'avg_check_2') val = Number(r.avg_check_2 || 0).toFixed(1);
-          else if (key === 'avg_homework') val = Number(r.avg_homework || 0).toFixed(1);
-          return val.toLowerCase().includes(sLower);
-        });
-      }
-
-      if (selectedValues.length > 0) {
-        result = result.filter(r => {
-          let val = '';
-          if (key === 'full_name') val = r.full_name || '';
-          else if (key === 'class_name') val = r.class_name || '';
-          else if (key === 'avg_check_1') val = Number(r.avg_check_1 || 0).toFixed(1);
-          else if (key === 'avg_check_2') val = Number(r.avg_check_2 || 0).toFixed(1);
-          else if (key === 'avg_homework') val = Number(r.avg_homework || 0).toFixed(1);
-          else if (key === 'overallAvg') {
-            const c1 = Number(r.avg_check_1 || 0); const c2 = Number(r.avg_check_2 || 0); const hw = Number(r.avg_homework || 0);
-            const avg = (c1 + c2 + hw) / 3;
-            val = avg >= 8.5 ? 'Xuất Sắc' : avg >= 7.0 ? 'Giỏi' : avg >= 5.0 ? 'Khá' : 'Cần Cố Gắng';
-          }
-          return selectedValues.includes(val);
-        });
-      }
-    });
-
-    // Column Sorting
-    if (sortConfig) {
-      const { key, direction } = sortConfig;
-      result.sort((a, b) => {
-        let valA: any = a[key];
-        let valB: any = b[key];
-
-        if (key === 'overallAvg') {
-          const c1A = Number(a.avg_check_1 || 0); const c2A = Number(a.avg_check_2 || 0); const hwA = Number(a.avg_homework || 0);
-          const c1B = Number(b.avg_check_1 || 0); const c2B = Number(b.avg_check_2 || 0); const hwB = Number(b.avg_homework || 0);
-          valA = (c1A + c2A + hwA) / 3;
-          valB = (c1B + c2B + hwB) / 3;
-        } else if (['avg_check_1', 'avg_check_2', 'avg_homework'].includes(key)) {
-          valA = Number(a[key] || 0);
-          valB = Number(b[key] || 0);
-        }
-
-        if (valA < valB) return direction === 'asc' ? -1 : 1;
-        if (valA > valB) return direction === 'asc' ? 1 : -1;
-        return 0;
-      });
-    }
-
-    return result;
-  }, [filteredRankings, tableSearch, columnFilters, sortConfig]);
+  // TanStack ColumnDef for rankings table
+  const rankingColumns = useMemo<ColumnDef<any>[]>(() => [
+    {
+      id: 'stt',
+      header: () => <div className="text-center w-full">STT</div>,
+      cell: ({ row }) => <div className="text-center font-bold text-slate-400">{row.index + 1}</div>,
+      enableSorting: false,
+      enableGlobalFilter: false,
+    },
+    {
+      accessorKey: 'full_name',
+      header: 'Họ và Tên',
+      cell: ({ row }) => {
+        const r = row.original;
+        const isSelected = String(r.student_id) === selectedStudentId;
+        return (
+          <div className="font-extrabold text-white text-xs flex items-center justify-between gap-2">
+            <span>{r.full_name}{r.nickname ? ` - ${r.nickname}` : ''}</span>
+            {isSelected && <span className="text-[10px] text-indigo-400 bg-indigo-500/20 px-2 py-0.5 rounded font-mono">Đang chọn</span>}
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: 'class_name',
+      header: 'Lớp Học',
+      cell: (info) => (
+        <span className="inline-block px-2.5 py-0.5 rounded-lg text-[10px] font-black bg-[#1c2442] text-indigo-300 border border-[#303d68]">
+          {info.getValue<string>() || 'Lớp học'}
+        </span>
+      ),
+    },
+    {
+      accessorKey: 'total_sessions',
+      header: () => <div className="text-center w-full">Buổi Học</div>,
+      cell: (info) => <div className="text-center text-slate-300 font-bold">{info.getValue<number>() || 0} buổi</div>,
+    },
+    {
+      id: 'present_count',
+      header: () => <div className="text-center w-full">Điểm Danh %</div>,
+      cell: ({ row }) => {
+        const r = row.original;
+        const pct = r.total_sessions > 0 ? Math.round((r.present_count / r.total_sessions) * 100) : 100;
+        return <div className="text-center font-bold text-emerald-400 font-mono">{pct}%</div>;
+      },
+    },
+    {
+      accessorKey: 'avg_check_1',
+      header: () => <div className="text-center w-full">Check 1</div>,
+      cell: (info) => <div className="text-center font-extrabold text-blue-400 font-mono">{Number(info.getValue() || 0).toFixed(1)}</div>,
+    },
+    {
+      accessorKey: 'avg_check_2',
+      header: () => <div className="text-center w-full">Check 2</div>,
+      cell: (info) => <div className="text-center font-extrabold text-purple-400 font-mono">{Number(info.getValue() || 0).toFixed(1)}</div>,
+    },
+    {
+      accessorKey: 'avg_homework',
+      header: () => <div className="text-center w-full">Homework</div>,
+      cell: (info) => <div className="text-center font-extrabold text-emerald-400 font-mono">{Number(info.getValue() || 0).toFixed(1)}</div>,
+    },
+    {
+      id: 'overallAvg',
+      header: () => <div className="text-center w-full">Đánh Giá</div>,
+      accessorFn: (r: any) => (Number(r.avg_check_1||0) + Number(r.avg_check_2||0) + Number(r.avg_homework||0)) / 3,
+      cell: ({ getValue }) => {
+        const avg = getValue<number>();
+        let label = 'Xuất Sắc', cls = 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30';
+        if (avg < 8.5) { label = 'Giỏi'; cls = 'bg-indigo-500/10 text-indigo-300 border-indigo-500/30'; }
+        if (avg < 7.0) { label = 'Khá'; cls = 'bg-amber-500/10 text-amber-300 border-amber-500/30'; }
+        if (avg < 5.0) { label = 'Cần Cố Gắng'; cls = 'bg-rose-500/10 text-rose-400 border-rose-500/30'; }
+        return (
+          <div className="text-center">
+            <span className={`inline-block px-2.5 py-1 rounded-xl text-[10px] font-black border ${cls}`}>{label}</span>
+          </div>
+        );
+      },
+    },
+  ], [selectedStudentId]);
 
   // Selected Student Object if individual mode
   const selectedStudentObj = useMemo(() => {
@@ -1167,293 +1120,41 @@ export default function ReportsPage() {
 
       </div>
 
-      {/* 6. STUDENT RANKINGS TABLE WITH FULL NGAN HANG CAU HOI STANDARD POPOVER FILTERS */}
+      {/* 6. STUDENT RANKINGS TABLE — TanStack Table */}
       <div className="bg-[#0d1120] border border-[#1d2644] rounded-2xl flex flex-col shadow-2xl mb-8">
-        
-        {/* TABLE HEADER BAR WITH CLASS SELECTOR AND SEARCH FILTER */}
-        <div className="px-6 py-4 border-b border-[#181f36] flex flex-wrap items-center justify-between gap-4">
+        <div className="px-5 py-4 border-b border-[#181f36] flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <GraduationCap size={18} className="text-indigo-400" />
             <h3 className="text-sm font-black text-white uppercase tracking-wider">
               BẢNG XẾP HẠNG VÀ CHI TIẾT ĐIỂM SỐ HỌC SINH
             </h3>
           </div>
-
-          <div className="flex flex-wrap items-center gap-3">
-            {/* Moved Class Selector Button */}
-            <div className="flex items-center gap-2 bg-[#121626] border border-[#202842] px-3.5 py-1.5 rounded-xl shadow-sm">
-              <GraduationCap size={14} className="text-indigo-400 shrink-0" />
-              <select
-                value={selectedClassId}
-                onChange={(e) => {
-                  setSelectedClassId(e.target.value);
-                  setSelectedStudentId('');
-                  setCurrentPage(1);
-                }}
-                className="bg-transparent text-white text-xs font-extrabold focus:outline-none cursor-pointer"
-              >
-                <option value="" className="bg-[#121626] text-white">Tất cả lớp học</option>
-                {classes.map(c => (
-                  <option key={c.id} value={c.id} className="bg-[#121626] text-white">
-                    {c.class_name} ({c.grade || 'Lớp 6'})
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Table Search Filter Box */}
-            <div className="relative w-56">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
-              <VietnameseInput
-                type="text"
-                value={tableSearch}
-                onChange={(e) => { setTableSearch(e.target.value); setCurrentPage(1); }}
-                placeholder="Tìm học sinh theo tên..."
-                className="w-full bg-[#151c34] border border-[#232d4e] rounded-xl pl-9 pr-3 py-1.5 text-xs text-white placeholder-slate-400 focus:outline-none focus:border-indigo-500 font-semibold"
-              />
-            </div>
-
-            {/* Clear All Column Filters Button */}
-            {(Object.values(columnFilters).some(f => f.search !== '' || f.selectedValues.length > 0) || sortConfig !== null) && (
-              <button
-                onClick={resetFilters}
-                className="group flex items-center gap-0 hover:gap-1.5 px-3 py-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 rounded-xl text-xs font-bold border border-rose-500/30 transition-all duration-300 cursor-pointer"
-                title="Xóa Bộ Lọc"
-              >
-                <RefreshCw size={12} className="shrink-0" />
-                <span className="max-w-0 opacity-0 group-hover:max-w-[100px] group-hover:opacity-100 transition-all duration-300 ease-in-out whitespace-nowrap overflow-hidden block">Xóa Bộ Lọc</span>
-              </button>
-            )}
+          <div className="flex items-center gap-2 bg-[#121626] border border-[#202842] px-3.5 py-1.5 rounded-xl">
+            <GraduationCap size={14} className="text-indigo-400 shrink-0" />
+            <select
+              value={selectedClassId}
+              onChange={(e) => { setSelectedClassId(e.target.value); setSelectedStudentId(''); }}
+              className="bg-transparent text-white text-xs font-extrabold focus:outline-none cursor-pointer"
+            >
+              <option value="" className="bg-[#121626] text-white">Tất cả lớp học</option>
+              {classes.map(c => (
+                <option key={c.id} value={c.id} className="bg-[#121626] text-white">
+                  {c.class_name} ({c.grade || 'Lớp 6'})
+                </option>
+              ))}
+            </select>
           </div>
         </div>
-
-        <div className="overflow-x-auto min-h-[250px] relative">
-          <table className="w-full text-left border-collapse text-xs">
-            <thead className="sticky top-0 z-10 bg-[#151c34] text-slate-300 uppercase text-[10px] font-black tracking-wider border-b border-[#232d4e] shadow-sm">
-              <tr>
-                <th className="py-3.5 px-4 w-12 text-center">STT</th>
-                
-                {/* Column Headings with Filter Icons */}
-                {[
-                  { key: 'full_name', label: 'Họ và Tên Học Sinh', align: 'left' },
-                  { key: 'class_name', label: 'Lớp Học', align: 'left' },
-                  { key: 'total_sessions', label: 'Buổi Học', align: 'center' },
-                  { key: 'present_count', label: 'Điểm Danh %', align: 'center' },
-                  { key: 'avg_check_1', label: 'Check 1', align: 'center' },
-                  { key: 'avg_check_2', label: 'Check 2', align: 'center' },
-                  { key: 'avg_homework', label: 'Homework', align: 'center' },
-                  { key: 'overallAvg', label: 'Đánh Giá', align: 'center' }
-                ].map(col => {
-                  const isFiltered = (columnFilters[col.key]?.selectedValues.length || 0) > 0 || (columnFilters[col.key]?.search || '') !== '';
-                  const isSorted = sortConfig?.key === col.key;
-                  const values = uniqueValuesMap[col.key] || [];
-
-                  return (
-                    <th 
-                      key={col.key} 
-                      className={`py-3.5 px-3 whitespace-nowrap relative ${col.align === 'center' ? 'text-center' : 'text-left'} ${activeHeaderMenu === col.key ? 'z-50' : ''}`}
-                    >
-                      <div className={`flex items-center gap-1.5 ${col.align === 'center' ? 'justify-center' : 'justify-between'}`}>
-                        <span>{col.label}</span>
-                        
-                        <div className="relative inline-block text-left" onClick={(e) => e.stopPropagation()}>
-                          <button
-                            onClick={() => setActiveHeaderMenu(activeHeaderMenu === col.key ? null : col.key)}
-                            className={`p-1 rounded hover:bg-slate-800 transition cursor-pointer ${
-                              isFiltered || isSorted
-                                ? 'text-indigo-400 bg-indigo-500/20'
-                                : 'text-slate-500 hover:text-slate-300'
-                            }`}
-                            title={`Lọc/Sắp xếp cột ${col.label}`}
-                          >
-                            <Filter size={11} />
-                          </button>
-
-                          {/* FILTER POPOVER CARD */}
-                          {activeHeaderMenu === col.key && (
-                            <div className="absolute top-full mt-1.5 right-0 w-64 bg-[#141b32] border border-[#2b3760] rounded-xl shadow-2xl z-50 p-3 text-slate-200 normal-case font-normal text-xs flex flex-col gap-2.5 animate-mac-dropdown">
-                              <div className="flex items-center justify-between pb-2 border-b border-[#232d4e]">
-                                <span className="text-[10px] font-extrabold text-indigo-300 uppercase tracking-wider">Lọc: {col.label}</span>
-                                <button onClick={() => setActiveHeaderMenu(null)} className="text-slate-400 hover:text-white transition">
-                                  <X size={12} />
-                                </button>
-                              </div>
-
-                              {/* Sort buttons */}
-                              <div className="flex items-center gap-1">
-                                <button
-                                  onClick={() => { setSortConfig({ key: col.key, direction: 'asc' }); setActiveHeaderMenu(null); }}
-                                  className={`flex-1 py-1 px-2 rounded-lg text-[10px] font-bold border transition ${
-                                    isSorted && sortConfig?.direction === 'asc' ? 'bg-indigo-600 text-white border-indigo-400' : 'bg-[#1b2342] text-slate-300 border-[#2c3866] hover:text-white'
-                                  }`}
-                                >
-                                  A-Z ↑
-                                </button>
-                                <button
-                                  onClick={() => { setSortConfig({ key: col.key, direction: 'desc' }); setActiveHeaderMenu(null); }}
-                                  className={`flex-1 py-1 px-2 rounded-lg text-[10px] font-bold border transition ${
-                                    isSorted && sortConfig?.direction === 'desc' ? 'bg-indigo-600 text-white border-indigo-400' : 'bg-[#1b2342] text-slate-300 border-[#2c3866] hover:text-white'
-                                  }`}
-                                >
-                                  Z-A ↓
-                                </button>
-                              </div>
-
-                              {/* Search values */}
-                              <input
-                                type="text"
-                                value={columnFilters[col.key]?.search || ''}
-                                onChange={(e) => handleUpdateFilter(col.key, e.target.value, columnFilters[col.key]?.selectedValues || [])}
-                                placeholder="Tìm giá trị..."
-                                className="w-full bg-[#0d1222] border border-[#232d4e] rounded-lg px-2.5 py-1 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 font-semibold"
-                              />
-
-                              {/* Unique values Checklist */}
-                              <div className="max-h-40 overflow-y-auto space-y-1 pr-1 scrollbar-thin">
-                                {values.length === 0 ? (
-                                  <p className="text-[10px] text-slate-500 text-center py-2">Không có giá trị</p>
-                                ) : (
-                                  values.map(val => {
-                                    const selected = columnFilters[col.key]?.selectedValues || [];
-                                    const isChecked = selected.includes(val);
-                                    return (
-                                      <label key={val} className="flex items-center gap-2 px-1.5 py-1 hover:bg-[#1f294c] rounded cursor-pointer text-xs font-semibold text-slate-300 hover:text-white">
-                                        <input
-                                          type="checkbox"
-                                          checked={isChecked}
-                                          onChange={(e) => {
-                                            const next = e.target.checked
-                                              ? [...selected, val]
-                                              : selected.filter(v => v !== val);
-                                            handleUpdateFilter(col.key, columnFilters[col.key]?.search || '', next);
-                                          }}
-                                          className="rounded border-[#2c3866] bg-[#0d1222] text-indigo-500 cursor-pointer"
-                                        />
-                                        <span className="truncate">{val}</span>
-                                      </label>
-                                    );
-                                  })
-                                )}
-                              </div>
-
-                              {/* Reset column filter */}
-                              {isFiltered && (
-                                <button
-                                  onClick={() => handleUpdateFilter(col.key, '', [])}
-                                  className="mt-1 text-[10px] font-bold text-rose-400 hover:text-rose-300 text-center w-full py-1 bg-rose-500/10 rounded-lg border border-rose-500/20"
-                                >
-                                  Xóa bộ lọc cột này
-                                </button>
-                              )}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </th>
-                  );
-                })}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[#1f2846] font-medium bg-[#0f1426]">
-              {searchedRankings.length === 0 ? (
-                <tr>
-                  <td colSpan={9} className="py-12 text-center text-slate-400 font-bold">
-                    Không tìm thấy học sinh nào phù hợp.
-                  </td>
-                </tr>
-              ) : (
-                searchedRankings.slice((currentPage - 1) * pageSize, currentPage * pageSize).map((r, idx) => {
-                  const c1 = Number(r.avg_check_1 || 0).toFixed(1);
-                  const c2 = Number(r.avg_check_2 || 0).toFixed(1);
-                  const hw = Number(r.avg_homework || 0).toFixed(1);
-                  const overallAvg = (Number(c1) + Number(c2) + Number(hw)) / 3;
-
-                  let evalBadge = { label: "Xuất Sắc", bg: "bg-emerald-500/10 text-emerald-400 border-emerald-500/30" };
-                  if (overallAvg < 8.5) evalBadge = { label: "Giỏi", bg: "bg-indigo-500/10 text-indigo-300 border-indigo-500/30" };
-                  if (overallAvg < 7.0) evalBadge = { label: "Khá", bg: "bg-amber-500/10 text-amber-300 border-amber-500/30" };
-                  if (overallAvg < 5.0) evalBadge = { label: "Cần Cố Gắng", bg: "bg-rose-500/10 text-rose-400 border-rose-500/30" };
-
-                  const isSelected = String(r.student_id) === selectedStudentId;
-
-                  return (
-                    <tr 
-                      key={r.student_id} 
-                      onClick={() => handleSelectRankingStudent(r.student_id)}
-                      className={`cursor-pointer transition-colors ${
-                        isSelected ? 'bg-indigo-900/40 border-l-4 border-indigo-500' : 'hover:bg-[#1a2340]'
-                      }`}
-                    >
-                      <td className="py-3.5 px-4 text-center font-bold text-slate-400">
-                        {(currentPage - 1) * pageSize + idx + 1}
-                      </td>
-                      <td className="py-3.5 px-4">
-                        <div className="font-extrabold text-white text-xs hover:text-indigo-300 transition flex items-center justify-between">
-                          <span>{r.full_name}{r.nickname ? ` - ${r.nickname}` : ''}</span>
-                          {isSelected && (
-                            <span className="text-[10px] text-indigo-400 bg-indigo-500/20 px-2 py-0.5 rounded font-mono">Đang chọn</span>
-                          )}
-                        </div>
-                      </td>
-                      <td className="py-3.5 px-3">
-                        <span className="inline-block px-2.5 py-0.5 rounded-lg text-[10px] font-black bg-[#1c2442] text-indigo-300 border border-[#303d68]">
-                          {r.class_name || 'Lớp học'}
-                        </span>
-                      </td>
-                      <td className="py-3.5 px-3 text-center text-slate-300 font-bold">
-                        {r.total_sessions || 0} buổi
-                      </td>
-                      <td className="py-3.5 px-3 text-center font-bold text-emerald-400 font-mono">
-                        {r.total_sessions > 0 ? Math.round((r.present_count / r.total_sessions) * 100) : 100}%
-                      </td>
-                      <td className="py-3.5 px-3 text-center font-extrabold text-blue-400 font-mono">
-                        {c1}
-                      </td>
-                      <td className="py-3.5 px-3 text-center font-extrabold text-purple-400 font-mono">
-                        {c2}
-                      </td>
-                      <td className="py-3.5 px-3 text-center font-extrabold text-emerald-400 font-mono">
-                        {hw}
-                      </td>
-                      <td className="py-3.5 px-4 text-center">
-                        <span className={`inline-block px-2.5 py-1 rounded-xl text-[10px] font-black border ${evalBadge.bg}`}>
-                          {evalBadge.label}
-                        </span>
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
-        </div>
-
-        {/* STRICT 20 ROWS/PAGE PAGINATION CONTROLS */}
-        {searchedRankings.length > pageSize && (
-          <div className="px-6 py-4 bg-[#14192b] border-t border-[#28334e] flex items-center justify-between">
-            <span className="text-xs text-slate-400">
-              Hiển thị {(currentPage - 1) * pageSize + 1} - {Math.min(currentPage * pageSize, searchedRankings.length)} trong tổng số {searchedRankings.length} học sinh
-            </span>
-            <div className="flex items-center gap-2">
-              <button
-                disabled={currentPage === 1}
-                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                className="px-3 py-1.5 rounded-xl bg-[#1e2540] hover:bg-[#283254] disabled:opacity-30 text-white text-xs font-bold border border-[#343e68] transition cursor-pointer"
-              >
-                Trước
-              </button>
-              <span className="px-3 text-xs text-indigo-300 font-black">
-                Trang {currentPage} / {Math.ceil(searchedRankings.length / pageSize)}
-              </span>
-              <button
-                disabled={currentPage >= Math.ceil(searchedRankings.length / pageSize)}
-                onClick={() => setCurrentPage(p => Math.min(Math.ceil(searchedRankings.length / pageSize), p + 1))}
-                className="px-3 py-1.5 rounded-xl bg-[#1e2540] hover:bg-[#283254] disabled:opacity-30 text-white text-xs font-bold border border-[#343e68] transition cursor-pointer"
-              >
-                Sau
-              </button>
-            </div>
-          </div>
-        )}
+        <DataTable
+          data={filteredRankings}
+          columns={rankingColumns}
+          loading={loading}
+          searchPlaceholder="Tìm học sinh theo tên, biệt danh, lớp..."
+          emptyMessage="Không có dữ liệu xếp hạng."
+          pageSize={20}
+          onRowClick={(r: any) => handleSelectRankingStudent(r.student_id)}
+          initialSorting={[{ id: 'overallAvg', desc: true }]}
+        />
       </div>
 
       {/* RESET GRADES POPUP MODAL */}
