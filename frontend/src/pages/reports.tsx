@@ -123,7 +123,7 @@ export default function ReportsPage() {
       });
       showToast(`Đã đặt lại điểm số thành công cho ${res.reset_count} bản ghi!`, "success");
       setResetModalOpen(false);
-      loadAnalyticsData();
+      loadAnalyticsData(true);
       notifyDataChanged();
     } catch (err: any) {
       showToast("Không thể đặt lại điểm: " + err.message, "error");

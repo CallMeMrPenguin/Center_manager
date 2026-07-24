@@ -141,7 +141,7 @@ export default function StudentsPage() {
       }
       setModalOpen(false);
       setHighlightMissingFields(false);
-      loadData();
+      loadData(true);
       notifyDataChanged();
     } catch (err: any) {
       showToast("Không thể lưu dữ liệu: " + err.message, "error");
@@ -163,7 +163,7 @@ export default function StudentsPage() {
       await api.deleteStudent(st.id);
       showToast("Đã xóa học sinh!", "success");
       setModalOpen(false);
-      loadData();
+      loadData(true);
       notifyDataChanged();
     } catch (err: any) {
       showToast("Không thể xóa: " + err.message, "error");

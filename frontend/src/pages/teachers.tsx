@@ -88,7 +88,7 @@ export default function TeachersPage() {
         showToast("Đã thêm giáo viên thành công!", "success");
       }
       setModalOpen(false);
-      loadData();
+      loadData(true);
       notifyDataChanged();
     } catch (err: any) {
       showToast("Lỗi khi lưu: " + err.message, "error");
@@ -106,7 +106,7 @@ export default function TeachersPage() {
       try {
         await api.deleteTeacherCM(t.id);
         showToast("Đã xóa giáo viên!", "success");
-        loadData();
+        loadData(true);
         notifyDataChanged();
       } catch (err: any) {
         showToast("Không thể xóa: " + err.message, "error");

@@ -318,14 +318,14 @@ export default function SchedulePage() {
 
       window.dispatchEvent(new CustomEvent('data-changed'));
       setModalOpen(false);
-      loadData();
+      loadData(true);
     } catch (e: any) { showToast('Lỗi khi lưu: ' + e.message, 'error'); }
   };
 
   const del = async (sess: ClassSession) => {
     const ok = await confirm({ title: 'Xóa Buổi Học', message: `Bạn có chắc muốn xóa buổi học ngày ${sess.date} lớp ${sess.class_name}?`, confirmText: 'Xóa', type: 'danger' });
     if (ok) {
-      try { await api.deleteClassSession(sess.id); window.dispatchEvent(new CustomEvent('data-changed')); loadData(); showToast('Đã xóa buổi học!', 'success'); }
+      try { await api.deleteClassSession(sess.id); window.dispatchEvent(new CustomEvent('data-changed')); loadData(true); showToast('Đã xóa buổi học!', 'success'); }
       catch (e: any) { showToast('Lỗi: ' + e.message, 'error'); }
     }
   };

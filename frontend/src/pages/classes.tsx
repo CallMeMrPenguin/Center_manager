@@ -1272,7 +1272,7 @@ export default function ClassesPage() {
                   showToast("Đã tạo lớp học mới và đồng bộ lịch học!", "success");
                 }
                 setClassModalOpen(false);
-                loadClasses();
+                loadClasses(true);
                 window.dispatchEvent(new CustomEvent('data-changed'));
               } catch (err: any) {
                 showToast("Lỗi khi lưu: " + err.message, "error");
