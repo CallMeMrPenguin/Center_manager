@@ -7,6 +7,7 @@ import { api } from '../api';
 import { showToast } from '../components/Toast';
 import { useConfirm } from '../components/ConfirmDialog';
 import { CustomDatePicker } from '../components/CustomDatePicker';
+import { CustomSelect } from '../components/CustomSelect';
 import { DataTable } from '../components/DataTable';
 
 interface TeacherCM {
@@ -171,20 +172,13 @@ export default function TeachersPage() {
       id: 'actions',
       header: () => <div className="text-right w-full">Thao tác</div>,
       cell: ({ row }) => (
-        <div className="flex items-center justify-end gap-1.5">
+        <div className="flex items-center justify-end">
           <button
             onClick={() => handleOpenEdit(row.original)}
             className="p-1.5 rounded-lg bg-[#1a213a] hover:bg-[#252e50] text-indigo-300 border border-[#374368] transition cursor-pointer"
-            title="Sửa"
+            title="Chỉnh sửa nhân sự"
           >
             <Edit3 size={13} />
-          </button>
-          <button
-            onClick={() => handleDelete(row.original)}
-            className="p-1.5 rounded-lg bg-[#2c151c] hover:bg-[#3d1c27] text-rose-300 border border-[#dc2626]/50 transition cursor-pointer"
-            title="Xóa"
-          >
-            <Trash2 size={13} />
           </button>
         </div>
       ),
@@ -311,14 +305,14 @@ export default function TeachersPage() {
                 <label className="block text-[11px] font-extrabold text-slate-300 uppercase tracking-wider mb-1.5">
                   Vai Trò
                 </label>
-                <select
+                <CustomSelect
                   value={formData.role || 'Giáo viên'}
-                  onChange={(e) => setFormData({ ...formData, role: e.target.value as any })}
-                  className="w-full bg-[#181d2e] border border-white/10 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-indigo-500 font-semibold cursor-pointer"
-                >
-                  <option value="Giáo viên">Giáo viên</option>
-                  <option value="Trợ giảng">Trợ giảng</option>
-                </select>
+                  onChange={(val) => setFormData({ ...formData, role: val as any })}
+                  options={[
+                    { value: 'Giáo viên', label: 'Giáo viên' },
+                    { value: 'Trợ giảng', label: 'Trợ giảng' }
+                  ]}
+                />
               </div>
 
               <div>
@@ -357,20 +351,38 @@ export default function TeachersPage() {
                 />
               </div>
 
-              <div className="flex items-center justify-end gap-3 pt-3 border-t border-white/10">
-                <button
-                  type="button"
-                  onClick={() => setModalOpen(false)}
-                  className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-bold transition cursor-pointer"
-                >
-                  Hủy Bỏ
-                </button>
-                <button
-                  type="submit"
-                  className="px-5 py-2 rounded-xl bg-[#5c36f5] hover:bg-[#7351f7] text-white text-xs font-extrabold shadow-[0_4px_12px_rgba(92,54,245,0.4)] transition cursor-pointer border border-white/20"
-                >
-                  Lưu Thông Tin
-                </button>
+              <div className="flex items-center justify-between pt-3 border-t border-white/10">
+                {editingTeacher ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setModalOpen(false);
+                      handleDelete(editingTeacher);
+                    }}
+                    className="px-3 py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 hover:text-white border border-rose-500/30 text-xs font-bold transition cursor-pointer flex items-center gap-1.5"
+                  >
+                    <Trash2 size={13} />
+                    <span>Xóa Nhân Sự</span>
+                  </button>
+                ) : (
+                  <div />
+                )}
+
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setModalOpen(false)}
+                    className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-bold transition cursor-pointer"
+                  >
+                    Hủy Bỏ
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-5 py-2 rounded-xl bg-[#5c36f5] hover:bg-[#7351f7] text-white text-xs font-extrabold shadow-[0_4px_12px_rgba(92,54,245,0.4)] transition cursor-pointer border border-white/20"
+                  >
+                    Lưu Thông Tin
+                  </button>
+                </div>
               </div>
             </form>
           </div>

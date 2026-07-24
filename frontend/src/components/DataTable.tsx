@@ -614,8 +614,8 @@ export function DataTable<TData>({
           {/* Scroll container */}
           <div
             ref={tableScrollRef}
-            className="overflow-auto flex-1 min-h-0 relative"
-            style={{ overscrollBehavior: 'contain' }}
+            className={`overflow-x-auto relative ${useVirt ? 'overflow-y-auto flex-1 min-h-0' : 'overflow-y-visible'}`}
+            style={{ overscrollBehaviorX: 'contain' }}
           >
             <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
               <SortableContext items={orderedHeaderIds} strategy={horizontalListSortingStrategy}>
