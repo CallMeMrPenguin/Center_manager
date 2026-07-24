@@ -57,6 +57,7 @@ class ClassPayload(BaseModel):
     subject: Optional[str] = None
     room: Optional[str] = None
     status: Optional[str] = "Đang hoạt động"
+    color: Optional[str] = "#7c3aed"
     notes: Optional[str] = None
 
 class EnrollPayload(BaseModel):
@@ -71,12 +72,14 @@ class WeeklySlotPayload(BaseModel):
     notes: Optional[str] = None
 
 class ClassSessionPayload(BaseModel):
+    class_id: Optional[int] = None
     date: str
     start_time: str
     duration: int
     status: Optional[str] = "Sắp diễn ra"
     teacher_id: Optional[int] = None
     notes: Optional[str] = ""
+    color: Optional[str] = None
 
 class CoursePayload(BaseModel):
     course_name: str
@@ -208,7 +211,8 @@ def api_get_sessions(class_id: int, month: str = ""):
 
 @router.post("/api/classes/{class_id}/schedule/sessions")
 def api_add_session(class_id: int, payload: ClassSessionPayload):
-    sid = add_class_session(class_id, payload.date, payload.start_time, payload.duration, payload.status or "Sắp diễn ra", payload.teacher_id, payload.notes or "")
+    target_cid = class_id if class_id > 0 else (payload.class_id or 1)
+    sid = add_class_session(target_cid, payload.date, payload.start_time, payload.duration, payload.status or "Sắp diễn ra", payload.teacher_id, payload.notes or "", payload.color)
     return {"id": sid, "status": "success"}
 
 @router.put("/api/classes/{class_id}/schedule/sessions/{session_id}")

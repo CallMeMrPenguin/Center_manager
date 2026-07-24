@@ -21,6 +21,7 @@ interface ClassItem {
   subject?: string;
   room?: string;
   status: 'Đang hoạt động' | 'Tạm dừng' | 'Đã kết thúc';
+  color?: string;
   notes?: string;
   student_count?: number;
 }
@@ -1321,6 +1322,23 @@ export default function ClassesPage() {
                     placeholder="Phòng 201"
                     className="w-full bg-[#181d2e] border border-white/10 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-indigo-500 font-semibold"
                   />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-extrabold text-slate-300 uppercase tracking-wider mb-1.5">Màu Sắc Lịch Trình</label>
+                <div className="flex items-center gap-2 flex-wrap bg-[#141928] p-2.5 rounded-xl border border-white/10">
+                  {['#7c3aed', '#0ea5e9', '#10b981', '#f59e0b', '#ec4899', '#06b6d4', '#f97316', '#84cc16', '#6366f1', '#fb7185'].map(hex => (
+                    <button
+                      key={hex}
+                      type="button"
+                      onClick={() => setClassForm({ ...classForm, color: hex })}
+                      className={`w-6 h-6 rounded-full border-2 transition cursor-pointer ${
+                        (classForm.color || '#7c3aed') === hex ? 'border-white scale-110 shadow-lg' : 'border-transparent opacity-60 hover:opacity-100'
+                      }`}
+                      style={{ backgroundColor: hex }}
+                    />
+                  ))}
                 </div>
               </div>
 

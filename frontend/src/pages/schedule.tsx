@@ -75,6 +75,8 @@ function getPremiumStyle(status: string, hexColor = '#7b61ff') {
 
 function getSessionColor(sess: ClassSession): string {
   if (sess.color && sess.color.startsWith('#')) return sess.color;
+  const match = (sess.notes || '').match(/#COLOR:(#[0-9a-fA-F]{6})/);
+  if (match) return match[1];
   const seed = ((sess.class_id || 1) * 7 + (sess.id || 1) * 13) % PALETTE_20.length;
   return PALETTE_20[seed];
 }

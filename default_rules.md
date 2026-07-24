@@ -6,7 +6,7 @@ The following mandatory rules MUST be strictly followed across all features, tab
 
 ## 🚀 1. Git Auto Quick-Commit & Push Standard
 - **Automatic Sync to Remote Repository**:
-  - Remote Origin URL: `https://github.com/CallMeMrPenguin/Center_manager.git` (Branch: `main`).
+  - Remote Origin URL: `https://github.com/CallMeMrPenguin/Center_manager.git` (Branch: `main`). (this bat)
   - **Mandatory End-of-Task Action**: After making code updates or completing features in any coding session, the agent MUST automatically perform a quick-commit & push to GitHub:
     ```bash
     git add .; git commit -m "feat/fix: [Brief summary of changes made]"; git push origin main
@@ -405,3 +405,36 @@ When any agent session adds a new table to any page:
 7. ✅ Set `exportFilename` to a descriptive name
 8. ✅ Run `npm run build` — 0 TypeScript errors required
 9. ✅ Commit with `git add . && git commit -m "feat: ..." && git push origin main`
+
+---
+
+## 💬 18. Zero Code Dumps in Conversation — MANDATORY
+
+- **NO CODE DUMPING IN CHAT**: Agents must NEVER output long code blocks, full source code files, or extensive multi-line code diffs inside conversation text responses.
+- **WRITE CODE DIRECTLY TO FILES**: Use file editing tools (`replace_file_content`, `write_to_file`) to apply all code changes directly to project files.
+- **CONCISE SUMMARY WITH FILE LINKS**: Chat responses must contain only a concise high-level summary of what was accomplished, highlighting key decisions and providing clickable markdown links to modified files (`[filename](file:///path/to/file)`).
+
+---
+
+## 🧠 19. Core Behavioral Guidelines (Merged from RULE.md)
+
+### 19.1 — Think Before Coding
+- State assumptions explicitly. If uncertain, ask.
+- If multiple interpretations exist, present them — do not pick silently.
+- If a simpler approach exists, propose it.
+- If requirements are ambiguous, clarify before mutating source code.
+
+### 19.2 — Simplicity First
+- Minimum code that solves the problem. Nothing speculative.
+- No unrequested abstractions or unused configurability.
+- If 50 lines solves a problem, do not write 200.
+
+### 19.3 — Surgical Changes
+- Touch only what is necessary to fulfill the request.
+- Match existing repository style and patterns.
+- Remove orphaned imports, variables, or functions created by your changes.
+
+### 19.4 — Goal-Driven Execution
+- Define verifiable success criteria before starting.
+- Verify changes with concrete runtime commands (`npm run build`, API tests, git checks).
+- Persevere through errors until verified success is achieved.

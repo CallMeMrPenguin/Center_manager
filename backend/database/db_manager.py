@@ -185,6 +185,11 @@ def init_db():
     except sqlite3.OperationalError:
         pass
 
+    try:
+        cursor.execute("ALTER TABLE classes ADD COLUMN color TEXT DEFAULT '#7c3aed'")
+    except sqlite3.OperationalError:
+        pass
+
     # 9. Class Students enrollment junction
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS class_students (
@@ -220,9 +225,15 @@ def init_db():
         status TEXT CHECK(status IN ('Sắp diễn ra', 'Đã học', 'Hủy')) DEFAULT 'Sắp diễn ra',
         teacher_id INTEGER REFERENCES teachers_cm(id) ON DELETE SET NULL,
         notes TEXT,
+        color TEXT DEFAULT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
     """)
+
+    try:
+        cursor.execute("ALTER TABLE class_sessions ADD COLUMN color TEXT DEFAULT NULL")
+    except sqlite3.OperationalError:
+        pass
 
     # 12. Class Seating Layout
     cursor.execute("""
@@ -1182,11 +1193,11 @@ def create_class(data: Dict[str, Any]) -> int:
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute("""
-        INSERT INTO classes (class_name, teacher_id, grade, subject, room, status, notes)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO classes (class_name, teacher_id, grade, subject, room, status, color, notes)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     """, (
         data.get("class_name"), data.get("teacher_id"), data.get("grade", "Lớp 6"), data.get("subject"),
-        data.get("room"), data.get("status", "Đang hoạt động"), data.get("notes")
+        data.get("room"), data.get("status", "Đang hoạt động"), data.get("color", "#7c3aed"), data.get("notes")
     ))
     conn.commit()
     cid = cursor.lastrowid
@@ -1198,12 +1209,12 @@ def update_class(class_id: int, data: Dict[str, Any]):
     cursor = conn.cursor()
     cursor.execute("""
         UPDATE classes SET
-            class_name = ?, teacher_id = ?, grade = ?, subject = ?, room = ?, status = ?, notes = ?,
+            class_name = ?, teacher_id = ?, grade = ?, subject = ?, room = ?, status = ?, color = ?, notes = ?,
             updated_at = CURRENT_TIMESTAMP
         WHERE id = ?
     """, (
         data.get("class_name"), data.get("teacher_id"), data.get("grade", "Lớp 6"), data.get("subject"),
-        data.get("room"), data.get("status"), data.get("notes"), class_id
+        data.get("room"), data.get("status"), data.get("color", "#7c3aed"), data.get("notes"), class_id
     ))
     conn.commit()
     conn.close()
@@ -1296,9 +1307,22 @@ def get_class_sessions(class_id: int, month_year: str = "") -> List[Dict[str, An
     conn = get_connection()
     cursor = conn.cursor()
     
+    is_all_classes = (not class_id or int(class_id) == 0)
+
     # 1. Get explicit sessions
-    query = "SELECT s.*, t.full_name as teacher_name FROM class_sessions s LEFT JOIN teachers_cm t ON s.teacher_id = t.id WHERE s.class_id = ?"
-    params = [class_id]
+    query = """
+        SELECT s.*, c.class_name, COALESCE(s.color, c.color, '#7c3aed') as color, t.full_name as teacher_name 
+        FROM class_sessions s 
+        LEFT JOIN classes c ON s.class_id = c.id
+        LEFT JOIN teachers_cm t ON s.teacher_id = t.id
+    """
+    params = []
+    if not is_all_classes:
+        query += " WHERE s.class_id = ?"
+        params.append(class_id)
+    else:
+        query += " WHERE 1=1"
+        
     if month_year:
         query += " AND s.date LIKE ?"
         params.append(f"{month_year}%")
@@ -1307,33 +1331,32 @@ def get_class_sessions(class_id: int, month_year: str = "") -> List[Dict[str, An
     rows = cursor.fetchall()
     explicit_sessions = [dict(r) for r in rows]
     
-    # 2. Get class info (for teacher)
-    cursor.execute("SELECT c.teacher_id, t.full_name as teacher_name FROM classes c LEFT JOIN teachers_cm t ON c.teacher_id = t.id WHERE c.id = ?", (class_id,))
-    class_info = cursor.fetchone()
-    class_teacher_id = class_info["teacher_id"] if class_info else None
-    class_teacher_name = class_info["teacher_name"] if class_info else None
-    
-    # 3. Get weekly slots
-    cursor.execute("SELECT * FROM class_schedule_weekly WHERE class_id = ?", (class_id,))
+    # 2. Get weekly slots
+    if not is_all_classes:
+        cursor.execute("""
+            SELECT w.*, c.class_name, COALESCE(c.color, '#7c3aed') as class_color, c.teacher_id as class_teacher_id, t.full_name as class_teacher_name
+            FROM class_schedule_weekly w
+            JOIN classes c ON w.class_id = c.id
+            LEFT JOIN teachers_cm t ON c.teacher_id = t.id
+            WHERE w.class_id = ?
+        """, (class_id,))
+    else:
+        cursor.execute("""
+            SELECT w.*, c.class_name, COALESCE(c.color, '#7c3aed') as class_color, c.teacher_id as class_teacher_id, t.full_name as class_teacher_name
+            FROM class_schedule_weekly w
+            JOIN classes c ON w.class_id = c.id
+            LEFT JOIN teachers_cm t ON c.teacher_id = t.id
+        """)
     weekly_slots = [dict(r) for r in cursor.fetchall()]
-    
     conn.close()
     
     if not weekly_slots or not month_year:
         return explicit_sessions
         
-    # Map Python's weekday index to "Thứ 2" - "Chủ nhật"
     weekday_map = {
-        0: "Thứ 2",
-        1: "Thứ 3",
-        2: "Thứ 4",
-        3: "Thứ 5",
-        4: "Thứ 6",
-        5: "Thứ 7",
-        6: "Chủ nhật"
+        0: "Thứ 2", 1: "Thứ 3", 2: "Thứ 4", 3: "Thứ 5", 4: "Thứ 6", 5: "Thứ 7", 6: "Chủ nhật"
     }
     
-    # 4. Generate virtual sessions for the month
     try:
         year_str, month_str = month_year.split('-')
         year = int(year_str)
@@ -1342,52 +1365,70 @@ def get_class_sessions(class_id: int, month_year: str = "") -> List[Dict[str, An
         return explicit_sessions
         
     _, num_days = calendar.monthrange(year, month)
-    
-    # Keep track of explicit sessions by date and start_time to check overrides
-    explicit_keys = {(s["date"], s["start_time"]) for s in explicit_sessions}
+    explicit_keys = {(s["class_id"], s["date"], s["start_time"]) for s in explicit_sessions}
     
     virtual_sessions = []
-    
     for day in range(1, num_days + 1):
         dt = datetime(year, month, day)
         day_name = weekday_map[dt.weekday()]
         date_str = f"{year:04d}-{month:02d}-{day:02d}"
         
-        # Check slots matching this day_name
         for slot in weekly_slots:
             if slot["day_of_week"] == day_name:
+                slot_cid = slot["class_id"]
                 start_time = slot["start_time"]
-                # If there's already an explicit session for this date & start time, skip virtual
-                if (date_str, start_time) not in explicit_keys:
+                if (slot_cid, date_str, start_time) not in explicit_keys:
                     virtual_sessions.append({
-                        "id": -slot["id"] - (day * 100), # Negate the slot ID and mix in day offset to make it unique and recognize it as virtual
-                        "class_id": class_id,
+                        "id": -slot["id"] - (day * 1000) - (slot_cid * 100000),
+                        "class_id": slot_cid,
+                        "class_name": slot["class_name"],
+                        "color": slot.get("class_color") or "#7c3aed",
                         "date": date_str,
                         "start_time": start_time,
                         "duration": slot["duration"],
                         "status": "Sắp diễn ra",
-                        "teacher_id": class_teacher_id,
-                        "teacher_name": class_teacher_name,
+                        "teacher_id": slot.get("class_teacher_id"),
+                        "teacher_name": slot.get("class_teacher_name") or "",
                         "notes": slot["notes"] or ""
                      })
                      
-    # Merge and sort
     all_sessions = explicit_sessions + virtual_sessions
     all_sessions.sort(key=lambda s: (s["date"], s["start_time"]))
     return all_sessions
 
 
-def add_class_session(class_id: int, date: str, start_time: str, duration: int, status: str = "Sắp diễn ra", teacher_id: int = None, notes: str = "") -> int:
+def add_class_session(class_id: int, date: str, start_time: str, duration: int, status: str = "Sắp diễn ra", teacher_id: int = None, notes: str = "", color: str = None) -> int:
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute("""
-        INSERT INTO class_sessions (class_id, date, start_time, duration, status, teacher_id, notes)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
-    """, (class_id, date, start_time, duration, status, teacher_id, notes))
+        INSERT INTO class_sessions (class_id, date, start_time, duration, status, teacher_id, notes, color)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    """, (class_id, date, start_time, duration, status, teacher_id, notes, color))
     conn.commit()
     sid = cursor.lastrowid
     conn.close()
     return sid
+
+def update_class_session(session_id: int, data: Dict[str, Any]):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        UPDATE class_sessions SET
+            class_id = COALESCE(?, class_id),
+            date = COALESCE(?, date),
+            start_time = COALESCE(?, start_time),
+            duration = COALESCE(?, duration),
+            status = COALESCE(?, status),
+            teacher_id = COALESCE(?, teacher_id),
+            notes = COALESCE(?, notes),
+            color = COALESCE(?, color)
+        WHERE id = ?
+    """, (
+        data.get("class_id"), data.get("date"), data.get("start_time"), data.get("duration"),
+        data.get("status"), data.get("teacher_id"), data.get("notes"), data.get("color"), session_id
+    ))
+    conn.commit()
+    conn.close()
 
 def update_class_session(session_id: int, data: Dict[str, Any]):
     conn = get_connection()
