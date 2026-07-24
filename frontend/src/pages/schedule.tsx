@@ -558,7 +558,7 @@ export default function SchedulePage() {
 
       {/* CONTEXT MENU */}
       {ctxMenu && (
-        <div style={{ top: ctxMenu.y, left: ctxMenu.x }} className="fixed z-[999] bg-[#0d1018]/95 border border-white/10 rounded-xl shadow-[0_20px_60px_rgba(0,0,0,0.8)] py-1.5 min-w-[150px] backdrop-blur-xl animate-mac-dropdown">
+        <div style={{ top: ctxMenu.y, left: ctxMenu.x }} className="fixed z-[999] bg-[#0d1018] border border-white/10 rounded-xl shadow-[0_20px_60px_rgba(0,0,0,0.8)] py-1.5 min-w-[150px] animate-mac-dropdown">
           <button onClick={() => { openAdd(ctxMenu.dateStr); setCtxMenu(null); }} className="w-full text-left px-4 py-2 text-xs font-bold text-slate-300 hover:text-white hover:bg-indigo-500/20 transition flex items-center gap-2 cursor-pointer">
             <Plus className="h-3.5 w-3.5 text-indigo-400" />Thêm buổi học
           </button>
@@ -567,7 +567,7 @@ export default function SchedulePage() {
 
       {/* MODAL */}
       {modalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-mac-backdrop">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 animate-mac-backdrop">
           <div className="bg-[#0f1320] border border-white/10 rounded-2xl w-full max-w-lg overflow-hidden shadow-[0_24px_80px_rgba(0,0,0,0.8)] animate-mac-modal">
             <div className="flex items-center justify-between p-5 border-b border-white/10 bg-[#14192b]">
               <h3 className="text-sm font-black text-white flex items-center gap-2"><CalendarIcon className="h-4 w-4 text-indigo-400" />{editing ? 'Cập Nhật Buổi Học' : 'Thêm Buổi Học Mới'}</h3>

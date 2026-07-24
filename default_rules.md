@@ -84,3 +84,18 @@ Every data table MUST feature a filter icon next to each column title in the tab
 ## 🚀 10. High-Performance Table & List Rendering Rule
 - **High-Performance Component Memoization**: All table rows (`QuestionTableRow`, `VocabTableRow`, `StudentTableRow`) and review card items MUST be extracted into standalone `React.memo()` components with pre-memoized text parsers (`useMemo`) to prevent unnecessary row re-renders on hover, checkbox selection, or filter updates.
 
+---
+
+## 🎨 11. Dropdown Menu Theme Standard
+- **Dark Theme Dropdown Styling**: All `<select>` and `<option>` elements across every tab MUST match the app's dark UI theme (`bg-[#0f1322]`, `text-white`, `select option { background-color: #0f1322 !important; color: #ffffff !important; }`). Native browser light grey options are strictly forbidden.
+
+---
+
+## ☀️ 12. White Icons & Date Picker Standard
+- **Pure White Icons**: No icon or SVG may use black or near-black colors (`text-black`, `text-slate-900`). All date pickers (`<input type="date">`) MUST enforce `color-scheme: dark !important` and `::-webkit-calendar-picker-indicator { filter: invert(1) brightness(2) !important; }` so that calendar picker icons display in crisp pure white.
+
+---
+
+## ⚡ 13. Lightweight Modal Overlays (Zero Blur Lag)
+- **Solid Dark Backdrop Overlays**: Small pop-up modal windows and context menus MUST NOT use `backdrop-blur-sm` or `backdrop-blur-xl`. All modal backdrops MUST use solid dark overlays (`bg-black/85`) to ensure 0-lag input typing and instant responsiveness.
+
