@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, Fragment } from 'react';
+import React, { useState, useRef, useEffect, useCallback, Fragment } from 'react';
 import {
   useReactTable,
   getCoreRowModel,
@@ -16,57 +16,85 @@ import {
   GroupingState,
   ExpandedState,
   ColumnPinningState,
+  ColumnOrderState,
   ColumnResizeMode,
   Row,
 } from '@tanstack/react-table';
+import { useVirtualizer } from '@tanstack/react-virtual';
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  horizontalListSortingStrategy,
+  useSortable,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import * as XLSX from 'xlsx';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 import {
   ChevronLeft, ChevronRight, RefreshCw, AlertCircle,
-  ArrowUp, ArrowDown, ArrowUpDown, Search, Eye, EyeOff,
-  ChevronDown, ChevronUp, CheckSquare, Square, Minus,
-  ChevronsLeft, ChevronsRight, X, SlidersHorizontal,
+  ArrowUp, ArrowDown, ArrowUpDown, Search, ChevronDown, ChevronUp,
+  CheckSquare, ChevronsLeft, ChevronsRight, X, SlidersHorizontal,
+  GripVertical, Download, FileSpreadsheet, FileText, Zap,
 } from 'lucide-react';
 
+// ─── Types ───────────────────────────────────────────────────────────────────
 export interface DataTableProps<TData> {
-  // --- Core ---
   data: TData[];
   columns: ColumnDef<TData, any>[];
   loading?: boolean;
   loadingMessage?: string;
   emptyMessage?: string | React.ReactNode;
 
-  // --- Pagination ---
+  // Pagination
   pageSize?: number;
   showPagination?: boolean;
 
-  // --- Features toggles ---
+  // Feature toggles
   enableGlobalSearch?: boolean;
   enableColumnVisibility?: boolean;
   enableRowSelection?: boolean;
   enableColumnResizing?: boolean;
+  enableColumnReorder?: boolean;
   enableGrouping?: boolean;
   enableRowExpansion?: boolean;
   enableColumnPinning?: boolean;
+  enableMultiSort?: boolean;
+  enableVirtualization?: boolean;   // auto-on when data.length > 500
+  enableExport?: boolean;
 
-  // --- Controlled state (optional overrides) ---
+  // Sticky layout
+  stickyHeader?: boolean;
+  stickyFirstColumn?: boolean;
+
+  // Initial state
   initialSorting?: SortingState;
   initialColumnVisibility?: VisibilityState;
   initialColumnPinning?: ColumnPinningState;
 
-  // --- Callbacks ---
+  // Callbacks
   onRowClick?: (row: TData) => void;
   onSelectionChange?: (selectedRows: TData[]) => void;
   renderSubComponent?: (props: { row: Row<TData> }) => React.ReactNode;
 
-  // --- Toolbar extras ---
-  toolbarLeft?: React.ReactNode;   // extra content on the left of toolbar
-  toolbarRight?: React.ReactNode;  // extra content on the right of toolbar
+  // Toolbar slots
+  toolbarLeft?: React.ReactNode;
+  toolbarRight?: React.ReactNode;
   searchPlaceholder?: string;
 
-  // --- Sticky header ---
-  stickyHeader?: boolean;
+  // Export
+  exportFilename?: string;
 }
 
-// ── Indeterminate Checkbox ───────────────────────────────────────────────────
+// ─── Indeterminate Checkbox ──────────────────────────────────────────────────
 function IndeterminateCheckbox({
   indeterminate,
   className = '',
@@ -88,15 +116,56 @@ function IndeterminateCheckbox({
   );
 }
 
-// ── Column Visibility Dropdown ───────────────────────────────────────────────
+// ─── Draggable Header Cell ────────────────────────────────────────────────────
+function DraggableHeader({ header, children, enableReorder }: {
+  header: any;
+  children: React.ReactNode;
+  enableReorder: boolean;
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: header.id,
+  });
+
+  const style: React.CSSProperties = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+    zIndex: isDragging ? 100 : undefined,
+    position: 'relative',
+  };
+
+  return (
+    <th
+      ref={setNodeRef}
+      style={style}
+      className="select-none relative"
+    >
+      <div className="flex items-center gap-1 w-full">
+        {enableReorder && (
+          <span
+            {...attributes}
+            {...listeners}
+            className="cursor-grab active:cursor-grabbing text-slate-600 hover:text-slate-400 shrink-0 transition-colors touch-none"
+            title="Kéo để sắp xếp cột"
+          >
+            <GripVertical size={12} />
+          </span>
+        )}
+        {children}
+      </div>
+    </th>
+  );
+}
+
+// ─── Column Visibility Dropdown ───────────────────────────────────────────────
 function ColumnVisibilityDropdown<TData>({ table }: { table: ReturnType<typeof useReactTable<TData>> }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    function handler(e: MouseEvent) {
+    const handler = (e: MouseEvent) => {
       if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
-    }
+    };
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
   }, []);
@@ -108,46 +177,31 @@ function ColumnVisibilityDropdown<TData>({ table }: { table: ReturnType<typeof u
       <button
         type="button"
         onClick={() => setOpen(v => !v)}
-        className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#1c243c] hover:bg-[#253050] text-slate-300 hover:text-white border border-[#303d62] text-xs font-bold transition cursor-pointer"
+        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#1c243c] hover:bg-[#253050] text-slate-300 hover:text-white border border-[#303d62] text-xs font-bold transition cursor-pointer"
         title="Hiển thị / ẩn cột"
       >
         <SlidersHorizontal size={13} className="text-indigo-400" />
         <span className="hidden sm:inline">Cột</span>
-        {open ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+        {open ? <ChevronUp size={11} /> : <ChevronDown size={11} />}
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full mt-2 z-50 w-52 bg-[#131929] border border-[#28334e] rounded-xl shadow-2xl p-3 space-y-1.5 animate-mac-dropdown">
+        <div className="absolute right-0 top-full mt-2 z-[60] w-52 bg-[#131929] border border-[#28334e] rounded-2xl shadow-2xl p-3 space-y-1 animate-mac-dropdown">
           <div className="text-[10px] font-black uppercase text-indigo-400 tracking-wider border-b border-white/10 pb-1.5 mb-2 flex items-center justify-between">
             <span>Hiển thị cột</span>
             <div className="flex gap-1">
-              <button
-                type="button"
-                className="text-[9px] text-slate-400 hover:text-white px-1.5 py-0.5 rounded bg-white/5 hover:bg-white/10 transition cursor-pointer"
-                onClick={() => table.toggleAllColumnsVisible(true)}
-              >Tất cả</button>
-              <button
-                type="button"
-                className="text-[9px] text-slate-400 hover:text-white px-1.5 py-0.5 rounded bg-white/5 hover:bg-white/10 transition cursor-pointer"
-                onClick={() => table.toggleAllColumnsVisible(false)}
-              >Ẩn hết</button>
+              <button type="button" onClick={() => table.toggleAllColumnsVisible(true)}
+                className="text-[9px] text-slate-400 hover:text-white px-1.5 py-0.5 rounded bg-white/5 hover:bg-white/10 transition cursor-pointer">Tất cả</button>
+              <button type="button" onClick={() => table.toggleAllColumnsVisible(false)}
+                className="text-[9px] text-slate-400 hover:text-white px-1.5 py-0.5 rounded bg-white/5 hover:bg-white/10 transition cursor-pointer">Ẩn hết</button>
             </div>
           </div>
           {allCols.map(col => (
-            <label
-              key={col.id}
-              className="flex items-center gap-2.5 text-xs text-slate-200 cursor-pointer hover:text-white px-1.5 py-1 rounded hover:bg-[#1e2740] transition"
-            >
-              <input
-                type="checkbox"
-                checked={col.getIsVisible()}
-                onChange={col.getToggleVisibilityHandler()}
-                className="accent-indigo-500 rounded cursor-pointer w-3.5 h-3.5"
-              />
+            <label key={col.id} className="flex items-center gap-2.5 text-xs text-slate-200 cursor-pointer hover:text-white px-1.5 py-1 rounded-lg hover:bg-[#1e2740] transition">
+              <input type="checkbox" checked={col.getIsVisible()} onChange={col.getToggleVisibilityHandler()}
+                className="accent-indigo-500 rounded cursor-pointer w-3.5 h-3.5" />
               <span className="truncate">{typeof col.columnDef.header === 'string' ? col.columnDef.header : col.id}</span>
-              {col.getIsPinned() && (
-                <span className="ml-auto text-[9px] text-amber-400 font-bold">PIN</span>
-              )}
+              {col.getIsPinned() && <span className="ml-auto text-[9px] text-amber-400 font-bold">PIN</span>}
             </label>
           ))}
         </div>
@@ -156,7 +210,108 @@ function ColumnVisibilityDropdown<TData>({ table }: { table: ReturnType<typeof u
   );
 }
 
-// ── Main DataTable Component ─────────────────────────────────────────────────
+// ─── Export Dropdown ──────────────────────────────────────────────────────────
+function ExportDropdown<TData>({
+  table,
+  filename,
+}: {
+  table: ReturnType<typeof useReactTable<TData>>;
+  filename: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  const getExportRows = () =>
+    table.getFilteredRowModel().rows.map(row =>
+      row.getVisibleCells()
+        .filter(c => c.column.id !== 'select' && c.column.id !== '_expander')
+        .map(c => {
+          const val = c.getValue();
+          if (val === null || val === undefined) return '';
+          if (typeof val === 'object') return JSON.stringify(val);
+          return String(val);
+        })
+    );
+
+  const getHeaders = () =>
+    table.getHeaderGroups()[0].headers
+      .filter(h => h.column.id !== 'select' && h.column.id !== '_expander' && h.column.getIsVisible())
+      .map(h => typeof h.column.columnDef.header === 'string' ? h.column.columnDef.header : h.column.id);
+
+  const exportExcel = () => {
+    const headers = getHeaders();
+    const rows = getExportRows();
+    const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Data');
+    XLSX.writeFile(wb, `${filename}.xlsx`);
+    setOpen(false);
+  };
+
+  const exportPDF = () => {
+    const headers = getHeaders();
+    const rows = getExportRows();
+    const doc = new jsPDF({ orientation: 'landscape' });
+    doc.setFontSize(12);
+    doc.text(filename, 14, 15);
+    autoTable(doc, {
+      head: [headers],
+      body: rows,
+      startY: 22,
+      styles: { fontSize: 8, cellPadding: 3 },
+      headStyles: { fillColor: [30, 41, 82], textColor: [200, 200, 255], fontStyle: 'bold' },
+      alternateRowStyles: { fillColor: [245, 245, 255] },
+    });
+    doc.save(`${filename}.pdf`);
+    setOpen(false);
+  };
+
+  return (
+    <div className="relative" ref={ref}>
+      <button
+        type="button"
+        onClick={() => setOpen(v => !v)}
+        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#1c243c] hover:bg-[#253050] text-slate-300 hover:text-white border border-[#303d62] text-xs font-bold transition cursor-pointer"
+        title="Xuất dữ liệu"
+      >
+        <Download size={13} className="text-emerald-400" />
+        <span className="hidden sm:inline">Xuất</span>
+        {open ? <ChevronUp size={11} /> : <ChevronDown size={11} />}
+      </button>
+
+      {open && (
+        <div className="absolute right-0 top-full mt-2 z-[60] w-44 bg-[#131929] border border-[#28334e] rounded-2xl shadow-2xl p-2 space-y-1 animate-mac-dropdown">
+          <button
+            type="button"
+            onClick={exportExcel}
+            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-slate-200 hover:text-white hover:bg-emerald-500/10 hover:border hover:border-emerald-500/20 transition cursor-pointer"
+          >
+            <FileSpreadsheet size={13} className="text-emerald-400" />
+            Excel (.xlsx)
+          </button>
+          <button
+            type="button"
+            onClick={exportPDF}
+            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-slate-200 hover:text-white hover:bg-rose-500/10 hover:border hover:border-rose-500/20 transition cursor-pointer"
+          >
+            <FileText size={13} className="text-rose-400" />
+            PDF (.pdf)
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Main DataTable ───────────────────────────────────────────────────────────
 export function DataTable<TData>({
   data,
   columns,
@@ -169,9 +324,15 @@ export function DataTable<TData>({
   enableColumnVisibility = true,
   enableRowSelection = false,
   enableColumnResizing = true,
+  enableColumnReorder = true,
   enableGrouping = false,
   enableRowExpansion = false,
   enableColumnPinning = false,
+  enableMultiSort = true,
+  enableVirtualization,
+  enableExport = true,
+  stickyHeader = true,
+  stickyFirstColumn = false,
   initialSorting = [],
   initialColumnVisibility = {},
   initialColumnPinning = {},
@@ -181,9 +342,10 @@ export function DataTable<TData>({
   toolbarLeft,
   toolbarRight,
   searchPlaceholder = 'Tìm kiếm...',
-  stickyHeader = true,
+  exportFilename = 'export',
 }: DataTableProps<TData>) {
-  // ── Internal State ─────────────────────────────────────────────────────────
+
+  // ── State ──────────────────────────────────────────────────────────────────
   const [globalFilter, setGlobalFilter] = useState('');
   const [sorting, setSorting] = useState<SortingState>(initialSorting);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -191,17 +353,25 @@ export function DataTable<TData>({
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
   const [grouping, setGrouping] = useState<GroupingState>([]);
   const [expanded, setExpanded] = useState<ExpandedState>({});
-  const [columnPinning, setColumnPinning] = useState<ColumnPinningState>(initialColumnPinning);
+  const [columnPinning, setColumnPinning] = useState<ColumnPinningState>(
+    stickyFirstColumn
+      ? { left: [columns[0] && (columns[0] as any).id || (columns[0] as any).accessorKey || ''], ...initialColumnPinning }
+      : initialColumnPinning
+  );
+  const [columnOrder, setColumnOrder] = useState<ColumnOrderState>([]);
   const columnResizeMode: ColumnResizeMode = 'onChange';
+  const tableScrollRef = useRef<HTMLDivElement>(null);
 
-  // ── Build column list (prepend select + expander if needed) ─────────────────
+  // ── Build columns (prepend select / expander) ────────────────────────────
   const allColumns = React.useMemo<ColumnDef<TData, any>[]>(() => {
     const cols: ColumnDef<TData, any>[] = [];
 
     if (enableRowSelection) {
       cols.push({
         id: 'select',
-        size: 40,
+        size: 42,
+        minSize: 42,
+        maxSize: 42,
         enableResizing: false,
         enableSorting: false,
         enableGlobalFilter: false,
@@ -248,7 +418,7 @@ export function DataTable<TData>({
     return cols;
   }, [columns, enableRowSelection, enableRowExpansion, renderSubComponent]);
 
-  // ── Table Instance ──────────────────────────────────────────────────────────
+  // ── Table instance ─────────────────────────────────────────────────────────
   const table = useReactTable<TData>({
     data,
     columns: allColumns,
@@ -262,92 +432,119 @@ export function DataTable<TData>({
       grouping,
       expanded,
       columnPinning,
+      columnOrder,
     },
-    // Handlers
     onGlobalFilterChange: setGlobalFilter,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
-    onRowSelectionChange: (updater) => {
+    onRowSelectionChange: updater => {
       setRowSelection(prev => {
         const next = typeof updater === 'function' ? updater(prev) : updater;
-        if (onSelectionChange) {
-          const selectedRows = table.getRowModel().rows
-            .filter(r => next[r.id])
-            .map(r => r.original);
-          onSelectionChange(selectedRows);
-        }
         return next;
       });
     },
     onGroupingChange: setGrouping,
     onExpandedChange: setExpanded,
     onColumnPinningChange: setColumnPinning,
-    // Row models
+    onColumnOrderChange: setColumnOrder,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getGroupedRowModel: enableGrouping ? getGroupedRowModel() : undefined,
     getExpandedRowModel: (enableRowExpansion || enableGrouping) ? getExpandedRowModel() : undefined,
-    // Options
     enableRowSelection,
     enableColumnResizing,
     enableGrouping,
     enableGlobalFilter: enableGlobalSearch,
+    enableMultiSort,
+    isMultiSortEvent: () => true,   // always multi-sort on header click
     getRowCanExpand: enableRowExpansion ? () => true : undefined,
-    initialState: {
-      pagination: { pageSize },
-    },
+    initialState: { pagination: { pageSize } },
   });
 
-  // ── Notify selection changes ────────────────────────────────────────────────
-  const prevSelectionRef = useRef<RowSelectionState>({});
+  // ── Selection change callback ──────────────────────────────────────────────
+  const prevSelRef = useRef<RowSelectionState>({});
   useEffect(() => {
     if (!onSelectionChange) return;
-    if (JSON.stringify(rowSelection) === JSON.stringify(prevSelectionRef.current)) return;
-    prevSelectionRef.current = rowSelection;
-    const selectedRows = table.getRowModel().rows
+    if (JSON.stringify(rowSelection) === JSON.stringify(prevSelRef.current)) return;
+    prevSelRef.current = rowSelection;
+    const selected = table.getRowModel().rows
       .filter(r => rowSelection[r.id])
       .map(r => r.original);
-    onSelectionChange(selectedRows);
+    onSelectionChange(selected);
   }, [rowSelection]);
 
-  // ── Pagination helpers ──────────────────────────────────────────────────────
+  // ── Virtual scrolling ──────────────────────────────────────────────────────
+  const useVirt = enableVirtualization !== undefined
+    ? enableVirtualization
+    : data.length > 500;
+
+  const allRows = table.getRowModel().rows;
+
+  const virtualizer = useVirtualizer({
+    count: allRows.length,
+    getScrollElement: () => tableScrollRef.current,
+    estimateSize: () => 44,
+    overscan: 10,
+    enabled: useVirt && !loading && allRows.length > 0,
+  });
+
+  const virtualRows = useVirt ? virtualizer.getVirtualItems() : null;
+  const totalSize = useVirt ? virtualizer.getTotalSize() : 0;
+  const paddingTop = virtualRows && virtualRows.length > 0 ? virtualRows[0].start : 0;
+  const paddingBottom = virtualRows && virtualRows.length > 0
+    ? totalSize - (virtualRows[virtualRows.length - 1]?.end ?? 0)
+    : 0;
+
+  // ── DnD sensors ────────────────────────────────────────────────────────────
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
+
+  const handleDragEnd = useCallback((event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    const currentOrder = table.getState().columnOrder.length > 0
+      ? table.getState().columnOrder
+      : table.getAllLeafColumns().map(c => c.id);
+    const oldIndex = currentOrder.indexOf(String(active.id));
+    const newIndex = currentOrder.indexOf(String(over.id));
+    if (oldIndex !== -1 && newIndex !== -1) {
+      setColumnOrder(arrayMove(currentOrder, oldIndex, newIndex));
+    }
+  }, [table]);
+
+  // ── Helpers ────────────────────────────────────────────────────────────────
   const pageIndex = table.getState().pagination.pageIndex;
   const pageCount = table.getPageCount();
   const totalFiltered = table.getFilteredRowModel().rows.length;
   const hasActiveFilter = globalFilter.trim().length > 0 || columnFilters.length > 0;
+  const selectedCount = Object.keys(rowSelection).length;
 
-  // ── Resize style helper ────────────────────────────────────────────────────
-  const getColWidth = (header: any) =>
-    header.getSize() !== 150 ? { width: header.getSize() } : {};
+  const orderedHeaderIds = table.getHeaderGroups()[0]?.headers.map(h => h.id) ?? [];
 
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
-    <div className="flex flex-col min-h-0 w-full h-full">
+    <div className="flex flex-col min-h-0 w-full h-full font-sans">
 
-      {/* ── TOOLBAR ──────────────────────────────────────────────────────────── */}
-      {(enableGlobalSearch || enableColumnVisibility || toolbarLeft || toolbarRight) && (
-        <div className="flex flex-wrap items-center gap-2 p-2.5 border-b border-[#28334e] bg-[#0d111a] shrink-0">
-          {/* Left side */}
+      {/* ── TOOLBAR ─────────────────────────────────────────────────────────── */}
+      {(enableGlobalSearch || enableColumnVisibility || enableExport || toolbarLeft || toolbarRight) && (
+        <div className="flex flex-wrap items-center gap-2 px-3 py-2.5 border-b border-[#1e2740] bg-[#0b0e1a] shrink-0">
+          {/* Left */}
           <div className="flex flex-wrap items-center gap-2 flex-1 min-w-0">
             {enableGlobalSearch && (
-              <div className="relative flex-1 min-w-[180px] max-w-xs">
+              <div className="relative flex-1 min-w-[160px] max-w-sm">
                 <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none" />
                 <input
                   type="text"
                   value={globalFilter}
                   onChange={e => setGlobalFilter(e.target.value)}
                   placeholder={searchPlaceholder}
-                  className="w-full bg-[#161b2e] border border-[#28334e] text-white text-xs rounded-xl pl-8 pr-8 py-1.5 focus:outline-none focus:border-indigo-500/70 placeholder:text-slate-600 font-medium transition"
+                  className="w-full bg-[#13192c] border border-[#253050] text-white text-xs rounded-xl pl-8 pr-8 py-1.5 focus:outline-none focus:border-indigo-500/60 placeholder:text-slate-600 font-medium transition"
                 />
                 {globalFilter && (
-                  <button
-                    type="button"
-                    onClick={() => setGlobalFilter('')}
-                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition cursor-pointer"
-                  >
+                  <button type="button" onClick={() => setGlobalFilter('')}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition cursor-pointer">
                     <X size={11} />
                   </button>
                 )}
@@ -356,228 +553,266 @@ export function DataTable<TData>({
             {toolbarLeft}
           </div>
 
-          {/* Right side */}
-          <div className="flex items-center gap-2 shrink-0">
+          {/* Right */}
+          <div className="flex items-center gap-2 shrink-0 flex-wrap justify-end">
             {/* Active filter badge */}
             {hasActiveFilter && (
               <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-[10px] font-bold">
-                <span>{totalFiltered} kết quả</span>
-                <button
-                  type="button"
-                  onClick={() => { setGlobalFilter(''); setColumnFilters([]); }}
-                  className="text-indigo-400 hover:text-white cursor-pointer"
-                >
-                  <X size={11} />
-                </button>
+                <span>{totalFiltered.toLocaleString()} kết quả</span>
+                <button type="button" onClick={() => { setGlobalFilter(''); setColumnFilters([]); }}
+                  className="text-indigo-400 hover:text-white cursor-pointer"><X size={10} /></button>
+              </div>
+            )}
+
+            {/* Virtualizer badge */}
+            {useVirt && !loading && (
+              <div className="hidden sm:flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-300 text-[10px] font-bold">
+                <Zap size={10} />
+                <span>Virtual</span>
+              </div>
+            )}
+
+            {/* Row selection badge */}
+            {enableRowSelection && selectedCount > 0 && (
+              <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-[10px] font-bold">
+                <CheckSquare size={10} />
+                <span>{selectedCount} đã chọn</span>
+                <button type="button" onClick={() => setRowSelection({})}
+                  className="text-emerald-400 hover:text-white cursor-pointer"><X size={10} /></button>
               </div>
             )}
 
             {toolbarRight}
 
-            {enableColumnVisibility && (
-              <ColumnVisibilityDropdown<TData> table={table} />
-            )}
-
-            {/* Row selection info */}
-            {enableRowSelection && Object.keys(rowSelection).length > 0 && (
-              <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-[10px] font-bold">
-                <CheckSquare size={11} />
-                <span>{Object.keys(rowSelection).length} đã chọn</span>
-                <button
-                  type="button"
-                  onClick={() => setRowSelection({})}
-                  className="text-emerald-400 hover:text-white cursor-pointer"
-                >
-                  <X size={11} />
-                </button>
-              </div>
-            )}
+            {enableExport && <ExportDropdown<TData> table={table} filename={exportFilename} />}
+            {enableColumnVisibility && <ColumnVisibilityDropdown<TData> table={table} />}
           </div>
         </div>
       )}
 
-      {/* ── TABLE BODY ───────────────────────────────────────────────────────── */}
+      {/* ── TABLE AREA ──────────────────────────────────────────────────────── */}
       {loading ? (
         <div className="flex-1 flex flex-col items-center justify-center text-slate-400 gap-3 py-16">
-          <RefreshCw className="h-7 w-7 text-indigo-400 animate-spin" />
+          <RefreshCw className="h-6 w-6 text-indigo-400 animate-spin" />
           <span className="text-xs font-bold">{loadingMessage}</span>
         </div>
-      ) : table.getRowModel().rows.length === 0 ? (
+      ) : allRows.length === 0 ? (
         <div className="flex-1 flex flex-col items-center justify-center text-slate-400 gap-3 py-16 text-center px-4">
-          <AlertCircle className="h-10 w-10 text-indigo-400/50" />
-          {typeof emptyMessage === 'string' ? (
-            <p className="text-sm font-black text-white">{emptyMessage}</p>
-          ) : (
-            emptyMessage
-          )}
+          <AlertCircle className="h-9 w-9 text-indigo-400/40" />
+          {typeof emptyMessage === 'string'
+            ? <p className="text-sm font-black text-slate-300">{emptyMessage}</p>
+            : emptyMessage}
           {hasActiveFilter && (
-            <button
-              type="button"
-              onClick={() => { setGlobalFilter(''); setColumnFilters([]); }}
-              className="text-xs text-indigo-400 hover:text-indigo-300 underline cursor-pointer mt-1"
-            >
+            <button type="button" onClick={() => { setGlobalFilter(''); setColumnFilters([]); }}
+              className="text-xs text-indigo-400 hover:text-indigo-300 underline cursor-pointer">
               Xóa bộ lọc
             </button>
           )}
         </div>
       ) : (
         <>
-          <div className="overflow-auto flex-1 min-h-0">
-            <table
-              className="w-full text-left border-collapse text-xs"
-              style={enableColumnResizing ? { width: table.getTotalSize() } : undefined}
-            >
-              <thead
-                className={`bg-[#161b2e] text-slate-300 uppercase text-[10px] font-black tracking-wider border-b border-[#28334e] ${stickyHeader ? 'sticky top-0 z-10' : ''}`}
-              >
-                {table.getHeaderGroups().map(headerGroup => (
-                  <tr key={headerGroup.id}>
-                    {headerGroup.headers.map(header => {
-                      const isPinned = header.column.getIsPinned();
-                      return (
-                        <th
-                          key={header.id}
-                          colSpan={header.colSpan}
-                          className={`py-3 px-3.5 select-none relative whitespace-nowrap ${isPinned ? 'bg-[#161b2e] shadow-[2px_0_8px_rgba(0,0,0,0.4)]' : ''}`}
-                          style={{
-                            ...getColWidth(header),
-                            ...(isPinned === 'left' ? { left: header.column.getStart('left'), position: 'sticky', zIndex: 5 } : {}),
-                            ...(isPinned === 'right' ? { right: header.column.getAfter('right'), position: 'sticky', zIndex: 5 } : {}),
-                          }}
-                        >
-                          <div
-                            className={`flex items-center gap-1.5 ${header.column.getCanSort() ? 'cursor-pointer hover:text-white transition-colors' : ''}`}
-                            onClick={header.column.getCanSort() ? header.column.getToggleSortingHandler() : undefined}
-                          >
-                            {header.isPlaceholder
-                              ? null
-                              : flexRender(header.column.columnDef.header, header.getContext())}
+          {/* Scroll container */}
+          <div
+            ref={tableScrollRef}
+            className="overflow-auto flex-1 min-h-0 relative"
+            style={{ overscrollBehavior: 'contain' }}
+          >
+            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+              <SortableContext items={orderedHeaderIds} strategy={horizontalListSortingStrategy}>
+                <table
+                  className="text-left text-xs min-w-full"
+                  style={{
+                    borderCollapse: 'separate',
+                    borderSpacing: 0,
+                    ...(enableColumnResizing ? { width: table.getTotalSize() } : { width: '100%' }),
+                  }}
+                >
+                  {/* ── THEAD ─────────────────────────────────────────────── */}
+                  <thead className={`bg-[#111827] ${stickyHeader ? 'sticky top-0 z-20' : ''}`}>
+                    {table.getHeaderGroups().map(headerGroup => (
+                      <tr key={headerGroup.id}>
+                        {headerGroup.headers.map((header, colIdx) => {
+                          const isPinned = header.column.getIsPinned();
+                          const isFirst = colIdx === 0;
+                          const isLast = colIdx === headerGroup.headers.length - 1;
 
-                            {header.column.getCanSort() && (
-                              <span className="text-slate-500 shrink-0">
-                                {header.column.getIsSorted() === 'asc'
-                                  ? <ArrowUp size={10} className="text-indigo-400" />
-                                  : header.column.getIsSorted() === 'desc'
-                                  ? <ArrowDown size={10} className="text-indigo-400" />
-                                  : <ArrowUpDown size={10} className="opacity-30 group-hover:opacity-80 transition" />}
-                              </span>
-                            )}
-                          </div>
+                          return (
+                            <DraggableHeader
+                              key={header.id}
+                              header={header}
+                              enableReorder={enableColumnReorder && header.column.id !== 'select' && header.column.id !== '_expander'}
+                            >
+                              {/* Inner cell content */}
+                              <div
+                                className={`
+                                  flex items-center gap-1 w-full
+                                  py-3 px-3.5 text-slate-300 text-[10px] font-black uppercase tracking-wider
+                                  whitespace-nowrap
+                                  ${isFirst ? 'rounded-tl-xl' : ''} ${isLast ? 'rounded-tr-xl' : ''}
+                                  ${isPinned ? 'bg-[#111827]' : ''}
+                                  border-b border-[#1e2740]
+                                `}
+                                style={{
+                                  ...(enableColumnResizing ? { width: header.getSize(), minWidth: header.getSize() } : {}),
+                                  ...(isPinned === 'left' ? { position: 'sticky', left: header.column.getStart('left'), zIndex: 10, boxShadow: '2px 0 6px rgba(0,0,0,0.5)' } : {}),
+                                  ...(isPinned === 'right' ? { position: 'sticky', right: header.column.getAfter('right'), zIndex: 10, boxShadow: '-2px 0 6px rgba(0,0,0,0.5)' } : {}),
+                                }}
+                              >
+                                <div
+                                  className={`flex items-center gap-1.5 flex-1 min-w-0 ${header.column.getCanSort() ? 'cursor-pointer select-none hover:text-white transition-colors' : ''}`}
+                                  onClick={header.column.getCanSort() ? header.column.getToggleSortingHandler() : undefined}
+                                >
+                                  {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
 
-                          {/* Column resize handle */}
-                          {enableColumnResizing && header.column.getCanResize() && (
-                            <div
-                              onMouseDown={header.getResizeHandler()}
-                              onTouchStart={header.getResizeHandler()}
-                              className={`absolute right-0 top-0 h-full w-1 cursor-col-resize select-none touch-none rounded-full transition-colors ${
-                                header.column.getIsResizing()
-                                  ? 'bg-indigo-500'
-                                  : 'bg-transparent hover:bg-indigo-500/50'
-                              }`}
-                            />
-                          )}
-                        </th>
-                      );
-                    })}
-                  </tr>
-                ))}
-              </thead>
+                                  {header.column.getCanSort() && (
+                                    <span className="shrink-0">
+                                      {header.column.getIsSorted() === 'asc'
+                                        ? <ArrowUp size={10} className="text-indigo-400" />
+                                        : header.column.getIsSorted() === 'desc'
+                                        ? <ArrowDown size={10} className="text-indigo-400" />
+                                        : <ArrowUpDown size={10} className="text-slate-600 hover:text-slate-400 transition" />}
+                                    </span>
+                                  )}
 
-              <tbody className="divide-y divide-[#1e2740] bg-[#0d1120]">
-                {table.getRowModel().rows.map(row => (
-                  <Fragment key={row.id}>
-                    <tr
-                      className={`hover:bg-[#131928] transition-colors ${onRowClick ? 'cursor-pointer' : ''} ${row.getIsSelected() ? 'bg-indigo-500/10 hover:bg-indigo-500/15' : ''}`}
-                      onClick={() => onRowClick?.(row.original)}
-                    >
-                      {row.getVisibleCells().map(cell => {
-                        const isPinned = cell.column.getIsPinned();
-                        return (
-                          <td
-                            key={cell.id}
-                            className={`py-3 px-3.5 font-medium ${isPinned ? 'bg-[#0d1120] shadow-[2px_0_8px_rgba(0,0,0,0.4)]' : ''} ${row.getIsSelected() ? 'bg-indigo-500/10' : ''}`}
-                            style={{
-                              ...(enableColumnResizing ? { width: cell.column.getSize() } : {}),
-                              ...(isPinned === 'left' ? { left: cell.column.getStart('left'), position: 'sticky', zIndex: 3 } : {}),
-                              ...(isPinned === 'right' ? { right: cell.column.getAfter('right'), position: 'sticky', zIndex: 3 } : {}),
-                            }}
-                          >
-                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                          </td>
-                        );
-                      })}
-                    </tr>
+                                  {/* Multi-sort priority badge */}
+                                  {header.column.getIsSorted() && enableMultiSort && (() => {
+                                    const idx = sorting.findIndex(s => s.id === header.column.id);
+                                    return sorting.length > 1 && idx !== -1 ? (
+                                      <span className="text-[8px] font-black text-indigo-300 bg-indigo-500/20 rounded px-1 shrink-0">{idx + 1}</span>
+                                    ) : null;
+                                  })()}
+                                </div>
 
-                    {/* Expanded row sub-component */}
-                    {row.getIsExpanded() && renderSubComponent && (
-                      <tr className="bg-[#0b0f1c] border-b border-[#1e2740]">
-                        <td colSpan={row.getVisibleCells().length} className="px-4 py-3">
-                          {renderSubComponent({ row })}
-                        </td>
+                                {/* Resize handle */}
+                                {enableColumnResizing && header.column.getCanResize() && (
+                                  <div
+                                    onMouseDown={header.getResizeHandler()}
+                                    onTouchStart={header.getResizeHandler()}
+                                    className={`absolute right-0 top-1 h-[calc(100%-8px)] w-1 cursor-col-resize select-none touch-none rounded-full transition-colors z-10 ${
+                                      header.column.getIsResizing() ? 'bg-indigo-500' : 'bg-transparent hover:bg-indigo-500/40'
+                                    }`}
+                                    style={{ position: 'absolute' }}
+                                  />
+                                )}
+                              </div>
+                            </DraggableHeader>
+                          );
+                        })}
                       </tr>
+                    ))}
+                  </thead>
+
+                  {/* ── TBODY ─────────────────────────────────────────────── */}
+                  <tbody className="bg-[#0d1018]">
+                    {/* Virtual padding top */}
+                    {useVirt && paddingTop > 0 && (
+                      <tr><td style={{ height: paddingTop }} colSpan={allColumns.length} /></tr>
                     )}
-                  </Fragment>
-                ))}
-              </tbody>
-            </table>
+
+                    {(useVirt ? virtualRows!.map(vr => allRows[vr.index]) : allRows).map((row, rowIdx) => (
+                      <Fragment key={row.id}>
+                        <tr
+                          className={`
+                            group transition-colors duration-150
+                            ${onRowClick ? 'cursor-pointer' : ''}
+                            ${row.getIsSelected()
+                              ? 'bg-indigo-500/10 hover:bg-indigo-500/15'
+                              : rowIdx % 2 === 0
+                              ? 'bg-[#0d1018] hover:bg-[#131928]'
+                              : 'bg-[#0b0f1c] hover:bg-[#131928]'}
+                          `}
+                          onClick={() => onRowClick?.(row.original)}
+                        >
+                          {row.getVisibleCells().map((cell, cellIdx) => {
+                            const isPinned = cell.column.getIsPinned();
+                            const isLastRow = rowIdx === allRows.length - 1;
+                            const isFirstCell = cellIdx === 0;
+                            const isLastCell = cellIdx === row.getVisibleCells().length - 1;
+
+                            return (
+                              <td
+                                key={cell.id}
+                                className={`
+                                  py-3 px-3.5 font-medium text-slate-200
+                                  border-b border-[#161e30]
+                                  ${isPinned ? 'bg-inherit' : ''}
+                                  ${isLastRow && isFirstCell ? 'rounded-bl-xl' : ''}
+                                  ${isLastRow && isLastCell ? 'rounded-br-xl' : ''}
+                                `}
+                                style={{
+                                  ...(enableColumnResizing ? { width: cell.column.getSize(), minWidth: cell.column.getSize() } : {}),
+                                  ...(isPinned === 'left' ? { position: 'sticky', left: cell.column.getStart('left'), zIndex: 3, boxShadow: '2px 0 6px rgba(0,0,0,0.4)' } : {}),
+                                  ...(isPinned === 'right' ? { position: 'sticky', right: cell.column.getAfter('right'), zIndex: 3, boxShadow: '-2px 0 6px rgba(0,0,0,0.4)' } : {}),
+                                  backgroundColor: isPinned
+                                    ? (row.getIsSelected() ? 'rgba(99,102,241,0.1)' : rowIdx % 2 === 0 ? '#0d1018' : '#0b0f1c')
+                                    : undefined,
+                                }}
+                              >
+                                {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                              </td>
+                            );
+                          })}
+                        </tr>
+
+                        {/* Expanded sub-row */}
+                        {row.getIsExpanded() && renderSubComponent && (
+                          <tr className="bg-[#090c16] border-b border-[#1a2236]">
+                            <td colSpan={row.getVisibleCells().length} className="px-5 py-4">
+                              {renderSubComponent({ row })}
+                            </td>
+                          </tr>
+                        )}
+                      </Fragment>
+                    ))}
+
+                    {/* Virtual padding bottom */}
+                    {useVirt && paddingBottom > 0 && (
+                      <tr><td style={{ height: paddingBottom }} colSpan={allColumns.length} /></tr>
+                    )}
+                  </tbody>
+                </table>
+              </SortableContext>
+            </DndContext>
           </div>
 
-          {/* ── PAGINATION ───────────────────────────────────────────────────── */}
-          {showPagination && pageCount > 0 && (
-            <div className="shrink-0 px-4 py-2.5 bg-[#0a0d17] border-t border-[#1e2740] flex flex-wrap items-center justify-between gap-3 text-xs text-slate-400 font-bold">
-              {/* Left: info */}
-              <div className="flex items-center gap-3">
+          {/* ── PAGINATION ──────────────────────────────────────────────────── */}
+          {showPagination && pageCount > 0 && !useVirt && (
+            <div className="shrink-0 px-4 py-2.5 bg-[#090c16] border-t border-[#1a2236] flex flex-wrap items-center justify-between gap-3 text-xs text-slate-400 font-bold">
+              {/* Left info */}
+              <div className="flex items-center gap-3 flex-wrap">
                 <span>
                   Trang <span className="text-white">{pageIndex + 1}</span> / {pageCount}
-                  <span className="text-slate-600 ml-2">({totalFiltered} bản ghi)</span>
+                  <span className="text-slate-600 ml-2">({totalFiltered.toLocaleString()} bản ghi)</span>
                 </span>
-
-                {/* Page size selector */}
                 <select
                   value={table.getState().pagination.pageSize}
                   onChange={e => table.setPageSize(Number(e.target.value))}
-                  className="bg-[#161b2e] border border-[#28334e] text-white text-[10px] font-bold rounded-lg px-2 py-1 focus:outline-none cursor-pointer"
+                  className="bg-[#13192c] border border-[#253050] text-white text-[10px] font-bold rounded-lg px-2 py-1 focus:outline-none cursor-pointer"
                 >
-                  {[10, 20, 50, 100].map(size => (
-                    <option key={size} value={size}>{size} / trang</option>
+                  {[10, 20, 50, 100].map(sz => (
+                    <option key={sz} value={sz}>{sz} / trang</option>
                   ))}
                 </select>
               </div>
 
-              {/* Right: navigation */}
-              <div className="flex items-center gap-1.5">
-                <button
-                  type="button"
-                  onClick={() => table.setPageIndex(0)}
-                  disabled={!table.getCanPreviousPage()}
-                  className="p-1.5 rounded-lg bg-[#182035] hover:bg-[#253050] text-slate-300 disabled:opacity-40 disabled:hover:bg-[#182035] border border-white/10 transition cursor-pointer disabled:cursor-not-allowed"
-                  title="Trang đầu"
-                >
+              {/* Right nav */}
+              <div className="flex items-center gap-1">
+                <button type="button" onClick={() => table.setPageIndex(0)} disabled={!table.getCanPreviousPage()}
+                  className="p-1.5 rounded-lg bg-[#141c2e] hover:bg-[#1e2a42] text-slate-300 disabled:opacity-30 border border-white/10 transition cursor-pointer disabled:cursor-not-allowed" title="Trang đầu">
                   <ChevronsLeft size={13} />
                 </button>
-                <button
-                  type="button"
-                  onClick={() => table.previousPage()}
-                  disabled={!table.getCanPreviousPage()}
-                  className="px-2.5 py-1.5 rounded-lg bg-[#182035] hover:bg-[#253050] text-slate-300 disabled:opacity-40 disabled:hover:bg-[#182035] border border-white/10 transition flex items-center gap-1 cursor-pointer disabled:cursor-not-allowed"
-                >
-                  <ChevronLeft size={13} />
-                  <span>Trước</span>
+                <button type="button" onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()}
+                  className="px-2.5 py-1.5 rounded-lg bg-[#141c2e] hover:bg-[#1e2a42] text-slate-300 disabled:opacity-30 border border-white/10 transition flex items-center gap-1 cursor-pointer disabled:cursor-not-allowed">
+                  <ChevronLeft size={13} /><span>Trước</span>
                 </button>
 
-                {/* Page number pills */}
                 <div className="flex items-center gap-1">
                   {Array.from({ length: Math.min(pageCount, 5) }, (_, i) => {
                     let pageNum: number;
-                    if (pageCount <= 5) {
-                      pageNum = i;
-                    } else if (pageIndex < 3) {
-                      pageNum = i;
-                    } else if (pageIndex > pageCount - 4) {
-                      pageNum = pageCount - 5 + i;
-                    } else {
-                      pageNum = pageIndex - 2 + i;
-                    }
+                    if (pageCount <= 5) pageNum = i;
+                    else if (pageIndex < 3) pageNum = i;
+                    else if (pageIndex > pageCount - 4) pageNum = pageCount - 5 + i;
+                    else pageNum = pageIndex - 2 + i;
                     return (
                       <button
                         key={pageNum}
@@ -585,8 +820,8 @@ export function DataTable<TData>({
                         onClick={() => table.setPageIndex(pageNum)}
                         className={`w-7 h-7 rounded-lg text-[11px] font-extrabold border transition cursor-pointer ${
                           pageNum === pageIndex
-                            ? 'bg-indigo-600 border-indigo-500 text-white shadow-[0_0_10px_rgba(99,102,241,0.4)]'
-                            : 'bg-[#182035] border-white/10 text-slate-400 hover:bg-[#253050] hover:text-white'
+                            ? 'bg-indigo-600 border-indigo-500 text-white shadow-[0_0_8px_rgba(99,102,241,0.4)]'
+                            : 'bg-[#141c2e] border-white/10 text-slate-400 hover:bg-[#1e2a42] hover:text-white'
                         }`}
                       >
                         {pageNum + 1}
@@ -595,25 +830,29 @@ export function DataTable<TData>({
                   })}
                 </div>
 
-                <button
-                  type="button"
-                  onClick={() => table.nextPage()}
-                  disabled={!table.getCanNextPage()}
-                  className="px-2.5 py-1.5 rounded-lg bg-[#182035] hover:bg-[#253050] text-slate-300 disabled:opacity-40 disabled:hover:bg-[#182035] border border-white/10 transition flex items-center gap-1 cursor-pointer disabled:cursor-not-allowed"
-                >
-                  <span>Sau</span>
-                  <ChevronRight size={13} />
+                <button type="button" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}
+                  className="px-2.5 py-1.5 rounded-lg bg-[#141c2e] hover:bg-[#1e2a42] text-slate-300 disabled:opacity-30 border border-white/10 transition flex items-center gap-1 cursor-pointer disabled:cursor-not-allowed">
+                  <span>Sau</span><ChevronRight size={13} />
                 </button>
-                <button
-                  type="button"
-                  onClick={() => table.setPageIndex(pageCount - 1)}
-                  disabled={!table.getCanNextPage()}
-                  className="p-1.5 rounded-lg bg-[#182035] hover:bg-[#253050] text-slate-300 disabled:opacity-40 disabled:hover:bg-[#182035] border border-white/10 transition cursor-pointer disabled:cursor-not-allowed"
-                  title="Trang cuối"
-                >
+                <button type="button" onClick={() => table.setPageIndex(pageCount - 1)} disabled={!table.getCanNextPage()}
+                  className="p-1.5 rounded-lg bg-[#141c2e] hover:bg-[#1e2a42] text-slate-300 disabled:opacity-30 border border-white/10 transition cursor-pointer disabled:cursor-not-allowed" title="Trang cuối">
                   <ChevronsRight size={13} />
                 </button>
               </div>
+            </div>
+          )}
+
+          {/* Virtual scroll info bar (replaces pagination) */}
+          {useVirt && (
+            <div className="shrink-0 px-4 py-2 bg-[#090c16] border-t border-[#1a2236] flex items-center justify-between text-[10px] text-slate-500 font-bold">
+              <div className="flex items-center gap-2">
+                <Zap size={10} className="text-amber-400" />
+                <span>Virtual scroll — {allRows.length.toLocaleString()} hàng</span>
+                {hasActiveFilter && <span className="text-indigo-400">({totalFiltered.toLocaleString()} kết quả)</span>}
+              </div>
+              {enableExport && (
+                <span className="text-slate-600">Xuất để lưu toàn bộ dữ liệu</span>
+              )}
             </div>
           )}
         </>
