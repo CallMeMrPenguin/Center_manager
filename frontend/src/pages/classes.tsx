@@ -41,6 +41,41 @@ interface TeacherCM {
 const GRADE_LIST = ['Lớp 1', 'Lớp 2', 'Lớp 3', 'Lớp 4', 'Lớp 5', 'Lớp 6', 'Lớp 7', 'Lớp 8', 'Lớp 9', 'Lớp 10', 'Lớp 11', 'Lớp 12'];
 const WEEKDAYS = ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7', 'Chủ nhật'];
 
+const DEFAULT_PALETTE = [
+  '#3b82f6', // Blue
+  '#8b5cf6', // Purple
+  '#ec4899', // Pink
+  '#10b981', // Emerald
+  '#f59e0b', // Amber
+  '#06b6d4', // Cyan
+  '#6366f1', // Indigo
+  '#f43f5e'  // Rose
+];
+
+function getClassColor(cls: ClassItem, index: number): string {
+  if (cls.color && cls.color.startsWith('#')) {
+    return cls.color;
+  }
+  const notesMatch = (cls.notes || '').match(/#COLOR:(#[0-9a-fA-F]{6})/);
+  if (notesMatch) {
+    return notesMatch[1];
+  }
+  return DEFAULT_PALETTE[(cls.id || index) % DEFAULT_PALETTE.length];
+}
+
+function hexToRGBA(hex: string, alpha: number): string {
+  let c = (hex || '#3b82f6').replace('#', '');
+  if (c.length === 3) {
+    c = c.split('').map(x => x + x).join('');
+  }
+  const num = parseInt(c, 16);
+  if (isNaN(num)) return `rgba(59, 130, 246, ${alpha})`;
+  const r = (num >> 16) & 255;
+  const g = (num >> 8) & 255;
+  const b = num & 255;
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
 export default function ClassesPage() {
   const confirm = useConfirm();
   const [classes, setClasses] = useState<ClassItem[]>([]);
@@ -707,36 +742,49 @@ export default function ClassesPage() {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                 {filteredClasses.map((cls, idx) => {
-                  const isPurple = idx % 2 === 1;
+                  const cardColor = getClassColor(cls, idx);
+                  const borderColor = hexToRGBA(cardColor, 0.35);
+                  const glowShadow = `0 0 24px ${hexToRGBA(cardColor, 0.22)}`;
+                  const hoverGlowShadow = `0 0 38px ${hexToRGBA(cardColor, 0.4)}`;
+
                   return (
                     <div
                       key={cls.id}
                       onClick={() => setSelectedClass(cls)}
-                      className={`bg-[#0a0d1a] border rounded-[28px] p-6 space-y-5 cursor-pointer transition-all duration-300 group relative overflow-hidden ${
-                        isPurple
-                          ? 'border-purple-500/30 hover:border-purple-400/60 shadow-[0_0_25px_rgba(147,51,234,0.18)] hover:shadow-[0_0_40px_rgba(147,51,234,0.35)]'
-                          : 'border-blue-500/30 hover:border-blue-400/60 shadow-[0_0_25px_rgba(59,130,246,0.18)] hover:shadow-[0_0_40px_rgba(59,130,246,0.35)]'
-                      } hover:-translate-y-1`}
+                      style={{
+                        borderColor: borderColor,
+                        boxShadow: glowShadow
+                      }}
+                      className="bg-[#0a0d1a] border rounded-[28px] p-6 space-y-5 cursor-pointer transition-all duration-300 group relative overflow-hidden hover:-translate-y-1 hover:brightness-110"
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.boxShadow = hoverGlowShadow;
+                        e.currentTarget.style.borderColor = hexToRGBA(cardColor, 0.6);
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.boxShadow = glowShadow;
+                        e.currentTarget.style.borderColor = borderColor;
+                      }}
                     >
                       {/* Top Header: Grade Pill + Circular Edit Pencil Button */}
                       <div className="flex items-center justify-between">
                         <span
-                          className={`text-xs font-black uppercase px-4 py-1.5 rounded-full tracking-wider shadow-md ${
-                            isPurple
-                              ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-purple-900/40'
-                              : 'bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-blue-900/40'
-                          }`}
+                          style={{
+                            backgroundColor: cardColor,
+                            boxShadow: `0 4px 14px ${hexToRGBA(cardColor, 0.45)}`
+                          }}
+                          className="text-xs font-black uppercase px-4 py-1.5 rounded-full tracking-wider text-white shadow-md"
                         >
                           {cls.grade || 'LỚP 8'}
                         </span>
 
                         <button
                           onClick={(e) => { e.stopPropagation(); handleOpenEditClass(cls); }}
-                          className={`w-11 h-11 rounded-full border flex items-center justify-center transition-all cursor-pointer active:scale-95 ${
-                            isPurple
-                              ? 'border-purple-500/30 bg-purple-500/10 hover:bg-purple-500/25 text-purple-300'
-                              : 'border-blue-500/30 bg-blue-500/10 hover:bg-blue-500/25 text-blue-300'
-                          }`}
+                          style={{
+                            borderColor: hexToRGBA(cardColor, 0.35),
+                            backgroundColor: hexToRGBA(cardColor, 0.12),
+                            color: cardColor
+                          }}
+                          className="w-11 h-11 rounded-full border flex items-center justify-center transition-all cursor-pointer active:scale-95 hover:brightness-125"
                           title="Chỉnh sửa hoặc xóa lớp"
                         >
                           <Pencil size={18} />
@@ -744,7 +792,7 @@ export default function ClassesPage() {
                       </div>
 
                       {/* Class Title */}
-                      <h3 className="text-2xl font-black text-white tracking-tight group-hover:text-indigo-200 transition-colors">
+                      <h3 className="text-2xl font-black text-white tracking-tight group-hover:text-slate-100 transition-colors">
                         {cls.class_name}
                       </h3>
 
@@ -752,7 +800,13 @@ export default function ClassesPage() {
                       <div className="space-y-2.5">
                         {/* Teacher */}
                         <div className="flex items-center gap-3 bg-[#0e1325] border border-white/5 p-3 rounded-2xl">
-                          <div className={`p-2.5 rounded-xl ${isPurple ? 'bg-purple-500/15 text-purple-400' : 'bg-blue-500/15 text-blue-400'}`}>
+                          <div
+                            style={{
+                              backgroundColor: hexToRGBA(cardColor, 0.15),
+                              color: cardColor
+                            }}
+                            className="p-2.5 rounded-xl flex items-center justify-center shrink-0"
+                          >
                             <User size={18} />
                           </div>
                           <div className="min-w-0 flex-1">
@@ -763,7 +817,13 @@ export default function ClassesPage() {
 
                         {/* Room */}
                         <div className="flex items-center gap-3 bg-[#0e1325] border border-white/5 p-3 rounded-2xl">
-                          <div className={`p-2.5 rounded-xl ${isPurple ? 'bg-purple-500/15 text-purple-400' : 'bg-blue-500/15 text-blue-400'}`}>
+                          <div
+                            style={{
+                              backgroundColor: hexToRGBA(cardColor, 0.15),
+                              color: cardColor
+                            }}
+                            className="p-2.5 rounded-xl flex items-center justify-center shrink-0"
+                          >
                             <MapPin size={18} />
                           </div>
                           <div className="min-w-0 flex-1">
@@ -774,7 +834,13 @@ export default function ClassesPage() {
 
                         {/* Students */}
                         <div className="flex items-center gap-3 bg-[#0e1325] border border-white/5 p-3 rounded-2xl">
-                          <div className={`p-2.5 rounded-xl ${isPurple ? 'bg-purple-500/15 text-purple-400' : 'bg-blue-500/15 text-blue-400'}`}>
+                          <div
+                            style={{
+                              backgroundColor: hexToRGBA(cardColor, 0.15),
+                              color: cardColor
+                            }}
+                            className="p-2.5 rounded-xl flex items-center justify-center shrink-0"
+                          >
                             <Users size={18} />
                           </div>
                           <div className="min-w-0 flex-1">
@@ -788,11 +854,11 @@ export default function ClassesPage() {
                       <div className="pt-1">
                         <button
                           onClick={() => setSelectedClass(cls)}
-                          className={`w-full py-3.5 px-6 rounded-2xl font-bold text-base text-white shadow-lg transition-all duration-300 cursor-pointer text-center active:scale-98 ${
-                            isPurple
-                              ? 'bg-gradient-to-r from-purple-600 via-indigo-600 to-indigo-500 hover:from-purple-500 hover:to-indigo-400 shadow-purple-900/40'
-                              : 'bg-gradient-to-r from-blue-600 via-blue-500 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 shadow-blue-900/40'
-                          }`}
+                          style={{
+                            backgroundColor: cardColor,
+                            boxShadow: `0 4px 20px ${hexToRGBA(cardColor, 0.4)}`
+                          }}
+                          className="w-full py-3.5 px-6 rounded-2xl font-bold text-base text-white shadow-lg transition-all duration-300 cursor-pointer text-center active:scale-98 hover:brightness-110 flex items-center justify-center"
                         >
                           Vào lớp
                         </button>
