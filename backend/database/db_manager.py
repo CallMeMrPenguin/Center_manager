@@ -1991,36 +1991,29 @@ def calculate_performance_analytics(session_records: List[Dict[str, Any]]) -> Di
     if weight_total > 0:
         academic_10 = weighted_sum / weight_total
     else:
-        academic_10 = sum(overall_session_scores) / len(overall_session_scores)
+        overall_session_scores = [academic_10]
 
-    academic_10 = max(0.0, min(10.0, academic_10))
-    academic_score = academic_10 * 10.0
-
-    def calc_regression(vals: List[float]):
-        valid_vals = [max(0.0, min(10.0, float(v))) for v in vals if v is not None and v > 0]
-        N = len(valid_vals)
-        if N == 0:
-            return 0.0, 8.0
-        if N == 1:
-            return 0.0, min(10.0, max(0.0, valid_vals[0]))
-        
+    def calc_regression(vals_list: List[float]) -> Tuple[float, float]:
+        N = len(vals_list)
+        if N < 2:
+            return 0.0, trunc_1_dec(vals_list[0]) if N == 1 else (0.0, 0.0)
         x_vals = list(range(1, N + 1))
         mean_x = sum(x_vals) / N
+        valid_vals = vals_list
         mean_y = sum(valid_vals) / N
+
         num = sum((x_vals[i] - mean_x) * (valid_vals[i] - mean_y) for i in range(N))
         den = sum((x_vals[i] - mean_x) ** 2 for i in range(N))
         slope = num / den if den != 0 else 0
         intercept = mean_y - (slope * mean_x)
-        # Next session prediction at index N + 1:
         raw_pred = slope * (N + 1) + intercept
-        # STRICT CLAMP: Grade prediction MUST NEVER exceed 10.0 or fall below 0.0
         predicted = max(0.0, min(10.0, raw_pred))
-        return slope, round(predicted, 1)
+        return slope, trunc_1_dec(predicted)
 
     slope_overall, pred_overall = calc_regression(overall_session_scores)
-    slope_c1, pred_c1 = calc_regression(c1_list) if c1_list else (0.0, round(academic_10, 1))
-    slope_c2, pred_c2 = calc_regression(c2_list) if c2_list else (0.0, round(academic_10, 1))
-    slope_hw, pred_hw = calc_regression(hw_list) if hw_list else (0.0, round(academic_10, 1))
+    slope_c1, pred_c1 = calc_regression(c1_list) if c1_list else (0.0, trunc_1_dec(academic_10))
+    slope_c2, pred_c2 = calc_regression(c2_list) if c2_list else (0.0, trunc_1_dec(academic_10))
+    slope_hw, pred_hw = calc_regression(hw_list) if hw_list else (0.0, trunc_1_dec(academic_10))
 
     if slope_overall > 0.3:
         trend_label = "Tăng trưởng mạnh ↗"
@@ -2086,16 +2079,12 @@ def calculate_performance_analytics(session_records: List[Dict[str, Any]]) -> Di
         recs.append(f"Dự đoán buổi tới: Check 1 ({pred_c1:.1f}), Check 2 ({pred_c2:.1f}), Homework ({pred_hw:.1f}).")
 
     return {
-        "academic_score": round(academic_score, 1),
+        "academic_score": trunc_1_dec(academic_score),
         "trend_slope": round(slope_overall, 2),
         "trend_label": trend_label,
-        "consistency_score": round(consistency_score, 1),
+        "consistency_score": trunc_1_dec(consistency_score),
         "std_dev": round(std_dev, 2),
         "consistency_label": consistency_label,
-        "ema_level": round(ema, 1),
-        "predicted_next": round(pred_overall, 1),
-        "pred_c1": round(pred_c1, 1),
-        "pred_c2": round(pred_c2, 1),
         "pred_hw": round(pred_hw, 1),
         "attendance_pct": round(att_pct, 1),
         "performance_index": round(performance_index, 1),

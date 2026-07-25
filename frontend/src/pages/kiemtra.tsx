@@ -9,7 +9,7 @@ import { api } from '../api';
 import { showToast } from '../components/Toast';
 import { VietnameseInput } from '../components/VietnameseInput';
 
-import { getLocalDateStr, notifyDataChanged } from '../utils';
+import { getLocalDateStr, notifyDataChanged, trunc1Dec } from '../utils';
 
 interface Question {
   id: number;
@@ -282,7 +282,7 @@ export default function KiemTraPage() {
   }, [activeQuestions, userAnswers]);
 
   const calculatedScore = useMemo(() => {
-    return totalQuestions > 0 ? Math.round((correctCount / totalQuestions) * 10 * 10) / 10 : 0;
+    return totalQuestions > 0 ? trunc1Dec((correctCount / totalQuestions) * 10) : 0;
   }, [correctCount, totalQuestions]);
 
   const handleSaveScoreToDB = async () => {

@@ -8,3 +8,20 @@ export function getLocalDateStr(date: Date = new Date()): string {
 export function notifyDataChanged() {
   window.dispatchEvent(new CustomEvent('data-changed'));
 }
+
+/**
+ * Truncate numbers to 1 figure after '.' without rounding up or down
+ * Example: 6.21 -> '6.2', 6.28 -> '6.2', 8.86 -> '8.8'
+ */
+export function format1Dec(val: number | string | null | undefined): string {
+  if (val === null || val === undefined || val === '') return '';
+  const num = typeof val === 'number' ? val : parseFloat(String(val));
+  if (isNaN(num)) return String(val);
+  const truncated = Math.floor(num * 10 + 0.0000001) / 10;
+  return truncated.toFixed(1);
+}
+
+export function trunc1Dec(val: number): number {
+  if (isNaN(val)) return 0;
+  return Math.floor(val * 10 + 0.0000001) / 10;
+}

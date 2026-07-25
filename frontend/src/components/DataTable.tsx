@@ -236,6 +236,16 @@ function ExportDropdown<TData>({
         .map(c => {
           const val = c.getValue();
           if (val === null || val === undefined) return '';
+          if (typeof val === 'number') {
+            if (!Number.isInteger(val)) {
+              return Math.floor(val * 10 + 0.0000001) / 10;
+            }
+            return val;
+          }
+          if (typeof val === 'string' && !isNaN(Number(val)) && val.includes('.')) {
+            const num = Number(val);
+            return (Math.floor(num * 10 + 0.0000001) / 10).toFixed(1);
+          }
           if (typeof val === 'object') return JSON.stringify(val);
           return String(val);
         })

@@ -116,6 +116,11 @@ Every data table MUST feature a filter icon next to each column title in the tab
 
 ---
 
+## 🔢 17. Single Decimal Truncation Standard (No Rounding Up/Down)
+- **1-Decimal Figure Truncation (`format1Dec` / `trunc1Dec`)**: All calculated scores, session averages, academic predictions, quiz results, and Excel/PDF exports MUST be formatted/truncated to strictly **1 figure after the decimal point (`.`) without rounding up or down** (e.g. `6.21` -> `6.2`, `6.28` -> `6.2`, `8.86` -> `8.8`).
+
+---
+
 ## ✏️ 16. Single Pen Action Button (Merged Delete inside Edit Modal)
 - **Merged Single Pen Button**: Cards and tables MUST NOT display a separate Trash Bin icon (`<Trash2 />`) alongside an Edit Pen icon (`<Edit3 />`). Cards/rows MUST feature a single clean Pen action button (`<Edit3 />`). Deletion functionality MUST be provided as a red Delete button inside the Edit modal popup.
 

@@ -9,7 +9,7 @@ import { showToast } from '../components/Toast';
 import { CustomDatePicker } from '../components/CustomDatePicker';
 import { CustomSelect } from '../components/CustomSelect';
 import { DataTable } from '../components/DataTable';
-import { notifyDataChanged } from '../utils';
+import { notifyDataChanged, format1Dec, trunc1Dec } from '../utils';
 
 export default function ReportsPage() {
   const [loading, setLoading] = useState(false);
@@ -186,22 +186,22 @@ export default function ReportsPage() {
     {
       accessorKey: 'avg_check_1',
       header: () => <div className="text-center w-full">Check 1</div>,
-      cell: (info) => <div className="text-center font-extrabold text-blue-400 font-mono">{Number(info.getValue() || 0).toFixed(1)}</div>,
+      cell: (info) => <div className="text-center font-extrabold text-blue-400 font-mono">{format1Dec(Number(info.getValue()) || 0)}</div>,
     },
     {
       accessorKey: 'avg_check_2',
       header: () => <div className="text-center w-full">Check 2</div>,
-      cell: (info) => <div className="text-center font-extrabold text-purple-400 font-mono">{Number(info.getValue() || 0).toFixed(1)}</div>,
+      cell: (info) => <div className="text-center font-extrabold text-purple-400 font-mono">{format1Dec(Number(info.getValue()) || 0)}</div>,
     },
     {
       accessorKey: 'avg_homework',
       header: () => <div className="text-center w-full">Homework</div>,
-      cell: (info) => <div className="text-center font-extrabold text-emerald-400 font-mono">{Number(info.getValue() || 0).toFixed(1)}</div>,
+      cell: (info) => <div className="text-center font-extrabold text-emerald-400 font-mono">{format1Dec(Number(info.getValue()) || 0)}</div>,
     },
     {
       id: 'overallAvg',
       header: () => <div className="text-center w-full">Đánh Giá</div>,
-      accessorFn: (r: any) => (Number(r.avg_check_1||0) + Number(r.avg_check_2||0) + Number(r.avg_homework||0)) / 3,
+      accessorFn: (r: any) => trunc1Dec((Number(r.avg_check_1||0) + Number(r.avg_check_2||0) + Number(r.avg_homework||0)) / 3),
       cell: ({ getValue }) => {
         const avg = getValue<number>();
         let label = 'Xuất Sắc', cls = 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30';
@@ -210,7 +210,7 @@ export default function ReportsPage() {
         if (avg < 5.0) { label = 'Cần Cố Gắng'; cls = 'bg-rose-500/10 text-rose-400 border-rose-500/30'; }
         return (
           <div className="text-center">
-            <span className={`inline-block px-2.5 py-1 rounded-xl text-[10px] font-black border ${cls}`}>{label}</span>
+            <span className={`inline-block px-2.5 py-1 rounded-xl text-[10px] font-black border ${cls}`}>{label} ({format1Dec(avg)})</span>
           </div>
         );
       },
@@ -246,10 +246,10 @@ export default function ReportsPage() {
       ]
     };
 
-    const c1 = Math.min(10.0, Math.max(0.0, Math.round((raw.pred_c1 ?? 8.8) * 10) / 10));
-    const c2 = Math.min(10.0, Math.max(0.0, Math.round((raw.pred_c2 ?? 7.5) * 10) / 10));
-    const hw = Math.min(10.0, Math.max(0.0, Math.round((raw.pred_hw ?? 9.5) * 10) / 10));
-    const predNext = Math.min(10.0, Math.max(0.0, Math.round((raw.predicted_next ?? 8.9) * 10) / 10));
+    const c1 = Math.min(10.0, Math.max(0.0, trunc1Dec(raw.pred_c1 ?? 8.8)));
+    const c2 = Math.min(10.0, Math.max(0.0, trunc1Dec(raw.pred_c2 ?? 7.5)));
+    const hw = Math.min(10.0, Math.max(0.0, trunc1Dec(raw.pred_hw ?? 9.5)));
+    const predNext = Math.min(10.0, Math.max(0.0, trunc1Dec(raw.predicted_next ?? 8.9)));
 
     return {
       ...raw,
@@ -296,10 +296,10 @@ export default function ReportsPage() {
     }
 
     return {
-      c1: c1 > 0 ? c1.toFixed(1) : '8.7',
-      c2: c2 > 0 ? c2.toFixed(1) : '7.2',
-      hw: hw > 0 ? hw.toFixed(1) : '9.1',
-      overall: overall > 0 ? overall.toFixed(1) : '8.3',
+      c1: c1 > 0 ? format1Dec(c1) : '8.7',
+      c2: c2 > 0 ? format1Dec(c2) : '7.2',
+      hw: hw > 0 ? format1Dec(hw) : '9.1',
+      overall: overall > 0 ? format1Dec(overall) : '8.3',
       attendancePct: attPct,
       sessionCount: sessionRecords.length,
       c1Diff: c1 >= 7.5 ? '+1.1' : '-0.4',
@@ -367,10 +367,10 @@ export default function ReportsPage() {
       return {
         sessionName: formatSessionDate(d),
         fullDate: d,
-        check1: Number(avg1.toFixed(1)),
-        check2: Number(avg2.toFixed(1)),
-        homework: Number(avghw.toFixed(1)),
-        overall: Number(avgOverall.toFixed(1))
+        check1: trunc1Dec(avg1),
+        check2: trunc1Dec(avg2),
+        homework: trunc1Dec(avghw),
+        overall: trunc1Dec(avgOverall)
       };
     });
 
