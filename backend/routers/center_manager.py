@@ -549,9 +549,19 @@ async def api_parse_kiemtra(file: UploadFile = File(None), raw_json: Optional[st
                 top_inst = data.get("instruction") or data.get("guide") or ""
                 normalized_qs = []
                 for idx, q in enumerate(data.get("questions", []), 1):
-                    q_text = q.get("question") or q.get("sentence") or q.get("x") or q.get("passage") or f"Câu {idx}"
-                    if q.get("sentence") and q.get("prompt"):
-                        q_text = f"{q.get('sentence')}\n👉 {q.get('prompt')}..."
+                    raw_x = q.get("x") or q.get("question")
+                    if isinstance(raw_x, list):
+                        q_text = "\n".join([str(item) for item in raw_x if item])
+                    elif isinstance(raw_x, str):
+                        q_text = raw_x
+                    elif q.get("sentence") and q.get("prompt"):
+                        prompt_str = str(q["prompt"]).strip()
+                        if not prompt_str.startswith("("):
+                            prompt_str = f"({prompt_str})"
+                        q_text = f"{str(q['sentence']).strip()}\n{prompt_str}"
+                    else:
+                        q_text = q.get("sentence") or q.get("passage") or q.get("content") or f"Câu {idx}"
+
                     opts = q.get("options") or q.get("o") or []
                     ans = q.get("answer") or q.get("a") or ""
                     q_type = q.get("type") or ("mcq" if opts else "fill")

@@ -145,11 +145,25 @@ export default function KiemTraPage() {
       const topInstruction = parsed.instruction || parsed.guide || parsed.yêu_cầu || undefined;
 
       const questions: Question[] = rawQuestions.map((q: any, index: number) => {
-        let rawQText = q.question || q.sentence || q.x || q.passage || q.content || q.stem;
-        
-        if (q.sentence && q.prompt) {
-          rawQText = `${q.sentence}\n👉 ${q.prompt}...`;
-        } else if (!rawQText) {
+        let rawQText = '';
+        if (Array.isArray(q.x)) {
+          rawQText = q.x.filter(Boolean).join('\n');
+        } else if (typeof q.x === 'string') {
+          rawQText = q.x;
+        } else if (Array.isArray(q.question)) {
+          rawQText = q.question.filter(Boolean).join('\n');
+        } else if (typeof q.question === 'string') {
+          rawQText = q.question;
+        } else if (q.sentence && q.prompt) {
+          const promptStr = String(q.prompt).trim().startsWith('(') ? q.prompt.trim() : `(${q.prompt.trim()})`;
+          rawQText = `${q.sentence.trim()}\n${promptStr}`;
+        } else if (q.sentence) {
+          rawQText = q.sentence;
+        } else if (q.passage) {
+          rawQText = q.passage;
+        } else if (q.content || q.stem) {
+          rawQText = q.content || q.stem;
+        } else {
           rawQText = `Câu ${index + 1}`;
         }
 

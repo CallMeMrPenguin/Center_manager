@@ -79,7 +79,7 @@ export default function PromptManager({ storageKey, tabTitle, defaultPrompts }: 
     return () => {
       active = false;
     };
-  }, [storageKey, defaultPrompts]);
+  }, [storageKey]);
 
   // Save prompts when list changes
   const savePromptsList = async (newList: PromptItem[]) => {
@@ -200,8 +200,8 @@ export default function PromptManager({ storageKey, tabTitle, defaultPrompts }: 
 
       {/* Prompts Dialog Overlay */}
       {isOpen && createPortal(
-        <div className="fixed inset-0 z-[999999] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-mac-backdrop p-4">
-          <div className="w-full max-w-xl bg-[#0f1320] border border-white/15 rounded-2xl p-6 flex flex-col gap-4 text-slate-100 max-h-[85vh] shadow-[0_25px_60px_rgba(0,0,0,0.9)] animate-mac-modal">
+        <div className="fixed inset-0 z-[999999] flex items-center justify-center bg-black/85 p-4 transition-opacity duration-150">
+          <div className="w-full max-w-xl bg-[#0f1320] border border-white/15 rounded-2xl p-6 flex flex-col gap-4 text-slate-100 max-h-[85vh] shadow-[0_25px_60px_rgba(0,0,0,0.9)] transform-gpu transition-all duration-150 scale-100">
             
             {/* Modal Header */}
             <div className="flex items-center justify-between border-b border-white/5 pb-3 shrink-0">

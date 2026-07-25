@@ -111,6 +111,11 @@ Every data table MUST feature a filter icon next to each column title in the tab
 
 ---
 
+## 🚫 16. Strictly No Emojis In UI & Parsed Content Standard
+- **No Injected Emojis**: Emojis (e.g. `👉`, `✨`, `🎨`, `📌`, `↔️`, `↕️`, `👁️`, `🎯`, `📄`, `⚡`, `📤`, `☑️`, `📱`, `🚀`, `🚫`) MUST NOT be injected by serializers, text formatters, parsers, or UI components unless explicitly present in raw source content. All parsed text and UI code must remain strictly faithful to source text without inserting inferential symbols or emojis.
+
+---
+
 ## ✏️ 16. Single Pen Action Button (Merged Delete inside Edit Modal)
 - **Merged Single Pen Button**: Cards and tables MUST NOT display a separate Trash Bin icon (`<Trash2 />`) alongside an Edit Pen icon (`<Edit3 />`). Cards/rows MUST feature a single clean Pen action button (`<Edit3 />`). Deletion functionality MUST be provided as a red Delete button inside the Edit modal popup.
 

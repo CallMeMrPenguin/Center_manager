@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
-  BookOpen, Plus, Search, Edit3, Trash2, Users,
+  BookOpen, Plus, Search, Edit3, Trash2, Users, User, MapPin, Pencil,
   Shuffle, FileCheck2, Save, X, RefreshCw, AlertTriangle, AlertCircle, UserPlus, ChevronLeft, ChevronRight, Move,
   Calendar, FileSpreadsheet, FileText, CheckCircle2, Minus, CheckSquare, Square, Filter, Eye, EyeOff
 } from 'lucide-react';
@@ -695,51 +695,100 @@ export default function ClassesPage() {
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                {classes.map(cls => (
-                  <div
-                    key={cls.id}
-                    onClick={() => setSelectedClass(cls)}
-                    className="bg-[#0f1320] border border-white/10 hover:border-indigo-500/50 rounded-2xl p-5 space-y-4 cursor-pointer transition-all hover:translate-y-[-2px] shadow-lg group relative overflow-hidden"
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <span className="text-[10px] font-black uppercase text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 px-2 py-0.5 rounded-md">
-                          {cls.grade || 'Lớp 6'}
+                {classes.map((cls, idx) => {
+                  const isPurple = idx % 2 === 1;
+                  return (
+                    <div
+                      key={cls.id}
+                      onClick={() => setSelectedClass(cls)}
+                      className={`bg-[#0a0d1a] border rounded-[28px] p-6 space-y-5 cursor-pointer transition-all duration-300 group relative overflow-hidden ${
+                        isPurple
+                          ? 'border-purple-500/30 hover:border-purple-400/60 shadow-[0_0_25px_rgba(147,51,234,0.18)] hover:shadow-[0_0_40px_rgba(147,51,234,0.35)]'
+                          : 'border-blue-500/30 hover:border-blue-400/60 shadow-[0_0_25px_rgba(59,130,246,0.18)] hover:shadow-[0_0_40px_rgba(59,130,246,0.35)]'
+                      } hover:-translate-y-1`}
+                    >
+                      {/* Top Header: Grade Pill + Circular Edit Pencil Button */}
+                      <div className="flex items-center justify-between">
+                        <span
+                          className={`text-xs font-black uppercase px-4 py-1.5 rounded-full tracking-wider shadow-md ${
+                            isPurple
+                              ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-purple-900/40'
+                              : 'bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-blue-900/40'
+                          }`}
+                        >
+                          {cls.grade || 'LỚP 8'}
                         </span>
-                        <h3 className="text-base font-black text-white group-hover:text-indigo-300 transition mt-1.5">{cls.class_name}</h3>
-                      </div>
 
-                      <div className="flex items-center gap-1">
                         <button
                           onClick={(e) => { e.stopPropagation(); handleOpenEditClass(cls); }}
-                          className="p-2 rounded-xl bg-white/5 hover:bg-indigo-600 text-slate-300 hover:text-white transition cursor-pointer border border-white/10"
+                          className={`w-11 h-11 rounded-full border flex items-center justify-center transition-all cursor-pointer active:scale-95 ${
+                            isPurple
+                              ? 'border-purple-500/30 bg-purple-500/10 hover:bg-purple-500/25 text-purple-300'
+                              : 'border-blue-500/30 bg-blue-500/10 hover:bg-blue-500/25 text-blue-300'
+                          }`}
                           title="Chỉnh sửa hoặc xóa lớp"
                         >
-                          <Edit3 size={14} />
+                          <Pencil size={18} />
+                        </button>
+                      </div>
+
+                      {/* Class Title */}
+                      <h3 className="text-2xl font-black text-white tracking-tight group-hover:text-indigo-200 transition-colors">
+                        {cls.class_name}
+                      </h3>
+
+                      {/* 3 Detail Info Rows */}
+                      <div className="space-y-2.5">
+                        {/* Teacher */}
+                        <div className="flex items-center gap-3 bg-[#0e1325] border border-white/5 p-3 rounded-2xl">
+                          <div className={`p-2.5 rounded-xl ${isPurple ? 'bg-purple-500/15 text-purple-400' : 'bg-blue-500/15 text-blue-400'}`}>
+                            <User size={18} />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <span className="text-[11px] font-medium text-slate-400 block leading-tight">Giáo viên</span>
+                            <span className="text-sm font-bold text-white block truncate">{cls.teacher_name || 'Chưa phân công'}</span>
+                          </div>
+                        </div>
+
+                        {/* Room */}
+                        <div className="flex items-center gap-3 bg-[#0e1325] border border-white/5 p-3 rounded-2xl">
+                          <div className={`p-2.5 rounded-xl ${isPurple ? 'bg-purple-500/15 text-purple-400' : 'bg-blue-500/15 text-blue-400'}`}>
+                            <MapPin size={18} />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <span className="text-[11px] font-medium text-slate-400 block leading-tight">Phòng</span>
+                            <span className="text-sm font-bold text-white block truncate">{cls.room || 'Chưa xếp'}</span>
+                          </div>
+                        </div>
+
+                        {/* Students */}
+                        <div className="flex items-center gap-3 bg-[#0e1325] border border-white/5 p-3 rounded-2xl">
+                          <div className={`p-2.5 rounded-xl ${isPurple ? 'bg-purple-500/15 text-purple-400' : 'bg-blue-500/15 text-blue-400'}`}>
+                            <Users size={18} />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <span className="text-[11px] font-medium text-slate-400 block leading-tight">Học sinh</span>
+                            <span className="text-sm font-bold text-white block">{cls.student_count || 0} học sinh</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Action Button: Vào lớp (NO ARROW) */}
+                      <div className="pt-1">
+                        <button
+                          onClick={() => setSelectedClass(cls)}
+                          className={`w-full py-3.5 px-6 rounded-2xl font-bold text-base text-white shadow-lg transition-all duration-300 cursor-pointer text-center active:scale-98 ${
+                            isPurple
+                              ? 'bg-gradient-to-r from-purple-600 via-indigo-600 to-indigo-500 hover:from-purple-500 hover:to-indigo-400 shadow-purple-900/40'
+                              : 'bg-gradient-to-r from-blue-600 via-blue-500 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 shadow-blue-900/40'
+                          }`}
+                        >
+                          Vào lớp
                         </button>
                       </div>
                     </div>
-
-                    <div className="grid grid-cols-2 gap-2 text-xs text-slate-300 font-semibold bg-[#14192b] p-3 rounded-xl border border-white/5">
-                      <div>
-                        <span className="text-[10px] text-slate-400 block font-normal">Giáo Viên</span>
-                        <span className="truncate block font-bold">{cls.teacher_name || 'Chưa xếp'}</span>
-                      </div>
-                      <div>
-                        <span className="text-[10px] text-slate-400 block font-normal">Phòng / Sĩ Số</span>
-                        <span className="font-bold">{cls.room || 'Phòng học'} | {cls.student_count || 0} HS</span>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-between pt-1 text-xs">
-                      <span className="text-slate-400 font-bold text-[11px] flex items-center gap-1">
-                        <Users size={13} className="text-indigo-400" />
-                        <span>{cls.student_count || 0} học sinh đã ghi danh</span>
-                      </span>
-                      <span className="text-indigo-400 font-extrabold group-hover:translate-x-1 transition-transform">Vào lớp →</span>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>
