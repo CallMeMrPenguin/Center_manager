@@ -142,17 +142,26 @@ export default function KiemTraPage() {
         return;
       }
 
+      const topInstruction = parsed.instruction || parsed.guide || parsed.yêu_cầu || undefined;
+
       const questions: Question[] = rawQuestions.map((q: any, index: number) => {
-        const qText = q.question || q.x || q.passage || `Câu ${index + 1}`;
+        let rawQText = q.question || q.sentence || q.x || q.passage || q.content || q.stem;
+        
+        if (q.sentence && q.prompt) {
+          rawQText = `${q.sentence}\n👉 ${q.prompt}...`;
+        } else if (!rawQText) {
+          rawQText = `Câu ${index + 1}`;
+        }
+
         const opts = q.options || q.o || [];
-        const ans = q.answer || q.a || '';
+        const ans = q.answer || q.a || q.correct || '';
         const qType = q.type || (q.t ? (q.t === 'fill' ? 'fill' : 'mcq') : (opts.length > 0 ? 'mcq' : 'fill'));
-        const instruction = q.instruction || (q.passage ? `Đoạn văn: ${q.passage}` : undefined);
+        const instruction = q.instruction || (q.passage ? `Đoạn văn: ${q.passage}` : topInstruction);
 
         return {
-          id: q.id || index + 1,
+          id: q.id || q.number || index + 1,
           type: qType === 'mcq' ? 'mcq' : 'fill',
-          question: qText,
+          question: rawQText,
           instruction,
           options: Array.isArray(opts) ? opts.map(String) : [],
           answer: String(ans),

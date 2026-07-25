@@ -543,8 +543,29 @@ async def api_parse_kiemtra(file: UploadFile = File(None), raw_json: Optional[st
                 if isinstance(data, list):
                     data = {"title": file.filename, "questions": data}
                 elif isinstance(data, dict) and "questions" not in data:
-                    raw_qs = data.get("exercises", [])
+                    raw_qs = data.get("exercises", []) or data.get("data", [])
                     data = {"title": file.filename, "questions": raw_qs}
+                
+                top_inst = data.get("instruction") or data.get("guide") or ""
+                normalized_qs = []
+                for idx, q in enumerate(data.get("questions", []), 1):
+                    q_text = q.get("question") or q.get("sentence") or q.get("x") or q.get("passage") or f"Câu {idx}"
+                    if q.get("sentence") and q.get("prompt"):
+                        q_text = f"{q.get('sentence')}\n👉 {q.get('prompt')}..."
+                    opts = q.get("options") or q.get("o") or []
+                    ans = q.get("answer") or q.get("a") or ""
+                    q_type = q.get("type") or ("mcq" if opts else "fill")
+                    inst = q.get("instruction") or top_inst
+                    normalized_qs.append({
+                        "id": q.get("id") or q.get("number") or idx,
+                        "question": q_text,
+                        "instruction": inst,
+                        "type": q_type,
+                        "options": opts,
+                        "answer": str(ans),
+                        "explanation": q.get("explanation", "")
+                    })
+                data["questions"] = normalized_qs
                 return data
             except Exception as e:
                 raise HTTPException(status_code=400, detail=f"Invalid JSON file: {e}")
