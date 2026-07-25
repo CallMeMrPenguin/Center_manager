@@ -95,10 +95,34 @@ export default function PromptManager({ storageKey, tabTitle, defaultPrompts }: 
 
   const handleCopy = async (id: string, text: string) => {
     try {
-      await navigator.clipboard.writeText(text);
-      setCopiedId(id);
-      showToast("Đã sao chép prompt vào bộ nhớ tạm!", "success");
-      setTimeout(() => setCopiedId(null), 1500);
+      let success = false;
+      if (navigator.clipboard && window.isSecureContext) {
+        try {
+          await navigator.clipboard.writeText(text);
+          success = true;
+        } catch (e) {
+          success = false;
+        }
+      }
+      if (!success) {
+        const textArea = document.createElement("textarea");
+        textArea.value = text;
+        textArea.style.position = "fixed";
+        textArea.style.left = "-999999px";
+        textArea.style.top = "-999999px";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        success = document.execCommand("copy");
+        document.body.removeChild(textArea);
+      }
+      if (success) {
+        setCopiedId(id);
+        showToast("Đã sao chép prompt vào bộ nhớ tạm!", "success");
+        setTimeout(() => setCopiedId(null), 1500);
+      } else {
+        showToast("Không thể sao chép prompt!", "error");
+      }
     } catch (err) {
       showToast("Không thể sao chép: " + err, "error");
     }

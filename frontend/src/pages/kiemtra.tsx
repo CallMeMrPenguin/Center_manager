@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { 
   FileCheck, Upload, Play, RefreshCw, CheckCircle2, XCircle, 
   Clock, Shuffle, Save, ArrowLeft, ArrowRight, Highlighter, Eye, EyeOff, Printer,
-  ChevronLeft, ChevronRight, Bookmark, Flag, Maximize2, Minimize2, MoreVertical, Sparkles, RotateCcw, Check
+  ChevronLeft, ChevronRight, Bookmark, Flag, Maximize2, Minimize2, MoreVertical, Sparkles, RotateCcw, Check,
+  Code, FileText
 } from 'lucide-react';
 import { api } from '../api';
 import { showToast } from '../components/Toast';
@@ -28,6 +29,8 @@ interface TestData {
 
 export default function KiemTraPage() {
   const [step, setStep] = useState<'import' | 'settings' | 'running' | 'results'>('import');
+  const [importTab, setImportTab] = useState<'file' | 'json'>('file');
+  const [pastedJson, setPastedJson] = useState('');
   const [loading, setLoading] = useState(false);
   const [testData, setTestData] = useState<TestData | null>(null);
 
@@ -106,6 +109,63 @@ export default function KiemTraPage() {
       showToast("Lỗi đọc file: " + err.message, "error");
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Handle Direct JSON Paste Parse
+  const handleParsePastedJson = () => {
+    const trimmed = pastedJson.trim();
+    if (!trimmed) {
+      showToast("Vui lòng dán nội dung JSON đề thi!", "warning");
+      return;
+    }
+    try {
+      let parsed = JSON.parse(trimmed);
+      let title = "Đề Thi Từ JSON";
+      let rawQuestions: any[] = [];
+
+      if (Array.isArray(parsed)) {
+        rawQuestions = parsed;
+      } else if (typeof parsed === 'object' && parsed !== null) {
+        if (parsed.title) title = parsed.title;
+        if (Array.isArray(parsed.questions)) {
+          rawQuestions = parsed.questions;
+        } else if (Array.isArray(parsed.exercises)) {
+          rawQuestions = parsed.exercises;
+        } else if (Array.isArray(parsed.data)) {
+          rawQuestions = parsed.data;
+        }
+      }
+
+      if (!rawQuestions || !rawQuestions.length) {
+        showToast("Không tìm thấy danh sách câu hỏi trong dữ liệu JSON!", "error");
+        return;
+      }
+
+      const questions: Question[] = rawQuestions.map((q: any, index: number) => {
+        const qText = q.question || q.x || q.passage || `Câu ${index + 1}`;
+        const opts = q.options || q.o || [];
+        const ans = q.answer || q.a || '';
+        const qType = q.type || (q.t ? (q.t === 'fill' ? 'fill' : 'mcq') : (opts.length > 0 ? 'mcq' : 'fill'));
+        const instruction = q.instruction || (q.passage ? `Đoạn văn: ${q.passage}` : undefined);
+
+        return {
+          id: q.id || index + 1,
+          type: qType === 'mcq' ? 'mcq' : 'fill',
+          question: qText,
+          instruction,
+          options: Array.isArray(opts) ? opts.map(String) : [],
+          answer: String(ans),
+          explanation: q.explanation || ''
+        };
+      });
+
+      const data: TestData = { title, questions };
+      setTestData(data);
+      setStep('settings');
+      showToast(`Đã nạp bài kiểm tra thành công với ${questions.length} câu hỏi!`, "success");
+    } catch (err: any) {
+      showToast("Cú pháp JSON không hợp lệ: " + err.message, "error");
     }
   };
 
@@ -304,27 +364,84 @@ export default function KiemTraPage() {
         </div>
       </div>
 
-      {/* STEP 1: IMPORT FILE */}
+      {/* STEP 1: IMPORT FILE / PASTE JSON */}
       {step === 'import' && (
         <div className="space-y-6 max-w-4xl mx-auto w-full flex-1 flex flex-col justify-center">
-          <div className="p-10 bg-[#0d1018] border border-dashed border-white/20 rounded-2xl text-center space-y-5 shadow-2xl">
-            <div className="h-20 w-20 rounded-2xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-indigo-400 shadow-[0_0_30px_rgba(92,54,245,0.3)] mx-auto">
-              <Upload size={36} />
-            </div>
+          
+          {/* TAB MODE TOGGLE */}
+          <div className="flex items-center justify-center gap-2 p-1.5 bg-[#0c0f1d] border border-white/10 rounded-2xl w-fit mx-auto shadow-lg">
+            <button
+              onClick={() => setImportTab('file')}
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black transition cursor-pointer ${
+                importTab === 'file' ? 'bg-[#5c36f5] text-white shadow-md' : 'text-slate-400 hover:text-white hover:bg-white/5'
+              }`}
+            >
+              <Upload size={15} />
+              <span>Tải File (.DOCX / .JSON / .CSV)</span>
+            </button>
 
-            <div className="space-y-1 max-w-md mx-auto">
-              <h3 className="text-lg font-black text-white">Tải Đề Thi Lên (DOCX / JSON / CSV)</h3>
-              <p className="text-xs text-slate-400">
-                Kéo thả file bài tập hoặc click nút bên dưới để tải đề thi từ máy tính.
-              </p>
-            </div>
-
-            <label className="inline-flex items-center gap-2 bg-[#5c36f5] hover:bg-[#7351f7] text-white px-6 py-3 rounded-xl font-extrabold text-xs shadow-[0_4px_16px_rgba(92,54,245,0.4)] transition cursor-pointer border border-white/20 active:scale-95">
-              {loading ? <RefreshCw className="animate-spin" size={16} /> : <Upload size={16} />}
-              <span>Chọn Đề Thi Từ Máy Tính</span>
-              <input type="file" accept=".docx,.json,.csv" onChange={handleFileUpload} className="hidden" />
-            </label>
+            <button
+              onClick={() => setImportTab('json')}
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black transition cursor-pointer ${
+                importTab === 'json' ? 'bg-[#5c36f5] text-white shadow-md' : 'text-slate-400 hover:text-white hover:bg-white/5'
+              }`}
+            >
+              <Code size={15} />
+              <span>Dán Cấu Trúc JSON</span>
+            </button>
           </div>
+
+          {importTab === 'file' ? (
+            <div className="p-10 bg-[#0d1018] border border-dashed border-white/20 rounded-2xl text-center space-y-5 shadow-2xl animate-mac-dropdown">
+              <div className="h-20 w-20 rounded-2xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-indigo-400 shadow-[0_0_30px_rgba(92,54,245,0.3)] mx-auto">
+                <Upload size={36} />
+              </div>
+
+              <div className="space-y-1 max-w-md mx-auto">
+                <h3 className="text-lg font-black text-white">Tải Đề Thi Lên (DOCX / JSON / CSV)</h3>
+                <p className="text-xs text-slate-400">
+                  Kéo thả file bài tập hoặc click nút bên dưới để tải đề thi từ máy tính.
+                </p>
+              </div>
+
+              <label className="inline-flex items-center gap-2 bg-[#5c36f5] hover:bg-[#7351f7] text-white px-6 py-3 rounded-xl font-extrabold text-xs shadow-[0_4px_16px_rgba(92,54,245,0.4)] transition cursor-pointer border border-white/20 active:scale-95">
+                {loading ? <RefreshCw className="animate-spin" size={16} /> : <Upload size={16} />}
+                <span>Chọn Đề Thi Từ Máy Tính</span>
+                <input type="file" accept=".docx,.json,.csv" onChange={handleFileUpload} className="hidden" />
+              </label>
+            </div>
+          ) : (
+            <div className="p-6 bg-[#0d1018] border border-white/10 rounded-2xl space-y-4 shadow-2xl animate-mac-dropdown">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Code size={18} className="text-indigo-400" />
+                  <h3 className="text-sm font-black text-white uppercase tracking-wider">Dán Nội Dung JSON Đề Thi</h3>
+                </div>
+                <span className="text-[11px] text-slate-400 font-medium">Hỗ trợ các dạng JSON mảng hoặc object đề thi</span>
+              </div>
+
+              <textarea
+                rows={10}
+                value={pastedJson}
+                onChange={(e) => setPastedJson(e.target.value)}
+                placeholder={`Dán nội dung JSON đề thi vào đây, ví dụ:\n[\n  {\n    "question": "We have English lessons _____ Tuesday.",\n    "options": ["on", "up", "at", "in"],\n    "answer": "on"\n  }\n]`}
+                className="w-full bg-[#060810] border border-white/10 rounded-xl p-4 text-xs font-mono text-slate-200 focus:outline-none focus:border-indigo-500/60 leading-relaxed resize-y"
+              />
+
+              <div className="flex items-center justify-between pt-2">
+                <p className="text-[11px] text-slate-400">
+                  Tip: Bạn có thể copy JSON từ ChatGPT, Claude hoặc Prompt Generator.
+                </p>
+                <button
+                  onClick={handleParsePastedJson}
+                  className="flex items-center gap-2 bg-[#5c36f5] hover:bg-[#7351f7] text-white px-6 py-2.5 rounded-xl font-black text-xs shadow-[0_4px_16px_rgba(92,54,245,0.4)] transition cursor-pointer border border-white/20 active:scale-95"
+                >
+                  <FileText size={15} />
+                  <span>Nạp Đề Thi Từ JSON</span>
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
 

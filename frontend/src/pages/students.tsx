@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { ColumnDef } from '@tanstack/react-table';
 import { 
   Users, UserPlus, Edit3, Trash2, CheckCircle2, XCircle, 
@@ -109,9 +110,21 @@ export default function StudentsPage() {
     }
 
     // Check for duplicate name in existing student list
-    const isDuplicateName = students.some(
-      s => s.full_name.trim().toLowerCase() === nameTrim.toLowerCase() && s.id !== editingStudent?.id
-    );
+    // If another student has the same name AND same grade (or missing grade), flag as duplicate needing details.
+    // If that student name is the same with another but different grade, then it's OK and no extra info is required.
+    const formGradeTrim = formData.grade?.trim().toLowerCase() || '';
+    const isDuplicateName = students.some(s => {
+      if (s.id === editingStudent?.id) return false;
+      const sNameTrim = s.full_name.trim().toLowerCase();
+      if (sNameTrim !== nameTrim.toLowerCase()) return false;
+
+      const sGradeTrim = s.grade?.trim().toLowerCase() || '';
+      // If both have explicit grades and they are different, it's NOT a duplicate conflict
+      if (formGradeTrim && sGradeTrim && formGradeTrim !== sGradeTrim) {
+        return false;
+      }
+      return true;
+    });
 
     if (isDuplicateName) {
       const missing: string[] = [];
@@ -344,7 +357,7 @@ export default function StudentsPage() {
           </div>
         </div>
 
-        <div className="kpi-card-amber p-5 flex items-center justify-between">
+        <div className="kpi-card-red p-5 flex items-center justify-between">
           <div>
             <span className="text-[10px] font-black uppercase tracking-widest text-rose-400 block">Đã Nghỉ Học</span>
             <span className="text-2xl font-black text-rose-400">{totalQuit}</span>
@@ -384,9 +397,9 @@ export default function StudentsPage() {
       </div>
 
       {/* DUPLICATE NAME WARNING MODAL */}
-      {duplicateWarningMsg && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 animate-mac-dropdown">
-          <div className="bg-[#14192b] border-2 border-rose-500/50 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl p-6 flex flex-col gap-4">
+      {duplicateWarningMsg && createPortal(
+        <div className="fixed inset-0 z-[999999] flex items-center justify-center p-4 bg-black/80 backdrop-blur-xs animate-mac-dropdown">
+          <div className="bg-[#14192b] border-2 border-rose-500/50 rounded-2xl w-full max-w-md overflow-hidden shadow-[0_25px_60px_rgba(0,0,0,0.9)] p-6 flex flex-col gap-4">
             <div className="flex items-start gap-3">
               <div className="p-3 rounded-xl bg-rose-500/20 text-rose-400 border border-rose-500/30 shrink-0">
                 <AlertCircle size={24} />
@@ -418,7 +431,8 @@ export default function StudentsPage() {
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* ADD / EDIT MODAL */}
