@@ -377,13 +377,13 @@ export default function ReportsPage() {
     return result.length > 0 ? result : defaultData;
   }, [sessionRecords, timeView]);
 
-  // Expanded Taller Chart (Height: 560px for greater vertical tick distance)
-  const chartHeight = 560;
+  // Expanded Taller Chart (Height: 750px for greater vertical tick distance)
+  const chartHeight = 750;
   const chartWidth = Math.max(containerWidth, 600);
   const paddingLeft = 45;
   const paddingRight = 75;
-  const paddingTop = 30;
-  const paddingBottom = 45;
+  const paddingTop = 35;
+  const paddingBottom = 50;
   const plotAreaHeight = chartHeight - paddingTop - paddingBottom;
   const plotAreaWidth = chartWidth - paddingLeft - paddingRight;
 
@@ -764,7 +764,7 @@ export default function ReportsPage() {
             </div>
           )}
 
-          <svg viewBox={`0 0 ${chartWidth} ${chartHeight}`} className="w-full h-[560px] overflow-visible">
+          <svg viewBox={`0 0 ${chartWidth} ${chartHeight}`} className="w-full h-[750px] overflow-visible">
             <defs>
               {/* Outer Glow Filters with EXPANDED BOUNDS (300% width/height to eliminate square edge clipping!) */}
               <filter id="glow-blue" x="-100%" y="-100%" width="300%" height="300%">

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   BookOpen, Plus, Search, Edit3, Trash2, Users, User, MapPin, Pencil,
   Shuffle, FileCheck2, Save, X, RefreshCw, AlertTriangle, AlertCircle, UserPlus, ChevronLeft, ChevronRight, Move,
@@ -47,6 +47,17 @@ export default function ClassesPage() {
   const [teachers, setTeachers] = useState<TeacherCM[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+
+  const filteredClasses = useMemo(() => {
+    if (!search.trim()) return classes;
+    const q = search.trim().toLowerCase();
+    return classes.filter(cls =>
+      (cls.class_name || '').toLowerCase().includes(q) ||
+      (cls.teacher_name || '').toLowerCase().includes(q) ||
+      (cls.room || '').toLowerCase().includes(q) ||
+      (cls.grade || '').toLowerCase().includes(q)
+    );
+  }, [classes, search]);
 
   // Selected class detail state
   const [selectedClass, setSelectedClass] = useState<ClassItem | null>(null);
@@ -695,7 +706,7 @@ export default function ClassesPage() {
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                {classes.map((cls, idx) => {
+                {filteredClasses.map((cls, idx) => {
                   const isPurple = idx % 2 === 1;
                   return (
                     <div
