@@ -41,7 +41,7 @@ function AppContent() {
   const [preloadedGrade, setPreloadedGrade] = useState<string | null>(null);
   const [preloadedUnit, setPreloadedUnit] = useState<string | null>(null);
   const [settings, setSettings] = useState<AppSettings | null>(null);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [sidebarHovered, setSidebarHovered] = useState(false);
   const [zoomLevel, setZoomLevel] = useState(() => {
     const saved = localStorage.getItem('app_zoom');
     return saved ? parseFloat(saved) : 1;
@@ -250,10 +250,14 @@ function AppContent() {
 
       <div className="relative flex flex-row flex-1 overflow-hidden p-4 gap-4 z-10">
         
-        {/* SIDEBAR NAVIGATION */}
-        <aside className={`${
-          sidebarCollapsed ? 'w-16' : 'w-64'
-        } sidebar-glass-glow rounded-2xl flex flex-col h-full overflow-hidden transition-all duration-300 z-10 shrink-0`}>
+        {/* SIDEBAR NAVIGATION (Hover to expand, collapsed by default) */}
+        <aside
+          onMouseEnter={() => setSidebarHovered(true)}
+          onMouseLeave={() => setSidebarHovered(false)}
+          className={`sidebar-glass-glow rounded-2xl flex flex-col h-full overflow-hidden transition-[width] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] z-30 shrink-0 ${
+            !sidebarHovered ? 'w-16' : 'w-64'
+          }`}
+        >
           
           {/* Header logo / Title */}
           <div className="flex items-center justify-between px-3.5 py-4 shrink-0 border-b border-white/5 min-w-0">
@@ -262,7 +266,7 @@ function AppContent() {
                 <GraduationCap size={20} className="text-white drop-shadow-[0_0_12px_rgba(255,255,255,1)]" />
               </div>
               <div className={`transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] whitespace-nowrap overflow-hidden ${
-                sidebarCollapsed ? 'opacity-0 max-w-0 pointer-events-none' : 'opacity-100 max-w-[200px]'
+                !sidebarHovered ? 'opacity-0 max-w-0 pointer-events-none' : 'opacity-100 max-w-[200px]'
               }`}>
                 <span className="text-base font-black tracking-wide uppercase text-white block leading-none">
                   EduPlatform
@@ -272,13 +276,6 @@ function AppContent() {
                 </span>
               </div>
             </div>
-            <button 
-              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-              className="p-2 rounded-xl bg-[#181d2f] hover:bg-[#22283f] text-slate-300 hover:text-white transition cursor-pointer border border-white/5 active:scale-95 shrink-0"
-              title={sidebarCollapsed ? "Mở rộng sidebar" : "Thu gọn sidebar"}
-            >
-              {sidebarCollapsed ? <ChevronRight size={15} /> : <ChevronLeft size={15} />}
-            </button>
           </div>
           
           {/* Nav Menu */}
@@ -297,7 +294,7 @@ function AppContent() {
                 <div key={section.id} className="flex flex-col gap-1 shrink-0">
                   {section.label && (
                     <div className={`px-3 py-1 text-xs font-black uppercase tracking-wider text-slate-400 mt-1 mb-0.5 transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] whitespace-nowrap overflow-hidden ${
-                      sidebarCollapsed ? 'opacity-0 max-h-0 py-0' : 'opacity-100 max-h-8'
+                      !sidebarHovered ? 'opacity-0 max-h-0 py-0' : 'opacity-100 max-h-8'
                     }`}>
                       {section.label}
                     </div>
@@ -326,13 +323,13 @@ function AppContent() {
                         </div>
 
                         <span className={`ml-3 text-sm font-bold transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] whitespace-nowrap overflow-hidden ${
-                          sidebarCollapsed ? 'opacity-0 max-w-0 pointer-events-none' : 'opacity-100 max-w-[180px]'
+                          !sidebarHovered ? 'opacity-0 max-w-0 pointer-events-none' : 'opacity-100 max-w-[180px]'
                         } ${isActive ? "text-white font-extrabold" : "text-slate-200 font-bold group-hover:text-white"}`}>
                           {item.label}
                         </span>
                         
                         {/* Tooltip for collapsed mode */}
-                        {sidebarCollapsed && (
+                        {!sidebarHovered && (
                           <div className="absolute left-16 bg-[#0d1018]/95 border border-white/10 text-white text-xs font-bold py-1.5 px-3 rounded-[14px] shadow-[0_12px_40px_rgba(0,0,0,0.85)] backdrop-blur-xl animate-mac-dropdown opacity-0 pointer-events-none group-hover:opacity-100 transition-all duration-200 z-50 whitespace-nowrap">
                             {item.label}
                           </div>
@@ -350,7 +347,7 @@ function AppContent() {
             {/* Profile flyout popup (opens upward) */}
             {profileOpen && (
               <div className={`absolute z-[250] bg-[#0d1018]/95 border border-white/10 rounded-[14px] shadow-[0_12px_40px_rgba(0,0,0,0.85)] p-1.5 backdrop-blur-xl animate-mac-dropdown ${
-                sidebarCollapsed
+                !sidebarHovered
                   ? 'left-full bottom-2 ml-3.5 w-44 origin-left'
                   : 'bottom-full left-0 mb-2 w-full origin-bottom'
               }`}>
@@ -399,13 +396,13 @@ function AppContent() {
             {/* Clickable Profile Row */}
             <button
               onClick={() => setProfileOpen(!profileOpen)}
-              className={`flex items-center py-2.5 rounded-xl hover:bg-white/[0.04] transition-all w-full cursor-pointer ${sidebarCollapsed ? 'justify-center px-0' : 'gap-2.5 px-2'}`}
+              className="flex items-center py-2.5 rounded-xl hover:bg-white/[0.04] transition-all w-full cursor-pointer px-2 gap-2.5"
             >
               <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center font-black text-xs text-white shadow-[0_4px_14px_rgba(92,54,245,0.45)] shrink-0 border border-white/20 hover:shadow-[0_0_12px_rgba(92,54,245,0.5)] transition-all">
                 CM
               </div>
               <div className={`transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] whitespace-nowrap overflow-hidden flex items-center justify-between flex-1 ${
-                sidebarCollapsed ? 'opacity-0 max-w-0 pointer-events-none' : 'opacity-100 max-w-[180px]'
+                !sidebarHovered ? 'opacity-0 max-w-0 pointer-events-none' : 'opacity-100 max-w-[180px]'
               }`}>
                 <div className="min-w-0 flex-1 text-left">
                   <p className="text-xs font-black text-white truncate leading-snug">Center Manager</p>
@@ -416,7 +413,7 @@ function AppContent() {
             </button>
 
             <div className={`flex items-center justify-between text-[10px] text-slate-600 font-bold px-2 mt-1 transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] whitespace-nowrap overflow-hidden ${
-              sidebarCollapsed ? 'opacity-0 max-h-0 pointer-events-none' : 'opacity-100 max-h-6'
+              !sidebarHovered ? 'opacity-0 max-h-0 pointer-events-none' : 'opacity-100 max-h-6'
             }`}>
               <span className="uppercase tracking-widest">v4.0.0</span>
               {zoomLevel !== 1 && <span className="text-indigo-400">{Math.round(zoomLevel * 100)}%</span>}

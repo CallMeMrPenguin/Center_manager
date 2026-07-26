@@ -43,7 +43,7 @@ import {
   ChevronLeft, ChevronRight, RefreshCw, AlertCircle,
   ArrowUp, ArrowDown, ArrowUpDown, Search, ChevronDown, ChevronUp,
   CheckSquare, ChevronsLeft, ChevronsRight, X, SlidersHorizontal,
-  GripVertical, Download, FileSpreadsheet, FileText, Zap,
+  GripVertical, Download, FileSpreadsheet, FileText, Zap, RotateCcw,
 } from 'lucide-react';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -139,14 +139,14 @@ function DraggableHeader({ header, children, enableReorder }: {
     <th
       ref={setNodeRef}
       style={style}
-      className="select-none relative"
+      className="select-none relative border-b border-[#28334e] bg-[#111827]"
     >
       <div className="flex items-center gap-1 w-full">
         {enableReorder && (
           <span
             {...attributes}
             {...listeners}
-            className="cursor-grab active:cursor-grabbing text-slate-600 hover:text-slate-400 shrink-0 transition-colors touch-none"
+            className="cursor-grab active:cursor-grabbing text-slate-600 hover:text-slate-400 shrink-0 transition-colors touch-none pl-2"
             title="Kéo để sắp xếp cột"
           >
             <GripVertical size={12} />
@@ -159,7 +159,13 @@ function DraggableHeader({ header, children, enableReorder }: {
 }
 
 // ─── Column Visibility Dropdown ───────────────────────────────────────────────
-function ColumnVisibilityDropdown<TData>({ table }: { table: ReturnType<typeof useReactTable<TData>> }) {
+function ColumnVisibilityDropdown<TData>({
+  table,
+  onResetColumnWidths,
+}: {
+  table: ReturnType<typeof useReactTable<TData>>;
+  onResetColumnWidths?: () => void;
+}) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -187,7 +193,7 @@ function ColumnVisibilityDropdown<TData>({ table }: { table: ReturnType<typeof u
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full mt-2 z-[60] w-52 bg-[#131929] border border-[#28334e] rounded-2xl shadow-2xl p-3 space-y-1 animate-mac-dropdown">
+        <div className="absolute right-0 top-full mt-2 z-[60] w-56 bg-[#131929] border border-[#28334e] rounded-2xl shadow-2xl p-3 space-y-1 animate-mac-dropdown">
           <div className="text-[10px] font-black uppercase text-indigo-400 tracking-wider border-b border-white/10 pb-1.5 mb-2 flex items-center justify-between">
             <span>Hiển thị cột</span>
             <div className="flex gap-1">
@@ -205,6 +211,23 @@ function ColumnVisibilityDropdown<TData>({ table }: { table: ReturnType<typeof u
               {col.getIsPinned() && <span className="ml-auto text-[9px] text-amber-400 font-bold">PIN</span>}
             </label>
           ))}
+
+          {onResetColumnWidths && (
+            <div className="pt-2 border-t border-white/10 mt-2">
+              <button
+                type="button"
+                onClick={() => {
+                  onResetColumnWidths();
+                  setOpen(false);
+                }}
+                className="w-full flex items-center justify-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 border border-indigo-500/20 text-xs font-extrabold transition cursor-pointer"
+                title="Đặt lại kích thước tất cả các cột về mặc định"
+              >
+                <RotateCcw size={12} />
+                <span>Đặt lại độ rộng cột</span>
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>
@@ -375,6 +398,15 @@ export function DataTable<TData>({
       localStorage.setItem(storageKey, JSON.stringify(columnSizing));
     } catch (e) {}
   }, [columnSizing, storageKey]);
+
+  const handleResetColumnWidths = useCallback(() => {
+    setColumnSizing({});
+    if (storageKey) {
+      try {
+        localStorage.removeItem(storageKey);
+      } catch (e) {}
+    }
+  }, [storageKey]);
 
   const [globalFilter, setGlobalFilter] = useState('');
   const [sorting, setSorting] = useState<SortingState>(initialSorting);
@@ -617,7 +649,12 @@ export function DataTable<TData>({
             {toolbarRight}
 
             {enableExport && <ExportDropdown<TData> table={table} filename={exportFilename} />}
-            {enableColumnVisibility && <ColumnVisibilityDropdown<TData> table={table} />}
+            {enableColumnVisibility && (
+              <ColumnVisibilityDropdown<TData>
+                table={table}
+                onResetColumnWidths={handleResetColumnWidths}
+              />
+            )}
           </div>
         </div>
       )}
@@ -682,7 +719,6 @@ export function DataTable<TData>({
                                   whitespace-nowrap
                                   ${isFirst ? 'rounded-tl-xl' : ''} ${isLast ? 'rounded-tr-xl' : ''}
                                   ${isPinned ? 'bg-[#111827]' : ''}
-                                  border-b border-[#1e2740]
                                 `}
                                 style={{
                                   ...(enableColumnResizing ? { width: header.getSize(), minWidth: header.getSize() } : {}),
