@@ -151,30 +151,26 @@ function DraggableHeader({
     <th
       ref={setNodeRef}
       style={style}
-      {...(enableReorder ? { ...attributes, ...listeners } : {})}
       className={`select-none relative border-b border-[#28334e] bg-[#111827] ${
         isPinned ? 'bg-[#111827]' : ''
-      } ${
-        enableReorder ? 'cursor-grab active:cursor-grabbing hover:bg-[#182033] transition-colors' : ''
       }`}
-      title={enableReorder ? 'Giữ chuột và kéo để thay đổi thứ tự cột' : undefined}
     >
-      <div className="flex items-center justify-center text-center gap-1.5 w-full py-3.5 px-3 overflow-hidden text-slate-200 text-xs sm:text-sm font-black uppercase tracking-wider whitespace-nowrap">
+      {/* Draggable Title Area (Only dragging text reorders column) */}
+      <div
+        {...(enableReorder ? { ...attributes, ...listeners } : {})}
+        className={`flex items-center justify-center text-center gap-1.5 w-full py-3.5 px-3 overflow-hidden text-slate-200 text-xs sm:text-sm font-black uppercase tracking-wider whitespace-nowrap ${
+          enableReorder ? 'cursor-grab active:cursor-grabbing hover:text-white transition-colors' : ''
+        }`}
+        title={enableReorder ? 'Giữ chuột và kéo để thay đổi thứ tự cột' : undefined}
+      >
         {children}
       </div>
 
-      {/* Resize handle — pinned to right border of th cell */}
+      {/* Resize handle — completely isolated from dnd listeners */}
       {enableColumnResizing && header.column.getCanResize() && (
         <div
-          onMouseDown={(e) => {
-            e.stopPropagation();
-            header.getResizeHandler()(e);
-          }}
-          onTouchStart={(e) => {
-            e.stopPropagation();
-            header.getResizeHandler()(e);
-          }}
-          onClick={(e) => e.stopPropagation()}
+          onMouseDown={header.getResizeHandler()}
+          onTouchStart={header.getResizeHandler()}
           title="Kéo để thay đổi độ rộng cột"
           className={`absolute -right-1 top-1 h-[calc(100%-8px)] w-2.5 cursor-col-resize select-none touch-none rounded-full transition-colors z-30 ${
             header.column.getIsResizing() ? 'bg-indigo-500' : 'bg-transparent hover:bg-indigo-500/60'
