@@ -38,10 +38,11 @@ const TYPE_MAP: Record<string, string> = {
   'er': 'Error Identification',
   'sy': 'Synonym',
   'an': 'Antonym',
-  'mq': 'Multiple Choice',
   'cz': 'Cloze Passage',
   'ro': 'Reordering',
-  'rd': 'Reading'
+  'rd': 'Reading',
+  'fb': 'Fill in the Blank',
+  'rw': 'Rewrite Sentences'
 };
 
 function parseUnits(unitStr: string): string[] {

@@ -13,30 +13,56 @@ import { showToast } from '../../components/Toast';
 const DEFAULT_TEST_FORMATTER_PROMPTS: PromptItem[] = [
   {
     id: "tf_1",
-    title: "Định dạng JSON Câu hỏi trắc nghiệm",
-    content: `Hãy định dạng các câu hỏi tiếng Anh sau đây thành một mảng JSON có cấu trúc như sau:
+    title: "Định dạng JSON Đề Thi Chuẩn (Form / Schema)",
+    content: `Hãy định dạng các câu hỏi tiếng Anh thành mảng JSON có cấu trúc như sau:
 [
   {
-    "t": "mq", // mq: Multiple Choice, pr: Pronunciation, st: Stress, er: Error Identification
-    "q": 1,
-    "x": "We have English lessons _______ Tuesday and Friday.",
-    "o": ["on", "up", "at", "in"],
+    "t": "fb", // Mã dạng bài: pr (Phát âm), st (Trọng âm), sy (Đồng nghĩa), an (Trái nghĩa), er (Tìm lỗi sai), fb (Điền từ), rw (Viết lại câu), cz (Đọc điền), rd (Đọc hiểu), ro (Sắp xếp)
+    "q": "1",
+    "x": "Complete the sentence: Living in a big city is more expensive than living in a rural village.\n(Living in)",
+    "o": ["Option A", "Option B", "Option C", "Option D"], // NẾU LÀ TRẮC NGHIỆM (MCQ): Điền 4 lựa chọn vào mảng "o". NẾU LÀ TỰ LUẬN / ĐIỀN TỪ / VIẾT LẠI CÂU: Bỏ trống "o": []
     "a": "A"
+  }
+]
+QUY TẮC:
+1. Hệ thống tự động nhận diện Trắc nghiệm (MCQ) nếu có 4 lựa chọn trong "o". Nếu không có 4 lựa chọn trong "o" (để "o": []), câu hỏi sẽ tự động hiển thị dạng Tự luận / Điền từ / Viết lại câu.
+2. Mã dạng bài ("t"):
+   - "pr": Pronunciation (Phát âm)
+   - "st": Stress (Trọng âm)
+   - "sy": Synonym (Từ đồng nghĩa)
+   - "an": Antonym (Từ trái nghĩa)
+   - "er": Error Identification (Tìm lỗi sai)
+   - "fb": Fill in the Blank (Điền vào chỗ trống)
+   - "rw": Rewrite Sentences (Viết lại câu)
+   - "cz": Cloze Passage (Đoạn văn điền từ)
+   - "rd": Reading Passage (Đoạn văn đọc hiểu)
+   - "ro": Sentence Reordering (Sắp xếp lại câu)`
+  },
+  {
+    id: "tf_2",
+    title: "Định dạng JSON Bài Viết lại câu (Rewrite - Non MCQ)",
+    content: `Chuyển đổi bài tập Viết lại câu (rw) thành JSON không có trắc nghiệm ("o": []):
+[
+  {
+    "t": "rw",
+    "q": "1",
+    "x": "Living in a big city is more expensive than living in a rural village.\n(Living in)",
+    "o": [],
+    "a": "Living in a rural village is cheaper than living in a big city."
   }
 ]`
   },
   {
-    id: "tf_2",
-    title: "Định dạng JSON Bài đọc hiểu (Reading)",
-    content: `Hãy chuyển đổi đoạn văn và các câu hỏi đọc hiểu đi kèm thành mảng JSON theo định dạng dưới đây:
+    id: "tf_3",
+    title: "Định dạng JSON Bài Điền từ vào chỗ trống (Fill in Blank - Non MCQ)",
+    content: `Chuyển đổi bài tập Điền vào chỗ trống (fb) thành JSON:
 [
   {
-    "t": "rd", // rd: Reading
-    "q": 5,
-    "passage": "[Nội dung đoạn văn đọc hiểu tại đây]",
-    "x": "What is the main idea of the passage?",
-    "o": ["Option A", "Option B", "Option C", "Option D"],
-    "a": "A"
+    "t": "fb",
+    "q": "1",
+    "x": "She is very _______ (INTEREST) in learning English.",
+    "o": [],
+    "a": "interested"
   }
 ]`
   }

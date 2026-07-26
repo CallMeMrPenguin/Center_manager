@@ -10,7 +10,6 @@ import { DataTable } from '../../components/DataTable';
 const EXERCISE_TYPE_LABELS: Record<string, string> = {
   "pr": "Pronunciation (Phát âm)",
   "st": "Stress (Trọng âm)",
-  "mq": "Multiple Choice (Trắc nghiệm tổng hợp)",
   "sy": "Synonym (Từ đồng nghĩa)",
   "an": "Antonym (Từ trái nghĩa)",
   "sg": "Sign (Biển báo)",
@@ -18,7 +17,9 @@ const EXERCISE_TYPE_LABELS: Record<string, string> = {
   "cz": "Cloze Passage (Điền từ đoạn văn)",
   "ro": "Reordering (Sắp xếp câu)",
   "rd": "Reading (Đọc hiểu)",
-  "er": "Error Identification (Tìm lỗi sai)"
+  "er": "Error Identification (Tìm lỗi sai)",
+  "fb": "Fill in the Blank (Điền vào chỗ trống)",
+  "rw": "Rewrite Sentences (Viết lại câu)"
 };
 
 export default function UnitConfig() {

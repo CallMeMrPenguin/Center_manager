@@ -12,22 +12,39 @@ from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 
 # Local instruction mapping dictionary
-INSTRUCTION_MAP = {
+INSTRUCTION_MAP_MCQ = {
     "pr": "Mark the letter A, B, C, or D on your answer sheet to indicate the word whose underlined part differs from the other three in pronunciation in each of the following questions.",
     "st": "Mark the letter A, B, C, or D on your answer sheet to indicate the word that differs from the other three in the position of primary stress in each of the following questions.",
-    "mq": "Mark the letter A, B, C, or D on your answer sheet to indicate the correct answer to each of the following questions.",
     "sy": "Mark the letter A, B, C, or D on your answer sheet to indicate the word(s) CLOSEST in meaning to the underlined word(s) in each of the following questions.",
     "an": "Mark the letter A, B, C, or D on your answer sheet to indicate the word(s) OPPOSITE in meaning to the underlined word(s) in each of the following questions.",
     "sg": "Mark the letter A, B, C, or D on your answer sheet to indicate the correct meaning of the sign in each of the following questions.",
     "nt": "Mark the letter A, B, C, or D on your answer sheet to indicate the correct meaning of the notice in each of the following questions.",
-    "cz": "Read the following passage and mark the letter A, B, C, or D on your answer sheet to indicate the correct word or phrase that best fits each of the numbered blanks.",
-    "ro": "Mark the letter A, B, C, or D on your answer sheet to indicate the correct arrangement of the sentences to make a meaningful text in each of the following questions.",
-    "rd": "Read the following passage and mark the letter A, B, C, or D on your answer sheet to indicate the correct answer to each of the following questions.",
-    "er": "Mark the letter A, B, C, or D on your answer sheet to indicate the underlined part that needs correction in each of the following questions."
+    "cz": "Read the following passage and mark the letter A, B, C, or D on your answer sheet to indicate the word or phrase that best fits each of the numbered blanks.",
+    "ro": "Mark the letter A, B, C, or D on your answer sheet to indicate the answer that best fits each of the following questions.",
+    "rd": "Read the following passage and mark the letter A, B, C, or D on your answer sheet to indicate the answer that best fits each of the following questions.",
+    "er": "Mark the letter A, B, C, or D on your answer sheet to indicate the underlined part that needs correction in each of the following questions.",
+    "fb": "Mark the letter A, B, C, or D on your answer sheet to indicate the word or phrase that best fits each blank in the following questions.",
+    "rw": "Mark the letter A, B, C, or D on your answer sheet to indicate the sentence that is closest in meaning to each of the following questions.",
+    "mq": "Mark the letter A, B, C, or D on your answer sheet to indicate the answer that best fits each of the following questions."
 }
 
-def get_instruction_map():
-    # Attempt to load custom exercise instruction config if available
+INSTRUCTION_MAP_NON_MCQ = {
+    "pr": "Write the word with the underlined sound for each of the following questions.",
+    "st": "Write the position of primary stress for each of the following words.",
+    "sy": "Provide a word or phrase closest in meaning to the underlined part in each of the following sentences.",
+    "an": "Provide a word or phrase opposite in meaning to the underlined part in each of the following sentences.",
+    "sg": "State the meaning of each of the following signs.",
+    "nt": "State the meaning of each of the following notices.",
+    "cz": "Read the following passage and fill in each numbered blank with ONE suitable word.",
+    "ro": "Rearrange the given words or phrases to make complete, meaningful sentences.",
+    "rd": "Read the following passage and answer the questions that follow.",
+    "er": "Identify and correct the mistake in each of the following sentences.",
+    "fb": "Complete each of the following sentences with the correct form of the word in brackets or a suitable word.",
+    "rw": "Rewrite each of the following sentences so that it has a similar meaning to the original sentence.",
+    "mq": "Complete each of the following questions."
+}
+
+def get_instruction_text(ex_type: str, is_mcq: bool = True) -> str:
     paths = [
         os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "backend", "exercise_config.json"),
         os.path.join(os.path.dirname(os.path.abspath(__file__)), "exercise_config.json"),
@@ -38,10 +55,18 @@ def get_instruction_map():
             try:
                 with open(config_file, "r", encoding="utf-8") as f:
                     custom_map = json.load(f)
-                    return {**INSTRUCTION_MAP, **custom_map}
+                    specific_key = f"{ex_type}_mcq" if is_mcq else f"{ex_type}_non_mcq"
+                    if specific_key in custom_map:
+                        return custom_map[specific_key]
+                    if ex_type in custom_map:
+                        return custom_map[ex_type]
             except Exception:
                 pass
-    return INSTRUCTION_MAP
+    if is_mcq:
+        return INSTRUCTION_MAP_MCQ.get(ex_type, "Mark the letter A, B, C, or D on your answer sheet to indicate the answer that best fits each of the following questions.")
+    else:
+        return INSTRUCTION_MAP_NON_MCQ.get(ex_type, "Answer each of the following questions.")
+
 
 
 def parse_text_formatting(text: str) -> List[Dict[str, Any]]:
@@ -294,14 +319,18 @@ class WordDocumentCompiler:
                 else:
                     raise ValueError("JSON dictionary does not contain a list of exercises.")
 
-        current_type = None
+        current_block_key = None
         for ex in exercises:
-            ex_type = ex.get("t")
+            ex_type = ex.get("t", "mq")
+            options = ex.get("o", [])
+            if not isinstance(options, list):
+                options = []
+            is_mcq = len(options) >= 2
             
-            # Whenever the exercise type shifts, inject the instruction block
-            if ex_type != current_type:
-                current_type = ex_type
-                instruction_text = get_instruction_map().get(current_type)
+            block_key = (ex_type, is_mcq)
+            if block_key != current_block_key:
+                current_block_key = block_key
+                instruction_text = get_instruction_text(ex_type, is_mcq)
                 if instruction_text:
                     self.add_instruction_header(instruction_text)
             
