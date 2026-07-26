@@ -260,26 +260,28 @@ function AppContent() {
         >
           
           {/* Header logo / Title */}
-          <div className="flex items-center justify-between px-3.5 py-4 shrink-0 border-b border-white/5 min-w-0">
+          <div className={`flex items-center py-4 shrink-0 border-b border-white/5 transition-all duration-300 ${
+            !sidebarHovered ? 'justify-center px-0' : 'justify-between px-3.5'
+          }`}>
             <div className="flex items-center gap-3 min-w-0">
               <div className="h-9 w-9 bg-indigo-500/25 border-2 border-indigo-400/80 rounded-2xl flex items-center justify-center shadow-[0_0_30px_rgba(92,54,245,0.8),0_0_15px_rgba(129,140,248,0.6),inset_0_0_12px_rgba(92,54,245,0.4)] shrink-0">
                 <GraduationCap size={20} className="text-white drop-shadow-[0_0_12px_rgba(255,255,255,1)]" />
               </div>
-              <div className={`transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] whitespace-nowrap overflow-hidden ${
-                !sidebarHovered ? 'opacity-0 max-w-0 pointer-events-none' : 'opacity-100 max-w-[200px]'
-              }`}>
-                <span className="text-base font-black tracking-wide uppercase text-white block leading-none">
-                  EduPlatform
-                </span>
-                <span className="text-[10px] font-black tracking-[0.2em] uppercase text-indigo-400 block mt-1">
-                  Center Manager
-                </span>
-              </div>
+              {sidebarHovered && (
+                <div className="whitespace-nowrap overflow-hidden transition-all duration-300 animate-fadeIn">
+                  <span className="text-base font-black tracking-wide uppercase text-white block leading-none">
+                    EduPlatform
+                  </span>
+                  <span className="text-[10px] font-black tracking-[0.2em] uppercase text-indigo-400 block mt-1">
+                    Center Manager
+                  </span>
+                </div>
+              )}
             </div>
           </div>
           
           {/* Nav Menu */}
-          <nav className="flex-1 overflow-y-auto min-h-0 px-2.5 py-3 flex flex-col gap-2.5 scrollbar-none">
+          <nav className="flex-1 overflow-y-auto min-h-0 px-2 py-3 flex flex-col gap-2.5 scrollbar-none">
             {SECTIONS.map((section) => {
               const sectionTabs = orderedTabIds
                 .map((tabId, idx) => ({ tabId, idx }))
@@ -292,10 +294,8 @@ function AppContent() {
 
               return (
                 <div key={section.id} className="flex flex-col gap-1 shrink-0">
-                  {section.label && (
-                    <div className={`px-3 py-1 text-xs font-black uppercase tracking-wider text-slate-400 mt-1 mb-0.5 transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] whitespace-nowrap overflow-hidden ${
-                      !sidebarHovered ? 'opacity-0 max-h-0 py-0' : 'opacity-100 max-h-8'
-                    }`}>
+                  {section.label && sidebarHovered && (
+                    <div className="px-3 py-1 text-xs font-black uppercase tracking-wider text-slate-400 mt-1 mb-0.5 whitespace-nowrap overflow-hidden animate-fadeIn">
                       {section.label}
                     </div>
                   )}
@@ -312,7 +312,11 @@ function AppContent() {
                         onDragEnd={() => setDraggedIndex(null)}
                         onDrop={() => handleDrop(idx)}
                         onClick={() => setActiveTab(item.id)}
-                        className={`flex items-center w-full h-11 px-3 rounded-xl transition-all duration-200 relative group cursor-pointer active:scale-95 shrink-0 overflow-hidden ${
+                        className={`flex items-center h-11 transition-all duration-200 relative group cursor-pointer active:scale-95 shrink-0 overflow-hidden ${
+                          !sidebarHovered
+                            ? 'w-11 h-11 mx-auto justify-center px-0 rounded-2xl'
+                            : 'w-full px-3.5 justify-start rounded-xl'
+                        } ${
                           isActive
                             ? 'bg-indigo-500/20 border-2 border-indigo-400 text-white font-black shadow-[0_0_20px_rgba(92,54,245,0.55),0_0_10px_rgba(129,140,248,0.45),inset_0_0_12px_rgba(92,54,245,0.3)]'
                             : 'text-slate-300 font-bold hover:text-white hover:bg-white/5 border border-transparent'
@@ -322,17 +326,12 @@ function AppContent() {
                           <Icon size={20} className={isActive ? 'text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.9)]' : 'text-slate-400 group-hover:text-white'} />
                         </div>
 
-                        <span className={`ml-3 text-sm font-bold transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] whitespace-nowrap overflow-hidden ${
-                          !sidebarHovered ? 'opacity-0 max-w-0 pointer-events-none' : 'opacity-100 max-w-[180px]'
-                        } ${isActive ? "text-white font-extrabold" : "text-slate-200 font-bold group-hover:text-white"}`}>
-                          {item.label}
-                        </span>
-                        
-                        {/* Tooltip for collapsed mode */}
-                        {!sidebarHovered && (
-                          <div className="absolute left-16 bg-[#0d1018]/95 border border-white/10 text-white text-xs font-bold py-1.5 px-3 rounded-[14px] shadow-[0_12px_40px_rgba(0,0,0,0.85)] backdrop-blur-xl animate-mac-dropdown opacity-0 pointer-events-none group-hover:opacity-100 transition-all duration-200 z-50 whitespace-nowrap">
+                        {sidebarHovered && (
+                          <span className={`ml-3 text-sm font-bold whitespace-nowrap overflow-hidden transition-all duration-200 ${
+                            isActive ? "text-white font-extrabold" : "text-slate-200 font-bold group-hover:text-white"
+                          }`}>
                             {item.label}
-                          </div>
+                          </span>
                         )}
                       </button>
                     );
@@ -396,28 +395,30 @@ function AppContent() {
             {/* Clickable Profile Row */}
             <button
               onClick={() => setProfileOpen(!profileOpen)}
-              className="flex items-center py-2.5 rounded-xl hover:bg-white/[0.04] transition-all w-full cursor-pointer px-2 gap-2.5"
+              className={`flex items-center py-2.5 rounded-xl hover:bg-white/[0.04] transition-all w-full cursor-pointer ${
+                !sidebarHovered ? 'justify-center px-0' : 'gap-2.5 px-2'
+              }`}
             >
               <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center font-black text-xs text-white shadow-[0_4px_14px_rgba(92,54,245,0.45)] shrink-0 border border-white/20 hover:shadow-[0_0_12px_rgba(92,54,245,0.5)] transition-all">
                 CM
               </div>
-              <div className={`transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] whitespace-nowrap overflow-hidden flex items-center justify-between flex-1 ${
-                !sidebarHovered ? 'opacity-0 max-w-0 pointer-events-none' : 'opacity-100 max-w-[180px]'
-              }`}>
-                <div className="min-w-0 flex-1 text-left">
-                  <p className="text-xs font-black text-white truncate leading-snug">Center Manager</p>
-                  <p className="text-[10px] font-extrabold text-indigo-400 truncate">Hệ thống quản lý</p>
+              {sidebarHovered && (
+                <div className="whitespace-nowrap overflow-hidden flex items-center justify-between flex-1 animate-fadeIn">
+                  <div className="min-w-0 flex-1 text-left">
+                    <p className="text-xs font-black text-white truncate leading-snug">Center Manager</p>
+                    <p className="text-[10px] font-extrabold text-indigo-400 truncate">Hệ thống quản lý</p>
+                  </div>
+                  <ChevronUp size={13} className={`text-slate-500 shrink-0 transition-transform ${profileOpen ? '' : 'rotate-180'}`} />
                 </div>
-                <ChevronUp size={13} className={`text-slate-500 shrink-0 transition-transform ${profileOpen ? '' : 'rotate-180'}`} />
-              </div>
+              )}
             </button>
 
-            <div className={`flex items-center justify-between text-[10px] text-slate-600 font-bold px-2 mt-1 transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] whitespace-nowrap overflow-hidden ${
-              !sidebarHovered ? 'opacity-0 max-h-0 pointer-events-none' : 'opacity-100 max-h-6'
-            }`}>
-              <span className="uppercase tracking-widest">v4.0.0</span>
-              {zoomLevel !== 1 && <span className="text-indigo-400">{Math.round(zoomLevel * 100)}%</span>}
-            </div>
+            {sidebarHovered && (
+              <div className="flex items-center justify-between text-[10px] text-slate-600 font-bold px-2 mt-1 animate-fadeIn">
+                <span className="uppercase tracking-widest">v4.0.0</span>
+                {zoomLevel !== 1 && <span className="text-indigo-400">{Math.round(zoomLevel * 100)}%</span>}
+              </div>
+            )}
           </div>
         </aside>
 
