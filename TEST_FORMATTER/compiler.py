@@ -14,7 +14,10 @@ from docx.oxml.ns import qn
 # Local instruction mapping dictionary
 INSTRUCTION_MAP = {
     "pr": "Mark the letter A, B, C, or D on your answer sheet to indicate the word whose underlined part differs from the other three in pronunciation in each of the following questions.",
+    "st": "Mark the letter A, B, C, or D on your answer sheet to indicate the word that differs from the other three in the position of primary stress in each of the following questions.",
     "mq": "Mark the letter A, B, C, or D on your answer sheet to indicate the correct answer to each of the following questions.",
+    "sy": "Mark the letter A, B, C, or D on your answer sheet to indicate the word(s) CLOSEST in meaning to the underlined word(s) in each of the following questions.",
+    "an": "Mark the letter A, B, C, or D on your answer sheet to indicate the word(s) OPPOSITE in meaning to the underlined word(s) in each of the following questions.",
     "sg": "Mark the letter A, B, C, or D on your answer sheet to indicate the correct meaning of the sign in each of the following questions.",
     "nt": "Mark the letter A, B, C, or D on your answer sheet to indicate the correct meaning of the notice in each of the following questions.",
     "cz": "Read the following passage and mark the letter A, B, C, or D on your answer sheet to indicate the correct word or phrase that best fits each of the numbered blanks.",
@@ -22,6 +25,24 @@ INSTRUCTION_MAP = {
     "rd": "Read the following passage and mark the letter A, B, C, or D on your answer sheet to indicate the correct answer to each of the following questions.",
     "er": "Mark the letter A, B, C, or D on your answer sheet to indicate the underlined part that needs correction in each of the following questions."
 }
+
+def get_instruction_map():
+    # Attempt to load custom exercise instruction config if available
+    paths = [
+        os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "backend", "exercise_config.json"),
+        os.path.join(os.path.dirname(os.path.abspath(__file__)), "exercise_config.json"),
+        "exercise_config.json"
+    ]
+    for config_file in paths:
+        if os.path.exists(config_file):
+            try:
+                with open(config_file, "r", encoding="utf-8") as f:
+                    custom_map = json.load(f)
+                    return {**INSTRUCTION_MAP, **custom_map}
+            except Exception:
+                pass
+    return INSTRUCTION_MAP
+
 
 def parse_text_formatting(text: str) -> List[Dict[str, Any]]:
     import re
@@ -280,7 +301,7 @@ class WordDocumentCompiler:
             # Whenever the exercise type shifts, inject the instruction block
             if ex_type != current_type:
                 current_type = ex_type
-                instruction_text = INSTRUCTION_MAP.get(current_type)
+                instruction_text = get_instruction_map().get(current_type)
                 if instruction_text:
                     self.add_instruction_header(instruction_text)
             
