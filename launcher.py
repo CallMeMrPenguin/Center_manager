@@ -7,10 +7,24 @@ Runs completely silently in the background without any command prompt window pop
 import os
 import sys
 import subprocess
+import shutil
 import threading
 
-ROOT = os.path.dirname(os.path.abspath(__file__))
+# Find root directory properly whether running as python script or frozen PyInstaller exe
+if getattr(sys, 'frozen', False):
+    ROOT = os.path.dirname(os.path.dirname(os.path.abspath(sys.executable)))
+else:
+    ROOT = os.path.dirname(os.path.abspath(__file__))
+
 NO_WINDOW = subprocess.CREATE_NO_WINDOW if sys.platform == "win32" else 0
+
+def find_system_python():
+    """Finds the system pythonw / py / python binary on Windows to avoid PyInstaller recursive execution."""
+    for py_bin in ["pythonw.exe", "pythonw", "py.exe", "py", "python.exe", "python"]:
+        found = shutil.which(py_bin)
+        if found:
+            return found
+    return sys.executable
 
 def check_git_updates_silent():
     """Background update checker - completely silent, runs in background thread."""
@@ -67,7 +81,7 @@ def ensure_frontend_build_silent():
             pass
 
 def main():
-    # 1. Start background update check in a separate silent thread (zero delay on boot)
+    # 1. Start background update check in a separate silent thread
     threading.Thread(target=check_git_updates_silent, daemon=True).start()
     
     # 2. Build frontend if completely missing
@@ -75,17 +89,12 @@ def main():
     if not os.path.exists(os.path.join(dist_dir, "index.html")):
         ensure_frontend_build_silent()
         
-    # 3. Launch main app completely silently without any CMD window
-    python_cmd = sys.executable
-    if python_cmd.endswith("python.exe"):
-        pyw = python_cmd[:-10] + "pythonw.exe"
-        if os.path.exists(pyw):
-            python_cmd = pyw
-
+    # 3. Launch main.py using system Python binary
+    py_bin = find_system_python()
     main_script = os.path.join(ROOT, "main.py")
     
     subprocess.Popen(
-        [python_cmd, main_script],
+        [py_bin, main_script],
         cwd=ROOT,
         creationflags=NO_WINDOW
     )
