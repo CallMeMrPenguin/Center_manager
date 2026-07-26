@@ -1,34 +1,33 @@
 # -*- coding: utf-8 -*-
 """
 CENTER MANAGER -- Executable Builder Script
-Compiles launcher.py into a lightweight standalone CenterManager.exe using PyInstaller
+Compiles launcher.py into a lightweight silent standalone CenterManager.exe (no CMD window) using PyInstaller
 and creates a Desktop shortcut for the user.
 """
 
 import os
 import sys
 import subprocess
-import shutil
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 
 def build_executable():
     print("=" * 60)
-    print("Building CenterManager.exe lightweight launcher via PyInstaller...")
+    print("Building CenterManager.exe silent launcher via PyInstaller...")
     print("=" * 60)
     
     cmd = [
         sys.executable, "-m", "PyInstaller",
         "--noconfirm",
         "--onedir",
-        "--console",
+        "--noconsole",
         "--name=CenterManager",
         os.path.join(ROOT, "launcher.py")
     ]
     
     res = subprocess.run(cmd, cwd=ROOT)
     if res.returncode == 0:
-        print("Success! CenterManager.exe built inside dist/CenterManager/")
+        print("Success! CenterManager.exe built silently inside dist/CenterManager/")
         create_desktop_shortcut()
     else:
         print(f"Build failed with exit code: {res.returncode}")
