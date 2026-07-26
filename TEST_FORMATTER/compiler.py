@@ -44,6 +44,22 @@ INSTRUCTION_MAP_NON_MCQ = {
     "mq": "Complete each of the following questions."
 }
 
+def get_instruction_map():
+    paths = [
+        os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "backend", "exercise_config.json"),
+        os.path.join(os.path.dirname(os.path.abspath(__file__)), "exercise_config.json"),
+        "exercise_config.json"
+    ]
+    for config_file in paths:
+        if os.path.exists(config_file):
+            try:
+                with open(config_file, "r", encoding="utf-8") as f:
+                    custom_map = json.load(f)
+                    return {**INSTRUCTION_MAP_MCQ, **custom_map}
+            except Exception:
+                pass
+    return INSTRUCTION_MAP_MCQ
+
 def get_instruction_text(ex_type: str, is_mcq: bool = True) -> str:
     paths = [
         os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "backend", "exercise_config.json"),
