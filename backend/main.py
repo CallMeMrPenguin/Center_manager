@@ -49,8 +49,13 @@ pdf_preview_dir = os.path.join(BASE_DIR, "backend", "temp_pdf_previews")
 os.makedirs(pdf_preview_dir, exist_ok=True)
 app.mount("/pdf-previews", StaticFiles(directory=pdf_preview_dir), name="pdf-previews")
 
-# Static Frontend Serving for React
-frontend_dist = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "frontend", "dist")
+if getattr(sys, 'frozen', False):
+    BUNDLE_DIR = getattr(sys, '_MEIPASS', os.path.dirname(sys.executable))
+    frontend_dist = os.path.join(BUNDLE_DIR, "frontend", "dist")
+    if not os.path.exists(frontend_dist):
+        frontend_dist = os.path.join(os.path.dirname(sys.executable), "frontend", "dist")
+else:
+    frontend_dist = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "frontend", "dist")
 
 if os.path.exists(frontend_dist):
     app.mount("/assets", StaticFiles(directory=os.path.join(frontend_dist, "assets")), name="assets")

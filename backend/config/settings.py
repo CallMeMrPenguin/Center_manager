@@ -3,8 +3,12 @@ import json
 import socket
 import uuid
 
-# Base directory of the application (root folder)
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+if getattr(sys, 'frozen', False):
+    BASE_DIR = os.path.dirname(os.path.abspath(sys.executable))
+    BUNDLE_DIR = getattr(sys, '_MEIPASS', BASE_DIR)
+else:
+    BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    BUNDLE_DIR = BASE_DIR
 
 CONFIG_FILE = os.path.join(BASE_DIR, "config.json")
 

@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-CENTER MANAGER -- Executable Builder Script
-Compiles launcher.py into a lightweight silent standalone CenterManager.exe (no CMD window) using PyInstaller
-and creates a Desktop shortcut for the user.
+CENTER MANAGER -- Portable Executable Builder Script
+Bundles Python backend, FastAPI, SQLite, and React frontend into a 100% standalone
+executable that runs on ANY Windows PC without needing Python, Node, or Git installed.
 """
 
 import os
@@ -13,21 +13,37 @@ ROOT = os.path.dirname(os.path.abspath(__file__))
 
 def build_executable():
     print("=" * 60)
-    print("Building CenterManager.exe silent launcher via PyInstaller...")
+    print("Building Standalone Portable CenterManager.exe via PyInstaller...")
     print("=" * 60)
     
+    # 1. Build frontend static production bundle
+    frontend_dir = os.path.join(ROOT, "frontend")
+    npm_cmd = "npm.cmd" if sys.platform == "win32" else "npm"
+    try:
+        subprocess.run([npm_cmd, "run", "build"], cwd=frontend_dir, check=True)
+    except Exception as e:
+        print(f"Warning building frontend: {e}")
+    
+    # 2. Bundle backend, frontend static files, DB, and configs into standalone EXE folder
     cmd = [
         sys.executable, "-m", "PyInstaller",
         "--noconfirm",
         "--onedir",
         "--noconsole",
         "--name=CenterManager",
-        os.path.join(ROOT, "launcher.py")
+        f"--add-data={os.path.join(ROOT, 'backend')};backend",
+        f"--add-data={os.path.join(ROOT, 'frontend', 'dist')};frontend/dist",
+        f"--add-data={os.path.join(ROOT, 'unit_config.json')};.",
+        f"--add-data={os.path.join(ROOT, 'exercise_config.json')};.",
+        f"--add-data={os.path.join(ROOT, 'config.json')};.",
+        f"--add-data={os.path.join(ROOT, 'prompts.json')};.",
+        f"--add-data={os.path.join(ROOT, 'test_formatter.db')};.",
+        os.path.join(ROOT, "main.py")
     ]
     
     res = subprocess.run(cmd, cwd=ROOT)
     if res.returncode == 0:
-        print("Success! CenterManager.exe built silently inside dist/CenterManager/")
+        print("Success! Standalone Portable CenterManager.exe created in dist/CenterManager/")
         create_desktop_shortcut()
     else:
         print(f"Build failed with exit code: {res.returncode}")
@@ -37,9 +53,6 @@ def create_desktop_shortcut():
     exe_path = os.path.join(ROOT, "dist", "CenterManager", "CenterManager.exe")
     shortcut_vbs = os.path.join(ROOT, "create_shortcut.vbs")
     
-    if not os.path.exists(exe_path):
-        exe_path = os.path.join(ROOT, "launcher.py")
-
     shortcut_path = os.path.join(desktop, "Center Manager.lnk")
     
     vbs_content = f'''
@@ -47,8 +60,8 @@ Set oWS = WScript.CreateObject("WScript.Shell")
 sLinkFile = "{shortcut_path}"
 Set oLink = oWS.CreateShortcut(sLinkFile)
 oLink.TargetPath = "{exe_path}"
-oLink.WorkingDirectory = "{ROOT}"
-oLink.Description = "Center Manager & Test Formatter App"
+oLink.WorkingDirectory = "{os.path.dirname(exe_path)}"
+oLink.Description = "Center Manager & Test Formatter Application"
 oLink.Save
 '''
     with open(shortcut_vbs, "w", encoding="utf-8") as f:
