@@ -199,7 +199,7 @@ export default function StudentsPage() {
       cell: ({ row }) => {
         const st = row.original;
         return (
-          <div className="font-extrabold text-white text-xs">
+          <div className="font-black text-white text-sm">
             {st.full_name}{st.nickname ? ` - ${st.nickname}` : ''}
           </div>
         );
@@ -212,11 +212,11 @@ export default function StudentsPage() {
       cell: ({ row }) => {
         const classes = row.original.enrolled_classes;
         return classes ? (
-          <span className="inline-block px-2.5 py-0.5 rounded-lg text-[10px] font-black bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+          <span className="inline-block px-2.5 py-1 rounded-lg text-xs font-black bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
             {classes}
           </span>
         ) : (
-          <span className="text-slate-500 text-[10px]">Chưa xếp lớp</span>
+          <span className="text-slate-500 text-xs font-semibold">Chưa xếp lớp</span>
         );
       },
     },
@@ -234,21 +234,27 @@ export default function StudentsPage() {
       id: 'gender',
       accessorKey: 'gender',
       header: 'Giới Tính',
-      cell: ({ row }) => {
-        const st = row.original;
-        return (
-          <div className="text-slate-300 font-bold text-xs">
-            <span>{st.gender || 'Nam'}</span>
-            {st.date_of_birth && <div className="text-[10px] text-slate-400 font-medium mt-0.5">Ns: {st.date_of_birth}</div>}
-          </div>
-        );
-      },
+      cell: ({ row }) => (
+        <span className="text-slate-300 font-semibold text-xs sm:text-sm">
+          {row.original.gender || 'Nam'}
+        </span>
+      ),
+    },
+    {
+      id: 'dob',
+      accessorKey: 'date_of_birth',
+      header: 'Ngày Sinh',
+      cell: (info) => (
+        <span className="text-slate-300 font-medium text-xs sm:text-sm">
+          {info.getValue<string>() || '-'}
+        </span>
+      ),
     },
     {
       id: 'school',
       accessorKey: 'school',
       header: 'Trường Học',
-      cell: (info) => <span className="text-slate-300">{info.getValue<string>() || '-'}</span>,
+      cell: (info) => <span className="text-slate-300 font-medium text-xs sm:text-sm">{info.getValue<string>() || '-'}</span>,
     },
     {
       id: 'parents',
@@ -256,7 +262,7 @@ export default function StudentsPage() {
       cell: ({ row }) => {
         const st = row.original;
         return (
-          <div className="text-slate-300 text-xs">
+          <div className="text-slate-300 text-xs sm:text-sm font-medium">
             {st.father_name && <div>Bố: {st.father_name} ({st.father_phone || 'Chưa có SĐT'})</div>}
             {st.mother_name && <div>Mẹ: {st.mother_name} ({st.mother_phone || 'Chưa có SĐT'})</div>}
             {!st.father_name && !st.mother_name && <span className="text-slate-500">-</span>}
@@ -268,7 +274,7 @@ export default function StudentsPage() {
       id: 'enrollDate',
       accessorKey: 'enroll_date',
       header: 'Ngày Nhập Học',
-      cell: (info) => <span className="text-slate-400">{info.getValue<string>() || '-'}</span>,
+      cell: (info) => <span className="text-slate-300 font-medium text-xs sm:text-sm">{info.getValue<string>() || '-'}</span>,
     },
     {
       id: 'status',

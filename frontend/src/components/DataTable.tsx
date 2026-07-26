@@ -678,7 +678,7 @@ export function DataTable<TData>({
                               <div
                                 className={`
                                   flex items-center gap-1 w-full
-                                  py-3.5 px-3.5 text-slate-300 text-xs font-black uppercase tracking-wider
+                                  py-3.5 px-4 text-slate-200 text-xs sm:text-sm font-black uppercase tracking-wider
                                   whitespace-nowrap
                                   ${isFirst ? 'rounded-tl-xl' : ''} ${isLast ? 'rounded-tr-xl' : ''}
                                   ${isPinned ? 'bg-[#111827]' : ''}
@@ -699,10 +699,10 @@ export function DataTable<TData>({
                                   {header.column.getCanSort() && (
                                     <span className="shrink-0">
                                       {header.column.getIsSorted() === 'asc'
-                                        ? <ArrowUp size={10} className="text-indigo-400" />
+                                        ? <ArrowUp size={12} className="text-indigo-400" />
                                         : header.column.getIsSorted() === 'desc'
-                                        ? <ArrowDown size={10} className="text-indigo-400" />
-                                        : <ArrowUpDown size={10} className="text-slate-600 hover:text-slate-400 transition" />}
+                                        ? <ArrowDown size={12} className="text-indigo-400" />
+                                        : <ArrowUpDown size={12} className="text-slate-600 hover:text-slate-400 transition" />}
                                     </span>
                                   )}
 
@@ -710,7 +710,7 @@ export function DataTable<TData>({
                                   {header.column.getIsSorted() && enableMultiSort && (() => {
                                     const idx = sorting.findIndex(s => s.id === header.column.id);
                                     return sorting.length > 1 && idx !== -1 ? (
-                                      <span className="text-[8px] font-black text-indigo-300 bg-indigo-500/20 rounded px-1 shrink-0">{idx + 1}</span>
+                                      <span className="text-[9px] font-black text-indigo-300 bg-indigo-500/20 rounded px-1 shrink-0">{idx + 1}</span>
                                     ) : null;
                                   })()}
                                 </div>
@@ -765,7 +765,7 @@ export function DataTable<TData>({
                               <td
                                 key={cell.id}
                                 className={`
-                                  py-3 px-3.5 font-semibold text-slate-200 text-xs sm:text-[13px]
+                                  py-3.5 px-4 font-semibold text-slate-200 text-sm
                                   border-b border-[#161e30]
                                   ${isPinned ? 'bg-inherit' : ''}
                                   ${isLastRow && isFirstCell ? 'rounded-bl-xl' : ''}

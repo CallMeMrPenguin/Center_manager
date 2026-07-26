@@ -256,7 +256,7 @@ function AppContent() {
         } sidebar-glass-glow rounded-2xl flex flex-col h-full overflow-hidden transition-all duration-300 z-10 shrink-0`}>
           
           {/* Header logo / Title */}
-          <div className="flex items-center justify-between px-4 py-4 shrink-0 border-b border-white/5 min-w-0">
+          <div className="flex items-center justify-between px-3.5 py-4 shrink-0 border-b border-white/5 min-w-0">
             <div className="flex items-center gap-3 min-w-0">
               <div className="h-9 w-9 bg-indigo-500/25 border-2 border-indigo-400/80 rounded-2xl flex items-center justify-center shadow-[0_0_30px_rgba(92,54,245,0.8),0_0_15px_rgba(129,140,248,0.6),inset_0_0_12px_rgba(92,54,245,0.4)] shrink-0">
                 <GraduationCap size={20} className="text-white drop-shadow-[0_0_12px_rgba(255,255,255,1)]" />
@@ -264,10 +264,10 @@ function AppContent() {
               <div className={`transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] whitespace-nowrap overflow-hidden ${
                 sidebarCollapsed ? 'opacity-0 max-w-0 pointer-events-none' : 'opacity-100 max-w-[200px]'
               }`}>
-                <span className="text-[14px] font-black tracking-wide uppercase text-white block leading-none">
+                <span className="text-base font-black tracking-wide uppercase text-white block leading-none">
                   EduPlatform
                 </span>
-                <span className="text-[9px] font-black tracking-[0.2em] uppercase text-indigo-400 block mt-1">
+                <span className="text-[10px] font-black tracking-[0.2em] uppercase text-indigo-400 block mt-1">
                   Center Manager
                 </span>
               </div>
@@ -277,12 +277,12 @@ function AppContent() {
               className="p-2 rounded-xl bg-[#181d2f] hover:bg-[#22283f] text-slate-300 hover:text-white transition cursor-pointer border border-white/5 active:scale-95 shrink-0"
               title={sidebarCollapsed ? "Mở rộng sidebar" : "Thu gọn sidebar"}
             >
-              {sidebarCollapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
+              {sidebarCollapsed ? <ChevronRight size={15} /> : <ChevronLeft size={15} />}
             </button>
           </div>
           
           {/* Nav Menu */}
-          <nav className="flex-1 overflow-y-auto min-h-0 px-3 py-3 flex flex-col gap-3">
+          <nav className="flex-1 overflow-y-auto min-h-0 px-2.5 py-3 flex flex-col gap-2.5 scrollbar-none">
             {SECTIONS.map((section) => {
               const sectionTabs = orderedTabIds
                 .map((tabId, idx) => ({ tabId, idx }))
@@ -296,7 +296,7 @@ function AppContent() {
               return (
                 <div key={section.id} className="flex flex-col gap-1 shrink-0">
                   {section.label && (
-                    <div className={`px-3.5 py-1 text-[10px] font-black uppercase tracking-widest text-slate-500 mt-1 mb-0.5 transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] whitespace-nowrap overflow-hidden ${
+                    <div className={`px-3 py-1 text-xs font-black uppercase tracking-wider text-slate-400 mt-1 mb-0.5 transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] whitespace-nowrap overflow-hidden ${
                       sidebarCollapsed ? 'opacity-0 max-h-0 py-0' : 'opacity-100 max-h-8'
                     }`}>
                       {section.label}
@@ -315,26 +315,25 @@ function AppContent() {
                         onDragEnd={() => setDraggedIndex(null)}
                         onDrop={() => handleDrop(idx)}
                         onClick={() => setActiveTab(item.id)}
-                        className={`flex items-center rounded-xl text-xs transition-all duration-300 relative group cursor-pointer active:scale-95 ${
-                          sidebarCollapsed
-                            ? 'justify-center w-11 h-11 p-0 mx-auto'
-                            : 'px-3.5 py-2.5 justify-start'
-                        } ${
+                        className={`flex items-center w-full h-11 px-3 rounded-xl transition-all duration-200 relative group cursor-pointer active:scale-95 shrink-0 overflow-hidden ${
                           isActive
-                            ? 'bg-indigo-500/20 border-2 border-indigo-400 text-white font-extrabold shadow-[0_0_20px_rgba(92,54,245,0.55),0_0_10px_rgba(129,140,248,0.45),inset_0_0_12px_rgba(92,54,245,0.3)]'
-                            : 'text-slate-400 font-bold hover:text-white hover:bg-white/5 border border-transparent'
+                            ? 'bg-indigo-500/20 border-2 border-indigo-400 text-white font-black shadow-[0_0_20px_rgba(92,54,245,0.55),0_0_10px_rgba(129,140,248,0.45),inset_0_0_12px_rgba(92,54,245,0.3)]'
+                            : 'text-slate-300 font-bold hover:text-white hover:bg-white/5 border border-transparent'
                         } ${draggedIndex === idx ? 'opacity-40 border border-dashed border-indigo-400 bg-indigo-500/10' : ''}`}
                       >
-                        <Icon size={sidebarCollapsed ? 20 : 18} className={`shrink-0 ${isActive ? 'text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.9)]' : 'text-slate-400 group-hover:text-white'}`} />
-                        <span className={`transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] whitespace-nowrap overflow-hidden ${
-                          sidebarCollapsed ? 'opacity-0 max-w-0 pointer-events-none' : 'opacity-100 max-w-[180px] ml-3'
-                        } ${isActive ? "text-white font-extrabold" : "text-slate-300 font-bold group-hover:text-white"}`}>
+                        <div className="w-6 h-6 flex items-center justify-center shrink-0">
+                          <Icon size={20} className={isActive ? 'text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.9)]' : 'text-slate-400 group-hover:text-white'} />
+                        </div>
+
+                        <span className={`ml-3 text-sm font-bold transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] whitespace-nowrap overflow-hidden ${
+                          sidebarCollapsed ? 'opacity-0 max-w-0 pointer-events-none' : 'opacity-100 max-w-[180px]'
+                        } ${isActive ? "text-white font-extrabold" : "text-slate-200 font-bold group-hover:text-white"}`}>
                           {item.label}
                         </span>
                         
                         {/* Tooltip for collapsed mode */}
                         {sidebarCollapsed && (
-                          <div className="absolute left-16 bg-[#0d1018]/95 border border-white/10 text-white text-[10px] font-bold py-1.5 px-3 rounded-[14px] shadow-[0_12px_40px_rgba(0,0,0,0.85)] backdrop-blur-xl animate-mac-dropdown opacity-0 pointer-events-none group-hover:opacity-100 transition-all duration-200 z-50 whitespace-nowrap">
+                          <div className="absolute left-16 bg-[#0d1018]/95 border border-white/10 text-white text-xs font-bold py-1.5 px-3 rounded-[14px] shadow-[0_12px_40px_rgba(0,0,0,0.85)] backdrop-blur-xl animate-mac-dropdown opacity-0 pointer-events-none group-hover:opacity-100 transition-all duration-200 z-50 whitespace-nowrap">
                             {item.label}
                           </div>
                         )}
