@@ -303,18 +303,21 @@ function AppContent() {
                         onDrop={() => handleDrop(idx)}
                         onClick={() => setActiveTab(item.id)}
                         className={`flex items-center w-full h-12 rounded-xl transition-all duration-200 relative group cursor-pointer active:scale-95 shrink-0 overflow-hidden ${
-                          isActive
-                            ? 'bg-indigo-500/20 border-2 border-indigo-400/90 text-white font-black shadow-[0_0_20px_rgba(92,54,245,0.45)]'
-                            : 'text-slate-300 font-bold hover:text-white hover:bg-white/5 border border-transparent'
-                        } ${draggedIndex === idx ? 'opacity-40 border border-dashed border-indigo-400 bg-indigo-500/10' : ''}`}
+                          draggedIndex === idx ? 'opacity-40 border border-dashed border-indigo-400 bg-indigo-500/10' : ''
+                        }`}
                       >
-                        {/* ICON BOX — PERFECTLY CENTERED AT 32px IN 64px COLLAPSED SIDEBAR */}
-                        <div className="w-12 h-12 flex items-center justify-center shrink-0">
+                        {/* PERFECT 44x44 CIRCLE HIGHLIGHT WHEN COLLAPSED, MORPHS TO ROUNDED PILL ON HOVER */}
+                        {isActive && (
+                          <div className="absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2 w-11 h-11 rounded-full bg-indigo-500/25 border-2 border-indigo-400/90 shadow-[0_0_20px_rgba(92,54,245,0.65),inset_0_0_10px_rgba(92,54,245,0.35)] group-hover/sidebar:w-full group-hover/sidebar:h-full group-hover/sidebar:left-0 group-hover/sidebar:top-0 group-hover/sidebar:translate-x-0 group-hover/sidebar:translate-y-0 group-hover/sidebar:rounded-xl transition-all duration-300 pointer-events-none" />
+                        )}
+
+                        {/* ICON BOX — PERFECTLY CENTERED */}
+                        <div className="w-12 h-12 flex items-center justify-center shrink-0 relative z-10">
                           <Icon size={20} className={isActive ? 'text-white drop-shadow-[0_0_10px_rgba(255,255,255,1)]' : 'text-slate-400 group-hover:text-white'} />
                         </div>
 
-                        {/* TEXT LABEL — 0 MARGIN WHEN COLLAPSED, SMOOTHLY SLIDES OUT ON HOVER */}
-                        <span className={`text-sm transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] whitespace-nowrap overflow-hidden pointer-events-none group-hover/sidebar:pointer-events-auto opacity-0 group-hover/sidebar:opacity-100 max-w-0 group-hover/sidebar:max-w-[180px] ml-0 group-hover/sidebar:ml-2 ${
+                        {/* TEXT LABEL — SMOOTHLY SLIDES OUT ON HOVER */}
+                        <span className={`text-sm relative z-10 transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] whitespace-nowrap overflow-hidden pointer-events-none group-hover/sidebar:pointer-events-auto opacity-0 group-hover/sidebar:opacity-100 max-w-0 group-hover/sidebar:max-w-[180px] ml-0 group-hover/sidebar:ml-2 ${
                           isActive ? "text-white font-extrabold" : "text-slate-200 font-bold group-hover:text-white"
                         }`}>
                           {item.label}
