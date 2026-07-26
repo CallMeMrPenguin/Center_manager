@@ -67,44 +67,48 @@ def open_browser(url: str):
     except Exception:
         pass
 
-def main():
-    # 0. Ensure hosts file entry for local.centermanager.edu
-    ensure_hosts_entry()
+def run_backend():
+    backend_dir = os.path.join(ROOT, "backend")
+    uvicorn.run("backend.main:app", host="127.0.0.1", port=8000, log_level="warning")
 
-    # Clean up any leftover server process holding port 8000
+def main():
+    # 0. Clean up any leftover server process holding port 8000
     kill_port_8000()
 
-    # Check background mode flag
-    is_background = "--background" in sys.argv or "--silent" in sys.argv
-
-    # 1. Determine if Vite dev server is running (Development Mode)
-    url = "http://localhost:8000"
-    
+    # 1. Determine target URL (Vite DEV server or Built Backend)
+    url = "http://127.0.0.1:8000"
     try:
         urllib.request.urlopen("http://localhost:5173", timeout=0.3)
         url = "http://localhost:5173"
-        print("Vite development server detected. Running in DEV mode.")
+        print("Vite dev server detected. Running in DEV Desktop Mode.")
     except Exception:
-        print("Vite dev server not found. Running in PRODUCTION mode.")
+        print("Running in Production Native Desktop App Mode.")
 
-    if not is_background:
-        # Open browser in a delayed background thread if not running in silent background mode
-        threading.Thread(target=open_browser, args=(url,), daemon=True).start()
+    is_browser_mode = "--browser" in sys.argv or "--web" in sys.argv
+    is_server_only = "--background" in sys.argv or "--server" in sys.argv
 
-    print("\n" + "="*55)
-    print("  CENTER MANAGER & TEST FORMATTER IS RUNNING")
-    print(f"  Web URL: {url} (or http://127.0.0.1:8000)")
-    if is_background:
-        print("  Running in BACKGROUND MODE (silent execution).")
+    # 2. Start FastAPI backend in a background daemon thread
+    server_thread = threading.Thread(target=run_backend, daemon=True)
+    server_thread.start()
+    time.sleep(1.0)
+
+    if is_server_only:
+        server_thread.join()
+    elif is_browser_mode:
+        import webbrowser
+        webbrowser.open(url)
+        server_thread.join()
     else:
-        print("  Keep this window open while using the app.")
-    print("  Press Ctrl+C to stop the server.")
-    print("="*55 + "\n")
-
-    # 3. Run uvicorn FastAPI server on host 0.0.0.0 to accept local.centermanager.edu and 127.0.0.1
-    # Enabled reload=True so backend automatically reloads when python files are modified.
-    backend_dir = os.path.join(ROOT, "backend")
-    uvicorn.run("backend.main:app", host="0.0.0.0", port=8000, reload=True, reload_dirs=[backend_dir], log_level="warning")
+        # 3. Create NATIVE STANDALONE DESKTOP APP WINDOW (Edge WebView2)
+        window = webview.create_window(
+            title="Center Manager & Test Formatter",
+            url=url,
+            width=1360,
+            height=850,
+            resizable=True,
+            min_size=(1024, 700)
+        )
+        webview.start(private_mode=False)
 
 if __name__ == "__main__":
     main()
