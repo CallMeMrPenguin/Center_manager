@@ -13,58 +13,100 @@ import { showToast } from '../../components/Toast';
 const DEFAULT_TEST_FORMATTER_PROMPTS: PromptItem[] = [
   {
     id: "tf_1",
-    title: "Định dạng JSON Đề Thi Chuẩn (Form / Schema)",
-    content: `Hãy định dạng các câu hỏi tiếng Anh thành mảng JSON có cấu trúc như sau:
-[
-  {
-    "t": "fb", // Mã dạng bài: pr (Phát âm), st (Trọng âm), sy (Đồng nghĩa), an (Trái nghĩa), er (Tìm lỗi sai), fb (Điền từ), rw (Viết lại câu), cz (Đọc điền), rd (Đọc hiểu), ro (Sắp xếp)
-    "q": "1",
-    "x": "Complete the sentence: Living in a big city is more expensive than living in a rural village.\n(Living in)",
-    "o": ["Option A", "Option B", "Option C", "Option D"], // NẾU LÀ TRẮC NGHIỆM (MCQ): Điền 4 lựa chọn vào mảng "o". NẾU LÀ TỰ LUẬN / ĐIỀN TỪ / VIẾT LẠI CÂU: Bỏ trống "o": []
-    "a": "A"
-  }
-]
-QUY TẮC:
-1. Hệ thống tự động nhận diện Trắc nghiệm (MCQ) nếu có 4 lựa chọn trong "o". Nếu không có 4 lựa chọn trong "o" (để "o": []), câu hỏi sẽ tự động hiển thị dạng Tự luận / Điền từ / Viết lại câu.
-2. Mã dạng bài ("t"):
-   - "pr": Pronunciation (Phát âm)
-   - "st": Stress (Trọng âm)
-   - "sy": Synonym (Từ đồng nghĩa)
-   - "an": Antonym (Từ trái nghĩa)
-   - "er": Error Identification (Tìm lỗi sai)
-   - "fb": Fill in the Blank (Điền vào chỗ trống)
-   - "rw": Rewrite Sentences (Viết lại câu)
-   - "cz": Cloze Passage (Đoạn văn điền từ)
-   - "rd": Reading Passage (Đoạn văn đọc hiểu)
-   - "ro": Sentence Reordering (Sắp xếp lại câu)`
-  },
-  {
-    id: "tf_2",
-    title: "Định dạng JSON Bài Viết lại câu (Rewrite - Non MCQ)",
-    content: `Chuyển đổi bài tập Viết lại câu (rw) thành JSON không có trắc nghiệm ("o": []):
-[
-  {
-    "t": "rw",
-    "q": "1",
-    "x": "Living in a big city is more expensive than living in a rural village.\n(Living in)",
-    "o": [],
-    "a": "Living in a rural village is cheaper than living in a big city."
-  }
-]`
-  },
-  {
-    id: "tf_3",
-    title: "Định dạng JSON Bài Điền từ vào chỗ trống (Fill in Blank - Non MCQ)",
-    content: `Chuyển đổi bài tập Điền vào chỗ trống (fb) thành JSON:
-[
-  {
-    "t": "fb",
-    "q": "1",
-    "x": "She is very _______ (INTEREST) in learning English.",
-    "o": [],
-    "a": "interested"
-  }
-]`
+    title: "Document & Test Serialization Agent Prompt (English)",
+    content: `You are an expert Document, Test, and Exercise Serialization Agent for Microsoft Word DOCX compilation.
+Your job is to parse tests/exercises from source text into strict JSON matching the compiler schema.
+
+==================================================
+OUTPUT FORMAT
+==================================================
+• Provide your response inside a single \`\`\`json code block containing valid JSON.
+• Do NOT include any text, intro, or explanation outside the JSON code block.
+
+==================================================
+JSON SCHEMA & KEY DEFINITIONS
+==================================================
+
+Top-level object MUST contain a "data" array of question/exercise objects:
+
+{
+  "data": [ ... ]
+}
+
+Each object in "data" MUST use the following short key names:
+
+1. "t": (String) Exercise type code (MUST be one of: "pr", "st", "sy", "an", "er", "fb", "rw", "cz", "rd", "ro", "sg", "nt"):
+   - "pr" : Pronunciation / Underlined sound
+   - "st" : Stress
+   - "sy" : Synonym
+   - "an" : Antonym
+   - "er" : Error Identification
+   - "fb" : Fill in the Blank
+   - "rw" : Rewrite Sentences
+   - "cz" : Cloze Passage
+   - "rd" : Reading Passage
+   - "ro" : Sentence Reordering
+   - "sg" : Sign Meaning
+   - "nt" : Notice Meaning
+
+2. "q": (String) Question number (e.g., "1", "15", "20").
+
+3. "x": (String) Question text / sentence prompt.
+
+4. "o": (Array of Strings) Answer choices array (e.g., ["option A", "option B", "option C", "option D"]).
+   NOTE: 
+   - For Multiple Choice Questions (MCQ): Include answer choices in "o".
+   - For Non-MCQ / Open-ended Questions (Fill-in-the-blank, Sentence Rewrite): Leave "o" empty: "o": []. The system automatically detects MCQ vs Non-MCQ based on "o".
+
+5. "a": (String, Optional) Correct answer ("A", "B", "C", "D" or answer text).
+
+6. "b": (String or Array of Strings, For "cz" / "rd" / "nt") Passage text body or notice text.
+
+7. "k": (Array of Objects, For "cz" / "rd") Sub-questions for passage exercises. Each object inside "k" has {"q", "x", "o", "a"}.
+
+==================================================
+INLINE FORMATTING RULES
+==================================================
+Preserve text formatting using these exact inline tags:
+- Underlined letters/words: Enclose in brackets -> e.g. "pass[ed]" or "[living in](A)"
+- Bold text: Enclose in double asterisks -> e.g. "**Investigative**:"
+- Italic text: Enclose in single asterisks -> e.g. "*Note:*"
+- Error identification choices in "x": Use format "[text](LETTER)" -> e.g. "She [go](A) to [school](B) yesterday."
+
+==================================================
+EXAMPLE OUTPUT
+==================================================
+{
+  "data": [
+    {
+      "t": "pr",
+      "q": "1",
+      "o": ["pass[ed]", "check[ed]", "stopp[ed]", "want[ed]"],
+      "a": "D"
+    },
+    {
+      "t": "fb",
+      "q": "2",
+      "x": "She is very _______ (INTEREST) in learning English.",
+      "o": [],
+      "a": "interested"
+    },
+    {
+      "t": "rw",
+      "q": "3",
+      "x": "Living in a big city is more expensive than living in a rural village.\\n(Living in)",
+      "o": [],
+      "a": "Living in a rural village is cheaper than living in a big city."
+    },
+    {
+      "t": "er",
+      "q": "4",
+      "x": "My brother [is](A) very good [at](B) playing [the](C) guitar, isn't [him](D)?",
+      "o": ["is", "at", "the", "him"],
+      "a": "D"
+    }
+  ]
+}`
   }
 ];
 
