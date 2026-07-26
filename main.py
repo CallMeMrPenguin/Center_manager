@@ -66,10 +66,9 @@ def open_native_app_window(url: str):
             ["chrome", f"--app={url}"],
             [r"C:\Program Files\Google\Chrome\Application\chrome.exe", f"--app={url}"]
         ]
-        no_window_flag = getattr(subprocess, "CREATE_NO_WINDOW", 0)
         for cmd in app_cmds:
             try:
-                proc = subprocess.Popen(cmd, creationflags=no_window_flag)
+                proc = subprocess.Popen(cmd)
                 if proc.poll() is None or proc.returncode is None:
                     return
             except Exception:
