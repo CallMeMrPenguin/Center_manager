@@ -302,19 +302,19 @@ function AppContent() {
                         onDragEnd={() => setDraggedIndex(null)}
                         onDrop={() => handleDrop(idx)}
                         onClick={() => setActiveTab(item.id)}
-                        className={`flex items-center w-full h-12 px-1 rounded-xl transition-all duration-200 relative group cursor-pointer active:scale-95 shrink-0 overflow-hidden ${
+                        className={`flex items-center w-full h-12 rounded-xl transition-all duration-200 relative group cursor-pointer active:scale-95 shrink-0 overflow-hidden ${
                           isActive
                             ? 'bg-indigo-500/20 border-2 border-indigo-400/90 text-white font-black shadow-[0_0_20px_rgba(92,54,245,0.45)]'
                             : 'text-slate-300 font-bold hover:text-white hover:bg-white/5 border border-transparent'
                         } ${draggedIndex === idx ? 'opacity-40 border border-dashed border-indigo-400 bg-indigo-500/10' : ''}`}
                       >
-                        {/* ICON BOX */}
-                        <div className="w-10 h-10 flex items-center justify-center shrink-0 rounded-lg">
+                        {/* ICON BOX — PERFECTLY CENTERED AT 32px IN 64px COLLAPSED SIDEBAR */}
+                        <div className="w-12 h-12 flex items-center justify-center shrink-0">
                           <Icon size={20} className={isActive ? 'text-white drop-shadow-[0_0_10px_rgba(255,255,255,1)]' : 'text-slate-400 group-hover:text-white'} />
                         </div>
 
-                        {/* TEXT LABEL — FADES AND SLIDES SMOOTHLY */}
-                        <span className={`ml-3 text-sm transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] whitespace-nowrap overflow-hidden pointer-events-none group-hover/sidebar:pointer-events-auto opacity-0 group-hover/sidebar:opacity-100 max-w-0 group-hover/sidebar:max-w-[180px] ${
+                        {/* TEXT LABEL — 0 MARGIN WHEN COLLAPSED, SMOOTHLY SLIDES OUT ON HOVER */}
+                        <span className={`text-sm transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] whitespace-nowrap overflow-hidden pointer-events-none group-hover/sidebar:pointer-events-auto opacity-0 group-hover/sidebar:opacity-100 max-w-0 group-hover/sidebar:max-w-[180px] ml-0 group-hover/sidebar:ml-2 ${
                           isActive ? "text-white font-extrabold" : "text-slate-200 font-bold group-hover:text-white"
                         }`}>
                           {item.label}
