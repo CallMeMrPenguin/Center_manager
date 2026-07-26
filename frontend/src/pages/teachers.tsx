@@ -209,16 +209,26 @@ export default function TeachersPage() {
           </p>
         </div>
 
-        <button
-          onClick={handleOpenAdd}
-          className="group flex items-center gap-0 hover:gap-2 bg-[#5c36f5] hover:bg-[#7351f7] text-white px-3.5 py-2.5 rounded-xl font-bold text-xs shadow-[0_4px_16px_rgba(92,54,245,0.4)] transition-all duration-300 cursor-pointer border border-white/20 active:scale-95"
-          title="Thêm Nhân Sự Mới"
-        >
-          <UserPlus size={16} className="shrink-0" />
-          <span className="max-w-0 opacity-0 group-hover:max-w-[200px] group-hover:opacity-100 transition-all duration-300 ease-in-out whitespace-nowrap overflow-hidden block">
-            Thêm Nhân Sự Mới
-          </span>
-        </button>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={loadData}
+            className="p-2.5 rounded-xl bg-[#14192b] hover:bg-[#1e2640] text-slate-300 hover:text-white border border-[#28334e] transition cursor-pointer shadow-sm"
+            title="Làm mới danh sách nhân sự"
+          >
+            <RefreshCw size={14} className={loading ? 'animate-spin text-indigo-400' : ''} />
+          </button>
+
+          <button
+            onClick={handleOpenAdd}
+            className="group flex items-center gap-0 hover:gap-2 bg-[#5c36f5] hover:bg-[#7351f7] text-white px-3.5 py-2.5 rounded-xl font-bold text-xs shadow-[0_4px_16px_rgba(92,54,245,0.4)] transition-all duration-300 cursor-pointer border border-white/20 active:scale-95"
+            title="Thêm Nhân Sự Mới"
+          >
+            <UserPlus size={16} className="shrink-0" />
+            <span className="max-w-0 opacity-0 group-hover:max-w-[200px] group-hover:opacity-100 transition-all duration-300 ease-in-out whitespace-nowrap overflow-hidden block">
+              Thêm Nhân Sự Mới
+            </span>
+          </button>
+        </div>
       </div>
 
       {/* METRICS */}
@@ -264,15 +274,6 @@ export default function TeachersPage() {
           emptyMessage="Chưa có thông tin giáo viên nào"
           searchPlaceholder="Tìm theo tên, SĐT..."
           pageSize={20}
-          toolbarRight={
-            <button
-              onClick={loadData}
-              className="p-2 rounded-xl bg-[#1c243c] hover:bg-[#253050] text-slate-300 border border-[#303d62] transition cursor-pointer"
-              title="Làm mới"
-            >
-              <RefreshCw size={13} className={loading ? 'animate-spin text-indigo-400' : ''} />
-            </button>
-          }
         />
       </div>
 

@@ -256,25 +256,25 @@ function AppContent() {
         } sidebar-glass-glow rounded-2xl flex flex-col h-full overflow-hidden transition-all duration-300 z-10 shrink-0`}>
           
           {/* Header logo / Title */}
-          <div className="flex items-center justify-between px-4 py-4 shrink-0 border-b border-white/5">
-            {!sidebarCollapsed && (
-              <div className="flex items-center gap-3">
-                <div className="h-9 w-9 bg-indigo-500/25 border-2 border-indigo-400/80 rounded-2xl flex items-center justify-center shadow-[0_0_30px_rgba(92,54,245,0.8),0_0_15px_rgba(129,140,248,0.6),inset_0_0_12px_rgba(92,54,245,0.4)] shrink-0">
-                  <GraduationCap size={20} className="text-white drop-shadow-[0_0_12px_rgba(255,255,255,1)]" />
-                </div>
-                <div>
-                  <span className="text-[14px] font-black tracking-wide uppercase text-white block leading-none">
-                    EduPlatform
-                  </span>
-                  <span className="text-[9px] font-black tracking-[0.2em] uppercase text-indigo-400 block mt-1">
-                    Center Manager
-                  </span>
-                </div>
+          <div className="flex items-center justify-between px-4 py-4 shrink-0 border-b border-white/5 min-w-0">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="h-9 w-9 bg-indigo-500/25 border-2 border-indigo-400/80 rounded-2xl flex items-center justify-center shadow-[0_0_30px_rgba(92,54,245,0.8),0_0_15px_rgba(129,140,248,0.6),inset_0_0_12px_rgba(92,54,245,0.4)] shrink-0">
+                <GraduationCap size={20} className="text-white drop-shadow-[0_0_12px_rgba(255,255,255,1)]" />
               </div>
-            )}
+              <div className={`transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] whitespace-nowrap overflow-hidden ${
+                sidebarCollapsed ? 'opacity-0 max-w-0 pointer-events-none' : 'opacity-100 max-w-[200px]'
+              }`}>
+                <span className="text-[14px] font-black tracking-wide uppercase text-white block leading-none">
+                  EduPlatform
+                </span>
+                <span className="text-[9px] font-black tracking-[0.2em] uppercase text-indigo-400 block mt-1">
+                  Center Manager
+                </span>
+              </div>
+            </div>
             <button 
               onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-              className="p-2 rounded-xl bg-[#181d2f] hover:bg-[#22283f] text-slate-300 hover:text-white mx-auto transition cursor-pointer border border-white/5 active:scale-95 shrink-0"
+              className="p-2 rounded-xl bg-[#181d2f] hover:bg-[#22283f] text-slate-300 hover:text-white transition cursor-pointer border border-white/5 active:scale-95 shrink-0"
               title={sidebarCollapsed ? "Mở rộng sidebar" : "Thu gọn sidebar"}
             >
               {sidebarCollapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
@@ -295,8 +295,10 @@ function AppContent() {
 
               return (
                 <div key={section.id} className="flex flex-col gap-1 shrink-0">
-                  {section.label && !sidebarCollapsed && (
-                    <div className="px-3.5 py-1 text-[10px] font-black uppercase tracking-widest text-slate-500 mt-1 mb-0.5">
+                  {section.label && (
+                    <div className={`px-3.5 py-1 text-[10px] font-black uppercase tracking-widest text-slate-500 mt-1 mb-0.5 transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] whitespace-nowrap overflow-hidden ${
+                      sidebarCollapsed ? 'opacity-0 max-h-0 py-0' : 'opacity-100 max-h-8'
+                    }`}>
                       {section.label}
                     </div>
                   )}
@@ -313,7 +315,7 @@ function AppContent() {
                         onDragEnd={() => setDraggedIndex(null)}
                         onDrop={() => handleDrop(idx)}
                         onClick={() => setActiveTab(item.id)}
-                        className={`flex items-center rounded-xl text-xs transition-all relative group cursor-pointer active:scale-95 ${
+                        className={`flex items-center rounded-xl text-xs transition-all duration-300 relative group cursor-pointer active:scale-95 ${
                           sidebarCollapsed
                             ? 'justify-center w-11 h-11 p-0 mx-auto'
                             : 'px-3.5 py-2.5 justify-start'
@@ -323,8 +325,12 @@ function AppContent() {
                             : 'text-slate-400 font-bold hover:text-white hover:bg-white/5 border border-transparent'
                         } ${draggedIndex === idx ? 'opacity-40 border border-dashed border-indigo-400 bg-indigo-500/10' : ''}`}
                       >
-                        <Icon size={sidebarCollapsed ? 20 : 18} className={isActive ? 'text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.9)]' : 'text-slate-400 group-hover:text-white'} />
-                        {!sidebarCollapsed && <span className={isActive ? "text-white font-extrabold ml-3 truncate" : "text-slate-300 font-bold group-hover:text-white ml-3 truncate"}>{item.label}</span>}
+                        <Icon size={sidebarCollapsed ? 20 : 18} className={`shrink-0 ${isActive ? 'text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.9)]' : 'text-slate-400 group-hover:text-white'}`} />
+                        <span className={`transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] whitespace-nowrap overflow-hidden ${
+                          sidebarCollapsed ? 'opacity-0 max-w-0 pointer-events-none' : 'opacity-100 max-w-[180px] ml-3'
+                        } ${isActive ? "text-white font-extrabold" : "text-slate-300 font-bold group-hover:text-white"}`}>
+                          {item.label}
+                        </span>
                         
                         {/* Tooltip for collapsed mode */}
                         {sidebarCollapsed && (
@@ -349,12 +355,10 @@ function AppContent() {
                   ? 'left-full bottom-2 ml-3.5 w-44 origin-left'
                   : 'bottom-full left-0 mb-2 w-full origin-bottom'
               }`}>
-                {!sidebarCollapsed && (
-                  <div className="px-3.5 py-2.5 border-b border-white/5 select-none mb-1">
-                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-wider">Tài Khoản</p>
-                    <p className="text-xs font-extrabold text-white mt-0.5">Center Manager</p>
-                  </div>
-                )}
+                <div className="px-3.5 py-2.5 border-b border-white/5 select-none mb-1">
+                  <p className="text-[10px] font-black text-slate-500 uppercase tracking-wider">Tài Khoản</p>
+                  <p className="text-xs font-extrabold text-white mt-0.5">Center Manager</p>
+                </div>
 
                 {/* Settings */}
                 <button
@@ -401,23 +405,23 @@ function AppContent() {
               <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center font-black text-xs text-white shadow-[0_4px_14px_rgba(92,54,245,0.45)] shrink-0 border border-white/20 hover:shadow-[0_0_12px_rgba(92,54,245,0.5)] transition-all">
                 CM
               </div>
-              {!sidebarCollapsed && (
-                <>
-                  <div className="min-w-0 flex-1 text-left">
-                    <p className="text-xs font-black text-white truncate leading-snug">Center Manager</p>
-                    <p className="text-[10px] font-extrabold text-indigo-400 truncate">Hệ thống quản lý</p>
-                  </div>
-                  <ChevronUp size={13} className={`text-slate-500 shrink-0 transition-transform ${profileOpen ? '' : 'rotate-180'}`} />
-                </>
-              )}
+              <div className={`transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] whitespace-nowrap overflow-hidden flex items-center justify-between flex-1 ${
+                sidebarCollapsed ? 'opacity-0 max-w-0 pointer-events-none' : 'opacity-100 max-w-[180px]'
+              }`}>
+                <div className="min-w-0 flex-1 text-left">
+                  <p className="text-xs font-black text-white truncate leading-snug">Center Manager</p>
+                  <p className="text-[10px] font-extrabold text-indigo-400 truncate">Hệ thống quản lý</p>
+                </div>
+                <ChevronUp size={13} className={`text-slate-500 shrink-0 transition-transform ${profileOpen ? '' : 'rotate-180'}`} />
+              </div>
             </button>
 
-            {!sidebarCollapsed && (
-              <div className="flex items-center justify-between text-[10px] text-slate-600 font-bold px-2 mt-1">
-                <span className="uppercase tracking-widest">v4.0.0</span>
-                {zoomLevel !== 1 && <span className="text-indigo-400">{Math.round(zoomLevel * 100)}%</span>}
-              </div>
-            )}
+            <div className={`flex items-center justify-between text-[10px] text-slate-600 font-bold px-2 mt-1 transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] whitespace-nowrap overflow-hidden ${
+              sidebarCollapsed ? 'opacity-0 max-h-0 pointer-events-none' : 'opacity-100 max-h-6'
+            }`}>
+              <span className="uppercase tracking-widest">v4.0.0</span>
+              {zoomLevel !== 1 && <span className="text-indigo-400">{Math.round(zoomLevel * 100)}%</span>}
+            </div>
           </div>
         </aside>
 

@@ -693,16 +693,26 @@ export default function ClassesPage() {
               </p>
             </div>
 
-            <button
-              onClick={handleOpenCreateClass}
-              className="group flex items-center gap-0 hover:gap-2 bg-[#5c36f5] hover:bg-[#7351f7] text-white px-3.5 py-2.5 rounded-xl font-bold text-xs shadow-[0_4px_16px_rgba(92,54,245,0.4)] transition-all duration-300 cursor-pointer border border-white/20 active:scale-95"
-              title="Tạo Lớp Học Mới"
-            >
-              <Plus size={16} className="shrink-0" />
-              <span className="max-w-0 opacity-0 group-hover:max-w-[200px] group-hover:opacity-100 transition-all duration-300 ease-in-out whitespace-nowrap overflow-hidden block">
-                Tạo Lớp Học Mới
-              </span>
-            </button>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={loadClasses}
+                className="p-2.5 rounded-xl bg-[#121626] hover:bg-[#1e2640] text-slate-300 hover:text-white border border-[#202842] transition cursor-pointer shadow-sm"
+                title="Làm mới danh sách lớp"
+              >
+                <RefreshCw size={14} className={loading ? "animate-spin text-indigo-400" : ""} />
+              </button>
+
+              <button
+                onClick={handleOpenCreateClass}
+                className="group flex items-center gap-0 hover:gap-2 bg-[#5c36f5] hover:bg-[#7351f7] text-white px-3.5 py-2.5 rounded-xl font-bold text-xs shadow-[0_4px_16px_rgba(92,54,245,0.4)] transition-all duration-300 cursor-pointer border border-white/20 active:scale-95"
+                title="Tạo Lớp Học Mới"
+              >
+                <Plus size={16} className="shrink-0" />
+                <span className="max-w-0 opacity-0 group-hover:max-w-[200px] group-hover:opacity-100 transition-all duration-300 ease-in-out whitespace-nowrap overflow-hidden block">
+                  Tạo Lớp Học Mới
+                </span>
+              </button>
+            </div>
           </div>
 
           {/* SEARCH & FILTER */}
@@ -717,13 +727,6 @@ export default function ClassesPage() {
                 className="w-full bg-[#161a29] border border-white/10 text-white text-xs rounded-xl pl-10 pr-4 py-2 focus:outline-none focus:border-indigo-500 placeholder:text-slate-500 font-medium"
               />
             </div>
-            <button
-              onClick={loadClasses}
-              className="p-2 rounded-xl bg-[#161a29] hover:bg-[#20263a] text-slate-300 hover:text-white border border-white/10 transition cursor-pointer"
-              title="Làm mới"
-            >
-              <RefreshCw size={14} className={loading ? "animate-spin text-indigo-400" : ""} />
-            </button>
           </div>
 
           {/* CLASS GRID LIST */}
@@ -1861,9 +1864,6 @@ const AttendanceTableRow = React.memo(({
           <div className="text-[9px] text-emerald-300 font-bold text-center" title="Dự đoán điểm HW">
             Dự đoán: {predHW}
           </div>
-          {hwNum === 0 && (
-            <span className="text-[9px] font-extrabold px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 shrink-0">Không BTVN</span>
-          )}
         </div>
       </td>
 

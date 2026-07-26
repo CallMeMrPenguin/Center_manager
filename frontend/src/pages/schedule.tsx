@@ -342,12 +342,17 @@ export default function SchedulePage() {
           <h1 className="text-xl font-black text-white flex items-center gap-2.5"><CalendarIcon className="h-6 w-6 text-indigo-400" />BẢNG LỊCH HỌC</h1>
           <p className="text-[11px] text-slate-400 font-semibold mt-0.5">Quản lý và theo dõi lịch học toàn trung tâm.</p>
         </div>
-        <button onClick={() => openAdd()} className="group flex items-center gap-0 hover:gap-2 bg-[#5c36f5] hover:bg-[#7351f7] text-white px-3.5 py-2.5 rounded-xl font-extrabold text-xs shadow-[0_4px_16px_rgba(92,54,245,0.45)] transition-all duration-300 cursor-pointer border border-white/20 active:scale-95" title="Thêm Lịch Học">
-          <Plus size={14} className="shrink-0" />
-          <span className="max-w-0 opacity-0 group-hover:max-w-[140px] group-hover:opacity-100 transition-all duration-300 ease-in-out whitespace-nowrap overflow-hidden block">
-            Thêm Lịch Học
-          </span>
-        </button>
+        <div className="flex items-center gap-2">
+          <button onClick={loadData} className="p-2.5 rounded-xl bg-[#14192b] hover:bg-[#1e2640] text-slate-300 hover:text-white border border-[#28334e] transition cursor-pointer shadow-sm" title="Tải lại lịch học">
+            <RefreshCw size={14} className={loading ? 'animate-spin text-indigo-400' : ''} />
+          </button>
+          <button onClick={() => openAdd()} className="group flex items-center gap-0 hover:gap-2 bg-[#5c36f5] hover:bg-[#7351f7] text-white px-3.5 py-2.5 rounded-xl font-extrabold text-xs shadow-[0_4px_16px_rgba(92,54,245,0.45)] transition-all duration-300 cursor-pointer border border-white/20 active:scale-95" title="Thêm Lịch Học">
+            <Plus size={14} className="shrink-0" />
+            <span className="max-w-0 opacity-0 group-hover:max-w-[140px] group-hover:opacity-100 transition-all duration-300 ease-in-out whitespace-nowrap overflow-hidden block">
+              Thêm Lịch Học
+            </span>
+          </button>
+        </div>
       </div>
 
       {/* KPI */}
@@ -418,9 +423,6 @@ export default function SchedulePage() {
               DANH SÁCH
             </button>
           </div>
-          <button onClick={loadData} className="p-2 rounded-xl bg-[#161a29] hover:bg-[#20263a] text-slate-300 hover:text-white border border-white/10 transition cursor-pointer">
-            <RefreshCw size={13} className={loading ? 'animate-spin text-indigo-400' : ''} />
-          </button>
         </div>
       </div>
 

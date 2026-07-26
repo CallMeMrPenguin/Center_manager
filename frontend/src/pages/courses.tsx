@@ -208,13 +208,23 @@ export default function CoursesPage() {
           </div>
         </div>
 
-        <button
-          onClick={handleOpenAdd}
-          className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#5c36f5] hover:bg-[#7351f7] text-white text-xs font-extrabold shadow-[0_4px_16px_rgba(92,54,245,0.4)] border border-white/20 transition cursor-pointer shrink-0"
-        >
-          <Plus size={15} />
-          <span>Tạo Khóa Học Mới</span>
-        </button>
+        <div className="flex items-center gap-3 shrink-0">
+          <button
+            onClick={loadData}
+            className="p-2.5 rounded-xl bg-[#14192b] hover:bg-[#1e2640] text-slate-300 hover:text-white border border-[#28334e] transition cursor-pointer shadow-sm"
+            title="Tải lại danh sách khóa học"
+          >
+            <RefreshCw size={14} className={loading ? 'animate-spin text-indigo-400' : ''} />
+          </button>
+
+          <button
+            onClick={handleOpenAdd}
+            className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#5c36f5] hover:bg-[#7351f7] text-white text-xs font-extrabold shadow-[0_4px_16px_rgba(92,54,245,0.4)] border border-white/20 transition cursor-pointer"
+          >
+            <Plus size={15} />
+            <span>Tạo Khóa Học Mới</span>
+          </button>
+        </div>
       </div>
 
       {/* TABLE */}
@@ -227,15 +237,6 @@ export default function CoursesPage() {
           emptyMessage="Chưa có khóa học nào."
           searchPlaceholder="Tìm theo tên khóa học, mô tả..."
           pageSize={20}
-          toolbarRight={
-            <button
-              onClick={loadData}
-              className="p-2 rounded-xl bg-[#1c243c] hover:bg-[#253050] text-slate-300 border border-[#303d62] transition cursor-pointer"
-              title="Tải lại"
-            >
-              <RefreshCw size={13} className={loading ? 'animate-spin text-indigo-400' : ''} />
-            </button>
-          }
         />
       </div>
 

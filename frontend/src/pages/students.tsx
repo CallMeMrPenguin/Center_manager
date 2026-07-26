@@ -323,6 +323,14 @@ export default function StudentsPage() {
 
         <div className="flex items-center gap-3">
           <button
+            onClick={loadData}
+            className="p-2.5 rounded-xl bg-[#14192b] hover:bg-[#1e2640] text-slate-300 hover:text-white border border-[#28334e] transition cursor-pointer shadow-sm"
+            title="Làm mới danh sách học sinh"
+          >
+            <RefreshCw size={14} className={loading ? 'animate-spin text-indigo-400' : ''} />
+          </button>
+
+          <button
             onClick={handleOpenAdd}
             className="group flex items-center gap-0 hover:gap-2 bg-[#5c36f5] hover:bg-[#7351f7] text-white px-3.5 py-2.5 rounded-xl font-bold text-xs shadow-[0_4px_16px_rgba(92,54,245,0.4)] transition-all duration-300 cursor-pointer border border-white/20 active:scale-95"
             title="Thêm Học Sinh Mới"
@@ -365,19 +373,6 @@ export default function StudentsPage() {
           <div className="p-3 bg-rose-500/20 border border-rose-500/30 rounded-xl text-rose-400">
             <XCircle size={22} />
           </div>
-        </div>
-      </div>
-
-      {/* FILTER TOOLBAR */}
-      <div className="flex flex-wrap items-center justify-between gap-3 bg-[#14192b] border border-[#28334e] p-3.5 rounded-2xl shadow-xl">
-        <div className="flex flex-wrap items-center gap-3 flex-1">
-          <button
-            onClick={loadData}
-            className="p-2 rounded-xl bg-[#1c243c] hover:bg-[#253050] text-slate-300 border border-[#303d62] transition cursor-pointer"
-            title="Làm mới"
-          >
-            <RefreshCw size={14} className={loading ? 'animate-spin text-indigo-400' : ''} />
-          </button>
         </div>
       </div>
 

@@ -90,8 +90,9 @@ export interface DataTableProps<TData> {
   toolbarRight?: React.ReactNode;
   searchPlaceholder?: string;
 
-  // Export
+  // Export & Storage
   exportFilename?: string;
+  tableId?: string;
 }
 
 // ─── Indeterminate Checkbox ──────────────────────────────────────────────────
@@ -353,9 +354,28 @@ export function DataTable<TData>({
   toolbarRight,
   searchPlaceholder = 'Tìm kiếm...',
   exportFilename = 'export',
+  tableId,
 }: DataTableProps<TData>) {
 
   // ── State ──────────────────────────────────────────────────────────────────
+  const storageKey = `dt_col_size_${tableId || exportFilename}`;
+  const [columnSizing, setColumnSizing] = useState<Record<string, number>>(() => {
+    if (!storageKey) return {};
+    try {
+      const saved = localStorage.getItem(storageKey);
+      return saved ? JSON.parse(saved) : {};
+    } catch (e) {
+      return {};
+    }
+  });
+
+  useEffect(() => {
+    if (!storageKey || Object.keys(columnSizing).length === 0) return;
+    try {
+      localStorage.setItem(storageKey, JSON.stringify(columnSizing));
+    } catch (e) {}
+  }, [columnSizing, storageKey]);
+
   const [globalFilter, setGlobalFilter] = useState('');
   const [sorting, setSorting] = useState<SortingState>(initialSorting);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -443,7 +463,9 @@ export function DataTable<TData>({
       expanded,
       columnPinning,
       columnOrder,
+      columnSizing,
     },
+    onColumnSizingChange: setColumnSizing,
     onGlobalFilterChange: setGlobalFilter,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -656,7 +678,7 @@ export function DataTable<TData>({
                               <div
                                 className={`
                                   flex items-center gap-1 w-full
-                                  py-3 px-3.5 text-slate-300 text-[10px] font-black uppercase tracking-wider
+                                  py-3.5 px-3.5 text-slate-300 text-xs font-black uppercase tracking-wider
                                   whitespace-nowrap
                                   ${isFirst ? 'rounded-tl-xl' : ''} ${isLast ? 'rounded-tr-xl' : ''}
                                   ${isPinned ? 'bg-[#111827]' : ''}
@@ -743,7 +765,7 @@ export function DataTable<TData>({
                               <td
                                 key={cell.id}
                                 className={`
-                                  py-3 px-3.5 font-medium text-slate-200
+                                  py-3 px-3.5 font-semibold text-slate-200 text-xs sm:text-[13px]
                                   border-b border-[#161e30]
                                   ${isPinned ? 'bg-inherit' : ''}
                                   ${isLastRow && isFirstCell ? 'rounded-bl-xl' : ''}
