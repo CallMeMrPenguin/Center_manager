@@ -302,21 +302,30 @@ function AppContent() {
                         onDragEnd={() => setDraggedIndex(null)}
                         onDrop={() => handleDrop(idx)}
                         onClick={() => setActiveTab(item.id)}
-                        className={`flex items-center w-full h-11 px-2 rounded-xl transition-all duration-200 relative group cursor-pointer active:scale-95 shrink-0 overflow-hidden ${
-                          isActive
-                            ? 'bg-indigo-500/20 border-2 border-indigo-400/90 text-white font-black shadow-[0_0_20px_rgba(92,54,245,0.45)]'
-                            : 'text-slate-300 font-bold hover:text-white hover:bg-white/5 border border-transparent'
-                        } ${draggedIndex === idx ? 'opacity-40 border border-dashed border-indigo-400 bg-indigo-500/10' : ''}`}
+                        className={`flex items-center w-full h-11 px-1 rounded-xl transition-all duration-200 relative group cursor-pointer active:scale-95 shrink-0 overflow-hidden ${
+                          draggedIndex === idx ? 'opacity-40 border border-dashed border-indigo-400 bg-indigo-500/10' : ''
+                        }`}
                       >
-                        {/* ICON BOX */}
-                        <div className="w-9 h-9 flex items-center justify-center shrink-0 rounded-lg">
-                          <Icon size={19} className={isActive ? 'text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.9)]' : 'text-slate-400 group-hover:text-white'} />
+                        {/* ICON BOX — FIXED 40x40 SQUARE WITH ROUNDED CORNERS FOR HIGHLIGHT EFFECT */}
+                        <div
+                          className={`w-10 h-10 flex items-center justify-center shrink-0 rounded-xl transition-all duration-200 ${
+                            isActive
+                              ? 'bg-indigo-500/25 border-2 border-indigo-400/90 text-white shadow-[0_0_18px_rgba(92,54,245,0.6),inset_0_0_10px_rgba(92,54,245,0.3)]'
+                              : 'text-slate-400 group-hover:text-white group-hover:bg-white/5 border border-transparent'
+                          }`}
+                        >
+                          <Icon
+                            size={20}
+                            className={isActive ? 'text-white drop-shadow-[0_0_10px_rgba(255,255,255,1)]' : ''}
+                          />
                         </div>
 
                         {/* TEXT LABEL — FADES AND SLIDES SMOOTHLY */}
-                        <span className={`ml-2 text-sm font-bold opacity-0 group-hover/sidebar:opacity-100 max-w-0 group-hover/sidebar:max-w-[180px] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] whitespace-nowrap overflow-hidden pointer-events-none group-hover/sidebar:pointer-events-auto ${
-                          isActive ? "text-white font-extrabold" : "text-slate-200 font-bold group-hover:text-white"
-                        }`}>
+                        <span
+                          className={`ml-3 text-sm transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] whitespace-nowrap overflow-hidden pointer-events-none group-hover/sidebar:pointer-events-auto opacity-0 group-hover/sidebar:opacity-100 max-w-0 group-hover/sidebar:max-w-[180px] ${
+                            isActive ? 'text-white font-extrabold' : 'text-slate-300 font-bold group-hover:text-white'
+                          }`}
+                        >
                           {item.label}
                         </span>
                       </button>
