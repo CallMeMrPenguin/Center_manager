@@ -87,23 +87,17 @@ def main():
     # 0. Clean up any leftover server process holding port 8000
     kill_port_8000()
 
-    # 1. Determine target URL (Vite DEV server or Built Backend)
+    # Always target local production backend server URL
     url = "http://127.0.0.1:8000"
-    try:
-        urllib.request.urlopen("http://localhost:5173", timeout=0.3)
-        url = "http://localhost:5173"
-        print("Vite dev server detected. Running in DEV App Mode.")
-    except Exception:
-        print("Running in Production Standalone App Mode.")
 
     is_server_only = "--background" in sys.argv or "--server" in sys.argv
 
-    # 2. Start FastAPI backend in a background daemon thread
+    # 1. Start FastAPI backend in a background daemon thread
     server_thread = threading.Thread(target=run_backend, daemon=True)
     server_thread.start()
 
     if not is_server_only:
-        # 3. Open Standalone Desktop Application Window!
+        # 2. Open Standalone Desktop Application Window
         open_native_app_window(url)
 
     # Keep main thread alive
