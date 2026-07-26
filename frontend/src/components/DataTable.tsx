@@ -542,26 +542,30 @@ export function DataTable<TData>({
     if (enableRowSelection) {
       cols.push({
         id: 'select',
-        size: 42,
-        minSize: 42,
-        maxSize: 42,
+        size: 38,
+        minSize: 38,
+        maxSize: 38,
         enableResizing: false,
         enableSorting: false,
         enableGlobalFilter: false,
         header: ({ table }) => (
-          <IndeterminateCheckbox
-            checked={table.getIsAllPageRowsSelected()}
-            indeterminate={table.getIsSomePageRowsSelected()}
-            onChange={table.getToggleAllPageRowsSelectedHandler()}
-          />
+          <div className="flex items-center justify-center w-full">
+            <IndeterminateCheckbox
+              checked={table.getIsAllPageRowsSelected()}
+              indeterminate={table.getIsSomePageRowsSelected()}
+              onChange={table.getToggleAllPageRowsSelectedHandler()}
+            />
+          </div>
         ),
         cell: ({ row }) => (
-          <IndeterminateCheckbox
-            checked={row.getIsSelected()}
-            indeterminate={row.getIsSomeSelected()}
-            onChange={row.getToggleSelectedHandler()}
-            onClick={e => e.stopPropagation()}
-          />
+          <div className="flex items-center justify-center w-full">
+            <IndeterminateCheckbox
+              checked={row.getIsSelected()}
+              indeterminate={row.getIsSomeSelected()}
+              onChange={row.getToggleSelectedHandler()}
+              onClick={e => e.stopPropagation()}
+            />
+          </div>
         ),
       });
     }
@@ -876,13 +880,14 @@ export function DataTable<TData>({
                             const isLastRow = rowIdx === allRows.length - 1;
                             const isFirstCell = cellIdx === 0;
                             const isLastCell = cellIdx === row.getVisibleCells().length - 1;
-                            const isCentered = columnAlignments[cell.column.id] === 'center';
+                            const isSelectCol = cell.column.id === 'select' || cell.column.id === '_expander';
+                            const isCentered = isSelectCol || columnAlignments[cell.column.id] === 'center';
 
                             return (
                               <td
                                 key={cell.id}
                                 className={`
-                                  py-3.5 px-4 font-semibold text-slate-200 text-sm
+                                  py-3.5 ${isSelectCol ? 'px-1' : 'px-4'} font-semibold text-slate-200 text-sm
                                   border-b border-[#161e30]
                                   ${isCentered ? 'text-center' : 'text-left'}
                                   ${isPinned ? 'bg-inherit' : ''}
