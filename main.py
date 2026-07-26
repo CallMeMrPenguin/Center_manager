@@ -55,15 +55,28 @@ def ensure_hosts_entry():
         print(f"Notice: Could not write to hosts file automatically: {e}")
         print("To enable http://local.centermanager.edu:8000 without port errors, run terminal as Administrator or add '127.0.0.1 local.centermanager.edu' to C:\\Windows\\System32\\drivers\\etc\\hosts")
 
-def open_browser(url: str):
-    """Waits for backend to respond, then opens default browser."""
-    time.sleep(1.2)
+def open_native_app_window(url: str):
+    """Launches application in a clean standalone Desktop App Window (--app mode)."""
+    time.sleep(1.0)
+    if sys.platform == "win32":
+        app_cmds = [
+            ["msedge", f"--app={url}"],
+            [r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe", f"--app={url}"],
+            [r"C:\Program Files\Microsoft\Edge\Application\msedge.exe", f"--app={url}"],
+            ["chrome", f"--app={url}"],
+            [r"C:\Program Files\Google\Chrome\Application\chrome.exe", f"--app={url}"]
+        ]
+        no_window_flag = getattr(subprocess, "CREATE_NO_WINDOW", 0)
+        for cmd in app_cmds:
+            try:
+                proc = subprocess.Popen(cmd, creationflags=no_window_flag)
+                if proc.poll() is None or proc.returncode is None:
+                    return
+            except Exception:
+                continue
     try:
-        if sys.platform == "win32":
-            os.system(f'start {url}')
-        else:
-            import webbrowser
-            webbrowser.open(url)
+        import webbrowser
+        webbrowser.open(url)
     except Exception:
         pass
 
@@ -80,35 +93,23 @@ def main():
     try:
         urllib.request.urlopen("http://localhost:5173", timeout=0.3)
         url = "http://localhost:5173"
-        print("Vite dev server detected. Running in DEV Desktop Mode.")
+        print("Vite dev server detected. Running in DEV App Mode.")
     except Exception:
-        print("Running in Production Native Desktop App Mode.")
+        print("Running in Production Standalone App Mode.")
 
-    is_browser_mode = "--browser" in sys.argv or "--web" in sys.argv
     is_server_only = "--background" in sys.argv or "--server" in sys.argv
 
     # 2. Start FastAPI backend in a background daemon thread
     server_thread = threading.Thread(target=run_backend, daemon=True)
     server_thread.start()
-    time.sleep(1.0)
 
-    if is_server_only:
-        server_thread.join()
-    elif is_browser_mode:
-        import webbrowser
-        webbrowser.open(url)
-        server_thread.join()
-    else:
-        # 3. Create NATIVE STANDALONE DESKTOP APP WINDOW (Edge WebView2)
-        window = webview.create_window(
-            title="Center Manager & Test Formatter",
-            url=url,
-            width=1360,
-            height=850,
-            resizable=True,
-            min_size=(1024, 700)
-        )
-        webview.start(private_mode=False)
+    if not is_server_only:
+        # 3. Open Standalone Desktop Application Window!
+        open_native_app_window(url)
+
+    # Keep main thread alive
+    while True:
+        time.sleep(1)
 
 if __name__ == "__main__":
     main()
