@@ -59,8 +59,11 @@ def open_browser(url: str):
     """Waits for backend to respond, then opens default browser."""
     time.sleep(1.2)
     try:
-        import webbrowser
-        webbrowser.open(url)
+        if sys.platform == "win32":
+            os.system(f'start {url}')
+        else:
+            import webbrowser
+            webbrowser.open(url)
     except Exception:
         pass
 
@@ -75,8 +78,7 @@ def main():
     is_background = "--background" in sys.argv or "--silent" in sys.argv
 
     # 1. Determine if Vite dev server is running (Development Mode)
-    domain = "local.centermanager.edu"
-    url = f"http://{domain}:8000"
+    url = "http://localhost:8000"
     
     try:
         urllib.request.urlopen("http://localhost:5173", timeout=0.3)
