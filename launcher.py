@@ -10,12 +10,20 @@ import subprocess
 import shutil
 import threading
 
-# Find root directory properly whether running as python script or frozen PyInstaller exe
-if getattr(sys, 'frozen', False):
-    ROOT = os.path.dirname(os.path.dirname(os.path.abspath(sys.executable)))
-else:
-    ROOT = os.path.dirname(os.path.abspath(__file__))
+def get_app_root():
+    """Finds the root directory containing main.py by climbing up from frozen executable."""
+    if getattr(sys, 'frozen', False):
+        curr = os.path.dirname(os.path.abspath(sys.executable))
+        for _ in range(5):
+            if os.path.exists(os.path.join(curr, "main.py")):
+                return curr
+            parent = os.path.dirname(curr)
+            if parent == curr:
+                break
+            curr = parent
+    return os.path.dirname(os.path.abspath(__file__))
 
+ROOT = get_app_root()
 NO_WINDOW = subprocess.CREATE_NO_WINDOW if sys.platform == "win32" else 0
 
 def find_system_python():
