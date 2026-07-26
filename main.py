@@ -1,18 +1,10 @@
 import os
-# CRITICAL: Must be set BEFORE 'import webview' loads the WebView2 DLL.
-# Without this, Vietnamese IME (Unikey, EVKey, etc.) will not work in the app window.
-os.environ['WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS'] = ' '.join([
-    '--enable-features=msEdgeIMEComposition',
-    '--disable-features=RendererCodeIntegrity',
-    '--lang=vi',
-])
-
 import sys
-import threading
 import time
+import threading
 import urllib.request
+import webbrowser
 import uvicorn
-import webview
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 
@@ -37,80 +29,43 @@ def kill_port_8000():
     except Exception:
         pass
 
-def ensure_hosts_entry():
-    """Checks and attempts to add 127.0.0.1 local.centermanager.edu to Windows hosts file."""
-    if sys.platform != "win32":
-        return
-    hosts_path = r"C:\Windows\System32\drivers\etc\hosts"
-    entry = "127.0.0.1 local.centermanager.edu\n"
+def open_browser(url: str):
+    """Waits for backend to start, then opens default browser."""
+    time.sleep(1.2)
     try:
-        if os.path.exists(hosts_path):
-            with open(hosts_path, "r", encoding="utf-8", errors="ignore") as f:
-                content = f.read()
-            if "local.centermanager.edu" not in content:
-                print("Adding local.centermanager.edu to hosts file...")
-                with open(hosts_path, "a", encoding="utf-8") as f:
-                    f.write(f"\n# Center Manager local domain\n{entry}")
-    except Exception as e:
-        print(f"Notice: Could not write to hosts file automatically: {e}")
-        print("To enable http://local.centermanager.edu:8000 without port errors, run terminal as Administrator or add '127.0.0.1 local.centermanager.edu' to C:\\Windows\\System32\\drivers\\etc\\hosts")
-
-def open_native_app_window(url: str):
-    """Launches application in a clean standalone Desktop App Window (--app mode)."""
-    time.sleep(1.0)
-    if sys.platform == "win32":
-        app_cmds = [
-            ["msedge", f"--app={url}"],
-            [r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe", f"--app={url}"],
-            [r"C:\Program Files\Microsoft\Edge\Application\msedge.exe", f"--app={url}"],
-            ["chrome", f"--app={url}"],
-            [r"C:\Program Files\Google\Chrome\Application\chrome.exe", f"--app={url}"]
-        ]
-        for cmd in app_cmds:
-            try:
-                proc = subprocess.Popen(cmd)
-                if proc.poll() is None or proc.returncode is None:
-                    return
-            except Exception:
-                continue
-    try:
-        import webbrowser
         webbrowser.open(url)
     except Exception:
         pass
 
-def run_backend():
-    backend_dir = os.path.join(ROOT, "backend")
-    uvicorn.run("backend.main:app", host="127.0.0.1", port=8000, log_level="warning")
-
 def main():
-    # 0. Clean up any leftover server process holding port 8000
+    # 1. Clean up any leftover server process holding port 8000
     kill_port_8000()
 
-    url = "http://127.0.0.1:8000"
-    is_server_only = "--background" in sys.argv or "--server" in sys.argv
+    # 2. Determine target URL (Vite DEV server or Built Backend)
+    url = "http://localhost:8000"
+    try:
+        urllib.request.urlopen("http://localhost:5173", timeout=0.3)
+        url = "http://localhost:5173"
+        print("Vite development server detected. Running in DEV mode.")
+    except Exception:
+        print("Vite dev server not found. Running in PRODUCTION mode.")
 
-    # 1. Start FastAPI backend in a background daemon thread
-    server_thread = threading.Thread(target=run_backend, daemon=True)
-    server_thread.start()
-    time.sleep(1.0)
+    is_background = "--background" in sys.argv or "--silent" in sys.argv
 
-    if is_server_only:
-        server_thread.join()
-    else:
-        # 2. Create NATIVE DESKTOP SOFTWARE APPLICATION WINDOW
-        window = webview.create_window(
-            title="Center Manager & Test Formatter",
-            url=url,
-            width=1360,
-            height=850,
-            resizable=True,
-            min_size=(1024, 700)
-        )
-        try:
-            webview.start(gui='qt', private_mode=False)
-        except Exception:
-            webview.start(private_mode=False)
+    if not is_background:
+        # Open default browser in a delayed background thread
+        threading.Thread(target=open_browser, args=(url,), daemon=True).start()
+
+    print("\n" + "=" * 55)
+    print("  CENTER MANAGER & TEST FORMATTER IS RUNNING")
+    print(f"  Web URL: {url} (or http://127.0.0.1:8000)")
+    print("  Keep this terminal window open while using the app.")
+    print("  Press Ctrl+C to stop the server.")
+    print("=" * 55 + "\n")
+
+    # 3. Run uvicorn FastAPI server
+    backend_dir = os.path.join(ROOT, "backend")
+    uvicorn.run("backend.main:app", host="0.0.0.0", port=8000, reload=True, reload_dirs=[backend_dir], log_level="warning")
 
 if __name__ == "__main__":
     main()

@@ -3,12 +3,8 @@ import json
 import socket
 import uuid
 
-if getattr(sys, 'frozen', False):
-    BASE_DIR = os.path.dirname(os.path.abspath(sys.executable))
-    BUNDLE_DIR = getattr(sys, '_MEIPASS', BASE_DIR)
-else:
-    BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    BUNDLE_DIR = BASE_DIR
+# Base directory of the application (root folder)
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 CONFIG_FILE = os.path.join(BASE_DIR, "config.json")
 
@@ -49,6 +45,3 @@ def set_setting(key, value):
     settings = load_settings()
     settings[key] = value
     save_settings(settings)
-
-
-
