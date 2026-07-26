@@ -152,14 +152,19 @@ function DraggableHeader({ header, children, enableReorder }: {
   );
 }
 
-// ─── Column Visibility Dropdown ───────────────────────────────────────────────
+// ─── Column Visibility & Alignment Dropdown ──────────────────────────────────
 function ColumnVisibilityDropdown<TData>({
   table,
+  columnAlignments,
+  onToggleAlignment,
   onResetColumnWidths,
 }: {
   table: ReturnType<typeof useReactTable<TData>>;
+  columnAlignments: Record<string, 'center' | 'left'>;
+  onToggleAlignment: (colId: string) => void;
   onResetColumnWidths?: () => void;
 }) {
+  const [activeTab, setActiveTab] = useState<'visibility' | 'align'>('visibility');
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -179,7 +184,7 @@ function ColumnVisibilityDropdown<TData>({
         type="button"
         onClick={() => setOpen(v => !v)}
         className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#1c243c] hover:bg-[#253050] text-slate-300 hover:text-white border border-[#303d62] text-xs font-bold transition cursor-pointer"
-        title="Hiển thị / ẩn cột"
+        title="Hiển thị & Căn chỉnh cột"
       >
         <SlidersHorizontal size={13} className="text-indigo-400" />
         <span className="hidden sm:inline">Cột</span>
@@ -187,27 +192,89 @@ function ColumnVisibilityDropdown<TData>({
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full mt-2 z-[60] w-56 bg-[#131929] border border-[#28334e] rounded-2xl shadow-2xl p-3 space-y-1 animate-mac-dropdown">
-          <div className="text-[10px] font-black uppercase text-indigo-400 tracking-wider border-b border-white/10 pb-1.5 mb-2 flex items-center justify-between">
-            <span>Hiển thị cột</span>
-            <div className="flex gap-1">
-              <button type="button" onClick={() => table.toggleAllColumnsVisible(true)}
-                className="text-[9px] text-slate-400 hover:text-white px-1.5 py-0.5 rounded bg-white/5 hover:bg-white/10 transition cursor-pointer">Tất cả</button>
-              <button type="button" onClick={() => table.toggleAllColumnsVisible(false)}
-                className="text-[9px] text-slate-400 hover:text-white px-1.5 py-0.5 rounded bg-white/5 hover:bg-white/10 transition cursor-pointer">Ẩn hết</button>
-            </div>
+        <div className="absolute right-0 top-full mt-2 z-[60] w-64 bg-[#131929] border border-[#28334e] rounded-2xl shadow-2xl p-3 space-y-2 animate-mac-dropdown">
+          {/* TAB SWITCHER */}
+          <div className="flex bg-[#0b0e19] p-1 rounded-xl border border-white/5 text-xs font-bold">
+            <button
+              type="button"
+              onClick={() => setActiveTab('visibility')}
+              className={`flex-1 py-1.5 text-center rounded-lg transition cursor-pointer ${
+                activeTab === 'visibility' ? 'bg-[#5c36f5] text-white font-extrabold shadow-sm' : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              Hiển Thị Cột
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('align')}
+              className={`flex-1 py-1.5 text-center rounded-lg transition cursor-pointer ${
+                activeTab === 'align' ? 'bg-[#5c36f5] text-white font-extrabold shadow-sm' : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              Căn Chỉnh
+            </button>
           </div>
-          {allCols.map(col => (
-            <label key={col.id} className="flex items-center gap-2.5 text-xs text-slate-200 cursor-pointer hover:text-white px-1.5 py-1 rounded-lg hover:bg-[#1e2740] transition">
-              <input type="checkbox" checked={col.getIsVisible()} onChange={col.getToggleVisibilityHandler()}
-                className="accent-indigo-500 rounded cursor-pointer w-3.5 h-3.5" />
-              <span className="truncate">{typeof col.columnDef.header === 'string' ? col.columnDef.header : col.id}</span>
-              {col.getIsPinned() && <span className="ml-auto text-[9px] text-amber-400 font-bold">PIN</span>}
-            </label>
-          ))}
 
+          {/* TAB 1: VISIBILITY */}
+          {activeTab === 'visibility' && (
+            <div className="space-y-1">
+              <div className="text-[10px] font-black uppercase text-indigo-400 tracking-wider border-b border-white/10 pb-1.5 mb-1 flex items-center justify-between">
+                <span>Chọn cột hiển thị</span>
+                <div className="flex gap-1">
+                  <button type="button" onClick={() => table.toggleAllColumnsVisible(true)}
+                    className="text-[9px] text-slate-400 hover:text-white px-1.5 py-0.5 rounded bg-white/5 hover:bg-white/10 transition cursor-pointer">Tất cả</button>
+                  <button type="button" onClick={() => table.toggleAllColumnsVisible(false)}
+                    className="text-[9px] text-slate-400 hover:text-white px-1.5 py-0.5 rounded bg-white/5 hover:bg-white/10 transition cursor-pointer">Ẩn hết</button>
+                </div>
+              </div>
+              <div className="max-h-56 overflow-y-auto space-y-0.5 scrollbar-thin pr-1">
+                {allCols.map(col => (
+                  <label key={col.id} className="flex items-center gap-2.5 text-xs text-slate-200 cursor-pointer hover:text-white px-1.5 py-1 rounded-lg hover:bg-[#1e2740] transition">
+                    <input type="checkbox" checked={col.getIsVisible()} onChange={col.getToggleVisibilityHandler()}
+                      className="accent-indigo-500 rounded cursor-pointer w-3.5 h-3.5" />
+                    <span className="truncate">{typeof col.columnDef.header === 'string' ? col.columnDef.header : col.id}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* TAB 2: ALIGNMENT */}
+          {activeTab === 'align' && (
+            <div className="space-y-1">
+              <div className="text-[10px] font-black uppercase text-indigo-400 tracking-wider border-b border-white/10 pb-1.5 mb-1">
+                <span>Tích = Căn Giữa | Bỏ tích = Trái</span>
+              </div>
+              <div className="max-h-56 overflow-y-auto space-y-0.5 scrollbar-thin pr-1">
+                {allCols.map(col => {
+                  const isCentered = columnAlignments[col.id] === 'center';
+                  const colName = typeof col.columnDef.header === 'string' ? col.columnDef.header : col.id;
+                  return (
+                    <label key={col.id} className="flex items-center justify-between gap-2 text-xs text-slate-200 cursor-pointer hover:text-white px-1.5 py-1 rounded-lg hover:bg-[#1e2740] transition">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <input
+                          type="checkbox"
+                          checked={isCentered}
+                          onChange={() => onToggleAlignment(col.id)}
+                          className="accent-indigo-500 rounded cursor-pointer w-3.5 h-3.5 shrink-0"
+                        />
+                        <span className="truncate">{colName}</span>
+                      </div>
+                      <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded shrink-0 ${
+                        isCentered ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-slate-800 text-slate-400'
+                      }`}>
+                        {isCentered ? 'Giữa' : 'Trái'}
+                      </span>
+                    </label>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* RESET BUTTON */}
           {onResetColumnWidths && (
-            <div className="pt-2 border-t border-white/10 mt-2">
+            <div className="pt-2 border-t border-white/10 mt-1">
               <button
                 type="button"
                 onClick={() => {
@@ -215,7 +282,7 @@ function ColumnVisibilityDropdown<TData>({
                   setOpen(false);
                 }}
                 className="w-full flex items-center justify-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 border border-indigo-500/20 text-xs font-extrabold transition cursor-pointer"
-                title="Đặt lại độ rộng, thứ tự và cài đặt hiển thị cột về mặc định"
+                title="Đặt lại độ rộng, thứ tự, căn chỉnh và hiển thị cột về mặc định"
               >
                 <RotateCcw size={12} />
                 <span>Đặt lại giao diện cột</span>
@@ -374,7 +441,7 @@ export function DataTable<TData>({
   tableId,
 }: DataTableProps<TData>) {
 
-  // ── Unified Layout State Persistence (Width + Visibility + Order) ─────────
+  // ── Unified Layout State Persistence (Width + Visibility + Order + Alignment)
   const storageKey = `dt_layout_${tableId || exportFilename}`;
 
   const savedLayout = React.useMemo(() => {
@@ -390,6 +457,7 @@ export function DataTable<TData>({
   const [columnSizing, setColumnSizing] = useState<Record<string, number>>(() => savedLayout?.sizing || {});
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(() => savedLayout?.visibility || initialColumnVisibility);
   const [columnOrder, setColumnOrder] = useState<ColumnOrderState>(() => savedLayout?.order || []);
+  const [columnAlignments, setColumnAlignments] = useState<Record<string, 'center' | 'left'>>(() => savedLayout?.alignments || {});
 
   useEffect(() => {
     if (!storageKey) return;
@@ -398,15 +466,25 @@ export function DataTable<TData>({
         sizing: columnSizing,
         visibility: columnVisibility,
         order: columnOrder,
+        alignments: columnAlignments,
       };
       localStorage.setItem(storageKey, JSON.stringify(layout));
     } catch (e) {}
-  }, [columnSizing, columnVisibility, columnOrder, storageKey]);
+  }, [columnSizing, columnVisibility, columnOrder, columnAlignments, storageKey]);
+
+  const handleToggleAlignment = useCallback((colId: string) => {
+    setColumnAlignments(prev => {
+      const current = prev[colId] || 'left';
+      const next = current === 'center' ? 'left' : 'center';
+      return { ...prev, [colId]: next };
+    });
+  }, []);
 
   const handleResetColumnWidths = useCallback(() => {
     setColumnSizing({});
     setColumnVisibility(initialColumnVisibility);
     setColumnOrder([]);
+    setColumnAlignments({});
     if (storageKey) {
       try {
         localStorage.removeItem(storageKey);
@@ -656,6 +734,8 @@ export function DataTable<TData>({
             {enableColumnVisibility && (
               <ColumnVisibilityDropdown<TData>
                 table={table}
+                columnAlignments={columnAlignments}
+                onToggleAlignment={handleToggleAlignment}
                 onResetColumnWidths={handleResetColumnWidths}
               />
             )}
@@ -700,7 +780,7 @@ export function DataTable<TData>({
                     ...(enableColumnResizing ? { width: table.getTotalSize() } : { width: '100%' }),
                   }}
                 >
-                  {/* ── THEAD ─────────────────────────────────────────────── */}
+                  {/* ── THEAD (All headers centered by default) ────────────────── */}
                   <thead className={`bg-[#111827] ${stickyHeader ? 'sticky top-0 z-20' : ''}`}>
                     {table.getHeaderGroups().map(headerGroup => (
                       <tr key={headerGroup.id}>
@@ -715,10 +795,10 @@ export function DataTable<TData>({
                               header={header}
                               enableReorder={enableColumnReorder && header.column.id !== 'select' && header.column.id !== '_expander'}
                             >
-                              {/* Inner cell content */}
+                              {/* Inner cell content (Centered by default) */}
                               <div
                                 className={`
-                                  flex items-center gap-1 w-full
+                                  flex items-center justify-center text-center gap-1 w-full
                                   py-3.5 px-4 text-slate-200 text-xs sm:text-sm font-black uppercase tracking-wider
                                   whitespace-nowrap
                                   ${isFirst ? 'rounded-tl-xl' : ''} ${isLast ? 'rounded-tr-xl' : ''}
@@ -731,7 +811,7 @@ export function DataTable<TData>({
                                 }}
                               >
                                 <div
-                                  className={`flex items-center gap-1.5 flex-1 min-w-0 ${header.column.getCanSort() ? 'cursor-pointer select-none hover:text-white transition-colors' : ''}`}
+                                  className={`flex items-center justify-center text-center gap-1.5 flex-1 min-w-0 ${header.column.getCanSort() ? 'cursor-pointer select-none hover:text-white transition-colors' : ''}`}
                                   onClick={header.column.getCanSort() ? header.column.getToggleSortingHandler() : undefined}
                                 >
                                   {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
@@ -800,6 +880,7 @@ export function DataTable<TData>({
                             const isLastRow = rowIdx === allRows.length - 1;
                             const isFirstCell = cellIdx === 0;
                             const isLastCell = cellIdx === row.getVisibleCells().length - 1;
+                            const isCentered = columnAlignments[cell.column.id] === 'center';
 
                             return (
                               <td
@@ -807,6 +888,7 @@ export function DataTable<TData>({
                                 className={`
                                   py-3.5 px-4 font-semibold text-slate-200 text-sm
                                   border-b border-[#161e30]
+                                  ${isCentered ? 'text-center' : 'text-left'}
                                   ${isPinned ? 'bg-inherit' : ''}
                                   ${isLastRow && isFirstCell ? 'rounded-bl-xl' : ''}
                                   ${isLastRow && isLastCell ? 'rounded-br-xl' : ''}
@@ -820,7 +902,9 @@ export function DataTable<TData>({
                                     : undefined,
                                 }}
                               >
-                                {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                <div className={`w-full flex items-center ${isCentered ? 'justify-center text-center' : 'justify-start text-left'}`}>
+                                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                </div>
                               </td>
                             );
                           })}
