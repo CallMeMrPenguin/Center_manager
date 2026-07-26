@@ -166,10 +166,18 @@ function DraggableHeader({
       {/* Resize handle — pinned to right border of th cell */}
       {enableColumnResizing && header.column.getCanResize() && (
         <div
-          onMouseDown={header.getResizeHandler()}
-          onTouchStart={header.getResizeHandler()}
-          className={`absolute right-0 top-1 h-[calc(100%-8px)] w-1.5 cursor-col-resize select-none touch-none rounded-full transition-colors z-20 ${
-            header.column.getIsResizing() ? 'bg-indigo-500' : 'bg-transparent hover:bg-indigo-500/50'
+          onMouseDown={(e) => {
+            e.stopPropagation();
+            header.getResizeHandler()(e);
+          }}
+          onTouchStart={(e) => {
+            e.stopPropagation();
+            header.getResizeHandler()(e);
+          }}
+          onClick={(e) => e.stopPropagation()}
+          title="Kéo để thay đổi độ rộng cột"
+          className={`absolute -right-1 top-1 h-[calc(100%-8px)] w-2.5 cursor-col-resize select-none touch-none rounded-full transition-colors z-30 ${
+            header.column.getIsResizing() ? 'bg-indigo-500' : 'bg-transparent hover:bg-indigo-500/60'
           }`}
         />
       )}
