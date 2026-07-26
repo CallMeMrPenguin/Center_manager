@@ -139,19 +139,13 @@ function DraggableHeader({ header, children, enableReorder }: {
     <th
       ref={setNodeRef}
       style={style}
-      className="select-none relative border-b border-[#28334e] bg-[#111827]"
+      {...(enableReorder ? { ...attributes, ...listeners } : {})}
+      className={`select-none relative border-b border-[#28334e] bg-[#111827] ${
+        enableReorder ? 'cursor-grab active:cursor-grabbing hover:bg-[#182033] transition-colors' : ''
+      }`}
+      title={enableReorder ? 'Giữ chuột và kéo để thay đổi thứ tự cột' : undefined}
     >
       <div className="flex items-center gap-1 w-full">
-        {enableReorder && (
-          <span
-            {...attributes}
-            {...listeners}
-            className="cursor-grab active:cursor-grabbing text-slate-600 hover:text-slate-400 shrink-0 transition-colors touch-none pl-2"
-            title="Kéo để sắp xếp cột"
-          >
-            <GripVertical size={12} />
-          </span>
-        )}
         {children}
       </div>
     </th>
@@ -221,10 +215,10 @@ function ColumnVisibilityDropdown<TData>({
                   setOpen(false);
                 }}
                 className="w-full flex items-center justify-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 border border-indigo-500/20 text-xs font-extrabold transition cursor-pointer"
-                title="Đặt lại kích thước tất cả các cột về mặc định"
+                title="Đặt lại độ rộng, thứ tự và cài đặt hiển thị cột về mặc định"
               >
                 <RotateCcw size={12} />
-                <span>Đặt lại độ rộng cột</span>
+                <span>Đặt lại giao diện cột</span>
               </button>
             </div>
           )}
@@ -380,38 +374,49 @@ export function DataTable<TData>({
   tableId,
 }: DataTableProps<TData>) {
 
-  // ── State ──────────────────────────────────────────────────────────────────
-  const storageKey = `dt_col_size_${tableId || exportFilename}`;
-  const [columnSizing, setColumnSizing] = useState<Record<string, number>>(() => {
-    if (!storageKey) return {};
+  // ── Unified Layout State Persistence (Width + Visibility + Order) ─────────
+  const storageKey = `dt_layout_${tableId || exportFilename}`;
+
+  const savedLayout = React.useMemo(() => {
+    if (!storageKey) return null;
     try {
-      const saved = localStorage.getItem(storageKey);
-      return saved ? JSON.parse(saved) : {};
+      const item = localStorage.getItem(storageKey);
+      return item ? JSON.parse(item) : null;
     } catch (e) {
-      return {};
+      return null;
     }
-  });
+  }, [storageKey]);
+
+  const [columnSizing, setColumnSizing] = useState<Record<string, number>>(() => savedLayout?.sizing || {});
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(() => savedLayout?.visibility || initialColumnVisibility);
+  const [columnOrder, setColumnOrder] = useState<ColumnOrderState>(() => savedLayout?.order || []);
 
   useEffect(() => {
-    if (!storageKey || Object.keys(columnSizing).length === 0) return;
+    if (!storageKey) return;
     try {
-      localStorage.setItem(storageKey, JSON.stringify(columnSizing));
+      const layout = {
+        sizing: columnSizing,
+        visibility: columnVisibility,
+        order: columnOrder,
+      };
+      localStorage.setItem(storageKey, JSON.stringify(layout));
     } catch (e) {}
-  }, [columnSizing, storageKey]);
+  }, [columnSizing, columnVisibility, columnOrder, storageKey]);
 
   const handleResetColumnWidths = useCallback(() => {
     setColumnSizing({});
+    setColumnVisibility(initialColumnVisibility);
+    setColumnOrder([]);
     if (storageKey) {
       try {
         localStorage.removeItem(storageKey);
       } catch (e) {}
     }
-  }, [storageKey]);
+  }, [initialColumnVisibility, storageKey]);
 
   const [globalFilter, setGlobalFilter] = useState('');
   const [sorting, setSorting] = useState<SortingState>(initialSorting);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(initialColumnVisibility);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
   const [grouping, setGrouping] = useState<GroupingState>([]);
   const [expanded, setExpanded] = useState<ExpandedState>({});
@@ -420,7 +425,6 @@ export function DataTable<TData>({
       ? { left: [columns[0] && (columns[0] as any).id || (columns[0] as any).accessorKey || ''], ...initialColumnPinning }
       : initialColumnPinning
   );
-  const [columnOrder, setColumnOrder] = useState<ColumnOrderState>([]);
   const columnResizeMode: ColumnResizeMode = 'onChange';
   const tableScrollRef = useRef<HTMLDivElement>(null);
 
