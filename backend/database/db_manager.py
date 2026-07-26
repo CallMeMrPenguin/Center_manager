@@ -1,7 +1,7 @@
 import os
 import sqlite3
 import math
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Tuple
 
 # Database Path
 DB_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "test_formatter.db")
@@ -1915,6 +1915,13 @@ def remove_trusted_swap_student(class_id: int, student_id: int):
     conn.close()
 
 # --- ANALYTICS REPORTS ---
+def trunc_1_dec(val: float) -> float:
+    try:
+        v = float(val)
+        return math.floor(v * 10.0) / 10.0
+    except (ValueError, TypeError):
+        return 0.0
+
 def calculate_performance_analytics(session_records: List[Dict[str, Any]]) -> Dict[str, Any]:
     if not session_records:
         return {
@@ -1991,7 +1998,9 @@ def calculate_performance_analytics(session_records: List[Dict[str, Any]]) -> Di
     if weight_total > 0:
         academic_10 = weighted_sum / weight_total
     else:
-        overall_session_scores = [academic_10]
+        academic_10 = sum(overall_session_scores) / len(overall_session_scores) if overall_session_scores else 8.0
+
+    academic_score = academic_10 * 10.0
 
     def calc_regression(vals_list: List[float]) -> Tuple[float, float]:
         N = len(vals_list)
