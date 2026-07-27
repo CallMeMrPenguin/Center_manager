@@ -4,13 +4,22 @@ The following mandatory rules MUST be strictly followed across all features, tab
 
 ---
 
-## 🚀 1. Git Auto Quick-Commit & Push Standard
+## 🚀 1. Git Auto Quick-Commit, Version Bump & Push Standard
 - **Automatic Sync to Remote Repository**:
-  - Remote Origin URL: `https://github.com/CallMeMrPenguin/Center_manager.git` (Branch: `main`). (this path can be changed based on the project shouldnt use this path unless given one)
+  - Remote Origin URL: `https://github.com/CallMeMrPenguin/Center_manager.git` (Branch: `main`).
   - **Mandatory End-of-Task Action**: After making code updates or completing features in any coding session, the agent MUST automatically perform a quick-commit & push to GitHub:
     ```bash
-    git add .; git commit -m "feat/fix: [Brief summary of changes made]"; git push origin main
+    git add . ; git commit -m "feat/fix: [Brief summary of changes made]" ; git push origin main
     ```
+- **Auto Push Update & Version Bump Standard**:
+  - Whenever asked to release an update, bump version, or publish changes:
+    1. Bump the version string in `VERSION` file (e.g., `1.0.0` → `1.0.1`).
+    2. Rebuild the frontend (`npm run build`) and Windows installer (`python installer/build_installer.py`).
+    3. Commit and push commits along with git tags:
+       ```bash
+       git add . ; git commit -m "release: v1.0.1" ; git tag v1.0.1 ; git push origin main --tags
+       ```
+    4. All installed user app instances will automatically detect the new tag via `updater.py` and update in-place without manual reinstall.
 
 ---
 

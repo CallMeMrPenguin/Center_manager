@@ -79,12 +79,18 @@ npm install @tanstack/react-table @tanstack/react-virtual @dnd-kit/core @dnd-kit
 
 ---
 
-## 🚀 RULE: Auto Git Commit After Every Task
+## 🚀 RULE: Auto Git Commit & Version Push After Every Task
 
-After ANY code change, ALWAYS run:
+- After ANY code change, ALWAYS run:
 ```bash
-git add . && git commit -m "feat/fix: [brief summary]" && git push origin main
+git add . ; git commit -m "feat/fix: [brief summary]" ; git push origin main
 ```
+
+- When releasing an update or bumping version:
+```bash
+git add . ; git commit -m "release: vX.Y.Z" ; git tag vX.Y.Z ; git push origin main --tags
+```
+Bumping `VERSION` and pushing git tags triggers the auto-update mechanism for all client installations automatically.
 
 ---
 
