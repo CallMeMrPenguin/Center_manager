@@ -3,6 +3,7 @@ import sys
 import json
 import shutil
 import time
+import threading
 import csv
 import tkinter as tk
 from tkinter import filedialog
@@ -17,6 +18,15 @@ from services.combine_and_format import process_grade
 from services.format_vocabulary import format_vocabulary_file
 from services.csv_parser import parse_question_bank_csv
 from services.docx_parser import convert_docx_to_json
+
+# Import updater (lives at project root, BASE_DIR)
+try:
+    sys.path.insert(0, BASE_DIR)
+    import updater as _updater
+    _UPDATER_AVAILABLE = True
+except Exception:
+    _UPDATER_AVAILABLE = False
+    _updater = None
 
 router = APIRouter()
 
@@ -451,3 +461,47 @@ def api_open_folder():
         os.startfile(files_dir)
         return {"success": True}
     raise HTTPException(status_code=404, detail="Folder not found")
+
+
+# ─────────────────────────────────────────────
+# UPDATE ENDPOINTS
+# ─────────────────────────────────────────────
+
+@router.get("/api/system/update-check")
+def api_update_check():
+    """Check GitHub for a newer release. Returns update state immediately;
+    if a check is in progress it returns the current cached state."""
+    if not _UPDATER_AVAILABLE:
+        return {"error": "Updater module not available", "has_update": False, "current_version": "unknown"}
+    # Non-blocking: spawn background check if not already running
+    if not _updater._update_state["checking"]:
+        threading.Thread(target=_updater.check_for_update, daemon=True).start()
+    return _updater.get_update_state()
+
+
+@router.post("/api/system/update-apply")
+def api_update_apply():
+    """Download and apply latest update in background. Server will restart after."""
+    if not _UPDATER_AVAILABLE:
+        raise HTTPException(status_code=503, detail="Updater module not available")
+    state = _updater.get_update_state()
+    if not state.get("has_update"):
+        raise HTTPException(status_code=400, detail="Không có bản cập nhật nào để cài đặt")
+    if state.get("applying"):
+        return {"success": False, "message": "Đang cập nhật, vui lòng đợi..."}
+
+    def _do_apply():
+        success = _updater.apply_update()
+        if success:
+            _updater.schedule_restart(delay_seconds=3.0)
+
+    threading.Thread(target=_do_apply, daemon=True).start()
+    return {"success": True, "message": "Đang tải xuống và cài đặt bản cập nhật..."}
+
+
+@router.get("/api/system/update-status")
+def api_update_status():
+    """Poll current update progress state (for frontend polling)."""
+    if not _UPDATER_AVAILABLE:
+        return {"error": "Updater module not available", "has_update": False, "current_version": "unknown"}
+    return _updater.get_update_state()

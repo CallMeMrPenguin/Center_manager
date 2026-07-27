@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { api } from '../../api';
 import { AppSettings, SystemCheck } from '../../types';
 import { 
   Settings as SettingsIcon, Database, RefreshCw, 
-  Trash2, ShieldCheck, Cpu, HardDrive, CheckCircle2, AlertTriangle, Save, Upload
+  Trash2, ShieldCheck, Cpu, HardDrive, CheckCircle2, AlertTriangle, Save, Upload,
+  Download, ArrowUpCircle, GitBranch, Loader2
 } from 'lucide-react';
 import { applyTheme } from '../../theme';
 import { showToast } from '../../components/Toast';
@@ -16,6 +17,12 @@ export default function Settings() {
   const [systemCheck, setSystemCheck] = useState<SystemCheck | null>(null);
   const [loadingDiagnostics, setLoadingDiagnostics] = useState(false);
   const [filesDirInput, setFilesDirInput] = useState("");
+
+  // Update state
+  const [updateState, setUpdateState] = useState<any>(null);
+  const [checkingUpdate, setCheckingUpdate] = useState(false);
+  const [applyingUpdate, setApplyingUpdate] = useState(false);
+  const updatePollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Theme & Glass effect state
   const [themeSettings, setThemeSettings] = useState(() => {
@@ -104,6 +111,11 @@ export default function Settings() {
     loadSettings();
     loadProfiles();
     runDiagnostics();
+    // Check update state silently on mount
+    api.getUpdateStatus().then(setUpdateState).catch(() => {});
+    return () => {
+      if (updatePollRef.current) clearInterval(updatePollRef.current);
+    };
   }, []);
 
   const loadSettings = async () => {
@@ -190,6 +202,61 @@ export default function Settings() {
       loadProfiles();
     } catch (e) {
       showToast("Lỗi xóa cấu hình: " + e, "error");
+    }
+  };
+
+  const handleCheckUpdate = async () => {
+    setCheckingUpdate(true);
+    try {
+      const result = await api.checkUpdate();
+      setUpdateState(result);
+      if (result.has_update) {
+        showToast(`Có bản cập nhật mới: v${result.latest_version}!`, 'success');
+      } else if (!result.error) {
+        showToast('Ứng dụng đang dùng phiên bản mới nhất!', 'success');
+      } else {
+        showToast('Lỗi kiểm tra cập nhật: ' + result.error, 'error');
+      }
+    } catch (e: any) {
+      showToast('Không thể kết nối kiểm tra cập nhật: ' + e.message, 'error');
+    } finally {
+      setCheckingUpdate(false);
+    }
+  };
+
+  const handleApplyUpdate = async () => {
+    const confirmed = await confirm({
+      title: 'Cài đặt bản cập nhật',
+      message: `Ứng dụng sẽ tải xuống bản v${updateState?.latest_version} và tự động khởi động lại. Quá trình này mất khoảng 1-2 phút.\n\nBạn có muốn tiếp tục?`,
+      confirmText: 'Cập Nhật Ngay',
+      cancelText: 'Hủy',
+      type: 'warning',
+    });
+    if (!confirmed) return;
+
+    setApplyingUpdate(true);
+    try {
+      await api.applyUpdate();
+      showToast('Đang tải xuống và cài đặt bản cập nhật...', 'warning');
+      // Start polling for progress
+      if (updatePollRef.current) clearInterval(updatePollRef.current);
+      updatePollRef.current = setInterval(async () => {
+        try {
+          const status = await api.getUpdateStatus();
+          setUpdateState(status);
+          if (status.applied) {
+            clearInterval(updatePollRef.current!);
+            showToast('Cập nhật thành công! Đang khởi động lại...', 'success');
+          } else if (status.error && !status.applying) {
+            clearInterval(updatePollRef.current!);
+            setApplyingUpdate(false);
+            showToast('Lỗi cập nhật: ' + status.error, 'error');
+          }
+        } catch {}
+      }, 1500);
+    } catch (e: any) {
+      setApplyingUpdate(false);
+      showToast('Không thể áp dụng bản cập nhật: ' + e.message, 'error');
     }
   };
 
@@ -469,6 +536,95 @@ export default function Settings() {
           </div>
         </div>
 
+      </div>
+
+      {/* Update Section — full width below grid */}
+      <div className="glass-panel rounded-2xl p-6 flex flex-col gap-4">
+        <div className="flex justify-between items-center border-b border-slate-900/60 pb-3">
+          <h3 className="text-xs font-extrabold text-white uppercase tracking-wider flex items-center gap-2">
+            <ArrowUpCircle size={14} className="text-blue-400" /> Cập Nhật Ứng Dụng
+          </h3>
+          <div className="flex items-center gap-2">
+            {/* Version badge */}
+            <span className="flex items-center gap-1 text-[10px] font-bold text-slate-400 bg-[#0b0f19] border border-slate-900 px-2.5 py-1 rounded-lg">
+              <GitBranch size={10} className="text-indigo-400" />
+              v{updateState?.current_version ?? '1.0.0'}
+            </span>
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-4">
+          {/* Status Row */}
+          <div className="flex items-center gap-4 p-4 rounded-xl bg-[#0b0f19]/60 border border-slate-900/50">
+            {applyingUpdate ? (
+              <div className="p-2 bg-amber-500/10 text-amber-400 rounded-xl shrink-0">
+                <Loader2 size={18} className="animate-spin" />
+              </div>
+            ) : updateState?.has_update ? (
+              <div className="p-2 bg-blue-500/10 text-blue-400 rounded-xl shrink-0">
+                <Download size={18} />
+              </div>
+            ) : (
+              <div className="p-2 bg-emerald-500/10 text-emerald-400 rounded-xl shrink-0">
+                <CheckCircle2 size={18} />
+              </div>
+            )}
+            <div className="flex-1 min-w-0">
+              <h4 className="text-xs font-bold text-white">
+                {applyingUpdate
+                  ? 'Đang cài đặt bản cập nhật...'
+                  : updateState?.has_update
+                  ? `Có bản cập nhật mới: v${updateState.latest_version}`
+                  : updateState?.error
+                  ? 'Không thể kiểm tra cập nhật'
+                  : 'Ứng dụng đang dùng phiên bản mới nhất'}
+              </h4>
+              <p className="text-[10px] text-slate-400 mt-0.5">
+                {applyingUpdate
+                  ? (updateState?.progress ?? 'Đang xử lý...')
+                  : updateState?.last_checked
+                  ? `Kiểm tra lần cuối: ${new Date(updateState.last_checked * 1000).toLocaleTimeString('vi-VN')}`
+                  : 'Nhấn "Kiểm Tra Cập Nhật" để kiểm tra phiên bản mới.'}
+              </p>
+              {updateState?.error && !applyingUpdate && (
+                <p className="text-[10px] text-rose-400 mt-1 font-mono">{updateState.error}</p>
+              )}
+            </div>
+
+            {/* Action buttons */}
+            <div className="flex items-center gap-2 shrink-0">
+              {updateState?.has_update && !applyingUpdate && (
+                <button
+                  onClick={handleApplyUpdate}
+                  className="flex items-center gap-1.5 px-3.5 py-2 bg-gradient-to-tr from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-extrabold text-[10px] rounded-xl transition-all duration-300 cursor-pointer shadow-md shadow-blue-500/20"
+                >
+                  <Download size={12} />
+                  Cài Đặt Ngay
+                </button>
+              )}
+              <button
+                onClick={handleCheckUpdate}
+                disabled={checkingUpdate || applyingUpdate}
+                className="group flex items-center gap-0 hover:gap-1.5 p-2 bg-[#0b0f19] border border-slate-850 hover:bg-gradient-to-tr hover:from-blue-600/10 hover:to-indigo-600/10 hover:border-blue-500/30 rounded-xl text-slate-400 hover:text-white transition-all duration-300 cursor-pointer disabled:opacity-40"
+                title="Kiểm tra bản cập nhật"
+              >
+                <RefreshCw size={13} className={checkingUpdate ? "animate-spin" : ""} />
+                <span className="max-w-0 overflow-hidden group-hover:max-w-[120px] transition-all duration-300 whitespace-nowrap block text-[10px] font-bold">Kiểm Tra Cập Nhật</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Progress bar when applying */}
+          {applyingUpdate && (
+            <div className="w-full bg-[#0b0f19] rounded-full h-1.5 border border-slate-900 overflow-hidden">
+              <div className="bg-gradient-to-r from-blue-500 to-indigo-500 h-full rounded-full animate-pulse w-2/3" />
+            </div>
+          )}
+
+          <p className="text-[9px] text-slate-600 leading-relaxed">
+            Cập nhật được phân phối qua GitHub Releases. Dữ liệu người dùng (cơ sở dữ liệu, cấu hình, thư mục tệp) sẽ được bảo toàn trong quá trình cập nhật.
+          </p>
+        </div>
       </div>
 
     </div>

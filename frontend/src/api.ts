@@ -519,4 +519,9 @@ export const api = {
     }
     return response.json();
   },
+
+  // Update API
+  checkUpdate: () => request<any>('/api/system/update-check'),
+  getUpdateStatus: () => request<any>('/api/system/update-status'),
+  applyUpdate: () => request<any>('/api/system/update-apply', { method: 'POST' }),
 };

@@ -3,7 +3,6 @@ import sys
 import time
 import threading
 import urllib.request
-import webbrowser
 import uvicorn
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
@@ -11,6 +10,14 @@ os.chdir(ROOT)
 
 # Add backend directory to path so imports inside backend resolve correctly
 sys.path.append(os.path.join(ROOT, "backend"))
+sys.path.insert(0, ROOT)
+
+def get_app_version() -> str:
+    try:
+        with open(os.path.join(ROOT, "VERSION"), "r", encoding="utf-8") as f:
+            return f.read().strip()
+    except Exception:
+        return "?"
 
 def kill_port_8000():
     """Kills any process currently occupying port 8000 (e.g. leftover zombie server)."""
@@ -31,6 +38,8 @@ def kill_port_8000():
         pass
 
 def main():
+    version = get_app_version()
+
     # 1. Clean up any leftover server process holding port 8000
     kill_port_8000()
 
@@ -44,13 +53,20 @@ def main():
         print("Vite dev server not found. Running in PRODUCTION mode.")
 
     print("\n" + "=" * 55)
-    print("  CENTER MANAGER & TEST FORMATTER IS RUNNING")
+    print(f"  CENTER MANAGER v{version} IS RUNNING")
     print(f"  Web URL: {url} (or http://127.0.0.1:8000)")
     print("  Keep this terminal window open while using the app.")
     print("  Press Ctrl+C to stop the server.")
     print("=" * 55 + "\n")
 
-    # 3. Run uvicorn FastAPI server
+    # 3. Start silent background update check (non-blocking)
+    try:
+        from updater import background_check_on_startup
+        background_check_on_startup()
+    except Exception:
+        pass  # Never crash startup due to updater issues
+
+    # 4. Run uvicorn FastAPI server
     backend_dir = os.path.join(ROOT, "backend")
     uvicorn.run("backend.main:app", host="0.0.0.0", port=8000, reload=True, reload_dirs=[backend_dir], log_level="warning")
 
