@@ -12,6 +12,8 @@ import BlossomResultModal from '../components/seating/BlossomResultModal';
 import { CustomDatePicker } from '../components/CustomDatePicker';
 import { CustomSelect } from '../components/CustomSelect';
 import { getLocalDateStr, notifyDataChanged } from '../utils';
+import { DataTable } from '../components/DataTable';
+import { ColumnDef } from '@tanstack/react-table';
 
 interface ClassItem {
   id: number;
@@ -75,6 +77,50 @@ function hexToRGBA(hex: string, alpha: number): string {
   const b = num & 255;
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
+
+const CheckScoreInput = React.memo(({
+  rec,
+  field,
+  onUpdateRecord,
+  parseAndFormatScore
+}: {
+  rec: any;
+  field: 'check_1' | 'check_2' | 'homework';
+  onUpdateRecord: (studentId: number, field: string, value: any) => void;
+  parseAndFormatScore: (val: any) => string;
+}) => {
+  const [val, setVal] = useState(rec[field] ?? '');
+
+  useEffect(() => {
+    setVal(rec[field] ?? '');
+  }, [rec[field]]);
+
+  const predKey = field === 'check_1' ? 'pred_c1' : field === 'check_2' ? 'pred_c2' : 'pred_hw';
+  const defaultPred = field === 'check_1' ? 8.5 : field === 'check_2' ? 8.0 : 9.0;
+  const predVal = rec[predKey] !== undefined ? rec[predKey] : Math.min(10.0, Math.max(0.0, (Number(val) || defaultPred)));
+  const badgeColor = field === 'check_1' ? 'text-indigo-300' : field === 'check_2' ? 'text-purple-300' : 'text-emerald-300';
+  const label = field === 'check_1' ? 'Check 1' : field === 'check_2' ? 'Check 2' : 'HW';
+
+  return (
+    <div className="flex flex-col items-center justify-center gap-0.5">
+      <input
+        type="text"
+        value={val}
+        onChange={(e) => setVal(e.target.value)}
+        onBlur={(e) => {
+          const formatted = parseAndFormatScore(e.target.value);
+          setVal(formatted);
+          onUpdateRecord(rec.student_id, field, formatted);
+        }}
+        placeholder="0-10"
+        className="w-20 bg-[#161a29] border border-white/10 rounded-lg px-2.5 py-1 text-white font-extrabold text-xs focus:outline-none focus:border-indigo-500 text-center"
+      />
+      <div className={`text-[9px] ${badgeColor} font-bold text-center mt-0.5`} title={`Dự đoán điểm ${label}`}>
+        Dự đoán: {predVal}
+      </div>
+    </div>
+  );
+});
 
 export default function ClassesPage() {
   const confirm = useConfirm();
@@ -308,21 +354,24 @@ export default function ClassesPage() {
     return String(numVal);
   }, []);
 
-  const handleUpdateRecord = useCallback(async (index: number, field: string, value: any) => {
+  const handleUpdateRecord = useCallback(async (studentId: number, field: string, value: any) => {
+    let updatedRecords: any[] = [];
     setAttendanceRecords((prev) => {
-      const newRecs = [...prev];
-      newRecs[index] = { ...newRecs[index], [field]: value };
+      const newRecs = prev.map((rec) =>
+        rec.student_id === studentId ? { ...rec, [field]: value } : rec
+      );
+      updatedRecords = newRecs;
       return newRecs;
     });
 
-    if (selectedClass) {
+    if (selectedClass && updatedRecords.length > 0) {
       try {
-        await api.saveClassAttendance(selectedClass.id, attendanceDate, attendanceRecords);
+        await api.saveClassAttendance(selectedClass.id, attendanceDate, updatedRecords);
       } catch (err: any) {
         console.error("Tự động lưu thất bại:", err);
       }
     }
-  }, [selectedClass, attendanceDate, attendanceRecords]);
+  }, [selectedClass, attendanceDate]);
 
   const handleExportExcel = async () => {
     if (!selectedClass) return;
@@ -665,6 +714,111 @@ export default function ClassesPage() {
       setSelectedStudentIdsToEnroll([...selectedStudentIdsToEnroll, stId]);
     }
   };
+
+  const attendanceColumns = useMemo<ColumnDef<any>[]>(() => [
+    {
+      id: 'stt',
+      header: 'STT',
+      enableSorting: false,
+      cell: ({ row }) => <span className="font-bold text-slate-400">{row.index + 1}</span>,
+    },
+    {
+      accessorKey: 'student_name',
+      header: 'Họ và Tên Học Sinh',
+      cell: ({ row }) => (
+        <span className="font-extrabold text-white text-xs block truncate">
+          {row.original.student_name}
+        </span>
+      ),
+    },
+    {
+      accessorKey: 'status',
+      header: 'Điểm Danh',
+      cell: ({ row }) => {
+        const rec = row.original;
+        const isAbsent = rec.status === 'Vắng mặt';
+        return (
+          <div className="flex items-center justify-center">
+            <button
+              type="button"
+              onClick={() => {
+                const newStatus = isAbsent ? 'Có mặt' : 'Vắng mặt';
+                handleUpdateRecord(rec.student_id, 'status', newStatus);
+              }}
+              className={`px-3 py-1.5 rounded-xl font-black text-xs transition cursor-pointer border flex items-center justify-center gap-1.5 ${
+                isAbsent
+                  ? 'bg-rose-500/20 border-rose-500/50 text-rose-300 hover:bg-rose-500/30'
+                  : 'bg-emerald-500/20 border-emerald-500/50 text-emerald-300 hover:bg-emerald-500/30'
+              }`}
+            >
+              <span className={`w-2 h-2 rounded-full ${isAbsent ? 'bg-rose-400' : 'bg-emerald-400'}`} />
+              <span>{rec.status || 'Có mặt'}</span>
+            </button>
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: 'check_1',
+      header: 'Check 1',
+      cell: ({ row }) => (
+        <CheckScoreInput
+          rec={row.original}
+          field="check_1"
+          onUpdateRecord={handleUpdateRecord}
+          parseAndFormatScore={parseAndFormatScore}
+        />
+      ),
+    },
+    {
+      accessorKey: 'check_2',
+      header: 'Check 2',
+      cell: ({ row }) => (
+        <CheckScoreInput
+          rec={row.original}
+          field="check_2"
+          onUpdateRecord={handleUpdateRecord}
+          parseAndFormatScore={parseAndFormatScore}
+        />
+      ),
+    },
+    {
+      accessorKey: 'homework',
+      header: 'Homework',
+      cell: ({ row }) => (
+        <CheckScoreInput
+          rec={row.original}
+          field="homework"
+          onUpdateRecord={handleUpdateRecord}
+          parseAndFormatScore={parseAndFormatScore}
+        />
+      ),
+    },
+    {
+      id: 'actions',
+      header: 'Thao Tác',
+      enableSorting: false,
+      enableGlobalFilter: false,
+      cell: ({ row }) => {
+        const rec = row.original;
+        const enrolledInfo = enrolledStudents.find((s) => s.id === rec.student_id);
+        return (
+          <div className="flex items-center justify-center">
+            <button
+              onClick={() => {
+                setSelectedEnrolledStudent(enrolledInfo || { id: rec.student_id, full_name: rec.student_name });
+                setActionModalOpen(true);
+              }}
+              className="p-1.5 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/25 text-indigo-300 border border-indigo-500/30 transition cursor-pointer"
+              title="Tùy chọn học sinh"
+            >
+              <Edit3 size={14} />
+            </button>
+          </div>
+        );
+      },
+    },
+  ], [enrolledStudents, handleUpdateRecord, parseAndFormatScore]);
 
   // Seating grid calculations
   const assignedStudentIdsInSeating = new Set<number>();
@@ -1027,127 +1181,13 @@ export default function ClassesPage() {
                 </div>
               </div>
 
-              {/* UNIFIED ATTENDANCE & GRADES TABLE WITH PAGINATION */}
-              <div className="bg-[#0d1018] border border-white/10 rounded-2xl overflow-hidden flex flex-col">
-                {(() => {
-                  const filteredRecords = attendanceRecords.filter((rec) => {
-                    if (colFilterName.trim()) {
-                      const q = colFilterName.toLowerCase().trim();
-                      if (!rec.student_name?.toLowerCase().includes(q)) return false;
-                    }
-                    if (colFilterStatus !== 'ALL') {
-                      if ((rec.status || 'Có mặt') !== colFilterStatus) return false;
-                    }
-                    return true;
-                  });
-
-                  const totalTablePages = Math.ceil(filteredRecords.length / tablePageSize);
-                  const currentTablePage = Math.min(tablePage, totalTablePages || 1);
-                  const pagedRecords = filteredRecords.slice((currentTablePage - 1) * tablePageSize, currentTablePage * tablePageSize);
-
-                  return (
-                    <>
-                      <table className="w-full text-left border-collapse text-xs">
-                        <thead className="sticky top-0 z-10 bg-[#161b2e] text-slate-300 uppercase text-[10px] font-black tracking-wider border-b border-[#28334e] select-none shadow-sm">
-                          <tr>
-                            <th className="py-3.5 px-4 w-14 text-center">STT</th>
-                            <th className="py-3.5 px-6 w-2/5 relative">
-                              <div className="flex items-center gap-1.5 cursor-pointer" onClick={() => setActiveFilterCol(activeFilterCol === 'name' ? null : 'name')}>
-                                <span>Họ và Tên Học Sinh</span>
-                                <Filter size={11} className={colFilterName ? "text-indigo-400 font-bold" : "text-slate-500"} />
-                              </div>
-                              {activeFilterCol === 'name' && (
-                                <div className="absolute left-2 top-10 z-20 bg-[#161a29] border border-white/20 p-2 rounded-xl shadow-xl space-y-2 min-w-[200px] normal-case">
-                                  <input
-                                    type="text"
-                                    autoFocus
-                                    value={colFilterName}
-                                    onChange={(e) => setColFilterName(e.target.value)}
-                                    placeholder="Lọc theo tên học sinh..."
-                                    className="w-full bg-[#0d1018] border border-white/10 rounded-lg px-2.5 py-1 text-white font-bold text-xs"
-                                  />
-                                  {colFilterName && (
-                                    <button onClick={() => setColFilterName('')} className="text-[10px] text-indigo-400 hover:underline block font-bold">Xóa lọc tên</button>
-                                  )}
-                                </div>
-                              )}
-                            </th>
-                            <th className="py-3.5 px-4 w-44 text-center relative">
-                              <div className="flex items-center justify-center gap-1.5 cursor-pointer" onClick={() => setActiveFilterCol(activeFilterCol === 'status' ? null : 'status')}>
-                                <span>Điểm Danh</span>
-                                <Filter size={11} className={colFilterStatus !== 'ALL' ? "text-indigo-400 font-bold" : "text-slate-500"} />
-                              </div>
-                              {activeFilterCol === 'status' && (
-                                <div className="absolute left-1/2 -translate-x-1/2 top-10 z-20 bg-[#161a29] border border-white/20 p-2 rounded-xl shadow-xl space-y-1.5 min-w-[140px] normal-case">
-                                  {['ALL', 'Có mặt', 'Vắng mặt'].map((st) => (
-                                    <button
-                                      key={st}
-                                      onClick={() => { setColFilterStatus(st); setActiveFilterCol(null); }}
-                                      className={`w-full text-left px-2.5 py-1 rounded-lg text-xs font-bold ${colFilterStatus === st ? 'bg-indigo-600 text-white' : 'text-slate-300 hover:bg-white/10'}`}
-                                    >
-                                      {st === 'ALL' ? 'Tất cả' : st}
-                                    </button>
-                                  ))}
-                                </div>
-                              )}
-                            </th>
-                            <th className="py-3.5 px-4 w-36 text-center">Check 1</th>
-                            <th className="py-3.5 px-4 w-36 text-center">Check 2</th>
-                            <th className="py-3.5 px-4 w-40 text-center">Homework</th>
-                            <th className="py-3.5 px-4 text-center w-24">Thao Tác</th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-[#28334e] font-medium bg-[#101422]">
-                          {pagedRecords.map((rec, pIdx) => {
-                            const originalIdx = attendanceRecords.findIndex(r => r.student_id === rec.student_id);
-                            const actualNum = (currentTablePage - 1) * tablePageSize + pIdx + 1;
-                            const enrolledInfo = enrolledStudents.find(s => s.id === rec.student_id);
-
-                            return (
-                              <AttendanceTableRow
-                                key={rec.student_id}
-                                rec={rec}
-                                displayIndex={actualNum}
-                                originalIndex={originalIdx >= 0 ? originalIdx : pIdx}
-                                enrolledInfo={enrolledInfo}
-                                onUpdateRecord={handleUpdateRecord}
-                                parseAndFormatScore={parseAndFormatScore}
-                                onSelectStudent={(info) => {
-                                  setSelectedEnrolledStudent(info);
-                                  setActionModalOpen(true);
-                                }}
-                              />
-                            );
-                          })}
-                        </tbody>
-                      </table>
-
-                      {/* TABLE PAGINATION BAR */}
-                      {totalTablePages > 1 && (
-                        <div className="flex items-center justify-end bg-[#14192b] px-4 py-2.5 border-t border-[#28334e] text-xs font-bold text-slate-300 gap-2 select-none">
-                          <button
-                            disabled={currentTablePage <= 1}
-                            onClick={() => setTablePage(p => Math.max(1, p - 1))}
-                            className="px-3 py-1.5 rounded-xl bg-[#1e2540] hover:bg-[#283254] disabled:opacity-30 text-white text-xs font-bold border border-[#343e68] transition cursor-pointer"
-                          >
-                            Trước
-                          </button>
-                          <span className="px-3 text-xs text-indigo-300 font-black">
-                            Trang {currentTablePage} / {totalTablePages}
-                          </span>
-                          <button
-                            disabled={currentTablePage >= totalTablePages}
-                            onClick={() => setTablePage(p => Math.min(totalTablePages, p + 1))}
-                            className="px-3 py-1.5 rounded-xl bg-[#1e2540] hover:bg-[#283254] disabled:opacity-30 text-white text-xs font-bold border border-[#343e68] transition cursor-pointer"
-                          >
-                            Sau
-                          </button>
-                        </div>
-                      )}
-                    </>
-                  );
-                })()}
-              </div>
+              {/* UNIFIED ATTENDANCE & GRADES DATATABLE */}
+              <DataTable
+                data={attendanceRecords}
+                columns={attendanceColumns}
+                pageSize={20}
+                exportFilename={`diem_danh_${selectedClass?.class_name || ''}_${attendanceDate}`}
+              />
             </div>
           )}
 
@@ -1747,135 +1787,3 @@ export default function ClassesPage() {
     </div>
   );
 }
-
-const AttendanceTableRow = React.memo(({
-  rec,
-  displayIndex,
-  originalIndex,
-  enrolledInfo,
-  onUpdateRecord,
-  parseAndFormatScore,
-  onSelectStudent
-}: {
-  rec: any;
-  displayIndex: number;
-  originalIndex: number;
-  enrolledInfo: any;
-  onUpdateRecord: (index: number, field: string, value: any) => void;
-  parseAndFormatScore: (val: any) => string;
-  onSelectStudent: (info: any) => void;
-}) => {
-  const [localCheck1, setLocalCheck1] = useState(rec.check_1 ?? '');
-  const [localCheck2, setLocalCheck2] = useState(rec.check_2 ?? '');
-  const [localHomework, setLocalHomework] = useState(rec.homework ?? '');
-
-  useEffect(() => {
-    setLocalCheck1(rec.check_1 ?? '');
-    setLocalCheck2(rec.check_2 ?? '');
-    setLocalHomework(rec.homework ?? '');
-  }, [rec.check_1, rec.check_2, rec.homework]);
-
-  const hwNum = Number(rec.homework) || 0;
-
-  // Projected point forecast for each grade
-  const predC1 = rec.pred_c1 !== undefined ? rec.pred_c1 : Math.min(10.0, Math.max(0.0, (Number(localCheck1) || 8.5)));
-  const predC2 = rec.pred_c2 !== undefined ? rec.pred_c2 : Math.min(10.0, Math.max(0.0, (Number(localCheck2) || 8.0)));
-  const predHW = rec.pred_hw !== undefined ? rec.pred_hw : Math.min(10.0, Math.max(0.0, (Number(localHomework) || 9.0)));
-
-  return (
-    <tr className="hover:bg-white/[0.03] transition-colors">
-      <td className="py-3 px-4 text-center font-bold text-slate-400">{displayIndex}</td>
-      <td className="py-3 px-6">
-        <span className="font-extrabold text-white text-xs block truncate">{rec.student_name}</span>
-      </td>
-      <td className="py-3 px-4 text-center">
-        <div className="flex items-center justify-center">
-          <button
-            type="button"
-            onClick={() => {
-              const newStatus = rec.status === 'Vắng mặt' ? 'Có mặt' : 'Vắng mặt';
-              onUpdateRecord(originalIndex, 'status', newStatus);
-            }}
-            className={`px-3 py-1.5 rounded-xl font-black text-xs transition cursor-pointer border flex items-center justify-center gap-1.5 ${rec.status === 'Vắng mặt'
-                ? 'bg-rose-500/20 border-rose-500/50 text-rose-300 hover:bg-rose-500/30'
-                : 'bg-emerald-500/20 border-emerald-500/50 text-emerald-300 hover:bg-emerald-500/30'
-              }`}
-          >
-            <span className={`w-2 h-2 rounded-full ${rec.status === 'Vắng mặt' ? 'bg-rose-400' : 'bg-emerald-400'}`}></span>
-            <span>{rec.status || 'Có mặt'}</span>
-          </button>
-        </div>
-      </td>
-
-      <td className="py-3 px-4 text-center">
-        <div className="flex flex-col items-center justify-center gap-0.5">
-          <input
-            type="text"
-            value={localCheck1}
-            onChange={(e) => setLocalCheck1(e.target.value)}
-            onBlur={(e) => {
-              const formatted = parseAndFormatScore(e.target.value);
-              setLocalCheck1(formatted);
-              onUpdateRecord(originalIndex, 'check_1', formatted);
-            }}
-            placeholder="0-10"
-            className="w-20 bg-[#161a29] border border-white/10 rounded-lg px-2.5 py-1 text-white font-extrabold text-xs focus:outline-none focus:border-indigo-500 text-center"
-          />
-          <div className="text-[9px] text-indigo-300 font-bold text-center mt-0.5" title="Dự đoán điểm Check 1">
-            Dự đoán: {predC1}
-          </div>
-        </div>
-      </td>
-
-      <td className="py-3 px-4 text-center">
-        <div className="flex flex-col items-center justify-center gap-0.5">
-          <input
-            type="text"
-            value={localCheck2}
-            onChange={(e) => setLocalCheck2(e.target.value)}
-            onBlur={(e) => {
-              const formatted = parseAndFormatScore(e.target.value);
-              setLocalCheck2(formatted);
-              onUpdateRecord(originalIndex, 'check_2', formatted);
-            }}
-            placeholder="0-10"
-            className="w-20 bg-[#161a29] border border-white/10 rounded-lg px-2.5 py-1 text-white font-extrabold text-xs focus:outline-none focus:border-indigo-500 text-center"
-          />
-          <div className="text-[9px] text-purple-300 font-bold text-center mt-0.5" title="Dự đoán điểm Check 2">
-            Dự đoán: {predC2}
-          </div>
-        </div>
-      </td>
-
-      <td className="py-3 px-4 text-center">
-        <div className="flex flex-col items-center justify-center gap-0.5">
-          <input
-            type="text"
-            value={localHomework}
-            onChange={(e) => setLocalHomework(e.target.value)}
-            onBlur={(e) => {
-              const formatted = parseAndFormatScore(e.target.value);
-              setLocalHomework(formatted);
-              onUpdateRecord(originalIndex, 'homework', formatted);
-            }}
-            placeholder="0-10"
-            className="w-20 bg-[#161a29] border border-white/10 rounded-lg px-2.5 py-1 text-white font-extrabold text-xs focus:outline-none focus:border-indigo-500 text-center"
-          />
-          <div className="text-[9px] text-emerald-300 font-bold text-center" title="Dự đoán điểm HW">
-            Dự đoán: {predHW}
-          </div>
-        </div>
-      </td>
-
-      <td className="py-3 px-4 text-center">
-        <button
-          onClick={() => onSelectStudent(enrolledInfo || { id: rec.student_id, full_name: rec.student_name })}
-          className="p-1.5 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/25 text-indigo-300 border border-indigo-500/30 transition cursor-pointer"
-          title="Tùy chọn học sinh"
-        >
-          <Edit3 size={14} />
-        </button>
-      </td>
-    </tr>
-  );
-});
