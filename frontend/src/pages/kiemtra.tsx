@@ -634,307 +634,302 @@ export default function KiemTraPage() {
         </div>
       )}
 
-      {/* STEP 3: RUNNING QUIZ MODE (OPTIMIZED FOR SPACE & TYPOGRAPHY) */}
+      {/* STEP 3: RUNNING QUIZ MODE (SINGLE UNIFIED CONTAINER WITH 1 SCROLL BAR) */}
       {step === 'running' && activeQuestions.length > 0 && (
-        <div className="flex-1 flex flex-col space-y-4 w-full select-none min-h-0">
+        <div className="flex-1 flex gap-5 min-h-0 select-none">
           
-          {/* SINGLE STREAMLINED TOP BAR (NO REDUNDANT FILE NAME OR DUPLICATE HEADERS) */}
-          <div className="bg-[#0d101d] border border-[#1e263d] px-6 py-3.5 rounded-2xl flex items-center justify-between shadow-xl shrink-0">
-            <div className="flex items-center gap-4">
-              <button
-                onClick={() => setStep('settings')}
-                className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white transition cursor-pointer border border-white/10 text-xs font-bold"
-                title="Thoát chế độ làm bài"
-              >
-                <ArrowLeft size={16} />
-                <span>Thoát</span>
-              </button>
+          {/* LEFT PALETTE SIDEBAR (COLLAPSIBLE) */}
+          {!isSidebarCollapsed && (
+            <div className="w-64 bg-[#0d101d] border border-[#1e263d] p-5 rounded-2xl flex flex-col justify-between shrink-0 shadow-2xl space-y-4 overflow-y-auto animate-slide-up">
+              <div className="space-y-5">
+                {/* TIẾN ĐỘ CÂU HỎI */}
+                <div className="space-y-2">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 block">TIẾN ĐỘ CÂU HỎI</span>
+                  <div className="flex items-baseline justify-between">
+                    <span className="text-xl font-black text-white">{answeredCount} / {totalQuestions}</span>
+                    <span className="text-xs font-bold text-indigo-400">{progressPct}%</span>
+                  </div>
+                  <div className="w-full h-2 bg-[#161a29] rounded-full overflow-hidden border border-white/5">
+                    <div className="h-full bg-gradient-to-r from-indigo-600 to-purple-500 rounded-full transition-all duration-300" style={{ width: `${progressPct}%` }}></div>
+                  </div>
+                </div>
 
-              <div className="flex items-center gap-3 border-l border-white/10 pl-4">
-                <span className="text-base font-black text-white">
-                  Câu {currentIndex + 1} / {totalQuestions}
-                </span>
-                <span className="text-xs text-indigo-400 font-extrabold bg-indigo-500/10 border border-indigo-500/20 px-2.5 py-1 rounded-lg">
-                  {progressPct}% Hoàn thành
-                </span>
+                {/* DANH SÁCH CÂU HỎI PALETTE GRID */}
+                <div className="space-y-2">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 block">DANH SÁCH CÂU HỎI</span>
+                  <div className="grid grid-cols-5 gap-2">
+                    {activeQuestions.map((q, idx) => {
+                      const isCurrent = currentIndex === idx;
+                      const isAns = !!userAnswers[q.id];
+                      const isBookmarked = !!bookmarkedQuestions[q.id];
+
+                      return (
+                        <button
+                          key={q.id}
+                          onClick={() => {
+                            setCurrentIndex(idx);
+                            if (timerMode === 'per_question') setQuestionTimer(perQuestionSeconds);
+                          }}
+                          className={`h-9 rounded-xl font-extrabold text-xs transition cursor-pointer relative flex items-center justify-center border ${
+                            isCurrent
+                              ? 'bg-[#5c36f5] text-white border-white/40 shadow-[0_0_12px_rgba(92,54,245,0.6)] scale-105 z-10'
+                              : isBookmarked
+                              ? 'bg-rose-500/20 text-rose-300 border-rose-500/40'
+                              : isAns
+                              ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
+                              : 'bg-[#14192b] text-slate-400 border-white/5 hover:bg-white/10 hover:text-white'
+                          }`}
+                        >
+                          <span>{idx + 1}</span>
+                          {isBookmarked && (
+                            <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-rose-500 rounded-full border border-black" />
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* STATUS LEGEND */}
+                <div className="space-y-1.5 pt-2 border-t border-white/5 text-[11px] font-bold text-slate-400">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full bg-[#5c36f5]" />
+                    <span>Đang làm</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
+                    <span>Đã trả lời</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full bg-slate-700" />
+                    <span>Chưa trả lời</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full bg-rose-500" />
+                    <span>Đánh dấu</span>
+                  </div>
+                </div>
+
+                {/* DIGITAL CLOCK CARD */}
+                {timerMode === 'global' && (
+                  <div className="bg-[#13192c] border border-[#232d4e] p-4 rounded-2xl flex items-center justify-between shadow-inner">
+                    <div>
+                      <span className="text-[9px] font-black uppercase text-slate-400 block tracking-widest">THỜI GIAN</span>
+                      <span className="text-xl font-black text-emerald-400 font-mono">{formattedTimerRemaining}</span>
+                      <span className="text-[10px] text-slate-500 block font-semibold">/ {Math.round(globalTimeSeconds / 60)}:00</span>
+                    </div>
+                    <div className="w-10 h-10 rounded-full border-2 border-emerald-500/30 flex items-center justify-center text-emerald-400 font-bold text-xs bg-emerald-500/10">
+                      <Clock size={18} />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* SIDEBAR ACTION BUTTONS */}
+              <div className="space-y-2 pt-3 border-t border-white/5">
+                <button
+                  onClick={() => toggleBookmark(activeQuestions[currentIndex]?.id)}
+                  className={`w-full flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl border text-xs font-bold transition cursor-pointer ${
+                    bookmarkedQuestions[activeQuestions[currentIndex]?.id]
+                      ? 'bg-rose-500/20 border-rose-500 text-rose-300'
+                      : 'bg-[#14192b] border-white/10 text-slate-300 hover:text-white'
+                  }`}
+                >
+                  <Flag size={14} className={bookmarkedQuestions[activeQuestions[currentIndex]?.id] ? "fill-rose-500 text-rose-500" : ""} />
+                  <span>{bookmarkedQuestions[activeQuestions[currentIndex]?.id] ? 'BỎ ĐÁNH DẤU' : 'ĐÁNH DẤU CÂU HỎI'}</span>
+                </button>
+
+                <button
+                  onClick={handleFinishTest}
+                  className="w-full flex items-center justify-center gap-2 bg-[#5c36f5] hover:bg-[#7351f7] text-white py-3 px-3 rounded-xl font-black text-xs shadow-[0_4px_16px_rgba(92,54,245,0.45)] transition cursor-pointer border border-white/20 active:scale-95"
+                >
+                  <span>NỘP BÀI</span>
+                </button>
               </div>
             </div>
+          )}
 
-            <div className="flex items-center gap-3">
-              {/* TIMER BADGE */}
-              {timerMode === 'global' && (
-                <div className="flex items-center gap-2 bg-[#121626] border border-[#263152] px-4 py-2 rounded-2xl shadow-inner">
-                  <Clock size={16} className="text-indigo-400" />
-                  <span className="text-xs text-slate-400 font-bold">Còn lại</span>
-                  <span className="text-base font-black text-white font-mono">{formattedTimerRemaining}</span>
-                </div>
-              )}
+          {/* RIGHT QUESTION CANVAS (SINGLE UNIFIED SCROLLBAR CONTAINER) */}
+          <div className="flex-1 bg-[#0d101d] border border-[#1e263d] p-6 sm:p-8 md:p-10 rounded-2xl flex flex-col justify-between shadow-2xl overflow-y-auto">
+            {(() => {
+              const q = activeQuestions[currentIndex];
+              const rawAns = userAnswers[q.id] || '';
+              const currentAns = cleanOptionPrefix(rawAns);
+              const isBookmarked = !!bookmarkedQuestions[q.id];
 
-              {timerMode === 'per_question' && (
-                <div className="flex items-center gap-2 bg-[#121626] border border-[#263152] px-4 py-2 rounded-2xl shadow-inner">
-                  <Clock size={16} className="text-amber-400" />
-                  <span className="text-xs text-slate-400 font-bold">Thời gian câu</span>
-                  <span className="text-base font-black text-amber-400 font-mono">{questionTimer}s</span>
-                </div>
-              )}
+              return (
+                <div className="flex-1 flex flex-col justify-between space-y-6">
+                  <div className="space-y-6">
+                    
+                    {/* MERGED CONTROL & PROGRESS HEADER BAR INSIDE CANVAS */}
+                    <div className="flex flex-wrap items-center justify-between gap-4 border-b border-white/10 pb-4">
+                      {/* Left: Exit Button + Progress Badge */}
+                      <div className="flex items-center gap-3">
+                        <button
+                          onClick={() => setStep('settings')}
+                          className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white transition cursor-pointer border border-white/10 text-xs font-extrabold"
+                          title="Thoát chế độ làm bài"
+                        >
+                          <ArrowLeft size={16} />
+                          <span>Thoát</span>
+                        </button>
 
-              {/* FULLSCREEN FOCUS TOGGLE */}
-              <button
-                onClick={() => setIsFullscreen(!isFullscreen)}
-                className={`p-2.5 rounded-xl border transition cursor-pointer ${
-                  isFullscreen ? 'bg-indigo-600 text-white border-indigo-400' : 'bg-[#121626] text-slate-300 hover:text-white border-[#263152]'
-                }`}
-                title={isFullscreen ? "Thoát toàn màn hình" : "Toàn màn hình"}
-              >
-                {isFullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
-              </button>
-
-              {/* COLLAPSE SIDEBAR TOGGLE */}
-              <button
-                onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-                className="p-2.5 rounded-xl bg-[#121626] hover:bg-[#1e2640] text-slate-300 hover:text-white border border-[#263152] transition cursor-pointer"
-                title={isSidebarCollapsed ? "Mở rộng danh sách câu hỏi" : "Thu gọn danh sách câu hỏi"}
-              >
-                {isSidebarCollapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
-              </button>
-            </div>
-          </div>
-
-          {/* MAIN CONTAINER: SIDEBAR + QUESTION CANVAS */}
-          <div className="flex-1 flex gap-5 min-h-0">
-            
-            {/* LEFT PALETTE SIDEBAR (COLLAPSIBLE) */}
-            {!isSidebarCollapsed && (
-              <div className="w-64 bg-[#0d101d] border border-[#1e263d] p-5 rounded-2xl flex flex-col justify-between shrink-0 shadow-2xl space-y-4 overflow-y-auto animate-slide-up">
-                <div className="space-y-5">
-                  {/* TIẾN ĐỘ CÂU HỎI */}
-                  <div className="space-y-2">
-                    <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 block">TIẾN ĐỘ CÂU HỎI</span>
-                    <div className="flex items-baseline justify-between">
-                      <span className="text-xl font-black text-white">{answeredCount} / {totalQuestions}</span>
-                      <span className="text-xs font-bold text-indigo-400">{progressPct}%</span>
-                    </div>
-                    <div className="w-full h-2 bg-[#161a29] rounded-full overflow-hidden border border-white/5">
-                      <div className="h-full bg-gradient-to-r from-indigo-600 to-purple-500 rounded-full transition-all duration-300" style={{ width: `${progressPct}%` }}></div>
-                    </div>
-                  </div>
-
-                  {/* DANH SÁCH CÂU HỎI PALETTE GRID */}
-                  <div className="space-y-2">
-                    <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 block">DANH SÁCH CÂU HỎI</span>
-                    <div className="grid grid-cols-5 gap-2">
-                      {activeQuestions.map((q, idx) => {
-                        const isCurrent = currentIndex === idx;
-                        const isAns = !!userAnswers[q.id];
-                        const isBookmarked = !!bookmarkedQuestions[q.id];
-
-                        return (
-                          <button
-                            key={q.id}
-                            onClick={() => {
-                              setCurrentIndex(idx);
-                              if (timerMode === 'per_question') setQuestionTimer(perQuestionSeconds);
-                            }}
-                            className={`h-9 rounded-xl font-extrabold text-xs transition cursor-pointer relative flex items-center justify-center border ${
-                              isCurrent
-                                ? 'bg-[#5c36f5] text-white border-white/40 shadow-[0_0_12px_rgba(92,54,245,0.6)] scale-105 z-10'
-                                : isBookmarked
-                                ? 'bg-rose-500/20 text-rose-300 border-rose-500/40'
-                                : isAns
-                                ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
-                                : 'bg-[#14192b] text-slate-400 border-white/5 hover:bg-white/10 hover:text-white'
-                            }`}
-                          >
-                            <span>{idx + 1}</span>
-                            {isBookmarked && (
-                              <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-rose-500 rounded-full border border-black" />
-                            )}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  {/* STATUS LEGEND */}
-                  <div className="space-y-1.5 pt-2 border-t border-white/5 text-[11px] font-bold text-slate-400">
-                    <div className="flex items-center gap-2">
-                      <span className="w-2.5 h-2.5 rounded-full bg-[#5c36f5]" />
-                      <span>Đang làm</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
-                      <span>Đã trả lời</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="w-2.5 h-2.5 rounded-full bg-slate-700" />
-                      <span>Chưa trả lời</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="w-2.5 h-2.5 rounded-full bg-rose-500" />
-                      <span>Đánh dấu</span>
-                    </div>
-                  </div>
-
-                  {/* DIGITAL CLOCK CARD */}
-                  {timerMode === 'global' && (
-                    <div className="bg-[#13192c] border border-[#232d4e] p-4 rounded-2xl flex items-center justify-between shadow-inner">
-                      <div>
-                        <span className="text-[9px] font-black uppercase text-slate-400 block tracking-widest">THỜI GIAN</span>
-                        <span className="text-xl font-black text-emerald-400 font-mono">{formattedTimerRemaining}</span>
-                        <span className="text-[10px] text-slate-500 block font-semibold">/ {Math.round(globalTimeSeconds / 60)}:00</span>
+                        <div className="flex items-center gap-2.5 bg-indigo-500/10 border border-indigo-500/20 px-3.5 py-1.5 rounded-xl">
+                          <span className="text-xs text-indigo-300 font-extrabold">
+                            {progressPct}% Hoàn thành
+                          </span>
+                          <div className="w-20 h-2 bg-[#161a29] rounded-full overflow-hidden border border-white/10">
+                            <div className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full transition-all duration-300" style={{ width: `${progressPct}%` }} />
+                          </div>
+                        </div>
                       </div>
-                      <div className="w-10 h-10 rounded-full border-2 border-emerald-500/30 flex items-center justify-center text-emerald-400 font-bold text-xs bg-emerald-500/10">
-                        <Clock size={18} />
-                      </div>
-                    </div>
-                  )}
-                </div>
 
-                {/* SIDEBAR ACTION BUTTONS */}
-                <div className="space-y-2 pt-3 border-t border-white/5">
-                  <button
-                    onClick={() => toggleBookmark(activeQuestions[currentIndex]?.id)}
-                    className={`w-full flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl border text-xs font-bold transition cursor-pointer ${
-                      bookmarkedQuestions[activeQuestions[currentIndex]?.id]
-                        ? 'bg-rose-500/20 border-rose-500 text-rose-300'
-                        : 'bg-[#14192b] border-white/10 text-slate-300 hover:text-white'
-                    }`}
-                  >
-                    <Flag size={14} className={bookmarkedQuestions[activeQuestions[currentIndex]?.id] ? "fill-rose-500 text-rose-500" : ""} />
-                    <span>{bookmarkedQuestions[activeQuestions[currentIndex]?.id] ? 'BỎ ĐÁNH DẤU' : 'ĐÁNH DẤU CÂU HỎI'}</span>
-                  </button>
+                      {/* Right: Timer + Bookmark + Fullscreen + Sidebar Toggle */}
+                      <div className="flex items-center gap-2.5">
+                        {timerMode === 'global' && (
+                          <div className="flex items-center gap-2 bg-[#121626] border border-[#263152] px-3.5 py-1.5 rounded-xl shadow-inner">
+                            <Clock size={15} className="text-indigo-400" />
+                            <span className="text-xs text-slate-400 font-bold">Còn lại</span>
+                            <span className="text-sm font-black text-white font-mono">{formattedTimerRemaining}</span>
+                          </div>
+                        )}
 
-                  <button
-                    onClick={handleFinishTest}
-                    className="w-full flex items-center justify-center gap-2 bg-[#5c36f5] hover:bg-[#7351f7] text-white py-3 px-3 rounded-xl font-black text-xs shadow-[0_4px_16px_rgba(92,54,245,0.45)] transition cursor-pointer border border-white/20 active:scale-95"
-                  >
-                    <span>NỘP BÀI</span>
-                  </button>
-                </div>
-              </div>
-            )}
+                        {timerMode === 'per_question' && (
+                          <div className="flex items-center gap-2 bg-[#121626] border border-[#263152] px-3.5 py-1.5 rounded-xl shadow-inner">
+                            <Clock size={15} className="text-amber-400" />
+                            <span className="text-xs text-slate-400 font-bold">Thời gian câu</span>
+                            <span className="text-sm font-black text-amber-400 font-mono">{questionTimer}s</span>
+                          </div>
+                        )}
 
-            {/* RIGHT QUESTION CANVAS (PROPORTIONAL BIGGER FONT SIZES & CLEANED QUESTION HEADERS) */}
-            <div className="flex-1 bg-[#0d101d] border border-[#1e263d] p-6 sm:p-8 md:p-10 rounded-2xl flex flex-col justify-between shadow-2xl overflow-y-auto">
-              {(() => {
-                const q = activeQuestions[currentIndex];
-                const rawAns = userAnswers[q.id] || '';
-                const currentAns = cleanOptionPrefix(rawAns);
-                const isBookmarked = !!bookmarkedQuestions[q.id];
-
-                return (
-                  <div className="flex-1 flex flex-col justify-between space-y-6">
-                    <div className="space-y-6">
-                      
-                      {/* TOP ACTIONS ROW (NO REPEATED CÂU NUMBER BADGE) */}
-                      <div className="flex items-center justify-end border-b border-white/10 pb-3">
                         <button
                           onClick={() => toggleBookmark(q.id)}
-                          className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer border ${
+                          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer border ${
                             isBookmarked ? 'bg-rose-500/20 border-rose-500/40 text-rose-300' : 'bg-white/5 border-white/10 text-slate-400 hover:text-slate-200'
                           }`}
                         >
                           <Flag size={14} className={isBookmarked ? "fill-rose-500 text-rose-500" : ""} />
-                          <span>{isBookmarked ? 'Đã đánh dấu' : 'Đánh dấu câu hỏi'}</span>
+                          <span>{isBookmarked ? 'Đã đánh dấu' : 'Đánh dấu'}</span>
+                        </button>
+
+                        <button
+                          onClick={() => setIsFullscreen(!isFullscreen)}
+                          className={`p-2 rounded-xl border transition cursor-pointer ${
+                            isFullscreen ? 'bg-indigo-600 text-white border-indigo-400' : 'bg-[#121626] text-slate-300 hover:text-white border-[#263152]'
+                          }`}
+                          title={isFullscreen ? "Thoát toàn màn hình" : "Toàn màn hình"}
+                        >
+                          {isFullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
+                        </button>
+
+                        <button
+                          onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+                          className="p-2 rounded-xl bg-[#121626] hover:bg-[#1e2640] text-slate-300 hover:text-white border border-[#263152] transition cursor-pointer"
+                          title={isSidebarCollapsed ? "Mở rộng danh sách câu hỏi" : "Thu gọn danh sách câu hỏi"}
+                        >
+                          {isSidebarCollapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
                         </button>
                       </div>
-
-                      {/* INSTRUCTION (CLEANED WITHOUT PREPENDED CÂU X/Y) */}
-                      {q.instruction && (
-                        <div className="text-base sm:text-lg font-bold text-indigo-300 leading-relaxed bg-indigo-500/10 border border-indigo-500/20 p-4 sm:p-5 rounded-2xl shadow-sm">
-                          {q.instruction}
-                        </div>
-                      )}
-
-                      {/* QUESTION STEM WITH PROPORTIONALLY BIGGER READABILITY */}
-                      <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-white leading-relaxed tracking-tight">
-                        {renderFormattedText(q.question)}
-                      </h2>
-
-                      {/* MCQ OPTIONS WITH LARGER READABLE TYPOGRAPHY AND STRIPPED A./B./C./D. PREFIXES */}
-                      {q.type === 'mcq' && q.options && (
-                        <div className="grid grid-cols-1 gap-4 pt-2">
-                          {q.options.map((opt, oIdx) => {
-                            const cleanOpt = cleanOptionPrefix(opt);
-                            const isSelected = currentAns === cleanOpt || rawAns === opt || rawAns === cleanOpt;
-                            return (
-                              <button
-                                key={oIdx}
-                                onClick={() => handleAnswerSelect(q.id, cleanOpt)}
-                                className={`p-4 sm:p-5 md:p-6 rounded-2xl border text-left text-lg sm:text-xl md:text-2xl font-extrabold transition-all duration-200 cursor-pointer flex items-center gap-4 sm:gap-5 ${
-                                  isSelected
-                                    ? 'bg-indigo-600/25 border-indigo-500 text-white shadow-[0_0_24px_rgba(92,54,245,0.45)] ring-2 ring-indigo-400'
-                                    : 'bg-[#121626] border-white/10 text-slate-200 hover:bg-white/5 hover:border-white/20'
-                                }`}
-                              >
-                                <span className={`w-11 h-11 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center text-base sm:text-lg font-black shrink-0 transition ${
-                                  isSelected ? 'bg-[#5c36f5] text-white shadow-md' : 'bg-white/10 text-slate-300'
-                                }`}>
-                                  {String.fromCharCode(65 + oIdx)}
-                                </span>
-                                <span className="leading-relaxed flex-1">{renderFormattedText(cleanOpt)}</span>
-                              </button>
-                            );
-                          })}
-                        </div>
-                      )}
-
-                      {/* FILL IN THE BLANK */}
-                      {q.type === 'fill' && (
-                        <div className="pt-3">
-                          <input
-                            type="text"
-                            value={rawAns}
-                            onChange={(e) => handleAnswerSelect(q.id, e.target.value)}
-                            placeholder="Nhập câu trả lời của bạn..."
-                            className="w-full bg-[#161a29] border border-white/20 text-white text-lg sm:text-xl md:text-2xl font-bold rounded-2xl p-5 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 shadow-inner"
-                          />
-                        </div>
-                      )}
                     </div>
 
-                    {/* BOTTOM NAVIGATION BAR */}
-                    <div className="flex items-center justify-between pt-6 border-t border-white/10">
+                    {/* INSTRUCTION */}
+                    {q.instruction && (
+                      <div className="text-base sm:text-lg font-bold text-indigo-300 leading-relaxed bg-indigo-500/10 border border-indigo-500/20 p-4 sm:p-5 rounded-2xl shadow-sm">
+                        {q.instruction}
+                      </div>
+                    )}
+
+                    {/* QUESTION STEM WITH INLINE BLUE QUESTION NUMBER */}
+                    <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-white leading-relaxed tracking-tight flex flex-wrap items-baseline gap-2">
+                      <span className="text-indigo-400 font-black">
+                        Câu {currentIndex + 1}.
+                      </span>
+                      <span>{renderFormattedText(q.question)}</span>
+                    </h2>
+
+                    {/* MCQ OPTIONS WITH LARGER FONT SIZES & PROMINENT OPTION BOXES */}
+                    {q.type === 'mcq' && q.options && (
+                      <div className="grid grid-cols-1 gap-4.5 pt-3">
+                        {q.options.map((opt, oIdx) => {
+                          const cleanOpt = cleanOptionPrefix(opt);
+                          const isSelected = currentAns === cleanOpt || rawAns === opt || rawAns === cleanOpt;
+                          return (
+                            <button
+                              key={oIdx}
+                              onClick={() => handleAnswerSelect(q.id, cleanOpt)}
+                              className={`p-5 sm:p-6 md:p-7 rounded-3xl border text-left font-extrabold transition-all duration-200 cursor-pointer flex items-center gap-5 sm:gap-6 ${
+                                isSelected
+                                  ? 'bg-indigo-600/30 border-indigo-400 text-white shadow-[0_0_30px_rgba(92,54,245,0.5)] ring-2 ring-indigo-400'
+                                  : 'bg-[#121626] border-white/10 text-slate-100 hover:bg-white/5 hover:border-white/20'
+                              }`}
+                            >
+                              <span className={`w-12 h-12 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center text-xl sm:text-2xl font-black shrink-0 transition ${
+                                isSelected ? 'bg-[#5c36f5] text-white shadow-lg' : 'bg-white/10 text-slate-300'
+                              }`}>
+                                {String.fromCharCode(65 + oIdx)}
+                              </span>
+                              <span className="leading-relaxed flex-1 text-xl sm:text-2xl md:text-3xl font-extrabold">{renderFormattedText(cleanOpt)}</span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
+
+                    {/* FILL IN THE BLANK */}
+                    {q.type === 'fill' && (
+                      <div className="pt-3">
+                        <input
+                          type="text"
+                          value={rawAns}
+                          onChange={(e) => handleAnswerSelect(q.id, e.target.value)}
+                          placeholder="Nhập câu trả lời của bạn..."
+                          className="w-full bg-[#161a29] border border-white/20 text-white text-xl sm:text-2xl md:text-3xl font-bold rounded-3xl p-6 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 shadow-inner"
+                        />
+                      </div>
+                    )}
+                  </div>
+
+                  {/* BOTTOM NAVIGATION BAR */}
+                  <div className="flex items-center justify-between pt-6 border-t border-white/10">
+                    <button
+                      disabled={currentIndex === 0}
+                      onClick={() => {
+                        setCurrentIndex(p => Math.max(0, p - 1));
+                        if (timerMode === 'per_question') setQuestionTimer(perQuestionSeconds);
+                      }}
+                      className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-bold disabled:opacity-30 cursor-pointer border border-white/5"
+                    >
+                      <ArrowLeft size={14} />
+                      <span>Câu trước</span>
+                    </button>
+
+                    <div className="text-xs font-black text-slate-400 font-mono">
+                      {currentIndex + 1} / {totalQuestions}
+                    </div>
+
+                    {currentIndex < activeQuestions.length - 1 ? (
                       <button
-                        disabled={currentIndex === 0}
                         onClick={() => {
-                          setCurrentIndex(p => Math.max(0, p - 1));
+                          setCurrentIndex(p => Math.min(activeQuestions.length - 1, p + 1));
                           if (timerMode === 'per_question') setQuestionTimer(perQuestionSeconds);
                         }}
-                        className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-bold disabled:opacity-30 cursor-pointer border border-white/5"
+                        className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-[#5c36f5] hover:bg-[#7351f7] text-white text-xs font-extrabold shadow-[0_4px_16px_rgba(92,54,245,0.4)] transition cursor-pointer border border-white/20 active:scale-95"
                       >
-                        <ArrowLeft size={14} />
-                        <span>Câu trước</span>
+                        <span>Câu tiếp</span>
+                        <ArrowRight size={14} />
                       </button>
-
-                      <div className="text-xs font-black text-slate-400 font-mono">
-                        {currentIndex + 1} / {totalQuestions}
-                      </div>
-
-                      {currentIndex < activeQuestions.length - 1 ? (
-                        <button
-                          onClick={() => {
-                            setCurrentIndex(p => Math.min(activeQuestions.length - 1, p + 1));
-                            if (timerMode === 'per_question') setQuestionTimer(perQuestionSeconds);
-                          }}
-                          className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-[#5c36f5] hover:bg-[#7351f7] text-white text-xs font-extrabold shadow-[0_4px_16px_rgba(92,54,245,0.4)] transition cursor-pointer border border-white/20 active:scale-95"
-                        >
-                          <span>Câu tiếp</span>
-                          <ArrowRight size={14} />
-                        </button>
-                      ) : (
-                        <button
-                          onClick={handleFinishTest}
-                          className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black shadow-[0_4px_16px_rgba(16,185,129,0.4)] transition cursor-pointer border border-white/20 active:scale-95"
-                        >
-                          <span>Nộp Bài</span>
-                        </button>
-                      )}
-                    </div>
+                    ) : (
+                      <button
+                        onClick={handleFinishTest}
+                        className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black shadow-[0_4px_16px_rgba(16,185,129,0.4)] transition cursor-pointer border border-white/20 active:scale-95"
+                      >
+                        <span>Nộp Bài</span>
+                      </button>
+                    )}
                   </div>
-                );
-              })()}
-            </div>
+                </div>
+              );
+            })()}
           </div>
         </div>
       )}
