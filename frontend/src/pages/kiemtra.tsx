@@ -840,16 +840,16 @@ export default function KiemTraPage() {
                     )}
 
                     {/* QUESTION STEM WITH INLINE BLUE QUESTION NUMBER */}
-                    <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-white leading-relaxed tracking-tight flex flex-wrap items-baseline gap-2">
+                    <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-white leading-relaxed tracking-tight flex flex-wrap items-baseline gap-2 sm:gap-3">
                       <span className="text-indigo-400 font-black">
                         Câu {currentIndex + 1}.
                       </span>
                       <span>{renderFormattedText(q.question)}</span>
                     </h2>
 
-                    {/* MCQ OPTIONS WITH LARGER FONT SIZES & PROMINENT OPTION BOXES */}
+                    {/* MCQ OPTIONS WITH EVEN LARGER TYPOGRAPHY & COMPACT INNER PADDING */}
                     {q.type === 'mcq' && q.options && (
-                      <div className="grid grid-cols-1 gap-4.5 pt-3">
+                      <div className="grid grid-cols-1 gap-3.5 sm:gap-4 pt-2">
                         {q.options.map((opt, oIdx) => {
                           const cleanOpt = cleanOptionPrefix(opt);
                           const isSelected = currentAns === cleanOpt || rawAns === opt || rawAns === cleanOpt;
@@ -857,18 +857,18 @@ export default function KiemTraPage() {
                             <button
                               key={oIdx}
                               onClick={() => handleAnswerSelect(q.id, cleanOpt)}
-                              className={`p-5 sm:p-6 md:p-7 rounded-3xl border text-left font-extrabold transition-all duration-200 cursor-pointer flex items-center gap-5 sm:gap-6 ${
+                              className={`px-5 py-3 sm:px-6 sm:py-3.5 md:px-7 md:py-4 rounded-2xl border text-left font-extrabold transition-all duration-200 cursor-pointer flex items-center gap-4 sm:gap-6 ${
                                 isSelected
                                   ? 'bg-indigo-600/30 border-indigo-400 text-white shadow-[0_0_30px_rgba(92,54,245,0.5)] ring-2 ring-indigo-400'
                                   : 'bg-[#121626] border-white/10 text-slate-100 hover:bg-white/5 hover:border-white/20'
                               }`}
                             >
-                              <span className={`w-12 h-12 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center text-xl sm:text-2xl font-black shrink-0 transition ${
+                              <span className={`w-11 h-11 sm:w-13 sm:h-13 md:w-14 md:h-14 rounded-xl flex items-center justify-center text-lg sm:text-xl md:text-2xl font-black shrink-0 transition ${
                                 isSelected ? 'bg-[#5c36f5] text-white shadow-lg' : 'bg-white/10 text-slate-300'
                               }`}>
                                 {String.fromCharCode(65 + oIdx)}
                               </span>
-                              <span className="leading-relaxed flex-1 text-xl sm:text-2xl md:text-3xl font-extrabold">{renderFormattedText(cleanOpt)}</span>
+                              <span className="leading-snug flex-1 text-xl sm:text-2xl md:text-3xl lg:text-4xl font-extrabold">{renderFormattedText(cleanOpt)}</span>
                             </button>
                           );
                         })}
@@ -883,7 +883,7 @@ export default function KiemTraPage() {
                           value={rawAns}
                           onChange={(e) => handleAnswerSelect(q.id, e.target.value)}
                           placeholder="Nhập câu trả lời của bạn..."
-                          className="w-full bg-[#161a29] border border-white/20 text-white text-xl sm:text-2xl md:text-3xl font-bold rounded-3xl p-6 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 shadow-inner"
+                          className="w-full bg-[#161a29] border border-white/20 text-white text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold rounded-2xl px-6 py-4 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 shadow-inner"
                         />
                       </div>
                     )}
