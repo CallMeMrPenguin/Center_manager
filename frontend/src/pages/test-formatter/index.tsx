@@ -9,6 +9,8 @@ import {
   FolderOpen, ZoomIn, ZoomOut, Sparkles, X, Layout, ExternalLink
 } from 'lucide-react';
 import { showToast } from '../../components/Toast';
+import { cleanOptionPrefix } from '../../utils';
+
 
 const DEFAULT_TEST_FORMATTER_PROMPTS: PromptItem[] = [
   {
@@ -440,7 +442,17 @@ export default function TestFormatter({
       if (uploadRes.success && uploadRes.filename) {
         const convertRes = await api.convertDocx(uploadRes.filename);
         if (convertRes.success && convertRes.exercises) {
-          setJsonText(JSON.stringify(convertRes.exercises, null, 2));
+          const cleanedExercises = Array.isArray(convertRes.exercises) ? convertRes.exercises.map((ex: any) => ({
+            ...ex,
+            o: Array.isArray(ex.o) ? ex.o.map((o: any) => cleanOptionPrefix(String(o))) : ex.o,
+            options: Array.isArray(ex.options) ? ex.options.map((o: any) => cleanOptionPrefix(String(o))) : ex.options,
+            k: Array.isArray(ex.k) ? ex.k.map((sub: any) => ({
+              ...sub,
+              o: Array.isArray(sub.o) ? sub.o.map((o: any) => cleanOptionPrefix(String(o))) : sub.o,
+              options: Array.isArray(sub.options) ? sub.options.map((o: any) => cleanOptionPrefix(String(o))) : sub.options
+            })) : ex.k
+          })) : convertRes.exercises;
+          setJsonText(JSON.stringify(cleanedExercises, null, 2));
           showToast(`Đã chuyển đổi thành công tệp ${file.name} sang JSON!`, "success");
         } else {
           showToast("Chuyển đổi thất bại hoặc dữ liệu không hợp lệ.", "error");

@@ -9,7 +9,7 @@ import { api } from '../api';
 import { showToast } from '../components/Toast';
 import { VietnameseInput } from '../components/VietnameseInput';
 
-import { getLocalDateStr, notifyDataChanged, trunc1Dec } from '../utils';
+import { getLocalDateStr, notifyDataChanged, trunc1Dec, cleanOptionPrefix } from '../utils';
 
 interface Question {
   id: number;
@@ -100,7 +100,15 @@ export default function KiemTraPage() {
     try {
       const res = await api.parseQuizFile(file);
       if (res && res.questions && res.questions.length > 0) {
-        setTestData(res);
+        // Clean option prefixes on file load
+        const cleanedData = {
+          ...res,
+          questions: res.questions.map((q: any) => ({
+            ...q,
+            options: Array.isArray(q.options) ? q.options.map((o: any) => cleanOptionPrefix(String(o))) : []
+          }))
+        };
+        setTestData(cleanedData);
         setStep('settings');
         showToast(`Đã tải bài kiểm tra với ${res.questions.length} câu hỏi!`, "success");
       } else {
@@ -178,7 +186,7 @@ export default function KiemTraPage() {
           type: qType === 'mcq' ? 'mcq' : 'fill',
           question: rawQText,
           instruction,
-          options: Array.isArray(opts) ? opts.map(String) : [],
+          options: Array.isArray(opts) ? opts.map((o: any) => cleanOptionPrefix(String(o))) : [],
           answer: String(ans),
           explanation: q.explanation || ''
         };
@@ -357,36 +365,38 @@ export default function KiemTraPage() {
   return (
     <div className={`h-full flex flex-col bg-[#070913] ${isFullscreen ? 'fixed inset-0 z-[100] p-6 overflow-y-auto' : 'p-6 space-y-6 overflow-y-auto'}`}>
       
-      {/* PERSISTENT HEADER BAR WITH ALWAYS AVAILABLE FULLSCREEN FOCUS BUTTON */}
-      <div className="flex items-center justify-between bg-[#0c0f1e] border border-[#1d2744] px-6 py-3.5 rounded-2xl shadow-2xl shrink-0">
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded-xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-400">
-            <FileCheck size={20} />
+      {/* PERSISTENT HEADER BAR (HIDDEN DURING QUIZ RUNNING TO MAXIMIZE SPACE) */}
+      {step !== 'running' && (
+        <div className="flex items-center justify-between bg-[#0c0f1e] border border-[#1d2744] px-6 py-3.5 rounded-2xl shadow-2xl shrink-0">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-400">
+              <FileCheck size={20} />
+            </div>
+            <div>
+              <h1 className="text-base font-black tracking-tight text-white flex items-center gap-2">
+                Kiểm Tra & Quiz Runner
+              </h1>
+              <p className="text-[11px] text-slate-400 font-semibold">
+                {testData?.title || 'Đánh giá năng lực học sinh'}
+              </p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-base font-black tracking-tight text-white flex items-center gap-2">
-              Kiểm Tra & Quiz Runner
-            </h1>
-            <p className="text-[11px] text-slate-400 font-semibold">
-              {testData?.title || 'Đánh giá năng lực học sinh'}
-            </p>
-          </div>
-        </div>
 
-        <div className="flex items-center gap-3">
-          {/* ALWAYS AVAILABLE FULLSCREEN FOCUS BUTTON */}
-          <button
-            onClick={() => setIsFullscreen(!isFullscreen)}
-            className={`flex items-center gap-2 px-3.5 py-2 rounded-xl border text-xs font-black transition cursor-pointer ${
-              isFullscreen ? 'bg-indigo-600 text-white border-indigo-400 shadow-md' : 'bg-[#121626] text-slate-300 hover:text-white border-[#263152]'
-            }`}
-            title={isFullscreen ? "Thoát toàn màn hình" : "Chế độ làm bài tập trung (Toàn màn hình)"}
-          >
-            {isFullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
-            <span>{isFullscreen ? 'Thoát Toàn Màn Hình' : 'Toàn Màn Hình'}</span>
-          </button>
+          <div className="flex items-center gap-3">
+            {/* ALWAYS AVAILABLE FULLSCREEN FOCUS BUTTON */}
+            <button
+              onClick={() => setIsFullscreen(!isFullscreen)}
+              className={`flex items-center gap-2 px-3.5 py-2 rounded-xl border text-xs font-black transition cursor-pointer ${
+                isFullscreen ? 'bg-indigo-600 text-white border-indigo-400 shadow-md' : 'bg-[#121626] text-slate-300 hover:text-white border-[#263152]'
+              }`}
+              title={isFullscreen ? "Thoát toàn màn hình" : "Chế độ làm bài tập trung (Toàn màn hình)"}
+            >
+              {isFullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
+              <span>{isFullscreen ? 'Thoát Toàn Màn Hình' : 'Toàn Màn Hình'}</span>
+            </button>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* STEP 1: IMPORT FILE / PASTE JSON */}
       {step === 'import' && (
@@ -624,27 +634,29 @@ export default function KiemTraPage() {
         </div>
       )}
 
-      {/* STEP 3: RUNNING QUIZ MODE (MATCHING REFERENCE UI WITH COLLAPSIBLE SIDEBAR & FULLSCREEN) */}
+      {/* STEP 3: RUNNING QUIZ MODE (OPTIMIZED FOR SPACE & TYPOGRAPHY) */}
       {step === 'running' && activeQuestions.length > 0 && (
         <div className="flex-1 flex flex-col space-y-4 w-full select-none min-h-0">
           
-          {/* TOP BAR (MATCHING SCREENSHOT NAVBAR) */}
+          {/* SINGLE STREAMLINED TOP BAR (NO REDUNDANT FILE NAME OR DUPLICATE HEADERS) */}
           <div className="bg-[#0d101d] border border-[#1e263d] px-6 py-3.5 rounded-2xl flex items-center justify-between shadow-xl shrink-0">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-4">
               <button
                 onClick={() => setStep('settings')}
-                className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white transition cursor-pointer border border-white/10"
+                className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white transition cursor-pointer border border-white/10 text-xs font-bold"
                 title="Thoát chế độ làm bài"
               >
                 <ArrowLeft size={16} />
+                <span>Thoát</span>
               </button>
-              <div>
-                <h1 className="text-base font-black text-white flex items-center gap-2">
-                  <span>{testData?.title || 'Bài Kiểm Tra'}</span>
-                </h1>
-                <p className="text-[11px] text-indigo-400 font-bold">
+
+              <div className="flex items-center gap-3 border-l border-white/10 pl-4">
+                <span className="text-base font-black text-white">
                   Câu {currentIndex + 1} / {totalQuestions}
-                </p>
+                </span>
+                <span className="text-xs text-indigo-400 font-extrabold bg-indigo-500/10 border border-indigo-500/20 px-2.5 py-1 rounded-lg">
+                  {progressPct}% Hoàn thành
+                </span>
               </div>
             </div>
 
@@ -653,7 +665,7 @@ export default function KiemTraPage() {
               {timerMode === 'global' && (
                 <div className="flex items-center gap-2 bg-[#121626] border border-[#263152] px-4 py-2 rounded-2xl shadow-inner">
                   <Clock size={16} className="text-indigo-400" />
-                  <span className="text-xs text-slate-400 font-bold">Thời gian còn lại</span>
+                  <span className="text-xs text-slate-400 font-bold">Còn lại</span>
                   <span className="text-base font-black text-white font-mono">{formattedTimerRemaining}</span>
                 </div>
               )}
@@ -661,10 +673,21 @@ export default function KiemTraPage() {
               {timerMode === 'per_question' && (
                 <div className="flex items-center gap-2 bg-[#121626] border border-[#263152] px-4 py-2 rounded-2xl shadow-inner">
                   <Clock size={16} className="text-amber-400" />
-                  <span className="text-xs text-slate-400 font-bold">Thời gian câu này</span>
+                  <span className="text-xs text-slate-400 font-bold">Thời gian câu</span>
                   <span className="text-base font-black text-amber-400 font-mono">{questionTimer}s</span>
                 </div>
               )}
+
+              {/* FULLSCREEN FOCUS TOGGLE */}
+              <button
+                onClick={() => setIsFullscreen(!isFullscreen)}
+                className={`p-2.5 rounded-xl border transition cursor-pointer ${
+                  isFullscreen ? 'bg-indigo-600 text-white border-indigo-400' : 'bg-[#121626] text-slate-300 hover:text-white border-[#263152]'
+                }`}
+                title={isFullscreen ? "Thoát toàn màn hình" : "Toàn màn hình"}
+              >
+                {isFullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
+              </button>
 
               {/* COLLAPSE SIDEBAR TOGGLE */}
               <button
@@ -680,7 +703,7 @@ export default function KiemTraPage() {
           {/* MAIN CONTAINER: SIDEBAR + QUESTION CANVAS */}
           <div className="flex-1 flex gap-5 min-h-0">
             
-            {/* LEFT PALETTE SIDEBAR (COLLAPSIBLE & MATCHING SCREENSHOT) */}
+            {/* LEFT PALETTE SIDEBAR (COLLAPSIBLE) */}
             {!isSidebarCollapsed && (
               <div className="w-64 bg-[#0d101d] border border-[#1e263d] p-5 rounded-2xl flex flex-col justify-between shrink-0 shadow-2xl space-y-4 overflow-y-auto animate-slide-up">
                 <div className="space-y-5">
@@ -791,27 +814,24 @@ export default function KiemTraPage() {
               </div>
             )}
 
-            {/* RIGHT QUESTION CANVAS (MATCHING SCREENSHOT DESIGN WITH RESPONSIVE FLUID TYPOGRAPHY) */}
-            <div className="flex-1 bg-[#0d101d] border border-[#1e263d] p-6 sm:p-8 rounded-2xl flex flex-col justify-between shadow-2xl overflow-y-auto">
+            {/* RIGHT QUESTION CANVAS (PROPORTIONAL BIGGER FONT SIZES & CLEANED QUESTION HEADERS) */}
+            <div className="flex-1 bg-[#0d101d] border border-[#1e263d] p-6 sm:p-8 md:p-10 rounded-2xl flex flex-col justify-between shadow-2xl overflow-y-auto">
               {(() => {
                 const q = activeQuestions[currentIndex];
-                const currentAns = userAnswers[q.id] || '';
+                const rawAns = userAnswers[q.id] || '';
+                const currentAns = cleanOptionPrefix(rawAns);
                 const isBookmarked = !!bookmarkedQuestions[q.id];
 
                 return (
                   <div className="flex-1 flex flex-col justify-between space-y-6">
                     <div className="space-y-6">
                       
-                      {/* HEADER BADGE BAR */}
-                      <div className="flex items-center justify-between border-b border-white/10 pb-4">
-                        <span className="px-3.5 py-1 rounded-xl bg-indigo-500/15 border border-indigo-500/30 text-indigo-300 font-black text-xs">
-                          Câu {currentIndex + 1} / {totalQuestions}
-                        </span>
-
+                      {/* TOP ACTIONS ROW (NO REPEATED CÂU NUMBER BADGE) */}
+                      <div className="flex items-center justify-end border-b border-white/10 pb-3">
                         <button
                           onClick={() => toggleBookmark(q.id)}
-                          className={`flex items-center gap-1.5 text-xs font-bold transition cursor-pointer ${
-                            isBookmarked ? 'text-rose-400' : 'text-slate-400 hover:text-slate-200'
+                          className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer border ${
+                            isBookmarked ? 'bg-rose-500/20 border-rose-500/40 text-rose-300' : 'bg-white/5 border-white/10 text-slate-400 hover:text-slate-200'
                           }`}
                         >
                           <Flag size={14} className={isBookmarked ? "fill-rose-500 text-rose-500" : ""} />
@@ -819,39 +839,40 @@ export default function KiemTraPage() {
                         </button>
                       </div>
 
-                      {/* INSTRUCTION */}
+                      {/* INSTRUCTION (CLEANED WITHOUT PREPENDED CÂU X/Y) */}
                       {q.instruction && (
-                        <div className="text-sm font-bold text-indigo-300 leading-relaxed bg-indigo-500/10 border border-indigo-500/20 p-4 rounded-xl">
-                          Câu {currentIndex + 1}/{totalQuestions}: {q.instruction}
+                        <div className="text-base sm:text-lg font-bold text-indigo-300 leading-relaxed bg-indigo-500/10 border border-indigo-500/20 p-4 sm:p-5 rounded-2xl shadow-sm">
+                          {q.instruction}
                         </div>
                       )}
 
-                      {/* QUESTION STEM WITH IDENTICAL RESPONSIVE FLUID FONT SIZE */}
-                      <h2 className="text-[clamp(1.15rem,1.5vw,1.45rem)] font-black text-white leading-relaxed tracking-tight">
+                      {/* QUESTION STEM WITH PROPORTIONALLY BIGGER READABILITY */}
+                      <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-white leading-relaxed tracking-tight">
                         {renderFormattedText(q.question)}
                       </h2>
 
-                      {/* MCQ OPTIONS WITH IDENTICAL RESPONSIVE FLUID FONT SIZE */}
+                      {/* MCQ OPTIONS WITH LARGER READABLE TYPOGRAPHY AND STRIPPED A./B./C./D. PREFIXES */}
                       {q.type === 'mcq' && q.options && (
-                        <div className="grid grid-cols-1 gap-3.5 pt-2">
+                        <div className="grid grid-cols-1 gap-4 pt-2">
                           {q.options.map((opt, oIdx) => {
-                            const isSelected = currentAns === opt;
+                            const cleanOpt = cleanOptionPrefix(opt);
+                            const isSelected = currentAns === cleanOpt || rawAns === opt || rawAns === cleanOpt;
                             return (
                               <button
                                 key={oIdx}
-                                onClick={() => handleAnswerSelect(q.id, opt)}
-                                className={`p-4 sm:p-5 rounded-2xl border text-left text-[clamp(1.15rem,1.5vw,1.45rem)] font-extrabold transition-all duration-200 cursor-pointer flex items-center gap-4 ${
+                                onClick={() => handleAnswerSelect(q.id, cleanOpt)}
+                                className={`p-4 sm:p-5 md:p-6 rounded-2xl border text-left text-lg sm:text-xl md:text-2xl font-extrabold transition-all duration-200 cursor-pointer flex items-center gap-4 sm:gap-5 ${
                                   isSelected
-                                    ? 'bg-indigo-600/20 border-indigo-500 text-white shadow-[0_0_24px_rgba(92,54,245,0.4)] ring-1 ring-indigo-400'
+                                    ? 'bg-indigo-600/25 border-indigo-500 text-white shadow-[0_0_24px_rgba(92,54,245,0.45)] ring-2 ring-indigo-400'
                                     : 'bg-[#121626] border-white/10 text-slate-200 hover:bg-white/5 hover:border-white/20'
                                 }`}
                               >
-                                <span className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-black shrink-0 transition ${
+                                <span className={`w-11 h-11 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center text-base sm:text-lg font-black shrink-0 transition ${
                                   isSelected ? 'bg-[#5c36f5] text-white shadow-md' : 'bg-white/10 text-slate-300'
                                 }`}>
                                   {String.fromCharCode(65 + oIdx)}
                                 </span>
-                                <span className="leading-relaxed flex-1">{renderFormattedText(opt)}</span>
+                                <span className="leading-relaxed flex-1">{renderFormattedText(cleanOpt)}</span>
                               </button>
                             );
                           })}
@@ -863,10 +884,10 @@ export default function KiemTraPage() {
                         <div className="pt-3">
                           <input
                             type="text"
-                            value={currentAns}
+                            value={rawAns}
                             onChange={(e) => handleAnswerSelect(q.id, e.target.value)}
                             placeholder="Nhập câu trả lời của bạn..."
-                            className="w-full bg-[#161a29] border border-white/20 text-white text-[clamp(1.15rem,1.5vw,1.45rem)] font-bold rounded-2xl p-4 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 shadow-inner"
+                            className="w-full bg-[#161a29] border border-white/20 text-white text-lg sm:text-xl md:text-2xl font-bold rounded-2xl p-5 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 shadow-inner"
                           />
                         </div>
                       )}
@@ -1102,8 +1123,11 @@ const QuestionReviewCard = React.memo(({
       {q.type === 'mcq' && q.options && (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm font-bold pt-1">
           {q.options.map((opt, oIdx) => {
-            const isUserChoice = userAns === opt;
-            const isRightAns = (q.answer || '').trim() === opt;
+            const cleanOpt = cleanOptionPrefix(opt);
+            const cleanUserAns = cleanOptionPrefix(userAns);
+            const cleanRightAns = cleanOptionPrefix((q.answer || '').trim());
+            const isUserChoice = userAns === opt || cleanUserAns === cleanOpt;
+            const isRightAns = (q.answer || '').trim() === opt || cleanRightAns === cleanOpt;
             return (
               <div
                 key={oIdx}
@@ -1118,7 +1142,7 @@ const QuestionReviewCard = React.memo(({
                 <span className="w-6 h-6 rounded-lg bg-white/10 text-xs font-black flex items-center justify-center shrink-0">
                   {String.fromCharCode(65 + oIdx)}
                 </span>
-                <span>{renderFormattedText(opt)}</span>
+                <span>{renderFormattedText(cleanOpt)}</span>
               </div>
             );
           })}

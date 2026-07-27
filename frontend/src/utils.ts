@@ -25,3 +25,15 @@ export function trunc1Dec(val: number): number {
   if (isNaN(val)) return 0;
   return Math.floor(val * 10 + 0.0000001) / 10;
 }
+
+/**
+ * Automatically removes leading option labels like "A. ", "B. ", "a) ", "C: ", "D - ", "1. " from option strings
+ * so options won't display redundant prefixes when rendered alongside option letter badges.
+ */
+export function cleanOptionPrefix(opt: string): string {
+  if (typeof opt !== 'string') return String(opt || '');
+  const trimmed = opt.trim();
+  const cleaned = trimmed.replace(/^[A-Da-d0-9][.\):\-]\s*/, '').trim();
+  return cleaned || trimmed;
+}
+

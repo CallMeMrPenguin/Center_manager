@@ -531,6 +531,13 @@ def api_delete_score(score_id: int):
     delete_student_score(score_id)
     return {"status": "success"}
 
+def _clean_opt_prefix(val: Any) -> str:
+    if not isinstance(val, str):
+        return str(val or "")
+    s = val.strip()
+    cleaned = re.sub(r'^[A-Da-d0-9][.\):\-]\s*', '', s).strip()
+    return cleaned if cleaned else s
+
 @router.post("/api/kiemtra/parse")
 async def api_parse_kiemtra(file: UploadFile = File(None), raw_json: Optional[str] = Form(None)):
     files_dir = get_setting("files_dir")
@@ -563,15 +570,16 @@ async def api_parse_kiemtra(file: UploadFile = File(None), raw_json: Optional[st
                         q_text = q.get("sentence") or q.get("passage") or q.get("content") or f"Câu {idx}"
 
                     opts = q.get("options") or q.get("o") or []
+                    cleaned_opts = [_clean_opt_prefix(o) for o in opts] if isinstance(opts, list) else []
                     ans = q.get("answer") or q.get("a") or ""
-                    q_type = q.get("type") or ("mcq" if opts else "fill")
+                    q_type = q.get("type") or ("mcq" if cleaned_opts else "fill")
                     inst = q.get("instruction") or top_inst
                     normalized_qs.append({
                         "id": q.get("id") or q.get("number") or idx,
                         "question": q_text,
                         "instruction": inst,
                         "type": q_type,
-                        "options": opts,
+                        "options": cleaned_opts,
                         "answer": str(ans),
                         "explanation": q.get("explanation", "")
                     })
@@ -589,6 +597,7 @@ async def api_parse_kiemtra(file: UploadFile = File(None), raw_json: Optional[st
                 questions = []
                 for idx, q in enumerate(flat_qs, 1):
                     opts = q.get("o", [])
+                    cleaned_opts = [_clean_opt_prefix(o) for o in opts] if isinstance(opts, list) else []
                     q_raw_text = q.get("x", "")
                     instruction = q.get("instruction", "")
                     if not instruction and q_raw_text.startswith("[Yêu cầu: "):
@@ -600,8 +609,8 @@ async def api_parse_kiemtra(file: UploadFile = File(None), raw_json: Optional[st
                         "id": idx,
                         "question": q_raw_text,
                         "instruction": instruction,
-                        "type": "mcq" if opts else "fill",
-                        "options": opts,
+                        "type": "mcq" if cleaned_opts else "fill",
+                        "options": cleaned_opts,
                         "answer": q.get("a", ""),
                         "explanation": ""
                     })
@@ -618,11 +627,12 @@ async def api_parse_kiemtra(file: UploadFile = File(None), raw_json: Optional[st
                 questions = []
                 for idx, q in enumerate(parsed_q, 1):
                     opts = q.get("o", [])
+                    cleaned_opts = [_clean_opt_prefix(o) for o in opts] if isinstance(opts, list) else []
                     questions.append({
                         "id": idx,
                         "question": q.get("x", ""),
-                        "type": "mcq" if opts else "fill",
-                        "options": opts,
+                        "type": "mcq" if cleaned_opts else "fill",
+                        "options": cleaned_opts,
                         "answer": q.get("a", ""),
                         "explanation": ""
                     })
