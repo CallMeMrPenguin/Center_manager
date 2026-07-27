@@ -66,7 +66,7 @@ def get_update_state() -> dict:
 
 def check_for_update() -> dict:
     """
-    Query GitHub Releases API for latest release.
+    Query GitHub Releases API (or fallback to Tags API) for latest version.
     Updates global _update_state and returns result dict.
     """
     global _update_state
@@ -76,6 +76,10 @@ def check_for_update() -> dict:
     _update_state["checking"] = True
     _update_state["error"] = None
 
+    tag = None
+    source_zip = None
+
+    # Try 1: GitHub Releases API
     try:
         req = urllib.request.Request(
             GITHUB_API_URL,
@@ -88,32 +92,54 @@ def check_for_update() -> dict:
             data = json.loads(resp.read().decode("utf-8"))
 
         tag = data.get("tag_name", "").lstrip("v")
-        current = get_current_version()
         zipball_url = data.get("zipball_url", "")
-
-        # Try source zip from assets first, fall back to zipball
         assets = data.get("assets", [])
         source_zip = next(
             (a["browser_download_url"] for a in assets if a["name"].endswith(".zip")),
             zipball_url
         )
-
-        has_update = bool(tag) and Version(tag) > Version(current)
-        _update_state.update({
-            "checking": False,
-            "has_update": has_update,
-            "latest_version": tag,
-            "download_url": source_zip if has_update else None,
-            "last_checked": time.time(),
-            "error": None,
-        })
-
+    except urllib.error.HTTPError as e:
+        if e.code == 404:
+            # Fallback 2: GitHub Tags API
+            try:
+                tags_url = f"https://api.github.com/repos/{GITHUB_REPO}/tags"
+                req_tags = urllib.request.Request(
+                    tags_url,
+                    headers={
+                        "Accept": "application/vnd.github+json",
+                        "User-Agent": "CenterManagerApp/1.0",
+                    }
+                )
+                with urllib.request.urlopen(req_tags, timeout=10) as resp_tags:
+                    tags_data = json.loads(resp_tags.read().decode("utf-8"))
+                if tags_data and isinstance(tags_data, list):
+                    latest_tag_obj = tags_data[0]
+                    raw_tag = latest_tag_obj.get("name", "")
+                    tag = raw_tag.lstrip("v")
+                    source_zip = f"https://github.com/{GITHUB_REPO}/archive/refs/tags/{raw_tag}.zip"
+            except Exception as ex:
+                _update_state["error"] = f"Tag check failed: {ex}"
+        else:
+            _update_state["error"] = str(e)
     except Exception as e:
-        _update_state.update({
-            "checking": False,
-            "error": str(e),
-            "last_checked": time.time(),
-        })
+        _update_state["error"] = str(e)
+
+    current = get_current_version()
+    has_update = False
+    if tag:
+        try:
+            has_update = Version(tag) > Version(current)
+        except Exception:
+            has_update = tag != current
+
+    _update_state.update({
+        "checking": False,
+        "has_update": has_update,
+        "latest_version": tag if has_update else (tag or current),
+        "download_url": source_zip if has_update else None,
+        "last_checked": time.time(),
+        "error": None if tag else _update_state.get("error"),
+    })
 
     return dict(_update_state)
 
