@@ -750,7 +750,7 @@ export default function KiemTraPage() {
           )}
 
           {/* RIGHT QUESTION CANVAS (SINGLE UNIFIED SCROLLBAR CONTAINER) */}
-          <div className="flex-1 bg-[#0d101d] border border-[#1e263d] p-6 sm:p-8 md:p-10 rounded-2xl flex flex-col justify-between shadow-2xl overflow-y-auto">
+          <div className="flex-1 bg-[#0d101d] border border-[#1e263d] p-5 sm:p-7 md:p-8 rounded-2xl flex flex-col justify-between shadow-2xl overflow-y-auto">
             {(() => {
               const q = activeQuestions[currentIndex];
               const rawAns = userAnswers[q.id] || '';
@@ -758,23 +758,23 @@ export default function KiemTraPage() {
               const isBookmarked = !!bookmarkedQuestions[q.id];
 
               return (
-                <div className="flex-1 flex flex-col justify-between space-y-6">
-                  <div className="space-y-6">
+                <div className="flex-1 flex flex-col justify-between space-y-3.5">
+                  <div className="space-y-3.5">
                     
                     {/* MERGED CONTROL & PROGRESS HEADER BAR INSIDE CANVAS */}
-                    <div className="flex flex-wrap items-center justify-between gap-4 border-b border-white/10 pb-4">
+                    <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-2.5">
                       {/* Left: Exit Button + Progress Badge */}
                       <div className="flex items-center gap-3">
                         <button
                           onClick={() => setStep('settings')}
-                          className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white transition cursor-pointer border border-white/10 text-xs font-extrabold"
+                          className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white transition cursor-pointer border border-white/10 text-xs font-extrabold"
                           title="Thoát chế độ làm bài"
                         >
-                          <ArrowLeft size={16} />
+                          <ArrowLeft size={15} />
                           <span>Thoát</span>
                         </button>
 
-                        <div className="flex items-center gap-2.5 bg-indigo-500/10 border border-indigo-500/20 px-3.5 py-1.5 rounded-xl">
+                        <div className="flex items-center gap-2 bg-indigo-500/10 border border-indigo-500/20 px-3 py-1 rounded-xl">
                           <span className="text-xs text-indigo-300 font-extrabold">
                             {progressPct}% Hoàn thành
                           </span>
@@ -785,71 +785,71 @@ export default function KiemTraPage() {
                       </div>
 
                       {/* Right: Timer + Bookmark + Fullscreen + Sidebar Toggle */}
-                      <div className="flex items-center gap-2.5">
+                      <div className="flex items-center gap-2">
                         {timerMode === 'global' && (
-                          <div className="flex items-center gap-2 bg-[#121626] border border-[#263152] px-3.5 py-1.5 rounded-xl shadow-inner">
-                            <Clock size={15} className="text-indigo-400" />
+                          <div className="flex items-center gap-2 bg-[#121626] border border-[#263152] px-3 py-1 rounded-xl shadow-inner">
+                            <Clock size={14} className="text-indigo-400" />
                             <span className="text-xs text-slate-400 font-bold">Còn lại</span>
-                            <span className="text-sm font-black text-white font-mono">{formattedTimerRemaining}</span>
+                            <span className="text-xs font-black text-white font-mono">{formattedTimerRemaining}</span>
                           </div>
                         )}
 
                         {timerMode === 'per_question' && (
-                          <div className="flex items-center gap-2 bg-[#121626] border border-[#263152] px-3.5 py-1.5 rounded-xl shadow-inner">
-                            <Clock size={15} className="text-amber-400" />
+                          <div className="flex items-center gap-2 bg-[#121626] border border-[#263152] px-3 py-1 rounded-xl shadow-inner">
+                            <Clock size={14} className="text-amber-400" />
                             <span className="text-xs text-slate-400 font-bold">Thời gian câu</span>
-                            <span className="text-sm font-black text-amber-400 font-mono">{questionTimer}s</span>
+                            <span className="text-xs font-black text-amber-400 font-mono">{questionTimer}s</span>
                           </div>
                         )}
 
                         <button
                           onClick={() => toggleBookmark(q.id)}
-                          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer border ${
+                          className={`flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-bold transition cursor-pointer border ${
                             isBookmarked ? 'bg-rose-500/20 border-rose-500/40 text-rose-300' : 'bg-white/5 border-white/10 text-slate-400 hover:text-slate-200'
                           }`}
                         >
-                          <Flag size={14} className={isBookmarked ? "fill-rose-500 text-rose-500" : ""} />
+                          <Flag size={13} className={isBookmarked ? "fill-rose-500 text-rose-500" : ""} />
                           <span>{isBookmarked ? 'Đã đánh dấu' : 'Đánh dấu'}</span>
                         </button>
 
                         <button
                           onClick={() => setIsFullscreen(!isFullscreen)}
-                          className={`p-2 rounded-xl border transition cursor-pointer ${
+                          className={`p-1.5 rounded-xl border transition cursor-pointer ${
                             isFullscreen ? 'bg-indigo-600 text-white border-indigo-400' : 'bg-[#121626] text-slate-300 hover:text-white border-[#263152]'
                           }`}
                           title={isFullscreen ? "Thoát toàn màn hình" : "Toàn màn hình"}
                         >
-                          {isFullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
+                          {isFullscreen ? <Minimize2 size={15} /> : <Maximize2 size={15} />}
                         </button>
 
                         <button
                           onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-                          className="p-2 rounded-xl bg-[#121626] hover:bg-[#1e2640] text-slate-300 hover:text-white border border-[#263152] transition cursor-pointer"
+                          className="p-1.5 rounded-xl bg-[#121626] hover:bg-[#1e2640] text-slate-300 hover:text-white border border-[#263152] transition cursor-pointer"
                           title={isSidebarCollapsed ? "Mở rộng danh sách câu hỏi" : "Thu gọn danh sách câu hỏi"}
                         >
-                          {isSidebarCollapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
+                          {isSidebarCollapsed ? <ChevronRight size={15} /> : <ChevronLeft size={15} />}
                         </button>
                       </div>
                     </div>
 
                     {/* INSTRUCTION */}
                     {q.instruction && (
-                      <div className="text-base sm:text-lg font-bold text-indigo-300 leading-relaxed bg-indigo-500/10 border border-indigo-500/20 p-4 sm:p-5 rounded-2xl shadow-sm">
+                      <div className="text-base sm:text-lg font-bold text-indigo-300 leading-relaxed bg-indigo-500/10 border border-indigo-500/20 p-3 sm:p-4 rounded-xl shadow-sm">
                         {q.instruction}
                       </div>
                     )}
 
-                    {/* QUESTION STEM WITH INLINE BLUE QUESTION NUMBER */}
-                    <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-white leading-relaxed tracking-tight flex flex-wrap items-baseline gap-2 sm:gap-3">
-                      <span className="text-indigo-400 font-black">
-                        Câu {currentIndex + 1}.
+                    {/* QUESTION STEM WITH INLINE BLUE Q PREFIX (Q1. Q2. Q3.) */}
+                    <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-white leading-tight tracking-tight flex flex-wrap items-baseline gap-2 sm:gap-3">
+                      <span className="text-[#5c36f5] sm:text-indigo-400 font-black">
+                        Q{currentIndex + 1}.
                       </span>
                       <span>{renderFormattedText(q.question)}</span>
                     </h2>
 
-                    {/* MCQ OPTIONS WITH EVEN LARGER TYPOGRAPHY & COMPACT INNER PADDING */}
+                    {/* MCQ OPTIONS WITH EVEN LARGER TYPOGRAPHY & COMPACT TIGHT INNER PADDING */}
                     {q.type === 'mcq' && q.options && (
-                      <div className="grid grid-cols-1 gap-3.5 sm:gap-4 pt-2">
+                      <div className="grid grid-cols-1 gap-2.5 sm:gap-3 pt-1">
                         {q.options.map((opt, oIdx) => {
                           const cleanOpt = cleanOptionPrefix(opt);
                           const isSelected = currentAns === cleanOpt || rawAns === opt || rawAns === cleanOpt;
@@ -857,18 +857,18 @@ export default function KiemTraPage() {
                             <button
                               key={oIdx}
                               onClick={() => handleAnswerSelect(q.id, cleanOpt)}
-                              className={`px-5 py-3 sm:px-6 sm:py-3.5 md:px-7 md:py-4 rounded-2xl border text-left font-extrabold transition-all duration-200 cursor-pointer flex items-center gap-4 sm:gap-6 ${
+                              className={`px-4 py-2 sm:px-5 sm:py-2.5 md:px-6 md:py-2.5 rounded-2xl border text-left font-black transition-all duration-200 cursor-pointer flex items-center gap-3.5 sm:gap-5 ${
                                 isSelected
                                   ? 'bg-indigo-600/30 border-indigo-400 text-white shadow-[0_0_30px_rgba(92,54,245,0.5)] ring-2 ring-indigo-400'
                                   : 'bg-[#121626] border-white/10 text-slate-100 hover:bg-white/5 hover:border-white/20'
                               }`}
                             >
-                              <span className={`w-11 h-11 sm:w-13 sm:h-13 md:w-14 md:h-14 rounded-xl flex items-center justify-center text-lg sm:text-xl md:text-2xl font-black shrink-0 transition ${
+                              <span className={`w-10 h-10 sm:w-12 sm:h-12 md:w-13 md:h-13 rounded-xl flex items-center justify-center text-lg sm:text-xl md:text-2xl font-black shrink-0 transition ${
                                 isSelected ? 'bg-[#5c36f5] text-white shadow-lg' : 'bg-white/10 text-slate-300'
                               }`}>
                                 {String.fromCharCode(65 + oIdx)}
                               </span>
-                              <span className="leading-snug flex-1 text-xl sm:text-2xl md:text-3xl lg:text-4xl font-extrabold">{renderFormattedText(cleanOpt)}</span>
+                              <span className="leading-tight flex-1 text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black">{renderFormattedText(cleanOpt)}</span>
                             </button>
                           );
                         })}
@@ -877,13 +877,13 @@ export default function KiemTraPage() {
 
                     {/* FILL IN THE BLANK */}
                     {q.type === 'fill' && (
-                      <div className="pt-3">
+                      <div className="pt-2">
                         <input
                           type="text"
                           value={rawAns}
                           onChange={(e) => handleAnswerSelect(q.id, e.target.value)}
                           placeholder="Nhập câu trả lời của bạn..."
-                          className="w-full bg-[#161a29] border border-white/20 text-white text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold rounded-2xl px-6 py-4 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 shadow-inner"
+                          className="w-full bg-[#161a29] border border-white/20 text-white text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold rounded-2xl px-5 py-3 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 shadow-inner"
                         />
                       </div>
                     )}
