@@ -37,25 +37,21 @@ Top-level object MUST contain a "data" array of question/exercise objects:
 
 Each object in "data" MUST use the following short key names:
 
-1. "t": (String) Exercise type code (MUST be one of: "pr", "st", "sy", "an", "er", "ec", "fb", "rw", "cz", "rd", "ro", "sg", "nt", "mt", "tb", "pl"):
+1. "t": (String) Exercise type code (MUST be one of: "pr", "st", "sy", "an", "er", "fb", "rw", "cz", "rd", "ro", "sg", "nt"):
    - "pr" : Pronunciation / Underlined sound
    - "st" : Stress
    - "sy" : Synonym
    - "an" : Antonym
-   - "er" : Error Identification (MCQ: [word](A))
-   - "ec" : Open Error Correction (Identify mistake & write correction)
-   - "fb" : Fill in the Blank / Word Form
+   - "er" : Error Identification
+   - "fb" : Fill in the Blank
    - "rw" : Rewrite Sentences
    - "cz" : Cloze Passage
    - "rd" : Reading Passage
    - "ro" : Sentence Reordering
    - "sg" : Sign Meaning
    - "nt" : Notice Meaning
-   - "mt" : Matching Exercise (Column A & Column B)
-   - "tb" : Table Categorization / Sound Classification
-   - "pl" : Picture Naming / Image Labeling
 
-2. "q": (String) Question number or section numeral (e.g., "1", "15", "II").
+2. "q": (String) Question number (e.g., "1", "15", "20").
 
 3. "x": (String) Question text / sentence prompt.
 
@@ -64,45 +60,11 @@ Each object in "data" MUST use the following short key names:
    - For Multiple Choice Questions (MCQ): Include answer choices in "o".
    - For Non-MCQ / Open-ended Questions (Fill-in-the-blank, Sentence Rewrite): Leave "o" empty: "o": []. The system automatically detects MCQ vs Non-MCQ based on "o".
 
-5. "a": (String or Object, Optional) Correct answer ("A", "B", "C", "D", text, or mapping object for matching/table).
+5. "a": (String, Optional) Correct answer ("A", "B", "C", "D" or answer text).
 
-6. "b": (String or Array of Strings) Used for:
-   - "cz" / "rd": Passage body paragraphs
-   - "nt": Notice body text
-   - "tb": Category header array, e.g. ["/ə/", "/ɜ:/"]
-   - "pl": Word bank array, e.g. ["cooking", "jogging", "gardening"]
-   - ANY exercise that shows a WORD BANK BOX with words to fill in blanks:
-     Add "b": ["word1", "word2", ...] to the exercise object.
-     The compiler will render this as a bordered word bank box above the items.
+6. "b": (String or Array of Strings, For "cz" / "rd" / "nt") Passage text body or notice text.
 
-7. "k": (Array of Objects, For "cz" / "rd" / "mt" / "pl") Sub-questions for complex exercises.
-
-8. "img": (String, Optional) Image path or placeholder for the exercise.
-   IMAGE PLACEMENT RULES:
-   - To attach an image to the WHOLE question (above options): set "img" on the exercise root object.
-     Example: {"t": "pl", "q": "I", "x": "Name the activities.", "img": "picture_I.jpg", "b": [...], "k": [...]}
-   - To attach an image to a SPECIFIC SUB-QUESTION inside "k": set "img" on that sub-item.
-     Example: {"q": "1", "x": "[Picture 1]", "img": "pic1.jpg", "a": "cooking"}
-   - If you do not know the filename, use sequential placeholders: "img": "pic1.jpg", "pic2.jpg", etc.
-     Images will be assigned in order by the teacher.
-   - If an exercise has NO image, omit "img" entirely.
-
-==================================================
-ADVANCED EXERCISE TYPES & SCHEMAS
-==================================================
-• Matching (Column A & B) [t: "mt"]:
-  Use "b": {"col_a": ["1. Item A1", "2. Item A2"], "col_b": ["a. Item B1", "b. Item B2"]}
-  Set "a": {"1": "b", "2": "a"}
-
-• Table Categorization / Sound Sorting [t: "tb"]:
-  Use "b": ["/ə/", "/ɜ:/"], "x": "Word bank: occasion, world, girl, answer..."
-  Set "a": {"/ə/": ["occasion", "answer"], "/ɜ:/": ["world", "girl"]}
-
-• Picture Naming / Labeling [t: "pl"]:
-  Use "b": ["cooking", "jogging", "gardening"], "k": [{"q": "1", "x": "[Picture 1]", "a": "cooking"}]
-
-• Open Error Correction [t: "ec"]:
-  Set "x": "Nam is my classmates.", "o": [], "a": "classmates -> classmate"
+7. "k": (Array of Objects, For "cz" / "rd") Sub-questions for passage exercises. Each object inside "k" has {"q", "x", "o", "a"}.
 
 ==================================================
 INLINE FORMATTING RULES
@@ -111,6 +73,7 @@ Preserve text formatting using these exact inline tags:
 - Underlined letters/words: Enclose in brackets -> e.g. "pass[ed]" or "[living in](A)"
 - Bold text: Enclose in double asterisks -> e.g. "**Investigative**:"
 - Italic text: Enclose in single asterisks -> e.g. "*Note:*"
+- Error identification choices in "x": Use format "[text](LETTER)" -> e.g. "She [go](A) to [school](B) yesterday."
 
 ==================================================
 EXAMPLE OUTPUT
@@ -124,28 +87,25 @@ EXAMPLE OUTPUT
       "a": "D"
     },
     {
-      "t": "tb",
-      "q": "I",
-      "x": "Put the words in the correct column: occasion, world, girl, answer",
-      "b": ["/ə/", "/ɜ:/"],
-      "a": {"/ə/": ["occasion", "answer"], "/ɜ:/": ["world", "girl"]}
-    },
-    {
-      "t": "mt",
-      "q": "II",
-      "x": "Match the word(s) in A with the rest in B to make a complete sentence.",
-      "b": {
-        "col_a": ["1. Model making", "2. Coin collecting"],
-        "col_b": ["a. helps you learn about countries", "b. means making small replicas"]
-      },
-      "a": {"1": "b", "2": "a"}
-    },
-    {
-      "t": "ec",
-      "q": "1",
-      "x": "Nam is my classmates. He watches TV every night.",
+      "t": "fb",
+      "q": "2",
+      "x": "She is very _______ (INTEREST) in learning English.",
       "o": [],
-      "a": "classmates -> classmate"
+      "a": "interested"
+    },
+    {
+      "t": "rw",
+      "q": "3",
+      "x": "Living in a big city is more expensive than living in a rural village.\\n(Living in)",
+      "o": [],
+      "a": "Living in a rural village is cheaper than living in a big city."
+    },
+    {
+      "t": "er",
+      "q": "4",
+      "x": "My brother [is](A) very good [at](B) playing [the](C) guitar, isn't [him](D)?",
+      "o": ["is", "at", "the", "him"],
+      "a": "D"
     }
   ]
 }`
@@ -176,9 +136,7 @@ const DEFAULT_LAYOUT: LayoutSettings = {
   reorder_left_indent: 1.0,
   notice_space_before: 4.0,
   notice_space_after: 6.0,
-  notice_left_indent: 1.0,
-  question_prefix: "Question",
-  question_separator: ":"
+  notice_left_indent: 1.0
 };
 
 const MOCK_PAYLOAD = [
@@ -294,50 +252,8 @@ export default function TestFormatter({
   const [pdfLoading, setPdfLoading] = useState(false);
   const [compiling, setCompiling] = useState(false);
   const [pdfZoom, setPdfZoom] = useState(100);
-  const [previewTab, setPreviewTab] = useState<'cards' | 'pdf'>('cards');
-  const [attachedImages, setAttachedImages] = useState<string[]>([]);
-
-  const handleBatchImagesUpload = (files: FileList | File[]) => {
-    const fileList = Array.from(files).filter(f => f.type.startsWith('image/'));
-    if (fileList.length === 0) return;
-
-    showToast(`Đang nạp ${fileList.length} hình ảnh...`, "warning");
-    const readPromises = fileList.map(file => {
-      return new Promise<string>((resolve) => {
-        const reader = new FileReader();
-        reader.onload = (e) => resolve(e.target?.result as string);
-        reader.readAsDataURL(file);
-      });
-    });
-
-    Promise.all(readPromises).then((dataUrls) => {
-      const newImages = [...attachedImages, ...dataUrls];
-      setAttachedImages(newImages);
-
-      let imgIdx = 0;
-      const updatedExercises = exercisesData.map(ex => {
-        if (Array.isArray(ex.k) && ex.k.length > 0) {
-          const newK = ex.k.map((sub: any) => {
-            if (imgIdx < dataUrls.length) {
-              return { ...sub, img: dataUrls[imgIdx++] };
-            }
-            return sub;
-          });
-          return { ...ex, k: newK };
-        } else {
-          if (imgIdx < dataUrls.length) {
-            return { ...ex, img: dataUrls[imgIdx++] };
-          }
-          return ex;
-        }
-      });
-
-      setExercisesData(updatedExercises);
-      setJsonText(JSON.stringify(updatedExercises, null, 2));
-      setPreviewTab('cards');
-      showToast(`Đã tự động gán ${dataUrls.length} hình ảnh vào các câu hỏi!`, "success");
-    });
-  };
+  
+  // Test Versions & Compiled Files State
   const [numVersions, setNumVersions] = useState<number>(1);
   const [lastCompiledFiles, setLastCompiledFiles] = useState<string[]>([]);
   
@@ -707,36 +623,6 @@ export default function TestFormatter({
             {renderSettingInput("Khoảng cách đoạn (pt)", "space_after", 0, 24, 1)}
           </div>
 
-          {/* Question Label Format */}
-          <h3 className="text-[0.66rem] font-bold text-slate-400 uppercase tracking-wider mt-4 mb-1">Nhãn Câu Hỏi</h3>
-          <div className="flex flex-col gap-2 bg-[#181f36] p-2.5 rounded-xl border border-[#252e4e] mt-1">
-            <div className="text-[0.6rem] text-slate-500 font-semibold mb-0.5">
-              Ví dụ: <span className="text-indigo-300 font-bold">{layout.question_prefix} 1{layout.question_separator}</span>
-            </div>
-            <div className="flex gap-2 items-end">
-              <div className="flex flex-col gap-1 flex-1">
-                <label className="text-[0.6rem] font-bold text-slate-400">Từ trước số</label>
-                <input
-                  type="text"
-                  value={layout.question_prefix ?? 'Question'}
-                  onChange={(e) => setLayout(prev => ({ ...prev, question_prefix: e.target.value }))}
-                  placeholder="Question"
-                  className="bg-[#121629] border border-[#283354] px-2.5 py-1.5 rounded-lg text-xs text-white font-bold focus:outline-none focus:border-indigo-500"
-                />
-              </div>
-              <div className="flex flex-col gap-1 w-14">
-                <label className="text-[0.6rem] font-bold text-slate-400">Dấu</label>
-                <input
-                  type="text"
-                  value={layout.question_separator ?? ':'}
-                  onChange={(e) => setLayout(prev => ({ ...prev, question_separator: e.target.value }))}
-                  placeholder=":"
-                  className="bg-[#121629] border border-[#283354] px-2.5 py-1.5 rounded-lg text-xs text-white font-bold focus:outline-none focus:border-indigo-500"
-                />
-              </div>
-            </div>
-          </div>
-
           {/* Mix Options Option */}
           <h3 className="text-[0.66rem] font-bold text-slate-400 uppercase tracking-wider mt-4 mb-1">Cấu hình Đề thi</h3>
           <div className="flex flex-col gap-2.5 bg-[#181f36] p-2.5 rounded-xl border border-[#252e4e] mt-1">
@@ -883,89 +769,31 @@ export default function TestFormatter({
             </div>
           </div>
 
-          {/* Text Area Content - Drag & Drop Image Section + Fast Isolated JSON Editor */}
-          <div className="flex-1 relative p-4 bg-[#0f1322] flex flex-col gap-3 overflow-y-auto">
-            
-            {/* IMAGE BATCH DRAG & DROP ZONE */}
-            <div 
-              onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
-              onDrop={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-                  handleBatchImagesUpload(e.dataTransfer.files);
-                }
-              }}
-              className="bg-[#14192b] border border-dashed border-indigo-500/40 hover:border-indigo-400 p-3 rounded-2xl flex flex-col gap-2 transition shadow-inner group/dropzone"
-            >
-              <div className="flex items-center justify-between">
-                <label className="flex items-center gap-2 text-xs font-bold text-slate-300 cursor-pointer hover:text-white">
-                  <div className="w-7 h-7 rounded-xl bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400">
-                    <Upload size={14} />
-                  </div>
-                  <span>Kéo thả hình ảnh bài tập vào đây (Tự động gán theo thứ tự câu hỏi)</span>
-                  <input 
-                    type="file" 
-                    multiple 
-                    accept="image/*" 
-                    onChange={(e) => e.target.files && handleBatchImagesUpload(e.target.files)} 
-                    className="hidden" 
-                  />
-                </label>
-                {attachedImages.length > 0 && (
-                  <button 
-                    onClick={() => {
-                      setAttachedImages([]);
-                      showToast("Đã xóa danh sách ảnh gán", "warning");
-                    }}
-                    className="text-[10px] font-bold text-rose-400 hover:text-rose-300 cursor-pointer flex items-center gap-1"
-                  >
-                    <Trash2 size={11} />
-                    <span>Xóa tất cả ({attachedImages.length})</span>
-                  </button>
-                )}
-              </div>
+          {/* Text Area Content - Uncontrolled Isolated Editor to eliminate 60FPS typing lag */}
+          <div className="flex-1 relative p-4 bg-[#0f1322] flex flex-col gap-4">
+            <FastJsonEditor
+              initialValue={jsonText}
+              onParsedDataChange={handleParsedDataChange}
+            />
 
-              {/* THUMBNAILS STRIP */}
-              {attachedImages.length > 0 && (
-                <div className="flex gap-2 overflow-x-auto pt-1 pb-0.5">
-                  {attachedImages.map((imgUrl, iIdx) => (
-                    <div key={iIdx} className="relative group shrink-0 w-14 h-14 rounded-xl border border-white/10 overflow-hidden bg-black/40">
-                      <img src={imgUrl} className="w-full h-full object-cover" alt={`Attach ${iIdx}`} />
-                      <span className="absolute top-0.5 left-0.5 bg-black/70 text-indigo-300 font-mono text-[9px] font-black px-1 rounded">
-                        #{iIdx + 1}
-                      </span>
-                    </div>
-                  ))}
+            {/* Validation Info Overlay */}
+            <div className="absolute bottom-8 right-8 flex items-center gap-2 select-none">
+              {jsonError ? (
+                <div className="flex items-center gap-1.5 text-rose-300 font-bold text-[0.66rem] bg-rose-500/20 border border-rose-500/40 px-3 py-1.5 rounded-xl shadow-lg">
+                  <AlertCircle size={12} />
+                  <span className="truncate max-w-xs">{jsonError}</span>
+                </div>
+              ) : exercisesData.length > 0 ? (
+                <div className="flex items-center gap-1.5 text-emerald-300 font-bold text-[0.66rem] bg-emerald-500/20 border border-emerald-500/40 px-3 py-1.5 rounded-xl shadow-lg">
+                  <CheckCircle size={12} />
+                  <span>Hợp lệ ({exercisesData.length} câu)</span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-1.5 text-slate-400 font-bold text-[0.66rem] bg-[#181f36] border border-[#283354] px-3 py-1.5 rounded-xl">
+                  <AlertCircle size={12} />
+                  <span>Trống</span>
                 </div>
               )}
-            </div>
-
-            <div className="flex-1 flex flex-col relative min-h-[300px]">
-              <FastJsonEditor
-                initialValue={jsonText}
-                onParsedDataChange={handleParsedDataChange}
-              />
-
-              {/* Validation Info Overlay */}
-              <div className="absolute bottom-4 right-4 flex items-center gap-2 select-none z-10">
-                {jsonError ? (
-                  <div className="flex items-center gap-1.5 text-rose-300 font-bold text-[0.66rem] bg-rose-500/20 border border-rose-500/40 px-3 py-1.5 rounded-xl shadow-lg">
-                    <AlertCircle size={12} />
-                    <span className="truncate max-w-xs">{jsonError}</span>
-                  </div>
-                ) : exercisesData.length > 0 ? (
-                  <div className="flex items-center gap-1.5 text-emerald-300 font-bold text-[0.66rem] bg-emerald-500/20 border border-emerald-500/40 px-3 py-1.5 rounded-xl shadow-lg">
-                    <CheckCircle size={12} />
-                    <span>Hợp lệ ({exercisesData.length} câu)</span>
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-1.5 text-slate-400 font-bold text-[0.66rem] bg-[#181f36] border border-[#283354] px-3 py-1.5 rounded-xl">
-                    <AlertCircle size={12} />
-                    <span>Trống</span>
-                  </div>
-                )}
-              </div>
             </div>
           </div>
           
@@ -995,165 +823,64 @@ export default function TestFormatter({
           )}
         </section>
         
-        {/* RIGHT COMPONENT: PREVIEW PANEL (DUAL MODE: VISUAL CARDS & PDF PRINT) */}
+        {/* RIGHT COMPONENT: PREVIEW PANEL */}
         <section className="flex-1 flex flex-col overflow-hidden bg-[#0d101d]">
           
           {/* Preview Panel Topbar */}
-          <div className="h-14 border-b border-[#202842] bg-[#121629] flex items-center justify-between px-6 shrink-0 gap-3">
-            
-            {/* TOGGLE SWITCHER BETWEEN CARDS AND PDF */}
-            <div className="flex items-center gap-1.5 bg-[#181f36] p-1 rounded-xl border border-[#283354]">
-              <button
-                onClick={() => setPreviewTab('cards')}
-                className={`px-3 py-1 rounded-lg text-xs font-black transition flex items-center gap-1.5 cursor-pointer ${
-                  previewTab === 'cards' ? 'bg-[#5c36f5] text-white shadow' : 'text-slate-400 hover:text-white'
-                }`}
-              >
-                <Layout size={13} />
-                <span>Thẻ Câu Hỏi & Ảnh ({exercisesData.length})</span>
-              </button>
-              <button
-                onClick={() => setPreviewTab('pdf')}
-                className={`px-3 py-1 rounded-lg text-xs font-black transition flex items-center gap-1.5 cursor-pointer ${
-                  previewTab === 'pdf' ? 'bg-[#5c36f5] text-white shadow' : 'text-slate-400 hover:text-white'
-                }`}
-              >
-                <FileText size={13} />
-                <span>Xem Bản In PDF</span>
-              </button>
+          <div className="h-14 border-b border-[#202842] bg-[#121629] flex items-center justify-between px-6 shrink-0">
+            <div className="flex items-center gap-2">
+              <Eye size={14} className="text-indigo-400" />
+              <span className="text-xs font-black text-white">XEM TRƯỚC BẢN IN PDF</span>
             </div>
 
             {/* Zoom controls and generate controls */}
-            {previewTab === 'pdf' && (
-              <div className="flex items-center gap-2.5 group/preview-toolbar">
-                <button 
-                  onClick={handleGeneratePdfPreview}
-                  disabled={pdfLoading}
-                  className="px-3 py-1.5 rounded-xl bg-[#5c36f5] hover:bg-[#7351f7] text-white font-extrabold text-[0.66rem] flex items-center transition shadow-md cursor-pointer disabled:opacity-50 border border-white/20"
-                  title="Tạo lại bản xem trước PDF từ nội dung JSON"
-                >
-                  <RefreshCw size={12} className={`shrink-0 ${pdfLoading ? "animate-spin" : ""}`} />
-                  <span className="max-w-0 opacity-0 group-hover/preview-toolbar:max-w-xs group-hover/preview-toolbar:opacity-100 group-hover/preview-toolbar:ml-1.5 transition-all duration-300 whitespace-nowrap overflow-hidden inline-block">{pdfLoading ? "Đang tạo PDF..." : "Cập Nhật Xem Trước PDF"}</span>
-                </button>
-                {pdfUrl && (
-                  <div className="flex items-center gap-2">
-                    <div className="flex items-center bg-[#181f36] rounded-xl border border-[#283354] p-1 shadow-inner gap-0.5">
-                      <button 
-                        onClick={() => setPdfZoom(prev => Math.max(prev - 10, 50))}
-                        className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition cursor-pointer"
-                        title="Thu nhỏ"
-                      >
-                        <ZoomOut size={13} />
-                      </button>
-                      <span className="px-2 text-[0.66rem] font-extrabold text-slate-300 font-mono w-12 text-center select-none">
-                        {pdfZoom}%
-                      </span>
-                      <button 
-                        onClick={() => setPdfZoom(prev => Math.min(prev + 10, 200))}
-                        className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition cursor-pointer"
-                        title="Phóng to"
-                      >
-                        <ZoomIn size={13} />
-                      </button>
-                    </div>
+            <div className="flex items-center gap-2.5 group/preview-toolbar">
+              <button 
+                onClick={handleGeneratePdfPreview}
+                disabled={pdfLoading}
+                className="px-3 py-1.5 rounded-xl bg-[#5c36f5] hover:bg-[#7351f7] text-white font-extrabold text-[0.66rem] flex items-center transition shadow-md cursor-pointer disabled:opacity-50 border border-white/20"
+                title="Tạo lại bản xem trước PDF từ nội dung JSON"
+              >
+                <RefreshCw size={12} className={`shrink-0 ${pdfLoading ? "animate-spin" : ""}`} />
+                <span className="max-w-0 opacity-0 group-hover/preview-toolbar:max-w-xs group-hover/preview-toolbar:opacity-100 group-hover/preview-toolbar:ml-1.5 transition-all duration-300 whitespace-nowrap overflow-hidden inline-block">{pdfLoading ? "Đang tạo PDF..." : "Cập Nhật Xem Trước PDF"}</span>
+              </button>
+              {pdfUrl && (
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center bg-[#181f36] rounded-xl border border-[#283354] p-1 shadow-inner gap-0.5">
                     <button 
-                      onClick={() => window.open(pdfUrl, '_blank')}
-                      className="p-2 rounded-xl bg-[#181f36] border border-[#283354] hover:bg-[#222a46] text-slate-300 hover:text-white transition cursor-pointer flex items-center text-[0.66rem] font-extrabold shadow-sm"
-                      title="Xem trong trình duyệt"
+                      onClick={() => setPdfZoom(prev => Math.max(prev - 10, 50))}
+                      className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition cursor-pointer"
+                      title="Thu nhỏ"
                     >
-                      <ExternalLink size={13} className="shrink-0" />
-                      <span className="max-w-0 opacity-0 group-hover/preview-toolbar:max-w-xs group-hover/preview-toolbar:opacity-100 group-hover/preview-toolbar:ml-1.5 transition-all duration-300 whitespace-nowrap overflow-hidden inline-block">Xem Trình Duyệt</span>
+                      <ZoomOut size={13} />
+                    </button>
+                    <span className="px-2 text-[0.66rem] font-extrabold text-slate-300 font-mono w-12 text-center select-none">
+                      {pdfZoom}%
+                    </span>
+                    <button 
+                      onClick={() => setPdfZoom(prev => Math.min(prev + 10, 200))}
+                      className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition cursor-pointer"
+                      title="Phóng to"
+                    >
+                      <ZoomIn size={13} />
                     </button>
                   </div>
-                )}
-              </div>
-            )}
+                  <button 
+                    onClick={() => window.open(pdfUrl, '_blank')}
+                    className="p-2 rounded-xl bg-[#181f36] border border-[#283354] hover:bg-[#222a46] text-slate-300 hover:text-white transition cursor-pointer flex items-center text-[0.66rem] font-extrabold shadow-sm"
+                    title="Xem trong trình duyệt"
+                  >
+                    <ExternalLink size={13} className="shrink-0" />
+                    <span className="max-w-0 opacity-0 group-hover/preview-toolbar:max-w-xs group-hover/preview-toolbar:opacity-100 group-hover/preview-toolbar:ml-1.5 transition-all duration-300 whitespace-nowrap overflow-hidden inline-block">Xem Trình Duyệt</span>
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
 
-          {/* MAIN PREVIEW CONTAINER (CARDS VIEW VS PDF VIEW) */}
-          <div className="flex-1 bg-[#101424] p-6 relative overflow-y-auto">
-            {previewTab === 'cards' ? (
-              <div className="max-w-3xl mx-auto space-y-4">
-                {exercisesData.length === 0 ? (
-                  <div className="text-center text-slate-400 py-20 font-semibold text-xs">
-                    Chưa có câu hỏi nào. Nhập JSON hoặc kéo thả ảnh để hiển thị xem trước.
-                  </div>
-                ) : (
-                  exercisesData.map((ex: any, idx: number) => {
-                    const mainImg = ex.img || ex.image;
-                    return (
-                      <div key={idx} className="bg-[#121629] border border-[#202842] rounded-2xl p-5 shadow-xl space-y-3">
-                        {/* Header Badge */}
-                        <div className="flex items-center justify-between border-b border-white/10 pb-2.5">
-                          <span className="text-xs font-black text-indigo-400">
-                            Q{ex.q || idx + 1}. {ex.t ? ex.t.toUpperCase() : ''}
-                          </span>
-                          {ex.a && (
-                            <span className="text-[10px] font-black text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-lg">
-                              ĐÁP ÁN: {typeof ex.a === 'object' ? JSON.stringify(ex.a) : String(ex.a)}
-                            </span>
-                          )}
-                        </div>
-
-                        {/* Question Prompt */}
-                        {ex.x && (
-                          <div className="text-sm font-bold text-white leading-relaxed">
-                            {ex.x}
-                          </div>
-                        )}
-
-                        {/* Instruction / Word Bank */}
-                        {ex.b && (
-                          <div className="text-xs font-semibold text-indigo-300 bg-indigo-500/10 border border-indigo-500/20 p-3 rounded-xl">
-                            {Array.isArray(ex.b) ? ex.b.join(' | ') : typeof ex.b === 'object' ? JSON.stringify(ex.b) : ex.b}
-                          </div>
-                        )}
-
-                        {/* Main Image Attachment */}
-                        {mainImg && (
-                          <div className="flex justify-center bg-black/50 p-2 rounded-2xl border border-indigo-500/30">
-                            <img src={mainImg} className="max-h-60 rounded-xl object-contain shadow" alt={`Question ${idx + 1}`} />
-                          </div>
-                        )}
-
-                        {/* MCQ Options */}
-                        {Array.isArray(ex.o) && ex.o.length > 0 && (
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
-                            {ex.o.map((opt: string, oIdx: number) => (
-                              <div key={oIdx} className="bg-[#181f36] border border-white/10 p-3 rounded-xl text-xs font-bold text-slate-200 flex items-center gap-2">
-                                <span className="w-6 h-6 rounded-lg bg-indigo-500/20 text-indigo-300 font-black text-[11px] flex items-center justify-center shrink-0">
-                                  {String.fromCharCode(65 + oIdx)}
-                                </span>
-                                <span>{opt}</span>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-
-                        {/* Subquestions Array (k) */}
-                        {Array.isArray(ex.k) && ex.k.length > 0 && (
-                          <div className="space-y-3 pt-2">
-                            {ex.k.map((sub: any, sIdx: number) => (
-                              <div key={sIdx} className="bg-[#181f36] border border-white/10 p-3 rounded-xl space-y-2">
-                                <div className="flex items-center justify-between text-xs font-bold text-white">
-                                  <span>{sub.q ? `Sub ${sub.q}` : `#${sIdx + 1}`} {sub.x || ''}</span>
-                                  {sub.a && <span className="text-emerald-400 font-black text-[10px]">Đáp án: {sub.a}</span>}
-                                </div>
-                                {sub.img && (
-                                  <div className="flex justify-center bg-black/40 p-1.5 rounded-xl border border-indigo-500/20">
-                                    <img src={sub.img} className="max-h-40 rounded-lg object-contain" alt={`Sub ${sIdx + 1}`} />
-                                  </div>
-                                )}
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })
-                )}
-              </div>
-            ) : pdfLoading ? (
+          {/* PDF Frame Container */}
+          <div className="flex-1 bg-[#101424] p-6 relative overflow-hidden flex justify-center items-center">
+            {pdfLoading ? (
               <div className="absolute inset-0 flex flex-col justify-center items-center text-slate-300 z-10 bg-[#101424]/90">
                 <RefreshCw className="animate-spin h-8 w-8 text-indigo-400 mb-3" />
                 <p className="font-bold text-xs">Đang xuất file Word và chuyển sang PDF...</p>
@@ -1167,13 +894,13 @@ export default function TestFormatter({
                 />
               </div>
             ) : (
-              <div className="max-w-sm mx-auto my-20 flex flex-col justify-center items-center text-center text-slate-400 px-6">
+              <div className="max-w-sm flex flex-col justify-center items-center text-center text-slate-400 px-6">
                 <div className="p-4 bg-[#181f36] border border-[#283354] rounded-2xl mb-4 text-indigo-400 shadow-md">
                   <FileText size={32} />
                 </div>
-                <h4 className="text-xs font-black text-white">Xem Trước Đề Thi PDF</h4>
+                <h4 className="text-xs font-black text-white">Xem Trước Đề Thi</h4>
                 <p className="text-[0.66rem] text-slate-400 mt-2 leading-relaxed font-semibold">
-                  Nhấn nút <strong className="text-indigo-300">"Cập Nhật Xem Trước PDF"</strong> để xuất bản in PDF trực tiếp từ Microsoft Word.
+                  Nhấn nút <strong className="text-indigo-300">"Cập Nhật Xem Trước PDF"</strong> ở góc trên bên phải để xuất bản in PDF trực tiếp từ Microsoft Word.
                 </p>
               </div>
             )}

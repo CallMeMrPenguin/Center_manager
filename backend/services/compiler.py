@@ -25,11 +25,7 @@ INSTRUCTION_MAP_MCQ = {
     "er": "Mark the letter A, B, C, or D on your answer sheet to indicate the underlined part that needs correction in each of the following questions.",
     "fb": "Mark the letter A, B, C, or D on your answer sheet to indicate the word or phrase that best fits each blank in the following questions.",
     "rw": "Mark the letter A, B, C, or D on your answer sheet to indicate the sentence that is closest in meaning to each of the following questions.",
-    "mq": "Mark the letter A, B, C, or D on your answer sheet to indicate the answer that best fits each of the following questions.",
-    "tb": "Answer each of the following questions.",
-    "mt": "Answer each of the following questions.",
-    "pl": "Answer each of the following questions.",
-    "ec": "Answer each of the following questions."
+    "mq": "Mark the letter A, B, C, or D on your answer sheet to indicate the answer that best fits each of the following questions."
 }
 
 INSTRUCTION_MAP_NON_MCQ = {
@@ -45,11 +41,7 @@ INSTRUCTION_MAP_NON_MCQ = {
     "er": "Identify and correct the mistake in each of the following sentences.",
     "fb": "Complete each of the following sentences with the correct form of the word in brackets or a suitable word.",
     "rw": "Rewrite each of the following sentences so that it has a similar meaning to the original sentence.",
-    "mq": "Complete each of the following questions.",
-    "tb": "Answer each of the following questions.",
-    "mt": "Answer each of the following questions.",
-    "pl": "Answer each of the following questions.",
-    "ec": "Answer each of the following questions."
+    "mq": "Complete each of the following questions."
 }
 
 def get_instruction_map():
@@ -273,30 +265,27 @@ class WordDocumentCompiler:
         run.bold = True
         run.font.size = Pt(font_size)
 
-    def add_question(self, q_num: Any, q_text: str, prefix: str = None, separator: str = None):
+    def add_question(self, q_num: Any, q_text: str):
         space_before = self.settings.get("question_space_before", 6.0)
         space_after = self.settings.get("question_space_after", 4.0)
-        q_prefix = prefix if prefix is not None else self.settings.get("question_prefix", "Question")
-        q_sep = separator if separator is not None else self.settings.get("question_separator", ":")
         
         p = self.doc.add_paragraph()
         p.paragraph_format.space_before = Pt(space_before)
         p.paragraph_format.space_after = Pt(space_after)
         p.paragraph_format.keep_with_next = True
         
-        run_q = p.add_run(f"{q_prefix} {q_num}{q_sep} ")
+        run_q = p.add_run(f"Question {q_num}: ")
         run_q.bold = True
         
-        if q_text:
-            segments = parse_text_formatting(q_text)
-            for seg in segments:
-                run = p.add_run(seg["text"])
-                if seg["bold"]:
-                    run.bold = True
-                if seg["italic"]:
-                    run.italic = True
-                if seg["underline"]:
-                    run.underline = True
+        segments = parse_text_formatting(q_text)
+        for seg in segments:
+            run = p.add_run(seg["text"])
+            if seg["bold"]:
+                run.bold = True
+            if seg["italic"]:
+                run.italic = True
+            if seg["underline"]:
+                run.underline = True
 
     def add_options_grid(self, options: List[str], exercise_type: str, correct_ans: Any = None):
         if not options:
@@ -527,44 +516,32 @@ class WordDocumentCompiler:
         run_unit.font.size = Pt(12)
 
     def collect_answers(self, exercises: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-        """Collect answers - separates simple (str) from complex (dict/list) answers."""
-        simple_answers = []
-        complex_answers = []  # list of (ex_type, q_num, answer_data)
-        
+        answers = []
         for ex in exercises:
-            ex_type = ex.get("t", "")
-            q_num = ex.get("q", "")
-            ans = ex.get("a", "")
-            
+            ex_type = ex.get("t")
             if ex_type in ["cz", "rd"]:
                 for sub in ex.get("k", []):
-                    sub_q = sub.get("q")
-                    sub_a = sub.get("a", "")
-                    if sub_q and sub_a:
-                        simple_answers.append({"q": sub_q, "a": sub_a})
-            elif ex_type == "pl":
-                # Picture labeling - sub-answers go into simple list
-                for sub in ex.get("k", []):
-                    sub_q = sub.get("q")
-                    sub_a = sub.get("a", "")
-                    if sub_q and sub_a:
-                        simple_answers.append({"q": sub_q, "a": sub_a})
-            elif ex_type in ["tb", "mt"] and isinstance(ans, dict):
-                complex_answers.append({"t": ex_type, "q": q_num, "a": ans})
-            elif q_num and ans and not isinstance(ans, dict) and not isinstance(ans, list):
-                simple_answers.append({"q": str(q_num), "a": str(ans)})
+                    q_num = sub.get("q")
+                    ans = sub.get("a", "")
+                    if q_num and ans:
+                        answers.append({"q": q_num, "a": ans})
+            else:
+                q_num = ex.get("q")
+                ans = ex.get("a", "")
+                if q_num and ans:
+                    answers.append({"q": q_num, "a": ans})
         
         def get_q_num(x):
             try:
                 return int(x["q"])
-            except (ValueError, TypeError):
+            except ValueError:
                 return 999
-        simple_answers.sort(key=get_q_num)
-        return simple_answers, complex_answers
+        answers.sort(key=get_q_num)
+        return answers
 
     def add_answer_key(self, exercises: List[Dict[str, Any]]):
-        simple_answers, complex_answers = self.collect_answers(exercises)
-        if not simple_answers and not complex_answers:
+        answers = self.collect_answers(exercises)
+        if not answers:
             return
             
         self.doc.add_page_break()
@@ -577,79 +554,24 @@ class WordDocumentCompiler:
         run_head.bold = True
         run_head.font.size = Pt(14)
         
-        # --- Simple answers in 5-column grid ---
-        if simple_answers:
-            N = len(simple_answers)
-            cols = 5
-            rows = math.ceil(N / cols)
-            
-            table = self.doc.add_table(rows=rows, cols=cols)
-            table.alignment = 1
-            
-            for r in range(rows):
-                for c in range(cols):
-                    idx = c * rows + r
-                    if idx < N:
-                        item = simple_answers[idx]
-                        cell = table.cell(r, c)
-                        p = cell.paragraphs[0]
-                        p.paragraph_format.space_after = Pt(4)
-                        run = p.add_run(f"{item['q']}. {item['a']}")
-                        run.bold = True
-                        run.font.size = Pt(11)
+        N = len(answers)
+        cols = 5
+        rows = math.ceil(N / cols)
         
-        # --- Complex answers (tb = table, mt = matching) ---
-        for ca in complex_answers:
-            ex_type = ca["t"]
-            q_num = ca["q"]
-            ans_dict = ca["a"]
-            
-            p_sub = self.doc.add_paragraph()
-            p_sub.paragraph_format.space_before = Pt(14)
-            p_sub.paragraph_format.space_after = Pt(6)
-            run_sub = p_sub.add_run(f"Question {q_num}:")
-            run_sub.bold = True
-            
-            if ex_type == "tb":
-                # Sound sorting - render a 2+ column table
-                buckets = list(ans_dict.keys())
-                num_cols = len(buckets)
-                # Find max rows needed
-                max_words = max(len(ans_dict[b]) for b in buckets) if buckets else 0
-                num_rows = max_words + 1  # +1 for header
-                
-                tbl = self.doc.add_table(rows=num_rows, cols=num_cols)
-                tbl.style = "Table Grid"
-                tbl.alignment = 1
-                
-                # Header row
-                for ci, bucket in enumerate(buckets):
-                    cell = tbl.cell(0, ci)
+        table = self.doc.add_table(rows=rows, cols=cols)
+        table.alignment = 1  # Center alignment
+        
+        for r in range(rows):
+            for c in range(cols):
+                idx = c * rows + r
+                if idx < N:
+                    item = answers[idx]
+                    cell = table.cell(r, c)
                     p = cell.paragraphs[0]
-                    p.alignment = 1
-                    run = p.add_run(bucket)
+                    p.paragraph_format.space_after = Pt(4)
+                    run = p.add_run(f"{item['q']}. {item['a']}")
                     run.bold = True
-                
-                # Data rows
-                for ri in range(1, num_rows):
-                    for ci, bucket in enumerate(buckets):
-                        words = ans_dict[bucket]
-                        cell = tbl.cell(ri, ci)
-                        p = cell.paragraphs[0]
-                        p.alignment = 1
-                        word_idx = ri - 1
-                        if word_idx < len(words):
-                            p.add_run(words[word_idx])
-            
-            elif ex_type == "mt":
-                # Column matching - render as numbered pairs
-                for k, v in ans_dict.items():
-                    p_pair = self.doc.add_paragraph()
-                    p_pair.paragraph_format.space_before = Pt(2)
-                    p_pair.paragraph_format.space_after = Pt(2)
-                    p_pair.paragraph_format.left_indent = Cm(0.5)
-                    run_pair = p_pair.add_run(f"{k}: {v}")
-                    run_pair.font.size = Pt(11)
+                    run.font.size = Pt(11)
 
     def compile_exercises(self, exercises: List[Dict[str, Any]], grade: str = "", unit: str = "", version_code: str = "", include_answer_key: bool = True):
         if isinstance(exercises, dict):
@@ -707,235 +629,7 @@ class WordDocumentCompiler:
                     
                     self.add_question(sub_q, sub_x)
                     self.add_options_grid(sub_o, ex_type, correct_ans=sub_a)
-
-            elif ex_type == "tb":
-                # Sound/Category Sorting Table
-                q_num = ex.get("q")
-                q_text = ex.get("x", "")
-                buckets_raw = ex.get("b", [])
-                buckets = list(buckets_raw) if isinstance(buckets_raw, list) else list(buckets_raw.keys())
-                
-                self.add_question(q_num, q_text)
-                
-                num_cols = max(len(buckets), 1)
-                # 1 header row + enough blank rows for students to write
-                num_data_rows = 5
-                
-                tbl = self.doc.add_table(rows=num_data_rows + 1, cols=num_cols)
-                tbl.style = "Table Grid"
-                tbl.alignment = 1
-                
-                font_size = self.settings.get("font_size", 12.0)
-                left_margin_cm = self.settings.get("margin_left", 3.0)
-                right_margin_cm = self.settings.get("margin_right", 1.5)
-                printable_width_cm = 21.0 - left_margin_cm - right_margin_cm
-                col_width_cm = printable_width_cm / num_cols
-                
-                for ci, bucket in enumerate(buckets):
-                    tbl.columns[ci].width = Cm(col_width_cm)
-                    cell = tbl.cell(0, ci)
-                    p = cell.paragraphs[0]
-                    p.alignment = 1
-                    p.paragraph_format.space_before = Pt(4)
-                    p.paragraph_format.space_after = Pt(4)
-                    run = p.add_run(bucket)
-                    run.bold = True
-                    run.font.size = Pt(font_size)
-                
-                # Blank rows for student answers
-                for ri in range(1, num_data_rows + 1):
-                    for ci in range(num_cols):
-                        cell = tbl.cell(ri, ci)
-                        p = cell.paragraphs[0]
-                        p.paragraph_format.space_before = Pt(4)
-                        p.paragraph_format.space_after = Pt(4)
-                        p.add_run("")
-
-            elif ex_type == "mt":
-                # Column Matching Exercise
-                q_num = ex.get("q")
-                q_text = ex.get("x", "Match the items in column A with column B.")
-                b_data = ex.get("b", {})
-                col_a = b_data.get("col_a", []) if isinstance(b_data, dict) else []
-                col_b = b_data.get("col_b", []) if isinstance(b_data, dict) else []
-                
-                self.add_question(q_num, q_text)
-                
-                num_rows = max(len(col_a), len(col_b))
-                if num_rows == 0:
-                    pass
-                else:
-                    font_size = self.settings.get("font_size", 12.0)
-                    left_margin_cm = self.settings.get("margin_left", 3.0)
-                    right_margin_cm = self.settings.get("margin_right", 1.5)
-                    printable_width_cm = 21.0 - left_margin_cm - right_margin_cm
                     
-                    # 3 columns: A items | gap | B items
-                    col_a_width = printable_width_cm * 0.35
-                    col_ans_width = printable_width_cm * 0.08
-                    col_b_width = printable_width_cm * 0.57
-                    
-                    tbl = self.doc.add_table(rows=num_rows + 1, cols=3)
-                    tbl.style = "Table Grid"
-                    tbl.alignment = 1
-                    tbl.columns[0].width = Cm(col_a_width)
-                    tbl.columns[1].width = Cm(col_ans_width)
-                    tbl.columns[2].width = Cm(col_b_width)
-                    
-                    # Header row
-                    for ci, hdr in enumerate(["A", "", "B"]):
-                        cell = tbl.cell(0, ci)
-                        p = cell.paragraphs[0]
-                        p.alignment = 1
-                        p.paragraph_format.space_before = Pt(4)
-                        p.paragraph_format.space_after = Pt(4)
-                        run = p.add_run(hdr)
-                        run.bold = True
-                        run.font.size = Pt(font_size)
-                    
-                    # Data rows
-                    for ri in range(num_rows):
-                        # Column A
-                        cell_a = tbl.cell(ri + 1, 0)
-                        p_a = cell_a.paragraphs[0]
-                        p_a.paragraph_format.space_before = Pt(4)
-                        p_a.paragraph_format.space_after = Pt(4)
-                        if ri < len(col_a):
-                            for seg in parse_text_formatting(col_a[ri]):
-                                run = p_a.add_run(seg["text"])
-                                if seg["bold"]: run.bold = True
-                                if seg["italic"]: run.italic = True
-                                if seg["underline"]: run.underline = True
-                        
-                        # Answer gap column
-                        cell_ans = tbl.cell(ri + 1, 1)
-                        p_ans = cell_ans.paragraphs[0]
-                        p_ans.alignment = 1
-                        p_ans.paragraph_format.space_before = Pt(4)
-                        p_ans.paragraph_format.space_after = Pt(4)
-                        p_ans.add_run("")
-                        
-                        # Column B
-                        cell_b = tbl.cell(ri + 1, 2)
-                        p_b = cell_b.paragraphs[0]
-                        p_b.paragraph_format.space_before = Pt(4)
-                        p_b.paragraph_format.space_after = Pt(4)
-                        if ri < len(col_b):
-                            for seg in parse_text_formatting(col_b[ri]):
-                                run = p_b.add_run(seg["text"])
-                                if seg["bold"]: run.bold = True
-                                if seg["italic"]: run.italic = True
-                                if seg["underline"]: run.underline = True
-
-            elif ex_type == "pl":
-                # Picture Labeling / Naming with Word Bank
-                q_num = ex.get("q")
-                q_text = ex.get("x", "Look at the pictures and name the activities.")
-                word_bank = ex.get("b", [])
-                sub_items = ex.get("k", [])
-                font_size = self.settings.get("font_size", 12.0)
-                
-                self.add_question(q_num, q_text)
-                
-                # Word bank line - render as a bordered box
-                if word_bank:
-                    # Use a 1x1 table cell as a bordered box (simulates rounded box)
-                    wb_tbl = self.doc.add_table(rows=1, cols=1)
-                    wb_tbl.alignment = 0
-                    
-                    left_margin_cm = self.settings.get("margin_left", 3.0)
-                    right_margin_cm = self.settings.get("margin_right", 1.5)
-                    printable_width_cm = 21.0 - left_margin_cm - right_margin_cm
-                    wb_tbl.columns[0].width = Cm(printable_width_cm)
-                    
-                    wb_cell = wb_tbl.cell(0, 0)
-                    p_wb = wb_cell.paragraphs[0]
-                    p_wb.alignment = 1
-                    p_wb.paragraph_format.space_before = Pt(6)
-                    p_wb.paragraph_format.space_after = Pt(6)
-                    p_wb.paragraph_format.left_indent = Cm(0.3)
-                    p_wb.paragraph_format.right_indent = Cm(0.3)
-                    
-                    wb_text = "     ".join(str(w) for w in word_bank)
-                    run_wbc = p_wb.add_run(wb_text)
-                    run_wbc.font.size = Pt(font_size)
-                    
-                    # Apply border to word bank cell
-                    border_spec = {"sz": 10, "val": "single", "color": "000000", "space": "0"}
-                    set_cell_border(
-                        wb_cell,
-                        top=border_spec,
-                        bottom=border_spec,
-                        left=border_spec,
-                        right=border_spec
-                    )
-                
-                # Sub-items: numbered picture placeholder + blank line for answer
-                # Render in a 2-column grid (up to 4 items per row)
-                num_cols = 2
-                num_subs = len(sub_items)
-                num_rows = math.ceil(num_subs / num_cols)
-                
-                if num_rows > 0:
-                    left_margin_cm = self.settings.get("margin_left", 3.0)
-                    right_margin_cm = self.settings.get("margin_right", 1.5)
-                    printable_width_cm = 21.0 - left_margin_cm - right_margin_cm
-                    cell_width = printable_width_cm / num_cols
-                    
-                    tbl = self.doc.add_table(rows=num_rows, cols=num_cols)
-                    tbl.alignment = 1
-                    
-                    for ri in range(num_rows):
-                        for ci in range(num_cols):
-                            idx = ri * num_cols + ci
-                            cell = tbl.cell(ri, ci)
-                            cell.width = Cm(cell_width)
-                            p = cell.paragraphs[0]
-                            p.alignment = 1
-                            p.paragraph_format.space_before = Pt(6)
-                            p.paragraph_format.space_after = Pt(6)
-                            if idx < num_subs:
-                                sub = sub_items[idx]
-                                sub_q = sub.get("q", str(idx + 1))
-                                # Picture placeholder box
-                                p.add_run(f"{sub_q}. ")
-                                run_pic = p.add_run("[                         ]")
-                                run_pic.font.size = Pt(font_size)
-                                # Answer blank on next line
-                                p2 = cell.add_paragraph()
-                                p2.alignment = 1
-                                p2.paragraph_format.space_before = Pt(2)
-                                p2.paragraph_format.space_after = Pt(6)
-                                p2.add_run("_______________________")
-
-            elif ex_type == "ec":
-                # Open Error Correction
-                q_num = ex.get("q")
-                q_text = ex.get("x", "")
-                font_size = self.settings.get("font_size", 12.0)
-                q_prefix = self.settings.get("question_prefix", "Question")
-                q_sep = self.settings.get("question_separator", ":")
-                
-                p = self.doc.add_paragraph()
-                p.paragraph_format.space_before = Pt(self.settings.get("question_space_before", 6.0))
-                p.paragraph_format.space_after = Pt(self.settings.get("question_space_after", 4.0))
-                
-                run_q = p.add_run(f"{q_prefix} {q_num}{q_sep} ")
-                run_q.bold = True
-                run_q.font.size = Pt(font_size)
-                
-                segments = parse_text_formatting(q_text)
-                for seg in segments:
-                    run = p.add_run(seg["text"])
-                    run.font.size = Pt(font_size)
-                    if seg["bold"]: run.bold = True
-                    if seg["italic"]: run.italic = True
-                    if seg["underline"]: run.underline = True
-                
-                # Answer blank
-                run_blank = p.add_run("  \u2192 _______________")
-                run_blank.font.size = Pt(font_size)
-                
             elif ex_type == "ro":
                 q_num = ex.get("q")
                 q_text = ex.get("x", "Choose the best arrangement of the sentences:")
@@ -985,33 +679,13 @@ class WordDocumentCompiler:
                 self.add_options_grid(ex.get("o", []), ex_type, correct_ans=ex.get("a", ""))
                 
             else:
-                # Generic MCQ question (pr, st, er, fb, rw, mq, ro, sy, an, sg, etc.)
                 q_num = ex.get("q")
                 q_text = ex.get("x", "")
                 options = ex.get("o", [])
                 ans = ex.get("a", "")
                 
-                # For pr/st/er types with no question text (x is empty), skip the question heading
-                # and just render the number inline with the options grid
-                if not q_text.strip() and ex_type in ["pr", "st"]:
-                    # Render options directly — add_options_grid will use q_num as prefix
-                    # We still need to output the question number before options
-                    font_size = self.settings.get("font_size", 12.0)
-                    # The options grid already handles layout; just call it
-                    # But we need a number prefix — inline number before A/B/C/D row
-                    # Patch: pass q_num into options grid by adding a tiny paragraph
-                    p_num = self.doc.add_paragraph()
-                    space_before = self.settings.get("question_space_before", 6.0)
-                    p_num.paragraph_format.space_before = Pt(space_before)
-                    p_num.paragraph_format.space_after = Pt(0)
-                    p_num.paragraph_format.keep_with_next = True
-                    run_num = p_num.add_run(f"{q_num}.")
-                    run_num.bold = True
-                    run_num.font.size = Pt(font_size)
-                    self.add_options_grid(options, ex_type, correct_ans=ans)
-                else:
-                    self.add_question(q_num, q_text)
-                    self.add_options_grid(options, ex_type, correct_ans=ans)
+                self.add_question(q_num, q_text)
+                self.add_options_grid(options, ex_type, correct_ans=ans)
 
         if include_answer_key:
             self.add_answer_key(exercises)
