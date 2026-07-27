@@ -37,21 +37,25 @@ Top-level object MUST contain a "data" array of question/exercise objects:
 
 Each object in "data" MUST use the following short key names:
 
-1. "t": (String) Exercise type code (MUST be one of: "pr", "st", "sy", "an", "er", "fb", "rw", "cz", "rd", "ro", "sg", "nt"):
+1. "t": (String) Exercise type code (MUST be one of: "pr", "st", "sy", "an", "er", "ec", "fb", "rw", "cz", "rd", "ro", "sg", "nt", "mt", "tb", "pl"):
    - "pr" : Pronunciation / Underlined sound
    - "st" : Stress
    - "sy" : Synonym
    - "an" : Antonym
-   - "er" : Error Identification
-   - "fb" : Fill in the Blank
+   - "er" : Error Identification (MCQ: [word](A))
+   - "ec" : Open Error Correction (Identify mistake & write correction)
+   - "fb" : Fill in the Blank / Word Form
    - "rw" : Rewrite Sentences
    - "cz" : Cloze Passage
    - "rd" : Reading Passage
    - "ro" : Sentence Reordering
    - "sg" : Sign Meaning
    - "nt" : Notice Meaning
+   - "mt" : Matching Exercise (Column A & Column B)
+   - "tb" : Table Categorization / Sound Classification
+   - "pl" : Picture Naming / Image Labeling
 
-2. "q": (String) Question number (e.g., "1", "15", "20").
+2. "q": (String) Question number or section numeral (e.g., "1", "15", "II").
 
 3. "x": (String) Question text / sentence prompt.
 
@@ -60,11 +64,28 @@ Each object in "data" MUST use the following short key names:
    - For Multiple Choice Questions (MCQ): Include answer choices in "o".
    - For Non-MCQ / Open-ended Questions (Fill-in-the-blank, Sentence Rewrite): Leave "o" empty: "o": []. The system automatically detects MCQ vs Non-MCQ based on "o".
 
-5. "a": (String, Optional) Correct answer ("A", "B", "C", "D" or answer text).
+5. "a": (String or Object, Optional) Correct answer ("A", "B", "C", "D", text, or mapping object for matching/table).
 
-6. "b": (String or Array of Strings, For "cz" / "rd" / "nt") Passage text body or notice text.
+6. "b": (String or Array of Strings, For "cz" / "rd" / "nt" / "tb" / "pl") Passage body, word bank array, or category headers.
 
-7. "k": (Array of Objects, For "cz" / "rd") Sub-questions for passage exercises. Each object inside "k" has {"q", "x", "o", "a"}.
+7. "k": (Array of Objects, For "cz" / "rd" / "mt" / "pl") Sub-questions for complex exercises.
+
+==================================================
+ADVANCED EXERCISE TYPES & SCHEMAS
+==================================================
+• Matching (Column A & B) [t: "mt"]:
+  Use "b": {"col_a": ["1. Item A1", "2. Item A2"], "col_b": ["a. Item B1", "b. Item B2"]}
+  Set "a": {"1": "b", "2": "a"}
+
+• Table Categorization / Sound Sorting [t: "tb"]:
+  Use "b": ["/ə/", "/ɜ:/"], "x": "Word bank: occasion, world, girl, answer..."
+  Set "a": {"/ə/": ["occasion", "answer"], "/ɜ:/": ["world", "girl"]}
+
+• Picture Naming / Labeling [t: "pl"]:
+  Use "b": ["cooking", "jogging", "gardening"], "k": [{"q": "1", "x": "[Picture 1]", "a": "cooking"}]
+
+• Open Error Correction [t: "ec"]:
+  Set "x": "Nam is my classmates.", "o": [], "a": "classmates -> classmate"
 
 ==================================================
 INLINE FORMATTING RULES
@@ -73,7 +94,6 @@ Preserve text formatting using these exact inline tags:
 - Underlined letters/words: Enclose in brackets -> e.g. "pass[ed]" or "[living in](A)"
 - Bold text: Enclose in double asterisks -> e.g. "**Investigative**:"
 - Italic text: Enclose in single asterisks -> e.g. "*Note:*"
-- Error identification choices in "x": Use format "[text](LETTER)" -> e.g. "She [go](A) to [school](B) yesterday."
 
 ==================================================
 EXAMPLE OUTPUT
@@ -87,25 +107,28 @@ EXAMPLE OUTPUT
       "a": "D"
     },
     {
-      "t": "fb",
-      "q": "2",
-      "x": "She is very _______ (INTEREST) in learning English.",
-      "o": [],
-      "a": "interested"
+      "t": "tb",
+      "q": "I",
+      "x": "Put the words in the correct column: occasion, world, girl, answer",
+      "b": ["/ə/", "/ɜ:/"],
+      "a": {"/ə/": ["occasion", "answer"], "/ɜ:/": ["world", "girl"]}
     },
     {
-      "t": "rw",
-      "q": "3",
-      "x": "Living in a big city is more expensive than living in a rural village.\\n(Living in)",
-      "o": [],
-      "a": "Living in a rural village is cheaper than living in a big city."
+      "t": "mt",
+      "q": "II",
+      "x": "Match the word(s) in A with the rest in B to make a complete sentence.",
+      "b": {
+        "col_a": ["1. Model making", "2. Coin collecting"],
+        "col_b": ["a. helps you learn about countries", "b. means making small replicas"]
+      },
+      "a": {"1": "b", "2": "a"}
     },
     {
-      "t": "er",
-      "q": "4",
-      "x": "My brother [is](A) very good [at](B) playing [the](C) guitar, isn't [him](D)?",
-      "o": ["is", "at", "the", "him"],
-      "a": "D"
+      "t": "ec",
+      "q": "1",
+      "x": "Nam is my classmates. He watches TV every night.",
+      "o": [],
+      "a": "classmates -> classmate"
     }
   ]
 }`
