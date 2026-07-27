@@ -7,6 +7,7 @@ import webbrowser
 import uvicorn
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
+os.chdir(ROOT)
 
 # Add backend directory to path so imports inside backend resolve correctly
 sys.path.append(os.path.join(ROOT, "backend"))
@@ -29,14 +30,6 @@ def kill_port_8000():
     except Exception:
         pass
 
-def open_browser(url: str):
-    """Waits for backend to start, then opens default browser."""
-    time.sleep(1.2)
-    try:
-        webbrowser.open(url)
-    except Exception:
-        pass
-
 def main():
     # 1. Clean up any leftover server process holding port 8000
     kill_port_8000()
@@ -49,12 +42,6 @@ def main():
         print("Vite development server detected. Running in DEV mode.")
     except Exception:
         print("Vite dev server not found. Running in PRODUCTION mode.")
-
-    is_background = "--background" in sys.argv or "--silent" in sys.argv
-
-    if not is_background:
-        # Open default browser in a delayed background thread
-        threading.Thread(target=open_browser, args=(url,), daemon=True).start()
 
     print("\n" + "=" * 55)
     print("  CENTER MANAGER & TEST FORMATTER IS RUNNING")

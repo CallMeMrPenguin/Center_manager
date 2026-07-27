@@ -38,7 +38,8 @@ export default function KiemTraPage() {
   const [timerMode, setTimerMode] = useState<'none' | 'global' | 'per_question'>('none');
   const [globalTimeSeconds, setGlobalTimeSeconds] = useState(1800); // 30 mins default
   const [perQuestionSeconds, setPerQuestionSeconds] = useState(45);
-  const [shuffleToggle, setShuffleToggle] = useState(true);
+  const [shuffleQuestions, setShuffleQuestions] = useState(true);
+  const [shuffleOptions, setShuffleOptions] = useState(true);
   
   // Student Score Assignment
   const [classesList, setClassesList] = useState<any[]>([]);
@@ -198,13 +199,13 @@ export default function KiemTraPage() {
 
     let qList = testData.questions.map((q) => {
       let opts = q.options ? [...q.options] : [];
-      if (shuffleToggle && opts.length > 1) {
+      if (shuffleOptions && opts.length > 1) {
         opts.sort(() => Math.random() - 0.5);
       }
       return { ...q, options: opts };
     });
 
-    if (shuffleToggle) {
+    if (shuffleQuestions) {
       qList.sort(() => Math.random() - 0.5);
     }
 
@@ -532,17 +533,37 @@ export default function KiemTraPage() {
               )}
             </div>
 
-            {/* SHUFFLE TOGGLE */}
-            <div className="flex items-center justify-between p-3.5 bg-white/5 border border-white/10 rounded-xl">
-              <span className="text-xs font-extrabold text-white">Xáo Trộn Câu Hỏi & Đáp Án</span>
-              <button
-                onClick={() => setShuffleToggle(!shuffleToggle)}
-                className={`w-12 h-6 rounded-full transition-colors p-0.5 border cursor-pointer ${
-                  shuffleToggle ? 'bg-indigo-600 border-indigo-400' : 'bg-slate-700 border-slate-600'
-                }`}
-              >
-                <div className={`w-5 h-5 rounded-full bg-white transition-transform ${shuffleToggle ? 'translate-x-6' : 'translate-x-0'}`} />
-              </button>
+            {/* SHUFFLE TOGGLES */}
+            <div className="space-y-2.5">
+              <div className="flex items-center justify-between p-3.5 bg-white/5 border border-white/10 rounded-xl">
+                <div className="flex items-center gap-2">
+                  <Shuffle size={15} className="text-indigo-400" />
+                  <span className="text-xs font-extrabold text-white">Xáo Trộn Thứ Tự Câu Hỏi</span>
+                </div>
+                <button
+                  onClick={() => setShuffleQuestions(!shuffleQuestions)}
+                  className={`w-12 h-6 rounded-full transition-colors p-0.5 border cursor-pointer ${
+                    shuffleQuestions ? 'bg-indigo-600 border-indigo-400' : 'bg-slate-700 border-slate-600'
+                  }`}
+                >
+                  <div className={`w-5 h-5 rounded-full bg-white transition-transform ${shuffleQuestions ? 'translate-x-6' : 'translate-x-0'}`} />
+                </button>
+              </div>
+
+              <div className="flex items-center justify-between p-3.5 bg-white/5 border border-white/10 rounded-xl">
+                <div className="flex items-center gap-2">
+                  <Shuffle size={15} className="text-indigo-400" />
+                  <span className="text-xs font-extrabold text-white">Xáo Trộn Thứ Tự Đáp Án</span>
+                </div>
+                <button
+                  onClick={() => setShuffleOptions(!shuffleOptions)}
+                  className={`w-12 h-6 rounded-full transition-colors p-0.5 border cursor-pointer ${
+                    shuffleOptions ? 'bg-indigo-600 border-indigo-400' : 'bg-slate-700 border-slate-600'
+                  }`}
+                >
+                  <div className={`w-5 h-5 rounded-full bg-white transition-transform ${shuffleOptions ? 'translate-x-6' : 'translate-x-0'}`} />
+                </button>
+              </div>
             </div>
 
             {/* ASSIGNMENT FOR STUDENT */}

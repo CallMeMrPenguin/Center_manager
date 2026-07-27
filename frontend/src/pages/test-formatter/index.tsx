@@ -674,48 +674,50 @@ export default function TestFormatter({
           
           {/* Editor Topbar */}
           <div className="h-14 border-b border-[#202842] bg-[#121629] flex items-center justify-between px-6 shrink-0 gap-3 relative z-30">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 group/left-toolbar">
               <button 
                 onClick={() => setShowConfig(!showConfig)}
-                className={`p-2 rounded-xl border transition-all duration-300 flex items-center gap-1.5 text-xs font-bold cursor-pointer ${
+                className={`p-2.5 rounded-xl border transition-all duration-300 flex items-center text-xs font-bold cursor-pointer ${
                   showConfig 
                     ? 'bg-[#5c36f5] text-white border-transparent px-3 shadow-md shadow-indigo-500/20' 
                     : 'bg-[#181f36] text-slate-300 border-[#283354] hover:bg-[#222a46] hover:text-white shadow-sm'
                 }`}
                 title={showConfig ? "Ẩn cấu hình lề và cỡ chữ" : "Hiện cấu hình lề và cỡ chữ"}
               >
-                <Settings size={14} />
-                {showConfig && <span>Căn Lề & Chữ</span>}
+                <Settings size={14} className="shrink-0" />
+                <span className={`transition-all duration-300 whitespace-nowrap overflow-hidden ${
+                  showConfig ? 'max-w-xs opacity-100 ml-1.5' : 'max-w-0 opacity-0 group-hover/left-toolbar:max-w-xs group-hover/left-toolbar:opacity-100 group-hover/left-toolbar:ml-1.5'
+                }`}>Căn Lề & Chữ</span>
               </button>
             </div>
 
-            <div className="flex items-center gap-3 flex-wrap md:flex-nowrap justify-end">
+            <div className="flex items-center gap-2.5 flex-wrap md:flex-nowrap justify-end group/function-bar">
               <PromptManager 
                 storageKey="prompts_test_formatter" 
                 tabTitle="Trình Tạo Đề Thi" 
                 defaultPrompts={DEFAULT_TEST_FORMATTER_PROMPTS} 
               />
 
-              <label className="group px-3.5 py-2 rounded-xl bg-[#181f36] border border-[#283354] hover:bg-[#222a46] text-slate-300 hover:text-white text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shadow-sm">
-                <Upload size={14} />
-                <span>Nạp JSON</span>
+              <label className="px-3 py-2 rounded-xl bg-[#181f36] border border-[#283354] hover:bg-[#222a46] text-slate-300 hover:text-white text-xs font-bold transition-all flex items-center cursor-pointer shadow-sm" title="Nạp dữ liệu từ file JSON">
+                <Upload size={14} className="shrink-0" />
+                <span className="max-w-0 opacity-0 group-hover/function-bar:max-w-xs group-hover/function-bar:opacity-100 group-hover/function-bar:ml-1.5 transition-all duration-300 whitespace-nowrap overflow-hidden inline-block">Nạp JSON</span>
                 <input type="file" accept=".json" onChange={handleDirectFileUpload} className="hidden" />
               </label>
 
-              <label className="group px-3.5 py-2 rounded-xl bg-[#181f36] border border-[#283354] hover:bg-[#222a46] text-slate-300 hover:text-white text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shadow-sm" title="Chuyển đổi file Word (.docx) sang JSON">
-                <Upload size={14} className="text-amber-400" />
-                <span>Nhập từ DOCX</span>
+              <label className="px-3 py-2 rounded-xl bg-[#181f36] border border-[#283354] hover:bg-[#222a46] text-slate-300 hover:text-white text-xs font-bold transition-all flex items-center cursor-pointer shadow-sm" title="Chuyển đổi file Word (.docx) sang JSON">
+                <Upload size={14} className="text-amber-400 shrink-0" />
+                <span className="max-w-0 opacity-0 group-hover/function-bar:max-w-xs group-hover/function-bar:opacity-100 group-hover/function-bar:ml-1.5 transition-all duration-300 whitespace-nowrap overflow-hidden inline-block">Nhập từ DOCX</span>
                 <input type="file" accept=".docx" onChange={handleDocxFileUpload} className="hidden" />
               </label>
 
-              <label className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-[#181f36] border border-[#283354] text-slate-300 text-xs font-bold cursor-pointer select-none hover:text-white transition">
+              <label className="flex items-center px-3 py-2 rounded-xl bg-[#181f36] border border-[#283354] text-slate-300 text-xs font-bold cursor-pointer select-none hover:text-white transition shadow-sm" title="Lưu vào quản lý Tài liệu">
                 <input 
                   type="checkbox" 
                   checked={saveToDocs} 
                   onChange={(e) => setSaveToDocs(e.target.checked)} 
-                  className="rounded border-[#283354] bg-[#121629] text-indigo-500 cursor-pointer"
+                  className="rounded border-[#283354] bg-[#121629] text-indigo-500 cursor-pointer shrink-0"
                 />
-                <span>Lưu vào Tài liệu</span>
+                <span className="max-w-0 opacity-0 group-hover/function-bar:max-w-xs group-hover/function-bar:opacity-100 group-hover/function-bar:ml-1.5 transition-all duration-300 whitespace-nowrap overflow-hidden inline-block">Lưu vào Tài liệu</span>
               </label>
 
               {/* Compile/Export Dropdown */}
@@ -723,11 +725,14 @@ export default function TestFormatter({
                 <button
                   onClick={() => setShowExportMenu(!showExportMenu)}
                   disabled={compiling}
-                  className="group px-4 py-2 rounded-xl bg-[#5c36f5] hover:bg-[#7351f7] disabled:opacity-50 text-white text-xs font-black transition-all flex items-center gap-2 cursor-pointer shadow-md shadow-indigo-500/20 border border-white/20"
+                  className="px-3 py-2 rounded-xl bg-[#5c36f5] hover:bg-[#7351f7] disabled:opacity-50 text-white text-xs font-black transition-all flex items-center cursor-pointer shadow-md shadow-indigo-500/20 border border-white/20"
+                  title="Xuất đề thi ra Word / Excel"
                 >
-                  <Download size={14} className={compiling ? "animate-spin" : ""} />
-                  <span>Xuất Đề Thi</span>
-                  <ChevronRight size={12} className={`transform transition-transform ${showExportMenu ? 'rotate-90' : ''}`} />
+                  <Download size={14} className={`shrink-0 ${compiling ? "animate-spin" : ""}`} />
+                  <span className={`transition-all duration-300 whitespace-nowrap overflow-hidden ${
+                    showExportMenu ? 'max-w-xs opacity-100 ml-1.5 mr-1' : 'max-w-0 opacity-0 group-hover/function-bar:max-w-xs group-hover/function-bar:opacity-100 group-hover/function-bar:ml-1.5 group-hover/function-bar:mr-1'
+                  }`}>Xuất Đề Thi</span>
+                  <ChevronRight size={12} className={`shrink-0 transform transition-transform ${showExportMenu ? 'rotate-90' : ''}`} />
                 </button>
 
                 {showExportMenu && (
@@ -817,15 +822,15 @@ export default function TestFormatter({
             </div>
 
             {/* Zoom controls and generate controls */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2.5 group/preview-toolbar">
               <button 
                 onClick={handleGeneratePdfPreview}
                 disabled={pdfLoading}
-                className="px-3.5 py-1.5 rounded-xl bg-[#5c36f5] hover:bg-[#7351f7] text-white font-extrabold text-[0.66rem] flex items-center gap-1.5 transition shadow-md cursor-pointer disabled:opacity-50 border border-white/20"
+                className="px-3 py-1.5 rounded-xl bg-[#5c36f5] hover:bg-[#7351f7] text-white font-extrabold text-[0.66rem] flex items-center transition shadow-md cursor-pointer disabled:opacity-50 border border-white/20"
                 title="Tạo lại bản xem trước PDF từ nội dung JSON"
               >
-                <RefreshCw size={12} className={pdfLoading ? "animate-spin" : ""} />
-                <span>{pdfLoading ? "Đang tạo PDF..." : "Cập Nhật Xem Trước PDF"}</span>
+                <RefreshCw size={12} className={`shrink-0 ${pdfLoading ? "animate-spin" : ""}`} />
+                <span className="max-w-0 opacity-0 group-hover/preview-toolbar:max-w-xs group-hover/preview-toolbar:opacity-100 group-hover/preview-toolbar:ml-1.5 transition-all duration-300 whitespace-nowrap overflow-hidden inline-block">{pdfLoading ? "Đang tạo PDF..." : "Cập Nhật Xem Trước PDF"}</span>
               </button>
               {pdfUrl && (
                 <div className="flex items-center gap-2">
@@ -850,11 +855,11 @@ export default function TestFormatter({
                   </div>
                   <button 
                     onClick={() => window.open(pdfUrl, '_blank')}
-                    className="p-2 rounded-xl bg-[#181f36] border border-[#283354] hover:bg-[#222a46] text-slate-300 hover:text-white transition cursor-pointer flex items-center gap-1.5 text-[0.66rem] font-extrabold shadow-sm"
+                    className="p-2 rounded-xl bg-[#181f36] border border-[#283354] hover:bg-[#222a46] text-slate-300 hover:text-white transition cursor-pointer flex items-center text-[0.66rem] font-extrabold shadow-sm"
                     title="Xem trong trình duyệt"
                   >
-                    <ExternalLink size={13} />
-                    <span>Xem Trình Duyệt</span>
+                    <ExternalLink size={13} className="shrink-0" />
+                    <span className="max-w-0 opacity-0 group-hover/preview-toolbar:max-w-xs group-hover/preview-toolbar:opacity-100 group-hover/preview-toolbar:ml-1.5 transition-all duration-300 whitespace-nowrap overflow-hidden inline-block">Xem Trình Duyệt</span>
                   </button>
                 </div>
               )}
