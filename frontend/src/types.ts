@@ -37,6 +37,8 @@ export interface LayoutSettings {
   notice_space_before: number;
   notice_space_after: number;
   notice_left_indent: number;
+  question_prefix: string;
+  question_separator: string;
 }
 
 export interface SystemCheck {

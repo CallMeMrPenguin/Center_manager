@@ -273,27 +273,30 @@ class WordDocumentCompiler:
         run.bold = True
         run.font.size = Pt(font_size)
 
-    def add_question(self, q_num: Any, q_text: str):
+    def add_question(self, q_num: Any, q_text: str, prefix: str = None, separator: str = None):
         space_before = self.settings.get("question_space_before", 6.0)
         space_after = self.settings.get("question_space_after", 4.0)
+        q_prefix = prefix if prefix is not None else self.settings.get("question_prefix", "Question")
+        q_sep = separator if separator is not None else self.settings.get("question_separator", ":")
         
         p = self.doc.add_paragraph()
         p.paragraph_format.space_before = Pt(space_before)
         p.paragraph_format.space_after = Pt(space_after)
         p.paragraph_format.keep_with_next = True
         
-        run_q = p.add_run(f"Question {q_num}: ")
+        run_q = p.add_run(f"{q_prefix} {q_num}{q_sep} ")
         run_q.bold = True
         
-        segments = parse_text_formatting(q_text)
-        for seg in segments:
-            run = p.add_run(seg["text"])
-            if seg["bold"]:
-                run.bold = True
-            if seg["italic"]:
-                run.italic = True
-            if seg["underline"]:
-                run.underline = True
+        if q_text:
+            segments = parse_text_formatting(q_text)
+            for seg in segments:
+                run = p.add_run(seg["text"])
+                if seg["bold"]:
+                    run.bold = True
+                if seg["italic"]:
+                    run.italic = True
+                if seg["underline"]:
+                    run.underline = True
 
     def add_options_grid(self, options: List[str], exercise_type: str, correct_ans: Any = None):
         if not options:
@@ -834,18 +837,38 @@ class WordDocumentCompiler:
                 
                 self.add_question(q_num, q_text)
                 
-                # Word bank line
+                # Word bank line - render as a bordered box
                 if word_bank:
-                    p_wb = self.doc.add_paragraph()
-                    p_wb.paragraph_format.space_before = Pt(4)
+                    # Use a 1x1 table cell as a bordered box (simulates rounded box)
+                    wb_tbl = self.doc.add_table(rows=1, cols=1)
+                    wb_tbl.alignment = 0
+                    
+                    left_margin_cm = self.settings.get("margin_left", 3.0)
+                    right_margin_cm = self.settings.get("margin_right", 1.5)
+                    printable_width_cm = 21.0 - left_margin_cm - right_margin_cm
+                    wb_tbl.columns[0].width = Cm(printable_width_cm)
+                    
+                    wb_cell = wb_tbl.cell(0, 0)
+                    p_wb = wb_cell.paragraphs[0]
+                    p_wb.alignment = 1
+                    p_wb.paragraph_format.space_before = Pt(6)
                     p_wb.paragraph_format.space_after = Pt(6)
-                    p_wb.paragraph_format.left_indent = Cm(0.5)
-                    run_wbl = p_wb.add_run("Word bank: ")
-                    run_wbl.bold = True
-                    run_wbl.font.size = Pt(font_size)
-                    run_wbc = p_wb.add_run(",  ".join(str(w) for w in word_bank))
-                    run_wbc.italic = True
+                    p_wb.paragraph_format.left_indent = Cm(0.3)
+                    p_wb.paragraph_format.right_indent = Cm(0.3)
+                    
+                    wb_text = "     ".join(str(w) for w in word_bank)
+                    run_wbc = p_wb.add_run(wb_text)
                     run_wbc.font.size = Pt(font_size)
+                    
+                    # Apply border to word bank cell
+                    border_spec = {"sz": 10, "val": "single", "color": "000000", "space": "0"}
+                    set_cell_border(
+                        wb_cell,
+                        top=border_spec,
+                        bottom=border_spec,
+                        left=border_spec,
+                        right=border_spec
+                    )
                 
                 # Sub-items: numbered picture placeholder + blank line for answer
                 # Render in a 2-column grid (up to 4 items per row)
@@ -890,12 +913,14 @@ class WordDocumentCompiler:
                 q_num = ex.get("q")
                 q_text = ex.get("x", "")
                 font_size = self.settings.get("font_size", 12.0)
+                q_prefix = self.settings.get("question_prefix", "Question")
+                q_sep = self.settings.get("question_separator", ":")
                 
                 p = self.doc.add_paragraph()
                 p.paragraph_format.space_before = Pt(self.settings.get("question_space_before", 6.0))
                 p.paragraph_format.space_after = Pt(self.settings.get("question_space_after", 4.0))
                 
-                run_q = p.add_run(f"Question {q_num}: ")
+                run_q = p.add_run(f"{q_prefix} {q_num}{q_sep} ")
                 run_q.bold = True
                 run_q.font.size = Pt(font_size)
                 
@@ -908,7 +933,7 @@ class WordDocumentCompiler:
                     if seg["underline"]: run.underline = True
                 
                 # Answer blank
-                run_blank = p.add_run("  → _______________")
+                run_blank = p.add_run("  \u2192 _______________")
                 run_blank.font.size = Pt(font_size)
                 
             elif ex_type == "ro":
@@ -960,13 +985,33 @@ class WordDocumentCompiler:
                 self.add_options_grid(ex.get("o", []), ex_type, correct_ans=ex.get("a", ""))
                 
             else:
+                # Generic MCQ question (pr, st, er, fb, rw, mq, ro, sy, an, sg, etc.)
                 q_num = ex.get("q")
                 q_text = ex.get("x", "")
                 options = ex.get("o", [])
                 ans = ex.get("a", "")
                 
-                self.add_question(q_num, q_text)
-                self.add_options_grid(options, ex_type, correct_ans=ans)
+                # For pr/st/er types with no question text (x is empty), skip the question heading
+                # and just render the number inline with the options grid
+                if not q_text.strip() and ex_type in ["pr", "st"]:
+                    # Render options directly — add_options_grid will use q_num as prefix
+                    # We still need to output the question number before options
+                    font_size = self.settings.get("font_size", 12.0)
+                    # The options grid already handles layout; just call it
+                    # But we need a number prefix — inline number before A/B/C/D row
+                    # Patch: pass q_num into options grid by adding a tiny paragraph
+                    p_num = self.doc.add_paragraph()
+                    space_before = self.settings.get("question_space_before", 6.0)
+                    p_num.paragraph_format.space_before = Pt(space_before)
+                    p_num.paragraph_format.space_after = Pt(0)
+                    p_num.paragraph_format.keep_with_next = True
+                    run_num = p_num.add_run(f"{q_num}.")
+                    run_num.bold = True
+                    run_num.font.size = Pt(font_size)
+                    self.add_options_grid(options, ex_type, correct_ans=ans)
+                else:
+                    self.add_question(q_num, q_text)
+                    self.add_options_grid(options, ex_type, correct_ans=ans)
 
         if include_answer_key:
             self.add_answer_key(exercises)

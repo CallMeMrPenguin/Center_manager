@@ -66,9 +66,26 @@ Each object in "data" MUST use the following short key names:
 
 5. "a": (String or Object, Optional) Correct answer ("A", "B", "C", "D", text, or mapping object for matching/table).
 
-6. "b": (String or Array of Strings, For "cz" / "rd" / "nt" / "tb" / "pl") Passage body, word bank array, or category headers.
+6. "b": (String or Array of Strings) Used for:
+   - "cz" / "rd": Passage body paragraphs
+   - "nt": Notice body text
+   - "tb": Category header array, e.g. ["/ə/", "/ɜ:/"]
+   - "pl": Word bank array, e.g. ["cooking", "jogging", "gardening"]
+   - ANY exercise that shows a WORD BANK BOX with words to fill in blanks:
+     Add "b": ["word1", "word2", ...] to the exercise object.
+     The compiler will render this as a bordered word bank box above the items.
 
 7. "k": (Array of Objects, For "cz" / "rd" / "mt" / "pl") Sub-questions for complex exercises.
+
+8. "img": (String, Optional) Image path or placeholder for the exercise.
+   IMAGE PLACEMENT RULES:
+   - To attach an image to the WHOLE question (above options): set "img" on the exercise root object.
+     Example: {"t": "pl", "q": "I", "x": "Name the activities.", "img": "picture_I.jpg", "b": [...], "k": [...]}
+   - To attach an image to a SPECIFIC SUB-QUESTION inside "k": set "img" on that sub-item.
+     Example: {"q": "1", "x": "[Picture 1]", "img": "pic1.jpg", "a": "cooking"}
+   - If you do not know the filename, use sequential placeholders: "img": "pic1.jpg", "pic2.jpg", etc.
+     Images will be assigned in order by the teacher.
+   - If an exercise has NO image, omit "img" entirely.
 
 ==================================================
 ADVANCED EXERCISE TYPES & SCHEMAS
@@ -159,7 +176,9 @@ const DEFAULT_LAYOUT: LayoutSettings = {
   reorder_left_indent: 1.0,
   notice_space_before: 4.0,
   notice_space_after: 6.0,
-  notice_left_indent: 1.0
+  notice_left_indent: 1.0,
+  question_prefix: "Question",
+  question_separator: ":"
 };
 
 const MOCK_PAYLOAD = [
@@ -686,6 +705,36 @@ export default function TestFormatter({
             {renderSettingInput("Cỡ chữ (pt)", "font_size", 8, 20, 0.5)}
             {renderSettingInput("Giãn dòng", "line_spacing", 1.0, 3.0, 0.05)}
             {renderSettingInput("Khoảng cách đoạn (pt)", "space_after", 0, 24, 1)}
+          </div>
+
+          {/* Question Label Format */}
+          <h3 className="text-[0.66rem] font-bold text-slate-400 uppercase tracking-wider mt-4 mb-1">Nhãn Câu Hỏi</h3>
+          <div className="flex flex-col gap-2 bg-[#181f36] p-2.5 rounded-xl border border-[#252e4e] mt-1">
+            <div className="text-[0.6rem] text-slate-500 font-semibold mb-0.5">
+              Ví dụ: <span className="text-indigo-300 font-bold">{layout.question_prefix} 1{layout.question_separator}</span>
+            </div>
+            <div className="flex gap-2 items-end">
+              <div className="flex flex-col gap-1 flex-1">
+                <label className="text-[0.6rem] font-bold text-slate-400">Từ trước số</label>
+                <input
+                  type="text"
+                  value={layout.question_prefix ?? 'Question'}
+                  onChange={(e) => setLayout(prev => ({ ...prev, question_prefix: e.target.value }))}
+                  placeholder="Question"
+                  className="bg-[#121629] border border-[#283354] px-2.5 py-1.5 rounded-lg text-xs text-white font-bold focus:outline-none focus:border-indigo-500"
+                />
+              </div>
+              <div className="flex flex-col gap-1 w-14">
+                <label className="text-[0.6rem] font-bold text-slate-400">Dấu</label>
+                <input
+                  type="text"
+                  value={layout.question_separator ?? ':'}
+                  onChange={(e) => setLayout(prev => ({ ...prev, question_separator: e.target.value }))}
+                  placeholder=":"
+                  className="bg-[#121629] border border-[#283354] px-2.5 py-1.5 rounded-lg text-xs text-white font-bold focus:outline-none focus:border-indigo-500"
+                />
+              </div>
+            </div>
           </div>
 
           {/* Mix Options Option */}
