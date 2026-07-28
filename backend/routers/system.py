@@ -152,13 +152,25 @@ def api_delete_profile(name: str):
 @router.post("/api/test/compile")
 def api_compile_test(req: CompileModel):
     try:
+        files_dir = get_setting("files_dir")
+        if not files_dir or not os.path.exists(files_dir):
+            files_dir = os.path.join(BASE_DIR, "workspace_files")
+        os.makedirs(files_dir, exist_ok=True)
+
+        target_dir = files_dir
+        if req.save_folder_id:
+            sub_dir = os.path.join(files_dir, req.save_folder_id)
+            if os.path.exists(sub_dir):
+                target_dir = sub_dir
+
         compiler = WordDocumentCompiler(req.settings)
         filename, filepath, files_list = compiler.compile_test_versions(
             req.exercises,
             num_versions=req.num_versions or 1,
             mix_options=req.mix_options if req.mix_options is not None else True,
             grade=req.grade or "",
-            unit=req.unit or ""
+            unit=req.unit or "",
+            output_dir=target_dir
         )
         return {"success": True, "filename": filename, "filepath": filepath, "files": files_list}
     except Exception as e:

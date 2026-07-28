@@ -1403,7 +1403,8 @@ class WordDocumentCompiler:
             return False
 
     def compile(self, exercises: List[Dict[str, Any]], output_filepath: Any, grade: str = "", unit: str = "", version_code: str = "", include_answer_key: bool = True, is_answer_key: bool = False, is_test: bool = False):
-        if win32com_available:
+        use_win32 = self.settings.get("use_win32_word", False)
+        if use_win32 and win32com_available:
             try:
                 compiler_win32 = WordDocumentCompilerPyWin32(self.settings)
                 compiler_win32.compile(exercises, output_filepath, grade=grade, unit=unit, version_code=version_code, include_answer_key=include_answer_key, is_answer_key=is_answer_key, is_test=is_test)
@@ -1414,16 +1415,19 @@ class WordDocumentCompiler:
         compiler_docx = WordDocumentCompilerDocx(self.settings)
         compiler_docx.compile(exercises, output_filepath, grade=grade, unit=unit, version_code=version_code, include_answer_key=include_answer_key, is_answer_key=is_answer_key, is_test=is_test)
 
-    def compile_test_versions(self, exercises: List[Dict[str, Any]], num_versions: int = 1, mix_options: bool = True, grade: str = "", unit: str = ""):
-        try:
-            from config.settings import BASE_DIR, get_setting
-            files_dir = get_setting("files_dir")
-            if files_dir and os.path.exists(files_dir):
-                out_dir = files_dir
-            else:
-                out_dir = os.path.join(BASE_DIR, "temp_compiled")
-        except Exception:
-            out_dir = os.path.join(os.getcwd(), "temp_compiled")
+    def compile_test_versions(self, exercises: List[Dict[str, Any]], num_versions: int = 1, mix_options: bool = True, grade: str = "", unit: str = "", output_dir: str = None):
+        if output_dir and os.path.exists(output_dir):
+            out_dir = output_dir
+        else:
+            try:
+                from config.settings import BASE_DIR, get_setting
+                files_dir = get_setting("files_dir")
+                if files_dir and os.path.exists(files_dir):
+                    out_dir = files_dir
+                else:
+                    out_dir = os.path.join(BASE_DIR, "workspace_files")
+            except Exception:
+                out_dir = os.path.join(os.getcwd(), "workspace_files")
 
         os.makedirs(out_dir, exist_ok=True)
         timestamp = int(time.time())

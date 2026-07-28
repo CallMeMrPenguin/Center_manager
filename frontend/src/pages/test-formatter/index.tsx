@@ -385,27 +385,7 @@ export default function TestFormatter({
       if (res.success) {
         const filesList = res.files || [res.filename];
         setLastCompiledFiles(filesList);
-        showToast(`Đã tạo thành công ${filesList.length} phiên bản đề thi!`, "success");
-
-        filesList.forEach((fname: string) => {
-          const downloadUrl = `/api/files/download/${encodeURIComponent(fname)}`;
-          const a = document.createElement('a');
-          a.href = downloadUrl;
-          a.download = fname;
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
-        });
-
-        filesList.forEach((fname: string) => {
-          const downloadUrl = `/api/files/download/${encodeURIComponent(fname)}`;
-          const a = document.createElement('a');
-          a.href = downloadUrl;
-          a.download = fname;
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
-        });
+        showToast(`Đã xuất bản thành công ${filesList.length} đề thi vào thư mục workspace_files!`, "success");
       }
     } catch (e) {
       showToast("Lỗi biên dịch đề thi: " + e, "error");
