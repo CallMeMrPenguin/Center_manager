@@ -605,23 +605,15 @@ class WordDocumentCompilerPyWin32:
         char_w_pt = 7.2 # Average character width in 12pt bold font
         col_width_pt = (max_len_all * char_w_pt) + 14.0
         
-        # Measure character width of the last column (col 5)
-        last_col_words = [words[i] for i in range(cols - 1, N, cols)] if N >= cols else [words[-1]]
-        last_col_max_len = max(len(str(w)) for w in last_col_words) if last_col_words else 8
-        last_col_text_w_pt = last_col_max_len * char_w_pt
-        
-        text_group_width_pt = ((cols - 1) * col_width_pt) + last_col_text_w_pt
-        left_offset_pt = max(0.0, (printable_width_pt - text_group_width_pt) / 2.0)
-        
-        # Configure paragraph indent and tab stops for centered multi-column word box
+        # Configure initial paragraph indent and tab stops for multi-column word box
         sel.ParagraphFormat.SpaceBefore = 3
         sel.ParagraphFormat.SpaceAfter = 0
         sel.ParagraphFormat.LineSpacingRule = 0 # Standard single line spacing for first rows
         sel.ParagraphFormat.Alignment = 0 # Left align inside tab stop
-        sel.ParagraphFormat.LeftIndent = left_offset_pt
+        sel.ParagraphFormat.LeftIndent = 0
         sel.ParagraphFormat.TabStops.ClearAll()
         for c in range(1, cols):
-            tab_pos = left_offset_pt + (col_width_pt * c)
+            tab_pos = col_width_pt * c
             sel.ParagraphFormat.TabStops.Add(Position=tab_pos, Alignment=0)
             
         p_start = sel.Range.Start
@@ -649,10 +641,38 @@ class WordDocumentCompilerPyWin32:
         p_end = sel.Range.Start
         box_range = self.doc.Range(p_start, p_end)
         
+        # 100% Empirical measurement from MS Word layout engine using Information(5)
+        actual_width = 300.0
+        try:
+            char_last = self.doc.Range(p_end - 2, p_end - 1)
+            char_last.Select()
+            end_x = sel.Information(5)
+            char_first = self.doc.Range(p_start, p_start + 1)
+            char_first.Select()
+            start_x = sel.Information(5)
+            if end_x > start_x:
+                actual_width = end_x - start_x
+        except Exception:
+            last_col_words = [words[i] for i in range(cols - 1, N, cols)] if N >= cols else [words[-1]]
+            last_col_max_len = max(len(str(w)) for w in last_col_words) if last_col_words else 8
+            actual_width = ((cols - 1) * col_width_pt) + (last_col_max_len * char_w_pt)
+            
+        left_offset_pt = max(0.0, (printable_width_pt - actual_width) / 2.0)
+        
+        # Center the word paragraphs on the page
+        try:
+            box_range.ParagraphFormat.LeftIndent = left_offset_pt
+            box_range.ParagraphFormat.TabStops.ClearAll()
+            for c in range(1, cols):
+                tab_pos = left_offset_pt + (col_width_pt * c)
+                box_range.ParagraphFormat.TabStops.Add(Position=tab_pos, Alignment=0)
+        except Exception:
+            pass
+        
         # Draw Rounded Rectangle Shape (msoShapeRoundedRectangle = 5) tightly anchored around centered word box
         try:
             padding_pt = 6.0 # Equal top, bottom, left, right padding (~2.1mm)
-            box_width_pt = text_group_width_pt + (padding_pt * 2)
+            box_width_pt = actual_width + (padding_pt * 2)
             # Row 1 (single) = 16pt, Row 2 (double) = 28pt
             text_height_pt = ((num_rows - 1) * 16.0) + 28.0
             box_height_pt = text_height_pt
@@ -667,7 +687,7 @@ class WordDocumentCompilerPyWin32:
             )
             shape.RelativeHorizontalPosition = 0 # wdRelativeHorizontalPositionMargin = 0
             shape.RelativeVerticalPosition = 2 # wdRelativeVerticalPositionParagraph = 2
-            shape.Left = left_offset_pt - padding_pt # Tight & symmetrical left/right borders around text
+            shape.Left = left_offset_pt - padding_pt # 100% symmetrical left/right borders around text
             shape.Top = -padding_pt # Equal top & bottom distance
             
             shape.Fill.Visible = False # Transparent background so words show directly in document
