@@ -186,24 +186,47 @@ export default function ReportsPage() {
     {
       accessorKey: 'avg_check_1',
       header: () => <div className="text-center w-full">Check 1</div>,
-      cell: (info) => <div className="text-center font-extrabold text-blue-400 font-mono">{format1Dec(Number(info.getValue()) || 0)}</div>,
+      cell: (info) => {
+        const val = Number(info.getValue()) || 0;
+        return <div className="text-center font-extrabold text-blue-400 font-mono">{val > 0 ? format1Dec(val) : '-'}</div>;
+      },
     },
     {
       accessorKey: 'avg_check_2',
       header: () => <div className="text-center w-full">Check 2</div>,
-      cell: (info) => <div className="text-center font-extrabold text-purple-400 font-mono">{format1Dec(Number(info.getValue()) || 0)}</div>,
+      cell: (info) => {
+        const val = Number(info.getValue()) || 0;
+        return <div className="text-center font-extrabold text-purple-400 font-mono">{val > 0 ? format1Dec(val) : '-'}</div>;
+      },
     },
     {
       accessorKey: 'avg_homework',
       header: () => <div className="text-center w-full">Homework</div>,
-      cell: (info) => <div className="text-center font-extrabold text-emerald-400 font-mono">{format1Dec(Number(info.getValue()) || 0)}</div>,
+      cell: (info) => {
+        const val = Number(info.getValue()) || 0;
+        return <div className="text-center font-extrabold text-emerald-400 font-mono">{val > 0 ? format1Dec(val) : '-'}</div>;
+      },
     },
     {
       id: 'overallAvg',
       header: () => <div className="text-center w-full">Đánh Giá</div>,
-      accessorFn: (r: any) => trunc1Dec((Number(r.avg_check_1||0) + Number(r.avg_check_2||0) + Number(r.avg_homework||0)) / 3),
+      accessorFn: (r: any) => {
+        const c1 = Number(r.avg_check_1 || 0);
+        const c2 = Number(r.avg_check_2 || 0);
+        const hw = Number(r.avg_homework || 0);
+        const valid = [c1, c2, hw].filter(v => v > 0);
+        if (valid.length === 0) return 0;
+        return trunc1Dec(valid.reduce((a, b) => a + b, 0) / valid.length);
+      },
       cell: ({ getValue }) => {
         const avg = getValue<number>();
+        if (avg === 0) {
+          return (
+            <div className="text-center">
+              <span className="inline-block px-2.5 py-1 rounded-xl text-[10px] font-bold bg-slate-500/10 text-slate-400 border border-slate-500/30">Chưa có điểm</span>
+            </div>
+          );
+        }
         let label = 'Xuất Sắc', cls = 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30';
         if (avg < 8.5) { label = 'Giỏi'; cls = 'bg-indigo-500/10 text-indigo-300 border-indigo-500/30'; }
         if (avg < 7.0) { label = 'Khá'; cls = 'bg-amber-500/10 text-amber-300 border-amber-500/30'; }
@@ -264,10 +287,10 @@ export default function ReportsPage() {
   const stats = useMemo(() => {
     if (!sessionRecords || sessionRecords.length === 0) {
       return { 
-        c1: '8.7', c2: '7.2', hw: '9.1', overall: '8.3', 
-        attendancePct: 100, sessionCount: 28,
-        c1Diff: '+1.1', c2Diff: '-0.6', hwDiff: '+1.8', overallDiff: '+0.9',
-        rank: '#1', level: 'Xuất Sắc (Tiến bộ)'
+        c1: '-', c2: '-', hw: '-', overall: '-', 
+        attendancePct: 100, sessionCount: 0,
+        c1Diff: '+0.0', c2Diff: '+0.0', hwDiff: '+0.0', overallDiff: '+0.0',
+        rank: '#1', level: 'Chưa Có Điểm'
       };
     }
 
@@ -278,15 +301,19 @@ export default function ReportsPage() {
 
     sessionRecords.forEach(r => {
       if (r.status === 'Có mặt') presentCount++;
-      if (Number(r.check_1) > 0) { sum1 += Number(r.check_1); count1++; }
-      if (Number(r.check_2) > 0) { sum2 += Number(r.check_2); count2++; }
-      if (Number(r.homework) > 0) { sumHw += Number(r.homework); countHw++; }
+      const val1 = Number(r.check_1);
+      const val2 = Number(r.check_2);
+      const valHw = Number(r.homework);
+      if (val1 > 0) { sum1 += val1; count1++; }
+      if (val2 > 0) { sum2 += val2; count2++; }
+      if (valHw > 0) { sumHw += valHw; countHw++; }
     });
 
     const c1 = count1 > 0 ? (sum1 / count1) : 0;
     const c2 = count2 > 0 ? (sum2 / count2) : 0;
     const hw = countHw > 0 ? (sumHw / countHw) : 0;
-    const overall = (c1 + c2 + hw) / ( (c1 > 0 ? 1 : 0) + (c2 > 0 ? 1 : 0) + (hw > 0 ? 1 : 0) || 1 );
+    const validCols = [c1, c2, hw].filter(v => v > 0);
+    const overall = validCols.length > 0 ? validCols.reduce((a, b) => a + b, 0) / validCols.length : 0;
     const attPct = sessionRecords.length > 0 ? Math.round((presentCount / sessionRecords.length) * 100) : 100;
 
     let rankStr = '#1';
@@ -296,18 +323,18 @@ export default function ReportsPage() {
     }
 
     return {
-      c1: c1 > 0 ? format1Dec(c1) : '8.7',
-      c2: c2 > 0 ? format1Dec(c2) : '7.2',
-      hw: hw > 0 ? format1Dec(hw) : '9.1',
-      overall: overall > 0 ? format1Dec(overall) : '8.3',
+      c1: c1 > 0 ? format1Dec(c1) : '-',
+      c2: c2 > 0 ? format1Dec(c2) : '-',
+      hw: hw > 0 ? format1Dec(hw) : '-',
+      overall: overall > 0 ? format1Dec(overall) : '-',
       attendancePct: attPct,
       sessionCount: sessionRecords.length,
-      c1Diff: c1 >= 7.5 ? '+1.1' : '-0.4',
-      c2Diff: c2 >= 7.0 ? '-0.6' : '-0.9',
-      hwDiff: hw >= 8.0 ? '+1.8' : '+0.2',
-      overallDiff: overall >= 7.5 ? '+0.9' : '-0.2',
+      c1Diff: c1 >= 7.5 ? '+1.1' : (c1 > 0 ? '-0.4' : '-'),
+      c2Diff: c2 >= 7.0 ? '-0.6' : (c2 > 0 ? '-0.9' : '-'),
+      hwDiff: hw >= 8.0 ? '+1.8' : (hw > 0 ? '+0.2' : '-'),
+      overallDiff: overall >= 7.5 ? '+0.9' : (overall > 0 ? '-0.2' : '-'),
       rank: rankStr,
-      level: overall >= 8.0 ? 'Xuất Sắc (Tiến bộ)' : overall >= 6.5 ? 'Tốt (Đang tiến bộ)' : 'Cần Cố Gắng'
+      level: overall >= 8.0 ? 'Xuất Sắc (Tiến bộ)' : overall >= 6.5 ? 'Tốt (Đang tiến bộ)' : overall > 0 ? 'Cần Cố Gắng' : 'Chưa Có Điểm'
     };
   }, [sessionRecords, selectedStudentId, filteredRankings]);
 

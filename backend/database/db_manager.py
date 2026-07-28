@@ -2153,7 +2153,11 @@ def get_analytics_reports(class_id: Optional[int] = None, student_id: Optional[i
 
     rank_query += """
         GROUP BY s.id, c.id
-        ORDER BY (COALESCE(AVG(ag.check_1), 0) + COALESCE(AVG(ag.check_2), 0) + COALESCE(AVG(ag.homework), 0)) DESC
+        ORDER BY (
+            COALESCE(AVG(CASE WHEN ag.check_1 > 0 THEN ag.check_1 END), 0) + 
+            COALESCE(AVG(CASE WHEN ag.check_2 > 0 THEN ag.check_2 END), 0) + 
+            COALESCE(AVG(CASE WHEN ag.homework > 0 THEN ag.homework END), 0)
+        ) DESC
     """
     cursor.execute(rank_query, rank_params)
     student_rankings = [dict(r) for r in cursor.fetchall()]
