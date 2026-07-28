@@ -600,15 +600,18 @@ class WordDocumentCompilerPyWin32:
             cols = N
             
         max_word_len = max(len(str(w)) for w in words) if words else 8
-        col_width_cm = max(2.6, (max_word_len * 0.18) + 0.6)
-        total_box_width_cm = cols * col_width_cm
+        col_width_cm = max(2.3, (max_word_len * 0.17) + 0.4)
+        last_word_w_cm = (max_word_len * 0.17) + 0.2
+        total_box_width_cm = ((cols - 1) * col_width_cm) + last_word_w_cm
+        
         left_offset_cm = max(0, (printable_width_cm - total_box_width_cm) / 2)
         left_offset_pt = cm_to_pt(left_offset_cm)
         col_width_pt = cm_to_pt(col_width_cm)
         
         # Configure paragraph indent and tab stops for centered multi-column word box
         sel.ParagraphFormat.SpaceBefore = 4
-        sel.ParagraphFormat.SpaceAfter = 4
+        sel.ParagraphFormat.SpaceAfter = 0
+        sel.ParagraphFormat.LineSpacingRule = 0 # Single spacing for first rows
         sel.ParagraphFormat.Alignment = 0 # Left align inside tab stop
         sel.ParagraphFormat.LeftIndent = left_offset_pt
         sel.ParagraphFormat.TabStops.ClearAll()
@@ -626,7 +629,12 @@ class WordDocumentCompilerPyWin32:
         num_rows = len(lines)
         for idx_line, chunk in enumerate(lines):
             if idx_line == num_rows - 1:
-                sel.ParagraphFormat.SpaceAfter = 14 # Extra spacing on last row so bottom border never overlaps passage text below!
+                sel.ParagraphFormat.LineSpacingRule = 2 # Double line spacing on last row!
+                sel.ParagraphFormat.SpaceAfter = 0
+            else:
+                sel.ParagraphFormat.LineSpacingRule = 0
+                sel.ParagraphFormat.SpaceAfter = 0
+                
             for idx_w, word in enumerate(chunk):
                 self.write_run(word, bold=True)
                 if idx_w < len(chunk) - 1:
@@ -640,7 +648,7 @@ class WordDocumentCompilerPyWin32:
         try:
             padding_pt = 6.0 # Equal top, bottom, left, right padding (~2.1mm)
             box_width_pt = cm_to_pt(total_box_width_cm) + (padding_pt * 2)
-            text_height_pt = (num_rows * 18.0) + 4.0
+            text_height_pt = ((num_rows - 1) * 18.0) + 24.0
             box_height_pt = text_height_pt + (padding_pt * 2)
             
             shape = self.doc.Shapes.AddShape(
@@ -653,7 +661,7 @@ class WordDocumentCompilerPyWin32:
             )
             shape.RelativeHorizontalPosition = 0 # wdRelativeHorizontalPositionMargin = 0
             shape.RelativeVerticalPosition = 2 # wdRelativeVerticalPositionParagraph = 2
-            shape.Left = left_offset_pt - padding_pt # Tight left border around first word column
+            shape.Left = left_offset_pt - padding_pt # Tight left & right borders symmetrical around text
             shape.Top = -padding_pt # Equal top & bottom distance
             
             shape.Fill.Visible = False # Transparent background so words show directly in document
@@ -669,6 +677,7 @@ class WordDocumentCompilerPyWin32:
         # Reset selection formatting for paragraphs after word box
         sel.ParagraphFormat.SpaceBefore = 4
         sel.ParagraphFormat.SpaceAfter = 4
+        sel.ParagraphFormat.LineSpacingRule = 0
         sel.ParagraphFormat.LeftIndent = 0
         sel.ParagraphFormat.TabStops.ClearAll()
 
