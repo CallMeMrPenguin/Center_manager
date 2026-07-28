@@ -138,6 +138,17 @@ def parse_text_formatting(text: str) -> List[Dict[str, Any]]:
         
     return segments
 
+def clean_option_text(opt: Any) -> str:
+    """Strips leading option prefixes like A., B., C., D., A), B), A:, B:, or repeated A. B. from option text."""
+    import re
+    if opt is None:
+        return ""
+    if not isinstance(opt, str):
+        opt = str(opt)
+    opt = opt.strip()
+    return re.sub(r'^(\s*(?:\*\*)?\s*[A-Ea-e]\s*[\.\:\)]\s*(?:\*\*)?\s*)+', '', opt).strip()
+
+
 def set_cell_border(cell, **kwargs):
     tc = cell._tc
     tcPr = tc.get_or_add_tcPr()
@@ -282,6 +293,7 @@ class WordDocumentCompilerPyWin32:
     def add_options_grid(self, options: List[str], exercise_type: str, correct_ans: Any = None):
         if not options:
             return
+        options = [clean_option_text(opt) for opt in options]
             
         correct_idx = -1
         if correct_ans:
@@ -736,6 +748,7 @@ class WordDocumentCompilerDocx:
     def add_options_grid(self, options: List[str], exercise_type: str, correct_ans: Any = None):
         if not options:
             return
+        options = [clean_option_text(opt) for opt in options]
             
         correct_idx = -1
         if correct_ans:
