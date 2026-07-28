@@ -162,7 +162,7 @@ function DraggableHeader({
       {/* Draggable Title Area (Only dragging text reorders column) */}
       <div
         {...(enableReorder ? { ...attributes, ...listeners } : {})}
-        className={`flex items-center ${alignClass} gap-1.5 w-full py-3.5 px-3 overflow-hidden text-slate-200 text-xs sm:text-sm font-black uppercase tracking-wider whitespace-nowrap ${
+        className={`flex items-center ${alignClass} gap-1.5 w-full py-3.5 px-3 overflow-hidden text-slate-200 text-sm sm:text-base font-black uppercase tracking-wider whitespace-nowrap ${
           enableReorder ? 'cursor-grab active:cursor-grabbing hover:text-white transition-colors' : ''
         }`}
         title={enableReorder ? 'Giữ chuột và kéo để thay đổi thứ tự cột' : undefined}
@@ -810,7 +810,7 @@ export function DataTable<TData>({
             <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
               <SortableContext items={orderedHeaderIds} strategy={horizontalListSortingStrategy}>
                 <table
-                  className="text-left text-xs min-w-full"
+                  className="text-left text-sm min-w-full"
                   style={{
                     borderCollapse: 'separate',
                     borderSpacing: 0,
@@ -901,7 +901,7 @@ export function DataTable<TData>({
                               <td
                                 key={cell.id}
                                 className={`
-                                  py-3.5 ${isSelectCol ? 'px-1' : 'px-4'} font-semibold text-slate-200 text-sm
+                                  py-3.5 ${isSelectCol ? 'px-1' : 'px-4'} font-semibold text-slate-200 text-base
                                   border-b border-[#161e30]
                                   ${isCentered ? 'text-center' : 'text-left'}
                                   ${isPinned ? 'bg-inherit' : ''}

@@ -199,7 +199,7 @@ export default function StudentsPage() {
       cell: ({ row }) => {
         const st = row.original;
         return (
-          <div className="font-black text-white text-sm">
+          <div className="font-black text-white text-base">
             {st.full_name}{st.nickname ? ` - ${st.nickname}` : ''}
           </div>
         );
@@ -212,11 +212,11 @@ export default function StudentsPage() {
       cell: ({ row }) => {
         const classes = row.original.enrolled_classes;
         return classes ? (
-          <span className="inline-block px-2.5 py-1 rounded-lg text-xs font-black bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+          <span className="inline-block px-2.5 py-1 rounded-lg text-sm font-black bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
             {classes}
           </span>
         ) : (
-          <span className="text-slate-500 text-xs font-semibold">Chưa xếp lớp</span>
+          <span className="text-slate-500 text-sm font-semibold">Chưa xếp lớp</span>
         );
       },
     },
@@ -225,7 +225,7 @@ export default function StudentsPage() {
       accessorKey: 'grade',
       header: 'Khối',
       cell: ({ row }) => (
-        <span className="inline-block px-2.5 py-0.5 rounded-lg text-xs font-extrabold bg-[#222b48] text-indigo-300 border border-indigo-500/20">
+        <span className="inline-block px-2.5 py-0.5 rounded-lg text-sm font-extrabold bg-[#222b48] text-indigo-300 border border-indigo-500/20">
           {row.original.grade || 'Lớp 6'}
         </span>
       ),
@@ -235,7 +235,7 @@ export default function StudentsPage() {
       accessorKey: 'gender',
       header: 'Giới Tính',
       cell: ({ row }) => (
-        <span className="text-slate-300 font-semibold text-xs sm:text-sm">
+        <span className="text-slate-300 font-semibold text-sm sm:text-base">
           {row.original.gender || 'Nam'}
         </span>
       ),
@@ -245,7 +245,7 @@ export default function StudentsPage() {
       accessorKey: 'date_of_birth',
       header: 'Ngày Sinh',
       cell: (info) => (
-        <span className="text-slate-300 font-medium text-xs sm:text-sm">
+        <span className="text-slate-300 font-medium text-sm sm:text-base">
           {info.getValue<string>() || '-'}
         </span>
       ),
@@ -254,7 +254,7 @@ export default function StudentsPage() {
       id: 'school',
       accessorKey: 'school',
       header: 'Trường Học',
-      cell: (info) => <span className="text-slate-300 font-medium text-xs sm:text-sm">{info.getValue<string>() || '-'}</span>,
+      cell: (info) => <span className="text-slate-300 font-medium text-sm sm:text-base">{info.getValue<string>() || '-'}</span>,
     },
     {
       id: 'parents',
@@ -262,7 +262,7 @@ export default function StudentsPage() {
       cell: ({ row }) => {
         const st = row.original;
         return (
-          <div className="text-slate-300 text-xs sm:text-sm font-medium">
+          <div className="text-slate-300 text-sm sm:text-base font-medium">
             {st.father_name && <div>Bố: {st.father_name} ({st.father_phone || 'Chưa có SĐT'})</div>}
             {st.mother_name && <div>Mẹ: {st.mother_name} ({st.mother_phone || 'Chưa có SĐT'})</div>}
             {!st.father_name && !st.mother_name && <span className="text-slate-500">-</span>}
@@ -274,7 +274,7 @@ export default function StudentsPage() {
       id: 'enrollDate',
       accessorKey: 'enroll_date',
       header: 'Ngày Nhập Học',
-      cell: (info) => <span className="text-slate-300 font-medium text-xs sm:text-sm">{info.getValue<string>() || '-'}</span>,
+      cell: (info) => <span className="text-slate-300 font-medium text-sm sm:text-base">{info.getValue<string>() || '-'}</span>,
     },
     {
       id: 'status',
@@ -284,7 +284,7 @@ export default function StudentsPage() {
         const st = info.getValue<string>();
         return (
           <div className="text-center">
-            <span className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-black ${
+            <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-black ${
               st === 'Đang học'
                 ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
                 : 'bg-rose-500/20 text-rose-400 border border-rose-500/30'
