@@ -43,6 +43,13 @@ def main():
     # 1. Clean up any leftover server process holding port 8000
     kill_port_8000()
 
+    # 2. Delete all temporary folders to Recycle Bin and create fresh replacement folders
+    try:
+        from services.cleanup_service import cleanup_temp_folders
+        cleanup_temp_folders(ROOT)
+    except Exception as e:
+        print(f"Cleanup warning: {e}")
+
     # 2. Determine target URL (Vite DEV server or Built Backend)
     url = "http://localhost:8000"
     try:

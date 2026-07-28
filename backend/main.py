@@ -41,7 +41,10 @@ app.include_router(documents.router)
 app.include_router(center_manager.router)
 app.include_router(seating.router)
 
-# Directories Initialization
+# Directories & Cleanup Initialization
+from services.cleanup_service import cleanup_temp_folders
+cleanup_temp_folders(os.path.dirname(BASE_DIR))
+
 FILES_DIR = get_setting("files_dir")
 os.makedirs(FILES_DIR, exist_ok=True)
 
