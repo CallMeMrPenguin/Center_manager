@@ -598,64 +598,66 @@ class WordDocumentCompilerPyWin32:
         else:
             cols = N
             
-        col_width_cm = printable_width_cm / cols
-        
-        # Configure tab stops on Selection for writing words directly in document
-        sel.ParagraphFormat.SpaceBefore = 4
-        sel.ParagraphFormat.SpaceAfter = 4
-        sel.ParagraphFormat.Alignment = 0
-        sel.ParagraphFormat.TabStops.ClearAll()
-        for c in range(1, cols):
-            tab_pos = col_width_cm * c + 0.3
-            sel.ParagraphFormat.TabStops.Add(Position=cm_to_pt(tab_pos), Alignment=0)
-            
-        p_start = sel.Range.Start
+        max_word_len = max(len(str(w)) for w in words) if words else 8
+        col_width_cm = max(2.8, (max_word_len * 0.18) + 1.0)
+        box_width_cm = min(printable_width_cm, cols * col_width_cm)
+        box_width_pt = cm_to_pt(box_width_cm)
         
         lines = []
         for i in range(0, N, cols):
             chunk = words[i:i + cols]
-            lines.append(chunk)
-            
+            lines.append("\t".join(chunk))
+        full_box_text = "\r".join(lines)
         num_rows = len(lines)
-        for idx_line, chunk in enumerate(lines):
-            for idx_w, word in enumerate(chunk):
-                self.write_run(word, bold=True)
-                if idx_w < len(chunk) - 1:
-                    self.write_run("\t", bold=False)
-            sel.TypeParagraph()
-            
-        p_end = sel.Range.End
-        box_range = self.doc.Range(p_start, p_end)
         
-        # Draw Rounded Rectangle Shape (msoShapeRoundedRectangle = 5) anchored around the words
+        box_height_pt = cm_to_pt(0.7) * num_rows + cm_to_pt(0.5)
+        
         try:
-            padding_pt = 6.0 # ~2.1mm padding away from text
-            text_height_pt = (num_rows * 18.0) + 4.0
-            box_width_pt = printable_width_pt + (padding_pt * 2)
-            box_height_pt = text_height_pt + (padding_pt * 2)
-            
             shape = self.doc.Shapes.AddShape(
                 5, # msoShapeRoundedRectangle = 5
                 0,
                 0,
                 box_width_pt,
                 box_height_pt,
-                Anchor=box_range
+                Anchor=sel.Range
             )
+            shape.WrapFormat.Type = 1 # wdWrapTopBottom = 1 (Pushes passage below cleanly, zero overlap!)
             shape.RelativeHorizontalPosition = 0 # wdRelativeHorizontalPositionMargin = 0
-            shape.RelativeVerticalPosition = 2 # wdRelativeVerticalPositionParagraph = 2
-            shape.Left = -padding_pt
-            shape.Top = -padding_pt
+            shape.Left = (printable_width_pt - box_width_pt) / 2 # Horizontally centered
             
-            shape.Fill.Visible = False # Transparent background so words show directly
+            shape.Fill.Solid()
+            shape.Fill.ForeColor.RGB = 16777215 # White background
             shape.Line.Weight = 1.0 # 1pt border
             shape.Line.ForeColor.RGB = 0 # Black line
+            
+            tf = shape.TextFrame
             try:
-                shape.ZOrder(1)
+                tf.MarginTop = 6
+                tf.MarginBottom = 6
+                tf.MarginLeft = 10
+                tf.MarginRight = 10
             except Exception:
                 pass
+                
+            tr = tf.TextRange
+            tr.Font.Name = "Times New Roman"
+            tr.Font.Size = 12
+            tr.Font.Bold = True
+            tr.Font.Color = 0 # Black text
+            
+            col_tab_pt = box_width_pt / cols
+            try:
+                tr.ParagraphFormat.TabStops.ClearAll()
+                for c in range(1, cols):
+                    tab_pos = col_tab_pt * c
+                    tr.ParagraphFormat.TabStops.Add(Position=tab_pos, Alignment=0)
+            except Exception:
+                pass
+                
+            tr.Text = full_box_text
+            sel.TypeParagraph()
         except Exception as e:
-            print(f"  [PyWin32] Warning drawing rounded shape around word box: {e}")
+            print(f"  [PyWin32] Warning drawing rounded word box shape: {e}")
 
     def compile(self, exercises: List[Dict[str, Any]], output_filepath: Any, grade: str = "", unit: str = "", version_code: str = "", include_answer_key: bool = True, is_answer_key: bool = False, is_test: bool = False):
         self.is_answer_key = is_answer_key
@@ -1032,19 +1034,27 @@ class WordDocumentCompilerDocx:
         else:
             cols = N
             
+        left_margin_cm = self.settings.get("margin_left", 3.0)
+        right_margin_cm = self.settings.get("margin_right", 1.5)
+        printable_width_cm = 21.0 - left_margin_cm - right_margin_cm
+        
+        max_word_len = max(len(str(w)) for w in words) if words else 8
+        col_width_cm = max(2.8, (max_word_len * 0.18) + 1.0)
+        box_width_cm = min(printable_width_cm, cols * col_width_cm)
+        
         table = self.doc.add_table(rows=1, cols=1)
         table.alignment = 1
         table.autofit = False
-        table.columns[0].width = Cm(15.5)
+        table.columns[0].width = Cm(box_width_cm)
         
         cell = table.cell(0, 0)
-        cell.width = Cm(15.5)
+        cell.width = Cm(box_width_cm)
         cell.vertical_alignment = 1
         
         border_spec = {"sz": 8, "val": "single", "color": "000000", "space": "0"}
         set_cell_border(cell, top=border_spec, bottom=border_spec, left=border_spec, right=border_spec)
         
-        col_width_cm = 15.5 / cols
+        tab_col_w_cm = box_width_cm / cols
         for i in range(0, N, cols):
             chunk = words[i:i + cols]
             p = cell.paragraphs[0] if i == 0 else cell.add_paragraph()
@@ -1054,7 +1064,7 @@ class WordDocumentCompilerDocx:
             
             p.paragraph_format.tab_stops.clear_all()
             for c in range(1, cols):
-                p.paragraph_format.tab_stops.add_tab_stop(Cm(col_width_cm * c), WD_TAB_ALIGNMENT.LEFT)
+                p.paragraph_format.tab_stops.add_tab_stop(Cm(tab_col_w_cm * c), WD_TAB_ALIGNMENT.LEFT)
                 
             for idx_w, word in enumerate(chunk):
                 run = p.add_run(word)
