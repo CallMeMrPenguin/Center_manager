@@ -600,39 +600,39 @@ class WordDocumentCompilerPyWin32:
         else:
             cols = N
             
+        col_width_cm = printable_width_cm / cols
+        
+        # Configure paragraph tab stops on selection for evenly spaced columns
+        sel.ParagraphFormat.SpaceBefore = 4
+        sel.ParagraphFormat.SpaceAfter = 4
+        sel.ParagraphFormat.Alignment = 0
+        sel.ParagraphFormat.TabStops.ClearAll()
+        for c in range(1, cols):
+            tab_pos = col_width_cm * c
+            sel.ParagraphFormat.TabStops.Add(Position=cm_to_pt(tab_pos), Alignment=0)
+            
         p_start = sel.Range.Start
         
-        # Create continuous section for Word multi-column divide text flow
-        try:
-            sel.InsertBreak(3) # wdSectionBreakContinuous = 3
-            sel.PageSetup.TextColumns.SetCount(cols)
-            try:
-                sel.PageSetup.TextColumns.EvenlySpaced = True
-            except Exception:
-                pass
-                
-            sel.ParagraphFormat.SpaceBefore = 2
-            sel.ParagraphFormat.SpaceAfter = 2
-            sel.ParagraphFormat.Alignment = 0
+        lines = []
+        for i in range(0, N, cols):
+            chunk = words[i:i + cols]
+            lines.append(chunk)
             
-            for word in words:
+        num_rows = len(lines)
+        for idx_line, chunk in enumerate(lines):
+            for idx_w, word in enumerate(chunk):
                 self.write_run(word, bold=True)
-                sel.TypeParagraph()
-                
-            sel.InsertBreak(3) # wdSectionBreakContinuous = 3
-            sel.PageSetup.TextColumns.SetCount(1) # Reset back to 1 column
-        except Exception as e:
-            print(f"  [PyWin32] Warning creating multi-column section for word box: {e}")
+                if idx_w < len(chunk) - 1:
+                    self.write_run("\t", bold=False)
+            sel.TypeParagraph()
             
         p_end = sel.Range.Start
-        section_range = self.doc.Range(p_start, p_end)
+        box_range = self.doc.Range(p_start, p_end)
         
-        num_rows = math.ceil(N / cols)
-        
-        # Draw Rounded Rectangle Shape (msoShapeRoundedRectangle = 5) anchored around multi-column section
+        # Draw Rounded Rectangle Shape (msoShapeRoundedRectangle = 5) anchored around the 5-column word box
         try:
             padding_pt = 6.0 # ~2.1mm padding away from text
-            text_height_pt = (num_rows * 18.0) + 8.0
+            text_height_pt = (num_rows * 18.0) + 4.0
             box_width_pt = printable_width_pt + (padding_pt * 2)
             box_height_pt = text_height_pt + (padding_pt * 2)
             
@@ -642,14 +642,14 @@ class WordDocumentCompilerPyWin32:
                 0,
                 box_width_pt,
                 box_height_pt,
-                Anchor=section_range
+                Anchor=box_range
             )
             shape.RelativeHorizontalPosition = 0 # wdRelativeHorizontalPositionMargin = 0
             shape.RelativeVerticalPosition = 2 # wdRelativeVerticalPositionParagraph = 2
             shape.Left = -padding_pt
             shape.Top = -padding_pt
             
-            shape.Fill.Visible = False # Transparent background so words in doc show directly
+            shape.Fill.Visible = False # Transparent background so words show directly in document
             shape.Line.Weight = 1.0 # 1pt border
             shape.Line.ForeColor.RGB = 0 # Black line
             try:
