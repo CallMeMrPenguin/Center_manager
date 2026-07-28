@@ -2,6 +2,7 @@ import os
 import re
 import json
 import time
+import math
 from datetime import datetime
 from fastapi import APIRouter, HTTPException, UploadFile, File, Form
 from pydantic import BaseModel
@@ -318,11 +319,13 @@ def api_export_class_excel(class_id: int, payload: Dict[str, Any]):
                 return 0.0
         return 0.0
 
-    present_recs = [r for r in attendance if r.get("status") != "Vắng mặt"]
-    calc_recs = present_recs if present_recs else attendance
-    avg_c1 = sum(clean_num(r.get("check_1")) for r in calc_recs) / max(1, len(calc_recs))
-    avg_c2 = sum(clean_num(r.get("check_2")) for r in calc_recs) / max(1, len(calc_recs))
-    avg_hw = sum(clean_num(r.get("homework")) for r in calc_recs) / max(1, len(calc_recs))
+    valid_c1 = [clean_num(r.get("check_1")) for r in attendance if r.get("status") != "Vắng mặt" and clean_num(r.get("check_1")) > 0]
+    valid_c2 = [clean_num(r.get("check_2")) for r in attendance if r.get("status") != "Vắng mặt" and clean_num(r.get("check_2")) > 0]
+    valid_hw = [clean_num(r.get("homework")) for r in attendance if r.get("status") != "Vắng mặt" and clean_num(r.get("homework")) > 0]
+
+    avg_c1 = math.ceil((sum(valid_c1) / len(valid_c1)) * 10) / 10.0 if valid_c1 else 0.0
+    avg_c2 = math.ceil((sum(valid_c2) / len(valid_c2)) * 10) / 10.0 if valid_c2 else 0.0
+    avg_hw = math.ceil((sum(valid_hw) / len(valid_hw)) * 10) / 10.0 if valid_hw else 0.0
 
     below_c1_students = []
     below_c2_students = []
@@ -363,8 +366,10 @@ def api_export_class_excel(class_id: int, payload: Dict[str, Any]):
         c2_cell.number_format = '0.0'
         hw_cell.number_format = '0.0'
 
-        ws.cell(row=curr_row, column=7, value=f"=F{curr_row}-E{curr_row}")
-        ws.cell(row=curr_row, column=8, value=f"=E{curr_row}-D{curr_row}")
+        c7_cell = ws.cell(row=curr_row, column=7, value=f"=ROUNDUP(ABS(F{curr_row}-E{curr_row}), 1)")
+        c8_cell = ws.cell(row=curr_row, column=8, value=f"=ROUNDUP(ABS(E{curr_row}-D{curr_row}), 1)")
+        c7_cell.number_format = '0.0'
+        c8_cell.number_format = '0.0'
 
         col_9_cell = ws.cell(row=curr_row, column=9, value=below_status_str)
         if below_items:
@@ -388,11 +393,11 @@ def api_export_class_excel(class_id: int, payload: Dict[str, Any]):
     ws.cell(row=avg_row_idx, column=3, value="")
 
     if len(attendance) > 0:
-        ws.cell(row=avg_row_idx, column=4, value=f"=AVERAGE(D{start_row}:D{end_row})")
-        ws.cell(row=avg_row_idx, column=5, value=f"=AVERAGE(E{start_row}:E{end_row})")
-        ws.cell(row=avg_row_idx, column=6, value=f"=AVERAGE(F{start_row}:F{end_row})")
-        ws.cell(row=avg_row_idx, column=7, value=f"=AVERAGE(G{start_row}:G{end_row})")
-        ws.cell(row=avg_row_idx, column=8, value=f"=AVERAGE(H{start_row}:H{end_row})")
+        ws.cell(row=avg_row_idx, column=4, value=f'=IFERROR(ROUNDUP(AVERAGEIF(D{start_row}:D{end_row}, ">0"), 1), 0)')
+        ws.cell(row=avg_row_idx, column=5, value=f'=IFERROR(ROUNDUP(AVERAGEIF(E{start_row}:E{end_row}, ">0"), 1), 0)')
+        ws.cell(row=avg_row_idx, column=6, value=f'=IFERROR(ROUNDUP(AVERAGEIF(F{start_row}:F{end_row}, ">0"), 1), 0)')
+        ws.cell(row=avg_row_idx, column=7, value=f'=IFERROR(ROUNDUP(AVERAGEIF(G{start_row}:G{end_row}, ">0"), 1), 0)')
+        ws.cell(row=avg_row_idx, column=8, value=f'=IFERROR(ROUNDUP(AVERAGEIF(H{start_row}:H{end_row}, ">0"), 1), 0)')
         ws.cell(row=avg_row_idx, column=9, value="")
     else:
         for c_idx in range(4, 10):
@@ -407,7 +412,7 @@ def api_export_class_excel(class_id: int, payload: Dict[str, Any]):
         cell.font = avg_font
         cell.border = thin_border
         if col_num in [4, 5, 6, 7, 8]:
-            cell.number_format = '0.00'
+            cell.number_format = '0.0'
             cell.alignment = Alignment(horizontal="center")
 
     s_row = avg_row_idx + 2

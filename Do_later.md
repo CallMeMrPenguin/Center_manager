@@ -1,6 +1,66 @@
 # 🤖 Gemini API Integration — Future TODO
 
-> **Model**: `gemini-2.5-flash` (via Google AI API)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+> **Model**: `gemini-3.5-flash` (via Google AI API)
 > **Priority**: Ranked from highest to lowest ROI
 > **Status**: 📋 Planned
 
