@@ -94,7 +94,7 @@ def get_instruction_text(ex_type: str, is_mcq: bool = True) -> str:
     else:
         return INSTRUCTION_MAP_NON_MCQ.get(ex_type, "Answer each of the following questions.")
 
-def format_question_label(q_num: Any, fmt: str = None, default_prefix: str = "Question ") -> str:
+def format_question_label(q_num: Any, fmt: str = None, default_prefix: str = "") -> str:
     if q_num is None or str(q_num).strip() == "":
         return ""
     q_str = str(q_num).strip()
@@ -301,7 +301,7 @@ class WordDocumentCompilerPyWin32:
         self.write_run(text, bold=True, font_size=font_size)
         sel.TypeParagraph()
 
-    def add_question(self, q_num: Any, q_text: str, fmt: str = None, layout: str = None, ind: int = 0, default_prefix: str = "Question "):
+    def add_question(self, q_num: Any, q_text: str, fmt: str = None, layout: str = None, ind: int = 0, default_prefix: str = ""):
         space_before = self.settings.get("question_space_before", 6.0)
         space_after = self.settings.get("question_space_after", 4.0)
         
@@ -606,6 +606,8 @@ class WordDocumentCompilerPyWin32:
             
             title_prefix = ex.get("title_prefix") or ex.get("prefix") or ex.get("title_num")
             custom_inst = ex.get("instruction") or ex.get("title")
+            if not custom_inst and ex.get("x"):
+                custom_inst = ex.get("x")
             
             block_key = (ex_type, is_mcq, title_prefix, custom_inst)
             if block_key != current_block_key:
@@ -646,7 +648,7 @@ class WordDocumentCompilerPyWin32:
                     sub_cols = sub.get("cols", cols_override)
                     sub_ind = sub.get("ind", ind)
 
-                    def_pref = "Question " if not sub_fmt else ""
+                    def_pref = ""
                     self.add_question(sub_q, sub_x, fmt=sub_fmt, layout=sub_layout, ind=sub_ind, default_prefix=def_pref)
                     
                     if sub_o and isinstance(sub_o, list):
@@ -664,7 +666,7 @@ class WordDocumentCompilerPyWin32:
                 options = ex.get("o", [])
                 ans = ex.get("a", "")
                 
-                def_pref = "Question " if not fmt else ""
+                def_pref = ""
 
                 if ex_type == "ro" and options and not (is_mcq and len(options) == 4):
                     self.add_question(q_num, q_text, fmt=fmt, layout=layout, ind=ind, default_prefix=def_pref)
@@ -804,7 +806,7 @@ class WordDocumentCompilerDocx:
         run.bold = True
         run.font.size = Pt(font_size)
 
-    def add_question(self, q_num: Any, q_text: str, fmt: str = None, layout: str = None, ind: int = 0, default_prefix: str = "Question "):
+    def add_question(self, q_num: Any, q_text: str, fmt: str = None, layout: str = None, ind: int = 0, default_prefix: str = ""):
         space_before = self.settings.get("question_space_before", 6.0)
         space_after = self.settings.get("question_space_after", 4.0)
         
@@ -829,8 +831,13 @@ class WordDocumentCompilerDocx:
             if seg["underline"]: run.underline = True
 
         if layout == "blank_right":
-            run_blank = p.add_run("   " + "_" * 25)
-            run_blank.bold = False
+            left_margin_cm = self.settings.get("margin_left", 3.0)
+            right_margin_cm = self.settings.get("margin_right", 1.5)
+            printable_width_cm = 21.0 - left_margin_cm - right_margin_cm - (0.5 * ind)
+            
+            p.paragraph_format.tab_stops.add_tab_stop(Cm(printable_width_cm), WD_TAB_ALIGNMENT.RIGHT)
+            r_tab = p.add_run("\t" + "_" * 22)
+            r_tab.bold = False
         elif layout == "tf":
             run_tf = p.add_run("   ( T  /  F )")
             run_tf.bold = True
@@ -844,7 +851,9 @@ class WordDocumentCompilerDocx:
         right_margin_cm = self.settings.get("margin_right", 1.5)
         printable_width_cm = 21.0 - left_margin_cm - right_margin_cm
         
-        col_w_cm = printable_width_cm / 2.0
+        max_left_len = max((len(clean_option_text(str(item))) for item in left_items), default=8)
+        left_col_cm = min(5.5, max(3.2, (max_left_len * 0.20) + 1.2))
+        right_col_cm = max(8.0, printable_width_cm - left_col_cm)
         
         table = self.doc.add_table(rows=max(len(left_items), len(right_items)), cols=2)
         table.alignment = 1
@@ -853,7 +862,7 @@ class WordDocumentCompilerDocx:
         for r_idx in range(max(len(left_items), len(right_items))):
             if r_idx < len(left_items):
                 cell_left = table.cell(r_idx, 0)
-                cell_left.width = Cm(col_w_cm)
+                cell_left.width = Cm(left_col_cm)
                 p_l = cell_left.paragraphs[0]
                 p_l.paragraph_format.space_before = Pt(2)
                 p_l.paragraph_format.space_after = Pt(2)
@@ -868,7 +877,7 @@ class WordDocumentCompilerDocx:
 
             if r_idx < len(right_items):
                 cell_right = table.cell(r_idx, 1)
-                cell_right.width = Cm(col_w_cm)
+                cell_right.width = Cm(right_col_cm)
                 p_r = cell_right.paragraphs[0]
                 p_r.paragraph_format.space_before = Pt(2)
                 p_r.paragraph_format.space_after = Pt(2)
@@ -1255,6 +1264,8 @@ class WordDocumentCompilerDocx:
             
             title_prefix = ex.get("title_prefix") or ex.get("prefix") or ex.get("title_num")
             custom_inst = ex.get("instruction") or ex.get("title")
+            if not custom_inst and ex.get("x"):
+                custom_inst = ex.get("x")
             
             block_key = (ex_type, is_mcq, title_prefix, custom_inst)
             if block_key != current_block_key:
@@ -1309,7 +1320,7 @@ class WordDocumentCompilerDocx:
                     sub_cols = sub.get("cols", cols_override)
                     sub_ind = sub.get("ind", ind)
 
-                    def_pref = "Question " if not sub_fmt else ""
+                    def_pref = ""
                     self.add_question(sub_q, sub_x, fmt=sub_fmt, layout=sub_layout, ind=sub_ind, default_prefix=def_pref)
                     
                     if sub_o and isinstance(sub_o, list):
@@ -1329,7 +1340,7 @@ class WordDocumentCompilerDocx:
                 options = ex.get("o", [])
                 ans = ex.get("a", "")
                 
-                def_pref = "Question " if not fmt else ""
+                def_pref = ""
 
                 if ex_type == "ro" and options and not (is_mcq and len(options) == 4):
                     self.add_question(q_num, q_text, fmt=fmt, layout=layout, ind=ind, default_prefix=def_pref)
