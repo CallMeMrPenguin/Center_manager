@@ -4,7 +4,7 @@ import json
 import math
 import copy
 import time
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 
 # pywin32 imports
 try:
@@ -1439,15 +1439,15 @@ class WordDocumentCompiler:
         compiler_docx = WordDocumentCompilerDocx(self.settings)
         compiler_docx.compile(exercises, output_filepath, grade=grade, unit=unit, version_code=version_code, include_answer_key=include_answer_key, is_answer_key=is_answer_key, is_test=is_test)
 
-    def compile_test_versions(self, exercises: List[Dict[str, Any]], num_versions: int = 1, mix_options: bool = True, grade: str = "", unit: str = ""):
+    def compile_test_versions(self, exercises: List[Dict[str, Any]], num_versions: int = 1, mix_options: bool = True, grade: str = "", unit: str = "", output_dir: Optional[str] = None):
         import random
         try:
             from backend.config.settings import get_setting
         except ImportError:
             from config.settings import get_setting
 
-        files_dir = get_setting("files_dir")
-        os.makedirs(files_dir, exist_ok=True)
+        target_dir = output_dir if output_dir else get_setting("files_dir")
+        os.makedirs(target_dir, exist_ok=True)
 
         timestamp = int(time.time())
         clean_grade = grade.replace(" ", "_") if grade else "Test"
@@ -1455,12 +1455,13 @@ class WordDocumentCompiler:
         
         last_filename = ""
         last_filepath = ""
+        files_list = []
         base_version = 101
 
         for i in range(num_versions):
             version_code = str(base_version + i)
             filename = f"De_thi_{clean_grade}_{clean_unit}_MDT{version_code}_{timestamp}.docx"
-            filepath = os.path.join(files_dir, filename)
+            filepath = os.path.join(target_dir, filename)
 
             ex_copy = copy.deepcopy(exercises)
             if mix_options:
@@ -1481,8 +1482,9 @@ class WordDocumentCompiler:
             
             last_filename = filename
             last_filepath = filepath
+            files_list.append({"filename": filename, "filepath": filepath, "version_code": version_code})
 
-        return last_filename, last_filepath
+        return last_filename, last_filepath, files_list
 
     def convert_docx_to_pdf_soffice(self, docx_path: str, pdf_path: str) -> bool:
         out_dir = os.path.dirname(pdf_path)

@@ -300,7 +300,7 @@ def api_compile_file(req: CompileFileRequest):
     settings = profiles.get(req.profile_name, profiles.get("Default Settings"))
 
     compiler = WordDocumentCompiler(settings)
-    out_filename, out_filepath = compiler.compile_test_versions(exercises, num_versions=1, mix_options=True)
+    out_filename, out_filepath, _ = compiler.compile_test_versions(exercises, num_versions=1, mix_options=True)
     return {"success": True, "filename": out_filename, "filepath": out_filepath}
 
 @router.post("/api/files/merge-vocabulary")
