@@ -35,7 +35,8 @@ INSTRUCTION_MAP_MCQ = {
     "er": "Mark the letter A, B, C, or D on your answer sheet to indicate the underlined part that needs correction in each of the following questions.",
     "fb": "Mark the letter A, B, C, or D on your answer sheet to indicate the word or phrase that best fits each blank in the following questions.",
     "rw": "Mark the letter A, B, C, or D on your answer sheet to indicate the sentence that is closest in meaning to each of the following questions.",
-    "mq": "Mark the letter A, B, C, or D on your answer sheet to indicate the answer that best fits each of the following questions."
+    "mq": "Mark the letter A, B, C, or D on your answer sheet to indicate the answer that best fits each of the following questions.",
+    "wb": "Complete each blank with ONE suitable word from the box."
 }
 
 INSTRUCTION_MAP_NON_MCQ = {
@@ -51,7 +52,8 @@ INSTRUCTION_MAP_NON_MCQ = {
     "er": "Identify and correct the mistake in each of the following sentences.",
     "fb": "Complete each of the following sentences with the correct form of the word in brackets or a suitable word.",
     "rw": "Rewrite each of the following sentences so that it has a similar meaning to the original sentence.",
-    "mq": "Complete each of the following questions."
+    "mq": "Complete each of the following questions.",
+    "wb": "Complete each blank with ONE suitable word from the box."
 }
 
 def cm_to_pt(cm: float) -> float:
@@ -247,11 +249,15 @@ class WordDocumentCompilerPyWin32:
         sel.Font.Italic = bool(italic)
         sel.Font.Underline = 1 if underline else 0
         if color_rgb is not None:
-            sel.Font.Color = color_rgb
-        else:
-            sel.Font.ColorIndex = 0
+            try:
+                sel.Font.Color = color_rgb
+            except Exception:
+                pass
         if highlight_index is not None:
-            sel.Font.HighlightColorIndex = highlight_index
+            try:
+                sel.Font.HighlightColorIndex = highlight_index
+            except Exception:
+                pass
             
         sel.TypeText(text)
 
@@ -304,7 +310,9 @@ class WordDocumentCompilerPyWin32:
                 correct_idx = int(c_str) - 1
 
         max_len = max(len(str(opt)) for opt in options) if options else 0
-        if exercise_type in ["pr", "st"] or max_len < 15:
+        if exercise_type in ["sg", "nt"]:
+            cols = 1
+        elif exercise_type in ["pr", "st"] or max_len < 15:
             cols = 4
         elif max_len < 35:
             cols = 2
@@ -362,7 +370,7 @@ class WordDocumentCompilerPyWin32:
                     for seg in parse_text_formatting(options[idx1]):
                         self.write_run(seg["text"], bold=seg["bold"], italic=seg["italic"], underline=seg["underline"], font_size=font_size, color_rgb=color_rgb, highlight_index=highlight_idx)
                 
-                sel.TypeText("\t")
+                self.write_run("\t", bold=False, italic=False, underline=False, font_size=font_size)
                 
                 idx2 = row * 2 + 1
                 if idx2 < len(options):
@@ -403,8 +411,17 @@ class WordDocumentCompilerPyWin32:
                         self.write_run(seg["text"], bold=seg["bold"], italic=seg["italic"], underline=seg["underline"], font_size=font_size, color_rgb=color_rgb, highlight_index=highlight_idx)
                 
                 if idx < 3:
-                    sel.TypeText("\t")
+                    self.write_run("\t", bold=False, italic=False, underline=False, font_size=font_size)
             sel.TypeParagraph()
+        
+        try:
+            sel.Font.Underline = 0
+        except Exception:
+            pass
+        try:
+            sel.Font.ColorIndex = 0
+        except Exception:
+            pass
 
     def add_test_header(self, grade: str, unit: str, version_code: str):
         left_margin_cm = self.settings.get("margin_left", 3.0)
@@ -552,6 +569,35 @@ class WordDocumentCompilerPyWin32:
         sel.Start = table.Range.End
         sel.TypeParagraph()
 
+    def add_word_box(self, words: List[str]):
+        if not words:
+            return
+        sel = self.word.Selection
+        table = self.doc.Tables.Add(Range=sel.Range, NumRows=1, NumColumns=1)
+        try:
+            table.Rows.Alignment = 1
+        except Exception:
+            pass
+        table.Columns(1).Width = cm_to_pt(15.0)
+        cell = table.Cell(1, 1)
+        cell.VerticalAlignment = 1
+        for border_id in [-1, -2, -3, -4]:
+            try:
+                cell.Borders(border_id).LineStyle = 1
+                cell.Borders(border_id).LineWidth = 8
+            except Exception:
+                pass
+        p_cell = cell.Range
+        p_cell.ParagraphFormat.Alignment = 1
+        p_cell.ParagraphFormat.SpaceBefore = 4
+        p_cell.ParagraphFormat.SpaceAfter = 4
+        p_cell.Font.Name = "Times New Roman"
+        p_cell.Font.Size = 12
+        p_cell.Font.Bold = True
+        p_cell.Text = "   │   ".join(words)
+        sel.Start = table.Range.End
+        sel.TypeParagraph()
+
     def compile(self, exercises: List[Dict[str, Any]], output_filepath: Any, grade: str = "", unit: str = "", version_code: str = "", include_answer_key: bool = True, is_answer_key: bool = False):
         self.is_answer_key = is_answer_key
         try:
@@ -575,7 +621,37 @@ class WordDocumentCompilerPyWin32:
                     if instruction_text:
                         self.add_instruction_header(instruction_text)
                 
-                if ex_type in ["cz", "rd"]:
+                if ex_type == "wb":
+                    words = ex.get("w", [])
+                    if words:
+                        self.add_word_box(words)
+                    space_before = self.settings.get("passage_space_before", 4.0)
+                    space_after = self.settings.get("passage_space_after", 6.0)
+                    indent_first = self.settings.get("passage_indent_first", 0.75)
+                    
+                    sel = self.word.Selection
+                    for paragraph_text in ex.get("b", []):
+                        sel.ParagraphFormat.SpaceBefore = space_before
+                        sel.ParagraphFormat.SpaceAfter = space_after
+                        sel.ParagraphFormat.FirstLineIndent = cm_to_pt(indent_first)
+                        sel.ParagraphFormat.LeftIndent = 0
+                        sel.ParagraphFormat.Alignment = 0
+                        segments = parse_text_formatting(paragraph_text)
+                        for seg in segments:
+                            self.write_run(seg["text"], bold=seg["bold"], italic=seg["italic"], underline=seg["underline"])
+                        sel.TypeParagraph()
+                        
+                    for sub in ex.get("k", []):
+                        sub_q = sub.get("q")
+                        sub_x = sub.get("x", "")
+                        sub_o = sub.get("o", [])
+                        sub_a = sub.get("a", "")
+                        if sub_q:
+                            self.add_question(sub_q, sub_x)
+                            if sub_o:
+                                self.add_options_grid(sub_o, ex_type, correct_ans=sub_a)
+
+                elif ex_type in ["cz", "rd"]:
                     space_before = self.settings.get("passage_space_before", 4.0)
                     space_after = self.settings.get("passage_space_after", 6.0)
                     indent_first = self.settings.get("passage_indent_first", 0.75)
@@ -694,7 +770,7 @@ class WordDocumentCompilerDocx:
             section.top_margin = Cm(top_cm)
             section.bottom_margin = Cm(bottom_cm)
             section.left_margin = Cm(left_cm)
-            section.right_margin = Cm(right_margin_cm)
+            section.right_margin = Cm(right_cm)
 
     def _configure_styles(self):
         font_name = self.settings.get("font_name", "Times New Roman")
@@ -759,7 +835,9 @@ class WordDocumentCompilerDocx:
                 correct_idx = int(c_str) - 1
 
         max_len = max(len(str(opt)) for opt in options) if options else 0
-        if exercise_type in ["pr", "st"] or max_len < 15:
+        if exercise_type in ["sg", "nt"]:
+            cols = 1
+        elif exercise_type in ["pr", "st"] or max_len < 15:
             cols = 4
         elif max_len < 35:
             cols = 2
@@ -827,7 +905,8 @@ class WordDocumentCompilerDocx:
                             run.font.color.rgb = RGBColor(255, 0, 0)
                             run.font.highlight_color = WD_COLOR_INDEX.YELLOW
                         
-                p.add_run("\t")
+                r_tab = p.add_run("\t")
+                r_tab.font.underline = False
                 
                 idx2 = row * 2 + 1
                 if idx2 < len(options):
@@ -878,7 +957,29 @@ class WordDocumentCompilerDocx:
                             run.font.highlight_color = WD_COLOR_INDEX.YELLOW
                 
                 if idx < 3:
-                    p.add_run("\t")
+                    r_tab = p.add_run("\t")
+                    r_tab.font.underline = False
+            
+    def add_word_box(self, words: List[str]):
+        if not words:
+            return
+        table = self.doc.add_table(rows=1, cols=1)
+        table.alignment = 1
+        table.autofit = False
+        table.columns[0].width = Cm(15.0)
+        cell = table.cell(0, 0)
+        cell.width = Cm(15.0)
+        cell.vertical_alignment = 1
+        border_spec = {"sz": 8, "val": "single", "color": "000000", "space": "0"}
+        set_cell_border(cell, top=border_spec, bottom=border_spec, left=border_spec, right=border_spec)
+        p = cell.paragraphs[0]
+        p.alignment = 1
+        p.paragraph_format.space_before = Pt(4)
+        p.paragraph_format.space_after = Pt(4)
+        run = p.add_run("   │   ".join(words))
+        run.bold = True
+        run.font.name = "Times New Roman"
+        run.font.size = Pt(12)
 
     def add_test_header(self, grade: str, unit: str, version_code: str):
         table = self.doc.add_table(rows=1, cols=2)
@@ -1050,7 +1151,38 @@ class WordDocumentCompilerDocx:
                 if instruction_text:
                     self.add_instruction_header(instruction_text)
             
-            if ex_type in ["cz", "rd"]:
+            if ex_type == "wb":
+                words = ex.get("w", [])
+                if words:
+                    self.add_word_box(words)
+                space_before = self.settings.get("passage_space_before", 4.0)
+                space_after = self.settings.get("passage_space_after", 6.0)
+                indent_first = self.settings.get("passage_indent_first", 0.75)
+                
+                for paragraph_text in ex.get("b", []):
+                    p_passage = self.doc.add_paragraph()
+                    p_passage.paragraph_format.space_before = Pt(space_before)
+                    p_passage.paragraph_format.space_after = Pt(space_after)
+                    p_passage.paragraph_format.first_line_indent = Cm(indent_first)
+                    
+                    segments = parse_text_formatting(paragraph_text)
+                    for seg in segments:
+                        run = p_passage.add_run(seg["text"])
+                        if seg["bold"]: run.bold = True
+                        if seg["italic"]: run.italic = True
+                        if seg["underline"]: run.underline = True
+                
+                for sub in ex.get("k", []):
+                    sub_q = sub.get("q")
+                    sub_x = sub.get("x", "")
+                    sub_o = sub.get("o", [])
+                    sub_a = sub.get("a", "")
+                    if sub_q:
+                        self.add_question(sub_q, sub_x)
+                        if sub_o:
+                            self.add_options_grid(sub_o, ex_type, correct_ans=sub_a)
+
+            elif ex_type in ["cz", "rd"]:
                 space_before = self.settings.get("passage_space_before", 4.0)
                 space_after = self.settings.get("passage_space_after", 6.0)
                 indent_first = self.settings.get("passage_indent_first", 0.75)
