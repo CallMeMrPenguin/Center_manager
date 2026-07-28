@@ -629,12 +629,21 @@ class WordDocumentCompilerPyWin32:
         
         # Draw Rounded Rectangle Shape (msoShapeRoundedRectangle = 5) anchored around the words
         try:
-            top_pt = box_range.Information(34) # wdVerticalPositionRelativeToPage = 34
-            left_pt = cm_to_pt(left_margin_cm)
-            width_pt = printable_width_pt
-            height_pt = max(cm_to_pt(1.2), num_rows * cm_to_pt(0.7) + cm_to_pt(0.3))
+            padding_pt = 6.0 # ~2.1mm padding away from text
+            text_height_pt = (num_rows * 18.0) + 4.0
+            box_width_pt = printable_width_pt + (padding_pt * 2)
+            box_height_pt = text_height_pt + (padding_pt * 2)
             
-            shape = self.doc.Shapes.AddShape(5, left_pt, top_pt - 4, width_pt, height_pt, Anchor=box_range)
+            shape = self.doc.Shapes.AddShape(
+                5, # msoShapeRoundedRectangle = 5
+                -padding_pt, # Left relative to margin
+                -padding_pt, # Top relative to paragraph
+                box_width_pt,
+                box_height_pt,
+                Anchor=box_range
+            )
+            shape.RelativeHorizontalPosition = 0 # wdRelativeHorizontalPositionMargin = 0
+            shape.RelativeVerticalPosition = 2 # wdRelativeVerticalPositionParagraph = 2
             shape.Fill.Visible = False # Transparent background so words show directly
             shape.Line.Weight = 1.0 # 1pt border
             shape.Line.ForeColor.RGB = 0 # Black line
