@@ -586,6 +586,7 @@ class WordDocumentCompilerPyWin32:
         left_margin_cm = self.settings.get("margin_left", 3.0)
         right_margin_cm = self.settings.get("margin_right", 1.5)
         printable_width_cm = 21.0 - left_margin_cm - right_margin_cm
+        printable_width_pt = cm_to_pt(printable_width_cm)
         
         N = len(words)
         if N >= 10:
@@ -599,19 +600,21 @@ class WordDocumentCompilerPyWin32:
         else:
             cols = N
             
-        max_word_len = max(len(str(w)) for w in words) if words else 8
-        col_width_cm = max(2.3, (max_word_len * 0.17) + 0.4)
-        last_word_w_cm = (max_word_len * 0.17) + 0.2
-        total_box_width_cm = ((cols - 1) * col_width_cm) + last_word_w_cm
-        
-        left_offset_cm = max(0, (printable_width_cm - total_box_width_cm) / 2)
-        left_offset_pt = cm_to_pt(left_offset_cm)
+        col_width_cm = 2.3
         col_width_pt = cm_to_pt(col_width_cm)
         
+        # Calculate maximum character length in the last column to compute exact right border boundary
+        last_col_words = [words[i] for i in range(cols - 1, N, cols)] if N >= cols else [words[-1]]
+        last_col_max_len = max(len(str(w)) for w in last_col_words) if last_col_words else 8
+        last_col_text_w_pt = (last_col_max_len * 6.2) + 2.0
+        
+        text_group_width_pt = ((cols - 1) * col_width_pt) + last_col_text_w_pt
+        left_offset_pt = max(0.0, (printable_width_pt - text_group_width_pt) / 2.0)
+        
         # Configure paragraph indent and tab stops for centered multi-column word box
-        sel.ParagraphFormat.SpaceBefore = 4
-        sel.ParagraphFormat.SpaceAfter = 0
-        sel.ParagraphFormat.LineSpacingRule = 0 # Single spacing for first rows
+        sel.ParagraphFormat.SpaceBefore = 3
+        sel.ParagraphFormat.SpaceAfter = 3
+        sel.ParagraphFormat.LineSpacingRule = 0 # Standard single line spacing
         sel.ParagraphFormat.Alignment = 0 # Left align inside tab stop
         sel.ParagraphFormat.LeftIndent = left_offset_pt
         sel.ParagraphFormat.TabStops.ClearAll()
@@ -628,13 +631,6 @@ class WordDocumentCompilerPyWin32:
             
         num_rows = len(lines)
         for idx_line, chunk in enumerate(lines):
-            if idx_line == num_rows - 1:
-                sel.ParagraphFormat.LineSpacingRule = 2 # Double line spacing on last row!
-                sel.ParagraphFormat.SpaceAfter = 0
-            else:
-                sel.ParagraphFormat.LineSpacingRule = 0
-                sel.ParagraphFormat.SpaceAfter = 0
-                
             for idx_w, word in enumerate(chunk):
                 self.write_run(word, bold=True)
                 if idx_w < len(chunk) - 1:
@@ -647,8 +643,8 @@ class WordDocumentCompilerPyWin32:
         # Draw Rounded Rectangle Shape (msoShapeRoundedRectangle = 5) tightly anchored around centered word box
         try:
             padding_pt = 6.0 # Equal top, bottom, left, right padding (~2.1mm)
-            box_width_pt = cm_to_pt(total_box_width_cm) + (padding_pt * 2)
-            text_height_pt = ((num_rows - 1) * 18.0) + 24.0
+            box_width_pt = text_group_width_pt + (padding_pt * 2)
+            text_height_pt = num_rows * 16.0
             box_height_pt = text_height_pt + (padding_pt * 2)
             
             shape = self.doc.Shapes.AddShape(
@@ -661,7 +657,7 @@ class WordDocumentCompilerPyWin32:
             )
             shape.RelativeHorizontalPosition = 0 # wdRelativeHorizontalPositionMargin = 0
             shape.RelativeVerticalPosition = 2 # wdRelativeVerticalPositionParagraph = 2
-            shape.Left = left_offset_pt - padding_pt # Tight left & right borders symmetrical around text
+            shape.Left = left_offset_pt - padding_pt # Tight & symmetrical left/right borders around text
             shape.Top = -padding_pt # Equal top & bottom distance
             
             shape.Fill.Visible = False # Transparent background so words show directly in document
@@ -674,8 +670,8 @@ class WordDocumentCompilerPyWin32:
         except Exception as e:
             print(f"  [PyWin32] Warning drawing rounded shape around word box: {e}")
             
-        # Reset selection formatting for paragraphs after word box
-        sel.ParagraphFormat.SpaceBefore = 4
+        # Reset selection formatting for paragraphs after word box with 12pt SpaceBefore to separate passage below
+        sel.ParagraphFormat.SpaceBefore = 12
         sel.ParagraphFormat.SpaceAfter = 4
         sel.ParagraphFormat.LineSpacingRule = 0
         sel.ParagraphFormat.LeftIndent = 0
