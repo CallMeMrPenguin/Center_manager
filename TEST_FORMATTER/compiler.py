@@ -586,7 +586,6 @@ class WordDocumentCompilerPyWin32:
         left_margin_cm = self.settings.get("margin_left", 3.0)
         right_margin_cm = self.settings.get("margin_right", 1.5)
         printable_width_cm = 21.0 - left_margin_cm - right_margin_cm
-        printable_width_pt = cm_to_pt(printable_width_cm)
         
         N = len(words)
         if N >= 10:
@@ -600,16 +599,22 @@ class WordDocumentCompilerPyWin32:
         else:
             cols = N
             
-        col_width_cm = printable_width_cm / cols
+        max_word_len = max(len(str(w)) for w in words) if words else 8
+        col_width_cm = max(2.6, (max_word_len * 0.18) + 0.6)
+        total_box_width_cm = cols * col_width_cm
+        left_offset_cm = max(0, (printable_width_cm - total_box_width_cm) / 2)
+        left_offset_pt = cm_to_pt(left_offset_cm)
+        col_width_pt = cm_to_pt(col_width_cm)
         
-        # Configure paragraph tab stops on selection for evenly spaced columns
+        # Configure paragraph indent and tab stops for centered multi-column word box
         sel.ParagraphFormat.SpaceBefore = 4
         sel.ParagraphFormat.SpaceAfter = 4
-        sel.ParagraphFormat.Alignment = 0
+        sel.ParagraphFormat.Alignment = 0 # Left align inside tab stop
+        sel.ParagraphFormat.LeftIndent = left_offset_pt
         sel.ParagraphFormat.TabStops.ClearAll()
         for c in range(1, cols):
-            tab_pos = col_width_cm * c
-            sel.ParagraphFormat.TabStops.Add(Position=cm_to_pt(tab_pos), Alignment=0)
+            tab_pos = left_offset_pt + (col_width_pt * c)
+            sel.ParagraphFormat.TabStops.Add(Position=tab_pos, Alignment=0)
             
         p_start = sel.Range.Start
         
@@ -620,6 +625,8 @@ class WordDocumentCompilerPyWin32:
             
         num_rows = len(lines)
         for idx_line, chunk in enumerate(lines):
+            if idx_line == num_rows - 1:
+                sel.ParagraphFormat.SpaceAfter = 14 # Extra spacing on last row so bottom border never overlaps passage text below!
             for idx_w, word in enumerate(chunk):
                 self.write_run(word, bold=True)
                 if idx_w < len(chunk) - 1:
@@ -629,11 +636,11 @@ class WordDocumentCompilerPyWin32:
         p_end = sel.Range.Start
         box_range = self.doc.Range(p_start, p_end)
         
-        # Draw Rounded Rectangle Shape (msoShapeRoundedRectangle = 5) anchored around the 5-column word box
+        # Draw Rounded Rectangle Shape (msoShapeRoundedRectangle = 5) tightly anchored around centered word box
         try:
-            padding_pt = 6.0 # ~2.1mm padding away from text
+            padding_pt = 6.0 # Equal top, bottom, left, right padding (~2.1mm)
+            box_width_pt = cm_to_pt(total_box_width_cm) + (padding_pt * 2)
             text_height_pt = (num_rows * 18.0) + 4.0
-            box_width_pt = printable_width_pt + (padding_pt * 2)
             box_height_pt = text_height_pt + (padding_pt * 2)
             
             shape = self.doc.Shapes.AddShape(
@@ -646,8 +653,8 @@ class WordDocumentCompilerPyWin32:
             )
             shape.RelativeHorizontalPosition = 0 # wdRelativeHorizontalPositionMargin = 0
             shape.RelativeVerticalPosition = 2 # wdRelativeVerticalPositionParagraph = 2
-            shape.Left = -padding_pt
-            shape.Top = -padding_pt
+            shape.Left = left_offset_pt - padding_pt # Tight left border around first word column
+            shape.Top = -padding_pt # Equal top & bottom distance
             
             shape.Fill.Visible = False # Transparent background so words show directly in document
             shape.Line.Weight = 1.0 # 1pt border
@@ -658,6 +665,12 @@ class WordDocumentCompilerPyWin32:
                 pass
         except Exception as e:
             print(f"  [PyWin32] Warning drawing rounded shape around word box: {e}")
+            
+        # Reset selection formatting for paragraphs after word box
+        sel.ParagraphFormat.SpaceBefore = 4
+        sel.ParagraphFormat.SpaceAfter = 4
+        sel.ParagraphFormat.LeftIndent = 0
+        sel.ParagraphFormat.TabStops.ClearAll()
 
     def compile(self, exercises: List[Dict[str, Any]], output_filepath: Any, grade: str = "", unit: str = "", version_code: str = "", include_answer_key: bool = True, is_answer_key: bool = False, is_test: bool = False):
         self.is_answer_key = is_answer_key
