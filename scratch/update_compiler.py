@@ -1,4 +1,7 @@
+import sys
 import os
+
+compiler_code = '''import os
 import sys
 import json
 import math
@@ -1423,3 +1426,15 @@ class WordDocumentCompiler:
         
         self.compile(exercises, filepath, grade=grade, unit=unit, version_code="101" if num_versions > 1 else "", include_answer_key=True, is_test=True)
         return filename, filepath
+'''
+
+targets = [
+    r"c:\Users\ACER\Desktop\Center_Manager_App\backend\services\compiler.py",
+    r"c:\Users\ACER\Desktop\Center_Manager_App\TEST_FORMATTER\compiler.py"
+]
+
+for t in targets:
+    os.makedirs(os.path.dirname(t), exist_ok=True)
+    with open(t, 'w', encoding='utf-8') as f:
+        f.write(compiler_code)
+    print(f"Updated {t}")

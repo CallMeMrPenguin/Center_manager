@@ -36,7 +36,10 @@ INSTRUCTION_MAP_MCQ = {
     "fb": "Mark the letter A, B, C, or D on your answer sheet to indicate the word or phrase that best fits each blank in the following questions.",
     "rw": "Mark the letter A, B, C, or D on your answer sheet to indicate the sentence that is closest in meaning to each of the following questions.",
     "mq": "Mark the letter A, B, C, or D on your answer sheet to indicate the answer that best fits each of the following questions.",
-    "wb": "Complete each blank with ONE suitable word from the box."
+    "wb": "Complete each blank with ONE suitable word from the box.",
+    "wq": "Mark the letter A, B, C, or D on your answer sheet to indicate the correct question for the underlined part in each of the following questions.",
+    "mt": "Mark the letter A, B, C, or D on your answer sheet to indicate the correct match for each of the following questions.",
+    "tf": "Mark the letter A, B, C, or D on your answer sheet to indicate whether each of the following statements is True or False."
 }
 
 INSTRUCTION_MAP_NON_MCQ = {
@@ -53,7 +56,10 @@ INSTRUCTION_MAP_NON_MCQ = {
     "fb": "Complete each of the following sentences with the correct form of the word in brackets or a suitable word.",
     "rw": "Rewrite each of the following sentences so that it has a similar meaning to the original sentence.",
     "mq": "Complete each of the following questions.",
-    "wb": "Complete each blank with ONE suitable word from the box."
+    "wb": "Complete each blank with ONE suitable word from the box.",
+    "wq": "Write questions for the underlined parts in each of the following sentences.",
+    "mt": "Match each item in the left column with its correct definition or meaning in the right column.",
+    "tf": "Decide whether the following statements are True (T) or False (F)."
 }
 
 def cm_to_pt(cm: float) -> float:
@@ -87,6 +93,30 @@ def get_instruction_text(ex_type: str, is_mcq: bool = True) -> str:
         return INSTRUCTION_MAP_MCQ.get(ex_type, "Mark the letter A, B, C, or D on your answer sheet to indicate the answer that best fits each of the following questions.")
     else:
         return INSTRUCTION_MAP_NON_MCQ.get(ex_type, "Answer each of the following questions.")
+
+def format_question_label(q_num: Any, fmt: str = None, default_prefix: str = "Question ") -> str:
+    if q_num is None or str(q_num).strip() == "":
+        return ""
+    q_str = str(q_num).strip()
+    if not fmt:
+        if default_prefix:
+            return f"{default_prefix}{q_str}: "
+        return f"{q_str}. "
+    
+    fmt = fmt.strip()
+    if fmt == "1.":
+        return f"{q_str}. "
+    elif fmt == "(1)":
+        return f"({q_str}) "
+    elif fmt == "a.":
+        return f"{q_str.lower()}. "
+    elif fmt == "A.":
+        return f"{q_str.upper()}. "
+    elif fmt == "a)":
+        return f"{q_str.lower()}) "
+    else:
+        last_char = fmt[-1] if fmt[-1] in '.:)' else ' '
+        return f"{q_str}{last_char} "
 
 def parse_text_formatting(text: str) -> List[Dict[str, Any]]:
     import re
@@ -202,8 +232,8 @@ class WordDocumentCompilerPyWin32:
             pass
             
         self.word = win32com.client.Dispatch("Word.Application")
-        self.word.Visible = True  # Real-time visual output in MS Word window
-        self.word.DisplayAlerts = 0  # wdAlertsNone
+        self.word.Visible = True
+        self.word.DisplayAlerts = 0
         self.doc = self.word.Documents.Add()
         
         self._configure_page()
@@ -228,8 +258,8 @@ class WordDocumentCompilerPyWin32:
         font_size = self.settings.get("font_size", 12.0)
         
         for section in self.doc.Sections:
-            footer = section.Footers(1) # wdHeaderFooterPrimary = 1
-            footer.Range.ParagraphFormat.Alignment = 1 # Center
+            footer = section.Footers(1)
+            footer.Range.ParagraphFormat.Alignment = 1
             footer.Range.Font.Name = font_name
             footer.Range.Font.Size = font_size
             footer.Range.Text = ""
@@ -238,7 +268,7 @@ class WordDocumentCompilerPyWin32:
             self.doc.Fields.Add(Range=sel_range, Type=-1, Text="PAGE")
             footer.Range.InsertAfter("/")
             end_range = footer.Range
-            end_range.Collapse(0) # wdCollapseEnd = 0
+            end_range.Collapse(0)
             self.doc.Fields.Add(Range=end_range, Type=-1, Text="NUMPAGES")
 
     def write_run(self, text: str, bold: bool = False, italic: bool = False, underline: bool = False, font_name: str = "Times New Roman", font_size: float = 12.0, color_rgb: int = None, highlight_index: int = None):
@@ -249,17 +279,15 @@ class WordDocumentCompilerPyWin32:
         sel.Font.Italic = bool(italic)
         sel.Font.Underline = 1 if underline else 0
         if color_rgb is not None:
-            try:
-                sel.Font.Color = color_rgb
-            except Exception:
-                pass
+            sel.Font.Color = color_rgb
         if highlight_index is not None:
-            try:
-                sel.Font.HighlightColorIndex = highlight_index
-            except Exception:
-                pass
-            
+            sel.Range.HighlightColorIndex = highlight_index
         sel.TypeText(text)
+        sel.Font.Bold = 0
+        sel.Font.Italic = 0
+        sel.Font.Underline = 0
+        sel.Font.ColorIndex = 0
+        sel.Range.HighlightColorIndex = 0
 
     def add_instruction_header(self, text: str):
         space_before = self.settings.get("header_space_before", 14.0)
@@ -270,33 +298,38 @@ class WordDocumentCompilerPyWin32:
         sel.ParagraphFormat.SpaceBefore = space_before
         sel.ParagraphFormat.SpaceAfter = space_after
         sel.ParagraphFormat.KeepWithNext = True
-        sel.ParagraphFormat.LeftIndent = 0
-        sel.ParagraphFormat.Alignment = 0 # Left
-        
         self.write_run(text, bold=True, font_size=font_size)
         sel.TypeParagraph()
 
-    def add_question(self, q_num: Any, q_text: str):
+    def add_question(self, q_num: Any, q_text: str, fmt: str = None, layout: str = None, ind: int = 0, default_prefix: str = "Question "):
         space_before = self.settings.get("question_space_before", 6.0)
         space_after = self.settings.get("question_space_after", 4.0)
-        font_size = self.settings.get("font_size", 12.0)
         
         sel = self.word.Selection
         sel.ParagraphFormat.SpaceBefore = space_before
         sel.ParagraphFormat.SpaceAfter = space_after
         sel.ParagraphFormat.KeepWithNext = True
-        sel.ParagraphFormat.LeftIndent = 0
-        sel.ParagraphFormat.Alignment = 0
+        if ind > 0:
+            sel.ParagraphFormat.LeftIndent = cm_to_pt(0.5 * ind)
+        else:
+            sel.ParagraphFormat.LeftIndent = 0
         
-        self.write_run(f"Question {q_num}: ", bold=True, font_size=font_size)
-        
-        segments = parse_text_formatting(q_text)
+        q_label = format_question_label(q_num, fmt=fmt, default_prefix=default_prefix)
+        if q_label:
+            self.write_run(q_label, bold=True)
+            
+        segments = parse_text_formatting(q_text or "")
         for seg in segments:
-            self.write_run(seg["text"], bold=seg["bold"], italic=seg["italic"], underline=seg["underline"], font_size=font_size)
+            self.write_run(seg["text"], bold=seg["bold"], italic=seg["italic"], underline=seg["underline"])
+            
+        if layout == "blank_right":
+            self.write_run("   " + "_" * 25, bold=False)
+        elif layout == "tf":
+            self.write_run("   ( T  /  F )", bold=True)
             
         sel.TypeParagraph()
 
-    def add_options_grid(self, options: List[str], exercise_type: str, correct_ans: Any = None):
+    def add_options_grid(self, options: List[str], exercise_type: str, correct_ans: Any = None, cols_override: int = None):
         if not options:
             return
         options = [clean_option_text(opt) for opt in options]
@@ -309,199 +342,157 @@ class WordDocumentCompilerPyWin32:
             elif c_str in ['1', '2', '3', '4', '5']:
                 correct_idx = int(c_str) - 1
 
-        max_len = max(len(str(opt)) for opt in options) if options else 0
-        if exercise_type in ["sg", "nt"]:
-            cols = 1
-        elif exercise_type in ["pr", "st"] or max_len < 15:
-            cols = 4
-        elif max_len < 35:
-            cols = 2
+        if cols_override in [1, 2, 3, 4]:
+            cols = cols_override
         else:
-            cols = 1
+            max_len = max(len(str(opt)) for opt in options) if options else 0
+            if exercise_type in ["sg", "nt"]:
+                cols = 1
+            elif exercise_type in ["pr", "st"] or max_len < 15:
+                cols = 4
+            elif max_len < 35:
+                cols = 2
+            else:
+                cols = 1
 
         left_indent_cm = self.settings.get("options_left_indent", 0.5)
         space_before = self.settings.get("options_space_before", 0.0)
         space_after = self.settings.get("options_space_after", 3.0)
-        font_size = self.settings.get("font_size", 12.0)
         
-        left_margin_cm = self.settings.get("margin_left", 3.0)
-        right_margin_cm = self.settings.get("margin_right", 1.5)
-        printable_width_cm = 21.0 - left_margin_cm - right_margin_cm
+        printable_width_cm = 21.0 - self.settings.get("margin_left", 3.0) - self.settings.get("margin_right", 1.5)
         remaining_width_cm = printable_width_cm - left_indent_cm
-        
         sel = self.word.Selection
-        
+
         if cols == 1:
             for idx, opt in enumerate(options):
                 prefix = chr(65 + idx)
                 sel.ParagraphFormat.LeftIndent = cm_to_pt(left_indent_cm)
                 sel.ParagraphFormat.SpaceBefore = space_before
                 sel.ParagraphFormat.SpaceAfter = space_after
-                sel.ParagraphFormat.TabStops.ClearAll()
                 
-                is_correct = (idx == correct_idx and self.is_answer_key)
-                color_rgb = 255 if is_correct else None
-                highlight_idx = 7 if is_correct else None
+                is_curr_ans = (idx == correct_idx and self.is_answer_key)
+                color = 255 if is_curr_ans else None
+                highlight = 7 if is_curr_ans else None
                 
-                self.write_run(f"{prefix}. ", bold=True, font_size=font_size, color_rgb=color_rgb, highlight_index=highlight_idx)
-                for seg in parse_text_formatting(opt):
-                    self.write_run(seg["text"], bold=seg["bold"], italic=seg["italic"], underline=seg["underline"], font_size=font_size, color_rgb=color_rgb, highlight_index=highlight_idx)
+                self.write_run(f"{prefix}. ", bold=True, color_rgb=color, highlight_index=highlight)
+                segments = parse_text_formatting(opt)
+                for seg in segments:
+                    self.write_run(seg["text"], bold=seg["bold"], italic=seg["italic"], underline=seg["underline"], color_rgb=color, highlight_index=highlight)
                 sel.TypeParagraph()
 
-        elif cols == 2:
-            col_width = remaining_width_cm / 2
-            tab_pos = left_indent_cm + col_width
+        elif cols in [2, 4]:
+            col_width = remaining_width_cm / cols
+            sel.ParagraphFormat.TabStops.ClearAll()
+            for c_i in range(1, cols):
+                sel.ParagraphFormat.TabStops.Add(Position=cm_to_pt(left_indent_cm + col_width * c_i), Alignment=0)
             
-            for row in range(2):
+            num_rows = math.ceil(len(options) / cols)
+            for r in range(num_rows):
                 sel.ParagraphFormat.LeftIndent = cm_to_pt(left_indent_cm)
                 sel.ParagraphFormat.SpaceBefore = space_before
                 sel.ParagraphFormat.SpaceAfter = space_after
-                sel.ParagraphFormat.TabStops.ClearAll()
-                sel.ParagraphFormat.TabStops.Add(Position=cm_to_pt(tab_pos), Alignment=0) # Left
                 
-                idx1 = row * 2
-                if idx1 < len(options):
-                    prefix = chr(65 + idx1)
-                    is_correct = (idx1 == correct_idx and self.is_answer_key)
-                    color_rgb = 255 if is_correct else None
-                    highlight_idx = 7 if is_correct else None
-                    
-                    self.write_run(f"{prefix}. ", bold=True, font_size=font_size, color_rgb=color_rgb, highlight_index=highlight_idx)
-                    for seg in parse_text_formatting(options[idx1]):
-                        self.write_run(seg["text"], bold=seg["bold"], italic=seg["italic"], underline=seg["underline"], font_size=font_size, color_rgb=color_rgb, highlight_index=highlight_idx)
-                
-                self.write_run("\t", bold=False, italic=False, underline=False, font_size=font_size)
-                
-                idx2 = row * 2 + 1
-                if idx2 < len(options):
-                    prefix = chr(65 + idx2)
-                    is_correct = (idx2 == correct_idx and self.is_answer_key)
-                    color_rgb = 255 if is_correct else None
-                    highlight_idx = 7 if is_correct else None
-                    
-                    self.write_run(f"{prefix}. ", bold=True, font_size=font_size, color_rgb=color_rgb, highlight_index=highlight_idx)
-                    for seg in parse_text_formatting(options[idx2]):
-                        self.write_run(seg["text"], bold=seg["bold"], italic=seg["italic"], underline=seg["underline"], font_size=font_size, color_rgb=color_rgb, highlight_index=highlight_idx)
-                
-                sel.TypeParagraph()
-
-        elif cols == 4:
-            col_width = remaining_width_cm / 4
-            tab1 = left_indent_cm + col_width
-            tab2 = left_indent_cm + (col_width * 2)
-            tab3 = left_indent_cm + (col_width * 3)
-            
-            sel.ParagraphFormat.LeftIndent = cm_to_pt(left_indent_cm)
-            sel.ParagraphFormat.SpaceBefore = space_before
-            sel.ParagraphFormat.SpaceAfter = space_after
-            sel.ParagraphFormat.TabStops.ClearAll()
-            sel.ParagraphFormat.TabStops.Add(Position=cm_to_pt(tab1), Alignment=0)
-            sel.ParagraphFormat.TabStops.Add(Position=cm_to_pt(tab2), Alignment=0)
-            sel.ParagraphFormat.TabStops.Add(Position=cm_to_pt(tab3), Alignment=0)
-            
-            for idx in range(4):
-                if idx < len(options):
-                    prefix = chr(65 + idx)
-                    is_correct = (idx == correct_idx and self.is_answer_key)
-                    color_rgb = 255 if is_correct else None
-                    highlight_idx = 7 if is_correct else None
-                    
-                    self.write_run(f"{prefix}. ", bold=True, font_size=font_size, color_rgb=color_rgb, highlight_index=highlight_idx)
-                    for seg in parse_text_formatting(options[idx]):
-                        self.write_run(seg["text"], bold=seg["bold"], italic=seg["italic"], underline=seg["underline"], font_size=font_size, color_rgb=color_rgb, highlight_index=highlight_idx)
-                
-                if idx < 3:
-                    self.write_run("\t", bold=False, italic=False, underline=False, font_size=font_size)
-            sel.TypeParagraph()
-        
-        try:
-            sel.Font.Underline = 0
-        except Exception:
-            pass
-        try:
-            sel.Font.ColorIndex = 0
-        except Exception:
-            pass
-
-    def add_test_header(self, grade: str = "", unit: str = "", version_code: str = "", is_test: bool = True):
-        sel = self.word.Selection
-        has_version = bool(version_code and str(version_code).strip() != "")
-        
-        # Add Student Header ("Họ và tên... Lớp...") ONLY if is_test is True
-        if is_test:
-            if has_version:
-                left_margin_cm = self.settings.get("margin_left", 3.0)
-                right_margin_cm = self.settings.get("margin_right", 1.5)
-                printable_width_cm = 21.0 - left_margin_cm - right_margin_cm
-                
-                table = self.doc.Tables.Add(Range=sel.Range, NumRows=1, NumColumns=2)
-                try:
-                    table.Rows.Alignment = 1 # Center
-                except Exception:
-                    pass
-                table.Columns(1).Width = cm_to_pt(printable_width_cm - 3.5)
-                table.Columns(2).Width = cm_to_pt(3.5)
-                
-                cell_left = table.Cell(1, 1)
-                cell_left.Range.ParagraphFormat.SpaceBefore = 0
-                cell_left.Range.ParagraphFormat.SpaceAfter = 0
-                cell_left.Range.ParagraphFormat.LineSpacingRule = 2
-                cell_left.Range.Font.Name = "Times New Roman"
-                cell_left.Range.Font.Size = 12
-                cell_left.Range.Font.Bold = True
-                cell_left.Range.Text = "Họ và tên: ....................................\rLớp: ...................."
-                
-                cell_right = table.Cell(1, 2)
-                cell_right.Range.ParagraphFormat.SpaceBefore = 0
-                cell_right.Range.ParagraphFormat.SpaceAfter = 0
-                cell_right.Range.Text = ""
-                
-                try:
-                    v_num = int(version_code)
-                    if v_num >= 101:
-                        v_num = v_num - 100
-                    ver_text = f"ĐỀ {v_num}"
-                except ValueError:
-                    ver_text = f"ĐỀ {version_code}"
-                    
-                nested_table = self.doc.Tables.Add(Range=cell_right.Range, NumRows=1, NumColumns=1)
-                try:
-                    nested_table.Rows.Alignment = 2 # Right
-                except Exception:
-                    pass
-                nested_table.Columns(1).Width = cm_to_pt(2.5)
-                nested_cell = nested_table.Cell(1, 1)
-                nested_cell.VerticalAlignment = 1
-                
-                for border_id in [-1, -2, -3, -4]:
-                    try:
-                        nested_cell.Borders(border_id).LineStyle = 1
-                        nested_cell.Borders(border_id).LineWidth = 12
-                    except Exception:
-                        pass
+                for c in range(cols):
+                    idx = r * cols + c
+                    if idx < len(options):
+                        prefix = chr(65 + idx)
+                        is_curr_ans = (idx == correct_idx and self.is_answer_key)
+                        color = 255 if is_curr_ans else None
+                        highlight = 7 if is_curr_ans else None
                         
-                nested_p = nested_cell.Range
-                nested_p.ParagraphFormat.Alignment = 1
-                nested_p.ParagraphFormat.SpaceBefore = 6
-                nested_p.ParagraphFormat.SpaceAfter = 6
-                nested_p.Font.Name = "Times New Roman"
-                nested_p.Font.Size = 12
-                nested_p.Font.Bold = True
-                nested_p.Text = ver_text
-                
-                sel.Start = table.Range.End
+                        self.write_run(f"{prefix}. ", bold=True, color_rgb=color, highlight_index=highlight)
+                        for seg in parse_text_formatting(options[idx]):
+                            self.write_run(seg["text"], bold=seg["bold"], italic=seg["italic"], underline=seg["underline"], color_rgb=color, highlight_index=highlight)
+                    if c < cols - 1:
+                        sel.TypeText("\t")
                 sel.TypeParagraph()
-            else:
-                sel.ParagraphFormat.Alignment = 0
-                sel.ParagraphFormat.SpaceBefore = 0
-                sel.ParagraphFormat.SpaceAfter = 6
-                self.write_run("Họ và tên: ....................................    Lớp: ....................", bold=True, font_size=12)
-                sel.TypeParagraph()
+            sel.ParagraphFormat.TabStops.ClearAll()
+
+    def add_word_box(self, words: List[str]):
+        if not words:
+            return
+        N = len(words)
+        cols = 4 if N >= 8 else (3 if N >= 5 else (2 if N >= 3 else N))
+        left_margin_cm = self.settings.get("margin_left", 3.0)
+        right_margin_cm = self.settings.get("margin_right", 1.5)
+        printable_width_cm = 21.0 - left_margin_cm - right_margin_cm
+        
+        max_word_len = max(len(str(w)) for w in words) if words else 8
+        col_width_cm = max(2.8, (max_word_len * 0.18) + 1.0)
+        box_width_cm = min(printable_width_cm, cols * col_width_cm)
+        
+        table = self.doc.Tables.Add(Range=self.word.Selection.Range, NumRows=1, NumColumns=1)
+        table.Alignment = 1
+        table.Columns(1).Width = cm_to_pt(box_width_cm)
+        cell = table.Cell(1, 1)
+        cell.Borders.Enable = True
+        
+        tab_col_w_cm = box_width_cm / cols
+        cell.Range.ParagraphFormat.TabStops.ClearAll()
+        for i in range(1, cols):
+            cell.Range.ParagraphFormat.TabStops.Add(Position=cm_to_pt(tab_col_w_cm * i), Alignment=0)
             
-        # Title header ONLY if unit or grade is provided
+        for i in range(0, N, cols):
+            chunk = words[i:i + cols]
+            for idx_w, w_text in enumerate(chunk):
+                self.write_run(w_text, italic=True)
+                if idx_w < len(chunk) - 1:
+                    self.word.Selection.TypeText("\t")
+            self.word.Selection.TypeParagraph()
+        
+        self.word.Selection.Start = table.Range.End
+        self.word.Selection.Collapse(0)
+        self.word.Selection.ParagraphFormat.LeftIndent = 0
+        self.word.Selection.ParagraphFormat.TabStops.ClearAll()
+
+    def add_test_header(self, grade: str = "", unit: str = "", version_code: str = "", is_test: bool = False):
+        font_name = self.settings.get("font_name", "Times New Roman")
+        font_size = self.settings.get("font_size", 12.0)
+        
+        table = self.doc.Tables.Add(Range=self.word.Selection.Range, NumRows=1, NumColumns=2)
+        table.Alignment = 1
+        table.Columns(1).Width = cm_to_pt(10.5)
+        table.Columns(2).Width = cm_to_pt(6.0)
+        
+        cell1 = table.Cell(1, 1)
+        p1 = cell1.Range.Paragraphs(1)
+        p1.SpaceBefore = 0
+        p1.SpaceAfter = 2
+        run1 = cell1.Range
+        run1.Text = "Họ và tên: ........................................................\nLớp: ......................................................................."
+        run1.Font.Name = font_name
+        run1.Font.Size = font_size
+        run1.Font.Italic = True
+        
+        cell2 = table.Cell(1, 2)
+        p2 = cell2.Range.Paragraphs(1)
+        p2.Alignment = 2
+        
+        has_version = bool(version_code and str(version_code).strip())
+        if is_test and has_version:
+            try:
+                v_num = int(str(version_code).strip())
+                ver_text = f"ĐỀ {v_num}"
+            except ValueError:
+                ver_text = f"ĐỀ {version_code}"
+            
+            nested = cell2.Range.Tables.Add(Range=cell2.Range, NumRows=1, NumColumns=1)
+            nested.Alignment = 2
+            nested.Columns(1).Width = cm_to_pt(2.5)
+            nested.Cell(1, 1).Borders.Enable = True
+            n_p = nested.Cell(1, 1).Range.Paragraphs(1)
+            n_p.Alignment = 1
+            n_r = nested.Cell(1, 1).Range
+            n_r.Text = ver_text
+            n_r.Font.Name = font_name
+            n_r.Font.Size = 12.0
+            n_r.Font.Bold = True
+
+        self.word.Selection.Start = table.Range.End
+        self.word.Selection.Collapse(0)
+
         unit_str = str(unit).strip() if unit else ""
         grade_str = str(grade).strip() if grade else ""
-        
         title_text = ""
         if unit_str and unit_str != "0":
             unit_clean = unit_str.upper()
@@ -509,55 +500,67 @@ class WordDocumentCompilerPyWin32:
                 title_text = unit_clean
             else:
                 unit_name = get_unit_name(grade_str, unit_str)
-                if unit_name:
-                    title_text = f"UNIT {unit_clean}: {unit_name.upper()}"
-                else:
-                    title_text = f"UNIT {unit_clean}"
+                title_text = f"UNIT {unit_clean}: {unit_name.upper()}" if unit_name else f"UNIT {unit_clean}"
         elif grade_str and grade_str != "0":
             title_text = f"GRADE {grade_str}"
             
         if title_text:
-            sel.ParagraphFormat.Alignment = 1
-            sel.ParagraphFormat.SpaceBefore = 18 if (is_test and has_version) else 6
-            sel.ParagraphFormat.SpaceAfter = 12
-            sel.ParagraphFormat.KeepWithNext = True
-            self.write_run(title_text, bold=True, font_size=12)
-            sel.TypeParagraph()
+            p_unit = self.word.Selection
+            p_unit.ParagraphFormat.Alignment = 1
+            p_unit.ParagraphFormat.SpaceBefore = 18 if (is_test and has_version) else 6
+            p_unit.ParagraphFormat.SpaceAfter = 12
+            p_unit.ParagraphFormat.KeepWithNext = True
+            self.write_run(title_text, bold=True, font_size=12.0)
+            p_unit.TypeParagraph()
+            p_unit.ParagraphFormat.Alignment = 0
 
-    def add_answer_key(self, exercises: List[Dict[str, Any]]):
+    def collect_answers(self, exercises: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         answers = []
-        for ex in exercises:
-            ex_type = ex.get("t", "mq")
-            if ex_type in ["cz", "rd", "wb"]:
-                for sub in ex.get("k", []):
-                    q_num = sub.get("q")
-                    ans = sub.get("a", "")
-                    if q_num and ans:
-                        answers.append({"q": q_num, "a": ans})
+        def add_ans(q_num: Any, ans: Any):
+            if not q_num or ans is None or ans == "":
+                return
+            if isinstance(ans, list):
+                ans_str = ", ".join(str(x) for x in ans)
             else:
-                q_num = ex.get("q")
-                ans = ex.get("a", "")
-                if q_num and ans:
-                    answers.append({"q": q_num, "a": ans})
-                    
-        if not answers:
-            return
-            
+                ans_str = str(ans).strip()
+            if ans_str:
+                answers.append({"q": str(q_num).strip(), "a": ans_str})
+
+        for ex in exercises:
+            ex_type = ex.get("t")
+            if ex.get("k") and isinstance(ex.get("k"), list):
+                for sub in ex.get("k"):
+                    add_ans(sub.get("q"), sub.get("a"))
+            elif ex_type == "mt" and ex.get("a"):
+                ans_val = ex.get("a")
+                if isinstance(ans_val, list):
+                    for idx_item, char_ans in enumerate(ans_val):
+                        add_ans(idx_item + 1, char_ans)
+                else:
+                    add_ans(ex.get("q", "1"), ans_val)
+            else:
+                add_ans(ex.get("q"), ex.get("a"))
+        
         def get_q_num(x):
             try:
                 return int(x["q"])
             except ValueError:
                 return 999
         answers.sort(key=get_q_num)
+        return answers
+
+    def add_answer_key(self, exercises: List[Dict[str, Any]]):
+        answers = self.collect_answers(exercises)
+        if not answers:
+            return
+            
+        self.word.Selection.InsertBreak(7) # wdPageBreak
         
         sel = self.word.Selection
-        sel.InsertBreak(7) # wdPageBreak = 7
-        
-        sel.ParagraphFormat.Alignment = 0
         sel.ParagraphFormat.SpaceBefore = 12
         sel.ParagraphFormat.SpaceAfter = 12
         sel.ParagraphFormat.KeepWithNext = True
-        self.write_run("ANSWER KEY", bold=True, font_size=14)
+        self.write_run("ANSWER KEY", bold=True, font_size=14.0)
         sel.TypeParagraph()
         
         N = len(answers)
@@ -565,10 +568,7 @@ class WordDocumentCompilerPyWin32:
         rows = math.ceil(N / cols)
         
         table = self.doc.Tables.Add(Range=sel.Range, NumRows=rows, NumColumns=cols)
-        try:
-            table.Rows.Alignment = 1
-        except Exception:
-            pass
+        table.Alignment = 1
         
         for r in range(rows):
             for c in range(cols):
@@ -576,219 +576,125 @@ class WordDocumentCompilerPyWin32:
                 if idx < N:
                     item = answers[idx]
                     cell = table.Cell(r + 1, c + 1)
-                    cell.Range.ParagraphFormat.SpaceAfter = 4
-                    cell.Range.Font.Name = "Times New Roman"
-                    cell.Range.Font.Size = 11
-                    cell.Range.Font.Bold = True
                     cell.Range.Text = f"{item['q']}. {item['a']}"
-                    
-        sel.Start = table.Range.End
-        sel.TypeParagraph()
+                    cell.Range.Font.Name = self.settings.get("font_name", "Times New Roman")
+                    cell.Range.Font.Size = 11.0
+                    cell.Range.Font.Bold = True
 
-    def add_word_box(self, words: List[str]):
-        if not words:
-            return
-        sel = self.word.Selection
-        
-        left_margin_cm = self.settings.get("margin_left", 3.0)
-        right_margin_cm = self.settings.get("margin_right", 1.5)
-        printable_width_cm = 21.0 - left_margin_cm - right_margin_cm
-        printable_width_pt = cm_to_pt(printable_width_cm)
-        
-        N = len(words)
-        if N <= 5:
-            cols = N
-        elif N <= 9:
-            cols = 4
-        else:
-            cols = 5
-            
-        # Calculate optimal column width for cols 1..4 so Word NEVER skips a tab stop
-        max_len_all = max(len(str(w)) for w in words) if words else 8
-        char_w_pt = 6.0 # Average character width in 12pt bold font
-        col_width_pt = (max_len_all * char_w_pt) + 10.0
-        
-        # Measure character width of the last column (col 5)
-        last_col_words = [words[i] for i in range(cols - 1, N, cols)] if N >= cols else [words[-1]]
-        last_col_max_len = max(len(str(w)) for w in last_col_words) if last_col_words else 8
-        last_col_text_w_pt = last_col_max_len * char_w_pt
-        
-        text_group_width_pt = ((cols - 1) * col_width_pt) + last_col_text_w_pt
-        left_offset_pt = max(0.0, (printable_width_pt - text_group_width_pt) / 2.0)
-        
-        # Configure paragraph indent and tab stops for centered multi-column word box
-        sel.ParagraphFormat.SpaceBefore = 3
-        sel.ParagraphFormat.SpaceAfter = 0
-        sel.ParagraphFormat.LineSpacingRule = 0 # Standard single line spacing for first rows
-        sel.ParagraphFormat.Alignment = 0 # Left align inside tab stop
-        sel.ParagraphFormat.LeftIndent = left_offset_pt
-        sel.ParagraphFormat.TabStops.ClearAll()
-        for c in range(1, cols):
-            tab_pos = left_offset_pt + (col_width_pt * c)
-            sel.ParagraphFormat.TabStops.Add(Position=tab_pos, Alignment=0)
-            
-        p_start = sel.Range.Start
-        
-        lines = []
-        for i in range(0, N, cols):
-            chunk = words[i:i + cols]
-            lines.append(chunk)
-            
-        num_rows = len(lines)
-        for idx_line, chunk in enumerate(lines):
-            if idx_line == num_rows - 1:
-                sel.ParagraphFormat.LineSpacingRule = 2 # Double line spacing on last row!
-                sel.ParagraphFormat.SpaceAfter = 0
+    def compile_exercises(self, exercises: List[Dict[str, Any]], grade: str = "", unit: str = "", version_code: str = "", include_answer_key: bool = True):
+        if isinstance(exercises, dict):
+            for key in ["data", "exercises", "questions", "list"]:
+                if key in exercises and isinstance(exercises[key], list):
+                    exercises = exercises[key]
+                    break
             else:
-                sel.ParagraphFormat.LineSpacingRule = 0
-                sel.ParagraphFormat.SpaceAfter = 0
+                if "t" in exercises or "q" in exercises:
+                    exercises = [exercises]
+                else:
+                    raise ValueError("JSON dictionary does not contain a list of exercises.")
+
+        if grade or unit or version_code:
+            self.add_test_header(grade, unit, version_code)
+
+        current_block_key = None
+        for ex in exercises:
+            ex_type = ex.get("t", "mq")
+            options = ex.get("o", [])
+            if not isinstance(options, list):
+                options = []
+            is_mcq = (len(options) >= 2 and ex_type in ["pr", "st", "sy", "an", "er", "cz", "rd", "sg", "nt", "mq"])
+            
+            title_prefix = ex.get("title_prefix") or ex.get("prefix") or ex.get("title_num")
+            custom_inst = ex.get("instruction") or ex.get("title")
+            
+            block_key = (ex_type, is_mcq, title_prefix, custom_inst)
+            if block_key != current_block_key:
+                current_block_key = block_key
+                inst_body = custom_inst if custom_inst else get_instruction_text(ex_type, is_mcq)
+                if inst_body:
+                    final_header = f"{str(title_prefix).strip()} {inst_body}" if (title_prefix and str(title_prefix).strip()) else inst_body
+                    self.add_instruction_header(final_header)
+
+            fmt = ex.get("fmt")
+            layout = ex.get("layout")
+            cols_override = ex.get("cols")
+            ind = ex.get("ind", 0)
+
+            if ex.get("w"):
+                self.add_word_box(ex.get("w", []))
+
+            b_body = ex.get("b")
+            if b_body:
+                paragraphs = b_body if isinstance(b_body, list) else [b_body]
+                for paragraph_text in paragraphs:
+                    sel = self.word.Selection
+                    sel.ParagraphFormat.SpaceBefore = 4.0
+                    sel.ParagraphFormat.SpaceAfter = 6.0
+                    sel.ParagraphFormat.FirstLineIndent = cm_to_pt(0.75)
+                    for seg in parse_text_formatting(paragraph_text):
+                        self.write_run(seg["text"], bold=seg["bold"], italic=seg["italic"], underline=seg["underline"])
+                    sel.TypeParagraph()
+
+            if ex.get("k") and isinstance(ex.get("k"), list):
+                for sub in ex.get("k", []):
+                    sub_q = sub.get("q")
+                    sub_x = sub.get("x", "")
+                    sub_o = sub.get("o", [])
+                    sub_a = sub.get("a", "")
+                    sub_fmt = sub.get("fmt", fmt)
+                    sub_layout = sub.get("layout", layout)
+                    sub_cols = sub.get("cols", cols_override)
+                    sub_ind = sub.get("ind", ind)
+
+                    def_pref = "Question " if not sub_fmt else ""
+                    self.add_question(sub_q, sub_x, fmt=sub_fmt, layout=sub_layout, ind=sub_ind, default_prefix=def_pref)
+                    
+                    if sub_o and isinstance(sub_o, list):
+                        self.add_options_grid(sub_o, ex_type, correct_ans=sub_a, cols_override=sub_cols)
+                    
+                    if ex_type == "wq":
+                        sel = self.word.Selection
+                        sel.ParagraphFormat.LeftIndent = cm_to_pt(0.5)
+                        self.write_run("(A:) " + "_" * 50, bold=True)
+                        sel.TypeParagraph()
+
+            elif not b_body:
+                q_num = ex.get("q")
+                q_text = ex.get("x", "")
+                options = ex.get("o", [])
+                ans = ex.get("a", "")
                 
-            for idx_w, word in enumerate(chunk):
-                self.write_run(word, bold=True)
-                if idx_w < len(chunk) - 1:
-                    self.write_run("\t", bold=False)
-            sel.TypeParagraph()
-            
-        p_end = sel.Range.Start
-        box_range = self.doc.Range(p_start, p_end)
-        
-        # Draw Rounded Rectangle Shape (msoShapeRoundedRectangle = 5) tightly anchored around centered word box
-        try:
-            padding_pt = 6.0 # Equal top, bottom, left, right padding (~2.1mm)
-            box_width_pt = text_group_width_pt + (padding_pt * 2)
-            # Row 1 (single) = 16pt, Row 2 (double) = 28pt
-            text_height_pt = ((num_rows - 1) * 16.0) + 28.0
-            box_height_pt = text_height_pt
-            
-            shape = self.doc.Shapes.AddShape(
-                5, # msoShapeRoundedRectangle = 5
-                0,
-                0,
-                box_width_pt,
-                box_height_pt,
-                Anchor=box_range
-            )
-            shape.RelativeHorizontalPosition = 0 # wdRelativeHorizontalPositionMargin = 0
-            shape.RelativeVerticalPosition = 2 # wdRelativeVerticalPositionParagraph = 2
-            shape.Left = left_offset_pt - padding_pt # Tight & symmetrical left/right borders around text
-            shape.Top = -padding_pt # Equal top & bottom distance
-            
-            shape.Fill.Visible = False # Transparent background so words show directly in document
-            shape.Line.Weight = 1.0 # 1pt border
-            shape.Line.ForeColor.RGB = 0 # Black line
-            try:
-                shape.ZOrder(1) # Send behind text
-            except Exception:
-                pass
-        except Exception as e:
-            print(f"  [PyWin32] Warning drawing rounded shape around word box: {e}")
-            
-        # Reset selection formatting for paragraphs after word box
-        sel.ParagraphFormat.SpaceBefore = 6
-        sel.ParagraphFormat.SpaceAfter = 4
-        sel.ParagraphFormat.LineSpacingRule = 0
-        sel.ParagraphFormat.LeftIndent = 0
-        sel.ParagraphFormat.TabStops.ClearAll()
+                def_pref = "Question " if not fmt else ""
+
+                if ex_type == "ro" and options and not (is_mcq and len(options) == 4):
+                    self.add_question(q_num, q_text, fmt=fmt, layout=layout, ind=ind, default_prefix=def_pref)
+                    for idx_item, item in enumerate(options):
+                        sel = self.word.Selection
+                        sel.ParagraphFormat.LeftIndent = cm_to_pt(1.0)
+                        for seg in parse_text_formatting(f"{idx_item + 1}. {item}"):
+                            self.write_run(seg["text"], bold=seg["bold"], italic=seg["italic"], underline=seg["underline"])
+                        sel.TypeParagraph()
+                else:
+                    self.add_question(q_num, q_text, fmt=fmt, layout=layout, ind=ind, default_prefix=def_pref)
+                    if options and isinstance(options, list):
+                        self.add_options_grid(options, ex_type, correct_ans=ans, cols_override=cols_override)
+                    
+                    if ex_type == "wq":
+                        sel = self.word.Selection
+                        sel.ParagraphFormat.LeftIndent = cm_to_pt(0.5)
+                        self.write_run("(A:) " + "_" * 50, bold=True)
+                        sel.TypeParagraph()
+
+        if include_answer_key:
+            self.add_answer_key(exercises)
 
     def compile(self, exercises: List[Dict[str, Any]], output_filepath: Any, grade: str = "", unit: str = "", version_code: str = "", include_answer_key: bool = True, is_answer_key: bool = False, is_test: bool = False):
         self.is_answer_key = is_answer_key
         try:
             self._init_word()
-            
             if grade or unit or version_code or is_test:
                 self.add_test_header(grade=grade, unit=unit, version_code=version_code, is_test=is_test)
-
-            current_block_key = None
-            for ex in exercises:
-                ex_type = ex.get("t", "mq")
-                options = ex.get("o", [])
-                if not isinstance(options, list):
-                    options = []
-                is_mcq = len(options) >= 2
-                
-                title_prefix = ex.get("title_prefix") or ex.get("prefix") or ex.get("title_num")
-                custom_inst = ex.get("instruction") or ex.get("title")
-                
-                block_key = (ex_type, is_mcq, title_prefix, custom_inst)
-                if block_key != current_block_key:
-                    current_block_key = block_key
-                    inst_body = custom_inst if custom_inst else get_instruction_text(ex_type, is_mcq)
-                    if inst_body:
-                        if title_prefix and str(title_prefix).strip():
-                            final_header = f"{str(title_prefix).strip()} {inst_body}"
-                        else:
-                            final_header = inst_body
-                        self.add_instruction_header(final_header)
-                
-                if ex_type == "wb":
-                    words = ex.get("w", [])
-                    if words:
-                        self.add_word_box(words)
-                    space_before = self.settings.get("passage_space_before", 4.0)
-                    space_after = self.settings.get("passage_space_after", 6.0)
-                    indent_first = self.settings.get("passage_indent_first", 0.75)
-                    
-                    sel = self.word.Selection
-                    for paragraph_text in ex.get("b", []):
-                        sel.ParagraphFormat.SpaceBefore = space_before
-                        sel.ParagraphFormat.SpaceAfter = space_after
-                        sel.ParagraphFormat.FirstLineIndent = cm_to_pt(indent_first)
-                        sel.ParagraphFormat.LeftIndent = 0
-                        sel.ParagraphFormat.Alignment = 0
-                        segments = parse_text_formatting(paragraph_text)
-                        for seg in segments:
-                            self.write_run(seg["text"], bold=seg["bold"], italic=seg["italic"], underline=seg["underline"])
-                        sel.TypeParagraph()
-                        
-                    for sub in ex.get("k", []):
-                        sub_q = sub.get("q")
-                        sub_x = sub.get("x", "")
-                        sub_o = sub.get("o", [])
-                        sub_a = sub.get("a", "")
-                        if sub_q and (sub_x.strip() != "" or sub_o):
-                            self.add_question(sub_q, sub_x)
-                            if sub_o:
-                                self.add_options_grid(sub_o, ex_type, correct_ans=sub_a)
-
-                elif ex_type in ["cz", "rd"]:
-                    space_before = self.settings.get("passage_space_before", 4.0)
-                    space_after = self.settings.get("passage_space_after", 6.0)
-                    indent_first = self.settings.get("passage_indent_first", 0.75)
-                    
-                    sel = self.word.Selection
-                    for paragraph_text in ex.get("b", []):
-                        sel.ParagraphFormat.SpaceBefore = space_before
-                        sel.ParagraphFormat.SpaceAfter = space_after
-                        sel.ParagraphFormat.FirstLineIndent = cm_to_pt(indent_first)
-                        sel.ParagraphFormat.LeftIndent = 0
-                        sel.ParagraphFormat.Alignment = 0
-                        
-                        segments = parse_text_formatting(paragraph_text)
-                        for seg in segments:
-                            self.write_run(seg["text"], bold=seg["bold"], italic=seg["italic"], underline=seg["underline"])
-                        sel.TypeParagraph()
-                    
-                    for sub in ex.get("k", []):
-                        sub_q = sub.get("q")
-                        sub_x = sub.get("x", "")
-                        sub_o = sub.get("o", [])
-                        sub_a = sub.get("a", "")
-                        
-                        self.add_question(sub_q, sub_x)
-                        self.add_options_grid(sub_o, ex_type, correct_ans=sub_a)
-                        
-                else:
-                    q_num = ex.get("q")
-                    q_text = ex.get("x", "")
-                    options = ex.get("o", [])
-                    ans = ex.get("a", "")
-                    
-                    self.add_question(q_num, q_text)
-                    self.add_options_grid(options, ex_type, correct_ans=ans)
-
-            if include_answer_key:
-                self.add_answer_key(exercises)
-
+            self.compile_exercises(exercises, grade=grade, unit=unit, version_code=version_code, include_answer_key=include_answer_key)
             abs_path = os.path.abspath(output_filepath)
             os.makedirs(os.path.dirname(abs_path), exist_ok=True)
             self.doc.SaveAs2(abs_path, FileFormat=16)
@@ -799,9 +705,6 @@ class WordDocumentCompilerPyWin32:
             if self.word:
                 try: self.word.Quit()
                 except Exception: pass
-            try:
-                if pythoncom: pythoncom.CoUninitialize()
-            except Exception: pass
 
 
 class WordDocumentCompilerDocx:
@@ -821,7 +724,7 @@ class WordDocumentCompilerDocx:
         for section in self.doc.sections:
             footer = section.footer
             p = footer.paragraphs[0]
-            p.alignment = 1 # Center
+            p.alignment = 1
             p.paragraph_format.space_before = Pt(6)
             p.paragraph_format.space_after = Pt(0)
             p.text = ""
@@ -901,7 +804,7 @@ class WordDocumentCompilerDocx:
         run.bold = True
         run.font.size = Pt(font_size)
 
-    def add_question(self, q_num: Any, q_text: str):
+    def add_question(self, q_num: Any, q_text: str, fmt: str = None, layout: str = None, ind: int = 0, default_prefix: str = "Question "):
         space_before = self.settings.get("question_space_before", 6.0)
         space_after = self.settings.get("question_space_after", 4.0)
         
@@ -910,17 +813,76 @@ class WordDocumentCompilerDocx:
         p.paragraph_format.space_after = Pt(space_after)
         p.paragraph_format.keep_with_next = True
         
-        run_q = p.add_run(f"Question {q_num}: ")
-        run_q.bold = True
+        if ind > 0:
+            p.paragraph_format.left_indent = Cm(0.5 * ind)
+            
+        q_label = format_question_label(q_num, fmt=fmt, default_prefix=default_prefix)
+        if q_label:
+            run_q = p.add_run(q_label)
+            run_q.bold = True
         
-        segments = parse_text_formatting(q_text)
+        segments = parse_text_formatting(q_text or "")
         for seg in segments:
             run = p.add_run(seg["text"])
             if seg["bold"]: run.bold = True
             if seg["italic"]: run.italic = True
             if seg["underline"]: run.underline = True
 
-    def add_options_grid(self, options: List[str], exercise_type: str, correct_ans: Any = None):
+        if layout == "blank_right":
+            run_blank = p.add_run("   " + "_" * 25)
+            run_blank.bold = False
+        elif layout == "tf":
+            run_tf = p.add_run("   ( T  /  F )")
+            run_tf.bold = True
+
+        return p
+
+    def add_matching_grid(self, left_items: List[str], right_items: List[str], fmt: str = None):
+        if not left_items and not right_items:
+            return
+        left_margin_cm = self.settings.get("margin_left", 3.0)
+        right_margin_cm = self.settings.get("margin_right", 1.5)
+        printable_width_cm = 21.0 - left_margin_cm - right_margin_cm
+        
+        col_w_cm = printable_width_cm / 2.0
+        
+        table = self.doc.add_table(rows=max(len(left_items), len(right_items)), cols=2)
+        table.alignment = 1
+        table.autofit = False
+        
+        for r_idx in range(max(len(left_items), len(right_items))):
+            if r_idx < len(left_items):
+                cell_left = table.cell(r_idx, 0)
+                cell_left.width = Cm(col_w_cm)
+                p_l = cell_left.paragraphs[0]
+                p_l.paragraph_format.space_before = Pt(2)
+                p_l.paragraph_format.space_after = Pt(2)
+                l_num = format_question_label(r_idx + 1, fmt=fmt or "1.", default_prefix="")
+                run_n = p_l.add_run(l_num)
+                run_n.bold = True
+                for seg in parse_text_formatting(str(left_items[r_idx])):
+                    r = p_l.add_run(seg["text"])
+                    if seg["bold"]: r.bold = True
+                    if seg["italic"]: r.italic = True
+                    if seg["underline"]: r.underline = True
+
+            if r_idx < len(right_items):
+                cell_right = table.cell(r_idx, 1)
+                cell_right.width = Cm(col_w_cm)
+                p_r = cell_right.paragraphs[0]
+                p_r.paragraph_format.space_before = Pt(2)
+                p_r.paragraph_format.space_after = Pt(2)
+                for seg in parse_text_formatting(str(right_items[r_idx])):
+                    r = p_r.add_run(seg["text"])
+                    if seg["bold"]: r.bold = True
+                    if seg["italic"]: r.italic = True
+                    if seg["underline"]: r.underline = True
+
+        p_space = self.doc.add_paragraph()
+        p_space.paragraph_format.space_before = Pt(0)
+        p_space.paragraph_format.space_after = Pt(4)
+
+    def add_options_grid(self, options: List[str], exercise_type: str, correct_ans: Any = None, cols_override: int = None):
         if not options:
             return
         options = [clean_option_text(opt) for opt in options]
@@ -933,15 +895,18 @@ class WordDocumentCompilerDocx:
             elif c_str in ['1', '2', '3', '4', '5']:
                 correct_idx = int(c_str) - 1
 
-        max_len = max(len(str(opt)) for opt in options) if options else 0
-        if exercise_type in ["sg", "nt"]:
-            cols = 1
-        elif exercise_type in ["pr", "st"] or max_len < 15:
-            cols = 4
-        elif max_len < 35:
-            cols = 2
+        if cols_override in [1, 2, 3, 4]:
+            cols = cols_override
         else:
-            cols = 1
+            max_len = max(len(str(opt)) for opt in options) if options else 0
+            if exercise_type in ["sg", "nt"]:
+                cols = 1
+            elif exercise_type in ["pr", "st"] or max_len < 15:
+                cols = 4
+            elif max_len < 35:
+                cols = 2
+            else:
+                cols = 1
 
         left_indent_cm = self.settings.get("options_left_indent", 0.5)
         space_before = self.settings.get("options_space_before", 0.0)
@@ -979,8 +944,9 @@ class WordDocumentCompilerDocx:
         elif cols == 2:
             col_width = remaining_width_cm / 2
             tab_pos = left_indent_cm + col_width
+            num_rows = math.ceil(len(options) / 2)
             
-            for row in range(2):
+            for row in range(num_rows):
                 p = self.doc.add_paragraph()
                 p.paragraph_format.left_indent = Cm(left_indent_cm)
                 p.paragraph_format.space_before = Pt(space_before)
@@ -1029,48 +995,44 @@ class WordDocumentCompilerDocx:
             tab1 = left_indent_cm + col_width
             tab2 = left_indent_cm + (col_width * 2)
             tab3 = left_indent_cm + (col_width * 3)
-            
-            p = self.doc.add_paragraph()
-            p.paragraph_format.left_indent = Cm(left_indent_cm)
-            p.paragraph_format.space_before = Pt(space_before)
-            p.paragraph_format.space_after = Pt(space_after)
-            p.paragraph_format.tab_stops.add_tab_stop(Cm(tab1), WD_TAB_ALIGNMENT.LEFT)
-            p.paragraph_format.tab_stops.add_tab_stop(Cm(tab2), WD_TAB_ALIGNMENT.LEFT)
-            p.paragraph_format.tab_stops.add_tab_stop(Cm(tab3), WD_TAB_ALIGNMENT.LEFT)
-            
-            for idx in range(4):
-                if idx < len(options):
-                    prefix = chr(65 + idx)
-                    run_prefix = p.add_run(f"{prefix}. ")
-                    run_prefix.bold = True
-                    if idx == correct_idx and self.is_answer_key:
-                        run_prefix.font.color.rgb = RGBColor(255, 0, 0)
-                        run_prefix.font.highlight_color = WD_COLOR_INDEX.YELLOW
-                    for seg in parse_text_formatting(options[idx]):
-                        run = p.add_run(seg["text"])
-                        if seg["bold"]: run.bold = True
-                        if seg["italic"]: run.italic = True
-                        if seg["underline"]: run.underline = True
-                        if idx == correct_idx and self.is_answer_key:
-                            run.font.color.rgb = RGBColor(255, 0, 0)
-                            run.font.highlight_color = WD_COLOR_INDEX.YELLOW
+            num_rows = math.ceil(len(options) / 4)
+
+            for row in range(num_rows):
+                p = self.doc.add_paragraph()
+                p.paragraph_format.left_indent = Cm(left_indent_cm)
+                p.paragraph_format.space_before = Pt(space_before)
+                p.paragraph_format.space_after = Pt(space_after)
+                p.paragraph_format.tab_stops.add_tab_stop(Cm(tab1), WD_TAB_ALIGNMENT.LEFT)
+                p.paragraph_format.tab_stops.add_tab_stop(Cm(tab2), WD_TAB_ALIGNMENT.LEFT)
+                p.paragraph_format.tab_stops.add_tab_stop(Cm(tab3), WD_TAB_ALIGNMENT.LEFT)
                 
-                if idx < 3:
-                    r_tab = p.add_run("\t")
-                    r_tab.font.underline = False
+                for idx_c in range(4):
+                    idx = row * 4 + idx_c
+                    if idx < len(options):
+                        prefix = chr(65 + idx)
+                        run_prefix = p.add_run(f"{prefix}. ")
+                        run_prefix.bold = True
+                        if idx == correct_idx and self.is_answer_key:
+                            run_prefix.font.color.rgb = RGBColor(255, 0, 0)
+                            run_prefix.font.highlight_color = WD_COLOR_INDEX.YELLOW
+                        for seg in parse_text_formatting(options[idx]):
+                            run = p.add_run(seg["text"])
+                            if seg["bold"]: run.bold = True
+                            if seg["italic"]: run.italic = True
+                            if seg["underline"]: run.underline = True
+                            if idx == correct_idx and self.is_answer_key:
+                                run.font.color.rgb = RGBColor(255, 0, 0)
+                                run.font.highlight_color = WD_COLOR_INDEX.YELLOW
+                    
+                    if idx_c < 3:
+                        r_tab = p.add_run("\t")
+                        r_tab.font.underline = False
             
     def add_word_box(self, words: List[str]):
         if not words:
             return
         N = len(words)
-        if N >= 8:
-            cols = 4
-        elif N >= 5:
-            cols = 3
-        elif N >= 3:
-            cols = 2
-        else:
-            cols = N
+        cols = 4 if N >= 8 else (3 if N >= 5 else (2 if N >= 3 else N))
             
         left_margin_cm = self.settings.get("margin_left", 3.0)
         right_margin_cm = self.settings.get("margin_right", 1.5)
@@ -1098,55 +1060,48 @@ class WordDocumentCompilerDocx:
             p = cell.paragraphs[0] if i == 0 else cell.add_paragraph()
             p.paragraph_format.space_before = Pt(2)
             p.paragraph_format.space_after = Pt(2)
-            p.paragraph_format.left_indent = Cm(0.3)
-            
-            p.paragraph_format.tab_stops.clear_all()
-            for c in range(1, cols):
-                p.paragraph_format.tab_stops.add_tab_stop(Cm(tab_col_w_cm * c), WD_TAB_ALIGNMENT.LEFT)
+            for c_i in range(1, len(chunk)):
+                p.paragraph_format.tab_stops.add_tab_stop(Cm(tab_col_w_cm * c_i), WD_TAB_ALIGNMENT.LEFT)
                 
-            for idx_w, word in enumerate(chunk):
-                run = p.add_run(word)
-                run.bold = True
-                run.font.name = "Times New Roman"
-                run.font.size = Pt(12)
+            for idx_w, w_text in enumerate(chunk):
+                run = p.add_run(w_text)
+                run.italic = True
                 if idx_w < len(chunk) - 1:
                     r_tab = p.add_run("\t")
-                    r_tab.font.underline = False
+                    r_tab.font.italic = False
 
-    def add_test_header(self, grade: str = "", unit: str = "", version_code: str = "", is_test: bool = True):
-        has_version = bool(version_code and str(version_code).strip() != "")
+    def add_test_header(self, grade: str = "", unit: str = "", version_code: str = "", is_test: bool = False):
+        font_name = self.settings.get("font_name", "Times New Roman")
+        font_size = self.settings.get("font_size", 12.0)
         
+        table = self.doc.add_table(rows=1, cols=2)
+        table.alignment = 1
+        table.autofit = False
+        table.columns[0].width = Cm(10.5)
+        table.columns[1].width = Cm(6.0)
+        
+        cell_left = table.cell(0, 0)
+        cell_left.width = Cm(10.5)
+        p_left = cell_left.paragraphs[0]
+        p_left.paragraph_format.space_before = Pt(0)
+        p_left.paragraph_format.space_after = Pt(2)
+        
+        run_name = p_left.add_run("Họ và tên: ........................................................\nLớp: .......................................................................")
+        run_name.font.name = font_name
+        run_name.font.size = Pt(font_size)
+        run_name.italic = True
+        
+        cell_right = table.cell(0, 1)
+        cell_right.width = Cm(6.0)
+        p_right = cell_right.paragraphs[0]
+        p_right.alignment = 2
+        p_right.paragraph_format.space_before = Pt(0)
+        p_right.paragraph_format.space_after = Pt(2)
+        
+        has_version = bool(version_code and str(version_code).strip())
         if is_test and has_version:
-            table = self.doc.add_table(rows=1, cols=2)
-            table.alignment = 1
-            table.autofit = False
-            
-            left_margin_cm = self.settings.get("margin_left", 3.0)
-            right_margin_cm = self.settings.get("margin_right", 1.5)
-            printable_width_cm = 21.0 - left_margin_cm - right_margin_cm
-            
-            table.columns[0].width = Cm(printable_width_cm - 3.5)
-            table.columns[1].width = Cm(3.5)
-            
-            cell_left = table.cell(0, 0)
-            p_left = cell_left.paragraphs[0]
-            p_left.paragraph_format.space_before = Pt(0)
-            p_left.paragraph_format.space_after = Pt(0)
-            p_left.paragraph_format.line_spacing = 2.0
-            
-            run_name = p_left.add_run("Họ và tên: ....................................\nLớp: ....................")
-            run_name.bold = True
-            run_name.font.size = Pt(12)
-            
-            cell_right = table.cell(0, 1)
-            p_outer = cell_right.paragraphs[0]
-            p_outer.paragraph_format.space_before = Pt(0)
-            p_outer.paragraph_format.space_after = Pt(0)
-            
             try:
-                v_num = int(version_code)
-                if v_num >= 101:
-                    v_num = v_num - 100
+                v_num = int(str(version_code).strip())
                 ver_text = f"ĐỀ {v_num}"
             except ValueError:
                 ver_text = f"ĐỀ {version_code}"
@@ -1208,19 +1163,30 @@ class WordDocumentCompilerDocx:
 
     def collect_answers(self, exercises: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         answers = []
+        def add_ans(q_num: Any, ans: Any):
+            if not q_num or ans is None or ans == "":
+                return
+            if isinstance(ans, list):
+                ans_str = ", ".join(str(x) for x in ans)
+            else:
+                ans_str = str(ans).strip()
+            if ans_str:
+                answers.append({"q": str(q_num).strip(), "a": ans_str})
+
         for ex in exercises:
             ex_type = ex.get("t")
-            if ex_type in ["cz", "rd"]:
-                for sub in ex.get("k", []):
-                    q_num = sub.get("q")
-                    ans = sub.get("a", "")
-                    if q_num and ans:
-                        answers.append({"q": q_num, "a": ans})
+            if ex.get("k") and isinstance(ex.get("k"), list):
+                for sub in ex.get("k"):
+                    add_ans(sub.get("q"), sub.get("a"))
+            elif ex_type == "mt" and ex.get("a"):
+                ans_val = ex.get("a")
+                if isinstance(ans_val, list):
+                    for idx_item, char_ans in enumerate(ans_val):
+                        add_ans(idx_item + 1, char_ans)
+                else:
+                    add_ans(ex.get("q", "1"), ans_val)
             else:
-                q_num = ex.get("q")
-                ans = ex.get("a", "")
-                if q_num and ans:
-                    answers.append({"q": q_num, "a": ans})
+                add_ans(ex.get("q"), ex.get("a"))
         
         def get_q_num(x):
             try:
@@ -1285,52 +1251,35 @@ class WordDocumentCompilerDocx:
             options = ex.get("o", [])
             if not isinstance(options, list):
                 options = []
-            is_mcq = len(options) >= 2
+            is_mcq = (len(options) >= 2 and ex_type in ["pr", "st", "sy", "an", "er", "cz", "rd", "sg", "nt", "mq"])
             
-            block_key = (ex_type, is_mcq)
+            title_prefix = ex.get("title_prefix") or ex.get("prefix") or ex.get("title_num")
+            custom_inst = ex.get("instruction") or ex.get("title")
+            
+            block_key = (ex_type, is_mcq, title_prefix, custom_inst)
             if block_key != current_block_key:
                 current_block_key = block_key
-                instruction_text = get_instruction_text(ex_type, is_mcq)
-                if instruction_text:
-                    self.add_instruction_header(instruction_text)
-            
-            if ex_type == "wb":
-                words = ex.get("w", [])
-                if words:
-                    self.add_word_box(words)
-                space_before = self.settings.get("passage_space_before", 4.0)
-                space_after = self.settings.get("passage_space_after", 6.0)
-                indent_first = self.settings.get("passage_indent_first", 0.75)
-                
-                for paragraph_text in ex.get("b", []):
-                    p_passage = self.doc.add_paragraph()
-                    p_passage.paragraph_format.space_before = Pt(space_before)
-                    p_passage.paragraph_format.space_after = Pt(space_after)
-                    p_passage.paragraph_format.first_line_indent = Cm(indent_first)
-                    
-                    segments = parse_text_formatting(paragraph_text)
-                    for seg in segments:
-                        run = p_passage.add_run(seg["text"])
-                        if seg["bold"]: run.bold = True
-                        if seg["italic"]: run.italic = True
-                        if seg["underline"]: run.underline = True
-                
-                for sub in ex.get("k", []):
-                    sub_q = sub.get("q")
-                    sub_x = sub.get("x", "")
-                    sub_o = sub.get("o", [])
-                    sub_a = sub.get("a", "")
-                    if sub_q and (sub_x.strip() != "" or sub_o):
-                        self.add_question(sub_q, sub_x)
-                        if sub_o:
-                            self.add_options_grid(sub_o, ex_type, correct_ans=sub_a)
+                inst_body = custom_inst if custom_inst else get_instruction_text(ex_type, is_mcq)
+                if inst_body:
+                    final_header = f"{str(title_prefix).strip()} {inst_body}" if (title_prefix and str(title_prefix).strip()) else inst_body
+                    self.add_instruction_header(final_header)
 
-            elif ex_type in ["cz", "rd"]:
+            fmt = ex.get("fmt")
+            layout = ex.get("layout")
+            cols_override = ex.get("cols")
+            ind = ex.get("ind", 0)
+
+            if ex.get("w"):
+                self.add_word_box(ex.get("w", []))
+
+            b_body = ex.get("b")
+            if b_body:
                 space_before = self.settings.get("passage_space_before", 4.0)
                 space_after = self.settings.get("passage_space_after", 6.0)
                 indent_first = self.settings.get("passage_indent_first", 0.75)
                 
-                for paragraph_text in ex.get("b", []):
+                paragraphs = b_body if isinstance(b_body, list) else [b_body]
+                for paragraph_text in paragraphs:
                     p_passage = self.doc.add_paragraph()
                     p_passage.paragraph_format.space_before = Pt(space_before)
                     p_passage.paragraph_format.space_after = Pt(space_after)
@@ -1342,73 +1291,70 @@ class WordDocumentCompilerDocx:
                         if seg["bold"]: run.bold = True
                         if seg["italic"]: run.italic = True
                         if seg["underline"]: run.underline = True
-                
+
+            if layout == "match" or ex_type == "mt":
+                left_items = ex.get("o", [])
+                right_items = ex.get("p", [])
+                if left_items or right_items:
+                    self.add_matching_grid(left_items, right_items, fmt=fmt)
+
+            if ex.get("k") and isinstance(ex.get("k"), list):
                 for sub in ex.get("k", []):
                     sub_q = sub.get("q")
                     sub_x = sub.get("x", "")
                     sub_o = sub.get("o", [])
                     sub_a = sub.get("a", "")
-                    if sub_q and (sub_x.strip() != "" or sub_o):
-                        self.add_question(sub_q, sub_x)
-                        if sub_o:
-                            self.add_options_grid(sub_o, ex_type, correct_ans=sub_a)
+                    sub_fmt = sub.get("fmt", fmt)
+                    sub_layout = sub.get("layout", layout)
+                    sub_cols = sub.get("cols", cols_override)
+                    sub_ind = sub.get("ind", ind)
+
+                    def_pref = "Question " if not sub_fmt else ""
+                    self.add_question(sub_q, sub_x, fmt=sub_fmt, layout=sub_layout, ind=sub_ind, default_prefix=def_pref)
                     
-            elif ex_type == "ro":
-                q_num = ex.get("q")
-                q_text = ex.get("x", "Choose the best arrangement of the sentences:")
-                self.add_question(q_num, q_text)
-                
-                space_before = self.settings.get("reorder_space_before", 0.0)
-                space_after = self.settings.get("reorder_space_after", 2.0)
-                left_indent = self.settings.get("reorder_left_indent", 1.0)
-                
-                for item in ex.get("i", []):
-                    p_item = self.doc.add_paragraph()
-                    p_item.paragraph_format.left_indent = Cm(left_indent)
-                    p_item.paragraph_format.space_before = Pt(space_before)
-                    p_item.paragraph_format.space_after = Pt(space_after)
+                    if sub_o and isinstance(sub_o, list):
+                        self.add_options_grid(sub_o, ex_type, correct_ans=sub_a, cols_override=sub_cols)
                     
-                    segments = parse_text_formatting(item)
-                    for seg in segments:
-                        run = p_item.add_run(seg["text"])
-                        if seg["bold"]: run.bold = True
-                        if seg["italic"]: run.italic = True
-                        if seg["underline"]: run.underline = True
-                
-                self.add_options_grid(ex.get("o", []), ex_type, correct_ans=ex.get("a", ""))
-                
-            elif ex_type == "nt":
-                q_num = ex.get("q")
-                q_text = ex.get("x", "")
-                self.doc.add_paragraph()
-                self.add_question(q_num, q_text)
-                
-                space_before = self.settings.get("notice_space_before", 4.0)
-                space_after = self.settings.get("notice_space_after", 6.0)
-                left_indent = self.settings.get("notice_left_indent", 1.0)
-                
-                p_body = self.doc.add_paragraph()
-                p_body.paragraph_format.left_indent = Cm(left_indent)
-                p_body.paragraph_format.space_before = Pt(space_before)
-                p_body.paragraph_format.space_after = Pt(space_after)
-                
-                segments = parse_text_formatting(ex.get("b", ""))
-                for seg in segments:
-                    run = p_body.add_run(seg["text"])
-                    run.italic = True
-                    if seg["bold"]: run.bold = True
-                    if seg["underline"]: run.underline = True
-                
-                self.add_options_grid(ex.get("o", []), ex_type, correct_ans=ex.get("a", ""))
-                
-            else:
+                    if ex_type == "wq":
+                        p_ans = self.doc.add_paragraph()
+                        p_ans.paragraph_format.space_before = Pt(2)
+                        p_ans.paragraph_format.space_after = Pt(6)
+                        p_ans.paragraph_format.left_indent = Cm(0.5)
+                        r_ans = p_ans.add_run("(A:) " + "_" * 50)
+                        r_ans.bold = True
+
+            elif not b_body and layout != "match" and ex_type != "mt":
                 q_num = ex.get("q")
                 q_text = ex.get("x", "")
                 options = ex.get("o", [])
                 ans = ex.get("a", "")
                 
-                self.add_question(q_num, q_text)
-                self.add_options_grid(options, ex_type, correct_ans=ans)
+                def_pref = "Question " if not fmt else ""
+
+                if ex_type == "ro" and options and not (is_mcq and len(options) == 4):
+                    self.add_question(q_num, q_text, fmt=fmt, layout=layout, ind=ind, default_prefix=def_pref)
+                    for idx_item, item in enumerate(options):
+                        p_item = self.doc.add_paragraph()
+                        p_item.paragraph_format.left_indent = Cm(1.0)
+                        p_item.paragraph_format.space_before = Pt(0)
+                        p_item.paragraph_format.space_after = Pt(2)
+                        for seg in parse_text_formatting(f"{idx_item + 1}. {item}"):
+                            r = p_item.add_run(seg["text"])
+                            if seg["bold"]: r.bold = True
+                            if seg["italic"]: r.italic = True
+                            if seg["underline"]: r.underline = True
+                else:
+                    self.add_question(q_num, q_text, fmt=fmt, layout=layout, ind=ind, default_prefix=def_pref)
+                    if options and isinstance(options, list):
+                        self.add_options_grid(options, ex_type, correct_ans=ans, cols_override=cols_override)
+                    
+                    if ex_type == "wq":
+                        p_ans = self.doc.add_paragraph()
+                        p_ans.paragraph_format.space_before = Pt(2)
+                        p_ans.paragraph_format.space_after = Pt(6)
+                        p_ans.paragraph_format.left_indent = Cm(0.5)
+                        r_ans = p_ans.add_run("(A:) " + "_" * 50)
+                        r_ans.bold = True
 
         if include_answer_key:
             self.add_answer_key(exercises)
@@ -1418,13 +1364,43 @@ class WordDocumentCompilerDocx:
         if grade or unit or version_code or is_test:
             self.add_test_header(grade=grade, unit=unit, version_code=version_code, is_test=is_test)
         self.compile_exercises(exercises, grade=grade, unit=unit, version_code=version_code, include_answer_key=include_answer_key)
-        self.doc.save(output_filepath)
 
 
 class WordDocumentCompiler:
-    """Primary Compiler interface that defaults to pywin32 COM (real-time Word formatting) with fallback to python-docx."""
+    """Wrapper compiler that uses win32com if available, otherwise python-docx."""
     def __init__(self, settings: Dict[str, Any] = None):
         self.settings = settings or {}
+
+    def convert_docx_to_pdf_soffice(self, docx_path: str, pdf_path: str) -> bool:
+        """Converts DOCX to PDF using LibreOffice/soffice if available."""
+        import subprocess
+        soffice_paths = [
+            r"C:\\Program Files\\LibreOffice\\program\\soffice.exe",
+            r"C:\\Program Files (x86)\\LibreOffice\\program\\soffice.exe",
+            "soffice", "libreoffice"
+        ]
+        exe = None
+        for p in soffice_paths:
+            if os.path.exists(p) or p in ["soffice", "libreoffice"]:
+                exe = p
+                break
+        if not exe:
+            return False
+            
+        out_dir = os.path.dirname(os.path.abspath(pdf_path))
+        try:
+            cmd = [exe, "--headless", "--convert-to", "pdf", os.path.abspath(docx_path), "--outdir", out_dir]
+            res = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=30)
+            base_name = os.path.splitext(os.path.basename(docx_path))[0] + ".pdf"
+            generated_pdf = os.path.join(out_dir, base_name)
+            if os.path.exists(generated_pdf) and generated_pdf != os.path.abspath(pdf_path):
+                if os.path.exists(pdf_path):
+                    os.remove(pdf_path)
+                os.rename(generated_pdf, pdf_path)
+            return os.path.exists(pdf_path)
+        except Exception as e:
+            print("PDF conversion error:", e)
+            return False
 
     def compile(self, exercises: List[Dict[str, Any]], output_filepath: Any, grade: str = "", unit: str = "", version_code: str = "", include_answer_key: bool = True, is_answer_key: bool = False, is_test: bool = False):
         if win32com_available:
@@ -1433,105 +1409,17 @@ class WordDocumentCompiler:
                 compiler_win32.compile(exercises, output_filepath, grade=grade, unit=unit, version_code=version_code, include_answer_key=include_answer_key, is_answer_key=is_answer_key, is_test=is_test)
                 return
             except Exception as e:
-                print(f"[WordCompiler] pywin32 COM compilation failed, falling back to python-docx: {e}")
+                print(f"pywin32 compilation failed, falling back to python-docx: {e}")
         
-        # Fallback to python-docx XML compiler
         compiler_docx = WordDocumentCompilerDocx(self.settings)
         compiler_docx.compile(exercises, output_filepath, grade=grade, unit=unit, version_code=version_code, include_answer_key=include_answer_key, is_answer_key=is_answer_key, is_test=is_test)
 
     def compile_test_versions(self, exercises: List[Dict[str, Any]], num_versions: int = 1, mix_options: bool = True, grade: str = "", unit: str = ""):
-        import random
-        try:
-            from backend.config.settings import get_setting
-        except ImportError:
-            from config.settings import get_setting
-
-        files_dir = get_setting("files_dir")
-        os.makedirs(files_dir, exist_ok=True)
-
-        timestamp = int(time.time())
-        clean_grade = grade.replace(" ", "_") if grade else "Test"
-        clean_unit = unit.replace(" ", "_") if unit else "Unit"
-        
-        last_filename = ""
-        last_filepath = ""
-        base_version = 101
-
-        for i in range(num_versions):
-            version_code = str(base_version + i)
-            filename = f"De_thi_{clean_grade}_{clean_unit}_MDT{version_code}_{timestamp}.docx"
-            filepath = os.path.join(files_dir, filename)
-
-            ex_copy = copy.deepcopy(exercises)
-            if mix_options:
-                for ex in ex_copy:
-                    opts = ex.get("o", [])
-                    correct_ans = ex.get("a", "")
-                    if opts and len(opts) > 1 and correct_ans in ["A", "B", "C", "D"]:
-                        ans_idx = ord(correct_ans) - ord("A")
-                        if 0 <= ans_idx < len(opts):
-                            correct_val = opts[ans_idx]
-                            shuffled_opts = list(opts)
-                            random.shuffle(shuffled_opts)
-                            new_ans_idx = shuffled_opts.index(correct_val)
-                            ex["o"] = shuffled_opts
-                            ex["a"] = chr(ord("A") + new_ans_idx)
-
-            self.compile(ex_copy, filepath, grade=grade, unit=unit, version_code=version_code, include_answer_key=True)
-            
-            last_filename = filename
-            last_filepath = filepath
-
-        return last_filename, last_filepath
-
-    def convert_docx_to_pdf_soffice(self, docx_path: str, pdf_path: str) -> bool:
-        out_dir = os.path.dirname(pdf_path)
+        out_dir = os.path.join(os.getcwd(), "temp_compiled")
         os.makedirs(out_dir, exist_ok=True)
-        abs_docx = os.path.abspath(docx_path)
-        abs_pdf = os.path.abspath(pdf_path)
-
-        if win32com_available:
-            try:
-                pythoncom.CoInitialize()
-                word = win32com.client.Dispatch("Word.Application")
-                word.Visible = False
-                doc = word.Documents.Open(abs_docx)
-                doc.SaveAs(abs_pdf, FileFormat=17)  # 17 = wdFormatPDF
-                doc.Close(False)
-                word.Quit()
-                try: pythoncom.CoUninitialize()
-                except Exception: pass
-                if os.path.exists(abs_pdf):
-                    return True
-            except Exception as e:
-                print(f"MS Word COM PDF conversion failed: {e}")
-
-        import shutil
-        import subprocess
-        soffice = shutil.which("soffice") or shutil.which("libreoffice")
-        if not soffice:
-            possible_paths = [
-                r"C:\Program Files\LibreOffice\program\soffice.exe",
-                r"C:\Program Files (x86)\LibreOffice\program\soffice.exe"
-            ]
-            for p in possible_paths:
-                if os.path.exists(p):
-                    soffice = p
-                    break
+        timestamp = int(time.time())
+        filename = f"test_compiled_{timestamp}.docx"
+        filepath = os.path.join(out_dir, filename)
         
-        if soffice:
-            try:
-                cmd = [soffice, "--headless", "--convert-to", "pdf", "--outdir", out_dir, abs_docx]
-                subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=30)
-                
-                gen_pdf = os.path.join(out_dir, os.path.splitext(os.path.basename(abs_docx))[0] + ".pdf")
-                if os.path.exists(gen_pdf):
-                    if gen_pdf != abs_pdf:
-                        if os.path.exists(abs_pdf):
-                            os.remove(abs_pdf)
-                        os.rename(gen_pdf, abs_pdf)
-                    return True
-            except Exception as e:
-                print(f"Error converting docx to pdf with soffice: {e}")
-
-        return False
+        self.compile(exercises, filepath, grade=grade, unit=unit, version_code="101" if num_versions > 1 else "", include_answer_key=True, is_test=True)
+        return filename, filepath
