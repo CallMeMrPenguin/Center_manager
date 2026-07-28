@@ -457,3 +457,38 @@ When any agent session adds a new table to any page:
 - Define verifiable success criteria before starting.
 - Verify changes with concrete runtime commands (`npm run build`, API tests, git checks).
 - Persevere through errors until verified success is achieved.
+
+---
+
+## 📄 20. DOCX Generation — Use pywin32 Exclusively
+
+Any feature that creates, edits, or exports `.docx` files **MUST** use **`pywin32` (`win32com.client`)** — no exceptions.
+
+### ❌ FORBIDDEN
+- `python-docx` / `pydocx` or any other third-party DOCX library.
+- Generating `.docx` via raw XML manipulation.
+
+### ✅ REQUIRED
+- Use `win32com.client.Dispatch("Word.Application")` (COM automation via `pywin32`).
+- Keep `Visible = False` and `DisplayAlerts = False` on the Word Application instance.
+- Always call `doc.Close(False)` and `word.Quit()` in a `finally` block to prevent orphaned Word processes.
+
+### Why pywin32?
+`pywin32` drives the full Microsoft Word engine via COM, giving access to every Word feature (styles, tables, mail merge, headers/footers, tracked changes, etc.) that `python-docx` / `pydocx` cannot replicate. It is the only correct choice for production-quality Word document generation on Windows.
+
+### Quick Pattern
+```python
+import win32com.client
+import os
+
+word = win32com.client.Dispatch("Word.Application")
+word.Visible = False
+word.DisplayAlerts = False
+try:
+    doc = word.Documents.Add()
+    # ... build document via COM API ...
+    doc.SaveAs(os.path.abspath("output.docx"), FileFormat=16)  # 16 = wdFormatDocx
+    doc.Close(False)
+finally:
+    word.Quit()
+```
