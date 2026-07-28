@@ -585,8 +585,8 @@ class WordDocumentCompilerPyWin32:
         
         left_margin_cm = self.settings.get("margin_left", 3.0)
         right_margin_cm = self.settings.get("margin_right", 1.5)
-        printable_width_pt = cm_to_pt(21.0 - left_margin_cm - right_margin_cm)
-        box_width = printable_width_pt - cm_to_pt(0.8)
+        printable_width_cm = 21.0 - left_margin_cm - right_margin_cm
+        printable_width_pt = cm_to_pt(printable_width_cm)
         
         N = len(words)
         if N >= 8:
@@ -598,62 +598,52 @@ class WordDocumentCompilerPyWin32:
         else:
             cols = N
             
+        col_width_cm = printable_width_cm / cols
+        
+        # Configure tab stops on Selection for writing words directly in document
+        sel.ParagraphFormat.SpaceBefore = 4
+        sel.ParagraphFormat.SpaceAfter = 4
+        sel.ParagraphFormat.Alignment = 0
+        sel.ParagraphFormat.TabStops.ClearAll()
+        for c in range(1, cols):
+            tab_pos = col_width_cm * c + 0.3
+            sel.ParagraphFormat.TabStops.Add(Position=cm_to_pt(tab_pos), Alignment=0)
+            
+        p_start = sel.Range.Start
+        
         lines = []
         for i in range(0, N, cols):
             chunk = words[i:i + cols]
-            lines.append("\t".join(chunk))
-        full_box_text = "\r".join(lines)
+            lines.append(chunk)
+            
         num_rows = len(lines)
-        
-        box_height = max(35, num_rows * 22 + 16)
-        
-        sel.ParagraphFormat.SpaceBefore = 6
-        sel.ParagraphFormat.SpaceAfter = 6
-        sel.ParagraphFormat.Alignment = 1
-        
-        shape = self.doc.Shapes.AddShape(5, 0, 0, box_width, box_height)
-        try:
-            shape.WrapFormat.Type = 1
-        except Exception:
-            pass
+        for idx_line, chunk in enumerate(lines):
+            for idx_w, word in enumerate(chunk):
+                self.write_run(word, bold=True)
+                if idx_w < len(chunk) - 1:
+                    self.write_run("\t", bold=False)
+            sel.TypeParagraph()
             
-        try:
-            shape.Fill.Solid()
-            shape.Fill.ForeColor.RGB = 16777215
-        except Exception:
-            pass
-        try:
-            shape.Line.Weight = 1.0
-            shape.Line.ForeColor.RGB = 0
-        except Exception:
-            pass
-            
-        tf = shape.TextFrame
-        try:
-            tf.MarginTop = cm_to_pt(0.2)
-            tf.MarginBottom = cm_to_pt(0.2)
-            tf.MarginLeft = cm_to_pt(0.4)
-            tf.MarginRight = cm_to_pt(0.4)
-        except Exception:
-            pass
-            
-        tr = tf.TextRange
-        tr.Font.Name = "Times New Roman"
-        tr.Font.Size = 12
-        tr.Font.Bold = True
-        tr.Font.Color = 0
+        p_end = sel.Range.End
+        box_range = self.doc.Range(p_start, p_end)
         
-        col_width = box_width / cols
+        # Draw Rounded Rectangle Shape (msoShapeRoundedRectangle = 5) anchored around the words
         try:
-            tr.ParagraphFormat.TabStops.ClearAll()
-            for c in range(1, cols):
-                tab_pos = col_width * c
-                tr.ParagraphFormat.TabStops.Add(Position=tab_pos, Alignment=0)
-        except Exception:
-            pass
+            top_pt = box_range.Information(34) # wdVerticalPositionRelativeToPage = 34
+            left_pt = cm_to_pt(left_margin_cm)
+            width_pt = printable_width_pt
+            height_pt = max(cm_to_pt(1.2), num_rows * cm_to_pt(0.7) + cm_to_pt(0.3))
             
-        tr.Text = full_box_text
-        sel.TypeParagraph()
+            shape = self.doc.Shapes.AddShape(5, left_pt, top_pt - 4, width_pt, height_pt, Anchor=box_range)
+            shape.Fill.Visible = False # Transparent background so words show directly
+            shape.Line.Weight = 1.0 # 1pt border
+            shape.Line.ForeColor.RGB = 0 # Black line
+            try:
+                shape.ZOrder(1)
+            except Exception:
+                pass
+        except Exception as e:
+            print(f"  [PyWin32] Warning drawing rounded shape around word box: {e}")
 
     def compile(self, exercises: List[Dict[str, Any]], output_filepath: Any, grade: str = "", unit: str = "", version_code: str = "", include_answer_key: bool = True, is_answer_key: bool = False, is_test: bool = False):
         self.is_answer_key = is_answer_key
