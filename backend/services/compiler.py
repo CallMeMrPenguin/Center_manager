@@ -301,7 +301,7 @@ class WordDocumentCompilerPyWin32:
         self.write_run(text, bold=True, font_size=font_size)
         sel.TypeParagraph()
 
-    def add_question(self, q_num: Any, q_text: str, fmt: str = None, layout: str = None, ind: int = 0, default_prefix: str = ""):
+    def add_question(self, q_num: Any, q_text: str, fmt: str = None, layout: str = None, ind: int = 0, default_prefix: str = "", blank_start_cm: float = None):
         space_before = self.settings.get("question_space_before", 6.0)
         space_after = self.settings.get("question_space_after", 4.0)
         
@@ -638,7 +638,21 @@ class WordDocumentCompilerPyWin32:
                     sel.TypeParagraph()
 
             if ex.get("k") and isinstance(ex.get("k"), list):
-                for sub in ex.get("k", []):
+                k_items = ex.get("k", [])
+                calc_blank_start = None
+                if layout == "blank_right" or any(sub.get("layout") == "blank_right" for sub in k_items):
+                    import re
+                    max_len_chars = 0
+                    for sub in k_items:
+                        s_q = str(sub.get("q", ""))
+                        s_x = str(sub.get("x", ""))
+                        s_clean = re.sub(r'\[([^\]]+)\](?:\([A-D]\))?', r'\1', s_x)
+                        s_clean = s_clean.replace('**', '').replace('*', '')
+                        max_len_chars = max(max_len_chars, len(s_q) + 3 + len(s_clean))
+                    sent_w = max_len_chars * 0.20
+                    calc_blank_start = min(13.0, max(7.0, sent_w + 0.5))
+
+                for sub in k_items:
                     sub_q = sub.get("q")
                     sub_x = sub.get("x", "")
                     sub_o = sub.get("o", [])
@@ -649,7 +663,7 @@ class WordDocumentCompilerPyWin32:
                     sub_ind = sub.get("ind", ind)
 
                     def_pref = ""
-                    self.add_question(sub_q, sub_x, fmt=sub_fmt, layout=sub_layout, ind=sub_ind, default_prefix=def_pref)
+                    self.add_question(sub_q, sub_x, fmt=sub_fmt, layout=sub_layout, ind=sub_ind, default_prefix=def_pref, blank_start_cm=calc_blank_start)
                     
                     if sub_o and isinstance(sub_o, list):
                         self.add_options_grid(sub_o, ex_type, correct_ans=sub_a, cols_override=sub_cols)
@@ -806,7 +820,7 @@ class WordDocumentCompilerDocx:
         run.bold = True
         run.font.size = Pt(font_size)
 
-    def add_question(self, q_num: Any, q_text: str, fmt: str = None, layout: str = None, ind: int = 0, default_prefix: str = ""):
+    def add_question(self, q_num: Any, q_text: str, fmt: str = None, layout: str = None, ind: int = 0, default_prefix: str = "", blank_start_cm: float = None):
         space_before = self.settings.get("question_space_before", 6.0)
         space_after = self.settings.get("question_space_after", 4.0)
         
@@ -835,8 +849,11 @@ class WordDocumentCompilerDocx:
             right_margin_cm = self.settings.get("margin_right", 1.5)
             printable_width_cm = 21.0 - left_margin_cm - right_margin_cm - (0.5 * ind)
             
+            b_start = blank_start_cm if blank_start_cm is not None else 10.0
+            p.paragraph_format.tab_stops.add_tab_stop(Cm(b_start), WD_TAB_ALIGNMENT.LEFT)
             p.paragraph_format.tab_stops.add_tab_stop(Cm(printable_width_cm), WD_TAB_ALIGNMENT.RIGHT)
-            r_tab = p.add_run("\t" + "_" * 22)
+            
+            r_tab = p.add_run("\t\t" + "_" * 25)
             r_tab.bold = False
         elif layout == "tf":
             run_tf = p.add_run("   ( T  /  F )")
@@ -1206,38 +1223,95 @@ class WordDocumentCompilerDocx:
         return answers
 
     def add_answer_key(self, exercises: List[Dict[str, Any]]):
-        answers = self.collect_answers(exercises)
-        if not answers:
+        if not exercises:
             return
             
         self.doc.add_page_break()
         
         p_head = self.doc.add_paragraph()
-        p_head.paragraph_format.space_before = Pt(12)
-        p_head.paragraph_format.space_after = Pt(12)
+        p_head.paragraph_format.space_before = Pt(14)
+        p_head.paragraph_format.space_after = Pt(10)
         p_head.paragraph_format.keep_with_next = True
         run_head = p_head.add_run("ANSWER KEY")
         run_head.bold = True
         run_head.font.size = Pt(14)
         
-        N = len(answers)
-        cols = 5
-        rows = math.ceil(N / cols)
-        
-        table = self.doc.add_table(rows=rows, cols=cols)
-        table.alignment = 1
-        
-        for r in range(rows):
-            for c in range(cols):
-                idx = c * rows + r
-                if idx < N:
-                    item = answers[idx]
-                    cell = table.cell(r, c)
-                    p = cell.paragraphs[0]
-                    p.paragraph_format.space_after = Pt(4)
-                    run = p.add_run(f"{item['q']}. {item['a']}")
-                    run.bold = True
-                    run.font.size = Pt(11)
+        left_margin_cm = self.settings.get("margin_left", 3.0)
+        right_margin_cm = self.settings.get("margin_right", 1.5)
+        printable_width_cm = 21.0 - left_margin_cm - right_margin_cm
+
+        for ex_idx, ex in enumerate(exercises):
+            ex_type = ex.get("t", "mq")
+            title_prefix = ex.get("title_prefix") or ex.get("prefix") or ex.get("title_num") or f"Part {ex_idx + 1}"
+            
+            ex_items = []
+            if ex.get("k") and isinstance(ex.get("k"), list):
+                for sub in ex.get("k"):
+                    if sub.get("q") and sub.get("a") is not None and str(sub.get("a")).strip() != "":
+                        ex_items.append({"q": str(sub.get("q")).strip(), "a": sub.get("a")})
+            elif ex_type == "mt" and ex.get("a"):
+                ans_val = ex.get("a")
+                if isinstance(ans_val, list):
+                    for idx_item, char_ans in enumerate(ans_val):
+                        ex_items.append({"q": str(idx_item + 1), "a": f"{idx_item + 1}-{char_ans}"})
+                else:
+                    ex_items.append({"q": str(ex.get("q", "1")), "a": str(ans_val)})
+            elif ex.get("q") and ex.get("a") is not None and str(ex.get("a")).strip() != "":
+                ex_items.append({"q": str(ex.get("q")).strip(), "a": ex.get("a")})
+
+            if not ex_items:
+                continue
+
+            p_sec = self.doc.add_paragraph()
+            p_sec.paragraph_format.space_before = Pt(10)
+            p_sec.paragraph_format.space_after = Pt(4)
+            p_sec.paragraph_format.keep_with_next = True
+            
+            sec_title = f"{title_prefix} Answer Key" if title_prefix else f"Exercise {ex_idx + 1} Answer Key"
+            run_sec = p_sec.add_run(sec_title)
+            run_sec.bold = True
+            run_sec.font.size = Pt(11)
+
+            # Determine layout of answers for this exercise:
+            are_short = all(isinstance(item["a"], str) and len(str(item["a"]).strip()) <= 8 for item in ex_items)
+
+            if are_short and len(ex_items) >= 3:
+                N = len(ex_items)
+                cols = 5
+                rows = math.ceil(N / cols)
+                table = self.doc.add_table(rows=rows, cols=cols)
+                table.alignment = 1
+                col_w = printable_width_cm / cols
+                
+                for r in range(rows):
+                    for c in range(cols):
+                        idx = c * rows + r
+                        if idx < N:
+                            item = ex_items[idx]
+                            cell = table.cell(r, c)
+                            cell.width = Cm(col_w)
+                            p_cell = cell.paragraphs[0]
+                            p_cell.paragraph_format.space_before = Pt(1)
+                            p_cell.paragraph_format.space_after = Pt(1)
+                            run_item = p_cell.add_run(f"{item['q']}. {item['a']}")
+                            run_item.bold = True
+                            run_item.font.size = Pt(11)
+            else:
+                for item in ex_items:
+                    p_item = self.doc.add_paragraph()
+                    p_item.paragraph_format.left_indent = Cm(0.5)
+                    p_item.paragraph_format.space_before = Pt(1)
+                    p_item.paragraph_format.space_after = Pt(2)
+                    
+                    if isinstance(item["a"], list):
+                        a_str = ", ".join(str(x) for x in item["a"])
+                    else:
+                        a_str = str(item["a"]).strip()
+                        
+                    run_q = p_item.add_run(f"{item['q']}. ")
+                    run_q.bold = True
+                    run_a = p_item.add_run(a_str)
+                    run_a.bold = False
 
     def compile_exercises(self, exercises: List[Dict[str, Any]], grade: str = "", unit: str = "", version_code: str = "", include_answer_key: bool = True):
         if isinstance(exercises, dict):
@@ -1310,7 +1384,21 @@ class WordDocumentCompilerDocx:
                     self.add_matching_grid(left_items, right_items, fmt=fmt)
 
             if ex.get("k") and isinstance(ex.get("k"), list):
-                for sub in ex.get("k", []):
+                k_items = ex.get("k", [])
+                calc_blank_start = None
+                if layout == "blank_right" or any(sub.get("layout") == "blank_right" for sub in k_items):
+                    import re
+                    max_len_chars = 0
+                    for sub in k_items:
+                        s_q = str(sub.get("q", ""))
+                        s_x = str(sub.get("x", ""))
+                        s_clean = re.sub(r'\[([^\]]+)\](?:\([A-D]\))?', r'\1', s_x)
+                        s_clean = s_clean.replace('**', '').replace('*', '')
+                        max_len_chars = max(max_len_chars, len(s_q) + 3 + len(s_clean))
+                    sent_w = max_len_chars * 0.20
+                    calc_blank_start = min(13.0, max(7.0, sent_w + 0.5))
+
+                for sub in k_items:
                     sub_q = sub.get("q")
                     sub_x = sub.get("x", "")
                     sub_o = sub.get("o", [])
@@ -1321,7 +1409,7 @@ class WordDocumentCompilerDocx:
                     sub_ind = sub.get("ind", ind)
 
                     def_pref = ""
-                    self.add_question(sub_q, sub_x, fmt=sub_fmt, layout=sub_layout, ind=sub_ind, default_prefix=def_pref)
+                    self.add_question(sub_q, sub_x, fmt=sub_fmt, layout=sub_layout, ind=sub_ind, default_prefix=def_pref, blank_start_cm=calc_blank_start)
                     
                     if sub_o and isinstance(sub_o, list):
                         self.add_options_grid(sub_o, ex_type, correct_ans=sub_a, cols_override=sub_cols)
