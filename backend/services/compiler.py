@@ -600,15 +600,15 @@ class WordDocumentCompilerPyWin32:
         else:
             cols = N
             
-        # Calculate optimal column width for cols 1..4 based on word lengths
-        col1_4_max_len = max(len(str(words[i])) for i in range(N) if (i % cols) < cols - 1) if N > 1 else 8
-        col_width_cm = max(2.0, (col1_4_max_len * 0.15) + 0.3)
-        col_width_pt = cm_to_pt(col_width_cm)
+        # Calculate optimal column width for cols 1..4 so Word NEVER skips a tab stop
+        max_len_all = max(len(str(w)) for w in words) if words else 8
+        char_w_pt = 7.2 # Average character width in 12pt bold font
+        col_width_pt = (max_len_all * char_w_pt) + 14.0
         
         # Measure character width of the last column (col 5)
         last_col_words = [words[i] for i in range(cols - 1, N, cols)] if N >= cols else [words[-1]]
         last_col_max_len = max(len(str(w)) for w in last_col_words) if last_col_words else 8
-        last_col_text_w_pt = last_col_max_len * 5.6
+        last_col_text_w_pt = last_col_max_len * char_w_pt
         
         text_group_width_pt = ((cols - 1) * col_width_pt) + last_col_text_w_pt
         left_offset_pt = max(0.0, (printable_width_pt - text_group_width_pt) / 2.0)
