@@ -1364,6 +1364,10 @@ class WordDocumentCompilerDocx:
         if grade or unit or version_code or is_test:
             self.add_test_header(grade=grade, unit=unit, version_code=version_code, is_test=is_test)
         self.compile_exercises(exercises, grade=grade, unit=unit, version_code=version_code, include_answer_key=include_answer_key)
+        
+        abs_path = os.path.abspath(output_filepath)
+        os.makedirs(os.path.dirname(abs_path), exist_ok=True)
+        self.doc.save(abs_path)
 
 
 class WordDocumentCompiler:
