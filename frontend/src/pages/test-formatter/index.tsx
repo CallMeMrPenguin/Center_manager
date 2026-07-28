@@ -69,6 +69,8 @@ Each object in "data" MUST use the following short key names:
 
 8. "w": (Array of Strings, For "wb") List of words to render inside a rounded Word Box shape above the passage (e.g., ["traditional", "attracts", "artisans", "pottery", "explore", "handicrafts", "preserve", "historical", "visitors", "culture"]).
 
+9. "title_prefix": (String, Optional) Custom numbering / prefix for the exercise instruction heading (e.g., "I.", "Exercise 1:", "Part A.", "BÀI 1."). If not provided, plain instruction text is used.
+
 ==================================================
 AUTOMATIC WORD BOX ("wb") RULE
 ==================================================
@@ -77,6 +79,11 @@ AUTOMATIC WORD BOX ("wb") RULE
   - Put the passage text with numbered blanks (1) _______, (2) _______ in "b".
   - Put the answer key mapping inside "k": [{"q": 1, "a": "word1"}, {"q": 2, "a": "word2"}, ...].
 • Do NOT format passages with a given word bank as "cz" or "fb". Automatically output them as "t": "wb".
+
+==================================================
+HEADER & DOCUMENT TYPE RULES
+==================================================
+• If input is NOT classified as an official test (is_test = false), DO NOT generate or request a student info header section ("Họ và tên", "Lớp", "Đề"). Student info headers are reserved strictly for official test documents.
 
 ==================================================
 INLINE FORMATTING RULES
@@ -88,48 +95,113 @@ Preserve text formatting using these exact inline tags:
 - Error identification choices in "x": Use format "[text](LETTER)" -> e.g. "She [go](A) to [school](B) yesterday."
 
 ==================================================
-EXAMPLE OUTPUT
+EXAMPLE OUTPUT (Covering all 13 exercise types)
 ==================================================
 {
   "data": [
     {
+      "title_prefix": "I.",
       "t": "pr",
       "q": "1",
       "o": ["pass[ed]", "check[ed]", "stopp[ed]", "want[ed]"],
       "a": "D"
     },
     {
-      "t": "wb",
-      "w": ["traditional", "attracts", "artisans", "pottery", "explore", "handicrafts", "preserve", "historical", "visitors", "culture"],
-      "b": "Bat Trang is a famous (1) _______ village located near Ha Noi. Many skilled (2) _______ work here to produce beautiful (3) _______. The village (4) _______ thousands of domestic and foreign (5) _______ every year who come to buy unique handicrafts.",
-      "k": [
-        {"q": 1, "a": "traditional"},
-        {"q": 2, "a": "artisans"},
-        {"q": 3, "a": "pottery"},
-        {"q": 4, "a": "attracts"},
-        {"q": 5, "a": "visitors"}
-      ]
+      "t": "st",
+      "q": "2",
+      "o": ["student", "teacher", "doctor", "police"],
+      "a": "D"
+    },
+    {
+      "t": "sy",
+      "q": "3",
+      "x": "The manager decided to [defer] the meeting until next week.",
+      "o": ["delay", "cancel", "start", "continue"],
+      "a": "A"
+    },
+    {
+      "t": "an",
+      "q": "4",
+      "x": "The morning session was incredibly [productive].",
+      "o": ["useful", "useless", "active", "busy"],
+      "a": "B"
+    },
+    {
+      "t": "er",
+      "q": "5",
+      "x": "My brother [is](A) very good [at](B) playing [the](C) guitar, isn't [him](D)?",
+      "o": ["is", "at", "the", "him"],
+      "a": "D"
     },
     {
       "t": "fb",
-      "q": "2",
+      "q": "6",
       "x": "She is very _______ (INTEREST) in learning English.",
       "o": [],
       "a": "interested"
     },
     {
       "t": "rw",
-      "q": "3",
+      "q": "7",
       "x": "Living in a big city is more expensive than living in a rural village.\\n(Living in)",
       "o": [],
       "a": "Living in a rural village is cheaper than living in a big city."
     },
     {
-      "t": "er",
-      "q": "4",
-      "x": "My brother [is](A) very good [at](B) playing [the](C) guitar, isn't [him](D)?",
-      "o": ["is", "at", "the", "him"],
-      "a": "D"
+      "title_prefix": "Exercise 2:",
+      "t": "wb",
+      "w": ["traditional", "attracts", "artisans", "pottery", "explore", "handicrafts", "preserve", "historical", "visitors", "culture"],
+      "b": "Bat Trang is a famous (1) _______ village located near Ha Noi. Many skilled (2) _______ work here to produce beautiful (3) _______.",
+      "k": [
+        {"q": 1, "a": "traditional"},
+        {"q": 2, "a": "artisans"},
+        {"q": 3, "a": "pottery"}
+      ]
+    },
+    {
+      "t": "cz",
+      "b": "Viet Nam is a country of rich cultural (1) _______.",
+      "k": [
+        {
+          "q": "8",
+          "x": "",
+          "o": ["heritage", "custom", "tradition", "habit"],
+          "a": "A"
+        }
+      ]
+    },
+    {
+      "t": "rd",
+      "b": "Ha Long Bay is one of the most magnificent natural wonders of Viet Nam.",
+      "k": [
+        {
+          "q": "9",
+          "x": "What is the main topic of the passage?",
+          "o": ["Ha Long Bay", "Ha Noi city", "Bat Trang village", "Pho noodle"],
+          "a": "A"
+        }
+      ]
+    },
+    {
+      "t": "ro",
+      "q": "10",
+      "x": "is / My father / a doctor / at / a local hospital .",
+      "o": [],
+      "a": "My father is a doctor at a local hospital."
+    },
+    {
+      "t": "sg",
+      "q": "11",
+      "x": "[NO PARKING]",
+      "o": ["You cannot park here", "You can park here", "Drive fast", "No entry"],
+      "a": "A"
+    },
+    {
+      "t": "nt",
+      "q": "12",
+      "b": "LIBRARY NOTICE: Silence must be maintained at all times.",
+      "o": ["Keep quiet in the library", "Talk loudly", "Eat food", "Play music"],
+      "a": "A"
     }
   ]
 }`

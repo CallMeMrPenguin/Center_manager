@@ -427,69 +427,76 @@ class WordDocumentCompilerPyWin32:
         sel = self.word.Selection
         has_version = bool(version_code and str(version_code).strip() != "")
         
-        # Add 1x2 outer table for Header ONLY if is_test is True and version_code is provided
-        if is_test and has_version:
-            left_margin_cm = self.settings.get("margin_left", 3.0)
-            right_margin_cm = self.settings.get("margin_right", 1.5)
-            printable_width_cm = 21.0 - left_margin_cm - right_margin_cm
-            
-            table = self.doc.Tables.Add(Range=sel.Range, NumRows=1, NumColumns=2)
-            try:
-                table.Rows.Alignment = 1 # Center
-            except Exception:
-                pass
-            table.Columns(1).Width = cm_to_pt(printable_width_cm - 3.5)
-            table.Columns(2).Width = cm_to_pt(3.5)
-            
-            cell_left = table.Cell(1, 1)
-            cell_left.Range.ParagraphFormat.SpaceBefore = 0
-            cell_left.Range.ParagraphFormat.SpaceAfter = 0
-            cell_left.Range.ParagraphFormat.LineSpacingRule = 2
-            cell_left.Range.Font.Name = "Times New Roman"
-            cell_left.Range.Font.Size = 12
-            cell_left.Range.Font.Bold = True
-            cell_left.Range.Text = "Họ và tên: ....................................\rLớp: ...................."
-            
-            cell_right = table.Cell(1, 2)
-            cell_right.Range.ParagraphFormat.SpaceBefore = 0
-            cell_right.Range.ParagraphFormat.SpaceAfter = 0
-            cell_right.Range.Text = ""
-            
-            try:
-                v_num = int(version_code)
-                if v_num >= 101:
-                    v_num = v_num - 100
-                ver_text = f"ĐỀ {v_num}"
-            except ValueError:
-                ver_text = f"ĐỀ {version_code}"
+        # Add Student Header ("Họ và tên... Lớp...") ONLY if is_test is True
+        if is_test:
+            if has_version:
+                left_margin_cm = self.settings.get("margin_left", 3.0)
+                right_margin_cm = self.settings.get("margin_right", 1.5)
+                printable_width_cm = 21.0 - left_margin_cm - right_margin_cm
                 
-            nested_table = self.doc.Tables.Add(Range=cell_right.Range, NumRows=1, NumColumns=1)
-            try:
-                nested_table.Rows.Alignment = 2 # Right
-            except Exception:
-                pass
-            nested_table.Columns(1).Width = cm_to_pt(2.5)
-            nested_cell = nested_table.Cell(1, 1)
-            nested_cell.VerticalAlignment = 1
-            
-            for border_id in [-1, -2, -3, -4]:
+                table = self.doc.Tables.Add(Range=sel.Range, NumRows=1, NumColumns=2)
                 try:
-                    nested_cell.Borders(border_id).LineStyle = 1
-                    nested_cell.Borders(border_id).LineWidth = 12
+                    table.Rows.Alignment = 1 # Center
                 except Exception:
                     pass
+                table.Columns(1).Width = cm_to_pt(printable_width_cm - 3.5)
+                table.Columns(2).Width = cm_to_pt(3.5)
+                
+                cell_left = table.Cell(1, 1)
+                cell_left.Range.ParagraphFormat.SpaceBefore = 0
+                cell_left.Range.ParagraphFormat.SpaceAfter = 0
+                cell_left.Range.ParagraphFormat.LineSpacingRule = 2
+                cell_left.Range.Font.Name = "Times New Roman"
+                cell_left.Range.Font.Size = 12
+                cell_left.Range.Font.Bold = True
+                cell_left.Range.Text = "Họ và tên: ....................................\rLớp: ...................."
+                
+                cell_right = table.Cell(1, 2)
+                cell_right.Range.ParagraphFormat.SpaceBefore = 0
+                cell_right.Range.ParagraphFormat.SpaceAfter = 0
+                cell_right.Range.Text = ""
+                
+                try:
+                    v_num = int(version_code)
+                    if v_num >= 101:
+                        v_num = v_num - 100
+                    ver_text = f"ĐỀ {v_num}"
+                except ValueError:
+                    ver_text = f"ĐỀ {version_code}"
                     
-            nested_p = nested_cell.Range
-            nested_p.ParagraphFormat.Alignment = 1
-            nested_p.ParagraphFormat.SpaceBefore = 6
-            nested_p.ParagraphFormat.SpaceAfter = 6
-            nested_p.Font.Name = "Times New Roman"
-            nested_p.Font.Size = 12
-            nested_p.Font.Bold = True
-            nested_p.Text = ver_text
-            
-            sel.Start = table.Range.End
-            sel.TypeParagraph()
+                nested_table = self.doc.Tables.Add(Range=cell_right.Range, NumRows=1, NumColumns=1)
+                try:
+                    nested_table.Rows.Alignment = 2 # Right
+                except Exception:
+                    pass
+                nested_table.Columns(1).Width = cm_to_pt(2.5)
+                nested_cell = nested_table.Cell(1, 1)
+                nested_cell.VerticalAlignment = 1
+                
+                for border_id in [-1, -2, -3, -4]:
+                    try:
+                        nested_cell.Borders(border_id).LineStyle = 1
+                        nested_cell.Borders(border_id).LineWidth = 12
+                    except Exception:
+                        pass
+                        
+                nested_p = nested_cell.Range
+                nested_p.ParagraphFormat.Alignment = 1
+                nested_p.ParagraphFormat.SpaceBefore = 6
+                nested_p.ParagraphFormat.SpaceAfter = 6
+                nested_p.Font.Name = "Times New Roman"
+                nested_p.Font.Size = 12
+                nested_p.Font.Bold = True
+                nested_p.Text = ver_text
+                
+                sel.Start = table.Range.End
+                sel.TypeParagraph()
+            else:
+                sel.ParagraphFormat.Alignment = 0
+                sel.ParagraphFormat.SpaceBefore = 0
+                sel.ParagraphFormat.SpaceAfter = 6
+                self.write_run("Họ và tên: ....................................    Lớp: ....................", bold=True, font_size=12)
+                sel.TypeParagraph()
             
         # Title header ONLY if unit or grade is provided
         unit_str = str(unit).strip() if unit else ""
@@ -520,8 +527,8 @@ class WordDocumentCompilerPyWin32:
     def add_answer_key(self, exercises: List[Dict[str, Any]]):
         answers = []
         for ex in exercises:
-            ex_type = ex.get("t")
-            if ex_type in ["cz", "rd"]:
+            ex_type = ex.get("t", "mq")
+            if ex_type in ["cz", "rd", "wb"]:
                 for sub in ex.get("k", []):
                     q_num = sub.get("q")
                     ans = sub.get("a", "")
@@ -699,12 +706,19 @@ class WordDocumentCompilerPyWin32:
                     options = []
                 is_mcq = len(options) >= 2
                 
-                block_key = (ex_type, is_mcq)
+                title_prefix = ex.get("title_prefix") or ex.get("prefix") or ex.get("title_num")
+                custom_inst = ex.get("instruction") or ex.get("title")
+                
+                block_key = (ex_type, is_mcq, title_prefix, custom_inst)
                 if block_key != current_block_key:
                     current_block_key = block_key
-                    instruction_text = get_instruction_text(ex_type, is_mcq)
-                    if instruction_text:
-                        self.add_instruction_header(instruction_text)
+                    inst_body = custom_inst if custom_inst else get_instruction_text(ex_type, is_mcq)
+                    if inst_body:
+                        if title_prefix and str(title_prefix).strip():
+                            final_header = f"{str(title_prefix).strip()} {inst_body}"
+                        else:
+                            final_header = inst_body
+                        self.add_instruction_header(final_header)
                 
                 if ex_type == "wb":
                     words = ex.get("w", [])
