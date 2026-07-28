@@ -3,7 +3,7 @@ import { ColumnDef } from '@tanstack/react-table';
 import { api } from '../api';
 import { 
   BarChart3, RefreshCw, Calendar, 
-  AlertCircle, Users, GraduationCap, ChevronRight, Info, RotateCcw, X
+  AlertCircle, Users, GraduationCap, ChevronRight, Info, RotateCcw, X, Edit2, History, Save
 } from 'lucide-react';
 import { showToast } from '../components/Toast';
 import { CustomDatePicker } from '../components/CustomDatePicker';
@@ -34,6 +34,15 @@ export default function ReportsPage() {
   const [resetFromDate, setResetFromDate] = useState('');
   const [resetToDate, setResetToDate] = useState('');
   const [resetScope, setResetScope] = useState<'class' | 'student'>('class');
+
+  // Edit Single Record Modal State
+  const [editingRecord, setEditingRecord] = useState<any | null>(null);
+  const [editStatus, setEditStatus] = useState<string>('Có mặt');
+  const [editCheck1, setEditCheck1] = useState<string>('');
+  const [editCheck2, setEditCheck2] = useState<string>('');
+  const [editHomework, setEditHomework] = useState<string>('');
+  const [editNotes, setEditNotes] = useState<string>('');
+  const [savingEdit, setSavingEdit] = useState<boolean>(false);
 
   // Active Tooltip Info State
   const [activeTooltip, setActiveTooltip] = useState<string | null>(null);
@@ -128,6 +137,50 @@ export default function ReportsPage() {
     } catch (err: any) {
       showToast("Không thể đặt lại điểm: " + err.message, "error");
     }
+  };
+  const handleOpenEditModal = (rec: any) => {
+    setEditingRecord(rec);
+    setEditStatus(rec.status || 'Có mặt');
+    setEditCheck1(rec.check_1 > 0 ? String(rec.check_1) : '');
+    setEditCheck2(rec.check_2 > 0 ? String(rec.check_2) : '');
+    setEditHomework(rec.homework > 0 ? String(rec.homework) : '');
+    setEditNotes(rec.notes || '');
+  };
+
+  const handleSaveEditGradeSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingRecord) return;
+    setSavingEdit(true);
+    try {
+      const c1 = editCheck1.trim() !== '' ? Math.max(0, Math.min(10, parseFloat(editCheck1.replace(',', '.')) || 0)) : 0;
+      const c2 = editCheck2.trim() !== '' ? Math.max(0, Math.min(10, parseFloat(editCheck2.replace(',', '.')) || 0)) : 0;
+      const hw = editHomework.trim() !== '' ? Math.max(0, Math.min(10, parseFloat(editHomework.replace(',', '.')) || 0)) : 0;
+
+      await api.saveClassAttendance(editingRecord.class_id, editingRecord.date, [{
+        student_id: editingRecord.student_id,
+        status: editStatus,
+        check_1: c1,
+        check_2: c2,
+        homework: hw,
+        notes: editNotes
+      }]);
+
+      showToast(`Đã cập nhật điểm số cho ${editingRecord.student_name || 'học sinh'}!`, "success");
+      setEditingRecord(null);
+      await loadAnalyticsData(true);
+      notifyDataChanged();
+    } catch (err: any) {
+      showToast("Lỗi khi cập nhật điểm: " + (err.message || err), "error");
+    } finally {
+      setSavingEdit(false);
+    }
+  };
+
+  const formatFullDate = (dStr: string) => {
+    if (!dStr) return '';
+    const parts = dStr.split('-');
+    if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`;
+    return dStr;
   };
 
 
@@ -239,6 +292,99 @@ export default function ReportsPage() {
       },
     },
   ], [selectedStudentId]);
+
+  // TanStack ColumnDef for Student Grade History Table
+  const historyColumns = useMemo<ColumnDef<any>[]>(() => [
+    {
+      id: 'stt',
+      header: () => <div className="text-center w-full">STT</div>,
+      cell: ({ row }) => <div className="text-center font-bold text-slate-400">{row.index + 1}</div>,
+      enableSorting: false,
+      enableGlobalFilter: false,
+    },
+    {
+      accessorKey: 'date',
+      header: 'Ngày Buổi Học',
+      cell: (info) => (
+        <span className="font-mono text-xs font-bold text-indigo-300">
+          {formatFullDate(info.getValue<string>())}
+        </span>
+      ),
+    },
+    {
+      accessorKey: 'class_name',
+      header: 'Lớp Học',
+      cell: (info) => (
+        <span className="inline-block px-2.5 py-0.5 rounded-lg text-[10px] font-black bg-[#1c2442] text-slate-300 border border-[#303d68]">
+          {info.getValue<string>() || 'Lớp học'}
+        </span>
+      ),
+    },
+    {
+      accessorKey: 'status',
+      header: () => <div className="text-center w-full">Điểm Danh</div>,
+      cell: ({ getValue }) => {
+        const st = getValue<string>() || 'Có mặt';
+        const isAbsent = st.includes('Vắng') || st.includes('Nghỉ');
+        return (
+          <div className="text-center">
+            <span className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-extrabold ${
+              isAbsent ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30' : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+            }`}>
+              {st}
+            </span>
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: 'check_1',
+      header: () => <div className="text-center w-full">Check 1</div>,
+      cell: (info) => {
+        const val = Number(info.getValue()) || 0;
+        return <div className="text-center font-extrabold text-blue-400 font-mono">{val > 0 ? format1Dec(val) : '-'}</div>;
+      },
+    },
+    {
+      accessorKey: 'check_2',
+      header: () => <div className="text-center w-full">Check 2</div>,
+      cell: (info) => {
+        const val = Number(info.getValue()) || 0;
+        return <div className="text-center font-extrabold text-purple-400 font-mono">{val > 0 ? format1Dec(val) : '-'}</div>;
+      },
+    },
+    {
+      accessorKey: 'homework',
+      header: () => <div className="text-center w-full">Homework</div>,
+      cell: (info) => {
+        const val = Number(info.getValue()) || 0;
+        return <div className="text-center font-extrabold text-emerald-400 font-mono">{val > 0 ? format1Dec(val) : '-'}</div>;
+      },
+    },
+    {
+      accessorKey: 'notes',
+      header: 'Ghi Chú',
+      cell: (info) => <span className="text-xs text-slate-400 truncate max-w-xs block">{info.getValue<string>() || '-'}</span>,
+    },
+    {
+      id: 'actions',
+      header: () => <div className="text-center w-full">Thao Tác</div>,
+      enableSorting: false,
+      enableGlobalFilter: false,
+      cell: ({ row }) => (
+        <div className="text-center">
+          <button
+            onClick={(e) => { e.stopPropagation(); handleOpenEditModal(row.original); }}
+            className="px-2.5 py-1 rounded-lg bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 hover:text-indigo-300 transition cursor-pointer border border-indigo-500/20 inline-flex items-center gap-1 text-[11px] font-bold"
+            title="Sửa điểm buổi học này"
+          >
+            <Edit2 size={12} />
+            <span>Sửa</span>
+          </button>
+        </div>
+      ),
+    },
+  ], []);
 
   // Selected Student Object if individual mode
   const selectedStudentObj = useMemo(() => {
@@ -1205,6 +1351,170 @@ export default function ReportsPage() {
           initialSorting={[{ id: 'overallAvg', desc: true }]}
         />
       </div>
+      {/* 7. STUDENT GRADE HISTORY & EDIT TABLE — TanStack Table */}
+      <div className="bg-[#0d1120] border border-[#1d2644] rounded-2xl flex flex-col shadow-2xl mb-8">
+        <div className="px-5 py-4 border-b border-[#181f36] flex flex-wrap items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <History size={18} className="text-indigo-400" />
+            <h3 className="text-sm font-black text-white uppercase tracking-wider">
+              {selectedStudentObj 
+                ? `LỊCH SỬ ĐIỂM SỐ & ĐIỂM DANH — HỌC SINH: ${selectedStudentObj.full_name.toUpperCase()}`
+                : `LỊCH SỬ ĐIỂM SỐ CHI TIẾT TẤT CẢ BUỔI HỌC (${sessionRecords.length} BẢN GHI)`
+              }
+            </h3>
+          </div>
+          {selectedStudentObj && (
+            <span className="text-xs font-extrabold text-indigo-300 bg-indigo-500/10 px-3 py-1 rounded-xl border border-indigo-500/20">
+              Tổng cộng: {sessionRecords.length} buổi học
+            </span>
+          )}
+        </div>
+        <DataTable
+          data={sessionRecords}
+          columns={historyColumns}
+          loading={loading}
+          searchPlaceholder="Tìm theo ngày, trạng thái, ghi chú..."
+          emptyMessage="Chưa có lịch sử điểm số."
+          pageSize={20}
+          exportFilename={`lich_su_diem_${selectedStudentObj ? selectedStudentObj.full_name : 'lop'}`}
+        />
+      </div>
+
+      {/* EDIT SINGLE GRADE POPUP MODAL */}
+      {editingRecord && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 animate-mac-dropdown">
+          <div className="bg-[#0f1320] border border-indigo-500/30 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-white/10 bg-[#141828]">
+              <h2 className="text-sm font-black uppercase text-indigo-300 flex items-center gap-2">
+                <Edit2 className="h-4 w-4" />
+                Sửa Điểm Số Buổi Học
+              </h2>
+              <button
+                onClick={() => setEditingRecord(null)}
+                className="text-slate-400 hover:text-white transition cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveEditGradeSubmit} className="p-6 space-y-4">
+              <div>
+                <label className="block text-[11px] font-extrabold text-slate-300 uppercase tracking-wider mb-1">
+                  Học Sinh
+                </label>
+                <input
+                  type="text"
+                  disabled
+                  value={editingRecord.student_name || 'Học sinh'}
+                  className="w-full bg-[#181d2e] border border-white/10 rounded-xl px-3.5 py-2 text-xs font-bold text-slate-300 cursor-not-allowed"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[11px] font-extrabold text-slate-300 uppercase tracking-wider mb-1">
+                    Ngày Học
+                  </label>
+                  <input
+                    type="text"
+                    disabled
+                    value={formatFullDate(editingRecord.date)}
+                    className="w-full bg-[#181d2e] border border-white/10 rounded-xl px-3.5 py-2 text-xs font-mono font-bold text-indigo-300 cursor-not-allowed"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-extrabold text-slate-300 uppercase tracking-wider mb-1">
+                    Điểm Danh
+                  </label>
+                  <CustomSelect
+                    value={editStatus}
+                    onChange={(val) => setEditStatus(String(val))}
+                    options={[
+                      { value: 'Có mặt', label: 'Có mặt' },
+                      { value: 'Vắng mặt', label: 'Vắng mặt' },
+                      { value: 'Nghỉ học có phép', label: 'Có phép' },
+                    ]}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-3">
+                <div>
+                  <label className="block text-[11px] font-extrabold text-blue-400 uppercase tracking-wider mb-1">
+                    Check 1
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="0.0"
+                    value={editCheck1}
+                    onChange={(e) => setEditCheck1(e.target.value)}
+                    className="w-full bg-[#161c30] border border-blue-500/30 rounded-xl px-3.5 py-2 text-xs font-mono font-extrabold text-white focus:outline-none focus:border-blue-400"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-extrabold text-purple-400 uppercase tracking-wider mb-1">
+                    Check 2
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="0.0"
+                    value={editCheck2}
+                    onChange={(e) => setEditCheck2(e.target.value)}
+                    className="w-full bg-[#161c30] border border-purple-500/30 rounded-xl px-3.5 py-2 text-xs font-mono font-extrabold text-white focus:outline-none focus:border-purple-400"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-extrabold text-emerald-400 uppercase tracking-wider mb-1">
+                    Homework
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="0.0"
+                    value={editHomework}
+                    onChange={(e) => setEditHomework(e.target.value)}
+                    className="w-full bg-[#161c30] border border-emerald-500/30 rounded-xl px-3.5 py-2 text-xs font-mono font-extrabold text-white focus:outline-none focus:border-emerald-400"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-extrabold text-slate-300 uppercase tracking-wider mb-1">
+                  Ghi Chú (Notes)
+                </label>
+                <input
+                  type="text"
+                  placeholder="Nhập ghi chú cho buổi học..."
+                  value={editNotes}
+                  onChange={(e) => setEditNotes(e.target.value)}
+                  className="w-full bg-[#161c30] border border-white/10 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-indigo-400"
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setEditingRecord(null)}
+                  className="px-4 py-2 rounded-xl bg-[#181d2e] hover:bg-[#252c42] text-slate-300 text-xs font-bold border border-white/10 transition cursor-pointer"
+                >
+                  Hủy bỏ
+                </button>
+
+                <button
+                  type="submit"
+                  disabled={savingEdit}
+                  className="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-extrabold border border-white/20 transition cursor-pointer shadow-md flex items-center gap-1.5 disabled:opacity-50"
+                >
+                  <Save size={13} />
+                  <span>{savingEdit ? 'Đang lưu...' : 'Lưu Điểm Số'}</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* RESET GRADES POPUP MODAL */}
       {resetModalOpen && (
