@@ -589,7 +589,9 @@ class WordDocumentCompilerPyWin32:
         printable_width_pt = cm_to_pt(printable_width_cm)
         
         N = len(words)
-        if N >= 8:
+        if N >= 10:
+            cols = 5
+        elif N >= 8:
             cols = 4
         elif N >= 5:
             cols = 3
@@ -598,66 +600,64 @@ class WordDocumentCompilerPyWin32:
         else:
             cols = N
             
-        max_word_len = max(len(str(w)) for w in words) if words else 8
-        col_width_cm = max(2.8, (max_word_len * 0.18) + 1.0)
-        box_width_cm = min(printable_width_cm, cols * col_width_cm)
-        box_width_pt = cm_to_pt(box_width_cm)
+        p_start = sel.Range.Start
         
-        lines = []
-        for i in range(0, N, cols):
-            chunk = words[i:i + cols]
-            lines.append("\t".join(chunk))
-        full_box_text = "\r".join(lines)
-        num_rows = len(lines)
-        
-        box_height_pt = cm_to_pt(0.7) * num_rows + cm_to_pt(0.5)
-        
+        # Create continuous section for Word multi-column divide text flow
         try:
+            sel.InsertBreak(3) # wdSectionBreakContinuous = 3
+            sel.PageSetup.TextColumns.SetCount(cols)
+            try:
+                sel.PageSetup.TextColumns.EvenlySpaced = True
+            except Exception:
+                pass
+                
+            sel.ParagraphFormat.SpaceBefore = 2
+            sel.ParagraphFormat.SpaceAfter = 2
+            sel.ParagraphFormat.Alignment = 0
+            
+            for word in words:
+                self.write_run(word, bold=True)
+                sel.TypeParagraph()
+                
+            sel.InsertBreak(3) # wdSectionBreakContinuous = 3
+            sel.PageSetup.TextColumns.SetCount(1) # Reset back to 1 column
+        except Exception as e:
+            print(f"  [PyWin32] Warning creating multi-column section for word box: {e}")
+            
+        p_end = sel.Range.Start
+        section_range = self.doc.Range(p_start, p_end)
+        
+        num_rows = math.ceil(N / cols)
+        
+        # Draw Rounded Rectangle Shape (msoShapeRoundedRectangle = 5) anchored around multi-column section
+        try:
+            padding_pt = 6.0 # ~2.1mm padding away from text
+            text_height_pt = (num_rows * 18.0) + 8.0
+            box_width_pt = printable_width_pt + (padding_pt * 2)
+            box_height_pt = text_height_pt + (padding_pt * 2)
+            
             shape = self.doc.Shapes.AddShape(
                 5, # msoShapeRoundedRectangle = 5
                 0,
                 0,
                 box_width_pt,
                 box_height_pt,
-                Anchor=sel.Range
+                Anchor=section_range
             )
-            shape.WrapFormat.Type = 1 # wdWrapTopBottom = 1 (Pushes passage below cleanly, zero overlap!)
             shape.RelativeHorizontalPosition = 0 # wdRelativeHorizontalPositionMargin = 0
-            shape.Left = (printable_width_pt - box_width_pt) / 2 # Horizontally centered
+            shape.RelativeVerticalPosition = 2 # wdRelativeVerticalPositionParagraph = 2
+            shape.Left = -padding_pt
+            shape.Top = -padding_pt
             
-            shape.Fill.Solid()
-            shape.Fill.ForeColor.RGB = 16777215 # White background
+            shape.Fill.Visible = False # Transparent background so words in doc show directly
             shape.Line.Weight = 1.0 # 1pt border
             shape.Line.ForeColor.RGB = 0 # Black line
-            
-            tf = shape.TextFrame
             try:
-                tf.MarginTop = 6
-                tf.MarginBottom = 6
-                tf.MarginLeft = 10
-                tf.MarginRight = 10
+                shape.ZOrder(1) # Send behind text
             except Exception:
                 pass
-                
-            tr = tf.TextRange
-            tr.Font.Name = "Times New Roman"
-            tr.Font.Size = 12
-            tr.Font.Bold = True
-            tr.Font.Color = 0 # Black text
-            
-            col_tab_pt = box_width_pt / cols
-            try:
-                tr.ParagraphFormat.TabStops.ClearAll()
-                for c in range(1, cols):
-                    tab_pos = col_tab_pt * c
-                    tr.ParagraphFormat.TabStops.Add(Position=tab_pos, Alignment=0)
-            except Exception:
-                pass
-                
-            tr.Text = full_box_text
-            sel.TypeParagraph()
         except Exception as e:
-            print(f"  [PyWin32] Warning drawing rounded word box shape: {e}")
+            print(f"  [PyWin32] Warning drawing rounded shape around word box: {e}")
 
     def compile(self, exercises: List[Dict[str, Any]], output_filepath: Any, grade: str = "", unit: str = "", version_code: str = "", include_answer_key: bool = True, is_answer_key: bool = False, is_test: bool = False):
         self.is_answer_key = is_answer_key
