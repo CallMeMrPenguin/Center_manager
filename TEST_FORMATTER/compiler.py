@@ -323,7 +323,15 @@ class WordDocumentCompilerPyWin32:
             self.write_run(seg["text"], bold=seg["bold"], italic=seg["italic"], underline=seg["underline"])
             
         if layout == "blank_right":
-            self.write_run("   " + "_" * 25, bold=False)
+            left_margin_cm = self.settings.get("margin_left", 3.0)
+            right_margin_cm = self.settings.get("margin_right", 1.5)
+            printable_width_cm = 21.0 - left_margin_cm - right_margin_cm - (0.5 * ind)
+            
+            tab_pos_pt = cm_to_pt(printable_width_cm)
+            ts = sel.ParagraphFormat.TabStops.Add(tab_pos_pt)
+            ts.Alignment = 2
+            ts.Leader = 4
+            sel.TypeText("\t")
         elif layout == "tf":
             self.write_run("   ( T  /  F )", bold=True)
             
@@ -384,7 +392,7 @@ class WordDocumentCompilerPyWin32:
             col_width = remaining_width_cm / cols
             sel.ParagraphFormat.TabStops.ClearAll()
             for c_i in range(1, cols):
-                sel.ParagraphFormat.TabStops.Add(Position=cm_to_pt(left_indent_cm + col_width * c_i), Alignment=0)
+                sel.ParagraphFormat.TabStops.Add(cm_to_pt(left_indent_cm + col_width * c_i))
             
             num_rows = math.ceil(len(options) / cols)
             for r in range(num_rows):
@@ -422,7 +430,7 @@ class WordDocumentCompilerPyWin32:
         box_width_cm = min(printable_width_cm, cols * col_width_cm)
         
         table = self.doc.Tables.Add(Range=self.word.Selection.Range, NumRows=1, NumColumns=1)
-        table.Alignment = 1
+        table.Rows.Alignment = 1
         table.Columns(1).Width = cm_to_pt(box_width_cm)
         cell = table.Cell(1, 1)
         cell.Borders.Enable = True
@@ -430,7 +438,7 @@ class WordDocumentCompilerPyWin32:
         tab_col_w_cm = box_width_cm / cols
         cell.Range.ParagraphFormat.TabStops.ClearAll()
         for i in range(1, cols):
-            cell.Range.ParagraphFormat.TabStops.Add(Position=cm_to_pt(tab_col_w_cm * i), Alignment=0)
+            cell.Range.ParagraphFormat.TabStops.Add(cm_to_pt(tab_col_w_cm * i))
             
         for i in range(0, N, cols):
             chunk = words[i:i + cols]
@@ -450,7 +458,7 @@ class WordDocumentCompilerPyWin32:
         font_size = self.settings.get("font_size", 12.0)
         
         table = self.doc.Tables.Add(Range=self.word.Selection.Range, NumRows=1, NumColumns=2)
-        table.Alignment = 1
+        table.Rows.Alignment = 1
         table.Columns(1).Width = cm_to_pt(10.5)
         table.Columns(2).Width = cm_to_pt(6.0)
         
@@ -568,7 +576,7 @@ class WordDocumentCompilerPyWin32:
         rows = math.ceil(N / cols)
         
         table = self.doc.Tables.Add(Range=sel.Range, NumRows=rows, NumColumns=cols)
-        table.Alignment = 1
+        table.Rows.Alignment = 1
         
         for r in range(rows):
             for c in range(cols):
@@ -849,12 +857,9 @@ class WordDocumentCompilerDocx:
             right_margin_cm = self.settings.get("margin_right", 1.5)
             printable_width_cm = 21.0 - left_margin_cm - right_margin_cm - (0.5 * ind)
             
-            b_start = blank_start_cm if blank_start_cm is not None else 10.0
-            p.paragraph_format.tab_stops.add_tab_stop(Cm(b_start), WD_TAB_ALIGNMENT.LEFT)
-            p.paragraph_format.tab_stops.add_tab_stop(Cm(printable_width_cm), WD_TAB_ALIGNMENT.RIGHT)
-            
-            r_tab = p.add_run("\t\t" + "_" * 25)
-            r_tab.bold = False
+            from docx.enum.text import WD_TAB_LEADER
+            p.paragraph_format.tab_stops.add_tab_stop(Cm(printable_width_cm), WD_TAB_ALIGNMENT.RIGHT, WD_TAB_LEADER.LINES)
+            p.add_run("\t")
         elif layout == "tf":
             run_tf = p.add_run("   ( T  /  F )")
             run_tf.bold = True
@@ -1506,8 +1511,7 @@ class WordDocumentCompiler:
             return False
 
     def compile(self, exercises: List[Dict[str, Any]], output_filepath: Any, grade: str = "", unit: str = "", version_code: str = "", include_answer_key: bool = True, is_answer_key: bool = False, is_test: bool = False):
-        use_win32 = self.settings.get("use_win32_word", False)
-        if use_win32 and win32com_available:
+        if win32com_available:
             try:
                 compiler_win32 = WordDocumentCompilerPyWin32(self.settings)
                 compiler_win32.compile(exercises, output_filepath, grade=grade, unit=unit, version_code=version_code, include_answer_key=include_answer_key, is_answer_key=is_answer_key, is_test=is_test)
