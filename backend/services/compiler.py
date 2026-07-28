@@ -636,14 +636,17 @@ class WordDocumentCompilerPyWin32:
             
             shape = self.doc.Shapes.AddShape(
                 5, # msoShapeRoundedRectangle = 5
-                -padding_pt, # Left relative to margin
-                -padding_pt, # Top relative to paragraph
+                0,
+                0,
                 box_width_pt,
                 box_height_pt,
                 Anchor=box_range
             )
             shape.RelativeHorizontalPosition = 0 # wdRelativeHorizontalPositionMargin = 0
             shape.RelativeVerticalPosition = 2 # wdRelativeVerticalPositionParagraph = 2
+            shape.Left = -padding_pt
+            shape.Top = -padding_pt
+            
             shape.Fill.Visible = False # Transparent background so words show directly
             shape.Line.Weight = 1.0 # 1pt border
             shape.Line.ForeColor.RGB = 0 # Black line
