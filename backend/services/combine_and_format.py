@@ -279,8 +279,14 @@ def update_docx_fields(filepath):
     print(f"  [win32com] Opening Word to update fields for: {abs_path}")
     word = None
     try:
+        try:
+            import pythoncom
+            pythoncom.CoInitialize()
+        except Exception:
+            pass
         word = win32com.client.Dispatch("Word.Application")
-        word.Visible = False
+        word.Visible = True  # Real-time visual output in MS Word
+        word.DisplayAlerts = 0
         doc = word.Documents.Open(abs_path)
         
         # Update fields in the document
@@ -297,7 +303,15 @@ def update_docx_fields(filepath):
         print(f"  [win32com] Error updating fields: {e}")
     finally:
         if word is not None:
-            word.Quit()
+            try:
+                word.Quit()
+            except Exception:
+                pass
+        try:
+            if pythoncom:
+                pythoncom.CoUninitialize()
+        except Exception:
+            pass
 
 def process_grade(files_dir, grade):
     """Combines Semester 1 & 2 files for a grade, then applies all formatting rules."""
