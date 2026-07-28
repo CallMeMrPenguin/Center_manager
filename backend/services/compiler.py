@@ -1418,8 +1418,20 @@ class WordDocumentCompiler:
         out_dir = os.path.join(os.getcwd(), "temp_compiled")
         os.makedirs(out_dir, exist_ok=True)
         timestamp = int(time.time())
-        filename = f"test_compiled_{timestamp}.docx"
-        filepath = os.path.join(out_dir, filename)
         
-        self.compile(exercises, filepath, grade=grade, unit=unit, version_code="101" if num_versions > 1 else "", include_answer_key=True, is_test=True)
-        return filename, filepath
+        num_v = max(1, num_versions or 1)
+        files_created = []
+        filenames_created = []
+        
+        for i in range(num_v):
+            v_code = f"{101 + i}" if num_v > 1 else ""
+            v_suffix = f"_De_{v_code}" if v_code else ""
+            fname = f"DeThi_{grade or 'Test'}_{unit or 'Exam'}_{timestamp}{v_suffix}.docx"
+            fpath = os.path.join(out_dir, fname)
+            
+            ex_copy = copy.deepcopy(exercises)
+            self.compile(ex_copy, fpath, grade=grade, unit=unit, version_code=v_code, include_answer_key=True, is_test=True)
+            files_created.append(fpath)
+            filenames_created.append(fname)
+            
+        return filenames_created[0], files_created[0], filenames_created

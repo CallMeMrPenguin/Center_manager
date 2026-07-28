@@ -386,6 +386,26 @@ export default function TestFormatter({
         const filesList = res.files || [res.filename];
         setLastCompiledFiles(filesList);
         showToast(`Đã tạo thành công ${filesList.length} phiên bản đề thi!`, "success");
+
+        filesList.forEach((fname: string) => {
+          const downloadUrl = `/api/files/download/${encodeURIComponent(fname)}`;
+          const a = document.createElement('a');
+          a.href = downloadUrl;
+          a.download = fname;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+        });
+
+        filesList.forEach((fname: string) => {
+          const downloadUrl = `/api/files/download/${encodeURIComponent(fname)}`;
+          const a = document.createElement('a');
+          a.href = downloadUrl;
+          a.download = fname;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+        });
       }
     } catch (e) {
       showToast("Lỗi biên dịch đề thi: " + e, "error");
@@ -713,6 +733,17 @@ export default function TestFormatter({
                 <h4 className="text-xs font-bold text-white">Đã xuất bản đề thi thành công ({lastCompiledFiles.length} mã đề)!</h4>
               </div>
               <div className="flex items-center gap-2">
+                {lastCompiledFiles.map((fname) => (
+                  <a
+                    key={fname}
+                    href={`/api/files/download/${encodeURIComponent(fname)}`}
+                    download={fname}
+                    className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-[0.66rem] rounded-xl flex items-center gap-1.5 transition cursor-pointer shadow"
+                  >
+                    <Download size={11} />
+                    <span>TẢI ĐỀ ({fname})</span>
+                  </a>
+                ))}
                 <button
                   onClick={async () => {
                     try { await api.openWorkspaceFolder(); showToast("Đang mở thư mục chứa đề thi...", "success"); }

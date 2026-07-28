@@ -153,14 +153,14 @@ def api_delete_profile(name: str):
 def api_compile_test(req: CompileModel):
     try:
         compiler = WordDocumentCompiler(req.settings)
-        filename, filepath = compiler.compile_test_versions(
+        filename, filepath, files_list = compiler.compile_test_versions(
             req.exercises,
             num_versions=req.num_versions or 1,
             mix_options=req.mix_options if req.mix_options is not None else True,
             grade=req.grade or "",
             unit=req.unit or ""
         )
-        return {"success": True, "filename": filename, "filepath": filepath}
+        return {"success": True, "filename": filename, "filepath": filepath, "files": files_list}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -168,7 +168,7 @@ def api_compile_test(req: CompileModel):
 def api_preview_pdf(req: CompileModel):
     try:
         compiler = WordDocumentCompiler(req.settings)
-        docx_filename, docx_path = compiler.compile_test_versions(
+        docx_filename, docx_path, _ = compiler.compile_test_versions(
             req.exercises,
             num_versions=1,
             mix_options=req.mix_options if req.mix_options is not None else True,
@@ -238,7 +238,12 @@ def api_download_file(filename: str):
     files_dir = get_setting("files_dir")
     filepath = get_file_path(files_dir, filename)
     if os.path.exists(filepath):
-        return FileResponse(filepath, filename=os.path.basename(filename))
+        return FileResponse(filepath, filename=os.path.basename(filename), media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+    
+    temp_path = os.path.join(os.getcwd(), "temp_compiled", filename)
+    if os.path.exists(temp_path):
+        return FileResponse(temp_path, filename=os.path.basename(filename), media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+        
     raise HTTPException(status_code=404, detail="File not found")
 
 @router.get("/api/files/preview-pdf/{filename:path}")
