@@ -14,9 +14,197 @@ import { cleanOptionPrefix } from '../../utils';
 
 const DEFAULT_TEST_FORMATTER_PROMPTS: PromptItem[] = [
   {
-    id: "tf_2",
-    title: "Form",
-    content: "You are an expert Document, Test, and Exercise Serialization Agent for Microsoft Word DOCX compilation.\nYour job is to parse tests/exercises from source text/images into strict JSON matching the compiler schema.\n\n==================================================\nOUTPUT FORMAT\n==================================================\n• Provide your response inside a single ```json code block containing valid JSON.\n• Do NOT include any text, intro, or explanation outside the JSON code block.\n\n==================================================\nCORE CONTENT FIELDS\n==================================================\n\nTop-level object MUST contain a \"data\" array:\n{\n  \"data\": [ ... ]\n}\n\nEach object in \"data\" uses these fields:\n\n1. \"t\": (String) Exercise type code. MUST be one of:\n   - \"pr\"  : Pronunciation / Underlined sound (MCQ)\n   - \"st\"  : Stress (MCQ)\n   - \"sy\"  : Synonym (MCQ)\n   - \"an\"  : Antonym (MCQ)\n   - \"er\"  : Error Identification (MCQ, underlined parts labeled A/B/C/D)\n   - \"fb\"  : Fill in the Blank — standalone sentence(s)\n   - \"rw\"  : Rewrite Sentence\n   - \"wq\"  : Write Question — write the A: question for a given underlined B: answer\n   - \"wb\"  : Word Box — fill blank passage with a given word bank\n   - \"cz\"  : Cloze Passage — MCQ A/B/C/D per blank\n   - \"rd\"  : Reading Passage with comprehension questions\n   - \"ro\"  : Sentence / Dialogue Reordering\n   - \"mt\"  : Matching — connect left-column items to right-column pool\n   - \"tf\"  : True / False statements\n   - \"sg\"  : Sign Meaning (MCQ)\n   - \"nt\"  : Notice Meaning (MCQ)\n\n2. \"q\": (String) Question number. e.g., \"1\", \"15\".\n\n3. \"x\": (String) Question sentence / group instruction text.\n\n4. \"o\": (Array) POLYMORPHIC — adapts by context:\n   - MCQ types (\"pr\",\"st\",\"sy\",\"an\",\"er\",\"sg\",\"nt\"): answer choice strings [\"A text\",\"B text\",\"C text\",\"D text\"]\n   - \"mt\" (matching): LEFT-column items (the words/phrases to match)\n   - \"ro\" (reordering): the SCRAMBLED list of sentences/words/phrases\n   - All others (\"fb\",\"rw\",\"wq\",\"tf\",\"wb\",\"cz\",\"rd\"): leave empty []\n\n5. \"a\": (String | Array) POLYMORPHIC — adapts by context:\n   - MCQ: \"A\", \"B\", \"C\", or \"D\"\n   - Open-ended / rewrite / wq: model answer string\n   - \"tf\" item: \"T\" or \"F\"\n   - \"ro\" (reordering): integer array of correct order indices into \"o\" → [3,1,5,2,4]\n   - \"mt\" (matching): string array of correct right-column letters in order of left items → [\"c\",\"a\",\"f\",\"b\",\"e\",\"d\"]\n\n6. \"b\": (String) Body/passage text. Used by \"wb\", \"cz\", \"rd\", \"nt\".\n\n7. \"k\": (Array) Sub-questions. ANY type can use \"k\" to group items under one shared heading.\n   Each k-item: { \"q\", \"x\"?, \"o\"?, \"a\", \"ind\"? }\n   RULE: When a section has a shared instruction + multiple numbered items → use ONE parent object with \"k\".\n   Do NOT output each numbered item as a separate top-level data object.\n\n8. \"w\": (Array of Strings) Word bank for \"wb\". Rendered in a rounded box above the passage.\n\n9. \"p\": (Array of Strings) RIGHT-column pool for \"mt\" (matching).\n   \"o\" = left column items, \"p\" = right column lettered options, \"a\" = correct letter mapping array.\n\n==================================================\nMETA / LAYOUT FIELDS (All optional)\n==================================================\n\n10. \"title_prefix\": (String) Prefix label before the exercise instruction heading.\n    e.g., \"I.\", \"II.\", \"A.\", \"B.\", \"Exercise 1:\", \"Part A.\"\n\n11. \"fmt\": (String) Question number format applied to items in \"k\" or listed questions.\n    - \"1.\"   → items numbered  1.  2.  3.\n    - \"(1)\"  → items numbered  (1) (2) (3)\n    - \"a.\"   → items lettered  a.  b.  c.\n    - \"A.\"   → items lettered  A.  B.  C.\n    - \"a)\"   → items lettered  a)  b)  c)\n    Default if omitted: plain number, no suffix.\n\n12. \"cols\": (Integer) Number of layout columns for rendering items.\n    - 1 (default): single column\n    - 2: items in \"k\" or \"o\"/\"p\" rendered side-by-side in two columns\n    - 3: three-column grid\n\n13. \"layout\": (String) Special rendering hint for the compiler. One of:\n    - \"match\"       : two-column matching layout. \"o\" = left, \"p\" = right.\n    - \"blank_right\" : each item gets a blank line drawn to the right (error correction style)\n    - \"tf\"          : each item gets (T) / (F) printed to the right\n    - \"inline_ans\"  : answer printed inline at end of line\n\n14. \"ind\": (Integer, item-level inside \"k\") Indentation level for this specific sub-item.\n    0 = no indent (default), 1 = one level in, 2 = two levels in.\n\n==================================================\nUNIVERSAL \"k\" GROUPING RULE\n==================================================\nANY exercise type can use \"k\" to group sub-questions under one shared instruction heading.\nWhen a section has: a shared instruction + multiple numbered items underneath:\n  → Output ONE parent object with \"t\", \"x\", \"title_prefix\", meta-fields, and a \"k\" array.\n  → Do NOT output each numbered item as a separate top-level data object.\n\n==================================================\nAUTOMATIC WORD BOX (\"wb\") RULE\n==================================================\nIf a fill-in-blank passage provides a given word bank (NOT MCQ A/B/C/D per blank):\n• Type MUST be \"wb\"\n• Given words → \"w\" array\n• Passage with numbered blanks (1) _______ → \"b\"\n• Answer key → \"k\": [{\"q\": 1, \"a\": \"word\"}, ...]\n• Do NOT use \"cz\" or \"fb\" for word-bank passages.\n\n==================================================\nHEADER RULE\n==================================================\nIf input is NOT an official test (is_test = false):\nDO NOT generate student info header (Họ và tên / Lớp / Đề số).\nHeaders are reserved strictly for official test documents.\n\n==================================================\nINLINE FORMATTING RULES\n==================================================\n- Underlined text:          [word]        → e.g., \"My hobby is [photography].\"\n- Bold text:                **word**      → e.g., \"**Important:**\"\n- Italic text:              *word*        → e.g., \"*Note:*\"\n- Error ID options in \"x\":  [text](LTR)   → e.g., \"She [go](A) to [school](B).\"\n- Newline within string:    \\n\n\n==================================================\nEXAMPLE OUTPUT (all 16 types)\n==================================================\n{\n  \"data\": [\n    {\n      \"title_prefix\": \"I.\",\n      \"t\": \"wq\",\n      \"x\": \"Write questions for the underlined parts.\",\n      \"fmt\": \"1.\",\n      \"k\": [\n        { \"q\": \"1\", \"x\": \"My hobby is [photography].\", \"a\": \"What is your hobby?\" },\n        { \"q\": \"2\", \"x\": \"I started my hobby [five years ago].\", \"a\": \"When did you start your hobby?\" },\n        { \"q\": \"3\", \"x\": \"I enjoy my hobby [because I think it's creative].\", \"a\": \"Why do you enjoy your hobby?\" }\n      ]\n    },\n    {\n      \"title_prefix\": \"II.\",\n      \"t\": \"ro\",\n      \"x\": \"Put the dialogue into the correct order. (*1 = Hey there!)\",\n      \"o\": [\n        \"Thanks. What else do you do in your free time?\",\n        \"I like basketball, too. Shall we play together this Saturday morning?\",\n        \"I really like painting.\",\n        \"Yeah, what kinds of hobby do you have?\",\n        \"Hey there!\",\n        \"I'm going to the judo club.\",\n        \"Oh, that's really cool!\",\n        \"Hey, where are you going?\",\n        \"How creative you are!\"\n      ],\n      \"a\": [5, 8, 6, 7, 4, 3, 9, 1, 2]\n    },\n    {\n      \"title_prefix\": \"A.\",\n      \"t\": \"mt\",\n      \"x\": \"Match each word with its meaning.\",\n      \"fmt\": \"1.\",\n      \"layout\": \"match\",\n      \"o\": [\"rest\", \"recreation\", \"interest\", \"enthusiasm\", \"relaxation\", \"pleasure\"],\n      \"p\": [\n        \"a. an activity that you enjoy doing\",\n        \"b. a strong feeling of excitement and interest in something\",\n        \"c. a feeling of happiness, enjoyment, or satisfaction\",\n        \"d. a period of relaxing, sleeping or doing nothing\",\n        \"e. the fact of people doing things for enjoyment\",\n        \"f. a way of resting and enjoying yourself\"\n      ],\n      \"a\": [\"f\", \"a\", \"c\", \"b\", \"d\", \"e\"]\n    },\n    {\n      \"title_prefix\": \"B.\",\n      \"t\": \"tf\",\n      \"x\": \"Decide whether the following statements are **true (T)** or **false (F)**.\",\n      \"fmt\": \"1.\",\n      \"layout\": \"tf\",\n      \"k\": [\n        { \"q\": \"1\", \"x\": \"A hobby is anything that you enjoy doing in your free time.\", \"a\": \"T\" },\n        { \"q\": \"2\", \"x\": \"Different people have the same hobbies.\", \"a\": \"F\" },\n        { \"q\": \"3\", \"x\": \"A hobby can provide us with relaxation.\", \"a\": \"T\" }\n      ]\n    },\n    {\n      \"t\": \"rw\",\n      \"x\": \"Find and correct the errors in the following sentences.\",\n      \"fmt\": \"1.\",\n      \"layout\": \"blank_right\",\n      \"k\": [\n        { \"q\": \"1\", \"x\": \"Nam is my [classmates]. He watches TV every night.\", \"a\": \"classmates → classmate\" },\n        { \"q\": \"2\", \"x\": \"I think [collecting stamps are] interesting.\", \"a\": \"are → is\" },\n        { \"q\": \"3\", \"x\": \"My dad cooks very [good].\", \"a\": \"good → well\" }\n      ]\n    },\n    {\n      \"title_prefix\": \"I.\",\n      \"t\": \"pr\",\n      \"x\": \"Choose the word whose underlined part is pronounced differently from the others.\",\n      \"fmt\": \"1.\",\n      \"k\": [\n        { \"q\": \"1\", \"o\": [\"pass[ed]\", \"check[ed]\", \"stopp[ed]\", \"want[ed]\"], \"a\": \"D\" },\n        { \"q\": \"2\", \"o\": [\"f[a]ce\", \"gr[a]de\", \"b[a]g\", \"pl[a]ce\"], \"a\": \"C\" }\n      ]\n    },\n    {\n      \"title_prefix\": \"Exercise 2:\",\n      \"t\": \"wb\",\n      \"w\": [\"traditional\", \"attracts\", \"artisans\", \"pottery\", \"explore\"],\n      \"b\": \"Bat Trang is a famous (1) _______ village. Many skilled (2) _______ work here to produce beautiful (3) _______.\",\n      \"k\": [\n        { \"q\": 1, \"a\": \"traditional\" },\n        { \"q\": 2, \"a\": \"artisans\" },\n        { \"q\": 3, \"a\": \"pottery\" }\n      ]\n    },\n    {\n      \"t\": \"cz\",\n      \"b\": \"Viet Nam is a country of rich cultural (1) _______. It (2) _______ millions of tourists every year.\",\n      \"k\": [\n        { \"q\": \"1\", \"x\": \"\", \"o\": [\"heritage\", \"custom\", \"tradition\", \"habit\"], \"a\": \"A\" },\n        { \"q\": \"2\", \"x\": \"\", \"o\": [\"attracts\", \"makes\", \"gives\", \"takes\"], \"a\": \"A\" }\n      ]\n    },\n    {\n      \"t\": \"rd\",\n      \"b\": \"Ha Long Bay is one of the most magnificent natural wonders of Viet Nam.\",\n      \"k\": [\n        { \"q\": \"1\", \"x\": \"What is the main topic of the passage?\", \"o\": [\"Ha Long Bay\", \"Ha Noi\", \"Bat Trang\", \"Pho noodle\"], \"a\": \"A\" },\n        { \"q\": \"2\", \"x\": \"Where is Ha Long Bay located?\", \"o\": [\"Viet Nam\", \"China\", \"Thailand\", \"Japan\"], \"a\": \"A\" }\n      ]\n    },\n    {\n      \"t\": \"er\",\n      \"fmt\": \"1.\",\n      \"k\": [\n        { \"q\": \"1\", \"x\": \"My brother [is](A) very good [at](B) playing [the](C) guitar, isn't [him](D)?\", \"o\": [\"is\", \"at\", \"the\", \"him\"], \"a\": \"D\" }\n      ]\n    },\n    {\n      \"t\": \"fb\",\n      \"fmt\": \"1.\",\n      \"k\": [\n        { \"q\": \"1\", \"x\": \"She is very _______ (INTEREST) in learning English.\", \"o\": [], \"a\": \"interested\" },\n        { \"q\": \"2\", \"x\": \"We should _______ (PROTECT) the environment.\", \"o\": [], \"a\": \"protect\" }\n      ]\n    },\n    {\n      \"t\": \"rw\",\n      \"fmt\": \"1.\",\n      \"k\": [\n        { \"q\": \"1\", \"x\": \"Living in a big city is more expensive than in a village.\\n(Living in a village)\", \"o\": [], \"a\": \"Living in a village is cheaper than living in a big city.\" }\n      ]\n    },\n    {\n      \"t\": \"ro\",\n      \"fmt\": \"1.\",\n      \"k\": [\n        { \"q\": \"1\", \"x\": \"is / My father / a doctor / at / a local hospital .\", \"o\": [], \"a\": \"My father is a doctor at a local hospital.\" }\n      ]\n    },\n    {\n      \"t\": \"sg\",\n      \"fmt\": \"1.\",\n      \"k\": [\n        { \"q\": \"1\", \"x\": \"[NO PARKING]\", \"o\": [\"You cannot park here\", \"You can park here\", \"Drive fast\", \"No entry\"], \"a\": \"A\" }\n      ]\n    },\n    {\n      \"t\": \"nt\",\n      \"fmt\": \"1.\",\n      \"k\": [\n        { \"q\": \"1\", \"b\": \"LIBRARY NOTICE: Silence must be maintained at all times.\", \"o\": [\"Keep quiet in the library\", \"Talk loudly\", \"Eat food\", \"Play music\"], \"a\": \"A\" }\n      ]\n    },\n    {\n      \"t\": \"st\",\n      \"fmt\": \"1.\",\n      \"k\": [\n        { \"q\": \"1\", \"o\": [\"student\", \"teacher\", \"doctor\", \"police\"], \"a\": \"D\" }\n      ]\n    },\n    {\n      \"t\": \"sy\",\n      \"fmt\": \"1.\",\n      \"k\": [\n        { \"q\": \"1\", \"x\": \"The manager decided to [defer] the meeting until next week.\", \"o\": [\"delay\", \"cancel\", \"start\", \"continue\"], \"a\": \"A\" }\n      ]\n    },\n    {\n      \"t\": \"an\",\n      \"fmt\": \"1.\",\n      \"k\": [\n        { \"q\": \"1\", \"x\": \"The morning session was incredibly [productive].\", \"o\": [\"useful\", \"useless\", \"active\", \"busy\"], \"a\": \"B\" }\n      ]\n    }\n  ]\n}"
+    id: "tf_1",
+    title: "Document & Test Serialization Agent Prompt (English)",
+    content: `You are an expert Document, Test, and Exercise Serialization Agent for Microsoft Word DOCX compilation.
+Your job is to parse tests/exercises from source text into strict JSON matching the compiler schema.
+
+==================================================
+OUTPUT FORMAT
+==================================================
+• Provide your response inside a single \`\`\`json code block containing valid JSON.
+• Do NOT include any text, intro, or explanation outside the JSON code block.
+
+==================================================
+JSON SCHEMA & KEY DEFINITIONS
+==================================================
+
+Top-level object MUST contain a "data" array of question/exercise objects:
+
+{
+  "data": [ ... ]
+}
+
+Each object in "data" MUST use the following short key names:
+
+1. "t": (String) Exercise type code (MUST be one of: "pr", "st", "sy", "an", "er", "fb", "rw", "wb", "cz", "rd", "ro", "sg", "nt"):
+   - "pr" : Pronunciation / Underlined sound
+   - "st" : Stress
+   - "sy" : Synonym
+   - "an" : Antonym
+   - "er" : Error Identification
+   - "fb" : Fill in the Blank (Standalone single sentence)
+   - "rw" : Rewrite Sentences
+   - "wb" : Word Box (Fill in the blank with given words inside a rounded box)
+   - "cz" : Cloze Passage (Multiple choice A/B/C/D options per blank)
+   - "rd" : Reading Passage
+   - "ro" : Sentence Reordering
+   - "sg" : Sign Meaning
+   - "nt" : Notice Meaning
+
+2. "q": (String) Question number (e.g., "1", "15", "20").
+
+3. "x": (String) Question text / sentence prompt.
+
+4. "o": (Array of Strings) Answer choices array (e.g., ["option A", "option B", "option C", "option D"]).
+   NOTE: 
+   - For Multiple Choice Questions (MCQ): Include answer choices in "o".
+   - For Non-MCQ / Open-ended Questions (Fill-in-the-blank, Sentence Rewrite): Leave "o" empty: "o": []. The system automatically detects MCQ vs Non-MCQ based on "o".
+
+5. "a": (String, Optional) Correct answer ("A", "B", "C", "D" or answer text).
+
+6. "b": (String or Array of Strings, For "wb" / "cz" / "rd" / "nt") Passage text body or notice text.
+
+7. "k": (Array of Objects, For "wb" / "cz" / "rd") Sub-questions / answers for passage exercises. Each object inside "k" has {"q", "a"} (or {"q", "x", "o", "a"}).
+
+8. "w": (Array of Strings, For "wb") List of words to render inside a rounded Word Box shape above the passage (e.g., ["traditional", "attracts", "artisans", "pottery", "explore", "handicrafts", "preserve", "historical", "visitors", "culture"]).
+
+9. "title_prefix": (String, Optional) Custom numbering / prefix for the exercise instruction heading (e.g., "I.", "Exercise 1:", "Part A.", "BÀI 1."). If not provided, plain instruction text is used.
+
+==================================================
+AUTOMATIC WORD BOX ("wb") RULE
+==================================================
+• If an exercise is a Fill-in-the-Blank passage that provides a set/list of given words in a box (and NOT a multiple-choice question format with options A/B/C/D per blank), you MUST automatically classify and output it as type "wb":
+  - Put all the given words in the "w" array: "w": ["word1", "word2", "word3", ...]
+  - Put the passage text with numbered blanks (1) _______, (2) _______ in "b".
+  - Put the answer key mapping inside "k": [{"q": 1, "a": "word1"}, {"q": 2, "a": "word2"}, ...].
+• Do NOT format passages with a given word bank as "cz" or "fb". Automatically output them as "t": "wb".
+
+==================================================
+HEADER & DOCUMENT TYPE RULES
+==================================================
+• If input is NOT classified as an official test (is_test = false), DO NOT generate or request a student info header section ("Họ và tên", "Lớp", "Đề"). Student info headers are reserved strictly for official test documents.
+
+==================================================
+INLINE FORMATTING RULES
+==================================================
+Preserve text formatting using these exact inline tags:
+- Underlined letters/words: Enclose in brackets -> e.g. "pass[ed]" or "[living in](A)"
+- Bold text: Enclose in double asterisks -> e.g. "**Investigative**:"
+- Italic text: Enclose in single asterisks -> e.g. "*Note:*"
+- Error identification choices in "x": Use format "[text](LETTER)" -> e.g. "She [go](A) to [school](B) yesterday."
+
+==================================================
+EXAMPLE OUTPUT (Covering all 13 exercise types)
+==================================================
+{
+  "data": [
+    {
+      "title_prefix": "I.",
+      "t": "pr",
+      "q": "1",
+      "o": ["pass[ed]", "check[ed]", "stopp[ed]", "want[ed]"],
+      "a": "D"
+    },
+    {
+      "t": "st",
+      "q": "2",
+      "o": ["student", "teacher", "doctor", "police"],
+      "a": "D"
+    },
+    {
+      "t": "sy",
+      "q": "3",
+      "x": "The manager decided to [defer] the meeting until next week.",
+      "o": ["delay", "cancel", "start", "continue"],
+      "a": "A"
+    },
+    {
+      "t": "an",
+      "q": "4",
+      "x": "The morning session was incredibly [productive].",
+      "o": ["useful", "useless", "active", "busy"],
+      "a": "B"
+    },
+    {
+      "t": "er",
+      "q": "5",
+      "x": "My brother [is](A) very good [at](B) playing [the](C) guitar, isn't [him](D)?",
+      "o": ["is", "at", "the", "him"],
+      "a": "D"
+    },
+    {
+      "t": "fb",
+      "q": "6",
+      "x": "She is very _______ (INTEREST) in learning English.",
+      "o": [],
+      "a": "interested"
+    },
+    {
+      "t": "rw",
+      "q": "7",
+      "x": "Living in a big city is more expensive than living in a rural village.\\n(Living in)",
+      "o": [],
+      "a": "Living in a rural village is cheaper than living in a big city."
+    },
+    {
+      "title_prefix": "Exercise 2:",
+      "t": "wb",
+      "w": ["traditional", "attracts", "artisans", "pottery", "explore", "handicrafts", "preserve", "historical", "visitors", "culture"],
+      "b": "Bat Trang is a famous (1) _______ village located near Ha Noi. Many skilled (2) _______ work here to produce beautiful (3) _______.",
+      "k": [
+        {"q": 1, "a": "traditional"},
+        {"q": 2, "a": "artisans"},
+        {"q": 3, "a": "pottery"}
+      ]
+    },
+    {
+      "t": "cz",
+      "b": "Viet Nam is a country of rich cultural (1) _______.",
+      "k": [
+        {
+          "q": "8",
+          "x": "",
+          "o": ["heritage", "custom", "tradition", "habit"],
+          "a": "A"
+        }
+      ]
+    },
+    {
+      "t": "rd",
+      "b": "Ha Long Bay is one of the most magnificent natural wonders of Viet Nam.",
+      "k": [
+        {
+          "q": "9",
+          "x": "What is the main topic of the passage?",
+          "o": ["Ha Long Bay", "Ha Noi city", "Bat Trang village", "Pho noodle"],
+          "a": "A"
+        }
+      ]
+    },
+    {
+      "t": "ro",
+      "q": "10",
+      "x": "is / My father / a doctor / at / a local hospital .",
+      "o": [],
+      "a": "My father is a doctor at a local hospital."
+    },
+    {
+      "t": "sg",
+      "q": "11",
+      "x": "[NO PARKING]",
+      "o": ["You cannot park here", "You can park here", "Drive fast", "No entry"],
+      "a": "A"
+    },
+    {
+      "t": "nt",
+      "q": "12",
+      "b": "LIBRARY NOTICE: Silence must be maintained at all times.",
+      "o": ["Keep quiet in the library", "Talk loudly", "Eat food", "Play music"],
+      "a": "A"
+    }
+  ]
+}`
   }
 ];
 
@@ -385,7 +573,7 @@ export default function TestFormatter({
       if (res.success) {
         const filesList = res.files || [res.filename];
         setLastCompiledFiles(filesList);
-        showToast(`Đã xuất bản thành công ${filesList.length} đề thi vào thư mục workspace_files!`, "success");
+        showToast(`Đã tạo thành công ${filesList.length} phiên bản đề thi!`, "success");
       }
     } catch (e) {
       showToast("Lỗi biên dịch đề thi: " + e, "error");
@@ -594,10 +782,10 @@ export default function TestFormatter({
           
           {/* Editor Topbar */}
           <div className="h-14 border-b border-[#202842] bg-[#121629] flex items-center justify-between px-6 shrink-0 gap-3 relative z-30">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 group/left-toolbar">
               <button 
                 onClick={() => setShowConfig(!showConfig)}
-                className={`p-2.5 rounded-xl border transition-all duration-300 flex items-center text-xs font-bold cursor-pointer group ${
+                className={`p-2.5 rounded-xl border transition-all duration-300 flex items-center text-xs font-bold cursor-pointer ${
                   showConfig 
                     ? 'bg-[#5c36f5] text-white border-transparent px-3 shadow-md shadow-indigo-500/20' 
                     : 'bg-[#181f36] text-slate-300 border-[#283354] hover:bg-[#222a46] hover:text-white shadow-sm'
@@ -606,42 +794,42 @@ export default function TestFormatter({
               >
                 <Settings size={14} className="shrink-0" />
                 <span className={`transition-all duration-300 whitespace-nowrap overflow-hidden ${
-                  showConfig ? 'max-w-xs opacity-100 ml-1.5' : 'max-w-0 opacity-0 group-hover:max-w-xs group-hover:opacity-100 group-hover:ml-1.5'
+                  showConfig ? 'max-w-xs opacity-100 ml-1.5' : 'max-w-0 opacity-0 group-hover/left-toolbar:max-w-xs group-hover/left-toolbar:opacity-100 group-hover/left-toolbar:ml-1.5'
                 }`}>Căn Lề & Chữ</span>
               </button>
             </div>
 
-            <div className="flex items-center gap-2.5 flex-wrap md:flex-nowrap justify-end">
+            <div className="flex items-center gap-2.5 flex-wrap md:flex-nowrap justify-end group/function-bar">
               <PromptManager 
                 storageKey="prompts_test_formatter" 
                 tabTitle="Trình Tạo Đề Thi" 
                 defaultPrompts={DEFAULT_TEST_FORMATTER_PROMPTS} 
               />
 
-              <label className="px-3 py-2 rounded-xl bg-[#181f36] border border-[#283354] hover:bg-[#222a46] text-slate-300 hover:text-white text-xs font-bold transition-all flex items-center cursor-pointer shadow-sm group" title="Nạp dữ liệu từ file JSON">
+              <label className="px-3 py-2 rounded-xl bg-[#181f36] border border-[#283354] hover:bg-[#222a46] text-slate-300 hover:text-white text-xs font-bold transition-all flex items-center cursor-pointer shadow-sm" title="Nạp dữ liệu từ file JSON">
                 <Upload size={14} className="shrink-0" />
-                <span className="max-w-0 opacity-0 group-hover:max-w-xs group-hover:opacity-100 group-hover:ml-1.5 transition-all duration-300 whitespace-nowrap overflow-hidden inline-block">Nạp JSON</span>
+                <span className="max-w-0 opacity-0 group-hover/function-bar:max-w-xs group-hover/function-bar:opacity-100 group-hover/function-bar:ml-1.5 transition-all duration-300 whitespace-nowrap overflow-hidden inline-block">Nạp JSON</span>
                 <input type="file" accept=".json" onChange={handleDirectFileUpload} className="hidden" />
               </label>
 
-              <label className="px-3 py-2 rounded-xl bg-[#181f36] border border-[#283354] hover:bg-[#222a46] text-slate-300 hover:text-white text-xs font-bold transition-all flex items-center cursor-pointer shadow-sm group" title="Chuyển đổi file Word (.docx) sang JSON">
+              <label className="px-3 py-2 rounded-xl bg-[#181f36] border border-[#283354] hover:bg-[#222a46] text-slate-300 hover:text-white text-xs font-bold transition-all flex items-center cursor-pointer shadow-sm" title="Chuyển đổi file Word (.docx) sang JSON">
                 <Upload size={14} className="text-amber-400 shrink-0" />
-                <span className="max-w-0 opacity-0 group-hover:max-w-xs group-hover:opacity-100 group-hover:ml-1.5 transition-all duration-300 whitespace-nowrap overflow-hidden inline-block">Nhập từ DOCX</span>
+                <span className="max-w-0 opacity-0 group-hover/function-bar:max-w-xs group-hover/function-bar:opacity-100 group-hover/function-bar:ml-1.5 transition-all duration-300 whitespace-nowrap overflow-hidden inline-block">Nhập từ DOCX</span>
                 <input type="file" accept=".docx" onChange={handleDocxFileUpload} className="hidden" />
               </label>
 
-              <label className="flex items-center px-3 py-2 rounded-xl bg-[#181f36] border border-[#283354] text-slate-300 text-xs font-bold cursor-pointer select-none hover:text-white transition shadow-sm group" title="Lưu vào quản lý Tài liệu">
+              <label className="flex items-center px-3 py-2 rounded-xl bg-[#181f36] border border-[#283354] text-slate-300 text-xs font-bold cursor-pointer select-none hover:text-white transition shadow-sm" title="Lưu vào quản lý Tài liệu">
                 <input 
                   type="checkbox" 
                   checked={saveToDocs} 
                   onChange={(e) => setSaveToDocs(e.target.checked)} 
                   className="rounded border-[#283354] bg-[#121629] text-indigo-500 cursor-pointer shrink-0"
                 />
-                <span className="max-w-0 opacity-0 group-hover:max-w-xs group-hover:opacity-100 group-hover:ml-1.5 transition-all duration-300 whitespace-nowrap overflow-hidden inline-block">Lưu vào Tài liệu</span>
+                <span className="max-w-0 opacity-0 group-hover/function-bar:max-w-xs group-hover/function-bar:opacity-100 group-hover/function-bar:ml-1.5 transition-all duration-300 whitespace-nowrap overflow-hidden inline-block">Lưu vào Tài liệu</span>
               </label>
 
               {/* Compile/Export Dropdown */}
-              <div className="relative group" ref={exportMenuRef}>
+              <div className="relative" ref={exportMenuRef}>
                 <button
                   onClick={() => setShowExportMenu(!showExportMenu)}
                   disabled={compiling}
@@ -650,7 +838,7 @@ export default function TestFormatter({
                 >
                   <Download size={14} className={`shrink-0 ${compiling ? "animate-spin" : ""}`} />
                   <span className={`transition-all duration-300 whitespace-nowrap overflow-hidden ${
-                    showExportMenu ? 'max-w-xs opacity-100 ml-1.5 mr-1' : 'max-w-0 opacity-0 group-hover:max-w-xs group-hover:opacity-100 group-hover:ml-1.5 group-hover:mr-1'
+                    showExportMenu ? 'max-w-xs opacity-100 ml-1.5 mr-1' : 'max-w-0 opacity-0 group-hover/function-bar:max-w-xs group-hover/function-bar:opacity-100 group-hover/function-bar:ml-1.5 group-hover/function-bar:mr-1'
                   }`}>Xuất Đề Thi</span>
                   <ChevronRight size={12} className={`shrink-0 transform transition-transform ${showExportMenu ? 'rotate-90' : ''}`} />
                 </button>
@@ -713,17 +901,6 @@ export default function TestFormatter({
                 <h4 className="text-xs font-bold text-white">Đã xuất bản đề thi thành công ({lastCompiledFiles.length} mã đề)!</h4>
               </div>
               <div className="flex items-center gap-2">
-                {lastCompiledFiles.map((fname) => (
-                  <a
-                    key={fname}
-                    href={`/api/files/download/${encodeURIComponent(fname)}`}
-                    download={fname}
-                    className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-[0.66rem] rounded-xl flex items-center gap-1.5 transition cursor-pointer shadow"
-                  >
-                    <Download size={11} />
-                    <span>TẢI ĐỀ ({fname})</span>
-                  </a>
-                ))}
                 <button
                   onClick={async () => {
                     try { await api.openWorkspaceFolder(); showToast("Đang mở thư mục chứa đề thi...", "success"); }
@@ -753,15 +930,15 @@ export default function TestFormatter({
             </div>
 
             {/* Zoom controls and generate controls */}
-            <div className="flex items-center gap-2.5">
+            <div className="flex items-center gap-2.5 group/preview-toolbar">
               <button 
                 onClick={handleGeneratePdfPreview}
                 disabled={pdfLoading}
-                className="px-3 py-1.5 rounded-xl bg-[#5c36f5] hover:bg-[#7351f7] text-white font-extrabold text-[0.66rem] flex items-center transition shadow-md cursor-pointer disabled:opacity-50 border border-white/20 group"
+                className="px-3 py-1.5 rounded-xl bg-[#5c36f5] hover:bg-[#7351f7] text-white font-extrabold text-[0.66rem] flex items-center transition shadow-md cursor-pointer disabled:opacity-50 border border-white/20"
                 title="Tạo lại bản xem trước PDF từ nội dung JSON"
               >
                 <RefreshCw size={12} className={`shrink-0 ${pdfLoading ? "animate-spin" : ""}`} />
-                <span className="max-w-0 opacity-0 group-hover:max-w-xs group-hover:opacity-100 group-hover:ml-1.5 transition-all duration-300 whitespace-nowrap overflow-hidden inline-block">{pdfLoading ? "Đang tạo PDF..." : "Cập Nhật Xem Trước PDF"}</span>
+                <span className="max-w-0 opacity-0 group-hover/preview-toolbar:max-w-xs group-hover/preview-toolbar:opacity-100 group-hover/preview-toolbar:ml-1.5 transition-all duration-300 whitespace-nowrap overflow-hidden inline-block">{pdfLoading ? "Đang tạo PDF..." : "Cập Nhật Xem Trước PDF"}</span>
               </button>
               {pdfUrl && (
                 <div className="flex items-center gap-2">
@@ -786,11 +963,11 @@ export default function TestFormatter({
                   </div>
                   <button 
                     onClick={() => window.open(pdfUrl, '_blank')}
-                    className="p-2 rounded-xl bg-[#181f36] border border-[#283354] hover:bg-[#222a46] text-slate-300 hover:text-white transition cursor-pointer flex items-center text-[0.66rem] font-extrabold shadow-sm group"
+                    className="p-2 rounded-xl bg-[#181f36] border border-[#283354] hover:bg-[#222a46] text-slate-300 hover:text-white transition cursor-pointer flex items-center text-[0.66rem] font-extrabold shadow-sm"
                     title="Xem trong trình duyệt"
                   >
                     <ExternalLink size={13} className="shrink-0" />
-                    <span className="max-w-0 opacity-0 group-hover:max-w-xs group-hover:opacity-100 group-hover:ml-1.5 transition-all duration-300 whitespace-nowrap overflow-hidden inline-block">Xem Trình Duyệt</span>
+                    <span className="max-w-0 opacity-0 group-hover/preview-toolbar:max-w-xs group-hover/preview-toolbar:opacity-100 group-hover/preview-toolbar:ml-1.5 transition-all duration-300 whitespace-nowrap overflow-hidden inline-block">Xem Trình Duyệt</span>
                   </button>
                 </div>
               )}
