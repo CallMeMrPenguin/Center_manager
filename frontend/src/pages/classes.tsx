@@ -726,7 +726,7 @@ export default function ClassesPage() {
       accessorKey: 'student_name',
       header: 'Họ và Tên Học Sinh',
       cell: ({ row }) => (
-        <span className="font-extrabold text-white text-xs block truncate">
+        <span className="font-extrabold text-white text-base block truncate">
           {row.original.student_name}
         </span>
       ),

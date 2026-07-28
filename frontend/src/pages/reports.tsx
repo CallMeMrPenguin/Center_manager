@@ -206,9 +206,9 @@ export default function ReportsPage() {
         const r = row.original;
         const isSelected = String(r.student_id) === selectedStudentId;
         return (
-          <div className="font-extrabold text-white text-xs flex items-center justify-between gap-2">
+          <div className="font-extrabold text-white text-base flex items-center justify-between gap-2">
             <span>{r.full_name}{r.nickname ? ` - ${r.nickname}` : ''}</span>
-            {isSelected && <span className="text-[10px] text-indigo-400 bg-indigo-500/20 px-2 py-0.5 rounded font-mono">Đang chọn</span>}
+            {isSelected && <span className="text-xs text-indigo-400 bg-indigo-500/20 px-2 py-0.5 rounded font-mono">Đang chọn</span>}
           </div>
         );
       },
@@ -217,7 +217,7 @@ export default function ReportsPage() {
       accessorKey: 'class_name',
       header: 'Lớp Học',
       cell: (info) => (
-        <span className="inline-block px-2.5 py-0.5 rounded-lg text-[10px] font-black bg-[#1c2442] text-indigo-300 border border-[#303d68]">
+        <span className="inline-block px-2.5 py-0.5 rounded-lg text-xs font-black bg-[#1c2442] text-indigo-300 border border-[#303d68]">
           {info.getValue<string>() || 'Lớp học'}
         </span>
       ),
@@ -306,7 +306,7 @@ export default function ReportsPage() {
       accessorKey: 'date',
       header: 'Ngày Buổi Học',
       cell: (info) => (
-        <span className="font-mono text-xs font-bold text-indigo-300">
+        <span className="font-mono text-base font-bold text-indigo-300">
           {formatFullDate(info.getValue<string>())}
         </span>
       ),
@@ -315,7 +315,7 @@ export default function ReportsPage() {
       accessorKey: 'class_name',
       header: 'Lớp Học',
       cell: (info) => (
-        <span className="inline-block px-2.5 py-0.5 rounded-lg text-[10px] font-black bg-[#1c2442] text-slate-300 border border-[#303d68]">
+        <span className="inline-block px-2.5 py-0.5 rounded-lg text-xs font-black bg-[#1c2442] text-slate-300 border border-[#303d68]">
           {info.getValue<string>() || 'Lớp học'}
         </span>
       ),
@@ -328,7 +328,7 @@ export default function ReportsPage() {
         const isAbsent = st.includes('Vắng') || st.includes('Nghỉ');
         return (
           <div className="text-center">
-            <span className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-extrabold ${
+            <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-extrabold ${
               isAbsent ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30' : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
             }`}>
               {st}
@@ -342,7 +342,7 @@ export default function ReportsPage() {
       header: () => <div className="text-center w-full">Check 1</div>,
       cell: (info) => {
         const val = Number(info.getValue()) || 0;
-        return <div className="text-center font-extrabold text-blue-400 font-mono">{val > 0 ? format1Dec(val) : '-'}</div>;
+        return <div className="text-center font-extrabold text-blue-400 font-mono text-base">{val > 0 ? format1Dec(val) : '-'}</div>;
       },
     },
     {
@@ -350,7 +350,7 @@ export default function ReportsPage() {
       header: () => <div className="text-center w-full">Check 2</div>,
       cell: (info) => {
         const val = Number(info.getValue()) || 0;
-        return <div className="text-center font-extrabold text-purple-400 font-mono">{val > 0 ? format1Dec(val) : '-'}</div>;
+        return <div className="text-center font-extrabold text-purple-400 font-mono text-base">{val > 0 ? format1Dec(val) : '-'}</div>;
       },
     },
     {
@@ -358,7 +358,7 @@ export default function ReportsPage() {
       header: () => <div className="text-center w-full">Homework</div>,
       cell: (info) => {
         const val = Number(info.getValue()) || 0;
-        return <div className="text-center font-extrabold text-emerald-400 font-mono">{val > 0 ? format1Dec(val) : '-'}</div>;
+        return <div className="text-center font-extrabold text-emerald-400 font-mono text-base">{val > 0 ? format1Dec(val) : '-'}</div>;
       },
     },
     {

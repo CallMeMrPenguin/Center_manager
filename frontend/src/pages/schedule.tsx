@@ -561,7 +561,7 @@ export default function SchedulePage() {
               {
                 accessorKey: 'date',
                 header: 'Ngày Học',
-                cell: (info) => <span className="font-bold text-white">{info.getValue<string>()}</span>,
+                cell: (info) => <span className="font-bold text-white text-base">{info.getValue<string>()}</span>,
               },
               {
                 accessorKey: 'class_name',
@@ -569,7 +569,7 @@ export default function SchedulePage() {
                 cell: ({ row }) => {
                   const s = row.original;
                   const hex = getSessionColor(s);
-                  return <span className="font-extrabold" style={{ color: hex }}>{s.class_name}</span>;
+                  return <span className="font-extrabold text-base" style={{ color: hex }}>{s.class_name}</span>;
                 },
               },
               {
@@ -578,7 +578,7 @@ export default function SchedulePage() {
                 cell: ({ row }) => {
                   const s = row.original;
                   return (
-                    <span className="text-slate-300">
+                    <span className="text-slate-200 text-base font-semibold">
                       {s.start_time} – {calcEndTime(s.start_time, s.duration)} ({s.duration}p)
                     </span>
                   );
@@ -587,7 +587,7 @@ export default function SchedulePage() {
               {
                 accessorKey: 'teacher_name',
                 header: 'Giáo Viên',
-                cell: (info) => <span className="text-slate-400">{info.getValue<string>() || 'Mặc định'}</span>,
+                cell: (info) => <span className="text-slate-300 text-base font-semibold">{info.getValue<string>() || 'Mặc định'}</span>,
               },
               {
                 accessorKey: 'status',
@@ -595,7 +595,7 @@ export default function SchedulePage() {
                 cell: (info) => {
                   const st = info.getValue<string>();
                   return (
-                    <span className={`inline-block px-2 py-0.5 rounded-xl text-[10px] font-black border ${
+                    <span className={`inline-block px-2.5 py-0.5 rounded-xl text-xs font-black border ${
                       st === 'Đã học'
                         ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
                         : st === 'Hủy'

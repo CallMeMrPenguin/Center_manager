@@ -116,16 +116,16 @@ export default function CoursesPage() {
   const columns = useMemo<ColumnDef<Course>[]>(() => [
     {
       accessorKey: 'course_name',
-      header: 'Tên Khóa Học',
+      header: 'Tên khóa học',
       cell: (info) => (
-        <span className="font-extrabold text-white text-xs">{info.getValue<string>()}</span>
+        <span className="font-extrabold text-white text-base">{info.getValue<string>()}</span>
       ),
     },
     {
       accessorKey: 'description',
       header: 'Mô tả',
       cell: (info) => (
-        <span className="text-slate-400 text-[11px] max-w-[260px] truncate block">
+        <span className="text-slate-300 text-sm max-w-[260px] truncate block">
           {info.getValue<string>() || '—'}
         </span>
       ),
@@ -134,7 +134,7 @@ export default function CoursesPage() {
       accessorKey: 'price',
       header: 'Học phí',
       cell: (info) => (
-        <span className="font-mono font-bold text-emerald-400">
+        <span className="font-mono font-bold text-emerald-400 text-base">
           {formatVND(info.getValue<number>() || 0)}
         </span>
       ),
@@ -145,8 +145,8 @@ export default function CoursesPage() {
       cell: (info) => {
         const weeks = info.getValue<number>();
         return weeks ? (
-          <span className="flex items-center gap-1 text-slate-300">
-            <Clock size={11} className="text-slate-500" />
+          <span className="flex items-center gap-1 text-slate-300 text-base">
+            <Clock size={13} className="text-slate-400" />
             <span>{weeks} tuần</span>
           </span>
         ) : (
@@ -160,7 +160,7 @@ export default function CoursesPage() {
       cell: (info) => {
         const status = info.getValue<string>();
         return (
-          <span className={`inline-block px-2.5 py-1 rounded-xl text-[10px] font-black border ${
+          <span className={`inline-block px-2.5 py-1 rounded-xl text-xs font-black border ${
             status === 'Đang mở'
               ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
               : 'bg-rose-500/10 border-rose-500/30 text-rose-400'

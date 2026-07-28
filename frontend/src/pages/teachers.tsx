@@ -119,7 +119,7 @@ export default function TeachersPage() {
       accessorKey: 'full_name',
       header: 'Họ và Tên',
       cell: (info) => (
-        <span className="font-extrabold text-white text-xs">{info.getValue<string>()}</span>
+        <span className="font-extrabold text-white text-base">{info.getValue<string>()}</span>
       ),
     },
     {
@@ -128,7 +128,7 @@ export default function TeachersPage() {
       cell: (info) => {
         const val = info.getValue<string>();
         return (
-          <span className={`inline-block px-2.5 py-1 rounded-xl text-[10px] font-black border ${
+          <span className={`inline-block px-2.5 py-1 rounded-xl text-xs font-black border ${
             val === 'Giáo viên'
               ? 'bg-[#1e2540] border-[#343e68] text-[#a5b4fc]'
               : 'bg-[#132a22] border-[#059669] text-[#34d399]'
@@ -144,8 +144,8 @@ export default function TeachersPage() {
       cell: (info) => {
         const dob = info.getValue<string>();
         return dob ? (
-          <span className="flex items-center gap-1 text-slate-400">
-            <Calendar size={11} className="text-slate-500" />
+          <span className="flex items-center gap-1 text-slate-300 text-base">
+            <Calendar size={13} className="text-slate-400" />
             <span>{dob}</span>
           </span>
         ) : (
@@ -159,8 +159,8 @@ export default function TeachersPage() {
       cell: (info) => {
         const phone = info.getValue<string>();
         return phone ? (
-          <a href={`tel:${phone}`} className="text-indigo-400 font-mono flex items-center gap-1 hover:underline">
-            <Phone size={11} />
+          <a href={`tel:${phone}`} className="text-indigo-400 font-mono text-base flex items-center gap-1 hover:underline">
+            <Phone size={13} />
             <span>{phone}</span>
           </a>
         ) : (
@@ -172,7 +172,7 @@ export default function TeachersPage() {
       accessorKey: 'notes',
       header: 'Ghi chú',
       cell: (info) => (
-        <span className="text-slate-400 max-w-xs truncate">{info.getValue<string>() || '—'}</span>
+        <span className="text-slate-300 text-base max-w-xs truncate">{info.getValue<string>() || '—'}</span>
       ),
     },
     {
