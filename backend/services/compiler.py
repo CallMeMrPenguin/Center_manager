@@ -423,90 +423,99 @@ class WordDocumentCompilerPyWin32:
         except Exception:
             pass
 
-    def add_test_header(self, grade: str, unit: str, version_code: str):
-        left_margin_cm = self.settings.get("margin_left", 3.0)
-        right_margin_cm = self.settings.get("margin_right", 1.5)
-        printable_width_cm = 21.0 - left_margin_cm - right_margin_cm
-        
+    def add_test_header(self, grade: str = "", unit: str = "", version_code: str = "", is_test: bool = True):
         sel = self.word.Selection
+        has_version = bool(version_code and str(version_code).strip() != "")
         
-        # Add 1x2 outer table for Header
-        table = self.doc.Tables.Add(Range=sel.Range, NumRows=1, NumColumns=2)
-        try:
-            table.Rows.Alignment = 1 # Center
-        except Exception:
-            pass
-        table.Columns(1).Width = cm_to_pt(printable_width_cm - 3.5)
-        table.Columns(2).Width = cm_to_pt(3.5)
-        
-        # Left Cell
-        cell_left = table.Cell(1, 1)
-        cell_left.Range.ParagraphFormat.SpaceBefore = 0
-        cell_left.Range.ParagraphFormat.SpaceAfter = 0
-        cell_left.Range.ParagraphFormat.LineSpacingRule = 2 # Double spacing
-        cell_left.Range.Font.Name = "Times New Roman"
-        cell_left.Range.Font.Size = 12
-        cell_left.Range.Font.Bold = True
-        cell_left.Range.Text = "Họ và tên: ....................................\rLớp: ...................."
-        
-        # Right Cell
-        cell_right = table.Cell(1, 2)
-        cell_right.Range.ParagraphFormat.SpaceBefore = 0
-        cell_right.Range.ParagraphFormat.SpaceAfter = 0
-        cell_right.Range.Text = ""
-        
-        try:
-            v_num = int(version_code)
-            if v_num >= 101:
-                v_num = v_num - 100
-            ver_text = f"ĐỀ {v_num}"
-        except ValueError:
-            ver_text = f"ĐỀ {version_code}"
+        # Add 1x2 outer table for Header ONLY if is_test is True and version_code is provided
+        if is_test and has_version:
+            left_margin_cm = self.settings.get("margin_left", 3.0)
+            right_margin_cm = self.settings.get("margin_right", 1.5)
+            printable_width_cm = 21.0 - left_margin_cm - right_margin_cm
             
-        nested_table = self.doc.Tables.Add(Range=cell_right.Range, NumRows=1, NumColumns=1)
-        try:
-            nested_table.Rows.Alignment = 2 # Right
-        except Exception:
-            pass
-        nested_table.Columns(1).Width = cm_to_pt(2.5)
-        nested_cell = nested_table.Cell(1, 1)
-        nested_cell.VerticalAlignment = 1 # Center vertical
-        
-        for border_id in [-1, -2, -3, -4]:
+            table = self.doc.Tables.Add(Range=sel.Range, NumRows=1, NumColumns=2)
             try:
-                nested_cell.Borders(border_id).LineStyle = 1
-                nested_cell.Borders(border_id).LineWidth = 12
+                table.Rows.Alignment = 1 # Center
             except Exception:
                 pass
+            table.Columns(1).Width = cm_to_pt(printable_width_cm - 3.5)
+            table.Columns(2).Width = cm_to_pt(3.5)
+            
+            cell_left = table.Cell(1, 1)
+            cell_left.Range.ParagraphFormat.SpaceBefore = 0
+            cell_left.Range.ParagraphFormat.SpaceAfter = 0
+            cell_left.Range.ParagraphFormat.LineSpacingRule = 2
+            cell_left.Range.Font.Name = "Times New Roman"
+            cell_left.Range.Font.Size = 12
+            cell_left.Range.Font.Bold = True
+            cell_left.Range.Text = "Họ và tên: ....................................\rLớp: ...................."
+            
+            cell_right = table.Cell(1, 2)
+            cell_right.Range.ParagraphFormat.SpaceBefore = 0
+            cell_right.Range.ParagraphFormat.SpaceAfter = 0
+            cell_right.Range.Text = ""
+            
+            try:
+                v_num = int(version_code)
+                if v_num >= 101:
+                    v_num = v_num - 100
+                ver_text = f"ĐỀ {v_num}"
+            except ValueError:
+                ver_text = f"ĐỀ {version_code}"
                 
-        nested_p = nested_cell.Range
-        nested_p.ParagraphFormat.Alignment = 1
-        nested_p.ParagraphFormat.SpaceBefore = 6
-        nested_p.ParagraphFormat.SpaceAfter = 6
-        nested_p.Font.Name = "Times New Roman"
-        nested_p.Font.Size = 12
-        nested_p.Font.Bold = True
-        nested_p.Text = ver_text
+            nested_table = self.doc.Tables.Add(Range=cell_right.Range, NumRows=1, NumColumns=1)
+            try:
+                nested_table.Rows.Alignment = 2 # Right
+            except Exception:
+                pass
+            nested_table.Columns(1).Width = cm_to_pt(2.5)
+            nested_cell = nested_table.Cell(1, 1)
+            nested_cell.VerticalAlignment = 1
+            
+            for border_id in [-1, -2, -3, -4]:
+                try:
+                    nested_cell.Borders(border_id).LineStyle = 1
+                    nested_cell.Borders(border_id).LineWidth = 12
+                except Exception:
+                    pass
+                    
+            nested_p = nested_cell.Range
+            nested_p.ParagraphFormat.Alignment = 1
+            nested_p.ParagraphFormat.SpaceBefore = 6
+            nested_p.ParagraphFormat.SpaceAfter = 6
+            nested_p.Font.Name = "Times New Roman"
+            nested_p.Font.Size = 12
+            nested_p.Font.Bold = True
+            nested_p.Text = ver_text
+            
+            sel.Start = table.Range.End
+            sel.TypeParagraph()
+            
+        # Title header ONLY if unit or grade is provided
+        unit_str = str(unit).strip() if unit else ""
+        grade_str = str(grade).strip() if grade else ""
         
-        sel.Start = table.Range.End
-        sel.TypeParagraph()
-        
-        unit_clean = str(unit).strip().upper()
-        if unit_clean.startswith("UNIT"):
-            unit_text = unit_clean
-        else:
-            unit_name = get_unit_name(grade, unit)
-            if unit_name:
-                unit_text = f"UNIT {unit_clean}: {unit_name.upper()}"
+        title_text = ""
+        if unit_str and unit_str != "0":
+            unit_clean = unit_str.upper()
+            if unit_clean.startswith("UNIT"):
+                title_text = unit_clean
             else:
-                unit_text = f"UNIT {unit_clean}" if unit_clean else "UNIT"
-                
-        sel.ParagraphFormat.Alignment = 1
-        sel.ParagraphFormat.SpaceBefore = 18
-        sel.ParagraphFormat.SpaceAfter = 12
-        sel.ParagraphFormat.KeepWithNext = True
-        self.write_run(unit_text, bold=True, font_size=12)
-        sel.TypeParagraph()
+                unit_name = get_unit_name(grade_str, unit_str)
+                if unit_name:
+                    title_text = f"UNIT {unit_clean}: {unit_name.upper()}"
+                else:
+                    title_text = f"UNIT {unit_clean}"
+        elif grade_str and grade_str != "0":
+            title_text = f"GRADE {grade_str}"
+            
+        if title_text:
+            sel.ParagraphFormat.Alignment = 1
+            sel.ParagraphFormat.SpaceBefore = 18 if (is_test and has_version) else 6
+            sel.ParagraphFormat.SpaceAfter = 12
+            sel.ParagraphFormat.KeepWithNext = True
+            self.write_run(title_text, bold=True, font_size=12)
+            sel.TypeParagraph()
 
     def add_answer_key(self, exercises: List[Dict[str, Any]]):
         answers = []
@@ -573,38 +582,86 @@ class WordDocumentCompilerPyWin32:
         if not words:
             return
         sel = self.word.Selection
-        table = self.doc.Tables.Add(Range=sel.Range, NumRows=1, NumColumns=1)
+        
+        left_margin_cm = self.settings.get("margin_left", 3.0)
+        right_margin_cm = self.settings.get("margin_right", 1.5)
+        printable_width_pt = cm_to_pt(21.0 - left_margin_cm - right_margin_cm)
+        box_width = printable_width_pt - cm_to_pt(0.8)
+        
+        N = len(words)
+        if N >= 8:
+            cols = 4
+        elif N >= 5:
+            cols = 3
+        elif N >= 3:
+            cols = 2
+        else:
+            cols = N
+            
+        lines = []
+        for i in range(0, N, cols):
+            chunk = words[i:i + cols]
+            lines.append("\t".join(chunk))
+        full_box_text = "\r".join(lines)
+        num_rows = len(lines)
+        
+        box_height = max(35, num_rows * 22 + 16)
+        
+        sel.ParagraphFormat.SpaceBefore = 6
+        sel.ParagraphFormat.SpaceAfter = 6
+        sel.ParagraphFormat.Alignment = 1
+        
+        shape = self.doc.Shapes.AddShape(5, 0, 0, box_width, box_height)
         try:
-            table.Rows.Alignment = 1
+            shape.WrapFormat.Type = 1
         except Exception:
             pass
-        table.Columns(1).Width = cm_to_pt(15.0)
-        cell = table.Cell(1, 1)
-        cell.VerticalAlignment = 1
-        for border_id in [-1, -2, -3, -4]:
-            try:
-                cell.Borders(border_id).LineStyle = 1
-                cell.Borders(border_id).LineWidth = 8
-            except Exception:
-                pass
-        p_cell = cell.Range
-        p_cell.ParagraphFormat.Alignment = 1
-        p_cell.ParagraphFormat.SpaceBefore = 4
-        p_cell.ParagraphFormat.SpaceAfter = 4
-        p_cell.Font.Name = "Times New Roman"
-        p_cell.Font.Size = 12
-        p_cell.Font.Bold = True
-        p_cell.Text = "   │   ".join(words)
-        sel.Start = table.Range.End
+            
+        try:
+            shape.Fill.Solid()
+            shape.Fill.ForeColor.RGB = 16777215
+        except Exception:
+            pass
+        try:
+            shape.Line.Weight = 1.0
+            shape.Line.ForeColor.RGB = 0
+        except Exception:
+            pass
+            
+        tf = shape.TextFrame
+        try:
+            tf.MarginTop = cm_to_pt(0.2)
+            tf.MarginBottom = cm_to_pt(0.2)
+            tf.MarginLeft = cm_to_pt(0.4)
+            tf.MarginRight = cm_to_pt(0.4)
+        except Exception:
+            pass
+            
+        tr = tf.TextRange
+        tr.Font.Name = "Times New Roman"
+        tr.Font.Size = 12
+        tr.Font.Bold = True
+        tr.Font.Color = 0
+        
+        col_width = box_width / cols
+        try:
+            tr.ParagraphFormat.TabStops.ClearAll()
+            for c in range(1, cols):
+                tab_pos = col_width * c
+                tr.ParagraphFormat.TabStops.Add(Position=tab_pos, Alignment=0)
+        except Exception:
+            pass
+            
+        tr.Text = full_box_text
         sel.TypeParagraph()
 
-    def compile(self, exercises: List[Dict[str, Any]], output_filepath: Any, grade: str = "", unit: str = "", version_code: str = "", include_answer_key: bool = True, is_answer_key: bool = False):
+    def compile(self, exercises: List[Dict[str, Any]], output_filepath: Any, grade: str = "", unit: str = "", version_code: str = "", include_answer_key: bool = True, is_answer_key: bool = False, is_test: bool = False):
         self.is_answer_key = is_answer_key
         try:
             self._init_word()
             
-            if grade or unit or version_code:
-                self.add_test_header(grade, unit, version_code)
+            if grade or unit or version_code or is_test:
+                self.add_test_header(grade=grade, unit=unit, version_code=version_code, is_test=is_test)
 
             current_block_key = None
             for ex in exercises:
@@ -646,7 +703,7 @@ class WordDocumentCompilerPyWin32:
                         sub_x = sub.get("x", "")
                         sub_o = sub.get("o", [])
                         sub_a = sub.get("a", "")
-                        if sub_q:
+                        if sub_q and (sub_x.strip() != "" or sub_o):
                             self.add_question(sub_q, sub_x)
                             if sub_o:
                                 self.add_options_grid(sub_o, ex_type, correct_ans=sub_a)
@@ -963,105 +1020,141 @@ class WordDocumentCompilerDocx:
     def add_word_box(self, words: List[str]):
         if not words:
             return
+        N = len(words)
+        if N >= 8:
+            cols = 4
+        elif N >= 5:
+            cols = 3
+        elif N >= 3:
+            cols = 2
+        else:
+            cols = N
+            
         table = self.doc.add_table(rows=1, cols=1)
         table.alignment = 1
         table.autofit = False
-        table.columns[0].width = Cm(15.0)
+        table.columns[0].width = Cm(15.5)
+        
         cell = table.cell(0, 0)
-        cell.width = Cm(15.0)
+        cell.width = Cm(15.5)
         cell.vertical_alignment = 1
+        
         border_spec = {"sz": 8, "val": "single", "color": "000000", "space": "0"}
         set_cell_border(cell, top=border_spec, bottom=border_spec, left=border_spec, right=border_spec)
-        p = cell.paragraphs[0]
-        p.alignment = 1
-        p.paragraph_format.space_before = Pt(4)
-        p.paragraph_format.space_after = Pt(4)
-        run = p.add_run("   │   ".join(words))
-        run.bold = True
-        run.font.name = "Times New Roman"
-        run.font.size = Pt(12)
-
-    def add_test_header(self, grade: str, unit: str, version_code: str):
-        table = self.doc.add_table(rows=1, cols=2)
-        table.alignment = 1
-        table.autofit = False
         
-        left_margin_cm = self.settings.get("margin_left", 3.0)
-        right_margin_cm = self.settings.get("margin_right", 1.5)
-        printable_width_cm = 21.0 - left_margin_cm - right_margin_cm
-        
-        table.columns[0].width = Cm(printable_width_cm - 3.5)
-        table.columns[1].width = Cm(3.5)
-        
-        cell_left = table.cell(0, 0)
-        p_left = cell_left.paragraphs[0]
-        p_left.paragraph_format.space_before = Pt(0)
-        p_left.paragraph_format.space_after = Pt(0)
-        p_left.paragraph_format.line_spacing = 2.0
-        
-        run_name = p_left.add_run("Họ và tên: ....................................\nLớp: ....................")
-        run_name.bold = True
-        run_name.font.size = Pt(12)
-        
-        cell_right = table.cell(0, 1)
-        p_outer = cell_right.paragraphs[0]
-        p_outer.paragraph_format.space_before = Pt(0)
-        p_outer.paragraph_format.space_after = Pt(0)
-        
-        try:
-            v_num = int(version_code)
-            if v_num >= 101:
-                v_num = v_num - 100
-            ver_text = f"ĐỀ {v_num}"
-        except ValueError:
-            ver_text = f"ĐỀ {version_code}"
+        col_width_cm = 15.5 / cols
+        for i in range(0, N, cols):
+            chunk = words[i:i + cols]
+            p = cell.paragraphs[0] if i == 0 else cell.add_paragraph()
+            p.paragraph_format.space_before = Pt(2)
+            p.paragraph_format.space_after = Pt(2)
+            p.paragraph_format.left_indent = Cm(0.3)
             
-        nested_table = cell_right.add_table(rows=1, cols=1)
-        nested_table.alignment = 2
-        nested_table.autofit = False
-        nested_table.columns[0].width = Cm(2.5)
-        
-        nested_cell = nested_table.cell(0, 0)
-        nested_cell.width = Cm(2.5)
-        nested_cell.vertical_alignment = 1
-        
-        p_nested = nested_cell.paragraphs[0]
-        p_nested.alignment = 1
-        p_nested.paragraph_format.space_before = Pt(6)
-        p_nested.paragraph_format.space_after = Pt(6)
-        
-        run_ver = p_nested.add_run(ver_text)
-        run_ver.bold = True
-        run_ver.font.size = Pt(12)
-        
-        border_spec = {"sz": 12, "val": "single", "color": "000000", "space": "0"}
-        set_cell_border(
-            nested_cell,
-            top=border_spec,
-            bottom=border_spec,
-            left=border_spec,
-            right=border_spec
-        )
-        
-        unit_clean = str(unit).strip().upper()
-        if unit_clean.startswith("UNIT"):
-            unit_text = unit_clean
-        else:
-            unit_name = get_unit_name(grade, unit)
-            if unit_name:
-                unit_text = f"UNIT {unit_clean}: {unit_name.upper()}"
-            else:
-                unit_text = f"UNIT {unit_clean}" if unit_clean else "UNIT"
+            p.paragraph_format.tab_stops.clear_all()
+            for c in range(1, cols):
+                p.paragraph_format.tab_stops.add_tab_stop(Cm(col_width_cm * c), WD_TAB_ALIGNMENT.LEFT)
                 
-        p_unit = self.doc.add_paragraph()
-        p_unit.alignment = 1
-        p_unit.paragraph_format.space_before = Pt(18)
-        p_unit.paragraph_format.space_after = Pt(12)
-        p_unit.paragraph_format.keep_with_next = True
+            for idx_w, word in enumerate(chunk):
+                run = p.add_run(word)
+                run.bold = True
+                run.font.name = "Times New Roman"
+                run.font.size = Pt(12)
+                if idx_w < len(chunk) - 1:
+                    r_tab = p.add_run("\t")
+                    r_tab.font.underline = False
+
+    def add_test_header(self, grade: str = "", unit: str = "", version_code: str = "", is_test: bool = True):
+        has_version = bool(version_code and str(version_code).strip() != "")
         
-        run_unit = p_unit.add_run(unit_text)
-        run_unit.bold = True
-        run_unit.font.size = Pt(12)
+        if is_test and has_version:
+            table = self.doc.add_table(rows=1, cols=2)
+            table.alignment = 1
+            table.autofit = False
+            
+            left_margin_cm = self.settings.get("margin_left", 3.0)
+            right_margin_cm = self.settings.get("margin_right", 1.5)
+            printable_width_cm = 21.0 - left_margin_cm - right_margin_cm
+            
+            table.columns[0].width = Cm(printable_width_cm - 3.5)
+            table.columns[1].width = Cm(3.5)
+            
+            cell_left = table.cell(0, 0)
+            p_left = cell_left.paragraphs[0]
+            p_left.paragraph_format.space_before = Pt(0)
+            p_left.paragraph_format.space_after = Pt(0)
+            p_left.paragraph_format.line_spacing = 2.0
+            
+            run_name = p_left.add_run("Họ và tên: ....................................\nLớp: ....................")
+            run_name.bold = True
+            run_name.font.size = Pt(12)
+            
+            cell_right = table.cell(0, 1)
+            p_outer = cell_right.paragraphs[0]
+            p_outer.paragraph_format.space_before = Pt(0)
+            p_outer.paragraph_format.space_after = Pt(0)
+            
+            try:
+                v_num = int(version_code)
+                if v_num >= 101:
+                    v_num = v_num - 100
+                ver_text = f"ĐỀ {v_num}"
+            except ValueError:
+                ver_text = f"ĐỀ {version_code}"
+                
+            nested_table = cell_right.add_table(rows=1, cols=1)
+            nested_table.alignment = 2
+            nested_table.autofit = False
+            nested_table.columns[0].width = Cm(2.5)
+            
+            nested_cell = nested_table.cell(0, 0)
+            nested_cell.width = Cm(2.5)
+            nested_cell.vertical_alignment = 1
+            
+            p_nested = nested_cell.paragraphs[0]
+            p_nested.alignment = 1
+            p_nested.paragraph_format.space_before = Pt(6)
+            p_nested.paragraph_format.space_after = Pt(6)
+            
+            run_ver = p_nested.add_run(ver_text)
+            run_ver.bold = True
+            run_ver.font.size = Pt(12)
+            
+            border_spec = {"sz": 12, "val": "single", "color": "000000", "space": "0"}
+            set_cell_border(
+                nested_cell,
+                top=border_spec,
+                bottom=border_spec,
+                left=border_spec,
+                right=border_spec
+            )
+            
+        unit_str = str(unit).strip() if unit else ""
+        grade_str = str(grade).strip() if grade else ""
+        
+        title_text = ""
+        if unit_str and unit_str != "0":
+            unit_clean = unit_str.upper()
+            if unit_clean.startswith("UNIT"):
+                title_text = unit_clean
+            else:
+                unit_name = get_unit_name(grade_str, unit_str)
+                if unit_name:
+                    title_text = f"UNIT {unit_clean}: {unit_name.upper()}"
+                else:
+                    title_text = f"UNIT {unit_clean}"
+        elif grade_str and grade_str != "0":
+            title_text = f"GRADE {grade_str}"
+            
+        if title_text:
+            p_unit = self.doc.add_paragraph()
+            p_unit.alignment = 1
+            p_unit.paragraph_format.space_before = Pt(18 if (is_test and has_version) else 6)
+            p_unit.paragraph_format.space_after = Pt(12)
+            p_unit.paragraph_format.keep_with_next = True
+            
+            run_unit = p_unit.add_run(title_text)
+            run_unit.bold = True
+            run_unit.font.size = Pt(12)
 
     def collect_answers(self, exercises: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         answers = []
@@ -1177,7 +1270,7 @@ class WordDocumentCompilerDocx:
                     sub_x = sub.get("x", "")
                     sub_o = sub.get("o", [])
                     sub_a = sub.get("a", "")
-                    if sub_q:
+                    if sub_q and (sub_x.strip() != "" or sub_o):
                         self.add_question(sub_q, sub_x)
                         if sub_o:
                             self.add_options_grid(sub_o, ex_type, correct_ans=sub_a)
@@ -1205,9 +1298,10 @@ class WordDocumentCompilerDocx:
                     sub_x = sub.get("x", "")
                     sub_o = sub.get("o", [])
                     sub_a = sub.get("a", "")
-                    
-                    self.add_question(sub_q, sub_x)
-                    self.add_options_grid(sub_o, ex_type, correct_ans=sub_a)
+                    if sub_q and (sub_x.strip() != "" or sub_o):
+                        self.add_question(sub_q, sub_x)
+                        if sub_o:
+                            self.add_options_grid(sub_o, ex_type, correct_ans=sub_a)
                     
             elif ex_type == "ro":
                 q_num = ex.get("q")
@@ -1269,8 +1363,10 @@ class WordDocumentCompilerDocx:
         if include_answer_key:
             self.add_answer_key(exercises)
 
-    def compile(self, exercises: List[Dict[str, Any]], output_filepath: Any, grade: str = "", unit: str = "", version_code: str = "", include_answer_key: bool = True, is_answer_key: bool = False):
+    def compile(self, exercises: List[Dict[str, Any]], output_filepath: Any, grade: str = "", unit: str = "", version_code: str = "", include_answer_key: bool = True, is_answer_key: bool = False, is_test: bool = False):
         self.is_answer_key = is_answer_key
+        if grade or unit or version_code or is_test:
+            self.add_test_header(grade=grade, unit=unit, version_code=version_code, is_test=is_test)
         self.compile_exercises(exercises, grade=grade, unit=unit, version_code=version_code, include_answer_key=include_answer_key)
         self.doc.save(output_filepath)
 
@@ -1280,18 +1376,18 @@ class WordDocumentCompiler:
     def __init__(self, settings: Dict[str, Any] = None):
         self.settings = settings or {}
 
-    def compile(self, exercises: List[Dict[str, Any]], output_filepath: Any, grade: str = "", unit: str = "", version_code: str = "", include_answer_key: bool = True, is_answer_key: bool = False):
+    def compile(self, exercises: List[Dict[str, Any]], output_filepath: Any, grade: str = "", unit: str = "", version_code: str = "", include_answer_key: bool = True, is_answer_key: bool = False, is_test: bool = False):
         if win32com_available:
             try:
                 compiler_win32 = WordDocumentCompilerPyWin32(self.settings)
-                compiler_win32.compile(exercises, output_filepath, grade=grade, unit=unit, version_code=version_code, include_answer_key=include_answer_key, is_answer_key=is_answer_key)
+                compiler_win32.compile(exercises, output_filepath, grade=grade, unit=unit, version_code=version_code, include_answer_key=include_answer_key, is_answer_key=is_answer_key, is_test=is_test)
                 return
             except Exception as e:
                 print(f"[WordCompiler] pywin32 COM compilation failed, falling back to python-docx: {e}")
         
         # Fallback to python-docx XML compiler
         compiler_docx = WordDocumentCompilerDocx(self.settings)
-        compiler_docx.compile(exercises, output_filepath, grade=grade, unit=unit, version_code=version_code, include_answer_key=include_answer_key, is_answer_key=is_answer_key)
+        compiler_docx.compile(exercises, output_filepath, grade=grade, unit=unit, version_code=version_code, include_answer_key=include_answer_key, is_answer_key=is_answer_key, is_test=is_test)
 
     def compile_test_versions(self, exercises: List[Dict[str, Any]], num_versions: int = 1, mix_options: bool = True, grade: str = "", unit: str = ""):
         import random
