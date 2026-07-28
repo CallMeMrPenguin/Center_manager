@@ -235,16 +235,26 @@ def api_delete_file(filename: str):
 
 @router.get("/api/files/download/{filename:path}")
 def api_download_file(filename: str):
+    fname = os.path.basename(filename)
     files_dir = get_setting("files_dir")
-    filepath = get_file_path(files_dir, filename)
-    if os.path.exists(filepath):
-        return FileResponse(filepath, filename=os.path.basename(filename), media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
     
-    temp_path = os.path.join(os.getcwd(), "temp_compiled", filename)
-    if os.path.exists(temp_path):
-        return FileResponse(temp_path, filename=os.path.basename(filename), media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+    candidates = [
+        get_file_path(files_dir, filename),
+        os.path.join(files_dir, fname) if files_dir else "",
+        os.path.join(BASE_DIR, "temp_compiled", fname),
+        os.path.join(os.getcwd(), "temp_compiled", fname),
+        os.path.join(BASE_DIR, "backend", "temp_compiled", fname)
+    ]
+
+    for candidate in candidates:
+        if candidate and os.path.exists(candidate):
+            return FileResponse(
+                candidate, 
+                filename=fname, 
+                media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            )
         
-    raise HTTPException(status_code=404, detail="File not found")
+    raise HTTPException(status_code=404, detail=f"File '{fname}' not found")
 
 @router.get("/api/files/preview-pdf/{filename:path}")
 def api_preview_pdf_file(filename: str):

@@ -232,7 +232,7 @@ class WordDocumentCompilerPyWin32:
             pass
             
         self.word = win32com.client.Dispatch("Word.Application")
-        self.word.Visible = True
+        self.word.Visible = False
         self.word.DisplayAlerts = 0
         self.doc = self.word.Documents.Add()
         
@@ -1415,7 +1415,16 @@ class WordDocumentCompiler:
         compiler_docx.compile(exercises, output_filepath, grade=grade, unit=unit, version_code=version_code, include_answer_key=include_answer_key, is_answer_key=is_answer_key, is_test=is_test)
 
     def compile_test_versions(self, exercises: List[Dict[str, Any]], num_versions: int = 1, mix_options: bool = True, grade: str = "", unit: str = ""):
-        out_dir = os.path.join(os.getcwd(), "temp_compiled")
+        try:
+            from config.settings import BASE_DIR, get_setting
+            files_dir = get_setting("files_dir")
+            if files_dir and os.path.exists(files_dir):
+                out_dir = files_dir
+            else:
+                out_dir = os.path.join(BASE_DIR, "temp_compiled")
+        except Exception:
+            out_dir = os.path.join(os.getcwd(), "temp_compiled")
+
         os.makedirs(out_dir, exist_ok=True)
         timestamp = int(time.time())
         
