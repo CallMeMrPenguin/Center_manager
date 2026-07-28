@@ -589,16 +589,12 @@ class WordDocumentCompilerPyWin32:
         printable_width_pt = cm_to_pt(printable_width_cm)
         
         N = len(words)
-        if N >= 10:
-            cols = 5
-        elif N >= 8:
-            cols = 4
-        elif N >= 5:
-            cols = 3
-        elif N >= 3:
-            cols = 2
-        else:
+        if N <= 5:
             cols = N
+        elif N <= 9:
+            cols = 4
+        else:
+            cols = 5
             
         # Calculate optimal column width for cols 1..4 so Word NEVER skips a tab stop
         max_len_all = max(len(str(w)) for w in words) if words else 8
