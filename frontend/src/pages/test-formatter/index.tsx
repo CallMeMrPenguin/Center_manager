@@ -37,15 +37,16 @@ Top-level object MUST contain a "data" array of question/exercise objects:
 
 Each object in "data" MUST use the following short key names:
 
-1. "t": (String) Exercise type code (MUST be one of: "pr", "st", "sy", "an", "er", "fb", "rw", "cz", "rd", "ro", "sg", "nt"):
+1. "t": (String) Exercise type code (MUST be one of: "pr", "st", "sy", "an", "er", "fb", "rw", "wb", "cz", "rd", "ro", "sg", "nt"):
    - "pr" : Pronunciation / Underlined sound
    - "st" : Stress
    - "sy" : Synonym
    - "an" : Antonym
    - "er" : Error Identification
-   - "fb" : Fill in the Blank
+   - "fb" : Fill in the Blank (Standalone single sentence)
    - "rw" : Rewrite Sentences
-   - "cz" : Cloze Passage
+   - "wb" : Word Box (Fill in the blank with given words inside a rounded box)
+   - "cz" : Cloze Passage (Multiple choice A/B/C/D options per blank)
    - "rd" : Reading Passage
    - "ro" : Sentence Reordering
    - "sg" : Sign Meaning
@@ -62,9 +63,20 @@ Each object in "data" MUST use the following short key names:
 
 5. "a": (String, Optional) Correct answer ("A", "B", "C", "D" or answer text).
 
-6. "b": (String or Array of Strings, For "cz" / "rd" / "nt") Passage text body or notice text.
+6. "b": (String or Array of Strings, For "wb" / "cz" / "rd" / "nt") Passage text body or notice text.
 
-7. "k": (Array of Objects, For "cz" / "rd") Sub-questions for passage exercises. Each object inside "k" has {"q", "x", "o", "a"}.
+7. "k": (Array of Objects, For "wb" / "cz" / "rd") Sub-questions / answers for passage exercises. Each object inside "k" has {"q", "a"} (or {"q", "x", "o", "a"}).
+
+8. "w": (Array of Strings, For "wb") List of words to render inside a rounded Word Box shape above the passage (e.g., ["traditional", "attracts", "artisans", "pottery", "explore", "handicrafts", "preserve", "historical", "visitors", "culture"]).
+
+==================================================
+AUTOMATIC WORD BOX ("wb") RULE
+==================================================
+• If an exercise is a Fill-in-the-Blank passage that provides a set/list of given words in a box (and NOT a multiple-choice question format with options A/B/C/D per blank), you MUST automatically classify and output it as type "wb":
+  - Put all the given words in the "w" array: "w": ["word1", "word2", "word3", ...]
+  - Put the passage text with numbered blanks (1) _______, (2) _______ in "b".
+  - Put the answer key mapping inside "k": [{"q": 1, "a": "word1"}, {"q": 2, "a": "word2"}, ...].
+• Do NOT format passages with a given word bank as "cz" or "fb". Automatically output them as "t": "wb".
 
 ==================================================
 INLINE FORMATTING RULES
@@ -85,6 +97,18 @@ EXAMPLE OUTPUT
       "q": "1",
       "o": ["pass[ed]", "check[ed]", "stopp[ed]", "want[ed]"],
       "a": "D"
+    },
+    {
+      "t": "wb",
+      "w": ["traditional", "attracts", "artisans", "pottery", "explore", "handicrafts", "preserve", "historical", "visitors", "culture"],
+      "b": "Bat Trang is a famous (1) _______ village located near Ha Noi. Many skilled (2) _______ work here to produce beautiful (3) _______. The village (4) _______ thousands of domestic and foreign (5) _______ every year who come to buy unique handicrafts.",
+      "k": [
+        {"q": 1, "a": "traditional"},
+        {"q": 2, "a": "artisans"},
+        {"q": 3, "a": "pottery"},
+        {"q": 4, "a": "attracts"},
+        {"q": 5, "a": "visitors"}
+      ]
     },
     {
       "t": "fb",
