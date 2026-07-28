@@ -123,11 +123,13 @@ function DraggableHeader({
   children,
   enableReorder,
   enableColumnResizing,
+  align = 'center',
 }: {
   header: any;
   children: React.ReactNode;
   enableReorder: boolean;
   enableColumnResizing: boolean;
+  align?: 'center' | 'left';
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: header.id,
@@ -147,6 +149,8 @@ function DraggableHeader({
     ...(isPinned === 'right' ? { position: 'sticky', right: header.column.getAfter('right'), zIndex: 10, boxShadow: '-2px 0 6px rgba(0,0,0,0.5)' } : {}),
   };
 
+  const alignClass = align === 'left' ? 'justify-start text-left' : 'justify-center text-center';
+
   return (
     <th
       ref={setNodeRef}
@@ -158,7 +162,7 @@ function DraggableHeader({
       {/* Draggable Title Area (Only dragging text reorders column) */}
       <div
         {...(enableReorder ? { ...attributes, ...listeners } : {})}
-        className={`flex items-center justify-center text-center gap-1.5 w-full py-3.5 px-3 overflow-hidden text-slate-200 text-xs sm:text-sm font-black uppercase tracking-wider whitespace-nowrap ${
+        className={`flex items-center ${alignClass} gap-1.5 w-full py-3.5 px-3 overflow-hidden text-slate-200 text-xs sm:text-sm font-black uppercase tracking-wider whitespace-nowrap ${
           enableReorder ? 'cursor-grab active:cursor-grabbing hover:text-white transition-colors' : ''
         }`}
         title={enableReorder ? 'Giữ chuột và kéo để thay đổi thứ tự cột' : undefined}
@@ -817,39 +821,49 @@ export function DataTable<TData>({
                   <thead className={`bg-[#111827] ${stickyHeader ? 'sticky top-0 z-20' : ''}`}>
                     {table.getHeaderGroups().map(headerGroup => (
                       <tr key={headerGroup.id}>
-                        {headerGroup.headers.map(header => (
-                          <DraggableHeader
-                            key={header.id}
-                            header={header}
-                            enableReorder={enableColumnReorder && header.column.id !== 'select' && header.column.id !== '_expander'}
-                            enableColumnResizing={enableColumnResizing}
-                          >
-                            <div
-                              className={`flex items-center justify-center text-center gap-1.5 flex-1 min-w-0 ${header.column.getCanSort() ? 'cursor-pointer select-none hover:text-white transition-colors' : ''}`}
-                              onClick={header.column.getCanSort() ? header.column.getToggleSortingHandler() : undefined}
+                        {headerGroup.headers.map(header => {
+                          const isSelectCol = header.column.id === 'select' || header.column.id === '_expander';
+                          const align = isSelectCol ? 'center' : (columnAlignments[header.column.id] || 'center');
+
+                          return (
+                            <DraggableHeader
+                              key={header.id}
+                              header={header}
+                              enableReorder={enableColumnReorder && !isSelectCol}
+                              enableColumnResizing={enableColumnResizing}
+                              align={align}
                             >
-                              {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
-
-                              {header.column.getCanSort() && (
-                                <span className="shrink-0">
-                                  {header.column.getIsSorted() === 'asc'
-                                    ? <ArrowUp size={12} className="text-indigo-400" />
-                                    : header.column.getIsSorted() === 'desc'
-                                    ? <ArrowDown size={12} className="text-indigo-400" />
-                                    : <ArrowUpDown size={12} className="text-slate-600 hover:text-slate-400 transition" />}
+                              <div
+                                className={`inline-flex items-center ${align === 'left' ? 'justify-start' : 'justify-center'} gap-1.5 max-w-full ${
+                                  header.column.getCanSort() ? 'cursor-pointer select-none hover:text-white transition-colors' : ''
+                                }`}
+                                onClick={header.column.getCanSort() ? header.column.getToggleSortingHandler() : undefined}
+                              >
+                                <span className="truncate">
+                                  {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
                                 </span>
-                              )}
 
-                              {/* Multi-sort priority badge */}
-                              {header.column.getIsSorted() && enableMultiSort && (() => {
-                                const idx = sorting.findIndex(s => s.id === header.column.id);
-                                return sorting.length > 1 && idx !== -1 ? (
-                                  <span className="text-[9px] font-black text-indigo-300 bg-indigo-500/20 rounded px-1 shrink-0">{idx + 1}</span>
-                                ) : null;
-                              })()}
-                            </div>
-                          </DraggableHeader>
-                        ))}
+                                {header.column.getCanSort() && (
+                                  <span className="shrink-0 inline-flex items-center">
+                                    {header.column.getIsSorted() === 'asc'
+                                      ? <ArrowUp size={12} className="text-indigo-400" />
+                                      : header.column.getIsSorted() === 'desc'
+                                      ? <ArrowDown size={12} className="text-indigo-400" />
+                                      : <ArrowUpDown size={12} className="text-slate-600 hover:text-slate-400 transition" />}
+                                  </span>
+                                )}
+
+                                {/* Multi-sort priority badge */}
+                                {header.column.getIsSorted() && enableMultiSort && (() => {
+                                  const idx = sorting.findIndex(s => s.id === header.column.id);
+                                  return sorting.length > 1 && idx !== -1 ? (
+                                    <span className="text-[9px] font-black text-indigo-300 bg-indigo-500/20 rounded px-1 shrink-0">{idx + 1}</span>
+                                  ) : null;
+                                })()}
+                              </div>
+                            </DraggableHeader>
+                          );
+                        })}
                       </tr>
                     ))}
                   </thead>

@@ -66,7 +66,7 @@ export const TAB_DEFINITIONS: TabDefinition[] = [
   },
   {
     id: 'teachers',
-    label: 'Giáo Viên',
+    label: 'Nhân Sự',
     icon: UserCheck,
     section: 'main',
     render: () => <TeachersPage />

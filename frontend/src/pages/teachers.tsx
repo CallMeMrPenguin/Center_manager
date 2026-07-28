@@ -177,9 +177,9 @@ export default function TeachersPage() {
     },
     {
       id: 'actions',
-      header: () => <div className="text-right w-full">Thao tác</div>,
+      header: 'Thao Tác',
       cell: ({ row }) => (
-        <div className="flex items-center justify-end">
+        <div className="flex items-center justify-center">
           <button
             onClick={() => handleOpenEdit(row.original)}
             className="p-1.5 rounded-lg bg-[#1a213a] hover:bg-[#252e50] text-indigo-300 border border-[#374368] transition cursor-pointer"
@@ -202,7 +202,7 @@ export default function TeachersPage() {
         <div>
           <h1 className="text-2xl font-black tracking-tight text-white flex items-center gap-3">
             <UserCheck className="h-7 w-7 text-indigo-400" />
-            Quản Lý Giáo Viên & Trợ Giảng
+            Quản Lý Nhân Sự
           </h1>
           <p className="text-xs text-slate-400 font-semibold mt-1">
             Quản lý đội ngũ giáo viên, trợ giảng, thông tin liên lạc và lịch làm việc.

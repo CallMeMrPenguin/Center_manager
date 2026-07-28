@@ -172,7 +172,7 @@ export default function CoursesPage() {
     },
     {
       id: 'actions',
-      header: () => <div className="text-right w-full">Thao tác</div>,
+      header: 'Thao Tác',
       cell: ({ row }) => (
         <div className="flex items-center justify-end gap-1.5">
           <button
