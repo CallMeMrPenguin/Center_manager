@@ -600,21 +600,23 @@ class WordDocumentCompilerPyWin32:
         else:
             cols = N
             
-        col_width_cm = 2.3
+        # Calculate optimal column width for cols 1..4 based on word lengths
+        col1_4_max_len = max(len(str(words[i])) for i in range(N) if (i % cols) < cols - 1) if N > 1 else 8
+        col_width_cm = max(2.0, (col1_4_max_len * 0.15) + 0.3)
         col_width_pt = cm_to_pt(col_width_cm)
         
-        # Calculate maximum character length in the last column to compute exact right border boundary
+        # Measure character width of the last column (col 5)
         last_col_words = [words[i] for i in range(cols - 1, N, cols)] if N >= cols else [words[-1]]
         last_col_max_len = max(len(str(w)) for w in last_col_words) if last_col_words else 8
-        last_col_text_w_pt = (last_col_max_len * 6.2) + 2.0
+        last_col_text_w_pt = last_col_max_len * 5.6
         
         text_group_width_pt = ((cols - 1) * col_width_pt) + last_col_text_w_pt
         left_offset_pt = max(0.0, (printable_width_pt - text_group_width_pt) / 2.0)
         
         # Configure paragraph indent and tab stops for centered multi-column word box
         sel.ParagraphFormat.SpaceBefore = 3
-        sel.ParagraphFormat.SpaceAfter = 3
-        sel.ParagraphFormat.LineSpacingRule = 0 # Standard single line spacing
+        sel.ParagraphFormat.SpaceAfter = 0
+        sel.ParagraphFormat.LineSpacingRule = 0 # Standard single line spacing for first rows
         sel.ParagraphFormat.Alignment = 0 # Left align inside tab stop
         sel.ParagraphFormat.LeftIndent = left_offset_pt
         sel.ParagraphFormat.TabStops.ClearAll()
@@ -631,6 +633,13 @@ class WordDocumentCompilerPyWin32:
             
         num_rows = len(lines)
         for idx_line, chunk in enumerate(lines):
+            if idx_line == num_rows - 1:
+                sel.ParagraphFormat.LineSpacingRule = 2 # Double line spacing on last row!
+                sel.ParagraphFormat.SpaceAfter = 0
+            else:
+                sel.ParagraphFormat.LineSpacingRule = 0
+                sel.ParagraphFormat.SpaceAfter = 0
+                
             for idx_w, word in enumerate(chunk):
                 self.write_run(word, bold=True)
                 if idx_w < len(chunk) - 1:
@@ -644,8 +653,9 @@ class WordDocumentCompilerPyWin32:
         try:
             padding_pt = 6.0 # Equal top, bottom, left, right padding (~2.1mm)
             box_width_pt = text_group_width_pt + (padding_pt * 2)
-            text_height_pt = num_rows * 16.0
-            box_height_pt = text_height_pt + (padding_pt * 2)
+            # Row 1 (single) = 16pt, Row 2 (double) = 28pt
+            text_height_pt = ((num_rows - 1) * 16.0) + 28.0
+            box_height_pt = text_height_pt
             
             shape = self.doc.Shapes.AddShape(
                 5, # msoShapeRoundedRectangle = 5
@@ -670,8 +680,8 @@ class WordDocumentCompilerPyWin32:
         except Exception as e:
             print(f"  [PyWin32] Warning drawing rounded shape around word box: {e}")
             
-        # Reset selection formatting for paragraphs after word box with 12pt SpaceBefore to separate passage below
-        sel.ParagraphFormat.SpaceBefore = 12
+        # Reset selection formatting for paragraphs after word box
+        sel.ParagraphFormat.SpaceBefore = 6
         sel.ParagraphFormat.SpaceAfter = 4
         sel.ParagraphFormat.LineSpacingRule = 0
         sel.ParagraphFormat.LeftIndent = 0
