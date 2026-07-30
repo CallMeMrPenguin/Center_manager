@@ -62,11 +62,26 @@ export default function KiemTraPage() {
   const [timerPos, setTimerPos] = useState({ x: 30, y: 30 });
   const [timerSize, setTimerSize] = useState({ width: 240, height: 130 });
   const [isDraggingTimer, setIsDraggingTimer] = useState(false);
-  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [isResizingTimer, setIsResizingTimer] = useState(false);
   const [resizeMode, setResizeMode] = useState<'se' | 'e' | 's'>('se');
-  const [resizeStart, setResizeStart] = useState({ x: 0, y: 0, w: 240, h: 130 });
   const [showPopoutTimer, setShowPopoutTimer] = useState(true);
+
+  // Refs for zero-lag drag & resize tracking
+  const isDraggingTimerRef = useRef(false);
+  const dragOffsetRef = useRef({ x: 0, y: 0 });
+  const isResizingTimerRef = useRef(false);
+  const resizeModeRef = useRef<'se' | 'e' | 's'>('se');
+  const resizeStartRef = useRef({ x: 0, y: 0, w: 240, h: 130 });
+  const timerSizeRef = useRef(timerSize);
+  const timerPosRef = useRef(timerPos);
+
+  useEffect(() => {
+    timerSizeRef.current = timerSize;
+  }, [timerSize]);
+
+  useEffect(() => {
+    timerPosRef.current = timerPos;
+  }, [timerPos]);
 
   // Review & Annotation mode state
   const [highlightMode, setHighlightMode] = useState(false);
@@ -88,79 +103,74 @@ export default function KiemTraPage() {
     }
   }, [isFullscreen]);
 
-  // Handle dragging floating timer widget across screen
+  // Window-level mousemove & mouseup listeners for drag and resize
   useEffect(() => {
-    if (!isDraggingTimer) return;
+    const handleWindowMouseMove = (e: MouseEvent) => {
+      if (isDraggingTimerRef.current) {
+        const newX = Math.max(10, Math.min(window.innerWidth - timerSizeRef.current.width, e.clientX - dragOffsetRef.current.x));
+        const newY = Math.max(10, Math.min(window.innerHeight - timerSizeRef.current.height, e.clientY - dragOffsetRef.current.y));
+        setTimerPos({ x: newX, y: newY });
+      }
 
-    const handleMouseMove = (e: MouseEvent) => {
-      const newX = Math.max(10, Math.min(window.innerWidth - timerSize.width, e.clientX - dragOffset.x));
-      const newY = Math.max(10, Math.min(window.innerHeight - timerSize.height, e.clientY - dragOffset.y));
-      setTimerPos({ x: newX, y: newY });
+      if (isResizingTimerRef.current) {
+        const deltaX = e.clientX - resizeStartRef.current.x;
+        const deltaY = e.clientY - resizeStartRef.current.y;
+        const mode = resizeModeRef.current;
+
+        const newW = mode === 's'
+          ? resizeStartRef.current.w
+          : Math.max(160, Math.min(1200, resizeStartRef.current.w + deltaX));
+
+        const newH = mode === 'e'
+          ? resizeStartRef.current.h
+          : Math.max(90, Math.min(600, resizeStartRef.current.h + deltaY));
+
+        setTimerSize({ width: newW, height: newH });
+      }
     };
 
-    const handleMouseUp = () => {
-      setIsDraggingTimer(false);
+    const handleWindowMouseUp = () => {
+      if (isDraggingTimerRef.current) {
+        isDraggingTimerRef.current = false;
+        setIsDraggingTimer(false);
+      }
+      if (isResizingTimerRef.current) {
+        isResizingTimerRef.current = false;
+        setIsResizingTimer(false);
+      }
     };
 
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('mouseup', handleMouseUp);
+    window.addEventListener('mousemove', handleWindowMouseMove);
+    window.addEventListener('mouseup', handleWindowMouseUp);
     return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseup', handleMouseUp);
+      window.removeEventListener('mousemove', handleWindowMouseMove);
+      window.removeEventListener('mouseup', handleWindowMouseUp);
     };
-  }, [isDraggingTimer, dragOffset, timerSize.width, timerSize.height]);
+  }, []);
 
-  // Handle resizing floating timer widget
-  useEffect(() => {
-    if (!isResizingTimer) return;
-
-    const handleMouseMove = (e: MouseEvent) => {
-      const deltaX = e.clientX - resizeStart.x;
-      const deltaY = e.clientY - resizeStart.y;
-
-      const newW = resizeMode === 's'
-        ? resizeStart.w
-        : Math.max(160, Math.min(1200, resizeStart.w + deltaX));
-
-      const newH = resizeMode === 'e'
-        ? resizeStart.h
-        : Math.max(90, Math.min(600, resizeStart.h + deltaY));
-
-      setTimerSize({ width: newW, height: newH });
-    };
-
-    const handleMouseUp = () => {
-      setIsResizingTimer(false);
-    };
-
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('mouseup', handleMouseUp);
-    return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseup', handleMouseUp);
-    };
-  }, [isResizingTimer, resizeStart, resizeMode]);
-
-  const handleTimerMouseDown = (e: React.MouseEvent) => {
+  const handleTimerMouseDown = (e: React.MouseEvent | React.PointerEvent) => {
     e.preventDefault();
-    setIsDraggingTimer(true);
-    setDragOffset({
+    isDraggingTimerRef.current = true;
+    dragOffsetRef.current = {
       x: e.clientX - timerPos.x,
       y: e.clientY - timerPos.y
-    });
+    };
+    setIsDraggingTimer(true);
   };
 
-  const handleTimerResizeMouseDown = (e: React.MouseEvent, mode: 'se' | 'e' | 's' = 'se') => {
+  const handleTimerResizeMouseDown = (e: React.MouseEvent | React.PointerEvent, mode: 'se' | 'e' | 's' = 'se') => {
     e.preventDefault();
     e.stopPropagation();
-    setIsResizingTimer(true);
-    setResizeMode(mode);
-    setResizeStart({
+    isResizingTimerRef.current = true;
+    resizeModeRef.current = mode;
+    resizeStartRef.current = {
       x: e.clientX,
       y: e.clientY,
       w: timerSize.width,
       h: timerSize.height
-    });
+    };
+    setIsResizingTimer(true);
+    setResizeMode(mode);
   };
 
   useEffect(() => {
@@ -1139,24 +1149,27 @@ export default function KiemTraPage() {
                   {/* RIGHT EDGE RESIZE HANDLE */}
                   <div
                     onMouseDown={(e) => handleTimerResizeMouseDown(e, 'e')}
-                    className="absolute right-0 top-0 bottom-0 w-2.5 cursor-ew-resize hover:bg-indigo-500/40 transition-colors z-20"
+                    onPointerDown={(e) => handleTimerResizeMouseDown(e, 'e')}
+                    className="absolute right-0 top-0 bottom-0 w-3 cursor-ew-resize hover:bg-indigo-500/40 transition-colors z-40 pointer-events-auto"
                     title="Kéo cạnh này để thay đổi chiều rộng"
                   />
 
                   {/* BOTTOM EDGE RESIZE HANDLE */}
                   <div
                     onMouseDown={(e) => handleTimerResizeMouseDown(e, 's')}
-                    className="absolute bottom-0 left-0 right-0 h-2.5 cursor-ns-resize hover:bg-indigo-500/40 transition-colors z-20"
+                    onPointerDown={(e) => handleTimerResizeMouseDown(e, 's')}
+                    className="absolute bottom-0 left-0 right-0 h-3 cursor-ns-resize hover:bg-indigo-500/40 transition-colors z-40 pointer-events-auto"
                     title="Kéo cạnh này để thay đổi chiều cao"
                   />
 
                   {/* CORNER RESIZE HANDLE (SE) */}
                   <div
                     onMouseDown={(e) => handleTimerResizeMouseDown(e, 'se')}
-                    className="absolute bottom-0 right-0 w-8 h-8 cursor-se-resize flex items-end justify-end p-1.5 z-30 text-indigo-400 hover:text-indigo-200 transition-all select-none bg-indigo-500/10 hover:bg-indigo-500/30 rounded-tl-xl border-t border-l border-indigo-500/30 group/corner"
+                    onPointerDown={(e) => handleTimerResizeMouseDown(e, 'se')}
+                    className="absolute bottom-0 right-0 w-10 h-10 cursor-se-resize flex items-end justify-end p-2 z-50 text-indigo-400 hover:text-indigo-200 transition-all select-none bg-indigo-500/20 hover:bg-indigo-500/40 rounded-tl-2xl border-t border-l border-indigo-500/40 group/corner pointer-events-auto shadow-lg"
                     title="Kéo góc này để chỉnh kích thước đồng hồ tự do"
                   >
-                    <svg width="14" height="14" viewBox="0 0 10 10" fill="currentColor" className="group-hover/corner:scale-110 transition-transform drop-shadow-[0_0_8px_rgba(99,102,241,0.8)]">
+                    <svg width="16" height="16" viewBox="0 0 10 10" fill="currentColor" className="group-hover/corner:scale-125 transition-transform drop-shadow-[0_0_8px_rgba(99,102,241,0.9)] pointer-events-none">
                       <path d="M8 0L10 2L2 10L0 8L8 0Z M8 5L10 7L7 10L5 8L8 5Z" />
                     </svg>
                   </div>

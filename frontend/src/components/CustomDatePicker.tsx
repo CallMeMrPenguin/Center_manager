@@ -7,6 +7,9 @@ interface CustomDatePickerProps {
   placeholder?: string;
   className?: string;
   required?: boolean;
+  highlightDaysOfWeek?: number[]; // e.g. [1, 3, 5] for Mon, Wed, Fri
+  highlightDates?: string[]; // e.g. ['2026-07-28', '2026-07-30']
+  maxHighlightDate?: string; // default today 'YYYY-MM-DD'
 }
 
 export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
@@ -14,6 +17,9 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
   onChange,
   placeholder = 'Chọn ngày...',
   className = '',
+  highlightDaysOfWeek,
+  highlightDates,
+  maxHighlightDate,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -102,6 +108,11 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
     setIsOpen(false);
   };
 
+  // Today ISO string
+  const todayObj = new Date();
+  const todayStr = `${todayObj.getFullYear()}-${String(todayObj.getMonth() + 1).padStart(2, '0')}-${String(todayObj.getDate()).padStart(2, '0')}`;
+  const cutoffDateStr = maxHighlightDate || todayStr;
+
   // Formatted value display
   const displayFormatted = value ? (() => {
     const parts = value.split('-');
@@ -183,25 +194,35 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
               const dd = String(dayNum).padStart(2, '0');
               const dateStr = `${viewYear}-${mm}-${dd}`;
               const isSelected = value === dateStr;
-              const isToday = (() => {
-                const t = new Date();
-                return t.getFullYear() === viewYear && t.getMonth() === viewMonth && t.getDate() === dayNum;
-              })();
+              const isToday = todayObj.getFullYear() === viewYear && todayObj.getMonth() === viewMonth && todayObj.getDate() === dayNum;
+
+              const dayOfWeek = new Date(viewYear, viewMonth, dayNum).getDay();
+              const isPastOrToday = dateStr <= cutoffDateStr;
+              const isStudyDay = isPastOrToday && (
+                (highlightDaysOfWeek && highlightDaysOfWeek.includes(dayOfWeek)) ||
+                (highlightDates && highlightDates.includes(dateStr))
+              );
 
               return (
                 <button
                   key={dayNum}
                   type="button"
                   onClick={() => handleSelectDay(dayNum)}
-                  className={`h-8 w-8 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center mx-auto ${
+                  className={`h-8 w-8 rounded-xl text-xs font-bold transition-all cursor-pointer flex flex-col items-center justify-center mx-auto relative ${
                     isSelected
                       ? 'bg-[#5c36f5] text-white font-black shadow-[0_0_16px_rgba(92,54,245,0.8)] border border-indigo-300'
                       : isToday
                       ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/50 font-black'
+                      : isStudyDay
+                      ? 'bg-emerald-500/10 text-emerald-300 border border-emerald-500/30 font-bold hover:bg-emerald-500/20'
                       : 'text-slate-200 hover:bg-white/10 hover:text-white'
                   }`}
+                  title={isStudyDay ? `Ngày học của lớp (${dd}/${mm}/${viewYear})` : undefined}
                 >
-                  {dayNum}
+                  <span>{dayNum}</span>
+                  {isStudyDay && (
+                    <span className={`absolute bottom-0.5 w-1 h-1 rounded-full ${isSelected ? 'bg-white' : 'bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.9)]'}`} />
+                  )}
                 </button>
               );
             })}

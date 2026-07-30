@@ -306,9 +306,24 @@ export default function ClassesPage() {
     }
   };
 
+  const [selectedClassWeeklyDays, setSelectedClassWeeklyDays] = useState<number[]>([]);
+
   useEffect(() => {
     if (selectedClass) {
       loadClassDetailData(selectedClass);
+      api.getClassWeeklySchedule(selectedClass.id).then(slots => {
+        if (slots && Array.isArray(slots)) {
+          const dayMap: Record<string, number> = {
+            'Chủ nhật': 0, 'Thứ 2': 1, 'Thứ 3': 2, 'Thứ 4': 3, 'Thứ 5': 4, 'Thứ 6': 5, 'Thứ 7': 6
+          };
+          const days = slots.map((s: any) => dayMap[s.day_of_week]).filter((d: any) => d !== undefined);
+          setSelectedClassWeeklyDays(days);
+        } else {
+          setSelectedClassWeeklyDays([]);
+        }
+      }).catch(() => setSelectedClassWeeklyDays([]));
+    } else {
+      setSelectedClassWeeklyDays([]);
     }
   }, [selectedClass]);
 
@@ -1138,7 +1153,12 @@ export default function ClassesPage() {
                     <Calendar size={15} className="text-indigo-400" />
                     <span>Ngày học:</span>
                   </span>
-                  <CustomDatePicker value={attendanceDate} onChange={setAttendanceDate} className="w-44" />
+                  <CustomDatePicker
+                    value={attendanceDate}
+                    onChange={setAttendanceDate}
+                    highlightDaysOfWeek={selectedClassWeeklyDays}
+                    className="w-44"
+                  />
                 </div>
 
                 <div className="flex items-center gap-2">
