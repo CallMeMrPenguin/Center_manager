@@ -60,8 +60,11 @@ export default function KiemTraPage() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [timerPos, setTimerPos] = useState({ x: 30, y: 30 });
+  const [timerSize, setTimerSize] = useState({ width: 240, height: 130 });
   const [isDraggingTimer, setIsDraggingTimer] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const [isResizingTimer, setIsResizingTimer] = useState(false);
+  const [resizeStart, setResizeStart] = useState({ x: 0, y: 0, w: 240, h: 130 });
   const [showPopoutTimer, setShowPopoutTimer] = useState(true);
 
   // Review & Annotation mode state
@@ -89,8 +92,8 @@ export default function KiemTraPage() {
     if (!isDraggingTimer) return;
 
     const handleMouseMove = (e: MouseEvent) => {
-      const newX = Math.max(10, Math.min(window.innerWidth - 180, e.clientX - dragOffset.x));
-      const newY = Math.max(10, Math.min(window.innerHeight - 80, e.clientY - dragOffset.y));
+      const newX = Math.max(10, Math.min(window.innerWidth - timerSize.width, e.clientX - dragOffset.x));
+      const newY = Math.max(10, Math.min(window.innerHeight - timerSize.height, e.clientY - dragOffset.y));
       setTimerPos({ x: newX, y: newY });
     };
 
@@ -104,7 +107,29 @@ export default function KiemTraPage() {
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [isDraggingTimer, dragOffset]);
+  }, [isDraggingTimer, dragOffset, timerSize.width, timerSize.height]);
+
+  // Handle resizing floating timer widget
+  useEffect(() => {
+    if (!isResizingTimer) return;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      const newW = Math.max(180, Math.min(800, resizeStart.w + (e.clientX - resizeStart.x)));
+      const newH = Math.max(100, Math.min(500, resizeStart.h + (e.clientY - resizeStart.y)));
+      setTimerSize({ width: newW, height: newH });
+    };
+
+    const handleMouseUp = () => {
+      setIsResizingTimer(false);
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseup', handleMouseUp);
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isResizingTimer, resizeStart]);
 
   const handleTimerMouseDown = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -112,6 +137,18 @@ export default function KiemTraPage() {
     setDragOffset({
       x: e.clientX - timerPos.x,
       y: e.clientY - timerPos.y
+    });
+  };
+
+  const handleTimerResizeMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsResizingTimer(true);
+    setResizeStart({
+      x: e.clientX,
+      y: e.clientY,
+      w: timerSize.width,
+      h: timerSize.height
     });
   };
 
@@ -986,81 +1023,107 @@ export default function KiemTraPage() {
           </div>
 
           {/* FLOATING DRAGGABLE & RESIZABLE POPOUT TIMER WIDGET */}
-          {timerMode !== 'none' && (isFullscreen || showPopoutTimer) && (
-            <div
-              style={{
-                position: 'fixed',
-                left: `${timerPos.x}px`,
-                top: `${timerPos.y}px`,
-                zIndex: 200,
-              }}
-              className="resize-both overflow-hidden min-w-[210px] min-h-[110px] w-[240px] h-[130px] max-w-[500px] max-h-[300px] bg-[#0c0f1e] border-2 border-indigo-500/50 rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.8)] flex flex-col transition-shadow duration-200"
-            >
-              {/* DRAG HEADER HANDLE */}
+          {timerMode !== 'none' && (isFullscreen || showPopoutTimer) && (() => {
+            const dynamicFontSize = Math.max(22, Math.min(timerSize.width * 0.18, timerSize.height * 0.38));
+            const dynamicSubtextSize = Math.max(10, Math.min(timerSize.width * 0.04, 15));
+
+            return (
               <div
-                onMouseDown={handleTimerMouseDown}
-                className="cursor-move select-none flex items-center justify-between bg-[#141a2e] px-3 py-1.5 border-b border-[#253259] rounded-t-2xl shrink-0"
-                title="Kéo thanh này để di chuyển đồng hồ tự do trên màn hình"
+                style={{
+                  position: 'fixed',
+                  left: `${timerPos.x}px`,
+                  top: `${timerPos.y}px`,
+                  width: `${timerSize.width}px`,
+                  height: `${timerSize.height}px`,
+                  zIndex: 200,
+                }}
+                className="overflow-hidden min-w-[180px] min-h-[100px] max-w-[800px] max-h-[500px] bg-[#0c0f1e] border-2 border-indigo-500/50 rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.8)] flex flex-col transition-shadow duration-200 select-none relative"
               >
-                <div className="flex items-center gap-1.5 text-indigo-400 font-black text-xs">
-                  <GripVertical size={14} className="text-slate-400" />
-                  <Clock size={13} className={timerMode === 'global' ? "text-emerald-400" : "text-amber-400"} />
-                  <span className="text-[11px] text-white tracking-wide font-extrabold uppercase">
-                    {timerMode === 'global' ? 'Đồng Hồ Tổng' : 'Thời Gian Câu'}
-                  </span>
-                </div>
+                {/* DRAG HEADER HANDLE */}
+                <div
+                  onMouseDown={handleTimerMouseDown}
+                  className="cursor-move select-none flex items-center justify-between bg-[#141a2e] px-3 py-1.5 border-b border-[#253259] rounded-t-2xl shrink-0"
+                  title="Kéo thanh này để di chuyển đồng hồ tự do trên màn hình"
+                >
+                  <div className="flex items-center gap-1.5 text-indigo-400 font-black text-xs min-w-0">
+                    <GripVertical size={14} className="text-slate-400 shrink-0" />
+                    <Clock size={13} className={timerMode === 'global' ? "text-emerald-400 shrink-0" : "text-amber-400 shrink-0"} />
+                    <span className="text-[11px] text-white tracking-wide font-extrabold uppercase truncate">
+                      {timerMode === 'global' ? 'Đồng Hồ Tổng' : 'Thời Gian Câu'}
+                    </span>
+                  </div>
 
-                <div className="flex items-center gap-1">
-                  <button
-                    onClick={() => setTimerPos({ x: Math.max(20, window.innerWidth - 270), y: 80 })}
-                    className="p-1 text-slate-400 hover:text-white rounded hover:bg-white/10 transition cursor-pointer"
-                    title="Đặt lại vị trí ban đầu"
-                  >
-                    <RotateCcw size={12} />
-                  </button>
-                  {isFullscreen && (
+                  <div className="flex items-center gap-1 shrink-0">
                     <button
-                      onClick={() => setShowPopoutTimer(!showPopoutTimer)}
+                      onClick={() => {
+                        setTimerPos({ x: Math.max(20, window.innerWidth - 270), y: 80 });
+                        setTimerSize({ width: 240, height: 130 });
+                      }}
                       className="p-1 text-slate-400 hover:text-white rounded hover:bg-white/10 transition cursor-pointer"
-                      title={showPopoutTimer ? "Thu gọn đồng hồ" : "Mở rộng đồng hồ"}
+                      title="Đặt lại vị trí & kích thước ban đầu"
                     >
-                      {showPopoutTimer ? <Minimize2 size={12} /> : <Maximize2 size={12} />}
+                      <RotateCcw size={12} />
                     </button>
+                    {isFullscreen && (
+                      <button
+                        onClick={() => setShowPopoutTimer(!showPopoutTimer)}
+                        className="p-1 text-slate-400 hover:text-white rounded hover:bg-white/10 transition cursor-pointer"
+                        title={showPopoutTimer ? "Thu gọn đồng hồ" : "Mở rộng đồng hồ"}
+                      >
+                        {showPopoutTimer ? <Minimize2 size={12} /> : <Maximize2 size={12} />}
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* TIMER BODY DISPLAY */}
+                <div className="flex-1 p-3 flex flex-col items-center justify-center bg-[#070913] text-center select-none overflow-hidden relative">
+                  {timerMode === 'global' ? (
+                    <>
+                      <div
+                        style={{ fontSize: `${dynamicFontSize}px`, lineHeight: 1 }}
+                        className="font-black text-emerald-400 font-mono tracking-wider drop-shadow-[0_0_12px_rgba(52,211,153,0.3)] transition-all duration-75"
+                      >
+                        {formattedTimerRemaining}
+                      </div>
+                      <span
+                        style={{ fontSize: `${dynamicSubtextSize}px` }}
+                        className="font-bold text-slate-400 mt-1"
+                      >
+                        Tổng: {Math.round(globalTimeSeconds / 60)} phút
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      <div
+                        style={{ fontSize: `${dynamicFontSize}px`, lineHeight: 1 }}
+                        className="font-black text-amber-400 font-mono tracking-wider drop-shadow-[0_0_12px_rgba(251,191,36,0.3)] transition-all duration-75"
+                      >
+                        {questionTimer}s
+                      </div>
+                      <span
+                        style={{ fontSize: `${dynamicSubtextSize}px` }}
+                        className="font-bold text-slate-400 mt-1"
+                      >
+                        Giới hạn câu: {perQuestionSeconds}s
+                      </span>
+                    </>
                   )}
+
+                  {/* INTERACTIVE RESIZE CORNER HANDLE */}
+                  <div
+                    onMouseDown={handleTimerResizeMouseDown}
+                    className="absolute bottom-0 right-0 w-7 h-7 cursor-se-resize flex items-end justify-end p-1 z-20 text-indigo-400 hover:text-indigo-200 hover:scale-125 transition-all select-none group"
+                    title="Kéo góc này để thay đổi kích thước đồng hồ"
+                  >
+                    <svg width="14" height="14" viewBox="0 0 10 10" fill="currentColor" className="group-hover:drop-shadow-[0_0_8px_rgba(99,102,241,0.8)]">
+                      <path d="M8 0L10 2L2 10L0 8L8 0Z M8 5L10 7L7 10L5 8L8 5Z" />
+                    </svg>
+                  </div>
                 </div>
               </div>
-
-              {/* TIMER BODY DISPLAY */}
-              <div className="flex-1 p-3 flex flex-col items-center justify-center bg-[#070913] text-center select-none overflow-hidden relative">
-                {timerMode === 'global' ? (
-                  <>
-                    <div className="text-3xl sm:text-4xl font-black text-emerald-400 font-mono tracking-wider drop-shadow-[0_0_12px_rgba(52,211,153,0.3)]">
-                      {formattedTimerRemaining}
-                    </div>
-                    <span className="text-[10px] font-bold text-slate-400 mt-1">
-                      Tổng: {Math.round(globalTimeSeconds / 60)} phút
-                    </span>
-                  </>
-                ) : (
-                  <>
-                    <div className="text-3xl sm:text-4xl font-black text-amber-400 font-mono tracking-wider drop-shadow-[0_0_12px_rgba(251,191,36,0.3)]">
-                      {questionTimer}s
-                    </div>
-                    <span className="text-[10px] font-bold text-slate-400 mt-1">
-                      Giới hạn câu: {perQuestionSeconds}s
-                    </span>
-                  </>
-                )}
-
-                {/* RESIZE CORNER HINT ICON */}
-                <div className="absolute bottom-1 right-1 pointer-events-none opacity-40 text-indigo-400">
-                  <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor">
-                    <path d="M8 0L10 2L2 10L0 8L8 0Z M8 5L10 7L7 10L5 8L8 5Z" />
-                  </svg>
-                </div>
-              </div>
-            </div>
-          )}
+            );
+          })()}
         </div>
       )}
 
