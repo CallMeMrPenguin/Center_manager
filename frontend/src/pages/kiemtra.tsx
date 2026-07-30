@@ -3,7 +3,7 @@ import {
   FileCheck, Upload, Play, RefreshCw, CheckCircle2, XCircle, 
   Clock, Shuffle, Save, ArrowLeft, ArrowRight, Highlighter, Eye, EyeOff, Printer,
   ChevronLeft, ChevronRight, Bookmark, Flag, Maximize2, Minimize2, MoreVertical, Sparkles, RotateCcw, Check,
-  Code, FileText
+  Code, FileText, GripVertical, Move
 } from 'lucide-react';
 import { api } from '../api';
 import { showToast } from '../components/Toast';
@@ -56,9 +56,13 @@ export default function KiemTraPage() {
   const [timerRemaining, setTimerRemaining] = useState(0);
   const [questionTimer, setQuestionTimer] = useState(0);
 
-  // UI Modes
+  // UI Modes & Popout Draggable Timer
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [timerPos, setTimerPos] = useState({ x: 30, y: 30 });
+  const [isDraggingTimer, setIsDraggingTimer] = useState(false);
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const [showPopoutTimer, setShowPopoutTimer] = useState(true);
 
   // Review & Annotation mode state
   const [highlightMode, setHighlightMode] = useState(false);
@@ -69,6 +73,47 @@ export default function KiemTraPage() {
   // Review Pagination State
   const [reviewPage, setReviewPage] = useState(1);
   const pageSize = 20;
+
+  // Auto initialize popout timer position on fullscreen toggle
+  useEffect(() => {
+    if (isFullscreen) {
+      const initialX = Math.max(20, window.innerWidth - 270);
+      const initialY = 80;
+      setTimerPos({ x: initialX, y: initialY });
+      setShowPopoutTimer(true);
+    }
+  }, [isFullscreen]);
+
+  // Handle dragging floating timer widget across screen
+  useEffect(() => {
+    if (!isDraggingTimer) return;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      const newX = Math.max(10, Math.min(window.innerWidth - 180, e.clientX - dragOffset.x));
+      const newY = Math.max(10, Math.min(window.innerHeight - 80, e.clientY - dragOffset.y));
+      setTimerPos({ x: newX, y: newY });
+    };
+
+    const handleMouseUp = () => {
+      setIsDraggingTimer(false);
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseup', handleMouseUp);
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isDraggingTimer, dragOffset]);
+
+  const handleTimerMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsDraggingTimer(true);
+    setDragOffset({
+      x: e.clientX - timerPos.x,
+      y: e.clientY - timerPos.y
+    });
+  };
 
   useEffect(() => {
     loadClasses();
@@ -787,19 +832,27 @@ export default function KiemTraPage() {
                       {/* Right: Timer + Bookmark + Fullscreen + Sidebar Toggle */}
                       <div className="flex items-center gap-2">
                         {timerMode === 'global' && (
-                          <div className="flex items-center gap-2 bg-[#121626] border border-[#263152] px-3 py-1 rounded-xl shadow-inner">
+                          <button
+                            onClick={() => setShowPopoutTimer(!showPopoutTimer)}
+                            className="flex items-center gap-2 bg-[#121626] hover:bg-[#1c233c] border border-[#263152] px-3 py-1 rounded-xl shadow-inner transition cursor-pointer"
+                            title="Nhấp để Ẩn / Hiện Cửa sổ Đồng hồ nổi"
+                          >
                             <Clock size={14} className="text-indigo-400" />
                             <span className="text-xs text-slate-400 font-bold">Còn lại</span>
                             <span className="text-xs font-black text-white font-mono">{formattedTimerRemaining}</span>
-                          </div>
+                          </button>
                         )}
 
                         {timerMode === 'per_question' && (
-                          <div className="flex items-center gap-2 bg-[#121626] border border-[#263152] px-3 py-1 rounded-xl shadow-inner">
+                          <button
+                            onClick={() => setShowPopoutTimer(!showPopoutTimer)}
+                            className="flex items-center gap-2 bg-[#121626] hover:bg-[#1c233c] border border-[#263152] px-3 py-1 rounded-xl shadow-inner transition cursor-pointer"
+                            title="Nhấp để Ẩn / Hiện Cửa sổ Đồng hồ nổi"
+                          >
                             <Clock size={14} className="text-amber-400" />
                             <span className="text-xs text-slate-400 font-bold">Thời gian câu</span>
                             <span className="text-xs font-black text-amber-400 font-mono">{questionTimer}s</span>
-                          </div>
+                          </button>
                         )}
 
                         <button
@@ -931,6 +984,83 @@ export default function KiemTraPage() {
               );
             })()}
           </div>
+
+          {/* FLOATING DRAGGABLE & RESIZABLE POPOUT TIMER WIDGET */}
+          {timerMode !== 'none' && (isFullscreen || showPopoutTimer) && (
+            <div
+              style={{
+                position: 'fixed',
+                left: `${timerPos.x}px`,
+                top: `${timerPos.y}px`,
+                zIndex: 200,
+              }}
+              className="resize-both overflow-hidden min-w-[210px] min-h-[110px] w-[240px] h-[130px] max-w-[500px] max-h-[300px] bg-[#0c0f1e] border-2 border-indigo-500/50 rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.8)] flex flex-col transition-shadow duration-200"
+            >
+              {/* DRAG HEADER HANDLE */}
+              <div
+                onMouseDown={handleTimerMouseDown}
+                className="cursor-move select-none flex items-center justify-between bg-[#141a2e] px-3 py-1.5 border-b border-[#253259] rounded-t-2xl shrink-0"
+                title="Kéo thanh này để di chuyển đồng hồ tự do trên màn hình"
+              >
+                <div className="flex items-center gap-1.5 text-indigo-400 font-black text-xs">
+                  <GripVertical size={14} className="text-slate-400" />
+                  <Clock size={13} className={timerMode === 'global' ? "text-emerald-400" : "text-amber-400"} />
+                  <span className="text-[11px] text-white tracking-wide font-extrabold uppercase">
+                    {timerMode === 'global' ? 'Đồng Hồ Tổng' : 'Thời Gian Câu'}
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={() => setTimerPos({ x: Math.max(20, window.innerWidth - 270), y: 80 })}
+                    className="p-1 text-slate-400 hover:text-white rounded hover:bg-white/10 transition cursor-pointer"
+                    title="Đặt lại vị trí ban đầu"
+                  >
+                    <RotateCcw size={12} />
+                  </button>
+                  {isFullscreen && (
+                    <button
+                      onClick={() => setShowPopoutTimer(!showPopoutTimer)}
+                      className="p-1 text-slate-400 hover:text-white rounded hover:bg-white/10 transition cursor-pointer"
+                      title={showPopoutTimer ? "Thu gọn đồng hồ" : "Mở rộng đồng hồ"}
+                    >
+                      {showPopoutTimer ? <Minimize2 size={12} /> : <Maximize2 size={12} />}
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* TIMER BODY DISPLAY */}
+              <div className="flex-1 p-3 flex flex-col items-center justify-center bg-[#070913] text-center select-none overflow-hidden relative">
+                {timerMode === 'global' ? (
+                  <>
+                    <div className="text-3xl sm:text-4xl font-black text-emerald-400 font-mono tracking-wider drop-shadow-[0_0_12px_rgba(52,211,153,0.3)]">
+                      {formattedTimerRemaining}
+                    </div>
+                    <span className="text-[10px] font-bold text-slate-400 mt-1">
+                      Tổng: {Math.round(globalTimeSeconds / 60)} phút
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <div className="text-3xl sm:text-4xl font-black text-amber-400 font-mono tracking-wider drop-shadow-[0_0_12px_rgba(251,191,36,0.3)]">
+                      {questionTimer}s
+                    </div>
+                    <span className="text-[10px] font-bold text-slate-400 mt-1">
+                      Giới hạn câu: {perQuestionSeconds}s
+                    </span>
+                  </>
+                )}
+
+                {/* RESIZE CORNER HINT ICON */}
+                <div className="absolute bottom-1 right-1 pointer-events-none opacity-40 text-indigo-400">
+                  <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor">
+                    <path d="M8 0L10 2L2 10L0 8L8 0Z M8 5L10 7L7 10L5 8L8 5Z" />
+                  </svg>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
