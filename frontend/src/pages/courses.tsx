@@ -230,6 +230,8 @@ export default function CoursesPage() {
       {/* TABLE */}
       <div className="flex-1 min-h-[380px] bg-[#0d1018] border border-white/10 rounded-2xl overflow-hidden flex flex-col">
         <DataTable
+          tableId="courses-table"
+          exportFilename="danh_sach_khoa_hoc"
           data={courses}
           columns={columns}
           loading={loading}

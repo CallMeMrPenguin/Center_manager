@@ -291,6 +291,8 @@ export default function UnitConfig() {
 
                 return (
                   <DataTable
+                    tableId="unit-config-units-table"
+                    exportFilename="cau_hinh_bai_hoc"
                     data={rows}
                     columns={unitColumns}
                     emptyMessage="Không tìm thấy bài học nào phù hợp."
@@ -398,6 +400,8 @@ export default function UnitConfig() {
 
               return (
                 <DataTable
+                  tableId="unit-config-exercises-table"
+                  exportFilename="cau_hinh_dang_bai"
                   data={exerciseData}
                   columns={exerciseColumns}
                   pageSize={20}

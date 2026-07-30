@@ -1990,6 +1990,8 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
 
                 return (
                   <DataTable
+                    tableId="question-bank-csv-preview-table"
+                    exportFilename="xem_truoc_cau_hoi"
                     data={csvPreviewModal.items}
                     columns={csvPreviewColumns}
                     pageSize={20}

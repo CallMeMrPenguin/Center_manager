@@ -1183,6 +1183,7 @@ export default function ClassesPage() {
 
               {/* UNIFIED ATTENDANCE & GRADES DATATABLE */}
               <DataTable
+                tableId="classes-attendance-table"
                 data={attendanceRecords}
                 columns={attendanceColumns}
                 pageSize={20}

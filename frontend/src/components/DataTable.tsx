@@ -492,6 +492,19 @@ export function DataTable<TData>({
   const [columnOrder, setColumnOrder] = useState<ColumnOrderState>(() => savedLayout?.order || []);
   const [columnAlignments, setColumnAlignments] = useState<Record<string, 'center' | 'left'>>(() => savedLayout?.alignments || {});
 
+  // Re-sync layout state when storageKey or savedLayout changes
+  useEffect(() => {
+    if (!storageKey) return;
+    try {
+      const item = localStorage.getItem(storageKey);
+      const layout = item ? JSON.parse(item) : null;
+      setColumnSizing(layout?.sizing || {});
+      setColumnVisibility(layout?.visibility || initialColumnVisibility);
+      setColumnOrder(layout?.order || []);
+      setColumnAlignments(layout?.alignments || {});
+    } catch (e) {}
+  }, [storageKey, initialColumnVisibility]);
+
   useEffect(() => {
     if (!storageKey) return;
     try {
@@ -823,7 +836,7 @@ export function DataTable<TData>({
                       <tr key={headerGroup.id}>
                         {headerGroup.headers.map(header => {
                           const isSelectCol = header.column.id === 'select' || header.column.id === '_expander';
-                          const align = isSelectCol ? 'center' : (columnAlignments[header.column.id] || 'center');
+                          const align = isSelectCol ? 'center' : (columnAlignments[header.column.id] || 'left');
 
                           return (
                             <DraggableHeader

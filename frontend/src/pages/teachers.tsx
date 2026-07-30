@@ -267,6 +267,8 @@ export default function TeachersPage() {
       {/* TABLE */}
       <div className="flex-1 min-h-[380px] bg-[#0f1320] border border-[#28334e] rounded-2xl overflow-hidden flex flex-col">
         <DataTable
+          tableId="teachers-table"
+          exportFilename="danh_sach_giao_vien"
           data={teachers}
           columns={columns}
           loading={loading}

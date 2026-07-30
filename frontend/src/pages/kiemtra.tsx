@@ -64,6 +64,7 @@ export default function KiemTraPage() {
   const [isDraggingTimer, setIsDraggingTimer] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [isResizingTimer, setIsResizingTimer] = useState(false);
+  const [resizeMode, setResizeMode] = useState<'se' | 'e' | 's'>('se');
   const [resizeStart, setResizeStart] = useState({ x: 0, y: 0, w: 240, h: 130 });
   const [showPopoutTimer, setShowPopoutTimer] = useState(true);
 
@@ -114,8 +115,17 @@ export default function KiemTraPage() {
     if (!isResizingTimer) return;
 
     const handleMouseMove = (e: MouseEvent) => {
-      const newW = Math.max(180, Math.min(800, resizeStart.w + (e.clientX - resizeStart.x)));
-      const newH = Math.max(100, Math.min(500, resizeStart.h + (e.clientY - resizeStart.y)));
+      const deltaX = e.clientX - resizeStart.x;
+      const deltaY = e.clientY - resizeStart.y;
+
+      const newW = resizeMode === 's'
+        ? resizeStart.w
+        : Math.max(160, Math.min(1200, resizeStart.w + deltaX));
+
+      const newH = resizeMode === 'e'
+        ? resizeStart.h
+        : Math.max(90, Math.min(600, resizeStart.h + deltaY));
+
       setTimerSize({ width: newW, height: newH });
     };
 
@@ -129,7 +139,7 @@ export default function KiemTraPage() {
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [isResizingTimer, resizeStart]);
+  }, [isResizingTimer, resizeStart, resizeMode]);
 
   const handleTimerMouseDown = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -140,10 +150,11 @@ export default function KiemTraPage() {
     });
   };
 
-  const handleTimerResizeMouseDown = (e: React.MouseEvent) => {
+  const handleTimerResizeMouseDown = (e: React.MouseEvent, mode: 'se' | 'e' | 's' = 'se') => {
     e.preventDefault();
     e.stopPropagation();
     setIsResizingTimer(true);
+    setResizeMode(mode);
     setResizeStart({
       x: e.clientX,
       y: e.clientY,
@@ -1022,10 +1033,25 @@ export default function KiemTraPage() {
             })()}
           </div>
 
+          {/* GLOBAL TRANSPARENT OVERLAY CAPTURING MOUSE DURING DRAG OR RESIZE */}
+          {(isDraggingTimer || isResizingTimer) && (
+            <div
+              className={`fixed inset-0 z-[9999] bg-transparent ${
+                isDraggingTimer
+                  ? 'cursor-move'
+                  : resizeMode === 'e'
+                  ? 'cursor-ew-resize'
+                  : resizeMode === 's'
+                  ? 'cursor-ns-resize'
+                  : 'cursor-se-resize'
+              }`}
+            />
+          )}
+
           {/* FLOATING DRAGGABLE & RESIZABLE POPOUT TIMER WIDGET */}
           {timerMode !== 'none' && (isFullscreen || showPopoutTimer) && (() => {
-            const dynamicFontSize = Math.max(22, Math.min(timerSize.width * 0.18, timerSize.height * 0.38));
-            const dynamicSubtextSize = Math.max(10, Math.min(timerSize.width * 0.04, 15));
+            const dynamicFontSize = Math.max(20, Math.min(timerSize.width * 0.18, timerSize.height * 0.45));
+            const dynamicSubtextSize = Math.max(10, Math.min(timerSize.width * 0.045, 15));
 
             return (
               <div
@@ -1035,14 +1061,14 @@ export default function KiemTraPage() {
                   top: `${timerPos.y}px`,
                   width: `${timerSize.width}px`,
                   height: `${timerSize.height}px`,
-                  zIndex: 200,
+                  zIndex: 300,
                 }}
-                className="overflow-hidden min-w-[180px] min-h-[100px] max-w-[800px] max-h-[500px] bg-[#0c0f1e] border-2 border-indigo-500/50 rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.8)] flex flex-col transition-shadow duration-200 select-none relative"
+                className="overflow-hidden min-w-[160px] min-h-[90px] max-w-[1200px] max-h-[600px] bg-[#0c0f1e] border-2 border-indigo-500/50 rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.8)] flex flex-col transition-shadow duration-200 select-none relative group/timer"
               >
                 {/* DRAG HEADER HANDLE */}
                 <div
                   onMouseDown={handleTimerMouseDown}
-                  className="cursor-move select-none flex items-center justify-between bg-[#141a2e] px-3 py-1.5 border-b border-[#253259] rounded-t-2xl shrink-0"
+                  className="cursor-move select-none flex items-center justify-between bg-[#141a2e] px-3 py-1.5 border-b border-[#253259] rounded-t-2xl shrink-0 z-10"
                   title="Kéo thanh này để di chuyển đồng hồ tự do trên màn hình"
                 >
                   <div className="flex items-center gap-1.5 text-indigo-400 font-black text-xs min-w-0">
@@ -1077,7 +1103,7 @@ export default function KiemTraPage() {
                 </div>
 
                 {/* TIMER BODY DISPLAY */}
-                <div className="flex-1 p-3 flex flex-col items-center justify-center bg-[#070913] text-center select-none overflow-hidden relative">
+                <div className="flex-1 p-2 sm:p-3 flex flex-col items-center justify-center bg-[#070913] text-center select-none overflow-hidden relative">
                   {timerMode === 'global' ? (
                     <>
                       <div
@@ -1088,7 +1114,7 @@ export default function KiemTraPage() {
                       </div>
                       <span
                         style={{ fontSize: `${dynamicSubtextSize}px` }}
-                        className="font-bold text-slate-400 mt-1"
+                        className="font-bold text-slate-400 mt-1 truncate max-w-full px-1"
                       >
                         Tổng: {Math.round(globalTimeSeconds / 60)} phút
                       </span>
@@ -1103,20 +1129,34 @@ export default function KiemTraPage() {
                       </div>
                       <span
                         style={{ fontSize: `${dynamicSubtextSize}px` }}
-                        className="font-bold text-slate-400 mt-1"
+                        className="font-bold text-slate-400 mt-1 truncate max-w-full px-1"
                       >
                         Giới hạn câu: {perQuestionSeconds}s
                       </span>
                     </>
                   )}
 
-                  {/* INTERACTIVE RESIZE CORNER HANDLE */}
+                  {/* RIGHT EDGE RESIZE HANDLE */}
                   <div
-                    onMouseDown={handleTimerResizeMouseDown}
-                    className="absolute bottom-0 right-0 w-7 h-7 cursor-se-resize flex items-end justify-end p-1 z-20 text-indigo-400 hover:text-indigo-200 hover:scale-125 transition-all select-none group"
-                    title="Kéo góc này để thay đổi kích thước đồng hồ"
+                    onMouseDown={(e) => handleTimerResizeMouseDown(e, 'e')}
+                    className="absolute right-0 top-0 bottom-0 w-2.5 cursor-ew-resize hover:bg-indigo-500/40 transition-colors z-20"
+                    title="Kéo cạnh này để thay đổi chiều rộng"
+                  />
+
+                  {/* BOTTOM EDGE RESIZE HANDLE */}
+                  <div
+                    onMouseDown={(e) => handleTimerResizeMouseDown(e, 's')}
+                    className="absolute bottom-0 left-0 right-0 h-2.5 cursor-ns-resize hover:bg-indigo-500/40 transition-colors z-20"
+                    title="Kéo cạnh này để thay đổi chiều cao"
+                  />
+
+                  {/* CORNER RESIZE HANDLE (SE) */}
+                  <div
+                    onMouseDown={(e) => handleTimerResizeMouseDown(e, 'se')}
+                    className="absolute bottom-0 right-0 w-8 h-8 cursor-se-resize flex items-end justify-end p-1.5 z-30 text-indigo-400 hover:text-indigo-200 transition-all select-none bg-indigo-500/10 hover:bg-indigo-500/30 rounded-tl-xl border-t border-l border-indigo-500/30 group/corner"
+                    title="Kéo góc này để chỉnh kích thước đồng hồ tự do"
                   >
-                    <svg width="14" height="14" viewBox="0 0 10 10" fill="currentColor" className="group-hover:drop-shadow-[0_0_8px_rgba(99,102,241,0.8)]">
+                    <svg width="14" height="14" viewBox="0 0 10 10" fill="currentColor" className="group-hover/corner:scale-110 transition-transform drop-shadow-[0_0_8px_rgba(99,102,241,0.8)]">
                       <path d="M8 0L10 2L2 10L0 8L8 0Z M8 5L10 7L7 10L5 8L8 5Z" />
                     </svg>
                   </div>

@@ -633,6 +633,8 @@ export default function SchedulePage() {
 
             return (
               <DataTable
+                tableId="schedule-table"
+                exportFilename="lich_hoc"
                 data={sessions}
                 columns={sessionColumns}
                 loading={loading}

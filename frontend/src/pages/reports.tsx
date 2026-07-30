@@ -1341,6 +1341,8 @@ export default function ReportsPage() {
 
         </div>
         <DataTable
+          tableId="reports-rankings-table"
+          exportFilename="bang_xep_hang_hoc_sinh"
           data={filteredRankings}
           columns={rankingColumns}
           loading={loading}
@@ -1370,6 +1372,7 @@ export default function ReportsPage() {
           )}
         </div>
         <DataTable
+          tableId="reports-history-table"
           data={sessionRecords}
           columns={historyColumns}
           loading={loading}

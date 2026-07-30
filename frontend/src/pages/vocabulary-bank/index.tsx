@@ -1662,6 +1662,8 @@ export default function VocabularyBank({ isActive }: { isActive?: boolean }) {
 
                 return (
                   <DataTable
+                    tableId="vocab-bank-csv-preview-table"
+                    exportFilename="xem_truoc_tu_vung"
                     data={csvPreviewModal.items}
                     columns={csvPreviewColumns}
                     pageSize={20}

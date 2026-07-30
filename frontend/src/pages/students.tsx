@@ -385,6 +385,8 @@ export default function StudentsPage() {
       {/* STUDENTS TABLE */}
       <div className="bg-[#14192b] border border-[#28334e] rounded-2xl overflow-hidden shadow-2xl flex flex-col">
         <DataTable
+          tableId="students-table"
+          exportFilename="danh_sach_hoc_sinh"
           data={students}
           columns={columns}
           loading={loading}
