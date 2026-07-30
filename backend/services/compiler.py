@@ -88,6 +88,57 @@ def get_instruction_text(ex_type: str, is_mcq: bool = True) -> str:
     else:
         return INSTRUCTION_MAP_NON_MCQ.get(ex_type, "Answer each of the following questions.")
 
+def normalize_input_exercises(exercises: Any) -> List[Dict[str, Any]]:
+    """
+    Normalizes any input JSON format (dict with 'data'/'questions'/'exercises'/'list', 
+    nested section objects with 'k' containing sub-questions for non-passage types, or flat lists)
+    into a standardized list of exercise objects for the compiler.
+    """
+    if isinstance(exercises, dict):
+        for key in ["data", "exercises", "questions", "list"]:
+            if key in exercises and isinstance(exercises[key], list):
+                exercises = exercises[key]
+                break
+        else:
+            if "t" in exercises or "q" in exercises:
+                exercises = [exercises]
+            else:
+                return []
+
+    if not isinstance(exercises, list):
+        return []
+
+    normalized = []
+    for ex in exercises:
+        if not isinstance(ex, dict):
+            continue
+        
+        ex_type = ex.get("t", "mq")
+        k_list = ex.get("k", [])
+
+        if isinstance(k_list, list) and len(k_list) > 0 and ex_type not in ["cz", "rd", "wb"]:
+            title_prefix = ex.get("title_prefix") or ex.get("prefix") or ex.get("title_num")
+            custom_inst = ex.get("instruction") or ex.get("title") or ex.get("x")
+            
+            for sub in k_list:
+                if isinstance(sub, dict):
+                    item = {
+                        "t": ex_type,
+                        "title_prefix": title_prefix,
+                        "instruction": custom_inst,
+                        "q": sub.get("q"),
+                        "x": sub.get("x", ""),
+                        "o": sub.get("o", []),
+                        "a": sub.get("a", "")
+                    }
+                    if "fmt" in ex and "fmt" not in item:
+                        item["fmt"] = ex["fmt"]
+                    normalized.append(item)
+        else:
+            normalized.append(ex)
+
+    return normalized
+
 def parse_text_formatting(text: str) -> List[Dict[str, Any]]:
     import re
     if not text:
@@ -692,6 +743,7 @@ class WordDocumentCompilerPyWin32:
 
     def compile(self, exercises: List[Dict[str, Any]], output_filepath: Any, grade: str = "", unit: str = "", version_code: str = "", include_answer_key: bool = True, is_answer_key: bool = False, is_test: bool = False):
         self.is_answer_key = is_answer_key
+        exercises = normalize_input_exercises(exercises)
         try:
             self._init_word()
             
@@ -1265,16 +1317,7 @@ class WordDocumentCompilerDocx:
                     run.font.size = Pt(11)
 
     def compile_exercises(self, exercises: List[Dict[str, Any]], grade: str = "", unit: str = "", version_code: str = "", include_answer_key: bool = True):
-        if isinstance(exercises, dict):
-            for key in ["data", "exercises", "questions", "list"]:
-                if key in exercises and isinstance(exercises[key], list):
-                    exercises = exercises[key]
-                    break
-            else:
-                if "t" in exercises or "q" in exercises:
-                    exercises = [exercises]
-                else:
-                    raise ValueError("JSON dictionary does not contain a list of exercises.")
+        exercises = normalize_input_exercises(exercises)
 
         if grade or unit or version_code:
             self.add_test_header(grade, unit, version_code)
