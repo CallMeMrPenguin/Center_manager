@@ -488,7 +488,16 @@ export function DataTable<TData>({
   }, [storageKey]);
 
   const [columnSizing, setColumnSizing] = useState<Record<string, number>>(() => savedLayout?.sizing || {});
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(() => savedLayout?.visibility || initialColumnVisibility);
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(() => {
+    const baseVis = { ...initialColumnVisibility, ...(savedLayout?.visibility || {}) };
+    columns.forEach((col: any) => {
+      const id = col.id || col.accessorKey;
+      if (id && baseVis[id] === undefined) {
+        baseVis[id] = true;
+      }
+    });
+    return baseVis;
+  });
   const [columnOrder, setColumnOrder] = useState<ColumnOrderState>(() => savedLayout?.order || []);
   const [columnAlignments, setColumnAlignments] = useState<Record<string, 'center' | 'left'>>(() => savedLayout?.alignments || {});
 
@@ -499,11 +508,18 @@ export function DataTable<TData>({
       const item = localStorage.getItem(storageKey);
       const layout = item ? JSON.parse(item) : null;
       setColumnSizing(layout?.sizing || {});
-      setColumnVisibility(layout?.visibility || initialColumnVisibility);
+      const baseVis = { ...initialColumnVisibility, ...(layout?.visibility || {}) };
+      columns.forEach((col: any) => {
+        const id = col.id || col.accessorKey;
+        if (id && baseVis[id] === undefined) {
+          baseVis[id] = true;
+        }
+      });
+      setColumnVisibility(baseVis);
       setColumnOrder(layout?.order || []);
       setColumnAlignments(layout?.alignments || {});
     } catch (e) {}
-  }, [storageKey, initialColumnVisibility]);
+  }, [storageKey, columns, initialColumnVisibility]);
 
   useEffect(() => {
     if (!storageKey) return;

@@ -363,6 +363,14 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
   const [showActionsMenu, setShowActionsMenu] = useState(false);
   const actionsMenuRef = useRef<HTMLDivElement>(null);
 
+  const [activeCompareQuestion, setActiveCompareQuestion] = useState<{
+    importedText: string;
+    matchedText: string;
+    similarityRatio?: number;
+    reason?: string;
+    isDuplicate?: boolean;
+  } | null>(null);
+
   const csvPreviewColumns = useMemo<ColumnDef<any>[]>(() => [
     {
       accessorKey: 'grade',
@@ -432,17 +440,45 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
       accessorFn: (row) => row.is_duplicate ? 'Trùng lặp' : row.is_similar ? `Tương đồng (${Math.round((row.similarity_ratio || 0) * 100)}%)` : 'Mới hợp lệ',
       cell: ({ row }) => {
         const item = row.original;
-        return item.is_duplicate ? (
-          <span className="flex items-center gap-1.5 text-rose-450 text-[0.66rem] bg-rose-500/10 px-2 py-0.5 rounded border border-rose-500/20" title={item.duplicate_reason}>
-            <AlertTriangle size={12} />
-            <span>Trùng lặp</span>
-          </span>
-        ) : item.is_similar ? (
-          <span className="flex items-center gap-1.5 text-amber-400 text-[0.66rem] bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20" title={item.duplicate_reason}>
-            <AlertTriangle size={12} />
-            <span>Tương đồng ({Math.round((item.similarity_ratio || 0) * 100)}%)</span>
-          </span>
-        ) : (
+        if (item.is_duplicate) {
+          return (
+            <button
+              type="button"
+              onClick={() => setActiveCompareQuestion({
+                importedText: item.x,
+                matchedText: item.similar_question || item.duplicate_reason || 'Câu hỏi đã có trong CSDL',
+                reason: item.duplicate_reason,
+                isDuplicate: true
+              })}
+              className="flex items-center gap-1.5 text-rose-450 text-[0.66rem] bg-rose-500/10 hover:bg-rose-500/20 px-2 py-1 rounded-lg border border-rose-500/25 font-bold transition cursor-pointer"
+              title="Bấm để xem câu hỏi trùng lặp trong CSDL"
+            >
+              <AlertTriangle size={12} />
+              <span>Trùng lặp (Xem)</span>
+            </button>
+          );
+        }
+        if (item.is_similar) {
+          const pct = Math.round((item.similarity_ratio || 0) * 100);
+          return (
+            <button
+              type="button"
+              onClick={() => setActiveCompareQuestion({
+                importedText: item.x,
+                matchedText: item.similar_question || item.duplicate_reason || '',
+                similarityRatio: item.similarity_ratio,
+                reason: item.duplicate_reason,
+                isDuplicate: false
+              })}
+              className="flex items-center gap-1.5 text-amber-400 text-[0.66rem] bg-amber-500/10 hover:bg-amber-500/20 px-2 py-1 rounded-lg border border-amber-500/25 font-bold transition cursor-pointer"
+              title="Bấm để xem câu hỏi tương đồng trong CSDL"
+            >
+              <AlertTriangle size={12} />
+              <span>Tương đồng ({pct}%) (Xem)</span>
+            </button>
+          );
+        }
+        return (
           <span className="flex items-center gap-1.5 text-emerald-400 text-[0.66rem] bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
             <CheckCircle2 size={12} />
             <span>Mới hợp lệ</span>
@@ -1985,7 +2021,7 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
 
       {/* CSV IMPORT VALIDATION DUPLICATE REPORT DIALOG */}
       {csvPreviewModal.show && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-6">
+        <div className="fixed inset-0 bg-black/85 z-50 flex items-center justify-center p-6">
           <div className="bg-[#111827] border border-slate-850 rounded-3xl w-full max-w-4xl h-[80vh] flex flex-col overflow-hidden shadow-2xl animate-fade-in">
             {/* Header */}
             <div className="h-14 border-b border-slate-900 bg-[#0A0D1A]/50 flex items-center justify-between px-6 shrink-0">
@@ -2014,7 +2050,7 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
                 </p>
               </div>
               <div className="bg-amber-500/5 border border-amber-500/15 rounded-xl p-3">
-                <p className="text-[0.66rem] font-bold text-amber-500 uppercase">Tương đồng (&gt;70%)</p>
+                <p className="text-[0.66rem] font-bold text-amber-500 uppercase">Tương đồng (&gt;75%)</p>
                 <p className="text-xl font-black text-amber-400 mt-1">
                   {csvPreviewModal.items.filter(x => x.is_similar && !x.is_duplicate).length}
                 </p>
@@ -2058,6 +2094,68 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
                   Bắt đầu nạp
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* COMPARISON MODAL FOR SIMILAR / DUPLICATE QUESTIONS */}
+      {activeCompareQuestion && (
+        <div className="fixed inset-0 bg-black/85 z-[60] flex items-center justify-center p-4">
+          <div className="bg-[#111827] border border-slate-800 rounded-3xl w-full max-w-2xl p-6 flex flex-col gap-4 text-slate-200 shadow-2xl animate-fade-in">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+              <h3 className="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2">
+                <AlertTriangle className={activeCompareQuestion.isDuplicate ? "text-rose-500" : "text-amber-500"} size={16} />
+                Chi tiết đối chiếu {activeCompareQuestion.isDuplicate ? "Trùng lặp 100%" : `Tương đồng ${Math.round((activeCompareQuestion.similarityRatio || 0) * 100)}%`}
+              </h3>
+              <button
+                onClick={() => setActiveCompareQuestion(null)}
+                className="text-slate-500 hover:text-white transition cursor-pointer"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            <div className="flex flex-col gap-4 text-xs">
+              {/* Question 1: From CSV file */}
+              <div className="flex flex-col gap-1.5 bg-[#080b12] border border-blue-500/30 p-4 rounded-2xl">
+                <span className="text-[10px] font-bold text-blue-400 uppercase tracking-wider">
+                  1. Nội dung câu hỏi trong file nạp (CSV):
+                </span>
+                <p className="text-slate-200 font-semibold leading-relaxed">
+                  {activeCompareQuestion.importedText}
+                </p>
+              </div>
+
+              {/* Question 2: Matched question in DB */}
+              <div className={`flex flex-col gap-1.5 bg-[#080b12] border p-4 rounded-2xl ${
+                activeCompareQuestion.isDuplicate ? 'border-rose-500/30' : 'border-amber-500/30'
+              }`}>
+                <span className={`text-[10px] font-bold uppercase tracking-wider ${
+                  activeCompareQuestion.isDuplicate ? 'text-rose-400' : 'text-amber-400'
+                }`}>
+                  2. Câu hỏi tương ứng trong CSDL:
+                </span>
+                <p className="text-slate-200 font-semibold leading-relaxed">
+                  {activeCompareQuestion.matchedText}
+                </p>
+              </div>
+
+              {/* Reason / Info banner */}
+              {activeCompareQuestion.reason && (
+                <div className="p-3 bg-slate-900 border border-slate-800 rounded-xl text-[11px] text-slate-400">
+                  <strong>Ghi chú kiểm tra:</strong> {activeCompareQuestion.reason}
+                </div>
+              )}
+            </div>
+
+            <div className="flex justify-end pt-2 border-t border-slate-900 mt-1">
+              <button
+                onClick={() => setActiveCompareQuestion(null)}
+                className="px-5 py-2 bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold rounded-xl transition cursor-pointer"
+              >
+                Đóng
+              </button>
             </div>
           </div>
         </div>

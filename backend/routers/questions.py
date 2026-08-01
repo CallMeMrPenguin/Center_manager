@@ -151,44 +151,77 @@ async def api_validate_db_questions(file: UploadFile = File(...)):
     if os.path.exists(temp_path):
         os.remove(temp_path)
 
-    # Validate duplicates and similarity against existing DB questions and within batch
     import difflib, re
-    existing_db = get_questions()
-    existing_texts = [re.sub(r'\s+', ' ', q.get("x", "")).strip().lower() for q in existing_db if q.get("x")]
-    existing_set = set(existing_texts)
 
-    seen_batch = set()
+    def clean_text(s: str) -> str:
+        if not s:
+            return ""
+        text = re.sub(r'[\[\]\(\)_,\.\?\!\-\'\"]+', ' ', str(s))
+        return re.sub(r'\s+', ' ', text).strip().lower()
+
+    existing_db = get_questions()
+    existing_map = {}
+    for q_item in existing_db:
+        cx = clean_text(q_item.get("x", ""))
+        if cx and cx not in existing_map:
+            existing_map[cx] = q_item.get("x", "")
+
+    seen_batch = {}
+
     for q in questions:
         raw_x = q.get("x", "")
-        clean_x = re.sub(r'\s+', ' ', raw_x).strip().lower()
+        clean_x = clean_text(raw_x)
+
         if not clean_x:
             q["is_duplicate"] = False
             q["is_similar"] = False
             continue
 
-        if clean_x in existing_set or clean_x in seen_batch:
+        if clean_x in existing_map:
             q["is_duplicate"] = True
             q["is_similar"] = False
-            q["duplicate_reason"] = "Trùng lặp hoàn toàn với câu hỏi đã có trong CSDL"
+            q["duplicate_reason"] = "Trùng lặp 100% với câu hỏi đã có trong CSDL"
+            q["similar_question"] = existing_map[clean_x]
+        elif clean_x in seen_batch:
+            q["is_duplicate"] = True
+            q["is_similar"] = False
+            q["duplicate_reason"] = "Trùng lặp 100% với một câu hỏi khác trong cùng tệp CSV"
+            q["similar_question"] = seen_batch[clean_x]
         else:
             q["is_duplicate"] = False
-            high_similarity = 0.0
-            for ex_t in existing_texts[:500]:
-                if abs(len(clean_x) - len(ex_t)) > len(clean_x) * 0.4:
+            best_match_text = None
+            best_ratio = 0.0
+
+            for ex_cx, ex_raw in existing_map.items():
+                if abs(len(clean_x) - len(ex_cx)) > max(len(clean_x), len(ex_cx)) * 0.25:
                     continue
-                ratio = difflib.SequenceMatcher(None, clean_x, ex_t).quick_ratio()
-                if ratio > 0.70 and ratio > high_similarity:
-                    high_similarity = ratio
-                    if high_similarity >= 0.95:
+                r = difflib.SequenceMatcher(None, clean_x, ex_cx).ratio()
+                if r >= 0.75 and r > best_ratio:
+                    best_ratio = r
+                    best_match_text = ex_raw
+                    if best_ratio >= 0.95:
                         break
-            if high_similarity > 0.70:
+
+            if best_ratio < 0.75:
+                for b_cx, b_raw in seen_batch.items():
+                    if abs(len(clean_x) - len(b_cx)) > max(len(clean_x), len(b_cx)) * 0.25:
+                        continue
+                    r = difflib.SequenceMatcher(None, clean_x, b_cx).ratio()
+                    if r >= 0.75 and r > best_ratio:
+                        best_ratio = r
+                        best_match_text = b_raw
+                        if best_ratio >= 0.95:
+                            break
+
+            if best_ratio >= 0.75 and best_match_text:
                 q["is_similar"] = True
-                q["similarity_ratio"] = round(high_similarity, 2)
-                q["duplicate_reason"] = f"Tương đồng {int(high_similarity * 100)}% với câu hỏi trong CSDL"
+                q["similarity_ratio"] = round(best_ratio, 2)
+                q["similar_question"] = best_match_text
+                q["duplicate_reason"] = f"Tương đồng {int(best_ratio * 100)}% với: '{best_match_text}'"
             else:
                 q["is_similar"] = False
 
-            seen_batch.add(clean_x)
+            seen_batch[clean_x] = raw_x
 
     return {"success": True, "items": questions}
 
