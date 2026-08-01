@@ -273,6 +273,17 @@ async def api_validate_db_questions(file: UploadFile = File(...)):
                 for w in sig_words_x:
                     word_to_batch_indices[w].append(b_idx)
 
+    def get_sort_key(item):
+        if item.get("is_duplicate"):
+            return (0, 0)
+        elif item.get("is_similar"):
+            ratio = item.get("similarity_ratio", 0)
+            return (1, -ratio)
+        else:
+            return (2, 0)
+
+    questions.sort(key=get_sort_key)
+
     return {"success": True, "items": questions}
 
 @router.post("/api/db/questions/confirm-import")
