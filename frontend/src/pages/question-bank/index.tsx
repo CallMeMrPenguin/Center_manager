@@ -88,7 +88,7 @@ function FastPastedCsvInput({
       }}
       placeholder="Dán nội dung CSV tại đây..."
       rows={6}
-      className="bg-[#070b14] border border-slate-800 focus:border-blue-500/50 p-3 rounded-xl text-xs text-slate-200 outline-none placeholder-slate-600 transition font-mono mt-1 w-full"
+      className="bg-[#070b14] border border-slate-800 focus:border-blue-500/50 p-3 rounded-xl text-xs text-slate-200 outline-none placeholder-slate-600 font-mono mt-1 w-full resize-y"
     />
   );
 }
@@ -368,6 +368,7 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
   const [availableGrades, setAvailableGrades] = useState<string[]>([]);
   const [showImportModal, setShowImportModal] = useState(false);
   const [pastedCsv, setPastedCsv] = useState('');
+  const [hasPastedText, setHasPastedText] = useState(false);
   const pastedCsvRef = useRef('');
   const [selectedCsvFile, setSelectedCsvFile] = useState<File | null>(null);
 
@@ -2757,9 +2758,12 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
               <div className="flex flex-col gap-1.5 bg-[#080b12] border border-slate-855 p-4 rounded-2xl">
                 <label className="text-[10px] font-bold text-slate-450 uppercase">Cách 2: Dán trực tiếp nội dung CSV</label>
                 <FastPastedCsvInput
-                  value={pastedCsv}
                   onFileClear={() => setSelectedCsvFile(null)}
-                  onTextChange={(val) => setPastedCsv(val)}
+                  onTextChange={(val) => {
+                    pastedCsvRef.current = val;
+                    const non = val.trim().length > 0;
+                    setHasPastedText(prev => (prev !== non ? non : prev));
+                  }}
                 />
               </div>
 
@@ -2776,6 +2780,8 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
                 onClick={() => {
                   setShowImportModal(false);
                   setPastedCsv('');
+                  pastedCsvRef.current = '';
+                  setHasPastedText(false);
                   setSelectedCsvFile(null);
                 }}
                 className="px-4 py-2 hover:bg-slate-800 text-slate-400 text-xs font-bold rounded-xl transition cursor-pointer"
@@ -2784,7 +2790,7 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
               </button>
               <button
                 onClick={handleSubmitImport}
-                disabled={loading || (!selectedCsvFile && !pastedCsv.trim())}
+                disabled={loading || (!selectedCsvFile && !hasPastedText)}
                 className="px-5 py-2 bg-gradient-to-tr from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 disabled:from-slate-850 disabled:to-slate-850 disabled:text-slate-500 disabled:cursor-not-allowed text-white text-xs font-black rounded-xl shadow-md shadow-blue-500/10 transition cursor-pointer"
               >
                 Bắt đầu kiểm tra

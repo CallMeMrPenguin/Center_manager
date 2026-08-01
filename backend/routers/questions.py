@@ -152,6 +152,16 @@ async def api_validate_db_questions(file: UploadFile = File(...)):
         os.remove(temp_path)
 
     import difflib, re
+    from collections import defaultdict
+
+    STOP_WORDS = {
+        "the", "a", "an", "is", "are", "was", "were", "of", "in", "to", "for", "with",
+        "on", "at", "from", "by", "about", "as", "into", "like", "through", "after",
+        "over", "between", "out", "against", "during", "without", "before", "under",
+        "around", "among", "and", "or", "but", "if", "not", "no", "can", "will", "just",
+        "là", "và", "của", "trong", "cho", "với", "trên", "tại", "từ", "bởi", "về",
+        "như", "sau", "khi", "ra", "vào", "đến", "theo", "được", "có", "không", "những", "các"
+    }
 
     def clean_text(s: str) -> str:
         if not s:
@@ -159,21 +169,29 @@ async def api_validate_db_questions(file: UploadFile = File(...)):
         text = re.sub(r'[\[\]\(\)_,\.\?\!\-\'\"]+', ' ', str(s))
         return re.sub(r'\s+', ' ', text).strip().lower()
 
+    def get_significant_words(text: str) -> set:
+        words = clean_text(text).split()
+        return {w for w in words if len(w) >= 2 and w not in STOP_WORDS}
+
     existing_db = get_questions()
     existing_map = {}
-    existing_word_sets = []
+    db_items = []
+    word_to_db_indices = defaultdict(list)
 
     for q_item in existing_db:
-        cx = clean_text(q_item.get("x", ""))
+        raw_text = q_item.get("x", "")
+        cx = clean_text(raw_text)
         if cx and cx not in existing_map:
-            raw_text = q_item.get("x", "")
             existing_map[cx] = raw_text
-            words = set(cx.split())
-            if words:
-                existing_word_sets.append((cx, raw_text, words))
+            sig_words = get_significant_words(raw_text)
+            idx = len(db_items)
+            db_items.append((cx, raw_text, sig_words, len(cx)))
+            for w in sig_words:
+                word_to_db_indices[w].append(idx)
 
     seen_batch_map = {}
-    seen_batch_word_sets = []
+    batch_items = []
+    word_to_batch_indices = defaultdict(list)
 
     for q in questions:
         raw_x = q.get("x", "")
@@ -198,17 +216,22 @@ async def api_validate_db_questions(file: UploadFile = File(...)):
             q["is_duplicate"] = False
             best_match_text = None
             best_ratio = 0.0
-            words_x = set(clean_x.split())
+            sig_words_x = get_significant_words(raw_x)
+            len_x = len(clean_x)
 
-            if words_x:
-                for ex_cx, ex_raw, ex_words in existing_word_sets:
-                    if abs(len(clean_x) - len(ex_cx)) > max(len(clean_x), len(ex_cx)) * 0.25:
-                        continue
-                    intersection_len = len(words_x & ex_words)
-                    max_words = max(len(words_x), len(ex_words))
-                    if max_words == 0 or (intersection_len / max_words) < 0.65:
-                        continue
+            if sig_words_x:
+                candidate_counts = defaultdict(int)
+                for w in sig_words_x:
+                    for idx in word_to_db_indices[w]:
+                        candidate_counts[idx] += 1
 
+                min_shared = max(1, int(len(sig_words_x) * 0.35))
+                candidate_indices = [idx for idx, count in candidate_counts.items() if count >= min_shared]
+
+                for idx in candidate_indices:
+                    ex_cx, ex_raw, ex_words, ex_len = db_items[idx]
+                    if abs(len_x - ex_len) > max(len_x, ex_len) * 0.25:
+                        continue
                     r = difflib.SequenceMatcher(None, clean_x, ex_cx).ratio()
                     if r >= 0.75 and r > best_ratio:
                         best_ratio = r
@@ -217,14 +240,17 @@ async def api_validate_db_questions(file: UploadFile = File(...)):
                             break
 
                 if best_ratio < 0.75:
-                    for b_cx, b_raw, b_words in seen_batch_word_sets:
-                        if abs(len(clean_x) - len(b_cx)) > max(len(clean_x), len(b_cx)) * 0.25:
-                            continue
-                        intersection_len = len(words_x & b_words)
-                        max_words = max(len(words_x), len(b_words))
-                        if max_words == 0 or (intersection_len / max_words) < 0.65:
-                            continue
+                    batch_candidate_counts = defaultdict(int)
+                    for w in sig_words_x:
+                        for idx in word_to_batch_indices[w]:
+                            batch_candidate_counts[idx] += 1
 
+                    batch_candidate_indices = [idx for idx, count in batch_candidate_counts.items() if count >= min_shared]
+
+                    for idx in batch_candidate_indices:
+                        b_cx, b_raw, b_words, b_len = batch_items[idx]
+                        if abs(len_x - b_len) > max(len_x, b_len) * 0.25:
+                            continue
                         r = difflib.SequenceMatcher(None, clean_x, b_cx).ratio()
                         if r >= 0.75 and r > best_ratio:
                             best_ratio = r
@@ -241,8 +267,11 @@ async def api_validate_db_questions(file: UploadFile = File(...)):
                 q["is_similar"] = False
 
             seen_batch_map[clean_x] = raw_x
-            if words_x:
-                seen_batch_word_sets.append((clean_x, raw_x, words_x))
+            if sig_words_x:
+                b_idx = len(batch_items)
+                batch_items.append((clean_x, raw_x, sig_words_x, len_x))
+                for w in sig_words_x:
+                    word_to_batch_indices[w].append(b_idx)
 
     return {"success": True, "items": questions}
 
