@@ -41,9 +41,9 @@ const TYPE_MAP: Record<string, string> = {
   'cz': 'Cloze Passage',
   'ro': 'Reordering',
   'rd': 'Reading',
-  'fb': 'Multiple Choice',
+  'fb': 'Fill in the Blank',
   'rw': 'Rewrite Sentences',
-  'wf': 'Multiple Choice',
+  'wf': 'Fill in the Blank',
   'mq': 'Multiple Choice'
 };
 
@@ -1019,7 +1019,8 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
     currentUniqueTypes.forEach(t => {
       defaultCounts[t] = 0;
     });
-    if (defaultCounts['mq'] !== undefined) defaultCounts['mq'] = 10;
+    if (defaultCounts['fb'] !== undefined) defaultCounts['fb'] = 10;
+    else if (defaultCounts['mq'] !== undefined) defaultCounts['mq'] = 10;
 
     setCreateTestConfig({
       source: selectedIds.length > 0 ? 'selected' : 'bank',
