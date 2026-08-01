@@ -68,31 +68,6 @@ function parseUnits(unitStr: string): string[] {
   return clean.split(',').map(p => p.trim()).filter(Boolean);
 }
 
-function FastPastedCsvInput({
-  value,
-  onFileClear,
-  onTextChange,
-}: {
-  value?: string;
-  onFileClear: () => void;
-  onTextChange: (val: string) => void;
-}) {
-  return (
-    <textarea
-      onChange={(e) => {
-        const text = e.target.value;
-        onTextChange(text);
-        if (text.trim()) {
-          onFileClear();
-        }
-      }}
-      placeholder="Dán nội dung CSV tại đây..."
-      rows={6}
-      className="bg-[#070b14] border border-slate-800 focus:border-blue-500/50 p-3 rounded-xl text-xs text-slate-200 outline-none placeholder-slate-600 font-mono mt-1 w-full resize-y"
-    />
-  );
-}
-
 const ColumnHeaderFilter = ({ 
   columnKey, 
   columnLabel, 
@@ -367,9 +342,7 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
   const [editRow, setEditRow] = useState<any>({});
   const [availableGrades, setAvailableGrades] = useState<string[]>([]);
   const [showImportModal, setShowImportModal] = useState(false);
-  const [pastedCsv, setPastedCsv] = useState('');
-  const [hasPastedText, setHasPastedText] = useState(false);
-  const pastedCsvRef = useRef('');
+  const csvTextAreaRef = useRef<HTMLTextAreaElement>(null);
   const [selectedCsvFile, setSelectedCsvFile] = useState<File | null>(null);
 
   // Scoped Deletion Modal State
@@ -706,7 +679,7 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
           fileName: file.name
         });
         setShowImportModal(false);
-        setPastedCsv('');
+        if (csvTextAreaRef.current) csvTextAreaRef.current.value = '';
         setSelectedCsvFile(null);
       }
     } catch (err: any) {
@@ -717,7 +690,7 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
   };
 
   const handleSubmitImport = () => {
-    const rawText = pastedCsvRef.current || pastedCsv;
+    const rawText = csvTextAreaRef.current ? csvTextAreaRef.current.value : "";
     if (selectedCsvFile) {
       handleImportCsvFile(selectedCsvFile);
     } else if (rawText && rawText.trim()) {
@@ -2709,7 +2682,7 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
               <button
                 onClick={() => {
                   setShowImportModal(false);
-                  setPastedCsv('');
+                  if (csvTextAreaRef.current) csvTextAreaRef.current.value = '';
                   setSelectedCsvFile(null);
                 }}
                 className="text-slate-500 hover:text-white transition cursor-pointer"
@@ -2734,7 +2707,7 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
                         const file = e.target.files?.[0];
                         if (file) {
                           setSelectedCsvFile(file);
-                          setPastedCsv(''); // Clear pasted if file chosen
+                          if (csvTextAreaRef.current) csvTextAreaRef.current.value = '';
                         }
                         e.target.value = '';
                       }}
@@ -2758,13 +2731,16 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
               {/* Option 2: Raw pasting */}
               <div className="flex flex-col gap-1.5 bg-[#080b12] border border-slate-855 p-4 rounded-2xl">
                 <label className="text-[10px] font-bold text-slate-450 uppercase">Cách 2: Dán trực tiếp nội dung CSV</label>
-                <FastPastedCsvInput
-                  onFileClear={() => setSelectedCsvFile(null)}
-                  onTextChange={(val) => {
-                    pastedCsvRef.current = val;
-                    const non = val.trim().length > 0;
-                    setHasPastedText(prev => (prev !== non ? non : prev));
+                <textarea
+                  ref={csvTextAreaRef}
+                  onChange={(e) => {
+                    if (e.target.value.trim() && selectedCsvFile) {
+                      setSelectedCsvFile(null);
+                    }
                   }}
+                  placeholder="Dán nội dung CSV tại đây..."
+                  rows={6}
+                  className="bg-[#070b14] border border-slate-800 focus:border-blue-500/50 p-3 rounded-xl text-xs text-slate-200 outline-none placeholder-slate-600 font-mono mt-1 w-full resize-y"
                 />
               </div>
 
@@ -2780,9 +2756,7 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
               <button
                 onClick={() => {
                   setShowImportModal(false);
-                  setPastedCsv('');
-                  pastedCsvRef.current = '';
-                  setHasPastedText(false);
+                  if (csvTextAreaRef.current) csvTextAreaRef.current.value = '';
                   setSelectedCsvFile(null);
                 }}
                 className="px-4 py-2 hover:bg-slate-800 text-slate-400 text-xs font-bold rounded-xl transition cursor-pointer"
@@ -2791,7 +2765,7 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
               </button>
               <button
                 onClick={handleSubmitImport}
-                disabled={loading || (!selectedCsvFile && !hasPastedText)}
+                disabled={loading}
                 className="px-5 py-2 bg-gradient-to-tr from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 disabled:from-slate-850 disabled:to-slate-850 disabled:text-slate-500 disabled:cursor-not-allowed text-white text-xs font-black rounded-xl shadow-md shadow-blue-500/10 transition cursor-pointer"
               >
                 Bắt đầu kiểm tra
