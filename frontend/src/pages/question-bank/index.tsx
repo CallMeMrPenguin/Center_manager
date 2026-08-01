@@ -42,7 +42,9 @@ const TYPE_MAP: Record<string, string> = {
   'ro': 'Reordering',
   'rd': 'Reading',
   'fb': 'Fill in the Blank',
-  'rw': 'Rewrite Sentences'
+  'rw': 'Rewrite Sentences',
+  'wf': 'Word Form',
+  'mq': 'Multiple Choice'
 };
 
 function parseUnits(unitStr: string): string[] {

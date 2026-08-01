@@ -58,7 +58,7 @@ def read_csv_rows(csv_path: str):
     """Helper to read CSV rows by auto-detecting common delimiters."""
     delimiter = ','
     try:
-        with open(csv_path, 'r', encoding='utf-8') as f:
+        with open(csv_path, 'r', encoding='utf-8-sig') as f:
             first_line = f.readline()
             if first_line:
                 # Remove quoted parts to avoid false detection of delimiters inside quotes
@@ -71,7 +71,7 @@ def read_csv_rows(csv_path: str):
     except Exception as e:
         print(f"Delimiter auto-detection failed for {csv_path}: {e}")
         
-    with open(csv_path, 'r', encoding='utf-8') as f:
+    with open(csv_path, 'r', encoding='utf-8-sig') as f:
         reader = csv.reader(f, delimiter=delimiter)
         return list(reader)
 
@@ -85,42 +85,69 @@ def parse_question_bank_csv(csv_path: str):
         return []
         
     header = [h.strip() for h in rows[0]]
+    header_lower = [h.lower() for h in header]
     
-    # Check column indices
-    try:
-        q_idx = header.index("QUESTIONS")
-        t_idx = header.index("QUESTION_TYPE")
-        o1_idx = header.index("OPTION 1")
-        o2_idx = header.index("OPTION 2")
-        o3_idx = header.index("OPTION 3")
-        o4_idx = header.index("OPTION 4")
-        a_idx = header.index("ANSWER")
-    except ValueError as e:
-        raise ValueError(f"CSV is missing required header fields: {e}")
+    def find_idx(aliases):
+        for alias in aliases:
+            a_lower = alias.lower()
+            if a_lower in header_lower:
+                return header_lower.index(a_lower)
+        return -1
+
+    q_idx = find_idx(["questions", "question", "câu hỏi", "cau hoi", "nội dung", "stem"])
+    t_idx = find_idx(["question_type", "question type", "questiontype", "loại câu", "loai cau", "dạng câu", "dang cau"])
+    o1_idx = find_idx(["option 1", "option1", "phương án 1", "phuong an 1", "tùy chọn 1", "lựa chọn 1"])
+    o2_idx = find_idx(["option 2", "option2", "phương án 2", "phuong an 2", "tùy chọn 2", "lựa chọn 2"])
+    o3_idx = find_idx(["option 3", "option3", "phương án 3", "phuong an 3", "tùy chọn 3", "lựa chọn 3"])
+    o4_idx = find_idx(["option 4", "option4", "phương án 4", "phuong an 4", "tùy chọn 4", "lựa chọn 4"])
+    a_idx = find_idx(["answer", "đáp án", "dap an", "đáp án đúng"])
+
+    # Position fallback if standard 11 or 12 column layout
+    if (q_idx == -1 or o1_idx == -1 or a_idx == -1) and len(header) >= 11:
+        if len(header) >= 12:
+            q_idx, t_idx, o1_idx, o2_idx, o3_idx, o4_idx, a_idx = 4, 5, 6, 7, 8, 9, 10
+        elif len(header) == 11:
+            q_idx, t_idx, o1_idx, o2_idx, o3_idx, o4_idx, a_idx = 3, 4, 5, 6, 7, 8, 9
+
+    if q_idx == -1 or o1_idx == -1 or a_idx == -1:
+        missing = []
+        if q_idx == -1: missing.append("QUESTIONS")
+        if o1_idx == -1: missing.append("OPTION 1")
+        if a_idx == -1: missing.append("ANSWER")
+        raise ValueError(f"CSV is missing required header fields: {', '.join(missing)}")
         
-    no_idx = header.index("No.") if "No." in header else -1
-    grade_idx = header.index("GRADE") if "GRADE" in header else -1
-    unit_idx = header.index("UNIT") if "UNIT" in header else -1
-    level_idx = header.index("LEVEL") if "LEVEL" in header else -1
-    freq_idx = header.index("FREQUENCY") if "FREQUENCY" in header else -1
-    test_type_idx = header.index("TEST_TYPE") if "TEST_TYPE" in header else -1
-    
+    no_idx = find_idx(["no.", "no", "stt", "câu số"])
+    grade_idx = find_idx(["grade", "khối", "khoi", "lớp", "lop"])
+    unit_idx = find_idx(["unit", "bài", "bai", "chủ đề"])
+    level_idx = find_idx(["level", "mức độ", "muc do", "độ khó", "do kho"])
+    freq_idx = find_idx(["frequency", "tần suất", "tan suat"])
+    test_type_idx = find_idx(["test_type", "test type", "dạng đề", "dang de", "loại đề"])
+
+    if no_idx == -1 and len(header) >= 12: no_idx = 0
+    if grade_idx == -1 and len(header) >= 12: grade_idx = 1
+    if unit_idx == -1 and len(header) >= 12: unit_idx = 2
+    if test_type_idx == -1 and len(header) >= 12: test_type_idx = 3
+    if level_idx == -1 and len(header) >= 12: level_idx = 11
+
     exercises = []
     for row_idx, row in enumerate(rows[1:], start=2):
         if not row or not any(x.strip() for x in row):
             continue
-        # Skip spacers
         if row[0].strip() == '-':
             continue
             
         try:
             q_num = row[no_idx].strip() if (no_idx != -1 and no_idx < len(row)) else str(row_idx - 1)
-            q_text = row[q_idx].strip() if q_idx < len(row) else ""
-            q_type_raw = row[t_idx].strip() if t_idx < len(row) else ""
+            q_text = row[q_idx].strip() if (q_idx != -1 and q_idx < len(row)) else ""
+            q_type_raw = row[t_idx].strip() if (t_idx != -1 and t_idx < len(row)) else ""
             
             # Map question type
             q_type_raw_lower = q_type_raw.lower()
-            if "pronunciation" in q_type_raw_lower or q_type_raw_lower == "pr":
+            if "fill" in q_type_raw_lower or "blank" in q_type_raw_lower or q_type_raw_lower == "fb":
+                t = "fb"
+            elif "word" in q_type_raw_lower or "form" in q_type_raw_lower or q_type_raw_lower == "wf":
+                t = "wf"
+            elif "pronun" in q_type_raw_lower or q_type_raw_lower == "pr":
                 t = "pr"
             elif "stress" in q_type_raw_lower or q_type_raw_lower == "st":
                 t = "st"
@@ -130,21 +157,31 @@ def parse_question_bank_csv(csv_path: str):
                 t = "sy"
             elif "antonym" in q_type_raw_lower or q_type_raw_lower == "an":
                 t = "an"
+            elif "cloze" in q_type_raw_lower or q_type_raw_lower == "cz":
+                t = "cz"
+            elif "reading" in q_type_raw_lower or q_type_raw_lower == "rd":
+                t = "rd"
+            elif "reorder" in q_type_raw_lower or q_type_raw_lower == "ro":
+                t = "ro"
+            elif "rewrite" in q_type_raw_lower or q_type_raw_lower == "rw":
+                t = "rw"
             else:
                 t = "mq" # default multiple choice
                 
             opts = []
             for idx in [o1_idx, o2_idx, o3_idx, o4_idx]:
-                if idx < len(row):
+                if idx != -1 and idx < len(row):
                     val = row[idx].strip()
                     if val:
                         opts.append(val)
                         
-            ans = row[a_idx].strip() if a_idx < len(row) else ""
+            ans = row[a_idx].strip() if (a_idx != -1 and a_idx < len(row)) else ""
             
-            meta = {}
-            if grade_idx != -1 and grade_idx < len(row): meta["grade"] = row[grade_idx].strip()
-            if unit_idx != -1 and unit_idx < len(row): meta["unit"] = row[unit_idx].strip()
+            grade_val = row[grade_idx].strip() if (grade_idx != -1 and grade_idx < len(row)) else ""
+            unit_val = row[unit_idx].strip() if (unit_idx != -1 and unit_idx < len(row)) else ""
+            level_val = row[level_idx].strip() if (level_idx != -1 and level_idx < len(row)) else ""
+            freq_val = row[freq_idx].strip() if (freq_idx != -1 and freq_idx < len(row)) else ""
+            test_type_val = row[test_type_idx].strip() if (test_type_idx != -1 and test_type_idx < len(row)) else ""
             
             ex = {
                 "t": t,
@@ -152,12 +189,16 @@ def parse_question_bank_csv(csv_path: str):
                 "x": q_text,
                 "o": opts,
                 "a": ans,
-                "level": row[level_idx].strip() if (level_idx != -1 and level_idx < len(row)) else "",
-                "frequency": row[freq_idx].strip() if (freq_idx != -1 and freq_idx < len(row)) else "",
-                "test_type": row[test_type_idx].strip() if (test_type_idx != -1 and test_type_idx < len(row)) else ""
+                "grade": grade_val,
+                "unit": unit_val,
+                "level": level_val,
+                "frequency": freq_val,
+                "test_type": test_type_val,
+                "meta": {
+                    "grade": grade_val,
+                    "unit": unit_val
+                }
             }
-            if meta:
-                ex["meta"] = meta
                 
             exercises.append(ex)
         except Exception as ex:
