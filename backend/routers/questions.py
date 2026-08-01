@@ -225,7 +225,7 @@ async def api_validate_db_questions(file: UploadFile = File(...)):
                     for idx in word_to_db_indices[w]:
                         candidate_counts[idx] += 1
 
-                min_shared = max(1, int(len(sig_words_x) * 0.35))
+                min_shared = max(2, int(len(sig_words_x) * 0.40))
                 candidate_indices = [idx for idx, count in candidate_counts.items() if count >= min_shared]
 
                 for idx in candidate_indices:

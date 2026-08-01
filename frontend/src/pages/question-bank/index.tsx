@@ -717,10 +717,11 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
   };
 
   const handleSubmitImport = () => {
+    const rawText = pastedCsvRef.current || pastedCsv;
     if (selectedCsvFile) {
       handleImportCsvFile(selectedCsvFile);
-    } else if (pastedCsv.trim()) {
-      const file = new File([pastedCsv], "pasted_questions.csv", { type: "text/csv" });
+    } else if (rawText && rawText.trim()) {
+      const file = new File([rawText], "pasted_questions.csv", { type: "text/csv" });
       handleImportCsvFile(file);
     } else {
       showToast("Vui lòng chọn một tệp CSV hoặc dán nội dung CSV!", "warning");
