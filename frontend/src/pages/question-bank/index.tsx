@@ -73,33 +73,19 @@ function FastPastedCsvInput({
   onFileClear,
   onTextChange,
 }: {
-  value: string;
+  value?: string;
   onFileClear: () => void;
   onTextChange: (val: string) => void;
 }) {
-  const [localText, setLocalText] = useState(value);
-  const timerRef = useRef<any>(null);
-
-  useEffect(() => {
-    setLocalText(value);
-  }, [value]);
-
-  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const text = e.target.value;
-    setLocalText(text);
-    if (text.trim()) {
-      onFileClear();
-    }
-    if (timerRef.current) clearTimeout(timerRef.current);
-    timerRef.current = setTimeout(() => {
-      onTextChange(text);
-    }, 100);
-  };
-
   return (
     <textarea
-      value={localText}
-      onChange={handleChange}
+      onChange={(e) => {
+        const text = e.target.value;
+        onTextChange(text);
+        if (text.trim()) {
+          onFileClear();
+        }
+      }}
       placeholder="Dán nội dung CSV tại đây..."
       rows={6}
       className="bg-[#070b14] border border-slate-800 focus:border-blue-500/50 p-3 rounded-xl text-xs text-slate-200 outline-none placeholder-slate-600 transition font-mono mt-1 w-full"
@@ -382,6 +368,7 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
   const [availableGrades, setAvailableGrades] = useState<string[]>([]);
   const [showImportModal, setShowImportModal] = useState(false);
   const [pastedCsv, setPastedCsv] = useState('');
+  const pastedCsvRef = useRef('');
   const [selectedCsvFile, setSelectedCsvFile] = useState<File | null>(null);
 
   // Scoped Deletion Modal State
@@ -2710,7 +2697,7 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
 
       {/* CSV Unified Import Modal */}
       {showImportModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm animate-fade-in p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 animate-fade-in p-4">
           <div className="w-full max-w-lg bg-[#111827] border border-slate-800 rounded-3xl p-6 flex flex-col gap-4 text-slate-200 max-h-[90vh] shadow-2xl">
             <div className="flex items-center justify-between border-b border-slate-900 pb-3">
               <h3 className="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2">

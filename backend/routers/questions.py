@@ -161,12 +161,19 @@ async def api_validate_db_questions(file: UploadFile = File(...)):
 
     existing_db = get_questions()
     existing_map = {}
+    existing_word_sets = []
+
     for q_item in existing_db:
         cx = clean_text(q_item.get("x", ""))
         if cx and cx not in existing_map:
-            existing_map[cx] = q_item.get("x", "")
+            raw_text = q_item.get("x", "")
+            existing_map[cx] = raw_text
+            words = set(cx.split())
+            if words:
+                existing_word_sets.append((cx, raw_text, words))
 
-    seen_batch = {}
+    seen_batch_map = {}
+    seen_batch_word_sets = []
 
     for q in questions:
         raw_x = q.get("x", "")
@@ -182,36 +189,48 @@ async def api_validate_db_questions(file: UploadFile = File(...)):
             q["is_similar"] = False
             q["duplicate_reason"] = "Trùng lặp 100% với câu hỏi đã có trong CSDL"
             q["similar_question"] = existing_map[clean_x]
-        elif clean_x in seen_batch:
+        elif clean_x in seen_batch_map:
             q["is_duplicate"] = True
             q["is_similar"] = False
             q["duplicate_reason"] = "Trùng lặp 100% với một câu hỏi khác trong cùng tệp CSV"
-            q["similar_question"] = seen_batch[clean_x]
+            q["similar_question"] = seen_batch_map[clean_x]
         else:
             q["is_duplicate"] = False
             best_match_text = None
             best_ratio = 0.0
+            words_x = set(clean_x.split())
 
-            for ex_cx, ex_raw in existing_map.items():
-                if abs(len(clean_x) - len(ex_cx)) > max(len(clean_x), len(ex_cx)) * 0.25:
-                    continue
-                r = difflib.SequenceMatcher(None, clean_x, ex_cx).ratio()
-                if r >= 0.75 and r > best_ratio:
-                    best_ratio = r
-                    best_match_text = ex_raw
-                    if best_ratio >= 0.95:
-                        break
-
-            if best_ratio < 0.75:
-                for b_cx, b_raw in seen_batch.items():
-                    if abs(len(clean_x) - len(b_cx)) > max(len(clean_x), len(b_cx)) * 0.25:
+            if words_x:
+                for ex_cx, ex_raw, ex_words in existing_word_sets:
+                    if abs(len(clean_x) - len(ex_cx)) > max(len(clean_x), len(ex_cx)) * 0.25:
                         continue
-                    r = difflib.SequenceMatcher(None, clean_x, b_cx).ratio()
+                    intersection_len = len(words_x & ex_words)
+                    max_words = max(len(words_x), len(ex_words))
+                    if max_words == 0 or (intersection_len / max_words) < 0.65:
+                        continue
+
+                    r = difflib.SequenceMatcher(None, clean_x, ex_cx).ratio()
                     if r >= 0.75 and r > best_ratio:
                         best_ratio = r
-                        best_match_text = b_raw
+                        best_match_text = ex_raw
                         if best_ratio >= 0.95:
                             break
+
+                if best_ratio < 0.75:
+                    for b_cx, b_raw, b_words in seen_batch_word_sets:
+                        if abs(len(clean_x) - len(b_cx)) > max(len(clean_x), len(b_cx)) * 0.25:
+                            continue
+                        intersection_len = len(words_x & b_words)
+                        max_words = max(len(words_x), len(b_words))
+                        if max_words == 0 or (intersection_len / max_words) < 0.65:
+                            continue
+
+                        r = difflib.SequenceMatcher(None, clean_x, b_cx).ratio()
+                        if r >= 0.75 and r > best_ratio:
+                            best_ratio = r
+                            best_match_text = b_raw
+                            if best_ratio >= 0.95:
+                                break
 
             if best_ratio >= 0.75 and best_match_text:
                 q["is_similar"] = True
@@ -221,7 +240,9 @@ async def api_validate_db_questions(file: UploadFile = File(...)):
             else:
                 q["is_similar"] = False
 
-            seen_batch[clean_x] = raw_x
+            seen_batch_map[clean_x] = raw_x
+            if words_x:
+                seen_batch_word_sets.append((clean_x, raw_x, words_x))
 
     return {"success": True, "items": questions}
 
