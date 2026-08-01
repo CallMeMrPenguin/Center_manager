@@ -43,7 +43,7 @@ const TYPE_MAP: Record<string, string> = {
   'rd': 'Reading',
   'fb': 'Fill in the Blank',
   'rw': 'Rewrite Sentences',
-  'wf': 'Word Form',
+  'wf': 'Fill in the Blank',
   'mq': 'Multiple Choice'
 };
 
@@ -2276,7 +2276,7 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
 
       {/* Unified Test Creation Modal */}
       {showCreateTestModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm animate-fade-in p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-none animate-fade-in p-4">
           <div className="w-full max-w-xl bg-[#111827] border border-slate-800 rounded-3xl p-6 flex flex-col gap-4 text-slate-200 max-h-[90vh] overflow-y-auto shadow-2xl">
             <div className="flex items-center justify-between border-b border-slate-900 pb-3">
               <h3 className="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2">

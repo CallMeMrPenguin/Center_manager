@@ -39,6 +39,13 @@ def init_db():
     )
     """)
     
+    # Migration: Convert all existing 'wf' / 'Word Form' questions to 'fb' (Fill in the Blank)
+    try:
+        cursor.execute("UPDATE question_bank SET question_type = 'fb' WHERE question_type IN ('wf', 'Word Form', 'word form', 'wordform')")
+        conn.commit()
+    except Exception:
+        pass
+    
     # 2. Vocabulary List table
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS vocabulary_list (
@@ -441,12 +448,16 @@ def insert_questions(questions: List[Dict[str, Any]]):
         opt3 = opts[2] if len(opts) > 2 else ""
         opt4 = opts[3] if len(opts) > 3 else ""
         
+        qtype = q.get("t", q.get("question_type", ""))
+        if str(qtype).lower() in ["wf", "word form", "wordform"]:
+            qtype = "fb"
+
         data.append((
             meta.get("grade", q.get("grade", "")),
             meta.get("unit", q.get("unit", "")),
             q.get("test_type", ""),
             q.get("x", q.get("question_text", "")),
-            q.get("t", q.get("question_type", "")),
+            qtype,
             opt1, opt2, opt3, opt4,
             q.get("a", q.get("answer", "")),
             q.get("level", ""),
@@ -498,13 +509,17 @@ def get_questions(grade=None, unit=None, qtype=None, level=None, search=None) ->
         if r["option_3"]: opts.append(r["option_3"])
         if r["option_4"]: opts.append(r["option_4"])
         
+        raw_t = r["question_type"]
+        if str(raw_t).lower() in ["wf", "word form", "wordform"]:
+            raw_t = "fb"
+
         result.append({
             "id": r["id"],
             "grade": r["grade"],
             "unit": r["unit"],
             "test_type": r["test_type"],
             "x": r["question_text"],
-            "t": r["question_type"],
+            "t": raw_t,
             "o": opts,
             "a": r["answer"],
             "level": r["level"],
