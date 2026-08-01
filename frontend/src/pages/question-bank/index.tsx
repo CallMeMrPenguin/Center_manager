@@ -1346,6 +1346,15 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
     return map;
   }, [questions]);
 
+  const typeAvailableMap = useMemo(() => {
+    const counts: Record<string, number> = {};
+    questions.forEach(q => {
+      const t = q.t || 'mq';
+      counts[t] = (counts[t] || 0) + 1;
+    });
+    return counts;
+  }, [questions]);
+
   const getUniqueValues = useCallback((key: string) => {
     return uniqueValuesMap[key] || [];
   }, [uniqueValuesMap]);
@@ -2519,7 +2528,7 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
                           createTestConfig.typeOrder.map((t, idx) => {
                             const isIncluded = createTestConfig.includedTypes.includes(t);
                             const countInType = createTestConfig.typeCounts[t] || 0;
-                            const available = poolForFilters.filter(q => q.t === t).length;
+                            const available = typeAvailableMap[t] || 0;
                             const numVersions = createTestConfig.numVersions;
                             
                             const suggested = Math.floor(available / numVersions);

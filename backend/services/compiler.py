@@ -1489,6 +1489,7 @@ class WordDocumentCompiler:
 
     def compile_test_versions(self, exercises: List[Dict[str, Any]], num_versions: int = 1, mix_options: bool = True, grade: str = "", unit: str = "", output_dir: Optional[str] = None):
         import random
+        from collections import defaultdict
         try:
             from backend.config.settings import get_setting
         except ImportError:
@@ -1497,36 +1498,53 @@ class WordDocumentCompiler:
         target_dir = output_dir if output_dir else get_setting("files_dir")
         os.makedirs(target_dir, exist_ok=True)
 
-        timestamp = int(time.time())
-        clean_grade = grade.replace(" ", "_") if grade else "Test"
-        clean_unit = unit.replace(" ", "_") if unit else "Unit"
+        clean_grade = str(grade).replace(" ", "_") if grade else "Test"
+        clean_unit = str(unit).replace(" ", "_") if unit else "Unit"
         
         last_filename = ""
         last_filepath = ""
         files_list = []
         base_version = 101
 
-        total_questions = len(exercises)
-        # If user requests N versions from a pool of M questions (e.g. 100 questions for 5 versions),
-        # slice the questions evenly so each version gets M // N questions (e.g. 20 questions).
-        if num_versions > 1 and total_questions >= num_versions:
-            per_version_count = total_questions // num_versions
+        # Group exercises by question type so each version gets a proportional mix of all types
+        grouped_by_type = defaultdict(list)
+        for ex in exercises:
+            t = ex.get("t", "mq")
+            grouped_by_type[t].append(ex)
+
+        version_pools = [[] for _ in range(num_versions)]
+
+        if num_versions > 1:
+            for t, t_list in grouped_by_type.items():
+                n_items = len(t_list)
+                per_v_count = n_items // num_versions
+                if per_v_count > 0:
+                    for v in range(num_versions):
+                        start_idx = v * per_v_count
+                        end_idx = (v + 1) * per_v_count if v < num_versions - 1 else min((v + 1) * per_v_count, n_items)
+                        version_pools[v].extend(t_list[start_idx:end_idx])
+                else:
+                    for v, item in enumerate(t_list):
+                        if v < num_versions:
+                            version_pools[v].append(item)
         else:
-            per_version_count = total_questions
+            version_pools[0] = list(exercises)
+
+        # Dedicated subfolder for multi-version tests
+        if num_versions > 1:
+            folder_name = f"Lop_{clean_grade}_Unit_{clean_unit}"
+            sub_target_dir = os.path.join(target_dir, folder_name)
+            os.makedirs(sub_target_dir, exist_ok=True)
+            active_out_dir = sub_target_dir
+        else:
+            active_out_dir = target_dir
 
         for i in range(num_versions):
             version_code = str(base_version + i)
-            filename = f"De_thi_{clean_grade}_{clean_unit}_MDT{version_code}_{timestamp}.docx"
-            filepath = os.path.join(target_dir, filename)
+            filename = f"De_Lop{clean_grade}_Unit{clean_unit}_MDT{version_code}.docx"
+            filepath = os.path.join(active_out_dir, filename)
 
-            if per_version_count < total_questions:
-                start_idx = i * per_version_count
-                end_idx = start_idx + per_version_count if i < num_versions - 1 else total_questions
-                version_exercises = exercises[start_idx:end_idx]
-            else:
-                version_exercises = exercises
-
-            ex_copy = copy.deepcopy(version_exercises)
+            ex_copy = copy.deepcopy(version_pools[i])
             # Re-number questions 1..N for each test version
             for idx, ex in enumerate(ex_copy, start=1):
                 ex["q"] = idx
