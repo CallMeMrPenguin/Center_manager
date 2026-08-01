@@ -41,9 +41,9 @@ const TYPE_MAP: Record<string, string> = {
   'cz': 'Cloze Passage',
   'ro': 'Reordering',
   'rd': 'Reading',
-  'fb': 'Fill in the Blank',
+  'fb': 'Multiple Choice',
   'rw': 'Rewrite Sentences',
-  'wf': 'Fill in the Blank',
+  'wf': 'Multiple Choice',
   'mq': 'Multiple Choice'
 };
 
@@ -1346,14 +1346,28 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
     return map;
   }, [questions]);
 
+  const filteredPoolForTest = useMemo(() => {
+    if (!createTestConfig.grade && !createTestConfig.unit) return questions;
+    const targetUnits = parseUnits(createTestConfig.unit);
+    return questions.filter(q => {
+      if (createTestConfig.grade && String(q.grade).trim() !== String(createTestConfig.grade).trim()) {
+        return false;
+      }
+      if (targetUnits.length > 0 && !targetUnits.includes(String(q.unit).trim())) {
+        return false;
+      }
+      return true;
+    });
+  }, [questions, createTestConfig.grade, createTestConfig.unit]);
+
   const typeAvailableMap = useMemo(() => {
     const counts: Record<string, number> = {};
-    questions.forEach(q => {
+    filteredPoolForTest.forEach(q => {
       const t = q.t || 'mq';
       counts[t] = (counts[t] || 0) + 1;
     });
     return counts;
-  }, [questions]);
+  }, [filteredPoolForTest]);
 
   const getUniqueValues = useCallback((key: string) => {
     return uniqueValuesMap[key] || [];
