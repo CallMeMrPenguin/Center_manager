@@ -1465,22 +1465,27 @@ class WordDocumentCompilerDocx:
 
 
 class WordDocumentCompiler:
-    """Primary Compiler interface that defaults to pywin32 COM (real-time Word formatting) with fallback to python-docx."""
+    """Primary Compiler interface that defaults to python-docx XML generation with fallback to pywin32 COM."""
     def __init__(self, settings: Dict[str, Any] = None):
         self.settings = settings or {}
 
     def compile(self, exercises: List[Dict[str, Any]], output_filepath: Any, grade: str = "", unit: str = "", version_code: str = "", include_answer_key: bool = True, is_answer_key: bool = False, is_test: bool = False):
+        # 1. Primary: python-docx XML compiler (fast, reliable, cross-platform)
+        try:
+            compiler_docx = WordDocumentCompilerDocx(self.settings)
+            compiler_docx.compile(exercises, output_filepath, grade=grade, unit=unit, version_code=version_code, include_answer_key=include_answer_key, is_answer_key=is_answer_key, is_test=is_test)
+            return
+        except Exception as e:
+            print(f"[WordCompiler] python-docx compilation failed, falling back to pywin32 COM: {e}")
+        
+        # 2. Fallback to pywin32 COM if available
         if win32com_available:
             try:
                 compiler_win32 = WordDocumentCompilerPyWin32(self.settings)
                 compiler_win32.compile(exercises, output_filepath, grade=grade, unit=unit, version_code=version_code, include_answer_key=include_answer_key, is_answer_key=is_answer_key, is_test=is_test)
                 return
             except Exception as e:
-                print(f"[WordCompiler] pywin32 COM compilation failed, falling back to python-docx: {e}")
-        
-        # Fallback to python-docx XML compiler
-        compiler_docx = WordDocumentCompilerDocx(self.settings)
-        compiler_docx.compile(exercises, output_filepath, grade=grade, unit=unit, version_code=version_code, include_answer_key=include_answer_key, is_answer_key=is_answer_key, is_test=is_test)
+                print(f"[WordCompiler] pywin32 COM compilation failed: {e}")
 
     def compile_test_versions(self, exercises: List[Dict[str, Any]], num_versions: int = 1, mix_options: bool = True, grade: str = "", unit: str = "", output_dir: Optional[str] = None):
         import random
@@ -1501,12 +1506,31 @@ class WordDocumentCompiler:
         files_list = []
         base_version = 101
 
+        total_questions = len(exercises)
+        # If user requests N versions from a pool of M questions (e.g. 100 questions for 5 versions),
+        # slice the questions evenly so each version gets M // N questions (e.g. 20 questions).
+        if num_versions > 1 and total_questions >= num_versions:
+            per_version_count = total_questions // num_versions
+        else:
+            per_version_count = total_questions
+
         for i in range(num_versions):
             version_code = str(base_version + i)
             filename = f"De_thi_{clean_grade}_{clean_unit}_MDT{version_code}_{timestamp}.docx"
             filepath = os.path.join(target_dir, filename)
 
-            ex_copy = copy.deepcopy(exercises)
+            if per_version_count < total_questions:
+                start_idx = i * per_version_count
+                end_idx = start_idx + per_version_count if i < num_versions - 1 else total_questions
+                version_exercises = exercises[start_idx:end_idx]
+            else:
+                version_exercises = exercises
+
+            ex_copy = copy.deepcopy(version_exercises)
+            # Re-number questions 1..N for each test version
+            for idx, ex in enumerate(ex_copy, start=1):
+                ex["q"] = idx
+
             if mix_options:
                 for ex in ex_copy:
                     opts = ex.get("o", [])

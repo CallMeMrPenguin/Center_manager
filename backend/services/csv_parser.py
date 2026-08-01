@@ -146,7 +146,7 @@ def parse_question_bank_csv(csv_path: str):
             if "fill" in q_type_raw_lower or "blank" in q_type_raw_lower or q_type_raw_lower == "fb":
                 t = "fb"
             elif "word" in q_type_raw_lower or "form" in q_type_raw_lower or q_type_raw_lower == "wf":
-                t = "wf"
+                t = "fb"
             elif "pronun" in q_type_raw_lower or q_type_raw_lower == "pr":
                 t = "pr"
             elif "stress" in q_type_raw_lower or q_type_raw_lower == "st":
