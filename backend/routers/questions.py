@@ -150,6 +150,46 @@ async def api_validate_db_questions(file: UploadFile = File(...)):
 
     if os.path.exists(temp_path):
         os.remove(temp_path)
+
+    # Validate duplicates and similarity against existing DB questions and within batch
+    import difflib, re
+    existing_db = get_questions()
+    existing_texts = [re.sub(r'\s+', ' ', q.get("x", "")).strip().lower() for q in existing_db if q.get("x")]
+    existing_set = set(existing_texts)
+
+    seen_batch = set()
+    for q in questions:
+        raw_x = q.get("x", "")
+        clean_x = re.sub(r'\s+', ' ', raw_x).strip().lower()
+        if not clean_x:
+            q["is_duplicate"] = False
+            q["is_similar"] = False
+            continue
+
+        if clean_x in existing_set or clean_x in seen_batch:
+            q["is_duplicate"] = True
+            q["is_similar"] = False
+            q["duplicate_reason"] = "Trùng lặp hoàn toàn với câu hỏi đã có trong CSDL"
+        else:
+            q["is_duplicate"] = False
+            high_similarity = 0.0
+            for ex_t in existing_texts[:500]:
+                if abs(len(clean_x) - len(ex_t)) > len(clean_x) * 0.4:
+                    continue
+                ratio = difflib.SequenceMatcher(None, clean_x, ex_t).quick_ratio()
+                if ratio > 0.70 and ratio > high_similarity:
+                    high_similarity = ratio
+                    if high_similarity >= 0.95:
+                        break
+            if high_similarity > 0.70:
+                q["is_similar"] = True
+                q["similarity_ratio"] = round(high_similarity, 2)
+                q["duplicate_reason"] = f"Tương đồng {int(high_similarity * 100)}% với câu hỏi trong CSDL"
+            else:
+                q["is_similar"] = False
+
+            seen_batch.add(clean_x)
+
     return {"success": True, "items": questions}
 
 @router.post("/api/db/questions/confirm-import")

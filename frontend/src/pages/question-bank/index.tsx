@@ -363,6 +363,95 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
   const [showActionsMenu, setShowActionsMenu] = useState(false);
   const actionsMenuRef = useRef<HTMLDivElement>(null);
 
+  const csvPreviewColumns = useMemo<ColumnDef<any>[]>(() => [
+    {
+      accessorKey: 'grade',
+      header: 'Khối',
+      cell: (info) => <span className="font-bold">{info.getValue<string>() || '-'}</span>,
+    },
+    {
+      accessorKey: 'unit',
+      header: 'Bài',
+      cell: (info) => <span className="font-bold">{info.getValue<string>() || '-'}</span>,
+    },
+    {
+      id: 'test_type',
+      header: 'Dạng đề',
+      accessorFn: (row) => row.test_type || '',
+      cell: (info) => <span className="font-bold">{info.getValue<string>() || '-'}</span>,
+    },
+    {
+      id: 't',
+      header: 'Loại câu',
+      accessorFn: (row) => TYPE_MAP[row.t] || row.t || 'Khác',
+      cell: (info) => <span className="font-semibold text-blue-400">{info.getValue<string>()}</span>,
+    },
+    {
+      accessorKey: 'x',
+      header: 'Nội dung câu hỏi',
+      cell: (info) => <span className="font-medium text-slate-200 block break-words max-w-sm">{info.getValue<string>()}</span>,
+    },
+    {
+      id: 'option_1',
+      header: 'Phương án 1',
+      accessorFn: (row) => (row.o && row.o[0]) ? row.o[0] : (row.option_1 || ''),
+      cell: (info) => <span className="text-slate-300">{info.getValue<string>()}</span>,
+    },
+    {
+      id: 'option_2',
+      header: 'Phương án 2',
+      accessorFn: (row) => (row.o && row.o[1]) ? row.o[1] : (row.option_2 || ''),
+      cell: (info) => <span className="text-slate-300">{info.getValue<string>()}</span>,
+    },
+    {
+      id: 'option_3',
+      header: 'Phương án 3',
+      accessorFn: (row) => (row.o && row.o[2]) ? row.o[2] : (row.option_3 || ''),
+      cell: (info) => <span className="text-slate-300">{info.getValue<string>()}</span>,
+    },
+    {
+      id: 'option_4',
+      header: 'Phương án 4',
+      accessorFn: (row) => (row.o && row.o[3]) ? row.o[3] : (row.option_4 || ''),
+      cell: (info) => <span className="text-slate-300">{info.getValue<string>()}</span>,
+    },
+    {
+      id: 'a',
+      header: 'Đáp án',
+      accessorFn: (row) => row.a || row.answer || '',
+      cell: (info) => <span className="font-extrabold text-emerald-400">{info.getValue<string>()}</span>,
+    },
+    {
+      accessorKey: 'level',
+      header: 'Mức độ',
+      cell: (info) => <span className="text-slate-300">{info.getValue<string>() || '-'}</span>,
+    },
+    {
+      id: 'status',
+      header: 'Trạng thái kiểm tra',
+      accessorFn: (row) => row.is_duplicate ? 'Trùng lặp' : row.is_similar ? `Tương đồng (${Math.round((row.similarity_ratio || 0) * 100)}%)` : 'Mới hợp lệ',
+      cell: ({ row }) => {
+        const item = row.original;
+        return item.is_duplicate ? (
+          <span className="flex items-center gap-1.5 text-rose-450 text-[0.66rem] bg-rose-500/10 px-2 py-0.5 rounded border border-rose-500/20" title={item.duplicate_reason}>
+            <AlertTriangle size={12} />
+            <span>Trùng lặp</span>
+          </span>
+        ) : item.is_similar ? (
+          <span className="flex items-center gap-1.5 text-amber-400 text-[0.66rem] bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20" title={item.duplicate_reason}>
+            <AlertTriangle size={12} />
+            <span>Tương đồng ({Math.round((item.similarity_ratio || 0) * 100)}%)</span>
+          </span>
+        ) : (
+          <span className="flex items-center gap-1.5 text-emerald-400 text-[0.66rem] bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+            <CheckCircle2 size={12} />
+            <span>Mới hợp lệ</span>
+          </span>
+        );
+      },
+    },
+  ], []);
+
   const fetchActiveGrades = async () => {
     try {
       const res = await api.getActiveGrades();
@@ -1940,66 +2029,13 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
 
             {/* Items scrollable list */}
             <div className="flex-1 overflow-auto bg-slate-950/20 flex flex-col">
-              {(() => {
-                const csvPreviewColumns: ColumnDef<any>[] = [
-                  {
-                    accessorKey: 'grade',
-                    header: 'Lớp',
-                    cell: (info) => <span className="font-bold">{info.getValue<string>()}</span>,
-                  },
-                  {
-                    accessorKey: 'unit',
-                    header: 'Unit',
-                    cell: (info) => <span className="font-bold">{info.getValue<string>()}</span>,
-                  },
-                  {
-                    accessorKey: 't',
-                    header: 'Dạng',
-                    cell: (info) => {
-                      const t = info.getValue<string>();
-                      return <span className="font-semibold">{TYPE_MAP[t] || t}</span>;
-                    },
-                  },
-                  {
-                    accessorKey: 'x',
-                    header: 'Nội dung câu hỏi',
-                    cell: (info) => <span className="truncate max-w-md block">{info.getValue<string>()}</span>,
-                  },
-                  {
-                    id: 'status',
-                    header: 'Trạng thái kiểm tra',
-                    cell: ({ row }) => {
-                      const item = row.original;
-                      return item.is_duplicate ? (
-                        <span className="flex items-center gap-1.5 text-rose-450 text-[0.66rem] bg-rose-500/10 px-2 py-0.5 rounded border border-rose-500/20" title={item.duplicate_reason}>
-                          <AlertTriangle size={12} />
-                          <span>Trùng lặp</span>
-                        </span>
-                      ) : item.is_similar ? (
-                        <span className="flex items-center gap-1.5 text-amber-400 text-[0.66rem] bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20" title={item.duplicate_reason}>
-                          <AlertTriangle size={12} />
-                          <span>Tương đồng ({Math.round((item.similarity_ratio || 0) * 100)}%)</span>
-                        </span>
-                      ) : (
-                        <span className="flex items-center gap-1.5 text-emerald-400 text-[0.66rem] bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
-                          <CheckCircle2 size={12} />
-                          <span>Mới hợp lệ</span>
-                        </span>
-                      );
-                    },
-                  },
-                ];
-
-                return (
-                  <DataTable
-                    tableId="question-bank-csv-preview-table"
-                    exportFilename="xem_truoc_cau_hoi"
-                    data={csvPreviewModal.items}
-                    columns={csvPreviewColumns}
-                    pageSize={20}
-                  />
-                );
-              })()}
+              <DataTable
+                tableId="question-bank-csv-preview-table"
+                exportFilename="bao_cao_kiem_tra_trung_lap_cau_hoi"
+                data={csvPreviewModal.items}
+                columns={csvPreviewColumns}
+                pageSize={20}
+              />
             </div>
 
             {/* Footer actions */}
