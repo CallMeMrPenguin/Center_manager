@@ -63,11 +63,48 @@ function parseUnits(unitStr: string): string[] {
       for (let i = from; i <= to; i++) {
         units.push(String(i));
       }
-      return units;
     }
   }
-  
   return clean.split(',').map(p => p.trim()).filter(Boolean);
+}
+
+function FastPastedCsvInput({
+  value,
+  onFileClear,
+  onTextChange,
+}: {
+  value: string;
+  onFileClear: () => void;
+  onTextChange: (val: string) => void;
+}) {
+  const [localText, setLocalText] = useState(value);
+  const timerRef = useRef<any>(null);
+
+  useEffect(() => {
+    setLocalText(value);
+  }, [value]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const text = e.target.value;
+    setLocalText(text);
+    if (text.trim()) {
+      onFileClear();
+    }
+    if (timerRef.current) clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => {
+      onTextChange(text);
+    }, 100);
+  };
+
+  return (
+    <textarea
+      value={localText}
+      onChange={handleChange}
+      placeholder="Dán nội dung CSV tại đây..."
+      rows={6}
+      className="bg-[#070b14] border border-slate-800 focus:border-blue-500/50 p-3 rounded-xl text-xs text-slate-200 outline-none placeholder-slate-600 transition font-mono mt-1 w-full"
+    />
+  );
 }
 
 const ColumnHeaderFilter = ({ 
@@ -2732,17 +2769,10 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
               {/* Option 2: Raw pasting */}
               <div className="flex flex-col gap-1.5 bg-[#080b12] border border-slate-855 p-4 rounded-2xl">
                 <label className="text-[10px] font-bold text-slate-450 uppercase">Cách 2: Dán trực tiếp nội dung CSV</label>
-                <textarea
+                <FastPastedCsvInput
                   value={pastedCsv}
-                  onChange={(e) => {
-                    setPastedCsv(e.target.value);
-                    if (e.target.value.trim()) {
-                      setSelectedCsvFile(null); // Clear file if pasting
-                    }
-                  }}
-                  placeholder="Dán nội dung CSV tại đây..."
-                  rows={6}
-                  className="bg-[#070b14] border border-slate-800 focus:border-blue-500/50 p-3 rounded-xl text-xs text-slate-200 outline-none placeholder-slate-600 transition font-mono mt-1"
+                  onFileClear={() => setSelectedCsvFile(null)}
+                  onTextChange={(val) => setPastedCsv(val)}
                 />
               </div>
 
