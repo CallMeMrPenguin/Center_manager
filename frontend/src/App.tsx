@@ -94,7 +94,23 @@ function AppContent() {
     };
   }, []);
 
+  const rafRef = useRef<number | null>(null);
+  const pendingZoomRef = useRef<number>(zoomLevel);
+
+  const updateZoomThrottled = (delta: number) => {
+    const nextZoom = Math.min(Math.max(pendingZoomRef.current + delta, 0.6), 2);
+    pendingZoomRef.current = Math.round(nextZoom * 100) / 100;
+    if (rafRef.current === null) {
+      rafRef.current = requestAnimationFrame(() => {
+        setZoomLevel(pendingZoomRef.current);
+        rafRef.current = null;
+      });
+    }
+  };
+
   useEffect(() => {
+    pendingZoomRef.current = zoomLevel;
+    (document.documentElement.style as any).zoom = String(zoomLevel);
     document.documentElement.style.fontSize = `${15 * zoomLevel}px`;
     localStorage.setItem('app_zoom', String(zoomLevel));
   }, [zoomLevel]);
@@ -103,10 +119,10 @@ function AppContent() {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.ctrlKey && (e.key === '=' || e.key === '+')) {
         e.preventDefault();
-        setZoomLevel(prev => Math.min(prev + 0.1, 2));
+        updateZoomThrottled(0.1);
       } else if (e.ctrlKey && e.key === '-') {
         e.preventDefault();
-        setZoomLevel(prev => Math.max(prev - 0.6, 0.6));
+        updateZoomThrottled(-0.1);
       } else if (e.ctrlKey && e.key === '0') {
         e.preventDefault();
         setZoomLevel(1);
@@ -118,11 +134,8 @@ function AppContent() {
     const handleWheel = (e: WheelEvent) => {
       if (e.ctrlKey) {
         e.preventDefault();
-        if (e.deltaY < 0) {
-          setZoomLevel(prev => Math.min(prev + 0.05, 2));
-        } else {
-          setZoomLevel(prev => Math.max(prev - 0.05, 0.6));
-        }
+        const delta = e.deltaY < 0 ? 0.04 : -0.04;
+        updateZoomThrottled(delta);
       }
     };
     
@@ -142,8 +155,6 @@ function AppContent() {
       window.removeEventListener('switch-tab', handleSwitchTab);
     };
   }, []);
-
-
   const loadSettings = async () => {
     try {
       const data = await api.getSettings();
@@ -240,27 +251,27 @@ function AppContent() {
   };
 
   return (
-    <div className="relative flex flex-col h-screen w-screen ambient-bg-dark text-slate-50 overflow-hidden font-sans">
+    <div className="relative flex flex-col h-screen w-screen ambient-bg-dark text-slate-50 overflow-hidden font-sans select-none">
       
       {/* Background Image Container */}
       <div 
-        className="absolute inset-0 pointer-events-none z-0 bg-cover bg-center bg-no-repeat transition-all duration-500 opacity-60" 
+        className="absolute inset-0 pointer-events-none z-0 bg-cover bg-center bg-no-repeat transition-opacity duration-300 opacity-60" 
         style={{ backgroundImage: 'var(--bg-image)' }} 
       />
 
       <div className="relative flex flex-row flex-1 overflow-hidden p-4 gap-4 z-10">
         
-        {/* SIDEBAR NAVIGATION (Pure CSS 60fps GPU-accelerated inline hover expansion) */}
+        {/* SIDEBAR NAVIGATION (Pure GPU-accelerated inline hover expansion) */}
         <aside
-          className="w-16 hover:w-64 group/sidebar sidebar-glass-glow rounded-2xl flex flex-col h-full overflow-hidden transition-[width] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] z-30 shrink-0"
+          className="w-16 hover:w-64 group/sidebar sidebar-glass-glow rounded-2xl flex flex-col h-full overflow-hidden transition-[width] duration-200 ease-out z-30 shrink-0"
         >
           
           {/* Header logo / Title */}
           <div className="flex items-center gap-3 px-3.5 py-4 shrink-0 border-b border-white/5 min-w-0">
-            <div className="h-9 w-9 bg-indigo-500/25 border-2 border-indigo-400/80 rounded-2xl flex items-center justify-center shadow-[0_0_30px_rgba(92,54,245,0.8),0_0_15px_rgba(129,140,248,0.6),inset_0_0_12px_rgba(92,54,245,0.4)] shrink-0">
+            <div className="h-9 w-9 bg-indigo-500/25 border-2 border-indigo-400/80 rounded-2xl flex items-center justify-center shadow-[0_0_20px_rgba(92,54,245,0.6)] shrink-0">
               <GraduationCap size={20} className="text-white drop-shadow-[0_0_12px_rgba(255,255,255,1)]" />
             </div>
-            <div className="opacity-0 group-hover/sidebar:opacity-100 max-w-0 group-hover/sidebar:max-w-[200px] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] whitespace-nowrap overflow-hidden pointer-events-none group-hover/sidebar:pointer-events-auto">
+            <div className="opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-200 ease-out whitespace-nowrap overflow-hidden pointer-events-none group-hover/sidebar:pointer-events-auto min-w-0 flex-1">
               <span className="text-base font-black tracking-wide uppercase text-white block leading-none">
                 EduPlatform
               </span>
@@ -285,7 +296,7 @@ function AppContent() {
               return (
                 <div key={section.id} className="flex flex-col gap-1 shrink-0">
                   {section.label && (
-                    <div className="px-3 py-1 text-xs font-black uppercase tracking-wider text-slate-400 mt-1 mb-0.5 opacity-0 group-hover/sidebar:opacity-100 max-h-0 group-hover/sidebar:max-h-8 transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] whitespace-nowrap overflow-hidden">
+                    <div className="px-3 py-1 text-xs font-black uppercase tracking-wider text-slate-400 mt-1 mb-0.5 opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-200 ease-out whitespace-nowrap overflow-hidden">
                       {section.label}
                     </div>
                   )}
@@ -302,22 +313,22 @@ function AppContent() {
                         onDragEnd={() => setDraggedIndex(null)}
                         onDrop={() => handleDrop(idx)}
                         onClick={() => setActiveTab(item.id)}
-                        className={`flex items-center w-full h-12 rounded-xl transition-all duration-200 relative group cursor-pointer active:scale-95 shrink-0 overflow-hidden ${
+                        className={`flex items-center w-full h-12 rounded-xl transition-colors duration-150 relative group cursor-pointer active:scale-95 shrink-0 overflow-hidden ${
                           draggedIndex === idx ? 'opacity-40 border border-dashed border-indigo-400 bg-indigo-500/10' : ''
                         }`}
                       >
-                        {/* PERFECT 44x44 CIRCLE HIGHLIGHT WHEN COLLAPSED, MORPHS TO ROUNDED PILL ON HOVER */}
+                        {/* ACTIVE TAB HIGHLIGHT */}
                         {isActive && (
-                          <div className="absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2 w-11 h-11 rounded-full bg-indigo-500/25 border-2 border-indigo-400/90 shadow-[0_0_20px_rgba(92,54,245,0.65),inset_0_0_10px_rgba(92,54,245,0.35)] group-hover/sidebar:w-full group-hover/sidebar:h-full group-hover/sidebar:left-0 group-hover/sidebar:top-0 group-hover/sidebar:translate-x-0 group-hover/sidebar:translate-y-0 group-hover/sidebar:rounded-xl transition-all duration-300 pointer-events-none" />
+                          <div className="absolute inset-1 rounded-xl bg-indigo-500/25 border-2 border-indigo-400/90 shadow-[0_0_16px_rgba(92,54,245,0.5)] transition-opacity duration-150 pointer-events-none" />
                         )}
 
-                        {/* ICON BOX — PERFECTLY CENTERED */}
+                        {/* ICON BOX */}
                         <div className="w-12 h-12 flex items-center justify-center shrink-0 relative z-10">
                           <Icon size={20} className={isActive ? 'text-white drop-shadow-[0_0_10px_rgba(255,255,255,1)]' : 'text-slate-400 group-hover:text-white'} />
                         </div>
 
-                        {/* TEXT LABEL — SMOOTHLY SLIDES OUT ON HOVER */}
-                        <span className={`text-sm relative z-10 transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] whitespace-nowrap overflow-hidden pointer-events-none group-hover/sidebar:pointer-events-auto opacity-0 group-hover/sidebar:opacity-100 max-w-0 group-hover/sidebar:max-w-[180px] ml-0 group-hover/sidebar:ml-2 ${
+                        {/* TEXT LABEL */}
+                        <span className={`text-sm relative z-10 transition-opacity duration-200 ease-out whitespace-nowrap overflow-hidden pointer-events-none group-hover/sidebar:pointer-events-auto opacity-0 group-hover/sidebar:opacity-100 ml-2 ${
                           isActive ? "text-white font-extrabold" : "text-slate-200 font-bold group-hover:text-white"
                         }`}>
                           {item.label}
@@ -334,7 +345,7 @@ function AppContent() {
           <div className="shrink-0 mt-auto p-2.5 border-t border-white/5 relative" ref={profileRef}>
             {/* Profile flyout popup (opens upward) */}
             {profileOpen && (
-              <div className="absolute z-[250] bg-[#0d1018]/95 border border-white/10 rounded-[14px] shadow-[0_12px_40px_rgba(0,0,0,0.85)] p-1.5 backdrop-blur-xl animate-mac-dropdown bottom-full left-0 mb-2 w-56 origin-bottom">
+              <div className="absolute z-[250] bg-[#0d1018] border border-white/10 rounded-[14px] shadow-[0_12px_40px_rgba(0,0,0,0.85)] p-1.5 animate-mac-dropdown bottom-full left-0 mb-2 w-56 origin-bottom">
                 <div className="px-3.5 py-2.5 border-b border-white/5 select-none mb-1">
                   <p className="text-[10px] font-black text-slate-500 uppercase tracking-wider">Tài Khoản</p>
                   <p className="text-xs font-extrabold text-white mt-0.5">Center Manager</p>
@@ -380,12 +391,12 @@ function AppContent() {
             {/* Clickable Profile Row */}
             <button
               onClick={() => setProfileOpen(!profileOpen)}
-              className="flex items-center w-full h-11 px-2.5 rounded-xl hover:bg-white/[0.04] transition-all cursor-pointer overflow-hidden"
+              className="flex items-center w-full h-11 px-2.5 rounded-xl hover:bg-white/[0.04] transition-colors cursor-pointer overflow-hidden"
             >
               <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center font-black text-xs text-white shadow-[0_4px_14px_rgba(92,54,245,0.45)] shrink-0 border border-white/20 hover:shadow-[0_0_12px_rgba(92,54,245,0.5)] transition-all">
                 CM
               </div>
-              <div className="ml-3 opacity-0 group-hover/sidebar:opacity-100 max-w-0 group-hover/sidebar:max-w-[180px] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] whitespace-nowrap overflow-hidden flex items-center justify-between flex-1 pointer-events-none group-hover/sidebar:pointer-events-auto">
+              <div className="ml-3 opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-200 ease-out whitespace-nowrap overflow-hidden flex items-center justify-between flex-1 pointer-events-none group-hover/sidebar:pointer-events-auto">
                 <div className="min-w-0 flex-1 text-left">
                   <p className="text-xs font-black text-white truncate leading-snug">Center Manager</p>
                   <p className="text-[10px] font-extrabold text-indigo-400 truncate">Hệ thống quản lý</p>
@@ -394,7 +405,7 @@ function AppContent() {
               </div>
             </button>
 
-            <div className="flex items-center justify-between text-[10px] text-slate-600 font-bold px-2 mt-1 opacity-0 group-hover/sidebar:opacity-100 max-h-0 group-hover/sidebar:max-h-6 transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] whitespace-nowrap overflow-hidden">
+            <div className="flex items-center justify-between text-[10px] text-slate-600 font-bold px-2 mt-1 opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-200 ease-out whitespace-nowrap overflow-hidden">
               <span className="uppercase tracking-widest">v4.0.0</span>
               {zoomLevel !== 1 && <span className="text-indigo-400">{Math.round(zoomLevel * 100)}%</span>}
             </div>
