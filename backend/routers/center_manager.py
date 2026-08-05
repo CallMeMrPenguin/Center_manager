@@ -278,6 +278,7 @@ def api_save_attendance(class_id: int, payload: Dict[str, Any]):
 def api_export_class_excel(class_id: int, payload: Dict[str, Any]):
     import openpyxl
     from openpyxl.styles import Font, Alignment, PatternFill, Border, Side
+    from openpyxl.worksheet.table import Table, TableStyleInfo
     
     date_str = payload.get("date") or datetime.now().strftime("%Y-%m-%d")
     cls_list = get_classes()
@@ -364,11 +365,11 @@ def api_export_class_excel(class_id: int, payload: Dict[str, Any]):
         c7_cell.number_format = '0.0'
         c8_cell.number_format = '0.0'
 
-        # Dynamic formula for Column 9 using Average row reference
+        # Dynamic formula for Column 9 with _xlfn. prefix for TEXTJOIN
         col_9_cell = ws.cell(
             row=curr_row,
             column=9,
-            value=f'=IF(C{curr_row}="Vắng mặt", "Vắng mặt", IF(AND(D{curr_row}>=D${avg_row_idx}, E{curr_row}>=E${avg_row_idx}, F{curr_row}>=F${avg_row_idx}), "Đạt yêu cầu", "⚠️ Cần cố gắng (" & TEXTJOIN(", ", TRUE, IF(D{curr_row}<D${avg_row_idx}, "Check 1", ""), IF(E{curr_row}<E${avg_row_idx}, "Check 2", ""), IF(F{curr_row}<F${avg_row_idx}, "BTVN", "")) & ")"))'
+            value=f'=IF(C{curr_row}="Vắng mặt", "Vắng mặt", IF(_xlfn.TEXTJOIN(", ", TRUE, IF(AND(D{curr_row}>0, D{curr_row}<D${avg_row_idx}), "Check 1", ""), IF(AND(E{curr_row}>0, E{curr_row}<E${avg_row_idx}), "Check 2", ""), IF(AND(F{curr_row}>0, F{curr_row}<F${avg_row_idx}), "BTVN", ""))="", "Đạt yêu cầu", "⚠️ Cần cố gắng (" & _xlfn.TEXTJOIN(", ", TRUE, IF(AND(D{curr_row}>0, D{curr_row}<D${avg_row_idx}), "Check 1", ""), IF(AND(E{curr_row}>0, E{curr_row}<E${avg_row_idx}), "Check 2", ""), IF(AND(F{curr_row}>0, F{curr_row}<F${avg_row_idx}), "BTVN", "")) & ")"))'
         )
 
         row_fill = PatternFill(start_color="F8FAFC" if idx % 2 == 0 else "FFFFFF", end_color="F8FAFC" if idx % 2 == 0 else "FFFFFF", fill_type="solid")
@@ -381,7 +382,19 @@ def api_export_class_excel(class_id: int, payload: Dict[str, Any]):
             else:
                 c_cell.alignment = Alignment(horizontal="left")
 
-    ws.auto_filter.ref = f"A3:I{end_row}"
+    # Add Official Excel Table Object (Format as Table - TableStyleMedium9)
+    ts = datetime.now().strftime("%H%M%S")
+    if len(attendance) > 0:
+        table_ref = f"A3:I{end_row}"
+        tab = Table(displayName=f"ClassTable_{ts}", ref=table_ref)
+        tab.tableStyleInfo = TableStyleInfo(
+            name="TableStyleMedium9",
+            showFirstColumn=False,
+            showLastColumn=False,
+            showRowStripes=True,
+            showColumnStripes=False
+        )
+        ws.add_table(tab)
 
     # Average row
     ws.cell(row=avg_row_idx, column=1, value="")
@@ -389,11 +402,11 @@ def api_export_class_excel(class_id: int, payload: Dict[str, Any]):
     ws.cell(row=avg_row_idx, column=3, value="")
 
     if len(attendance) > 0:
-        ws.cell(row=avg_row_idx, column=4, value=f'=IFERROR(ROUNDUP(AVERAGEIF(D{start_row}:D{end_row}, ">0"), 1), 0)')
-        ws.cell(row=avg_row_idx, column=5, value=f'=IFERROR(ROUNDUP(AVERAGEIF(E{start_row}:E{end_row}, ">0"), 1), 0)')
-        ws.cell(row=avg_row_idx, column=6, value=f'=IFERROR(ROUNDUP(AVERAGEIF(F{start_row}:F{end_row}, ">0"), 1), 0)')
-        ws.cell(row=avg_row_idx, column=7, value=f'=IFERROR(ROUNDUP(AVERAGEIF(G{start_row}:G{end_row}, ">0"), 1), 0)')
-        ws.cell(row=avg_row_idx, column=8, value=f'=IFERROR(ROUNDUP(AVERAGEIF(H{start_row}:H{end_row}, ">0"), 1), 0)')
+        ws.cell(row=avg_row_idx, column=4, value=f'=_xlfn.IFERROR(ROUNDUP(AVERAGEIF(D{start_row}:D{end_row}, ">0"), 1), 0)')
+        ws.cell(row=avg_row_idx, column=5, value=f'=_xlfn.IFERROR(ROUNDUP(AVERAGEIF(E{start_row}:E{end_row}, ">0"), 1), 0)')
+        ws.cell(row=avg_row_idx, column=6, value=f'=_xlfn.IFERROR(ROUNDUP(AVERAGEIF(F{start_row}:F{end_row}, ">0"), 1), 0)')
+        ws.cell(row=avg_row_idx, column=7, value=f'=_xlfn.IFERROR(ROUNDUP(AVERAGEIF(G{start_row}:G{end_row}, ">0"), 1), 0)')
+        ws.cell(row=avg_row_idx, column=8, value=f'=_xlfn.IFERROR(ROUNDUP(AVERAGEIF(H{start_row}:H{end_row}, ">0"), 1), 0)')
         ws.cell(row=avg_row_idx, column=9, value="")
     else:
         for c_idx in range(4, 10):
@@ -411,7 +424,7 @@ def api_export_class_excel(class_id: int, payload: Dict[str, Any]):
             cell.number_format = '0.0'
             cell.alignment = Alignment(horizontal="center")
 
-    # Thống kê section using Excel dynamic array formulas
+    # Thống kê section using _xlfn.TEXTJOIN Excel dynamic array formulas
     s_row = avg_row_idx + 2
     ws.merge_cells(f"A{s_row}:I{s_row}")
     sum_title = ws.cell(row=s_row, column=1, value="THỐNG KÊ HỌC SINH DƯỚI ĐIỂM TRUNG BÌNH CẢ LỚP")
@@ -440,7 +453,7 @@ def api_export_class_excel(class_id: int, payload: Dict[str, Any]):
         val_cell = ws.cell(
             row=r_idx,
             column=3,
-            value=f'=IF(TEXTJOIN(", ", TRUE, IF(({col_let}{start_row}:{col_let}{end_row}>0)*({col_let}{start_row}:{col_let}{end_row}<{col_let}{avg_row_idx})*(C{start_row}:C{end_row}<>"Vắng mặt"), B{start_row}:B{end_row}, ""))="", "Không có (Tất cả đạt)", TEXTJOIN(", ", TRUE, IF(({col_let}{start_row}:{col_let}{end_row}>0)*({col_let}{start_row}:{col_let}{end_row}<{col_let}{avg_row_idx})*(C{start_row}:C{end_row}<>"Vắng mặt"), B{start_row}:B{end_row}, "")))' if len(attendance) > 0 else "Không có (Tất cả đạt)"
+            value=f'=IF(_xlfn.TEXTJOIN(", ", TRUE, IF(({col_let}{start_row}:{col_let}{end_row}>0)*({col_let}{start_row}:{col_let}{end_row}<{col_let}{avg_row_idx})*(C{start_row}:C{end_row}<>"Vắng mặt"), B{start_row}:B{end_row}, ""))="", "Không có (Tất cả đạt)", _xlfn.TEXTJOIN(", ", TRUE, IF(({col_let}{start_row}:{col_let}{end_row}>0)*({col_let}{start_row}:{col_let}{end_row}<{col_let}{avg_row_idx})*(C{start_row}:C{end_row}<>"Vắng mặt"), B{start_row}:B{end_row}, "")))' if len(attendance) > 0 else "Không có (Tất cả đạt)"
         )
         val_cell.font = Font(bold=True, color="1E1E2F")
 
@@ -450,7 +463,6 @@ def api_export_class_excel(class_id: int, payload: Dict[str, Any]):
 
     files_dir = get_setting("files_dir")
     os.makedirs(files_dir, exist_ok=True)
-    ts = datetime.now().strftime("%H%M%S")
     filename = f"ClassReport_{class_name}_{date_str}_{ts}.xlsx"
     filepath = os.path.join(files_dir, filename)
     wb.save(filepath)

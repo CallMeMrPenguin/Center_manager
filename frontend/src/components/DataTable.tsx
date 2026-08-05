@@ -938,6 +938,20 @@ export function DataTable<TData>({
                     ...(enableColumnResizing ? { width: table.getTotalSize() } : { width: '100%' }),
                   }}
                 >
+                  {/* ── COLGROUP for instant, jitter-free column widths ── */}
+                  <colgroup>
+                    {table.getVisibleFlatColumns().map(col => (
+                      <col
+                        key={col.id}
+                        style={{
+                          width: col.getSize(),
+                          minWidth: col.getSize(),
+                          maxWidth: col.getSize(),
+                        }}
+                      />
+                    ))}
+                  </colgroup>
+
                   {/* ── THEAD (All headers centered by default) ────────────────── */}
                   <thead className={`bg-[#111827] ${stickyHeader ? 'sticky top-0 z-20' : ''}`}>
                     {table.getHeaderGroups().map(headerGroup => (
@@ -1023,14 +1037,15 @@ export function DataTable<TData>({
                                 key={cell.id}
                                 className={`
                                   py-3.5 ${isSelectCol ? 'px-1' : 'px-4'} font-semibold text-slate-200 text-base
-                                  border-b border-[#161e30]
+                                  border-b border-[#161e30] overflow-hidden
                                   ${isCentered ? 'text-center' : 'text-left'}
                                   ${isPinned ? 'bg-inherit' : ''}
                                   ${isLastRow && isFirstCell ? 'rounded-bl-xl' : ''}
                                   ${isLastRow && isLastCell ? 'rounded-br-xl' : ''}
                                 `}
                                 style={{
-                                  ...(enableColumnResizing ? { width: cell.column.getSize(), minWidth: cell.column.getSize() } : {}),
+                                  boxSizing: 'border-box',
+                                  ...(enableColumnResizing ? { width: cell.column.getSize(), minWidth: cell.column.getSize(), maxWidth: cell.column.getSize() } : {}),
                                   ...(isPinned === 'left' ? { position: 'sticky', left: cell.column.getStart('left'), zIndex: 3, boxShadow: '2px 0 6px rgba(0,0,0,0.4)' } : {}),
                                   ...(isPinned === 'right' ? { position: 'sticky', right: cell.column.getAfter('right'), zIndex: 3, boxShadow: '-2px 0 6px rgba(0,0,0,0.4)' } : {}),
                                   backgroundColor: isPinned

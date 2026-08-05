@@ -94,38 +94,31 @@ function AppContent() {
     };
   }, []);
 
-  const rafRef = useRef<number | null>(null);
-  const pendingZoomRef = useRef<number>(zoomLevel);
+  const currentZoomRef = useRef<number>(zoomLevel);
 
-  const updateZoomThrottled = (delta: number) => {
-    const nextZoom = Math.min(Math.max(pendingZoomRef.current + delta, 0.6), 2);
-    pendingZoomRef.current = Math.round(nextZoom * 100) / 100;
-    if (rafRef.current === null) {
-      rafRef.current = requestAnimationFrame(() => {
-        setZoomLevel(pendingZoomRef.current);
-        rafRef.current = null;
-      });
-    }
+  const applyZoom = (newZoom: number) => {
+    const clamped = Math.round(Math.min(Math.max(newZoom, 0.6), 2) * 100) / 100;
+    currentZoomRef.current = clamped;
+    document.documentElement.style.fontSize = `${15 * clamped}px`;
+    localStorage.setItem('app_zoom', String(clamped));
+    setZoomLevel(clamped);
   };
 
   useEffect(() => {
-    pendingZoomRef.current = zoomLevel;
-    (document.documentElement.style as any).zoom = String(zoomLevel);
     document.documentElement.style.fontSize = `${15 * zoomLevel}px`;
-    localStorage.setItem('app_zoom', String(zoomLevel));
-  }, [zoomLevel]);
+  }, []);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.ctrlKey && (e.key === '=' || e.key === '+')) {
         e.preventDefault();
-        updateZoomThrottled(0.1);
+        applyZoom(currentZoomRef.current + 0.1);
       } else if (e.ctrlKey && e.key === '-') {
         e.preventDefault();
-        updateZoomThrottled(-0.1);
+        applyZoom(currentZoomRef.current - 0.1);
       } else if (e.ctrlKey && e.key === '0') {
         e.preventDefault();
-        setZoomLevel(1);
+        applyZoom(1);
       } else if (e.key === 'Escape') {
         window.dispatchEvent(new CustomEvent('app-escape'));
       }
@@ -134,8 +127,8 @@ function AppContent() {
     const handleWheel = (e: WheelEvent) => {
       if (e.ctrlKey) {
         e.preventDefault();
-        const delta = e.deltaY < 0 ? 0.04 : -0.04;
-        updateZoomThrottled(delta);
+        const delta = e.deltaY < 0 ? 0.05 : -0.05;
+        applyZoom(currentZoomRef.current + delta);
       }
     };
     
