@@ -616,18 +616,7 @@ export function DataTable<TData>({
     } catch (e) {}
   }, [storageKey, columns, initialColumnVisibility]);
 
-  useEffect(() => {
-    if (!storageKey) return;
-    try {
-      const layout = {
-        sizing: columnSizing,
-        visibility: columnVisibility,
-        order: columnOrder,
-        alignments: columnAlignments,
-      };
-      localStorage.setItem(storageKey, JSON.stringify(layout));
-    } catch (e) {}
-  }, [columnSizing, columnVisibility, columnOrder, columnAlignments, storageKey]);
+
 
   const handleToggleAlignment = useCallback((colId: string) => {
     setColumnAlignments(prev => {
@@ -767,9 +756,24 @@ export function DataTable<TData>({
     enableGlobalFilter: enableGlobalSearch,
     enableMultiSort,
     isMultiSortEvent: () => true,   // always multi-sort on header click
-    getRowCanExpand: enableRowExpansion ? () => true : undefined,
     initialState: { pagination: { pageSize } },
   });
+
+  const isAnyColumnResizing = table.getState().columnSizingInfo.isResizingColumn !== false;
+
+  // Persist layout to localStorage ONLY when NOT actively dragging/resizing
+  useEffect(() => {
+    if (!storageKey || isAnyColumnResizing) return;
+    try {
+      const layout = {
+        sizing: columnSizing,
+        visibility: columnVisibility,
+        order: columnOrder,
+        alignments: columnAlignments,
+      };
+      localStorage.setItem(storageKey, JSON.stringify(layout));
+    } catch (e) {}
+  }, [columnSizing, columnVisibility, columnOrder, columnAlignments, storageKey, isAnyColumnResizing]);
 
   // ── Selection change callback ──────────────────────────────────────────────
   const prevSelRef = useRef<RowSelectionState>({});

@@ -396,21 +396,25 @@ def api_export_class_excel(class_id: int, payload: Dict[str, Any]):
         )
         ws.add_table(tab)
 
-        # Highlight "Cần cố gắng" in soft red and "Đạt yêu cầu" in soft green
-        from openpyxl.formatting.rule import CellIsRule
+        # Highlight "Cần cố gắng" in soft red and "Đạt yêu cầu" in soft green using valid OpenXML FormulaRule
+        from openpyxl.formatting.rule import FormulaRule
         red_font = Font(color="991B1B", bold=True)
         red_fill = PatternFill(start_color="FEE2E2", end_color="FEE2E2", fill_type="solid")
         green_font = Font(color="166534", bold=True)
         green_fill = PatternFill(start_color="DCFCE7", end_color="DCFCE7", fill_type="solid")
 
-        ws.conditional_formatting.add(
-            f"I4:I{end_row}",
-            CellIsRule(operator="containsText", formula=['"Cần cố gắng"'], font=red_font, fill=red_fill)
+        rule_red = FormulaRule(
+            formula=['NOT(ISERROR(SEARCH("Cần cố gắng", I4)))'],
+            font=red_font,
+            fill=red_fill
         )
-        ws.conditional_formatting.add(
-            f"I4:I{end_row}",
-            CellIsRule(operator="containsText", formula=['"Đạt yêu cầu"'], font=green_font, fill=green_fill)
+        rule_green = FormulaRule(
+            formula=['NOT(ISERROR(SEARCH("Đạt yêu cầu", I4)))'],
+            font=green_font,
+            fill=green_fill
         )
+        ws.conditional_formatting.add(f"I4:I{end_row}", rule_red)
+        ws.conditional_formatting.add(f"I4:I{end_row}", rule_green)
 
     # Average row (Raw pre-calculated numbers so user can edit cell manually in Excel)
     ws.cell(row=avg_row_idx, column=1, value="")
