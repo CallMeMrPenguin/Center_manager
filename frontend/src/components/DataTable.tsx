@@ -946,12 +946,13 @@ export function DataTable<TData>({
             <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
               <SortableContext items={orderedHeaderIds} strategy={horizontalListSortingStrategy}>
                 <table
-                  className="text-left text-sm min-w-full"
+                  className="text-left text-sm"
                   style={{
                     tableLayout: 'fixed',
                     borderCollapse: 'separate',
                     borderSpacing: 0,
-                    ...(enableColumnResizing ? { width: table.getTotalSize() } : { width: '100%' }),
+                    width: enableColumnResizing ? table.getTotalSize() : '100%',
+                    minWidth: enableColumnResizing ? table.getTotalSize() : '100%',
                   }}
                 >
                   {/* ── COLGROUP for instant, jitter-free column widths ── */}
@@ -962,7 +963,6 @@ export function DataTable<TData>({
                         style={{
                           width: col.getSize(),
                           minWidth: col.getSize(),
-                          maxWidth: col.getSize(),
                         }}
                       />
                     ))}
