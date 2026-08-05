@@ -175,7 +175,7 @@ function DraggableHeader({
     opacity: isDragging ? 0.5 : 1,
     zIndex: isDragging ? 100 : undefined,
     position: 'relative',
-    ...(enableColumnResizing ? { width, minWidth: width, maxWidth: width } : {}),
+    ...(enableColumnResizing ? { width, minWidth: width } : {}),
     ...(isPinned === 'left' ? { position: 'sticky', left: header.column.getStart('left'), zIndex: 10, boxShadow: '2px 0 6px rgba(0,0,0,0.5)' } : {}),
     ...(isPinned === 'right' ? { position: 'sticky', right: header.column.getAfter('right'), zIndex: 10, boxShadow: '-2px 0 6px rgba(0,0,0,0.5)' } : {}),
   };
@@ -214,10 +214,12 @@ function DraggableHeader({
             header.getResizeHandler()(e);
           }}
           title="Kéo để thay đổi độ rộng cột"
-          className={`absolute -right-1 top-1 h-[calc(100%-8px)] w-2.5 cursor-col-resize select-none touch-none rounded-full transition-colors z-30 ${
-            header.column.getIsResizing() ? 'bg-indigo-500' : 'bg-transparent hover:bg-indigo-500/60'
-          }`}
-        />
+          className="absolute right-0 top-0 bottom-0 w-3 cursor-col-resize select-none touch-none z-30 flex items-center justify-center group/resize"
+        >
+          <div className={`w-1 h-full transition-colors ${
+            header.column.getIsResizing() ? 'bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.8)]' : 'bg-transparent group-hover/resize:bg-indigo-400/80'
+          }`} />
+        </div>
       )}
     </th>
   );
@@ -1052,7 +1054,7 @@ export function DataTable<TData>({
                                 `}
                                 style={{
                                   boxSizing: 'border-box',
-                                  ...(enableColumnResizing ? { width: cell.column.getSize(), minWidth: cell.column.getSize(), maxWidth: cell.column.getSize() } : {}),
+                                  ...(enableColumnResizing ? { width: cell.column.getSize(), minWidth: cell.column.getSize() } : {}),
                                   ...(isPinned === 'left' ? { position: 'sticky', left: cell.column.getStart('left'), zIndex: 3, boxShadow: '2px 0 6px rgba(0,0,0,0.4)' } : {}),
                                   ...(isPinned === 'right' ? { position: 'sticky', right: cell.column.getAfter('right'), zIndex: 3, boxShadow: '-2px 0 6px rgba(0,0,0,0.4)' } : {}),
                                   backgroundColor: isPinned

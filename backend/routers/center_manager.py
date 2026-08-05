@@ -396,21 +396,37 @@ def api_export_class_excel(class_id: int, payload: Dict[str, Any]):
         )
         ws.add_table(tab)
 
-    # Average row
+    # Average row (Raw pre-calculated numbers so user can edit cell manually in Excel)
     ws.cell(row=avg_row_idx, column=1, value="")
     ws.cell(row=avg_row_idx, column=2, value="Điểm trung bình (Average)")
     ws.cell(row=avg_row_idx, column=3, value="")
 
     if len(attendance) > 0:
-        ws.cell(row=avg_row_idx, column=4, value=f'=_xlfn.IFERROR(ROUNDUP(AVERAGEIF(D{start_row}:D{end_row}, ">0"), 1), 0)')
-        ws.cell(row=avg_row_idx, column=5, value=f'=_xlfn.IFERROR(ROUNDUP(AVERAGEIF(E{start_row}:E{end_row}, ">0"), 1), 0)')
-        ws.cell(row=avg_row_idx, column=6, value=f'=_xlfn.IFERROR(ROUNDUP(AVERAGEIF(F{start_row}:F{end_row}, ">0"), 1), 0)')
-        ws.cell(row=avg_row_idx, column=7, value=f'=_xlfn.IFERROR(ROUNDUP(AVERAGEIF(G{start_row}:G{end_row}, ">0"), 1), 0)')
-        ws.cell(row=avg_row_idx, column=8, value=f'=_xlfn.IFERROR(ROUNDUP(AVERAGEIF(H{start_row}:H{end_row}, ">0"), 1), 0)')
+        c1_vals = [clean_num(r.get("check_1")) for r in attendance if clean_num(r.get("check_1")) > 0 and str(r.get("status")) != "Vắng mặt"]
+        c2_vals = [clean_num(r.get("check_2")) for r in attendance if clean_num(r.get("check_2")) > 0 and str(r.get("status")) != "Vắng mặt"]
+        hw_vals = [clean_num(r.get("homework")) for r in attendance if clean_num(r.get("homework")) > 0 and str(r.get("status")) != "Vắng mặt"]
+
+        def trunc1dec(val_list):
+            if not val_list:
+                return 0.0
+            avg = sum(val_list) / len(val_list)
+            return math.floor(avg * 10) / 10.0
+
+        avg_c1 = trunc1dec(c1_vals)
+        avg_c2 = trunc1dec(c2_vals)
+        avg_hw = trunc1dec(hw_vals)
+        avg_diff1 = math.floor(abs(avg_hw - avg_c2) * 10) / 10.0
+        avg_diff2 = math.floor(abs(avg_c2 - avg_c1) * 10) / 10.0
+
+        ws.cell(row=avg_row_idx, column=4, value=avg_c1)
+        ws.cell(row=avg_row_idx, column=5, value=avg_c2)
+        ws.cell(row=avg_row_idx, column=6, value=avg_hw)
+        ws.cell(row=avg_row_idx, column=7, value=avg_diff1)
+        ws.cell(row=avg_row_idx, column=8, value=avg_diff2)
         ws.cell(row=avg_row_idx, column=9, value="")
     else:
         for c_idx in range(4, 10):
-            ws.cell(row=avg_row_idx, column=c_idx, value=0)
+            ws.cell(row=avg_row_idx, column=c_idx, value=0.0)
 
     avg_fill = PatternFill(start_color="EEF2FF", end_color="EEF2FF", fill_type="solid")
     avg_font = Font(bold=True, color="312E81")
