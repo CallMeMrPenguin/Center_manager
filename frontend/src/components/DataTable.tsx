@@ -204,8 +204,15 @@ function DraggableHeader({
       {/* Resize handle — completely isolated from dnd listeners */}
       {enableColumnResizing && header.column.getCanResize() && (
         <div
-          onMouseDown={header.getResizeHandler()}
-          onTouchStart={header.getResizeHandler()}
+          onMouseDown={(e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            header.getResizeHandler()(e);
+          }}
+          onTouchStart={(e) => {
+            e.stopPropagation();
+            header.getResizeHandler()(e);
+          }}
           title="Kéo để thay đổi độ rộng cột"
           className={`absolute -right-1 top-1 h-[calc(100%-8px)] w-2.5 cursor-col-resize select-none touch-none rounded-full transition-colors z-30 ${
             header.column.getIsResizing() ? 'bg-indigo-500' : 'bg-transparent hover:bg-indigo-500/60'

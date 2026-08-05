@@ -453,7 +453,7 @@ def api_export_class_excel(class_id: int, payload: Dict[str, Any]):
         val_cell = ws.cell(
             row=r_idx,
             column=3,
-            value=f'=IF(_xlfn.TEXTJOIN(", ", TRUE, IF(({col_let}{start_row}:{col_let}{end_row}>0)*({col_let}{start_row}:{col_let}{end_row}<{col_let}{avg_row_idx})*(C{start_row}:C{end_row}<>"Vắng mặt"), B{start_row}:B{end_row}, ""))="", "Không có (Tất cả đạt)", _xlfn.TEXTJOIN(", ", TRUE, IF(({col_let}{start_row}:{col_let}{end_row}>0)*({col_let}{start_row}:{col_let}{end_row}<{col_let}{avg_row_idx})*(C{start_row}:C{end_row}<>"Vắng mặt"), B{start_row}:B{end_row}, "")))' if len(attendance) > 0 else "Không có (Tất cả đạt)"
+            value=f'=_xlfn.TEXTJOIN(", ", TRUE, _xlfn.FILTER(B{start_row}:B{end_row}, ({col_let}{start_row}:{col_let}{end_row}>0)*({col_let}{start_row}:{col_let}{end_row}<{col_let}{avg_row_idx})*(C{start_row}:C{end_row}<>"Vắng mặt"), "Không có (Tất cả đạt)"))' if len(attendance) > 0 else "Không có (Tất cả đạt)"
         )
         val_cell.font = Font(bold=True, color="1E1E2F")
 
