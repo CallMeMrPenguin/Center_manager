@@ -396,6 +396,22 @@ def api_export_class_excel(class_id: int, payload: Dict[str, Any]):
         )
         ws.add_table(tab)
 
+        # Highlight "Cần cố gắng" in soft red and "Đạt yêu cầu" in soft green
+        from openpyxl.formatting.rule import CellIsRule
+        red_font = Font(color="991B1B", bold=True)
+        red_fill = PatternFill(start_color="FEE2E2", end_color="FEE2E2", fill_type="solid")
+        green_font = Font(color="166534", bold=True)
+        green_fill = PatternFill(start_color="DCFCE7", end_color="DCFCE7", fill_type="solid")
+
+        ws.conditional_formatting.add(
+            f"I4:I{end_row}",
+            CellIsRule(operator="containsText", formula=['"Cần cố gắng"'], font=red_font, fill=red_fill)
+        )
+        ws.conditional_formatting.add(
+            f"I4:I{end_row}",
+            CellIsRule(operator="containsText", formula=['"Đạt yêu cầu"'], font=green_font, fill=green_fill)
+        )
+
     # Average row (Raw pre-calculated numbers so user can edit cell manually in Excel)
     ws.cell(row=avg_row_idx, column=1, value="")
     ws.cell(row=avg_row_idx, column=2, value="Điểm trung bình (Average)")

@@ -154,15 +154,18 @@ function DraggableHeader({
   enableReorder,
   enableColumnResizing,
   align = 'center',
+  isAnyColumnResizing = false,
 }: {
   header: any;
   children: React.ReactNode;
   enableReorder: boolean;
   enableColumnResizing: boolean;
   align?: 'center' | 'left';
+  isAnyColumnResizing?: boolean;
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: header.id,
+    disabled: !enableReorder || isAnyColumnResizing,
   });
 
   const isPinned = header.column.getIsPinned();
@@ -171,7 +174,7 @@ function DraggableHeader({
 
   const style: React.CSSProperties = {
     transform: CSS.Transform.toString(transform),
-    transition: isResizing ? 'none' : transition,
+    transition: (isResizing || isAnyColumnResizing) ? 'none' : transition,
     opacity: isDragging ? 0.5 : 1,
     zIndex: isDragging ? 100 : undefined,
     position: 'relative',
@@ -968,6 +971,7 @@ export function DataTable<TData>({
                         {headerGroup.headers.map(header => {
                           const isSelectCol = header.column.id === 'select' || header.column.id === '_expander';
                           const align = isSelectCol ? 'center' : (columnAlignments[header.column.id] || 'left');
+                          const isAnyColumnResizing = table.getState().columnSizingInfo.isResizingColumn !== false;
 
                           return (
                             <DraggableHeader
@@ -976,6 +980,7 @@ export function DataTable<TData>({
                               enableReorder={enableColumnReorder && !isSelectCol}
                               enableColumnResizing={enableColumnResizing}
                               align={align}
+                              isAnyColumnResizing={isAnyColumnResizing}
                             >
                               <div
                                 className={`inline-flex items-center ${align === 'left' ? 'justify-start' : 'justify-center'} gap-1.5 max-w-full ${

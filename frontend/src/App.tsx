@@ -256,13 +256,13 @@ function AppContent() {
         
         {/* SIDEBAR NAVIGATION (Pure GPU-accelerated inline hover expansion) */}
         <aside
-          className="w-16 hover:w-64 group/sidebar sidebar-glass-glow rounded-2xl flex flex-col h-full overflow-hidden transition-[width] duration-200 ease-out z-30 shrink-0"
+          className="w-20 hover:w-64 group/sidebar sidebar-glass-glow rounded-2xl flex flex-col h-full overflow-hidden transition-[width] duration-200 ease-out z-30 shrink-0"
         >
           
           {/* Header logo / Title */}
-          <div className="flex items-center gap-3 px-3.5 py-4 shrink-0 border-b border-white/5 min-w-0">
-            <div className="h-9 w-9 bg-indigo-500/25 border-2 border-indigo-400/80 rounded-2xl flex items-center justify-center shadow-[0_0_20px_rgba(92,54,245,0.6)] shrink-0">
-              <GraduationCap size={20} className="text-white drop-shadow-[0_0_12px_rgba(255,255,255,1)]" />
+          <div className="flex items-center gap-3 px-4 py-4 shrink-0 border-b border-white/5 min-w-0">
+            <div className="h-10 w-10 bg-indigo-500/25 border-2 border-indigo-400/80 rounded-2xl flex items-center justify-center shadow-[0_0_20px_rgba(92,54,245,0.6)] shrink-0">
+              <GraduationCap size={22} className="text-white drop-shadow-[0_0_12px_rgba(255,255,255,1)]" />
             </div>
             <div className="opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-200 ease-out whitespace-nowrap overflow-hidden pointer-events-none group-hover/sidebar:pointer-events-auto min-w-0 flex-1">
               <span className="text-base font-black tracking-wide uppercase text-white block leading-none">
@@ -275,7 +275,7 @@ function AppContent() {
           </div>
           
           {/* Nav Menu */}
-          <nav className="flex-1 overflow-y-auto min-h-0 px-2 py-3 flex flex-col gap-2 scrollbar-none">
+          <nav className="flex-1 overflow-y-auto min-h-0 px-3 py-3 flex flex-col gap-2 scrollbar-none">
             {SECTIONS.map((section) => {
               const sectionTabs = orderedTabIds
                 .map((tabId, idx) => ({ tabId, idx }))
@@ -310,9 +310,9 @@ function AppContent() {
                           draggedIndex === idx ? 'opacity-40 border border-dashed border-indigo-400 bg-indigo-500/10' : ''
                         }`}
                       >
-                        {/* ACTIVE TAB HIGHLIGHT */}
+                        {/* PERFECTLY CENTERED ACTIVE TAB HIGHLIGHT */}
                         {isActive && (
-                          <div className="absolute inset-1 rounded-xl bg-indigo-500/25 border-2 border-indigo-400/90 shadow-[0_0_16px_rgba(92,54,245,0.5)] transition-opacity duration-150 pointer-events-none" />
+                          <div className="absolute top-[4px] left-[4px] w-11 h-10 rounded-xl bg-indigo-500/25 border-2 border-indigo-400/90 shadow-[0_0_16px_rgba(92,54,245,0.5)] group-hover/sidebar:w-[calc(100%-8px)] group-hover/sidebar:h-[calc(100%-8px)] transition-all duration-200 pointer-events-none" />
                         )}
 
                         {/* ICON BOX */}
