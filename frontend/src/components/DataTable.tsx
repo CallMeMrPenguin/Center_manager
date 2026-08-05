@@ -178,7 +178,6 @@ function DraggableHeader({
     opacity: isDragging ? 0.5 : 1,
     zIndex: isDragging ? 100 : undefined,
     position: 'relative',
-    ...(enableColumnResizing ? { width, minWidth: width } : {}),
     ...(isPinned === 'left' ? { position: 'sticky', left: header.column.getStart('left'), zIndex: 10, boxShadow: '2px 0 6px rgba(0,0,0,0.5)' } : {}),
     ...(isPinned === 'right' ? { position: 'sticky', right: header.column.getAfter('right'), zIndex: 10, boxShadow: '-2px 0 6px rgba(0,0,0,0.5)' } : {}),
   };
@@ -946,13 +945,11 @@ export function DataTable<TData>({
             <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
               <SortableContext items={orderedHeaderIds} strategy={horizontalListSortingStrategy}>
                 <table
-                  className="text-left text-sm"
+                  className="text-left text-sm w-full min-w-full"
                   style={{
                     tableLayout: 'fixed',
                     borderCollapse: 'separate',
                     borderSpacing: 0,
-                    width: enableColumnResizing ? table.getTotalSize() : '100%',
-                    minWidth: enableColumnResizing ? table.getTotalSize() : '100%',
                   }}
                 >
                   {/* ── COLGROUP for instant, jitter-free column widths ── */}
@@ -962,7 +959,6 @@ export function DataTable<TData>({
                         key={col.id}
                         style={{
                           width: col.getSize(),
-                          minWidth: col.getSize(),
                         }}
                       />
                     ))}
@@ -1063,7 +1059,6 @@ export function DataTable<TData>({
                                 `}
                                 style={{
                                   boxSizing: 'border-box',
-                                  ...(enableColumnResizing ? { width: cell.column.getSize(), minWidth: cell.column.getSize() } : {}),
                                   ...(isPinned === 'left' ? { position: 'sticky', left: cell.column.getStart('left'), zIndex: 3, boxShadow: '2px 0 6px rgba(0,0,0,0.4)' } : {}),
                                   ...(isPinned === 'right' ? { position: 'sticky', right: cell.column.getAfter('right'), zIndex: 3, boxShadow: '-2px 0 6px rgba(0,0,0,0.4)' } : {}),
                                   backgroundColor: isPinned
