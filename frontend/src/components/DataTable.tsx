@@ -208,7 +208,6 @@ function DraggableHeader({
         <div
           onMouseDown={(e) => {
             e.stopPropagation();
-            e.preventDefault();
             header.getResizeHandler()(e);
           }}
           onTouchStart={(e) => {
@@ -595,7 +594,7 @@ export function DataTable<TData>({
   const [columnOrder, setColumnOrder] = useState<ColumnOrderState>(() => savedLayout?.order || []);
   const [columnAlignments, setColumnAlignments] = useState<Record<string, 'center' | 'left'>>(() => savedLayout?.alignments || {});
 
-  // Re-sync layout state when storageKey or savedLayout changes
+  // Re-sync layout state ONLY when switching tables (storageKey changes)
   useEffect(() => {
     if (!storageKey) return;
     try {
@@ -613,7 +612,7 @@ export function DataTable<TData>({
       setColumnOrder(layout?.order || []);
       setColumnAlignments(layout?.alignments || {});
     } catch (e) {}
-  }, [storageKey, columns, initialColumnVisibility]);
+  }, [storageKey]);
 
 
 
