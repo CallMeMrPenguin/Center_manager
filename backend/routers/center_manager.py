@@ -22,7 +22,7 @@ from database.db_manager import (
     get_courses, create_course, update_course, delete_course,
     get_student_scores, upsert_student_score, delete_student_score,
     get_class_attendance_grades, upsert_class_attendance_grades,
-    get_analytics_reports, reset_student_grades
+    get_analytics_reports, reset_student_grades, get_class_student_predictions
 )
 from routers.questions import flatten_docx_to_questions
 
@@ -231,12 +231,22 @@ def api_get_attendance(class_id: int, date: str):
     students = get_class_students(class_id)
     existing = get_class_attendance_grades(class_id, date)
     existing_map = {r["student_id"]: r for r in existing}
+    student_preds = get_class_student_predictions(class_id)
     
     result = []
     for st in students:
+        preds = student_preds.get(st["id"], {
+            "pred_c1": 8.5,
+            "pred_c2": 8.0,
+            "pred_hw": 9.0,
+            "predicted_next": 8.5
+        })
         if st["id"] in existing_map:
             rec = dict(existing_map[st["id"]])
             rec["student_name"] = st["full_name"]
+            rec["pred_c1"] = preds["pred_c1"]
+            rec["pred_c2"] = preds["pred_c2"]
+            rec["pred_hw"] = preds["pred_hw"]
             result.append(rec)
         else:
             result.append({
@@ -248,7 +258,10 @@ def api_get_attendance(class_id: int, date: str):
                 "check_1": 0,
                 "check_2": 0,
                 "homework": 0,
-                "notes": ""
+                "notes": "",
+                "pred_c1": preds["pred_c1"],
+                "pred_c2": preds["pred_c2"],
+                "pred_hw": preds["pred_hw"]
             })
     return {"date": date, "records": result}
 

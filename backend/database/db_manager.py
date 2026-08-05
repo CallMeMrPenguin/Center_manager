@@ -2100,7 +2100,7 @@ def calculate_performance_analytics(session_records: List[Dict[str, Any]]) -> Di
         recs.append("Khuyên dùng: Điểm số trồi sụt thất thường, cần giáo viên theo dõi sát sao từng buổi học.")
     if not recs:
         recs.append("Đánh giá: Duy trì phong độ tốt. Tiếp tục phát huy trong các kỳ tới.")
-        recs.append(f"Dự đoán buổi tới: Check 1 ({pred_c1:.1f}), Check 2 ({pred_c2:.1f}), Homework ({pred_hw:.1f}).")
+    recs.append(f"Dự đoán buổi tới: Check 1 ({pred_c1:.1f}), Check 2 ({pred_c2:.1f}), Homework ({pred_hw:.1f}).")
 
     return {
         "academic_score": trunc_1_dec(academic_score),
@@ -2109,12 +2109,94 @@ def calculate_performance_analytics(session_records: List[Dict[str, Any]]) -> Di
         "consistency_score": trunc_1_dec(consistency_score),
         "std_dev": round(std_dev, 2),
         "consistency_label": consistency_label,
-        "pred_hw": round(pred_hw, 1),
+        "ema_level": trunc_1_dec(ema),
+        "predicted_next": trunc_1_dec(pred_overall),
+        "pred_c1": trunc_1_dec(pred_c1),
+        "pred_c2": trunc_1_dec(pred_c2),
+        "pred_hw": trunc_1_dec(pred_hw),
         "attendance_pct": round(att_pct, 1),
         "performance_index": round(performance_index, 1),
         "rating_label": rating_label,
         "recommendations": recs
     }
+
+def get_class_student_predictions(class_id: int) -> Dict[int, Dict[str, float]]:
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT student_id, check_1, check_2, homework, status
+        FROM class_attendance_grades
+        WHERE class_id = ?
+        ORDER BY date ASC
+    """, (class_id,))
+    rows = [dict(r) for r in cursor.fetchall()]
+    conn.close()
+
+    records_by_student: Dict[int, List[Dict[str, Any]]] = {}
+    for r in rows:
+        sid = r["student_id"]
+        if sid not in records_by_student:
+            records_by_student[sid] = []
+        records_by_student[sid].append(r)
+
+    predictions: Dict[int, Dict[str, float]] = {}
+    for sid, recs in records_by_student.items():
+        c1_list, c2_list, hw_list = [], [], []
+        overall_session_scores = []
+        for r in recs:
+            status = r.get("status", "Có mặt")
+            if status in ("Vắng mặt", "Nghỉ học"):
+                continue
+            c1 = float(r.get("check_1") or 0)
+            c2 = float(r.get("check_2") or 0)
+            hw = float(r.get("homework") or 0)
+
+            if c1 > 0: c1_list.append(c1)
+            if c2 > 0: c2_list.append(c2)
+            if hw > 0: hw_list.append(hw)
+
+            valid_in_session = [s for s in [c1, c2, hw] if s > 0]
+            if valid_in_session:
+                overall_session_scores.append(sum(valid_in_session) / len(valid_in_session))
+
+        weighted_sum = 0.0
+        weight_total = 0.0
+        if hw_list:
+            weighted_sum += (sum(hw_list) / len(hw_list)) * 0.40
+            weight_total += 0.40
+        if c1_list:
+            weighted_sum += (sum(c1_list) / len(c1_list)) * 0.30
+            weight_total += 0.30
+        if c2_list:
+            weighted_sum += (sum(c2_list) / len(c2_list)) * 0.30
+            weight_total += 0.30
+
+        academic_10 = (weighted_sum / weight_total) if weight_total > 0 else (sum(overall_session_scores) / len(overall_session_scores) if overall_session_scores else 8.0)
+
+        def calc_reg(vals_list: List[float]) -> float:
+            N = len(vals_list)
+            if N == 0:
+                return trunc_1_dec(academic_10)
+            if N == 1:
+                return trunc_1_dec(vals_list[0])
+            x_vals = list(range(1, N + 1))
+            mean_x = sum(x_vals) / N
+            mean_y = sum(vals_list) / N
+            num = sum((x_vals[i] - mean_x) * (vals_list[i] - mean_y) for i in range(N))
+            den = sum((x_vals[i] - mean_x) ** 2 for i in range(N))
+            slope = num / den if den != 0 else 0
+            intercept = mean_y - (slope * mean_x)
+            raw_pred = slope * (N + 1) + intercept
+            return trunc_1_dec(max(0.0, min(10.0, raw_pred)))
+
+        predictions[sid] = {
+            "pred_c1": calc_reg(c1_list),
+            "pred_c2": calc_reg(c2_list),
+            "pred_hw": calc_reg(hw_list),
+            "predicted_next": calc_reg(overall_session_scores)
+        }
+
+    return predictions
 
 def get_analytics_reports(class_id: Optional[int] = None, student_id: Optional[int] = None) -> Dict[str, Any]:
     conn = get_connection()

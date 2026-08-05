@@ -415,10 +415,10 @@ export default function ReportsPage() {
       ]
     };
 
-    const c1 = Math.min(10.0, Math.max(0.0, trunc1Dec(raw.pred_c1 ?? 8.8)));
-    const c2 = Math.min(10.0, Math.max(0.0, trunc1Dec(raw.pred_c2 ?? 7.5)));
-    const hw = Math.min(10.0, Math.max(0.0, trunc1Dec(raw.pred_hw ?? 9.5)));
-    const predNext = Math.min(10.0, Math.max(0.0, trunc1Dec(raw.predicted_next ?? 8.9)));
+    const c1 = Math.min(10.0, Math.max(0.0, trunc1Dec(raw.pred_c1 ?? 0.0)));
+    const c2 = Math.min(10.0, Math.max(0.0, trunc1Dec(raw.pred_c2 ?? 0.0)));
+    const hw = Math.min(10.0, Math.max(0.0, trunc1Dec(raw.pred_hw ?? 0.0)));
+    const predNext = Math.min(10.0, Math.max(0.0, trunc1Dec(raw.predicted_next ?? 0.0)));
 
     return {
       ...raw,
@@ -859,13 +859,13 @@ export default function ReportsPage() {
           <div className="flex items-center gap-5">
             <div className="flex items-center gap-4 text-[11px] font-bold">
               <span className="flex items-center gap-1.5 text-blue-400">
-                <span className="w-2.5 h-2.5 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.8)]"></span> Check 1 (Dự đoán: {engine.pred_c1 || 8.8})
+                <span className="w-2.5 h-2.5 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.8)]"></span> Check 1 (Dự đoán: {format1Dec(engine.pred_c1)})
               </span>
               <span className="flex items-center gap-1.5 text-purple-400">
-                <span className="w-2.5 h-2.5 rounded-full bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.8)]"></span> Check 2 (Dự đoán: {engine.pred_c2 || 7.5})
+                <span className="w-2.5 h-2.5 rounded-full bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.8)]"></span> Check 2 (Dự đoán: {format1Dec(engine.pred_c2)})
               </span>
               <span className="flex items-center gap-1.5 text-emerald-400">
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]"></span> Homework (Dự đoán: {engine.pred_hw || 9.5})
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]"></span> Homework (Dự đoán: {format1Dec(engine.pred_hw)})
               </span>
             </div>
 
@@ -1061,14 +1061,14 @@ export default function ReportsPage() {
                   x1={getSvgX(sessionChartData.length - 1, sessionChartData.length)}
                   y1={getSvgY(sessionChartData[sessionChartData.length - 1].check1)}
                   x2={chartWidth - paddingRight + 30}
-                  y2={getSvgY(engine.pred_c1 || 8.8)}
+                  y2={getSvgY(engine.pred_c1)}
                   stroke="#3b82f6"
                   strokeWidth="2.5"
                   strokeDasharray="4 4"
                 />
                 <circle 
                   cx={chartWidth - paddingRight + 30} 
-                  cy={getSvgY(engine.pred_c1 || 8.8)} 
+                  cy={getSvgY(engine.pred_c1)} 
                   r="6" 
                   fill="#3b82f6" 
                   stroke="#ffffff" 
@@ -1076,12 +1076,12 @@ export default function ReportsPage() {
                 />
                 <text 
                   x={chartWidth - paddingRight + 38} 
-                  y={getSvgY(engine.pred_c1 || 8.8) + 4} 
+                  y={getSvgY(engine.pred_c1) + 4} 
                   fill="#60a5fa" 
                   fontSize="11" 
                   fontWeight="900"
                 >
-                  {engine.pred_c1 || 8.8}
+                  {format1Dec(engine.pred_c1)}
                 </text>
 
                 {/* 2. Check 2 Forecast Line & Point */}
@@ -1089,14 +1089,14 @@ export default function ReportsPage() {
                   x1={getSvgX(sessionChartData.length - 1, sessionChartData.length)}
                   y1={getSvgY(sessionChartData[sessionChartData.length - 1].check2)}
                   x2={chartWidth - paddingRight + 30}
-                  y2={getSvgY(engine.pred_c2 || 7.5)}
+                  y2={getSvgY(engine.pred_c2)}
                   stroke="#a855f7"
                   strokeWidth="2.5"
                   strokeDasharray="4 4"
                 />
                 <circle 
                   cx={chartWidth - paddingRight + 30} 
-                  cy={getSvgY(engine.pred_c2 || 7.5)} 
+                  cy={getSvgY(engine.pred_c2)} 
                   r="6" 
                   fill="#a855f7" 
                   stroke="#ffffff" 
@@ -1104,12 +1104,12 @@ export default function ReportsPage() {
                 />
                 <text 
                   x={chartWidth - paddingRight + 38} 
-                  y={getSvgY(engine.pred_c2 || 7.5) + 4} 
+                  y={getSvgY(engine.pred_c2) + 4} 
                   fill="#c084fc" 
                   fontSize="11" 
                   fontWeight="900"
                 >
-                  {engine.pred_c2 || 7.5}
+                  {format1Dec(engine.pred_c2)}
                 </text>
 
                 {/* 3. Homework Forecast Line & Point */}
@@ -1117,14 +1117,14 @@ export default function ReportsPage() {
                   x1={getSvgX(sessionChartData.length - 1, sessionChartData.length)}
                   y1={getSvgY(sessionChartData[sessionChartData.length - 1].homework)}
                   x2={chartWidth - paddingRight + 30}
-                  y2={getSvgY(engine.pred_hw || 9.5)}
+                  y2={getSvgY(engine.pred_hw)}
                   stroke="#10b981"
                   strokeWidth="2.5"
                   strokeDasharray="4 4"
                 />
                 <circle 
                   cx={chartWidth - paddingRight + 30} 
-                  cy={getSvgY(engine.pred_hw || 9.5)} 
+                  cy={getSvgY(engine.pred_hw)} 
                   r="6" 
                   fill="#10b981" 
                   stroke="#ffffff" 
@@ -1132,12 +1132,12 @@ export default function ReportsPage() {
                 />
                 <text 
                   x={chartWidth - paddingRight + 38} 
-                  y={getSvgY(engine.pred_hw || 9.5) + 4} 
+                  y={getSvgY(engine.pred_hw) + 4} 
                   fill="#34d399" 
                   fontSize="11" 
                   fontWeight="900"
                 >
-                  {engine.pred_hw || 9.5}
+                  {format1Dec(engine.pred_hw)}
                 </text>
               </>
             )}
