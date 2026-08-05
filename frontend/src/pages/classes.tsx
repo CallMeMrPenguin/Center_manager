@@ -1172,24 +1172,6 @@ export default function ClassesPage() {
                   </button>
 
                   <button
-                    onClick={handleExportExcel}
-                    className="group flex items-center gap-0 hover:gap-1.5 bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/30 px-3.5 py-1.5 rounded-xl font-bold text-xs transition-all duration-300 cursor-pointer"
-                    title="Xuất Excel"
-                  >
-                    <FileSpreadsheet size={14} className="shrink-0" />
-                    <span className="max-w-0 opacity-0 group-hover:max-w-[120px] group-hover:opacity-100 transition-all duration-300 ease-in-out whitespace-nowrap overflow-hidden block">Xuất Excel</span>
-                  </button>
-
-                  <button
-                    onClick={handleExportDocx}
-                    className="group flex items-center gap-0 hover:gap-1.5 bg-blue-500/15 hover:bg-blue-500/25 text-blue-300 border border-blue-500/30 px-3.5 py-1.5 rounded-xl font-bold text-xs transition-all duration-300 cursor-pointer"
-                    title="Xuất Word"
-                  >
-                    <FileText size={14} className="shrink-0" />
-                    <span className="max-w-0 opacity-0 group-hover:max-w-[120px] group-hover:opacity-100 transition-all duration-300 ease-in-out whitespace-nowrap overflow-hidden block">Xuất Word</span>
-                  </button>
-
-                  <button
                     onClick={handleSaveAttendance}
                     disabled={savingAttendance}
                     className="group flex items-center gap-0 hover:gap-1.5 bg-[#5c36f5] hover:bg-[#7351f7] text-white px-3.5 py-1.5 rounded-xl font-extrabold text-xs shadow-[0_4px_12px_rgba(92,54,245,0.4)] transition-all duration-300 cursor-pointer border border-white/20"
@@ -1208,6 +1190,8 @@ export default function ClassesPage() {
                 columns={attendanceColumns}
                 pageSize={20}
                 exportFilename={`diem_danh_${selectedClass?.class_name || ''}_${attendanceDate}`}
+                onExportExcel={handleExportExcel}
+                onExportDocx={handleExportDocx}
               />
             </div>
           )}

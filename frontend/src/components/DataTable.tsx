@@ -46,6 +46,33 @@ import {
   GripVertical, Download, FileSpreadsheet, FileText, Zap, RotateCcw,
 } from 'lucide-react';
 
+// ─── Header Text Extractor Helper ───────────────────────────────────────────
+function getTextFromReactNode(node: any): string {
+  if (node === null || node === undefined || typeof node === 'boolean') return '';
+  if (typeof node === 'string' || typeof node === 'number') return String(node);
+  if (Array.isArray(node)) return node.map(getTextFromReactNode).join('');
+  if (React.isValidElement(node)) {
+    return getTextFromReactNode((node.props as any)?.children);
+  }
+  return '';
+}
+
+function getColumnHeaderText(column: any, context: any): string {
+  const headerDef = column.columnDef.header;
+  if (typeof headerDef === 'string') return headerDef;
+  if (typeof headerDef === 'function') {
+    try {
+      const rendered = flexRender(headerDef, context);
+      const text = getTextFromReactNode(rendered).trim();
+      if (text) return text;
+    } catch (e) {}
+  }
+  if (typeof column.columnDef.meta?.headerText === 'string') {
+    return column.columnDef.meta.headerText;
+  }
+  return column.id;
+}
+
 // ─── Types ───────────────────────────────────────────────────────────────────
 export interface DataTableProps<TData> {
   data: TData[];
@@ -84,6 +111,9 @@ export interface DataTableProps<TData> {
   onRowClick?: (row: TData) => void;
   onSelectionChange?: (selectedRows: TData[]) => void;
   renderSubComponent?: (props: { row: Row<TData> }) => React.ReactNode;
+  onExportExcel?: () => void;
+  onExportDocx?: () => void;
+  onExportPdf?: () => void;
 
   // Toolbar slots
   toolbarLeft?: React.ReactNode;
@@ -137,14 +167,15 @@ function DraggableHeader({
 
   const isPinned = header.column.getIsPinned();
   const width = header.getSize();
+  const isResizing = header.column.getIsResizing();
 
   const style: React.CSSProperties = {
     transform: CSS.Transform.toString(transform),
-    transition,
+    transition: isResizing ? 'none' : transition,
     opacity: isDragging ? 0.5 : 1,
     zIndex: isDragging ? 100 : undefined,
     position: 'relative',
-    ...(enableColumnResizing ? { width, minWidth: width } : {}),
+    ...(enableColumnResizing ? { width, minWidth: width, maxWidth: width } : {}),
     ...(isPinned === 'left' ? { position: 'sticky', left: header.column.getStart('left'), zIndex: 10, boxShadow: '2px 0 6px rgba(0,0,0,0.5)' } : {}),
     ...(isPinned === 'right' ? { position: 'sticky', right: header.column.getAfter('right'), zIndex: 10, boxShadow: '-2px 0 6px rgba(0,0,0,0.5)' } : {}),
   };
@@ -332,9 +363,15 @@ function ColumnVisibilityDropdown<TData>({
 function ExportDropdown<TData>({
   table,
   filename,
+  onExportExcel,
+  onExportPdf,
+  onExportDocx,
 }: {
   table: ReturnType<typeof useReactTable<TData>>;
   filename: string;
+  onExportExcel?: () => void;
+  onExportPdf?: () => void;
+  onExportDocx?: () => void;
 }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -347,37 +384,65 @@ function ExportDropdown<TData>({
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
-  const getExportRows = () =>
-    table.getFilteredRowModel().rows.map(row =>
-      row.getVisibleCells()
-        .filter(c => c.column.id !== 'select' && c.column.id !== '_expander')
-        .map(c => {
-          const val = c.getValue();
-          if (val === null || val === undefined) return '';
-          if (typeof val === 'number') {
-            if (!Number.isInteger(val)) {
-              return Math.floor(val * 10 + 0.0000001) / 10;
-            }
-            return val;
-          }
-          if (typeof val === 'string' && !isNaN(Number(val)) && val.includes('.')) {
-            const num = Number(val);
-            return (Math.floor(num * 10 + 0.0000001) / 10).toFixed(1);
-          }
-          if (typeof val === 'object') return JSON.stringify(val);
-          return String(val);
-        })
-    );
+  const visibleHeaders = table.getHeaderGroups()[0].headers.filter(
+    h => h.column.id !== 'select' && h.column.id !== '_expander' && h.column.getIsVisible()
+  );
 
   const getHeaders = () =>
-    table.getHeaderGroups()[0].headers
-      .filter(h => h.column.id !== 'select' && h.column.id !== '_expander' && h.column.getIsVisible())
-      .map(h => typeof h.column.columnDef.header === 'string' ? h.column.columnDef.header : h.column.id);
+    visibleHeaders.map(h => getColumnHeaderText(h.column, h.getContext()));
+
+  const getExportRows = () =>
+    table.getFilteredRowModel().rows.map(row =>
+      visibleHeaders.map(h => {
+        const cell = row.getVisibleCells().find(c => c.column.id === h.column.id);
+        const val = cell ? cell.getValue() : row.getValue(h.column.id);
+        if (val === null || val === undefined) return '';
+        if (typeof val === 'number') {
+          if (!Number.isInteger(val)) {
+            return Math.floor(val * 10 + 0.0000001) / 10;
+          }
+          return val;
+        }
+        if (typeof val === 'string' && !isNaN(Number(val)) && val.includes('.')) {
+          const num = Number(val);
+          return (Math.floor(num * 10 + 0.0000001) / 10).toFixed(1);
+        }
+        if (typeof val === 'object') return JSON.stringify(val);
+        return String(val);
+      })
+    );
 
   const exportExcel = () => {
+    if (onExportExcel) {
+      onExportExcel();
+      setOpen(false);
+      return;
+    }
     const headers = getHeaders();
     const rows = getExportRows();
     const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+
+    // Auto-fit column widths
+    const colWidths = headers.map((h, colIdx) => {
+      let maxLen = String(h || '').length;
+      rows.forEach(r => {
+        const cellVal = String(r[colIdx] ?? '');
+        if (cellVal.length > maxLen) maxLen = cellVal.length;
+      });
+      return { wch: Math.max(maxLen + 4, 12) };
+    });
+    ws['!cols'] = colWidths;
+
+    // Auto-filter headers range
+    if (rows.length > 0) {
+      ws['!autofilter'] = {
+        ref: XLSX.utils.encode_range({
+          s: { r: 0, c: 0 },
+          e: { r: rows.length, c: headers.length - 1 },
+        }),
+      };
+    }
+
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Data');
     XLSX.writeFile(wb, `${filename}.xlsx`);
@@ -385,6 +450,11 @@ function ExportDropdown<TData>({
   };
 
   const exportPDF = () => {
+    if (onExportPdf) {
+      onExportPdf();
+      setOpen(false);
+      return;
+    }
     const headers = getHeaders();
     const rows = getExportRows();
     const doc = new jsPDF({ orientation: 'landscape' });
@@ -425,6 +495,16 @@ function ExportDropdown<TData>({
             <FileSpreadsheet size={13} className="text-emerald-400" />
             Excel (.xlsx)
           </button>
+          {onExportDocx && (
+            <button
+              type="button"
+              onClick={() => { onExportDocx(); setOpen(false); }}
+              className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-slate-200 hover:text-white hover:bg-blue-500/10 hover:border hover:border-blue-500/20 transition cursor-pointer"
+            >
+              <FileText size={13} className="text-blue-400" />
+              Word (.docx)
+            </button>
+          )}
           <button
             type="button"
             onClick={exportPDF}
@@ -796,7 +876,15 @@ export function DataTable<TData>({
 
             {toolbarRight}
 
-            {enableExport && <ExportDropdown<TData> table={table} filename={exportFilename} />}
+            {enableExport && (
+              <ExportDropdown<TData>
+                table={table}
+                filename={exportFilename}
+                onExportExcel={onExportExcel}
+                onExportPdf={onExportPdf}
+                onExportDocx={onExportDocx}
+              />
+            )}
             {enableColumnVisibility && (
               <ColumnVisibilityDropdown<TData>
                 table={table}
@@ -841,6 +929,7 @@ export function DataTable<TData>({
                 <table
                   className="text-left text-sm min-w-full"
                   style={{
+                    tableLayout: 'fixed',
                     borderCollapse: 'separate',
                     borderSpacing: 0,
                     ...(enableColumnResizing ? { width: table.getTotalSize() } : { width: '100%' }),

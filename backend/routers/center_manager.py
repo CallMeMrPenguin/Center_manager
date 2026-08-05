@@ -294,16 +294,19 @@ def api_export_class_excel(class_id: int, payload: Dict[str, Any]):
     
     ws.merge_cells("A1:I1")
     ws["A1"] = f"BÁO CÁO ĐIỂM DANH & ĐIỂM BÀI HỌC - {class_name.upper()} ({date_str})"
-    ws["A1"].font = Font(size=14, bold=True, color="1E1E2F")
+    ws["A1"].font = Font(size=14, bold=True, color="FFFFFF")
+    ws["A1"].fill = PatternFill(start_color="1E1B4B", end_color="1E1B4B", fill_type="solid")
     ws["A1"].alignment = Alignment(horizontal="center", vertical="center")
+    ws.row_dimensions[1].height = 36
     
     headers = ["STT", "Họ và Tên", "Điểm Danh", "Check 1", "Check 2", "BTVN", "BTVN - Check 2", "Check 2 - Check 1", "Cần Cố Gắng (Dưới TB)"]
     ws.cell(row=2, column=1, value="")
+    ws.row_dimensions[3].height = 26
     for col_idx, h in enumerate(headers, 1):
         ws.cell(row=3, column=col_idx, value=h)
     
-    header_fill = PatternFill(start_color="4F46E5", end_color="4F46E5", fill_type="solid")
-    header_font = Font(color="FFFFFF", bold=True)
+    header_fill = PatternFill(start_color="312E81", end_color="312E81", fill_type="solid")
+    header_font = Font(color="FFFFFF", bold=True, size=11)
     thin_border = Border(
         left=Side(style='thin', color='CBD5E1'),
         right=Side(style='thin', color='CBD5E1'),
@@ -332,19 +335,10 @@ def api_export_class_excel(class_id: int, payload: Dict[str, Any]):
                 return 0.0
         return 0.0
 
-    valid_c1 = [clean_num(r.get("check_1")) for r in attendance if r.get("status") != "Vắng mặt" and clean_num(r.get("check_1")) > 0]
-    valid_c2 = [clean_num(r.get("check_2")) for r in attendance if r.get("status") != "Vắng mặt" and clean_num(r.get("check_2")) > 0]
-    valid_hw = [clean_num(r.get("homework")) for r in attendance if r.get("status") != "Vắng mặt" and clean_num(r.get("homework")) > 0]
-
-    avg_c1 = math.ceil((sum(valid_c1) / len(valid_c1)) * 10) / 10.0 if valid_c1 else 0.0
-    avg_c2 = math.ceil((sum(valid_c2) / len(valid_c2)) * 10) / 10.0 if valid_c2 else 0.0
-    avg_hw = math.ceil((sum(valid_hw) / len(valid_hw)) * 10) / 10.0 if valid_hw else 0.0
-
-    below_c1_students = []
-    below_c2_students = []
-    below_hw_students = []
-
     start_row = 4
+    end_row = start_row + len(attendance) - 1 if len(attendance) > 0 else start_row
+    avg_row_idx = end_row + 1
+
     for idx, r in enumerate(attendance, 1):
         curr_row = start_row + idx - 1
         st_name = str(r.get("student_name", ""))
@@ -352,20 +346,6 @@ def api_export_class_excel(class_id: int, payload: Dict[str, Any]):
         c1 = clean_num(r.get("check_1"))
         c2 = clean_num(r.get("check_2"))
         hw = clean_num(r.get("homework"))
-
-        below_items = []
-        if status_val != "Vắng mặt":
-            if c1 < avg_c1:
-                below_items.append("Check 1")
-                below_c1_students.append(st_name)
-            if c2 < avg_c2:
-                below_items.append("Check 2")
-                below_c2_students.append(st_name)
-            if hw < avg_hw:
-                below_items.append("BTVN")
-                below_hw_students.append(st_name)
-
-        below_status_str = f"⚠️ Cần cố gắng ({', '.join(below_items)})" if below_items else ("Vắng mặt" if status_val == "Vắng mặt" else "Đạt yêu cầu")
 
         ws.cell(row=curr_row, column=1, value=idx)
         ws.cell(row=curr_row, column=2, value=st_name)
@@ -384,23 +364,26 @@ def api_export_class_excel(class_id: int, payload: Dict[str, Any]):
         c7_cell.number_format = '0.0'
         c8_cell.number_format = '0.0'
 
-        col_9_cell = ws.cell(row=curr_row, column=9, value=below_status_str)
-        if below_items:
-            col_9_cell.font = Font(color="991B1B", bold=True)
-            col_9_cell.fill = PatternFill(start_color="FEE2E2", end_color="FEE2E2", fill_type="solid")
+        # Dynamic formula for Column 9 using Average row reference
+        col_9_cell = ws.cell(
+            row=curr_row,
+            column=9,
+            value=f'=IF(C{curr_row}="Vắng mặt", "Vắng mặt", IF(AND(D{curr_row}>=D${avg_row_idx}, E{curr_row}>=E${avg_row_idx}, F{curr_row}>=F${avg_row_idx}), "Đạt yêu cầu", "⚠️ Cần cố gắng (" & TEXTJOIN(", ", TRUE, IF(D{curr_row}<D${avg_row_idx}, "Check 1", ""), IF(E{curr_row}<E${avg_row_idx}, "Check 2", ""), IF(F{curr_row}<F${avg_row_idx}, "BTVN", "")) & ")"))'
+        )
 
+        row_fill = PatternFill(start_color="F8FAFC" if idx % 2 == 0 else "FFFFFF", end_color="F8FAFC" if idx % 2 == 0 else "FFFFFF", fill_type="solid")
         for col_num in range(1, 10):
             c_cell = ws.cell(row=curr_row, column=col_num)
             c_cell.border = thin_border
+            c_cell.fill = row_fill
             if col_num in [1, 3, 4, 5, 6, 7, 8]:
                 c_cell.alignment = Alignment(horizontal="center")
             else:
                 c_cell.alignment = Alignment(horizontal="left")
 
-    end_row = start_row + len(attendance) - 1 if len(attendance) > 0 else start_row
     ws.auto_filter.ref = f"A3:I{end_row}"
 
-    avg_row_idx = end_row + 1
+    # Average row
     ws.cell(row=avg_row_idx, column=1, value="")
     ws.cell(row=avg_row_idx, column=2, value="Điểm trung bình (Average)")
     ws.cell(row=avg_row_idx, column=3, value="")
@@ -428,28 +411,40 @@ def api_export_class_excel(class_id: int, payload: Dict[str, Any]):
             cell.number_format = '0.0'
             cell.alignment = Alignment(horizontal="center")
 
+    # Thống kê section using Excel dynamic array formulas
     s_row = avg_row_idx + 2
     ws.merge_cells(f"A{s_row}:I{s_row}")
     sum_title = ws.cell(row=s_row, column=1, value="THỐNG KÊ HỌC SINH DƯỚI ĐIỂM TRUNG BÌNH CẢ LỚP")
     sum_title.font = Font(size=11, bold=True, color="991B1B")
     sum_title.fill = PatternFill(start_color="FEE2E2", end_color="FEE2E2", fill_type="solid")
 
-    s_items = [
-        (f"Check 1 dưới TB (< {avg_c1:.2f})", ", ".join(below_c1_students) if below_c1_students else "Không có (Tất cả đạt)"),
-        (f"Check 2 dưới TB (< {avg_c2:.2f})", ", ".join(below_c2_students) if below_c2_students else "Không có (Tất cả đạt)"),
-        (f"BTVN dưới TB (< {avg_hw:.2f})", ", ".join(below_hw_students) if below_hw_students else "Không có (Tất cả đạt)")
+    metrics = [
+        ("Check 1", "D"),
+        ("Check 2", "E"),
+        ("BTVN", "F"),
     ]
 
-    for idx, (label, val_str) in enumerate(s_items, 1):
+    for idx, (m_label, col_let) in enumerate(metrics, 1):
         r_idx = s_row + idx
         ws.cell(row=r_idx, column=1, value="")
-        lbl_cell = ws.cell(row=r_idx, column=2, value=label)
+        lbl_cell = ws.cell(
+            row=r_idx,
+            column=2,
+            value=f'="Check 1 dưới TB (< " & TEXT({col_let}{avg_row_idx}, "0.0") & ")"' if m_label == "Check 1" else (
+                f'="Check 2 dưới TB (< " & TEXT({col_let}{avg_row_idx}, "0.0") & ")"' if m_label == "Check 2" else
+                f'="BTVN dưới TB (< " & TEXT({col_let}{avg_row_idx}, "0.0") & ")"'
+            )
+        )
         lbl_cell.font = Font(bold=True, color="7F1D1D")
         ws.merge_cells(f"C{r_idx}:I{r_idx}")
-        val_cell = ws.cell(row=r_idx, column=3, value=val_str)
+        val_cell = ws.cell(
+            row=r_idx,
+            column=3,
+            value=f'=IF(TEXTJOIN(", ", TRUE, IF(({col_let}{start_row}:{col_let}{end_row}>0)*({col_let}{start_row}:{col_let}{end_row}<{col_let}{avg_row_idx})*(C{start_row}:C{end_row}<>"Vắng mặt"), B{start_row}:B{end_row}, ""))="", "Không có (Tất cả đạt)", TEXTJOIN(", ", TRUE, IF(({col_let}{start_row}:{col_let}{end_row}>0)*({col_let}{start_row}:{col_let}{end_row}<{col_let}{avg_row_idx})*(C{start_row}:C{end_row}<>"Vắng mặt"), B{start_row}:B{end_row}, "")))' if len(attendance) > 0 else "Không có (Tất cả đạt)"
+        )
         val_cell.font = Font(bold=True, color="1E1E2F")
 
-    col_widths = [8, 26, 14, 12, 12, 12, 20, 20, 32]
+    col_widths = [8, 26, 14, 12, 12, 12, 20, 20, 36]
     for i, w in enumerate(col_widths, 1):
         ws.column_dimensions[openpyxl.utils.get_column_letter(i)].width = w
 
