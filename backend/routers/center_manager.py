@@ -377,18 +377,15 @@ def api_export_class_excel(class_id: int, payload: Dict[str, Any]):
             c_cell = ws.cell(row=curr_row, column=col_num)
             c_cell.border = thin_border
             c_cell.fill = row_fill
-            if col_num in [1, 3, 4, 5, 6, 7, 8]:
-                c_cell.alignment = Alignment(horizontal="center")
-            else:
-                c_cell.alignment = Alignment(horizontal="left")
+            c_cell.alignment = Alignment(horizontal="center", vertical="center")
 
-    # Add Official Excel Table Object (Format as Table - TableStyleMedium9)
+    # Add Official Excel Table Object (Format as Table - TableStyleMedium13: Aqua style)
     ts = datetime.now().strftime("%H%M%S")
     if len(attendance) > 0:
         table_ref = f"A3:I{end_row}"
         tab = Table(displayName=f"ClassTable_{ts}", ref=table_ref)
         tab.tableStyleInfo = TableStyleInfo(
-            name="TableStyleMedium9",
+            name="TableStyleMedium13",
             showFirstColumn=False,
             showLastColumn=False,
             showRowStripes=True,

@@ -430,7 +430,7 @@ function ExportDropdown<TData>({
       })
     );
 
-  const exportExcel = () => {
+  const exportExcel = async () => {
     if (onExportExcel) {
       onExportExcel();
       setOpen(false);
@@ -438,32 +438,69 @@ function ExportDropdown<TData>({
     }
     const headers = getHeaders();
     const rows = getExportRows();
-    const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
 
-    // Auto-fit column widths
-    const colWidths = headers.map((h, colIdx) => {
-      let maxLen = String(h || '').length;
-      rows.forEach(r => {
-        const cellVal = String(r[colIdx] ?? '');
-        if (cellVal.length > maxLen) maxLen = cellVal.length;
-      });
-      return { wch: Math.max(maxLen + 4, 12) };
-    });
-    ws['!cols'] = colWidths;
+    try {
+      const ExcelJS = (await import('exceljs')).default;
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet('Data');
 
-    // Auto-filter headers range
-    if (rows.length > 0) {
-      ws['!autofilter'] = {
-        ref: XLSX.utils.encode_range({
-          s: { r: 0, c: 0 },
-          e: { r: rows.length, c: headers.length - 1 },
-        }),
-      };
+      if (rows.length > 0) {
+        worksheet.addTable({
+          name: 'ExportTable',
+          ref: 'A1',
+          headerRow: true,
+          totalsRow: false,
+          style: {
+            theme: 'TableStyleMedium13',
+            showRowStripes: true,
+          },
+          columns: headers.map((h, i) => ({
+            name: h || `Col_${i + 1}`,
+            filterButton: true,
+          })),
+          rows: rows.map(r => r.map(cellVal => {
+            if (cellVal === null || cellVal === undefined) return '';
+            if (typeof cellVal === 'number') return cellVal;
+            const num = Number(cellVal);
+            if (!isNaN(num) && String(cellVal).trim() === String(num)) return num;
+            return cellVal;
+          })),
+        });
+
+        worksheet.eachRow((row) => {
+          row.eachCell((cell) => {
+            cell.alignment = { vertical: 'middle', horizontal: 'center' };
+            if (typeof cell.value === 'number' && !Number.isInteger(cell.value)) {
+              cell.numFmt = '0.0';
+            }
+          });
+        });
+
+        worksheet.columns.forEach((column, colIdx) => {
+          let maxLen = String(headers[colIdx] || '').length;
+          rows.forEach(r => {
+            const cellVal = String(r[colIdx] ?? '');
+            if (cellVal.length > maxLen) maxLen = cellVal.length;
+          });
+          column.width = Math.max(maxLen + 5, 14);
+        });
+
+        const buffer = await workbook.xlsx.writeBuffer();
+        const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${filename}.xlsx`;
+        a.click();
+        URL.revokeObjectURL(url);
+      }
+    } catch (err) {
+      console.error("ExcelJS export failed, falling back to XLSX:", err);
+      const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Data');
+      XLSX.writeFile(wb, `${filename}.xlsx`);
     }
-
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Data');
-    XLSX.writeFile(wb, `${filename}.xlsx`);
     setOpen(false);
   };
 
