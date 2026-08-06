@@ -392,29 +392,23 @@ def api_export_class_excel(class_id: int, payload: Dict[str, Any]):
         )
         ws.add_table(tab)
 
-        # Highlight "Cần cố gắng" in soft red, "Đạt yêu cầu" in soft green, and "Vắng mặt" in soft grey
+        # Colored text for Column I without background fills so Column I shares the exact table row background style
         from openpyxl.formatting.rule import FormulaRule
-        red_font = Font(color="991B1B", bold=True)
-        red_fill = PatternFill(start_color="FEE2E2", end_color="FEE2E2", fill_type="solid")
-        green_font = Font(color="166534", bold=True)
-        green_fill = PatternFill(start_color="DCFCE7", end_color="DCFCE7", fill_type="solid")
-        grey_font = Font(color="475569", bold=True)
-        grey_fill = PatternFill(start_color="E2E8F0", end_color="E2E8F0", fill_type="solid")
+        red_font = Font(color="B91C1C", bold=True)
+        green_font = Font(color="15803D", bold=True)
+        grey_font = Font(color="64748B", bold=True)
 
         rule_red = FormulaRule(
             formula=['NOT(ISERROR(SEARCH("Cần cố gắng", I4)))'],
-            font=red_font,
-            fill=red_fill
+            font=red_font
         )
         rule_green = FormulaRule(
             formula=['NOT(ISERROR(SEARCH("Đạt yêu cầu", I4)))'],
-            font=green_font,
-            fill=green_fill
+            font=green_font
         )
         rule_grey = FormulaRule(
             formula=['NOT(ISERROR(SEARCH("Vắng mặt", I4)))'],
-            font=grey_font,
-            fill=grey_fill
+            font=grey_font
         )
         ws.conditional_formatting.add(f"I4:I{end_row}", rule_red)
         ws.conditional_formatting.add(f"I4:I{end_row}", rule_green)
