@@ -51,13 +51,18 @@ function getTextFromReactNode(node: any): string {
   if (node === null || node === undefined || typeof node === 'boolean') return '';
   if (typeof node === 'string' || typeof node === 'number') return String(node);
   if (Array.isArray(node)) return node.map(getTextFromReactNode).join('');
-  if (React.isValidElement(node)) {
-    return getTextFromReactNode((node.props as any)?.children);
+  if (typeof node === 'object') {
+    if (node.props && node.props.children !== undefined) {
+      return getTextFromReactNode(node.props.children);
+    }
   }
   return '';
 }
 
 function getColumnHeaderText(column: any, context: any): string {
+  if (typeof column.columnDef.meta?.headerText === 'string') {
+    return column.columnDef.meta.headerText;
+  }
   const headerDef = column.columnDef.header;
   if (typeof headerDef === 'string') return headerDef;
   if (typeof headerDef === 'function') {
@@ -66,9 +71,6 @@ function getColumnHeaderText(column: any, context: any): string {
       const text = getTextFromReactNode(rendered).trim();
       if (text) return text;
     } catch (e) {}
-  }
-  if (typeof column.columnDef.meta?.headerText === 'string') {
-    return column.columnDef.meta.headerText;
   }
   return column.id;
 }
@@ -395,15 +397,21 @@ function ExportDropdown<TData>({
   }, []);
 
   const visibleHeaders = table.getHeaderGroups()[0].headers.filter(
-    h => h.column.id !== 'select' && h.column.id !== '_expander' && h.column.getIsVisible()
+    h => h.column.id !== 'select' && h.column.id !== '_expander' && h.column.id !== 'actions' && h.column.getIsVisible()
   );
 
   const getHeaders = () =>
     visibleHeaders.map(h => getColumnHeaderText(h.column, h.getContext()));
 
   const getExportRows = () =>
-    table.getFilteredRowModel().rows.map(row =>
+    table.getFilteredRowModel().rows.map((row, rowIdx) =>
       visibleHeaders.map(h => {
+        const meta = h.column.columnDef.meta as any;
+        if (meta?.exportValue && typeof meta.exportValue === 'function') {
+          return meta.exportValue(row.original, rowIdx);
+        }
+        if (h.column.id === 'stt') return rowIdx + 1;
+
         const cell = row.getVisibleCells().find(c => c.column.id === h.column.id);
         const val = cell ? cell.getValue() : row.getValue(h.column.id);
         if (val === null || val === undefined) return '';

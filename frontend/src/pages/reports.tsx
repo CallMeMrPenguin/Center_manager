@@ -195,6 +195,7 @@ export default function ReportsPage() {
     {
       id: 'stt',
       header: () => <div className="text-center w-full">STT</div>,
+      meta: { headerText: 'STT', exportValue: (_: any, idx: number) => idx + 1 },
       cell: ({ row }) => <div className="text-center font-bold text-slate-400">{row.index + 1}</div>,
       enableSorting: false,
       enableGlobalFilter: false,
@@ -202,6 +203,7 @@ export default function ReportsPage() {
     {
       accessorKey: 'full_name',
       header: 'Họ và Tên',
+      meta: { headerText: 'Họ và Tên', exportValue: (r: any) => `${r.full_name}${r.nickname ? ` (${r.nickname})` : ''}` },
       cell: ({ row }) => {
         const r = row.original;
         const isSelected = String(r.student_id) === selectedStudentId;
@@ -216,6 +218,7 @@ export default function ReportsPage() {
     {
       accessorKey: 'class_name',
       header: 'Lớp Học',
+      meta: { headerText: 'Lớp Học', exportValue: (r: any) => r.class_name || 'Lớp học' },
       cell: (info) => (
         <span className="inline-block px-2.5 py-0.5 rounded-lg text-xs font-black bg-[#1c2442] text-indigo-300 border border-[#303d68]">
           {info.getValue<string>() || 'Lớp học'}
@@ -225,6 +228,10 @@ export default function ReportsPage() {
     {
       accessorKey: 'total_sessions',
       header: () => <div className="text-center w-full">Buổi Học</div>,
+      meta: {
+        headerText: 'Buổi Học',
+        exportValue: (r: any) => `${r.present_count ?? 0}/${r.total_sessions ?? 0} buổi`
+      },
       cell: ({ row }) => {
         const r = row.original;
         const present = r.present_count ?? 0;
@@ -242,6 +249,13 @@ export default function ReportsPage() {
     {
       id: 'present_count',
       header: () => <div className="text-center w-full">Điểm Danh %</div>,
+      meta: {
+        headerText: 'Điểm Danh %',
+        exportValue: (r: any) => {
+          const pct = r.total_sessions > 0 ? Math.round((r.present_count / r.total_sessions) * 100) : 100;
+          return `${pct}%`;
+        }
+      },
       cell: ({ row }) => {
         const r = row.original;
         const pct = r.total_sessions > 0 ? Math.round((r.present_count / r.total_sessions) * 100) : 100;
@@ -251,6 +265,7 @@ export default function ReportsPage() {
     {
       accessorKey: 'avg_check_1',
       header: () => <div className="text-center w-full">Check 1</div>,
+      meta: { headerText: 'Check 1', exportValue: (r: any) => Number(r.avg_check_1) > 0 ? format1Dec(Number(r.avg_check_1)) : '-' },
       cell: (info) => {
         const val = Number(info.getValue()) || 0;
         return <div className="text-center font-extrabold text-blue-400 font-mono">{val > 0 ? format1Dec(val) : '-'}</div>;
@@ -259,6 +274,7 @@ export default function ReportsPage() {
     {
       accessorKey: 'avg_check_2',
       header: () => <div className="text-center w-full">Check 2</div>,
+      meta: { headerText: 'Check 2', exportValue: (r: any) => Number(r.avg_check_2) > 0 ? format1Dec(Number(r.avg_check_2)) : '-' },
       cell: (info) => {
         const val = Number(info.getValue()) || 0;
         return <div className="text-center font-extrabold text-purple-400 font-mono">{val > 0 ? format1Dec(val) : '-'}</div>;
@@ -267,6 +283,7 @@ export default function ReportsPage() {
     {
       accessorKey: 'avg_homework',
       header: () => <div className="text-center w-full">Homework</div>,
+      meta: { headerText: 'Homework', exportValue: (r: any) => Number(r.avg_homework) > 0 ? format1Dec(Number(r.avg_homework)) : '-' },
       cell: (info) => {
         const val = Number(info.getValue()) || 0;
         return <div className="text-center font-extrabold text-emerald-400 font-mono">{val > 0 ? format1Dec(val) : '-'}</div>;
@@ -275,6 +292,22 @@ export default function ReportsPage() {
     {
       id: 'overallAvg',
       header: () => <div className="text-center w-full">Đánh Giá</div>,
+      meta: {
+        headerText: 'Đánh Giá',
+        exportValue: (r: any) => {
+          const c1 = Number(r.avg_check_1 || 0);
+          const c2 = Number(r.avg_check_2 || 0);
+          const hw = Number(r.avg_homework || 0);
+          const valid = [c1, c2, hw].filter(v => v > 0);
+          if (valid.length === 0) return 'Chưa có điểm';
+          const avg = trunc1Dec(valid.reduce((a, b) => a + b, 0) / valid.length);
+          let label = 'Xuất Sắc';
+          if (avg < 8.5) label = 'Giỏi';
+          if (avg < 7.0) label = 'Khá';
+          if (avg < 5.0) label = 'Cần Cố Gắng';
+          return `${label} (${format1Dec(avg)})`;
+        }
+      },
       accessorFn: (r: any) => {
         const c1 = Number(r.avg_check_1 || 0);
         const c2 = Number(r.avg_check_2 || 0);
@@ -310,6 +343,7 @@ export default function ReportsPage() {
     {
       id: 'stt',
       header: () => <div className="text-center w-full">STT</div>,
+      meta: { headerText: 'STT', exportValue: (_: any, idx: number) => idx + 1 },
       cell: ({ row }) => <div className="text-center font-bold text-slate-400">{row.index + 1}</div>,
       enableSorting: false,
       enableGlobalFilter: false,
@@ -317,6 +351,7 @@ export default function ReportsPage() {
     {
       accessorKey: 'date',
       header: 'Ngày Buổi Học',
+      meta: { headerText: 'Ngày Buổi Học', exportValue: (r: any) => formatFullDate(r.date) },
       cell: (info) => (
         <span className="font-mono text-base font-bold text-indigo-300">
           {formatFullDate(info.getValue<string>())}
@@ -326,6 +361,7 @@ export default function ReportsPage() {
     {
       accessorKey: 'class_name',
       header: 'Lớp Học',
+      meta: { headerText: 'Lớp Học', exportValue: (r: any) => r.class_name || 'Lớp học' },
       cell: (info) => (
         <span className="inline-block px-2.5 py-0.5 rounded-lg text-xs font-black bg-[#1c2442] text-slate-300 border border-[#303d68]">
           {info.getValue<string>() || 'Lớp học'}
@@ -335,6 +371,7 @@ export default function ReportsPage() {
     {
       accessorKey: 'status',
       header: () => <div className="text-center w-full">Điểm Danh</div>,
+      meta: { headerText: 'Điểm Danh', exportValue: (r: any) => r.status || 'Có mặt' },
       cell: ({ getValue }) => {
         const st = getValue<string>() || 'Có mặt';
         const isAbsent = st.includes('Vắng') || st.includes('Nghỉ');
@@ -352,6 +389,7 @@ export default function ReportsPage() {
     {
       accessorKey: 'check_1',
       header: () => <div className="text-center w-full">Check 1</div>,
+      meta: { headerText: 'Check 1', exportValue: (r: any) => Number(r.check_1) > 0 ? format1Dec(Number(r.check_1)) : '-' },
       cell: (info) => {
         const val = Number(info.getValue()) || 0;
         return <div className="text-center font-extrabold text-blue-400 font-mono text-base">{val > 0 ? format1Dec(val) : '-'}</div>;
@@ -360,6 +398,7 @@ export default function ReportsPage() {
     {
       accessorKey: 'check_2',
       header: () => <div className="text-center w-full">Check 2</div>,
+      meta: { headerText: 'Check 2', exportValue: (r: any) => Number(r.check_2) > 0 ? format1Dec(Number(r.check_2)) : '-' },
       cell: (info) => {
         const val = Number(info.getValue()) || 0;
         return <div className="text-center font-extrabold text-purple-400 font-mono text-base">{val > 0 ? format1Dec(val) : '-'}</div>;
@@ -368,6 +407,7 @@ export default function ReportsPage() {
     {
       accessorKey: 'homework',
       header: () => <div className="text-center w-full">Homework</div>,
+      meta: { headerText: 'Homework', exportValue: (r: any) => Number(r.homework) > 0 ? format1Dec(Number(r.homework)) : '-' },
       cell: (info) => {
         const val = Number(info.getValue()) || 0;
         return <div className="text-center font-extrabold text-emerald-400 font-mono text-base">{val > 0 ? format1Dec(val) : '-'}</div>;
@@ -376,11 +416,13 @@ export default function ReportsPage() {
     {
       accessorKey: 'notes',
       header: 'Ghi Chú',
+      meta: { headerText: 'Ghi Chú', exportValue: (r: any) => r.notes || '-' },
       cell: (info) => <span className="text-xs text-slate-400 truncate max-w-xs block">{info.getValue<string>() || '-'}</span>,
     },
     {
       id: 'actions',
       header: () => <div className="text-center w-full">Thao Tác</div>,
+      meta: { headerText: 'Thao Tác' },
       enableSorting: false,
       enableGlobalFilter: false,
       cell: ({ row }) => (
