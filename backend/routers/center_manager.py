@@ -307,7 +307,8 @@ def api_export_class_excel(class_id: int, payload: Dict[str, Any]):
         ws.cell(row=3, column=col_idx, value=h)
     
     header_fill = PatternFill(start_color="312E81", end_color="312E81", fill_type="solid")
-    header_font = Font(color="FFFFFF", bold=True, size=11)
+    header_font = Font(name="Times New Roman", color="FFFFFF", bold=True, size=13)
+    data_font = Font(name="Times New Roman", size=13)
     thin_border = Border(
         left=Side(style='thin', color='CBD5E1'),
         right=Side(style='thin', color='CBD5E1'),
@@ -348,7 +349,7 @@ def api_export_class_excel(class_id: int, payload: Dict[str, Any]):
         c2 = clean_num(r.get("check_2"))
         hw = clean_num(r.get("homework"))
 
-        ws.cell(row=curr_row, column=1, value=idx)
+        ws.cell(row=curr_row, column=1, value=f"=ROW()-3")
         ws.cell(row=curr_row, column=2, value=st_name)
         ws.cell(row=curr_row, column=3, value=status_val)
         
@@ -365,7 +366,6 @@ def api_export_class_excel(class_id: int, payload: Dict[str, Any]):
         c7_cell.number_format = '0.0'
         c8_cell.number_format = '0.0'
 
-        # Dynamic formula for Column 9 with _xlfn. prefix for TEXTJOIN
         col_9_cell = ws.cell(
             row=curr_row,
             column=9,
@@ -375,17 +375,18 @@ def api_export_class_excel(class_id: int, payload: Dict[str, Any]):
         row_fill = PatternFill(start_color="F8FAFC" if idx % 2 == 0 else "FFFFFF", end_color="F8FAFC" if idx % 2 == 0 else "FFFFFF", fill_type="solid")
         for col_num in range(1, 10):
             c_cell = ws.cell(row=curr_row, column=col_num)
+            c_cell.font = data_font
             c_cell.border = thin_border
             c_cell.fill = row_fill
             c_cell.alignment = Alignment(horizontal="center", vertical="center")
 
-    # Add Official Excel Table Object (Format as Table - TableStyleMedium13: Aqua style)
-    ts = datetime.now().strftime("%H%M%S")
+    # Add Official Excel Table Object (Format as Table - Non-aqua style TableStyleMedium9)
+    ts = datetime.now().strftime("%Y%m%d_%H%M%S")
     if len(attendance) > 0:
         table_ref = f"A3:I{end_row}"
         tab = Table(displayName=f"ClassTable_{ts}", ref=table_ref)
         tab.tableStyleInfo = TableStyleInfo(
-            name="TableStyleMedium13",
+            name="TableStyleMedium9",
             showFirstColumn=False,
             showLastColumn=False,
             showRowStripes=True,

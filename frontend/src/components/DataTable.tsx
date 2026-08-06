@@ -410,7 +410,7 @@ function ExportDropdown<TData>({
         if (meta?.exportValue && typeof meta.exportValue === 'function') {
           return meta.exportValue(row.original, rowIdx);
         }
-        if (h.column.id === 'stt') return rowIdx + 1;
+        if (h.column.id === 'stt') return { formula: 'ROW()-1' };
 
         const cell = row.getVisibleCells().find(c => c.column.id === h.column.id);
         const val = cell ? cell.getValue() : row.getValue(h.column.id);
@@ -460,6 +460,7 @@ function ExportDropdown<TData>({
           })),
           rows: rows.map(r => r.map(cellVal => {
             if (cellVal === null || cellVal === undefined) return '';
+            if (typeof cellVal === 'object' && (cellVal as any).formula) return cellVal;
             if (typeof cellVal === 'number') return cellVal;
             const num = Number(cellVal);
             if (!isNaN(num) && String(cellVal).trim() === String(num)) return num;
@@ -467,8 +468,10 @@ function ExportDropdown<TData>({
           })),
         });
 
-        worksheet.eachRow((row) => {
+        worksheet.eachRow((row, rowNumber) => {
+          const isHeader = rowNumber === 1;
           row.eachCell((cell) => {
+            cell.font = { name: 'Times New Roman', size: 13, bold: isHeader };
             cell.alignment = { vertical: 'middle', horizontal: 'center' };
             if (typeof cell.value === 'number' && !Number.isInteger(cell.value)) {
               cell.numFmt = '0.0';
@@ -490,7 +493,11 @@ function ExportDropdown<TData>({
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `${filename}.xlsx`;
+        const now = new Date();
+        const pad = (n: number) => String(n).padStart(2, '0');
+        const timestamp = `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}_${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
+        const finalFilename = filename.includes('_202') ? filename : `${filename}_${timestamp}`;
+        a.download = `${finalFilename}.xlsx`;
         a.click();
         URL.revokeObjectURL(url);
       }
@@ -499,7 +506,10 @@ function ExportDropdown<TData>({
       const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, 'Data');
-      XLSX.writeFile(wb, `${filename}.xlsx`);
+      const now = new Date();
+      const pad = (n: number) => String(n).padStart(2, '0');
+      const timestamp = `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}_${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
+      XLSX.writeFile(wb, `${filename}_${timestamp}.xlsx`);
     }
     setOpen(false);
   };
