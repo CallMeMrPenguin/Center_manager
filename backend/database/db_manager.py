@@ -417,7 +417,18 @@ def init_db():
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_document_folders_parent_deleted ON document_folders(parent_id, is_deleted);")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_class_sessions_class_date ON class_sessions(class_id, date);")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_attendance_class_student_date ON class_attendance_grades(class_id, student_id, date);")
-    cursor.execute("CREATE INDEX IF NOT EXISTS idx_student_scores_student_class ON student_scores(student_id, class_id);")
+    # Cleanup / migration: set status = 'Vắng mặt' and scores = NULL for records with no scores
+    try:
+        cursor.execute("""
+            UPDATE class_attendance_grades
+            SET status = 'Vắng mặt', check_1 = NULL, check_2 = NULL, homework = NULL
+            WHERE (check_1 IS NULL OR check_1 = 0) AND (check_2 IS NULL OR check_2 = 0) AND (homework IS NULL OR homework = 0)
+        """)
+        cursor.execute("UPDATE class_attendance_grades SET check_1 = NULL WHERE check_1 = 0")
+        cursor.execute("UPDATE class_attendance_grades SET check_2 = NULL WHERE check_2 = 0")
+        cursor.execute("UPDATE class_attendance_grades SET homework = NULL WHERE homework = 0")
+    except Exception as e:
+        print("Attendance cleanup error:", e)
 
     conn.commit()
     conn.close()
@@ -1672,10 +1683,30 @@ def upsert_class_attendance_grades(class_id: int, date_str: str, records: List[D
         student_id = rec.get("student_id")
         if not student_id:
             continue
-        status = rec.get("status", "Có mặt")
-        check_1 = float(rec.get("check_1") or 0)
-        check_2 = float(rec.get("check_2") or 0)
-        homework = float(rec.get("homework") or 0)
+        
+        def parse_score(val):
+            if val is None or val == "" or val == 0 or val == "0":
+                return None
+            try:
+                v = float(val)
+                return v if v > 0 else None
+            except (ValueError, TypeError):
+                return None
+
+        c1 = parse_score(rec.get("check_1"))
+        c2 = parse_score(rec.get("check_2"))
+        hw = parse_score(rec.get("homework"))
+
+        has_score = (c1 is not None) or (c2 is not None) or (hw is not None)
+        status = rec.get("status")
+        
+        if not has_score:
+            status = "Vắng mặt"
+            c1, c2, hw = None, None, None
+        else:
+            if not status or status == "Vắng mặt":
+                status = "Có mặt"
+
         notes = rec.get("notes", "")
 
         cursor.execute("""
@@ -1688,7 +1719,7 @@ def upsert_class_attendance_grades(class_id: int, date_str: str, records: List[D
                 homework = EXCLUDED.homework,
                 notes = EXCLUDED.notes,
                 updated_at = CURRENT_TIMESTAMP
-        """, (class_id, student_id, date_str, status, check_1, check_2, homework, notes))
+        """, (class_id, student_id, date_str, status, c1, c2, hw, notes))
     conn.commit()
     conn.close()
 

@@ -333,11 +333,29 @@ export default function ClassesPage() {
     }
   }, [attendanceDate, activeSubTab]);
 
+  const applyAutoAttendanceStatus = useCallback((records: any[]) => {
+    return records.map((rec) => {
+      const c1 = Number(rec.check_1) || 0;
+      const c2 = Number(rec.check_2) || 0;
+      const hw = Number(rec.homework) || 0;
+      const hasScore = c1 > 0 || c2 > 0 || hw > 0;
+      let newStatus = rec.status;
+      if (!hasScore) {
+        newStatus = 'Vắng mặt';
+      } else if (!newStatus || newStatus === 'Vắng mặt') {
+        newStatus = 'Có mặt';
+      }
+      return { ...rec, status: newStatus };
+    });
+  }, []);
+
   const handleSaveAttendance = async () => {
     if (!selectedClass) return;
     setSavingAttendance(true);
     try {
-      await api.saveClassAttendance(selectedClass.id, attendanceDate, attendanceRecords);
+      const finalRecords = applyAutoAttendanceStatus(attendanceRecords);
+      setAttendanceRecords(finalRecords);
+      await api.saveClassAttendance(selectedClass.id, attendanceDate, finalRecords);
       showToast("Đã lưu bảng điểm danh và điểm học sinh!", "success");
     } catch (err: any) {
       showToast("Lưu thất bại: " + err.message, "error");
@@ -372,9 +390,21 @@ export default function ClassesPage() {
   const handleUpdateRecord = useCallback(async (studentId: number, field: string, value: any) => {
     let updatedRecords: any[] = [];
     setAttendanceRecords((prev) => {
-      const newRecs = prev.map((rec) =>
-        rec.student_id === studentId ? { ...rec, [field]: value } : rec
-      );
+      const newRecs = prev.map((rec) => {
+        if (rec.student_id !== studentId) return rec;
+        const updated = { ...rec, [field]: value };
+        const c1 = Number(updated.check_1) || 0;
+        const c2 = Number(updated.check_2) || 0;
+        const hw = Number(updated.homework) || 0;
+        const hasScore = c1 > 0 || c2 > 0 || hw > 0;
+
+        if (!hasScore) {
+          updated.status = 'Vắng mặt';
+        } else if (field !== 'status' && updated.status === 'Vắng mặt') {
+          updated.status = 'Có mặt';
+        }
+        return updated;
+      });
       updatedRecords = newRecs;
       return newRecs;
     });

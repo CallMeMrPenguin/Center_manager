@@ -225,7 +225,19 @@ export default function ReportsPage() {
     {
       accessorKey: 'total_sessions',
       header: () => <div className="text-center w-full">Buổi Học</div>,
-      cell: (info) => <div className="text-center text-slate-300 font-bold">{info.getValue<number>() || 0} buổi</div>,
+      cell: ({ row }) => {
+        const r = row.original;
+        const present = r.present_count ?? 0;
+        const total = r.total_sessions ?? 0;
+        return (
+          <div className="text-center font-bold font-mono text-xs">
+            <span className={present < total ? "text-amber-400 font-extrabold" : "text-emerald-400"}>
+              {present}
+            </span>
+            <span className="text-slate-400"> / {total} buổi</span>
+          </div>
+        );
+      },
     },
     {
       id: 'present_count',
@@ -1367,7 +1379,7 @@ export default function ReportsPage() {
           </div>
           {selectedStudentObj && (
             <span className="text-xs font-extrabold text-indigo-300 bg-indigo-500/10 px-3 py-1 rounded-xl border border-indigo-500/20">
-              Tổng cộng: {sessionRecords.length} buổi học
+              Tổng cộng: {sessionRecords.length} buổi học ({stats.sessionCount} có mặt, {sessionRecords.length - stats.sessionCount} vắng mặt)
             </span>
           )}
         </div>
