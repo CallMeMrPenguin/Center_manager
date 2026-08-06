@@ -476,6 +476,7 @@ def api_export_class_excel(class_id: int, payload: Dict[str, Any]):
             )
         )
         sum_title.font = Font(name="Times New Roman", bold=True, color="7F1D1D", size=13)
+        sum_title.alignment = Alignment(horizontal="left", vertical="center")
         ws.merge_cells(f"C{r_idx}:I{r_idx}")
         val_cell = ws.cell(
             row=r_idx,
@@ -483,21 +484,31 @@ def api_export_class_excel(class_id: int, payload: Dict[str, Any]):
             value=f'=_xlfn.TEXTJOIN(", ", TRUE, _xlfn.FILTER(B{start_row}:B{end_row}, ({col_let}{start_row}:{col_let}{end_row}>0)*({col_let}{start_row}:{col_let}{end_row}<{col_let}{avg_row_idx})*(C{start_row}:C{end_row}<>"Vắng mặt"), "Không có (Tất cả đạt)"))' if len(attendance) > 0 else "Không có (Tất cả đạt)"
         )
         val_cell.font = Font(name="Times New Roman", bold=True, color="1E1E2F", size=13)
+        val_cell.alignment = Alignment(horizontal="left", vertical="center")
 
-    # Auto-fit column widths from row 3 (headings) to end_row (data rows)
+    # Auto-fit column widths from row 3 (headings) down to bottom summary rows
+    total_max_row = avg_row_idx + 5
     for col_idx in range(1, 10):
         col_let = openpyxl.utils.get_column_letter(col_idx)
         max_len = 0
-        for r_idx in range(3, end_row + 1):
+        for r_idx in range(3, total_max_row + 1):
             cell_val = ws.cell(row=r_idx, column=col_idx).value
             val_str = str(cell_val) if cell_val is not None else ""
             if val_str.startswith("="):
-                if col_idx == 9: val_str = "⚠️ Cần cố gắng (Check 1, Check 2, BTVN)"
-                elif col_idx == 1: val_str = "999"
-                elif col_idx in (7, 8): val_str = "10.0"
+                if col_idx == 9:
+                    val_str = "⚠️ Cần cố gắng (Check 1, Check 2, BTVN)"
+                elif col_idx == 2:
+                    val_str = "Check 1 dưới TB (< 10.0)"
+                elif col_idx == 1:
+                    val_str = "999"
+                elif col_idx in (7, 8):
+                    val_str = "10.0"
             if len(val_str) > max_len:
                 max_len = len(val_str)
-        ws.column_dimensions[col_let].width = max(max_len + 5, 14)
+
+        extra_padding = 8 if col_idx in (2, 9) else 5
+        min_w = 36 if col_idx == 2 else (48 if col_idx == 9 else 14)
+        ws.column_dimensions[col_let].width = max(max_len + extra_padding, min_w)
 
     files_dir = get_setting("files_dir")
     os.makedirs(files_dir, exist_ok=True)
