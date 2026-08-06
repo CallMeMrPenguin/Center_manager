@@ -392,12 +392,14 @@ def api_export_class_excel(class_id: int, payload: Dict[str, Any]):
         )
         ws.add_table(tab)
 
-        # Highlight "Cần cố gắng" in soft red and "Đạt yêu cầu" in soft green using valid OpenXML FormulaRule
+        # Highlight "Cần cố gắng" in soft red, "Đạt yêu cầu" in soft green, and "Vắng mặt" in soft grey
         from openpyxl.formatting.rule import FormulaRule
         red_font = Font(color="991B1B", bold=True)
         red_fill = PatternFill(start_color="FEE2E2", end_color="FEE2E2", fill_type="solid")
         green_font = Font(color="166534", bold=True)
         green_fill = PatternFill(start_color="DCFCE7", end_color="DCFCE7", fill_type="solid")
+        grey_font = Font(color="475569", bold=True)
+        grey_fill = PatternFill(start_color="E2E8F0", end_color="E2E8F0", fill_type="solid")
 
         rule_red = FormulaRule(
             formula=['NOT(ISERROR(SEARCH("Cần cố gắng", I4)))'],
@@ -409,8 +411,14 @@ def api_export_class_excel(class_id: int, payload: Dict[str, Any]):
             font=green_font,
             fill=green_fill
         )
+        rule_grey = FormulaRule(
+            formula=['NOT(ISERROR(SEARCH("Vắng mặt", I4)))'],
+            font=grey_font,
+            fill=grey_fill
+        )
         ws.conditional_formatting.add(f"I4:I{end_row}", rule_red)
         ws.conditional_formatting.add(f"I4:I{end_row}", rule_green)
+        ws.conditional_formatting.add(f"I4:I{end_row}", rule_grey)
 
     # Average row
     ws.cell(row=avg_row_idx, column=1, value="")
@@ -506,8 +514,8 @@ def api_export_class_excel(class_id: int, payload: Dict[str, Any]):
             if len(val_str) > max_len:
                 max_len = len(val_str)
 
-        extra_padding = 8 if col_idx in (2, 9) else 5
-        min_w = 36 if col_idx == 2 else (48 if col_idx == 9 else 14)
+        extra_padding = 12 if col_idx == 9 else (8 if col_idx == 2 else 5)
+        min_w = 54 if col_idx == 9 else (36 if col_idx == 2 else 14)
         ws.column_dimensions[col_let].width = max(max_len + extra_padding, min_w)
 
     files_dir = get_setting("files_dir")
