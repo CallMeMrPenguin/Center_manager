@@ -372,12 +372,10 @@ def api_export_class_excel(class_id: int, payload: Dict[str, Any]):
             value=f'=IF(C{curr_row}="Vắng mặt", "Vắng mặt", IF(_xlfn.TEXTJOIN(", ", TRUE, IF(AND(D{curr_row}>0, D{curr_row}<D${avg_row_idx}), "Check 1", ""), IF(AND(E{curr_row}>0, E{curr_row}<E${avg_row_idx}), "Check 2", ""), IF(AND(F{curr_row}>0, F{curr_row}<F${avg_row_idx}), "BTVN", ""))="", "Đạt yêu cầu", "⚠️ Cần cố gắng (" & _xlfn.TEXTJOIN(", ", TRUE, IF(AND(D{curr_row}>0, D{curr_row}<D${avg_row_idx}), "Check 1", ""), IF(AND(E{curr_row}>0, E{curr_row}<E${avg_row_idx}), "Check 2", ""), IF(AND(F{curr_row}>0, F{curr_row}<F${avg_row_idx}), "BTVN", "")) & ")"))'
         )
 
-        row_fill = PatternFill(start_color="F8FAFC" if idx % 2 == 0 else "FFFFFF", end_color="F8FAFC" if idx % 2 == 0 else "FFFFFF", fill_type="solid")
         for col_num in range(1, 10):
             c_cell = ws.cell(row=curr_row, column=col_num)
             c_cell.font = data_font
             c_cell.border = thin_border
-            c_cell.fill = row_fill
             c_cell.alignment = Alignment(horizontal="center", vertical="center")
 
     # Add Official Excel Table Object (Format as Table - Non-aqua style TableStyleMedium9)
@@ -414,86 +412,92 @@ def api_export_class_excel(class_id: int, payload: Dict[str, Any]):
         ws.conditional_formatting.add(f"I4:I{end_row}", rule_red)
         ws.conditional_formatting.add(f"I4:I{end_row}", rule_green)
 
-    # Average row (Raw pre-calculated numbers so user can edit cell manually in Excel)
+    # Average row
     ws.cell(row=avg_row_idx, column=1, value="")
     ws.cell(row=avg_row_idx, column=2, value="Điểm trung bình (Average)")
     ws.cell(row=avg_row_idx, column=3, value="")
+
+    def trunc_1_dec(v):
+        return math.floor(v * 10) / 10.0
 
     if len(attendance) > 0:
         c1_vals = [clean_num(r.get("check_1")) for r in attendance if clean_num(r.get("check_1")) > 0 and str(r.get("status")) != "Vắng mặt"]
         c2_vals = [clean_num(r.get("check_2")) for r in attendance if clean_num(r.get("check_2")) > 0 and str(r.get("status")) != "Vắng mặt"]
         hw_vals = [clean_num(r.get("homework")) for r in attendance if clean_num(r.get("homework")) > 0 and str(r.get("status")) != "Vắng mặt"]
+        
+        avg_1 = trunc_1_dec(sum(c1_vals) / len(c1_vals)) if c1_vals else 0.0
+        avg_2 = trunc_1_dec(sum(c2_vals) / len(c2_vals)) if c2_vals else 0.0
+        avg_hw = trunc_1_dec(sum(hw_vals) / len(hw_vals)) if hw_vals else 0.0
 
-        def trunc1dec(val_list):
-            if not val_list:
-                return 0.0
-            avg = sum(val_list) / len(val_list)
-            return math.floor(avg * 10) / 10.0
+        c1_avg_cell = ws.cell(row=avg_row_idx, column=4, value=avg_1)
+        c2_avg_cell = ws.cell(row=avg_row_idx, column=5, value=avg_2)
+        hw_avg_cell = ws.cell(row=avg_row_idx, column=6, value=avg_hw)
 
-        avg_c1 = trunc1dec(c1_vals)
-        avg_c2 = trunc1dec(c2_vals)
-        avg_hw = trunc1dec(hw_vals)
-        avg_diff1 = math.floor(abs(avg_hw - avg_c2) * 10) / 10.0
-        avg_diff2 = math.floor(abs(avg_c2 - avg_c1) * 10) / 10.0
+        c1_avg_cell.number_format = '0.0'
+        c2_avg_cell.number_format = '0.0'
+        hw_avg_cell.number_format = '0.0'
 
-        ws.cell(row=avg_row_idx, column=4, value=avg_c1)
-        ws.cell(row=avg_row_idx, column=5, value=avg_c2)
-        ws.cell(row=avg_row_idx, column=6, value=avg_hw)
-        ws.cell(row=avg_row_idx, column=7, value=avg_diff1)
-        ws.cell(row=avg_row_idx, column=8, value=avg_diff2)
-        ws.cell(row=avg_row_idx, column=9, value="")
-    else:
-        for c_idx in range(4, 10):
-            ws.cell(row=avg_row_idx, column=c_idx, value=0.0)
+        diff_hw_c2 = trunc_1_dec(abs(avg_hw - avg_2))
+        diff_c2_c1 = trunc_1_dec(abs(avg_2 - avg_1))
 
-    avg_fill = PatternFill(start_color="EEF2FF", end_color="EEF2FF", fill_type="solid")
-    avg_font = Font(bold=True, color="312E81")
+        c7_avg_cell = ws.cell(row=avg_row_idx, column=7, value=diff_hw_c2)
+        c8_avg_cell = ws.cell(row=avg_row_idx, column=8, value=diff_c2_c1)
 
+        c7_avg_cell.number_format = '0.0'
+        c8_avg_cell.number_format = '0.0'
+
+        ws.cell(row=avg_row_idx, column=9, value=f"=IF(D{avg_row_idx}>0, \"Đã tính TB lớp\", \"Chưa đủ điểm\")")
+
+    avg_fill = PatternFill(start_color="FEF3C7", end_color="FEF3C7", fill_type="solid")
+    avg_font = Font(name="Times New Roman", bold=True, size=13, color="92400E")
     for col_num in range(1, 10):
-        cell = ws.cell(row=avg_row_idx, column=col_num)
-        cell.fill = avg_fill
-        cell.font = avg_font
-        cell.border = thin_border
-        if col_num in [4, 5, 6, 7, 8]:
-            cell.number_format = '0.0'
-            cell.alignment = Alignment(horizontal="center")
+        c_cell = ws.cell(row=avg_row_idx, column=col_num)
+        c_cell.font = avg_font
+        c_cell.fill = avg_fill
+        c_cell.border = thin_border
+        c_cell.alignment = Alignment(horizontal="center", vertical="center")
 
-    # Thống kê section using _xlfn.TEXTJOIN Excel dynamic array formulas
-    s_row = avg_row_idx + 2
-    ws.merge_cells(f"A{s_row}:I{s_row}")
-    sum_title = ws.cell(row=s_row, column=1, value="THỐNG KÊ HỌC SINH DƯỚI ĐIỂM TRUNG BÌNH CẢ LỚP")
-    sum_title.font = Font(size=11, bold=True, color="991B1B")
-    sum_title.fill = PatternFill(start_color="FEE2E2", end_color="FEE2E2", fill_type="solid")
-
-    metrics = [
-        ("Check 1", "D"),
-        ("Check 2", "E"),
-        ("BTVN", "F"),
+    summary_labels = [
+        ("Check 1", 4, "D"),
+        ("Check 2", 5, "E"),
+        ("Bài tập về nhà", 6, "F")
     ]
 
-    for idx, (m_label, col_let) in enumerate(metrics, 1):
-        r_idx = s_row + idx
+    for idx, (m_label, col_num, col_let) in enumerate(summary_labels):
+        r_idx = avg_row_idx + 2 + idx
         ws.cell(row=r_idx, column=1, value="")
-        lbl_cell = ws.cell(
+        sum_title = ws.cell(
             row=r_idx,
             column=2,
-            value=f'="Check 1 dưới TB (< " & TEXT({col_let}{avg_row_idx}, "0.0") & ")"' if m_label == "Check 1" else (
+            value=(
+                f'="Check 1 dưới TB (< " & TEXT({col_let}{avg_row_idx}, "0.0") & ")"' if m_label == "Check 1" else
                 f'="Check 2 dưới TB (< " & TEXT({col_let}{avg_row_idx}, "0.0") & ")"' if m_label == "Check 2" else
                 f'="BTVN dưới TB (< " & TEXT({col_let}{avg_row_idx}, "0.0") & ")"'
             )
         )
-        lbl_cell.font = Font(bold=True, color="7F1D1D")
+        sum_title.font = Font(name="Times New Roman", bold=True, color="7F1D1D", size=13)
         ws.merge_cells(f"C{r_idx}:I{r_idx}")
         val_cell = ws.cell(
             row=r_idx,
             column=3,
             value=f'=_xlfn.TEXTJOIN(", ", TRUE, _xlfn.FILTER(B{start_row}:B{end_row}, ({col_let}{start_row}:{col_let}{end_row}>0)*({col_let}{start_row}:{col_let}{end_row}<{col_let}{avg_row_idx})*(C{start_row}:C{end_row}<>"Vắng mặt"), "Không có (Tất cả đạt)"))' if len(attendance) > 0 else "Không có (Tất cả đạt)"
         )
-        val_cell.font = Font(bold=True, color="1E1E2F")
+        val_cell.font = Font(name="Times New Roman", bold=True, color="1E1E2F", size=13)
 
-    col_widths = [8, 26, 14, 12, 12, 12, 20, 20, 36]
-    for i, w in enumerate(col_widths, 1):
-        ws.column_dimensions[openpyxl.utils.get_column_letter(i)].width = w
+    # Auto-fit column widths from row 3 (headings) to end_row (data rows)
+    for col_idx in range(1, 10):
+        col_let = openpyxl.utils.get_column_letter(col_idx)
+        max_len = 0
+        for r_idx in range(3, end_row + 1):
+            cell_val = ws.cell(row=r_idx, column=col_idx).value
+            val_str = str(cell_val) if cell_val is not None else ""
+            if val_str.startswith("="):
+                if col_idx == 9: val_str = "⚠️ Cần cố gắng (Check 1, Check 2, BTVN)"
+                elif col_idx == 1: val_str = "999"
+                elif col_idx in (7, 8): val_str = "10.0"
+            if len(val_str) > max_len:
+                max_len = len(val_str)
+        ws.column_dimensions[col_let].width = max(max_len + 5, 14)
 
     files_dir = get_setting("files_dir")
     os.makedirs(files_dir, exist_ok=True)

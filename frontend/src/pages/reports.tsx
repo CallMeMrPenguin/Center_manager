@@ -256,11 +256,26 @@ export default function ReportsPage() {
 
           worksheet.eachRow((row, rowNumber) => {
             const isHeader = rowNumber === 1;
-            row.eachCell((cell) => {
+            row.eachCell((cell, colNumber) => {
               cell.font = { name: 'Times New Roman', size: 13, bold: isHeader };
               cell.alignment = { vertical: 'middle', horizontal: 'center' };
               if (typeof cell.value === 'number' && !Number.isInteger(cell.value)) {
                 cell.numFmt = '0.0';
+              }
+
+              if (!isHeader && colNumber === 9) {
+                const text = String(cell.value || '');
+                if (text.includes('Xuất Sắc')) {
+                  cell.font = { name: 'Times New Roman', size: 13, bold: true, color: { argb: 'FF15803D' } };
+                } else if (text.includes('Giỏi')) {
+                  cell.font = { name: 'Times New Roman', size: 13, bold: true, color: { argb: 'FF4338CA' } };
+                } else if (text.includes('Khá')) {
+                  cell.font = { name: 'Times New Roman', size: 13, bold: true, color: { argb: 'FFB45309' } };
+                } else if (text.includes('Cần Cố Gắng')) {
+                  cell.font = { name: 'Times New Roman', size: 13, bold: true, color: { argb: 'FFB91C1C' } };
+                } else {
+                  cell.font = { name: 'Times New Roman', size: 13, italic: true, color: { argb: 'FF64748B' } };
+                }
               }
             });
           });
