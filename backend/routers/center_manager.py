@@ -494,6 +494,8 @@ def api_export_class_excel(class_id: int, payload: Dict[str, Any]):
         col_let = openpyxl.utils.get_column_letter(col_idx)
         max_len = 0
         for r_idx in range(3, total_max_row + 1):
+            if r_idx > end_row and col_idx == 3:
+                continue
             cell_val = ws.cell(row=r_idx, column=col_idx).value
             val_str = str(cell_val) if cell_val is not None else ""
             if val_str.startswith("="):
@@ -505,11 +507,13 @@ def api_export_class_excel(class_id: int, payload: Dict[str, Any]):
                     val_str = "999"
                 elif col_idx in (7, 8):
                     val_str = "10.0"
+                else:
+                    val_str = ""
             if len(val_str) > max_len:
                 max_len = len(val_str)
 
         extra_padding = 12 if col_idx == 9 else (8 if col_idx == 2 else 5)
-        min_w = 54 if col_idx == 9 else (36 if col_idx == 2 else 14)
+        min_w = 54 if col_idx == 9 else (36 if col_idx == 2 else (16 if col_idx == 3 else 14))
         ws.column_dimensions[col_let].width = max(max_len + extra_padding, min_w)
 
     files_dir = get_setting("files_dir")
