@@ -85,6 +85,8 @@ def generate_swap_pairs(students: List[Student], relationships: RelationshipData
         random.seed(seed)
 
     present = [s for s in students if not s.is_absent]
+    if not present and students:
+        present = list(students)
     if not present:
         return {"pairs": [], "unmatched": []}
 
@@ -262,6 +264,8 @@ def genetic_seat_mix(
         random.seed(seed)
 
     present = [s.id for s in students if not s.is_absent]
+    if not present and students:
+        present = [s.id for s in students]
     total_seats = rows * cols
     if len(present) > total_seats:
         # Expand rows if seats are fewer than students

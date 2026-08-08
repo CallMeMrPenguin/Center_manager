@@ -335,14 +335,12 @@ export default function ClassesPage() {
 
   const applyAutoAttendanceStatus = useCallback((records: any[]) => {
     return records.map((rec) => {
-      const c1 = Number(rec.check_1) || 0;
-      const c2 = Number(rec.check_2) || 0;
-      const hw = Number(rec.homework) || 0;
-      const hasScore = c1 > 0 || c2 > 0 || hw > 0;
-      let newStatus = rec.status;
-      if (!hasScore) {
-        newStatus = 'Vắng mặt';
-      } else if (!newStatus || newStatus === 'Vắng mặt') {
+      const c1 = rec.check_1 !== null && rec.check_1 !== undefined && rec.check_1 !== '' ? Number(rec.check_1) : null;
+      const c2 = rec.check_2 !== null && rec.check_2 !== undefined && rec.check_2 !== '' ? Number(rec.check_2) : null;
+      const hw = rec.homework !== null && rec.homework !== undefined && rec.homework !== '' ? Number(rec.homework) : null;
+      const hasScore = (c1 !== null && c1 > 0) || (c2 !== null && c2 > 0) || (hw !== null && hw > 0);
+      let newStatus = rec.status || 'Có mặt';
+      if (hasScore && newStatus === 'Vắng mặt') {
         newStatus = 'Có mặt';
       }
       return { ...rec, status: newStatus };
@@ -393,14 +391,12 @@ export default function ClassesPage() {
       const newRecs = prev.map((rec) => {
         if (rec.student_id !== studentId) return rec;
         const updated = { ...rec, [field]: value };
-        const c1 = Number(updated.check_1) || 0;
-        const c2 = Number(updated.check_2) || 0;
-        const hw = Number(updated.homework) || 0;
-        const hasScore = c1 > 0 || c2 > 0 || hw > 0;
+        const c1 = updated.check_1 !== null && updated.check_1 !== undefined && updated.check_1 !== '' ? Number(updated.check_1) : null;
+        const c2 = updated.check_2 !== null && updated.check_2 !== undefined && updated.check_2 !== '' ? Number(updated.check_2) : null;
+        const hw = updated.homework !== null && updated.homework !== undefined && updated.homework !== '' ? Number(updated.homework) : null;
+        const hasScore = (c1 !== null && c1 > 0) || (c2 !== null && c2 > 0) || (hw !== null && hw > 0);
 
-        if (!hasScore) {
-          updated.status = 'Vắng mặt';
-        } else if (field !== 'status' && updated.status === 'Vắng mặt') {
+        if (field !== 'status' && hasScore && updated.status === 'Vắng mặt') {
           updated.status = 'Có mặt';
         }
         return updated;
@@ -587,9 +583,11 @@ export default function ClassesPage() {
         col_index: col.col_index,
         desks_in_col: col.desks_in_col || desksPerCol
       }));
-      const res = await api.mixClassSeating(selectedClass.id, numCols, desksPerCol, colsConfig);
-      setSeatingGrid(res.layout);
-      showToast("Đã trộn ngẫu nhiên sơ đồ lớp!", "success");
+      const res = await api.mixClassSeating(selectedClass.id, numCols, desksPerCol, colsConfig, attendanceDate);
+      if (res.layout) {
+        setSeatingGrid(res.layout);
+        showToast("Đã trộn ngẫu nhiên sơ đồ lớp!", "success");
+      }
     } catch (err: any) {
       showToast("Trộn thất bại: " + err.message, "error");
     }
@@ -690,6 +688,17 @@ export default function ClassesPage() {
       showToast("Đã lưu sơ đồ lớp học thành công!", "success");
     } catch (err: any) {
       showToast("Không thể lưu sơ đồ: " + err.message, "error");
+    }
+  };
+
+  const handleClearSeat = (colIdx: number, deskIdx: number, posIdx: number) => {
+    const newGrid = JSON.parse(JSON.stringify(seatingGrid));
+    const seatIndex = deskIdx * 2 + posIdx;
+    const seat = newGrid[colIdx]?.seats[seatIndex];
+    if (seat) {
+      seat.student_id = null;
+      seat.student_name = null;
+      setSeatingGrid(newGrid);
     }
   };
 
@@ -1385,13 +1394,26 @@ export default function ClassesPage() {
                                 }}
                                 onDragOver={(e) => e.preventDefault()}
                                 onDrop={() => handleDropOnSeat(colIdx, deskIdx, 0)}
-                                className={`p-2 rounded-xl border flex flex-col items-center justify-center min-h-[56px] text-center transition cursor-pointer ${seatLeft?.student_name
+                                className={`group/seat relative p-2 rounded-xl border flex flex-col items-center justify-center min-h-[56px] text-center transition cursor-pointer ${seatLeft?.student_name
                                     ? 'bg-indigo-500/10 border-indigo-500/30 text-white cursor-grab active:cursor-grabbing hover:border-indigo-400'
                                     : 'bg-white/[0.02] border-dashed border-white/10 text-slate-600 hover:border-white/20'
                                   }`}
                               >
                                 {seatLeft?.student_name ? (
-                                  <span className="text-xs font-extrabold truncate">{seatLeft.student_name}</span>
+                                  <>
+                                    <button
+                                      type="button"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleClearSeat(colIdx, deskIdx, 0);
+                                      }}
+                                      className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-rose-500 hover:bg-rose-600 text-white text-[9px] font-black flex items-center justify-center opacity-0 group-hover/seat:opacity-100 transition shadow cursor-pointer"
+                                      title="Bỏ xếp chỗ"
+                                    >
+                                      ×
+                                    </button>
+                                    <span className="text-xs font-extrabold truncate">{seatLeft.student_name}</span>
+                                  </>
                                 ) : (
                                   <span className="text-[10px] text-slate-500">Thả vào đây</span>
                                 )}
@@ -1406,13 +1428,26 @@ export default function ClassesPage() {
                                 }}
                                 onDragOver={(e) => e.preventDefault()}
                                 onDrop={() => handleDropOnSeat(colIdx, deskIdx, 1)}
-                                className={`p-2 rounded-xl border flex flex-col items-center justify-center min-h-[56px] text-center transition cursor-pointer ${seatRight?.student_name
+                                className={`group/seat relative p-2 rounded-xl border flex flex-col items-center justify-center min-h-[56px] text-center transition cursor-pointer ${seatRight?.student_name
                                     ? 'bg-indigo-500/10 border-indigo-500/30 text-white cursor-grab active:cursor-grabbing hover:border-indigo-400'
                                     : 'bg-white/[0.02] border-dashed border-white/10 text-slate-600 hover:border-white/20'
                                   }`}
                               >
                                 {seatRight?.student_name ? (
-                                  <span className="text-xs font-extrabold truncate">{seatRight.student_name}</span>
+                                  <>
+                                    <button
+                                      type="button"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleClearSeat(colIdx, deskIdx, 1);
+                                      }}
+                                      className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-rose-500 hover:bg-rose-600 text-white text-[9px] font-black flex items-center justify-center opacity-0 group-hover/seat:opacity-100 transition shadow cursor-pointer"
+                                      title="Bỏ xếp chỗ"
+                                    >
+                                      ×
+                                    </button>
+                                    <span className="text-xs font-extrabold truncate">{seatRight.student_name}</span>
+                                  </>
                                 ) : (
                                   <span className="text-[10px] text-slate-500">Thả vào đây</span>
                                 )}

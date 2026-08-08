@@ -417,12 +417,12 @@ def init_db():
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_document_folders_parent_deleted ON document_folders(parent_id, is_deleted);")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_class_sessions_class_date ON class_sessions(class_id, date);")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_attendance_class_student_date ON class_attendance_grades(class_id, student_id, date);")
-    # Cleanup / migration: set status = 'Vắng mặt' and scores = NULL for records with no scores
+    # Cleanup / migration: Reset status = 'Có mặt' for records that were wrongly forced to 'Vắng mặt' without scores
     try:
         cursor.execute("""
             UPDATE class_attendance_grades
-            SET status = 'Vắng mặt', check_1 = NULL, check_2 = NULL, homework = NULL
-            WHERE (check_1 IS NULL OR check_1 = 0) AND (check_2 IS NULL OR check_2 = 0) AND (homework IS NULL OR homework = 0)
+            SET status = 'Có mặt'
+            WHERE (check_1 IS NULL OR check_1 = 0) AND (check_2 IS NULL OR check_2 = 0) AND (homework IS NULL OR homework = 0) AND (status = 'Vắng mặt' OR status IS NULL)
         """)
         cursor.execute("UPDATE class_attendance_grades SET check_1 = NULL WHERE check_1 = 0")
         cursor.execute("UPDATE class_attendance_grades SET check_2 = NULL WHERE check_2 = 0")
@@ -1698,14 +1698,10 @@ def upsert_class_attendance_grades(class_id: int, date_str: str, records: List[D
         hw = parse_score(rec.get("homework"))
 
         has_score = (c1 is not None) or (c2 is not None) or (hw is not None)
-        status = rec.get("status")
+        status = rec.get("status") or "Có mặt"
         
-        if not has_score:
-            status = "Vắng mặt"
-            c1, c2, hw = None, None, None
-        else:
-            if not status or status == "Vắng mặt":
-                status = "Có mặt"
+        if has_score and status == "Vắng mặt":
+            status = "Có mặt"
 
         notes = rec.get("notes", "")
 

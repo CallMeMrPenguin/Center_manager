@@ -429,8 +429,8 @@ export const api = {
     request<any>(`/api/classes/${classId}/seating`),
   saveClassSeating: (classId: number, numRows: number, layoutJson: string) =>
     request<any>(`/api/classes/${classId}/seating`, { method: 'PUT', body: JSON.stringify({ num_rows: numRows, layout_json: layoutJson }) }),
-  mixClassSeating: (classId: number, numCols: number, desksPerCol: number, colsConfig?: any[]) =>
-    request<any>(`/api/classes/${classId}/seating/mix`, { method: 'POST', body: JSON.stringify({ num_cols: numCols, desks_per_col: desksPerCol, cols_config: colsConfig }) }),
+  mixClassSeating: (classId: number, numCols: number, desksPerCol: number, colsConfig?: any[], date?: string) =>
+    request<any>(`/api/classes/${classId}/seating/mix`, { method: 'POST', body: JSON.stringify({ num_cols: numCols, desks_per_col: desksPerCol, cols_config: colsConfig, date }) }),
   generateGradingPairs: (classId: number) =>
     request<any>(`/api/classes/${classId}/seating/grading-pairs`, { method: 'POST' }),
   getClassAttendance: (classId: number, date: string) =>
