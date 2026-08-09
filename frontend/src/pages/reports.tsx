@@ -722,7 +722,13 @@ export default function ReportsPage() {
       if (Number(r.homework) > 0) dateMap[d].hw.push(Number(r.homework));
     });
 
-    const dates = Object.keys(dateMap).sort();
+    const dates = Object.keys(dateMap)
+      .filter(d => {
+        const item = dateMap[d];
+        return item.check1.length > 0 || item.check2.length > 0 || item.hw.length > 0;
+      })
+      .sort();
+
     let limit = dates.length;
     if (timeView === '1m') limit = Math.min(4, dates.length);
     if (timeView === '2m') limit = Math.min(8, dates.length);
@@ -732,10 +738,13 @@ export default function ReportsPage() {
 
     const result = selectedDates.map((d) => {
       const item = dateMap[d];
-      const avg1 = item.check1.length > 0 ? item.check1.reduce((a,b)=>a+b,0)/item.check1.length : 7.5;
-      const avg2 = item.check2.length > 0 ? item.check2.reduce((a,b)=>a+b,0)/item.check2.length : 6.8;
-      const avghw = item.hw.length > 0 ? item.hw.reduce((a,b)=>a+b,0)/item.hw.length : 8.8;
-      const avgOverall = (avg1 + avg2 + avghw) / 3;
+      const validScores = [...item.check1, ...item.check2, ...item.hw];
+      const sessionFallback = validScores.length > 0 ? validScores.reduce((a,b)=>a+b,0)/validScores.length : 8.0;
+
+      const avg1 = item.check1.length > 0 ? item.check1.reduce((a,b)=>a+b,0)/item.check1.length : sessionFallback;
+      const avg2 = item.check2.length > 0 ? item.check2.reduce((a,b)=>a+b,0)/item.check2.length : sessionFallback;
+      const avghw = item.hw.length > 0 ? item.hw.reduce((a,b)=>a+b,0)/item.hw.length : sessionFallback;
+      const avgOverall = (avg1 * 0.35) + (avg2 * 0.55) + (avghw * 0.10);
 
       return {
         sessionName: formatSessionDate(d),
