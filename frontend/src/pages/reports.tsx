@@ -1251,10 +1251,15 @@ export default function ReportsPage() {
           )}
 
           <svg 
-            viewBox={`${-panOffset.x / zoomLevel} ${-panOffset.y / zoomLevel} ${chartWidth / zoomLevel} ${chartHeight / zoomLevel}`} 
+            viewBox={`0 0 ${chartWidth} ${chartHeight}`} 
             className="w-full h-[750px] overflow-visible"
           >
             <defs>
+              {/* Plot area clip path so curves don't overflow fixed X/Y axes */}
+              <clipPath id="chart-plot-clip">
+                <rect x={paddingLeft} y={paddingTop - 10} width={plotAreaWidth} height={plotAreaHeight + 20} />
+              </clipPath>
+
               {/* Outer Glow Filters with EXPANDED BOUNDS (300% width/height to eliminate square edge clipping!) */}
               <filter id="glow-blue" x="-100%" y="-100%" width="300%" height="300%">
                 <feGaussianBlur stdDeviation="6" result="blur" />
@@ -1300,7 +1305,7 @@ export default function ReportsPage() {
               </linearGradient>
             </defs>
 
-            {/* Horizontal Grid Lines */}
+            {/* FIXED Y-AXIS GRID LINES & LABELS (STAY FIXED ON THE LEFT) */}
             {yBounds.ticks.map(val => {
               const y = getSvgY(val);
               return (
@@ -1333,204 +1338,215 @@ export default function ReportsPage() {
               opacity="0.4"
             />
 
-            {/* GRADIENT AREA FILLS UNDER LINES */}
-            <path d={makeAreaPath('check1')} fill="url(#area-gradient-blue)" />
-            <path d={makeAreaPath('check2')} fill="url(#area-gradient-purple)" />
-            <path d={makeAreaPath('homework')} fill="url(#area-gradient-emerald)" />
+            {/* CLIPPED INTERACTIVE PLOT AREA (ZOOMS & PANS FREELY INSIDE PLOT BOUNDS) */}
+            <g clipPath="url(#chart-plot-clip)">
+              <g transform={`translate(${panOffset.x}, ${panOffset.y}) scale(${zoomLevel})`}>
+                {/* GRADIENT AREA FILLS UNDER LINES */}
+                <path d={makeAreaPath('check1')} fill="url(#area-gradient-blue)" />
+                <path d={makeAreaPath('check2')} fill="url(#area-gradient-purple)" />
+                <path d={makeAreaPath('homework')} fill="url(#area-gradient-emerald)" />
 
-            {/* SMOOTH BEZIER LINES */}
-            <path 
-              d={makeBezierPath('check1')} 
-              fill="none" 
-              stroke="#3b82f6" 
-              strokeWidth="3.5" 
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              filter="url(#glow-blue)"
-            />
-
-            <path 
-              d={makeBezierPath('check2')} 
-              fill="none" 
-              stroke="#a855f7" 
-              strokeWidth="3.5" 
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              filter="url(#glow-purple)"
-            />
-
-            <path 
-              d={makeBezierPath('homework')} 
-              fill="none" 
-              stroke="#10b981" 
-              strokeWidth="3.5" 
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              filter="url(#glow-emerald)"
-            />
-
-            {/* ALL 3 FORECAST DASHED CONNECTION LINES & FORECAST POINTS */}
-            {sessionChartData.length > 0 && (
-              <>
-                {/* 1. Check 1 Forecast Line & Point */}
-                <line
-                  x1={getSvgX(sessionChartData.length - 1, sessionChartData.length)}
-                  y1={getSvgY(sessionChartData[sessionChartData.length - 1].check1)}
-                  x2={chartWidth - paddingRight + 30}
-                  y2={getSvgY(engine.pred_c1)}
-                  stroke="#3b82f6"
-                  strokeWidth="2.5"
-                  strokeDasharray="4 4"
+                {/* SMOOTH BEZIER LINES */}
+                <path 
+                  d={makeBezierPath('check1')} 
+                  fill="none" 
+                  stroke="#3b82f6" 
+                  strokeWidth="3.5" 
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  filter="url(#glow-blue)"
                 />
-                <circle 
-                  cx={chartWidth - paddingRight + 30} 
-                  cy={getSvgY(engine.pred_c1)} 
-                  r="6" 
-                  fill="#3b82f6" 
-                  stroke="#ffffff" 
-                  strokeWidth="2" 
-                />
-                <text 
-                  x={chartWidth - paddingRight + 38} 
-                  y={getSvgY(engine.pred_c1) + 4} 
-                  fill="#60a5fa" 
-                  fontSize="11" 
-                  fontWeight="900"
-                >
-                  {format1Dec(engine.pred_c1)}
-                </text>
 
-                {/* 2. Check 2 Forecast Line & Point */}
-                <line
-                  x1={getSvgX(sessionChartData.length - 1, sessionChartData.length)}
-                  y1={getSvgY(sessionChartData[sessionChartData.length - 1].check2)}
-                  x2={chartWidth - paddingRight + 30}
-                  y2={getSvgY(engine.pred_c2)}
-                  stroke="#a855f7"
-                  strokeWidth="2.5"
-                  strokeDasharray="4 4"
+                <path 
+                  d={makeBezierPath('check2')} 
+                  fill="none" 
+                  stroke="#a855f7" 
+                  strokeWidth="3.5" 
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  filter="url(#glow-purple)"
                 />
-                <circle 
-                  cx={chartWidth - paddingRight + 30} 
-                  cy={getSvgY(engine.pred_c2)} 
-                  r="6" 
-                  fill="#a855f7" 
-                  stroke="#ffffff" 
-                  strokeWidth="2" 
-                />
-                <text 
-                  x={chartWidth - paddingRight + 38} 
-                  y={getSvgY(engine.pred_c2) + 4} 
-                  fill="#c084fc" 
-                  fontSize="11" 
-                  fontWeight="900"
-                >
-                  {format1Dec(engine.pred_c2)}
-                </text>
 
-                {/* 3. Homework Forecast Line & Point */}
-                <line
-                  x1={getSvgX(sessionChartData.length - 1, sessionChartData.length)}
-                  y1={getSvgY(sessionChartData[sessionChartData.length - 1].homework)}
-                  x2={chartWidth - paddingRight + 30}
-                  y2={getSvgY(engine.pred_hw)}
-                  stroke="#10b981"
-                  strokeWidth="2.5"
-                  strokeDasharray="4 4"
+                <path 
+                  d={makeBezierPath('homework')} 
+                  fill="none" 
+                  stroke="#10b981" 
+                  strokeWidth="3.5" 
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  filter="url(#glow-emerald)"
                 />
-                <circle 
-                  cx={chartWidth - paddingRight + 30} 
-                  cy={getSvgY(engine.pred_hw)} 
-                  r="6" 
-                  fill="#10b981" 
-                  stroke="#ffffff" 
-                  strokeWidth="2" 
-                />
-                <text 
-                  x={chartWidth - paddingRight + 38} 
-                  y={getSvgY(engine.pred_hw) + 4} 
-                  fill="#34d399" 
-                  fontSize="11" 
-                  fontWeight="900"
-                >
-                  {format1Dec(engine.pred_hw)}
-                </text>
-              </>
-            )}
 
-            {/* INTERACTIVE HOVER OVERLAY COLUMNS & CIRCULAR DATA POINTS */}
+                {/* FORECAST DASHED CONNECTION LINES & FORECAST POINTS */}
+                {sessionChartData.length > 0 && (
+                  <>
+                    <line
+                      x1={getSvgX(sessionChartData.length - 1, sessionChartData.length)}
+                      y1={getSvgY(sessionChartData[sessionChartData.length - 1].check1)}
+                      x2={chartWidth - paddingRight + 30}
+                      y2={getSvgY(engine.pred_c1)}
+                      stroke="#3b82f6"
+                      strokeWidth="2.5"
+                      strokeDasharray="4 4"
+                    />
+                    <circle 
+                      cx={chartWidth - paddingRight + 30} 
+                      cy={getSvgY(engine.pred_c1)} 
+                      r="6" 
+                      fill="#3b82f6" 
+                      stroke="#ffffff" 
+                      strokeWidth="2" 
+                    />
+                    <text 
+                      x={chartWidth - paddingRight + 38} 
+                      y={getSvgY(engine.pred_c1) + 4} 
+                      fill="#60a5fa" 
+                      fontSize="11" 
+                      fontWeight="900"
+                    >
+                      {format1Dec(engine.pred_c1)}
+                    </text>
+
+                    <line
+                      x1={getSvgX(sessionChartData.length - 1, sessionChartData.length)}
+                      y1={getSvgY(sessionChartData[sessionChartData.length - 1].check2)}
+                      x2={chartWidth - paddingRight + 30}
+                      y2={getSvgY(engine.pred_c2)}
+                      stroke="#a855f7"
+                      strokeWidth="2.5"
+                      strokeDasharray="4 4"
+                    />
+                    <circle 
+                      cx={chartWidth - paddingRight + 30} 
+                      cy={getSvgY(engine.pred_c2)} 
+                      r="6" 
+                      fill="#a855f7" 
+                      stroke="#ffffff" 
+                      strokeWidth="2" 
+                    />
+                    <text 
+                      x={chartWidth - paddingRight + 38} 
+                      y={getSvgY(engine.pred_c2) + 4} 
+                      fill="#c084fc" 
+                      fontSize="11" 
+                      fontWeight="900"
+                    >
+                      {format1Dec(engine.pred_c2)}
+                    </text>
+
+                    <line
+                      x1={getSvgX(sessionChartData.length - 1, sessionChartData.length)}
+                      y1={getSvgY(sessionChartData[sessionChartData.length - 1].homework)}
+                      x2={chartWidth - paddingRight + 30}
+                      y2={getSvgY(engine.pred_hw)}
+                      stroke="#10b981"
+                      strokeWidth="2.5"
+                      strokeDasharray="4 4"
+                    />
+                    <circle 
+                      cx={chartWidth - paddingRight + 30} 
+                      cy={getSvgY(engine.pred_hw)} 
+                      r="6" 
+                      fill="#10b981" 
+                      stroke="#ffffff" 
+                      strokeWidth="2" 
+                    />
+                    <text 
+                      x={chartWidth - paddingRight + 38} 
+                      y={getSvgY(engine.pred_hw) + 4} 
+                      fill="#34d399" 
+                      fontSize="11" 
+                      fontWeight="900"
+                    >
+                      {format1Dec(engine.pred_hw)}
+                    </text>
+                  </>
+                )}
+
+                {/* INTERACTIVE HOVER OVERLAY COLUMNS & CIRCULAR DATA POINTS */}
+                {sessionChartData.map((d, i) => {
+                  const x = getSvgX(i, sessionChartData.length);
+                  const y1 = getSvgY(d.check1);
+                  const y2 = getSvgY(d.check2);
+                  const yHw = getSvgY(d.homework);
+
+                  return (
+                    <g 
+                      key={i}
+                      className="cursor-pointer group"
+                      onMouseEnter={() => setHoveredPoint({
+                        index: i,
+                        sessionName: d.sessionName,
+                        fullDate: d.fullDate,
+                        check1: d.check1,
+                        check2: d.check2,
+                        homework: d.homework,
+                        x,
+                        fittedC1: fittedLookup.c1[i] ?? null,
+                        fittedC2: fittedLookup.c2[i] ?? null,
+                        fittedHw: fittedLookup.hw[i] ?? null,
+                        predModel: 'EMA',
+                      })}
+                      onMouseLeave={() => setHoveredPoint(null)}
+                    >
+                      <rect
+                        x={x - 25}
+                        y={paddingTop}
+                        width={50}
+                        height={plotAreaHeight}
+                        fill="transparent"
+                      />
+
+                      <line
+                        x1={x}
+                        y1={paddingTop}
+                        x2={x}
+                        y2={chartHeight - paddingBottom}
+                        stroke="#5c36f5"
+                        strokeWidth="1.5"
+                        strokeDasharray="3 3"
+                        className="opacity-0 group-hover:opacity-100 transition-opacity"
+                      />
+
+                      <circle cx={x} cy={y1} r="7" fill="#3b82f6" filter="url(#glow-blue)" style={{ transformBox: 'fill-box', transformOrigin: 'center' }} className="transition-transform duration-200 group-hover:scale-125" />
+                      <circle cx={x} cy={y1} r="3.5" fill="#ffffff" style={{ transformBox: 'fill-box', transformOrigin: 'center' }} className="transition-transform duration-200 group-hover:scale-125" />
+
+                      <circle cx={x} cy={y2} r="7" fill="#a855f7" filter="url(#glow-purple)" style={{ transformBox: 'fill-box', transformOrigin: 'center' }} className="transition-transform duration-200 group-hover:scale-125" />
+                      <circle cx={x} cy={y2} r="3.5" fill="#ffffff" style={{ transformBox: 'fill-box', transformOrigin: 'center' }} className="transition-transform duration-200 group-hover:scale-125" />
+
+                      <circle cx={x} cy={yHw} r="7" fill="#10b981" filter="url(#glow-emerald)" style={{ transformBox: 'fill-box', transformOrigin: 'center' }} className="transition-transform duration-200 group-hover:scale-125" />
+                      <circle cx={x} cy={yHw} r="3.5" fill="#ffffff" style={{ transformBox: 'fill-box', transformOrigin: 'center' }} className="transition-transform duration-200 group-hover:scale-125" />
+
+                      {i === sessionChartData.length - 1 && (
+                        <>
+                          <text x={x + 14} y={y1 + 4} fill="#3b82f6" fontSize="12" fontWeight="900">{d.check1}</text>
+                          <text x={x + 14} y={y2 + 4} fill="#a855f7" fontSize="12" fontWeight="900">{d.check2}</text>
+                          <text x={x + 14} y={yHw + 4} fill="#10b981" fontSize="12" fontWeight="900">{d.homework}</text>
+                        </>
+                      )}
+                    </g>
+                  );
+                })}
+              </g>
+            </g>
+
+            {/* FIXED X-AXIS SESSION DATE LABELS (STAY PINNED AT BOTTOM) */}
             {sessionChartData.map((d, i) => {
-              const x = getSvgX(i, sessionChartData.length);
-              const y1 = getSvgY(d.check1);
-              const y2 = getSvgY(d.check2);
-              const yHw = getSvgY(d.homework);
-
+              const origX = getSvgX(i, sessionChartData.length);
+              const transX = origX * zoomLevel + panOffset.x;
+              if (transX < paddingLeft - 20 || transX > chartWidth - paddingRight + 20) return null;
               return (
-                <g 
+                <text 
                   key={i}
-                  className="cursor-pointer group"
-                  onMouseEnter={() => setHoveredPoint({
-                    index: i,
-                    sessionName: d.sessionName,
-                    fullDate: d.fullDate,
-                    check1: d.check1,
-                    check2: d.check2,
-                    homework: d.homework,
-                    x,
-                    fittedC1: fittedLookup.c1[i] ?? null,
-                    fittedC2: fittedLookup.c2[i] ?? null,
-                    fittedHw: fittedLookup.hw[i] ?? null,
-                    predModel: 'EMA',
-                  })}
-                  onMouseLeave={() => setHoveredPoint(null)}
+                  x={transX} 
+                  y={chartHeight - 12} 
+                  fill={hoveredPoint?.index === i ? "#ffffff" : "#94a3b8"} 
+                  fontSize="11" 
+                  fontWeight="extrabold" 
+                  textAnchor="middle"
                 >
-                  {/* Invisible Vertical Hover Area Column */}
-                  <rect
-                    x={x - 25}
-                    y={paddingTop}
-                    width={50}
-                    height={plotAreaHeight}
-                    fill="transparent"
-                  />
-
-                  {/* Vertical Guide Line on Hover */}
-                  <line
-                    x1={x}
-                    y1={paddingTop}
-                    x2={x}
-                    y2={chartHeight - paddingBottom}
-                    stroke="#5c36f5"
-                    strokeWidth="1.5"
-                    strokeDasharray="3 3"
-                    className="opacity-0 group-hover:opacity-100 transition-opacity"
-                  />
-
-                  {/* Check 1 Point */}
-                  <circle cx={x} cy={y1} r="7" fill="#3b82f6" filter="url(#glow-blue)" style={{ transformBox: 'fill-box', transformOrigin: 'center' }} className="transition-transform duration-200 group-hover:scale-125" />
-                  <circle cx={x} cy={y1} r="3.5" fill="#ffffff" style={{ transformBox: 'fill-box', transformOrigin: 'center' }} className="transition-transform duration-200 group-hover:scale-125" />
-
-                  {/* Check 2 Point */}
-                  <circle cx={x} cy={y2} r="7" fill="#a855f7" filter="url(#glow-purple)" style={{ transformBox: 'fill-box', transformOrigin: 'center' }} className="transition-transform duration-200 group-hover:scale-125" />
-                  <circle cx={x} cy={y2} r="3.5" fill="#ffffff" style={{ transformBox: 'fill-box', transformOrigin: 'center' }} className="transition-transform duration-200 group-hover:scale-125" />
-
-                  {/* Homework Point */}
-                  <circle cx={x} cy={yHw} r="7" fill="#10b981" filter="url(#glow-emerald)" style={{ transformBox: 'fill-box', transformOrigin: 'center' }} className="transition-transform duration-200 group-hover:scale-125" />
-                  <circle cx={x} cy={yHw} r="3.5" fill="#ffffff" style={{ transformBox: 'fill-box', transformOrigin: 'center' }} className="transition-transform duration-200 group-hover:scale-125" />
-
-                  {/* X-axis Session Date */}
-                  <text x={x} y={chartHeight - 12} fill={hoveredPoint?.index === i ? "#ffffff" : "#94a3b8"} fontSize="11" fontWeight="extrabold" textAnchor="middle">
-                    {d.sessionName}
-                  </text>
-
-                  {/* Score label next to last data point */}
-                  {i === sessionChartData.length - 1 && (
-                    <>
-                      <text x={x + 14} y={y1 + 4} fill="#3b82f6" fontSize="12" fontWeight="900">{d.check1}</text>
-                      <text x={x + 14} y={y2 + 4} fill="#a855f7" fontSize="12" fontWeight="900">{d.check2}</text>
-                      <text x={x + 14} y={yHw + 4} fill="#10b981" fontSize="12" fontWeight="900">{d.homework}</text>
-                    </>
-                  )}
-                </g>
+                  {d.sessionName}
+                </text>
               );
             })}
           </svg>
