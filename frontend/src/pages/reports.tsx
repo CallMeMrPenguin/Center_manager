@@ -27,6 +27,10 @@ export default function ReportsPage() {
     check2: number;
     homework: number;
     x: number;
+    fittedC1: number | null;
+    fittedC2: number | null;
+    fittedHw: number | null;
+    predModel: string;
   } | null>(null);
 
   // Reset Grades Modal State
@@ -740,6 +744,17 @@ export default function ReportsPage() {
     return result.length > 0 ? result : defaultData;
   }, [sessionRecords, timeView]);
 
+  // Per-session fitted value lookup aligned to sessionChartData positions
+  // Fitted arrays from backend are in the same session order as sessionChartData
+  const fittedLookup = useMemo(() => {
+    if (!analyticsSummary) return { c1: [], c2: [], hw: [] };
+    return {
+      c1: (analyticsSummary.fitted_c1 as number[]) || [],
+      c2: (analyticsSummary.fitted_c2 as number[]) || [],
+      hw: (analyticsSummary.fitted_hw as number[]) || [],
+    };
+  }, [analyticsSummary]);
+
   // Expanded Taller Chart (Height: 750px for greater vertical tick distance)
   const chartHeight = 750;
   const chartWidth = Math.max(containerWidth, 600);
@@ -1113,15 +1128,30 @@ export default function ReportsPage() {
               <div className="space-y-1 font-mono text-[11px] font-bold">
                 <div className="flex items-center justify-between gap-4 text-blue-400">
                   <span>Check 1:</span>
-                  <span>{hoveredPoint.check1}</span>
+                  <span>
+                    {hoveredPoint.check1}
+                    {hoveredPoint.fittedC1 !== null && (
+                      <span className="ml-1 text-blue-300/70 font-semibold">({hoveredPoint.predModel}: {hoveredPoint.fittedC1})</span>
+                    )}
+                  </span>
                 </div>
                 <div className="flex items-center justify-between gap-4 text-purple-400">
                   <span>Check 2:</span>
-                  <span>{hoveredPoint.check2}</span>
+                  <span>
+                    {hoveredPoint.check2}
+                    {hoveredPoint.fittedC2 !== null && (
+                      <span className="ml-1 text-purple-300/70 font-semibold">({hoveredPoint.predModel}: {hoveredPoint.fittedC2})</span>
+                    )}
+                  </span>
                 </div>
                 <div className="flex items-center justify-between gap-4 text-emerald-400">
                   <span>Homework:</span>
-                  <span>{hoveredPoint.homework}</span>
+                  <span>
+                    {hoveredPoint.homework}
+                    {hoveredPoint.fittedHw !== null && (
+                      <span className="ml-1 text-emerald-300/70 font-semibold">({hoveredPoint.predModel}: {hoveredPoint.fittedHw})</span>
+                    )}
+                  </span>
                 </div>
               </div>
             </div>
@@ -1350,7 +1380,11 @@ export default function ReportsPage() {
                     check1: d.check1,
                     check2: d.check2,
                     homework: d.homework,
-                    x
+                    x,
+                    fittedC1: fittedLookup.c1[i] ?? null,
+                    fittedC2: fittedLookup.c2[i] ?? null,
+                    fittedHw: fittedLookup.hw[i] ?? null,
+                    predModel: analyticsSummary?.prediction_model ?? 'Smart Predict',
                   })}
                   onMouseLeave={() => setHoveredPoint(null)}
                 >
@@ -1421,12 +1455,12 @@ export default function ReportsPage() {
               </button>
             </div>
             <span className="text-sm font-black text-indigo-400 font-mono">{engine.predicted_next} Điểm</span>
-            <span className="text-[10px] text-slate-400 font-semibold block">Regression Forecast</span>
+            <span className="text-[10px] text-slate-400 font-semibold block">{engine.prediction_model ?? 'Smart Predict'}</span>
 
             {activeTooltip === 'forecast' && (
               <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 w-64 p-3 bg-[#161c34] border border-[#2c375e] text-slate-200 text-[11px] rounded-xl shadow-2xl z-30 text-left font-sans">
-                <span className="font-extrabold text-indigo-300 block mb-1">Dự Đoán Hồi Quy (Linear Regression):</span>
-                Phân tích đường xu hướng từ tất cả các buổi học trước để dự đoán điểm số của học sinh ở buổi học tiếp theo.
+                <span className="font-extrabold text-indigo-300 block mb-1">Dự Đoán ({engine.prediction_model ?? 'Smart Predict'}):</span>
+                Tự động chọn mô hình tốt nhất dựa trên lượng dữ liệu: EMA (&lt;5 buổi), Weighted OLS (5–19 buổi), Holt-Winters (20+ buổi).
               </div>
             )}
           </div>

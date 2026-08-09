@@ -2123,6 +2123,64 @@ def calculate_performance_analytics(session_records: List[Dict[str, Any]]) -> Di
     slope_c2, pred_c2 = smart_predict(c2_list) if c2_list else (0.0, trunc_1_dec(academic_10))
     slope_hw, pred_hw = smart_predict(hw_list) if hw_list else (0.0, trunc_1_dec(academic_10))
 
+    # ── Determine which model was selected (based on the overall series length) ─
+    _N = len(overall_session_scores)
+    if _N < 5:
+        prediction_model = "EMA"
+    elif _N < 20:
+        prediction_model = "Weighted OLS"
+    else:
+        prediction_model = "Holt-Winters"
+
+    # ── Per-session fitted values for tooltip display ────────────────────────
+    # For each historical data point we produce a smoothed/fitted estimate so
+    # the hover tooltip can show: "Check 1: 9.0 (EMA: 8.8)".
+    def _fitted_ema(vals: List[float]) -> List[float]:
+        """Running EMA fitted value at each position."""
+        if not vals:
+            return []
+        alpha = 0.5
+        fitted: List[float] = []
+        ema_v = vals[0]
+        for v in vals:
+            ema_v = alpha * v + (1 - alpha) * ema_v
+            fitted.append(trunc_1_dec(max(0.0, min(10.0, ema_v))))
+        return fitted
+
+    def _fitted_wols(vals: List[float]) -> List[float]:
+        """Leave-one-out weighted OLS fitted value at each position."""
+        fitted: List[float] = []
+        for end in range(1, len(vals) + 1):
+            sub = vals[:end]
+            _, pv = _weighted_ols_predict(sub)
+            # fitted value = weighted OLS prediction of the sub-series up to this point
+            fitted.append(pv)
+        return fitted
+
+    def _fitted_holtwinters(vals: List[float]) -> List[float]:
+        """Return Holt-Winters in-sample fitted values."""
+        try:
+            from statsmodels.tsa.holtwinters import ExponentialSmoothing
+            model = ExponentialSmoothing(vals, trend="add", seasonal=None)
+            fitted_model = model.fit(optimized=True, disp=False)
+            return [trunc_1_dec(max(0.0, min(10.0, float(v)))) for v in fitted_model.fittedvalues]
+        except Exception:
+            return _fitted_wols(vals)
+
+    def get_fitted_values(vals: List[float]) -> List[float]:
+        """Select fitted-values method matching smart_predict's tier."""
+        N = len(vals)
+        if N < 5:
+            return _fitted_ema(vals)
+        elif N < 20:
+            return _fitted_wols(vals)
+        else:
+            return _fitted_holtwinters(vals)
+
+    fitted_c1 = get_fitted_values(c1_list) if c1_list else []
+    fitted_c2 = get_fitted_values(c2_list) if c2_list else []
+    fitted_hw = get_fitted_values(hw_list) if hw_list else []
+
     if slope_overall > 0.3:
         trend_label = "Tăng trưởng mạnh ↗"
     elif slope_overall >= 0.1:
@@ -2198,6 +2256,10 @@ def calculate_performance_analytics(session_records: List[Dict[str, Any]]) -> Di
         "pred_c1": trunc_1_dec(pred_c1),
         "pred_c2": trunc_1_dec(pred_c2),
         "pred_hw": trunc_1_dec(pred_hw),
+        "prediction_model": prediction_model,
+        "fitted_c1": fitted_c1,
+        "fitted_c2": fitted_c2,
+        "fitted_hw": fitted_hw,
         "attendance_pct": round(att_pct, 1),
         "performance_index": round(performance_index, 1),
         "rating_label": rating_label,
