@@ -1620,7 +1620,11 @@ export default function ReportsPage() {
                 <Info size={11} />
               </button>
             </div>
-            <span className="text-sm font-black text-emerald-400 font-mono">{engine.ema_level}</span>
+            <span className={`text-sm font-black font-mono ${
+              engine.ema_level < 5.0 ? 'text-rose-500' :
+              engine.ema_level < 6.5 ? 'text-amber-400' :
+              engine.ema_level < 8.0 ? 'text-blue-400' : 'text-emerald-400'
+            }`}>{engine.ema_level}</span>
             <span className="text-[10px] text-slate-400 font-semibold block">Exponential Moving</span>
 
             {activeTooltip === 'ema' && (
@@ -1658,8 +1662,15 @@ export default function ReportsPage() {
                 <Info size={11} />
               </button>
             </div>
-            <span className="text-sm font-black text-cyan-400 font-mono">σ = {engine.std_dev}</span>
-            <span className="text-[10px] text-slate-400 font-semibold block">{engine.consistency_label}</span>
+            <span className={`text-sm font-black font-mono ${
+              engine.std_dev > 2.0 ? 'text-rose-500' :
+              engine.std_dev > 1.0 ? 'text-amber-400' :
+              engine.std_dev < 0.5 ? 'text-emerald-400' : 'text-cyan-400'
+            }`}>σ = {engine.std_dev}</span>
+            <span className={`text-[10px] font-semibold block ${
+              engine.consistency_label?.includes('Trồi sụt') ? 'text-rose-400 font-bold' :
+              engine.consistency_label?.includes('Biến động') ? 'text-amber-400' : 'text-slate-400'
+            }`}>{engine.consistency_label}</span>
 
             {activeTooltip === 'sd' && (
               <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 w-64 p-3 bg-[#161c34] border border-[#2c375e] text-slate-200 text-[11px] rounded-xl shadow-2xl z-30 text-left font-sans">
@@ -1697,7 +1708,10 @@ export default function ReportsPage() {
               </button>
             </div>
             <span className="text-sm font-black text-purple-300 font-mono">{engine.trend_slope > 0 ? `+${engine.trend_slope}` : engine.trend_slope}/buổi</span>
-            <span className="text-[10px] text-emerald-400 font-bold block">{engine.trend_label}</span>
+            <span className={`text-[10px] font-bold block ${
+              engine.trend_label?.includes('Giảm') || engine.trend_label?.includes('Suy giảm') ? 'text-rose-400' :
+              engine.trend_label?.includes('Ổn định') ? 'text-slate-300' : 'text-emerald-400'
+            }`}>{engine.trend_label}</span>
 
             {activeTooltip === 'trend' && (
               <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 w-64 p-3 bg-[#161c34] border border-[#2c375e] text-slate-200 text-[11px] rounded-xl shadow-2xl z-30 text-left font-sans">
@@ -1709,7 +1723,11 @@ export default function ReportsPage() {
 
           <div className="border-l border-[#1d2644] col-span-2 sm:col-span-1">
             <span className="text-[10px] font-black uppercase text-slate-400 block">Xếp Loại Tổng Thể</span>
-            <span className="text-xs font-black text-emerald-400 flex items-center justify-center gap-1">
+            <span className={`text-xs font-black flex items-center justify-center gap-1 ${
+              engine.rating_label?.includes('NGUY CƠ') ? 'text-rose-500 font-extrabold animate-pulse' :
+              engine.rating_label?.includes('Cần Cố Gắng') ? 'text-amber-400' :
+              engine.rating_label?.includes('Tốt') ? 'text-blue-400' : 'text-emerald-400'
+            }`}>
               {engine.rating_label}
             </span>
           </div>
