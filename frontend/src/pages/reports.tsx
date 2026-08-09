@@ -744,16 +744,27 @@ export default function ReportsPage() {
     return result.length > 0 ? result : defaultData;
   }, [sessionRecords, timeView]);
 
-  // Per-session fitted value lookup aligned to sessionChartData positions
-  // Fitted arrays from backend are in the same session order as sessionChartData
+  // Per-session EMA fitted values computed client-side from sessionChartData.
+  // This is always perfectly aligned with chart point indices regardless of
+  // timeView filtering — avoids the backend fitted-array index mismatch problem.
   const fittedLookup = useMemo(() => {
-    if (!analyticsSummary) return { c1: [], c2: [], hw: [] };
-    return {
-      c1: (analyticsSummary.fitted_c1 as number[]) || [],
-      c2: (analyticsSummary.fitted_c2 as number[]) || [],
-      hw: (analyticsSummary.fitted_hw as number[]) || [],
+    const alpha = 0.5;
+    const computeEMA = (values: number[]): number[] => {
+      if (values.length === 0) return [];
+      const result: number[] = [];
+      let ema = values[0];
+      for (const v of values) {
+        ema = alpha * v + (1 - alpha) * ema;
+        result.push(trunc1Dec(Math.min(10, Math.max(0, ema))));
+      }
+      return result;
     };
-  }, [analyticsSummary]);
+    return {
+      c1: computeEMA(sessionChartData.map(d => d.check1)),
+      c2: computeEMA(sessionChartData.map(d => d.check2)),
+      hw: computeEMA(sessionChartData.map(d => d.homework)),
+    };
+  }, [sessionChartData]);
 
   // Expanded Taller Chart (Height: 750px for greater vertical tick distance)
   const chartHeight = 750;
@@ -1384,7 +1395,7 @@ export default function ReportsPage() {
                     fittedC1: fittedLookup.c1[i] ?? null,
                     fittedC2: fittedLookup.c2[i] ?? null,
                     fittedHw: fittedLookup.hw[i] ?? null,
-                    predModel: analyticsSummary?.prediction_model ?? 'Smart Predict',
+                    predModel: 'EMA',
                   })}
                   onMouseLeave={() => setHoveredPoint(null)}
                 >

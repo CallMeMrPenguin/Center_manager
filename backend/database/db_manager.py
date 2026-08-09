@@ -2319,27 +2319,26 @@ def get_class_student_predictions(class_id: int) -> Dict[int, Dict[str, float]]:
 
         academic_10 = (weighted_sum / weight_total) if weight_total > 0 else (sum(overall_session_scores) / len(overall_session_scores) if overall_session_scores else 8.0)
 
-        def calc_reg(vals_list: List[float]) -> float:
-            N = len(vals_list)
-            if N == 0:
+        _N_overall = len(overall_session_scores)
+        if _N_overall < 5:
+            _model_name = "EMA"
+        elif _N_overall < 20:
+            _model_name = "Weighted OLS"
+        else:
+            _model_name = "Holt-Winters"
+
+        def _smart_pred(vals_list: List[float]) -> float:
+            if not vals_list:
                 return trunc_1_dec(academic_10)
-            if N == 1:
-                return trunc_1_dec(vals_list[0])
-            x_vals = list(range(1, N + 1))
-            mean_x = sum(x_vals) / N
-            mean_y = sum(vals_list) / N
-            num = sum((x_vals[i] - mean_x) * (vals_list[i] - mean_y) for i in range(N))
-            den = sum((x_vals[i] - mean_x) ** 2 for i in range(N))
-            slope = num / den if den != 0 else 0
-            intercept = mean_y - (slope * mean_x)
-            raw_pred = slope * (N + 1) + intercept
-            return trunc_1_dec(max(0.0, min(10.0, raw_pred)))
+            _, pv = smart_predict(vals_list)
+            return pv
 
         predictions[sid] = {
-            "pred_c1": calc_reg(c1_list),
-            "pred_c2": calc_reg(c2_list),
-            "pred_hw": calc_reg(hw_list),
-            "predicted_next": calc_reg(overall_session_scores)
+            "pred_c1": _smart_pred(c1_list),
+            "pred_c2": _smart_pred(c2_list),
+            "pred_hw": _smart_pred(hw_list),
+            "predicted_next": _smart_pred(overall_session_scores),
+            "prediction_model": _model_name,
         }
 
     return predictions

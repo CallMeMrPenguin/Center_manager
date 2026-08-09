@@ -116,7 +116,7 @@ const CheckScoreInput = React.memo(({
         className="w-20 bg-[#161a29] border border-white/10 rounded-lg px-2.5 py-1 text-white font-extrabold text-xs focus:outline-none focus:border-indigo-500 text-center"
       />
       <div className={`text-[9px] ${badgeColor} font-bold text-center mt-0.5`} title={`Dự đoán điểm ${label}`}>
-        Dự đoán: {predVal}
+        {rec.prediction_model ? `${rec.prediction_model}: ` : 'Dự đoán: '}{predVal}
       </div>
     </div>
   );
