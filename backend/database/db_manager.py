@@ -2243,10 +2243,32 @@ def calculate_performance_analytics(session_records: List[Dict[str, Any]]) -> Di
     else:
         consistency_label = "Trồi sụt thất thường"
 
-    ema = overall_session_scores[0]
-    alpha = 0.5
-    for s in overall_session_scores[1:]:
-        ema = alpha * s + (1 - alpha) * ema
+    def _calc_ema(vals: List[float]) -> float:
+        if not vals:
+            return 0.0
+        e = vals[0]
+        alpha = 0.5
+        for v in vals[1:]:
+            e = alpha * v + (1 - alpha) * e
+        return e
+
+    ema_c1 = _calc_ema(c1_list)
+    ema_c2 = _calc_ema(c2_list)
+    ema_hw = _calc_ema(hw_list)
+
+    ema_w_sum = 0.0
+    ema_w_tot = 0.0
+    if hw_list:
+        ema_w_sum += ema_hw * 0.10
+        ema_w_tot += 0.10
+    if c1_list:
+        ema_w_sum += ema_c1 * 0.35
+        ema_w_tot += 0.35
+    if c2_list:
+        ema_w_sum += ema_c2 * 0.55
+        ema_w_tot += 0.55
+
+    ema = (ema_w_sum / ema_w_tot) if ema_w_tot > 0 else (overall_session_scores[0] if overall_session_scores else 8.0)
     ema_score = max(0.0, min(100.0, ema * 10.0))
 
     total_rec_count = len(session_records)
@@ -2290,6 +2312,9 @@ def calculate_performance_analytics(session_records: List[Dict[str, Any]]) -> Di
         "std_dev_hw": round(std_dev_hw, 2),
         "consistency_label": consistency_label,
         "ema_level": trunc_1_dec(ema),
+        "ema_c1": trunc_1_dec(ema_c1),
+        "ema_c2": trunc_1_dec(ema_c2),
+        "ema_hw": trunc_1_dec(ema_hw),
         "predicted_next": trunc_1_dec(pred_overall),
         "pred_c1": trunc_1_dec(pred_c1),
         "pred_c2": trunc_1_dec(pred_c2),

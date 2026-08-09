@@ -599,6 +599,9 @@ export default function ReportsPage() {
       std_dev_hw: 0.20,
       consistency_label: "Rất ổn định",
       ema_level: 8.6,
+      ema_c1: 8.5,
+      ema_c2: 7.2,
+      ema_hw: 9.2,
       predicted_next: 8.9,
       pred_c1: 8.8,
       pred_c2: 7.5,
@@ -1495,8 +1498,24 @@ export default function ReportsPage() {
 
             {activeTooltip === 'ema' && (
               <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 w-64 p-3 bg-[#161c34] border border-[#2c375e] text-slate-200 text-[11px] rounded-xl shadow-2xl z-30 text-left font-sans">
-                <span className="font-extrabold text-emerald-300 block mb-1">Trung Bình Trọng Số Gần Nhất (EMA):</span>
-                Ưu tiên trọng số cao hơn cho các bài học gần đây nhất, giúp đánh giá chính xác năng lực thực tế hiện tại của học sinh thay vì cào bằng với điểm số từ nhiều tháng trước.
+                <span className="font-extrabold text-emerald-300 block mb-1">Trình Độ Hiện Tại (EMA):</span>
+                <div className="space-y-1 my-1.5 font-mono text-[10px] font-bold bg-[#0d1120] p-2 rounded-lg border border-[#202948]">
+                  <div className="flex items-center justify-between text-blue-400">
+                    <span>Check 1 EMA:</span>
+                    <span>{engine.ema_c1 ?? 0}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-purple-400">
+                    <span>Check 2 EMA:</span>
+                    <span>{engine.ema_c2 ?? 0}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-emerald-400">
+                    <span>Homework EMA:</span>
+                    <span>{engine.ema_hw ?? 0}</span>
+                  </div>
+                </div>
+                <span className="text-[10px] text-slate-400 block">
+                  Trình độ tổng hợp ({engine.ema_level}) ưu tiên trọng số bài học mới nhất.
+                </span>
               </div>
             )}
           </div>
