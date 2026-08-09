@@ -3,7 +3,8 @@ import { ColumnDef } from '@tanstack/react-table';
 import { api } from '../api';
 import { 
   BarChart3, RefreshCw, Calendar, 
-  AlertCircle, Users, GraduationCap, ChevronRight, Info, RotateCcw, X, Edit2, History, Save
+  AlertCircle, Users, GraduationCap, ChevronRight, Info, RotateCcw, X, Edit2, History, Save,
+  ZoomIn, ZoomOut, Move
 } from 'lucide-react';
 import { showToast } from '../components/Toast';
 import { CustomDatePicker } from '../components/CustomDatePicker';
@@ -59,6 +60,12 @@ export default function ReportsPage() {
   // Time View Filter: 1 Tháng (Current Month), 2 Tháng, 3 Tháng, Tất Cả
   const [timeView, setTimeView] = useState<'1m' | '2m' | '3m' | 'all'>('all');
 
+  // Interactive Zoom & Pan State for Chart
+  const [zoomLevel, setZoomLevel] = useState(1.0);
+  const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+
   // Chart Responsive Full-Screen Width Observer
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const topRef = useRef<HTMLDivElement>(null);
@@ -78,6 +85,19 @@ export default function ReportsPage() {
       window.removeEventListener('resize', updateWidth);
       observer.disconnect();
     };
+  }, []);
+
+  // Non-passive wheel event listener to prevent page scrolling while zooming chart
+  useEffect(() => {
+    const el = chartContainerRef.current;
+    if (!el) return;
+    const handleWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      const delta = e.deltaY < 0 ? 0.15 : -0.15;
+      setZoomLevel(prev => Math.min(5.0, Math.max(0.5, prev + delta)));
+    };
+    el.addEventListener('wheel', handleWheel, { passive: false });
+    return () => el.removeEventListener('wheel', handleWheel);
   }, []);
 
   useEffect(() => {
@@ -791,7 +811,7 @@ export default function ReportsPage() {
   const plotAreaHeight = chartHeight - paddingTop - paddingBottom;
   const plotAreaWidth = chartWidth - paddingLeft - paddingRight;
 
-  // Dynamic Y-axis Auto-scaling
+  // Dynamic Y-axis Auto-scaling (minY allows 0.0 so low grades are fully visible)
   const yBounds = useMemo(() => {
     let minVal = 10;
     let maxVal = 0;
@@ -799,7 +819,7 @@ export default function ReportsPage() {
       minVal = Math.min(minVal, d.check1, d.check2, d.homework);
       maxVal = Math.max(maxVal, d.check1, d.check2, d.homework);
     });
-    const minY = Math.max(4.0, Math.floor(minVal - 0.5));
+    const minY = Math.max(0.0, Math.floor(minVal - 0.5));
     const maxY = Math.min(10.0, Math.ceil(maxVal + 0.5));
     
     const ticks: number[] = [];
@@ -1100,6 +1120,34 @@ export default function ReportsPage() {
               </span>
             </div>
 
+            {/* Interactive Zoom & Pan Controls */}
+            <div className="flex items-center gap-1.5 bg-[#141b32] border border-[#232d4e] p-1 rounded-xl text-xs font-extrabold shrink-0">
+              <button
+                onClick={() => setZoomLevel(prev => Math.min(5.0, prev + 0.25))}
+                className="p-1 rounded-lg hover:bg-indigo-600/30 text-slate-300 hover:text-white transition cursor-pointer"
+                title="Phóng to (Scroll Cuộn Chuột Lên)"
+              >
+                <ZoomIn size={14} />
+              </button>
+              <button
+                onClick={() => setZoomLevel(prev => Math.max(0.5, prev - 0.25))}
+                className="p-1 rounded-lg hover:bg-indigo-600/30 text-slate-300 hover:text-white transition cursor-pointer"
+                title="Thu nhỏ (Scroll Cuộn Chuột Xuống)"
+              >
+                <ZoomOut size={14} />
+              </button>
+              <span className="text-[10px] text-indigo-300 font-mono px-1">
+                {Math.round(zoomLevel * 100)}%
+              </span>
+              <button
+                onClick={() => { setZoomLevel(1.0); setPanOffset({ x: 0, y: 0 }); }}
+                className="p-1.5 rounded-lg hover:bg-rose-500/20 text-slate-400 hover:text-rose-300 transition cursor-pointer"
+                title="Đặt lại góc nhìn (Reset View)"
+              >
+                <RotateCcw size={12} />
+              </button>
+            </div>
+
             <div className="relative flex bg-[#141b32] border border-[#232d4e] p-1 rounded-xl text-xs font-extrabold select-none w-72 shrink-0">
               <div
                 className="absolute top-1 bottom-1 rounded-lg bg-indigo-600 shadow-[0_0_14px_rgba(99,102,241,0.5)] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] pointer-events-none"
@@ -1134,15 +1182,34 @@ export default function ReportsPage() {
           </div>
         </div>
 
-        {/* RESPONSIVE SVG GRAPH CONTAINER WITH TALLER HEIGHT (560px) */}
-        <div ref={chartContainerRef} className="relative w-full overflow-hidden pt-1">
+        {/* RESPONSIVE SVG GRAPH CONTAINER WITH TALLER HEIGHT (560px), ZOOM & PAN DRAG */}
+        <div
+          ref={chartContainerRef}
+          className={`relative w-full overflow-hidden pt-1 select-none ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
+          onContextMenu={(e) => e.preventDefault()}
+          onMouseDown={(e) => {
+            if (e.button === 0 || e.button === 2) {
+              setIsDragging(true);
+              setDragStart({ x: e.clientX, y: e.clientY });
+            }
+          }}
+          onMouseMove={(e) => {
+            if (!isDragging) return;
+            const dx = e.clientX - dragStart.x;
+            const dy = e.clientY - dragStart.y;
+            setPanOffset(prev => ({ x: prev.x + dx, y: prev.y + dy }));
+            setDragStart({ x: e.clientX, y: e.clientY });
+          }}
+          onMouseUp={() => setIsDragging(false)}
+          onMouseLeave={() => setIsDragging(false)}
+        >
           
           {/* HOVER TOOLTIP CARD */}
           {hoveredPoint && (
             <div 
               className="absolute z-30 pointer-events-none bg-[#161c34] border border-[#2c375e] p-3 rounded-xl shadow-2xl text-xs font-sans animate-mac-dropdown"
               style={{
-                left: `${Math.min(Math.max(hoveredPoint.x, 120), chartWidth - 140)}px`,
+                left: `${Math.min(Math.max(hoveredPoint.x * zoomLevel + panOffset.x, 120), chartWidth - 140)}px`,
                 top: '20px',
                 transform: 'translateX(-50%)'
               }}
@@ -1183,7 +1250,10 @@ export default function ReportsPage() {
             </div>
           )}
 
-          <svg viewBox={`0 0 ${chartWidth} ${chartHeight}`} className="w-full h-[750px] overflow-visible">
+          <svg 
+            viewBox={`${-panOffset.x / zoomLevel} ${-panOffset.y / zoomLevel} ${chartWidth / zoomLevel} ${chartHeight / zoomLevel}`} 
+            className="w-full h-[750px] overflow-visible"
+          >
             <defs>
               {/* Outer Glow Filters with EXPANDED BOUNDS (300% width/height to eliminate square edge clipping!) */}
               <filter id="glow-blue" x="-100%" y="-100%" width="300%" height="300%">
