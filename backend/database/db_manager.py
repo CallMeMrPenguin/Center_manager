@@ -2246,7 +2246,7 @@ def calculate_performance_analytics(session_records: List[Dict[str, Any]]) -> Di
     elif std_dev <= 2.0:
         consistency_label = "Biến động"
     else:
-        consistency_label = "Trồi sụt thất thường"
+        consistency_label = "Biến động mạnh"
 
     def _calc_ema(vals: List[float]) -> float:
         if not vals:

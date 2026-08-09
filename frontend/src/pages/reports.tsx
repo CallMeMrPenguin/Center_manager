@@ -1668,8 +1668,9 @@ export default function ReportsPage() {
               engine.std_dev < 0.5 ? 'text-emerald-400' : 'text-cyan-400'
             }`}>σ = {engine.std_dev}</span>
             <span className={`text-[10px] font-semibold block ${
-              engine.consistency_label?.includes('Trồi sụt') ? 'text-rose-400 font-bold' :
-              engine.consistency_label?.includes('Biến động') ? 'text-amber-400' : 'text-slate-400'
+              engine.consistency_label?.includes('mạnh') ? 'text-rose-400 font-extrabold' :
+              engine.consistency_label?.includes('Biến động') ? 'text-amber-400 font-bold' :
+              engine.consistency_label?.includes('Rất ổn định') ? 'text-emerald-400 font-bold' : 'text-slate-400'
             }`}>{engine.consistency_label}</span>
 
             {activeTooltip === 'sd' && (
