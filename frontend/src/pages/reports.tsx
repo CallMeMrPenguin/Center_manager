@@ -811,35 +811,27 @@ export default function ReportsPage() {
   const plotAreaHeight = chartHeight - paddingTop - paddingBottom;
   const plotAreaWidth = chartWidth - paddingLeft - paddingRight;
 
-  // Dynamic Y-axis Auto-scaling (minY allows 0.0 so low grades are fully visible)
+  // Dynamic Y-axis Auto-scaling (ticks 0.0 to 10.0)
   const yBounds = useMemo(() => {
-    let minVal = 10;
-    let maxVal = 0;
-    sessionChartData.forEach(d => {
-      minVal = Math.min(minVal, d.check1, d.check2, d.homework);
-      maxVal = Math.max(maxVal, d.check1, d.check2, d.homework);
-    });
-    const minY = Math.max(0.0, Math.floor(minVal - 0.5));
-    const maxY = Math.min(10.0, Math.ceil(maxVal + 0.5));
-    
     const ticks: number[] = [];
-    const step = 1.0;
-    for (let v = minY; v <= maxY; v += step) {
+    for (let v = 0.0; v <= 10.0; v += 1.0) {
       ticks.push(Number(v.toFixed(1)));
     }
-    return { minY, maxY, ticks };
-  }, [sessionChartData]);
+    return { minY: 0.0, maxY: 10.0, ticks };
+  }, []);
 
-  const getSvgY = (val: number) => {
+  const getSvgY = useCallback((val: number) => {
     const ratio = (val - yBounds.minY) / (yBounds.maxY - yBounds.minY || 1);
-    return paddingTop + (1 - ratio) * plotAreaHeight;
-  };
+    const rawY = paddingTop + (1 - ratio) * plotAreaHeight;
+    return (rawY - paddingTop) * zoomLevel + paddingTop + panOffset.y;
+  }, [zoomLevel, panOffset.y, yBounds, plotAreaHeight, paddingTop]);
 
-  const getSvgX = (index: number, total: number) => {
-    if (total <= 1) return paddingLeft + plotAreaWidth / 2;
+  const getSvgX = useCallback((index: number, total: number) => {
+    if (total <= 1) return paddingLeft + (plotAreaWidth / 2) * zoomLevel + panOffset.x;
     const step = plotAreaWidth / (total - 1);
-    return paddingLeft + index * step;
-  };
+    const rawX = paddingLeft + index * step;
+    return (rawX - paddingLeft) * zoomLevel + paddingLeft + panOffset.x;
+  }, [zoomLevel, panOffset.x, plotAreaWidth, paddingLeft]);
 
   // Bezier Curve generator
   const makeBezierPath = (key: 'check1' | 'check2' | 'homework') => {
@@ -1209,7 +1201,7 @@ export default function ReportsPage() {
             <div 
               className="absolute z-30 pointer-events-none bg-[#161c34] border border-[#2c375e] p-3 rounded-xl shadow-2xl text-xs font-sans animate-mac-dropdown"
               style={{
-                left: `${Math.min(Math.max(hoveredPoint.x * zoomLevel + panOffset.x, 120), chartWidth - 140)}px`,
+                left: `${Math.min(Math.max(hoveredPoint.x, 120), chartWidth - 140)}px`,
                 top: '20px',
                 transform: 'translateX(-50%)'
               }}
@@ -1305,9 +1297,10 @@ export default function ReportsPage() {
               </linearGradient>
             </defs>
 
-            {/* FIXED Y-AXIS GRID LINES & LABELS (STAY FIXED ON THE LEFT) */}
+            {/* DYNAMIC Y-AXIS GRID LINES & TICK LABELS (VALUES & LINES MOVE DYNAMICALLY, LABELS PINNED ON LEFT) */}
             {yBounds.ticks.map(val => {
               const y = getSvgY(val);
+              if (y < paddingTop - 12 || y > chartHeight - paddingBottom + 12) return null;
               return (
                 <g key={val}>
                   <line 
@@ -1327,24 +1320,25 @@ export default function ReportsPage() {
             })}
 
             {/* Benchmark Dashed Line (7.5) */}
-            <line 
-              x1={paddingLeft} 
-              y1={getSvgY(7.5)} 
-              x2={chartWidth - paddingRight} 
-              y2={getSvgY(7.5)} 
-              stroke="#94a3b8" 
-              strokeWidth="1.5"
-              strokeDasharray="5 5"
-              opacity="0.4"
-            />
+            {getSvgY(7.5) >= paddingTop - 10 && getSvgY(7.5) <= chartHeight - paddingBottom + 10 && (
+              <line 
+                x1={paddingLeft} 
+                y1={getSvgY(7.5)} 
+                x2={chartWidth - paddingRight} 
+                y2={getSvgY(7.5)} 
+                stroke="#94a3b8" 
+                strokeWidth="1.5"
+                strokeDasharray="5 5"
+                opacity="0.4"
+              />
+            )}
 
-            {/* CLIPPED INTERACTIVE PLOT AREA (ZOOMS & PANS FREELY INSIDE PLOT BOUNDS) */}
+            {/* CLIPPED INTERACTIVE PLOT AREA (CURVES & DATA POINTS DYNAMICALLY SCALE & TRANSLATE) */}
             <g clipPath="url(#chart-plot-clip)">
-              <g transform={`translate(${panOffset.x}, ${panOffset.y}) scale(${zoomLevel})`}>
-                {/* GRADIENT AREA FILLS UNDER LINES */}
-                <path d={makeAreaPath('check1')} fill="url(#area-gradient-blue)" />
-                <path d={makeAreaPath('check2')} fill="url(#area-gradient-purple)" />
-                <path d={makeAreaPath('homework')} fill="url(#area-gradient-emerald)" />
+              {/* GRADIENT AREA FILLS UNDER LINES */}
+              <path d={makeAreaPath('check1')} fill="url(#area-gradient-blue)" />
+              <path d={makeAreaPath('check2')} fill="url(#area-gradient-purple)" />
+              <path d={makeAreaPath('homework')} fill="url(#area-gradient-emerald)" />
 
                 {/* SMOOTH BEZIER LINES */}
                 <path 
@@ -1528,17 +1522,15 @@ export default function ReportsPage() {
                   );
                 })}
               </g>
-            </g>
 
-            {/* FIXED X-AXIS SESSION DATE LABELS (STAY PINNED AT BOTTOM) */}
+            {/* DYNAMIC X-AXIS SESSION DATE LABELS (DATES MOVE WITH DRAG/ZOOM, LABELS PINNED AT BOTTOM) */}
             {sessionChartData.map((d, i) => {
-              const origX = getSvgX(i, sessionChartData.length);
-              const transX = origX * zoomLevel + panOffset.x;
-              if (transX < paddingLeft - 20 || transX > chartWidth - paddingRight + 20) return null;
+              const x = getSvgX(i, sessionChartData.length);
+              if (x < paddingLeft - 20 || x > chartWidth - paddingRight + 20) return null;
               return (
                 <text 
                   key={i}
-                  x={transX} 
+                  x={x} 
                   y={chartHeight - 12} 
                   fill={hoveredPoint?.index === i ? "#ffffff" : "#94a3b8"} 
                   fontSize="11" 
