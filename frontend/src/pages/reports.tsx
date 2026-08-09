@@ -812,25 +812,25 @@ export default function ReportsPage() {
   // Expanded Taller Chart (Height: 750px for greater vertical tick distance)
   const chartHeight = 750;
   const chartWidth = Math.max(containerWidth, 600);
-  const paddingLeft = 45;
-  const paddingRight = 75;
-  const paddingTop = 35;
+  const paddingLeft = 50;
+  const paddingRight = 130;
+  const paddingTop = 40;
   const paddingBottom = 50;
   const plotAreaHeight = chartHeight - paddingTop - paddingBottom;
   const plotAreaWidth = chartWidth - paddingLeft - paddingRight;
 
-  // Clamp panOffset so first data point is strictly anchored to Y-axis (panOffset.x <= 0)
-  // and no empty gap/void is created on either side during zoom or drag.
+  // Clamp panOffset so first data point is anchored with 30px inner padding from Y-axis,
+  // and vertical dragging is capped to ±60px so graph cannot be lost vertically.
   const clampPanOffset = useCallback((x: number, y: number, currentZoom: number) => {
     const contentWidth = plotAreaWidth * currentZoom;
     const maxDragLeft = Math.max(0, contentWidth - plotAreaWidth);
     const clampedX = Math.min(0, Math.max(-maxDragLeft, x));
 
-    const maxDragY = plotAreaHeight * 1.5 * currentZoom;
+    const maxDragY = 60 * currentZoom;
     const clampedY = Math.min(maxDragY, Math.max(-maxDragY, y));
 
     return { x: clampedX, y: clampedY };
-  }, [plotAreaWidth, plotAreaHeight]);
+  }, [plotAreaWidth]);
 
   // Dynamic Y-axis Auto-scaling (ticks 0.0 to 10.0)
   const yBounds = useMemo(() => {
@@ -848,9 +848,12 @@ export default function ReportsPage() {
   }, [zoomLevel, panOffset.y, yBounds, plotAreaHeight, paddingTop]);
 
   const getSvgX = useCallback((index: number, total: number) => {
-    if (total <= 1) return paddingLeft + (plotAreaWidth / 2) * zoomLevel + panOffset.x;
-    const step = plotAreaWidth / (total - 1);
-    const rawX = paddingLeft + index * step;
+    const innerMarginLeft = 30;
+    const innerMarginRight = 60;
+    const usableWidth = plotAreaWidth - innerMarginLeft - innerMarginRight;
+    if (total <= 1) return paddingLeft + innerMarginLeft + (usableWidth / 2) * zoomLevel + panOffset.x;
+    const step = usableWidth / (total - 1);
+    const rawX = paddingLeft + innerMarginLeft + index * step;
     return (rawX - paddingLeft) * zoomLevel + paddingLeft + panOffset.x;
   }, [zoomLevel, panOffset.x, plotAreaWidth, paddingLeft]);
 
@@ -1401,90 +1404,98 @@ export default function ReportsPage() {
                 />
 
                 {/* FORECAST DASHED CONNECTION LINES & FORECAST POINTS */}
-                {sessionChartData.length > 0 && (
-                  <>
-                    <line
-                      x1={getSvgX(sessionChartData.length - 1, sessionChartData.length)}
-                      y1={getSvgY(sessionChartData[sessionChartData.length - 1].check1)}
-                      x2={chartWidth - paddingRight + 30}
-                      y2={getSvgY(engine.pred_c1)}
-                      stroke="#3b82f6"
-                      strokeWidth="2.5"
-                      strokeDasharray="4 4"
-                    />
-                    <circle 
-                      cx={chartWidth - paddingRight + 30} 
-                      cy={getSvgY(engine.pred_c1)} 
-                      r="6" 
-                      fill="#3b82f6" 
-                      stroke="#ffffff" 
-                      strokeWidth="2" 
-                    />
-                    <text 
-                      x={chartWidth - paddingRight + 38} 
-                      y={getSvgY(engine.pred_c1) + 4} 
-                      fill="#60a5fa" 
-                      fontSize="11" 
-                      fontWeight="900"
-                    >
-                      {format1Dec(engine.pred_c1)}
-                    </text>
+                {sessionChartData.length > 0 && (() => {
+                  const lastIdx = sessionChartData.length - 1;
+                  const lastX = getSvgX(lastIdx, sessionChartData.length);
+                  const forecastX = lastX + 40 * zoomLevel;
+                  return (
+                    <>
+                      {/* 1. Check 1 Forecast Line & Point */}
+                      <line
+                        x1={lastX}
+                        y1={getSvgY(sessionChartData[lastIdx].check1)}
+                        x2={forecastX}
+                        y2={getSvgY(engine.pred_c1)}
+                        stroke="#3b82f6"
+                        strokeWidth="2.5"
+                        strokeDasharray="4 4"
+                      />
+                      <circle 
+                        cx={forecastX} 
+                        cy={getSvgY(engine.pred_c1)} 
+                        r="6" 
+                        fill="#3b82f6" 
+                        stroke="#ffffff" 
+                        strokeWidth="2" 
+                      />
+                      <text 
+                        x={forecastX + 8} 
+                        y={getSvgY(engine.pred_c1) + 4} 
+                        fill="#60a5fa" 
+                        fontSize="11" 
+                        fontWeight="900"
+                      >
+                        {format1Dec(engine.pred_c1)}
+                      </text>
 
-                    <line
-                      x1={getSvgX(sessionChartData.length - 1, sessionChartData.length)}
-                      y1={getSvgY(sessionChartData[sessionChartData.length - 1].check2)}
-                      x2={chartWidth - paddingRight + 30}
-                      y2={getSvgY(engine.pred_c2)}
-                      stroke="#a855f7"
-                      strokeWidth="2.5"
-                      strokeDasharray="4 4"
-                    />
-                    <circle 
-                      cx={chartWidth - paddingRight + 30} 
-                      cy={getSvgY(engine.pred_c2)} 
-                      r="6" 
-                      fill="#a855f7" 
-                      stroke="#ffffff" 
-                      strokeWidth="2" 
-                    />
-                    <text 
-                      x={chartWidth - paddingRight + 38} 
-                      y={getSvgY(engine.pred_c2) + 4} 
-                      fill="#c084fc" 
-                      fontSize="11" 
-                      fontWeight="900"
-                    >
-                      {format1Dec(engine.pred_c2)}
-                    </text>
+                      {/* 2. Check 2 Forecast Line & Point */}
+                      <line
+                        x1={lastX}
+                        y1={getSvgY(sessionChartData[lastIdx].check2)}
+                        x2={forecastX}
+                        y2={getSvgY(engine.pred_c2)}
+                        stroke="#a855f7"
+                        strokeWidth="2.5"
+                        strokeDasharray="4 4"
+                      />
+                      <circle 
+                        cx={forecastX} 
+                        cy={getSvgY(engine.pred_c2)} 
+                        r="6" 
+                        fill="#a855f7" 
+                        stroke="#ffffff" 
+                        strokeWidth="2" 
+                      />
+                      <text 
+                        x={forecastX + 8} 
+                        y={getSvgY(engine.pred_c2) + 4} 
+                        fill="#c084fc" 
+                        fontSize="11" 
+                        fontWeight="900"
+                      >
+                        {format1Dec(engine.pred_c2)}
+                      </text>
 
-                    <line
-                      x1={getSvgX(sessionChartData.length - 1, sessionChartData.length)}
-                      y1={getSvgY(sessionChartData[sessionChartData.length - 1].homework)}
-                      x2={chartWidth - paddingRight + 30}
-                      y2={getSvgY(engine.pred_hw)}
-                      stroke="#10b981"
-                      strokeWidth="2.5"
-                      strokeDasharray="4 4"
-                    />
-                    <circle 
-                      cx={chartWidth - paddingRight + 30} 
-                      cy={getSvgY(engine.pred_hw)} 
-                      r="6" 
-                      fill="#10b981" 
-                      stroke="#ffffff" 
-                      strokeWidth="2" 
-                    />
-                    <text 
-                      x={chartWidth - paddingRight + 38} 
-                      y={getSvgY(engine.pred_hw) + 4} 
-                      fill="#34d399" 
-                      fontSize="11" 
-                      fontWeight="900"
-                    >
-                      {format1Dec(engine.pred_hw)}
-                    </text>
-                  </>
-                )}
+                      {/* 3. Homework Forecast Line & Point */}
+                      <line
+                        x1={lastX}
+                        y1={getSvgY(sessionChartData[lastIdx].homework)}
+                        x2={forecastX}
+                        y2={getSvgY(engine.pred_hw)}
+                        stroke="#10b981"
+                        strokeWidth="2.5"
+                        strokeDasharray="4 4"
+                      />
+                      <circle 
+                        cx={forecastX} 
+                        cy={getSvgY(engine.pred_hw)} 
+                        r="6" 
+                        fill="#10b981" 
+                        stroke="#ffffff" 
+                        strokeWidth="2" 
+                      />
+                      <text 
+                        x={forecastX + 8} 
+                        y={getSvgY(engine.pred_hw) + 4} 
+                        fill="#34d399" 
+                        fontSize="11" 
+                        fontWeight="900"
+                      >
+                        {format1Dec(engine.pred_hw)}
+                      </text>
+                    </>
+                  );
+                })()}
 
                 {/* INTERACTIVE HOVER OVERLAY COLUMNS & CIRCULAR DATA POINTS */}
                 {sessionChartData.map((d, i) => {
