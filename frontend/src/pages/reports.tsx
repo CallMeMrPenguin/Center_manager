@@ -60,7 +60,7 @@ export default function ReportsPage() {
   // Time View Filter: 1 Tháng (Current Month), 2 Tháng, 3 Tháng, Tất Cả
   const [timeView, setTimeView] = useState<'1m' | '2m' | '3m' | 'all'>('all');
 
-  // Interactive Zoom & Pan State for Chart
+  // Interactive Zoom & Pan State for Chart (minZoom = 1.0)
   const [zoomLevel, setZoomLevel] = useState(1.0);
   const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
@@ -93,12 +93,20 @@ export default function ReportsPage() {
     if (!el) return;
     const handleWheel = (e: WheelEvent) => {
       e.preventDefault();
-      const delta = e.deltaY < 0 ? 0.15 : -0.15;
-      setZoomLevel(prev => Math.min(5.0, Math.max(0.5, prev + delta)));
+      const delta = e.deltaY < 0 ? 0.2 : -0.2;
+      setZoomLevel(prev => {
+        const next = Math.min(5.0, Math.max(1.0, prev + delta));
+        setPanOffset(p => {
+          const contentWidth = containerWidth * next;
+          const maxDragLeft = Math.max(0, contentWidth - containerWidth);
+          return { x: Math.min(0, Math.max(-maxDragLeft, p.x)), y: p.y };
+        });
+        return next;
+      });
     };
     el.addEventListener('wheel', handleWheel, { passive: false });
     return () => el.removeEventListener('wheel', handleWheel);
-  }, []);
+  }, [containerWidth]);
 
   useEffect(() => {
     loadClassesAndStudents();
@@ -811,6 +819,19 @@ export default function ReportsPage() {
   const plotAreaHeight = chartHeight - paddingTop - paddingBottom;
   const plotAreaWidth = chartWidth - paddingLeft - paddingRight;
 
+  // Clamp panOffset so first data point is strictly anchored to Y-axis (panOffset.x <= 0)
+  // and no empty gap/void is created on either side during zoom or drag.
+  const clampPanOffset = useCallback((x: number, y: number, currentZoom: number) => {
+    const contentWidth = plotAreaWidth * currentZoom;
+    const maxDragLeft = Math.max(0, contentWidth - plotAreaWidth);
+    const clampedX = Math.min(0, Math.max(-maxDragLeft, x));
+
+    const maxDragY = plotAreaHeight * 1.5 * currentZoom;
+    const clampedY = Math.min(maxDragY, Math.max(-maxDragY, y));
+
+    return { x: clampedX, y: clampedY };
+  }, [plotAreaWidth, plotAreaHeight]);
+
   // Dynamic Y-axis Auto-scaling (ticks 0.0 to 10.0)
   const yBounds = useMemo(() => {
     const ticks: number[] = [];
@@ -1115,14 +1136,22 @@ export default function ReportsPage() {
             {/* Interactive Zoom & Pan Controls */}
             <div className="flex items-center gap-1.5 bg-[#141b32] border border-[#232d4e] p-1 rounded-xl text-xs font-extrabold shrink-0">
               <button
-                onClick={() => setZoomLevel(prev => Math.min(5.0, prev + 0.25))}
+                onClick={() => setZoomLevel(prev => {
+                  const next = Math.min(5.0, prev + 0.25);
+                  setPanOffset(p => clampPanOffset(p.x, p.y, next));
+                  return next;
+                })}
                 className="p-1 rounded-lg hover:bg-indigo-600/30 text-slate-300 hover:text-white transition cursor-pointer"
                 title="Phóng to (Scroll Cuộn Chuột Lên)"
               >
                 <ZoomIn size={14} />
               </button>
               <button
-                onClick={() => setZoomLevel(prev => Math.max(0.5, prev - 0.25))}
+                onClick={() => setZoomLevel(prev => {
+                  const next = Math.max(1.0, prev - 0.25);
+                  setPanOffset(p => clampPanOffset(p.x, p.y, next));
+                  return next;
+                })}
                 className="p-1 rounded-lg hover:bg-indigo-600/30 text-slate-300 hover:text-white transition cursor-pointer"
                 title="Thu nhỏ (Scroll Cuộn Chuột Xuống)"
               >
@@ -1189,7 +1218,7 @@ export default function ReportsPage() {
             if (!isDragging) return;
             const dx = e.clientX - dragStart.x;
             const dy = e.clientY - dragStart.y;
-            setPanOffset(prev => ({ x: prev.x + dx, y: prev.y + dy }));
+            setPanOffset(prev => clampPanOffset(prev.x + dx, prev.y + dy, zoomLevel));
             setDragStart({ x: e.clientX, y: e.clientY });
           }}
           onMouseUp={() => setIsDragging(false)}
