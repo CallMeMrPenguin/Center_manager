@@ -2044,27 +2044,84 @@ def calculate_performance_analytics(session_records: List[Dict[str, Any]]) -> Di
 
     academic_score = academic_10 * 10.0
 
-    def calc_regression(vals_list: List[float]) -> Tuple[float, float]:
-        N = len(vals_list)
-        if N < 2:
-            return 0.0, trunc_1_dec(vals_list[0]) if N == 1 else (0.0, 0.0)
-        x_vals = list(range(1, N + 1))
-        mean_x = sum(x_vals) / N
-        valid_vals = vals_list
-        mean_y = sum(valid_vals) / N
+    # ── Tiered Prediction Engine ──────────────────────────────────────────────
+    # Automatically selects the best model based on available data volume:
+    #   < 5  sessions → EMA (Exponential Moving Average)
+    #   5–19 sessions → Weighted OLS (recent sessions weighted more)
+    #  20+  sessions → Holt's Double Exponential Smoothing (statsmodels)
+    # All variants return the same (slope, predicted_next) tuple.
 
-        num = sum((x_vals[i] - mean_x) * (valid_vals[i] - mean_y) for i in range(N))
-        den = sum((x_vals[i] - mean_x) ** 2 for i in range(N))
-        slope = num / den if den != 0 else 0
-        intercept = mean_y - (slope * mean_x)
+    def _ema_predict(vals: List[float]) -> Tuple[float, float]:
+        """EMA predictor for very short histories (< 5 data points)."""
+        N = len(vals)
+        if N == 0:
+            return 0.0, 0.0
+        if N == 1:
+            return 0.0, trunc_1_dec(vals[0])
+        alpha = 0.5
+        ema = vals[0]
+        for v in vals[1:]:
+            ema = alpha * v + (1 - alpha) * ema
+        # Simple slope from first to last value for trend label purposes
+        slope = (vals[-1] - vals[0]) / (N - 1)
+        predicted = max(0.0, min(10.0, ema))
+        return slope, trunc_1_dec(predicted)
+
+    def _weighted_ols_predict(vals: List[float]) -> Tuple[float, float]:
+        """Weighted OLS for moderate histories (5–19 data points).
+        Recent sessions receive linearly higher weights so recent
+        performance influences the prediction more than old sessions."""
+        N = len(vals)
+        if N < 2:
+            return _ema_predict(vals)
+        x_vals = list(range(1, N + 1))
+        weights = list(range(1, N + 1))  # session 1 → weight 1, latest → weight N
+        w_total = float(sum(weights))
+        mean_x = sum(w * x for w, x in zip(weights, x_vals)) / w_total
+        mean_y = sum(w * y for w, y in zip(weights, vals)) / w_total
+        num = sum(weights[i] * (x_vals[i] - mean_x) * (vals[i] - mean_y) for i in range(N))
+        den = sum(weights[i] * (x_vals[i] - mean_x) ** 2 for i in range(N))
+        slope = num / den if den != 0 else 0.0
+        intercept = mean_y - slope * mean_x
         raw_pred = slope * (N + 1) + intercept
         predicted = max(0.0, min(10.0, raw_pred))
         return slope, trunc_1_dec(predicted)
 
-    slope_overall, pred_overall = calc_regression(overall_session_scores)
-    slope_c1, pred_c1 = calc_regression(c1_list) if c1_list else (0.0, trunc_1_dec(academic_10))
-    slope_c2, pred_c2 = calc_regression(c2_list) if c2_list else (0.0, trunc_1_dec(academic_10))
-    slope_hw, pred_hw = calc_regression(hw_list) if hw_list else (0.0, trunc_1_dec(academic_10))
+    def _holtwinters_predict(vals: List[float]) -> Tuple[float, float]:
+        """Holt's Double Exponential Smoothing for rich histories (20+ data points).
+        Captures both current performance level and trend direction.
+        Falls back to weighted OLS if statsmodels is unavailable or errors."""
+        try:
+            from statsmodels.tsa.holtwinters import ExponentialSmoothing
+            # Additive trend only — no seasonal component (avoids needing 2×period points)
+            model = ExponentialSmoothing(vals, trend="add", seasonal=None)
+            fitted = model.fit(optimized=True, disp=False)
+            predicted_val = float(fitted.forecast(1).iloc[0])
+            predicted = max(0.0, min(10.0, predicted_val))
+            # Use the model's final smoothed trend component as the slope estimate
+            trend_series = fitted.trend
+            if trend_series is not None and len(trend_series) > 0:
+                slope = float(trend_series.iloc[-1])
+            else:
+                slope = (vals[-1] - vals[0]) / (len(vals) - 1)
+            return slope, trunc_1_dec(predicted)
+        except Exception:
+            return _weighted_ols_predict(vals)
+
+    def smart_predict(vals: List[float]) -> Tuple[float, float]:
+        """Dispatch to the appropriate prediction model based on data volume."""
+        N = len(vals)
+        if N < 5:
+            return _ema_predict(vals)
+        elif N < 20:
+            return _weighted_ols_predict(vals)
+        else:
+            return _holtwinters_predict(vals)
+
+    slope_overall, pred_overall = smart_predict(overall_session_scores)
+    slope_c1, pred_c1 = smart_predict(c1_list) if c1_list else (0.0, trunc_1_dec(academic_10))
+    slope_c2, pred_c2 = smart_predict(c2_list) if c2_list else (0.0, trunc_1_dec(academic_10))
+    slope_hw, pred_hw = smart_predict(hw_list) if hw_list else (0.0, trunc_1_dec(academic_10))
 
     if slope_overall > 0.3:
         trend_label = "Tăng trưởng mạnh ↗"
