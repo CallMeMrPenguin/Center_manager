@@ -384,23 +384,101 @@ def api_system_check():
 
 @router.post("/api/test/export-excel-csv")
 def api_export_test_excel_csv(req: ExportTestExcelCsvRequest):
+    import copy
+    import random
+    import re
     files_dir = get_setting("files_dir")
+    if not files_dir or not os.path.exists(files_dir):
+        files_dir = os.path.join(BASE_DIR, "workspace_files")
+    os.makedirs(files_dir, exist_ok=True)
+
     filename = f"exported_test_{int(time.time())}.{req.format}"
     filepath = os.path.join(files_dir, filename)
-    if req.format == "csv":
+
+    exercises = copy.deepcopy(req.exercises or [])
+
+    if req.mix_options:
+        def _mix_item(item: Dict[str, Any]):
+            opts = item.get("o", [])
+            raw_ans = str(item.get("a", "")).strip()
+            if opts and len(opts) > 1 and raw_ans:
+                match = re.search(r'\b([A-Ea-e])\b', raw_ans)
+                if match:
+                    correct_letter = match.group(1).upper()
+                    ans_idx = ord(correct_letter) - ord("A")
+                    if 0 <= ans_idx < len(opts):
+                        correct_val = opts[ans_idx]
+                        shuffled_opts = list(opts)
+                        random.shuffle(shuffled_opts)
+                        new_ans_idx = shuffled_opts.index(correct_val)
+                        item["o"] = shuffled_opts
+                        item["a"] = chr(ord("A") + new_ans_idx)
+
+        for ex in exercises:
+            _mix_item(ex)
+            for sub_key in ["k", "questions"]:
+                sub_list = ex.get(sub_key)
+                if isinstance(sub_list, list):
+                    for sub in sub_list:
+                        if isinstance(sub, dict):
+                            _mix_item(sub)
+
+    # Flatten questions list
+    flattened_rows = []
+    idx = 1
+    for ex in exercises:
+        ex_title = ex.get("title") or ex.get("instruction") or ex.get("x") or ex.get("t", "")
+        ex_type = ex.get("t", "")
+
+        sub_items = []
+        for sub_key in ["k", "questions"]:
+            if isinstance(ex.get(sub_key), list) and len(ex[sub_key]) > 0:
+                sub_items = ex[sub_key]
+                break
+
+        if sub_items:
+            for sub in sub_items:
+                if not isinstance(sub, dict):
+                    continue
+                opts = sub.get("o") or []
+                o1 = opts[0] if len(opts) > 0 else ""
+                o2 = opts[1] if len(opts) > 1 else ""
+                o3 = opts[2] if len(opts) > 2 else ""
+                o4 = opts[3] if len(opts) > 3 else ""
+                q_text = sub.get("x", "")
+                q_ans = sub.get("a", "")
+                flattened_rows.append([idx, ex_title, q_text, ex_type, o1, o2, o3, o4, q_ans])
+                idx += 1
+        else:
+            opts = ex.get("o") or []
+            o1 = opts[0] if len(opts) > 0 else ""
+            o2 = opts[1] if len(opts) > 1 else ""
+            o3 = opts[2] if len(opts) > 2 else ""
+            o4 = opts[3] if len(opts) > 3 else ""
+            q_text = ex.get("x", "")
+            q_ans = ex.get("a", "")
+            flattened_rows.append([idx, ex_title, q_text, ex_type, o1, o2, o3, o4, q_ans])
+            idx += 1
+
+    headers = ["STT", "Dạng bài", "Nội dung câu hỏi", "Loại câu", "Phương án 1", "Phương án 2", "Phương án 3", "Phương án 4", "Đáp án"]
+
+    if req.format == "xlsx":
+        try:
+            import pandas as pd
+            df = pd.DataFrame(flattened_rows, columns=headers)
+            df.to_excel(filepath, index=False)
+        except Exception:
+            # Fallback to CSV if pandas/openpyxl is unavailable
+            with open(filepath, "w", newline="", encoding="utf-8-sig") as f:
+                writer = csv.writer(f)
+                writer.writerow(headers)
+                writer.writerows(flattened_rows)
+    else:
         with open(filepath, "w", newline="", encoding="utf-8-sig") as f:
             writer = csv.writer(f)
-            writer.writerow(["STT", "Dạng bài", "Nội dung câu hỏi", "Loại câu", "Phương án 1", "Phương án 2", "Phương án 3", "Phương án 4", "Đáp án"])
-            idx = 1
-            for ex in req.exercises:
-                for q in ex.get("questions", []):
-                    opts = q.get("o") or []
-                    o1 = opts[0] if len(opts) > 0 else ""
-                    o2 = opts[1] if len(opts) > 1 else ""
-                    o3 = opts[2] if len(opts) > 2 else ""
-                    o4 = opts[3] if len(opts) > 3 else ""
-                    writer.writerow([idx, ex.get("title", ""), q.get("x", ""), q.get("t", ""), o1, o2, o3, o4, q.get("a", "")])
-                    idx += 1
+            writer.writerow(headers)
+            writer.writerows(flattened_rows)
+
     return {"success": True, "filename": filename, "filepath": filepath}
 
 @router.post("/api/system/select-directory")

@@ -4,6 +4,7 @@ import json
 import math
 import copy
 import time
+import random
 from typing import List, Dict, Any, Optional
 
 # pywin32 imports
@@ -1550,18 +1551,31 @@ class WordDocumentCompiler:
                 ex["q"] = idx
 
             if mix_options:
+                import re
+                def _mix_item(item: Dict[str, Any]):
+                    opts = item.get("o", [])
+                    raw_ans = str(item.get("a", "")).strip()
+                    if opts and len(opts) > 1 and raw_ans:
+                        match = re.search(r'\b([A-Ea-e])\b', raw_ans)
+                        if match:
+                            correct_letter = match.group(1).upper()
+                            ans_idx = ord(correct_letter) - ord("A")
+                            if 0 <= ans_idx < len(opts):
+                                correct_val = opts[ans_idx]
+                                shuffled_opts = list(opts)
+                                random.shuffle(shuffled_opts)
+                                new_ans_idx = shuffled_opts.index(correct_val)
+                                item["o"] = shuffled_opts
+                                item["a"] = chr(ord("A") + new_ans_idx)
+
                 for ex in ex_copy:
-                    opts = ex.get("o", [])
-                    correct_ans = ex.get("a", "")
-                    if opts and len(opts) > 1 and correct_ans in ["A", "B", "C", "D"]:
-                        ans_idx = ord(correct_ans) - ord("A")
-                        if 0 <= ans_idx < len(opts):
-                            correct_val = opts[ans_idx]
-                            shuffled_opts = list(opts)
-                            random.shuffle(shuffled_opts)
-                            new_ans_idx = shuffled_opts.index(correct_val)
-                            ex["o"] = shuffled_opts
-                            ex["a"] = chr(ord("A") + new_ans_idx)
+                    _mix_item(ex)
+                    for sub_key in ["k", "questions"]:
+                        sub_list = ex.get(sub_key)
+                        if isinstance(sub_list, list):
+                            for sub in sub_list:
+                                if isinstance(sub, dict):
+                                    _mix_item(sub)
 
             self.compile(ex_copy, filepath, grade=grade, unit=unit, version_code=version_code, include_answer_key=True)
             
