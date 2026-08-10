@@ -49,12 +49,26 @@ DEFAULT_LAYOUT_SETTINGS = {
 }
 
 def get_file_path(files_dir: str, filename: str) -> str:
+    if not files_dir or not os.path.exists(files_dir):
+        files_dir = os.path.join(BASE_DIR, "workspace_files")
+    os.makedirs(files_dir, exist_ok=True)
+
     if filename.lower().endswith(".json") or filename.startswith("json/"):
         json_dir = os.path.join(files_dir, "json")
         os.makedirs(json_dir, exist_ok=True)
         clean_name = filename[5:] if filename.startswith("json/") else filename
         return os.path.join(json_dir, clean_name)
-    return os.path.join(files_dir, filename)
+
+    direct_path = os.path.join(files_dir, filename)
+    if os.path.exists(direct_path):
+        return direct_path
+
+    fname = os.path.basename(filename)
+    for root, _, files in os.walk(files_dir):
+        if fname in files:
+            return os.path.join(root, fname)
+
+    return direct_path
 
 def load_profiles() -> Dict[str, Any]:
     if os.path.exists(CONFIG_PROFILES_FILE):
@@ -553,15 +567,20 @@ def api_save_exercise_config(config: Dict[str, Any]):
 @router.post("/api/utils/open-file")
 def api_open_file(req: OpenFileRequest):
     files_dir = get_setting("files_dir")
+    if not files_dir or not os.path.exists(files_dir):
+        files_dir = os.path.join(BASE_DIR, "workspace_files")
     filepath = get_file_path(files_dir, req.filename)
     if os.path.exists(filepath):
         os.startfile(filepath)
         return {"success": True}
-    raise HTTPException(status_code=404, detail="File not found")
+    raise HTTPException(status_code=404, detail=f"File '{req.filename}' not found")
 
 @router.post("/api/utils/open-folder")
 def api_open_folder():
     files_dir = get_setting("files_dir")
+    if not files_dir or not os.path.exists(files_dir):
+        files_dir = os.path.join(BASE_DIR, "workspace_files")
+    os.makedirs(files_dir, exist_ok=True)
     if os.path.exists(files_dir):
         os.startfile(files_dir)
         return {"success": True}

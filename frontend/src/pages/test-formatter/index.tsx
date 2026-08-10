@@ -351,7 +351,7 @@ export default function TestFormatter({
   
   // Test Versions & Compiled Files State
   const [numVersions, setNumVersions] = useState<number>(1);
-  const [lastCompiledFiles, setLastCompiledFiles] = useState<string[]>([]);
+  const [lastCompiledFiles, setLastCompiledFiles] = useState<any[]>([]);
   
   // Workspace files for loader selector
   const [jsonFiles, setJsonFiles] = useState<AppFile[]>([]);
@@ -561,6 +561,15 @@ export default function TestFormatter({
     }
   };
 
+  const triggerDownload = (url: string, filename: string) => {
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', filename);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   const handleCompileAndDownload = async () => {
     if (jsonError || exercisesData.length === 0) {
       showToast("Vui lòng sửa lỗi JSON trước khi biên dịch", "error");
@@ -571,9 +580,19 @@ export default function TestFormatter({
       showToast("Đang tạo file Word...", "warning");
       const res = await api.compileTest(exercisesData, layout, numVersions, mixOptions, grade, unit, saveToDocs, saveFolderId || null);
       if (res.success) {
-        const filesList = res.files || [res.filename];
+        const filesList = res.files && res.files.length > 0 ? res.files : [{ filename: res.filename, filepath: res.filepath }];
         setLastCompiledFiles(filesList);
-        showToast(`Đã tạo thành công ${filesList.length} phiên bản đề thi!`, "success");
+
+        filesList.forEach((fileItem: any, i: number) => {
+          const fname = typeof fileItem === 'string' ? fileItem : (fileItem.filename || res.filename);
+          if (fname) {
+            setTimeout(() => {
+              triggerDownload(api.downloadFileUrl(fname), fname);
+            }, i * 300);
+          }
+        });
+
+        showToast(`Đã tạo và tải xuống thành công ${filesList.length} phiên bản đề thi!`, "success");
       }
     } catch (e) {
       showToast("Lỗi biên dịch đề thi: " + e, "error");
@@ -595,9 +614,19 @@ export default function TestFormatter({
         numVersions, mixOptions, grade, unit, saveToDocs, saveFolderId || null
       );
       if (res.success) {
-        const filesList = res.files || [res.filename];
+        const filesList = res.files && res.files.length > 0 ? res.files : [{ filename: res.filename, filepath: res.filepath }];
         setLastCompiledFiles(filesList);
-        showToast(`Đã xuất thành công ${filesList.length} phiên bản bảng tính!`, "success");
+
+        filesList.forEach((fileItem: any, i: number) => {
+          const fname = typeof fileItem === 'string' ? fileItem : (fileItem.filename || res.filename);
+          if (fname) {
+            setTimeout(() => {
+              triggerDownload(api.downloadFileUrl(fname), fname);
+            }, i * 300);
+          }
+        });
+
+        showToast(`Đã xuất và tải xuống thành công ${filesList.length} phiên bản bảng tính!`, "success");
         setShowExportModal(false);
       }
     } catch (e: any) {
@@ -895,23 +924,49 @@ export default function TestFormatter({
           
           {/* BANNER TO OPEN COMPILED FILES */}
           {lastCompiledFiles && lastCompiledFiles.length > 0 && (
-            <div className="bg-[#12182b] border-t border-indigo-500/30 px-6 py-3 flex items-center justify-between shrink-0 shadow-lg">
+            <div className="bg-[#12182b] border-t border-indigo-500/30 px-6 py-3 flex flex-wrap items-center justify-between shrink-0 shadow-lg gap-3">
               <div className="flex items-center gap-2">
                 <FileText size={15} className="text-indigo-400" />
                 <h4 className="text-xs font-bold text-white">Đã xuất bản đề thi thành công ({lastCompiledFiles.length} mã đề)!</h4>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
+                {lastCompiledFiles.map((fileItem: any, i: number) => {
+                  const fname = typeof fileItem === 'string' ? fileItem : (fileItem.filename || '');
+                  if (!fname) return null;
+                  return (
+                    <div key={i} className="flex items-center gap-1 bg-[#1a2238] border border-indigo-500/30 px-2 py-1 rounded-xl text-xs">
+                      <button
+                        onClick={() => triggerDownload(api.downloadFileUrl(fname), fname)}
+                        className="text-indigo-300 hover:text-white font-bold flex items-center gap-1 cursor-pointer text-[0.66rem]"
+                        title="Tải về file"
+                      >
+                        <Download size={11} />
+                        <span>{fname}</span>
+                      </button>
+                      <button
+                        onClick={async () => {
+                          try { await api.openLocalFile(fname); showToast(`Đang mở tệp: ${fname}`, "success"); }
+                          catch (e) { showToast("Lỗi mở file: " + e, "error"); }
+                        }}
+                        className="text-slate-400 hover:text-emerald-400 p-1 cursor-pointer"
+                        title="Mở file bằng Word"
+                      >
+                        <Eye size={11} />
+                      </button>
+                    </div>
+                  );
+                })}
                 <button
                   onClick={async () => {
                     try { await api.openWorkspaceFolder(); showToast("Đang mở thư mục chứa đề thi...", "success"); }
                     catch (e) { showToast("Lỗi mở thư mục: " + e, "error"); }
                   }}
-                  className="px-3 py-1.5 bg-[#5c36f5] hover:bg-[#7351f7] text-white font-extrabold text-[0.66rem] rounded-xl flex items-center gap-1.5 transition cursor-pointer shadow"
+                  className="px-3 py-1.5 bg-[#5c36f5] hover:bg-[#7351f7] text-white font-extrabold text-[0.66rem] rounded-xl flex items-center gap-1.5 transition cursor-pointer shadow ml-1"
                 >
                   <FolderOpen size={11} />
                   <span>MỞ THƯ MỤC CHỨA ĐỀ</span>
                 </button>
-                <button onClick={() => setLastCompiledFiles([])} className="p-1 text-slate-400 hover:text-white">
+                <button onClick={() => setLastCompiledFiles([])} className="p-1 text-slate-400 hover:text-white cursor-pointer ml-1">
                   <X size={13} />
                 </button>
               </div>
