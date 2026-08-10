@@ -333,7 +333,10 @@ export default function ClassesPage() {
     }
   }, [attendanceDate, activeSubTab]);
 
-  const applyAutoAttendanceStatus = useCallback((records: any[]) => {
+  const applyAutoAttendanceStatus = useCallback((records: any[], targetDateStr: string) => {
+    const todayStr = getLocalDateStr();
+    const isPastDate = targetDateStr < todayStr;
+
     const newRecords = records.map((rec) => {
       const c1 = rec.check_1 !== null && rec.check_1 !== undefined && rec.check_1 !== '' ? Number(rec.check_1) : null;
       const c2 = rec.check_2 !== null && rec.check_2 !== undefined && rec.check_2 !== '' ? Number(rec.check_2) : null;
@@ -344,7 +347,7 @@ export default function ClassesPage() {
       let newStatus = rec.status;
       if (hasScore) {
         newStatus = 'Có mặt';
-      } else if (!hasScore && !hasNote) {
+      } else if (isPastDate && !hasScore && !hasNote) {
         newStatus = 'Vắng mặt';
       } else if (!newStatus) {
         newStatus = 'Có mặt';
@@ -358,7 +361,7 @@ export default function ClassesPage() {
     if (!selectedClass) return;
     setSavingAttendance(true);
     try {
-      const { records: finalRecords } = applyAutoAttendanceStatus(attendanceRecords);
+      const { records: finalRecords } = applyAutoAttendanceStatus(attendanceRecords, attendanceDate);
       setAttendanceRecords(finalRecords);
       await api.saveClassAttendance(selectedClass.id, attendanceDate, finalRecords);
       showToast("Đã lưu bảng điểm danh và điểm học sinh!", "success");
