@@ -334,38 +334,29 @@ export default function ClassesPage() {
   }, [attendanceDate, activeSubTab]);
 
   const applyAutoAttendanceStatus = useCallback((records: any[]) => {
-    let convertedCount = 0;
     const newRecords = records.map((rec) => {
       const c1 = rec.check_1 !== null && rec.check_1 !== undefined && rec.check_1 !== '' ? Number(rec.check_1) : null;
       const c2 = rec.check_2 !== null && rec.check_2 !== undefined && rec.check_2 !== '' ? Number(rec.check_2) : null;
       const hw = rec.homework !== null && rec.homework !== undefined && rec.homework !== '' ? Number(rec.homework) : null;
       const hasScore = (c1 !== null && c1 > 0) || (c2 !== null && c2 > 0) || (hw !== null && hw > 0);
-      const hasNote = rec.notes && String(rec.notes).trim() !== '';
 
       let newStatus = rec.status || 'Có mặt';
-      if (hasScore) {
+      if (hasScore && newStatus === 'Vắng mặt') {
         newStatus = 'Có mặt';
-      } else if (!hasScore && !hasNote && newStatus === 'Có mặt') {
-        newStatus = 'Vắng mặt';
-        convertedCount++;
       }
       return { ...rec, status: newStatus };
     });
-    return { records: newRecords, convertedCount };
+    return { records: newRecords };
   }, []);
 
   const handleSaveAttendance = async () => {
     if (!selectedClass) return;
     setSavingAttendance(true);
     try {
-      const { records: finalRecords, convertedCount } = applyAutoAttendanceStatus(attendanceRecords);
+      const { records: finalRecords } = applyAutoAttendanceStatus(attendanceRecords);
       setAttendanceRecords(finalRecords);
       await api.saveClassAttendance(selectedClass.id, attendanceDate, finalRecords);
-      if (convertedCount > 0) {
-        showToast(`Đã lưu! Tự động chuyển ${convertedCount} học sinh không có điểm & ghi chú sang 'Vắng mặt'.`, "warning");
-      } else {
-        showToast("Đã lưu bảng điểm danh và điểm học sinh!", "success");
-      }
+      showToast("Đã lưu bảng điểm danh và điểm học sinh!", "success");
     } catch (err: any) {
       showToast("Lưu thất bại: " + err.message, "error");
     } finally {

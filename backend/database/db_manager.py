@@ -417,16 +417,16 @@ def init_db():
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_document_folders_parent_deleted ON document_folders(parent_id, is_deleted);")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_class_sessions_class_date ON class_sessions(class_id, date);")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_attendance_class_student_date ON class_attendance_grades(class_id, student_id, date);")
-    # Cleanup / migration: Set status = 'Vắng mặt' for records with 0 grades and no notes that defaulted to 'Có mặt'
+    # Cleanup / migration: Restore status = 'Có mặt' for all attendance records that were erroneously forced to 'Vắng mặt' without scores or notes
     try:
         cursor.execute("""
             UPDATE class_attendance_grades
-            SET status = 'Vắng mặt'
+            SET status = 'Có mặt'
             WHERE (check_1 IS NULL OR check_1 = 0)
               AND (check_2 IS NULL OR check_2 = 0)
               AND (homework IS NULL OR homework = 0)
               AND (notes IS NULL OR TRIM(notes) = '')
-              AND status = 'Có mặt'
+              AND status = 'Vắng mặt'
         """)
         cursor.execute("UPDATE class_attendance_grades SET check_1 = NULL WHERE check_1 = 0")
         cursor.execute("UPDATE class_attendance_grades SET check_2 = NULL WHERE check_2 = 0")
@@ -1705,10 +1705,8 @@ def upsert_class_attendance_grades(class_id: int, date_str: str, records: List[D
         notes = (rec.get("notes") or "").strip()
         status = rec.get("status") or "Có mặt"
 
-        if has_score:
+        if has_score and status == "Vắng mặt":
             status = "Có mặt"
-        elif not has_score and not notes and status == "Có mặt":
-            status = "Vắng mặt"
 
         cursor.execute("""
             INSERT INTO class_attendance_grades (class_id, student_id, date, status, check_1, check_2, homework, notes)
