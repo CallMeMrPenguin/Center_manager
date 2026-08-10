@@ -339,9 +339,14 @@ export default function ClassesPage() {
       const c2 = rec.check_2 !== null && rec.check_2 !== undefined && rec.check_2 !== '' ? Number(rec.check_2) : null;
       const hw = rec.homework !== null && rec.homework !== undefined && rec.homework !== '' ? Number(rec.homework) : null;
       const hasScore = (c1 !== null && c1 > 0) || (c2 !== null && c2 > 0) || (hw !== null && hw > 0);
+      const hasNote = rec.notes && String(rec.notes).trim() !== '';
 
-      let newStatus = rec.status || 'Có mặt';
-      if (hasScore && newStatus === 'Vắng mặt') {
+      let newStatus = rec.status;
+      if (hasScore) {
+        newStatus = 'Có mặt';
+      } else if (!hasScore && !hasNote) {
+        newStatus = 'Vắng mặt';
+      } else if (!newStatus) {
         newStatus = 'Có mặt';
       }
       return { ...rec, status: newStatus };
