@@ -945,8 +945,9 @@ export default function TestFormatter({
                       </button>
                       <button
                         onClick={async () => {
-                          try { await api.openLocalFile(fname); showToast(`Đang mở tệp: ${fname}`, "success"); }
-                          catch (e) { showToast("Lỗi mở file: " + e, "error"); }
+                          const fileToOpen = typeof fileItem === 'string' ? fileItem : (fileItem.filepath || fileItem.filename || fname);
+                          try { await api.openLocalFile(fileToOpen); showToast(`Đang mở tệp: ${fname}`, "success"); }
+                          catch (e: any) { showToast("Lỗi mở file: " + (e.message || e), "error"); }
                         }}
                         className="text-slate-400 hover:text-emerald-400 p-1 cursor-pointer"
                         title="Mở file bằng Word"

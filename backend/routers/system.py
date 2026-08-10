@@ -569,11 +569,24 @@ def api_open_file(req: OpenFileRequest):
     files_dir = get_setting("files_dir")
     if not files_dir or not os.path.exists(files_dir):
         files_dir = os.path.join(BASE_DIR, "workspace_files")
-    filepath = get_file_path(files_dir, req.filename)
+
+    filepath = req.filename
+    if not (os.path.isabs(filepath) and os.path.exists(filepath)):
+        filepath = get_file_path(files_dir, req.filename)
+
     if os.path.exists(filepath):
-        os.startfile(filepath)
-        return {"success": True}
-    raise HTTPException(status_code=404, detail=f"File '{req.filename}' not found")
+        abs_path = os.path.abspath(filepath)
+        try:
+            os.startfile(abs_path)
+            return {"success": True}
+        except Exception:
+            try:
+                import subprocess
+                subprocess.Popen(['start', '', abs_path], shell=True)
+                return {"success": True}
+            except Exception as e:
+                raise HTTPException(status_code=500, detail=f"Failed to open file '{abs_path}': {e}")
+    raise HTTPException(status_code=404, detail=f"File '{req.filename}' not found at '{filepath}'")
 
 @router.post("/api/utils/open-folder")
 def api_open_folder():
