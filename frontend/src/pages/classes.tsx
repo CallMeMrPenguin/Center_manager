@@ -328,10 +328,10 @@ export default function ClassesPage() {
   }, [selectedClass]);
 
   useEffect(() => {
-    if (selectedClass && activeSubTab === 'grades') {
+    if (selectedClass && (activeSubTab === 'grades' || activeSubTab === 'seating')) {
       loadAttendanceData(selectedClass.id, attendanceDate);
     }
-  }, [attendanceDate, activeSubTab]);
+  }, [attendanceDate, activeSubTab, selectedClass?.id]);
 
   const applyAutoAttendanceStatus = useCallback((records: any[], targetDateStr: string) => {
     const todayStr = getLocalDateStr();
@@ -884,6 +884,17 @@ export default function ClassesPage() {
     },
   ], [enrolledStudents, handleUpdateRecord, parseAndFormatScore]);
 
+  // Absent students lookup for seating chart
+  const absentStudentIds = useMemo(() => {
+    const set = new Set<number>();
+    attendanceRecords.forEach((r: any) => {
+      if (r.status === 'Vắng mặt') {
+        set.add(r.student_id);
+      }
+    });
+    return set;
+  }, [attendanceRecords]);
+
   // Seating grid calculations
   const assignedStudentIdsInSeating = new Set<number>();
   seatingGrid.forEach(col => {
@@ -1258,6 +1269,23 @@ export default function ClassesPage() {
                     <button onClick={handleAddColumn} className="w-5 h-5 rounded bg-white/5 hover:bg-white/10 text-white font-extrabold flex items-center justify-center cursor-pointer" title="Thêm 1 cột">+</button>
                   </div>
 
+                  <div className="flex items-center gap-2 bg-[#121624] border border-white/10 px-2.5 py-1 rounded-xl">
+                    <Calendar size={13} className="text-indigo-400" />
+                    <CustomDatePicker
+                      value={attendanceDate}
+                      onChange={setAttendanceDate}
+                      highlightDaysOfWeek={selectedClassWeeklyDays}
+                      className="w-36 text-xs"
+                    />
+                  </div>
+
+                  {absentStudentIds.size > 0 && (
+                    <span className="flex items-center gap-1.5 bg-rose-500/20 text-rose-300 border border-rose-500/30 px-2.5 py-1 rounded-xl text-xs font-bold">
+                      <span className="w-2 h-2 rounded-full bg-rose-400 animate-pulse" />
+                      <span>Vắng mặt: {absentStudentIds.size} học sinh</span>
+                    </span>
+                  )}
+
                   {!showUnassignedPanel && (
                     <button
                       onClick={() => setShowUnassignedPanel(true)}
@@ -1331,22 +1359,34 @@ export default function ClassesPage() {
                     <p className="text-[10px] text-slate-500">Kéo và thả học sinh vào vị trí bàn học bên phải.</p>
 
                     <div className="space-y-2 max-h-[calc(100vh-320px)] min-h-[240px] overflow-y-auto pr-1">
-                      {unassignedStudents.map((st) => (
-                        <div
-                          key={st.id}
-                          draggable
-                          onDragStart={() => {
-                            setDraggedUnassigned(st);
-                            setDraggedSeat(null);
-                          }}
-                          className="p-2.5 rounded-xl bg-[#14192b] border border-white/10 hover:border-indigo-500/60 cursor-grab active:cursor-grabbing text-xs text-white font-extrabold flex items-center justify-between shadow-md transition"
-                        >
-                          <div className="flex items-center gap-2 truncate">
-                            <Move size={12} className="text-slate-500 shrink-0" />
-                            <span className="truncate">{st.full_name}</span>
+                      {unassignedStudents.map((st) => {
+                        const isStAbsent = absentStudentIds.has(st.id);
+                        return (
+                          <div
+                            key={st.id}
+                            draggable
+                            onDragStart={() => {
+                              setDraggedUnassigned(st);
+                              setDraggedSeat(null);
+                            }}
+                            className={`p-2.5 rounded-xl border cursor-grab active:cursor-grabbing text-xs font-extrabold flex items-center justify-between shadow-md transition ${
+                              isStAbsent
+                                ? 'bg-rose-500/10 border-rose-500/30 text-rose-300 hover:border-rose-400'
+                                : 'bg-[#14192b] border-white/10 text-white hover:border-indigo-500/60'
+                            }`}
+                          >
+                            <div className="flex items-center gap-2 truncate">
+                              <Move size={12} className="text-slate-500 shrink-0" />
+                              <span className={`truncate ${isStAbsent ? 'line-through text-rose-200 opacity-80' : ''}`}>{st.full_name}</span>
+                            </div>
+                            {isStAbsent && (
+                              <span className="text-[9px] font-black px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/40 shrink-0 ml-1">
+                                Vắng
+                              </span>
+                            )}
                           </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                       {unassignedStudents.length === 0 && (
                         <div className="text-center py-8 text-[11px] text-slate-500 font-bold">
                           Đã xếp đủ tất cả học sinh!
@@ -1387,6 +1427,8 @@ export default function ClassesPage() {
                       {Array.from({ length: col.desks_in_col || desksPerCol }).map((_, deskIdx) => {
                         const seatLeft = col.seats ? col.seats[deskIdx * 2] : null;
                         const seatRight = col.seats ? col.seats[deskIdx * 2 + 1] : null;
+                        const isLeftAbsent = seatLeft?.student_id ? absentStudentIds.has(seatLeft.student_id) : false;
+                        const isRightAbsent = seatRight?.student_id ? absentStudentIds.has(seatRight.student_id) : false;
 
                         return (
                           <div key={deskIdx} className="bg-[#121626] border border-white/10 p-3 rounded-2xl shadow-md w-60 flex flex-col gap-2">
@@ -1405,7 +1447,9 @@ export default function ClassesPage() {
                                 onDragOver={(e) => e.preventDefault()}
                                 onDrop={() => handleDropOnSeat(colIdx, deskIdx, 0)}
                                 className={`group/seat relative p-2 rounded-xl border flex flex-col items-center justify-center min-h-[56px] text-center transition cursor-pointer ${seatLeft?.student_name
-                                    ? 'bg-indigo-500/10 border-indigo-500/30 text-white cursor-grab active:cursor-grabbing hover:border-indigo-400'
+                                    ? isLeftAbsent
+                                      ? 'bg-rose-500/15 border-rose-500/40 text-rose-200 cursor-grab active:cursor-grabbing hover:border-rose-400 shadow-[0_0_12px_rgba(244,63,94,0.15)]'
+                                      : 'bg-indigo-500/10 border-indigo-500/30 text-white cursor-grab active:cursor-grabbing hover:border-indigo-400'
                                     : 'bg-white/[0.02] border-dashed border-white/10 text-slate-600 hover:border-white/20'
                                   }`}
                               >
@@ -1417,12 +1461,19 @@ export default function ClassesPage() {
                                         e.stopPropagation();
                                         handleClearSeat(colIdx, deskIdx, 0);
                                       }}
-                                      className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-rose-500 hover:bg-rose-600 text-white text-[9px] font-black flex items-center justify-center opacity-0 group-hover/seat:opacity-100 transition shadow cursor-pointer"
+                                      className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-rose-500 hover:bg-rose-600 text-white text-[9px] font-black flex items-center justify-center opacity-0 group-hover/seat:opacity-100 transition shadow cursor-pointer z-10"
                                       title="Bỏ xếp chỗ"
                                     >
                                       ×
                                     </button>
-                                    <span className="text-xs font-extrabold truncate">{seatLeft.student_name}</span>
+                                    <span className={`text-xs font-extrabold truncate w-full ${isLeftAbsent ? 'line-through text-rose-200 opacity-90' : ''}`}>
+                                      {seatLeft.student_name}
+                                    </span>
+                                    {isLeftAbsent && (
+                                      <span className="mt-0.5 px-1.5 py-0.5 rounded text-[9px] font-black bg-rose-500/30 text-rose-300 border border-rose-500/50">
+                                        Vắng mặt
+                                      </span>
+                                    )}
                                   </>
                                 ) : (
                                   <span className="text-[10px] text-slate-500">Thả vào đây</span>
@@ -1439,7 +1490,9 @@ export default function ClassesPage() {
                                 onDragOver={(e) => e.preventDefault()}
                                 onDrop={() => handleDropOnSeat(colIdx, deskIdx, 1)}
                                 className={`group/seat relative p-2 rounded-xl border flex flex-col items-center justify-center min-h-[56px] text-center transition cursor-pointer ${seatRight?.student_name
-                                    ? 'bg-indigo-500/10 border-indigo-500/30 text-white cursor-grab active:cursor-grabbing hover:border-indigo-400'
+                                    ? isRightAbsent
+                                      ? 'bg-rose-500/15 border-rose-500/40 text-rose-200 cursor-grab active:cursor-grabbing hover:border-rose-400 shadow-[0_0_12px_rgba(244,63,94,0.15)]'
+                                      : 'bg-indigo-500/10 border-indigo-500/30 text-white cursor-grab active:cursor-grabbing hover:border-indigo-400'
                                     : 'bg-white/[0.02] border-dashed border-white/10 text-slate-600 hover:border-white/20'
                                   }`}
                               >
@@ -1451,12 +1504,19 @@ export default function ClassesPage() {
                                         e.stopPropagation();
                                         handleClearSeat(colIdx, deskIdx, 1);
                                       }}
-                                      className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-rose-500 hover:bg-rose-600 text-white text-[9px] font-black flex items-center justify-center opacity-0 group-hover/seat:opacity-100 transition shadow cursor-pointer"
+                                      className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-rose-500 hover:bg-rose-600 text-white text-[9px] font-black flex items-center justify-center opacity-0 group-hover/seat:opacity-100 transition shadow cursor-pointer z-10"
                                       title="Bỏ xếp chỗ"
                                     >
                                       ×
                                     </button>
-                                    <span className="text-xs font-extrabold truncate">{seatRight.student_name}</span>
+                                    <span className={`text-xs font-extrabold truncate w-full ${isRightAbsent ? 'line-through text-rose-200 opacity-90' : ''}`}>
+                                      {seatRight.student_name}
+                                    </span>
+                                    {isRightAbsent && (
+                                      <span className="mt-0.5 px-1.5 py-0.5 rounded text-[9px] font-black bg-rose-500/30 text-rose-300 border border-rose-500/50">
+                                        Vắng mặt
+                                      </span>
+                                    )}
                                   </>
                                 ) : (
                                   <span className="text-[10px] text-slate-500">Thả vào đây</span>
