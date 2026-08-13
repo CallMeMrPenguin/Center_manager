@@ -10,6 +10,14 @@ import { applyTheme } from '../../theme';
 import { showToast } from '../../components/Toast';
 import { useConfirm } from '../../components/ConfirmDialog';
 
+const DEFAULT_THEME = {
+  bgImage: 'none',
+  opacity: 0.08,
+  blur: 24,
+  borderOpacity: 0.15,
+  saturate: 180
+};
+
 export default function Settings() {
   const confirm = useConfirm();
   const [settings, setSettings] = useState<AppSettings | null>(null);
@@ -36,21 +44,22 @@ export default function Settings() {
 
   // Theme & Glass effect state
   const [themeSettings, setThemeSettings] = useState(() => {
-    const defaults = {
-      bgImage: 'none',
-      opacity: 0.08,
-      blur: 24,
-      borderOpacity: 0.15,
-      saturate: 180
-    };
     const saved = localStorage.getItem('app_theme_settings');
     if (saved) {
       try {
-        return { ...defaults, ...JSON.parse(saved) };
+        return { ...DEFAULT_THEME, ...JSON.parse(saved) };
       } catch (e) {}
     }
-    return defaults;
+    return DEFAULT_THEME;
   });
+
+  const safeTheme = {
+    bgImage: typeof themeSettings?.bgImage === 'string' ? themeSettings.bgImage : 'none',
+    opacity: typeof themeSettings?.opacity === 'number' ? themeSettings.opacity : 0.08,
+    blur: typeof themeSettings?.blur === 'number' ? themeSettings.blur : 24,
+    borderOpacity: typeof themeSettings?.borderOpacity === 'number' ? themeSettings.borderOpacity : 0.15,
+    saturate: typeof themeSettings?.saturate === 'number' ? themeSettings.saturate : 180,
+  };
 
   const handleLocalBgUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -132,10 +141,11 @@ export default function Settings() {
     try {
       const data = await api.getSettings();
       setSettings(data);
-      setFilesDirInput(data.files_dir);
+      if (data?.files_dir) setFilesDirInput(data.files_dir);
       if (data && (data as any).theme) {
-        setThemeSettings((data as any).theme);
-        applyTheme((data as any).theme);
+        const mergedTheme = { ...DEFAULT_THEME, ...(data as any).theme };
+        setThemeSettings(mergedTheme);
+        applyTheme(mergedTheme);
       }
       if (data && data.grade_types && Array.isArray(data.grade_types) && data.grade_types.length > 0) {
         setGradeTypes(data.grade_types);
@@ -435,48 +445,47 @@ export default function Settings() {
               <HardDrive size={14} className="text-blue-400" /> Thiết lập hệ thống tệp tin
             </h3>
 
-            {settings && (
-              <div className="flex flex-col gap-4">
-                
-                {/* Files dir input */}
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-[10px] font-bold text-slate-450 uppercase">Đường dẫn thư mục quản lý tệp</label>
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      value={filesDirInput}
-                      onChange={(e) => setFilesDirInput(e.target.value)}
-                      onBlur={() => {
-                        if (filesDirInput.trim() && settings && filesDirInput.trim() !== settings.files_dir) {
-                          handleSaveSettings();
-                        }
-                      }}
-                      className="bg-[#0b0f19] border border-slate-850 px-3.5 py-2 rounded-xl text-xs text-white focus:outline-none focus:border-slate-700 flex-1 font-mono"
-                    />
-                    <button
-                      type="button"
-                      onClick={handleBrowseDirectory}
-                      className="px-4 py-2 bg-slate-900 border border-slate-850 hover:border-slate-700 text-slate-350 hover:text-white font-extrabold text-[10px] rounded-xl cursor-pointer transition whitespace-nowrap"
-                    >
-                      Duyệt...
-                    </button>
-                  </div>
-                  <p className="text-[9px] text-slate-500">Thư mục dùng để lưu trữ tệp đề JSON, file word docx hoàn thiện.</p>
-                </div>
-
-                <div className="border-t border-slate-900/60 pt-4 flex justify-between items-center">
-                  <span className="text-[10px] text-slate-500 font-mono">ID thiết bị máy chủ: {settings.machine_id}</span>
+            <div className="flex flex-col gap-4">
+              
+              {/* Files dir input */}
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[10px] font-bold text-slate-450 uppercase">Đường dẫn thư mục quản lý tệp</label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={filesDirInput}
+                    onChange={(e) => setFilesDirInput(e.target.value)}
+                    onBlur={() => {
+                      if (filesDirInput.trim() && settings && filesDirInput.trim() !== settings.files_dir) {
+                        handleSaveSettings();
+                      }
+                    }}
+                    placeholder="Workspace Files Directory Path..."
+                    className="bg-[#0b0f19] border border-slate-850 px-3.5 py-2 rounded-xl text-xs text-white focus:outline-none focus:border-slate-700 flex-1 font-mono"
+                  />
                   <button
-                    onClick={handleSaveSettings}
-                    className="group px-3.5 py-2 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-xs transition-all duration-300 flex items-center gap-0 hover:gap-1.5 cursor-pointer shadow-md shadow-blue-500/10"
+                    type="button"
+                    onClick={handleBrowseDirectory}
+                    className="px-4 py-2 bg-slate-900 border border-slate-850 hover:border-slate-700 text-slate-350 hover:text-white font-extrabold text-[10px] rounded-xl cursor-pointer transition whitespace-nowrap"
                   >
-                    <Save size={13} />
-                    <span className="max-w-0 overflow-hidden group-hover:max-w-[150px] transition-all duration-300 whitespace-nowrap block">Lưu cấu hình hệ thống</span>
+                    Duyệt...
                   </button>
                 </div>
-
+                <p className="text-[9px] text-slate-500">Thư mục dùng để lưu trữ tệp đề JSON, file word docx hoàn thiện.</p>
               </div>
-            )}
+
+              <div className="border-t border-slate-900/60 pt-4 flex justify-between items-center">
+                <span className="text-[10px] text-slate-500 font-mono">ID thiết bị máy chủ: {settings?.machine_id || 'LOCAL_HOST'}</span>
+                <button
+                  onClick={handleSaveSettings}
+                  className="group px-3.5 py-2 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-xs transition-all duration-300 flex items-center gap-0 hover:gap-1.5 cursor-pointer shadow-md shadow-blue-500/10"
+                >
+                  <Save size={13} />
+                  <span className="max-w-0 overflow-hidden group-hover:max-w-[150px] transition-all duration-300 whitespace-nowrap block">Lưu cấu hình hệ thống</span>
+                </button>
+              </div>
+
+            </div>
           </div>
 
           {/* Dynamic Grade Types & Proportions Box */}
@@ -622,7 +631,7 @@ export default function Settings() {
                   <span className="text-[9px] text-slate-400">Nhập URL hình nền tùy chỉnh:</span>
                   <input
                     type="text"
-                    value={themeSettings.bgImage !== 'none' && !themeSettings.bgImage.startsWith('data:') ? themeSettings.bgImage : ''}
+                    value={safeTheme.bgImage !== 'none' && !safeTheme.bgImage.startsWith('data:') ? safeTheme.bgImage : ''}
                     onChange={(e) => updateThemeSetting('bgImage', e.target.value || 'none')}
                     placeholder="https://example.com/background.jpg"
                     className="bg-[#0b0f19] border border-slate-850 px-3.5 py-2.5 rounded-xl text-xs text-white focus:outline-none focus:border-slate-700 font-mono w-full"
@@ -662,14 +671,14 @@ export default function Settings() {
               <div className="flex flex-col gap-1.5">
                 <div className="flex justify-between items-center text-[10px] font-bold">
                   <span className="text-slate-400 uppercase">Độ đục nền kính (Opacity)</span>
-                  <span className="text-blue-400 font-mono">{Math.round(themeSettings.opacity * 100)}%</span>
+                  <span className="text-blue-400 font-mono">{Math.round(safeTheme.opacity * 100)}%</span>
                 </div>
                 <input
                   type="range"
                   min="0.01"
                   max="0.5"
                   step="0.01"
-                  value={themeSettings.opacity}
+                  value={safeTheme.opacity}
                   onChange={(e) => updateThemeSetting('opacity', parseFloat(e.target.value))}
                   className="w-full h-1 bg-slate-900 rounded-lg appearance-none cursor-pointer accent-blue-500"
                 />
@@ -679,14 +688,14 @@ export default function Settings() {
               <div className="flex flex-col gap-1.5">
                 <div className="flex justify-between items-center text-[10px] font-bold">
                   <span className="text-slate-400 uppercase">Độ nhòe kính (Blur)</span>
-                  <span className="text-blue-400 font-mono">{themeSettings.blur}px</span>
+                  <span className="text-blue-400 font-mono">{safeTheme.blur}px</span>
                 </div>
                 <input
                   type="range"
                   min="0"
                   max="40"
                   step="1"
-                  value={themeSettings.blur}
+                  value={safeTheme.blur}
                   onChange={(e) => updateThemeSetting('blur', parseInt(e.target.value))}
                   className="w-full h-1 bg-slate-900 rounded-lg appearance-none cursor-pointer accent-blue-500"
                 />
@@ -696,14 +705,14 @@ export default function Settings() {
               <div className="flex flex-col gap-1.5">
                 <div className="flex justify-between items-center text-[10px] font-bold">
                   <span className="text-slate-400 uppercase">Độ rõ viền kính (Border Opacity)</span>
-                  <span className="text-blue-400 font-mono">{Math.round(themeSettings.borderOpacity * 100)}%</span>
+                  <span className="text-blue-400 font-mono">{Math.round(safeTheme.borderOpacity * 100)}%</span>
                 </div>
                 <input
                   type="range"
                   min="0.0"
                   max="0.3"
                   step="0.01"
-                  value={themeSettings.borderOpacity}
+                  value={safeTheme.borderOpacity}
                   onChange={(e) => updateThemeSetting('borderOpacity', parseFloat(e.target.value))}
                   className="w-full h-1 bg-slate-900 rounded-lg appearance-none cursor-pointer accent-blue-500"
                 />
