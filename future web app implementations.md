@@ -63,41 +63,6 @@ Do NOT split into multiple databases — foreign keys and JOINs won't work acros
 
 ---
 
-## Customizable Grade Proportions (Score Weighting)
-
-### How "Điểm Đánh Giá" is calculated right now
-Currently, the academic score ("Điểm Đánh Giá") and predictions in `db_manager.py` & `reports.tsx` use fixed weighted averages:
-- **Homework (BTVN)**: `10%` (`0.10`)
-- **Check 1**: `35%` (`0.35`)
-- **Check 2**: `55%` (`0.55`)
-
-Formula:
-$$\text{Academic Score} = \frac{\text{HW} \times 0.10 + \text{Check 1} \times 0.35 + \text{Check 2} \times 0.55}{0.10 + 0.35 + 0.55}$$
-
-*(If a student is missing one grade component, the missing weight is excluded from the denominator so missing grades do not drag down averages to 0).*
-
-### Planned Feature: Customizable Proportions / Weights
-To allow manual adjustments per class or system-wide (e.g. including **Speaking / Speaking Portion**, **Check 1**, **Check 2**, **Homework**):
-
-1. **Configurable Settings in `config.json` / Database**:
-   ```json
-   {
-     "grade_weights": {
-       "homework": 0.10,
-       "check_1": 0.35,
-       "check_2": 0.55,
-       "speaking": 0.00
-     }
-   }
-   ```
-2. **Settings UI Component**:
-   - Provide a visual slider / percentage input group under Center Settings where admins can set percentages (must sum to 100%).
-   - Support custom categories like `Speaking` / `Oral Test` if added to attendance/grade entry.
-3. **Backend & Frontend Calculation Engine**:
-   - Dynamic formula reads weights from config/settings instead of hardcoded `0.10 / 0.35 / 0.55`.
-
----
-
 ## Feature Flags — Hide Local-Only Sections on Web
 
 Use a single environment variable to control which pages are visible.

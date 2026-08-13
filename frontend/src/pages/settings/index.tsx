@@ -118,6 +118,12 @@ export default function Settings() {
     };
   }, []);
 
+  const [gradeWeights, setGradeWeights] = useState({
+    check_1: 35,
+    check_2: 55,
+    homework: 10
+  });
+
   const loadSettings = async () => {
     try {
       const data = await api.getSettings();
@@ -127,8 +133,36 @@ export default function Settings() {
         setThemeSettings((data as any).theme);
         applyTheme((data as any).theme);
       }
+      if (data && data.grade_weights) {
+        setGradeWeights({
+          check_1: data.grade_weights.check_1 ?? 35,
+          check_2: data.grade_weights.check_2 ?? 55,
+          homework: data.grade_weights.homework ?? 10
+        });
+      }
     } catch (e) {
       showToast("Không thể tải cấu hình hệ thống: " + e, "error");
+    }
+  };
+
+  const handleSaveGradeWeights = async () => {
+    const sum = (Number(gradeWeights.check_1) || 0) + (Number(gradeWeights.check_2) || 0) + (Number(gradeWeights.homework) || 0);
+    if (Math.abs(sum - 100) > 0.01) {
+      showToast(`Tổng tỷ lệ phải bằng 100% (Hiện tại: ${sum}%)`, "warning");
+      return;
+    }
+    try {
+      await api.saveSettings({
+        grade_weights: {
+          check_1: Number(gradeWeights.check_1),
+          check_2: Number(gradeWeights.check_2),
+          homework: Number(gradeWeights.homework)
+        }
+      });
+      showToast("Đã lưu trọng số điểm đánh giá!", "success");
+      loadSettings();
+    } catch (e) {
+      showToast("Không thể lưu trọng số: " + e, "error");
     }
   };
 
@@ -392,6 +426,69 @@ export default function Settings() {
 
               </div>
             )}
+          </div>
+
+          {/* Grade Proportions (Score Weighting) Box */}
+          <div className="glass-panel rounded-2xl p-6 flex flex-col gap-4">
+            <div className="flex justify-between items-center border-b border-slate-900/60 pb-3">
+              <h3 className="text-xs font-extrabold text-white uppercase tracking-wider flex items-center gap-2">
+                <SettingsIcon size={14} className="text-indigo-400" /> Cấu Hình Trọng Số Điểm Đánh Giá
+              </h3>
+              <span className={`text-xs font-bold px-2.5 py-1 rounded-lg ${
+                Math.abs((Number(gradeWeights.check_1) || 0) + (Number(gradeWeights.check_2) || 0) + (Number(gradeWeights.homework) || 0) - 100) < 0.01
+                  ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                  : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
+              }`}>
+                Tổng: {(Number(gradeWeights.check_1) || 0) + (Number(gradeWeights.check_2) || 0) + (Number(gradeWeights.homework) || 0)}%
+              </span>
+            </div>
+            <p className="text-xs text-slate-400">
+              Tùy chỉnh tỷ lệ phần trăm các điểm thành phần dùng để tính toán <b>Điểm Đánh Giá</b> và <b>Dự Đoán Học Tập</b> trong toàn bộ báo cáo.
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-1">
+              <div className="flex flex-col gap-1.5 bg-[#0b0f19] p-3.5 rounded-xl border border-slate-850">
+                <label className="text-[10px] font-extrabold text-blue-400 uppercase">Check 1 (%)</label>
+                <input
+                  type="number"
+                  min={0}
+                  max={100}
+                  value={gradeWeights.check_1}
+                  onChange={(e) => setGradeWeights({ ...gradeWeights, check_1: parseFloat(e.target.value) || 0 })}
+                  className="bg-[#121626] border border-slate-700 px-3 py-2 rounded-lg text-sm text-white font-bold focus:outline-none focus:border-blue-500"
+                />
+              </div>
+              <div className="flex flex-col gap-1.5 bg-[#0b0f19] p-3.5 rounded-xl border border-slate-850">
+                <label className="text-[10px] font-extrabold text-purple-400 uppercase">Check 2 (%)</label>
+                <input
+                  type="number"
+                  min={0}
+                  max={100}
+                  value={gradeWeights.check_2}
+                  onChange={(e) => setGradeWeights({ ...gradeWeights, check_2: parseFloat(e.target.value) || 0 })}
+                  className="bg-[#121626] border border-slate-700 px-3 py-2 rounded-lg text-sm text-white font-bold focus:outline-none focus:border-purple-500"
+                />
+              </div>
+              <div className="flex flex-col gap-1.5 bg-[#0b0f19] p-3.5 rounded-xl border border-slate-850">
+                <label className="text-[10px] font-extrabold text-amber-400 uppercase">BTVN / Homework (%)</label>
+                <input
+                  type="number"
+                  min={0}
+                  max={100}
+                  value={gradeWeights.homework}
+                  onChange={(e) => setGradeWeights({ ...gradeWeights, homework: parseFloat(e.target.value) || 0 })}
+                  className="bg-[#121626] border border-slate-700 px-3 py-2 rounded-lg text-sm text-white font-bold focus:outline-none focus:border-amber-500"
+                />
+              </div>
+            </div>
+            <div className="flex justify-end pt-2">
+              <button
+                onClick={handleSaveGradeWeights}
+                className="group px-3.5 py-2 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-xs transition-all duration-300 flex items-center gap-1.5 cursor-pointer shadow-md shadow-blue-500/10"
+              >
+                <Save size={13} />
+                <span>Lưu Trọng Số Điểm</span>
+              </button>
+            </div>
           </div>
 
           {/* Glassmorphism & Background Theme Box */}

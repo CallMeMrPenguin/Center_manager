@@ -2043,6 +2043,20 @@ def _holtwinters_predict(vals: List[float]) -> Tuple[float, float]:
     except Exception:
         return _weighted_ols_predict(vals)
 
+def _get_grade_weights() -> Tuple[float, float, float]:
+    """Retrieves (w_c1, w_c2, w_hw) fractional weights from app settings."""
+    try:
+        from config.settings import get_setting
+        gw = get_setting("grade_weights") or {}
+        w_c1 = float(gw.get("check_1", 35.0)) / 100.0
+        w_c2 = float(gw.get("check_2", 55.0)) / 100.0
+        w_hw = float(gw.get("homework", 10.0)) / 100.0
+        if w_c1 + w_c2 + w_hw <= 0:
+            return 0.35, 0.55, 0.10
+        return w_c1, w_c2, w_hw
+    except Exception:
+        return 0.35, 0.55, 0.10
+
 def smart_predict(vals: List[float]) -> Tuple[float, float]:
     """Dispatch to the appropriate prediction model based on data volume.
     < 5  sessions -> EMA
@@ -2060,6 +2074,8 @@ def smart_predict(vals: List[float]) -> Tuple[float, float]:
 
 
 def calculate_performance_analytics(session_records: List[Dict[str, Any]]) -> Dict[str, Any]:
+    w_c1, w_c2, w_hw = _get_grade_weights()
+
     if not session_records:
         return {
             "academic_score": 82.0,
@@ -2068,14 +2084,15 @@ def calculate_performance_analytics(session_records: List[Dict[str, Any]]) -> Di
             "consistency_score": 92.0,
             "std_dev": 0.45,
             "consistency_label": "Rất ổn định",
-            "ema_level": 8.6,
-            "predicted_next": 8.9,
+            "ema_score": 85.0,
+            "att_pct": 100.0,
+            "performance_index": 87.5,
+            "rating_label": "Rất Tốt",
+            "pred_overall": 8.5,
             "pred_c1": 8.8,
             "pred_c2": 7.5,
             "pred_hw": 9.5,
-            "attendance_pct": 96.0,
-            "performance_index": 86.7,
-            "rating_label": "Xuất Sắc",
+            "model_used": "EMA",
             "recommendations": [
                 "Duy trì tiến độ học tập hiện tại",
                 "Dự đoán buổi tới: Check 1 (8.8), Check 2 (7.5), Homework (9.5)."
@@ -2103,42 +2120,42 @@ def calculate_performance_analytics(session_records: List[Dict[str, Any]]) -> Di
         w_sum = 0.0
         w_tot = 0.0
         if hw > 0:
-            w_sum += hw * 0.10
-            w_tot += 0.10
+            w_sum += hw * w_hw
+            w_tot += w_hw
         if c1 > 0:
-            w_sum += c1 * 0.35
-            w_tot += 0.35
+            w_sum += c1 * w_c1
+            w_tot += w_c1
         if c2 > 0:
-            w_sum += c2 * 0.55
-            w_tot += 0.55
+            w_sum += c2 * w_c2
+            w_tot += w_c2
         if w_tot > 0:
             overall_session_scores.append(w_sum / w_tot)
 
     if not overall_session_scores:
         overall_session_scores = [8.0]
 
-    # Proportional weighted academic average based on available score types (HW 10%, Check 1 35%, Check 2 55%)
+    # Proportional weighted academic average based on available score types
     weighted_sum = 0.0
     weight_total = 0.0
 
     if hw_list:
         avg_hw = sum(hw_list) / len(hw_list)
-        weighted_sum += avg_hw * 0.10
-        weight_total += 0.10
+        weighted_sum += avg_hw * w_hw
+        weight_total += w_hw
     else:
         avg_hw = 0.0
 
     if c1_list:
         avg_c1 = sum(c1_list) / len(c1_list)
-        weighted_sum += avg_c1 * 0.35
-        weight_total += 0.35
+        weighted_sum += avg_c1 * w_c1
+        weight_total += w_c1
     else:
         avg_c1 = 0.0
 
     if c2_list:
         avg_c2 = sum(c2_list) / len(c2_list)
-        weighted_sum += avg_c2 * 0.55
-        weight_total += 0.55
+        weighted_sum += avg_c2 * w_c2
+        weight_total += w_c2
     else:
         avg_c2 = 0.0
 
@@ -2239,18 +2256,18 @@ def calculate_performance_analytics(session_records: List[Dict[str, Any]]) -> Di
     std_dev_c2 = _calc_sd(c2_list)
     std_dev_hw = _calc_sd(hw_list)
 
-    # Weighted combined SD using 10% HW, 35% C1, 55% C2
+    # Weighted combined SD using configured grade weights
     sd_w_sum = 0.0
     sd_w_total = 0.0
     if hw_list:
-        sd_w_sum += std_dev_hw * 0.10
-        sd_w_total += 0.10
+        sd_w_sum += std_dev_hw * w_hw
+        sd_w_total += w_hw
     if c1_list:
-        sd_w_sum += std_dev_c1 * 0.35
-        sd_w_total += 0.35
+        sd_w_sum += std_dev_c1 * w_c1
+        sd_w_total += w_c1
     if c2_list:
-        sd_w_sum += std_dev_c2 * 0.55
-        sd_w_total += 0.55
+        sd_w_sum += std_dev_c2 * w_c2
+        sd_w_total += w_c2
 
     std_dev = (sd_w_sum / sd_w_total) if sd_w_total > 0 else 0.0
     consistency_score = max(0.0, min(100.0, 100.0 - (std_dev * 15.0)))
@@ -2280,14 +2297,14 @@ def calculate_performance_analytics(session_records: List[Dict[str, Any]]) -> Di
     ema_w_sum = 0.0
     ema_w_tot = 0.0
     if hw_list:
-        ema_w_sum += ema_hw * 0.10
-        ema_w_tot += 0.10
+        ema_w_sum += ema_hw * w_hw
+        ema_w_tot += w_hw
     if c1_list:
-        ema_w_sum += ema_c1 * 0.35
-        ema_w_tot += 0.35
+        ema_w_sum += ema_c1 * w_c1
+        ema_w_tot += w_c1
     if c2_list:
-        ema_w_sum += ema_c2 * 0.55
-        ema_w_tot += 0.55
+        ema_w_sum += ema_c2 * w_c2
+        ema_w_tot += w_c2
 
     ema = (ema_w_sum / ema_w_tot) if ema_w_tot > 0 else (overall_session_scores[0] if overall_session_scores else 8.0)
     ema_score = max(0.0, min(100.0, ema * 10.0))
@@ -2369,6 +2386,7 @@ def get_class_student_predictions(class_id: int) -> Dict[int, Dict[str, float]]:
             records_by_student[sid] = []
         records_by_student[sid].append(r)
 
+    w_c1, w_c2, w_hw = _get_grade_weights()
     predictions: Dict[int, Dict[str, float]] = {}
     for sid, recs in records_by_student.items():
         c1_list, c2_list, hw_list = [], [], []
@@ -2388,28 +2406,28 @@ def get_class_student_predictions(class_id: int) -> Dict[int, Dict[str, float]]:
             w_sum = 0.0
             w_tot = 0.0
             if hw > 0:
-                w_sum += hw * 0.10
-                w_tot += 0.10
+                w_sum += hw * w_hw
+                w_tot += w_hw
             if c1 > 0:
-                w_sum += c1 * 0.35
-                w_tot += 0.35
+                w_sum += c1 * w_c1
+                w_tot += w_c1
             if c2 > 0:
-                w_sum += c2 * 0.55
-                w_tot += 0.55
+                w_sum += c2 * w_c2
+                w_tot += w_c2
             if w_tot > 0:
                 overall_session_scores.append(w_sum / w_tot)
 
         weighted_sum = 0.0
         weight_total = 0.0
         if hw_list:
-            weighted_sum += (sum(hw_list) / len(hw_list)) * 0.10
-            weight_total += 0.10
+            weighted_sum += (sum(hw_list) / len(hw_list)) * w_hw
+            weight_total += w_hw
         if c1_list:
-            weighted_sum += (sum(c1_list) / len(c1_list)) * 0.35
-            weight_total += 0.35
+            weighted_sum += (sum(c1_list) / len(c1_list)) * w_c1
+            weight_total += w_c1
         if c2_list:
-            weighted_sum += (sum(c2_list) / len(c2_list)) * 0.55
-            weight_total += 0.55
+            weighted_sum += (sum(c2_list) / len(c2_list)) * w_c2
+            weight_total += w_c2
 
         academic_10 = (weighted_sum / weight_total) if weight_total > 0 else (sum(overall_session_scores) / len(overall_session_scores) if overall_session_scores else 8.0)
 

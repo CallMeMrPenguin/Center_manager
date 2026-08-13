@@ -10,7 +10,12 @@ CONFIG_FILE = os.path.join(BASE_DIR, "config.json")
 
 DEFAULT_SETTINGS = {
     "files_dir": os.path.join(BASE_DIR, "workspace_files"),
-    "machine_id": f"{socket.gethostname()}_{uuid.uuid4().hex[:6]}"
+    "machine_id": f"{socket.gethostname()}_{uuid.uuid4().hex[:6]}",
+    "grade_weights": {
+        "check_1": 35.0,
+        "check_2": 55.0,
+        "homework": 10.0
+    }
 }
 
 def load_settings():
@@ -24,6 +29,10 @@ def load_settings():
             for key, val in DEFAULT_SETTINGS.items():
                 if key not in settings:
                     settings[key] = val
+                elif isinstance(val, dict) and isinstance(settings[key], dict):
+                    for sub_k, sub_v in val.items():
+                        if sub_k not in settings[key]:
+                            settings[key][sub_k] = sub_v
             return settings
     except Exception:
         return DEFAULT_SETTINGS

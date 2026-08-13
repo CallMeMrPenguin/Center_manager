@@ -608,6 +608,20 @@ export default function ReportsPage() {
     },
   ], []);
 
+  const [gradeWeights, setGradeWeights] = useState({ check_1: 35, check_2: 55, homework: 10 });
+
+  useEffect(() => {
+    api.getSettings().then(data => {
+      if (data?.grade_weights) {
+        setGradeWeights({
+          check_1: data.grade_weights.check_1 ?? 35,
+          check_2: data.grade_weights.check_2 ?? 55,
+          homework: data.grade_weights.homework ?? 10,
+        });
+      }
+    }).catch(() => {});
+  }, []);
+
   // Selected Student Object if individual mode
   const selectedStudentObj = useMemo(() => {
     if (!selectedStudentId) return null;
@@ -764,6 +778,11 @@ export default function ReportsPage() {
 
     const selectedDates = dates.slice(-limit);
 
+    const w1 = (gradeWeights.check_1 || 35) / 100;
+    const w2 = (gradeWeights.check_2 || 55) / 100;
+    const whw = (gradeWeights.homework || 10) / 100;
+    const wTot = (w1 + w2 + whw) || 1;
+
     const result = selectedDates.map((d) => {
       const item = dateMap[d];
       const validScores = [...item.check1, ...item.check2, ...item.hw];
@@ -772,7 +791,7 @@ export default function ReportsPage() {
       const avg1 = item.check1.length > 0 ? item.check1.reduce((a,b)=>a+b,0)/item.check1.length : sessionFallback;
       const avg2 = item.check2.length > 0 ? item.check2.reduce((a,b)=>a+b,0)/item.check2.length : sessionFallback;
       const avghw = item.hw.length > 0 ? item.hw.reduce((a,b)=>a+b,0)/item.hw.length : sessionFallback;
-      const avgOverall = (avg1 * 0.35) + (avg2 * 0.55) + (avghw * 0.10);
+      const avgOverall = ((avg1 * w1) + (avg2 * w2) + (avghw * whw)) / wTot;
 
       return {
         sessionName: formatSessionDate(d),
@@ -785,7 +804,7 @@ export default function ReportsPage() {
     });
 
     return result.length > 0 ? result : defaultData;
-  }, [sessionRecords, timeView]);
+  }, [sessionRecords, timeView, gradeWeights]);
 
   // Per-session EMA fitted values computed client-side from sessionChartData.
   // This is always perfectly aligned with chart point indices regardless of
@@ -1678,20 +1697,20 @@ export default function ReportsPage() {
                 <span className="font-extrabold text-cyan-300 block mb-1">Độ Lệch Chuẩn 3 Loại Điểm (SD):</span>
                 <div className="space-y-1 my-1.5 font-mono text-[10px] font-bold bg-[#0d1120] p-2 rounded-lg border border-[#202948]">
                   <div className="flex items-center justify-between text-blue-400">
-                    <span>Check 1 SD (35%):</span>
+                    <span>Check 1 SD ({gradeWeights.check_1}%):</span>
                     <span>σ = {engine.std_dev_c1 ?? 0}</span>
                   </div>
                   <div className="flex items-center justify-between text-purple-400">
-                    <span>Check 2 SD (55%):</span>
+                    <span>Check 2 SD ({gradeWeights.check_2}%):</span>
                     <span>σ = {engine.std_dev_c2 ?? 0}</span>
                   </div>
                   <div className="flex items-center justify-between text-emerald-400">
-                    <span>Homework SD (10%):</span>
+                    <span>Homework SD ({gradeWeights.homework}%):</span>
                     <span>σ = {engine.std_dev_hw ?? 0}</span>
                   </div>
                 </div>
                 <span className="text-[10px] text-slate-400 block">
-                  SD tổng hợp (σ = {engine.std_dev}) được tính theo trọng số (HW 10%, Check 1 35%, Check 2 55%).
+                  SD tổng hợp (σ = {engine.std_dev}) được tính theo trọng số (HW {gradeWeights.homework}%, Check 1 {gradeWeights.check_1}%, Check 2 {gradeWeights.check_2}%).
                 </span>
               </div>
             )}

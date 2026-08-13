@@ -5,11 +5,18 @@ export interface AppFile {
   type: 'json' | 'docx' | 'pdf' | 'csv' | 'other';
 }
 
+export interface GradeWeights {
+  check_1: number;
+  check_2: number;
+  homework: number;
+}
+
 export interface AppSettings {
   files_dir: string;
   machine_id: string;
   pdf_server_port?: number;
   theme?: any;
+  grade_weights?: GradeWeights;
 }
 
 export interface LayoutSettings {
