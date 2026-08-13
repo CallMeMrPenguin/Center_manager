@@ -2043,19 +2043,27 @@ def _holtwinters_predict(vals: List[float]) -> Tuple[float, float]:
     except Exception:
         return _weighted_ols_predict(vals)
 
-def _get_grade_weights() -> Tuple[float, float, float]:
-    """Retrieves (w_c1, w_c2, w_hw) fractional weights from app settings."""
+def _get_grade_weights() -> Dict[str, float]:
+    """Retrieves fractional weight map {grade_key: fraction_weight} from app settings."""
     try:
         from config.settings import get_setting
+        gt_list = get_setting("grade_types")
+        if gt_list and isinstance(gt_list, list):
+            res = {}
+            for item in gt_list:
+                gid = str(item.get("id", "")).strip()
+                w = float(item.get("weight", 0)) / 100.0
+                if gid:
+                    res[gid] = w
+            if res:
+                return res
         gw = get_setting("grade_weights") or {}
         w_c1 = float(gw.get("check_1", 35.0)) / 100.0
         w_c2 = float(gw.get("check_2", 55.0)) / 100.0
         w_hw = float(gw.get("homework", 10.0)) / 100.0
-        if w_c1 + w_c2 + w_hw <= 0:
-            return 0.35, 0.55, 0.10
-        return w_c1, w_c2, w_hw
+        return {"check_1": w_c1, "check_2": w_c2, "homework": w_hw}
     except Exception:
-        return 0.35, 0.55, 0.10
+        return {"check_1": 0.35, "check_2": 0.55, "homework": 0.10}
 
 def smart_predict(vals: List[float]) -> Tuple[float, float]:
     """Dispatch to the appropriate prediction model based on data volume.
@@ -2074,7 +2082,10 @@ def smart_predict(vals: List[float]) -> Tuple[float, float]:
 
 
 def calculate_performance_analytics(session_records: List[Dict[str, Any]]) -> Dict[str, Any]:
-    w_c1, w_c2, w_hw = _get_grade_weights()
+    gw = _get_grade_weights()
+    w_c1 = gw.get("check_1", 0.35)
+    w_c2 = gw.get("check_2", 0.55)
+    w_hw = gw.get("homework", 0.10)
 
     if not session_records:
         return {
@@ -2386,7 +2397,10 @@ def get_class_student_predictions(class_id: int) -> Dict[int, Dict[str, float]]:
             records_by_student[sid] = []
         records_by_student[sid].append(r)
 
-    w_c1, w_c2, w_hw = _get_grade_weights()
+    gw = _get_grade_weights()
+    w_c1 = gw.get("check_1", 0.35)
+    w_c2 = gw.get("check_2", 0.55)
+    w_hw = gw.get("homework", 0.10)
     predictions: Dict[int, Dict[str, float]] = {}
     for sid, recs in records_by_student.items():
         c1_list, c2_list, hw_list = [], [], []

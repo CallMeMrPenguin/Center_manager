@@ -171,5 +171,12 @@ export const TAB_DEFINITIONS: TabDefinition[] = [
     icon: UserCog,
     section: 'settings',
     render: () => <WaitingForDevelopment title="Quyền & Vai Trò" />
+  },
+  {
+    id: 'settings',
+    label: 'Cấu Hình Hệ Thống',
+    icon: SettingsIcon,
+    section: 'settings',
+    render: () => <Settings />
   }
 ];

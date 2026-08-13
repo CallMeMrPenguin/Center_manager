@@ -15,7 +15,12 @@ DEFAULT_SETTINGS = {
         "check_1": 35.0,
         "check_2": 55.0,
         "homework": 10.0
-    }
+    },
+    "grade_types": [
+        {"id": "check_1", "label": "Check 1", "weight": 35.0, "color": "#3b82f6"},
+        {"id": "check_2", "label": "Check 2", "weight": 55.0, "color": "#a855f7"},
+        {"id": "homework", "label": "BTVN", "weight": 10.0, "color": "#f59e0b"}
+    ]
 }
 
 def load_settings():

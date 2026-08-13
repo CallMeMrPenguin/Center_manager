@@ -11,12 +11,20 @@ export interface GradeWeights {
   homework: number;
 }
 
+export interface GradeTypeItem {
+  id: string;
+  label: string;
+  weight: number;
+  color?: string;
+}
+
 export interface AppSettings {
   files_dir: string;
   machine_id: string;
   pdf_server_port?: number;
   theme?: any;
   grade_weights?: GradeWeights;
+  grade_types?: GradeTypeItem[];
 }
 
 export interface LayoutSettings {

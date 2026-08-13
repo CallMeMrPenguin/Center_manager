@@ -1,10 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
 import { api } from '../../api';
-import { AppSettings, SystemCheck } from '../../types';
+import { AppSettings, SystemCheck, GradeTypeItem } from '../../types';
 import { 
   Settings as SettingsIcon, Database, RefreshCw, 
   Trash2, ShieldCheck, Cpu, HardDrive, CheckCircle2, AlertTriangle, Save, Upload,
-  Download, ArrowUpCircle, GitBranch, Loader2
+  Download, ArrowUpCircle, GitBranch, Loader2, Plus, Scale, Edit3
 } from 'lucide-react';
 import { applyTheme } from '../../theme';
 import { showToast } from '../../components/Toast';
@@ -17,6 +17,16 @@ export default function Settings() {
   const [systemCheck, setSystemCheck] = useState<SystemCheck | null>(null);
   const [loadingDiagnostics, setLoadingDiagnostics] = useState(false);
   const [filesDirInput, setFilesDirInput] = useState("");
+
+  // Dynamic Grade Types state
+  const DEFAULT_GRADE_TYPES: GradeTypeItem[] = [
+    { id: 'check_1', label: 'Check 1', weight: 35, color: '#3b82f6' },
+    { id: 'check_2', label: 'Check 2', weight: 55, color: '#a855f7' },
+    { id: 'homework', label: 'BTVN / Homework', weight: 10, color: '#f59e0b' }
+  ];
+  const [gradeTypes, setGradeTypes] = useState<GradeTypeItem[]>(DEFAULT_GRADE_TYPES);
+  const [newGradeLabel, setNewGradeLabel] = useState("");
+  const [showAddModal, setShowAddModal] = useState(false);
 
   // Update state
   const [updateState, setUpdateState] = useState<any>(null);
@@ -118,12 +128,6 @@ export default function Settings() {
     };
   }, []);
 
-  const [gradeWeights, setGradeWeights] = useState({
-    check_1: 35,
-    check_2: 55,
-    homework: 10
-  });
-
   const loadSettings = async () => {
     try {
       const data = await api.getSettings();
@@ -133,37 +137,84 @@ export default function Settings() {
         setThemeSettings((data as any).theme);
         applyTheme((data as any).theme);
       }
-      if (data && data.grade_weights) {
-        setGradeWeights({
-          check_1: data.grade_weights.check_1 ?? 35,
-          check_2: data.grade_weights.check_2 ?? 55,
-          homework: data.grade_weights.homework ?? 10
-        });
+      if (data && data.grade_types && Array.isArray(data.grade_types) && data.grade_types.length > 0) {
+        setGradeTypes(data.grade_types);
+      } else if (data && data.grade_weights) {
+        setGradeTypes([
+          { id: 'check_1', label: 'Check 1', weight: data.grade_weights.check_1 ?? 35, color: '#3b82f6' },
+          { id: 'check_2', label: 'Check 2', weight: data.grade_weights.check_2 ?? 55, color: '#a855f7' },
+          { id: 'homework', label: 'BTVN / Homework', weight: data.grade_weights.homework ?? 10, color: '#f59e0b' }
+        ]);
       }
     } catch (e) {
       showToast("Không thể tải cấu hình hệ thống: " + e, "error");
     }
   };
 
-  const handleSaveGradeWeights = async () => {
-    const sum = (Number(gradeWeights.check_1) || 0) + (Number(gradeWeights.check_2) || 0) + (Number(gradeWeights.homework) || 0);
-    if (Math.abs(sum - 100) > 0.01) {
-      showToast(`Tổng tỷ lệ phải bằng 100% (Hiện tại: ${sum}%)`, "warning");
+  const handleSaveGradeTypes = async () => {
+    const sum = gradeTypes.reduce((acc, curr) => acc + (Number(curr.weight) || 0), 0);
+    if (Math.abs(sum - 100) > 0.1) {
+      showToast(`Tổng các trọng số phải bằng 100% (Hiện tại: ${sum.toFixed(1)}%)`, "warning");
       return;
     }
     try {
+      const legacyWeights: Record<string, number> = {};
+      gradeTypes.forEach(gt => { legacyWeights[gt.id] = gt.weight; });
+
       await api.saveSettings({
-        grade_weights: {
-          check_1: Number(gradeWeights.check_1),
-          check_2: Number(gradeWeights.check_2),
-          homework: Number(gradeWeights.homework)
-        }
+        grade_types: gradeTypes,
+        grade_weights: legacyWeights as any
       });
-      showToast("Đã lưu trọng số điểm đánh giá!", "success");
+      showToast("Đã lưu danh sách loại điểm & trọng số thành công!", "success");
       loadSettings();
     } catch (e) {
       showToast("Không thể lưu trọng số: " + e, "error");
     }
+  };
+
+  const handleAutoRebalance = () => {
+    if (gradeTypes.length === 0) return;
+    const equalWeight = Number((100 / gradeTypes.length).toFixed(1));
+    let currentSum = 0;
+    const rebalanced = gradeTypes.map((gt, idx) => {
+      if (idx === gradeTypes.length - 1) {
+        const lastW = Number((100 - currentSum).toFixed(1));
+        return { ...gt, weight: Math.max(0, lastW) };
+      }
+      currentSum += equalWeight;
+      return { ...gt, weight: equalWeight };
+    });
+    setGradeTypes(rebalanced);
+    showToast("Đã tự động cân bằng các trọng số!", "success");
+  };
+
+  const handleAddGradeType = () => {
+    if (!newGradeLabel.trim()) {
+      showToast("Vui lòng nhập tên loại điểm mới", "warning");
+      return;
+    }
+    const cleanLabel = newGradeLabel.trim();
+    const cleanId = cleanLabel.toLowerCase().replace(/[^a-z0-9]/g, '_') || `grade_${Date.now()}`;
+    if (gradeTypes.some(gt => gt.id === cleanId)) {
+      showToast("Loại điểm này đã tồn tại", "warning");
+      return;
+    }
+    const colors = ['#3b82f6', '#a855f7', '#f59e0b', '#10b981', '#ec4899', '#06b6d4', '#f97316'];
+    const assignedColor = colors[gradeTypes.length % colors.length];
+    const updated = [...gradeTypes, { id: cleanId, label: cleanLabel, weight: 0, color: assignedColor }];
+    setGradeTypes(updated);
+    setNewGradeLabel('');
+    setShowAddModal(false);
+    showToast(`Đã thêm '${cleanLabel}'! Bấm 'Tự động cân bằng' để chia đều trọng số.`, "success");
+  };
+
+  const handleRemoveGradeType = (id: string) => {
+    if (gradeTypes.length <= 1) {
+      showToast("Phải duy trì ít nhất 1 loại điểm", "warning");
+      return;
+    }
+    setGradeTypes(prev => prev.filter(gt => gt.id !== id));
+    showToast("Đã xóa loại điểm. Hãy điều chỉnh hoặc bấm Tự động cân bằng.", "warning");
   };
 
   const loadProfiles = async () => {
@@ -428,64 +479,128 @@ export default function Settings() {
             )}
           </div>
 
-          {/* Grade Proportions (Score Weighting) Box */}
+          {/* Dynamic Grade Types & Proportions Box */}
           <div className="glass-panel rounded-2xl p-6 flex flex-col gap-4">
-            <div className="flex justify-between items-center border-b border-slate-900/60 pb-3">
+            <div className="flex flex-wrap justify-between items-center border-b border-slate-900/60 pb-3 gap-2">
               <h3 className="text-xs font-extrabold text-white uppercase tracking-wider flex items-center gap-2">
-                <SettingsIcon size={14} className="text-indigo-400" /> Cấu Hình Trọng Số Điểm Đánh Giá
+                <SettingsIcon size={14} className="text-indigo-400" /> Quản Lý Loại Điểm & Trọng Số (%)
               </h3>
-              <span className={`text-xs font-bold px-2.5 py-1 rounded-lg ${
-                Math.abs((Number(gradeWeights.check_1) || 0) + (Number(gradeWeights.check_2) || 0) + (Number(gradeWeights.homework) || 0) - 100) < 0.01
-                  ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                  : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
-              }`}>
-                Tổng: {(Number(gradeWeights.check_1) || 0) + (Number(gradeWeights.check_2) || 0) + (Number(gradeWeights.homework) || 0)}%
-              </span>
+              <div className="flex items-center gap-2">
+                <span className={`text-xs font-bold px-2.5 py-1 rounded-lg ${
+                  Math.abs(gradeTypes.reduce((acc, c) => acc + (Number(c.weight) || 0), 0) - 100) < 0.1
+                    ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                    : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
+                }`}>
+                  Tổng: {gradeTypes.reduce((acc, c) => acc + (Number(c.weight) || 0), 0).toFixed(1)}%
+                </span>
+                <button
+                  type="button"
+                  onClick={handleAutoRebalance}
+                  className="px-2.5 py-1 rounded-lg bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/20 text-xs font-bold transition flex items-center gap-1 cursor-pointer"
+                  title="Tự động chia đều trọng số cho tất cả loại điểm"
+                >
+                  <Scale size={12} />
+                  <span>Tự Động Cân Bằng</span>
+                </button>
+              </div>
             </div>
+
             <p className="text-xs text-slate-400">
-              Tùy chỉnh tỷ lệ phần trăm các điểm thành phần dùng để tính toán <b>Điểm Đánh Giá</b> và <b>Dự Đoán Học Tập</b> trong toàn bộ báo cáo.
+              Thêm, xóa hoặc chỉnh sửa trọng số % của các loại điểm. Hệ thống tự động đồng bộ trọng số để tính <b>Điểm Đánh Giá</b> và <b>Dự Đoán Học Tập</b>.
             </p>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-1">
-              <div className="flex flex-col gap-1.5 bg-[#0b0f19] p-3.5 rounded-xl border border-slate-850">
-                <label className="text-[10px] font-extrabold text-blue-400 uppercase">Check 1 (%)</label>
-                <input
-                  type="number"
-                  min={0}
-                  max={100}
-                  value={gradeWeights.check_1}
-                  onChange={(e) => setGradeWeights({ ...gradeWeights, check_1: parseFloat(e.target.value) || 0 })}
-                  className="bg-[#121626] border border-slate-700 px-3 py-2 rounded-lg text-sm text-white font-bold focus:outline-none focus:border-blue-500"
-                />
-              </div>
-              <div className="flex flex-col gap-1.5 bg-[#0b0f19] p-3.5 rounded-xl border border-slate-850">
-                <label className="text-[10px] font-extrabold text-purple-400 uppercase">Check 2 (%)</label>
-                <input
-                  type="number"
-                  min={0}
-                  max={100}
-                  value={gradeWeights.check_2}
-                  onChange={(e) => setGradeWeights({ ...gradeWeights, check_2: parseFloat(e.target.value) || 0 })}
-                  className="bg-[#121626] border border-slate-700 px-3 py-2 rounded-lg text-sm text-white font-bold focus:outline-none focus:border-purple-500"
-                />
-              </div>
-              <div className="flex flex-col gap-1.5 bg-[#0b0f19] p-3.5 rounded-xl border border-slate-850">
-                <label className="text-[10px] font-extrabold text-amber-400 uppercase">BTVN / Homework (%)</label>
-                <input
-                  type="number"
-                  min={0}
-                  max={100}
-                  value={gradeWeights.homework}
-                  onChange={(e) => setGradeWeights({ ...gradeWeights, homework: parseFloat(e.target.value) || 0 })}
-                  className="bg-[#121626] border border-slate-700 px-3 py-2 rounded-lg text-sm text-white font-bold focus:outline-none focus:border-amber-500"
-                />
-              </div>
+
+            <div className="flex flex-col gap-3">
+              {gradeTypes.map((gt, idx) => (
+                <div key={gt.id || idx} className="flex items-center gap-3 bg-[#0b0f19] p-3 rounded-xl border border-slate-850">
+                  <div 
+                    className="w-3 h-8 rounded-lg shrink-0" 
+                    style={{ backgroundColor: gt.color || '#5c36f5' }} 
+                  />
+                  <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <div>
+                      <span className="text-[9px] font-bold text-slate-500 uppercase block">Tên loại điểm</span>
+                      <input
+                        type="text"
+                        value={gt.label}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setGradeTypes(prev => prev.map((item, i) => i === idx ? { ...item, label: val } : item));
+                        }}
+                        className="bg-[#121626] border border-slate-700 px-3 py-1.5 rounded-lg text-xs text-white font-bold focus:outline-none focus:border-indigo-500 w-full"
+                      />
+                    </div>
+                    <div>
+                      <span className="text-[9px] font-bold text-slate-500 uppercase block">Trọng số (%)</span>
+                      <input
+                        type="number"
+                        min={0}
+                        max={100}
+                        step={0.5}
+                        value={gt.weight}
+                        onChange={(e) => {
+                          const val = parseFloat(e.target.value) || 0;
+                          setGradeTypes(prev => prev.map((item, i) => i === idx ? { ...item, weight: val } : item));
+                        }}
+                        className="bg-[#121626] border border-slate-700 px-3 py-1.5 rounded-lg text-xs text-white font-bold focus:outline-none focus:border-indigo-500 w-full"
+                      />
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveGradeType(gt.id)}
+                    className="p-2 bg-rose-500/10 hover:bg-rose-500/20 text-rose-450 rounded-lg transition border border-rose-500/20 shrink-0 cursor-pointer"
+                    title="Xóa loại điểm này"
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </div>
+              ))}
             </div>
-            <div className="flex justify-end pt-2">
+
+            {showAddModal ? (
+              <div className="flex items-center gap-2 bg-[#0d1222] p-3 rounded-xl border border-indigo-500/30">
+                <input
+                  type="text"
+                  placeholder="Nhập tên loại điểm mới (VD: Speaking, Listening...)"
+                  value={newGradeLabel}
+                  onChange={(e) => setNewGradeLabel(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleAddGradeType()}
+                  className="bg-[#121626] border border-slate-700 px-3 py-2 rounded-lg text-xs text-white font-bold focus:outline-none focus:border-indigo-500 flex-1"
+                  autoFocus
+                />
+                <button
+                  type="button"
+                  onClick={handleAddGradeType}
+                  className="px-3 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-lg transition"
+                >
+                  Xác Nhận
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowAddModal(false)}
+                  className="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs rounded-lg transition"
+                >
+                  Hủy
+                </button>
+              </div>
+            ) : (
               <button
-                onClick={handleSaveGradeWeights}
-                className="group px-3.5 py-2 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-xs transition-all duration-300 flex items-center gap-1.5 cursor-pointer shadow-md shadow-blue-500/10"
+                type="button"
+                onClick={() => setShowAddModal(true)}
+                className="w-full py-2.5 border border-dashed border-slate-800 hover:border-indigo-500/40 bg-[#0b0f19]/50 hover:bg-indigo-500/5 text-slate-400 hover:text-indigo-300 font-bold text-xs rounded-xl transition flex items-center justify-center gap-1.5 cursor-pointer"
               >
-                <Save size={13} />
+                <Plus size={14} />
+                <span>+ Thêm Loại Điểm Mới</span>
+              </button>
+            )}
+
+            <div className="flex justify-end pt-2 border-t border-slate-900/60">
+              <button
+                type="button"
+                onClick={handleSaveGradeTypes}
+                className="group px-4 py-2 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-xs transition-all duration-300 flex items-center gap-1.5 cursor-pointer shadow-md shadow-blue-500/10"
+              >
+                <Save size={14} />
                 <span>Lưu Trọng Số Điểm</span>
               </button>
             </div>

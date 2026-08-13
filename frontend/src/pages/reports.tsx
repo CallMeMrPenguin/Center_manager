@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
 import { api } from '../api';
+import { GradeTypeItem } from '../types';
 import { 
   BarChart3, RefreshCw, Calendar, 
   AlertCircle, Users, GraduationCap, ChevronRight, Info, RotateCcw, X, Edit2, History, Save,
@@ -608,16 +609,22 @@ export default function ReportsPage() {
     },
   ], []);
 
-  const [gradeWeights, setGradeWeights] = useState({ check_1: 35, check_2: 55, homework: 10 });
+  const [gradeTypesList, setGradeTypesList] = useState<GradeTypeItem[]>([
+    { id: 'check_1', label: 'Check 1', weight: 35, color: '#3b82f6' },
+    { id: 'check_2', label: 'Check 2', weight: 55, color: '#a855f7' },
+    { id: 'homework', label: 'BTVN', weight: 10, color: '#f59e0b' }
+  ]);
 
   useEffect(() => {
     api.getSettings().then(data => {
-      if (data?.grade_weights) {
-        setGradeWeights({
-          check_1: data.grade_weights.check_1 ?? 35,
-          check_2: data.grade_weights.check_2 ?? 55,
-          homework: data.grade_weights.homework ?? 10,
-        });
+      if (data?.grade_types && Array.isArray(data.grade_types) && data.grade_types.length > 0) {
+        setGradeTypesList(data.grade_types);
+      } else if (data?.grade_weights) {
+        setGradeTypesList([
+          { id: 'check_1', label: 'Check 1', weight: data.grade_weights.check_1 ?? 35, color: '#3b82f6' },
+          { id: 'check_2', label: 'Check 2', weight: data.grade_weights.check_2 ?? 55, color: '#a855f7' },
+          { id: 'homework', label: 'BTVN', weight: data.grade_weights.homework ?? 10, color: '#f59e0b' }
+        ]);
       }
     }).catch(() => {});
   }, []);
@@ -778,10 +785,18 @@ export default function ReportsPage() {
 
     const selectedDates = dates.slice(-limit);
 
-    const w1 = (gradeWeights.check_1 || 35) / 100;
-    const w2 = (gradeWeights.check_2 || 55) / 100;
-    const whw = (gradeWeights.homework || 10) / 100;
-    const wTot = (w1 + w2 + whw) || 1;
+    const weightsMap: Record<string, number> = {};
+    let wTot = 0;
+    gradeTypesList.forEach(gt => {
+      const frac = (Number(gt.weight) || 0) / 100;
+      weightsMap[gt.id] = frac;
+      wTot += frac;
+    });
+    if (wTot <= 0) wTot = 1;
+
+    const w1 = weightsMap['check_1'] ?? 0.35;
+    const w2 = weightsMap['check_2'] ?? 0.55;
+    const whw = weightsMap['homework'] ?? 0.10;
 
     const result = selectedDates.map((d) => {
       const item = dateMap[d];
@@ -804,7 +819,7 @@ export default function ReportsPage() {
     });
 
     return result.length > 0 ? result : defaultData;
-  }, [sessionRecords, timeView, gradeWeights]);
+  }, [sessionRecords, timeView, gradeTypesList]);
 
   // Per-session EMA fitted values computed client-side from sessionChartData.
   // This is always perfectly aligned with chart point indices regardless of
@@ -1694,23 +1709,17 @@ export default function ReportsPage() {
 
             {activeTooltip === 'sd' && (
               <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 w-64 p-3 bg-[#161c34] border border-[#2c375e] text-slate-200 text-[11px] rounded-xl shadow-2xl z-30 text-left font-sans">
-                <span className="font-extrabold text-cyan-300 block mb-1">Độ Lệch Chuẩn 3 Loại Điểm (SD):</span>
+                <span className="font-extrabold text-cyan-300 block mb-1">Độ Lệch Chuẩn Các Loại Điểm (SD):</span>
                 <div className="space-y-1 my-1.5 font-mono text-[10px] font-bold bg-[#0d1120] p-2 rounded-lg border border-[#202948]">
-                  <div className="flex items-center justify-between text-blue-400">
-                    <span>Check 1 SD ({gradeWeights.check_1}%):</span>
-                    <span>σ = {engine.std_dev_c1 ?? 0}</span>
-                  </div>
-                  <div className="flex items-center justify-between text-purple-400">
-                    <span>Check 2 SD ({gradeWeights.check_2}%):</span>
-                    <span>σ = {engine.std_dev_c2 ?? 0}</span>
-                  </div>
-                  <div className="flex items-center justify-between text-emerald-400">
-                    <span>Homework SD ({gradeWeights.homework}%):</span>
-                    <span>σ = {engine.std_dev_hw ?? 0}</span>
-                  </div>
+                  {gradeTypesList.map(gt => (
+                    <div key={gt.id} className="flex items-center justify-between" style={{ color: gt.color || '#3b82f6' }}>
+                      <span>{gt.label} ({gt.weight}%):</span>
+                      <span>σ = {((engine as any)[`std_dev_${gt.id}`] ?? engine.std_dev ?? 0)}</span>
+                    </div>
+                  ))}
                 </div>
                 <span className="text-[10px] text-slate-400 block">
-                  SD tổng hợp (σ = {engine.std_dev}) được tính theo trọng số (HW {gradeWeights.homework}%, Check 1 {gradeWeights.check_1}%, Check 2 {gradeWeights.check_2}%).
+                  SD tổng hợp (σ = {engine.std_dev}) được tính theo trọng số ({gradeTypesList.map(gt => `${gt.label} ${gt.weight}%`).join(', ')}).
                 </span>
               </div>
             )}
