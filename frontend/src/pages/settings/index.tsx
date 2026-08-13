@@ -3,20 +3,11 @@ import { api } from '../../api';
 import { AppSettings, SystemCheck, GradeTypeItem } from '../../types';
 import { 
   Settings as SettingsIcon, Database, RefreshCw, 
-  Trash2, ShieldCheck, Cpu, HardDrive, CheckCircle2, AlertTriangle, Save, Upload,
+  Trash2, ShieldCheck, Cpu, HardDrive, CheckCircle2, AlertTriangle, Save,
   Download, ArrowUpCircle, GitBranch, Loader2, Plus, Scale, Edit3
 } from 'lucide-react';
-import { applyTheme } from '../../theme';
 import { showToast } from '../../components/Toast';
 import { useConfirm } from '../../components/ConfirmDialog';
-
-const DEFAULT_THEME = {
-  bgImage: 'none',
-  opacity: 0.08,
-  blur: 24,
-  borderOpacity: 0.15,
-  saturate: 180
-};
 
 export default function Settings() {
   const confirm = useConfirm();
@@ -42,90 +33,6 @@ export default function Settings() {
   const [applyingUpdate, setApplyingUpdate] = useState(false);
   const updatePollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // Theme & Glass effect state
-  const [themeSettings, setThemeSettings] = useState(() => {
-    const saved = localStorage.getItem('app_theme_settings');
-    if (saved) {
-      try {
-        return { ...DEFAULT_THEME, ...JSON.parse(saved) };
-      } catch (e) {}
-    }
-    return DEFAULT_THEME;
-  });
-
-  const safeTheme = {
-    bgImage: typeof themeSettings?.bgImage === 'string' ? themeSettings.bgImage : 'none',
-    opacity: typeof themeSettings?.opacity === 'number' ? themeSettings.opacity : 0.08,
-    blur: typeof themeSettings?.blur === 'number' ? themeSettings.blur : 24,
-    borderOpacity: typeof themeSettings?.borderOpacity === 'number' ? themeSettings.borderOpacity : 0.15,
-    saturate: typeof themeSettings?.saturate === 'number' ? themeSettings.saturate : 180,
-  };
-
-  const handleLocalBgUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const img = new Image();
-      img.onload = () => {
-        const maxDim = 2560;
-        let width = img.width;
-        let height = img.height;
-        if (width > maxDim || height > maxDim) {
-          if (width > height) {
-            height = Math.round((height * maxDim) / width);
-            width = maxDim;
-          } else {
-            width = Math.round((width * maxDim) / height);
-            height = maxDim;
-          }
-        }
-
-        const canvas = document.createElement('canvas');
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        if (ctx) {
-          ctx.drawImage(img, 0, 0, width, height);
-          const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
-          try {
-            updateThemeSetting('bgImage', dataUrl);
-            showToast("Đã áp dụng hình nền cục bộ từ máy tính!", "success");
-          } catch (err) {
-            showToast("Lỗi bộ nhớ: Hình ảnh quá lớn. Hãy thử ảnh khác nhỏ hơn.", "error");
-          }
-        }
-      };
-      img.src = event.target?.result as string;
-    };
-    reader.readAsDataURL(file);
-  };
-
-  const updateThemeSetting = (key: string, value: any) => {
-    const newSettings = { ...themeSettings, [key]: value };
-    setThemeSettings(newSettings);
-    
-    try {
-      localStorage.setItem('app_theme_settings', JSON.stringify(newSettings));
-    } catch (err) {
-      console.error("Failed to save theme setting to localStorage:", err);
-    }
-
-    // Save to backend configuration
-    api.saveSettings({ theme: newSettings }).catch(err => {
-      console.error("Failed to save theme settings to backend:", err);
-    });
-    
-    applyTheme(newSettings);
-
-    // Sync theme settings with iframe
-    const iframe = document.querySelector('iframe');
-    if (iframe && iframe.contentWindow) {
-      iframe.contentWindow.postMessage({ type: 'THEME_UPDATE', theme: newSettings }, '*');
-    }
-  };
-
   useEffect(() => {
     loadSettings();
     loadProfiles();
@@ -142,18 +49,13 @@ export default function Settings() {
       const data = await api.getSettings();
       setSettings(data);
       if (data?.files_dir) setFilesDirInput(data.files_dir);
-      if (data && (data as any).theme) {
-        const mergedTheme = { ...DEFAULT_THEME, ...(data as any).theme };
-        setThemeSettings(mergedTheme);
-        applyTheme(mergedTheme);
-      }
       if (data && data.grade_types && Array.isArray(data.grade_types) && data.grade_types.length > 0) {
         setGradeTypes(data.grade_types);
       } else if (data && data.grade_weights) {
         setGradeTypes([
           { id: 'check_1', label: 'Check 1', weight: data.grade_weights.check_1 ?? 35, color: '#3b82f6' },
           { id: 'check_2', label: 'Check 2', weight: data.grade_weights.check_2 ?? 55, color: '#a855f7' },
-          { id: 'homework', label: 'BTVN / Homework', weight: data.grade_weights.homework ?? 10, color: '#f59e0b' }
+          { id: 'homework', label: 'BTVN / Homework', weight: 10, color: '#f59e0b' }
         ]);
       }
     } catch (e) {
@@ -615,110 +517,7 @@ export default function Settings() {
             </div>
           </div>
 
-          {/* Glassmorphism & Background Theme Box */}
-          <div className="glass-panel rounded-2xl p-6 flex flex-col gap-5">
-            <h3 className="text-xs font-extrabold text-white uppercase tracking-wider border-b border-slate-900/60 pb-3 flex items-center gap-2">
-              <SettingsIcon size={14} className="text-blue-400" /> Tùy biến giao diện & Hiệu ứng kính (Glassmorphism)
-            </h3>
 
-            {/* Background Image Selection */}
-            <div className="flex flex-col gap-3">
-              <label className="text-[10px] font-bold text-slate-450 uppercase">Hình nền ứng dụng</label>
-              
-              {/* Custom Image Chooser */}
-              <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 items-end">
-                <div className="sm:col-span-2 flex flex-col gap-1.5">
-                  <span className="text-[9px] text-slate-400">Nhập URL hình nền tùy chỉnh:</span>
-                  <input
-                    type="text"
-                    value={safeTheme.bgImage !== 'none' && !safeTheme.bgImage.startsWith('data:') ? safeTheme.bgImage : ''}
-                    onChange={(e) => updateThemeSetting('bgImage', e.target.value || 'none')}
-                    placeholder="https://example.com/background.jpg"
-                    className="bg-[#0b0f19] border border-slate-850 px-3.5 py-2.5 rounded-xl text-xs text-white focus:outline-none focus:border-slate-700 font-mono w-full"
-                  />
-                </div>
-                <div>
-                  <label className="group w-full px-3.5 py-2.5 bg-slate-900 border border-slate-850 hover:bg-gradient-to-tr hover:from-blue-600/10 hover:to-indigo-600/10 hover:border-blue-500/30 text-slate-350 hover:text-white font-extrabold text-xs rounded-xl cursor-pointer transition-all duration-300 whitespace-nowrap flex items-center justify-center gap-0 hover:gap-1.5 h-10">
-                    <Upload size={12} />
-                    <span className="max-w-0 overflow-hidden group-hover:max-w-[100px] transition-all duration-300 whitespace-nowrap block">Chọn tệp ảnh...</span>
-                    <input 
-                      type="file" 
-                      accept="image/*" 
-                      onChange={handleLocalBgUpload} 
-                      className="hidden" 
-                    />
-                  </label>
-                </div>
-                <div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      updateThemeSetting('bgImage', 'none');
-                      showToast("Đã khôi phục hình nền mặc định!", "success");
-                    }}
-                    className="group w-full px-3.5 py-2.5 bg-slate-900 border border-slate-850 hover:bg-gradient-to-tr hover:from-blue-600/10 hover:to-indigo-600/10 hover:border-blue-500/30 text-slate-350 hover:text-white font-extrabold text-xs rounded-xl cursor-pointer transition-all duration-300 whitespace-nowrap flex items-center justify-center gap-0 hover:gap-1.5 h-10"
-                  >
-                    <Trash2 size={12} className="text-rose-450" />
-                    <span className="max-w-0 overflow-hidden group-hover:max-w-[150px] transition-all duration-300 whitespace-nowrap block">Khôi phục mặc định</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* Glass Effect Adjusters */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 pt-2 border-t border-slate-900/60">
-              {/* Opacity Slider */}
-              <div className="flex flex-col gap-1.5">
-                <div className="flex justify-between items-center text-[10px] font-bold">
-                  <span className="text-slate-400 uppercase">Độ đục nền kính (Opacity)</span>
-                  <span className="text-blue-400 font-mono">{Math.round(safeTheme.opacity * 100)}%</span>
-                </div>
-                <input
-                  type="range"
-                  min="0.01"
-                  max="0.5"
-                  step="0.01"
-                  value={safeTheme.opacity}
-                  onChange={(e) => updateThemeSetting('opacity', parseFloat(e.target.value))}
-                  className="w-full h-1 bg-slate-900 rounded-lg appearance-none cursor-pointer accent-blue-500"
-                />
-              </div>
-
-              {/* Blur Slider */}
-              <div className="flex flex-col gap-1.5">
-                <div className="flex justify-between items-center text-[10px] font-bold">
-                  <span className="text-slate-400 uppercase">Độ nhòe kính (Blur)</span>
-                  <span className="text-blue-400 font-mono">{safeTheme.blur}px</span>
-                </div>
-                <input
-                  type="range"
-                  min="0"
-                  max="40"
-                  step="1"
-                  value={safeTheme.blur}
-                  onChange={(e) => updateThemeSetting('blur', parseInt(e.target.value))}
-                  className="w-full h-1 bg-slate-900 rounded-lg appearance-none cursor-pointer accent-blue-500"
-                />
-              </div>
-
-              {/* Border Opacity Slider */}
-              <div className="flex flex-col gap-1.5">
-                <div className="flex justify-between items-center text-[10px] font-bold">
-                  <span className="text-slate-400 uppercase">Độ rõ viền kính (Border Opacity)</span>
-                  <span className="text-blue-400 font-mono">{Math.round(safeTheme.borderOpacity * 100)}%</span>
-                </div>
-                <input
-                  type="range"
-                  min="0.0"
-                  max="0.3"
-                  step="0.01"
-                  value={safeTheme.borderOpacity}
-                  onChange={(e) => updateThemeSetting('borderOpacity', parseFloat(e.target.value))}
-                  className="w-full h-1 bg-slate-900 rounded-lg appearance-none cursor-pointer accent-blue-500"
-                />
-              </div>
-            </div>
-          </div>
         </div>
 
         {/* Right Column: Profiles CRUD List */}
