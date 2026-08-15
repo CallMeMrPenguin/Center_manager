@@ -2298,10 +2298,12 @@ def calculate_performance_analytics(session_records: List[Dict[str, Any]]) -> Di
         consistency_label = "Rất ổn định"
     elif std_dev <= 1.0:
         consistency_label = "Ổn định"
-    elif std_dev <= 2.0:
+    elif std_dev <= 2.2:
         consistency_label = "Biến động"
-    else:
+    elif std_dev <= 3.8:
         consistency_label = "Biến động mạnh"
+    else:
+        consistency_label = "Phân hóa cực lớn"
 
     def _calc_ema(vals: List[float]) -> float:
         if not vals:
@@ -2356,15 +2358,22 @@ def calculate_performance_analytics(session_records: List[Dict[str, Any]]) -> Di
 
     recs = []
     if slope_overall < -0.1:
-        recs.append("Cảnh báo: Học sinh đang có xu hướng giảm điểm, cần giáo viên trao đổi trực tiếp.")
+        recs.append("Cảnh báo: Xu hướng điểm số đang giảm sút, cần giáo viên trao đổi trực tiếp.")
     if hw_list and avg_hw < 7.0:
-        recs.append("Khuyên dùng: Cho học sinh luyện tập thêm bài tập về nhà để củng cố kiến thức cơ bản.")
+        recs.append("Khuyên dùng: Cho học sinh luyện tập thêm bài tập về nhà để củng cố kiến thức căn bản.")
     if att_pct < 85:
         recs.append(f"Cảnh báo: Tỷ lệ vắng mặt cao ({att_pct:.0f}%), ảnh hưởng đến khả năng tiếp thu.")
-    if std_dev > 1.5:
-        recs.append("Khuyên dùng: Điểm số trồi sụt thất thường so với xu hướng, cần giáo viên theo dõi sát sao từng buổi học.")
+
+    # Highly Specific Tiered Volatility & Dispersion Recommendations
+    if std_dev >= 4.0:
+        recs.append(f"Cảnh báo phân cực cực độ: Lớp học có sự chênh lệch trình độ rất lớn (SD = {std_dev:.1f}). Cần khẩn cấp chia nhóm phụ đạo riêng biệt hoặc áp dụng bài tập phân hóa.")
+    elif std_dev >= 2.2:
+        recs.append(f"Cảnh báo phân hóa mạnh: Khoảng cách học lực trong lớp khá cao (SD = {std_dev:.1f}). Giáo viên nên giao bài mở rộng cho nhóm giỏi và bài củng cố cho nhóm dưới.")
+    elif std_dev >= 1.2:
+        recs.append(f"Khuyên dùng: Điểm số có sự trồi sụt so với xu hướng (SD = {std_dev:.1f}), cần theo dõi sát sao từng buổi học.")
     elif slope_overall > 0.2:
-        recs.append("Khen ngợi: Học sinh đang có sự tiến bộ vượt bậc và duy trì phong độ rất tốt!")
+        recs.append("Khen ngợi: Đang có sự tiến bộ vượt bậc và duy trì phong độ rất tốt!")
+
     if not recs:
         recs.append("Đánh giá: Duy trì phong độ tốt. Tiếp tục phát huy trong các kỳ tới.")
     recs.append(f"Dự đoán buổi tới: Check 1 ({pred_c1:.1f}), Check 2 ({pred_c2:.1f}), Homework ({pred_hw:.1f}).")

@@ -1160,7 +1160,7 @@ export default function ReportsPage() {
 
     const currentClass = classes.find(c => String(c.id) === selectedClassId);
     const className = currentClass ? currentClass.class_name : 'Tất Cả Lớp';
-    const modeName = groupingMode === 'tier' ? 'Theo Chuẩn Học Lực (Mode A)' : `Tự Động Phân Cụm K-Means (${kmeansK} Nhóm) (Mode B)`;
+    const modeName = groupingMode === 'tier' ? 'Theo Chuẩn Học Lực' : `Tự Động Phân Cụm K-Means (${kmeansK} Nhóm)`;
 
     let text = `=== KẾT QUẢ GỢI Ý PHÂN NHÓM HỌC TẬP ===\n`;
     text += `Lớp: ${className} | Tổng số: ${filteredRankings.length} học sinh\n`;
@@ -2158,7 +2158,7 @@ export default function ReportsPage() {
                   groupingMode === 'tier' ? 'text-white font-black' : 'text-slate-400 hover:text-white'
                 }`}
               >
-                Theo Chuẩn Học Lực (Mode A)
+                Theo Chuẩn Học Lực
               </button>
               <button
                 type="button"
@@ -2167,7 +2167,7 @@ export default function ReportsPage() {
                   groupingMode === 'kmeans' ? 'text-white font-black' : 'text-slate-400 hover:text-white'
                 }`}
               >
-                Tự Động Phân Cụm K-Means (Mode B)
+                Tự Động Phân Cụm K-Means
               </button>
             </div>
 
