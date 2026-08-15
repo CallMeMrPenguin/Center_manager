@@ -4,15 +4,30 @@ import { api } from '../api';
 import { GradeTypeItem } from '../types';
 import { 
   BarChart3, RefreshCw, Calendar, 
-  AlertCircle, Users, GraduationCap, ChevronRight, Info, RotateCcw, X, Edit2, History, Save,
+  AlertCircle, Users, GraduationCap, ChevronRight, ChevronDown, ChevronUp, Info, RotateCcw, X, Edit2, History, Save,
   ZoomIn, ZoomOut, Move, Sparkles, Layers, Copy, Check, FileSpreadsheet, TrendingUp, TrendingDown, Minus, ShieldAlert, Award, Zap,
-  SlidersHorizontal, Settings, Plus, Trash2, ShieldCheck, Flame, BellRing, Target, Activity, CheckCircle2, Clock, BarChart2, ShieldX, HelpCircle
+  SlidersHorizontal, Settings, Plus, Trash2, ShieldCheck, Flame, BellRing, Target, Activity, CheckCircle2, Clock, BarChart2, ShieldX, HelpCircle,
+  FolderTree, ArrowUpRight
 } from 'lucide-react';
 import { showToast } from '../components/Toast';
 import { CustomDatePicker } from '../components/CustomDatePicker';
 import { CustomSelect } from '../components/CustomSelect';
 import { DataTable } from '../components/DataTable';
 import { notifyDataChanged, format1Dec, trunc1Dec } from '../utils';
+
+const DEFAULT_WARNING_SETTINGS = {
+  absentPct: 15,
+  consecutiveAbsent: 2,
+  trendThreshold: -0.2
+};
+
+const getSavedWarningSettings = () => {
+  try {
+    const raw = localStorage.getItem('cm_reports_warning_settings');
+    if (raw) return { ...DEFAULT_WARNING_SETTINGS, ...JSON.parse(raw) };
+  } catch {}
+  return DEFAULT_WARNING_SETTINGS;
+};
 
 export default function ReportsPage() {
   const [loading, setLoading] = useState(false);
@@ -70,10 +85,34 @@ export default function ReportsPage() {
   const [savingPhase, setSavingPhase] = useState<boolean>(false);
 
   // Early Warning & Risk Retention State (Configurable Thresholds)
-  const [warningAbsentPct, setWarningAbsentPct] = useState<number>(15);
-  const [warningConsecutiveAbsent, setWarningConsecutiveAbsent] = useState<number>(2);
-  const [warningTrendThreshold, setWarningTrendThreshold] = useState<number>(-0.2);
+  const initialSettings = useMemo(() => getSavedWarningSettings(), []);
+  const [warningAbsentPct, setWarningAbsentPct] = useState<number>(initialSettings.absentPct);
+  const [warningConsecutiveAbsent, setWarningConsecutiveAbsent] = useState<number>(initialSettings.consecutiveAbsent);
+  const [warningTrendThreshold, setWarningTrendThreshold] = useState<number>(initialSettings.trendThreshold);
   const [showWarningSettings, setShowWarningSettings] = useState<boolean>(false);
+
+  const handleUpdateWarningSettings = (updates: Partial<typeof DEFAULT_WARNING_SETTINGS>) => {
+    const newSettings = { 
+      absentPct: warningAbsentPct, 
+      consecutiveAbsent: warningConsecutiveAbsent, 
+      trendThreshold: warningTrendThreshold,
+      ...updates 
+    };
+    if (updates.absentPct !== undefined) setWarningAbsentPct(updates.absentPct);
+    if (updates.consecutiveAbsent !== undefined) setWarningConsecutiveAbsent(updates.consecutiveAbsent);
+    if (updates.trendThreshold !== undefined) setWarningTrendThreshold(updates.trendThreshold);
+    localStorage.setItem('cm_reports_warning_settings', JSON.stringify(newSettings));
+  };
+
+  // Collapsible Sections State (all collapsed by default per user request)
+  const [isWarningSectionOpen, setIsWarningSectionOpen] = useState<boolean>(false);
+  const [isGroupingSectionOpen, setIsGroupingSectionOpen] = useState<boolean>(false);
+  const [isGrowthSectionOpen, setIsGrowthSectionOpen] = useState<boolean>(false);
+  const [isBottlenecksSectionOpen, setIsBottlenecksSectionOpen] = useState<boolean>(false);
+
+  // Smart Level Grouping Scope: 'current' (Lớp hiện tại) | 'grade' (Toàn bộ cùng khối) | 'all' (Toàn trung tâm)
+  const [groupingScope, setGroupingScope] = useState<'current' | 'grade' | 'all'>('current');
+  const [groupingGradeFilter, setGroupingGradeFilter] = useState<string>('');
 
   // Score Distribution Histogram Filter State
   const [selectedDistFilter, setSelectedDistFilter] = useState<'all' | 'excellent' | 'good' | 'average' | 'weak'>('all');
@@ -1358,7 +1397,21 @@ export default function ReportsPage() {
 
   // Compute Smart Level Groups
   const smartGroups = useMemo(() => {
-    if (!filteredRankings || filteredRankings.length === 0) return [];
+    let pool = filteredRankings || [];
+    if (pool.length === 0) return [];
+
+    if (groupingScope === 'current' && selectedClassId) {
+      pool = pool.filter(s => String(s.class_id) === selectedClassId);
+    } else if (groupingScope === 'grade') {
+      const currentClass = classes.find(c => String(c.id) === selectedClassId);
+      const targetGrade = currentClass?.grade || groupingGradeFilter || (classes[0]?.grade ?? 'Lớp 8');
+      pool = pool.filter(s => {
+        const sClass = classes.find(c => String(c.id) === String(s.class_id));
+        return s.grade === targetGrade || (sClass && sClass.grade === targetGrade);
+      });
+    }
+
+    if (pool.length === 0) return [];
 
     // Helper to extract numeric skill score for each student
     const getStudentScore = (s: any) => {
@@ -1392,7 +1445,7 @@ export default function ReportsPage() {
       const g2Students: any[] = [];
       const g3Students: any[] = [];
 
-      filteredRankings.forEach(s => {
+      pool.forEach(s => {
         const ema = getStudentScore(s);
         const slope = Number(s.trend_slope || 0);
 
@@ -1418,31 +1471,31 @@ export default function ReportsPage() {
           id: 'tier-advanced',
           title: 'Nhóm 1: Bứt Phá & Nâng Cao',
           subtitle: 'Năng Lực Vượt Trội (Mastery)',
-          pedagogyAdvice: 'Tiếp thu nhanh, kiến thức vững chắc. Giao thêm bài tập tư duy, bài toán phân hóa cao & đề thi học sinh giỏi.',
-          themeColor: 'purple',
-          borderCls: 'border-purple-500/40',
-          headerBg: 'bg-[#18142a]',
-          badgeCls: 'bg-purple-500/20 text-purple-300 border-purple-500/40',
-          dotColor: '#c084fc',
+          pedagogyAdvice: 'Tập trung luyện đề phân hóa, chuyên đề khó và giao bài tập tư duy mức độ 4. Khuyến khích làm bài tập mở rộng.',
+          themeColor: 'emerald',
+          borderCls: 'border-emerald-500/40',
+          headerBg: 'bg-[#102419]',
+          badgeCls: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40',
+          dotColor: '#10b981',
           ...stats1,
           students: g1Students,
         },
         {
           id: 'tier-standard',
-          title: 'Nhóm 2: Tiêu Chuẩn & Cơ Bản',
-          subtitle: 'Năng Lực Đạt Chuẩn (Proficient)',
-          pedagogyAdvice: 'Nắm vững kiến thức trọng tâm. Rèn luyện tốc độ giải bài, trình bày cẩn thận để bứt phá lên nhóm giỏi.',
+          title: 'Nhóm 2: Củng Cố & Chuẩn Hóa',
+          subtitle: 'Đạt Chuẩn Tiến Độ (Standard)',
+          pedagogyAdvice: 'Tăng cường tốc độ làm bài & kỹ năng trình bày. Hướng dẫn sửa các lỗi sai cơ bản thường gặp ở câu thông hiểu.',
           themeColor: 'blue',
           borderCls: 'border-blue-500/40',
-          headerBg: 'bg-[#10182c]',
+          headerBg: 'bg-[#101b2e]',
           badgeCls: 'bg-blue-500/20 text-blue-300 border-blue-500/40',
-          dotColor: '#60a5fa',
+          dotColor: '#3b82f6',
           ...stats2,
           students: g2Students,
         },
         {
           id: 'tier-support',
-          title: 'Nhóm 3: Cần Phụ Đạo & Củng Cố',
+          title: 'Nhóm 3: Phụ Đạo & Nền Tảng',
           subtitle: 'Cần Hỗ Trợ Trọng Tâm (Support)',
           pedagogyAdvice: 'Hổng kiến thức nền hoặc phong độ giảm sút. Cần giảng lại lý thuyết căn bản, chia nhỏ bài tập & phụ đạo 1-1.',
           themeColor: 'amber',
@@ -1456,10 +1509,10 @@ export default function ReportsPage() {
       ];
     } else {
       // ── MODE B: 1D K-Means Clustering ────────────────────────────────────────
-      const K = Math.min(kmeansK, filteredRankings.length);
+      const K = Math.min(kmeansK, pool.length);
       if (K <= 0) return [];
 
-      const studentsWithScore = filteredRankings.map(s => ({
+      const studentsWithScore = pool.map(s => ({
         student: s,
         score: getStudentScore(s),
       }));
@@ -1572,7 +1625,7 @@ export default function ReportsPage() {
         };
       });
     }
-  }, [filteredRankings, groupingMode, kmeansK]);
+  }, [filteredRankings, groupingMode, kmeansK, groupingScope, groupingGradeFilter, selectedClassId, studentRankings, classes]);
 
   // Copy Grouping text to clipboard
   const handleCopyGrouping = useCallback(() => {
@@ -2169,9 +2222,9 @@ export default function ReportsPage() {
                     <span className="text-xl font-black text-emerald-400 font-mono">{filteredRankings.length} học sinh</span>
                   </div>
                   <div className="text-right">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase block">Tỷ Lệ Nguy Cơ</span>
-                    <span className="text-sm font-black text-amber-400 font-mono">
-                      {filteredRankings.length > 0 ? Math.round((atRiskStudents.length / filteredRankings.length) * 100) : 0}%
+                    <span className="text-[10px] font-bold text-slate-400 uppercase block">Cần Chú Ý</span>
+                    <span className={`text-sm font-black font-mono ${atRiskStudents.length > 0 ? 'text-amber-400' : 'text-emerald-400'}`}>
+                      {atRiskStudents.length} học sinh
                     </span>
                   </div>
                 </div>
@@ -2180,19 +2233,22 @@ export default function ReportsPage() {
           </div>
 
           {/* 3.6 EARLY WARNING & RISK RETENTION ALERT SYSTEM */}
-          <div className="bg-[#120d18] border border-rose-500/30 rounded-2xl p-6 shadow-2xl flex flex-col gap-4">
-            <div className="flex flex-wrap items-center justify-between gap-4 border-b border-rose-500/20 pb-4">
+          <div className="bg-[#120d18] border border-rose-500/30 rounded-2xl p-4 sm:p-5 shadow-2xl transition-all">
+            <div 
+              onClick={() => setIsWarningSectionOpen(!isWarningSectionOpen)}
+              className="flex flex-wrap items-center justify-between gap-4 cursor-pointer select-none"
+            >
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-rose-500/20 border border-rose-500/40 flex items-center justify-center text-rose-400 shadow-md shadow-rose-500/10">
+                <div className="w-9 h-9 rounded-xl bg-rose-500/20 border border-rose-500/40 flex items-center justify-center text-rose-400 shadow-md shadow-rose-500/10 shrink-0">
                   <ShieldAlert size={20} />
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
                     <h3 className="text-sm font-black text-white uppercase tracking-wider">
-                      HỆ THỐNG CẢNH BÁO NGUY CƠ SỚM (EARLY WARNING & RETENTION)
+                      HỆ THỐNG CẢNH BÁO NGUY CƠ
                     </h3>
                     <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-rose-500/20 text-rose-300 border border-rose-500/40">
-                      {atRiskStudents.length} Học Sinh Cần Chăm Sóc
+                      {atRiskStudents.length} Học Sinh Cần Chú Ý
                     </span>
                   </div>
                   <p className="text-xs text-slate-400 font-semibold mt-0.5">
@@ -2201,144 +2257,158 @@ export default function ReportsPage() {
                 </div>
               </div>
 
-              <button
-                type="button"
-                onClick={() => setShowWarningSettings(!showWarningSettings)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#1c1426] hover:bg-[#281b38] text-rose-300 hover:text-white border border-rose-500/30 text-xs font-bold transition cursor-pointer"
-              >
-                <SlidersHorizontal size={13} />
-                <span>{showWarningSettings ? 'Đóng Cài Đặt Ngưỡng' : 'Tùy Chỉnh Ngưỡng Cảnh Báo'}</span>
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowWarningSettings(!showWarningSettings);
+                    if (!isWarningSectionOpen) setIsWarningSectionOpen(true);
+                  }}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#1c1426] hover:bg-[#281b38] text-rose-300 hover:text-white border border-rose-500/30 text-xs font-bold transition cursor-pointer"
+                >
+                  <SlidersHorizontal size={13} />
+                  <span>{showWarningSettings ? 'Đóng Cài Đặt' : 'Tùy Chỉnh Ngưỡng'}</span>
+                </button>
+                <div className="p-1.5 rounded-lg bg-white/5 text-slate-400">
+                  {isWarningSectionOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                </div>
+              </div>
             </div>
 
-            {/* Expandable Threshold Customization Drawer */}
-            {showWarningSettings && (
-              <div className="p-4 rounded-xl bg-[#181120] border border-rose-500/20 grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
-                <div>
-                  <label className="block text-[11px] font-bold text-slate-300 mb-1.5">
-                    Ngưỡng Tỷ Lệ Vắng Mặt (%):
-                  </label>
-                  <div className="flex items-center gap-3">
-                    <input
-                      type="range"
-                      min="5"
-                      max="40"
-                      step="5"
-                      value={warningAbsentPct}
-                      onChange={(e) => setWarningAbsentPct(Number(e.target.value))}
-                      className="flex-1 accent-rose-500 cursor-pointer"
-                    />
-                    <span className="font-mono font-black text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded border border-rose-500/20">
-                      ≥ {warningAbsentPct}%
-                    </span>
-                  </div>
-                </div>
+            {/* Collapsible Content */}
+            {isWarningSectionOpen && (
+              <div className="mt-4 pt-4 border-t border-rose-500/20 space-y-4">
+                {/* Expandable Threshold Customization Drawer */}
+                {showWarningSettings && (
+                  <div className="p-4 rounded-xl bg-[#181120] border border-rose-500/20 grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-300 mb-1.5">
+                        Ngưỡng Tỷ Lệ Vắng Mặt (%):
+                      </label>
+                      <div className="flex items-center gap-3">
+                        <input
+                          type="range"
+                          min="5"
+                          max="90"
+                          step="5"
+                          value={warningAbsentPct}
+                          onChange={(e) => handleUpdateWarningSettings({ absentPct: Number(e.target.value) })}
+                          className="flex-1 accent-rose-500 cursor-pointer"
+                        />
+                        <span className="font-mono font-black text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded border border-rose-500/20">
+                          ≥ {warningAbsentPct}%
+                        </span>
+                      </div>
+                    </div>
 
-                <div>
-                  <label className="block text-[11px] font-bold text-slate-300 mb-1.5">
-                    Số Buổi Vắng Liên Tiếp:
-                  </label>
-                  <div className="flex items-center gap-3">
-                    <input
-                      type="range"
-                      min="1"
-                      max="5"
-                      step="1"
-                      value={warningConsecutiveAbsent}
-                      onChange={(e) => setWarningConsecutiveAbsent(Number(e.target.value))}
-                      className="flex-1 accent-rose-500 cursor-pointer"
-                    />
-                    <span className="font-mono font-black text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded border border-rose-500/20">
-                      ≥ {warningConsecutiveAbsent} buổi
-                    </span>
-                  </div>
-                </div>
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-300 mb-1.5">
+                        Số Buổi Vắng Liên Tiếp:
+                      </label>
+                      <div className="flex items-center gap-3">
+                        <input
+                          type="range"
+                          min="1"
+                          max="5"
+                          step="1"
+                          value={warningConsecutiveAbsent}
+                          onChange={(e) => handleUpdateWarningSettings({ consecutiveAbsent: Number(e.target.value) })}
+                          className="flex-1 accent-rose-500 cursor-pointer"
+                        />
+                        <span className="font-mono font-black text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded border border-rose-500/20">
+                          ≥ {warningConsecutiveAbsent} buổi
+                        </span>
+                      </div>
+                    </div>
 
-                <div>
-                  <label className="block text-[11px] font-bold text-slate-300 mb-1.5">
-                    Ngưỡng Tốc Độ Giảm Điểm (Trend):
-                  </label>
-                  <div className="flex items-center gap-3">
-                    <input
-                      type="range"
-                      min="-0.6"
-                      max="-0.1"
-                      step="0.05"
-                      value={warningTrendThreshold}
-                      onChange={(e) => setWarningTrendThreshold(Number(e.target.value))}
-                      className="flex-1 accent-rose-500 cursor-pointer"
-                    />
-                    <span className="font-mono font-black text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded border border-rose-500/20">
-                      ≤ {warningTrendThreshold}/buổi
-                    </span>
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-300 mb-1.5">
+                        Ngưỡng Tốc Độ Giảm Điểm (Trend):
+                      </label>
+                      <div className="flex items-center gap-3">
+                        <input
+                          type="range"
+                          min="-0.6"
+                          max="-0.1"
+                          step="0.05"
+                          value={warningTrendThreshold}
+                          onChange={(e) => handleUpdateWarningSettings({ trendThreshold: Number(e.target.value) })}
+                          className="flex-1 accent-rose-500 cursor-pointer"
+                        />
+                        <span className="font-mono font-black text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded border border-rose-500/20">
+                          ≤ {warningTrendThreshold}/buổi
+                        </span>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
-            )}
+                )}
 
-            {/* At-Risk Students Grid */}
-            {atRiskStudents.length === 0 ? (
-              <div className="p-6 rounded-xl bg-[#0f1422] border border-emerald-500/20 text-center flex flex-col items-center gap-2">
-                <CheckCircle2 size={24} className="text-emerald-400" />
-                <p className="text-xs font-bold text-emerald-300">
-                  Tuyệt vời! Không có học sinh nào rơi vào diện cảnh báo nguy cơ theo các tiêu chí hiện tại.
-                </p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                {atRiskStudents.map((s, idx) => (
-                  <div
-                    key={s.student_id || idx}
-                    onClick={() => handleSelectRankingStudent(s.student_id)}
-                    className={`p-3.5 rounded-xl border transition cursor-pointer flex flex-col justify-between gap-3 ${
-                      s.isUrgent
-                        ? 'bg-[#1e1017] border-rose-500/40 hover:border-rose-400'
-                        : 'bg-[#161220] border-amber-500/30 hover:border-amber-400'
-                    }`}
-                  >
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="flex items-center gap-2.5">
-                        <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs text-white ${
-                          s.isUrgent ? 'bg-rose-600' : 'bg-amber-600'
-                        }`}>
-                          {s.full_name.slice(0, 2).toUpperCase()}
+                {/* At-Risk Students Grid */}
+                {atRiskStudents.length === 0 ? (
+                  <div className="p-6 rounded-xl bg-[#0f1422] border border-emerald-500/20 text-center flex flex-col items-center gap-2">
+                    <CheckCircle2 size={24} className="text-emerald-400" />
+                    <p className="text-xs font-bold text-emerald-300">
+                      Tuyệt vời! Không có học sinh nào rơi vào diện cảnh báo nguy cơ theo các tiêu chí hiện tại.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                    {atRiskStudents.map((s, idx) => (
+                      <div
+                        key={s.student_id || idx}
+                        onClick={() => handleSelectRankingStudent(s.student_id)}
+                        className={`p-3.5 rounded-xl border transition cursor-pointer flex flex-col justify-between gap-3 ${
+                          s.isUrgent
+                            ? 'bg-[#1e1017] border-rose-500/40 hover:border-rose-400'
+                            : 'bg-[#161220] border-amber-500/30 hover:border-amber-400'
+                        }`}
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex items-center gap-2.5">
+                            <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs text-white ${
+                              s.isUrgent ? 'bg-rose-600' : 'bg-amber-600'
+                            }`}>
+                              {s.full_name.slice(0, 2).toUpperCase()}
+                            </div>
+                            <div>
+                              <h4 className="text-sm font-black text-white leading-tight">
+                                {s.full_name} {s.nickname ? `(${s.nickname})` : ''}
+                              </h4>
+                              <span className="text-[10px] text-slate-400 font-semibold">{s.class_name || 'Lớp học'}</span>
+                            </div>
+                          </div>
+                          <span className={`text-[10px] font-black px-2 py-0.5 rounded-lg border ${
+                            s.isUrgent
+                              ? 'bg-rose-500/20 text-rose-300 border-rose-500/40'
+                              : 'bg-amber-500/20 text-amber-300 border-amber-500/40'
+                          }`}>
+                            {s.isUrgent ? 'Nguy Cơ Cao' : 'Cần Theo Dõi'}
+                          </span>
                         </div>
-                        <div>
-                          <h4 className="text-sm font-black text-white leading-tight">
-                            {s.full_name} {s.nickname ? `(${s.nickname})` : ''}
-                          </h4>
-                          <span className="text-[10px] text-slate-400 font-semibold">{s.class_name || 'Lớp học'}</span>
+
+                        {/* Risk Reasons Badges */}
+                        <div className="flex flex-wrap gap-1.5">
+                          {s.riskTags.map((tag: string, tIdx: number) => (
+                            <span
+                              key={tIdx}
+                              className="text-[10px] font-bold px-2 py-0.5 rounded bg-black/40 text-rose-300 border border-rose-500/20"
+                            >
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+
+                        <div className="flex items-center justify-between pt-1 border-t border-white/5 text-[11px]">
+                          <span className="text-slate-400 font-medium">Điểm EMA: <strong className="text-white font-mono">{s.ema_level ? format1Dec(Number(s.ema_level)) : '-'}</strong></span>
+                          <span className="text-indigo-400 hover:text-indigo-300 font-bold flex items-center gap-1">
+                            Xem chi tiết →
+                          </span>
                         </div>
                       </div>
-                      <span className={`text-[10px] font-black px-2 py-0.5 rounded-lg border ${
-                        s.isUrgent
-                          ? 'bg-rose-500/20 text-rose-300 border-rose-500/40'
-                          : 'bg-amber-500/20 text-amber-300 border-amber-500/40'
-                      }`}>
-                        {s.isUrgent ? 'Nguy Cơ Cao' : 'Cần Theo Dõi'}
-                      </span>
-                    </div>
-
-                    {/* Risk Reasons Badges */}
-                    <div className="flex flex-wrap gap-1.5">
-                      {s.riskTags.map((tag: string, tIdx: number) => (
-                        <span
-                          key={tIdx}
-                          className="text-[10px] font-bold px-2 py-0.5 rounded bg-black/40 text-rose-300 border border-rose-500/20"
-                        >
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-
-                    <div className="flex items-center justify-between pt-1 border-t border-white/5 text-[11px]">
-                      <span className="text-slate-400 font-medium">Điểm EMA: <strong className="text-white font-mono">{s.ema_level ? format1Dec(Number(s.ema_level)) : '-'}</strong></span>
-                      <span className="text-indigo-400 hover:text-indigo-300 font-bold flex items-center gap-1">
-                        Xem chi tiết →
-                      </span>
-                    </div>
+                    ))}
                   </div>
-                ))}
+                )}
               </div>
             )}
           </div>
@@ -2992,11 +3062,14 @@ export default function ReportsPage() {
       </div>
 
       {/* 5.5 SMART LEVEL GROUPING (MODE A & MODE B) */}
-      <div className="bg-[#0d1120] border border-indigo-500/30 rounded-2xl flex flex-col shadow-2xl mb-8 overflow-hidden">
-        {/* Header Bar */}
-        <div className="px-6 py-5 border-b border-[#181f36] bg-[#0a0d18] flex flex-wrap items-center justify-between gap-4">
+      <div className="bg-[#0d1120] border border-indigo-500/30 rounded-2xl flex flex-col shadow-2xl mb-8 overflow-hidden transition-all">
+        {/* Collapsible Header Bar */}
+        <div 
+          onClick={() => setIsGroupingSectionOpen(!isGroupingSectionOpen)}
+          className="px-6 py-4 border-b border-[#181f36] bg-[#0a0d18] flex flex-wrap items-center justify-between gap-4 cursor-pointer select-none"
+        >
           <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-400">
+            <div className="p-2.5 rounded-xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 shrink-0">
               <Sparkles size={20} />
             </div>
             <div>
@@ -3005,307 +3078,434 @@ export default function ReportsPage() {
                   GỢI Ý PHÂN NHÓM HỌC TẬP THEO TRÌNH ĐỘ
                 </h3>
                 <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-md bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
-                  Smart Level Grouping
+                  {smartGroups.length} Nhóm | {smartGroups.reduce((acc, g) => acc + g.students.length, 0)} Học Sinh
+                </span>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-[#182038] text-slate-300 border border-white/10">
+                  {groupingScope === 'current' ? (selectedClassId ? `Lớp ${classes.find(c => String(c.id) === selectedClassId)?.class_name}` : 'Lớp Hiện Tại') :
+                   groupingScope === 'grade' ? `Toàn Khối ${classes.find(c => String(c.id) === selectedClassId)?.grade || groupingGradeFilter || '8'}` :
+                   'Toàn Trung Tâm'}
                 </span>
               </div>
               <p className="text-xs text-slate-400 font-semibold mt-0.5">
-                Tự động phân loại dựa trên Năng lực hiện tại (EMA), Tốc độ tăng trưởng (Trend) và Phổ điểm thực tế của lớp
+                Tự động phân loại học sinh theo Năng lực hiện tại (EMA), Tốc độ tăng trưởng và Phổ điểm thực tế.
               </p>
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3">
-            {/* Sliding Pill Indicator Segmented Control (Mode A vs Mode B) */}
-            <div className="relative flex bg-[#0d1018] p-1 rounded-xl border border-white/10 text-xs shrink-0 font-bold select-none">
-              <div
-                className="absolute top-1 bottom-1 rounded-lg bg-[#5c36f5] shadow-[0_0_14px_rgba(92,54,245,0.5)] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] pointer-events-none"
-                style={{
-                  left: groupingMode === 'tier' ? '4px' : 'calc(50% + 1px)',
-                  width: 'calc(50% - 4px)',
-                }}
-              />
-              <button
-                type="button"
-                onClick={() => setGroupingMode('tier')}
-                className={`flex-1 relative z-10 py-1.5 px-3.5 text-center transition-colors cursor-pointer ${
-                  groupingMode === 'tier' ? 'text-white font-black' : 'text-slate-400 hover:text-white'
-                }`}
-              >
-                Theo Chuẩn Học Lực
-              </button>
-              <button
-                type="button"
-                onClick={() => setGroupingMode('kmeans')}
-                className={`flex-1 relative z-10 py-1.5 px-3.5 text-center transition-colors cursor-pointer ${
-                  groupingMode === 'kmeans' ? 'text-white font-black' : 'text-slate-400 hover:text-white'
-                }`}
-              >
-                Tự Động Phân Cụm K-Means
-              </button>
-            </div>
-
-            {/* Sub-selector for K = 2, 3, 4 when in K-Means mode */}
-            {groupingMode === 'kmeans' && (
-              <div className="relative flex bg-[#0d1018] p-1 rounded-xl border border-white/10 text-xs shrink-0 font-bold select-none">
-                <div
-                  className="absolute top-1 bottom-1 rounded-lg bg-[#3b82f6] shadow-[0_0_12px_rgba(59,130,246,0.5)] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] pointer-events-none"
-                  style={{
-                    left: kmeansK === 2 ? '4px' : kmeansK === 3 ? 'calc(33.333% + 1px)' : 'calc(66.666% + 1px)',
-                    width: 'calc(33.333% - 4px)',
-                  }}
-                />
-                <button
-                  type="button"
-                  onClick={() => setKmeansK(2)}
-                  className={`flex-1 relative z-10 py-1 px-3 text-center transition-colors cursor-pointer ${
-                    kmeansK === 2 ? 'text-white font-black' : 'text-slate-400 hover:text-white'
-                  }`}
-                >
-                  2 Nhóm
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setKmeansK(3)}
-                  className={`flex-1 relative z-10 py-1 px-3 text-center transition-colors cursor-pointer ${
-                    kmeansK === 3 ? 'text-white font-black' : 'text-slate-400 hover:text-white'
-                  }`}
-                >
-                  3 Nhóm
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setKmeansK(4)}
-                  className={`flex-1 relative z-10 py-1 px-3 text-center transition-colors cursor-pointer ${
-                    kmeansK === 4 ? 'text-white font-black' : 'text-slate-400 hover:text-white'
-                  }`}
-                >
-                  4 Nhóm
-                </button>
-              </div>
-            )}
-
-            {/* Action Buttons */}
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={handleCopyGrouping}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#14182a] hover:bg-[#1a2038] text-slate-300 hover:text-white text-xs font-bold border border-white/10 transition cursor-pointer"
-                title="Sao chép danh sách phân nhóm vào clipboard"
-              >
-                {copiedGroupText ? <Check size={14} className="text-emerald-400" /> : <Copy size={14} />}
-                <span>{copiedGroupText ? 'Đã Sao Chép' : 'Sao Chép'}</span>
-              </button>
-              <button
-                type="button"
-                onClick={handleExportGroupingExcel}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 text-xs font-bold border border-emerald-500/30 transition cursor-pointer"
-                title="Xuất file Excel danh sách phân nhóm"
-              >
-                <FileSpreadsheet size={14} />
-                <span>Xuất Excel</span>
-              </button>
+          <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+            <button
+              type="button"
+              onClick={handleCopyGrouping}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#14182a] hover:bg-[#1a2038] text-slate-300 hover:text-white text-xs font-bold border border-white/10 transition cursor-pointer"
+              title="Sao chép danh sách phân nhóm vào clipboard"
+            >
+              {copiedGroupText ? <Check size={14} className="text-emerald-400" /> : <Copy size={14} />}
+              <span>{copiedGroupText ? 'Đã Sao Chép' : 'Sao Chép'}</span>
+            </button>
+            <button
+              type="button"
+              onClick={handleExportGroupingExcel}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 text-xs font-bold border border-emerald-500/30 transition cursor-pointer"
+              title="Xuất file Excel danh sách phân nhóm"
+            >
+              <FileSpreadsheet size={14} />
+              <span>Xuất Excel</span>
+            </button>
+            <div 
+              onClick={() => setIsGroupingSectionOpen(!isGroupingSectionOpen)}
+              className="p-1.5 rounded-lg bg-white/5 text-slate-400 hover:text-white transition cursor-pointer ml-1"
+            >
+              {isGroupingSectionOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
             </div>
           </div>
         </div>
 
-        {/* Group Cards Grid */}
-        <div className="p-6">
-          {smartGroups.length === 0 ? (
-            <div className="text-center py-10 text-slate-400 text-xs font-bold">
-              Chưa có dữ liệu điểm học sinh để phân nhóm.
+        {/* Expanded Grouping Controls & Cards */}
+        {isGroupingSectionOpen && (
+          <div className="p-6 space-y-6">
+            {/* Scope & Mode Control Toolbar */}
+            <div className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-xl bg-[#090d1a] border border-[#1a2340]">
+              {/* Scope Selector: Lớp hiện tại vs Toàn bộ khối vs Toàn trung tâm */}
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-xs font-black uppercase text-indigo-300 tracking-wider flex items-center gap-1.5 mr-1">
+                  <FolderTree size={14} />
+                  Phạm Vi Phân Nhóm:
+                </span>
+                <div className="relative flex bg-[#0d1018] p-1 rounded-xl border border-white/10 text-xs shrink-0 font-bold select-none">
+                  <div
+                    className="absolute top-1 bottom-1 rounded-lg bg-indigo-600 shadow-[0_0_12px_rgba(99,102,241,0.5)] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] pointer-events-none"
+                    style={{
+                      left: groupingScope === 'current' ? '4px' : groupingScope === 'grade' ? 'calc(33.333% + 1px)' : 'calc(66.666% + 1px)',
+                      width: 'calc(33.333% - 4px)',
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setGroupingScope('current')}
+                    className={`flex-1 relative z-10 py-1.5 px-3 text-center transition-colors cursor-pointer ${
+                      groupingScope === 'current' ? 'text-white font-black' : 'text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    Lớp Hiện Tại
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setGroupingScope('grade')}
+                    className={`flex-1 relative z-10 py-1.5 px-3 text-center transition-colors cursor-pointer ${
+                      groupingScope === 'grade' ? 'text-white font-black' : 'text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    Toàn Khối {classes.find(c => String(c.id) === selectedClassId)?.grade || groupingGradeFilter || '8'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setGroupingScope('all')}
+                    className={`flex-1 relative z-10 py-1.5 px-3 text-center transition-colors cursor-pointer ${
+                      groupingScope === 'all' ? 'text-white font-black' : 'text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    Toàn Trung Tâm
+                  </button>
+                </div>
+
+                {groupingScope === 'grade' && !selectedClassId && (
+                  <div className="flex items-center gap-1.5 bg-[#14182a] px-2.5 py-1 rounded-xl border border-white/10">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase">Chọn Khối:</span>
+                    <CustomSelect
+                      value={groupingGradeFilter || (classes[0]?.grade ?? 'Lớp 8')}
+                      onChange={(val) => setGroupingGradeFilter(String(val))}
+                      options={Array.from(new Set(classes.map(c => c.grade).filter(Boolean))).map(g => ({
+                        value: String(g),
+                        label: String(g)
+                      }))}
+                      className="w-32"
+                    />
+                  </div>
+                )}
+              </div>
+
+              {/* Grouping Algorithm Mode & K-Means Selector */}
+              <div className="flex flex-wrap items-center gap-3">
+                <div className="relative flex bg-[#0d1018] p-1 rounded-xl border border-white/10 text-xs shrink-0 font-bold select-none">
+                  <div
+                    className="absolute top-1 bottom-1 rounded-lg bg-[#5c36f5] shadow-[0_0_14px_rgba(92,54,245,0.5)] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] pointer-events-none"
+                    style={{
+                      left: groupingMode === 'tier' ? '4px' : 'calc(50% + 1px)',
+                      width: 'calc(50% - 4px)',
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setGroupingMode('tier')}
+                    className={`flex-1 relative z-10 py-1.5 px-3.5 text-center transition-colors cursor-pointer ${
+                      groupingMode === 'tier' ? 'text-white font-black' : 'text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    Theo Chuẩn Học Lực
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setGroupingMode('kmeans')}
+                    className={`flex-1 relative z-10 py-1.5 px-3.5 text-center transition-colors cursor-pointer ${
+                      groupingMode === 'kmeans' ? 'text-white font-black' : 'text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    Tự Động Phân Cụm K-Means
+                  </button>
+                </div>
+
+                {groupingMode === 'kmeans' && (
+                  <div className="relative flex bg-[#0d1018] p-1 rounded-xl border border-white/10 text-xs shrink-0 font-bold select-none">
+                    <div
+                      className="absolute top-1 bottom-1 rounded-lg bg-[#3b82f6] shadow-[0_0_12px_rgba(59,130,246,0.5)] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] pointer-events-none"
+                      style={{
+                        left: kmeansK === 2 ? '4px' : kmeansK === 3 ? 'calc(33.333% + 1px)' : 'calc(66.666% + 1px)',
+                        width: 'calc(33.333% - 4px)',
+                      }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setKmeansK(2)}
+                      className={`flex-1 relative z-10 py-1 px-3 text-center transition-colors cursor-pointer ${
+                        kmeansK === 2 ? 'text-white font-black' : 'text-slate-400 hover:text-white'
+                      }`}
+                    >
+                      2 Nhóm
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setKmeansK(3)}
+                      className={`flex-1 relative z-10 py-1 px-3 text-center transition-colors cursor-pointer ${
+                        kmeansK === 3 ? 'text-white font-black' : 'text-slate-400 hover:text-white'
+                      }`}
+                    >
+                      3 Nhóm
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setKmeansK(4)}
+                      className={`flex-1 relative z-10 py-1 px-3 text-center transition-colors cursor-pointer ${
+                        kmeansK === 4 ? 'text-white font-black' : 'text-slate-400 hover:text-white'
+                      }`}
+                    >
+                      4 Nhóm
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
-          ) : (
-            <div className={`grid gap-4 ${
-              smartGroups.length === 2 ? 'grid-cols-1 md:grid-cols-2' :
-              smartGroups.length === 3 ? 'grid-cols-1 lg:grid-cols-3' :
-              'grid-cols-1 sm:grid-cols-2 xl:grid-cols-4'
-            }`}>
-              {smartGroups.map((g) => (
-                <div
-                  key={g.id}
-                  className={`bg-[#0f1424] border ${g.borderCls} rounded-2xl flex flex-col overflow-hidden shadow-xl transition-all duration-300 hover:border-white/20`}
-                >
-                  {/* Card Header */}
-                  <div className={`p-4 border-b border-white/5 ${g.headerBg}`}>
-                    <div className="flex items-start justify-between gap-2">
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <span
-                            className="w-2.5 h-2.5 rounded-full shrink-0 shadow-sm"
-                            style={{ backgroundColor: g.dotColor }}
-                          />
-                          <h4 className="text-xs font-black text-white uppercase tracking-wide">
-                            {g.title}
-                          </h4>
+
+            {/* Group Cards Grid */}
+            {smartGroups.length === 0 ? (
+              <div className="text-center py-10 text-slate-400 text-xs font-bold bg-[#090d1a] rounded-xl border border-[#1a2340]">
+                Chưa có dữ liệu điểm học sinh trong phạm vi này để phân nhóm.
+              </div>
+            ) : (
+              <div className={`grid gap-4 ${
+                smartGroups.length === 2 ? 'grid-cols-1 md:grid-cols-2' :
+                smartGroups.length === 3 ? 'grid-cols-1 lg:grid-cols-3' :
+                'grid-cols-1 sm:grid-cols-2 xl:grid-cols-4'
+              }`}>
+                {smartGroups.map((g) => (
+                  <div
+                    key={g.id}
+                    className={`bg-[#0f1424] border ${g.borderCls} rounded-2xl flex flex-col overflow-hidden shadow-xl transition-all duration-300 hover:border-white/20`}
+                  >
+                    {/* Card Header */}
+                    <div className={`p-4 border-b border-white/5 ${g.headerBg}`}>
+                      <div className="flex items-start justify-between gap-2">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span
+                              className="w-2.5 h-2.5 rounded-full shrink-0 shadow-sm"
+                              style={{ backgroundColor: g.dotColor }}
+                            />
+                            <h4 className="text-xs font-black text-white uppercase tracking-wide">
+                              {g.title}
+                            </h4>
+                          </div>
+                          <span className="text-[10px] font-bold text-slate-400 block mt-0.5">
+                            {g.subtitle}
+                          </span>
                         </div>
-                        <span className="text-[10px] font-bold text-slate-400 block mt-0.5">
-                          {g.subtitle}
+                        <span className={`px-2 py-0.5 rounded-lg text-[10px] font-black shrink-0 ${g.badgeCls}`}>
+                          {g.students.length} Học Sinh
                         </span>
                       </div>
-                      <span className={`px-2 py-0.5 rounded-lg text-[10px] font-black shrink-0 ${g.badgeCls}`}>
-                        {g.students.length} Học Sinh
+
+                      {/* Quick Group Metrics */}
+                      <div className="grid grid-cols-2 gap-2 mt-3 pt-3 border-t border-white/5">
+                        <div className="bg-[#0b0e1a] p-2 rounded-xl border border-white/5">
+                          <span className="text-[9px] font-black uppercase text-slate-400 block">EMA Trung Bình</span>
+                          <span className="text-sm font-black text-white font-mono">{g.avgEma} <span className="text-[10px] text-slate-500 font-bold">/ 10</span></span>
+                        </div>
+                        <div className="bg-[#0b0e1a] p-2 rounded-xl border border-white/5">
+                          <span className="text-[9px] font-black uppercase text-slate-400 block">Độ Phân Tán (SD)</span>
+                          <span className="text-sm font-black text-emerald-400 font-mono">σ = {g.groupSd}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Pedagogy Focus Box */}
+                    <div className="p-3 bg-[#0a0d18] border-b border-white/5">
+                      <span className="text-[9px] font-black uppercase tracking-wider text-slate-400 block mb-1">
+                        Định Hướng Giảng Dạy:
                       </span>
+                      <p className="text-[11px] font-semibold text-slate-300 leading-relaxed">
+                        {g.pedagogyAdvice}
+                      </p>
                     </div>
 
-                    {/* Quick Group Metrics */}
-                    <div className="grid grid-cols-2 gap-2 mt-3 pt-3 border-t border-white/5">
-                      <div className="bg-[#0b0e1a] p-2 rounded-xl border border-white/5">
-                        <span className="text-[9px] font-black uppercase text-slate-400 block">EMA Trung Bình</span>
-                        <span className="text-sm font-black text-white font-mono">{g.avgEma} <span className="text-[10px] text-slate-500 font-bold">/ 10</span></span>
-                      </div>
-                      <div className="bg-[#0b0e1a] p-2 rounded-xl border border-white/5">
-                        <span className="text-[9px] font-black uppercase text-slate-400 block">Độ Phân Tán (SD)</span>
-                        <span className="text-sm font-black text-emerald-400 font-mono">σ = {g.groupSd}</span>
-                      </div>
-                    </div>
-                  </div>
+                    {/* Student List */}
+                    <div className="p-3 flex-1 flex flex-col gap-2 max-h-[380px] overflow-y-auto custom-scrollbar">
+                      {g.students.length === 0 ? (
+                        <div className="text-center py-6 text-[11px] text-slate-500 font-bold">
+                          Không có học sinh trong nhóm này
+                        </div>
+                      ) : (
+                        g.students.map((s: any, sIdx: number) => {
+                          const slope = Number(s.trend_slope || 0);
+                          const isImproving = slope > 0.1;
+                          const isDeclining = slope < -0.1;
+                          const initials = s.full_name
+                            ? s.full_name.split(' ').map((n: string) => n[0]).slice(-2).join('').toUpperCase()
+                            : 'HS';
 
-                  {/* Pedagogy Focus Box */}
-                  <div className="p-3 bg-[#0a0d18] border-b border-white/5">
-                    <span className="text-[9px] font-black uppercase tracking-wider text-slate-400 block mb-1">
-                      Định Hướng Giảng Dạy:
-                    </span>
-                    <p className="text-[11px] font-semibold text-slate-300 leading-relaxed">
-                      {g.pedagogyAdvice}
-                    </p>
-                  </div>
-
-                  {/* Student List */}
-                  <div className="p-3 flex-1 flex flex-col gap-2 max-h-[380px] overflow-y-auto custom-scrollbar">
-                    {g.students.length === 0 ? (
-                      <div className="text-center py-6 text-[11px] text-slate-500 font-bold">
-                        Không có học sinh trong nhóm này
-                      </div>
-                    ) : (
-                      g.students.map((s: any, sIdx: number) => {
-                        const slope = Number(s.trend_slope || 0);
-                        const isImproving = slope > 0.1;
-                        const isDeclining = slope < -0.1;
-                        const initials = s.full_name
-                          ? s.full_name.split(' ').map((n: string) => n[0]).slice(-2).join('').toUpperCase()
-                          : 'HS';
-
-                        return (
-                          <div
-                            key={s.student_id || sIdx}
-                            onClick={() => handleSelectRankingStudent(s.student_id)}
-                            className="bg-[#13192e] hover:bg-[#18203a] p-2.5 rounded-xl border border-[#202948] hover:border-indigo-500/40 transition cursor-pointer flex items-center justify-between gap-3 group"
-                            title={`Xem chi tiết học sinh ${s.full_name}`}
-                          >
-                            <div className="flex items-center gap-2.5 min-w-0">
-                              <div className="w-7 h-7 rounded-lg bg-[#1e274a] text-indigo-300 flex items-center justify-center font-black text-[10px] shrink-0 border border-indigo-500/20 group-hover:border-indigo-500/50">
-                                {initials}
-                              </div>
-                              <div className="truncate">
-                                <div className="text-xs font-bold text-white group-hover:text-indigo-200 transition truncate">
-                                  {s.full_name}
+                          return (
+                            <div
+                              key={s.student_id || sIdx}
+                              onClick={() => handleSelectRankingStudent(s.student_id)}
+                              className="bg-[#13192e] hover:bg-[#18203a] p-2.5 rounded-xl border border-[#202948] hover:border-indigo-500/40 transition cursor-pointer flex items-center justify-between gap-3 group"
+                              title={`Xem chi tiết học sinh ${s.full_name}`}
+                            >
+                              <div className="flex items-center gap-2.5 min-w-0">
+                                <div className="w-7 h-7 rounded-lg bg-[#1e274a] text-indigo-300 flex items-center justify-center font-black text-[10px] shrink-0 border border-indigo-500/20 group-hover:border-indigo-500/50">
+                                  {initials}
                                 </div>
-                                <div className="text-[10px] font-semibold text-slate-400 truncate">
-                                  {s.nickname ? `(${s.nickname})` : s.class_name || 'Học sinh'}
+                                <div className="truncate">
+                                  <div className="text-xs font-bold text-white group-hover:text-indigo-200 transition truncate">
+                                    {s.full_name}
+                                  </div>
+                                  <div className="text-[10px] font-semibold text-slate-400 truncate flex items-center gap-1.5">
+                                    {s.nickname && <span className="text-slate-300 font-bold">({s.nickname})</span>}
+                                    <span className="px-1.5 py-0.2 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-[9px] font-mono font-bold">
+                                      {s.class_name || 'Lớp'}
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div className="flex items-center gap-1.5 shrink-0">
+                                {/* Trend Indicator */}
+                                <div className={`px-1.5 py-0.5 rounded-md text-[10px] font-extrabold font-mono flex items-center gap-0.5 ${
+                                  isImproving ? 'text-emerald-400 bg-emerald-500/10' :
+                                  isDeclining ? 'text-rose-400 bg-rose-500/10' :
+                                  'text-slate-400 bg-slate-500/10'
+                                }`}>
+                                  {isImproving ? <TrendingUp size={11} /> : isDeclining ? <TrendingDown size={11} /> : <Minus size={11} />}
+                                  <span>{slope > 0 ? `+${format1Dec(slope)}` : format1Dec(slope)}</span>
+                                </div>
+
+                                {/* EMA Badge */}
+                                <div className="px-2 py-0.5 rounded-lg bg-[#0b0e1a] border border-white/10 text-xs font-black font-mono text-white">
+                                  {s.ema_level ? format1Dec(Number(s.ema_level)) : '-'}
                                 </div>
                               </div>
                             </div>
-
-                            <div className="flex items-center gap-1.5 shrink-0">
-                              {/* Trend Indicator */}
-                              <div className={`px-1.5 py-0.5 rounded-md text-[10px] font-extrabold font-mono flex items-center gap-0.5 ${
-                                isImproving ? 'text-emerald-400 bg-emerald-500/10' :
-                                isDeclining ? 'text-rose-400 bg-rose-500/10' :
-                                'text-slate-400 bg-slate-500/10'
-                              }`}>
-                                {isImproving ? <TrendingUp size={11} /> : isDeclining ? <TrendingDown size={11} /> : <Minus size={11} />}
-                                <span>{slope > 0 ? `+${format1Dec(slope)}` : format1Dec(slope)}</span>
-                              </div>
-
-                              {/* EMA Badge */}
-                              <div className="px-2 py-0.5 rounded-lg bg-[#0b0e1a] border border-white/10 text-xs font-black font-mono text-white">
-                                {s.ema_level ? format1Dec(Number(s.ema_level)) : '-'}
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      })
-                    )}
+                          );
+                        })
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
-      {/* 5.6 PRE VS POST GROWTH SHOWCASE */}
+      {/* 5.6 CẢI THIỆN ĐIỂM SỐ (LEADERBOARD TABLE FORMAT) */}
       {growthShowcase.length > 0 && (
-        <div className="bg-[#0e1424] border border-emerald-500/30 rounded-2xl p-6 shadow-2xl flex flex-col gap-4">
-          <div className="flex flex-wrap items-center justify-between gap-4 border-b border-emerald-500/20 pb-4">
+        <div className="bg-[#0e1424] border border-emerald-500/30 rounded-2xl p-4 sm:p-5 shadow-2xl transition-all mb-8">
+          <div
+            onClick={() => setIsGrowthSectionOpen(!isGrowthSectionOpen)}
+            className="flex flex-wrap items-center justify-between gap-4 cursor-pointer select-none"
+          >
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 shadow-md shadow-emerald-500/10">
+              <div className="w-9 h-9 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 shadow-md shadow-emerald-500/10 shrink-0">
                 <Flame size={20} />
               </div>
               <div>
-                <h3 className="text-sm font-black text-white uppercase tracking-wider">
-                  BÁO CÁO TIẾN BỘ TRƯỚC - SAU (TOP HỌC SINH BỨT PHÁ ĐIỂM SỐ)
-                </h3>
+                <div className="flex items-center gap-2">
+                  <h3 className="text-sm font-black text-white uppercase tracking-wider">
+                    CẢI THIỆN ĐIỂM SỐ
+                  </h3>
+                  <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                    Top 5 Bứt Phá Nhất
+                  </span>
+                </div>
                 <p className="text-xs text-slate-400 font-semibold mt-0.5">
-                  So sánh điểm trung bình 3 buổi đầu tiên khi mới vào học so với 3 buổi gần nhất để ghi nhận sự trưởng thành vượt bậc.
+                  So sánh điểm trung bình 3 buổi đầu tiên khi mới vào học so với 3 buổi gần nhất để ghi nhận sự cải thiện vượt bậc.
                 </p>
               </div>
             </div>
-            <span className="text-xs font-black text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-xl">
-              Top 5 Bứt Phá Nhất
-            </span>
+
+            <div className="p-1.5 rounded-lg bg-white/5 text-slate-400">
+              {isGrowthSectionOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+            </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3">
-            {growthShowcase.map((st, idx) => (
-              <div
-                key={st.student_id || idx}
-                onClick={() => handleSelectRankingStudent(st.student_id)}
-                className="p-4 rounded-xl bg-[#121b30] border border-emerald-500/20 hover:border-emerald-500/40 transition cursor-pointer flex flex-col justify-between gap-3 shadow-md"
-              >
-                <div className="flex items-center justify-between">
-                  <span className="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 font-mono font-black text-xs flex items-center justify-center border border-emerald-500/30">
-                    #{idx + 1}
-                  </span>
-                  <span className={`text-xs font-mono font-black px-2 py-0.5 rounded-lg ${
-                    st.delta >= 0 ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-rose-500/20 text-rose-300 border border-rose-500/30'
-                  }`}>
-                    {st.delta >= 0 ? `+${format1Dec(st.delta)}` : format1Dec(st.delta)} Điểm
-                  </span>
-                </div>
-
-                <div>
-                  <h4 className="text-sm font-black text-white truncate">{st.full_name}</h4>
-                  <span className="text-[10px] text-slate-400 font-semibold">{st.class_name || ''}</span>
-                </div>
-
-                <div className="p-2.5 rounded-lg bg-[#0a0f1c] border border-white/5 space-y-1 text-xs">
-                  <div className="flex items-center justify-between text-slate-400">
-                    <span>Đầu vào (3 buổi đầu):</span>
-                    <strong className="text-slate-200 font-mono">{st.baseline}</strong>
-                  </div>
-                  <div className="flex items-center justify-between text-slate-400">
-                    <span>Hiện tại (3 buổi gần nhất):</span>
-                    <strong className="text-emerald-400 font-mono">{st.current}</strong>
-                  </div>
-                </div>
+          {isGrowthSectionOpen && (
+            <div className="mt-4 pt-4 border-t border-emerald-500/20">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse text-xs">
+                  <thead>
+                    <tr className="border-b border-[#1c2744] text-slate-400 font-bold uppercase text-[10px] tracking-wider">
+                      <th className="py-2.5 px-3">Hạng</th>
+                      <th className="py-2.5 px-3">Học Sinh</th>
+                      <th className="py-2.5 px-3">Lớp Học</th>
+                      <th className="py-2.5 px-3 text-center">Đầu Vào (3 buổi đầu)</th>
+                      <th className="py-2.5 px-3 text-center">Hiện Tại (3 buổi gần nhất)</th>
+                      <th className="py-2.5 px-4">Tiến Trình Cải Thiện</th>
+                      <th className="py-2.5 px-3 text-right">Mức Tăng Trưởng</th>
+                      <th className="py-2.5 px-3 text-center">Thao Tác</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-white/5">
+                    {growthShowcase.map((st, idx) => (
+                      <tr
+                        key={st.student_id || idx}
+                        onClick={() => handleSelectRankingStudent(st.student_id)}
+                        className="hover:bg-emerald-500/5 transition cursor-pointer group"
+                      >
+                        <td className="py-3 px-3">
+                          <span className={`w-6 h-6 rounded-lg flex items-center justify-center font-mono font-black text-xs ${
+                            idx === 0 ? 'bg-amber-500 text-black shadow-md shadow-amber-500/30' :
+                            idx === 1 ? 'bg-slate-300 text-black' :
+                            idx === 2 ? 'bg-amber-700 text-white' :
+                            'bg-[#1a233a] text-slate-300 border border-white/10'
+                          }`}>
+                            #{idx + 1}
+                          </span>
+                        </td>
+                        <td className="py-3 px-3">
+                          <div className="font-bold text-white group-hover:text-emerald-300 transition text-sm">
+                            {st.full_name}
+                          </div>
+                        </td>
+                        <td className="py-3 px-3">
+                          <span className="px-2 py-0.5 rounded-md bg-[#131b30] text-slate-300 border border-white/10 text-[11px] font-semibold">
+                            {st.class_name || 'Lớp học'}
+                          </span>
+                        </td>
+                        <td className="py-3 px-3 text-center font-mono font-bold text-slate-300 text-sm">
+                          {st.baseline}
+                        </td>
+                        <td className="py-3 px-3 text-center font-mono font-black text-emerald-400 text-sm">
+                          {st.current}
+                        </td>
+                        <td className="py-3 px-4 w-48">
+                          <div className="w-full bg-[#101728] h-2.5 rounded-full overflow-hidden p-0.5 border border-white/10">
+                            <div
+                              style={{ width: `${Math.min(100, Math.max(10, (st.current / 10) * 100))}%` }}
+                              className="h-full rounded-full bg-gradient-to-r from-emerald-600 to-teal-400 transition-all duration-500"
+                            />
+                          </div>
+                        </td>
+                        <td className="py-3 px-3 text-right">
+                          <span className="font-mono font-black text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-2.5 py-1 rounded-lg text-xs">
+                            +{format1Dec(st.delta)} Điểm
+                          </span>
+                        </td>
+                        <td className="py-3 px-3 text-center">
+                          <span className="text-indigo-400 group-hover:text-indigo-300 font-bold text-[11px] flex items-center justify-center gap-0.5">
+                            Chi tiết <ArrowUpRight size={13} />
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
-            ))}
-          </div>
+            </div>
+          )}
         </div>
       )}
 
-      {/* 5.7 LEARNING BOTTLENECK DETECTOR (OUTLINE PREVIEW / UNDER DEVELOPMENT) */}
-      <div className="bg-[#101424] border border-indigo-500/20 rounded-2xl p-6 shadow-xl flex flex-col gap-4">
-        <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[#182038] pb-4">
+      {/* 5.7 BẤT THƯỜNG HỌC TẬP (STUDY ANOMALIES) */}
+      <div className="bg-[#101424] border border-indigo-500/20 rounded-2xl p-4 sm:p-5 shadow-xl flex flex-col gap-4 mb-8 transition-all">
+        <div 
+          onClick={() => setIsBottlenecksSectionOpen(!isBottlenecksSectionOpen)}
+          className="flex flex-wrap items-center justify-between gap-4 cursor-pointer select-none"
+        >
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-indigo-500/20 border border-indigo-500/40 flex items-center justify-center text-indigo-400 shadow-md shadow-indigo-500/10">
+            <div className="w-9 h-9 rounded-xl bg-indigo-500/20 border border-indigo-500/40 flex items-center justify-center text-indigo-400 shadow-md shadow-indigo-500/10 shrink-0">
               <Target size={20} />
             </div>
             <div>
               <div className="flex items-center gap-2">
                 <h3 className="text-sm font-black text-white uppercase tracking-wider">
-                  BỘ LỌC NÚT THẮT HỌC TẬP (LEARNING BOTTLENECK DETECTOR)
+                  BẤT THƯỜNG HỌC TẬP (STUDY ANOMALIES)
                 </h3>
                 <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
                   Đang Hoàn Thiện Phương Pháp Kiểm Thử
@@ -3316,49 +3516,55 @@ export default function ReportsPage() {
               </p>
             </div>
           </div>
-        </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Anomaly Type 1 */}
-          <div className="p-4 rounded-xl bg-[#141a2e] border border-amber-500/20 flex flex-col justify-between gap-3">
-            <div>
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-black uppercase text-amber-400">
-                  Dạng 1: Nghi vấn chép giải / Phụ thuộc tài liệu
-                </span>
-                <span className="text-[10px] font-mono font-black text-amber-300 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">
-                  {learningBottlenecks.type1.length} học sinh
-                </span>
-              </div>
-              <p className="text-xs text-slate-300 font-semibold mt-1">
-                Điểm BTVN rất cao (≥ 8.5) nhưng Điểm trên lớp rất thấp (≤ 5.5). Chênh lệch ≥ 3.0 điểm.
-              </p>
-              <p className="text-[11px] text-slate-400 mt-1 italic">
-                Định hướng: Gọi học sinh lên bảng giải trình trực tiếp phương pháp giải BTVN.
-              </p>
-            </div>
-          </div>
-
-          {/* Anomaly Type 2 */}
-          <div className="p-4 rounded-xl bg-[#141a2e] border border-blue-500/20 flex flex-col justify-between gap-3">
-            <div>
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-black uppercase text-blue-400">
-                  Dạng 2: Tiếp thu nhanh nhưng thiếu kỷ luật tự học
-                </span>
-                <span className="text-[10px] font-mono font-black text-blue-300 bg-blue-500/10 px-2 py-0.5 rounded border border-blue-500/20">
-                  {learningBottlenecks.type2.length} học sinh
-                </span>
-              </div>
-              <p className="text-xs text-slate-300 font-semibold mt-1">
-                Điểm trên lớp cao (≥ 8.5) nhưng BTVN thấp (≤ 5.5) hoặc thường xuyên bỏ làm. Chênh lệch ≥ 3.0 điểm.
-              </p>
-              <p className="text-[11px] text-slate-400 mt-1 italic">
-                Định hướng: Nhắc nhở kỷ luật tự rèn luyện và giao chỉ tiêu bài tập bắt buộc hoàn thành.
-              </p>
-            </div>
+          <div className="p-1.5 rounded-lg bg-white/5 text-slate-400">
+            {isBottlenecksSectionOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
           </div>
         </div>
+
+        {isBottlenecksSectionOpen && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-[#182038]">
+            {/* Anomaly Type 1 */}
+            <div className="p-4 rounded-xl bg-[#141a2e] border border-amber-500/20 flex flex-col justify-between gap-3">
+              <div>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-black uppercase text-amber-400">
+                    Dạng 1: Nghi vấn chép giải / Phụ thuộc tài liệu
+                  </span>
+                  <span className="text-[10px] font-mono font-black text-amber-300 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">
+                    {learningBottlenecks.type1.length} học sinh
+                  </span>
+                </div>
+                <p className="text-xs text-slate-300 font-semibold mt-1">
+                  Điểm BTVN rất cao (≥ 8.5) nhưng Điểm trên lớp rất thấp (≤ 5.5). Chênh lệch ≥ 3.0 điểm.
+                </p>
+                <p className="text-[11px] text-slate-400 mt-1 italic">
+                  Định hướng: Gọi học sinh lên bảng giải trình trực tiếp phương pháp giải BTVN.
+                </p>
+              </div>
+            </div>
+
+            {/* Anomaly Type 2 */}
+            <div className="p-4 rounded-xl bg-[#141a2e] border border-blue-500/20 flex flex-col justify-between gap-3">
+              <div>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-black uppercase text-blue-400">
+                    Dạng 2: Tiếp thu nhanh nhưng thiếu kỷ luật tự học
+                  </span>
+                  <span className="text-[10px] font-mono font-black text-blue-300 bg-blue-500/10 px-2 py-0.5 rounded border border-blue-500/20">
+                    {learningBottlenecks.type2.length} học sinh
+                  </span>
+                </div>
+                <p className="text-xs text-slate-300 font-semibold mt-1">
+                  Điểm trên lớp cao (≥ 8.5) nhưng BTVN thấp (≤ 5.5) hoặc thường xuyên bỏ làm. Chênh lệch ≥ 3.0 điểm.
+                </p>
+                <p className="text-[11px] text-slate-400 mt-1 italic">
+                  Định hướng: Nhắc nhở kỷ luật tự rèn luyện và giao chỉ tiêu bài tập bắt buộc hoàn thành.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* 6. STUDENT RANKINGS TABLE — TanStack Table */}
