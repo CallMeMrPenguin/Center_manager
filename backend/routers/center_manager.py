@@ -22,7 +22,8 @@ from database.db_manager import (
     get_courses, create_course, update_course, delete_course,
     get_student_scores, upsert_student_score, delete_student_score,
     get_class_attendance_grades, upsert_class_attendance_grades,
-    get_analytics_reports, reset_student_grades, get_class_student_predictions
+    get_analytics_reports, reset_student_grades, get_class_student_predictions,
+    get_custom_time_phases, save_custom_time_phase, delete_custom_time_phase
 )
 from routers.questions import flatten_docx_to_questions
 
@@ -744,3 +745,23 @@ class ResetGradesPayload(BaseModel):
 def api_reset_grades(payload: ResetGradesPayload):
     count = reset_student_grades(payload.class_id, payload.student_id, payload.from_date, payload.to_date)
     return {"status": "success", "reset_count": count}
+
+class TimePhasePayload(BaseModel):
+    id: Optional[int] = None
+    phase_name: str
+    class_id: Optional[int] = None
+    from_date: str
+    to_date: str
+
+@router.get("/api/reports/time-phases")
+def api_get_time_phases(class_id: Optional[int] = None):
+    return get_custom_time_phases(class_id)
+
+@router.post("/api/reports/time-phases")
+def api_save_time_phase(payload: TimePhasePayload):
+    return save_custom_time_phase(payload.model_dump())
+
+@router.delete("/api/reports/time-phases/{phase_id}")
+def api_delete_time_phase(phase_id: int):
+    success = delete_custom_time_phase(phase_id)
+    return {"status": "success", "deleted": success}

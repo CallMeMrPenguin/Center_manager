@@ -289,6 +289,19 @@ export const api = {
       method: 'POST',
       body: JSON.stringify(params),
     }),
+  getTimePhases: (class_id?: number) => {
+    const query = class_id ? `?class_id=${class_id}` : '';
+    return request<any[]>(`/api/reports/time-phases${query}`);
+  },
+  saveTimePhase: (payload: { id?: number; phase_name: string; class_id?: number | null; from_date: string; to_date: string }) =>
+    request<any>('/api/reports/time-phases', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
+  deleteTimePhase: (phase_id: number) =>
+    request<{ status: string; deleted: boolean }>(`/api/reports/time-phases/${phase_id}`, {
+      method: 'DELETE',
+    }),
 
   // Document Manager (Tài liệu) API
   getDocuments: (params: { folder_id?: string; tag?: string; search?: string }) => {

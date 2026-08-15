@@ -411,6 +411,18 @@ def init_db():
     except sqlite3.OperationalError:
         pass
 
+    # 23. Custom Time Phases table
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS custom_time_phases (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        phase_name TEXT NOT NULL,
+        class_id INTEGER REFERENCES classes(id) ON DELETE CASCADE DEFAULT NULL,
+        from_date TEXT NOT NULL,
+        to_date TEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+    """)
+
     # Performance Indexes
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_question_bank_grade_unit ON question_bank(grade, unit);")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_vocabulary_list_grade_unit ON vocabulary_list(grade, unit);")
@@ -418,6 +430,7 @@ def init_db():
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_document_folders_parent_deleted ON document_folders(parent_id, is_deleted);")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_class_sessions_class_date ON class_sessions(class_id, date);")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_attendance_class_student_date ON class_attendance_grades(class_id, student_id, date);")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_custom_time_phases_class_dates ON custom_time_phases(class_id, from_date, to_date);")
     # Cleanup / migration: Set status = 'Vắng mặt' ONLY for PAST attendance records (date < today) with no grades and no notes, while restoring today/future records to 'Có mặt'
     try:
         cursor.execute("""
@@ -2623,6 +2636,60 @@ def reset_student_grades(class_id: Optional[int] = None, student_id: Optional[in
     conn.close()
     return count
 
+def get_custom_time_phases(class_id: Optional[int] = None) -> List[Dict[str, Any]]:
+    conn = get_connection()
+    cursor = conn.cursor()
+    if class_id:
+        cursor.execute("SELECT * FROM custom_time_phases WHERE class_id IS NULL OR class_id = ? ORDER BY from_date ASC", (class_id,))
+    else:
+        cursor.execute("SELECT * FROM custom_time_phases ORDER BY from_date ASC")
+    rows = [dict(r) for r in cursor.fetchall()]
+    conn.close()
+    return rows
 
+def save_custom_time_phase(phase_data: Dict[str, Any]) -> Dict[str, Any]:
+    conn = get_connection()
+    cursor = conn.cursor()
+    phase_id = phase_data.get("id")
+    phase_name = str(phase_data.get("phase_name", "")).strip()
+    class_id = phase_data.get("class_id")
+    if class_id is not None and str(class_id).strip() != "":
+        try:
+            class_id = int(class_id)
+        except Exception:
+            class_id = None
+    else:
+        class_id = None
 
+    from_date = str(phase_data.get("from_date", "")).strip()
+    to_date = str(phase_data.get("to_date", "")).strip()
 
+    if phase_id:
+        cursor.execute("""
+            UPDATE custom_time_phases 
+            SET phase_name = ?, class_id = ?, from_date = ?, to_date = ?
+            WHERE id = ?
+        """, (phase_name, class_id, from_date, to_date, phase_id))
+    else:
+        cursor.execute("""
+            INSERT INTO custom_time_phases (phase_name, class_id, from_date, to_date)
+            VALUES (?, ?, ?, ?)
+        """, (phase_name, class_id, from_date, to_date))
+        phase_id = cursor.lastrowid
+    conn.commit()
+    conn.close()
+    return {
+        "id": phase_id,
+        "phase_name": phase_name,
+        "class_id": class_id,
+        "from_date": from_date,
+        "to_date": to_date
+    }
+
+def delete_custom_time_phase(phase_id: int) -> bool:
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM custom_time_phases WHERE id = ?", (phase_id,))
+    conn.commit()
+    conn.close()
+    return True
