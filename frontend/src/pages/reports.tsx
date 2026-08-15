@@ -1223,9 +1223,9 @@ export default function ReportsPage() {
     },
     {
       id: 'rankTier',
-      header: () => <div className="text-center w-full">Hạng / Rank Tier</div>,
+      header: () => <div className="text-center w-full">Hạng / Tier</div>,
       meta: {
-        headerText: 'Hạng / Rank Tier',
+        headerText: 'Hạng / Tier',
         exportValue: (r: any) => {
           const c1 = Number(r.avg_check_1 || 0);
           const c2 = Number(r.avg_check_2 || 0);
@@ -1234,7 +1234,59 @@ export default function ReportsPage() {
           if (valid.length === 0) return 'Chưa xếp hạng';
           const avg = trunc1Dec(valid.reduce((a, b) => a + b, 0) / valid.length);
           const tier = getStudentTier(avg);
-          return `${tier.name} - ${tier.title} (${format1Dec(avg)})`;
+          return `${tier.name} (${tier.title})`;
+        }
+      },
+      accessorFn: (r: any) => {
+        const c1 = Number(r.avg_check_1 || 0);
+        const c2 = Number(r.avg_check_2 || 0);
+        const hw = Number(r.avg_homework || 0);
+        const valid = [c1, c2, hw].filter(v => v > 0);
+        if (valid.length === 0) return 0;
+        return trunc1Dec(valid.reduce((a, b) => a + b, 0) / valid.length);
+      },
+      cell: ({ getValue }) => {
+        const avg = getValue<number>();
+        if (avg === 0) {
+          return (
+            <div className="text-center">
+              <span className="inline-block px-2.5 py-1 rounded-lg text-[10px] font-bold bg-slate-500/10 text-slate-400 border border-slate-500/30">Chưa xếp hạng</span>
+            </div>
+          );
+        }
+        const tier = getStudentTier(avg);
+        return (
+          <div className="flex items-center justify-center gap-2">
+            <img
+              src={tier.badge}
+              alt={tier.name}
+              className="w-7 h-7 object-contain shrink-0 drop-shadow-[0_2px_8px_rgba(0,0,0,0.5)] transform hover:scale-110 transition-transform duration-200"
+            />
+            <div className="text-left">
+              <span className={`text-xs font-black font-sans block leading-tight ${tier.text}`}>{tier.name}</span>
+              <span className="text-[10px] text-slate-400 font-semibold">{tier.title}</span>
+            </div>
+          </div>
+        );
+      },
+    },
+    {
+      id: 'overallAvg',
+      header: () => <div className="text-center w-full">Đánh Giá / Hiệu Suất</div>,
+      meta: {
+        headerText: 'Đánh Giá / Hiệu Suất',
+        exportValue: (r: any) => {
+          const c1 = Number(r.avg_check_1 || 0);
+          const c2 = Number(r.avg_check_2 || 0);
+          const hw = Number(r.avg_homework || 0);
+          const valid = [c1, c2, hw].filter(v => v > 0);
+          if (valid.length === 0) return 'Chưa có điểm';
+          const avg = trunc1Dec(valid.reduce((a, b) => a + b, 0) / valid.length);
+          let label = 'Xuất Sắc';
+          if (avg < 8.5) label = 'Giỏi';
+          if (avg < 7.0) label = 'Khá';
+          if (avg < 5.0) label = 'Cần Cố Gắng';
+          return `${label} (${format1Dec(avg)})`;
         }
       },
       accessorFn: (r: any) => {
@@ -1254,21 +1306,13 @@ export default function ReportsPage() {
             </div>
           );
         }
-        const tier = getStudentTier(avg);
+        let label = 'Xuất Sắc', cls = 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30';
+        if (avg < 8.5) { label = 'Giỏi'; cls = 'bg-blue-500/10 text-blue-300 border-blue-500/30'; }
+        if (avg < 7.0) { label = 'Khá'; cls = 'bg-amber-500/10 text-amber-300 border-amber-500/30'; }
+        if (avg < 5.0) { label = 'Cần Cố Gắng'; cls = 'bg-rose-500/10 text-rose-400 border-rose-500/30'; }
         return (
-          <div className="flex items-center justify-center gap-2">
-            <img
-              src={tier.badge}
-              alt={tier.name}
-              className="w-7 h-7 object-contain shrink-0 drop-shadow-[0_2px_8px_rgba(0,0,0,0.5)] transform hover:scale-110 transition-transform duration-200"
-            />
-            <div className="text-left">
-              <div className="flex items-center gap-1">
-                <span className={`text-xs font-black font-sans ${tier.text}`}>{tier.name}</span>
-                <span className="text-[10px] text-slate-400 font-semibold">({tier.title})</span>
-              </div>
-              <span className="text-[11px] font-mono font-black text-slate-200 block">{format1Dec(avg)} đ</span>
-            </div>
+          <div className="text-center">
+            <span className={`inline-block px-2.5 py-1 rounded-lg text-[10px] font-black border ${cls}`}>{label} ({format1Dec(avg)})</span>
           </div>
         );
       },
@@ -2402,10 +2446,10 @@ export default function ReportsPage() {
                         </div>
                         <div className="grid grid-cols-2 gap-2 h-2.5 bg-[#0f1422] p-0.5 rounded-md border border-white/5">
                           <div className="w-full bg-[#131b2e] rounded-sm overflow-hidden flex justify-end">
-                            <div style={{ width: `${Math.min(100, (classComparisonData.classA.avgCheck1 / 10) * 100)}%` }} className="h-full bg-blue-500 rounded-sm animate-grow-width" />
+                            <div style={{ width: `${Math.min(100, (classComparisonData.classA.avgCheck1 / 10) * 100)}%` }} className="h-full bg-blue-500 rounded-sm animate-grow-width-right-origin" />
                           </div>
                           <div className="w-full bg-[#131b2e] rounded-sm overflow-hidden">
-                            <div style={{ width: `${Math.min(100, (classComparisonData.classB.avgCheck1 / 10) * 100)}%` }} className="h-full bg-cyan-500 rounded-sm animate-grow-width" />
+                            <div style={{ width: `${Math.min(100, (classComparisonData.classB.avgCheck1 / 10) * 100)}%` }} className="h-full bg-cyan-500 rounded-sm animate-grow-width-left-origin" />
                           </div>
                         </div>
                       </div>
@@ -2421,10 +2465,10 @@ export default function ReportsPage() {
                         </div>
                         <div className="grid grid-cols-2 gap-2 h-2.5 bg-[#0f1422] p-0.5 rounded-md border border-white/5">
                           <div className="w-full bg-[#131b2e] rounded-sm overflow-hidden flex justify-end">
-                            <div style={{ width: `${Math.min(100, (classComparisonData.classA.avgCheck2 / 10) * 100)}%` }} className="h-full bg-blue-500 rounded-sm animate-grow-width" />
+                            <div style={{ width: `${Math.min(100, (classComparisonData.classA.avgCheck2 / 10) * 100)}%` }} className="h-full bg-blue-500 rounded-sm animate-grow-width-right-origin" />
                           </div>
                           <div className="w-full bg-[#131b2e] rounded-sm overflow-hidden">
-                            <div style={{ width: `${Math.min(100, (classComparisonData.classB.avgCheck2 / 10) * 100)}%` }} className="h-full bg-cyan-500 rounded-sm animate-grow-width" />
+                            <div style={{ width: `${Math.min(100, (classComparisonData.classB.avgCheck2 / 10) * 100)}%` }} className="h-full bg-cyan-500 rounded-sm animate-grow-width-left-origin" />
                           </div>
                         </div>
                       </div>
@@ -2440,10 +2484,10 @@ export default function ReportsPage() {
                         </div>
                         <div className="grid grid-cols-2 gap-2 h-2.5 bg-[#0f1422] p-0.5 rounded-md border border-white/5">
                           <div className="w-full bg-[#131b2e] rounded-sm overflow-hidden flex justify-end">
-                            <div style={{ width: `${Math.min(100, (classComparisonData.classA.avgHomework / 10) * 100)}%` }} className="h-full bg-blue-500 rounded-sm animate-grow-width" />
+                            <div style={{ width: `${Math.min(100, (classComparisonData.classA.avgHomework / 10) * 100)}%` }} className="h-full bg-blue-500 rounded-sm animate-grow-width-right-origin" />
                           </div>
                           <div className="w-full bg-[#131b2e] rounded-sm overflow-hidden">
-                            <div style={{ width: `${Math.min(100, (classComparisonData.classB.avgHomework / 10) * 100)}%` }} className="h-full bg-cyan-500 rounded-sm animate-grow-width" />
+                            <div style={{ width: `${Math.min(100, (classComparisonData.classB.avgHomework / 10) * 100)}%` }} className="h-full bg-cyan-500 rounded-sm animate-grow-width-left-origin" />
                           </div>
                         </div>
                       </div>
@@ -3640,6 +3684,18 @@ export default function ReportsPage() {
                 <rect x={paddingLeft} y={paddingTop - 10} width={plotAreaWidth} height={plotAreaHeight + 20} />
               </clipPath>
 
+              {/* Dynamic Curtain Reveal Clip for Gradient Shadows (advances in exact sync with line draw animation) */}
+              <clipPath id="chart-curtain-clip">
+                <rect 
+                  key={`curtain-${selectedStudentId || selectedClassId || 'all'}-${timeView}`}
+                  x={paddingLeft} 
+                  y={paddingTop - 15} 
+                  width={plotAreaWidth} 
+                  height={plotAreaHeight + 30} 
+                  className="animate-curtain-reveal"
+                />
+              </clipPath>
+
               {/* Outer Glow Filters with EXPANDED BOUNDS (300% width/height to eliminate square edge clipping!) */}
               <filter id="glow-blue" x="-100%" y="-100%" width="300%" height="300%">
                 <feGaussianBlur stdDeviation="6" result="blur" />
@@ -3723,10 +3779,12 @@ export default function ReportsPage() {
 
             {/* CLIPPED INTERACTIVE PLOT AREA (CURVES & DATA POINTS DYNAMICALLY SCALE & TRANSLATE) */}
             <g clipPath="url(#chart-plot-clip)">
-              {/* GRADIENT AREA FILLS UNDER LINES */}
-              <path d={makeAreaPath('check1')} fill="url(#area-gradient-blue)" className="transition-all duration-300" />
-              <path d={makeAreaPath('check2')} fill="url(#area-gradient-purple)" className="transition-all duration-300" />
-              <path d={makeAreaPath('homework')} fill="url(#area-gradient-emerald)" className="transition-all duration-300" />
+              {/* GRADIENT AREA FILLS UNDER LINES - REVEALED IN EXACT SYNC WITH SELF-DRAWING CURVES */}
+              <g clipPath="url(#chart-curtain-clip)">
+                <path d={makeAreaPath('check1')} fill="url(#area-gradient-blue)" />
+                <path d={makeAreaPath('check2')} fill="url(#area-gradient-purple)" />
+                <path d={makeAreaPath('homework')} fill="url(#area-gradient-emerald)" />
+              </g>
 
                 {/* SMOOTH BEZIER LINES WITH SELF-DRAW ANIMATION */}
                 <path 
