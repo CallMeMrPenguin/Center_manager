@@ -350,6 +350,17 @@ input[type="month"]::-webkit-calendar-picker-indicator {
 }
 .animate-card-enter { animation: cardEnter 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; will-change: opacity, transform; }
 
+@keyframes cascadeFadeIn {
+  0%   { opacity: 0; transform: translateY(22px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+.animate-cascade-1 { animation: cascadeFadeIn 0.65s cubic-bezier(0.16, 1, 0.3, 1) 0.04s both; will-change: opacity, transform; }
+.animate-cascade-2 { animation: cascadeFadeIn 0.65s cubic-bezier(0.16, 1, 0.3, 1) 0.12s both; will-change: opacity, transform; }
+.animate-cascade-3 { animation: cascadeFadeIn 0.65s cubic-bezier(0.16, 1, 0.3, 1) 0.20s both; will-change: opacity, transform; }
+.animate-cascade-4 { animation: cascadeFadeIn 0.65s cubic-bezier(0.16, 1, 0.3, 1) 0.28s both; will-change: opacity, transform; }
+.animate-cascade-5 { animation: cascadeFadeIn 0.65s cubic-bezier(0.16, 1, 0.3, 1) 0.36s both; will-change: opacity, transform; }
+.animate-cascade-6 { animation: cascadeFadeIn 0.65s cubic-bezier(0.16, 1, 0.3, 1) 0.44s both; will-change: opacity, transform; }
+
 @keyframes growWidth {
   0%   { transform: scaleX(0); transform-origin: left; }
   100% { transform: scaleX(1); transform-origin: left; }

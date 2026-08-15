@@ -306,23 +306,23 @@ function AppContent() {
                         onDragEnd={() => setDraggedIndex(null)}
                         onDrop={() => handleDrop(idx)}
                         onClick={() => setActiveTab(item.id)}
-                        className={`flex items-center w-full h-12 rounded-xl transition-colors duration-150 relative group cursor-pointer active:scale-95 shrink-0 overflow-hidden ${
-                          draggedIndex === idx ? 'opacity-40 border border-dashed border-indigo-400 bg-indigo-500/10' : ''
+                        className={`flex items-center w-full h-11 rounded-xl transition-all duration-150 relative group cursor-pointer active:scale-95 shrink-0 ${
+                          draggedIndex === idx ? 'opacity-40 border border-dashed border-blue-400 bg-blue-500/10' : ''
                         }`}
                       >
-                        {/* PERFECTLY CENTERED ACTIVE TAB HIGHLIGHT */}
+                        {/* PERFECTLY INSET ACTIVE TAB HIGHLIGHT (NO BORDER CLIPPING) */}
                         {isActive && (
-                          <div className="absolute top-[4px] left-[4px] w-11 h-10 rounded-xl bg-indigo-500/25 border-2 border-indigo-400/90 shadow-[0_0_16px_rgba(92,54,245,0.5)] group-hover/sidebar:w-[calc(100%-8px)] group-hover/sidebar:h-[calc(100%-8px)] transition-all duration-200 pointer-events-none" />
+                          <div className="absolute inset-0.5 rounded-lg bg-blue-600/20 border border-blue-500/80 shadow-[0_0_12px_rgba(59,130,246,0.35)] pointer-events-none transition-all duration-200" />
                         )}
 
                         {/* ICON BOX */}
-                        <div className="w-12 h-12 flex items-center justify-center shrink-0 relative z-10">
-                          <Icon size={20} className={isActive ? 'text-white drop-shadow-[0_0_10px_rgba(255,255,255,1)]' : 'text-slate-400 group-hover:text-white'} />
+                        <div className="w-10 h-10 flex items-center justify-center shrink-0 relative z-10 mx-auto group-hover/sidebar:mx-0">
+                          <Icon size={19} className={isActive ? 'text-blue-400 drop-shadow-[0_0_8px_rgba(59,130,246,0.8)]' : 'text-slate-400 group-hover:text-white'} />
                         </div>
 
                         {/* TEXT LABEL */}
                         <span className={`text-sm relative z-10 transition-opacity duration-200 ease-out whitespace-nowrap overflow-hidden pointer-events-none group-hover/sidebar:pointer-events-auto opacity-0 group-hover/sidebar:opacity-100 ml-2 ${
-                          isActive ? "text-white font-extrabold" : "text-slate-200 font-bold group-hover:text-white"
+                          isActive ? "text-white font-black" : "text-slate-300 font-bold group-hover:text-white"
                         }`}>
                           {item.label}
                         </span>

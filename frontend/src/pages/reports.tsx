@@ -2214,7 +2214,7 @@ export default function ReportsPage() {
               activeReportTab === 'deep' ? 'text-white font-black' : 'text-slate-400 hover:text-white'
             }`}
           >
-            <Sparkles size={13} />
+            <Layers size={13} />
             <span>Thống Kê Sâu</span>
           </button>
           <button
@@ -2230,14 +2230,14 @@ export default function ReportsPage() {
         </div>
       </div>
 
-      {/* ACTIVE SUB-TAB CONTAINER WITH FLUID TRANSITION ANIMATION */}
-      <div key={activeReportTab} className="animate-subtab-enter space-y-6">
+      {/* ACTIVE SUB-TAB CONTAINER WITH PROGRESSIVE CASCADING FADE-IN */}
+      <div key={activeReportTab} className="space-y-6">
         {activeReportTab === 'benchmark' ? (
           /* CROSS-CLASS BENCHMARK & 2-CLASS HEAD-TO-HEAD TAB VIEW */
-          <div className="space-y-6 mb-8 animate-card-enter">
+          <div className="space-y-6 mb-8">
             {/* 1. 2-CLASS HEAD-TO-HEAD COMPARISON DUEL SECTION (4 ROUNDED SQUARE CARDS, DARK THEME) */}
             {classComparisonData && (
-              <div className="bg-[#0b0f19] border border-[#1b253b] rounded-xl p-6 shadow-xl space-y-6">
+              <div className="bg-[#0b0f19] border border-[#1b253b] rounded-xl p-6 shadow-xl space-y-6 animate-cascade-1">
                 {/* Header & Dual Class Selector */}
                 <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[#161f33] pb-5">
                   <div className="flex items-center gap-3">
@@ -2285,7 +2285,7 @@ export default function ReportsPage() {
                 </div>
 
                 {/* 4 Duel KPI Comparison Rounded Square Cards */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 animate-cascade-2">
                   {/* 1. EMA Comparison */}
                   <div className="p-4 rounded-xl bg-[#0e1322] border border-[#1b253b] flex flex-col justify-between gap-3 shadow-md">
                     <div className="flex items-center justify-between">
@@ -2416,8 +2416,8 @@ export default function ReportsPage() {
                 </div>
 
                 {/* Side-by-Side Component Scores & 6-Tier Rank Distribution */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pt-1">
-                  {/* Left: Component Score Progress Bars with 0-to-target animation */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pt-1 animate-cascade-3">
+                  {/* Left: Dual Progress Bars for each metric with explicit tracks & values */}
                   <div className="p-5 rounded-xl bg-[#090d17] border border-[#192236] space-y-4">
                     <div className="flex items-center justify-between border-b border-white/5 pb-2.5">
                       <span className="text-xs font-black uppercase tracking-wider text-white flex items-center gap-2">
@@ -2435,59 +2435,92 @@ export default function ReportsPage() {
                     </div>
 
                     <div className="space-y-4">
-                      <div>
-                        <div className="flex items-center justify-between text-xs font-bold mb-1.5">
-                          <span className="text-slate-300">Check 1 (Kiểm tra đầu giờ)</span>
-                          <div className="font-mono text-[11px]">
-                            <span className="text-blue-400 font-extrabold">{classComparisonData.classA.avgCheck1}</span>
-                            <span className="text-slate-500 mx-1.5">vs</span>
-                            <span className="text-cyan-400 font-extrabold">{classComparisonData.classB.avgCheck1}</span>
-                          </div>
+                      {/* 1. Check 1 Dual Bars */}
+                      <div className="p-3 rounded-lg bg-[#0c101c] border border-white/5 space-y-2.5">
+                        <div className="flex items-center justify-between text-xs font-bold">
+                          <span className="text-slate-200 font-extrabold">Check 1 (Kiểm tra đầu giờ)</span>
+                          <span className="text-[11px] font-mono font-bold text-slate-400">Thang điểm 10</span>
                         </div>
-                        <div className="grid grid-cols-2 gap-2 h-2.5 bg-[#0f1422] p-0.5 rounded-md border border-white/5">
-                          <div className="w-full bg-[#131b2e] rounded-sm overflow-hidden flex justify-end">
-                            <div style={{ width: `${Math.min(100, (classComparisonData.classA.avgCheck1 / 10) * 100)}%` }} className="h-full bg-blue-500 rounded-sm animate-grow-width-right-origin" />
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-3">
+                            <span className="text-[11px] font-bold text-blue-400 w-24 truncate shrink-0">{classComparisonData.classA.name}:</span>
+                            <div className="flex-1 h-3 bg-[#111726] rounded-md overflow-hidden p-0.5 border border-white/5">
+                              <div
+                                style={{ width: `${Math.min(100, (classComparisonData.classA.avgCheck1 / 10) * 100)}%` }}
+                                className="h-full bg-blue-500 rounded-sm animate-grow-width shadow-[0_0_8px_rgba(59,130,246,0.5)]"
+                              />
+                            </div>
+                            <span className="text-xs font-mono font-black text-blue-300 w-12 text-right shrink-0">{format1Dec(classComparisonData.classA.avgCheck1)} đ</span>
                           </div>
-                          <div className="w-full bg-[#131b2e] rounded-sm overflow-hidden">
-                            <div style={{ width: `${Math.min(100, (classComparisonData.classB.avgCheck1 / 10) * 100)}%` }} className="h-full bg-cyan-500 rounded-sm animate-grow-width-left-origin" />
-                          </div>
-                        </div>
-                      </div>
-
-                      <div>
-                        <div className="flex items-center justify-between text-xs font-bold mb-1.5">
-                          <span className="text-slate-300">Check 2 (Kiểm tra trọng tâm)</span>
-                          <div className="font-mono text-[11px]">
-                            <span className="text-blue-400 font-extrabold">{classComparisonData.classA.avgCheck2}</span>
-                            <span className="text-slate-500 mx-1.5">vs</span>
-                            <span className="text-cyan-400 font-extrabold">{classComparisonData.classB.avgCheck2}</span>
-                          </div>
-                        </div>
-                        <div className="grid grid-cols-2 gap-2 h-2.5 bg-[#0f1422] p-0.5 rounded-md border border-white/5">
-                          <div className="w-full bg-[#131b2e] rounded-sm overflow-hidden flex justify-end">
-                            <div style={{ width: `${Math.min(100, (classComparisonData.classA.avgCheck2 / 10) * 100)}%` }} className="h-full bg-blue-500 rounded-sm animate-grow-width-right-origin" />
-                          </div>
-                          <div className="w-full bg-[#131b2e] rounded-sm overflow-hidden">
-                            <div style={{ width: `${Math.min(100, (classComparisonData.classB.avgCheck2 / 10) * 100)}%` }} className="h-full bg-cyan-500 rounded-sm animate-grow-width-left-origin" />
+                          <div className="flex items-center gap-3">
+                            <span className="text-[11px] font-bold text-cyan-400 w-24 truncate shrink-0">{classComparisonData.classB.name}:</span>
+                            <div className="flex-1 h-3 bg-[#111726] rounded-md overflow-hidden p-0.5 border border-white/5">
+                              <div
+                                style={{ width: `${Math.min(100, (classComparisonData.classB.avgCheck1 / 10) * 100)}%` }}
+                                className="h-full bg-cyan-500 rounded-sm animate-grow-width shadow-[0_0_8px_rgba(6,182,212,0.5)]"
+                              />
+                            </div>
+                            <span className="text-xs font-mono font-black text-cyan-300 w-12 text-right shrink-0">{format1Dec(classComparisonData.classB.avgCheck1)} đ</span>
                           </div>
                         </div>
                       </div>
 
-                      <div>
-                        <div className="flex items-center justify-between text-xs font-bold mb-1.5">
-                          <span className="text-slate-300">Homework (Bài tập về nhà)</span>
-                          <div className="font-mono text-[11px]">
-                            <span className="text-blue-400 font-extrabold">{classComparisonData.classA.avgHomework}</span>
-                            <span className="text-slate-500 mx-1.5">vs</span>
-                            <span className="text-cyan-400 font-extrabold">{classComparisonData.classB.avgHomework}</span>
+                      {/* 2. Check 2 Dual Bars */}
+                      <div className="p-3 rounded-lg bg-[#0c101c] border border-white/5 space-y-2.5">
+                        <div className="flex items-center justify-between text-xs font-bold">
+                          <span className="text-slate-200 font-extrabold">Check 2 (Kiểm tra trọng tâm)</span>
+                          <span className="text-[11px] font-mono font-bold text-slate-400">Thang điểm 10</span>
+                        </div>
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-3">
+                            <span className="text-[11px] font-bold text-blue-400 w-24 truncate shrink-0">{classComparisonData.classA.name}:</span>
+                            <div className="flex-1 h-3 bg-[#111726] rounded-md overflow-hidden p-0.5 border border-white/5">
+                              <div
+                                style={{ width: `${Math.min(100, (classComparisonData.classA.avgCheck2 / 10) * 100)}%` }}
+                                className="h-full bg-blue-500 rounded-sm animate-grow-width shadow-[0_0_8px_rgba(59,130,246,0.5)]"
+                              />
+                            </div>
+                            <span className="text-xs font-mono font-black text-blue-300 w-12 text-right shrink-0">{format1Dec(classComparisonData.classA.avgCheck2)} đ</span>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <span className="text-[11px] font-bold text-cyan-400 w-24 truncate shrink-0">{classComparisonData.classB.name}:</span>
+                            <div className="flex-1 h-3 bg-[#111726] rounded-md overflow-hidden p-0.5 border border-white/5">
+                              <div
+                                style={{ width: `${Math.min(100, (classComparisonData.classB.avgCheck2 / 10) * 100)}%` }}
+                                className="h-full bg-cyan-500 rounded-sm animate-grow-width shadow-[0_0_8px_rgba(6,182,212,0.5)]"
+                              />
+                            </div>
+                            <span className="text-xs font-mono font-black text-cyan-300 w-12 text-right shrink-0">{format1Dec(classComparisonData.classB.avgCheck2)} đ</span>
                           </div>
                         </div>
-                        <div className="grid grid-cols-2 gap-2 h-2.5 bg-[#0f1422] p-0.5 rounded-md border border-white/5">
-                          <div className="w-full bg-[#131b2e] rounded-sm overflow-hidden flex justify-end">
-                            <div style={{ width: `${Math.min(100, (classComparisonData.classA.avgHomework / 10) * 100)}%` }} className="h-full bg-blue-500 rounded-sm animate-grow-width-right-origin" />
+                      </div>
+
+                      {/* 3. Homework Dual Bars */}
+                      <div className="p-3 rounded-lg bg-[#0c101c] border border-white/5 space-y-2.5">
+                        <div className="flex items-center justify-between text-xs font-bold">
+                          <span className="text-slate-200 font-extrabold">Homework (Bài tập về nhà)</span>
+                          <span className="text-[11px] font-mono font-bold text-slate-400">Thang điểm 10</span>
+                        </div>
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-3">
+                            <span className="text-[11px] font-bold text-blue-400 w-24 truncate shrink-0">{classComparisonData.classA.name}:</span>
+                            <div className="flex-1 h-3 bg-[#111726] rounded-md overflow-hidden p-0.5 border border-white/5">
+                              <div
+                                style={{ width: `${Math.min(100, (classComparisonData.classA.avgHomework / 10) * 100)}%` }}
+                                className="h-full bg-blue-500 rounded-sm animate-grow-width shadow-[0_0_8px_rgba(59,130,246,0.5)]"
+                              />
+                            </div>
+                            <span className="text-xs font-mono font-black text-blue-300 w-12 text-right shrink-0">{format1Dec(classComparisonData.classA.avgHomework)} đ</span>
                           </div>
-                          <div className="w-full bg-[#131b2e] rounded-sm overflow-hidden">
-                            <div style={{ width: `${Math.min(100, (classComparisonData.classB.avgHomework / 10) * 100)}%` }} className="h-full bg-cyan-500 rounded-sm animate-grow-width-left-origin" />
+                          <div className="flex items-center gap-3">
+                            <span className="text-[11px] font-bold text-cyan-400 w-24 truncate shrink-0">{classComparisonData.classB.name}:</span>
+                            <div className="flex-1 h-3 bg-[#111726] rounded-md overflow-hidden p-0.5 border border-white/5">
+                              <div
+                                style={{ width: `${Math.min(100, (classComparisonData.classB.avgHomework / 10) * 100)}%` }}
+                                className="h-full bg-cyan-500 rounded-sm animate-grow-width shadow-[0_0_8px_rgba(6,182,212,0.5)]"
+                              />
+                            </div>
+                            <span className="text-xs font-mono font-black text-cyan-300 w-12 text-right shrink-0">{format1Dec(classComparisonData.classB.avgHomework)} đ</span>
                           </div>
                         </div>
                       </div>
@@ -2535,7 +2568,7 @@ export default function ReportsPage() {
                 </div>
 
                 {/* Leading Student Badges */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1 animate-cascade-4">
                   <div className="p-3.5 rounded-xl bg-[#0e1322] border border-blue-500/30 flex items-center justify-between gap-3">
                     <div className="flex items-center gap-3">
                       {classComparisonData.classA.topStudent ? (
@@ -2619,9 +2652,9 @@ export default function ReportsPage() {
           </div>
         ) : activeReportTab === 'deep' ? (
         /* THỐNG KÊ SÂU (DEEP ANALYSIS TAB VIEW) */
-        <div className="flex flex-col gap-8 mb-8 animate-card-enter">
+        <div className="flex flex-col gap-8 mb-8">
           {/* 1. 6-TIER ACADEMIC RANKING DISTRIBUTION (FULL WIDTH, CLEAN & CRISP) */}
-          <div className="bg-[#0c101d] border border-[#1d253f] p-5 rounded-xl shadow-xl flex flex-col justify-between gap-4">
+          <div className="bg-[#0c101d] border border-[#1d253f] p-5 rounded-xl shadow-xl flex flex-col justify-between gap-4 animate-cascade-1">
             <div className="flex items-center justify-between gap-2 border-b border-[#182038] pb-3">
               <div className="flex items-center gap-2.5">
                 <Award size={18} className="text-amber-400" />
@@ -2703,7 +2736,7 @@ export default function ReportsPage() {
           </div>
 
           {/* 2. EARLY WARNING & RISK RETENTION ALERT SYSTEM */}
-          <div className="bg-[#120d18] border border-rose-500/30 rounded-2xl p-4 sm:p-5 shadow-2xl transition-all">
+          <div className="bg-[#120d18] border border-rose-500/30 rounded-2xl p-4 sm:p-5 shadow-2xl transition-all animate-cascade-2">
             <div 
               onClick={() => setIsWarningSectionOpen(!isWarningSectionOpen)}
               className="flex flex-wrap items-center justify-between gap-4 cursor-pointer select-none"
@@ -2884,7 +2917,7 @@ export default function ReportsPage() {
           </div>
 
           {/* 3. SMART LEVEL GROUPING (MODE A & MODE B) */}
-          <div className="bg-[#0d1120] border border-indigo-500/30 rounded-2xl flex flex-col shadow-2xl overflow-hidden transition-all">
+          <div className="bg-[#0d1120] border border-indigo-500/30 rounded-2xl flex flex-col shadow-2xl overflow-hidden transition-all animate-cascade-3">
             {/* Collapsible Header Bar */}
             <div 
               onClick={() => setIsGroupingSectionOpen(!isGroupingSectionOpen)}
@@ -2892,7 +2925,7 @@ export default function ReportsPage() {
             >
               <div className="flex items-center gap-3">
                 <div className="p-2.5 rounded-xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 shrink-0">
-                  <Sparkles size={20} />
+                  <FolderTree size={20} />
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
@@ -3334,7 +3367,7 @@ export default function ReportsPage() {
         <>
           {/* 2. INDIVIDUAL STUDENT PERFORMANCE INDEX */}
           {selectedStudentObj && (
-            <div className="flex flex-col gap-6">
+            <div className="flex flex-col gap-6 animate-cascade-1">
               <div className="bg-[#0e1222] border border-[#1e2744] p-6 rounded-2xl shadow-2xl flex flex-wrap items-center justify-between gap-6 relative overflow-hidden">
                 <div className="flex items-center gap-4 z-10">
                   <div className="w-14 h-14 rounded-full bg-gradient-to-tr from-indigo-600 to-purple-600 text-white font-black text-xl flex items-center justify-center shadow-lg shadow-indigo-500/20 border border-white/20">
@@ -3420,7 +3453,7 @@ export default function ReportsPage() {
           )}
 
           {/* 3. FOUR GLOWING KPI CARDS */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 animate-cascade-2">
             <div className="kpi-card-blue p-5 flex flex-col justify-between shadow-2xl transition-all duration-300 min-h-[100px]">
               <div>
                 <span className="text-[10px] font-black uppercase tracking-wider text-blue-400 block mb-1">
@@ -3483,7 +3516,7 @@ export default function ReportsPage() {
           </div>
 
           {/* 4. EXPANDED TALLER SVG GRAPH (560px HEIGHT WITH SMOOTH CIRCULAR GLOW & HOVER TOOLTIP) */}
-          <div className="bg-[#0b0e1b] border border-[#1d2644] p-6 rounded-2xl shadow-2xl flex flex-col gap-4">
+          <div className="bg-[#0b0e1b] border border-[#1d2644] p-6 rounded-2xl shadow-2xl flex flex-col gap-4 animate-cascade-3">
             
             {/* GRAPH HEADER & TIME VIEW FILTERS */}
             <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[#181f36] pb-3">
@@ -4151,7 +4184,7 @@ export default function ReportsPage() {
       </div>
 
       {/* 6. STUDENT RANKINGS TABLE — TanStack Table */}
-      <div className="bg-[#0d1120] border border-[#1d2644] rounded-2xl flex flex-col shadow-2xl mb-8">
+      <div className="bg-[#0d1120] border border-[#1d2644] rounded-2xl flex flex-col shadow-2xl mb-8 animate-cascade-4">
         <div className="px-5 py-4 border-b border-[#181f36] flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <GraduationCap size={18} className="text-indigo-400" />
@@ -4188,7 +4221,7 @@ export default function ReportsPage() {
         />
       </div>
       {/* 7. STUDENT GRADE HISTORY & EDIT TABLE — TanStack Table */}
-      <div className="bg-[#0d1120] border border-[#1d2644] rounded-2xl flex flex-col shadow-2xl mb-8">
+      <div className="bg-[#0d1120] border border-[#1d2644] rounded-2xl flex flex-col shadow-2xl mb-8 animate-cascade-5">
         <div className="px-5 py-4 border-b border-[#181f36] flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <History size={18} className="text-indigo-400" />
