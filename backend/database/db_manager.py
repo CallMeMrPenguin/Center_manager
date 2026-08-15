@@ -2209,14 +2209,20 @@ def calculate_performance_analytics(session_records: List[Dict[str, Any]]) -> Di
         return fitted
 
     def _fitted_wols(vals: List[float]) -> List[float]:
-        """Leave-one-out weighted OLS fitted value at each position."""
-        fitted: List[float] = []
-        for end in range(1, len(vals) + 1):
-            sub = vals[:end]
-            _, pv = _weighted_ols_predict(sub)
-            # fitted value = weighted OLS prediction of the sub-series up to this point
-            fitted.append(pv)
-        return fitted
+        """In-sample weighted OLS fitted values along the regression trend line."""
+        N = len(vals)
+        if N < 2:
+            return vals[:]
+        x_vals = list(range(1, N + 1))
+        weights = [0.85 ** (N - 1 - i) for i in range(N)]
+        sum_w = sum(weights)
+        mean_x = sum(w * x for w, x in zip(weights, x_vals)) / sum_w
+        mean_y = sum(w * y for w, y in zip(weights, vals)) / sum_w
+        num = sum(weights[i] * (x_vals[i] - mean_x) * (vals[i] - mean_y) for i in range(N))
+        den = sum(weights[i] * (x_vals[i] - mean_x) ** 2 for i in range(N))
+        slope = num / den if den != 0 else 0.0
+        intercept = mean_y - slope * mean_x
+        return [trunc_1_dec(max(0.0, min(10.0, slope * x + intercept))) for x in x_vals]
 
     def _fitted_holtwinters(vals: List[float]) -> List[float]:
         """Return Holt-Winters in-sample fitted values."""
@@ -2255,17 +2261,22 @@ def calculate_performance_analytics(session_records: List[Dict[str, Any]]) -> Di
 
     trend_score = max(0.0, min(100.0, 50.0 + (slope_overall * 25.0)))
 
-    # Calculate 3 separate SD values for each score type
-    def _calc_sd(vals: List[float]) -> float:
+    # Calculate residual SD (RMSE around fitted trajectory) for each score type
+    # This prevents systematic upward progress from being falsely penalized as volatility
+    def _calc_sd(vals: List[float], fitted_vals: Optional[List[float]] = None) -> float:
         if len(vals) < 2:
             return 0.0
-        m = sum(vals) / len(vals)
-        v = sum((x - m) ** 2 for x in vals) / len(vals)
+        if fitted_vals and len(fitted_vals) == len(vals):
+            # Residual variance from the progress trajectory
+            v = sum((actual - fitted) ** 2 for actual, fitted in zip(vals, fitted_vals)) / len(vals)
+        else:
+            m = sum(vals) / len(vals)
+            v = sum((x - m) ** 2 for x in vals) / len(vals)
         return math.sqrt(v)
 
-    std_dev_c1 = _calc_sd(c1_list)
-    std_dev_c2 = _calc_sd(c2_list)
-    std_dev_hw = _calc_sd(hw_list)
+    std_dev_c1 = _calc_sd(c1_list, fitted_c1)
+    std_dev_c2 = _calc_sd(c2_list, fitted_c2)
+    std_dev_hw = _calc_sd(hw_list, fitted_hw)
 
     # Weighted combined SD using configured grade weights
     sd_w_sum = 0.0
@@ -2323,7 +2334,13 @@ def calculate_performance_analytics(session_records: List[Dict[str, Any]]) -> Di
     total_rec_count = len(session_records)
     att_pct = (present_count / total_rec_count * 100) if total_rec_count > 0 else 100.0
 
-    performance_index = (academic_score * 0.40) + (trend_score * 0.20) + (consistency_score * 0.15) + (ema_score * 0.15) + (att_pct * 0.10)
+    # Modern Multi-Factor Composite Performance Index (Scale 0 - 100):
+    # 40% Recent Capability (EMA Score)
+    # 25% Growth Trajectory (Trend Score)
+    # 15% True Consistency (Residual Consistency Score)
+    # 10% Historical Cumulative Average (Academic Score)
+    # 10% Attendance & Discipline (att_pct)
+    performance_index = (ema_score * 0.40) + (trend_score * 0.25) + (consistency_score * 0.15) + (academic_score * 0.10) + (att_pct * 0.10)
     performance_index = max(0.0, min(100.0, performance_index))
 
     if performance_index >= 90:
@@ -2345,7 +2362,9 @@ def calculate_performance_analytics(session_records: List[Dict[str, Any]]) -> Di
     if att_pct < 85:
         recs.append(f"Cảnh báo: Tỷ lệ vắng mặt cao ({att_pct:.0f}%), ảnh hưởng đến khả năng tiếp thu.")
     if std_dev > 1.5:
-        recs.append("Khuyên dùng: Điểm số trồi sụt thất thường, cần giáo viên theo dõi sát sao từng buổi học.")
+        recs.append("Khuyên dùng: Điểm số trồi sụt thất thường so với xu hướng, cần giáo viên theo dõi sát sao từng buổi học.")
+    elif slope_overall > 0.2:
+        recs.append("Khen ngợi: Học sinh đang có sự tiến bộ vượt bậc và duy trì phong độ rất tốt!")
     if not recs:
         recs.append("Đánh giá: Duy trì phong độ tốt. Tiếp tục phát huy trong các kỳ tới.")
     recs.append(f"Dự đoán buổi tới: Check 1 ({pred_c1:.1f}), Check 2 ({pred_c2:.1f}), Homework ({pred_hw:.1f}).")

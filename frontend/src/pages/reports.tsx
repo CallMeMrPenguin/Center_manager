@@ -1709,7 +1709,7 @@ export default function ReportsPage() {
 
             {activeTooltip === 'sd' && (
               <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 w-64 p-3 bg-[#161c34] border border-[#2c375e] text-slate-200 text-[11px] rounded-xl shadow-2xl z-30 text-left font-sans">
-                <span className="font-extrabold text-cyan-300 block mb-1">Độ Lệch Chuẩn Các Loại Điểm (SD):</span>
+                <span className="font-extrabold text-cyan-300 block mb-1">Độ Biến Động Thật Sự (Residual SD):</span>
                 <div className="space-y-1 my-1.5 font-mono text-[10px] font-bold bg-[#0d1120] p-2 rounded-lg border border-[#202948]">
                   {gradeTypesList.map(gt => (
                     <div key={gt.id} className="flex items-center justify-between" style={{ color: gt.color || '#3b82f6' }}>
@@ -1719,7 +1719,7 @@ export default function ReportsPage() {
                   ))}
                 </div>
                 <span className="text-[10px] text-slate-400 block">
-                  SD tổng hợp (σ = {engine.std_dev}) được tính theo trọng số ({gradeTypesList.map(gt => `${gt.label} ${gt.weight}%`).join(', ')}).
+                  SD đo độ ổn định quanh quỹ đạo tiến bộ (khử xu hướng), phân biệt chính xác giữa tiến bộ vượt bậc và trồi sụt thất thường.
                 </span>
               </div>
             )}
