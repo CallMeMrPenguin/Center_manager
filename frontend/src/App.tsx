@@ -406,27 +406,13 @@ function AppContent() {
         </aside>
 
         {/* MAIN BODY SKELETON */}
-        <div className="flex-1 flex flex-col overflow-hidden bg-transparent gap-3">
-          {/* HEADER BANNER */}
-          <header className="macos-toolbar h-12 rounded-2xl flex items-center justify-between px-5 z-10 shrink-0">
-            <div className="text-xs font-black text-white uppercase tracking-wider flex items-center gap-2.5">
-              <span className="h-2 w-2 rounded-full bg-indigo-500 shadow-[0_0_10px_rgba(92,54,245,1)]"></span>
-              <span>{TAB_DEFINITIONS.find(t => t.id === activeTab)?.label}</span>
-            </div>
-
-            <div className="flex items-center gap-2 text-[11px] font-bold text-slate-400">
-              <span className="px-2.5 py-1 rounded-lg bg-white/5 border border-white/5 text-slate-300">
-                Center Manager EDU
-              </span>
-            </div>
-          </header>
-
+        <div className="flex-1 flex flex-col overflow-hidden bg-transparent">
           {/* PAGE CONTENT CONTAINER */}
           <main className="flex-1 overflow-hidden bg-transparent relative gradient-border-card rounded-2xl">
             {TAB_DEFINITIONS.map((tab) => {
               const isActive = activeTab === tab.id;
               return (
-                <div key={tab.id} className={`h-full w-full ${isActive ? '' : 'hidden'}`}>
+                <div key={tab.id} className={`h-full w-full ${isActive ? 'animate-tab-enter' : 'hidden'}`}>
                   {tab.render({
                     isActive,
                     preloadedQuestions,

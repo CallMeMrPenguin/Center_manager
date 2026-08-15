@@ -332,6 +332,18 @@ input[type="month"]::-webkit-calendar-picker-indicator {
 }
 .animate-mac-modal { animation: macModalContentOpen 0.5s cubic-bezier(0.16,1,0.3,1) forwards; }
 
+@keyframes tabEnter {
+  0%   { opacity: 0; transform: translateY(6px) scale(0.995); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+.animate-tab-enter { animation: tabEnter 0.22s cubic-bezier(0.16,1,0.3,1) forwards; will-change: opacity, transform; }
+
+@keyframes subTabEnter {
+  0%   { opacity: 0; transform: translateY(4px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+.animate-subtab-enter { animation: subTabEnter 0.2s cubic-bezier(0.16,1,0.3,1) forwards; will-change: opacity, transform; }
+
 ::-webkit-scrollbar { width: 8px; height: 8px; }
 ::-webkit-scrollbar-track { background: rgba(13,16,24,0.3); border-radius: 99px; }
 ::-webkit-scrollbar-thumb { background: rgba(92,54,245,0.25); border-radius: 99px; border: 2px solid #06070a; }

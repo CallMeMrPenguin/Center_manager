@@ -4,10 +4,10 @@ import { api } from '../api';
 import { GradeTypeItem } from '../types';
 import { 
   BarChart3, RefreshCw, Calendar, 
-  AlertCircle, Users, GraduationCap, ChevronRight, ChevronDown, ChevronUp, Info, RotateCcw, X, Edit2, History, Save,
+  AlertCircle, Users, GraduationCap, ChevronRight, ChevronDown, ChevronUp, Info, RotateCcw, X, Edit3, History, Save,
   ZoomIn, ZoomOut, Move, Sparkles, Layers, Copy, Check, FileSpreadsheet, TrendingUp, TrendingDown, Minus, ShieldAlert, Award, Zap,
   SlidersHorizontal, Settings, Plus, Trash2, ShieldCheck, Flame, BellRing, Target, Activity, CheckCircle2, Clock, BarChart2, ShieldX, HelpCircle,
-  FolderTree, ArrowUpRight
+  FolderTree, ArrowUpRight, GitCompare, Scale, ArrowLeftRight, LineChart, Percent
 } from 'lucide-react';
 import { showToast } from '../components/Toast';
 import { CustomDatePicker } from '../components/CustomDatePicker';
@@ -35,6 +35,10 @@ export default function ReportsPage() {
   const [selectedClassId, setSelectedClassId] = useState<string>('');
   const [students, setStudents] = useState<any[]>([]);
   const [selectedStudentId, setSelectedStudentId] = useState<string>('');
+
+  // 2-Class Head-to-Head Comparison State
+  const [compareClassAId, setCompareClassAId] = useState<string>('');
+  const [compareClassBId, setCompareClassBId] = useState<string>('');
 
   // Hovered Data Point for Graph Tooltip
   const [hoveredPoint, setHoveredPoint] = useState<{
@@ -107,7 +111,7 @@ export default function ReportsPage() {
   // Collapsible Sections State (all collapsed by default per user request)
   const [isWarningSectionOpen, setIsWarningSectionOpen] = useState<boolean>(false);
   const [isGroupingSectionOpen, setIsGroupingSectionOpen] = useState<boolean>(false);
-  const [isGrowthSectionOpen, setIsGrowthSectionOpen] = useState<boolean>(false);
+  const [isGrowthSectionOpen, setIsGrowthSectionOpen] = useState<boolean>(true);
   const [isBottlenecksSectionOpen, setIsBottlenecksSectionOpen] = useState<boolean>(false);
 
   // Smart Level Grouping Scope: 'current' (Lớp hiện tại) | 'grade' (Toàn bộ cùng khối) | 'all' (Toàn trung tâm)
@@ -190,6 +194,12 @@ export default function ReportsPage() {
     try {
       const classList = await api.getClasses();
       setClasses(classList);
+      if (classList && classList.length >= 2) {
+        setCompareClassAId(prev => prev || String(classList[0].id));
+        setCompareClassBId(prev => prev || String(classList[1].id));
+      } else if (classList && classList.length === 1) {
+        setCompareClassAId(prev => prev || String(classList[0].id));
+      }
       const studentList = await api.getStudents();
       setStudents(studentList);
     } catch (err: any) {
@@ -460,8 +470,8 @@ export default function ReportsPage() {
     return list.sort((a, b) => b.riskTags.length - a.riskTags.length);
   }, [studentRankings, sessionRecords, selectedClassId, warningAbsentPct, warningConsecutiveAbsent, warningTrendThreshold]);
 
-  // Pre vs Post Growth Showcase (Top 5 Bứt Phá Điểm Số)
-  const growthShowcase = useMemo(() => {
+  // Score Fluctuations & Variations for ALL students of selected class
+  const scoreFluctuations = useMemo(() => {
     const rawList = selectedClassId ? studentRankings.filter(r => String(r.class_id) === selectedClassId) : studentRankings;
     if (!rawList || rawList.length === 0) return [];
 
@@ -480,38 +490,195 @@ export default function ReportsPage() {
         .filter(r => Number(r.check_1) > 0 || Number(r.check_2) > 0 || Number(r.homework) > 0)
         .sort((a, b) => (a.date > b.date ? 1 : -1));
 
-      if (sSessions.length >= 3) {
-        const getSessionScore = (r: any) => {
-          const c1 = Number(r.check_1 || 0);
-          const c2 = Number(r.check_2 || 0);
-          const hw = Number(r.homework || 0);
-          const valid = [c1, c2, hw].filter(v => v > 0);
-          return valid.length > 0 ? valid.reduce((a,b)=>a+b,0)/valid.length : 0;
-        };
+      const getSessionScore = (r: any) => {
+        const c1 = Number(r.check_1 || 0);
+        const c2 = Number(r.check_2 || 0);
+        const hw = Number(r.homework || 0);
+        const valid = [c1, c2, hw].filter(v => v > 0);
+        return valid.length > 0 ? valid.reduce((a, b) => a + b, 0) / valid.length : 0;
+      };
 
-        const firstThree = sSessions.slice(0, 3).map(getSessionScore);
-        const baseline = firstThree.reduce((a,b)=>a+b,0) / firstThree.length;
+      let baseline = 0;
+      let current = 0;
+      let delta = 0;
 
-        const latestThree = sSessions.slice(-3).map(getSessionScore);
-        const current = latestThree.reduce((a,b)=>a+b,0) / latestThree.length;
+      if (sSessions.length >= 1) {
+        const sampleCount = Math.min(3, sSessions.length);
+        const firstSample = sSessions.slice(0, sampleCount).map(getSessionScore);
+        baseline = trunc1Dec(firstSample.reduce((a, b) => a + b, 0) / firstSample.length);
 
-        const delta = trunc1Dec(current - baseline);
-
-        list.push({
-          student_id: s.student_id,
-          full_name: s.full_name,
-          nickname: s.nickname,
-          class_name: s.class_name,
-          baseline: trunc1Dec(baseline),
-          current: trunc1Dec(current),
-          delta,
-          sessionCount: sSessions.length
-        });
+        const latestSample = sSessions.slice(-sampleCount).map(getSessionScore);
+        current = trunc1Dec(latestSample.reduce((a, b) => a + b, 0) / latestSample.length);
+        delta = trunc1Dec(current - baseline);
+      } else {
+        const ema = Number(s.ema_level || 0);
+        baseline = trunc1Dec(ema);
+        current = trunc1Dec(ema);
+        delta = 0.0;
       }
+
+      let statusLabel = 'Duy trì ổn định';
+      let statusType: 'breakthrough' | 'improving' | 'stable' | 'declining' | 'critical' = 'stable';
+
+      if (delta >= 1.5) {
+        statusLabel = `Bứt phá mạnh (+${format1Dec(delta)})`;
+        statusType = 'breakthrough';
+      } else if (delta >= 0.5) {
+        statusLabel = `Tiến bộ tốt (+${format1Dec(delta)})`;
+        statusType = 'improving';
+      } else if (delta <= -1.5) {
+        statusLabel = `Sụt giảm nghiêm trọng (${format1Dec(delta)})`;
+        statusType = 'critical';
+      } else if (delta <= -0.5) {
+        statusLabel = `Có chiều hướng giảm (${format1Dec(delta)})`;
+        statusType = 'declining';
+      } else {
+        statusLabel = delta > 0 ? `Tăng nhẹ (+${format1Dec(delta)})` : delta < 0 ? `Giảm nhẹ (${format1Dec(delta)})` : 'Duy trì ổn định';
+        statusType = 'stable';
+      }
+
+      list.push({
+        student_id: s.student_id,
+        full_name: s.full_name,
+        nickname: s.nickname,
+        class_name: s.class_name,
+        class_id: s.class_id,
+        baseline,
+        current,
+        delta,
+        statusLabel,
+        statusType,
+        sessionCount: sSessions.length,
+        ema: Number(s.ema_level || 0)
+      });
     });
 
-    return list.sort((a, b) => b.delta - a.delta).slice(0, 5);
+    return list.sort((a, b) => b.delta - a.delta);
   }, [studentRankings, sessionRecords, selectedClassId]);
+
+  // 2-Class Head-to-Head Comparison Metrics
+  const classComparisonData = useMemo(() => {
+    if (!classes || classes.length === 0 || !studentRankings) return null;
+
+    const classA = classes.find(c => String(c.id) === String(compareClassAId)) || classes[0];
+    const classB = classes.find(c => String(c.id) === String(compareClassBId)) || (classes.length > 1 ? classes[1] : classes[0]);
+
+    if (!classA || !classB) return null;
+
+    const computeClassStats = (cObj: any) => {
+      const cStudents = studentRankings.filter(s => String(s.class_id) === String(cObj.id));
+      const totalStudents = cStudents.length;
+
+      if (totalStudents === 0) {
+        return {
+          id: cObj.id,
+          name: cObj.class_name,
+          grade: cObj.grade || 'Lớp 6',
+          studentCount: 0,
+          attendancePct: 100,
+          avgEma: 0,
+          avgCheck1: 0,
+          avgCheck2: 0,
+          avgHomework: 0,
+          improvingPct: 0,
+          classSd: 0,
+          scoreDistribution: { excellent: 0, good: 0, average: 0, weak: 0 },
+          topStudent: null,
+          atRiskCount: 0
+        };
+      }
+
+      const emaScores = cStudents.map(s => Number(s.ema_level || 0)).filter(v => v > 0);
+      const avgEma = emaScores.length > 0 ? trunc1Dec(emaScores.reduce((a, b) => a + b, 0) / emaScores.length) : 0;
+
+      const c1Scores = cStudents.map(s => Number(s.avg_check_1 || 0)).filter(v => v > 0);
+      const avgC1 = c1Scores.length > 0 ? trunc1Dec(c1Scores.reduce((a, b) => a + b, 0) / c1Scores.length) : 0;
+
+      const c2Scores = cStudents.map(s => Number(s.avg_check_2 || 0)).filter(v => v > 0);
+      const avgC2 = c2Scores.length > 0 ? trunc1Dec(c2Scores.reduce((a, b) => a + b, 0) / c2Scores.length) : 0;
+
+      const hwScores = cStudents.map(s => Number(s.avg_homework || 0)).filter(v => v > 0);
+      const avgHw = hwScores.length > 0 ? trunc1Dec(hwScores.reduce((a, b) => a + b, 0) / hwScores.length) : 0;
+
+      let classSd = 0;
+      if (emaScores.length >= 2) {
+        const mean = avgEma;
+        const variance = emaScores.reduce((sum, sc) => sum + Math.pow(sc - mean, 2), 0) / emaScores.length;
+        classSd = trunc1Dec(Math.sqrt(variance));
+      }
+
+      let totalPresent = 0, totalSessions = 0;
+      cStudents.forEach(s => {
+        totalPresent += s.present_count || 0;
+        totalSessions += s.total_sessions || 0;
+      });
+      const attendancePct = totalSessions > 0 ? Math.round((totalPresent / totalSessions) * 100) : 100;
+
+      const improvingCount = cStudents.filter(s => Number(s.trend_slope || 0) >= 0.05).length;
+      const improvingPct = Math.round((improvingCount / totalStudents) * 100);
+
+      let exc = 0, gd = 0, avg = 0, wk = 0;
+      cStudents.forEach(s => {
+        const sc = s.ema_level && Number(s.ema_level) > 0 ? Number(s.ema_level) : (Number(s.avg_check_1 || 0) * 0.35 + Number(s.avg_check_2 || 0) * 0.55 + Number(s.avg_homework || 0) * 0.1);
+        if (sc >= 8.5) exc++;
+        else if (sc >= 7.0) gd++;
+        else if (sc >= 5.0) avg++;
+        else wk++;
+      });
+
+      const sortedByScore = [...cStudents].sort((a, b) => Number(b.ema_level || 0) - Number(a.ema_level || 0));
+      const topStudent = sortedByScore[0] || null;
+
+      const atRiskCount = cStudents.filter(s => {
+        const slope = Number(s.trend_slope || 0);
+        const ema = Number(s.ema_level || 0);
+        return slope <= -0.2 || (ema < 6.0 && ema > 0);
+      }).length;
+
+      return {
+        id: cObj.id,
+        name: cObj.class_name,
+        grade: cObj.grade || 'Lớp 6',
+        studentCount: totalStudents,
+        attendancePct,
+        avgEma,
+        avgCheck1: avgC1,
+        avgCheck2: avgC2,
+        avgHomework: avgHw,
+        improvingPct,
+        classSd,
+        scoreDistribution: {
+          excellent: Math.round((exc / totalStudents) * 100),
+          good: Math.round((gd / totalStudents) * 100),
+          average: Math.round((avg / totalStudents) * 100),
+          weak: Math.round((wk / totalStudents) * 100)
+        },
+        topStudent,
+        atRiskCount
+      };
+    };
+
+    const statsA = computeClassStats(classA);
+    const statsB = computeClassStats(classB);
+
+    const emaDiff = trunc1Dec(statsA.avgEma - statsB.avgEma);
+    const attDiff = statsA.attendancePct - statsB.attendancePct;
+    const impDiff = statsA.improvingPct - statsB.improvingPct;
+    const c1Diff = trunc1Dec(statsA.avgCheck1 - statsB.avgCheck1);
+    const c2Diff = trunc1Dec(statsA.avgCheck2 - statsB.avgCheck2);
+    const hwDiff = trunc1Dec(statsA.avgHomework - statsB.avgHomework);
+
+    return {
+      classA: statsA,
+      classB: statsB,
+      emaDiff,
+      attDiff,
+      impDiff,
+      c1Diff,
+      c2Diff,
+      hwDiff,
+    };
+  }, [classes, studentRankings, compareClassAId, compareClassBId]);
 
   // Cross-Class Benchmark Data
   const crossClassBenchmark = useMemo(() => {
@@ -652,6 +819,125 @@ export default function ReportsPage() {
       },
     },
   ], []);
+
+  // TanStack ColumnDef for Score Fluctuations (Biến Động Điểm Số) Table
+  const fluctuationColumns = useMemo<ColumnDef<any>[]>(() => [
+    {
+      id: 'stt',
+      header: () => <div className="text-center w-full">STT</div>,
+      meta: { headerText: 'STT', exportValue: (_: any, idx: number) => idx + 1 },
+      cell: ({ row }) => <div className="text-center font-bold text-slate-400">{row.index + 1}</div>,
+      enableSorting: false,
+      enableGlobalFilter: false,
+    },
+    {
+      accessorKey: 'full_name',
+      header: 'Họ và Tên',
+      meta: { headerText: 'Họ và Tên', exportValue: (r: any) => `${r.full_name}${r.nickname ? ` (${r.nickname})` : ''}` },
+      cell: ({ row }) => {
+        const r = row.original;
+        const isSelected = String(r.student_id) === selectedStudentId;
+        return (
+          <div className="font-extrabold text-white text-sm flex items-center justify-between gap-2">
+            <span>{r.full_name}{r.nickname ? ` - ${r.nickname}` : ''}</span>
+            {isSelected && <span className="text-[10px] text-indigo-400 bg-indigo-500/20 px-2 py-0.5 rounded font-mono font-bold">Đang chọn</span>}
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: 'class_name',
+      header: 'Lớp Học',
+      meta: { headerText: 'Lớp Học', exportValue: (r: any) => r.class_name || 'Lớp học' },
+      cell: (info) => (
+        <span className="inline-block px-2.5 py-0.5 rounded-lg text-xs font-black bg-[#1c2442] text-indigo-300 border border-[#303d68]">
+          {info.getValue<string>() || 'Lớp học'}
+        </span>
+      ),
+    },
+    {
+      accessorKey: 'baseline',
+      header: () => <div className="text-center w-full">Đầu Vào (3 buổi đầu)</div>,
+      meta: { headerText: 'Đầu Vào (3 buổi đầu)', exportValue: (r: any) => r.baseline > 0 ? format1Dec(r.baseline) : '-' },
+      cell: ({ getValue }) => <div className="text-center font-mono font-bold text-slate-300 text-sm">{getValue<number>() > 0 ? format1Dec(getValue<number>()) : '-'}</div>,
+    },
+    {
+      accessorKey: 'current',
+      header: () => <div className="text-center w-full">Hiện Tại (3 buổi gần nhất)</div>,
+      meta: { headerText: 'Hiện Tại (3 buổi gần nhất)', exportValue: (r: any) => r.current > 0 ? format1Dec(r.current) : '-' },
+      cell: ({ getValue }) => <div className="text-center font-mono font-black text-indigo-300 text-sm">{getValue<number>() > 0 ? format1Dec(getValue<number>()) : '-'}</div>,
+    },
+    {
+      accessorKey: 'delta',
+      header: () => <div className="text-center w-full">Mức Biến Động</div>,
+      meta: { headerText: 'Mức Biến Động', exportValue: (r: any) => r.delta > 0 ? `+${format1Dec(r.delta)}` : format1Dec(r.delta) },
+      cell: ({ row }) => {
+        const delta = Number(row.original.delta || 0);
+        const isUp = delta > 0.05;
+        const isDown = delta < -0.05;
+        return (
+          <div className="text-center">
+            <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-xs font-mono font-black border ${
+              isUp ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30' :
+              isDown ? 'bg-rose-500/15 text-rose-400 border-rose-500/30' :
+              'bg-slate-500/15 text-slate-300 border-slate-500/30'
+            }`}>
+              {isUp ? <TrendingUp size={13} /> : isDown ? <TrendingDown size={13} /> : <Minus size={13} />}
+              <span>{delta > 0 ? `+${format1Dec(delta)}` : format1Dec(delta)}</span>
+            </span>
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: 'statusLabel',
+      header: () => <div className="text-center w-full">Đánh Giá Xu Hướng</div>,
+      meta: { headerText: 'Đánh Giá Xu Hướng', exportValue: (r: any) => r.statusLabel },
+      cell: ({ row }) => {
+        const type = row.original.statusType;
+        const label = row.original.statusLabel;
+        const cls =
+          type === 'breakthrough' ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40' :
+          type === 'improving' ? 'bg-teal-500/15 text-teal-300 border-teal-500/30' :
+          type === 'declining' ? 'bg-amber-500/15 text-amber-300 border-amber-500/30' :
+          type === 'critical' ? 'bg-rose-500/20 text-rose-300 border-rose-500/40' :
+          'bg-indigo-500/10 text-indigo-300 border-indigo-500/20';
+
+        return (
+          <div className="text-center">
+            <span className={`inline-block px-2.5 py-0.5 rounded-lg text-[10px] font-black border ${cls}`}>
+              {label}
+            </span>
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: 'sessionCount',
+      header: () => <div className="text-center w-full">Số Buổi Đã Học</div>,
+      meta: { headerText: 'Số Buổi Đã Học', exportValue: (r: any) => `${r.sessionCount} buổi` },
+      cell: ({ getValue }) => <div className="text-center font-mono font-bold text-slate-400 text-xs">{getValue<number>()} buổi</div>,
+    },
+    {
+      id: 'actions',
+      header: () => <div className="text-center w-full">Thao Tác</div>,
+      meta: { headerText: 'Thao Tác' },
+      enableSorting: false,
+      enableGlobalFilter: false,
+      cell: ({ row }) => (
+        <div className="text-center">
+          <button
+            onClick={(e) => { e.stopPropagation(); handleSelectRankingStudent(row.original.student_id); }}
+            className="px-2.5 py-1 rounded-lg bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 hover:text-indigo-300 transition cursor-pointer border border-indigo-500/20 inline-flex items-center gap-1 text-[11px] font-bold"
+            title="Xem chi tiết học sinh"
+          >
+            <span>Chi tiết</span>
+            <ArrowUpRight size={12} />
+          </button>
+        </div>
+      ),
+    },
+  ], [selectedStudentId]);
 
   // Learning Bottlenecks Scanner (Preview / Under Development)
   const learningBottlenecks = useMemo(() => {
@@ -1055,7 +1341,7 @@ export default function ReportsPage() {
             className="px-2.5 py-1 rounded-lg bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 hover:text-indigo-300 transition cursor-pointer border border-indigo-500/20 inline-flex items-center gap-1 text-[11px] font-bold"
             title="Sửa điểm buổi học này"
           >
-            <Edit2 size={12} />
+            <Edit3 size={12} />
             <span>Sửa</span>
           </button>
         </div>
@@ -1866,41 +2152,401 @@ export default function ReportsPage() {
               activeReportTab === 'benchmark' ? 'text-white font-black' : 'text-slate-400 hover:text-white'
             }`}
           >
-            <BarChart2 size={13} />
+            <GitCompare size={13} />
             <span>So Sánh Giữa Các Lớp</span>
           </button>
         </div>
       </div>
 
-      {activeReportTab === 'benchmark' ? (
-        /* CROSS-CLASS BENCHMARK TAB VIEW */
-        <div className="bg-[#0d1120] border border-[#1d2644] rounded-2xl flex flex-col shadow-2xl mb-8 p-6 space-y-4">
-          <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[#181f36] pb-4">
-            <div className="flex items-center gap-3">
-              <BarChart2 size={20} className="text-indigo-400" />
-              <div>
-                <h3 className="text-base font-black text-white uppercase tracking-wider">
-                  BẢNG SO SÁNH HIỆU QUẢ GIẢNG DẠY GIỮA CÁC LỚP HỌC (CROSS-CLASS BENCHMARK)
-                </h3>
-                <p className="text-xs text-slate-400 font-semibold mt-0.5">
-                  Đánh giá toàn diện sĩ số, tỷ lệ chuyên cần, điểm số EMA trung bình, tỷ lệ tiến bộ và mức độ phân hóa trình độ giữa các lớp.
-                </p>
+      {/* ACTIVE SUB-TAB CONTAINER WITH FLUID TRANSITION ANIMATION */}
+      <div key={activeReportTab} className="animate-subtab-enter space-y-6">
+        {activeReportTab === 'benchmark' ? (
+          /* CROSS-CLASS BENCHMARK & 2-CLASS HEAD-TO-HEAD TAB VIEW */
+          <div className="space-y-6 mb-8">
+            {/* 1. 2-CLASS HEAD-TO-HEAD COMPARISON DUEL SECTION */}
+            {classComparisonData && (
+              <div className="bg-[#0d1120] border border-indigo-500/30 rounded-2xl p-6 shadow-2xl space-y-6">
+                {/* Header & Dual Class Selector */}
+                <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[#181f36] pb-5">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-indigo-500/20 border border-indigo-500/40 flex items-center justify-center text-indigo-400 shadow-md shadow-indigo-500/10 shrink-0">
+                      <GitCompare size={20} />
+                    </div>
+                    <div>
+                      <h3 className="text-base font-black text-white uppercase tracking-wider flex items-center gap-2">
+                        SO SÁNH ĐỐI ĐẦU 2 LỚP HỌC (HEAD-TO-HEAD)
+                      </h3>
+                      <p className="text-xs text-slate-400 font-semibold mt-0.5">
+                        Chọn 2 lớp học để so sánh trực diện toàn bộ chỉ số học lực, chuyên cần, phân bố phổ điểm và đà phát triển.
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Dual Class Selector Bar with glowing VS badge */}
+                  <div className="flex flex-wrap items-center gap-3 bg-[#080b14] p-2 rounded-2xl border border-[#1f2846]">
+                    <div className="flex items-center gap-2 bg-[#12162a] border border-indigo-500/40 px-3 py-1.5 rounded-xl">
+                      <span className="w-2.5 h-2.5 rounded-full bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.8)]"></span>
+                      <span className="text-xs font-black text-indigo-300">Lớp A:</span>
+                      <CustomSelect
+                        value={compareClassAId}
+                        onChange={(val) => setCompareClassAId(String(val))}
+                        options={classes.map(c => ({ value: String(c.id), label: `${c.class_name} (${c.grade || 'Lớp 6'})` }))}
+                        className="w-44"
+                      />
+                    </div>
+
+                    <div className="px-2.5 py-1 rounded-lg bg-gradient-to-r from-indigo-600 to-purple-600 font-mono font-black text-xs text-white shadow-[0_0_12px_rgba(99,102,241,0.6)] uppercase tracking-wider shrink-0">
+                      VS
+                    </div>
+
+                    <div className="flex items-center gap-2 bg-[#19132a] border border-purple-500/40 px-3 py-1.5 rounded-xl">
+                      <span className="w-2.5 h-2.5 rounded-full bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.8)]"></span>
+                      <span className="text-xs font-black text-purple-300">Lớp B:</span>
+                      <CustomSelect
+                        value={compareClassBId}
+                        onChange={(val) => setCompareClassBId(String(val))}
+                        options={classes.map(c => ({ value: String(c.id), label: `${c.class_name} (${c.grade || 'Lớp 6'})` }))}
+                        className="w-44"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* 4 Duel KPI Comparison Cards */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {/* 1. EMA Comparison */}
+                  <div className="p-4 rounded-2xl bg-[#0a0e1c] border border-[#1e2746] flex flex-col justify-between gap-3 shadow-lg">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-black uppercase tracking-wider text-indigo-400">ĐIỂM EMA TRUNG BÌNH</span>
+                      <BarChart3 size={14} className="text-indigo-400" />
+                    </div>
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="text-left">
+                        <span className="text-[10px] text-slate-400 block font-semibold truncate max-w-[90px]">{classComparisonData.classA.name}</span>
+                        <span className="text-2xl font-black font-mono text-indigo-300">{classComparisonData.classA.avgEma > 0 ? format1Dec(classComparisonData.classA.avgEma) : '-'}</span>
+                      </div>
+                      <span className="text-xs font-black text-slate-600 font-mono">VS</span>
+                      <div className="text-right">
+                        <span className="text-[10px] text-slate-400 block font-semibold truncate max-w-[90px]">{classComparisonData.classB.name}</span>
+                        <span className="text-2xl font-black font-mono text-purple-300">{classComparisonData.classB.avgEma > 0 ? format1Dec(classComparisonData.classB.avgEma) : '-'}</span>
+                      </div>
+                    </div>
+                    <div className="pt-2 border-t border-white/5 text-[10px] font-black flex items-center justify-center">
+                      {classComparisonData.emaDiff > 0 ? (
+                        <span className="text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-lg border border-emerald-500/20">
+                          {classComparisonData.classA.name} cao hơn +{format1Dec(classComparisonData.emaDiff)} điểm
+                        </span>
+                      ) : classComparisonData.emaDiff < 0 ? (
+                        <span className="text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded-lg border border-purple-500/20">
+                          {classComparisonData.classB.name} cao hơn +{format1Dec(Math.abs(classComparisonData.emaDiff))} điểm
+                        </span>
+                      ) : (
+                        <span className="text-slate-400 bg-slate-500/10 px-2 py-0.5 rounded-lg">Hai lớp bằng điểm nhau</span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* 2. Attendance % Comparison */}
+                  <div className="p-4 rounded-2xl bg-[#0a0e1c] border border-[#1e2746] flex flex-col justify-between gap-3 shadow-lg">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-black uppercase tracking-wider text-emerald-400">CHUYÊN CẦN %</span>
+                      <Users size={14} className="text-emerald-400" />
+                    </div>
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="text-left">
+                        <span className="text-[10px] text-slate-400 block font-semibold truncate max-w-[90px]">{classComparisonData.classA.name}</span>
+                        <span className="text-2xl font-black font-mono text-emerald-400">{classComparisonData.classA.attendancePct}%</span>
+                      </div>
+                      <span className="text-xs font-black text-slate-600 font-mono">VS</span>
+                      <div className="text-right">
+                        <span className="text-[10px] text-slate-400 block font-semibold truncate max-w-[90px]">{classComparisonData.classB.name}</span>
+                        <span className="text-2xl font-black font-mono text-teal-400">{classComparisonData.classB.attendancePct}%</span>
+                      </div>
+                    </div>
+                    <div className="pt-2 border-t border-white/5 text-[10px] font-black flex items-center justify-center">
+                      {classComparisonData.attDiff > 0 ? (
+                        <span className="text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-lg border border-emerald-500/20">
+                          {classComparisonData.classA.name} chuyên cần hơn +{classComparisonData.attDiff}%
+                        </span>
+                      ) : classComparisonData.attDiff < 0 ? (
+                        <span className="text-teal-400 bg-teal-500/10 px-2 py-0.5 rounded-lg border border-teal-500/20">
+                          {classComparisonData.classB.name} chuyên cần hơn +{Math.abs(classComparisonData.attDiff)}%
+                        </span>
+                      ) : (
+                        <span className="text-slate-400 bg-slate-500/10 px-2 py-0.5 rounded-lg">Tỷ lệ chuyên cần tương đương</span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* 3. Improving % Comparison */}
+                  <div className="p-4 rounded-2xl bg-[#0a0e1c] border border-[#1e2746] flex flex-col justify-between gap-3 shadow-lg">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-black uppercase tracking-wider text-cyan-400">TỶ LỆ TIẾN BỘ</span>
+                      <TrendingUp size={14} className="text-cyan-400" />
+                    </div>
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="text-left">
+                        <span className="text-[10px] text-slate-400 block font-semibold truncate max-w-[90px]">{classComparisonData.classA.name}</span>
+                        <span className="text-2xl font-black font-mono text-cyan-300">{classComparisonData.classA.improvingPct}%</span>
+                      </div>
+                      <span className="text-xs font-black text-slate-600 font-mono">VS</span>
+                      <div className="text-right">
+                        <span className="text-[10px] text-slate-400 block font-semibold truncate max-w-[90px]">{classComparisonData.classB.name}</span>
+                        <span className="text-2xl font-black font-mono text-sky-300">{classComparisonData.classB.improvingPct}%</span>
+                      </div>
+                    </div>
+                    <div className="pt-2 border-t border-white/5 text-[10px] font-black flex items-center justify-center">
+                      {classComparisonData.impDiff > 0 ? (
+                        <span className="text-cyan-400 bg-cyan-500/10 px-2 py-0.5 rounded-lg border border-cyan-500/20">
+                          {classComparisonData.classA.name} bứt phá hơn +{classComparisonData.impDiff}%
+                        </span>
+                      ) : classComparisonData.impDiff < 0 ? (
+                        <span className="text-sky-400 bg-sky-500/10 px-2 py-0.5 rounded-lg border border-sky-500/20">
+                          {classComparisonData.classB.name} bứt phá hơn +{Math.abs(classComparisonData.impDiff)}%
+                        </span>
+                      ) : (
+                        <span className="text-slate-400 bg-slate-500/10 px-2 py-0.5 rounded-lg">Tỷ lệ tiến bộ bằng nhau</span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* 4. Std Dev / Homogeneity Comparison */}
+                  <div className="p-4 rounded-2xl bg-[#0a0e1c] border border-[#1e2746] flex flex-col justify-between gap-3 shadow-lg">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-black uppercase tracking-wider text-amber-400">ĐỘ ĐỒNG ĐỀU (σ)</span>
+                      <Activity size={14} className="text-amber-400" />
+                    </div>
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="text-left">
+                        <span className="text-[10px] text-slate-400 block font-semibold truncate max-w-[90px]">{classComparisonData.classA.name}</span>
+                        <span className="text-2xl font-black font-mono text-amber-300">σ={classComparisonData.classA.classSd}</span>
+                      </div>
+                      <span className="text-xs font-black text-slate-600 font-mono">VS</span>
+                      <div className="text-right">
+                        <span className="text-[10px] text-slate-400 block font-semibold truncate max-w-[90px]">{classComparisonData.classB.name}</span>
+                        <span className="text-2xl font-black font-mono text-orange-300">σ={classComparisonData.classB.classSd}</span>
+                      </div>
+                    </div>
+                    <div className="pt-2 border-t border-white/5 text-[10px] font-black flex items-center justify-center">
+                      {classComparisonData.classA.classSd < classComparisonData.classB.classSd ? (
+                        <span className="text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-lg border border-emerald-500/20">
+                          {classComparisonData.classA.name} đồng đều học lực hơn
+                        </span>
+                      ) : classComparisonData.classA.classSd > classComparisonData.classB.classSd ? (
+                        <span className="text-orange-400 bg-orange-500/10 px-2 py-0.5 rounded-lg border border-orange-500/20">
+                          {classComparisonData.classB.name} đồng đều học lực hơn
+                        </span>
+                      ) : (
+                        <span className="text-slate-400 bg-slate-500/10 px-2 py-0.5 rounded-lg">Mức độ phân tán ngang nhau</span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Side-by-Side Component Scores & Score Distributions */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pt-2">
+                  {/* Left: Component Score Bars Comparison */}
+                  <div className="p-5 rounded-2xl bg-[#090d18] border border-[#1a233e] space-y-4">
+                    <div className="flex items-center justify-between border-b border-white/5 pb-2.5">
+                      <span className="text-xs font-black uppercase tracking-wider text-white flex items-center gap-2">
+                        <BarChart3 size={15} className="text-indigo-400" />
+                        So Sánh Từng Đầu Điểm Thành Phần
+                      </span>
+                      <div className="flex items-center gap-3 text-[11px] font-bold">
+                        <span className="flex items-center gap-1.5 text-indigo-400">
+                          <span className="w-2 h-2 rounded-full bg-indigo-500"></span> {classComparisonData.classA.name}
+                        </span>
+                        <span className="flex items-center gap-1.5 text-purple-400">
+                          <span className="w-2 h-2 rounded-full bg-purple-500"></span> {classComparisonData.classB.name}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Check 1, Check 2, Homework Bars */}
+                    <div className="space-y-3.5">
+                      <div>
+                        <div className="flex items-center justify-between text-xs font-bold mb-1">
+                          <span className="text-slate-300">Check 1 (Kiểm tra đầu giờ)</span>
+                          <div className="font-mono text-[11px]">
+                            <span className="text-indigo-400 font-extrabold">{classComparisonData.classA.avgCheck1}</span>
+                            <span className="text-slate-500 mx-1.5">vs</span>
+                            <span className="text-purple-400 font-extrabold">{classComparisonData.classB.avgCheck1}</span>
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2 h-2.5 bg-[#12172a] p-0.5 rounded-full border border-white/5">
+                          <div className="w-full bg-[#161d36] rounded-full overflow-hidden flex justify-end">
+                            <div style={{ width: `${Math.min(100, (classComparisonData.classA.avgCheck1 / 10) * 100)}%` }} className="h-full bg-indigo-500 rounded-full" />
+                          </div>
+                          <div className="w-full bg-[#161d36] rounded-full overflow-hidden">
+                            <div style={{ width: `${Math.min(100, (classComparisonData.classB.avgCheck1 / 10) * 100)}%` }} className="h-full bg-purple-500 rounded-full" />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div>
+                        <div className="flex items-center justify-between text-xs font-bold mb-1">
+                          <span className="text-slate-300">Check 2 (Kiểm tra trọng tâm)</span>
+                          <div className="font-mono text-[11px]">
+                            <span className="text-indigo-400 font-extrabold">{classComparisonData.classA.avgCheck2}</span>
+                            <span className="text-slate-500 mx-1.5">vs</span>
+                            <span className="text-purple-400 font-extrabold">{classComparisonData.classB.avgCheck2}</span>
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2 h-2.5 bg-[#12172a] p-0.5 rounded-full border border-white/5">
+                          <div className="w-full bg-[#161d36] rounded-full overflow-hidden flex justify-end">
+                            <div style={{ width: `${Math.min(100, (classComparisonData.classA.avgCheck2 / 10) * 100)}%` }} className="h-full bg-indigo-500 rounded-full" />
+                          </div>
+                          <div className="w-full bg-[#161d36] rounded-full overflow-hidden">
+                            <div style={{ width: `${Math.min(100, (classComparisonData.classB.avgCheck2 / 10) * 100)}%` }} className="h-full bg-purple-500 rounded-full" />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div>
+                        <div className="flex items-center justify-between text-xs font-bold mb-1">
+                          <span className="text-slate-300">Homework (Bài tập về nhà)</span>
+                          <div className="font-mono text-[11px]">
+                            <span className="text-indigo-400 font-extrabold">{classComparisonData.classA.avgHomework}</span>
+                            <span className="text-slate-500 mx-1.5">vs</span>
+                            <span className="text-purple-400 font-extrabold">{classComparisonData.classB.avgHomework}</span>
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2 h-2.5 bg-[#12172a] p-0.5 rounded-full border border-white/5">
+                          <div className="w-full bg-[#161d36] rounded-full overflow-hidden flex justify-end">
+                            <div style={{ width: `${Math.min(100, (classComparisonData.classA.avgHomework / 10) * 100)}%` }} className="h-full bg-indigo-500 rounded-full" />
+                          </div>
+                          <div className="w-full bg-[#161d36] rounded-full overflow-hidden">
+                            <div style={{ width: `${Math.min(100, (classComparisonData.classB.avgHomework / 10) * 100)}%` }} className="h-full bg-purple-500 rounded-full" />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Right: Score Tier Distribution Duel */}
+                  <div className="p-5 rounded-2xl bg-[#090d18] border border-[#1a233e] space-y-4">
+                    <div className="flex items-center justify-between border-b border-white/5 pb-2.5">
+                      <span className="text-xs font-black uppercase tracking-wider text-white flex items-center gap-2">
+                        <Sparkles size={15} className="text-amber-400" />
+                        Phân Bố Phổ Điểm Đối Đầu
+                      </span>
+                      <span className="text-[11px] font-bold text-slate-400">
+                        Sĩ số: {classComparisonData.classA.studentCount} vs {classComparisonData.classB.studentCount} hs
+                      </span>
+                    </div>
+
+                    <div className="space-y-2.5 text-xs">
+                      {/* Xuất Sắc */}
+                      <div className="flex items-center justify-between gap-3 p-2 rounded-xl bg-[#10162a] border border-emerald-500/20">
+                        <span className="font-bold text-emerald-400 text-[11px]">Xuất Sắc (≥8.5):</span>
+                        <div className="flex items-center gap-3 font-mono font-bold">
+                          <span className="text-indigo-300">{classComparisonData.classA.scoreDistribution.excellent}%</span>
+                          <span className="text-slate-500">|</span>
+                          <span className="text-purple-300">{classComparisonData.classB.scoreDistribution.excellent}%</span>
+                        </div>
+                      </div>
+
+                      {/* Khá */}
+                      <div className="flex items-center justify-between gap-3 p-2 rounded-xl bg-[#10162a] border border-blue-500/20">
+                        <span className="font-bold text-blue-400 text-[11px]">Khá (7.0 - 8.4):</span>
+                        <div className="flex items-center gap-3 font-mono font-bold">
+                          <span className="text-indigo-300">{classComparisonData.classA.scoreDistribution.good}%</span>
+                          <span className="text-slate-500">|</span>
+                          <span className="text-purple-300">{classComparisonData.classB.scoreDistribution.good}%</span>
+                        </div>
+                      </div>
+
+                      {/* Trung Bình */}
+                      <div className="flex items-center justify-between gap-3 p-2 rounded-xl bg-[#10162a] border border-amber-500/20">
+                        <span className="font-bold text-amber-400 text-[11px]">Trung Bình (5.0 - 6.9):</span>
+                        <div className="flex items-center gap-3 font-mono font-bold">
+                          <span className="text-indigo-300">{classComparisonData.classA.scoreDistribution.average}%</span>
+                          <span className="text-slate-500">|</span>
+                          <span className="text-purple-300">{classComparisonData.classB.scoreDistribution.average}%</span>
+                        </div>
+                      </div>
+
+                      {/* Cần Cố Gắng */}
+                      <div className="flex items-center justify-between gap-3 p-2 rounded-xl bg-[#10162a] border border-rose-500/20">
+                        <span className="font-bold text-rose-400 text-[11px]">Cần Cố Gắng (&lt;5.0):</span>
+                        <div className="flex items-center gap-3 font-mono font-bold">
+                          <span className="text-indigo-300">{classComparisonData.classA.scoreDistribution.weak}%</span>
+                          <span className="text-slate-500">|</span>
+                          <span className="text-purple-300">{classComparisonData.classB.scoreDistribution.weak}%</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Top Performer Badges for both classes */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
+                  <div className="p-3.5 rounded-xl bg-[#0f1426] border border-indigo-500/30 flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-2.5">
+                      <Award size={18} className="text-amber-400 shrink-0" />
+                      <div>
+                        <span className="text-[10px] font-black uppercase text-indigo-400 block">Học Sinh Dẫn Đầu ({classComparisonData.classA.name})</span>
+                        <span className="text-xs font-bold text-white">
+                          {classComparisonData.classA.topStudent ? classComparisonData.classA.topStudent.full_name : 'Chưa có'}
+                        </span>
+                      </div>
+                    </div>
+                    {classComparisonData.classA.topStudent && (
+                      <span className="text-xs font-mono font-black text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+                        EMA {format1Dec(Number(classComparisonData.classA.topStudent.ema_level || 0))}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="p-3.5 rounded-xl bg-[#140f26] border border-purple-500/30 flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-2.5">
+                      <Award size={18} className="text-amber-400 shrink-0" />
+                      <div>
+                        <span className="text-[10px] font-black uppercase text-purple-400 block">Học Sinh Dẫn Đầu ({classComparisonData.classB.name})</span>
+                        <span className="text-xs font-bold text-white">
+                          {classComparisonData.classB.topStudent ? classComparisonData.classB.topStudent.full_name : 'Chưa có'}
+                        </span>
+                      </div>
+                    </div>
+                    {classComparisonData.classB.topStudent && (
+                      <span className="text-xs font-mono font-black text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+                        EMA {format1Dec(Number(classComparisonData.classB.topStudent.ema_level || 0))}
+                      </span>
+                    )}
+                  </div>
+                </div>
               </div>
+            )}
+
+            {/* 2. FULL CROSS-CLASS BENCHMARK TABLE */}
+            <div className="bg-[#0d1120] border border-[#1d2644] rounded-2xl flex flex-col shadow-2xl p-6 space-y-4">
+              <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[#181f36] pb-4">
+                <div className="flex items-center gap-3">
+                  <BarChart3 size={20} className="text-indigo-400" />
+                  <div>
+                    <h3 className="text-base font-black text-white uppercase tracking-wider">
+                      BẢNG TỔNG HỢP HIỆU QUẢ TOÀN BỘ CÁC LỚP HỌC (CENTER-WIDE BENCHMARK)
+                    </h3>
+                    <p className="text-xs text-slate-400 font-semibold mt-0.5">
+                      Đánh giá toàn diện sĩ số, tỷ lệ chuyên cần, điểm số EMA trung bình, tỷ lệ tiến bộ và mức độ phân hóa trình độ của tất cả các lớp.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <DataTable
+                tableId="reports-class-benchmark-table"
+                exportFilename="so_sanh_hieu_qua_cac_lop"
+                data={crossClassBenchmark}
+                columns={classBenchmarkColumns}
+                loading={loading}
+                searchPlaceholder="Tìm kiếm lớp học..."
+                emptyMessage="Chưa có dữ liệu lớp học để so sánh."
+                pageSize={20}
+              />
             </div>
           </div>
-
-          <DataTable
-            tableId="reports-class-benchmark-table"
-            exportFilename="so_sanh_hieu_qua_cac_lop"
-            data={crossClassBenchmark}
-            columns={classBenchmarkColumns}
-            loading={loading}
-            searchPlaceholder="Tìm kiếm lớp học..."
-            emptyMessage="Chưa có dữ liệu lớp học để so sánh."
-            pageSize={20}
-          />
-        </div>
-      ) : activeReportTab === 'deep' ? (
+        ) : activeReportTab === 'deep' ? (
         /* THỐNG KÊ SÂU (DEEP ANALYSIS TAB VIEW) */
         <div className="flex flex-col gap-8 mb-8">
           {/* 1. SCORE DISTRIBUTION (FULL WIDTH, CLEAN & CRISP) */}
@@ -2499,113 +3145,53 @@ export default function ReportsPage() {
             )}
           </div>
 
-          {/* 4. CẢI THIỆN ĐIỂM SỐ (LEADERBOARD TABLE FORMAT) */}
-          {growthShowcase.length > 0 && (
-            <div className="bg-[#0e1424] border border-emerald-500/30 rounded-2xl p-4 sm:p-5 shadow-2xl transition-all">
-              <div
-                onClick={() => setIsGrowthSectionOpen(!isGrowthSectionOpen)}
-                className="flex flex-wrap items-center justify-between gap-4 cursor-pointer select-none"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 shadow-md shadow-emerald-500/10 shrink-0">
-                    <Flame size={20} />
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <h3 className="text-sm font-black text-white uppercase tracking-wider">
-                        CẢI THIỆN ĐIỂM SỐ
-                      </h3>
-                      <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                        Top 5 Bứt Phá Nhất
-                      </span>
-                    </div>
-                    <p className="text-xs text-slate-400 font-semibold mt-0.5">
-                      So sánh điểm trung bình 3 buổi đầu tiên khi mới vào học so với 3 buổi gần nhất để ghi nhận sự cải thiện vượt bậc.
-                    </p>
-                  </div>
+          {/* 4. BIẾN ĐỘNG ĐIỂM SỐ (SCORE FLUCTUATIONS & GROWTH TRACKING) */}
+          <div className="bg-[#0d1120] border border-emerald-500/30 rounded-2xl flex flex-col shadow-2xl overflow-hidden transition-all">
+            <div
+              onClick={() => setIsGrowthSectionOpen(!isGrowthSectionOpen)}
+              className="px-6 py-4 border-b border-[#181f36] bg-[#0a0d18] flex flex-wrap items-center justify-between gap-4 cursor-pointer select-none"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 shadow-md shadow-emerald-500/10 shrink-0">
+                  <TrendingUp size={20} />
                 </div>
-
-                <div className="p-1.5 rounded-lg bg-white/5 text-slate-400">
-                  {isGrowthSectionOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-sm font-black text-white uppercase tracking-wider">
+                      BIẾN ĐỘNG ĐIỂM SỐ (SCORE FLUCTUATIONS)
+                    </h3>
+                    <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                      {scoreFluctuations.length} Học Sinh
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-400 font-semibold mt-0.5">
+                    So sánh điểm trung bình 3 buổi đầu tiên khi mới vào học so với 3 buổi gần nhất để theo dõi biến động, sự tiến bộ hoặc dấu hiệu sa sút của từng học sinh.
+                  </p>
                 </div>
               </div>
 
-              {isGrowthSectionOpen && (
-                <div className="mt-4 pt-4 border-t border-emerald-500/20">
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse text-xs">
-                      <thead>
-                        <tr className="border-b border-[#1c2744] text-slate-400 font-bold uppercase text-[10px] tracking-wider">
-                          <th className="py-2.5 px-3">Hạng</th>
-                          <th className="py-2.5 px-3">Học Sinh</th>
-                          <th className="py-2.5 px-3">Lớp Học</th>
-                          <th className="py-2.5 px-3 text-center">Đầu Vào (3 buổi đầu)</th>
-                          <th className="py-2.5 px-3 text-center">Hiện Tại (3 buổi gần nhất)</th>
-                          <th className="py-2.5 px-4">Tiến Trình Cải Thiện</th>
-                          <th className="py-2.5 px-3 text-right">Mức Tăng Trưởng</th>
-                          <th className="py-2.5 px-3 text-center">Thao Tác</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-white/5">
-                        {growthShowcase.map((st, idx) => (
-                          <tr
-                            key={st.student_id || idx}
-                            onClick={() => handleSelectRankingStudent(st.student_id)}
-                            className="hover:bg-emerald-500/5 transition cursor-pointer group"
-                          >
-                            <td className="py-3 px-3">
-                              <span className={`w-6 h-6 rounded-lg flex items-center justify-center font-mono font-black text-xs ${
-                                idx === 0 ? 'bg-amber-500 text-black shadow-md shadow-amber-500/30' :
-                                idx === 1 ? 'bg-slate-300 text-black' :
-                                idx === 2 ? 'bg-amber-700 text-white' :
-                                'bg-[#1a233a] text-slate-300 border border-white/10'
-                              }`}>
-                                #{idx + 1}
-                              </span>
-                            </td>
-                            <td className="py-3 px-3">
-                              <div className="font-bold text-white group-hover:text-emerald-300 transition text-sm">
-                                {st.full_name}
-                              </div>
-                            </td>
-                            <td className="py-3 px-3">
-                              <span className="px-2 py-0.5 rounded-md bg-[#131b30] text-slate-300 border border-white/10 text-[11px] font-semibold">
-                                {st.class_name || 'Lớp học'}
-                              </span>
-                            </td>
-                            <td className="py-3 px-3 text-center font-mono font-bold text-slate-300 text-sm">
-                              {st.baseline}
-                            </td>
-                            <td className="py-3 px-3 text-center font-mono font-black text-emerald-400 text-sm">
-                              {st.current}
-                            </td>
-                            <td className="py-3 px-4 w-48">
-                              <div className="w-full bg-[#101728] h-2.5 rounded-full overflow-hidden p-0.5 border border-white/10">
-                                <div
-                                  style={{ width: `${Math.min(100, Math.max(10, (st.current / 10) * 100))}%` }}
-                                  className="h-full rounded-full bg-gradient-to-r from-emerald-600 to-teal-400 transition-all duration-500"
-                                />
-                              </div>
-                            </td>
-                            <td className="py-3 px-3 text-right">
-                              <span className="font-mono font-black text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-2.5 py-1 rounded-lg text-xs">
-                                +{format1Dec(st.delta)} Điểm
-                              </span>
-                            </td>
-                            <td className="py-3 px-3 text-center">
-                              <span className="text-indigo-400 group-hover:text-indigo-300 font-bold text-[11px] flex items-center justify-center gap-0.5">
-                                Chi tiết <ArrowUpRight size={13} />
-                              </span>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              )}
+              <div className="p-1.5 rounded-lg bg-white/5 text-slate-400">
+                {isGrowthSectionOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+              </div>
             </div>
-          )}
+
+            {isGrowthSectionOpen && (
+              <div className="p-5">
+                <DataTable
+                  tableId="reports-fluctuations-table"
+                  exportFilename="bien_dong_diem_so_hoc_sinh"
+                  data={scoreFluctuations}
+                  columns={fluctuationColumns}
+                  loading={loading}
+                  searchPlaceholder="Tìm học sinh, lớp học, mức biến động..."
+                  emptyMessage="Chưa có dữ liệu biến động điểm số."
+                  pageSize={20}
+                  onRowClick={(r: any) => handleSelectRankingStudent(r.student_id)}
+                  initialSorting={[{ id: 'delta', desc: true }]}
+                />
+              </div>
+            )}
+          </div>
 
           {/* 5. BẤT THƯỜNG HỌC TẬP (STUDY ANOMALIES) */}
           <div className="bg-[#101424] border border-indigo-500/20 rounded-2xl p-4 sm:p-5 shadow-xl flex flex-col gap-4 transition-all">
@@ -3551,6 +4137,7 @@ export default function ReportsPage() {
       </div>
       </>
       )}
+      </div>
 
       {/* EDIT SINGLE GRADE POPUP MODAL */}
       {editingRecord && (
@@ -3558,7 +4145,7 @@ export default function ReportsPage() {
           <div className="bg-[#0f1320] border border-indigo-500/30 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl">
             <div className="flex items-center justify-between px-6 py-4 border-b border-white/10 bg-[#141828]">
               <h2 className="text-sm font-black uppercase text-indigo-300 flex items-center gap-2">
-                <Edit2 className="h-4 w-4" />
+                <Edit3 className="h-4 w-4" />
                 Sửa Điểm Số Buổi Học
               </h2>
               <button
