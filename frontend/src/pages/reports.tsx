@@ -5,7 +5,7 @@ import { GradeTypeItem } from '../types';
 import { 
   BarChart3, RefreshCw, Calendar, 
   AlertCircle, Users, GraduationCap, ChevronRight, Info, RotateCcw, X, Edit2, History, Save,
-  ZoomIn, ZoomOut, Move
+  ZoomIn, ZoomOut, Move, Sparkles, Layers, Copy, Check, FileSpreadsheet, TrendingUp, TrendingDown, Minus, ShieldAlert, Award, Zap
 } from 'lucide-react';
 import { showToast } from '../components/Toast';
 import { CustomDatePicker } from '../components/CustomDatePicker';
@@ -928,6 +928,360 @@ export default function ReportsPage() {
     return `${lineD} L ${lastX} ${bottomY} L ${firstX} ${bottomY} Z`;
   };
 
+  // Smart Level Grouping State (Mode A: Fixed Tiers, Mode B: 1D K-Means Clustering)
+  const [groupingMode, setGroupingMode] = useState<'tier' | 'kmeans'>('tier');
+  const [kmeansK, setKmeansK] = useState<number>(3);
+  const [copiedGroupText, setCopiedGroupText] = useState(false);
+
+  // Compute Smart Level Groups
+  const smartGroups = useMemo(() => {
+    if (!filteredRankings || filteredRankings.length === 0) return [];
+
+    // Helper to extract numeric skill score for each student
+    const getStudentScore = (s: any) => {
+      if (s.ema_level && Number(s.ema_level) > 0) return Number(s.ema_level);
+      const c1 = Number(s.avg_check_1 || 0);
+      const c2 = Number(s.avg_check_2 || 0);
+      const hw = Number(s.avg_homework || 0);
+      const valid = [c1, c2, hw].filter(v => v > 0);
+      return valid.length > 0 ? valid.reduce((a, b) => a + b, 0) / valid.length : 0.0;
+    };
+
+    const calcGroupStats = (studentsList: any[]) => {
+      if (studentsList.length === 0) {
+        return { avgEma: 0, groupSd: 0, minScore: 0, maxScore: 0 };
+      }
+      const scores = studentsList.map(getStudentScore);
+      const avg = scores.reduce((a, b) => a + b, 0) / scores.length;
+      const variance = scores.reduce((sum, sc) => sum + Math.pow(sc - avg, 2), 0) / scores.length;
+      const sd = Math.sqrt(variance);
+      return {
+        avgEma: trunc1Dec(avg),
+        groupSd: trunc1Dec(sd),
+        minScore: trunc1Dec(Math.min(...scores)),
+        maxScore: trunc1Dec(Math.max(...scores)),
+      };
+    };
+
+    if (groupingMode === 'tier') {
+      // ── MODE A: Fixed Pedagogical Tiers ──────────────────────────────────────
+      const g1Students: any[] = [];
+      const g2Students: any[] = [];
+      const g3Students: any[] = [];
+
+      filteredRankings.forEach(s => {
+        const ema = getStudentScore(s);
+        const slope = Number(s.trend_slope || 0);
+
+        if (ema >= 8.0 || (ema >= 7.5 && slope >= 0.2)) {
+          g1Students.push(s);
+        } else if (ema >= 6.5 && slope >= -0.25) {
+          g2Students.push(s);
+        } else {
+          g3Students.push(s);
+        }
+      });
+
+      g1Students.sort((a, b) => getStudentScore(b) - getStudentScore(a));
+      g2Students.sort((a, b) => getStudentScore(b) - getStudentScore(a));
+      g3Students.sort((a, b) => getStudentScore(b) - getStudentScore(a));
+
+      const stats1 = calcGroupStats(g1Students);
+      const stats2 = calcGroupStats(g2Students);
+      const stats3 = calcGroupStats(g3Students);
+
+      return [
+        {
+          id: 'tier-advanced',
+          title: 'Nhóm 1: Bứt Phá & Nâng Cao',
+          subtitle: 'Năng Lực Vượt Trội (Mastery)',
+          pedagogyAdvice: 'Tiếp thu nhanh, kiến thức vững chắc. Giao thêm bài tập tư duy, bài toán phân hóa cao & đề thi học sinh giỏi.',
+          themeColor: 'purple',
+          borderCls: 'border-purple-500/40',
+          headerBg: 'bg-[#18142a]',
+          badgeCls: 'bg-purple-500/20 text-purple-300 border-purple-500/40',
+          dotColor: '#c084fc',
+          ...stats1,
+          students: g1Students,
+        },
+        {
+          id: 'tier-standard',
+          title: 'Nhóm 2: Tiêu Chuẩn & Cơ Bản',
+          subtitle: 'Năng Lực Đạt Chuẩn (Proficient)',
+          pedagogyAdvice: 'Nắm vững kiến thức trọng tâm. Rèn luyện tốc độ giải bài, trình bày cẩn thận để bứt phá lên nhóm giỏi.',
+          themeColor: 'blue',
+          borderCls: 'border-blue-500/40',
+          headerBg: 'bg-[#10182c]',
+          badgeCls: 'bg-blue-500/20 text-blue-300 border-blue-500/40',
+          dotColor: '#60a5fa',
+          ...stats2,
+          students: g2Students,
+        },
+        {
+          id: 'tier-support',
+          title: 'Nhóm 3: Cần Phụ Đạo & Củng Cố',
+          subtitle: 'Cần Hỗ Trợ Trọng Tâm (Support)',
+          pedagogyAdvice: 'Hổng kiến thức nền hoặc phong độ giảm sút. Cần giảng lại lý thuyết căn bản, chia nhỏ bài tập & phụ đạo 1-1.',
+          themeColor: 'amber',
+          borderCls: 'border-amber-500/40',
+          headerBg: 'bg-[#201810]',
+          badgeCls: 'bg-amber-500/20 text-amber-300 border-amber-500/40',
+          dotColor: '#fbbf24',
+          ...stats3,
+          students: g3Students,
+        },
+      ];
+    } else {
+      // ── MODE B: 1D K-Means Clustering ────────────────────────────────────────
+      const K = Math.min(kmeansK, filteredRankings.length);
+      if (K <= 0) return [];
+
+      const studentsWithScore = filteredRankings.map(s => ({
+        student: s,
+        score: getStudentScore(s),
+      }));
+
+      const allScores = studentsWithScore.map(s => s.score);
+      const minS = Math.min(...allScores);
+      const maxS = Math.max(...allScores);
+
+      let centroids: number[] = [];
+      if (minS === maxS) {
+        centroids = Array(K).fill(minS);
+      } else {
+        for (let i = 0; i < K; i++) {
+          centroids.push(minS + (i * (maxS - minS)) / (K - 1));
+        }
+      }
+
+      let clusters: any[][] = Array.from({ length: K }, () => []);
+      for (let iter = 0; iter < 20; iter++) {
+        clusters = Array.from({ length: K }, () => []);
+        studentsWithScore.forEach(item => {
+          let bestIdx = 0;
+          let bestDist = Math.abs(item.score - centroids[0]);
+          for (let c = 1; c < K; c++) {
+            const dist = Math.abs(item.score - centroids[c]);
+            if (dist < bestDist) {
+              bestDist = dist;
+              bestIdx = c;
+            }
+          }
+          clusters[bestIdx].push(item.student);
+        });
+
+        let changed = false;
+        for (let c = 0; c < K; c++) {
+          if (clusters[c].length > 0) {
+            const newMean = clusters[c].map(getStudentScore).reduce((a, b) => a + b, 0) / clusters[c].length;
+            if (Math.abs(newMean - centroids[c]) > 0.001) {
+              centroids[c] = newMean;
+              changed = true;
+            }
+          }
+        }
+        if (!changed) break;
+      }
+
+      const pairedClusters = clusters.map((studs, idx) => ({
+        centroid: centroids[idx],
+        students: studs.sort((a, b) => getStudentScore(b) - getStudentScore(a)),
+      })).sort((a, b) => b.centroid - a.centroid);
+
+      const metaConfig = [
+        {
+          title: 'Nhóm 1: Dẫn Đầu (Top Tier)',
+          subtitle: 'Cụm Điểm Cao Nhất',
+          pedagogy: 'Nhóm học sinh tiếp thu vượt trội trong lớp. Giao bài tập mở rộng & thử thách tư duy.',
+          themeColor: 'purple',
+          borderCls: 'border-purple-500/40',
+          headerBg: 'bg-[#18142a]',
+          badgeCls: 'bg-purple-500/20 text-purple-300 border-purple-500/40',
+          dotColor: '#c084fc',
+        },
+        {
+          title: 'Nhóm 2: Trung Tâm (Core Tier)',
+          subtitle: 'Cụm Điểm Trung Bình Khá',
+          pedagogy: 'Lực lượng nòng cốt của lớp. Rèn luyện phương pháp làm bài & củng cố kiến thức để tiến vào nhóm dẫn đầu.',
+          themeColor: 'blue',
+          borderCls: 'border-blue-500/40',
+          headerBg: 'bg-[#10182c]',
+          badgeCls: 'bg-blue-500/20 text-blue-300 border-blue-500/40',
+          dotColor: '#60a5fa',
+        },
+        {
+          title: 'Nhóm 3: Cần Hỗ Trợ (Focus Tier)',
+          subtitle: 'Cụm Cần Củng Cố Nền Tảng',
+          pedagogy: 'Cụm học sinh cần sự quan tâm đặc biệt. Ôn tập kiến thức cơ bản, sửa lỗi sai thường gặp & kèm cặp sát sao.',
+          themeColor: 'amber',
+          borderCls: 'border-amber-500/40',
+          headerBg: 'bg-[#201810]',
+          badgeCls: 'bg-amber-500/20 text-amber-300 border-amber-500/40',
+          dotColor: '#fbbf24',
+        },
+        {
+          title: 'Nhóm 4: Phụ Đạo Tăng Cường (Intensive Tier)',
+          subtitle: 'Cụm Phụ Đạo 1-1',
+          pedagogy: 'Hổng kiến thức nặng. Cần giáo viên hoặc trợ giảng hỗ trợ trực tiếp từng buổi học.',
+          themeColor: 'rose',
+          borderCls: 'border-rose-500/40',
+          headerBg: 'bg-[#241216]',
+          badgeCls: 'bg-rose-500/20 text-rose-300 border-rose-500/40',
+          dotColor: '#fb7185',
+        },
+      ];
+
+      return pairedClusters.map((pc, idx) => {
+        const cfg = metaConfig[idx] || metaConfig[metaConfig.length - 1];
+        const stats = calcGroupStats(pc.students);
+        return {
+          id: `kmeans-group-${idx + 1}`,
+          title: K === 2 && idx === 1 ? 'Nhóm 2: Cần Rèn Luyện & Hỗ Trợ' : cfg.title,
+          subtitle: cfg.subtitle,
+          pedagogyAdvice: cfg.pedagogy,
+          themeColor: cfg.themeColor,
+          borderCls: cfg.borderCls,
+          headerBg: cfg.headerBg,
+          badgeCls: cfg.badgeCls,
+          dotColor: cfg.dotColor,
+          ...stats,
+          students: pc.students,
+        };
+      });
+    }
+  }, [filteredRankings, groupingMode, kmeansK]);
+
+  // Copy Grouping text to clipboard
+  const handleCopyGrouping = useCallback(() => {
+    if (!smartGroups || smartGroups.length === 0) {
+      showToast('Không có dữ liệu học sinh để phân nhóm', 'warning');
+      return;
+    }
+
+    const currentClass = classes.find(c => String(c.id) === selectedClassId);
+    const className = currentClass ? currentClass.class_name : 'Tất Cả Lớp';
+    const modeName = groupingMode === 'tier' ? 'Theo Chuẩn Học Lực (Mode A)' : `Tự Động Phân Cụm K-Means (${kmeansK} Nhóm) (Mode B)`;
+
+    let text = `=== KẾT QUẢ GỢI Ý PHÂN NHÓM HỌC TẬP ===\n`;
+    text += `Lớp: ${className} | Tổng số: ${filteredRankings.length} học sinh\n`;
+    text += `Phương pháp: ${modeName}\n\n`;
+
+    smartGroups.forEach(g => {
+      text += `[${g.title.toUpperCase()}] (${g.students.length} học sinh | EMA TB: ${g.avgEma} | SD: ${g.groupSd})\n`;
+      text += `Mục tiêu: ${g.pedagogyAdvice}\n`;
+      if (g.students.length === 0) {
+        text += `  (Chưa có học sinh)\n`;
+      } else {
+        g.students.forEach((s, idx) => {
+          const ema = s.ema_level ? format1Dec(Number(s.ema_level)) : '-';
+          const slope = Number(s.trend_slope || 0);
+          const trendStr = slope > 0 ? `+${format1Dec(slope)} (Tăng)` : slope < 0 ? `${format1Dec(slope)} (Giảm)` : 'Ổn định';
+          const pi = s.performance_index ? format1Dec(Number(s.performance_index)) : '-';
+          const nick = s.nickname ? ` (${s.nickname})` : '';
+          text += `  ${idx + 1}. ${s.full_name}${nick} | EMA: ${ema} | Trend: ${trendStr} | PI: ${pi} | ${s.class_name || ''}\n`;
+        });
+      }
+      text += `\n`;
+    });
+
+    navigator.clipboard.writeText(text).then(() => {
+      setCopiedGroupText(true);
+      showToast('Đã sao chép danh sách phân nhóm vào clipboard!', 'success');
+      setTimeout(() => setCopiedGroupText(false), 2500);
+    }).catch(() => {
+      showToast('Không thể sao chép vào clipboard', 'error');
+    });
+  }, [smartGroups, classes, selectedClassId, groupingMode, kmeansK, filteredRankings]);
+
+  // Export Grouping to Excel (.xlsx)
+  const handleExportGroupingExcel = useCallback(async () => {
+    if (!smartGroups || smartGroups.length === 0) {
+      showToast('Không có dữ liệu để xuất Excel', 'warning');
+      return;
+    }
+
+    try {
+      const ExcelJS = (await import('exceljs')).default;
+      const workbook = new ExcelJS.Workbook();
+      const currentClass = classes.find(c => String(c.id) === selectedClassId);
+      const className = currentClass ? currentClass.class_name : 'Toan_Lop';
+      const safeClassName = className.replace(/[\*\?:\/\\\[\]]/g, '').slice(0, 25) || 'Lop';
+
+      const worksheet = workbook.addWorksheet(`Phân Nhóm ${safeClassName}`);
+      const headers = ['Nhóm Học Tập', 'STT', 'Họ và Tên', 'Biệt Danh', 'Lớp Học', 'Điểm EMA', 'Tốc Độ Tiến Bộ (Trend)', 'Hiệu Suất (PI)', 'Check 1', 'Check 2', 'Homework', 'Định Hướng Sư Phạm'];
+
+      const rows: any[] = [];
+      smartGroups.forEach(g => {
+        g.students.forEach((s, idx) => {
+          const c1 = Number(s.avg_check_1 || 0);
+          const c2 = Number(s.avg_check_2 || 0);
+          const hw = Number(s.avg_homework || 0);
+          rows.push([
+            g.title,
+            idx + 1,
+            s.full_name,
+            s.nickname || '',
+            s.class_name || '',
+            s.ema_level ? Number(format1Dec(Number(s.ema_level))) : '-',
+            Number(s.trend_slope || 0) > 0 ? `+${format1Dec(Number(s.trend_slope))}` : format1Dec(Number(s.trend_slope || 0)),
+            s.performance_index ? Number(format1Dec(Number(s.performance_index))) : '-',
+            c1 > 0 ? Number(format1Dec(c1)) : '-',
+            c2 > 0 ? Number(format1Dec(c2)) : '-',
+            hw > 0 ? Number(format1Dec(hw)) : '-',
+            g.pedagogyAdvice
+          ]);
+        });
+      });
+
+      if (rows.length > 0) {
+        worksheet.addTable({
+          name: `Table_Grouping_${Math.floor(Math.random() * 10000)}`,
+          ref: 'A1',
+          headerRow: true,
+          totalsRow: false,
+          style: {
+            theme: 'TableStyleMedium13',
+            showRowStripes: true,
+          },
+          columns: headers.map(h => ({ name: h, filterButton: true })),
+          rows: rows,
+        });
+
+        worksheet.eachRow((row, rowNumber) => {
+          const isHeader = rowNumber === 1;
+          row.eachCell((cell) => {
+            cell.font = { name: 'Times New Roman', size: 12, bold: isHeader };
+            cell.alignment = { vertical: 'middle', horizontal: 'center' };
+          });
+        });
+
+        worksheet.columns.forEach((column) => {
+          let maxLength = 10;
+          column.eachCell?.({ includeEmpty: true }, (cell) => {
+            const length = cell.value ? String(cell.value).length : 0;
+            if (length > maxLength) maxLength = length;
+          });
+          column.width = Math.min(maxLength + 4, 45);
+        });
+
+        const buffer = await workbook.xlsx.writeBuffer();
+        const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `phan_nhom_hoc_tap_${safeClassName}.xlsx`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        showToast('Xuất file Excel phân nhóm thành công!', 'success');
+      }
+    } catch (err: any) {
+      console.error('Error exporting grouping Excel:', err);
+      showToast('Có lỗi khi xuất file Excel', 'error');
+    }
+  }, [smartGroups, classes, selectedClassId]);
+
   // Handle clicking student row in rankings table: Toggle Select / Unselect
   const handleSelectRankingStudent = (studentId: number) => {
     const sidStr = String(studentId);
@@ -1762,6 +2116,249 @@ export default function ReportsPage() {
           </div>
         </div>
 
+      </div>
+
+      {/* 5.5 SMART LEVEL GROUPING (MODE A & MODE B) */}
+      <div className="bg-[#0d1120] border border-indigo-500/30 rounded-2xl flex flex-col shadow-2xl mb-8 overflow-hidden">
+        {/* Header Bar */}
+        <div className="px-6 py-5 border-b border-[#181f36] bg-[#0a0d18] flex flex-wrap items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 rounded-xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-400">
+              <Sparkles size={20} />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h3 className="text-sm font-black text-white uppercase tracking-wider">
+                  GỢI Ý PHÂN NHÓM HỌC TẬP THEO TRÌNH ĐỘ
+                </h3>
+                <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-md bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                  Smart Level Grouping
+                </span>
+              </div>
+              <p className="text-xs text-slate-400 font-semibold mt-0.5">
+                Tự động phân loại dựa trên Năng lực hiện tại (EMA), Tốc độ tăng trưởng (Trend) và Phổ điểm thực tế của lớp
+              </p>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-3">
+            {/* Sliding Pill Indicator Segmented Control (Mode A vs Mode B) */}
+            <div className="relative flex bg-[#0d1018] p-1 rounded-xl border border-white/10 text-xs shrink-0 font-bold select-none">
+              <div
+                className="absolute top-1 bottom-1 rounded-lg bg-[#5c36f5] shadow-[0_0_14px_rgba(92,54,245,0.5)] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] pointer-events-none"
+                style={{
+                  left: groupingMode === 'tier' ? '4px' : 'calc(50% + 1px)',
+                  width: 'calc(50% - 4px)',
+                }}
+              />
+              <button
+                type="button"
+                onClick={() => setGroupingMode('tier')}
+                className={`flex-1 relative z-10 py-1.5 px-3.5 text-center transition-colors cursor-pointer ${
+                  groupingMode === 'tier' ? 'text-white font-black' : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                Theo Chuẩn Học Lực (Mode A)
+              </button>
+              <button
+                type="button"
+                onClick={() => setGroupingMode('kmeans')}
+                className={`flex-1 relative z-10 py-1.5 px-3.5 text-center transition-colors cursor-pointer ${
+                  groupingMode === 'kmeans' ? 'text-white font-black' : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                Tự Động Phân Cụm K-Means (Mode B)
+              </button>
+            </div>
+
+            {/* Sub-selector for K = 2, 3, 4 when in K-Means mode */}
+            {groupingMode === 'kmeans' && (
+              <div className="relative flex bg-[#0d1018] p-1 rounded-xl border border-white/10 text-xs shrink-0 font-bold select-none">
+                <div
+                  className="absolute top-1 bottom-1 rounded-lg bg-[#3b82f6] shadow-[0_0_12px_rgba(59,130,246,0.5)] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] pointer-events-none"
+                  style={{
+                    left: kmeansK === 2 ? '4px' : kmeansK === 3 ? 'calc(33.333% + 1px)' : 'calc(66.666% + 1px)',
+                    width: 'calc(33.333% - 4px)',
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={() => setKmeansK(2)}
+                  className={`flex-1 relative z-10 py-1 px-3 text-center transition-colors cursor-pointer ${
+                    kmeansK === 2 ? 'text-white font-black' : 'text-slate-400 hover:text-white'
+                  }`}
+                >
+                  2 Nhóm
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setKmeansK(3)}
+                  className={`flex-1 relative z-10 py-1 px-3 text-center transition-colors cursor-pointer ${
+                    kmeansK === 3 ? 'text-white font-black' : 'text-slate-400 hover:text-white'
+                  }`}
+                >
+                  3 Nhóm
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setKmeansK(4)}
+                  className={`flex-1 relative z-10 py-1 px-3 text-center transition-colors cursor-pointer ${
+                    kmeansK === 4 ? 'text-white font-black' : 'text-slate-400 hover:text-white'
+                  }`}
+                >
+                  4 Nhóm
+                </button>
+              </div>
+            )}
+
+            {/* Action Buttons */}
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={handleCopyGrouping}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#14182a] hover:bg-[#1a2038] text-slate-300 hover:text-white text-xs font-bold border border-white/10 transition cursor-pointer"
+                title="Sao chép danh sách phân nhóm vào clipboard"
+              >
+                {copiedGroupText ? <Check size={14} className="text-emerald-400" /> : <Copy size={14} />}
+                <span>{copiedGroupText ? 'Đã Sao Chép' : 'Sao Chép'}</span>
+              </button>
+              <button
+                type="button"
+                onClick={handleExportGroupingExcel}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 text-xs font-bold border border-emerald-500/30 transition cursor-pointer"
+                title="Xuất file Excel danh sách phân nhóm"
+              >
+                <FileSpreadsheet size={14} />
+                <span>Xuất Excel</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Group Cards Grid */}
+        <div className="p-6">
+          {smartGroups.length === 0 ? (
+            <div className="text-center py-10 text-slate-400 text-xs font-bold">
+              Chưa có dữ liệu điểm học sinh để phân nhóm.
+            </div>
+          ) : (
+            <div className={`grid gap-4 ${
+              smartGroups.length === 2 ? 'grid-cols-1 md:grid-cols-2' :
+              smartGroups.length === 3 ? 'grid-cols-1 lg:grid-cols-3' :
+              'grid-cols-1 sm:grid-cols-2 xl:grid-cols-4'
+            }`}>
+              {smartGroups.map((g) => (
+                <div
+                  key={g.id}
+                  className={`bg-[#0f1424] border ${g.borderCls} rounded-2xl flex flex-col overflow-hidden shadow-xl transition-all duration-300 hover:border-white/20`}
+                >
+                  {/* Card Header */}
+                  <div className={`p-4 border-b border-white/5 ${g.headerBg}`}>
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span
+                            className="w-2.5 h-2.5 rounded-full shrink-0 shadow-sm"
+                            style={{ backgroundColor: g.dotColor }}
+                          />
+                          <h4 className="text-xs font-black text-white uppercase tracking-wide">
+                            {g.title}
+                          </h4>
+                        </div>
+                        <span className="text-[10px] font-bold text-slate-400 block mt-0.5">
+                          {g.subtitle}
+                        </span>
+                      </div>
+                      <span className={`px-2 py-0.5 rounded-lg text-[10px] font-black shrink-0 ${g.badgeCls}`}>
+                        {g.students.length} Học Sinh
+                      </span>
+                    </div>
+
+                    {/* Quick Group Metrics */}
+                    <div className="grid grid-cols-2 gap-2 mt-3 pt-3 border-t border-white/5">
+                      <div className="bg-[#0b0e1a] p-2 rounded-xl border border-white/5">
+                        <span className="text-[9px] font-black uppercase text-slate-400 block">EMA Trung Bình</span>
+                        <span className="text-sm font-black text-white font-mono">{g.avgEma} <span className="text-[10px] text-slate-500 font-bold">/ 10</span></span>
+                      </div>
+                      <div className="bg-[#0b0e1a] p-2 rounded-xl border border-white/5">
+                        <span className="text-[9px] font-black uppercase text-slate-400 block">Độ Phân Tán (SD)</span>
+                        <span className="text-sm font-black text-emerald-400 font-mono">σ = {g.groupSd}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Pedagogy Focus Box */}
+                  <div className="p-3 bg-[#0a0d18] border-b border-white/5">
+                    <span className="text-[9px] font-black uppercase tracking-wider text-slate-400 block mb-1">
+                      Định Hướng Giảng Dạy:
+                    </span>
+                    <p className="text-[11px] font-semibold text-slate-300 leading-relaxed">
+                      {g.pedagogyAdvice}
+                    </p>
+                  </div>
+
+                  {/* Student List */}
+                  <div className="p-3 flex-1 flex flex-col gap-2 max-h-[380px] overflow-y-auto custom-scrollbar">
+                    {g.students.length === 0 ? (
+                      <div className="text-center py-6 text-[11px] text-slate-500 font-bold">
+                        Không có học sinh trong nhóm này
+                      </div>
+                    ) : (
+                      g.students.map((s: any, sIdx: number) => {
+                        const slope = Number(s.trend_slope || 0);
+                        const isImproving = slope > 0.1;
+                        const isDeclining = slope < -0.1;
+                        const initials = s.full_name
+                          ? s.full_name.split(' ').map((n: string) => n[0]).slice(-2).join('').toUpperCase()
+                          : 'HS';
+
+                        return (
+                          <div
+                            key={s.student_id || sIdx}
+                            onClick={() => handleSelectRankingStudent(s.student_id)}
+                            className="bg-[#13192e] hover:bg-[#18203a] p-2.5 rounded-xl border border-[#202948] hover:border-indigo-500/40 transition cursor-pointer flex items-center justify-between gap-3 group"
+                            title={`Xem chi tiết học sinh ${s.full_name}`}
+                          >
+                            <div className="flex items-center gap-2.5 min-w-0">
+                              <div className="w-7 h-7 rounded-lg bg-[#1e274a] text-indigo-300 flex items-center justify-center font-black text-[10px] shrink-0 border border-indigo-500/20 group-hover:border-indigo-500/50">
+                                {initials}
+                              </div>
+                              <div className="truncate">
+                                <div className="text-xs font-bold text-white group-hover:text-indigo-200 transition truncate">
+                                  {s.full_name}
+                                </div>
+                                <div className="text-[10px] font-semibold text-slate-400 truncate">
+                                  {s.nickname ? `(${s.nickname})` : s.class_name || 'Học sinh'}
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="flex items-center gap-1.5 shrink-0">
+                              {/* Trend Indicator */}
+                              <div className={`px-1.5 py-0.5 rounded-md text-[10px] font-extrabold font-mono flex items-center gap-0.5 ${
+                                isImproving ? 'text-emerald-400 bg-emerald-500/10' :
+                                isDeclining ? 'text-rose-400 bg-rose-500/10' :
+                                'text-slate-400 bg-slate-500/10'
+                              }`}>
+                                {isImproving ? <TrendingUp size={11} /> : isDeclining ? <TrendingDown size={11} /> : <Minus size={11} />}
+                                <span>{slope > 0 ? `+${format1Dec(slope)}` : format1Dec(slope)}</span>
+                              </div>
+
+                              {/* EMA Badge */}
+                              <div className="px-2 py-0.5 rounded-lg bg-[#0b0e1a] border border-white/10 text-xs font-black font-mono text-white">
+                                {s.ema_level ? format1Dec(Number(s.ema_level)) : '-'}
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* 6. STUDENT RANKINGS TABLE — TanStack Table */}

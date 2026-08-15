@@ -2547,15 +2547,47 @@ def get_analytics_reports(class_id: Optional[int] = None, student_id: Optional[i
         ) DESC
     """
     cursor.execute(rank_query, rank_params)
-    student_rankings = [dict(r) for r in cursor.fetchall()]
+    raw_rankings = [dict(r) for r in cursor.fetchall()]
 
     conn.close()
+
+    # Calculate per-student individual analytics for ranking & level grouping
+    student_rows_map: Dict[int, List[Dict[str, Any]]] = {}
+    for r in rows:
+        sid = r.get("student_id")
+        if sid is not None:
+            student_rows_map.setdefault(sid, []).append(r)
+
+    enriched_rankings = []
+    for sr in raw_rankings:
+        sid = sr.get("student_id")
+        s_rows = student_rows_map.get(sid, [])
+        if s_rows:
+            s_analytics = calculate_performance_analytics(s_rows)
+            sr["ema_level"] = s_analytics.get("ema_level", 0.0)
+            sr["trend_slope"] = s_analytics.get("trend_slope", 0.0)
+            sr["trend_label"] = s_analytics.get("trend_label", "Ổn định")
+            sr["performance_index"] = s_analytics.get("performance_index", 0.0)
+            sr["consistency_score"] = s_analytics.get("consistency_score", 100.0)
+            sr["rating_label"] = s_analytics.get("rating_label", "Tốt")
+            sr["predicted_next"] = s_analytics.get("predicted_next", 0.0)
+            sr["std_dev"] = s_analytics.get("std_dev", 0.0)
+        else:
+            sr["ema_level"] = 0.0
+            sr["trend_slope"] = 0.0
+            sr["trend_label"] = "Chưa có dữ liệu"
+            sr["performance_index"] = 0.0
+            sr["consistency_score"] = 100.0
+            sr["rating_label"] = "Chưa có dữ liệu"
+            sr["predicted_next"] = 0.0
+            sr["std_dev"] = 0.0
+        enriched_rankings.append(sr)
 
     analytics_summary = calculate_performance_analytics(rows)
 
     return {
         "session_records": rows,
-        "student_rankings": student_rankings,
+        "student_rankings": enriched_rankings,
         "analytics_summary": analytics_summary
     }
 
