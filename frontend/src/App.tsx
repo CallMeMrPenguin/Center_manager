@@ -256,7 +256,7 @@ function AppContent() {
         
         {/* SIDEBAR NAVIGATION (Pure GPU-accelerated inline hover expansion) */}
         <aside
-          className="w-20 hover:w-64 group/sidebar sidebar-glass-glow rounded-2xl flex flex-col h-full overflow-hidden transition-[width] duration-200 ease-out z-30 shrink-0"
+          className="w-20 hover:w-64 group/sidebar sidebar-glass-glow rounded-2xl flex flex-col h-full overflow-hidden transition-[width] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] z-30 shrink-0"
         >
           
           {/* Header logo / Title */}
@@ -264,7 +264,7 @@ function AppContent() {
             <div className="h-10 w-10 bg-indigo-500/25 border-2 border-indigo-400/80 rounded-2xl flex items-center justify-center shadow-[0_0_20px_rgba(92,54,245,0.6)] shrink-0">
               <GraduationCap size={22} className="text-white drop-shadow-[0_0_12px_rgba(255,255,255,1)]" />
             </div>
-            <div className="opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-200 ease-out whitespace-nowrap overflow-hidden pointer-events-none group-hover/sidebar:pointer-events-auto min-w-0 flex-1">
+            <div className="opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-150 ease-out delay-0 group-hover/sidebar:delay-150 whitespace-nowrap overflow-hidden pointer-events-none group-hover/sidebar:pointer-events-auto min-w-0 flex-1">
               <span className="text-base font-black tracking-wide uppercase text-white block leading-none">
                 EduPlatform
               </span>
@@ -289,7 +289,7 @@ function AppContent() {
               return (
                 <div key={section.id} className="flex flex-col gap-1 shrink-0">
                   {section.label && (
-                    <div className="px-3 py-1 text-xs font-black uppercase tracking-wider text-slate-400 mt-1 mb-0.5 opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-200 ease-out whitespace-nowrap overflow-hidden">
+                    <div className="px-3 py-1 text-xs font-black uppercase tracking-wider text-slate-400 mt-1 mb-0.5 opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-150 ease-out delay-0 group-hover/sidebar:delay-150 whitespace-nowrap overflow-hidden">
                       {section.label}
                     </div>
                   )}
@@ -307,22 +307,22 @@ function AppContent() {
                         onDrop={() => handleDrop(idx)}
                         onClick={() => setActiveTab(item.id)}
                         className={`flex items-center w-full h-11 rounded-xl transition-all duration-150 relative group cursor-pointer active:scale-95 shrink-0 ${
-                          draggedIndex === idx ? 'opacity-40 border border-dashed border-blue-400 bg-blue-500/10' : ''
+                          draggedIndex === idx ? 'opacity-40 border border-dashed border-indigo-400 bg-indigo-500/10' : ''
                         }`}
                       >
-                        {/* PERFECTLY INSET ACTIVE TAB HIGHLIGHT (NO BORDER CLIPPING) */}
+                        {/* RESTORED BELOVED OLD PURPLE HIGHLIGHT WITH SAFE RIGHT MARGIN (NO CLIPPING) */}
                         {isActive && (
-                          <div className="absolute inset-0.5 rounded-lg bg-blue-600/20 border border-blue-500/80 shadow-[0_0_12px_rgba(59,130,246,0.35)] pointer-events-none transition-all duration-200" />
+                          <div className="absolute top-[3px] left-[5px] w-10 h-9 rounded-xl bg-indigo-500/25 border-2 border-indigo-400/90 shadow-[0_0_16px_rgba(92,54,245,0.5)] group-hover/sidebar:w-[calc(100%-10px)] group-hover/sidebar:h-[calc(100%-6px)] transition-all duration-200 pointer-events-none" />
                         )}
 
                         {/* ICON BOX */}
-                        <div className="w-10 h-10 flex items-center justify-center shrink-0 relative z-10 mx-auto group-hover/sidebar:mx-0">
-                          <Icon size={19} className={isActive ? 'text-blue-400 drop-shadow-[0_0_8px_rgba(59,130,246,0.8)]' : 'text-slate-400 group-hover:text-white'} />
+                        <div className="w-12 h-11 flex items-center justify-center shrink-0 relative z-10">
+                          <Icon size={20} className={isActive ? 'text-white drop-shadow-[0_0_10px_rgba(255,255,255,1)]' : 'text-slate-400 group-hover:text-white'} />
                         </div>
 
-                        {/* TEXT LABEL */}
-                        <span className={`text-sm relative z-10 transition-opacity duration-200 ease-out whitespace-nowrap overflow-hidden pointer-events-none group-hover/sidebar:pointer-events-auto opacity-0 group-hover/sidebar:opacity-100 ml-2 ${
-                          isActive ? "text-white font-black" : "text-slate-300 font-bold group-hover:text-white"
+                        {/* TEXT LABEL (SMOOTH DELAYED TRANSITION, NO GLITCHING) */}
+                        <span className={`text-sm relative z-10 transition-opacity duration-150 ease-out delay-0 group-hover/sidebar:delay-150 whitespace-nowrap overflow-hidden pointer-events-none group-hover/sidebar:pointer-events-auto opacity-0 group-hover/sidebar:opacity-100 ml-1.5 ${
+                          isActive ? "text-white font-black" : "text-slate-200 font-bold group-hover:text-white"
                         }`}>
                           {item.label}
                         </span>
