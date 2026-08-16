@@ -410,11 +410,11 @@ input[type="month"]::-webkit-calendar-picker-indicator {
 .animate-grow-width-left-origin { animation: growWidthLeftOrigin 1.2s cubic-bezier(0.22, 1, 0.36, 1) 0.65s both; will-change: transform; }
 
 @keyframes pathDraw {
-  0%   { stroke-dashoffset: 2500; }
+  0%   { stroke-dashoffset: 60000; }
   100% { stroke-dashoffset: 0; }
 }
 .animate-path-draw {
-  stroke-dasharray: 2500;
+  stroke-dasharray: 60000;
   animation: pathDraw 1.6s cubic-bezier(0.22, 1, 0.36, 1) 0.85s both;
 }
 

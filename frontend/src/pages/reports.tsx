@@ -2,8 +2,8 @@ import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import { ColumnDef } from '@tanstack/react-table';
 import { api } from '../api';
 import { GradeTypeItem } from '../types';
-import { 
-  BarChart3, RefreshCw, Calendar, 
+import {
+  BarChart3, RefreshCw, Calendar,
   AlertCircle, Users, GraduationCap, ChevronRight, ChevronDown, ChevronUp, Info, RotateCcw, X, Edit3, History, Save,
   ZoomIn, ZoomOut, Move, Sparkles, Layers, Copy, Check, FileSpreadsheet, TrendingUp, TrendingDown, Minus, ShieldAlert, Award, Zap,
   SlidersHorizontal, Settings, Plus, Trash2, ShieldCheck, Flame, BellRing, Target, Activity, CheckCircle2, Clock, BarChart2, ShieldX, HelpCircle,
@@ -225,7 +225,7 @@ const getSavedWarningSettings = () => {
   try {
     const raw = localStorage.getItem('cm_reports_warning_settings');
     if (raw) return { ...DEFAULT_WARNING_SETTINGS, ...JSON.parse(raw) };
-  } catch {}
+  } catch { }
   return DEFAULT_WARNING_SETTINGS;
 };
 
@@ -297,11 +297,11 @@ export default function ReportsPage() {
   const [showWarningSettings, setShowWarningSettings] = useState<boolean>(false);
 
   const handleUpdateWarningSettings = (updates: Partial<typeof DEFAULT_WARNING_SETTINGS>) => {
-    const newSettings = { 
-      absentPct: warningAbsentPct, 
-      consecutiveAbsent: warningConsecutiveAbsent, 
+    const newSettings = {
+      absentPct: warningAbsentPct,
+      consecutiveAbsent: warningConsecutiveAbsent,
       trendThreshold: warningTrendThreshold,
-      ...updates 
+      ...updates
     };
     if (updates.absentPct !== undefined) setWarningAbsentPct(updates.absentPct);
     if (updates.consecutiveAbsent !== undefined) setWarningConsecutiveAbsent(updates.consecutiveAbsent);
@@ -619,7 +619,7 @@ export default function ReportsPage() {
     const list: any[] = [];
     rawList.forEach(s => {
       const sSessions = (studentSessionsMap[s.student_id] || []).sort((a, b) => (a.date > b.date ? 1 : -1));
-      
+
       let consecutiveAbsent = 0;
       for (let i = sSessions.length - 1; i >= 0; i--) {
         const st = sSessions[i].status || 'Có mặt';
@@ -852,8 +852,8 @@ export default function ReportsPage() {
       const classSd = classAnalyticsMap[String(cObj.id)]?.std_dev !== undefined
         ? classAnalyticsMap[String(cObj.id)].std_dev
         : (selectedClassId === String(cObj.id) && analyticsSummary?.std_dev !== undefined)
-        ? analyticsSummary.std_dev
-        : computeClassAnalyticsSd(cSessionRecords);
+          ? analyticsSummary.std_dev
+          : computeClassAnalyticsSd(cSessionRecords);
 
       let totalPresent = 0, totalSessions = 0;
       cStudents.forEach(s => {
@@ -950,14 +950,14 @@ export default function ReportsPage() {
       }
 
       const emaScores = cStudents.map(s => Number(s.ema_level || 0)).filter(v => v > 0);
-      const avgEma = emaScores.length > 0 ? trunc1Dec(emaScores.reduce((a,b)=>a+b,0) / emaScores.length) : 0;
+      const avgEma = emaScores.length > 0 ? trunc1Dec(emaScores.reduce((a, b) => a + b, 0) / emaScores.length) : 0;
 
       const cSessionRecords = sessionRecords.filter(r => String(r.class_id) === String(c.id));
       const classSd = classAnalyticsMap[String(c.id)]?.std_dev !== undefined
         ? classAnalyticsMap[String(c.id)].std_dev
         : (selectedClassId === String(c.id) && analyticsSummary?.std_dev !== undefined)
-        ? analyticsSummary.std_dev
-        : computeClassAnalyticsSd(cSessionRecords);
+          ? analyticsSummary.std_dev
+          : computeClassAnalyticsSd(cSessionRecords);
 
       let totalPresent = 0, totalSessions = 0;
       cStudents.forEach(s => {
@@ -1022,11 +1022,10 @@ export default function ReportsPage() {
         const val = getValue<number>();
         return (
           <div className="text-center">
-            <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-mono font-black border ${
-              val >= 90 ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' :
-              val >= 80 ? 'bg-blue-500/20 text-blue-300 border-blue-500/30' :
-              'bg-rose-500/20 text-rose-300 border-rose-500/30'
-            }`}>{val}%</span>
+            <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-mono font-black border ${val >= 90 ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' :
+                val >= 80 ? 'bg-blue-500/20 text-blue-300 border-blue-500/30' :
+                  'bg-rose-500/20 text-rose-300 border-rose-500/30'
+              }`}>{val}%</span>
           </div>
         );
       },
@@ -1058,9 +1057,8 @@ export default function ReportsPage() {
         const isExcel = ev.includes('Xuất sắc') || ev.includes('Tiến bộ');
         return (
           <div className="text-center">
-            <span className={`inline-block px-2.5 py-1 rounded-xl text-[10px] font-black border ${
-              isExcel ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' : 'bg-amber-500/10 text-amber-400 border-amber-500/30'
-            }`}>{ev}</span>
+            <span className={`inline-block px-2.5 py-1 rounded-xl text-[10px] font-black border ${isExcel ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' : 'bg-amber-500/10 text-amber-400 border-amber-500/30'
+              }`}>{ev}</span>
           </div>
         );
       },
@@ -1124,11 +1122,10 @@ export default function ReportsPage() {
         const isDown = delta < -0.05;
         return (
           <div className="text-center">
-            <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-xs font-mono font-black border ${
-              isUp ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30' :
-              isDown ? 'bg-rose-500/15 text-rose-400 border-rose-500/30' :
-              'bg-slate-500/15 text-slate-300 border-slate-500/30'
-            }`}>
+            <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-xs font-mono font-black border ${isUp ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30' :
+                isDown ? 'bg-rose-500/15 text-rose-400 border-rose-500/30' :
+                  'bg-slate-500/15 text-slate-300 border-slate-500/30'
+              }`}>
               {isUp ? <TrendingUp size={13} /> : isDown ? <TrendingDown size={13} /> : <Minus size={13} />}
               <span>{delta > 0 ? `+${format1Dec(delta)}` : format1Dec(delta)}</span>
             </span>
@@ -1145,10 +1142,10 @@ export default function ReportsPage() {
         const label = row.original.statusLabel;
         const cls =
           type === 'breakthrough' ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40' :
-          type === 'improving' ? 'bg-teal-500/15 text-teal-300 border-teal-500/30' :
-          type === 'declining' ? 'bg-amber-500/15 text-amber-300 border-amber-500/30' :
-          type === 'critical' ? 'bg-rose-500/20 text-rose-300 border-rose-500/40' :
-          'bg-indigo-500/10 text-indigo-300 border-indigo-500/20';
+            type === 'improving' ? 'bg-teal-500/15 text-teal-300 border-teal-500/30' :
+              type === 'declining' ? 'bg-amber-500/15 text-amber-300 border-amber-500/30' :
+                type === 'critical' ? 'bg-rose-500/20 text-rose-300 border-rose-500/40' :
+                  'bg-indigo-500/10 text-indigo-300 border-indigo-500/20';
 
         return (
           <div className="text-center">
@@ -1244,7 +1241,7 @@ export default function ReportsPage() {
           const present = r.present_count ?? 0;
           const total = r.total_sessions ?? 0;
           const pct = total > 0 ? Math.round((present / total) * 100) : 100;
-          
+
           const c1 = Number(r.avg_check_1 || 0);
           const c2 = Number(r.avg_check_2 || 0);
           const hw = Number(r.avg_homework || 0);
@@ -1281,7 +1278,7 @@ export default function ReportsPage() {
 
         if (rows.length > 0) {
           worksheet.addTable({
-            name: `Table_${safeName.replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_]/g, '')}_${Math.floor(Math.random()*10000)}`,
+            name: `Table_${safeName.replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_]/g, '')}_${Math.floor(Math.random() * 10000)}`,
             ref: 'A1',
             headerRow: true,
             totalsRow: false,
@@ -1440,9 +1437,8 @@ export default function ReportsPage() {
         const r = row.original;
         return (
           <div className="flex items-center gap-2.5">
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs text-white shrink-0 ${
-              r.isUrgent ? 'bg-rose-600' : 'bg-amber-600'
-            }`}>
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs text-white shrink-0 ${r.isUrgent ? 'bg-rose-600' : 'bg-amber-600'
+              }`}>
               {r.full_name ? r.full_name.slice(0, 2).toUpperCase() : 'HS'}
             </div>
             <div>
@@ -1473,9 +1469,8 @@ export default function ReportsPage() {
         const isUrgent = getValue<boolean>();
         return (
           <div className="text-center">
-            <span className={`inline-block px-2.5 py-0.5 rounded-lg text-[10px] font-black border ${
-              isUrgent ? 'bg-rose-500/20 text-rose-300 border-rose-500/40' : 'bg-amber-500/20 text-amber-300 border-amber-500/40'
-            }`}>
+            <span className={`inline-block px-2.5 py-0.5 rounded-lg text-[10px] font-black border ${isUrgent ? 'bg-rose-500/20 text-rose-300 border-rose-500/40' : 'bg-amber-500/20 text-amber-300 border-amber-500/40'
+              }`}>
               {isUrgent ? 'Nguy Cơ Cao' : 'Cần Theo Dõi'}
             </span>
           </div>
@@ -1648,7 +1643,7 @@ export default function ReportsPage() {
         const r = row.original;
         const sSessions = (studentSessionsMap[r.student_id] || [])
           .filter(sess => Number(sess.check_1) > 0 || Number(sess.check_2) > 0 || Number(sess.homework) > 0);
-        
+
         const recentScores = sSessions.slice(-5).map(sess => {
           const c1 = Number(sess.check_1 || 0);
           const c2 = Number(sess.check_2 || 0);
@@ -1800,9 +1795,8 @@ export default function ReportsPage() {
         const isAbsent = st.includes('Vắng') || st.includes('Nghỉ');
         return (
           <div className="text-center">
-            <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-extrabold ${
-              isAbsent ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30' : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
-            }`}>
+            <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-extrabold ${isAbsent ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30' : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+              }`}>
               {st}
             </span>
           </div>
@@ -1880,7 +1874,7 @@ export default function ReportsPage() {
           { id: 'homework', label: 'BTVN', weight: data.grade_weights.homework ?? 10, color: '#f59e0b' }
         ]);
       }
-    }).catch(() => {});
+    }).catch(() => { });
   }, []);
 
   // Selected Student Object if individual mode
@@ -1935,8 +1929,8 @@ export default function ReportsPage() {
   // Overall stats calculations
   const stats = useMemo(() => {
     if (!sessionRecords || sessionRecords.length === 0) {
-      return { 
-        c1: '-', c2: '-', hw: '-', overall: '-', 
+      return {
+        c1: '-', c2: '-', hw: '-', overall: '-',
         attendancePct: 100, sessionCount: 0,
         c1Diff: '+0.0', c2Diff: '+0.0', hwDiff: '+0.0', overallDiff: '+0.0',
         rank: '#1', level: 'Chưa Có Điểm'
@@ -2032,7 +2026,7 @@ export default function ReportsPage() {
     ];
 
     if (!sessionRecords || sessionRecords.length === 0) return defaultData;
-    
+
     // Group records by Date
     const dateMap: Record<string, { check1: number[]; check2: number[]; hw: number[] }> = {};
     sessionRecords.forEach(r => {
@@ -2083,11 +2077,11 @@ export default function ReportsPage() {
     const result = selectedDates.map((d) => {
       const item = dateMap[d];
       const validScores = [...item.check1, ...item.check2, ...item.hw];
-      const sessionFallback = validScores.length > 0 ? validScores.reduce((a,b)=>a+b,0)/validScores.length : 8.0;
+      const sessionFallback = validScores.length > 0 ? validScores.reduce((a, b) => a + b, 0) / validScores.length : 8.0;
 
-      const avg1 = item.check1.length > 0 ? item.check1.reduce((a,b)=>a+b,0)/item.check1.length : sessionFallback;
-      const avg2 = item.check2.length > 0 ? item.check2.reduce((a,b)=>a+b,0)/item.check2.length : sessionFallback;
-      const avghw = item.hw.length > 0 ? item.hw.reduce((a,b)=>a+b,0)/item.hw.length : sessionFallback;
+      const avg1 = item.check1.length > 0 ? item.check1.reduce((a, b) => a + b, 0) / item.check1.length : sessionFallback;
+      const avg2 = item.check2.length > 0 ? item.check2.reduce((a, b) => a + b, 0) / item.check2.length : sessionFallback;
+      const avghw = item.hw.length > 0 ? item.hw.reduce((a, b) => a + b, 0) / item.hw.length : sessionFallback;
       const avgOverall = ((avg1 * w1) + (avg2 * w2) + (avghw * whw)) / wTot;
 
       return {
@@ -2129,7 +2123,7 @@ export default function ReportsPage() {
   const chartHeight = 750;
   const chartWidth = Math.max(containerWidth, 600);
   const paddingLeft = 50;
-  const paddingRight = 140;
+  const paddingRight = 145;
   const paddingTop = 40;
   const paddingBottom = 50;
   const plotAreaHeight = chartHeight - paddingTop - paddingBottom;
@@ -2594,7 +2588,7 @@ export default function ReportsPage() {
 
   return (
     <div ref={topRef} className="h-full w-full overflow-y-auto p-6 space-y-6 bg-[#080b14] text-slate-100 select-none font-sans scrollbar-thin">
-      
+
       {/* 1. TOP BREADCRUMB & RESET GRADES CONTROL */}
       <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[#181f36] pb-4">
         <div>
@@ -2655,17 +2649,16 @@ export default function ReportsPage() {
               left: activeReportTab === 'overview'
                 ? '4px'
                 : activeReportTab === 'deep'
-                ? 'calc(33.333% + 1px)'
-                : 'calc(66.666% + 1px)',
+                  ? 'calc(33.333% + 1px)'
+                  : 'calc(66.666% + 1px)',
               width: 'calc(33.333% - 4px)',
             }}
           />
           <button
             type="button"
             onClick={() => setActiveReportTab('overview')}
-            className={`flex-1 relative z-10 py-1.5 px-3 text-center transition-colors cursor-pointer flex items-center justify-center gap-1.5 ${
-              activeReportTab === 'overview' ? 'text-white font-black' : 'text-slate-400 hover:text-white'
-            }`}
+            className={`flex-1 relative z-10 py-1.5 px-3 text-center transition-colors cursor-pointer flex items-center justify-center gap-1.5 ${activeReportTab === 'overview' ? 'text-white font-black' : 'text-slate-400 hover:text-white'
+              }`}
           >
             <Activity size={13} />
             <span>Tổng Quan Học Lực</span>
@@ -2673,9 +2666,8 @@ export default function ReportsPage() {
           <button
             type="button"
             onClick={() => setActiveReportTab('deep')}
-            className={`flex-1 relative z-10 py-1.5 px-3 text-center transition-colors cursor-pointer flex items-center justify-center gap-1.5 ${
-              activeReportTab === 'deep' ? 'text-white font-black' : 'text-slate-400 hover:text-white'
-            }`}
+            className={`flex-1 relative z-10 py-1.5 px-3 text-center transition-colors cursor-pointer flex items-center justify-center gap-1.5 ${activeReportTab === 'deep' ? 'text-white font-black' : 'text-slate-400 hover:text-white'
+              }`}
           >
             <Layers size={13} />
             <span>Thống Kê Sâu</span>
@@ -2683,9 +2675,8 @@ export default function ReportsPage() {
           <button
             type="button"
             onClick={() => setActiveReportTab('benchmark')}
-            className={`flex-1 relative z-10 py-1.5 px-3 text-center transition-colors cursor-pointer flex items-center justify-center gap-1.5 ${
-              activeReportTab === 'benchmark' ? 'text-white font-black' : 'text-slate-400 hover:text-white'
-            }`}
+            className={`flex-1 relative z-10 py-1.5 px-3 text-center transition-colors cursor-pointer flex items-center justify-center gap-1.5 ${activeReportTab === 'benchmark' ? 'text-white font-black' : 'text-slate-400 hover:text-white'
+              }`}
           >
             <GitCompare size={13} />
             <span>So Sánh Giữa Các Lớp</span>
@@ -3077,9 +3068,9 @@ export default function ReportsPage() {
                   <div className="p-3.5 rounded-xl bg-[#0e1322] border border-blue-500/30 flex items-center justify-between gap-3">
                     <div className="flex items-center gap-3">
                       {classComparisonData.classA.topStudent ? (
-                        <img 
-                          src={getStudentTier(Number(classComparisonData.classA.topStudent.ema_level || 0)).badge} 
-                          alt="Badge" 
+                        <img
+                          src={getStudentTier(Number(classComparisonData.classA.topStudent.ema_level || 0)).badge}
+                          alt="Badge"
                           className="w-10 h-10 object-contain drop-shadow"
                         />
                       ) : (
@@ -3102,9 +3093,9 @@ export default function ReportsPage() {
                   <div className="p-3.5 rounded-xl bg-[#0e1622] border border-cyan-500/30 flex items-center justify-between gap-3">
                     <div className="flex items-center gap-3">
                       {classComparisonData.classB.topStudent ? (
-                        <img 
-                          src={getStudentTier(Number(classComparisonData.classB.topStudent.ema_level || 0)).badge} 
-                          alt="Badge" 
+                        <img
+                          src={getStudentTier(Number(classComparisonData.classB.topStudent.ema_level || 0)).badge}
+                          alt="Badge"
                           className="w-10 h-10 object-contain drop-shadow"
                         />
                       ) : (
@@ -3156,1483 +3147,1482 @@ export default function ReportsPage() {
             </div>
           </div>
         ) : activeReportTab === 'deep' ? (
-        /* THỐNG KÊ SÂU (DEEP ANALYSIS TAB VIEW) */
-        <div className="flex flex-col gap-8 mb-8">
-          {/* 1. 6-TIER ACADEMIC RANKING DISTRIBUTION (MATCHING REFERENCE DESIGN) */}
-          <div className="bg-[#0b0f19] border border-[#1b253b] p-6 rounded-2xl shadow-xl flex flex-col gap-5 animate-cascade-1">
-            <div className="flex items-center justify-between gap-2 border-b border-[#161f33] pb-4">
-              <div className="flex items-center gap-2">
-                <h4 className="text-sm font-black uppercase text-white tracking-wider">
-                  PHÂN BỐ HẠNG BẬC HỌC LỰC
-                </h4>
-                <div className="group relative">
-                  <Info size={14} className="text-slate-400 hover:text-white cursor-pointer transition-colors" />
-                  <div className="absolute left-0 top-full mt-1.5 hidden group-hover:block z-50 w-64 p-2.5 rounded-xl bg-[#131929] border border-[#28334e] text-[11px] text-slate-300 shadow-xl pointer-events-none">
-                    Phân bố học sinh theo 6 cấp bậc danh hiệu học lực. Nhấp vào từng bậc để lọc danh sách học sinh.
+          /* THỐNG KÊ SÂU (DEEP ANALYSIS TAB VIEW) */
+          <div className="flex flex-col gap-8 mb-8">
+            {/* 1. 6-TIER ACADEMIC RANKING DISTRIBUTION (MATCHING REFERENCE DESIGN) */}
+            <div className="bg-[#0b0f19] border border-[#1b253b] p-6 rounded-2xl shadow-xl flex flex-col gap-5 animate-cascade-1">
+              <div className="flex items-center justify-between gap-2 border-b border-[#161f33] pb-4">
+                <div className="flex items-center gap-2">
+                  <h4 className="text-sm font-black uppercase text-white tracking-wider">
+                    PHÂN BỐ HẠNG BẬC HỌC LỰC
+                  </h4>
+                  <div className="group relative">
+                    <Info size={14} className="text-slate-400 hover:text-white cursor-pointer transition-colors" />
+                    <div className="absolute left-0 top-full mt-1.5 hidden group-hover:block z-50 w-64 p-2.5 rounded-xl bg-[#131929] border border-[#28334e] text-[11px] text-slate-300 shadow-xl pointer-events-none">
+                      Phân bố học sinh theo 6 cấp bậc danh hiệu học lực. Nhấp vào từng bậc để lọc danh sách học sinh.
+                    </div>
                   </div>
                 </div>
-              </div>
-              <div className="flex items-center gap-2">
-                {selectedDistFilter !== 'all' && (
-                  <button
-                    onClick={() => setSelectedDistFilter('all')}
-                    className="text-[10px] font-bold text-blue-400 hover:text-white bg-blue-500/10 px-2 py-0.5 rounded border border-blue-500/30 transition cursor-pointer mr-2"
-                  >
-                    Bỏ Lọc Hạng
-                  </button>
-                )}
-                <span className="text-xs font-bold text-slate-400">
-                  Tổng số: <strong className="text-white font-mono">{tierDistribution.total}</strong> học sinh
-                </span>
-              </div>
-            </div>
-
-            {/* 6 Horizontal Bar Rows Matching Reference Design */}
-            <div className="space-y-3.5">
-              {tierDistribution.tiers.map((t) => {
-                const isSelected = selectedDistFilter === t.tier;
-                return (
-                  <div
-                    key={t.tier}
-                    onClick={() => setSelectedDistFilter(prev => prev === t.tier ? 'all' : t.tier)}
-                    className={`flex items-center justify-between gap-4 py-2 px-3 rounded-xl transition-all cursor-pointer select-none ${
-                      isSelected ? 'bg-white/10 ring-1 ring-white/20' : 'hover:bg-white/5'
-                    }`}
-                  >
-                    {/* Badge Icon + Tier Name */}
-                    <div className="flex items-center gap-3 w-32 shrink-0">
-                      <img src={t.badge} alt={t.name} className="w-8 h-8 object-contain shrink-0 drop-shadow" />
-                      <span className="text-sm font-bold text-slate-200">{t.name}</span>
-                    </div>
-
-                    {/* Horizontal Progress Bar Track */}
-                    <div className="flex-1 h-3 bg-[#0e1424] rounded-full overflow-hidden p-0.5 border border-white/5 mx-2">
-                      <div
-                        style={{ width: `${Math.max(t.pct > 0 ? 3 : 0, t.pct)}%`, backgroundColor: t.color }}
-                        className="h-full rounded-full transition-all duration-700 animate-grow-width shadow-sm"
-                      />
-                    </div>
-
-                    {/* Student Count */}
-                    <span className="text-sm font-black text-white font-mono w-10 text-right shrink-0">{t.count}</span>
-
-                    {/* Percentage */}
-                    <span className="text-sm font-black font-mono w-14 text-right shrink-0" style={{ color: t.color }}>{t.pct}%</span>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* 2. EARLY WARNING & RISK RETENTION ALERT SYSTEM (NOW A STANDARD TABLE) */}
-          <div className="bg-[#120d18] border border-rose-500/30 rounded-2xl p-4 sm:p-5 shadow-2xl transition-all animate-cascade-2">
-            <div 
-              onClick={() => setIsWarningSectionOpen(!isWarningSectionOpen)}
-              className="flex flex-wrap items-center justify-between gap-4 cursor-pointer select-none"
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-rose-500/20 border border-rose-500/40 flex items-center justify-center text-rose-400 shadow-md shadow-rose-500/10 shrink-0">
-                  <ShieldAlert size={20} />
-                </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h3 className="text-sm font-black text-white uppercase tracking-wider">
-                      HỆ THỐNG CẢNH BÁO NGUY CƠ
-                    </h3>
-                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-rose-500/20 text-rose-300 border border-rose-500/40">
-                      {atRiskStudents.length} Học Sinh Cần Chú Ý
-                    </span>
-                  </div>
-                  <p className="text-xs text-slate-400 font-semibold mt-0.5">
-                    Tự động phát hiện học sinh có dấu hiệu nghỉ học liên tiếp, tỷ lệ vắng cao hoặc đà điểm số tụt dốc để can thiệp kịp thời.
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setShowWarningSettings(!showWarningSettings);
-                    if (!isWarningSectionOpen) setIsWarningSectionOpen(true);
-                  }}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#1c1426] hover:bg-[#281b38] text-rose-300 hover:text-white border border-rose-500/30 text-xs font-bold transition cursor-pointer"
-                >
-                  <SlidersHorizontal size={13} />
-                  <span>{showWarningSettings ? 'Đóng Cài Đặt' : 'Tùy Chỉnh Ngưỡng'}</span>
-                </button>
-                <div className="p-1.5 rounded-lg bg-white/5 text-slate-400">
-                  {isWarningSectionOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-                </div>
-              </div>
-            </div>
-
-            {/* Collapsible Content with Smooth Animated Grid Accordion */}
-            <div className={`grid transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-              isWarningSectionOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0 pointer-events-none'
-            }`}>
-              <div className="overflow-hidden">
-                <div className="mt-4 pt-4 border-t border-rose-500/20 space-y-4">
-                  {/* Expandable Threshold Customization Drawer */}
-                  {showWarningSettings && (
-                    <div className="p-4 rounded-xl bg-[#181120] border border-rose-500/20 grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
-                      <div>
-                        <label className="block text-[11px] font-bold text-slate-300 mb-1.5">
-                          Ngưỡng Tỷ Lệ Vắng Mặt (%):
-                        </label>
-                        <div className="flex items-center gap-3">
-                          <input
-                            type="range"
-                            min="5"
-                            max="90"
-                            step="5"
-                            value={warningAbsentPct}
-                            onChange={(e) => handleUpdateWarningSettings({ absentPct: Number(e.target.value) })}
-                            className="flex-1 accent-rose-500 cursor-pointer"
-                          />
-                          <span className="font-mono font-black text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded border border-rose-500/20">
-                            ≥ {warningAbsentPct}%
-                          </span>
-                        </div>
-                      </div>
-
-                      <div>
-                        <label className="block text-[11px] font-bold text-slate-300 mb-1.5">
-                          Số Buổi Vắng Liên Tiếp:
-                        </label>
-                        <div className="flex items-center gap-3">
-                          <input
-                            type="range"
-                            min="1"
-                            max="5"
-                            step="1"
-                            value={warningConsecutiveAbsent}
-                            onChange={(e) => handleUpdateWarningSettings({ consecutiveAbsent: Number(e.target.value) })}
-                            className="flex-1 accent-rose-500 cursor-pointer"
-                          />
-                          <span className="font-mono font-black text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded border border-rose-500/20">
-                            ≥ {warningConsecutiveAbsent} buổi
-                          </span>
-                        </div>
-                      </div>
-
-                      <div>
-                        <label className="block text-[11px] font-bold text-slate-300 mb-1.5">
-                          Ngưỡng Tốc Độ Giảm Điểm (Trend):
-                        </label>
-                        <div className="flex items-center gap-3">
-                          <input
-                            type="range"
-                            min="-0.6"
-                            max="-0.1"
-                            step="0.05"
-                            value={warningTrendThreshold}
-                            onChange={(e) => handleUpdateWarningSettings({ trendThreshold: Number(e.target.value) })}
-                            className="flex-1 accent-rose-500 cursor-pointer"
-                          />
-                          <span className="font-mono font-black text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded border border-rose-500/20">
-                            ≤ {warningTrendThreshold}/buổi
-                          </span>
-                        </div>
-                      </div>
-                    </div>
+                <div className="flex items-center gap-2">
+                  {selectedDistFilter !== 'all' && (
+                    <button
+                      onClick={() => setSelectedDistFilter('all')}
+                      className="text-[10px] font-bold text-blue-400 hover:text-white bg-blue-500/10 px-2 py-0.5 rounded border border-blue-500/30 transition cursor-pointer mr-2"
+                    >
+                      Bỏ Lọc Hạng
+                    </button>
                   )}
-
-                  {/* At-Risk Students Standard TanStack DataTable */}
-                  <DataTable
-                    tableId="reports-warning-table"
-                    exportFilename="danh_sach_hoc_sinh_nguy_co"
-                    data={atRiskStudents}
-                    columns={warningColumns}
-                    loading={loading}
-                    searchPlaceholder="Tìm học sinh nguy cơ theo tên, lớp..."
-                    emptyMessage="Tuyệt vời! Không có học sinh nào rơi vào diện cảnh báo nguy cơ theo các tiêu chí hiện tại."
-                    pageSize={20}
-                    onRowClick={(r: any) => handleSelectRankingStudent(r.student_id)}
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* 3. SMART LEVEL GROUPING (MODE A & MODE B) */}
-          <div className="bg-[#0d1120] border border-indigo-500/30 rounded-2xl flex flex-col shadow-2xl overflow-hidden transition-all animate-cascade-3">
-            {/* Collapsible Header Bar */}
-            <div 
-              onClick={() => setIsGroupingSectionOpen(!isGroupingSectionOpen)}
-              className="px-6 py-4 border-b border-[#181f36] bg-[#0a0d18] flex flex-wrap items-center justify-between gap-4 cursor-pointer select-none"
-            >
-              <div className="flex items-center gap-3">
-                <div className="p-2.5 rounded-xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 shrink-0">
-                  <FolderTree size={20} />
-                </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h3 className="text-sm font-black text-white uppercase tracking-wider">
-                      GỢI Ý PHÂN NHÓM HỌC TẬP THEO TRÌNH ĐỘ
-                    </h3>
-                    <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-md bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
-                      {smartGroups.length} Nhóm | {smartGroups.reduce((acc, g) => acc + g.students.length, 0)} Học Sinh
-                    </span>
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-[#182038] text-slate-300 border border-white/10">
-                      {groupingScope === 'current' ? (selectedClassId ? `Lớp ${classes.find(c => String(c.id) === selectedClassId)?.class_name}` : 'Lớp Hiện Tại') :
-                       groupingScope === 'grade' ? 'Toàn Khối' :
-                       'Toàn Trung Tâm'}
-                    </span>
-                  </div>
-                  <p className="text-xs text-slate-400 font-semibold mt-0.5">
-                    Tự động phân loại học sinh theo Năng lực hiện tại, Tốc độ tăng trưởng và Phổ điểm thực tế.
-                  </p>
+                  <span className="text-xs font-bold text-slate-400">
+                    Tổng số: <strong className="text-white font-mono">{tierDistribution.total}</strong> học sinh
+                  </span>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
-                <button
-                  type="button"
-                  onClick={handleCopyGrouping}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#14182a] hover:bg-[#1a2038] text-slate-300 hover:text-white text-xs font-bold border border-white/10 transition cursor-pointer"
-                  title="Sao chép danh sách phân nhóm vào clipboard"
-                >
-                  {copiedGroupText ? <Check size={14} className="text-emerald-400" /> : <Copy size={14} />}
-                  <span>{copiedGroupText ? 'Đã Sao Chép' : 'Sao Chép'}</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={handleExportGroupingExcel}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 text-xs font-bold border border-emerald-500/30 transition cursor-pointer"
-                  title="Xuất file Excel danh sách phân nhóm"
-                >
-                  <FileSpreadsheet size={14} />
-                  <span>Xuất Excel</span>
-                </button>
-                <div 
-                  onClick={() => setIsGroupingSectionOpen(!isGroupingSectionOpen)}
-                  className="p-1.5 rounded-lg bg-white/5 text-slate-400 hover:text-white transition cursor-pointer ml-1"
-                >
-                  {isGroupingSectionOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-                </div>
-              </div>
-            </div>
+              {/* 6 Horizontal Bar Rows Matching Reference Design */}
+              <div className="space-y-3.5">
+                {tierDistribution.tiers.map((t) => {
+                  const isSelected = selectedDistFilter === t.tier;
+                  return (
+                    <div
+                      key={t.tier}
+                      onClick={() => setSelectedDistFilter(prev => prev === t.tier ? 'all' : t.tier)}
+                      className={`flex items-center justify-between gap-4 py-2 px-3 rounded-xl transition-all cursor-pointer select-none ${isSelected ? 'bg-white/10 ring-1 ring-white/20' : 'hover:bg-white/5'
+                        }`}
+                    >
+                      {/* Badge Icon + Tier Name */}
+                      <div className="flex items-center gap-3 w-32 shrink-0">
+                        <img src={t.badge} alt={t.name} className="w-8 h-8 object-contain shrink-0 drop-shadow" />
+                        <span className="text-sm font-bold text-slate-200">{t.name}</span>
+                      </div>
 
-            {/* Expanded Grouping Controls & Cards with Smooth Animated Grid Accordion */}
-            <div className={`grid transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-              isGroupingSectionOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0 pointer-events-none'
-            }`}>
-              <div className="overflow-hidden">
-                <div className="p-6 space-y-6">
-                  {/* Scope & Mode Control Toolbar */}
-                  <div className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-xl bg-[#090d1a] border border-[#1a2340]">
-                    {/* Scope Selector: Lớp hiện tại vs Toàn bộ khối vs Toàn trung tâm */}
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="text-xs font-black uppercase text-indigo-300 tracking-wider flex items-center gap-1.5 mr-1">
-                        <FolderTree size={14} />
-                        Phạm Vi Phân Nhóm:
-                      </span>
-                      <div className="relative flex bg-[#0d1018] p-1 rounded-xl border border-white/10 text-xs shrink-0 font-bold select-none">
+                      {/* Horizontal Progress Bar Track */}
+                      <div className="flex-1 h-3 bg-[#0e1424] rounded-full overflow-hidden p-0.5 border border-white/5 mx-2">
                         <div
-                          className="absolute top-1 bottom-1 rounded-lg bg-indigo-600 shadow-[0_0_12px_rgba(99,102,241,0.5)] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] pointer-events-none"
-                          style={{
-                            left: groupingScope === 'current' ? '4px' : groupingScope === 'grade' ? 'calc(33.333% + 1px)' : 'calc(66.666% + 1px)',
-                            width: 'calc(33.333% - 4px)',
-                          }}
+                          style={{ width: `${Math.max(t.pct > 0 ? 3 : 0, t.pct)}%`, backgroundColor: t.color }}
+                          className="h-full rounded-full transition-all duration-700 animate-grow-width shadow-sm"
                         />
-                        <button
-                          type="button"
-                          onClick={() => setGroupingScope('current')}
-                          className={`flex-1 relative z-10 py-1.5 px-3 text-center transition-colors cursor-pointer ${
-                            groupingScope === 'current' ? 'text-white font-black' : 'text-slate-400 hover:text-white'
-                          }`}
-                        >
-                          Lớp Hiện Tại
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setGroupingScope('grade')}
-                          className={`flex-1 relative z-10 py-1.5 px-3 text-center transition-colors cursor-pointer ${
-                            groupingScope === 'grade' ? 'text-white font-black' : 'text-slate-400 hover:text-white'
-                          }`}
-                        >
-                          Toàn Khối
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setGroupingScope('all')}
-                          className={`flex-1 relative z-10 py-1.5 px-3 text-center transition-colors cursor-pointer ${
-                            groupingScope === 'all' ? 'text-white font-black' : 'text-slate-400 hover:text-white'
-                          }`}
-                        >
-                          Toàn Trung Tâm
-                        </button>
                       </div>
 
-                      {groupingScope === 'grade' && !selectedClassId && (
-                        <div className="flex items-center gap-1.5 bg-[#14182a] px-2.5 py-1 rounded-xl border border-white/10">
-                          <span className="text-[10px] font-bold text-slate-400 uppercase">Chọn Khối:</span>
-                          <CustomSelect
-                            value={groupingGradeFilter || (classes[0]?.grade ?? 'Lớp 8')}
-                            onChange={(val) => setGroupingGradeFilter(String(val))}
-                            options={Array.from(new Set(classes.map(c => c.grade).filter(Boolean))).map(g => ({
-                              value: String(g),
-                              label: String(g)
-                            }))}
-                            className="w-32"
-                          />
-                        </div>
-                      )}
+                      {/* Student Count */}
+                      <span className="text-sm font-black text-white font-mono w-10 text-right shrink-0">{t.count}</span>
+
+                      {/* Percentage */}
+                      <span className="text-sm font-black font-mono w-14 text-right shrink-0" style={{ color: t.color }}>{t.pct}%</span>
                     </div>
-
-                    {/* Grouping Algorithm Mode & K-Means Selector */}
-                    <div className="flex flex-wrap items-center gap-3">
-                      <div className="relative flex bg-[#0d1018] p-1 rounded-xl border border-white/10 text-xs shrink-0 font-bold select-none">
-                        <div
-                          className="absolute top-1 bottom-1 rounded-lg bg-[#5c36f5] shadow-[0_0_14px_rgba(92,54,245,0.5)] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] pointer-events-none"
-                          style={{
-                            left: groupingMode === 'tier' ? '4px' : 'calc(50% + 1px)',
-                            width: 'calc(50% - 4px)',
-                          }}
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setGroupingMode('tier')}
-                          className={`flex-1 relative z-10 py-1.5 px-3.5 text-center transition-colors cursor-pointer ${
-                            groupingMode === 'tier' ? 'text-white font-black' : 'text-slate-400 hover:text-white'
-                          }`}
-                        >
-                          Theo 6 Hạng Bậc
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setGroupingMode('kmeans')}
-                          className={`flex-1 relative z-10 py-1.5 px-3.5 text-center transition-colors cursor-pointer ${
-                            groupingMode === 'kmeans' ? 'text-white font-black' : 'text-slate-400 hover:text-white'
-                          }`}
-                        >
-                          Phân Cụm Tự Động
-                        </button>
-                      </div>
-
-                      {groupingMode === 'kmeans' && (
-                        <div className="flex items-center gap-2 bg-[#121626] px-3 py-1.5 rounded-xl border border-white/10">
-                          <span className="text-xs text-slate-300 font-bold">Số nhóm:</span>
-                          <div className="flex items-center gap-1">
-                            {[2, 3, 4].map(k => (
-                              <button
-                                key={k}
-                                type="button"
-                                onClick={() => setKmeansK(k)}
-                                className={`w-6 h-6 rounded-lg text-xs font-black transition cursor-pointer ${
-                                  kmeansK === k ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white hover:bg-white/5'
-                                }`}
-                              >
-                                {k}
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Group Cards Grid with Staggered Cascading Animation */}
-                  {smartGroups.length === 0 ? (
-                    <div className="text-center py-12 text-slate-500 text-sm font-semibold">
-                      Chưa có dữ liệu học sinh để phân nhóm.
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                      {smartGroups.map((g) => (
-                        <div
-                          key={g.id}
-                          className={`bg-[#0e1222] border ${g.borderCls} rounded-2xl flex flex-col overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 animate-cascade-1`}
-                        >
-                          {/* Group Header Card */}
-                          <div className={`p-4 border-b border-white/5 ${g.headerBg} flex flex-col gap-2`}>
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-2">
-                                <span
-                                  className="w-3 h-3 rounded-full shrink-0"
-                                  style={{ backgroundColor: g.dotColor, boxShadow: `0 0 10px ${g.dotColor}80` }}
-                                />
-                                <h4 className="text-sm font-black text-white">{g.title}</h4>
-                              </div>
-                              <span className={`text-xs font-black px-2.5 py-0.5 rounded-lg border font-mono ${g.badgeCls}`}>
-                                {g.students.length} HS
-                              </span>
-                            </div>
-
-                            {/* Subtitle & Key Stats */}
-                            <p className="text-[11px] text-slate-400 font-semibold">{g.subtitle}</p>
-
-                            <div className="grid grid-cols-3 gap-2 pt-2 border-t border-white/5 text-center">
-                              <div className="bg-[#0b0e1a] p-2 rounded-xl border border-white/5">
-                                <span className="text-[9px] font-black uppercase text-slate-400 block">EMA TB</span>
-                                <span className="text-sm font-black text-white font-mono">{format1Dec(g.avgEma)}</span>
-                              </div>
-                              <div className="bg-[#0b0e1a] p-2 rounded-xl border border-white/5">
-                                <span className="text-[9px] font-black uppercase text-slate-400 block">Phổ Điểm</span>
-                                <span className="text-xs font-black font-mono text-indigo-300">
-                                  {format1Dec(g.minScore)} - {format1Dec(g.maxScore)}đ
-                                </span>
-                              </div>
-                              <div 
-                                className="bg-[#0b0e1a] p-2 rounded-xl border border-white/5 cursor-help group/sd"
-                                title="Độ Lệch Chuẩn (Standard Deviation - SD / σ): Đo lường mức độ đồng đều về trình độ điểm số giữa các học sinh trong nhóm. SD càng nhỏ thì học lực trong nhóm càng đồng đều."
-                              >
-                                <span className="text-[9px] font-black uppercase text-slate-400 flex items-center justify-between">
-                                  <span>Độ Lệch Chuẩn (SD)</span>
-                                  <Info size={10} className="text-slate-500 group-hover/sd:text-white transition-colors" />
-                                </span>
-                                <span className="text-sm font-black text-emerald-400 font-mono">σ = {g.groupSd}</span>
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Pedagogy Focus Box */}
-                          <div className="p-3 bg-[#0a0d18] border-b border-white/5">
-                            <span className="text-[9px] font-black uppercase tracking-wider text-slate-400 block mb-1">
-                              Định Hướng Giảng Dạy:
-                            </span>
-                            <p className="text-[11px] font-semibold text-slate-300 leading-relaxed">
-                              {g.pedagogyAdvice}
-                            </p>
-                          </div>
-
-                          {/* Student List */}
-                          <div className="p-3 flex-1 flex flex-col gap-2 max-h-[380px] overflow-y-auto custom-scrollbar">
-                            {g.students.length === 0 ? (
-                              <div className="text-center py-6 text-[11px] text-slate-500 font-bold">
-                                Không có học sinh trong nhóm này
-                              </div>
-                            ) : (
-                              g.students.map((s: any, sIdx: number) => {
-                                const slope = Number(s.trend_slope || 0);
-                                const isImproving = slope > 0.1;
-                                const isDeclining = slope < -0.1;
-                                const initials = s.full_name
-                                  ? s.full_name.split(' ').map((n: string) => n[0]).slice(-2).join('').toUpperCase()
-                                  : 'HS';
-
-                                return (
-                                  <div
-                                    key={s.student_id || sIdx}
-                                    onClick={() => handleSelectRankingStudent(s.student_id)}
-                                    className="bg-[#13192e] hover:bg-[#18203a] p-2.5 rounded-xl border border-[#202948] hover:border-indigo-500/40 transition cursor-pointer flex items-center justify-between gap-3 group"
-                                    title={`Xem chi tiết học sinh ${s.full_name}`}
-                                  >
-                                    <div className="flex items-center gap-2.5 min-w-0">
-                                      <div className="w-7 h-7 rounded-lg bg-[#1e2744] text-indigo-300 flex items-center justify-center font-black text-[10px] shrink-0 border border-indigo-500/20 group-hover:border-indigo-500/50">
-                                        {initials}
-                                      </div>
-                                      <div className="truncate">
-                                        <div className="text-xs font-bold text-white group-hover:text-indigo-200 transition truncate">
-                                          {s.full_name}
-                                        </div>
-                                        <div className="text-[10px] font-semibold text-slate-400 truncate flex items-center gap-1.5">
-                                          {s.nickname && <span className="text-slate-300 font-bold">({s.nickname})</span>}
-                                          <span className="px-1.5 py-0.2 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-[9px] font-mono font-bold">
-                                            {s.class_name || 'Lớp'}
-                                          </span>
-                                        </div>
-                                      </div>
-                                    </div>
-
-                                    <div className="flex items-center gap-1.5 shrink-0">
-                                      {/* Trend Indicator */}
-                                      <div className={`px-1.5 py-0.5 rounded-md text-[10px] font-extrabold font-mono flex items-center gap-0.5 ${
-                                        isImproving ? 'text-emerald-400 bg-emerald-500/10' :
-                                        isDeclining ? 'text-rose-400 bg-rose-500/10' :
-                                        'text-slate-400 bg-slate-500/10'
-                                      }`}>
-                                        {isImproving ? <TrendingUp size={11} /> : isDeclining ? <TrendingDown size={11} /> : <Minus size={11} />}
-                                        <span>{slope > 0 ? `+${format1Dec(slope)}` : format1Dec(slope)}</span>
-                                      </div>
-
-                                      {/* EMA Badge */}
-                                      <div className="px-2 py-0.5 rounded-lg bg-[#0b0e1a] border border-white/10 text-xs font-black font-mono text-white">
-                                        {s.ema_level ? format1Dec(Number(s.ema_level)) : '-'}
-                                      </div>
-                                    </div>
-                                  </div>
-                                );
-                              })
-                            )}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* 4. BIẾN ĐỘNG ĐIỂM SỐ */}
-          <div className="bg-[#0d1120] border border-emerald-500/30 rounded-2xl flex flex-col shadow-2xl overflow-hidden transition-all animate-cascade-4">
-            <div
-              onClick={() => setIsGrowthSectionOpen(!isGrowthSectionOpen)}
-              className="px-6 py-4 border-b border-[#181f36] bg-[#0a0d18] flex flex-wrap items-center justify-between gap-4 cursor-pointer select-none"
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 shadow-md shadow-emerald-500/10 shrink-0">
-                  <TrendingUp size={20} />
-                </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h3 className="text-sm font-black text-white uppercase tracking-wider">
-                      BIẾN ĐỘNG ĐIỂM SỐ
-                    </h3>
-                    <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                      {scoreFluctuations.length} Học Sinh
-                    </span>
-                  </div>
-                  <p className="text-xs text-slate-400 font-semibold mt-0.5">
-                    So sánh điểm trung bình 3 buổi đầu tiên khi mới vào học so với 3 buổi gần nhất để theo dõi biến động, sự tiến bộ hoặc dấu hiệu sa sút của từng học sinh.
-                  </p>
-                </div>
-              </div>
-
-              <div className="p-1.5 rounded-lg bg-white/5 text-slate-400">
-                {isGrowthSectionOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                  );
+                })}
               </div>
             </div>
 
-            {/* Collapsible Content with Smooth Animated Grid Accordion */}
-            <div className={`grid transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-              isGrowthSectionOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0 pointer-events-none'
-            }`}>
-              <div className="overflow-hidden">
-                <div className="p-5">
-                  <DataTable
-                    tableId="reports-fluctuations-table"
-                    exportFilename="bien_dong_diem_so_hoc_sinh"
-                    data={scoreFluctuations}
-                    columns={fluctuationColumns}
-                    loading={loading}
-                    searchPlaceholder="Tìm học sinh, lớp học, mức biến động..."
-                    emptyMessage="Chưa có dữ liệu biến động điểm số."
-                    pageSize={20}
-                    onRowClick={(r: any) => handleSelectRankingStudent(r.student_id)}
-                    initialSorting={[{ id: 'delta', desc: true }]}
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* 5. BẤT THƯỜNG HỌC TẬP */}
-          <div className="bg-[#101424] border border-indigo-500/20 rounded-2xl p-4 sm:p-5 shadow-xl flex flex-col gap-4 transition-all animate-cascade-5">
-            <div 
-              onClick={() => setIsBottlenecksSectionOpen(!isBottlenecksSectionOpen)}
-              className="flex flex-wrap items-center justify-between gap-4 cursor-pointer select-none"
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-indigo-500/20 border border-indigo-500/40 flex items-center justify-center text-indigo-400 shadow-md shadow-indigo-500/10 shrink-0">
-                  <Target size={20} />
-                </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h3 className="text-sm font-black text-white uppercase tracking-wider">
-                      BẤT THƯỜNG HỌC TẬP
-                    </h3>
-                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
-                      Đang Hoàn Thiện Phương Pháp Kiểm Thử
-                    </span>
-                  </div>
-                  <p className="text-xs text-slate-400 font-semibold mt-0.5">
-                    Phát hiện mâu thuẫn điểm số giữa Bài Tập Về Nhà và Kiểm Tra Trên Lớp (Chênh lệch ≥ 3.0 điểm).
-                  </p>
-                </div>
-              </div>
-
-              <div className="p-1.5 rounded-lg bg-white/5 text-slate-400">
-                {isBottlenecksSectionOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-              </div>
-            </div>
-
-            {/* Collapsible Content with Smooth Animated Grid Accordion */}
-            <div className={`grid transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-              isBottlenecksSectionOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0 pointer-events-none'
-            }`}>
-              <div className="overflow-hidden">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-[#182038]">
-                  {/* Anomaly Type 1 */}
-                  <div className="p-4 rounded-xl bg-[#141a2e] border border-amber-500/20 flex flex-col justify-between gap-3">
-                    <div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs font-black uppercase text-amber-400">
-                          Dạng 1: Nghi vấn chép giải / Phụ thuộc tài liệu
-                        </span>
-                        <span className="text-[10px] font-mono font-black text-amber-300 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">
-                          {learningBottlenecks.type1.length} học sinh
-                        </span>
-                      </div>
-                      <p className="text-xs text-slate-300 font-semibold mt-1">
-                        Điểm BTVN rất cao (≥ 8.5) nhưng Điểm trên lớp rất thấp (≤ 5.5). Chênh lệch ≥ 3.0 điểm.
-                      </p>
-                      <p className="text-[11px] text-slate-400 mt-1 italic">
-                        Định hướng: Gọi học sinh lên bảng giải trình trực tiếp phương pháp giải BTVN.
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Anomaly Type 2 */}
-                  <div className="p-4 rounded-xl bg-[#141a2e] border border-blue-500/20 flex flex-col justify-between gap-3">
-                    <div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs font-black uppercase text-blue-400">
-                          Dạng 2: Tiếp thu nhanh nhưng thiếu kỷ luật tự học
-                        </span>
-                        <span className="text-[10px] font-mono font-black text-blue-300 bg-blue-500/10 px-2 py-0.5 rounded border border-blue-500/20">
-                          {learningBottlenecks.type2.length} học sinh
-                        </span>
-                      </div>
-                      <p className="text-xs text-slate-300 font-semibold mt-1">
-                        Điểm trên lớp cao (≥ 8.5) nhưng BTVN thấp (≤ 5.5) hoặc thường xuyên bỏ làm. Chênh lệch ≥ 3.0 điểm.
-                      </p>
-                      <p className="text-[11px] text-slate-400 mt-1 italic">
-                        Định hướng: Nhắc nhở kỷ luật tự rèn luyện và giao chỉ tiêu bài tập bắt buộc hoàn thành.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      ) : (
-        /* TỔNG QUAN HỌC LỰC (OVERVIEW TAB VIEW) */
-        <>
-          {/* 2. INDIVIDUAL STUDENT PERFORMANCE PROFILE */}
-          {selectedStudentObj && (
-            <div className="animate-cascade-1">
-              <div className="bg-[#0e1222] border border-[#1e2744] p-6 rounded-2xl shadow-2xl flex flex-wrap items-center justify-between gap-6 relative overflow-hidden">
-                <div className="flex items-center gap-4 z-10">
-                  <div className="w-14 h-14 rounded-full bg-gradient-to-tr from-indigo-600 to-purple-600 text-white font-black text-xl flex items-center justify-center shadow-lg shadow-indigo-500/20 border border-white/20">
-                    {selectedStudentObj.full_name.slice(0, 2).toUpperCase()}
+            {/* 2. EARLY WARNING & RISK RETENTION ALERT SYSTEM (NOW A STANDARD TABLE) */}
+            <div className="bg-[#120d18] border border-rose-500/30 rounded-2xl p-4 sm:p-5 shadow-2xl transition-all animate-cascade-2">
+              <div
+                onClick={() => setIsWarningSectionOpen(!isWarningSectionOpen)}
+                className="flex flex-wrap items-center justify-between gap-4 cursor-pointer select-none"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-rose-500/20 border border-rose-500/40 flex items-center justify-center text-rose-400 shadow-md shadow-rose-500/10 shrink-0">
+                    <ShieldAlert size={20} />
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <h2 className="text-xl font-black text-white">{selectedStudentObj.full_name}</h2>
-                      {selectedStudentObj.nickname && (
-                        <span className="text-sm font-extrabold text-white">- {selectedStudentObj.nickname}</span>
-                      )}
-                      <button 
-                        onClick={() => setSelectedStudentId('')} 
-                        className="ml-3 px-2.5 py-1 rounded-lg bg-[#1a2340] hover:bg-rose-500/20 text-slate-400 hover:text-rose-400 border border-[#2e3b66] text-[10px] font-bold transition cursor-pointer"
-                        title="Bỏ chọn học sinh"
-                      >
-                        Bỏ Chọn ✕
-                      </button>
+                      <h3 className="text-sm font-black text-white uppercase tracking-wider">
+                        HỆ THỐNG CẢNH BÁO NGUY CƠ
+                      </h3>
+                      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-rose-500/20 text-rose-300 border border-rose-500/40">
+                        {atRiskStudents.length} Học Sinh Cần Chú Ý
+                      </span>
                     </div>
                     <p className="text-xs text-slate-400 font-semibold mt-0.5">
-                      {selectedStudentObj.grade || 'Lớp 6'} | {selectedStudentObj.school || 'Trung tâm'} | Theo dõi tiến độ học tập qua các kỳ đánh giá
+                      Tự động phát hiện học sinh có dấu hiệu nghỉ học liên tiếp, tỷ lệ vắng cao hoặc đà điểm số tụt dốc để can thiệp kịp thời.
                     </p>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-6 z-10 bg-[#141a30] border border-[#232d4e] px-6 py-3 rounded-xl">
-                  <div>
-                    <span className="text-[10px] font-black uppercase text-slate-400 block">Tổng Điểm</span>
-                    <span className="text-xl font-black text-emerald-400 font-mono">{stats.overall}</span>
-                  </div>
-                  <div className="h-8 w-px bg-[#232d4e]"></div>
-                  <div>
-                    <span className="text-[10px] font-black uppercase text-slate-400 block">Chuyên Cần</span>
-                    <span className="text-xl font-black text-emerald-400 font-mono">{stats.attendancePct}%</span>
-                  </div>
-                  <div className="h-8 w-px bg-[#232d4e]"></div>
-                  <div>
-                    <span className="text-[10px] font-black uppercase text-slate-400 block">Hạng</span>
-                    <span className="text-xl font-black text-amber-400 font-mono">{stats.rank}</span>
-                  </div>
-                  <div className="h-8 w-px bg-[#232d4e]"></div>
-                  <div>
-                    <span className="text-[10px] font-black uppercase text-slate-400 block">Học Lực</span>
-                    <span className="inline-block px-2.5 py-0.5 rounded-lg text-[10px] font-black bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
-                      {stats.level}
-                    </span>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowWarningSettings(!showWarningSettings);
+                      if (!isWarningSectionOpen) setIsWarningSectionOpen(true);
+                    }}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#1c1426] hover:bg-[#281b38] text-rose-300 hover:text-white border border-rose-500/30 text-xs font-bold transition cursor-pointer"
+                  >
+                    <SlidersHorizontal size={13} />
+                    <span>{showWarningSettings ? 'Đóng Cài Đặt' : 'Tùy Chỉnh Ngưỡng'}</span>
+                  </button>
+                  <div className="p-1.5 rounded-lg bg-white/5 text-slate-400">
+                    {isWarningSectionOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                   </div>
                 </div>
               </div>
-            </div>
-          )}
 
-          {/* 3. FOUR GLOWING KPI CARDS */}
-          <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 ${selectedStudentObj ? 'animate-cascade-2' : 'animate-cascade-1'}`}>
-            <div className="kpi-card-blue p-5 flex flex-col justify-between shadow-2xl transition-all duration-300 min-h-[100px]">
-              <div>
-                <span className="text-[10px] font-black uppercase tracking-wider text-blue-400 block mb-1">
-                  CHECK 1 TRUNG BÌNH
-                </span>
-                <div className="flex items-baseline gap-1.5">
-                  <span className="text-3xl font-black text-white font-mono">{stats.c1}</span>
-                  <span className="text-xs text-slate-400 font-bold font-mono">/ 10</span>
+              {/* Collapsible Content with Smooth Animated Grid Accordion */}
+              <div className={`grid transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${isWarningSectionOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0 pointer-events-none'
+                }`}>
+                <div className="overflow-hidden">
+                  <div className="mt-4 pt-4 border-t border-rose-500/20 space-y-4">
+                    {/* Expandable Threshold Customization Drawer */}
+                    {showWarningSettings && (
+                      <div className="p-4 rounded-xl bg-[#181120] border border-rose-500/20 grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+                        <div>
+                          <label className="block text-[11px] font-bold text-slate-300 mb-1.5">
+                            Ngưỡng Tỷ Lệ Vắng Mặt (%):
+                          </label>
+                          <div className="flex items-center gap-3">
+                            <input
+                              type="range"
+                              min="5"
+                              max="90"
+                              step="5"
+                              value={warningAbsentPct}
+                              onChange={(e) => handleUpdateWarningSettings({ absentPct: Number(e.target.value) })}
+                              className="flex-1 accent-rose-500 cursor-pointer"
+                            />
+                            <span className="font-mono font-black text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded border border-rose-500/20">
+                              ≥ {warningAbsentPct}%
+                            </span>
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-[11px] font-bold text-slate-300 mb-1.5">
+                            Số Buổi Vắng Liên Tiếp:
+                          </label>
+                          <div className="flex items-center gap-3">
+                            <input
+                              type="range"
+                              min="1"
+                              max="5"
+                              step="1"
+                              value={warningConsecutiveAbsent}
+                              onChange={(e) => handleUpdateWarningSettings({ consecutiveAbsent: Number(e.target.value) })}
+                              className="flex-1 accent-rose-500 cursor-pointer"
+                            />
+                            <span className="font-mono font-black text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded border border-rose-500/20">
+                              ≥ {warningConsecutiveAbsent} buổi
+                            </span>
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-[11px] font-bold text-slate-300 mb-1.5">
+                            Ngưỡng Tốc Độ Giảm Điểm (Trend):
+                          </label>
+                          <div className="flex items-center gap-3">
+                            <input
+                              type="range"
+                              min="-0.6"
+                              max="-0.1"
+                              step="0.05"
+                              value={warningTrendThreshold}
+                              onChange={(e) => handleUpdateWarningSettings({ trendThreshold: Number(e.target.value) })}
+                              className="flex-1 accent-rose-500 cursor-pointer"
+                            />
+                            <span className="font-mono font-black text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded border border-rose-500/20">
+                              ≤ {warningTrendThreshold}/buổi
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* At-Risk Students Standard TanStack DataTable */}
+                    <DataTable
+                      tableId="reports-warning-table"
+                      exportFilename="danh_sach_hoc_sinh_nguy_co"
+                      data={atRiskStudents}
+                      columns={warningColumns}
+                      loading={loading}
+                      searchPlaceholder="Tìm học sinh nguy cơ theo tên, lớp..."
+                      emptyMessage="Tuyệt vời! Không có học sinh nào rơi vào diện cảnh báo nguy cơ theo các tiêu chí hiện tại."
+                      pageSize={20}
+                      onRowClick={(r: any) => handleSelectRankingStudent(r.student_id)}
+                    />
+                  </div>
                 </div>
               </div>
-              <div className="mt-2 text-[10px] font-bold text-blue-400">
-                <span>{stats.c1Diff} so với kỳ trước</span>
-              </div>
             </div>
 
-            <div className="kpi-card-purple p-5 flex flex-col justify-between shadow-2xl transition-all duration-300 min-h-[100px]">
-              <div>
-                <span className="text-[10px] font-black uppercase tracking-wider text-purple-400 block mb-1">
-                  CHECK 2 TRUNG BÌNH
-                </span>
-                <div className="flex items-baseline gap-1.5">
-                  <span className="text-3xl font-black text-white font-mono">{stats.c2}</span>
-                  <span className="text-xs text-slate-400 font-bold font-mono">/ 10</span>
-                </div>
-              </div>
-              <div className="mt-2 text-[10px] font-bold text-purple-400">
-                <span>{stats.c2Diff} so với kỳ trước</span>
-              </div>
-            </div>
-
-            <div className="kpi-card-green p-5 flex flex-col justify-between shadow-2xl transition-all duration-300 min-h-[100px]">
-              <div>
-                <span className="text-[10px] font-black uppercase tracking-wider text-emerald-400 block mb-1">
-                  HOMEWORK TRUNG BÌNH
-                </span>
-                <div className="flex items-baseline gap-1.5">
-                  <span className="text-3xl font-black text-white font-mono">{stats.hw}</span>
-                  <span className="text-xs text-slate-400 font-bold font-mono">/ 10</span>
-                </div>
-              </div>
-              <div className="mt-2 text-[10px] font-bold text-emerald-400">
-                <span>{stats.hwDiff} so với kỳ trước</span>
-              </div>
-            </div>
-
-            <div className="kpi-card-amber p-5 flex flex-col justify-between shadow-2xl transition-all duration-300 min-h-[100px]">
-              <div>
-                <span className="text-[10px] font-black uppercase tracking-wider text-amber-400 block mb-1">
-                  TỔNG ĐIỂM TRUNG BÌNH
-                </span>
-                <div className="flex items-baseline gap-1.5">
-                  <span className="text-3xl font-black text-white font-mono">{stats.overall}</span>
-                  <span className="text-xs text-slate-400 font-bold font-mono">/ 10</span>
-                </div>
-              </div>
-              <div className="mt-2 text-[10px] font-bold text-amber-400">
-                <span>{stats.overallDiff} so với kỳ trước</span>
-              </div>
-            </div>
-          </div>
-
-          {/* 4. EXPANDED TALLER SVG GRAPH (560px HEIGHT WITH SMOOTH CIRCULAR GLOW & HOVER TOOLTIP) */}
-          <div className={`bg-[#0b0e1b] border border-[#1d2644] p-6 rounded-2xl shadow-2xl flex flex-col gap-4 ${selectedStudentObj ? 'animate-cascade-3' : 'animate-cascade-2'}`}>
-            
-            {/* GRAPH HEADER & TIME VIEW FILTERS */}
-            <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[#181f36] pb-3">
-              <div className="flex items-center gap-3">
-                <BarChart3 size={18} className="text-indigo-400" />
-                <h3 className="text-sm font-black text-white uppercase tracking-wider">
-                  TIẾN ĐỘ HỌC TẬP QUA CÁC KỲ & DỰ ĐOÁN XU HƯỚNG
-                </h3>
-              </div>
-
-          <div className="flex items-center gap-5">
-            <div className="flex items-center gap-4 text-[11px] font-bold">
-              <span className="flex items-center gap-1.5 text-blue-400">
-                <span className="w-2.5 h-2.5 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.8)]"></span> Check 1 (Dự đoán: {format1Dec(engine.pred_c1)})
-              </span>
-              <span className="flex items-center gap-1.5 text-purple-400">
-                <span className="w-2.5 h-2.5 rounded-full bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.8)]"></span> Check 2 (Dự đoán: {format1Dec(engine.pred_c2)})
-              </span>
-              <span className="flex items-center gap-1.5 text-emerald-400">
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]"></span> Homework (Dự đoán: {format1Dec(engine.pred_hw)})
-              </span>
-            </div>
-
-            {/* Interactive Zoom & Pan Controls */}
-            <div className="flex items-center gap-1.5 bg-[#141b32] border border-[#232d4e] p-1 rounded-xl text-xs font-extrabold shrink-0">
-              <button
-                onClick={() => setZoomLevel(prev => {
-                  const next = Math.min(5.0, prev + 0.25);
-                  setPanOffset(p => clampPanOffset(p.x, p.y, next));
-                  return next;
-                })}
-                className="p-1 rounded-lg hover:bg-indigo-600/30 text-slate-300 hover:text-white transition cursor-pointer"
-                title="Phóng to (Scroll Cuộn Chuột Lên)"
-              >
-                <ZoomIn size={14} />
-              </button>
-              <button
-                onClick={() => setZoomLevel(prev => {
-                  const next = Math.max(1.0, prev - 0.25);
-                  setPanOffset(p => clampPanOffset(p.x, p.y, next));
-                  return next;
-                })}
-                className="p-1 rounded-lg hover:bg-indigo-600/30 text-slate-300 hover:text-white transition cursor-pointer"
-                title="Thu nhỏ (Scroll Cuộn Chuột Xuống)"
-              >
-                <ZoomOut size={14} />
-              </button>
-              <span className="text-[10px] text-indigo-300 font-mono px-1">
-                {Math.round(zoomLevel * 100)}%
-              </span>
-              <button
-                onClick={() => { setZoomLevel(1.0); setPanOffset({ x: 0, y: 0 }); }}
-                className="p-1.5 rounded-lg hover:bg-rose-500/20 text-slate-400 hover:text-rose-300 transition cursor-pointer"
-                title="Đặt lại góc nhìn (Reset View)"
-              >
-                <RotateCcw size={12} />
-              </button>
-            </div>
-
-            <div className="relative flex bg-[#141b32] border border-[#232d4e] p-1 rounded-xl text-xs font-extrabold select-none w-72 shrink-0">
+            {/* 3. SMART LEVEL GROUPING (MODE A & MODE B) */}
+            <div className="bg-[#0d1120] border border-indigo-500/30 rounded-2xl flex flex-col shadow-2xl overflow-hidden transition-all animate-cascade-3">
+              {/* Collapsible Header Bar */}
               <div
-                className="absolute top-1 bottom-1 rounded-lg bg-indigo-600 shadow-[0_0_14px_rgba(99,102,241,0.5)] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] pointer-events-none"
-                style={{
-                  left: timeView === '1m'
-                    ? '4px'
-                    : timeView === '2m'
-                    ? 'calc(25% + 1px)'
-                    : timeView === '3m'
-                    ? 'calc(50% + 1px)'
-                    : 'calc(75% + 1px)',
-                  width: 'calc(25% - 4px)',
-                }}
-              />
-              {[
-                { id: '1m', label: '1 Tháng' },
-                { id: '2m', label: '2 Tháng' },
-                { id: '3m', label: '3 Tháng' },
-                { id: 'all', label: 'Tất Cả' }
-              ].map(t => (
-                <button
-                  key={t.id}
-                  onClick={() => {
-                    setTimeView(t.id as any);
-                    setSelectedPhaseId('');
-                  }}
-                  className={`flex-1 relative z-10 py-1 text-center transition-colors cursor-pointer ${
-                    !selectedPhaseId && timeView === t.id ? 'text-white font-black' : 'text-slate-400 hover:text-white'
-                  }`}
-                >
-                  {t.label}
-                </button>
-              ))}
+                onClick={() => setIsGroupingSectionOpen(!isGroupingSectionOpen)}
+                className="px-6 py-4 border-b border-[#181f36] bg-[#0a0d18] flex flex-wrap items-center justify-between gap-4 cursor-pointer select-none"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="p-2.5 rounded-xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 shrink-0">
+                    <FolderTree size={20} />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-sm font-black text-white uppercase tracking-wider">
+                        GỢI Ý PHÂN NHÓM HỌC TẬP THEO TRÌNH ĐỘ
+                      </h3>
+                      <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-md bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                        {smartGroups.length} Nhóm | {smartGroups.reduce((acc, g) => acc + g.students.length, 0)} Học Sinh
+                      </span>
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-[#182038] text-slate-300 border border-white/10">
+                        {groupingScope === 'current' ? (selectedClassId ? `Lớp ${classes.find(c => String(c.id) === selectedClassId)?.class_name}` : 'Lớp Hiện Tại') :
+                          groupingScope === 'grade' ? 'Toàn Khối' :
+                            'Toàn Trung Tâm'}
+                      </span>
+                    </div>
+                    <p className="text-xs text-slate-400 font-semibold mt-0.5">
+                      Tự động phân loại học sinh theo Năng lực hiện tại, Tốc độ tăng trưởng và Phổ điểm thực tế.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                  <button
+                    type="button"
+                    onClick={handleCopyGrouping}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#14182a] hover:bg-[#1a2038] text-slate-300 hover:text-white text-xs font-bold border border-white/10 transition cursor-pointer"
+                    title="Sao chép danh sách phân nhóm vào clipboard"
+                  >
+                    {copiedGroupText ? <Check size={14} className="text-emerald-400" /> : <Copy size={14} />}
+                    <span>{copiedGroupText ? 'Đã Sao Chép' : 'Sao Chép'}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleExportGroupingExcel}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 text-xs font-bold border border-emerald-500/30 transition cursor-pointer"
+                    title="Xuất file Excel danh sách phân nhóm"
+                  >
+                    <FileSpreadsheet size={14} />
+                    <span>Xuất Excel</span>
+                  </button>
+                  <div
+                    onClick={() => setIsGroupingSectionOpen(!isGroupingSectionOpen)}
+                    className="p-1.5 rounded-lg bg-white/5 text-slate-400 hover:text-white transition cursor-pointer ml-1"
+                  >
+                    {isGroupingSectionOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                  </div>
+                </div>
+              </div>
+
+              {/* Expanded Grouping Controls & Cards with Smooth Animated Grid Accordion */}
+              <div className={`grid transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${isGroupingSectionOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0 pointer-events-none'
+                }`}>
+                <div className="overflow-hidden">
+                  <div className="p-6 space-y-6">
+                    {/* Scope & Mode Control Toolbar */}
+                    <div className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-xl bg-[#090d1a] border border-[#1a2340]">
+                      {/* Scope Selector: Lớp hiện tại vs Toàn bộ khối vs Toàn trung tâm */}
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="text-xs font-black uppercase text-indigo-300 tracking-wider flex items-center gap-1.5 mr-1">
+                          <FolderTree size={14} />
+                          Phạm Vi Phân Nhóm:
+                        </span>
+                        <div className="relative flex bg-[#0d1018] p-1 rounded-xl border border-white/10 text-xs shrink-0 font-bold select-none">
+                          <div
+                            className="absolute top-1 bottom-1 rounded-lg bg-indigo-600 shadow-[0_0_12px_rgba(99,102,241,0.5)] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] pointer-events-none"
+                            style={{
+                              left: groupingScope === 'current' ? '4px' : groupingScope === 'grade' ? 'calc(33.333% + 1px)' : 'calc(66.666% + 1px)',
+                              width: 'calc(33.333% - 4px)',
+                            }}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setGroupingScope('current')}
+                            className={`flex-1 relative z-10 py-1.5 px-3 text-center transition-colors cursor-pointer ${groupingScope === 'current' ? 'text-white font-black' : 'text-slate-400 hover:text-white'
+                              }`}
+                          >
+                            Lớp Hiện Tại
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setGroupingScope('grade')}
+                            className={`flex-1 relative z-10 py-1.5 px-3 text-center transition-colors cursor-pointer ${groupingScope === 'grade' ? 'text-white font-black' : 'text-slate-400 hover:text-white'
+                              }`}
+                          >
+                            Toàn Khối
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setGroupingScope('all')}
+                            className={`flex-1 relative z-10 py-1.5 px-3 text-center transition-colors cursor-pointer ${groupingScope === 'all' ? 'text-white font-black' : 'text-slate-400 hover:text-white'
+                              }`}
+                          >
+                            Toàn Trung Tâm
+                          </button>
+                        </div>
+
+                        {groupingScope === 'grade' && !selectedClassId && (
+                          <div className="flex items-center gap-1.5 bg-[#14182a] px-2.5 py-1 rounded-xl border border-white/10">
+                            <span className="text-[10px] font-bold text-slate-400 uppercase">Chọn Khối:</span>
+                            <CustomSelect
+                              value={groupingGradeFilter || (classes[0]?.grade ?? 'Lớp 8')}
+                              onChange={(val) => setGroupingGradeFilter(String(val))}
+                              options={Array.from(new Set(classes.map(c => c.grade).filter(Boolean))).map(g => ({
+                                value: String(g),
+                                label: String(g)
+                              }))}
+                              className="w-32"
+                            />
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Grouping Algorithm Mode & K-Means Selector */}
+                      <div className="flex flex-wrap items-center gap-3">
+                        <div className="relative flex bg-[#0d1018] p-1 rounded-xl border border-white/10 text-xs shrink-0 font-bold select-none">
+                          <div
+                            className="absolute top-1 bottom-1 rounded-lg bg-[#5c36f5] shadow-[0_0_14px_rgba(92,54,245,0.5)] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] pointer-events-none"
+                            style={{
+                              left: groupingMode === 'tier' ? '4px' : 'calc(50% + 1px)',
+                              width: 'calc(50% - 4px)',
+                            }}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setGroupingMode('tier')}
+                            className={`flex-1 relative z-10 py-1.5 px-3.5 text-center transition-colors cursor-pointer ${groupingMode === 'tier' ? 'text-white font-black' : 'text-slate-400 hover:text-white'
+                              }`}
+                          >
+                            Theo 6 Hạng Bậc
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setGroupingMode('kmeans')}
+                            className={`flex-1 relative z-10 py-1.5 px-3.5 text-center transition-colors cursor-pointer ${groupingMode === 'kmeans' ? 'text-white font-black' : 'text-slate-400 hover:text-white'
+                              }`}
+                          >
+                            Phân Cụm Tự Động
+                          </button>
+                        </div>
+
+                        {groupingMode === 'kmeans' && (
+                          <div className="flex items-center gap-2 bg-[#121626] px-3 py-1.5 rounded-xl border border-white/10">
+                            <span className="text-xs text-slate-300 font-bold">Số nhóm:</span>
+                            <div className="flex items-center gap-1">
+                              {[2, 3, 4].map(k => (
+                                <button
+                                  key={k}
+                                  type="button"
+                                  onClick={() => setKmeansK(k)}
+                                  className={`w-6 h-6 rounded-lg text-xs font-black transition cursor-pointer ${kmeansK === k ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white hover:bg-white/5'
+                                    }`}
+                                >
+                                  {k}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Group Cards Grid with Staggered Cascading Animation */}
+                    {smartGroups.length === 0 ? (
+                      <div className="text-center py-12 text-slate-500 text-sm font-semibold">
+                        Chưa có dữ liệu học sinh để phân nhóm.
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                        {smartGroups.map((g) => (
+                          <div
+                            key={g.id}
+                            className={`bg-[#0e1222] border ${g.borderCls} rounded-2xl flex flex-col overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 animate-cascade-1`}
+                          >
+                            {/* Group Header Card */}
+                            <div className={`p-4 border-b border-white/5 ${g.headerBg} flex flex-col gap-2`}>
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                  <span
+                                    className="w-3 h-3 rounded-full shrink-0"
+                                    style={{ backgroundColor: g.dotColor, boxShadow: `0 0 10px ${g.dotColor}80` }}
+                                  />
+                                  <h4 className="text-sm font-black text-white">{g.title}</h4>
+                                </div>
+                                <span className={`text-xs font-black px-2.5 py-0.5 rounded-lg border font-mono ${g.badgeCls}`}>
+                                  {g.students.length} HS
+                                </span>
+                              </div>
+
+                              {/* Subtitle & Key Stats */}
+                              <p className="text-[11px] text-slate-400 font-semibold">{g.subtitle}</p>
+
+                              <div className="grid grid-cols-3 gap-2 pt-2 border-t border-white/5 text-center">
+                                <div className="bg-[#0b0e1a] p-2 rounded-xl border border-white/5">
+                                  <span className="text-[9px] font-black uppercase text-slate-400 block">EMA TB</span>
+                                  <span className="text-sm font-black text-white font-mono">{format1Dec(g.avgEma)}</span>
+                                </div>
+                                <div className="bg-[#0b0e1a] p-2 rounded-xl border border-white/5">
+                                  <span className="text-[9px] font-black uppercase text-slate-400 block">Phổ Điểm</span>
+                                  <span className="text-xs font-black font-mono text-indigo-300">
+                                    {format1Dec(g.minScore)} - {format1Dec(g.maxScore)}đ
+                                  </span>
+                                </div>
+                                <div
+                                  className="bg-[#0b0e1a] p-2 rounded-xl border border-white/5 cursor-help group/sd"
+                                  title="Độ Lệch Chuẩn (Standard Deviation - SD / σ): Đo lường mức độ đồng đều về trình độ điểm số giữa các học sinh trong nhóm. SD càng nhỏ thì học lực trong nhóm càng đồng đều."
+                                >
+                                  <span className="text-[9px] font-black uppercase text-slate-400 flex items-center justify-between">
+                                    <span>Độ Lệch Chuẩn (SD)</span>
+                                    <Info size={10} className="text-slate-500 group-hover/sd:text-white transition-colors" />
+                                  </span>
+                                  <span className="text-sm font-black text-emerald-400 font-mono">σ = {g.groupSd}</span>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Pedagogy Focus Box */}
+                            <div className="p-3 bg-[#0a0d18] border-b border-white/5">
+                              <span className="text-[9px] font-black uppercase tracking-wider text-slate-400 block mb-1">
+                                Định Hướng Giảng Dạy:
+                              </span>
+                              <p className="text-[11px] font-semibold text-slate-300 leading-relaxed">
+                                {g.pedagogyAdvice}
+                              </p>
+                            </div>
+
+                            {/* Student List */}
+                            <div className="p-3 flex-1 flex flex-col gap-2 max-h-[380px] overflow-y-auto custom-scrollbar">
+                              {g.students.length === 0 ? (
+                                <div className="text-center py-6 text-[11px] text-slate-500 font-bold">
+                                  Không có học sinh trong nhóm này
+                                </div>
+                              ) : (
+                                g.students.map((s: any, sIdx: number) => {
+                                  const slope = Number(s.trend_slope || 0);
+                                  const isImproving = slope > 0.1;
+                                  const isDeclining = slope < -0.1;
+                                  const initials = s.full_name
+                                    ? s.full_name.split(' ').map((n: string) => n[0]).slice(-2).join('').toUpperCase()
+                                    : 'HS';
+
+                                  return (
+                                    <div
+                                      key={s.student_id || sIdx}
+                                      onClick={() => handleSelectRankingStudent(s.student_id)}
+                                      className="bg-[#13192e] hover:bg-[#18203a] p-2.5 rounded-xl border border-[#202948] hover:border-indigo-500/40 transition cursor-pointer flex items-center justify-between gap-3 group"
+                                      title={`Xem chi tiết học sinh ${s.full_name}`}
+                                    >
+                                      <div className="flex items-center gap-2.5 min-w-0">
+                                        <div className="w-7 h-7 rounded-lg bg-[#1e2744] text-indigo-300 flex items-center justify-center font-black text-[10px] shrink-0 border border-indigo-500/20 group-hover:border-indigo-500/50">
+                                          {initials}
+                                        </div>
+                                        <div className="truncate">
+                                          <div className="text-xs font-bold text-white group-hover:text-indigo-200 transition truncate">
+                                            {s.full_name}
+                                          </div>
+                                          <div className="text-[10px] font-semibold text-slate-400 truncate flex items-center gap-1.5">
+                                            {s.nickname && <span className="text-slate-300 font-bold">({s.nickname})</span>}
+                                            <span className="px-1.5 py-0.2 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-[9px] font-mono font-bold">
+                                              {s.class_name || 'Lớp'}
+                                            </span>
+                                          </div>
+                                        </div>
+                                      </div>
+
+                                      <div className="flex items-center gap-1.5 shrink-0">
+                                        {/* Trend Indicator */}
+                                        <div className={`px-1.5 py-0.5 rounded-md text-[10px] font-extrabold font-mono flex items-center gap-0.5 ${isImproving ? 'text-emerald-400 bg-emerald-500/10' :
+                                            isDeclining ? 'text-rose-400 bg-rose-500/10' :
+                                              'text-slate-400 bg-slate-500/10'
+                                          }`}>
+                                          {isImproving ? <TrendingUp size={11} /> : isDeclining ? <TrendingDown size={11} /> : <Minus size={11} />}
+                                          <span>{slope > 0 ? `+${format1Dec(slope)}` : format1Dec(slope)}</span>
+                                        </div>
+
+                                        {/* EMA Badge */}
+                                        <div className="px-2 py-0.5 rounded-lg bg-[#0b0e1a] border border-white/10 text-xs font-black font-mono text-white">
+                                          {s.ema_level ? format1Dec(Number(s.ema_level)) : '-'}
+                                        </div>
+                                      </div>
+                                    </div>
+                                  );
+                                })
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
             </div>
 
-            {/* Custom Time Phase Selector */}
-            <div className="flex items-center gap-1.5">
-              <CustomSelect
-                value={selectedPhaseId}
-                onChange={(val) => {
-                  setSelectedPhaseId(String(val));
-                }}
-                options={[
-                  { value: '', label: 'Tất cả giai đoạn' },
-                  ...timePhases.map(p => ({
-                    value: String(p.id),
-                    label: `${p.phase_name} (${formatSessionDate(p.from_date)} - ${formatSessionDate(p.to_date)})`
-                  }))
-                ]}
-                className="w-48"
-              />
-              <button
-                type="button"
-                onClick={handleOpenPhaseModal}
-                className="p-2 rounded-xl bg-[#141b32] hover:bg-indigo-600/30 text-indigo-300 hover:text-white border border-[#232d4e] transition cursor-pointer"
-                title="Quản Lý Giai Đoạn Học Tập Tùy Chỉnh"
+            {/* 4. BIẾN ĐỘNG ĐIỂM SỐ */}
+            <div className="bg-[#0d1120] border border-emerald-500/30 rounded-2xl flex flex-col shadow-2xl overflow-hidden transition-all animate-cascade-4">
+              <div
+                onClick={() => setIsGrowthSectionOpen(!isGrowthSectionOpen)}
+                className="px-6 py-4 border-b border-[#181f36] bg-[#0a0d18] flex flex-wrap items-center justify-between gap-4 cursor-pointer select-none"
               >
-                <Clock size={14} />
-              </button>
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 shadow-md shadow-emerald-500/10 shrink-0">
+                    <TrendingUp size={20} />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-sm font-black text-white uppercase tracking-wider">
+                        BIẾN ĐỘNG ĐIỂM SỐ
+                      </h3>
+                      <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                        {scoreFluctuations.length} Học Sinh
+                      </span>
+                    </div>
+                    <p className="text-xs text-slate-400 font-semibold mt-0.5">
+                      So sánh điểm trung bình 3 buổi đầu tiên khi mới vào học so với 3 buổi gần nhất để theo dõi biến động, sự tiến bộ hoặc dấu hiệu sa sút của từng học sinh.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="p-1.5 rounded-lg bg-white/5 text-slate-400">
+                  {isGrowthSectionOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                </div>
+              </div>
+
+              {/* Collapsible Content with Smooth Animated Grid Accordion */}
+              <div className={`grid transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${isGrowthSectionOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0 pointer-events-none'
+                }`}>
+                <div className="overflow-hidden">
+                  <div className="p-5">
+                    <DataTable
+                      tableId="reports-fluctuations-table"
+                      exportFilename="bien_dong_diem_so_hoc_sinh"
+                      data={scoreFluctuations}
+                      columns={fluctuationColumns}
+                      loading={loading}
+                      searchPlaceholder="Tìm học sinh, lớp học, mức biến động..."
+                      emptyMessage="Chưa có dữ liệu biến động điểm số."
+                      pageSize={20}
+                      onRowClick={(r: any) => handleSelectRankingStudent(r.student_id)}
+                      initialSorting={[{ id: 'delta', desc: true }]}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* 5. BẤT THƯỜNG HỌC TẬP */}
+            <div className="bg-[#101424] border border-indigo-500/20 rounded-2xl p-4 sm:p-5 shadow-xl flex flex-col gap-4 transition-all animate-cascade-5">
+              <div
+                onClick={() => setIsBottlenecksSectionOpen(!isBottlenecksSectionOpen)}
+                className="flex flex-wrap items-center justify-between gap-4 cursor-pointer select-none"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-indigo-500/20 border border-indigo-500/40 flex items-center justify-center text-indigo-400 shadow-md shadow-indigo-500/10 shrink-0">
+                    <Target size={20} />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-sm font-black text-white uppercase tracking-wider">
+                        BẤT THƯỜNG HỌC TẬP
+                      </h3>
+                      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                        Đang Hoàn Thiện Phương Pháp Kiểm Thử
+                      </span>
+                    </div>
+                    <p className="text-xs text-slate-400 font-semibold mt-0.5">
+                      Phát hiện mâu thuẫn điểm số giữa Bài Tập Về Nhà và Kiểm Tra Trên Lớp (Chênh lệch ≥ 3.0 điểm).
+                    </p>
+                  </div>
+                </div>
+
+                <div className="p-1.5 rounded-lg bg-white/5 text-slate-400">
+                  {isBottlenecksSectionOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                </div>
+              </div>
+
+              {/* Collapsible Content with Smooth Animated Grid Accordion */}
+              <div className={`grid transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${isBottlenecksSectionOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0 pointer-events-none'
+                }`}>
+                <div className="overflow-hidden">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-[#182038]">
+                    {/* Anomaly Type 1 */}
+                    <div className="p-4 rounded-xl bg-[#141a2e] border border-amber-500/20 flex flex-col justify-between gap-3">
+                      <div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-black uppercase text-amber-400">
+                            Dạng 1: Nghi vấn chép giải / Phụ thuộc tài liệu
+                          </span>
+                          <span className="text-[10px] font-mono font-black text-amber-300 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">
+                            {learningBottlenecks.type1.length} học sinh
+                          </span>
+                        </div>
+                        <p className="text-xs text-slate-300 font-semibold mt-1">
+                          Điểm BTVN rất cao (≥ 8.5) nhưng Điểm trên lớp rất thấp (≤ 5.5). Chênh lệch ≥ 3.0 điểm.
+                        </p>
+                        <p className="text-[11px] text-slate-400 mt-1 italic">
+                          Định hướng: Gọi học sinh lên bảng giải trình trực tiếp phương pháp giải BTVN.
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Anomaly Type 2 */}
+                    <div className="p-4 rounded-xl bg-[#141a2e] border border-blue-500/20 flex flex-col justify-between gap-3">
+                      <div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-black uppercase text-blue-400">
+                            Dạng 2: Tiếp thu nhanh nhưng thiếu kỷ luật tự học
+                          </span>
+                          <span className="text-[10px] font-mono font-black text-blue-300 bg-blue-500/10 px-2 py-0.5 rounded border border-blue-500/20">
+                            {learningBottlenecks.type2.length} học sinh
+                          </span>
+                        </div>
+                        <p className="text-xs text-slate-300 font-semibold mt-1">
+                          Điểm trên lớp cao (≥ 8.5) nhưng BTVN thấp (≤ 5.5) hoặc thường xuyên bỏ làm. Chênh lệch ≥ 3.0 điểm.
+                        </p>
+                        <p className="text-[11px] text-slate-400 mt-1 italic">
+                          Định hướng: Nhắc nhở kỷ luật tự rèn luyện và giao chỉ tiêu bài tập bắt buộc hoàn thành.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
+        ) : (
+          /* TỔNG QUAN HỌC LỰC (OVERVIEW TAB VIEW) */
+          <>
+            {/* 2. INDIVIDUAL STUDENT PERFORMANCE PROFILE */}
+            {selectedStudentObj && (
+              <div className="animate-cascade-1">
+                <div className="bg-[#0e1222] border border-[#1e2744] p-6 rounded-2xl shadow-2xl flex flex-wrap items-center justify-between gap-6 relative overflow-hidden">
+                  <div className="flex items-center gap-4 z-10">
+                    <div className="w-14 h-14 rounded-full bg-gradient-to-tr from-indigo-600 to-purple-600 text-white font-black text-xl flex items-center justify-center shadow-lg shadow-indigo-500/20 border border-white/20">
+                      {selectedStudentObj.full_name.slice(0, 2).toUpperCase()}
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h2 className="text-xl font-black text-white">{selectedStudentObj.full_name}</h2>
+                        {selectedStudentObj.nickname && (
+                          <span className="text-sm font-extrabold text-white">- {selectedStudentObj.nickname}</span>
+                        )}
+                        <button
+                          onClick={() => setSelectedStudentId('')}
+                          className="ml-3 px-2.5 py-1 rounded-lg bg-[#1a2340] hover:bg-rose-500/20 text-slate-400 hover:text-rose-400 border border-[#2e3b66] text-[10px] font-bold transition cursor-pointer"
+                          title="Bỏ chọn học sinh"
+                        >
+                          Bỏ Chọn ✕
+                        </button>
+                      </div>
+                      <p className="text-xs text-slate-400 font-semibold mt-0.5">
+                        {selectedStudentObj.grade || 'Lớp 6'} | {selectedStudentObj.school || 'Trung tâm'} | Theo dõi tiến độ học tập qua các kỳ đánh giá
+                      </p>
+                    </div>
+                  </div>
 
-        {/* RESPONSIVE SVG GRAPH CONTAINER WITH TALLER HEIGHT (560px), ZOOM & PAN DRAG */}
-        <div
-          ref={chartContainerRef}
-          className={`relative w-full overflow-hidden pt-1 select-none ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
-          onContextMenu={(e) => e.preventDefault()}
-          onMouseDown={(e) => {
-            if (e.button === 0 || e.button === 2) {
-              setIsDragging(true);
-              setDragStart({ x: e.clientX, y: e.clientY });
-            }
-          }}
-          onMouseMove={(e) => {
-            if (!isDragging) return;
-            const dx = e.clientX - dragStart.x;
-            const dy = e.clientY - dragStart.y;
-            setPanOffset(prev => clampPanOffset(prev.x + dx, prev.y + dy, zoomLevel));
-            setDragStart({ x: e.clientX, y: e.clientY });
-          }}
-          onMouseUp={() => setIsDragging(false)}
-          onMouseLeave={() => setIsDragging(false)}
-        >
-          
-          {/* HOVER TOOLTIP CARD */}
-          {hoveredPoint && (
-            <div 
-              className="absolute z-30 pointer-events-none bg-[#161c34] border border-[#2c375e] p-3 rounded-xl shadow-2xl text-xs font-sans animate-mac-dropdown"
-              style={{
-                left: `${Math.min(Math.max(hoveredPoint.x, 120), chartWidth - 140)}px`,
-                top: '20px',
-                transform: 'translateX(-50%)'
-              }}
-            >
-              <div className="text-[11px] font-extrabold text-slate-300 border-b border-[#242e50] pb-1 mb-1.5 flex items-center justify-between gap-3">
-                <span>Buổi Học: {hoveredPoint.sessionName}</span>
-                <span className="text-[10px] text-indigo-300">{hoveredPoint.fullDate}</span>
-              </div>
-              <div className="space-y-1 font-mono text-[11px] font-bold">
-                <div className="flex items-center justify-between gap-4 text-blue-400">
-                  <span>Check 1:</span>
-                  <span>
-                    {hoveredPoint.check1}
-                    {hoveredPoint.fittedC1 !== null && (
-                      <span className="ml-1 text-blue-300/70 font-semibold">({hoveredPoint.predModel}: {hoveredPoint.fittedC1})</span>
-                    )}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between gap-4 text-purple-400">
-                  <span>Check 2:</span>
-                  <span>
-                    {hoveredPoint.check2}
-                    {hoveredPoint.fittedC2 !== null && (
-                      <span className="ml-1 text-purple-300/70 font-semibold">({hoveredPoint.predModel}: {hoveredPoint.fittedC2})</span>
-                    )}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between gap-4 text-emerald-400">
-                  <span>Homework:</span>
-                  <span>
-                    {hoveredPoint.homework}
-                    {hoveredPoint.fittedHw !== null && (
-                      <span className="ml-1 text-emerald-300/70 font-semibold">({hoveredPoint.predModel}: {hoveredPoint.fittedHw})</span>
-                    )}
-                  </span>
+                  <div className="flex items-center gap-6 z-10 bg-[#141a30] border border-[#232d4e] px-6 py-3 rounded-xl">
+                    <div>
+                      <span className="text-[10px] font-black uppercase text-slate-400 block">Tổng Điểm</span>
+                      <span className="text-xl font-black text-emerald-400 font-mono">{stats.overall}</span>
+                    </div>
+                    <div className="h-8 w-px bg-[#232d4e]"></div>
+                    <div>
+                      <span className="text-[10px] font-black uppercase text-slate-400 block">Chuyên Cần</span>
+                      <span className="text-xl font-black text-emerald-400 font-mono">{stats.attendancePct}%</span>
+                    </div>
+                    <div className="h-8 w-px bg-[#232d4e]"></div>
+                    <div>
+                      <span className="text-[10px] font-black uppercase text-slate-400 block">Hạng</span>
+                      <span className="text-xl font-black text-amber-400 font-mono">{stats.rank}</span>
+                    </div>
+                    <div className="h-8 w-px bg-[#232d4e]"></div>
+                    <div>
+                      <span className="text-[10px] font-black uppercase text-slate-400 block">Học Lực</span>
+                      <span className="inline-block px-2.5 py-0.5 rounded-lg text-[10px] font-black bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+                        {stats.level}
+                      </span>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
-
-          <svg 
-            viewBox={`0 0 ${chartWidth} ${chartHeight}`} 
-            className="w-full h-[750px] overflow-visible"
-          >
-            <defs>
-              {/* Plot area clip path so curves don't overflow fixed X/Y axes */}
-              <clipPath id="chart-plot-clip">
-                <rect x={paddingLeft} y={paddingTop - 15} width={plotAreaWidth + paddingRight} height={plotAreaHeight + 30} />
-              </clipPath>
-
-              {/* Dynamic Curtain Reveal Clip for Gradient Shadows (advances in exact sync with line draw animation) */}
-              <clipPath id="chart-curtain-clip">
-                <rect 
-                  key={`curtain-${selectedStudentId || selectedClassId || 'all'}-${timeView}`}
-                  x={paddingLeft} 
-                  y={paddingTop - 15} 
-                  width={plotAreaWidth + paddingRight} 
-                  height={plotAreaHeight + 30} 
-                  className="animate-curtain-reveal"
-                />
-              </clipPath>
-
-              {/* Outer Glow Filters with EXPANDED BOUNDS (300% width/height to eliminate square edge clipping!) */}
-              <filter id="glow-blue" x="-100%" y="-100%" width="300%" height="300%">
-                <feGaussianBlur stdDeviation="6" result="blur" />
-                <feMerge>
-                  <feMergeNode in="blur" />
-                  <feMergeNode in="SourceGraphic" />
-                </feMerge>
-              </filter>
-
-              <filter id="glow-purple" x="-100%" y="-100%" width="300%" height="300%">
-                <feGaussianBlur stdDeviation="6" result="blur" />
-                <feMerge>
-                  <feMergeNode in="blur" />
-                  <feMergeNode in="SourceGraphic" />
-                </feMerge>
-              </filter>
-
-              <filter id="glow-emerald" x="-100%" y="-100%" width="300%" height="300%">
-                <feGaussianBlur stdDeviation="6" result="blur" />
-                <feMerge>
-                  <feMergeNode in="blur" />
-                  <feMergeNode in="SourceGraphic" />
-                </feMerge>
-              </filter>
-
-              {/* Gradient Area Fills */}
-              <linearGradient id="area-gradient-blue" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.35" />
-                <stop offset="70%" stopColor="#3b82f6" stopOpacity="0.08" />
-                <stop offset="100%" stopColor="#3b82f6" stopOpacity="0.0" />
-              </linearGradient>
-
-              <linearGradient id="area-gradient-purple" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#a855f7" stopOpacity="0.35" />
-                <stop offset="70%" stopColor="#a855f7" stopOpacity="0.08" />
-                <stop offset="100%" stopColor="#a855f7" stopOpacity="0.0" />
-              </linearGradient>
-
-              <linearGradient id="area-gradient-emerald" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#10b981" stopOpacity="0.35" />
-                <stop offset="70%" stopColor="#10b981" stopOpacity="0.08" />
-                <stop offset="100%" stopColor="#10b981" stopOpacity="0.0" />
-              </linearGradient>
-            </defs>
-
-            {/* DYNAMIC Y-AXIS GRID LINES & TICK LABELS (VALUES & LINES MOVE DYNAMICALLY, LABELS PINNED ON LEFT) */}
-            {yBounds.ticks.map(val => {
-              const y = getSvgY(val);
-              if (y < paddingTop - 12 || y > chartHeight - paddingBottom + 12) return null;
-              return (
-                <g key={val}>
-                  <line 
-                    x1={paddingLeft} 
-                    y1={y} 
-                    x2={chartWidth - paddingRight} 
-                    y2={y} 
-                    stroke="#171e34" 
-                    strokeWidth="1"
-                    strokeDasharray={val === 7.5 ? "4 4" : "0"}
-                  />
-                  <text x={paddingLeft - 14} y={y + 4} fill="#64748b" fontSize="11" fontWeight="bold" textAnchor="end">
-                    {val.toFixed(1)}
-                  </text>
-                </g>
-              );
-            })}
-
-            {/* Benchmark Dashed Line (7.5) */}
-            {getSvgY(7.5) >= paddingTop - 10 && getSvgY(7.5) <= chartHeight - paddingBottom + 10 && (
-              <line 
-                x1={paddingLeft} 
-                y1={getSvgY(7.5)} 
-                x2={chartWidth - paddingRight} 
-                y2={getSvgY(7.5)} 
-                stroke="#94a3b8" 
-                strokeWidth="1.5"
-                strokeDasharray="5 5"
-                opacity="0.4"
-              />
             )}
 
-            {/* CLIPPED INTERACTIVE PLOT AREA (CURVES & DATA POINTS DYNAMICALLY SCALE & TRANSLATE) */}
-            <g clipPath="url(#chart-plot-clip)">
-              {/* GRADIENT AREA FILLS UNDER LINES - REVEALED IN EXACT SYNC WITH SELF-DRAWING CURVES */}
-              <g clipPath="url(#chart-curtain-clip)">
-                <path d={makeAreaPath('check1')} fill="url(#area-gradient-blue)" />
-                <path d={makeAreaPath('check2')} fill="url(#area-gradient-purple)" />
-                <path d={makeAreaPath('homework')} fill="url(#area-gradient-emerald)" />
-              </g>
+            {/* 3. FOUR GLOWING KPI CARDS */}
+            <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 ${selectedStudentObj ? 'animate-cascade-2' : 'animate-cascade-1'}`}>
+              <div className="kpi-card-blue p-5 flex flex-col justify-between shadow-2xl transition-all duration-300 min-h-[100px]">
+                <div>
+                  <span className="text-[10px] font-black uppercase tracking-wider text-blue-400 block mb-1">
+                    CHECK 1 TRUNG BÌNH
+                  </span>
+                  <div className="flex items-baseline gap-1.5">
+                    <span className="text-3xl font-black text-white font-mono">{stats.c1}</span>
+                    <span className="text-xs text-slate-400 font-bold font-mono">/ 10</span>
+                  </div>
+                </div>
+                <div className="mt-2 text-[10px] font-bold text-blue-400">
+                  <span>{stats.c1Diff} so với kỳ trước</span>
+                </div>
+              </div>
 
-                {/* SMOOTH BEZIER LINES WITH SELF-DRAW ANIMATION */}
-                <path 
-                  key={`c1-${selectedStudentId || selectedClassId || 'all'}-${timeView}`}
-                  d={makeBezierPath('check1')} 
-                  fill="none" 
-                  stroke="#3b82f6" 
-                  strokeWidth="3.5" 
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  filter="url(#glow-blue)"
-                  className="animate-path-draw"
-                />
+              <div className="kpi-card-purple p-5 flex flex-col justify-between shadow-2xl transition-all duration-300 min-h-[100px]">
+                <div>
+                  <span className="text-[10px] font-black uppercase tracking-wider text-purple-400 block mb-1">
+                    CHECK 2 TRUNG BÌNH
+                  </span>
+                  <div className="flex items-baseline gap-1.5">
+                    <span className="text-3xl font-black text-white font-mono">{stats.c2}</span>
+                    <span className="text-xs text-slate-400 font-bold font-mono">/ 10</span>
+                  </div>
+                </div>
+                <div className="mt-2 text-[10px] font-bold text-purple-400">
+                  <span>{stats.c2Diff} so với kỳ trước</span>
+                </div>
+              </div>
 
-                <path 
-                  key={`c2-${selectedStudentId || selectedClassId || 'all'}-${timeView}`}
-                  d={makeBezierPath('check2')} 
-                  fill="none" 
-                  stroke="#a855f7" 
-                  strokeWidth="3.5" 
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  filter="url(#glow-purple)"
-                  className="animate-path-draw"
-                />
+              <div className="kpi-card-green p-5 flex flex-col justify-between shadow-2xl transition-all duration-300 min-h-[100px]">
+                <div>
+                  <span className="text-[10px] font-black uppercase tracking-wider text-emerald-400 block mb-1">
+                    HOMEWORK TRUNG BÌNH
+                  </span>
+                  <div className="flex items-baseline gap-1.5">
+                    <span className="text-3xl font-black text-white font-mono">{stats.hw}</span>
+                    <span className="text-xs text-slate-400 font-bold font-mono">/ 10</span>
+                  </div>
+                </div>
+                <div className="mt-2 text-[10px] font-bold text-emerald-400">
+                  <span>{stats.hwDiff} so với kỳ trước</span>
+                </div>
+              </div>
 
-                <path 
-                  key={`hw-${selectedStudentId || selectedClassId || 'all'}-${timeView}`}
-                  d={makeBezierPath('homework')} 
-                  fill="none" 
-                  stroke="#10b981" 
-                  strokeWidth="3.5" 
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  filter="url(#glow-emerald)"
-                  className="animate-path-draw"
-                />
+              <div className="kpi-card-amber p-5 flex flex-col justify-between shadow-2xl transition-all duration-300 min-h-[100px]">
+                <div>
+                  <span className="text-[10px] font-black uppercase tracking-wider text-amber-400 block mb-1">
+                    TỔNG ĐIỂM TRUNG BÌNH
+                  </span>
+                  <div className="flex items-baseline gap-1.5">
+                    <span className="text-3xl font-black text-white font-mono">{stats.overall}</span>
+                    <span className="text-xs text-slate-400 font-bold font-mono">/ 10</span>
+                  </div>
+                </div>
+                <div className="mt-2 text-[10px] font-bold text-amber-400">
+                  <span>{stats.overallDiff} so với kỳ trước</span>
+                </div>
+              </div>
+            </div>
 
-                {/* SINGLE TOTAL ACADEMIC PREDICTION FORECAST DASHED LINE & POINT */}
-                {sessionChartData.length > 0 && (() => {
-                  const lastIdx = sessionChartData.length - 1;
-                  const lastX = getSvgX(lastIdx, sessionChartData.length);
-                  const lastOverall = sessionChartData[lastIdx].overall ?? 8.0;
-                  const forecastX = lastX + 45 * zoomLevel;
-                  const predNextY = getSvgY(engine.predicted_next);
+            {/* 4. EXPANDED TALLER SVG GRAPH (560px HEIGHT WITH SMOOTH CIRCULAR GLOW & HOVER TOOLTIP) */}
+            <div className={`bg-[#0b0e1b] border border-[#1d2644] p-6 rounded-2xl shadow-2xl flex flex-col gap-4 ${selectedStudentObj ? 'animate-cascade-3' : 'animate-cascade-2'}`}>
 
-                  return (
-                    <g 
-                      key={`forecast-${selectedStudentId || selectedClassId || 'all'}-${timeView}-${sessionChartData.length}`}
-                      className="animate-point-pop" 
-                      style={{ animationDelay: '2.45s' }}
+              {/* GRAPH HEADER & TIME VIEW FILTERS */}
+              <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[#181f36] pb-3">
+                <div className="flex items-center gap-3">
+                  <BarChart3 size={18} className="text-indigo-400" />
+                  <h3 className="text-sm font-black text-white uppercase tracking-wider">
+                    TIẾN ĐỘ HỌC TẬP QUA CÁC KỲ & DỰ ĐOÁN XU HƯỚNG
+                  </h3>
+                </div>
+
+                <div className="flex items-center gap-5">
+                  <div className="flex items-center gap-4 text-[11px] font-bold">
+                    <span className="flex items-center gap-1.5 text-blue-400">
+                      <span className="w-2.5 h-2.5 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.8)]"></span> Check 1 (Dự đoán: {format1Dec(engine.pred_c1)})
+                    </span>
+                    <span className="flex items-center gap-1.5 text-purple-400">
+                      <span className="w-2.5 h-2.5 rounded-full bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.8)]"></span> Check 2 (Dự đoán: {format1Dec(engine.pred_c2)})
+                    </span>
+                    <span className="flex items-center gap-1.5 text-emerald-400">
+                      <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]"></span> Homework (Dự đoán: {format1Dec(engine.pred_hw)})
+                    </span>
+                  </div>
+
+                  {/* Interactive Zoom & Pan Controls */}
+                  <div className="flex items-center gap-1.5 bg-[#141b32] border border-[#232d4e] p-1 rounded-xl text-xs font-extrabold shrink-0">
+                    <button
+                      onClick={() => setZoomLevel(prev => {
+                        const next = Math.min(5.0, prev + 0.25);
+                        setPanOffset(p => clampPanOffset(p.x, p.y, next));
+                        return next;
+                      })}
+                      className="p-1 rounded-lg hover:bg-indigo-600/30 text-slate-300 hover:text-white transition cursor-pointer"
+                      title="Phóng to (Scroll Cuộn Chuột Lên)"
                     >
-                      {/* Total Academic Forecast Connection Line */}
-                      <line
-                        x1={lastX}
-                        y1={getSvgY(lastOverall)}
-                        x2={forecastX}
-                        y2={predNextY}
-                        stroke="#6366f1"
-                        strokeWidth="2.5"
-                        strokeDasharray="5 5"
-                        strokeLinecap="round"
-                      />
+                      <ZoomIn size={14} />
+                    </button>
+                    <button
+                      onClick={() => setZoomLevel(prev => {
+                        const next = Math.max(1.0, prev - 0.25);
+                        setPanOffset(p => clampPanOffset(p.x, p.y, next));
+                        return next;
+                      })}
+                      className="p-1 rounded-lg hover:bg-indigo-600/30 text-slate-300 hover:text-white transition cursor-pointer"
+                      title="Thu nhỏ (Scroll Cuộn Chuột Xuống)"
+                    >
+                      <ZoomOut size={14} />
+                    </button>
+                    <span className="text-[10px] text-indigo-300 font-mono px-1">
+                      {Math.round(zoomLevel * 100)}%
+                    </span>
+                    <button
+                      onClick={() => { setZoomLevel(1.0); setPanOffset({ x: 0, y: 0 }); }}
+                      className="p-1.5 rounded-lg hover:bg-rose-500/20 text-slate-400 hover:text-rose-300 transition cursor-pointer"
+                      title="Đặt lại góc nhìn (Reset View)"
+                    >
+                      <RotateCcw size={12} />
+                    </button>
+                  </div>
 
-                      {/* Glowing Prediction Dot */}
-                      <circle 
-                        cx={forecastX} 
-                        cy={predNextY} 
-                        r="7" 
-                        fill="#6366f1" 
-                        stroke="#ffffff" 
-                        strokeWidth="2" 
-                      />
-                      <circle 
-                        cx={forecastX} 
-                        cy={predNextY} 
-                        r="3.5" 
-                        fill="#ffffff" 
-                      />
-
-                      {/* Prediction Score & Label */}
-                      <text 
-                        x={forecastX + 10} 
-                        y={predNextY + 4} 
-                        fill="#a5b4fc" 
-                        fontSize="12" 
-                        fontWeight="900"
-                        className="font-mono drop-shadow"
+                  <div className="relative flex bg-[#141b32] border border-[#232d4e] p-1 rounded-xl text-xs font-extrabold select-none w-72 shrink-0">
+                    <div
+                      className="absolute top-1 bottom-1 rounded-lg bg-indigo-600 shadow-[0_0_14px_rgba(99,102,241,0.5)] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] pointer-events-none"
+                      style={{
+                        left: timeView === '1m'
+                          ? '4px'
+                          : timeView === '2m'
+                            ? 'calc(25% + 1px)'
+                            : timeView === '3m'
+                              ? 'calc(50% + 1px)'
+                              : 'calc(75% + 1px)',
+                        width: 'calc(25% - 4px)',
+                      }}
+                    />
+                    {[
+                      { id: '1m', label: '1 Tháng' },
+                      { id: '2m', label: '2 Tháng' },
+                      { id: '3m', label: '3 Tháng' },
+                      { id: 'all', label: 'Tất Cả' }
+                    ].map(t => (
+                      <button
+                        key={t.id}
+                        onClick={() => {
+                          setTimeView(t.id as any);
+                          setSelectedPhaseId('');
+                        }}
+                        className={`flex-1 relative z-10 py-1 text-center transition-colors cursor-pointer ${!selectedPhaseId && timeView === t.id ? 'text-white font-black' : 'text-slate-400 hover:text-white'
+                          }`}
                       >
-                        {format1Dec(engine.predicted_next)}
-                        <tspan dx="4" fill="#64748b" fontSize="10" fontWeight="700">(Dự đoán)</tspan>
-                      </text>
-                    </g>
-                  );
-                })()}
+                        {t.label}
+                      </button>
+                    ))}
+                  </div>
 
-                {/* INTERACTIVE HOVER OVERLAY COLUMNS & SEQUENTIALLY POPPING DATA POINTS */}
-                <g key={`chart-points-${selectedStudentId || selectedClassId || 'all'}-${timeView}-${sessionChartData.length}`}>
-                  {sessionChartData.map((d, i) => {
-                    const x = getSvgX(i, sessionChartData.length);
-                    const y1 = getSvgY(d.check1);
-                    const y2 = getSvgY(d.check2);
-                    const yHw = getSvgY(d.homework);
-                    const pointDelay = (0.85 + (i / Math.max(1, sessionChartData.length - 1)) * 1.55).toFixed(2);
+                  {/* Custom Time Phase Selector */}
+                  <div className="flex items-center gap-1.5">
+                    <CustomSelect
+                      value={selectedPhaseId}
+                      onChange={(val) => {
+                        setSelectedPhaseId(String(val));
+                      }}
+                      options={[
+                        { value: '', label: 'Tất cả giai đoạn' },
+                        ...timePhases.map(p => ({
+                          value: String(p.id),
+                          label: `${p.phase_name} (${formatSessionDate(p.from_date)} - ${formatSessionDate(p.to_date)})`
+                        }))
+                      ]}
+                      className="w-48"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleOpenPhaseModal}
+                      className="p-2 rounded-xl bg-[#141b32] hover:bg-indigo-600/30 text-indigo-300 hover:text-white border border-[#232d4e] transition cursor-pointer"
+                      title="Quản Lý Giai Đoạn Học Tập Tùy Chỉnh"
+                    >
+                      <Clock size={14} />
+                    </button>
+                  </div>
+                </div>
+              </div>
 
+              {/* RESPONSIVE SVG GRAPH CONTAINER WITH TALLER HEIGHT (560px), ZOOM & PAN DRAG */}
+              <div
+                ref={chartContainerRef}
+                className={`relative w-full overflow-hidden pt-1 select-none ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
+                onContextMenu={(e) => e.preventDefault()}
+                onMouseDown={(e) => {
+                  if (e.button === 0 || e.button === 2) {
+                    setIsDragging(true);
+                    setDragStart({ x: e.clientX, y: e.clientY });
+                  }
+                }}
+                onMouseMove={(e) => {
+                  if (!isDragging) return;
+                  const dx = e.clientX - dragStart.x;
+                  const dy = e.clientY - dragStart.y;
+                  setPanOffset(prev => clampPanOffset(prev.x + dx, prev.y + dy, zoomLevel));
+                  setDragStart({ x: e.clientX, y: e.clientY });
+                }}
+                onMouseUp={() => setIsDragging(false)}
+                onMouseLeave={() => setIsDragging(false)}
+              >
+
+                {/* HOVER TOOLTIP CARD */}
+                {hoveredPoint && (
+                  <div
+                    className="absolute z-30 pointer-events-none bg-[#161c34] border border-[#2c375e] p-3 rounded-xl shadow-2xl text-xs font-sans animate-mac-dropdown"
+                    style={{
+                      left: `${Math.min(Math.max(hoveredPoint.x, 120), chartWidth - 140)}px`,
+                      top: '20px',
+                      transform: 'translateX(-50%)'
+                    }}
+                  >
+                    <div className="text-[11px] font-extrabold text-slate-300 border-b border-[#242e50] pb-1 mb-1.5 flex items-center justify-between gap-3">
+                      <span>Buổi Học: {hoveredPoint.sessionName}</span>
+                      <span className="text-[10px] text-indigo-300">{hoveredPoint.fullDate}</span>
+                    </div>
+                    <div className="space-y-1 font-mono text-[11px] font-bold">
+                      <div className="flex items-center justify-between gap-4 text-blue-400">
+                        <span>Check 1:</span>
+                        <span>
+                          {hoveredPoint.check1}
+                          {hoveredPoint.fittedC1 !== null && (
+                            <span className="ml-1 text-blue-300/70 font-semibold">({hoveredPoint.predModel}: {hoveredPoint.fittedC1})</span>
+                          )}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between gap-4 text-purple-400">
+                        <span>Check 2:</span>
+                        <span>
+                          {hoveredPoint.check2}
+                          {hoveredPoint.fittedC2 !== null && (
+                            <span className="ml-1 text-purple-300/70 font-semibold">({hoveredPoint.predModel}: {hoveredPoint.fittedC2})</span>
+                          )}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between gap-4 text-emerald-400">
+                        <span>Homework:</span>
+                        <span>
+                          {hoveredPoint.homework}
+                          {hoveredPoint.fittedHw !== null && (
+                            <span className="ml-1 text-emerald-300/70 font-semibold">({hoveredPoint.predModel}: {hoveredPoint.fittedHw})</span>
+                          )}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                <svg
+                  viewBox={`0 0 ${chartWidth} ${chartHeight}`}
+                  className="w-full h-[750px] overflow-visible"
+                >
+                  <defs>
+                    {/* Plot area clip path so curves don't overflow fixed X/Y axes */}
+                    <clipPath id="chart-plot-clip">
+                      <rect x={paddingLeft - 10} y={paddingTop - 20} width={plotAreaWidth + paddingRight + 40} height={plotAreaHeight + 40} />
+                    </clipPath>
+
+                    {/* Dynamic Curtain Reveal Clip for Gradient Shadows (advances in exact sync with line draw animation) */}
+                    <clipPath id="chart-curtain-clip">
+                      <rect
+                        key={`curtain-${selectedStudentId || selectedClassId || 'all'}-${timeView}`}
+                        x={paddingLeft - 10}
+                        y={paddingTop - 20}
+                        width={plotAreaWidth + paddingRight + 40}
+                        height={plotAreaHeight + 40}
+                        className="animate-curtain-reveal"
+                      />
+                    </clipPath>
+
+                    {/* Outer Glow Filters with EXPANDED BOUNDS (300% width/height to eliminate square edge clipping!) */}
+                    <filter id="glow-blue" x="-100%" y="-100%" width="300%" height="300%">
+                      <feGaussianBlur stdDeviation="6" result="blur" />
+                      <feMerge>
+                        <feMergeNode in="blur" />
+                        <feMergeNode in="SourceGraphic" />
+                      </feMerge>
+                    </filter>
+
+                    <filter id="glow-purple" x="-100%" y="-100%" width="300%" height="300%">
+                      <feGaussianBlur stdDeviation="6" result="blur" />
+                      <feMerge>
+                        <feMergeNode in="blur" />
+                        <feMergeNode in="SourceGraphic" />
+                      </feMerge>
+                    </filter>
+
+                    <filter id="glow-emerald" x="-100%" y="-100%" width="300%" height="300%">
+                      <feGaussianBlur stdDeviation="6" result="blur" />
+                      <feMerge>
+                        <feMergeNode in="blur" />
+                        <feMergeNode in="SourceGraphic" />
+                      </feMerge>
+                    </filter>
+
+                    {/* Gradient Area Fills */}
+                    <linearGradient id="area-gradient-blue" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.35" />
+                      <stop offset="70%" stopColor="#3b82f6" stopOpacity="0.08" />
+                      <stop offset="100%" stopColor="#3b82f6" stopOpacity="0.0" />
+                    </linearGradient>
+
+                    <linearGradient id="area-gradient-purple" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#a855f7" stopOpacity="0.35" />
+                      <stop offset="70%" stopColor="#a855f7" stopOpacity="0.08" />
+                      <stop offset="100%" stopColor="#a855f7" stopOpacity="0.0" />
+                    </linearGradient>
+
+                    <linearGradient id="area-gradient-emerald" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#10b981" stopOpacity="0.35" />
+                      <stop offset="70%" stopColor="#10b981" stopOpacity="0.08" />
+                      <stop offset="100%" stopColor="#10b981" stopOpacity="0.0" />
+                    </linearGradient>
+                  </defs>
+
+                  {/* DYNAMIC Y-AXIS GRID LINES & TICK LABELS (VALUES & LINES MOVE DYNAMICALLY, LABELS PINNED ON LEFT) */}
+                  {yBounds.ticks.map(val => {
+                    const y = getSvgY(val);
+                    if (y < paddingTop - 12 || y > chartHeight - paddingBottom + 12) return null;
                     return (
-                      <g 
-                        key={`pt-${selectedStudentId || selectedClassId || 'all'}-${timeView}-${i}`}
-                        className="cursor-pointer group"
-                        onMouseEnter={() => setHoveredPoint({
-                          index: i,
-                          sessionName: d.sessionName,
-                          fullDate: d.fullDate,
-                          check1: d.check1,
-                          check2: d.check2,
-                          homework: d.homework,
-                          x,
-                          fittedC1: fittedLookup.c1[i] ?? null,
-                          fittedC2: fittedLookup.c2[i] ?? null,
-                          fittedHw: fittedLookup.hw[i] ?? null,
-                          predModel: 'EMA',
-                        })}
-                        onMouseLeave={() => setHoveredPoint(null)}
-                      >
-                        <rect
-                          x={x - 25}
-                          y={paddingTop}
-                          width={50}
-                          height={plotAreaHeight}
-                          fill="transparent"
-                        />
-
+                      <g key={val}>
                         <line
-                          x1={x}
-                          y1={paddingTop}
-                          x2={x}
-                          y2={chartHeight - paddingBottom}
-                          stroke="#5c36f5"
-                          strokeWidth="1.5"
-                          strokeDasharray="3 3"
-                          className="opacity-0 group-hover:opacity-100 transition-opacity"
+                          x1={paddingLeft}
+                          y1={y}
+                          x2={chartWidth - paddingRight}
+                          y2={y}
+                          stroke="#171e34"
+                          strokeWidth="1"
+                          strokeDasharray={val === 7.5 ? "4 4" : "0"}
                         />
-
-                        {/* Check 1 Point */}
-                        <g className="animate-point-pop" style={{ animationDelay: `${pointDelay}s` }}>
-                          <circle cx={x} cy={y1} r="7" fill="#3b82f6" filter="url(#glow-blue)" style={{ transformBox: 'fill-box', transformOrigin: 'center' }} className="transition-transform duration-200 group-hover:scale-125" />
-                          <circle cx={x} cy={y1} r="3.5" fill="#ffffff" style={{ transformBox: 'fill-box', transformOrigin: 'center' }} className="transition-transform duration-200 group-hover:scale-125" />
-                        </g>
-
-                        {/* Check 2 Point */}
-                        <g className="animate-point-pop" style={{ animationDelay: `${pointDelay}s` }}>
-                          <circle cx={x} cy={y2} r="7" fill="#a855f7" filter="url(#glow-purple)" style={{ transformBox: 'fill-box', transformOrigin: 'center' }} className="transition-transform duration-200 group-hover:scale-125" />
-                          <circle cx={x} cy={y2} r="3.5" fill="#ffffff" style={{ transformBox: 'fill-box', transformOrigin: 'center' }} className="transition-transform duration-200 group-hover:scale-125" />
-                        </g>
-
-                        {/* Homework Point */}
-                        <g className="animate-point-pop" style={{ animationDelay: `${pointDelay}s` }}>
-                          <circle cx={x} cy={yHw} r="7" fill="#10b981" filter="url(#glow-emerald)" style={{ transformBox: 'fill-box', transformOrigin: 'center' }} className="transition-transform duration-200 group-hover:scale-125" />
-                          <circle cx={x} cy={yHw} r="3.5" fill="#ffffff" style={{ transformBox: 'fill-box', transformOrigin: 'center' }} className="transition-transform duration-200 group-hover:scale-125" />
-                        </g>
-
-                        {i === sessionChartData.length - 1 && (
-                          <g className="animate-point-pop" style={{ animationDelay: `${pointDelay}s` }}>
-                            <text x={x + 14} y={y1 + 4} fill="#3b82f6" fontSize="12" fontWeight="900">{d.check1}</text>
-                            <text x={x + 14} y={y2 + 4} fill="#a855f7" fontSize="12" fontWeight="900">{d.check2}</text>
-                            <text x={x + 14} y={yHw + 4} fill="#10b981" fontSize="12" fontWeight="900">{d.homework}</text>
-                          </g>
-                        )}
+                        <text x={paddingLeft - 14} y={y + 4} fill="#64748b" fontSize="11" fontWeight="bold" textAnchor="end">
+                          {val.toFixed(1)}
+                        </text>
                       </g>
                     );
                   })}
-                </g>
-              </g>
 
-            {/* DYNAMIC X-AXIS SESSION DATE LABELS (DATES MOVE WITH DRAG/ZOOM, LABELS PINNED AT BOTTOM) */}
-            {sessionChartData.map((d, i) => {
-              const x = getSvgX(i, sessionChartData.length);
-              if (x < paddingLeft - 20 || x > chartWidth - paddingRight + 20) return null;
-              return (
-                <text 
-                  key={`xlabel-${selectedStudentId || selectedClassId || 'all'}-${timeView}-${i}`}
-                  x={x} 
-                  y={chartHeight - 12} 
-                  fill={hoveredPoint?.index === i ? "#ffffff" : "#94a3b8"} 
-                  fontSize="11" 
-                  fontWeight="extrabold" 
-                  textAnchor="middle"
-                >
-                  {d.sessionName}
-                </text>
-              );
-            })}
-          </svg>
-        </div>
+                  {/* Benchmark Dashed Line (7.5) */}
+                  {getSvgY(7.5) >= paddingTop - 10 && getSvgY(7.5) <= chartHeight - paddingBottom + 10 && (
+                    <line
+                      x1={paddingLeft}
+                      y1={getSvgY(7.5)}
+                      x2={chartWidth - paddingRight}
+                      y2={getSvgY(7.5)}
+                      stroke="#94a3b8"
+                      strokeWidth="1.5"
+                      strokeDasharray="5 5"
+                      opacity="0.4"
+                    />
+                  )}
 
-        {/* 5. SUMMARY STRIP WITH SUBTLE INFO TOOLTIPS */}
-        <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 bg-[#0f1426] border border-[#1d2644] p-3 rounded-xl text-center items-center relative">
-          
-          <div className="relative group">
-            <div className="flex items-center justify-center gap-1">
-              <span className="text-[10px] font-black uppercase text-slate-400 block">Dự Đoán Buổi Tới</span>
-              <button 
-                onClick={() => setActiveTooltip(activeTooltip === 'forecast' ? null : 'forecast')} 
-                className="text-slate-500 hover:text-indigo-400 cursor-pointer"
-                title="Giải thích Forecast"
-              >
-                <Info size={11} />
-              </button>
-            </div>
-            <span className="text-sm font-black text-indigo-400 font-mono">{engine.predicted_next} Điểm</span>
-            <span className="text-[10px] text-slate-400 font-semibold block">{engine.prediction_model ?? 'Smart Predict'}</span>
+                  {/* CLIPPED INTERACTIVE PLOT AREA (CURVES & DATA POINTS DYNAMICALLY SCALE & TRANSLATE) */}
+                  <g clipPath="url(#chart-plot-clip)">
+                    {/* GRADIENT AREA FILLS UNDER LINES - REVEALED IN EXACT SYNC WITH SELF-DRAWING CURVES */}
+                    <g clipPath="url(#chart-curtain-clip)">
+                      <path d={makeAreaPath('check1')} fill="url(#area-gradient-blue)" />
+                      <path d={makeAreaPath('check2')} fill="url(#area-gradient-purple)" />
+                      <path d={makeAreaPath('homework')} fill="url(#area-gradient-emerald)" />
+                    </g>
 
-            {activeTooltip === 'forecast' && (
-              <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 w-64 p-3 bg-[#161c34] border border-[#2c375e] text-slate-200 text-[11px] rounded-xl shadow-2xl z-30 text-left font-sans">
-                <span className="font-extrabold text-indigo-300 block mb-1">Dự Đoán ({engine.prediction_model ?? 'Smart Predict'}):</span>
-                Tự động chọn mô hình tốt nhất dựa trên lượng dữ liệu: EMA (&lt;5 buổi), Weighted OLS (5–19 buổi), Holt-Winters (20+ buổi).
+                    {/* SMOOTH BEZIER LINES WITH SELF-DRAW ANIMATION */}
+                    <path
+                      key={`c1-${selectedStudentId || selectedClassId || 'all'}-${timeView}`}
+                      d={makeBezierPath('check1')}
+                      fill="none"
+                      stroke="#3b82f6"
+                      strokeWidth="3.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      filter="url(#glow-blue)"
+                      className="animate-path-draw"
+                    />
+
+                    <path
+                      key={`c2-${selectedStudentId || selectedClassId || 'all'}-${timeView}`}
+                      d={makeBezierPath('check2')}
+                      fill="none"
+                      stroke="#a855f7"
+                      strokeWidth="3.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      filter="url(#glow-purple)"
+                      className="animate-path-draw"
+                    />
+
+                    <path
+                      key={`hw-${selectedStudentId || selectedClassId || 'all'}-${timeView}`}
+                      d={makeBezierPath('homework')}
+                      fill="none"
+                      stroke="#10b981"
+                      strokeWidth="3.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      filter="url(#glow-emerald)"
+                      className="animate-path-draw"
+                    />
+
+                    {/* 3-GRADE PROJECTIONS WITH ANTI-COLLISION VERTICAL LABEL SPACING */}
+                    {sessionChartData.length > 0 && (() => {
+                      const lastIdx = sessionChartData.length - 1;
+                      const lastX = getSvgX(lastIdx, sessionChartData.length);
+                      const forecastX = lastX + 45 * zoomLevel;
+
+                      const preds = [
+                        { id: 'c1', label: 'Check 1', score: engine.pred_c1, lastVal: sessionChartData[lastIdx].check1, color: '#3b82f6', textColor: '#60a5fa', rawY: getSvgY(engine.pred_c1) },
+                        { id: 'c2', label: 'Check 2', score: engine.pred_c2, lastVal: sessionChartData[lastIdx].check2, color: '#a855f7', textColor: '#c084fc', rawY: getSvgY(engine.pred_c2) },
+                        { id: 'hw', label: 'Homework', score: engine.pred_hw, lastVal: sessionChartData[lastIdx].homework, color: '#10b981', textColor: '#34d399', rawY: getSvgY(engine.pred_hw) },
+                      ];
+
+                      // Resolve vertical collisions: sort by rawY (top to bottom), ensure min distance of 18px
+                      const sorted = [...preds].sort((a, b) => a.rawY - b.rawY);
+                      const adjustedYs: Record<string, number> = {};
+                      let prevY = -999;
+                      sorted.forEach(p => {
+                        let curY = p.rawY;
+                        if (curY - prevY < 18) {
+                          curY = prevY + 18;
+                        }
+                        adjustedYs[p.id] = curY;
+                        prevY = curY;
+                      });
+
+                      return (
+                        <g
+                          key={`forecast-${selectedStudentId || selectedClassId || 'all'}-${timeView}-${sessionChartData.length}`}
+                          className="animate-point-pop"
+                          style={{ animationDelay: '2.45s' }}
+                        >
+                          {preds.map(p => {
+                            const labelY = adjustedYs[p.id] ?? p.rawY;
+                            return (
+                              <g key={p.id}>
+                                {/* Projection Dashed Line */}
+                                <line
+                                  x1={lastX}
+                                  y1={getSvgY(p.lastVal)}
+                                  x2={forecastX}
+                                  y2={p.rawY}
+                                  stroke={p.color}
+                                  strokeWidth="2.5"
+                                  strokeDasharray="4 4"
+                                  strokeLinecap="round"
+                                />
+
+                                {/* Projection Target Dot */}
+                                <circle
+                                  cx={forecastX}
+                                  cy={p.rawY}
+                                  r="6"
+                                  fill={p.color}
+                                  stroke="#ffffff"
+                                  strokeWidth="2"
+                                />
+
+                                {/* Prediction Score Label (Anti-collided) */}
+                                <text
+                                  x={forecastX + 9}
+                                  y={labelY + 4}
+                                  fill={p.textColor}
+                                  fontSize="11"
+                                  fontWeight="900"
+                                  className="font-mono drop-shadow"
+                                >
+                                  {format1Dec(p.score)}
+                                </text>
+                              </g>
+                            );
+                          })}
+                        </g>
+                      );
+                    })()}
+
+                    {/* INTERACTIVE HOVER OVERLAY COLUMNS & SEQUENTIALLY POPPING DATA POINTS */}
+                    <g key={`chart-points-${selectedStudentId || selectedClassId || 'all'}-${timeView}-${sessionChartData.length}`}>
+                      {sessionChartData.map((d, i) => {
+                        const x = getSvgX(i, sessionChartData.length);
+                        const y1 = getSvgY(d.check1);
+                        const y2 = getSvgY(d.check2);
+                        const yHw = getSvgY(d.homework);
+                        const pointDelay = (0.85 + (i / Math.max(1, sessionChartData.length - 1)) * 1.55).toFixed(2);
+
+                        return (
+                          <g
+                            key={`pt-${selectedStudentId || selectedClassId || 'all'}-${timeView}-${i}`}
+                            className="cursor-pointer group"
+                            onMouseEnter={() => setHoveredPoint({
+                              index: i,
+                              sessionName: d.sessionName,
+                              fullDate: d.fullDate,
+                              check1: d.check1,
+                              check2: d.check2,
+                              homework: d.homework,
+                              x,
+                              fittedC1: fittedLookup.c1[i] ?? null,
+                              fittedC2: fittedLookup.c2[i] ?? null,
+                              fittedHw: fittedLookup.hw[i] ?? null,
+                              predModel: 'EMA',
+                            })}
+                            onMouseLeave={() => setHoveredPoint(null)}
+                          >
+                            <rect
+                              x={x - 25}
+                              y={paddingTop}
+                              width={50}
+                              height={plotAreaHeight}
+                              fill="transparent"
+                            />
+
+                            <line
+                              x1={x}
+                              y1={paddingTop}
+                              x2={x}
+                              y2={chartHeight - paddingBottom}
+                              stroke="#5c36f5"
+                              strokeWidth="1.5"
+                              strokeDasharray="3 3"
+                              className="opacity-0 group-hover:opacity-100 transition-opacity"
+                            />
+
+                            {/* Check 1 Point */}
+                            <g className="animate-point-pop" style={{ animationDelay: `${pointDelay}s` }}>
+                              <circle cx={x} cy={y1} r="7" fill="#3b82f6" filter="url(#glow-blue)" style={{ transformBox: 'fill-box', transformOrigin: 'center' }} className="transition-transform duration-200 group-hover:scale-125" />
+                              <circle cx={x} cy={y1} r="3.5" fill="#ffffff" style={{ transformBox: 'fill-box', transformOrigin: 'center' }} className="transition-transform duration-200 group-hover:scale-125" />
+                            </g>
+
+                            {/* Check 2 Point */}
+                            <g className="animate-point-pop" style={{ animationDelay: `${pointDelay}s` }}>
+                              <circle cx={x} cy={y2} r="7" fill="#a855f7" filter="url(#glow-purple)" style={{ transformBox: 'fill-box', transformOrigin: 'center' }} className="transition-transform duration-200 group-hover:scale-125" />
+                              <circle cx={x} cy={y2} r="3.5" fill="#ffffff" style={{ transformBox: 'fill-box', transformOrigin: 'center' }} className="transition-transform duration-200 group-hover:scale-125" />
+                            </g>
+
+                            {/* Homework Point */}
+                            <g className="animate-point-pop" style={{ animationDelay: `${pointDelay}s` }}>
+                              <circle cx={x} cy={yHw} r="7" fill="#10b981" filter="url(#glow-emerald)" style={{ transformBox: 'fill-box', transformOrigin: 'center' }} className="transition-transform duration-200 group-hover:scale-125" />
+                              <circle cx={x} cy={yHw} r="3.5" fill="#ffffff" style={{ transformBox: 'fill-box', transformOrigin: 'center' }} className="transition-transform duration-200 group-hover:scale-125" />
+                            </g>
+
+                            {i === sessionChartData.length - 1 && (
+                              <g className="animate-point-pop" style={{ animationDelay: `${pointDelay}s` }}>
+                                <text x={x + 14} y={y1 + 4} fill="#3b82f6" fontSize="12" fontWeight="900">{d.check1}</text>
+                                <text x={x + 14} y={y2 + 4} fill="#a855f7" fontSize="12" fontWeight="900">{d.check2}</text>
+                                <text x={x + 14} y={yHw + 4} fill="#10b981" fontSize="12" fontWeight="900">{d.homework}</text>
+                              </g>
+                            )}
+                          </g>
+                        );
+                      })}
+                    </g>
+                  </g>
+
+                  {/* DYNAMIC X-AXIS SESSION DATE LABELS (DATES MOVE WITH DRAG/ZOOM, LABELS PINNED AT BOTTOM) */}
+                  {sessionChartData.map((d, i) => {
+                    const x = getSvgX(i, sessionChartData.length);
+                    if (x < paddingLeft - 20 || x > chartWidth - paddingRight + 20) return null;
+                    return (
+                      <text
+                        key={`xlabel-${selectedStudentId || selectedClassId || 'all'}-${timeView}-${i}`}
+                        x={x}
+                        y={chartHeight - 12}
+                        fill={hoveredPoint?.index === i ? "#ffffff" : "#94a3b8"}
+                        fontSize="11"
+                        fontWeight="extrabold"
+                        textAnchor="middle"
+                      >
+                        {d.sessionName}
+                      </text>
+                    );
+                  })}
+                </svg>
               </div>
-            )}
-          </div>
 
-          <div className="border-l border-[#1d2644] relative group">
-            <div className="flex items-center justify-center gap-1">
-              <span className="text-[10px] font-black uppercase text-slate-400 block">Trình Độ EMA</span>
-              <button 
-                onClick={() => setActiveTooltip(activeTooltip === 'ema' ? null : 'ema')} 
-                className="text-slate-500 hover:text-emerald-400 cursor-pointer"
-                title="Giải thích EMA"
-              >
-                <Info size={11} />
-              </button>
-            </div>
-            <span className={`text-sm font-black font-mono ${
-              engine.ema_level < 5.0 ? 'text-rose-500' :
-              engine.ema_level < 6.5 ? 'text-amber-400' :
-              engine.ema_level < 8.0 ? 'text-blue-400' : 'text-emerald-400'
-            }`}>{engine.ema_level}</span>
-            <span className="text-[10px] text-slate-400 font-semibold block">Exponential Moving</span>
+              {/* 5. SUMMARY STRIP WITH SUBTLE INFO TOOLTIPS */}
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 bg-[#0f1426] border border-[#1d2644] p-3 rounded-xl text-center items-center relative">
 
-            {activeTooltip === 'ema' && (
-              <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 w-64 p-3 bg-[#161c34] border border-[#2c375e] text-slate-200 text-[11px] rounded-xl shadow-2xl z-30 text-left font-sans">
-                <span className="font-extrabold text-emerald-300 block mb-1">Trình Độ Hiện Tại (EMA):</span>
-                <div className="space-y-1 my-1.5 font-mono text-[10px] font-bold bg-[#0d1120] p-2 rounded-lg border border-[#202948]">
-                  <div className="flex items-center justify-between text-blue-400">
-                    <span>Check 1 EMA:</span>
-                    <span>{engine.ema_c1 ?? 0}</span>
+                <div className="relative group">
+                  <div className="flex items-center justify-center gap-1">
+                    <span className="text-[10px] font-black uppercase text-slate-400 block">Dự Đoán Buổi Tới</span>
+                    <button
+                      onClick={() => setActiveTooltip(activeTooltip === 'forecast' ? null : 'forecast')}
+                      className="text-slate-500 hover:text-indigo-400 cursor-pointer"
+                      title="Giải thích Forecast"
+                    >
+                      <Info size={11} />
+                    </button>
                   </div>
-                  <div className="flex items-center justify-between text-purple-400">
-                    <span>Check 2 EMA:</span>
-                    <span>{engine.ema_c2 ?? 0}</span>
-                  </div>
-                  <div className="flex items-center justify-between text-emerald-400">
-                    <span>Homework EMA:</span>
-                    <span>{engine.ema_hw ?? 0}</span>
-                  </div>
-                </div>
-                <span className="text-[10px] text-slate-400 block">
-                  Trình độ tổng hợp ({engine.ema_level}) ưu tiên trọng số bài học mới nhất.
-                </span>
-              </div>
-            )}
-          </div>
+                  <span className="text-sm font-black text-indigo-400 font-mono">{engine.predicted_next} Điểm</span>
+                  <span className="text-[10px] text-slate-400 font-semibold block">{engine.prediction_model ?? 'Smart Predict'}</span>
 
-          <div className="border-l border-[#1d2644] relative group">
-            <div className="flex items-center justify-center gap-1">
-              <span className="text-[10px] font-black uppercase text-slate-400 block">Độ Biến Động (SD)</span>
-              <button 
-                onClick={() => setActiveTooltip(activeTooltip === 'sd' ? null : 'sd')} 
-                className="text-slate-500 hover:text-cyan-400 cursor-pointer"
-                title="Giải thích Standard Deviation"
-              >
-                <Info size={11} />
-              </button>
-            </div>
-            <span className={`text-sm font-black font-mono ${
-              engine.std_dev > 2.0 ? 'text-rose-500' :
-              engine.std_dev > 1.0 ? 'text-amber-400' :
-              engine.std_dev < 0.5 ? 'text-emerald-400' : 'text-cyan-400'
-            }`}>σ = {engine.std_dev}</span>
-            <span className={`text-[10px] font-semibold block ${
-              engine.consistency_label?.includes('mạnh') ? 'text-rose-400 font-extrabold' :
-              engine.consistency_label?.includes('Biến động') ? 'text-amber-400 font-bold' :
-              engine.consistency_label?.includes('Rất ổn định') ? 'text-emerald-400 font-bold' : 'text-slate-400'
-            }`}>{engine.consistency_label}</span>
-
-            {activeTooltip === 'sd' && (
-              <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 w-64 p-3 bg-[#161c34] border border-[#2c375e] text-slate-200 text-[11px] rounded-xl shadow-2xl z-30 text-left font-sans">
-                <span className="font-extrabold text-cyan-300 block mb-1">Độ Biến Động Thật Sự (Residual SD):</span>
-                <div className="space-y-1 my-1.5 font-mono text-[10px] font-bold bg-[#0d1120] p-2 rounded-lg border border-[#202948]">
-                  {gradeTypesList.map(gt => (
-                    <div key={gt.id} className="flex items-center justify-between" style={{ color: gt.color || '#3b82f6' }}>
-                      <span>{gt.label} ({gt.weight}%):</span>
-                      <span>σ = {((engine as any)[`std_dev_${gt.id}`] ?? engine.std_dev ?? 0)}</span>
+                  {activeTooltip === 'forecast' && (
+                    <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 w-64 p-3 bg-[#161c34] border border-[#2c375e] text-slate-200 text-[11px] rounded-xl shadow-2xl z-30 text-left font-sans">
+                      <span className="font-extrabold text-indigo-300 block mb-1">Dự Đoán ({engine.prediction_model ?? 'Smart Predict'}):</span>
+                      Tự động chọn mô hình tốt nhất dựa trên lượng dữ liệu: EMA (&lt;5 buổi), Weighted OLS (5–19 buổi), Holt-Winters (20+ buổi).
                     </div>
-                  ))}
+                  )}
                 </div>
-                <span className="text-[10px] text-slate-400 block">
-                  SD đo độ ổn định quanh quỹ đạo tiến bộ (khử xu hướng), phân biệt chính xác giữa tiến bộ vượt bậc và trồi sụt thất thường.
-                </span>
-              </div>
-            )}
-          </div>
 
-          <div className="border-l border-[#1d2644] relative group">
-            <div className="flex items-center justify-center gap-1">
-              <span className="text-[10px] font-black uppercase text-slate-400 block">Tốc Độ Tăng Trưởng</span>
-              <button 
-                onClick={() => setActiveTooltip(activeTooltip === 'trend' ? null : 'trend')} 
-                className="text-slate-500 hover:text-purple-400 cursor-pointer"
-                title="Giải thích Trend Rate"
-              >
-                <Info size={11} />
-              </button>
+                <div className="border-l border-[#1d2644] relative group">
+                  <div className="flex items-center justify-center gap-1">
+                    <span className="text-[10px] font-black uppercase text-slate-400 block">Trình Độ EMA</span>
+                    <button
+                      onClick={() => setActiveTooltip(activeTooltip === 'ema' ? null : 'ema')}
+                      className="text-slate-500 hover:text-emerald-400 cursor-pointer"
+                      title="Giải thích EMA"
+                    >
+                      <Info size={11} />
+                    </button>
+                  </div>
+                  <span className={`text-sm font-black font-mono ${engine.ema_level < 5.0 ? 'text-rose-500' :
+                      engine.ema_level < 6.5 ? 'text-amber-400' :
+                        engine.ema_level < 8.0 ? 'text-blue-400' : 'text-emerald-400'
+                    }`}>{engine.ema_level}</span>
+                  <span className="text-[10px] text-slate-400 font-semibold block">Exponential Moving</span>
+
+                  {activeTooltip === 'ema' && (
+                    <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 w-64 p-3 bg-[#161c34] border border-[#2c375e] text-slate-200 text-[11px] rounded-xl shadow-2xl z-30 text-left font-sans">
+                      <span className="font-extrabold text-emerald-300 block mb-1">Trình Độ Hiện Tại (EMA):</span>
+                      <div className="space-y-1 my-1.5 font-mono text-[10px] font-bold bg-[#0d1120] p-2 rounded-lg border border-[#202948]">
+                        <div className="flex items-center justify-between text-blue-400">
+                          <span>Check 1 EMA:</span>
+                          <span>{engine.ema_c1 ?? 0}</span>
+                        </div>
+                        <div className="flex items-center justify-between text-purple-400">
+                          <span>Check 2 EMA:</span>
+                          <span>{engine.ema_c2 ?? 0}</span>
+                        </div>
+                        <div className="flex items-center justify-between text-emerald-400">
+                          <span>Homework EMA:</span>
+                          <span>{engine.ema_hw ?? 0}</span>
+                        </div>
+                      </div>
+                      <span className="text-[10px] text-slate-400 block">
+                        Trình độ tổng hợp ({engine.ema_level}) ưu tiên trọng số bài học mới nhất.
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                <div className="border-l border-[#1d2644] relative group">
+                  <div className="flex items-center justify-center gap-1">
+                    <span className="text-[10px] font-black uppercase text-slate-400 block">Độ Biến Động (SD)</span>
+                    <button
+                      onClick={() => setActiveTooltip(activeTooltip === 'sd' ? null : 'sd')}
+                      className="text-slate-500 hover:text-cyan-400 cursor-pointer"
+                      title="Giải thích Standard Deviation"
+                    >
+                      <Info size={11} />
+                    </button>
+                  </div>
+                  <span className={`text-sm font-black font-mono ${engine.std_dev > 2.0 ? 'text-rose-500' :
+                      engine.std_dev > 1.0 ? 'text-amber-400' :
+                        engine.std_dev < 0.5 ? 'text-emerald-400' : 'text-cyan-400'
+                    }`}>σ = {engine.std_dev}</span>
+                  <span className={`text-[10px] font-semibold block ${engine.consistency_label?.includes('mạnh') ? 'text-rose-400 font-extrabold' :
+                      engine.consistency_label?.includes('Biến động') ? 'text-amber-400 font-bold' :
+                        engine.consistency_label?.includes('Rất ổn định') ? 'text-emerald-400 font-bold' : 'text-slate-400'
+                    }`}>{engine.consistency_label}</span>
+
+                  {activeTooltip === 'sd' && (
+                    <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 w-64 p-3 bg-[#161c34] border border-[#2c375e] text-slate-200 text-[11px] rounded-xl shadow-2xl z-30 text-left font-sans">
+                      <span className="font-extrabold text-cyan-300 block mb-1">Độ Biến Động Thật Sự (Residual SD):</span>
+                      <div className="space-y-1 my-1.5 font-mono text-[10px] font-bold bg-[#0d1120] p-2 rounded-lg border border-[#202948]">
+                        {gradeTypesList.map(gt => (
+                          <div key={gt.id} className="flex items-center justify-between" style={{ color: gt.color || '#3b82f6' }}>
+                            <span>{gt.label} ({gt.weight}%):</span>
+                            <span>σ = {((engine as any)[`std_dev_${gt.id}`] ?? engine.std_dev ?? 0)}</span>
+                          </div>
+                        ))}
+                      </div>
+                      <span className="text-[10px] text-slate-400 block">
+                        SD đo độ ổn định quanh quỹ đạo tiến bộ (khử xu hướng), phân biệt chính xác giữa tiến bộ vượt bậc và trồi sụt thất thường.
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                <div className="border-l border-[#1d2644] relative group">
+                  <div className="flex items-center justify-center gap-1">
+                    <span className="text-[10px] font-black uppercase text-slate-400 block">Tốc Độ Tăng Trưởng</span>
+                    <button
+                      onClick={() => setActiveTooltip(activeTooltip === 'trend' ? null : 'trend')}
+                      className="text-slate-500 hover:text-purple-400 cursor-pointer"
+                      title="Giải thích Trend Rate"
+                    >
+                      <Info size={11} />
+                    </button>
+                  </div>
+                  <span className="text-sm font-black text-purple-300 font-mono">{engine.trend_slope > 0 ? `+${engine.trend_slope}` : engine.trend_slope}/buổi</span>
+                  <span className={`text-[10px] font-bold block ${engine.trend_label?.includes('Giảm') || engine.trend_label?.includes('Suy giảm') ? 'text-rose-400' :
+                      engine.trend_label?.includes('Ổn định') ? 'text-slate-300' : 'text-emerald-400'
+                    }`}>{engine.trend_label}</span>
+
+                  {activeTooltip === 'trend' && (
+                    <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 w-64 p-3 bg-[#161c34] border border-[#2c375e] text-slate-200 text-[11px] rounded-xl shadow-2xl z-30 text-left font-sans">
+                      <span className="font-extrabold text-purple-300 block mb-1">Tốc Độ Tăng Trưởng (Trend Rate):</span>
+                      Hệ số góc (slope) tính toán mức tăng hoặc giảm trung bình của học sinh sau mỗi buổi học.
+                    </div>
+                  )}
+                </div>
+
+                <div className="border-l border-[#1d2644] col-span-2 sm:col-span-1">
+                  <span className="text-[10px] font-black uppercase text-slate-400 block">Xếp Loại Tổng Thể</span>
+                  <span className={`text-xs font-black flex items-center justify-center gap-1 ${engine.rating_label?.includes('NGUY CƠ') ? 'text-rose-500 font-extrabold animate-pulse' :
+                      engine.rating_label?.includes('Cần Cố Gắng') ? 'text-amber-400' :
+                        engine.rating_label?.includes('Tốt') ? 'text-blue-400' : 'text-emerald-400'
+                    }`}>
+                    {engine.rating_label}
+                  </span>
+                </div>
+              </div>
+
             </div>
-            <span className="text-sm font-black text-purple-300 font-mono">{engine.trend_slope > 0 ? `+${engine.trend_slope}` : engine.trend_slope}/buổi</span>
-            <span className={`text-[10px] font-bold block ${
-              engine.trend_label?.includes('Giảm') || engine.trend_label?.includes('Suy giảm') ? 'text-rose-400' :
-              engine.trend_label?.includes('Ổn định') ? 'text-slate-300' : 'text-emerald-400'
-            }`}>{engine.trend_label}</span>
 
-            {activeTooltip === 'trend' && (
-              <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 w-64 p-3 bg-[#161c34] border border-[#2c375e] text-slate-200 text-[11px] rounded-xl shadow-2xl z-30 text-left font-sans">
-                <span className="font-extrabold text-purple-300 block mb-1">Tốc Độ Tăng Trưởng (Trend Rate):</span>
-                Hệ số góc (slope) tính toán mức tăng hoặc giảm trung bình của học sinh sau mỗi buổi học.
+            {/* 6. STUDENT RANKINGS TABLE — TanStack Table */}
+            <div className={`bg-[#0d1120] border border-[#1d2644] rounded-2xl flex flex-col shadow-2xl mb-8 ${selectedStudentObj ? 'animate-cascade-4' : 'animate-cascade-3'}`}>
+              <div className="px-5 py-4 border-b border-[#181f36] flex flex-wrap items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <GraduationCap size={18} className="text-indigo-400" />
+                  <h3 className="text-sm font-black text-white uppercase tracking-wider">
+                    BẢNG XẾP HẠNG VÀ CHI TIẾT ĐIỂM SỐ HỌC SINH
+                  </h3>
+                </div>
+                <div className="flex items-center gap-2">
+                  <GraduationCap size={15} className="text-indigo-400 shrink-0" />
+                  <CustomSelect
+                    value={selectedClassId}
+                    onChange={(val) => { setSelectedClassId(String(val)); setSelectedStudentId(''); }}
+                    options={[
+                      { value: '', label: 'Tất cả lớp học' },
+                      ...classes.map(c => ({ value: String(c.id), label: `${c.class_name} (${c.grade || 'Lớp 6'})` }))
+                    ]}
+                    className="w-52"
+                  />
+                </div>
+
               </div>
-            )}
-          </div>
-
-          <div className="border-l border-[#1d2644] col-span-2 sm:col-span-1">
-            <span className="text-[10px] font-black uppercase text-slate-400 block">Xếp Loại Tổng Thể</span>
-            <span className={`text-xs font-black flex items-center justify-center gap-1 ${
-              engine.rating_label?.includes('NGUY CƠ') ? 'text-rose-500 font-extrabold animate-pulse' :
-              engine.rating_label?.includes('Cần Cố Gắng') ? 'text-amber-400' :
-              engine.rating_label?.includes('Tốt') ? 'text-blue-400' : 'text-emerald-400'
-            }`}>
-              {engine.rating_label}
-            </span>
-          </div>
-        </div>
-
-      </div>
-
-      {/* 6. STUDENT RANKINGS TABLE — TanStack Table */}
-      <div className={`bg-[#0d1120] border border-[#1d2644] rounded-2xl flex flex-col shadow-2xl mb-8 ${selectedStudentObj ? 'animate-cascade-4' : 'animate-cascade-3'}`}>
-        <div className="px-5 py-4 border-b border-[#181f36] flex flex-wrap items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <GraduationCap size={18} className="text-indigo-400" />
-            <h3 className="text-sm font-black text-white uppercase tracking-wider">
-              BẢNG XẾP HẠNG VÀ CHI TIẾT ĐIỂM SỐ HỌC SINH
-            </h3>
-          </div>
-          <div className="flex items-center gap-2">
-            <GraduationCap size={15} className="text-indigo-400 shrink-0" />
-            <CustomSelect
-              value={selectedClassId}
-              onChange={(val) => { setSelectedClassId(String(val)); setSelectedStudentId(''); }}
-              options={[
-                { value: '', label: 'Tất cả lớp học' },
-                ...classes.map(c => ({ value: String(c.id), label: `${c.class_name} (${c.grade || 'Lớp 6'})` }))
-              ]}
-              className="w-52"
-            />
-          </div>
-
-        </div>
-        <DataTable
-          tableId="reports-rankings-table"
-          exportFilename="bang_xep_hang_hoc_sinh"
-          data={filteredRankings}
-          columns={rankingColumns}
-          loading={loading}
-          searchPlaceholder="Tìm học sinh theo tên, biệt danh, lớp..."
-          emptyMessage="Không có dữ liệu xếp hạng."
-          pageSize={20}
-          onRowClick={(r: any) => handleSelectRankingStudent(r.student_id)}
-          initialSorting={[{ id: 'overallAvg', desc: true }]}
-          onExportExcel={handleExportRankingsExcel}
-        />
-      </div>
-      {/* 7. STUDENT GRADE HISTORY & EDIT TABLE — TanStack Table */}
-      <div className={`bg-[#0d1120] border border-[#1d2644] rounded-2xl flex flex-col shadow-2xl mb-8 ${selectedStudentObj ? 'animate-cascade-5' : 'animate-cascade-4'}`}>
-        <div className="px-5 py-4 border-b border-[#181f36] flex flex-wrap items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <History size={18} className="text-indigo-400" />
-            <h3 className="text-sm font-black text-white uppercase tracking-wider">
-              {selectedStudentObj 
-                ? `LỊCH SỬ ĐIỂM SỐ & ĐIỂM DANH — HỌC SINH: ${selectedStudentObj.full_name.toUpperCase()}`
-                : `LỊCH SỬ ĐIỂM SỐ CHI TIẾT TẤT CẢ BUỔI HỌC (${sessionRecords.length} BẢN GHI)`
-              }
-            </h3>
-          </div>
-          {selectedStudentObj && (
-            <span className="text-xs font-extrabold text-indigo-300 bg-indigo-500/10 px-3 py-1 rounded-xl border border-indigo-500/20">
-              Tổng cộng: {sessionRecords.length} buổi học ({stats.sessionCount} có mặt, {sessionRecords.length - stats.sessionCount} vắng mặt)
-            </span>
-          )}
-        </div>
-        <DataTable
-          tableId="reports-history-table"
-          data={sessionRecords}
-          columns={historyColumns}
-          loading={loading}
-          searchPlaceholder="Tìm theo ngày, trạng thái, ghi chú..."
-          emptyMessage="Chưa có lịch sử điểm số."
-          pageSize={20}
-          exportFilename={`lich_su_diem_${selectedStudentObj ? selectedStudentObj.full_name : 'lop'}`}
-        />
-      </div>
-      </>
-      )}
+              <DataTable
+                tableId="reports-rankings-table"
+                exportFilename="bang_xep_hang_hoc_sinh"
+                data={filteredRankings}
+                columns={rankingColumns}
+                loading={loading}
+                searchPlaceholder="Tìm học sinh theo tên, biệt danh, lớp..."
+                emptyMessage="Không có dữ liệu xếp hạng."
+                pageSize={20}
+                onRowClick={(r: any) => handleSelectRankingStudent(r.student_id)}
+                initialSorting={[{ id: 'overallAvg', desc: true }]}
+                onExportExcel={handleExportRankingsExcel}
+              />
+            </div>
+            {/* 7. STUDENT GRADE HISTORY & EDIT TABLE — TanStack Table */}
+            <div className={`bg-[#0d1120] border border-[#1d2644] rounded-2xl flex flex-col shadow-2xl mb-8 ${selectedStudentObj ? 'animate-cascade-5' : 'animate-cascade-4'}`}>
+              <div className="px-5 py-4 border-b border-[#181f36] flex flex-wrap items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <History size={18} className="text-indigo-400" />
+                  <h3 className="text-sm font-black text-white uppercase tracking-wider">
+                    {selectedStudentObj
+                      ? `LỊCH SỬ ĐIỂM SỐ & ĐIỂM DANH — HỌC SINH: ${selectedStudentObj.full_name.toUpperCase()}`
+                      : `LỊCH SỬ ĐIỂM SỐ CHI TIẾT TẤT CẢ BUỔI HỌC (${sessionRecords.length} BẢN GHI)`
+                    }
+                  </h3>
+                </div>
+                {selectedStudentObj && (
+                  <span className="text-xs font-extrabold text-indigo-300 bg-indigo-500/10 px-3 py-1 rounded-xl border border-indigo-500/20">
+                    Tổng cộng: {sessionRecords.length} buổi học ({stats.sessionCount} có mặt, {sessionRecords.length - stats.sessionCount} vắng mặt)
+                  </span>
+                )}
+              </div>
+              <DataTable
+                tableId="reports-history-table"
+                data={sessionRecords}
+                columns={historyColumns}
+                loading={loading}
+                searchPlaceholder="Tìm theo ngày, trạng thái, ghi chú..."
+                emptyMessage="Chưa có lịch sử điểm số."
+                pageSize={20}
+                exportFilename={`lich_su_diem_${selectedStudentObj ? selectedStudentObj.full_name : 'lop'}`}
+              />
+            </div>
+          </>
+        )}
       </div>
 
       {/* EDIT SINGLE GRADE POPUP MODAL */}
@@ -4797,11 +4787,10 @@ export default function ReportsPage() {
                   <button
                     type="button"
                     onClick={() => setResetScope('class')}
-                    className={`py-2 px-3 rounded-xl text-xs font-bold transition cursor-pointer border ${
-                      resetScope === 'class'
+                    className={`py-2 px-3 rounded-xl text-xs font-bold transition cursor-pointer border ${resetScope === 'class'
                         ? 'bg-indigo-600 text-white border-indigo-400 shadow'
                         : 'bg-[#181d2e] text-slate-400 border-white/10 hover:text-white'
-                    }`}
+                      }`}
                   >
                     Toàn Bộ Lớp {selectedClassId ? `(${classes.find(c => String(c.id) === selectedClassId)?.class_name})` : ''}
                   </button>
@@ -4810,12 +4799,11 @@ export default function ReportsPage() {
                     type="button"
                     onClick={() => setResetScope('student')}
                     disabled={!selectedStudentId}
-                    className={`py-2 px-3 rounded-xl text-xs font-bold transition cursor-pointer border ${
-                      !selectedStudentId ? 'opacity-40 cursor-not-allowed bg-[#181d2e] text-slate-500 border-white/5' :
-                      resetScope === 'student'
-                        ? 'bg-indigo-600 text-white border-indigo-400 shadow'
-                        : 'bg-[#181d2e] text-slate-400 border-white/10 hover:text-white'
-                    }`}
+                    className={`py-2 px-3 rounded-xl text-xs font-bold transition cursor-pointer border ${!selectedStudentId ? 'opacity-40 cursor-not-allowed bg-[#181d2e] text-slate-500 border-white/5' :
+                        resetScope === 'student'
+                          ? 'bg-indigo-600 text-white border-indigo-400 shadow'
+                          : 'bg-[#181d2e] text-slate-400 border-white/10 hover:text-white'
+                      }`}
                   >
                     Học Sinh Đang Chọn
                   </button>
