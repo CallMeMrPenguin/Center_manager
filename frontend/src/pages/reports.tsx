@@ -340,16 +340,35 @@ export default function ReportsPage() {
   const [containerWidth, setContainerWidth] = useState(1200);
 
   useEffect(() => {
+    let timeoutId: any = null;
+    let rAFId = 0;
+
     const updateWidth = () => {
-      if (chartContainerRef.current) {
-        setContainerWidth(chartContainerRef.current.clientWidth);
-      }
+      cancelAnimationFrame(rAFId);
+      clearTimeout(timeoutId);
+
+      // Debounce and throttle: Prevents 60 FPS re-renders during sidebar expand/collapse transitions
+      timeoutId = setTimeout(() => {
+        rAFId = requestAnimationFrame(() => {
+          if (chartContainerRef.current) {
+            const w = chartContainerRef.current.clientWidth;
+            if (w > 0) {
+              setContainerWidth(prev => (Math.abs(prev - w) > 6 ? w : prev));
+            }
+          }
+        });
+      }, 50);
     };
-    updateWidth();
+
+    if (chartContainerRef.current) {
+      setContainerWidth(chartContainerRef.current.clientWidth);
+    }
     window.addEventListener('resize', updateWidth);
     const observer = new ResizeObserver(updateWidth);
     if (chartContainerRef.current) observer.observe(chartContainerRef.current);
     return () => {
+      cancelAnimationFrame(rAFId);
+      clearTimeout(timeoutId);
       window.removeEventListener('resize', updateWidth);
       observer.disconnect();
     };
