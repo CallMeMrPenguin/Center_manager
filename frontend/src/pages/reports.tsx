@@ -1120,11 +1120,10 @@ export default function ReportsPage() {
         <div className="text-center">
           <button
             onClick={(e) => { e.stopPropagation(); handleSelectRankingStudent(row.original.student_id); }}
-            className="px-2.5 py-1 rounded-lg bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 hover:text-indigo-300 transition cursor-pointer border border-indigo-500/20 inline-flex items-center gap-1 text-[11px] font-bold"
+            className="px-2.5 py-1 rounded-lg bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 hover:text-indigo-300 transition cursor-pointer border border-indigo-500/20 inline-flex items-center text-[11px] font-bold"
             title="Xem chi tiết học sinh"
           >
-            <span>Chi tiết</span>
-            <ArrowUpRight size={12} />
+            <span>Xem chi tiết</span>
           </button>
         </div>
       ),
@@ -1180,7 +1179,16 @@ export default function ReportsPage() {
           if (valid.length > 0) {
             const avg = trunc1Dec(valid.reduce((a, b) => a + b, 0) / valid.length);
             const tier = getStudentTier(avg);
-            tierStr = `${tier.name} (${tier.title})`;
+            const iconMap: Record<number, string> = {
+              6: '👑',
+              5: '💎',
+              4: '💠',
+              3: '🥇',
+              2: '🥈',
+              1: '🥉'
+            };
+            const icon = iconMap[tier.tier] || '⚪';
+            tierStr = `${icon} ${tier.name} (${tier.title})`;
             let label = 'Xuất Sắc';
             if (avg < 8.5) label = 'Giỏi';
             if (avg < 7.0) label = 'Khá';
@@ -1430,9 +1438,9 @@ export default function ReportsPage() {
               e.stopPropagation();
               handleSelectRankingStudent(row.original.student_id);
             }}
-            className="px-2.5 py-1 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 hover:text-white transition cursor-pointer border border-rose-500/30 text-[11px] font-bold inline-flex items-center gap-1"
+            className="px-2.5 py-1 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 hover:text-white transition cursor-pointer border border-rose-500/30 text-[11px] font-bold inline-flex items-center"
           >
-            <span>Xem Chi Tiết →</span>
+            <span>Xem chi tiết</span>
           </button>
         </div>
       ),
@@ -2464,13 +2472,14 @@ export default function ReportsPage() {
     }
   }, [smartGroups, classes, selectedClassId]);
 
-  // Handle clicking student row in rankings table: Toggle Select / Unselect
+  // Handle clicking student row in rankings table or detail button: Select & Redirect to Overview
   const handleSelectRankingStudent = (studentId: number) => {
     const sidStr = String(studentId);
-    if (selectedStudentId === sidStr) {
+    if (selectedStudentId === sidStr && activeReportTab === 'overview') {
       setSelectedStudentId('');
     } else {
       setSelectedStudentId(sidStr);
+      setActiveReportTab('overview');
       if (topRef.current) {
         topRef.current.scrollIntoView({ behavior: 'smooth' });
       }
@@ -2604,17 +2613,17 @@ export default function ReportsPage() {
 
                   {/* Dual Class Selector Bar - 4 Rounded Square Clean Boxes */}
                   <div className="flex flex-wrap items-center gap-3 bg-[#070a12] p-2 rounded-xl border border-[#182236]">
-                    <div className="flex items-center gap-2.5 bg-[#0d1322] border border-blue-500/40 px-3.5 py-1.5 rounded-lg">
+                    <div className="flex items-center gap-2.5 bg-[#0d1322] border border-blue-500/40 px-3.5 py-1.5 rounded-lg shrink-0">
                       <span
-                        className="w-2.5 h-2.5 rounded-sm shadow-sm"
+                        className="w-2.5 h-2.5 rounded-full shrink-0"
                         style={{ backgroundColor: getClassColor(compareClassAId, 0), boxShadow: `0 0 8px ${getClassColor(compareClassAId, 0)}80` }}
                       ></span>
-                      <span className="text-xs font-black text-blue-400">Lớp A:</span>
+                      <span className="text-xs font-black text-blue-400 whitespace-nowrap shrink-0">Lớp A:</span>
                       <CustomSelect
                         value={compareClassAId}
                         onChange={(val) => setCompareClassAId(String(val))}
-                        options={classes.map((c, i) => ({ value: String(c.id), label: `${c.class_name} (${c.grade || 'Lớp 6'})` }))}
-                        className="w-44"
+                        options={classes.map((c) => ({ value: String(c.id), label: `${c.class_name} (${c.grade || 'Lớp 6'})` }))}
+                        className="w-48 shrink-0"
                       />
                     </div>
 
@@ -2622,17 +2631,17 @@ export default function ReportsPage() {
                       VS
                     </div>
 
-                    <div className="flex items-center gap-2.5 bg-[#0d1622] border border-cyan-500/40 px-3.5 py-1.5 rounded-lg">
+                    <div className="flex items-center gap-2.5 bg-[#0d1622] border border-cyan-500/40 px-3.5 py-1.5 rounded-lg shrink-0">
                       <span
-                        className="w-2.5 h-2.5 rounded-sm shadow-sm"
+                        className="w-2.5 h-2.5 rounded-full shrink-0"
                         style={{ backgroundColor: getClassColor(compareClassBId, 1), boxShadow: `0 0 8px ${getClassColor(compareClassBId, 1)}80` }}
                       ></span>
-                      <span className="text-xs font-black text-cyan-400">Lớp B:</span>
+                      <span className="text-xs font-black text-cyan-400 whitespace-nowrap shrink-0">Lớp B:</span>
                       <CustomSelect
                         value={compareClassBId}
                         onChange={(val) => setCompareClassBId(String(val))}
-                        options={classes.map((c, i) => ({ value: String(c.id), label: `${c.class_name} (${c.grade || 'Lớp 6'})` }))}
-                        className="w-44"
+                        options={classes.map((c) => ({ value: String(c.id), label: `${c.class_name} (${c.grade || 'Lớp 6'})` }))}
+                        className="w-48 shrink-0"
                       />
                     </div>
                   </div>
@@ -2888,12 +2897,17 @@ export default function ReportsPage() {
                         <Award size={15} className="text-amber-400" />
                         Phân Bố 6 Hạng Bậc Học Lực
                       </span>
-                      <span className="text-[11px] font-bold text-slate-400">
-                        {classComparisonData.classA.studentCount} vs {classComparisonData.classB.studentCount} hs
-                      </span>
+                      <div className="flex items-center gap-3 text-[11px] font-bold">
+                        <span className="flex items-center gap-1.5 text-blue-400">
+                          <span className="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_6px_rgba(59,130,246,0.8)]"></span> {classComparisonData.classA.name} ({classComparisonData.classA.studentCount} hs)
+                        </span>
+                        <span className="flex items-center gap-1.5 text-cyan-400">
+                          <span className="w-2 h-2 rounded-full bg-cyan-500 shadow-[0_0_6px_rgba(6,182,212,0.8)]"></span> {classComparisonData.classB.name} ({classComparisonData.classB.studentCount} hs)
+                        </span>
+                      </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-2 text-xs">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 text-xs">
                       {TIERS_CONFIG.slice().reverse().map(tier => {
                         const countA = classComparisonData.classA.tierDistribution.find((t: any) => t.tier === tier.tier)?.count || 0;
                         const pctA = classComparisonData.classA.tierDistribution.find((t: any) => t.tier === tier.tier)?.pct || 0;
@@ -2901,18 +2915,28 @@ export default function ReportsPage() {
                         const pctB = classComparisonData.classB.tierDistribution.find((t: any) => t.tier === tier.tier)?.pct || 0;
 
                         return (
-                          <div key={tier.tier} className="p-2 rounded-lg bg-[#0e1422] border border-white/5 flex items-center justify-between gap-2">
-                            <div className="flex items-center gap-2 min-w-0">
-                              <img src={tier.badge} alt={tier.name} className="w-6 h-6 object-contain shrink-0" />
+                          <div key={tier.tier} className="p-2.5 rounded-xl bg-[#0d1220] border border-white/5 hover:border-white/10 transition-colors flex items-center justify-between gap-3 shadow-sm">
+                            <div className="flex items-center gap-2.5 min-w-0">
+                              <img src={tier.badge} alt={tier.name} className="w-7 h-7 object-contain shrink-0 drop-shadow" />
                               <div className="truncate">
-                                <span className={`text-[11px] font-black block leading-none ${tier.text}`}>{tier.name}</span>
-                                <span className="text-[9px] text-slate-500 font-semibold">{tier.minScore} - {tier.maxScore}đ</span>
+                                <span className={`text-xs font-black block leading-tight ${tier.text}`}>{tier.name}</span>
+                                <span className="text-[10px] text-slate-400 font-mono font-semibold">{tier.minScore} - {tier.maxScore}đ</span>
                               </div>
                             </div>
-                            <div className="text-right font-mono font-bold text-[11px] shrink-0">
-                              <span className="text-blue-400">{countA}hs ({pctA}%)</span>
-                              <span className="text-slate-600 mx-1">|</span>
-                              <span className="text-cyan-400">{countB}hs ({pctB}%)</span>
+                            <div className="flex items-center gap-1.5 shrink-0 font-mono text-[11px] font-black">
+                              <div 
+                                className="px-2 py-1 rounded-lg bg-blue-500/10 text-blue-300 border border-blue-500/20 text-center min-w-[56px]"
+                                title={`${classComparisonData.classA.name}: ${countA} học sinh (${pctA}%)`}
+                              >
+                                <span>{countA}hs</span> <span className="text-[9px] text-blue-400/80 font-normal">({pctA}%)</span>
+                              </div>
+                              <span className="text-[10px] text-slate-600 font-bold">vs</span>
+                              <div 
+                                className="px-2 py-1 rounded-lg bg-cyan-500/10 text-cyan-300 border border-cyan-500/20 text-center min-w-[56px]"
+                                title={`${classComparisonData.classB.name}: ${countB} học sinh (${pctB}%)`}
+                              >
+                                <span>{countB}hs</span> <span className="text-[9px] text-cyan-400/80 font-normal">({pctB}%)</span>
+                              </div>
                             </div>
                           </div>
                         );
@@ -4784,8 +4808,8 @@ export default function ReportsPage() {
       {/* 8. CUSTOM TIME PHASE MANAGEMENT MODAL */}
       {phaseModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-4 animate-mac-dropdown">
-          <div className="bg-[#0e1222] border border-[#232d4e] rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl">
-            <div className="px-6 py-4 border-b border-[#1c243f] flex items-center justify-between bg-[#141828]">
+          <div className="bg-[#0e1222] border border-[#232d4e] rounded-2xl w-full max-w-lg shadow-2xl overflow-visible relative">
+            <div className="px-6 py-4 border-b border-[#1c243f] flex items-center justify-between bg-[#141828] rounded-t-2xl">
               <div className="flex items-center gap-2">
                 <Clock className="text-indigo-400" size={18} />
                 <h3 className="text-sm font-black uppercase text-white tracking-wider">
@@ -4815,8 +4839,8 @@ export default function ReportsPage() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
+              <div className="grid grid-cols-2 gap-4 relative z-30">
+                <div className="relative">
                   <label className="block text-[11px] font-black uppercase tracking-wider text-slate-300 mb-1.5">
                     Ngày Bắt Đầu:
                   </label>
@@ -4824,9 +4848,10 @@ export default function ReportsPage() {
                     value={phaseFromDate}
                     onChange={(val) => setPhaseFromDate(val)}
                     placeholder="YYYY-MM-DD"
+                    align="left"
                   />
                 </div>
-                <div>
+                <div className="relative">
                   <label className="block text-[11px] font-black uppercase tracking-wider text-slate-300 mb-1.5">
                     Ngày Kết Thúc:
                   </label>
@@ -4834,11 +4859,12 @@ export default function ReportsPage() {
                     value={phaseToDate}
                     onChange={(val) => setPhaseToDate(val)}
                     placeholder="YYYY-MM-DD"
+                    align="right"
                   />
                 </div>
               </div>
 
-              <div>
+              <div className="relative z-20">
                 <label className="block text-[11px] font-black uppercase tracking-wider text-slate-300 mb-1.5">
                   Áp Dụng Cho Lớp:
                 </label>
@@ -4852,7 +4878,7 @@ export default function ReportsPage() {
                 />
               </div>
 
-              <div className="pt-2 flex items-center justify-end gap-3">
+              <div className="pt-2 flex items-center justify-end gap-3 relative z-10">
                 <button
                   type="button"
                   onClick={() => setPhaseModalOpen(false)}

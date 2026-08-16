@@ -7,6 +7,7 @@ interface CustomDatePickerProps {
   placeholder?: string;
   className?: string;
   required?: boolean;
+  align?: 'left' | 'right';
   highlightDaysOfWeek?: number[]; // e.g. [1, 3, 5] for Mon, Wed, Fri
   highlightDates?: string[]; // e.g. ['2026-07-28', '2026-07-30']
   maxHighlightDate?: string; // default today 'YYYY-MM-DD'
@@ -17,6 +18,7 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
   onChange,
   placeholder = 'Chọn ngày...',
   className = '',
+  align = 'left',
   highlightDaysOfWeek,
   highlightDates,
   maxHighlightDate,
@@ -149,7 +151,7 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
 
       {/* CUSTOM DARK POPOVER DIALOG */}
       {isOpen && (
-        <div className="absolute left-0 mt-2 z-[9999] w-72 bg-[#0c0f1e] border border-[#212c4b] rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.95)] p-4 select-none animate-slide-up">
+        <div className={`absolute ${align === 'right' ? 'right-0' : 'left-0'} mt-2 z-[9999] w-72 bg-[#0c0f1e] border border-[#212c4b] rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.95)] p-4 select-none animate-slide-up`}>
           {/* HEADER MONTH/YEAR NAV */}
           <div className="flex items-center justify-between pb-3 mb-3 border-b border-white/10">
             <button
