@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Info, Zap } from 'lucide-react';
+import { Info } from 'lucide-react';
 import { GradeTypeItem } from '../../../types';
 
 interface SummaryStripProps {
@@ -9,6 +9,30 @@ interface SummaryStripProps {
 
 export const SummaryStrip: React.FC<SummaryStripProps> = ({ engine, gradeTypesList }) => {
   const [activeTooltip, setActiveTooltip] = useState<string | null>(null);
+
+  // Dynamic colors and descriptive labels for PI scale
+  const pi = engine.performance_index != null ? Number(engine.performance_index) : 85.0;
+  let piColor = 'text-emerald-400';
+  let piLabel = 'Phong Độ Xuất Sắc';
+  let piSubColor = 'text-emerald-400 font-bold';
+
+  if (pi < 60) {
+    piColor = 'text-rose-500';
+    piLabel = 'Cảnh Báo Nguy Cơ';
+    piSubColor = 'text-rose-400 font-extrabold';
+  } else if (pi < 70) {
+    piColor = 'text-amber-400';
+    piLabel = 'Cần Cố Gắng';
+    piSubColor = 'text-amber-400 font-bold';
+  } else if (pi < 80) {
+    piColor = 'text-cyan-400';
+    piLabel = 'Phong Độ Tốt';
+    piSubColor = 'text-cyan-400 font-bold';
+  } else if (pi < 90) {
+    piColor = 'text-blue-400';
+    piLabel = 'Phong Độ Rất Tốt';
+    piSubColor = 'text-blue-400 font-bold';
+  }
 
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 bg-[#0f1426] border border-[#1d2644] p-3 rounded-xl text-center items-center relative shadow-lg">
@@ -148,29 +172,32 @@ export const SummaryStrip: React.FC<SummaryStripProps> = ({ engine, gradeTypesLi
       {/* 5. Performance Index (PI) */}
       <div className="border-l border-[#1d2644] relative group p-1">
         <div className="flex items-center justify-center gap-1">
-          <span className="text-[10px] font-black uppercase text-amber-400 block flex items-center gap-1">
-            <Zap size={11} className="text-amber-400" />
+          <span className="text-[10px] font-black uppercase text-slate-400 block">
             Chỉ Số PI
           </span>
           <button
             type="button"
             onClick={() => setActiveTooltip(activeTooltip === 'pi' ? null : 'pi')}
-            className="text-slate-500 hover:text-amber-400 cursor-pointer"
+            className="text-slate-500 hover:text-indigo-400 cursor-pointer"
             title="Giải thích Performance Index (PI)"
           >
             <Info size={11} />
           </button>
         </div>
-        <span className="text-sm font-black text-amber-300 font-mono">{engine.performance_index ?? 85.0} / 100</span>
-        <span className="text-[10px] text-amber-400/90 font-bold block truncate">Phong Độ Toàn Diện</span>
+        <span className={`text-sm font-black font-mono ${piColor}`}>
+          {pi} / 100
+        </span>
+        <span className={`text-[10px] block truncate ${piSubColor}`}>
+          {piLabel}
+        </span>
 
         {activeTooltip === 'pi' && (
-          <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 w-72 p-3.5 bg-[#161c34] border border-amber-500/40 text-slate-200 text-[11px] rounded-xl shadow-2xl z-30 text-left font-sans space-y-1.5">
+          <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 w-72 p-3.5 bg-[#161c34] border border-[#2c375e] text-slate-200 text-[11px] rounded-xl shadow-2xl z-30 text-left font-sans space-y-1.5">
             <div className="flex items-center justify-between border-b border-white/10 pb-1">
-              <span className="font-extrabold text-amber-300 flex items-center gap-1">
-                <Zap size={12} /> Chỉ Số PI (Performance Index):
+              <span className="font-extrabold text-indigo-300">
+                Chỉ Số PI (Performance Index):
               </span>
-              <span className="font-mono font-black text-amber-300">{engine.performance_index ?? 85.0}đ</span>
+              <span className={`font-mono font-black ${piColor}`}>{pi}đ</span>
             </div>
             <p className="text-[10px] text-slate-300 leading-relaxed">
               Tổng hợp 5 yếu tố học tập toàn diện:
