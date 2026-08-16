@@ -350,42 +350,44 @@ input[type="month"]::-webkit-calendar-picker-indicator {
 }
 .animate-card-enter { animation: cardEnter 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; will-change: opacity, transform; }
 
-/* ── ENERGETIC FLY IN ANIMATION SYSTEM ────────────────────────────────── */
+/* ── ENERGETIC BOTTOM-UP FLY IN ANIMATION SYSTEM ──────────────────────── */
 @keyframes flyInUp {
   0% {
     opacity: 0;
-    transform: translateY(36px) scale(0.97);
+    transform: translateY(90px);
   }
-  65% {
-    opacity: 1;
-    transform: translateY(-2px) scale(1.003);
+  35% {
+    opacity: 0.6;
   }
   100% {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: translateY(0);
   }
 }
 
-.animate-cascade-1, .animate-fly-1 { animation: flyInUp 0.65s cubic-bezier(0.16, 1, 0.3, 1) 0.05s both; will-change: opacity, transform; }
-.animate-cascade-2, .animate-fly-2 { animation: flyInUp 0.65s cubic-bezier(0.16, 1, 0.3, 1) 0.25s both; will-change: opacity, transform; }
-.animate-cascade-3, .animate-fly-3 { animation: flyInUp 0.65s cubic-bezier(0.16, 1, 0.3, 1) 0.50s both; will-change: opacity, transform; }
-.animate-cascade-4, .animate-fly-4 { animation: flyInUp 0.65s cubic-bezier(0.16, 1, 0.3, 1) 0.75s both; will-change: opacity, transform; }
-.animate-cascade-5, .animate-fly-5 { animation: flyInUp 0.65s cubic-bezier(0.16, 1, 0.3, 1) 1.00s both; will-change: opacity, transform; }
-.animate-cascade-6, .animate-fly-6 { animation: flyInUp 0.65s cubic-bezier(0.16, 1, 0.3, 1) 1.25s both; will-change: opacity, transform; }
+.animate-cascade-1, .animate-fly-1 { animation: flyInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.05s both; will-change: opacity, transform; }
+.animate-cascade-2, .animate-fly-2 { animation: flyInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.22s both; will-change: opacity, transform; }
+.animate-cascade-3, .animate-fly-3 { animation: flyInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.44s both; will-change: opacity, transform; }
+.animate-cascade-4, .animate-fly-4 { animation: flyInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.66s both; will-change: opacity, transform; }
+.animate-cascade-5, .animate-fly-5 { animation: flyInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.88s both; will-change: opacity, transform; }
+.animate-cascade-6, .animate-fly-6 { animation: flyInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) 1.10s both; will-change: opacity, transform; }
 
-/* Table Row Fly In */
+/* Table Row Fly In from Bottom */
 @keyframes rowFlyIn {
   0% {
     opacity: 0;
-    transform: translateY(14px) scale(0.99);
+    transform: translateY(32px);
+  }
+  40% {
+    opacity: 0.7;
   }
   100% {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: translateY(0);
   }
 }
 .animate-row-enter {
-  animation: rowFlyIn 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: rowFlyIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
   will-change: opacity, transform;
 }
 
