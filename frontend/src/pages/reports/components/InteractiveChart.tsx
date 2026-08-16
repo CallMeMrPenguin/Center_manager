@@ -155,21 +155,32 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = ({
 
       <div
         className={`w-full relative overflow-hidden rounded-xl bg-[#080b14]/50 border border-[#141b2e] ${isDragging ? 'cursor-grabbing' : zoomLevel > 1.0 ? 'cursor-grab' : 'cursor-default'}`}
-        onContextMenu={(e) => e.preventDefault()}
+        onContextMenu={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+        }}
         onMouseDown={(e) => {
-          if (e.button === 0 && zoomLevel > 1.0) {
+          // Strictly only allow left-click (button === 0) for dragging when zoomed in
+          if (e.button !== 0) return;
+          if (zoomLevel > 1.0) {
             setIsDragging(true);
             setDragStart({ x: e.clientX, y: e.clientY });
           }
         }}
         onMouseMove={(e) => {
-          if (!isDragging) return;
+          // If not dragging or if left button is not held down, stop drag immediately
+          if (!isDragging || (e.buttons & 1) !== 1) {
+            if (isDragging) setIsDragging(false);
+            return;
+          }
           const dx = e.clientX - dragStart.x;
           const dy = e.clientY - dragStart.y;
           setPanOffset(prev => clampPanOffset(prev.x + dx, prev.y + dy, zoomLevel));
           setDragStart({ x: e.clientX, y: e.clientY });
         }}
-        onMouseUp={() => setIsDragging(false)}
+        onMouseUp={(e) => {
+          if (e.button === 0) setIsDragging(false);
+        }}
         onMouseLeave={() => setIsDragging(false)}
       >
         <ChartSvgPlot
