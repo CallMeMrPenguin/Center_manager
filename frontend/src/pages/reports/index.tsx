@@ -1,62 +1,84 @@
-import React, { useState, useRef, useMemo } from 'react';
+import React, { useState, useRef, useMemo, useEffect, useCallback } from 'react';
 import {
-  BarChart3, RefreshCw, GraduationCap, ChevronRight, RotateCcw,
-  Activity, Layers, GitCompare
+  BarChart3,
+  GitCompare,
+  Activity,
+  Layers,
+  RotateCcw,
+  RefreshCw,
+  ChevronRight,
+  GraduationCap,
+  Calendar,
 } from 'lucide-react';
 import { CustomSelect } from '../../components/CustomSelect';
-import { useReportsData } from './hooks/useReportsData';
 import { OverviewTab } from './tabs/OverviewTab';
 import { DeepAnalysisTab } from './tabs/DeepAnalysisTab';
 import { BenchmarkTab } from './tabs/BenchmarkTab';
-import { ResetGradesModal } from './components/ResetGradesModal';
 import { EditGradeModal } from './components/EditGradeModal';
+import { ResetGradesModal } from './components/ResetGradesModal';
 import { TimePhaseModal } from './components/TimePhaseModal';
-import { getStudentTier } from './types';
+import { useReportsData } from './hooks/useReportsData';
+import { getStudentTier, WarningSettings } from './types';
+import { generateAcademicYears, getCurrentAcademicYear, getSavedWarningSettings } from './utils';
 
-export default function ReportsPage() {
+export const ReportsPage: React.FC = () => {
   const topRef = useRef<HTMLDivElement>(null);
   const [activeReportTab, setActiveReportTab] = useState<'overview' | 'deep' | 'benchmark'>('overview');
-  const [resetModalOpen, setResetModalOpen] = useState(false);
-  const [editingRecord, setEditingRecord] = useState<any | null>(null);
-  const [phaseModalOpen, setPhaseModalOpen] = useState(false);
-  const [selectedDistFilter, setSelectedDistFilter] = useState<'all' | number>('all');
+  const [selectedAcademicYear, setSelectedAcademicYear] = useState<string>(getCurrentAcademicYear());
+  const academicYears = useMemo(() => generateAcademicYears(), []);
 
+  // Filter and modal states
+  const [selectedDistFilter, setSelectedDistFilter] = useState<'all' | number>('all');
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [editingRecord, setEditingRecord] = useState<any>(null);
+  const [resetModalOpen, setResetModalOpen] = useState(false);
+  const [phaseModalOpen, setPhaseModalOpen] = useState(false);
+
+  // Early warning settings
+  const [warningSettings, setWarningSettings] = useState<WarningSettings>(getSavedWarningSettings());
+  const [showWarningSettings, setShowWarningSettings] = useState(false);
+
+  const handleUpdateWarningSettings = useCallback((updates: Partial<WarningSettings>) => {
+    setWarningSettings(prev => {
+      const next = { ...prev, ...updates };
+      localStorage.setItem('cm_reports_warning_settings', JSON.stringify(next));
+      return next;
+    });
+  }, []);
+
+  // Data fetching hook
   const {
     loading,
     classes,
     selectedClassId,
     setSelectedClassId,
-    students,
     selectedStudentId,
     setSelectedStudentId,
-    compareClassAId,
-    setCompareClassAId,
-    compareClassBId,
-    setCompareClassBId,
     sessionRecords,
     studentRankings,
+    gradeTypesList,
     analyticsSummary,
     classAnalyticsMap,
     timePhases,
     selectedPhaseId,
     setSelectedPhaseId,
-    warningAbsentPct,
-    warningConsecutiveAbsent,
-    warningTrendThreshold,
-    showWarningSettings,
-    setShowWarningSettings,
-    handleUpdateWarningSettings,
-    gradeTypesList,
-    selectedStudentObj,
+    compareClassAId,
+    setCompareClassAId,
+    compareClassBId,
+    setCompareClassBId,
     engine,
     studentSessionsMap,
     loadAnalyticsData,
     loadTimePhases,
   } = useReportsData();
 
-  // Filter rankings strictly by selectedClassId and 6-Tier rank filter
+  const selectedStudentObj = useMemo(() => {
+    if (!selectedStudentId || !studentRankings) return null;
+    return studentRankings.find(s => String(s.student_id) === selectedStudentId) || null;
+  }, [selectedStudentId, studentRankings]);
+
   const filteredRankings = useMemo(() => {
-    let list = studentRankings;
+    let list = studentRankings || [];
     if (selectedClassId) {
       list = list.filter(r => String(r.class_id) === selectedClassId);
     }
@@ -102,6 +124,18 @@ export default function ReportsPage() {
 
         {/* Action Controls Bar */}
         <div className="flex flex-wrap items-center gap-3">
+          {/* Academic Year Selector */}
+          <div className="flex items-center gap-2 bg-[#121626] border border-[#202842] px-3.5 py-1.5 rounded-xl shadow-sm">
+            <Calendar size={15} className="text-indigo-400 shrink-0" />
+            <CustomSelect
+              value={selectedAcademicYear}
+              onChange={(val) => setSelectedAcademicYear(String(val))}
+              options={academicYears.map(y => ({ value: y, label: `Năm học ${y}` }))}
+              className="w-44"
+            />
+          </div>
+
+          {/* Class Selector */}
           <div className="flex items-center gap-2 bg-[#121626] border border-[#202842] px-3.5 py-1.5 rounded-xl shadow-sm">
             <GraduationCap size={15} className="text-indigo-400 shrink-0" />
             <CustomSelect
@@ -111,7 +145,7 @@ export default function ReportsPage() {
                 { value: '', label: 'Tất cả lớp học' },
                 ...classes.map(c => ({ value: String(c.id), label: `${c.class_name} (${c.grade || 'Lớp 6'})` }))
               ]}
-              className="w-52"
+              className="w-48"
             />
           </div>
 
@@ -204,9 +238,9 @@ export default function ReportsPage() {
             filteredRankings={filteredRankings}
             selectedDistFilter={selectedDistFilter}
             setSelectedDistFilter={setSelectedDistFilter}
-            warningAbsentPct={warningAbsentPct}
-            warningConsecutiveAbsent={warningConsecutiveAbsent}
-            warningTrendThreshold={warningTrendThreshold}
+            warningAbsentPct={warningSettings.absentPct}
+            warningConsecutiveAbsent={warningSettings.consecutiveAbsent}
+            warningTrendThreshold={warningSettings.trendThreshold}
             showWarningSettings={showWarningSettings}
             setShowWarningSettings={setShowWarningSettings}
             onUpdateWarningSettings={handleUpdateWarningSettings}
@@ -221,6 +255,7 @@ export default function ReportsPage() {
             selectedStudentId={selectedStudentId}
             setSelectedStudentId={setSelectedStudentId}
             selectedStudentObj={selectedStudentObj}
+            selectedAcademicYear={selectedAcademicYear}
             sessionRecords={sessionRecords}
             studentRankings={studentRankings}
             filteredRankings={filteredRankings}
@@ -231,7 +266,7 @@ export default function ReportsPage() {
             selectedPhaseId={selectedPhaseId}
             setSelectedPhaseId={setSelectedPhaseId}
             onOpenPhaseModal={() => setPhaseModalOpen(true)}
-            onOpenEditModal={(rec) => setEditingRecord(rec)}
+            onOpenEditModal={(rec) => { setEditingRecord(rec); setEditModalOpen(true); }}
             onSelectRankingStudent={handleSelectRankingStudent}
           />
         )}
@@ -240,7 +275,7 @@ export default function ReportsPage() {
       {/* 4. MODALS */}
       <EditGradeModal
         record={editingRecord}
-        onClose={() => setEditingRecord(null)}
+        onClose={() => { setEditingRecord(null); setEditModalOpen(false); }}
         onSuccess={() => loadAnalyticsData(true)}
       />
 
@@ -265,4 +300,6 @@ export default function ReportsPage() {
       />
     </div>
   );
-}
+};
+
+export default ReportsPage;

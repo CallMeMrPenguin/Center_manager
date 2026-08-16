@@ -5,7 +5,7 @@ import { InteractiveChart } from '../components/InteractiveChart';
 import { SummaryStrip } from '../components/SummaryStrip';
 import { StudentRankingsTable } from '../components/StudentRankingsTable';
 import { StudentGradeHistoryTable } from '../components/StudentGradeHistoryTable';
-import { formatSessionDate } from '../utils';
+import { formatSessionDate, getStandardMoetPhases } from '../utils';
 import { format1Dec, trunc1Dec } from '../../../utils';
 
 interface OverviewTabProps {
@@ -16,6 +16,7 @@ interface OverviewTabProps {
   selectedStudentId: string;
   setSelectedStudentId: (id: string) => void;
   selectedStudentObj: any;
+  selectedAcademicYear: string;
   sessionRecords: any[];
   studentRankings: any[];
   filteredRankings: any[];
@@ -38,6 +39,7 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
   selectedStudentId,
   setSelectedStudentId,
   selectedStudentObj,
+  selectedAcademicYear,
   sessionRecords,
   studentRankings,
   filteredRankings,
@@ -53,9 +55,35 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
 }) => {
   const [timeView, setTimeView] = useState<'1m' | '2m' | '3m' | 'all'>('all');
 
-  // Overall stats calculations
+  // Combined Standard MOET phases + Custom User Phases
+  const combinedTimePhases = useMemo(() => {
+    const moetPhases = getStandardMoetPhases(selectedAcademicYear);
+    return [...moetPhases, ...(timePhases || [])];
+  }, [selectedAcademicYear, timePhases]);
+
+  // Filter session records according to academic year and active phase
+  const activeSessionRecords = useMemo(() => {
+    if (!sessionRecords || sessionRecords.length === 0) return [];
+
+    let filtered = sessionRecords;
+    if (selectedPhaseId) {
+      const activePhase = combinedTimePhases.find(p => String(p.id) === selectedPhaseId);
+      if (activePhase && activePhase.from_date && activePhase.to_date) {
+        filtered = filtered.filter(r => r.date && r.date >= activePhase.from_date && r.date <= activePhase.to_date);
+      }
+    } else if (selectedAcademicYear) {
+      const startYear = parseInt(selectedAcademicYear.split('-')[0], 10) || 2026;
+      const academicStart = `${startYear}-08-01`;
+      const academicEnd = `${startYear + 1}-07-31`;
+      filtered = filtered.filter(r => r.date && r.date >= academicStart && r.date <= academicEnd);
+    }
+    return filtered;
+  }, [sessionRecords, selectedPhaseId, selectedAcademicYear, combinedTimePhases]);
+
+  // Overall stats calculations on active session records
   const stats = useMemo(() => {
-    if (!sessionRecords || sessionRecords.length === 0) {
+    const records = activeSessionRecords.length > 0 ? activeSessionRecords : sessionRecords;
+    if (!records || records.length === 0) {
       return {
         c1: '-', c2: '-', hw: '-', overall: '-',
         attendancePct: 100, sessionCount: 0,
@@ -69,7 +97,7 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
     let sumHw = 0, countHw = 0;
     let presentCount = 0;
 
-    sessionRecords.forEach(r => {
+    records.forEach(r => {
       if (r.status === 'Có mặt') presentCount++;
       const val1 = Number(r.check_1);
       const val2 = Number(r.check_2);
@@ -84,7 +112,7 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
     const hw = countHw > 0 ? (sumHw / countHw) : 0;
     const validCols = [c1, c2, hw].filter(v => v > 0);
     const overall = validCols.length > 0 ? validCols.reduce((a, b) => a + b, 0) / validCols.length : 0;
-    const attPct = sessionRecords.length > 0 ? Math.round((presentCount / sessionRecords.length) * 100) : 100;
+    const attPct = records.length > 0 ? Math.round((presentCount / records.length) * 100) : 100;
 
     let rankStr = '#1';
     if (selectedStudentId && filteredRankings.length > 0) {
@@ -98,7 +126,7 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
       hw: hw > 0 ? format1Dec(hw) : '-',
       overall: overall > 0 ? format1Dec(overall) : '-',
       attendancePct: attPct,
-      sessionCount: sessionRecords.length,
+      sessionCount: records.length,
       c1Diff: '+0.0',
       c2Diff: '+0.0',
       hwDiff: '+0.0',
@@ -106,7 +134,7 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
       rank: rankStr,
       level: overall >= 8.0 ? 'Xuất Sắc (Tiến bộ)' : overall >= 6.5 ? 'Tốt (Đang tiến bộ)' : overall > 0 ? 'Cần Cố Gắng' : 'Chưa Có Điểm'
     };
-  }, [sessionRecords, selectedStudentId, filteredRankings]);
+  }, [activeSessionRecords, sessionRecords, selectedStudentId, filteredRankings]);
 
   // Session chart data calculation
   const sessionChartData = useMemo(() => {
@@ -117,10 +145,11 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
       { sessionName: '24/07', fullDate: '2026-07-24', check1: 8.7, check2: 7.2, homework: 9.4, overall: 8.4 },
     ];
 
-    if (!sessionRecords || sessionRecords.length === 0) return defaultData;
+    const recordsToChart = activeSessionRecords.length > 0 ? activeSessionRecords : sessionRecords;
+    if (!recordsToChart || recordsToChart.length === 0) return defaultData;
 
     const dateMap: Record<string, { check1: number[]; check2: number[]; hw: number[] }> = {};
-    sessionRecords.forEach(r => {
+    recordsToChart.forEach(r => {
       const d = r.date || 'Session';
       if (!dateMap[d]) dateMap[d] = { check1: [], check2: [], hw: [] };
       if (Number(r.check_1) > 0) dateMap[d].check1.push(Number(r.check_1));
@@ -136,13 +165,7 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
       .sort();
 
     let selectedDates = dates;
-    if (selectedPhaseId) {
-      const activePhase = timePhases.find(p => String(p.id) === selectedPhaseId);
-      if (activePhase && activePhase.from_date && activePhase.to_date) {
-        const filtered = dates.filter(d => d >= activePhase.from_date && d <= activePhase.to_date);
-        selectedDates = filtered.length > 0 ? filtered : dates;
-      }
-    } else {
+    if (!selectedPhaseId) {
       let limit = dates.length;
       if (timeView === '1m') limit = Math.min(4, dates.length);
       if (timeView === '2m') limit = Math.min(8, dates.length);
@@ -184,7 +207,7 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
     });
 
     return result.length > 0 ? result : defaultData;
-  }, [sessionRecords, timeView, gradeTypesList, selectedPhaseId, timePhases]);
+  }, [activeSessionRecords, sessionRecords, timeView, gradeTypesList, selectedPhaseId]);
 
   // Fitted values computed client-side
   const fittedLookup = useMemo(() => {
@@ -233,7 +256,7 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
         selectedClassId={selectedClassId}
         timeView={timeView}
         setTimeView={setTimeView}
-        timePhases={timePhases}
+        timePhases={combinedTimePhases}
         selectedPhaseId={selectedPhaseId}
         setSelectedPhaseId={setSelectedPhaseId}
         onOpenPhaseModal={onOpenPhaseModal}
@@ -263,7 +286,7 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
       {/* 6. STUDENT GRADE HISTORY TABLE */}
       <StudentGradeHistoryTable
         loading={loading}
-        sessionRecords={sessionRecords}
+        sessionRecords={activeSessionRecords.length > 0 ? activeSessionRecords : sessionRecords}
         selectedStudentObj={selectedStudentObj}
         stats={stats}
         onOpenEditModal={onOpenEditModal}

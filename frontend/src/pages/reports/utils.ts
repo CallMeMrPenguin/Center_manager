@@ -1,6 +1,14 @@
 import { WarningSettings } from './types';
 import { trunc1Dec } from '../../utils';
 
+export interface StandardMoetPhase {
+  id: string;
+  phase_name: string;
+  from_date: string;
+  to_date: string;
+  is_standard: boolean;
+}
+
 export const DEFAULT_WARNING_SETTINGS: WarningSettings = {
   absentPct: 15,
   consecutiveAbsent: 2,
@@ -13,6 +21,89 @@ export const getSavedWarningSettings = (): WarningSettings => {
     if (raw) return { ...DEFAULT_WARNING_SETTINGS, ...JSON.parse(raw) };
   } catch { }
   return DEFAULT_WARNING_SETTINGS;
+};
+
+export const getCurrentAcademicYear = (): string => {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth() + 1;
+  if (month >= 8) {
+    return `${year}-${year + 1}`;
+  } else {
+    return `${year - 1}-${year}`;
+  }
+};
+
+export const generateAcademicYears = (): string[] => {
+  const current = getCurrentAcademicYear();
+  const [startYearStr] = current.split('-');
+  const startYear = parseInt(startYearStr, 10) || 2026;
+  const years: string[] = [];
+  for (let y = startYear - 2; y <= startYear + 2; y++) {
+    years.push(`${y}-${y + 1}`);
+  }
+  return years;
+};
+
+export const getStandardMoetPhases = (academicYear: string): StandardMoetPhase[] => {
+  let startYear = 2026;
+  try {
+    const parts = academicYear.split('-');
+    if (parts.length >= 2) startYear = parseInt(parts[0], 10);
+  } catch { }
+  const endYear = startYear + 1;
+
+  return [
+    {
+      id: `moet-full-${academicYear}`,
+      phase_name: `Cả Năm Học (${academicYear})`,
+      from_date: `${startYear}-09-05`,
+      to_date: `${endYear}-05-31`,
+      is_standard: true,
+    },
+    {
+      id: `moet-hk1-${academicYear}`,
+      phase_name: 'Học Kỳ I',
+      from_date: `${startYear}-09-05`,
+      to_date: `${endYear}-01-15`,
+      is_standard: true,
+    },
+    {
+      id: `moet-mid-hk1-${academicYear}`,
+      phase_name: 'Giữa Học Kỳ I',
+      from_date: `${startYear}-09-05`,
+      to_date: `${startYear}-11-05`,
+      is_standard: true,
+    },
+    {
+      id: `moet-end-hk1-${academicYear}`,
+      phase_name: 'Cuối Học Kỳ I',
+      from_date: `${startYear}-11-06`,
+      to_date: `${endYear}-01-15`,
+      is_standard: true,
+    },
+    {
+      id: `moet-hk2-${academicYear}`,
+      phase_name: 'Học Kỳ II',
+      from_date: `${endYear}-01-16`,
+      to_date: `${endYear}-05-31`,
+      is_standard: true,
+    },
+    {
+      id: `moet-mid-hk2-${academicYear}`,
+      phase_name: 'Giữa Học Kỳ II',
+      from_date: `${endYear}-01-16`,
+      to_date: `${endYear}-03-31`,
+      is_standard: true,
+    },
+    {
+      id: `moet-end-hk2-${academicYear}`,
+      phase_name: 'Cuối Học Kỳ II',
+      from_date: `${endYear}-04-01`,
+      to_date: `${endYear}-05-31`,
+      is_standard: true,
+    },
+  ];
 };
 
 export const formatFullDate = (dStr: string): string => {
