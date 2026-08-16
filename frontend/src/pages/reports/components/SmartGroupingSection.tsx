@@ -1,13 +1,17 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { FolderTree, ChevronDown, ChevronUp, Copy, Check, FileSpreadsheet } from 'lucide-react';
+import { CustomSelect } from '../../../components/CustomSelect';
+import { GroupCardItem } from './GroupCardItem';
+import { computeSmartGroups } from '../utils/computeSmartGroups';
 import { showToast } from '../../../components/Toast';
-import { format1Dec, trunc1Dec } from '../../../utils';
+import { format1Dec } from '../../../utils';
 
 interface SmartGroupingSectionProps {
   filteredRankings: any[];
   studentRankings: any[];
   classes: any[];
   selectedClassId: string;
+  onSelectRankingStudent?: (studentId: number) => void;
 }
 
 export const SmartGroupingSection: React.FC<SmartGroupingSectionProps> = ({
@@ -15,6 +19,7 @@ export const SmartGroupingSection: React.FC<SmartGroupingSectionProps> = ({
   studentRankings,
   classes,
   selectedClassId,
+  onSelectRankingStudent,
 }) => {
   const [isGroupingSectionOpen, setIsGroupingSectionOpen] = useState(false);
   const [groupingScope, setGroupingScope] = useState<'current' | 'grade' | 'all'>('current');
@@ -23,172 +28,23 @@ export const SmartGroupingSection: React.FC<SmartGroupingSectionProps> = ({
   const [kmeansK, setKmeansK] = useState(3);
   const [copiedGroupText, setCopiedGroupText] = useState(false);
 
+  const availableGrades = useMemo(() => {
+    const gradesSet = new Set<string>();
+    classes.forEach(c => { if (c.grade) gradesSet.add(c.grade); });
+    return Array.from(gradesSet).sort();
+  }, [classes]);
+
   const smartGroups = useMemo(() => {
-    let pool = filteredRankings || [];
-    if (pool.length === 0) return [];
-
-    if (groupingScope === 'current' && selectedClassId) {
-      pool = pool.filter(s => String(s.class_id) === selectedClassId);
-    } else if (groupingScope === 'grade') {
-      const currentClass = classes.find(c => String(c.id) === selectedClassId);
-      const targetGrade = currentClass?.grade || groupingGradeFilter || (classes[0]?.grade ?? 'Lớp 8');
-      pool = pool.filter(s => {
-        const sClass = classes.find(c => String(c.id) === String(s.class_id));
-        return s.grade === targetGrade || (sClass && sClass.grade === targetGrade);
-      });
-    }
-
-    if (pool.length === 0) return [];
-
-    const getStudentScore = (s: any) => {
-      if (s.ema_level && Number(s.ema_level) > 0) return Number(s.ema_level);
-      const c1 = Number(s.avg_check_1 || 0);
-      const c2 = Number(s.avg_check_2 || 0);
-      const hw = Number(s.avg_homework || 0);
-      const valid = [c1, c2, hw].filter(v => v > 0);
-      return valid.length > 0 ? valid.reduce((a, b) => a + b, 0) / valid.length : 0.0;
-    };
-
-    const calcGroupStats = (studentsList: any[]) => {
-      if (studentsList.length === 0) return { avgEma: 0, groupSd: 0, minScore: 0, maxScore: 0 };
-      const scores = studentsList.map(getStudentScore);
-      const avg = scores.reduce((a, b) => a + b, 0) / scores.length;
-      const variance = scores.reduce((sum, sc) => sum + Math.pow(sc - avg, 2), 0) / scores.length;
-      const sd = Math.sqrt(variance);
-      return {
-        avgEma: trunc1Dec(avg),
-        groupSd: trunc1Dec(sd),
-        minScore: trunc1Dec(Math.min(...scores)),
-        maxScore: trunc1Dec(Math.max(...scores)),
-      };
-    };
-
-    if (groupingMode === 'tier') {
-      const g1Students: any[] = [];
-      const g2Students: any[] = [];
-      const g3Students: any[] = [];
-
-      pool.forEach(s => {
-        const ema = getStudentScore(s);
-        const slope = Number(s.trend_slope || 0);
-        if (ema >= 8.0 || (ema >= 7.5 && slope >= 0.2)) g1Students.push(s);
-        else if (ema >= 6.5 && slope >= -0.25) g2Students.push(s);
-        else g3Students.push(s);
-      });
-
-      g1Students.sort((a, b) => getStudentScore(b) - getStudentScore(a));
-      g2Students.sort((a, b) => getStudentScore(b) - getStudentScore(a));
-      g3Students.sort((a, b) => getStudentScore(b) - getStudentScore(a));
-
-      return [
-        {
-          id: 'tier-advanced',
-          title: 'Nhóm 1: Bứt Phá & Nâng Cao',
-          subtitle: 'Năng Lực Vượt Trội (Mastery)',
-          pedagogyAdvice: 'Tập trung luyện đề phân hóa, chuyên đề khó và giao bài tập tư duy mức độ 4. Khuyến khích làm bài tập mở rộng.',
-          themeColor: 'emerald',
-          borderCls: 'border-emerald-500/40',
-          headerBg: 'bg-[#102419]',
-          badgeCls: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40',
-          dotColor: '#10b981',
-          ...calcGroupStats(g1Students),
-          students: g1Students,
-        },
-        {
-          id: 'tier-standard',
-          title: 'Nhóm 2: Củng Cố & Chuẩn Hóa',
-          subtitle: 'Đạt Chuẩn Tiến Độ (Standard)',
-          pedagogyAdvice: 'Tăng cường tốc độ làm bài & kỹ năng trình bày. Hướng dẫn sửa các lỗi sai cơ bản thường gặp ở câu thông hiểu.',
-          themeColor: 'blue',
-          borderCls: 'border-blue-500/40',
-          headerBg: 'bg-[#101b2e]',
-          badgeCls: 'bg-blue-500/20 text-blue-300 border-blue-500/40',
-          dotColor: '#3b82f6',
-          ...calcGroupStats(g2Students),
-          students: g2Students,
-        },
-        {
-          id: 'tier-support',
-          title: 'Nhóm 3: Phụ Đạo & Nền Tảng',
-          subtitle: 'Cần Hỗ Trợ Trọng Tâm (Support)',
-          pedagogyAdvice: 'Hổng kiến thức nền hoặc phong độ giảm sút. Cần giảng lại lý thuyết căn bản, chia nhỏ bài tập & phụ đạo 1-1.',
-          themeColor: 'amber',
-          borderCls: 'border-amber-500/40',
-          headerBg: 'bg-[#201810]',
-          badgeCls: 'bg-amber-500/20 text-amber-300 border-amber-500/40',
-          dotColor: '#fbbf24',
-          ...calcGroupStats(g3Students),
-          students: g3Students,
-        },
-      ];
-    } else {
-      const K = Math.min(kmeansK, pool.length);
-      if (K <= 0) return [];
-      const studentsWithScore = pool.map(s => ({ student: s, score: getStudentScore(s) }));
-      const allScores = studentsWithScore.map(s => s.score);
-      const minS = Math.min(...allScores);
-      const maxS = Math.max(...allScores);
-
-      let centroids: number[] = [];
-      if (minS === maxS) {
-        centroids = Array(K).fill(minS);
-      } else {
-        for (let i = 0; i < K; i++) centroids.push(minS + (i * (maxS - minS)) / (K - 1));
-      }
-
-      let clusters: any[][] = Array.from({ length: K }, () => []);
-      for (let iter = 0; iter < 20; iter++) {
-        clusters = Array.from({ length: K }, () => []);
-        studentsWithScore.forEach(item => {
-          let bestIdx = 0;
-          let bestDist = Math.abs(item.score - centroids[0]);
-          for (let c = 1; c < K; c++) {
-            const dist = Math.abs(item.score - centroids[c]);
-            if (dist < bestDist) { bestDist = dist; bestIdx = c; }
-          }
-          clusters[bestIdx].push(item.student);
-        });
-
-        let changed = false;
-        for (let c = 0; c < K; c++) {
-          if (clusters[c].length > 0) {
-            const newMean = clusters[c].map(getStudentScore).reduce((a, b) => a + b, 0) / clusters[c].length;
-            if (Math.abs(newMean - centroids[c]) > 0.001) { centroids[c] = newMean; changed = true; }
-          }
-        }
-        if (!changed) break;
-      }
-
-      const pairedClusters = clusters.map((studs, idx) => ({
-        centroid: centroids[idx],
-        students: studs.sort((a, b) => getStudentScore(b) - getStudentScore(a)),
-      })).sort((a, b) => b.centroid - a.centroid);
-
-      const metaConfig = [
-        { title: 'Nhóm 1: Dẫn Đầu (Top Tier)', subtitle: 'Cụm Điểm Cao Nhất', pedagogy: 'Nhóm học sinh tiếp thu vượt trội trong lớp. Giao bài tập mở rộng & thử thách tư duy.', themeColor: 'purple', borderCls: 'border-purple-500/40', headerBg: 'bg-[#18142a]', badgeCls: 'bg-purple-500/20 text-purple-300 border-purple-500/40', dotColor: '#c084fc' },
-        { title: 'Nhóm 2: Trung Tâm (Core Tier)', subtitle: 'Cụm Điểm Trung Bình Khá', pedagogy: 'Lực lượng nòng cốt của lớp. Rèn luyện phương pháp làm bài & củng cố kiến thức để tiến vào nhóm dẫn đầu.', themeColor: 'blue', borderCls: 'border-blue-500/40', headerBg: 'bg-[#10182c]', badgeCls: 'bg-blue-500/20 text-blue-300 border-blue-500/40', dotColor: '#60a5fa' },
-        { title: 'Nhóm 3: Cần Hỗ Trợ (Focus Tier)', subtitle: 'Cụm Cần Củng Cố Nền Tảng', pedagogy: 'Cụm học sinh cần sự quan tâm đặc biệt. Ôn tập kiến thức cơ bản, sửa lỗi sai thường gặp & kèm cặp sát sao.', themeColor: 'amber', borderCls: 'border-amber-500/40', headerBg: 'bg-[#201810]', badgeCls: 'bg-amber-500/20 text-amber-300 border-amber-500/40', dotColor: '#fbbf24' },
-        { title: 'Nhóm 4: Phụ Đạo Tăng Cường (Intensive Tier)', subtitle: 'Cụm Phụ Đạo 1-1', pedagogy: 'Hổng kiến thức nặng. Cần giáo viên hoặc trợ giảng hỗ trợ trực tiếp từng buổi học.', themeColor: 'rose', borderCls: 'border-rose-500/40', headerBg: 'bg-[#241216]', badgeCls: 'bg-rose-500/20 text-rose-300 border-rose-500/40', dotColor: '#fb7185' },
-      ];
-
-      return pairedClusters.map((pc, idx) => {
-        const cfg = metaConfig[idx] || metaConfig[metaConfig.length - 1];
-        return {
-          id: `kmeans-group-${idx + 1}`,
-          title: K === 2 && idx === 1 ? 'Nhóm 2: Cần Rèn Luyện & Hỗ Trợ' : cfg.title,
-          subtitle: cfg.subtitle,
-          pedagogyAdvice: cfg.pedagogy,
-          themeColor: cfg.themeColor,
-          borderCls: cfg.borderCls,
-          headerBg: cfg.headerBg,
-          badgeCls: cfg.badgeCls,
-          dotColor: cfg.dotColor,
-          ...calcGroupStats(pc.students),
-          students: pc.students,
-        };
-      });
-    }
-  }, [filteredRankings, groupingMode, kmeansK, groupingScope, groupingGradeFilter, selectedClassId, studentRankings, classes]);
+    return computeSmartGroups({
+      studentRankings,
+      selectedClassId,
+      groupingScope,
+      groupingGradeFilter,
+      classes,
+      groupingMode,
+      kmeansK,
+    });
+  }, [studentRankings, selectedClassId, groupingScope, groupingGradeFilter, classes, groupingMode, kmeansK]);
 
   const handleCopyGrouping = useCallback(() => {
     if (!smartGroups || smartGroups.length === 0) {
@@ -202,7 +58,7 @@ export const SmartGroupingSection: React.FC<SmartGroupingSectionProps> = ({
     smartGroups.forEach(g => {
       text += `[${g.title.toUpperCase()}] (${g.students.length} học sinh | EMA TB: ${g.avgEma} | SD: ${g.groupSd})\nMục tiêu: ${g.pedagogyAdvice}\n`;
       if (g.students.length === 0) text += `  (Chưa có học sinh)\n`;
-      else g.students.forEach((s, idx) => {
+      else g.students.forEach((s: any, idx: number) => {
         const ema = s.ema_level ? format1Dec(Number(s.ema_level)) : '-';
         const slope = Number(s.trend_slope || 0);
         const trendStr = slope > 0 ? `+${format1Dec(slope)} (Tăng)` : slope < 0 ? `${format1Dec(slope)} (Giảm)` : 'Ổn định';
@@ -294,6 +150,7 @@ export const SmartGroupingSection: React.FC<SmartGroupingSectionProps> = ({
 
   return (
     <div className="bg-[#0b0f19] border border-[#1b253b] rounded-2xl p-6 shadow-xl space-y-6 animate-cascade-3">
+      {/* Header Bar */}
       <div onClick={() => setIsGroupingSectionOpen(!isGroupingSectionOpen)} className="flex flex-wrap items-center justify-between gap-4 cursor-pointer select-none border-b border-[#161f33] pb-4">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400 shrink-0">
@@ -317,25 +174,82 @@ export const SmartGroupingSection: React.FC<SmartGroupingSectionProps> = ({
 
       {isGroupingSectionOpen && (
         <div className="space-y-6">
-          <div className="flex flex-wrap items-center justify-between gap-4 bg-[#0e1322] p-3 rounded-xl border border-[#1e2744]">
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-bold text-slate-300">Chế độ:</span>
-              <button
-                type="button"
-                onClick={() => setGroupingMode('tier')}
-                className={`px-3 py-1 rounded-lg text-xs font-bold transition cursor-pointer ${groupingMode === 'tier' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'}`}
-              >
-                Theo Chuẩn Học Lực (3 Nhóm)
-              </button>
-              <button
-                type="button"
-                onClick={() => setGroupingMode('kmeans')}
-                className={`px-3 py-1 rounded-lg text-xs font-bold transition cursor-pointer ${groupingMode === 'kmeans' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'}`}
-              >
-                Tự Động K-Means Clustering
-              </button>
+          {/* Scope, Algorithm & Export Toolbar */}
+          <div className="flex flex-wrap items-center justify-between gap-4 bg-[#0e1322] p-4 rounded-xl border border-[#1e2744]">
+            <div className="flex flex-wrap items-center gap-4">
+              {/* Scope Selector */}
+              <div className="flex items-center gap-1.5 bg-[#090d16] p-1 rounded-xl border border-[#182236] text-xs font-bold">
+                <span className="text-[10px] uppercase font-black text-slate-400 px-2">Phạm Vi:</span>
+                <button
+                  type="button"
+                  onClick={() => setGroupingScope('current')}
+                  className={`px-2.5 py-1 rounded-lg transition cursor-pointer ${groupingScope === 'current' ? 'bg-indigo-600 text-white shadow' : 'text-slate-400 hover:text-white'}`}
+                >
+                  Lớp Hiện Tại
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setGroupingScope('grade')}
+                  className={`px-2.5 py-1 rounded-lg transition cursor-pointer ${groupingScope === 'grade' ? 'bg-indigo-600 text-white shadow' : 'text-slate-400 hover:text-white'}`}
+                >
+                  Toàn Bộ Khối
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setGroupingScope('all')}
+                  className={`px-2.5 py-1 rounded-lg transition cursor-pointer ${groupingScope === 'all' ? 'bg-indigo-600 text-white shadow' : 'text-slate-400 hover:text-white'}`}
+                >
+                  Toàn Trung Tâm
+                </button>
+              </div>
+
+              {/* Grade Selector when groupingScope === 'grade' */}
+              {groupingScope === 'grade' && availableGrades.length > 0 && (
+                <div className="w-36">
+                  <CustomSelect
+                    value={groupingGradeFilter}
+                    onChange={(val) => setGroupingGradeFilter(String(val))}
+                    options={availableGrades.map(g => ({ value: g, label: g }))}
+                  />
+                </div>
+              )}
+
+              {/* Algorithm Mode */}
+              <div className="flex items-center gap-1.5 bg-[#090d16] p-1 rounded-xl border border-[#182236] text-xs font-bold">
+                <span className="text-[10px] uppercase font-black text-slate-400 px-2">Thuật Toán:</span>
+                <button
+                  type="button"
+                  onClick={() => setGroupingMode('tier')}
+                  className={`px-2.5 py-1 rounded-lg transition cursor-pointer ${groupingMode === 'tier' ? 'bg-indigo-600 text-white shadow' : 'text-slate-400 hover:text-white'}`}
+                >
+                  Theo Chuẩn Học Lực (3 Nhóm)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setGroupingMode('kmeans')}
+                  className={`px-2.5 py-1 rounded-lg transition cursor-pointer ${groupingMode === 'kmeans' ? 'bg-indigo-600 text-white shadow' : 'text-slate-400 hover:text-white'}`}
+                >
+                  Tự Động K-Means
+                </button>
+
+                {groupingMode === 'kmeans' && (
+                  <div className="flex items-center gap-1 pl-2 border-l border-white/10">
+                    {[2, 3, 4].map(k => (
+                      <button
+                        key={k}
+                        type="button"
+                        onClick={() => setKmeansK(k)}
+                        className={`w-6 h-6 rounded-lg text-xs font-mono font-bold transition cursor-pointer ${kmeansK === k ? 'bg-purple-600 text-white shadow' : 'text-slate-400 hover:text-white'}`}
+                      >
+                        {k}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
 
+            {/* Export Actions */}
             <div className="flex items-center gap-2">
               <button
                 type="button"
@@ -356,28 +270,14 @@ export const SmartGroupingSection: React.FC<SmartGroupingSectionProps> = ({
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* Group Cards Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             {smartGroups.map(g => (
-              <div key={g.id} className={`rounded-xl border ${g.borderCls} bg-[#0c101c] overflow-hidden flex flex-col justify-between shadow-lg`}>
-                <div className={`p-4 ${g.headerBg} border-b border-white/5`}>
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-xs font-black text-white">{g.title}</span>
-                    <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-full border ${g.badgeCls}`}>
-                      {g.students.length} HS
-                    </span>
-                  </div>
-                  <p className="text-[11px] text-slate-400">{g.pedagogyAdvice}</p>
-                </div>
-                <div className="p-4 space-y-2 max-h-60 overflow-y-auto scrollbar-thin">
-                  {g.students.map((s, idx) => (
-                    <div key={idx} className="flex items-center justify-between text-xs py-1 border-b border-white/5 last:border-0">
-                      <span className="font-bold text-slate-200">{idx + 1}. {s.full_name}</span>
-                      <span className="font-mono text-slate-400">{s.ema_level ? format1Dec(Number(s.ema_level)) : '-'}</span>
-                    </div>
-                  ))}
-                  {g.students.length === 0 && <span className="text-xs text-slate-500 italic block text-center">Chưa có học sinh</span>}
-                </div>
-              </div>
+              <GroupCardItem
+                key={g.id}
+                group={g}
+                onSelectRankingStudent={onSelectRankingStudent}
+              />
             ))}
           </div>
         </div>

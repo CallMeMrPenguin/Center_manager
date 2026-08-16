@@ -35,8 +35,8 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = ({
   const [hoveredPoint, setHoveredPoint] = useState<HoveredChartPoint | null>(null);
   const [zoomLevel, setZoomLevel] = useState(1.0);
   const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
-  const [isPanning, setIsPanning] = useState(false);
-  const [panStart, setPanStart] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [chartWidth, setChartWidth] = useState(1050);
 
   const chartHeight = 750;
@@ -58,6 +58,13 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = ({
     if (chartWrapperRef.current) observer.observe(chartWrapperRef.current);
     return () => observer.disconnect();
   }, []);
+
+  const clampPanOffset = useCallback((x: number, y: number, currentZoom: number) => {
+    if (currentZoom <= 1.0) return { x: 0, y: 0 };
+    const maxPanX = (plotAreaWidth * (currentZoom - 1));
+    const clampedX = Math.max(-maxPanX, Math.min(0, x));
+    return { x: clampedX, y: 0 };
+  }, [plotAreaWidth]);
 
   const yBounds = useMemo(() => {
     let min = 10, max = 0;
@@ -128,33 +135,13 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = ({
     return `${linePath} L ${lastX} ${bottomY} L ${firstX} ${bottomY} Z`;
   }, [sessionChartData, getSvgX, getSvgY, makeBezierPath]);
 
-  const handleWheel = (e: React.WheelEvent) => {
-    e.preventDefault();
-    const zoomDelta = e.deltaY < 0 ? 0.15 : -0.15;
-    setZoomLevel(prev => Math.min(5.0, Math.max(1.0, prev + zoomDelta)));
-  };
-
-  const handleMouseDown = (e: React.MouseEvent) => {
-    if (zoomLevel > 1.0) {
-      setIsPanning(true);
-      setPanStart({ x: e.clientX - panOffset.x, y: e.clientY - panOffset.y });
-    }
-  };
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (isPanning) {
-      setPanOffset({ x: e.clientX - panStart.x, y: e.clientY - panStart.y });
-    }
-  };
-
-  const handleMouseUp = () => setIsPanning(false);
-
   return (
     <div
       ref={chartWrapperRef}
       className="bg-[#0b0f19] border border-[#1b253b] p-6 rounded-2xl shadow-xl flex flex-col gap-6 relative select-none animate-cascade-2"
     >
       <ChartControls
+        engine={engine}
         timePhases={timePhases}
         selectedPhaseId={selectedPhaseId}
         setSelectedPhaseId={setSelectedPhaseId}
@@ -167,12 +154,32 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = ({
       />
 
       <div
-        className="w-full relative overflow-hidden rounded-xl bg-[#080b14]/50 border border-[#141b2e] cursor-crosshair"
-        onWheel={handleWheel}
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseUp}
+        className={`w-full relative overflow-hidden rounded-xl bg-[#080b14]/50 border border-[#141b2e] ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
+        onContextMenu={(e) => e.preventDefault()}
+        onWheel={(e) => {
+          e.preventDefault();
+          const zoomDelta = e.deltaY < 0 ? 0.15 : -0.15;
+          setZoomLevel(prev => {
+            const next = Math.min(5.0, Math.max(1.0, prev + zoomDelta));
+            setPanOffset(p => clampPanOffset(p.x, p.y, next));
+            return next;
+          });
+        }}
+        onMouseDown={(e) => {
+          if (e.button === 0 || e.button === 2) {
+            setIsDragging(true);
+            setDragStart({ x: e.clientX, y: e.clientY });
+          }
+        }}
+        onMouseMove={(e) => {
+          if (!isDragging) return;
+          const dx = e.clientX - dragStart.x;
+          const dy = e.clientY - dragStart.y;
+          setPanOffset(prev => clampPanOffset(prev.x + dx, prev.y + dy, zoomLevel));
+          setDragStart({ x: e.clientX, y: e.clientY });
+        }}
+        onMouseUp={() => setIsDragging(false)}
+        onMouseLeave={() => setIsDragging(false)}
       >
         <ChartSvgPlot
           chartWidth={chartWidth}
@@ -199,32 +206,46 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = ({
           setHoveredPoint={setHoveredPoint}
         />
 
-        {/* Floating Tooltip Card */}
+        {/* Floating Hover Tooltip Card */}
         {hoveredPoint && (
           <div
-            className="absolute z-50 pointer-events-none p-3.5 rounded-xl bg-[#0f1422] border border-[#283556] shadow-2xl text-xs space-y-1.5 transition-all duration-75"
+            className="absolute z-30 pointer-events-none bg-[#161c34] border border-[#2c375e] p-3.5 rounded-xl shadow-2xl text-xs font-sans transition-all duration-75"
             style={{
-              left: Math.min(Math.max(10, (hoveredPoint.x / chartWidth) * 100), 85) + '%',
-              top: '60px',
-              transform: 'translateX(-50%)',
+              left: `${Math.min(Math.max(hoveredPoint.x, 130), chartWidth - 160)}px`,
+              top: '20px',
             }}
           >
-            <div className="font-extrabold text-white border-b border-white/10 pb-1 flex items-center justify-between gap-4">
+            <div className="font-extrabold text-white border-b border-white/10 pb-1.5 flex items-center justify-between gap-4">
               <span>{hoveredPoint.sessionName}</span>
               <span className="text-[10px] text-slate-400 font-mono">{hoveredPoint.fullDate}</span>
             </div>
-            <div className="space-y-1 pt-0.5">
+            <div className="space-y-1.5 pt-1.5">
               <div className="flex items-center justify-between gap-4">
                 <span className="text-blue-400 font-bold">Check 1:</span>
-                <span className="font-mono font-extrabold text-white">{format1Dec(hoveredPoint.check1)}</span>
+                <div className="flex items-center gap-1.5">
+                  <span className="font-mono font-extrabold text-white">{format1Dec(hoveredPoint.check1)}</span>
+                  {hoveredPoint.fittedC1 !== null && (
+                    <span className="text-[10px] font-mono text-slate-400">({format1Dec(hoveredPoint.fittedC1)})</span>
+                  )}
+                </div>
               </div>
               <div className="flex items-center justify-between gap-4">
                 <span className="text-purple-400 font-bold">Check 2:</span>
-                <span className="font-mono font-extrabold text-white">{format1Dec(hoveredPoint.check2)}</span>
+                <div className="flex items-center gap-1.5">
+                  <span className="font-mono font-extrabold text-white">{format1Dec(hoveredPoint.check2)}</span>
+                  {hoveredPoint.fittedC2 !== null && (
+                    <span className="text-[10px] font-mono text-slate-400">({format1Dec(hoveredPoint.fittedC2)})</span>
+                  )}
+                </div>
               </div>
               <div className="flex items-center justify-between gap-4">
                 <span className="text-emerald-400 font-bold">Homework:</span>
-                <span className="font-mono font-extrabold text-white">{format1Dec(hoveredPoint.homework)}</span>
+                <div className="flex items-center gap-1.5">
+                  <span className="font-mono font-extrabold text-white">{format1Dec(hoveredPoint.homework)}</span>
+                  {hoveredPoint.fittedHw !== null && (
+                    <span className="text-[10px] font-mono text-slate-400">({format1Dec(hoveredPoint.fittedHw)})</span>
+                  )}
+                </div>
               </div>
               <div className="border-t border-white/10 pt-1 flex items-center justify-between gap-4">
                 <span className="text-indigo-300 font-extrabold">Điểm TB Buổi:</span>

@@ -74,6 +74,7 @@ export const DeepAnalysisTab: React.FC<DeepAnalysisTabProps> = ({
         studentRankings={studentRankings}
         classes={classes}
         selectedClassId={selectedClassId}
+        onSelectRankingStudent={onSelectRankingStudent}
       />
 
       {/* 4. SCORE FLUCTUATIONS & VARIATIONS TABLE */}

@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
 import { api } from '../api';
 import { GradeTypeItem } from '../types';
@@ -35,21 +35,21 @@ export interface StudentTier {
 }
 
 export const TIERS_CONFIG: StudentTier[] = [
-  { tier: 1, name: '─Éß╗ông', title: 'Tß║¡p Sß╗▒', badge: '/ranks/tier_1.png', color: '#d97706', bg: 'bg-amber-700/10', border: 'border-amber-700/30', text: 'text-amber-500', minScore: 0, maxScore: 4.9 },
-  { tier: 2, name: 'Bß║íc', title: 'Cãí Bß║ún', badge: '/ranks/tier_2.png', color: '#38bdf8', bg: 'bg-sky-500/10', border: 'border-sky-500/30', text: 'text-sky-400', minScore: 5.0, maxScore: 6.4 },
-  { tier: 3, name: 'V├áng', title: 'Kh├í', badge: '/ranks/tier_3.png', color: '#eab308', bg: 'bg-yellow-500/10', border: 'border-yellow-500/30', text: 'text-yellow-400', minScore: 6.5, maxScore: 7.4 },
-  { tier: 4, name: 'Bß║ích Kim', title: 'Giß╗Åi', badge: '/ranks/tier_4.png', color: '#818cf8', bg: 'bg-indigo-500/10', border: 'border-indigo-500/30', text: 'text-indigo-300', minScore: 7.5, maxScore: 8.4 },
-  { tier: 5, name: 'Kim Cã░ãíng', title: 'Xuß║Ñt Sß║»c', badge: '/ranks/tier_5.png', color: '#f43f5e', bg: 'bg-rose-500/10', border: 'border-rose-500/30', text: 'text-rose-400', minScore: 8.5, maxScore: 9.4 },
-  { tier: 6, name: 'Qu├ín Qu├ón', title: 'Huyß╗ün Thoß║íi', badge: '/ranks/tier_6.png', color: '#fbbf24', bg: 'bg-amber-500/15', border: 'border-amber-500/40', text: 'text-amber-300', minScore: 9.5, maxScore: 10.0 }
+  { tier: 1, name: 'Đồng', title: 'Tập Sự', badge: '/ranks/tier_1.png', color: '#d97706', bg: 'bg-amber-700/10', border: 'border-amber-700/30', text: 'text-amber-500', minScore: 0, maxScore: 4.9 },
+  { tier: 2, name: 'Bạc', title: 'Cơ Bản', badge: '/ranks/tier_2.png', color: '#38bdf8', bg: 'bg-sky-500/10', border: 'border-sky-500/30', text: 'text-sky-400', minScore: 5.0, maxScore: 6.4 },
+  { tier: 3, name: 'Vàng', title: 'Khá', badge: '/ranks/tier_3.png', color: '#eab308', bg: 'bg-yellow-500/10', border: 'border-yellow-500/30', text: 'text-yellow-400', minScore: 6.5, maxScore: 7.4 },
+  { tier: 4, name: 'Bạch Kim', title: 'Giỏi', badge: '/ranks/tier_4.png', color: '#818cf8', bg: 'bg-indigo-500/10', border: 'border-indigo-500/30', text: 'text-indigo-300', minScore: 7.5, maxScore: 8.4 },
+  { tier: 5, name: 'Kim Cương', title: 'Xuất Sắc', badge: '/ranks/tier_5.png', color: '#f43f5e', bg: 'bg-rose-500/10', border: 'border-rose-500/30', text: 'text-rose-400', minScore: 8.5, maxScore: 9.4 },
+  { tier: 6, name: 'Quán Quân', title: 'Huyền Thoại', badge: '/ranks/tier_6.png', color: '#fbbf24', bg: 'bg-amber-500/15', border: 'border-amber-500/40', text: 'text-amber-300', minScore: 9.5, maxScore: 10.0 }
 ];
 
 export const getStudentTier = (score: number): StudentTier => {
-  if (score >= 9.5) return TIERS_CONFIG[5]; // Qu├ín Qu├ón (9.5 - 10.0)
-  if (score >= 8.5) return TIERS_CONFIG[4]; // Kim Cã░ãíng (8.5 - 9.4)
-  if (score >= 7.5) return TIERS_CONFIG[3]; // Bß║ích Kim (7.5 - 8.4)
-  if (score >= 6.5) return TIERS_CONFIG[2]; // V├áng (6.5 - 7.4)
-  if (score >= 5.0) return TIERS_CONFIG[1]; // Bß║íc (5.0 - 6.4)
-  return TIERS_CONFIG[0]; // ─Éß╗ông (< 5.0)
+  if (score >= 9.5) return TIERS_CONFIG[5]; // Quán Quân (9.5 - 10.0)
+  if (score >= 8.5) return TIERS_CONFIG[4]; // Kim Cương (8.5 - 9.4)
+  if (score >= 7.5) return TIERS_CONFIG[3]; // Bạch Kim (7.5 - 8.4)
+  if (score >= 6.5) return TIERS_CONFIG[2]; // Vàng (6.5 - 7.4)
+  if (score >= 5.0) return TIERS_CONFIG[1]; // Bạc (5.0 - 6.4)
+  return TIERS_CONFIG[0]; // Đồng (< 5.0)
 };
 
 // 36+ VIBRANT DISTINCT CLASS COLOR PALETTE (GUARANTEES UNIQUE DISTINCT COLOR FOR 36+ CLASSES)
@@ -214,7 +214,7 @@ const MiniTrendSparkline = React.memo(({ points, slope, ema }: { points: number[
   const areaPath = `${linePath} L ${coords[coords.length - 1].x.toFixed(1)} ${height} L ${coords[0].x.toFixed(1)} ${height} Z`;
 
   return (
-    <div className="flex items-center justify-center cursor-default" title={`5 mß╗æc gß║ºn nhß║Ñt: ${dataPoints.map(p => format1Dec(p)).join(' ÔåÆ ')}`}>
+    <div className="flex items-center justify-center cursor-default" title={`5 mốc gần nhất: ${dataPoints.map(p => format1Dec(p)).join(' → ')}`}>
       <svg width={width} height={height} className="overflow-visible">
         <defs>
           <linearGradient id={uniqueId} x1="0" y1="0" x2="0" y2="1">
@@ -301,7 +301,7 @@ export default function ReportsPage() {
 
   // Edit Single Record Modal State
   const [editingRecord, setEditingRecord] = useState<any | null>(null);
-  const [editStatus, setEditStatus] = useState<string>('C├│ mß║Àt');
+  const [editStatus, setEditStatus] = useState<string>('Có mặt');
   const [editCheck1, setEditCheck1] = useState<string>('');
   const [editCheck2, setEditCheck2] = useState<string>('');
   const [editHomework, setEditHomework] = useState<string>('');
@@ -353,7 +353,7 @@ export default function ReportsPage() {
   const [isGrowthSectionOpen, setIsGrowthSectionOpen] = useState<boolean>(false);
   const [isBottlenecksSectionOpen, setIsBottlenecksSectionOpen] = useState<boolean>(false);
 
-  // Smart Level Grouping Scope: 'current' (Lß╗øp hiß╗çn tß║íi) | 'grade' (To├án bß╗Ö c├╣ng khß╗æi) | 'all' (To├án trung t├óm)
+  // Smart Level Grouping Scope: 'current' (Lớp hiện tại) | 'grade' (Toàn bộ cùng khối) | 'all' (Toàn trung tâm)
   const [groupingScope, setGroupingScope] = useState<'current' | 'grade' | 'all'>('current');
   const [groupingGradeFilter, setGroupingGradeFilter] = useState<string>('');
 
@@ -363,7 +363,7 @@ export default function ReportsPage() {
   // Cross-Class Benchmark, Deep Analysis & Overview Tab State
   const [activeReportTab, setActiveReportTab] = useState<'overview' | 'deep' | 'benchmark'>('overview');
 
-  // Time View Filter: 1 Th├íng (Current Month), 2 Th├íng, 3 Th├íng, Tß║Ñt Cß║ú
+  // Time View Filter: 1 Tháng (Current Month), 2 Tháng, 3 Tháng, Tất Cả
   const [timeView, setTimeView] = useState<'1m' | '2m' | '3m' | 'all'>('all');
 
   // Interactive Zoom & Pan State for Chart (minZoom = 1.0)
@@ -460,7 +460,7 @@ export default function ReportsPage() {
       const studentList = await api.getStudents();
       setStudents(studentList);
     } catch (err: any) {
-      showToast("Kh├┤ng thß╗â tß║úi danh s├ích lß╗øp/hß╗ìc sinh: " + err.message, "error");
+      showToast("Không thể tải danh sách lớp/học sinh: " + err.message, "error");
     }
   };
 
@@ -476,7 +476,7 @@ export default function ReportsPage() {
       setAnalyticsSummary(res.analytics_summary || null);
       setClassAnalyticsMap(res.class_analytics_map || {});
     } catch (e: any) {
-      if (!isSilent) showToast("Lß╗ùi tß║úi b├ío c├ío thß╗æng k├¬: " + (e.message || e), "error");
+      if (!isSilent) showToast("Lỗi tải báo cáo thống kê: " + (e.message || e), "error");
     } finally {
       if (!isSilent) setLoading(false);
     }
@@ -507,15 +507,15 @@ export default function ReportsPage() {
   const handleSavePhaseSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!phaseNameInput.trim()) {
-      showToast('Vui l├▓ng nhß║¡p t├¬n giai ─æoß║ín', 'error');
+      showToast('Vui lòng nhập tên giai đoạn', 'error');
       return;
     }
     if (!phaseFromDate || !phaseToDate) {
-      showToast('Vui l├▓ng chß╗ìn ng├áy bß║»t ─æß║ºu v├á kß║┐t th├║c', 'error');
+      showToast('Vui lòng chọn ngày bắt đầu và kết thúc', 'error');
       return;
     }
     if (phaseFromDate > phaseToDate) {
-      showToast('Ng├áy bß║»t ─æß║ºu kh├┤ng ─æã░ß╗úc lß╗øn hãín ng├áy kß║┐t th├║c', 'error');
+      showToast('Ngày bắt đầu không được lớn hơn ngày kết thúc', 'error');
       return;
     }
 
@@ -527,11 +527,11 @@ export default function ReportsPage() {
         from_date: phaseFromDate,
         to_date: phaseToDate
       });
-      showToast('─É├ú lã░u giai ─æoß║ín hß╗ìc tß║¡p th├ánh c├┤ng!', 'success');
+      showToast('Đã lưu giai đoạn học tập thành công!', 'success');
       setPhaseModalOpen(false);
       await loadTimePhases();
     } catch (err: any) {
-      showToast('Lß╗ùi lã░u giai ─æoß║ín: ' + (err.message || err), 'error');
+      showToast('Lỗi lưu giai đoạn: ' + (err.message || err), 'error');
     } finally {
       setSavingPhase(false);
     }
@@ -540,11 +540,11 @@ export default function ReportsPage() {
   const handleDeletePhase = async (phaseId: number) => {
     try {
       await api.deleteTimePhase(phaseId);
-      showToast('─É├ú x├│a giai ─æoß║ín hß╗ìc tß║¡p', 'success');
+      showToast('Đã xóa giai đoạn học tập', 'success');
       if (selectedPhaseId === String(phaseId)) setSelectedPhaseId('');
       await loadTimePhases();
     } catch (err: any) {
-      showToast('Lß╗ùi x├│a giai ─æoß║ín: ' + (err.message || err), 'error');
+      showToast('Lỗi xóa giai đoạn: ' + (err.message || err), 'error');
     }
   };
 
@@ -559,17 +559,17 @@ export default function ReportsPage() {
         from_date: resetFromDate || undefined,
         to_date: resetToDate || undefined
       });
-      showToast(`─É├ú ─æß║Àt lß║íi ─æiß╗âm sß╗æ th├ánh c├┤ng cho ${res.reset_count} bß║ún ghi!`, "success");
+      showToast(`Đã đặt lại điểm số thành công cho ${res.reset_count} bản ghi!`, "success");
       setResetModalOpen(false);
       loadAnalyticsData(true);
       notifyDataChanged();
     } catch (err: any) {
-      showToast("Kh├┤ng thß╗â ─æß║Àt lß║íi ─æiß╗âm: " + err.message, "error");
+      showToast("Không thể đặt lại điểm: " + err.message, "error");
     }
   };
   const handleOpenEditModal = (rec: any) => {
     setEditingRecord(rec);
-    setEditStatus(rec.status || 'C├│ mß║Àt');
+    setEditStatus(rec.status || 'Có mặt');
     setEditCheck1(rec.check_1 > 0 ? String(rec.check_1) : '');
     setEditCheck2(rec.check_2 > 0 ? String(rec.check_2) : '');
     setEditHomework(rec.homework > 0 ? String(rec.homework) : '');
@@ -594,12 +594,12 @@ export default function ReportsPage() {
         notes: editNotes
       }]);
 
-      showToast(`─É├ú cß║¡p nhß║¡t ─æiß╗âm sß╗æ cho ${editingRecord.student_name || 'hß╗ìc sinh'}!`, "success");
+      showToast(`Đã cập nhật điểm số cho ${editingRecord.student_name || 'học sinh'}!`, "success");
       setEditingRecord(null);
       await loadAnalyticsData(true);
       notifyDataChanged();
     } catch (err: any) {
-      showToast("Lß╗ùi khi cß║¡p nhß║¡t ─æiß╗âm: " + (err.message || err), "error");
+      showToast("Lỗi khi cập nhật điểm: " + (err.message || err), "error");
     } finally {
       setSavingEdit(false);
     }
@@ -630,7 +630,7 @@ export default function ReportsPage() {
     return list;
   }, [studentRankings, selectedClassId, selectedDistFilter]);
 
-  // 6-Tier Academic Ranking Distribution Breakdown (Ordered Top to Bottom: Qu├ín Qu├ón -> ─Éß╗ông)
+  // 6-Tier Academic Ranking Distribution Breakdown (Ordered Top to Bottom: Quán Quân -> Đồng)
   const tierDistribution = useMemo(() => {
     const rawList = selectedClassId ? studentRankings.filter(r => String(r.class_id) === selectedClassId) : studentRankings;
     const total = rawList ? rawList.length : 0;
@@ -678,8 +678,8 @@ export default function ReportsPage() {
 
       let consecutiveAbsent = 0;
       for (let i = sSessions.length - 1; i >= 0; i--) {
-        const st = sSessions[i].status || 'C├│ mß║Àt';
-        if (st.includes('Vß║»ng') || st.includes('Nghß╗ë')) {
+        const st = sSessions[i].status || 'Có mặt';
+        if (st.includes('Vắng') || st.includes('Nghỉ')) {
           consecutiveAbsent++;
         } else {
           break;
@@ -687,7 +687,7 @@ export default function ReportsPage() {
       }
 
       const total = s.total_sessions || sSessions.length || 0;
-      const present = s.present_count ?? sSessions.filter(r => r.status === 'C├│ mß║Àt').length;
+      const present = s.present_count ?? sSessions.filter(r => r.status === 'Có mặt').length;
       const absent = total - present;
       const absentPct = total > 0 ? Math.round((absent / total) * 100) : 0;
       const slope = Number(s.trend_slope || 0);
@@ -695,16 +695,16 @@ export default function ReportsPage() {
 
       const riskTags: string[] = [];
       if (consecutiveAbsent >= warningConsecutiveAbsent) {
-        riskTags.push(`Vß║»ng li├¬n tiß║┐p ${consecutiveAbsent} buß╗òi`);
+        riskTags.push(`Vắng liên tiếp ${consecutiveAbsent} buổi`);
       }
       if (absentPct >= warningAbsentPct && total >= 3) {
-        riskTags.push(`Tß╗À lß╗ç vß║»ng ${absentPct}% (vã░ß╗út ${warningAbsentPct}%)`);
+        riskTags.push(`Tỷ lệ vắng ${absentPct}% (vượt ${warningAbsentPct}%)`);
       }
       if (slope <= warningTrendThreshold) {
-        riskTags.push(`─Éiß╗âm giß║úm dß╗æc (${format1Dec(slope)}/buß╗òi)`);
+        riskTags.push(`Điểm giảm dốc (${format1Dec(slope)}/buổi)`);
       }
       if (ema < 6.0 && ema > 0) {
-        riskTags.push(`Hß╗ìc lß╗▒c yß║┐u (EMA ${format1Dec(ema)})`);
+        riskTags.push(`Học lực yếu (EMA ${format1Dec(ema)})`);
       }
 
       if (riskTags.length > 0) {
@@ -769,28 +769,28 @@ export default function ReportsPage() {
       }
 
       // Safe Zone Fluctuation Assessment: Top-performing students with minor fluctuations stay in safe zone
-      let statusLabel = 'Duy tr├¼ ß╗òn ─æß╗ïnh';
+      let statusLabel = 'Duy trì ổn định';
       let statusType: 'breakthrough' | 'improving' | 'stable' | 'declining' | 'critical' = 'stable';
       const isHighTier = current >= 8.0 || baseline >= 8.5;
 
       if (delta >= 1.5) {
-        statusLabel = `Bß╗®t ph├í mß║ính (+${format1Dec(delta)})`;
+        statusLabel = `Bứt phá mạnh (+${format1Dec(delta)})`;
         statusType = 'breakthrough';
       } else if (delta >= 0.5) {
-        statusLabel = `Tiß║┐n bß╗Ö tß╗æt (+${format1Dec(delta)})`;
+        statusLabel = `Tiến bộ tốt (+${format1Dec(delta)})`;
         statusType = 'improving';
       } else if (isHighTier && delta >= -0.8) {
         // Safe Zone: Grade is high (8.0+), slight drop is completely normal and safe
-        statusLabel = delta >= 0 ? `Giß╗» vß╗»ng phong ─æß╗Ö cao (+${format1Dec(delta)})` : `Duy tr├¼ xuß║Ñt sß║»c (${format1Dec(delta)})`;
+        statusLabel = delta >= 0 ? `Giữ vững phong độ cao (+${format1Dec(delta)})` : `Duy trì xuất sắc (${format1Dec(delta)})`;
         statusType = 'stable';
       } else if (delta <= -1.5) {
-        statusLabel = `Sß╗Ñt giß║úm nghi├¬m trß╗ìng (${format1Dec(delta)})`;
+        statusLabel = `Sụt giảm nghiêm trọng (${format1Dec(delta)})`;
         statusType = 'critical';
       } else if (delta <= -0.5) {
-        statusLabel = isHighTier ? `Giß║úm nhß║╣ ß╗ƒ mß╗®c giß╗Åi (${format1Dec(delta)})` : `C├│ chiß╗üu hã░ß╗øng giß║úm (${format1Dec(delta)})`;
+        statusLabel = isHighTier ? `Giảm nhẹ ở mức giỏi (${format1Dec(delta)})` : `Có chiều hướng giảm (${format1Dec(delta)})`;
         statusType = isHighTier ? 'stable' : 'declining';
       } else {
-        statusLabel = delta > 0 ? `T─âng nhß║╣ (+${format1Dec(delta)})` : delta < 0 ? `Biß║┐n ─æß╗Öng nhß║╣ (${format1Dec(delta)})` : 'Duy tr├¼ ß╗òn ─æß╗ïnh';
+        statusLabel = delta > 0 ? `Tăng nhẹ (+${format1Dec(delta)})` : delta < 0 ? `Biến động nhẹ (${format1Dec(delta)})` : 'Duy trì ổn định';
         statusType = 'stable';
       }
 
@@ -821,8 +821,8 @@ export default function ReportsPage() {
     const hw_list: number[] = [];
 
     records.forEach(r => {
-      const st = r.status || 'C├│ mß║Àt';
-      if (st === 'Vß║»ng mß║Àt' || st === 'Nghß╗ë hß╗ìc') return;
+      const st = r.status || 'Có mặt';
+      if (st === 'Vắng mặt' || st === 'Nghỉ học') return;
       const c1 = Number(r.check_1 || 0);
       const c2 = Number(r.check_2 || 0);
       const hw = Number(r.homework || 0);
@@ -877,7 +877,7 @@ export default function ReportsPage() {
         return {
           id: cObj.id,
           name: cObj.class_name,
-          grade: cObj.grade || 'Lß╗øp 6',
+          grade: cObj.grade || 'Lớp 6',
           studentCount: 0,
           attendancePct: 100,
           avgEma: 0,
@@ -946,7 +946,7 @@ export default function ReportsPage() {
       return {
         id: cObj.id,
         name: cObj.class_name,
-        grade: cObj.grade || 'Lß╗øp 6',
+        grade: cObj.grade || 'Lớp 6',
         studentCount: totalStudents,
         attendancePct,
         avgEma,
@@ -995,13 +995,13 @@ export default function ReportsPage() {
         return {
           class_id: c.id,
           class_name: c.class_name,
-          grade: c.grade || 'Lß╗øp 6',
+          grade: c.grade || 'Lớp 6',
           studentCount: 0,
           attendancePct: 100,
           avgEma: 0,
           improvingPct: 0,
           classSd: 0,
-          evaluation: 'Chã░a c├│ hß╗ìc sinh'
+          evaluation: 'Chưa có học sinh'
         };
       }
 
@@ -1025,15 +1025,15 @@ export default function ReportsPage() {
       const improvingCount = cStudents.filter(s => Number(s.trend_slope || 0) >= 0.05).length;
       const improvingPct = Math.round((improvingCount / totalStudents) * 100);
 
-      let evaluation = 'Tiß║┐n bß╗Ö tß╗æt';
-      if (avgEma >= 8.5 && classSd < 1.0) evaluation = '─Éß╗ông ─æß╗üu & Xuß║Ñt sß║»c';
-      else if (classSd >= 3.0) evaluation = 'Ph├ón h├│a rß║Ñt mß║ính';
-      else if (avgEma < 6.5) evaluation = 'Cß║ºn hß╗ù trß╗ú hß╗ìc lß╗▒c';
+      let evaluation = 'Tiến bộ tốt';
+      if (avgEma >= 8.5 && classSd < 1.0) evaluation = 'Đồng đều & Xuất sắc';
+      else if (classSd >= 3.0) evaluation = 'Phân hóa rất mạnh';
+      else if (avgEma < 6.5) evaluation = 'Cần hỗ trợ học lực';
 
       return {
         class_id: c.id,
         class_name: c.class_name,
-        grade: c.grade || 'Lß╗øp 6',
+        grade: c.grade || 'Lớp 6',
         studentCount: totalStudents,
         attendancePct,
         avgEma,
@@ -1055,8 +1055,8 @@ export default function ReportsPage() {
     },
     {
       accessorKey: 'class_name',
-      header: 'T├¬n Lß╗øp Hß╗ìc',
-      meta: { headerText: 'T├¬n Lß╗øp Hß╗ìc' },
+      header: 'Tên Lớp Học',
+      meta: { headerText: 'Tên Lớp Học' },
       cell: ({ row }) => (
         <div>
           <span className="font-bold text-white block text-sm">{row.original.class_name}</span>
@@ -1066,14 +1066,14 @@ export default function ReportsPage() {
     },
     {
       accessorKey: 'studentCount',
-      header: () => <div className="text-center w-full">S─® Sß╗æ</div>,
-      meta: { headerText: 'S─® Sß╗æ' },
-      cell: ({ getValue }) => <div className="text-center font-mono font-bold text-slate-200">{getValue<number>()} hß╗ìc sinh</div>,
+      header: () => <div className="text-center w-full">Sĩ Số</div>,
+      meta: { headerText: 'Sĩ Số' },
+      cell: ({ getValue }) => <div className="text-center font-mono font-bold text-slate-200">{getValue<number>()} học sinh</div>,
     },
     {
       accessorKey: 'attendancePct',
-      header: () => <div className="text-center w-full">Chuy├¬n Cß║ºn %</div>,
-      meta: { headerText: 'Chuy├¬n Cß║ºn %' },
+      header: () => <div className="text-center w-full">Chuyên Cần %</div>,
+      meta: { headerText: 'Chuyên Cần %' },
       cell: ({ getValue }) => {
         const val = getValue<number>();
         return (
@@ -1088,29 +1088,29 @@ export default function ReportsPage() {
     },
     {
       accessorKey: 'avgEma',
-      header: () => <div className="text-center w-full">─Éiß╗âm EMA TB</div>,
-      meta: { headerText: '─Éiß╗âm EMA TB' },
+      header: () => <div className="text-center w-full">Điểm EMA TB</div>,
+      meta: { headerText: 'Điểm EMA TB' },
       cell: ({ getValue }) => <div className="text-center font-mono font-black text-indigo-300 text-sm">{getValue<number>() > 0 ? format1Dec(getValue<number>()) : '-'}</div>,
     },
     {
       accessorKey: 'improvingPct',
-      header: () => <div className="text-center w-full">Tß╗À Lß╗ç Tiß║┐n Bß╗Ö</div>,
-      meta: { headerText: 'Tß╗À Lß╗ç Tiß║┐n Bß╗Ö' },
-      cell: ({ getValue }) => <div className="text-center font-mono font-bold text-emerald-400">{getValue<number>()}% lß╗øp</div>,
+      header: () => <div className="text-center w-full">Tỷ Lệ Tiến Bộ</div>,
+      meta: { headerText: 'Tỷ Lệ Tiến Bộ' },
+      cell: ({ getValue }) => <div className="text-center font-mono font-bold text-emerald-400">{getValue<number>()}% lớp</div>,
     },
     {
       accessorKey: 'classSd',
-      header: () => <div className="text-center w-full">─Éß╗Ö Lß╗çch Chuß║®n (¤â)</div>,
-      meta: { headerText: '─Éß╗Ö Lß╗çch Chuß║®n (¤â)' },
-      cell: ({ getValue }) => <div className="text-center font-mono font-bold text-cyan-300">¤â = {getValue<number>()}</div>,
+      header: () => <div className="text-center w-full">Độ Lệch Chuẩn (σ)</div>,
+      meta: { headerText: 'Độ Lệch Chuẩn (σ)' },
+      cell: ({ getValue }) => <div className="text-center font-mono font-bold text-cyan-300">σ = {getValue<number>()}</div>,
     },
     {
       accessorKey: 'evaluation',
-      header: () => <div className="text-center w-full">─É├ính Gi├í Hiß╗çu Quß║ú</div>,
-      meta: { headerText: '─É├ính Gi├í Hiß╗çu Quß║ú' },
+      header: () => <div className="text-center w-full">Đánh Giá Hiệu Quả</div>,
+      meta: { headerText: 'Đánh Giá Hiệu Quả' },
       cell: ({ getValue }) => {
         const ev = getValue<string>();
-        const isExcel = ev.includes('Xuß║Ñt sß║»c') || ev.includes('Tiß║┐n bß╗Ö');
+        const isExcel = ev.includes('Xuất sắc') || ev.includes('Tiến bộ');
         return (
           <div className="text-center">
             <span className={`inline-block px-2.5 py-1 rounded-xl text-[10px] font-black border ${isExcel ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' : 'bg-amber-500/10 text-amber-400 border-amber-500/30'
@@ -1121,7 +1121,7 @@ export default function ReportsPage() {
     },
   ], []);
 
-  // TanStack ColumnDef for Score Fluctuations (Biß║┐n ─Éß╗Öng ─Éiß╗âm Sß╗æ) Table
+  // TanStack ColumnDef for Score Fluctuations (Biến Động Điểm Số) Table
   const fluctuationColumns = useMemo<ColumnDef<any>[]>(() => [
     {
       id: 'stt',
@@ -1133,45 +1133,45 @@ export default function ReportsPage() {
     },
     {
       accessorKey: 'full_name',
-      header: 'Hß╗ì v├á T├¬n',
-      meta: { headerText: 'Hß╗ì v├á T├¬n', exportValue: (r: any) => `${r.full_name}${r.nickname ? ` (${r.nickname})` : ''}` },
+      header: 'Họ và Tên',
+      meta: { headerText: 'Họ và Tên', exportValue: (r: any) => `${r.full_name}${r.nickname ? ` (${r.nickname})` : ''}` },
       cell: ({ row }) => {
         const r = row.original;
         const isSelected = String(r.student_id) === selectedStudentId;
         return (
           <div className="font-extrabold text-white text-sm flex items-center justify-between gap-2">
             <span>{r.full_name}{r.nickname ? ` - ${r.nickname}` : ''}</span>
-            {isSelected && <span className="text-[10px] text-indigo-400 bg-indigo-500/20 px-2 py-0.5 rounded font-mono font-bold">─Éang chß╗ìn</span>}
+            {isSelected && <span className="text-[10px] text-indigo-400 bg-indigo-500/20 px-2 py-0.5 rounded font-mono font-bold">Đang chọn</span>}
           </div>
         );
       },
     },
     {
       accessorKey: 'class_name',
-      header: 'Lß╗øp Hß╗ìc',
-      meta: { headerText: 'Lß╗øp Hß╗ìc', exportValue: (r: any) => r.class_name || 'Lß╗øp hß╗ìc' },
+      header: 'Lớp Học',
+      meta: { headerText: 'Lớp Học', exportValue: (r: any) => r.class_name || 'Lớp học' },
       cell: (info) => (
         <span className="inline-block px-2.5 py-0.5 rounded-lg text-xs font-black bg-[#1c2442] text-indigo-300 border border-[#303d68]">
-          {info.getValue<string>() || 'Lß╗øp hß╗ìc'}
+          {info.getValue<string>() || 'Lớp học'}
         </span>
       ),
     },
     {
       accessorKey: 'baseline',
-      header: () => <div className="text-center w-full">─Éß║ºu V├áo (3 buß╗òi ─æß║ºu)</div>,
-      meta: { headerText: '─Éß║ºu V├áo (3 buß╗òi ─æß║ºu)', exportValue: (r: any) => r.baseline > 0 ? format1Dec(r.baseline) : '-' },
+      header: () => <div className="text-center w-full">Đầu Vào (3 buổi đầu)</div>,
+      meta: { headerText: 'Đầu Vào (3 buổi đầu)', exportValue: (r: any) => r.baseline > 0 ? format1Dec(r.baseline) : '-' },
       cell: ({ getValue }) => <div className="text-center font-mono font-bold text-slate-300 text-sm">{getValue<number>() > 0 ? format1Dec(getValue<number>()) : '-'}</div>,
     },
     {
       accessorKey: 'current',
-      header: () => <div className="text-center w-full">Hiß╗çn Tß║íi (3 buß╗òi gß║ºn nhß║Ñt)</div>,
-      meta: { headerText: 'Hiß╗çn Tß║íi (3 buß╗òi gß║ºn nhß║Ñt)', exportValue: (r: any) => r.current > 0 ? format1Dec(r.current) : '-' },
+      header: () => <div className="text-center w-full">Hiện Tại (3 buổi gần nhất)</div>,
+      meta: { headerText: 'Hiện Tại (3 buổi gần nhất)', exportValue: (r: any) => r.current > 0 ? format1Dec(r.current) : '-' },
       cell: ({ getValue }) => <div className="text-center font-mono font-black text-indigo-300 text-sm">{getValue<number>() > 0 ? format1Dec(getValue<number>()) : '-'}</div>,
     },
     {
       accessorKey: 'delta',
-      header: () => <div className="text-center w-full">Mß╗®c Biß║┐n ─Éß╗Öng</div>,
-      meta: { headerText: 'Mß╗®c Biß║┐n ─Éß╗Öng', exportValue: (r: any) => r.delta > 0 ? `+${format1Dec(r.delta)}` : format1Dec(r.delta) },
+      header: () => <div className="text-center w-full">Mức Biến Động</div>,
+      meta: { headerText: 'Mức Biến Động', exportValue: (r: any) => r.delta > 0 ? `+${format1Dec(r.delta)}` : format1Dec(r.delta) },
       cell: ({ row }) => {
         const delta = Number(row.original.delta || 0);
         const isUp = delta > 0.05;
@@ -1191,8 +1191,8 @@ export default function ReportsPage() {
     },
     {
       accessorKey: 'statusLabel',
-      header: () => <div className="text-center w-full">─É├ính Gi├í Xu Hã░ß╗øng</div>,
-      meta: { headerText: '─É├ính Gi├í Xu Hã░ß╗øng', exportValue: (r: any) => r.statusLabel },
+      header: () => <div className="text-center w-full">Đánh Giá Xu Hướng</div>,
+      meta: { headerText: 'Đánh Giá Xu Hướng', exportValue: (r: any) => r.statusLabel },
       cell: ({ row }) => {
         const type = row.original.statusType;
         const label = row.original.statusLabel;
@@ -1214,14 +1214,14 @@ export default function ReportsPage() {
     },
     {
       accessorKey: 'sessionCount',
-      header: () => <div className="text-center w-full">Sß╗æ Buß╗òi ─É├ú Hß╗ìc</div>,
-      meta: { headerText: 'Sß╗æ Buß╗òi ─É├ú Hß╗ìc', exportValue: (r: any) => `${r.sessionCount} buß╗òi` },
-      cell: ({ getValue }) => <div className="text-center font-mono font-bold text-slate-400 text-xs">{getValue<number>()} buß╗òi</div>,
+      header: () => <div className="text-center w-full">Số Buổi Đã Học</div>,
+      meta: { headerText: 'Số Buổi Đã Học', exportValue: (r: any) => `${r.sessionCount} buổi` },
+      cell: ({ getValue }) => <div className="text-center font-mono font-bold text-slate-400 text-xs">{getValue<number>()} buổi</div>,
     },
     {
       id: 'actions',
-      header: () => <div className="text-center w-full">Thao T├íc</div>,
-      meta: { headerText: 'Thao T├íc' },
+      header: () => <div className="text-center w-full">Thao Tác</div>,
+      meta: { headerText: 'Thao Tác' },
       enableSorting: false,
       enableGlobalFilter: false,
       cell: ({ row }) => (
@@ -1229,9 +1229,9 @@ export default function ReportsPage() {
           <button
             onClick={(e) => { e.stopPropagation(); handleSelectRankingStudent(row.original.student_id); }}
             className="px-2.5 py-1 rounded-lg bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 hover:text-indigo-300 transition cursor-pointer border border-indigo-500/20 inline-flex items-center text-[11px] font-bold"
-            title="Xem chi tiß║┐t hß╗ìc sinh"
+            title="Xem chi tiết học sinh"
           >
-            <span>Xem chi tiß║┐t</span>
+            <span>Xem chi tiết</span>
           </button>
         </div>
       ),
@@ -1267,7 +1267,7 @@ export default function ReportsPage() {
     try {
       const ExcelJS = (await import('exceljs')).default;
       const workbook = new ExcelJS.Workbook();
-      const headers = ['STT', 'Hß╗ì v├á T├¬n', 'Lß╗øp Hß╗ìc', 'Buß╗òi Hß╗ìc', '─Éiß╗âm Danh %', 'Check 1', 'Check 2', 'Homework', 'Hß║íng', '─É├ính Gi├í'];
+      const headers = ['STT', 'Họ và Tên', 'Lớp Học', 'Buổi Học', 'Điểm Danh %', 'Check 1', 'Check 2', 'Homework', 'Hạng', 'Đánh Giá'];
 
       // Pre-load real rank badge PNG images for embedding in Excel
       const rankImages: Record<number, number> = {};
@@ -1289,7 +1289,7 @@ export default function ReportsPage() {
       }
 
       const addClassSheet = (sheetName: string, items: any[]) => {
-        const safeName = sheetName.replace(/[\*\?:\/\\\[\]]/g, '').slice(0, 31) || 'Lß╗øp';
+        const safeName = sheetName.replace(/[\*\?:\/\\\[\]]/g, '').slice(0, 31) || 'Lớp';
         const worksheet = workbook.addWorksheet(safeName);
 
         const tierObjs: any[] = [];
@@ -1302,18 +1302,18 @@ export default function ReportsPage() {
           const c2 = Number(r.avg_check_2 || 0);
           const hw = Number(r.avg_homework || 0);
           const valid = [c1, c2, hw].filter(v => v > 0);
-          let evalStr = 'Chã░a c├│ ─æiß╗âm';
-          let tierStr = 'Chã░a xß║┐p hß║íng';
+          let evalStr = 'Chưa có điểm';
+          let tierStr = 'Chưa xếp hạng';
           let currentTier: any = null;
           if (valid.length > 0) {
             const avg = trunc1Dec(valid.reduce((a, b) => a + b, 0) / valid.length);
             const tier = getStudentTier(avg);
             currentTier = tier;
             tierStr = `       ${tier.name} (${tier.title})`;
-            let label = 'Xuß║Ñt Sß║»c';
-            if (avg < 8.5) label = 'Giß╗Åi';
-            if (avg < 7.0) label = 'Kh├í';
-            if (avg < 5.0) label = 'Cß║ºn Cß╗æ Gß║»ng';
+            let label = 'Xuất Sắc';
+            if (avg < 8.5) label = 'Giỏi';
+            if (avg < 7.0) label = 'Khá';
+            if (avg < 5.0) label = 'Cần Cố Gắng';
             evalStr = `${label} (${format1Dec(avg)})`;
           }
           tierObjs.push(currentTier);
@@ -1321,8 +1321,8 @@ export default function ReportsPage() {
           return [
             { formula: 'ROW()-1' },
             `${r.full_name}${r.nickname ? ` (${r.nickname})` : ''}`,
-            r.class_name || 'Lß╗øp hß╗ìc',
-            `${present}/${total} buß╗òi`,
+            r.class_name || 'Lớp học',
+            `${present}/${total} buổi`,
             `${pct}%`,
             c1 > 0 ? format1Dec(c1) : '-',
             c2 > 0 ? format1Dec(c2) : '-',
@@ -1363,32 +1363,32 @@ export default function ReportsPage() {
                 cell.numFmt = '0.0';
               }
 
-              // Col 9: Hß║íng / Tier
+              // Col 9: Hạng / Tier
               if (!isHeader && colNumber === 9) {
                 const text = String(cell.value || '');
-                if (text.includes('Qu├ín Qu├ón') || text.includes('Kim Cã░ãíng')) {
+                if (text.includes('Quán Quân') || text.includes('Kim Cương')) {
                   cell.font = { name: 'Times New Roman', size: 13, bold: true, color: { argb: 'FFE11D48' } };
-                } else if (text.includes('Bß║ích Kim')) {
+                } else if (text.includes('Bạch Kim')) {
                   cell.font = { name: 'Times New Roman', size: 13, bold: true, color: { argb: 'FF4F46E5' } };
-                } else if (text.includes('V├áng')) {
+                } else if (text.includes('Vàng')) {
                   cell.font = { name: 'Times New Roman', size: 13, bold: true, color: { argb: 'FFD97706' } };
-                } else if (text.includes('Bß║íc')) {
+                } else if (text.includes('Bạc')) {
                   cell.font = { name: 'Times New Roman', size: 13, bold: true, color: { argb: 'FF0284C7' } };
                 } else {
                   cell.font = { name: 'Times New Roman', size: 13, bold: true, color: { argb: 'FF92400E' } };
                 }
               }
 
-              // Col 10: ─É├ính Gi├í
+              // Col 10: Đánh Giá
               if (!isHeader && colNumber === 10) {
                 const text = String(cell.value || '');
-                if (text.includes('Xuß║Ñt Sß║»c')) {
+                if (text.includes('Xuất Sắc')) {
                   cell.font = { name: 'Times New Roman', size: 13, bold: true, color: { argb: 'FF15803D' } };
-                } else if (text.includes('Giß╗Åi')) {
+                } else if (text.includes('Giỏi')) {
                   cell.font = { name: 'Times New Roman', size: 13, bold: true, color: { argb: 'FF4338CA' } };
-                } else if (text.includes('Kh├í')) {
+                } else if (text.includes('Khá')) {
                   cell.font = { name: 'Times New Roman', size: 13, bold: true, color: { argb: 'FFB45309' } };
-                } else if (text.includes('Cß║ºn Cß╗æ Gß║»ng')) {
+                } else if (text.includes('Cần Cố Gắng')) {
                   cell.font = { name: 'Times New Roman', size: 13, bold: true, color: { argb: 'FFB91C1C' } };
                 } else {
                   cell.font = { name: 'Times New Roman', size: 13, italic: true, color: { argb: 'FF64748B' } };
@@ -1425,11 +1425,11 @@ export default function ReportsPage() {
       };
 
       if (!selectedClassId) {
-        addClassSheet('Tß║Ñt Cß║ú Lß╗øp', studentRankings);
+        addClassSheet('Tất Cả Lớp', studentRankings);
 
         const groups: Record<string, any[]> = {};
         studentRankings.forEach((r) => {
-          const cName = r.class_name || 'Kh├íc';
+          const cName = r.class_name || 'Khác';
           if (!groups[cName]) groups[cName] = [];
           groups[cName].push(r);
         });
@@ -1439,7 +1439,7 @@ export default function ReportsPage() {
         });
       } else {
         const selClassObj = classes.find(c => String(c.id) === selectedClassId);
-        const name = selClassObj?.class_name || 'Bß║úng Xß║┐p Hß║íng';
+        const name = selClassObj?.class_name || 'Bảng Xếp Hạng';
         addClassSheet(name, filteredRankings);
       }
 
@@ -1455,7 +1455,7 @@ export default function ReportsPage() {
       a.click();
       URL.revokeObjectURL(url);
     } catch (err: any) {
-      console.error("Lß╗ùi xuß║Ñt Excel xß║┐p hß║íng:", err);
+      console.error("Lỗi xuất Excel xếp hạng:", err);
     }
   }, [selectedClassId, classes, studentRankings, filteredRankings]);
 
@@ -1475,7 +1475,7 @@ export default function ReportsPage() {
     return map;
   }, [sessionRecords]);
 
-  // TanStack ColumnDef for Early Warning (Hß╗ìc Sinh Nguy Cãí) Table
+  // TanStack ColumnDef for Early Warning (Học Sinh Nguy Cơ) Table
   const warningColumns = useMemo<ColumnDef<any>[]>(() => [
     {
       id: 'stt',
@@ -1487,8 +1487,8 @@ export default function ReportsPage() {
     },
     {
       accessorKey: 'full_name',
-      header: 'Hß╗ì v├á T├¬n',
-      meta: { headerText: 'Hß╗ì v├á T├¬n', exportValue: (r: any) => `${r.full_name}${r.nickname ? ` (${r.nickname})` : ''}` },
+      header: 'Họ và Tên',
+      meta: { headerText: 'Họ và Tên', exportValue: (r: any) => `${r.full_name}${r.nickname ? ` (${r.nickname})` : ''}` },
       cell: ({ row }) => {
         const r = row.original;
         return (
@@ -1501,7 +1501,7 @@ export default function ReportsPage() {
               <span className="font-extrabold text-white text-sm block">
                 {r.full_name} {r.nickname ? `(${r.nickname})` : ''}
               </span>
-              <span className="text-[10px] text-slate-400 font-semibold">{r.class_name || 'Lß╗øp hß╗ìc'}</span>
+              <span className="text-[10px] text-slate-400 font-semibold">{r.class_name || 'Lớp học'}</span>
             </div>
           </div>
         );
@@ -1509,25 +1509,25 @@ export default function ReportsPage() {
     },
     {
       accessorKey: 'class_name',
-      header: 'Lß╗øp Hß╗ìc',
-      meta: { headerText: 'Lß╗øp Hß╗ìc', exportValue: (r: any) => r.class_name || 'Lß╗øp hß╗ìc' },
+      header: 'Lớp Học',
+      meta: { headerText: 'Lớp Học', exportValue: (r: any) => r.class_name || 'Lớp học' },
       cell: (info) => (
         <span className="inline-block px-2.5 py-0.5 rounded-lg text-xs font-black bg-[#1c2442] text-rose-300 border border-rose-500/20">
-          {info.getValue<string>() || 'Lß╗øp hß╗ìc'}
+          {info.getValue<string>() || 'Lớp học'}
         </span>
       ),
     },
     {
       accessorKey: 'isUrgent',
-      header: () => <div className="text-center w-full">Mß╗®c ─Éß╗Ö</div>,
-      meta: { headerText: 'Mß╗®c ─Éß╗Ö', exportValue: (r: any) => r.isUrgent ? 'Nguy Cãí Cao' : 'Cß║ºn Theo D├Ái' },
+      header: () => <div className="text-center w-full">Mức Độ</div>,
+      meta: { headerText: 'Mức Độ', exportValue: (r: any) => r.isUrgent ? 'Nguy Cơ Cao' : 'Cần Theo Dõi' },
       cell: ({ getValue }) => {
         const isUrgent = getValue<boolean>();
         return (
           <div className="text-center">
             <span className={`inline-block px-2.5 py-0.5 rounded-lg text-[10px] font-black border ${isUrgent ? 'bg-rose-500/20 text-rose-300 border-rose-500/40' : 'bg-amber-500/20 text-amber-300 border-amber-500/40'
               }`}>
-              {isUrgent ? 'Nguy Cãí Cao' : 'Cß║ºn Theo D├Ái'}
+              {isUrgent ? 'Nguy Cơ Cao' : 'Cần Theo Dõi'}
             </span>
           </div>
         );
@@ -1535,8 +1535,8 @@ export default function ReportsPage() {
     },
     {
       accessorKey: 'riskTags',
-      header: 'L├¢ Do Cß║únh B├ío',
-      meta: { headerText: 'L├¢ Do Cß║únh B├ío', exportValue: (r: any) => (r.riskTags || []).join(' | ') },
+      header: 'Lý Do Cảnh Báo',
+      meta: { headerText: 'Lý Do Cảnh Báo', exportValue: (r: any) => (r.riskTags || []).join(' | ') },
       cell: ({ getValue }) => {
         const tags = getValue<string[]>() || [];
         return (
@@ -1555,8 +1555,8 @@ export default function ReportsPage() {
     },
     {
       accessorKey: 'ema_level',
-      header: () => <div className="text-center w-full">─Éiß╗âm EMA</div>,
-      meta: { headerText: '─Éiß╗âm EMA', exportValue: (r: any) => r.ema_level ? format1Dec(Number(r.ema_level)) : '-' },
+      header: () => <div className="text-center w-full">Điểm EMA</div>,
+      meta: { headerText: 'Điểm EMA', exportValue: (r: any) => r.ema_level ? format1Dec(Number(r.ema_level)) : '-' },
       cell: (info) => {
         const val = Number(info.getValue()) || 0;
         return <div className="text-center font-extrabold text-white font-mono text-sm">{val > 0 ? format1Dec(val) : '-'}</div>;
@@ -1564,8 +1564,8 @@ export default function ReportsPage() {
     },
     {
       id: 'actions',
-      header: () => <div className="text-center w-full">Thao T├íc</div>,
-      meta: { headerText: 'Thao T├íc' },
+      header: () => <div className="text-center w-full">Thao Tác</div>,
+      meta: { headerText: 'Thao Tác' },
       enableSorting: false,
       enableGlobalFilter: false,
       cell: ({ row }) => (
@@ -1577,7 +1577,7 @@ export default function ReportsPage() {
             }}
             className="px-2.5 py-1 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 hover:text-white transition cursor-pointer border border-rose-500/30 text-[11px] font-bold inline-flex items-center"
           >
-            <span>Xem chi tiß║┐t</span>
+            <span>Xem chi tiết</span>
           </button>
         </div>
       ),
@@ -1596,35 +1596,35 @@ export default function ReportsPage() {
     },
     {
       accessorKey: 'full_name',
-      header: 'Hß╗ì v├á T├¬n',
-      meta: { headerText: 'Hß╗ì v├á T├¬n', exportValue: (r: any) => `${r.full_name}${r.nickname ? ` (${r.nickname})` : ''}` },
+      header: 'Họ và Tên',
+      meta: { headerText: 'Họ và Tên', exportValue: (r: any) => `${r.full_name}${r.nickname ? ` (${r.nickname})` : ''}` },
       cell: ({ row }) => {
         const r = row.original;
         const isSelected = String(r.student_id) === selectedStudentId;
         return (
           <div className="font-extrabold text-white text-base flex items-center justify-between gap-2">
             <span>{r.full_name}{r.nickname ? ` - ${r.nickname}` : ''}</span>
-            {isSelected && <span className="text-xs text-indigo-400 bg-indigo-500/20 px-2 py-0.5 rounded font-mono">─Éang chß╗ìn</span>}
+            {isSelected && <span className="text-xs text-indigo-400 bg-indigo-500/20 px-2 py-0.5 rounded font-mono">Đang chọn</span>}
           </div>
         );
       },
     },
     {
       accessorKey: 'class_name',
-      header: 'Lß╗øp Hß╗ìc',
-      meta: { headerText: 'Lß╗øp Hß╗ìc', exportValue: (r: any) => r.class_name || 'Lß╗øp hß╗ìc' },
+      header: 'Lớp Học',
+      meta: { headerText: 'Lớp Học', exportValue: (r: any) => r.class_name || 'Lớp học' },
       cell: (info) => (
         <span className="inline-block px-2.5 py-0.5 rounded-lg text-xs font-black bg-[#1c2442] text-indigo-300 border border-[#303d68]">
-          {info.getValue<string>() || 'Lß╗øp hß╗ìc'}
+          {info.getValue<string>() || 'Lớp học'}
         </span>
       ),
     },
     {
       accessorKey: 'total_sessions',
-      header: () => <div className="text-center w-full">Buß╗òi Hß╗ìc</div>,
+      header: () => <div className="text-center w-full">Buổi Học</div>,
       meta: {
-        headerText: 'Buß╗òi Hß╗ìc',
-        exportValue: (r: any) => `${r.present_count ?? 0}/${r.total_sessions ?? 0} buß╗òi`
+        headerText: 'Buổi Học',
+        exportValue: (r: any) => `${r.present_count ?? 0}/${r.total_sessions ?? 0} buổi`
       },
       cell: ({ row }) => {
         const r = row.original;
@@ -1635,16 +1635,16 @@ export default function ReportsPage() {
             <span className={present < total ? "text-amber-400 font-extrabold" : "text-emerald-400"}>
               {present}
             </span>
-            <span className="text-slate-400"> / {total} buß╗òi</span>
+            <span className="text-slate-400"> / {total} buổi</span>
           </div>
         );
       },
     },
     {
       id: 'present_count',
-      header: () => <div className="text-center w-full">─Éiß╗âm Danh %</div>,
+      header: () => <div className="text-center w-full">Điểm Danh %</div>,
       meta: {
-        headerText: '─Éiß╗âm Danh %',
+        headerText: 'Điểm Danh %',
         exportValue: (r: any) => {
           const pct = r.total_sessions > 0 ? Math.round((r.present_count / r.total_sessions) * 100) : 100;
           return `${pct}%`;
@@ -1685,12 +1685,12 @@ export default function ReportsPage() {
     },
     {
       id: 'trend_sparkline',
-      header: () => <div className="text-center w-full">Xu Hã░ß╗øng</div>,
+      header: () => <div className="text-center w-full">Xu Hướng</div>,
       meta: {
-        headerText: 'Xu Hã░ß╗øng',
+        headerText: 'Xu Hướng',
         exportValue: (r: any) => {
           const slope = Number(r.trend_slope || 0);
-          return slope > 0 ? `+${format1Dec(slope)}/buß╗òi` : `${format1Dec(slope)}/buß╗òi`;
+          return slope > 0 ? `+${format1Dec(slope)}/buổi` : `${format1Dec(slope)}/buổi`;
         }
       },
       enableSorting: false,
@@ -1716,15 +1716,15 @@ export default function ReportsPage() {
     },
     {
       id: 'rankTier',
-      header: () => <div className="text-center w-full">Hß║íng</div>,
+      header: () => <div className="text-center w-full">Hạng</div>,
       meta: {
-        headerText: 'Hß║íng',
+        headerText: 'Hạng',
         exportValue: (r: any) => {
           const c1 = Number(r.avg_check_1 || 0);
           const c2 = Number(r.avg_check_2 || 0);
           const hw = Number(r.avg_homework || 0);
           const valid = [c1, c2, hw].filter(v => v > 0);
-          if (valid.length === 0) return 'Chã░a xß║┐p hß║íng';
+          if (valid.length === 0) return 'Chưa xếp hạng';
           const avg = trunc1Dec(valid.reduce((a, b) => a + b, 0) / valid.length);
           const tier = getStudentTier(avg);
           return `${tier.name} (${tier.title})`;
@@ -1743,7 +1743,7 @@ export default function ReportsPage() {
         if (avg === 0) {
           return (
             <div className="text-center">
-              <span className="inline-block px-2.5 py-1 rounded-lg text-[10px] font-bold bg-slate-500/10 text-slate-400 border border-slate-500/30">Chã░a xß║┐p hß║íng</span>
+              <span className="inline-block px-2.5 py-1 rounded-lg text-[10px] font-bold bg-slate-500/10 text-slate-400 border border-slate-500/30">Chưa xếp hạng</span>
             </div>
           );
         }
@@ -1765,20 +1765,20 @@ export default function ReportsPage() {
     },
     {
       id: 'overallAvg',
-      header: () => <div className="text-center w-full">─É├ính Gi├í</div>,
+      header: () => <div className="text-center w-full">Đánh Giá</div>,
       meta: {
-        headerText: '─É├ính Gi├í',
+        headerText: 'Đánh Giá',
         exportValue: (r: any) => {
           const c1 = Number(r.avg_check_1 || 0);
           const c2 = Number(r.avg_check_2 || 0);
           const hw = Number(r.avg_homework || 0);
           const valid = [c1, c2, hw].filter(v => v > 0);
-          if (valid.length === 0) return 'Chã░a c├│ ─æiß╗âm';
+          if (valid.length === 0) return 'Chưa có điểm';
           const avg = trunc1Dec(valid.reduce((a, b) => a + b, 0) / valid.length);
-          let label = 'Xuß║Ñt Sß║»c';
-          if (avg < 8.5) label = 'Giß╗Åi';
-          if (avg < 7.0) label = 'Kh├í';
-          if (avg < 5.0) label = 'Cß║ºn Cß╗æ Gß║»ng';
+          let label = 'Xuất Sắc';
+          if (avg < 8.5) label = 'Giỏi';
+          if (avg < 7.0) label = 'Khá';
+          if (avg < 5.0) label = 'Cần Cố Gắng';
           return `${label} (${format1Dec(avg)})`;
         }
       },
@@ -1795,14 +1795,14 @@ export default function ReportsPage() {
         if (avg === 0) {
           return (
             <div className="text-center">
-              <span className="inline-block px-2.5 py-1 rounded-lg text-[10px] font-bold bg-slate-500/10 text-slate-400 border border-slate-500/30">Chã░a c├│ ─æiß╗âm</span>
+              <span className="inline-block px-2.5 py-1 rounded-lg text-[10px] font-bold bg-slate-500/10 text-slate-400 border border-slate-500/30">Chưa có điểm</span>
             </div>
           );
         }
-        let label = 'Xuß║Ñt Sß║»c', cls = 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30';
-        if (avg < 8.5) { label = 'Giß╗Åi'; cls = 'bg-blue-500/10 text-blue-300 border-blue-500/30'; }
-        if (avg < 7.0) { label = 'Kh├í'; cls = 'bg-amber-500/10 text-amber-300 border-amber-500/30'; }
-        if (avg < 5.0) { label = 'Cß║ºn Cß╗æ Gß║»ng'; cls = 'bg-rose-500/10 text-rose-400 border-rose-500/30'; }
+        let label = 'Xuất Sắc', cls = 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30';
+        if (avg < 8.5) { label = 'Giỏi'; cls = 'bg-blue-500/10 text-blue-300 border-blue-500/30'; }
+        if (avg < 7.0) { label = 'Khá'; cls = 'bg-amber-500/10 text-amber-300 border-amber-500/30'; }
+        if (avg < 5.0) { label = 'Cần Cố Gắng'; cls = 'bg-rose-500/10 text-rose-400 border-rose-500/30'; }
         return (
           <div className="text-center">
             <span className={`inline-block px-2.5 py-1 rounded-lg text-[10px] font-black border ${cls}`}>{label} ({format1Dec(avg)})</span>
@@ -1824,8 +1824,8 @@ export default function ReportsPage() {
     },
     {
       accessorKey: 'date',
-      header: 'Thß╗Øi Gian',
-      meta: { headerText: 'Thß╗Øi Gian', exportValue: (r: any) => formatFullDate(r.date) },
+      header: 'Thời Gian',
+      meta: { headerText: 'Thời Gian', exportValue: (r: any) => formatFullDate(r.date) },
       cell: (info) => (
         <span className="font-mono text-base font-bold text-indigo-300">
           {formatFullDate(info.getValue<string>())}
@@ -1834,21 +1834,21 @@ export default function ReportsPage() {
     },
     {
       accessorKey: 'class_name',
-      header: 'Lß╗øp Hß╗ìc',
-      meta: { headerText: 'Lß╗øp Hß╗ìc', exportValue: (r: any) => r.class_name || 'Lß╗øp hß╗ìc' },
+      header: 'Lớp Học',
+      meta: { headerText: 'Lớp Học', exportValue: (r: any) => r.class_name || 'Lớp học' },
       cell: (info) => (
         <span className="inline-block px-2.5 py-0.5 rounded-lg text-xs font-black bg-[#1c2442] text-slate-300 border border-[#303d68]">
-          {info.getValue<string>() || 'Lß╗øp hß╗ìc'}
+          {info.getValue<string>() || 'Lớp học'}
         </span>
       ),
     },
     {
       accessorKey: 'status',
-      header: () => <div className="text-center w-full">─Éiß╗âm Danh</div>,
-      meta: { headerText: '─Éiß╗âm Danh', exportValue: (r: any) => r.status || 'C├│ mß║Àt' },
+      header: () => <div className="text-center w-full">Điểm Danh</div>,
+      meta: { headerText: 'Điểm Danh', exportValue: (r: any) => r.status || 'Có mặt' },
       cell: ({ getValue }) => {
-        const st = getValue<string>() || 'C├│ mß║Àt';
-        const isAbsent = st.includes('Vß║»ng') || st.includes('Nghß╗ë');
+        const st = getValue<string>() || 'Có mặt';
+        const isAbsent = st.includes('Vắng') || st.includes('Nghỉ');
         return (
           <div className="text-center">
             <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-extrabold ${isAbsent ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30' : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
@@ -1888,14 +1888,14 @@ export default function ReportsPage() {
     },
     {
       accessorKey: 'notes',
-      header: 'Ghi Ch├║',
-      meta: { headerText: 'Ghi Ch├║', exportValue: (r: any) => r.notes || '-' },
+      header: 'Ghi Chú',
+      meta: { headerText: 'Ghi Chú', exportValue: (r: any) => r.notes || '-' },
       cell: (info) => <span className="text-xs text-slate-400 truncate max-w-xs block">{info.getValue<string>() || '-'}</span>,
     },
     {
       id: 'actions',
-      header: () => <div className="text-center w-full">Thao T├íc</div>,
-      meta: { headerText: 'Thao T├íc' },
+      header: () => <div className="text-center w-full">Thao Tác</div>,
+      meta: { headerText: 'Thao Tác' },
       enableSorting: false,
       enableGlobalFilter: false,
       cell: ({ row }) => (
@@ -1903,10 +1903,10 @@ export default function ReportsPage() {
           <button
             onClick={(e) => { e.stopPropagation(); handleOpenEditModal(row.original); }}
             className="px-2.5 py-1 rounded-lg bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 hover:text-indigo-300 transition cursor-pointer border border-indigo-500/20 inline-flex items-center gap-1 text-[11px] font-bold"
-            title="Sß╗¡a ─æiß╗âm buß╗òi hß╗ìc n├áy"
+            title="Sửa điểm buổi học này"
           >
             <Edit3 size={12} />
-            <span>Sß╗¡a</span>
+            <span>Sửa</span>
           </button>
         </div>
       ),
@@ -1944,13 +1944,13 @@ export default function ReportsPage() {
     const raw = analyticsSummary || {
       academic_score: 82.0,
       trend_slope: 0.38,
-      trend_label: "─Éang cß║úi thiß╗çn",
+      trend_label: "Đang cải thiện",
       consistency_score: 92.0,
       std_dev: 0.45,
       std_dev_c1: 0.35,
       std_dev_c2: 0.50,
       std_dev_hw: 0.20,
-      consistency_label: "Rß║Ñt ß╗òn ─æß╗ïnh",
+      consistency_label: "Rất ổn định",
       ema_level: 8.6,
       ema_c1: 8.5,
       ema_c2: 7.2,
@@ -1961,10 +1961,10 @@ export default function ReportsPage() {
       pred_hw: 9.5,
       attendance_pct: 96.0,
       performance_index: 86.7,
-      rating_label: "Xuß║Ñt Sß║»c",
+      rating_label: "Xuất Sắc",
       recommendations: [
-        "Duy tr├¼ tiß║┐n ─æß╗Ö hß╗ìc tß║¡p hiß╗çn tß║íi",
-        "Dß╗▒ ─æo├ín buß╗òi tß╗øi: Check 1 (8.8), Check 2 (7.5), Homework (9.5)."
+        "Duy trì tiến độ học tập hiện tại",
+        "Dự đoán buổi tới: Check 1 (8.8), Check 2 (7.5), Homework (9.5)."
       ]
     };
 
@@ -1989,7 +1989,7 @@ export default function ReportsPage() {
         c1: '-', c2: '-', hw: '-', overall: '-',
         attendancePct: 100, sessionCount: 0,
         c1Diff: '+0.0', c2Diff: '+0.0', hwDiff: '+0.0', overallDiff: '+0.0',
-        rank: '#1', level: 'Chã░a C├│ ─Éiß╗âm'
+        rank: '#1', level: 'Chưa Có Điểm'
       };
     }
 
@@ -1999,7 +1999,7 @@ export default function ReportsPage() {
     let presentCount = 0;
 
     sessionRecords.forEach(r => {
-      if (r.status === 'C├│ mß║Àt') presentCount++;
+      if (r.status === 'Có mặt') presentCount++;
       const val1 = Number(r.check_1);
       const val2 = Number(r.check_2);
       const valHw = Number(r.homework);
@@ -2033,7 +2033,7 @@ export default function ReportsPage() {
       hwDiff: hw >= 8.0 ? '+1.8' : (hw > 0 ? '+0.2' : '-'),
       overallDiff: overall >= 7.5 ? '+0.9' : (overall > 0 ? '-0.2' : '-'),
       rank: rankStr,
-      level: overall >= 8.0 ? 'Xuß║Ñt Sß║»c (Tiß║┐n bß╗Ö)' : overall >= 6.5 ? 'Tß╗æt (─Éang tiß║┐n bß╗Ö)' : overall > 0 ? 'Cß║ºn Cß╗æ Gß║»ng' : 'Chã░a C├│ ─Éiß╗âm'
+      level: overall >= 8.0 ? 'Xuất Sắc (Tiến bộ)' : overall >= 6.5 ? 'Tốt (Đang tiến bộ)' : overall > 0 ? 'Cần Cố Gắng' : 'Chưa Có Điểm'
     };
   }, [sessionRecords, selectedStudentId, filteredRankings]);
 
@@ -2155,7 +2155,7 @@ export default function ReportsPage() {
 
   // Per-session EMA fitted values computed client-side from sessionChartData.
   // This is always perfectly aligned with chart point indices regardless of
-  // timeView filtering ÔÇö avoids the backend fitted-array index mismatch problem.
+  // timeView filtering — avoids the backend fitted-array index mismatch problem.
   const fittedLookup = useMemo(() => {
     const alpha = 0.5;
     const computeEMA = (values: number[]): number[] => {
@@ -2186,7 +2186,7 @@ export default function ReportsPage() {
   const plotAreaWidth = chartWidth - paddingLeft - paddingRight;
 
   // Clamp panOffset so first data point is anchored with 30px inner padding from Y-axis,
-  // and vertical dragging is capped to ┬▒60px so graph cannot be lost vertically.
+  // and vertical dragging is capped to ±60px so graph cannot be lost vertically.
   const clampPanOffset = useCallback((x: number, y: number, currentZoom: number) => {
     const contentWidth = plotAreaWidth * currentZoom;
     const maxDragLeft = Math.max(0, contentWidth - plotAreaWidth);
@@ -2274,7 +2274,7 @@ export default function ReportsPage() {
       pool = pool.filter(s => String(s.class_id) === selectedClassId);
     } else if (groupingScope === 'grade') {
       const currentClass = classes.find(c => String(c.id) === selectedClassId);
-      const targetGrade = currentClass?.grade || groupingGradeFilter || (classes[0]?.grade ?? 'Lß╗øp 8');
+      const targetGrade = currentClass?.grade || groupingGradeFilter || (classes[0]?.grade ?? 'Lớp 8');
       pool = pool.filter(s => {
         const sClass = classes.find(c => String(c.id) === String(s.class_id));
         return s.grade === targetGrade || (sClass && sClass.grade === targetGrade);
@@ -2310,7 +2310,7 @@ export default function ReportsPage() {
     };
 
     if (groupingMode === 'tier') {
-      // ÔöÇÔöÇ MODE A: Fixed Pedagogical Tiers ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+      // ── MODE A: Fixed Pedagogical Tiers ──────────────────────────────────────
       const g1Students: any[] = [];
       const g2Students: any[] = [];
       const g3Students: any[] = [];
@@ -2339,9 +2339,9 @@ export default function ReportsPage() {
       return [
         {
           id: 'tier-advanced',
-          title: 'Nh├│m 1: Bß╗®t Ph├í & N├óng Cao',
-          subtitle: 'N─âng Lß╗▒c Vã░ß╗út Trß╗Öi (Mastery)',
-          pedagogyAdvice: 'Tß║¡p trung luyß╗çn ─æß╗ü ph├ón h├│a, chuy├¬n ─æß╗ü kh├│ v├á giao b├ái tß║¡p tã░ duy mß╗®c ─æß╗Ö 4. Khuyß║┐n kh├¡ch l├ám b├ái tß║¡p mß╗ƒ rß╗Öng.',
+          title: 'Nhóm 1: Bứt Phá & Nâng Cao',
+          subtitle: 'Năng Lực Vượt Trội (Mastery)',
+          pedagogyAdvice: 'Tập trung luyện đề phân hóa, chuyên đề khó và giao bài tập tư duy mức độ 4. Khuyến khích làm bài tập mở rộng.',
           themeColor: 'emerald',
           borderCls: 'border-emerald-500/40',
           headerBg: 'bg-[#102419]',
@@ -2352,9 +2352,9 @@ export default function ReportsPage() {
         },
         {
           id: 'tier-standard',
-          title: 'Nh├│m 2: Cß╗ºng Cß╗æ & Chuß║®n H├│a',
-          subtitle: '─Éß║ít Chuß║®n Tiß║┐n ─Éß╗Ö (Standard)',
-          pedagogyAdvice: 'T─âng cã░ß╗Øng tß╗æc ─æß╗Ö l├ám b├ái & kß╗╣ n─âng tr├¼nh b├áy. Hã░ß╗øng dß║½n sß╗¡a c├íc lß╗ùi sai cãí bß║ún thã░ß╗Øng gß║Àp ß╗ƒ c├óu th├┤ng hiß╗âu.',
+          title: 'Nhóm 2: Củng Cố & Chuẩn Hóa',
+          subtitle: 'Đạt Chuẩn Tiến Độ (Standard)',
+          pedagogyAdvice: 'Tăng cường tốc độ làm bài & kỹ năng trình bày. Hướng dẫn sửa các lỗi sai cơ bản thường gặp ở câu thông hiểu.',
           themeColor: 'blue',
           borderCls: 'border-blue-500/40',
           headerBg: 'bg-[#101b2e]',
@@ -2365,9 +2365,9 @@ export default function ReportsPage() {
         },
         {
           id: 'tier-support',
-          title: 'Nh├│m 3: Phß╗Ñ ─Éß║ío & Nß╗ün Tß║úng',
-          subtitle: 'Cß║ºn Hß╗ù Trß╗ú Trß╗ìng T├óm (Support)',
-          pedagogyAdvice: 'Hß╗òng kiß║┐n thß╗®c nß╗ün hoß║Àc phong ─æß╗Ö giß║úm s├║t. Cß║ºn giß║úng lß║íi l├¢ thuyß║┐t c─ân bß║ún, chia nhß╗Å b├ái tß║¡p & phß╗Ñ ─æß║ío 1-1.',
+          title: 'Nhóm 3: Phụ Đạo & Nền Tảng',
+          subtitle: 'Cần Hỗ Trợ Trọng Tâm (Support)',
+          pedagogyAdvice: 'Hổng kiến thức nền hoặc phong độ giảm sút. Cần giảng lại lý thuyết căn bản, chia nhỏ bài tập & phụ đạo 1-1.',
           themeColor: 'amber',
           borderCls: 'border-amber-500/40',
           headerBg: 'bg-[#201810]',
@@ -2378,7 +2378,7 @@ export default function ReportsPage() {
         },
       ];
     } else {
-      // ÔöÇÔöÇ MODE B: 1D K-Means Clustering ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+      // ── MODE B: 1D K-Means Clustering ────────────────────────────────────────
       const K = Math.min(kmeansK, pool.length);
       if (K <= 0) return [];
 
@@ -2436,9 +2436,9 @@ export default function ReportsPage() {
 
       const metaConfig = [
         {
-          title: 'Nh├│m 1: Dß║½n ─Éß║ºu (Top Tier)',
-          subtitle: 'Cß╗Ñm ─Éiß╗âm Cao Nhß║Ñt',
-          pedagogy: 'Nh├│m hß╗ìc sinh tiß║┐p thu vã░ß╗út trß╗Öi trong lß╗øp. Giao b├ái tß║¡p mß╗ƒ rß╗Öng & thß╗¡ th├ích tã░ duy.',
+          title: 'Nhóm 1: Dẫn Đầu (Top Tier)',
+          subtitle: 'Cụm Điểm Cao Nhất',
+          pedagogy: 'Nhóm học sinh tiếp thu vượt trội trong lớp. Giao bài tập mở rộng & thử thách tư duy.',
           themeColor: 'purple',
           borderCls: 'border-purple-500/40',
           headerBg: 'bg-[#18142a]',
@@ -2446,9 +2446,9 @@ export default function ReportsPage() {
           dotColor: '#c084fc',
         },
         {
-          title: 'Nh├│m 2: Trung T├óm (Core Tier)',
-          subtitle: 'Cß╗Ñm ─Éiß╗âm Trung B├¼nh Kh├í',
-          pedagogy: 'Lß╗▒c lã░ß╗úng n├▓ng cß╗æt cß╗ºa lß╗øp. R├¿n luyß╗çn phã░ãíng ph├íp l├ám b├ái & cß╗ºng cß╗æ kiß║┐n thß╗®c ─æß╗â tiß║┐n v├áo nh├│m dß║½n ─æß║ºu.',
+          title: 'Nhóm 2: Trung Tâm (Core Tier)',
+          subtitle: 'Cụm Điểm Trung Bình Khá',
+          pedagogy: 'Lực lượng nòng cốt của lớp. Rèn luyện phương pháp làm bài & củng cố kiến thức để tiến vào nhóm dẫn đầu.',
           themeColor: 'blue',
           borderCls: 'border-blue-500/40',
           headerBg: 'bg-[#10182c]',
@@ -2456,9 +2456,9 @@ export default function ReportsPage() {
           dotColor: '#60a5fa',
         },
         {
-          title: 'Nh├│m 3: Cß║ºn Hß╗ù Trß╗ú (Focus Tier)',
-          subtitle: 'Cß╗Ñm Cß║ºn Cß╗ºng Cß╗æ Nß╗ün Tß║úng',
-          pedagogy: 'Cß╗Ñm hß╗ìc sinh cß║ºn sß╗▒ quan t├óm ─æß║Àc biß╗çt. ├ön tß║¡p kiß║┐n thß╗®c cãí bß║ún, sß╗¡a lß╗ùi sai thã░ß╗Øng gß║Àp & k├¿m cß║Àp s├ít sao.',
+          title: 'Nhóm 3: Cần Hỗ Trợ (Focus Tier)',
+          subtitle: 'Cụm Cần Củng Cố Nền Tảng',
+          pedagogy: 'Cụm học sinh cần sự quan tâm đặc biệt. Ôn tập kiến thức cơ bản, sửa lỗi sai thường gặp & kèm cặp sát sao.',
           themeColor: 'amber',
           borderCls: 'border-amber-500/40',
           headerBg: 'bg-[#201810]',
@@ -2466,9 +2466,9 @@ export default function ReportsPage() {
           dotColor: '#fbbf24',
         },
         {
-          title: 'Nh├│m 4: Phß╗Ñ ─Éß║ío T─âng Cã░ß╗Øng (Intensive Tier)',
-          subtitle: 'Cß╗Ñm Phß╗Ñ ─Éß║ío 1-1',
-          pedagogy: 'Hß╗òng kiß║┐n thß╗®c nß║Àng. Cß║ºn gi├ío vi├¬n hoß║Àc trß╗ú giß║úng hß╗ù trß╗ú trß╗▒c tiß║┐p tß╗½ng buß╗òi hß╗ìc.',
+          title: 'Nhóm 4: Phụ Đạo Tăng Cường (Intensive Tier)',
+          subtitle: 'Cụm Phụ Đạo 1-1',
+          pedagogy: 'Hổng kiến thức nặng. Cần giáo viên hoặc trợ giảng hỗ trợ trực tiếp từng buổi học.',
           themeColor: 'rose',
           borderCls: 'border-rose-500/40',
           headerBg: 'bg-[#241216]',
@@ -2482,7 +2482,7 @@ export default function ReportsPage() {
         const stats = calcGroupStats(pc.students);
         return {
           id: `kmeans-group-${idx + 1}`,
-          title: K === 2 && idx === 1 ? 'Nh├│m 2: Cß║ºn R├¿n Luyß╗çn & Hß╗ù Trß╗ú' : cfg.title,
+          title: K === 2 && idx === 1 ? 'Nhóm 2: Cần Rèn Luyện & Hỗ Trợ' : cfg.title,
           subtitle: cfg.subtitle,
           pedagogyAdvice: cfg.pedagogy,
           themeColor: cfg.themeColor,
@@ -2500,28 +2500,28 @@ export default function ReportsPage() {
   // Copy Grouping text to clipboard
   const handleCopyGrouping = useCallback(() => {
     if (!smartGroups || smartGroups.length === 0) {
-      showToast('Kh├┤ng c├│ dß╗» liß╗çu hß╗ìc sinh ─æß╗â ph├ón nh├│m', 'warning');
+      showToast('Không có dữ liệu học sinh để phân nhóm', 'warning');
       return;
     }
 
     const currentClass = classes.find(c => String(c.id) === selectedClassId);
-    const className = currentClass ? currentClass.class_name : 'Tß║Ñt Cß║ú Lß╗øp';
-    const modeName = groupingMode === 'tier' ? 'Theo Chuß║®n Hß╗ìc Lß╗▒c' : `Tß╗▒ ─Éß╗Öng Ph├ón Cß╗Ñm K-Means (${kmeansK} Nh├│m)`;
+    const className = currentClass ? currentClass.class_name : 'Tất Cả Lớp';
+    const modeName = groupingMode === 'tier' ? 'Theo Chuẩn Học Lực' : `Tự Động Phân Cụm K-Means (${kmeansK} Nhóm)`;
 
-    let text = `=== Kß║¥T QUß║ó Gß╗óI ├Ø PH├éN NH├ôM Hß╗îC Tß║¼P ===\n`;
-    text += `Lß╗øp: ${className} | Tß╗òng sß╗æ: ${filteredRankings.length} hß╗ìc sinh\n`;
-    text += `Phã░ãíng ph├íp: ${modeName}\n\n`;
+    let text = `=== KẾT QUẢ GỢI Ý PHÂN NHÓM HỌC TẬP ===\n`;
+    text += `Lớp: ${className} | Tổng số: ${filteredRankings.length} học sinh\n`;
+    text += `Phương pháp: ${modeName}\n\n`;
 
     smartGroups.forEach(g => {
-      text += `[${g.title.toUpperCase()}] (${g.students.length} hß╗ìc sinh | EMA TB: ${g.avgEma} | SD: ${g.groupSd})\n`;
-      text += `Mß╗Ñc ti├¬u: ${g.pedagogyAdvice}\n`;
+      text += `[${g.title.toUpperCase()}] (${g.students.length} học sinh | EMA TB: ${g.avgEma} | SD: ${g.groupSd})\n`;
+      text += `Mục tiêu: ${g.pedagogyAdvice}\n`;
       if (g.students.length === 0) {
-        text += `  (Chã░a c├│ hß╗ìc sinh)\n`;
+        text += `  (Chưa có học sinh)\n`;
       } else {
         g.students.forEach((s, idx) => {
           const ema = s.ema_level ? format1Dec(Number(s.ema_level)) : '-';
           const slope = Number(s.trend_slope || 0);
-          const trendStr = slope > 0 ? `+${format1Dec(slope)} (T─âng)` : slope < 0 ? `${format1Dec(slope)} (Giß║úm)` : 'ß╗ön ─æß╗ïnh';
+          const trendStr = slope > 0 ? `+${format1Dec(slope)} (Tăng)` : slope < 0 ? `${format1Dec(slope)} (Giảm)` : 'Ổn định';
           const pi = s.performance_index ? format1Dec(Number(s.performance_index)) : '-';
           const nick = s.nickname ? ` (${s.nickname})` : '';
           text += `  ${idx + 1}. ${s.full_name}${nick} | EMA: ${ema} | Trend: ${trendStr} | PI: ${pi} | ${s.class_name || ''}\n`;
@@ -2532,17 +2532,17 @@ export default function ReportsPage() {
 
     navigator.clipboard.writeText(text).then(() => {
       setCopiedGroupText(true);
-      showToast('─É├ú sao ch├®p danh s├ích ph├ón nh├│m v├áo clipboard!', 'success');
+      showToast('Đã sao chép danh sách phân nhóm vào clipboard!', 'success');
       setTimeout(() => setCopiedGroupText(false), 2500);
     }).catch(() => {
-      showToast('Kh├┤ng thß╗â sao ch├®p v├áo clipboard', 'error');
+      showToast('Không thể sao chép vào clipboard', 'error');
     });
   }, [smartGroups, classes, selectedClassId, groupingMode, kmeansK, filteredRankings]);
 
   // Export Grouping to Excel (.xlsx)
   const handleExportGroupingExcel = useCallback(async () => {
     if (!smartGroups || smartGroups.length === 0) {
-      showToast('Kh├┤ng c├│ dß╗» liß╗çu ─æß╗â xuß║Ñt Excel', 'warning');
+      showToast('Không có dữ liệu để xuất Excel', 'warning');
       return;
     }
 
@@ -2553,8 +2553,8 @@ export default function ReportsPage() {
       const className = currentClass ? currentClass.class_name : 'Toan_Lop';
       const safeClassName = className.replace(/[\*\?:\/\\\[\]]/g, '').slice(0, 25) || 'Lop';
 
-      const worksheet = workbook.addWorksheet(`Ph├ón Nh├│m ${safeClassName}`);
-      const headers = ['Nh├│m Hß╗ìc Tß║¡p', 'STT', 'Hß╗ì v├á T├¬n', 'Biß╗çt Danh', 'Lß╗øp Hß╗ìc', '─Éiß╗âm EMA', 'Tß╗æc ─Éß╗Ö Tiß║┐n Bß╗Ö (Trend)', 'Hiß╗çu Suß║Ñt (PI)', 'Check 1', 'Check 2', 'Homework', '─Éß╗ïnh Hã░ß╗øng Sã░ Phß║ím'];
+      const worksheet = workbook.addWorksheet(`Phân Nhóm ${safeClassName}`);
+      const headers = ['Nhóm Học Tập', 'STT', 'Họ và Tên', 'Biệt Danh', 'Lớp Học', 'Điểm EMA', 'Tốc Độ Tiến Bộ (Trend)', 'Hiệu Suất (PI)', 'Check 1', 'Check 2', 'Homework', 'Định Hướng Sư Phạm'];
 
       const rows: any[] = [];
       smartGroups.forEach(g => {
@@ -2620,11 +2620,11 @@ export default function ReportsPage() {
         a.click();
         window.URL.revokeObjectURL(url);
         document.body.removeChild(a);
-        showToast('Xuß║Ñt file Excel ph├ón nh├│m th├ánh c├┤ng!', 'success');
+        showToast('Xuất file Excel phân nhóm thành công!', 'success');
       }
     } catch (err: any) {
       console.error('Error exporting grouping Excel:', err);
-      showToast('C├│ lß╗ùi khi xuß║Ñt file Excel', 'error');
+      showToast('Có lỗi khi xuất file Excel', 'error');
     }
   }, [smartGroups, classes, selectedClassId]);
 
@@ -2649,13 +2649,13 @@ export default function ReportsPage() {
       <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[#181f36] pb-4">
         <div>
           <div className="flex items-center gap-2 text-[11px] font-black uppercase text-indigo-400 tracking-wider">
-            <span>B├üO C├üO THß╗ÉNG K├è</span>
+            <span>BÁO CÁO THỐNG KÊ</span>
             <ChevronRight size={12} className="text-slate-500" />
-            <span className="text-white">HIß╗åU SUß║ñT Hß╗îC Tß║¼P</span>
+            <span className="text-white">HIỆU SUẤT HỌC TẬP</span>
           </div>
           <h1 className="text-2xl font-black text-white mt-1 tracking-tight flex items-center gap-3">
             <BarChart3 className="h-7 w-7 text-indigo-400" />
-            B├ío C├ío Hiß╗çu Suß║Ñt Hß╗ìc Tß║¡p
+            Báo Cáo Hiệu Suất Học Tập
           </h1>
         </div>
 
@@ -2668,8 +2668,8 @@ export default function ReportsPage() {
               value={selectedClassId}
               onChange={(val) => { setSelectedClassId(String(val)); setSelectedStudentId(''); }}
               options={[
-                { value: '', label: 'Tß║Ñt cß║ú lß╗øp hß╗ìc' },
-                ...classes.map(c => ({ value: String(c.id), label: `${c.class_name} (${c.grade || 'Lß╗øp 6'})` }))
+                { value: '', label: 'Tất cả lớp học' },
+                ...classes.map(c => ({ value: String(c.id), label: `${c.class_name} (${c.grade || 'Lớp 6'})` }))
               ]}
               className="w-52"
             />
@@ -2678,18 +2678,18 @@ export default function ReportsPage() {
           <button
             onClick={() => setResetModalOpen(true)}
             className="group flex items-center gap-0 hover:gap-1.5 px-3 py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 hover:text-white border border-rose-500/30 text-xs font-bold transition-all duration-300 cursor-pointer shadow-sm active:scale-95"
-            title="─Éß║Àt Lß║íi ─Éiß╗âm Sß╗æ"
+            title="Đặt Lại Điểm Số"
           >
             <RotateCcw size={14} className="shrink-0" />
             <span className="max-w-0 opacity-0 group-hover:max-w-[140px] group-hover:opacity-100 transition-all duration-300 ease-in-out whitespace-nowrap overflow-hidden block">
-              ─Éß║Àt Lß║íi ─Éiß╗âm Sß╗æ
+              Đặt Lại Điểm Số
             </span>
           </button>
 
           <button
             onClick={loadAnalyticsData}
             className="p-2.5 rounded-xl bg-[#121626] hover:bg-[#1e2640] text-slate-300 hover:text-white border border-[#202842] transition cursor-pointer shadow-sm"
-            title="L├ám mß╗øi b├ío c├ío"
+            title="Làm mới báo cáo"
           >
             <RefreshCw size={14} className={loading ? "animate-spin text-indigo-400" : ""} />
           </button>
@@ -2717,7 +2717,7 @@ export default function ReportsPage() {
               }`}
           >
             <Activity size={13} />
-            <span>Tß╗òng Quan Hß╗ìc Lß╗▒c</span>
+            <span>Tổng Quan Học Lực</span>
           </button>
           <button
             type="button"
@@ -2726,7 +2726,7 @@ export default function ReportsPage() {
               }`}
           >
             <Layers size={13} />
-            <span>Thß╗æng K├¬ S├óu</span>
+            <span>Thống Kê Sâu</span>
           </button>
           <button
             type="button"
@@ -2735,7 +2735,7 @@ export default function ReportsPage() {
               }`}
           >
             <GitCompare size={13} />
-            <span>So S├ính Giß╗»a C├íc Lß╗øp</span>
+            <span>So Sánh Giữa Các Lớp</span>
           </button>
         </div>
       </div>
@@ -2756,10 +2756,10 @@ export default function ReportsPage() {
                     </div>
                     <div>
                       <h3 className="text-base font-black text-white uppercase tracking-wider flex items-center gap-2">
-                        SO S├üNH ─Éß╗ÉI ─Éß║ªU 2 Lß╗ÜP Hß╗îC
+                        SO SÁNH ĐỐI ĐẦU 2 LỚP HỌC
                       </h3>
                       <p className="text-xs text-slate-400 font-semibold mt-0.5">
-                        Chß╗ìn 2 lß╗øp hß╗ìc ─æß╗â so s├ính trß╗▒c diß╗çn c├íc chß╗ë sß╗æ hß╗ìc lß╗▒c, chuy├¬n cß║ºn, ph├ón bß╗æ 6 hß║íng bß║¡c v├á ─æ├á ph├ít triß╗ân.
+                        Chọn 2 lớp học để so sánh trực diện các chỉ số học lực, chuyên cần, phân bố 6 hạng bậc và đà phát triển.
                       </p>
                     </div>
                   </div>
@@ -2771,12 +2771,12 @@ export default function ReportsPage() {
                         className="w-2.5 h-2.5 rounded-full shrink-0"
                         style={{ backgroundColor: getClassColor(compareClassAId, 0), boxShadow: `0 0 8px ${getClassColor(compareClassAId, 0)}80` }}
                       ></span>
-                      <span className="text-xs font-black text-blue-400 whitespace-nowrap shrink-0">Lß╗øp A:</span>
+                      <span className="text-xs font-black text-blue-400 whitespace-nowrap shrink-0">Lớp A:</span>
                       <div className="w-48 shrink-0">
                         <CustomSelect
                           value={compareClassAId}
                           onChange={(val) => setCompareClassAId(String(val))}
-                          options={classes.map((c) => ({ value: String(c.id), label: `${c.class_name} (${c.grade || 'Lß╗øp 6'})` }))}
+                          options={classes.map((c) => ({ value: String(c.id), label: `${c.class_name} (${c.grade || 'Lớp 6'})` }))}
                         />
                       </div>
                     </div>
@@ -2790,12 +2790,12 @@ export default function ReportsPage() {
                         className="w-2.5 h-2.5 rounded-full shrink-0"
                         style={{ backgroundColor: getClassColor(compareClassBId, 1), boxShadow: `0 0 8px ${getClassColor(compareClassBId, 1)}80` }}
                       ></span>
-                      <span className="text-xs font-black text-cyan-400 whitespace-nowrap shrink-0">Lß╗øp B:</span>
+                      <span className="text-xs font-black text-cyan-400 whitespace-nowrap shrink-0">Lớp B:</span>
                       <div className="w-48 shrink-0">
                         <CustomSelect
                           value={compareClassBId}
                           onChange={(val) => setCompareClassBId(String(val))}
-                          options={classes.map((c) => ({ value: String(c.id), label: `${c.class_name} (${c.grade || 'Lß╗øp 6'})` }))}
+                          options={classes.map((c) => ({ value: String(c.id), label: `${c.class_name} (${c.grade || 'Lớp 6'})` }))}
                         />
                       </div>
                     </div>
@@ -2808,7 +2808,7 @@ export default function ReportsPage() {
                   <div className="p-4 rounded-xl bg-[#0e1322] border border-[#1b253b] flex flex-col justify-between gap-3 shadow-md">
                     <div className="flex items-center justify-center gap-2 border-b border-white/5 pb-2 text-center">
                       <BarChart3 size={14} className="text-blue-400" />
-                      <span className="text-xs font-black uppercase tracking-wider text-blue-400">─ÉIß╗éM EMA TRUNG B├îNH</span>
+                      <span className="text-xs font-black uppercase tracking-wider text-blue-400">ĐIỂM EMA TRUNG BÌNH</span>
                     </div>
                     <div className="flex items-center justify-between gap-2 px-1">
                       <div className="text-left">
@@ -2824,14 +2824,14 @@ export default function ReportsPage() {
                     <div className="pt-2 border-t border-white/5 text-[11px] font-black flex items-center justify-center">
                       {classComparisonData.emaDiff > 0 ? (
                         <span className="text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-lg border border-emerald-500/20 whitespace-nowrap">
-                          {classComparisonData.classA.name} cao hãín +{format1Dec(classComparisonData.emaDiff)} ─æ
+                          {classComparisonData.classA.name} cao hơn +{format1Dec(classComparisonData.emaDiff)} đ
                         </span>
                       ) : classComparisonData.emaDiff < 0 ? (
                         <span className="text-cyan-400 bg-cyan-500/10 px-2.5 py-1 rounded-lg border border-cyan-500/20 whitespace-nowrap">
-                          {classComparisonData.classB.name} cao hãín +{format1Dec(Math.abs(classComparisonData.emaDiff))} ─æ
+                          {classComparisonData.classB.name} cao hơn +{format1Dec(Math.abs(classComparisonData.emaDiff))} đ
                         </span>
                       ) : (
-                        <span className="text-slate-400 bg-slate-500/10 px-2.5 py-1 rounded-lg whitespace-nowrap">Hai lß╗øp bß║▒ng ─æiß╗âm nhau</span>
+                        <span className="text-slate-400 bg-slate-500/10 px-2.5 py-1 rounded-lg whitespace-nowrap">Hai lớp bằng điểm nhau</span>
                       )}
                     </div>
                   </div>
@@ -2840,7 +2840,7 @@ export default function ReportsPage() {
                   <div className="p-4 rounded-xl bg-[#0e1322] border border-[#1b253b] flex flex-col justify-between gap-3 shadow-md">
                     <div className="flex items-center justify-center gap-2 border-b border-white/5 pb-2 text-center">
                       <Users size={14} className="text-emerald-400" />
-                      <span className="text-xs font-black uppercase tracking-wider text-emerald-400">CHUY├èN Cß║ªN %</span>
+                      <span className="text-xs font-black uppercase tracking-wider text-emerald-400">CHUYÊN CẦN %</span>
                     </div>
                     <div className="flex items-center justify-between gap-2 px-1">
                       <div className="text-left">
@@ -2856,14 +2856,14 @@ export default function ReportsPage() {
                     <div className="pt-2 border-t border-white/5 text-[11px] font-black flex items-center justify-center">
                       {classComparisonData.attDiff > 0 ? (
                         <span className="text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-lg border border-emerald-500/20 whitespace-nowrap">
-                          {classComparisonData.classA.name} chuy├¬n cß║ºn hãín +{classComparisonData.attDiff}%
+                          {classComparisonData.classA.name} chuyên cần hơn +{classComparisonData.attDiff}%
                         </span>
                       ) : classComparisonData.attDiff < 0 ? (
                         <span className="text-teal-400 bg-teal-500/10 px-2.5 py-1 rounded-lg border border-teal-500/20 whitespace-nowrap">
-                          {classComparisonData.classB.name} chuy├¬n cß║ºn hãín +{Math.abs(classComparisonData.attDiff)}%
+                          {classComparisonData.classB.name} chuyên cần hơn +{Math.abs(classComparisonData.attDiff)}%
                         </span>
                       ) : (
-                        <span className="text-slate-400 bg-slate-500/10 px-2.5 py-1 rounded-lg whitespace-nowrap">Tß╗À lß╗ç chuy├¬n cß║ºn ngang nhau</span>
+                        <span className="text-slate-400 bg-slate-500/10 px-2.5 py-1 rounded-lg whitespace-nowrap">Tỷ lệ chuyên cần ngang nhau</span>
                       )}
                     </div>
                   </div>
@@ -2872,7 +2872,7 @@ export default function ReportsPage() {
                   <div className="p-4 rounded-xl bg-[#0e1322] border border-[#1b253b] flex flex-col justify-between gap-3 shadow-md">
                     <div className="flex items-center justify-center gap-2 border-b border-white/5 pb-2 text-center">
                       <TrendingUp size={14} className="text-sky-400" />
-                      <span className="text-xs font-black uppercase tracking-wider text-sky-400">Tß╗Â Lß╗å TIß║¥N Bß╗ÿ</span>
+                      <span className="text-xs font-black uppercase tracking-wider text-sky-400">TỶ LỆ TIẾN BỘ</span>
                     </div>
                     <div className="flex items-center justify-between gap-2 px-1">
                       <div className="text-left">
@@ -2888,14 +2888,14 @@ export default function ReportsPage() {
                     <div className="pt-2 border-t border-white/5 text-[11px] font-black flex items-center justify-center">
                       {classComparisonData.impDiff > 0 ? (
                         <span className="text-blue-400 bg-blue-500/10 px-2.5 py-1 rounded-lg border border-blue-500/20 whitespace-nowrap">
-                          {classComparisonData.classA.name} tiß║┐n bß╗Ö hãín +{classComparisonData.impDiff}%
+                          {classComparisonData.classA.name} tiến bộ hơn +{classComparisonData.impDiff}%
                         </span>
                       ) : classComparisonData.impDiff < 0 ? (
                         <span className="text-cyan-400 bg-cyan-500/10 px-2.5 py-1 rounded-lg border border-cyan-500/20 whitespace-nowrap">
-                          {classComparisonData.classB.name} tiß║┐n bß╗Ö hãín +{Math.abs(classComparisonData.impDiff)}%
+                          {classComparisonData.classB.name} tiến bộ hơn +{Math.abs(classComparisonData.impDiff)}%
                         </span>
                       ) : (
-                        <span className="text-slate-400 bg-slate-500/10 px-2.5 py-1 rounded-lg whitespace-nowrap">Tß╗À lß╗ç tiß║┐n bß╗Ö bß║▒ng nhau</span>
+                        <span className="text-slate-400 bg-slate-500/10 px-2.5 py-1 rounded-lg whitespace-nowrap">Tỷ lệ tiến bộ bằng nhau</span>
                       )}
                     </div>
                   </div>
@@ -2904,30 +2904,30 @@ export default function ReportsPage() {
                   <div className="p-4 rounded-xl bg-[#0e1322] border border-[#1b253b] flex flex-col justify-between gap-3 shadow-md">
                     <div className="flex items-center justify-center gap-2 border-b border-white/5 pb-2 text-center">
                       <Activity size={14} className="text-amber-400" />
-                      <span className="text-xs font-black uppercase tracking-wider text-amber-400">─Éß╗ÿ Lß╗åCH CHUß║¿N (SD)</span>
+                      <span className="text-xs font-black uppercase tracking-wider text-amber-400">ĐỘ LỆCH CHUẨN (SD)</span>
                     </div>
                     <div className="flex items-center justify-between gap-2 px-1">
                       <div className="text-left">
                         <span className="text-[11px] text-slate-400 block font-semibold truncate max-w-[100px]">{classComparisonData.classA.name}</span>
-                        <span className="text-2xl font-black font-mono text-amber-300">¤â={classComparisonData.classA.classSd}</span>
+                        <span className="text-2xl font-black font-mono text-amber-300">σ={classComparisonData.classA.classSd}</span>
                       </div>
                       <span className="text-xs font-black text-slate-600 font-mono">VS</span>
                       <div className="text-right">
                         <span className="text-[11px] text-slate-400 block font-semibold truncate max-w-[100px]">{classComparisonData.classB.name}</span>
-                        <span className="text-2xl font-black font-mono text-yellow-300">¤â={classComparisonData.classB.classSd}</span>
+                        <span className="text-2xl font-black font-mono text-yellow-300">σ={classComparisonData.classB.classSd}</span>
                       </div>
                     </div>
                     <div className="pt-2 border-t border-white/5 text-[11px] font-black flex items-center justify-center">
                       {classComparisonData.classA.classSd < classComparisonData.classB.classSd ? (
                         <span className="text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-lg border border-emerald-500/20 whitespace-nowrap">
-                          {classComparisonData.classA.name} ─æß╗ông ─æß╗üu hß╗ìc lß╗▒c hãín
+                          {classComparisonData.classA.name} đồng đều học lực hơn
                         </span>
                       ) : classComparisonData.classA.classSd > classComparisonData.classB.classSd ? (
                         <span className="text-yellow-400 bg-yellow-500/10 px-2.5 py-1 rounded-lg border border-yellow-500/20 whitespace-nowrap">
-                          {classComparisonData.classB.name} ─æß╗ông ─æß╗üu hß╗ìc lß╗▒c hãín
+                          {classComparisonData.classB.name} đồng đều học lực hơn
                         </span>
                       ) : (
-                        <span className="text-slate-400 bg-slate-500/10 px-2.5 py-1 rounded-lg whitespace-nowrap">Mß╗®c ─æß╗Ö ph├ón t├ín ngang nhau</span>
+                        <span className="text-slate-400 bg-slate-500/10 px-2.5 py-1 rounded-lg whitespace-nowrap">Mức độ phân tán ngang nhau</span>
                       )}
                     </div>
                   </div>
@@ -2940,7 +2940,7 @@ export default function ReportsPage() {
                     <div className="flex items-center justify-between border-b border-white/5 pb-2.5">
                       <span className="text-xs font-black uppercase tracking-wider text-white flex items-center gap-2">
                         <BarChart3 size={15} className="text-blue-400" />
-                        So S├ính ─Éiß╗âm Th├ánh Phß║ºn
+                        So Sánh Điểm Thành Phần
                       </span>
                       <div className="flex items-center gap-3 text-[11px] font-bold">
                         <span className="flex items-center gap-1.5 text-blue-400">
@@ -2956,8 +2956,8 @@ export default function ReportsPage() {
                       {/* 1. Check 1 Dual Bars */}
                       <div className="p-3 rounded-lg bg-[#0c101c] border border-white/5 space-y-2.5">
                         <div className="flex items-center justify-between text-xs font-bold">
-                          <span className="text-slate-200 font-extrabold">Check 1 (Kiß╗âm tra ─æß║ºu giß╗Ø)</span>
-                          <span className="text-[11px] font-mono font-bold text-slate-400">Thang ─æiß╗âm 10</span>
+                          <span className="text-slate-200 font-extrabold">Check 1 (Kiểm tra đầu giờ)</span>
+                          <span className="text-[11px] font-mono font-bold text-slate-400">Thang điểm 10</span>
                         </div>
                         <div className="space-y-2">
                           <div className="flex items-center gap-3">
@@ -2970,7 +2970,7 @@ export default function ReportsPage() {
                                 delayMs={750}
                               />
                             </div>
-                            <span className="text-xs font-mono font-black text-blue-300 w-12 text-right shrink-0">{format1Dec(classComparisonData.classA.avgCheck1)} ─æ</span>
+                            <span className="text-xs font-mono font-black text-blue-300 w-12 text-right shrink-0">{format1Dec(classComparisonData.classA.avgCheck1)} đ</span>
                           </div>
                           <div className="flex items-center gap-3">
                             <span className="text-[11px] font-bold text-cyan-400 w-24 truncate shrink-0">{classComparisonData.classB.name}:</span>
@@ -2982,7 +2982,7 @@ export default function ReportsPage() {
                                 delayMs={750}
                               />
                             </div>
-                            <span className="text-xs font-mono font-black text-cyan-300 w-12 text-right shrink-0">{format1Dec(classComparisonData.classB.avgCheck1)} ─æ</span>
+                            <span className="text-xs font-mono font-black text-cyan-300 w-12 text-right shrink-0">{format1Dec(classComparisonData.classB.avgCheck1)} đ</span>
                           </div>
                         </div>
                       </div>
@@ -2990,8 +2990,8 @@ export default function ReportsPage() {
                       {/* 2. Check 2 Dual Bars */}
                       <div className="p-3 rounded-lg bg-[#0c101c] border border-white/5 space-y-2.5">
                         <div className="flex items-center justify-between text-xs font-bold">
-                          <span className="text-slate-200 font-extrabold">Check 2 (Kiß╗âm tra trß╗ìng t├óm)</span>
-                          <span className="text-[11px] font-mono font-bold text-slate-400">Thang ─æiß╗âm 10</span>
+                          <span className="text-slate-200 font-extrabold">Check 2 (Kiểm tra trọng tâm)</span>
+                          <span className="text-[11px] font-mono font-bold text-slate-400">Thang điểm 10</span>
                         </div>
                         <div className="space-y-2">
                           <div className="flex items-center gap-3">
@@ -3004,7 +3004,7 @@ export default function ReportsPage() {
                                 delayMs={830}
                               />
                             </div>
-                            <span className="text-xs font-mono font-black text-blue-300 w-12 text-right shrink-0">{format1Dec(classComparisonData.classA.avgCheck2)} ─æ</span>
+                            <span className="text-xs font-mono font-black text-blue-300 w-12 text-right shrink-0">{format1Dec(classComparisonData.classA.avgCheck2)} đ</span>
                           </div>
                           <div className="flex items-center gap-3">
                             <span className="text-[11px] font-bold text-cyan-400 w-24 truncate shrink-0">{classComparisonData.classB.name}:</span>
@@ -3016,7 +3016,7 @@ export default function ReportsPage() {
                                 delayMs={830}
                               />
                             </div>
-                            <span className="text-xs font-mono font-black text-cyan-300 w-12 text-right shrink-0">{format1Dec(classComparisonData.classB.avgCheck2)} ─æ</span>
+                            <span className="text-xs font-mono font-black text-cyan-300 w-12 text-right shrink-0">{format1Dec(classComparisonData.classB.avgCheck2)} đ</span>
                           </div>
                         </div>
                       </div>
@@ -3024,8 +3024,8 @@ export default function ReportsPage() {
                       {/* 3. Homework Dual Bars */}
                       <div className="p-3 rounded-lg bg-[#0c101c] border border-white/5 space-y-2.5">
                         <div className="flex items-center justify-between text-xs font-bold">
-                          <span className="text-slate-200 font-extrabold">Homework (B├ái tß║¡p vß╗ü nh├á)</span>
-                          <span className="text-[11px] font-mono font-bold text-slate-400">Thang ─æiß╗âm 10</span>
+                          <span className="text-slate-200 font-extrabold">Homework (Bài tập về nhà)</span>
+                          <span className="text-[11px] font-mono font-bold text-slate-400">Thang điểm 10</span>
                         </div>
                         <div className="space-y-2">
                           <div className="flex items-center gap-3">
@@ -3038,7 +3038,7 @@ export default function ReportsPage() {
                                 delayMs={910}
                               />
                             </div>
-                            <span className="text-xs font-mono font-black text-blue-300 w-12 text-right shrink-0">{format1Dec(classComparisonData.classA.avgHomework)} ─æ</span>
+                            <span className="text-xs font-mono font-black text-blue-300 w-12 text-right shrink-0">{format1Dec(classComparisonData.classA.avgHomework)} đ</span>
                           </div>
                           <div className="flex items-center gap-3">
                             <span className="text-[11px] font-bold text-cyan-400 w-24 truncate shrink-0">{classComparisonData.classB.name}:</span>
@@ -3050,19 +3050,19 @@ export default function ReportsPage() {
                                 delayMs={910}
                               />
                             </div>
-                            <span className="text-xs font-mono font-black text-cyan-300 w-12 text-right shrink-0">{format1Dec(classComparisonData.classB.avgHomework)} ─æ</span>
+                            <span className="text-xs font-mono font-black text-cyan-300 w-12 text-right shrink-0">{format1Dec(classComparisonData.classB.avgHomework)} đ</span>
                           </div>
                         </div>
                       </div>
                     </div>
                   </div>
 
-                  {/* Right: 6-Tier Academic Rank Distribution Duel ÔÇö Symmetrical Tug-of-War Comparative Ladder */}
+                  {/* Right: 6-Tier Academic Rank Distribution Duel — Symmetrical Tug-of-War Comparative Ladder */}
                   <div className="p-5 rounded-xl bg-[#090d17] border border-[#192236] space-y-4 shadow-xl">
                     <div className="flex flex-wrap items-center justify-between border-b border-white/5 pb-3 gap-2">
                       <span className="text-xs font-black uppercase tracking-wider text-white flex items-center gap-2">
                         <Award size={16} className="text-amber-400" />
-                        Ph├ón Bß╗æ 6 Hß║íng Bß║¡c Hß╗ìc Lß╗▒c
+                        Phân Bố 6 Hạng Bậc Học Lực
                       </span>
                       <div className="flex items-center gap-4 text-xs font-extrabold">
                         <div className="flex items-center gap-1.5 text-blue-400">
@@ -3077,7 +3077,7 @@ export default function ReportsPage() {
                       </div>
                     </div>
 
-                    {/* 6-Tier Dual Butterfly Comparison Ladder (Qu├ín Qu├ón -> ─Éß╗ông) */}
+                    {/* 6-Tier Dual Butterfly Comparison Ladder (Quán Quân -> Đồng) */}
                     <div className="space-y-2.5">
                       {TIERS_CONFIG.slice().reverse().map((tier, tierIdx) => {
                         const countA = classComparisonData.classA.tierDistribution.find((t: any) => t.tier === tier.tier)?.count || 0;
@@ -3111,7 +3111,7 @@ export default function ReportsPage() {
                               <img src={tier.badge} alt={tier.name} className="w-7 h-7 object-contain shrink-0 drop-shadow" />
                               <div className="text-center">
                                 <span className={`text-xs font-black block leading-tight ${tier.text}`}>{tier.name}</span>
-                                <span className="text-[10px] text-slate-400 font-mono font-semibold">{tier.minScore} - {tier.maxScore}─æ</span>
+                                <span className="text-[10px] text-slate-400 font-mono font-semibold">{tier.minScore} - {tier.maxScore}đ</span>
                               </div>
                             </div>
 
@@ -3150,9 +3150,9 @@ export default function ReportsPage() {
                         <Award size={22} className="text-blue-400 shrink-0" />
                       )}
                       <div>
-                        <span className="text-[10px] font-black uppercase text-blue-400 block">Hß╗ìc Sinh Dß║½n ─Éß║ºu ({classComparisonData.classA.name})</span>
+                        <span className="text-[10px] font-black uppercase text-blue-400 block">Học Sinh Dẫn Đầu ({classComparisonData.classA.name})</span>
                         <span className="text-xs font-bold text-white">
-                          {classComparisonData.classA.topStudent ? classComparisonData.classA.topStudent.full_name : 'Chã░a c├│'}
+                          {classComparisonData.classA.topStudent ? classComparisonData.classA.topStudent.full_name : 'Chưa có'}
                         </span>
                       </div>
                     </div>
@@ -3175,9 +3175,9 @@ export default function ReportsPage() {
                         <Award size={22} className="text-cyan-400 shrink-0" />
                       )}
                       <div>
-                        <span className="text-[10px] font-black uppercase text-cyan-400 block">Hß╗ìc Sinh Dß║½n ─Éß║ºu ({classComparisonData.classB.name})</span>
+                        <span className="text-[10px] font-black uppercase text-cyan-400 block">Học Sinh Dẫn Đầu ({classComparisonData.classB.name})</span>
                         <span className="text-xs font-bold text-white">
-                          {classComparisonData.classB.topStudent ? classComparisonData.classB.topStudent.full_name : 'Chã░a c├│'}
+                          {classComparisonData.classB.topStudent ? classComparisonData.classB.topStudent.full_name : 'Chưa có'}
                         </span>
                       </div>
                     </div>
@@ -3198,10 +3198,10 @@ export default function ReportsPage() {
                   <BarChart3 size={20} className="text-blue-400" />
                   <div>
                     <h3 className="text-base font-black text-white uppercase tracking-wider">
-                      Bß║óNG Tß╗öNG Hß╗óP HIß╗åU QUß║ó TO├ÇN Bß╗ÿ C├üC Lß╗ÜP Hß╗îC
+                      BẢNG TỔNG HỢP HIỆU QUẢ TOÀN BỘ CÁC LỚP HỌC
                     </h3>
                     <p className="text-xs text-slate-400 font-semibold mt-0.5">
-                      ─É├ính gi├í to├án diß╗çn s─® sß╗æ, tß╗À lß╗ç chuy├¬n cß║ºn, ─æiß╗âm sß╗æ EMA trung b├¼nh, tß╗À lß╗ç tiß║┐n bß╗Ö v├á mß╗®c ─æß╗Ö ph├ón h├│a tr├¼nh ─æß╗Ö cß╗ºa tß║Ñt cß║ú c├íc lß╗øp.
+                      Đánh giá toàn diện sĩ số, tỷ lệ chuyên cần, điểm số EMA trung bình, tỷ lệ tiến bộ và mức độ phân hóa trình độ của tất cả các lớp.
                     </p>
                   </div>
                 </div>
@@ -3213,26 +3213,26 @@ export default function ReportsPage() {
                 data={crossClassBenchmark}
                 columns={classBenchmarkColumns}
                 loading={loading}
-                searchPlaceholder="T├¼m kiß║┐m lß╗øp hß╗ìc..."
-                emptyMessage="Chã░a c├│ dß╗» liß╗çu lß╗øp hß╗ìc ─æß╗â so s├ính."
+                searchPlaceholder="Tìm kiếm lớp học..."
+                emptyMessage="Chưa có dữ liệu lớp học để so sánh."
                 pageSize={20}
               />
             </div>
           </div>
         ) : activeReportTab === 'deep' ? (
-          /* THß╗ÉNG K├è S├éU (DEEP ANALYSIS TAB VIEW) */
+          /* THỐNG KÊ SÂU (DEEP ANALYSIS TAB VIEW) */
           <div className="flex flex-col gap-8 mb-8">
             {/* 1. 6-TIER ACADEMIC RANKING DISTRIBUTION (MATCHING REFERENCE DESIGN) */}
             <div className="bg-[#0b0f19] border border-[#1b253b] p-6 rounded-2xl shadow-xl flex flex-col gap-5 animate-cascade-1">
               <div className="flex items-center justify-between gap-2 border-b border-[#161f33] pb-4">
                 <div className="flex items-center gap-2">
                   <h4 className="text-sm font-black uppercase text-white tracking-wider">
-                    PH├éN Bß╗É Hß║áNG Bß║¼C Hß╗îC Lß╗░C
+                    PHÂN BỐ HẠNG BẬC HỌC LỰC
                   </h4>
                   <div className="group relative">
                     <Info size={14} className="text-slate-400 hover:text-white cursor-pointer transition-colors" />
                     <div className="absolute left-0 top-full mt-1.5 hidden group-hover:block z-50 w-64 p-2.5 rounded-xl bg-[#131929] border border-[#28334e] text-[11px] text-slate-300 shadow-xl pointer-events-none">
-                      Ph├ón bß╗æ hß╗ìc sinh theo 6 cß║Ñp bß║¡c danh hiß╗çu hß╗ìc lß╗▒c. Nhß║Ñp v├áo tß╗½ng bß║¡c ─æß╗â lß╗ìc danh s├ích hß╗ìc sinh.
+                      Phân bố học sinh theo 6 cấp bậc danh hiệu học lực. Nhấp vào từng bậc để lọc danh sách học sinh.
                     </div>
                   </div>
                 </div>
@@ -3242,11 +3242,11 @@ export default function ReportsPage() {
                       onClick={() => setSelectedDistFilter('all')}
                       className="text-[10px] font-bold text-blue-400 hover:text-white bg-blue-500/10 px-2 py-0.5 rounded border border-blue-500/30 transition cursor-pointer mr-2"
                     >
-                      Bß╗Å Lß╗ìc Hß║íng
+                      Bỏ Lọc Hạng
                     </button>
                   )}
                   <span className="text-xs font-bold text-slate-400">
-                    Tß╗òng sß╗æ: <strong className="text-white font-mono">{tierDistribution.total}</strong> hß╗ìc sinh
+                    Tổng số: <strong className="text-white font-mono">{tierDistribution.total}</strong> học sinh
                   </span>
                 </div>
               </div>
@@ -3303,14 +3303,14 @@ export default function ReportsPage() {
                   <div>
                     <div className="flex items-center gap-2">
                       <h3 className="text-sm font-black text-white uppercase tracking-wider">
-                        Hß╗å THß╗ÉNG Cß║óNH B├üO NGUY Cãá
+                        HỆ THỐNG CẢNH BÁO NGUY CƠ
                       </h3>
                       <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-rose-500/20 text-rose-300 border border-rose-500/40">
-                        {atRiskStudents.length} Hß╗ìc Sinh Cß║ºn Ch├║ ├Ø
+                        {atRiskStudents.length} Học Sinh Cần Chú Ý
                       </span>
                     </div>
                     <p className="text-xs text-slate-400 font-semibold mt-0.5">
-                      Tß╗▒ ─æß╗Öng ph├ít hiß╗çn hß╗ìc sinh c├│ dß║Ñu hiß╗çu nghß╗ë hß╗ìc li├¬n tiß║┐p, tß╗À lß╗ç vß║»ng cao hoß║Àc ─æ├á ─æiß╗âm sß╗æ tß╗Ñt dß╗æc ─æß╗â can thiß╗çp kß╗ïp thß╗Øi.
+                      Tự động phát hiện học sinh có dấu hiệu nghỉ học liên tiếp, tỷ lệ vắng cao hoặc đà điểm số tụt dốc để can thiệp kịp thời.
                     </p>
                   </div>
                 </div>
@@ -3326,7 +3326,7 @@ export default function ReportsPage() {
                     className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#1c1426] hover:bg-[#281b38] text-rose-300 hover:text-white border border-rose-500/30 text-xs font-bold transition cursor-pointer"
                   >
                     <SlidersHorizontal size={13} />
-                    <span>{showWarningSettings ? '─É├│ng C├ái ─Éß║Àt' : 'T├╣y Chß╗ënh Ngã░ß╗íng'}</span>
+                    <span>{showWarningSettings ? 'Đóng Cài Đặt' : 'Tùy Chỉnh Ngưỡng'}</span>
                   </button>
                   <div className="p-1.5 rounded-lg bg-white/5 text-slate-400">
                     {isWarningSectionOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
@@ -3344,7 +3344,7 @@ export default function ReportsPage() {
                       <div className="p-4 rounded-xl bg-[#181120] border border-rose-500/20 grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
                         <div>
                           <label className="block text-[11px] font-bold text-slate-300 mb-1.5">
-                            Ngã░ß╗íng Tß╗À Lß╗ç Vß║»ng Mß║Àt (%):
+                            Ngưỡng Tỷ Lệ Vắng Mặt (%):
                           </label>
                           <div className="flex items-center gap-3">
                             <input
@@ -3357,14 +3357,14 @@ export default function ReportsPage() {
                               className="flex-1 accent-rose-500 cursor-pointer"
                             />
                             <span className="font-mono font-black text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded border border-rose-500/20">
-                              ÔëÑ {warningAbsentPct}%
+                              ≥ {warningAbsentPct}%
                             </span>
                           </div>
                         </div>
 
                         <div>
                           <label className="block text-[11px] font-bold text-slate-300 mb-1.5">
-                            Sß╗æ Buß╗òi Vß║»ng Li├¬n Tiß║┐p:
+                            Số Buổi Vắng Liên Tiếp:
                           </label>
                           <div className="flex items-center gap-3">
                             <input
@@ -3377,14 +3377,14 @@ export default function ReportsPage() {
                               className="flex-1 accent-rose-500 cursor-pointer"
                             />
                             <span className="font-mono font-black text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded border border-rose-500/20">
-                              ÔëÑ {warningConsecutiveAbsent} buß╗òi
+                              ≥ {warningConsecutiveAbsent} buổi
                             </span>
                           </div>
                         </div>
 
                         <div>
                           <label className="block text-[11px] font-bold text-slate-300 mb-1.5">
-                            Ngã░ß╗íng Tß╗æc ─Éß╗Ö Giß║úm ─Éiß╗âm (Trend):
+                            Ngưỡng Tốc Độ Giảm Điểm (Trend):
                           </label>
                           <div className="flex items-center gap-3">
                             <input
@@ -3397,7 +3397,7 @@ export default function ReportsPage() {
                               className="flex-1 accent-rose-500 cursor-pointer"
                             />
                             <span className="font-mono font-black text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded border border-rose-500/20">
-                              Ôëñ {warningTrendThreshold}/buß╗òi
+                              ≤ {warningTrendThreshold}/buổi
                             </span>
                           </div>
                         </div>
@@ -3411,8 +3411,8 @@ export default function ReportsPage() {
                       data={atRiskStudents}
                       columns={warningColumns}
                       loading={loading}
-                      searchPlaceholder="T├¼m hß╗ìc sinh nguy cãí theo t├¬n, lß╗øp..."
-                      emptyMessage="Tuyß╗çt vß╗Øi! Kh├┤ng c├│ hß╗ìc sinh n├áo rãíi v├áo diß╗çn cß║únh b├ío nguy cãí theo c├íc ti├¬u ch├¡ hiß╗çn tß║íi."
+                      searchPlaceholder="Tìm học sinh nguy cơ theo tên, lớp..."
+                      emptyMessage="Tuyệt vời! Không có học sinh nào rơi vào diện cảnh báo nguy cơ theo các tiêu chí hiện tại."
                       pageSize={20}
                       onRowClick={(r: any) => handleSelectRankingStudent(r.student_id)}
                     />
@@ -3435,19 +3435,19 @@ export default function ReportsPage() {
                   <div>
                     <div className="flex items-center gap-2">
                       <h3 className="text-sm font-black text-white uppercase tracking-wider">
-                        Gß╗óI ├Ø PH├éN NH├ôM Hß╗îC Tß║¼P THEO TR├îNH ─Éß╗ÿ
+                        GỢI Ý PHÂN NHÓM HỌC TẬP THEO TRÌNH ĐỘ
                       </h3>
                       <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-md bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
-                        {smartGroups.length} Nh├│m | {smartGroups.reduce((acc, g) => acc + g.students.length, 0)} Hß╗ìc Sinh
+                        {smartGroups.length} Nhóm | {smartGroups.reduce((acc, g) => acc + g.students.length, 0)} Học Sinh
                       </span>
                       <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-[#182038] text-slate-300 border border-white/10">
-                        {groupingScope === 'current' ? (selectedClassId ? `Lß╗øp ${classes.find(c => String(c.id) === selectedClassId)?.class_name}` : 'Lß╗øp Hiß╗çn Tß║íi') :
-                          groupingScope === 'grade' ? 'To├án Khß╗æi' :
-                            'To├án Trung T├óm'}
+                        {groupingScope === 'current' ? (selectedClassId ? `Lớp ${classes.find(c => String(c.id) === selectedClassId)?.class_name}` : 'Lớp Hiện Tại') :
+                          groupingScope === 'grade' ? 'Toàn Khối' :
+                            'Toàn Trung Tâm'}
                       </span>
                     </div>
                     <p className="text-xs text-slate-400 font-semibold mt-0.5">
-                      Tß╗▒ ─æß╗Öng ph├ón loß║íi hß╗ìc sinh theo N─âng lß╗▒c hiß╗çn tß║íi, Tß╗æc ─æß╗Ö t─âng trã░ß╗ƒng v├á Phß╗ò ─æiß╗âm thß╗▒c tß║┐.
+                      Tự động phân loại học sinh theo Năng lực hiện tại, Tốc độ tăng trưởng và Phổ điểm thực tế.
                     </p>
                   </div>
                 </div>
@@ -3457,19 +3457,19 @@ export default function ReportsPage() {
                     type="button"
                     onClick={handleCopyGrouping}
                     className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#14182a] hover:bg-[#1a2038] text-slate-300 hover:text-white text-xs font-bold border border-white/10 transition cursor-pointer"
-                    title="Sao ch├®p danh s├ích ph├ón nh├│m v├áo clipboard"
+                    title="Sao chép danh sách phân nhóm vào clipboard"
                   >
                     {copiedGroupText ? <Check size={14} className="text-emerald-400" /> : <Copy size={14} />}
-                    <span>{copiedGroupText ? '─É├ú Sao Ch├®p' : 'Sao Ch├®p'}</span>
+                    <span>{copiedGroupText ? 'Đã Sao Chép' : 'Sao Chép'}</span>
                   </button>
                   <button
                     type="button"
                     onClick={handleExportGroupingExcel}
                     className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 text-xs font-bold border border-emerald-500/30 transition cursor-pointer"
-                    title="Xuß║Ñt file Excel danh s├ích ph├ón nh├│m"
+                    title="Xuất file Excel danh sách phân nhóm"
                   >
                     <FileSpreadsheet size={14} />
-                    <span>Xuß║Ñt Excel</span>
+                    <span>Xuất Excel</span>
                   </button>
                   <div
                     onClick={() => setIsGroupingSectionOpen(!isGroupingSectionOpen)}
@@ -3487,11 +3487,11 @@ export default function ReportsPage() {
                   <div className="p-6 space-y-6">
                     {/* Scope & Mode Control Toolbar */}
                     <div className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-xl bg-[#090d1a] border border-[#1a2340]">
-                      {/* Scope Selector: Lß╗øp hiß╗çn tß║íi vs To├án bß╗Ö khß╗æi vs To├án trung t├óm */}
+                      {/* Scope Selector: Lớp hiện tại vs Toàn bộ khối vs Toàn trung tâm */}
                       <div className="flex flex-wrap items-center gap-2">
                         <span className="text-xs font-black uppercase text-indigo-300 tracking-wider flex items-center gap-1.5 mr-1">
                           <FolderTree size={14} />
-                          Phß║ím Vi Ph├ón Nh├│m:
+                          Phạm Vi Phân Nhóm:
                         </span>
                         <div className="relative flex bg-[#0d1018] p-1 rounded-xl border border-white/10 text-xs shrink-0 font-bold select-none">
                           <div
@@ -3507,7 +3507,7 @@ export default function ReportsPage() {
                             className={`flex-1 relative z-10 py-1.5 px-3 text-center transition-colors cursor-pointer ${groupingScope === 'current' ? 'text-white font-black' : 'text-slate-400 hover:text-white'
                               }`}
                           >
-                            Lß╗øp Hiß╗çn Tß║íi
+                            Lớp Hiện Tại
                           </button>
                           <button
                             type="button"
@@ -3515,7 +3515,7 @@ export default function ReportsPage() {
                             className={`flex-1 relative z-10 py-1.5 px-3 text-center transition-colors cursor-pointer ${groupingScope === 'grade' ? 'text-white font-black' : 'text-slate-400 hover:text-white'
                               }`}
                           >
-                            To├án Khß╗æi
+                            Toàn Khối
                           </button>
                           <button
                             type="button"
@@ -3523,15 +3523,15 @@ export default function ReportsPage() {
                             className={`flex-1 relative z-10 py-1.5 px-3 text-center transition-colors cursor-pointer ${groupingScope === 'all' ? 'text-white font-black' : 'text-slate-400 hover:text-white'
                               }`}
                           >
-                            To├án Trung T├óm
+                            Toàn Trung Tâm
                           </button>
                         </div>
 
                         {groupingScope === 'grade' && !selectedClassId && (
                           <div className="flex items-center gap-1.5 bg-[#14182a] px-2.5 py-1 rounded-xl border border-white/10">
-                            <span className="text-[10px] font-bold text-slate-400 uppercase">Chß╗ìn Khß╗æi:</span>
+                            <span className="text-[10px] font-bold text-slate-400 uppercase">Chọn Khối:</span>
                             <CustomSelect
-                              value={groupingGradeFilter || (classes[0]?.grade ?? 'Lß╗øp 8')}
+                              value={groupingGradeFilter || (classes[0]?.grade ?? 'Lớp 8')}
                               onChange={(val) => setGroupingGradeFilter(String(val))}
                               options={Array.from(new Set(classes.map(c => c.grade).filter(Boolean))).map(g => ({
                                 value: String(g),
@@ -3559,7 +3559,7 @@ export default function ReportsPage() {
                             className={`flex-1 relative z-10 py-1.5 px-3.5 text-center transition-colors cursor-pointer ${groupingMode === 'tier' ? 'text-white font-black' : 'text-slate-400 hover:text-white'
                               }`}
                           >
-                            Theo 6 Hß║íng Bß║¡c
+                            Theo 6 Hạng Bậc
                           </button>
                           <button
                             type="button"
@@ -3567,13 +3567,13 @@ export default function ReportsPage() {
                             className={`flex-1 relative z-10 py-1.5 px-3.5 text-center transition-colors cursor-pointer ${groupingMode === 'kmeans' ? 'text-white font-black' : 'text-slate-400 hover:text-white'
                               }`}
                           >
-                            Ph├ón Cß╗Ñm Tß╗▒ ─Éß╗Öng
+                            Phân Cụm Tự Động
                           </button>
                         </div>
 
                         {groupingMode === 'kmeans' && (
                           <div className="flex items-center gap-2 bg-[#121626] px-3 py-1.5 rounded-xl border border-white/10">
-                            <span className="text-xs text-slate-300 font-bold">Sß╗æ nh├│m:</span>
+                            <span className="text-xs text-slate-300 font-bold">Số nhóm:</span>
                             <div className="flex items-center gap-1">
                               {[2, 3, 4].map(k => (
                                 <button
@@ -3595,7 +3595,7 @@ export default function ReportsPage() {
                     {/* Group Cards Grid with Staggered Cascading Animation */}
                     {smartGroups.length === 0 ? (
                       <div className="text-center py-12 text-slate-500 text-sm font-semibold">
-                        Chã░a c├│ dß╗» liß╗çu hß╗ìc sinh ─æß╗â ph├ón nh├│m.
+                        Chưa có dữ liệu học sinh để phân nhóm.
                       </div>
                     ) : (
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -3628,20 +3628,20 @@ export default function ReportsPage() {
                                   <span className="text-sm font-black text-white font-mono">{format1Dec(g.avgEma)}</span>
                                 </div>
                                 <div className="bg-[#0b0e1a] p-2 rounded-xl border border-white/5">
-                                  <span className="text-[9px] font-black uppercase text-slate-400 block">Phß╗ò ─Éiß╗âm</span>
+                                  <span className="text-[9px] font-black uppercase text-slate-400 block">Phổ Điểm</span>
                                   <span className="text-xs font-black font-mono text-indigo-300">
-                                    {format1Dec(g.minScore)} - {format1Dec(g.maxScore)}─æ
+                                    {format1Dec(g.minScore)} - {format1Dec(g.maxScore)}đ
                                   </span>
                                 </div>
                                 <div
                                   className="bg-[#0b0e1a] p-2 rounded-xl border border-white/5 cursor-help group/sd"
-                                  title="─Éß╗Ö Lß╗çch Chuß║®n (Standard Deviation - SD / ¤â): ─Éo lã░ß╗Øng mß╗®c ─æß╗Ö ─æß╗ông ─æß╗üu vß╗ü tr├¼nh ─æß╗Ö ─æiß╗âm sß╗æ giß╗»a c├íc hß╗ìc sinh trong nh├│m. SD c├áng nhß╗Å th├¼ hß╗ìc lß╗▒c trong nh├│m c├áng ─æß╗ông ─æß╗üu."
+                                  title="Độ Lệch Chuẩn (Standard Deviation - SD / σ): Đo lường mức độ đồng đều về trình độ điểm số giữa các học sinh trong nhóm. SD càng nhỏ thì học lực trong nhóm càng đồng đều."
                                 >
                                   <span className="text-[9px] font-black uppercase text-slate-400 flex items-center justify-between">
-                                    <span>─Éß╗Ö Lß╗çch Chuß║®n (SD)</span>
+                                    <span>Độ Lệch Chuẩn (SD)</span>
                                     <Info size={10} className="text-slate-500 group-hover/sd:text-white transition-colors" />
                                   </span>
-                                  <span className="text-sm font-black text-emerald-400 font-mono">¤â = {g.groupSd}</span>
+                                  <span className="text-sm font-black text-emerald-400 font-mono">σ = {g.groupSd}</span>
                                 </div>
                               </div>
                             </div>
@@ -3649,7 +3649,7 @@ export default function ReportsPage() {
                             {/* Pedagogy Focus Box */}
                             <div className="p-3 bg-[#0a0d18] border-b border-white/5">
                               <span className="text-[9px] font-black uppercase tracking-wider text-slate-400 block mb-1">
-                                ─Éß╗ïnh Hã░ß╗øng Giß║úng Dß║íy:
+                                Định Hướng Giảng Dạy:
                               </span>
                               <p className="text-[11px] font-semibold text-slate-300 leading-relaxed">
                                 {g.pedagogyAdvice}
@@ -3660,7 +3660,7 @@ export default function ReportsPage() {
                             <div className="p-3 flex-1 flex flex-col gap-2 max-h-[380px] overflow-y-auto custom-scrollbar">
                               {g.students.length === 0 ? (
                                 <div className="text-center py-6 text-[11px] text-slate-500 font-bold">
-                                  Kh├┤ng c├│ hß╗ìc sinh trong nh├│m n├áy
+                                  Không có học sinh trong nhóm này
                                 </div>
                               ) : (
                                 g.students.map((s: any, sIdx: number) => {
@@ -3676,7 +3676,7 @@ export default function ReportsPage() {
                                       key={s.student_id || sIdx}
                                       onClick={() => handleSelectRankingStudent(s.student_id)}
                                       className="bg-[#13192e] hover:bg-[#18203a] p-2.5 rounded-xl border border-[#202948] hover:border-indigo-500/40 transition cursor-pointer flex items-center justify-between gap-3 group"
-                                      title={`Xem chi tiß║┐t hß╗ìc sinh ${s.full_name}`}
+                                      title={`Xem chi tiết học sinh ${s.full_name}`}
                                     >
                                       <div className="flex items-center gap-2.5 min-w-0">
                                         <div className="w-7 h-7 rounded-lg bg-[#1e2744] text-indigo-300 flex items-center justify-center font-black text-[10px] shrink-0 border border-indigo-500/20 group-hover:border-indigo-500/50">
@@ -3689,7 +3689,7 @@ export default function ReportsPage() {
                                           <div className="text-[10px] font-semibold text-slate-400 truncate flex items-center gap-1.5">
                                             {s.nickname && <span className="text-slate-300 font-bold">({s.nickname})</span>}
                                             <span className="px-1.5 py-0.2 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-[9px] font-mono font-bold">
-                                              {s.class_name || 'Lß╗øp'}
+                                              {s.class_name || 'Lớp'}
                                             </span>
                                           </div>
                                         </div>
@@ -3724,7 +3724,7 @@ export default function ReportsPage() {
               </div>
             </div>
 
-            {/* 4. BIß║¥N ─Éß╗ÿNG ─ÉIß╗éM Sß╗É */}
+            {/* 4. BIẾN ĐỘNG ĐIỂM SỐ */}
             <div className="bg-[#0d1120] border border-emerald-500/30 rounded-2xl flex flex-col shadow-2xl overflow-hidden transition-all animate-cascade-4">
               <div
                 onClick={() => setIsGrowthSectionOpen(!isGrowthSectionOpen)}
@@ -3737,14 +3737,14 @@ export default function ReportsPage() {
                   <div>
                     <div className="flex items-center gap-2">
                       <h3 className="text-sm font-black text-white uppercase tracking-wider">
-                        BIß║¥N ─Éß╗ÿNG ─ÉIß╗éM Sß╗É
+                        BIẾN ĐỘNG ĐIỂM SỐ
                       </h3>
                       <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                        {scoreFluctuations.length} Hß╗ìc Sinh
+                        {scoreFluctuations.length} Học Sinh
                       </span>
                     </div>
                     <p className="text-xs text-slate-400 font-semibold mt-0.5">
-                      So s├ính ─æiß╗âm trung b├¼nh 3 buß╗òi ─æß║ºu ti├¬n khi mß╗øi v├áo hß╗ìc so vß╗øi 3 buß╗òi gß║ºn nhß║Ñt ─æß╗â theo d├Ái biß║┐n ─æß╗Öng, sß╗▒ tiß║┐n bß╗Ö hoß║Àc dß║Ñu hiß╗çu sa s├║t cß╗ºa tß╗½ng hß╗ìc sinh.
+                      So sánh điểm trung bình 3 buổi đầu tiên khi mới vào học so với 3 buổi gần nhất để theo dõi biến động, sự tiến bộ hoặc dấu hiệu sa sút của từng học sinh.
                     </p>
                   </div>
                 </div>
@@ -3765,8 +3765,8 @@ export default function ReportsPage() {
                       data={scoreFluctuations}
                       columns={fluctuationColumns}
                       loading={loading}
-                      searchPlaceholder="T├¼m hß╗ìc sinh, lß╗øp hß╗ìc, mß╗®c biß║┐n ─æß╗Öng..."
-                      emptyMessage="Chã░a c├│ dß╗» liß╗çu biß║┐n ─æß╗Öng ─æiß╗âm sß╗æ."
+                      searchPlaceholder="Tìm học sinh, lớp học, mức biến động..."
+                      emptyMessage="Chưa có dữ liệu biến động điểm số."
                       pageSize={20}
                       onRowClick={(r: any) => handleSelectRankingStudent(r.student_id)}
                       initialSorting={[{ id: 'delta', desc: true }]}
@@ -3776,7 +3776,7 @@ export default function ReportsPage() {
               </div>
             </div>
 
-            {/* 5. Bß║ñT THã»ß╗£NG Hß╗îC Tß║¼P */}
+            {/* 5. BẤT THƯỜNG HỌC TẬP */}
             <div className="bg-[#101424] border border-indigo-500/20 rounded-2xl p-4 sm:p-5 shadow-xl flex flex-col gap-4 transition-all animate-cascade-5">
               <div
                 onClick={() => setIsBottlenecksSectionOpen(!isBottlenecksSectionOpen)}
@@ -3789,14 +3789,14 @@ export default function ReportsPage() {
                   <div>
                     <div className="flex items-center gap-2">
                       <h3 className="text-sm font-black text-white uppercase tracking-wider">
-                        Bß║ñT THã»ß╗£NG Hß╗îC Tß║¼P
+                        BẤT THƯỜNG HỌC TẬP
                       </h3>
                       <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
-                        ─Éang Ho├án Thiß╗çn Phã░ãíng Ph├íp Kiß╗âm Thß╗¡
+                        Đang Hoàn Thiện Phương Pháp Kiểm Thử
                       </span>
                     </div>
                     <p className="text-xs text-slate-400 font-semibold mt-0.5">
-                      Ph├ít hiß╗çn m├óu thuß║½n ─æiß╗âm sß╗æ giß╗»a B├ái Tß║¡p Vß╗ü Nh├á v├á Kiß╗âm Tra Tr├¬n Lß╗øp (Ch├¬nh lß╗çch ÔëÑ 3.0 ─æiß╗âm).
+                      Phát hiện mâu thuẫn điểm số giữa Bài Tập Về Nhà và Kiểm Tra Trên Lớp (Chênh lệch ≥ 3.0 điểm).
                     </p>
                   </div>
                 </div>
@@ -3816,17 +3816,17 @@ export default function ReportsPage() {
                       <div>
                         <div className="flex items-center justify-between">
                           <span className="text-xs font-black uppercase text-amber-400">
-                            Dß║íng 1: Nghi vß║Ñn ch├®p giß║úi / Phß╗Ñ thuß╗Öc t├ái liß╗çu
+                            Dạng 1: Nghi vấn chép giải / Phụ thuộc tài liệu
                           </span>
                           <span className="text-[10px] font-mono font-black text-amber-300 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">
-                            {learningBottlenecks.type1.length} hß╗ìc sinh
+                            {learningBottlenecks.type1.length} học sinh
                           </span>
                         </div>
                         <p className="text-xs text-slate-300 font-semibold mt-1">
-                          ─Éiß╗âm BTVN rß║Ñt cao (ÔëÑ 8.5) nhã░ng ─Éiß╗âm tr├¬n lß╗øp rß║Ñt thß║Ñp (Ôëñ 5.5). Ch├¬nh lß╗çch ÔëÑ 3.0 ─æiß╗âm.
+                          Điểm BTVN rất cao (≥ 8.5) nhưng Điểm trên lớp rất thấp (≤ 5.5). Chênh lệch ≥ 3.0 điểm.
                         </p>
                         <p className="text-[11px] text-slate-400 mt-1 italic">
-                          ─Éß╗ïnh hã░ß╗øng: Gß╗ìi hß╗ìc sinh l├¬n bß║úng giß║úi tr├¼nh trß╗▒c tiß║┐p phã░ãíng ph├íp giß║úi BTVN.
+                          Định hướng: Gọi học sinh lên bảng giải trình trực tiếp phương pháp giải BTVN.
                         </p>
                       </div>
                     </div>
@@ -3836,17 +3836,17 @@ export default function ReportsPage() {
                       <div>
                         <div className="flex items-center justify-between">
                           <span className="text-xs font-black uppercase text-blue-400">
-                            Dß║íng 2: Tiß║┐p thu nhanh nhã░ng thiß║┐u kß╗À luß║¡t tß╗▒ hß╗ìc
+                            Dạng 2: Tiếp thu nhanh nhưng thiếu kỷ luật tự học
                           </span>
                           <span className="text-[10px] font-mono font-black text-blue-300 bg-blue-500/10 px-2 py-0.5 rounded border border-blue-500/20">
-                            {learningBottlenecks.type2.length} hß╗ìc sinh
+                            {learningBottlenecks.type2.length} học sinh
                           </span>
                         </div>
                         <p className="text-xs text-slate-300 font-semibold mt-1">
-                          ─Éiß╗âm tr├¬n lß╗øp cao (ÔëÑ 8.5) nhã░ng BTVN thß║Ñp (Ôëñ 5.5) hoß║Àc thã░ß╗Øng xuy├¬n bß╗Å l├ám. Ch├¬nh lß╗çch ÔëÑ 3.0 ─æiß╗âm.
+                          Điểm trên lớp cao (≥ 8.5) nhưng BTVN thấp (≤ 5.5) hoặc thường xuyên bỏ làm. Chênh lệch ≥ 3.0 điểm.
                         </p>
                         <p className="text-[11px] text-slate-400 mt-1 italic">
-                          ─Éß╗ïnh hã░ß╗øng: Nhß║»c nhß╗ƒ kß╗À luß║¡t tß╗▒ r├¿n luyß╗çn v├á giao chß╗ë ti├¬u b├ái tß║¡p bß║»t buß╗Öc ho├án th├ánh.
+                          Định hướng: Nhắc nhở kỷ luật tự rèn luyện và giao chỉ tiêu bài tập bắt buộc hoàn thành.
                         </p>
                       </div>
                     </div>
@@ -3856,7 +3856,7 @@ export default function ReportsPage() {
             </div>
           </div>
         ) : (
-          /* Tß╗öNG QUAN Hß╗îC Lß╗░C (OVERVIEW TAB VIEW) */
+          /* TỔNG QUAN HỌC LỰC (OVERVIEW TAB VIEW) */
           <>
             {/* 2. INDIVIDUAL STUDENT PERFORMANCE PROFILE */}
             {selectedStudentObj && (
@@ -3875,35 +3875,35 @@ export default function ReportsPage() {
                         <button
                           onClick={() => setSelectedStudentId('')}
                           className="ml-3 px-2.5 py-1 rounded-lg bg-[#1a2340] hover:bg-rose-500/20 text-slate-400 hover:text-rose-400 border border-[#2e3b66] text-[10px] font-bold transition cursor-pointer"
-                          title="Bß╗Å chß╗ìn hß╗ìc sinh"
+                          title="Bỏ chọn học sinh"
                         >
-                          Bß╗Å Chß╗ìn Ô£ò
+                          Bỏ Chọn ✕
                         </button>
                       </div>
                       <p className="text-xs text-slate-400 font-semibold mt-0.5">
-                        {selectedStudentObj.grade || 'Lß╗øp 6'} | {selectedStudentObj.school || 'Trung t├óm'} | Theo d├Ái tiß║┐n ─æß╗Ö hß╗ìc tß║¡p qua c├íc kß╗│ ─æ├ính gi├í
+                        {selectedStudentObj.grade || 'Lớp 6'} | {selectedStudentObj.school || 'Trung tâm'} | Theo dõi tiến độ học tập qua các kỳ đánh giá
                       </p>
                     </div>
                   </div>
 
                   <div className="flex items-center gap-6 z-10 bg-[#141a30] border border-[#232d4e] px-6 py-3 rounded-xl">
                     <div>
-                      <span className="text-[10px] font-black uppercase text-slate-400 block">Tß╗òng ─Éiß╗âm</span>
+                      <span className="text-[10px] font-black uppercase text-slate-400 block">Tổng Điểm</span>
                       <span className="text-xl font-black text-emerald-400 font-mono">{stats.overall}</span>
                     </div>
                     <div className="h-8 w-px bg-[#232d4e]"></div>
                     <div>
-                      <span className="text-[10px] font-black uppercase text-slate-400 block">Chuy├¬n Cß║ºn</span>
+                      <span className="text-[10px] font-black uppercase text-slate-400 block">Chuyên Cần</span>
                       <span className="text-xl font-black text-emerald-400 font-mono">{stats.attendancePct}%</span>
                     </div>
                     <div className="h-8 w-px bg-[#232d4e]"></div>
                     <div>
-                      <span className="text-[10px] font-black uppercase text-slate-400 block">Hß║íng</span>
+                      <span className="text-[10px] font-black uppercase text-slate-400 block">Hạng</span>
                       <span className="text-xl font-black text-amber-400 font-mono">{stats.rank}</span>
                     </div>
                     <div className="h-8 w-px bg-[#232d4e]"></div>
                     <div>
-                      <span className="text-[10px] font-black uppercase text-slate-400 block">Hß╗ìc Lß╗▒c</span>
+                      <span className="text-[10px] font-black uppercase text-slate-400 block">Học Lực</span>
                       <span className="inline-block px-2.5 py-0.5 rounded-lg text-[10px] font-black bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
                         {stats.level}
                       </span>
@@ -3918,7 +3918,7 @@ export default function ReportsPage() {
               <div className="kpi-card-blue p-5 flex flex-col justify-between shadow-2xl transition-all duration-300 min-h-[100px]">
                 <div>
                   <span className="text-[10px] font-black uppercase tracking-wider text-blue-400 block mb-1">
-                    CHECK 1 TRUNG B├îNH
+                    CHECK 1 TRUNG BÌNH
                   </span>
                   <div className="flex items-baseline gap-1.5">
                     <span className="text-3xl font-black text-white font-mono">{stats.c1}</span>
@@ -3926,14 +3926,14 @@ export default function ReportsPage() {
                   </div>
                 </div>
                 <div className="mt-2 text-[10px] font-bold text-blue-400">
-                  <span>{stats.c1Diff} so vß╗øi kß╗│ trã░ß╗øc</span>
+                  <span>{stats.c1Diff} so với kỳ trước</span>
                 </div>
               </div>
 
               <div className="kpi-card-purple p-5 flex flex-col justify-between shadow-2xl transition-all duration-300 min-h-[100px]">
                 <div>
                   <span className="text-[10px] font-black uppercase tracking-wider text-purple-400 block mb-1">
-                    CHECK 2 TRUNG B├îNH
+                    CHECK 2 TRUNG BÌNH
                   </span>
                   <div className="flex items-baseline gap-1.5">
                     <span className="text-3xl font-black text-white font-mono">{stats.c2}</span>
@@ -3941,14 +3941,14 @@ export default function ReportsPage() {
                   </div>
                 </div>
                 <div className="mt-2 text-[10px] font-bold text-purple-400">
-                  <span>{stats.c2Diff} so vß╗øi kß╗│ trã░ß╗øc</span>
+                  <span>{stats.c2Diff} so với kỳ trước</span>
                 </div>
               </div>
 
               <div className="kpi-card-green p-5 flex flex-col justify-between shadow-2xl transition-all duration-300 min-h-[100px]">
                 <div>
                   <span className="text-[10px] font-black uppercase tracking-wider text-emerald-400 block mb-1">
-                    HOMEWORK TRUNG B├îNH
+                    HOMEWORK TRUNG BÌNH
                   </span>
                   <div className="flex items-baseline gap-1.5">
                     <span className="text-3xl font-black text-white font-mono">{stats.hw}</span>
@@ -3956,14 +3956,14 @@ export default function ReportsPage() {
                   </div>
                 </div>
                 <div className="mt-2 text-[10px] font-bold text-emerald-400">
-                  <span>{stats.hwDiff} so vß╗øi kß╗│ trã░ß╗øc</span>
+                  <span>{stats.hwDiff} so với kỳ trước</span>
                 </div>
               </div>
 
               <div className="kpi-card-amber p-5 flex flex-col justify-between shadow-2xl transition-all duration-300 min-h-[100px]">
                 <div>
                   <span className="text-[10px] font-black uppercase tracking-wider text-amber-400 block mb-1">
-                    Tß╗öNG ─ÉIß╗éM TRUNG B├îNH
+                    TỔNG ĐIỂM TRUNG BÌNH
                   </span>
                   <div className="flex items-baseline gap-1.5">
                     <span className="text-3xl font-black text-white font-mono">{stats.overall}</span>
@@ -3971,7 +3971,7 @@ export default function ReportsPage() {
                   </div>
                 </div>
                 <div className="mt-2 text-[10px] font-bold text-amber-400">
-                  <span>{stats.overallDiff} so vß╗øi kß╗│ trã░ß╗øc</span>
+                  <span>{stats.overallDiff} so với kỳ trước</span>
                 </div>
               </div>
             </div>
@@ -3984,20 +3984,20 @@ export default function ReportsPage() {
                 <div className="flex items-center gap-3">
                   <BarChart3 size={18} className="text-indigo-400" />
                   <h3 className="text-sm font-black text-white uppercase tracking-wider">
-                    TIß║¥N ─Éß╗ÿ Hß╗îC Tß║¼P QUA C├üC Kß╗▓ & Dß╗░ ─ÉO├üN XU Hã»ß╗ÜNG
+                    TIẾN ĐỘ HỌC TẬP QUA CÁC KỲ & DỰ ĐOÁN XU HƯỚNG
                   </h3>
                 </div>
 
                 <div className="flex items-center gap-5">
                   <div className="flex items-center gap-4 text-[11px] font-bold">
                     <span className="flex items-center gap-1.5 text-blue-400">
-                      <span className="w-2.5 h-2.5 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.8)]"></span> Check 1 (Dß╗▒ ─æo├ín: {format1Dec(engine.pred_c1)})
+                      <span className="w-2.5 h-2.5 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.8)]"></span> Check 1 (Dự đoán: {format1Dec(engine.pred_c1)})
                     </span>
                     <span className="flex items-center gap-1.5 text-purple-400">
-                      <span className="w-2.5 h-2.5 rounded-full bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.8)]"></span> Check 2 (Dß╗▒ ─æo├ín: {format1Dec(engine.pred_c2)})
+                      <span className="w-2.5 h-2.5 rounded-full bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.8)]"></span> Check 2 (Dự đoán: {format1Dec(engine.pred_c2)})
                     </span>
                     <span className="flex items-center gap-1.5 text-emerald-400">
-                      <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]"></span> Homework (Dß╗▒ ─æo├ín: {format1Dec(engine.pred_hw)})
+                      <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]"></span> Homework (Dự đoán: {format1Dec(engine.pred_hw)})
                     </span>
                   </div>
 
@@ -4010,7 +4010,7 @@ export default function ReportsPage() {
                         return next;
                       })}
                       className="p-1 rounded-lg hover:bg-indigo-600/30 text-slate-300 hover:text-white transition cursor-pointer"
-                      title="Ph├│ng to (Scroll Cuß╗Ön Chuß╗Öt L├¬n)"
+                      title="Phóng to (Scroll Cuộn Chuột Lên)"
                     >
                       <ZoomIn size={14} />
                     </button>
@@ -4021,7 +4021,7 @@ export default function ReportsPage() {
                         return next;
                       })}
                       className="p-1 rounded-lg hover:bg-indigo-600/30 text-slate-300 hover:text-white transition cursor-pointer"
-                      title="Thu nhß╗Å (Scroll Cuß╗Ön Chuß╗Öt Xuß╗æng)"
+                      title="Thu nhỏ (Scroll Cuộn Chuột Xuống)"
                     >
                       <ZoomOut size={14} />
                     </button>
@@ -4031,7 +4031,7 @@ export default function ReportsPage() {
                     <button
                       onClick={() => { setZoomLevel(1.0); setPanOffset({ x: 0, y: 0 }); }}
                       className="p-1.5 rounded-lg hover:bg-rose-500/20 text-slate-400 hover:text-rose-300 transition cursor-pointer"
-                      title="─Éß║Àt lß║íi g├│c nh├¼n (Reset View)"
+                      title="Đặt lại góc nhìn (Reset View)"
                     >
                       <RotateCcw size={12} />
                     </button>
@@ -4052,10 +4052,10 @@ export default function ReportsPage() {
                       }}
                     />
                     {[
-                      { id: '1m', label: '1 Th├íng' },
-                      { id: '2m', label: '2 Th├íng' },
-                      { id: '3m', label: '3 Th├íng' },
-                      { id: 'all', label: 'Tß║Ñt Cß║ú' }
+                      { id: '1m', label: '1 Tháng' },
+                      { id: '2m', label: '2 Tháng' },
+                      { id: '3m', label: '3 Tháng' },
+                      { id: 'all', label: 'Tất Cả' }
                     ].map(t => (
                       <button
                         key={t.id}
@@ -4079,7 +4079,7 @@ export default function ReportsPage() {
                         setSelectedPhaseId(String(val));
                       }}
                       options={[
-                        { value: '', label: 'Tß║Ñt cß║ú giai ─æoß║ín' },
+                        { value: '', label: 'Tất cả giai đoạn' },
                         ...timePhases.map(p => ({
                           value: String(p.id),
                           label: `${p.phase_name} (${formatSessionDate(p.from_date)} - ${formatSessionDate(p.to_date)})`
@@ -4091,7 +4091,7 @@ export default function ReportsPage() {
                       type="button"
                       onClick={handleOpenPhaseModal}
                       className="p-2 rounded-xl bg-[#141b32] hover:bg-indigo-600/30 text-indigo-300 hover:text-white border border-[#232d4e] transition cursor-pointer"
-                      title="Quß║ún L├¢ Giai ─Éoß║ín Hß╗ìc Tß║¡p T├╣y Chß╗ënh"
+                      title="Quản Lý Giai Đoạn Học Tập Tùy Chỉnh"
                     >
                       <Clock size={14} />
                     </button>
@@ -4132,7 +4132,7 @@ export default function ReportsPage() {
                     }}
                   >
                     <div className="text-[11px] font-extrabold text-slate-300 border-b border-[#242e50] pb-1 mb-1.5 flex items-center justify-between gap-3">
-                      <span>Buß╗òi Hß╗ìc: {hoveredPoint.sessionName}</span>
+                      <span>Buổi Học: {hoveredPoint.sessionName}</span>
                       <span className="text-[10px] text-indigo-300">{hoveredPoint.fullDate}</span>
                     </div>
                     <div className="space-y-1 font-mono text-[11px] font-bold">
@@ -4509,33 +4509,33 @@ export default function ReportsPage() {
 
                 <div className="relative group">
                   <div className="flex items-center justify-center gap-1">
-                    <span className="text-[10px] font-black uppercase text-slate-400 block">Dß╗▒ ─Éo├ín Buß╗òi Tß╗øi</span>
+                    <span className="text-[10px] font-black uppercase text-slate-400 block">Dự Đoán Buổi Tới</span>
                     <button
                       onClick={() => setActiveTooltip(activeTooltip === 'forecast' ? null : 'forecast')}
                       className="text-slate-500 hover:text-indigo-400 cursor-pointer"
-                      title="Giß║úi th├¡ch Forecast"
+                      title="Giải thích Forecast"
                     >
                       <Info size={11} />
                     </button>
                   </div>
-                  <span className="text-sm font-black text-indigo-400 font-mono">{engine.predicted_next} ─Éiß╗âm</span>
+                  <span className="text-sm font-black text-indigo-400 font-mono">{engine.predicted_next} Điểm</span>
                   <span className="text-[10px] text-slate-400 font-semibold block">{engine.prediction_model ?? 'Smart Predict'}</span>
 
                   {activeTooltip === 'forecast' && (
                     <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 w-64 p-3 bg-[#161c34] border border-[#2c375e] text-slate-200 text-[11px] rounded-xl shadow-2xl z-30 text-left font-sans">
-                      <span className="font-extrabold text-indigo-300 block mb-1">Dß╗▒ ─Éo├ín ({engine.prediction_model ?? 'Smart Predict'}):</span>
-                      Tß╗▒ ─æß╗Öng chß╗ìn m├┤ h├¼nh tß╗æt nhß║Ñt dß╗▒a tr├¬n lã░ß╗úng dß╗» liß╗çu: EMA (&lt;5 buß╗òi), Weighted OLS (5ÔÇô19 buß╗òi), Holt-Winters (20+ buß╗òi).
+                      <span className="font-extrabold text-indigo-300 block mb-1">Dự Đoán ({engine.prediction_model ?? 'Smart Predict'}):</span>
+                      Tự động chọn mô hình tốt nhất dựa trên lượng dữ liệu: EMA (&lt;5 buổi), Weighted OLS (5–19 buổi), Holt-Winters (20+ buổi).
                     </div>
                   )}
                 </div>
 
                 <div className="border-l border-[#1d2644] relative group">
                   <div className="flex items-center justify-center gap-1">
-                    <span className="text-[10px] font-black uppercase text-slate-400 block">Tr├¼nh ─Éß╗Ö EMA</span>
+                    <span className="text-[10px] font-black uppercase text-slate-400 block">Trình Độ EMA</span>
                     <button
                       onClick={() => setActiveTooltip(activeTooltip === 'ema' ? null : 'ema')}
                       className="text-slate-500 hover:text-emerald-400 cursor-pointer"
-                      title="Giß║úi th├¡ch EMA"
+                      title="Giải thích EMA"
                     >
                       <Info size={11} />
                     </button>
@@ -4548,7 +4548,7 @@ export default function ReportsPage() {
 
                   {activeTooltip === 'ema' && (
                     <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 w-64 p-3 bg-[#161c34] border border-[#2c375e] text-slate-200 text-[11px] rounded-xl shadow-2xl z-30 text-left font-sans">
-                      <span className="font-extrabold text-emerald-300 block mb-1">Tr├¼nh ─Éß╗Ö Hiß╗çn Tß║íi (EMA):</span>
+                      <span className="font-extrabold text-emerald-300 block mb-1">Trình Độ Hiện Tại (EMA):</span>
                       <div className="space-y-1 my-1.5 font-mono text-[10px] font-bold bg-[#0d1120] p-2 rounded-lg border border-[#202948]">
                         <div className="flex items-center justify-between text-blue-400">
                           <span>Check 1 EMA:</span>
@@ -4564,7 +4564,7 @@ export default function ReportsPage() {
                         </div>
                       </div>
                       <span className="text-[10px] text-slate-400 block">
-                        Tr├¼nh ─æß╗Ö tß╗òng hß╗úp ({engine.ema_level}) ã░u ti├¬n trß╗ìng sß╗æ b├ái hß╗ìc mß╗øi nhß║Ñt.
+                        Trình độ tổng hợp ({engine.ema_level}) ưu tiên trọng số bài học mới nhất.
                       </span>
                     </div>
                   )}
@@ -4572,11 +4572,11 @@ export default function ReportsPage() {
 
                 <div className="border-l border-[#1d2644] relative group">
                   <div className="flex items-center justify-center gap-1">
-                    <span className="text-[10px] font-black uppercase text-slate-400 block">─Éß╗Ö Biß║┐n ─Éß╗Öng (SD)</span>
+                    <span className="text-[10px] font-black uppercase text-slate-400 block">Độ Biến Động (SD)</span>
                     <button
                       onClick={() => setActiveTooltip(activeTooltip === 'sd' ? null : 'sd')}
                       className="text-slate-500 hover:text-cyan-400 cursor-pointer"
-                      title="Giß║úi th├¡ch Standard Deviation"
+                      title="Giải thích Standard Deviation"
                     >
                       <Info size={11} />
                     </button>
@@ -4584,25 +4584,25 @@ export default function ReportsPage() {
                   <span className={`text-sm font-black font-mono ${engine.std_dev > 2.0 ? 'text-rose-500' :
                     engine.std_dev > 1.0 ? 'text-amber-400' :
                       engine.std_dev < 0.5 ? 'text-emerald-400' : 'text-cyan-400'
-                    }`}>¤â = {engine.std_dev}</span>
-                  <span className={`text-[10px] font-semibold block ${engine.consistency_label?.includes('mß║ính') ? 'text-rose-400 font-extrabold' :
-                    engine.consistency_label?.includes('Biß║┐n ─æß╗Öng') ? 'text-amber-400 font-bold' :
-                      engine.consistency_label?.includes('Rß║Ñt ß╗òn ─æß╗ïnh') ? 'text-emerald-400 font-bold' : 'text-slate-400'
+                    }`}>σ = {engine.std_dev}</span>
+                  <span className={`text-[10px] font-semibold block ${engine.consistency_label?.includes('mạnh') ? 'text-rose-400 font-extrabold' :
+                    engine.consistency_label?.includes('Biến động') ? 'text-amber-400 font-bold' :
+                      engine.consistency_label?.includes('Rất ổn định') ? 'text-emerald-400 font-bold' : 'text-slate-400'
                     }`}>{engine.consistency_label}</span>
 
                   {activeTooltip === 'sd' && (
                     <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 w-64 p-3 bg-[#161c34] border border-[#2c375e] text-slate-200 text-[11px] rounded-xl shadow-2xl z-30 text-left font-sans">
-                      <span className="font-extrabold text-cyan-300 block mb-1">─Éß╗Ö Biß║┐n ─Éß╗Öng Thß║¡t Sß╗▒ (Residual SD):</span>
+                      <span className="font-extrabold text-cyan-300 block mb-1">Độ Biến Động Thật Sự (Residual SD):</span>
                       <div className="space-y-1 my-1.5 font-mono text-[10px] font-bold bg-[#0d1120] p-2 rounded-lg border border-[#202948]">
                         {gradeTypesList.map(gt => (
                           <div key={gt.id} className="flex items-center justify-between" style={{ color: gt.color || '#3b82f6' }}>
                             <span>{gt.label} ({gt.weight}%):</span>
-                            <span>¤â = {((engine as any)[`std_dev_${gt.id}`] ?? engine.std_dev ?? 0)}</span>
+                            <span>σ = {((engine as any)[`std_dev_${gt.id}`] ?? engine.std_dev ?? 0)}</span>
                           </div>
                         ))}
                       </div>
                       <span className="text-[10px] text-slate-400 block">
-                        SD ─æo ─æß╗Ö ß╗òn ─æß╗ïnh quanh quß╗╣ ─æß║ío tiß║┐n bß╗Ö (khß╗¡ xu hã░ß╗øng), ph├ón biß╗çt ch├¡nh x├íc giß╗»a tiß║┐n bß╗Ö vã░ß╗út bß║¡c v├á trß╗ôi sß╗Ñt thß║Ñt thã░ß╗Øng.
+                        SD đo độ ổn định quanh quỹ đạo tiến bộ (khử xu hướng), phân biệt chính xác giữa tiến bộ vượt bậc và trồi sụt thất thường.
                       </span>
                     </div>
                   )}
@@ -4610,33 +4610,33 @@ export default function ReportsPage() {
 
                 <div className="border-l border-[#1d2644] relative group">
                   <div className="flex items-center justify-center gap-1">
-                    <span className="text-[10px] font-black uppercase text-slate-400 block">Tß╗æc ─Éß╗Ö T─âng Trã░ß╗ƒng</span>
+                    <span className="text-[10px] font-black uppercase text-slate-400 block">Tốc Độ Tăng Trưởng</span>
                     <button
                       onClick={() => setActiveTooltip(activeTooltip === 'trend' ? null : 'trend')}
                       className="text-slate-500 hover:text-purple-400 cursor-pointer"
-                      title="Giß║úi th├¡ch Trend Rate"
+                      title="Giải thích Trend Rate"
                     >
                       <Info size={11} />
                     </button>
                   </div>
-                  <span className="text-sm font-black text-purple-300 font-mono">{engine.trend_slope > 0 ? `+${engine.trend_slope}` : engine.trend_slope}/buß╗òi</span>
-                  <span className={`text-[10px] font-bold block ${engine.trend_label?.includes('Giß║úm') || engine.trend_label?.includes('Suy giß║úm') ? 'text-rose-400' :
-                    engine.trend_label?.includes('ß╗ön ─æß╗ïnh') ? 'text-slate-300' : 'text-emerald-400'
+                  <span className="text-sm font-black text-purple-300 font-mono">{engine.trend_slope > 0 ? `+${engine.trend_slope}` : engine.trend_slope}/buổi</span>
+                  <span className={`text-[10px] font-bold block ${engine.trend_label?.includes('Giảm') || engine.trend_label?.includes('Suy giảm') ? 'text-rose-400' :
+                    engine.trend_label?.includes('Ổn định') ? 'text-slate-300' : 'text-emerald-400'
                     }`}>{engine.trend_label}</span>
 
                   {activeTooltip === 'trend' && (
                     <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 w-64 p-3 bg-[#161c34] border border-[#2c375e] text-slate-200 text-[11px] rounded-xl shadow-2xl z-30 text-left font-sans">
-                      <span className="font-extrabold text-purple-300 block mb-1">Tß╗æc ─Éß╗Ö T─âng Trã░ß╗ƒng (Trend Rate):</span>
-                      Hß╗ç sß╗æ g├│c (slope) t├¡nh to├ín mß╗®c t─âng hoß║Àc giß║úm trung b├¼nh cß╗ºa hß╗ìc sinh sau mß╗ùi buß╗òi hß╗ìc.
+                      <span className="font-extrabold text-purple-300 block mb-1">Tốc Độ Tăng Trưởng (Trend Rate):</span>
+                      Hệ số góc (slope) tính toán mức tăng hoặc giảm trung bình của học sinh sau mỗi buổi học.
                     </div>
                   )}
                 </div>
 
                 <div className="border-l border-[#1d2644] col-span-2 sm:col-span-1">
-                  <span className="text-[10px] font-black uppercase text-slate-400 block">Xß║┐p Loß║íi Tß╗òng Thß╗â</span>
-                  <span className={`text-xs font-black flex items-center justify-center gap-1 ${engine.rating_label?.includes('NGUY Cãá') ? 'text-rose-500 font-extrabold animate-pulse' :
-                    engine.rating_label?.includes('Cß║ºn Cß╗æ Gß║»ng') ? 'text-amber-400' :
-                      engine.rating_label?.includes('Tß╗æt') ? 'text-blue-400' : 'text-emerald-400'
+                  <span className="text-[10px] font-black uppercase text-slate-400 block">Xếp Loại Tổng Thể</span>
+                  <span className={`text-xs font-black flex items-center justify-center gap-1 ${engine.rating_label?.includes('NGUY CƠ') ? 'text-rose-500 font-extrabold animate-pulse' :
+                    engine.rating_label?.includes('Cần Cố Gắng') ? 'text-amber-400' :
+                      engine.rating_label?.includes('Tốt') ? 'text-blue-400' : 'text-emerald-400'
                     }`}>
                     {engine.rating_label}
                   </span>
@@ -4645,13 +4645,13 @@ export default function ReportsPage() {
 
             </div>
 
-            {/* 6. STUDENT RANKINGS TABLE ÔÇö TanStack Table */}
+            {/* 6. STUDENT RANKINGS TABLE — TanStack Table */}
             <div className={`bg-[#0d1120] border border-[#1d2644] rounded-2xl flex flex-col shadow-2xl mb-8 ${selectedStudentObj ? 'animate-cascade-4' : 'animate-cascade-3'}`}>
               <div className="px-5 py-4 border-b border-[#181f36] flex flex-wrap items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
                   <GraduationCap size={18} className="text-indigo-400" />
                   <h3 className="text-sm font-black text-white uppercase tracking-wider">
-                    Bß║óNG Xß║¥P Hß║áNG V├Ç CHI TIß║¥T ─ÉIß╗éM Sß╗É Hß╗îC SINH
+                    BẢNG XẾP HẠNG VÀ CHI TIẾT ĐIỂM SỐ HỌC SINH
                   </h3>
                 </div>
                 <div className="flex items-center gap-2">
@@ -4660,8 +4660,8 @@ export default function ReportsPage() {
                     value={selectedClassId}
                     onChange={(val) => { setSelectedClassId(String(val)); setSelectedStudentId(''); }}
                     options={[
-                      { value: '', label: 'Tß║Ñt cß║ú lß╗øp hß╗ìc' },
-                      ...classes.map(c => ({ value: String(c.id), label: `${c.class_name} (${c.grade || 'Lß╗øp 6'})` }))
+                      { value: '', label: 'Tất cả lớp học' },
+                      ...classes.map(c => ({ value: String(c.id), label: `${c.class_name} (${c.grade || 'Lớp 6'})` }))
                     ]}
                     className="w-52"
                   />
@@ -4674,29 +4674,29 @@ export default function ReportsPage() {
                 data={filteredRankings}
                 columns={rankingColumns}
                 loading={loading}
-                searchPlaceholder="T├¼m hß╗ìc sinh theo t├¬n, biß╗çt danh, lß╗øp..."
-                emptyMessage="Kh├┤ng c├│ dß╗» liß╗çu xß║┐p hß║íng."
+                searchPlaceholder="Tìm học sinh theo tên, biệt danh, lớp..."
+                emptyMessage="Không có dữ liệu xếp hạng."
                 pageSize={20}
                 onRowClick={(r: any) => handleSelectRankingStudent(r.student_id)}
                 initialSorting={[{ id: 'overallAvg', desc: true }]}
                 onExportExcel={handleExportRankingsExcel}
               />
             </div>
-            {/* 7. STUDENT GRADE HISTORY & EDIT TABLE ÔÇö TanStack Table */}
+            {/* 7. STUDENT GRADE HISTORY & EDIT TABLE — TanStack Table */}
             <div className={`bg-[#0d1120] border border-[#1d2644] rounded-2xl flex flex-col shadow-2xl mb-8 ${selectedStudentObj ? 'animate-cascade-5' : 'animate-cascade-4'}`}>
               <div className="px-5 py-4 border-b border-[#181f36] flex flex-wrap items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
                   <History size={18} className="text-indigo-400" />
                   <h3 className="text-sm font-black text-white uppercase tracking-wider">
                     {selectedStudentObj
-                      ? `Lß╗èCH Sß╗¼ ─ÉIß╗éM Sß╗É & ─ÉIß╗éM DANH ÔÇö Hß╗îC SINH: ${selectedStudentObj.full_name.toUpperCase()}`
-                      : `Lß╗èCH Sß╗¼ ─ÉIß╗éM Sß╗É CHI TIß║¥T Tß║ñT Cß║ó BUß╗öI Hß╗îC (${sessionRecords.length} Bß║óN GHI)`
+                      ? `LỊCH SỬ ĐIỂM SỐ & ĐIỂM DANH — HỌC SINH: ${selectedStudentObj.full_name.toUpperCase()}`
+                      : `LỊCH SỬ ĐIỂM SỐ CHI TIẾT TẤT CẢ BUỔI HỌC (${sessionRecords.length} BẢN GHI)`
                     }
                   </h3>
                 </div>
                 {selectedStudentObj && (
                   <span className="text-xs font-extrabold text-indigo-300 bg-indigo-500/10 px-3 py-1 rounded-xl border border-indigo-500/20">
-                    Tß╗òng cß╗Öng: {sessionRecords.length} buß╗òi hß╗ìc ({stats.sessionCount} c├│ mß║Àt, {sessionRecords.length - stats.sessionCount} vß║»ng mß║Àt)
+                    Tổng cộng: {sessionRecords.length} buổi học ({stats.sessionCount} có mặt, {sessionRecords.length - stats.sessionCount} vắng mặt)
                   </span>
                 )}
               </div>
@@ -4705,8 +4705,8 @@ export default function ReportsPage() {
                 data={sessionRecords}
                 columns={historyColumns}
                 loading={loading}
-                searchPlaceholder="T├¼m theo ng├áy, trß║íng th├íi, ghi ch├║..."
-                emptyMessage="Chã░a c├│ lß╗ïch sß╗¡ ─æiß╗âm sß╗æ."
+                searchPlaceholder="Tìm theo ngày, trạng thái, ghi chú..."
+                emptyMessage="Chưa có lịch sử điểm số."
                 pageSize={20}
                 exportFilename={`lich_su_diem_${selectedStudentObj ? selectedStudentObj.full_name : 'lop'}`}
               />
@@ -4722,25 +4722,25 @@ export default function ReportsPage() {
             <div className="flex items-center justify-between px-6 py-4 border-b border-white/10 bg-[#141828]">
               <h2 className="text-sm font-black uppercase text-indigo-300 flex items-center gap-2">
                 <Edit3 className="h-4 w-4" />
-                Sß╗¡a ─Éiß╗âm Sß╗æ Buß╗òi Hß╗ìc
+                Sửa Điểm Số Buổi Học
               </h2>
               <button
                 onClick={() => setEditingRecord(null)}
                 className="text-slate-400 hover:text-white transition cursor-pointer"
               >
-                Ô£ò
+                ✕
               </button>
             </div>
 
             <form onSubmit={handleSaveEditGradeSubmit} className="p-6 space-y-4">
               <div>
                 <label className="block text-[11px] font-extrabold text-slate-300 uppercase tracking-wider mb-1">
-                  Hß╗ìc Sinh
+                  Học Sinh
                 </label>
                 <input
                   type="text"
                   disabled
-                  value={editingRecord.student_name || 'Hß╗ìc sinh'}
+                  value={editingRecord.student_name || 'Học sinh'}
                   className="w-full bg-[#181d2e] border border-white/10 rounded-xl px-3.5 py-2 text-xs font-bold text-slate-300 cursor-not-allowed"
                 />
               </div>
@@ -4748,7 +4748,7 @@ export default function ReportsPage() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-[11px] font-extrabold text-slate-300 uppercase tracking-wider mb-1">
-                    Ng├áy Hß╗ìc
+                    Ngày Học
                   </label>
                   <input
                     type="text"
@@ -4760,15 +4760,15 @@ export default function ReportsPage() {
 
                 <div>
                   <label className="block text-[11px] font-extrabold text-slate-300 uppercase tracking-wider mb-1">
-                    ─Éiß╗âm Danh
+                    Điểm Danh
                   </label>
                   <CustomSelect
                     value={editStatus}
                     onChange={(val) => setEditStatus(String(val))}
                     options={[
-                      { value: 'C├│ mß║Àt', label: 'C├│ mß║Àt' },
-                      { value: 'Vß║»ng mß║Àt', label: 'Vß║»ng mß║Àt' },
-                      { value: 'Nghß╗ë hß╗ìc c├│ ph├®p', label: 'C├│ ph├®p' },
+                      { value: 'Có mặt', label: 'Có mặt' },
+                      { value: 'Vắng mặt', label: 'Vắng mặt' },
+                      { value: 'Nghỉ học có phép', label: 'Có phép' },
                     ]}
                   />
                 </div>
@@ -4817,11 +4817,11 @@ export default function ReportsPage() {
 
               <div>
                 <label className="block text-[11px] font-extrabold text-slate-300 uppercase tracking-wider mb-1">
-                  Ghi Ch├║ (Notes)
+                  Ghi Chú (Notes)
                 </label>
                 <input
                   type="text"
-                  placeholder="Nhß║¡p ghi ch├║ cho buß╗òi hß╗ìc..."
+                  placeholder="Nhập ghi chú cho buổi học..."
                   value={editNotes}
                   onChange={(e) => setEditNotes(e.target.value)}
                   className="w-full bg-[#161c30] border border-white/10 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-indigo-400"
@@ -4834,7 +4834,7 @@ export default function ReportsPage() {
                   onClick={() => setEditingRecord(null)}
                   className="px-4 py-2 rounded-xl bg-[#181d2e] hover:bg-[#252c42] text-slate-300 text-xs font-bold border border-white/10 transition cursor-pointer"
                 >
-                  Hß╗ºy bß╗Å
+                  Hủy bỏ
                 </button>
 
                 <button
@@ -4843,7 +4843,7 @@ export default function ReportsPage() {
                   className="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-extrabold border border-white/20 transition cursor-pointer shadow-md flex items-center gap-1.5 disabled:opacity-50"
                 >
                   <Save size={13} />
-                  <span>{savingEdit ? '─Éang lã░u...' : 'Lã░u ─Éiß╗âm Sß╗æ'}</span>
+                  <span>{savingEdit ? 'Đang lưu...' : 'Lưu Điểm Số'}</span>
                 </button>
               </div>
             </form>
@@ -4858,20 +4858,20 @@ export default function ReportsPage() {
             <div className="flex items-center justify-between px-6 py-4 border-b border-white/10 bg-[#141828]">
               <h2 className="text-sm font-black uppercase text-rose-400 flex items-center gap-2">
                 <RotateCcw className="h-4 w-4" />
-                ─Éß║Àt Lß║íi (X├│a) ─Éiß╗âm Sß╗æ Hß╗ìc Sinh
+                Đặt Lại (Xóa) Điểm Số Học Sinh
               </h2>
               <button
                 onClick={() => setResetModalOpen(false)}
                 className="text-slate-400 hover:text-white transition cursor-pointer"
               >
-                Ô£ò
+                ✕
               </button>
             </div>
 
             <form onSubmit={handleResetGradesSubmit} className="p-6 space-y-4">
               <div>
                 <label className="block text-[11px] font-extrabold text-slate-300 uppercase tracking-wider mb-1.5">
-                  Phß║ím Vi ─Éß║Àt Lß║íi ─Éiß╗âm
+                  Phạm Vi Đặt Lại Điểm
                 </label>
                 <div className="grid grid-cols-2 gap-2">
                   <button
@@ -4882,7 +4882,7 @@ export default function ReportsPage() {
                       : 'bg-[#181d2e] text-slate-400 border-white/10 hover:text-white'
                       }`}
                   >
-                    To├án Bß╗Ö Lß╗øp {selectedClassId ? `(${classes.find(c => String(c.id) === selectedClassId)?.class_name})` : ''}
+                    Toàn Bộ Lớp {selectedClassId ? `(${classes.find(c => String(c.id) === selectedClassId)?.class_name})` : ''}
                   </button>
 
                   <button
@@ -4895,24 +4895,24 @@ export default function ReportsPage() {
                         : 'bg-[#181d2e] text-slate-400 border-white/10 hover:text-white'
                       }`}
                   >
-                    Hß╗ìc Sinh ─Éang Chß╗ìn
+                    Học Sinh Đang Chọn
                   </button>
                 </div>
                 {!selectedStudentId && resetScope === 'student' && (
-                  <p className="text-[10px] text-amber-400 mt-1">Vui l├▓ng chß╗ìn hß╗ìc sinh trong bß║úng trã░ß╗øc ─æß╗â ─æß║Àt lß║íi ─æiß╗âm c├í nh├ón.</p>
+                  <p className="text-[10px] text-amber-400 mt-1">Vui lòng chọn học sinh trong bảng trước để đặt lại điểm cá nhân.</p>
                 )}
               </div>
 
               <div>
                 <label className="block text-[11px] font-extrabold text-slate-300 uppercase tracking-wider mb-1.5">
-                  Tß╗½ Ng├áy (From Date)
+                  Từ Ngày (From Date)
                 </label>
                 <CustomDatePicker value={resetFromDate} onChange={setResetFromDate} />
               </div>
 
               <div>
                 <label className="block text-[11px] font-extrabold text-slate-300 uppercase tracking-wider mb-1.5">
-                  ─Éß║┐n Ng├áy (To Date)
+                  Đến Ngày (To Date)
                 </label>
                 <CustomDatePicker value={resetToDate} onChange={setResetToDate} />
               </div>
@@ -4923,14 +4923,14 @@ export default function ReportsPage() {
                   onClick={() => setResetModalOpen(false)}
                   className="px-4 py-2 rounded-xl bg-[#181d2e] hover:bg-[#252c42] text-slate-300 text-xs font-bold border border-white/10 transition cursor-pointer"
                 >
-                  Hß╗ºy bß╗Å
+                  Hủy bỏ
                 </button>
 
                 <button
                   type="submit"
                   className="px-5 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-extrabold border border-white/20 transition cursor-pointer shadow-md"
                 >
-                  X├íc Nhß║¡n ─Éß║Àt Lß║íi
+                  Xác Nhận Đặt Lại
                 </button>
               </div>
             </form>
@@ -4946,7 +4946,7 @@ export default function ReportsPage() {
               <div className="flex items-center gap-2">
                 <Clock className="text-indigo-400" size={18} />
                 <h3 className="text-sm font-black uppercase text-white tracking-wider">
-                  Quß║ún L├¢ Giai ─Éoß║ín Hß╗ìc Tß║¡p T├╣y Chß╗ënh
+                  Quản Lý Giai Đoạn Học Tập Tùy Chỉnh
                 </h3>
               </div>
               <button
@@ -4960,11 +4960,11 @@ export default function ReportsPage() {
             <form onSubmit={handleSavePhaseSubmit} className="p-6 space-y-4">
               <div>
                 <label className="block text-[11px] font-black uppercase tracking-wider text-slate-300 mb-1.5">
-                  T├¬n Giai ─Éoß║ín:
+                  Tên Giai Đoạn:
                 </label>
                 <input
                   type="text"
-                  placeholder="V├¡ dß╗Ñ: ├ön tß║¡p Giß╗»a kß╗│ 1, Luyß╗çn ─æß╗ü Chuy├¬n s├óu 9 l├¬n 10..."
+                  placeholder="Ví dụ: Ôn tập Giữa kỳ 1, Luyện đề Chuyên sâu 9 lên 10..."
                   value={phaseNameInput}
                   onChange={(e) => setPhaseNameInput(e.target.value)}
                   className="w-full bg-[#141a2e] border border-[#232d4e] rounded-xl px-3.5 py-2 text-xs text-white font-semibold focus:outline-none focus:border-indigo-500 transition"
@@ -4975,7 +4975,7 @@ export default function ReportsPage() {
               <div className="grid grid-cols-2 gap-4 relative z-30">
                 <div className="relative">
                   <label className="block text-[11px] font-black uppercase tracking-wider text-slate-300 mb-1.5">
-                    Ng├áy Bß║»t ─Éß║ºu:
+                    Ngày Bắt Đầu:
                   </label>
                   <CustomDatePicker
                     value={phaseFromDate}
@@ -4986,7 +4986,7 @@ export default function ReportsPage() {
                 </div>
                 <div className="relative">
                   <label className="block text-[11px] font-black uppercase tracking-wider text-slate-300 mb-1.5">
-                    Ng├áy Kß║┐t Th├║c:
+                    Ngày Kết Thúc:
                   </label>
                   <CustomDatePicker
                     value={phaseToDate}
@@ -4999,14 +4999,14 @@ export default function ReportsPage() {
 
               <div className="relative z-20">
                 <label className="block text-[11px] font-black uppercase tracking-wider text-slate-300 mb-1.5">
-                  ├üp Dß╗Ñng Cho Lß╗øp:
+                  Áp Dụng Cho Lớp:
                 </label>
                 <CustomSelect
                   value={phaseClassId}
                   onChange={(val) => setPhaseClassId(String(val))}
                   options={[
-                    { value: '', label: 'Tß║Ñt cß║ú lß╗øp hß╗ìc' },
-                    ...classes.map(c => ({ value: String(c.id), label: `${c.class_name} (${c.grade || 'Lß╗øp 6'})` }))
+                    { value: '', label: 'Tất cả lớp học' },
+                    ...classes.map(c => ({ value: String(c.id), label: `${c.class_name} (${c.grade || 'Lớp 6'})` }))
                   ]}
                 />
               </div>
@@ -5017,7 +5017,7 @@ export default function ReportsPage() {
                   onClick={() => setPhaseModalOpen(false)}
                   className="px-4 py-2 rounded-xl bg-[#141a2e] text-slate-300 hover:text-white border border-[#232d4e] text-xs font-bold transition cursor-pointer"
                 >
-                  Hß╗ºy
+                  Hủy
                 </button>
                 <button
                   type="submit"
@@ -5025,7 +5025,7 @@ export default function ReportsPage() {
                   className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition cursor-pointer shadow-lg shadow-indigo-600/30 flex items-center gap-1.5"
                 >
                   <Plus size={14} />
-                  <span>{savingPhase ? '─Éang lã░u...' : 'Th├¬m Giai ─Éoß║ín'}</span>
+                  <span>{savingPhase ? 'Đang lưu...' : 'Thêm Giai Đoạn'}</span>
                 </button>
               </div>
             </form>
@@ -5034,7 +5034,7 @@ export default function ReportsPage() {
             {timePhases.length > 0 && (
               <div className="px-6 pb-6 pt-2 border-t border-[#1c243f]">
                 <h4 className="text-[11px] font-black uppercase tracking-wider text-slate-400 mb-2">
-                  Danh S├ích Giai ─Éoß║ín ─É├ú Tß║ío ({timePhases.length})
+                  Danh Sách Giai Đoạn Đã Tạo ({timePhases.length})
                 </h4>
                 <div className="max-h-40 overflow-y-auto space-y-2 scrollbar-thin">
                   {timePhases.map(p => (
@@ -5045,14 +5045,14 @@ export default function ReportsPage() {
                       <div>
                         <span className="font-bold text-white block">{p.phase_name}</span>
                         <span className="text-[10px] text-slate-400 font-mono">
-                          {formatSessionDate(p.from_date)} ÔåÆ {formatSessionDate(p.to_date)}
+                          {formatSessionDate(p.from_date)} → {formatSessionDate(p.to_date)}
                         </span>
                       </div>
                       <button
                         type="button"
                         onClick={() => handleDeletePhase(p.id)}
                         className="p-1.5 rounded-lg hover:bg-rose-500/20 text-slate-400 hover:text-rose-400 transition cursor-pointer"
-                        title="X├│a giai ─æoß║ín n├áy"
+                        title="Xóa giai đoạn này"
                       >
                         <Trash2 size={13} />
                       </button>
