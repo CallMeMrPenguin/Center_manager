@@ -66,6 +66,21 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = ({
     return { x: clampedX, y: 0 };
   }, [plotAreaWidth]);
 
+  // Auto reset or re-clamp panOffset whenever zoomLevel changes
+  useEffect(() => {
+    if (zoomLevel <= 1.0) {
+      setPanOffset({ x: 0, y: 0 });
+    } else {
+      setPanOffset(prev => clampPanOffset(prev.x, prev.y, zoomLevel));
+    }
+  }, [zoomLevel, clampPanOffset]);
+
+  // Reset zoom & pan when timeView, selectedPhaseId, or sessionChartData changes
+  useEffect(() => {
+    setZoomLevel(1.0);
+    setPanOffset({ x: 0, y: 0 });
+  }, [timeView, selectedPhaseId, sessionChartData.length]);
+
   const yBounds = useMemo(() => {
     let min = 10, max = 0;
     sessionChartData.forEach(d => {
@@ -86,11 +101,12 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = ({
   }, [sessionChartData]);
 
   const getSvgX = useCallback((index: number, total: number) => {
-    if (total <= 1) return paddingLeft + plotAreaWidth / 2 + panOffset.x;
+    const currentPanX = zoomLevel > 1.0 ? panOffset.x : 0;
+    if (total <= 1) return paddingLeft + plotAreaWidth / 2 + currentPanX;
     const baseSpacing = plotAreaWidth / (total - 1);
     const effectiveSpacing = baseSpacing * zoomLevel;
     const baseX = paddingLeft + index * effectiveSpacing;
-    return baseX + panOffset.x;
+    return baseX + currentPanX;
   }, [plotAreaWidth, zoomLevel, panOffset.x]);
 
   const getSvgY = useCallback((val: number) => {
