@@ -4213,6 +4213,7 @@ export default function ReportsPage() {
                       strokeLinecap="round"
                       strokeLinejoin="round"
                       filter="url(#glow-blue)"
+                      pathLength={1000}
                       className="animate-path-draw"
                     />
 
@@ -4225,6 +4226,7 @@ export default function ReportsPage() {
                       strokeLinecap="round"
                       strokeLinejoin="round"
                       filter="url(#glow-purple)"
+                      pathLength={1000}
                       className="animate-path-draw"
                     />
 
@@ -4237,6 +4239,7 @@ export default function ReportsPage() {
                       strokeLinecap="round"
                       strokeLinejoin="round"
                       filter="url(#glow-emerald)"
+                      pathLength={1000}
                       className="animate-path-draw"
                     />
 
