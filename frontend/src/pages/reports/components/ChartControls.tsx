@@ -62,7 +62,7 @@ export const ChartControls: React.FC<ChartControlsProps> = ({
             type="button"
             onClick={() => setZoomLevel(prev => Math.min(5.0, prev + 0.25))}
             className="p-1 rounded-lg hover:bg-indigo-600/30 text-slate-300 hover:text-white transition cursor-pointer"
-            title="Phóng to (Scroll Cuộn Chuột Lên)"
+            title="Phóng to (Zoom In)"
           >
             <ZoomIn size={14} />
           </button>
@@ -70,7 +70,7 @@ export const ChartControls: React.FC<ChartControlsProps> = ({
             type="button"
             onClick={() => setZoomLevel(prev => Math.max(1.0, prev - 0.25))}
             className="p-1 rounded-lg hover:bg-indigo-600/30 text-slate-300 hover:text-white transition cursor-pointer"
-            title="Thu nhỏ (Scroll Cuộn Chuột Xuống)"
+            title="Thu nhỏ (Zoom Out)"
           >
             <ZoomOut size={14} />
           </button>

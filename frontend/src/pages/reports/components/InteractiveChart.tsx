@@ -154,19 +154,10 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = ({
       />
 
       <div
-        className={`w-full relative overflow-hidden rounded-xl bg-[#080b14]/50 border border-[#141b2e] ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
+        className={`w-full relative overflow-hidden rounded-xl bg-[#080b14]/50 border border-[#141b2e] ${isDragging ? 'cursor-grabbing' : zoomLevel > 1.0 ? 'cursor-grab' : 'cursor-default'}`}
         onContextMenu={(e) => e.preventDefault()}
-        onWheel={(e) => {
-          e.preventDefault();
-          const zoomDelta = e.deltaY < 0 ? 0.15 : -0.15;
-          setZoomLevel(prev => {
-            const next = Math.min(5.0, Math.max(1.0, prev + zoomDelta));
-            setPanOffset(p => clampPanOffset(p.x, p.y, next));
-            return next;
-          });
-        }}
         onMouseDown={(e) => {
-          if (e.button === 0 || e.button === 2) {
+          if (e.button === 0 && zoomLevel > 1.0) {
             setIsDragging(true);
             setDragStart({ x: e.clientX, y: e.clientY });
           }
