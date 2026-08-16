@@ -2285,7 +2285,7 @@ export default function ReportsPage() {
                 </div>
 
                 {/* 4 Duel KPI Comparison Rounded Square Cards */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 animate-cascade-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                   {/* 1. EMA Comparison */}
                   <div className="p-4 rounded-xl bg-[#0e1322] border border-[#1b253b] flex flex-col justify-between gap-3 shadow-md">
                     <div className="flex items-center justify-between">
@@ -2416,7 +2416,7 @@ export default function ReportsPage() {
                 </div>
 
                 {/* Side-by-Side Component Scores & 6-Tier Rank Distribution */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pt-1 animate-cascade-3">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pt-1">
                   {/* Left: Dual Progress Bars for each metric with explicit tracks & values */}
                   <div className="p-5 rounded-xl bg-[#090d17] border border-[#192236] space-y-4">
                     <div className="flex items-center justify-between border-b border-white/5 pb-2.5">
@@ -2568,7 +2568,7 @@ export default function ReportsPage() {
                 </div>
 
                 {/* Leading Student Badges */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1 animate-cascade-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
                   <div className="p-3.5 rounded-xl bg-[#0e1322] border border-blue-500/30 flex items-center justify-between gap-3">
                     <div className="flex items-center gap-3">
                       {classComparisonData.classA.topStudent ? (
@@ -2623,7 +2623,7 @@ export default function ReportsPage() {
             )}
 
             {/* 2. FULL CROSS-CLASS BENCHMARK TABLE */}
-            <div className="bg-[#0b0f19] border border-[#1b253b] rounded-xl flex flex-col shadow-xl p-6 space-y-4">
+            <div className="bg-[#0b0f19] border border-[#1b253b] rounded-xl flex flex-col shadow-xl p-6 space-y-4 animate-cascade-2">
               <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[#161f33] pb-4">
                 <div className="flex items-center gap-3">
                   <BarChart3 size={20} className="text-blue-400" />
@@ -3240,7 +3240,7 @@ export default function ReportsPage() {
           </div>
 
           {/* 4. BIẾN ĐỘNG ĐIỂM SỐ (SCORE FLUCTUATIONS & GROWTH TRACKING) */}
-          <div className="bg-[#0d1120] border border-emerald-500/30 rounded-2xl flex flex-col shadow-2xl overflow-hidden transition-all">
+          <div className="bg-[#0d1120] border border-emerald-500/30 rounded-2xl flex flex-col shadow-2xl overflow-hidden transition-all animate-cascade-4">
             <div
               onClick={() => setIsGrowthSectionOpen(!isGrowthSectionOpen)}
               className="px-6 py-4 border-b border-[#181f36] bg-[#0a0d18] flex flex-wrap items-center justify-between gap-4 cursor-pointer select-none"
@@ -3288,7 +3288,7 @@ export default function ReportsPage() {
           </div>
 
           {/* 5. BẤT THƯỜNG HỌC TẬP (STUDY ANOMALIES) */}
-          <div className="bg-[#101424] border border-indigo-500/20 rounded-2xl p-4 sm:p-5 shadow-xl flex flex-col gap-4 transition-all">
+          <div className="bg-[#101424] border border-indigo-500/20 rounded-2xl p-4 sm:p-5 shadow-xl flex flex-col gap-4 transition-all animate-cascade-5">
             <div 
               onClick={() => setIsBottlenecksSectionOpen(!isBottlenecksSectionOpen)}
               className="flex flex-wrap items-center justify-between gap-4 cursor-pointer select-none"
@@ -3453,7 +3453,7 @@ export default function ReportsPage() {
           )}
 
           {/* 3. FOUR GLOWING KPI CARDS */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 animate-cascade-2">
+          <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 ${selectedStudentObj ? 'animate-cascade-2' : 'animate-cascade-1'}`}>
             <div className="kpi-card-blue p-5 flex flex-col justify-between shadow-2xl transition-all duration-300 min-h-[100px]">
               <div>
                 <span className="text-[10px] font-black uppercase tracking-wider text-blue-400 block mb-1">
@@ -3516,7 +3516,7 @@ export default function ReportsPage() {
           </div>
 
           {/* 4. EXPANDED TALLER SVG GRAPH (560px HEIGHT WITH SMOOTH CIRCULAR GLOW & HOVER TOOLTIP) */}
-          <div className="bg-[#0b0e1b] border border-[#1d2644] p-6 rounded-2xl shadow-2xl flex flex-col gap-4 animate-cascade-3">
+          <div className={`bg-[#0b0e1b] border border-[#1d2644] p-6 rounded-2xl shadow-2xl flex flex-col gap-4 ${selectedStudentObj ? 'animate-cascade-3' : 'animate-cascade-2'}`}>
             
             {/* GRAPH HEADER & TIME VIEW FILTERS */}
             <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[#181f36] pb-3">
@@ -4194,7 +4194,7 @@ export default function ReportsPage() {
       </div>
 
       {/* 6. STUDENT RANKINGS TABLE — TanStack Table */}
-      <div className="bg-[#0d1120] border border-[#1d2644] rounded-2xl flex flex-col shadow-2xl mb-8 animate-cascade-4">
+      <div className={`bg-[#0d1120] border border-[#1d2644] rounded-2xl flex flex-col shadow-2xl mb-8 ${selectedStudentObj ? 'animate-cascade-4' : 'animate-cascade-3'}`}>
         <div className="px-5 py-4 border-b border-[#181f36] flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <GraduationCap size={18} className="text-indigo-400" />
@@ -4231,7 +4231,7 @@ export default function ReportsPage() {
         />
       </div>
       {/* 7. STUDENT GRADE HISTORY & EDIT TABLE — TanStack Table */}
-      <div className="bg-[#0d1120] border border-[#1d2644] rounded-2xl flex flex-col shadow-2xl mb-8 animate-cascade-5">
+      <div className={`bg-[#0d1120] border border-[#1d2644] rounded-2xl flex flex-col shadow-2xl mb-8 ${selectedStudentObj ? 'animate-cascade-5' : 'animate-cascade-4'}`}>
         <div className="px-5 py-4 border-b border-[#181f36] flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <History size={18} className="text-indigo-400" />
