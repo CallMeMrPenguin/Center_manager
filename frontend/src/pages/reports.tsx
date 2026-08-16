@@ -2129,7 +2129,7 @@ export default function ReportsPage() {
   const chartHeight = 750;
   const chartWidth = Math.max(containerWidth, 600);
   const paddingLeft = 50;
-  const paddingRight = 130;
+  const paddingRight = 140;
   const paddingTop = 40;
   const paddingBottom = 50;
   const plotAreaHeight = chartHeight - paddingTop - paddingBottom;
@@ -2165,7 +2165,7 @@ export default function ReportsPage() {
 
   const getSvgX = useCallback((index: number, total: number) => {
     const innerMarginLeft = 30;
-    const innerMarginRight = 60;
+    const innerMarginRight = 75;
     const usableWidth = plotAreaWidth - innerMarginLeft - innerMarginRight;
     if (total <= 1) return paddingLeft + innerMarginLeft + (usableWidth / 2) * zoomLevel + panOffset.x;
     const step = usableWidth / (total - 1);
@@ -4120,7 +4120,7 @@ export default function ReportsPage() {
             <defs>
               {/* Plot area clip path so curves don't overflow fixed X/Y axes */}
               <clipPath id="chart-plot-clip">
-                <rect x={paddingLeft} y={paddingTop - 10} width={plotAreaWidth} height={plotAreaHeight + 20} />
+                <rect x={paddingLeft} y={paddingTop - 15} width={plotAreaWidth + paddingRight} height={plotAreaHeight + 30} />
               </clipPath>
 
               {/* Dynamic Curtain Reveal Clip for Gradient Shadows (advances in exact sync with line draw animation) */}
@@ -4129,7 +4129,7 @@ export default function ReportsPage() {
                   key={`curtain-${selectedStudentId || selectedClassId || 'all'}-${timeView}`}
                   x={paddingLeft} 
                   y={paddingTop - 15} 
-                  width={plotAreaWidth} 
+                  width={plotAreaWidth + paddingRight} 
                   height={plotAreaHeight + 30} 
                   className="animate-curtain-reveal"
                 />
@@ -4262,99 +4262,59 @@ export default function ReportsPage() {
                   className="animate-path-draw"
                 />
 
-                {/* FORECAST DASHED CONNECTION LINES & FORECAST POINTS */}
+                {/* SINGLE TOTAL ACADEMIC PREDICTION FORECAST DASHED LINE & POINT */}
                 {sessionChartData.length > 0 && (() => {
                   const lastIdx = sessionChartData.length - 1;
                   const lastX = getSvgX(lastIdx, sessionChartData.length);
-                  const forecastX = lastX + 40 * zoomLevel;
+                  const lastOverall = sessionChartData[lastIdx].overall ?? 8.0;
+                  const forecastX = lastX + 45 * zoomLevel;
+                  const predNextY = getSvgY(engine.predicted_next);
+
                   return (
                     <g 
                       key={`forecast-${selectedStudentId || selectedClassId || 'all'}-${timeView}-${sessionChartData.length}`}
                       className="animate-point-pop" 
                       style={{ animationDelay: '2.45s' }}
                     >
-                      {/* 1. Check 1 Forecast Line & Point */}
+                      {/* Total Academic Forecast Connection Line */}
                       <line
                         x1={lastX}
-                        y1={getSvgY(sessionChartData[lastIdx].check1)}
+                        y1={getSvgY(lastOverall)}
                         x2={forecastX}
-                        y2={getSvgY(engine.pred_c1)}
-                        stroke="#3b82f6"
+                        y2={predNextY}
+                        stroke="#6366f1"
                         strokeWidth="2.5"
-                        strokeDasharray="4 4"
+                        strokeDasharray="5 5"
+                        strokeLinecap="round"
                       />
-                      <circle 
-                        cx={forecastX} 
-                        cy={getSvgY(engine.pred_c1)} 
-                        r="6" 
-                        fill="#3b82f6" 
-                        stroke="#ffffff" 
-                        strokeWidth="2" 
-                      />
-                      <text 
-                        x={forecastX + 8} 
-                        y={getSvgY(engine.pred_c1) + 4} 
-                        fill="#60a5fa" 
-                        fontSize="11" 
-                        fontWeight="900"
-                      >
-                        {format1Dec(engine.pred_c1)}
-                      </text>
 
-                      {/* 2. Check 2 Forecast Line & Point */}
-                      <line
-                        x1={lastX}
-                        y1={getSvgY(sessionChartData[lastIdx].check2)}
-                        x2={forecastX}
-                        y2={getSvgY(engine.pred_c2)}
-                        stroke="#a855f7"
-                        strokeWidth="2.5"
-                        strokeDasharray="4 4"
-                      />
+                      {/* Glowing Prediction Dot */}
                       <circle 
                         cx={forecastX} 
-                        cy={getSvgY(engine.pred_c2)} 
-                        r="6" 
-                        fill="#a855f7" 
+                        cy={predNextY} 
+                        r="7" 
+                        fill="#6366f1" 
                         stroke="#ffffff" 
                         strokeWidth="2" 
                       />
-                      <text 
-                        x={forecastX + 8} 
-                        y={getSvgY(engine.pred_c2) + 4} 
-                        fill="#c084fc" 
-                        fontSize="11" 
-                        fontWeight="900"
-                      >
-                        {format1Dec(engine.pred_c2)}
-                      </text>
+                      <circle 
+                        cx={forecastX} 
+                        cy={predNextY} 
+                        r="3.5" 
+                        fill="#ffffff" 
+                      />
 
-                      {/* 3. Homework Forecast Line & Point */}
-                      <line
-                        x1={lastX}
-                        y1={getSvgY(sessionChartData[lastIdx].homework)}
-                        x2={forecastX}
-                        y2={getSvgY(engine.pred_hw)}
-                        stroke="#10b981"
-                        strokeWidth="2.5"
-                        strokeDasharray="4 4"
-                      />
-                      <circle 
-                        cx={forecastX} 
-                        cy={getSvgY(engine.pred_hw)} 
-                        r="6" 
-                        fill="#10b981" 
-                        stroke="#ffffff" 
-                        strokeWidth="2" 
-                      />
+                      {/* Prediction Score & Label */}
                       <text 
-                        x={forecastX + 8} 
-                        y={getSvgY(engine.pred_hw) + 4} 
-                        fill="#34d399" 
-                        fontSize="11" 
+                        x={forecastX + 10} 
+                        y={predNextY + 4} 
+                        fill="#a5b4fc" 
+                        fontSize="12" 
                         fontWeight="900"
+                        className="font-mono drop-shadow"
                       >
-                        {format1Dec(engine.pred_hw)}
+                        {format1Dec(engine.predicted_next)}
+                        <tspan dx="4" fill="#64748b" fontSize="10" fontWeight="700">(Dự đoán)</tspan>
                       </text>
                     </g>
                   );
