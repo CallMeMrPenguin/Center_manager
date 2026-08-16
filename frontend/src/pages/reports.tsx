@@ -4132,31 +4132,6 @@ export default function ReportsPage() {
                       />
                     </clipPath>
 
-                    {/* Outer Glow Filters with EXPANDED BOUNDS (300% width/height to eliminate square edge clipping!) */}
-                    <filter id="glow-blue" x="-100%" y="-100%" width="300%" height="300%">
-                      <feGaussianBlur stdDeviation="6" result="blur" />
-                      <feMerge>
-                        <feMergeNode in="blur" />
-                        <feMergeNode in="SourceGraphic" />
-                      </feMerge>
-                    </filter>
-
-                    <filter id="glow-purple" x="-100%" y="-100%" width="300%" height="300%">
-                      <feGaussianBlur stdDeviation="6" result="blur" />
-                      <feMerge>
-                        <feMergeNode in="blur" />
-                        <feMergeNode in="SourceGraphic" />
-                      </feMerge>
-                    </filter>
-
-                    <filter id="glow-emerald" x="-100%" y="-100%" width="300%" height="300%">
-                      <feGaussianBlur stdDeviation="6" result="blur" />
-                      <feMerge>
-                        <feMergeNode in="blur" />
-                        <feMergeNode in="SourceGraphic" />
-                      </feMerge>
-                    </filter>
-
                     {/* Gradient Area Fills */}
                     <linearGradient id="area-gradient-blue" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.35" />
@@ -4231,7 +4206,6 @@ export default function ReportsPage() {
                       strokeWidth="3.5"
                       strokeLinecap="round"
                       strokeLinejoin="round"
-                      filter="url(#glow-blue)"
                       pathLength={1000}
                       className="animate-path-draw"
                     />
@@ -4244,7 +4218,6 @@ export default function ReportsPage() {
                       strokeWidth="3.5"
                       strokeLinecap="round"
                       strokeLinejoin="round"
-                      filter="url(#glow-purple)"
                       pathLength={1000}
                       className="animate-path-draw"
                     />
@@ -4257,7 +4230,6 @@ export default function ReportsPage() {
                       strokeWidth="3.5"
                       strokeLinecap="round"
                       strokeLinejoin="round"
-                      filter="url(#glow-emerald)"
                       pathLength={1000}
                       className="animate-path-draw"
                     />
@@ -4291,7 +4263,7 @@ export default function ReportsPage() {
                         <g
                           key={`forecast-${selectedStudentId || selectedClassId || 'all'}-${timeView}-${sessionChartData.length}`}
                           className="animate-point-pop"
-                          style={{ animationDelay: '2.45s' }}
+                          style={{ animationDelay: '0.80s' }}
                         >
                           {preds.map(p => {
                             const labelY = adjustedYs[p.id] ?? p.rawY;
@@ -4344,7 +4316,7 @@ export default function ReportsPage() {
                         const y1 = getSvgY(d.check1);
                         const y2 = getSvgY(d.check2);
                         const yHw = getSvgY(d.homework);
-                        const pointDelay = (0.85 + (i / Math.max(1, sessionChartData.length - 1)) * 1.55).toFixed(2);
+                        const pointDelay = (0.2 + (i / Math.max(1, sessionChartData.length - 1)) * 0.55).toFixed(2);
 
                         return (
                           <g

@@ -416,7 +416,8 @@ input[type="month"]::-webkit-calendar-picker-indicator {
 .animate-path-draw {
   stroke-dasharray: 1000;
   stroke-dashoffset: 1000;
-  animation: pathDraw 1.6s cubic-bezier(0.22, 1, 0.36, 1) 0.85s both;
+  animation: pathDraw 0.75s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both;
+  will-change: stroke-dashoffset;
 }
 
 @keyframes curtainReveal {
@@ -424,20 +425,21 @@ input[type="month"]::-webkit-calendar-picker-indicator {
   100% { transform: scaleX(1); }
 }
 .animate-curtain-reveal {
-  animation: curtainReveal 1.6s cubic-bezier(0.22, 1, 0.36, 1) 0.85s both;
+  animation: curtainReveal 0.75s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both;
   transform-box: fill-box;
   transform-origin: left center;
+  will-change: transform;
 }
 
 @keyframes pointPop {
   0%   { transform: scale(0); opacity: 0; }
-  60%  { transform: scale(1.35); opacity: 1; }
   100% { transform: scale(1); opacity: 1; }
 }
 .animate-point-pop {
-  animation: pointPop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  animation: pointPop 0.25s cubic-bezier(0.16, 1, 0.3, 1) both;
   transform-box: fill-box;
   transform-origin: center;
+  will-change: transform, opacity;
 }
 
 ::-webkit-scrollbar { width: 7px; height: 7px; }
