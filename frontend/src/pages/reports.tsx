@@ -3019,7 +3019,7 @@ export default function ReportsPage() {
                     </div>
 
                     {/* 6-Tier Dual Butterfly Comparison Ladder (Quán Quân -> Đồng) */}
-                    <div className="space-y-2">
+                    <div className="space-y-2.5">
                       {TIERS_CONFIG.slice().reverse().map(tier => {
                         const countA = classComparisonData.classA.tierDistribution.find((t: any) => t.tier === tier.tier)?.count || 0;
                         const pctA = classComparisonData.classA.tierDistribution.find((t: any) => t.tier === tier.tier)?.pct || 0;
@@ -3029,40 +3029,40 @@ export default function ReportsPage() {
                         return (
                           <div
                             key={tier.tier}
-                            className="bg-[#0c101d] border border-[#1b253b] hover:border-indigo-500/30 p-2 rounded-xl transition-all duration-200 flex items-center justify-between gap-3 group"
+                            className="bg-[#0c101d] border border-[#1b253b] hover:border-indigo-500/30 py-2.5 px-4 rounded-xl transition-all duration-200 flex items-center justify-between gap-4 group"
                           >
                             {/* LEFT: Class A Bar & Percentage */}
-                            <div className="flex-1 flex items-center justify-end gap-2.5 min-w-0">
+                            <div className="flex-1 flex items-center justify-end gap-3 min-w-0">
                               <span className="text-xs font-mono font-black text-blue-400 shrink-0">
-                                {countA} HS <span className="text-[10px] text-slate-400 font-normal">({pctA}%)</span>
+                                {countA} HS <span className="text-[11px] text-slate-400 font-normal">({pctA}%)</span>
                               </span>
-                              <div className="flex-1 max-w-[120px] h-2 bg-[#121829] rounded-full overflow-hidden flex justify-end p-0.5 border border-white/5">
+                              <div className="flex-1 h-3.5 bg-[#121829] rounded-full overflow-hidden flex justify-end p-0.5 border border-white/5">
                                 <div
-                                  style={{ width: `${Math.min(100, pctA)}%` }}
-                                  className="h-full bg-blue-500 rounded-full transition-all duration-500 shadow-[0_0_8px_rgba(59,130,246,0.6)]"
+                                  style={{ width: `${Math.max(pctA > 0 ? 4 : 0, Math.min(100, pctA))}%` }}
+                                  className="h-full bg-gradient-to-l from-blue-500 to-blue-600 rounded-full transition-all duration-500 shadow-[0_0_10px_rgba(59,130,246,0.6)]"
                                 />
                               </div>
                             </div>
 
                             {/* CENTER: Tier Badge, Name & Score */}
-                            <div className="flex items-center justify-center gap-2 w-44 shrink-0 py-1 px-2 bg-[#121728] rounded-lg border border-white/5 shadow-inner">
-                              <img src={tier.badge} alt={tier.name} className="w-6 h-6 object-contain shrink-0 drop-shadow" />
+                            <div className="flex items-center justify-center gap-2.5 w-44 shrink-0 py-1.5 px-3 bg-[#121728] rounded-xl border border-white/5 shadow-inner">
+                              <img src={tier.badge} alt={tier.name} className="w-7 h-7 object-contain shrink-0 drop-shadow" />
                               <div className="text-center">
                                 <span className={`text-xs font-black block leading-tight ${tier.text}`}>{tier.name}</span>
-                                <span className="text-[9px] text-slate-400 font-mono font-semibold">{tier.minScore} - {tier.maxScore}đ</span>
+                                <span className="text-[10px] text-slate-400 font-mono font-semibold">{tier.minScore} - {tier.maxScore}đ</span>
                               </div>
                             </div>
 
                             {/* RIGHT: Class B Bar & Percentage */}
-                            <div className="flex-1 flex items-center justify-start gap-2.5 min-w-0">
-                              <div className="flex-1 max-w-[120px] h-2 bg-[#121829] rounded-full overflow-hidden p-0.5 border border-white/5">
+                            <div className="flex-1 flex items-center justify-start gap-3 min-w-0">
+                              <div className="flex-1 h-3.5 bg-[#121829] rounded-full overflow-hidden p-0.5 border border-white/5">
                                 <div
-                                  style={{ width: `${Math.min(100, pctB)}%` }}
-                                  className="h-full bg-cyan-500 rounded-full transition-all duration-500 shadow-[0_0_8px_rgba(6,182,212,0.6)]"
+                                  style={{ width: `${Math.max(pctB > 0 ? 4 : 0, Math.min(100, pctB))}%` }}
+                                  className="h-full bg-gradient-to-r from-cyan-500 to-cyan-400 rounded-full transition-all duration-500 shadow-[0_0_10px_rgba(6,182,212,0.6)]"
                                 />
                               </div>
                               <span className="text-xs font-mono font-black text-cyan-400 shrink-0">
-                                {countB} HS <span className="text-[10px] text-slate-400 font-normal">({pctB}%)</span>
+                                {countB} HS <span className="text-[11px] text-slate-400 font-normal">({pctB}%)</span>
                               </span>
                             </div>
                           </div>
