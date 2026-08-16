@@ -194,10 +194,10 @@ function DraggableHeader({
         isPinned ? 'bg-[#111827]' : ''
       }`}
     >
-      {/* Draggable Title Area (Only dragging text reorders column) */}
+      {/* Draggable Title Area (Centered by default across all columns) */}
       <div
         {...(enableReorder ? { ...attributes, ...listeners } : {})}
-        className={`flex items-center ${alignClass} gap-1.5 w-full py-3.5 px-3 overflow-hidden text-slate-200 text-sm sm:text-base font-black uppercase tracking-wider whitespace-nowrap ${
+        className={`flex items-center justify-center text-center gap-1.5 w-full py-3.5 px-3 overflow-hidden text-slate-200 text-sm sm:text-base font-black uppercase tracking-wider whitespace-nowrap ${
           enableReorder ? 'cursor-grab active:cursor-grabbing hover:text-white transition-colors' : ''
         }`}
         title={enableReorder ? 'Giữ chuột và kéo để thay đổi thứ tự cột' : undefined}
@@ -1051,7 +1051,7 @@ export function DataTable<TData>({
                               isAnyColumnResizing={isAnyColumnResizing}
                             >
                               <div
-                                className={`inline-flex items-center ${align === 'left' ? 'justify-start' : 'justify-center'} gap-1.5 max-w-full ${
+                                className={`inline-flex items-center justify-center gap-1.5 max-w-full ${
                                   header.column.getCanSort() ? 'cursor-pointer select-none hover:text-white transition-colors' : ''
                                 }`}
                                 onClick={header.column.getCanSort() ? header.column.getToggleSortingHandler() : undefined}
