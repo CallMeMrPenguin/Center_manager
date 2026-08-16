@@ -325,6 +325,15 @@ export default function ReportsPage() {
   // Cross-Class Benchmark, Deep Analysis & Overview Tab State
   const [activeReportTab, setActiveReportTab] = useState<'overview' | 'deep' | 'benchmark'>('overview');
 
+  // 6-Tier Comparison Ladder animation state
+  const [ladderAnimated, setLadderAnimated] = useState(false);
+
+  useEffect(() => {
+    setLadderAnimated(false);
+    const timer = setTimeout(() => setLadderAnimated(true), 60);
+    return () => clearTimeout(timer);
+  }, [compareClassAId, compareClassBId, activeReportTab]);
+
   // Time View Filter: 1 Tháng (Current Month), 2 Tháng, 3 Tháng, Tất Cả
   const [timeView, setTimeView] = useState<'1m' | '2m' | '3m' | 'all'>('all');
 
@@ -2660,7 +2669,7 @@ export default function ReportsPage() {
 
       {/* REPORT MODE TAB SWITCHER (3 TABS) */}
       <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[#181f36] pb-3">
-        <div className="relative flex bg-[#090d16] p-1 rounded-xl border border-[#1b253b] text-xs shrink-0 font-bold select-none w-full sm:w-[500px]">
+        <div className="relative flex bg-[#090d16] p-1 rounded-xl border border-[#1b253b] text-xs shrink-0 font-bold select-none w-full sm:w-auto min-w-[580px]">
           <div
             className="absolute top-1 bottom-1 rounded-lg bg-[#2563eb] shadow-[0_0_14px_rgba(37,99,235,0.45)] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] pointer-events-none"
             style={{
@@ -2675,7 +2684,7 @@ export default function ReportsPage() {
           <button
             type="button"
             onClick={() => setActiveReportTab('overview')}
-            className={`flex-1 relative z-10 py-1.5 px-3 text-center transition-colors cursor-pointer flex items-center justify-center gap-1.5 ${activeReportTab === 'overview' ? 'text-white font-black' : 'text-slate-400 hover:text-white'
+            className={`flex-1 relative z-10 py-2 px-3 text-center transition-colors cursor-pointer flex items-center justify-center gap-1.5 whitespace-nowrap ${activeReportTab === 'overview' ? 'text-white font-black' : 'text-slate-400 hover:text-white'
               }`}
           >
             <Activity size={13} />
@@ -2684,7 +2693,7 @@ export default function ReportsPage() {
           <button
             type="button"
             onClick={() => setActiveReportTab('deep')}
-            className={`flex-1 relative z-10 py-1.5 px-3 text-center transition-colors cursor-pointer flex items-center justify-center gap-1.5 ${activeReportTab === 'deep' ? 'text-white font-black' : 'text-slate-400 hover:text-white'
+            className={`flex-1 relative z-10 py-2 px-3 text-center transition-colors cursor-pointer flex items-center justify-center gap-1.5 whitespace-nowrap ${activeReportTab === 'deep' ? 'text-white font-black' : 'text-slate-400 hover:text-white'
               }`}
           >
             <Layers size={13} />
@@ -2693,7 +2702,7 @@ export default function ReportsPage() {
           <button
             type="button"
             onClick={() => setActiveReportTab('benchmark')}
-            className={`flex-1 relative z-10 py-1.5 px-3 text-center transition-colors cursor-pointer flex items-center justify-center gap-1.5 ${activeReportTab === 'benchmark' ? 'text-white font-black' : 'text-slate-400 hover:text-white'
+            className={`flex-1 relative z-10 py-2 px-3 text-center transition-colors cursor-pointer flex items-center justify-center gap-1.5 whitespace-nowrap ${activeReportTab === 'benchmark' ? 'text-white font-black' : 'text-slate-400 hover:text-white'
               }`}
           >
             <GitCompare size={13} />
@@ -2707,7 +2716,7 @@ export default function ReportsPage() {
         {activeReportTab === 'benchmark' ? (
           /* CROSS-CLASS BENCHMARK & 2-CLASS HEAD-TO-HEAD TAB VIEW */
           <div className="space-y-6 mb-8">
-            {/* 1. 2-CLASS HEAD-TO-HEAD COMPARISON DUEL SECTION (4 ROUNDED SQUARE CARDS, DARK THEME) */}
+            {/* 1. 2-CLASS HEAD-TO-HEAD COMPARISON DUEL SECTION */}
             {classComparisonData && (
               <div className="bg-[#0b0f19] border border-[#1b253b] rounded-xl p-6 shadow-xl space-y-6 animate-cascade-1">
                 {/* Header & Dual Class Selector */}
@@ -2726,15 +2735,15 @@ export default function ReportsPage() {
                     </div>
                   </div>
 
-                  {/* Dual Class Selector Bar - 4 Rounded Square Clean Boxes */}
-                  <div className="flex flex-wrap items-center gap-3 bg-[#070a12] p-2 rounded-xl border border-[#182236]">
-                    <div className="flex items-center gap-2 bg-[#0d1322] border border-blue-500/40 pl-3 pr-1.5 py-1 rounded-xl shrink-0">
+                  {/* Dual Class Selector Bar - Clean Single Layer with Zero Nested Card Borders */}
+                  <div className="flex flex-wrap items-center gap-3 bg-[#070a12] px-3.5 py-2 rounded-xl border border-[#182236]">
+                    <div className="flex items-center gap-2 shrink-0">
                       <span
                         className="w-2.5 h-2.5 rounded-full shrink-0"
                         style={{ backgroundColor: getClassColor(compareClassAId, 0), boxShadow: `0 0 8px ${getClassColor(compareClassAId, 0)}80` }}
                       ></span>
                       <span className="text-xs font-black text-blue-400 whitespace-nowrap shrink-0">Lớp A:</span>
-                      <div className="w-44 shrink-0">
+                      <div className="w-48 shrink-0">
                         <CustomSelect
                           value={compareClassAId}
                           onChange={(val) => setCompareClassAId(String(val))}
@@ -2743,17 +2752,17 @@ export default function ReportsPage() {
                       </div>
                     </div>
 
-                    <div className="px-3 py-1.5 rounded-lg bg-[#131b2e] border border-[#22304d] font-mono font-black text-xs text-blue-300 uppercase tracking-wider shrink-0">
+                    <div className="px-2.5 py-1 rounded-lg bg-[#131b2e] border border-[#22304d] font-mono font-black text-xs text-blue-300 uppercase tracking-wider shrink-0">
                       VS
                     </div>
 
-                    <div className="flex items-center gap-2 bg-[#0d1622] border border-cyan-500/40 pl-3 pr-1.5 py-1 rounded-xl shrink-0">
+                    <div className="flex items-center gap-2 shrink-0">
                       <span
                         className="w-2.5 h-2.5 rounded-full shrink-0"
                         style={{ backgroundColor: getClassColor(compareClassBId, 1), boxShadow: `0 0 8px ${getClassColor(compareClassBId, 1)}80` }}
                       ></span>
                       <span className="text-xs font-black text-cyan-400 whitespace-nowrap shrink-0">Lớp B:</span>
-                      <div className="w-44 shrink-0">
+                      <div className="w-48 shrink-0">
                         <CustomSelect
                           value={compareClassBId}
                           onChange={(val) => setCompareClassBId(String(val))}
@@ -3048,12 +3057,12 @@ export default function ReportsPage() {
                               </span>
                               <div className="flex-1 h-3.5 bg-[#121829] rounded-full overflow-hidden flex justify-end p-0.5 border border-white/5">
                                 <div
-                                  key={`bar-a-${tier.tier}-${classComparisonData.classA.name}-${pctA}`}
                                   style={{
-                                    width: `${Math.max(pctA > 0 ? 4 : 0, Math.min(100, pctA))}%`,
-                                    animationDelay: `${delaySec}s`
+                                    width: ladderAnimated ? `${Math.max(pctA > 0 ? 4 : 0, Math.min(100, pctA))}%` : '0%',
+                                    transition: 'width 0.85s cubic-bezier(0.16, 1, 0.3, 1)',
+                                    transitionDelay: `${tierIdx * 70 + 50}ms`,
                                   }}
-                                  className="h-full bg-gradient-to-l from-blue-500 to-blue-600 rounded-full animate-grow-width-right-origin shadow-[0_0_10px_rgba(59,130,246,0.6)]"
+                                  className="h-full bg-gradient-to-l from-blue-500 to-blue-600 rounded-full shadow-[0_0_10px_rgba(59,130,246,0.6)] will-change-[width]"
                                 />
                               </div>
                             </div>
@@ -3071,12 +3080,12 @@ export default function ReportsPage() {
                             <div className="flex-1 flex items-center justify-start gap-3 min-w-0">
                               <div className="flex-1 h-3.5 bg-[#121829] rounded-full overflow-hidden p-0.5 border border-white/5">
                                 <div
-                                  key={`bar-b-${tier.tier}-${classComparisonData.classB.name}-${pctB}`}
                                   style={{
-                                    width: `${Math.max(pctB > 0 ? 4 : 0, Math.min(100, pctB))}%`,
-                                    animationDelay: `${delaySec}s`
+                                    width: ladderAnimated ? `${Math.max(pctB > 0 ? 4 : 0, Math.min(100, pctB))}%` : '0%',
+                                    transition: 'width 0.85s cubic-bezier(0.16, 1, 0.3, 1)',
+                                    transitionDelay: `${tierIdx * 70 + 50}ms`,
                                   }}
-                                  className="h-full bg-gradient-to-r from-cyan-500 to-cyan-400 rounded-full animate-grow-width-left-origin shadow-[0_0_10px_rgba(6,182,212,0.6)]"
+                                  className="h-full bg-gradient-to-r from-cyan-500 to-cyan-400 rounded-full shadow-[0_0_10px_rgba(6,182,212,0.6)] will-change-[width]"
                                 />
                               </div>
                               <span className="text-xs font-mono font-black text-cyan-400 shrink-0">
