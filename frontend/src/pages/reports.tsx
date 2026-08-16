@@ -4301,7 +4301,7 @@ export default function ReportsPage() {
                         <g
                           key={`forecast-${selectedStudentId || selectedClassId || 'all'}-${timeView}-${sessionChartData.length}`}
                           className="animate-point-pop"
-                          style={{ animationDelay: '1.40s' }}
+                          style={{ animationDelay: '2.10s' }}
                         >
                           {preds.map(p => {
                             const labelY = adjustedYs[p.id] ?? p.rawY;
@@ -4354,7 +4354,7 @@ export default function ReportsPage() {
                         const y1 = getSvgY(d.check1);
                         const y2 = getSvgY(d.check2);
                         const yHw = getSvgY(d.homework);
-                        const pointDelay = (0.4 + (i / Math.max(1, sessionChartData.length - 1)) * 0.9).toFixed(2);
+                        const pointDelay = (0.7 + (i / Math.max(1, sessionChartData.length - 1)) * 1.35).toFixed(2);
 
                         return (
                           <g

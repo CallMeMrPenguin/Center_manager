@@ -591,7 +591,7 @@ input[type="month"]::-webkit-calendar-picker-indicator {
 .animate-path-draw {
   stroke-dasharray: 1000;
   stroke-dashoffset: 1000;
-  animation: pathDraw 1.0s cubic-bezier(0.25, 1, 0.5, 1) 0.35s both;
+  animation: pathDraw 1.4s cubic-bezier(0.25, 1, 0.5, 1) 0.65s both;
   will-change: stroke-dashoffset;
 }
 
@@ -600,7 +600,7 @@ input[type="month"]::-webkit-calendar-picker-indicator {
   100% { transform: scaleX(1); }
 }
 .animate-curtain-reveal {
-  animation: curtainReveal 1.0s cubic-bezier(0.25, 1, 0.5, 1) 0.35s both;
+  animation: curtainReveal 1.4s cubic-bezier(0.25, 1, 0.5, 1) 0.65s both;
   transform-box: fill-box;
   transform-origin: left center;
   will-change: transform;

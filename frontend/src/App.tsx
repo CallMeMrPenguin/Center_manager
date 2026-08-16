@@ -270,8 +270,9 @@ function AppContent() {
           className={`${isSidebarExpanded ? 'w-64' : 'w-20'} sidebar-glass-glow rounded-2xl flex flex-col h-full overflow-hidden transition-[width] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] z-30 shrink-0 select-none`}
         >
 
-          {/* Header logo / Title + Manual Toggle Button */}
-          <div className="flex items-center justify-between px-3.5 py-4 shrink-0 border-b border-white/5 min-w-0">
+          {/* Header logo / Title + Manual Toggle Button directly below */}
+          <div className="flex flex-col px-3.5 pt-3.5 pb-2.5 shrink-0 border-b border-white/5 gap-2.5">
+            {/* Top Row: App Logo & App Name */}
             <div className="flex items-center gap-3 min-w-0">
               <div className="h-10 w-10 bg-indigo-500/25 border-2 border-indigo-400/80 rounded-2xl flex items-center justify-center shadow-[0_0_20px_rgba(92,54,245,0.6)] shrink-0">
                 <GraduationCap size={22} className="text-white drop-shadow-[0_0_12px_rgba(255,255,255,1)]" />
@@ -288,14 +289,23 @@ function AppContent() {
               )}
             </div>
 
-            {/* Manual Collapse / Expand Toggle Button */}
+            {/* Sub Row: Collapse / Expand Toggle Button directly below logo */}
             <button
               type="button"
               onClick={toggleSidebar}
-              className="p-1.5 rounded-xl bg-white/5 hover:bg-indigo-500/20 text-slate-400 hover:text-white border border-white/10 hover:border-indigo-400/40 transition cursor-pointer shrink-0"
+              className={`flex items-center justify-center h-8 rounded-xl bg-white/5 hover:bg-indigo-500/20 text-slate-400 hover:text-white border border-white/10 hover:border-indigo-400/40 transition cursor-pointer shrink-0 ${
+                isSidebarExpanded ? 'w-full px-2.5 gap-2' : 'w-10 self-center'
+              }`}
               title={isSidebarExpanded ? "Thu gọn thanh điều hướng" : "Mở rộng thanh điều hướng"}
             >
-              {isSidebarExpanded ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
+              {isSidebarExpanded ? (
+                <>
+                  <ChevronLeft size={15} />
+                  <span className="text-[11px] font-bold text-slate-300">Thu gọn</span>
+                </>
+              ) : (
+                <ChevronRight size={15} />
+              )}
             </button>
           </div>
 
