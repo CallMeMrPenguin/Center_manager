@@ -325,12 +325,12 @@ export default function ReportsPage() {
   // Cross-Class Benchmark, Deep Analysis & Overview Tab State
   const [activeReportTab, setActiveReportTab] = useState<'overview' | 'deep' | 'benchmark'>('overview');
 
-  // 6-Tier Comparison Ladder animation state (triggered after entrance fly-in)
+  // 6-Tier Comparison Ladder animation state (triggered with 750ms delay after entrance fly-in)
   const [ladderAnimated, setLadderAnimated] = useState(false);
 
   useEffect(() => {
     setLadderAnimated(false);
-    const timer = setTimeout(() => setLadderAnimated(true), 400);
+    const timer = setTimeout(() => setLadderAnimated(true), 750);
     return () => clearTimeout(timer);
   }, [compareClassAId, compareClassBId, activeReportTab, selectedClassId]);
 
@@ -2937,8 +2937,8 @@ export default function ReportsPage() {
                               <div
                                 style={{
                                   width: ladderAnimated ? `${Math.min(100, (classComparisonData.classA.avgCheck1 / 10) * 100)}%` : '0%',
-                                  transition: 'width 1.2s cubic-bezier(0.2, 0.8, 0.2, 1)',
-                                  transitionDelay: '100ms',
+                                  transition: 'width 1.3s cubic-bezier(0.16, 1, 0.3, 1)',
+                                  transitionDelay: '60ms',
                                 }}
                                 className="h-full bg-blue-500 rounded-sm shadow-[0_0_8px_rgba(59,130,246,0.5)] will-change-[width]"
                               />
@@ -2951,8 +2951,8 @@ export default function ReportsPage() {
                               <div
                                 style={{
                                   width: ladderAnimated ? `${Math.min(100, (classComparisonData.classB.avgCheck1 / 10) * 100)}%` : '0%',
-                                  transition: 'width 1.2s cubic-bezier(0.2, 0.8, 0.2, 1)',
-                                  transitionDelay: '100ms',
+                                  transition: 'width 1.3s cubic-bezier(0.16, 1, 0.3, 1)',
+                                  transitionDelay: '60ms',
                                 }}
                                 className="h-full bg-cyan-500 rounded-sm shadow-[0_0_8px_rgba(6,182,212,0.5)] will-change-[width]"
                               />
@@ -2975,8 +2975,8 @@ export default function ReportsPage() {
                               <div
                                 style={{
                                   width: ladderAnimated ? `${Math.min(100, (classComparisonData.classA.avgCheck2 / 10) * 100)}%` : '0%',
-                                  transition: 'width 1.2s cubic-bezier(0.2, 0.8, 0.2, 1)',
-                                  transitionDelay: '180ms',
+                                  transition: 'width 1.3s cubic-bezier(0.16, 1, 0.3, 1)',
+                                  transitionDelay: '140ms',
                                 }}
                                 className="h-full bg-blue-500 rounded-sm shadow-[0_0_8px_rgba(59,130,246,0.5)] will-change-[width]"
                               />
@@ -2989,8 +2989,8 @@ export default function ReportsPage() {
                               <div
                                 style={{
                                   width: ladderAnimated ? `${Math.min(100, (classComparisonData.classB.avgCheck2 / 10) * 100)}%` : '0%',
-                                  transition: 'width 1.2s cubic-bezier(0.2, 0.8, 0.2, 1)',
-                                  transitionDelay: '180ms',
+                                  transition: 'width 1.3s cubic-bezier(0.16, 1, 0.3, 1)',
+                                  transitionDelay: '140ms',
                                 }}
                                 className="h-full bg-cyan-500 rounded-sm shadow-[0_0_8px_rgba(6,182,212,0.5)] will-change-[width]"
                               />
@@ -3013,8 +3013,8 @@ export default function ReportsPage() {
                               <div
                                 style={{
                                   width: ladderAnimated ? `${Math.min(100, (classComparisonData.classA.avgHomework / 10) * 100)}%` : '0%',
-                                  transition: 'width 1.2s cubic-bezier(0.2, 0.8, 0.2, 1)',
-                                  transitionDelay: '260ms',
+                                  transition: 'width 1.3s cubic-bezier(0.16, 1, 0.3, 1)',
+                                  transitionDelay: '220ms',
                                 }}
                                 className="h-full bg-blue-500 rounded-sm shadow-[0_0_8px_rgba(59,130,246,0.5)] will-change-[width]"
                               />
@@ -3027,8 +3027,8 @@ export default function ReportsPage() {
                               <div
                                 style={{
                                   width: ladderAnimated ? `${Math.min(100, (classComparisonData.classB.avgHomework / 10) * 100)}%` : '0%',
-                                  transition: 'width 1.2s cubic-bezier(0.2, 0.8, 0.2, 1)',
-                                  transitionDelay: '260ms',
+                                  transition: 'width 1.3s cubic-bezier(0.16, 1, 0.3, 1)',
+                                  transitionDelay: '220ms',
                                 }}
                                 className="h-full bg-cyan-500 rounded-sm shadow-[0_0_8px_rgba(6,182,212,0.5)] will-change-[width]"
                               />
@@ -3083,8 +3083,8 @@ export default function ReportsPage() {
                                 <div
                                   style={{
                                     width: ladderAnimated ? `${Math.max(pctA > 0 ? 4 : 0, Math.min(100, pctA))}%` : '0%',
-                                    transition: 'width 0.85s cubic-bezier(0.16, 1, 0.3, 1)',
-                                    transitionDelay: `${tierIdx * 70 + 50}ms`,
+                                    transition: 'width 1.3s cubic-bezier(0.16, 1, 0.3, 1)',
+                                    transitionDelay: `${tierIdx * 80}ms`,
                                   }}
                                   className="h-full bg-gradient-to-l from-blue-500 to-blue-600 rounded-full shadow-[0_0_10px_rgba(59,130,246,0.6)] will-change-[width]"
                                 />
@@ -3106,8 +3106,8 @@ export default function ReportsPage() {
                                 <div
                                   style={{
                                     width: ladderAnimated ? `${Math.max(pctB > 0 ? 4 : 0, Math.min(100, pctB))}%` : '0%',
-                                    transition: 'width 0.85s cubic-bezier(0.16, 1, 0.3, 1)',
-                                    transitionDelay: `${tierIdx * 70 + 50}ms`,
+                                    transition: 'width 1.3s cubic-bezier(0.16, 1, 0.3, 1)',
+                                    transitionDelay: `${tierIdx * 80}ms`,
                                   }}
                                   className="h-full bg-gradient-to-r from-cyan-500 to-cyan-400 rounded-full shadow-[0_0_10px_rgba(6,182,212,0.6)] will-change-[width]"
                                 />
