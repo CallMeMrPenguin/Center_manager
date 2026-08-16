@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { api } from './api';
 import { AppSettings } from './types';
-import { 
+import {
   FolderOpen, ChevronLeft, ChevronRight, LogOut,
   Database, GraduationCap, Settings as SettingsIcon, ChevronUp
 } from 'lucide-react';
@@ -49,7 +49,7 @@ function AppContent() {
 
   useEffect(() => {
     loadSettings();
-    
+
     // Load and apply theme settings on mount
     let theme = {
       bgImage: 'https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/f0733c36-a64b-4f7c-b06c-3c679f8ddbc1_3840w.webp',
@@ -71,7 +71,7 @@ function AppContent() {
       }
     }
     applyTheme(theme);
-    
+
     // Periodically refresh configuration settings & check server boot time for auto-reload
     let lastBootTime: number | null = null;
     const interval = setInterval(async () => {
@@ -86,7 +86,7 @@ function AppContent() {
           }
           lastBootTime = data.boot_time;
         }
-      } catch (e) {}
+      } catch (e) { }
     }, 3000);
 
     return () => {
@@ -123,7 +123,7 @@ function AppContent() {
         window.dispatchEvent(new CustomEvent('app-escape'));
       }
     };
-    
+
     const handleWheel = (e: WheelEvent) => {
       if (e.ctrlKey) {
         e.preventDefault();
@@ -131,7 +131,7 @@ function AppContent() {
         applyZoom(currentZoomRef.current + delta);
       }
     };
-    
+
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('wheel', handleWheel, { passive: false });
 
@@ -156,7 +156,7 @@ function AppContent() {
         applyTheme((data as any).theme);
         try {
           localStorage.setItem('app_theme_settings', JSON.stringify((data as any).theme));
-        } catch (e) {}
+        } catch (e) { }
       }
     } catch (e) {
       console.error("Failed to load settings:", e);
@@ -168,14 +168,14 @@ function AppContent() {
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [orderedTabIds, setOrderedTabIds] = useState<string[]>(() => {
     const defaultIds = TAB_DEFINITIONS.map(tab => tab.id);
-    
+
     // Load from v2 (string IDs)
     const savedV2 = localStorage.getItem('sidebar_menu_order_v2');
     if (savedV2) {
       try {
         const parsed = JSON.parse(savedV2) as string[];
         const validParsed = parsed.filter(id => defaultIds.includes(id));
-        
+
         // Append missing tab IDs
         defaultIds.forEach(id => {
           if (!validParsed.includes(id)) {
@@ -233,35 +233,34 @@ function AppContent() {
     if (draggedIndex === null || draggedIndex === targetIndex) return;
     const newIds = [...orderedTabIds];
     const draggedId = newIds[draggedIndex];
-    
+
     newIds.splice(draggedIndex, 1);
     newIds.splice(targetIndex, 0, draggedId);
-    
+
     setOrderedTabIds(newIds);
     setDraggedIndex(null);
-    
+
     localStorage.setItem('sidebar_menu_order_v2', JSON.stringify(newIds));
   };
 
   return (
     <div className="relative flex flex-col h-screen w-screen ambient-bg-dark text-slate-50 overflow-hidden font-sans select-none">
-      
+
       {/* Background Image Container */}
-      <div 
-        className="absolute inset-0 pointer-events-none z-0 bg-cover bg-center bg-no-repeat transition-opacity duration-300 opacity-60" 
-        style={{ backgroundImage: 'var(--bg-image)' }} 
+      <div
+        className="absolute inset-0 pointer-events-none z-0 bg-cover bg-center bg-no-repeat transition-opacity duration-300 opacity-60"
+        style={{ backgroundImage: 'var(--bg-image)' }}
       />
 
       <div className="relative flex flex-row flex-1 overflow-hidden p-4 gap-4 z-10">
-        
-        {/* SIDEBAR NAVIGATION (Pure GPU-accelerated floating overlay expansion) */}
-        <div className="relative w-20 shrink-0 h-full z-30">
-          <aside
-            className="absolute top-0 left-0 h-full w-20 hover:w-64 group/sidebar sidebar-glass-glow rounded-2xl flex flex-col overflow-hidden transition-[width] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] shadow-2xl z-30"
-          >
-            
-            {/* Header logo / Title */}
-            <div className="flex items-center gap-3 px-4 py-4 shrink-0 border-b border-white/5 min-w-0">
+
+        {/* SIDEBAR NAVIGATION (Pure GPU-accelerated inline hover expansion) */}
+        <aside
+          className="w-20 hover:w-64 group/sidebar sidebar-glass-glow rounded-2xl flex flex-col h-full overflow-hidden transition-[width] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] z-30 shrink-0"
+        >
+
+          {/* Header logo / Title */}
+          <div className="flex items-center gap-3 px-4 py-4 shrink-0 border-b border-white/5 min-w-0">
             <div className="h-10 w-10 bg-indigo-500/25 border-2 border-indigo-400/80 rounded-2xl flex items-center justify-center shadow-[0_0_20px_rgba(92,54,245,0.6)] shrink-0">
               <GraduationCap size={22} className="text-white drop-shadow-[0_0_12px_rgba(255,255,255,1)]" />
             </div>
@@ -274,7 +273,7 @@ function AppContent() {
               </span>
             </div>
           </div>
-          
+
           {/* Nav Menu */}
           <nav className="flex-1 overflow-y-auto min-h-0 px-3 py-3 flex flex-col gap-2 scrollbar-none">
             {SECTIONS.map((section) => {
@@ -307,9 +306,8 @@ function AppContent() {
                         onDragEnd={() => setDraggedIndex(null)}
                         onDrop={() => handleDrop(idx)}
                         onClick={() => setActiveTab(item.id)}
-                        className={`flex items-center w-full h-11 rounded-xl transition-all duration-150 relative group cursor-pointer active:scale-95 shrink-0 ${
-                          draggedIndex === idx ? 'opacity-40 border border-dashed border-indigo-400 bg-indigo-500/10' : ''
-                        }`}
+                        className={`flex items-center w-full h-11 rounded-xl transition-all duration-150 relative group cursor-pointer active:scale-95 shrink-0 ${draggedIndex === idx ? 'opacity-40 border border-dashed border-indigo-400 bg-indigo-500/10' : ''
+                          }`}
                       >
                         {/* RESTORED BELOVED OLD PURPLE HIGHLIGHT WITH SAFE RIGHT MARGIN (NO CLIPPING) */}
                         {isActive && (
@@ -322,9 +320,8 @@ function AppContent() {
                         </div>
 
                         {/* TEXT LABEL (SMOOTH DELAYED TRANSITION, NO GLITCHING) */}
-                        <span className={`text-sm relative z-10 transition-opacity duration-150 ease-out delay-0 group-hover/sidebar:delay-150 whitespace-nowrap overflow-hidden pointer-events-none group-hover/sidebar:pointer-events-auto opacity-0 group-hover/sidebar:opacity-100 ml-1.5 ${
-                          isActive ? "text-white font-black" : "text-slate-200 font-bold group-hover:text-white"
-                        }`}>
+                        <span className={`text-sm relative z-10 transition-opacity duration-150 ease-out delay-0 group-hover/sidebar:delay-150 whitespace-nowrap overflow-hidden pointer-events-none group-hover/sidebar:pointer-events-auto opacity-0 group-hover/sidebar:opacity-100 ml-1.5 ${isActive ? "text-white font-black" : "text-slate-200 font-bold group-hover:text-white"
+                          }`}>
                           {item.label}
                         </span>
                       </button>
@@ -405,7 +402,6 @@ function AppContent() {
             </div>
           </div>
         </aside>
-      </div>
 
         {/* MAIN BODY SKELETON */}
         <div className="flex-1 flex flex-col overflow-hidden bg-transparent">

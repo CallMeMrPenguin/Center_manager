@@ -53,7 +53,9 @@
   --radius-sm: 8px;
 }
 
-.kpi-editorial-card, .event-float, .btn-interactive {
+.kpi-editorial-card,
+.event-float,
+.btn-interactive {
   transition: background-color 150ms ease, border-color 150ms ease, box-shadow 150ms ease, transform 150ms ease;
 }
 
@@ -61,10 +63,10 @@ body {
   margin: 0;
   background-color: #08090e;
   background-image:
-    radial-gradient(ellipse 65% 40% at 20% 0%, rgba(92,54,245,0.22), transparent 75%),
-    radial-gradient(ellipse 55% 45% at 85% 15%, rgba(236,72,153,0.16), transparent 70%),
-    radial-gradient(ellipse 60% 45% at 50% 90%, rgba(6,182,212,0.16), transparent 75%),
-    radial-gradient(ellipse 40% 30% at 80% 85%, rgba(147,51,234,0.12), transparent 60%);
+    radial-gradient(ellipse 65% 40% at 20% 0%, rgba(92, 54, 245, 0.22), transparent 75%),
+    radial-gradient(ellipse 55% 45% at 85% 15%, rgba(236, 72, 153, 0.16), transparent 70%),
+    radial-gradient(ellipse 60% 45% at 50% 90%, rgba(6, 182, 212, 0.16), transparent 75%),
+    radial-gradient(ellipse 40% 30% at 80% 85%, rgba(147, 51, 234, 0.12), transparent 60%);
   background-attachment: fixed;
   color: #f8fafc;
   font-family: var(--font-sans);
@@ -76,20 +78,32 @@ body {
   min-height: 100vh;
 }
 
-html { font-size: 15px; }
+html {
+  font-size: 15px;
+}
 
-input, textarea, select, [contenteditable="true"] {
+input,
+textarea,
+select,
+[contenteditable="true"] {
   user-select: text !important;
   -webkit-user-select: text !important;
 }
 
 input::-webkit-outer-spin-button,
-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-input[type=number] { -moz-appearance: textfield; }
-select { 
-  -webkit-appearance: none; 
-  -moz-appearance: none; 
-  appearance: none; 
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type=number] {
+  -moz-appearance: textfield;
+}
+
+select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
   background-color: #0f1322 !important;
   color: #ffffff !important;
 }
@@ -108,7 +122,10 @@ select option:checked {
   color: #ffffff !important;
 }
 
-input[type="date"], input[type="time"], input[type="datetime-local"], input[type="month"] {
+input[type="date"],
+input[type="time"],
+input[type="datetime-local"],
+input[type="month"] {
   color-scheme: dark !important;
   accent-color: #5c36f5 !important;
   background-color: #121626 !important;
@@ -127,10 +144,10 @@ input[type="month"]::-webkit-calendar-picker-indicator {
 .ambient-bg-dark {
   background-color: #08090e;
   background-image:
-    radial-gradient(ellipse 65% 40% at 20% 0%, rgba(92,54,245,0.22), transparent 75%),
-    radial-gradient(ellipse 55% 45% at 85% 15%, rgba(236,72,153,0.16), transparent 70%),
-    radial-gradient(ellipse 60% 45% at 50% 90%, rgba(6,182,212,0.16), transparent 75%),
-    radial-gradient(ellipse 40% 30% at 80% 85%, rgba(147,51,234,0.12), transparent 60%);
+    radial-gradient(ellipse 65% 40% at 20% 0%, rgba(92, 54, 245, 0.22), transparent 75%),
+    radial-gradient(ellipse 55% 45% at 85% 15%, rgba(236, 72, 153, 0.16), transparent 70%),
+    radial-gradient(ellipse 60% 45% at 50% 90%, rgba(6, 182, 212, 0.16), transparent 75%),
+    radial-gradient(ellipse 40% 30% at 80% 85%, rgba(147, 51, 234, 0.12), transparent 60%);
   background-attachment: fixed;
 }
 
@@ -139,38 +156,47 @@ input[type="month"]::-webkit-calendar-picker-indicator {
   border: 1.5px solid transparent !important;
   background-clip: padding-box, border-box !important;
   background-origin: padding-box, border-box !important;
-  background-image: linear-gradient(#141824, #141824), linear-gradient(135deg, rgba(92,54,245,0.85) 0%, rgba(168,85,247,0.65) 50%, rgba(6,182,212,0.85) 100%) !important;
-  box-shadow: 0 16px 45px rgba(0,0,0,0.6), 0 0 25px rgba(92,54,245,0.2);
+  background-image: linear-gradient(#141824, #141824), linear-gradient(135deg, rgba(92, 54, 245, 0.85) 0%, rgba(168, 85, 247, 0.65) 50%, rgba(6, 182, 212, 0.85) 100%) !important;
+  box-shadow: 0 16px 45px rgba(0, 0, 0, 0.6), 0 0 25px rgba(92, 54, 245, 0.2);
   transition: box-shadow 250ms ease;
 }
-.gradient-border-card:hover { box-shadow: 0 20px 50px rgba(0,0,0,0.7), 0 0 35px rgba(92,54,245,0.35); }
+
+.gradient-border-card:hover {
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7), 0 0 35px rgba(92, 54, 245, 0.35);
+}
 
 .calendar-container-depth {
   position: relative;
   border: 1.5px solid transparent !important;
   background-clip: padding-box, border-box !important;
   background-origin: padding-box, border-box !important;
-  background-image: linear-gradient(#141824, #141824), linear-gradient(135deg, rgba(92,54,245,0.85) 0%, rgba(168,85,247,0.65) 50%, rgba(6,182,212,0.85) 100%) !important;
+  background-image: linear-gradient(#141824, #141824), linear-gradient(135deg, rgba(92, 54, 245, 0.85) 0%, rgba(168, 85, 247, 0.65) 50%, rgba(6, 182, 212, 0.85) 100%) !important;
   border-radius: 22px;
   overflow: hidden;
-  box-shadow: 0 24px 60px rgba(0,0,0,0.65), 0 0 30px rgba(92,54,245,0.2);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.65), 0 0 30px rgba(92, 54, 245, 0.2);
 }
 
 .glowing-timeline-bar {
   height: 2px;
-  background: linear-gradient(90deg, transparent 0%, rgba(92,54,245,0.9) 35%, rgba(6,182,212,1) 65%, transparent 100%);
-  box-shadow: 0 0 14px rgba(92,54,245,0.8);
+  background: linear-gradient(90deg, transparent 0%, rgba(92, 54, 245, 0.9) 35%, rgba(6, 182, 212, 1) 65%, transparent 100%);
+  box-shadow: 0 0 14px rgba(92, 54, 245, 0.8);
 }
 
-.event-float { border-radius: 10px; will-change: transform, box-shadow; }
-.event-float:hover { transform: translateY(-2px) scale(1.02); }
+.event-float {
+  border-radius: 10px;
+  will-change: transform, box-shadow;
+}
+
+.event-float:hover {
+  transform: translateY(-2px) scale(1.02);
+}
 
 .sidebar-glass-glow {
   background: #0d101d !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
-  border: 1px solid rgba(255,255,255,0.08) !important;
-  box-shadow: 0 12px 36px rgba(0,0,0,0.65), 0 0 20px rgba(92,54,245,0.15) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.65), 0 0 20px rgba(92, 54, 245, 0.15) !important;
   transition: width 250ms cubic-bezier(0.4, 0, 0.2, 1);
   will-change: width;
 }
@@ -179,8 +205,8 @@ input[type="month"]::-webkit-calendar-picker-indicator {
   background: #0d1018;
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
-  border: 1px solid rgba(255,255,255,0.08);
-  box-shadow: 0 16px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.08);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
 .kpi-editorial-card {
@@ -188,10 +214,10 @@ input[type="month"]::-webkit-calendar-picker-indicator {
   border: 1.5px solid transparent !important;
   background-clip: padding-box, border-box !important;
   background-origin: padding-box, border-box !important;
-  background-image: linear-gradient(#141824, #141824), linear-gradient(135deg, rgba(92,54,245,0.85) 0%, rgba(168,85,247,0.65) 50%, rgba(6,182,212,0.85) 100%) !important;
+  background-image: linear-gradient(#141824, #141824), linear-gradient(135deg, rgba(92, 54, 245, 0.85) 0%, rgba(168, 85, 247, 0.65) 50%, rgba(6, 182, 212, 0.85) 100%) !important;
   border-radius: 22px;
   overflow: hidden;
-  box-shadow: 0 12px 30px rgba(0,0,0,0.35), 0 0 20px rgba(92,54,245,0.15);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35), 0 0 20px rgba(92, 54, 245, 0.15);
 }
 
 .kpi-card-green {
@@ -199,11 +225,11 @@ input[type="month"]::-webkit-calendar-picker-indicator {
   border: 1.5px solid transparent !important;
   background-clip: padding-box, border-box !important;
   background-origin: padding-box, border-box !important;
-  background-image: linear-gradient(#0d111c, #0d111c), linear-gradient(135deg, rgba(16,185,129,0.45) 0%, rgba(16,185,129,0.15) 100%) !important;
+  background-image: linear-gradient(#0d111c, #0d111c), linear-gradient(135deg, rgba(16, 185, 129, 0.45) 0%, rgba(16, 185, 129, 0.15) 100%) !important;
   border-radius: 22px;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
-  box-shadow: inset 0 0 15px rgba(16,185,129,0.35), 0 12px 30px rgba(0,0,0,0.45), 0 0 25px rgba(16,185,129,0.15) !important;
+  box-shadow: inset 0 0 15px rgba(16, 185, 129, 0.35), 0 12px 30px rgba(0, 0, 0, 0.45), 0 0 25px rgba(16, 185, 129, 0.15) !important;
 }
 
 .kpi-card-red {
@@ -211,11 +237,11 @@ input[type="month"]::-webkit-calendar-picker-indicator {
   border: 1.5px solid transparent !important;
   background-clip: padding-box, border-box !important;
   background-origin: padding-box, border-box !important;
-  background-image: linear-gradient(#0d111c, #0d111c), linear-gradient(135deg, rgba(239,68,68,0.45) 0%, rgba(239,68,68,0.15) 100%) !important;
+  background-image: linear-gradient(#0d111c, #0d111c), linear-gradient(135deg, rgba(239, 68, 68, 0.45) 0%, rgba(239, 68, 68, 0.15) 100%) !important;
   border-radius: 22px;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
-  box-shadow: inset 0 0 15px rgba(239,68,68,0.35), 0 12px 30px rgba(0,0,0,0.45), 0 0 25px rgba(239,68,68,0.15) !important;
+  box-shadow: inset 0 0 15px rgba(239, 68, 68, 0.35), 0 12px 30px rgba(0, 0, 0, 0.45), 0 0 25px rgba(239, 68, 68, 0.15) !important;
 }
 
 .kpi-card-blue {
@@ -223,11 +249,11 @@ input[type="month"]::-webkit-calendar-picker-indicator {
   border: 1.5px solid transparent !important;
   background-clip: padding-box, border-box !important;
   background-origin: padding-box, border-box !important;
-  background-image: linear-gradient(#0d111c, #0d111c), linear-gradient(135deg, rgba(59,130,246,0.45) 0%, rgba(59,130,246,0.15) 100%) !important;
+  background-image: linear-gradient(#0d111c, #0d111c), linear-gradient(135deg, rgba(59, 130, 246, 0.45) 0%, rgba(59, 130, 246, 0.15) 100%) !important;
   border-radius: 22px;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
-  box-shadow: inset 0 0 15px rgba(59,130,246,0.35), 0 12px 30px rgba(0,0,0,0.45), 0 0 25px rgba(59,130,246,0.15) !important;
+  box-shadow: inset 0 0 15px rgba(59, 130, 246, 0.35), 0 12px 30px rgba(0, 0, 0, 0.45), 0 0 25px rgba(59, 130, 246, 0.15) !important;
 }
 
 .kpi-card-purple {
@@ -235,11 +261,11 @@ input[type="month"]::-webkit-calendar-picker-indicator {
   border: 1.5px solid transparent !important;
   background-clip: padding-box, border-box !important;
   background-origin: padding-box, border-box !important;
-  background-image: linear-gradient(#0d111c, #0d111c), linear-gradient(135deg, rgba(168,85,247,0.45) 0%, rgba(168,85,247,0.15) 100%) !important;
+  background-image: linear-gradient(#0d111c, #0d111c), linear-gradient(135deg, rgba(168, 85, 247, 0.45) 0%, rgba(168, 85, 247, 0.15) 100%) !important;
   border-radius: 22px;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
-  box-shadow: inset 0 0 15px rgba(168,85,247,0.35), 0 12px 30px rgba(0,0,0,0.45), 0 0 25px rgba(168,85,247,0.15) !important;
+  box-shadow: inset 0 0 15px rgba(168, 85, 247, 0.35), 0 12px 30px rgba(0, 0, 0, 0.45), 0 0 25px rgba(168, 85, 247, 0.15) !important;
 }
 
 .kpi-card-amber {
@@ -247,108 +273,190 @@ input[type="month"]::-webkit-calendar-picker-indicator {
   border: 1.5px solid transparent !important;
   background-clip: padding-box, border-box !important;
   background-origin: padding-box, border-box !important;
-  background-image: linear-gradient(#0d111c, #0d111c), linear-gradient(135deg, rgba(245,158,11,0.45) 0%, rgba(245,158,11,0.15) 100%) !important;
+  background-image: linear-gradient(#0d111c, #0d111c), linear-gradient(135deg, rgba(245, 158, 11, 0.45) 0%, rgba(245, 158, 11, 0.15) 100%) !important;
   border-radius: 22px;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
-  box-shadow: inset 0 0 15px rgba(245,158,11,0.35), 0 12px 30px rgba(0,0,0,0.45), 0 0 25px rgba(245,158,11,0.15) !important;
+  box-shadow: inset 0 0 15px rgba(245, 158, 11, 0.35), 0 12px 30px rgba(0, 0, 0, 0.45), 0 0 25px rgba(245, 158, 11, 0.15) !important;
 }
 
 .schedule-inward-glow {
-  box-shadow: inset 0 0 14px var(--glow-color-alpha, rgba(99,102,241,0.35)), inset 0 0 2px var(--glow-color, #6366f1), 0 4px 14px rgba(0,0,0,0.4) !important;
+  box-shadow: inset 0 0 14px var(--glow-color-alpha, rgba(99, 102, 241, 0.35)), inset 0 0 2px var(--glow-color, #6366f1), 0 4px 14px rgba(0, 0, 0, 0.4) !important;
   border-radius: 16px !important;
 }
 
 .today-inward-glow {
   background-color: #1f2042 !important;
-  box-shadow: inset 0 0 20px rgba(92,54,245,0.25) !important;
+  box-shadow: inset 0 0 20px rgba(92, 54, 245, 0.25) !important;
   outline: 2px solid #5c36f5;
   outline-offset: -2px;
   z-index: 10;
 }
 
-.text-glow-green  { text-shadow: 0 0 10px rgba(16,185,129,0.5); }
-.text-glow-red    { text-shadow: 0 0 10px rgba(239,68,68,0.5); }
-.text-glow-blue   { text-shadow: 0 0 10px rgba(59,130,246,0.5); }
-.text-glow-purple { text-shadow: 0 0 10px rgba(168,85,247,0.5); }
-.text-glow-white  { text-shadow: 0 0 12px rgba(255,255,255,0.7); }
+.text-glow-green {
+  text-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+}
+
+.text-glow-red {
+  text-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+}
+
+.text-glow-blue {
+  text-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+}
+
+.text-glow-purple {
+  text-shadow: 0 0 10px rgba(168, 85, 247, 0.5);
+}
+
+.text-glow-white {
+  text-shadow: 0 0 12px rgba(255, 255, 255, 0.7);
+}
 
 .glass-panel {
   background: #0f121a !important;
-  border: 1px solid rgba(255,255,255,0.08) !important;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.4) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4) !important;
   border-radius: 20px;
 }
+
 .glass-panel-dark {
   background: #0a0d16 !important;
-  border: 1px solid rgba(255,255,255,0.06) !important;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.5) !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
   border-radius: 20px;
 }
+
 .glass-inner {
-  background: rgba(255,255,255,0.04) !important;
-  border: 1px solid rgba(255,255,255,0.06) !important;
+  background: rgba(255, 255, 255, 0.04) !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
   border-radius: 14px;
 }
 
 .highlight-income-row td {
-  border-top: 1px solid rgba(16,185,129,0.25) !important;
-  border-bottom: 1px solid rgba(16,185,129,0.25) !important;
-  border-left: none !important; border-right: none !important;
-  background-image: linear-gradient(to bottom, rgba(16,185,129,0.06) 0%, transparent 12%, transparent 88%, rgba(16,185,129,0.06) 100%) !important;
+  border-top: 1px solid rgba(16, 185, 129, 0.25) !important;
+  border-bottom: 1px solid rgba(16, 185, 129, 0.25) !important;
+  border-left: none !important;
+  border-right: none !important;
+  background-image: linear-gradient(to bottom, rgba(16, 185, 129, 0.06) 0%, transparent 12%, transparent 88%, rgba(16, 185, 129, 0.06) 100%) !important;
   box-shadow: none !important;
 }
+
 .highlight-income-row td:first-child {
-  border-left: 2.5px solid rgba(16,185,129,0.8) !important;
-  box-shadow: inset 10px 0 12px -8px rgba(16,185,129,0.3) !important;
+  border-left: 2.5px solid rgba(16, 185, 129, 0.8) !important;
+  box-shadow: inset 10px 0 12px -8px rgba(16, 185, 129, 0.3) !important;
 }
+
 .highlight-expense-row td {
-  border-top: 1px solid rgba(239,68,68,0.25) !important;
-  border-bottom: 1px solid rgba(239,68,68,0.25) !important;
-  border-left: none !important; border-right: none !important;
-  background-image: linear-gradient(to bottom, rgba(239,68,68,0.06) 0%, transparent 12%, transparent 88%, rgba(239,68,68,0.06) 100%) !important;
+  border-top: 1px solid rgba(239, 68, 68, 0.25) !important;
+  border-bottom: 1px solid rgba(239, 68, 68, 0.25) !important;
+  border-left: none !important;
+  border-right: none !important;
+  background-image: linear-gradient(to bottom, rgba(239, 68, 68, 0.06) 0%, transparent 12%, transparent 88%, rgba(239, 68, 68, 0.06) 100%) !important;
   box-shadow: none !important;
 }
+
 .highlight-expense-row td:first-child {
-  border-left: 2.5px solid rgba(239,68,68,0.8) !important;
-  box-shadow: inset 10px 0 12px -8px rgba(239,68,68,0.3) !important;
+  border-left: 2.5px solid rgba(239, 68, 68, 0.8) !important;
+  box-shadow: inset 10px 0 12px -8px rgba(239, 68, 68, 0.3) !important;
 }
 
 @keyframes macDropdownOpen {
-  0%   { opacity: 0; transform: scale(0.95) translateY(-8px); }
-  100% { opacity: 1; transform: scale(1) translateY(0); }
+  0% {
+    opacity: 0;
+    transform: scale(0.95) translateY(-8px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }
-.animate-mac-dropdown { animation: macDropdownOpen 0.18s cubic-bezier(0.16,1,0.3,1) forwards; }
+
+.animate-mac-dropdown {
+  animation: macDropdownOpen 0.18s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
 
 @keyframes macModalBackdropOpen {
-  0%   { opacity: 0; }
-  100% { opacity: 1; }
+  0% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 1;
+  }
 }
-.animate-mac-backdrop { animation: macModalBackdropOpen 0.45s cubic-bezier(0.16,1,0.3,1) forwards; }
+
+.animate-mac-backdrop {
+  animation: macModalBackdropOpen 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
 
 @keyframes macModalContentOpen {
-  0%   { opacity: 0; transform: scale(0.92) translateY(16px); }
-  100% { opacity: 1; transform: scale(1) translateY(0); }
+  0% {
+    opacity: 0;
+    transform: scale(0.92) translateY(16px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }
-.animate-mac-modal { animation: macModalContentOpen 0.5s cubic-bezier(0.16,1,0.3,1) forwards; }
+
+.animate-mac-modal {
+  animation: macModalContentOpen 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
 
 @keyframes tabEnter {
-  0%   { opacity: 0; transform: translateY(24px) scale(0.985); }
-  100% { opacity: 1; transform: translateY(0) scale(1); }
+  0% {
+    opacity: 0;
+    transform: translateY(24px) scale(0.985);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
-.animate-tab-enter { animation: tabEnter 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards; will-change: opacity, transform; }
+
+.animate-tab-enter {
+  animation: tabEnter 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: opacity, transform;
+}
 
 @keyframes subTabEnter {
-  0%   { opacity: 0; transform: translateY(20px) scale(0.985); }
-  100% { opacity: 1; transform: translateY(0) scale(1); }
+  0% {
+    opacity: 0;
+    transform: translateY(20px) scale(0.985);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
-.animate-subtab-enter { animation: subTabEnter 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards; will-change: opacity, transform; }
+
+.animate-subtab-enter {
+  animation: subTabEnter 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: opacity, transform;
+}
 
 @keyframes cardEnter {
-  0%   { opacity: 0; transform: translateY(18px); }
-  100% { opacity: 1; transform: translateY(0); }
+  0% {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
-.animate-card-enter { animation: cardEnter 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; will-change: opacity, transform; }
+
+.animate-card-enter {
+  animation: cardEnter 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: opacity, transform;
+}
 
 /* ── ENERGETIC BOTTOM-UP FLY IN ANIMATION SYSTEM (SLOWER & LUXURIOUS) ─── */
 @keyframes flyInUp {
@@ -356,21 +464,52 @@ input[type="month"]::-webkit-calendar-picker-indicator {
     opacity: 0;
     transform: translateY(95px);
   }
+
   30% {
     opacity: 0.5;
   }
+
   100% {
     opacity: 1;
     transform: translateY(0);
   }
 }
 
-.animate-cascade-1, .animate-fly-1 { animation: flyInUp 1.05s cubic-bezier(0.16, 1, 0.3, 1) 0.08s both; will-change: opacity, transform; }
-.animate-cascade-2, .animate-fly-2 { animation: flyInUp 1.05s cubic-bezier(0.16, 1, 0.3, 1) 0.35s both; will-change: opacity, transform; }
-.animate-cascade-3, .animate-fly-3 { animation: flyInUp 1.05s cubic-bezier(0.16, 1, 0.3, 1) 0.65s both; will-change: opacity, transform; }
-.animate-cascade-4, .animate-fly-4 { animation: flyInUp 1.05s cubic-bezier(0.16, 1, 0.3, 1) 0.95s both; will-change: opacity, transform; }
-.animate-cascade-5, .animate-fly-5 { animation: flyInUp 1.05s cubic-bezier(0.16, 1, 0.3, 1) 1.25s both; will-change: opacity, transform; }
-.animate-cascade-6, .animate-fly-6 { animation: flyInUp 1.05s cubic-bezier(0.16, 1, 0.3, 1) 1.55s both; will-change: opacity, transform; }
+.animate-cascade-1,
+.animate-fly-1 {
+  animation: flyInUp 1.05s cubic-bezier(0.16, 1, 0.3, 1) 0.08s both;
+  will-change: opacity, transform;
+}
+
+.animate-cascade-2,
+.animate-fly-2 {
+  animation: flyInUp 1.05s cubic-bezier(0.16, 1, 0.3, 1) 0.35s both;
+  will-change: opacity, transform;
+}
+
+.animate-cascade-3,
+.animate-fly-3 {
+  animation: flyInUp 1.05s cubic-bezier(0.16, 1, 0.3, 1) 0.65s both;
+  will-change: opacity, transform;
+}
+
+.animate-cascade-4,
+.animate-fly-4 {
+  animation: flyInUp 1.05s cubic-bezier(0.16, 1, 0.3, 1) 0.95s both;
+  will-change: opacity, transform;
+}
+
+.animate-cascade-5,
+.animate-fly-5 {
+  animation: flyInUp 1.05s cubic-bezier(0.16, 1, 0.3, 1) 1.25s both;
+  will-change: opacity, transform;
+}
+
+.animate-cascade-6,
+.animate-fly-6 {
+  animation: flyInUp 1.05s cubic-bezier(0.16, 1, 0.3, 1) 1.55s both;
+  will-change: opacity, transform;
+}
 
 /* Table Row Fly In from Bottom (Relaxed & Smooth) */
 @keyframes rowFlyIn {
@@ -378,36 +517,72 @@ input[type="month"]::-webkit-calendar-picker-indicator {
     opacity: 0;
     transform: translateY(35px);
   }
+
   35% {
     opacity: 0.6;
   }
+
   100% {
     opacity: 1;
     transform: translateY(0);
   }
 }
+
 .animate-row-enter {
   animation: rowFlyIn 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
   will-change: opacity, transform;
 }
 
 @keyframes growWidth {
-  0%   { transform: scaleX(0); transform-origin: left; }
-  100% { transform: scaleX(1); transform-origin: left; }
+  0% {
+    transform: scaleX(0);
+    transform-origin: left;
+  }
+
+  100% {
+    transform: scaleX(1);
+    transform-origin: left;
+  }
 }
-.animate-grow-width { animation: growWidth 1.2s cubic-bezier(0.22, 1, 0.36, 1) 0.65s both; will-change: transform; }
+
+.animate-grow-width {
+  animation: growWidth 1.2s cubic-bezier(0.22, 1, 0.36, 1) 0.65s both;
+  will-change: transform;
+}
 
 @keyframes growWidthRightOrigin {
-  0%   { transform: scaleX(0); transform-origin: right; }
-  100% { transform: scaleX(1); transform-origin: right; }
+  0% {
+    transform: scaleX(0);
+    transform-origin: right;
+  }
+
+  100% {
+    transform: scaleX(1);
+    transform-origin: right;
+  }
 }
-.animate-grow-width-right-origin { animation: growWidthRightOrigin 1.2s cubic-bezier(0.22, 1, 0.36, 1) 0.65s both; will-change: transform; }
+
+.animate-grow-width-right-origin {
+  animation: growWidthRightOrigin 1.2s cubic-bezier(0.22, 1, 0.36, 1) 0.65s both;
+  will-change: transform;
+}
 
 @keyframes growWidthLeftOrigin {
-  0%   { transform: scaleX(0); transform-origin: left; }
-  100% { transform: scaleX(1); transform-origin: left; }
+  0% {
+    transform: scaleX(0);
+    transform-origin: left;
+  }
+
+  100% {
+    transform: scaleX(1);
+    transform-origin: left;
+  }
 }
-.animate-grow-width-left-origin { animation: growWidthLeftOrigin 1.2s cubic-bezier(0.22, 1, 0.36, 1) 0.65s both; will-change: transform; }
+
+.animate-grow-width-left-origin {
+  animation: growWidthLeftOrigin 1.2s cubic-bezier(0.22, 1, 0.36, 1) 0.65s both;
+  will-change: transform;
+}
 
 @keyframes pathDraw {
   0%   { stroke-dashoffset: 1000; }
@@ -416,7 +591,7 @@ input[type="month"]::-webkit-calendar-picker-indicator {
 .animate-path-draw {
   stroke-dasharray: 1000;
   stroke-dashoffset: 1000;
-  animation: pathDraw 0.75s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both;
+  animation: pathDraw 1.1s cubic-bezier(0.25, 1, 0.5, 1) 0.15s both;
   will-change: stroke-dashoffset;
 }
 
@@ -425,7 +600,7 @@ input[type="month"]::-webkit-calendar-picker-indicator {
   100% { transform: scaleX(1); }
 }
 .animate-curtain-reveal {
-  animation: curtainReveal 0.75s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both;
+  animation: curtainReveal 1.1s cubic-bezier(0.25, 1, 0.5, 1) 0.15s both;
   transform-box: fill-box;
   transform-origin: left center;
   will-change: transform;
@@ -436,36 +611,67 @@ input[type="month"]::-webkit-calendar-picker-indicator {
   100% { transform: scale(1); opacity: 1; }
 }
 .animate-point-pop {
-  animation: pointPop 0.25s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: pointPop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) both;
   transform-box: fill-box;
   transform-origin: center;
   will-change: transform, opacity;
 }
 
-::-webkit-scrollbar { width: 7px; height: 7px; }
-::-webkit-scrollbar-track { background: rgba(11,15,25,0.6); border-radius: 4px; }
-::-webkit-scrollbar-thumb { background: rgba(59,130,246,0.3); border-radius: 4px; border: 1px solid #0b0f19; }
-::-webkit-scrollbar-thumb:hover { background: rgba(59,130,246,0.6); }
-* { scrollbar-width: thin; scrollbar-color: rgba(59,130,246,0.3) rgba(11,15,25,0.6); }
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
 
-h1, h2, h3, h4, h5, h6 {
+::-webkit-scrollbar-track {
+  background: rgba(11, 15, 25, 0.6);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(59, 130, 246, 0.3);
+  border-radius: 4px;
+  border: 1px solid #0b0f19;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(59, 130, 246, 0.6);
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(59, 130, 246, 0.3) rgba(11, 15, 25, 0.6);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   letter-spacing: -0.02em;
   font-family: var(--font-sans);
   font-weight: 700 !important;
   color: #ffffff !important;
 }
 
-input[type="text"], input[type="number"], input[type="password"], textarea:not(.code-editor-textarea), select {
+input[type="text"],
+input[type="number"],
+input[type="password"],
+textarea:not(.code-editor-textarea),
+select {
   background: #0d1018 !important;
-  border: 1px solid rgba(255,255,255,0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
   color: #ffffff !important;
   font-weight: 600;
   border-radius: 14px;
 }
-input:focus, select:focus, textarea:not(.code-editor-textarea):focus {
+
+input:focus,
+select:focus,
+textarea:not(.code-editor-textarea):focus {
   outline: none;
-  border-color: rgba(92,54,245,0.6) !important;
-  box-shadow: 0 0 0 2px rgba(92,54,245,0.2) !important;
+  border-color: rgba(92, 54, 245, 0.6) !important;
+  box-shadow: 0 0 0 2px rgba(92, 54, 245, 0.2) !important;
 }
 
 .code-editor-textarea {
@@ -478,6 +684,7 @@ input:focus, select:focus, textarea:not(.code-editor-textarea):focus {
   line-height: 1.6 !important;
   tab-size: 2 !important;
 }
+
 .code-editor-textarea:focus {
   outline: none !important;
   border-color: rgba(92, 54, 245, 0.7) !important;

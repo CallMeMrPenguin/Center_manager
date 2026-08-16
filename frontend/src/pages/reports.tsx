@@ -347,7 +347,6 @@ export default function ReportsPage() {
       cancelAnimationFrame(rAFId);
       clearTimeout(timeoutId);
 
-      // Debounce and throttle: Prevents 60 FPS re-renders during sidebar expand/collapse transitions
       timeoutId = setTimeout(() => {
         rAFId = requestAnimationFrame(() => {
           if (chartContainerRef.current) {
@@ -1042,8 +1041,8 @@ export default function ReportsPage() {
         return (
           <div className="text-center">
             <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-mono font-black border ${val >= 90 ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' :
-                val >= 80 ? 'bg-blue-500/20 text-blue-300 border-blue-500/30' :
-                  'bg-rose-500/20 text-rose-300 border-rose-500/30'
+              val >= 80 ? 'bg-blue-500/20 text-blue-300 border-blue-500/30' :
+                'bg-rose-500/20 text-rose-300 border-rose-500/30'
               }`}>{val}%</span>
           </div>
         );
@@ -1142,8 +1141,8 @@ export default function ReportsPage() {
         return (
           <div className="text-center">
             <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-xs font-mono font-black border ${isUp ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30' :
-                isDown ? 'bg-rose-500/15 text-rose-400 border-rose-500/30' :
-                  'bg-slate-500/15 text-slate-300 border-slate-500/30'
+              isDown ? 'bg-rose-500/15 text-rose-400 border-rose-500/30' :
+                'bg-slate-500/15 text-slate-300 border-slate-500/30'
               }`}>
               {isUp ? <TrendingUp size={13} /> : isDown ? <TrendingDown size={13} /> : <Minus size={13} />}
               <span>{delta > 0 ? `+${format1Dec(delta)}` : format1Dec(delta)}</span>
@@ -3641,8 +3640,8 @@ export default function ReportsPage() {
                                       <div className="flex items-center gap-1.5 shrink-0">
                                         {/* Trend Indicator */}
                                         <div className={`px-1.5 py-0.5 rounded-md text-[10px] font-extrabold font-mono flex items-center gap-0.5 ${isImproving ? 'text-emerald-400 bg-emerald-500/10' :
-                                            isDeclining ? 'text-rose-400 bg-rose-500/10' :
-                                              'text-slate-400 bg-slate-500/10'
+                                          isDeclining ? 'text-rose-400 bg-rose-500/10' :
+                                            'text-slate-400 bg-slate-500/10'
                                           }`}>
                                           {isImproving ? <TrendingUp size={11} /> : isDeclining ? <TrendingDown size={11} /> : <Minus size={11} />}
                                           <span>{slope > 0 ? `+${format1Dec(slope)}` : format1Dec(slope)}</span>
@@ -4197,7 +4196,20 @@ export default function ReportsPage() {
                       <path d={makeAreaPath('homework')} fill="url(#area-gradient-emerald)" />
                     </g>
 
-                    {/* SMOOTH BEZIER LINES WITH SELF-DRAW ANIMATION */}
+                    {/* SMOOTH BEZIER LINES WITH LIQUID GPU GLOW & SELF-DRAW ANIMATION */}
+                    {/* 1. Check 1 (Blue) Radiant Halo + Core Stroke */}
+                    <path
+                      key={`c1-glow-${selectedStudentId || selectedClassId || 'all'}-${timeView}`}
+                      d={makeBezierPath('check1')}
+                      fill="none"
+                      stroke="#3b82f6"
+                      strokeWidth="9"
+                      strokeOpacity="0.25"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      pathLength={1000}
+                      className="animate-path-draw"
+                    />
                     <path
                       key={`c1-${selectedStudentId || selectedClassId || 'all'}-${timeView}`}
                       d={makeBezierPath('check1')}
@@ -4210,6 +4222,19 @@ export default function ReportsPage() {
                       className="animate-path-draw"
                     />
 
+                    {/* 2. Check 2 (Purple) Radiant Halo + Core Stroke */}
+                    <path
+                      key={`c2-glow-${selectedStudentId || selectedClassId || 'all'}-${timeView}`}
+                      d={makeBezierPath('check2')}
+                      fill="none"
+                      stroke="#a855f7"
+                      strokeWidth="9"
+                      strokeOpacity="0.25"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      pathLength={1000}
+                      className="animate-path-draw"
+                    />
                     <path
                       key={`c2-${selectedStudentId || selectedClassId || 'all'}-${timeView}`}
                       d={makeBezierPath('check2')}
@@ -4222,6 +4247,19 @@ export default function ReportsPage() {
                       className="animate-path-draw"
                     />
 
+                    {/* 3. Homework (Emerald) Radiant Halo + Core Stroke */}
+                    <path
+                      key={`hw-glow-${selectedStudentId || selectedClassId || 'all'}-${timeView}`}
+                      d={makeBezierPath('homework')}
+                      fill="none"
+                      stroke="#10b981"
+                      strokeWidth="9"
+                      strokeOpacity="0.25"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      pathLength={1000}
+                      className="animate-path-draw"
+                    />
                     <path
                       key={`hw-${selectedStudentId || selectedClassId || 'all'}-${timeView}`}
                       d={makeBezierPath('homework')}
@@ -4263,7 +4301,7 @@ export default function ReportsPage() {
                         <g
                           key={`forecast-${selectedStudentId || selectedClassId || 'all'}-${timeView}-${sessionChartData.length}`}
                           className="animate-point-pop"
-                          style={{ animationDelay: '0.80s' }}
+                          style={{ animationDelay: '1.15s' }}
                         >
                           {preds.map(p => {
                             const labelY = adjustedYs[p.id] ?? p.rawY;
@@ -4316,7 +4354,7 @@ export default function ReportsPage() {
                         const y1 = getSvgY(d.check1);
                         const y2 = getSvgY(d.check2);
                         const yHw = getSvgY(d.homework);
-                        const pointDelay = (0.2 + (i / Math.max(1, sessionChartData.length - 1)) * 0.55).toFixed(2);
+                        const pointDelay = (0.2 + (i / Math.max(1, sessionChartData.length - 1)) * 0.85).toFixed(2);
 
                         return (
                           <g
@@ -4445,8 +4483,8 @@ export default function ReportsPage() {
                     </button>
                   </div>
                   <span className={`text-sm font-black font-mono ${engine.ema_level < 5.0 ? 'text-rose-500' :
-                      engine.ema_level < 6.5 ? 'text-amber-400' :
-                        engine.ema_level < 8.0 ? 'text-blue-400' : 'text-emerald-400'
+                    engine.ema_level < 6.5 ? 'text-amber-400' :
+                      engine.ema_level < 8.0 ? 'text-blue-400' : 'text-emerald-400'
                     }`}>{engine.ema_level}</span>
                   <span className="text-[10px] text-slate-400 font-semibold block">Exponential Moving</span>
 
@@ -4486,12 +4524,12 @@ export default function ReportsPage() {
                     </button>
                   </div>
                   <span className={`text-sm font-black font-mono ${engine.std_dev > 2.0 ? 'text-rose-500' :
-                      engine.std_dev > 1.0 ? 'text-amber-400' :
-                        engine.std_dev < 0.5 ? 'text-emerald-400' : 'text-cyan-400'
+                    engine.std_dev > 1.0 ? 'text-amber-400' :
+                      engine.std_dev < 0.5 ? 'text-emerald-400' : 'text-cyan-400'
                     }`}>σ = {engine.std_dev}</span>
                   <span className={`text-[10px] font-semibold block ${engine.consistency_label?.includes('mạnh') ? 'text-rose-400 font-extrabold' :
-                      engine.consistency_label?.includes('Biến động') ? 'text-amber-400 font-bold' :
-                        engine.consistency_label?.includes('Rất ổn định') ? 'text-emerald-400 font-bold' : 'text-slate-400'
+                    engine.consistency_label?.includes('Biến động') ? 'text-amber-400 font-bold' :
+                      engine.consistency_label?.includes('Rất ổn định') ? 'text-emerald-400 font-bold' : 'text-slate-400'
                     }`}>{engine.consistency_label}</span>
 
                   {activeTooltip === 'sd' && (
@@ -4525,7 +4563,7 @@ export default function ReportsPage() {
                   </div>
                   <span className="text-sm font-black text-purple-300 font-mono">{engine.trend_slope > 0 ? `+${engine.trend_slope}` : engine.trend_slope}/buổi</span>
                   <span className={`text-[10px] font-bold block ${engine.trend_label?.includes('Giảm') || engine.trend_label?.includes('Suy giảm') ? 'text-rose-400' :
-                      engine.trend_label?.includes('Ổn định') ? 'text-slate-300' : 'text-emerald-400'
+                    engine.trend_label?.includes('Ổn định') ? 'text-slate-300' : 'text-emerald-400'
                     }`}>{engine.trend_label}</span>
 
                   {activeTooltip === 'trend' && (
@@ -4539,8 +4577,8 @@ export default function ReportsPage() {
                 <div className="border-l border-[#1d2644] col-span-2 sm:col-span-1">
                   <span className="text-[10px] font-black uppercase text-slate-400 block">Xếp Loại Tổng Thể</span>
                   <span className={`text-xs font-black flex items-center justify-center gap-1 ${engine.rating_label?.includes('NGUY CƠ') ? 'text-rose-500 font-extrabold animate-pulse' :
-                      engine.rating_label?.includes('Cần Cố Gắng') ? 'text-amber-400' :
-                        engine.rating_label?.includes('Tốt') ? 'text-blue-400' : 'text-emerald-400'
+                    engine.rating_label?.includes('Cần Cố Gắng') ? 'text-amber-400' :
+                      engine.rating_label?.includes('Tốt') ? 'text-blue-400' : 'text-emerald-400'
                     }`}>
                     {engine.rating_label}
                   </span>
@@ -4782,8 +4820,8 @@ export default function ReportsPage() {
                     type="button"
                     onClick={() => setResetScope('class')}
                     className={`py-2 px-3 rounded-xl text-xs font-bold transition cursor-pointer border ${resetScope === 'class'
-                        ? 'bg-indigo-600 text-white border-indigo-400 shadow'
-                        : 'bg-[#181d2e] text-slate-400 border-white/10 hover:text-white'
+                      ? 'bg-indigo-600 text-white border-indigo-400 shadow'
+                      : 'bg-[#181d2e] text-slate-400 border-white/10 hover:text-white'
                       }`}
                   >
                     Toàn Bộ Lớp {selectedClassId ? `(${classes.find(c => String(c.id) === selectedClassId)?.class_name})` : ''}
@@ -4794,9 +4832,9 @@ export default function ReportsPage() {
                     onClick={() => setResetScope('student')}
                     disabled={!selectedStudentId}
                     className={`py-2 px-3 rounded-xl text-xs font-bold transition cursor-pointer border ${!selectedStudentId ? 'opacity-40 cursor-not-allowed bg-[#181d2e] text-slate-500 border-white/5' :
-                        resetScope === 'student'
-                          ? 'bg-indigo-600 text-white border-indigo-400 shadow'
-                          : 'bg-[#181d2e] text-slate-400 border-white/10 hover:text-white'
+                      resetScope === 'student'
+                        ? 'bg-indigo-600 text-white border-indigo-400 shadow'
+                        : 'bg-[#181d2e] text-slate-400 border-white/10 hover:text-white'
                       }`}
                   >
                     Học Sinh Đang Chọn
