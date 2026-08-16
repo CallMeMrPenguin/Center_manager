@@ -265,39 +265,35 @@ function AppContent() {
 
       <div className="relative flex flex-row flex-1 overflow-hidden p-4 gap-4 z-10">
 
-        {/* SIDEBAR NAVIGATION (Manual toggle button, smooth synchronized collapsing) */}
+        {/* SIDEBAR NAVIGATION (Floating circle toggle button on right edge) */}
         <aside
-          className={`${isSidebarExpanded ? 'w-64' : 'w-20'} sidebar-glass-glow rounded-2xl flex flex-col h-full overflow-hidden transition-[width] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] z-30 shrink-0 select-none`}
+          className={`relative ${isSidebarExpanded ? 'w-64' : 'w-20'} sidebar-glass-glow rounded-2xl flex flex-col h-full transition-[width] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] z-30 shrink-0 select-none`}
         >
+          {/* Floating Circular Collapse / Expand Button on right edge */}
+          <button
+            type="button"
+            onClick={toggleSidebar}
+            className="absolute -right-3 top-6.5 w-6 h-6 rounded-full bg-[#181d2e] hover:bg-[#5c36f5] text-slate-300 hover:text-white border border-white/20 shadow-[0_2px_10px_rgba(0,0,0,0.6)] flex items-center justify-center transition-all duration-200 hover:scale-115 cursor-pointer z-50 active:scale-95"
+            title={isSidebarExpanded ? "Thu gọn thanh điều hướng" : "Mở rộng thanh điều hướng"}
+          >
+            {isSidebarExpanded ? <ChevronLeft size={13} strokeWidth={2.5} /> : <ChevronRight size={13} strokeWidth={2.5} />}
+          </button>
 
-          {/* Header logo / Title + Manual Toggle Button directly below */}
-          <div className="flex flex-col px-3.5 pt-3.5 pb-2.5 shrink-0 border-b border-white/5 gap-2.5">
-            {/* Top Row: App Logo & App Name */}
-            <div className="flex items-center min-w-0 overflow-hidden">
-              <div className="h-10 w-10 bg-indigo-500/25 border-2 border-indigo-400/80 rounded-2xl flex items-center justify-center shadow-[0_0_20px_rgba(92,54,245,0.6)] shrink-0">
-                <GraduationCap size={22} className="text-white drop-shadow-[0_0_12px_rgba(255,255,255,1)]" />
-              </div>
-              <div className={`whitespace-nowrap overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${
-                isSidebarExpanded ? 'opacity-100 max-w-[160px] ml-3 translate-x-0' : 'opacity-0 max-w-0 ml-0 -translate-x-3 pointer-events-none'
-              }`}>
-                <span className="text-base font-black tracking-wide uppercase text-white block leading-none">
-                  EduPlatform
-                </span>
-                <span className="text-[10px] font-black tracking-[0.2em] uppercase text-indigo-400 block mt-1">
-                  Center Manager
-                </span>
-              </div>
+          {/* Header logo / Title */}
+          <div className="flex items-center px-4 py-4 shrink-0 border-b border-white/5 min-w-0">
+            <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-indigo-500 via-indigo-600 to-purple-600 flex items-center justify-center shadow-[0_4px_16px_rgba(92,54,245,0.45)] shrink-0 border border-white/20">
+              <GraduationCap size={22} className="text-white drop-shadow" />
             </div>
-
-            {/* Sub Row: Collapse / Expand Toggle Button directly below logo (Icon only) */}
-            <button
-              type="button"
-              onClick={toggleSidebar}
-              className="flex items-center justify-center w-10 h-8 self-center rounded-xl bg-white/5 hover:bg-indigo-500/20 text-slate-400 hover:text-white border border-white/10 hover:border-indigo-400/40 transition cursor-pointer shrink-0"
-              title={isSidebarExpanded ? "Thu gọn thanh điều hướng" : "Mở rộng thanh điều hướng"}
-            >
-              {isSidebarExpanded ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
-            </button>
+            <div className={`whitespace-nowrap overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${
+              isSidebarExpanded ? 'opacity-100 max-w-[160px] ml-3 translate-x-0' : 'opacity-0 max-w-0 ml-0 -translate-x-3 pointer-events-none'
+            }`}>
+              <span className="text-base font-black tracking-wide uppercase text-white block leading-none">
+                EduPlatform
+              </span>
+              <span className="text-[10px] font-black tracking-[0.2em] uppercase text-indigo-400 block mt-1">
+                Center Manager
+              </span>
+            </div>
           </div>
 
           {/* Nav Menu */}
