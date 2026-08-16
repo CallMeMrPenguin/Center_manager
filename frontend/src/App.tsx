@@ -41,11 +41,22 @@ function AppContent() {
   const [preloadedGrade, setPreloadedGrade] = useState<string | null>(null);
   const [preloadedUnit, setPreloadedUnit] = useState<string | null>(null);
   const [settings, setSettings] = useState<AppSettings | null>(null);
-  const [sidebarHovered, setSidebarHovered] = useState(false);
   const [zoomLevel, setZoomLevel] = useState(() => {
     const saved = localStorage.getItem('app_zoom');
     return saved ? parseFloat(saved) : 1;
   });
+  const [isSidebarExpanded, setIsSidebarExpanded] = useState<boolean>(() => {
+    const saved = localStorage.getItem('sidebar_expanded');
+    return saved !== null ? JSON.parse(saved) : true;
+  });
+
+  const toggleSidebar = () => {
+    setIsSidebarExpanded(prev => {
+      const next = !prev;
+      localStorage.setItem('sidebar_expanded', JSON.stringify(next));
+      return next;
+    });
+  };
 
   useEffect(() => {
     loadSettings();
@@ -254,24 +265,38 @@ function AppContent() {
 
       <div className="relative flex flex-row flex-1 overflow-hidden p-4 gap-4 z-10">
 
-        {/* SIDEBAR NAVIGATION (Pure GPU-accelerated inline hover expansion) */}
+        {/* SIDEBAR NAVIGATION (Manual toggle button, no auto hover-collapse) */}
         <aside
-          className="w-20 hover:w-64 group/sidebar sidebar-glass-glow rounded-2xl flex flex-col h-full overflow-hidden transition-[width] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] z-30 shrink-0"
+          className={`${isSidebarExpanded ? 'w-64' : 'w-20'} sidebar-glass-glow rounded-2xl flex flex-col h-full overflow-hidden transition-[width] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] z-30 shrink-0 select-none`}
         >
 
-          {/* Header logo / Title */}
-          <div className="flex items-center gap-3 px-4 py-4 shrink-0 border-b border-white/5 min-w-0">
-            <div className="h-10 w-10 bg-indigo-500/25 border-2 border-indigo-400/80 rounded-2xl flex items-center justify-center shadow-[0_0_20px_rgba(92,54,245,0.6)] shrink-0">
-              <GraduationCap size={22} className="text-white drop-shadow-[0_0_12px_rgba(255,255,255,1)]" />
+          {/* Header logo / Title + Manual Toggle Button */}
+          <div className="flex items-center justify-between px-3.5 py-4 shrink-0 border-b border-white/5 min-w-0">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="h-10 w-10 bg-indigo-500/25 border-2 border-indigo-400/80 rounded-2xl flex items-center justify-center shadow-[0_0_20px_rgba(92,54,245,0.6)] shrink-0">
+                <GraduationCap size={22} className="text-white drop-shadow-[0_0_12px_rgba(255,255,255,1)]" />
+              </div>
+              {isSidebarExpanded && (
+                <div className="whitespace-nowrap overflow-hidden min-w-0 flex-1 transition-opacity duration-200">
+                  <span className="text-base font-black tracking-wide uppercase text-white block leading-none">
+                    EduPlatform
+                  </span>
+                  <span className="text-[10px] font-black tracking-[0.2em] uppercase text-indigo-400 block mt-1">
+                    Center Manager
+                  </span>
+                </div>
+              )}
             </div>
-            <div className="opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-150 ease-out delay-0 group-hover/sidebar:delay-150 whitespace-nowrap overflow-hidden pointer-events-none group-hover/sidebar:pointer-events-auto min-w-0 flex-1">
-              <span className="text-base font-black tracking-wide uppercase text-white block leading-none">
-                EduPlatform
-              </span>
-              <span className="text-[10px] font-black tracking-[0.2em] uppercase text-indigo-400 block mt-1">
-                Center Manager
-              </span>
-            </div>
+
+            {/* Manual Collapse / Expand Toggle Button */}
+            <button
+              type="button"
+              onClick={toggleSidebar}
+              className="p-1.5 rounded-xl bg-white/5 hover:bg-indigo-500/20 text-slate-400 hover:text-white border border-white/10 hover:border-indigo-400/40 transition cursor-pointer shrink-0"
+              title={isSidebarExpanded ? "Thu gọn thanh điều hướng" : "Mở rộng thanh điều hướng"}
+            >
+              {isSidebarExpanded ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
+            </button>
           </div>
 
           {/* Nav Menu */}
@@ -288,8 +313,8 @@ function AppContent() {
 
               return (
                 <div key={section.id} className="flex flex-col gap-1 shrink-0">
-                  {section.label && (
-                    <div className="px-3 py-1 text-xs font-black uppercase tracking-wider text-slate-400 mt-1 mb-0.5 opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-150 ease-out delay-0 group-hover/sidebar:delay-150 whitespace-nowrap overflow-hidden">
+                  {section.label && isSidebarExpanded && (
+                    <div className="px-3 py-1 text-xs font-black uppercase tracking-wider text-slate-400 mt-1 mb-0.5 whitespace-nowrap overflow-hidden">
                       {section.label}
                     </div>
                   )}
@@ -309,9 +334,8 @@ function AppContent() {
                         className={`flex items-center w-full h-11 rounded-xl transition-all duration-150 relative group cursor-pointer active:scale-95 shrink-0 ${draggedIndex === idx ? 'opacity-40 border border-dashed border-indigo-400 bg-indigo-500/10' : ''
                           }`}
                       >
-                        {/* RESTORED BELOVED OLD PURPLE HIGHLIGHT WITH SAFE RIGHT MARGIN (NO CLIPPING) */}
                         {isActive && (
-                          <div className="absolute top-[3px] left-[5px] w-10 h-9 rounded-xl bg-indigo-500/25 border-2 border-indigo-400/90 shadow-[0_0_16px_rgba(92,54,245,0.5)] group-hover/sidebar:w-[calc(100%-10px)] group-hover/sidebar:h-[calc(100%-6px)] transition-all duration-200 pointer-events-none" />
+                          <div className={`absolute top-[3px] left-[5px] rounded-xl bg-indigo-500/25 border-2 border-indigo-400/90 shadow-[0_0_16px_rgba(92,54,245,0.5)] transition-all duration-200 pointer-events-none ${isSidebarExpanded ? 'w-[calc(100%-10px)] h-[calc(100%-6px)]' : 'w-10 h-9'}`} />
                         )}
 
                         {/* ICON BOX */}
@@ -319,11 +343,13 @@ function AppContent() {
                           <Icon size={20} className={isActive ? 'text-white drop-shadow-[0_0_10px_rgba(255,255,255,1)]' : 'text-slate-400 group-hover:text-white'} />
                         </div>
 
-                        {/* TEXT LABEL (SMOOTH DELAYED TRANSITION, NO GLITCHING) */}
-                        <span className={`text-sm relative z-10 transition-opacity duration-150 ease-out delay-0 group-hover/sidebar:delay-150 whitespace-nowrap overflow-hidden pointer-events-none group-hover/sidebar:pointer-events-auto opacity-0 group-hover/sidebar:opacity-100 ml-1.5 ${isActive ? "text-white font-black" : "text-slate-200 font-bold group-hover:text-white"
-                          }`}>
-                          {item.label}
-                        </span>
+                        {/* TEXT LABEL */}
+                        {isSidebarExpanded && (
+                          <span className={`text-sm relative z-10 whitespace-nowrap overflow-hidden ml-1.5 transition-opacity duration-150 ${isActive ? "text-white font-black" : "text-slate-200 font-bold group-hover:text-white"
+                            }`}>
+                            {item.label}
+                          </span>
+                        )}
                       </button>
                     );
                   })}
@@ -387,18 +413,19 @@ function AppContent() {
               <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center font-black text-xs text-white shadow-[0_4px_14px_rgba(92,54,245,0.45)] shrink-0 border border-white/20 hover:shadow-[0_0_12px_rgba(92,54,245,0.5)] transition-all">
                 CM
               </div>
-              <div className="ml-3 opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-200 ease-out whitespace-nowrap overflow-hidden flex items-center justify-between flex-1 pointer-events-none group-hover/sidebar:pointer-events-auto">
-                <div className="min-w-0 flex-1 text-left">
-                  <p className="text-xs font-black text-white truncate leading-snug">Center Manager</p>
-                  <p className="text-[10px] font-extrabold text-indigo-400 truncate">Hệ thống quản lý</p>
+              {isSidebarExpanded && (
+                <div className="ml-3 transition-opacity duration-200 ease-out whitespace-nowrap overflow-hidden flex items-center justify-between flex-1">
+                  <div className="min-w-0 flex-1 text-left">
+                    <p className="text-xs font-black text-white truncate leading-snug">Center Manager</p>
+                    <p className="text-[10px] font-extrabold text-indigo-400 truncate">Hệ thống quản lý</p>
+                  </div>
+                  <ChevronUp size={13} className={`text-slate-500 shrink-0 transition-transform ${profileOpen ? '' : 'rotate-180'}`} />
                 </div>
-                <ChevronUp size={13} className={`text-slate-500 shrink-0 transition-transform ${profileOpen ? '' : 'rotate-180'}`} />
-              </div>
+              )}
             </button>
 
-            <div className="flex items-center justify-between text-[10px] text-slate-600 font-bold px-2 mt-1 opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-200 ease-out whitespace-nowrap overflow-hidden">
-              <span className="uppercase tracking-widest">v4.0.0</span>
-              {zoomLevel !== 1 && <span className="text-indigo-400">{Math.round(zoomLevel * 100)}%</span>}
+            <div className="flex items-center justify-between text-[10px] text-slate-600 font-bold px-2 mt-1 transition-opacity duration-200 ease-out whitespace-nowrap overflow-hidden">
+              <span className="uppercase tracking-widest">{isSidebarExpanded ? 'v4.0.0' : 'v4'}</span>
             </div>
           </div>
         </aside>
