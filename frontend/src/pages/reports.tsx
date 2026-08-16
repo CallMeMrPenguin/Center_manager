@@ -104,6 +104,44 @@ export const getClassColor = (classId: string | number, fallbackIndex: number = 
   return CLASS_PALETTE_36[index];
 };
 
+// SMOOTH REACTIVE PROGRESS BAR WITH DELAYED SWEEP-UP ENTRANCE
+const AnimatedProgressBar = React.memo(({
+  pct,
+  color,
+  gradientClass = '',
+  delayMs = 750,
+  durationSec = 1.3,
+  className = '',
+}: {
+  pct: number;
+  color?: string;
+  gradientClass?: string;
+  delayMs?: number;
+  durationSec?: number;
+  className?: string;
+}) => {
+  const [width, setWidth] = useState(0);
+
+  useEffect(() => {
+    setWidth(0);
+    const timer = setTimeout(() => {
+      setWidth(Math.max(pct > 0 ? (pct < 3 ? 3 : pct) : 0, Math.min(100, pct)));
+    }, delayMs);
+    return () => clearTimeout(timer);
+  }, [pct, delayMs]);
+
+  return (
+    <div
+      style={{
+        width: `${width}%`,
+        backgroundColor: color,
+        transition: `width ${durationSec}s cubic-bezier(0.16, 1, 0.3, 1)`,
+      }}
+      className={`h-full rounded-full will-change-[width] ${gradientClass} ${className}`}
+    />
+  );
+});
+
 // MINI TREND SPARKLINE GRAPH FOR RANKING TABLE ROW
 const MiniTrendSparkline = React.memo(({ points, slope, ema }: { points: number[]; slope: number; ema: number }) => {
   let dataPoints: number[] = [];
@@ -2925,13 +2963,11 @@ export default function ReportsPage() {
                           <div className="flex items-center gap-3">
                             <span className="text-[11px] font-bold text-blue-400 w-24 truncate shrink-0">{classComparisonData.classA.name}:</span>
                             <div className="flex-1 h-3 bg-[#111726] rounded-md overflow-hidden p-0.5 border border-white/5">
-                              <div
+                              <AnimatedProgressBar
                                 key={`comp-c1-a-${compareClassAId}-${compareClassBId}-${classComparisonData.classA.avgCheck1}`}
-                                style={{
-                                  width: `${Math.min(100, (classComparisonData.classA.avgCheck1 / 10) * 100)}%`,
-                                  animationDelay: '0.75s',
-                                }}
-                                className="h-full bg-blue-500 rounded-sm shadow-[0_0_8px_rgba(59,130,246,0.5)] animate-bar-fill"
+                                pct={(classComparisonData.classA.avgCheck1 / 10) * 100}
+                                gradientClass="bg-blue-500 rounded-sm shadow-[0_0_8px_rgba(59,130,246,0.5)]"
+                                delayMs={750}
                               />
                             </div>
                             <span className="text-xs font-mono font-black text-blue-300 w-12 text-right shrink-0">{format1Dec(classComparisonData.classA.avgCheck1)} đ</span>
@@ -2939,13 +2975,11 @@ export default function ReportsPage() {
                           <div className="flex items-center gap-3">
                             <span className="text-[11px] font-bold text-cyan-400 w-24 truncate shrink-0">{classComparisonData.classB.name}:</span>
                             <div className="flex-1 h-3 bg-[#111726] rounded-md overflow-hidden p-0.5 border border-white/5">
-                              <div
+                              <AnimatedProgressBar
                                 key={`comp-c1-b-${compareClassAId}-${compareClassBId}-${classComparisonData.classB.avgCheck1}`}
-                                style={{
-                                  width: `${Math.min(100, (classComparisonData.classB.avgCheck1 / 10) * 100)}%`,
-                                  animationDelay: '0.75s',
-                                }}
-                                className="h-full bg-cyan-500 rounded-sm shadow-[0_0_8px_rgba(6,182,212,0.5)] animate-bar-fill"
+                                pct={(classComparisonData.classB.avgCheck1 / 10) * 100}
+                                gradientClass="bg-cyan-500 rounded-sm shadow-[0_0_8px_rgba(6,182,212,0.5)]"
+                                delayMs={750}
                               />
                             </div>
                             <span className="text-xs font-mono font-black text-cyan-300 w-12 text-right shrink-0">{format1Dec(classComparisonData.classB.avgCheck1)} đ</span>
@@ -2963,13 +2997,11 @@ export default function ReportsPage() {
                           <div className="flex items-center gap-3">
                             <span className="text-[11px] font-bold text-blue-400 w-24 truncate shrink-0">{classComparisonData.classA.name}:</span>
                             <div className="flex-1 h-3 bg-[#111726] rounded-md overflow-hidden p-0.5 border border-white/5">
-                              <div
+                              <AnimatedProgressBar
                                 key={`comp-c2-a-${compareClassAId}-${compareClassBId}-${classComparisonData.classA.avgCheck2}`}
-                                style={{
-                                  width: `${Math.min(100, (classComparisonData.classA.avgCheck2 / 10) * 100)}%`,
-                                  animationDelay: '0.85s',
-                                }}
-                                className="h-full bg-blue-500 rounded-sm shadow-[0_0_8px_rgba(59,130,246,0.5)] animate-bar-fill"
+                                pct={(classComparisonData.classA.avgCheck2 / 10) * 100}
+                                gradientClass="bg-blue-500 rounded-sm shadow-[0_0_8px_rgba(59,130,246,0.5)]"
+                                delayMs={830}
                               />
                             </div>
                             <span className="text-xs font-mono font-black text-blue-300 w-12 text-right shrink-0">{format1Dec(classComparisonData.classA.avgCheck2)} đ</span>
@@ -2977,13 +3009,11 @@ export default function ReportsPage() {
                           <div className="flex items-center gap-3">
                             <span className="text-[11px] font-bold text-cyan-400 w-24 truncate shrink-0">{classComparisonData.classB.name}:</span>
                             <div className="flex-1 h-3 bg-[#111726] rounded-md overflow-hidden p-0.5 border border-white/5">
-                              <div
+                              <AnimatedProgressBar
                                 key={`comp-c2-b-${compareClassAId}-${compareClassBId}-${classComparisonData.classB.avgCheck2}`}
-                                style={{
-                                  width: `${Math.min(100, (classComparisonData.classB.avgCheck2 / 10) * 100)}%`,
-                                  animationDelay: '0.85s',
-                                }}
-                                className="h-full bg-cyan-500 rounded-sm shadow-[0_0_8px_rgba(6,182,212,0.5)] animate-bar-fill"
+                                pct={(classComparisonData.classB.avgCheck2 / 10) * 100}
+                                gradientClass="bg-cyan-500 rounded-sm shadow-[0_0_8px_rgba(6,182,212,0.5)]"
+                                delayMs={830}
                               />
                             </div>
                             <span className="text-xs font-mono font-black text-cyan-300 w-12 text-right shrink-0">{format1Dec(classComparisonData.classB.avgCheck2)} đ</span>
@@ -3001,13 +3031,11 @@ export default function ReportsPage() {
                           <div className="flex items-center gap-3">
                             <span className="text-[11px] font-bold text-blue-400 w-24 truncate shrink-0">{classComparisonData.classA.name}:</span>
                             <div className="flex-1 h-3 bg-[#111726] rounded-md overflow-hidden p-0.5 border border-white/5">
-                              <div
+                              <AnimatedProgressBar
                                 key={`comp-hw-a-${compareClassAId}-${compareClassBId}-${classComparisonData.classA.avgHomework}`}
-                                style={{
-                                  width: `${Math.min(100, (classComparisonData.classA.avgHomework / 10) * 100)}%`,
-                                  animationDelay: '0.95s',
-                                }}
-                                className="h-full bg-blue-500 rounded-sm shadow-[0_0_8px_rgba(59,130,246,0.5)] animate-bar-fill"
+                                pct={(classComparisonData.classA.avgHomework / 10) * 100}
+                                gradientClass="bg-blue-500 rounded-sm shadow-[0_0_8px_rgba(59,130,246,0.5)]"
+                                delayMs={910}
                               />
                             </div>
                             <span className="text-xs font-mono font-black text-blue-300 w-12 text-right shrink-0">{format1Dec(classComparisonData.classA.avgHomework)} đ</span>
@@ -3015,13 +3043,11 @@ export default function ReportsPage() {
                           <div className="flex items-center gap-3">
                             <span className="text-[11px] font-bold text-cyan-400 w-24 truncate shrink-0">{classComparisonData.classB.name}:</span>
                             <div className="flex-1 h-3 bg-[#111726] rounded-md overflow-hidden p-0.5 border border-white/5">
-                              <div
+                              <AnimatedProgressBar
                                 key={`comp-hw-b-${compareClassAId}-${compareClassBId}-${classComparisonData.classB.avgHomework}`}
-                                style={{
-                                  width: `${Math.min(100, (classComparisonData.classB.avgHomework / 10) * 100)}%`,
-                                  animationDelay: '0.95s',
-                                }}
-                                className="h-full bg-cyan-500 rounded-sm shadow-[0_0_8px_rgba(6,182,212,0.5)] animate-bar-fill"
+                                pct={(classComparisonData.classB.avgHomework / 10) * 100}
+                                gradientClass="bg-cyan-500 rounded-sm shadow-[0_0_8px_rgba(6,182,212,0.5)]"
+                                delayMs={910}
                               />
                             </div>
                             <span className="text-xs font-mono font-black text-cyan-300 w-12 text-right shrink-0">{format1Dec(classComparisonData.classB.avgHomework)} đ</span>
@@ -3071,13 +3097,11 @@ export default function ReportsPage() {
                                 {countA} HS <span className="text-[11px] text-slate-400 font-normal">({pctA}%)</span>
                               </span>
                               <div className="flex-1 h-3.5 bg-[#121829] rounded-full overflow-hidden flex justify-end p-0.5 border border-white/5">
-                                <div
+                                <AnimatedProgressBar
                                   key={`bench-a-${compareClassAId}-${compareClassBId}-${tier.tier}-${pctA}`}
-                                  style={{
-                                    width: `${Math.max(pctA > 0 ? 4 : 0, Math.min(100, pctA))}%`,
-                                    animationDelay: `${tierIdx * 0.08 + 0.75}s`,
-                                  }}
-                                  className="h-full bg-gradient-to-l from-blue-500 to-blue-600 rounded-full shadow-[0_0_10px_rgba(59,130,246,0.6)] animate-bar-fill"
+                                  pct={pctA}
+                                  gradientClass="bg-gradient-to-l from-blue-500 to-blue-600 shadow-[0_0_10px_rgba(59,130,246,0.6)]"
+                                  delayMs={750 + tierIdx * 80}
                                 />
                               </div>
                             </div>
@@ -3094,13 +3118,11 @@ export default function ReportsPage() {
                             {/* RIGHT: Class B Bar & Percentage */}
                             <div className="flex-1 flex items-center justify-start gap-3 min-w-0">
                               <div className="flex-1 h-3.5 bg-[#121829] rounded-full overflow-hidden p-0.5 border border-white/5">
-                                <div
+                                <AnimatedProgressBar
                                   key={`bench-b-${compareClassAId}-${compareClassBId}-${tier.tier}-${pctB}`}
-                                  style={{
-                                    width: `${Math.max(pctB > 0 ? 4 : 0, Math.min(100, pctB))}%`,
-                                    animationDelay: `${tierIdx * 0.08 + 0.75}s`,
-                                  }}
-                                  className="h-full bg-gradient-to-r from-cyan-500 to-cyan-400 rounded-full shadow-[0_0_10px_rgba(6,182,212,0.6)] animate-bar-fill"
+                                  pct={pctB}
+                                  gradientClass="bg-gradient-to-r from-cyan-500 to-cyan-400 shadow-[0_0_10px_rgba(6,182,212,0.6)]"
+                                  delayMs={750 + tierIdx * 80}
                                 />
                               </div>
                               <span className="text-xs font-mono font-black text-cyan-400 shrink-0">
@@ -3248,14 +3270,12 @@ export default function ReportsPage() {
 
                       {/* Horizontal Progress Bar Track */}
                       <div className="flex-1 h-3 bg-[#0e1424] rounded-full overflow-hidden p-0.5 border border-white/5 mx-2">
-                        <div
+                        <AnimatedProgressBar
                           key={`deep-tier-${selectedClassId}-${t.tier}-${t.pct}`}
-                          style={{
-                            width: `${Math.max(t.pct > 0 ? 3 : 0, t.pct)}%`,
-                            backgroundColor: t.color,
-                            animationDelay: `${(5 - t.tier) * 0.08 + 0.75}s`,
-                          }}
-                          className="h-full rounded-full shadow-sm animate-bar-fill"
+                          pct={t.pct}
+                          color={t.color}
+                          gradientClass="shadow-sm"
+                          delayMs={750 + (5 - t.tier) * 80}
                         />
                       </div>
 

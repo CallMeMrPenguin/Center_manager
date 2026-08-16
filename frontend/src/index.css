@@ -549,16 +549,6 @@ input[type="month"]::-webkit-calendar-picker-indicator {
   animation: growWidth 1.2s cubic-bezier(0.22, 1, 0.36, 1) 0.65s both;
 }
 
-@keyframes fillProgressBar {
-  from {
-    width: 0% !important;
-  }
-}
-
-.animate-bar-fill {
-  animation: fillProgressBar 1.3s cubic-bezier(0.16, 1, 0.3, 1) 0.75s both;
-  will-change: width;
-}
 
 @keyframes pathDraw {
   0%   { stroke-dashoffset: 1000; }
