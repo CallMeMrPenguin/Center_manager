@@ -350,11 +350,33 @@ input[type="month"]::-webkit-calendar-picker-indicator {
 }
 .animate-card-enter { animation: cardEnter 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; will-change: opacity, transform; }
 
-/* ── ENERGETIC BOTTOM-UP FLY IN ANIMATION SYSTEM ──────────────────────── */
+/* ── ENERGETIC BOTTOM-UP FLY IN ANIMATION SYSTEM (SLOWER & LUXURIOUS) ─── */
 @keyframes flyInUp {
   0% {
     opacity: 0;
-    transform: translateY(90px);
+    transform: translateY(95px);
+  }
+  30% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-cascade-1, .animate-fly-1 { animation: flyInUp 1.05s cubic-bezier(0.16, 1, 0.3, 1) 0.08s both; will-change: opacity, transform; }
+.animate-cascade-2, .animate-fly-2 { animation: flyInUp 1.05s cubic-bezier(0.16, 1, 0.3, 1) 0.35s both; will-change: opacity, transform; }
+.animate-cascade-3, .animate-fly-3 { animation: flyInUp 1.05s cubic-bezier(0.16, 1, 0.3, 1) 0.65s both; will-change: opacity, transform; }
+.animate-cascade-4, .animate-fly-4 { animation: flyInUp 1.05s cubic-bezier(0.16, 1, 0.3, 1) 0.95s both; will-change: opacity, transform; }
+.animate-cascade-5, .animate-fly-5 { animation: flyInUp 1.05s cubic-bezier(0.16, 1, 0.3, 1) 1.25s both; will-change: opacity, transform; }
+.animate-cascade-6, .animate-fly-6 { animation: flyInUp 1.05s cubic-bezier(0.16, 1, 0.3, 1) 1.55s both; will-change: opacity, transform; }
+
+/* Table Row Fly In from Bottom (Relaxed & Smooth) */
+@keyframes rowFlyIn {
+  0% {
+    opacity: 0;
+    transform: translateY(35px);
   }
   35% {
     opacity: 0.6;
@@ -364,30 +386,8 @@ input[type="month"]::-webkit-calendar-picker-indicator {
     transform: translateY(0);
   }
 }
-
-.animate-cascade-1, .animate-fly-1 { animation: flyInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.05s both; will-change: opacity, transform; }
-.animate-cascade-2, .animate-fly-2 { animation: flyInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.22s both; will-change: opacity, transform; }
-.animate-cascade-3, .animate-fly-3 { animation: flyInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.44s both; will-change: opacity, transform; }
-.animate-cascade-4, .animate-fly-4 { animation: flyInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.66s both; will-change: opacity, transform; }
-.animate-cascade-5, .animate-fly-5 { animation: flyInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.88s both; will-change: opacity, transform; }
-.animate-cascade-6, .animate-fly-6 { animation: flyInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) 1.10s both; will-change: opacity, transform; }
-
-/* Table Row Fly In from Bottom */
-@keyframes rowFlyIn {
-  0% {
-    opacity: 0;
-    transform: translateY(32px);
-  }
-  40% {
-    opacity: 0.7;
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
 .animate-row-enter {
-  animation: rowFlyIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: rowFlyIn 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
   will-change: opacity, transform;
 }
 
@@ -395,19 +395,19 @@ input[type="month"]::-webkit-calendar-picker-indicator {
   0%   { transform: scaleX(0); transform-origin: left; }
   100% { transform: scaleX(1); transform-origin: left; }
 }
-.animate-grow-width { animation: growWidth 0.85s cubic-bezier(0.22, 1, 0.36, 1) 0.45s both; will-change: transform; }
+.animate-grow-width { animation: growWidth 1.2s cubic-bezier(0.22, 1, 0.36, 1) 0.65s both; will-change: transform; }
 
 @keyframes growWidthRightOrigin {
   0%   { transform: scaleX(0); transform-origin: right; }
   100% { transform: scaleX(1); transform-origin: right; }
 }
-.animate-grow-width-right-origin { animation: growWidthRightOrigin 0.85s cubic-bezier(0.22, 1, 0.36, 1) 0.45s both; will-change: transform; }
+.animate-grow-width-right-origin { animation: growWidthRightOrigin 1.2s cubic-bezier(0.22, 1, 0.36, 1) 0.65s both; will-change: transform; }
 
 @keyframes growWidthLeftOrigin {
   0%   { transform: scaleX(0); transform-origin: left; }
   100% { transform: scaleX(1); transform-origin: left; }
 }
-.animate-grow-width-left-origin { animation: growWidthLeftOrigin 0.85s cubic-bezier(0.22, 1, 0.36, 1) 0.45s both; will-change: transform; }
+.animate-grow-width-left-origin { animation: growWidthLeftOrigin 1.2s cubic-bezier(0.22, 1, 0.36, 1) 0.65s both; will-change: transform; }
 
 @keyframes pathDraw {
   0%   { stroke-dashoffset: 2500; }
@@ -415,7 +415,7 @@ input[type="month"]::-webkit-calendar-picker-indicator {
 }
 .animate-path-draw {
   stroke-dasharray: 2500;
-  animation: pathDraw 1.2s cubic-bezier(0.22, 1, 0.36, 1) 0.60s both;
+  animation: pathDraw 1.6s cubic-bezier(0.22, 1, 0.36, 1) 0.85s both;
 }
 
 @keyframes curtainReveal {
@@ -423,7 +423,7 @@ input[type="month"]::-webkit-calendar-picker-indicator {
   100% { transform: scaleX(1); }
 }
 .animate-curtain-reveal {
-  animation: curtainReveal 1.2s cubic-bezier(0.22, 1, 0.36, 1) 0.60s both;
+  animation: curtainReveal 1.6s cubic-bezier(0.22, 1, 0.36, 1) 0.85s both;
   transform-box: fill-box;
   transform-origin: left center;
 }
@@ -434,7 +434,7 @@ input[type="month"]::-webkit-calendar-picker-indicator {
   100% { transform: scale(1); opacity: 1; }
 }
 .animate-point-pop {
-  animation: pointPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  animation: pointPop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both;
   transform-box: fill-box;
   transform-origin: center;
 }

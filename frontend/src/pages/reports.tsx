@@ -3862,7 +3862,7 @@ export default function ReportsPage() {
                   const lastX = getSvgX(lastIdx, sessionChartData.length);
                   const forecastX = lastX + 40 * zoomLevel;
                   return (
-                    <g className="animate-point-pop" style={{ animationDelay: '1.80s' }}>
+                    <g className="animate-point-pop" style={{ animationDelay: '2.45s' }}>
                       {/* 1. Check 1 Forecast Line & Point */}
                       <line
                         x1={lastX}
@@ -3956,7 +3956,7 @@ export default function ReportsPage() {
                   const y1 = getSvgY(d.check1);
                   const y2 = getSvgY(d.check2);
                   const yHw = getSvgY(d.homework);
-                  const pointDelay = (0.60 + (i / Math.max(1, sessionChartData.length - 1)) * 1.15).toFixed(2);
+                  const pointDelay = (0.85 + (i / Math.max(1, sessionChartData.length - 1)) * 1.55).toFixed(2);
 
                   return (
                     <g 
