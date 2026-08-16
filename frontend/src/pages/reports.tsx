@@ -52,6 +52,58 @@ export const getStudentTier = (score: number): StudentTier => {
   return TIERS_CONFIG[0]; // Đồng (< 5.0)
 };
 
+// 36+ VIBRANT DISTINCT CLASS COLOR PALETTE (GUARANTEES UNIQUE DISTINCT COLOR FOR 36+ CLASSES)
+export const CLASS_PALETTE_36: string[] = [
+  '#3b82f6', // 1. Blue
+  '#06b6d4', // 2. Cyan
+  '#10b981', // 3. Emerald
+  '#a855f7', // 4. Purple
+  '#f59e0b', // 5. Amber
+  '#ec4899', // 6. Pink
+  '#6366f1', // 7. Indigo
+  '#14b8a6', // 8. Teal
+  '#84cc16', // 9. Lime
+  '#f97316', // 10. Orange
+  '#8b5cf6', // 11. Violet
+  '#e11d48', // 12. Rose
+  '#0284c7', // 13. Sky Blue
+  '#059669', // 14. Mint / Forest Green
+  '#d97706', // 15. Dark Amber
+  '#d946ef', // 16. Fuchsia
+  '#4f46e5', // 17. Deep Indigo
+  '#10b981', // 18. Sea Green
+  '#eab308', // 19. Yellow
+  '#f43f5e', // 20. Coral
+  '#7c3aed', // 21. Bright Violet
+  '#0ea5e9', // 22. Light Sky
+  '#22c55e', // 23. Green
+  '#fb923c', // 24. Light Orange
+  '#c084fc', // 25. Lavender
+  '#fb7185', // 26. Salmon
+  '#38bdf8', // 27. Electric Cyan
+  '#4ade80', // 28. Light Green
+  '#facc15', // 29. Golden
+  '#f472b6', // 30. Hot Pink
+  '#818cf8', // 31. Periwinkle
+  '#2dd4bf', // 32. Aquamarine
+  '#a3e635', // 33. Chartreuse
+  '#fdba74', // 34. Peach
+  '#e879f9', // 35. Orchid
+  '#67e8f9', // 36. Ice Blue
+];
+
+export const getClassColor = (classId: string | number, fallbackIndex: number = 0): string => {
+  if (!classId) return CLASS_PALETTE_36[fallbackIndex % CLASS_PALETTE_36.length];
+  const str = String(classId);
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = (hash << 5) - hash + str.charCodeAt(i);
+    hash |= 0;
+  }
+  const index = Math.abs(hash) % CLASS_PALETTE_36.length;
+  return CLASS_PALETTE_36[index];
+};
+
 // MINI TREND SPARKLINE GRAPH FOR RANKING TABLE ROW
 const MiniTrendSparkline = React.memo(({ points, slope, ema }: { points: number[]; slope: number; ema: number }) => {
   let dataPoints: number[] = [];
@@ -259,7 +311,7 @@ export default function ReportsPage() {
   // Collapsible Sections State (all collapsed by default per user request)
   const [isWarningSectionOpen, setIsWarningSectionOpen] = useState<boolean>(false);
   const [isGroupingSectionOpen, setIsGroupingSectionOpen] = useState<boolean>(false);
-  const [isGrowthSectionOpen, setIsGrowthSectionOpen] = useState<boolean>(true);
+  const [isGrowthSectionOpen, setIsGrowthSectionOpen] = useState<boolean>(false);
   const [isBottlenecksSectionOpen, setIsBottlenecksSectionOpen] = useState<boolean>(false);
 
   // Smart Level Grouping Scope: 'current' (Lớp hiện tại) | 'grade' (Toàn bộ cùng khối) | 'all' (Toàn trung tâm)
@@ -1108,7 +1160,7 @@ export default function ReportsPage() {
     try {
       const ExcelJS = (await import('exceljs')).default;
       const workbook = new ExcelJS.Workbook();
-      const headers = ['STT', 'Họ và Tên', 'Lớp Học', 'Buổi Học', 'Điểm Danh %', 'Check 1', 'Check 2', 'Homework', 'Đánh Giá'];
+      const headers = ['STT', 'Họ và Tên', 'Lớp Học', 'Buổi Học', 'Điểm Danh %', 'Check 1', 'Check 2', 'Homework', 'Hạng', 'Đánh Giá'];
 
       const addClassSheet = (sheetName: string, items: any[]) => {
         const safeName = sheetName.replace(/[\*\?:\/\\\[\]]/g, '').slice(0, 31) || 'Lớp';
@@ -1124,8 +1176,11 @@ export default function ReportsPage() {
           const hw = Number(r.avg_homework || 0);
           const valid = [c1, c2, hw].filter(v => v > 0);
           let evalStr = 'Chưa có điểm';
+          let tierStr = 'Chưa xếp hạng';
           if (valid.length > 0) {
             const avg = trunc1Dec(valid.reduce((a, b) => a + b, 0) / valid.length);
+            const tier = getStudentTier(avg);
+            tierStr = `${tier.name} (${tier.title})`;
             let label = 'Xuất Sắc';
             if (avg < 8.5) label = 'Giỏi';
             if (avg < 7.0) label = 'Khá';
@@ -1142,6 +1197,7 @@ export default function ReportsPage() {
             c1 > 0 ? format1Dec(c1) : '-',
             c2 > 0 ? format1Dec(c2) : '-',
             hw > 0 ? format1Dec(hw) : '-',
+            tierStr,
             evalStr
           ];
         });
@@ -1176,7 +1232,24 @@ export default function ReportsPage() {
                 cell.numFmt = '0.0';
               }
 
+              // Col 9: Hạng / Tier
               if (!isHeader && colNumber === 9) {
+                const text = String(cell.value || '');
+                if (text.includes('Quán Quân') || text.includes('Kim Cương')) {
+                  cell.font = { name: 'Times New Roman', size: 13, bold: true, color: { argb: 'FFE11D48' } };
+                } else if (text.includes('Bạch Kim')) {
+                  cell.font = { name: 'Times New Roman', size: 13, bold: true, color: { argb: 'FF4F46E5' } };
+                } else if (text.includes('Vàng')) {
+                  cell.font = { name: 'Times New Roman', size: 13, bold: true, color: { argb: 'FFD97706' } };
+                } else if (text.includes('Bạc')) {
+                  cell.font = { name: 'Times New Roman', size: 13, bold: true, color: { argb: 'FF0284C7' } };
+                } else {
+                  cell.font = { name: 'Times New Roman', size: 13, bold: true, color: { argb: 'FF92400E' } };
+                }
+              }
+
+              // Col 10: Đánh Giá
+              if (!isHeader && colNumber === 10) {
                 const text = String(cell.value || '');
                 if (text.includes('Xuất Sắc')) {
                   cell.font = { name: 'Times New Roman', size: 13, bold: true, color: { argb: 'FF15803D' } };
@@ -2521,7 +2594,7 @@ export default function ReportsPage() {
                     </div>
                     <div>
                       <h3 className="text-base font-black text-white uppercase tracking-wider flex items-center gap-2">
-                        SO SÁNH ĐỐI ĐẦU 2 LỚP HỌC (HEAD-TO-HEAD)
+                        SO SÁNH ĐỐI ĐẦU 2 LỚP HỌC
                       </h3>
                       <p className="text-xs text-slate-400 font-semibold mt-0.5">
                         Chọn 2 lớp học để so sánh trực diện các chỉ số học lực, chuyên cần, phân bố 6 hạng bậc và đà phát triển.
@@ -2532,12 +2605,15 @@ export default function ReportsPage() {
                   {/* Dual Class Selector Bar - 4 Rounded Square Clean Boxes */}
                   <div className="flex flex-wrap items-center gap-3 bg-[#070a12] p-2 rounded-xl border border-[#182236]">
                     <div className="flex items-center gap-2.5 bg-[#0d1322] border border-blue-500/40 px-3.5 py-1.5 rounded-lg">
-                      <span className="w-2.5 h-2.5 rounded-sm bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.8)]"></span>
+                      <span
+                        className="w-2.5 h-2.5 rounded-sm shadow-sm"
+                        style={{ backgroundColor: getClassColor(compareClassAId, 0), boxShadow: `0 0 8px ${getClassColor(compareClassAId, 0)}80` }}
+                      ></span>
                       <span className="text-xs font-black text-blue-400">Lớp A:</span>
                       <CustomSelect
                         value={compareClassAId}
                         onChange={(val) => setCompareClassAId(String(val))}
-                        options={classes.map(c => ({ value: String(c.id), label: `${c.class_name} (${c.grade || 'Lớp 6'})` }))}
+                        options={classes.map((c, i) => ({ value: String(c.id), label: `${c.class_name} (${c.grade || 'Lớp 6'})` }))}
                         className="w-44"
                       />
                     </div>
@@ -2547,151 +2623,154 @@ export default function ReportsPage() {
                     </div>
 
                     <div className="flex items-center gap-2.5 bg-[#0d1622] border border-cyan-500/40 px-3.5 py-1.5 rounded-lg">
-                      <span className="w-2.5 h-2.5 rounded-sm bg-cyan-500 shadow-[0_0_8px_rgba(6,182,212,0.8)]"></span>
+                      <span
+                        className="w-2.5 h-2.5 rounded-sm shadow-sm"
+                        style={{ backgroundColor: getClassColor(compareClassBId, 1), boxShadow: `0 0 8px ${getClassColor(compareClassBId, 1)}80` }}
+                      ></span>
                       <span className="text-xs font-black text-cyan-400">Lớp B:</span>
                       <CustomSelect
                         value={compareClassBId}
                         onChange={(val) => setCompareClassBId(String(val))}
-                        options={classes.map(c => ({ value: String(c.id), label: `${c.class_name} (${c.grade || 'Lớp 6'})` }))}
+                        options={classes.map((c, i) => ({ value: String(c.id), label: `${c.class_name} (${c.grade || 'Lớp 6'})` }))}
                         className="w-44"
                       />
                     </div>
                   </div>
                 </div>
 
-                {/* 4 Duel KPI Comparison Rounded Square Cards */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {/* 4 Duel KPI Comparison Rounded Square Cards - Centered Title & VS Layout */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 animate-cascade-2">
                   {/* 1. EMA Comparison */}
                   <div className="p-4 rounded-xl bg-[#0e1322] border border-[#1b253b] flex flex-col justify-between gap-3 shadow-md">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-black uppercase tracking-wider text-blue-400">ĐIỂM EMA TRUNG BÌNH</span>
+                    <div className="flex items-center justify-center gap-2 border-b border-white/5 pb-2 text-center">
                       <BarChart3 size={14} className="text-blue-400" />
+                      <span className="text-xs font-black uppercase tracking-wider text-blue-400">ĐIỂM EMA TRUNG BÌNH</span>
                     </div>
-                    <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center justify-between gap-2 px-1">
                       <div className="text-left">
-                        <span className="text-[10px] text-slate-400 block font-semibold truncate max-w-[90px]">{classComparisonData.classA.name}</span>
+                        <span className="text-[11px] text-slate-400 block font-semibold truncate max-w-[100px]">{classComparisonData.classA.name}</span>
                         <span className="text-2xl font-black font-mono text-blue-400">{classComparisonData.classA.avgEma > 0 ? format1Dec(classComparisonData.classA.avgEma) : '-'}</span>
                       </div>
                       <span className="text-xs font-black text-slate-600 font-mono">VS</span>
                       <div className="text-right">
-                        <span className="text-[10px] text-slate-400 block font-semibold truncate max-w-[90px]">{classComparisonData.classB.name}</span>
+                        <span className="text-[11px] text-slate-400 block font-semibold truncate max-w-[100px]">{classComparisonData.classB.name}</span>
                         <span className="text-2xl font-black font-mono text-cyan-400">{classComparisonData.classB.avgEma > 0 ? format1Dec(classComparisonData.classB.avgEma) : '-'}</span>
                       </div>
                     </div>
-                    <div className="pt-2 border-t border-white/5 text-[10px] font-black flex items-center justify-center">
+                    <div className="pt-2 border-t border-white/5 text-[11px] font-black flex items-center justify-center">
                       {classComparisonData.emaDiff > 0 ? (
-                        <span className="text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+                        <span className="text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-lg border border-emerald-500/20 whitespace-nowrap">
                           {classComparisonData.classA.name} cao hơn +{format1Dec(classComparisonData.emaDiff)} đ
                         </span>
                       ) : classComparisonData.emaDiff < 0 ? (
-                        <span className="text-cyan-400 bg-cyan-500/10 px-2 py-0.5 rounded border border-cyan-500/20">
+                        <span className="text-cyan-400 bg-cyan-500/10 px-2.5 py-1 rounded-lg border border-cyan-500/20 whitespace-nowrap">
                           {classComparisonData.classB.name} cao hơn +{format1Dec(Math.abs(classComparisonData.emaDiff))} đ
                         </span>
                       ) : (
-                        <span className="text-slate-400 bg-slate-500/10 px-2 py-0.5 rounded">Hai lớp bằng điểm nhau</span>
+                        <span className="text-slate-400 bg-slate-500/10 px-2.5 py-1 rounded-lg whitespace-nowrap">Hai lớp bằng điểm nhau</span>
                       )}
                     </div>
                   </div>
 
                   {/* 2. Attendance % Comparison */}
                   <div className="p-4 rounded-xl bg-[#0e1322] border border-[#1b253b] flex flex-col justify-between gap-3 shadow-md">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-black uppercase tracking-wider text-emerald-400">CHUYÊN CẦN %</span>
+                    <div className="flex items-center justify-center gap-2 border-b border-white/5 pb-2 text-center">
                       <Users size={14} className="text-emerald-400" />
+                      <span className="text-xs font-black uppercase tracking-wider text-emerald-400">CHUYÊN CẦN %</span>
                     </div>
-                    <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center justify-between gap-2 px-1">
                       <div className="text-left">
-                        <span className="text-[10px] text-slate-400 block font-semibold truncate max-w-[90px]">{classComparisonData.classA.name}</span>
+                        <span className="text-[11px] text-slate-400 block font-semibold truncate max-w-[100px]">{classComparisonData.classA.name}</span>
                         <span className="text-2xl font-black font-mono text-emerald-400">{classComparisonData.classA.attendancePct}%</span>
                       </div>
                       <span className="text-xs font-black text-slate-600 font-mono">VS</span>
                       <div className="text-right">
-                        <span className="text-[10px] text-slate-400 block font-semibold truncate max-w-[90px]">{classComparisonData.classB.name}</span>
+                        <span className="text-[11px] text-slate-400 block font-semibold truncate max-w-[100px]">{classComparisonData.classB.name}</span>
                         <span className="text-2xl font-black font-mono text-teal-400">{classComparisonData.classB.attendancePct}%</span>
                       </div>
                     </div>
-                    <div className="pt-2 border-t border-white/5 text-[10px] font-black flex items-center justify-center">
+                    <div className="pt-2 border-t border-white/5 text-[11px] font-black flex items-center justify-center">
                       {classComparisonData.attDiff > 0 ? (
-                        <span className="text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+                        <span className="text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-lg border border-emerald-500/20 whitespace-nowrap">
                           {classComparisonData.classA.name} chuyên cần hơn +{classComparisonData.attDiff}%
                         </span>
                       ) : classComparisonData.attDiff < 0 ? (
-                        <span className="text-teal-400 bg-teal-500/10 px-2 py-0.5 rounded border border-teal-500/20">
+                        <span className="text-teal-400 bg-teal-500/10 px-2.5 py-1 rounded-lg border border-teal-500/20 whitespace-nowrap">
                           {classComparisonData.classB.name} chuyên cần hơn +{Math.abs(classComparisonData.attDiff)}%
                         </span>
                       ) : (
-                        <span className="text-slate-400 bg-slate-500/10 px-2 py-0.5 rounded">Tỷ lệ chuyên cần ngang nhau</span>
+                        <span className="text-slate-400 bg-slate-500/10 px-2.5 py-1 rounded-lg whitespace-nowrap">Tỷ lệ chuyên cần ngang nhau</span>
                       )}
                     </div>
                   </div>
 
                   {/* 3. Improving % Comparison */}
                   <div className="p-4 rounded-xl bg-[#0e1322] border border-[#1b253b] flex flex-col justify-between gap-3 shadow-md">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-black uppercase tracking-wider text-sky-400">TỶ LỆ TIẾN BỘ</span>
+                    <div className="flex items-center justify-center gap-2 border-b border-white/5 pb-2 text-center">
                       <TrendingUp size={14} className="text-sky-400" />
+                      <span className="text-xs font-black uppercase tracking-wider text-sky-400">TỶ LỆ TIẾN BỘ</span>
                     </div>
-                    <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center justify-between gap-2 px-1">
                       <div className="text-left">
-                        <span className="text-[10px] text-slate-400 block font-semibold truncate max-w-[90px]">{classComparisonData.classA.name}</span>
+                        <span className="text-[11px] text-slate-400 block font-semibold truncate max-w-[100px]">{classComparisonData.classA.name}</span>
                         <span className="text-2xl font-black font-mono text-blue-400">{classComparisonData.classA.improvingPct}%</span>
                       </div>
                       <span className="text-xs font-black text-slate-600 font-mono">VS</span>
                       <div className="text-right">
-                        <span className="text-[10px] text-slate-400 block font-semibold truncate max-w-[90px]">{classComparisonData.classB.name}</span>
+                        <span className="text-[11px] text-slate-400 block font-semibold truncate max-w-[100px]">{classComparisonData.classB.name}</span>
                         <span className="text-2xl font-black font-mono text-cyan-300">{classComparisonData.classB.improvingPct}%</span>
                       </div>
                     </div>
-                    <div className="pt-2 border-t border-white/5 text-[10px] font-black flex items-center justify-center">
+                    <div className="pt-2 border-t border-white/5 text-[11px] font-black flex items-center justify-center">
                       {classComparisonData.impDiff > 0 ? (
-                        <span className="text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded border border-blue-500/20">
+                        <span className="text-blue-400 bg-blue-500/10 px-2.5 py-1 rounded-lg border border-blue-500/20 whitespace-nowrap">
                           {classComparisonData.classA.name} tiến bộ hơn +{classComparisonData.impDiff}%
                         </span>
                       ) : classComparisonData.impDiff < 0 ? (
-                        <span className="text-cyan-400 bg-cyan-500/10 px-2 py-0.5 rounded border border-cyan-500/20">
+                        <span className="text-cyan-400 bg-cyan-500/10 px-2.5 py-1 rounded-lg border border-cyan-500/20 whitespace-nowrap">
                           {classComparisonData.classB.name} tiến bộ hơn +{Math.abs(classComparisonData.impDiff)}%
                         </span>
                       ) : (
-                        <span className="text-slate-400 bg-slate-500/10 px-2 py-0.5 rounded">Tỷ lệ tiến bộ bằng nhau</span>
+                        <span className="text-slate-400 bg-slate-500/10 px-2.5 py-1 rounded-lg whitespace-nowrap">Tỷ lệ tiến bộ bằng nhau</span>
                       )}
                     </div>
                   </div>
 
                   {/* 4. Std Dev / Homogeneity Comparison */}
                   <div className="p-4 rounded-xl bg-[#0e1322] border border-[#1b253b] flex flex-col justify-between gap-3 shadow-md">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-black uppercase tracking-wider text-amber-400">ĐỘ ĐỒNG ĐỀU (σ)</span>
+                    <div className="flex items-center justify-center gap-2 border-b border-white/5 pb-2 text-center">
                       <Activity size={14} className="text-amber-400" />
+                      <span className="text-xs font-black uppercase tracking-wider text-amber-400">ĐỘ LỆCH CHUẨN (SD)</span>
                     </div>
-                    <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center justify-between gap-2 px-1">
                       <div className="text-left">
-                        <span className="text-[10px] text-slate-400 block font-semibold truncate max-w-[90px]">{classComparisonData.classA.name}</span>
+                        <span className="text-[11px] text-slate-400 block font-semibold truncate max-w-[100px]">{classComparisonData.classA.name}</span>
                         <span className="text-2xl font-black font-mono text-amber-300">σ={classComparisonData.classA.classSd}</span>
                       </div>
                       <span className="text-xs font-black text-slate-600 font-mono">VS</span>
                       <div className="text-right">
-                        <span className="text-[10px] text-slate-400 block font-semibold truncate max-w-[90px]">{classComparisonData.classB.name}</span>
+                        <span className="text-[11px] text-slate-400 block font-semibold truncate max-w-[100px]">{classComparisonData.classB.name}</span>
                         <span className="text-2xl font-black font-mono text-yellow-300">σ={classComparisonData.classB.classSd}</span>
                       </div>
                     </div>
-                    <div className="pt-2 border-t border-white/5 text-[10px] font-black flex items-center justify-center">
+                    <div className="pt-2 border-t border-white/5 text-[11px] font-black flex items-center justify-center">
                       {classComparisonData.classA.classSd < classComparisonData.classB.classSd ? (
-                        <span className="text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+                        <span className="text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-lg border border-emerald-500/20 whitespace-nowrap">
                           {classComparisonData.classA.name} đồng đều học lực hơn
                         </span>
                       ) : classComparisonData.classA.classSd > classComparisonData.classB.classSd ? (
-                        <span className="text-yellow-400 bg-yellow-500/10 px-2 py-0.5 rounded border border-yellow-500/20">
+                        <span className="text-yellow-400 bg-yellow-500/10 px-2.5 py-1 rounded-lg border border-yellow-500/20 whitespace-nowrap">
                           {classComparisonData.classB.name} đồng đều học lực hơn
                         </span>
                       ) : (
-                        <span className="text-slate-400 bg-slate-500/10 px-2 py-0.5 rounded">Mức độ phân tán ngang nhau</span>
+                        <span className="text-slate-400 bg-slate-500/10 px-2.5 py-1 rounded-lg whitespace-nowrap">Mức độ phân tán ngang nhau</span>
                       )}
                     </div>
                   </div>
                 </div>
 
                 {/* Side-by-Side Component Scores & 6-Tier Rank Distribution */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pt-1">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pt-1 animate-cascade-3">
                   {/* Left: Dual Progress Bars for each metric with explicit tracks & values */}
                   <div className="p-5 rounded-xl bg-[#090d17] border border-[#192236] space-y-4">
                     <div className="flex items-center justify-between border-b border-white/5 pb-2.5">
@@ -2807,7 +2886,7 @@ export default function ReportsPage() {
                     <div className="flex items-center justify-between border-b border-white/5 pb-2.5">
                       <span className="text-xs font-black uppercase tracking-wider text-white flex items-center gap-2">
                         <Award size={15} className="text-amber-400" />
-                        Phân Bố 6 Hạng Bậc Học Lực (6-Tier Rank Duel)
+                        Phân Bố 6 Hạng Bậc Học Lực
                       </span>
                       <span className="text-[11px] font-bold text-slate-400">
                         {classComparisonData.classA.studentCount} vs {classComparisonData.classB.studentCount} hs
@@ -2843,7 +2922,7 @@ export default function ReportsPage() {
                 </div>
 
                 {/* Leading Student Badges */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1 animate-cascade-4">
                   <div className="p-3.5 rounded-xl bg-[#0e1322] border border-blue-500/30 flex items-center justify-between gap-3">
                     <div className="flex items-center gap-3">
                       {classComparisonData.classA.topStudent ? (
@@ -2898,13 +2977,13 @@ export default function ReportsPage() {
             )}
 
             {/* 2. FULL CROSS-CLASS BENCHMARK TABLE */}
-            <div className="bg-[#0b0f19] border border-[#1b253b] rounded-xl flex flex-col shadow-xl p-6 space-y-4 animate-cascade-2">
+            <div className="bg-[#0b0f19] border border-[#1b253b] rounded-xl flex flex-col shadow-xl p-6 space-y-4 animate-cascade-5">
               <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[#161f33] pb-4">
                 <div className="flex items-center gap-3">
                   <BarChart3 size={20} className="text-blue-400" />
                   <div>
                     <h3 className="text-base font-black text-white uppercase tracking-wider">
-                      BẢNG TỔNG HỢP HIỆU QUẢ TOÀN BỘ CÁC LỚP HỌC (CENTER-WIDE BENCHMARK)
+                      BẢNG TỔNG HỢP HIỆU QUẢ TOÀN BỘ CÁC LỚP HỌC
                     </h3>
                     <p className="text-xs text-slate-400 font-semibold mt-0.5">
                       Đánh giá toàn diện sĩ số, tỷ lệ chuyên cần, điểm số EMA trung bình, tỷ lệ tiến bộ và mức độ phân hóa trình độ của tất cả các lớp.
@@ -3147,12 +3226,12 @@ export default function ReportsPage() {
                     </span>
                     <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-[#182038] text-slate-300 border border-white/10">
                       {groupingScope === 'current' ? (selectedClassId ? `Lớp ${classes.find(c => String(c.id) === selectedClassId)?.class_name}` : 'Lớp Hiện Tại') :
-                       groupingScope === 'grade' ? `Toàn Khối ${classes.find(c => String(c.id) === selectedClassId)?.grade || groupingGradeFilter || '8'}` :
+                       groupingScope === 'grade' ? 'Toàn Khối' :
                        'Toàn Trung Tâm'}
                     </span>
                   </div>
                   <p className="text-xs text-slate-400 font-semibold mt-0.5">
-                    Tự động phân loại học sinh theo Năng lực hiện tại (EMA), Tốc độ tăng trưởng và Phổ điểm thực tế.
+                    Tự động phân loại học sinh theo Năng lực hiện tại, Tốc độ tăng trưởng và Phổ điểm thực tế.
                   </p>
                 </div>
               </div>
@@ -3223,7 +3302,7 @@ export default function ReportsPage() {
                             groupingScope === 'grade' ? 'text-white font-black' : 'text-slate-400 hover:text-white'
                           }`}
                         >
-                          Toàn Khối {classes.find(c => String(c.id) === selectedClassId)?.grade || groupingGradeFilter || '8'}
+                          Toàn Khối
                         </button>
                         <button
                           type="button"
@@ -3269,7 +3348,7 @@ export default function ReportsPage() {
                             groupingMode === 'tier' ? 'text-white font-black' : 'text-slate-400 hover:text-white'
                           }`}
                         >
-                          Theo Chuẩn Học Lực
+                          Theo 6 Hạng Bậc
                         </button>
                         <button
                           type="button"
@@ -3278,96 +3357,74 @@ export default function ReportsPage() {
                             groupingMode === 'kmeans' ? 'text-white font-black' : 'text-slate-400 hover:text-white'
                           }`}
                         >
-                          Tự Động Phân Cụm K-Means
+                          Phân Cụm Tự Động
                         </button>
                       </div>
 
                       {groupingMode === 'kmeans' && (
-                        <div className="relative flex bg-[#0d1018] p-1 rounded-xl border border-white/10 text-xs shrink-0 font-bold select-none">
-                          <div
-                            className="absolute top-1 bottom-1 rounded-lg bg-[#3b82f6] shadow-[0_0_12px_rgba(59,130,246,0.5)] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] pointer-events-none"
-                            style={{
-                              left: kmeansK === 2 ? '4px' : kmeansK === 3 ? 'calc(33.333% + 1px)' : 'calc(66.666% + 1px)',
-                              width: 'calc(33.333% - 4px)',
-                            }}
-                          />
-                          <button
-                            type="button"
-                            onClick={() => setKmeansK(2)}
-                            className={`flex-1 relative z-10 py-1 px-3 text-center transition-colors cursor-pointer ${
-                              kmeansK === 2 ? 'text-white font-black' : 'text-slate-400 hover:text-white'
-                            }`}
-                          >
-                            2 Nhóm
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => setKmeansK(3)}
-                            className={`flex-1 relative z-10 py-1 px-3 text-center transition-colors cursor-pointer ${
-                              kmeansK === 3 ? 'text-white font-black' : 'text-slate-400 hover:text-white'
-                            }`}
-                          >
-                            3 Nhóm
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => setKmeansK(4)}
-                            className={`flex-1 relative z-10 py-1 px-3 text-center transition-colors cursor-pointer ${
-                              kmeansK === 4 ? 'text-white font-black' : 'text-slate-400 hover:text-white'
-                            }`}
-                          >
-                            4 Nhóm
-                          </button>
+                        <div className="flex items-center gap-2 bg-[#121626] px-3 py-1.5 rounded-xl border border-white/10">
+                          <span className="text-xs text-slate-300 font-bold">Số nhóm:</span>
+                          <div className="flex items-center gap-1">
+                            {[2, 3, 4].map(k => (
+                              <button
+                                key={k}
+                                type="button"
+                                onClick={() => setKmeansK(k)}
+                                className={`w-6 h-6 rounded-lg text-xs font-black transition cursor-pointer ${
+                                  kmeansK === k ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white hover:bg-white/5'
+                                }`}
+                              >
+                                {k}
+                              </button>
+                            ))}
+                          </div>
                         </div>
                       )}
                     </div>
                   </div>
 
-                  {/* Group Cards Grid */}
+                  {/* Group Cards Grid with Staggered Cascading Animation */}
                   {smartGroups.length === 0 ? (
-                    <div className="text-center py-10 text-slate-400 text-xs font-bold bg-[#090d1a] rounded-xl border border-[#1a2340]">
-                      Chưa có dữ liệu điểm học sinh trong phạm vi này để phân nhóm.
+                    <div className="text-center py-12 text-slate-500 text-sm font-semibold">
+                      Chưa có dữ liệu học sinh để phân nhóm.
                     </div>
                   ) : (
-                    <div className={`grid gap-4 ${
-                      smartGroups.length === 2 ? 'grid-cols-1 md:grid-cols-2' :
-                      smartGroups.length === 3 ? 'grid-cols-1 lg:grid-cols-3' :
-                      'grid-cols-1 sm:grid-cols-2 xl:grid-cols-4'
-                    }`}>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                       {smartGroups.map((g) => (
                         <div
                           key={g.id}
-                          className={`bg-[#0f1424] border ${g.borderCls} rounded-2xl flex flex-col overflow-hidden shadow-xl transition-all duration-300 hover:border-white/20`}
+                          className={`bg-[#0e1222] border ${g.borderCls} rounded-2xl flex flex-col overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 animate-cascade-1`}
                         >
-                          {/* Card Header */}
-                          <div className={`p-4 border-b border-white/5 ${g.headerBg}`}>
-                            <div className="flex items-start justify-between gap-2">
-                              <div>
-                                <div className="flex items-center gap-2">
-                                  <span
-                                    className="w-2.5 h-2.5 rounded-full shrink-0 shadow-sm"
-                                    style={{ backgroundColor: g.dotColor }}
-                                  />
-                                  <h4 className="text-xs font-black text-white uppercase tracking-wide">
-                                    {g.title}
-                                  </h4>
-                                </div>
-                                <span className="text-[10px] font-bold text-slate-400 block mt-0.5">
-                                  {g.subtitle}
-                                </span>
+                          {/* Group Header Card */}
+                          <div className={`p-4 border-b border-white/5 ${g.headerBg} flex flex-col gap-2`}>
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <span
+                                  className="w-3 h-3 rounded-full shrink-0"
+                                  style={{ backgroundColor: g.dotColor, boxShadow: `0 0 10px ${g.dotColor}80` }}
+                                />
+                                <h4 className="text-sm font-black text-white">{g.title}</h4>
                               </div>
-                              <span className={`px-2 py-0.5 rounded-lg text-[10px] font-black shrink-0 ${g.badgeCls}`}>
-                                {g.students.length} Học Sinh
+                              <span className={`text-xs font-black px-2.5 py-0.5 rounded-lg border font-mono ${g.badgeCls}`}>
+                                {g.students.length} HS
                               </span>
                             </div>
 
-                            {/* Quick Group Metrics with Standard Deviation (SD) Tooltip */}
-                            <div className="grid grid-cols-2 gap-2 mt-3 pt-3 border-t border-white/5">
+                            {/* Subtitle & Key Stats */}
+                            <p className="text-[11px] text-slate-400 font-semibold">{g.subtitle}</p>
+
+                            <div className="grid grid-cols-3 gap-2 pt-2 border-t border-white/5 text-center">
                               <div className="bg-[#0b0e1a] p-2 rounded-xl border border-white/5">
-                                <span className="text-[9px] font-black uppercase text-slate-400 block">EMA Trung Bình</span>
-                                <span className="text-sm font-black text-white font-mono">{g.avgEma} <span className="text-[10px] text-slate-500 font-bold">/ 10</span></span>
+                                <span className="text-[9px] font-black uppercase text-slate-400 block">EMA TB</span>
+                                <span className="text-sm font-black text-white font-mono">{format1Dec(g.avgEma)}</span>
                               </div>
-                              <div
+                              <div className="bg-[#0b0e1a] p-2 rounded-xl border border-white/5">
+                                <span className="text-[9px] font-black uppercase text-slate-400 block">Phổ Điểm</span>
+                                <span className="text-xs font-black font-mono text-indigo-300">
+                                  {format1Dec(g.minScore)} - {format1Dec(g.maxScore)}đ
+                                </span>
+                              </div>
+                              <div 
                                 className="bg-[#0b0e1a] p-2 rounded-xl border border-white/5 cursor-help group/sd"
                                 title="Độ Lệch Chuẩn (Standard Deviation - SD / σ): Đo lường mức độ đồng đều về trình độ điểm số giữa các học sinh trong nhóm. SD càng nhỏ thì học lực trong nhóm càng đồng đều."
                               >
@@ -3459,7 +3516,7 @@ export default function ReportsPage() {
             </div>
           </div>
 
-          {/* 4. BIẾN ĐỘNG ĐIỂM SỐ (SCORE FLUCTUATIONS & GROWTH TRACKING) */}
+          {/* 4. BIẾN ĐỘNG ĐIỂM SỐ */}
           <div className="bg-[#0d1120] border border-emerald-500/30 rounded-2xl flex flex-col shadow-2xl overflow-hidden transition-all animate-cascade-4">
             <div
               onClick={() => setIsGrowthSectionOpen(!isGrowthSectionOpen)}
@@ -3472,7 +3529,7 @@ export default function ReportsPage() {
                 <div>
                   <div className="flex items-center gap-2">
                     <h3 className="text-sm font-black text-white uppercase tracking-wider">
-                      BIẾN ĐỘNG ĐIỂM SỐ (SCORE FLUCTUATIONS)
+                      BIẾN ĐỘNG ĐIỂM SỐ
                     </h3>
                     <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
                       {scoreFluctuations.length} Học Sinh
@@ -3512,7 +3569,7 @@ export default function ReportsPage() {
             </div>
           </div>
 
-          {/* 5. BẤT THƯỜNG HỌC TẬP (STUDY ANOMALIES) */}
+          {/* 5. BẤT THƯỜNG HỌC TẬP */}
           <div className="bg-[#101424] border border-indigo-500/20 rounded-2xl p-4 sm:p-5 shadow-xl flex flex-col gap-4 transition-all animate-cascade-5">
             <div 
               onClick={() => setIsBottlenecksSectionOpen(!isBottlenecksSectionOpen)}
@@ -3525,7 +3582,7 @@ export default function ReportsPage() {
                 <div>
                   <div className="flex items-center gap-2">
                     <h3 className="text-sm font-black text-white uppercase tracking-wider">
-                      BẤT THƯỜNG HỌC TẬP (STUDY ANOMALIES)
+                      BẤT THƯỜNG HỌC TẬP
                     </h3>
                     <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
                       Đang Hoàn Thiện Phương Pháp Kiểm Thử
@@ -3625,22 +3682,22 @@ export default function ReportsPage() {
 
                 <div className="flex items-center gap-6 z-10 bg-[#141a30] border border-[#232d4e] px-6 py-3 rounded-xl">
                   <div>
-                    <span className="text-[10px] font-black uppercase text-slate-400 block">Overall Score</span>
+                    <span className="text-[10px] font-black uppercase text-slate-400 block">Tổng Điểm</span>
                     <span className="text-xl font-black text-emerald-400 font-mono">{stats.overall}</span>
                   </div>
                   <div className="h-8 w-px bg-[#232d4e]"></div>
                   <div>
-                    <span className="text-[10px] font-black uppercase text-slate-400 block">Attendance</span>
+                    <span className="text-[10px] font-black uppercase text-slate-400 block">Chuyên Cần</span>
                     <span className="text-xl font-black text-emerald-400 font-mono">{stats.attendancePct}%</span>
                   </div>
                   <div className="h-8 w-px bg-[#232d4e]"></div>
                   <div>
-                    <span className="text-[10px] font-black uppercase text-slate-400 block">Rank</span>
+                    <span className="text-[10px] font-black uppercase text-slate-400 block">Hạng</span>
                     <span className="text-xl font-black text-amber-400 font-mono">{stats.rank}</span>
                   </div>
                   <div className="h-8 w-px bg-[#232d4e]"></div>
                   <div>
-                    <span className="text-[10px] font-black uppercase text-slate-400 block">Level</span>
+                    <span className="text-[10px] font-black uppercase text-slate-400 block">Học Lực</span>
                     <span className="inline-block px-2.5 py-0.5 rounded-lg text-[10px] font-black bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
                       {stats.level}
                     </span>
@@ -3653,7 +3710,7 @@ export default function ReportsPage() {
                   <div>
                     <div className="flex items-center gap-2">
                       <span className="text-[10px] font-black uppercase text-indigo-400 tracking-widest">
-                        CHỈ SỐ HIỆU SUẤT TỔNG HỢP (PERFORMANCE INDEX)
+                        CHỈ SỐ HIỆU SUẤT TỔNG HỢP
                       </span>
                       <span className="inline-block px-2.5 py-0.5 rounded-lg text-[10px] font-black bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
                         {engine.rating_label}
@@ -3753,7 +3810,7 @@ export default function ReportsPage() {
               <div className="flex items-center gap-3">
                 <BarChart3 size={18} className="text-indigo-400" />
                 <h3 className="text-sm font-black text-white uppercase tracking-wider">
-                  TIẾN ĐỘ HỌC TẬP QUA CÁC KỲ & DỰ ĐOÁN REGRESSION
+                  TIẾN ĐỘ HỌC TẬP QUA CÁC KỲ & DỰ ĐOÁN XU HƯỚNG
                 </h3>
               </div>
 
@@ -4092,7 +4149,11 @@ export default function ReportsPage() {
                   const lastX = getSvgX(lastIdx, sessionChartData.length);
                   const forecastX = lastX + 40 * zoomLevel;
                   return (
-                    <g className="animate-point-pop" style={{ animationDelay: '2.45s' }}>
+                    <g 
+                      key={`forecast-${selectedStudentId || selectedClassId || 'all'}-${timeView}-${sessionChartData.length}`}
+                      className="animate-point-pop" 
+                      style={{ animationDelay: '2.45s' }}
+                    >
                       {/* 1. Check 1 Forecast Line & Point */}
                       <line
                         x1={lastX}
@@ -4181,79 +4242,81 @@ export default function ReportsPage() {
                 })()}
 
                 {/* INTERACTIVE HOVER OVERLAY COLUMNS & SEQUENTIALLY POPPING DATA POINTS */}
-                {sessionChartData.map((d, i) => {
-                  const x = getSvgX(i, sessionChartData.length);
-                  const y1 = getSvgY(d.check1);
-                  const y2 = getSvgY(d.check2);
-                  const yHw = getSvgY(d.homework);
-                  const pointDelay = (0.85 + (i / Math.max(1, sessionChartData.length - 1)) * 1.55).toFixed(2);
+                <g key={`chart-points-${selectedStudentId || selectedClassId || 'all'}-${timeView}-${sessionChartData.length}`}>
+                  {sessionChartData.map((d, i) => {
+                    const x = getSvgX(i, sessionChartData.length);
+                    const y1 = getSvgY(d.check1);
+                    const y2 = getSvgY(d.check2);
+                    const yHw = getSvgY(d.homework);
+                    const pointDelay = (0.85 + (i / Math.max(1, sessionChartData.length - 1)) * 1.55).toFixed(2);
 
-                  return (
-                    <g 
-                      key={i}
-                      className="cursor-pointer group"
-                      onMouseEnter={() => setHoveredPoint({
-                        index: i,
-                        sessionName: d.sessionName,
-                        fullDate: d.fullDate,
-                        check1: d.check1,
-                        check2: d.check2,
-                        homework: d.homework,
-                        x,
-                        fittedC1: fittedLookup.c1[i] ?? null,
-                        fittedC2: fittedLookup.c2[i] ?? null,
-                        fittedHw: fittedLookup.hw[i] ?? null,
-                        predModel: 'EMA',
-                      })}
-                      onMouseLeave={() => setHoveredPoint(null)}
-                    >
-                      <rect
-                        x={x - 25}
-                        y={paddingTop}
-                        width={50}
-                        height={plotAreaHeight}
-                        fill="transparent"
-                      />
+                    return (
+                      <g 
+                        key={`pt-${selectedStudentId || selectedClassId || 'all'}-${timeView}-${i}`}
+                        className="cursor-pointer group"
+                        onMouseEnter={() => setHoveredPoint({
+                          index: i,
+                          sessionName: d.sessionName,
+                          fullDate: d.fullDate,
+                          check1: d.check1,
+                          check2: d.check2,
+                          homework: d.homework,
+                          x,
+                          fittedC1: fittedLookup.c1[i] ?? null,
+                          fittedC2: fittedLookup.c2[i] ?? null,
+                          fittedHw: fittedLookup.hw[i] ?? null,
+                          predModel: 'EMA',
+                        })}
+                        onMouseLeave={() => setHoveredPoint(null)}
+                      >
+                        <rect
+                          x={x - 25}
+                          y={paddingTop}
+                          width={50}
+                          height={plotAreaHeight}
+                          fill="transparent"
+                        />
 
-                      <line
-                        x1={x}
-                        y1={paddingTop}
-                        x2={x}
-                        y2={chartHeight - paddingBottom}
-                        stroke="#5c36f5"
-                        strokeWidth="1.5"
-                        strokeDasharray="3 3"
-                        className="opacity-0 group-hover:opacity-100 transition-opacity"
-                      />
+                        <line
+                          x1={x}
+                          y1={paddingTop}
+                          x2={x}
+                          y2={chartHeight - paddingBottom}
+                          stroke="#5c36f5"
+                          strokeWidth="1.5"
+                          strokeDasharray="3 3"
+                          className="opacity-0 group-hover:opacity-100 transition-opacity"
+                        />
 
-                      {/* Check 1 Point */}
-                      <g className="animate-point-pop" style={{ animationDelay: `${pointDelay}s` }}>
-                        <circle cx={x} cy={y1} r="7" fill="#3b82f6" filter="url(#glow-blue)" style={{ transformBox: 'fill-box', transformOrigin: 'center' }} className="transition-transform duration-200 group-hover:scale-125" />
-                        <circle cx={x} cy={y1} r="3.5" fill="#ffffff" style={{ transformBox: 'fill-box', transformOrigin: 'center' }} className="transition-transform duration-200 group-hover:scale-125" />
-                      </g>
-
-                      {/* Check 2 Point */}
-                      <g className="animate-point-pop" style={{ animationDelay: `${pointDelay}s` }}>
-                        <circle cx={x} cy={y2} r="7" fill="#a855f7" filter="url(#glow-purple)" style={{ transformBox: 'fill-box', transformOrigin: 'center' }} className="transition-transform duration-200 group-hover:scale-125" />
-                        <circle cx={x} cy={y2} r="3.5" fill="#ffffff" style={{ transformBox: 'fill-box', transformOrigin: 'center' }} className="transition-transform duration-200 group-hover:scale-125" />
-                      </g>
-
-                      {/* Homework Point */}
-                      <g className="animate-point-pop" style={{ animationDelay: `${pointDelay}s` }}>
-                        <circle cx={x} cy={yHw} r="7" fill="#10b981" filter="url(#glow-emerald)" style={{ transformBox: 'fill-box', transformOrigin: 'center' }} className="transition-transform duration-200 group-hover:scale-125" />
-                        <circle cx={x} cy={yHw} r="3.5" fill="#ffffff" style={{ transformBox: 'fill-box', transformOrigin: 'center' }} className="transition-transform duration-200 group-hover:scale-125" />
-                      </g>
-
-                      {i === sessionChartData.length - 1 && (
+                        {/* Check 1 Point */}
                         <g className="animate-point-pop" style={{ animationDelay: `${pointDelay}s` }}>
-                          <text x={x + 14} y={y1 + 4} fill="#3b82f6" fontSize="12" fontWeight="900">{d.check1}</text>
-                          <text x={x + 14} y={y2 + 4} fill="#a855f7" fontSize="12" fontWeight="900">{d.check2}</text>
-                          <text x={x + 14} y={yHw + 4} fill="#10b981" fontSize="12" fontWeight="900">{d.homework}</text>
+                          <circle cx={x} cy={y1} r="7" fill="#3b82f6" filter="url(#glow-blue)" style={{ transformBox: 'fill-box', transformOrigin: 'center' }} className="transition-transform duration-200 group-hover:scale-125" />
+                          <circle cx={x} cy={y1} r="3.5" fill="#ffffff" style={{ transformBox: 'fill-box', transformOrigin: 'center' }} className="transition-transform duration-200 group-hover:scale-125" />
                         </g>
-                      )}
-                    </g>
-                  );
-                })}
+
+                        {/* Check 2 Point */}
+                        <g className="animate-point-pop" style={{ animationDelay: `${pointDelay}s` }}>
+                          <circle cx={x} cy={y2} r="7" fill="#a855f7" filter="url(#glow-purple)" style={{ transformBox: 'fill-box', transformOrigin: 'center' }} className="transition-transform duration-200 group-hover:scale-125" />
+                          <circle cx={x} cy={y2} r="3.5" fill="#ffffff" style={{ transformBox: 'fill-box', transformOrigin: 'center' }} className="transition-transform duration-200 group-hover:scale-125" />
+                        </g>
+
+                        {/* Homework Point */}
+                        <g className="animate-point-pop" style={{ animationDelay: `${pointDelay}s` }}>
+                          <circle cx={x} cy={yHw} r="7" fill="#10b981" filter="url(#glow-emerald)" style={{ transformBox: 'fill-box', transformOrigin: 'center' }} className="transition-transform duration-200 group-hover:scale-125" />
+                          <circle cx={x} cy={yHw} r="3.5" fill="#ffffff" style={{ transformBox: 'fill-box', transformOrigin: 'center' }} className="transition-transform duration-200 group-hover:scale-125" />
+                        </g>
+
+                        {i === sessionChartData.length - 1 && (
+                          <g className="animate-point-pop" style={{ animationDelay: `${pointDelay}s` }}>
+                            <text x={x + 14} y={y1 + 4} fill="#3b82f6" fontSize="12" fontWeight="900">{d.check1}</text>
+                            <text x={x + 14} y={y2 + 4} fill="#a855f7" fontSize="12" fontWeight="900">{d.check2}</text>
+                            <text x={x + 14} y={yHw + 4} fill="#10b981" fontSize="12" fontWeight="900">{d.homework}</text>
+                          </g>
+                        )}
+                      </g>
+                    );
+                  })}
+                </g>
               </g>
 
             {/* DYNAMIC X-AXIS SESSION DATE LABELS (DATES MOVE WITH DRAG/ZOOM, LABELS PINNED AT BOTTOM) */}
@@ -4262,7 +4325,7 @@ export default function ReportsPage() {
               if (x < paddingLeft - 20 || x > chartWidth - paddingRight + 20) return null;
               return (
                 <text 
-                  key={i}
+                  key={`xlabel-${selectedStudentId || selectedClassId || 'all'}-${timeView}-${i}`}
                   x={x} 
                   y={chartHeight - 12} 
                   fill={hoveredPoint?.index === i ? "#ffffff" : "#94a3b8"} 
