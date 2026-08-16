@@ -1,0 +1,231 @@
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import { api } from '../../../api';
+import { showToast } from '../../../components/Toast';
+import { GradeTypeItem } from '../../../types';
+import { getSavedWarningSettings, DEFAULT_WARNING_SETTINGS, formatSessionDate } from '../utils';
+import { trunc1Dec } from '../../../utils';
+
+export function useReportsData() {
+  const [loading, setLoading] = useState(false);
+  const [classes, setClasses] = useState<any[]>([]);
+  const [selectedClassId, setSelectedClassId] = useState<string>('');
+  const [students, setStudents] = useState<any[]>([]);
+  const [selectedStudentId, setSelectedStudentId] = useState<string>('');
+
+  // 2-Class Head-to-Head Comparison State
+  const [compareClassAId, setCompareClassAId] = useState<string>('');
+  const [compareClassBId, setCompareClassBId] = useState<string>('');
+
+  // Analytics Data & System Engine Results from API
+  const [sessionRecords, setSessionRecords] = useState<any[]>([]);
+  const [studentRankings, setStudentRankings] = useState<any[]>([]);
+  const [analyticsSummary, setAnalyticsSummary] = useState<any>(null);
+  const [classAnalyticsMap, setClassAnalyticsMap] = useState<Record<string, any>>({});
+
+  // Custom Time Phases State
+  const [timePhases, setTimePhases] = useState<any[]>([]);
+  const [selectedPhaseId, setSelectedPhaseId] = useState<string>('');
+
+  // Early Warning & Risk Retention State (Configurable Thresholds)
+  const initialSettings = useMemo(() => getSavedWarningSettings(), []);
+  const [warningAbsentPct, setWarningAbsentPct] = useState<number>(initialSettings.absentPct);
+  const [warningConsecutiveAbsent, setWarningConsecutiveAbsent] = useState<number>(initialSettings.consecutiveAbsent);
+  const [warningTrendThreshold, setWarningTrendThreshold] = useState<number>(initialSettings.trendThreshold);
+  const [showWarningSettings, setShowWarningSettings] = useState<boolean>(false);
+
+  // Grade types configuration
+  const [gradeTypesList, setGradeTypesList] = useState<GradeTypeItem[]>([
+    { id: 'check_1', label: 'Check 1', weight: 35, color: '#3b82f6' },
+    { id: 'check_2', label: 'Check 2', weight: 55, color: '#a855f7' },
+    { id: 'homework', label: 'BTVN', weight: 10, color: '#f59e0b' }
+  ]);
+
+  useEffect(() => {
+    api.getSettings().then(data => {
+      if (data?.grade_types && Array.isArray(data.grade_types) && data.grade_types.length > 0) {
+        setGradeTypesList(data.grade_types);
+      } else if (data?.grade_weights) {
+        setGradeTypesList([
+          { id: 'check_1', label: 'Check 1', weight: data.grade_weights.check_1 ?? 35, color: '#3b82f6' },
+          { id: 'check_2', label: 'Check 2', weight: data.grade_weights.check_2 ?? 55, color: '#a855f7' },
+          { id: 'homework', label: 'BTVN', weight: data.grade_weights.homework ?? 10, color: '#f59e0b' }
+        ]);
+      }
+    }).catch(() => { });
+  }, []);
+
+  const handleUpdateWarningSettings = (updates: Partial<typeof DEFAULT_WARNING_SETTINGS>) => {
+    const newSettings = {
+      absentPct: warningAbsentPct,
+      consecutiveAbsent: warningConsecutiveAbsent,
+      trendThreshold: warningTrendThreshold,
+      ...updates
+    };
+    if (updates.absentPct !== undefined) setWarningAbsentPct(updates.absentPct);
+    if (updates.consecutiveAbsent !== undefined) setWarningConsecutiveAbsent(updates.consecutiveAbsent);
+    if (updates.trendThreshold !== undefined) setWarningTrendThreshold(updates.trendThreshold);
+    localStorage.setItem('cm_reports_warning_settings', JSON.stringify(newSettings));
+  };
+
+  const loadClassesAndStudents = async () => {
+    try {
+      const classList = await api.getClasses();
+      setClasses(classList);
+      if (classList && classList.length >= 2) {
+        setCompareClassAId(prev => prev || String(classList[0].id));
+        setCompareClassBId(prev => prev || String(classList[1].id));
+      } else if (classList && classList.length === 1) {
+        setCompareClassAId(prev => prev || String(classList[0].id));
+      }
+      const studentList = await api.getStudents();
+      setStudents(studentList);
+    } catch (err: any) {
+      showToast("Không thể tải danh sách lớp/học sinh: " + err.message, "error");
+    }
+  };
+
+  const loadAnalyticsData = async (silent?: boolean | any) => {
+    const isSilent = silent === true;
+    if (!isSilent) setLoading(true);
+    try {
+      const cid = selectedClassId ? parseInt(selectedClassId) : undefined;
+      const sid = selectedStudentId ? parseInt(selectedStudentId) : undefined;
+      const res = await api.getGradeAnalytics(cid, sid);
+      setSessionRecords(res.session_records || []);
+      setStudentRankings(res.student_rankings || []);
+      setAnalyticsSummary(res.analytics_summary || null);
+      setClassAnalyticsMap(res.class_analytics_map || {});
+    } catch (e: any) {
+      if (!isSilent) showToast("Lỗi tải báo cáo thống kê: " + (e.message || e), "error");
+    } finally {
+      if (!isSilent) setLoading(false);
+    }
+  };
+
+  const loadTimePhases = useCallback(async () => {
+    try {
+      const cid = selectedClassId ? parseInt(selectedClassId) : undefined;
+      const res = await api.getTimePhases(cid);
+      setTimePhases(res || []);
+    } catch {
+      setTimePhases([]);
+    }
+  }, [selectedClassId]);
+
+  useEffect(() => {
+    loadClassesAndStudents();
+    loadAnalyticsData();
+    const handleDataChanged = () => {
+      loadClassesAndStudents();
+      loadAnalyticsData();
+    };
+    window.addEventListener('data-changed', handleDataChanged);
+    return () => window.removeEventListener('data-changed', handleDataChanged);
+  }, []);
+
+  useEffect(() => {
+    loadAnalyticsData();
+  }, [selectedClassId, selectedStudentId]);
+
+  useEffect(() => {
+    loadTimePhases();
+  }, [loadTimePhases]);
+
+  // Selected Student Object
+  const selectedStudentObj = useMemo(() => {
+    if (!selectedStudentId) return null;
+    return students.find(s => String(s.id) === selectedStudentId) || null;
+  }, [selectedStudentId, students]);
+
+  // Analytics Engine math
+  const engine = useMemo(() => {
+    const raw = analyticsSummary || {
+      academic_score: 82.0,
+      trend_slope: 0.38,
+      trend_label: "Đang cải thiện",
+      consistency_score: 92.0,
+      std_dev: 0.45,
+      std_dev_c1: 0.35,
+      std_dev_c2: 0.50,
+      std_dev_hw: 0.20,
+      consistency_label: "Rất ổn định",
+      ema_level: 8.6,
+      ema_c1: 8.5,
+      ema_c2: 7.2,
+      ema_hw: 9.2,
+      predicted_next: 8.9,
+      pred_c1: 8.8,
+      pred_c2: 7.5,
+      pred_hw: 9.5,
+      attendance_pct: 96.0,
+      performance_index: 86.7,
+      rating_label: "Xuất Sắc",
+      recommendations: [
+        "Duy trì tiến độ học tập hiện tại",
+        "Dự đoán buổi tới: Check 1 (8.8), Check 2 (7.5), Homework (9.5)."
+      ]
+    };
+
+    const c1 = Math.min(10.0, Math.max(0.0, trunc1Dec(raw.pred_c1 ?? 0.0)));
+    const c2 = Math.min(10.0, Math.max(0.0, trunc1Dec(raw.pred_c2 ?? 0.0)));
+    const hw = Math.min(10.0, Math.max(0.0, trunc1Dec(raw.pred_hw ?? 0.0)));
+    const predNext = Math.min(10.0, Math.max(0.0, trunc1Dec(raw.predicted_next ?? 0.0)));
+
+    return {
+      ...raw,
+      pred_c1: c1,
+      pred_c2: c2,
+      pred_hw: hw,
+      predicted_next: predNext
+    };
+  }, [analyticsSummary]);
+
+  // Map student_id to sorted list of session records
+  const studentSessionsMap = useMemo(() => {
+    const map: Record<number, any[]> = {};
+    sessionRecords.forEach(r => {
+      const sid = r.student_id;
+      if (sid) {
+        if (!map[sid]) map[sid] = [];
+        map[sid].push(r);
+      }
+    });
+    Object.keys(map).forEach(k => {
+      map[Number(k)].sort((a, b) => (a.date > b.date ? 1 : -1));
+    });
+    return map;
+  }, [sessionRecords]);
+
+  return {
+    loading,
+    classes,
+    selectedClassId,
+    setSelectedClassId,
+    students,
+    selectedStudentId,
+    setSelectedStudentId,
+    compareClassAId,
+    setCompareClassAId,
+    compareClassBId,
+    setCompareClassBId,
+    sessionRecords,
+    studentRankings,
+    analyticsSummary,
+    classAnalyticsMap,
+    timePhases,
+    selectedPhaseId,
+    setSelectedPhaseId,
+    warningAbsentPct,
+    warningConsecutiveAbsent,
+    warningTrendThreshold,
+    showWarningSettings,
+    setShowWarningSettings,
+    handleUpdateWarningSettings,
+    gradeTypesList,
+    selectedStudentObj,
+    engine,
+    studentSessionsMap,
+    loadAnalyticsData,
+    loadTimePhases,
+  };
+}

@@ -94,6 +94,14 @@ Bumping `VERSION` and pushing git tags triggers the auto-update mechanism for al
 
 ---
 
+## 📏 RULE: STRICT FILE SIZE LIMIT & MODULAR ARCHITECTURE STANDARD
+
+- **Frontend Files**: **Strict Maximum 400 Lines** per file. Any component, page, or view approaching 400 lines MUST be refactored and modularized into subcomponents, dedicated hooks, types, or tab sub-views.
+- **Backend Files**: **Strict Maximum 500 Lines** per file. Large routers or service files MUST be partitioned into modular domain routers, services, or utility modules.
+- **Strictly No Bloated Monoliths**: 1,000+ line files are strictly forbidden to ensure clean searchability, maintainability, fast code reviews, and minimal merge conflicts.
+
+---
+
 ## 🚫 FORBIDDEN PATTERNS
 
 | Forbidden | Required Instead |
@@ -101,6 +109,7 @@ Bumping `VERSION` and pushing git tags triggers the auto-update mechanism for al
 | Raw `<table>` with manual JS filtering | `<DataTable data={...} columns={...} />` |
 | `useState` for search/sort/page in a page with DataTable | Remove it — DataTable handles internally |
 | `useReactTable` called directly in a page | Only allowed inside `DataTable.tsx` component |
+| Bloated files (>400 lines frontend, >500 lines backend) | Modularize into subcomponents, hooks & tabs |
 | `backdrop-blur-*` CSS classes | Solid dark backgrounds only |
 | Native `<select>` dropdowns | `<CustomSelect />` component |
 | Native `<input type="date">` | `<CustomDatePicker />` component |
