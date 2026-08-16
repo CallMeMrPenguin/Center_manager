@@ -572,13 +572,13 @@ export default function ReportsPage() {
     return list;
   }, [studentRankings, selectedClassId, selectedDistFilter]);
 
-  // 6-Tier Academic Ranking Distribution Breakdown
+  // 6-Tier Academic Ranking Distribution Breakdown (Ordered Top to Bottom: Quán Quân -> Đồng)
   const tierDistribution = useMemo(() => {
     const rawList = selectedClassId ? studentRankings.filter(r => String(r.class_id) === selectedClassId) : studentRankings;
     const total = rawList ? rawList.length : 0;
     if (total === 0) {
       return {
-        tiers: TIERS_CONFIG.map(t => ({ ...t, count: 0, pct: 0 })),
+        tiers: TIERS_CONFIG.slice().reverse().map(t => ({ ...t, count: 0, pct: 0 })),
         total: 0
       };
     }
@@ -591,7 +591,7 @@ export default function ReportsPage() {
     });
 
     return {
-      tiers: TIERS_CONFIG.map(t => ({
+      tiers: TIERS_CONFIG.slice().reverse().map(t => ({
         ...t,
         count: counts[t.tier] || 0,
         pct: Math.round(((counts[t.tier] || 0) / total) * 100)
@@ -755,6 +755,53 @@ export default function ReportsPage() {
     return list.sort((a, b) => b.delta - a.delta);
   }, [studentRankings, sessionRecords, selectedClassId]);
 
+  // Calculate exact standard deviation matching backend performance engine
+  const computeClassAnalyticsSd = (records: any[]): number => {
+    if (!records || records.length === 0) return 0.0;
+    const c1_list: number[] = [];
+    const c2_list: number[] = [];
+    const hw_list: number[] = [];
+
+    records.forEach(r => {
+      const st = r.status || 'Có mặt';
+      if (st === 'Vắng mặt' || st === 'Nghỉ học') return;
+      const c1 = Number(r.check_1 || 0);
+      const c2 = Number(r.check_2 || 0);
+      const hw = Number(r.homework || 0);
+      if (c1 > 0) c1_list.push(c1);
+      if (c2 > 0) c2_list.push(c2);
+      if (hw > 0) hw_list.push(hw);
+    });
+
+    const getFittedEma = (vals: number[]): number[] => {
+      if (vals.length === 0) return [];
+      let ema = vals[0];
+      return vals.map(v => {
+        ema = 0.5 * v + 0.5 * ema;
+        return trunc1Dec(Math.max(0, Math.min(10, ema)));
+      });
+    };
+
+    const calcResidualSd = (vals: number[]): number => {
+      if (vals.length < 2) return 0.0;
+      const fitted = getFittedEma(vals);
+      const v = vals.reduce((sum, val, idx) => sum + Math.pow(val - fitted[idx], 2), 0) / vals.length;
+      return Math.sqrt(v);
+    };
+
+    const sd_c1 = calcResidualSd(c1_list);
+    const sd_c2 = calcResidualSd(c2_list);
+    const sd_hw = calcResidualSd(hw_list);
+
+    let w_sum = 0.0;
+    let w_tot = 0.0;
+    if (hw_list.length > 0) { w_sum += sd_hw * 0.10; w_tot += 0.10; }
+    if (c1_list.length > 0) { w_sum += sd_c1 * 0.35; w_tot += 0.35; }
+    if (c2_list.length > 0) { w_sum += sd_c2 * 0.55; w_tot += 0.55; }
+
+    return w_tot > 0 ? trunc1Dec(w_sum / w_tot) : 0.0;
+  };
+
   // 2-Class Head-to-Head Comparison Metrics
   const classComparisonData = useMemo(() => {
     if (!classes || classes.length === 0 || !studentRankings) return null;
@@ -781,7 +828,7 @@ export default function ReportsPage() {
           avgHomework: 0,
           improvingPct: 0,
           classSd: 0,
-          tierDistribution: TIERS_CONFIG.map(t => ({ ...t, count: 0, pct: 0 })),
+          tierDistribution: TIERS_CONFIG.slice().reverse().map(t => ({ ...t, count: 0, pct: 0 })),
           topStudent: null,
           atRiskCount: 0
         };
@@ -799,26 +846,10 @@ export default function ReportsPage() {
       const hwScores = cStudents.map(s => Number(s.avg_homework || 0)).filter(v => v > 0);
       const avgHw = hwScores.length > 0 ? trunc1Dec(hwScores.reduce((a, b) => a + b, 0) / hwScores.length) : 0;
 
-      let classSd = 0;
       const cSessionRecords = sessionRecords.filter(r => String(r.class_id) === String(cObj.id));
-      if (cSessionRecords.length >= 2) {
-        const scores = cSessionRecords.map(r => {
-          const c1 = Number(r.check_1 || 0);
-          const c2 = Number(r.check_2 || 0);
-          const hw = Number(r.homework || 0);
-          const valid = [c1, c2, hw].filter(v => v > 0);
-          return valid.length > 0 ? valid.reduce((a, b) => a + b, 0) / valid.length : 0;
-        }).filter(v => v > 0);
-        if (scores.length >= 2) {
-          const m = scores.reduce((a, b) => a + b, 0) / scores.length;
-          const v = scores.reduce((sum, sc) => sum + Math.pow(sc - m, 2), 0) / scores.length;
-          classSd = trunc1Dec(Math.sqrt(v));
-        }
-      } else if (emaScores.length >= 2) {
-        const mean = avgEma;
-        const variance = emaScores.reduce((sum, sc) => sum + Math.pow(sc - mean, 2), 0) / emaScores.length;
-        classSd = trunc1Dec(Math.sqrt(variance));
-      }
+      const classSd = (selectedClassId === String(cObj.id) && analyticsSummary?.std_dev !== undefined)
+        ? trunc1Dec(analyticsSummary.std_dev)
+        : computeClassAnalyticsSd(cSessionRecords);
 
       let totalPresent = 0, totalSessions = 0;
       cStudents.forEach(s => {
@@ -837,7 +868,7 @@ export default function ReportsPage() {
         tierCounts[tierObj.tier] = (tierCounts[tierObj.tier] || 0) + 1;
       });
 
-      const tierDistribution = TIERS_CONFIG.map(t => ({
+      const tierDistribution = TIERS_CONFIG.slice().reverse().map(t => ({
         ...t,
         count: tierCounts[t.tier] || 0,
         pct: Math.round(((tierCounts[t.tier] || 0) / totalStudents) * 100)
@@ -890,7 +921,7 @@ export default function ReportsPage() {
       c2Diff,
       hwDiff,
     };
-  }, [classes, studentRankings, sessionRecords, compareClassAId, compareClassBId]);
+  }, [classes, studentRankings, sessionRecords, compareClassAId, compareClassBId, selectedClassId, analyticsSummary]);
 
   // Cross-Class Benchmark Data
   const crossClassBenchmark = useMemo(() => {
@@ -917,26 +948,10 @@ export default function ReportsPage() {
       const emaScores = cStudents.map(s => Number(s.ema_level || 0)).filter(v => v > 0);
       const avgEma = emaScores.length > 0 ? trunc1Dec(emaScores.reduce((a,b)=>a+b,0) / emaScores.length) : 0;
 
-      let classSd = 0;
       const cSessionRecords = sessionRecords.filter(r => String(r.class_id) === String(c.id));
-      if (cSessionRecords.length >= 2) {
-        const scores = cSessionRecords.map(r => {
-          const c1 = Number(r.check_1 || 0);
-          const c2 = Number(r.check_2 || 0);
-          const hw = Number(r.homework || 0);
-          const valid = [c1, c2, hw].filter(v => v > 0);
-          return valid.length > 0 ? valid.reduce((a, b) => a + b, 0) / valid.length : 0;
-        }).filter(v => v > 0);
-        if (scores.length >= 2) {
-          const m = scores.reduce((a, b) => a + b, 0) / scores.length;
-          const v = scores.reduce((sum, sc) => sum + Math.pow(sc - m, 2), 0) / scores.length;
-          classSd = trunc1Dec(Math.sqrt(v));
-        }
-      } else if (emaScores.length >= 2) {
-        const mean = avgEma;
-        const variance = emaScores.reduce((sum, sc) => sum + Math.pow(sc - mean, 2), 0) / emaScores.length;
-        classSd = trunc1Dec(Math.sqrt(variance));
-      }
+      const classSd = (selectedClassId === String(c.id) && analyticsSummary?.std_dev !== undefined)
+        ? trunc1Dec(analyticsSummary.std_dev)
+        : computeClassAnalyticsSd(cSessionRecords);
 
       let totalPresent = 0, totalSessions = 0;
       cStudents.forEach(s => {
@@ -965,7 +980,7 @@ export default function ReportsPage() {
         evaluation
       };
     });
-  }, [classes, studentRankings]);
+  }, [classes, studentRankings, sessionRecords, selectedClassId, analyticsSummary]);
 
   // TanStack ColumnDef for Cross-Class Benchmark
   const classBenchmarkColumns = useMemo<ColumnDef<any>[]>(() => [
@@ -1966,17 +1981,37 @@ export default function ReportsPage() {
     };
   }, [sessionRecords, selectedStudentId, filteredRankings]);
 
-  // Format date to DD/MM
+  // Format date to DD/MM/YY or HH:mm:ss DD/MM/YY
   const formatSessionDate = (fullDateStr: string) => {
     if (!fullDateStr) return '';
-    if (fullDateStr.includes('-')) {
-      const parts = fullDateStr.split('-');
-      if (parts.length >= 3) return `${parts[2]}/${parts[1]}`;
-      if (parts.length === 2) return `${parts[1]}/${parts[0]}`;
-    }
-    if (fullDateStr.includes('/')) {
-      const parts = fullDateStr.split('/');
-      if (parts.length >= 2) return `${parts[0].padStart(2, '0')}/${parts[1].padStart(2, '0')}`;
+    try {
+      const trimmed = fullDateStr.trim();
+      if (trimmed.includes('-')) {
+        const parts = trimmed.split(/[\sT]+/);
+        const dateParts = parts[0].split('-');
+        if (dateParts.length >= 3) {
+          const dd = dateParts[2].padStart(2, '0');
+          const mm = dateParts[1].padStart(2, '0');
+          const yy = dateParts[0].slice(-2);
+          const dateFormatted = `${dd}/${mm}/${yy}`;
+          if (parts[1]) {
+            const timeParts = parts[1].split(':');
+            const hh = (timeParts[0] || '00').padStart(2, '0');
+            const min = (timeParts[1] || '00').padStart(2, '0');
+            const ss = (timeParts[2] || '00').split('.')[0].padStart(2, '0');
+            return `${hh}:${min}:${ss} ${dateFormatted}`;
+          }
+          return dateFormatted;
+        }
+      }
+      if (trimmed.includes('/')) {
+        const parts = trimmed.split('/');
+        if (parts.length === 3) {
+          return `${parts[0].padStart(2, '0')}/${parts[1].padStart(2, '0')}/${parts[2].slice(-2)}`;
+        }
+      }
+    } catch {
+      // fallback
     }
     return fullDateStr;
   };

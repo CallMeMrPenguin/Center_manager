@@ -37,3 +37,47 @@ export function cleanOptionPrefix(opt: string): string {
   return cleaned || trimmed;
 }
 
+/**
+ * Universal Date/Time Formatter: HH:mm:ss DD/MM/YY or DD/MM/YY
+ * Example: '2026-08-16 10:30:00' -> '10:30:00 16/08/26'
+ * Example: '2026-08-16' -> '16/08/26'
+ */
+export function formatDateTime(val: string | Date | null | undefined): string {
+  if (!val) return '';
+  try {
+    if (typeof val === 'string') {
+      const trimmed = val.trim();
+      if (trimmed.includes('-')) {
+        const parts = trimmed.split(/[\sT]+/);
+        const dateParts = parts[0].split('-');
+        if (dateParts.length >= 3) {
+          const dd = dateParts[2].padStart(2, '0');
+          const mm = dateParts[1].padStart(2, '0');
+          const yy = dateParts[0].slice(-2);
+          const dateFormatted = `${dd}/${mm}/${yy}`;
+          if (parts[1]) {
+            const timeParts = parts[1].split(':');
+            const hh = (timeParts[0] || '00').padStart(2, '0');
+            const min = (timeParts[1] || '00').padStart(2, '0');
+            const ss = (timeParts[2] || '00').split('.')[0].padStart(2, '0');
+            return `${hh}:${min}:${ss} ${dateFormatted}`;
+          }
+          return dateFormatted;
+        }
+      }
+    }
+    const d = typeof val === 'string' ? new Date(val) : val;
+    if (isNaN(d.getTime())) return String(val);
+    const hh = String(d.getHours()).padStart(2, '0');
+    const min = String(d.getMinutes()).padStart(2, '0');
+    const ss = String(d.getSeconds()).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const yy = String(d.getFullYear()).slice(-2);
+    return `${hh}:${min}:${ss} ${dd}/${mm}/${yy}`;
+  } catch {
+    return String(val);
+  }
+}
+
+
