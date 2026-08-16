@@ -7,7 +7,6 @@ import { StudentRankingsTable } from '../components/StudentRankingsTable';
 import { StudentGradeHistoryTable } from '../components/StudentGradeHistoryTable';
 import { formatSessionDate } from '../utils';
 import { format1Dec, trunc1Dec } from '../../../utils';
-import { GradeTypeItem } from '../../../types';
 
 interface OverviewTabProps {
   loading: boolean;
@@ -21,13 +20,13 @@ interface OverviewTabProps {
   studentRankings: any[];
   filteredRankings: any[];
   engine: any;
-  gradeTypesList: GradeTypeItem[];
-  studentSessionsMap: Record<number, any[]>;
+  gradeTypesList: any[];
+  studentSessionsMap: Record<string, any[]>;
   timePhases: any[];
   selectedPhaseId: string;
   setSelectedPhaseId: (id: string) => void;
   onOpenPhaseModal: () => void;
-  onOpenEditModal: (record: any) => void;
+  onOpenEditModal: (rec: any) => void;
   onSelectRankingStudent: (studentId: number) => void;
 }
 
@@ -100,10 +99,10 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
       overall: overall > 0 ? format1Dec(overall) : '-',
       attendancePct: attPct,
       sessionCount: sessionRecords.length,
-      c1Diff: c1 >= 7.5 ? '+1.1' : (c1 > 0 ? '-0.4' : '-'),
-      c2Diff: c2 >= 7.0 ? '-0.6' : (c2 > 0 ? '-0.9' : '-'),
-      hwDiff: hw >= 8.0 ? '+1.8' : (hw > 0 ? '+0.2' : '-'),
-      overallDiff: overall >= 7.5 ? '+0.9' : (overall > 0 ? '-0.2' : '-'),
+      c1Diff: '+0.0',
+      c2Diff: '+0.0',
+      hwDiff: '+0.0',
+      overallDiff: '+0.0',
       rank: rankStr,
       level: overall >= 8.0 ? 'Xuất Sắc (Tiến bộ)' : overall >= 6.5 ? 'Tốt (Đang tiến bộ)' : overall > 0 ? 'Cần Cố Gắng' : 'Chưa Có Điểm'
     };
