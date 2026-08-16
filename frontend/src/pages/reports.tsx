@@ -3029,11 +3029,12 @@ export default function ReportsPage() {
 
                     {/* 6-Tier Dual Butterfly Comparison Ladder (Quán Quân -> Đồng) */}
                     <div className="space-y-2.5">
-                      {TIERS_CONFIG.slice().reverse().map(tier => {
+                      {TIERS_CONFIG.slice().reverse().map((tier, tierIdx) => {
                         const countA = classComparisonData.classA.tierDistribution.find((t: any) => t.tier === tier.tier)?.count || 0;
                         const pctA = classComparisonData.classA.tierDistribution.find((t: any) => t.tier === tier.tier)?.pct || 0;
                         const countB = classComparisonData.classB.tierDistribution.find((t: any) => t.tier === tier.tier)?.count || 0;
                         const pctB = classComparisonData.classB.tierDistribution.find((t: any) => t.tier === tier.tier)?.pct || 0;
+                        const delaySec = (tierIdx * 0.07 + 0.1).toFixed(2);
 
                         return (
                           <div
@@ -3047,8 +3048,12 @@ export default function ReportsPage() {
                               </span>
                               <div className="flex-1 h-3.5 bg-[#121829] rounded-full overflow-hidden flex justify-end p-0.5 border border-white/5">
                                 <div
-                                  style={{ width: `${Math.max(pctA > 0 ? 4 : 0, Math.min(100, pctA))}%` }}
-                                  className="h-full bg-gradient-to-l from-blue-500 to-blue-600 rounded-full transition-all duration-500 shadow-[0_0_10px_rgba(59,130,246,0.6)]"
+                                  key={`bar-a-${tier.tier}-${classComparisonData.classA.name}-${pctA}`}
+                                  style={{
+                                    width: `${Math.max(pctA > 0 ? 4 : 0, Math.min(100, pctA))}%`,
+                                    animationDelay: `${delaySec}s`
+                                  }}
+                                  className="h-full bg-gradient-to-l from-blue-500 to-blue-600 rounded-full animate-grow-width-right-origin shadow-[0_0_10px_rgba(59,130,246,0.6)]"
                                 />
                               </div>
                             </div>
@@ -3066,8 +3071,12 @@ export default function ReportsPage() {
                             <div className="flex-1 flex items-center justify-start gap-3 min-w-0">
                               <div className="flex-1 h-3.5 bg-[#121829] rounded-full overflow-hidden p-0.5 border border-white/5">
                                 <div
-                                  style={{ width: `${Math.max(pctB > 0 ? 4 : 0, Math.min(100, pctB))}%` }}
-                                  className="h-full bg-gradient-to-r from-cyan-500 to-cyan-400 rounded-full transition-all duration-500 shadow-[0_0_10px_rgba(6,182,212,0.6)]"
+                                  key={`bar-b-${tier.tier}-${classComparisonData.classB.name}-${pctB}`}
+                                  style={{
+                                    width: `${Math.max(pctB > 0 ? 4 : 0, Math.min(100, pctB))}%`,
+                                    animationDelay: `${delaySec}s`
+                                  }}
+                                  className="h-full bg-gradient-to-r from-cyan-500 to-cyan-400 rounded-full animate-grow-width-left-origin shadow-[0_0_10px_rgba(6,182,212,0.6)]"
                                 />
                               </div>
                               <span className="text-xs font-mono font-black text-cyan-400 shrink-0">

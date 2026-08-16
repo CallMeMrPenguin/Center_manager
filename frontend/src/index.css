@@ -553,35 +553,35 @@ input[type="month"]::-webkit-calendar-picker-indicator {
 @keyframes growWidthRightOrigin {
   0% {
     transform: scaleX(0);
-    transform-origin: right;
+    opacity: 0;
   }
-
   100% {
     transform: scaleX(1);
-    transform-origin: right;
+    opacity: 1;
   }
 }
 
 .animate-grow-width-right-origin {
-  animation: growWidthRightOrigin 1.2s cubic-bezier(0.22, 1, 0.36, 1) 0.65s both;
-  will-change: transform;
+  animation: growWidthRightOrigin 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+  transform-origin: right center;
+  will-change: transform, opacity;
 }
 
 @keyframes growWidthLeftOrigin {
   0% {
     transform: scaleX(0);
-    transform-origin: left;
+    opacity: 0;
   }
-
   100% {
     transform: scaleX(1);
-    transform-origin: left;
+    opacity: 1;
   }
 }
 
 .animate-grow-width-left-origin {
-  animation: growWidthLeftOrigin 1.2s cubic-bezier(0.22, 1, 0.36, 1) 0.65s both;
-  will-change: transform;
+  animation: growWidthLeftOrigin 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+  transform-origin: left center;
+  will-change: transform, opacity;
 }
 
 @keyframes pathDraw {
