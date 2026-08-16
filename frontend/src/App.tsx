@@ -280,9 +280,9 @@ function AppContent() {
           </button>
 
           {/* Header logo / Title */}
-          <div className="flex items-center px-4 py-4 shrink-0 border-b border-white/5 min-w-0">
-            <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-indigo-500 via-indigo-600 to-purple-600 flex items-center justify-center shadow-[0_4px_16px_rgba(92,54,245,0.45)] shrink-0 border border-white/20">
-              <GraduationCap size={22} className="text-white drop-shadow" />
+          <div className="flex items-center px-3.5 py-4 shrink-0 border-b border-white/5 min-w-0">
+            <div className="h-10 w-10 rounded-full bg-indigo-500/25 border-2 border-indigo-400/90 shadow-[0_0_16px_rgba(92,54,245,0.5)] flex items-center justify-center shrink-0">
+              <GraduationCap size={20} className="text-white drop-shadow-[0_0_10px_rgba(255,255,255,1)]" />
             </div>
             <div className={`whitespace-nowrap overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${
               isSidebarExpanded ? 'opacity-100 max-w-[160px] ml-3 translate-x-0' : 'opacity-0 max-w-0 ml-0 -translate-x-3 pointer-events-none'
@@ -334,7 +334,11 @@ function AppContent() {
                           }`}
                       >
                         {isActive && (
-                          <div className={`absolute top-[3px] left-[5px] rounded-xl bg-indigo-500/25 border-2 border-indigo-400/90 shadow-[0_0_16px_rgba(92,54,245,0.5)] transition-all duration-300 pointer-events-none ${isSidebarExpanded ? 'w-[calc(100%-10px)] h-[calc(100%-6px)]' : 'w-10 h-9'}`} />
+                          <div className={`absolute transition-all duration-300 pointer-events-none bg-indigo-500/25 border-2 border-indigo-400/90 shadow-[0_0_16px_rgba(92,54,245,0.5)] ${
+                            isSidebarExpanded
+                              ? 'top-[3px] left-[5px] w-[calc(100%-10px)] h-[calc(100%-6px)] rounded-xl'
+                              : 'top-[2px] left-[4px] w-10 h-10 rounded-full'
+                          }`} />
                         )}
 
                         {/* ICON BOX */}
