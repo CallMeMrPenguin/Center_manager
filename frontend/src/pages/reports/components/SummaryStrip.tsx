@@ -48,7 +48,7 @@ export const SummaryStrip: React.FC<SummaryStripProps> = ({ engine, gradeTypesLi
             type="button"
             onClick={() => setActiveTooltip(activeTooltip === 'forecast' ? null : 'forecast')}
             className="text-slate-500 hover:text-indigo-400 cursor-pointer"
-            title="Giải thích Forecast"
+            title="Xem chi tiết dự đoán"
           >
             <Info size={11} />
           </button>
@@ -57,9 +57,36 @@ export const SummaryStrip: React.FC<SummaryStripProps> = ({ engine, gradeTypesLi
         <span className="text-[10px] text-slate-400 font-semibold block">{engine.prediction_model ?? 'Smart Predict'}</span>
 
         {activeTooltip === 'forecast' && (
-          <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 w-64 p-3 bg-[#161c34] border border-[#2c375e] text-slate-200 text-[11px] rounded-xl shadow-2xl z-30 text-left font-sans">
-            <span className="font-extrabold text-indigo-300 block mb-1">Dự Đoán ({engine.prediction_model ?? 'Smart Predict'}):</span>
-            Tự động chọn mô hình tối ưu theo số buổi học: EMA (&lt;5 buổi), Weighted OLS (5–19 buổi), Holt-Winters (20+ buổi).
+          <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 w-80 p-4 bg-[#161c34] border border-[#2c375e] text-slate-200 text-[11px] rounded-xl shadow-2xl z-30 text-left font-sans space-y-2">
+            <div className="flex items-center justify-between border-b border-white/10 pb-1.5">
+              <span className="font-extrabold text-indigo-300">
+                Dự Đoán Điểm Buổi Tiếp Theo:
+              </span>
+              <span className="font-mono font-black text-indigo-300">{engine.predicted_next}đ</span>
+            </div>
+            <p className="text-[10px] text-slate-300 leading-relaxed">
+              Dự báo điểm số bằng thuật toán chuỗi thời gian dựa trên lịch sử và đà học tập:
+            </p>
+            <div className="space-y-1 my-1 font-mono text-[10px] font-bold bg-[#0d1120] p-2 rounded-lg border border-[#202948]">
+              <div className="flex items-center justify-between text-blue-400">
+                <span>Check 1 Dự Đoán:</span>
+                <span>{engine.pred_c1 ?? 0}đ</span>
+              </div>
+              <div className="flex items-center justify-between text-purple-400">
+                <span>Check 2 Dự Đoán:</span>
+                <span>{engine.pred_c2 ?? 0}đ</span>
+              </div>
+              <div className="flex items-center justify-between text-emerald-400">
+                <span>Homework Dự Đoán:</span>
+                <span>{engine.pred_hw ?? 0}đ</span>
+              </div>
+            </div>
+            <div className="pt-1.5 border-t border-white/10 text-[10px] text-slate-400 space-y-0.5">
+              <span className="font-bold text-slate-300 block">Cơ chế mô hình ({engine.prediction_model}):</span>
+              <span>• &lt; 5 buổi: EMA (Trung bình trượt hàm mũ)</span><br />
+              <span>• 5–19 buổi: Weighted OLS (Hồi quy trọng số lùi)</span><br />
+              <span>• ≥ 20 buổi: Holt-Winters (Dự phóng bậc cao)</span>
+            </div>
           </div>
         )}
       </div>
@@ -72,7 +99,7 @@ export const SummaryStrip: React.FC<SummaryStripProps> = ({ engine, gradeTypesLi
             type="button"
             onClick={() => setActiveTooltip(activeTooltip === 'ema' ? null : 'ema')}
             className="text-slate-500 hover:text-emerald-400 cursor-pointer"
-            title="Giải thích EMA"
+            title="Xem chi tiết EMA"
           >
             <Info size={11} />
           </button>
@@ -84,25 +111,40 @@ export const SummaryStrip: React.FC<SummaryStripProps> = ({ engine, gradeTypesLi
         <span className="text-[10px] text-slate-400 font-semibold block">Học Lực Gần Nhất</span>
 
         {activeTooltip === 'ema' && (
-          <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 w-64 p-3 bg-[#161c34] border border-[#2c375e] text-slate-200 text-[11px] rounded-xl shadow-2xl z-30 text-left font-sans">
-            <span className="font-extrabold text-emerald-300 block mb-1">Trình Độ Hiện Tại (EMA):</span>
-            <div className="space-y-1 my-1.5 font-mono text-[10px] font-bold bg-[#0d1120] p-2 rounded-lg border border-[#202948]">
+          <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 w-80 p-4 bg-[#161c34] border border-[#2c375e] text-slate-200 text-[11px] rounded-xl shadow-2xl z-30 text-left font-sans space-y-2">
+            <div className="flex items-center justify-between border-b border-white/10 pb-1.5">
+              <span className="font-extrabold text-emerald-300">
+                Trình Độ Năng Lực Hiện Tại (EMA):
+              </span>
+              <span className="font-mono font-black text-emerald-300">{engine.ema_level} / 10</span>
+            </div>
+            <p className="text-[10px] text-slate-300 leading-relaxed">
+              Điểm số phản ánh đúng thực lực trong <strong>3–4 buổi học gần nhất</strong> (áp dụng hàm mũ EMA $\alpha=0.5$ giảm dần ảnh hưởng từ các điểm số quá cũ đầu kỳ):
+            </p>
+            <div className="space-y-1 my-1 font-mono text-[10px] font-bold bg-[#0d1120] p-2 rounded-lg border border-[#202948]">
               <div className="flex items-center justify-between text-blue-400">
-                <span>Check 1 EMA:</span>
-                <span>{engine.ema_c1 ?? 0}</span>
+                <span>Check 1 EMA (35%):</span>
+                <span>{engine.ema_c1 ?? 0}đ</span>
               </div>
               <div className="flex items-center justify-between text-purple-400">
-                <span>Check 2 EMA:</span>
-                <span>{engine.ema_c2 ?? 0}</span>
+                <span>Check 2 EMA (55%):</span>
+                <span>{engine.ema_c2 ?? 0}đ</span>
               </div>
               <div className="flex items-center justify-between text-emerald-400">
-                <span>Homework EMA:</span>
-                <span>{engine.ema_hw ?? 0}</span>
+                <span>Homework EMA (10%):</span>
+                <span>{engine.ema_hw ?? 0}đ</span>
               </div>
             </div>
-            <span className="text-[10px] text-slate-400 block">
-              Trình độ EMA ({engine.ema_level}) ưu tiên trọng số các buổi học mới nhất.
-            </span>
+            <div className="pt-1.5 border-t border-white/10 text-[10px] font-semibold text-slate-300 space-y-1">
+              <span className="text-[10px] font-black text-emerald-300 uppercase block">Thang Điểm Học Lực EMA:</span>
+              <div className="grid grid-cols-2 gap-1 text-[10px]">
+                <span className="text-emerald-400">≥8.5: Xuất Sắc</span>
+                <span className="text-blue-400">7.5–8.4: Giỏi</span>
+                <span className="text-cyan-400">6.5–7.4: Khá</span>
+                <span className="text-amber-400">5.0–6.4: Trung Bình</span>
+                <span className="text-rose-400 col-span-2">&lt;5.0: Yếu / Cần Bổ Trợ</span>
+              </div>
+            </div>
           </div>
         )}
       </div>
@@ -115,7 +157,7 @@ export const SummaryStrip: React.FC<SummaryStripProps> = ({ engine, gradeTypesLi
             type="button"
             onClick={() => setActiveTooltip(activeTooltip === 'sd' ? null : 'sd')}
             className="text-slate-500 hover:text-cyan-400 cursor-pointer"
-            title="Giải thích Standard Deviation"
+            title="Xem chi tiết độ biến động"
           >
             <Info size={11} />
           </button>
@@ -130,9 +172,17 @@ export const SummaryStrip: React.FC<SummaryStripProps> = ({ engine, gradeTypesLi
           }`}>{engine.consistency_label}</span>
 
         {activeTooltip === 'sd' && (
-          <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 w-64 p-3 bg-[#161c34] border border-[#2c375e] text-slate-200 text-[11px] rounded-xl shadow-2xl z-30 text-left font-sans">
-            <span className="font-extrabold text-cyan-300 block mb-1">Độ Biến Động Thật Sự (Residual SD):</span>
-            <div className="space-y-1 my-1.5 font-mono text-[10px] font-bold bg-[#0d1120] p-2 rounded-lg border border-[#202948]">
+          <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 w-80 p-4 bg-[#161c34] border border-[#2c375e] text-slate-200 text-[11px] rounded-xl shadow-2xl z-30 text-left font-sans space-y-2">
+            <div className="flex items-center justify-between border-b border-white/10 pb-1.5">
+              <span className="font-extrabold text-cyan-300">
+                Độ Ổn Định & Biến Động Điểm Số (SD):
+              </span>
+              <span className="font-mono font-black text-cyan-300">σ = {engine.std_dev}</span>
+            </div>
+            <p className="text-[10px] text-slate-300 leading-relaxed">
+              Đo độ lệch chuẩn dư ($RMSE$) quanh đường xu hướng để nhận diện học sinh làm bài đều tay hay bị trồi sụt thất thường:
+            </p>
+            <div className="space-y-1 my-1 font-mono text-[10px] font-bold bg-[#0d1120] p-2 rounded-lg border border-[#202948]">
               {gradeTypesList.map(gt => (
                 <div key={gt.id} className="flex items-center justify-between" style={{ color: gt.color || '#3b82f6' }}>
                   <span>{gt.label} ({gt.weight}%):</span>
@@ -140,9 +190,15 @@ export const SummaryStrip: React.FC<SummaryStripProps> = ({ engine, gradeTypesLi
                 </div>
               ))}
             </div>
-            <span className="text-[10px] text-slate-400 block">
-              SD đo độ ổn định quanh quỹ đạo tiến bộ, loại bỏ sai số giữa tiến bộ vượt bậc và trồi sụt thất thường.
-            </span>
+            <div className="pt-1.5 border-t border-white/10 text-[10px] font-semibold text-slate-300 space-y-1">
+              <span className="text-[10px] font-black text-cyan-300 uppercase block">Thang Phân Loại Phong Độ:</span>
+              <div className="space-y-0.5 text-[10px]">
+                <div className="text-emerald-400">σ &lt; 0.5: Rất Ổn Định (Làm bài cực kỳ đều)</div>
+                <div className="text-cyan-400">0.5 ≤ σ ≤ 1.0: Ổn Định (Phong độ vững vàng)</div>
+                <div className="text-amber-400">1.1 ≤ σ ≤ 2.2: Biến Động (Có bài cao bài thấp)</div>
+                <div className="text-rose-400">σ &gt; 2.2: Biến Động Mạnh (Cần theo dõi sát)</div>
+              </div>
+            </div>
           </div>
         )}
       </div>
@@ -155,7 +211,7 @@ export const SummaryStrip: React.FC<SummaryStripProps> = ({ engine, gradeTypesLi
             type="button"
             onClick={() => setActiveTooltip(activeTooltip === 'trend' ? null : 'trend')}
             className="text-slate-500 hover:text-purple-400 cursor-pointer"
-            title="Giải thích Trend Rate"
+            title="Xem chi tiết tốc độ tăng trưởng"
           >
             <Info size={11} />
           </button>
@@ -166,9 +222,26 @@ export const SummaryStrip: React.FC<SummaryStripProps> = ({ engine, gradeTypesLi
           }`}>{engine.trend_label}</span>
 
         {activeTooltip === 'trend' && (
-          <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 w-64 p-3 bg-[#161c34] border border-[#2c375e] text-slate-200 text-[11px] rounded-xl shadow-2xl z-30 text-left font-sans">
-            <span className="font-extrabold text-purple-300 block mb-1">Tốc Độ Tăng Trưởng (Trend Rate):</span>
-            Hệ số góc (slope) tính toán mức tăng hoặc giảm trung bình của học sinh sau mỗi buổi học.
+          <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 w-80 p-4 bg-[#161c34] border border-[#2c375e] text-slate-200 text-[11px] rounded-xl shadow-2xl z-30 text-left font-sans space-y-2">
+            <div className="flex items-center justify-between border-b border-white/10 pb-1.5">
+              <span className="font-extrabold text-purple-300">
+                Tốc Độ Tăng Trưởng (Trend Rate):
+              </span>
+              <span className="font-mono font-black text-purple-300">{engine.trend_slope > 0 ? `+${engine.trend_slope}` : engine.trend_slope}đ/buổi</span>
+            </div>
+            <p className="text-[10px] text-slate-300 leading-relaxed">
+              Hệ số góc hồi quy tuyến tính ($a$ trong phương trình $y = ax + b$), đo mức tăng hoặc sụt giảm trung bình sau mỗi buổi học:
+            </p>
+            <div className="pt-1.5 border-t border-white/10 text-[10px] font-semibold text-slate-300 space-y-1">
+              <span className="text-[10px] font-black text-purple-300 uppercase block">Thang Phân Loại Xu Hướng:</span>
+              <div className="space-y-0.5 text-[10px]">
+                <div className="text-emerald-400">&gt; +0.3đ/buổi: Tăng trưởng mạnh ↗</div>
+                <div className="text-cyan-400">+0.1 đến +0.3đ/buổi: Đang cải thiện tiến bộ</div>
+                <div className="text-slate-300">-0.1 đến +0.1đ/buổi: Duy trì ổn định</div>
+                <div className="text-amber-400">-0.3 đến -0.1đ/buổi: Giảm nhẹ ↘</div>
+                <div className="text-rose-400">&lt; -0.3đ/buổi: Suy giảm nhanh ⚠️ (Cần trao đổi)</div>
+              </div>
+            </div>
           </div>
         )}
       </div>
@@ -183,7 +256,7 @@ export const SummaryStrip: React.FC<SummaryStripProps> = ({ engine, gradeTypesLi
             type="button"
             onClick={() => setActiveTooltip(activeTooltip === 'pi' ? null : 'pi')}
             className="text-slate-500 hover:text-indigo-400 cursor-pointer"
-            title="Giải thích Performance Index (PI)"
+            title="Xem chi tiết chỉ số PI"
           >
             <Info size={11} />
           </button>
@@ -227,8 +300,18 @@ export const SummaryStrip: React.FC<SummaryStripProps> = ({ engine, gradeTypesLi
       </div>
 
       {/* 6. Overall Rating */}
-      <div className="border-l border-[#1d2644] p-1">
-        <span className="text-[10px] font-black uppercase text-slate-400 block">Xếp Loại Chung</span>
+      <div className="border-l border-[#1d2644] relative group p-1">
+        <div className="flex items-center justify-center gap-1">
+          <span className="text-[10px] font-black uppercase text-slate-400 block">Xếp Loại Chung</span>
+          <button
+            type="button"
+            onClick={() => setActiveTooltip(activeTooltip === 'rating' ? null : 'rating')}
+            className="text-slate-500 hover:text-indigo-400 cursor-pointer"
+            title="Xem khuyến nghị sư phạm"
+          >
+            <Info size={11} />
+          </button>
+        </div>
         <span className={`text-xs font-black flex items-center justify-center gap-1 ${engine.rating_label?.includes('Kém') || engine.rating_label?.includes('NGUY CƠ') ? 'text-rose-500 font-extrabold animate-pulse' :
           engine.rating_label?.includes('Yếu') ? 'text-orange-400' :
             engine.rating_label?.includes('Trung Bình') ? 'text-amber-400' :
@@ -238,6 +321,31 @@ export const SummaryStrip: React.FC<SummaryStripProps> = ({ engine, gradeTypesLi
           {engine.rating_label ?? 'Tốt'}
         </span>
         <span className="text-[10px] text-slate-400 font-semibold block truncate">Đánh Giá Học Lực</span>
+
+        {activeTooltip === 'rating' && (
+          <div className="absolute bottom-full mb-2 right-0 w-80 p-4 bg-[#161c34] border border-[#2c375e] text-slate-200 text-[11px] rounded-xl shadow-2xl z-30 text-left font-sans space-y-2">
+            <div className="flex items-center justify-between border-b border-white/10 pb-1.5">
+              <span className="font-extrabold text-indigo-300">
+                Nhận Xét & Khuyến Nghị Sư Phạm:
+              </span>
+              <span className="text-[10px] font-black text-slate-400 uppercase">{engine.rating_label}</span>
+            </div>
+            <div className="space-y-1.5 text-[10px] text-slate-300 leading-relaxed">
+              {engine.recommendations && engine.recommendations.length > 0 ? (
+                engine.recommendations.map((rec: string, i: number) => (
+                  <div key={i} className="flex items-start gap-1.5 bg-[#0d1120] p-2 rounded-lg border border-[#202948]">
+                    <span className="text-indigo-400 font-bold shrink-0">•</span>
+                    <span>{rec}</span>
+                  </div>
+                ))
+              ) : (
+                <div className="bg-[#0d1120] p-2 rounded-lg border border-[#202948]">
+                  Đánh giá: Học sinh duy trì phong độ tốt. Tiếp tục phát huy trong các kỳ tới.
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
