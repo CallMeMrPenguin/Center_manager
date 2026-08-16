@@ -2514,25 +2514,26 @@ def get_analytics_reports(class_id: Optional[int] = None, student_id: Optional[i
     conn = get_connection()
     cursor = conn.cursor()
 
-    query = """
+    # Always fetch full session records across all classes to accurately populate student rankings and class analytics
+    cursor.execute("""
         SELECT ag.*, s.full_name as student_name, s.nickname, c.class_name
         FROM class_attendance_grades ag
         JOIN students s ON ag.student_id = s.id
         JOIN classes c ON ag.class_id = c.id
         JOIN class_students cs ON ag.student_id = cs.student_id AND ag.class_id = cs.class_id
-        WHERE 1=1
-    """
-    params = []
-    if class_id:
-        query += " AND ag.class_id = ?"
-        params.append(class_id)
-    if student_id:
-        query += " AND ag.student_id = ?"
-        params.append(student_id)
-    query += " ORDER BY ag.date ASC"
+        ORDER BY ag.date ASC
+    """)
+    all_rows = [dict(r) for r in cursor.fetchall()]
 
-    cursor.execute(query, params)
-    rows = [dict(r) for r in cursor.fetchall()]
+    # Filter session records for the specific class / student view if requested
+    if class_id or student_id:
+        rows = [
+            r for r in all_rows 
+            if (not class_id or r.get("class_id") == class_id) and 
+               (not student_id or r.get("student_id") == student_id)
+        ]
+    else:
+        rows = all_rows
 
     rank_query = """
         SELECT 
@@ -2550,17 +2551,6 @@ def get_analytics_reports(class_id: Optional[int] = None, student_id: Optional[i
         JOIN class_students cs ON s.id = cs.student_id
         JOIN classes c ON cs.class_id = c.id
         LEFT JOIN class_attendance_grades ag ON s.id = ag.student_id AND c.id = ag.class_id
-        WHERE 1=1
-    """
-    rank_params = []
-    if class_id:
-        rank_query += " AND c.id = ?"
-        rank_params.append(class_id)
-    if student_id:
-        rank_query += " AND s.id = ?"
-        rank_params.append(student_id)
-
-    rank_query += """
         GROUP BY s.id, c.id
         ORDER BY (
             COALESCE(AVG(CASE WHEN ag.check_1 > 0 THEN ag.check_1 END), 0) + 
@@ -2568,14 +2558,14 @@ def get_analytics_reports(class_id: Optional[int] = None, student_id: Optional[i
             COALESCE(AVG(CASE WHEN ag.homework > 0 THEN ag.homework END), 0)
         ) DESC
     """
-    cursor.execute(rank_query, rank_params)
+    cursor.execute(rank_query)
     raw_rankings = [dict(r) for r in cursor.fetchall()]
 
     conn.close()
 
-    # Calculate per-student individual analytics for ranking & level grouping
+    # Calculate per-student individual analytics for ranking & level grouping using all records
     student_rows_map: Dict[int, List[Dict[str, Any]]] = {}
-    for r in rows:
+    for r in all_rows:
         sid = r.get("student_id")
         if sid is not None:
             student_rows_map.setdefault(sid, []).append(r)
@@ -2606,22 +2596,6 @@ def get_analytics_reports(class_id: Optional[int] = None, student_id: Optional[i
         enriched_rankings.append(sr)
 
     # Calculate per-class analytics summary for cross-class comparisons
-    if class_id:
-        conn_all = get_connection()
-        cursor_all = conn_all.cursor()
-        cursor_all.execute("""
-            SELECT ag.*, s.full_name as student_name, s.nickname, c.class_name
-            FROM class_attendance_grades ag
-            JOIN students s ON ag.student_id = s.id
-            JOIN classes c ON ag.class_id = c.id
-            JOIN class_students cs ON ag.student_id = cs.student_id AND ag.class_id = cs.class_id
-            ORDER BY ag.date ASC
-        """)
-        all_rows = [dict(r) for r in cursor_all.fetchall()]
-        conn_all.close()
-    else:
-        all_rows = rows
-
     class_rows_map: Dict[int, List[Dict[str, Any]]] = {}
     for r in all_rows:
         cid = r.get("class_id")
