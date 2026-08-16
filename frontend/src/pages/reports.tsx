@@ -325,14 +325,14 @@ export default function ReportsPage() {
   // Cross-Class Benchmark, Deep Analysis & Overview Tab State
   const [activeReportTab, setActiveReportTab] = useState<'overview' | 'deep' | 'benchmark'>('overview');
 
-  // 6-Tier Comparison Ladder animation state
+  // 6-Tier Comparison Ladder animation state (triggered after entrance fly-in)
   const [ladderAnimated, setLadderAnimated] = useState(false);
 
   useEffect(() => {
     setLadderAnimated(false);
-    const timer = setTimeout(() => setLadderAnimated(true), 60);
+    const timer = setTimeout(() => setLadderAnimated(true), 400);
     return () => clearTimeout(timer);
-  }, [compareClassAId, compareClassBId, activeReportTab]);
+  }, [compareClassAId, compareClassBId, activeReportTab, selectedClassId]);
 
   // Time View Filter: 1 Tháng (Current Month), 2 Tháng, 3 Tháng, Tất Cả
   const [timeView, setTimeView] = useState<'1m' | '2m' | '3m' | 'all'>('all');
@@ -2935,8 +2935,12 @@ export default function ReportsPage() {
                             <span className="text-[11px] font-bold text-blue-400 w-24 truncate shrink-0">{classComparisonData.classA.name}:</span>
                             <div className="flex-1 h-3 bg-[#111726] rounded-md overflow-hidden p-0.5 border border-white/5">
                               <div
-                                style={{ width: `${Math.min(100, (classComparisonData.classA.avgCheck1 / 10) * 100)}%` }}
-                                className="h-full bg-blue-500 rounded-sm animate-grow-width shadow-[0_0_8px_rgba(59,130,246,0.5)]"
+                                style={{
+                                  width: ladderAnimated ? `${Math.min(100, (classComparisonData.classA.avgCheck1 / 10) * 100)}%` : '0%',
+                                  transition: 'width 1.2s cubic-bezier(0.2, 0.8, 0.2, 1)',
+                                  transitionDelay: '100ms',
+                                }}
+                                className="h-full bg-blue-500 rounded-sm shadow-[0_0_8px_rgba(59,130,246,0.5)] will-change-[width]"
                               />
                             </div>
                             <span className="text-xs font-mono font-black text-blue-300 w-12 text-right shrink-0">{format1Dec(classComparisonData.classA.avgCheck1)} đ</span>
@@ -2945,8 +2949,12 @@ export default function ReportsPage() {
                             <span className="text-[11px] font-bold text-cyan-400 w-24 truncate shrink-0">{classComparisonData.classB.name}:</span>
                             <div className="flex-1 h-3 bg-[#111726] rounded-md overflow-hidden p-0.5 border border-white/5">
                               <div
-                                style={{ width: `${Math.min(100, (classComparisonData.classB.avgCheck1 / 10) * 100)}%` }}
-                                className="h-full bg-cyan-500 rounded-sm animate-grow-width shadow-[0_0_8px_rgba(6,182,212,0.5)]"
+                                style={{
+                                  width: ladderAnimated ? `${Math.min(100, (classComparisonData.classB.avgCheck1 / 10) * 100)}%` : '0%',
+                                  transition: 'width 1.2s cubic-bezier(0.2, 0.8, 0.2, 1)',
+                                  transitionDelay: '100ms',
+                                }}
+                                className="h-full bg-cyan-500 rounded-sm shadow-[0_0_8px_rgba(6,182,212,0.5)] will-change-[width]"
                               />
                             </div>
                             <span className="text-xs font-mono font-black text-cyan-300 w-12 text-right shrink-0">{format1Dec(classComparisonData.classB.avgCheck1)} đ</span>
@@ -2965,8 +2973,12 @@ export default function ReportsPage() {
                             <span className="text-[11px] font-bold text-blue-400 w-24 truncate shrink-0">{classComparisonData.classA.name}:</span>
                             <div className="flex-1 h-3 bg-[#111726] rounded-md overflow-hidden p-0.5 border border-white/5">
                               <div
-                                style={{ width: `${Math.min(100, (classComparisonData.classA.avgCheck2 / 10) * 100)}%` }}
-                                className="h-full bg-blue-500 rounded-sm animate-grow-width shadow-[0_0_8px_rgba(59,130,246,0.5)]"
+                                style={{
+                                  width: ladderAnimated ? `${Math.min(100, (classComparisonData.classA.avgCheck2 / 10) * 100)}%` : '0%',
+                                  transition: 'width 1.2s cubic-bezier(0.2, 0.8, 0.2, 1)',
+                                  transitionDelay: '180ms',
+                                }}
+                                className="h-full bg-blue-500 rounded-sm shadow-[0_0_8px_rgba(59,130,246,0.5)] will-change-[width]"
                               />
                             </div>
                             <span className="text-xs font-mono font-black text-blue-300 w-12 text-right shrink-0">{format1Dec(classComparisonData.classA.avgCheck2)} đ</span>
@@ -2975,8 +2987,12 @@ export default function ReportsPage() {
                             <span className="text-[11px] font-bold text-cyan-400 w-24 truncate shrink-0">{classComparisonData.classB.name}:</span>
                             <div className="flex-1 h-3 bg-[#111726] rounded-md overflow-hidden p-0.5 border border-white/5">
                               <div
-                                style={{ width: `${Math.min(100, (classComparisonData.classB.avgCheck2 / 10) * 100)}%` }}
-                                className="h-full bg-cyan-500 rounded-sm animate-grow-width shadow-[0_0_8px_rgba(6,182,212,0.5)]"
+                                style={{
+                                  width: ladderAnimated ? `${Math.min(100, (classComparisonData.classB.avgCheck2 / 10) * 100)}%` : '0%',
+                                  transition: 'width 1.2s cubic-bezier(0.2, 0.8, 0.2, 1)',
+                                  transitionDelay: '180ms',
+                                }}
+                                className="h-full bg-cyan-500 rounded-sm shadow-[0_0_8px_rgba(6,182,212,0.5)] will-change-[width]"
                               />
                             </div>
                             <span className="text-xs font-mono font-black text-cyan-300 w-12 text-right shrink-0">{format1Dec(classComparisonData.classB.avgCheck2)} đ</span>
@@ -2995,8 +3011,12 @@ export default function ReportsPage() {
                             <span className="text-[11px] font-bold text-blue-400 w-24 truncate shrink-0">{classComparisonData.classA.name}:</span>
                             <div className="flex-1 h-3 bg-[#111726] rounded-md overflow-hidden p-0.5 border border-white/5">
                               <div
-                                style={{ width: `${Math.min(100, (classComparisonData.classA.avgHomework / 10) * 100)}%` }}
-                                className="h-full bg-blue-500 rounded-sm animate-grow-width shadow-[0_0_8px_rgba(59,130,246,0.5)]"
+                                style={{
+                                  width: ladderAnimated ? `${Math.min(100, (classComparisonData.classA.avgHomework / 10) * 100)}%` : '0%',
+                                  transition: 'width 1.2s cubic-bezier(0.2, 0.8, 0.2, 1)',
+                                  transitionDelay: '260ms',
+                                }}
+                                className="h-full bg-blue-500 rounded-sm shadow-[0_0_8px_rgba(59,130,246,0.5)] will-change-[width]"
                               />
                             </div>
                             <span className="text-xs font-mono font-black text-blue-300 w-12 text-right shrink-0">{format1Dec(classComparisonData.classA.avgHomework)} đ</span>
@@ -3005,8 +3025,12 @@ export default function ReportsPage() {
                             <span className="text-[11px] font-bold text-cyan-400 w-24 truncate shrink-0">{classComparisonData.classB.name}:</span>
                             <div className="flex-1 h-3 bg-[#111726] rounded-md overflow-hidden p-0.5 border border-white/5">
                               <div
-                                style={{ width: `${Math.min(100, (classComparisonData.classB.avgHomework / 10) * 100)}%` }}
-                                className="h-full bg-cyan-500 rounded-sm animate-grow-width shadow-[0_0_8px_rgba(6,182,212,0.5)]"
+                                style={{
+                                  width: ladderAnimated ? `${Math.min(100, (classComparisonData.classB.avgHomework / 10) * 100)}%` : '0%',
+                                  transition: 'width 1.2s cubic-bezier(0.2, 0.8, 0.2, 1)',
+                                  transitionDelay: '260ms',
+                                }}
+                                className="h-full bg-cyan-500 rounded-sm shadow-[0_0_8px_rgba(6,182,212,0.5)] will-change-[width]"
                               />
                             </div>
                             <span className="text-xs font-mono font-black text-cyan-300 w-12 text-right shrink-0">{format1Dec(classComparisonData.classB.avgHomework)} đ</span>
@@ -3234,8 +3258,13 @@ export default function ReportsPage() {
                       {/* Horizontal Progress Bar Track */}
                       <div className="flex-1 h-3 bg-[#0e1424] rounded-full overflow-hidden p-0.5 border border-white/5 mx-2">
                         <div
-                          style={{ width: `${Math.max(t.pct > 0 ? 3 : 0, t.pct)}%`, backgroundColor: t.color }}
-                          className="h-full rounded-full transition-all duration-700 animate-grow-width shadow-sm"
+                          style={{
+                            width: ladderAnimated ? `${Math.max(t.pct > 0 ? 3 : 0, t.pct)}%` : '0%',
+                            backgroundColor: t.color,
+                            transition: 'width 1.2s cubic-bezier(0.2, 0.8, 0.2, 1)',
+                            transitionDelay: `${(5 - t.tier) * 80 + 50}ms`,
+                          }}
+                          className="h-full rounded-full shadow-sm will-change-[width]"
                         />
                       </div>
 
