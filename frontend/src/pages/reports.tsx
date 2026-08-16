@@ -710,8 +710,10 @@ export default function ReportsPage() {
         delta = 0.0;
       }
 
+      // Safe Zone Fluctuation Assessment: Top-performing students with minor fluctuations stay in safe zone
       let statusLabel = 'Duy trì ổn định';
       let statusType: 'breakthrough' | 'improving' | 'stable' | 'declining' | 'critical' = 'stable';
+      const isHighTier = current >= 8.0 || baseline >= 8.5;
 
       if (delta >= 1.5) {
         statusLabel = `Bứt phá mạnh (+${format1Dec(delta)})`;
@@ -719,14 +721,18 @@ export default function ReportsPage() {
       } else if (delta >= 0.5) {
         statusLabel = `Tiến bộ tốt (+${format1Dec(delta)})`;
         statusType = 'improving';
+      } else if (isHighTier && delta >= -0.8) {
+        // Safe Zone: Grade is high (8.0+), slight drop is completely normal and safe
+        statusLabel = delta >= 0 ? `Giữ vững phong độ cao (+${format1Dec(delta)})` : `Duy trì xuất sắc (${format1Dec(delta)})`;
+        statusType = 'stable';
       } else if (delta <= -1.5) {
         statusLabel = `Sụt giảm nghiêm trọng (${format1Dec(delta)})`;
         statusType = 'critical';
       } else if (delta <= -0.5) {
-        statusLabel = `Có chiều hướng giảm (${format1Dec(delta)})`;
-        statusType = 'declining';
+        statusLabel = isHighTier ? `Giảm nhẹ ở mức giỏi (${format1Dec(delta)})` : `Có chiều hướng giảm (${format1Dec(delta)})`;
+        statusType = isHighTier ? 'stable' : 'declining';
       } else {
-        statusLabel = delta > 0 ? `Tăng nhẹ (+${format1Dec(delta)})` : delta < 0 ? `Giảm nhẹ (${format1Dec(delta)})` : 'Duy trì ổn định';
+        statusLabel = delta > 0 ? `Tăng nhẹ (+${format1Dec(delta)})` : delta < 0 ? `Biến động nhẹ (${format1Dec(delta)})` : 'Duy trì ổn định';
         statusType = 'stable';
       }
 
@@ -794,7 +800,21 @@ export default function ReportsPage() {
       const avgHw = hwScores.length > 0 ? trunc1Dec(hwScores.reduce((a, b) => a + b, 0) / hwScores.length) : 0;
 
       let classSd = 0;
-      if (emaScores.length >= 2) {
+      const cSessionRecords = sessionRecords.filter(r => String(r.class_id) === String(cObj.id));
+      if (cSessionRecords.length >= 2) {
+        const scores = cSessionRecords.map(r => {
+          const c1 = Number(r.check_1 || 0);
+          const c2 = Number(r.check_2 || 0);
+          const hw = Number(r.homework || 0);
+          const valid = [c1, c2, hw].filter(v => v > 0);
+          return valid.length > 0 ? valid.reduce((a, b) => a + b, 0) / valid.length : 0;
+        }).filter(v => v > 0);
+        if (scores.length >= 2) {
+          const m = scores.reduce((a, b) => a + b, 0) / scores.length;
+          const v = scores.reduce((sum, sc) => sum + Math.pow(sc - m, 2), 0) / scores.length;
+          classSd = trunc1Dec(Math.sqrt(v));
+        }
+      } else if (emaScores.length >= 2) {
         const mean = avgEma;
         const variance = emaScores.reduce((sum, sc) => sum + Math.pow(sc - mean, 2), 0) / emaScores.length;
         classSd = trunc1Dec(Math.sqrt(variance));
@@ -870,7 +890,7 @@ export default function ReportsPage() {
       c2Diff,
       hwDiff,
     };
-  }, [classes, studentRankings, compareClassAId, compareClassBId]);
+  }, [classes, studentRankings, sessionRecords, compareClassAId, compareClassBId]);
 
   // Cross-Class Benchmark Data
   const crossClassBenchmark = useMemo(() => {
@@ -898,7 +918,21 @@ export default function ReportsPage() {
       const avgEma = emaScores.length > 0 ? trunc1Dec(emaScores.reduce((a,b)=>a+b,0) / emaScores.length) : 0;
 
       let classSd = 0;
-      if (emaScores.length >= 2) {
+      const cSessionRecords = sessionRecords.filter(r => String(r.class_id) === String(c.id));
+      if (cSessionRecords.length >= 2) {
+        const scores = cSessionRecords.map(r => {
+          const c1 = Number(r.check_1 || 0);
+          const c2 = Number(r.check_2 || 0);
+          const hw = Number(r.homework || 0);
+          const valid = [c1, c2, hw].filter(v => v > 0);
+          return valid.length > 0 ? valid.reduce((a, b) => a + b, 0) / valid.length : 0;
+        }).filter(v => v > 0);
+        if (scores.length >= 2) {
+          const m = scores.reduce((a, b) => a + b, 0) / scores.length;
+          const v = scores.reduce((sum, sc) => sum + Math.pow(sc - m, 2), 0) / scores.length;
+          classSd = trunc1Dec(Math.sqrt(v));
+        }
+      } else if (emaScores.length >= 2) {
         const mean = avgEma;
         const variance = emaScores.reduce((sum, sc) => sum + Math.pow(sc - mean, 2), 0) / emaScores.length;
         classSd = trunc1Dec(Math.sqrt(variance));
@@ -1161,10 +1195,30 @@ export default function ReportsPage() {
       const workbook = new ExcelJS.Workbook();
       const headers = ['STT', 'Họ và Tên', 'Lớp Học', 'Buổi Học', 'Điểm Danh %', 'Check 1', 'Check 2', 'Homework', 'Hạng', 'Đánh Giá'];
 
+      // Pre-load real rank badge PNG images for embedding in Excel
+      const rankImages: Record<number, number> = {};
+      for (let t = 1; t <= 6; t++) {
+        try {
+          const resp = await fetch(`/ranks/tier_${t}.png`);
+          if (resp.ok) {
+            const blob = await resp.blob();
+            const arrayBuffer = await blob.arrayBuffer();
+            const imageId = workbook.addImage({
+              buffer: arrayBuffer,
+              extension: 'png',
+            });
+            rankImages[t] = imageId;
+          }
+        } catch {
+          // ignore
+        }
+      }
+
       const addClassSheet = (sheetName: string, items: any[]) => {
         const safeName = sheetName.replace(/[\*\?:\/\\\[\]]/g, '').slice(0, 31) || 'Lớp';
         const worksheet = workbook.addWorksheet(safeName);
 
+        const tierObjs: any[] = [];
         const rows = items.map((r) => {
           const present = r.present_count ?? 0;
           const total = r.total_sessions ?? 0;
@@ -1176,25 +1230,19 @@ export default function ReportsPage() {
           const valid = [c1, c2, hw].filter(v => v > 0);
           let evalStr = 'Chưa có điểm';
           let tierStr = 'Chưa xếp hạng';
+          let currentTier: any = null;
           if (valid.length > 0) {
             const avg = trunc1Dec(valid.reduce((a, b) => a + b, 0) / valid.length);
             const tier = getStudentTier(avg);
-            const iconMap: Record<number, string> = {
-              6: '👑',
-              5: '💎',
-              4: '💠',
-              3: '🥇',
-              2: '🥈',
-              1: '🥉'
-            };
-            const icon = iconMap[tier.tier] || '⚪';
-            tierStr = `${icon} ${tier.name} (${tier.title})`;
+            currentTier = tier;
+            tierStr = `       ${tier.name} (${tier.title})`;
             let label = 'Xuất Sắc';
             if (avg < 8.5) label = 'Giỏi';
             if (avg < 7.0) label = 'Khá';
             if (avg < 5.0) label = 'Cần Cố Gắng';
             evalStr = `${label} (${format1Dec(avg)})`;
           }
+          tierObjs.push(currentTier);
 
           return [
             { formula: 'ROW()-1' },
@@ -1233,6 +1281,7 @@ export default function ReportsPage() {
 
           worksheet.eachRow((row, rowNumber) => {
             const isHeader = rowNumber === 1;
+            row.height = isHeader ? 26 : 28;
             row.eachCell((cell, colNumber) => {
               cell.font = { name: 'Times New Roman', size: 13, bold: isHeader };
               cell.alignment = { vertical: 'middle', horizontal: 'center' };
@@ -1272,6 +1321,22 @@ export default function ReportsPage() {
                 }
               }
             });
+
+            // Embed real PNG rank badge icon inside column 9 (col index 8)
+            if (!isHeader) {
+              const rIdx = rowNumber - 2;
+              const tObj = tierObjs[rIdx];
+              if (tObj && rankImages[tObj.tier] !== undefined) {
+                try {
+                  worksheet.addImage(rankImages[tObj.tier], {
+                    tl: { col: 8.08, row: rowNumber - 1 + 0.12 },
+                    ext: { width: 22, height: 22 },
+                  });
+                } catch {
+                  // ignore
+                }
+              }
+            }
           });
 
           worksheet.columns.forEach((col, colIdx) => {
@@ -2613,36 +2678,38 @@ export default function ReportsPage() {
 
                   {/* Dual Class Selector Bar - 4 Rounded Square Clean Boxes */}
                   <div className="flex flex-wrap items-center gap-3 bg-[#070a12] p-2 rounded-xl border border-[#182236]">
-                    <div className="flex items-center gap-2.5 bg-[#0d1322] border border-blue-500/40 px-3.5 py-1.5 rounded-lg shrink-0">
+                    <div className="flex items-center gap-2 bg-[#0d1322] border border-blue-500/40 pl-3 pr-1.5 py-1 rounded-xl shrink-0">
                       <span
                         className="w-2.5 h-2.5 rounded-full shrink-0"
                         style={{ backgroundColor: getClassColor(compareClassAId, 0), boxShadow: `0 0 8px ${getClassColor(compareClassAId, 0)}80` }}
                       ></span>
                       <span className="text-xs font-black text-blue-400 whitespace-nowrap shrink-0">Lớp A:</span>
-                      <CustomSelect
-                        value={compareClassAId}
-                        onChange={(val) => setCompareClassAId(String(val))}
-                        options={classes.map((c) => ({ value: String(c.id), label: `${c.class_name} (${c.grade || 'Lớp 6'})` }))}
-                        className="w-48 shrink-0"
-                      />
+                      <div className="w-44 shrink-0">
+                        <CustomSelect
+                          value={compareClassAId}
+                          onChange={(val) => setCompareClassAId(String(val))}
+                          options={classes.map((c) => ({ value: String(c.id), label: `${c.class_name} (${c.grade || 'Lớp 6'})` }))}
+                        />
+                      </div>
                     </div>
 
-                    <div className="px-3 py-1 rounded-md bg-[#131b2e] border border-[#22304d] font-mono font-black text-xs text-blue-300 uppercase tracking-wider shrink-0">
+                    <div className="px-3 py-1.5 rounded-lg bg-[#131b2e] border border-[#22304d] font-mono font-black text-xs text-blue-300 uppercase tracking-wider shrink-0">
                       VS
                     </div>
 
-                    <div className="flex items-center gap-2.5 bg-[#0d1622] border border-cyan-500/40 px-3.5 py-1.5 rounded-lg shrink-0">
+                    <div className="flex items-center gap-2 bg-[#0d1622] border border-cyan-500/40 pl-3 pr-1.5 py-1 rounded-xl shrink-0">
                       <span
                         className="w-2.5 h-2.5 rounded-full shrink-0"
                         style={{ backgroundColor: getClassColor(compareClassBId, 1), boxShadow: `0 0 8px ${getClassColor(compareClassBId, 1)}80` }}
                       ></span>
                       <span className="text-xs font-black text-cyan-400 whitespace-nowrap shrink-0">Lớp B:</span>
-                      <CustomSelect
-                        value={compareClassBId}
-                        onChange={(val) => setCompareClassBId(String(val))}
-                        options={classes.map((c) => ({ value: String(c.id), label: `${c.class_name} (${c.grade || 'Lớp 6'})` }))}
-                        className="w-48 shrink-0"
-                      />
+                      <div className="w-44 shrink-0">
+                        <CustomSelect
+                          value={compareClassBId}
+                          onChange={(val) => setCompareClassBId(String(val))}
+                          options={classes.map((c) => ({ value: String(c.id), label: `${c.class_name} (${c.grade || 'Lớp 6'})` }))}
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -2890,24 +2957,28 @@ export default function ReportsPage() {
                     </div>
                   </div>
 
-                  {/* Right: 6-Tier Academic Rank Distribution Duel */}
-                  <div className="p-5 rounded-xl bg-[#090d17] border border-[#192236] space-y-3">
-                    <div className="flex items-center justify-between border-b border-white/5 pb-2.5">
+                  {/* Right: 6-Tier Academic Rank Distribution Duel — Symmetrical Tug-of-War Comparative Ladder */}
+                  <div className="p-5 rounded-xl bg-[#090d17] border border-[#192236] space-y-4 shadow-xl">
+                    <div className="flex flex-wrap items-center justify-between border-b border-white/5 pb-3 gap-2">
                       <span className="text-xs font-black uppercase tracking-wider text-white flex items-center gap-2">
-                        <Award size={15} className="text-amber-400" />
+                        <Award size={16} className="text-amber-400" />
                         Phân Bố 6 Hạng Bậc Học Lực
                       </span>
-                      <div className="flex items-center gap-3 text-[11px] font-bold">
-                        <span className="flex items-center gap-1.5 text-blue-400">
-                          <span className="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_6px_rgba(59,130,246,0.8)]"></span> {classComparisonData.classA.name} ({classComparisonData.classA.studentCount} hs)
-                        </span>
-                        <span className="flex items-center gap-1.5 text-cyan-400">
-                          <span className="w-2 h-2 rounded-full bg-cyan-500 shadow-[0_0_6px_rgba(6,182,212,0.8)]"></span> {classComparisonData.classB.name} ({classComparisonData.classB.studentCount} hs)
-                        </span>
+                      <div className="flex items-center gap-4 text-xs font-extrabold">
+                        <div className="flex items-center gap-1.5 text-blue-400">
+                          <span className="w-2.5 h-2.5 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.8)]"></span>
+                          <span>{classComparisonData.classA.name} ({classComparisonData.classA.studentCount} HS)</span>
+                        </div>
+                        <span className="text-slate-600 font-bold">VS</span>
+                        <div className="flex items-center gap-1.5 text-cyan-400">
+                          <span className="w-2.5 h-2.5 rounded-full bg-cyan-500 shadow-[0_0_8px_rgba(6,182,212,0.8)]"></span>
+                          <span>{classComparisonData.classB.name} ({classComparisonData.classB.studentCount} HS)</span>
+                        </div>
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 text-xs">
+                    {/* 6-Tier Dual Butterfly Comparison Ladder (Quán Quân -> Đồng) */}
+                    <div className="space-y-2">
                       {TIERS_CONFIG.slice().reverse().map(tier => {
                         const countA = classComparisonData.classA.tierDistribution.find((t: any) => t.tier === tier.tier)?.count || 0;
                         const pctA = classComparisonData.classA.tierDistribution.find((t: any) => t.tier === tier.tier)?.pct || 0;
@@ -2915,28 +2986,43 @@ export default function ReportsPage() {
                         const pctB = classComparisonData.classB.tierDistribution.find((t: any) => t.tier === tier.tier)?.pct || 0;
 
                         return (
-                          <div key={tier.tier} className="p-2.5 rounded-xl bg-[#0d1220] border border-white/5 hover:border-white/10 transition-colors flex items-center justify-between gap-3 shadow-sm">
-                            <div className="flex items-center gap-2.5 min-w-0">
-                              <img src={tier.badge} alt={tier.name} className="w-7 h-7 object-contain shrink-0 drop-shadow" />
-                              <div className="truncate">
-                                <span className={`text-xs font-black block leading-tight ${tier.text}`}>{tier.name}</span>
-                                <span className="text-[10px] text-slate-400 font-mono font-semibold">{tier.minScore} - {tier.maxScore}đ</span>
+                          <div
+                            key={tier.tier}
+                            className="bg-[#0c101d] border border-[#1b253b] hover:border-indigo-500/30 p-2 rounded-xl transition-all duration-200 flex items-center justify-between gap-3 group"
+                          >
+                            {/* LEFT: Class A Bar & Percentage */}
+                            <div className="flex-1 flex items-center justify-end gap-2.5 min-w-0">
+                              <span className="text-xs font-mono font-black text-blue-400 shrink-0">
+                                {countA} HS <span className="text-[10px] text-slate-400 font-normal">({pctA}%)</span>
+                              </span>
+                              <div className="flex-1 max-w-[120px] h-2 bg-[#121829] rounded-full overflow-hidden flex justify-end p-0.5 border border-white/5">
+                                <div
+                                  style={{ width: `${Math.min(100, pctA)}%` }}
+                                  className="h-full bg-blue-500 rounded-full transition-all duration-500 shadow-[0_0_8px_rgba(59,130,246,0.6)]"
+                                />
                               </div>
                             </div>
-                            <div className="flex items-center gap-1.5 shrink-0 font-mono text-[11px] font-black">
-                              <div 
-                                className="px-2 py-1 rounded-lg bg-blue-500/10 text-blue-300 border border-blue-500/20 text-center min-w-[56px]"
-                                title={`${classComparisonData.classA.name}: ${countA} học sinh (${pctA}%)`}
-                              >
-                                <span>{countA}hs</span> <span className="text-[9px] text-blue-400/80 font-normal">({pctA}%)</span>
+
+                            {/* CENTER: Tier Badge, Name & Score */}
+                            <div className="flex items-center justify-center gap-2 w-44 shrink-0 py-1 px-2 bg-[#121728] rounded-lg border border-white/5 shadow-inner">
+                              <img src={tier.badge} alt={tier.name} className="w-6 h-6 object-contain shrink-0 drop-shadow" />
+                              <div className="text-center">
+                                <span className={`text-xs font-black block leading-tight ${tier.text}`}>{tier.name}</span>
+                                <span className="text-[9px] text-slate-400 font-mono font-semibold">{tier.minScore} - {tier.maxScore}đ</span>
                               </div>
-                              <span className="text-[10px] text-slate-600 font-bold">vs</span>
-                              <div 
-                                className="px-2 py-1 rounded-lg bg-cyan-500/10 text-cyan-300 border border-cyan-500/20 text-center min-w-[56px]"
-                                title={`${classComparisonData.classB.name}: ${countB} học sinh (${pctB}%)`}
-                              >
-                                <span>{countB}hs</span> <span className="text-[9px] text-cyan-400/80 font-normal">({pctB}%)</span>
+                            </div>
+
+                            {/* RIGHT: Class B Bar & Percentage */}
+                            <div className="flex-1 flex items-center justify-start gap-2.5 min-w-0">
+                              <div className="flex-1 max-w-[120px] h-2 bg-[#121829] rounded-full overflow-hidden p-0.5 border border-white/5">
+                                <div
+                                  style={{ width: `${Math.min(100, pctB)}%` }}
+                                  className="h-full bg-cyan-500 rounded-full transition-all duration-500 shadow-[0_0_8px_rgba(6,182,212,0.6)]"
+                                />
                               </div>
+                              <span className="text-xs font-mono font-black text-cyan-400 shrink-0">
+                                {countB} HS <span className="text-[10px] text-slate-400 font-normal">({pctB}%)</span>
+                              </span>
                             </div>
                           </div>
                         );
@@ -3676,9 +3762,9 @@ export default function ReportsPage() {
       ) : (
         /* TỔNG QUAN HỌC LỰC (OVERVIEW TAB VIEW) */
         <>
-          {/* 2. INDIVIDUAL STUDENT PERFORMANCE INDEX */}
+          {/* 2. INDIVIDUAL STUDENT PERFORMANCE PROFILE */}
           {selectedStudentObj && (
-            <div className="flex flex-col gap-6 animate-cascade-1">
+            <div className="animate-cascade-1">
               <div className="bg-[#0e1222] border border-[#1e2744] p-6 rounded-2xl shadow-2xl flex flex-wrap items-center justify-between gap-6 relative overflow-hidden">
                 <div className="flex items-center gap-4 z-10">
                   <div className="w-14 h-14 rounded-full bg-gradient-to-tr from-indigo-600 to-purple-600 text-white font-black text-xl flex items-center justify-center shadow-lg shadow-indigo-500/20 border border-white/20">
@@ -3725,38 +3811,6 @@ export default function ReportsPage() {
                     <span className="inline-block px-2.5 py-0.5 rounded-lg text-[10px] font-black bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
                       {stats.level}
                     </span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-[#0e1326] border border-indigo-500/30 p-6 rounded-2xl shadow-2xl flex flex-col gap-6 relative overflow-hidden">
-                <div className="flex flex-wrap items-center justify-between gap-6 z-10">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-[10px] font-black uppercase text-indigo-400 tracking-widest">
-                        CHỈ SỐ HIỆU SUẤT TỔNG HỢP
-                      </span>
-                      <span className="inline-block px-2.5 py-0.5 rounded-lg text-[10px] font-black bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-                        {engine.rating_label}
-                      </span>
-                    </div>
-                    <div className="flex items-baseline gap-2 mt-1">
-                      <span className="text-4xl font-black text-white font-mono">{engine.performance_index}</span>
-                      <span className="text-sm font-bold text-slate-400 font-mono">/ 100 Điểm</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-[#12182e] border border-indigo-500/20 p-4 rounded-xl flex flex-col gap-2 z-10">
-                  <div className="text-xs font-black uppercase text-indigo-300 tracking-wider">
-                    ĐÁNH GIÁ VÀ NỘI DUNG NÊN THỰC HIỆN:
-                  </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs font-semibold text-slate-200">
-                    {engine.recommendations && engine.recommendations.map((rec: string, idx: number) => (
-                      <div key={idx} className="bg-[#171f3b] px-3.5 py-2 rounded-lg border border-[#26325a]">
-                        <span>{rec}</span>
-                      </div>
-                    ))}
                   </div>
                 </div>
               </div>
