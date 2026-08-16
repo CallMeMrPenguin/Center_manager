@@ -3862,7 +3862,7 @@ export default function ReportsPage() {
                   const lastX = getSvgX(lastIdx, sessionChartData.length);
                   const forecastX = lastX + 40 * zoomLevel;
                   return (
-                    <>
+                    <g className="animate-point-pop" style={{ animationDelay: '1.80s' }}>
                       {/* 1. Check 1 Forecast Line & Point */}
                       <line
                         x1={lastX}
@@ -3946,16 +3946,17 @@ export default function ReportsPage() {
                       >
                         {format1Dec(engine.pred_hw)}
                       </text>
-                    </>
+                    </g>
                   );
                 })()}
 
-                {/* INTERACTIVE HOVER OVERLAY COLUMNS & CIRCULAR DATA POINTS */}
+                {/* INTERACTIVE HOVER OVERLAY COLUMNS & SEQUENTIALLY POPPING DATA POINTS */}
                 {sessionChartData.map((d, i) => {
                   const x = getSvgX(i, sessionChartData.length);
                   const y1 = getSvgY(d.check1);
                   const y2 = getSvgY(d.check2);
                   const yHw = getSvgY(d.homework);
+                  const pointDelay = (0.60 + (i / Math.max(1, sessionChartData.length - 1)) * 1.15).toFixed(2);
 
                   return (
                     <g 
@@ -3995,21 +3996,30 @@ export default function ReportsPage() {
                         className="opacity-0 group-hover:opacity-100 transition-opacity"
                       />
 
-                      <circle cx={x} cy={y1} r="7" fill="#3b82f6" filter="url(#glow-blue)" style={{ transformBox: 'fill-box', transformOrigin: 'center' }} className="transition-transform duration-200 group-hover:scale-125" />
-                      <circle cx={x} cy={y1} r="3.5" fill="#ffffff" style={{ transformBox: 'fill-box', transformOrigin: 'center' }} className="transition-transform duration-200 group-hover:scale-125" />
+                      {/* Check 1 Point */}
+                      <g className="animate-point-pop" style={{ animationDelay: `${pointDelay}s` }}>
+                        <circle cx={x} cy={y1} r="7" fill="#3b82f6" filter="url(#glow-blue)" style={{ transformBox: 'fill-box', transformOrigin: 'center' }} className="transition-transform duration-200 group-hover:scale-125" />
+                        <circle cx={x} cy={y1} r="3.5" fill="#ffffff" style={{ transformBox: 'fill-box', transformOrigin: 'center' }} className="transition-transform duration-200 group-hover:scale-125" />
+                      </g>
 
-                      <circle cx={x} cy={y2} r="7" fill="#a855f7" filter="url(#glow-purple)" style={{ transformBox: 'fill-box', transformOrigin: 'center' }} className="transition-transform duration-200 group-hover:scale-125" />
-                      <circle cx={x} cy={y2} r="3.5" fill="#ffffff" style={{ transformBox: 'fill-box', transformOrigin: 'center' }} className="transition-transform duration-200 group-hover:scale-125" />
+                      {/* Check 2 Point */}
+                      <g className="animate-point-pop" style={{ animationDelay: `${pointDelay}s` }}>
+                        <circle cx={x} cy={y2} r="7" fill="#a855f7" filter="url(#glow-purple)" style={{ transformBox: 'fill-box', transformOrigin: 'center' }} className="transition-transform duration-200 group-hover:scale-125" />
+                        <circle cx={x} cy={y2} r="3.5" fill="#ffffff" style={{ transformBox: 'fill-box', transformOrigin: 'center' }} className="transition-transform duration-200 group-hover:scale-125" />
+                      </g>
 
-                      <circle cx={x} cy={yHw} r="7" fill="#10b981" filter="url(#glow-emerald)" style={{ transformBox: 'fill-box', transformOrigin: 'center' }} className="transition-transform duration-200 group-hover:scale-125" />
-                      <circle cx={x} cy={yHw} r="3.5" fill="#ffffff" style={{ transformBox: 'fill-box', transformOrigin: 'center' }} className="transition-transform duration-200 group-hover:scale-125" />
+                      {/* Homework Point */}
+                      <g className="animate-point-pop" style={{ animationDelay: `${pointDelay}s` }}>
+                        <circle cx={x} cy={yHw} r="7" fill="#10b981" filter="url(#glow-emerald)" style={{ transformBox: 'fill-box', transformOrigin: 'center' }} className="transition-transform duration-200 group-hover:scale-125" />
+                        <circle cx={x} cy={yHw} r="3.5" fill="#ffffff" style={{ transformBox: 'fill-box', transformOrigin: 'center' }} className="transition-transform duration-200 group-hover:scale-125" />
+                      </g>
 
                       {i === sessionChartData.length - 1 && (
-                        <>
+                        <g className="animate-point-pop" style={{ animationDelay: `${pointDelay}s` }}>
                           <text x={x + 14} y={y1 + 4} fill="#3b82f6" fontSize="12" fontWeight="900">{d.check1}</text>
                           <text x={x + 14} y={y2 + 4} fill="#a855f7" fontSize="12" fontWeight="900">{d.check2}</text>
                           <text x={x + 14} y={yHw + 4} fill="#10b981" fontSize="12" fontWeight="900">{d.homework}</text>
-                        </>
+                        </g>
                       )}
                     </g>
                   );
