@@ -325,15 +325,6 @@ export default function ReportsPage() {
   // Cross-Class Benchmark, Deep Analysis & Overview Tab State
   const [activeReportTab, setActiveReportTab] = useState<'overview' | 'deep' | 'benchmark'>('overview');
 
-  // 6-Tier Comparison Ladder animation state (triggered with 750ms delay after entrance fly-in)
-  const [ladderAnimated, setLadderAnimated] = useState(false);
-
-  useEffect(() => {
-    setLadderAnimated(false);
-    const timer = setTimeout(() => setLadderAnimated(true), 750);
-    return () => clearTimeout(timer);
-  }, [compareClassAId, compareClassBId, activeReportTab, selectedClassId]);
-
   // Time View Filter: 1 Tháng (Current Month), 2 Tháng, 3 Tháng, Tất Cả
   const [timeView, setTimeView] = useState<'1m' | '2m' | '3m' | 'all'>('all');
 
@@ -2935,12 +2926,12 @@ export default function ReportsPage() {
                             <span className="text-[11px] font-bold text-blue-400 w-24 truncate shrink-0">{classComparisonData.classA.name}:</span>
                             <div className="flex-1 h-3 bg-[#111726] rounded-md overflow-hidden p-0.5 border border-white/5">
                               <div
+                                key={`comp-c1-a-${compareClassAId}-${compareClassBId}-${classComparisonData.classA.avgCheck1}`}
                                 style={{
-                                  width: ladderAnimated ? `${Math.min(100, (classComparisonData.classA.avgCheck1 / 10) * 100)}%` : '0%',
-                                  transition: 'width 1.3s cubic-bezier(0.16, 1, 0.3, 1)',
-                                  transitionDelay: '60ms',
+                                  width: `${Math.min(100, (classComparisonData.classA.avgCheck1 / 10) * 100)}%`,
+                                  animationDelay: '0.75s',
                                 }}
-                                className="h-full bg-blue-500 rounded-sm shadow-[0_0_8px_rgba(59,130,246,0.5)] will-change-[width]"
+                                className="h-full bg-blue-500 rounded-sm shadow-[0_0_8px_rgba(59,130,246,0.5)] animate-bar-fill"
                               />
                             </div>
                             <span className="text-xs font-mono font-black text-blue-300 w-12 text-right shrink-0">{format1Dec(classComparisonData.classA.avgCheck1)} đ</span>
@@ -2949,12 +2940,12 @@ export default function ReportsPage() {
                             <span className="text-[11px] font-bold text-cyan-400 w-24 truncate shrink-0">{classComparisonData.classB.name}:</span>
                             <div className="flex-1 h-3 bg-[#111726] rounded-md overflow-hidden p-0.5 border border-white/5">
                               <div
+                                key={`comp-c1-b-${compareClassAId}-${compareClassBId}-${classComparisonData.classB.avgCheck1}`}
                                 style={{
-                                  width: ladderAnimated ? `${Math.min(100, (classComparisonData.classB.avgCheck1 / 10) * 100)}%` : '0%',
-                                  transition: 'width 1.3s cubic-bezier(0.16, 1, 0.3, 1)',
-                                  transitionDelay: '60ms',
+                                  width: `${Math.min(100, (classComparisonData.classB.avgCheck1 / 10) * 100)}%`,
+                                  animationDelay: '0.75s',
                                 }}
-                                className="h-full bg-cyan-500 rounded-sm shadow-[0_0_8px_rgba(6,182,212,0.5)] will-change-[width]"
+                                className="h-full bg-cyan-500 rounded-sm shadow-[0_0_8px_rgba(6,182,212,0.5)] animate-bar-fill"
                               />
                             </div>
                             <span className="text-xs font-mono font-black text-cyan-300 w-12 text-right shrink-0">{format1Dec(classComparisonData.classB.avgCheck1)} đ</span>
@@ -2973,12 +2964,12 @@ export default function ReportsPage() {
                             <span className="text-[11px] font-bold text-blue-400 w-24 truncate shrink-0">{classComparisonData.classA.name}:</span>
                             <div className="flex-1 h-3 bg-[#111726] rounded-md overflow-hidden p-0.5 border border-white/5">
                               <div
+                                key={`comp-c2-a-${compareClassAId}-${compareClassBId}-${classComparisonData.classA.avgCheck2}`}
                                 style={{
-                                  width: ladderAnimated ? `${Math.min(100, (classComparisonData.classA.avgCheck2 / 10) * 100)}%` : '0%',
-                                  transition: 'width 1.3s cubic-bezier(0.16, 1, 0.3, 1)',
-                                  transitionDelay: '140ms',
+                                  width: `${Math.min(100, (classComparisonData.classA.avgCheck2 / 10) * 100)}%`,
+                                  animationDelay: '0.85s',
                                 }}
-                                className="h-full bg-blue-500 rounded-sm shadow-[0_0_8px_rgba(59,130,246,0.5)] will-change-[width]"
+                                className="h-full bg-blue-500 rounded-sm shadow-[0_0_8px_rgba(59,130,246,0.5)] animate-bar-fill"
                               />
                             </div>
                             <span className="text-xs font-mono font-black text-blue-300 w-12 text-right shrink-0">{format1Dec(classComparisonData.classA.avgCheck2)} đ</span>
@@ -2987,12 +2978,12 @@ export default function ReportsPage() {
                             <span className="text-[11px] font-bold text-cyan-400 w-24 truncate shrink-0">{classComparisonData.classB.name}:</span>
                             <div className="flex-1 h-3 bg-[#111726] rounded-md overflow-hidden p-0.5 border border-white/5">
                               <div
+                                key={`comp-c2-b-${compareClassAId}-${compareClassBId}-${classComparisonData.classB.avgCheck2}`}
                                 style={{
-                                  width: ladderAnimated ? `${Math.min(100, (classComparisonData.classB.avgCheck2 / 10) * 100)}%` : '0%',
-                                  transition: 'width 1.3s cubic-bezier(0.16, 1, 0.3, 1)',
-                                  transitionDelay: '140ms',
+                                  width: `${Math.min(100, (classComparisonData.classB.avgCheck2 / 10) * 100)}%`,
+                                  animationDelay: '0.85s',
                                 }}
-                                className="h-full bg-cyan-500 rounded-sm shadow-[0_0_8px_rgba(6,182,212,0.5)] will-change-[width]"
+                                className="h-full bg-cyan-500 rounded-sm shadow-[0_0_8px_rgba(6,182,212,0.5)] animate-bar-fill"
                               />
                             </div>
                             <span className="text-xs font-mono font-black text-cyan-300 w-12 text-right shrink-0">{format1Dec(classComparisonData.classB.avgCheck2)} đ</span>
@@ -3011,12 +3002,12 @@ export default function ReportsPage() {
                             <span className="text-[11px] font-bold text-blue-400 w-24 truncate shrink-0">{classComparisonData.classA.name}:</span>
                             <div className="flex-1 h-3 bg-[#111726] rounded-md overflow-hidden p-0.5 border border-white/5">
                               <div
+                                key={`comp-hw-a-${compareClassAId}-${compareClassBId}-${classComparisonData.classA.avgHomework}`}
                                 style={{
-                                  width: ladderAnimated ? `${Math.min(100, (classComparisonData.classA.avgHomework / 10) * 100)}%` : '0%',
-                                  transition: 'width 1.3s cubic-bezier(0.16, 1, 0.3, 1)',
-                                  transitionDelay: '220ms',
+                                  width: `${Math.min(100, (classComparisonData.classA.avgHomework / 10) * 100)}%`,
+                                  animationDelay: '0.95s',
                                 }}
-                                className="h-full bg-blue-500 rounded-sm shadow-[0_0_8px_rgba(59,130,246,0.5)] will-change-[width]"
+                                className="h-full bg-blue-500 rounded-sm shadow-[0_0_8px_rgba(59,130,246,0.5)] animate-bar-fill"
                               />
                             </div>
                             <span className="text-xs font-mono font-black text-blue-300 w-12 text-right shrink-0">{format1Dec(classComparisonData.classA.avgHomework)} đ</span>
@@ -3025,12 +3016,12 @@ export default function ReportsPage() {
                             <span className="text-[11px] font-bold text-cyan-400 w-24 truncate shrink-0">{classComparisonData.classB.name}:</span>
                             <div className="flex-1 h-3 bg-[#111726] rounded-md overflow-hidden p-0.5 border border-white/5">
                               <div
+                                key={`comp-hw-b-${compareClassAId}-${compareClassBId}-${classComparisonData.classB.avgHomework}`}
                                 style={{
-                                  width: ladderAnimated ? `${Math.min(100, (classComparisonData.classB.avgHomework / 10) * 100)}%` : '0%',
-                                  transition: 'width 1.3s cubic-bezier(0.16, 1, 0.3, 1)',
-                                  transitionDelay: '220ms',
+                                  width: `${Math.min(100, (classComparisonData.classB.avgHomework / 10) * 100)}%`,
+                                  animationDelay: '0.95s',
                                 }}
-                                className="h-full bg-cyan-500 rounded-sm shadow-[0_0_8px_rgba(6,182,212,0.5)] will-change-[width]"
+                                className="h-full bg-cyan-500 rounded-sm shadow-[0_0_8px_rgba(6,182,212,0.5)] animate-bar-fill"
                               />
                             </div>
                             <span className="text-xs font-mono font-black text-cyan-300 w-12 text-right shrink-0">{format1Dec(classComparisonData.classB.avgHomework)} đ</span>
@@ -3081,12 +3072,12 @@ export default function ReportsPage() {
                               </span>
                               <div className="flex-1 h-3.5 bg-[#121829] rounded-full overflow-hidden flex justify-end p-0.5 border border-white/5">
                                 <div
+                                  key={`bench-a-${compareClassAId}-${compareClassBId}-${tier.tier}-${pctA}`}
                                   style={{
-                                    width: ladderAnimated ? `${Math.max(pctA > 0 ? 4 : 0, Math.min(100, pctA))}%` : '0%',
-                                    transition: 'width 1.3s cubic-bezier(0.16, 1, 0.3, 1)',
-                                    transitionDelay: `${tierIdx * 80}ms`,
+                                    width: `${Math.max(pctA > 0 ? 4 : 0, Math.min(100, pctA))}%`,
+                                    animationDelay: `${tierIdx * 0.08 + 0.75}s`,
                                   }}
-                                  className="h-full bg-gradient-to-l from-blue-500 to-blue-600 rounded-full shadow-[0_0_10px_rgba(59,130,246,0.6)] will-change-[width]"
+                                  className="h-full bg-gradient-to-l from-blue-500 to-blue-600 rounded-full shadow-[0_0_10px_rgba(59,130,246,0.6)] animate-bar-fill"
                                 />
                               </div>
                             </div>
@@ -3104,12 +3095,12 @@ export default function ReportsPage() {
                             <div className="flex-1 flex items-center justify-start gap-3 min-w-0">
                               <div className="flex-1 h-3.5 bg-[#121829] rounded-full overflow-hidden p-0.5 border border-white/5">
                                 <div
+                                  key={`bench-b-${compareClassAId}-${compareClassBId}-${tier.tier}-${pctB}`}
                                   style={{
-                                    width: ladderAnimated ? `${Math.max(pctB > 0 ? 4 : 0, Math.min(100, pctB))}%` : '0%',
-                                    transition: 'width 1.3s cubic-bezier(0.16, 1, 0.3, 1)',
-                                    transitionDelay: `${tierIdx * 80}ms`,
+                                    width: `${Math.max(pctB > 0 ? 4 : 0, Math.min(100, pctB))}%`,
+                                    animationDelay: `${tierIdx * 0.08 + 0.75}s`,
                                   }}
-                                  className="h-full bg-gradient-to-r from-cyan-500 to-cyan-400 rounded-full shadow-[0_0_10px_rgba(6,182,212,0.6)] will-change-[width]"
+                                  className="h-full bg-gradient-to-r from-cyan-500 to-cyan-400 rounded-full shadow-[0_0_10px_rgba(6,182,212,0.6)] animate-bar-fill"
                                 />
                               </div>
                               <span className="text-xs font-mono font-black text-cyan-400 shrink-0">
@@ -3258,13 +3249,13 @@ export default function ReportsPage() {
                       {/* Horizontal Progress Bar Track */}
                       <div className="flex-1 h-3 bg-[#0e1424] rounded-full overflow-hidden p-0.5 border border-white/5 mx-2">
                         <div
+                          key={`deep-tier-${selectedClassId}-${t.tier}-${t.pct}`}
                           style={{
-                            width: ladderAnimated ? `${Math.max(t.pct > 0 ? 3 : 0, t.pct)}%` : '0%',
+                            width: `${Math.max(t.pct > 0 ? 3 : 0, t.pct)}%`,
                             backgroundColor: t.color,
-                            transition: 'width 1.2s cubic-bezier(0.2, 0.8, 0.2, 1)',
-                            transitionDelay: `${(5 - t.tier) * 80 + 50}ms`,
+                            animationDelay: `${(5 - t.tier) * 0.08 + 0.75}s`,
                           }}
-                          className="h-full rounded-full shadow-sm will-change-[width]"
+                          className="h-full rounded-full shadow-sm animate-bar-fill"
                         />
                       </div>
 
