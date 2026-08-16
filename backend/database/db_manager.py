@@ -2605,12 +2605,40 @@ def get_analytics_reports(class_id: Optional[int] = None, student_id: Optional[i
             sr["std_dev"] = 0.0
         enriched_rankings.append(sr)
 
+    # Calculate per-class analytics summary for cross-class comparisons
+    if class_id:
+        conn_all = get_connection()
+        cursor_all = conn_all.cursor()
+        cursor_all.execute("""
+            SELECT ag.*, s.full_name as student_name, s.nickname, c.class_name
+            FROM class_attendance_grades ag
+            JOIN students s ON ag.student_id = s.id
+            JOIN classes c ON ag.class_id = c.id
+            JOIN class_students cs ON ag.student_id = cs.student_id AND ag.class_id = cs.class_id
+            ORDER BY ag.date ASC
+        """)
+        all_rows = [dict(r) for r in cursor_all.fetchall()]
+        conn_all.close()
+    else:
+        all_rows = rows
+
+    class_rows_map: Dict[int, List[Dict[str, Any]]] = {}
+    for r in all_rows:
+        cid = r.get("class_id")
+        if cid is not None:
+            class_rows_map.setdefault(cid, []).append(r)
+
+    class_analytics_map: Dict[str, Dict[str, Any]] = {}
+    for cid_k, c_rows in class_rows_map.items():
+        class_analytics_map[str(cid_k)] = calculate_performance_analytics(c_rows)
+
     analytics_summary = calculate_performance_analytics(rows)
 
     return {
         "session_records": rows,
         "student_rankings": enriched_rankings,
-        "analytics_summary": analytics_summary
+        "analytics_summary": analytics_summary,
+        "class_analytics_map": class_analytics_map
     }
 
 def reset_student_grades(class_id: Optional[int] = None, student_id: Optional[int] = None, from_date: Optional[str] = None, to_date: Optional[str] = None) -> int:

@@ -277,6 +277,7 @@ export default function ReportsPage() {
   const [sessionRecords, setSessionRecords] = useState<any[]>([]);
   const [studentRankings, setStudentRankings] = useState<any[]>([]);
   const [analyticsSummary, setAnalyticsSummary] = useState<any>(null);
+  const [classAnalyticsMap, setClassAnalyticsMap] = useState<Record<string, any>>({});
 
   // Custom Time Phases State
   const [timePhases, setTimePhases] = useState<any[]>([]);
@@ -417,6 +418,7 @@ export default function ReportsPage() {
       setSessionRecords(res.session_records || []);
       setStudentRankings(res.student_rankings || []);
       setAnalyticsSummary(res.analytics_summary || null);
+      setClassAnalyticsMap(res.class_analytics_map || {});
     } catch (e: any) {
       if (!isSilent) showToast("Lỗi tải báo cáo thống kê: " + (e.message || e), "error");
     } finally {
@@ -847,8 +849,10 @@ export default function ReportsPage() {
       const avgHw = hwScores.length > 0 ? trunc1Dec(hwScores.reduce((a, b) => a + b, 0) / hwScores.length) : 0;
 
       const cSessionRecords = sessionRecords.filter(r => String(r.class_id) === String(cObj.id));
-      const classSd = (selectedClassId === String(cObj.id) && analyticsSummary?.std_dev !== undefined)
-        ? trunc1Dec(analyticsSummary.std_dev)
+      const classSd = classAnalyticsMap[String(cObj.id)]?.std_dev !== undefined
+        ? classAnalyticsMap[String(cObj.id)].std_dev
+        : (selectedClassId === String(cObj.id) && analyticsSummary?.std_dev !== undefined)
+        ? analyticsSummary.std_dev
         : computeClassAnalyticsSd(cSessionRecords);
 
       let totalPresent = 0, totalSessions = 0;
@@ -921,7 +925,7 @@ export default function ReportsPage() {
       c2Diff,
       hwDiff,
     };
-  }, [classes, studentRankings, sessionRecords, compareClassAId, compareClassBId, selectedClassId, analyticsSummary]);
+  }, [classes, studentRankings, sessionRecords, compareClassAId, compareClassBId, selectedClassId, analyticsSummary, classAnalyticsMap]);
 
   // Cross-Class Benchmark Data
   const crossClassBenchmark = useMemo(() => {
@@ -949,8 +953,10 @@ export default function ReportsPage() {
       const avgEma = emaScores.length > 0 ? trunc1Dec(emaScores.reduce((a,b)=>a+b,0) / emaScores.length) : 0;
 
       const cSessionRecords = sessionRecords.filter(r => String(r.class_id) === String(c.id));
-      const classSd = (selectedClassId === String(c.id) && analyticsSummary?.std_dev !== undefined)
-        ? trunc1Dec(analyticsSummary.std_dev)
+      const classSd = classAnalyticsMap[String(c.id)]?.std_dev !== undefined
+        ? classAnalyticsMap[String(c.id)].std_dev
+        : (selectedClassId === String(c.id) && analyticsSummary?.std_dev !== undefined)
+        ? analyticsSummary.std_dev
         : computeClassAnalyticsSd(cSessionRecords);
 
       let totalPresent = 0, totalSessions = 0;
@@ -980,7 +986,7 @@ export default function ReportsPage() {
         evaluation
       };
     });
-  }, [classes, studentRankings, sessionRecords, selectedClassId, analyticsSummary]);
+  }, [classes, studentRankings, sessionRecords, selectedClassId, analyticsSummary, classAnalyticsMap]);
 
   // TanStack ColumnDef for Cross-Class Benchmark
   const classBenchmarkColumns = useMemo<ColumnDef<any>[]>(() => [

@@ -282,7 +282,7 @@ export const api = {
     if (class_id) params.class_id = String(class_id);
     if (student_id) params.student_id = String(student_id);
     const query = new URLSearchParams(params).toString();
-    return request<{ session_records: any[]; student_rankings: any[]; analytics_summary?: any }>(`/api/reports/grade-analytics?${query}`);
+    return request<{ session_records: any[]; student_rankings: any[]; analytics_summary?: any; class_analytics_map?: Record<string, any> }>(`/api/reports/grade-analytics?${query}`);
   },
   resetGrades: (params: { class_id?: number; student_id?: number; from_date?: string; to_date?: string }) =>
     request<{ status: string; reset_count: number }>('/api/reports/reset-grades', {
