@@ -3,6 +3,7 @@ import { trunc1Dec } from '../../utils';
 
 export interface StandardMoetPhase {
   id: string;
+  db_id?: number;
   phase_name: string;
   from_date: string;
   to_date: string;

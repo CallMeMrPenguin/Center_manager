@@ -55,10 +55,38 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
 }) => {
   const [timeView, setTimeView] = useState<'1m' | '2m' | '3m' | 'all'>('all');
 
-  // Combined Standard MOET phases + Custom User Phases
+  // Combined Standard MOET phases + Database Custom User Phases
   const combinedTimePhases = useMemo(() => {
-    const moetPhases = getStandardMoetPhases(selectedAcademicYear);
-    return [...moetPhases, ...(timePhases || [])];
+    const defaultMoet = getStandardMoetPhases(selectedAcademicYear);
+    const dbPhases = timePhases || [];
+
+    const merged = defaultMoet.map(m => {
+      const dbMatch = dbPhases.find(p => p.phase_name === m.phase_name);
+      if (dbMatch) {
+        return {
+          ...m,
+          db_id: dbMatch.id,
+          from_date: dbMatch.from_date || m.from_date,
+          to_date: dbMatch.to_date || m.to_date,
+        };
+      }
+      return m;
+    });
+
+    dbPhases.forEach(dbp => {
+      if (!defaultMoet.some(m => m.phase_name === dbp.phase_name)) {
+        merged.push({
+          id: String(dbp.id),
+          db_id: dbp.id,
+          phase_name: dbp.phase_name,
+          from_date: dbp.from_date,
+          to_date: dbp.to_date,
+          is_standard: false,
+        });
+      }
+    });
+
+    return merged;
   }, [selectedAcademicYear, timePhases]);
 
   // Filter session records according to academic year and active phase
@@ -73,8 +101,8 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
       }
     } else if (selectedAcademicYear) {
       const startYear = parseInt(selectedAcademicYear.split('-')[0], 10) || 2026;
-      const academicStart = `${startYear}-08-01`;
-      const academicEnd = `${startYear + 1}-07-31`;
+      const academicStart = `${startYear}-06-01`;
+      const academicEnd = `${startYear + 1}-05-31`;
       filtered = filtered.filter(r => r.date && r.date >= academicStart && r.date <= academicEnd);
     }
     return filtered;
@@ -262,7 +290,7 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
         onOpenPhaseModal={onOpenPhaseModal}
       />
 
-      {/* 4. SUMMARY STRIP */}
+      {/* 4. SUMMARY STRIP (NOW WITH PI INDEX & DETAILED TOOLTIP) */}
       <SummaryStrip
         engine={engine}
         gradeTypesList={gradeTypesList}

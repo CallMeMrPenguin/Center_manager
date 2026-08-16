@@ -1,10 +1,10 @@
 import React, { useState, useMemo } from 'react';
-import { Clock, X, Plus, Trash2, Edit3, RotateCcw, Check } from 'lucide-react';
+import { Clock, X, Plus, Trash2, Edit3, Check } from 'lucide-react';
 import { CustomDatePicker } from '../../../components/CustomDatePicker';
 import { CustomSelect } from '../../../components/CustomSelect';
 import { showToast } from '../../../components/Toast';
 import { api } from '../../../api';
-import { formatSessionDate, getStandardMoetPhases, savePhaseOverride, resetPhaseOverride, StandardMoetPhase } from '../utils';
+import { formatSessionDate, getStandardMoetPhases, StandardMoetPhase } from '../utils';
 
 interface TimePhaseModalProps {
   isOpen: boolean;
@@ -30,20 +30,44 @@ export const TimePhaseModal: React.FC<TimePhaseModalProps> = ({
   setSelectedPhaseId,
 }) => {
   const [editingPhaseId, setEditingPhaseId] = useState<string | null>(null);
+  const [editingDbId, setEditingDbId] = useState<number | null>(null);
   const [phaseNameInput, setPhaseNameInput] = useState('');
   const [phaseFromDate, setPhaseFromDate] = useState('');
   const [phaseToDate, setPhaseToDate] = useState('');
   const [phaseClassId, setPhaseClassId] = useState(selectedClassId || '');
   const [savingPhase, setSavingPhase] = useState(false);
 
-  const moetPhases = useMemo(() => {
-    return getStandardMoetPhases(selectedAcademicYear);
-  }, [selectedAcademicYear, isOpen]);
+  // Merge standard MOET phases with database phases
+  const mergedPhases = useMemo(() => {
+    const defaultMoet = getStandardMoetPhases(selectedAcademicYear);
+    const dbList = timePhases || [];
+
+    return defaultMoet.map(m => {
+      const dbMatch = dbList.find(p => p.phase_name === m.phase_name);
+      if (dbMatch) {
+        return {
+          ...m,
+          db_id: dbMatch.id,
+          from_date: dbMatch.from_date || m.from_date,
+          to_date: dbMatch.to_date || m.to_date,
+        };
+      }
+      return m;
+    });
+  }, [selectedAcademicYear, timePhases, isOpen]);
+
+  // Additional custom phases not in standard list
+  const customOnlyPhases = useMemo(() => {
+    const defaultMoet = getStandardMoetPhases(selectedAcademicYear);
+    const dbList = timePhases || [];
+    return dbList.filter(dbp => !defaultMoet.some(m => m.phase_name === dbp.phase_name));
+  }, [selectedAcademicYear, timePhases, isOpen]);
 
   if (!isOpen) return null;
 
-  const handleStartEdit = (p: StandardMoetPhase | any) => {
+  const handleStartEdit = (p: StandardMoetPhase & { db_id?: number; class_id?: any }) => {
     setEditingPhaseId(String(p.id));
+    setEditingDbId(p.db_id || (typeof p.id === 'number' ? p.id : null));
     setPhaseNameInput(p.phase_name);
     setPhaseFromDate(p.from_date);
     setPhaseToDate(p.to_date);
@@ -52,6 +76,7 @@ export const TimePhaseModal: React.FC<TimePhaseModalProps> = ({
 
   const handleCancelEdit = () => {
     setEditingPhaseId(null);
+    setEditingDbId(null);
     setPhaseNameInput('');
     setPhaseFromDate('');
     setPhaseToDate('');
@@ -75,47 +100,36 @@ export const TimePhaseModal: React.FC<TimePhaseModalProps> = ({
 
     setSavingPhase(true);
     try {
-      if (editingPhaseId && editingPhaseId.startsWith('moet-')) {
-        // Save override for standard MOET phase
-        savePhaseOverride(selectedAcademicYear, editingPhaseId, {
-          phase_name: phaseNameInput.trim(),
-          from_date: phaseFromDate,
-          to_date: phaseToDate,
-        });
-        showToast('Đã lưu điều chỉnh thời gian giai đoạn thành công!', 'success');
-        handleCancelEdit();
-        await onPhasesUpdated();
-      } else {
-        // Save or update custom time phase via API
-        await api.saveTimePhase({
-          id: editingPhaseId && !editingPhaseId.startsWith('moet-') ? parseInt(editingPhaseId, 10) : undefined,
-          phase_name: phaseNameInput.trim(),
-          class_id: phaseClassId ? parseInt(phaseClassId, 10) : null,
-          from_date: phaseFromDate,
-          to_date: phaseToDate,
-        });
-        showToast('Đã lưu giai đoạn học tập thành công!', 'success');
-        handleCancelEdit();
-        await onPhasesUpdated();
+      // Find if this phase name already exists in database
+      let targetDbId = editingDbId;
+      if (!targetDbId) {
+        const found = (timePhases || []).find(p => p.phase_name === phaseNameInput.trim());
+        if (found) targetDbId = found.id;
       }
+
+      // Save directly to SQLite Database via API
+      await api.saveTimePhase({
+        id: targetDbId || undefined,
+        phase_name: phaseNameInput.trim(),
+        class_id: phaseClassId ? parseInt(phaseClassId, 10) : null,
+        from_date: phaseFromDate,
+        to_date: phaseToDate,
+      });
+
+      showToast('Đã lưu dữ liệu giai đoạn vào Database thành công!', 'success');
+      handleCancelEdit();
+      await onPhasesUpdated();
     } catch (err: any) {
-      showToast('Lỗi lưu giai đoạn: ' + (err.message || err), 'error');
+      showToast('Lỗi lưu giai đoạn vào Database: ' + (err.message || err), 'error');
     } finally {
       setSavingPhase(false);
     }
   };
 
-  const handleResetMoetPhase = async (phaseId: string) => {
-    resetPhaseOverride(selectedAcademicYear, phaseId);
-    showToast('Đã đặt lại thời gian chuẩn Bộ GD&ĐT', 'success');
-    if (editingPhaseId === phaseId) handleCancelEdit();
-    await onPhasesUpdated();
-  };
-
   const handleDeletePhase = async (phaseId: number) => {
     try {
       await api.deleteTimePhase(phaseId);
-      showToast('Đã xóa giai đoạn học tập', 'success');
+      showToast('Đã xóa giai đoạn trong Database', 'success');
       if (selectedPhaseId === String(phaseId)) setSelectedPhaseId('');
       await onPhasesUpdated();
     } catch (err: any) {
@@ -132,7 +146,7 @@ export const TimePhaseModal: React.FC<TimePhaseModalProps> = ({
             <Clock className="text-indigo-400" size={18} />
             <div>
               <h3 className="text-sm font-black uppercase text-white tracking-wider">
-                Quản Lý & Chỉnh Sửa Giai Đoạn Học Tập
+                Quản Lý & Chỉnh Sửa Giai Đoạn (Database SQLite)
               </h3>
               <span className="text-[11px] text-indigo-300 font-bold block">
                 Năm học: {selectedAcademicYear} (01/06 → 31/05)
@@ -153,7 +167,7 @@ export const TimePhaseModal: React.FC<TimePhaseModalProps> = ({
           <form onSubmit={handleSavePhaseSubmit} className="p-4 rounded-xl bg-[#141a2e] border border-[#232d4e] space-y-4">
             <div className="flex items-center justify-between border-b border-white/5 pb-2">
               <span className="text-xs font-black uppercase tracking-wider text-indigo-300">
-                {editingPhaseId ? 'Chỉnh Sửa Thời Gian Giai Đoạn' : 'Thêm Giai Đoạn Tùy Chỉnh Mới'}
+                {editingPhaseId ? 'Chỉnh Sửa Giai Đoạn (Lưu Database)' : 'Thêm Giai Đoạn Tùy Chỉnh (Lưu Database)'}
               </span>
               {editingPhaseId && (
                 <button
@@ -172,7 +186,7 @@ export const TimePhaseModal: React.FC<TimePhaseModalProps> = ({
               </label>
               <input
                 type="text"
-                placeholder="Ví dụ: Ôn tập Giữa kỳ 1, Luyện đề Chuyên sâu 9 lên 10..."
+                placeholder="Ví dụ: Học Kỳ I, Ôn tập Giữa kỳ 1, Luyện đề Chuyên sâu..."
                 value={phaseNameInput}
                 onChange={(e) => setPhaseNameInput(e.target.value)}
                 className="w-full bg-[#0d1222] border border-[#232d4e] rounded-xl px-3.5 py-2 text-xs text-white font-semibold focus:outline-none focus:border-indigo-500 transition"
@@ -205,21 +219,19 @@ export const TimePhaseModal: React.FC<TimePhaseModalProps> = ({
               </div>
             </div>
 
-            {!editingPhaseId?.startsWith('moet-') && (
-              <div className="relative z-20">
-                <label className="block text-[11px] font-black uppercase tracking-wider text-slate-300 mb-1.5">
-                  Áp Dụng Cho Lớp:
-                </label>
-                <CustomSelect
-                  value={phaseClassId}
-                  onChange={(val) => setPhaseClassId(String(val))}
-                  options={[
-                    { value: '', label: 'Tất cả lớp học' },
-                    ...classes.map(c => ({ value: String(c.id), label: `${c.class_name} (${c.grade || 'Lớp 6'})` }))
-                  ]}
-                />
-              </div>
-            )}
+            <div className="relative z-20">
+              <label className="block text-[11px] font-black uppercase tracking-wider text-slate-300 mb-1.5">
+                Áp Dụng Cho Lớp:
+              </label>
+              <CustomSelect
+                value={phaseClassId}
+                onChange={(val) => setPhaseClassId(String(val))}
+                options={[
+                  { value: '', label: 'Tất cả lớp học' },
+                  ...classes.map(c => ({ value: String(c.id), label: `${c.class_name} (${c.grade || 'Lớp 6'})` }))
+                ]}
+              />
+            </div>
 
             <div className="pt-2 flex items-center justify-end gap-3 relative z-10">
               {editingPhaseId && (
@@ -237,7 +249,7 @@ export const TimePhaseModal: React.FC<TimePhaseModalProps> = ({
                 className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition cursor-pointer shadow-lg shadow-indigo-600/30 flex items-center gap-1.5 disabled:opacity-50"
               >
                 {editingPhaseId ? <Check size={14} /> : <Plus size={14} />}
-                <span>{savingPhase ? 'Đang lưu...' : editingPhaseId ? 'Lưu Cập Nhật Ngày' : 'Thêm Giai Đoạn'}</span>
+                <span>{savingPhase ? 'Đang lưu DB...' : editingPhaseId ? 'Lưu Vào Database' : 'Thêm Vào Database'}</span>
               </button>
             </div>
           </form>
@@ -245,18 +257,25 @@ export const TimePhaseModal: React.FC<TimePhaseModalProps> = ({
           {/* Standard MOET Phases List */}
           <div className="space-y-2.5">
             <h4 className="text-[11px] font-black uppercase tracking-wider text-indigo-300 flex items-center justify-between">
-              <span>Khung Giai Đoạn Chuẩn Bộ GD&ĐT ({moetPhases.length})</span>
-              <span className="text-[10px] text-slate-400 font-normal">Nhấn biểu tượng cây bút để sửa ngày tháng</span>
+              <span>Giai Đoạn Chuẩn Bộ GD&ĐT ({mergedPhases.length})</span>
+              <span className="text-[10px] text-slate-400 font-normal">Bấm ✏️ để sửa tên & ngày lưu vào DB</span>
             </h4>
             <div className="space-y-2">
-              {moetPhases.map(p => (
+              {mergedPhases.map(p => (
                 <div
                   key={p.id}
-                  className={`p-3 rounded-xl bg-[#141a2e] border transition flex items-center justify-between gap-3 text-xs ${editingPhaseId === p.id ? 'border-indigo-500 bg-indigo-950/20' : 'border-[#232d4e] hover:border-indigo-500/40'}`}
+                  className={`p-3 rounded-xl bg-[#141a2e] border transition flex items-center justify-between gap-3 text-xs ${editingPhaseId === String(p.id) ? 'border-indigo-500 bg-indigo-950/20' : 'border-[#232d4e] hover:border-indigo-500/40'}`}
                 >
                   <div className="flex-1">
-                    <span className="font-black text-white block">{p.phase_name}</span>
-                    <span className="text-[11px] text-indigo-300 font-mono font-bold">
+                    <div className="flex items-center gap-2">
+                      <span className="font-black text-white">{p.phase_name}</span>
+                      {p.db_id && (
+                        <span className="px-1.5 py-0.5 rounded-md bg-emerald-500/10 text-emerald-300 text-[9px] font-bold border border-emerald-500/20">
+                          Đã lưu DB
+                        </span>
+                      )}
+                    </div>
+                    <span className="text-[11px] text-indigo-300 font-mono font-bold block mt-0.5">
                       {formatSessionDate(p.from_date)} → {formatSessionDate(p.to_date)}
                     </span>
                   </div>
@@ -264,18 +283,11 @@ export const TimePhaseModal: React.FC<TimePhaseModalProps> = ({
                     <button
                       type="button"
                       onClick={() => handleStartEdit(p)}
-                      className="p-1.5 rounded-lg bg-[#0d1222] hover:bg-indigo-600/30 text-indigo-300 hover:text-white border border-[#232d4e] transition cursor-pointer"
-                      title="Chỉnh sửa ngày tháng giai đoạn này"
+                      className="p-1.5 rounded-lg bg-[#0d1222] hover:bg-indigo-600/30 text-indigo-300 hover:text-white border border-[#232d4e] transition cursor-pointer flex items-center gap-1 text-[11px] font-bold"
+                      title="Chỉnh sửa tên và ngày tháng"
                     >
                       <Edit3 size={13} />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleResetMoetPhase(p.id)}
-                      className="p-1.5 rounded-lg bg-[#0d1222] hover:bg-amber-500/20 text-slate-400 hover:text-amber-300 border border-[#232d4e] transition cursor-pointer"
-                      title="Đặt lại ngày mặc định chuẩn Bộ GD&ĐT"
-                    >
-                      <RotateCcw size={13} />
+                      <span>Sửa</span>
                     </button>
                   </div>
                 </div>
@@ -284,13 +296,13 @@ export const TimePhaseModal: React.FC<TimePhaseModalProps> = ({
           </div>
 
           {/* Custom Time Phases List */}
-          {timePhases.length > 0 && (
+          {customOnlyPhases.length > 0 && (
             <div className="space-y-2.5 pt-2 border-t border-[#1c243f]">
               <h4 className="text-[11px] font-black uppercase tracking-wider text-slate-400">
-                Giai Đoạn Tùy Chỉnh Bổ Sung ({timePhases.length})
+                Giai Đoạn Tùy Chỉnh Khác ({customOnlyPhases.length})
               </h4>
               <div className="space-y-2">
-                {timePhases.map(p => (
+                {customOnlyPhases.map(p => (
                   <div
                     key={p.id}
                     className="p-3 rounded-xl bg-[#141a2e] border border-[#232d4e] flex items-center justify-between gap-3 text-xs"
