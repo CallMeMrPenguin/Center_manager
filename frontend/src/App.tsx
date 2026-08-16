@@ -254,13 +254,14 @@ function AppContent() {
 
       <div className="relative flex flex-row flex-1 overflow-hidden p-4 gap-4 z-10">
         
-        {/* SIDEBAR NAVIGATION (Pure GPU-accelerated inline hover expansion) */}
-        <aside
-          className="w-20 hover:w-64 group/sidebar sidebar-glass-glow rounded-2xl flex flex-col h-full overflow-hidden transition-[width] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] z-30 shrink-0"
-        >
-          
-          {/* Header logo / Title */}
-          <div className="flex items-center gap-3 px-4 py-4 shrink-0 border-b border-white/5 min-w-0">
+        {/* SIDEBAR NAVIGATION (Pure GPU-accelerated floating overlay expansion) */}
+        <div className="relative w-20 shrink-0 h-full z-30">
+          <aside
+            className="absolute top-0 left-0 h-full w-20 hover:w-64 group/sidebar sidebar-glass-glow rounded-2xl flex flex-col overflow-hidden transition-[width] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] shadow-2xl z-30"
+          >
+            
+            {/* Header logo / Title */}
+            <div className="flex items-center gap-3 px-4 py-4 shrink-0 border-b border-white/5 min-w-0">
             <div className="h-10 w-10 bg-indigo-500/25 border-2 border-indigo-400/80 rounded-2xl flex items-center justify-center shadow-[0_0_20px_rgba(92,54,245,0.6)] shrink-0">
               <GraduationCap size={22} className="text-white drop-shadow-[0_0_12px_rgba(255,255,255,1)]" />
             </div>
@@ -404,6 +405,7 @@ function AppContent() {
             </div>
           </div>
         </aside>
+      </div>
 
         {/* MAIN BODY SKELETON */}
         <div className="flex-1 flex flex-col overflow-hidden bg-transparent">
