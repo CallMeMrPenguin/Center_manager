@@ -10,27 +10,31 @@ interface SummaryStripProps {
 export const SummaryStrip: React.FC<SummaryStripProps> = ({ engine, gradeTypesList }) => {
   const [activeTooltip, setActiveTooltip] = useState<string | null>(null);
 
-  // Dynamic colors and descriptive labels for PI scale
+  // 6-Tier Realistic Educational Scale for PI (Scale 0 - 100)
   const pi = engine.performance_index != null ? Number(engine.performance_index) : 85.0;
   let piColor = 'text-emerald-400';
-  let piLabel = 'Phong Độ Xuất Sắc';
+  let piLabel = 'Xuất Sắc (Vững Vàng)';
   let piSubColor = 'text-emerald-400 font-bold';
 
-  if (pi < 60) {
+  if (pi < 35) {
     piColor = 'text-rose-500';
-    piLabel = 'Cảnh Báo Nguy Cơ';
+    piLabel = 'Kém (Cần Phụ Đạo)';
     piSubColor = 'text-rose-400 font-extrabold';
-  } else if (pi < 70) {
+  } else if (pi < 50) {
+    piColor = 'text-orange-400';
+    piLabel = 'Yếu (Hổng Kiến Thức)';
+    piSubColor = 'text-orange-400 font-bold';
+  } else if (pi < 65) {
     piColor = 'text-amber-400';
-    piLabel = 'Cần Cố Gắng';
+    piLabel = 'Trung Bình (Cần Củng Cố)';
     piSubColor = 'text-amber-400 font-bold';
   } else if (pi < 80) {
     piColor = 'text-cyan-400';
-    piLabel = 'Phong Độ Tốt';
+    piLabel = 'Khá (Đang Tiến Bộ)';
     piSubColor = 'text-cyan-400 font-bold';
   } else if (pi < 90) {
     piColor = 'text-blue-400';
-    piLabel = 'Phong Độ Rất Tốt';
+    piLabel = 'Giỏi / Rất Tốt';
     piSubColor = 'text-blue-400 font-bold';
   }
 
@@ -192,23 +196,31 @@ export const SummaryStrip: React.FC<SummaryStripProps> = ({ engine, gradeTypesLi
         </span>
 
         {activeTooltip === 'pi' && (
-          <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 w-72 p-3.5 bg-[#161c34] border border-[#2c375e] text-slate-200 text-[11px] rounded-xl shadow-2xl z-30 text-left font-sans space-y-1.5">
-            <div className="flex items-center justify-between border-b border-white/10 pb-1">
+          <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 w-80 p-4 bg-[#161c34] border border-[#2c375e] text-slate-200 text-[11px] rounded-xl shadow-2xl z-30 text-left font-sans space-y-2">
+            <div className="flex items-center justify-between border-b border-white/10 pb-1.5">
               <span className="font-extrabold text-indigo-300">
-                Chỉ Số PI (Performance Index):
+                Chỉ Số Phong Độ PI (Scale 0 - 100):
               </span>
               <span className={`font-mono font-black ${piColor}`}>{pi}đ</span>
             </div>
             <p className="text-[10px] text-slate-300 leading-relaxed">
-              Tổng hợp 5 yếu tố học tập toàn diện:
-              <br />• <strong>40% EMA</strong>: Trình độ năng lực gần đây nhất.
-              <br />• <strong>25% Trend</strong>: Đà phát triển & tốc độ tiến bộ.
-              <br />• <strong>15% Độ ổn định</strong>: Phong độ vững vàng (SD).
-              <br />• <strong>10% Điểm lịch sử</strong>: Quá trình từ đầu kỳ.
-              <br />• <strong>10% Chuyên cần</strong>: Tỷ lệ đi học đầy đủ.
+              Tổng hợp 5 yếu tố học tập cốt lõi:
+              <br />• <strong>40% EMA</strong>: Trình độ năng lực qua các bài kiểm tra gần nhất.
+              <br />• <strong>25% Trend</strong>: Đà phát triển / tốc độ tiến bộ qua từng buổi.
+              <br />• <strong>15% Độ ổn định (SD)</strong>: Độ đều tay, tránh dao động thất thường.
+              <br />• <strong>10% Điểm lịch sử</strong>: Điểm trung bình cả quá trình.
+              <br />• <strong>10% Chuyên cần</strong>: Tỷ lệ tham gia buổi học đầy đủ.
             </p>
-            <div className="pt-1 border-t border-white/10 text-[10px] font-bold text-slate-400">
-              Thang điểm: ≥90 Xuất sắc | 80-89 Rất tốt | 70-79 Tốt | 60-69 Cần cố gắng | &lt;60 Nguy cơ
+            <div className="pt-2 border-t border-white/10 text-[10px] font-semibold text-slate-300 space-y-1">
+              <span className="text-[10px] font-black text-indigo-300 uppercase block">Thang Đánh Giá Học Lực:</span>
+              <div className="grid grid-cols-2 gap-1 text-[10px]">
+                <span className="text-emerald-400">≥90: Xuất Sắc</span>
+                <span className="text-blue-400">80–89: Giỏi / Rất Tốt</span>
+                <span className="text-cyan-400">65–79: Khá</span>
+                <span className="text-amber-400">50–64: Trung Bình</span>
+                <span className="text-orange-400">35–49: Yếu (Hổng KT)</span>
+                <span className="text-rose-400">0–34: Kém (Phụ Đạo)</span>
+              </div>
             </div>
           </div>
         )}
@@ -217,9 +229,11 @@ export const SummaryStrip: React.FC<SummaryStripProps> = ({ engine, gradeTypesLi
       {/* 6. Overall Rating */}
       <div className="border-l border-[#1d2644] p-1">
         <span className="text-[10px] font-black uppercase text-slate-400 block">Xếp Loại Chung</span>
-        <span className={`text-xs font-black flex items-center justify-center gap-1 ${engine.rating_label?.includes('NGUY CƠ') ? 'text-rose-500 font-extrabold animate-pulse' :
-          engine.rating_label?.includes('Cần Cố Gắng') ? 'text-amber-400' :
-            engine.rating_label?.includes('Tốt') ? 'text-blue-400' : 'text-emerald-400'
+        <span className={`text-xs font-black flex items-center justify-center gap-1 ${engine.rating_label?.includes('Kém') || engine.rating_label?.includes('NGUY CƠ') ? 'text-rose-500 font-extrabold animate-pulse' :
+          engine.rating_label?.includes('Yếu') ? 'text-orange-400' :
+            engine.rating_label?.includes('Trung Bình') ? 'text-amber-400' :
+              engine.rating_label?.includes('Khá') ? 'text-cyan-400' :
+                engine.rating_label?.includes('Giỏi') ? 'text-blue-400' : 'text-emerald-400'
           }`}>
           {engine.rating_label ?? 'Tốt'}
         </span>

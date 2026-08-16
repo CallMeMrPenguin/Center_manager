@@ -2361,13 +2361,15 @@ def calculate_performance_analytics(session_records: List[Dict[str, Any]]) -> Di
     if performance_index >= 90:
         rating_label = "Xuất Sắc"
     elif performance_index >= 80:
-        rating_label = "Rất Tốt"
-    elif performance_index >= 70:
-        rating_label = "Tốt"
-    elif performance_index >= 60:
-        rating_label = "Cần Cố Gắng"
+        rating_label = "Giỏi / Rất Tốt"
+    elif performance_index >= 65:
+        rating_label = "Khá"
+    elif performance_index >= 50:
+        rating_label = "Trung Bình"
+    elif performance_index >= 35:
+        rating_label = "Yếu (Hổng Kiến Thức)"
     else:
-        rating_label = "Cảnh Báo NGUY CƠ"
+        rating_label = "Kém (Cần Phụ Đạo)"
 
     recs = []
     if slope_overall < -0.1:
