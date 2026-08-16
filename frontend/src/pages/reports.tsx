@@ -52,6 +52,94 @@ export const getStudentTier = (score: number): StudentTier => {
   return TIERS_CONFIG[0]; // Đồng (< 5.0)
 };
 
+// MINI TREND SPARKLINE GRAPH FOR RANKING TABLE ROW
+const MiniTrendSparkline = React.memo(({ points, slope, ema }: { points: number[]; slope: number; ema: number }) => {
+  let dataPoints = points;
+  if (!dataPoints || dataPoints.length === 0) {
+    const base = ema > 0 ? ema : 7.0;
+    dataPoints = [base, base, base, base, base];
+  } else if (dataPoints.length < 5) {
+    const first = dataPoints[0];
+    const padded = [...dataPoints];
+    while (padded.length < 5) {
+      padded.unshift(first);
+    }
+    dataPoints = padded;
+  }
+
+  // Determine trend color matching the user's reference:
+  // Red/coral for downward trend, Orange/amber for moderate or slumping, Emerald for positive progress
+  const isDeclining = slope < -0.12 || (dataPoints[dataPoints.length - 1] < dataPoints[0] - 0.4);
+  const isWarning = slope < 0 || ema < 6.5;
+
+  const strokeColor = isDeclining ? '#f43f5e' : isWarning ? '#f97316' : '#10b981';
+  const glowColor = isDeclining ? 'rgba(244,63,94,0.45)' : isWarning ? 'rgba(249,115,22,0.45)' : 'rgba(16,185,129,0.45)';
+  const uniqueId = `spark-${Math.abs(Math.sin((dataPoints[0] || 1) * 100 + (dataPoints[dataPoints.length - 1] || 1) * 10)).toString(36).substr(2, 6)}`;
+
+  const width = 110;
+  const height = 34;
+  const paddingX = 8;
+  const paddingY = 6;
+
+  const minVal = 0;
+  const maxVal = 10;
+
+  const coords = dataPoints.map((val, idx) => {
+    const clamped = Math.max(0, Math.min(10, val));
+    const x = paddingX + (idx / (dataPoints.length - 1)) * (width - 2 * paddingX);
+    const y = paddingY + ((maxVal - clamped) / (maxVal - minVal)) * (height - 2 * paddingY);
+    return { x, y, val: clamped };
+  });
+
+  const linePath = coords.map((c, i) => `${i === 0 ? 'M' : 'L'} ${c.x.toFixed(1)} ${c.y.toFixed(1)}`).join(' ');
+  const areaPath = `${linePath} L ${coords[coords.length - 1].x.toFixed(1)} ${height} L ${coords[0].x.toFixed(1)} ${height} Z`;
+
+  return (
+    <div className="flex items-center justify-center cursor-default" title={`5 buổi gần nhất: ${dataPoints.map(p => format1Dec(p)).join(' → ')}`}>
+      <svg width={width} height={height} className="overflow-visible">
+        <defs>
+          <linearGradient id={uniqueId} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor={strokeColor} stopOpacity="0.4" />
+            <stop offset="100%" stopColor={strokeColor} stopOpacity="0.0" />
+          </linearGradient>
+        </defs>
+
+        {/* Subtle glowing area under line */}
+        <path d={areaPath} fill={`url(#${uniqueId})`} />
+
+        {/* Trend Line */}
+        <path
+          d={linePath}
+          fill="none"
+          stroke={strokeColor}
+          strokeWidth="2.2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+
+        {/* 5 Critical Data Points */}
+        {coords.map((c, i) => (
+          <g key={i}>
+            <circle
+              cx={c.x}
+              cy={c.y}
+              r="3.5"
+              fill={strokeColor}
+              style={{ filter: `drop-shadow(0 0 4px ${glowColor})` }}
+            />
+            <circle
+              cx={c.x}
+              cy={c.y}
+              r="1.5"
+              fill="#ffffff"
+            />
+          </g>
+        ))}
+      </svg>
+    </div>
+  );
+});
+
 const getSavedWarningSettings = () => {
   try {
     const raw = localStorage.getItem('cm_reports_warning_settings');
@@ -1122,6 +1210,133 @@ export default function ReportsPage() {
     }
   }, [selectedClassId, classes, studentRankings, filteredRankings]);
 
+  // Map student_id to sorted list of session records for fast O(1) lookups
+  const studentSessionsMap = useMemo(() => {
+    const map: Record<number, any[]> = {};
+    sessionRecords.forEach(r => {
+      const sid = r.student_id;
+      if (sid) {
+        if (!map[sid]) map[sid] = [];
+        map[sid].push(r);
+      }
+    });
+    Object.keys(map).forEach(k => {
+      map[Number(k)].sort((a, b) => (a.date > b.date ? 1 : -1));
+    });
+    return map;
+  }, [sessionRecords]);
+
+  // TanStack ColumnDef for Early Warning (Học Sinh Nguy Cơ) Table
+  const warningColumns = useMemo<ColumnDef<any>[]>(() => [
+    {
+      id: 'stt',
+      header: () => <div className="text-center w-full">STT</div>,
+      meta: { headerText: 'STT', exportValue: (_: any, idx: number) => idx + 1 },
+      cell: ({ row }) => <div className="text-center font-bold text-slate-400">{row.index + 1}</div>,
+      enableSorting: false,
+      enableGlobalFilter: false,
+    },
+    {
+      accessorKey: 'full_name',
+      header: 'Họ và Tên',
+      meta: { headerText: 'Họ và Tên', exportValue: (r: any) => `${r.full_name}${r.nickname ? ` (${r.nickname})` : ''}` },
+      cell: ({ row }) => {
+        const r = row.original;
+        return (
+          <div className="flex items-center gap-2.5">
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs text-white shrink-0 ${
+              r.isUrgent ? 'bg-rose-600' : 'bg-amber-600'
+            }`}>
+              {r.full_name ? r.full_name.slice(0, 2).toUpperCase() : 'HS'}
+            </div>
+            <div>
+              <span className="font-extrabold text-white text-sm block">
+                {r.full_name} {r.nickname ? `(${r.nickname})` : ''}
+              </span>
+              <span className="text-[10px] text-slate-400 font-semibold">{r.class_name || 'Lớp học'}</span>
+            </div>
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: 'class_name',
+      header: 'Lớp Học',
+      meta: { headerText: 'Lớp Học', exportValue: (r: any) => r.class_name || 'Lớp học' },
+      cell: (info) => (
+        <span className="inline-block px-2.5 py-0.5 rounded-lg text-xs font-black bg-[#1c2442] text-rose-300 border border-rose-500/20">
+          {info.getValue<string>() || 'Lớp học'}
+        </span>
+      ),
+    },
+    {
+      accessorKey: 'isUrgent',
+      header: () => <div className="text-center w-full">Mức Độ</div>,
+      meta: { headerText: 'Mức Độ', exportValue: (r: any) => r.isUrgent ? 'Nguy Cơ Cao' : 'Cần Theo Dõi' },
+      cell: ({ getValue }) => {
+        const isUrgent = getValue<boolean>();
+        return (
+          <div className="text-center">
+            <span className={`inline-block px-2.5 py-0.5 rounded-lg text-[10px] font-black border ${
+              isUrgent ? 'bg-rose-500/20 text-rose-300 border-rose-500/40' : 'bg-amber-500/20 text-amber-300 border-amber-500/40'
+            }`}>
+              {isUrgent ? 'Nguy Cơ Cao' : 'Cần Theo Dõi'}
+            </span>
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: 'riskTags',
+      header: 'Lý Do Cảnh Báo',
+      meta: { headerText: 'Lý Do Cảnh Báo', exportValue: (r: any) => (r.riskTags || []).join(' | ') },
+      cell: ({ getValue }) => {
+        const tags = getValue<string[]>() || [];
+        return (
+          <div className="flex flex-wrap gap-1.5">
+            {tags.map((tag: string, idx: number) => (
+              <span
+                key={idx}
+                className="text-[10px] font-bold px-2 py-0.5 rounded bg-black/40 text-rose-300 border border-rose-500/20"
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: 'ema_level',
+      header: () => <div className="text-center w-full">Điểm EMA</div>,
+      meta: { headerText: 'Điểm EMA', exportValue: (r: any) => r.ema_level ? format1Dec(Number(r.ema_level)) : '-' },
+      cell: (info) => {
+        const val = Number(info.getValue()) || 0;
+        return <div className="text-center font-extrabold text-white font-mono text-sm">{val > 0 ? format1Dec(val) : '-'}</div>;
+      },
+    },
+    {
+      id: 'actions',
+      header: () => <div className="text-center w-full">Thao Tác</div>,
+      meta: { headerText: 'Thao Tác' },
+      enableSorting: false,
+      enableGlobalFilter: false,
+      cell: ({ row }) => (
+        <div className="text-center">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              handleSelectRankingStudent(row.original.student_id);
+            }}
+            className="px-2.5 py-1 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 hover:text-white transition cursor-pointer border border-rose-500/30 text-[11px] font-bold inline-flex items-center gap-1"
+          >
+            <span>Xem Chi Tiết →</span>
+          </button>
+        </div>
+      ),
+    },
+  ], []);
+
   // TanStack ColumnDef for rankings table
   const rankingColumns = useMemo<ColumnDef<any>[]>(() => [
     {
@@ -1219,6 +1434,37 @@ export default function ReportsPage() {
       cell: (info) => {
         const val = Number(info.getValue()) || 0;
         return <div className="text-center font-extrabold text-emerald-400 font-mono">{val > 0 ? format1Dec(val) : '-'}</div>;
+      },
+    },
+    {
+      id: 'trend_sparkline',
+      header: () => <div className="text-center w-full">Xu Hướng</div>,
+      meta: {
+        headerText: 'Xu Hướng',
+        exportValue: (r: any) => {
+          const slope = Number(r.trend_slope || 0);
+          return slope > 0 ? `+${format1Dec(slope)}/buổi` : `${format1Dec(slope)}/buổi`;
+        }
+      },
+      enableSorting: false,
+      enableGlobalFilter: false,
+      cell: ({ row }) => {
+        const r = row.original;
+        const sSessions = (studentSessionsMap[r.student_id] || [])
+          .filter(sess => Number(sess.check_1) > 0 || Number(sess.check_2) > 0 || Number(sess.homework) > 0);
+        
+        const recentScores = sSessions.slice(-5).map(sess => {
+          const c1 = Number(sess.check_1 || 0);
+          const c2 = Number(sess.check_2 || 0);
+          const hw = Number(sess.homework || 0);
+          const valid = [c1, c2, hw].filter(v => v > 0);
+          return valid.length > 0 ? valid.reduce((a, b) => a + b, 0) / valid.length : 0;
+        }).filter(v => v > 0);
+
+        const slope = Number(r.trend_slope || 0);
+        const ema = Number(r.ema_level || 0);
+
+        return <MiniTrendSparkline points={recentScores} slope={slope} ema={ema} />;
       },
     },
     {
@@ -2653,9 +2899,9 @@ export default function ReportsPage() {
         ) : activeReportTab === 'deep' ? (
         /* THỐNG KÊ SÂU (DEEP ANALYSIS TAB VIEW) */
         <div className="flex flex-col gap-8 mb-8">
-          {/* 1. 6-TIER ACADEMIC RANKING DISTRIBUTION (FULL WIDTH, CLEAN & CRISP) */}
-          <div className="bg-[#0c101d] border border-[#1d253f] p-5 rounded-xl shadow-xl flex flex-col justify-between gap-4 animate-cascade-1">
-            <div className="flex items-center justify-between gap-2 border-b border-[#182038] pb-3">
+          {/* 1. 6-TIER ACADEMIC RANKING DISTRIBUTION (SINGLE UNIFIED SECTION, NO NESTED BOXES) */}
+          <div className="bg-[#0b0f19] border border-[#1b253b] p-5 rounded-xl shadow-xl flex flex-col justify-between gap-4 animate-cascade-1">
+            <div className="flex items-center justify-between gap-2 border-b border-[#161f33] pb-3">
               <div className="flex items-center gap-2.5">
                 <Award size={18} className="text-amber-400" />
                 <div>
@@ -2682,42 +2928,42 @@ export default function ReportsPage() {
               </div>
             </div>
 
-            {/* Horizontal 6-Segment Multi-Color Progress Bar */}
-            <div className="space-y-3">
-              <div className="h-4 w-full bg-[#090d16] rounded-md overflow-hidden flex p-0.5 border border-white/5 shadow-inner">
+            {/* Horizontal 6-Segment Multi-Color Progress Bar Matching Tier Colors */}
+            <div className="space-y-4">
+              <div className="h-3.5 w-full bg-[#070a12] rounded-md overflow-hidden flex p-0.5 border border-white/5 shadow-inner">
                 {tierDistribution.tiers.map((t, idx) => (
                   <div
                     key={t.tier}
                     style={{ width: `${t.pct}%`, backgroundColor: t.color }}
-                    className={`h-full opacity-80 hover:opacity-100 transition-all duration-500 ${idx === 0 ? 'rounded-l-sm' : ''} ${idx === tierDistribution.tiers.length - 1 ? 'rounded-r-sm' : ''} animate-grow-width`}
+                    className={`h-full opacity-90 hover:opacity-100 transition-all duration-500 ${idx === 0 ? 'rounded-l-sm' : ''} ${idx === tierDistribution.tiers.length - 1 ? 'rounded-r-sm' : ''} animate-grow-width`}
                     title={`${t.name} (${t.title}): ${t.count} hs (${t.pct}%)`}
                   />
                 ))}
               </div>
 
-              {/* 6 Ranking Tier Cards Grid */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 pt-1">
+              {/* 6 Ranking Tier Columns Seamlessly Integrated (No Nested Box Cards) */}
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
                 {tierDistribution.tiers.map(t => {
                   const isSelected = selectedDistFilter === t.tier;
                   return (
                     <div
                       key={t.tier}
                       onClick={() => setSelectedDistFilter(prev => prev === t.tier ? 'all' : t.tier)}
-                      className={`p-3 rounded-xl border transition-all cursor-pointer select-none flex flex-col justify-between gap-2.5 ${
+                      className={`p-2.5 rounded-xl transition-all duration-200 cursor-pointer select-none flex flex-col justify-between gap-2 border ${
                         isSelected 
-                          ? `bg-[#131b2e] ${t.border} ring-2 ring-blue-500 shadow-lg` 
-                          : `bg-[#0e1322] border-white/10 hover:border-white/20 hover:bg-[#12192c]`
+                          ? `bg-[#131b2e] ${t.border} ring-2 ring-blue-500 shadow-md` 
+                          : `bg-transparent hover:bg-white/5 border-transparent hover:border-white/10`
                       }`}
                     >
                       <div className="flex items-center justify-between gap-2">
-                        <img src={t.badge} alt={t.name} className="w-8 h-8 object-contain shrink-0 drop-shadow" />
+                        <img src={t.badge} alt={t.name} className="w-7 h-7 object-contain shrink-0 drop-shadow" />
                         <span className={`text-[10px] font-black px-1.5 py-0.5 rounded ${t.bg} ${t.text} border ${t.border}`}>
                           Tier {t.tier}
                         </span>
                       </div>
                       <div>
                         <div className="flex items-baseline justify-between">
-                          <span className="text-xs font-black text-white">{t.name}</span>
+                          <span className={`text-xs font-black ${t.text}`}>{t.name}</span>
                           <span className="text-[10px] text-slate-400 font-semibold">{t.title}</span>
                         </div>
                         <div className="flex items-baseline justify-between mt-1">
@@ -2735,7 +2981,7 @@ export default function ReportsPage() {
             </div>
           </div>
 
-          {/* 2. EARLY WARNING & RISK RETENTION ALERT SYSTEM */}
+          {/* 2. EARLY WARNING & RISK RETENTION ALERT SYSTEM (NOW A STANDARD TABLE) */}
           <div className="bg-[#120d18] border border-rose-500/30 rounded-2xl p-4 sm:p-5 shadow-2xl transition-all animate-cascade-2">
             <div 
               onClick={() => setIsWarningSectionOpen(!isWarningSectionOpen)}
@@ -2847,71 +3093,18 @@ export default function ReportsPage() {
                   </div>
                 )}
 
-                {/* At-Risk Students Grid */}
-                {atRiskStudents.length === 0 ? (
-                  <div className="p-6 rounded-xl bg-[#0f1422] border border-emerald-500/20 text-center flex flex-col items-center gap-2">
-                    <CheckCircle2 size={24} className="text-emerald-400" />
-                    <p className="text-xs font-bold text-emerald-300">
-                      Tuyệt vời! Không có học sinh nào rơi vào diện cảnh báo nguy cơ theo các tiêu chí hiện tại.
-                    </p>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                    {atRiskStudents.map((s, idx) => (
-                      <div
-                        key={s.student_id || idx}
-                        onClick={() => handleSelectRankingStudent(s.student_id)}
-                        className={`p-3.5 rounded-xl border transition cursor-pointer flex flex-col justify-between gap-3 ${
-                          s.isUrgent
-                            ? 'bg-[#1e1017] border-rose-500/40 hover:border-rose-400'
-                            : 'bg-[#161220] border-amber-500/30 hover:border-amber-400'
-                        }`}
-                      >
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="flex items-center gap-2.5">
-                            <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs text-white ${
-                              s.isUrgent ? 'bg-rose-600' : 'bg-amber-600'
-                            }`}>
-                              {s.full_name.slice(0, 2).toUpperCase()}
-                            </div>
-                            <div>
-                              <h4 className="text-sm font-black text-white leading-tight">
-                                {s.full_name} {s.nickname ? `(${s.nickname})` : ''}
-                              </h4>
-                              <span className="text-[10px] text-slate-400 font-semibold">{s.class_name || 'Lớp học'}</span>
-                            </div>
-                          </div>
-                          <span className={`text-[10px] font-black px-2 py-0.5 rounded-lg border ${
-                            s.isUrgent
-                              ? 'bg-rose-500/20 text-rose-300 border-rose-500/40'
-                              : 'bg-amber-500/20 text-amber-300 border-amber-500/40'
-                          }`}>
-                            {s.isUrgent ? 'Nguy Cơ Cao' : 'Cần Theo Dõi'}
-                          </span>
-                        </div>
-
-                        {/* Risk Reasons Badges */}
-                        <div className="flex flex-wrap gap-1.5">
-                          {s.riskTags.map((tag: string, tIdx: number) => (
-                            <span
-                              key={tIdx}
-                              className="text-[10px] font-bold px-2 py-0.5 rounded bg-black/40 text-rose-300 border border-rose-500/20"
-                            >
-                              {tag}
-                            </span>
-                          ))}
-                        </div>
-
-                        <div className="flex items-center justify-between pt-1 border-t border-white/5 text-[11px]">
-                          <span className="text-slate-400 font-medium">Điểm EMA: <strong className="text-white font-mono">{s.ema_level ? format1Dec(Number(s.ema_level)) : '-'}</strong></span>
-                          <span className="text-indigo-400 hover:text-indigo-300 font-bold flex items-center gap-1">
-                            Xem chi tiết →
-                          </span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                {/* At-Risk Students Standard TanStack DataTable */}
+                <DataTable
+                  tableId="reports-warning-table"
+                  exportFilename="danh_sach_hoc_sinh_nguy_co"
+                  data={atRiskStudents}
+                  columns={warningColumns}
+                  loading={loading}
+                  searchPlaceholder="Tìm học sinh nguy cơ theo tên, lớp..."
+                  emptyMessage="Tuyệt vời! Không có học sinh nào rơi vào diện cảnh báo nguy cơ theo các tiêu chí hiện tại."
+                  pageSize={20}
+                  onRowClick={(r: any) => handleSelectRankingStudent(r.student_id)}
+                />
               </div>
             )}
           </div>
