@@ -23,26 +23,41 @@ export const getSavedWarningSettings = (): WarningSettings => {
   return DEFAULT_WARNING_SETTINGS;
 };
 
+// Academic year starts on June 1st (01/06)
 export const getCurrentAcademicYear = (): string => {
   const now = new Date();
   const year = now.getFullYear();
   const month = now.getMonth() + 1;
-  if (month >= 8) {
+  if (month >= 6) {
     return `${year}-${year + 1}`;
   } else {
     return `${year - 1}-${year}`;
   }
 };
 
-export const generateAcademicYears = (): string[] => {
+// Only generate existing/historical academic years up to current year, no future placeholder years
+export const generateAcademicYears = (sessionRecords?: any[]): string[] => {
   const current = getCurrentAcademicYear();
-  const [startYearStr] = current.split('-');
-  const startYear = parseInt(startYearStr, 10) || 2026;
-  const years: string[] = [];
-  for (let y = startYear - 2; y <= startYear + 2; y++) {
-    years.push(`${y}-${y + 1}`);
+  const yearsSet = new Set<string>();
+  yearsSet.add(current);
+
+  if (sessionRecords && sessionRecords.length > 0) {
+    sessionRecords.forEach(r => {
+      if (r.date) {
+        const parts = r.date.split(/[-\/]/);
+        if (parts.length >= 2) {
+          const y = parseInt(parts[0], 10);
+          const m = parseInt(parts[1], 10);
+          if (y && m) {
+            const acad = m >= 6 ? `${y}-${y + 1}` : `${y - 1}-${y}`;
+            yearsSet.add(acad);
+          }
+        }
+      }
+    });
   }
-  return years;
+
+  return Array.from(yearsSet).sort();
 };
 
 export const getStandardMoetPhases = (academicYear: string): StandardMoetPhase[] => {
@@ -53,11 +68,11 @@ export const getStandardMoetPhases = (academicYear: string): StandardMoetPhase[]
   } catch { }
   const endYear = startYear + 1;
 
-  return [
+  const defaultPhases: StandardMoetPhase[] = [
     {
       id: `moet-full-${academicYear}`,
       phase_name: `Cả Năm Học (${academicYear})`,
-      from_date: `${startYear}-09-05`,
+      from_date: `${startYear}-06-01`,
       to_date: `${endYear}-05-31`,
       is_standard: true,
     },
@@ -104,6 +119,47 @@ export const getStandardMoetPhases = (academicYear: string): StandardMoetPhase[]
       is_standard: true,
     },
   ];
+
+  try {
+    const raw = localStorage.getItem(`cm_phase_overrides_${academicYear}`);
+    if (raw) {
+      const overrides = JSON.parse(raw);
+      return defaultPhases.map(p => {
+        if (overrides[p.id]) {
+          return { ...p, ...overrides[p.id] };
+        }
+        return p;
+      });
+    }
+  } catch { }
+
+  return defaultPhases;
+};
+
+export const savePhaseOverride = (
+  academicYear: string,
+  phaseId: string,
+  data: { from_date: string; to_date: string; phase_name?: string }
+) => {
+  try {
+    const key = `cm_phase_overrides_${academicYear}`;
+    const raw = localStorage.getItem(key);
+    const overrides = raw ? JSON.parse(raw) : {};
+    overrides[phaseId] = { ...overrides[phaseId], ...data };
+    localStorage.setItem(key, JSON.stringify(overrides));
+  } catch { }
+};
+
+export const resetPhaseOverride = (academicYear: string, phaseId: string) => {
+  try {
+    const key = `cm_phase_overrides_${academicYear}`;
+    const raw = localStorage.getItem(key);
+    if (raw) {
+      const overrides = JSON.parse(raw);
+      delete overrides[phaseId];
+      localStorage.setItem(key, JSON.stringify(overrides));
+    }
+  } catch { }
 };
 
 export const formatFullDate = (dStr: string): string => {

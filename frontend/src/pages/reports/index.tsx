@@ -1,4 +1,4 @@
-import React, { useState, useRef, useMemo, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useMemo, useCallback } from 'react';
 import {
   BarChart3,
   GitCompare,
@@ -25,7 +25,6 @@ export const ReportsPage: React.FC = () => {
   const topRef = useRef<HTMLDivElement>(null);
   const [activeReportTab, setActiveReportTab] = useState<'overview' | 'deep' | 'benchmark'>('overview');
   const [selectedAcademicYear, setSelectedAcademicYear] = useState<string>(getCurrentAcademicYear());
-  const academicYears = useMemo(() => generateAcademicYears(), []);
 
   // Filter and modal states
   const [selectedDistFilter, setSelectedDistFilter] = useState<'all' | number>('all');
@@ -71,6 +70,8 @@ export const ReportsPage: React.FC = () => {
     loadAnalyticsData,
     loadTimePhases,
   } = useReportsData();
+
+  const academicYears = useMemo(() => generateAcademicYears(sessionRecords), [sessionRecords]);
 
   const selectedStudentObj = useMemo(() => {
     if (!selectedStudentId || !studentRankings) return null;
@@ -293,6 +294,7 @@ export const ReportsPage: React.FC = () => {
         onClose={() => setPhaseModalOpen(false)}
         classes={classes}
         selectedClassId={selectedClassId}
+        selectedAcademicYear={selectedAcademicYear}
         timePhases={timePhases}
         onPhasesUpdated={loadTimePhases}
         selectedPhaseId={selectedPhaseId}
