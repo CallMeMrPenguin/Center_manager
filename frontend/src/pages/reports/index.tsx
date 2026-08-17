@@ -13,6 +13,7 @@ import {
 import { CustomSelect } from '../../components/CustomSelect';
 import { OverviewTab } from './tabs/OverviewTab';
 import { DeepAnalysisTab } from './tabs/DeepAnalysisTab';
+import { SkillBreakdownTab } from './tabs/SkillBreakdownTab';
 import { BenchmarkTab } from './tabs/BenchmarkTab';
 import { EditGradeModal } from './components/EditGradeModal';
 import { ResetGradesModal } from './components/ResetGradesModal';
@@ -23,7 +24,7 @@ import { generateAcademicYears, getCurrentAcademicYear, getSavedWarningSettings 
 
 export const ReportsPage: React.FC = () => {
   const topRef = useRef<HTMLDivElement>(null);
-  const [activeReportTab, setActiveReportTab] = useState<'overview' | 'deep' | 'benchmark'>('overview');
+  const [activeReportTab, setActiveReportTab] = useState<'overview' | 'deep' | 'skills' | 'benchmark'>('overview');
   const [selectedAcademicYear, setSelectedAcademicYear] = useState<string>(getCurrentAcademicYear());
 
   // Filter and modal states
@@ -171,18 +172,20 @@ export const ReportsPage: React.FC = () => {
         </div>
       </div>
 
-      {/* 2. REPORT MODE TAB SWITCHER (3 TABS) */}
+      {/* 2. REPORT MODE TAB SWITCHER (4 TABS) */}
       <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[#181f36] pb-3">
-        <div className="relative flex bg-[#090d16] p-1 rounded-xl border border-[#1b253b] text-xs shrink-0 font-bold select-none w-full sm:w-auto min-w-[580px]">
+        <div className="relative flex bg-[#090d16] p-1 rounded-xl border border-[#1b253b] text-xs shrink-0 font-bold select-none w-full sm:w-auto min-w-[720px]">
           <div
             className="absolute top-1 bottom-1 rounded-lg bg-[#2563eb] shadow-[0_0_14px_rgba(37,99,235,0.45)] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] pointer-events-none"
             style={{
               left: activeReportTab === 'overview'
                 ? '4px'
                 : activeReportTab === 'deep'
-                  ? 'calc(33.333% + 1px)'
-                  : 'calc(66.666% + 1px)',
-              width: 'calc(33.333% - 4px)',
+                  ? 'calc(25% + 1px)'
+                  : activeReportTab === 'skills'
+                    ? 'calc(50% + 1px)'
+                    : 'calc(75% + 1px)',
+              width: 'calc(25% - 4px)',
             }}
           />
           <button
@@ -200,6 +203,14 @@ export const ReportsPage: React.FC = () => {
           >
             <Layers size={13} />
             <span>Thống Kê Sâu</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveReportTab('skills')}
+            className={`flex-1 relative z-10 py-2 px-3 text-center transition-colors cursor-pointer flex items-center justify-center gap-1.5 whitespace-nowrap ${activeReportTab === 'skills' ? 'text-white font-black' : 'text-slate-400 hover:text-white'}`}
+          >
+            <GraduationCap size={13} />
+            <span>Phân Tích Kỹ Năng & Unit</span>
           </button>
           <button
             type="button"
@@ -227,6 +238,12 @@ export const ReportsPage: React.FC = () => {
             selectedClassId={selectedClassId}
             analyticsSummary={analyticsSummary}
             classAnalyticsMap={classAnalyticsMap}
+          />
+        ) : activeReportTab === 'skills' ? (
+          <SkillBreakdownTab
+            selectedClassId={selectedClassId}
+            selectedStudentId={selectedStudentId}
+            onSelectRankingStudent={handleSelectRankingStudent}
           />
         ) : activeReportTab === 'deep' ? (
           <DeepAnalysisTab

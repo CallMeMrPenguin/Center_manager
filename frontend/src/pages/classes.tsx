@@ -2,13 +2,14 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   BookOpen, Plus, Search, Edit3, Trash2, Users, User, MapPin, Pencil,
   Shuffle, FileCheck2, Save, X, RefreshCw, AlertTriangle, AlertCircle, UserPlus, ChevronLeft, ChevronRight, Move,
-  Calendar, FileSpreadsheet, FileText, CheckCircle2, Minus, CheckSquare, Square, Filter, Eye, EyeOff
+  Calendar, FileSpreadsheet, FileText, CheckCircle2, Minus, CheckSquare, Square, Filter, Eye, EyeOff, Layers
 } from 'lucide-react';
 import { api } from '../api';
 import { showToast } from '../components/Toast';
 import { useConfirm } from '../components/ConfirmDialog';
 import RelationshipsTab from '../components/seating/RelationshipsTab';
 import BlossomResultModal from '../components/seating/BlossomResultModal';
+import { TestConfigModal } from '../components/TestConfigModal';
 import { CustomDatePicker } from '../components/CustomDatePicker';
 import { CustomSelect } from '../components/CustomSelect';
 import { getLocalDateStr, notifyDataChanged } from '../utils';
@@ -158,6 +159,7 @@ export default function ClassesPage() {
   const [attendanceDate, setAttendanceDate] = useState(() => getLocalDateStr());
   const [attendanceRecords, setAttendanceRecords] = useState<any[]>([]);
   const [savingAttendance, setSavingAttendance] = useState(false);
+  const [testConfigModalOpen, setTestConfigModalOpen] = useState(false);
 
   // Class create/edit modal & Multi-day schedule with per-day time & duration
   const [classModalOpen, setClassModalOpen] = useState(false);
@@ -1223,6 +1225,16 @@ export default function ClassesPage() {
 
                 <div className="flex items-center gap-2">
                   <button
+                    type="button"
+                    onClick={() => setTestConfigModalOpen(true)}
+                    className="group flex items-center gap-0 hover:gap-1.5 bg-blue-500/15 hover:bg-blue-500/25 text-blue-300 border border-blue-500/30 px-3.5 py-1.5 rounded-xl font-bold text-xs transition-all duration-300 cursor-pointer"
+                    title="Cấu Hình Bài Kiểm Tra (Check 1 & Check 2)"
+                  >
+                    <Layers size={14} className="shrink-0" />
+                    <span className="max-w-0 opacity-0 group-hover:max-w-[180px] group-hover:opacity-100 transition-all duration-300 ease-in-out whitespace-nowrap overflow-hidden block">Cấu Hình Bài Kiểm Tra</span>
+                  </button>
+
+                  <button
                     onClick={handleOpenEnrollModal}
                     className="group flex items-center gap-0 hover:gap-1.5 bg-indigo-500/15 hover:bg-indigo-500/25 text-indigo-300 border border-indigo-500/30 px-3.5 py-1.5 rounded-xl font-bold text-xs transition-all duration-300 cursor-pointer"
                     title="Ghi Danh Học Sinh"
@@ -1924,6 +1936,20 @@ export default function ClassesPage() {
         pairs={blossomPairs}
         unmatched={blossomUnmatched}
       />
+
+      {/* SESSION TEST CONFIG MODAL */}
+      {selectedClass && (
+        <TestConfigModal
+          isOpen={testConfigModalOpen}
+          onClose={() => setTestConfigModalOpen(false)}
+          classId={selectedClass.id}
+          date={attendanceDate}
+          grade={selectedClass.grade}
+          onSaved={() => {
+            loadAttendanceData(selectedClass.id, attendanceDate);
+          }}
+        />
+      )}
     </div>
   );
 }

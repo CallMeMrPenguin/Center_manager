@@ -533,6 +533,22 @@ export const api = {
     return response.json();
   },
 
+  // Skill Analytics & Test Config API
+  getSkillBreakdown: (classId?: number, studentId?: number) => {
+    let url = '/api/reports/skill-breakdown';
+    const params: string[] = [];
+    if (classId) params.push(`class_id=${classId}`);
+    if (studentId) params.push(`student_id=${studentId}`);
+    if (params.length > 0) url += `?${params.join('&')}`;
+    return request<any>(url);
+  },
+  getSessionTestConfig: (classId: number, date: string) =>
+    request<{ configured: boolean; test_config: any; session_id: number | null }>(`/api/classes/${classId}/sessions/test-config?date=${encodeURIComponent(date)}`),
+  saveSessionTestConfig: (classId: number, data: any) =>
+    request<any>(`/api/classes/${classId}/sessions/test-config`, { method: 'POST', body: JSON.stringify(data) }),
+  getUnitSuggestions: (grade?: string) =>
+    request<{ units: string[]; grammar_topics: string[] }>(`/api/suggestions/units${grade ? `?grade=${encodeURIComponent(grade)}` : ''}`),
+
   // Update API
   checkUpdate: () => request<any>('/api/system/update-check'),
   getUpdateStatus: () => request<any>('/api/system/update-status'),

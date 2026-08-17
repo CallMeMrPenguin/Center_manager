@@ -458,6 +458,12 @@ def init_db():
     except Exception as e:
         print("Attendance cleanup error:", e)
 
+    try:
+        from services.skill_mastery_service import init_skill_mastery_db
+        init_skill_mastery_db(conn)
+    except Exception as e:
+        print("Skill mastery schema init error:", e)
+
     conn.commit()
     conn.close()
     print("Database initialized successfully.")
