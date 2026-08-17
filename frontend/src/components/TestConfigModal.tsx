@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Layers, Save, Plus, Check } from 'lucide-react';
+import { X, Layers, Save, Check } from 'lucide-react';
 import { CustomSelect } from './CustomSelect';
 import { api } from '../api';
 import { showToast } from './Toast';
@@ -12,10 +12,18 @@ export interface TestConfigItemData {
 }
 
 export interface SessionTestConfigData {
-  mode: string; // 'two_separate' | 'single_split'
+  mode: string; // 'two_separate'
   check_1: TestConfigItemData;
   check_2: TestConfigItemData;
   notes: string;
+}
+
+interface UnitDetail {
+  unit: string;
+  unit_num: string;
+  name: string;
+  grammar: string;
+  label: string;
 }
 
 interface TestConfigModalProps {
@@ -39,7 +47,7 @@ const DEFAULT_CONFIG: SessionTestConfigData = {
     skill: 'grammar',
     units: ['Unit 1'],
     topic: '',
-    grammar_topic: 'Present Simple',
+    grammar_topic: '',
   },
   notes: '',
 };
@@ -55,10 +63,10 @@ export const TestConfigModal: React.FC<TestConfigModalProps> = ({
   const [config, setConfig] = useState<SessionTestConfigData>(DEFAULT_CONFIG);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [unitSuggestions, setUnitSuggestions] = useState<string[]>([]);
+  const [unitsDetailed, setUnitsDetailed] = useState<UnitDetail[]>([]);
+  const [unitGrammarMap, setUnitGrammarMap] = useState<Record<string, string>>({});
+  const [unitNameMap, setUnitNameMap] = useState<Record<string, string>>({});
   const [grammarSuggestions, setGrammarSuggestions] = useState<string[]>([]);
-  const [customUnitInput1, setCustomUnitInput1] = useState('');
-  const [customUnitInput2, setCustomUnitInput2] = useState('');
 
   useEffect(() => {
     if (isOpen && classId && date) {
@@ -68,9 +76,16 @@ export const TestConfigModal: React.FC<TestConfigModalProps> = ({
         api.getUnitSuggestions(grade),
       ])
         .then(([resConfig, resSugg]) => {
+          if (resSugg) {
+            setUnitsDetailed(resSugg.units_detailed || []);
+            setUnitGrammarMap(resSugg.unit_grammar_map || {});
+            setUnitNameMap(resSugg.unit_name_map || {});
+            setGrammarSuggestions(resSugg.grammar_topics || []);
+          }
+
           if (resConfig?.test_config) {
             setConfig({
-              mode: resConfig.test_config.mode || 'two_separate',
+              mode: 'two_separate',
               check_1: {
                 skill: resConfig.test_config.check_1?.skill || 'vocab',
                 units: resConfig.test_config.check_1?.units || [],
@@ -86,12 +101,24 @@ export const TestConfigModal: React.FC<TestConfigModalProps> = ({
               notes: resConfig.test_config.notes || '',
             });
           } else {
-            setConfig(DEFAULT_CONFIG);
-          }
-
-          if (resSugg) {
-            setUnitSuggestions(resSugg.units || []);
-            setGrammarSuggestions(resSugg.grammar_topics || []);
+            // Pick first unit from suggestions
+            const firstUnit = resSugg?.units_detailed?.[0];
+            setConfig({
+              mode: 'two_separate',
+              check_1: {
+                skill: 'vocab',
+                units: firstUnit ? [firstUnit.unit] : ['Unit 1'],
+                topic: firstUnit?.name || '',
+                grammar_topic: '',
+              },
+              check_2: {
+                skill: 'grammar',
+                units: firstUnit ? [firstUnit.unit] : ['Unit 1'],
+                topic: '',
+                grammar_topic: firstUnit?.grammar || '',
+              },
+              notes: '',
+            });
           }
         })
         .catch(() => {
@@ -103,29 +130,37 @@ export const TestConfigModal: React.FC<TestConfigModalProps> = ({
 
   if (!isOpen) return null;
 
-  const handleToggleUnit = (part: 'check_1' | 'check_2', unitName: string) => {
+  const handleToggleUnit = (part: 'check_1' | 'check_2', unitKey: string) => {
     setConfig((prev) => {
       const currentUnits = prev[part].units || [];
-      const exists = currentUnits.includes(unitName);
+      const exists = currentUnits.includes(unitKey);
       const nextUnits = exists
-        ? currentUnits.filter((u) => u !== unitName)
-        : [...currentUnits, unitName];
+        ? currentUnits.filter((u) => u !== unitKey)
+        : [...currentUnits, unitKey];
+
+      let nextTopic = prev[part].topic;
+      let nextGrammar = prev[part].grammar_topic;
+
+      // Auto populate topic name if empty or only 1 unit selected
+      if (!exists && nextUnits.length === 1) {
+        if (part === 'check_1' && !nextTopic && unitNameMap[unitKey]) {
+          nextTopic = unitNameMap[unitKey];
+        }
+        if (part === 'check_2' && !nextGrammar && unitGrammarMap[unitKey]) {
+          nextGrammar = unitGrammarMap[unitKey];
+        }
+      }
+
       return {
         ...prev,
         [part]: {
           ...prev[part],
           units: nextUnits,
+          topic: nextTopic,
+          grammar_topic: nextGrammar,
         },
       };
     });
-  };
-
-  const handleAddCustomUnit = (part: 'check_1' | 'check_2') => {
-    const val = part === 'check_1' ? customUnitInput1.trim() : customUnitInput2.trim();
-    if (!val) return;
-    handleToggleUnit(part, val);
-    if (part === 'check_1') setCustomUnitInput1('');
-    else setCustomUnitInput2('');
   };
 
   const handleSave = async () => {
@@ -134,7 +169,7 @@ export const TestConfigModal: React.FC<TestConfigModalProps> = ({
       await api.saveSessionTestConfig(classId, {
         date,
         class_id: classId,
-        mode: config.mode,
+        mode: 'two_separate',
         check_1: config.check_1,
         check_2: config.check_2,
         notes: config.notes,
@@ -165,9 +200,9 @@ export const TestConfigModal: React.FC<TestConfigModalProps> = ({
               <Layers size={18} />
             </div>
             <div>
-              <h2 className="text-base font-black text-white">Cấu Hình Bài Kiểm Tra</h2>
+              <h2 className="text-base font-black text-white">Cấu Hình Bài Kiểm Tra Buổi Học</h2>
               <span className="text-xs text-slate-400">
-                Buổi học ngày: <strong className="text-indigo-300">{date}</strong>
+                Ngày học: <strong className="text-indigo-300">{date}</strong> | Khối lớp: <strong className="text-white">{grade || 'Lớp 6'}</strong>
               </span>
             </div>
           </div>
@@ -183,46 +218,10 @@ export const TestConfigModal: React.FC<TestConfigModalProps> = ({
         <div className="p-6 overflow-y-auto space-y-6 flex-1 scrollbar-thin">
           {loading ? (
             <div className="py-12 text-center text-slate-400 text-xs font-bold">
-              Đang tải cấu hình...
+              Đang tải danh sách bài học & cấu hình...
             </div>
           ) : (
             <>
-              {/* Mode Selection */}
-              <div className="space-y-2">
-                <label className="text-xs font-bold text-slate-300 block">Hình Thức Kiểm Tra</label>
-                <div className="grid grid-cols-2 gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setConfig((p) => ({ ...p, mode: 'two_separate' }))}
-                    className={`p-3 rounded-xl border text-left transition cursor-pointer ${
-                      config.mode === 'two_separate'
-                        ? 'bg-indigo-600/20 border-indigo-500 text-white shadow-sm'
-                        : 'bg-[#121626] border-white/5 text-slate-400 hover:text-white'
-                    }`}
-                  >
-                    <div className="text-xs font-black">2 Bài Test Riêng Biệt</div>
-                    <div className="text-[11px] text-slate-400 mt-0.5">
-                      Check 1 và Check 2 là 2 bài test với nội dung khác nhau.
-                    </div>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setConfig((p) => ({ ...p, mode: 'single_split' }))}
-                    className={`p-3 rounded-xl border text-left transition cursor-pointer ${
-                      config.mode === 'single_split'
-                        ? 'bg-indigo-600/20 border-indigo-500 text-white shadow-sm'
-                        : 'bg-[#121626] border-white/5 text-slate-400 hover:text-white'
-                    }`}
-                  >
-                    <div className="text-xs font-black">1 Bài Test Lớn (2 Phần)</div>
-                    <div className="text-[11px] text-slate-400 mt-0.5">
-                      Check 1 là Phần 1, Check 2 là Điểm Toàn Bài.
-                    </div>
-                  </button>
-                </div>
-              </div>
-
               {/* CHECK 1 CONFIG */}
               <div className="bg-[#121626] border border-white/5 rounded-xl p-4 space-y-4">
                 <div className="flex items-center justify-between border-b border-white/5 pb-2">
@@ -230,7 +229,7 @@ export const TestConfigModal: React.FC<TestConfigModalProps> = ({
                     Cấu Hình Check 1
                   </span>
                   <span className="text-[11px] text-slate-400 font-medium">
-                    {config.mode === 'single_split' ? 'Phần 1' : 'Bài Kiểm Tra 1'}
+                    Bài Kiểm Tra 1
                   </span>
                 </div>
 
@@ -254,7 +253,7 @@ export const TestConfigModal: React.FC<TestConfigModalProps> = ({
 
                   <div>
                     <label className="text-[11px] font-bold text-slate-300 block mb-1">
-                      Chủ Đề / Nội Dung Cụ Thể
+                      Chủ Đề Từ Vựng / Nội Dung
                     </label>
                     <input
                       type="text"
@@ -271,53 +270,37 @@ export const TestConfigModal: React.FC<TestConfigModalProps> = ({
                   </div>
                 </div>
 
-                {/* Unit / Lessons Tag Selector */}
+                {/* Unit / Lessons Tag Selector from Unit Config */}
                 <div className="space-y-1.5">
                   <label className="text-[11px] font-bold text-slate-300 block">
-                    Bài Học / Units Áp Dụng (Chọn một hoặc nhiều)
+                    Chọn Bài Học / Units Từ Cấu Hình (Có thể chọn nhiều):
                   </label>
-                  <div className="flex flex-wrap gap-1.5">
-                    {unitSuggestions.slice(0, 10).map((u) => {
-                      const selected = config.check_1.units.includes(u);
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                    {unitsDetailed.map((u) => {
+                      const selected = config.check_1.units.includes(u.unit);
                       return (
                         <button
-                          key={u}
+                          key={u.unit}
                           type="button"
-                          onClick={() => handleToggleUnit('check_1', u)}
-                          className={`px-2.5 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1 cursor-pointer ${
+                          onClick={() => handleToggleUnit('check_1', u.unit)}
+                          className={`p-2 rounded-xl text-left transition border cursor-pointer ${
                             selected
-                              ? 'bg-blue-600 text-white shadow-sm'
-                              : 'bg-[#0c0f1d] border border-[#212c4b] text-slate-300 hover:text-white'
+                              ? 'bg-blue-600/20 border-blue-500 text-white shadow-sm'
+                              : 'bg-[#0c0f1d] border-[#212c4b] text-slate-300 hover:border-slate-500'
                           }`}
                         >
-                          {selected && <Check size={11} />}
-                          <span>{u}</span>
+                          <div className="flex items-center justify-between text-xs font-black">
+                            <span>{u.unit}</span>
+                            {selected && <Check size={13} className="text-blue-400" />}
+                          </div>
+                          {u.name && (
+                            <div className="text-[10px] text-slate-400 truncate mt-0.5" title={u.name}>
+                              {u.name}
+                            </div>
+                          )}
                         </button>
                       );
                     })}
-                  </div>
-                  <div className="flex gap-2 mt-2">
-                    <input
-                      type="text"
-                      value={customUnitInput1}
-                      onChange={(e) => setCustomUnitInput1(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
-                          e.preventDefault();
-                          handleAddCustomUnit('check_1');
-                        }
-                      }}
-                      placeholder="Thêm bài khác (VD: Ôn tập kỳ 1)..."
-                      className="flex-1 bg-[#0c0f1d] border border-[#212c4b] text-white text-xs rounded-xl px-3 py-1.5 focus:outline-none focus:border-indigo-500"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => handleAddCustomUnit('check_1')}
-                      className="px-3 py-1.5 bg-[#212c4b] hover:bg-[#2d3b66] text-white rounded-xl text-xs font-bold flex items-center gap-1"
-                    >
-                      <Plus size={12} />
-                      <span>Thêm</span>
-                    </button>
                   </div>
                 </div>
               </div>
@@ -329,7 +312,7 @@ export const TestConfigModal: React.FC<TestConfigModalProps> = ({
                     Cấu Hình Check 2
                   </span>
                   <span className="text-[11px] text-slate-400 font-medium">
-                    {config.mode === 'single_split' ? 'Toàn Bài' : 'Bài Kiểm Tra 2'}
+                    Bài Kiểm Tra 2
                   </span>
                 </div>
 
@@ -353,7 +336,7 @@ export const TestConfigModal: React.FC<TestConfigModalProps> = ({
 
                   <div>
                     <label className="text-[11px] font-bold text-slate-300 block mb-1">
-                      Chủ Đề Ngữ Pháp / Nội Dung
+                      Chủ Đề Ngữ Pháp (Grammar Topic)
                     </label>
                     <input
                       type="text"
@@ -374,14 +357,52 @@ export const TestConfigModal: React.FC<TestConfigModalProps> = ({
                   </div>
                 </div>
 
-                {/* Quick Grammar topic chips */}
-                {config.check_2.skill === 'grammar' && (
-                  <div className="space-y-1.5">
+                {/* Unit / Lessons Tag Selector from Unit Config */}
+                <div className="space-y-1.5">
+                  <label className="text-[11px] font-bold text-slate-300 block">
+                    Chọn Bài Học / Units Cho Check 2:
+                  </label>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                    {unitsDetailed.map((u) => {
+                      const selected = config.check_2.units.includes(u.unit);
+                      return (
+                        <button
+                          key={u.unit}
+                          type="button"
+                          onClick={() => handleToggleUnit('check_2', u.unit)}
+                          className={`p-2 rounded-xl text-left transition border cursor-pointer ${
+                            selected
+                              ? 'bg-purple-600/20 border-purple-500 text-white shadow-sm'
+                              : 'bg-[#0c0f1d] border-[#212c4b] text-slate-300 hover:border-slate-500'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between text-xs font-black">
+                            <span>{u.unit}</span>
+                            {selected && <Check size={13} className="text-purple-400" />}
+                          </div>
+                          {u.grammar ? (
+                            <div className="text-[10px] text-purple-300 truncate mt-0.5" title={u.grammar}>
+                              {u.grammar}
+                            </div>
+                          ) : u.name ? (
+                            <div className="text-[10px] text-slate-400 truncate mt-0.5" title={u.name}>
+                              {u.name}
+                            </div>
+                          ) : null}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Quick Grammar suggestions */}
+                {config.check_2.skill === 'grammar' && grammarSuggestions.length > 0 && (
+                  <div className="space-y-1.5 pt-1">
                     <label className="text-[11px] font-bold text-slate-400 block">
-                      Gợi Ý Chủ Đề Ngữ Pháp Phổ Biến:
+                      Hoặc Chọn Nhanh Chủ Đề Ngữ Pháp Khác:
                     </label>
                     <div className="flex flex-wrap gap-1.5">
-                      {grammarSuggestions.slice(0, 6).map((g) => (
+                      {grammarSuggestions.slice(0, 8).map((g) => (
                         <button
                           key={g}
                           type="button"
@@ -391,7 +412,7 @@ export const TestConfigModal: React.FC<TestConfigModalProps> = ({
                               check_2: { ...p.check_2, grammar_topic: g, topic: g },
                             }))
                           }
-                          className="px-2 py-0.5 rounded-lg bg-[#0c0f1d] border border-[#212c4b] hover:border-purple-500 text-[11px] text-slate-300 hover:text-white transition"
+                          className="px-2.5 py-1 rounded-lg bg-[#0c0f1d] border border-[#212c4b] hover:border-purple-500 text-[11px] text-slate-300 hover:text-white transition cursor-pointer"
                         >
                           {g}
                         </button>
@@ -399,56 +420,6 @@ export const TestConfigModal: React.FC<TestConfigModalProps> = ({
                     </div>
                   </div>
                 )}
-
-                {/* Unit / Lessons Tag Selector for Check 2 */}
-                <div className="space-y-1.5">
-                  <label className="text-[11px] font-bold text-slate-300 block">
-                    Bài Học / Units Áp Dụng:
-                  </label>
-                  <div className="flex flex-wrap gap-1.5">
-                    {unitSuggestions.slice(0, 10).map((u) => {
-                      const selected = config.check_2.units.includes(u);
-                      return (
-                        <button
-                          key={u}
-                          type="button"
-                          onClick={() => handleToggleUnit('check_2', u)}
-                          className={`px-2.5 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1 cursor-pointer ${
-                            selected
-                              ? 'bg-purple-600 text-white shadow-sm'
-                              : 'bg-[#0c0f1d] border border-[#212c4b] text-slate-300 hover:text-white'
-                          }`}
-                        >
-                          {selected && <Check size={11} />}
-                          <span>{u}</span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                  <div className="flex gap-2 mt-2">
-                    <input
-                      type="text"
-                      value={customUnitInput2}
-                      onChange={(e) => setCustomUnitInput2(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
-                          e.preventDefault();
-                          handleAddCustomUnit('check_2');
-                        }
-                      }}
-                      placeholder="Thêm bài khác..."
-                      className="flex-1 bg-[#0c0f1d] border border-[#212c4b] text-white text-xs rounded-xl px-3 py-1.5 focus:outline-none focus:border-indigo-500"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => handleAddCustomUnit('check_2')}
-                      className="px-3 py-1.5 bg-[#212c4b] hover:bg-[#2d3b66] text-white rounded-xl text-xs font-bold flex items-center gap-1"
-                    >
-                      <Plus size={12} />
-                      <span>Thêm</span>
-                    </button>
-                  </div>
-                </div>
               </div>
             </>
           )}
@@ -457,13 +428,13 @@ export const TestConfigModal: React.FC<TestConfigModalProps> = ({
         {/* Footer */}
         <div className="flex items-center justify-between px-6 py-4 border-t border-white/10 bg-[#121626]">
           <div className="text-xs text-slate-400 font-medium">
-            Thông tin sẽ được dùng để phân tích điểm và dự đoán năng lực học sinh.
+            Thông tin sẽ được tự động đồng bộ để tính toán độ nắm vững kiến thức của học sinh.
           </div>
           <div className="flex items-center gap-3">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-xl text-xs font-bold text-slate-300 hover:text-white hover:bg-white/5 transition"
+              className="px-4 py-2 rounded-xl text-xs font-bold text-slate-300 hover:text-white hover:bg-white/5 transition cursor-pointer"
             >
               Hủy
             </button>
@@ -471,7 +442,7 @@ export const TestConfigModal: React.FC<TestConfigModalProps> = ({
               type="button"
               onClick={handleSave}
               disabled={saving || loading}
-              className="px-5 py-2 rounded-xl bg-[#5c36f5] hover:bg-[#7351f7] text-white text-xs font-black shadow-lg transition flex items-center gap-1.5 disabled:opacity-50"
+              className="px-5 py-2 rounded-xl bg-[#5c36f5] hover:bg-[#7351f7] text-white text-xs font-black shadow-lg transition flex items-center gap-1.5 disabled:opacity-50 cursor-pointer"
             >
               <Save size={14} />
               <span>{saving ? 'Đang Lưu...' : 'Lưu Cấu Hình'}</span>

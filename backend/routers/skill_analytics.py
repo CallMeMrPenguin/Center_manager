@@ -109,55 +109,49 @@ def api_save_session_test_config(class_id: int, payload: SessionTestConfigPayloa
 
 @router.get("/api/suggestions/units")
 def api_get_unit_suggestions(grade: Optional[str] = None):
-    """Returns list of unit and topic suggestions from vocabulary_list and question_bank."""
-    conn = get_connection()
-    cursor = conn.cursor()
-    try:
-        units_set = set()
+    """Returns list of unit and topic suggestions from unit_config, vocabulary_list and question_bank."""
+    from config.unit_config import load_unit_config
+    unit_cfg_all = load_unit_config()
 
-        # From vocabulary_list
-        v_query = "SELECT DISTINCT unit FROM vocabulary_list WHERE unit IS NOT NULL AND TRIM(unit) != ''"
-        v_params = []
-        if grade:
-            v_query += " AND grade = ?"
-            v_params.append(grade)
-        cursor.execute(v_query, v_params)
-        for r in cursor.fetchall():
-            u = r["unit"].strip()
-            if u:
-                units_set.add(u)
+    clean_grade = ""
+    if grade:
+        clean_grade = ''.join(filter(str.isdigit, str(grade)))
+    if not clean_grade:
+        clean_grade = "6"
 
-        # From question_bank
-        q_query = "SELECT DISTINCT unit FROM question_bank WHERE unit IS NOT NULL AND TRIM(unit) != ''"
-        q_params = []
-        if grade:
-            q_query += " AND grade = ?"
-            q_params.append(grade)
-        cursor.execute(q_query, q_params)
-        for r in cursor.fetchall():
-            u = r["unit"].strip()
-            if u:
-                units_set.add(u)
+    grade_units = unit_cfg_all.get(clean_grade, unit_cfg_all.get("6", {}))
 
-        # Add common default units if empty
-        if not units_set:
-            units_set = {f"Unit {i}" for i in range(1, 13)}
+    units_list = []
+    unit_grammar_map = {}
+    unit_name_map = {}
 
-        sorted_units = sorted(list(units_set), key=lambda x: (
-            int(''.join(filter(str.isdigit, x))) if any(c.isdigit() for c in x) else 999,
-            x
-        ))
+    for u_num, u_data in grade_units.items():
+        ukey = f"Unit {u_num}"
+        uname = u_data.get("name", "") if isinstance(u_data, dict) else str(u_data)
+        ugrammar = u_data.get("grammar", "") if isinstance(u_data, dict) else ""
+        units_list.append({
+            "unit": ukey,
+            "unit_num": u_num,
+            "name": uname,
+            "grammar": ugrammar,
+            "label": f"{ukey}: {uname}" if uname else ukey
+        })
+        unit_grammar_map[ukey] = ugrammar
+        unit_name_map[ukey] = uname
 
-        grammar_topics = [
-            "Present Simple", "Present Continuous", "Past Simple", "Past Continuous",
-            "Present Perfect", "Future Simple (Will / Be going to)", "Comparatives & Superlatives",
-            "Modal Verbs (Can/Could/Must/Should)", "Passive Voice", "Conditionals (Type 1 & 2)",
-            "Relative Clauses", "Reported Speech", "Prepositions of Time & Place", "Articles (A/An/The)"
-        ]
+    units_list.sort(key=lambda x: int(x["unit_num"]) if x["unit_num"].isdigit() else 999)
 
-        return {
-            "units": sorted_units,
-            "grammar_topics": grammar_topics
-        }
-    finally:
-        conn.close()
+    grammar_topics = [
+        "Present Simple", "Present Continuous", "Past Simple", "Past Continuous",
+        "Present Perfect", "Future Simple (Will / Be going to)", "Comparatives & Superlatives",
+        "Modal Verbs (Can/Could/Must/Should)", "Passive Voice", "Conditionals (Type 1 & 2)",
+        "Relative Clauses", "Reported Speech", "Prepositions of Time & Place", "Articles (A/An/The)"
+    ]
+
+    return {
+        "units": [u["unit"] for u in units_list],
+        "units_detailed": units_list,
+        "unit_grammar_map": unit_grammar_map,
+        "unit_name_map": unit_name_map,
+        "grammar_topics": grammar_topics
+    }

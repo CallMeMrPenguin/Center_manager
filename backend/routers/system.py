@@ -534,19 +534,14 @@ def api_save_prompts(storageKey: str, payload: Dict[str, Any]):
 
 @router.get("/api/unit-config")
 def api_get_unit_config():
-    if os.path.exists(UNIT_CONFIG_FILE):
-        try:
-            with open(UNIT_CONFIG_FILE, "r", encoding="utf-8") as f:
-                return json.load(f)
-        except Exception:
-            pass
-    return {}
+    from config.unit_config import load_unit_config
+    return load_unit_config()
 
 @router.post("/api/unit-config")
 def api_save_unit_config(config: Dict[str, Any]):
-    with open(UNIT_CONFIG_FILE, "w", encoding="utf-8") as f:
-        json.dump(config, f, indent=2, ensure_ascii=False)
-    return {"success": True}
+    from config.unit_config import save_unit_config
+    success = save_unit_config(config)
+    return {"success": success}
 
 @router.get("/api/exercise-config")
 def api_get_exercise_config():

@@ -3,7 +3,7 @@
     "machine_id": "MrNobody_dc9366",
     "pdf_server_port": 8502,
     "theme": {
-        "bgImage": "https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/f0733c36-a64b-4f7c-b06c-3c679f8ddbc1_3840w.webp",
+        "bgImage": "none",
         "opacity": 0.08,
         "blur": 24,
         "borderOpacity": 0.15,

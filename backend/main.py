@@ -77,13 +77,14 @@ if os.path.exists(frontend_dist):
             blur = theme.get("blur", 24)
             border_opacity = theme.get("borderOpacity", 0.15)
             saturate = theme.get("saturate", 180)
-            bg_image = theme.get("bgImage", "")
-            if bg_image == 'none' or not bg_image or str(bg_image).startswith('data:'):
-                bg_image = "https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/f0733c36-a64b-4f7c-b06c-3c679f8ddbc1_3840w.webp"
+            bg_image = theme.get("bgImage", "none")
+            if not bg_image or bg_image == 'none' or str(bg_image).startswith('data:') or 'supabase.co' in str(bg_image):
+                bg_image = "none"
 
             with open(index_file, "r", encoding="utf-8") as f:
                 html_content = f.read()
 
+            bg_css = "none" if bg_image == "none" else f"url('{bg_image}')"
             theme_style = f"""
             <style>
                 :root {{
@@ -91,7 +92,7 @@ if os.path.exists(frontend_dist):
                     --glass-blur: {blur}px;
                     --glass-border-opacity: {border_opacity};
                     --glass-saturate: {saturate}%;
-                    --bg-image: url('{bg_image}');
+                    --bg-image: {bg_css};
                 }}
             </style>
             """

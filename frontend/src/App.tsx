@@ -63,7 +63,7 @@ function AppContent() {
 
     // Load and apply theme settings on mount
     let theme = {
-      bgImage: 'https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/f0733c36-a64b-4f7c-b06c-3c679f8ddbc1_3840w.webp',
+      bgImage: 'none',
       opacity: 0.08,
       blur: 24,
       borderOpacity: 0.15,
@@ -74,8 +74,8 @@ function AppContent() {
       try {
         const parsed = JSON.parse(savedTheme);
         theme = { ...theme, ...parsed };
-        if (!theme.bgImage || theme.bgImage === 'none') {
-          theme.bgImage = 'https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/f0733c36-a64b-4f7c-b06c-3c679f8ddbc1_3840w.webp';
+        if (theme.bgImage && (theme.bgImage.includes('supabase.co') || theme.bgImage === 'none')) {
+          theme.bgImage = 'none';
         }
       } catch (e) {
         console.error("Failed to load theme settings:", e);

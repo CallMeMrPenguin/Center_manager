@@ -153,7 +153,7 @@ export const MasteryHeatmap: React.FC<MasteryHeatmapProps> = ({
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Tìm học sinh..."
+              placeholder="Tìm kiếm học sinh..."
               className="bg-[#121626] border border-white/10 text-white text-xs rounded-xl pl-9 pr-3 py-1.5 focus:outline-none focus:border-indigo-500 w-44"
             />
           </div>
