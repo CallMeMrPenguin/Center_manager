@@ -255,25 +255,18 @@ function AppContent() {
   };
 
   return (
-    <div className="relative flex flex-col h-screen w-screen ambient-bg-dark text-slate-50 overflow-hidden font-sans select-none">
-
-      {/* Background Image Container */}
-      <div
-        className="absolute inset-0 pointer-events-none z-0 bg-cover bg-center bg-no-repeat transition-opacity duration-300 opacity-60"
-        style={{ backgroundImage: 'var(--bg-image)' }}
-      />
-
+    <div className="relative flex flex-col h-screen w-screen bg-[#08090e] text-slate-50 overflow-hidden font-sans select-none">
       <div className="relative flex flex-row flex-1 overflow-hidden p-4 gap-4 z-10">
 
         {/* SIDEBAR NAVIGATION (Floating circle toggle button on right edge) */}
         <aside
-          className={`relative ${isSidebarExpanded ? 'w-64' : 'w-20'} sidebar-glass-glow rounded-2xl flex flex-col h-full transition-[width] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] z-30 shrink-0 select-none`}
+          className={`relative ${isSidebarExpanded ? 'w-64' : 'w-20'} bg-[#0c0f1d] border border-white/10 rounded-2xl flex flex-col h-full transition-[width] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] z-30 shrink-0 select-none shadow-xl`}
         >
           {/* Floating Circular Collapse / Expand Button on right edge */}
           <button
             type="button"
             onClick={toggleSidebar}
-            className="absolute -right-3 top-6.5 w-6 h-6 rounded-full bg-[#181d2e] hover:bg-[#5c36f5] text-slate-300 hover:text-white border border-white/20 shadow-[0_2px_10px_rgba(0,0,0,0.6)] flex items-center justify-center transition-all duration-200 hover:scale-115 cursor-pointer z-50 active:scale-95"
+            className="absolute -right-3 top-6.5 w-6 h-6 rounded-full bg-[#181d2e] hover:bg-[#5c36f5] text-slate-300 hover:text-white border border-white/20 shadow-md flex items-center justify-center transition-all duration-200 hover:scale-110 cursor-pointer z-50 active:scale-95"
             title={isSidebarExpanded ? "Thu gọn thanh điều hướng" : "Mở rộng thanh điều hướng"}
           >
             {isSidebarExpanded ? <ChevronLeft size={13} strokeWidth={2.5} /> : <ChevronRight size={13} strokeWidth={2.5} />}
@@ -281,8 +274,8 @@ function AppContent() {
 
           {/* Header logo / Title */}
           <div className="flex items-center px-3.5 py-4 shrink-0 border-b border-white/5 min-w-0">
-            <div className="h-10 w-10 rounded-full bg-indigo-500/25 border-2 border-indigo-400/90 shadow-[0_0_16px_rgba(92,54,245,0.5)] flex items-center justify-center shrink-0">
-              <GraduationCap size={20} className="text-white drop-shadow-[0_0_10px_rgba(255,255,255,1)]" />
+            <div className="h-10 w-10 rounded-xl bg-[#5c36f5] flex items-center justify-center shrink-0 shadow-sm border border-white/15">
+              <GraduationCap size={20} className="text-white" />
             </div>
             <div className={`whitespace-nowrap overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${
               isSidebarExpanded ? 'opacity-100 max-w-[160px] ml-3 translate-x-0' : 'opacity-0 max-w-0 ml-0 -translate-x-3 pointer-events-none'
@@ -334,16 +327,16 @@ function AppContent() {
                           }`}
                       >
                         {isActive && (
-                          <div className={`absolute transition-all duration-300 pointer-events-none bg-indigo-500/25 border-2 border-indigo-400/90 shadow-[0_0_16px_rgba(92,54,245,0.5)] ${
+                          <div className={`absolute transition-all duration-200 pointer-events-none bg-[#5c36f5] ${
                             isSidebarExpanded
                               ? 'top-[3px] left-[5px] w-[calc(100%-10px)] h-[calc(100%-6px)] rounded-xl'
-                              : 'top-[2px] left-[4px] w-10 h-10 rounded-full'
+                              : 'top-[3px] left-[5px] w-[calc(100%-10px)] h-[calc(100%-6px)] rounded-xl'
                           }`} />
                         )}
 
                         {/* ICON BOX */}
                         <div className="w-12 h-11 flex items-center justify-center shrink-0 relative z-10">
-                          <Icon size={20} className={isActive ? 'text-white drop-shadow-[0_0_10px_rgba(255,255,255,1)]' : 'text-slate-400 group-hover:text-white'} />
+                          <Icon size={20} className={isActive ? 'text-white font-bold' : 'text-slate-400 group-hover:text-white'} />
                         </div>
 
                         {/* TEXT LABEL WITH SYNCHRONIZED SMOOTH FADE & SLIDE */}

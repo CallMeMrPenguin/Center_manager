@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { ChevronDown, Check } from 'lucide-react';
+import { ChevronDown, Check, Search } from 'lucide-react';
 
 export interface SelectOption {
   value: string | number;
@@ -15,6 +15,8 @@ interface CustomSelectProps {
   className?: string;
   icon?: React.ReactNode;
   disabled?: boolean;
+  searchable?: boolean;
+  searchPlaceholder?: string;
 }
 
 export const CustomSelect: React.FC<CustomSelectProps> = ({
@@ -25,11 +27,15 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
   className = '',
   icon,
   disabled = false,
+  searchable = false,
+  searchPlaceholder = 'Tìm kiếm...',
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const containerRef = useRef<HTMLDivElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
-  const selectedOption = options.find(opt => String(opt.value) === String(value));
+  const selectedOption = options.find((opt) => String(opt.value) === String(value));
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -41,11 +47,24 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  useEffect(() => {
+    if (isOpen && searchable) {
+      setSearchQuery('');
+      setTimeout(() => searchInputRef.current?.focus(), 50);
+    }
+  }, [isOpen, searchable]);
+
   const handleSelect = (optVal: string | number) => {
     if (disabled) return;
     onChange(optVal);
     setIsOpen(false);
   };
+
+  const filteredOptions = searchQuery.trim()
+    ? options.filter((opt) =>
+        opt.label.toLowerCase().includes(searchQuery.toLowerCase().trim())
+      )
+    : options;
 
   return (
     <div className={`relative inline-block w-full ${className}`} ref={containerRef}>
@@ -75,34 +94,52 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
 
       {/* CUSTOM DARK POPOVER MENU */}
       {isOpen && !disabled && (
-        <div className="absolute left-0 right-0 mt-2 z-[9999] bg-[#0c0f1e] border border-[#212c4b] rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.95)] p-1.5 space-y-1 max-h-60 overflow-y-auto select-none animate-slide-up">
-          {options.length === 0 ? (
-            <div className="px-3 py-2 text-xs text-slate-500 text-center font-semibold">
-              Không có tùy chọn
+        <div className="absolute left-0 right-0 mt-2 z-[9999] bg-[#0c0f1e] border border-[#212c4b] rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.95)] p-1.5 space-y-1 max-h-64 flex flex-col select-none animate-slide-up">
+          {searchable && (
+            <div className="p-1 border-b border-white/5 shrink-0">
+              <div className="relative">
+                <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input
+                  ref={searchInputRef}
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder={searchPlaceholder}
+                  className="w-full bg-[#161a29] border border-white/10 text-white text-xs rounded-lg pl-8 pr-2.5 py-1.5 focus:outline-none focus:border-indigo-500"
+                />
+              </div>
             </div>
-          ) : (
-            options.map((opt) => {
-              const isSelected = String(opt.value) === String(value);
-              return (
-                <button
-                  key={String(opt.value)}
-                  type="button"
-                  onClick={() => handleSelect(opt.value)}
-                  className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-extrabold transition-all cursor-pointer text-left ${
-                    isSelected
-                      ? 'bg-[#5c36f5] text-white shadow-[0_0_14px_rgba(92,54,245,0.5)]'
-                      : 'text-slate-200 hover:bg-white/10 hover:text-white'
-                  }`}
-                >
-                  <div className="flex items-center gap-2 truncate">
-                    {opt.icon && <span className="shrink-0">{opt.icon}</span>}
-                    <span className="truncate">{opt.label}</span>
-                  </div>
-                  {isSelected && <Check size={14} className="text-white shrink-0" />}
-                </button>
-              );
-            })
           )}
+
+          <div className="overflow-y-auto space-y-1 flex-1 scrollbar-thin">
+            {filteredOptions.length === 0 ? (
+              <div className="px-3 py-3 text-xs text-slate-500 text-center font-semibold">
+                Không tìm thấy tùy chọn
+              </div>
+            ) : (
+              filteredOptions.map((opt) => {
+                const isSelected = String(opt.value) === String(value);
+                return (
+                  <button
+                    key={String(opt.value)}
+                    type="button"
+                    onClick={() => handleSelect(opt.value)}
+                    className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-extrabold transition-all cursor-pointer text-left ${
+                      isSelected
+                        ? 'bg-[#5c36f5] text-white shadow-sm'
+                        : 'text-slate-200 hover:bg-white/10 hover:text-white'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2 truncate">
+                      {opt.icon && <span className="shrink-0">{opt.icon}</span>}
+                      <span className="truncate">{opt.label}</span>
+                    </div>
+                    {isSelected && <Check size={14} className="text-white shrink-0" />}
+                  </button>
+                );
+              })
+            )}
+          </div>
         </div>
       )}
     </div>
