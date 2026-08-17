@@ -107,17 +107,21 @@ def api_save_session_test_config(class_id: int, payload: SessionTestConfigPayloa
         conn.close()
 
 
+import re
+
 @router.get("/api/suggestions/units")
 def api_get_unit_suggestions(grade: Optional[str] = None):
     """Returns list of unit and topic suggestions from unit_config, vocabulary_list and question_bank."""
     from config.unit_config import load_unit_config
     unit_cfg_all = load_unit_config()
 
-    clean_grade = ""
+    clean_grade = "6"
     if grade:
-        clean_grade = ''.join(filter(str.isdigit, str(grade)))
-    if not clean_grade:
-        clean_grade = "6"
+        m = re.search(r'\b(1[0-2]|[6-9])\b', str(grade))
+        if not m:
+            m = re.search(r'(1[0-2]|[6-9])', str(grade))
+        if m:
+            clean_grade = m.group(1)
 
     grade_units = unit_cfg_all.get(clean_grade, unit_cfg_all.get("6", {}))
 

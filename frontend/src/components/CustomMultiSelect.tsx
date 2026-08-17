@@ -8,13 +8,14 @@ export interface MultiSelectOption {
 }
 
 interface CustomMultiSelectProps {
-  values: string[];
+  values?: string[];
   onChange: (values: string[]) => void;
   options: MultiSelectOption[];
   placeholder?: string;
   searchPlaceholder?: string;
   className?: string;
   disabled?: boolean;
+  placement?: 'auto' | 'top' | 'bottom';
 }
 
 export const CustomMultiSelect: React.FC<CustomMultiSelectProps> = ({
@@ -25,11 +26,19 @@ export const CustomMultiSelect: React.FC<CustomMultiSelectProps> = ({
   searchPlaceholder = 'Tìm kiếm bài học...',
   className = '',
   disabled = false,
+  placement = 'auto',
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [openUpwards, setOpenUpwards] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const containerRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
+
+  const safeValues = Array.isArray(values)
+    ? values
+    : typeof values === 'string' && (values as string).trim()
+    ? [(values as string).trim()]
+    : [];
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -44,22 +53,31 @@ export const CustomMultiSelect: React.FC<CustomMultiSelectProps> = ({
   useEffect(() => {
     if (isOpen) {
       setSearchQuery('');
+      if (placement === 'top') {
+        setOpenUpwards(true);
+      } else if (placement === 'bottom') {
+        setOpenUpwards(false);
+      } else if (containerRef.current) {
+        const rect = containerRef.current.getBoundingClientRect();
+        const spaceBelow = window.innerHeight - rect.bottom;
+        setOpenUpwards(spaceBelow < 280 && rect.top > 280);
+      }
       setTimeout(() => searchInputRef.current?.focus(), 50);
     }
-  }, [isOpen]);
+  }, [isOpen, placement]);
 
   const handleToggleOption = (val: string, e?: React.MouseEvent) => {
     e?.stopPropagation();
     if (disabled) return;
-    const exists = values.includes(val);
-    const next = exists ? values.filter((v) => v !== val) : [...values, val];
+    const exists = safeValues.includes(val);
+    const next = exists ? safeValues.filter((v) => v !== val) : [...safeValues, val];
     onChange(next);
   };
 
   const handleRemoveTag = (val: string, e: React.MouseEvent) => {
     e.stopPropagation();
     if (disabled) return;
-    onChange(values.filter((v) => v !== val));
+    onChange(safeValues.filter((v) => v !== val));
   };
 
   const handleSelectAll = (e: React.MouseEvent) => {
@@ -76,11 +94,12 @@ export const CustomMultiSelect: React.FC<CustomMultiSelectProps> = ({
     ? options.filter(
         (opt) =>
           opt.label.toLowerCase().includes(searchQuery.toLowerCase().trim()) ||
+          opt.value.toLowerCase().includes(searchQuery.toLowerCase().trim()) ||
           (opt.sublabel && opt.sublabel.toLowerCase().includes(searchQuery.toLowerCase().trim()))
       )
     : options;
 
-  const selectedOptions = options.filter((o) => values.includes(o.value));
+  const selectedOptions = options.filter((o) => safeValues.includes(o.value));
 
   return (
     <div className={`relative inline-block w-full ${className}`} ref={containerRef}>
@@ -106,6 +125,7 @@ export const CustomMultiSelect: React.FC<CustomMultiSelectProps> = ({
                 <span
                   onClick={(e) => handleRemoveTag(opt.value, e)}
                   className="hover:text-white p-0.5 rounded transition cursor-pointer"
+                  title="Xóa"
                 >
                   <X size={11} />
                 </span>
@@ -114,10 +134,10 @@ export const CustomMultiSelect: React.FC<CustomMultiSelectProps> = ({
           ) : (
             <div className="flex items-center gap-1.5">
               <span className="inline-flex items-center gap-1 bg-[#5c36f5] text-white px-2 py-0.5 rounded-lg text-[11px] font-black">
-                {values.length} bài học đã chọn
+                {safeValues.length} bài học đã chọn
               </span>
               <span className="text-slate-400 text-[11px] font-medium truncate max-w-[150px]">
-                ({values.join(', ')})
+                ({safeValues.join(', ')})
               </span>
             </div>
           )}
@@ -133,7 +153,11 @@ export const CustomMultiSelect: React.FC<CustomMultiSelectProps> = ({
 
       {/* MULTI-SELECT DROPDOWN MENU */}
       {isOpen && !disabled && (
-        <div className="absolute left-0 right-0 mt-2 z-[9999] bg-[#0c0f1e] border border-[#212c4b] rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.95)] p-2 space-y-2 max-h-72 flex flex-col select-none animate-slide-up">
+        <div
+          className={`absolute left-0 right-0 ${
+            openUpwards ? 'bottom-full mb-2' : 'top-full mt-2'
+          } z-[9999] bg-[#0c0f1e] border border-[#212c4b] rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.95)] p-2 space-y-2 max-h-64 flex flex-col select-none animate-slide-up`}
+        >
           {/* Search Input */}
           <div className="relative">
             <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -150,7 +174,7 @@ export const CustomMultiSelect: React.FC<CustomMultiSelectProps> = ({
           {/* Quick Actions Header */}
           <div className="flex items-center justify-between px-1 text-[11px] border-b border-white/5 pb-1.5 shrink-0">
             <span className="text-slate-400 font-bold">
-              Đã chọn: <strong className="text-indigo-300">{values.length}</strong>/{options.length}
+              Đã chọn: <strong className="text-indigo-300">{safeValues.length}</strong>/{options.length}
             </span>
             <div className="flex items-center gap-2">
               <button
@@ -179,7 +203,7 @@ export const CustomMultiSelect: React.FC<CustomMultiSelectProps> = ({
               </div>
             ) : (
               filteredOptions.map((opt) => {
-                const isSelected = values.includes(opt.value);
+                const isSelected = safeValues.includes(opt.value);
                 return (
                   <div
                     key={opt.value}

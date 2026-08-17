@@ -17,6 +17,7 @@ interface CustomSelectProps {
   disabled?: boolean;
   searchable?: boolean;
   searchPlaceholder?: string;
+  placement?: 'auto' | 'top' | 'bottom';
 }
 
 export const CustomSelect: React.FC<CustomSelectProps> = ({
@@ -29,8 +30,10 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
   disabled = false,
   searchable = false,
   searchPlaceholder = 'Tìm kiếm...',
+  placement = 'auto',
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [openUpwards, setOpenUpwards] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const containerRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -48,11 +51,22 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
   }, []);
 
   useEffect(() => {
-    if (isOpen && searchable) {
-      setSearchQuery('');
-      setTimeout(() => searchInputRef.current?.focus(), 50);
+    if (isOpen) {
+      if (placement === 'top') {
+        setOpenUpwards(true);
+      } else if (placement === 'bottom') {
+        setOpenUpwards(false);
+      } else if (containerRef.current) {
+        const rect = containerRef.current.getBoundingClientRect();
+        const spaceBelow = window.innerHeight - rect.bottom;
+        setOpenUpwards(spaceBelow < 260 && rect.top > 260);
+      }
+      if (searchable) {
+        setSearchQuery('');
+        setTimeout(() => searchInputRef.current?.focus(), 50);
+      }
     }
-  }, [isOpen, searchable]);
+  }, [isOpen, searchable, placement]);
 
   const handleSelect = (optVal: string | number) => {
     if (disabled) return;
@@ -94,7 +108,11 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
 
       {/* CUSTOM DARK POPOVER MENU */}
       {isOpen && !disabled && (
-        <div className="absolute left-0 right-0 mt-2 z-[9999] bg-[#0c0f1e] border border-[#212c4b] rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.95)] p-1.5 space-y-1 max-h-64 flex flex-col select-none animate-slide-up">
+        <div
+          className={`absolute left-0 right-0 ${
+            openUpwards ? 'bottom-full mb-2' : 'top-full mt-2'
+          } z-[9999] bg-[#0c0f1e] border border-[#212c4b] rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.95)] p-1.5 space-y-1 max-h-64 flex flex-col select-none animate-slide-up`}
+        >
           {searchable && (
             <div className="p-1 border-b border-white/5 shrink-0">
               <div className="relative">

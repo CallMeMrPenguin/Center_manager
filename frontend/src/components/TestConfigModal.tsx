@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { X, Layers, Save } from 'lucide-react';
 import { CustomSelect } from './CustomSelect';
 import { CustomMultiSelect } from './CustomMultiSelect';
@@ -77,20 +77,38 @@ export const TestConfigModal: React.FC<TestConfigModalProps> = ({
           const list = resSugg?.units_detailed || [];
           setUnitsDetailed(list);
 
+          const normalizeUnits = (item: any): string[] => {
+            if (Array.isArray(item?.units) && item.units.length > 0) {
+              return item.units.filter((u: any) => typeof u === 'string' && u.trim());
+            }
+            if (typeof item?.units === 'string' && item.units.trim()) {
+              return item.units.split(',').map((s: string) => s.trim()).filter(Boolean);
+            }
+            if (typeof item?.unit === 'string' && item.unit.trim()) {
+              return [item.unit.trim()];
+            }
+            return list[0] ? [list[0].unit] : ['Unit 1'];
+          };
+
           if (resConfig?.test_config) {
+            const c1 = resConfig.test_config.check_1 || {};
+            const c2 = resConfig.test_config.check_2 || {};
+            const c1Units = normalizeUnits(c1);
+            const c2Units = normalizeUnits(c2);
+
             setConfig({
               mode: 'two_separate',
               check_1: {
-                skill: resConfig.test_config.check_1?.skill || 'vocab',
-                units: resConfig.test_config.check_1?.units || (list[0] ? [list[0].unit] : ['Unit 1']),
-                topic: resConfig.test_config.check_1?.topic || list[0]?.name || '',
-                grammar_topic: resConfig.test_config.check_1?.grammar_topic || '',
+                skill: c1.skill || 'vocab',
+                units: c1Units,
+                topic: c1.topic || list.find((u) => u.unit === c1Units[0])?.name || list[0]?.name || '',
+                grammar_topic: c1.grammar_topic || list.find((u) => u.unit === c1Units[0])?.grammar || '',
               },
               check_2: {
-                skill: resConfig.test_config.check_2?.skill || 'grammar',
-                units: resConfig.test_config.check_2?.units || (list[0] ? [list[0].unit] : ['Unit 1']),
-                topic: resConfig.test_config.check_2?.topic || '',
-                grammar_topic: resConfig.test_config.check_2?.grammar_topic || list[0]?.grammar || '',
+                skill: c2.skill || 'grammar',
+                units: c2Units,
+                topic: c2.topic || list.find((u) => u.unit === c2Units[0])?.name || '',
+                grammar_topic: c2.grammar_topic || list.find((u) => u.unit === c2Units[0])?.grammar || list[0]?.grammar || '',
               },
               notes: resConfig.test_config.notes || '',
             });
@@ -121,11 +139,90 @@ export const TestConfigModal: React.FC<TestConfigModalProps> = ({
     }
   }, [isOpen, classId, date, grade]);
 
+  const skillOptions = [
+    { value: 'vocab', label: 'Từ Vựng (Vocabulary)' },
+    { value: 'grammar', label: 'Ngữ Pháp (Grammar)' },
+    { value: 'mixed', label: 'Tổng Hợp (Mixed)' },
+  ];
+
+  const getUnitOptionsForSkill = (skill: string) => {
+    return unitsDetailed.map((u) => {
+      let label = u.unit;
+      if (skill === 'vocab') {
+        label = u.name ? `${u.name}` : u.unit;
+      } else if (skill === 'grammar') {
+        label = u.grammar ? `${u.grammar}` : (u.name ? `${u.name}` : u.unit);
+      } else {
+        label = u.name && u.grammar ? `${u.name} | ${u.grammar}` : (u.name || u.grammar || u.unit);
+      }
+      return {
+        value: u.unit,
+        label,
+        sublabel: skill === 'vocab' ? u.grammar : u.name,
+      };
+    });
+  };
+
+  const check1UnitOptions = useMemo(
+    () => getUnitOptionsForSkill(config.check_1.skill),
+    [unitsDetailed, config.check_1.skill]
+  );
+
+  const check2UnitOptions = useMemo(
+    () => getUnitOptionsForSkill(config.check_2.skill),
+    [unitsDetailed, config.check_2.skill]
+  );
+
   if (!isOpen) return null;
+
+  const handleSkillChangeCheck1 = (skill: string) => {
+    setConfig((prev) => {
+      const units = prev.check_1.units || [];
+      const matchedNames = units
+        .map((ukey) => unitsDetailed.find((u) => u.unit === ukey)?.name)
+        .filter(Boolean);
+      const matchedGrammars = units
+        .map((ukey) => unitsDetailed.find((u) => u.unit === ukey)?.grammar)
+        .filter(Boolean);
+      return {
+        ...prev,
+        check_1: {
+          ...prev.check_1,
+          skill,
+          topic: matchedNames.join(' | '),
+          grammar_topic: matchedGrammars.join(' | '),
+        },
+      };
+    });
+  };
+
+  const handleSkillChangeCheck2 = (skill: string) => {
+    setConfig((prev) => {
+      const units = prev.check_2.units || [];
+      const matchedNames = units
+        .map((ukey) => unitsDetailed.find((u) => u.unit === ukey)?.name)
+        .filter(Boolean);
+      const matchedGrammars = units
+        .map((ukey) => unitsDetailed.find((u) => u.unit === ukey)?.grammar)
+        .filter(Boolean);
+      return {
+        ...prev,
+        check_2: {
+          ...prev.check_2,
+          skill,
+          topic: matchedNames.join(' | '),
+          grammar_topic: matchedGrammars.join(' | '),
+        },
+      };
+    });
+  };
 
   const handleMultiSelectCheck1 = (selectedUnits: string[]) => {
     const matchedNames = selectedUnits
       .map((ukey) => unitsDetailed.find((u) => u.unit === ukey)?.name)
+      .filter(Boolean);
+    const matchedGrammars = selectedUnits
+      .map((ukey) => unitsDetailed.find((u) => u.unit === ukey)?.grammar)
       .filter(Boolean);
 
     setConfig((prev) => ({
@@ -134,16 +231,17 @@ export const TestConfigModal: React.FC<TestConfigModalProps> = ({
         ...prev.check_1,
         units: selectedUnits,
         topic: matchedNames.join(' | '),
+        grammar_topic: matchedGrammars.join(' | '),
       },
     }));
   };
 
   const handleMultiSelectCheck2 = (selectedUnits: string[]) => {
+    const matchedNames = selectedUnits
+      .map((ukey) => unitsDetailed.find((u) => u.unit === ukey)?.name)
+      .filter(Boolean);
     const matchedGrammars = selectedUnits
-      .map((ukey) => {
-        const item = unitsDetailed.find((u) => u.unit === ukey);
-        return item?.grammar || item?.name;
-      })
+      .map((ukey) => unitsDetailed.find((u) => u.unit === ukey)?.grammar)
       .filter(Boolean);
 
     setConfig((prev) => ({
@@ -151,8 +249,8 @@ export const TestConfigModal: React.FC<TestConfigModalProps> = ({
       check_2: {
         ...prev.check_2,
         units: selectedUnits,
+        topic: matchedNames.join(' | '),
         grammar_topic: matchedGrammars.join(' | '),
-        topic: matchedGrammars.join(' | '),
       },
     }));
   };
@@ -178,27 +276,11 @@ export const TestConfigModal: React.FC<TestConfigModalProps> = ({
     }
   };
 
-  const skillOptions = [
-    { value: 'vocab', label: 'Từ Vựng (Vocabulary)' },
-    { value: 'grammar', label: 'Ngữ Pháp (Grammar)' },
-    { value: 'mixed', label: 'Tổng Hợp (Mixed)' },
-  ];
-
-  const check1UnitOptions = unitsDetailed.map((u) => ({
-    value: u.unit,
-    label: u.name ? `${u.name}` : u.unit,
-  }));
-
-  const check2UnitOptions = unitsDetailed.map((u) => ({
-    value: u.unit,
-    label: u.grammar ? `${u.grammar}` : u.name ? `${u.name}` : u.unit,
-  }));
-
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-4 select-none animate-mac-backdrop">
-      <div className="bg-[#0c0f1d] border border-white/10 w-full max-w-xl rounded-2xl shadow-2xl overflow-hidden flex flex-col animate-mac-modal">
+      <div className="bg-[#0c0f1d] border border-white/10 w-full max-w-xl rounded-2xl shadow-2xl overflow-visible flex flex-col animate-mac-modal relative">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-white/10 bg-[#121626]">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-white/10 bg-[#121626] rounded-t-2xl">
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-xl bg-indigo-500/15 text-indigo-400 border border-indigo-500/20">
               <Layers size={18} />
@@ -206,7 +288,8 @@ export const TestConfigModal: React.FC<TestConfigModalProps> = ({
             <div>
               <h2 className="text-sm font-black text-white">Cấu Hình Bài Kiểm Tra Buổi Học</h2>
               <span className="text-xs text-slate-400">
-                Ngày học: <strong className="text-indigo-300">{date}</strong> | Khối lớp: <strong className="text-white">{grade || 'Lớp 6'}</strong>
+                Ngày học: <strong className="text-indigo-300">{date}</strong> | Khối lớp:{' '}
+                <strong className="text-white">{grade || 'Lớp 6'}</strong>
               </span>
             </div>
           </div>
@@ -219,7 +302,7 @@ export const TestConfigModal: React.FC<TestConfigModalProps> = ({
         </div>
 
         {/* Body */}
-        <div className="p-6 space-y-5">
+        <div className="p-6 space-y-5 relative">
           {loading ? (
             <div className="py-12 text-center text-slate-400 text-xs font-bold">
               Đang tải danh sách bài học & cấu hình...
@@ -227,7 +310,7 @@ export const TestConfigModal: React.FC<TestConfigModalProps> = ({
           ) : (
             <>
               {/* CHECK 1 CONFIG CARD */}
-              <div className="bg-[#121626] border border-white/5 rounded-xl p-4 space-y-3.5">
+              <div className="bg-[#121626] border border-white/5 rounded-xl p-4 space-y-3.5 relative">
                 <div className="flex items-center justify-between border-b border-white/5 pb-2">
                   <span className="text-xs font-black uppercase tracking-wider text-blue-400">
                     Cấu Hình Check 1
@@ -244,20 +327,16 @@ export const TestConfigModal: React.FC<TestConfigModalProps> = ({
                     </label>
                     <CustomSelect
                       value={config.check_1.skill}
-                      onChange={(val) =>
-                        setConfig((p) => ({
-                          ...p,
-                          check_1: { ...p.check_1, skill: String(val) },
-                        }))
-                      }
+                      onChange={(val) => handleSkillChangeCheck1(String(val))}
                       options={skillOptions}
+                      placement="bottom"
                       className="w-full"
                     />
                   </div>
 
                   <div>
                     <label className="text-[11px] font-bold text-slate-300 block mb-1">
-                      Chủ Đề
+                      Chủ Đề (Bài Học)
                     </label>
                     <CustomMultiSelect
                       values={config.check_1.units}
@@ -265,6 +344,7 @@ export const TestConfigModal: React.FC<TestConfigModalProps> = ({
                       options={check1UnitOptions}
                       placeholder="Chọn các Unit..."
                       searchPlaceholder="Tìm kiếm bài học..."
+                      placement="bottom"
                       className="w-full"
                     />
                   </div>
@@ -272,7 +352,7 @@ export const TestConfigModal: React.FC<TestConfigModalProps> = ({
               </div>
 
               {/* CHECK 2 CONFIG CARD */}
-              <div className="bg-[#121626] border border-white/5 rounded-xl p-4 space-y-3.5">
+              <div className="bg-[#121626] border border-white/5 rounded-xl p-4 space-y-3.5 relative">
                 <div className="flex items-center justify-between border-b border-white/5 pb-2">
                   <span className="text-xs font-black uppercase tracking-wider text-purple-400">
                     Cấu Hình Check 2
@@ -289,20 +369,16 @@ export const TestConfigModal: React.FC<TestConfigModalProps> = ({
                     </label>
                     <CustomSelect
                       value={config.check_2.skill}
-                      onChange={(val) =>
-                        setConfig((p) => ({
-                          ...p,
-                          check_2: { ...p.check_2, skill: String(val) },
-                        }))
-                      }
+                      onChange={(val) => handleSkillChangeCheck2(String(val))}
                       options={skillOptions}
+                      placement="top"
                       className="w-full"
                     />
                   </div>
 
                   <div>
                     <label className="text-[11px] font-bold text-slate-300 block mb-1">
-                      Chủ Đề
+                      Chủ Đề (Bài Học)
                     </label>
                     <CustomMultiSelect
                       values={config.check_2.units}
@@ -310,6 +386,7 @@ export const TestConfigModal: React.FC<TestConfigModalProps> = ({
                       options={check2UnitOptions}
                       placeholder="Chọn các Unit..."
                       searchPlaceholder="Tìm kiếm bài học..."
+                      placement="top"
                       className="w-full"
                     />
                   </div>
@@ -320,7 +397,7 @@ export const TestConfigModal: React.FC<TestConfigModalProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between px-6 py-4 border-t border-white/10 bg-[#121626]">
+        <div className="flex items-center justify-between px-6 py-4 border-t border-white/10 bg-[#121626] rounded-b-2xl">
           <div className="text-[11px] text-slate-400 font-medium">
             Tự động đồng bộ với ma trận nắm vững kiến thức.
           </div>
