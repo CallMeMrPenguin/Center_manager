@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { X, Layers, Save, Check, ChevronDown } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { X, Layers, Save } from 'lucide-react';
 import { CustomSelect } from './CustomSelect';
+import { CustomMultiSelect } from './CustomMultiSelect';
 import { api } from '../api';
 import { showToast } from './Toast';
 
@@ -122,27 +123,36 @@ export const TestConfigModal: React.FC<TestConfigModalProps> = ({
 
   if (!isOpen) return null;
 
-  const handleSelectUnitCheck1 = (unitKey: string) => {
-    const matched = unitsDetailed.find((u) => u.unit === unitKey);
+  const handleMultiSelectCheck1 = (selectedUnits: string[]) => {
+    const matchedNames = selectedUnits
+      .map((ukey) => unitsDetailed.find((u) => u.unit === ukey)?.name)
+      .filter(Boolean);
+
     setConfig((prev) => ({
       ...prev,
       check_1: {
         ...prev.check_1,
-        units: [unitKey],
-        topic: matched?.name || unitKey,
+        units: selectedUnits,
+        topic: matchedNames.join(' | '),
       },
     }));
   };
 
-  const handleSelectUnitCheck2 = (unitKey: string) => {
-    const matched = unitsDetailed.find((u) => u.unit === unitKey);
+  const handleMultiSelectCheck2 = (selectedUnits: string[]) => {
+    const matchedGrammars = selectedUnits
+      .map((ukey) => {
+        const item = unitsDetailed.find((u) => u.unit === ukey);
+        return item?.grammar || item?.name;
+      })
+      .filter(Boolean);
+
     setConfig((prev) => ({
       ...prev,
       check_2: {
         ...prev.check_2,
-        units: [unitKey],
-        grammar_topic: matched?.grammar || matched?.name || unitKey,
-        topic: matched?.name || unitKey,
+        units: selectedUnits,
+        grammar_topic: matchedGrammars.join(' | '),
+        topic: matchedGrammars.join(' | '),
       },
     }));
   };
@@ -176,20 +186,17 @@ export const TestConfigModal: React.FC<TestConfigModalProps> = ({
 
   const check1UnitOptions = unitsDetailed.map((u) => ({
     value: u.unit,
-    label: u.name ? `${u.unit} — ${u.name}` : u.unit,
+    label: u.name ? `${u.name}` : u.unit,
   }));
 
   const check2UnitOptions = unitsDetailed.map((u) => ({
     value: u.unit,
-    label: u.grammar ? `${u.unit} — ${u.grammar}` : u.name ? `${u.unit} — ${u.name}` : u.unit,
+    label: u.grammar ? `${u.grammar}` : u.name ? `${u.name}` : u.unit,
   }));
-
-  const currentCheck1Unit = config.check_1.units[0] || (unitsDetailed[0]?.unit || 'Unit 1');
-  const currentCheck2Unit = config.check_2.units[0] || (unitsDetailed[0]?.unit || 'Unit 1');
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-4 select-none animate-mac-backdrop">
-      <div className="bg-[#0c0f1d] border border-white/10 w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden flex flex-col animate-mac-modal">
+      <div className="bg-[#0c0f1d] border border-white/10 w-full max-w-xl rounded-2xl shadow-2xl overflow-hidden flex flex-col animate-mac-modal">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-white/10 bg-[#121626]">
           <div className="flex items-center gap-3">
@@ -252,11 +259,11 @@ export const TestConfigModal: React.FC<TestConfigModalProps> = ({
                     <label className="text-[11px] font-bold text-slate-300 block mb-1">
                       Chủ Đề
                     </label>
-                    <CustomSelect
-                      value={currentCheck1Unit}
-                      onChange={(val) => handleSelectUnitCheck1(String(val))}
+                    <CustomMultiSelect
+                      values={config.check_1.units}
+                      onChange={handleMultiSelectCheck1}
                       options={check1UnitOptions}
-                      searchable={true}
+                      placeholder="Chọn các Unit..."
                       searchPlaceholder="Tìm kiếm bài học..."
                       className="w-full"
                     />
@@ -297,11 +304,11 @@ export const TestConfigModal: React.FC<TestConfigModalProps> = ({
                     <label className="text-[11px] font-bold text-slate-300 block mb-1">
                       Chủ Đề
                     </label>
-                    <CustomSelect
-                      value={currentCheck2Unit}
-                      onChange={(val) => handleSelectUnitCheck2(String(val))}
+                    <CustomMultiSelect
+                      values={config.check_2.units}
+                      onChange={handleMultiSelectCheck2}
                       options={check2UnitOptions}
-                      searchable={true}
+                      placeholder="Chọn các Unit..."
                       searchPlaceholder="Tìm kiếm bài học..."
                       className="w-full"
                     />
