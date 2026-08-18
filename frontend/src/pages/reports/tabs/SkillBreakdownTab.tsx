@@ -5,8 +5,7 @@ import { MasteryHeatmap } from '../components/MasteryHeatmap';
 import { UnitBreakdownTable } from '../components/UnitBreakdownTable';
 import { SkillAwarePredictionCard } from '../components/SkillAwarePredictionCard';
 import { StudentWeaknessDiagnosisCard } from '../components/StudentWeaknessDiagnosisCard';
-import { computeMockSkillBreakdown } from '../utils/mockReportsData';
-import { RefreshCw } from 'lucide-react';
+import { computeMockSkillBreakdown, generateMockReportsData } from '../utils/mockReportsData';
 
 interface SkillBreakdownTabProps {
   selectedClassId: string;
@@ -48,17 +47,19 @@ export const SkillBreakdownTab: React.FC<SkillBreakdownTabProps> = ({
   }, [fetchSkillData]);
 
   const reportData = useMemo(() => {
-    if (isTestMode && sessionRecords && sessionRecords.length > 0) {
-      return computeMockSkillBreakdown(sessionRecords, selectedClassId, selectedStudentId);
+    if (isTestMode) {
+      const recs = (sessionRecords && sessionRecords.length > 0)
+        ? sessionRecords
+        : generateMockReportsData([], []).session_records;
+      return computeMockSkillBreakdown(recs, selectedClassId, selectedStudentId);
     }
     return apiReportData;
   }, [isTestMode, sessionRecords, selectedClassId, selectedStudentId, apiReportData]);
 
   if (loading && !reportData) {
     return (
-      <div className="py-24 text-center text-slate-400 text-xs font-bold flex flex-col items-center justify-center gap-3">
-        <RefreshCw size={24} className="animate-spin text-indigo-400" />
-        <span>Đang tính toán phân tích kỹ năng & độ nắm vững Bloom...</span>
+      <div className="py-24 text-center text-slate-400 text-xs font-bold flex flex-col items-center justify-center gap-2">
+        <span className="text-indigo-400 font-black">Đang tính toán phân tích kỹ năng & độ nắm vững Bloom...</span>
       </div>
     );
   }
@@ -87,7 +88,7 @@ export const SkillBreakdownTab: React.FC<SkillBreakdownTabProps> = ({
   }, [selectedStudentId, studentRankings]);
 
   return (
-    <div className="flex flex-col gap-8 mb-8 select-none">
+    <div className="flex flex-col gap-6 mb-8 select-none">
       {/* 0. ACTIVE STUDENT FILTER BANNER */}
       {selectedStudent && (
         <div className="bg-[#101528] border border-indigo-500/40 p-4 rounded-2xl flex items-center justify-between gap-4 shadow-lg animate-cascade-1">
@@ -118,29 +119,30 @@ export const SkillBreakdownTab: React.FC<SkillBreakdownTabProps> = ({
       {/* 1. TOP PEDAGOGICAL KPI CARDS */}
       <SkillOverviewCards stats={stats} />
 
-      {/* 2. CHẨN ĐOÁN ĐIỂM YẾU CHI TIẾT THEO TỪNG BÀI & KỸ NĂNG */}
-      <StudentWeaknessDiagnosisCard
-        sessionRecords={sessionRecords}
-        studentRankings={studentRankings}
-        selectedClassId={selectedClassId}
-        onSelectStudent={onSelectRankingStudent}
-      />
-
-      {/* 3. SKILL-AWARE PREDICTION CARD */}
-      <SkillAwarePredictionCard
-        prediction={prediction}
-        onSelectStudent={onSelectRankingStudent}
-      />
-
-      {/* 4. MASTERY HEATMAP MATRIX */}
+      {/* 2. MASTERY HEATMAP MATRIX */}
       <MasteryHeatmap
         units={heatmapUnits}
         students={heatmapStudents}
         onSelectStudent={onSelectRankingStudent}
       />
 
-      {/* 5. UNIT & TOPIC BREAKDOWN TANSTACK TABLE */}
+      {/* 3. BẢNG DANH SÁCH HỌC SINH CẦN PHỤ ĐẠO THEO BÀI HỌC (TANSTACK TABLE) */}
+      <StudentWeaknessDiagnosisCard
+        sessionRecords={sessionRecords}
+        studentRankings={studentRankings}
+        selectedClassId={selectedClassId}
+        selectedStudentId={selectedStudentId}
+        onSelectStudent={onSelectRankingStudent}
+      />
+
+      {/* 4. UNIT & TOPIC BREAKDOWN (TANSTACK TABLE) */}
       <UnitBreakdownTable data={unitBreakdown} />
+
+      {/* 5. SKILL-AWARE PREDICTION CARD */}
+      <SkillAwarePredictionCard
+        prediction={prediction}
+        onSelectStudent={onSelectRankingStudent}
+      />
     </div>
   );
 };

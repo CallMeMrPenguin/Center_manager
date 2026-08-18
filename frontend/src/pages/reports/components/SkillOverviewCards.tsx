@@ -1,5 +1,4 @@
 import React from 'react';
-import { BookOpen, Sparkles, CheckCircle2, AlertTriangle } from 'lucide-react';
 import { trunc1Dec } from '../../../utils';
 
 interface SkillStats {
@@ -37,13 +36,10 @@ export const SkillOverviewCards: React.FC<SkillOverviewCardsProps> = ({ stats })
           <span className="text-[11px] font-black uppercase text-blue-400 tracking-wider">
             Từ Vựng
           </span>
-          <div className="p-2 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20">
-            <BookOpen size={16} />
-          </div>
         </div>
 
         <div className="flex items-baseline justify-between">
-          <div className="text-3xl font-black text-white tracking-tight">
+          <div className="text-3xl font-black text-white tracking-tight font-mono">
             {stats.vocab_avg > 0 ? trunc1Dec(stats.vocab_avg) : 'N/A'}
             <span className="text-xs font-normal text-slate-400 ml-1">/ 10</span>
           </div>
@@ -65,13 +61,10 @@ export const SkillOverviewCards: React.FC<SkillOverviewCardsProps> = ({ stats })
           <span className="text-[11px] font-black uppercase text-purple-400 tracking-wider">
             Ngữ Pháp
           </span>
-          <div className="p-2 rounded-xl bg-purple-500/10 text-purple-400 border border-purple-500/20">
-            <Sparkles size={16} />
-          </div>
         </div>
 
         <div className="flex items-baseline justify-between">
-          <div className="text-3xl font-black text-white tracking-tight">
+          <div className="text-3xl font-black text-white tracking-tight font-mono">
             {stats.grammar_avg > 0 ? trunc1Dec(stats.grammar_avg) : 'N/A'}
             <span className="text-xs font-normal text-slate-400 ml-1">/ 10</span>
           </div>
@@ -93,13 +86,10 @@ export const SkillOverviewCards: React.FC<SkillOverviewCardsProps> = ({ stats })
           <span className="text-[11px] font-black uppercase text-emerald-400 tracking-wider">
             Tỷ Lệ Nắm Vững (Mastery)
           </span>
-          <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-            <CheckCircle2 size={16} />
-          </div>
         </div>
 
         <div className="flex items-baseline justify-between">
-          <div className="text-3xl font-black text-white tracking-tight">
+          <div className="text-3xl font-black text-white tracking-tight font-mono">
             {stats.mastery_rate}%
           </div>
           <span className="text-[10px] font-extrabold px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
@@ -118,13 +108,10 @@ export const SkillOverviewCards: React.FC<SkillOverviewCardsProps> = ({ stats })
           <span className="text-[11px] font-black uppercase text-amber-400 tracking-wider">
             Cần Phụ Đạo & Ôn Lại
           </span>
-          <div className="p-2 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20">
-            <AlertTriangle size={16} />
-          </div>
         </div>
 
         <div className="flex items-baseline justify-between">
-          <div className="text-3xl font-black text-white tracking-tight">
+          <div className="text-3xl font-black text-white tracking-tight font-mono">
             {stats.not_yet_count + stats.regressed_count}
           </div>
           <div className="flex gap-1.5">

@@ -2,7 +2,6 @@ import React, { useMemo } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
 import { DataTable } from '../../../components/DataTable';
 import { trunc1Dec } from '../../../utils';
-import { BookOpen, Sparkles, Layers } from 'lucide-react';
 
 export interface UnitBreakdownItem {
   skill: string;
@@ -28,26 +27,7 @@ export const UnitBreakdownTable: React.FC<UnitBreakdownTableProps> = ({ data }) 
         accessorKey: 'unit_key',
         header: 'Bài Học / Chủ Đề',
         cell: ({ row }) => (
-          <div className="flex items-center gap-2">
-            <div
-              className={`p-1.5 rounded-lg shrink-0 ${
-                row.original.skill === 'vocab'
-                  ? 'bg-blue-500/10 text-blue-400'
-                  : row.original.skill === 'grammar'
-                  ? 'bg-purple-500/10 text-purple-400'
-                  : 'bg-indigo-500/10 text-indigo-400'
-              }`}
-            >
-              {row.original.skill === 'vocab' ? (
-                <BookOpen size={14} />
-              ) : row.original.skill === 'grammar' ? (
-                <Sparkles size={14} />
-              ) : (
-                <Layers size={14} />
-              )}
-            </div>
-            <span className="font-bold text-white text-xs">{row.original.unit_key}</span>
-          </div>
+          <span className="font-bold text-white text-xs">{row.original.unit_key}</span>
         ),
       },
       {
@@ -86,7 +66,7 @@ export const UnitBreakdownTable: React.FC<UnitBreakdownTableProps> = ({ data }) 
               ? 'text-amber-400 font-bold'
               : 'text-rose-400 font-black';
           return (
-            <div className="text-left">
+            <div className="text-left font-mono">
               <span className={`text-xs ${colorClass}`}>{trunc1Dec(score)}</span>
               <span className="text-[10px] text-slate-500 ml-1">/ 10</span>
             </div>
@@ -107,26 +87,28 @@ export const UnitBreakdownTable: React.FC<UnitBreakdownTableProps> = ({ data }) 
         header: 'Tỷ Lệ Nắm Vững',
         cell: ({ row }) => {
           const pct = row.original.mastery_pct;
-          const barColor =
-            pct >= 75
-              ? 'bg-emerald-500'
-              : pct >= 50
-              ? 'bg-blue-500'
-              : pct >= 30
-              ? 'bg-amber-500'
-              : 'bg-rose-500';
+          const mastered = row.original.mastered_count;
+          const total = row.original.student_count;
           return (
-            <div className="space-y-1 min-w-[120px]">
-              <div className="flex justify-between text-[11px]">
-                <span className="font-bold text-white">{pct}%</span>
-                <span className="text-slate-400">
-                  {row.original.mastered_count}/{row.original.student_count} hs
+            <div className="space-y-1">
+              <div className="flex items-center justify-between text-xs">
+                <span className="font-bold text-white font-mono">{pct}%</span>
+                <span className="text-[10px] text-slate-400 font-mono">
+                  {mastered}/{total}
                 </span>
               </div>
-              <div className="w-full h-1.5 bg-[#161a29] rounded-full overflow-hidden">
+              <div className="w-full bg-[#1e2744] h-1.5 rounded-full overflow-hidden">
                 <div
-                  className={`h-full ${barColor} rounded-full transition-all duration-300`}
-                  style={{ width: `${Math.min(100, Math.max(0, pct))}%` }}
+                  className={`h-full rounded-full ${
+                    pct >= 75
+                      ? 'bg-emerald-500'
+                      : pct >= 50
+                      ? 'bg-blue-500'
+                      : pct >= 25
+                      ? 'bg-amber-500'
+                      : 'bg-rose-500'
+                  }`}
+                  style={{ width: `${pct}%` }}
                 />
               </div>
             </div>
@@ -134,37 +116,25 @@ export const UnitBreakdownTable: React.FC<UnitBreakdownTableProps> = ({ data }) 
         },
       },
       {
-        id: 'reinforcement',
-        header: 'Cần Hỗ Trợ',
-        accessorFn: (row) => row.weak_count + row.regressed_count,
-        cell: ({ row }) => {
-          const count = row.original.weak_count + row.original.regressed_count;
+        accessorKey: 'weak_count',
+        header: 'Cần Phụ Đạo',
+        cell: ({ getValue }) => {
+          const count = getValue<number>();
           if (count === 0) {
-            return (
-              <span className="text-[11px] text-emerald-400 font-bold">
-                Tất cả đều đạt
-              </span>
-            );
+            return <span className="text-xs text-emerald-400 font-bold font-mono">0 học sinh</span>;
           }
           return (
-            <div className="flex items-center gap-1.5">
-              <span className="text-[11px] text-rose-400 font-black">
-                {count} học sinh
-              </span>
-              {row.original.regressed_count > 0 && (
-                <span className="text-[10px] text-amber-400 font-normal">
-                  ({row.original.regressed_count} giảm sút)
-                </span>
-              )}
-            </div>
+            <span className="text-xs font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-md border border-amber-500/20 font-mono">
+              {count} học sinh
+            </span>
           );
         },
       },
       {
         accessorKey: 'recommendation',
-        header: 'Khuyến Nghị Sư Phạm',
+        header: 'Định Hướng Sư Phạm',
         cell: ({ getValue }) => (
-          <span className="text-xs text-slate-300 italic block max-w-xs truncate" title={getValue<string>()}>
+          <span className="text-xs text-slate-400 italic">
             {getValue<string>()}
           </span>
         ),
@@ -174,24 +144,25 @@ export const UnitBreakdownTable: React.FC<UnitBreakdownTableProps> = ({ data }) 
   );
 
   return (
-    <div className="bg-[#0c0f1d] border border-white/10 rounded-2xl p-5 space-y-4 shadow-lg select-none">
-      <div className="border-b border-white/5 pb-3">
+    <div className="bg-[#0c0f1d] border border-white/10 rounded-2xl p-5 space-y-4 select-none shadow-lg animate-cascade-3">
+      <div>
         <h3 className="text-base font-black text-white">
-          Thống Kê Chi Tiết Từng Bài Học & Kỹ Năng
+          Thống Kê Chi Tiết Từng Unit & Chủ Đề
         </h3>
         <p className="text-xs text-slate-400 mt-0.5">
-          Bảng tổng hợp điểm số, mức độ nắm vững và khuyến nghị sư phạm cho từng đơn vị kiến thức.
+          Tổng hợp điểm số và tỷ lệ nắm vững để giáo viên đánh giá mức độ tiếp thu của cả lớp.
         </p>
       </div>
 
-      <DataTable
-        tableId="unit-breakdown-datatable"
+      <DataTable<UnitBreakdownItem>
+        tableId="unit-breakdown-table"
         data={data}
         columns={columns}
         pageSize={20}
-        searchPlaceholder="Tìm bài học, kỹ năng, chủ đề..."
+        searchPlaceholder="Tìm theo bài học, kỹ năng..."
+        emptyMessage="Chưa có dữ liệu bài học nào."
         exportFilename="thong_ke_ky_nang_unit"
-        emptyMessage="Chưa có dữ liệu bài học nào được kiểm tra."
+        initialSorting={[{ id: 'avg_score', desc: false }]}
       />
     </div>
   );

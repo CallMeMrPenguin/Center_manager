@@ -107,8 +107,7 @@ export const MasteryHeatmap: React.FC<MasteryHeatmapProps> = ({
       {/* Header & Controls */}
       <div className="flex flex-wrap items-center justify-between gap-4 border-b border-white/5 pb-4">
         <div>
-          <h3 className="text-base font-black text-white flex items-center gap-2">
-            <Layers size={18} className="text-indigo-400" />
+          <h3 className="text-base font-black text-white">
             Ma Trận Nắm Vững Kiến Thức (Mastery Heatmap)
           </h3>
           <p className="text-xs text-slate-400 mt-0.5">
@@ -147,14 +146,13 @@ export const MasteryHeatmap: React.FC<MasteryHeatmapProps> = ({
           </div>
 
           {/* Search Input */}
-          <div className="relative">
-            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+          <div>
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Tìm kiếm học sinh..."
-              className="bg-[#121626] border border-white/10 text-white text-xs rounded-xl pl-9 pr-3 py-1.5 focus:outline-none focus:border-indigo-500 w-44"
+              className="bg-[#121626] border border-white/10 text-white text-xs rounded-xl px-3 py-1.5 focus:outline-none focus:border-indigo-500 w-44"
             />
           </div>
         </div>
@@ -163,7 +161,6 @@ export const MasteryHeatmap: React.FC<MasteryHeatmapProps> = ({
       {/* Heatmap Table Grid */}
       {filteredUnits.length === 0 ? (
         <div className="py-16 text-center text-slate-400 text-xs font-bold space-y-2">
-          <Info size={24} className="mx-auto text-indigo-400/50" />
           <p className="text-white">Chưa có bài học nào được cấu hình kiểm tra</p>
           <p className="text-slate-500">
             Hãy vào trang Quản Lý Lớp Học &rarr; Chọn ngày học &rarr; Bấm "Cấu Hình Bài Kiểm Tra".

@@ -22,19 +22,24 @@ interface StudentWeaknessDiagnosisCardProps {
   sessionRecords: any[];
   studentRankings: any[];
   selectedClassId: string;
+  selectedStudentId?: string;
   onSelectStudent?: (studentId: number) => void;
 }
 
 export const StudentWeaknessDiagnosisCard: React.FC<StudentWeaknessDiagnosisCardProps> = ({
   sessionRecords,
   selectedClassId,
+  selectedStudentId,
   onSelectStudent,
 }) => {
   const [skillFilter, setSkillFilter] = useState<'all' | 'grammar' | 'vocab'>('all');
 
   // Flattened array of weaknesses for DataTable
   const rawWeaknessList = useMemo<WeaknessTableRow[]>(() => {
-    const list = selectedClassId ? sessionRecords.filter(r => String(r.class_id) === selectedClassId) : sessionRecords;
+    let list = selectedClassId ? sessionRecords.filter(r => String(r.class_id) === selectedClassId) : sessionRecords;
+    if (selectedStudentId) {
+      list = list.filter(r => String(r.student_id) === selectedStudentId);
+    }
     if (!list || list.length === 0) return [];
 
     // Map: student_id -> Map<unit_skill_key, { ...scores }>
@@ -168,14 +173,13 @@ export const StudentWeaknessDiagnosisCard: React.FC<StudentWeaknessDiagnosisCard
         return (
           <div className="text-center">
             <span
-              className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-black border ${
+              className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-black border ${
                 isGrammar
                   ? 'bg-purple-500/15 text-purple-300 border-purple-500/30'
                   : 'bg-blue-500/15 text-blue-300 border-blue-500/30'
               }`}
             >
-              {isGrammar ? <Sparkles size={11} /> : <BookOpen size={11} />}
-              <span>{isGrammar ? 'Ngữ Pháp' : 'Từ Vựng'}</span>
+              {isGrammar ? 'Ngữ Pháp' : 'Từ Vựng'}
             </span>
           </div>
         );
@@ -253,21 +257,19 @@ export const StudentWeaknessDiagnosisCard: React.FC<StudentWeaknessDiagnosisCard
       </button>
       <button
         onClick={() => setSkillFilter('grammar')}
-        className={`px-3 py-1 rounded-lg transition cursor-pointer flex items-center gap-1.5 ${
+        className={`px-3 py-1 rounded-lg transition cursor-pointer ${
           skillFilter === 'grammar' ? 'bg-[#5c36f5] text-white shadow-sm' : 'text-slate-400 hover:text-white'
         }`}
       >
-        <Sparkles size={12} />
-        <span>Chỉ Ngữ Pháp</span>
+        Chỉ Ngữ Pháp
       </button>
       <button
         onClick={() => setSkillFilter('vocab')}
-        className={`px-3 py-1 rounded-lg transition cursor-pointer flex items-center gap-1.5 ${
+        className={`px-3 py-1 rounded-lg transition cursor-pointer ${
           skillFilter === 'vocab' ? 'bg-[#5c36f5] text-white shadow-sm' : 'text-slate-400 hover:text-white'
         }`}
       >
-        <BookOpen size={12} />
-        <span>Chỉ Từ Vựng</span>
+        Chỉ Từ Vựng
       </button>
     </div>
   );
@@ -275,18 +277,13 @@ export const StudentWeaknessDiagnosisCard: React.FC<StudentWeaknessDiagnosisCard
   return (
     <div className="bg-[#0c0f1d] border border-white/10 rounded-2xl p-5 space-y-4 select-none shadow-lg animate-cascade-2">
       {/* Title Bar */}
-      <div className="flex items-center gap-3 border-b border-white/5 pb-3">
-        <div className="p-2 rounded-xl bg-rose-500/10 text-rose-400 border border-rose-500/20">
-          <AlertCircle size={18} />
-        </div>
-        <div>
-          <h3 className="text-sm font-black text-white uppercase tracking-wider">
-            Danh Sách Học Sinh Cần Phụ Đạo Theo Bài Học & Kỹ Năng
-          </h3>
-          <p className="text-xs text-slate-400 mt-0.5">
-            Bảng thống kê chi tiết toàn bộ các Unit có điểm trung bình dưới 6.5 để giáo viên lên kế hoạch kèm cặp trọng điểm.
-          </p>
-        </div>
+      <div className="border-b border-white/5 pb-3">
+        <h3 className="text-sm font-black text-white uppercase tracking-wider">
+          Danh Sách Học Sinh Cần Phụ Đạo Theo Bài Học & Kỹ Năng
+        </h3>
+        <p className="text-xs text-slate-400 mt-0.5">
+          Bảng thống kê chi tiết toàn bộ các Unit có điểm trung bình dưới 6.5 để giáo viên lên kế hoạch kèm cặp trọng điểm.
+        </p>
       </div>
 
       {/* TanStack DataTable */}
