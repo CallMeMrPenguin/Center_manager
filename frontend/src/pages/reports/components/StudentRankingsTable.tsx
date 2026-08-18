@@ -211,14 +211,14 @@ export const StudentRankingsTable: React.FC<StudentRankingsTableProps> = ({
           if (valid.length === 0) return 'Chưa có điểm';
           const avg = trunc1Dec(valid.reduce((a, b) => a + b, 0) / valid.length);
           let label = 'Xuất Sắc';
-          if (avg >= 9.7) label = 'Huyền Thoại';
-          else if (avg >= 9.4) label = 'Siêu Việt';
-          else if (avg >= 9.0) label = 'Tinh Hoa';
+          if (avg >= 9.7) label = 'Xuất Chúng';
+          else if (avg >= 9.4) label = 'Vượt Trội';
+          else if (avg >= 9.0) label = 'Ưu Tú';
           else if (avg >= 8.5) label = 'Xuất Sắc';
           else if (avg >= 7.5) label = 'Giỏi';
           else if (avg >= 6.5) label = 'Khá';
-          else if (avg >= 5.0) label = 'Cơ Bản';
-          else label = 'Cần Cố Gắng';
+          else if (avg >= 5.0) label = 'Trung Bình';
+          else label = 'Yếu';
           return `${label} (${format1Dec(avg)})`;
         }
       },
@@ -240,14 +240,14 @@ export const StudentRankingsTable: React.FC<StudentRankingsTableProps> = ({
           );
         }
         let label = 'Xuất Sắc', cls = 'bg-cyan-500/15 text-cyan-300 border-cyan-500/35';
-        if (avg >= 9.7) { label = 'Huyền Thoại'; cls = 'bg-amber-500/15 text-amber-300 border-amber-500/40 font-black'; }
-        else if (avg >= 9.4) { label = 'Siêu Việt'; cls = 'bg-rose-500/15 text-rose-400 border-rose-500/35 font-bold'; }
-        else if (avg >= 9.0) { label = 'Tinh Hoa'; cls = 'bg-purple-500/15 text-purple-300 border-purple-500/35 font-bold'; }
+        if (avg >= 9.7) { label = 'Xuất Chúng'; cls = 'bg-amber-500/15 text-amber-300 border-amber-500/40 font-black'; }
+        else if (avg >= 9.4) { label = 'Vượt Trội'; cls = 'bg-pink-500/15 text-pink-300 border-pink-500/35 font-bold'; }
+        else if (avg >= 9.0) { label = 'Ưu Tú'; cls = 'bg-purple-500/15 text-purple-300 border-purple-500/35 font-bold'; }
         else if (avg >= 8.5) { label = 'Xuất Sắc'; cls = 'bg-cyan-500/15 text-cyan-300 border-cyan-500/35 font-bold'; }
         else if (avg >= 7.5) { label = 'Giỏi'; cls = 'bg-indigo-500/15 text-indigo-300 border-indigo-500/35 font-semibold'; }
         else if (avg >= 6.5) { label = 'Khá'; cls = 'bg-yellow-500/15 text-yellow-300 border-yellow-500/35 font-semibold'; }
-        else if (avg >= 5.0) { label = 'Cơ Bản'; cls = 'bg-sky-500/15 text-sky-300 border-sky-500/35'; }
-        else { label = 'Cần Cố Gắng'; cls = 'bg-amber-700/15 text-amber-500 border-amber-700/35'; }
+        else if (avg >= 5.0) { label = 'Trung Bình'; cls = 'bg-sky-500/15 text-sky-300 border-sky-500/35'; }
+        else { label = 'Yếu'; cls = 'bg-amber-700/15 text-amber-500 border-amber-700/35'; }
         return (
           <div className="text-center">
             <span className={`inline-block px-2.5 py-1 rounded-lg text-[10px] font-black border ${cls}`}>{label} ({format1Dec(avg)})</span>

@@ -297,6 +297,7 @@ export const ReportsPage: React.FC = () => {
           <SkillBreakdownTab
             selectedClassId={selectedClassId} selectedStudentId={selectedStudentId}
             onSelectRankingStudent={handleSelectRankingStudent}
+            isTestMode={isTestMode} sessionRecords={sessionRecords}
           />
         ) : activeReportTab === 'deep' ? (
           <DeepAnalysisTab

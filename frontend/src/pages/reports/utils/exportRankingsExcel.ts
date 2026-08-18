@@ -52,14 +52,14 @@ export async function exportRankingsExcel({
           currentTier = tier;
           tierStr = `       ${tier.name} (${tier.title})`;
           let label = 'Xuất Sắc';
-          if (avg >= 9.7) label = 'Huyền Thoại';
-          else if (avg >= 9.4) label = 'Siêu Việt';
-          else if (avg >= 9.0) label = 'Tinh Hoa';
+          if (avg >= 9.7) label = 'Xuất Chúng';
+          else if (avg >= 9.4) label = 'Vượt Trội';
+          else if (avg >= 9.0) label = 'Ưu Tú';
           else if (avg >= 8.5) label = 'Xuất Sắc';
           else if (avg >= 7.5) label = 'Giỏi';
           else if (avg >= 6.5) label = 'Khá';
-          else if (avg >= 5.0) label = 'Cơ Bản';
-          else label = 'Cần Cố Gắng';
+          else if (avg >= 5.0) label = 'Trung Bình';
+          else label = 'Yếu';
           evalStr = `${label} (${format1Dec(avg)})`;
         }
         tierObjs.push(currentTier);

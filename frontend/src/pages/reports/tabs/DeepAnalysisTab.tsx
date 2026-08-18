@@ -2,6 +2,7 @@ import React from 'react';
 import { TierDistributionCard } from '../components/TierDistributionCard';
 import { EarlyWarningSection } from '../components/EarlyWarningSection';
 import { SmartGroupingSection } from '../components/SmartGroupingSection';
+import { SkillGrammarVocabCard } from '../components/SkillGrammarVocabCard';
 import { ScoreFluctuationsSection } from '../components/ScoreFluctuationsSection';
 import { LearningBottlenecksSection } from '../components/LearningBottlenecksSection';
 import { WarningSettings } from '../types';
@@ -45,7 +46,7 @@ export const DeepAnalysisTab: React.FC<DeepAnalysisTabProps> = ({
 }) => {
   return (
     <div className="flex flex-col gap-8 mb-8">
-      {/* 1. 6-TIER ACADEMIC RANKING DISTRIBUTION */}
+      {/* 1. 8-TIER ACADEMIC RANKING DISTRIBUTION */}
       <TierDistributionCard
         studentRankings={studentRankings}
         selectedClassId={selectedClassId}
@@ -77,7 +78,15 @@ export const DeepAnalysisTab: React.FC<DeepAnalysisTabProps> = ({
         onSelectRankingStudent={onSelectRankingStudent}
       />
 
-      {/* 4. SCORE FLUCTUATIONS & VARIATIONS TABLE */}
+      {/* 4. GRAMMAR VS. VOCABULARY COMPARATIVE ANALYSIS */}
+      <SkillGrammarVocabCard
+        sessionRecords={sessionRecords}
+        studentRankings={studentRankings}
+        selectedClassId={selectedClassId}
+        onSelectRankingStudent={onSelectRankingStudent}
+      />
+
+      {/* 5. SCORE FLUCTUATIONS & VARIATIONS TABLE */}
       <ScoreFluctuationsSection
         loading={loading}
         studentRankings={studentRankings}
@@ -87,7 +96,7 @@ export const DeepAnalysisTab: React.FC<DeepAnalysisTabProps> = ({
         onSelectRankingStudent={onSelectRankingStudent}
       />
 
-      {/* 5. LEARNING BOTTLENECKS SCANNER */}
+      {/* 6. LEARNING BOTTLENECKS SCANNER */}
       <LearningBottlenecksSection
         studentRankings={studentRankings}
         selectedClassId={selectedClassId}

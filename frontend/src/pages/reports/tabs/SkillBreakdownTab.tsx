@@ -1,42 +1,55 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { api } from '../../../api';
 import { SkillOverviewCards } from '../components/SkillOverviewCards';
 import { MasteryHeatmap } from '../components/MasteryHeatmap';
 import { UnitBreakdownTable } from '../components/UnitBreakdownTable';
 import { SkillAwarePredictionCard } from '../components/SkillAwarePredictionCard';
+import { computeMockSkillBreakdown } from '../utils/mockReportsData';
 import { RefreshCw } from 'lucide-react';
 
 interface SkillBreakdownTabProps {
   selectedClassId: string;
   selectedStudentId: string;
   onSelectRankingStudent: (studentId: number) => void;
+  isTestMode?: boolean;
+  sessionRecords?: any[];
 }
 
 export const SkillBreakdownTab: React.FC<SkillBreakdownTabProps> = ({
   selectedClassId,
   selectedStudentId,
   onSelectRankingStudent,
+  isTestMode,
+  sessionRecords,
 }) => {
   const [loading, setLoading] = useState(false);
-  const [reportData, setReportData] = useState<any>(null);
+  const [apiReportData, setApiReportData] = useState<any>(null);
 
   const fetchSkillData = useCallback(async () => {
+    if (isTestMode) return;
     setLoading(true);
     try {
       const cid = selectedClassId ? parseInt(selectedClassId) : undefined;
       const sid = selectedStudentId ? parseInt(selectedStudentId) : undefined;
       const res = await api.getSkillBreakdown(cid, sid);
-      setReportData(res);
+      setApiReportData(res);
     } catch {
-      setReportData(null);
+      setApiReportData(null);
     } finally {
       setLoading(false);
     }
-  }, [selectedClassId, selectedStudentId]);
+  }, [selectedClassId, selectedStudentId, isTestMode]);
 
   useEffect(() => {
     fetchSkillData();
   }, [fetchSkillData]);
+
+  const reportData = useMemo(() => {
+    if (isTestMode && sessionRecords && sessionRecords.length > 0) {
+      return computeMockSkillBreakdown(sessionRecords, selectedClassId, selectedStudentId);
+    }
+    return apiReportData;
+  }, [isTestMode, sessionRecords, selectedClassId, selectedStudentId, apiReportData]);
 
   if (loading && !reportData) {
     return (

@@ -6,6 +6,7 @@ import { SummaryStrip } from '../components/SummaryStrip';
 import { StudentRankingsTable } from '../components/StudentRankingsTable';
 import { StudentGradeHistoryTable } from '../components/StudentGradeHistoryTable';
 import { formatSessionDate, getStandardMoetPhases } from '../utils';
+import { getStudentTier } from '../types';
 import { format1Dec, trunc1Dec } from '../../../utils';
 
 interface OverviewTabProps {
@@ -160,7 +161,7 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
       hwDiff: '+0.0',
       overallDiff: '+0.0',
       rank: rankStr,
-      level: overall >= 8.0 ? 'Xuất Sắc (Tiến bộ)' : overall >= 6.5 ? 'Tốt (Đang tiến bộ)' : overall > 0 ? 'Cần Cố Gắng' : 'Chưa Có Điểm'
+      level: overall > 0 ? getStudentTier(overall).title : 'Chưa Có Điểm'
     };
   }, [activeSessionRecords, sessionRecords, selectedStudentId, filteredRankings]);
 

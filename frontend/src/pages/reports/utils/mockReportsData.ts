@@ -7,31 +7,22 @@ export interface MockReportsDataset {
   class_analytics_map: Record<string, any>;
 }
 
-// 8 Profiles matching 8 Tiers: Đồng -> Quán Quân
+// 8 Profiles matching 8 Tiers: Đồng -> Quán Quân (with user specified titles)
 export const MOCK_PROFILES = [
-  { tier: 8, rankName: 'Quán Quân', title: 'Huyền Thoại', baseC1: 9.8, baseC2: 9.8, baseHw: 9.9, slope: 0.02, volatility: 0.15, absentSessions: [] as number[] },
-  { tier: 7, rankName: 'Cao Thủ', title: 'Siêu Việt', baseC1: 9.4, baseC2: 9.5, baseHw: 9.6, slope: 0.02, volatility: 0.25, absentSessions: [] as number[] },
-  { tier: 6, rankName: 'Tinh Anh', title: 'Tinh Hoa', baseC1: 9.0, baseC2: 9.2, baseHw: 9.4, slope: 0.04, volatility: 0.3, absentSessions: [] as number[] },
+  { tier: 8, rankName: 'Quán Quân', title: 'Xuất Chúng', baseC1: 9.8, baseC2: 9.8, baseHw: 9.9, slope: 0.02, volatility: 0.15, absentSessions: [] as number[] },
+  { tier: 7, rankName: 'Cao Thủ', title: 'Vượt Trội', baseC1: 9.4, baseC2: 9.5, baseHw: 9.6, slope: 0.02, volatility: 0.25, absentSessions: [] as number[] },
+  { tier: 6, rankName: 'Tinh Anh', title: 'Ưu Tú', baseC1: 9.0, baseC2: 9.2, baseHw: 9.4, slope: 0.04, volatility: 0.3, absentSessions: [] as number[] },
   { tier: 5, rankName: 'Kim Cương', title: 'Xuất Sắc', baseC1: 8.5, baseC2: 8.7, baseHw: 9.0, slope: 0.03, volatility: 0.35, absentSessions: [] as number[] },
   { tier: 4, rankName: 'Bạch Kim', title: 'Giỏi', baseC1: 7.8, baseC2: 8.0, baseHw: 8.5, slope: 0.02, volatility: 0.4, absentSessions: [7] as number[] },
   { tier: 3, rankName: 'Vàng', title: 'Khá', baseC1: 6.8, baseC2: 7.0, baseHw: 7.6, slope: -0.01, volatility: 0.6, absentSessions: [12] as number[] },
-  { tier: 2, rankName: 'Bạc', title: 'Cơ Bản', baseC1: 5.8, baseC2: 6.0, baseHw: 6.5, slope: -0.04, volatility: 0.7, absentSessions: [15, 18] as number[] },
-  { tier: 1, rankName: 'Đồng', title: 'Tập Sự', baseC1: 4.2, baseC2: 4.5, baseHw: 5.0, slope: -0.03, volatility: 0.8, absentSessions: [19, 20] as number[] },
+  { tier: 2, rankName: 'Bạc', title: 'Trung Bình', baseC1: 5.8, baseC2: 6.0, baseHw: 6.5, slope: -0.04, volatility: 0.7, absentSessions: [15, 18] as number[] },
+  { tier: 1, rankName: 'Đồng', title: 'Yếu', baseC1: 4.2, baseC2: 4.5, baseHw: 5.0, slope: -0.03, volatility: 0.8, absentSessions: [19, 20] as number[] },
 ];
 
-const GRAMMAR_TOPICS_LIST = [
-  'Present Simple',
-  'Present Continuous',
-  'Past Simple',
-  'Past Continuous',
-  'Present Perfect',
-  'Comparative Adjectives',
-  'Superlative Adjectives',
-  'Modal Verbs (Can, Must, Should)',
-  'First Conditional',
-  'Second Conditional',
-  'Passive Voice',
-  'Relative Clauses',
+export const GRAMMAR_TOPICS_LIST = [
+  'Present Simple', 'Present Continuous', 'Past Simple', 'Past Continuous',
+  'Present Perfect', 'Comparative Adjectives', 'Superlative Adjectives',
+  'Modal Verbs', 'First Conditional', 'Second Conditional', 'Passive Voice', 'Relative Clauses',
 ];
 
 export function computeDatasetFromRecords(
@@ -39,11 +30,8 @@ export function computeDatasetFromRecords(
   classes: any[],
   students: any[]
 ): MockReportsDataset {
-  const sampleClasses = classes && classes.length > 0
-    ? classes
-    : [{ id: 1, class_name: 'Tiếng Anh 6A1', grade: '6' }];
+  const sampleClasses = classes && classes.length > 0 ? classes : [{ id: 1, class_name: 'Tiếng Anh 6A1', grade: '6' }];
 
-  // Group by student_id
   const studentRecordsMap = new Map<number, any[]>();
   allRecords.forEach((r) => {
     const sid = Number(r.student_id);
@@ -66,15 +54,9 @@ export function computeDatasetFromRecords(
 
     recs.forEach((r) => {
       if (r.attendance !== 'absent') {
-        if (r.check_1 !== null && r.check_1 !== undefined && !isNaN(Number(r.check_1))) {
-          validC1s.push(Number(r.check_1));
-        }
-        if (r.check_2 !== null && r.check_2 !== undefined && !isNaN(Number(r.check_2))) {
-          validC2s.push(Number(r.check_2));
-        }
-        if (r.homework !== null && r.homework !== undefined && !isNaN(Number(r.homework))) {
-          validHws.push(Number(r.homework));
-        }
+        if (r.check_1 !== null && r.check_1 !== undefined && !isNaN(Number(r.check_1))) validC1s.push(Number(r.check_1));
+        if (r.check_2 !== null && r.check_2 !== undefined && !isNaN(Number(r.check_2))) validC2s.push(Number(r.check_2));
+        if (r.homework !== null && r.homework !== undefined && !isNaN(Number(r.homework))) validHws.push(Number(r.homework));
       }
     });
 
@@ -83,7 +65,6 @@ export function computeDatasetFromRecords(
     const avgHw = validHws.length > 0 ? trunc1Dec(validHws.reduce((a, b) => a + b, 0) / validHws.length) : 0;
     const overallAvg = trunc1Dec(avgC1 * 0.35 + avgC2 * 0.55 + avgHw * 0.1);
 
-    // EMA calculation
     let ema = validC1s.length > 0 ? (validC1s[0] * 0.35 + (validC2s[0] || validC1s[0]) * 0.55 + (validHws[0] || 8.0) * 0.1) : overallAvg;
     const alpha = 0.3;
     for (let k = 1; k < validC1s.length; k++) {
@@ -115,7 +96,7 @@ export function computeDatasetFromRecords(
       trend_label: trendLabel,
       performance_index: trunc1Dec(overallAvg * 10),
       consistency_score: 90.0,
-      rating_label: ema >= 9.7 ? 'Huyền Thoại' : ema >= 9.4 ? 'Siêu Việt' : ema >= 9.0 ? 'Tinh Hoa' : ema >= 8.5 ? 'Xuất Sắc' : ema >= 7.5 ? 'Giỏi' : ema >= 6.5 ? 'Khá' : ema >= 5.0 ? 'Cơ Bản' : 'Tập Sự',
+      rating_label: ema >= 9.7 ? 'Xuất Chúng' : ema >= 9.4 ? 'Vượt Trội' : ema >= 9.0 ? 'Ưu Tú' : ema >= 8.5 ? 'Xuất Sắc' : ema >= 7.5 ? 'Giỏi' : ema >= 6.5 ? 'Khá' : ema >= 5.0 ? 'Trung Bình' : 'Yếu',
       predicted_next: trunc1Dec(Math.min(10.0, Math.max(1.0, ema + 0.1))),
       std_dev: 0.4,
     });
@@ -145,9 +126,9 @@ export function computeDatasetFromRecords(
     performance_index: 86.5,
     rating_label: 'Xuất Sắc',
     recommendations: [
-      'Chế độ Test 20 buổi đang hoạt động với đầy đủ 8 cấp bậc xếp hạng (Đồng -> Quán Quân).',
-      'Học sinh nhóm Quán Quân & Cao Thủ đạt phong độ xuất sắc và điểm Check 1, Check 2 vượt trội.',
-      'Giáo viên có thể chỉnh sửa trực tiếp 20 buổi điểm Check 1, Check 2, BTVN và loại bài kiểm tra.',
+      'Chế độ Test 20 buổi: Check 1 (Từ Vựng) và Check 2 (Ngữ Pháp) được phân hóa riêng biệt.',
+      'Học sinh nhóm Xuất Chúng & Vượt Trội có năng lực ngữ pháp và từ vựng rất đồng đều.',
+      'Giáo viên có thể theo dõi cụ thể từng chủ đề ngữ pháp trong tab Phân Tích Kỹ Năng & Unit.',
     ],
   };
 
@@ -181,27 +162,175 @@ export function computeDatasetFromRecords(
   };
 }
 
+export function computeMockSkillBreakdown(
+  records: any[],
+  selectedClassId?: string,
+  selectedStudentId?: string
+) {
+  let list = records || [];
+  if (selectedClassId) list = list.filter(r => String(r.class_id) === selectedClassId);
+  if (selectedStudentId) list = list.filter(r => String(r.student_id) === selectedStudentId);
+
+  const vocabScores: number[] = [];
+  const grammarScores: number[] = [];
+  const mixedScores: number[] = [];
+
+  list.forEach(r => {
+    if (r.attendance !== 'absent') {
+      if (r.check_1 !== null && r.check_1 !== undefined && !isNaN(Number(r.check_1))) vocabScores.push(Number(r.check_1));
+      if (r.check_2 !== null && r.check_2 !== undefined && !isNaN(Number(r.check_2))) grammarScores.push(Number(r.check_2));
+      if (r.homework !== null && r.homework !== undefined && !isNaN(Number(r.homework))) mixedScores.push(Number(r.homework));
+    }
+  });
+
+  const vocabAvg = vocabScores.length > 0 ? trunc1Dec(vocabScores.reduce((a, b) => a + b, 0) / vocabScores.length) : 0;
+  const grammarAvg = grammarScores.length > 0 ? trunc1Dec(grammarScores.reduce((a, b) => a + b, 0) / grammarScores.length) : 0;
+  const mixedAvg = mixedScores.length > 0 ? trunc1Dec(mixedScores.reduce((a, b) => a + b, 0) / mixedScores.length) : 0;
+
+  const unitBreakdownMap = new Map<string, { skill: string; unit_key: string; scores: number[] }>();
+
+  list.forEach(r => {
+    if (r.attendance !== 'absent') {
+      const uKey = r.topic || `Unit ${Math.min(12, Math.floor(((r.session_id || 1001) - 1001) / 2) + 1)}`;
+      const gTopic = r.check_2_topic || r.grammar_topic || 'Ngữ pháp';
+      
+      const vKey = `${uKey}-vocab`;
+      if (!unitBreakdownMap.has(vKey)) unitBreakdownMap.set(vKey, { skill: 'vocab', unit_key: `${uKey} (Từ vựng)`, scores: [] });
+      if (r.check_1 !== null && r.check_1 !== undefined) unitBreakdownMap.get(vKey)!.scores.push(Number(r.check_1));
+
+      const gKey = `${uKey}-grammar`;
+      if (!unitBreakdownMap.has(gKey)) unitBreakdownMap.set(gKey, { skill: 'grammar', unit_key: `${uKey} (${gTopic})`, scores: [] });
+      if (r.check_2 !== null && r.check_2 !== undefined) unitBreakdownMap.get(gKey)!.scores.push(Number(r.check_2));
+    }
+  });
+
+  let masteredCount = 0;
+  let partialCount = 0;
+  let notYetCount = 0;
+  const unitBreakdown: any[] = [];
+
+  unitBreakdownMap.forEach((val) => {
+    const sc = val.scores;
+    const avg = sc.length > 0 ? trunc1Dec(sc.reduce((a, b) => a + b, 0) / sc.length) : 0;
+    const mCnt = sc.filter(s => s >= 8.5).length;
+    const pCnt = sc.filter(s => s >= 6.5 && s < 8.5).length;
+    const wCnt = sc.filter(s => s < 6.5).length;
+    const total = sc.length || 1;
+    const mPct = trunc1Dec((mCnt / total) * 100);
+
+    masteredCount += mCnt;
+    partialCount += pCnt;
+    notYetCount += wCnt;
+
+    let rec = "Nắm vững tốt, sẵn sàng phát triển bài tập nâng cao.";
+    if (mPct < 50) rec = "Cần tăng cường bài tập củng cố và kiểm tra lại.";
+    else if (mPct < 75) rec = "Nắm khá ổn định, cần bổ sung thêm bài luyện tập.";
+
+    unitBreakdown.push({
+      skill: val.skill,
+      unit_key: val.unit_key,
+      avg_score: avg,
+      student_count: total,
+      mastered_count: mCnt,
+      partial_count: pCnt,
+      regressed_count: 0,
+      weak_count: wCnt,
+      mastery_pct: mPct,
+      recommendation: rec,
+    });
+  });
+
+  const totalInstances = masteredCount + partialCount + notYetCount;
+  const masteryRate = totalInstances > 0 ? trunc1Dec((masteredCount / totalInstances) * 100) : 0;
+
+  const studentMap = new Map<number, { id: number; name: string; nickname: string; className: string; units: Record<string, any> }>();
+  list.forEach(r => {
+    const sid = Number(r.student_id);
+    if (!studentMap.has(sid)) {
+      studentMap.set(sid, {
+        id: sid,
+        name: r.full_name,
+        nickname: r.nickname,
+        className: r.class_name,
+        units: {},
+      });
+    }
+    const uKey = r.topic || `Unit ${Math.min(12, Math.floor(((r.session_id || 1001) - 1001) / 2) + 1)}`;
+    const stObj = studentMap.get(sid)!;
+    const c1 = Number(r.check_1 || 0);
+    const c2 = Number(r.check_2 || 0);
+    const score = c1 > 0 && c2 > 0 ? trunc1Dec((c1 + c2) / 2) : (c1 || c2 || 0);
+    stObj.units[uKey] = {
+      score,
+      status: score >= 8.5 ? 'mastered' : score >= 6.5 ? 'partial' : 'not_yet',
+      level: score >= 8.5 ? 'Nắm vững' : score >= 6.5 ? 'Khá' : 'Cần chú ý',
+    };
+  });
+
+  const heatmapUnits = ['Unit 1', 'Unit 2', 'Unit 3', 'Unit 4', 'Unit 5', 'Unit 6', 'Unit 7', 'Unit 8', 'Unit 9', 'Unit 10', 'Unit 11', 'Unit 12'];
+  const heatmapStudents = Array.from(studentMap.values()).map(s => ({
+    student_id: s.id,
+    student_name: s.name,
+    nickname: s.nickname,
+    class_name: s.className,
+    units: s.units,
+  }));
+
+  const prediction = {
+    pred_vocab: trunc1Dec(vocabAvg + 0.1),
+    pred_grammar: trunc1Dec(grammarAvg + 0.15),
+    strongest_skill: vocabAvg >= grammarAvg ? 'Từ Vựng (Check 1)' : 'Ngữ Pháp (Check 2)',
+    weakest_skill: vocabAvg >= grammarAvg ? 'Ngữ Pháp (Check 2)' : 'Từ Vựng (Check 1)',
+    focus_unit: 'Unit 7 (Superlative Adjectives)',
+    risk_students: heatmapStudents.filter(s => {
+      const avg = Object.values(s.units).reduce((acc: number, u: any) => acc + (u.score || 0), 0) / (Object.values(s.units).length || 1);
+      return avg < 6.5;
+    }).map(s => ({
+      student_id: s.student_id,
+      student_name: s.student_name,
+      nickname: s.nickname,
+      class_name: s.class_name,
+      gap_skills: ['Ngữ Pháp cần củng cố thêm bài tập'],
+    })),
+  };
+
+  return {
+    skill_stats: {
+      vocab_avg: vocabAvg,
+      grammar_avg: grammarAvg,
+      mixed_avg: mixedAvg,
+      mastered_count: masteredCount,
+      partial_count: partialCount,
+      regressed_count: 0,
+      not_yet_count: notYetCount,
+      total_instances: totalInstances,
+      mastery_rate: masteryRate,
+    },
+    unit_breakdown: unitBreakdown,
+    mastery_heatmap: {
+      units: heatmapUnits,
+      students: heatmapStudents,
+    },
+    skill_aware_prediction: prediction,
+  };
+}
+
 export function generateMockReportsData(
   classes: any[],
   students: any[]
 ): MockReportsDataset {
-  // Check if custom user-edited records exist in localStorage
   try {
     const saved = localStorage.getItem('cm_custom_mock_records');
     if (saved) {
       const parsed = JSON.parse(saved);
-      if (Array.isArray(parsed) && parsed.length > 0) {
-        return computeDatasetFromRecords(parsed, classes, students);
-      }
+      if (Array.isArray(parsed) && parsed.length > 0) return computeDatasetFromRecords(parsed, classes, students);
     }
   } catch { }
 
-  const sampleClasses = classes && classes.length > 0
-    ? classes
-    : [
-        { id: 1, class_name: 'Tiếng Anh 6A1', grade: '6' },
-        { id: 2, class_name: 'Tiếng Anh 6A2', grade: '6' },
-      ];
+  const sampleClasses = classes && classes.length > 0 ? classes : [
+    { id: 1, class_name: 'Tiếng Anh 6A1', grade: '6' },
+    { id: 2, class_name: 'Tiếng Anh 6A2', grade: '6' },
+  ];
 
   let studentList = students && students.length > 0 ? [...students] : [];
   if (studentList.length === 0) {
