@@ -296,28 +296,7 @@ export const StudentWeaknessDiagnosisCard: React.FC<StudentWeaknessDiagnosisCard
         );
       },
     },
-    {
-      id: 'action',
-      header: () => <div className="text-center w-full">Thao Tác</div>,
-      enableSorting: false,
-      enableGlobalFilter: false,
-      cell: ({ row }) => (
-        <div className="text-center">
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              onSelectStudent && onSelectStudent(row.original.student_id);
-            }}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-600/20 hover:bg-indigo-600/40 text-indigo-300 hover:text-white border border-indigo-500/30 text-xs font-bold transition cursor-pointer active:scale-95"
-          >
-            <span>Soi Ma Trận</span>
-            <ArrowRight size={12} />
-          </button>
-        </div>
-      ),
-    },
-  ], [onSelectStudent]);
+  ], []);
 
   const toolbarLeft = (
     <div className="relative flex bg-[#0d1018] p-1 rounded-xl border border-white/10 text-xs font-bold shrink-0 w-80">
