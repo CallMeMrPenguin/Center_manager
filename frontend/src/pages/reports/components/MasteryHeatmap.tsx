@@ -38,6 +38,7 @@ export const MasteryHeatmap: React.FC<MasteryHeatmapProps> = ({
 }) => {
   const [search, setSearch] = useState('');
   const [skillFilter, setSkillFilter] = useState<'all' | 'vocab' | 'grammar'>('all');
+  const [isExpanded, setIsExpanded] = useState(false);
   const [hoveredCell, setHoveredCell] = useState<{
     studentName: string;
     unitKey: string;
@@ -60,6 +61,13 @@ export const MasteryHeatmap: React.FC<MasteryHeatmapProps> = ({
         (s.nickname && s.nickname.toLowerCase().includes(q))
     );
   }, [students, search]);
+
+  const displayedStudents = useMemo(() => {
+    if (!isExpanded && !search.trim() && filteredStudents.length > 8) {
+      return filteredStudents.slice(0, 8);
+    }
+    return filteredStudents;
+  }, [filteredStudents, isExpanded, search]);
 
   const getStatusBadge = (status?: string, ema?: number) => {
     if (!status) {
@@ -118,27 +126,38 @@ export const MasteryHeatmap: React.FC<MasteryHeatmapProps> = ({
         {/* Filter Pills & Search */}
         <div className="flex flex-wrap items-center gap-3">
           {/* Skill Filter Segmented Control */}
-          <div className="flex bg-[#121626] p-1 rounded-xl border border-white/10 text-xs font-bold">
+          <div className="relative flex bg-[#121626] p-1 rounded-xl border border-white/10 text-xs font-bold w-64">
+            <div
+              className="absolute top-1 bottom-1 rounded-lg bg-[#5c36f5] shadow-[0_0_14px_rgba(92,54,245,0.5)] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] pointer-events-none"
+              style={{
+                left: skillFilter === 'all'
+                  ? '4px'
+                  : skillFilter === 'vocab'
+                    ? 'calc((100% / 3) + 1px)'
+                    : 'calc(((100% / 3) * 2) + 1px)',
+                width: 'calc((100% / 3) - 4px)',
+              }}
+            />
             <button
               onClick={() => setSkillFilter('all')}
-              className={`px-3 py-1 rounded-lg transition cursor-pointer ${
-                skillFilter === 'all' ? 'bg-[#5c36f5] text-white shadow-sm' : 'text-slate-400 hover:text-white'
+              className={`flex-1 relative z-10 py-1 text-center transition cursor-pointer ${
+                skillFilter === 'all' ? 'text-white font-black' : 'text-slate-400 hover:text-white'
               }`}
             >
               Tất Cả
             </button>
             <button
               onClick={() => setSkillFilter('vocab')}
-              className={`px-3 py-1 rounded-lg transition cursor-pointer ${
-                skillFilter === 'vocab' ? 'bg-[#5c36f5] text-white shadow-sm' : 'text-slate-400 hover:text-white'
+              className={`flex-1 relative z-10 py-1 text-center transition cursor-pointer ${
+                skillFilter === 'vocab' ? 'text-white font-black' : 'text-slate-400 hover:text-white'
               }`}
             >
               Từ Vựng
             </button>
             <button
               onClick={() => setSkillFilter('grammar')}
-              className={`px-3 py-1 rounded-lg transition cursor-pointer ${
-                skillFilter === 'grammar' ? 'bg-[#5c36f5] text-white shadow-sm' : 'text-slate-400 hover:text-white'
+              className={`flex-1 relative z-10 py-1 text-center transition cursor-pointer ${
+                skillFilter === 'grammar' ? 'text-white font-black' : 'text-slate-400 hover:text-white'
               }`}
             >
               Ngữ Pháp
@@ -167,101 +186,118 @@ export const MasteryHeatmap: React.FC<MasteryHeatmapProps> = ({
           </p>
         </div>
       ) : (
-        <div className="overflow-x-auto border border-white/5 rounded-xl scrollbar-thin">
-          <table className="w-full text-xs text-left border-collapse">
-            <thead>
-              <tr className="bg-[#121626] border-b border-white/10 text-slate-300">
-                <th className="py-3 px-4 sticky left-0 z-20 bg-[#121626] min-w-[180px] font-black uppercase text-[11px] tracking-wider border-r border-white/10">
-                  Học Sinh
-                </th>
-                {filteredUnits.map((u) => (
-                  <th
-                    key={u.unit_key}
-                    className="py-2.5 px-3 text-center min-w-[110px] font-bold border-r border-white/5"
-                  >
-                    <div className="text-[11px] text-white truncate max-w-[120px] mx-auto font-black" title={u.unit_key}>
-                      {u.unit_key}
-                    </div>
-                    <div className="flex items-center justify-center gap-1 mt-1">
-                      <span
-                        className={`text-[9px] font-extrabold uppercase px-1.5 py-0.2 rounded ${
-                          u.skill === 'vocab'
-                            ? 'bg-blue-500/20 text-blue-300'
-                            : 'bg-purple-500/20 text-purple-300'
-                        }`}
-                      >
-                        {u.skill === 'vocab' ? 'Từ Vựng' : 'Ngữ Pháp'}
-                      </span>
-                      <span className="text-[10px] text-slate-400 font-semibold">
-                        TB: {trunc1Dec(u.avg_score)}
-                      </span>
-                    </div>
+        <div className="space-y-3">
+          <div className="overflow-x-auto border border-white/5 rounded-xl scrollbar-thin">
+            <table className="w-full text-xs text-left border-collapse">
+              <thead>
+                <tr className="bg-[#121626] border-b border-white/10 text-slate-300">
+                  <th className="py-3 px-4 sticky left-0 z-20 bg-[#121626] min-w-[180px] font-black uppercase text-[11px] tracking-wider border-r border-white/10">
+                    Học Sinh ({displayedStudents.length}/{filteredStudents.length})
                   </th>
-                ))}
-              </tr>
-            </thead>
-
-            <tbody className="divide-y divide-white/5">
-              {filteredStudents.map((st, idx) => (
-                <tr
-                  key={st.student_id}
-                  className={`hover:bg-white/[0.02] transition-colors ${
-                    idx % 2 === 1 ? 'bg-[#0d1018]' : 'bg-[#0c0f1d]'
-                  }`}
-                >
-                  <td className="py-2.5 px-4 sticky left-0 z-10 bg-[#0c0f1d] border-r border-white/10 whitespace-nowrap">
-                    <button
-                      onClick={() => onSelectStudent && onSelectStudent(st.student_id)}
-                      className="text-left font-bold text-white hover:text-indigo-400 transition flex items-center gap-2 group cursor-pointer"
+                  {filteredUnits.map((u) => (
+                    <th
+                      key={u.unit_key}
+                      className="py-2.5 px-3 text-center min-w-[110px] font-bold border-r border-white/5"
                     >
-                      <div className="w-6 h-6 rounded-full bg-indigo-500/10 text-indigo-400 flex items-center justify-center text-[10px] font-black shrink-0">
-                        {st.student_name.charAt(0)}
+                      <div className="text-[11px] text-white truncate max-w-[120px] mx-auto font-black" title={u.unit_key}>
+                        {u.unit_key}
                       </div>
-                      <div>
-                        <span className="block leading-tight">{st.student_name}</span>
-                        {st.nickname && (
-                          <span className="text-[10px] text-slate-500 font-normal">
-                            ({st.nickname})
-                          </span>
-                        )}
-                      </div>
-                    </button>
-                  </td>
-
-                  {filteredUnits.map((u) => {
-                    const uData = st.units?.[u.unit_key];
-                    const badge = getStatusBadge(uData?.mastery_status, uData?.ema_score);
-
-                    return (
-                      <td
-                        key={u.unit_key}
-                        className="py-2 px-2 text-center border-r border-white/5"
-                        onMouseEnter={(e) => {
-                          if (uData) {
-                            const rect = e.currentTarget.getBoundingClientRect();
-                            setHoveredCell({
-                              studentName: st.student_name,
-                              unitKey: u.unit_key,
-                              data: uData,
-                              x: rect.left + rect.width / 2,
-                              y: rect.top - 8,
-                            });
-                          }
-                        }}
-                        onMouseLeave={() => setHoveredCell(null)}
-                      >
-                        <div
-                          className={`w-full py-1.5 px-2 rounded-lg border text-center transition cursor-default ${badge.bg} ${badge.border} ${badge.text}`}
+                      <div className="flex items-center justify-center gap-1 mt-1">
+                        <span
+                          className={`text-[9px] font-extrabold uppercase px-1.5 py-0.2 rounded ${
+                            u.skill === 'vocab'
+                              ? 'bg-blue-500/20 text-blue-300'
+                              : 'bg-purple-500/20 text-purple-300'
+                          }`}
                         >
-                          {badge.label}
-                        </div>
-                      </td>
-                    );
-                  })}
+                          {u.skill === 'vocab' ? 'Từ Vựng' : 'Ngữ Pháp'}
+                        </span>
+                        <span className="text-[10px] text-slate-400 font-semibold">
+                          TB: {trunc1Dec(u.avg_score)}
+                        </span>
+                      </div>
+                    </th>
+                  ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+
+              <tbody className="divide-y divide-white/5">
+                {displayedStudents.map((st, idx) => (
+                  <tr
+                    key={st.student_id}
+                    className={`hover:bg-white/[0.02] transition-colors ${
+                      idx % 2 === 1 ? 'bg-[#0d1018]' : 'bg-[#0c0f1d]'
+                    }`}
+                  >
+                    <td className="py-2.5 px-4 sticky left-0 z-10 bg-[#0c0f1d] border-r border-white/10 whitespace-nowrap">
+                      <button
+                        onClick={() => onSelectStudent && onSelectStudent(st.student_id)}
+                        className="text-left font-bold text-white hover:text-indigo-400 transition flex items-center gap-2 group cursor-pointer"
+                      >
+                        <div className="w-6 h-6 rounded-full bg-indigo-500/10 text-indigo-400 flex items-center justify-center text-[10px] font-black shrink-0">
+                          {st.student_name.charAt(0)}
+                        </div>
+                        <div>
+                          <span className="block leading-tight">{st.student_name}</span>
+                          {st.nickname && (
+                            <span className="text-[10px] text-slate-500 font-normal">
+                              ({st.nickname})
+                            </span>
+                          )}
+                        </div>
+                      </button>
+                    </td>
+
+                    {filteredUnits.map((u) => {
+                      const uData = st.units?.[u.unit_key];
+                      const badge = getStatusBadge(uData?.mastery_status, uData?.ema_score);
+
+                      return (
+                        <td
+                          key={u.unit_key}
+                          className="py-2 px-2 text-center border-r border-white/5"
+                          onMouseEnter={(e) => {
+                            if (uData) {
+                              const rect = e.currentTarget.getBoundingClientRect();
+                              setHoveredCell({
+                                studentName: st.student_name,
+                                unitKey: u.unit_key,
+                                data: uData,
+                                x: rect.left + rect.width / 2,
+                                y: rect.top - 8,
+                              });
+                            }
+                          }}
+                          onMouseLeave={() => setHoveredCell(null)}
+                        >
+                          <div
+                            className={`w-full py-1.5 px-2 rounded-lg border text-center transition cursor-default ${badge.bg} ${badge.border} ${badge.text}`}
+                          >
+                            {badge.label}
+                          </div>
+                        </td>
+                      );
+                    })}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Compact / Expand Toggle Button */}
+          {filteredStudents.length > 8 && !search.trim() && (
+            <div className="flex justify-center pt-1">
+              <button
+                type="button"
+                onClick={() => setIsExpanded(prev => !prev)}
+                className="px-4 py-1.5 rounded-xl bg-[#161c32] hover:bg-[#20294a] text-indigo-300 hover:text-white border border-indigo-500/30 text-xs font-bold transition cursor-pointer shadow-sm active:scale-95"
+              >
+                {isExpanded
+                  ? 'Thu Gọn Danh Sách (Hiện 8 Học Sinh)'
+                  : `Xem Toàn Bộ (${filteredStudents.length} Học Sinh)`}
+              </button>
+            </div>
+          )}
         </div>
       )}
 

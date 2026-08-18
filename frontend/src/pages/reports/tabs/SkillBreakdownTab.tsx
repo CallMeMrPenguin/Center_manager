@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { Sparkles, LayoutGrid, ListFilter } from 'lucide-react';
 import { api } from '../../../api';
 import { SkillOverviewCards } from '../components/SkillOverviewCards';
 import { MasteryHeatmap } from '../components/MasteryHeatmap';
@@ -24,6 +25,7 @@ export const SkillBreakdownTab: React.FC<SkillBreakdownTabProps> = ({
   sessionRecords = [],
   studentRankings = [],
 }) => {
+  const [activeSubTab, setActiveSubTab] = useState<'overview' | 'heatmap' | 'diagnosis'>('overview');
   const [loading, setLoading] = useState(false);
   const [apiReportData, setApiReportData] = useState<any>(null);
 
@@ -116,33 +118,92 @@ export const SkillBreakdownTab: React.FC<SkillBreakdownTabProps> = ({
         </div>
       )}
 
-      {/* 1. TOP PEDAGOGICAL KPI CARDS */}
-      <SkillOverviewCards stats={stats} />
+      {/* 1. INTERNAL SUB-TAB SELECTOR (SLIDING PILL INDICATOR) */}
+      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-white/5 pb-2">
+        <div className="relative flex bg-[#0d1018] p-1 rounded-xl border border-white/10 text-xs shrink-0 font-bold select-none w-full sm:w-auto min-w-[540px]">
+          <div
+            className="absolute top-1 bottom-1 rounded-lg bg-[#5c36f5] shadow-[0_0_14px_rgba(92,54,245,0.5)] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] pointer-events-none"
+            style={{
+              left: activeSubTab === 'overview'
+                ? '4px'
+                : activeSubTab === 'heatmap'
+                  ? 'calc((100% / 3) + 1px)'
+                  : 'calc(((100% / 3) * 2) + 1px)',
+              width: 'calc((100% / 3) - 4px)',
+            }}
+          />
+          <button
+            type="button"
+            onClick={() => setActiveSubTab('overview')}
+            className={`flex-1 relative z-10 py-2 px-3 text-center transition-colors cursor-pointer flex items-center justify-center gap-1.5 whitespace-nowrap ${
+              activeSubTab === 'overview' ? 'text-white font-black' : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            <Sparkles size={13} />
+            <span>Tổng Quan & Dự Báo</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveSubTab('heatmap')}
+            className={`flex-1 relative z-10 py-2 px-3 text-center transition-colors cursor-pointer flex items-center justify-center gap-1.5 whitespace-nowrap ${
+              activeSubTab === 'heatmap' ? 'text-white font-black' : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            <LayoutGrid size={13} />
+            <span>Ma Trận Nắm Vững</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveSubTab('diagnosis')}
+            className={`flex-1 relative z-10 py-2 px-3 text-center transition-colors cursor-pointer flex items-center justify-center gap-1.5 whitespace-nowrap ${
+              activeSubTab === 'diagnosis' ? 'text-white font-black' : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            <ListFilter size={13} />
+            <span>Chi Tiết Phụ Đạo & Unit</span>
+          </button>
+        </div>
+      </div>
 
-      {/* 2. MASTERY HEATMAP MATRIX */}
-      <MasteryHeatmap
-        units={heatmapUnits}
-        students={heatmapStudents}
-        onSelectStudent={onSelectRankingStudent}
-      />
+      {/* 2. SUB-TAB CONTENT VIEWS */}
+      {activeSubTab === 'overview' && (
+        <div className="space-y-6 animate-cascade-1">
+          {/* Top Pedagogical KPI Cards */}
+          <SkillOverviewCards stats={stats} />
 
-      {/* 3. BẢNG DANH SÁCH HỌC SINH CẦN PHỤ ĐẠO THEO BÀI HỌC (TANSTACK TABLE) */}
-      <StudentWeaknessDiagnosisCard
-        sessionRecords={sessionRecords}
-        studentRankings={studentRankings}
-        selectedClassId={selectedClassId}
-        selectedStudentId={selectedStudentId}
-        onSelectStudent={onSelectRankingStudent}
-      />
+          {/* Skill-Aware Prediction Card */}
+          <SkillAwarePredictionCard
+            prediction={prediction}
+            onSelectStudent={onSelectRankingStudent}
+          />
+        </div>
+      )}
 
-      {/* 4. UNIT & TOPIC BREAKDOWN (TANSTACK TABLE) */}
-      <UnitBreakdownTable data={unitBreakdown} />
+      {activeSubTab === 'heatmap' && (
+        <div className="animate-cascade-1">
+          <MasteryHeatmap
+            units={heatmapUnits}
+            students={heatmapStudents}
+            onSelectStudent={onSelectRankingStudent}
+          />
+        </div>
+      )}
 
-      {/* 5. SKILL-AWARE PREDICTION CARD */}
-      <SkillAwarePredictionCard
-        prediction={prediction}
-        onSelectStudent={onSelectRankingStudent}
-      />
+      {activeSubTab === 'diagnosis' && (
+        <div className="space-y-6 animate-cascade-1">
+          {/* Bảng danh sách học sinh cần phụ đạo theo bài học */}
+          <StudentWeaknessDiagnosisCard
+            sessionRecords={sessionRecords}
+            studentRankings={studentRankings}
+            selectedClassId={selectedClassId}
+            selectedStudentId={selectedStudentId}
+            onSelectStudent={onSelectRankingStudent}
+          />
+
+          {/* Unit & Topic Breakdown */}
+          <UnitBreakdownTable data={unitBreakdown} />
+        </div>
+      )}
     </div>
   );
 };
