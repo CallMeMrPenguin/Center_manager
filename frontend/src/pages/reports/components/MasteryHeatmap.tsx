@@ -71,59 +71,60 @@ export const MasteryHeatmap: React.FC<MasteryHeatmapProps> = ({
     return filteredStudents;
   }, [filteredStudents, isExpanded, search, viewMode]);
 
-  // 4-Color Scale: Xanh Lá (>=8.0), Vàng (6.5-7.9), Cam (5.0-6.4), Đỏ (<5.0)
-  const getStatusBadge = (status?: string, ema?: number) => {
+  // Full-cell colors: Xanh (>=8.0), Vàng (6.5-7.9), Cam (5.0-6.4), Đỏ (<5.0)
+  const getCellStyle = (ema?: number) => {
     if (ema === undefined || ema === null) {
       return {
-        bg: 'bg-white/5',
-        text: 'text-slate-500',
+        tdBg: 'bg-[#0a0d18]',
+        tdBorder: 'border-white/5',
+        textColor: 'text-slate-600',
         label: '-',
-        border: 'border-transparent',
       };
     }
     const score = Number(ema);
     if (score >= 8.0) {
       return {
-        bg: 'bg-emerald-500/25 hover:bg-emerald-500/40',
-        text: 'text-emerald-300 font-black',
+        tdBg: 'bg-emerald-950/70 hover:bg-emerald-900/90',
+        tdBorder: 'border-emerald-500/25',
+        textColor: 'text-emerald-300 font-black',
         label: trunc1Dec(score),
-        border: 'border-emerald-500/50',
       };
     }
     if (score >= 6.5) {
       return {
-        bg: 'bg-amber-500/25 hover:bg-amber-500/40',
-        text: 'text-amber-300 font-bold',
+        tdBg: 'bg-amber-950/70 hover:bg-amber-900/90',
+        tdBorder: 'border-amber-500/25',
+        textColor: 'text-amber-300 font-bold',
         label: trunc1Dec(score),
-        border: 'border-amber-500/50',
       };
     }
     if (score >= 5.0) {
       return {
-        bg: 'bg-orange-500/25 hover:bg-orange-500/40',
-        text: 'text-orange-300 font-bold',
+        tdBg: 'bg-orange-950/70 hover:bg-orange-900/90',
+        tdBorder: 'border-orange-500/25',
+        textColor: 'text-orange-300 font-bold',
         label: trunc1Dec(score),
-        border: 'border-orange-500/50',
       };
     }
     // Score < 5.0: Red (Chưa đạt / Cần kèm gấp)
     return {
-      bg: 'bg-rose-500/25 hover:bg-rose-500/40',
-      text: 'text-rose-300 font-black',
+      tdBg: 'bg-rose-950/70 hover:bg-rose-900/90',
+      tdBorder: 'border-rose-500/30',
+      textColor: 'text-rose-300 font-black',
       label: trunc1Dec(score),
-      border: 'border-rose-500/50',
     };
   };
 
-  const handleCellHover = (e: React.MouseEvent, studentName: string, unitKey: string, data: StudentUnitData) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const showBelow = rect.top < 180;
+  const handleCellMouseMove = (e: React.MouseEvent, studentName: string, unitKey: string, data: StudentUnitData) => {
+    const x = e.clientX;
+    const y = e.clientY;
+    const showBelow = y < 220;
     setHoveredCell({
       studentName,
       unitKey,
       data,
-      x: Math.min(window.innerWidth - 140, Math.max(140, rect.left + rect.width / 2)),
-      y: showBelow ? rect.bottom + 12 : rect.top - 12,
+      x: Math.min(window.innerWidth - 150, Math.max(150, x)),
+      y: showBelow ? y + 20 : y - 20,
       showBelow,
     });
   };
@@ -138,7 +139,7 @@ export const MasteryHeatmap: React.FC<MasteryHeatmapProps> = ({
             Ma Trận Nắm Vững Kiến Thức (Mastery Heatmap)
           </h3>
           <p className="text-xs text-slate-400 mt-0.5">
-            Bảng màu trực quan theo thang đo 4 mức (Đỏ &lt; 5.0 | Cam 5.0-6.4 | Vàng 6.5-7.9 | Xanh &ge; 8.0).
+            Bảng màu trực quan theo thang đo 4 mức (Đỏ &lt; 5.0, Cam 5.0-6.4, Vàng 6.5-7.9, Xanh &ge; 8.0).
           </p>
         </div>
 
@@ -231,24 +232,24 @@ export const MasteryHeatmap: React.FC<MasteryHeatmapProps> = ({
           </p>
         </div>
       ) : viewMode === 'grid' ? (
-        /* 1. GRID MATRIX VIEW */
+        /* 1. FULL-CELL COLOR MATRIX VIEW (No inner rounded pill!) */
         <div className="space-y-3">
-          <div className="overflow-x-auto border border-white/5 rounded-xl scrollbar-thin">
+          <div className="overflow-x-auto border border-white/10 rounded-xl scrollbar-thin">
             <table className="w-full text-xs text-left border-collapse">
               <thead>
                 <tr className="bg-[#121626] border-b border-white/10 text-slate-300">
-                  <th className="py-3 px-4 sticky left-0 z-20 bg-[#121626] min-w-[180px] font-black uppercase text-[11px] tracking-wider border-r border-white/10">
+                  <th className="py-3.5 px-4 sticky left-0 z-20 bg-[#121626] min-w-[200px] font-black uppercase text-[11px] tracking-wider border-r border-white/10">
                     Học Sinh ({displayedStudents.length}/{filteredStudents.length})
                   </th>
                   {filteredUnits.map((u) => (
                     <th
                       key={u.unit_key}
-                      className="py-2.5 px-3 text-center min-w-[110px] font-bold border-r border-white/5"
+                      className="py-3 px-3 text-center min-w-[110px] font-bold border-r border-white/10"
                     >
                       <div className="text-[11px] text-white truncate max-w-[120px] mx-auto font-black" title={u.unit_key}>
                         {u.unit_key}
                       </div>
-                      <div className="flex items-center justify-center gap-1 mt-1">
+                      <div className="flex items-center justify-center gap-1.5 mt-1">
                         <span
                           className={`text-[9px] font-extrabold uppercase px-1.5 py-0.2 rounded ${
                             u.skill === 'vocab'
@@ -258,8 +259,8 @@ export const MasteryHeatmap: React.FC<MasteryHeatmapProps> = ({
                         >
                           {u.skill === 'vocab' ? 'Từ Vựng' : 'Ngữ Pháp'}
                         </span>
-                        <span className="text-[10px] text-slate-400 font-semibold">
-                          TB: {trunc1Dec(u.avg_score)}
+                        <span className="text-[10px] text-slate-400 font-semibold font-mono">
+                          TB {trunc1Dec(u.avg_score)}
                         </span>
                       </div>
                     </th>
@@ -268,14 +269,12 @@ export const MasteryHeatmap: React.FC<MasteryHeatmapProps> = ({
               </thead>
 
               <tbody className="divide-y divide-white/5">
-                {displayedStudents.map((st, idx) => (
+                {displayedStudents.map((st) => (
                   <tr
                     key={st.student_id}
-                    className={`hover:bg-white/[0.02] transition-colors ${
-                      idx % 2 === 1 ? 'bg-[#0d1018]' : 'bg-[#0c0f1d]'
-                    }`}
+                    className="hover:brightness-110 transition-all duration-150"
                   >
-                    <td className="py-2.5 px-4 sticky left-0 z-10 bg-[#0c0f1d] border-r border-white/10 whitespace-nowrap">
+                    <td className="py-3 px-4 sticky left-0 z-10 bg-[#0c0f1d] border-r border-b border-white/10 whitespace-nowrap">
                       <button
                         onClick={() => onSelectStudent && onSelectStudent(st.student_id)}
                         className="text-left font-bold text-white hover:text-indigo-400 transition flex items-center gap-2 group cursor-pointer"
@@ -284,9 +283,9 @@ export const MasteryHeatmap: React.FC<MasteryHeatmapProps> = ({
                           {st.student_name.charAt(0)}
                         </div>
                         <div>
-                          <span className="block leading-tight">{st.student_name}</span>
+                          <span className="block leading-tight font-bold">{st.student_name}</span>
                           {st.nickname && (
-                            <span className="text-[10px] text-slate-500 font-normal">
+                            <span className="text-[10px] text-slate-500 font-semibold">
                               ({st.nickname})
                             </span>
                           )}
@@ -296,22 +295,18 @@ export const MasteryHeatmap: React.FC<MasteryHeatmapProps> = ({
 
                     {filteredUnits.map((u) => {
                       const uData = st.units?.[u.unit_key];
-                      const badge = getStatusBadge(uData?.mastery_status, uData?.ema_score);
+                      const cellStyle = getCellStyle(uData?.ema_score);
 
                       return (
                         <td
                           key={u.unit_key}
-                          className="py-2 px-2 text-center border-r border-white/5"
+                          onMouseMove={(e) => {
+                            if (uData) handleCellMouseMove(e, st.student_name, u.unit_key, uData);
+                          }}
+                          onMouseLeave={() => setHoveredCell(null)}
+                          className={`py-3 px-3 text-center border-r border-b font-mono text-xs transition-colors cursor-pointer select-none ${cellStyle.tdBg} ${cellStyle.tdBorder} ${cellStyle.textColor}`}
                         >
-                          <div
-                            onMouseEnter={(e) => {
-                              if (uData) handleCellHover(e, st.student_name, u.unit_key, uData);
-                            }}
-                            onMouseLeave={() => setHoveredCell(null)}
-                            className={`w-full py-1.5 px-2 rounded-lg border text-center transition cursor-default font-mono text-xs ${badge.bg} ${badge.border} ${badge.text}`}
-                          >
-                            {badge.label}
-                          </div>
+                          {cellStyle.label}
                         </td>
                       );
                     })}
@@ -337,13 +332,15 @@ export const MasteryHeatmap: React.FC<MasteryHeatmapProps> = ({
           )}
         </div>
       ) : (
-        /* 2. STUDENT MASTERY CARDS VIEW (ALTERNATIVE VIEW) */
+        /* 2. STUDENT MASTERY CARDS VIEW */
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredStudents.map((st) => {
             const unitList = Object.entries(st.units || {});
             const masteredList = unitList.filter(([_, d]) => (d.ema_score ?? 0) >= 8.0);
-            const weakList = unitList.filter(([_, d]) => (d.ema_score ?? 0) < 6.5);
             const partialList = unitList.filter(([_, d]) => (d.ema_score ?? 0) >= 6.5 && (d.ema_score ?? 0) < 8.0);
+            const orangeList = unitList.filter(([_, d]) => (d.ema_score ?? 0) >= 5.0 && (d.ema_score ?? 0) < 6.5);
+            const redList = unitList.filter(([_, d]) => (d.ema_score ?? 0) < 5.0);
+            const totalWeak = orangeList.length + redList.length;
 
             return (
               <div
@@ -360,9 +357,10 @@ export const MasteryHeatmap: React.FC<MasteryHeatmapProps> = ({
                       <h4 className="text-xs font-black text-white group-hover:text-indigo-300 transition">
                         {st.student_name}
                       </h4>
-                      <span className="text-[10px] text-slate-400">
-                        {st.nickname ? `${st.nickname} | ` : ''}{st.class_name || 'Lớp học'}
-                      </span>
+                      <div className="flex items-center gap-1.5 text-[10px] text-slate-400">
+                        {st.nickname && <span>({st.nickname})</span>}
+                        <span>{st.class_name || 'Lớp học'}</span>
+                      </div>
                     </div>
                   </div>
                   <span className="text-[10px] font-mono font-bold bg-white/5 px-2 py-0.5 rounded text-slate-300">
@@ -375,23 +373,25 @@ export const MasteryHeatmap: React.FC<MasteryHeatmapProps> = ({
                   <div className="flex justify-between text-[10px] font-mono text-slate-400">
                     <span className="text-emerald-400 font-bold">{masteredList.length} Vững</span>
                     <span className="text-amber-400 font-bold">{partialList.length} Khá</span>
-                    <span className="text-rose-400 font-bold">{weakList.length} Cần Kèm</span>
+                    <span className="text-orange-400 font-bold">{orangeList.length} Củng Cố</span>
+                    <span className="text-rose-400 font-bold">{redList.length} Yếu</span>
                   </div>
                   <div className="w-full h-2 rounded-full bg-[#1e2744] overflow-hidden flex">
                     <div style={{ width: `${(masteredList.length / (unitList.length || 1)) * 100}%` }} className="bg-emerald-500 h-full" />
                     <div style={{ width: `${(partialList.length / (unitList.length || 1)) * 100}%` }} className="bg-amber-500 h-full" />
-                    <div style={{ width: `${(weakList.length / (unitList.length || 1)) * 100}%` }} className="bg-rose-500 h-full" />
+                    <div style={{ width: `${(orangeList.length / (unitList.length || 1)) * 100}%` }} className="bg-orange-500 h-full" />
+                    <div style={{ width: `${(redList.length / (unitList.length || 1)) * 100}%` }} className="bg-rose-500 h-full" />
                   </div>
                 </div>
 
                 {/* Weak Units Tags */}
-                {weakList.length > 0 ? (
+                {totalWeak > 0 ? (
                   <div className="space-y-1 pt-1 border-t border-white/5">
                     <span className="text-[10px] font-black uppercase text-rose-400 block">
-                      Bài Học Cần Kèm Cặp ({weakList.length}):
+                      Bài Học Cần Kèm ({totalWeak}):
                     </span>
                     <div className="flex flex-wrap gap-1">
-                      {weakList.map(([uKey, d]) => (
+                      {[...redList, ...orangeList].slice(0, 4).map(([uKey, d]) => (
                         <span
                           key={uKey}
                           className={`text-[10px] font-bold px-1.5 py-0.5 rounded border font-mono ${
@@ -403,6 +403,11 @@ export const MasteryHeatmap: React.FC<MasteryHeatmapProps> = ({
                           {uKey}: {format1Dec(d.ema_score)}đ
                         </span>
                       ))}
+                      {totalWeak > 4 && (
+                        <span className="text-[10px] text-slate-400 bg-white/5 px-1.5 py-0.5 rounded">
+                          +{totalWeak - 4} bài khác
+                        </span>
+                      )}
                     </div>
                   </div>
                 ) : (
@@ -426,7 +431,7 @@ export const MasteryHeatmap: React.FC<MasteryHeatmapProps> = ({
           </div>
           <div className="flex items-center gap-1.5">
             <span className="w-3 h-3 rounded bg-amber-500/30 border border-amber-500/60 block" />
-            <span className="text-amber-300 font-bold">Vàng: Tiến Bộ (6.5 – 7.9)</span>
+            <span className="text-amber-300 font-bold">Vàng: Đang Tiến Bộ (6.5 – 7.9)</span>
           </div>
           <div className="flex items-center gap-1.5">
             <span className="w-3 h-3 rounded bg-orange-500/30 border border-orange-500/60 block" />
@@ -439,11 +444,11 @@ export const MasteryHeatmap: React.FC<MasteryHeatmapProps> = ({
         </div>
 
         <span className="text-slate-500 italic text-[10px]">
-          Điểm hiển thị là điểm EMA tích lũy của học sinh đối với từng bài học
+          Điểm số là điểm EMA tích lũy của học sinh đối với từng bài học
         </span>
       </div>
 
-      {/* Rock-solid Hover Tooltip (Never jumps or clips) */}
+      {/* Dynamic Colorful Hover Tooltip (Follows cursor, zero jump, rich design) */}
       {hoveredCell && (
         <div
           style={{
@@ -452,32 +457,64 @@ export const MasteryHeatmap: React.FC<MasteryHeatmapProps> = ({
             top: hoveredCell.y,
             transform: hoveredCell.showBelow ? 'translate(-50%, 0)' : 'translate(-50%, -100%)',
           }}
-          className="z-50 pointer-events-none bg-[#121626] border border-indigo-500/40 rounded-xl p-3.5 shadow-[0_12px_30px_rgba(0,0,0,0.7)] text-xs text-white space-y-1.5 min-w-[220px]"
+          className="z-50 pointer-events-none bg-[#0e1224] border-2 border-indigo-500/60 rounded-2xl p-4 shadow-[0_15px_35px_rgba(0,0,0,0.85)] text-xs text-white space-y-2.5 min-w-[240px] select-none"
         >
-          <div className="font-black text-indigo-300 border-b border-white/10 pb-1 flex justify-between">
-            <span>{hoveredCell.studentName}</span>
-            <span className="text-slate-400 font-normal">{hoveredCell.unitKey}</span>
+          {/* Header */}
+          <div className="flex items-center justify-between border-b border-white/10 pb-2">
+            <span className="font-black text-white text-sm">{hoveredCell.studentName}</span>
+            <span className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full border ${
+              hoveredCell.data.skill === 'vocab'
+                ? 'bg-blue-500/20 text-blue-300 border-blue-500/40'
+                : 'bg-purple-500/20 text-purple-300 border-purple-500/40'
+            }`}>
+              {hoveredCell.data.skill === 'vocab' ? 'Từ Vựng' : 'Ngữ Pháp'}
+            </span>
           </div>
-          <div className="flex justify-between text-[11px] text-slate-300">
-            <span>Điểm EMA Tích Lũy:</span>
-            <strong className="text-white font-mono">{trunc1Dec(hoveredCell.data.ema_score)} / 10</strong>
+
+          {/* Unit Title */}
+          <div className="text-xs font-bold text-indigo-300">
+            {hoveredCell.unitKey}
           </div>
-          {hoveredCell.data.last_score !== undefined && (
-            <div className="flex justify-between text-[11px] text-slate-300">
-              <span>Điểm Lần Gần Nhất:</span>
-              <strong className="text-white font-mono">{trunc1Dec(hoveredCell.data.last_score)} / 10</strong>
+
+          {/* Stats */}
+          <div className="space-y-1.5 bg-[#080b16] p-2.5 rounded-xl border border-white/5 font-mono text-[11px]">
+            <div className="flex justify-between items-center">
+              <span className="text-slate-400">Điểm EMA Tích Lũy:</span>
+              <span className={`font-black text-sm ${
+                hoveredCell.data.ema_score >= 8.0 ? 'text-emerald-400' :
+                hoveredCell.data.ema_score >= 6.5 ? 'text-amber-400' :
+                hoveredCell.data.ema_score >= 5.0 ? 'text-orange-400' : 'text-rose-400'
+              }`}>
+                {trunc1Dec(hoveredCell.data.ema_score)} / 10
+              </span>
             </div>
-          )}
-          <div className="flex justify-between text-[11px] text-slate-300">
-            <span>Số Lần Kiểm Tra:</span>
-            <strong className="text-white font-mono">{hoveredCell.data.test_count} lần</strong>
-          </div>
-          {hoveredCell.data.last_tested && (
-            <div className="flex justify-between text-[10px] text-slate-400 pt-0.5">
-              <span>Ngày test gần nhất:</span>
-              <span>{hoveredCell.data.last_tested}</span>
+
+            {hoveredCell.data.last_score !== undefined && (
+              <div className="flex justify-between items-center text-slate-300">
+                <span className="text-slate-400">Điểm Test Gần Nhất:</span>
+                <span className="font-bold text-white">{trunc1Dec(hoveredCell.data.last_score)}đ</span>
+              </div>
+            )}
+
+            <div className="flex justify-between items-center text-slate-300">
+              <span className="text-slate-400">Số Lần Đã Test:</span>
+              <span className="font-bold text-indigo-300">{hoveredCell.data.test_count} buổi</span>
             </div>
-          )}
+          </div>
+
+          {/* Status Badge */}
+          <div className="flex items-center justify-between pt-1 text-[11px]">
+            <span className="text-slate-400 font-medium">Trạng thái:</span>
+            <span className={`font-black px-2 py-0.5 rounded-md ${
+              hoveredCell.data.ema_score >= 8.0 ? 'bg-emerald-500/20 text-emerald-300' :
+              hoveredCell.data.ema_score >= 6.5 ? 'bg-amber-500/20 text-amber-300' :
+              hoveredCell.data.ema_score >= 5.0 ? 'bg-orange-500/20 text-orange-300' : 'bg-rose-500/20 text-rose-300'
+            }`}>
+              {hoveredCell.data.ema_score >= 8.0 ? 'Nắm Vững' :
+               hoveredCell.data.ema_score >= 6.5 ? 'Đang Tiến Bộ' :
+               hoveredCell.data.ema_score >= 5.0 ? 'Cần Củng Cố' : 'Chưa Đạt (Kèm Gấp)'}
+            </span>
+          </div>
         </div>
       )}
     </div>

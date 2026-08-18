@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
 import { DataTable } from '../../../components/DataTable';
-import { AlertTriangle, ArrowRight } from 'lucide-react';
+import { AlertTriangle, ArrowRight, BookOpen } from 'lucide-react';
 import { trunc1Dec, format1Dec } from '../../../utils';
 
 export interface StudentWeakUnitItem {
@@ -175,16 +175,19 @@ export const StudentWeaknessDiagnosisCard: React.FC<StudentWeaknessDiagnosisCard
       header: 'Học Sinh',
       meta: { headerText: 'Học Sinh', exportValue: (r: StudentRemedialSummaryRow) => `${r.student_name} ${r.nickname ? `(${r.nickname})` : ''}` },
       cell: ({ row }) => (
-        <div className="flex flex-col">
+        <div className="flex flex-col gap-1">
           <span className="font-bold text-white group-hover:text-indigo-300 transition text-xs">
             {row.original.student_name}
           </span>
-          <div className="flex items-center gap-1.5 text-[11px] text-slate-400 font-semibold">
+          <div className="flex items-center gap-1.5 flex-wrap">
             {row.original.nickname && (
-              <span>({row.original.nickname})</span>
+              <span className="text-[10px] font-extrabold text-indigo-300 bg-indigo-500/15 px-1.5 py-0.5 rounded border border-indigo-500/20">
+                {row.original.nickname}
+              </span>
             )}
-            <span className="text-slate-500">|</span>
-            <span className="text-slate-400">{row.original.class_name || 'Lớp học'}</span>
+            <span className="text-[10px] text-slate-400 font-semibold bg-[#121626] px-1.5 py-0.5 rounded border border-white/5">
+              {row.original.class_name || 'Lớp học'}
+            </span>
           </div>
         </div>
       ),
@@ -194,19 +197,24 @@ export const StudentWeaknessDiagnosisCard: React.FC<StudentWeaknessDiagnosisCard
       header: () => <div className="text-center w-full">Số Bài Cần Kèm</div>,
       meta: { headerText: 'Số Bài Cần Kèm', exportValue: (r: StudentRemedialSummaryRow) => `${r.total_weak_count} bài` },
       cell: ({ row }) => (
-        <div className="text-center">
+        <div className="text-center space-y-1">
           <span className="font-mono font-black text-rose-400 text-sm block">
             {row.original.total_weak_count} bài
           </span>
-          <span className="text-[10px] text-slate-400 font-semibold">
-            {row.original.grammar_count} NP | {row.original.vocab_count} TV
-          </span>
+          <div className="flex items-center justify-center gap-1 flex-wrap">
+            <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30">
+              {row.original.grammar_count} Ngữ Pháp
+            </span>
+            <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-blue-500/20 text-blue-300 border border-blue-500/30">
+              {row.original.vocab_count} Từ Vựng
+            </span>
+          </div>
         </div>
       ),
     },
     {
       id: 'weak_units_list',
-      header: 'Các Unit & Chủ Đề Cần Phụ Đạo',
+      header: 'Các Unit Điểm Thấp Cần Kèm',
       enableSorting: false,
       meta: {
         headerText: 'Danh Sách Unit',
@@ -214,29 +222,39 @@ export const StudentWeaknessDiagnosisCard: React.FC<StudentWeaknessDiagnosisCard
       },
       cell: ({ row }) => {
         const units = row.original.weak_units;
+        const topUnits = units.slice(0, 4);
+        const remaining = units.length - 4;
+
         return (
-          <div className="flex flex-wrap items-center gap-1.5 max-w-xl py-1">
-            {units.map((u, i) => {
+          <div className="flex items-center gap-1.5 flex-wrap py-1">
+            {topUnits.map((u, i) => {
               const isUrgent = u.avg_score < 5.0;
               const isGrammar = u.skill === 'grammar';
               return (
                 <span
                   key={i}
-                  className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[11px] font-bold border ${
+                  className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg text-[11px] font-bold border ${
                     isUrgent
                       ? 'bg-rose-500/20 text-rose-300 border-rose-500/40 font-mono'
                       : 'bg-orange-500/20 text-orange-300 border-orange-500/40 font-mono'
                   }`}
                   title={`${u.topic_name} - ${format1Dec(u.avg_score)}đ (${u.test_count} lần kiểm tra)`}
                 >
-                  <span className={isGrammar ? 'text-purple-300 font-black' : 'text-blue-300 font-black'}>
+                  <span className={`text-[9px] font-black uppercase px-1 py-0.2 rounded ${
+                    isGrammar ? 'bg-purple-500/30 text-purple-200' : 'bg-blue-500/30 text-blue-200'
+                  }`}>
                     {isGrammar ? 'NP' : 'TV'}
                   </span>
                   <span>{u.unit_key}</span>
-                  <span className="font-black underline">{format1Dec(u.avg_score)}đ</span>
+                  <span className="font-black text-white">{format1Dec(u.avg_score)}đ</span>
                 </span>
               );
             })}
+            {remaining > 0 && (
+              <span className="text-[10px] font-bold text-slate-400 bg-[#121626] border border-white/10 px-2 py-0.5 rounded-lg">
+                +{remaining} bài khác
+              </span>
+            )}
           </div>
         );
       },
@@ -291,7 +309,7 @@ export const StudentWeaknessDiagnosisCard: React.FC<StudentWeaknessDiagnosisCard
               e.stopPropagation();
               onSelectStudent && onSelectStudent(row.original.student_id);
             }}
-            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-indigo-600/20 hover:bg-indigo-600/40 text-indigo-300 hover:text-white border border-indigo-500/30 text-xs font-bold transition cursor-pointer active:scale-95"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-600/20 hover:bg-indigo-600/40 text-indigo-300 hover:text-white border border-indigo-500/30 text-xs font-bold transition cursor-pointer active:scale-95"
           >
             <span>Soi Ma Trận</span>
             <ArrowRight size={12} />
@@ -351,7 +369,7 @@ export const StudentWeaknessDiagnosisCard: React.FC<StudentWeaknessDiagnosisCard
             Danh Sách Học Sinh Cần Phụ Đạo & Kèm Cặp Trọng Điểm
           </h3>
           <p className="text-xs text-slate-400 mt-0.5">
-            Mỗi học sinh hiển thị 1 dòng tổng hợp toàn bộ các bài học/chủ đề bị hổng kiến thức (&lt; 6.5đ). Nhấn vào học sinh để mở Ma trận Nắm vững.
+            Tổng hợp danh sách học sinh có bài học &lt; 6.5đ. Bấm vào học sinh để mở Ma trận Nắm vững.
           </p>
         </div>
       </div>
@@ -369,12 +387,12 @@ export const StudentWeaknessDiagnosisCard: React.FC<StudentWeaknessDiagnosisCard
           <span className="text-[10px] text-slate-500 font-medium block">Có bài kiểm tra &lt; 5.0đ</span>
         </div>
         <div className="space-y-0.5">
-          <span className="text-[10px] font-bold uppercase text-slate-400">Tổng Số Bài Ngữ Pháp Hổng</span>
+          <span className="text-[10px] font-bold uppercase text-slate-400">Tổng Lượt Ngữ Pháp Hổng</span>
           <div className="text-xl font-black text-purple-400 font-mono">{stats.totalGrammarWeak} lượt</div>
           <span className="text-[10px] text-slate-500 font-medium block">Cần củng cố cấu trúc ngữ pháp</span>
         </div>
         <div className="space-y-0.5">
-          <span className="text-[10px] font-bold uppercase text-slate-400">Tổng Số Bài Từ Vựng Hổng</span>
+          <span className="text-[10px] font-bold uppercase text-slate-400">Tổng Lượt Từ Vựng Hổng</span>
           <div className="text-xl font-black text-blue-400 font-mono">{stats.totalVocabWeak} lượt</div>
           <span className="text-[10px] text-slate-500 font-medium block">Cần kiểm tra lại từ vựng unit</span>
         </div>
@@ -386,7 +404,7 @@ export const StudentWeaknessDiagnosisCard: React.FC<StudentWeaknessDiagnosisCard
         data={filteredData}
         columns={columns}
         pageSize={20}
-        searchPlaceholder="Tìm theo tên học sinh, lớp, unit..."
+        searchPlaceholder="Tìm theo tên học sinh, lớp..."
         emptyMessage="Tuyệt vời! Không phát hiện học sinh nào có điểm dưới 6.5."
         toolbarLeft={toolbarLeft}
         exportFilename="danh_sach_hoc_sinh_can_phu_dao"
