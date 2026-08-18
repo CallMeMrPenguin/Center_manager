@@ -1,20 +1,29 @@
 import React, { useState, useMemo } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
 import { DataTable } from '../../../components/DataTable';
-import { AlertCircle, BookOpen, Sparkles } from 'lucide-react';
+import { AlertTriangle, ArrowRight } from 'lucide-react';
 import { trunc1Dec, format1Dec } from '../../../utils';
 
-export interface WeaknessTableRow {
-  id: string;
-  student_id: number;
-  student_name: string;
-  nickname: string;
-  class_name: string;
+export interface StudentWeakUnitItem {
   unit_key: string;
   skill: 'vocab' | 'grammar';
   topic_name: string;
   avg_score: number;
   test_count: number;
+}
+
+export interface StudentRemedialSummaryRow {
+  id: string;
+  student_id: number;
+  student_name: string;
+  nickname: string;
+  class_name: string;
+  weak_units: StudentWeakUnitItem[];
+  total_weak_count: number;
+  grammar_count: number;
+  vocab_count: number;
+  urgent_count: number;
+  lowest_score: number;
   status: string;
 }
 
@@ -34,15 +43,15 @@ export const StudentWeaknessDiagnosisCard: React.FC<StudentWeaknessDiagnosisCard
 }) => {
   const [skillFilter, setSkillFilter] = useState<'all' | 'grammar' | 'vocab'>('all');
 
-  // Flattened array of weaknesses for DataTable
-  const rawWeaknessList = useMemo<WeaknessTableRow[]>(() => {
+  // Aggregate session records by Student (1 row per student)
+  const studentRemedialList = useMemo<StudentRemedialSummaryRow[]>(() => {
     let list = selectedClassId ? sessionRecords.filter(r => String(r.class_id) === selectedClassId) : sessionRecords;
     if (selectedStudentId && selectedStudentId !== '0' && selectedStudentId !== '') {
       list = list.filter(r => String(r.student_id) === String(selectedStudentId));
     }
     if (!list || list.length === 0) return [];
 
-    // Map: student_id -> Map<unit_skill_key, { ...scores }>
+    // Map: student_id -> { name, nickname, className, unitMap }
     const studentScoreMap = new Map<number, {
       name: string;
       nickname: string;
@@ -88,40 +97,71 @@ export const StudentWeaknessDiagnosisCard: React.FC<StudentWeaknessDiagnosisCard
       }
     });
 
-    const rows: WeaknessTableRow[] = [];
+    const rows: StudentRemedialSummaryRow[] = [];
 
     studentScoreMap.forEach((stData, sid) => {
+      const weakUnits: StudentWeakUnitItem[] = [];
+
       stData.unitMap.forEach((uData) => {
         if (uData.scores.length > 0) {
           const avg = trunc1Dec(uData.scores.reduce((a, b) => a + b, 0) / uData.scores.length);
           if (avg < 6.5) {
-            rows.push({
-              id: `${sid}-${uData.unit_key}-${uData.skill}`,
-              student_id: sid,
-              student_name: stData.name,
-              nickname: stData.nickname,
-              class_name: stData.className,
+            weakUnits.push({
               unit_key: uData.unit_key,
               skill: uData.skill,
               topic_name: uData.topic_name,
               avg_score: avg,
               test_count: uData.scores.length,
-              status: avg < 5.0 ? 'Cần Phụ Đạo Gấp' : 'Cần Củng Cố',
             });
           }
         }
       });
+
+      if (weakUnits.length > 0) {
+        weakUnits.sort((a, b) => a.avg_score - b.avg_score);
+        const urgentCount = weakUnits.filter(u => u.avg_score < 5.0).length;
+        const grammarCount = weakUnits.filter(u => u.skill === 'grammar').length;
+        const vocabCount = weakUnits.filter(u => u.skill === 'vocab').length;
+        const lowestScore = weakUnits[0]?.avg_score ?? 0;
+
+        rows.push({
+          id: String(sid),
+          student_id: sid,
+          student_name: stData.name,
+          nickname: stData.nickname,
+          class_name: stData.className,
+          weak_units: weakUnits,
+          total_weak_count: weakUnits.length,
+          grammar_count: grammarCount,
+          vocab_count: vocabCount,
+          urgent_count: urgentCount,
+          lowest_score: lowestScore,
+          status: urgentCount > 0 ? 'Cần Phụ Đạo Gấp' : 'Cần Củng Cố',
+        });
+      }
     });
 
-    return rows.sort((a, b) => a.avg_score - b.avg_score);
-  }, [sessionRecords, selectedClassId]);
+    // Sort by urgent cases first, then by total weak count descending
+    return rows.sort((a, b) => (b.urgent_count - a.urgent_count) || (b.total_weak_count - a.total_weak_count));
+  }, [sessionRecords, selectedClassId, selectedStudentId]);
 
   const filteredData = useMemo(() => {
-    if (skillFilter === 'all') return rawWeaknessList;
-    return rawWeaknessList.filter(r => r.skill === skillFilter);
-  }, [rawWeaknessList, skillFilter]);
+    if (skillFilter === 'all') return studentRemedialList;
+    if (skillFilter === 'grammar') {
+      return studentRemedialList.filter(r => r.grammar_count > 0);
+    }
+    return studentRemedialList.filter(r => r.vocab_count > 0);
+  }, [studentRemedialList, skillFilter]);
 
-  const columns = useMemo<ColumnDef<WeaknessTableRow>[]>(() => [
+  const stats = useMemo(() => {
+    const totalStudents = studentRemedialList.length;
+    const urgentCount = studentRemedialList.filter(r => r.urgent_count > 0).length;
+    const totalGrammarWeak = studentRemedialList.reduce((sum, r) => sum + r.grammar_count, 0);
+    const totalVocabWeak = studentRemedialList.reduce((sum, r) => sum + r.vocab_count, 0);
+    return { totalStudents, urgentCount, totalGrammarWeak, totalVocabWeak };
+  }, [studentRemedialList]);
+
+  const columns = useMemo<ColumnDef<StudentRemedialSummaryRow>[]>(() => [
     {
       id: 'stt',
       header: () => <div className="text-center w-full">STT</div>,
@@ -133,78 +173,83 @@ export const StudentWeaknessDiagnosisCard: React.FC<StudentWeaknessDiagnosisCard
     {
       accessorKey: 'student_name',
       header: 'Học Sinh',
-      meta: { headerText: 'Học Sinh', exportValue: (r: WeaknessTableRow) => `${r.student_name} ${r.nickname ? `(${r.nickname})` : ''}` },
+      meta: { headerText: 'Học Sinh', exportValue: (r: StudentRemedialSummaryRow) => `${r.student_name} ${r.nickname ? `(${r.nickname})` : ''}` },
       cell: ({ row }) => (
         <div className="flex flex-col">
-          <span className="font-bold text-white group-hover:text-indigo-300 transition">
+          <span className="font-bold text-white group-hover:text-indigo-300 transition text-xs">
             {row.original.student_name}
           </span>
-          {row.original.nickname && (
-            <span className="text-[11px] text-slate-400 font-semibold">
-              Biệt danh: {row.original.nickname}
-            </span>
-          )}
+          <div className="flex items-center gap-1.5 text-[11px] text-slate-400 font-semibold">
+            {row.original.nickname && (
+              <span>({row.original.nickname})</span>
+            )}
+            <span className="text-slate-500">|</span>
+            <span className="text-slate-400">{row.original.class_name || 'Lớp học'}</span>
+          </div>
         </div>
       ),
     },
     {
-      accessorKey: 'class_name',
-      header: 'Lớp Học',
-      meta: { headerText: 'Lớp Học', exportValue: (r: WeaknessTableRow) => r.class_name },
-      cell: (info) => <span className="font-bold text-slate-300">{info.getValue<string>() || 'Lớp học'}</span>,
-    },
-    {
-      accessorKey: 'unit_key',
-      header: 'Bài Học / Unit',
-      meta: { headerText: 'Bài Học', exportValue: (r: WeaknessTableRow) => r.unit_key },
-      cell: (info) => (
-        <span className="font-bold font-mono text-indigo-300">
-          {info.getValue<string>()}
-        </span>
+      accessorKey: 'total_weak_count',
+      header: () => <div className="text-center w-full">Số Bài Cần Kèm</div>,
+      meta: { headerText: 'Số Bài Cần Kèm', exportValue: (r: StudentRemedialSummaryRow) => `${r.total_weak_count} bài` },
+      cell: ({ row }) => (
+        <div className="text-center">
+          <span className="font-mono font-black text-rose-400 text-sm block">
+            {row.original.total_weak_count} bài
+          </span>
+          <span className="text-[10px] text-slate-400 font-semibold">
+            {row.original.grammar_count} NP | {row.original.vocab_count} TV
+          </span>
+        </div>
       ),
     },
     {
-      accessorKey: 'skill',
-      header: () => <div className="text-center w-full">Kỹ Năng</div>,
-      meta: { headerText: 'Kỹ Năng', exportValue: (r: WeaknessTableRow) => r.skill === 'grammar' ? 'Ngữ Pháp' : 'Từ Vựng' },
-      cell: ({ getValue }) => {
-        const skill = getValue<string>();
-        const isGrammar = skill === 'grammar';
+      id: 'weak_units_list',
+      header: 'Các Unit & Chủ Đề Cần Phụ Đạo',
+      enableSorting: false,
+      meta: {
+        headerText: 'Danh Sách Unit',
+        exportValue: (r: StudentRemedialSummaryRow) => r.weak_units.map(u => `${u.unit_key} (${u.skill === 'grammar' ? 'NP' : 'TV'}: ${format1Dec(u.avg_score)}đ)`).join(', ')
+      },
+      cell: ({ row }) => {
+        const units = row.original.weak_units;
         return (
-          <div className="text-center">
-            <span
-              className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-black border ${
-                isGrammar
-                  ? 'bg-purple-500/15 text-purple-300 border-purple-500/30'
-                  : 'bg-blue-500/15 text-blue-300 border-blue-500/30'
-              }`}
-            >
-              {isGrammar ? 'Ngữ Pháp' : 'Từ Vựng'}
-            </span>
+          <div className="flex flex-wrap items-center gap-1.5 max-w-xl py-1">
+            {units.map((u, i) => {
+              const isUrgent = u.avg_score < 5.0;
+              const isGrammar = u.skill === 'grammar';
+              return (
+                <span
+                  key={i}
+                  className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[11px] font-bold border ${
+                    isUrgent
+                      ? 'bg-rose-500/20 text-rose-300 border-rose-500/40 font-mono'
+                      : 'bg-orange-500/20 text-orange-300 border-orange-500/40 font-mono'
+                  }`}
+                  title={`${u.topic_name} - ${format1Dec(u.avg_score)}đ (${u.test_count} lần kiểm tra)`}
+                >
+                  <span className={isGrammar ? 'text-purple-300 font-black' : 'text-blue-300 font-black'}>
+                    {isGrammar ? 'NP' : 'TV'}
+                  </span>
+                  <span>{u.unit_key}</span>
+                  <span className="font-black underline">{format1Dec(u.avg_score)}đ</span>
+                </span>
+              );
+            })}
           </div>
         );
       },
     },
     {
-      accessorKey: 'topic_name',
-      header: 'Chủ Đề Chi Tiết',
-      meta: { headerText: 'Chủ Đề', exportValue: (r: WeaknessTableRow) => r.topic_name },
-      cell: (info) => (
-        <span className="text-xs text-slate-300 truncate max-w-[200px] block" title={info.getValue<string>()}>
-          {info.getValue<string>()}
-        </span>
-      ),
-    },
-    {
-      accessorKey: 'avg_score',
-      header: () => <div className="text-center w-full">Điểm TB Unit</div>,
-      meta: { headerText: 'Điểm TB Unit', exportValue: (r: WeaknessTableRow) => format1Dec(r.avg_score) },
+      accessorKey: 'lowest_score',
+      header: () => <div className="text-center w-full">Điểm Thấp Nhất</div>,
+      meta: { headerText: 'Điểm Thấp Nhất', exportValue: (r: StudentRemedialSummaryRow) => format1Dec(r.lowest_score) },
       cell: ({ getValue }) => {
         const val = getValue<number>();
-        const isCritical = val < 5.0;
         return (
           <div className="text-center font-mono font-black text-sm">
-            <span className={isCritical ? 'text-rose-400' : 'text-amber-400'}>
+            <span className={val < 5.0 ? 'text-rose-400' : 'text-orange-400'}>
               {format1Dec(val)}đ
             </span>
           </div>
@@ -212,19 +257,9 @@ export const StudentWeaknessDiagnosisCard: React.FC<StudentWeaknessDiagnosisCard
       },
     },
     {
-      accessorKey: 'test_count',
-      header: () => <div className="text-center w-full">Số Lần Test</div>,
-      meta: { headerText: 'Số Lần Test', exportValue: (r: WeaknessTableRow) => r.test_count },
-      cell: (info) => (
-        <div className="text-center font-mono font-bold text-slate-400">
-          {info.getValue<number>()} buổi
-        </div>
-      ),
-    },
-    {
       accessorKey: 'status',
-      header: () => <div className="text-center w-full">Định Hướng Sư Phạm</div>,
-      meta: { headerText: 'Định Hướng', exportValue: (r: WeaknessTableRow) => r.status },
+      header: () => <div className="text-center w-full">Mức Độ</div>,
+      meta: { headerText: 'Mức Độ', exportValue: (r: StudentRemedialSummaryRow) => r.status },
       cell: ({ getValue }) => {
         const status = getValue<string>();
         const isUrgent = status === 'Cần Phụ Đạo Gấp';
@@ -234,7 +269,7 @@ export const StudentWeaknessDiagnosisCard: React.FC<StudentWeaknessDiagnosisCard
               className={`inline-block px-2.5 py-0.5 rounded-full text-[11px] font-extrabold border ${
                 isUrgent
                   ? 'bg-rose-500/20 text-rose-300 border-rose-500/40'
-                  : 'bg-amber-500/20 text-amber-300 border-amber-500/40'
+                  : 'bg-orange-500/20 text-orange-300 border-orange-500/40'
               }`}
             >
               {status}
@@ -243,15 +278,28 @@ export const StudentWeaknessDiagnosisCard: React.FC<StudentWeaknessDiagnosisCard
         );
       },
     },
-  ], []);
-
-  const stats = useMemo(() => {
-    const uniqueStudents = new Set(rawWeaknessList.map(r => r.student_id)).size;
-    const urgentCount = rawWeaknessList.filter(r => r.status === 'Cần Phụ Đạo Gấp').length;
-    const grammarCount = rawWeaknessList.filter(r => r.skill === 'grammar').length;
-    const vocabCount = rawWeaknessList.filter(r => r.skill === 'vocab').length;
-    return { uniqueStudents, urgentCount, grammarCount, vocabCount };
-  }, [rawWeaknessList]);
+    {
+      id: 'action',
+      header: () => <div className="text-center w-full">Thao Tác</div>,
+      enableSorting: false,
+      enableGlobalFilter: false,
+      cell: ({ row }) => (
+        <div className="text-center">
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onSelectStudent && onSelectStudent(row.original.student_id);
+            }}
+            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-indigo-600/20 hover:bg-indigo-600/40 text-indigo-300 hover:text-white border border-indigo-500/30 text-xs font-bold transition cursor-pointer active:scale-95"
+          >
+            <span>Soi Ma Trận</span>
+            <ArrowRight size={12} />
+          </button>
+        </div>
+      ),
+    },
+  ], [onSelectStudent]);
 
   const toolbarLeft = (
     <div className="relative flex bg-[#0d1018] p-1 rounded-xl border border-white/10 text-xs font-bold shrink-0 w-80">
@@ -272,7 +320,7 @@ export const StudentWeaknessDiagnosisCard: React.FC<StudentWeaknessDiagnosisCard
           skillFilter === 'all' ? 'text-white font-black' : 'text-slate-400 hover:text-white'
         }`}
       >
-        Tất Cả ({rawWeaknessList.length})
+        Tất Cả ({studentRemedialList.length})
       </button>
       <button
         onClick={() => setSkillFilter('grammar')}
@@ -280,7 +328,7 @@ export const StudentWeaknessDiagnosisCard: React.FC<StudentWeaknessDiagnosisCard
           skillFilter === 'grammar' ? 'text-white font-black' : 'text-slate-400 hover:text-white'
         }`}
       >
-        Ngữ Pháp ({stats.grammarCount})
+        Ngữ Pháp
       </button>
       <button
         onClick={() => setSkillFilter('vocab')}
@@ -288,7 +336,7 @@ export const StudentWeaknessDiagnosisCard: React.FC<StudentWeaknessDiagnosisCard
           skillFilter === 'vocab' ? 'text-white font-black' : 'text-slate-400 hover:text-white'
         }`}
       >
-        Từ Vựng ({stats.vocabCount})
+        Từ Vựng
       </button>
     </div>
   );
@@ -298,11 +346,12 @@ export const StudentWeaknessDiagnosisCard: React.FC<StudentWeaknessDiagnosisCard
       {/* Title Bar */}
       <div className="border-b border-white/5 pb-3 flex flex-wrap items-center justify-between gap-2">
         <div>
-          <h3 className="text-sm font-black text-white uppercase tracking-wider">
-            Danh Sách Học Sinh Cần Phụ Đạo Theo Bài Học & Kỹ Năng
+          <h3 className="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2">
+            <AlertTriangle size={16} className="text-amber-400" />
+            Danh Sách Học Sinh Cần Phụ Đạo & Kèm Cặp Trọng Điểm
           </h3>
           <p className="text-xs text-slate-400 mt-0.5">
-            Bảng thống kê chi tiết toàn bộ các Unit có điểm trung bình dưới 6.5 để giáo viên lên kế hoạch kèm cặp trọng điểm.
+            Mỗi học sinh hiển thị 1 dòng tổng hợp toàn bộ các bài học/chủ đề bị hổng kiến thức (&lt; 6.5đ). Nhấn vào học sinh để mở Ma trận Nắm vững.
           </p>
         </div>
       </div>
@@ -311,38 +360,38 @@ export const StudentWeaknessDiagnosisCard: React.FC<StudentWeaknessDiagnosisCard
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-[#080c18] border border-white/5 p-3.5 rounded-xl">
         <div className="space-y-0.5">
           <span className="text-[10px] font-bold uppercase text-slate-400">Học Sinh Cần Kèm</span>
-          <div className="text-xl font-black text-amber-400 font-mono">{stats.uniqueStudents} HS</div>
+          <div className="text-xl font-black text-amber-400 font-mono">{stats.totalStudents} HS</div>
           <span className="text-[10px] text-slate-500 font-medium block">Có bài học &lt; 6.5đ</span>
         </div>
         <div className="space-y-0.5">
           <span className="text-[10px] font-bold uppercase text-slate-400">Cần Phụ Đạo Gấp</span>
-          <div className="text-xl font-black text-rose-400 font-mono">{stats.urgentCount} lượt</div>
-          <span className="text-[10px] text-slate-500 font-medium block">Điểm trung bình &lt; 5.0đ</span>
+          <div className="text-xl font-black text-rose-400 font-mono">{stats.urgentCount} HS</div>
+          <span className="text-[10px] text-slate-500 font-medium block">Có bài kiểm tra &lt; 5.0đ</span>
         </div>
         <div className="space-y-0.5">
-          <span className="text-[10px] font-bold uppercase text-slate-400">Hổng Kiến Thức Ngữ Pháp</span>
-          <div className="text-xl font-black text-purple-400 font-mono">{stats.grammarCount} lượt</div>
-          <span className="text-[10px] text-slate-500 font-medium block">Cần ôn lại cấu trúc ngữ pháp</span>
+          <span className="text-[10px] font-bold uppercase text-slate-400">Tổng Số Bài Ngữ Pháp Hổng</span>
+          <div className="text-xl font-black text-purple-400 font-mono">{stats.totalGrammarWeak} lượt</div>
+          <span className="text-[10px] text-slate-500 font-medium block">Cần củng cố cấu trúc ngữ pháp</span>
         </div>
         <div className="space-y-0.5">
-          <span className="text-[10px] font-bold uppercase text-slate-400">Hổng Kiến Thức Từ Vựng</span>
-          <div className="text-xl font-black text-blue-400 font-mono">{stats.vocabCount} lượt</div>
+          <span className="text-[10px] font-bold uppercase text-slate-400">Tổng Số Bài Từ Vựng Hổng</span>
+          <div className="text-xl font-black text-blue-400 font-mono">{stats.totalVocabWeak} lượt</div>
           <span className="text-[10px] text-slate-500 font-medium block">Cần kiểm tra lại từ vựng unit</span>
         </div>
       </div>
 
       {/* TanStack DataTable */}
-      <DataTable<WeaknessTableRow>
+      <DataTable<StudentRemedialSummaryRow>
         tableId="student-weakness-diagnosis-table"
         data={filteredData}
         columns={columns}
         pageSize={20}
-        searchPlaceholder="Tìm theo tên học sinh, bài học, chủ đề..."
-        emptyMessage="Tuyệt vời! Không phát hiện bài học nào dưới 6.5 điểm."
+        searchPlaceholder="Tìm theo tên học sinh, lớp, unit..."
+        emptyMessage="Tuyệt vời! Không phát hiện học sinh nào có điểm dưới 6.5."
         toolbarLeft={toolbarLeft}
         exportFilename="danh_sach_hoc_sinh_can_phu_dao"
         onRowClick={(row) => onSelectStudent && onSelectStudent(row.student_id)}
-        initialSorting={[{ id: 'avg_score', desc: false }]}
+        initialSorting={[{ id: 'total_weak_count', desc: true }]}
       />
     </div>
   );
