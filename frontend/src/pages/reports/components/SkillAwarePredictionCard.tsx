@@ -1,5 +1,6 @@
 import React from 'react';
 import { trunc1Dec } from '../../../utils';
+import { Sparkles, AlertTriangle, CheckCircle2, TrendingUp } from 'lucide-react';
 
 interface SkillAwarePredictionProps {
   prediction: {
@@ -14,6 +15,15 @@ interface SkillAwarePredictionProps {
       skill: string;
       topic?: string;
       units: string[];
+    };
+    class_overview?: {
+      total_students: number;
+      ready_count: number;
+      mastered_count: number;
+      at_risk_count: number;
+      avg_c1_pred: number;
+      avg_c2_pred: number;
+      readiness_rate: number;
     };
     at_risk_students: {
       student_id: number;
@@ -50,6 +60,7 @@ export const SkillAwarePredictionCard: React.FC<SkillAwarePredictionProps> = ({
   }
 
   const atRisk = prediction.at_risk_students || [];
+  const overview = prediction.class_overview;
 
   return (
     <div className="bg-[#0c0f1d] border border-indigo-500/30 rounded-2xl p-5 shadow-xl space-y-5 select-none relative overflow-hidden">
@@ -57,7 +68,8 @@ export const SkillAwarePredictionCard: React.FC<SkillAwarePredictionProps> = ({
       <div className="flex flex-wrap items-center justify-between gap-4 border-b border-white/5 pb-4">
         <div>
           <div className="flex items-center gap-2">
-            <h3 className="text-base font-black text-white">
+            <h3 className="text-base font-black text-white flex items-center gap-2">
+              <Sparkles size={18} className="text-indigo-400" />
               Dự Báo Năng Lực Buổi Học Sắp Tới
             </h3>
             <span className="text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
@@ -84,6 +96,63 @@ export const SkillAwarePredictionCard: React.FC<SkillAwarePredictionProps> = ({
         </div>
       </div>
 
+      {/* Class Readiness Overview KPI Strip */}
+      {overview && (
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-[#080c18] border border-white/5 p-3.5 rounded-xl">
+          <div className="space-y-1">
+            <span className="text-[10px] font-bold uppercase text-slate-400 flex items-center gap-1.5">
+              <CheckCircle2 size={12} className="text-emerald-400" />
+              Tỷ Lệ Sẵn Sàng
+            </span>
+            <div className="text-xl font-black text-emerald-400 font-mono">
+              {overview.readiness_rate}%
+            </div>
+            <span className="text-[10px] text-slate-500 font-medium block">
+              {overview.ready_count}/{overview.total_students} học sinh đạt chuẩn
+            </span>
+          </div>
+
+          <div className="space-y-1">
+            <span className="text-[10px] font-bold uppercase text-slate-400 flex items-center gap-1.5">
+              <TrendingUp size={12} className="text-blue-400" />
+              Dự Báo Check 1 (Từ Vựng)
+            </span>
+            <div className="text-xl font-black text-blue-400 font-mono">
+              {trunc1Dec(overview.avg_c1_pred)}đ
+            </div>
+            <span className="text-[10px] text-slate-500 font-medium block">
+              Điểm TB dự kiến cả lớp
+            </span>
+          </div>
+
+          <div className="space-y-1">
+            <span className="text-[10px] font-bold uppercase text-slate-400 flex items-center gap-1.5">
+              <TrendingUp size={12} className="text-purple-400" />
+              Dự Báo Check 2 (Ngữ Pháp)
+            </span>
+            <div className="text-xl font-black text-purple-400 font-mono">
+              {trunc1Dec(overview.avg_c2_pred)}đ
+            </div>
+            <span className="text-[10px] text-slate-500 font-medium block">
+              Điểm TB dự kiến cả lớp
+            </span>
+          </div>
+
+          <div className="space-y-1">
+            <span className="text-[10px] font-bold uppercase text-slate-400 flex items-center gap-1.5">
+              <AlertTriangle size={12} className="text-amber-400" />
+              Cần Kèm Cặp Trước
+            </span>
+            <div className="text-xl font-black text-amber-400 font-mono">
+              {overview.at_risk_count} HS
+            </div>
+            <span className="text-[10px] text-slate-500 font-medium block">
+              Có nguy cơ điểm &lt; 6.5
+            </span>
+          </div>
+        </div>
+      )}
+
       {/* At-Risk Students Grid */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
@@ -91,7 +160,8 @@ export const SkillAwarePredictionCard: React.FC<SkillAwarePredictionProps> = ({
             Học Sinh Có Nguy Cơ Cần Phụ Đạo Trước ({atRisk.length} học sinh)
           </span>
           {atRisk.length === 0 && (
-            <span className="text-xs text-emerald-400 font-bold">
+            <span className="text-xs text-emerald-400 font-bold flex items-center gap-1">
+              <CheckCircle2 size={13} />
               Toàn bộ học sinh đều đã đạt chuẩn cho bài học này
             </span>
           )}
@@ -103,7 +173,7 @@ export const SkillAwarePredictionCard: React.FC<SkillAwarePredictionProps> = ({
               <div
                 key={st.student_id}
                 onClick={() => onSelectStudent && onSelectStudent(st.student_id)}
-                className="bg-[#121626] border border-amber-500/20 hover:border-amber-500/40 p-3.5 rounded-xl space-y-2 cursor-pointer transition group"
+                className="bg-[#121626] border border-amber-500/20 hover:border-amber-500/40 p-3.5 rounded-xl space-y-2 cursor-pointer transition group active:scale-[0.99]"
               >
                 <div className="flex items-center justify-between">
                   <span className="font-bold text-white group-hover:text-indigo-300 transition text-xs">
@@ -125,7 +195,8 @@ export const SkillAwarePredictionCard: React.FC<SkillAwarePredictionProps> = ({
             ))}
           </div>
         ) : (
-          <div className="bg-[#121626] border border-emerald-500/20 p-4 rounded-xl text-xs text-slate-300">
+          <div className="bg-[#121626] border border-emerald-500/20 p-4 rounded-xl text-xs text-slate-300 flex items-center gap-2">
+            <CheckCircle2 size={16} className="text-emerald-400 shrink-0" />
             <span>
               Dựa trên dữ liệu lịch sử, các học sinh trong lớp đều có điểm EMA &ge; 6.5 đối với các chủ đề sẽ kiểm tra trong buổi học tiếp theo.
             </span>

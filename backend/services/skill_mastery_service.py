@@ -53,27 +53,77 @@ def parse_test_config(raw_config: Any) -> Optional[Dict[str, Any]]:
     return None
 
 
-def calculate_ema(scores: List[float], alpha: float = 0.45) -> float:
-    """Calculates exponential moving average on chronological score list."""
+def trunc_1_dec(val: Optional[float]) -> float:
+    """Strictly truncates to 1 decimal place without rounding up or down (Rule 17)."""
+    if val is None or math.isnan(val):
+        return 0.0
+    return math.floor(float(val) * 10.0) / 10.0
+
+
+def calculate_ema(scores: List[float], alpha: float = 0.30) -> float:
+    """Calculates exponential moving average on chronological score list (alpha = 0.30)."""
     if not scores:
         return 0.0
     ema = scores[0]
     for s in scores[1:]:
         ema = alpha * s + (1.0 - alpha) * ema
-    return round(ema, 1)
+    return trunc_1_dec(ema)
 
 
-def evaluate_mastery_status(ema_score: float, test_count: int, last_score: float) -> str:
+def evaluate_mastery_timeline(scores: List[float], alpha: float = 0.30) -> Dict[str, Any]:
     """
-    Evaluates mastery status based on Bloom's Mastery Threshold (8.0/10) and EMA:
+    Evaluates mastery status across chronological score timeline with true historical regression tracking:
     - 'mastered': EMA >= 8.0 AND test_count >= 2 AND last_score >= 6.8
-    - 'regressed': test_count >= 3 AND ema_score >= 7.2 AND last_score < 6.0 (needs refresh)
-    - 'partial': ema_score >= 6.5 OR (test_count == 1 AND last_score >= 7.0)
-    - 'not_yet': ema_score < 6.5 (needs reinforcement)
+    - 'regressed': was ever in 'mastered' status previously, but last_score < 6.0 or current EMA < 7.0
+    - 'partial': EMA >= 6.5 OR (test_count == 1 AND last_score >= 7.0)
+    - 'not_yet': EMA < 6.5 (needs reinforcement)
     """
+    if not scores:
+        return {
+            "ema_score": 0.0,
+            "last_score": 0.0,
+            "test_count": 0,
+            "mastery_status": "not_yet",
+            "was_ever_mastered": False,
+        }
+
+    running_ema = scores[0]
+    was_ever_mastered = False
+
+    for i, s in enumerate(scores):
+        if i > 0:
+            running_ema = alpha * s + (1.0 - alpha) * running_ema
+        cnt = i + 1
+        if cnt >= 2 and running_ema >= 8.0 and s >= 6.8:
+            was_ever_mastered = True
+
+    final_ema = trunc_1_dec(running_ema)
+    last_score = trunc_1_dec(scores[-1])
+    test_cnt = len(scores)
+
+    if test_cnt >= 2 and final_ema >= 8.0 and last_score >= 6.8:
+        status = "mastered"
+    elif was_ever_mastered and (last_score < 6.0 or final_ema < 7.0):
+        status = "regressed"
+    elif final_ema >= 6.5 or (test_cnt == 1 and last_score >= 7.0):
+        status = "partial"
+    else:
+        status = "not_yet"
+
+    return {
+        "ema_score": final_ema,
+        "last_score": last_score,
+        "test_count": test_cnt,
+        "mastery_status": status,
+        "was_ever_mastered": was_ever_mastered,
+    }
+
+
+def evaluate_mastery_status(ema_score: float, test_count: int, last_score: float, was_ever_mastered: bool = False) -> str:
+    """Helper for evaluate_mastery_status fallback."""
     if test_count >= 2 and ema_score >= 8.0 and last_score >= 6.8:
         return "mastered"
-    if test_count >= 3 and ema_score >= 7.2 and last_score < 6.0:
+    if was_ever_mastered and (last_score < 6.0 or ema_score < 7.0):
         return "regressed"
     if ema_score >= 6.5 or (test_count == 1 and last_score >= 7.0):
         return "partial"
@@ -134,7 +184,6 @@ def compute_skill_mastery_from_records(conn, class_id: Optional[int] = None, stu
     grades = [dict(r) for r in cursor.fetchall()]
 
     # Collect chronological scores per (student_id, class_id, skill, unit_key)
-    # structure: { (student_id, class_id, skill, unit_key): [ (date, score), ... ] }
     student_unit_series: Dict[tuple, List[tuple]] = {}
 
     for g in grades:
@@ -145,12 +194,12 @@ def compute_skill_mastery_from_records(conn, class_id: Optional[int] = None, stu
         if not cfg:
             continue
 
-        c1_score = float(g.get("check_1") or 0.0)
-        c2_score = float(g.get("check_2") or 0.0)
+        c1_score = float(g.get("check_1") or 0.0) if g.get("check_1") is not None else None
+        c2_score = float(g.get("check_2") or 0.0) if g.get("check_2") is not None else None
 
         # Check 1 processing
         c1_cfg = cfg.get("check_1") or {}
-        if c1_score > 0 and c1_cfg:
+        if c1_score is not None and c1_score > 0 and c1_cfg:
             skill = c1_cfg.get("skill") or "vocab"
             units = c1_cfg.get("units") or []
             topic = c1_cfg.get("topic") or c1_cfg.get("grammar_topic") or ""
@@ -171,7 +220,7 @@ def compute_skill_mastery_from_records(conn, class_id: Optional[int] = None, stu
 
         # Check 2 processing
         c2_cfg = cfg.get("check_2") or {}
-        if c2_score > 0 and c2_cfg:
+        if c2_score is not None and c2_score > 0 and c2_cfg:
             skill = c2_cfg.get("skill") or "grammar"
             units = c2_cfg.get("units") or []
             topic = c2_cfg.get("topic") or c2_cfg.get("grammar_topic") or ""
@@ -198,10 +247,12 @@ def compute_skill_mastery_from_records(conn, class_id: Optional[int] = None, stu
         series.sort(key=lambda x: x[0])
         scores = [item[1] for item in series]
         last_date = series[-1][0]
-        last_score = round(scores[-1], 1)
-        ema = calculate_ema(scores)
-        test_cnt = len(scores)
-        status = evaluate_mastery_status(ema, test_cnt, last_score)
+
+        eval_res = evaluate_mastery_timeline(scores, alpha=0.30)
+        ema = eval_res["ema_score"]
+        last_score = eval_res["last_score"]
+        test_cnt = eval_res["test_count"]
+        status = eval_res["mastery_status"]
 
         cursor.execute("""
             INSERT INTO skill_mastery (

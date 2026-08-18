@@ -1,7 +1,11 @@
 import json
 from typing import Dict, Any, List, Optional
 from datetime import datetime
-from services.skill_mastery_service import compute_skill_mastery_from_records, parse_test_config
+from services.skill_mastery_service import (
+    compute_skill_mastery_from_records,
+    parse_test_config,
+    trunc_1_dec
+)
 
 
 def get_skill_breakdown_report(conn, class_id: Optional[int] = None, student_id: Optional[int] = None) -> Dict[str, Any]:
@@ -34,14 +38,14 @@ def get_skill_breakdown_report(conn, class_id: Optional[int] = None, student_id:
     cursor.execute(query, params)
     mastery_rows = [dict(r) for r in cursor.fetchall()]
 
-    # 3. Compute overall Skill Stats
+    # 3. Compute overall Skill Stats with strict 1-decimal truncation
     vocab_scores = [r["ema_score"] for r in mastery_rows if r["skill"] == "vocab" and r.get("ema_score") is not None]
     grammar_scores = [r["ema_score"] for r in mastery_rows if r["skill"] == "grammar" and r.get("ema_score") is not None]
     mixed_scores = [r["ema_score"] for r in mastery_rows if r["skill"] not in ("vocab", "grammar") and r.get("ema_score") is not None]
 
-    vocab_avg = round(sum(vocab_scores) / len(vocab_scores), 1) if vocab_scores else 0.0
-    grammar_avg = round(sum(grammar_scores) / len(grammar_scores), 1) if grammar_scores else 0.0
-    mixed_avg = round(sum(mixed_scores) / len(mixed_scores), 1) if mixed_scores else 0.0
+    vocab_avg = trunc_1_dec(sum(vocab_scores) / len(vocab_scores)) if vocab_scores else 0.0
+    grammar_avg = trunc_1_dec(sum(grammar_scores) / len(grammar_scores)) if grammar_scores else 0.0
+    mixed_avg = trunc_1_dec(sum(mixed_scores) / len(mixed_scores)) if mixed_scores else 0.0
 
     mastered_cnt = sum(1 for r in mastery_rows if r["mastery_status"] == "mastered")
     partial_cnt = sum(1 for r in mastery_rows if r["mastery_status"] == "partial")
@@ -49,7 +53,7 @@ def get_skill_breakdown_report(conn, class_id: Optional[int] = None, student_id:
     not_yet_cnt = sum(1 for r in mastery_rows if r["mastery_status"] == "not_yet")
     total_instances = len(mastery_rows)
 
-    mastery_rate = round((mastered_cnt / total_instances * 100), 1) if total_instances > 0 else 0.0
+    mastery_rate = trunc_1_dec((mastered_cnt / total_instances * 100)) if total_instances > 0 else 0.0
 
     skill_stats = {
         "vocab_avg": vocab_avg,
@@ -72,13 +76,13 @@ def get_skill_breakdown_report(conn, class_id: Optional[int] = None, student_id:
     unit_breakdown = []
     for (skill, ukey), items in unit_map.items():
         scores = [it["ema_score"] for it in items if it.get("ema_score") is not None]
-        avg_score = round(sum(scores) / len(scores), 1) if scores else 0.0
+        avg_score = trunc_1_dec(sum(scores) / len(scores)) if scores else 0.0
         m_cnt = sum(1 for it in items if it["mastery_status"] == "mastered")
         p_cnt = sum(1 for it in items if it["mastery_status"] == "partial")
         r_cnt = sum(1 for it in items if it["mastery_status"] == "regressed")
         w_cnt = sum(1 for it in items if it["mastery_status"] == "not_yet")
         st_count = len(items)
-        m_pct = round((m_cnt / st_count * 100), 1) if st_count > 0 else 0.0
+        m_pct = trunc_1_dec((m_cnt / st_count * 100)) if st_count > 0 else 0.0
 
         if m_pct >= 75:
             rec = "Lớp nắm vững tốt, sẵn sàng chuyển sang bài học tiếp theo."
@@ -105,7 +109,6 @@ def get_skill_breakdown_report(conn, class_id: Optional[int] = None, student_id:
     unit_breakdown.sort(key=lambda x: (x["skill"], -x["avg_score"]))
 
     # 5. Build Mastery Heatmap Matrix
-    # Get distinct units
     unique_units = []
     seen_units = set()
     for ub in unit_breakdown:
@@ -117,7 +120,6 @@ def get_skill_breakdown_report(conn, class_id: Optional[int] = None, student_id:
                 "avg_score": ub["avg_score"]
             })
 
-    # Group students
     student_map: Dict[int, Dict[str, Any]] = {}
     for r in mastery_rows:
         sid = r["student_id"]
@@ -169,17 +171,43 @@ def get_skill_breakdown_report(conn, class_id: Optional[int] = None, student_id:
             c2_units = c2_cfg.get("units") or ([c2_cfg.get("topic") or c2_cfg.get("grammar_topic")] if (c2_cfg.get("topic") or c2_cfg.get("grammar_topic")) else ["Chung"])
 
             at_risk_students = []
+            all_student_preds = []
+
             for st in heatmap_students:
                 sid = st["student_id"]
                 s_units = st.get("units", {})
 
-                # Estimate c1 pred
-                c1_matched = [s_units[u]["ema_score"] for u in c1_units if u in s_units]
-                c1_pred = round(sum(c1_matched) / len(c1_matched), 1) if c1_matched else (vocab_avg if c1_cfg.get("skill") == "vocab" else 7.5)
+                # Estimate c1 pred with multi-tier fallback
+                c1_matched = [s_units[u]["ema_score"] for u in c1_units if u in s_units and s_units[u].get("ema_score") is not None]
+                if c1_matched:
+                    c1_pred = trunc_1_dec(sum(c1_matched) / len(c1_matched))
+                else:
+                    st_vocab = [v["ema_score"] for v in s_units.values() if v.get("skill") == "vocab" and v.get("ema_score") is not None]
+                    if st_vocab:
+                        c1_pred = trunc_1_dec(sum(st_vocab) / len(st_vocab))
+                    elif vocab_avg > 0:
+                        c1_pred = vocab_avg
+                    else:
+                        c1_pred = 7.0
 
-                # Estimate c2 pred
-                c2_matched = [s_units[u]["ema_score"] for u in c2_units if u in s_units]
-                c2_pred = round(sum(c2_matched) / len(c2_matched), 1) if c2_matched else (grammar_avg if c2_cfg.get("skill") == "grammar" else 7.5)
+                # Estimate c2 pred with multi-tier fallback
+                c2_matched = [s_units[u]["ema_score"] for u in c2_units if u in s_units and s_units[u].get("ema_score") is not None]
+                if c2_matched:
+                    c2_pred = trunc_1_dec(sum(c2_matched) / len(c2_matched))
+                else:
+                    st_grammar = [v["ema_score"] for v in s_units.values() if v.get("skill") == "grammar" and v.get("ema_score") is not None]
+                    if st_grammar:
+                        c2_pred = trunc_1_dec(sum(st_grammar) / len(st_grammar))
+                    elif grammar_avg > 0:
+                        c2_pred = grammar_avg
+                    else:
+                        c2_pred = 7.0
+
+                all_student_preds.append({
+                    "student_id": sid,
+                    "pred_c1": c1_pred,
+                    "pred_c2": c2_pred,
+                })
 
                 if c1_pred < 6.5 or c2_pred < 6.5:
                     at_risk_students.append({
@@ -190,6 +218,14 @@ def get_skill_breakdown_report(conn, class_id: Optional[int] = None, student_id:
                         "pred_c2": c2_pred,
                         "reason": f"Dự báo điểm dưới 6.5 ({'Check 1' if c1_pred < 6.5 else ''} {'Check 2' if c2_pred < 6.5 else ''}) do lịch sử chưa nắm vững kiến thức bài này."
                     })
+
+            # Compute class-wide prediction summary metrics
+            tot_st = len(all_student_preds)
+            ready_cnt = sum(1 for p in all_student_preds if p["pred_c1"] >= 6.5 and p["pred_c2"] >= 6.5)
+            mastered_cnt = sum(1 for p in all_student_preds if p["pred_c1"] >= 8.0 and p["pred_c2"] >= 8.0)
+            avg_c1_pred = trunc_1_dec(sum(p["pred_c1"] for p in all_student_preds) / tot_st) if tot_st > 0 else 0.0
+            avg_c2_pred = trunc_1_dec(sum(p["pred_c2"] for p in all_student_preds) / tot_st) if tot_st > 0 else 0.0
+            readiness_rate = trunc_1_dec(ready_cnt / tot_st * 100) if tot_st > 0 else 0.0
 
             skill_prediction = {
                 "has_upcoming_config": True,
@@ -204,8 +240,17 @@ def get_skill_breakdown_report(conn, class_id: Optional[int] = None, student_id:
                     "units": c2_units,
                     "topic": c2_cfg.get("grammar_topic") or c2_cfg.get("topic", "")
                 },
+                "class_overview": {
+                    "total_students": tot_st,
+                    "ready_count": ready_cnt,
+                    "mastered_count": mastered_cnt,
+                    "at_risk_count": len(at_risk_students),
+                    "avg_c1_pred": avg_c1_pred,
+                    "avg_c2_pred": avg_c2_pred,
+                    "readiness_rate": readiness_rate
+                },
                 "at_risk_students": at_risk_students,
-                "summary": f"Buổi học tới ({ns['date']}) kiểm tra {', '.join(c1_units)} và {', '.join(c2_units)}. Có {len(at_risk_students)} học sinh có nguy cơ cần phụ đạo trước."
+                "summary": f"Buổi học tới ({ns['date']}) kiểm tra {', '.join(c1_units)} và {', '.join(c2_units)}. Tỷ lệ sẵn sàng cả lớp: {readiness_rate}%. Có {len(at_risk_students)} học sinh có nguy cơ cần phụ đạo trước."
             }
         else:
             skill_prediction = {
