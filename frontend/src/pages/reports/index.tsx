@@ -106,6 +106,10 @@ export const ReportsPage: React.FC = () => {
   }, [studentRankings, selectedClassId, selectedDistFilter]);
 
   const handleSelectRankingStudent = (studentId: number) => {
+    if (!studentId || studentId === 0) {
+      setSelectedStudentId('');
+      return;
+    }
     const sidStr = String(studentId);
     if (selectedStudentId === sidStr && activeReportTab === 'overview') {
       setSelectedStudentId('');
@@ -296,7 +300,7 @@ export const ReportsPage: React.FC = () => {
         ) : activeReportTab === 'skills' ? (
           <SkillBreakdownTab
             selectedClassId={selectedClassId} selectedStudentId={selectedStudentId}
-            onSelectRankingStudent={(id) => setSelectedStudentId(prev => String(prev) === String(id) ? '' : String(id))}
+            onSelectRankingStudent={(id) => setSelectedStudentId(prev => (!id || id === 0 || String(prev) === String(id)) ? '' : String(id))}
             isTestMode={isTestMode} sessionRecords={sessionRecords}
             studentRankings={studentRankings}
           />

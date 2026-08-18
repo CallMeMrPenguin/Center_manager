@@ -37,8 +37,8 @@ export const StudentWeaknessDiagnosisCard: React.FC<StudentWeaknessDiagnosisCard
   // Flattened array of weaknesses for DataTable
   const rawWeaknessList = useMemo<WeaknessTableRow[]>(() => {
     let list = selectedClassId ? sessionRecords.filter(r => String(r.class_id) === selectedClassId) : sessionRecords;
-    if (selectedStudentId) {
-      list = list.filter(r => String(r.student_id) === selectedStudentId);
+    if (selectedStudentId && selectedStudentId !== '0' && selectedStudentId !== '') {
+      list = list.filter(r => String(r.student_id) === String(selectedStudentId));
     }
     if (!list || list.length === 0) return [];
 
