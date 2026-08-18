@@ -56,6 +56,11 @@ export const SkillBreakdownTab: React.FC<SkillBreakdownTabProps> = ({
     return apiReportData;
   }, [isTestMode, sessionRecords, selectedClassId, selectedStudentId, apiReportData]);
 
+  const selectedStudent = useMemo(() => {
+    if (!selectedStudentId) return null;
+    return studentRankings.find(s => String(s.student_id) === String(selectedStudentId)) || null;
+  }, [selectedStudentId, studentRankings]);
+
   if (loading && !reportData) {
     return (
       <div className="py-24 text-center text-slate-400 text-xs font-bold flex flex-col items-center justify-center gap-2">
@@ -81,11 +86,6 @@ export const SkillBreakdownTab: React.FC<SkillBreakdownTabProps> = ({
   const heatmapUnits = reportData?.mastery_heatmap?.units || [];
   const heatmapStudents = reportData?.mastery_heatmap?.students || [];
   const prediction = reportData?.skill_aware_prediction || null;
-
-  const selectedStudent = useMemo(() => {
-    if (!selectedStudentId) return null;
-    return studentRankings.find(s => String(s.student_id) === String(selectedStudentId)) || null;
-  }, [selectedStudentId, studentRankings]);
 
   return (
     <div className="flex flex-col gap-6 mb-8 select-none">
