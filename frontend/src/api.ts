@@ -549,8 +549,9 @@ export const api = {
   getUnitSuggestions: (grade?: string) =>
     request<{
       units: string[];
-      units_detailed?: Array<{ unit: string; unit_num: string; name: string; grammar: string; label: string }>;
+      units_detailed?: Array<{ unit: string; unit_num: string; name: string; grammar: string; grammar_topics?: string[]; label: string }>;
       unit_grammar_map?: Record<string, string>;
+      unit_grammar_topics_map?: Record<string, string[]>;
       unit_name_map?: Record<string, string>;
       grammar_topics?: string[];
     }>(`/api/suggestions/units${grade ? `?grade=${encodeURIComponent(grade)}` : ''}`),

@@ -100,15 +100,36 @@ DEFAULT_UNIT_DATA = {
 }
 
 
+import re
+
 def normalize_unit_entry(val):
     if isinstance(val, dict):
+        name = str(val.get("name", "")).strip()
+        grammar = str(val.get("grammar", "")).strip()
+        raw_topics = val.get("grammar_topics")
+        if isinstance(raw_topics, list):
+            grammar_topics = [str(t).strip() for t in raw_topics if str(t).strip()]
+        elif isinstance(raw_topics, str) and raw_topics.strip():
+            grammar_topics = [s.strip() for s in re.split(r'[\n\r,&/]+', raw_topics) if s.strip()]
+        elif grammar:
+            grammar_topics = [s.strip() for s in re.split(r'[\n\r&/]+', grammar) if s.strip()]
+        else:
+            grammar_topics = []
+
+        if not grammar and grammar_topics:
+            grammar = " & ".join(grammar_topics)
+
         return {
-            "name": str(val.get("name", "")).strip(),
-            "grammar": str(val.get("grammar", "")).strip()
+            "name": name,
+            "grammar": grammar,
+            "grammar_topics": grammar_topics
         }
+    
+    val_str = str(val or "").strip()
     return {
-        "name": str(val or "").strip(),
-        "grammar": ""
+        "name": val_str,
+        "grammar": "",
+        "grammar_topics": []
     }
 
 

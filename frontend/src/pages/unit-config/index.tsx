@@ -9,6 +9,7 @@ import { ExerciseConfigTab } from './components/ExerciseConfigTab';
 interface UnitConfigItem {
   name: string;
   grammar: string;
+  grammar_topics?: string[];
 }
 
 export default function UnitConfig() {
@@ -47,7 +48,7 @@ export default function UnitConfig() {
   const fetchConfig = async () => {
     setLoading(true);
     try {
-      const data = await api.getUnitConfig();
+      const data: any = await api.getUnitConfig();
       setConfig(data);
     } catch {
       showToast("Không thể tải cấu hình tên Unit", "error");
@@ -69,9 +70,15 @@ export default function UnitConfig() {
     const updated: any = { ...config };
     if (!updated[grade]) updated[grade] = {};
     
+    const topics = grammarVal
+      .split(/[\n,&/]+/)
+      .map(s => s.trim())
+      .filter(Boolean);
+
     updated[grade][unit] = {
       name: nameVal.trim(),
-      grammar: grammarVal.trim()
+      grammar: grammarVal.trim(),
+      grammar_topics: topics
     };
 
     setLoading(true);
@@ -95,14 +102,21 @@ export default function UnitConfig() {
 
   // Build rows for TanStack Table
   const rows = useMemo(() => {
-    const list: { key: string; grade: string; unit: string; name: string; grammar: string }[] = [];
+    const list: { key: string; grade: string; unit: string; name: string; grammar: string; grammarTopics: string[] }[] = [];
     const gradeUnits = config[selectedGrade] || {};
     
     Object.entries(gradeUnits).forEach(([unit, val]) => {
       const key = `U${unit}_G${selectedGrade}`;
       const name = typeof val === 'object' && val !== null ? val.name || '' : String(val || '');
       const grammar = typeof val === 'object' && val !== null ? val.grammar || '' : '';
-      list.push({ key, grade: selectedGrade, unit, name, grammar });
+      const rawTopics = typeof val === 'object' && val !== null ? (val as any).grammar_topics : null;
+      let grammarTopics: string[] = [];
+      if (Array.isArray(rawTopics) && rawTopics.length > 0) {
+        grammarTopics = rawTopics;
+      } else if (grammar) {
+        grammarTopics = grammar.split(/[\n,&/]+/).map(s => s.trim()).filter(Boolean);
+      }
+      list.push({ key, grade: selectedGrade, unit, name, grammar, grammarTopics });
     });
 
     list.sort((a, b) => parseInt(a.unit) - parseInt(b.unit));
@@ -155,26 +169,37 @@ export default function UnitConfig() {
       },
       {
         accessorKey: 'grammar',
-        header: 'Chủ Đề Ngữ Pháp (Grammar Topic)',
+        header: 'Chủ Đề Ngữ Pháp (Nhiều chủ đề ngăn cách bằng dấu phẩy hoặc &)',
         cell: ({ row }) => {
           const item = row.original;
           const isEditing = editingKey?.grade === item.grade && editingKey?.unit === item.unit;
           return isEditing ? (
-            <input
-              type="text"
-              value={editGrammar}
-              onChange={(e) => setEditGrammar(e.target.value)}
-              placeholder="VD: Present Simple, Passive Voice..."
-              className="w-full px-3 py-1.5 bg-[#0c0f1d] border border-purple-500 rounded-lg focus:outline-none text-xs text-white"
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') handleSave(item.grade, item.unit, editName, editGrammar);
-                if (e.key === 'Escape') setEditingKey(null);
-              }}
-            />
+            <div className="space-y-1">
+              <input
+                type="text"
+                value={editGrammar}
+                onChange={(e) => setEditGrammar(e.target.value)}
+                placeholder="VD: Present Simple, Adverbs of Frequency..."
+                className="w-full px-3 py-1.5 bg-[#0c0f1d] border border-purple-500 rounded-lg focus:outline-none text-xs text-white"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') handleSave(item.grade, item.unit, editName, editGrammar);
+                  if (e.key === 'Escape') setEditingKey(null);
+                }}
+              />
+              <span className="text-[10px] text-slate-500 block">Nhập nhiều chủ đề cách nhau bằng dấu phẩy (,) hoặc (&) để chọn riêng từng chủ đề khi kiểm tra</span>
+            </div>
           ) : (
-            <span className="text-xs text-purple-300 font-semibold">
-              {item.grammar || <span className="text-slate-600 font-normal">Chưa cấu hình</span>}
-            </span>
+            <div className="flex flex-wrap gap-1.5 items-center">
+              {item.grammarTopics && item.grammarTopics.length > 0 ? (
+                item.grammarTopics.map((gt: string, idx: number) => (
+                  <span key={idx} className="inline-flex items-center px-2 py-0.5 rounded-md bg-purple-500/15 text-purple-300 border border-purple-500/30 text-xs font-semibold">
+                    {gt}
+                  </span>
+                ))
+              ) : (
+                <span className="text-xs text-slate-600 font-normal">Chưa cấu hình</span>
+              )}
+            </div>
           );
         },
       },

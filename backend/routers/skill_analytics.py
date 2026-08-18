@@ -127,20 +127,27 @@ def api_get_unit_suggestions(grade: Optional[str] = None):
 
     units_list = []
     unit_grammar_map = {}
+    unit_grammar_topics_map = {}
     unit_name_map = {}
 
     for u_num, u_data in grade_units.items():
         ukey = f"Unit {u_num}"
         uname = u_data.get("name", "") if isinstance(u_data, dict) else str(u_data)
         ugrammar = u_data.get("grammar", "") if isinstance(u_data, dict) else ""
+        ugrammar_topics = u_data.get("grammar_topics", []) if isinstance(u_data, dict) else []
+        if not ugrammar_topics and ugrammar:
+            ugrammar_topics = [s.strip() for s in re.split(r'[\n\r&/]+', ugrammar) if s.strip()]
+
         units_list.append({
             "unit": ukey,
             "unit_num": u_num,
             "name": uname,
             "grammar": ugrammar,
+            "grammar_topics": ugrammar_topics,
             "label": f"{ukey}: {uname}" if uname else ukey
         })
         unit_grammar_map[ukey] = ugrammar
+        unit_grammar_topics_map[ukey] = ugrammar_topics
         unit_name_map[ukey] = uname
 
     units_list.sort(key=lambda x: int(x["unit_num"]) if x["unit_num"].isdigit() else 999)
@@ -156,6 +163,7 @@ def api_get_unit_suggestions(grade: Optional[str] = None):
         "units": [u["unit"] for u in units_list],
         "units_detailed": units_list,
         "unit_grammar_map": unit_grammar_map,
+        "unit_grammar_topics_map": unit_grammar_topics_map,
         "unit_name_map": unit_name_map,
         "grammar_topics": grammar_topics
     }

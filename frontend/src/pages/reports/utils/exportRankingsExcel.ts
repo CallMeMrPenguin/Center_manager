@@ -18,7 +18,7 @@ export async function exportRankingsExcel({
     const headers = ['STT', 'Họ và Tên', 'Lớp Học', 'Buổi Học', 'Điểm Danh %', 'Check 1', 'Check 2', 'Homework', 'Hạng', 'Đánh Giá'];
 
     const rankImages: Record<number, number> = {};
-    for (let t = 1; t <= 6; t++) {
+    for (let t = 1; t <= 7; t++) {
       try {
         const resp = await fetch(`/ranks/tier_${t}.png`);
         if (resp.ok) {
@@ -52,9 +52,13 @@ export async function exportRankingsExcel({
           currentTier = tier;
           tierStr = `       ${tier.name} (${tier.title})`;
           let label = 'Xuất Sắc';
-          if (avg < 8.5) label = 'Giỏi';
-          if (avg < 7.0) label = 'Khá';
-          if (avg < 5.0) label = 'Cần Cố Gắng';
+          if (avg >= 9.5) label = 'Huyền Thoại';
+          else if (avg >= 9.0) label = 'Siêu Việt';
+          else if (avg >= 8.5) label = 'Xuất Sắc';
+          else if (avg >= 7.5) label = 'Giỏi';
+          else if (avg >= 6.5) label = 'Khá';
+          else if (avg >= 5.0) label = 'Cơ Bản';
+          else label = 'Cần Cố Gắng';
           evalStr = `${label} (${format1Dec(avg)})`;
         }
         tierObjs.push(currentTier);

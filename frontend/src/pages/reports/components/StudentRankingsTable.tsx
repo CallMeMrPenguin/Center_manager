@@ -211,9 +211,13 @@ export const StudentRankingsTable: React.FC<StudentRankingsTableProps> = ({
           if (valid.length === 0) return 'Chưa có điểm';
           const avg = trunc1Dec(valid.reduce((a, b) => a + b, 0) / valid.length);
           let label = 'Xuất Sắc';
-          if (avg < 8.5) label = 'Giỏi';
-          if (avg < 7.0) label = 'Khá';
-          if (avg < 5.0) label = 'Cần Cố Gắng';
+          if (avg >= 9.5) label = 'Huyền Thoại';
+          else if (avg >= 9.0) label = 'Siêu Việt';
+          else if (avg >= 8.5) label = 'Xuất Sắc';
+          else if (avg >= 7.5) label = 'Giỏi';
+          else if (avg >= 6.5) label = 'Khá';
+          else if (avg >= 5.0) label = 'Cơ Bản';
+          else label = 'Cần Cố Gắng';
           return `${label} (${format1Dec(avg)})`;
         }
       },
@@ -234,10 +238,14 @@ export const StudentRankingsTable: React.FC<StudentRankingsTableProps> = ({
             </div>
           );
         }
-        let label = 'Xuất Sắc', cls = 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30';
-        if (avg < 8.5) { label = 'Giỏi'; cls = 'bg-blue-500/10 text-blue-300 border-blue-500/30'; }
-        if (avg < 7.0) { label = 'Khá'; cls = 'bg-amber-500/10 text-amber-300 border-amber-500/30'; }
-        if (avg < 5.0) { label = 'Cần Cố Gắng'; cls = 'bg-rose-500/10 text-rose-400 border-rose-500/30'; }
+        let label = 'Xuất Sắc', cls = 'bg-purple-500/15 text-purple-300 border-purple-500/35';
+        if (avg >= 9.5) { label = 'Huyền Thoại'; cls = 'bg-amber-500/15 text-amber-300 border-amber-500/40 font-black'; }
+        else if (avg >= 9.0) { label = 'Siêu Việt'; cls = 'bg-rose-500/15 text-rose-400 border-rose-500/35 font-bold'; }
+        else if (avg >= 8.5) { label = 'Xuất Sắc'; cls = 'bg-purple-500/15 text-purple-300 border-purple-500/35 font-bold'; }
+        else if (avg >= 7.5) { label = 'Giỏi'; cls = 'bg-indigo-500/15 text-indigo-300 border-indigo-500/35 font-semibold'; }
+        else if (avg >= 6.5) { label = 'Khá'; cls = 'bg-yellow-500/15 text-yellow-300 border-yellow-500/35 font-semibold'; }
+        else if (avg >= 5.0) { label = 'Cơ Bản'; cls = 'bg-sky-500/15 text-sky-300 border-sky-500/35'; }
+        else { label = 'Cần Cố Gắng'; cls = 'bg-amber-700/15 text-amber-500 border-amber-700/35'; }
         return (
           <div className="text-center">
             <span className={`inline-block px-2.5 py-1 rounded-lg text-[10px] font-black border ${cls}`}>{label} ({format1Dec(avg)})</span>
