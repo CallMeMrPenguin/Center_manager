@@ -211,7 +211,7 @@ export const ReportsPage: React.FC = () => {
                 <span className="px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-300 border border-amber-500/40 text-[10px]">Đang Bật</span>
               </div>
               <p className="text-[11px] text-amber-300/80 mt-0.5">
-                Đang mô phỏng 20 buổi học với hệ thống điểm Check 1, Check 2, BTVN và phân bố đủ 8 cấp bậc xếp hạng (Đồng $\to$ Quán Quân). Không ảnh hưởng đến dữ liệu thực.
+                Đang mô phỏng 20 buổi học với hệ thống điểm Từ Vựng, Ngữ Pháp, BTVN và phân bố đủ 8 cấp bậc xếp hạng (Đồng $\to$ Quán Quân). Không ảnh hưởng đến dữ liệu thực.
               </p>
             </div>
           </div>
@@ -296,7 +296,7 @@ export const ReportsPage: React.FC = () => {
         ) : activeReportTab === 'skills' ? (
           <SkillBreakdownTab
             selectedClassId={selectedClassId} selectedStudentId={selectedStudentId}
-            onSelectRankingStudent={handleSelectRankingStudent}
+            onSelectRankingStudent={(id) => setSelectedStudentId(prev => String(prev) === String(id) ? '' : String(id))}
             isTestMode={isTestMode} sessionRecords={sessionRecords}
             studentRankings={studentRankings}
           />

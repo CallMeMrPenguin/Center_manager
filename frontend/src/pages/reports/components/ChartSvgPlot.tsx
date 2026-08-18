@@ -131,8 +131,8 @@ export const ChartSvgPlot: React.FC<ChartSvgPlotProps> = ({
           const lastX = getSvgX(lastIdx, sessionChartData.length);
           const forecastX = lastX + 45 * zoomLevel;
           const preds = [
-            { id: 'c1', label: 'Check 1', score: engine.pred_c1, lastVal: sessionChartData[lastIdx].check1, color: '#3b82f6', textColor: '#60a5fa', rawY: getSvgY(engine.pred_c1) },
-            { id: 'c2', label: 'Check 2', score: engine.pred_c2, lastVal: sessionChartData[lastIdx].check2, color: '#a855f7', textColor: '#c084fc', rawY: getSvgY(engine.pred_c2) },
+            { id: 'c1', label: 'Từ Vựng', score: engine.pred_c1, lastVal: sessionChartData[lastIdx].check1, color: '#3b82f6', textColor: '#60a5fa', rawY: getSvgY(engine.pred_c1) },
+            { id: 'c2', label: 'Ngữ Pháp', score: engine.pred_c2, lastVal: sessionChartData[lastIdx].check2, color: '#a855f7', textColor: '#c084fc', rawY: getSvgY(engine.pred_c2) },
             { id: 'hw', label: 'Homework', score: engine.pred_hw, lastVal: sessionChartData[lastIdx].homework, color: '#10b981', textColor: '#34d399', rawY: getSvgY(engine.pred_hw) },
           ];
           const sorted = [...preds].sort((a, b) => a.rawY - b.rawY);

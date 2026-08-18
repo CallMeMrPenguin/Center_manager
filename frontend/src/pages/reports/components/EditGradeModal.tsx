@@ -148,7 +148,7 @@ export const EditGradeModal: React.FC<EditGradeModalProps> = ({
           <div className="grid grid-cols-3 gap-3">
             <div>
               <label className="block text-[11px] font-extrabold text-blue-400 uppercase tracking-wider mb-1">
-                Check 1
+                Từ Vựng
               </label>
               <input
                 type="text"
@@ -161,7 +161,7 @@ export const EditGradeModal: React.FC<EditGradeModalProps> = ({
 
             <div>
               <label className="block text-[11px] font-extrabold text-purple-400 uppercase tracking-wider mb-1">
-                Check 2
+                Ngữ Pháp
               </label>
               <input
                 type="text"

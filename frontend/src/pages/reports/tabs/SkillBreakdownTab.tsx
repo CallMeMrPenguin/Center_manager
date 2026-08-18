@@ -81,8 +81,40 @@ export const SkillBreakdownTab: React.FC<SkillBreakdownTabProps> = ({
   const heatmapStudents = reportData?.mastery_heatmap?.students || [];
   const prediction = reportData?.skill_aware_prediction || null;
 
+  const selectedStudent = useMemo(() => {
+    if (!selectedStudentId) return null;
+    return studentRankings.find(s => String(s.student_id) === String(selectedStudentId)) || null;
+  }, [selectedStudentId, studentRankings]);
+
   return (
     <div className="flex flex-col gap-8 mb-8 select-none">
+      {/* 0. ACTIVE STUDENT FILTER BANNER */}
+      {selectedStudent && (
+        <div className="bg-[#101528] border border-indigo-500/40 p-4 rounded-2xl flex items-center justify-between gap-4 shadow-lg animate-cascade-1">
+          <div className="flex items-center gap-3.5">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-indigo-600 to-purple-600 text-white font-black text-sm flex items-center justify-center border border-white/20">
+              {selectedStudent.full_name.slice(0, 2).toUpperCase()}
+            </div>
+            <div>
+              <span className="text-[10px] font-black uppercase text-indigo-400 block tracking-wider">
+                ĐANG PHÂN TÍCH KỸ NĂNG HỌC SINH
+              </span>
+              <h3 className="text-base font-black text-white">
+                {selectedStudent.full_name} {selectedStudent.nickname && <span className="text-indigo-300 font-bold">({selectedStudent.nickname})</span>}
+                <span className="text-xs text-slate-400 font-normal ml-2">| {selectedStudent.class_name}</span>
+              </h3>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => onSelectRankingStudent(0)}
+            className="px-3 py-1.5 rounded-xl bg-[#1c2442] hover:bg-rose-500/20 text-slate-300 hover:text-rose-300 border border-white/10 text-xs font-bold transition cursor-pointer"
+          >
+            Bỏ Lọc Học Sinh ✕
+          </button>
+        </div>
+      )}
+
       {/* 1. TOP PEDAGOGICAL KPI CARDS */}
       <SkillOverviewCards stats={stats} />
 

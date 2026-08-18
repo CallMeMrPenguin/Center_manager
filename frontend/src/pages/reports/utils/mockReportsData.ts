@@ -125,7 +125,7 @@ export function computeDatasetFromRecords(
     performance_index: 86.5,
     rating_label: 'Xuất Sắc',
     recommendations: [
-      'Chế độ Test 20 buổi: Check 1 (Từ Vựng) và Check 2 (Ngữ Pháp) được phân hóa riêng biệt.',
+      'Chế độ Test 20 buổi: Điểm Từ Vựng và Ngữ Pháp được phân hóa riêng biệt.',
       'Học sinh nhóm Xuất Chúng & Vượt Trội có năng lực ngữ pháp và từ vựng rất đồng đều.',
       'Giáo viên có thể theo dõi cụ thể từng chủ đề ngữ pháp trong tab Phân Tích Kỹ Năng & Unit.',
     ],
@@ -332,7 +332,7 @@ export function computeMockSkillBreakdown(
         reason: avgC2 < 6.5 ? 'Nguy cơ điểm Ngữ Pháp thấp ở bài tới do các thì trước đó chưa nắm vững' : 'Cần trau dồi thêm vốn từ vựng học thuật',
       };
     }),
-    summary: 'Dự báo kiểm tra tiếp theo: Check 1 (Từ Vựng) & Check 2 (Ngữ Pháp) theo dữ liệu tích lũy.',
+    summary: 'Dự báo kiểm tra tiếp theo: Điểm Từ Vựng & Ngữ Pháp theo dữ liệu tích lũy.',
   };
 
   return {

@@ -15,7 +15,7 @@ export async function exportRankingsExcel({
   try {
     const ExcelJS = (await import('exceljs')).default;
     const workbook = new ExcelJS.Workbook();
-    const headers = ['STT', 'Họ và Tên', 'Lớp Học', 'Buổi Học', 'Điểm Danh %', 'Check 1', 'Check 2', 'Homework', 'Hạng', 'Đánh Giá'];
+    const headers = ['STT', 'Họ và Tên', 'Lớp Học', 'Buổi Học', 'Điểm Danh %', 'Từ Vựng', 'Ngữ Pháp', 'Homework', 'Hạng', 'Đánh Giá'];
 
     const rankImages: Record<number, number> = {};
     for (let t = 1; t <= 8; t++) {

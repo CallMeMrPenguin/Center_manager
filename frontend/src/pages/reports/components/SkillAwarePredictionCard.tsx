@@ -93,13 +93,13 @@ export const SkillAwarePredictionCard: React.FC<SkillAwarePredictionCardProps> =
         {/* Content Badges */}
         <div className="flex flex-wrap items-center gap-2 text-xs">
           <div className="bg-[#121626] border border-blue-500/30 px-3 py-1.5 rounded-xl flex items-center gap-2">
-            <span className="text-[10px] font-black uppercase text-blue-400">Check 1:</span>
+            <span className="text-[10px] font-black uppercase text-blue-400">Từ Vựng:</span>
             <span className="text-white font-bold">
               {prediction.check_1_info?.units?.join(', ') || 'Chung'}
             </span>
           </div>
           <div className="bg-[#121626] border border-purple-500/30 px-3 py-1.5 rounded-xl flex items-center gap-2">
-            <span className="text-[10px] font-black uppercase text-purple-400">Check 2:</span>
+            <span className="text-[10px] font-black uppercase text-purple-400">Ngữ Pháp:</span>
             <span className="text-white font-bold">
               {prediction.check_2_info?.topic || prediction.check_2_info?.units?.join(', ') || 'Chung'}
             </span>
@@ -136,10 +136,10 @@ export const SkillAwarePredictionCard: React.FC<SkillAwarePredictionCardProps> =
                   </span>
                   <div className="flex gap-1.5 text-[11px] font-extrabold">
                     <span className="text-blue-400 bg-blue-500/10 px-1.5 py-0.5 rounded">
-                      C1: {trunc1Dec(st.pred_c1)}
+                      Từ Vựng: {trunc1Dec(st.pred_c1)}
                     </span>
                     <span className="text-purple-400 bg-purple-500/10 px-1.5 py-0.5 rounded">
-                      C2: {trunc1Dec(st.pred_c2)}
+                      Ngữ Pháp: {trunc1Dec(st.pred_c2)}
                     </span>
                   </div>
                 </div>

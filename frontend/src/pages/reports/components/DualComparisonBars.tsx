@@ -39,10 +39,10 @@ export const DualComparisonBars: React.FC<DualComparisonBarsProps> = ({
         </div>
 
         <div className="space-y-4">
-          {/* 1. Check 1 */}
+          {/* 1. Từ Vựng */}
           <div className="space-y-1.5">
             <div className="flex items-center justify-between text-[11px] font-black uppercase tracking-wider text-slate-400">
-              <span>Check 1 (35%)</span>
+              <span>Từ Vựng (35%)</span>
             </div>
             <div className="space-y-1.5">
               <div className="flex items-center gap-3">
@@ -72,10 +72,10 @@ export const DualComparisonBars: React.FC<DualComparisonBarsProps> = ({
             </div>
           </div>
 
-          {/* 2. Check 2 */}
+          {/* 2. Ngữ Pháp */}
           <div className="space-y-1.5">
             <div className="flex items-center justify-between text-[11px] font-black uppercase tracking-wider text-slate-400">
-              <span>Check 2 (55%)</span>
+              <span>Ngữ Pháp (55%)</span>
             </div>
             <div className="space-y-1.5">
               <div className="flex items-center gap-3">

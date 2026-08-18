@@ -69,11 +69,11 @@ export const SummaryStrip: React.FC<SummaryStripProps> = ({ engine, gradeTypesLi
             </p>
             <div className="space-y-1 my-1 font-mono text-[10px] font-bold bg-[#0d1120] p-2 rounded-lg border border-[#202948]">
               <div className="flex items-center justify-between text-blue-400">
-                <span>Check 1 Dự Đoán:</span>
+                <span>Từ Vựng Dự Đoán:</span>
                 <span>{engine.pred_c1 ?? 0}đ</span>
               </div>
               <div className="flex items-center justify-between text-purple-400">
-                <span>Check 2 Dự Đoán:</span>
+                <span>Ngữ Pháp Dự Đoán:</span>
                 <span>{engine.pred_c2 ?? 0}đ</span>
               </div>
               <div className="flex items-center justify-between text-emerald-400">
@@ -123,11 +123,11 @@ export const SummaryStrip: React.FC<SummaryStripProps> = ({ engine, gradeTypesLi
             </p>
             <div className="space-y-1 my-1 font-mono text-[10px] font-bold bg-[#0d1120] p-2 rounded-lg border border-[#202948]">
               <div className="flex items-center justify-between text-blue-400">
-                <span>Check 1 EMA (35%):</span>
+                <span>Từ Vựng EMA (35%):</span>
                 <span>{engine.ema_c1 ?? 0}đ</span>
               </div>
               <div className="flex items-center justify-between text-purple-400">
-                <span>Check 2 EMA (55%):</span>
+                <span>Ngữ Pháp EMA (55%):</span>
                 <span>{engine.ema_c2 ?? 0}đ</span>
               </div>
               <div className="flex items-center justify-between text-emerald-400">
