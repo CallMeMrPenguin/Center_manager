@@ -10,6 +10,7 @@ import {
   GraduationCap,
   Calendar,
   FlaskConical,
+  Edit3,
 } from 'lucide-react';
 import { CustomSelect } from '../../components/CustomSelect';
 import { OverviewTab } from './tabs/OverviewTab';
@@ -19,6 +20,7 @@ import { BenchmarkTab } from './tabs/BenchmarkTab';
 import { EditGradeModal } from './components/EditGradeModal';
 import { ResetGradesModal } from './components/ResetGradesModal';
 import { TimePhaseModal } from './components/TimePhaseModal';
+import { TestDatasetModal } from './components/TestDatasetModal';
 import { useReportsData } from './hooks/useReportsData';
 import { getStudentTier, WarningSettings } from './types';
 import { generateAcademicYears, getCurrentAcademicYear, getSavedWarningSettings } from './utils';
@@ -34,6 +36,7 @@ export const ReportsPage: React.FC = () => {
   const [editingRecord, setEditingRecord] = useState<any>(null);
   const [resetModalOpen, setResetModalOpen] = useState(false);
   const [phaseModalOpen, setPhaseModalOpen] = useState(false);
+  const [testDatasetModalOpen, setTestDatasetModalOpen] = useState(false);
 
   // Early warning settings
   const [warningSettings, setWarningSettings] = useState<WarningSettings>(getSavedWarningSettings());
@@ -51,12 +54,16 @@ export const ReportsPage: React.FC = () => {
   const {
     loading,
     classes,
+    students,
     selectedClassId,
     setSelectedClassId,
     selectedStudentId,
     setSelectedStudentId,
     isTestMode,
     toggleTestMode,
+    saveTestRecords,
+    resetTestRecords,
+    mockDataset,
     sessionRecords,
     studentRankings,
     gradeTypesList,
@@ -138,7 +145,7 @@ export const ReportsPage: React.FC = () => {
                 ? 'bg-amber-500/20 text-amber-300 border-amber-500/50 shadow-[0_0_15px_rgba(245,158,11,0.3)]'
                 : 'bg-[#121626] text-slate-400 hover:text-white border-[#202842] hover:border-slate-600'
             }`}
-            title={isTestMode ? "Chế độ Test đang BẬT (20 buổi/học sinh): Nhấp để chuyển về dữ liệu thực" : "Nhấp để BẬT chế độ Test (20 buổi học / học sinh)"}
+            title={isTestMode ? "Chế độ Test đang BẬT: Nhấp để chuyển về dữ liệu thực" : "Nhấp để BẬT chế độ Test (20 buổi học / học sinh)"}
           >
             <FlaskConical size={14} className={isTestMode ? "text-amber-400 animate-pulse" : "text-slate-400"} />
             <span>Chế Độ Test (20 Buổi)</span>
@@ -204,16 +211,25 @@ export const ReportsPage: React.FC = () => {
                 <span className="px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-300 border border-amber-500/40 text-[10px]">Đang Bật</span>
               </div>
               <p className="text-[11px] text-amber-300/80 mt-0.5">
-                Đang mô phỏng 20 buổi học với hệ thống điểm Check 1, Check 2, BTVN và phân bố đủ 7 cấp bậc xếp hạng (Đồng $\to$ Quán Quân). Không ảnh hưởng đến dữ liệu thực trong cơ sở dữ liệu.
+                Đang mô phỏng 20 buổi học với hệ thống điểm Check 1, Check 2, BTVN và phân bố đủ 8 cấp bậc xếp hạng (Đồng $\to$ Quán Quân). Không ảnh hưởng đến dữ liệu thực.
               </p>
             </div>
           </div>
-          <button
-            onClick={toggleTestMode}
-            className="px-3.5 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 border border-amber-500/40 text-xs font-black transition cursor-pointer shrink-0 active:scale-95"
-          >
-            Tắt Chế Độ Test
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setTestDatasetModalOpen(true)}
+              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-indigo-600/30 hover:bg-indigo-600/50 text-indigo-200 border border-indigo-500/40 text-xs font-black transition cursor-pointer shrink-0 active:scale-95"
+            >
+              <Edit3 size={13} />
+              <span>Xem & Sửa Dữ Liệu Test</span>
+            </button>
+            <button
+              onClick={toggleTestMode}
+              className="px-3.5 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 border border-amber-500/40 text-xs font-black transition cursor-pointer shrink-0 active:scale-95"
+            >
+              Tắt Chế Độ Test
+            </button>
+          </div>
         </div>
       )}
 
@@ -272,62 +288,36 @@ export const ReportsPage: React.FC = () => {
       <div key={activeReportTab} className="space-y-6">
         {activeReportTab === 'benchmark' ? (
           <BenchmarkTab
-            loading={loading}
-            classes={classes}
-            studentRankings={studentRankings}
-            sessionRecords={sessionRecords}
-            compareClassAId={compareClassAId}
-            setCompareClassAId={setCompareClassAId}
-            compareClassBId={compareClassBId}
-            setCompareClassBId={setCompareClassBId}
-            selectedClassId={selectedClassId}
-            analyticsSummary={analyticsSummary}
-            classAnalyticsMap={classAnalyticsMap}
+            loading={loading} classes={classes} studentRankings={studentRankings}
+            sessionRecords={sessionRecords} compareClassAId={compareClassAId} setCompareClassAId={setCompareClassAId}
+            compareClassBId={compareClassBId} setCompareClassBId={setCompareClassBId} selectedClassId={selectedClassId}
+            analyticsSummary={analyticsSummary} classAnalyticsMap={classAnalyticsMap}
           />
         ) : activeReportTab === 'skills' ? (
           <SkillBreakdownTab
-            selectedClassId={selectedClassId}
-            selectedStudentId={selectedStudentId}
+            selectedClassId={selectedClassId} selectedStudentId={selectedStudentId}
             onSelectRankingStudent={handleSelectRankingStudent}
           />
         ) : activeReportTab === 'deep' ? (
           <DeepAnalysisTab
-            loading={loading}
-            classes={classes}
-            selectedClassId={selectedClassId}
-            selectedStudentId={selectedStudentId}
-            studentRankings={studentRankings}
-            sessionRecords={sessionRecords}
-            filteredRankings={filteredRankings}
-            selectedDistFilter={selectedDistFilter}
-            setSelectedDistFilter={setSelectedDistFilter}
-            warningAbsentPct={warningSettings.absentPct}
-            warningConsecutiveAbsent={warningSettings.consecutiveAbsent}
-            warningTrendThreshold={warningSettings.trendThreshold}
-            showWarningSettings={showWarningSettings}
-            setShowWarningSettings={setShowWarningSettings}
-            onUpdateWarningSettings={handleUpdateWarningSettings}
+            loading={loading} classes={classes} selectedClassId={selectedClassId}
+            selectedStudentId={selectedStudentId} studentRankings={studentRankings}
+            sessionRecords={sessionRecords} filteredRankings={filteredRankings}
+            selectedDistFilter={selectedDistFilter} setSelectedDistFilter={setSelectedDistFilter}
+            warningAbsentPct={warningSettings.absentPct} warningConsecutiveAbsent={warningSettings.consecutiveAbsent}
+            warningTrendThreshold={warningSettings.trendThreshold} showWarningSettings={showWarningSettings}
+            setShowWarningSettings={setShowWarningSettings} onUpdateWarningSettings={handleUpdateWarningSettings}
             onSelectRankingStudent={handleSelectRankingStudent}
           />
         ) : (
           <OverviewTab
-            loading={loading}
-            classes={classes}
-            selectedClassId={selectedClassId}
-            setSelectedClassId={setSelectedClassId}
-            selectedStudentId={selectedStudentId}
-            setSelectedStudentId={setSelectedStudentId}
-            selectedStudentObj={selectedStudentObj}
-            selectedAcademicYear={selectedAcademicYear}
-            sessionRecords={sessionRecords}
-            studentRankings={studentRankings}
-            filteredRankings={filteredRankings}
-            engine={engine}
-            gradeTypesList={gradeTypesList}
-            studentSessionsMap={studentSessionsMap}
-            timePhases={timePhases}
-            selectedPhaseId={selectedPhaseId}
-            setSelectedPhaseId={setSelectedPhaseId}
+            loading={loading} classes={classes} selectedClassId={selectedClassId}
+            setSelectedClassId={setSelectedClassId} selectedStudentId={selectedStudentId}
+            setSelectedStudentId={setSelectedStudentId} selectedStudentObj={selectedStudentObj}
+            selectedAcademicYear={selectedAcademicYear} sessionRecords={sessionRecords}
+            studentRankings={studentRankings} filteredRankings={filteredRankings}
+            engine={engine} gradeTypesList={gradeTypesList} studentSessionsMap={studentSessionsMap}
+            timePhases={timePhases} selectedPhaseId={selectedPhaseId} setSelectedPhaseId={setSelectedPhaseId}
             onOpenPhaseModal={() => setPhaseModalOpen(true)}
             onOpenEditModal={(rec) => { setEditingRecord(rec); setEditModalOpen(true); }}
             onSelectRankingStudent={handleSelectRankingStudent}
@@ -337,33 +327,40 @@ export const ReportsPage: React.FC = () => {
 
       {/* 4. MODALS */}
       <EditGradeModal
-        record={editingRecord}
+        record={editingRecord} isTestMode={isTestMode}
+        onSaveTestRecord={(updatedRec) => {
+          const list = [...(mockDataset?.session_records || sessionRecords)];
+          const idx = list.findIndex(r => r.session_id === updatedRec.session_id && String(r.student_id) === String(updatedRec.student_id));
+          if (idx !== -1) list[idx] = updatedRec;
+          else list.push(updatedRec);
+          saveTestRecords(list);
+        }}
         onClose={() => { setEditingRecord(null); setEditModalOpen(false); }}
         onSuccess={() => loadAnalyticsData(true)}
       />
 
       <ResetGradesModal
-        isOpen={resetModalOpen}
-        onClose={() => setResetModalOpen(false)}
-        selectedClassId={selectedClassId}
-        selectedStudentId={selectedStudentId}
-        classes={classes}
-        onSuccess={() => loadAnalyticsData(true)}
+        isOpen={resetModalOpen} onClose={() => setResetModalOpen(false)}
+        selectedClassId={selectedClassId} selectedStudentId={selectedStudentId}
+        classes={classes} onSuccess={() => loadAnalyticsData(true)}
       />
 
       <TimePhaseModal
-        isOpen={phaseModalOpen}
-        onClose={() => setPhaseModalOpen(false)}
-        classes={classes}
-        selectedClassId={selectedClassId}
-        selectedAcademicYear={selectedAcademicYear}
-        timePhases={timePhases}
-        onPhasesUpdated={loadTimePhases}
-        selectedPhaseId={selectedPhaseId}
+        isOpen={phaseModalOpen} onClose={() => setPhaseModalOpen(false)}
+        classes={classes} selectedClassId={selectedClassId}
+        selectedAcademicYear={selectedAcademicYear} timePhases={timePhases}
+        onPhasesUpdated={loadTimePhases} selectedPhaseId={selectedPhaseId}
         setSelectedPhaseId={setSelectedPhaseId}
+      />
+
+      <TestDatasetModal
+        isOpen={testDatasetModalOpen} onClose={() => setTestDatasetModalOpen(false)}
+        classes={classes} students={students} sessionRecords={mockDataset?.session_records || sessionRecords}
+        onSaveRecords={saveTestRecords} onResetToDefault={resetTestRecords}
       />
     </div>
   );
 };
 
 export default ReportsPage;
+

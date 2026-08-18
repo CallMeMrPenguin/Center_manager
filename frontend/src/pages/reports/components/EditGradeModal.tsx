@@ -10,12 +10,16 @@ interface EditGradeModalProps {
   record: any | null;
   onClose: () => void;
   onSuccess: () => void;
+  isTestMode?: boolean;
+  onSaveTestRecord?: (updatedRecord: any) => void;
 }
 
 export const EditGradeModal: React.FC<EditGradeModalProps> = ({
   record,
   onClose,
   onSuccess,
+  isTestMode,
+  onSaveTestRecord,
 }) => {
   const [editStatus, setEditStatus] = useState<string>('Có mặt');
   const [editCheck1, setEditCheck1] = useState<string>('');
@@ -26,10 +30,10 @@ export const EditGradeModal: React.FC<EditGradeModalProps> = ({
 
   useEffect(() => {
     if (record) {
-      setEditStatus(record.status || 'Có mặt');
-      setEditCheck1(Number(record.check_1) > 0 ? String(record.check_1) : '');
-      setEditCheck2(Number(record.check_2) > 0 ? String(record.check_2) : '');
-      setEditHomework(Number(record.homework) > 0 ? String(record.homework) : '');
+      setEditStatus(record.status || (record.attendance === 'absent' ? 'Vắng' : 'Có mặt'));
+      setEditCheck1(record.check_1 !== null && record.check_1 !== undefined && Number(record.check_1) > 0 ? String(record.check_1) : '');
+      setEditCheck2(record.check_2 !== null && record.check_2 !== undefined && Number(record.check_2) > 0 ? String(record.check_2) : '');
+      setEditHomework(record.homework !== null && record.homework !== undefined && Number(record.homework) > 0 ? String(record.homework) : '');
       setEditNotes(record.notes || '');
     }
   }, [record]);
@@ -40,20 +44,39 @@ export const EditGradeModal: React.FC<EditGradeModalProps> = ({
     e.preventDefault();
     setSaving(true);
     try {
-      const c1 = editCheck1.trim() !== '' ? Math.max(0, Math.min(10, parseFloat(editCheck1.replace(',', '.')) || 0)) : 0;
-      const c2 = editCheck2.trim() !== '' ? Math.max(0, Math.min(10, parseFloat(editCheck2.replace(',', '.')) || 0)) : 0;
-      const hw = editHomework.trim() !== '' ? Math.max(0, Math.min(10, parseFloat(editHomework.replace(',', '.')) || 0)) : 0;
+      const c1 = editCheck1.trim() !== '' ? Math.max(0, Math.min(10, parseFloat(editCheck1.replace(',', '.')) || 0)) : null;
+      const c2 = editCheck2.trim() !== '' ? Math.max(0, Math.min(10, parseFloat(editCheck2.replace(',', '.')) || 0)) : null;
+      const hw = editHomework.trim() !== '' ? Math.max(0, Math.min(10, parseFloat(editHomework.replace(',', '.')) || 0)) : null;
+
+      if (isTestMode) {
+        const updated = {
+          ...record,
+          attendance: editStatus.includes('Vắng') ? 'absent' : 'present',
+          status: editStatus,
+          check_1: c1,
+          check_2: c2,
+          homework: hw,
+          notes: editNotes,
+        };
+        if (onSaveTestRecord) {
+          onSaveTestRecord(updated);
+        }
+        showToast(`Đã cập nhật điểm số test cho ${record.full_name || record.student_name || 'học sinh'}!`, "success");
+        onClose();
+        onSuccess();
+        return;
+      }
 
       await api.saveClassAttendance(record.class_id, record.date, [{
         student_id: record.student_id,
         status: editStatus,
-        check_1: c1,
-        check_2: c2,
-        homework: hw,
+        check_1: c1 ?? 0,
+        check_2: c2 ?? 0,
+        homework: hw ?? 0,
         notes: editNotes,
       }]);
 
-      showToast(`Đã cập nhật điểm số cho ${record.student_name || 'học sinh'}!`, "success");
+      showToast(`Đã cập nhật điểm số cho ${record.student_name || record.full_name || 'học sinh'}!`, "success");
       onClose();
       onSuccess();
       notifyDataChanged();

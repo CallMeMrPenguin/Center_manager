@@ -3,7 +3,7 @@ import { api } from '../../../api';
 import { showToast } from '../../../components/Toast';
 import { GradeTypeItem } from '../../../types';
 import { getSavedWarningSettings, DEFAULT_WARNING_SETTINGS, formatSessionDate } from '../utils';
-import { generateMockReportsData } from '../utils/mockReportsData';
+import { generateMockReportsData, computeDatasetFromRecords } from '../utils/mockReportsData';
 import { trunc1Dec } from '../../../utils';
 
 export function useReportsData() {
@@ -13,9 +13,18 @@ export function useReportsData() {
   const [students, setStudents] = useState<any[]>([]);
   const [selectedStudentId, setSelectedStudentId] = useState<string>('');
 
-  // Test Mode Toggle State
+  // Test Mode Toggle State & Custom Mock Records State
   const [isTestMode, setIsTestMode] = useState<boolean>(() => {
     return localStorage.getItem('cm_reports_test_mode') === 'true';
+  });
+
+  const [customMockRecords, setCustomMockRecords] = useState<any[] | null>(() => {
+    try {
+      const saved = localStorage.getItem('cm_custom_mock_records');
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
   });
 
   const toggleTestMode = useCallback(() => {
@@ -29,6 +38,22 @@ export function useReportsData() {
       }
       return next;
     });
+  }, []);
+
+  const saveTestRecords = useCallback((records: any[]) => {
+    try {
+      localStorage.setItem('cm_custom_mock_records', JSON.stringify(records));
+      setCustomMockRecords(records);
+    } catch (e: any) {
+      showToast("Lỗi lưu dữ liệu test: " + e.message, "error");
+    }
+  }, []);
+
+  const resetTestRecords = useCallback(() => {
+    try {
+      localStorage.removeItem('cm_custom_mock_records');
+      setCustomMockRecords(null);
+    } catch { }
   }, []);
 
   // 2-Class Head-to-Head Comparison State
@@ -152,8 +177,11 @@ export function useReportsData() {
 
   // Mock Dataset when Test Mode is Active
   const mockDataset = useMemo(() => {
+    if (customMockRecords && customMockRecords.length > 0) {
+      return computeDatasetFromRecords(customMockRecords, classes, students);
+    }
     return generateMockReportsData(classes, students);
-  }, [classes, students]);
+  }, [classes, students, customMockRecords]);
 
   // Active data sources based on Test Mode toggle
   const sessionRecords = useMemo(() => {
@@ -264,6 +292,9 @@ export function useReportsData() {
     isTestMode,
     setIsTestMode,
     toggleTestMode,
+    saveTestRecords,
+    resetTestRecords,
+    mockDataset,
     compareClassAId,
     setCompareClassAId,
     compareClassBId,

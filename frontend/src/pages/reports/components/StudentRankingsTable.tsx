@@ -188,11 +188,11 @@ export const StudentRankingsTable: React.FC<StudentRankingsTableProps> = ({
         }
         const tier = getStudentTier(avg);
         return (
-          <div className="flex items-center justify-center gap-2">
-            <img src={tier.badge} alt={tier.name} className="w-7 h-7 object-contain shrink-0 drop-shadow-[0_2px_8px_rgba(0,0,0,0.5)] transform hover:scale-110 transition-transform duration-200" />
+          <div className="flex items-center justify-center gap-2.5 py-0.5">
+            <img src={tier.badge} alt={tier.name} className="w-11 h-11 object-contain shrink-0 drop-shadow-[0_4px_12px_rgba(0,0,0,0.6)] transform hover:scale-115 transition-transform duration-200" />
             <div className="text-left">
-              <span className={`text-xs font-black font-sans block leading-tight ${tier.text}`}>{tier.name}</span>
-              <span className="text-[10px] text-slate-400 font-semibold">{tier.title}</span>
+              <span className={`text-sm font-black font-sans block leading-tight ${tier.text}`}>{tier.name}</span>
+              <span className="text-[11px] text-slate-400 font-bold">{tier.title}</span>
             </div>
           </div>
         );
@@ -211,8 +211,9 @@ export const StudentRankingsTable: React.FC<StudentRankingsTableProps> = ({
           if (valid.length === 0) return 'Chưa có điểm';
           const avg = trunc1Dec(valid.reduce((a, b) => a + b, 0) / valid.length);
           let label = 'Xuất Sắc';
-          if (avg >= 9.5) label = 'Huyền Thoại';
-          else if (avg >= 9.0) label = 'Siêu Việt';
+          if (avg >= 9.7) label = 'Huyền Thoại';
+          else if (avg >= 9.4) label = 'Siêu Việt';
+          else if (avg >= 9.0) label = 'Tinh Hoa';
           else if (avg >= 8.5) label = 'Xuất Sắc';
           else if (avg >= 7.5) label = 'Giỏi';
           else if (avg >= 6.5) label = 'Khá';
@@ -238,10 +239,11 @@ export const StudentRankingsTable: React.FC<StudentRankingsTableProps> = ({
             </div>
           );
         }
-        let label = 'Xuất Sắc', cls = 'bg-purple-500/15 text-purple-300 border-purple-500/35';
-        if (avg >= 9.5) { label = 'Huyền Thoại'; cls = 'bg-amber-500/15 text-amber-300 border-amber-500/40 font-black'; }
-        else if (avg >= 9.0) { label = 'Siêu Việt'; cls = 'bg-rose-500/15 text-rose-400 border-rose-500/35 font-bold'; }
-        else if (avg >= 8.5) { label = 'Xuất Sắc'; cls = 'bg-purple-500/15 text-purple-300 border-purple-500/35 font-bold'; }
+        let label = 'Xuất Sắc', cls = 'bg-cyan-500/15 text-cyan-300 border-cyan-500/35';
+        if (avg >= 9.7) { label = 'Huyền Thoại'; cls = 'bg-amber-500/15 text-amber-300 border-amber-500/40 font-black'; }
+        else if (avg >= 9.4) { label = 'Siêu Việt'; cls = 'bg-rose-500/15 text-rose-400 border-rose-500/35 font-bold'; }
+        else if (avg >= 9.0) { label = 'Tinh Hoa'; cls = 'bg-purple-500/15 text-purple-300 border-purple-500/35 font-bold'; }
+        else if (avg >= 8.5) { label = 'Xuất Sắc'; cls = 'bg-cyan-500/15 text-cyan-300 border-cyan-500/35 font-bold'; }
         else if (avg >= 7.5) { label = 'Giỏi'; cls = 'bg-indigo-500/15 text-indigo-300 border-indigo-500/35 font-semibold'; }
         else if (avg >= 6.5) { label = 'Khá'; cls = 'bg-yellow-500/15 text-yellow-300 border-yellow-500/35 font-semibold'; }
         else if (avg >= 5.0) { label = 'Cơ Bản'; cls = 'bg-sky-500/15 text-sky-300 border-sky-500/35'; }
