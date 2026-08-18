@@ -85,16 +85,18 @@ export const UnitBreakdownTable: React.FC<UnitBreakdownTableProps> = ({ data }) 
       {
         accessorKey: 'mastery_pct',
         header: 'Tỷ Lệ Nắm Vững',
+        size: 160,
+        minSize: 140,
         cell: ({ row }) => {
           const pct = row.original.mastery_pct;
           const mastered = row.original.mastered_count;
           const total = row.original.student_count;
           return (
-            <div className="space-y-1">
-              <div className="flex items-center justify-between text-xs">
-                <span className="font-bold text-white font-mono">{pct}%</span>
-                <span className="text-[10px] text-slate-400 font-mono">
-                  {mastered}/{total}
+            <div className="min-w-[130px] max-w-[160px] space-y-1.5 py-0.5">
+              <div className="flex items-center justify-between gap-2 text-xs">
+                <span className="font-bold text-white font-mono shrink-0">{pct}%</span>
+                <span className="text-[10px] text-slate-400 font-mono shrink-0">
+                  {mastered}/{total} HS
                 </span>
               </div>
               <div className="w-full bg-[#1e2744] h-1.5 rounded-full overflow-hidden">

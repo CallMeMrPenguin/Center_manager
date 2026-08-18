@@ -245,31 +245,50 @@ export const StudentWeaknessDiagnosisCard: React.FC<StudentWeaknessDiagnosisCard
     },
   ], []);
 
+  const stats = useMemo(() => {
+    const uniqueStudents = new Set(rawWeaknessList.map(r => r.student_id)).size;
+    const urgentCount = rawWeaknessList.filter(r => r.status === 'Cần Phụ Đạo Gấp').length;
+    const grammarCount = rawWeaknessList.filter(r => r.skill === 'grammar').length;
+    const vocabCount = rawWeaknessList.filter(r => r.skill === 'vocab').length;
+    return { uniqueStudents, urgentCount, grammarCount, vocabCount };
+  }, [rawWeaknessList]);
+
   const toolbarLeft = (
-    <div className="flex bg-[#0d1018] p-1 rounded-xl border border-white/10 text-xs font-bold shrink-0">
+    <div className="relative flex bg-[#0d1018] p-1 rounded-xl border border-white/10 text-xs font-bold shrink-0 w-80">
+      <div
+        className="absolute top-1 bottom-1 rounded-lg bg-[#5c36f5] shadow-[0_0_14px_rgba(92,54,245,0.5)] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] pointer-events-none"
+        style={{
+          left: skillFilter === 'all'
+            ? '4px'
+            : skillFilter === 'grammar'
+              ? 'calc((100% / 3) + 1px)'
+              : 'calc(((100% / 3) * 2) + 1px)',
+          width: 'calc((100% / 3) - 4px)',
+        }}
+      />
       <button
         onClick={() => setSkillFilter('all')}
-        className={`px-3 py-1 rounded-lg transition cursor-pointer ${
-          skillFilter === 'all' ? 'bg-[#5c36f5] text-white shadow-sm' : 'text-slate-400 hover:text-white'
+        className={`flex-1 relative z-10 py-1 text-center transition cursor-pointer ${
+          skillFilter === 'all' ? 'text-white font-black' : 'text-slate-400 hover:text-white'
         }`}
       >
         Tất Cả ({rawWeaknessList.length})
       </button>
       <button
         onClick={() => setSkillFilter('grammar')}
-        className={`px-3 py-1 rounded-lg transition cursor-pointer ${
-          skillFilter === 'grammar' ? 'bg-[#5c36f5] text-white shadow-sm' : 'text-slate-400 hover:text-white'
+        className={`flex-1 relative z-10 py-1 text-center transition cursor-pointer ${
+          skillFilter === 'grammar' ? 'text-white font-black' : 'text-slate-400 hover:text-white'
         }`}
       >
-        Chỉ Ngữ Pháp
+        Ngữ Pháp ({stats.grammarCount})
       </button>
       <button
         onClick={() => setSkillFilter('vocab')}
-        className={`px-3 py-1 rounded-lg transition cursor-pointer ${
-          skillFilter === 'vocab' ? 'bg-[#5c36f5] text-white shadow-sm' : 'text-slate-400 hover:text-white'
+        className={`flex-1 relative z-10 py-1 text-center transition cursor-pointer ${
+          skillFilter === 'vocab' ? 'text-white font-black' : 'text-slate-400 hover:text-white'
         }`}
       >
-        Chỉ Từ Vựng
+        Từ Vựng ({stats.vocabCount})
       </button>
     </div>
   );
@@ -277,13 +296,39 @@ export const StudentWeaknessDiagnosisCard: React.FC<StudentWeaknessDiagnosisCard
   return (
     <div className="bg-[#0c0f1d] border border-white/10 rounded-2xl p-5 space-y-4 select-none shadow-lg animate-cascade-2">
       {/* Title Bar */}
-      <div className="border-b border-white/5 pb-3">
-        <h3 className="text-sm font-black text-white uppercase tracking-wider">
-          Danh Sách Học Sinh Cần Phụ Đạo Theo Bài Học & Kỹ Năng
-        </h3>
-        <p className="text-xs text-slate-400 mt-0.5">
-          Bảng thống kê chi tiết toàn bộ các Unit có điểm trung bình dưới 6.5 để giáo viên lên kế hoạch kèm cặp trọng điểm.
-        </p>
+      <div className="border-b border-white/5 pb-3 flex flex-wrap items-center justify-between gap-2">
+        <div>
+          <h3 className="text-sm font-black text-white uppercase tracking-wider">
+            Danh Sách Học Sinh Cần Phụ Đạo Theo Bài Học & Kỹ Năng
+          </h3>
+          <p className="text-xs text-slate-400 mt-0.5">
+            Bảng thống kê chi tiết toàn bộ các Unit có điểm trung bình dưới 6.5 để giáo viên lên kế hoạch kèm cặp trọng điểm.
+          </p>
+        </div>
+      </div>
+
+      {/* Quick Summary KPIs */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-[#080c18] border border-white/5 p-3.5 rounded-xl">
+        <div className="space-y-0.5">
+          <span className="text-[10px] font-bold uppercase text-slate-400">Học Sinh Cần Kèm</span>
+          <div className="text-xl font-black text-amber-400 font-mono">{stats.uniqueStudents} HS</div>
+          <span className="text-[10px] text-slate-500 font-medium block">Có bài học &lt; 6.5đ</span>
+        </div>
+        <div className="space-y-0.5">
+          <span className="text-[10px] font-bold uppercase text-slate-400">Cần Phụ Đạo Gấp</span>
+          <div className="text-xl font-black text-rose-400 font-mono">{stats.urgentCount} lượt</div>
+          <span className="text-[10px] text-slate-500 font-medium block">Điểm trung bình &lt; 5.0đ</span>
+        </div>
+        <div className="space-y-0.5">
+          <span className="text-[10px] font-bold uppercase text-slate-400">Hổng Kiến Thức Ngữ Pháp</span>
+          <div className="text-xl font-black text-purple-400 font-mono">{stats.grammarCount} lượt</div>
+          <span className="text-[10px] text-slate-500 font-medium block">Cần ôn lại cấu trúc ngữ pháp</span>
+        </div>
+        <div className="space-y-0.5">
+          <span className="text-[10px] font-bold uppercase text-slate-400">Hổng Kiến Thức Từ Vựng</span>
+          <div className="text-xl font-black text-blue-400 font-mono">{stats.vocabCount} lượt</div>
+          <span className="text-[10px] text-slate-500 font-medium block">Cần kiểm tra lại từ vựng unit</span>
+        </div>
       </div>
 
       {/* TanStack DataTable */}

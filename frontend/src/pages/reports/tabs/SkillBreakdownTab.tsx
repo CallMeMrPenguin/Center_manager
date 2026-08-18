@@ -1,10 +1,8 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { Sparkles, LayoutGrid, ListFilter } from 'lucide-react';
+import { AlertTriangle, LayoutGrid, BookOpen } from 'lucide-react';
 import { api } from '../../../api';
-import { SkillOverviewCards } from '../components/SkillOverviewCards';
 import { MasteryHeatmap } from '../components/MasteryHeatmap';
 import { UnitBreakdownTable } from '../components/UnitBreakdownTable';
-import { SkillAwarePredictionCard } from '../components/SkillAwarePredictionCard';
 import { StudentWeaknessDiagnosisCard } from '../components/StudentWeaknessDiagnosisCard';
 import { computeMockSkillBreakdown, generateMockReportsData } from '../utils/mockReportsData';
 
@@ -25,7 +23,7 @@ export const SkillBreakdownTab: React.FC<SkillBreakdownTabProps> = ({
   sessionRecords = [],
   studentRankings = [],
 }) => {
-  const [activeSubTab, setActiveSubTab] = useState<'overview' | 'heatmap' | 'diagnosis'>('overview');
+  const [activeSubTab, setActiveSubTab] = useState<'diagnosis' | 'heatmap' | 'units'>('diagnosis');
   const [loading, setLoading] = useState(false);
   const [apiReportData, setApiReportData] = useState<any>(null);
 
@@ -71,23 +69,9 @@ export const SkillBreakdownTab: React.FC<SkillBreakdownTabProps> = ({
     );
   }
 
-  const defaultStats = {
-    vocab_avg: 0,
-    grammar_avg: 0,
-    mixed_avg: 0,
-    mastered_count: 0,
-    partial_count: 0,
-    regressed_count: 0,
-    not_yet_count: 0,
-    total_instances: 0,
-    mastery_rate: 0,
-  };
-
-  const stats = reportData?.skill_stats || defaultStats;
   const unitBreakdown = reportData?.unit_breakdown || [];
   const heatmapUnits = reportData?.mastery_heatmap?.units || [];
   const heatmapStudents = reportData?.mastery_heatmap?.students || [];
-  const prediction = reportData?.skill_aware_prediction || null;
 
   return (
     <div className="flex flex-col gap-6 mb-8 select-none">
@@ -124,7 +108,7 @@ export const SkillBreakdownTab: React.FC<SkillBreakdownTabProps> = ({
           <div
             className="absolute top-1 bottom-1 rounded-lg bg-[#5c36f5] shadow-[0_0_14px_rgba(92,54,245,0.5)] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] pointer-events-none"
             style={{
-              left: activeSubTab === 'overview'
+              left: activeSubTab === 'diagnosis'
                 ? '4px'
                 : activeSubTab === 'heatmap'
                   ? 'calc((100% / 3) + 1px)'
@@ -134,13 +118,13 @@ export const SkillBreakdownTab: React.FC<SkillBreakdownTabProps> = ({
           />
           <button
             type="button"
-            onClick={() => setActiveSubTab('overview')}
+            onClick={() => setActiveSubTab('diagnosis')}
             className={`flex-1 relative z-10 py-2 px-3 text-center transition-colors cursor-pointer flex items-center justify-center gap-1.5 whitespace-nowrap ${
-              activeSubTab === 'overview' ? 'text-white font-black' : 'text-slate-400 hover:text-white'
+              activeSubTab === 'diagnosis' ? 'text-white font-black' : 'text-slate-400 hover:text-white'
             }`}
           >
-            <Sparkles size={13} />
-            <span>Tổng Quan & Dự Báo</span>
+            <AlertTriangle size={13} />
+            <span>Học Sinh Cần Phụ Đạo</span>
           </button>
           <button
             type="button"
@@ -154,26 +138,26 @@ export const SkillBreakdownTab: React.FC<SkillBreakdownTabProps> = ({
           </button>
           <button
             type="button"
-            onClick={() => setActiveSubTab('diagnosis')}
+            onClick={() => setActiveSubTab('units')}
             className={`flex-1 relative z-10 py-2 px-3 text-center transition-colors cursor-pointer flex items-center justify-center gap-1.5 whitespace-nowrap ${
-              activeSubTab === 'diagnosis' ? 'text-white font-black' : 'text-slate-400 hover:text-white'
+              activeSubTab === 'units' ? 'text-white font-black' : 'text-slate-400 hover:text-white'
             }`}
           >
-            <ListFilter size={13} />
-            <span>Chi Tiết Phụ Đạo & Unit</span>
+            <BookOpen size={13} />
+            <span>Thống Kê Theo Unit</span>
           </button>
         </div>
       </div>
 
       {/* 2. SUB-TAB CONTENT VIEWS */}
-      {activeSubTab === 'overview' && (
-        <div className="space-y-6 animate-cascade-1">
-          {/* Top Pedagogical KPI Cards */}
-          <SkillOverviewCards stats={stats} />
-
-          {/* Skill-Aware Prediction Card */}
-          <SkillAwarePredictionCard
-            prediction={prediction}
+      {activeSubTab === 'diagnosis' && (
+        <div className="animate-cascade-1">
+          {/* Bảng danh sách học sinh cần phụ đạo theo bài học */}
+          <StudentWeaknessDiagnosisCard
+            sessionRecords={sessionRecords}
+            studentRankings={studentRankings}
+            selectedClassId={selectedClassId}
+            selectedStudentId={selectedStudentId}
             onSelectStudent={onSelectRankingStudent}
           />
         </div>
@@ -189,18 +173,9 @@ export const SkillBreakdownTab: React.FC<SkillBreakdownTabProps> = ({
         </div>
       )}
 
-      {activeSubTab === 'diagnosis' && (
-        <div className="space-y-6 animate-cascade-1">
-          {/* Bảng danh sách học sinh cần phụ đạo theo bài học */}
-          <StudentWeaknessDiagnosisCard
-            sessionRecords={sessionRecords}
-            studentRankings={studentRankings}
-            selectedClassId={selectedClassId}
-            selectedStudentId={selectedStudentId}
-            onSelectStudent={onSelectRankingStudent}
-          />
-
-          {/* Unit & Topic Breakdown */}
+      {activeSubTab === 'units' && (
+        <div className="animate-cascade-1">
+          {/* Unit & Topic Breakdown Table */}
           <UnitBreakdownTable data={unitBreakdown} />
         </div>
       )}
