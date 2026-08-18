@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
 import { DataTable } from '../../../components/DataTable';
-import { AlertTriangle, ArrowRight, BookOpen } from 'lucide-react';
+import { AlertTriangle } from 'lucide-react';
 import { trunc1Dec, format1Dec } from '../../../utils';
 
 export interface StudentWeakUnitItem {
@@ -33,6 +33,8 @@ interface StudentWeaknessDiagnosisCardProps {
   selectedClassId: string;
   selectedStudentId?: string;
   onSelectStudent?: (studentId: number) => void;
+  heatmapStudents?: any[];
+  isTestMode?: boolean;
 }
 
 export const StudentWeaknessDiagnosisCard: React.FC<StudentWeaknessDiagnosisCardProps> = ({
@@ -40,18 +42,68 @@ export const StudentWeaknessDiagnosisCard: React.FC<StudentWeaknessDiagnosisCard
   selectedClassId,
   selectedStudentId,
   onSelectStudent,
+  heatmapStudents,
+  isTestMode,
 }) => {
   const [skillFilter, setSkillFilter] = useState<'all' | 'grammar' | 'vocab'>('all');
 
-  // Aggregate session records by Student (1 row per student)
+  // Aggregate student weaknesses (No fake Unit 1 in real mode!)
   const studentRemedialList = useMemo<StudentRemedialSummaryRow[]>(() => {
+    if (heatmapStudents && heatmapStudents.length > 0) {
+      const rows: StudentRemedialSummaryRow[] = [];
+
+      heatmapStudents.forEach(st => {
+        if (selectedStudentId && selectedStudentId !== '0' && selectedStudentId !== '' && String(st.student_id) !== String(selectedStudentId)) {
+          return;
+        }
+
+        const weakUnits: StudentWeakUnitItem[] = [];
+        Object.entries(st.units || {}).forEach(([uKey, uData]: [string, any]) => {
+          if (uData.ema_score !== undefined && uData.ema_score !== null && uData.ema_score < 6.5) {
+            weakUnits.push({
+              unit_key: uKey,
+              skill: (uData.skill as any) || 'grammar',
+              topic_name: uKey,
+              avg_score: trunc1Dec(uData.ema_score),
+              test_count: uData.test_count || 1,
+            });
+          }
+        });
+
+        if (weakUnits.length > 0) {
+          weakUnits.sort((a, b) => a.avg_score - b.avg_score);
+          const urgentCount = weakUnits.filter(u => u.avg_score < 5.0).length;
+          const grammarCount = weakUnits.filter(u => u.skill === 'grammar').length;
+          const vocabCount = weakUnits.filter(u => u.skill === 'vocab').length;
+          const lowestScore = weakUnits[0]?.avg_score ?? 0;
+
+          rows.push({
+            id: String(st.student_id),
+            student_id: st.student_id,
+            student_name: st.student_name,
+            nickname: st.nickname || '',
+            class_name: st.class_name || '',
+            weak_units: weakUnits,
+            total_weak_count: weakUnits.length,
+            grammar_count: grammarCount,
+            vocab_count: vocabCount,
+            urgent_count: urgentCount,
+            lowest_score: lowestScore,
+            status: urgentCount > 0 ? 'Cần Phụ Đạo Gấp' : 'Cần Củng Cố',
+          });
+        }
+      });
+
+      return rows.sort((a, b) => (b.urgent_count - a.urgent_count) || (b.total_weak_count - a.total_weak_count));
+    }
+
+    // Fallback ONLY when explicit topics exist in sessionRecords or in test mode
     let list = selectedClassId ? sessionRecords.filter(r => String(r.class_id) === selectedClassId) : sessionRecords;
     if (selectedStudentId && selectedStudentId !== '0' && selectedStudentId !== '') {
       list = list.filter(r => String(r.student_id) === String(selectedStudentId));
     }
     if (!list || list.length === 0) return [];
 
-    // Map: student_id -> { name, nickname, className, unitMap }
     const studentScoreMap = new Map<number, {
       name: string;
       nickname: string;
@@ -60,6 +112,10 @@ export const StudentWeaknessDiagnosisCard: React.FC<StudentWeaknessDiagnosisCard
     }>();
 
     list.forEach(r => {
+      // In real data mode, DO NOT invent Unit 1 if topic is empty!
+      const uKey = r.topic || (isTestMode ? `Unit ${Math.min(12, Math.floor(((r.session_id || 1001) - 1001) / 2) + 1)}` : null);
+      if (!uKey) return; // Skip sessions with no test topic configured
+
       if (r.attendance !== 'absent') {
         const sid = Number(r.student_id);
         if (!studentScoreMap.has(sid)) {
@@ -71,8 +127,7 @@ export const StudentWeaknessDiagnosisCard: React.FC<StudentWeaknessDiagnosisCard
           });
         }
 
-        const uKey = r.topic || `Unit ${Math.min(12, Math.floor(((r.session_id || 1001) - 1001) / 2) + 1)}`;
-        const gTopic = r.check_2_topic || r.grammar_topic || 'Ngữ pháp';
+        const gTopic = r.check_2_topic || r.grammar_topic || `${uKey}: Ngữ pháp`;
         const vTopic = r.check_1_topic || `${uKey}: Từ vựng`;
 
         const stData = studentScoreMap.get(sid)!;
@@ -90,7 +145,7 @@ export const StudentWeaknessDiagnosisCard: React.FC<StudentWeaknessDiagnosisCard
         if (r.check_2 !== null && r.check_2 !== undefined) {
           const gk = `${uKey}-grammar`;
           if (!stData.unitMap.has(gk)) {
-            stData.unitMap.set(gk, { unit_key: uKey, skill: 'grammar', topic_name: `${uKey} (${gTopic})`, scores: [] });
+            stData.unitMap.set(gk, { unit_key: uKey, skill: 'grammar', topic_name: gTopic, scores: [] });
           }
           stData.unitMap.get(gk)!.scores.push(Number(r.check_2));
         }
@@ -141,9 +196,8 @@ export const StudentWeaknessDiagnosisCard: React.FC<StudentWeaknessDiagnosisCard
       }
     });
 
-    // Sort by urgent cases first, then by total weak count descending
     return rows.sort((a, b) => (b.urgent_count - a.urgent_count) || (b.total_weak_count - a.total_weak_count));
-  }, [sessionRecords, selectedClassId, selectedStudentId]);
+  }, [heatmapStudents, sessionRecords, selectedClassId, selectedStudentId, isTestMode]);
 
   const filteredData = useMemo(() => {
     if (skillFilter === 'all') return studentRemedialList;
@@ -384,7 +438,7 @@ export const StudentWeaknessDiagnosisCard: React.FC<StudentWeaknessDiagnosisCard
         columns={columns}
         pageSize={20}
         searchPlaceholder="Tìm theo tên học sinh, lớp..."
-        emptyMessage="Tuyệt vời! Không phát hiện học sinh nào có điểm dưới 6.5."
+        emptyMessage="Chưa có dữ liệu bài kiểm tra nào hoặc không phát hiện học sinh nào dưới 6.5đ."
         toolbarLeft={toolbarLeft}
         exportFilename="danh_sach_hoc_sinh_can_phu_dao"
         onRowClick={(row) => onSelectStudent && onSelectStudent(row.student_id)}

@@ -158,6 +158,8 @@ export const SkillBreakdownTab: React.FC<SkillBreakdownTabProps> = ({
             studentRankings={studentRankings}
             selectedClassId={selectedClassId}
             selectedStudentId={selectedStudentId}
+            heatmapStudents={heatmapStudents}
+            isTestMode={isTestMode}
             onSelectStudent={(sid) => {
               onSelectRankingStudent(sid);
               setActiveSubTab('heatmap');
