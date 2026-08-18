@@ -9,9 +9,10 @@ interface StudentGradeHistoryTableProps {
   loading: boolean;
   sessionRecords: any[];
   selectedStudentObj: any;
-  stats: { sessionCount: number };
-  onOpenEditModal: (record: any) => void;
+  stats: any;
+  onOpenEditModal: (rec: any) => void;
   hasSelectedStudent: boolean;
+  isTestMode?: boolean;
 }
 
 export const StudentGradeHistoryTable: React.FC<StudentGradeHistoryTableProps> = ({
@@ -21,6 +22,7 @@ export const StudentGradeHistoryTable: React.FC<StudentGradeHistoryTableProps> =
   stats,
   onOpenEditModal,
   hasSelectedStudent,
+  isTestMode,
 }) => {
   const historyColumns = useMemo<ColumnDef<any>[]>(() => [
     {
@@ -46,7 +48,7 @@ export const StudentGradeHistoryTable: React.FC<StudentGradeHistoryTableProps> =
       header: 'Lớp Học',
       meta: { headerText: 'Lớp Học', exportValue: (r: any) => r.class_name || 'Lớp học' },
       cell: (info) => (
-        <span className="inline-block px-2.5 py-0.5 rounded-lg text-xs font-black bg-[#1c2442] text-slate-300 border border-[#303d68]">
+        <span className="font-bold text-slate-300">
           {info.getValue<string>() || 'Lớp học'}
         </span>
       ),
@@ -69,8 +71,8 @@ export const StudentGradeHistoryTable: React.FC<StudentGradeHistoryTableProps> =
     },
     {
       accessorKey: 'check_1',
-      header: () => <div className="text-center w-full">Check 1</div>,
-      meta: { headerText: 'Check 1', exportValue: (r: any) => Number(r.check_1) > 0 ? format1Dec(Number(r.check_1)) : '-' },
+      header: () => <div className="text-center w-full">{isTestMode ? 'Từ Vựng (Vocab)' : 'Check 1'}</div>,
+      meta: { headerText: isTestMode ? 'Từ Vựng' : 'Check 1', exportValue: (r: any) => Number(r.check_1) > 0 ? format1Dec(Number(r.check_1)) : '-' },
       cell: ({ row }) => {
         const r = row.original;
         const val = Number(r.check_1) || 0;
@@ -97,8 +99,8 @@ export const StudentGradeHistoryTable: React.FC<StudentGradeHistoryTableProps> =
     },
     {
       accessorKey: 'check_2',
-      header: () => <div className="text-center w-full">Check 2</div>,
-      meta: { headerText: 'Check 2', exportValue: (r: any) => Number(r.check_2) > 0 ? format1Dec(Number(r.check_2)) : '-' },
+      header: () => <div className="text-center w-full">{isTestMode ? 'Ngữ Pháp (Grammar)' : 'Check 2'}</div>,
+      meta: { headerText: isTestMode ? 'Ngữ Pháp' : 'Check 2', exportValue: (r: any) => Number(r.check_2) > 0 ? format1Dec(Number(r.check_2)) : '-' },
       cell: ({ row }) => {
         const r = row.original;
         const val = Number(r.check_2) || 0;

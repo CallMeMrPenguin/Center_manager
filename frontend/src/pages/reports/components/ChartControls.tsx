@@ -15,6 +15,7 @@ interface ChartControlsProps {
   zoomLevel: number;
   setZoomLevel: React.Dispatch<React.SetStateAction<number>>;
   setPanOffset: React.Dispatch<React.SetStateAction<{ x: number; y: number }>>;
+  isTestMode?: boolean;
 }
 
 export const ChartControls: React.FC<ChartControlsProps> = ({
@@ -28,6 +29,7 @@ export const ChartControls: React.FC<ChartControlsProps> = ({
   zoomLevel,
   setZoomLevel,
   setPanOffset,
+  isTestMode,
 }) => {
   return (
     <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[#181f36] pb-3">
@@ -44,11 +46,11 @@ export const ChartControls: React.FC<ChartControlsProps> = ({
         <div className="flex items-center gap-3.5 text-[11px] font-bold">
           <span className="flex items-center gap-1.5 text-blue-400">
             <span className="w-2.5 h-2.5 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.8)]"></span>
-            Check 1 (Dự đoán: {format1Dec(engine.pred_c1)})
+            {isTestMode ? 'Từ Vựng' : 'Check 1'} (Dự đoán: {format1Dec(engine.pred_c1)})
           </span>
           <span className="flex items-center gap-1.5 text-purple-400">
             <span className="w-2.5 h-2.5 rounded-full bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.8)]"></span>
-            Check 2 (Dự đoán: {format1Dec(engine.pred_c2)})
+            {isTestMode ? 'Ngữ Pháp' : 'Check 2'} (Dự đoán: {format1Dec(engine.pred_c2)})
           </span>
           <span className="flex items-center gap-1.5 text-emerald-400">
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]"></span>

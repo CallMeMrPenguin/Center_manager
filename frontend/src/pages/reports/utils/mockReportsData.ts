@@ -7,7 +7,6 @@ export interface MockReportsDataset {
   class_analytics_map: Record<string, any>;
 }
 
-// 8 Profiles matching 8 Tiers: Đồng -> Quán Quân (with user specified titles)
 export const MOCK_PROFILES = [
   { tier: 8, rankName: 'Quán Quân', title: 'Xuất Chúng', baseC1: 9.8, baseC2: 9.8, baseHw: 9.9, slope: 0.02, volatility: 0.15, absentSessions: [] as number[] },
   { tier: 7, rankName: 'Cao Thủ', title: 'Vượt Trội', baseC1: 9.4, baseC2: 9.5, baseHw: 9.6, slope: 0.02, volatility: 0.25, absentSessions: [] as number[] },
@@ -208,6 +207,7 @@ export function computeMockSkillBreakdown(
   let partialCount = 0;
   let notYetCount = 0;
   const unitBreakdown: any[] = [];
+  const heatmapUnitsList: { unit_key: string; skill: 'vocab' | 'grammar'; avg_score: number }[] = [];
 
   unitBreakdownMap.forEach((val) => {
     const sc = val.scores;
@@ -238,6 +238,12 @@ export function computeMockSkillBreakdown(
       mastery_pct: mPct,
       recommendation: rec,
     });
+
+    heatmapUnitsList.push({
+      unit_key: val.unit_key,
+      skill: val.skill as 'vocab' | 'grammar',
+      avg_score: avg,
+    });
   });
 
   const totalInstances = masteredCount + partialCount + notYetCount;
@@ -250,24 +256,42 @@ export function computeMockSkillBreakdown(
       studentMap.set(sid, {
         id: sid,
         name: r.full_name,
-        nickname: r.nickname,
-        className: r.class_name,
+        nickname: r.nickname || '',
+        className: r.class_name || '',
         units: {},
       });
     }
     const uKey = r.topic || `Unit ${Math.min(12, Math.floor(((r.session_id || 1001) - 1001) / 2) + 1)}`;
+    const gTopic = r.check_2_topic || r.grammar_topic || 'Ngữ pháp';
     const stObj = studentMap.get(sid)!;
-    const c1 = Number(r.check_1 || 0);
-    const c2 = Number(r.check_2 || 0);
-    const score = c1 > 0 && c2 > 0 ? trunc1Dec((c1 + c2) / 2) : (c1 || c2 || 0);
-    stObj.units[uKey] = {
-      score,
-      status: score >= 8.5 ? 'mastered' : score >= 6.5 ? 'partial' : 'not_yet',
-      level: score >= 8.5 ? 'Nắm vững' : score >= 6.5 ? 'Khá' : 'Cần chú ý',
-    };
+
+    if (r.check_1 !== null && r.check_1 !== undefined) {
+      const c1 = Number(r.check_1);
+      const vUnitKey = `${uKey} (Từ vựng)`;
+      stObj.units[vUnitKey] = {
+        skill: 'vocab',
+        ema_score: trunc1Dec(c1),
+        last_score: trunc1Dec(c1),
+        test_count: 1,
+        mastery_status: c1 >= 8.5 ? 'mastered' : c1 >= 6.5 ? 'partial' : 'not_yet',
+        last_tested: r.date,
+      };
+    }
+
+    if (r.check_2 !== null && r.check_2 !== undefined) {
+      const c2 = Number(r.check_2);
+      const gUnitKey = `${uKey} (${gTopic})`;
+      stObj.units[gUnitKey] = {
+        skill: 'grammar',
+        ema_score: trunc1Dec(c2),
+        last_score: trunc1Dec(c2),
+        test_count: 1,
+        mastery_status: c2 >= 8.5 ? 'mastered' : c2 >= 6.5 ? 'partial' : 'not_yet',
+        last_tested: r.date,
+      };
+    }
   });
 
-  const heatmapUnits = ['Unit 1', 'Unit 2', 'Unit 3', 'Unit 4', 'Unit 5', 'Unit 6', 'Unit 7', 'Unit 8', 'Unit 9', 'Unit 10', 'Unit 11', 'Unit 12'];
   const heatmapStudents = Array.from(studentMap.values()).map(s => ({
     student_id: s.id,
     student_name: s.name,
@@ -277,21 +301,38 @@ export function computeMockSkillBreakdown(
   }));
 
   const prediction = {
-    pred_vocab: trunc1Dec(vocabAvg + 0.1),
-    pred_grammar: trunc1Dec(grammarAvg + 0.15),
-    strongest_skill: vocabAvg >= grammarAvg ? 'Từ Vựng (Check 1)' : 'Ngữ Pháp (Check 2)',
-    weakest_skill: vocabAvg >= grammarAvg ? 'Ngữ Pháp (Check 2)' : 'Từ Vựng (Check 1)',
-    focus_unit: 'Unit 7 (Superlative Adjectives)',
-    risk_students: heatmapStudents.filter(s => {
-      const avg = Object.values(s.units).reduce((acc: number, u: any) => acc + (u.score || 0), 0) / (Object.values(s.units).length || 1);
-      return avg < 6.5;
-    }).map(s => ({
-      student_id: s.student_id,
-      student_name: s.student_name,
-      nickname: s.nickname,
-      class_name: s.class_name,
-      gap_skills: ['Ngữ Pháp cần củng cố thêm bài tập'],
-    })),
+    has_upcoming_config: true,
+    session_date: 'Buổi 21 (Dự Báo)',
+    check_1_info: {
+      skill: 'vocab',
+      topic: 'Unit 11: Global Warming (Từ Vựng Mở Rộng)',
+      units: ['Unit 11 (Từ vựng)'],
+    },
+    check_2_info: {
+      skill: 'grammar',
+      topic: 'Unit 11: Passive Voice (Bị Động Nâng Cao)',
+      units: ['Unit 11 (Ngữ pháp)'],
+    },
+    at_risk_students: heatmapStudents.filter(s => {
+      const vals = Object.values(s.units);
+      const avg = vals.reduce((sum, u: any) => sum + (u.ema_score || 0), 0) / (vals.length || 1);
+      return avg < 7.0;
+    }).map(s => {
+      const vals = Object.values(s.units);
+      const vVals = vals.filter((u: any) => u.skill === 'vocab');
+      const gVals = vals.filter((u: any) => u.skill === 'grammar');
+      const avgC1 = trunc1Dec(vVals.reduce((sum, u: any) => sum + (u.ema_score || 0), 0) / (vVals.length || 1));
+      const avgC2 = trunc1Dec(gVals.reduce((sum, u: any) => sum + (u.ema_score || 0), 0) / (gVals.length || 1));
+      return {
+        student_id: s.student_id,
+        student_name: s.student_name,
+        nickname: s.nickname,
+        pred_c1: avgC1,
+        pred_c2: avgC2,
+        reason: avgC2 < 6.5 ? 'Nguy cơ điểm Ngữ Pháp thấp ở bài tới do các thì trước đó chưa nắm vững' : 'Cần trau dồi thêm vốn từ vựng học thuật',
+      };
+    }),
+    summary: 'Dự báo kiểm tra tiếp theo: Check 1 (Từ Vựng) & Check 2 (Ngữ Pháp) theo dữ liệu tích lũy.',
   };
 
   return {
@@ -308,7 +349,7 @@ export function computeMockSkillBreakdown(
     },
     unit_breakdown: unitBreakdown,
     mastery_heatmap: {
-      units: heatmapUnits,
+      units: heatmapUnitsList,
       students: heatmapStudents,
     },
     skill_aware_prediction: prediction,

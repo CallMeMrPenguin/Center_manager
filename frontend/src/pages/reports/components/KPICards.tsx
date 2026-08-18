@@ -17,16 +17,17 @@ interface KPICardsProps {
   };
   engine: any;
   hasSelectedStudent: boolean;
+  isTestMode?: boolean;
 }
 
-export const KPICards: React.FC<KPICardsProps> = ({ stats, hasSelectedStudent }) => {
+export const KPICards: React.FC<KPICardsProps> = ({ stats, hasSelectedStudent, isTestMode }) => {
   return (
     <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 ${hasSelectedStudent ? 'animate-cascade-2' : 'animate-cascade-1'}`}>
       {/* 1. CHECK 1 TRUNG BÌNH */}
       <div className="kpi-card-blue p-5 flex flex-col justify-between shadow-2xl transition-all duration-300 min-h-[100px]">
         <div>
           <span className="text-[10px] font-black uppercase tracking-wider text-blue-400 block mb-1">
-            CHECK 1 TRUNG BÌNH
+            {isTestMode ? 'TỪ VỰNG TRUNG BÌNH (CHECK 1)' : 'CHECK 1 TRUNG BÌNH'}
           </span>
           <div className="flex items-baseline gap-1.5">
             <span className="text-3xl font-black text-white font-mono">{stats.c1}</span>
@@ -42,7 +43,7 @@ export const KPICards: React.FC<KPICardsProps> = ({ stats, hasSelectedStudent })
       <div className="kpi-card-purple p-5 flex flex-col justify-between shadow-2xl transition-all duration-300 min-h-[100px]">
         <div>
           <span className="text-[10px] font-black uppercase tracking-wider text-purple-400 block mb-1">
-            CHECK 2 TRUNG BÌNH
+            {isTestMode ? 'NGỮ PHÁP TRUNG BÌNH (CHECK 2)' : 'CHECK 2 TRUNG BÌNH'}
           </span>
           <div className="flex items-baseline gap-1.5">
             <span className="text-3xl font-black text-white font-mono">{stats.c2}</span>

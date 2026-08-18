@@ -30,6 +30,7 @@ interface OverviewTabProps {
   onOpenPhaseModal: () => void;
   onOpenEditModal: (rec: any) => void;
   onSelectRankingStudent: (studentId: number) => void;
+  isTestMode?: boolean;
 }
 
 export const OverviewTab: React.FC<OverviewTabProps> = ({
@@ -53,6 +54,7 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
   onOpenPhaseModal,
   onOpenEditModal,
   onSelectRankingStudent,
+  isTestMode,
 }) => {
   const [timeView, setTimeView] = useState<'1m' | '2m' | '3m' | 'all'>('all');
 
@@ -274,6 +276,7 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
         stats={stats}
         engine={engine}
         hasSelectedStudent={!!selectedStudentObj}
+        isTestMode={isTestMode}
       />
 
       {/* 3. INTERACTIVE CHART */}
@@ -289,6 +292,7 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
         selectedPhaseId={selectedPhaseId}
         setSelectedPhaseId={setSelectedPhaseId}
         onOpenPhaseModal={onOpenPhaseModal}
+        isTestMode={isTestMode}
       />
 
       {/* 4. SUMMARY STRIP (NOW WITH PI INDEX & DETAILED TOOLTIP) */}
@@ -310,6 +314,7 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
         studentSessionsMap={studentSessionsMap}
         onSelectRankingStudent={onSelectRankingStudent}
         hasSelectedStudent={!!selectedStudentObj}
+        isTestMode={isTestMode}
       />
 
       {/* 6. STUDENT GRADE HISTORY TABLE */}
@@ -320,6 +325,7 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
         stats={stats}
         onOpenEditModal={onOpenEditModal}
         hasSelectedStudent={!!selectedStudentObj}
+        isTestMode={isTestMode}
       />
     </>
   );

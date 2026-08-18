@@ -151,8 +151,8 @@ export const TestDatasetModal: React.FC<TestDatasetModalProps> = ({
                   <th className="py-2.5 px-3 text-center w-12">Buổi</th>
                   <th className="py-2.5 px-3 w-28">Ngày Học</th>
                   <th className="py-2.5 px-3 text-center w-28">Điểm Danh</th>
-                  <th className="py-2.5 px-3 min-w-[200px]">Check 1 (Kỹ Năng | Chủ Đề | Điểm)</th>
-                  <th className="py-2.5 px-3 min-w-[200px]">Check 2 (Kỹ Năng | Chủ Đề | Điểm)</th>
+                  <th className="py-2.5 px-3 min-w-[200px]">Từ Vựng (Check 1)</th>
+                  <th className="py-2.5 px-3 min-w-[200px]">Ngữ Pháp (Check 2)</th>
                   <th className="py-2.5 px-3 min-w-[150px]">Homework (BTVN)</th>
                   <th className="py-2.5 px-3 w-32">Ghi Chú</th>
                 </tr>

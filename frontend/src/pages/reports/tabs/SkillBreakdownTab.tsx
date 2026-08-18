@@ -4,6 +4,7 @@ import { SkillOverviewCards } from '../components/SkillOverviewCards';
 import { MasteryHeatmap } from '../components/MasteryHeatmap';
 import { UnitBreakdownTable } from '../components/UnitBreakdownTable';
 import { SkillAwarePredictionCard } from '../components/SkillAwarePredictionCard';
+import { StudentWeaknessDiagnosisCard } from '../components/StudentWeaknessDiagnosisCard';
 import { computeMockSkillBreakdown } from '../utils/mockReportsData';
 import { RefreshCw } from 'lucide-react';
 
@@ -13,6 +14,7 @@ interface SkillBreakdownTabProps {
   onSelectRankingStudent: (studentId: number) => void;
   isTestMode?: boolean;
   sessionRecords?: any[];
+  studentRankings?: any[];
 }
 
 export const SkillBreakdownTab: React.FC<SkillBreakdownTabProps> = ({
@@ -20,7 +22,8 @@ export const SkillBreakdownTab: React.FC<SkillBreakdownTabProps> = ({
   selectedStudentId,
   onSelectRankingStudent,
   isTestMode,
-  sessionRecords,
+  sessionRecords = [],
+  studentRankings = [],
 }) => {
   const [loading, setLoading] = useState(false);
   const [apiReportData, setApiReportData] = useState<any>(null);
@@ -83,20 +86,28 @@ export const SkillBreakdownTab: React.FC<SkillBreakdownTabProps> = ({
       {/* 1. TOP PEDAGOGICAL KPI CARDS */}
       <SkillOverviewCards stats={stats} />
 
-      {/* 2. SKILL-AWARE PREDICTION CARD */}
+      {/* 2. CHẨN ĐOÁN ĐIỂM YẾU CHI TIẾT THEO TỪNG BÀI & KỸ NĂNG */}
+      <StudentWeaknessDiagnosisCard
+        sessionRecords={sessionRecords}
+        studentRankings={studentRankings}
+        selectedClassId={selectedClassId}
+        onSelectStudent={onSelectRankingStudent}
+      />
+
+      {/* 3. SKILL-AWARE PREDICTION CARD */}
       <SkillAwarePredictionCard
         prediction={prediction}
         onSelectStudent={onSelectRankingStudent}
       />
 
-      {/* 3. MASTERY HEATMAP MATRIX */}
+      {/* 4. MASTERY HEATMAP MATRIX */}
       <MasteryHeatmap
         units={heatmapUnits}
         students={heatmapStudents}
         onSelectStudent={onSelectRankingStudent}
       />
 
-      {/* 4. UNIT & TOPIC BREAKDOWN TANSTACK TABLE */}
+      {/* 5. UNIT & TOPIC BREAKDOWN TANSTACK TABLE */}
       <UnitBreakdownTable data={unitBreakdown} />
     </div>
   );

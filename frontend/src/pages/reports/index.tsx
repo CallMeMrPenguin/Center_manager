@@ -298,6 +298,7 @@ export const ReportsPage: React.FC = () => {
             selectedClassId={selectedClassId} selectedStudentId={selectedStudentId}
             onSelectRankingStudent={handleSelectRankingStudent}
             isTestMode={isTestMode} sessionRecords={sessionRecords}
+            studentRankings={studentRankings}
           />
         ) : activeReportTab === 'deep' ? (
           <DeepAnalysisTab
@@ -322,6 +323,7 @@ export const ReportsPage: React.FC = () => {
             onOpenPhaseModal={() => setPhaseModalOpen(true)}
             onOpenEditModal={(rec) => { setEditingRecord(rec); setEditModalOpen(true); }}
             onSelectRankingStudent={handleSelectRankingStudent}
+            isTestMode={isTestMode}
           />
         )}
       </div>

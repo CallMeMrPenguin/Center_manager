@@ -16,6 +16,7 @@ interface InteractiveChartProps {
   selectedPhaseId: string;
   setSelectedPhaseId: (id: string) => void;
   onOpenPhaseModal: () => void;
+  isTestMode?: boolean;
 }
 
 export const InteractiveChart: React.FC<InteractiveChartProps> = ({
@@ -30,6 +31,7 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = ({
   selectedPhaseId,
   setSelectedPhaseId,
   onOpenPhaseModal,
+  isTestMode,
 }) => {
   const chartWrapperRef = useRef<HTMLDivElement>(null);
   const [hoveredPoint, setHoveredPoint] = useState<HoveredChartPoint | null>(null);
@@ -167,32 +169,24 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = ({
         zoomLevel={zoomLevel}
         setZoomLevel={setZoomLevel}
         setPanOffset={setPanOffset}
+        isTestMode={isTestMode}
       />
 
+      {/* SVG Canvas Plot Area with Pan & Zoom Drag Handlers */}
       <div
-        className={`w-full relative overflow-hidden rounded-xl bg-[#080b14]/50 border border-[#141b2e] ${isDragging ? 'cursor-grabbing' : zoomLevel > 1.0 ? 'cursor-grab' : 'cursor-default'}`}
-        onContextMenu={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-        }}
+        className={`relative overflow-hidden cursor-${isDragging ? 'grabbing' : zoomLevel > 1.0 ? 'grab' : 'default'} select-none rounded-xl bg-[#080b14]/50 border border-[#141b2e]`}
         onMouseDown={(e) => {
-          // Strictly only allow left-click (button === 0) for dragging when zoomed in
-          if (e.button !== 0) return;
-          if (zoomLevel > 1.0) {
+          if (zoomLevel > 1.0 && e.button === 0) {
             setIsDragging(true);
-            setDragStart({ x: e.clientX, y: e.clientY });
+            setDragStart({ x: e.clientX - panOffset.x, y: e.clientY - panOffset.y });
           }
         }}
         onMouseMove={(e) => {
-          // If not dragging or if left button is not held down, stop drag immediately
-          if (!isDragging || (e.buttons & 1) !== 1) {
-            if (isDragging) setIsDragging(false);
-            return;
+          if (isDragging && zoomLevel > 1.0) {
+            const rawX = e.clientX - dragStart.x;
+            const rawY = e.clientY - dragStart.y;
+            setPanOffset(clampPanOffset(rawX, rawY, zoomLevel));
           }
-          const dx = e.clientX - dragStart.x;
-          const dy = e.clientY - dragStart.y;
-          setPanOffset(prev => clampPanOffset(prev.x + dx, prev.y + dy, zoomLevel));
-          setDragStart({ x: e.clientX, y: e.clientY });
         }}
         onMouseUp={(e) => {
           if (e.button === 0) setIsDragging(false);
@@ -239,7 +233,7 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = ({
             </div>
             <div className="space-y-1.5 pt-1.5">
               <div className="flex items-center justify-between gap-4">
-                <span className="text-blue-400 font-bold">Check 1:</span>
+                <span className="text-blue-400 font-bold">{isTestMode ? 'Từ Vựng:' : 'Check 1:'}</span>
                 <div className="flex items-center gap-1.5">
                   <span className="font-mono font-extrabold text-white">{format1Dec(hoveredPoint.check1)}</span>
                   {hoveredPoint.fittedC1 !== null && (
@@ -248,7 +242,7 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = ({
                 </div>
               </div>
               <div className="flex items-center justify-between gap-4">
-                <span className="text-purple-400 font-bold">Check 2:</span>
+                <span className="text-purple-400 font-bold">{isTestMode ? 'Ngữ Pháp:' : 'Check 2:'}</span>
                 <div className="flex items-center gap-1.5">
                   <span className="font-mono font-extrabold text-white">{format1Dec(hoveredPoint.check2)}</span>
                   {hoveredPoint.fittedC2 !== null && (

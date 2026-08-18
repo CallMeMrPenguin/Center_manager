@@ -17,9 +17,10 @@ interface StudentRankingsTableProps {
   setSelectedStudentId: (id: string) => void;
   studentRankings: any[];
   filteredRankings: any[];
-  studentSessionsMap: Record<number, any[]>;
-  onSelectRankingStudent: (studentId: number) => void;
+  studentSessionsMap: Record<string, any[]>;
+  onSelectRankingStudent?: (studentId: number) => void;
   hasSelectedStudent: boolean;
+  isTestMode?: boolean;
 }
 
 export const StudentRankingsTable: React.FC<StudentRankingsTableProps> = ({
@@ -34,6 +35,7 @@ export const StudentRankingsTable: React.FC<StudentRankingsTableProps> = ({
   studentSessionsMap,
   onSelectRankingStudent,
   hasSelectedStudent,
+  isTestMode,
 }) => {
   const handleExportRankingsExcel = useCallback(() => {
     exportRankingsExcel({
@@ -106,8 +108,8 @@ export const StudentRankingsTable: React.FC<StudentRankingsTableProps> = ({
     },
     {
       accessorKey: 'avg_check_1',
-      header: () => <div className="text-center w-full">Check 1</div>,
-      meta: { headerText: 'Check 1', exportValue: (r: any) => Number(r.avg_check_1) > 0 ? format1Dec(Number(r.avg_check_1)) : '-' },
+      header: () => <div className="text-center w-full">{isTestMode ? 'Từ Vựng' : 'Check 1'}</div>,
+      meta: { headerText: isTestMode ? 'Từ Vựng' : 'Check 1', exportValue: (r: any) => Number(r.avg_check_1) > 0 ? format1Dec(Number(r.avg_check_1)) : '-' },
       cell: (info) => {
         const val = Number(info.getValue()) || 0;
         return <div className="text-center font-extrabold text-blue-400 font-mono">{val > 0 ? format1Dec(val) : '-'}</div>;
@@ -115,8 +117,8 @@ export const StudentRankingsTable: React.FC<StudentRankingsTableProps> = ({
     },
     {
       accessorKey: 'avg_check_2',
-      header: () => <div className="text-center w-full">Check 2</div>,
-      meta: { headerText: 'Check 2', exportValue: (r: any) => Number(r.avg_check_2) > 0 ? format1Dec(Number(r.avg_check_2)) : '-' },
+      header: () => <div className="text-center w-full">{isTestMode ? 'Ngữ Pháp' : 'Check 2'}</div>,
+      meta: { headerText: isTestMode ? 'Ngữ Pháp' : 'Check 2', exportValue: (r: any) => Number(r.avg_check_2) > 0 ? format1Dec(Number(r.avg_check_2)) : '-' },
       cell: (info) => {
         const val = Number(info.getValue()) || 0;
         return <div className="text-center font-extrabold text-purple-400 font-mono">{val > 0 ? format1Dec(val) : '-'}</div>;
@@ -288,7 +290,7 @@ export const StudentRankingsTable: React.FC<StudentRankingsTableProps> = ({
         searchPlaceholder="Tìm học sinh theo tên, biệt danh, lớp..."
         emptyMessage="Không có dữ liệu xếp hạng."
         pageSize={20}
-        onRowClick={(r: any) => onSelectRankingStudent(r.student_id)}
+        onRowClick={(r: any) => onSelectRankingStudent?.(r.student_id)}
         initialSorting={[{ id: 'overallAvg', desc: true }]}
         onExportExcel={handleExportRankingsExcel}
       />
