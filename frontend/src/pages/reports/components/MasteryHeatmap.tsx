@@ -53,41 +53,36 @@ export const MasteryHeatmap: React.FC<MasteryHeatmapProps> = ({
     return units.filter((u) => u.skill === skillFilter);
   }, [units, skillFilter]);
 
-  // Vibrant, bright 4-color scale: Xanh (>=8.0), Vàng (6.5-7.9), Cam (5.0-6.4), Đỏ (<5.0)
-  const getCellStyle = (ema?: number) => {
+  // Clean glowing badges with vibrant colors
+  const getBadgeStyle = (ema?: number) => {
     if (ema === undefined || ema === null) {
       return {
-        bg: 'bg-[#0e1322]',
-        textColor: 'text-slate-600',
+        badgeClass: 'text-slate-600 font-normal',
         label: '-',
       };
     }
     const score = Number(ema);
     if (score >= 8.0) {
       return {
-        bg: 'bg-emerald-500/25 hover:bg-emerald-500/40 text-emerald-200',
-        textColor: 'text-emerald-300 font-black',
+        badgeClass: 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 hover:bg-emerald-500/35 hover:scale-105 shadow-[0_0_8px_rgba(16,185,129,0.15)] font-black',
         label: trunc1Dec(score),
       };
     }
     if (score >= 6.5) {
       return {
-        bg: 'bg-amber-500/25 hover:bg-amber-500/40 text-amber-200',
-        textColor: 'text-amber-300 font-bold',
+        badgeClass: 'bg-amber-500/20 text-amber-300 border border-amber-500/40 hover:bg-amber-500/35 hover:scale-105 shadow-[0_0_8px_rgba(245,158,11,0.15)] font-bold',
         label: trunc1Dec(score),
       };
     }
     if (score >= 5.0) {
       return {
-        bg: 'bg-orange-500/25 hover:bg-orange-500/40 text-orange-200',
-        textColor: 'text-orange-300 font-bold',
+        badgeClass: 'bg-orange-500/20 text-orange-300 border border-orange-500/40 hover:bg-orange-500/35 hover:scale-105 shadow-[0_0_8px_rgba(249,115,22,0.15)] font-bold',
         label: trunc1Dec(score),
       };
     }
-    // Score < 5.0: Bright Red
+    // Score < 5.0: Rose/Red
     return {
-      bg: 'bg-rose-500/30 hover:bg-rose-500/45 text-rose-200',
-      textColor: 'text-rose-300 font-black',
+      badgeClass: 'bg-rose-500/25 text-rose-300 border border-rose-500/50 hover:bg-rose-500/40 hover:scale-105 shadow-[0_0_8px_rgba(244,63,94,0.2)] font-black',
       label: trunc1Dec(score),
     };
   };
@@ -145,13 +140,13 @@ export const MasteryHeatmap: React.FC<MasteryHeatmapProps> = ({
     const unitCols: ColumnDef<HeatmapStudent>[] = filteredUnits.map((u) => ({
       id: `unit_${u.unit_key}`,
       header: () => (
-        <div className="text-center py-0.5">
-          <div className="text-[11px] font-black text-white truncate max-w-[130px]" title={u.unit_key}>
+        <div className="text-center py-1 select-none">
+          <div className="text-xs font-black text-white truncate max-w-[130px]" title={u.unit_key}>
             {u.unit_key}
           </div>
-          <div className="flex items-center justify-center gap-1.5 mt-0.5">
+          <div className="flex items-center justify-center gap-1.5 mt-1">
             <span
-              className={`text-[9px] font-black uppercase px-1.5 py-0.2 rounded ${
+              className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-full ${
                 u.skill === 'vocab'
                   ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30'
                   : 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
@@ -171,17 +166,19 @@ export const MasteryHeatmap: React.FC<MasteryHeatmapProps> = ({
       cell: ({ row }) => {
         const uData = row.original.units?.[u.unit_key];
         const ema = uData?.ema_score;
-        const cellStyle = getCellStyle(ema);
+        const style = getBadgeStyle(ema);
 
         return (
-          <div
-            onMouseMove={(e) => {
-              if (uData) handleCellMouseMove(e, row.original.student_name, u.unit_key, uData);
-            }}
-            onMouseLeave={() => setHoveredCell(null)}
-            className={`w-full h-full min-h-[40px] flex items-center justify-center font-mono text-xs font-black transition-colors cursor-pointer select-none -m-3 p-3 ${cellStyle.bg} ${cellStyle.textColor}`}
-          >
-            {cellStyle.label}
+          <div className="flex items-center justify-center py-0.5">
+            <span
+              onMouseMove={(e) => {
+                if (uData) handleCellMouseMove(e, row.original.student_name, u.unit_key, uData);
+              }}
+              onMouseLeave={() => setHoveredCell(null)}
+              className={`inline-flex items-center justify-center w-14 h-7 rounded-lg text-xs font-mono transition-all duration-150 cursor-pointer ${style.badgeClass}`}
+            >
+              {style.label}
+            </span>
           </div>
         );
       },
@@ -262,19 +259,19 @@ export const MasteryHeatmap: React.FC<MasteryHeatmapProps> = ({
         <div className="flex flex-wrap items-center gap-4">
           <span className="font-bold text-slate-300">Thang Điểm 4 Mức:</span>
           <div className="flex items-center gap-1.5">
-            <span className="w-3 h-3 rounded bg-emerald-500/40 border border-emerald-500/80 block" />
+            <span className="w-3 h-3 rounded bg-emerald-500/30 border border-emerald-500/60 block" />
             <span className="text-emerald-300 font-bold">Xanh: Nắm Vững (&ge; 8.0)</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="w-3 h-3 rounded bg-amber-500/40 border border-amber-500/80 block" />
+            <span className="w-3 h-3 rounded bg-amber-500/30 border border-amber-500/60 block" />
             <span className="text-amber-300 font-bold">Vàng: Đang Tiến Bộ (6.5 – 7.9)</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="w-3 h-3 rounded bg-orange-500/40 border border-orange-500/80 block" />
+            <span className="w-3 h-3 rounded bg-orange-500/30 border border-orange-500/60 block" />
             <span className="text-orange-300 font-bold">Cam: Cần Củng Cố (5.0 – 6.4)</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="w-3 h-3 rounded bg-rose-500/40 border border-rose-500/80 block" />
+            <span className="w-3 h-3 rounded bg-rose-500/30 border border-rose-500/60 block" />
             <span className="text-rose-300 font-bold">Đỏ: Chưa Đạt (&lt; 5.0)</span>
           </div>
         </div>
@@ -284,7 +281,7 @@ export const MasteryHeatmap: React.FC<MasteryHeatmapProps> = ({
         </span>
       </div>
 
-      {/* Dynamic Colorful Hover Tooltip (Follows cursor, zero jump, rich design) */}
+      {/* Dynamic Colorful Hover Tooltip */}
       {hoveredCell && (
         <div
           style={{
