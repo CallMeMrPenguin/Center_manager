@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { ShieldAlert, Users2 } from 'lucide-react';
 import { TierDistributionCard } from '../components/TierDistributionCard';
 import { EarlyWarningSection } from '../components/EarlyWarningSection';
 import { SmartGroupingSection } from '../components/SmartGroupingSection';
@@ -43,55 +44,99 @@ export const DeepAnalysisTab: React.FC<DeepAnalysisTabProps> = ({
   onUpdateWarningSettings,
   onSelectRankingStudent,
 }) => {
+  const [activeSubTab, setActiveSubTab] = useState<'warnings' | 'pedagogy'>('warnings');
+
   return (
-    <div className="flex flex-col gap-8 mb-8">
-      {/* 1. 8-TIER ACADEMIC RANKING DISTRIBUTION */}
-      <TierDistributionCard
-        studentRankings={studentRankings}
-        selectedClassId={selectedClassId}
-        selectedDistFilter={selectedDistFilter}
-        setSelectedDistFilter={setSelectedDistFilter}
-      />
+    <div className="flex flex-col gap-6 mb-8 select-none">
+      {/* 1. INTERNAL SUB-TAB SELECTOR (SLIDING PILL INDICATOR) */}
+      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-white/5 pb-2">
+        <div className="relative flex bg-[#0d1018] p-1 rounded-xl border border-white/10 text-xs shrink-0 font-bold select-none w-full sm:w-auto min-w-[500px]">
+          <div
+            className="absolute top-1 bottom-1 rounded-lg bg-[#5c36f5] shadow-[0_0_14px_rgba(92,54,245,0.5)] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] pointer-events-none"
+            style={{
+              left: activeSubTab === 'warnings' ? '4px' : 'calc(50% + 1px)',
+              width: 'calc(50% - 4px)',
+            }}
+          />
+          <button
+            type="button"
+            onClick={() => setActiveSubTab('warnings')}
+            className={`flex-1 relative z-10 py-2 px-4 text-center transition-colors cursor-pointer flex items-center justify-center gap-1.5 whitespace-nowrap ${
+              activeSubTab === 'warnings' ? 'text-white font-black' : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            <ShieldAlert size={13} />
+            <span>Phân Bố Cấp Bậc & Cảnh Báo Sớm</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveSubTab('pedagogy')}
+            className={`flex-1 relative z-10 py-2 px-4 text-center transition-colors cursor-pointer flex items-center justify-center gap-1.5 whitespace-nowrap ${
+              activeSubTab === 'pedagogy' ? 'text-white font-black' : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            <Users2 size={13} />
+            <span>Nhóm Học & Biến Động Điểm</span>
+          </button>
+        </div>
+      </div>
 
-      {/* 2. EARLY WARNING ALERT SYSTEM */}
-      <EarlyWarningSection
-        loading={loading}
-        studentRankings={studentRankings}
-        sessionRecords={sessionRecords}
-        selectedClassId={selectedClassId}
-        warningAbsentPct={warningAbsentPct}
-        warningConsecutiveAbsent={warningConsecutiveAbsent}
-        warningTrendThreshold={warningTrendThreshold}
-        showWarningSettings={showWarningSettings}
-        setShowWarningSettings={setShowWarningSettings}
-        onUpdateWarningSettings={onUpdateWarningSettings}
-        onSelectRankingStudent={onSelectRankingStudent}
-      />
+      {/* 2. SUB-TAB CONTENT VIEWS */}
+      {activeSubTab === 'warnings' && (
+        <div className="space-y-6 animate-cascade-1">
+          {/* 1. 8-TIER ACADEMIC RANKING DISTRIBUTION */}
+          <TierDistributionCard
+            studentRankings={studentRankings}
+            selectedClassId={selectedClassId}
+            selectedDistFilter={selectedDistFilter}
+            setSelectedDistFilter={setSelectedDistFilter}
+          />
 
-      {/* 3. SMART PEDAGOGICAL LEVEL GROUPING */}
-      <SmartGroupingSection
-        filteredRankings={filteredRankings}
-        studentRankings={studentRankings}
-        classes={classes}
-        selectedClassId={selectedClassId}
-        onSelectRankingStudent={onSelectRankingStudent}
-      />
+          {/* 2. EARLY WARNING ALERT SYSTEM */}
+          <EarlyWarningSection
+            loading={loading}
+            studentRankings={studentRankings}
+            sessionRecords={sessionRecords}
+            selectedClassId={selectedClassId}
+            warningAbsentPct={warningAbsentPct}
+            warningConsecutiveAbsent={warningConsecutiveAbsent}
+            warningTrendThreshold={warningTrendThreshold}
+            showWarningSettings={showWarningSettings}
+            setShowWarningSettings={setShowWarningSettings}
+            onUpdateWarningSettings={onUpdateWarningSettings}
+            onSelectRankingStudent={onSelectRankingStudent}
+          />
+        </div>
+      )}
 
-      {/* 4. SCORE FLUCTUATIONS & VARIATIONS TABLE */}
-      <ScoreFluctuationsSection
-        loading={loading}
-        studentRankings={studentRankings}
-        sessionRecords={sessionRecords}
-        selectedClassId={selectedClassId}
-        selectedStudentId={selectedStudentId}
-        onSelectRankingStudent={onSelectRankingStudent}
-      />
+      {activeSubTab === 'pedagogy' && (
+        <div className="space-y-6 animate-cascade-1">
+          {/* 3. SMART PEDAGOGICAL LEVEL GROUPING */}
+          <SmartGroupingSection
+            filteredRankings={filteredRankings}
+            studentRankings={studentRankings}
+            classes={classes}
+            selectedClassId={selectedClassId}
+            onSelectRankingStudent={onSelectRankingStudent}
+          />
 
-      {/* 5. LEARNING BOTTLENECKS SCANNER */}
-      <LearningBottlenecksSection
-        studentRankings={studentRankings}
-        selectedClassId={selectedClassId}
-      />
+          {/* 4. SCORE FLUCTUATIONS & VARIATIONS TABLE */}
+          <ScoreFluctuationsSection
+            loading={loading}
+            studentRankings={studentRankings}
+            sessionRecords={sessionRecords}
+            selectedClassId={selectedClassId}
+            selectedStudentId={selectedStudentId}
+            onSelectRankingStudent={onSelectRankingStudent}
+          />
+
+          {/* 5. LEARNING BOTTLENECKS SCANNER */}
+          <LearningBottlenecksSection
+            studentRankings={studentRankings}
+            selectedClassId={selectedClassId}
+          />
+        </div>
+      )}
     </div>
   );
 };
