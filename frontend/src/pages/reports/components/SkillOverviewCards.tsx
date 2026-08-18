@@ -35,7 +35,7 @@ export const SkillOverviewCards: React.FC<SkillOverviewCardsProps> = ({ stats })
       <div className="bg-[#0c0f1d] border border-blue-500/20 p-5 rounded-2xl relative overflow-hidden shadow-lg space-y-3">
         <div className="flex items-center justify-between">
           <span className="text-[11px] font-black uppercase text-blue-400 tracking-wider">
-            Từ Vựng (Vocabulary)
+            Từ Vựng
           </span>
           <div className="p-2 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20">
             <BookOpen size={16} />
@@ -63,7 +63,7 @@ export const SkillOverviewCards: React.FC<SkillOverviewCardsProps> = ({ stats })
       <div className="bg-[#0c0f1d] border border-purple-500/20 p-5 rounded-2xl relative overflow-hidden shadow-lg space-y-3">
         <div className="flex items-center justify-between">
           <span className="text-[11px] font-black uppercase text-purple-400 tracking-wider">
-            Ngữ Pháp (Grammar)
+            Ngữ Pháp
           </span>
           <div className="p-2 rounded-xl bg-purple-500/10 text-purple-400 border border-purple-500/20">
             <Sparkles size={16} />

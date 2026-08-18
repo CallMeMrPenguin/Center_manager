@@ -1,6 +1,5 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { getStudentTier, StudentTier } from '../types';
-import { showToast } from '../../../components/Toast';
 
 interface StudentProfileHeaderProps {
   student: any;
@@ -18,69 +17,52 @@ export const StudentProfileHeader: React.FC<StudentProfileHeaderProps> = ({
   stats,
   onClearStudent,
 }) => {
-  const [isClicked, setIsClicked] = useState(false);
-
   if (!student) return null;
 
   const scoreNum = typeof stats.overall === 'number' ? stats.overall : parseFloat(String(stats.overall)) || 0;
   const tier: StudentTier = getStudentTier(scoreNum);
 
-  const handleRankClick = () => {
-    setIsClicked(true);
-    showToast(`Hạng ${tier.name} — Danh hiệu: ${tier.title} (${tier.minScore} - ${tier.maxScore} đ)`, 'success');
-    setTimeout(() => setIsClicked(false), 600);
-  };
-
-  // Rank-specific glow & border theme
   const getRankTheme = (t: number) => {
     switch (t) {
       case 8: // Quán Quân
         return {
-          glow: 'shadow-[0_0_28px_rgba(251,191,36,0.5)] border-amber-400/60 bg-gradient-to-b from-[#2e2308] to-[#121626]',
+          card: 'border-amber-400/50 bg-[#1e1708]',
           badgeText: 'text-amber-300 font-black',
-          aura: 'from-amber-500/20 via-yellow-500/10 to-transparent',
         };
       case 7: // Cao Thủ
         return {
-          glow: 'shadow-[0_0_28px_rgba(236,72,153,0.5)] border-pink-400/60 bg-gradient-to-b from-[#2e0f22] to-[#121626]',
+          card: 'border-pink-400/50 bg-[#200c19]',
           badgeText: 'text-pink-300 font-black',
-          aura: 'from-pink-500/20 via-rose-500/10 to-transparent',
         };
       case 6: // Tinh Anh
         return {
-          glow: 'shadow-[0_0_28px_rgba(168,85,247,0.5)] border-purple-400/60 bg-gradient-to-b from-[#250d38] to-[#121626]',
+          card: 'border-purple-400/50 bg-[#1a0c29]',
           badgeText: 'text-purple-300 font-bold',
-          aura: 'from-purple-500/20 via-indigo-500/10 to-transparent',
         };
       case 5: // Kim Cương
         return {
-          glow: 'shadow-[0_0_28px_rgba(6,182,212,0.5)] border-cyan-400/60 bg-gradient-to-b from-[#0b2736] to-[#121626]',
+          card: 'border-cyan-400/50 bg-[#091f2b]',
           badgeText: 'text-cyan-300 font-bold',
-          aura: 'from-cyan-500/20 via-teal-500/10 to-transparent',
         };
       case 4: // Bạch Kim
         return {
-          glow: 'shadow-[0_0_24px_rgba(129,140,248,0.4)] border-indigo-400/50 bg-gradient-to-b from-[#141a38] to-[#121626]',
+          card: 'border-indigo-400/40 bg-[#12162e]',
           badgeText: 'text-indigo-300 font-bold',
-          aura: 'from-indigo-500/20 via-blue-500/10 to-transparent',
         };
       case 3: // Vàng
         return {
-          glow: 'shadow-[0_0_24px_rgba(234,179,8,0.4)] border-yellow-400/50 bg-gradient-to-b from-[#282108] to-[#121626]',
+          card: 'border-yellow-400/40 bg-[#1f1a08]',
           badgeText: 'text-yellow-300 font-bold',
-          aura: 'from-yellow-500/20 via-amber-500/10 to-transparent',
         };
       case 2: // Bạc
         return {
-          glow: 'shadow-[0_0_20px_rgba(56,189,248,0.35)] border-sky-400/40 bg-gradient-to-b from-[#0e2130] to-[#121626]',
+          card: 'border-sky-400/30 bg-[#0b1a26]',
           badgeText: 'text-sky-300 font-bold',
-          aura: 'from-sky-500/15 via-blue-500/5 to-transparent',
         };
       default: // Đồng
         return {
-          glow: 'shadow-[0_0_20px_rgba(217,119,6,0.35)] border-amber-600/40 bg-gradient-to-b from-[#2b1708] to-[#121626]',
+          card: 'border-amber-600/30 bg-[#1f1208]',
           badgeText: 'text-amber-500 font-bold',
-          aura: 'from-amber-700/15 via-amber-600/5 to-transparent',
         };
     }
   };
@@ -88,11 +70,11 @@ export const StudentProfileHeader: React.FC<StudentProfileHeaderProps> = ({
   const rankTheme = getRankTheme(tier.tier);
 
   return (
-    <div className="animate-cascade-1 select-none">
-      <div className="bg-[#0e1222] border border-[#1e2744] p-6 rounded-2xl shadow-2xl flex flex-wrap items-center justify-between gap-6 relative overflow-hidden">
-        {/* Left: Avatar & Info */}
+    <div className="select-none">
+      <div className="bg-[#0e1222] border border-[#1e2744] p-6 rounded-2xl shadow-xl flex flex-wrap items-center justify-between gap-6 relative overflow-hidden">
+        {/* Left: Avatar & Student Info */}
         <div className="flex items-center gap-4 z-10">
-          <div className="w-14 h-14 rounded-full bg-gradient-to-tr from-indigo-600 to-purple-600 text-white font-black text-xl flex items-center justify-center shadow-lg shadow-indigo-500/20 border border-white/20">
+          <div className="w-14 h-14 rounded-full bg-gradient-to-tr from-indigo-600 to-purple-600 text-white font-black text-xl flex items-center justify-center shadow-lg border border-white/20">
             {student.full_name.slice(0, 2).toUpperCase()}
           </div>
           <div>
@@ -115,7 +97,7 @@ export const StudentProfileHeader: React.FC<StudentProfileHeaderProps> = ({
           </div>
         </div>
 
-        {/* Right: Stats & Glorious Rank Badge Card */}
+        {/* Right: Stats & Clean Static Rank Badge */}
         <div className="flex flex-wrap items-center gap-4 z-10">
           {/* Stats Bar */}
           <div className="flex items-center gap-5 bg-[#141a30] border border-[#232d4e] px-5 py-3 rounded-xl">
@@ -135,27 +117,16 @@ export const StudentProfileHeader: React.FC<StudentProfileHeaderProps> = ({
             </div>
           </div>
 
-          {/* Interactive Glorious Rank Badge */}
+          {/* Clean Static Rank Badge Card */}
           <div
-            onClick={handleRankClick}
-            title={`Nhấn để xem chi tiết hạng ${tier.name}`}
-            className={`group relative flex items-center gap-3.5 px-4 py-2 rounded-xl border transition-all duration-300 cursor-pointer ${
-              rankTheme.glow
-            } ${isClicked ? 'scale-95' : 'hover:scale-105'}`}
+            className={`flex items-center gap-3.5 px-4 py-2 rounded-xl border ${rankTheme.card}`}
           >
-            {/* Rank Icon with Hover Scale & Click Pulse */}
-            <div className="relative">
-              <img
-                src={tier.badge}
-                alt={tier.name}
-                className="w-13 h-13 object-contain drop-shadow-[0_6px_16px_rgba(0,0,0,0.7)] group-hover:scale-120 transition-transform duration-300 ease-out"
-              />
-              {isClicked && (
-                <span className="absolute inset-0 rounded-full animate-ping border-2 border-white pointer-events-none" />
-              )}
-            </div>
+            <img
+              src={tier.badge}
+              alt={tier.name}
+              className="w-12 h-12 object-contain drop-shadow-[0_4px_10px_rgba(0,0,0,0.6)]"
+            />
 
-            {/* Rank Metadata */}
             <div className="flex flex-col">
               <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">
                 Cấp Bậc

@@ -27,7 +27,7 @@ export const KPICards: React.FC<KPICardsProps> = ({ stats, hasSelectedStudent, i
       <div className="kpi-card-blue p-5 flex flex-col justify-between shadow-2xl transition-all duration-300 min-h-[100px]">
         <div>
           <span className="text-[10px] font-black uppercase tracking-wider text-blue-400 block mb-1">
-            {isTestMode ? 'TỪ VỰNG TRUNG BÌNH (CHECK 1)' : 'CHECK 1 TRUNG BÌNH'}
+            {isTestMode ? 'TỪ VỰNG TRUNG BÌNH' : 'CHECK 1 TRUNG BÌNH'}
           </span>
           <div className="flex items-baseline gap-1.5">
             <span className="text-3xl font-black text-white font-mono">{stats.c1}</span>
@@ -43,7 +43,7 @@ export const KPICards: React.FC<KPICardsProps> = ({ stats, hasSelectedStudent, i
       <div className="kpi-card-purple p-5 flex flex-col justify-between shadow-2xl transition-all duration-300 min-h-[100px]">
         <div>
           <span className="text-[10px] font-black uppercase tracking-wider text-purple-400 block mb-1">
-            {isTestMode ? 'NGỮ PHÁP TRUNG BÌNH (CHECK 2)' : 'CHECK 2 TRUNG BÌNH'}
+            {isTestMode ? 'NGỮ PHÁP TRUNG BÌNH' : 'CHECK 2 TRUNG BÌNH'}
           </span>
           <div className="flex items-baseline gap-1.5">
             <span className="text-3xl font-black text-white font-mono">{stats.c2}</span>

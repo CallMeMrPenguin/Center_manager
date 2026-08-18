@@ -71,7 +71,7 @@ export const StudentGradeHistoryTable: React.FC<StudentGradeHistoryTableProps> =
     },
     {
       accessorKey: 'check_1',
-      header: () => <div className="text-center w-full">{isTestMode ? 'Từ Vựng (Vocab)' : 'Check 1'}</div>,
+      header: () => <div className="text-center w-full">{isTestMode ? 'Từ Vựng' : 'Check 1'}</div>,
       meta: { headerText: isTestMode ? 'Từ Vựng' : 'Check 1', exportValue: (r: any) => Number(r.check_1) > 0 ? format1Dec(Number(r.check_1)) : '-' },
       cell: ({ row }) => {
         const r = row.original;
@@ -99,7 +99,7 @@ export const StudentGradeHistoryTable: React.FC<StudentGradeHistoryTableProps> =
     },
     {
       accessorKey: 'check_2',
-      header: () => <div className="text-center w-full">{isTestMode ? 'Ngữ Pháp (Grammar)' : 'Check 2'}</div>,
+      header: () => <div className="text-center w-full">{isTestMode ? 'Ngữ Pháp' : 'Check 2'}</div>,
       meta: { headerText: isTestMode ? 'Ngữ Pháp' : 'Check 2', exportValue: (r: any) => Number(r.check_2) > 0 ? format1Dec(Number(r.check_2)) : '-' },
       cell: ({ row }) => {
         const r = row.original;
