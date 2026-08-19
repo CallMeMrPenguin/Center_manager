@@ -6,9 +6,10 @@ import { SummaryTooltipCard } from './SummaryTooltipCard';
 interface SummaryStripProps {
   engine: any;
   gradeTypesList: GradeTypeItem[];
+  hasSelectedStudent?: boolean;
 }
 
-export const SummaryStrip: React.FC<SummaryStripProps> = ({ engine, gradeTypesList }) => {
+export const SummaryStrip: React.FC<SummaryStripProps> = ({ engine, gradeTypesList, hasSelectedStudent }) => {
   const [activeTooltip, setActiveTooltip] = useState<string | null>(null);
 
   // 6-Tier Realistic Educational Scale for PI (Scale 0 - 100)
@@ -40,9 +41,9 @@ export const SummaryStrip: React.FC<SummaryStripProps> = ({ engine, gradeTypesLi
   }
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 bg-[#0f1426] border border-[#1d2644] p-3 rounded-xl text-center items-center relative shadow-lg">
+    <div className={`grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 bg-[#0c0f1e] border border-[#1e2746] rounded-xl text-center items-center relative shadow-md divide-y sm:divide-y-0 sm:divide-x divide-[#1e2746] ${hasSelectedStudent ? 'animate-cascade-4' : 'animate-cascade-3'}`}>
       {/* 1. Next Session Prediction */}
-      <div className="relative group p-1">
+      <div className="relative group p-2.5">
         <div className="flex items-center justify-center gap-1">
           <span className="text-[10px] font-black uppercase text-slate-400 block">Dự Đoán Buổi Tới</span>
           <button
@@ -74,7 +75,7 @@ export const SummaryStrip: React.FC<SummaryStripProps> = ({ engine, gradeTypesLi
           >
             <div className="bg-[#0d1120] p-2.5 rounded-lg border border-[#202948] space-y-1.5 font-mono text-[10px]">
               <div className="text-slate-400 font-bold border-b border-white/5 pb-1">
-                Công thức: Dự Đoán = 35% C1 + 55% C2 + 10% HW
+                Công thức: Dự Đoán = 30% C1 + 45% C2 + 10% HW + 15% Luyện Đề
               </div>
               <div className="flex items-center justify-between text-blue-400">
                 <span>Từ Vựng Dự Đoán:</span>
@@ -94,7 +95,7 @@ export const SummaryStrip: React.FC<SummaryStripProps> = ({ engine, gradeTypesLi
       </div>
 
       {/* 2. EMA Skill Level */}
-      <div className="border-l border-[#1d2644] relative group p-1">
+      <div className="relative group p-2.5">
         <div className="flex items-center justify-center gap-1">
           <span className="text-[10px] font-black uppercase text-slate-400 block">Trình Độ EMA</span>
           <button
@@ -152,7 +153,7 @@ export const SummaryStrip: React.FC<SummaryStripProps> = ({ engine, gradeTypesLi
       </div>
 
       {/* 3. Volatility / Standard Deviation (SD) */}
-      <div className="border-l border-[#1d2644] relative group p-1">
+      <div className="relative group p-2.5">
         <div className="flex items-center justify-center gap-1">
           <span className="text-[10px] font-black uppercase text-slate-400 block">Độ Biến Động (SD)</span>
           <button
@@ -207,7 +208,7 @@ export const SummaryStrip: React.FC<SummaryStripProps> = ({ engine, gradeTypesLi
       </div>
 
       {/* 4. Growth Rate (Trend Rate) */}
-      <div className="border-l border-[#1d2644] relative group p-1">
+      <div className="relative group p-2.5">
         <div className="flex items-center justify-center gap-1">
           <span className="text-[10px] font-black uppercase text-slate-400 block">Tốc Độ Tăng Trưởng</span>
           <button
@@ -257,7 +258,7 @@ export const SummaryStrip: React.FC<SummaryStripProps> = ({ engine, gradeTypesLi
       </div>
 
       {/* 5. Performance Index (PI) */}
-      <div className="border-l border-[#1d2644] relative group p-1">
+      <div className="relative group p-2.5">
         <div className="flex items-center justify-center gap-1">
           <span className="text-[10px] font-black uppercase text-slate-400 block">
             Chỉ Số PI
@@ -313,7 +314,7 @@ export const SummaryStrip: React.FC<SummaryStripProps> = ({ engine, gradeTypesLi
       </div>
 
       {/* 6. Overall Rating */}
-      <div className="border-l border-[#1d2644] relative group p-1">
+      <div className="relative group p-2.5">
         <div className="flex items-center justify-center gap-1">
           <span className="text-[10px] font-black uppercase text-slate-400 block">Xếp Loại Chung</span>
           <button

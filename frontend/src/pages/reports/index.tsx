@@ -76,6 +76,7 @@ export const ReportsPage: React.FC = () => {
     setCompareClassAId,
     compareClassBId,
     setCompareClassBId,
+    selectedStudentObj,
     engine,
     studentSessionsMap,
     loadAnalyticsData,
@@ -83,11 +84,6 @@ export const ReportsPage: React.FC = () => {
   } = useReportsData();
 
   const academicYears = useMemo(() => generateAcademicYears(sessionRecords), [sessionRecords]);
-
-  const selectedStudentObj = useMemo(() => {
-    if (!selectedStudentId || !studentRankings) return null;
-    return studentRankings.find(s => String(s.student_id) === selectedStudentId) || null;
-  }, [selectedStudentId, studentRankings]);
 
   const filteredRankings = useMemo(() => {
     let list = studentRankings || [];
@@ -156,30 +152,26 @@ export const ReportsPage: React.FC = () => {
             <span className={`w-2 h-2 rounded-full ${isTestMode ? 'bg-amber-400 animate-ping' : 'bg-slate-600'}`} />
           </button>
 
-          {/* Academic Year Selector */}
-          <div className="flex items-center gap-2 bg-[#121626] border border-[#202842] px-3.5 py-1.5 rounded-xl shadow-sm">
-            <Calendar size={15} className="text-indigo-400 shrink-0" />
-            <CustomSelect
-              value={selectedAcademicYear}
-              onChange={(val) => setSelectedAcademicYear(String(val))}
-              options={academicYears.map(y => ({ value: y, label: `Năm học ${y}` }))}
-              className="w-44"
-            />
-          </div>
+          {/* Academic Year Selector (No double border) */}
+          <CustomSelect
+            icon={<Calendar size={14} className="text-indigo-400" />}
+            value={selectedAcademicYear}
+            onChange={(val) => setSelectedAcademicYear(String(val))}
+            options={academicYears.map(y => ({ value: y, label: `Năm học ${y}` }))}
+            className="w-48"
+          />
 
-          {/* Class Selector */}
-          <div className="flex items-center gap-2 bg-[#121626] border border-[#202842] px-3.5 py-1.5 rounded-xl shadow-sm">
-            <GraduationCap size={15} className="text-indigo-400 shrink-0" />
-            <CustomSelect
-              value={selectedClassId}
-              onChange={(val) => { setSelectedClassId(String(val)); setSelectedStudentId(''); }}
-              options={[
-                { value: '', label: 'Tất cả lớp học' },
-                ...classes.map(c => ({ value: String(c.id), label: `${c.class_name} (${c.grade || 'Lớp 6'})` }))
-              ]}
-              className="w-48"
-            />
-          </div>
+          {/* Class Selector (No double border) */}
+          <CustomSelect
+            icon={<GraduationCap size={14} className="text-indigo-400" />}
+            value={selectedClassId}
+            onChange={(val) => { setSelectedClassId(String(val)); setSelectedStudentId(''); }}
+            options={[
+              { value: '', label: 'Tất cả lớp học' },
+              ...classes.map(c => ({ value: String(c.id), label: `${c.class_name} (${c.grade || 'Lớp 6'})` }))
+            ]}
+            className="w-52"
+          />
 
           <button
             onClick={() => setResetModalOpen(true)}

@@ -9,6 +9,7 @@ export interface GradeWeights {
   check_1: number;
   check_2: number;
   homework: number;
+  mock_test?: number;
 }
 
 export interface GradeTypeItem {

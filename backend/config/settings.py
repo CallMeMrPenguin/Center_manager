@@ -12,14 +12,16 @@ DEFAULT_SETTINGS = {
     "files_dir": os.path.join(BASE_DIR, "workspace_files"),
     "machine_id": f"{socket.gethostname()}_{uuid.uuid4().hex[:6]}",
     "grade_weights": {
-        "check_1": 35.0,
-        "check_2": 55.0,
-        "homework": 10.0
+        "check_1": 30.0,
+        "check_2": 45.0,
+        "homework": 10.0,
+        "mock_test": 15.0
     },
     "grade_types": [
-        {"id": "check_1", "label": "Check 1", "weight": 35.0, "color": "#3b82f6"},
-        {"id": "check_2", "label": "Check 2", "weight": 55.0, "color": "#a855f7"},
-        {"id": "homework", "label": "BTVN", "weight": 10.0, "color": "#f59e0b"}
+        {"id": "check_1", "label": "Từ Vựng (Check 1)", "weight": 30.0, "color": "#3b82f6"},
+        {"id": "check_2", "label": "Ngữ Pháp (Check 2)", "weight": 45.0, "color": "#a855f7"},
+        {"id": "homework", "label": "BTVN", "weight": 10.0, "color": "#10b981"},
+        {"id": "mock_test", "label": "Luyện Đề (Giữa/Cuối Kỳ)", "weight": 15.0, "color": "#f59e0b"}
     ]
 }
 

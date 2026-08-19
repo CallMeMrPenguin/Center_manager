@@ -1004,26 +1004,7 @@ export function DataTable<TData>({
         </div>
       )}
 
-      {/* ── NEAR MATCH SUGGESTION BANNER ─────────────────────────────────────────── */}
-      {isNearMatch && globalFilter.trim() && (
-        <div className="flex items-center justify-between gap-3 px-4 py-2 bg-amber-500/10 border-b border-amber-500/25 text-xs text-amber-300 font-medium">
-          <div className="flex items-center gap-2">
-            <span className="px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-300 font-black text-[11px] uppercase tracking-wider">
-              Tìm gần đúng
-            </span>
-            <span>
-              Không tìm thấy kết quả chính xác cho "<strong className="text-white font-bold">{globalFilter}</strong>". Hiển thị <strong>{processedData.length}</strong> kết quả gần đúng nhất:
-            </span>
-          </div>
-          <button
-            type="button"
-            onClick={() => setGlobalFilter('')}
-            className="text-amber-400 hover:text-white underline cursor-pointer shrink-0 font-bold text-[11px]"
-          >
-            Xóa tìm kiếm
-          </button>
-        </div>
-      )}
+
 
       {/* ── TABLE AREA ──────────────────────────────────────────────────────── */}
       {loading && allRows.length === 0 ? (

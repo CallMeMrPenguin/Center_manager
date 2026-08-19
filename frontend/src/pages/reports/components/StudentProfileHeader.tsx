@@ -59,16 +59,16 @@ export const StudentProfileHeader: React.FC<StudentProfileHeaderProps> = ({
     .toString()
     .padStart(4, '0');
 
-  const gradeDisplay = student.enrolled_classes
-    ? student.enrolled_classes
-    : student.class_name
+  const rawGrade = student.grade || student.student_grade || student.class_grade;
+  const gradeDisplay = student.class_name
     ? student.class_name
-    : student.grade
-    ? String(student.grade).startsWith('Lớp') ||
-      String(student.grade).startsWith('Khối')
-      ? student.grade
-      : `Lớp ${student.grade}`
-    : 'Lớp 6';
+    : student.enrolled_classes
+    ? student.enrolled_classes
+    : rawGrade
+    ? String(rawGrade).startsWith('Lớp') || String(rawGrade).startsWith('Khối')
+      ? rawGrade
+      : `Lớp ${rawGrade}`
+    : 'Chưa phân lớp';
 
   // Calculate PI index (Performance Index on 0-100 scale)
   const rawPi = student.performance_index != null

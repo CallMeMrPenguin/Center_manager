@@ -5,12 +5,14 @@ interface KPICardsProps {
     c1: string | number;
     c2: string | number;
     hw: string | number;
+    mockTest?: string | number;
     overall: string | number;
     attendancePct: number;
     sessionCount: number;
     c1Diff: string;
     c2Diff: string;
     hwDiff: string;
+    mockTestDiff?: string;
     overallDiff: string;
     rank: string;
     level: string;
@@ -21,8 +23,10 @@ interface KPICardsProps {
 }
 
 export const KPICards: React.FC<KPICardsProps> = ({ stats, hasSelectedStudent, isTestMode }) => {
+  const hasMockTest = stats.mockTest !== undefined && stats.mockTest !== null && stats.mockTest !== '-';
+
   return (
-    <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 ${hasSelectedStudent ? 'animate-cascade-2' : 'animate-cascade-1'}`}>
+    <div className={`grid grid-cols-1 sm:grid-cols-2 ${hasMockTest ? 'lg:grid-cols-5' : 'lg:grid-cols-4'} gap-4 ${hasSelectedStudent ? 'animate-cascade-2' : 'animate-cascade-1'}`}>
       {/* 1. CHECK 1 TRUNG BÌNH */}
       <div className="kpi-card-blue p-5 flex flex-col justify-between shadow-2xl transition-all duration-300 min-h-[100px]">
         <div>
@@ -71,7 +75,25 @@ export const KPICards: React.FC<KPICardsProps> = ({ stats, hasSelectedStudent, i
         </div>
       </div>
 
-      {/* 4. TỔNG ĐIỂM TRUNG BÌNH */}
+      {/* 4. LUYỆN ĐỀ (GIỮA/CUỐI KỲ) */}
+      {hasMockTest && (
+        <div className="kpi-card-blue p-5 flex flex-col justify-between shadow-2xl transition-all duration-300 min-h-[100px]" style={{ borderColor: 'rgba(245, 158, 11, 0.45)' }}>
+          <div>
+            <span className="text-[10px] font-black uppercase tracking-wider text-amber-400 block mb-1">
+              LUYỆN ĐỀ (GIỮA / CUỐI KỲ)
+            </span>
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-3xl font-black text-white font-mono">{stats.mockTest}</span>
+              <span className="text-xs text-slate-400 font-bold font-mono">/ 10</span>
+            </div>
+          </div>
+          <div className="mt-2 text-[10px] font-bold text-amber-400">
+            <span>{stats.mockTestDiff || '+0.0'} so với kỳ trước</span>
+          </div>
+        </div>
+      )}
+
+      {/* 5. TỔNG ĐIỂM TRUNG BÌNH */}
       <div className="kpi-card-amber p-5 flex flex-col justify-between shadow-2xl transition-all duration-300 min-h-[100px]">
         <div>
           <span className="text-[10px] font-black uppercase tracking-wider text-amber-400 block mb-1">

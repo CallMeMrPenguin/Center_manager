@@ -321,6 +321,12 @@ def init_db():
     )
     """)
 
+    # Migration: Add mock_test column to class_attendance_grades if not exists
+    try:
+        cursor.execute("ALTER TABLE class_attendance_grades ADD COLUMN mock_test REAL DEFAULT 0")
+    except sqlite3.OperationalError:
+        pass
+
     # 16. Friend Groups table
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS friend_groups (
@@ -2548,13 +2554,25 @@ def get_analytics_reports(class_id: Optional[int] = None, student_id: Optional[i
             s.id as student_id,
             s.full_name,
             s.nickname,
+            s.grade as student_grade,
+            s.school,
+            s.date_of_birth,
+            s.gender,
+            s.phone,
+            s.father_name,
+            s.father_phone,
+            s.mother_name,
+            s.mother_phone,
+            s.address,
             c.id as class_id,
             c.class_name,
+            c.grade as class_grade,
             COUNT(ag.id) as total_sessions,
             SUM(CASE WHEN ag.status = 'Có mặt' THEN 1 ELSE 0 END) as present_count,
             AVG(CASE WHEN ag.check_1 > 0 THEN ag.check_1 END) as avg_check_1,
             AVG(CASE WHEN ag.check_2 > 0 THEN ag.check_2 END) as avg_check_2,
-            AVG(CASE WHEN ag.homework > 0 THEN ag.homework END) as avg_homework
+            AVG(CASE WHEN ag.homework > 0 THEN ag.homework END) as avg_homework,
+            AVG(CASE WHEN (ag.mock_test > 0) THEN ag.mock_test END) as avg_mock_test
         FROM students s
         JOIN class_students cs ON s.id = cs.student_id
         JOIN classes c ON cs.class_id = c.id

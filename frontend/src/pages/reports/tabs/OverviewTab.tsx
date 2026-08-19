@@ -126,6 +126,7 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
     let sum1 = 0, count1 = 0;
     let sum2 = 0, count2 = 0;
     let sumHw = 0, countHw = 0;
+    let sumMock = 0, countMock = 0;
     let presentCount = 0;
 
     records.forEach(r => {
@@ -133,15 +134,18 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
       const val1 = Number(r.check_1);
       const val2 = Number(r.check_2);
       const valHw = Number(r.homework);
+      const valMock = Number((r as any).mock_test);
       if (val1 > 0) { sum1 += val1; count1++; }
       if (val2 > 0) { sum2 += val2; count2++; }
       if (valHw > 0) { sumHw += valHw; countHw++; }
+      if (valMock > 0) { sumMock += valMock; countMock++; }
     });
 
     const c1 = count1 > 0 ? (sum1 / count1) : 0;
     const c2 = count2 > 0 ? (sum2 / count2) : 0;
     const hw = countHw > 0 ? (sumHw / countHw) : 0;
-    const validCols = [c1, c2, hw].filter(v => v > 0);
+    const mockTest = countMock > 0 ? (sumMock / countMock) : 0;
+    const validCols = [c1, c2, hw, mockTest].filter(v => v > 0);
     const overall = validCols.length > 0 ? validCols.reduce((a, b) => a + b, 0) / validCols.length : 0;
     const attPct = records.length > 0 ? Math.round((presentCount / records.length) * 100) : 100;
 
@@ -155,12 +159,14 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
       c1: c1 > 0 ? format1Dec(c1) : '-',
       c2: c2 > 0 ? format1Dec(c2) : '-',
       hw: hw > 0 ? format1Dec(hw) : '-',
+      mockTest: mockTest > 0 ? format1Dec(mockTest) : '-',
       overall: overall > 0 ? format1Dec(overall) : '-',
       attendancePct: attPct,
       sessionCount: records.length,
       c1Diff: '+0.0',
       c2Diff: '+0.0',
       hwDiff: '+0.0',
+      mockTestDiff: '+0.0',
       overallDiff: '+0.0',
       rank: rankStr,
       level: overall > 0 ? getStudentTier(overall).title : 'Chưa Có Điểm'
@@ -300,6 +306,7 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
       <SummaryStrip
         engine={engine}
         gradeTypesList={gradeTypesList}
+        hasSelectedStudent={!!selectedStudentObj}
       />
 
       {/* 5. STUDENT RANKINGS TABLE */}
