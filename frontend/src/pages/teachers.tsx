@@ -275,7 +275,7 @@ export default function TeachersPage() {
           loadingMessage="Đang tải dữ liệu nhân sự..."
           emptyMessage="Chưa có thông tin giáo viên nào"
           searchPlaceholder="Tìm theo tên, SĐT..."
-          pageSize={20}
+          pageSize={10}
         />
       </div>
 

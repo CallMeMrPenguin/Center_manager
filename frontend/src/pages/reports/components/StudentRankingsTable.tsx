@@ -326,7 +326,7 @@ export const StudentRankingsTable: React.FC<StudentRankingsTableProps> = React.m
         loading={loading}
         searchPlaceholder="Tìm học sinh theo tên, biệt danh, lớp..."
         emptyMessage="Không có dữ liệu xếp hạng."
-        pageSize={20}
+        pageSize={10}
         onRowClick={(r: any) => onSelectRankingStudent?.(r.student_id)}
         initialSorting={[{ id: 'overallAvg', desc: true }]}
         onExportExcel={handleExportRankingsExcel}

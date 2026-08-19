@@ -91,7 +91,7 @@ export default function KiemTraPage() {
 
   // Review Pagination State
   const [reviewPage, setReviewPage] = useState(1);
-  const pageSize = 20;
+  const pageSize = 10;
 
   // Auto initialize popout timer position on fullscreen toggle
   useEffect(() => {

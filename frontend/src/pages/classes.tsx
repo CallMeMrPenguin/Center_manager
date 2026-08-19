@@ -211,7 +211,7 @@ export default function ClassesPage() {
   const [colFilterStatus, setColFilterStatus] = useState('ALL');
   const [activeFilterCol, setActiveFilterCol] = useState<string | null>(null);
   const [tablePage, setTablePage] = useState(1);
-  const tablePageSize = 20;
+  const tablePageSize = 10;
 
   const loadClasses = async (silent?: boolean | any) => {
     const isSilent = silent === true;
@@ -1272,7 +1272,7 @@ export default function ClassesPage() {
                 tableId="classes-attendance-table"
                 data={attendanceRecords}
                 columns={attendanceColumns}
-                pageSize={20}
+                pageSize={10}
                 exportFilename={`diem_danh_${selectedClass?.class_name || ''}_${attendanceDate}`}
                 onExportExcel={handleExportExcel}
                 onExportDocx={handleExportDocx}

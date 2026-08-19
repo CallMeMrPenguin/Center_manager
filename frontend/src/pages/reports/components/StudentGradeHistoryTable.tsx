@@ -256,7 +256,7 @@ export const StudentGradeHistoryTable: React.FC<StudentGradeHistoryTableProps> =
         loading={loading}
         searchPlaceholder="Tìm theo học sinh, ngày, lớp, trạng thái, ghi chú..."
         emptyMessage="Chưa có lịch sử điểm số."
-        pageSize={20}
+        pageSize={10}
         initialSorting={[{ id: 'date', desc: true }]}
         exportFilename={`lich_su_diem_${selectedStudentObj ? selectedStudentObj.full_name : 'lop'}`}
       />

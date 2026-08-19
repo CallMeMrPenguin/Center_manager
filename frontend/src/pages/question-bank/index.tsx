@@ -535,7 +535,7 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 20;
+  const pageSize = 10;
 
   // CSV Validation & Preview Modal
   const [csvPreviewModal, setCsvPreviewModal] = useState<{
@@ -2093,7 +2093,7 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
                 exportFilename="bao_cao_kiem_tra_trung_lap_cau_hoi"
                 data={csvPreviewModal.items}
                 columns={csvPreviewColumns}
-                pageSize={20}
+                pageSize={10}
               />
             </div>
 

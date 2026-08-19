@@ -365,7 +365,7 @@ export default function VocabularyBank({ isActive }: { isActive?: boolean }) {
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 20;
+  const pageSize = 10;
 
   // CSV Validation & Preview Modal
   const [csvPreviewModal, setCsvPreviewModal] = useState<{
@@ -1666,7 +1666,7 @@ export default function VocabularyBank({ isActive }: { isActive?: boolean }) {
                     exportFilename="xem_truoc_tu_vung"
                     data={csvPreviewModal.items}
                     columns={csvPreviewColumns}
-                    pageSize={20}
+                    pageSize={10}
                   />
                 );
               })()}

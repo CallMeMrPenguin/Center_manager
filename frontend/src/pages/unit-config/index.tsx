@@ -349,7 +349,7 @@ export default function UnitConfig() {
               data={rows}
               columns={unitColumns}
               emptyMessage={`Chưa có bài học nào cho Khối Lớp ${selectedGrade}.`}
-              pageSize={20}
+              pageSize={10}
               searchPlaceholder="Tìm kiếm bài học, chủ đề ngữ pháp..."
             />
           </div>

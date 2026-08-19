@@ -290,7 +290,7 @@ export const StudentWeaknessDiagnosisCard: React.FC<StudentWeaknessDiagnosisCard
         columns={columns}
         searchPlaceholder="Tìm học sinh cần phụ đạo theo tên..."
         emptyMessage="Không có học sinh nào bị hổng kiến thức trong phạm vi này."
-        pageSize={20}
+        pageSize={10}
         onRowClick={(row) => onSelectStudent?.(row.student_id)}
       />
     </div>

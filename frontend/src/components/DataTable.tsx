@@ -606,7 +606,7 @@ export function DataTable<TData>({
   loading = false,
   loadingMessage = 'Đang tải dữ liệu...',
   emptyMessage = 'Không tìm thấy dữ liệu phù hợp.',
-  pageSize = 20,
+  pageSize = 10,
   showPagination = true,
   enableGlobalSearch = true,
   enableColumnVisibility = true,

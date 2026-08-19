@@ -640,7 +640,7 @@ export default function SchedulePage() {
                 loading={loading}
                 loadingMessage="Đang tải lịch học..."
                 emptyMessage="Không có buổi học nào."
-                pageSize={20}
+                pageSize={10}
               />
             );
           })()}

@@ -238,7 +238,7 @@ export default function CoursesPage() {
           loadingMessage="Đang tải dữ liệu khóa học..."
           emptyMessage="Chưa có khóa học nào."
           searchPlaceholder="Tìm theo tên khóa học, mô tả..."
-          pageSize={20}
+          pageSize={10}
         />
       </div>
 

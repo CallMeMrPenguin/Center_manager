@@ -255,7 +255,7 @@ export const ScoreFluctuationsSection: React.FC<ScoreFluctuationsSectionProps> =
           loading={loading}
           searchPlaceholder="Tìm học sinh theo tên..."
           emptyMessage="Không có dữ liệu biến động điểm số."
-          pageSize={20}
+          pageSize={10}
           onRowClick={(r: any) => onSelectRankingStudent(r.student_id)}
         />
       )}
