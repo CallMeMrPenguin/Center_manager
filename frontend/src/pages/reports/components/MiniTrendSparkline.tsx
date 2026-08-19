@@ -1,72 +1,67 @@
 import React from 'react';
-import { format1Dec, trunc1Dec } from '../../../utils';
+import { format1Dec } from '../../../utils';
 
 interface MiniTrendSparklineProps {
-  points: number[];
-  slope: number;
-  ema: number;
+  points?: number[];
+  slope?: number;
+  ema?: number;
 }
 
-export const MiniTrendSparkline = React.memo(({ points, slope, ema }: MiniTrendSparklineProps) => {
-  let dataPoints: number[] = [];
+export const MiniTrendSparkline: React.FC<MiniTrendSparklineProps> = React.memo(({ points, slope = 0, ema = 0 }) => {
+  const dataPoints = (points || []).filter(
+    (p) => typeof p === 'number' && !isNaN(p) && p > 0
+  );
 
-  if (points && points.length >= 5) {
-    dataPoints = points.slice(-5);
-  } else if (points && points.length > 1) {
-    // Interpolate between the available points to construct a smooth 5-point progression
-    const first = points[0];
-    const last = points[points.length - 1];
-    const step = (last - first) / 4;
-    dataPoints = [
-      first,
-      trunc1Dec(first + step * 1),
-      trunc1Dec(first + step * 2),
-      trunc1Dec(first + step * 3),
-      last
-    ];
-  } else if (points && points.length === 1) {
-    const single = points[0];
-    const s = slope !== 0 ? slope : 0.15;
-    dataPoints = [
-      trunc1Dec(Math.max(0, Math.min(10, single - s * 2))),
-      trunc1Dec(Math.max(0, Math.min(10, single - s * 1))),
-      single,
-      trunc1Dec(Math.max(0, Math.min(10, single + s * 1))),
-      trunc1Dec(Math.max(0, Math.min(10, single + s * 2)))
-    ];
-  } else {
-    const base = ema > 0 ? ema : 7.0;
-    const s = slope !== 0 ? slope : (base >= 8.0 ? 0.2 : base >= 6.5 ? 0.1 : -0.2);
-    dataPoints = [
-      trunc1Dec(Math.max(0, Math.min(10, base - s * 2))),
-      trunc1Dec(Math.max(0, Math.min(10, base - s * 1))),
-      base,
-      trunc1Dec(Math.max(0, Math.min(10, base + s * 1))),
-      trunc1Dec(Math.max(0, Math.min(10, base + s * 2)))
-    ];
+  // If 0 session records
+  if (dataPoints.length === 0) {
+    return (
+      <div className="flex items-center justify-center text-slate-500 font-mono text-xs font-bold">
+        -
+      </div>
+    );
   }
 
-  const isDeclining = slope < -0.12 || (dataPoints[dataPoints.length - 1] < dataPoints[0] - 0.4);
-  const isWarning = slope < 0 || ema < 6.5;
+  // If only 1 session record exists
+  if (dataPoints.length === 1) {
+    const singleVal = dataPoints[0];
+    return (
+      <div
+        className="inline-flex items-center justify-center gap-1.5 px-2 py-0.5 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs font-mono font-bold cursor-default mx-auto"
+        title={`Điểm buổi gần nhất: ${format1Dec(singleVal)} (Cần từ 2 buổi để hiển thị đường xu hướng)`}
+      >
+        <span className="w-1.5 h-1.5 rounded-full bg-indigo-400" />
+        <span>{format1Dec(singleVal)}</span>
+      </div>
+    );
+  }
 
-  const strokeColor = isDeclining ? '#f43f5e' : isWarning ? '#f97316' : '#10b981';
-  const glowColor = isDeclining ? 'rgba(244,63,94,0.45)' : isWarning ? 'rgba(249,115,22,0.45)' : 'rgba(16,185,129,0.45)';
-  const uniqueId = `spark-${Math.abs(Math.sin((dataPoints[0] || 1) * 100 + (dataPoints[dataPoints.length - 1] || 1) * 10)).toString(36).substr(2, 6)}`;
+  // 2 to 5 actual sessions available
+  const recentPoints = dataPoints.slice(-5);
+  const count = recentPoints.length;
+  const first = recentPoints[0];
+  const last = recentPoints[count - 1];
+  const delta = last - first;
 
-  const width = 110;
-  const height = 34;
+  const isDeclining = slope < -0.1 || delta < -0.3;
+  const isImproving = slope > 0.1 || delta > 0.3;
+
+  const strokeColor = isDeclining ? '#f43f5e' : isImproving ? '#10b981' : '#38bdf8';
+  const uniqueId = `spark-${Math.abs(Math.sin((recentPoints[0] || 1) * 100 + (recentPoints[count - 1] || 1) * 10)).toString(36).substr(2, 6)}`;
+
+  const width = 100;
+  const height = 28;
   const paddingX = 8;
-  const paddingY = 6;
+  const paddingY = 5;
 
-  const pMin = Math.min(...dataPoints);
-  const pMax = Math.max(...dataPoints);
-  const minVal = Math.max(0, pMin - 0.8);
-  const maxVal = Math.min(10, pMax + 0.8);
-  const range = Math.max(1.8, maxVal - minVal);
+  const pMin = Math.min(...recentPoints);
+  const pMax = Math.max(...recentPoints);
+  const minVal = Math.max(0, pMin - 0.5);
+  const maxVal = Math.min(10, pMax + 0.5);
+  const range = Math.max(1.0, maxVal - minVal);
 
-  const coords = dataPoints.map((val, idx) => {
+  const coords = recentPoints.map((val, idx) => {
     const clamped = Math.max(0, Math.min(10, val));
-    const x = paddingX + (idx / (dataPoints.length - 1)) * (width - 2 * paddingX);
+    const x = paddingX + (idx / (count - 1)) * (width - 2 * paddingX);
     const y = paddingY + ((maxVal - clamped) / range) * (height - 2 * paddingY);
     return { x, y, val: clamped };
   });
@@ -74,12 +69,14 @@ export const MiniTrendSparkline = React.memo(({ points, slope, ema }: MiniTrendS
   const linePath = coords.map((c, i) => `${i === 0 ? 'M' : 'L'} ${c.x.toFixed(1)} ${c.y.toFixed(1)}`).join(' ');
   const areaPath = `${linePath} L ${coords[coords.length - 1].x.toFixed(1)} ${height} L ${coords[0].x.toFixed(1)} ${height} Z`;
 
+  const tooltipTitle = `${count} buổi gần nhất: ${recentPoints.map((p) => format1Dec(p)).join(' → ')}`;
+
   return (
-    <div className="flex items-center justify-center cursor-default" title={`5 mốc gần nhất: ${dataPoints.map(p => format1Dec(p)).join(' → ')}`}>
+    <div className="flex items-center justify-center cursor-default" title={tooltipTitle}>
       <svg width={width} height={height} className="overflow-visible">
         <defs>
           <linearGradient id={uniqueId} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor={strokeColor} stopOpacity="0.4" />
+            <stop offset="0%" stopColor={strokeColor} stopOpacity="0.35" />
             <stop offset="100%" stopColor={strokeColor} stopOpacity="0.0" />
           </linearGradient>
         </defs>
@@ -90,7 +87,7 @@ export const MiniTrendSparkline = React.memo(({ points, slope, ema }: MiniTrendS
           d={linePath}
           fill="none"
           stroke={strokeColor}
-          strokeWidth="2.2"
+          strokeWidth="2"
           strokeLinecap="round"
           strokeLinejoin="round"
         />
@@ -100,20 +97,21 @@ export const MiniTrendSparkline = React.memo(({ points, slope, ema }: MiniTrendS
             <circle
               cx={c.x}
               cy={c.y}
-              r="4.5"
+              r="3.5"
               fill={strokeColor}
               fillOpacity="0.25"
             />
             <circle
               cx={c.x}
               cy={c.y}
-              r="2.5"
+              r="2"
               fill={strokeColor}
+              style={{ transformBox: 'fill-box', transformOrigin: 'center' }}
             />
             <circle
               cx={c.x}
               cy={c.y}
-              r="1.2"
+              r="1"
               fill="#ffffff"
             />
           </g>
