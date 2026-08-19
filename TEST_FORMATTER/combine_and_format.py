@@ -64,9 +64,9 @@ UNIT_NAMES = {
         7: "NATURAL WONDERS OF THE WORLD",
         8: "TOURISM",
         9: "WORLD ENGLISHES",
-        10: "SPACE TRAVEL",
-        11: "CHANGING ROLES IN SOCIETY",
-        12: "MY FUTURE CAREER"
+        10: "PLANET EARTH",
+        11: "ELECTRONIC DEVICES",
+        12: "CAREER PATHS"
     }
 }
 

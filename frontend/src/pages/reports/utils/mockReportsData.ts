@@ -19,9 +19,18 @@ export const MOCK_PROFILES = [
 ];
 
 export const GRAMMAR_TOPICS_LIST = [
-  'Present Simple', 'Present Continuous', 'Past Simple', 'Past Continuous',
-  'Present Perfect', 'Comparative Adjectives', 'Superlative Adjectives',
-  'Modal Verbs', 'First Conditional', 'Second Conditional', 'Passive Voice', 'Relative Clauses',
+  'Present Simple & Adverbs of Frequency',    // Unit 1: My New School
+  'Possessive Case & Prepositions of Place',  // Unit 2: My House
+  'Present Continuous',                       // Unit 3: My Friends
+  'Comparative Adjectives',                   // Unit 4: My Neighbourhood
+  'Countable/Uncountable Nouns & Must',       // Unit 5: Natural Wonders of Viet Nam
+  'Should/Shouldn\'t & Some/Any',             // Unit 6: Our Tet Holiday
+  'Conjunctions & Question Words',            // Unit 7: Television
+  'Past Simple & Imperatives',                // Unit 8: Sports and Games
+  'Possessive Pronouns',                      // Unit 9: Cities of the World
+  'Future Simple (Will) & Might',             // Unit 10: Our Houses in the Future
+  'Articles & First Conditional',             // Unit 11: Our Greener World
+  'Superlative Adjectives & Could',           // Unit 12: Robots
 ];
 
 export function computeDatasetFromRecords(
@@ -305,12 +314,12 @@ export function computeMockSkillBreakdown(
     session_date: 'Buổi 21 (Dự Báo)',
     check_1_info: {
       skill: 'vocab',
-      topic: 'Unit 11: Global Warming (Từ Vựng Mở Rộng)',
+      topic: 'Unit 11: Our Greener World (Môi Trường & 3Rs)',
       units: ['Unit 11 (Từ vựng)'],
     },
     check_2_info: {
       skill: 'grammar',
-      topic: 'Unit 11: Passive Voice (Bị Động Nâng Cao)',
+      topic: 'Unit 11: Articles & First Conditional (Câu điều kiện loại 1)',
       units: ['Unit 11 (Ngữ pháp)'],
     },
     at_risk_students: heatmapStudents.filter(s => {

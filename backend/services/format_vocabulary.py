@@ -14,7 +14,7 @@ from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 
-# Unit Catalog for Global Success (Semester 1: Unit 1-6)
+# Unit Catalog for Global Success (Full Year: Unit 1-12)
 UNIT_NAMES = {
     6: {
         1: "MY NEW SCHOOL",
@@ -22,7 +22,13 @@ UNIT_NAMES = {
         3: "MY FRIENDS",
         4: "MY NEIGHBOURHOOD",
         5: "NATURAL WONDERS OF VIET NAM",
-        6: "OUR TET HOLIDAY"
+        6: "OUR TET HOLIDAY",
+        7: "TELEVISION",
+        8: "SPORTS AND GAMES",
+        9: "CITIES OF THE WORLD",
+        10: "OUR HOUSES IN THE FUTURE",
+        11: "OUR GREENER WORLD",
+        12: "ROBOTS"
     },
     7: {
         1: "HOBBIES",
@@ -30,7 +36,13 @@ UNIT_NAMES = {
         3: "COMMUNITY SERVICE",
         4: "MUSIC AND ARTS",
         5: "FOOD AND DRINK",
-        6: "A VISIT TO SCHOOL"
+        6: "A VISIT TO SCHOOL",
+        7: "TRAFFIC",
+        8: "FILMS",
+        9: "FESTIVALS AROUND THE WORLD",
+        10: "ENERGY SOURCES",
+        11: "TRAVELLING IN THE FUTURE",
+        12: "ENGLISH-SPEAKING COUNTRIES"
     },
     8: {
         1: "LEISURE TIME",
@@ -38,7 +50,13 @@ UNIT_NAMES = {
         3: "TEENAGERS",
         4: "ETHNIC GROUPS OF VIET NAM",
         5: "OUR CUSTOMS AND TRADITIONS",
-        6: "LIFESTYLES"
+        6: "LIFESTYLES",
+        7: "ENVIRONMENTAL PROTECTION",
+        8: "SHOPPING",
+        9: "NATURAL DISASTERS",
+        10: "COMMUNICATION IN THE FUTURE",
+        11: "SCIENCE AND TECHNOLOGY",
+        12: "LIFE ON OTHER PLANETS"
     },
     9: {
         1: "LOCAL COMMUNITY",
@@ -46,7 +64,13 @@ UNIT_NAMES = {
         3: "TEEN STRESS AND PRESSURE",
         4: "LIFE IN THE PAST",
         5: "WONDERS OF VIET NAM",
-        6: "VIET NAM THEN AND NOW"
+        6: "VIET NAM THEN AND NOW",
+        7: "NATURAL WONDERS OF THE WORLD",
+        8: "TOURISM",
+        9: "WORLD ENGLISHES",
+        10: "PLANET EARTH",
+        11: "ELECTRONIC DEVICES",
+        12: "CAREER PATHS"
     }
 }
 
