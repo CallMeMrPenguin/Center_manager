@@ -270,71 +270,83 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
     <div className="space-y-6">
       {/* 1. INDIVIDUAL STUDENT PROFILE */}
       {selectedStudentObj && (
-        <StudentProfileHeader
-          student={selectedStudentObj}
-          stats={stats}
-          onClearStudent={() => setSelectedStudentId('')}
-          isTestMode={isTestMode}
-        />
+        <div className="animate-cascade-1">
+          <StudentProfileHeader
+            student={selectedStudentObj}
+            stats={stats}
+            onClearStudent={() => setSelectedStudentId('')}
+            isTestMode={isTestMode}
+          />
+        </div>
       )}
 
       {/* 2. FOUR/FIVE GLOWING KPI CARDS */}
-      <KPICards
-        stats={stats}
-        engine={engine}
-        hasSelectedStudent={!!selectedStudentObj}
-        isTestMode={isTestMode}
-      />
+      <div className={selectedStudentObj ? 'animate-cascade-2' : 'animate-cascade-1'}>
+        <KPICards
+          stats={stats}
+          engine={engine}
+          hasSelectedStudent={!!selectedStudentObj}
+          isTestMode={isTestMode}
+        />
+      </div>
 
       {/* 3. INTERACTIVE CHART */}
-      <InteractiveChart
-        sessionChartData={sessionChartData}
-        engine={engine}
-        fittedLookup={fittedLookup}
-        selectedStudentId={selectedStudentId}
-        selectedClassId={selectedClassId}
-        timeView={timeView}
-        setTimeView={setTimeView}
-        timePhases={combinedTimePhases}
-        selectedPhaseId={selectedPhaseId}
-        setSelectedPhaseId={setSelectedPhaseId}
-        onOpenPhaseModal={onOpenPhaseModal}
-        isTestMode={isTestMode}
-      />
+      <div className={selectedStudentObj ? 'animate-cascade-3' : 'animate-cascade-2'}>
+        <InteractiveChart
+          sessionChartData={sessionChartData}
+          engine={engine}
+          fittedLookup={fittedLookup}
+          selectedStudentId={selectedStudentId}
+          selectedClassId={selectedClassId}
+          timeView={timeView}
+          setTimeView={setTimeView}
+          timePhases={combinedTimePhases}
+          selectedPhaseId={selectedPhaseId}
+          setSelectedPhaseId={setSelectedPhaseId}
+          onOpenPhaseModal={onOpenPhaseModal}
+          isTestMode={isTestMode}
+        />
+      </div>
 
       {/* 4. SUMMARY STRIP (NOW WITH PI INDEX & DETAILED TOOLTIP) */}
-      <SummaryStrip
-        engine={engine}
-        gradeTypesList={gradeTypesList}
-        hasSelectedStudent={!!selectedStudentObj}
-      />
+      <div className={selectedStudentObj ? 'animate-cascade-4' : 'animate-cascade-3'}>
+        <SummaryStrip
+          engine={engine}
+          gradeTypesList={gradeTypesList}
+          hasSelectedStudent={!!selectedStudentObj}
+        />
+      </div>
 
       {/* 5. STUDENT RANKINGS TABLE */}
-      <StudentRankingsTable
-        loading={loading}
-        classes={classes}
-        selectedClassId={selectedClassId}
-        setSelectedClassId={setSelectedClassId}
-        selectedStudentId={selectedStudentId}
-        setSelectedStudentId={setSelectedStudentId}
-        studentRankings={studentRankings}
-        filteredRankings={filteredRankings}
-        studentSessionsMap={studentSessionsMap}
-        onSelectRankingStudent={onSelectRankingStudent}
-        hasSelectedStudent={!!selectedStudentObj}
-        isTestMode={isTestMode}
-      />
+      <div className={selectedStudentObj ? 'animate-cascade-5' : 'animate-cascade-4'}>
+        <StudentRankingsTable
+          loading={loading}
+          classes={classes}
+          selectedClassId={selectedClassId}
+          setSelectedClassId={setSelectedClassId}
+          selectedStudentId={selectedStudentId}
+          setSelectedStudentId={setSelectedStudentId}
+          studentRankings={studentRankings}
+          filteredRankings={filteredRankings}
+          studentSessionsMap={studentSessionsMap}
+          onSelectRankingStudent={onSelectRankingStudent}
+          hasSelectedStudent={!!selectedStudentObj}
+          isTestMode={isTestMode}
+        />
+      </div>
 
       {/* 6. STUDENT GRADE HISTORY TABLE */}
-      <StudentGradeHistoryTable
-        loading={loading}
-        sessionRecords={activeSessionRecords.length > 0 ? activeSessionRecords : sessionRecords}
-        selectedStudentObj={selectedStudentObj}
-        stats={stats}
-        onOpenEditModal={onOpenEditModal}
-        hasSelectedStudent={!!selectedStudentObj}
-        isTestMode={isTestMode}
-      />
+      <div className={selectedStudentObj ? 'animate-cascade-6' : 'animate-cascade-5'}>
+        <StudentGradeHistoryTable
+          loading={loading}
+          sessionRecords={activeSessionRecords.length > 0 ? activeSessionRecords : sessionRecords}
+          selectedStudentObj={selectedStudentObj}
+          stats={stats}
+          onOpenEditModal={onOpenEditModal}
+          hasSelectedStudent={!!selectedStudentObj}
+          isTestMode={isTestMode}
+        />
+      </div>
     </div>
   );
 };

@@ -50,15 +50,23 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = ({
   const plotAreaHeight = Math.max(100, chartHeight - paddingTop - paddingBottom);
 
   useEffect(() => {
+    let animId: number;
     const updateDimensions = () => {
       if (chartWrapperRef.current) {
-        setChartWidth(Math.max(600, chartWrapperRef.current.clientWidth));
+        const w = Math.max(600, Math.round(chartWrapperRef.current.clientWidth));
+        setChartWidth(prev => Math.abs(prev - w) > 3 ? w : prev);
       }
     };
     updateDimensions();
-    const observer = new ResizeObserver(updateDimensions);
+    const observer = new ResizeObserver(() => {
+      cancelAnimationFrame(animId);
+      animId = requestAnimationFrame(updateDimensions);
+    });
     if (chartWrapperRef.current) observer.observe(chartWrapperRef.current);
-    return () => observer.disconnect();
+    return () => {
+      cancelAnimationFrame(animId);
+      observer.disconnect();
+    };
   }, []);
 
   const clampPanOffset = useCallback((x: number, y: number, currentZoom: number) => {

@@ -43,7 +43,7 @@ export const SummaryStrip: React.FC<SummaryStripProps> = React.memo(({ engine, g
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 bg-[#0c0f1e] border border-[#1e2746] rounded-xl text-center items-center relative shadow-md divide-y sm:divide-y-0 sm:divide-x divide-[#1e2746]">
       {/* 1. Next Session Prediction */}
-      <div className="relative group p-2.5">
+      <div className="relative group p-2.5 animate-cascade-1">
         <div className="flex items-center justify-center gap-1">
           <span className="text-[10px] font-black uppercase text-slate-400 block">Dự Đoán Buổi Tới</span>
           <button
@@ -95,7 +95,7 @@ export const SummaryStrip: React.FC<SummaryStripProps> = React.memo(({ engine, g
       </div>
 
       {/* 2. EMA Skill Level */}
-      <div className="relative group p-2.5">
+      <div className="relative group p-2.5 animate-cascade-2">
         <div className="flex items-center justify-center gap-1">
           <span className="text-[10px] font-black uppercase text-slate-400 block">Trình Độ EMA</span>
           <button
@@ -153,7 +153,7 @@ export const SummaryStrip: React.FC<SummaryStripProps> = React.memo(({ engine, g
       </div>
 
       {/* 3. Volatility / Standard Deviation (SD) */}
-      <div className="relative group p-2.5">
+      <div className="relative group p-2.5 animate-cascade-3">
         <div className="flex items-center justify-center gap-1">
           <span className="text-[10px] font-black uppercase text-slate-400 block">Độ Biến Động (SD)</span>
           <button
@@ -208,7 +208,7 @@ export const SummaryStrip: React.FC<SummaryStripProps> = React.memo(({ engine, g
       </div>
 
       {/* 4. Growth Rate (Trend Rate) */}
-      <div className="relative group p-2.5">
+      <div className="relative group p-2.5 animate-cascade-4">
         <div className="flex items-center justify-center gap-1">
           <span className="text-[10px] font-black uppercase text-slate-400 block">Tốc Độ Tăng Trưởng</span>
           <button
@@ -258,7 +258,7 @@ export const SummaryStrip: React.FC<SummaryStripProps> = React.memo(({ engine, g
       </div>
 
       {/* 5. Performance Index (PI) */}
-      <div className="relative group p-2.5">
+      <div className="relative group p-2.5 animate-cascade-5">
         <div className="flex items-center justify-center gap-1">
           <span className="text-[10px] font-black uppercase text-slate-400 block">
             Chỉ Số PI
@@ -314,7 +314,7 @@ export const SummaryStrip: React.FC<SummaryStripProps> = React.memo(({ engine, g
       </div>
 
       {/* 6. Overall Rating */}
-      <div className="relative group p-2.5">
+      <div className="relative group p-2.5 animate-cascade-6">
         <div className="flex items-center justify-center gap-1">
           <span className="text-[10px] font-black uppercase text-slate-400 block">Xếp Loại Chung</span>
           <button

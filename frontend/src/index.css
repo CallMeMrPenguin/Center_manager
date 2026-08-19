@@ -431,11 +431,11 @@ input[type="month"]::-webkit-calendar-picker-indicator {
   will-change: opacity, transform;
 }
 
-/* ── ULTRA-FAST ZERO-LAG SEQUENTIAL REVEAL ANIMATION SYSTEM ─── */
+/* ── SMOOTH & GRACEFUL SEQUENTIAL REVEAL ANIMATION SYSTEM ─── */
 @keyframes flyInUp {
   0% {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(20px);
   }
   100% {
     opacity: 1;
@@ -445,49 +445,49 @@ input[type="month"]::-webkit-calendar-picker-indicator {
 
 .animate-cascade-1,
 .animate-fly-1 {
-  animation: flyInUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) 0.02s both;
+  animation: flyInUp 0.55s cubic-bezier(0.16, 1, 0.3, 1) 0.05s both;
 }
 
 .animate-cascade-2,
 .animate-fly-2 {
-  animation: flyInUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) 0.06s both;
+  animation: flyInUp 0.55s cubic-bezier(0.16, 1, 0.3, 1) 0.15s both;
 }
 
 .animate-cascade-3,
 .animate-fly-3 {
-  animation: flyInUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) 0.10s both;
+  animation: flyInUp 0.55s cubic-bezier(0.16, 1, 0.3, 1) 0.25s both;
 }
 
 .animate-cascade-4,
 .animate-fly-4 {
-  animation: flyInUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) 0.14s both;
+  animation: flyInUp 0.55s cubic-bezier(0.16, 1, 0.3, 1) 0.35s both;
 }
 
 .animate-cascade-5,
 .animate-fly-5 {
-  animation: flyInUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) 0.18s both;
+  animation: flyInUp 0.55s cubic-bezier(0.16, 1, 0.3, 1) 0.45s both;
 }
 
 .animate-cascade-6,
 .animate-fly-6 {
-  animation: flyInUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) 0.22s both;
+  animation: flyInUp 0.55s cubic-bezier(0.16, 1, 0.3, 1) 0.55s both;
 }
 
 .animate-cascade-7,
 .animate-fly-7 {
-  animation: flyInUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) 0.26s both;
+  animation: flyInUp 0.55s cubic-bezier(0.16, 1, 0.3, 1) 0.65s both;
 }
 
 .animate-cascade-8,
 .animate-fly-8 {
-  animation: flyInUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) 0.30s both;
+  animation: flyInUp 0.55s cubic-bezier(0.16, 1, 0.3, 1) 0.75s both;
 }
 
-/* Table Row Fly In from Bottom (Fast & Smooth) */
+/* Table Row Fly In from Bottom (Smooth & Staggered) */
 @keyframes rowFlyIn {
   0% {
     opacity: 0;
-    transform: translateY(12px);
+    transform: translateY(18px);
   }
   100% {
     opacity: 1;
@@ -496,7 +496,7 @@ input[type="month"]::-webkit-calendar-picker-indicator {
 }
 
 .animate-row-enter {
-  animation: rowFlyIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: rowFlyIn 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 @keyframes growWidth {
