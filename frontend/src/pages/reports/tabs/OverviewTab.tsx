@@ -268,6 +268,7 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
           student={selectedStudentObj}
           stats={stats}
           onClearStudent={() => setSelectedStudentId('')}
+          isTestMode={isTestMode}
         />
       )}
 
