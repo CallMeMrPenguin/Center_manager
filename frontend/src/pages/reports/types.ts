@@ -20,9 +20,9 @@ export const TIERS_CONFIG: StudentTier[] = [
   { tier: 3, name: 'Vàng', title: 'Khá', badge: '/ranks/tier_3.png', scale: 'scale-[1.7]', color: '#eab308', bg: 'bg-yellow-500/10', border: 'border-yellow-500/30', text: 'text-yellow-400', minScore: 6.0, maxScore: 6.9 },
   { tier: 4, name: 'Bạch Kim', title: 'Giỏi', badge: '/ranks/tier_4.png', scale: 'scale-[1.25]', color: '#818cf8', bg: 'bg-indigo-500/10', border: 'border-indigo-500/30', text: 'text-indigo-300', minScore: 7.0, maxScore: 7.9 },
   { tier: 5, name: 'Kim Cương', title: 'Xuất Sắc', badge: '/ranks/tier_5.png', scale: 'scale-100', color: '#06b6d4', bg: 'bg-cyan-500/10', border: 'border-cyan-500/30', text: 'text-cyan-400', minScore: 8.0, maxScore: 8.6 },
-  { tier: 6, name: 'Tinh Anh', title: 'Ưu Tú', badge: '/ranks/tier_6.png', scale: 'scale-[1.3]', color: '#a855f7', bg: 'bg-purple-500/10', border: 'border-purple-500/30', text: 'text-purple-300', minScore: 8.7, maxScore: 9.1 },
-  { tier: 7, name: 'Cao Thủ', title: 'Vượt Trội', badge: '/ranks/tier_7.png', scale: 'scale-[1.75]', color: '#ec4899', bg: 'bg-pink-500/10', border: 'border-pink-500/30', text: 'text-pink-400', minScore: 9.2, maxScore: 9.5 },
-  { tier: 8, name: 'Quán Quân', title: 'Xuất Chúng', badge: '/ranks/tier_8.png', scale: 'scale-[1.3]', color: '#fbbf24', bg: 'bg-amber-500/15', border: 'border-amber-500/40', text: 'text-amber-300', minScore: 9.6, maxScore: 10.0 }
+  { tier: 6, name: 'Tinh Anh', title: 'Ưu Tú', badge: '/ranks/tier_6.png', scale: 'scale-[1.48]', color: '#a855f7', bg: 'bg-purple-500/10', border: 'border-purple-500/30', text: 'text-purple-300', minScore: 8.7, maxScore: 9.1 },
+  { tier: 7, name: 'Cao Thủ', title: 'Vượt Trội', badge: '/ranks/tier_7.png', scale: 'scale-[1.5]', color: '#ec4899', bg: 'bg-pink-500/10', border: 'border-pink-500/30', text: 'text-pink-400', minScore: 9.2, maxScore: 9.5 },
+  { tier: 8, name: 'Quán Quân', title: 'Xuất Chúng', badge: '/ranks/tier_8.png', scale: 'scale-[1.48]', color: '#fbbf24', bg: 'bg-amber-500/15', border: 'border-amber-500/40', text: 'text-amber-300', minScore: 9.6, maxScore: 10.0 }
 ];
 
 export const getStudentTier = (score: number): StudentTier => {
