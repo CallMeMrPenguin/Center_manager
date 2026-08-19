@@ -190,7 +190,9 @@ export const DualComparisonBars: React.FC<DualComparisonBarsProps> = ({
 
                 {/* CENTER: Tier Badge, Name & Score */}
                 <div className="flex items-center justify-center gap-2.5 w-48 shrink-0 py-1.5 px-3 bg-[#121728] rounded-xl border border-white/5 shadow-inner">
-                  <img src={tier.badge} alt={tier.name} className="w-9 h-9 object-contain shrink-0 drop-shadow-[0_2px_8px_rgba(0,0,0,0.5)]" />
+                  <div className="w-9 h-9 flex items-center justify-center shrink-0">
+                    <img src={tier.badge} alt={tier.name} className={`w-full h-full object-contain ${tier.scale || 'scale-100'} drop-shadow-[0_2px_8px_rgba(0,0,0,0.5)]`} />
+                  </div>
                   <div className="text-center">
                     <span className={`text-xs font-black block leading-tight ${tier.text}`}>{tier.name}</span>
                     <span className="text-[10px] text-slate-400 font-mono font-semibold">{tier.minScore} - {tier.maxScore}đ</span>

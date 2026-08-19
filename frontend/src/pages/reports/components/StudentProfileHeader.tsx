@@ -102,7 +102,7 @@ export const StudentProfileHeader: React.FC<StudentProfileHeaderProps> = ({
         <X className="w-5 h-5 text-white" />
       </button>
 
-      {/* TOP HEADER: Left: Avatar + Name + Nickname | Right: Big Rank Icon + #Rank + Rank Name */}
+      {/* TOP HEADER: Left: Avatar + Name + Nickname + #Rank | Right: Big Rank Icon + Rank Name */}
       <div className="flex flex-wrap items-center justify-between gap-4 pr-8">
         {/* Left: Profile Pic & Info */}
         <div className="flex items-center gap-4 min-w-0">
@@ -123,7 +123,7 @@ export const StudentProfileHeader: React.FC<StudentProfileHeaderProps> = ({
               </span>
             </div>
 
-            <div className="flex flex-wrap items-baseline gap-2">
+            <div className="flex flex-wrap items-baseline gap-2.5">
               <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
                 {student.full_name}
               </h2>
@@ -132,25 +132,26 @@ export const StudentProfileHeader: React.FC<StudentProfileHeaderProps> = ({
                   ({student.nickname})
                 </span>
               )}
+              {/* #rank stays next to name */}
+              <span className="text-2xl sm:text-3xl font-black text-amber-400 font-mono tracking-tight ml-1">
+                {stats.rank}
+              </span>
             </div>
           </div>
         </div>
 
-        {/* Right: Big Rank Icon & Rank Details (Moved to right) */}
-        <div className="flex items-center gap-3.5 sm:gap-4 shrink-0">
-          <img
-            src={tier.badge}
-            alt={tier.name}
-            className="w-14 h-14 sm:w-16 sm:h-16 object-contain drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)]"
-          />
-          <div className="flex flex-col items-start justify-center">
-            <span className="text-2xl sm:text-3xl font-black text-amber-400 font-mono tracking-tight leading-none">
-              {stats.rank}
-            </span>
-            <span className={`text-xl sm:text-2xl font-black leading-tight mt-0.5 ${rankTheme.badgeText}`}>
-              {tier.name}
-            </span>
+        {/* Right: Big Rank Icon & Rank Name */}
+        <div className="flex items-center gap-3 sm:gap-4 shrink-0">
+          <div className="w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center shrink-0">
+            <img
+              src={tier.badge}
+              alt={tier.name}
+              className={`w-full h-full object-contain ${tier.scale || 'scale-100'} drop-shadow-[0_4px_16px_rgba(0,0,0,0.6)]`}
+            />
           </div>
+          <span className={`text-2xl sm:text-3xl font-black leading-none ${rankTheme.badgeText}`}>
+            {tier.name}
+          </span>
         </div>
       </div>
 

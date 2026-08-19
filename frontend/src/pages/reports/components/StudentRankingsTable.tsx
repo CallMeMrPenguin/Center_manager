@@ -191,7 +191,13 @@ export const StudentRankingsTable: React.FC<StudentRankingsTableProps> = ({
         const tier = getStudentTier(avg);
         return (
           <div className="flex items-center justify-center gap-2.5 py-0.5">
-            <img src={tier.badge} alt={tier.name} className="w-11 h-11 object-contain shrink-0 drop-shadow-[0_4px_12px_rgba(0,0,0,0.6)] transform hover:scale-115 transition-transform duration-200" />
+            <div className="w-11 h-11 flex items-center justify-center shrink-0">
+              <img
+                src={tier.badge}
+                alt={tier.name}
+                className={`w-full h-full object-contain ${tier.scale || 'scale-100'} drop-shadow-[0_4px_12px_rgba(0,0,0,0.6)] transform hover:scale-115 transition-transform duration-200`}
+              />
+            </div>
             <div className="text-left">
               <span className={`text-sm font-black font-sans block leading-tight ${tier.text}`}>{tier.name}</span>
               <span className="text-[11px] text-slate-400 font-bold">{tier.title}</span>

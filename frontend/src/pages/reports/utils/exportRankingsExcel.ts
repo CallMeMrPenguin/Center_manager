@@ -15,26 +15,13 @@ export async function exportRankingsExcel({
   try {
     const ExcelJS = (await import('exceljs')).default;
     const workbook = new ExcelJS.Workbook();
-    const headers = ['STT', 'Họ và Tên', 'Lớp Học', 'Buổi Học', 'Điểm Danh %', 'Từ Vựng', 'Ngữ Pháp', 'Homework', 'Hạng', 'Đánh Giá'];
-
-    const rankImages: Record<number, number> = {};
-    for (let t = 1; t <= 8; t++) {
-      try {
-        const resp = await fetch(`/ranks/tier_${t}.png`);
-        if (resp.ok) {
-          const blob = await resp.blob();
-          const arrayBuffer = await blob.arrayBuffer();
-          const imageId = workbook.addImage({ buffer: arrayBuffer, extension: 'png' });
-          rankImages[t] = imageId;
-        }
-      } catch { }
-    }
+    // Headers without Rank ('Hạng') column
+    const headers = ['STT', 'Họ và Tên', 'Lớp Học', 'Buổi Học', 'Điểm Danh %', 'Từ Vựng', 'Ngữ Pháp', 'Homework', 'Đánh Giá'];
 
     const addClassSheet = (sheetName: string, items: any[]) => {
       const safeName = sheetName.replace(/[\*\?:\/\\\[\]]/g, '').slice(0, 31) || 'Lớp';
       const worksheet = workbook.addWorksheet(safeName);
 
-      const tierObjs: any[] = [];
       const rows = items.map((r) => {
         const present = r.present_count ?? 0;
         const total = r.total_sessions ?? 0;
@@ -44,13 +31,8 @@ export async function exportRankingsExcel({
         const hw = Number(r.avg_homework || 0);
         const valid = [c1, c2, hw].filter(v => v > 0);
         let evalStr = 'Chưa có điểm';
-        let tierStr = 'Chưa xếp hạng';
-        let currentTier: any = null;
         if (valid.length > 0) {
           const avg = trunc1Dec(valid.reduce((a, b) => a + b, 0) / valid.length);
-          const tier = getStudentTier(avg);
-          currentTier = tier;
-          tierStr = `       ${tier.name} (${tier.title})`;
           let label = 'Xuất Sắc';
           if (avg >= 9.7) label = 'Xuất Chúng';
           else if (avg >= 9.4) label = 'Vượt Trội';
@@ -62,7 +44,6 @@ export async function exportRankingsExcel({
           else label = 'Yếu';
           evalStr = `${label} (${format1Dec(avg)})`;
         }
-        tierObjs.push(currentTier);
 
         return [
           { formula: 'ROW()-1' },
@@ -73,7 +54,6 @@ export async function exportRankingsExcel({
           c1 > 0 ? format1Dec(c1) : '-',
           c2 > 0 ? format1Dec(c2) : '-',
           hw > 0 ? format1Dec(hw) : '-',
-          tierStr,
           evalStr
         ];
       });
@@ -104,18 +84,6 @@ export async function exportRankingsExcel({
             cell.alignment = { vertical: 'middle', horizontal: 'center' };
             if (typeof cell.value === 'number' && !Number.isInteger(cell.value)) cell.numFmt = '0.0';
           });
-          if (!isHeader) {
-            const rIdx = rowNumber - 2;
-            const tObj = tierObjs[rIdx];
-            if (tObj && rankImages[tObj.tier] !== undefined) {
-              try {
-                worksheet.addImage(rankImages[tObj.tier], {
-                  tl: { col: 8.08, row: rowNumber - 1 + 0.12 },
-                  ext: { width: 22, height: 22 },
-                });
-              } catch { }
-            }
-          }
         });
 
         worksheet.columns.forEach((col, colIdx) => {
