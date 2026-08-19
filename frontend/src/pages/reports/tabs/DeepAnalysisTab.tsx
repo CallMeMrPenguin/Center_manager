@@ -83,58 +83,68 @@ export const DeepAnalysisTab: React.FC<DeepAnalysisTabProps> = ({
 
       {/* 2. SUB-TAB CONTENT VIEWS */}
       {activeSubTab === 'warnings' && (
-        <div className="space-y-6 animate-cascade-1">
+        <div key="warnings-subtab" className="space-y-6">
           {/* 1. 8-TIER ACADEMIC RANKING DISTRIBUTION */}
-          <TierDistributionCard
-            studentRankings={studentRankings}
-            selectedClassId={selectedClassId}
-            selectedDistFilter={selectedDistFilter}
-            setSelectedDistFilter={setSelectedDistFilter}
-          />
+          <div className="animate-cascade-1">
+            <TierDistributionCard
+              studentRankings={studentRankings}
+              selectedClassId={selectedClassId}
+              selectedDistFilter={selectedDistFilter}
+              setSelectedDistFilter={setSelectedDistFilter}
+            />
+          </div>
 
           {/* 2. EARLY WARNING ALERT SYSTEM */}
-          <EarlyWarningSection
-            loading={loading}
-            studentRankings={studentRankings}
-            sessionRecords={sessionRecords}
-            selectedClassId={selectedClassId}
-            warningAbsentPct={warningAbsentPct}
-            warningConsecutiveAbsent={warningConsecutiveAbsent}
-            warningTrendThreshold={warningTrendThreshold}
-            showWarningSettings={showWarningSettings}
-            setShowWarningSettings={setShowWarningSettings}
-            onUpdateWarningSettings={onUpdateWarningSettings}
-            onSelectRankingStudent={onSelectRankingStudent}
-          />
+          <div className="animate-cascade-2">
+            <EarlyWarningSection
+              loading={loading}
+              studentRankings={studentRankings}
+              sessionRecords={sessionRecords}
+              selectedClassId={selectedClassId}
+              warningAbsentPct={warningAbsentPct}
+              warningConsecutiveAbsent={warningConsecutiveAbsent}
+              warningTrendThreshold={warningTrendThreshold}
+              showWarningSettings={showWarningSettings}
+              setShowWarningSettings={setShowWarningSettings}
+              onUpdateWarningSettings={onUpdateWarningSettings}
+              onSelectRankingStudent={onSelectRankingStudent}
+            />
+          </div>
         </div>
       )}
 
       {activeSubTab === 'pedagogy' && (
-        <div className="space-y-6 animate-cascade-1">
+        <div key="pedagogy-subtab" className="space-y-6">
           {/* 3. SMART PEDAGOGICAL LEVEL GROUPING */}
-          <SmartGroupingSection
-            filteredRankings={filteredRankings}
-            studentRankings={studentRankings}
-            classes={classes}
-            selectedClassId={selectedClassId}
-            onSelectRankingStudent={onSelectRankingStudent}
-          />
+          <div className="animate-cascade-1">
+            <SmartGroupingSection
+              filteredRankings={filteredRankings}
+              studentRankings={studentRankings}
+              classes={classes}
+              selectedClassId={selectedClassId}
+              onSelectRankingStudent={onSelectRankingStudent}
+            />
+          </div>
 
           {/* 4. SCORE FLUCTUATIONS & VARIATIONS TABLE */}
-          <ScoreFluctuationsSection
-            loading={loading}
-            studentRankings={studentRankings}
-            sessionRecords={sessionRecords}
-            selectedClassId={selectedClassId}
-            selectedStudentId={selectedStudentId}
-            onSelectRankingStudent={onSelectRankingStudent}
-          />
+          <div className="animate-cascade-2">
+            <ScoreFluctuationsSection
+              loading={loading}
+              studentRankings={studentRankings}
+              sessionRecords={sessionRecords}
+              selectedClassId={selectedClassId}
+              selectedStudentId={selectedStudentId}
+              onSelectRankingStudent={onSelectRankingStudent}
+            />
+          </div>
 
           {/* 5. LEARNING BOTTLENECKS SCANNER */}
-          <LearningBottlenecksSection
-            studentRankings={studentRankings}
-            selectedClassId={selectedClassId}
-          />
+          <div className="animate-cascade-3">
+            <LearningBottlenecksSection
+              studentRankings={studentRankings}
+              selectedClassId={selectedClassId}
+            />
+          </div>
         </div>
       )}
     </div>
