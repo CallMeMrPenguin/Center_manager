@@ -219,13 +219,13 @@ export const StudentRankingsTable: React.FC<StudentRankingsTableProps> = ({
           if (valid.length === 0) return 'Chưa có điểm';
           const avg = trunc1Dec(valid.reduce((a, b) => a + b, 0) / valid.length);
           let label = 'Xuất Sắc';
-          if (avg >= 9.7) label = 'Xuất Chúng';
-          else if (avg >= 9.4) label = 'Vượt Trội';
-          else if (avg >= 9.0) label = 'Ưu Tú';
-          else if (avg >= 8.5) label = 'Xuất Sắc';
-          else if (avg >= 7.5) label = 'Giỏi';
-          else if (avg >= 6.5) label = 'Khá';
-          else if (avg >= 5.0) label = 'Trung Bình';
+          if (avg >= 9.6) label = 'Xuất Chúng';
+          else if (avg >= 9.2) label = 'Vượt Trội';
+          else if (avg >= 8.7) label = 'Ưu Tú';
+          else if (avg >= 8.0) label = 'Xuất Sắc';
+          else if (avg >= 7.0) label = 'Giỏi';
+          else if (avg >= 6.0) label = 'Khá';
+          else if (avg >= 4.6) label = 'Trung Bình';
           else label = 'Yếu';
           return `${label} (${format1Dec(avg)})`;
         }

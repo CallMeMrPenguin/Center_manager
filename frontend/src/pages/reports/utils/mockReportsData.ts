@@ -95,7 +95,7 @@ export function computeDatasetFromRecords(
       trend_label: trendLabel,
       performance_index: trunc1Dec(overallAvg * 10),
       consistency_score: 90.0,
-      rating_label: ema >= 9.7 ? 'Xuất Chúng' : ema >= 9.4 ? 'Vượt Trội' : ema >= 9.0 ? 'Ưu Tú' : ema >= 8.5 ? 'Xuất Sắc' : ema >= 7.5 ? 'Giỏi' : ema >= 6.5 ? 'Khá' : ema >= 5.0 ? 'Trung Bình' : 'Yếu',
+      rating_label: ema >= 9.6 ? 'Xuất Chúng' : ema >= 9.2 ? 'Vượt Trội' : ema >= 8.7 ? 'Ưu Tú' : ema >= 8.0 ? 'Xuất Sắc' : ema >= 7.0 ? 'Giỏi' : ema >= 6.0 ? 'Khá' : ema >= 4.6 ? 'Trung Bình' : 'Yếu',
       predicted_next: trunc1Dec(Math.min(10.0, Math.max(1.0, ema + 0.1))),
       std_dev: 0.4,
     });

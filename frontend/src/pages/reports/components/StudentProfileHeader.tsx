@@ -79,12 +79,13 @@ export const StudentProfileHeader: React.FC<StudentProfileHeaderProps> = ({
     if (student.rating_label) {
       return { text: student.rating_label, color: 'text-emerald-400' };
     }
-    if (score >= 9.5 || piVal >= 95) return { text: 'Xuất Chúng (Vững Vàng)', color: 'text-amber-400' };
-    if (score >= 9.0 || piVal >= 90) return { text: 'Vượt Trội (Ưu Tú)', color: 'text-rose-400' };
-    if (score >= 8.5 || piVal >= 85) return { text: 'Xuất Sắc (Tiến Bộ Nhanh)', color: 'text-purple-400' };
-    if (score >= 8.0 || piVal >= 80) return { text: 'Giỏi (Nắm Chắc)', color: 'text-cyan-400' };
-    if (score >= 7.0 || piVal >= 70) return { text: 'Khá (Đang Tiến Bộ)', color: 'text-blue-400' };
-    if (score >= 5.5 || piVal >= 55) return { text: 'Trung Bình (Cần Củng Cố)', color: 'text-amber-400' };
+    if (score >= 9.6 || piVal >= 96) return { text: 'Xuất Chúng (Vững Vàng)', color: 'text-amber-400' };
+    if (score >= 9.2 || piVal >= 92) return { text: 'Vượt Trội (Ưu Tú)', color: 'text-rose-400' };
+    if (score >= 8.7 || piVal >= 87) return { text: 'Ưu Tú (Tiến Bộ Nhanh)', color: 'text-purple-400' };
+    if (score >= 8.0 || piVal >= 80) return { text: 'Xuất Sắc (Nắm Chắc)', color: 'text-cyan-400' };
+    if (score >= 7.0 || piVal >= 70) return { text: 'Giỏi (Đang Tiến Bộ)', color: 'text-blue-400' };
+    if (score >= 6.0 || piVal >= 60) return { text: 'Khá (Đang Tiến Bộ)', color: 'text-blue-400' };
+    if (score >= 4.6 || piVal >= 46) return { text: 'Trung Bình (Cần Củng Cố)', color: 'text-amber-400' };
     if (score > 0) return { text: 'Yếu (Cần Phụ Đạo)', color: 'text-rose-400' };
     return { text: 'Chưa Đánh Giá', color: 'text-slate-400' };
   };
