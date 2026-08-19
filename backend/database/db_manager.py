@@ -2558,9 +2558,22 @@ def get_analytics_reports(class_id: Optional[int] = None, student_id: Optional[i
                 c2_info = cfg.get("check_2") or {}
                 c1_skill = c1_info.get("skill") or "vocab"
                 c2_skill = c2_info.get("skill") or "grammar"
-                c1_topic = c1_info.get("topic") or (", ".join(c1_info.get("units", [])) if c1_info.get("units") else "")
-                c2_topic = c2_info.get("grammar_topic") or c2_info.get("topic") or (", ".join(c2_info.get("units", [])) if c2_info.get("units") else "")
-                grammar_topic = c2_topic if c2_skill == "grammar" else c1_topic
+                if c1_skill == "grammar":
+                    c1_topic = c1_info.get("grammar_topic") or c1_info.get("topic") or (", ".join(c1_info.get("units", [])) if c1_info.get("units") else "")
+                else:
+                    c1_topic = c1_info.get("topic") or (", ".join(c1_info.get("units", [])) if c1_info.get("units") else "")
+
+                if c2_skill == "grammar":
+                    c2_topic = c2_info.get("grammar_topic") or c2_info.get("topic") or (", ".join(c2_info.get("units", [])) if c2_info.get("units") else "")
+                else:
+                    c2_topic = c2_info.get("topic") or (", ".join(c2_info.get("units", [])) if c2_info.get("units") else "")
+
+                if c2_skill == "grammar" and c2_topic:
+                    grammar_topic = c2_topic
+                elif c1_skill == "grammar" and c1_topic:
+                    grammar_topic = c1_topic
+                else:
+                    grammar_topic = ""
                 topic = c1_topic or c2_topic or (", ".join(c1_info.get("units", []) + c2_info.get("units", [])))
             except Exception:
                 pass

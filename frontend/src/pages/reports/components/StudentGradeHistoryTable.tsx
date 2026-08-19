@@ -91,13 +91,14 @@ export const StudentGradeHistoryTable: React.FC<StudentGradeHistoryTableProps> =
     },
     {
       accessorKey: 'check_1',
-      header: () => <div className="text-center w-full">Từ Vựng</div>,
-      meta: { headerText: 'Từ Vựng', exportValue: (r: any) => Number(r.check_1) > 0 ? format1Dec(Number(r.check_1)) : '-' },
+      header: () => <div className="text-center w-full">Check 1</div>,
+      meta: { headerText: 'Check 1', exportValue: (r: any) => Number(r.check_1) > 0 ? format1Dec(Number(r.check_1)) : '-' },
       cell: ({ row }) => {
         const r = row.original;
         const val = Number(r.check_1) || 0;
-        const topic = r.check_1_topic || r.topic;
+        const topic = r.check_1_topic || (r.check_1_skill === 'grammar' ? r.grammar_topic : r.topic);
         const skill = r.check_1_skill || (r.check_1_test_type ? (r.check_1_test_type === 'grammar' ? 'Ngữ pháp' : r.check_1_test_type === 'vocab' ? 'Từ vựng' : 'Tổng hợp') : 'Từ vựng');
+        const skillLabel = skill === 'vocab' ? 'Từ Vựng' : skill === 'grammar' ? 'Ngữ Pháp' : skill === 'mixed' ? 'Tổng Hợp' : skill === 'mock_test' ? 'Luyện Đề' : skill;
         return (
           <div className="text-center py-0.5">
             <div className="font-extrabold text-blue-400 font-mono text-base leading-tight">
@@ -109,7 +110,7 @@ export const StudentGradeHistoryTable: React.FC<StudentGradeHistoryTableProps> =
                   {topic}
                 </span>
                 <span className="text-[9px] px-1.5 py-0.2 rounded bg-blue-500/15 text-blue-300 border border-blue-500/30 font-semibold mt-0.5">
-                  {skill === 'vocab' ? 'Từ Vựng' : skill === 'grammar' ? 'Ngữ Pháp' : skill}
+                  {skillLabel}
                 </span>
               </div>
             )}
@@ -119,13 +120,14 @@ export const StudentGradeHistoryTable: React.FC<StudentGradeHistoryTableProps> =
     },
     {
       accessorKey: 'check_2',
-      header: () => <div className="text-center w-full">Ngữ Pháp</div>,
-      meta: { headerText: 'Ngữ Pháp', exportValue: (r: any) => Number(r.check_2) > 0 ? format1Dec(Number(r.check_2)) : '-' },
+      header: () => <div className="text-center w-full">Check 2</div>,
+      meta: { headerText: 'Check 2', exportValue: (r: any) => Number(r.check_2) > 0 ? format1Dec(Number(r.check_2)) : '-' },
       cell: ({ row }) => {
         const r = row.original;
         const val = Number(r.check_2) || 0;
-        const topic = r.check_2_topic || r.grammar_topic;
+        const topic = r.check_2_topic || (r.check_2_skill === 'vocab' ? r.topic : r.grammar_topic);
         const skill = r.check_2_skill || (r.check_2_test_type ? (r.check_2_test_type === 'vocab' ? 'Từ vựng' : r.check_2_test_type === 'grammar' ? 'Ngữ pháp' : 'Tổng hợp') : 'Ngữ pháp');
+        const skillLabel = skill === 'grammar' ? 'Ngữ Pháp' : skill === 'vocab' ? 'Từ Vựng' : skill === 'mixed' ? 'Tổng Hợp' : skill === 'mock_test' ? 'Luyện Đề' : skill;
         return (
           <div className="text-center py-0.5">
             <div className="font-extrabold text-purple-400 font-mono text-base leading-tight">
@@ -137,7 +139,7 @@ export const StudentGradeHistoryTable: React.FC<StudentGradeHistoryTableProps> =
                   {topic}
                 </span>
                 <span className="text-[9px] px-1.5 py-0.2 rounded bg-purple-500/15 text-purple-300 border border-purple-500/30 font-semibold mt-0.5">
-                  {skill === 'grammar' ? 'Ngữ Pháp' : skill === 'vocab' ? 'Từ Vựng' : skill}
+                  {skillLabel}
                 </span>
               </div>
             )}
@@ -152,7 +154,7 @@ export const StudentGradeHistoryTable: React.FC<StudentGradeHistoryTableProps> =
       cell: ({ row }) => {
         const r = row.original;
         const val = Number(r.homework) || 0;
-        const topic = r.homework_topic || (r.topic ? `BTVN ${r.topic}` : '');
+        const topic = r.homework_topic || '';
         return (
           <div className="text-center py-0.5">
             <div className="font-extrabold text-emerald-400 font-mono text-base leading-tight">
