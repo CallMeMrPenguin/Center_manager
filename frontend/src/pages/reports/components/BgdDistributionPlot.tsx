@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { BgdDistributionStats } from '../utils/bgdAnalytics';
+import { BgdDistributionStats, GradeTypeFilterKey } from '../utils/bgdAnalytics';
 import { BgdDetailedCommentaryCard } from './BgdDetailedCommentaryCard';
 import { format1Dec } from '../../../utils';
 
@@ -7,6 +7,8 @@ interface BgdDistributionPlotProps {
   stats: BgdDistributionStats;
   selectedStudentId?: string;
   selectedClassId?: string;
+  selectedGradeTypeFilter: GradeTypeFilterKey;
+  setSelectedGradeTypeFilter: (key: GradeTypeFilterKey) => void;
   isTestMode?: boolean;
 }
 
@@ -14,6 +16,8 @@ export const BgdDistributionPlot: React.FC<BgdDistributionPlotProps> = ({
   stats,
   selectedStudentId,
   selectedClassId,
+  selectedGradeTypeFilter,
+  setSelectedGradeTypeFilter,
   isTestMode,
 }) => {
   const [hoveredBinScore, setHoveredBinScore] = useState<number | null>(null);
@@ -21,21 +25,47 @@ export const BgdDistributionPlot: React.FC<BgdDistributionPlotProps> = ({
   const maxBinCount = Math.max(1, ...stats.scoreBins.map((b) => b.count));
   const hoveredBin = stats.scoreBins.find((b) => b.score === hoveredBinScore);
 
+  const filterTabs: { id: GradeTypeFilterKey; label: string }[] = [
+    { id: 'overall', label: 'Tất Cả (Tổng Hợp)' },
+    { id: 'check_1', label: isTestMode ? 'Từ Vựng (Check 1)' : 'Check 1 (Từ Vựng)' },
+    { id: 'check_2', label: isTestMode ? 'Ngữ Pháp (Check 2)' : 'Check 2 (Ngữ Pháp)' },
+    { id: 'homework', label: 'Homework (BTVN)' },
+    { id: 'mock_test', label: 'Luyện Đề (Mock Test)' },
+  ];
+
+  const activeTabIndex = filterTabs.findIndex((t) => t.id === selectedGradeTypeFilter);
+
   return (
     <div className="flex flex-col gap-6 select-none animate-cascade-2">
-      {/* 1. TOP SUMMARY BAR & EDUCATIONAL ZONES */}
+      {/* 1. TOP CONTROLS: Skill/Test-type Segmented Pill Control */}
       <div className="flex flex-wrap items-center justify-between gap-4 pb-2 border-b border-white/10">
-        <div className="flex items-center gap-3">
-          <span className="text-xs font-black uppercase tracking-wider text-slate-200">
-            PHỔ ĐIỂM HỌC LỰC TOÀN DIỆN (CHUẨN BỘ GIÁO DỤC)
-          </span>
-          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">
-            21 Thang Điểm (0.0 - 10.0)
-          </span>
+        {/* Sliding Pill Indicator for Grade Type Filter */}
+        <div className="relative flex bg-[#0c101d] border border-[#1e2947] p-1 rounded-xl text-xs font-black select-none w-full lg:w-auto min-w-[580px] shrink-0">
+          <div
+            className="absolute top-1 bottom-1 rounded-lg bg-[#5c36f5] shadow-[0_0_14px_rgba(92,54,245,0.5)] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] pointer-events-none"
+            style={{
+              left: `calc((100% / 5) * ${activeTabIndex} + 2px)`,
+              width: 'calc((100% / 5) - 4px)',
+            }}
+          />
+          {filterTabs.map((tab) => (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => setSelectedGradeTypeFilter(tab.id)}
+              className={`flex-1 relative z-10 py-1.5 px-2 text-center transition-colors cursor-pointer whitespace-nowrap ${
+                selectedGradeTypeFilter === tab.id
+                  ? 'text-white font-black'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
         </div>
 
         {/* 4 Academic Tier Badges */}
-        <div className="flex flex-wrap items-center gap-3 text-[11px] font-bold">
+        <div className="flex flex-wrap items-center gap-3.5 text-[11px] font-bold">
           <span className="flex items-center gap-1.5 text-rose-400">
             <span className="w-2.5 h-2.5 rounded-sm bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.6)]" />
             Yếu &lt;5.0 ({stats.bands[0].pct}%)
@@ -69,11 +99,11 @@ export const BgdDistributionPlot: React.FC<BgdDistributionPlotProps> = ({
 
           {/* Dotted Lines for Mean & Median */}
           <div
-            className="absolute top-6 bottom-8 w-0.5 border-l-2 border-dashed border-cyan-400/70 z-20 pointer-events-none"
+            className="absolute top-6 bottom-8 w-0.5 border-l-2 border-dashed border-cyan-400/80 z-20 pointer-events-none"
             style={{ left: `calc(1rem + ${(stats.mean / 10) * 100}% * ((100% - 2rem) / 100))` }}
           >
-            <span className="absolute -top-5 left-1 text-[10px] font-black text-cyan-400 font-mono whitespace-nowrap">
-              Mean: {format1Dec(stats.mean)}
+            <span className="absolute -top-5 left-1 text-[10px] font-black text-cyan-400 font-mono whitespace-nowrap bg-[#0a0e1c] px-1 rounded border border-cyan-500/30">
+              TB: {format1Dec(stats.mean)}đ
             </span>
           </div>
 
@@ -81,8 +111,8 @@ export const BgdDistributionPlot: React.FC<BgdDistributionPlotProps> = ({
             className="absolute top-6 bottom-8 w-0.5 border-l-2 border-amber-400 z-20 pointer-events-none shadow-[0_0_10px_rgba(245,158,11,0.8)]"
             style={{ left: `calc(1rem + ${(stats.median / 10) * 100}% * ((100% - 2rem) / 100))` }}
           >
-            <span className="absolute -top-5 right-1 text-[10px] font-black text-amber-400 font-mono whitespace-nowrap">
-              Median: {format1Dec(stats.median)}
+            <span className="absolute -top-5 right-1 text-[10px] font-black text-amber-400 font-mono whitespace-nowrap bg-[#0a0e1c] px-1 rounded border border-amber-500/30">
+              Trung vị: {format1Dec(stats.median)}đ
             </span>
           </div>
 
@@ -98,7 +128,7 @@ export const BgdDistributionPlot: React.FC<BgdDistributionPlotProps> = ({
                 onMouseLeave={() => setHoveredBinScore(null)}
                 className="flex-1 flex flex-col items-center justify-end h-full relative cursor-pointer group"
               >
-                {/* Floating Top Number on Hover or if active */}
+                {/* Floating Top Number on Hover */}
                 {bin.count > 0 && (
                   <div
                     className={`mb-1 flex flex-col items-center transition-all ${
@@ -128,7 +158,7 @@ export const BgdDistributionPlot: React.FC<BgdDistributionPlotProps> = ({
                   </div>
                 </div>
 
-                {/* X-axis Tick Label (Shows on integers or highlighted) */}
+                {/* X-axis Tick Label */}
                 <span
                   className={`mt-2 text-[10px] font-mono block ${
                     Number.isInteger(bin.score)
@@ -168,7 +198,7 @@ export const BgdDistributionPlot: React.FC<BgdDistributionPlotProps> = ({
           )}
         </div>
 
-        {/* 3. SEAMLESS HORIZONTAL BOX PLOT (BIỂU ĐỒ HỘP BGD) */}
+        {/* 3. SEAMLESS HORIZONTAL BOX PLOT */}
         <div className="pt-2 border-t border-white/10 flex flex-col gap-3">
           <div className="flex flex-wrap items-center justify-between text-xs font-bold text-slate-300">
             <span className="uppercase tracking-wider text-indigo-300">
@@ -181,10 +211,9 @@ export const BgdDistributionPlot: React.FC<BgdDistributionPlotProps> = ({
 
           {/* Graphical Box-and-Whisker Track */}
           <div className="relative w-full h-8 flex items-center px-4 my-1">
-            {/* Base axis line 0 - 10 */}
             <div className="absolute left-4 right-4 h-1 bg-[#1a233a] rounded-full" />
 
-            {/* Whisker Line (Min to Max) */}
+            {/* Whisker Line */}
             <div
               className="absolute h-0.5 bg-indigo-400/60"
               style={{
@@ -202,24 +231,24 @@ export const BgdDistributionPlot: React.FC<BgdDistributionPlotProps> = ({
               }}
             >
               <span className="text-[10px] font-black text-indigo-200 font-mono">
-                IQR: {format1Dec(stats.iqr)}đ (50% lớp)
+                IQR: {format1Dec(stats.iqr)}đ (50% học sinh)
               </span>
             </div>
 
-            {/* Median Mark (Center Line) */}
+            {/* Median Mark */}
             <div
               className="absolute h-8 w-1 bg-amber-400 rounded-full shadow-[0_0_10px_rgba(245,158,11,0.9)] z-20"
               style={{
                 left: `calc(1rem + ${(stats.median / 10) * 100}% * ((100% - 2rem) / 100))`,
                 transform: 'translateX(-50%)',
               }}
-              title={`Trung vị (Median): ${format1Dec(stats.median)}đ`}
+              title={`Trung vị: ${format1Dec(stats.median)}đ`}
             />
           </div>
         </div>
       </div>
 
-      {/* 4. COMPREHENSIVE COMMENTARY CARD (CLEAN SINGLE VISUAL BOUNDARY) */}
+      {/* 4. COMPREHENSIVE COMMENTARY CARD */}
       <BgdDetailedCommentaryCard
         evaluation={stats.evaluation}
         distributionRating={stats.distributionRating}

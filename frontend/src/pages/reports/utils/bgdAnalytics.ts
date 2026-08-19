@@ -1,5 +1,7 @@
 import { trunc1Dec, format1Dec } from '../../../utils';
 
+export type GradeTypeFilterKey = 'overall' | 'check_1' | 'check_2' | 'homework' | 'mock_test';
+
 export interface BgdDistributionBand {
   id: string;
   name: string;
@@ -37,6 +39,7 @@ export interface BgdMetricItem {
 
 export interface BgdDetailedEvaluation {
   subjectTitle: string;
+  skillName: string;
   metrics: BgdMetricItem[];
   conclusion: {
     overviewSummary: string;
@@ -131,55 +134,73 @@ export function computeBgdDistribution(
   sessionRecords: any[],
   studentRankings: any[],
   selectedStudentId?: string,
-  className?: string
+  className?: string,
+  gradeTypeFilter: GradeTypeFilterKey = 'overall',
+  isTestMode?: boolean
 ): BgdDistributionStats {
   const scores: number[] = [];
+
+  const getRecordScore = (r: any): number | null => {
+    if (gradeTypeFilter === 'check_1') {
+      const v = Number(r.check_1);
+      return v > 0 ? v : null;
+    }
+    if (gradeTypeFilter === 'check_2') {
+      const v = Number(r.check_2);
+      return v > 0 ? v : null;
+    }
+    if (gradeTypeFilter === 'homework') {
+      const v = Number(r.homework);
+      return v > 0 ? v : null;
+    }
+    if (gradeTypeFilter === 'mock_test') {
+      const v = Number(r.mock_test);
+      if (v > 0) return v;
+      if (r.grade_type === 'Luyện Đề' || r.session_type === 'mock_test') {
+        const c2 = Number(r.check_2);
+        if (c2 > 0) return c2;
+      }
+      return null;
+    }
+    // Overall weighted score
+    const c1 = Number(r.check_1 || 0);
+    const c2 = Number(r.check_2 || 0);
+    const hw = Number(r.homework || 0);
+    const mock = Number(r.mock_test || 0);
+    if (mock > 0) return mock;
+    if (c1 > 0 || c2 > 0 || hw > 0) {
+      return trunc1Dec(c1 * 0.35 + c2 * 0.55 + hw * 0.1);
+    }
+    return null;
+  };
 
   if (selectedStudentId) {
     const sidStr = String(selectedStudentId);
     sessionRecords.forEach((r) => {
       if (String(r.student_id) === sidStr && r.status !== 'Vắng mặt' && r.attendance !== 'absent') {
-        const c1 = Number(r.check_1 || 0);
-        const c2 = Number(r.check_2 || 0);
-        const hw = Number(r.homework || 0);
-        const mock = Number(r.mock_test || 0);
-
-        if (mock > 0) {
-          scores.push(mock);
-        } else {
-          if (c1 > 0) scores.push(c1);
-          if (c2 > 0) scores.push(c2);
-          if (hw > 0) scores.push(hw);
-        }
+        const val = getRecordScore(r);
+        if (val !== null && val > 0) scores.push(val);
       }
     });
   } else {
-    // Extract individual scores from all sessions to build a rich, detailed distribution
     if (sessionRecords && sessionRecords.length > 0) {
       sessionRecords.forEach((r) => {
         if (r.status !== 'Vắng mặt' && r.attendance !== 'absent') {
-          const c1 = Number(r.check_1 || 0);
-          const c2 = Number(r.check_2 || 0);
-          const hw = Number(r.homework || 0);
-          const mock = Number(r.mock_test || 0);
-
-          if (mock > 0) {
-            scores.push(mock);
-          } else {
-            if (c1 > 0) scores.push(c1);
-            if (c2 > 0) scores.push(c2);
-            if (hw > 0) scores.push(hw);
-          }
+          const val = getRecordScore(r);
+          if (val !== null && val > 0) scores.push(val);
         }
       });
     }
 
-    // Fallback to student rankings if sessionRecords had no score values
     if (scores.length === 0 && studentRankings && studentRankings.length > 0) {
       studentRankings.forEach((s) => {
-        if (Number(s.avg_check_1 || 0) > 0) scores.push(Number(s.avg_check_1));
-        if (Number(s.avg_check_2 || 0) > 0) scores.push(Number(s.avg_check_2));
-        if (Number(s.avg_homework || 0) > 0) scores.push(Number(s.avg_homework));
+        if (gradeTypeFilter === 'check_1' && Number(s.avg_check_1 || 0) > 0) scores.push(Number(s.avg_check_1));
+        else if (gradeTypeFilter === 'check_2' && Number(s.avg_check_2 || 0) > 0) scores.push(Number(s.avg_check_2));
+        else if (gradeTypeFilter === 'homework' && Number(s.avg_homework || 0) > 0) scores.push(Number(s.avg_homework));
+        else {
+          const sc = s.ema_level && Number(s.ema_level) > 0 ? Number(s.ema_level) : trunc1Dec((Number(s.avg_check_1 || 0) * 0.35) + (Number(s.avg_check_2 || 0) * 0.55) + (Number(s.avg_homework || 0) * 0.1));
+          if (sc > 0) scores.push(sc);
+        }
       });
     }
   }
@@ -240,16 +261,9 @@ export function computeBgdDistribution(
     const count = scores.filter((v) => Math.abs(v - binScore) < 0.25).length;
     let color = '#f43f5e';
     let bandId = 'weak';
-    if (binScore >= 8.0) {
-      color = '#10b981';
-      bandId = 'excellent';
-    } else if (binScore >= 6.5) {
-      color = '#06b6d4';
-      bandId = 'good';
-    } else if (binScore >= 5.0) {
-      color = '#f59e0b';
-      bandId = 'average';
-    }
+    if (binScore >= 8.0) { color = '#10b981'; bandId = 'excellent'; }
+    else if (binScore >= 6.5) { color = '#06b6d4'; bandId = 'good'; }
+    else if (binScore >= 5.0) { color = '#f59e0b'; bandId = 'average'; }
 
     scoreBins.push({
       score: binScore,
@@ -261,7 +275,7 @@ export function computeBgdDistribution(
     });
   }
 
-  // Bell curve calculation
+  // Bell curve points
   const curvePoints: { x: number; y: number }[] = [];
   const effectiveSd = Math.max(0.6, sd);
   for (let s = 0; s <= 10.0; s += 0.2) {
@@ -270,43 +284,38 @@ export function computeBgdDistribution(
     curvePoints.push({ x: s, y: density });
   }
 
-  let skewnessLabel = 'Phân bố cân đối';
-  if (skewness > 0.15) {
-    skewnessLabel = 'Lệch phải (Top điểm cao kéo TB lên)';
-  } else if (skewness < -0.15) {
-    skewnessLabel = 'Lệch trái (Nhóm điểm thấp kéo TB xuống)';
-  }
+  const skillName = gradeTypeFilter === 'check_1' ? (isTestMode ? 'Từ Vựng (Check 1)' : 'Check 1 (Từ Vựng)')
+    : gradeTypeFilter === 'check_2' ? (isTestMode ? 'Ngữ Pháp (Check 2)' : 'Check 2 (Ngữ Pháp)')
+    : gradeTypeFilter === 'homework' ? 'Homework (BTVN)'
+    : gradeTypeFilter === 'mock_test' ? 'Luyện Đề (Mock Test)'
+    : 'Tổng Hợp Tất Cả Đầu Điểm';
 
-  let sdLabel = 'Phân hóa vừa phải (Bình thường)';
-  if (sd < 1.0) {
-    sdLabel = 'Đồng đều cao (Ít chênh lệch)';
-  } else if (sd > 2.0) {
-    sdLabel = 'Phân hóa rất mạnh (Chênh lệch lớn)';
-  }
+  let skewnessLabel = 'Phân bố cân đối';
+  if (skewness > 0.15) skewnessLabel = 'Lệch phải (Top điểm cao kéo TB lên)';
+  else if (skewness < -0.15) skewnessLabel = 'Lệch trái (Nhóm điểm thấp kéo TB xuống)';
+
+  let sdLabel = 'Phân hóa vừa phải (Ổn định)';
+  if (sd < 1.0) sdLabel = 'Đồng đều cao (Ít chênh lệch)';
+  else if (sd > 2.0) sdLabel = 'Phân hóa rất mạnh (Chênh lệch lớn)';
 
   const iqrLabel = `Vùng 50% học sinh tập trung: ${format1Dec(q1)} - ${format1Dec(q3)}đ`;
   let distributionShape = 'Phân phối chuẩn đối xứng';
   let distributionRating = 'Chất Lượng Tốt';
 
-  if (passPct < 70) {
-    distributionRating = 'Cần Can Thiệp Khẩn';
-  } else if (excellentPct >= 40 && passPct >= 90) {
-    distributionRating = 'Xuất Sắc Vượt Trội';
-  } else if (passPct >= 85) {
-    distributionRating = 'Đạt Chuẩn Tốt';
-  } else {
-    distributionRating = 'Cần Củng Cố';
-  }
+  if (passPct < 70) distributionRating = 'Cần Can Thiệp Khẩn';
+  else if (excellentPct >= 40 && passPct >= 90) distributionRating = 'Xuất Sắc Vượt Trội';
+  else if (passPct >= 85) distributionRating = 'Đạt Chuẩn Tốt';
+  else distributionRating = 'Cần Củng Cố';
 
   // Metrics point-by-point
   const metrics: BgdMetricItem[] = [];
 
   let meanInsight = '';
-  if (mean >= 8.5) meanInsight = 'kết quả xuất sắc vượt trội, mặt bằng kiến thức toàn diện và rất vững vàng.';
-  else if (mean >= 8.0) meanInsight = 'kết quả giỏi, phần lớn học sinh nắm chắc các chủ điểm kiến thức cốt lõi.';
-  else if (mean >= 6.5) meanInsight = 'kết quả khá, nhưng vẫn còn dư địa đáng kể để nâng cao chất lượng.';
-  else if (mean >= 5.0) meanInsight = 'kết quả trung bình, nhiều học sinh còn lúng túng ở các nội dung vận dụng.';
-  else meanInsight = 'kết quả dưới chuẩn yêu cầu, cần rà soát lại phương pháp giảng dạy và phụ đạo cấp tốc.';
+  if (mean >= 8.5) meanInsight = `kết quả ${skillName.toLowerCase()} xuất sắc vượt trội, học sinh nắm vững chắc toàn diện.`;
+  else if (mean >= 8.0) meanInsight = `kết quả ${skillName.toLowerCase()} giỏi, đa số học sinh nắm chắc kiến thức.`;
+  else if (mean >= 6.5) meanInsight = `kết quả ${skillName.toLowerCase()} khá, nhưng còn dư địa để nâng cao chất lượng.`;
+  else if (mean >= 5.0) meanInsight = `kết quả ${skillName.toLowerCase()} trung bình, học sinh còn lúng túng ở phần nâng cao.`;
+  else meanInsight = `kết quả ${skillName.toLowerCase()} dưới chuẩn, cần tăng cường phụ đạo chuyên sâu.`;
 
   metrics.push({
     id: 'mean',
@@ -314,19 +323,19 @@ export function computeBgdDistribution(
     value: format1Dec(mean),
     color: '#3b82f6',
     text: `Điểm trung bình ${format1Dec(mean)} → ${meanInsight}`,
-    tooltipTitle: 'Điểm Trung Bình (Mean)',
-    tooltipDesc: 'Mặt bằng chung toàn bộ điểm số của học sinh trong phạm vi đánh giá.',
-    tooltipFormula: 'Mean = (Tổng điểm của tất cả học sinh) / N',
-    tooltipImpact: 'Cho biết mức độ vừa sức tổng thể của đề thi so với năng lực chung của lớp.',
+    tooltipTitle: `Điểm Trung Bình ${skillName}`,
+    tooltipDesc: `Mặt bằng điểm số trung bình của toàn bộ học sinh đối với phần ${skillName}.`,
+    tooltipFormula: 'Mean = (Tổng điểm) / N',
+    tooltipImpact: 'Đo lường độ vừa sức của nội dung kiểm tra so với trình độ chung của lớp.',
   });
 
   let medianInsight = '';
   if (median > mean + 0.15) {
-    medianInsight = `Trung vị ${format1Dec(median)} > trung bình ${format1Dec(mean)} → có một số học sinh điểm thấp kéo điểm trung bình xuống; phân bố điểm hơi lệch trái. Học sinh điển hình thực chất có học lực cao hơn điểm TB phản ánh.`;
+    medianInsight = `Trung vị ${format1Dec(median)} > trung bình ${format1Dec(mean)} → có một số học sinh điểm thấp kéo điểm TB xuống; phân bố điểm hơi lệch trái. Học sinh điển hình thực chất có học lực cao hơn điểm TB phản ánh.`;
   } else if (median < mean - 0.15) {
-    medianInsight = `Trung vị ${format1Dec(median)} < trung bình ${format1Dec(mean)} → có nhóm học sinh xuất sắc kéo điểm trung bình lên; phân bố điểm hơi lệch phải. Thực tế quá nửa lớp đang có điểm dưới mức trung bình.`;
+    medianInsight = `Trung vị ${format1Dec(median)} < trung bình ${format1Dec(mean)} → có nhóm học sinh xuất sắc kéo điểm TB lên; phân bố điểm hơi lệch phải. Thực tế quá nửa lớp đang có điểm dưới mức trung bình.`;
   } else {
-    medianInsight = `Trung vị ${format1Dec(median)} ≈ trung bình ${format1Dec(mean)} → điểm trung bình và trung vị gần như tương đương; phân bố điểm đối xứng và đồng đều quanh tâm.`;
+    medianInsight = `Trung vị ${format1Dec(median)} ≈ trung bình ${format1Dec(mean)} → điểm trung bình và trung vị cân bằng; phân bố điểm đối xứng và đồng đều quanh tâm.`;
   }
 
   metrics.push({
@@ -335,22 +344,17 @@ export function computeBgdDistribution(
     value: format1Dec(median),
     color: '#a855f7',
     text: medianInsight,
-    tooltipTitle: 'Trung Vị Điểm Số (Median)',
-    tooltipDesc: 'Điểm số của học sinh đứng ở chính giữa bảng điểm khi xếp thứ tự tăng dần.',
-    tooltipFormula: 'Sắp xếp dãy điểm tăng dần, lấy giá trị phần tử ở vị trí 50%.',
-    tooltipImpact: 'Kháng nhiễu điểm số ngoại lai (outliers), phản ánh chính xác học sinh điển hình.',
+    tooltipTitle: `Trung Vị ${skillName}`,
+    tooltipDesc: `Mức điểm của học sinh đứng ở vị trí 50% chính giữa bảng điểm ${skillName}.`,
+    tooltipFormula: 'Sắp xếp dãy điểm tăng dần, lấy giá trị phần tử ở vị trí trung tâm 50%.',
+    tooltipImpact: 'Kháng nhiễu điểm số ngoại lai (outliers), phản ánh năng lực của học sinh điển hình.',
   });
 
   let sdInsight = '';
-  if (sd < 1.0) {
-    sdInsight = `SD = ${format1Dec(sd)} → điểm số có độ phân tán rất thấp, trình độ học sinh trong lớp cực kỳ đồng đều.`;
-  } else if (sd <= 1.8) {
-    sdInsight = `SD = ${format1Dec(sd)} → điểm số có độ phân tán vừa phải (chuẩn Bộ GD), mức độ phân hóa học lực tự nhiên và khỏe mạnh.`;
-  } else if (sd <= 2.5) {
-    sdInsight = `SD = ${format1Dec(sd)} → điểm số có độ phân tán tương đối rõ, trình độ học sinh không đồng đều.`;
-  } else {
-    sdInsight = `SD = ${format1Dec(sd)} → điểm số có độ phân tán rất lớn, học lực trong lớp bị phân cực sâu sắc.`;
-  }
+  if (sd < 1.0) sdInsight = `SD = ${format1Dec(sd)} → điểm số ${skillName.toLowerCase()} có độ phân tán rất thấp, học sinh làm bài cực kỳ đồng đều.`;
+  else if (sd <= 1.8) sdInsight = `SD = ${format1Dec(sd)} → điểm số ${skillName.toLowerCase()} có độ phân tán vừa phải, mức độ phân hóa học lực tự nhiên và khỏe mạnh.`;
+  else if (sd <= 2.5) sdInsight = `SD = ${format1Dec(sd)} → điểm số ${skillName.toLowerCase()} có độ phân tán tương đối rõ, trình độ học sinh không đồng đều.`;
+  else sdInsight = `SD = ${format1Dec(sd)} → điểm số ${skillName.toLowerCase()} có độ phân tán rất lớn, học lực bị phân cực sâu sắc.`;
 
   metrics.push({
     id: 'sd',
@@ -358,20 +362,16 @@ export function computeBgdDistribution(
     value: format1Dec(sd),
     color: '#06b6d4',
     text: sdInsight,
-    tooltipTitle: 'Độ Lệch Chuẩn (Standard Deviation - σ)',
-    tooltipDesc: 'Thước đo mức độ chênh lệch và dao động của từng điểm số so với điểm trung bình.',
+    tooltipTitle: `Độ Lệch Chuẩn ${skillName}`,
+    tooltipDesc: `Mức độ dao động và phân tán của điểm ${skillName} quanh điểm trung bình.`,
     tooltipFormula: 'σ = Căn bậc hai của Phương sai [Σ(xi - Mean)² / N]',
-    tooltipImpact: 'Đo lường trực tiếp mức độ đồng đều hay khoảng cách chênh lệch trình độ trong lớp.',
+    tooltipImpact: 'Đo lường mức độ đồng đều hay khoảng cách chênh lệch học lực trong lớp.',
   });
 
   let iqrInsight = '';
-  if (iqr < 1.2) {
-    iqrInsight = `IQR = ${format1Dec(iqr)} → 50% học sinh ở vùng điểm trung tâm tập trung trong khoảng hẹp (${format1Dec(iqr)} điểm, từ ${format1Dec(q1)} đến ${format1Dec(q3)}). Trình độ đa số học sinh rất tương đồng.`;
-  } else if (iqr <= 2.2) {
-    iqrInsight = `IQR = ${format1Dec(iqr)} → 50% học sinh ở vùng điểm trung tâm trải rộng khoảng ${format1Dec(iqr)} điểm (từ ${format1Dec(q1)} đến ${format1Dec(q3)}). Đây là mức phân tán tiêu chuẩn.`;
-  } else {
-    iqrInsight = `IQR = ${format1Dec(iqr)} → 50% học sinh ở vùng điểm trung tâm trải rộng tới ${format1Dec(iqr)} điểm (từ ${format1Dec(q1)} đến ${format1Dec(q3)}). Đây là mức phân tán đáng kể, cho thấy năng lực có sự khác biệt rõ rệt.`;
-  }
+  if (iqr < 1.2) iqrInsight = `IQR = ${format1Dec(iqr)} → 50% học sinh ở vùng trung tâm tập trung trong khoảng hẹp (${format1Dec(iqr)}đ, từ ${format1Dec(q1)} đến ${format1Dec(q3)}). Trình độ đa số học sinh rất tương đồng.`;
+  else if (iqr <= 2.2) iqrInsight = `IQR = ${format1Dec(iqr)} → 50% học sinh ở vùng trung tâm trải rộng khoảng ${format1Dec(iqr)}đ (từ ${format1Dec(q1)} đến ${format1Dec(q3)}). Mức phân tán tiêu chuẩn.`;
+  else iqrInsight = `IQR = ${format1Dec(iqr)} → 50% học sinh ở vùng trung tâm trải rộng tới ${format1Dec(iqr)}đ (từ ${format1Dec(q1)} đến ${format1Dec(q3)}). Mức phân tán đáng kể, năng lực có sự khác biệt rõ rệt.`;
 
   metrics.push({
     id: 'iqr',
@@ -379,17 +379,15 @@ export function computeBgdDistribution(
     value: format1Dec(iqr),
     color: '#f59e0b',
     text: iqrInsight,
-    tooltipTitle: 'Khoảng Tứ Phân Vị (IQR = Q3 - Q1)',
-    tooltipDesc: 'Độ rộng vùng điểm chứa 50% học sinh ở giữa bảng xếp hạng (loại bỏ 25% đầu và 25% cuối).',
+    tooltipTitle: `Khoảng Tứ Phân Vị ${skillName}`,
+    tooltipDesc: 'Độ rộng vùng điểm chứa 50% học sinh ở giữa (loại bỏ 25% đầu và 25% cuối).',
     tooltipFormula: 'IQR = Điểm phân vị 75% (Q3) - Điểm phân vị 25% (Q1)',
-    tooltipImpact: 'Giúp giáo viên xác định "vùng an toàn" chứa đại đa số học sinh để thiết kế giáo án phù hợp.',
+    tooltipImpact: 'Giúp xác định "vùng an toàn" của đa số học sinh để thiết kế giáo án phù hợp.',
   });
 
-  const weakRatioText = weakBand.pct === 0
-    ? '100% học sinh đều đạt chuẩn kiến thức từ 5.0 trở lên, không có học sinh yếu kém.'
-    : weakBand.pct <= 10
-    ? `tỷ lệ học sinh chưa đạt ở mức thấp (${weakBand.count}/${n} lượt điểm). Đây là tỷ lệ trong tầm kiểm soát an toàn.`
-    : `cứ 10 học sinh thì khoảng ${Math.max(1, Math.round(weakBand.pct / 10))} em chưa đạt (${weakBand.count}/${n} lượt điểm). Đây là điểm cần quan tâm phụ đạo sớm.`;
+  const weakRatioText = weakBand.pct === 0 ? '100% học sinh đều đạt chuẩn từ 5.0đ trở lên, không có học sinh yếu kém.'
+    : weakBand.pct <= 10 ? `tỷ lệ chưa đạt ở mức thấp (${weakBand.count}/${n} lượt điểm). Đây là tỷ lệ an toàn.`
+    : `cứ 10 học sinh thì khoảng ${Math.max(1, Math.round(weakBand.pct / 10))} em chưa đạt (${weakBand.count}/${n} lượt điểm). Cần chú ý phụ đạo sớm.`;
 
   metrics.push({
     id: 'weak',
@@ -397,10 +395,10 @@ export function computeBgdDistribution(
     value: `${weakBand.pct}%`,
     color: '#f43f5e',
     text: `${weakBand.pct}% yếu/kém (< 5) → ${weakRatioText}`,
-    tooltipTitle: 'Tỷ Lệ Yếu / Kém (< 5.0đ)',
-    tooltipDesc: 'Tỷ lệ học sinh chưa đạt chuẩn kiến thức tối thiểu theo quy định của Bộ Giáo Dục.',
-    tooltipFormula: 'Tỷ lệ Yếu/Kém = (Số học sinh dưới 5.0đ / N) × 100%',
-    tooltipImpact: 'Chỉ số cảnh báo đỏ cần can thiệp phụ đạo để tránh tình trạng hổng kiến thức dây chuyền.',
+    tooltipTitle: 'Tỷ Lệ Điểm Dưới 5.0',
+    tooltipDesc: 'Tỷ lệ học sinh chưa đạt chuẩn kiến thức tối thiểu đối với phần kiểm tra này.',
+    tooltipFormula: 'Tỷ lệ Yếu/Kém = (Số lượt dưới 5.0đ / N) × 100%',
+    tooltipImpact: 'Cảnh báo đỏ cần can thiệp phụ đạo để tránh hổng kiến thức dây chuyền.',
   });
 
   let excFractionText = 'khoảng 1/5';
@@ -410,11 +408,9 @@ export function computeBgdDistribution(
   else if (excBand.pct >= 15) excFractionText = 'khoảng 1/6';
   else if (excBand.pct > 0) excFractionText = 'một bộ phận nhỏ';
 
-  const excRatioText = excBand.pct === 0
-    ? 'chưa có học sinh nào bứt phá đạt ngưỡng 8.0 điểm, cần đẩy mạnh bồi dưỡng nâng cao.'
-    : excBand.pct >= 35
-    ? `${excFractionText} học sinh đạt mức cao, lớp có chất lượng mũi nhọn xuất sắc vượt trội.`
-    : `${excFractionText} học sinh đạt mức cao, cho thấy vẫn có nhóm học sinh nắm kiến thức khá tốt.`;
+  const excRatioText = excBand.pct === 0 ? 'chưa có học sinh nào bứt phá đạt ngưỡng 8.0 điểm.'
+    : excBand.pct >= 35 ? `${excFractionText} học sinh đạt mức cao, lớp có chất lượng mũi nhọn xuất sắc.`
+    : `${excFractionText} học sinh đạt mức cao, cho thấy vẫn có nhóm học sinh nắm kiến thức rất tốt.`;
 
   metrics.push({
     id: 'excellent',
@@ -422,10 +418,10 @@ export function computeBgdDistribution(
     value: `${excBand.pct}%`,
     color: '#10b981',
     text: `${excBand.pct}% giỏi/xuất sắc (≥ 8) → ${excRatioText}`,
-    tooltipTitle: 'Tỷ Lệ Giỏi / Xuất Sắc (≥ 8.0đ)',
-    tooltipDesc: 'Tỷ lệ học sinh đạt chuẩn kiến thức nâng cao, tư duy vận dụng tốt.',
-    tooltipFormula: 'Tỷ lệ Giỏi = (Số học sinh từ 8.0đ trở lên / N) × 100%',
-    tooltipImpact: 'Đo lường chất lượng mũi nhọn và năng lực cạnh tranh học thuật của lớp.',
+    tooltipTitle: 'Tỷ Lệ Điểm Giỏi & Xuất Sắc (≥ 8.0đ)',
+    tooltipDesc: 'Tỷ lệ học sinh đạt chuẩn nâng cao, tư duy vận dụng tốt.',
+    tooltipFormula: 'Tỷ lệ Giỏi = (Số lượt từ 8.0đ trở lên / N) × 100%',
+    tooltipImpact: 'Đo lường chất lượng mũi nhọn và năng lực cạnh tranh học thuật.',
   });
 
   const sortedBands = [...bands].sort((a, b) => b.count - a.count);
@@ -441,13 +437,12 @@ export function computeBgdDistribution(
     value: `${largestBand.pct}%`,
     color: largestBand.color,
     text: `${largestBand.pct}% ${largestBandName} → đây là nhóm học sinh chiếm tỷ trọng lớn nhất trong lớp.`,
-    tooltipTitle: 'Nhóm Học Lực Chủ Lực',
+    tooltipTitle: 'Nhóm Điểm Chiếm Đa Số',
     tooltipDesc: 'Phân khúc học lực chiếm tỷ trọng đông đảo nhất trong tổng thể học sinh.',
-    tooltipFormula: 'Nhóm có số lượng học sinh Max(Count) trong 4 phân khúc chuẩn BGD.',
-    tooltipImpact: 'Xác định đối tượng học sinh trung tâm để định hình trọng tâm bài giảng chính khóa.',
+    tooltipFormula: 'Nhóm có số lượng Max(Count) trong 4 phân khúc.',
+    tooltipImpact: 'Xác định đối tượng trung tâm để định hình trọng tâm bài giảng chính khóa.',
   });
 
-  // Conclusion synthesis
   const goodAndAboveCount = goodBand.count + excBand.count;
   const goodAndAbovePct = Math.round((goodAndAboveCount / n) * 100);
 
@@ -462,7 +457,7 @@ export function computeBgdDistribution(
   if (sd < 1.0) diffSummary = 'độ đồng đều giữa các học sinh rất cao';
   else if (sd > 2.0) diffSummary = 'sự phân cực học lực diễn ra rất mạnh';
 
-  const overviewSummary = `Chất lượng chung ${generalQuality}, nhưng ${diffSummary}. Nhóm học sinh đạt mức khá trở lên chiếm ${goodAndAbovePct}% (${goodAndAboveCount}/${n} lượt điểm), tuy nhiên vẫn còn ${weakBand.pct}% học sinh dưới 5 điểm, trong khi nhóm giỏi/xuất sắc chiếm ${excBand.pct}%.`;
+  const overviewSummary = `Chất lượng ${skillName.toLowerCase()} chung ${generalQuality}, nhưng ${diffSummary}. Nhóm học sinh đạt mức khá trở lên chiếm ${goodAndAbovePct}% (${goodAndAboveCount}/${n} lượt điểm), tuy nhiên vẫn còn ${weakBand.pct}% học sinh dưới 5 điểm, trong khi nhóm giỏi/xuất sắc chiếm ${excBand.pct}%.`;
 
   let deepDispersionReasoning = '';
   if (sd > 1.8 || iqr > 2.2) {
@@ -475,18 +470,18 @@ export function computeBgdDistribution(
 
   let strategicAction = '';
   if (weakBand.pct > 15 && excBand.pct < 30) {
-    strategicAction = `Bài toán chính của lớp là kéo nhóm yếu/kém lên (chiếm ${weakBand.pct}%), đồng thời bồi dưỡng nhóm khá (${goodBand.pct}%) để tăng tỷ lệ đạt điểm giỏi ≥ 8.0.`;
+    strategicAction = `Bài toán chính của lớp ở phần ${skillName.toLowerCase()} là kéo nhóm yếu/kém lên (chiếm ${weakBand.pct}%), đồng thời bồi dưỡng nhóm khá (${goodBand.pct}%) để tăng tỷ lệ đạt điểm giỏi ≥ 8.0.`;
   } else if (weakBand.pct > 25) {
-    strategicAction = `Bài toán cấp bách nhất là tổ chức phụ đạo tăng cường để giải quyết triệt để lỗ hổng kiến thức cho ${weakBand.count} học sinh đang dưới 5.0 điểm.`;
+    strategicAction = `Bài toán cấp bách nhất là tổ chức phụ đạo tăng cường để giải quyết triệt để lỗ hổng kiến thức phần ${skillName.toLowerCase()} cho ${weakBand.count} học sinh đang dưới 5.0 điểm.`;
   } else if (excBand.pct >= 35) {
-    strategicAction = `Bài toán chính của lớp là tiếp tục duy trì đà phát triển mũi nhọn, đồng thời kèm cặp cá nhân hóa cho ${weakBand.count} học sinh còn yếu để đạt chuẩn toàn diện.`;
+    strategicAction = `Bài toán chính của lớp là tiếp tục duy trì đà phát triển mũi nhọn phần ${skillName.toLowerCase()}, đồng thời kèm cặp cá nhân hóa cho ${weakBand.count} học sinh còn yếu để đạt chuẩn toàn diện.`;
   } else {
     strategicAction = `Bài toán của lớp là duy trì tiến độ bài học ổn định và bồi dưỡng chuyển hóa nhóm khá (${goodBand.pct}%) vươn lên nhóm giỏi ≥ 8.0.`;
   }
 
   const pedagogicalActions: string[] = [];
   if (weakBand.pct > 15) {
-    pedagogicalActions.push(`Tổ chức 15-20 phút phụ đạo bổ trợ trước giờ học cho nhóm ${weakBand.count} học sinh đang dưới 5.0đ.`);
+    pedagogicalActions.push(`Tổ chức 15-20 phút phụ đạo bổ trợ trước giờ học cho nhóm ${weakBand.count} học sinh đang dưới 5.0đ ở phần ${skillName.toLowerCase()}.`);
   }
   if (sd > 1.8) {
     pedagogicalActions.push(`Áp dụng mô hình bài tập phân hóa: Giao bài tập cơ bản cho nhóm dưới ${format1Dec(q1)}đ và bài tập mở rộng/nâng cao cho nhóm trên ${format1Dec(q3)}đ.`);
@@ -496,13 +491,14 @@ export function computeBgdDistribution(
   }
   if (pedagogicalActions.length === 0) {
     pedagogicalActions.push(`Duy trì phương pháp giảng dạy hiện tại và theo dõi sát bài kiểm tra định kỳ kế tiếp.`);
-    pedagogicalActions.push(`Củng cố các chủ đề ngữ pháp và từ vựng cốt lõi cho nhóm học sinh ở vùng trung vị (${format1Dec(median)}đ).`);
+    pedagogicalActions.push(`Củng cố các chủ điểm cốt lõi cho nhóm học sinh ở vùng trung vị (${format1Dec(median)}đ).`);
   }
 
-  const subjectTitle = className ? `Đánh giá phổ điểm môn học - ${className}` : 'Đánh giá phổ điểm & phân tích học lực chuẩn Bộ Giáo Dục';
+  const subjectTitle = className ? `Đánh Giá Phổ Điểm & Phân Phối Học Lực - ${className}` : 'Đánh Giá Phổ Điểm & Phân Phối Học Lực Lớp Học';
 
   const evaluation: BgdDetailedEvaluation = {
     subjectTitle,
+    skillName,
     metrics,
     conclusion: {
       overviewSummary,
@@ -512,7 +508,7 @@ export function computeBgdDistribution(
     pedagogicalActions,
   };
 
-  const headline = `Phổ điểm đạt mức ${distributionRating.toLowerCase()} với điểm trung bình ${format1Dec(mean)} và trung vị ${format1Dec(median)}.`;
+  const headline = `Phổ điểm ${skillName.toLowerCase()} đạt mức ${distributionRating.toLowerCase()} với điểm trung bình ${format1Dec(mean)} và trung vị ${format1Dec(median)}.`;
   const overallSummaryOld = `Tổng số ${n} điểm số được phân tích. Điểm trung bình toàn lớp đạt ${format1Dec(mean)}/10, trong đó học sinh điển hình (trung vị) ở mức ${format1Dec(median)}/10.`;
 
   return {

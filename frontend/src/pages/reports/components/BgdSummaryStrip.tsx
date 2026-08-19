@@ -105,7 +105,7 @@ export const BgdSummaryStrip: React.FC<BgdSummaryStripProps> = React.memo(({ bgd
             footer={
               <div className="text-[10px] space-y-1 text-slate-300">
                 <div>σ dưới 1.0: Cả lớp rất đồng đều (ít chênh lệch)</div>
-                <div>σ từ 1.2 - 2.0: Phân hóa chuẩn Bộ GD (khỏe mạnh)</div>
+                <div>σ từ 1.2 - 2.0: Phân hóa vừa phải (khỏe mạnh)</div>
                 <div>σ trên 2.0: Chênh lệch rất lớn (cần chia nhóm dạy)</div>
               </div>
             }
@@ -171,7 +171,7 @@ export const BgdSummaryStrip: React.FC<BgdSummaryStripProps> = React.memo(({ bgd
             title="Tỷ Lệ Đạt Chuẩn Kiến Thức"
             titleColor="text-emerald-300"
             onClose={() => setActiveTooltip(null)}
-            whatItReflects="Tỷ lệ lượt làm bài đạt từ 5.0 điểm trở lên theo chuẩn đánh giá của Bộ Giáo Dục."
+            whatItReflects="Tỷ lệ lượt làm bài đạt từ 5.0 điểm trở lên trong các kỳ kiểm tra."
             footer={
               <div className="text-[10px] space-y-1 text-slate-300">
                 <div>Đạt yêu cầu (≥ 5.0đ): {bgdStats.passPct}% ({bgdStats.passCount} lượt)</div>
@@ -191,7 +191,7 @@ export const BgdSummaryStrip: React.FC<BgdSummaryStripProps> = React.memo(({ bgd
             type="button"
             onClick={() => setActiveTooltip(activeTooltip === 'bgd-rating' ? null : 'bgd-rating')}
             className="text-slate-500 hover:text-indigo-400 cursor-pointer"
-            title="Xem khuyến nghị sư phạm BGD"
+            title="Xem khuyến nghị sư phạm"
           >
             <Info size={11} />
           </button>

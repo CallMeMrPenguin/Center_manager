@@ -6,7 +6,7 @@ import { SummaryStrip } from '../components/SummaryStrip';
 import { StudentRankingsTable } from '../components/StudentRankingsTable';
 import { StudentGradeHistoryTable } from '../components/StudentGradeHistoryTable';
 import { formatSessionDate, getStandardMoetPhases } from '../utils';
-import { computeBgdDistribution } from '../utils/bgdAnalytics';
+import { computeBgdDistribution, GradeTypeFilterKey } from '../utils/bgdAnalytics';
 import { getStudentTier } from '../types';
 import { format1Dec, trunc1Dec } from '../../../utils';
 
@@ -59,6 +59,7 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
 }) => {
   const [timeView, setTimeView] = useState<'1m' | '2m' | '3m' | 'all'>('all');
   const [chartViewMode, setChartViewMode] = useState<'timeline' | 'distribution'>('timeline');
+  const [selectedGradeTypeFilter, setSelectedGradeTypeFilter] = useState<GradeTypeFilterKey>('overall');
 
   // Combined Standard MOET phases + Database Custom User Phases
   const combinedTimePhases = useMemo(() => {
@@ -277,8 +278,8 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
     const recs = activeSessionRecords.length > 0 ? activeSessionRecords : sessionRecords;
     const ranks = filteredRankings.length > 0 ? filteredRankings : studentRankings;
     const clsName = selectedClassObj ? selectedClassObj.class_name : undefined;
-    return computeBgdDistribution(recs, ranks, selectedStudentId, clsName);
-  }, [activeSessionRecords, sessionRecords, filteredRankings, studentRankings, selectedStudentId, selectedClassObj]);
+    return computeBgdDistribution(recs, ranks, selectedStudentId, clsName, selectedGradeTypeFilter, isTestMode);
+  }, [activeSessionRecords, sessionRecords, filteredRankings, studentRankings, selectedStudentId, selectedClassObj, selectedGradeTypeFilter, isTestMode]);
 
   return (
     <div className="space-y-6">
@@ -304,7 +305,7 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
         />
       </div>
 
-      {/* 3. INTERACTIVE CHART (WITH TIMELINE & BGD DISTRIBUTION TOGGLE) */}
+      {/* 3. INTERACTIVE CHART (WITH TIMELINE & SCORE DISTRIBUTION TOGGLE) */}
       <div className={selectedStudentObj ? 'animate-cascade-3' : 'animate-cascade-2'}>
         <InteractiveChart
           sessionChartData={sessionChartData}
@@ -321,6 +322,8 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
           chartViewMode={chartViewMode}
           setChartViewMode={setChartViewMode}
           bgdStats={bgdStats}
+          selectedGradeTypeFilter={selectedGradeTypeFilter}
+          setSelectedGradeTypeFilter={setSelectedGradeTypeFilter}
           isTestMode={isTestMode}
         />
       </div>

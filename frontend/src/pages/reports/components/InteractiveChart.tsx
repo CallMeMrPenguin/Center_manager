@@ -3,7 +3,7 @@ import { ChartControls } from './ChartControls';
 import { ChartSvgPlot } from './ChartSvgPlot';
 import { BgdDistributionPlot } from './BgdDistributionPlot';
 import { ChartSessionItem, HoveredChartPoint } from '../types';
-import { BgdDistributionStats } from '../utils/bgdAnalytics';
+import { BgdDistributionStats, GradeTypeFilterKey } from '../utils/bgdAnalytics';
 import { format1Dec, trunc1Dec } from '../../../utils';
 
 interface InteractiveChartProps {
@@ -21,6 +21,8 @@ interface InteractiveChartProps {
   chartViewMode: 'timeline' | 'distribution';
   setChartViewMode: (mode: 'timeline' | 'distribution') => void;
   bgdStats: BgdDistributionStats;
+  selectedGradeTypeFilter: GradeTypeFilterKey;
+  setSelectedGradeTypeFilter: (key: GradeTypeFilterKey) => void;
   isTestMode?: boolean;
 }
 
@@ -39,6 +41,8 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = ({
   chartViewMode,
   setChartViewMode,
   bgdStats,
+  selectedGradeTypeFilter,
+  setSelectedGradeTypeFilter,
   isTestMode,
 }) => {
   const chartWrapperRef = useRef<HTMLDivElement>(null);
@@ -336,11 +340,13 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = ({
           })()}
         </div>
       ) : (
-        /* VIEW 2: MOET STANDARD SCORE DISTRIBUTION */
+        /* VIEW 2: SCORE DISTRIBUTION ACROSS SKILLS */
         <BgdDistributionPlot
           stats={bgdStats}
           selectedStudentId={selectedStudentId}
           selectedClassId={selectedClassId}
+          selectedGradeTypeFilter={selectedGradeTypeFilter}
+          setSelectedGradeTypeFilter={setSelectedGradeTypeFilter}
           isTestMode={isTestMode}
         />
       )}

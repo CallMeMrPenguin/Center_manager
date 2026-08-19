@@ -47,12 +47,12 @@ export const ChartControls: React.FC<ChartControlsProps> = ({
           {chartViewMode === 'timeline' ? (
             <TrendingUp size={18} className="text-indigo-400" />
           ) : (
-            <BarChart2 size={18} className="text-emerald-400" />
+            <BarChart2 size={18} className="text-cyan-400" />
           )}
           <h3 className="text-sm font-black text-white uppercase tracking-wider">
             {chartViewMode === 'timeline'
               ? 'TIẾN ĐỘ HỌC TẬP QUA CÁC KỲ & DỰ ĐOÁN XU HƯỚNG'
-              : 'PHỔ ĐIỂM HỌC LỰC & PHÂN BỐ CHUẨN BỘ GIÁO DỤC'}
+              : 'PHỔ ĐIỂM HỌC LỰC & PHÂN PHỐI NĂNG LỰC'}
           </h3>
         </div>
 
@@ -83,26 +83,26 @@ export const ChartControls: React.FC<ChartControlsProps> = ({
             }`}
           >
             <BarChart3 size={13} />
-            <span>Phổ Điểm Chuẩn BGD</span>
+            <span>Phổ Điểm Học Lực</span>
           </button>
         </div>
       </div>
 
-      {/* 2. SECONDARY CONTROLS (DIFFERENT PER ACTIVE VIEW MODE) */}
+      {/* 2. SECONDARY CONTROLS */}
       {chartViewMode === 'timeline' ? (
         <div className="flex flex-wrap items-center justify-between gap-4 pt-1">
           {/* Legend with Predictions */}
           <div className="flex flex-wrap items-center gap-3.5 text-[11px] font-bold">
             <span className="flex items-center gap-1.5 text-blue-400">
-              <span className="w-2.5 h-2.5 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.8)]"></span>
+              <span className="w-2.5 h-2.5 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.8)]" />
               {isTestMode ? 'Từ Vựng' : 'Check 1'} (Dự đoán: {format1Dec(engine.pred_c1)})
             </span>
             <span className="flex items-center gap-1.5 text-purple-400">
-              <span className="w-2.5 h-2.5 rounded-full bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.8)]"></span>
+              <span className="w-2.5 h-2.5 rounded-full bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.8)]" />
               {isTestMode ? 'Ngữ Pháp' : 'Check 2'} (Dự đoán: {format1Dec(engine.pred_c2)})
             </span>
             <span className="flex items-center gap-1.5 text-emerald-400">
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]"></span>
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]" />
               Homework (Dự đoán: {format1Dec(engine.pred_hw)})
             </span>
           </div>
@@ -209,18 +209,21 @@ export const ChartControls: React.FC<ChartControlsProps> = ({
         </div>
       ) : (
         <div className="flex flex-wrap items-center justify-between gap-3 text-xs font-bold pt-1">
-          <div className="flex flex-wrap items-center gap-3">
-            <span className="text-slate-400">
+          <div className="flex flex-wrap items-center gap-4">
+            <span className="text-slate-300">
               Tổng số mẫu: <strong className="text-white font-mono">{bgdStats?.n ?? 0}</strong> lượt điểm
             </span>
-            <span className="text-indigo-400 font-mono">
-              Trung vị: {format1Dec(bgdStats?.median ?? 0)}đ
+            <span className="text-indigo-300 font-mono">
+              Điểm TB: <strong className="text-white">{format1Dec(bgdStats?.mean ?? 0)}đ</strong>
             </span>
-            <span className="text-cyan-400 font-mono">
-              Độ lệch chuẩn σ: {format1Dec(bgdStats?.sd ?? 0)}
+            <span className="text-purple-300 font-mono">
+              Trung vị: <strong className="text-white">{format1Dec(bgdStats?.median ?? 0)}đ</strong>
             </span>
-            <span className="text-emerald-400 font-mono">
-              Đạt chuẩn: {bgdStats?.passPct ?? 0}%
+            <span className="text-cyan-300 font-mono">
+              Độ lệch chuẩn σ: <strong className="text-white">{format1Dec(bgdStats?.sd ?? 0)}</strong>
+            </span>
+            <span className="text-emerald-300 font-mono">
+              Đạt yêu cầu: <strong className="text-white">{bgdStats?.passPct ?? 0}%</strong>
             </span>
           </div>
 
