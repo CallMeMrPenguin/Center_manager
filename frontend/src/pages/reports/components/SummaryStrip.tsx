@@ -2,15 +2,30 @@ import React, { useState } from 'react';
 import { Info } from 'lucide-react';
 import { GradeTypeItem } from '../../../types';
 import { SummaryTooltipCard } from './SummaryTooltipCard';
+import { BgdSummaryStrip } from './BgdSummaryStrip';
+import { BgdDistributionStats } from '../utils/bgdAnalytics';
 
 interface SummaryStripProps {
   engine: any;
   gradeTypesList: GradeTypeItem[];
   hasSelectedStudent?: boolean;
+  chartViewMode?: 'timeline' | 'distribution';
+  bgdStats?: BgdDistributionStats;
 }
 
-export const SummaryStrip: React.FC<SummaryStripProps> = React.memo(({ engine, gradeTypesList, hasSelectedStudent }) => {
+export const SummaryStrip: React.FC<SummaryStripProps> = React.memo(({
+  engine,
+  gradeTypesList,
+  hasSelectedStudent,
+  chartViewMode = 'timeline',
+  bgdStats,
+}) => {
   const [activeTooltip, setActiveTooltip] = useState<string | null>(null);
+
+  // If in MOET Distribution view mode, render BgdSummaryStrip
+  if (chartViewMode === 'distribution' && bgdStats) {
+    return <BgdSummaryStrip bgdStats={bgdStats} />;
+  }
 
   // 6-Tier Realistic Educational Scale for PI (Scale 0 - 100)
   const pi = engine.performance_index != null ? Number(engine.performance_index) : 85.0;

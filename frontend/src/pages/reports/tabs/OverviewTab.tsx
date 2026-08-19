@@ -6,6 +6,7 @@ import { SummaryStrip } from '../components/SummaryStrip';
 import { StudentRankingsTable } from '../components/StudentRankingsTable';
 import { StudentGradeHistoryTable } from '../components/StudentGradeHistoryTable';
 import { formatSessionDate, getStandardMoetPhases } from '../utils';
+import { computeBgdDistribution } from '../utils/bgdAnalytics';
 import { getStudentTier } from '../types';
 import { format1Dec, trunc1Dec } from '../../../utils';
 
@@ -57,6 +58,7 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
   isTestMode,
 }) => {
   const [timeView, setTimeView] = useState<'1m' | '2m' | '3m' | 'all'>('all');
+  const [chartViewMode, setChartViewMode] = useState<'timeline' | 'distribution'>('timeline');
 
   // Combined Standard MOET phases + Database Custom User Phases
   const combinedTimePhases = useMemo(() => {
@@ -266,6 +268,13 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
     };
   }, [sessionChartData]);
 
+  // MOET standard distribution stats computed client-side
+  const bgdStats = useMemo(() => {
+    const recs = activeSessionRecords.length > 0 ? activeSessionRecords : sessionRecords;
+    const ranks = filteredRankings.length > 0 ? filteredRankings : studentRankings;
+    return computeBgdDistribution(recs, ranks, selectedStudentId);
+  }, [activeSessionRecords, sessionRecords, filteredRankings, studentRankings, selectedStudentId]);
+
   return (
     <div className="space-y-6">
       {/* 1. INDIVIDUAL STUDENT PROFILE */}
@@ -290,7 +299,7 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
         />
       </div>
 
-      {/* 3. INTERACTIVE CHART */}
+      {/* 3. INTERACTIVE CHART (WITH TIMELINE & BGD DISTRIBUTION TOGGLE) */}
       <div className={selectedStudentObj ? 'animate-cascade-3' : 'animate-cascade-2'}>
         <InteractiveChart
           sessionChartData={sessionChartData}
@@ -304,16 +313,21 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
           selectedPhaseId={selectedPhaseId}
           setSelectedPhaseId={setSelectedPhaseId}
           onOpenPhaseModal={onOpenPhaseModal}
+          chartViewMode={chartViewMode}
+          setChartViewMode={setChartViewMode}
+          bgdStats={bgdStats}
           isTestMode={isTestMode}
         />
       </div>
 
-      {/* 4. SUMMARY STRIP (NOW WITH PI INDEX & DETAILED TOOLTIP) */}
+      {/* 4. SUMMARY STRIP (DYNAMICALLY SWITCHES BETWEEN TIMELINE & BGD METRICS) */}
       <div className={selectedStudentObj ? 'animate-cascade-4' : 'animate-cascade-3'}>
         <SummaryStrip
           engine={engine}
           gradeTypesList={gradeTypesList}
           hasSelectedStudent={!!selectedStudentObj}
+          chartViewMode={chartViewMode}
+          bgdStats={bgdStats}
         />
       </div>
 
