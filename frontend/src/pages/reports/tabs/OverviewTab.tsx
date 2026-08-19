@@ -268,12 +268,17 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
     };
   }, [sessionChartData]);
 
+  const selectedClassObj = useMemo(() => {
+    return classes.find(c => String(c.id) === selectedClassId);
+  }, [classes, selectedClassId]);
+
   // MOET standard distribution stats computed client-side
   const bgdStats = useMemo(() => {
     const recs = activeSessionRecords.length > 0 ? activeSessionRecords : sessionRecords;
     const ranks = filteredRankings.length > 0 ? filteredRankings : studentRankings;
-    return computeBgdDistribution(recs, ranks, selectedStudentId);
-  }, [activeSessionRecords, sessionRecords, filteredRankings, studentRankings, selectedStudentId]);
+    const clsName = selectedClassObj ? selectedClassObj.class_name : undefined;
+    return computeBgdDistribution(recs, ranks, selectedStudentId, clsName);
+  }, [activeSessionRecords, sessionRecords, filteredRankings, studentRankings, selectedStudentId, selectedClassObj]);
 
   return (
     <div className="space-y-6">

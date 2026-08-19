@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Award, BookOpen, AlertCircle, CheckCircle2, ChevronRight, BarChart2 } from 'lucide-react';
 import { BgdDistributionStats } from '../utils/bgdAnalytics';
+import { BgdDetailedCommentaryCard } from './BgdDetailedCommentaryCard';
 import { format1Dec } from '../../../utils';
 
 interface BgdDistributionPlotProps {
@@ -19,8 +19,8 @@ export const BgdDistributionPlot: React.FC<BgdDistributionPlotProps> = ({
   const [hoveredBandId, setHoveredBandId] = useState<string | null>(null);
   const [distributionViewType, setDistributionViewType] = useState<'4bands' | '10bins'>('4bands');
 
-  const maxBandCount = Math.max(1, ...stats.bands.map(b => b.count));
-  const maxBinCount = Math.max(1, ...stats.scoreBins.map(b => b.count));
+  const maxBandCount = Math.max(1, ...stats.bands.map((b) => b.count));
+  const maxBinCount = Math.max(1, ...stats.scoreBins.map((b) => b.count));
 
   return (
     <div className="flex flex-col gap-6 select-none animate-cascade-2">
@@ -70,7 +70,7 @@ export const BgdDistributionPlot: React.FC<BgdDistributionPlotProps> = ({
         {/* SVG Distribution Plot Area */}
         <div className="w-full h-72 relative flex items-end justify-between gap-4 sm:gap-8 pt-8 pb-4 px-2 sm:px-6">
           {distributionViewType === '4bands' ? (
-            stats.bands.map((band, idx) => {
+            stats.bands.map((band) => {
               const heightPct = Math.max(8, Math.round((band.count / maxBandCount) * 85));
               const isHovered = hoveredBandId === band.id;
 
@@ -164,7 +164,7 @@ export const BgdDistributionPlot: React.FC<BgdDistributionPlotProps> = ({
               BIỂU ĐỒ HỘP & TỨ PHÂN VỊ (BOX PLOT SUMMARY)
             </span>
             <span className="text-[11px] text-slate-400 font-mono">
-              Min: {format1Dec(stats.min)}đ | Q1: {format1Dec(stats.q1)}đ | Trung vị: {format1Dec(stats.median)}đ | Q3: {format1Dec(stats.q3)}đ | Max: {format1Dec(stats.max)}đ
+              Min: {format1Dec(stats.min)}đ - Q1: {format1Dec(stats.q1)}đ - Trung vị: {format1Dec(stats.median)}đ - Q3: {format1Dec(stats.q3)}đ - Max: {format1Dec(stats.max)}đ
             </span>
           </div>
 
@@ -208,104 +208,11 @@ export const BgdDistributionPlot: React.FC<BgdDistributionPlotProps> = ({
         </div>
       </div>
 
-      {/* 4. DETAILED PEDAGOGICAL COMMENTARY PANEL */}
-      <div className="bg-[#0b0f19] border border-[#1b253b] rounded-2xl p-6 shadow-xl space-y-5">
-        {/* Title and Rating Headline */}
-        <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-white/5">
-          <div className="flex items-center gap-2.5">
-            <BookOpen size={16} className="text-indigo-400" />
-            <h4 className="text-sm font-black uppercase text-white tracking-wider">
-              NHẬN XÉT & ĐÁNH GIÁ SƯ PHẠM CHI TIẾT (CHUẨN BỘ GIÁO DỤC)
-            </h4>
-          </div>
-          <span className="px-3 py-1 rounded-lg text-xs font-black bg-indigo-500/15 text-indigo-300 border border-indigo-500/30">
-            {stats.distributionRating}
-          </span>
-        </div>
-
-        {/* Highlight Headline */}
-        <div className="p-3.5 rounded-xl bg-[#12182c] border border-[#232f52] flex items-start gap-3">
-          <Award size={18} className="text-amber-400 shrink-0 mt-0.5" />
-          <p className="text-xs sm:text-sm font-bold text-slate-200 leading-relaxed">
-            {stats.commentary.headline}
-          </p>
-        </div>
-
-        {/* 3 Structured Educational Dimensions */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {/* Dimension 1: Mean vs Median */}
-          <div className="bg-[#0d1222] p-4 rounded-xl border border-[#1d2744] space-y-2 flex flex-col justify-between">
-            <div>
-              <div className="flex items-center justify-between pb-1.5 border-b border-white/5">
-                <span className="text-[11px] font-black uppercase tracking-wider text-blue-400">
-                  Mặt Bằng & Phân Bố
-                </span>
-                <span className="text-[10px] font-mono text-slate-400">Mean / Median</span>
-              </div>
-              <p className="text-xs text-slate-300 leading-relaxed mt-2">
-                {stats.commentary.meanVsMedianInsight}
-              </p>
-            </div>
-            <div className="pt-2 border-t border-white/5 text-[10px] font-mono text-blue-300 font-bold">
-              Chênh lệch: {format1Dec(stats.mean - stats.median > 0 ? stats.mean - stats.median : stats.median - stats.mean)}đ
-            </div>
-          </div>
-
-          {/* Dimension 2: Dispersion (SD & IQR) */}
-          <div className="bg-[#0d1222] p-4 rounded-xl border border-[#1d2744] space-y-2 flex flex-col justify-between">
-            <div>
-              <div className="flex items-center justify-between pb-1.5 border-b border-white/5">
-                <span className="text-[11px] font-black uppercase tracking-wider text-purple-400">
-                  Độ Phân Hóa Học Lực
-                </span>
-                <span className="text-[10px] font-mono text-slate-400">SD & IQR</span>
-              </div>
-              <p className="text-xs text-slate-300 leading-relaxed mt-2">
-                {stats.commentary.dispersionInsight}
-              </p>
-            </div>
-            <div className="pt-2 border-t border-white/5 text-[10px] font-mono text-purple-300 font-bold">
-              {stats.sdLabel}
-            </div>
-          </div>
-
-          {/* Dimension 3: Quality & Pass Rate */}
-          <div className="bg-[#0d1222] p-4 rounded-xl border border-[#1d2744] space-y-2 flex flex-col justify-between">
-            <div>
-              <div className="flex items-center justify-between pb-1.5 border-b border-white/5">
-                <span className="text-[11px] font-black uppercase tracking-wider text-emerald-400">
-                  Tỷ Lệ Đạt & Xuất Sắc
-                </span>
-                <span className="text-[10px] font-mono text-slate-400">≥ 5.0 & ≥ 8.0</span>
-              </div>
-              <p className="text-xs text-slate-300 leading-relaxed mt-2">
-                {stats.commentary.passExcellenceInsight}
-              </p>
-            </div>
-            <div className="pt-2 border-t border-white/5 text-[10px] font-mono text-emerald-300 font-bold">
-              Đạt chuẩn: {stats.passPct}%
-            </div>
-          </div>
-        </div>
-
-        {/* Actionable Pedagogical Recommendations */}
-        <div className="space-y-2.5 pt-2">
-          <span className="text-xs font-black uppercase tracking-wider text-slate-400 block">
-            KHUYẾN NGHỊ HÀNH ĐỘNG SƯ PHẠM DÀNH CHO GIÁO VIÊN
-          </span>
-          <div className="space-y-2">
-            {stats.commentary.pedagogicalActions.map((action, idx) => (
-              <div
-                key={idx}
-                className="flex items-start gap-2.5 bg-[#0e1424] p-3 rounded-xl border border-[#1f2b48] text-xs text-slate-200"
-              >
-                <CheckCircle2 size={15} className="text-emerald-400 shrink-0 mt-0.5" />
-                <span className="leading-relaxed">{action}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
+      {/* 4. COMPREHENSIVE POINT-BY-POINT COMMENTARY & SYNTHESIS */}
+      <BgdDetailedCommentaryCard
+        evaluation={stats.evaluation}
+        distributionRating={stats.distributionRating}
+      />
     </div>
   );
 };
