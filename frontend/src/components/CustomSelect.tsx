@@ -88,8 +88,10 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
     );
   }, [options, searchQuery]);
 
+  const hasCustomWidth = className.includes('w-') || className.includes('min-w-') || className.includes('max-w-');
+
   return (
-    <div className={`relative inline-block w-full ${className}`} ref={containerRef}>
+    <div className={`relative inline-block ${hasCustomWidth ? '' : 'w-full'} ${className}`} ref={containerRef}>
       {/* TRIGGER BUTTON */}
       <button
         type="button"
