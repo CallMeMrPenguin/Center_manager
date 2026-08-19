@@ -52,21 +52,21 @@ export const StudentProfileHeader: React.FC<StudentProfileHeaderProps> = ({
   const getRankTheme = (t: number) => {
     switch (t) {
       case 8: // Quán Quân
-        return { badgeText: 'text-amber-400 font-black', bgBadge: 'bg-amber-500/10 border-amber-500/30' };
+        return { badgeText: 'text-amber-400 font-black' };
       case 7: // Cao Thủ
-        return { badgeText: 'text-rose-400 font-black', bgBadge: 'bg-rose-500/10 border-rose-500/30' };
+        return { badgeText: 'text-rose-400 font-black' };
       case 6: // Tinh Anh
-        return { badgeText: 'text-purple-400 font-black', bgBadge: 'bg-purple-500/10 border-purple-500/30' };
+        return { badgeText: 'text-purple-400 font-black' };
       case 5: // Kim Cương
-        return { badgeText: 'text-cyan-400 font-black', bgBadge: 'bg-cyan-500/10 border-cyan-500/30' };
+        return { badgeText: 'text-cyan-400 font-black' };
       case 4: // Bạch Kim
-        return { badgeText: 'text-indigo-300 font-bold', bgBadge: 'bg-indigo-500/10 border-indigo-500/30' };
+        return { badgeText: 'text-indigo-300 font-bold' };
       case 3: // Vàng
-        return { badgeText: 'text-yellow-400 font-bold', bgBadge: 'bg-yellow-500/10 border-yellow-500/30' };
+        return { badgeText: 'text-yellow-400 font-bold' };
       case 2: // Bạc
-        return { badgeText: 'text-sky-300 font-bold', bgBadge: 'bg-sky-500/10 border-sky-500/30' };
+        return { badgeText: 'text-sky-300 font-bold' };
       default: // Đồng
-        return { badgeText: 'text-amber-500 font-bold', bgBadge: 'bg-amber-600/10 border-amber-600/30' };
+        return { badgeText: 'text-amber-500 font-bold' };
     }
   };
 
@@ -119,17 +119,17 @@ export const StudentProfileHeader: React.FC<StudentProfileHeaderProps> = ({
         <X className="w-5 h-5 text-white" />
       </button>
 
-      {/* TOP HEADER: Avatar + Name + Nickname + Rank Badge + Thứ Hạng */}
+      {/* TOP HEADER: Avatar + Name + Nickname + Rank Badge + Thứ Hạng (NO PILL BOXES / NO BORDERS) */}
       <div className="flex flex-wrap items-center gap-4 pr-10">
         {/* Avatar */}
-        <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-br from-indigo-600 via-indigo-700 to-purple-800 text-white font-black text-xl sm:text-2xl flex items-center justify-center shadow-lg border border-white/20 ring-4 ring-indigo-500/10 shrink-0">
+        <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-br from-indigo-600 to-purple-600 text-white font-black text-xl sm:text-2xl flex items-center justify-center shadow-lg shrink-0">
           {student.full_name?.slice(0, 2)?.toUpperCase() || 'HS'}
         </div>
 
-        {/* Identity & Rank Badges */}
-        <div className="flex-1 min-w-0 space-y-1.5">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="font-mono text-xs font-bold text-indigo-300 bg-indigo-500/15 border border-indigo-500/30 px-2 py-0.5 rounded">
+        {/* Identity & Rank Line */}
+        <div className="flex-1 min-w-0 space-y-1">
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="font-mono text-xs font-bold text-indigo-400">
               ID: HS-{studentIdStr}
             </span>
             <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-400">
@@ -138,7 +138,7 @@ export const StudentProfileHeader: React.FC<StudentProfileHeaderProps> = ({
             </span>
           </div>
 
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5">
             {/* Student Name */}
             <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight">
               {student.full_name}
@@ -150,25 +150,25 @@ export const StudentProfileHeader: React.FC<StudentProfileHeaderProps> = ({
               </span>
             )}
 
-            {/* Rank / Cấp Bậc Badge next to Name */}
-            <div className={`inline-flex items-center gap-2 px-2.5 py-1 rounded-lg border ${rankTheme.bgBadge}`}>
+            {/* Rank / Cấp Bậc (Clean text & icon, zero card box / zero border) */}
+            <div className="inline-flex items-center gap-1.5">
               <img
                 src={tier.badge}
                 alt={tier.name}
                 className="w-5 h-5 object-contain"
               />
-              <span className="text-xs font-bold text-slate-300">Cấp Bậc:</span>
-              <span className={`text-xs font-black ${rankTheme.badgeText}`}>
+              <span className="text-xs font-bold text-slate-400">Cấp Bậc:</span>
+              <span className={`text-sm font-black ${rankTheme.badgeText}`}>
                 {tier.name}
               </span>
-              <span className="text-[11px] font-semibold text-slate-400">
+              <span className="text-xs font-semibold text-slate-400">
                 ({tier.title})
               </span>
             </div>
 
-            {/* Thứ Hạng Badge next to Name */}
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-500/10 border border-amber-500/25">
-              <span className="text-xs font-bold text-amber-300">Thứ Hạng:</span>
+            {/* Thứ Hạng (Clean text, zero card box / zero border) */}
+            <div className="inline-flex items-center gap-1.5">
+              <span className="text-xs font-bold text-slate-400">Thứ Hạng:</span>
               <span className="text-sm font-black text-amber-400 font-mono">
                 {stats.rank}
               </span>
