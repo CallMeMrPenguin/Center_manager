@@ -1719,17 +1719,29 @@ def get_class_attendance_grades(class_id: int, date_str: str) -> List[Dict[str, 
 def upsert_class_attendance_grades(class_id: int, date_str: str, records: List[Dict[str, Any]]):
     conn = get_connection()
     cursor = conn.cursor()
+
+    # Ensure class_sessions record exists for this date
+    cursor.execute("SELECT id FROM class_sessions WHERE class_id = ? AND date = ?", (class_id, date_str))
+    if not cursor.fetchone():
+        try:
+            cursor.execute("""
+                INSERT INTO class_sessions (class_id, date, start_time, duration, status)
+                VALUES (?, ?, '18:00', 90, 'Đã hoàn thành')
+            """, (class_id, date_str))
+        except Exception:
+            pass
+
     for rec in records:
         student_id = rec.get("student_id")
         if not student_id:
             continue
         
         def parse_score(val):
-            if val is None or val == "" or val == 0 or val == "0":
+            if val is None or val == "" or val == "null" or val == "undefined":
                 return None
             try:
                 v = float(val)
-                return v if v > 0 else None
+                return v if v >= 0 else None
             except (ValueError, TypeError):
                 return None
 
@@ -1743,13 +1755,15 @@ def upsert_class_attendance_grades(class_id: int, date_str: str, records: List[D
 
         has_score = (c1 is not None) or (c2 is not None) or (hw is not None) or (mock is not None)
         notes = (rec.get("notes") or "").strip()
-        status = rec.get("status")
+        raw_status = rec.get("status")
 
         if has_score:
             status = "Có mặt"
-        elif is_past_date and not has_score and not notes:
+        elif raw_status:
+            status = raw_status
+        elif is_past_date and not notes:
             status = "Vắng mặt"
-        elif not status:
+        else:
             status = "Có mặt"
 
         cursor.execute("""
@@ -2536,7 +2550,6 @@ def get_analytics_reports(class_id: Optional[int] = None, student_id: Optional[i
         FROM class_attendance_grades ag
         JOIN students s ON ag.student_id = s.id
         JOIN classes c ON ag.class_id = c.id
-        JOIN class_students cs ON ag.student_id = cs.student_id AND ag.class_id = cs.class_id
         LEFT JOIN class_sessions csess ON ag.class_id = csess.class_id AND ag.date = csess.date
         ORDER BY ag.date ASC
     """)

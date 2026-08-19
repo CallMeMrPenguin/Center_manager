@@ -367,6 +367,7 @@ export default function ClassesPage() {
       setAttendanceRecords(finalRecords);
       await api.saveClassAttendance(selectedClass.id, attendanceDate, finalRecords);
       showToast("Đã lưu bảng điểm danh và điểm học sinh!", "success");
+      notifyDataChanged();
     } catch (err: any) {
       showToast("Lưu thất bại: " + err.message, "error");
     } finally {
@@ -420,6 +421,7 @@ export default function ClassesPage() {
     if (selectedClass && updatedRecords.length > 0) {
       try {
         await api.saveClassAttendance(selectedClass.id, attendanceDate, updatedRecords);
+        notifyDataChanged();
       } catch (err: any) {
         console.error("Tự động lưu thất bại:", err);
       }
@@ -550,6 +552,7 @@ export default function ClassesPage() {
         showToast("Đã xóa lớp học!", "success");
         if (selectedClass?.id === cls.id) setSelectedClass(null);
         loadClasses();
+        notifyDataChanged();
       } catch (err: any) {
         showToast("Không thể xóa: " + err.message, "error");
       }
@@ -569,6 +572,7 @@ export default function ClassesPage() {
       setEnrollModalOpen(false);
       setSelectedStudentIdsToEnroll([]);
       loadClassDetailData(selectedClass);
+      notifyDataChanged();
     } catch (err: any) {
       showToast("Ghi danh thất bại: " + err.message, "error");
     } finally {
@@ -583,6 +587,7 @@ export default function ClassesPage() {
       showToast("Đã xoá học sinh khỏi lớp!", "success");
       setActionModalOpen(false);
       loadClassDetailData(selectedClass);
+      notifyDataChanged();
     } catch (err: any) {
       showToast("Không thể bỏ ghi danh: " + err.message, "error");
     }
@@ -1959,6 +1964,7 @@ export default function ClassesPage() {
           grade={selectedClass.grade}
           onSaved={() => {
             loadAttendanceData(selectedClass.id, attendanceDate);
+            notifyDataChanged();
           }}
         />
       )}

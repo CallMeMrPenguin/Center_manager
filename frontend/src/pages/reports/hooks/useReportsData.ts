@@ -129,7 +129,7 @@ export function useReportsData() {
     }
   };
 
-  const loadAnalyticsData = async (silent?: boolean | any) => {
+  const loadAnalyticsData = useCallback(async (silent?: boolean | any) => {
     const isSilent = silent === true;
     if (!isSilent) setLoading(true);
     try {
@@ -156,7 +156,7 @@ export function useReportsData() {
     } finally {
       if (!isSilent) setLoading(false);
     }
-  };
+  }, [selectedClassId, selectedStudentId]);
 
   const loadTimePhases = useCallback(async () => {
     try {
@@ -170,18 +170,20 @@ export function useReportsData() {
 
   useEffect(() => {
     loadClassesAndStudents();
-    loadAnalyticsData();
-    const handleDataChanged = () => {
-      loadClassesAndStudents();
-      loadAnalyticsData();
-    };
-    window.addEventListener('data-changed', handleDataChanged);
-    return () => window.removeEventListener('data-changed', handleDataChanged);
   }, []);
 
   useEffect(() => {
     loadAnalyticsData();
-  }, [selectedClassId, selectedStudentId]);
+  }, [loadAnalyticsData]);
+
+  useEffect(() => {
+    const handleDataChanged = () => {
+      loadClassesAndStudents();
+      loadAnalyticsData(true);
+    };
+    window.addEventListener('data-changed', handleDataChanged);
+    return () => window.removeEventListener('data-changed', handleDataChanged);
+  }, [loadAnalyticsData]);
 
   useEffect(() => {
     loadTimePhases();

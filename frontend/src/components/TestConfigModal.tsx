@@ -4,6 +4,7 @@ import { CustomSelect } from './CustomSelect';
 import { CustomMultiSelect } from './CustomMultiSelect';
 import { api } from '../api';
 import { showToast } from './Toast';
+import { notifyDataChanged } from '../utils';
 
 export interface TestConfigItemData {
   skill: string; // 'vocab' | 'grammar' | 'mixed'
@@ -209,6 +210,7 @@ export const TestConfigModal: React.FC<TestConfigModalProps> = ({
         notes: config.notes,
       });
       showToast('Đã lưu cấu hình bài kiểm tra cho buổi học.', 'success');
+      notifyDataChanged();
       if (onSaved) onSaved(config);
       onClose();
     } catch (err: any) {
