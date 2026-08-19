@@ -9,6 +9,13 @@ import {
   MapPin,
   Clock,
   X,
+  Award,
+  Activity,
+  Sparkles,
+  BookOpen,
+  FileText,
+  CheckSquare,
+  CheckCircle2,
 } from 'lucide-react';
 import { getStudentTier, StudentTier } from '../types';
 
@@ -45,21 +52,21 @@ export const StudentProfileHeader: React.FC<StudentProfileHeaderProps> = ({
   const getRankTheme = (t: number) => {
     switch (t) {
       case 8: // Quán Quân
-        return { badgeText: 'text-amber-400 font-black' };
+        return { badgeText: 'text-amber-400 font-black', bgBadge: 'bg-amber-500/10 border-amber-500/30' };
       case 7: // Cao Thủ
-        return { badgeText: 'text-rose-400 font-black' };
+        return { badgeText: 'text-rose-400 font-black', bgBadge: 'bg-rose-500/10 border-rose-500/30' };
       case 6: // Tinh Anh
-        return { badgeText: 'text-purple-400 font-black' };
+        return { badgeText: 'text-purple-400 font-black', bgBadge: 'bg-purple-500/10 border-purple-500/30' };
       case 5: // Kim Cương
-        return { badgeText: 'text-cyan-400 font-black' };
+        return { badgeText: 'text-cyan-400 font-black', bgBadge: 'bg-cyan-500/10 border-cyan-500/30' };
       case 4: // Bạch Kim
-        return { badgeText: 'text-indigo-300 font-bold' };
+        return { badgeText: 'text-indigo-300 font-bold', bgBadge: 'bg-indigo-500/10 border-indigo-500/30' };
       case 3: // Vàng
-        return { badgeText: 'text-yellow-400 font-bold' };
+        return { badgeText: 'text-yellow-400 font-bold', bgBadge: 'bg-yellow-500/10 border-yellow-500/30' };
       case 2: // Bạc
-        return { badgeText: 'text-sky-300 font-bold' };
+        return { badgeText: 'text-sky-300 font-bold', bgBadge: 'bg-sky-500/10 border-sky-500/30' };
       default: // Đồng
-        return { badgeText: 'text-amber-500 font-bold' };
+        return { badgeText: 'text-amber-500 font-bold', bgBadge: 'bg-amber-600/10 border-amber-600/30' };
     }
   };
 
@@ -78,8 +85,31 @@ export const StudentProfileHeader: React.FC<StudentProfileHeaderProps> = ({
       : `Lớp ${student.grade}`
     : 'Lớp 6';
 
+  // Calculate PI index (Performance Index on 0-100 scale)
+  const rawPi = student.performance_index != null
+    ? Number(student.performance_index)
+    : (scoreNum > 0 ? scoreNum * 10 : 0);
+  const piScore = rawPi > 0 ? rawPi.toFixed(1) : (scoreNum > 0 ? (scoreNum * 10).toFixed(1) : '0.0');
+
+  // Dynamic Evaluation based on PI & Score
+  const getEvaluation = (score: number, piVal: number) => {
+    if (student.rating_label) {
+      return { text: student.rating_label, color: 'text-emerald-400' };
+    }
+    if (score >= 9.5 || piVal >= 95) return { text: 'Xuất Chúng (Vững Vàng)', color: 'text-amber-400' };
+    if (score >= 9.0 || piVal >= 90) return { text: 'Vượt Trội (Ưu Tú)', color: 'text-rose-400' };
+    if (score >= 8.5 || piVal >= 85) return { text: 'Xuất Sắc (Tiến Bộ Nhanh)', color: 'text-purple-400' };
+    if (score >= 8.0 || piVal >= 80) return { text: 'Giỏi (Nắm Chắc)', color: 'text-cyan-400' };
+    if (score >= 7.0 || piVal >= 70) return { text: 'Khá (Đang Tiến Bộ)', color: 'text-blue-400' };
+    if (score >= 5.5 || piVal >= 55) return { text: 'Trung Bình (Cần Củng Cố)', color: 'text-amber-400' };
+    if (score > 0) return { text: 'Yếu (Cần Phụ Đạo)', color: 'text-rose-400' };
+    return { text: 'Chưa Đánh Giá', color: 'text-slate-400' };
+  };
+
+  const evaluation = getEvaluation(scoreNum, rawPi);
+
   return (
-    <div className="select-none relative bg-[#0e1222] border border-[#1e2744] p-6 rounded-2xl shadow-xl">
+    <div className="select-none relative bg-[#0e1222] border border-[#1e2744] p-5 sm:p-6 rounded-2xl shadow-xl space-y-5">
       {/* Top-Right Deselect Button (X icon only) */}
       <button
         onClick={onClearStudent}
@@ -89,217 +119,252 @@ export const StudentProfileHeader: React.FC<StudentProfileHeaderProps> = ({
         <X className="w-5 h-5 text-white" />
       </button>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
-        {/* LEFT: Student ID Card Information (cols 1-7) */}
-        <div className="lg:col-span-7 space-y-4">
-          {/* Avatar & Main Identification */}
-          <div className="flex items-start gap-4">
-            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-br from-indigo-600 via-indigo-700 to-purple-800 text-white font-black text-2xl sm:text-3xl flex items-center justify-center shadow-lg border border-white/20 ring-4 ring-indigo-500/10 shrink-0">
-              {student.full_name?.slice(0, 2)?.toUpperCase() || 'HS'}
-            </div>
-
-            <div className="flex-1 min-w-0 space-y-1">
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="font-mono text-xs font-bold text-indigo-300 bg-indigo-500/15 border border-indigo-500/30 px-2 py-0.5 rounded">
-                  ID: HS-{studentIdStr}
-                </span>
-                <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-400">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                  {student.status || 'Đang theo học'}
-                </span>
-              </div>
-
-              <div className="flex flex-wrap items-baseline gap-2">
-                <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight">
-                  {student.full_name}
-                </h2>
-                {student.nickname && (
-                  <span className="text-sm font-bold text-indigo-300">
-                    ({student.nickname})
-                  </span>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Personal Information Details Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2.5 pt-2 text-xs">
-            <div className="flex items-center gap-2">
-              <GraduationCap className="w-4 h-4 text-indigo-400 shrink-0" />
-              <span className="text-slate-400 font-medium min-w-[70px]">
-                Khối / Lớp:
-              </span>
-              <span className="font-semibold text-white truncate">
-                {gradeDisplay}
-              </span>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <School className="w-4 h-4 text-indigo-400 shrink-0" />
-              <span className="text-slate-400 font-medium min-w-[70px]">
-                Trường học:
-              </span>
-              <span className="font-semibold text-white truncate">
-                {student.school || 'Trung tâm'}
-              </span>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <Calendar className="w-4 h-4 text-indigo-400 shrink-0" />
-              <span className="text-slate-400 font-medium min-w-[70px]">
-                Ngày sinh:
-              </span>
-              <span className="font-semibold text-white">
-                {student.date_of_birth || 'Chưa cập nhật'}
-              </span>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <User className="w-4 h-4 text-indigo-400 shrink-0" />
-              <span className="text-slate-400 font-medium min-w-[70px]">
-                Giới tính:
-              </span>
-              <span className="font-semibold text-white">
-                {student.gender || 'Chưa cập nhật'}
-              </span>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <Users className="w-4 h-4 text-indigo-400 shrink-0" />
-              <span className="text-slate-400 font-medium min-w-[70px]">
-                Phụ huynh:
-              </span>
-              <span className="font-semibold text-white truncate">
-                {student.father_name ||
-                  student.mother_name ||
-                  'Chưa cập nhật'}
-              </span>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <Phone className="w-4 h-4 text-indigo-400 shrink-0" />
-              <span className="text-slate-400 font-medium min-w-[70px]">
-                Điện thoại:
-              </span>
-              <span className="font-semibold text-white">
-                {student.father_phone ||
-                  student.mother_phone ||
-                  student.phone ||
-                  'Chưa cập nhật'}
-              </span>
-            </div>
-
-            {student.enroll_date && (
-              <div className="flex items-center gap-2">
-                <Clock className="w-4 h-4 text-indigo-400 shrink-0" />
-                <span className="text-slate-400 font-medium min-w-[70px]">
-                  Nhập học:
-                </span>
-                <span className="font-semibold text-white">
-                  {student.enroll_date}
-                </span>
-              </div>
-            )}
-
-            {student.address && (
-              <div className="flex items-center gap-2 sm:col-span-2">
-                <MapPin className="w-4 h-4 text-indigo-400 shrink-0" />
-                <span className="text-slate-400 font-medium min-w-[70px]">
-                  Địa chỉ:
-                </span>
-                <span className="font-semibold text-white truncate">
-                  {student.address}
-                </span>
-              </div>
-            )}
-          </div>
+      {/* TOP HEADER: Avatar + Name + Nickname + Rank Badge + Thứ Hạng */}
+      <div className="flex flex-wrap items-center gap-4 pr-10">
+        {/* Avatar */}
+        <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-br from-indigo-600 via-indigo-700 to-purple-800 text-white font-black text-xl sm:text-2xl flex items-center justify-center shadow-lg border border-white/20 ring-4 ring-indigo-500/10 shrink-0">
+          {student.full_name?.slice(0, 2)?.toUpperCase() || 'HS'}
         </div>
 
-        {/* RIGHT: Detailed Vertical Scores & Performance (cols 8-12) */}
-        <div className="lg:col-span-5 lg:border-l lg:border-white/10 lg:pl-8 pt-4 lg:pt-0 border-t lg:border-t-0 border-white/10 space-y-4">
-          {/* Tier & Rank Header */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
+        {/* Identity & Rank Badges */}
+        <div className="flex-1 min-w-0 space-y-1.5">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="font-mono text-xs font-bold text-indigo-300 bg-indigo-500/15 border border-indigo-500/30 px-2 py-0.5 rounded">
+              ID: HS-{studentIdStr}
+            </span>
+            <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-400">
+              <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
+              {student.status || 'Đang theo học'}
+            </span>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+            {/* Student Name */}
+            <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight">
+              {student.full_name}
+            </h2>
+
+            {student.nickname && (
+              <span className="text-sm font-bold text-indigo-300">
+                ({student.nickname})
+              </span>
+            )}
+
+            {/* Rank / Cấp Bậc Badge next to Name */}
+            <div className={`inline-flex items-center gap-2 px-2.5 py-1 rounded-lg border ${rankTheme.bgBadge}`}>
               <img
                 src={tier.badge}
                 alt={tier.name}
-                className="w-12 h-12 object-contain drop-shadow-[0_4px_10px_rgba(0,0,0,0.5)]"
+                className="w-5 h-5 object-contain"
               />
-              <div>
-                <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 block">
-                  Cấp Bậc
-                </span>
-                <span className={`text-base font-black ${rankTheme.badgeText}`}>
-                  {tier.name}
-                </span>
-                <span className="text-xs font-semibold text-slate-300 block">
-                  {tier.title}
-                </span>
-              </div>
+              <span className="text-xs font-bold text-slate-300">Cấp Bậc:</span>
+              <span className={`text-xs font-black ${rankTheme.badgeText}`}>
+                {tier.name}
+              </span>
+              <span className="text-[11px] font-semibold text-slate-400">
+                ({tier.title})
+              </span>
             </div>
 
-            <div className="text-right pr-6 lg:pr-8">
-              <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 block">
-                Thứ Hạng
-              </span>
-              <span className="text-2xl font-black text-amber-400 font-mono tracking-tight">
+            {/* Thứ Hạng Badge next to Name */}
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-500/10 border border-amber-500/25">
+              <span className="text-xs font-bold text-amber-300">Thứ Hạng:</span>
+              <span className="text-sm font-black text-amber-400 font-mono">
                 {stats.rank}
               </span>
             </div>
           </div>
+        </div>
+      </div>
 
-          {/* Vertical Scores Breakdown */}
-          <div className="space-y-2 pt-1">
-            <div className="flex items-center justify-between py-1 border-b border-white/5">
-              <span className="text-xs font-bold text-slate-300 uppercase tracking-wider">
-                Điểm Tổng Kết
-              </span>
-              <span className="text-2xl font-black text-emerald-400 font-mono">
-                {stats.overall}
+      {/* MAIN BODY: 2 Balanced Columns with Matching Line Separators */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 pt-2">
+        {/* LEFT COLUMN: Thông Tin Cá Nhân (Lined Rows) */}
+        <div className="space-y-0.5">
+          <div className="flex items-center justify-between pb-2 border-b border-white/10">
+            <span className="text-xs font-black uppercase tracking-wider text-slate-400">
+              Thông Tin Học Sinh
+            </span>
+            <span className="text-xs text-slate-500 font-medium">Hồ sơ cá nhân</span>
+          </div>
+
+          <div className="flex items-center justify-between py-2.5 border-b border-white/10 text-sm">
+            <div className="flex items-center gap-2.5 text-slate-300">
+              <GraduationCap className="w-4 h-4 text-indigo-400 shrink-0" />
+              <span className="text-slate-400 font-medium">Khối / Lớp:</span>
+            </div>
+            <span className="font-bold text-white text-right truncate max-w-[200px] sm:max-w-none">
+              {gradeDisplay}
+            </span>
+          </div>
+
+          <div className="flex items-center justify-between py-2.5 border-b border-white/10 text-sm">
+            <div className="flex items-center gap-2.5 text-slate-300">
+              <School className="w-4 h-4 text-indigo-400 shrink-0" />
+              <span className="text-slate-400 font-medium">Trường học:</span>
+            </div>
+            <span className="font-bold text-white text-right truncate max-w-[200px] sm:max-w-none">
+              {student.school || 'Trung tâm'}
+            </span>
+          </div>
+
+          <div className="flex items-center justify-between py-2.5 border-b border-white/10 text-sm">
+            <div className="flex items-center gap-2.5 text-slate-300">
+              <Calendar className="w-4 h-4 text-indigo-400 shrink-0" />
+              <span className="text-slate-400 font-medium">Ngày sinh:</span>
+            </div>
+            <span className="font-semibold text-slate-200">
+              {student.date_of_birth || 'Chưa cập nhật'}
+            </span>
+          </div>
+
+          <div className="flex items-center justify-between py-2.5 border-b border-white/10 text-sm">
+            <div className="flex items-center gap-2.5 text-slate-300">
+              <User className="w-4 h-4 text-indigo-400 shrink-0" />
+              <span className="text-slate-400 font-medium">Giới tính:</span>
+            </div>
+            <span className="font-semibold text-slate-200">
+              {student.gender || 'Chưa cập nhật'}
+            </span>
+          </div>
+
+          <div className="flex items-center justify-between py-2.5 border-b border-white/10 text-sm">
+            <div className="flex items-center gap-2.5 text-slate-300">
+              <Users className="w-4 h-4 text-indigo-400 shrink-0" />
+              <span className="text-slate-400 font-medium">Phụ huynh:</span>
+            </div>
+            <span className="font-semibold text-slate-200 text-right truncate max-w-[200px] sm:max-w-none">
+              {student.father_name || student.mother_name || 'Chưa cập nhật'}
+            </span>
+          </div>
+
+          <div className="flex items-center justify-between py-2.5 border-b border-white/10 text-sm">
+            <div className="flex items-center gap-2.5 text-slate-300">
+              <Phone className="w-4 h-4 text-indigo-400 shrink-0" />
+              <span className="text-slate-400 font-medium">Điện thoại:</span>
+            </div>
+            <span className="font-semibold text-slate-200 font-mono">
+              {student.father_phone ||
+                student.mother_phone ||
+                student.phone ||
+                'Chưa cập nhật'}
+            </span>
+          </div>
+
+          <div className="flex items-center justify-between py-2.5 border-b border-white/10 text-sm">
+            <div className="flex items-center gap-2.5 text-slate-300">
+              {student.address ? (
+                <MapPin className="w-4 h-4 text-indigo-400 shrink-0" />
+              ) : (
+                <Clock className="w-4 h-4 text-indigo-400 shrink-0" />
+              )}
+              <span className="text-slate-400 font-medium">
+                {student.address ? 'Địa chỉ:' : 'Nhập học:'}
               </span>
             </div>
+            <span className="font-semibold text-slate-200 text-right truncate max-w-[220px]">
+              {student.address || student.enroll_date || 'Chưa cập nhật'}
+            </span>
+          </div>
+        </div>
 
-            <div className="flex items-center justify-between py-1 border-b border-white/5">
-              <span className="text-xs font-bold text-slate-300 uppercase tracking-wider">
-                {isTestMode ? 'Từ Vựng (Check 1)' : 'Check 1'}
+        {/* RIGHT COLUMN: Điểm Số, Chỉ Số PI & Đánh Giá (Lined Rows) */}
+        <div className="space-y-0.5">
+          <div className="flex items-center justify-between pb-2 border-b border-white/10">
+            <span className="text-xs font-black uppercase tracking-wider text-slate-400">
+              Kết Quả Học Tập & Đánh Giá
+            </span>
+            <span className="text-xs text-slate-500 font-medium">Thống kê chi tiết</span>
+          </div>
+
+          {/* Điểm Tổng Kết */}
+          <div className="flex items-center justify-between py-2.5 border-b border-white/10 text-sm">
+            <div className="flex items-center gap-2.5 text-slate-300">
+              <Award className="w-4 h-4 text-emerald-400 shrink-0" />
+              <span className="text-slate-300 font-bold">Điểm Tổng Kết</span>
+            </div>
+            <span className="text-xl sm:text-2xl font-black text-emerald-400 font-mono">
+              {stats.overall}
+            </span>
+          </div>
+
+          {/* Chỉ Số PI (Performance Index) */}
+          <div className="flex items-center justify-between py-2.5 border-b border-white/10 text-sm">
+            <div className="flex items-center gap-2.5 text-slate-300">
+              <Activity className="w-4 h-4 text-cyan-400 shrink-0" />
+              <span className="text-slate-300 font-bold">Chỉ Số PI (Hiệu Suất)</span>
+            </div>
+            <div className="flex items-baseline gap-1">
+              <span className="text-lg sm:text-xl font-black text-cyan-400 font-mono">
+                {piScore}
               </span>
-              <span className="text-xl font-black text-blue-400 font-mono">
-                {stats.c1 ?? '-'}
+              <span className="text-xs text-slate-400 font-bold">/ 100</span>
+            </div>
+          </div>
+
+          {/* Đánh Giá Năng Lực */}
+          <div className="flex items-center justify-between py-2.5 border-b border-white/10 text-sm">
+            <div className="flex items-center gap-2.5 text-slate-300">
+              <Sparkles className="w-4 h-4 text-amber-400 shrink-0" />
+              <span className="text-slate-300 font-bold">Đánh Giá Năng Lực</span>
+            </div>
+            <span className={`text-sm font-black ${evaluation.color}`}>
+              {evaluation.text}
+            </span>
+          </div>
+
+          {/* Check 1 (Từ Vựng) */}
+          <div className="flex items-center justify-between py-2.5 border-b border-white/10 text-sm">
+            <div className="flex items-center gap-2.5 text-slate-300">
+              <BookOpen className="w-4 h-4 text-blue-400 shrink-0" />
+              <span className="text-slate-400 font-medium">
+                {isTestMode ? 'Từ Vựng (Check 1)' : 'Check 1 (Từ Vựng)'}
               </span>
             </div>
+            <span className="text-base sm:text-lg font-black text-blue-400 font-mono">
+              {stats.c1 ?? '-'}
+            </span>
+          </div>
 
-            <div className="flex items-center justify-between py-1 border-b border-white/5">
-              <span className="text-xs font-bold text-slate-300 uppercase tracking-wider">
-                {isTestMode ? 'Ngữ Pháp (Check 2)' : 'Check 2'}
-              </span>
-              <span className="text-xl font-black text-purple-400 font-mono">
-                {stats.c2 ?? '-'}
+          {/* Check 2 (Ngữ Pháp) */}
+          <div className="flex items-center justify-between py-2.5 border-b border-white/10 text-sm">
+            <div className="flex items-center gap-2.5 text-slate-300">
+              <FileText className="w-4 h-4 text-purple-400 shrink-0" />
+              <span className="text-slate-400 font-medium">
+                {isTestMode ? 'Ngữ Pháp (Check 2)' : 'Check 2 (Ngữ Pháp)'}
               </span>
             </div>
+            <span className="text-base sm:text-lg font-black text-purple-400 font-mono">
+              {stats.c2 ?? '-'}
+            </span>
+          </div>
 
-            <div className="flex items-center justify-between py-1 border-b border-white/5">
-              <span className="text-xs font-bold text-slate-300 uppercase tracking-wider">
-                Homework (BTVN)
-              </span>
-              <span className="text-xl font-black text-amber-400 font-mono">
-                {stats.hw ?? '-'}
-              </span>
+          {/* Homework (BTVN) */}
+          <div className="flex items-center justify-between py-2.5 border-b border-white/10 text-sm">
+            <div className="flex items-center gap-2.5 text-slate-300">
+              <CheckSquare className="w-4 h-4 text-amber-400 shrink-0" />
+              <span className="text-slate-400 font-medium">Homework (BTVN)</span>
             </div>
+            <span className="text-base sm:text-lg font-black text-amber-400 font-mono">
+              {stats.hw ?? '-'}
+            </span>
+          </div>
 
-            <div className="flex items-center justify-between py-1">
-              <span className="text-xs font-bold text-slate-300 uppercase tracking-wider">
-                Chuyên Cần
-              </span>
-              <div className="flex items-baseline gap-2">
-                {stats.sessionCount !== undefined && stats.sessionCount > 0 && (
-                  <span className="text-[11px] font-semibold text-slate-400">
-                    ({stats.sessionCount} buổi)
-                  </span>
-                )}
-                <span className="text-xl font-black text-sky-400 font-mono">
-                  {stats.attendancePct}%
+          {/* Chuyên Cần */}
+          <div className="flex items-center justify-between py-2.5 border-b border-white/10 text-sm">
+            <div className="flex items-center gap-2.5 text-slate-300">
+              <CheckCircle2 className="w-4 h-4 text-sky-400 shrink-0" />
+              <span className="text-slate-400 font-medium">Chuyên Cần</span>
+            </div>
+            <div className="flex items-baseline gap-2">
+              {stats.sessionCount !== undefined && stats.sessionCount > 0 && (
+                <span className="text-xs text-slate-400">
+                  ({stats.sessionCount} buổi)
                 </span>
-              </div>
+              )}
+              <span className="text-base sm:text-lg font-black text-sky-400 font-mono">
+                {stats.attendancePct}%
+              </span>
             </div>
           </div>
         </div>
