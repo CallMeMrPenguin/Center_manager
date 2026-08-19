@@ -1,22 +1,5 @@
 import React from 'react';
-import {
-  GraduationCap,
-  School,
-  Calendar,
-  User,
-  Users,
-  Phone,
-  MapPin,
-  Clock,
-  X,
-  Award,
-  Activity,
-  Sparkles,
-  BookOpen,
-  FileText,
-  CheckSquare,
-  CheckCircle2,
-} from 'lucide-react';
+import { X } from 'lucide-react';
 import { getStudentTier, StudentTier } from '../types';
 
 interface StudentProfileHeaderProps {
@@ -119,7 +102,7 @@ export const StudentProfileHeader: React.FC<StudentProfileHeaderProps> = ({
         <X className="w-5 h-5 text-white" />
       </button>
 
-      {/* TOP HEADER: Avatar + Name + Nickname + Rank Badge + Thứ Hạng (NO PILL BOXES / NO BORDERS) */}
+      {/* TOP HEADER: Avatar + Name + Nickname + #Rank + Rank Icon + Rank Name */}
       <div className="flex flex-wrap items-center gap-4 pr-10">
         {/* Avatar */}
         <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-br from-indigo-600 to-purple-600 text-white font-black text-xl sm:text-2xl flex items-center justify-center shadow-lg shrink-0">
@@ -170,7 +153,7 @@ export const StudentProfileHeader: React.FC<StudentProfileHeaderProps> = ({
         </div>
       </div>
 
-      {/* MAIN BODY: 2 Balanced Columns with Matching Line Separators */}
+      {/* MAIN BODY: 2 Balanced Columns with Matching Line Separators (Clean Text Labels, No Icons) */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 pt-2">
         {/* LEFT COLUMN: Thông Tin Cá Nhân (Lined Rows) */}
         <div className="space-y-0.5">
@@ -182,60 +165,42 @@ export const StudentProfileHeader: React.FC<StudentProfileHeaderProps> = ({
           </div>
 
           <div className="flex items-center justify-between py-2.5 border-b border-white/10 text-sm">
-            <div className="flex items-center gap-2.5 text-slate-300">
-              <GraduationCap className="w-4 h-4 text-indigo-400 shrink-0" />
-              <span className="text-slate-400 font-medium">Khối / Lớp:</span>
-            </div>
+            <span className="text-slate-400 font-medium">Khối / Lớp:</span>
             <span className="font-bold text-white text-right truncate max-w-[200px] sm:max-w-none">
               {gradeDisplay}
             </span>
           </div>
 
           <div className="flex items-center justify-between py-2.5 border-b border-white/10 text-sm">
-            <div className="flex items-center gap-2.5 text-slate-300">
-              <School className="w-4 h-4 text-indigo-400 shrink-0" />
-              <span className="text-slate-400 font-medium">Trường học:</span>
-            </div>
+            <span className="text-slate-400 font-medium">Trường học:</span>
             <span className="font-bold text-white text-right truncate max-w-[200px] sm:max-w-none">
               {student.school || 'Trung tâm'}
             </span>
           </div>
 
           <div className="flex items-center justify-between py-2.5 border-b border-white/10 text-sm">
-            <div className="flex items-center gap-2.5 text-slate-300">
-              <Calendar className="w-4 h-4 text-indigo-400 shrink-0" />
-              <span className="text-slate-400 font-medium">Ngày sinh:</span>
-            </div>
+            <span className="text-slate-400 font-medium">Ngày sinh:</span>
             <span className="font-semibold text-slate-200">
               {student.date_of_birth || 'Chưa cập nhật'}
             </span>
           </div>
 
           <div className="flex items-center justify-between py-2.5 border-b border-white/10 text-sm">
-            <div className="flex items-center gap-2.5 text-slate-300">
-              <User className="w-4 h-4 text-indigo-400 shrink-0" />
-              <span className="text-slate-400 font-medium">Giới tính:</span>
-            </div>
+            <span className="text-slate-400 font-medium">Giới tính:</span>
             <span className="font-semibold text-slate-200">
               {student.gender || 'Chưa cập nhật'}
             </span>
           </div>
 
           <div className="flex items-center justify-between py-2.5 border-b border-white/10 text-sm">
-            <div className="flex items-center gap-2.5 text-slate-300">
-              <Users className="w-4 h-4 text-indigo-400 shrink-0" />
-              <span className="text-slate-400 font-medium">Phụ huynh:</span>
-            </div>
+            <span className="text-slate-400 font-medium">Phụ huynh:</span>
             <span className="font-semibold text-slate-200 text-right truncate max-w-[200px] sm:max-w-none">
               {student.father_name || student.mother_name || 'Chưa cập nhật'}
             </span>
           </div>
 
           <div className="flex items-center justify-between py-2.5 border-b border-white/10 text-sm">
-            <div className="flex items-center gap-2.5 text-slate-300">
-              <Phone className="w-4 h-4 text-indigo-400 shrink-0" />
-              <span className="text-slate-400 font-medium">Điện thoại:</span>
-            </div>
+            <span className="text-slate-400 font-medium">Điện thoại:</span>
             <span className="font-semibold text-slate-200 font-mono">
               {student.father_phone ||
                 student.mother_phone ||
@@ -245,23 +210,16 @@ export const StudentProfileHeader: React.FC<StudentProfileHeaderProps> = ({
           </div>
 
           <div className="flex items-center justify-between py-2.5 border-b border-white/10 text-sm">
-            <div className="flex items-center gap-2.5 text-slate-300">
-              {student.address ? (
-                <MapPin className="w-4 h-4 text-indigo-400 shrink-0" />
-              ) : (
-                <Clock className="w-4 h-4 text-indigo-400 shrink-0" />
-              )}
-              <span className="text-slate-400 font-medium">
-                {student.address ? 'Địa chỉ:' : 'Nhập học:'}
-              </span>
-            </div>
+            <span className="text-slate-400 font-medium">
+              {student.address ? 'Địa chỉ:' : 'Nhập học:'}
+            </span>
             <span className="font-semibold text-slate-200 text-right truncate max-w-[220px]">
               {student.address || student.enroll_date || 'Chưa cập nhật'}
             </span>
           </div>
         </div>
 
-        {/* RIGHT COLUMN: Điểm Số, Chỉ Số PI & Đánh Giá (Lined Rows) */}
+        {/* RIGHT COLUMN: Điểm Số, Chỉ Số PI & Đánh Giá (Lined Rows, No Icons) */}
         <div className="space-y-0.5">
           <div className="flex items-center justify-between pb-2 border-b border-white/10">
             <span className="text-xs font-black uppercase tracking-wider text-slate-400">
@@ -272,10 +230,7 @@ export const StudentProfileHeader: React.FC<StudentProfileHeaderProps> = ({
 
           {/* Điểm Tổng Kết */}
           <div className="flex items-center justify-between py-2.5 border-b border-white/10 text-sm">
-            <div className="flex items-center gap-2.5 text-slate-300">
-              <Award className="w-4 h-4 text-emerald-400 shrink-0" />
-              <span className="text-slate-300 font-bold">Điểm Tổng Kết</span>
-            </div>
+            <span className="text-slate-300 font-bold">Điểm Tổng Kết</span>
             <span className="text-xl sm:text-2xl font-black text-emerald-400 font-mono">
               {stats.overall}
             </span>
@@ -283,10 +238,7 @@ export const StudentProfileHeader: React.FC<StudentProfileHeaderProps> = ({
 
           {/* Chỉ Số PI (Performance Index) */}
           <div className="flex items-center justify-between py-2.5 border-b border-white/10 text-sm">
-            <div className="flex items-center gap-2.5 text-slate-300">
-              <Activity className="w-4 h-4 text-cyan-400 shrink-0" />
-              <span className="text-slate-300 font-bold">Chỉ Số PI (Hiệu Suất)</span>
-            </div>
+            <span className="text-slate-300 font-bold">Chỉ Số PI (Hiệu Suất)</span>
             <div className="flex items-baseline gap-1">
               <span className="text-lg sm:text-xl font-black text-cyan-400 font-mono">
                 {piScore}
@@ -297,10 +249,7 @@ export const StudentProfileHeader: React.FC<StudentProfileHeaderProps> = ({
 
           {/* Đánh Giá Năng Lực */}
           <div className="flex items-center justify-between py-2.5 border-b border-white/10 text-sm">
-            <div className="flex items-center gap-2.5 text-slate-300">
-              <Sparkles className="w-4 h-4 text-amber-400 shrink-0" />
-              <span className="text-slate-300 font-bold">Đánh Giá Năng Lực</span>
-            </div>
+            <span className="text-slate-300 font-bold">Đánh Giá Năng Lực</span>
             <span className={`text-sm font-black ${evaluation.color}`}>
               {evaluation.text}
             </span>
@@ -308,12 +257,9 @@ export const StudentProfileHeader: React.FC<StudentProfileHeaderProps> = ({
 
           {/* Check 1 (Từ Vựng) */}
           <div className="flex items-center justify-between py-2.5 border-b border-white/10 text-sm">
-            <div className="flex items-center gap-2.5 text-slate-300">
-              <BookOpen className="w-4 h-4 text-blue-400 shrink-0" />
-              <span className="text-slate-400 font-medium">
-                {isTestMode ? 'Từ Vựng (Check 1)' : 'Check 1 (Từ Vựng)'}
-              </span>
-            </div>
+            <span className="text-slate-400 font-medium">
+              {isTestMode ? 'Từ Vựng (Check 1)' : 'Check 1 (Từ Vựng)'}
+            </span>
             <span className="text-base sm:text-lg font-black text-blue-400 font-mono">
               {stats.c1 ?? '-'}
             </span>
@@ -321,12 +267,9 @@ export const StudentProfileHeader: React.FC<StudentProfileHeaderProps> = ({
 
           {/* Check 2 (Ngữ Pháp) */}
           <div className="flex items-center justify-between py-2.5 border-b border-white/10 text-sm">
-            <div className="flex items-center gap-2.5 text-slate-300">
-              <FileText className="w-4 h-4 text-purple-400 shrink-0" />
-              <span className="text-slate-400 font-medium">
-                {isTestMode ? 'Ngữ Pháp (Check 2)' : 'Check 2 (Ngữ Pháp)'}
-              </span>
-            </div>
+            <span className="text-slate-400 font-medium">
+              {isTestMode ? 'Ngữ Pháp (Check 2)' : 'Check 2 (Ngữ Pháp)'}
+            </span>
             <span className="text-base sm:text-lg font-black text-purple-400 font-mono">
               {stats.c2 ?? '-'}
             </span>
@@ -334,10 +277,7 @@ export const StudentProfileHeader: React.FC<StudentProfileHeaderProps> = ({
 
           {/* Homework (BTVN) */}
           <div className="flex items-center justify-between py-2.5 border-b border-white/10 text-sm">
-            <div className="flex items-center gap-2.5 text-slate-300">
-              <CheckSquare className="w-4 h-4 text-amber-400 shrink-0" />
-              <span className="text-slate-400 font-medium">Homework (BTVN)</span>
-            </div>
+            <span className="text-slate-400 font-medium">Homework (BTVN)</span>
             <span className="text-base sm:text-lg font-black text-amber-400 font-mono">
               {stats.hw ?? '-'}
             </span>
@@ -345,10 +285,7 @@ export const StudentProfileHeader: React.FC<StudentProfileHeaderProps> = ({
 
           {/* Chuyên Cần */}
           <div className="flex items-center justify-between py-2.5 border-b border-white/10 text-sm">
-            <div className="flex items-center gap-2.5 text-slate-300">
-              <CheckCircle2 className="w-4 h-4 text-sky-400 shrink-0" />
-              <span className="text-slate-400 font-medium">Chuyên Cần</span>
-            </div>
+            <span className="text-slate-400 font-medium">Chuyên Cần</span>
             <div className="flex items-baseline gap-2">
               {stats.sessionCount !== undefined && stats.sessionCount > 0 && (
                 <span className="text-xs text-slate-400">
