@@ -209,25 +209,25 @@ export const ChartControls: React.FC<ChartControlsProps> = ({
         </div>
       ) : (
         <div className="flex flex-wrap items-center justify-between gap-3 text-xs font-bold pt-1">
-          <div className="flex flex-wrap items-center gap-4">
-            <span className="text-slate-300">
-              Tổng số mẫu: <strong className="text-white font-mono">{bgdStats?.n ?? 0}</strong> lượt điểm
+          <div className="flex flex-wrap items-center gap-2 text-[11px] font-mono">
+            <span className="bg-[#101526] border border-[#202b48] px-2.5 py-1 rounded-lg text-slate-300">
+              Tổng số mẫu: <strong className="text-white font-bold">{bgdStats?.n ?? 0}</strong> lượt
             </span>
-            <span className="text-indigo-300 font-mono">
-              Điểm TB: <strong className="text-white">{format1Dec(bgdStats?.mean ?? 0)}đ</strong>
+            <span className="bg-[#101526] border border-[#202b48] px-2.5 py-1 rounded-lg text-indigo-300">
+              Điểm TB: <strong className="text-white font-bold">{format1Dec(bgdStats?.mean ?? 0)}đ</strong>
             </span>
-            <span className="text-purple-300 font-mono">
-              Trung vị: <strong className="text-white">{format1Dec(bgdStats?.median ?? 0)}đ</strong>
+            <span className="bg-[#101526] border border-[#202b48] px-2.5 py-1 rounded-lg text-purple-300">
+              Trung vị: <strong className="text-white font-bold">{format1Dec(bgdStats?.median ?? 0)}đ</strong>
             </span>
-            <span className="text-cyan-300 font-mono">
-              Độ lệch chuẩn σ: <strong className="text-white">{format1Dec(bgdStats?.sd ?? 0)}</strong>
+            <span className="bg-[#101526] border border-[#202b48] px-2.5 py-1 rounded-lg text-cyan-300">
+              Độ lệch σ: <strong className="text-white font-bold">{format1Dec(bgdStats?.sd ?? 0)}</strong>
             </span>
-            <span className="text-emerald-300 font-mono">
-              Đạt yêu cầu: <strong className="text-white">{bgdStats?.passPct ?? 0}%</strong>
+            <span className="bg-[#101526] border border-[#202b48] px-2.5 py-1 rounded-lg text-emerald-300">
+              Đạt chuẩn: <strong className="text-white font-bold">{bgdStats?.passPct ?? 0}%</strong>
             </span>
           </div>
 
-          <span className="text-[11px] font-bold text-slate-400">
+          <span className="bg-[#101526] border border-[#202b48] px-3 py-1 rounded-lg text-[11px] font-bold text-amber-300">
             {bgdStats?.skewnessLabel}
           </span>
         </div>

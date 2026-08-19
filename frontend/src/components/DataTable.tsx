@@ -1198,15 +1198,7 @@ export function DataTable<TData>({
                   Trang <span className="text-white">{pageIndex + 1}</span> / {pageCount}
                   <span className="text-slate-600 ml-2">({totalFiltered.toLocaleString()} bản ghi)</span>
                 </span>
-                <select
-                  value={table.getState().pagination.pageSize}
-                  onChange={e => table.setPageSize(Number(e.target.value))}
-                  className="bg-[#13192c] border border-[#253050] text-white text-[10px] font-bold rounded-lg px-2 py-1 focus:outline-none cursor-pointer"
-                >
-                  {[10, 20, 50, 100].map(sz => (
-                    <option key={sz} value={sz}>{sz} / trang</option>
-                  ))}
-                </select>
+                
               </div>
 
               {/* Right nav */}

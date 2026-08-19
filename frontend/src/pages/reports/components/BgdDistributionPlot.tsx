@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { BgdDistributionStats, GradeTypeFilterKey } from '../utils/bgdAnalytics';
+import { Bgd3DHistogram, GranularityMode } from './Bgd3DHistogram';
+import { BgdBoxPlot } from './BgdBoxPlot';
 import { BgdDetailedCommentaryCard } from './BgdDetailedCommentaryCard';
-import { format1Dec } from '../../../utils';
 
 interface BgdDistributionPlotProps {
   stats: BgdDistributionStats;
@@ -14,16 +15,11 @@ interface BgdDistributionPlotProps {
 
 export const BgdDistributionPlot: React.FC<BgdDistributionPlotProps> = ({
   stats,
-  selectedStudentId,
-  selectedClassId,
   selectedGradeTypeFilter,
   setSelectedGradeTypeFilter,
   isTestMode,
 }) => {
-  const [hoveredBinScore, setHoveredBinScore] = useState<number | null>(null);
-
-  const maxBinCount = Math.max(1, ...stats.scoreBins.map((b) => b.count));
-  const hoveredBin = stats.scoreBins.find((b) => b.score === hoveredBinScore);
+  const [granularity, setGranularity] = useState<GranularityMode>('10bins');
 
   const filterTabs: { id: GradeTypeFilterKey; label: string }[] = [
     { id: 'overall', label: 'Tất Cả (Tổng Hợp)' },
@@ -37,10 +33,10 @@ export const BgdDistributionPlot: React.FC<BgdDistributionPlotProps> = ({
 
   return (
     <div className="flex flex-col gap-6 select-none animate-cascade-2">
-      {/* 1. TOP CONTROLS: Skill/Test-type Segmented Pill Control */}
+      {/* 1. TOP CONTROLS: Skill/Test-type Segmented Pill & Academic Tiers */}
       <div className="flex flex-wrap items-center justify-between gap-4 pb-2 border-b border-white/10">
         {/* Sliding Pill Indicator for Grade Type Filter */}
-        <div className="relative flex bg-[#0c101d] border border-[#1e2947] p-1 rounded-xl text-xs font-black select-none w-full lg:w-auto min-w-[580px] shrink-0">
+        <div className="relative flex bg-[#0c101d] border border-[#1e2947] p-1 rounded-xl text-xs font-black select-none w-full lg:w-auto min-w-[560px] shrink-0">
           <div
             className="absolute top-1 bottom-1 rounded-lg bg-[#5c36f5] shadow-[0_0_14px_rgba(92,54,245,0.5)] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] pointer-events-none"
             style={{
@@ -64,191 +60,38 @@ export const BgdDistributionPlot: React.FC<BgdDistributionPlotProps> = ({
           ))}
         </div>
 
-        {/* 4 Academic Tier Badges */}
-        <div className="flex flex-wrap items-center gap-3.5 text-[11px] font-bold">
-          <span className="flex items-center gap-1.5 text-rose-400">
-            <span className="w-2.5 h-2.5 rounded-sm bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.6)]" />
+        {/* 4 Academic Tier Badges (Clean flex badges, no pipes/bullets) */}
+        <div className="flex flex-wrap items-center gap-2.5 text-[11px] font-bold">
+          <span className="flex items-center gap-1.5 bg-[#12182b] border border-[#232f52] px-2 py-1 rounded-lg text-rose-400">
+            <span className="w-2 h-2 rounded-sm bg-rose-500 shadow-[0_0_6px_rgba(244,63,94,0.6)]" />
             Yếu &lt;5.0 ({stats.bands[0].pct}%)
           </span>
-          <span className="flex items-center gap-1.5 text-amber-400">
-            <span className="w-2.5 h-2.5 rounded-sm bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.6)]" />
+          <span className="flex items-center gap-1.5 bg-[#12182b] border border-[#232f52] px-2 py-1 rounded-lg text-amber-400">
+            <span className="w-2 h-2 rounded-sm bg-amber-500 shadow-[0_0_6px_rgba(245,158,11,0.6)]" />
             TB 5.0-6.4 ({stats.bands[1].pct}%)
           </span>
-          <span className="flex items-center gap-1.5 text-cyan-400">
-            <span className="w-2.5 h-2.5 rounded-sm bg-cyan-500 shadow-[0_0_8px_rgba(6,182,212,0.6)]" />
+          <span className="flex items-center gap-1.5 bg-[#12182b] border border-[#232f52] px-2 py-1 rounded-lg text-cyan-400">
+            <span className="w-2 h-2 rounded-sm bg-cyan-500 shadow-[0_0_6px_rgba(6,182,212,0.6)]" />
             Khá 6.5-7.9 ({stats.bands[2].pct}%)
           </span>
-          <span className="flex items-center gap-1.5 text-emerald-400">
-            <span className="w-2.5 h-2.5 rounded-sm bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)]" />
+          <span className="flex items-center gap-1.5 bg-[#12182b] border border-[#232f52] px-2 py-1 rounded-lg text-emerald-400">
+            <span className="w-2 h-2 rounded-sm bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.6)]" />
             Giỏi ≥8.0 ({stats.bands[3].pct}%)
           </span>
         </div>
       </div>
 
-      {/* 2. DENSE HISTOGRAM SCORE DISTRIBUTION CANVAS */}
-      <div className="relative rounded-2xl bg-[#080b14]/70 border border-[#182138] p-6 shadow-2xl flex flex-col gap-6">
-        {/* SVG Plot Area */}
-        <div className="w-full h-80 relative flex items-end gap-1 sm:gap-2 pt-10 pb-6 px-2 sm:px-4">
-          {/* Horizontal Grid lines */}
-          <div className="absolute inset-x-4 top-10 bottom-8 flex flex-col justify-between pointer-events-none opacity-20">
-            <div className="border-b border-white" />
-            <div className="border-b border-white" />
-            <div className="border-b border-white" />
-            <div className="border-b border-white" />
-          </div>
+      {/* 2. 3D ISOMETRIC HISTOGRAM CHART ENGINE */}
+      <Bgd3DHistogram
+        stats={stats}
+        granularity={granularity}
+        setGranularity={setGranularity}
+      />
 
-          {/* Dotted Lines for Mean & Median */}
-          <div
-            className="absolute top-6 bottom-8 w-0.5 border-l-2 border-dashed border-cyan-400/80 z-20 pointer-events-none"
-            style={{ left: `calc(1rem + ${(stats.mean / 10) * 100}% * ((100% - 2rem) / 100))` }}
-          >
-            <span className="absolute -top-5 left-1 text-[10px] font-black text-cyan-400 font-mono whitespace-nowrap bg-[#0a0e1c] px-1 rounded border border-cyan-500/30">
-              TB: {format1Dec(stats.mean)}đ
-            </span>
-          </div>
+      {/* 3. SEAMLESS HORIZONTAL BOX PLOT */}
+      <BgdBoxPlot stats={stats} />
 
-          <div
-            className="absolute top-6 bottom-8 w-0.5 border-l-2 border-amber-400 z-20 pointer-events-none shadow-[0_0_10px_rgba(245,158,11,0.8)]"
-            style={{ left: `calc(1rem + ${(stats.median / 10) * 100}% * ((100% - 2rem) / 100))` }}
-          >
-            <span className="absolute -top-5 right-1 text-[10px] font-black text-amber-400 font-mono whitespace-nowrap bg-[#0a0e1c] px-1 rounded border border-amber-500/30">
-              Trung vị: {format1Dec(stats.median)}đ
-            </span>
-          </div>
-
-          {/* 21 Bars across 0.0 to 10.0 */}
-          {stats.scoreBins.map((bin) => {
-            const heightPct = bin.count > 0 ? Math.max(8, Math.round((bin.count / maxBinCount) * 85)) : 2;
-            const isHovered = hoveredBinScore === bin.score;
-
-            return (
-              <div
-                key={bin.score}
-                onMouseEnter={() => setHoveredBinScore(bin.score)}
-                onMouseLeave={() => setHoveredBinScore(null)}
-                className="flex-1 flex flex-col items-center justify-end h-full relative cursor-pointer group"
-              >
-                {/* Floating Top Number on Hover */}
-                {bin.count > 0 && (
-                  <div
-                    className={`mb-1 flex flex-col items-center transition-all ${
-                      isHovered ? 'scale-110 opacity-100' : 'opacity-70 group-hover:opacity-100'
-                    }`}
-                  >
-                    <span className="text-[11px] font-black font-mono text-white">
-                      {bin.count}
-                    </span>
-                  </div>
-                )}
-
-                {/* Vertical Bar */}
-                <div className="w-full h-full flex items-end">
-                  <div
-                    className="w-full rounded-t-sm sm:rounded-t-md transition-all duration-300 ease-out relative overflow-hidden"
-                    style={{
-                      height: `${heightPct}%`,
-                      backgroundColor: bin.count > 0 ? bin.color : 'rgba(255,255,255,0.04)',
-                      boxShadow: isHovered && bin.count > 0 ? `0 0 16px ${bin.color}` : 'none',
-                      opacity: hoveredBinScore !== null && !isHovered ? 0.4 : 1,
-                    }}
-                  >
-                    {bin.count > 0 && (
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-white/20" />
-                    )}
-                  </div>
-                </div>
-
-                {/* X-axis Tick Label */}
-                <span
-                  className={`mt-2 text-[10px] font-mono block ${
-                    Number.isInteger(bin.score)
-                      ? 'font-bold text-slate-300'
-                      : 'text-slate-600 hidden sm:block text-[9px]'
-                  }`}
-                >
-                  {Number.isInteger(bin.score) ? bin.score : ''}
-                </span>
-              </div>
-            );
-          })}
-
-          {/* Floating Hover Tooltip Card */}
-          {hoveredBin && hoveredBin.count > 0 && (
-            <div
-              className="absolute z-30 pointer-events-none bg-[#12172b] border border-[#2c375e] p-2.5 rounded-xl shadow-[0_10px_30px_rgba(0,0,0,0.8)] text-xs font-sans transition-all duration-75"
-              style={{
-                left: `calc(1rem + ${(hoveredBin.score / 10) * 100}% * ((100% - 2rem) / 100))`,
-                top: '20px',
-                transform: 'translateX(-50%)',
-              }}
-            >
-              <div className="flex items-center gap-2 border-b border-white/10 pb-1 font-bold text-white">
-                <span className="w-2 h-2 rounded-full" style={{ backgroundColor: hoveredBin.color }} />
-                <span>Mức điểm: {hoveredBin.label}</span>
-              </div>
-              <div className="pt-1 text-[11px] space-y-0.5 font-mono">
-                <div className="text-slate-200">
-                  Số học sinh: <strong className="text-white font-bold">{hoveredBin.count}</strong> em
-                </div>
-                <div style={{ color: hoveredBin.color }} className="font-bold">
-                  Tỷ lệ: {hoveredBin.pct}%
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* 3. SEAMLESS HORIZONTAL BOX PLOT */}
-        <div className="pt-2 border-t border-white/10 flex flex-col gap-3">
-          <div className="flex flex-wrap items-center justify-between text-xs font-bold text-slate-300">
-            <span className="uppercase tracking-wider text-indigo-300">
-              BIỂU ĐỒ HỘP & TỨ PHÂN VỊ (BOX PLOT SUMMARY)
-            </span>
-            <span className="text-[11px] text-slate-400 font-mono">
-              Min: {format1Dec(stats.min)}đ - Q1: {format1Dec(stats.q1)}đ - Trung vị: {format1Dec(stats.median)}đ - Q3: {format1Dec(stats.q3)}đ - Max: {format1Dec(stats.max)}đ
-            </span>
-          </div>
-
-          {/* Graphical Box-and-Whisker Track */}
-          <div className="relative w-full h-8 flex items-center px-4 my-1">
-            <div className="absolute left-4 right-4 h-1 bg-[#1a233a] rounded-full" />
-
-            {/* Whisker Line */}
-            <div
-              className="absolute h-0.5 bg-indigo-400/60"
-              style={{
-                left: `calc(1rem + ${(stats.min / 10) * 100}% * ((100% - 2rem) / 100))`,
-                width: `calc(${((stats.max - stats.min) / 10) * 100}% * ((100% - 2rem) / 100))`,
-              }}
-            />
-
-            {/* IQR Box (Q1 to Q3) */}
-            <div
-              className="absolute h-6 rounded-lg bg-indigo-600/30 border border-indigo-400/80 shadow-[0_0_12px_rgba(99,102,241,0.3)] z-10 flex items-center justify-center"
-              style={{
-                left: `calc(1rem + ${(stats.q1 / 10) * 100}% * ((100% - 2rem) / 100))`,
-                width: `calc(${((stats.q3 - stats.q1) / 10) * 100}% * ((100% - 2rem) / 100))`,
-              }}
-            >
-              <span className="text-[10px] font-black text-indigo-200 font-mono">
-                IQR: {format1Dec(stats.iqr)}đ (50% học sinh)
-              </span>
-            </div>
-
-            {/* Median Mark */}
-            <div
-              className="absolute h-8 w-1 bg-amber-400 rounded-full shadow-[0_0_10px_rgba(245,158,11,0.9)] z-20"
-              style={{
-                left: `calc(1rem + ${(stats.median / 10) * 100}% * ((100% - 2rem) / 100))`,
-                transform: 'translateX(-50%)',
-              }}
-              title={`Trung vị: ${format1Dec(stats.median)}đ`}
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* 4. COMPREHENSIVE COMMENTARY CARD */}
+      {/* 4. COMPREHENSIVE COMMENTARY & PEDAGOGICAL ACTIONS */}
       <BgdDetailedCommentaryCard
         evaluation={stats.evaluation}
         distributionRating={stats.distributionRating}
