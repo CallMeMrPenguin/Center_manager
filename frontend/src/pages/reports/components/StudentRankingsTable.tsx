@@ -51,7 +51,7 @@ export const StudentRankingsTable: React.FC<StudentRankingsTableProps> = ({
       id: 'stt',
       header: () => <div className="text-center w-full">STT</div>,
       meta: { headerText: 'STT', exportValue: (_: any, idx: number) => idx + 1 },
-      cell: ({ row }) => <div className="text-center font-bold text-slate-400">{row.index + 1}</div>,
+      cell: ({ row }) => <div className="text-center font-bold text-slate-300 text-sm sm:text-base">{row.index + 1}</div>,
       enableSorting: false,
       enableGlobalFilter: false,
     },
@@ -63,7 +63,7 @@ export const StudentRankingsTable: React.FC<StudentRankingsTableProps> = ({
         const r = row.original;
         const isSelected = String(r.student_id) === selectedStudentId;
         return (
-          <div className="font-extrabold text-white text-base flex items-center justify-between gap-2">
+          <div className="font-extrabold text-white text-base sm:text-lg flex items-center justify-between gap-2">
             <span>{r.full_name}{r.nickname ? ` - ${r.nickname}` : ''}</span>
             {isSelected && <span className="text-xs text-indigo-400 bg-indigo-500/20 px-2 py-0.5 rounded font-mono">Đang chọn</span>}
           </div>
@@ -75,7 +75,7 @@ export const StudentRankingsTable: React.FC<StudentRankingsTableProps> = ({
       header: 'Lớp Học',
       meta: { headerText: 'Lớp Học', exportValue: (r: any) => r.class_name || 'Lớp học' },
       cell: (info) => (
-        <span className="inline-block px-2.5 py-0.5 rounded-lg text-xs font-black bg-[#1c2442] text-indigo-300 border border-[#303d68]">
+        <span className="inline-block px-3 py-1 rounded-lg text-xs sm:text-sm font-black bg-[#1c2442] text-indigo-300 border border-[#303d68]">
           {info.getValue<string>() || 'Lớp học'}
         </span>
       ),
@@ -89,8 +89,8 @@ export const StudentRankingsTable: React.FC<StudentRankingsTableProps> = ({
         const present = r.present_count ?? 0;
         const total = r.total_sessions ?? 0;
         return (
-          <div className="text-center font-bold font-mono text-xs">
-            <span className={present < total ? "text-amber-400 font-extrabold" : "text-emerald-400"}>{present}</span>
+          <div className="text-center font-bold font-mono text-xs sm:text-sm">
+            <span className={present < total ? "text-amber-400 font-black" : "text-emerald-400 font-black"}>{present}</span>
             <span className="text-slate-400"> / {total} buổi</span>
           </div>
         );
@@ -103,7 +103,7 @@ export const StudentRankingsTable: React.FC<StudentRankingsTableProps> = ({
       cell: ({ row }) => {
         const r = row.original;
         const pct = r.total_sessions > 0 ? Math.round((r.present_count / r.total_sessions) * 100) : 100;
-        return <div className="text-center font-bold text-emerald-400 font-mono">{pct}%</div>;
+        return <div className="text-center font-black text-emerald-400 font-mono text-sm sm:text-base">{pct}%</div>;
       },
     },
     {
@@ -112,7 +112,7 @@ export const StudentRankingsTable: React.FC<StudentRankingsTableProps> = ({
       meta: { headerText: isTestMode ? 'Từ Vựng' : 'Check 1', exportValue: (r: any) => Number(r.avg_check_1) > 0 ? format1Dec(Number(r.avg_check_1)) : '-' },
       cell: (info) => {
         const val = Number(info.getValue()) || 0;
-        return <div className="text-center font-extrabold text-blue-400 font-mono">{val > 0 ? format1Dec(val) : '-'}</div>;
+        return <div className="text-center font-black text-blue-400 font-mono text-sm sm:text-base">{val > 0 ? format1Dec(val) : '-'}</div>;
       },
     },
     {
@@ -121,7 +121,7 @@ export const StudentRankingsTable: React.FC<StudentRankingsTableProps> = ({
       meta: { headerText: isTestMode ? 'Ngữ Pháp' : 'Check 2', exportValue: (r: any) => Number(r.avg_check_2) > 0 ? format1Dec(Number(r.avg_check_2)) : '-' },
       cell: (info) => {
         const val = Number(info.getValue()) || 0;
-        return <div className="text-center font-extrabold text-purple-400 font-mono">{val > 0 ? format1Dec(val) : '-'}</div>;
+        return <div className="text-center font-black text-purple-400 font-mono text-sm sm:text-base">{val > 0 ? format1Dec(val) : '-'}</div>;
       },
     },
     {
@@ -130,7 +130,7 @@ export const StudentRankingsTable: React.FC<StudentRankingsTableProps> = ({
       meta: { headerText: 'Homework', exportValue: (r: any) => Number(r.avg_homework) > 0 ? format1Dec(Number(r.avg_homework)) : '-' },
       cell: (info) => {
         const val = Number(info.getValue()) || 0;
-        return <div className="text-center font-extrabold text-emerald-400 font-mono">{val > 0 ? format1Dec(val) : '-'}</div>;
+        return <div className="text-center font-black text-emerald-400 font-mono text-sm sm:text-base">{val > 0 ? format1Dec(val) : '-'}</div>;
       },
     },
     {
@@ -184,14 +184,14 @@ export const StudentRankingsTable: React.FC<StudentRankingsTableProps> = ({
         if (avg === 0) {
           return (
             <div className="text-center">
-              <span className="inline-block px-2.5 py-1 rounded-lg text-[10px] font-bold bg-slate-500/10 text-slate-400 border border-slate-500/30">Chưa xếp hạng</span>
+              <span className="inline-block px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-500/10 text-slate-400 border border-slate-500/30">Chưa xếp hạng</span>
             </div>
           );
         }
         const tier = getStudentTier(avg);
         return (
-          <div className="flex items-center justify-center gap-2.5 py-0.5">
-            <div className="w-11 h-11 flex items-center justify-center shrink-0">
+          <div className="flex items-center justify-center gap-3 py-0.5">
+            <div className="w-12 h-12 flex items-center justify-center shrink-0">
               <img
                 src={tier.badge}
                 alt={tier.name}
@@ -199,8 +199,8 @@ export const StudentRankingsTable: React.FC<StudentRankingsTableProps> = ({
               />
             </div>
             <div className="text-left">
-              <span className={`text-sm font-black font-sans block leading-tight ${tier.text}`}>{tier.name}</span>
-              <span className="text-[11px] text-slate-400 font-bold">{tier.title}</span>
+              <span className={`text-base font-black font-sans block leading-tight ${tier.text}`}>{tier.name}</span>
+              <span className="text-xs text-slate-400 font-bold">{tier.title}</span>
             </div>
           </div>
         );
@@ -243,22 +243,22 @@ export const StudentRankingsTable: React.FC<StudentRankingsTableProps> = ({
         if (avg === 0) {
           return (
             <div className="text-center">
-              <span className="inline-block px-2.5 py-1 rounded-lg text-[10px] font-bold bg-slate-500/10 text-slate-400 border border-slate-500/30">Chưa có điểm</span>
+              <span className="inline-block px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-500/10 text-slate-400 border border-slate-500/30">Chưa có điểm</span>
             </div>
           );
         }
         let label = 'Xuất Sắc', cls = 'bg-cyan-500/15 text-cyan-300 border-cyan-500/35';
-        if (avg >= 9.7) { label = 'Xuất Chúng'; cls = 'bg-amber-500/15 text-amber-300 border-amber-500/40 font-black'; }
-        else if (avg >= 9.4) { label = 'Vượt Trội'; cls = 'bg-pink-500/15 text-pink-300 border-pink-500/35 font-bold'; }
-        else if (avg >= 9.0) { label = 'Ưu Tú'; cls = 'bg-purple-500/15 text-purple-300 border-purple-500/35 font-bold'; }
-        else if (avg >= 8.5) { label = 'Xuất Sắc'; cls = 'bg-cyan-500/15 text-cyan-300 border-cyan-500/35 font-bold'; }
-        else if (avg >= 7.5) { label = 'Giỏi'; cls = 'bg-indigo-500/15 text-indigo-300 border-indigo-500/35 font-semibold'; }
-        else if (avg >= 6.5) { label = 'Khá'; cls = 'bg-yellow-500/15 text-yellow-300 border-yellow-500/35 font-semibold'; }
-        else if (avg >= 5.0) { label = 'Trung Bình'; cls = 'bg-sky-500/15 text-sky-300 border-sky-500/35'; }
+        if (avg >= 9.6) { label = 'Xuất Chúng'; cls = 'bg-amber-500/15 text-amber-300 border-amber-500/40 font-black'; }
+        else if (avg >= 9.2) { label = 'Vượt Trội'; cls = 'bg-pink-500/15 text-pink-300 border-pink-500/35 font-bold'; }
+        else if (avg >= 8.7) { label = 'Ưu Tú'; cls = 'bg-purple-500/15 text-purple-300 border-purple-500/35 font-bold'; }
+        else if (avg >= 8.0) { label = 'Xuất Sắc'; cls = 'bg-cyan-500/15 text-cyan-300 border-cyan-500/35 font-bold'; }
+        else if (avg >= 7.0) { label = 'Giỏi'; cls = 'bg-indigo-500/15 text-indigo-300 border-indigo-500/35 font-semibold'; }
+        else if (avg >= 6.0) { label = 'Khá'; cls = 'bg-yellow-500/15 text-yellow-300 border-yellow-500/35 font-semibold'; }
+        else if (avg >= 4.6) { label = 'Trung Bình'; cls = 'bg-sky-500/15 text-sky-300 border-sky-500/35'; }
         else { label = 'Yếu'; cls = 'bg-amber-700/15 text-amber-500 border-amber-700/35'; }
         return (
           <div className="text-center">
-            <span className={`inline-block px-2.5 py-1 rounded-lg text-[10px] font-black border ${cls}`}>{label} ({format1Dec(avg)})</span>
+            <span className={`inline-block px-3 py-1 rounded-lg text-xs font-black border ${cls}`}>{label} ({format1Dec(avg)})</span>
           </div>
         );
       },
