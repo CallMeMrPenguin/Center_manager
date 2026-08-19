@@ -14,6 +14,15 @@ export interface BgdDistributionBand {
   pct: number;
 }
 
+export interface BgdScoreBin {
+  score: number;
+  label: string;
+  count: number;
+  pct: number;
+  color: string;
+  bandId: string;
+}
+
 export interface BgdMetricItem {
   id: string;
   label: string;
@@ -58,7 +67,8 @@ export interface BgdDistributionStats {
   distributionShape: string;
   distributionRating: string;
   bands: BgdDistributionBand[];
-  scoreBins: { label: string; count: number; pct: number; min: number; max: number }[];
+  scoreBins: BgdScoreBin[];
+  curvePoints: { x: number; y: number }[];
   evaluation: BgdDetailedEvaluation;
   commentary: {
     headline: string;
@@ -136,39 +146,46 @@ export function computeBgdDistribution(
 
         if (mock > 0) {
           scores.push(mock);
-        } else if (c1 > 0 || c2 > 0 || hw > 0) {
-          const sc = trunc1Dec((c1 * 0.35) + (c2 * 0.55) + (hw * 0.10));
-          if (sc > 0) scores.push(sc);
+        } else {
+          if (c1 > 0) scores.push(c1);
+          if (c2 > 0) scores.push(c2);
+          if (hw > 0) scores.push(hw);
         }
       }
     });
   } else {
-    if (studentRankings && studentRankings.length > 0) {
-      studentRankings.forEach((s) => {
-        const sc = s.ema_level && Number(s.ema_level) > 0
-          ? Number(s.ema_level)
-          : trunc1Dec((Number(s.avg_check_1 || 0) * 0.35) + (Number(s.avg_check_2 || 0) * 0.55) + (Number(s.avg_homework || 0) * 0.10));
-        if (sc > 0) scores.push(sc);
-      });
-    }
-
-    if (scores.length === 0 && sessionRecords && sessionRecords.length > 0) {
+    // Extract individual scores from all sessions to build a rich, detailed distribution
+    if (sessionRecords && sessionRecords.length > 0) {
       sessionRecords.forEach((r) => {
         if (r.status !== 'Vắng mặt' && r.attendance !== 'absent') {
           const c1 = Number(r.check_1 || 0);
           const c2 = Number(r.check_2 || 0);
           const hw = Number(r.homework || 0);
-          if (c1 > 0 || c2 > 0 || hw > 0) {
-            const sc = trunc1Dec((c1 * 0.35) + (c2 * 0.55) + (hw * 0.10));
-            if (sc > 0) scores.push(sc);
+          const mock = Number(r.mock_test || 0);
+
+          if (mock > 0) {
+            scores.push(mock);
+          } else {
+            if (c1 > 0) scores.push(c1);
+            if (c2 > 0) scores.push(c2);
+            if (hw > 0) scores.push(hw);
           }
         }
+      });
+    }
+
+    // Fallback to student rankings if sessionRecords had no score values
+    if (scores.length === 0 && studentRankings && studentRankings.length > 0) {
+      studentRankings.forEach((s) => {
+        if (Number(s.avg_check_1 || 0) > 0) scores.push(Number(s.avg_check_1));
+        if (Number(s.avg_check_2 || 0) > 0) scores.push(Number(s.avg_check_2));
+        if (Number(s.avg_homework || 0) > 0) scores.push(Number(s.avg_homework));
       });
     }
   }
 
   if (scores.length === 0) {
-    scores.push(7.0, 7.5, 8.0, 8.5, 6.5, 6.0, 5.5, 9.0);
+    scores.push(5.0, 5.5, 6.0, 6.5, 6.8, 7.0, 7.2, 7.5, 7.8, 8.0, 8.2, 8.5, 9.0, 9.2);
   }
 
   scores.sort((a, b) => a - b);
@@ -216,18 +233,42 @@ export function computeBgdDistribution(
   const goodBand = bands[2];
   const excBand = bands[3];
 
-  const scoreBins = Array.from({ length: 10 }, (_, i) => {
-    const binMin = i;
-    const binMax = i + 1;
-    const count = scores.filter((s) => i === 9 ? (s >= 9.0 && s <= 10.0) : (s >= binMin && s < binMax)).length;
-    return {
-      label: `${binMin}-${binMax}đ`,
-      min: binMin,
-      max: binMax,
+  // 21 Dense Score Bins (Step 0.5: 0.0, 0.5, 1.0, ..., 10.0)
+  const scoreBins: BgdScoreBin[] = [];
+  for (let s = 0; s <= 10.0; s += 0.5) {
+    const binScore = Math.round(s * 10) / 10;
+    const count = scores.filter((v) => Math.abs(v - binScore) < 0.25).length;
+    let color = '#f43f5e';
+    let bandId = 'weak';
+    if (binScore >= 8.0) {
+      color = '#10b981';
+      bandId = 'excellent';
+    } else if (binScore >= 6.5) {
+      color = '#06b6d4';
+      bandId = 'good';
+    } else if (binScore >= 5.0) {
+      color = '#f59e0b';
+      bandId = 'average';
+    }
+
+    scoreBins.push({
+      score: binScore,
+      label: `${binScore}đ`,
       count,
       pct: Math.round((count / n) * 100),
-    };
-  });
+      color,
+      bandId,
+    });
+  }
+
+  // Bell curve calculation
+  const curvePoints: { x: number; y: number }[] = [];
+  const effectiveSd = Math.max(0.6, sd);
+  for (let s = 0; s <= 10.0; s += 0.2) {
+    const exponent = -0.5 * Math.pow((s - mean) / effectiveSd, 2);
+    const density = (1 / (effectiveSd * Math.sqrt(2 * Math.PI))) * Math.exp(exponent);
+    curvePoints.push({ x: s, y: density });
+  }
 
   let skewnessLabel = 'Phân bố cân đối';
   if (skewness > 0.15) {
@@ -257,10 +298,9 @@ export function computeBgdDistribution(
     distributionRating = 'Cần Củng Cố';
   }
 
-  // ── GENERATE POINT-BY-POINT METRIC ITEMS (COVERING ALL COMBINATIONS) ──
+  // Metrics point-by-point
   const metrics: BgdMetricItem[] = [];
 
-  // 1. Mean Item
   let meanInsight = '';
   if (mean >= 8.5) meanInsight = 'kết quả xuất sắc vượt trội, mặt bằng kiến thức toàn diện và rất vững vàng.';
   else if (mean >= 8.0) meanInsight = 'kết quả giỏi, phần lớn học sinh nắm chắc các chủ điểm kiến thức cốt lõi.';
@@ -275,12 +315,11 @@ export function computeBgdDistribution(
     color: '#3b82f6',
     text: `Điểm trung bình ${format1Dec(mean)} → ${meanInsight}`,
     tooltipTitle: 'Điểm Trung Bình (Mean)',
-    tooltipDesc: 'Mặt bằng điểm số chung của toàn bộ học sinh trong phạm vi đánh giá.',
+    tooltipDesc: 'Mặt bằng chung toàn bộ điểm số của học sinh trong phạm vi đánh giá.',
     tooltipFormula: 'Mean = (Tổng điểm của tất cả học sinh) / N',
     tooltipImpact: 'Cho biết mức độ vừa sức tổng thể của đề thi so với năng lực chung của lớp.',
   });
 
-  // 2. Median vs Mean Item
   let medianInsight = '';
   if (median > mean + 0.15) {
     medianInsight = `Trung vị ${format1Dec(median)} > trung bình ${format1Dec(mean)} → có một số học sinh điểm thấp kéo điểm trung bình xuống; phân bố điểm hơi lệch trái. Học sinh điển hình thực chất có học lực cao hơn điểm TB phản ánh.`;
@@ -302,7 +341,6 @@ export function computeBgdDistribution(
     tooltipImpact: 'Kháng nhiễu điểm số ngoại lai (outliers), phản ánh chính xác học sinh điển hình.',
   });
 
-  // 3. Standard Deviation (SD) Item
   let sdInsight = '';
   if (sd < 1.0) {
     sdInsight = `SD = ${format1Dec(sd)} → điểm số có độ phân tán rất thấp, trình độ học sinh trong lớp cực kỳ đồng đều.`;
@@ -326,7 +364,6 @@ export function computeBgdDistribution(
     tooltipImpact: 'Đo lường trực tiếp mức độ đồng đều hay khoảng cách chênh lệch trình độ trong lớp.',
   });
 
-  // 4. Interquartile Range (IQR) Item
   let iqrInsight = '';
   if (iqr < 1.2) {
     iqrInsight = `IQR = ${format1Dec(iqr)} → 50% học sinh ở vùng điểm trung tâm tập trung trong khoảng hẹp (${format1Dec(iqr)} điểm, từ ${format1Dec(q1)} đến ${format1Dec(q3)}). Trình độ đa số học sinh rất tương đồng.`;
@@ -348,12 +385,11 @@ export function computeBgdDistribution(
     tooltipImpact: 'Giúp giáo viên xác định "vùng an toàn" chứa đại đa số học sinh để thiết kế giáo án phù hợp.',
   });
 
-  // 5. Weak / Underperforming Item (< 5.0)
   const weakRatioText = weakBand.pct === 0
     ? '100% học sinh đều đạt chuẩn kiến thức từ 5.0 trở lên, không có học sinh yếu kém.'
     : weakBand.pct <= 10
-    ? `tỷ lệ học sinh chưa đạt ở mức thấp (${weakBand.count}/${n} học sinh). Đây là tỷ lệ trong tầm kiểm soát an toàn.`
-    : `cứ 10 học sinh thì khoảng ${Math.max(1, Math.round(weakBand.pct / 10))} em chưa đạt (${weakBand.count}/${n} học sinh). Đây là điểm cần quan tâm phụ đạo sớm.`;
+    ? `tỷ lệ học sinh chưa đạt ở mức thấp (${weakBand.count}/${n} lượt điểm). Đây là tỷ lệ trong tầm kiểm soát an toàn.`
+    : `cứ 10 học sinh thì khoảng ${Math.max(1, Math.round(weakBand.pct / 10))} em chưa đạt (${weakBand.count}/${n} lượt điểm). Đây là điểm cần quan tâm phụ đạo sớm.`;
 
   metrics.push({
     id: 'weak',
@@ -367,7 +403,6 @@ export function computeBgdDistribution(
     tooltipImpact: 'Chỉ số cảnh báo đỏ cần can thiệp phụ đạo để tránh tình trạng hổng kiến thức dây chuyền.',
   });
 
-  // 6. Good & Excellent Item (>= 8.0)
   let excFractionText = 'khoảng 1/5';
   if (excBand.pct >= 50) excFractionText = 'hơn một nửa';
   else if (excBand.pct >= 33) excFractionText = 'khoảng 1/3';
@@ -393,7 +428,6 @@ export function computeBgdDistribution(
     tooltipImpact: 'Đo lường chất lượng mũi nhọn và năng lực cạnh tranh học thuật của lớp.',
   });
 
-  // 7. Largest Group Item
   const sortedBands = [...bands].sort((a, b) => b.count - a.count);
   const largestBand = sortedBands[0];
   const largestBandName = largestBand.id === 'weak' ? 'yếu/kém (< 5)'
@@ -413,7 +447,7 @@ export function computeBgdDistribution(
     tooltipImpact: 'Xác định đối tượng học sinh trung tâm để định hình trọng tâm bài giảng chính khóa.',
   });
 
-  // ── GENERATE COMPREHENSIVE CONCLUSION & SYNTHESIS ────────────────────
+  // Conclusion synthesis
   const goodAndAboveCount = goodBand.count + excBand.count;
   const goodAndAbovePct = Math.round((goodAndAboveCount / n) * 100);
 
@@ -428,7 +462,7 @@ export function computeBgdDistribution(
   if (sd < 1.0) diffSummary = 'độ đồng đều giữa các học sinh rất cao';
   else if (sd > 2.0) diffSummary = 'sự phân cực học lực diễn ra rất mạnh';
 
-  const overviewSummary = `Chất lượng chung ${generalQuality}, nhưng ${diffSummary}. Nhóm học sinh đạt mức khá trở lên chiếm ${goodAndAbovePct}% (${goodAndAboveCount}/${n} học sinh), tuy nhiên vẫn còn ${weakBand.pct}% học sinh dưới 5 điểm, trong khi nhóm giỏi/xuất sắc chiếm ${excBand.pct}%.`;
+  const overviewSummary = `Chất lượng chung ${generalQuality}, nhưng ${diffSummary}. Nhóm học sinh đạt mức khá trở lên chiếm ${goodAndAbovePct}% (${goodAndAboveCount}/${n} lượt điểm), tuy nhiên vẫn còn ${weakBand.pct}% học sinh dưới 5 điểm, trong khi nhóm giỏi/xuất sắc chiếm ${excBand.pct}%.`;
 
   let deepDispersionReasoning = '';
   if (sd > 1.8 || iqr > 2.2) {
@@ -503,6 +537,7 @@ export function computeBgdDistribution(
     distributionRating,
     bands,
     scoreBins,
+    curvePoints,
     evaluation,
     commentary: {
       headline,

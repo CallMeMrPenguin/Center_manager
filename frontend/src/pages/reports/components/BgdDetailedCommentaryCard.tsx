@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { Info, BookOpen, CheckCircle2, ChevronRight, X } from 'lucide-react';
-import { BgdDetailedEvaluation, BgdMetricItem } from '../utils/bgdAnalytics';
+import React, { useState, useRef, useEffect } from 'react';
+import { Info, BookOpen, CheckCircle2, X } from 'lucide-react';
+import { BgdDetailedEvaluation } from '../utils/bgdAnalytics';
 
 interface BgdDetailedCommentaryCardProps {
   evaluation: BgdDetailedEvaluation;
@@ -12,13 +12,26 @@ export const BgdDetailedCommentaryCard: React.FC<BgdDetailedCommentaryCardProps>
   distributionRating,
 }) => {
   const [activeTooltipId, setActiveTooltipId] = useState<string | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
-  const activeMetric = evaluation.metrics.find((m) => m.id === activeTooltipId);
+  // Close floating tooltip when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setActiveTooltipId(null);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   return (
-    <div className="bg-[#0b0f19] border border-[#1b253b] rounded-2xl p-6 shadow-xl space-y-6 select-none relative animate-cascade-3">
+    <div
+      ref={containerRef}
+      className="bg-[#0b0f19] border border-[#1b253b] rounded-2xl p-6 shadow-xl space-y-6 select-none relative animate-cascade-3"
+    >
       {/* 1. HEADER TITLE & RATING BADGE */}
-      <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-white/5">
+      <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-white/10">
         <div className="flex items-center gap-2.5">
           <BookOpen size={16} className="text-indigo-400" />
           <h4 className="text-sm font-black uppercase text-white tracking-wider">
@@ -30,37 +43,33 @@ export const BgdDetailedCommentaryCard: React.FC<BgdDetailedCommentaryCardProps>
         </span>
       </div>
 
-      {/* 2. POINT-BY-POINT METRIC BREAKDOWN (WITH INDIVIDUAL INFO TOOLTIPS) */}
-      <div className="space-y-3">
+      {/* 2. POINT-BY-POINT METRIC BREAKDOWN (CLEAN ROWS, NO CARD-IN-CARD) */}
+      <div className="space-y-0.5 divide-y divide-white/5">
         {evaluation.metrics.map((item) => {
           const isTooltipActive = activeTooltipId === item.id;
 
           return (
             <div
               key={item.id}
-              className={`p-3 rounded-xl border transition-all relative ${
-                isTooltipActive
-                  ? 'bg-[#141b32] border-indigo-500/50 shadow-[0_0_15px_rgba(99,102,241,0.2)]'
-                  : 'bg-[#0d1222]/80 border-[#1c2642] hover:border-white/20'
-              }`}
+              className="py-2.5 flex items-start justify-between gap-3 relative group"
             >
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex items-start gap-2.5 min-w-0">
-                  {/* Glowing Indicator Pill */}
-                  <span
-                    className="w-2 h-2 rounded-full shrink-0 mt-1.5 shadow-[0_0_8px_rgba(255,255,255,0.4)]"
-                    style={{ backgroundColor: item.color }}
-                  />
-                  <p className="text-xs sm:text-sm font-medium text-slate-200 leading-relaxed">
-                    {item.text}
-                  </p>
-                </div>
+              <div className="flex items-start gap-3 min-w-0 pr-2">
+                {/* Glowing Indicator Dot */}
+                <span
+                  className="w-2 h-2 rounded-full shrink-0 mt-1.5 shadow-[0_0_8px_rgba(255,255,255,0.4)]"
+                  style={{ backgroundColor: item.color }}
+                />
+                <p className="text-xs sm:text-sm font-medium text-slate-200 leading-relaxed">
+                  {item.text}
+                </p>
+              </div>
 
-                {/* Info Button for Individual Metric Explanation */}
+              {/* Info Popover Button */}
+              <div className="relative shrink-0">
                 <button
                   type="button"
                   onClick={() => setActiveTooltipId(isTooltipActive ? null : item.id)}
-                  className={`p-1.5 rounded-lg shrink-0 transition cursor-pointer ${
+                  className={`p-1.5 rounded-lg transition cursor-pointer ${
                     isTooltipActive
                       ? 'bg-indigo-600 text-white shadow-[0_0_10px_rgba(99,102,241,0.6)]'
                       : 'text-slate-400 hover:text-white hover:bg-white/10'
@@ -69,44 +78,44 @@ export const BgdDetailedCommentaryCard: React.FC<BgdDetailedCommentaryCardProps>
                 >
                   <Info size={13} />
                 </button>
-              </div>
 
-              {/* In-place Explanatory Card for this Metric */}
-              {isTooltipActive && (
-                <div className="mt-3 pt-3 border-t border-white/10 space-y-2 text-xs animate-in fade-in duration-200">
-                  <div className="flex items-center justify-between text-indigo-300 font-bold">
-                    <span className="uppercase text-[10px] tracking-wider">
-                      Ý Nghĩa Chỉ Số: {item.tooltipTitle}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => setActiveTooltipId(null)}
-                      className="text-slate-400 hover:text-white cursor-pointer"
-                    >
-                      <X size={13} />
-                    </button>
-                  </div>
-                  <p className="text-slate-300 leading-relaxed text-[11px]">
-                    {item.tooltipDesc}
-                  </p>
-                  <div className="bg-[#090d18] p-2.5 rounded-lg border border-[#1e2744] space-y-1 font-mono text-[10px]">
-                    <div className="text-indigo-400 font-bold">
-                      {item.tooltipFormula}
+                {/* Floating Popover Card (Zero layout shift, absolute overlay) */}
+                {isTooltipActive && (
+                  <div className="absolute right-0 top-full mt-2 z-50 w-72 sm:w-80 p-3.5 rounded-xl bg-[#12172b] border border-[#2c375e] text-xs shadow-2xl space-y-2 animate-in fade-in zoom-in-95 duration-150">
+                    <div className="flex items-center justify-between text-indigo-300 font-bold border-b border-white/10 pb-1.5">
+                      <span className="uppercase text-[10px] tracking-wider">
+                        Ý Nghĩa: {item.tooltipTitle}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setActiveTooltipId(null)}
+                        className="text-slate-400 hover:text-white cursor-pointer"
+                      >
+                        <X size={13} />
+                      </button>
                     </div>
-                    <div className="text-slate-400 font-sans">
-                      {item.tooltipImpact}
+                    <p className="text-slate-300 leading-relaxed text-[11px]">
+                      {item.tooltipDesc}
+                    </p>
+                    <div className="bg-[#090d18] p-2.5 rounded-lg border border-[#1e2744] space-y-1 font-mono text-[10px]">
+                      <div className="text-indigo-400 font-bold">
+                        {item.tooltipFormula}
+                      </div>
+                      <div className="text-slate-400 font-sans">
+                        {item.tooltipImpact}
+                      </div>
                     </div>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
             </div>
           );
         })}
       </div>
 
-      {/* 3. KẾT LUẬN TỔNG QUAN & CHIẾN LƯỢC SƯ PHẠM */}
-      <div className="bg-[#0e1426] border border-[#1f2b4c] rounded-xl p-5 space-y-4 shadow-lg">
-        <div className="flex items-center gap-2 border-b border-white/10 pb-2.5">
+      {/* 3. KẾT LUẬN & ĐỊNH HƯỚNG SƯ PHẠM (SEAMLESS TYPOGRAPHY, NO BORDER-IN-BORDER) */}
+      <div className="space-y-3 pt-2">
+        <div className="flex items-center gap-2">
           <span className="text-xs font-black uppercase tracking-wider text-amber-400">
             KẾT LUẬN & ĐỊNH HƯỚNG SƯ PHẠM
           </span>
@@ -117,28 +126,25 @@ export const BgdDetailedCommentaryCard: React.FC<BgdDetailedCommentaryCardProps>
           {evaluation.conclusion.overviewSummary}
         </p>
 
-        {/* Paragraph 2: Deep Dispersion Warning (IQR & SD) */}
-        <p className="text-xs sm:text-sm font-semibold text-slate-300 leading-relaxed bg-[#090e1c] p-3.5 rounded-lg border border-white/5">
+        {/* Paragraph 2: Deep Dispersion Warning (Left accent line) */}
+        <p className="text-xs sm:text-sm font-medium text-slate-300 leading-relaxed border-l-2 border-indigo-500/80 pl-3.5 py-0.5">
           {evaluation.conclusion.dispersionWarning}
         </p>
 
-        {/* Paragraph 3: Core Pedagogical Action */}
-        <p className="text-xs sm:text-sm font-bold text-amber-300 leading-relaxed">
+        {/* Paragraph 3: Core Pedagogical Action (Left accent amber) */}
+        <p className="text-xs sm:text-sm font-bold text-amber-300 leading-relaxed border-l-2 border-amber-400/80 pl-3.5 py-0.5">
           {evaluation.conclusion.strategicAction}
         </p>
       </div>
 
-      {/* 4. HÀNH ĐỘNG SƯ PHẠM CỤ THỂ DÀNH CHO GIÁO VIÊN */}
-      <div className="space-y-2.5 pt-1">
+      {/* 4. HÀNH ĐỘNG SƯ PHẠM CỤ THỂ (CLEAN ROWS, NO BORDER BOXES) */}
+      <div className="space-y-2 pt-2 border-t border-white/5">
         <span className="text-xs font-black uppercase tracking-wider text-slate-400 block">
           KHUYẾN NGHỊ HÀNH ĐỘNG CỤ THỂ
         </span>
         <div className="space-y-2">
           {evaluation.pedagogicalActions.map((action, idx) => (
-            <div
-              key={idx}
-              className="flex items-start gap-2.5 bg-[#0e1424] p-3 rounded-xl border border-[#1f2b48] text-xs text-slate-200"
-            >
+            <div key={idx} className="flex items-start gap-2.5 text-xs text-slate-200 py-0.5">
               <CheckCircle2 size={15} className="text-emerald-400 shrink-0 mt-0.5" />
               <span className="leading-relaxed font-medium">{action}</span>
             </div>
