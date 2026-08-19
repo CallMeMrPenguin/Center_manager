@@ -435,7 +435,7 @@ input[type="month"]::-webkit-calendar-picker-indicator {
 @keyframes flyInUp {
   0% {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(22px);
   }
   100% {
     opacity: 1;
@@ -445,42 +445,42 @@ input[type="month"]::-webkit-calendar-picker-indicator {
 
 .animate-cascade-1,
 .animate-fly-1 {
-  animation: flyInUp 0.55s cubic-bezier(0.16, 1, 0.3, 1) 0.05s both;
+  animation: flyInUp 0.65s cubic-bezier(0.16, 1, 0.3, 1) 0.06s both;
 }
 
 .animate-cascade-2,
 .animate-fly-2 {
-  animation: flyInUp 0.55s cubic-bezier(0.16, 1, 0.3, 1) 0.15s both;
+  animation: flyInUp 0.65s cubic-bezier(0.16, 1, 0.3, 1) 0.16s both;
 }
 
 .animate-cascade-3,
 .animate-fly-3 {
-  animation: flyInUp 0.55s cubic-bezier(0.16, 1, 0.3, 1) 0.25s both;
+  animation: flyInUp 0.65s cubic-bezier(0.16, 1, 0.3, 1) 0.26s both;
 }
 
 .animate-cascade-4,
 .animate-fly-4 {
-  animation: flyInUp 0.55s cubic-bezier(0.16, 1, 0.3, 1) 0.35s both;
+  animation: flyInUp 0.65s cubic-bezier(0.16, 1, 0.3, 1) 0.36s both;
 }
 
 .animate-cascade-5,
 .animate-fly-5 {
-  animation: flyInUp 0.55s cubic-bezier(0.16, 1, 0.3, 1) 0.45s both;
+  animation: flyInUp 0.65s cubic-bezier(0.16, 1, 0.3, 1) 0.46s both;
 }
 
 .animate-cascade-6,
 .animate-fly-6 {
-  animation: flyInUp 0.55s cubic-bezier(0.16, 1, 0.3, 1) 0.55s both;
+  animation: flyInUp 0.65s cubic-bezier(0.16, 1, 0.3, 1) 0.56s both;
 }
 
 .animate-cascade-7,
 .animate-fly-7 {
-  animation: flyInUp 0.55s cubic-bezier(0.16, 1, 0.3, 1) 0.65s both;
+  animation: flyInUp 0.65s cubic-bezier(0.16, 1, 0.3, 1) 0.66s both;
 }
 
 .animate-cascade-8,
 .animate-fly-8 {
-  animation: flyInUp 0.55s cubic-bezier(0.16, 1, 0.3, 1) 0.75s both;
+  animation: flyInUp 0.65s cubic-bezier(0.16, 1, 0.3, 1) 0.76s both;
 }
 
 /* Table Row Fly In from Bottom (Smooth & Staggered) */

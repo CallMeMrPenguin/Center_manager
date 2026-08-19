@@ -226,56 +226,84 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = ({
           setHoveredPoint={setHoveredPoint}
         />
 
-        {/* Floating Hover Tooltip Card */}
-        {hoveredPoint && (
-          <div
-            className="absolute z-30 pointer-events-none bg-[#161c34] border border-[#2c375e] p-3.5 rounded-xl shadow-2xl text-xs font-sans transition-all duration-75"
-            style={{
-              left: `${Math.min(Math.max(hoveredPoint.x, 130), chartWidth - 160)}px`,
-              top: '20px',
-            }}
-          >
-            <div className="font-extrabold text-white border-b border-white/10 pb-1.5 flex items-center justify-between gap-4">
-              <span>{hoveredPoint.sessionName}</span>
-              <span className="text-[10px] text-slate-400 font-mono">{hoveredPoint.fullDate}</span>
+        {/* Floating Hover Tooltip Card (Anchored directly next to data point / mouse) */}
+        {hoveredPoint && (() => {
+          const cardWidth = 200;
+          const cardHeight = 160;
+          const pointX = hoveredPoint.x;
+          const pointY = hoveredPoint.y ?? 100;
+
+          // Default: Above the point, centered horizontally
+          let left = pointX;
+          let top = pointY - 14;
+          let transform = 'translate(-50%, -100%)';
+
+          // If too close to top edge, pop below the point
+          if (pointY < cardHeight + 20) {
+            top = pointY + 18;
+            transform = 'translate(-50%, 0)';
+          }
+
+          // Edge clamping horizontally so tooltip never overflows container
+          if (pointX < cardWidth / 2 + 16) {
+            left = 16;
+            transform = transform.replace('-50%', '0%');
+          } else if (pointX > chartWidth - (cardWidth / 2 + 16)) {
+            left = chartWidth - 16;
+            transform = transform.replace('-50%', '-100%');
+          }
+
+          return (
+            <div
+              className="absolute z-30 pointer-events-none bg-[#12172b] border border-[#2c375e] p-3 rounded-xl shadow-[0_10px_30px_rgba(0,0,0,0.8)] text-xs font-sans transition-all duration-75 min-w-[190px]"
+              style={{
+                left: `${left}px`,
+                top: `${top}px`,
+                transform,
+              }}
+            >
+              <div className="font-extrabold text-white border-b border-white/10 pb-1.5 flex items-center justify-between gap-4">
+                <span>{hoveredPoint.sessionName}</span>
+                <span className="text-[10px] text-slate-400 font-mono">{hoveredPoint.fullDate}</span>
+              </div>
+              <div className="space-y-1.5 pt-1.5">
+                <div className="flex items-center justify-between gap-4">
+                  <span className="text-blue-400 font-bold">{isTestMode ? 'Từ Vựng:' : 'Check 1:'}</span>
+                  <div className="flex items-center gap-1.5">
+                    <span className="font-mono font-extrabold text-white">{format1Dec(hoveredPoint.check1)}</span>
+                    {hoveredPoint.fittedC1 !== null && (
+                      <span className="text-[10px] font-mono text-slate-400">({format1Dec(hoveredPoint.fittedC1)})</span>
+                    )}
+                  </div>
+                </div>
+                <div className="flex items-center justify-between gap-4">
+                  <span className="text-purple-400 font-bold">{isTestMode ? 'Ngữ Pháp:' : 'Check 2:'}</span>
+                  <div className="flex items-center gap-1.5">
+                    <span className="font-mono font-extrabold text-white">{format1Dec(hoveredPoint.check2)}</span>
+                    {hoveredPoint.fittedC2 !== null && (
+                      <span className="text-[10px] font-mono text-slate-400">({format1Dec(hoveredPoint.fittedC2)})</span>
+                    )}
+                  </div>
+                </div>
+                <div className="flex items-center justify-between gap-4">
+                  <span className="text-emerald-400 font-bold">Homework:</span>
+                  <div className="flex items-center gap-1.5">
+                    <span className="font-mono font-extrabold text-white">{format1Dec(hoveredPoint.homework)}</span>
+                    {hoveredPoint.fittedHw !== null && (
+                      <span className="text-[10px] font-mono text-slate-400">({format1Dec(hoveredPoint.fittedHw)})</span>
+                    )}
+                  </div>
+                </div>
+                <div className="border-t border-white/10 pt-1 flex items-center justify-between gap-4">
+                  <span className="text-indigo-300 font-extrabold">Điểm TB Buổi:</span>
+                  <span className="font-mono font-black text-indigo-300">
+                    {format1Dec(trunc1Dec((hoveredPoint.check1 * 0.35) + (hoveredPoint.check2 * 0.55) + (hoveredPoint.homework * 0.10)))}
+                  </span>
+                </div>
+              </div>
             </div>
-            <div className="space-y-1.5 pt-1.5">
-              <div className="flex items-center justify-between gap-4">
-                <span className="text-blue-400 font-bold">{isTestMode ? 'Từ Vựng:' : 'Check 1:'}</span>
-                <div className="flex items-center gap-1.5">
-                  <span className="font-mono font-extrabold text-white">{format1Dec(hoveredPoint.check1)}</span>
-                  {hoveredPoint.fittedC1 !== null && (
-                    <span className="text-[10px] font-mono text-slate-400">({format1Dec(hoveredPoint.fittedC1)})</span>
-                  )}
-                </div>
-              </div>
-              <div className="flex items-center justify-between gap-4">
-                <span className="text-purple-400 font-bold">{isTestMode ? 'Ngữ Pháp:' : 'Check 2:'}</span>
-                <div className="flex items-center gap-1.5">
-                  <span className="font-mono font-extrabold text-white">{format1Dec(hoveredPoint.check2)}</span>
-                  {hoveredPoint.fittedC2 !== null && (
-                    <span className="text-[10px] font-mono text-slate-400">({format1Dec(hoveredPoint.fittedC2)})</span>
-                  )}
-                </div>
-              </div>
-              <div className="flex items-center justify-between gap-4">
-                <span className="text-emerald-400 font-bold">Homework:</span>
-                <div className="flex items-center gap-1.5">
-                  <span className="font-mono font-extrabold text-white">{format1Dec(hoveredPoint.homework)}</span>
-                  {hoveredPoint.fittedHw !== null && (
-                    <span className="text-[10px] font-mono text-slate-400">({format1Dec(hoveredPoint.fittedHw)})</span>
-                  )}
-                </div>
-              </div>
-              <div className="border-t border-white/10 pt-1 flex items-center justify-between gap-4">
-                <span className="text-indigo-300 font-extrabold">Điểm TB Buổi:</span>
-                <span className="font-mono font-black text-indigo-300">
-                  {format1Dec(trunc1Dec((hoveredPoint.check1 * 0.35) + (hoveredPoint.check2 * 0.55) + (hoveredPoint.homework * 0.10)))}
-                </span>
-              </div>
-            </div>
-          </div>
-        )}
+          );
+        })()}
       </div>
     </div>
   );

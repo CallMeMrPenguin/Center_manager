@@ -167,23 +167,35 @@ export const ChartSvgPlot: React.FC<ChartSvgPlotProps> = React.memo(({
             const yHw = getSvgY(d.homework);
             const pointDelay = (0.6 + (i / Math.max(1, sessionChartData.length - 1)) * 1.2).toFixed(2);
 
+            const highestY = Math.min(y1, y2, yHw);
+
+            const handleHover = (e: React.MouseEvent<SVGGElement>) => {
+              const svg = e.currentTarget.ownerSVGElement;
+              const svgRect = svg?.getBoundingClientRect();
+              const relY = svgRect ? (e.clientY - svgRect.top) : highestY;
+
+              setHoveredPoint({
+                index: i,
+                sessionName: d.sessionName,
+                fullDate: d.fullDate,
+                check1: d.check1,
+                check2: d.check2,
+                homework: d.homework,
+                x,
+                y: relY,
+                fittedC1: fittedLookup.c1[i] ?? null,
+                fittedC2: fittedLookup.c2[i] ?? null,
+                fittedHw: fittedLookup.hw[i] ?? null,
+                predModel: 'EMA',
+              });
+            };
+
             return (
               <g
                 key={`pt-${selectedStudentId || selectedClassId || 'all'}-${timeView}-${i}`}
                 className="cursor-pointer group"
-                onMouseEnter={() => setHoveredPoint({
-                  index: i,
-                  sessionName: d.sessionName,
-                  fullDate: d.fullDate,
-                  check1: d.check1,
-                  check2: d.check2,
-                  homework: d.homework,
-                  x,
-                  fittedC1: fittedLookup.c1[i] ?? null,
-                  fittedC2: fittedLookup.c2[i] ?? null,
-                  fittedHw: fittedLookup.hw[i] ?? null,
-                  predModel: 'EMA',
-                })}
+                onMouseEnter={handleHover}
+                onMouseMove={handleHover}
                 onMouseLeave={() => setHoveredPoint(null)}
               >
                 <rect x={x - 25} y={paddingTop} width={50} height={plotAreaHeight} fill="transparent" />

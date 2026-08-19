@@ -71,6 +71,7 @@ export interface HoveredChartPoint {
   check2: number;
   homework: number;
   x: number;
+  y: number;
   fittedC1: number | null;
   fittedC2: number | null;
   fittedHw: number | null;

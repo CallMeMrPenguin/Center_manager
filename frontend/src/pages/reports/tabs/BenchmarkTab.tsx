@@ -32,29 +32,33 @@ export const BenchmarkTab: React.FC<BenchmarkTabProps> = ({
   return (
     <div className="space-y-6 mb-8">
       {/* 1. 2-CLASS HEAD-TO-HEAD COMPARISON DUEL */}
-      <HeadToHeadDuel
-        classes={classes}
-        studentRankings={studentRankings}
-        sessionRecords={sessionRecords}
-        compareClassAId={compareClassAId}
-        setCompareClassAId={setCompareClassAId}
-        compareClassBId={compareClassBId}
-        setCompareClassBId={setCompareClassBId}
-        selectedClassId={selectedClassId}
-        analyticsSummary={analyticsSummary}
-        classAnalyticsMap={classAnalyticsMap}
-      />
+      <div className="animate-cascade-1">
+        <HeadToHeadDuel
+          classes={classes}
+          studentRankings={studentRankings}
+          sessionRecords={sessionRecords}
+          compareClassAId={compareClassAId}
+          setCompareClassAId={setCompareClassAId}
+          compareClassBId={compareClassBId}
+          setCompareClassBId={setCompareClassBId}
+          selectedClassId={selectedClassId}
+          analyticsSummary={analyticsSummary}
+          classAnalyticsMap={classAnalyticsMap}
+        />
+      </div>
 
       {/* 2. CROSS-CLASS BENCHMARK OVERVIEW TABLE */}
-      <ClassBenchmarkTable
-        loading={loading}
-        classes={classes}
-        studentRankings={studentRankings}
-        sessionRecords={sessionRecords}
-        selectedClassId={selectedClassId}
-        analyticsSummary={analyticsSummary}
-        classAnalyticsMap={classAnalyticsMap}
-      />
+      <div className="animate-cascade-2">
+        <ClassBenchmarkTable
+          loading={loading}
+          classes={classes}
+          studentRankings={studentRankings}
+          sessionRecords={sessionRecords}
+          selectedClassId={selectedClassId}
+          analyticsSummary={analyticsSummary}
+          classAnalyticsMap={classAnalyticsMap}
+        />
+      </div>
     </div>
   );
 };
