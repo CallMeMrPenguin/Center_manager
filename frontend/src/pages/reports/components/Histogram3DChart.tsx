@@ -24,7 +24,7 @@ export const Histogram3DChart: React.FC<Histogram3DChartProps> = ({
   const [svgWidth, setSvgWidth] = useState(1050);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-  const [isGrown, setIsGrown] = useState(false);
+  const [animFactor, setAnimFactor] = useState(0);
 
   useEffect(() => {
     const handleResize = () => {
@@ -37,13 +37,28 @@ export const Histogram3DChart: React.FC<Histogram3DChartProps> = ({
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Trigger column rising animation on mount and granularity/stats update
+  // Frame-by-frame direct SVG coordinate interpolation for guaranteed 100% smooth column rising animation
   useEffect(() => {
-    setIsGrown(false);
-    const timer = setTimeout(() => {
-      setIsGrown(true);
-    }, 60);
-    return () => clearTimeout(timer);
+    let animId: number;
+    const startTime = performance.now();
+    const duration = 680; // ms
+
+    setAnimFactor(0);
+
+    const tick = (now: number) => {
+      const elapsed = now - startTime;
+      const p = Math.min(1, elapsed / duration);
+      // Smooth cubic ease-out deceleration
+      const ease = 1 - Math.pow(1 - p, 3);
+      setAnimFactor(ease);
+
+      if (p < 1) {
+        animId = requestAnimationFrame(tick);
+      }
+    };
+
+    animId = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(animId);
   }, [granularity, stats]);
 
   const activeBins: DistributionScoreBin[] = useMemo(() => {
@@ -242,7 +257,12 @@ export const Histogram3DChart: React.FC<Histogram3DChartProps> = ({
           {activeBins.map((bin, i) => {
             const count = bin.count;
             const targetColHeight = (count / maxCount) * chartAreaHeight;
-            const currentHeight = Math.max(targetColHeight, count > 0 ? 8 : 2);
+
+            // Compute staggered frame animation progress for each column
+            const delayOffset = (i / Math.max(numBins - 1, 1)) * 0.28;
+            const colP = Math.max(0, Math.min(1, (animFactor - delayOffset) / (1 - delayOffset || 1)));
+            const colEase = 1 - Math.pow(1 - colP, 3);
+            const currentHeight = Math.max(targetColHeight * colEase, count > 0 ? 8 * colEase : 2);
 
             const slotStartX = paddingX + i * slotWidth;
             const x0 = slotStartX + (slotWidth - colWidth) / 2;
@@ -288,55 +308,45 @@ export const Histogram3DChart: React.FC<Histogram3DChartProps> = ({
                   transition: `opacity 0.15s ease, filter 0.15s ease`,
                 }}
               >
-                {/* Rising 3D Column Body Group (animates smoothly from baseY upward) */}
-                <g
+                {/* 1. Right Side Face */}
+                <polygon
+                  points={sidePoints}
+                  fill={sideColor}
+                  stroke="rgba(0,0,0,0.35)"
+                  strokeWidth={0.5}
+                />
+
+                {/* 2. Front Face */}
+                <polygon
+                  points={frontPoints}
+                  fill={count > 0 ? frontGrad : 'rgba(255,255,255,0.05)'}
+                  stroke={isSelected ? '#ffffff' : 'rgba(255,255,255,0.15)'}
+                  strokeWidth={isSelected ? 1.5 : 0.5}
+                />
+
+                {/* 3. Top Cap */}
+                <polygon
+                  points={topPoints}
+                  fill={count > 0 ? topGrad : 'rgba(255,255,255,0.08)'}
+                  stroke={isSelected ? '#ffffff' : 'rgba(255,255,255,0.4)'}
+                  strokeWidth={isSelected ? 1.5 : 0.5}
+                />
+
+                {/* Value on Top of Column (moves smoothly upwards with the rising column) */}
+                <text
+                  x={topCenterX}
+                  y={topCenterY - 10}
+                  textAnchor="middle"
+                  className={`font-mono font-black select-none fill-white ${
+                    isSelected ? 'text-lg sm:text-xl' : isHovered ? 'text-base sm:text-lg' : 'text-sm sm:text-base'
+                  }`}
                   style={{
-                    transform: isGrown ? 'scaleY(1)' : 'scaleY(0.01)',
-                    transformOrigin: `${topCenterX}px ${baseY}px`,
-                    transition: `transform 0.65s cubic-bezier(0.16, 1, 0.3, 1) ${i * 45}ms`,
+                    opacity: colP > 0.15 ? Math.min(1, (colP - 0.15) / 0.4) : 0,
+                    filter: isHovered || isSelected ? 'drop-shadow(0 0 6px rgba(255,255,255,0.9))' : 'none',
                   }}
                 >
-                  {/* 1. Right Side Face */}
-                  <polygon
-                    points={sidePoints}
-                    fill={sideColor}
-                    stroke="rgba(0,0,0,0.35)"
-                    strokeWidth={0.5}
-                  />
-
-                  {/* 2. Front Face */}
-                  <polygon
-                    points={frontPoints}
-                    fill={count > 0 ? frontGrad : 'rgba(255,255,255,0.05)'}
-                    stroke={isSelected ? '#ffffff' : 'rgba(255,255,255,0.15)'}
-                    strokeWidth={isSelected ? 1.5 : 0.5}
-                  />
-
-                  {/* 3. Top Cap */}
-                  <polygon
-                    points={topPoints}
-                    fill={count > 0 ? topGrad : 'rgba(255,255,255,0.08)'}
-                    stroke={isSelected ? '#ffffff' : 'rgba(255,255,255,0.4)'}
-                    strokeWidth={isSelected ? 1.5 : 0.5}
-                  />
-
-                  {/* Value on Top of Column */}
-                  <text
-                    x={topCenterX}
-                    y={topCenterY - 10}
-                    textAnchor="middle"
-                    className={`font-mono font-black select-none fill-white ${
-                      isSelected ? 'text-lg sm:text-xl' : isHovered ? 'text-base sm:text-lg' : 'text-sm sm:text-base'
-                    }`}
-                    style={{
-                      opacity: isGrown ? 1 : 0,
-                      transition: `opacity 0.3s ease ${i * 45 + 150}ms`,
-                      filter: isHovered || isSelected ? 'drop-shadow(0 0 6px rgba(255,255,255,0.9))' : 'none',
-                    }}
-                  >
-                    {count}
-                  </text>
-                </g>
+                  {count}
+                </text>
 
                 {/* X-axis Interval Label (Fixed at base platform) */}
                 <text
