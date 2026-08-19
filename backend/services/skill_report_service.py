@@ -167,9 +167,7 @@ def get_skill_breakdown_report(conn, class_id: Optional[int] = None, student_id:
             c1_cfg = cfg.get("check_1") or {}
             c2_cfg = cfg.get("check_2") or {}
 
-            c1_skill_type = c1_cfg.get("skill", "vocab")
-            c2_skill_type = c2_cfg.get("skill", "grammar")
-            c1_units = c1_cfg.get("units") or ([c1_cfg.get("topic") or c1_cfg.get("grammar_topic")] if (c1_cfg.get("topic") or c1_cfg.get("grammar_topic")) else ["Chung"])
+            c1_units = c1_cfg.get("units") or ([c1_cfg.get("topic")] if c1_cfg.get("topic") else ["Chung"])
             c2_units = c2_cfg.get("units") or ([c2_cfg.get("topic") or c2_cfg.get("grammar_topic")] if (c2_cfg.get("topic") or c2_cfg.get("grammar_topic")) else ["Chung"])
 
             at_risk_students = []
@@ -184,11 +182,9 @@ def get_skill_breakdown_report(conn, class_id: Optional[int] = None, student_id:
                 if c1_matched:
                     c1_pred = trunc_1_dec(sum(c1_matched) / len(c1_matched))
                 else:
-                    st_skill_scores = [v["ema_score"] for v in s_units.values() if v.get("skill") == c1_skill_type and v.get("ema_score") is not None]
-                    if st_skill_scores:
-                        c1_pred = trunc_1_dec(sum(st_skill_scores) / len(st_skill_scores))
-                    elif c1_skill_type == "grammar" and grammar_avg > 0:
-                        c1_pred = grammar_avg
+                    st_vocab = [v["ema_score"] for v in s_units.values() if v.get("skill") == "vocab" and v.get("ema_score") is not None]
+                    if st_vocab:
+                        c1_pred = trunc_1_dec(sum(st_vocab) / len(st_vocab))
                     elif vocab_avg > 0:
                         c1_pred = vocab_avg
                     else:
@@ -199,11 +195,9 @@ def get_skill_breakdown_report(conn, class_id: Optional[int] = None, student_id:
                 if c2_matched:
                     c2_pred = trunc_1_dec(sum(c2_matched) / len(c2_matched))
                 else:
-                    st_skill_scores = [v["ema_score"] for v in s_units.values() if v.get("skill") == c2_skill_type and v.get("ema_score") is not None]
-                    if st_skill_scores:
-                        c2_pred = trunc_1_dec(sum(st_skill_scores) / len(st_skill_scores))
-                    elif c2_skill_type == "vocab" and vocab_avg > 0:
-                        c2_pred = vocab_avg
+                    st_grammar = [v["ema_score"] for v in s_units.values() if v.get("skill") == "grammar" and v.get("ema_score") is not None]
+                    if st_grammar:
+                        c2_pred = trunc_1_dec(sum(st_grammar) / len(st_grammar))
                     elif grammar_avg > 0:
                         c2_pred = grammar_avg
                     else:
@@ -233,21 +227,18 @@ def get_skill_breakdown_report(conn, class_id: Optional[int] = None, student_id:
             avg_c2_pred = trunc_1_dec(sum(p["pred_c2"] for p in all_student_preds) / tot_st) if tot_st > 0 else 0.0
             readiness_rate = trunc_1_dec(ready_cnt / tot_st * 100) if tot_st > 0 else 0.0
 
-            c1_topic_val = c1_cfg.get("grammar_topic") if c1_skill_type == "grammar" else (c1_cfg.get("topic") or c1_cfg.get("grammar_topic", ""))
-            c2_topic_val = c2_cfg.get("grammar_topic") if c2_skill_type == "grammar" else (c2_cfg.get("topic") or c2_cfg.get("grammar_topic", ""))
-
             skill_prediction = {
                 "has_upcoming_config": True,
                 "session_date": ns["date"],
                 "check_1_info": {
-                    "skill": c1_skill_type,
+                    "skill": c1_cfg.get("skill", "vocab"),
                     "units": c1_units,
-                    "topic": c1_topic_val
+                    "topic": c1_cfg.get("topic", "")
                 },
                 "check_2_info": {
-                    "skill": c2_skill_type,
+                    "skill": c2_cfg.get("skill", "grammar"),
                     "units": c2_units,
-                    "topic": c2_topic_val
+                    "topic": c2_cfg.get("grammar_topic") or c2_cfg.get("topic", "")
                 },
                 "class_overview": {
                     "total_students": tot_st,

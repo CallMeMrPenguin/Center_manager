@@ -44,6 +44,28 @@ export const StudentGradeHistoryTable: React.FC<StudentGradeHistoryTableProps> =
       ),
     },
     {
+      id: 'student_name',
+      accessorFn: (r: any) => r.student_name || r.full_name || 'Học sinh',
+      header: 'Học Sinh',
+      meta: {
+        headerText: 'Học Sinh',
+        exportValue: (r: any) => `${r.student_name || r.full_name || 'Học sinh'}${r.nickname ? ` (${r.nickname})` : ''}`,
+      },
+      cell: ({ row }) => {
+        const r = row.original;
+        const name = r.student_name || r.full_name || 'Học sinh';
+        const nick = r.nickname;
+        return (
+          <div className="flex flex-col py-0.5">
+            <span className="font-bold text-slate-100 text-sm">{name}</span>
+            {nick && (
+              <span className="text-[11px] text-indigo-400 font-semibold">{nick}</span>
+            )}
+          </div>
+        );
+      },
+    },
+    {
       accessorKey: 'class_name',
       header: 'Lớp Học',
       meta: { headerText: 'Lớp Học', exportValue: (r: any) => r.class_name || 'Lớp học' },
@@ -69,37 +91,26 @@ export const StudentGradeHistoryTable: React.FC<StudentGradeHistoryTableProps> =
     },
     {
       accessorKey: 'check_1',
-      header: () => <div className="text-center w-full">Check 1</div>,
-      meta: { headerText: 'Check 1', exportValue: (r: any) => Number(r.check_1) > 0 ? format1Dec(Number(r.check_1)) : '-' },
+      header: () => <div className="text-center w-full">Từ Vựng</div>,
+      meta: { headerText: 'Từ Vựng', exportValue: (r: any) => Number(r.check_1) > 0 ? format1Dec(Number(r.check_1)) : '-' },
       cell: ({ row }) => {
         const r = row.original;
         const val = Number(r.check_1) || 0;
-        const skill = r.check_1_skill || (r.check_1_test_type ? (r.check_1_test_type === 'grammar' ? 'grammar' : r.check_1_test_type === 'vocab' ? 'vocab' : r.check_1_test_type) : '');
-        const topic = r.check_1_topic || (skill === 'grammar' ? r.grammar_topic : r.topic);
-        const skillLabel = skill === 'vocab' ? 'Từ Vựng' : skill === 'grammar' ? 'Ngữ Pháp' : skill === 'mock_test' ? 'Luyện Đề' : skill === 'mixed' ? 'Tổng Hợp' : skill;
-        const isGrammar = skill === 'grammar';
-        const isMock = skill === 'mock_test';
+        const topic = r.check_1_topic || r.topic;
+        const skill = r.check_1_skill || (r.check_1_test_type ? (r.check_1_test_type === 'grammar' ? 'Ngữ pháp' : r.check_1_test_type === 'vocab' ? 'Từ vựng' : 'Tổng hợp') : 'Từ vựng');
         return (
           <div className="text-center py-0.5">
-            <div className={`font-extrabold font-mono text-base leading-tight ${isGrammar ? 'text-purple-400' : isMock ? 'text-amber-400' : 'text-blue-400'}`}>
+            <div className="font-extrabold text-blue-400 font-mono text-base leading-tight">
               {val > 0 ? format1Dec(val) : '-'}
             </div>
             {topic && (
               <div className="mt-0.5 flex flex-col items-center">
-                <span className={`text-[10px] font-medium truncate max-w-[140px] block ${isGrammar ? 'text-purple-300/80' : isMock ? 'text-amber-300/80' : 'text-blue-300/80'}`} title={topic}>
+                <span className="text-[10px] text-blue-300/80 font-medium truncate max-w-[140px] block" title={topic}>
                   {topic}
                 </span>
-                {skillLabel && (
-                  <span className={`text-[9px] px-1.5 py-0.2 rounded font-semibold mt-0.5 border ${
-                    isGrammar
-                      ? 'bg-purple-500/15 text-purple-300 border-purple-500/30'
-                      : isMock
-                      ? 'bg-amber-500/15 text-amber-300 border-amber-500/30'
-                      : 'bg-blue-500/15 text-blue-300 border-blue-500/30'
-                  }`}>
-                    {skillLabel}
-                  </span>
-                )}
+                <span className="text-[9px] px-1.5 py-0.2 rounded bg-blue-500/15 text-blue-300 border border-blue-500/30 font-semibold mt-0.5">
+                  {skill === 'vocab' ? 'Từ Vựng' : skill === 'grammar' ? 'Ngữ Pháp' : skill}
+                </span>
               </div>
             )}
           </div>
@@ -108,37 +119,26 @@ export const StudentGradeHistoryTable: React.FC<StudentGradeHistoryTableProps> =
     },
     {
       accessorKey: 'check_2',
-      header: () => <div className="text-center w-full">Check 2</div>,
-      meta: { headerText: 'Check 2', exportValue: (r: any) => Number(r.check_2) > 0 ? format1Dec(Number(r.check_2)) : '-' },
+      header: () => <div className="text-center w-full">Ngữ Pháp</div>,
+      meta: { headerText: 'Ngữ Pháp', exportValue: (r: any) => Number(r.check_2) > 0 ? format1Dec(Number(r.check_2)) : '-' },
       cell: ({ row }) => {
         const r = row.original;
         const val = Number(r.check_2) || 0;
-        const skill = r.check_2_skill || (r.check_2_test_type ? (r.check_2_test_type === 'vocab' ? 'vocab' : r.check_2_test_type === 'grammar' ? 'grammar' : r.check_2_test_type) : '');
-        const topic = r.check_2_topic || (skill === 'vocab' ? r.topic : r.grammar_topic);
-        const skillLabel = skill === 'grammar' ? 'Ngữ Pháp' : skill === 'vocab' ? 'Từ Vựng' : skill === 'mock_test' ? 'Luyện Đề' : skill === 'mixed' ? 'Tổng Hợp' : skill;
-        const isVocab = skill === 'vocab';
-        const isMock = skill === 'mock_test';
+        const topic = r.check_2_topic || r.grammar_topic;
+        const skill = r.check_2_skill || (r.check_2_test_type ? (r.check_2_test_type === 'vocab' ? 'Từ vựng' : r.check_2_test_type === 'grammar' ? 'Ngữ pháp' : 'Tổng hợp') : 'Ngữ pháp');
         return (
           <div className="text-center py-0.5">
-            <div className={`font-extrabold font-mono text-base leading-tight ${isVocab ? 'text-blue-400' : isMock ? 'text-amber-400' : 'text-purple-400'}`}>
+            <div className="font-extrabold text-purple-400 font-mono text-base leading-tight">
               {val > 0 ? format1Dec(val) : '-'}
             </div>
             {topic && (
               <div className="mt-0.5 flex flex-col items-center">
-                <span className={`text-[10px] font-medium truncate max-w-[140px] block ${isVocab ? 'text-blue-300/80' : isMock ? 'text-amber-300/80' : 'text-purple-300/80'}`} title={topic}>
+                <span className="text-[10px] text-purple-300/80 font-medium truncate max-w-[140px] block" title={topic}>
                   {topic}
                 </span>
-                {skillLabel && (
-                  <span className={`text-[9px] px-1.5 py-0.2 rounded font-semibold mt-0.5 border ${
-                    isVocab
-                      ? 'bg-blue-500/15 text-blue-300 border-blue-500/30'
-                      : isMock
-                      ? 'bg-amber-500/15 text-amber-300 border-amber-500/30'
-                      : 'bg-purple-500/15 text-purple-300 border-purple-500/30'
-                  }`}>
-                    {skillLabel}
-                  </span>
-                )}
+                <span className="text-[9px] px-1.5 py-0.2 rounded bg-purple-500/15 text-purple-300 border border-purple-500/30 font-semibold mt-0.5">
+                  {skill === 'grammar' ? 'Ngữ Pháp' : skill === 'vocab' ? 'Từ Vựng' : skill}
+                </span>
               </div>
             )}
           </div>
@@ -217,9 +217,10 @@ export const StudentGradeHistoryTable: React.FC<StudentGradeHistoryTableProps> =
         data={sessionRecords}
         columns={historyColumns}
         loading={loading}
-        searchPlaceholder="Tìm theo ngày, trạng thái, ghi chú..."
+        searchPlaceholder="Tìm theo học sinh, ngày, lớp, trạng thái, ghi chú..."
         emptyMessage="Chưa có lịch sử điểm số."
         pageSize={20}
+        initialSorting={[{ id: 'date', desc: true }]}
         exportFilename={`lich_su_diem_${selectedStudentObj ? selectedStudentObj.full_name : 'lop'}`}
       />
     </div>

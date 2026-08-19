@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { api } from '../../../api';
 import { showToast } from '../../../components/Toast';
 import { GradeTypeItem } from '../../../types';
-import { getSavedWarningSettings, DEFAULT_WARNING_SETTINGS, formatSessionDate } from '../utils';
+import { getSavedWarningSettings, DEFAULT_WARNING_SETTINGS, formatSessionDate, formatFullDate } from '../utils';
 import { generateMockReportsData, computeDatasetFromRecords } from '../utils/mockReportsData';
 import { trunc1Dec } from '../../../utils';
 
@@ -136,8 +136,18 @@ export function useReportsData() {
       const cid = selectedClassId ? parseInt(selectedClassId) : undefined;
       const sid = selectedStudentId ? parseInt(selectedStudentId) : undefined;
       const res = await api.getGradeAnalytics(cid, sid);
-      setRawSessionRecords(res.session_records || []);
-      setRawAllSessionRecords(res.all_session_records || res.session_records || []);
+      const enrichedRecords = (res.session_records || []).map((r: any) => ({
+        ...r,
+        student_name: r.student_name || r.full_name || 'Học sinh',
+        date_formatted: formatFullDate(r.date),
+      }));
+      const enrichedAllRecords = (res.all_session_records || res.session_records || []).map((r: any) => ({
+        ...r,
+        student_name: r.student_name || r.full_name || 'Học sinh',
+        date_formatted: formatFullDate(r.date),
+      }));
+      setRawSessionRecords(enrichedRecords);
+      setRawAllSessionRecords(enrichedAllRecords);
       setRawStudentRankings(res.student_rankings || []);
       setRawAnalyticsSummary(res.analytics_summary || null);
       setRawClassAnalyticsMap(res.class_analytics_map || {});

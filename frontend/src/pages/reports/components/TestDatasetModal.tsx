@@ -151,8 +151,8 @@ export const TestDatasetModal: React.FC<TestDatasetModalProps> = ({
                   <th className="py-2.5 px-3 text-center w-12">Buổi</th>
                   <th className="py-2.5 px-3 w-28">Ngày Học</th>
                   <th className="py-2.5 px-3 text-center w-28">Điểm Danh</th>
-                  <th className="py-2.5 px-3 min-w-[200px]">Check 1</th>
-                  <th className="py-2.5 px-3 min-w-[200px]">Check 2</th>
+                  <th className="py-2.5 px-3 min-w-[200px]">Từ Vựng</th>
+                  <th className="py-2.5 px-3 min-w-[200px]">Ngữ Pháp</th>
                   <th className="py-2.5 px-3 min-w-[150px]">Homework (BTVN)</th>
                   <th className="py-2.5 px-3 w-32">Ghi Chú</th>
                 </tr>
@@ -182,11 +182,10 @@ export const TestDatasetModal: React.FC<TestDatasetModalProps> = ({
                         <button
                           type="button"
                           onClick={() => handleCellChange(idx, 'attendance', isAbsent ? 'present' : 'absent')}
-                          className={`px-2.5 py-1 rounded-lg text-xs font-bold transition cursor-pointer ${
-                            isAbsent
+                          className={`px-2.5 py-1 rounded-lg text-xs font-bold transition cursor-pointer ${isAbsent
                               ? 'bg-rose-500/20 text-rose-300 border border-rose-500/40'
                               : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
-                          }`}
+                            }`}
                         >
                           {isAbsent ? 'Vắng' : 'Có mặt'}
                         </button>
