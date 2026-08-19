@@ -138,41 +138,34 @@ export const StudentProfileHeader: React.FC<StudentProfileHeaderProps> = ({
             </span>
           </div>
 
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
             {/* Student Name */}
-            <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight">
+            <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
               {student.full_name}
             </h2>
 
             {student.nickname && (
-              <span className="text-sm font-bold text-indigo-300">
+              <span className="text-lg font-bold text-indigo-300">
                 ({student.nickname})
               </span>
             )}
 
-            {/* Rank / Cấp Bậc (Clean text & icon, zero card box / zero border) */}
-            <div className="inline-flex items-center gap-1.5">
-              <img
-                src={tier.badge}
-                alt={tier.name}
-                className="w-5 h-5 object-contain"
-              />
-              <span className="text-xs font-bold text-slate-400">Cấp Bậc:</span>
-              <span className={`text-sm font-black ${rankTheme.badgeText}`}>
-                {tier.name}
-              </span>
-              <span className="text-xs font-semibold text-slate-400">
-                ({tier.title})
-              </span>
-            </div>
+            {/* #rank */}
+            <span className="text-2xl sm:text-3xl font-black text-amber-400 font-mono tracking-tight">
+              {stats.rank}
+            </span>
 
-            {/* Thứ Hạng (Clean text, zero card box / zero border) */}
-            <div className="inline-flex items-center gap-1.5">
-              <span className="text-xs font-bold text-slate-400">Thứ Hạng:</span>
-              <span className="text-sm font-black text-amber-400 font-mono">
-                {stats.rank}
-              </span>
-            </div>
+            {/* Rank Icon */}
+            <img
+              src={tier.badge}
+              alt={tier.name}
+              className="w-8 h-8 sm:w-9 sm:h-9 object-contain drop-shadow-md"
+            />
+
+            {/* Rank Name */}
+            <span className={`text-xl sm:text-2xl font-black ${rankTheme.badgeText}`}>
+              {tier.name}
+            </span>
           </div>
         </div>
       </div>
