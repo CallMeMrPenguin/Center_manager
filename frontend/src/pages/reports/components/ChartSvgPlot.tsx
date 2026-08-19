@@ -133,7 +133,7 @@ export const ChartSvgPlot: React.FC<ChartSvgPlotProps> = React.memo(({
           const preds = [
             { id: 'c1', label: 'Từ Vựng', score: engine.pred_c1, lastVal: sessionChartData[lastIdx].check1, color: '#3b82f6', textColor: '#60a5fa', rawY: getSvgY(engine.pred_c1) },
             { id: 'c2', label: 'Ngữ Pháp', score: engine.pred_c2, lastVal: sessionChartData[lastIdx].check2, color: '#a855f7', textColor: '#c084fc', rawY: getSvgY(engine.pred_c2) },
-            { id: 'hw', label: 'Homework', score: engine.pred_hw, lastVal: sessionChartData[lastIdx].homework, color: '#10b981', textColor: '#34d399', rawY: getSvgY(engine.pred_hw) },
+            { id: 'hw', label: 'BTVN', score: engine.pred_hw, lastVal: sessionChartData[lastIdx].homework, color: '#10b981', textColor: '#34d399', rawY: getSvgY(engine.pred_hw) },
           ];
           const sorted = [...preds].sort((a, b) => a.rawY - b.rawY);
           const adjustedYs: Record<string, number> = {};

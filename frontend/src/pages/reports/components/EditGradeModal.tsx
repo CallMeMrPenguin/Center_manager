@@ -179,7 +179,7 @@ export const EditGradeModal: React.FC<EditGradeModalProps> = ({
 
             <div>
               <label className="block text-[11px] font-extrabold text-emerald-400 uppercase tracking-wider mb-1">
-                Homework
+                BTVN
               </label>
               <input
                 type="text"

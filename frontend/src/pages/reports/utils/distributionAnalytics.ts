@@ -2,7 +2,7 @@ import { trunc1Dec, format1Dec } from '../../../utils';
 
 export type GradeTypeFilterKey = 'overall' | 'check_1' | 'check_2' | 'homework' | 'mock_test';
 
-export interface BgdDistributionBand {
+export interface DistributionBand {
   id: string;
   name: string;
   title: string;
@@ -16,7 +16,7 @@ export interface BgdDistributionBand {
   pct: number;
 }
 
-export interface BgdScoreBin {
+export interface DistributionScoreBin {
   score: number;
   label: string;
   rangeLabel: string;
@@ -26,10 +26,11 @@ export interface BgdScoreBin {
   pct: number;
   color: string;
   bandId: string;
+  studentIds?: (number | string)[];
   studentNames?: string[];
 }
 
-export interface BgdMetricItem {
+export interface DistributionMetricItem {
   id: string;
   label: string;
   value: string;
@@ -41,10 +42,10 @@ export interface BgdMetricItem {
   tooltipImpact: string;
 }
 
-export interface BgdDetailedEvaluation {
+export interface DistributionDetailedEvaluation {
   subjectTitle: string;
   skillName: string;
-  metrics: BgdMetricItem[];
+  metrics: DistributionMetricItem[];
   conclusion: {
     overviewSummary: string;
     dispersionWarning: string;
@@ -53,7 +54,7 @@ export interface BgdDetailedEvaluation {
   pedagogicalActions: string[];
 }
 
-export interface BgdDistributionStats {
+export interface DistributionStats {
   n: number;
   mean: number;
   median: number;
@@ -73,12 +74,12 @@ export interface BgdDistributionStats {
   iqrLabel: string;
   distributionShape: string;
   distributionRating: string;
-  bands: BgdDistributionBand[];
-  scoreBins: BgdScoreBin[]; // 21 bins (0.5 step)
-  scoreBins10: BgdScoreBin[]; // 10 standard 1.0-step bins
-  tierBins: BgdScoreBin[]; // 4 academic tier bins
+  bands: DistributionBand[];
+  scoreBins: DistributionScoreBin[]; // 21 bins (0.5 step)
+  scoreBins10: DistributionScoreBin[]; // 10 standard 1.0-step bins
+  tierBins: DistributionScoreBin[]; // 4 academic tier bins
   curvePoints: { x: number; y: number }[];
-  evaluation: BgdDetailedEvaluation;
+  evaluation: DistributionDetailedEvaluation;
   commentary: {
     headline: string;
     overallSummary: string;
@@ -89,7 +90,7 @@ export interface BgdDistributionStats {
   };
 }
 
-export const BGD_BANDS_TEMPLATE: Omit<BgdDistributionBand, 'count' | 'pct'>[] = [
+export const DISTRIBUTION_BANDS_TEMPLATE: Omit<DistributionBand, 'count' | 'pct'>[] = [
   {
     id: 'weak',
     name: 'Yếu / Kém',
@@ -138,17 +139,18 @@ export const BGD_BANDS_TEMPLATE: Omit<BgdDistributionBand, 'count' | 'pct'>[] = 
 
 interface ScoreRecord {
   score: number;
+  studentId?: number | string;
   studentName?: string;
 }
 
-export function computeBgdDistribution(
+export function computeDistributionStats(
   sessionRecords: any[],
   studentRankings: any[],
   selectedStudentId?: string,
   className?: string,
   gradeTypeFilter: GradeTypeFilterKey = 'overall',
-  isTestMode?: boolean
-): BgdDistributionStats {
+  _isTestMode?: boolean
+): DistributionStats {
   const scoreEntries: ScoreRecord[] = [];
 
   const getRecordScore = (r: any): number | null => {
@@ -186,38 +188,82 @@ export function computeBgdDistribution(
   };
 
   if (selectedStudentId) {
+    // 1. Single Student View: 1 score entry per session for this specific student
     const sidStr = String(selectedStudentId);
     sessionRecords.forEach((r) => {
       if (String(r.student_id) === sidStr && r.status !== 'Vắng mặt' && r.attendance !== 'absent') {
         const val = getRecordScore(r);
         if (val !== null && val > 0) {
-          scoreEntries.push({ score: val, studentName: r.student_name || r.name });
+          scoreEntries.push({
+            score: val,
+            studentId: r.student_id,
+            studentName: r.student_name || r.name || r.full_name,
+          });
         }
       }
     });
   } else {
-    if (sessionRecords && sessionRecords.length > 0) {
+    // 2. Class / All Students View: 1 score entry per student (student average)
+    if (studentRankings && studentRankings.length > 0) {
+      studentRankings.forEach((s) => {
+        let sc: number | null = null;
+        if (gradeTypeFilter === 'check_1') {
+          if (Number(s.avg_check_1 || 0) > 0) sc = Number(s.avg_check_1);
+        } else if (gradeTypeFilter === 'check_2') {
+          if (Number(s.avg_check_2 || 0) > 0) sc = Number(s.avg_check_2);
+        } else if (gradeTypeFilter === 'homework') {
+          if (Number(s.avg_homework || 0) > 0) sc = Number(s.avg_homework);
+        } else if (gradeTypeFilter === 'mock_test') {
+          const m = Number(s.avg_mock_test || s.mock_test || 0);
+          if (m > 0) sc = m;
+          else if (Number(s.avg_check_2 || 0) > 0) sc = Number(s.avg_check_2);
+        } else {
+          if (s.overallAvg && Number(s.overallAvg) > 0) sc = Number(s.overallAvg);
+          else if (s.ema_level && Number(s.ema_level) > 0) sc = Number(s.ema_level);
+          else {
+            const c1 = Number(s.avg_check_1 || 0);
+            const c2 = Number(s.avg_check_2 || 0);
+            const hw = Number(s.avg_homework || 0);
+            if (c1 > 0 || c2 > 0 || hw > 0) {
+              sc = trunc1Dec(c1 * 0.35 + c2 * 0.55 + hw * 0.1);
+            }
+          }
+        }
+        if (sc !== null && sc > 0) {
+          scoreEntries.push({
+            score: sc,
+            studentId: s.student_id || s.id,
+            studentName: s.full_name || s.name,
+          });
+        }
+      });
+    } else if (sessionRecords && sessionRecords.length > 0) {
+      // Group by student_id from sessionRecords to compute per-student average
+      const studentMap: Record<string, { scores: number[]; name: string; id: any }> = {};
       sessionRecords.forEach((r) => {
         if (r.status !== 'Vắng mặt' && r.attendance !== 'absent') {
           const val = getRecordScore(r);
           if (val !== null && val > 0) {
-            scoreEntries.push({ score: val, studentName: r.student_name || r.name });
+            const sid = String(r.student_id || r.id);
+            if (!studentMap[sid]) {
+              studentMap[sid] = {
+                scores: [],
+                name: r.student_name || r.name || r.full_name || 'Học sinh',
+                id: r.student_id || r.id,
+              };
+            }
+            studentMap[sid].scores.push(val);
           }
         }
       });
-    }
-
-    if (scoreEntries.length === 0 && studentRankings && studentRankings.length > 0) {
-      studentRankings.forEach((s) => {
-        let sc: number | null = null;
-        if (gradeTypeFilter === 'check_1' && Number(s.avg_check_1 || 0) > 0) sc = Number(s.avg_check_1);
-        else if (gradeTypeFilter === 'check_2' && Number(s.avg_check_2 || 0) > 0) sc = Number(s.avg_check_2);
-        else if (gradeTypeFilter === 'homework' && Number(s.avg_homework || 0) > 0) sc = Number(s.avg_homework);
-        else {
-          sc = s.ema_level && Number(s.ema_level) > 0 ? Number(s.ema_level) : trunc1Dec((Number(s.avg_check_1 || 0) * 0.35) + (Number(s.avg_check_2 || 0) * 0.55) + (Number(s.avg_homework || 0) * 0.1));
-        }
-        if (sc !== null && sc > 0) {
-          scoreEntries.push({ score: sc, studentName: s.full_name || s.name });
+      Object.values(studentMap).forEach((st) => {
+        if (st.scores.length > 0) {
+          const avg = trunc1Dec(st.scores.reduce((a, b) => a + b, 0) / st.scores.length);
+          scoreEntries.push({
+            score: avg,
+            studentId: st.id,
+            studentName: st.name,
+          });
         }
       });
     }
@@ -225,7 +271,7 @@ export function computeBgdDistribution(
 
   if (scoreEntries.length === 0) {
     const fallback = [5.0, 5.5, 6.0, 6.5, 6.8, 7.0, 7.2, 7.5, 7.8, 8.0, 8.2, 8.5, 9.0, 9.2];
-    fallback.forEach((sc) => scoreEntries.push({ score: sc }));
+    fallback.forEach((sc, i) => scoreEntries.push({ score: sc, studentId: i + 1, studentName: `Học sinh ${i + 1}` }));
   }
 
   scoreEntries.sort((a, b) => a.score - b.score);
@@ -263,14 +309,14 @@ export function computeBgdDistribution(
     else bandCounts.excellent++;
   });
 
-  const bands: BgdDistributionBand[] = BGD_BANDS_TEMPLATE.map((b) => ({
+  const bands: DistributionBand[] = DISTRIBUTION_BANDS_TEMPLATE.map((b) => ({
     ...b,
     count: bandCounts[b.id] || 0,
     pct: Math.round(((bandCounts[b.id] || 0) / n) * 100),
   }));
 
-  // 1. STANDARD 10 SCORE INTERVALS (0-1, 1-2, 2-3, ..., 9-10) -> Primary & Clean
-  const scoreBins10: BgdScoreBin[] = [];
+  // 1. STANDARD 10 SCORE INTERVALS (0-1, 1-2, 2-3, ..., 9-10)
+  const scoreBins10: DistributionScoreBin[] = [];
   for (let i = 0; i < 10; i++) {
     const minVal = i;
     const maxVal = i === 9 ? 10.0 : i + 1.0;
@@ -296,12 +342,18 @@ export function computeBgdDistribution(
       pct: Math.round((count / n) * 100),
       color,
       bandId,
+      studentIds: matched.map((e) => e.studentId).filter(Boolean) as (number | string)[],
       studentNames: matched.map((e) => e.studentName).filter(Boolean) as string[],
     });
   }
 
   // 2. 4 ACADEMIC TIER BINS (Yếu <5, TB 5-6.4, Khá 6.5-7.9, Giỏi ≥8)
-  const tierBins: BgdScoreBin[] = [
+  const weakEntries = scoreEntries.filter((e) => e.score < 5.0);
+  const avgEntries = scoreEntries.filter((e) => e.score >= 5.0 && e.score < 6.5);
+  const goodEntries = scoreEntries.filter((e) => e.score >= 6.5 && e.score < 8.0);
+  const excelEntries = scoreEntries.filter((e) => e.score >= 8.0);
+
+  const tierBins: DistributionScoreBin[] = [
     {
       score: 2.5,
       label: 'Yếu <5.0',
@@ -312,6 +364,8 @@ export function computeBgdDistribution(
       pct: Math.round((bandCounts.weak / n) * 100),
       color: '#f43f5e',
       bandId: 'weak',
+      studentIds: weakEntries.map((e) => e.studentId).filter(Boolean) as (number | string)[],
+      studentNames: weakEntries.map((e) => e.studentName).filter(Boolean) as string[],
     },
     {
       score: 5.7,
@@ -323,6 +377,8 @@ export function computeBgdDistribution(
       pct: Math.round((bandCounts.average / n) * 100),
       color: '#f59e0b',
       bandId: 'average',
+      studentIds: avgEntries.map((e) => e.studentId).filter(Boolean) as (number | string)[],
+      studentNames: avgEntries.map((e) => e.studentName).filter(Boolean) as string[],
     },
     {
       score: 7.2,
@@ -334,6 +390,8 @@ export function computeBgdDistribution(
       pct: Math.round((bandCounts.good / n) * 100),
       color: '#06b6d4',
       bandId: 'good',
+      studentIds: goodEntries.map((e) => e.studentId).filter(Boolean) as (number | string)[],
+      studentNames: goodEntries.map((e) => e.studentName).filter(Boolean) as string[],
     },
     {
       score: 9.0,
@@ -345,14 +403,19 @@ export function computeBgdDistribution(
       pct: Math.round((bandCounts.excellent / n) * 100),
       color: '#10b981',
       bandId: 'excellent',
+      studentIds: excelEntries.map((e) => e.studentId).filter(Boolean) as (number | string)[],
+      studentNames: excelEntries.map((e) => e.studentName).filter(Boolean) as string[],
     },
   ];
 
   // 3. 21 DENSE SCORE BINS (0.0 to 10.0 step 0.5)
-  const scoreBins: BgdScoreBin[] = [];
+  const scoreBins: DistributionScoreBin[] = [];
   for (let s = 0; s <= 10.0; s += 0.5) {
     const binScore = Math.round(s * 10) / 10;
-    const count = scores.filter((v) => Math.abs(v - binScore) < 0.25).length;
+    const minRange = Math.max(0, binScore - 0.25);
+    const maxRange = Math.min(10, binScore + 0.25);
+    const matched = scoreEntries.filter((e) => Math.abs(e.score - binScore) < 0.25);
+    const count = matched.length;
     let color = '#f43f5e';
     let bandId = 'weak';
     if (binScore >= 8.0) { color = '#10b981'; bandId = 'excellent'; }
@@ -363,12 +426,14 @@ export function computeBgdDistribution(
       score: binScore,
       label: `${binScore}đ`,
       rangeLabel: `${binScore}đ`,
-      minScore: Math.max(0, binScore - 0.25),
-      maxScore: Math.min(10, binScore + 0.25),
+      minScore: minRange,
+      maxScore: maxRange,
       count,
       pct: Math.round((count / n) * 100),
       color,
       bandId,
+      studentIds: matched.map((e) => e.studentId).filter(Boolean) as (number | string)[],
+      studentNames: matched.map((e) => e.studentName).filter(Boolean) as string[],
     });
   }
 
@@ -381,11 +446,11 @@ export function computeBgdDistribution(
     curvePoints.push({ x: s, y: density });
   }
 
-  const skillName = gradeTypeFilter === 'check_1' ? (isTestMode ? 'Từ Vựng (Check 1)' : 'Check 1 (Từ Vựng)')
-    : gradeTypeFilter === 'check_2' ? (isTestMode ? 'Ngữ Pháp (Check 2)' : 'Check 2 (Ngữ Pháp)')
-    : gradeTypeFilter === 'homework' ? 'Homework (BTVN)'
-    : gradeTypeFilter === 'mock_test' ? 'Luyện Đề (Mock Test)'
-    : 'Tổng Hợp Tất Cả Đầu Điểm';
+  const skillName = gradeTypeFilter === 'check_1' ? 'Từ Vựng'
+    : gradeTypeFilter === 'check_2' ? 'Ngữ Pháp'
+    : gradeTypeFilter === 'homework' ? 'BTVN'
+    : gradeTypeFilter === 'mock_test' ? 'Luyện Đề'
+    : 'Tổng Hợp';
 
   let skewnessLabel = 'Phân bố cân đối';
   if (skewness > 0.15) skewnessLabel = 'Lệch phải (Top điểm cao kéo TB lên)';
@@ -405,7 +470,7 @@ export function computeBgdDistribution(
   else distributionRating = 'Cần Củng Cố';
 
   // Metrics breakdown
-  const metrics: BgdMetricItem[] = [
+  const metrics: DistributionMetricItem[] = [
     {
       id: 'mean',
       label: 'Điểm trung bình',
@@ -503,7 +568,7 @@ export function computeBgdDistribution(
 
   const subjectTitle = className ? `Đánh Giá Phổ Điểm - ${className}` : 'Đánh Giá Phổ Điểm & Phân Phối Học Lực';
 
-  const evaluation: BgdDetailedEvaluation = {
+  const evaluation: DistributionDetailedEvaluation = {
     subjectTitle,
     skillName,
     metrics,

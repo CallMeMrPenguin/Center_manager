@@ -3,7 +3,7 @@ import { BarChart3, TrendingUp, BarChart2, ZoomIn, ZoomOut, RotateCcw, Clock } f
 import { CustomSelect } from '../../../components/CustomSelect';
 import { formatSessionDate } from '../utils';
 import { format1Dec } from '../../../utils';
-import { BgdDistributionStats } from '../utils/bgdAnalytics';
+import { DistributionStats } from '../utils/distributionAnalytics';
 
 interface ChartControlsProps {
   engine: any;
@@ -18,7 +18,7 @@ interface ChartControlsProps {
   setPanOffset: React.Dispatch<React.SetStateAction<{ x: number; y: number }>>;
   chartViewMode: 'timeline' | 'distribution';
   setChartViewMode: (mode: 'timeline' | 'distribution') => void;
-  bgdStats?: BgdDistributionStats;
+  distributionStats?: DistributionStats;
   isTestMode?: boolean;
 }
 
@@ -35,7 +35,7 @@ export const ChartControls: React.FC<ChartControlsProps> = ({
   setPanOffset,
   chartViewMode,
   setChartViewMode,
-  bgdStats,
+  distributionStats,
   isTestMode,
 }) => {
   return (
@@ -95,15 +95,15 @@ export const ChartControls: React.FC<ChartControlsProps> = ({
           <div className="flex flex-wrap items-center gap-3.5 text-[11px] font-bold">
             <span className="flex items-center gap-1.5 text-blue-400">
               <span className="w-2.5 h-2.5 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.8)]" />
-              {isTestMode ? 'Từ Vựng' : 'Check 1'} (Dự đoán: {format1Dec(engine.pred_c1)})
+              Từ Vựng (Dự đoán: {format1Dec(engine.pred_c1)})
             </span>
             <span className="flex items-center gap-1.5 text-purple-400">
               <span className="w-2.5 h-2.5 rounded-full bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.8)]" />
-              {isTestMode ? 'Ngữ Pháp' : 'Check 2'} (Dự đoán: {format1Dec(engine.pred_c2)})
+              Ngữ Pháp (Dự đoán: {format1Dec(engine.pred_c2)})
             </span>
             <span className="flex items-center gap-1.5 text-emerald-400">
               <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]" />
-              Homework (Dự đoán: {format1Dec(engine.pred_hw)})
+              BTVN (Dự đoán: {format1Dec(engine.pred_hw)})
             </span>
           </div>
 
@@ -211,24 +211,24 @@ export const ChartControls: React.FC<ChartControlsProps> = ({
         <div className="flex flex-wrap items-center justify-between gap-3 text-xs font-bold pt-1">
           <div className="flex flex-wrap items-center gap-2 text-[11px] font-mono">
             <span className="bg-[#101526] border border-[#202b48] px-2.5 py-1 rounded-lg text-slate-300">
-              Tổng số mẫu: <strong className="text-white font-bold">{bgdStats?.n ?? 0}</strong> lượt
+              Tổng số mẫu: <strong className="text-white font-bold">{distributionStats?.n ?? 0}</strong> lượt
             </span>
             <span className="bg-[#101526] border border-[#202b48] px-2.5 py-1 rounded-lg text-indigo-300">
-              Điểm TB: <strong className="text-white font-bold">{format1Dec(bgdStats?.mean ?? 0)}đ</strong>
+              Điểm TB: <strong className="text-white font-bold">{format1Dec(distributionStats?.mean ?? 0)}đ</strong>
             </span>
             <span className="bg-[#101526] border border-[#202b48] px-2.5 py-1 rounded-lg text-purple-300">
-              Trung vị: <strong className="text-white font-bold">{format1Dec(bgdStats?.median ?? 0)}đ</strong>
+              Trung vị: <strong className="text-white font-bold">{format1Dec(distributionStats?.median ?? 0)}đ</strong>
             </span>
             <span className="bg-[#101526] border border-[#202b48] px-2.5 py-1 rounded-lg text-cyan-300">
-              Độ lệch σ: <strong className="text-white font-bold">{format1Dec(bgdStats?.sd ?? 0)}</strong>
+              Độ lệch σ: <strong className="text-white font-bold">{format1Dec(distributionStats?.sd ?? 0)}</strong>
             </span>
             <span className="bg-[#101526] border border-[#202b48] px-2.5 py-1 rounded-lg text-emerald-300">
-              Đạt chuẩn: <strong className="text-white font-bold">{bgdStats?.passPct ?? 0}%</strong>
+              Đạt chuẩn: <strong className="text-white font-bold">{distributionStats?.passPct ?? 0}%</strong>
             </span>
           </div>
 
           <span className="bg-[#101526] border border-[#202b48] px-3 py-1 rounded-lg text-[11px] font-bold text-amber-300">
-            {bgdStats?.skewnessLabel}
+            {distributionStats?.skewnessLabel}
           </span>
         </div>
       )}

@@ -1,9 +1,9 @@
 import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { ChartControls } from './ChartControls';
 import { ChartSvgPlot } from './ChartSvgPlot';
-import { BgdDistributionPlot } from './BgdDistributionPlot';
+import { DistributionPlot } from './DistributionPlot';
 import { ChartSessionItem, HoveredChartPoint } from '../types';
-import { BgdDistributionStats, GradeTypeFilterKey } from '../utils/bgdAnalytics';
+import { DistributionStats, GradeTypeFilterKey, DistributionScoreBin } from '../utils/distributionAnalytics';
 import { format1Dec, trunc1Dec } from '../../../utils';
 
 interface InteractiveChartProps {
@@ -20,9 +20,11 @@ interface InteractiveChartProps {
   onOpenPhaseModal: () => void;
   chartViewMode: 'timeline' | 'distribution';
   setChartViewMode: (mode: 'timeline' | 'distribution') => void;
-  bgdStats: BgdDistributionStats;
+  distributionStats: DistributionStats;
   selectedGradeTypeFilter: GradeTypeFilterKey;
   setSelectedGradeTypeFilter: (key: GradeTypeFilterKey) => void;
+  selectedScoreBin?: DistributionScoreBin | null;
+  onSelectScoreBin?: (bin: DistributionScoreBin) => void;
   isTestMode?: boolean;
 }
 
@@ -40,9 +42,11 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = ({
   onOpenPhaseModal,
   chartViewMode,
   setChartViewMode,
-  bgdStats,
+  distributionStats,
   selectedGradeTypeFilter,
   setSelectedGradeTypeFilter,
+  selectedScoreBin,
+  onSelectScoreBin,
   isTestMode,
 }) => {
   const chartWrapperRef = useRef<HTMLDivElement>(null);
@@ -210,7 +214,7 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = ({
         setPanOffset={setPanOffset}
         chartViewMode={chartViewMode}
         setChartViewMode={setChartViewMode}
-        bgdStats={bgdStats}
+        distributionStats={distributionStats}
         isTestMode={isTestMode}
       />
 
@@ -302,7 +306,7 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = ({
                 </div>
                 <div className="space-y-1.5 pt-1.5">
                   <div className="flex items-center justify-between gap-4">
-                    <span className="text-blue-400 font-bold">{isTestMode ? 'Từ Vựng:' : 'Check 1:'}</span>
+                    <span className="text-blue-400 font-bold">Từ Vựng:</span>
                     <div className="flex items-center gap-1.5">
                       <span className="font-mono font-extrabold text-white">{format1Dec(hoveredPoint.check1)}</span>
                       {hoveredPoint.fittedC1 !== null && (
@@ -311,7 +315,7 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = ({
                     </div>
                   </div>
                   <div className="flex items-center justify-between gap-4">
-                    <span className="text-purple-400 font-bold">{isTestMode ? 'Ngữ Pháp:' : 'Check 2:'}</span>
+                    <span className="text-purple-400 font-bold">Ngữ Pháp:</span>
                     <div className="flex items-center gap-1.5">
                       <span className="font-mono font-extrabold text-white">{format1Dec(hoveredPoint.check2)}</span>
                       {hoveredPoint.fittedC2 !== null && (
@@ -320,7 +324,7 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = ({
                     </div>
                   </div>
                   <div className="flex items-center justify-between gap-4">
-                    <span className="text-emerald-400 font-bold">Homework:</span>
+                    <span className="text-emerald-400 font-bold">BTVN:</span>
                     <div className="flex items-center gap-1.5">
                       <span className="font-mono font-extrabold text-white">{format1Dec(hoveredPoint.homework)}</span>
                       {hoveredPoint.fittedHw !== null && (
@@ -341,12 +345,14 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = ({
         </div>
       ) : (
         /* VIEW 2: SCORE DISTRIBUTION ACROSS SKILLS */
-        <BgdDistributionPlot
-          stats={bgdStats}
+        <DistributionPlot
+          stats={distributionStats}
           selectedStudentId={selectedStudentId}
           selectedClassId={selectedClassId}
           selectedGradeTypeFilter={selectedGradeTypeFilter}
           setSelectedGradeTypeFilter={setSelectedGradeTypeFilter}
+          selectedScoreBin={selectedScoreBin}
+          onSelectScoreBin={onSelectScoreBin}
           isTestMode={isTestMode}
         />
       )}

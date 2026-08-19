@@ -105,10 +105,10 @@ export const DualComparisonBars: React.FC<DualComparisonBarsProps> = ({
             </div>
           </div>
 
-          {/* 3. Homework */}
+          {/* 3. BTVN */}
           <div className="space-y-1.5">
             <div className="flex items-center justify-between text-[11px] font-black uppercase tracking-wider text-slate-400">
-              <span>Homework (10%)</span>
+              <span>BTVN (10%)</span>
             </div>
             <div className="space-y-1.5">
               <div className="flex items-center gap-3">

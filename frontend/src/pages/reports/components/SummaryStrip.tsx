@@ -2,15 +2,15 @@ import React, { useState } from 'react';
 import { Info } from 'lucide-react';
 import { GradeTypeItem } from '../../../types';
 import { SummaryTooltipCard } from './SummaryTooltipCard';
-import { BgdSummaryStrip } from './BgdSummaryStrip';
-import { BgdDistributionStats } from '../utils/bgdAnalytics';
+import { DistributionSummaryStrip } from './DistributionSummaryStrip';
+import { DistributionStats } from '../utils/distributionAnalytics';
 
 interface SummaryStripProps {
   engine: any;
   gradeTypesList: GradeTypeItem[];
   hasSelectedStudent?: boolean;
   chartViewMode?: 'timeline' | 'distribution';
-  bgdStats?: BgdDistributionStats;
+  distributionStats?: DistributionStats;
 }
 
 export const SummaryStrip: React.FC<SummaryStripProps> = React.memo(({
@@ -18,13 +18,13 @@ export const SummaryStrip: React.FC<SummaryStripProps> = React.memo(({
   gradeTypesList,
   hasSelectedStudent,
   chartViewMode = 'timeline',
-  bgdStats,
+  distributionStats,
 }) => {
   const [activeTooltip, setActiveTooltip] = useState<string | null>(null);
 
-  // If in MOET Distribution view mode, render BgdSummaryStrip
-  if (chartViewMode === 'distribution' && bgdStats) {
-    return <BgdSummaryStrip bgdStats={bgdStats} />;
+  // If in Distribution view mode, render DistributionSummaryStrip
+  if (chartViewMode === 'distribution' && distributionStats) {
+    return <DistributionSummaryStrip distributionStats={distributionStats} />;
   }
 
   // 6-Tier Realistic Educational Scale for PI (Scale 0 - 100)
@@ -90,7 +90,7 @@ export const SummaryStrip: React.FC<SummaryStripProps> = React.memo(({
           >
             <div className="bg-[#0d1120] p-2.5 rounded-lg border border-[#202948] space-y-1.5 font-mono text-[10px]">
               <div className="text-slate-400 font-bold border-b border-white/5 pb-1">
-                Công thức: Dự Đoán = 30% C1 + 45% C2 + 10% HW + 15% Luyện Đề
+                Công thức: Dự Đoán = 30% Từ Vựng + 45% Ngữ Pháp + 10% BTVN + 15% Luyện Đề
               </div>
               <div className="flex items-center justify-between text-blue-400">
                 <span>Từ Vựng Dự Đoán:</span>
@@ -101,7 +101,7 @@ export const SummaryStrip: React.FC<SummaryStripProps> = React.memo(({
                 <span className="font-black">{engine.pred_c2 ?? 0} đ</span>
               </div>
               <div className="flex items-center justify-between text-emerald-400">
-                <span>Homework Dự Đoán:</span>
+                <span>BTVN Dự Đoán:</span>
                 <span className="font-black">{engine.pred_hw ?? 0} đ</span>
               </div>
             </div>
@@ -159,7 +159,7 @@ export const SummaryStrip: React.FC<SummaryStripProps> = React.memo(({
                 <span className="font-black">{engine.ema_c2 ?? 0} đ</span>
               </div>
               <div className="flex items-center justify-between text-emerald-400">
-                <span>Homework EMA (10%):</span>
+                <span>BTVN EMA (10%):</span>
                 <span className="font-black">{engine.ema_hw ?? 0} đ</span>
               </div>
             </div>

@@ -16,7 +16,7 @@ export async function exportRankingsExcel({
     const ExcelJS = (await import('exceljs')).default;
     const workbook = new ExcelJS.Workbook();
     // Headers without Rank ('Hạng') column
-    const headers = ['STT', 'Họ và Tên', 'Lớp Học', 'Buổi Học', 'Điểm Danh %', 'Từ Vựng', 'Ngữ Pháp', 'Homework', 'Đánh Giá'];
+    const headers = ['STT', 'Họ và Tên', 'Lớp Học', 'Buổi Học', 'Điểm Danh %', 'Từ Vựng', 'Ngữ Pháp', 'BTVN', 'Đánh Giá'];
 
     const addClassSheet = (sheetName: string, items: any[]) => {
       const safeName = sheetName.replace(/[\*\?:\/\\\[\]]/g, '').slice(0, 31) || 'Lớp';

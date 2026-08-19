@@ -22,16 +22,16 @@ interface KPICardsProps {
   isTestMode?: boolean;
 }
 
-export const KPICards: React.FC<KPICardsProps> = React.memo(({ stats, isTestMode }) => {
+export const KPICards: React.FC<KPICardsProps> = React.memo(({ stats }) => {
   const hasMockTest = stats.mockTest !== undefined && stats.mockTest !== null && stats.mockTest !== '-';
 
   return (
     <div className={`grid grid-cols-1 sm:grid-cols-2 ${hasMockTest ? 'lg:grid-cols-5' : 'lg:grid-cols-4'} gap-4 select-none`}>
-      {/* 1. CHECK 1 TRUNG BÌNH */}
+      {/* 1. TỪ VỰNG TRUNG BÌNH */}
       <div className="kpi-card-blue p-5 flex flex-col justify-between shadow-2xl transition-all duration-200 min-h-[105px] animate-cascade-1">
         <div>
           <span className="text-[10px] font-black uppercase tracking-wider text-blue-400 block mb-1">
-            {isTestMode ? 'TỪ VỰNG TRUNG BÌNH' : 'CHECK 1 TRUNG BÌNH'}
+            TỪ VỰNG TRUNG BÌNH
           </span>
           <div className="flex items-baseline gap-1.5">
             <span className="text-3xl font-black text-white font-mono">{stats.c1}</span>
@@ -43,11 +43,11 @@ export const KPICards: React.FC<KPICardsProps> = React.memo(({ stats, isTestMode
         </div>
       </div>
 
-      {/* 2. CHECK 2 TRUNG BÌNH */}
+      {/* 2. NGỮ PHÁP TRUNG BÌNH */}
       <div className="kpi-card-purple p-5 flex flex-col justify-between shadow-2xl transition-all duration-200 min-h-[105px] animate-cascade-2">
         <div>
           <span className="text-[10px] font-black uppercase tracking-wider text-purple-400 block mb-1">
-            {isTestMode ? 'NGỮ PHÁP TRUNG BÌNH' : 'CHECK 2 TRUNG BÌNH'}
+            NGỮ PHÁP TRUNG BÌNH
           </span>
           <div className="flex items-baseline gap-1.5">
             <span className="text-3xl font-black text-white font-mono">{stats.c2}</span>
@@ -59,11 +59,11 @@ export const KPICards: React.FC<KPICardsProps> = React.memo(({ stats, isTestMode
         </div>
       </div>
 
-      {/* 3. HOMEWORK TRUNG BÌNH */}
+      {/* 3. BTVN TRUNG BÌNH */}
       <div className="kpi-card-green p-5 flex flex-col justify-between shadow-2xl transition-all duration-200 min-h-[105px] animate-cascade-3">
         <div>
           <span className="text-[10px] font-black uppercase tracking-wider text-emerald-400 block mb-1">
-            HOMEWORK TRUNG BÌNH
+            BTVN TRUNG BÌNH
           </span>
           <div className="flex items-baseline gap-1.5">
             <span className="text-3xl font-black text-white font-mono">{stats.hw}</span>
@@ -75,12 +75,12 @@ export const KPICards: React.FC<KPICardsProps> = React.memo(({ stats, isTestMode
         </div>
       </div>
 
-      {/* 4. LUYỆN ĐỀ (GIỮA/CUỐI KỲ) */}
+      {/* 4. LUYỆN ĐỀ */}
       {hasMockTest && (
         <div className="kpi-card-blue p-5 flex flex-col justify-between shadow-2xl transition-all duration-200 min-h-[105px] animate-cascade-4" style={{ borderColor: 'rgba(245, 158, 11, 0.45)' }}>
           <div>
             <span className="text-[10px] font-black uppercase tracking-wider text-amber-400 block mb-1">
-              LUYỆN ĐỀ (GIỮA / CUỐI KỲ)
+              LUYỆN ĐỀ
             </span>
             <div className="flex items-baseline gap-1.5">
               <span className="text-3xl font-black text-white font-mono">{stats.mockTest}</span>

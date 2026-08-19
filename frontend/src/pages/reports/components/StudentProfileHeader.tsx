@@ -260,29 +260,25 @@ export const StudentProfileHeader: React.FC<StudentProfileHeaderProps> = ({
             </span>
           </div>
 
-          {/* Check 1 (Từ Vựng) */}
+          {/* Từ Vựng */}
           <div className="flex items-center justify-between py-2.5 border-b border-white/10 text-sm">
-            <span className="text-slate-400 font-medium">
-              {isTestMode ? 'Từ Vựng (Check 1)' : 'Check 1 (Từ Vựng)'}
-            </span>
+            <span className="text-slate-400 font-medium">Từ Vựng</span>
             <span className="text-base sm:text-lg font-black text-blue-400 font-mono">
               {stats.c1 ?? '-'}
             </span>
           </div>
 
-          {/* Check 2 (Ngữ Pháp) */}
+          {/* Ngữ Pháp */}
           <div className="flex items-center justify-between py-2.5 border-b border-white/10 text-sm">
-            <span className="text-slate-400 font-medium">
-              {isTestMode ? 'Ngữ Pháp (Check 2)' : 'Check 2 (Ngữ Pháp)'}
-            </span>
+            <span className="text-slate-400 font-medium">Ngữ Pháp</span>
             <span className="text-base sm:text-lg font-black text-purple-400 font-mono">
               {stats.c2 ?? '-'}
             </span>
           </div>
 
-          {/* Homework (BTVN) */}
+          {/* BTVN */}
           <div className="flex items-center justify-between py-2.5 border-b border-white/10 text-sm">
-            <span className="text-slate-400 font-medium">Homework (BTVN)</span>
+            <span className="text-slate-400 font-medium">BTVN</span>
             <span className="text-base sm:text-lg font-black text-amber-400 font-mono">
               {stats.hw ?? '-'}
             </span>

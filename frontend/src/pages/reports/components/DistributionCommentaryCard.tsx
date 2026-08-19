@@ -1,13 +1,13 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Info, BookOpen, CheckCircle2, X } from 'lucide-react';
-import { BgdDetailedEvaluation } from '../utils/bgdAnalytics';
+import { DistributionDetailedEvaluation } from '../utils/distributionAnalytics';
 
-interface BgdDetailedCommentaryCardProps {
-  evaluation: BgdDetailedEvaluation;
+interface DistributionCommentaryCardProps {
+  evaluation: DistributionDetailedEvaluation;
   distributionRating: string;
 }
 
-export const BgdDetailedCommentaryCard: React.FC<BgdDetailedCommentaryCardProps> = ({
+export const DistributionCommentaryCard: React.FC<DistributionCommentaryCardProps> = ({
   evaluation,
   distributionRating,
 }) => {
@@ -43,7 +43,7 @@ export const BgdDetailedCommentaryCard: React.FC<BgdDetailedCommentaryCardProps>
         </span>
       </div>
 
-      {/* 2. POINT-BY-POINT METRIC BREAKDOWN (CLEAN ROWS, NO CARD-IN-CARD) */}
+      {/* 2. POINT-BY-POINT METRIC BREAKDOWN */}
       <div className="space-y-0.5 divide-y divide-white/5">
         {evaluation.metrics.map((item) => {
           const isTooltipActive = activeTooltipId === item.id;
@@ -79,7 +79,7 @@ export const BgdDetailedCommentaryCard: React.FC<BgdDetailedCommentaryCardProps>
                   <Info size={13} />
                 </button>
 
-                {/* Floating Popover Card (Zero layout shift, absolute overlay) */}
+                {/* Floating Popover Card */}
                 {isTooltipActive && (
                   <div className="absolute right-0 top-full mt-2 z-50 w-72 sm:w-80 p-3.5 rounded-xl bg-[#12172b] border border-[#2c375e] text-xs shadow-2xl space-y-2 animate-in fade-in zoom-in-95 duration-150">
                     <div className="flex items-center justify-between text-indigo-300 font-bold border-b border-white/10 pb-1.5">
@@ -113,7 +113,7 @@ export const BgdDetailedCommentaryCard: React.FC<BgdDetailedCommentaryCardProps>
         })}
       </div>
 
-      {/* 3. KẾT LUẬN & ĐỊNH HƯỚNG SƯ PHẠM (SEAMLESS TYPOGRAPHY, NO BORDER-IN-BORDER) */}
+      {/* 3. KẾT LUẬN & ĐỊNH HƯỚNG SƯ PHẠM */}
       <div className="space-y-3 pt-2">
         <div className="flex items-center gap-2">
           <span className="text-xs font-black uppercase tracking-wider text-amber-400">
@@ -121,23 +121,20 @@ export const BgdDetailedCommentaryCard: React.FC<BgdDetailedCommentaryCardProps>
           </span>
         </div>
 
-        {/* Paragraph 1: Overview Quality */}
         <p className="text-xs sm:text-sm font-semibold text-slate-200 leading-relaxed">
           {evaluation.conclusion.overviewSummary}
         </p>
 
-        {/* Paragraph 2: Deep Dispersion Warning (Left accent line) */}
         <p className="text-xs sm:text-sm font-medium text-slate-300 leading-relaxed border-l-2 border-indigo-500/80 pl-3.5 py-0.5">
           {evaluation.conclusion.dispersionWarning}
         </p>
 
-        {/* Paragraph 3: Core Pedagogical Action (Left accent amber) */}
         <p className="text-xs sm:text-sm font-bold text-amber-300 leading-relaxed border-l-2 border-amber-400/80 pl-3.5 py-0.5">
           {evaluation.conclusion.strategicAction}
         </p>
       </div>
 
-      {/* 4. HÀNH ĐỘNG SƯ PHẠM CỤ THỂ (CLEAN ROWS, NO BORDER BOXES) */}
+      {/* 4. HÀNH ĐỘNG SƯ PHẠM CỤ THỂ */}
       <div className="space-y-2 pt-2 border-t border-white/5">
         <span className="text-xs font-black uppercase tracking-wider text-slate-400 block">
           KHUYẾN NGHỊ HÀNH ĐỘNG CỤ THỂ

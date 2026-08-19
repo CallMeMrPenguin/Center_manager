@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { StudentProfileHeader } from '../components/StudentProfileHeader';
 import { KPICards } from '../components/KPICards';
 import { InteractiveChart } from '../components/InteractiveChart';
@@ -6,7 +6,7 @@ import { SummaryStrip } from '../components/SummaryStrip';
 import { StudentRankingsTable } from '../components/StudentRankingsTable';
 import { StudentGradeHistoryTable } from '../components/StudentGradeHistoryTable';
 import { formatSessionDate, getStandardMoetPhases } from '../utils';
-import { computeBgdDistribution, GradeTypeFilterKey } from '../utils/bgdAnalytics';
+import { computeDistributionStats, GradeTypeFilterKey, DistributionScoreBin } from '../utils/distributionAnalytics';
 import { getStudentTier } from '../types';
 import { format1Dec, trunc1Dec } from '../../../utils';
 
@@ -60,6 +60,20 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
   const [timeView, setTimeView] = useState<'1m' | '2m' | '3m' | 'all'>('all');
   const [chartViewMode, setChartViewMode] = useState<'timeline' | 'distribution'>('timeline');
   const [selectedGradeTypeFilter, setSelectedGradeTypeFilter] = useState<GradeTypeFilterKey>('overall');
+  const [selectedScoreBin, setSelectedScoreBin] = useState<DistributionScoreBin | null>(null);
+
+  // Clear score bin filter whenever class or grade type filter changes
+  useEffect(() => {
+    setSelectedScoreBin(null);
+  }, [selectedClassId, selectedGradeTypeFilter, selectedPhaseId]);
+
+  const handleSelectScoreBin = (bin: DistributionScoreBin) => {
+    if (selectedScoreBin && selectedScoreBin.minScore === bin.minScore && selectedScoreBin.maxScore === bin.maxScore) {
+      setSelectedScoreBin(null);
+    } else {
+      setSelectedScoreBin(bin);
+    }
+  };
 
   // Combined Standard MOET phases + Database Custom User Phases
   const combinedTimePhases = useMemo(() => {
@@ -98,7 +112,6 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
   // Filter session records according to academic year and active phase
   const activeSessionRecords = useMemo(() => {
     if (!sessionRecords || sessionRecords.length === 0) return [];
-
     let filtered = sessionRecords;
     if (selectedPhaseId) {
       const activePhase = combinedTimePhases.find(p => String(p.id) === selectedPhaseId);
@@ -273,13 +286,33 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
     return classes.find(c => String(c.id) === selectedClassId);
   }, [classes, selectedClassId]);
 
-  // MOET standard distribution stats computed client-side
-  const bgdStats = useMemo(() => {
+  // Standard distribution stats computed client-side (per-student average)
+  const distributionStats = useMemo(() => {
     const recs = activeSessionRecords.length > 0 ? activeSessionRecords : sessionRecords;
     const ranks = filteredRankings.length > 0 ? filteredRankings : studentRankings;
     const clsName = selectedClassObj ? selectedClassObj.class_name : undefined;
-    return computeBgdDistribution(recs, ranks, selectedStudentId, clsName, selectedGradeTypeFilter, isTestMode);
+    return computeDistributionStats(recs, ranks, selectedStudentId, clsName, selectedGradeTypeFilter, isTestMode);
   }, [activeSessionRecords, sessionRecords, filteredRankings, studentRankings, selectedStudentId, selectedClassObj, selectedGradeTypeFilter, isTestMode]);
+
+  // Rankings filtered by selected score bin (if any column was clicked)
+  const displayedRankings = useMemo(() => {
+    if (!selectedScoreBin) return filteredRankings;
+    if (selectedScoreBin.studentIds && selectedScoreBin.studentIds.length > 0) {
+      const idSet = new Set(selectedScoreBin.studentIds.map(id => String(id)));
+      return filteredRankings.filter(r => idSet.has(String(r.student_id || r.id)));
+    }
+    return filteredRankings.filter(r => {
+      let sc: number = 0;
+      if (selectedGradeTypeFilter === 'check_1') sc = Number(r.avg_check_1 || 0);
+      else if (selectedGradeTypeFilter === 'check_2') sc = Number(r.avg_check_2 || 0);
+      else if (selectedGradeTypeFilter === 'homework') sc = Number(r.avg_homework || 0);
+      else if (selectedGradeTypeFilter === 'mock_test') sc = Number(r.avg_mock_test || r.mock_test || r.avg_check_2 || 0);
+      else {
+        sc = Number(r.overallAvg) || Number(r.ema_level) || (Number(r.avg_check_1 || 0) * 0.35 + Number(r.avg_check_2 || 0) * 0.55 + Number(r.avg_homework || 0) * 0.1);
+      }
+      return sc >= selectedScoreBin.minScore && (selectedScoreBin.maxScore === 10 ? sc <= 10 : sc < selectedScoreBin.maxScore);
+    });
+  }, [filteredRankings, selectedScoreBin, selectedGradeTypeFilter]);
 
   return (
     <div className="space-y-6">
@@ -321,21 +354,23 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
           onOpenPhaseModal={onOpenPhaseModal}
           chartViewMode={chartViewMode}
           setChartViewMode={setChartViewMode}
-          bgdStats={bgdStats}
+          distributionStats={distributionStats}
           selectedGradeTypeFilter={selectedGradeTypeFilter}
           setSelectedGradeTypeFilter={setSelectedGradeTypeFilter}
+          selectedScoreBin={selectedScoreBin}
+          onSelectScoreBin={handleSelectScoreBin}
           isTestMode={isTestMode}
         />
       </div>
 
-      {/* 4. SUMMARY STRIP (DYNAMICALLY SWITCHES BETWEEN TIMELINE & BGD METRICS) */}
+      {/* 4. SUMMARY STRIP */}
       <div className={selectedStudentObj ? 'animate-cascade-4' : 'animate-cascade-3'}>
         <SummaryStrip
           engine={engine}
           gradeTypesList={gradeTypesList}
           hasSelectedStudent={!!selectedStudentObj}
           chartViewMode={chartViewMode}
-          bgdStats={bgdStats}
+          distributionStats={distributionStats}
         />
       </div>
 
@@ -349,10 +384,12 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
           selectedStudentId={selectedStudentId}
           setSelectedStudentId={setSelectedStudentId}
           studentRankings={studentRankings}
-          filteredRankings={filteredRankings}
+          filteredRankings={displayedRankings}
           studentSessionsMap={studentSessionsMap}
           onSelectRankingStudent={onSelectRankingStudent}
           hasSelectedStudent={!!selectedStudentObj}
+          selectedScoreBin={selectedScoreBin}
+          onClearScoreBin={() => setSelectedScoreBin(null)}
           isTestMode={isTestMode}
         />
       </div>

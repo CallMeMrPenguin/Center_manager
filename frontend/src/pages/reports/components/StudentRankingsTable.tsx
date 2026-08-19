@@ -7,6 +7,7 @@ import { MiniTrendSparkline } from './MiniTrendSparkline';
 import { getStudentTier } from '../types';
 import { format1Dec, trunc1Dec } from '../../../utils';
 import { exportRankingsExcel } from '../utils/exportRankingsExcel';
+import { DistributionScoreBin } from '../utils/distributionAnalytics';
 
 interface StudentRankingsTableProps {
   loading: boolean;
@@ -20,6 +21,8 @@ interface StudentRankingsTableProps {
   studentSessionsMap: Record<string, any[]>;
   onSelectRankingStudent?: (studentId: number) => void;
   hasSelectedStudent: boolean;
+  selectedScoreBin?: DistributionScoreBin | null;
+  onClearScoreBin?: () => void;
   isTestMode?: boolean;
 }
 
@@ -35,7 +38,8 @@ export const StudentRankingsTable: React.FC<StudentRankingsTableProps> = React.m
   studentSessionsMap,
   onSelectRankingStudent,
   hasSelectedStudent,
-  isTestMode,
+  selectedScoreBin,
+  onClearScoreBin,
 }) => {
   const handleExportRankingsExcel = useCallback(() => {
     exportRankingsExcel({
@@ -75,7 +79,7 @@ export const StudentRankingsTable: React.FC<StudentRankingsTableProps> = React.m
       header: 'Lớp Học',
       meta: { headerText: 'Lớp Học', exportValue: (r: any) => r.class_name || 'Lớp học' },
       cell: (info) => (
-        <span className="inline-block px-3 py-1 rounded-lg text-xs sm:text-sm font-black bg-[#1c2442] text-indigo-300 border border-[#303d68]">
+        <span className="font-bold text-slate-300 text-sm sm:text-base">
           {info.getValue<string>() || 'Lớp học'}
         </span>
       ),
@@ -95,18 +99,16 @@ export const StudentRankingsTable: React.FC<StudentRankingsTableProps> = React.m
         const r = row.original;
         const pct = r.total_sessions > 0 ? Math.round((r.present_count / r.total_sessions) * 100) : 100;
         return (
-          <div className="text-center">
-            <span className={`inline-block px-3 py-1 rounded-full text-xs font-black font-mono ${pct < 80 ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30' : pct < 90 ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'}`}>
-              {pct}%
-            </span>
+          <div className="text-center font-mono font-bold text-slate-300 text-sm sm:text-base">
+            {pct}%
           </div>
         );
       },
     },
     {
       accessorKey: 'avg_check_1',
-      header: () => <div className="text-center w-full">{isTestMode ? 'Từ Vựng' : 'Check 1'}</div>,
-      meta: { headerText: isTestMode ? 'Từ Vựng' : 'Check 1', exportValue: (r: any) => Number(r.avg_check_1) > 0 ? format1Dec(Number(r.avg_check_1)) : '-' },
+      header: () => <div className="text-center w-full">Từ Vựng</div>,
+      meta: { headerText: 'Từ Vựng', exportValue: (r: any) => Number(r.avg_check_1) > 0 ? format1Dec(Number(r.avg_check_1)) : '-' },
       cell: ({ getValue }) => {
         const val = Number(getValue()) || 0;
         return (
@@ -118,8 +120,8 @@ export const StudentRankingsTable: React.FC<StudentRankingsTableProps> = React.m
     },
     {
       accessorKey: 'avg_check_2',
-      header: () => <div className="text-center w-full">{isTestMode ? 'Ngữ Pháp' : 'Check 2'}</div>,
-      meta: { headerText: isTestMode ? 'Ngữ Pháp' : 'Check 2', exportValue: (r: any) => Number(r.avg_check_2) > 0 ? format1Dec(Number(r.avg_check_2)) : '-' },
+      header: () => <div className="text-center w-full">Ngữ Pháp</div>,
+      meta: { headerText: 'Ngữ Pháp', exportValue: (r: any) => Number(r.avg_check_2) > 0 ? format1Dec(Number(r.avg_check_2)) : '-' },
       cell: ({ getValue }) => {
         const val = Number(getValue()) || 0;
         return (
@@ -131,8 +133,8 @@ export const StudentRankingsTable: React.FC<StudentRankingsTableProps> = React.m
     },
     {
       accessorKey: 'avg_homework',
-      header: () => <div className="text-center w-full">Homework</div>,
-      meta: { headerText: 'Homework', exportValue: (r: any) => Number(r.avg_homework) > 0 ? format1Dec(Number(r.avg_homework)) : '-' },
+      header: () => <div className="text-center w-full">BTVN</div>,
+      meta: { headerText: 'BTVN', exportValue: (r: any) => Number(r.avg_homework) > 0 ? format1Dec(Number(r.avg_homework)) : '-' },
       cell: ({ getValue }) => {
         const val = Number(getValue()) || 0;
         return (
@@ -296,6 +298,26 @@ export const StudentRankingsTable: React.FC<StudentRankingsTableProps> = React.m
           />
         </div>
       </div>
+
+      {/* Active Histogram Score Bin Filter Bar */}
+      {selectedScoreBin && (
+        <div className="mx-5 my-3 flex items-center justify-between bg-indigo-950/70 border border-indigo-500/40 px-4 py-2.5 rounded-xl text-xs font-bold text-indigo-200 shadow-lg">
+          <div className="flex items-center gap-2.5">
+            <span className="w-2.5 h-2.5 rounded-full bg-indigo-400 animate-pulse" />
+            <span>
+              Đang lọc theo mức điểm: <strong className="text-white font-mono text-sm">{selectedScoreBin.rangeLabel}</strong> ({filteredRankings.length} học sinh)
+            </span>
+          </div>
+          <button
+            type="button"
+            onClick={onClearScoreBin}
+            className="px-3 py-1 rounded-lg bg-indigo-600/40 hover:bg-indigo-600/70 text-white font-bold transition cursor-pointer border border-indigo-400/30"
+          >
+            ✕ Bỏ lọc phổ điểm
+          </button>
+        </div>
+      )}
+
       <DataTable
         tableId="reports-rankings-table"
         exportFilename="bang_xep_hang_hoc_sinh"

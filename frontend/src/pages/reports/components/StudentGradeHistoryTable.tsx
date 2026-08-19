@@ -61,18 +61,16 @@ export const StudentGradeHistoryTable: React.FC<StudentGradeHistoryTableProps> =
         const st = getValue<string>() || 'Có mặt';
         const isAbsent = st.includes('Vắng') || st.includes('Nghỉ');
         return (
-          <div className="text-center">
-            <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-extrabold ${isAbsent ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30' : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'}`}>
-              {st}
-            </span>
+          <div className={`text-center font-bold text-sm sm:text-base ${isAbsent ? 'text-rose-400' : 'text-emerald-400'}`}>
+            {st}
           </div>
         );
       },
     },
     {
       accessorKey: 'check_1',
-      header: () => <div className="text-center w-full">{isTestMode ? 'Từ Vựng' : 'Check 1'}</div>,
-      meta: { headerText: isTestMode ? 'Từ Vựng' : 'Check 1', exportValue: (r: any) => Number(r.check_1) > 0 ? format1Dec(Number(r.check_1)) : '-' },
+      header: () => <div className="text-center w-full">Từ Vựng</div>,
+      meta: { headerText: 'Từ Vựng', exportValue: (r: any) => Number(r.check_1) > 0 ? format1Dec(Number(r.check_1)) : '-' },
       cell: ({ row }) => {
         const r = row.original;
         const val = Number(r.check_1) || 0;
@@ -99,8 +97,8 @@ export const StudentGradeHistoryTable: React.FC<StudentGradeHistoryTableProps> =
     },
     {
       accessorKey: 'check_2',
-      header: () => <div className="text-center w-full">{isTestMode ? 'Ngữ Pháp' : 'Check 2'}</div>,
-      meta: { headerText: isTestMode ? 'Ngữ Pháp' : 'Check 2', exportValue: (r: any) => Number(r.check_2) > 0 ? format1Dec(Number(r.check_2)) : '-' },
+      header: () => <div className="text-center w-full">Ngữ Pháp</div>,
+      meta: { headerText: 'Ngữ Pháp', exportValue: (r: any) => Number(r.check_2) > 0 ? format1Dec(Number(r.check_2)) : '-' },
       cell: ({ row }) => {
         const r = row.original;
         const val = Number(r.check_2) || 0;
@@ -127,8 +125,8 @@ export const StudentGradeHistoryTable: React.FC<StudentGradeHistoryTableProps> =
     },
     {
       accessorKey: 'homework',
-      header: () => <div className="text-center w-full">Homework</div>,
-      meta: { headerText: 'Homework', exportValue: (r: any) => Number(r.homework) > 0 ? format1Dec(Number(r.homework)) : '-' },
+      header: () => <div className="text-center w-full">BTVN</div>,
+      meta: { headerText: 'BTVN', exportValue: (r: any) => Number(r.homework) > 0 ? format1Dec(Number(r.homework)) : '-' },
       cell: ({ row }) => {
         const r = row.original;
         const val = Number(r.homework) || 0;

@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
 import { Info } from 'lucide-react';
 import { SummaryTooltipCard } from './SummaryTooltipCard';
-import { BgdDistributionStats } from '../utils/bgdAnalytics';
+import { DistributionStats } from '../utils/distributionAnalytics';
 import { format1Dec } from '../../../utils';
 
-interface BgdSummaryStripProps {
-  bgdStats: BgdDistributionStats;
+interface DistributionSummaryStripProps {
+  distributionStats: DistributionStats;
 }
 
-export const BgdSummaryStrip: React.FC<BgdSummaryStripProps> = React.memo(({ bgdStats }) => {
+export const DistributionSummaryStrip: React.FC<DistributionSummaryStripProps> = React.memo(({ distributionStats }) => {
   const [activeTooltip, setActiveTooltip] = useState<string | null>(null);
 
   return (
@@ -19,17 +19,17 @@ export const BgdSummaryStrip: React.FC<BgdSummaryStripProps> = React.memo(({ bgd
           <span className="text-[10px] font-black uppercase text-slate-400 block">Điểm Trung Bình</span>
           <button
             type="button"
-            onClick={() => setActiveTooltip(activeTooltip === 'bgd-mean' ? null : 'bgd-mean')}
+            onClick={() => setActiveTooltip(activeTooltip === 'dist-mean' ? null : 'dist-mean')}
             className="text-slate-500 hover:text-indigo-400 cursor-pointer"
             title="Xem chi tiết Điểm Trung Bình"
           >
             <Info size={11} />
           </button>
         </div>
-        <span className="text-sm font-black text-blue-400 font-mono">{format1Dec(bgdStats.mean)} Điểm</span>
+        <span className="text-sm font-black text-blue-400 font-mono">{format1Dec(distributionStats.mean)} Điểm</span>
         <span className="text-[10px] text-slate-400 font-semibold block truncate">Mặt Bằng Điểm Số</span>
 
-        {activeTooltip === 'bgd-mean' && (
+        {activeTooltip === 'dist-mean' && (
           <SummaryTooltipCard
             title="Điểm Trung Bình (Mean)"
             titleColor="text-blue-300"
@@ -38,8 +38,8 @@ export const BgdSummaryStrip: React.FC<BgdSummaryStripProps> = React.memo(({ bgd
             footer={
               <div className="text-[10px] space-y-1 text-slate-300">
                 <span className="font-bold text-blue-300 block">Công thức: Mean = Tổng điểm / N</span>
-                <div>Tổng số mẫu: {bgdStats.n} lượt điểm</div>
-                <div>Thấp nhất: {format1Dec(bgdStats.min)}đ - Cao nhất: {format1Dec(bgdStats.max)}đ</div>
+                <div>Tổng số mẫu: {distributionStats.n} học sinh</div>
+                <div>Thấp nhất: {format1Dec(distributionStats.min)}đ - Cao nhất: {format1Dec(distributionStats.max)}đ</div>
               </div>
             }
           />
@@ -52,17 +52,17 @@ export const BgdSummaryStrip: React.FC<BgdSummaryStripProps> = React.memo(({ bgd
           <span className="text-[10px] font-black uppercase text-slate-400 block">Trung Vị (Median)</span>
           <button
             type="button"
-            onClick={() => setActiveTooltip(activeTooltip === 'bgd-median' ? null : 'bgd-median')}
+            onClick={() => setActiveTooltip(activeTooltip === 'dist-median' ? null : 'dist-median')}
             className="text-slate-500 hover:text-indigo-400 cursor-pointer"
             title="Xem chi tiết Trung Vị"
           >
             <Info size={11} />
           </button>
         </div>
-        <span className="text-sm font-black text-purple-400 font-mono">{format1Dec(bgdStats.median)} Điểm</span>
+        <span className="text-sm font-black text-purple-400 font-mono">{format1Dec(distributionStats.median)} Điểm</span>
         <span className="text-[10px] text-slate-400 font-semibold block truncate">Học Sinh Điển Hình</span>
 
-        {activeTooltip === 'bgd-median' && (
+        {activeTooltip === 'dist-median' && (
           <SummaryTooltipCard
             title="Trung Vị Điểm Số (Median)"
             titleColor="text-purple-300"
@@ -71,7 +71,7 @@ export const BgdSummaryStrip: React.FC<BgdSummaryStripProps> = React.memo(({ bgd
             footer={
               <div className="text-[10px] space-y-1 text-slate-300">
                 <span className="font-bold text-purple-300 block">So sánh với Điểm Trung Bình:</span>
-                <div>{bgdStats.skewnessLabel}</div>
+                <div>{distributionStats.skewnessLabel}</div>
               </div>
             }
           />
@@ -84,7 +84,7 @@ export const BgdSummaryStrip: React.FC<BgdSummaryStripProps> = React.memo(({ bgd
           <span className="text-[10px] font-black uppercase text-slate-400 block">Độ Lệch Chuẩn (SD)</span>
           <button
             type="button"
-            onClick={() => setActiveTooltip(activeTooltip === 'bgd-sd' ? null : 'bgd-sd')}
+            onClick={() => setActiveTooltip(activeTooltip === 'dist-sd' ? null : 'dist-sd')}
             className="text-slate-500 hover:text-cyan-400 cursor-pointer"
             title="Xem chi tiết Độ Lệch Chuẩn"
           >
@@ -92,11 +92,11 @@ export const BgdSummaryStrip: React.FC<BgdSummaryStripProps> = React.memo(({ bgd
           </button>
         </div>
         <span className={`text-sm font-black font-mono ${
-          bgdStats.sd > 2.0 ? 'text-rose-500' : bgdStats.sd > 1.2 ? 'text-cyan-400' : 'text-emerald-400'
-        }`}>σ = {format1Dec(bgdStats.sd)}</span>
+          distributionStats.sd > 2.0 ? 'text-rose-500' : distributionStats.sd > 1.2 ? 'text-cyan-400' : 'text-emerald-400'
+        }`}>σ = {format1Dec(distributionStats.sd)}</span>
         <span className="text-[10px] text-slate-400 font-semibold block truncate">Độ Phân Hóa Lớp</span>
 
-        {activeTooltip === 'bgd-sd' && (
+        {activeTooltip === 'dist-sd' && (
           <SummaryTooltipCard
             title="Độ Lệch Chuẩn (Standard Deviation)"
             titleColor="text-cyan-300"
@@ -119,17 +119,17 @@ export const BgdSummaryStrip: React.FC<BgdSummaryStripProps> = React.memo(({ bgd
           <span className="text-[10px] font-black uppercase text-slate-400 block">Khoảng Tứ Phân Vị</span>
           <button
             type="button"
-            onClick={() => setActiveTooltip(activeTooltip === 'bgd-iqr' ? null : 'bgd-iqr')}
+            onClick={() => setActiveTooltip(activeTooltip === 'dist-iqr' ? null : 'dist-iqr')}
             className="text-slate-500 hover:text-amber-400 cursor-pointer"
             title="Xem chi tiết Khoảng Tứ Phân Vị"
           >
             <Info size={11} />
           </button>
         </div>
-        <span className="text-sm font-black text-amber-400 font-mono">IQR: {format1Dec(bgdStats.iqr)} đ</span>
+        <span className="text-sm font-black text-amber-400 font-mono">IQR: {format1Dec(distributionStats.iqr)} đ</span>
         <span className="text-[10px] text-slate-400 font-semibold block truncate">Vùng 50% Giữa Bảng</span>
 
-        {activeTooltip === 'bgd-iqr' && (
+        {activeTooltip === 'dist-iqr' && (
           <SummaryTooltipCard
             title="Khoảng Tứ Phân Vị (IQR = Q3 - Q1)"
             titleColor="text-amber-300"
@@ -137,9 +137,9 @@ export const BgdSummaryStrip: React.FC<BgdSummaryStripProps> = React.memo(({ bgd
             whatItReflects="Độ rộng vùng điểm của 50% học sinh giữa bảng (bỏ qua 25% top đầu và 25% đáy). Giúp giáo viên thiết kế độ khó bài tập nhắm trúng đa số học sinh."
             footer={
               <div className="text-[10px] space-y-1 text-slate-300">
-                <div>Q1 (Mốc 25%): {format1Dec(bgdStats.q1)} điểm</div>
-                <div>Q3 (Mốc 75%): {format1Dec(bgdStats.q3)} điểm</div>
-                <div>Vùng tập trung: {format1Dec(bgdStats.q1)}đ đến {format1Dec(bgdStats.q3)}đ</div>
+                <div>Q1 (Mốc 25%): {format1Dec(distributionStats.q1)} điểm</div>
+                <div>Q3 (Mốc 75%): {format1Dec(distributionStats.q3)} điểm</div>
+                <div>Vùng tập trung: {format1Dec(distributionStats.q1)}đ đến {format1Dec(distributionStats.q3)}đ</div>
               </div>
             }
           />
@@ -152,7 +152,7 @@ export const BgdSummaryStrip: React.FC<BgdSummaryStripProps> = React.memo(({ bgd
           <span className="text-[10px] font-black uppercase text-slate-400 block">Tỷ Lệ Đạt (≥5.0)</span>
           <button
             type="button"
-            onClick={() => setActiveTooltip(activeTooltip === 'bgd-pass' ? null : 'bgd-pass')}
+            onClick={() => setActiveTooltip(activeTooltip === 'dist-pass' ? null : 'dist-pass')}
             className="text-slate-500 hover:text-emerald-400 cursor-pointer"
             title="Xem chi tiết Tỷ lệ Đạt"
           >
@@ -160,23 +160,23 @@ export const BgdSummaryStrip: React.FC<BgdSummaryStripProps> = React.memo(({ bgd
           </button>
         </div>
         <span className={`text-sm font-black font-mono ${
-          bgdStats.passPct >= 85 ? 'text-emerald-400' : bgdStats.passPct >= 70 ? 'text-amber-400' : 'text-rose-500'
-        }`}>{bgdStats.passPct}%</span>
+          distributionStats.passPct >= 85 ? 'text-emerald-400' : distributionStats.passPct >= 70 ? 'text-amber-400' : 'text-rose-500'
+        }`}>{distributionStats.passPct}%</span>
         <span className="text-[10px] text-slate-400 font-semibold block truncate">
-          {bgdStats.passCount}/{bgdStats.n} Lượt Đạt
+          {distributionStats.passCount}/{distributionStats.n} Học Sinh Đạt
         </span>
 
-        {activeTooltip === 'bgd-pass' && (
+        {activeTooltip === 'dist-pass' && (
           <SummaryTooltipCard
             title="Tỷ Lệ Đạt Chuẩn Kiến Thức"
             titleColor="text-emerald-300"
             onClose={() => setActiveTooltip(null)}
-            whatItReflects="Tỷ lệ lượt làm bài đạt từ 5.0 điểm trở lên trong các kỳ kiểm tra."
+            whatItReflects="Tỷ lệ học sinh đạt từ 5.0 điểm trở lên trong đợt đánh giá."
             footer={
               <div className="text-[10px] space-y-1 text-slate-300">
-                <div>Đạt yêu cầu (≥ 5.0đ): {bgdStats.passPct}% ({bgdStats.passCount} lượt)</div>
-                <div>Giỏi & Xuất Sắc (≥ 8.0đ): {bgdStats.excellentPct}% ({bgdStats.excellentCount} lượt)</div>
-                <div>Chưa đạt (dưới 5.0đ): {100 - bgdStats.passPct}% ({bgdStats.n - bgdStats.passCount} lượt)</div>
+                <div>Đạt yêu cầu (≥ 5.0đ): {distributionStats.passPct}% ({distributionStats.passCount} học sinh)</div>
+                <div>Giỏi & Xuất Sắc (≥ 8.0đ): {distributionStats.excellentPct}% ({distributionStats.excellentCount} học sinh)</div>
+                <div>Chưa đạt (dưới 5.0đ): {100 - distributionStats.passPct}% ({distributionStats.n - distributionStats.passCount} học sinh)</div>
               </div>
             }
           />
@@ -189,7 +189,7 @@ export const BgdSummaryStrip: React.FC<BgdSummaryStripProps> = React.memo(({ bgd
           <span className="text-[10px] font-black uppercase text-slate-400 block">Đánh Giá Phổ Điểm</span>
           <button
             type="button"
-            onClick={() => setActiveTooltip(activeTooltip === 'bgd-rating' ? null : 'bgd-rating')}
+            onClick={() => setActiveTooltip(activeTooltip === 'dist-rating' ? null : 'dist-rating')}
             className="text-slate-500 hover:text-indigo-400 cursor-pointer"
             title="Xem khuyến nghị sư phạm"
           >
@@ -197,17 +197,17 @@ export const BgdSummaryStrip: React.FC<BgdSummaryStripProps> = React.memo(({ bgd
           </button>
         </div>
         <span className={`text-xs font-black truncate block ${
-          bgdStats.distributionRating.includes('Xuất Sắc') ? 'text-emerald-400' :
-          bgdStats.distributionRating.includes('Tốt') ? 'text-cyan-400' :
-          bgdStats.distributionRating.includes('Khẩn') ? 'text-rose-500 animate-pulse' : 'text-amber-400'
+          distributionStats.distributionRating.includes('Xuất Sắc') ? 'text-emerald-400' :
+          distributionStats.distributionRating.includes('Tốt') ? 'text-cyan-400' :
+          distributionStats.distributionRating.includes('Khẩn') ? 'text-rose-500 animate-pulse' : 'text-amber-400'
         }`}>
-          {bgdStats.distributionRating}
+          {distributionStats.distributionRating}
         </span>
         <span className="text-[10px] text-slate-400 font-semibold block truncate">
-          {bgdStats.distributionShape}
+          {distributionStats.distributionShape}
         </span>
 
-        {activeTooltip === 'bgd-rating' && (
+        {activeTooltip === 'dist-rating' && (
           <SummaryTooltipCard
             title="Đánh Giá Tổng Quan Phổ Điểm"
             titleColor="text-indigo-300"
@@ -217,7 +217,7 @@ export const BgdSummaryStrip: React.FC<BgdSummaryStripProps> = React.memo(({ bgd
           >
             <div className="space-y-1.5 text-[10px] text-slate-300 leading-relaxed">
               <div className="p-2 rounded-lg bg-[#0d1120] border border-[#202948]">
-                {bgdStats.commentary.headline}
+                {distributionStats.commentary.headline}
               </div>
             </div>
           </SummaryTooltipCard>
