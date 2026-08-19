@@ -2545,8 +2545,8 @@ def get_analytics_reports(class_id: Optional[int] = None, student_id: Optional[i
     all_rows = []
     for r in raw_db_rows:
         cfg_str = r.get("test_config_json")
-        c1_skill = "vocab"
-        c2_skill = "grammar"
+        c1_skill = ""
+        c2_skill = ""
         topic = ""
         c1_topic = ""
         c2_topic = ""
@@ -2558,10 +2558,22 @@ def get_analytics_reports(class_id: Optional[int] = None, student_id: Optional[i
                 c2_info = cfg.get("check_2") or {}
                 c1_skill = c1_info.get("skill") or "vocab"
                 c2_skill = c2_info.get("skill") or "grammar"
-                c1_topic = c1_info.get("topic") or (", ".join(c1_info.get("units", [])) if c1_info.get("units") else "")
-                c2_topic = c2_info.get("grammar_topic") or c2_info.get("topic") or (", ".join(c2_info.get("units", [])) if c2_info.get("units") else "")
-                grammar_topic = c2_topic if c2_skill == "grammar" else c1_topic
-                topic = c1_topic or c2_topic or (", ".join(c1_info.get("units", []) + c2_info.get("units", [])))
+
+                # Check 1 topic: if grammar, prioritize grammar_topic; otherwise topic / units
+                if c1_skill == "grammar":
+                    c1_topic = c1_info.get("grammar_topic") or c1_info.get("topic") or (", ".join(c1_info.get("units", [])) if c1_info.get("units") else "")
+                else:
+                    c1_topic = c1_info.get("topic") or c1_info.get("grammar_topic") or (", ".join(c1_info.get("units", [])) if c1_info.get("units") else "")
+
+                # Check 2 topic: if grammar, prioritize grammar_topic; otherwise topic / units
+                if c2_skill == "grammar":
+                    c2_topic = c2_info.get("grammar_topic") or c2_info.get("topic") or (", ".join(c2_info.get("units", [])) if c2_info.get("units") else "")
+                else:
+                    c2_topic = c2_info.get("topic") or c2_info.get("grammar_topic") or (", ".join(c2_info.get("units", [])) if c2_info.get("units") else "")
+
+                grammar_topic = c1_topic if c1_skill == "grammar" else (c2_topic if c2_skill == "grammar" else "")
+                vocab_topic = c1_topic if c1_skill == "vocab" else (c2_topic if c2_skill == "vocab" else "")
+                topic = vocab_topic or c1_topic or c2_topic or (", ".join(c1_info.get("units", []) + c2_info.get("units", [])))
             except Exception:
                 pass
         r["check_1_skill"] = c1_skill

@@ -81,18 +81,30 @@ export const SkillAwarePredictionCard: React.FC<SkillAwarePredictionProps> = ({
 
         {/* Content Badges */}
         <div className="flex flex-wrap items-center gap-2 text-xs">
-          <div className="bg-[#121626] border border-blue-500/30 px-3 py-1.5 rounded-xl flex items-center gap-2">
-            <span className="text-[10px] font-black uppercase text-blue-400">Từ Vựng:</span>
-            <span className="text-white font-bold">
-              {prediction.check_1_info?.units?.join(', ') || 'Chung'}
-            </span>
-          </div>
-          <div className="bg-[#121626] border border-purple-500/30 px-3 py-1.5 rounded-xl flex items-center gap-2">
-            <span className="text-[10px] font-black uppercase text-purple-400">Ngữ Pháp:</span>
-            <span className="text-white font-bold">
-              {prediction.check_2_info?.topic || prediction.check_2_info?.units?.join(', ') || 'Chung'}
-            </span>
-          </div>
+          {(() => {
+            const c1Skill = prediction.check_1_info?.skill || 'vocab';
+            const c2Skill = prediction.check_2_info?.skill || 'grammar';
+            const c1Label = c1Skill === 'grammar' ? 'Ngữ Pháp' : c1Skill === 'vocab' ? 'Từ Vựng' : c1Skill === 'mock_test' ? 'Luyện Đề' : c1Skill;
+            const c2Label = c2Skill === 'grammar' ? 'Ngữ Pháp' : c2Skill === 'vocab' ? 'Từ Vựng' : c2Skill === 'mock_test' ? 'Luyện Đề' : c2Skill;
+            const c1Color = c1Skill === 'grammar' ? 'purple' : c1Skill === 'mock_test' ? 'amber' : 'blue';
+            const c2Color = c2Skill === 'vocab' ? 'blue' : c2Skill === 'mock_test' ? 'amber' : 'purple';
+            return (
+              <>
+                <div className={`bg-[#121626] border border-${c1Color}-500/30 px-3 py-1.5 rounded-xl flex items-center gap-2`}>
+                  <span className={`text-[10px] font-black uppercase text-${c1Color}-400`}>Check 1 ({c1Label}):</span>
+                  <span className="text-white font-bold">
+                    {prediction.check_1_info?.topic || prediction.check_1_info?.units?.join(', ') || 'Chung'}
+                  </span>
+                </div>
+                <div className={`bg-[#121626] border border-${c2Color}-500/30 px-3 py-1.5 rounded-xl flex items-center gap-2`}>
+                  <span className={`text-[10px] font-black uppercase text-${c2Color}-400`}>Check 2 ({c2Label}):</span>
+                  <span className="text-white font-bold">
+                    {prediction.check_2_info?.topic || prediction.check_2_info?.units?.join(', ') || 'Chung'}
+                  </span>
+                </div>
+              </>
+            );
+          })()}
         </div>
       </div>
 
@@ -115,7 +127,7 @@ export const SkillAwarePredictionCard: React.FC<SkillAwarePredictionProps> = ({
           <div className="space-y-1">
             <span className="text-[10px] font-bold uppercase text-slate-400 flex items-center gap-1.5">
               <TrendingUp size={12} className="text-blue-400" />
-              Dự Báo Check 1 (Từ Vựng)
+              Dự Báo Check 1 ({prediction.check_1_info?.skill === 'grammar' ? 'Ngữ Pháp' : prediction.check_1_info?.skill === 'mock_test' ? 'Luyện Đề' : 'Từ Vựng'})
             </span>
             <div className="text-xl font-black text-blue-400 font-mono">
               {trunc1Dec(overview.avg_c1_pred)}đ
@@ -128,7 +140,7 @@ export const SkillAwarePredictionCard: React.FC<SkillAwarePredictionProps> = ({
           <div className="space-y-1">
             <span className="text-[10px] font-bold uppercase text-slate-400 flex items-center gap-1.5">
               <TrendingUp size={12} className="text-purple-400" />
-              Dự Báo Check 2 (Ngữ Pháp)
+              Dự Báo Check 2 ({prediction.check_2_info?.skill === 'vocab' ? 'Từ Vựng' : prediction.check_2_info?.skill === 'mock_test' ? 'Luyện Đề' : 'Ngữ Pháp'})
             </span>
             <div className="text-xl font-black text-purple-400 font-mono">
               {trunc1Dec(overview.avg_c2_pred)}đ

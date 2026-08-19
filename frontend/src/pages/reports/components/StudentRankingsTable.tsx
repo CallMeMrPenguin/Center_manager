@@ -107,8 +107,8 @@ export const StudentRankingsTable: React.FC<StudentRankingsTableProps> = React.m
     },
     {
       accessorKey: 'avg_check_1',
-      header: () => <div className="text-center w-full">Từ Vựng</div>,
-      meta: { headerText: 'Từ Vựng', exportValue: (r: any) => Number(r.avg_check_1) > 0 ? format1Dec(Number(r.avg_check_1)) : '-' },
+      header: () => <div className="text-center w-full">Check 1</div>,
+      meta: { headerText: 'Check 1', exportValue: (r: any) => Number(r.avg_check_1) > 0 ? format1Dec(Number(r.avg_check_1)) : '-' },
       cell: ({ getValue }) => {
         const val = Number(getValue()) || 0;
         return (
@@ -120,8 +120,8 @@ export const StudentRankingsTable: React.FC<StudentRankingsTableProps> = React.m
     },
     {
       accessorKey: 'avg_check_2',
-      header: () => <div className="text-center w-full">Ngữ Pháp</div>,
-      meta: { headerText: 'Ngữ Pháp', exportValue: (r: any) => Number(r.avg_check_2) > 0 ? format1Dec(Number(r.avg_check_2)) : '-' },
+      header: () => <div className="text-center w-full">Check 2</div>,
+      meta: { headerText: 'Check 2', exportValue: (r: any) => Number(r.avg_check_2) > 0 ? format1Dec(Number(r.avg_check_2)) : '-' },
       cell: ({ getValue }) => {
         const val = Number(getValue()) || 0;
         return (
