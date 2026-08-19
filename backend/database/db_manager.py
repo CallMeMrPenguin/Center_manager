@@ -2558,7 +2558,7 @@ def get_analytics_reports(class_id: Optional[int] = None, student_id: Optional[i
             s.school,
             s.date_of_birth,
             s.gender,
-            s.phone,
+            COALESCE(s.father_phone, s.mother_phone, '') as phone,
             s.father_name,
             s.father_phone,
             s.mother_name,
@@ -2636,6 +2636,7 @@ def get_analytics_reports(class_id: Optional[int] = None, student_id: Optional[i
 
     return {
         "session_records": rows,
+        "all_session_records": all_rows,
         "student_rankings": enriched_rankings,
         "analytics_summary": analytics_summary,
         "class_analytics_map": class_analytics_map

@@ -27,3 +27,11 @@
 - Emojis MUST NOT be injected in UI elements or serializers.
 - All calculated grades and scores MUST be truncated to strictly 1 decimal place using `format1Dec` or `trunc1Dec` without rounding up/down.
 - Missing grades recorded as `NULL`, never numeric `0` or `0.0`.
+
+## 🚫 5. Strictly No Pipe (`|`) or Bullet (`•`) Text Separators
+- Do NOT use vertical pipe characters (`|`) or bullet dots (`•`) to separate text or metadata.
+- Use structured flex badges, subtle typography, or clean whitespace layout instead.
+
+## 📐 6. "One Container, One Visual Boundary" UI Standard
+- **Strictly No Border-in-Border / Card-in-Card**: Avoid wrapping bordered components (e.g. `<CustomSelect />`, inputs, metric items) inside another bordered outer wrapper card.
+- Every section or group should have **one visual boundary**. Inner sub-items must use clean flex/grid layout with spacing or single-line dividers (`divide-x` / `divide-y`) rather than nested cards with double borders.

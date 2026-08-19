@@ -35,7 +35,7 @@ export const ClassBenchmarkTable: React.FC<ClassBenchmarkTableProps> = ({
         return {
           class_id: c.id,
           class_name: c.class_name,
-          grade: c.grade || 'Lớp 6',
+          grade: c.grade || 'Chưa phân lớp',
           studentCount: 0,
           attendancePct: 100,
           avgEma: 0,
@@ -73,7 +73,7 @@ export const ClassBenchmarkTable: React.FC<ClassBenchmarkTableProps> = ({
       return {
         class_id: c.id,
         class_name: c.class_name,
-        grade: c.grade || 'Lớp 6',
+        grade: c.grade || 'Chưa phân lớp',
         studentCount: totalStudents,
         attendancePct,
         avgEma,

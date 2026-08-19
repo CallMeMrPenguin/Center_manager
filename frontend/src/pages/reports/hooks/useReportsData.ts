@@ -62,6 +62,7 @@ export function useReportsData() {
 
   // Analytics Data & System Engine Results from API
   const [rawSessionRecords, setRawSessionRecords] = useState<any[]>([]);
+  const [rawAllSessionRecords, setRawAllSessionRecords] = useState<any[]>([]);
   const [rawStudentRankings, setRawStudentRankings] = useState<any[]>([]);
   const [rawAnalyticsSummary, setRawAnalyticsSummary] = useState<any>(null);
   const [rawClassAnalyticsMap, setRawClassAnalyticsMap] = useState<Record<string, any>>({});
@@ -136,6 +137,7 @@ export function useReportsData() {
       const sid = selectedStudentId ? parseInt(selectedStudentId) : undefined;
       const res = await api.getGradeAnalytics(cid, sid);
       setRawSessionRecords(res.session_records || []);
+      setRawAllSessionRecords(res.all_session_records || res.session_records || []);
       setRawStudentRankings(res.student_rankings || []);
       setRawAnalyticsSummary(res.analytics_summary || null);
       setRawClassAnalyticsMap(res.class_analytics_map || {});
@@ -196,14 +198,30 @@ export function useReportsData() {
     return list;
   }, [isTestMode, rawSessionRecords, mockDataset, selectedClassId, selectedStudentId]);
 
+  const allSessionRecords = useMemo(() => {
+    if (!isTestMode) return rawAllSessionRecords.length > 0 ? rawAllSessionRecords : rawSessionRecords;
+    return mockDataset.session_records;
+  }, [isTestMode, rawAllSessionRecords, rawSessionRecords, mockDataset]);
+
   const studentRankings = useMemo(() => {
-    if (!isTestMode) return rawStudentRankings;
+    if (!isTestMode) {
+      let list = rawStudentRankings;
+      if (selectedClassId) {
+        list = list.filter(r => String(r.class_id) === selectedClassId);
+      }
+      return list;
+    }
     let list = mockDataset.student_rankings;
     if (selectedClassId) {
       list = list.filter(r => String(r.class_id) === selectedClassId);
     }
     return list;
   }, [isTestMode, rawStudentRankings, mockDataset, selectedClassId]);
+
+  const allStudentRankings = useMemo(() => {
+    if (!isTestMode) return rawStudentRankings;
+    return mockDataset.student_rankings;
+  }, [isTestMode, rawStudentRankings, mockDataset]);
 
   const analyticsSummary = useMemo(() => {
     if (!isTestMode) return rawAnalyticsSummary;
@@ -328,7 +346,9 @@ export function useReportsData() {
     compareClassBId,
     setCompareClassBId,
     sessionRecords,
+    allSessionRecords,
     studentRankings,
+    allStudentRankings,
     analyticsSummary,
     classAnalyticsMap,
     timePhases,

@@ -36,7 +36,7 @@ export function computeDuelStats({
       return {
         id: cObj.id,
         name: cObj.class_name,
-        grade: cObj.grade || 'Lớp 6',
+        grade: cObj.grade || 'Chưa phân lớp',
         studentCount: 0,
         attendancePct: 100,
         avgEma: 0,

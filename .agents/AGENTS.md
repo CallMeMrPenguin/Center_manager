@@ -114,7 +114,8 @@ Bumping `VERSION` and pushing git tags triggers the auto-update mechanism for al
 | Native `<select>` dropdowns | `<CustomSelect />` component |
 | Native `<input type="date">` | `<CustomDatePicker />` component |
 | Separate trash bin icon on cards | Single edit pen + delete inside modal |
-| Bullet dot `•` separators | Pipe `|` separators or flex badges |
+| Pipe `|` or Bullet `•` text separators | Structured flex badges, typography & spacing |
+| Card-in-card / Border-in-border | 'One container, one visual boundary' & dividers |
 | Grade `0` / `0.0` for unset scores | `NULL` for missing grades |
 
 ---

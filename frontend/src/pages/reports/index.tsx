@@ -65,7 +65,9 @@ export const ReportsPage: React.FC = () => {
     resetTestRecords,
     mockDataset,
     sessionRecords,
+    allSessionRecords,
     studentRankings,
+    allStudentRankings,
     gradeTypesList,
     analyticsSummary,
     classAnalyticsMap,
@@ -284,10 +286,17 @@ export const ReportsPage: React.FC = () => {
       <div key={activeReportTab} className="space-y-6">
         {activeReportTab === 'benchmark' ? (
           <BenchmarkTab
-            loading={loading} classes={classes} studentRankings={studentRankings}
-            sessionRecords={sessionRecords} compareClassAId={compareClassAId} setCompareClassAId={setCompareClassAId}
-            compareClassBId={compareClassBId} setCompareClassBId={setCompareClassBId} selectedClassId={selectedClassId}
-            analyticsSummary={analyticsSummary} classAnalyticsMap={classAnalyticsMap}
+            loading={loading}
+            classes={classes}
+            studentRankings={allStudentRankings}
+            sessionRecords={allSessionRecords}
+            compareClassAId={compareClassAId}
+            setCompareClassAId={setCompareClassAId}
+            compareClassBId={compareClassBId}
+            setCompareClassBId={setCompareClassBId}
+            selectedClassId={selectedClassId}
+            analyticsSummary={analyticsSummary}
+            classAnalyticsMap={classAnalyticsMap}
           />
         ) : activeReportTab === 'skills' ? (
           <SkillBreakdownTab

@@ -65,7 +65,7 @@ export const HeadToHeadDuel: React.FC<HeadToHeadDuelProps> = ({
         </div>
 
         {/* Dual Class Selector Bar */}
-        <div className="flex flex-wrap items-center gap-3 bg-[#070a12] px-3.5 py-2 rounded-xl border border-[#182236]">
+        <div className="flex flex-wrap items-center gap-3">
           <div className="flex items-center gap-2 shrink-0">
             <span
               className="w-2.5 h-2.5 rounded-full shrink-0"
