@@ -3,7 +3,7 @@ import { Layers } from 'lucide-react';
 import { DistributionStats, DistributionScoreBin } from '../utils/distributionAnalytics';
 import { HistogramTooltip } from './HistogramTooltip';
 
-export type GranularityMode = '10bins' | 'tiers' | '5bins';
+export type GranularityMode = '10bins' | 'tiers';
 
 interface Histogram3DChartProps {
   stats: DistributionStats;
@@ -63,7 +63,6 @@ export const Histogram3DChart: React.FC<Histogram3DChartProps> = ({
 
   const activeBins: DistributionScoreBin[] = useMemo(() => {
     if (granularity === 'tiers') return stats.tierBins;
-    if (granularity === '5bins') return stats.scoreBins;
     return stats.scoreBins10;
   }, [granularity, stats]);
 
@@ -121,47 +120,33 @@ export const Histogram3DChart: React.FC<Histogram3DChartProps> = ({
           </div>
         </div>
 
-        {/* Segmented Pill for Granularity */}
+        {/* Segmented Pill for Granularity (2 Views: Chi Tiết & Tổng Quan) */}
         <div className="flex items-center gap-2">
-          <div className="relative flex bg-[#0c101d] border border-[#1e2947] p-1 rounded-xl text-xs font-bold select-none">
+          <div className="relative flex bg-[#0c101d] border border-[#1e2947] p-1 rounded-xl text-xs font-bold select-none min-w-[190px]">
             <div
               className="absolute top-1 bottom-1 rounded-lg bg-[#5c36f5] shadow-[0_0_12px_rgba(92,54,245,0.5)] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] pointer-events-none"
               style={{
-                left:
-                  granularity === '10bins'
-                    ? '4px'
-                    : granularity === '5bins'
-                    ? 'calc(33.333% + 2px)'
-                    : 'calc(66.666% + 1px)',
-                width: 'calc(33.333% - 4px)',
+                left: granularity === '10bins' ? '4px' : 'calc(50% + 2px)',
+                width: 'calc(50% - 6px)',
               }}
             />
             <button
               type="button"
               onClick={() => setGranularity('10bins')}
-              className={`relative z-10 px-3 py-1 text-center transition-colors cursor-pointer ${
+              className={`flex-1 relative z-10 px-3.5 py-1 text-center transition-colors cursor-pointer ${
                 granularity === '10bins' ? 'text-white font-black' : 'text-slate-400 hover:text-white'
               }`}
             >
-              10 Mức (1đ)
-            </button>
-            <button
-              type="button"
-              onClick={() => setGranularity('5bins')}
-              className={`relative z-10 px-3 py-1 text-center transition-colors cursor-pointer ${
-                granularity === '5bins' ? 'text-white font-black' : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              5 Mức (2đ)
+              Chi Tiết
             </button>
             <button
               type="button"
               onClick={() => setGranularity('tiers')}
-              className={`relative z-10 px-3 py-1 text-center transition-colors cursor-pointer ${
+              className={`flex-1 relative z-10 px-3.5 py-1 text-center transition-colors cursor-pointer ${
                 granularity === 'tiers' ? 'text-white font-black' : 'text-slate-400 hover:text-white'
               }`}
             >
-              4 Chuẩn
+              Tổng Quan
             </button>
           </div>
         </div>
