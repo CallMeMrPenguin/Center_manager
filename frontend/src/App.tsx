@@ -274,8 +274,8 @@ function AppContent() {
 
           {/* Header logo / Title */}
           <div className="flex items-center px-3.5 py-4 shrink-0 border-b border-white/5 min-w-0">
-            <div className="h-10 w-10 rounded-full bg-indigo-500/25 border-2 border-indigo-400/90 shadow-[0_0_16px_rgba(92,54,245,0.5)] flex items-center justify-center shrink-0">
-              <GraduationCap size={20} className="text-white drop-shadow-[0_0_10px_rgba(255,255,255,1)]" />
+            <div className="h-10 w-10 rounded-xl overflow-hidden flex items-center justify-center shrink-0 shadow-[0_0_16px_rgba(59,130,246,0.4)]">
+              <img src="/logo.png" alt="Center Manager Logo" className="h-full w-full object-contain" />
             </div>
             <div className={`whitespace-nowrap overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${
               isSidebarExpanded ? 'opacity-100 max-w-[160px] ml-3 translate-x-0' : 'opacity-0 max-w-0 ml-0 -translate-x-3 pointer-events-none'
