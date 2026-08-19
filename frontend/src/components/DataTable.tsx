@@ -45,6 +45,7 @@ import {
   CheckSquare, ChevronsLeft, ChevronsRight, X, SlidersHorizontal,
   GripVertical, Download, FileSpreadsheet, FileText, Zap, RotateCcw,
 } from 'lucide-react';
+import { filterWithNearMatchFallback } from '../utils/fuzzySearch';
 
 // ─── Header Text Extractor Helper ───────────────────────────────────────────
 function getTextFromReactNode(node: any): string {
@@ -779,13 +780,33 @@ export function DataTable<TData>({
     return cols;
   }, [columns, enableRowSelection, enableRowExpansion, renderSubComponent]);
 
+  // ── Fuzzy & Near-Match Search (Exact Match preference with Top 5 Near-Match Fallback)
+  const { results: processedData, isNearMatch } = React.useMemo(() => {
+    if (!enableGlobalSearch || !globalFilter.trim()) {
+      return { results: data, isNearMatch: false };
+    }
+    return filterWithNearMatchFallback(
+      data,
+      globalFilter,
+      (item) => {
+        if (!item || typeof item !== 'object') return String(item || '');
+        return Object.entries(item as any)
+          .filter(([k, v]) => v !== null && v !== undefined && typeof v !== 'object' && !k.startsWith('_'))
+          .map(([_, v]) => String(v))
+          .join(' ');
+      },
+      5,
+      0.18
+    );
+  }, [data, globalFilter, enableGlobalSearch]);
+
   // ── Table instance ─────────────────────────────────────────────────────────
   const table = useReactTable<TData>({
-    data,
+    data: processedData,
     columns: allColumns,
     columnResizeMode,
     state: {
-      globalFilter,
+      globalFilter: '',
       sorting,
       columnFilters,
       columnVisibility,
@@ -820,7 +841,7 @@ export function DataTable<TData>({
     enableRowSelection,
     enableColumnResizing,
     enableGrouping,
-    enableGlobalFilter: enableGlobalSearch,
+    enableGlobalFilter: false,
     enableMultiSort,
     isMultiSortEvent: () => true,   // always multi-sort on header click
     initialState: { pagination: { pageSize } },
@@ -980,6 +1001,27 @@ export function DataTable<TData>({
               />
             )}
           </div>
+        </div>
+      )}
+
+      {/* ── NEAR MATCH SUGGESTION BANNER ─────────────────────────────────────────── */}
+      {isNearMatch && globalFilter.trim() && (
+        <div className="flex items-center justify-between gap-3 px-4 py-2 bg-amber-500/10 border-b border-amber-500/25 text-xs text-amber-300 font-medium">
+          <div className="flex items-center gap-2">
+            <span className="px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-300 font-black text-[11px] uppercase tracking-wider">
+              Tìm gần đúng
+            </span>
+            <span>
+              Không tìm thấy kết quả chính xác cho "<strong className="text-white font-bold">{globalFilter}</strong>". Hiển thị <strong>{processedData.length}</strong> kết quả gần đúng nhất:
+            </span>
+          </div>
+          <button
+            type="button"
+            onClick={() => setGlobalFilter('')}
+            className="text-amber-400 hover:text-white underline cursor-pointer shrink-0 font-bold text-[11px]"
+          >
+            Xóa tìm kiếm
+          </button>
         </div>
       )}
 

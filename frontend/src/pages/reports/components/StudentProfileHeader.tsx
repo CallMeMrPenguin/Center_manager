@@ -61,6 +61,8 @@ export const StudentProfileHeader: React.FC<StudentProfileHeaderProps> = ({
 
   const gradeDisplay = student.enrolled_classes
     ? student.enrolled_classes
+    : student.class_name
+    ? student.class_name
     : student.grade
     ? String(student.grade).startsWith('Lớp') ||
       String(student.grade).startsWith('Khối')

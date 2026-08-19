@@ -215,11 +215,38 @@ export function useReportsData() {
     return mockDataset.class_analytics_map;
   }, [isTestMode, rawClassAnalyticsMap, mockDataset]);
 
-  // Selected Student Object
+  // Selected Student Object (merging personal details and ranking performance)
   const selectedStudentObj = useMemo(() => {
     if (!selectedStudentId) return null;
-    const list = isTestMode ? mockDataset.student_rankings : (students.length > 0 ? students : rawStudentRankings);
-    return list.find((s: any) => String(s.id || s.student_id) === selectedStudentId) || null;
+    const rawStudent = (students || []).find((s: any) => String(s.id || s.student_id) === selectedStudentId);
+    const rankingObj = (isTestMode ? mockDataset.student_rankings : (rawStudentRankings || [])).find(
+      (s: any) => String(s.student_id || s.id) === selectedStudentId
+    );
+
+    if (!rawStudent && !rankingObj) return null;
+
+    return {
+      ...(rawStudent || {}),
+      ...(rankingObj || {}),
+      id: rawStudent?.id || rankingObj?.student_id || rankingObj?.id || selectedStudentId,
+      student_id: rawStudent?.id || rankingObj?.student_id || rankingObj?.id || selectedStudentId,
+      full_name: rawStudent?.full_name || rankingObj?.full_name || 'Học sinh',
+      nickname: rawStudent?.nickname || rankingObj?.nickname || '',
+      school: rawStudent?.school || rankingObj?.school || 'Trung tâm',
+      date_of_birth: rawStudent?.date_of_birth || rawStudent?.birthday || rankingObj?.date_of_birth || '',
+      gender: rawStudent?.gender || rankingObj?.gender || '',
+      father_name: rawStudent?.father_name || rankingObj?.father_name || '',
+      father_phone: rawStudent?.father_phone || rankingObj?.father_phone || '',
+      mother_name: rawStudent?.mother_name || rankingObj?.mother_name || '',
+      mother_phone: rawStudent?.mother_phone || rankingObj?.mother_phone || '',
+      phone: rawStudent?.phone || rankingObj?.phone || rawStudent?.father_phone || rawStudent?.mother_phone || '',
+      address: rawStudent?.address || rankingObj?.address || '',
+      grade: rawStudent?.grade || rankingObj?.grade || '',
+      class_name: rankingObj?.class_name || rawStudent?.class_name || rawStudent?.enrolled_classes || '',
+      enrolled_classes: rawStudent?.enrolled_classes || rankingObj?.class_name || '',
+      performance_index: rankingObj?.performance_index ?? rawStudent?.performance_index,
+      rating_label: rankingObj?.rating_label || rawStudent?.rating_label,
+    };
   }, [selectedStudentId, isTestMode, mockDataset, students, rawStudentRankings]);
 
   // Analytics Engine math

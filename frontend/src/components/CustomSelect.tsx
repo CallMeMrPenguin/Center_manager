@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { ChevronDown, Check, Search } from 'lucide-react';
+import { filterWithNearMatchFallback } from '../utils/fuzzySearch';
 
 export interface SelectOption {
   value: string | number;
@@ -74,11 +75,18 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
     setIsOpen(false);
   };
 
-  const filteredOptions = searchQuery.trim()
-    ? options.filter((opt) =>
-        opt.label.toLowerCase().includes(searchQuery.toLowerCase().trim())
-      )
-    : options;
+  const { results: filteredOptions, isNearMatch } = React.useMemo(() => {
+    if (!searchQuery.trim()) {
+      return { results: options, isNearMatch: false };
+    }
+    return filterWithNearMatchFallback(
+      options,
+      searchQuery,
+      (opt) => opt.label,
+      5,
+      0.18
+    );
+  }, [options, searchQuery]);
 
   return (
     <div className={`relative inline-block w-full ${className}`} ref={containerRef}>
@@ -130,6 +138,11 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
           )}
 
           <div className="overflow-y-auto space-y-1 flex-1 scrollbar-thin">
+            {isNearMatch && filteredOptions.length > 0 && (
+              <div className="px-2.5 py-1 text-[10px] font-bold text-amber-400 bg-amber-500/10 rounded-lg">
+                Gợi ý gần đúng nhất ({filteredOptions.length}):
+              </div>
+            )}
             {filteredOptions.length === 0 ? (
               <div className="px-3 py-3 text-xs text-slate-500 text-center font-semibold">
                 Không tìm thấy tùy chọn
