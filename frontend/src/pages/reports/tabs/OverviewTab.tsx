@@ -235,8 +235,8 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
     });
     if (wTot <= 0) wTot = 1;
 
-    const w1 = weightsMap['check_1'] ?? 0.35;
-    const w2 = weightsMap['check_2'] ?? 0.55;
+    const w1 = weightsMap['check_1'] ?? 0.55;
+    const w2 = weightsMap['check_2'] ?? 0.35;
     const whw = weightsMap['homework'] ?? 0.10;
 
     const result = selectedDates.map((d) => {
@@ -308,7 +308,7 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
       else if (selectedGradeTypeFilter === 'homework') sc = Number(r.avg_homework || 0);
       else if (selectedGradeTypeFilter === 'mock_test') sc = Number(r.avg_mock_test || r.mock_test || r.avg_check_2 || 0);
       else {
-        sc = Number(r.overallAvg) || Number(r.ema_level) || (Number(r.avg_check_1 || 0) * 0.35 + Number(r.avg_check_2 || 0) * 0.55 + Number(r.avg_homework || 0) * 0.1);
+        sc = Number(r.overallAvg) || Number(r.ema_level) || (Number(r.avg_check_1 || 0) * 0.55 + Number(r.avg_check_2 || 0) * 0.35 + Number(r.avg_homework || 0) * 0.1);
       }
       return sc >= selectedScoreBin.minScore && (selectedScoreBin.maxScore === 10 ? sc <= 10 : sc < selectedScoreBin.maxScore);
     });

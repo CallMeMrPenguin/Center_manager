@@ -244,8 +244,8 @@ export const computeClassAnalyticsSd = (records: any[]): number => {
   let w_sum = 0.0;
   let w_tot = 0.0;
   if (hw_list.length > 0) { w_sum += sd_hw * 0.10; w_tot += 0.10; }
-  if (c1_list.length > 0) { w_sum += sd_c1 * 0.35; w_tot += 0.35; }
-  if (c2_list.length > 0) { w_sum += sd_c2 * 0.55; w_tot += 0.55; }
+  if (c1_list.length > 0) { w_sum += sd_c1 * 0.55; w_tot += 0.55; }
+  if (c2_list.length > 0) { w_sum += sd_c2 * 0.35; w_tot += 0.35; }
 
   return w_tot > 0 ? trunc1Dec(w_sum / w_tot) : 0.0;
 };

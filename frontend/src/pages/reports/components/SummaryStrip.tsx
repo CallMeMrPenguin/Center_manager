@@ -90,7 +90,7 @@ export const SummaryStrip: React.FC<SummaryStripProps> = React.memo(({
           >
             <div className="bg-[#0d1120] p-2.5 rounded-lg border border-[#202948] space-y-1.5 font-mono text-[10px]">
               <div className="text-slate-400 font-bold border-b border-white/5 pb-1">
-                Công thức: Dự Đoán = 30% Từ Vựng + 45% Ngữ Pháp + 10% BTVN + 15% Luyện Đề
+                Công thức: Dự Đoán = 55% Từ Vựng + 35% Ngữ Pháp + 10% BTVN
               </div>
               <div className="flex items-center justify-between text-blue-400">
                 <span>Từ Vựng Dự Đoán:</span>
@@ -151,11 +151,11 @@ export const SummaryStrip: React.FC<SummaryStripProps> = React.memo(({
                 Công thức: EMA_mới = 0.5 × Điểm_mới + 0.5 × EMA_cũ
               </div>
               <div className="flex items-center justify-between text-blue-400">
-                <span>Từ Vựng EMA (35%):</span>
+                <span>Từ Vựng EMA (55%):</span>
                 <span className="font-black">{engine.ema_c1 ?? 0} đ</span>
               </div>
               <div className="flex items-center justify-between text-purple-400">
-                <span>Ngữ Pháp EMA (55%):</span>
+                <span>Ngữ Pháp EMA (35%):</span>
                 <span className="font-black">{engine.ema_c2 ?? 0} đ</span>
               </div>
               <div className="flex items-center justify-between text-emerald-400">

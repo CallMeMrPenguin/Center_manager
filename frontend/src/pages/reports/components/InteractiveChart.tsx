@@ -335,7 +335,7 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = ({
                   <div className="border-t border-white/10 pt-1 flex items-center justify-between gap-4">
                     <span className="text-indigo-300 font-extrabold">Điểm TB Buổi:</span>
                     <span className="font-mono font-black text-indigo-300">
-                      {format1Dec(trunc1Dec((hoveredPoint.check1 * 0.35) + (hoveredPoint.check2 * 0.55) + (hoveredPoint.homework * 0.10)))}
+                      {format1Dec(trunc1Dec((hoveredPoint.check1 * 0.55) + (hoveredPoint.check2 * 0.35) + (hoveredPoint.homework * 0.10)))}
                     </span>
                   </div>
                 </div>

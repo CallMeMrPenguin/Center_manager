@@ -71,12 +71,12 @@ export function computeDatasetFromRecords(
     const avgC1 = validC1s.length > 0 ? trunc1Dec(validC1s.reduce((a, b) => a + b, 0) / validC1s.length) : 0;
     const avgC2 = validC2s.length > 0 ? trunc1Dec(validC2s.reduce((a, b) => a + b, 0) / validC2s.length) : 0;
     const avgHw = validHws.length > 0 ? trunc1Dec(validHws.reduce((a, b) => a + b, 0) / validHws.length) : 0;
-    const overallAvg = trunc1Dec(avgC1 * 0.35 + avgC2 * 0.55 + avgHw * 0.1);
+    const overallAvg = trunc1Dec(avgC1 * 0.55 + avgC2 * 0.35 + avgHw * 0.1);
 
-    let ema = validC1s.length > 0 ? (validC1s[0] * 0.35 + (validC2s[0] || validC1s[0]) * 0.55 + (validHws[0] || 8.0) * 0.1) : overallAvg;
+    let ema = validC1s.length > 0 ? (validC1s[0] * 0.55 + (validC2s[0] || validC1s[0]) * 0.35 + (validHws[0] || 8.0) * 0.1) : overallAvg;
     const alpha = 0.3;
     for (let k = 1; k < validC1s.length; k++) {
-      const sessScore = validC1s[k] * 0.35 + (validC2s[k] ?? validC1s[k]) * 0.55 + (validHws[k] ?? 8.0) * 0.1;
+      const sessScore = validC1s[k] * 0.55 + (validC2s[k] ?? validC1s[k]) * 0.35 + (validHws[k] ?? 8.0) * 0.1;
       ema = alpha * sessScore + (1 - alpha) * ema;
     }
     ema = trunc1Dec(ema);

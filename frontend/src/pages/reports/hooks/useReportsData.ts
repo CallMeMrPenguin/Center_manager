@@ -80,9 +80,9 @@ export function useReportsData() {
 
   // Grade types configuration
   const [gradeTypesList, setGradeTypesList] = useState<GradeTypeItem[]>([
-    { id: 'check_1', label: 'Check 1', weight: 35, color: '#3b82f6' },
-    { id: 'check_2', label: 'Check 2', weight: 55, color: '#a855f7' },
-    { id: 'homework', label: 'BTVN', weight: 10, color: '#f59e0b' }
+    { id: 'check_1', label: 'Từ Vựng', weight: 55, color: '#3b82f6' },
+    { id: 'check_2', label: 'Ngữ Pháp', weight: 35, color: '#a855f7' },
+    { id: 'homework', label: 'BTVN', weight: 10, color: '#10b981' }
   ]);
 
   useEffect(() => {
@@ -91,9 +91,9 @@ export function useReportsData() {
         setGradeTypesList(data.grade_types);
       } else if (data?.grade_weights) {
         setGradeTypesList([
-          { id: 'check_1', label: 'Check 1', weight: data.grade_weights.check_1 ?? 35, color: '#3b82f6' },
-          { id: 'check_2', label: 'Check 2', weight: data.grade_weights.check_2 ?? 55, color: '#a855f7' },
-          { id: 'homework', label: 'BTVN', weight: data.grade_weights.homework ?? 10, color: '#f59e0b' }
+          { id: 'check_1', label: 'Từ Vựng', weight: data.grade_weights.check_1 ?? 55, color: '#3b82f6' },
+          { id: 'check_2', label: 'Ngữ Pháp', weight: data.grade_weights.check_2 ?? 35, color: '#a855f7' },
+          { id: 'homework', label: 'BTVN', weight: data.grade_weights.homework ?? 10, color: '#10b981' }
         ]);
       }
     }).catch(() => { });

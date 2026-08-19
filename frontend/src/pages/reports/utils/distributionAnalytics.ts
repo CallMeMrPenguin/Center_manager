@@ -182,7 +182,7 @@ export function computeDistributionStats(
     const mock = Number(r.mock_test || 0);
     if (mock > 0) return mock;
     if (c1 > 0 || c2 > 0 || hw > 0) {
-      return trunc1Dec(c1 * 0.35 + c2 * 0.55 + hw * 0.1);
+      return trunc1Dec(c1 * 0.55 + c2 * 0.35 + hw * 0.1);
     }
     return null;
   };
@@ -225,7 +225,7 @@ export function computeDistributionStats(
             const c2 = Number(s.avg_check_2 || 0);
             const hw = Number(s.avg_homework || 0);
             if (c1 > 0 || c2 > 0 || hw > 0) {
-              sc = trunc1Dec(c1 * 0.35 + c2 * 0.55 + hw * 0.1);
+              sc = trunc1Dec(c1 * 0.55 + c2 * 0.35 + hw * 0.1);
             }
           }
         }

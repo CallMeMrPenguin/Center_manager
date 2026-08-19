@@ -42,7 +42,7 @@ export const GroupCardItem: React.FC<GroupCardItemProps> = ({
       {/* Student List */}
       <div className="p-3 space-y-1.5 max-h-72 overflow-y-auto scrollbar-thin">
         {group.students.map((s: any, sIdx: number) => {
-          const ema = s.ema_level && Number(s.ema_level) > 0 ? Number(s.ema_level) : (Number(s.avg_check_1 || 0) * 0.35 + Number(s.avg_check_2 || 0) * 0.55 + Number(s.avg_homework || 0) * 0.1);
+          const ema = s.ema_level && Number(s.ema_level) > 0 ? Number(s.ema_level) : (Number(s.avg_check_1 || 0) * 0.55 + Number(s.avg_check_2 || 0) * 0.35 + Number(s.avg_homework || 0) * 0.1);
           const tier = getStudentTier(ema);
           const slope = Number(s.trend_slope || 0);
           const isUp = slope > 0.05;

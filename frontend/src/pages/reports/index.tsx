@@ -88,7 +88,7 @@ export const ReportsPage: React.FC = () => {
     if (selectedDistFilter && selectedDistFilter !== 'all') {
       const targetTier = Number(selectedDistFilter);
       list = list.filter(s => {
-        const score = s.ema_level && Number(s.ema_level) > 0 ? Number(s.ema_level) : (Number(s.avg_check_1 || 0) * 0.35 + Number(s.avg_check_2 || 0) * 0.55 + Number(s.avg_homework || 0) * 0.1);
+        const score = s.ema_level && Number(s.ema_level) > 0 ? Number(s.ema_level) : (Number(s.avg_check_1 || 0) * 0.55 + Number(s.avg_check_2 || 0) * 0.35 + Number(s.avg_homework || 0) * 0.1);
         const tierObj = getStudentTier(score);
         return tierObj.tier === targetTier;
       });

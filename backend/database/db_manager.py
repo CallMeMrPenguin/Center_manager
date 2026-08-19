@@ -2085,12 +2085,12 @@ def _get_grade_weights() -> Dict[str, float]:
             if res:
                 return res
         gw = get_setting("grade_weights") or {}
-        w_c1 = float(gw.get("check_1", 35.0)) / 100.0
-        w_c2 = float(gw.get("check_2", 55.0)) / 100.0
+        w_c1 = float(gw.get("check_1", 55.0)) / 100.0
+        w_c2 = float(gw.get("check_2", 35.0)) / 100.0
         w_hw = float(gw.get("homework", 10.0)) / 100.0
         return {"check_1": w_c1, "check_2": w_c2, "homework": w_hw}
     except Exception:
-        return {"check_1": 0.35, "check_2": 0.55, "homework": 0.10}
+        return {"check_1": 0.55, "check_2": 0.35, "homework": 0.10}
 
 def smart_predict(vals: List[float]) -> Tuple[float, float]:
     """Dispatch to the appropriate prediction model based on data volume.
@@ -2110,8 +2110,8 @@ def smart_predict(vals: List[float]) -> Tuple[float, float]:
 
 def calculate_performance_analytics(session_records: List[Dict[str, Any]]) -> Dict[str, Any]:
     gw = _get_grade_weights()
-    w_c1 = gw.get("check_1", 0.35)
-    w_c2 = gw.get("check_2", 0.55)
+    w_c1 = gw.get("check_1", 0.55)
+    w_c2 = gw.get("check_2", 0.35)
     w_hw = gw.get("homework", 0.10)
 
     if not session_records:
@@ -2455,8 +2455,8 @@ def get_class_student_predictions(class_id: int) -> Dict[int, Dict[str, float]]:
         records_by_student[sid].append(r)
 
     gw = _get_grade_weights()
-    w_c1 = gw.get("check_1", 0.35)
-    w_c2 = gw.get("check_2", 0.55)
+    w_c1 = gw.get("check_1", 0.55)
+    w_c2 = gw.get("check_2", 0.35)
     w_hw = gw.get("homework", 0.10)
     predictions: Dict[int, Dict[str, float]] = {}
     for sid, recs in records_by_student.items():

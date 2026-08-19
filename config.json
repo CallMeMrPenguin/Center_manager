@@ -8,5 +8,15 @@
         "blur": 24,
         "borderOpacity": 0.15,
         "saturate": 180
-    }
+    },
+    "grade_weights": {
+        "check_1": 55.0,
+        "check_2": 35.0,
+        "homework": 10.0
+    },
+    "grade_types": [
+        {"id": "check_1", "label": "Từ Vựng", "weight": 55.0, "color": "#3b82f6"},
+        {"id": "check_2", "label": "Ngữ Pháp", "weight": 35.0, "color": "#a855f7"},
+        {"id": "homework", "label": "BTVN", "weight": 10.0, "color": "#10b981"}
+    ]
 }
