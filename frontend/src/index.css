@@ -431,14 +431,14 @@ input[type="month"]::-webkit-calendar-picker-indicator {
   will-change: opacity, transform;
 }
 
-/* ── SMOOTH & ORDERED SEQUENTIAL REVEAL ANIMATION SYSTEM ─── */
+/* ── SMOOTH & CALM SEQUENTIAL REVEAL ANIMATION SYSTEM ─── */
 @keyframes flyInUp {
   0% {
     opacity: 0;
-    transform: translateY(22px) scale(0.98);
+    transform: translateY(26px) scale(0.97);
   }
 
-  70% {
+  65% {
     opacity: 1;
     transform: translateY(-2px) scale(1.002);
   }
@@ -451,49 +451,49 @@ input[type="month"]::-webkit-calendar-picker-indicator {
 
 .animate-cascade-1,
 .animate-fly-1 {
-  animation: flyInUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) 0.04s both;
+  animation: flyInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.06s both;
   will-change: opacity, transform;
 }
 
 .animate-cascade-2,
 .animate-fly-2 {
-  animation: flyInUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) 0.10s both;
+  animation: flyInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.18s both;
   will-change: opacity, transform;
 }
 
 .animate-cascade-3,
 .animate-fly-3 {
-  animation: flyInUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) 0.16s both;
+  animation: flyInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.30s both;
   will-change: opacity, transform;
 }
 
 .animate-cascade-4,
 .animate-fly-4 {
-  animation: flyInUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) 0.22s both;
+  animation: flyInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.42s both;
   will-change: opacity, transform;
 }
 
 .animate-cascade-5,
 .animate-fly-5 {
-  animation: flyInUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) 0.28s both;
+  animation: flyInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.54s both;
   will-change: opacity, transform;
 }
 
 .animate-cascade-6,
 .animate-fly-6 {
-  animation: flyInUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) 0.34s both;
+  animation: flyInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.66s both;
   will-change: opacity, transform;
 }
 
 .animate-cascade-7,
 .animate-fly-7 {
-  animation: flyInUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) 0.40s both;
+  animation: flyInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.78s both;
   will-change: opacity, transform;
 }
 
 .animate-cascade-8,
 .animate-fly-8 {
-  animation: flyInUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) 0.46s both;
+  animation: flyInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.90s both;
   will-change: opacity, transform;
 }
 
