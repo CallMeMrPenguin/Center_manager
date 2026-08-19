@@ -102,51 +102,52 @@ export const StudentProfileHeader: React.FC<StudentProfileHeaderProps> = ({
         <X className="w-5 h-5 text-white" />
       </button>
 
-      {/* TOP HEADER: Avatar + Name + Nickname + #Rank + Rank Icon + Rank Name */}
-      <div className="flex flex-wrap items-center gap-4 pr-10">
-        {/* Avatar */}
-        <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-br from-indigo-600 to-purple-600 text-white font-black text-xl sm:text-2xl flex items-center justify-center shadow-lg shrink-0">
-          {student.full_name?.slice(0, 2)?.toUpperCase() || 'HS'}
-        </div>
-
-        {/* Identity & Rank Line */}
-        <div className="flex-1 min-w-0 space-y-1">
-          <div className="flex flex-wrap items-center gap-3">
-            <span className="font-mono text-xs font-bold text-indigo-400">
-              ID: HS-{studentIdStr}
-            </span>
-            <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-400">
-              <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
-              {student.status || 'Đang theo học'}
-            </span>
+      {/* TOP HEADER: Left: Avatar + Name + Nickname | Right: Big Rank Icon + #Rank + Rank Name */}
+      <div className="flex flex-wrap items-center justify-between gap-4 pr-8">
+        {/* Left: Profile Pic & Info */}
+        <div className="flex items-center gap-4 min-w-0">
+          {/* Avatar */}
+          <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-br from-indigo-600 to-purple-600 text-white font-black text-xl sm:text-2xl flex items-center justify-center shadow-lg shrink-0">
+            {student.full_name?.slice(0, 2)?.toUpperCase() || 'HS'}
           </div>
 
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-            {/* Student Name */}
-            <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-              {student.full_name}
-            </h2>
-
-            {student.nickname && (
-              <span className="text-lg font-bold text-indigo-300">
-                ({student.nickname})
+          {/* Identity Info */}
+          <div className="min-w-0 space-y-1">
+            <div className="flex flex-wrap items-center gap-3">
+              <span className="font-mono text-xs font-bold text-indigo-400">
+                ID: HS-{studentIdStr}
               </span>
-            )}
+              <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-400">
+                <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
+                {student.status || 'Đang theo học'}
+              </span>
+            </div>
 
-            {/* #rank */}
-            <span className="text-2xl sm:text-3xl font-black text-amber-400 font-mono tracking-tight">
+            <div className="flex flex-wrap items-baseline gap-2">
+              <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+                {student.full_name}
+              </h2>
+              {student.nickname && (
+                <span className="text-lg font-bold text-indigo-300">
+                  ({student.nickname})
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Right: Big Rank Icon & Rank Details (Moved to right) */}
+        <div className="flex items-center gap-3.5 sm:gap-4 shrink-0">
+          <img
+            src={tier.badge}
+            alt={tier.name}
+            className="w-14 h-14 sm:w-16 sm:h-16 object-contain drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)]"
+          />
+          <div className="flex flex-col items-start justify-center">
+            <span className="text-2xl sm:text-3xl font-black text-amber-400 font-mono tracking-tight leading-none">
               {stats.rank}
             </span>
-
-            {/* Rank Icon */}
-            <img
-              src={tier.badge}
-              alt={tier.name}
-              className="w-8 h-8 sm:w-9 sm:h-9 object-contain drop-shadow-md"
-            />
-
-            {/* Rank Name */}
-            <span className={`text-xl sm:text-2xl font-black ${rankTheme.badgeText}`}>
+            <span className={`text-xl sm:text-2xl font-black leading-tight mt-0.5 ${rankTheme.badgeText}`}>
               {tier.name}
             </span>
           </div>
