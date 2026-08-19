@@ -15,6 +15,41 @@ interface StudentGradeHistoryTableProps {
   isTestMode?: boolean;
 }
 
+const getSkillStyle = (skillKey?: string) => {
+  const norm = (skillKey || '').toLowerCase().trim();
+  if (norm === 'grammar' || norm === 'ngữ pháp') {
+    return {
+      scoreColor: 'text-purple-400',
+      topicColor: 'text-purple-300/80',
+      badgeClass: 'bg-purple-500/15 text-purple-300 border-purple-500/30',
+      label: 'Ngữ Pháp',
+    };
+  }
+  if (norm === 'mixed' || norm === 'tổng hợp') {
+    return {
+      scoreColor: 'text-amber-400',
+      topicColor: 'text-amber-300/80',
+      badgeClass: 'bg-amber-500/15 text-amber-300 border-amber-500/30',
+      label: 'Tổng Hợp',
+    };
+  }
+  if (norm === 'mock_test' || norm === 'luyện đề') {
+    return {
+      scoreColor: 'text-rose-400',
+      topicColor: 'text-rose-300/80',
+      badgeClass: 'bg-rose-500/15 text-rose-300 border-rose-500/30',
+      label: 'Luyện Đề',
+    };
+  }
+  // Default to vocab (Từ vựng) - Blue
+  return {
+    scoreColor: 'text-blue-400',
+    topicColor: 'text-blue-300/80',
+    badgeClass: 'bg-blue-500/15 text-blue-300 border-blue-500/30',
+    label: 'Từ Vựng',
+  };
+};
+
 export const StudentGradeHistoryTable: React.FC<StudentGradeHistoryTableProps> = ({
   loading,
   sessionRecords,
@@ -96,21 +131,21 @@ export const StudentGradeHistoryTable: React.FC<StudentGradeHistoryTableProps> =
       cell: ({ row }) => {
         const r = row.original;
         const val = Number(r.check_1) || 0;
-        const topic = r.check_1_topic || (r.check_1_skill === 'grammar' ? r.grammar_topic : r.topic);
-        const skill = r.check_1_skill || (r.check_1_test_type ? (r.check_1_test_type === 'grammar' ? 'Ngữ pháp' : r.check_1_test_type === 'vocab' ? 'Từ vựng' : 'Tổng hợp') : 'Từ vựng');
-        const skillLabel = skill === 'vocab' ? 'Từ Vựng' : skill === 'grammar' ? 'Ngữ Pháp' : skill === 'mixed' ? 'Tổng Hợp' : skill === 'mock_test' ? 'Luyện Đề' : skill;
+        const skill = r.check_1_skill || (r.check_1_test_type ? (r.check_1_test_type === 'grammar' ? 'grammar' : r.check_1_test_type === 'vocab' ? 'vocab' : 'mixed') : 'vocab');
+        const style = getSkillStyle(skill);
+        const topic = r.check_1_topic || (skill === 'grammar' ? r.grammar_topic : r.topic);
         return (
           <div className="text-center py-0.5">
-            <div className="font-extrabold text-blue-400 font-mono text-base leading-tight">
+            <div className={`font-extrabold ${style.scoreColor} font-mono text-base leading-tight`}>
               {val > 0 ? format1Dec(val) : '-'}
             </div>
             {topic && (
               <div className="mt-0.5 flex flex-col items-center">
-                <span className="text-[10px] text-blue-300/80 font-medium truncate max-w-[140px] block" title={topic}>
+                <span className={`text-[10px] ${style.topicColor} font-medium truncate max-w-[140px] block`} title={topic}>
                   {topic}
                 </span>
-                <span className="text-[9px] px-1.5 py-0.2 rounded bg-blue-500/15 text-blue-300 border border-blue-500/30 font-semibold mt-0.5">
-                  {skillLabel}
+                <span className={`text-[9px] px-1.5 py-0.2 rounded ${style.badgeClass} border font-semibold mt-0.5`}>
+                  {style.label}
                 </span>
               </div>
             )}
@@ -125,21 +160,21 @@ export const StudentGradeHistoryTable: React.FC<StudentGradeHistoryTableProps> =
       cell: ({ row }) => {
         const r = row.original;
         const val = Number(r.check_2) || 0;
-        const topic = r.check_2_topic || (r.check_2_skill === 'vocab' ? r.topic : r.grammar_topic);
-        const skill = r.check_2_skill || (r.check_2_test_type ? (r.check_2_test_type === 'vocab' ? 'Từ vựng' : r.check_2_test_type === 'grammar' ? 'Ngữ pháp' : 'Tổng hợp') : 'Ngữ pháp');
-        const skillLabel = skill === 'grammar' ? 'Ngữ Pháp' : skill === 'vocab' ? 'Từ Vựng' : skill === 'mixed' ? 'Tổng Hợp' : skill === 'mock_test' ? 'Luyện Đề' : skill;
+        const skill = r.check_2_skill || (r.check_2_test_type ? (r.check_2_test_type === 'vocab' ? 'vocab' : r.check_2_test_type === 'grammar' ? 'grammar' : 'mixed') : 'grammar');
+        const style = getSkillStyle(skill);
+        const topic = r.check_2_topic || (skill === 'vocab' ? r.topic : r.grammar_topic);
         return (
           <div className="text-center py-0.5">
-            <div className="font-extrabold text-purple-400 font-mono text-base leading-tight">
+            <div className={`font-extrabold ${style.scoreColor} font-mono text-base leading-tight`}>
               {val > 0 ? format1Dec(val) : '-'}
             </div>
             {topic && (
               <div className="mt-0.5 flex flex-col items-center">
-                <span className="text-[10px] text-purple-300/80 font-medium truncate max-w-[140px] block" title={topic}>
+                <span className={`text-[10px] ${style.topicColor} font-medium truncate max-w-[140px] block`} title={topic}>
                   {topic}
                 </span>
-                <span className="text-[9px] px-1.5 py-0.2 rounded bg-purple-500/15 text-purple-300 border border-purple-500/30 font-semibold mt-0.5">
-                  {skillLabel}
+                <span className={`text-[9px] px-1.5 py-0.2 rounded ${style.badgeClass} border font-semibold mt-0.5`}>
+                  {style.label}
                 </span>
               </div>
             )}
