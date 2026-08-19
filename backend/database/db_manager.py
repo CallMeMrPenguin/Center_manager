@@ -2532,14 +2532,45 @@ def get_analytics_reports(class_id: Optional[int] = None, student_id: Optional[i
 
     # Always fetch full session records across all classes to accurately populate student rankings and class analytics
     cursor.execute("""
-        SELECT ag.*, s.full_name as student_name, s.nickname, c.class_name
+        SELECT ag.*, s.full_name as student_name, s.nickname, c.class_name, csess.test_config_json
         FROM class_attendance_grades ag
         JOIN students s ON ag.student_id = s.id
         JOIN classes c ON ag.class_id = c.id
         JOIN class_students cs ON ag.student_id = cs.student_id AND ag.class_id = cs.class_id
+        LEFT JOIN class_sessions csess ON ag.class_id = csess.class_id AND ag.date = csess.date
         ORDER BY ag.date ASC
     """)
-    all_rows = [dict(r) for r in cursor.fetchall()]
+    raw_db_rows = [dict(r) for r in cursor.fetchall()]
+    import json
+    all_rows = []
+    for r in raw_db_rows:
+        cfg_str = r.get("test_config_json")
+        c1_skill = "vocab"
+        c2_skill = "grammar"
+        topic = ""
+        c1_topic = ""
+        c2_topic = ""
+        grammar_topic = ""
+        if cfg_str:
+            try:
+                cfg = json.loads(cfg_str)
+                c1_info = cfg.get("check_1") or {}
+                c2_info = cfg.get("check_2") or {}
+                c1_skill = c1_info.get("skill") or "vocab"
+                c2_skill = c2_info.get("skill") or "grammar"
+                c1_topic = c1_info.get("topic") or (", ".join(c1_info.get("units", [])) if c1_info.get("units") else "")
+                c2_topic = c2_info.get("grammar_topic") or c2_info.get("topic") or (", ".join(c2_info.get("units", [])) if c2_info.get("units") else "")
+                grammar_topic = c2_topic if c2_skill == "grammar" else c1_topic
+                topic = c1_topic or c2_topic or (", ".join(c1_info.get("units", []) + c2_info.get("units", [])))
+            except Exception:
+                pass
+        r["check_1_skill"] = c1_skill
+        r["check_2_skill"] = c2_skill
+        r["check_1_topic"] = c1_topic
+        r["check_2_topic"] = c2_topic
+        r["grammar_topic"] = grammar_topic
+        r["topic"] = topic
+        all_rows.append(r)
 
     # Filter session records for the specific class / student view if requested
     if class_id or student_id:

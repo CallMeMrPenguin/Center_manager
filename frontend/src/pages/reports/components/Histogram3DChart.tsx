@@ -24,7 +24,6 @@ export const Histogram3DChart: React.FC<Histogram3DChartProps> = ({
   const [svgWidth, setSvgWidth] = useState(1050);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-  const [isRendered, setIsRendered] = useState(false);
 
   useEffect(() => {
     const handleResize = () => {
@@ -36,12 +35,6 @@ export const Histogram3DChart: React.FC<Histogram3DChartProps> = ({
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
-
-  useEffect(() => {
-    setIsRendered(false);
-    const timer = setTimeout(() => setIsRendered(true), 60);
-    return () => clearTimeout(timer);
-  }, [granularity, stats]);
 
   const activeBins: DistributionScoreBin[] = useMemo(() => {
     if (granularity === 'tiers') return stats.tierBins;
@@ -235,11 +228,11 @@ export const Histogram3DChart: React.FC<Histogram3DChartProps> = ({
             strokeWidth={1.5}
           />
 
-          {/* 3D Isometric Columns */}
+          {/* 3D Isometric Columns (Zero-lag immediate static render, no height growth animation) */}
           {activeBins.map((bin, i) => {
             const count = bin.count;
             const targetColHeight = (count / maxCount) * chartAreaHeight;
-            const currentHeight = isRendered ? Math.max(targetColHeight, count > 0 ? 8 : 2) : 2;
+            const currentHeight = Math.max(targetColHeight, count > 0 ? 8 : 2);
 
             const slotStartX = paddingX + i * slotWidth;
             const x0 = slotStartX + (slotWidth - colWidth) / 2;
@@ -282,7 +275,7 @@ export const Histogram3DChart: React.FC<Histogram3DChartProps> = ({
                       : isHovered
                       ? `drop-shadow(0 0 16px ${glowColor})`
                       : 'none',
-                  transition: `opacity 0.2s ease, filter 0.2s ease`,
+                  transition: `opacity 0.15s ease, filter 0.15s ease`,
                 }}
               >
                 {/* 1. Right Side Face */}
@@ -291,9 +284,6 @@ export const Histogram3DChart: React.FC<Histogram3DChartProps> = ({
                   fill={sideColor}
                   stroke="rgba(0,0,0,0.35)"
                   strokeWidth={0.5}
-                  style={{
-                    transition: `points 0.45s cubic-bezier(0.34, 1.3, 0.64, 1) ${i * 35}ms`,
-                  }}
                 />
 
                 {/* 2. Front Face */}
@@ -302,9 +292,6 @@ export const Histogram3DChart: React.FC<Histogram3DChartProps> = ({
                   fill={count > 0 ? frontGrad : 'rgba(255,255,255,0.05)'}
                   stroke={isSelected ? '#ffffff' : 'rgba(255,255,255,0.15)'}
                   strokeWidth={isSelected ? 1.5 : 0.5}
-                  style={{
-                    transition: `points 0.45s cubic-bezier(0.34, 1.3, 0.64, 1) ${i * 35}ms`,
-                  }}
                 />
 
                 {/* 3. Top Cap */}
@@ -313,12 +300,9 @@ export const Histogram3DChart: React.FC<Histogram3DChartProps> = ({
                   fill={count > 0 ? topGrad : 'rgba(255,255,255,0.08)'}
                   stroke={isSelected ? '#ffffff' : 'rgba(255,255,255,0.4)'}
                   strokeWidth={isSelected ? 1.5 : 0.5}
-                  style={{
-                    transition: `points 0.45s cubic-bezier(0.34, 1.3, 0.64, 1) ${i * 35}ms`,
-                  }}
                 />
 
-                {/* Value on Top of Column (Bigger Font Size) */}
+                {/* Value on Top of Column */}
                 <text
                   x={topCenterX}
                   y={topCenterY - 10}
@@ -327,15 +311,13 @@ export const Histogram3DChart: React.FC<Histogram3DChartProps> = ({
                     isSelected ? 'text-lg sm:text-xl' : isHovered ? 'text-base sm:text-lg' : 'text-sm sm:text-base'
                   }`}
                   style={{
-                    opacity: isRendered ? 1 : 0,
-                    transition: `all 0.4s ease ${i * 35 + 150}ms`,
                     filter: isHovered || isSelected ? 'drop-shadow(0 0 6px rgba(255,255,255,0.9))' : 'none',
                   }}
                 >
                   {count}
                 </text>
 
-                {/* X-axis Interval Label (Bigger Font Size) */}
+                {/* X-axis Interval Label */}
                 <text
                   x={topCenterX}
                   y={baseY + 22}
