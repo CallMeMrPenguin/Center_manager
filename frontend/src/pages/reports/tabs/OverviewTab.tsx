@@ -267,7 +267,7 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
   }, [sessionChartData]);
 
   return (
-    <div key={selectedStudentId || 'class-overview'} className="space-y-6">
+    <div className="space-y-6">
       {/* 1. INDIVIDUAL STUDENT PROFILE */}
       {selectedStudentObj && (
         <StudentProfileHeader
@@ -287,62 +287,54 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
       />
 
       {/* 3. INTERACTIVE CHART */}
-      <div className="animate-cascade-3">
-        <InteractiveChart
-          sessionChartData={sessionChartData}
-          engine={engine}
-          fittedLookup={fittedLookup}
-          selectedStudentId={selectedStudentId}
-          selectedClassId={selectedClassId}
-          timeView={timeView}
-          setTimeView={setTimeView}
-          timePhases={combinedTimePhases}
-          selectedPhaseId={selectedPhaseId}
-          setSelectedPhaseId={setSelectedPhaseId}
-          onOpenPhaseModal={onOpenPhaseModal}
-          isTestMode={isTestMode}
-        />
-      </div>
+      <InteractiveChart
+        sessionChartData={sessionChartData}
+        engine={engine}
+        fittedLookup={fittedLookup}
+        selectedStudentId={selectedStudentId}
+        selectedClassId={selectedClassId}
+        timeView={timeView}
+        setTimeView={setTimeView}
+        timePhases={combinedTimePhases}
+        selectedPhaseId={selectedPhaseId}
+        setSelectedPhaseId={setSelectedPhaseId}
+        onOpenPhaseModal={onOpenPhaseModal}
+        isTestMode={isTestMode}
+      />
 
       {/* 4. SUMMARY STRIP (NOW WITH PI INDEX & DETAILED TOOLTIP) */}
-      <div className="animate-cascade-4">
-        <SummaryStrip
-          engine={engine}
-          gradeTypesList={gradeTypesList}
-          hasSelectedStudent={!!selectedStudentObj}
-        />
-      </div>
+      <SummaryStrip
+        engine={engine}
+        gradeTypesList={gradeTypesList}
+        hasSelectedStudent={!!selectedStudentObj}
+      />
 
       {/* 5. STUDENT RANKINGS TABLE */}
-      <div className="animate-cascade-5">
-        <StudentRankingsTable
-          loading={loading}
-          classes={classes}
-          selectedClassId={selectedClassId}
-          setSelectedClassId={setSelectedClassId}
-          selectedStudentId={selectedStudentId}
-          setSelectedStudentId={setSelectedStudentId}
-          studentRankings={studentRankings}
-          filteredRankings={filteredRankings}
-          studentSessionsMap={studentSessionsMap}
-          onSelectRankingStudent={onSelectRankingStudent}
-          hasSelectedStudent={!!selectedStudentObj}
-          isTestMode={isTestMode}
-        />
-      </div>
+      <StudentRankingsTable
+        loading={loading}
+        classes={classes}
+        selectedClassId={selectedClassId}
+        setSelectedClassId={setSelectedClassId}
+        selectedStudentId={selectedStudentId}
+        setSelectedStudentId={setSelectedStudentId}
+        studentRankings={studentRankings}
+        filteredRankings={filteredRankings}
+        studentSessionsMap={studentSessionsMap}
+        onSelectRankingStudent={onSelectRankingStudent}
+        hasSelectedStudent={!!selectedStudentObj}
+        isTestMode={isTestMode}
+      />
 
       {/* 6. STUDENT GRADE HISTORY TABLE */}
-      <div className="animate-cascade-6">
-        <StudentGradeHistoryTable
-          loading={loading}
-          sessionRecords={activeSessionRecords.length > 0 ? activeSessionRecords : sessionRecords}
-          selectedStudentObj={selectedStudentObj}
-          stats={stats}
-          onOpenEditModal={onOpenEditModal}
-          hasSelectedStudent={!!selectedStudentObj}
-          isTestMode={isTestMode}
-        />
-      </div>
+      <StudentGradeHistoryTable
+        loading={loading}
+        sessionRecords={activeSessionRecords.length > 0 ? activeSessionRecords : sessionRecords}
+        selectedStudentObj={selectedStudentObj}
+        stats={stats}
+        onOpenEditModal={onOpenEditModal}
+        hasSelectedStudent={!!selectedStudentObj}
+        isTestMode={isTestMode}
+      />
     </div>
   );
 };

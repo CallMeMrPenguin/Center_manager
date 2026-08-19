@@ -100,14 +100,20 @@ export const MiniTrendSparkline = React.memo(({ points, slope, ema }: MiniTrendS
             <circle
               cx={c.x}
               cy={c.y}
-              r="3.5"
+              r="4.5"
               fill={strokeColor}
-              style={{ filter: `drop-shadow(0 0 4px ${glowColor})` }}
+              fillOpacity="0.25"
             />
             <circle
               cx={c.x}
               cy={c.y}
-              r="1.5"
+              r="2.5"
+              fill={strokeColor}
+            />
+            <circle
+              cx={c.x}
+              cy={c.y}
+              r="1.2"
               fill="#ffffff"
             />
           </g>

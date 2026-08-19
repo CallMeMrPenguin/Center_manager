@@ -179,11 +179,14 @@ export function useReportsData() {
 
   // Mock Dataset when Test Mode is Active
   const mockDataset = useMemo(() => {
+    if (!isTestMode) {
+      return { session_records: [], student_rankings: [], analytics_summary: null, class_analytics_map: {} };
+    }
     if (customMockRecords && customMockRecords.length > 0) {
       return computeDatasetFromRecords(customMockRecords, classes, students);
     }
     return generateMockReportsData(classes, students);
-  }, [classes, students, customMockRecords]);
+  }, [isTestMode, classes, students, customMockRecords]);
 
   // Active data sources based on Test Mode toggle
   const sessionRecords = useMemo(() => {

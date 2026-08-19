@@ -86,10 +86,12 @@ export const SkillBreakdownTab: React.FC<SkillBreakdownTabProps> = ({
               <span className="text-[10px] font-black uppercase text-indigo-400 block tracking-wider">
                 ĐANG PHÂN TÍCH KỸ NĂNG HỌC SINH
               </span>
-              <h3 className="text-base font-black text-white">
-                {selectedStudent.full_name} {selectedStudent.nickname && <span className="text-indigo-300 font-bold">({selectedStudent.nickname})</span>}
-                <span className="text-xs text-slate-400 font-normal ml-2">| {selectedStudent.class_name}</span>
-              </h3>
+              <div className="flex items-center gap-2 mt-0.5">
+                <h3 className="text-base font-black text-white">
+                  {selectedStudent.full_name} {selectedStudent.nickname && <span className="text-indigo-300 font-bold">({selectedStudent.nickname})</span>}
+                </h3>
+                <span className="text-xs px-2 py-0.5 rounded-md bg-[#1e2748] text-indigo-300 font-bold border border-indigo-500/20">{selectedStudent.class_name}</span>
+              </div>
             </div>
           </div>
           <button

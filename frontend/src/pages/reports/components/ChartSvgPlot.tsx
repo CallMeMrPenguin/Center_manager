@@ -27,7 +27,7 @@ interface ChartSvgPlotProps {
   setHoveredPoint: (pt: HoveredChartPoint | null) => void;
 }
 
-export const ChartSvgPlot: React.FC<ChartSvgPlotProps> = ({
+export const ChartSvgPlot: React.FC<ChartSvgPlotProps> = React.memo(({
   chartWidth,
   chartHeight,
   paddingLeft,
@@ -114,16 +114,16 @@ export const ChartSvgPlot: React.FC<ChartSvgPlotProps> = ({
         </g>
 
         {/* Check 1 Bezier */}
-        <path key={`c1-glow-${selectedStudentId || selectedClassId || 'all'}-${timeView}`} d={makeBezierPath('check1')} fill="none" stroke="#3b82f6" strokeWidth="9" strokeOpacity="0.25" strokeLinecap="round" strokeLinejoin="round" pathLength={1000} className="animate-path-draw" />
-        <path key={`c1-${selectedStudentId || selectedClassId || 'all'}-${timeView}`} d={makeBezierPath('check1')} fill="none" stroke="#3b82f6" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" pathLength={1000} className="animate-path-draw" />
+        <path key={`c1-glow-${selectedStudentId || selectedClassId || 'all'}-${timeView}`} d={makeBezierPath('check1')} fill="none" stroke="#3b82f6" strokeWidth="9" strokeOpacity="0.25" strokeLinecap="round" strokeLinejoin="round" />
+        <path key={`c1-${selectedStudentId || selectedClassId || 'all'}-${timeView}`} d={makeBezierPath('check1')} fill="none" stroke="#3b82f6" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" />
 
         {/* Check 2 Bezier */}
-        <path key={`c2-glow-${selectedStudentId || selectedClassId || 'all'}-${timeView}`} d={makeBezierPath('check2')} fill="none" stroke="#a855f7" strokeWidth="9" strokeOpacity="0.25" strokeLinecap="round" strokeLinejoin="round" pathLength={1000} className="animate-path-draw" />
-        <path key={`c2-${selectedStudentId || selectedClassId || 'all'}-${timeView}`} d={makeBezierPath('check2')} fill="none" stroke="#a855f7" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" pathLength={1000} className="animate-path-draw" />
+        <path key={`c2-glow-${selectedStudentId || selectedClassId || 'all'}-${timeView}`} d={makeBezierPath('check2')} fill="none" stroke="#a855f7" strokeWidth="9" strokeOpacity="0.25" strokeLinecap="round" strokeLinejoin="round" />
+        <path key={`c2-${selectedStudentId || selectedClassId || 'all'}-${timeView}`} d={makeBezierPath('check2')} fill="none" stroke="#a855f7" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" />
 
         {/* Homework Bezier */}
-        <path key={`hw-glow-${selectedStudentId || selectedClassId || 'all'}-${timeView}`} d={makeBezierPath('homework')} fill="none" stroke="#10b981" strokeWidth="9" strokeOpacity="0.25" strokeLinecap="round" strokeLinejoin="round" pathLength={1000} className="animate-path-draw" />
-        <path key={`hw-${selectedStudentId || selectedClassId || 'all'}-${timeView}`} d={makeBezierPath('homework')} fill="none" stroke="#10b981" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" pathLength={1000} className="animate-path-draw" />
+        <path key={`hw-glow-${selectedStudentId || selectedClassId || 'all'}-${timeView}`} d={makeBezierPath('homework')} fill="none" stroke="#10b981" strokeWidth="9" strokeOpacity="0.25" strokeLinecap="round" strokeLinejoin="round" />
+        <path key={`hw-${selectedStudentId || selectedClassId || 'all'}-${timeView}`} d={makeBezierPath('homework')} fill="none" stroke="#10b981" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" />
 
         {/* Forecast projections */}
         {sessionChartData.length > 0 && (() => {
@@ -146,12 +146,12 @@ export const ChartSvgPlot: React.FC<ChartSvgPlotProps> = ({
           });
 
           return (
-            <g key={`forecast-${selectedStudentId || selectedClassId || 'all'}-${timeView}-${sessionChartData.length}`} className="animate-point-pop" style={{ animationDelay: '2.10s' }}>
+            <g key={`forecast-${selectedStudentId || selectedClassId || 'all'}-${timeView}-${sessionChartData.length}`}>
               {preds.map(p => (
                 <g key={p.id}>
                   <line x1={lastX} y1={getSvgY(p.lastVal)} x2={forecastX} y2={p.rawY} stroke={p.color} strokeWidth="2.5" strokeDasharray="4 4" strokeLinecap="round" />
                   <circle cx={forecastX} cy={p.rawY} r="6" fill={p.color} stroke="#ffffff" strokeWidth="2" />
-                  <text x={forecastX + 9} y={(adjustedYs[p.id] ?? p.rawY) + 4} fill={p.textColor} fontSize="11" fontWeight="900" className="font-mono drop-shadow">{format1Dec(p.score)}</text>
+                  <text x={forecastX + 9} y={(adjustedYs[p.id] ?? p.rawY) + 4} fill={p.textColor} fontSize="11" fontWeight="900" className="font-mono">{format1Dec(p.score)}</text>
                 </g>
               ))}
             </g>
@@ -165,7 +165,6 @@ export const ChartSvgPlot: React.FC<ChartSvgPlotProps> = ({
             const y1 = getSvgY(d.check1);
             const y2 = getSvgY(d.check2);
             const yHw = getSvgY(d.homework);
-            const pointDelay = (0.7 + (i / Math.max(1, sessionChartData.length - 1)) * 1.35).toFixed(2);
 
             return (
               <g
@@ -188,20 +187,20 @@ export const ChartSvgPlot: React.FC<ChartSvgPlotProps> = ({
               >
                 <rect x={x - 25} y={paddingTop} width={50} height={plotAreaHeight} fill="transparent" />
                 <line x1={x} y1={paddingTop} x2={x} y2={chartHeight - paddingBottom} stroke="#5c36f5" strokeWidth="1.5" strokeDasharray="3 3" className="opacity-0 group-hover:opacity-100 transition-opacity" />
-                <g className="animate-point-pop" style={{ animationDelay: `${pointDelay}s` }}>
-                  <circle cx={x} cy={y1} r="7" fill="#3b82f6" style={{ transformBox: 'fill-box', transformOrigin: 'center' }} className="transition-transform duration-200 group-hover:scale-125" />
-                  <circle cx={x} cy={y1} r="3.5" fill="#ffffff" style={{ transformBox: 'fill-box', transformOrigin: 'center' }} className="transition-transform duration-200 group-hover:scale-125" />
+                <g>
+                  <circle cx={x} cy={y1} r="7" fill="#3b82f6" style={{ transformBox: 'fill-box', transformOrigin: 'center' }} className="transition-transform duration-150 group-hover:scale-125" />
+                  <circle cx={x} cy={y1} r="3.5" fill="#ffffff" style={{ transformBox: 'fill-box', transformOrigin: 'center' }} className="transition-transform duration-150 group-hover:scale-125" />
                 </g>
-                <g className="animate-point-pop" style={{ animationDelay: `${pointDelay}s` }}>
-                  <circle cx={x} cy={y2} r="7" fill="#a855f7" style={{ transformBox: 'fill-box', transformOrigin: 'center' }} className="transition-transform duration-200 group-hover:scale-125" />
-                  <circle cx={x} cy={y2} r="3.5" fill="#ffffff" style={{ transformBox: 'fill-box', transformOrigin: 'center' }} className="transition-transform duration-200 group-hover:scale-125" />
+                <g>
+                  <circle cx={x} cy={y2} r="7" fill="#a855f7" style={{ transformBox: 'fill-box', transformOrigin: 'center' }} className="transition-transform duration-150 group-hover:scale-125" />
+                  <circle cx={x} cy={y2} r="3.5" fill="#ffffff" style={{ transformBox: 'fill-box', transformOrigin: 'center' }} className="transition-transform duration-150 group-hover:scale-125" />
                 </g>
-                <g className="animate-point-pop" style={{ animationDelay: `${pointDelay}s` }}>
-                  <circle cx={x} cy={yHw} r="7" fill="#10b981" style={{ transformBox: 'fill-box', transformOrigin: 'center' }} className="transition-transform duration-200 group-hover:scale-125" />
-                  <circle cx={x} cy={yHw} r="3.5" fill="#ffffff" style={{ transformBox: 'fill-box', transformOrigin: 'center' }} className="transition-transform duration-200 group-hover:scale-125" />
+                <g>
+                  <circle cx={x} cy={yHw} r="7" fill="#10b981" style={{ transformBox: 'fill-box', transformOrigin: 'center' }} className="transition-transform duration-150 group-hover:scale-125" />
+                  <circle cx={x} cy={yHw} r="3.5" fill="#ffffff" style={{ transformBox: 'fill-box', transformOrigin: 'center' }} className="transition-transform duration-150 group-hover:scale-125" />
                 </g>
                 {i === sessionChartData.length - 1 && (
-                  <g className="animate-point-pop" style={{ animationDelay: `${pointDelay}s` }}>
+                  <g>
                     <text x={x + 14} y={y1 + 4} fill="#3b82f6" fontSize="12" fontWeight="900">{d.check1}</text>
                     <text x={x + 14} y={y2 + 4} fill="#a855f7" fontSize="12" fontWeight="900">{d.check2}</text>
                     <text x={x + 14} y={yHw + 4} fill="#10b981" fontSize="12" fontWeight="900">{d.homework}</text>
@@ -233,4 +232,4 @@ export const ChartSvgPlot: React.FC<ChartSvgPlotProps> = ({
       })}
     </svg>
   );
-};
+});

@@ -22,13 +22,13 @@ interface KPICardsProps {
   isTestMode?: boolean;
 }
 
-export const KPICards: React.FC<KPICardsProps> = ({ stats, isTestMode }) => {
+export const KPICards: React.FC<KPICardsProps> = React.memo(({ stats, isTestMode }) => {
   const hasMockTest = stats.mockTest !== undefined && stats.mockTest !== null && stats.mockTest !== '-';
 
   return (
     <div className={`grid grid-cols-1 sm:grid-cols-2 ${hasMockTest ? 'lg:grid-cols-5' : 'lg:grid-cols-4'} gap-4`}>
       {/* 1. CHECK 1 TRUNG BÌNH */}
-      <div className="kpi-card-blue p-5 flex flex-col justify-between shadow-2xl transition-all duration-300 min-h-[100px] animate-cascade-1">
+      <div className="kpi-card-blue p-5 flex flex-col justify-between shadow-2xl transition-all duration-200 min-h-[100px]">
         <div>
           <span className="text-[10px] font-black uppercase tracking-wider text-blue-400 block mb-1">
             {isTestMode ? 'TỪ VỰNG TRUNG BÌNH' : 'CHECK 1 TRUNG BÌNH'}
@@ -44,7 +44,7 @@ export const KPICards: React.FC<KPICardsProps> = ({ stats, isTestMode }) => {
       </div>
 
       {/* 2. CHECK 2 TRUNG BÌNH */}
-      <div className="kpi-card-purple p-5 flex flex-col justify-between shadow-2xl transition-all duration-300 min-h-[100px] animate-cascade-2">
+      <div className="kpi-card-purple p-5 flex flex-col justify-between shadow-2xl transition-all duration-200 min-h-[100px]">
         <div>
           <span className="text-[10px] font-black uppercase tracking-wider text-purple-400 block mb-1">
             {isTestMode ? 'NGỮ PHÁP TRUNG BÌNH' : 'CHECK 2 TRUNG BÌNH'}
@@ -60,7 +60,7 @@ export const KPICards: React.FC<KPICardsProps> = ({ stats, isTestMode }) => {
       </div>
 
       {/* 3. HOMEWORK TRUNG BÌNH */}
-      <div className="kpi-card-green p-5 flex flex-col justify-between shadow-2xl transition-all duration-300 min-h-[100px] animate-cascade-3">
+      <div className="kpi-card-green p-5 flex flex-col justify-between shadow-2xl transition-all duration-200 min-h-[100px]">
         <div>
           <span className="text-[10px] font-black uppercase tracking-wider text-emerald-400 block mb-1">
             HOMEWORK TRUNG BÌNH
@@ -77,7 +77,7 @@ export const KPICards: React.FC<KPICardsProps> = ({ stats, isTestMode }) => {
 
       {/* 4. LUYỆN ĐỀ (GIỮA/CUỐI KỲ) */}
       {hasMockTest && (
-        <div className="kpi-card-blue p-5 flex flex-col justify-between shadow-2xl transition-all duration-300 min-h-[100px] animate-cascade-4" style={{ borderColor: 'rgba(245, 158, 11, 0.45)' }}>
+        <div className="kpi-card-blue p-5 flex flex-col justify-between shadow-2xl transition-all duration-200 min-h-[100px]" style={{ borderColor: 'rgba(245, 158, 11, 0.45)' }}>
           <div>
             <span className="text-[10px] font-black uppercase tracking-wider text-amber-400 block mb-1">
               LUYỆN ĐỀ (GIỮA / CUỐI KỲ)
@@ -94,7 +94,7 @@ export const KPICards: React.FC<KPICardsProps> = ({ stats, isTestMode }) => {
       )}
 
       {/* 5. TỔNG ĐIỂM TRUNG BÌNH */}
-      <div className={`kpi-card-amber p-5 flex flex-col justify-between shadow-2xl transition-all duration-300 min-h-[100px] ${hasMockTest ? 'animate-cascade-5' : 'animate-cascade-4'}`}>
+      <div className="kpi-card-amber p-5 flex flex-col justify-between shadow-2xl transition-all duration-200 min-h-[100px]">
         <div>
           <span className="text-[10px] font-black uppercase tracking-wider text-amber-400 block mb-1">
             TỔNG ĐIỂM TRUNG BÌNH
@@ -110,4 +110,4 @@ export const KPICards: React.FC<KPICardsProps> = ({ stats, isTestMode }) => {
       </div>
     </div>
   );
-};
+});

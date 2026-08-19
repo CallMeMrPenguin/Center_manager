@@ -23,7 +23,7 @@ interface StudentRankingsTableProps {
   isTestMode?: boolean;
 }
 
-export const StudentRankingsTable: React.FC<StudentRankingsTableProps> = ({
+export const StudentRankingsTable: React.FC<StudentRankingsTableProps> = React.memo(({
   loading,
   classes,
   selectedClassId,
@@ -81,56 +81,65 @@ export const StudentRankingsTable: React.FC<StudentRankingsTableProps> = ({
       ),
     },
     {
-      accessorKey: 'total_sessions',
-      header: () => <div className="text-center w-full">Buổi Học</div>,
-      meta: { headerText: 'Buổi Học', exportValue: (r: any) => `${r.present_count ?? 0}/${r.total_sessions ?? 0} buổi` },
-      cell: ({ row }) => {
-        const r = row.original;
-        const present = r.present_count ?? 0;
-        const total = r.total_sessions ?? 0;
-        return (
-          <div className="text-center font-bold font-mono text-xs sm:text-sm">
-            <span className={present < total ? "text-amber-400 font-black" : "text-emerald-400 font-black"}>{present}</span>
-            <span className="text-slate-400"> / {total} buổi</span>
-          </div>
-        );
-      },
-    },
-    {
       id: 'present_count',
-      header: () => <div className="text-center w-full">Điểm Danh %</div>,
-      meta: { headerText: 'Điểm Danh %', exportValue: (r: any) => `${r.total_sessions > 0 ? Math.round((r.present_count / r.total_sessions) * 100) : 100}%` },
+      accessorFn: (r) => (r.total_sessions > 0 ? (r.present_count / r.total_sessions) * 100 : 100),
+      header: () => <div className="text-center w-full">Điểm Danh</div>,
+      meta: {
+        headerText: 'Điểm Danh',
+        exportValue: (r: any) => {
+          const pct = r.total_sessions > 0 ? ((r.present_count / r.total_sessions) * 100).toFixed(0) : '100';
+          return `${pct}%`;
+        }
+      },
       cell: ({ row }) => {
         const r = row.original;
         const pct = r.total_sessions > 0 ? Math.round((r.present_count / r.total_sessions) * 100) : 100;
-        return <div className="text-center font-black text-emerald-400 font-mono text-sm sm:text-base">{pct}%</div>;
+        return (
+          <div className="text-center">
+            <span className={`inline-block px-3 py-1 rounded-full text-xs font-black font-mono ${pct < 80 ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30' : pct < 90 ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'}`}>
+              {pct}%
+            </span>
+          </div>
+        );
       },
     },
     {
       accessorKey: 'avg_check_1',
       header: () => <div className="text-center w-full">{isTestMode ? 'Từ Vựng' : 'Check 1'}</div>,
       meta: { headerText: isTestMode ? 'Từ Vựng' : 'Check 1', exportValue: (r: any) => Number(r.avg_check_1) > 0 ? format1Dec(Number(r.avg_check_1)) : '-' },
-      cell: (info) => {
-        const val = Number(info.getValue()) || 0;
-        return <div className="text-center font-black text-blue-400 font-mono text-sm sm:text-base">{val > 0 ? format1Dec(val) : '-'}</div>;
+      cell: ({ getValue }) => {
+        const val = Number(getValue()) || 0;
+        return (
+          <div className="text-center font-mono font-extrabold text-blue-400 text-sm sm:text-base">
+            {val > 0 ? format1Dec(val) : '-'}
+          </div>
+        );
       },
     },
     {
       accessorKey: 'avg_check_2',
       header: () => <div className="text-center w-full">{isTestMode ? 'Ngữ Pháp' : 'Check 2'}</div>,
       meta: { headerText: isTestMode ? 'Ngữ Pháp' : 'Check 2', exportValue: (r: any) => Number(r.avg_check_2) > 0 ? format1Dec(Number(r.avg_check_2)) : '-' },
-      cell: (info) => {
-        const val = Number(info.getValue()) || 0;
-        return <div className="text-center font-black text-purple-400 font-mono text-sm sm:text-base">{val > 0 ? format1Dec(val) : '-'}</div>;
+      cell: ({ getValue }) => {
+        const val = Number(getValue()) || 0;
+        return (
+          <div className="text-center font-mono font-extrabold text-purple-400 text-sm sm:text-base">
+            {val > 0 ? format1Dec(val) : '-'}
+          </div>
+        );
       },
     },
     {
       accessorKey: 'avg_homework',
       header: () => <div className="text-center w-full">Homework</div>,
       meta: { headerText: 'Homework', exportValue: (r: any) => Number(r.avg_homework) > 0 ? format1Dec(Number(r.avg_homework)) : '-' },
-      cell: (info) => {
-        const val = Number(info.getValue()) || 0;
-        return <div className="text-center font-black text-emerald-400 font-mono text-sm sm:text-base">{val > 0 ? format1Dec(val) : '-'}</div>;
+      cell: ({ getValue }) => {
+        const val = Number(getValue()) || 0;
+        return (
+          <div className="text-center font-mono font-extrabold text-emerald-400 text-sm sm:text-base">
+            {val > 0 ? format1Dec(val) : '-'}
+          </div>
+        );
       },
     },
     {
@@ -302,4 +311,4 @@ export const StudentRankingsTable: React.FC<StudentRankingsTableProps> = ({
       />
     </div>
   );
-};
+});
