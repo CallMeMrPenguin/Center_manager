@@ -37,11 +37,11 @@ export const Histogram3DChart: React.FC<Histogram3DChartProps> = ({
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Frame-by-frame direct SVG coordinate interpolation for guaranteed 100% smooth column rising animation
+  // Frame-by-frame direct SVG coordinate interpolation for smooth, elegant column rising animation
   useEffect(() => {
     let animId: number;
     const startTime = performance.now();
-    const duration = 680; // ms
+    const duration = 1250; // ms for graceful, clearly visible rising wave
 
     setAnimFactor(0);
 
@@ -258,8 +258,8 @@ export const Histogram3DChart: React.FC<Histogram3DChartProps> = ({
             const count = bin.count;
             const targetColHeight = (count / maxCount) * chartAreaHeight;
 
-            // Compute staggered frame animation progress for each column
-            const delayOffset = (i / Math.max(numBins - 1, 1)) * 0.28;
+            // Compute staggered frame animation progress for each column (smooth wave progression)
+            const delayOffset = (i / Math.max(numBins - 1, 1)) * 0.42;
             const colP = Math.max(0, Math.min(1, (animFactor - delayOffset) / (1 - delayOffset || 1)));
             const colEase = 1 - Math.pow(1 - colP, 3);
             const currentHeight = Math.max(targetColHeight * colEase, count > 0 ? 8 * colEase : 2);
