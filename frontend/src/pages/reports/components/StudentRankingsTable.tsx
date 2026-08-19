@@ -91,16 +91,45 @@ export const StudentRankingsTable: React.FC<StudentRankingsTableProps> = React.m
       meta: {
         headerText: 'Điểm Danh',
         exportValue: (r: any) => {
-          const pct = r.total_sessions > 0 ? ((r.present_count / r.total_sessions) * 100).toFixed(0) : '100';
-          return `${pct}%`;
+          const total = r.total_sessions || 0;
+          const present = r.present_count || 0;
+          const pct = total > 0 ? Math.round((present / total) * 100) : 100;
+          return `${pct}% (${present}/${total} buổi)`;
         }
       },
       cell: ({ row }) => {
         const r = row.original;
-        const pct = r.total_sessions > 0 ? Math.round((r.present_count / r.total_sessions) * 100) : 100;
+        const total = r.total_sessions || 0;
+        const present = r.present_count || 0;
+        const pct = total > 0 ? Math.round((present / total) * 100) : 100;
+
+        let pctColor = 'text-emerald-400';
+        let subColor = 'text-emerald-300';
+        let badgeBg = 'bg-emerald-500/15 border-emerald-500/30';
+        if (total > 0) {
+          if (pct < 50) {
+            pctColor = 'text-rose-400';
+            subColor = 'text-rose-300';
+            badgeBg = 'bg-rose-500/15 border-rose-500/30';
+          } else if (pct < 75) {
+            pctColor = 'text-orange-400';
+            subColor = 'text-orange-300';
+            badgeBg = 'bg-orange-500/15 border-orange-500/30';
+          } else if (pct < 90) {
+            pctColor = 'text-amber-400';
+            subColor = 'text-amber-300';
+            badgeBg = 'bg-amber-500/15 border-amber-500/30';
+          }
+        }
+
         return (
-          <div className="text-center font-mono font-bold text-slate-300 text-sm sm:text-base">
-            {pct}%
+          <div className="text-center py-0.5 flex flex-col items-center justify-center">
+            <div className={`font-mono font-extrabold text-base leading-tight ${pctColor}`}>
+              {pct}%
+            </div>
+            <div className={`text-[10px] font-mono font-bold mt-1 px-2 py-0.5 rounded-md border ${badgeBg} ${subColor}`}>
+              {present}/{total} buổi
+            </div>
           </div>
         );
       },
