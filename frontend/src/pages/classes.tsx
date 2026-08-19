@@ -86,7 +86,7 @@ const CheckScoreInput = React.memo(({
   parseAndFormatScore
 }: {
   rec: any;
-  field: 'check_1' | 'check_2' | 'homework';
+  field: 'check_1' | 'check_2' | 'homework' | 'mock_test';
   onUpdateRecord: (studentId: number, field: string, value: any) => void;
   parseAndFormatScore: (val: any) => string;
 }) => {
@@ -96,11 +96,11 @@ const CheckScoreInput = React.memo(({
     setVal(rec[field] ?? '');
   }, [rec[field]]);
 
-  const predKey = field === 'check_1' ? 'pred_c1' : field === 'check_2' ? 'pred_c2' : 'pred_hw';
-  const defaultPred = field === 'check_1' ? 8.5 : field === 'check_2' ? 8.0 : 9.0;
+  const predKey = field === 'check_1' ? 'pred_c1' : field === 'check_2' ? 'pred_c2' : field === 'homework' ? 'pred_hw' : 'pred_mock';
+  const defaultPred = field === 'check_1' ? 8.5 : field === 'check_2' ? 8.0 : field === 'homework' ? 9.0 : 8.5;
   const predVal = rec[predKey] !== undefined ? rec[predKey] : Math.min(10.0, Math.max(0.0, (Number(val) || defaultPred)));
-  const badgeColor = field === 'check_1' ? 'text-indigo-300' : field === 'check_2' ? 'text-purple-300' : 'text-emerald-300';
-  const label = field === 'check_1' ? 'Check 1' : field === 'check_2' ? 'Check 2' : 'HW';
+  const badgeColor = field === 'check_1' ? 'text-indigo-300' : field === 'check_2' ? 'text-purple-300' : field === 'homework' ? 'text-emerald-300' : 'text-amber-300';
+  const label = field === 'check_1' ? 'Check 1' : field === 'check_2' ? 'Check 2' : field === 'homework' ? 'HW' : 'Luyện Đề';
 
   return (
     <div className="flex flex-col items-center justify-center gap-0.5">
@@ -855,6 +855,18 @@ export default function ClassesPage() {
         <CheckScoreInput
           rec={row.original}
           field="homework"
+          onUpdateRecord={handleUpdateRecord}
+          parseAndFormatScore={parseAndFormatScore}
+        />
+      ),
+    },
+    {
+      accessorKey: 'mock_test',
+      header: 'Luyện Đề',
+      cell: ({ row }) => (
+        <CheckScoreInput
+          rec={row.original}
+          field="mock_test"
           onUpdateRecord={handleUpdateRecord}
           parseAndFormatScore={parseAndFormatScore}
         />

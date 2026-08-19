@@ -25,6 +25,7 @@ export const EditGradeModal: React.FC<EditGradeModalProps> = ({
   const [editCheck1, setEditCheck1] = useState<string>('');
   const [editCheck2, setEditCheck2] = useState<string>('');
   const [editHomework, setEditHomework] = useState<string>('');
+  const [editMockTest, setEditMockTest] = useState<string>('');
   const [editNotes, setEditNotes] = useState<string>('');
   const [saving, setSaving] = useState(false);
 
@@ -34,6 +35,7 @@ export const EditGradeModal: React.FC<EditGradeModalProps> = ({
       setEditCheck1(record.check_1 !== null && record.check_1 !== undefined && Number(record.check_1) > 0 ? String(record.check_1) : '');
       setEditCheck2(record.check_2 !== null && record.check_2 !== undefined && Number(record.check_2) > 0 ? String(record.check_2) : '');
       setEditHomework(record.homework !== null && record.homework !== undefined && Number(record.homework) > 0 ? String(record.homework) : '');
+      setEditMockTest(record.mock_test !== null && record.mock_test !== undefined && Number(record.mock_test) > 0 ? String(record.mock_test) : '');
       setEditNotes(record.notes || '');
     }
   }, [record]);
@@ -47,6 +49,7 @@ export const EditGradeModal: React.FC<EditGradeModalProps> = ({
       const c1 = editCheck1.trim() !== '' ? Math.max(0, Math.min(10, parseFloat(editCheck1.replace(',', '.')) || 0)) : null;
       const c2 = editCheck2.trim() !== '' ? Math.max(0, Math.min(10, parseFloat(editCheck2.replace(',', '.')) || 0)) : null;
       const hw = editHomework.trim() !== '' ? Math.max(0, Math.min(10, parseFloat(editHomework.replace(',', '.')) || 0)) : null;
+      const mock = editMockTest.trim() !== '' ? Math.max(0, Math.min(10, parseFloat(editMockTest.replace(',', '.')) || 0)) : null;
 
       if (isTestMode) {
         const updated = {
@@ -56,6 +59,7 @@ export const EditGradeModal: React.FC<EditGradeModalProps> = ({
           check_1: c1,
           check_2: c2,
           homework: hw,
+          mock_test: mock,
           notes: editNotes,
         };
         if (onSaveTestRecord) {
@@ -73,6 +77,7 @@ export const EditGradeModal: React.FC<EditGradeModalProps> = ({
         check_1: c1 ?? 0,
         check_2: c2 ?? 0,
         homework: hw ?? 0,
+        mock_test: mock ?? 0,
         notes: editNotes,
       }]);
 
@@ -89,7 +94,7 @@ export const EditGradeModal: React.FC<EditGradeModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 animate-mac-dropdown">
-      <div className="bg-[#0f1320] border border-indigo-500/30 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl">
+      <div className="bg-[#0f1320] border border-indigo-500/30 rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl">
         <div className="flex items-center justify-between px-6 py-4 border-b border-white/10 bg-[#141828]">
           <h2 className="text-sm font-black uppercase text-indigo-300 flex items-center gap-2">
             <Edit3 className="h-4 w-4" />
@@ -145,7 +150,7 @@ export const EditGradeModal: React.FC<EditGradeModalProps> = ({
             </div>
           </div>
 
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
             <div>
               <label className="block text-[11px] font-extrabold text-blue-400 uppercase tracking-wider mb-1">
                 Từ Vựng
@@ -155,7 +160,7 @@ export const EditGradeModal: React.FC<EditGradeModalProps> = ({
                 placeholder="0.0"
                 value={editCheck1}
                 onChange={(e) => setEditCheck1(e.target.value)}
-                className="w-full bg-[#161c30] border border-blue-500/30 rounded-xl px-3.5 py-2 text-xs font-mono font-extrabold text-white focus:outline-none focus:border-blue-400"
+                className="w-full bg-[#161c30] border border-blue-500/30 rounded-xl px-3 py-2 text-xs font-mono font-extrabold text-white focus:outline-none focus:border-blue-400"
               />
             </div>
 
@@ -168,7 +173,7 @@ export const EditGradeModal: React.FC<EditGradeModalProps> = ({
                 placeholder="0.0"
                 value={editCheck2}
                 onChange={(e) => setEditCheck2(e.target.value)}
-                className="w-full bg-[#161c30] border border-purple-500/30 rounded-xl px-3.5 py-2 text-xs font-mono font-extrabold text-white focus:outline-none focus:border-purple-400"
+                className="w-full bg-[#161c30] border border-purple-500/30 rounded-xl px-3 py-2 text-xs font-mono font-extrabold text-white focus:outline-none focus:border-purple-400"
               />
             </div>
 
@@ -181,7 +186,20 @@ export const EditGradeModal: React.FC<EditGradeModalProps> = ({
                 placeholder="0.0"
                 value={editHomework}
                 onChange={(e) => setEditHomework(e.target.value)}
-                className="w-full bg-[#161c30] border border-emerald-500/30 rounded-xl px-3.5 py-2 text-xs font-mono font-extrabold text-white focus:outline-none focus:border-emerald-400"
+                className="w-full bg-[#161c30] border border-emerald-500/30 rounded-xl px-3 py-2 text-xs font-mono font-extrabold text-white focus:outline-none focus:border-emerald-400"
+              />
+            </div>
+
+            <div>
+              <label className="block text-[11px] font-extrabold text-amber-400 uppercase tracking-wider mb-1">
+                Luyện Đề
+              </label>
+              <input
+                type="text"
+                placeholder="0.0"
+                value={editMockTest}
+                onChange={(e) => setEditMockTest(e.target.value)}
+                className="w-full bg-[#161c30] border border-amber-500/30 rounded-xl px-3 py-2 text-xs font-mono font-extrabold text-white focus:outline-none focus:border-amber-400"
               />
             </div>
           </div>

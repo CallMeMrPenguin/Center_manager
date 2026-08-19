@@ -1736,11 +1736,12 @@ def upsert_class_attendance_grades(class_id: int, date_str: str, records: List[D
         c1 = parse_score(rec.get("check_1"))
         c2 = parse_score(rec.get("check_2"))
         hw = parse_score(rec.get("homework"))
+        mock = parse_score(rec.get("mock_test"))
 
         today_str = datetime.now().strftime("%Y-%m-%d")
         is_past_date = str(date_str) < today_str
 
-        has_score = (c1 is not None) or (c2 is not None) or (hw is not None)
+        has_score = (c1 is not None) or (c2 is not None) or (hw is not None) or (mock is not None)
         notes = (rec.get("notes") or "").strip()
         status = rec.get("status")
 
@@ -1752,16 +1753,17 @@ def upsert_class_attendance_grades(class_id: int, date_str: str, records: List[D
             status = "Có mặt"
 
         cursor.execute("""
-            INSERT INTO class_attendance_grades (class_id, student_id, date, status, check_1, check_2, homework, notes)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO class_attendance_grades (class_id, student_id, date, status, check_1, check_2, homework, mock_test, notes)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(class_id, student_id, date) DO UPDATE SET
                 status = EXCLUDED.status,
                 check_1 = EXCLUDED.check_1,
                 check_2 = EXCLUDED.check_2,
                 homework = EXCLUDED.homework,
+                mock_test = EXCLUDED.mock_test,
                 notes = EXCLUDED.notes,
                 updated_at = CURRENT_TIMESTAMP
-        """, (class_id, student_id, date_str, status, c1, c2, hw, notes))
+        """, (class_id, student_id, date_str, status, c1, c2, hw, mock, notes))
     conn.commit()
     conn.close()
 

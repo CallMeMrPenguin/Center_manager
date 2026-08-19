@@ -132,6 +132,7 @@ export const TestConfigModal: React.FC<TestConfigModalProps> = ({
     { value: 'vocab', label: 'Từ Vựng (Vocabulary)' },
     { value: 'grammar', label: 'Ngữ Pháp (Grammar)' },
     { value: 'mixed', label: 'Tổng Hợp (Mixed)' },
+    { value: 'mock_test', label: 'Luyện Đề (Mock Test)' },
   ];
 
   const getUnitOptions = (skill: string) => {
@@ -165,18 +166,32 @@ export const TestConfigModal: React.FC<TestConfigModalProps> = ({
 
   if (!isOpen) return null;
 
+  const handleSkillChange = (checkKey: 'check_1' | 'check_2', skillVal: string) => {
+    const isMock = skillVal === 'mock_test';
+    setConfig((prev) => ({
+      ...prev,
+      [checkKey]: {
+        ...prev[checkKey],
+        skill: skillVal,
+        topic: isMock ? (prev[checkKey].topic || 'Luyện đề tổng hợp') : prev[checkKey].topic,
+        grammar_topic: isMock ? '' : prev[checkKey].grammar_topic,
+      },
+    }));
+  };
+
   const handleMultiSelectUnits = (checkKey: 'check_1' | 'check_2', selectedUnits: string[]) => {
+    const isMock = config[checkKey].skill === 'mock_test';
     const matchedNames = selectedUnits.map((ukey) => unitsDetailed.find((u) => u.unit === ukey)?.name).filter(Boolean);
     const matchedGrammars = selectedUnits.map((ukey) => unitsDetailed.find((u) => u.unit === ukey)?.grammar).filter(Boolean);
     const topics = getAvailableGrammarTopics(selectedUnits);
-    const defaultGrammarTopic = topics.length === 1 ? topics[0] : matchedGrammars.join(' | ');
+    const defaultGrammarTopic = isMock ? '' : (topics.length === 1 ? topics[0] : matchedGrammars.join(' , '));
 
     setConfig((prev) => ({
       ...prev,
       [checkKey]: {
         ...prev[checkKey],
         units: selectedUnits,
-        topic: matchedNames.join(' | '),
+        topic: selectedUnits.length > 0 ? matchedNames.join(' , ') : (isMock ? 'Luyện đề tổng hợp' : ''),
         grammar_topic: defaultGrammarTopic,
       },
     }));
@@ -219,18 +234,18 @@ export const TestConfigModal: React.FC<TestConfigModalProps> = ({
         {availableTopics.length > 0 ? (
           <div className="flex flex-wrap gap-1.5 mb-2">
             {availableTopics.map((topic) => {
-              const isSelected = currentTopic === topic || currentTopic.split(' | ').includes(topic);
+              const isSelected = currentTopic === topic || currentTopic.split(' , ').includes(topic);
               return (
                 <button
                   key={topic}
                   type="button"
                   onClick={() => {
                     let nextTopic = topic;
-                    if (currentTopic.split(' | ').includes(topic)) {
-                      const remaining = currentTopic.split(' | ').filter(t => t !== topic);
-                      nextTopic = remaining.length > 0 ? remaining.join(' | ') : availableTopics.join(' | ');
-                    } else if (currentTopic && currentTopic !== availableTopics.join(' | ')) {
-                      nextTopic = `${currentTopic} | ${topic}`;
+                    if (currentTopic.split(' , ').includes(topic)) {
+                      const remaining = currentTopic.split(' , ').filter(t => t !== topic);
+                      nextTopic = remaining.length > 0 ? remaining.join(' , ') : availableTopics.join(' , ');
+                    } else if (currentTopic && currentTopic !== availableTopics.join(' , ')) {
+                      nextTopic = `${currentTopic} , ${topic}`;
                     }
                     setConfig(prev => ({ ...prev, [checkKey]: { ...prev[checkKey], grammar_topic: nextTopic } }));
                   }}
@@ -247,9 +262,9 @@ export const TestConfigModal: React.FC<TestConfigModalProps> = ({
             })}
             <button
               type="button"
-              onClick={() => setConfig(prev => ({ ...prev, [checkKey]: { ...prev[checkKey], grammar_topic: availableTopics.join(' | ') } }))}
+              onClick={() => setConfig(prev => ({ ...prev, [checkKey]: { ...prev[checkKey], grammar_topic: availableTopics.join(' , ') } }))}
               className={`px-2 py-1 rounded-lg text-[11px] font-semibold transition cursor-pointer ${
-                currentTopic === availableTopics.join(' | ')
+                currentTopic === availableTopics.join(' , ')
                   ? 'bg-indigo-600 text-white border border-indigo-400'
                   : 'bg-white/5 text-slate-400 hover:text-white'
               }`}
@@ -283,10 +298,11 @@ export const TestConfigModal: React.FC<TestConfigModalProps> = ({
             </div>
             <div>
               <h2 className="text-sm font-black text-white">Cấu Hình Bài Kiểm Tra Buổi Học</h2>
-              <span className="text-xs text-slate-400">
-                Ngày: <strong className="text-indigo-300">{date}</strong> | Khối:{' '}
-                <strong className="text-white">{grade || 'Lớp 6'}</strong>
-              </span>
+              <div className="flex items-center gap-2 mt-0.5 text-xs text-slate-400">
+                <span>Ngày: <strong className="text-indigo-300">{date}</strong></span>
+                <span className="text-slate-600">/</span>
+                <span>Khối: <strong className="text-white">{grade || 'Chưa phân khối'}</strong></span>
+              </div>
             </div>
           </div>
           <button onClick={onClose} className="text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-white/5 transition cursor-pointer">
@@ -313,19 +329,24 @@ export const TestConfigModal: React.FC<TestConfigModalProps> = ({
                     <label className="text-[11px] font-bold text-slate-300 block mb-1">Kỹ Năng Đánh Giá</label>
                     <CustomSelect
                       value={config.check_1.skill}
-                      onChange={(val) => setConfig(prev => ({ ...prev, check_1: { ...prev.check_1, skill: String(val) } }))}
+                      onChange={(val) => handleSkillChange('check_1', String(val))}
                       options={skillOptions}
                       placement="bottom"
                       className="w-full"
                     />
                   </div>
                   <div>
-                    <label className="text-[11px] font-bold text-slate-300 block mb-1">Bài Học (Unit)</label>
+                    <label className="text-[11px] font-bold text-slate-300 block mb-1 flex items-center justify-between">
+                      <span>Bài Học (Unit)</span>
+                      {config.check_1.skill === 'mock_test' && (
+                        <span className="text-[10px] text-amber-400 font-normal">Không bắt buộc</span>
+                      )}
+                    </label>
                     <CustomMultiSelect
                       values={config.check_1.units}
                       onChange={(units) => handleMultiSelectUnits('check_1', units)}
                       options={check1UnitOptions}
-                      placeholder="Chọn các Unit..."
+                      placeholder={config.check_1.skill === 'mock_test' ? 'Luyện đề tổng hợp / Chọn Unit (nếu có)...' : 'Chọn các Unit...'}
                       placement="bottom"
                       className="w-full"
                     />
@@ -345,19 +366,24 @@ export const TestConfigModal: React.FC<TestConfigModalProps> = ({
                     <label className="text-[11px] font-bold text-slate-300 block mb-1">Kỹ Năng Đánh Giá</label>
                     <CustomSelect
                       value={config.check_2.skill}
-                      onChange={(val) => setConfig(prev => ({ ...prev, check_2: { ...prev.check_2, skill: String(val) } }))}
+                      onChange={(val) => handleSkillChange('check_2', String(val))}
                       options={skillOptions}
                       placement="top"
                       className="w-full"
                     />
                   </div>
                   <div>
-                    <label className="text-[11px] font-bold text-slate-300 block mb-1">Bài Học (Unit)</label>
+                    <label className="text-[11px] font-bold text-slate-300 block mb-1 flex items-center justify-between">
+                      <span>Bài Học (Unit)</span>
+                      {config.check_2.skill === 'mock_test' && (
+                        <span className="text-[10px] text-amber-400 font-normal">Không bắt buộc</span>
+                      )}
+                    </label>
                     <CustomMultiSelect
                       values={config.check_2.units}
                       onChange={(units) => handleMultiSelectUnits('check_2', units)}
                       options={check2UnitOptions}
-                      placeholder="Chọn các Unit..."
+                      placeholder={config.check_2.skill === 'mock_test' ? 'Luyện đề tổng hợp / Chọn Unit (nếu có)...' : 'Chọn các Unit...'}
                       placement="top"
                       className="w-full"
                     />
