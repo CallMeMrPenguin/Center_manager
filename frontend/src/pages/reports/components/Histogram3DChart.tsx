@@ -24,6 +24,7 @@ export const Histogram3DChart: React.FC<Histogram3DChartProps> = ({
   const [svgWidth, setSvgWidth] = useState(1050);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const [isGrown, setIsGrown] = useState(false);
 
   useEffect(() => {
     const handleResize = () => {
@@ -35,6 +36,15 @@ export const Histogram3DChart: React.FC<Histogram3DChartProps> = ({
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  // Trigger column rising animation on mount and granularity/stats update
+  useEffect(() => {
+    setIsGrown(false);
+    const timer = setTimeout(() => {
+      setIsGrown(true);
+    }, 60);
+    return () => clearTimeout(timer);
+  }, [granularity, stats]);
 
   const activeBins: DistributionScoreBin[] = useMemo(() => {
     if (granularity === 'tiers') return stats.tierBins;
@@ -228,7 +238,7 @@ export const Histogram3DChart: React.FC<Histogram3DChartProps> = ({
             strokeWidth={1.5}
           />
 
-          {/* 3D Isometric Columns (Zero-lag immediate static render, no height growth animation) */}
+          {/* 3D Isometric Columns */}
           {activeBins.map((bin, i) => {
             const count = bin.count;
             const targetColHeight = (count / maxCount) * chartAreaHeight;
@@ -278,46 +288,57 @@ export const Histogram3DChart: React.FC<Histogram3DChartProps> = ({
                   transition: `opacity 0.15s ease, filter 0.15s ease`,
                 }}
               >
-                {/* 1. Right Side Face */}
-                <polygon
-                  points={sidePoints}
-                  fill={sideColor}
-                  stroke="rgba(0,0,0,0.35)"
-                  strokeWidth={0.5}
-                />
-
-                {/* 2. Front Face */}
-                <polygon
-                  points={frontPoints}
-                  fill={count > 0 ? frontGrad : 'rgba(255,255,255,0.05)'}
-                  stroke={isSelected ? '#ffffff' : 'rgba(255,255,255,0.15)'}
-                  strokeWidth={isSelected ? 1.5 : 0.5}
-                />
-
-                {/* 3. Top Cap */}
-                <polygon
-                  points={topPoints}
-                  fill={count > 0 ? topGrad : 'rgba(255,255,255,0.08)'}
-                  stroke={isSelected ? '#ffffff' : 'rgba(255,255,255,0.4)'}
-                  strokeWidth={isSelected ? 1.5 : 0.5}
-                />
-
-                {/* Value on Top of Column */}
-                <text
-                  x={topCenterX}
-                  y={topCenterY - 10}
-                  textAnchor="middle"
-                  className={`font-mono font-black select-none fill-white ${
-                    isSelected ? 'text-lg sm:text-xl' : isHovered ? 'text-base sm:text-lg' : 'text-sm sm:text-base'
-                  }`}
+                {/* Rising 3D Column Body Group (animates smoothly from baseY upward) */}
+                <g
                   style={{
-                    filter: isHovered || isSelected ? 'drop-shadow(0 0 6px rgba(255,255,255,0.9))' : 'none',
+                    transform: isGrown ? 'scaleY(1)' : 'scaleY(0.01)',
+                    transformOrigin: `${topCenterX}px ${baseY}px`,
+                    transition: `transform 0.65s cubic-bezier(0.16, 1, 0.3, 1) ${i * 45}ms`,
                   }}
                 >
-                  {count}
-                </text>
+                  {/* 1. Right Side Face */}
+                  <polygon
+                    points={sidePoints}
+                    fill={sideColor}
+                    stroke="rgba(0,0,0,0.35)"
+                    strokeWidth={0.5}
+                  />
 
-                {/* X-axis Interval Label */}
+                  {/* 2. Front Face */}
+                  <polygon
+                    points={frontPoints}
+                    fill={count > 0 ? frontGrad : 'rgba(255,255,255,0.05)'}
+                    stroke={isSelected ? '#ffffff' : 'rgba(255,255,255,0.15)'}
+                    strokeWidth={isSelected ? 1.5 : 0.5}
+                  />
+
+                  {/* 3. Top Cap */}
+                  <polygon
+                    points={topPoints}
+                    fill={count > 0 ? topGrad : 'rgba(255,255,255,0.08)'}
+                    stroke={isSelected ? '#ffffff' : 'rgba(255,255,255,0.4)'}
+                    strokeWidth={isSelected ? 1.5 : 0.5}
+                  />
+
+                  {/* Value on Top of Column */}
+                  <text
+                    x={topCenterX}
+                    y={topCenterY - 10}
+                    textAnchor="middle"
+                    className={`font-mono font-black select-none fill-white ${
+                      isSelected ? 'text-lg sm:text-xl' : isHovered ? 'text-base sm:text-lg' : 'text-sm sm:text-base'
+                    }`}
+                    style={{
+                      opacity: isGrown ? 1 : 0,
+                      transition: `opacity 0.3s ease ${i * 45 + 150}ms`,
+                      filter: isHovered || isSelected ? 'drop-shadow(0 0 6px rgba(255,255,255,0.9))' : 'none',
+                    }}
+                  >
+                    {count}
+                  </text>
+                </g>
+
+                {/* X-axis Interval Label (Fixed at base platform) */}
                 <text
                   x={topCenterX}
                   y={baseY + 22}

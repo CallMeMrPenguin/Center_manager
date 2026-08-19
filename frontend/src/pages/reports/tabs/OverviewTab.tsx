@@ -161,8 +161,15 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
     const c2 = count2 > 0 ? (sum2 / count2) : 0;
     const hw = countHw > 0 ? (sumHw / countHw) : 0;
     const mockTest = countMock > 0 ? (sumMock / countMock) : 0;
-    const validCols = [c1, c2, hw, mockTest].filter(v => v > 0);
-    const overall = validCols.length > 0 ? validCols.reduce((a, b) => a + b, 0) / validCols.length : 0;
+
+    let overall = 0;
+    let totW = 0;
+    if (c1 > 0) { overall += c1 * 0.55; totW += 0.55; }
+    if (c2 > 0) { overall += c2 * 0.35; totW += 0.35; }
+    if (hw > 0) { overall += hw * 0.10; totW += 0.10; }
+    if (mockTest > 0) { overall += mockTest * 0.15; totW += 0.15; }
+    if (totW > 0) overall = overall / totW;
+
     const attPct = records.length > 0 ? Math.round((presentCount / records.length) * 100) : 100;
 
     let rankStr = '#1';
