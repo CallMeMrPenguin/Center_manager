@@ -56,27 +56,39 @@ export function computeDatasetFromRecords(
     const cId = first.class_id || sampleClasses[0].id;
     const cObj = sampleClasses.find(c => String(c.id) === String(cId)) || sampleClasses[0];
 
-    const validC1s: number[] = [];
-    const validC2s: number[] = [];
+    const validVocabs: number[] = [];
+    const validGrammars: number[] = [];
     const validHws: number[] = [];
 
     recs.forEach((r) => {
       if (r.attendance !== 'absent') {
-        if (r.check_1 !== null && r.check_1 !== undefined && !isNaN(Number(r.check_1))) validC1s.push(Number(r.check_1));
-        if (r.check_2 !== null && r.check_2 !== undefined && !isNaN(Number(r.check_2))) validC2s.push(Number(r.check_2));
-        if (r.homework !== null && r.homework !== undefined && !isNaN(Number(r.homework))) validHws.push(Number(r.homework));
+        const c1 = r.check_1 !== null && r.check_1 !== undefined && !isNaN(Number(r.check_1)) ? Number(r.check_1) : null;
+        const c2 = r.check_2 !== null && r.check_2 !== undefined && !isNaN(Number(r.check_2)) ? Number(r.check_2) : null;
+        const hw = r.homework !== null && r.homework !== undefined && !isNaN(Number(r.homework)) ? Number(r.homework) : null;
+        const c1Skill = String(r.check_1_skill || 'vocab').toLowerCase().trim();
+        const c2Skill = String(r.check_2_skill || 'grammar').toLowerCase().trim();
+
+        if (c1 !== null && c1 > 0) {
+          if (c1Skill === 'grammar' || c1Skill === 'ngữ pháp') validGrammars.push(c1);
+          else validVocabs.push(c1);
+        }
+        if (c2 !== null && c2 > 0) {
+          if (c2Skill === 'vocab' || c2Skill === 'từ vựng') validVocabs.push(c2);
+          else validGrammars.push(c2);
+        }
+        if (hw !== null && hw > 0) validHws.push(hw);
       }
     });
 
-    const avgC1 = validC1s.length > 0 ? trunc1Dec(validC1s.reduce((a, b) => a + b, 0) / validC1s.length) : 0;
-    const avgC2 = validC2s.length > 0 ? trunc1Dec(validC2s.reduce((a, b) => a + b, 0) / validC2s.length) : 0;
+    const avgVocab = validVocabs.length > 0 ? trunc1Dec(validVocabs.reduce((a, b) => a + b, 0) / validVocabs.length) : 0;
+    const avgGrammar = validGrammars.length > 0 ? trunc1Dec(validGrammars.reduce((a, b) => a + b, 0) / validGrammars.length) : 0;
     const avgHw = validHws.length > 0 ? trunc1Dec(validHws.reduce((a, b) => a + b, 0) / validHws.length) : 0;
-    const overallAvg = trunc1Dec(avgC1 * 0.55 + avgC2 * 0.35 + avgHw * 0.1);
+    const overallAvg = trunc1Dec(avgVocab * 0.55 + avgGrammar * 0.35 + avgHw * 0.1);
 
-    let ema = validC1s.length > 0 ? (validC1s[0] * 0.55 + (validC2s[0] || validC1s[0]) * 0.35 + (validHws[0] || 8.0) * 0.1) : overallAvg;
+    let ema = validVocabs.length > 0 ? (validVocabs[0] * 0.55 + (validGrammars[0] || validVocabs[0]) * 0.35 + (validHws[0] || 8.0) * 0.1) : overallAvg;
     const alpha = 0.3;
-    for (let k = 1; k < validC1s.length; k++) {
-      const sessScore = validC1s[k] * 0.55 + (validC2s[k] ?? validC1s[k]) * 0.35 + (validHws[k] ?? 8.0) * 0.1;
+    for (let k = 1; k < validVocabs.length; k++) {
+      const sessScore = validVocabs[k] * 0.55 + (validGrammars[k] ?? validVocabs[k]) * 0.35 + (validHws[k] ?? 8.0) * 0.1;
       ema = alpha * sessScore + (1 - alpha) * ema;
     }
     ema = trunc1Dec(ema);
@@ -95,8 +107,10 @@ export function computeDatasetFromRecords(
       grade: cObj.grade || '6',
       total_sessions: recs.length,
       present_count: recs.filter(r => r.attendance !== 'absent').length,
-      avg_check_1: avgC1,
-      avg_check_2: avgC2,
+      avg_vocab: avgVocab,
+      avg_grammar: avgGrammar,
+      avg_check_1: avgVocab,
+      avg_check_2: avgGrammar,
       avg_homework: avgHw,
       academic_score: overallAvg,
       ema_level: ema,

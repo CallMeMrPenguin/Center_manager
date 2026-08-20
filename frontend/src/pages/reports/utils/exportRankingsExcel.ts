@@ -26,8 +26,8 @@ export async function exportRankingsExcel({
         const present = r.present_count ?? 0;
         const total = r.total_sessions ?? 0;
         const pct = total > 0 ? Math.round((present / total) * 100) : 100;
-        const c1 = Number(r.avg_check_1 || 0);
-        const c2 = Number(r.avg_check_2 || 0);
+        const c1 = Number(r.avg_vocab ?? r.avg_check_1 ?? 0);
+        const c2 = Number(r.avg_grammar ?? r.avg_check_2 ?? 0);
         const hw = Number(r.avg_homework || 0);
         const valid = [c1, c2, hw].filter(v => v > 0);
         let evalStr = 'Chưa có điểm';

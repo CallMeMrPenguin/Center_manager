@@ -2151,7 +2151,7 @@ def calculate_performance_analytics(session_records: List[Dict[str, Any]]) -> Di
             ]
         }
 
-    c1_list, c2_list, hw_list = [], [], []
+    vocab_list, grammar_list, hw_list = [], [], []
     overall_session_scores = []
     present_count = 0
 
@@ -2164,24 +2164,50 @@ def calculate_performance_analytics(session_records: List[Dict[str, Any]]) -> Di
         c1 = float(r.get("check_1") or 0)
         c2 = float(r.get("check_2") or 0)
         hw = float(r.get("homework") or 0)
+        c1_skill = str(r.get("check_1_skill") or "vocab").lower().strip()
+        c2_skill = str(r.get("check_2_skill") or "grammar").lower().strip()
 
-        if c1 > 0: c1_list.append(c1)
-        if c2 > 0: c2_list.append(c2)
-        if hw > 0: hw_list.append(hw)
+        session_vocab = []
+        session_grammar = []
+
+        if c1 > 0:
+            if c1_skill in ("grammar", "ngữ pháp"):
+                grammar_list.append(c1)
+                session_grammar.append(c1)
+            else:
+                vocab_list.append(c1)
+                session_vocab.append(c1)
+
+        if c2 > 0:
+            if c2_skill in ("vocab", "từ vựng"):
+                vocab_list.append(c2)
+                session_vocab.append(c2)
+            else:
+                grammar_list.append(c2)
+                session_grammar.append(c2)
+
+        if hw > 0:
+            hw_list.append(hw)
 
         w_sum = 0.0
         w_tot = 0.0
         if hw > 0:
             w_sum += hw * w_hw
             w_tot += w_hw
-        if c1 > 0:
-            w_sum += c1 * w_c1
+        if session_vocab:
+            avg_sess_vocab = sum(session_vocab) / len(session_vocab)
+            w_sum += avg_sess_vocab * w_c1
             w_tot += w_c1
-        if c2 > 0:
-            w_sum += c2 * w_c2
+        if session_grammar:
+            avg_sess_grammar = sum(session_grammar) / len(session_grammar)
+            w_sum += avg_sess_grammar * w_c2
             w_tot += w_c2
+
         if w_tot > 0:
             overall_session_scores.append(w_sum / w_tot)
+
+    c1_list = vocab_list
+    c2_list = grammar_list
 
     if not overall_session_scores:
         overall_session_scores = [8.0]
@@ -2419,7 +2445,7 @@ def calculate_performance_analytics(session_records: List[Dict[str, Any]]) -> Di
 
     if not recs:
         recs.append("Đánh giá: Duy trì phong độ tốt. Tiếp tục phát huy trong các kỳ tới.")
-    recs.append(f"Dự đoán buổi tới: Check 1 ({pred_c1:.1f}), Check 2 ({pred_c2:.1f}), Homework ({pred_hw:.1f}).")
+    recs.append(f"Dự đoán buổi tới: Từ Vựng ({pred_c1:.1f}), Ngữ Pháp ({pred_c2:.1f}), Homework ({pred_hw:.1f}).")
 
     return {
         "academic_score": trunc_1_dec(academic_score),
@@ -2435,10 +2461,16 @@ def calculate_performance_analytics(session_records: List[Dict[str, Any]]) -> Di
         "ema_c1": trunc_1_dec(ema_c1),
         "ema_c2": trunc_1_dec(ema_c2),
         "ema_hw": trunc_1_dec(ema_hw),
+        "ema_vocab": trunc_1_dec(ema_c1),
+        "ema_grammar": trunc_1_dec(ema_c2),
         "predicted_next": trunc_1_dec(pred_overall),
         "pred_c1": trunc_1_dec(pred_c1),
         "pred_c2": trunc_1_dec(pred_c2),
         "pred_hw": trunc_1_dec(pred_hw),
+        "pred_vocab": trunc_1_dec(pred_c1),
+        "pred_grammar": trunc_1_dec(pred_c2),
+        "avg_vocab": trunc_1_dec(avg_c1),
+        "avg_grammar": trunc_1_dec(avg_c2),
         "prediction_model": prediction_model,
         "fitted_c1": fitted_c1,
         "fitted_c2": fitted_c2,
@@ -2453,16 +2485,31 @@ def get_class_student_predictions(class_id: int) -> Dict[int, Dict[str, float]]:
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute("""
-        SELECT student_id, check_1, check_2, homework, status
-        FROM class_attendance_grades
-        WHERE class_id = ?
-        ORDER BY date ASC
+        SELECT ag.student_id, ag.check_1, ag.check_2, ag.homework, ag.status, csess.test_config_json
+        FROM class_attendance_grades ag
+        LEFT JOIN class_sessions csess ON ag.class_id = csess.class_id AND ag.date = csess.date
+        WHERE ag.class_id = ?
+        ORDER BY ag.date ASC
     """, (class_id,))
     rows = [dict(r) for r in cursor.fetchall()]
     conn.close()
 
+    import json
     records_by_student: Dict[int, List[Dict[str, Any]]] = {}
     for r in rows:
+        cfg_str = r.get("test_config_json")
+        c1_skill = "vocab"
+        c2_skill = "grammar"
+        if cfg_str:
+            try:
+                cfg = json.loads(cfg_str)
+                c1_skill = (cfg.get("check_1") or {}).get("skill") or "vocab"
+                c2_skill = (cfg.get("check_2") or {}).get("skill") or "grammar"
+            except Exception:
+                pass
+        r["check_1_skill"] = c1_skill
+        r["check_2_skill"] = c2_skill
+
         sid = r["student_id"]
         if sid not in records_by_student:
             records_by_student[sid] = []
@@ -2474,7 +2521,7 @@ def get_class_student_predictions(class_id: int) -> Dict[int, Dict[str, float]]:
     w_hw = gw.get("homework", 0.10)
     predictions: Dict[int, Dict[str, float]] = {}
     for sid, recs in records_by_student.items():
-        c1_list, c2_list, hw_list = [], [], []
+        vocab_list, grammar_list, hw_list = [], [], []
         overall_session_scores = []
         for r in recs:
             status = r.get("status", "Có mặt")
@@ -2483,24 +2530,50 @@ def get_class_student_predictions(class_id: int) -> Dict[int, Dict[str, float]]:
             c1 = float(r.get("check_1") or 0)
             c2 = float(r.get("check_2") or 0)
             hw = float(r.get("homework") or 0)
+            c1_s = str(r.get("check_1_skill") or "vocab").lower().strip()
+            c2_s = str(r.get("check_2_skill") or "grammar").lower().strip()
 
-            if c1 > 0: c1_list.append(c1)
-            if c2 > 0: c2_list.append(c2)
-            if hw > 0: hw_list.append(hw)
+            session_vocab = []
+            session_grammar = []
+
+            if c1 > 0:
+                if c1_s in ("grammar", "ngữ pháp"):
+                    grammar_list.append(c1)
+                    session_grammar.append(c1)
+                else:
+                    vocab_list.append(c1)
+                    session_vocab.append(c1)
+
+            if c2 > 0:
+                if c2_s in ("vocab", "từ vựng"):
+                    vocab_list.append(c2)
+                    session_vocab.append(c2)
+                else:
+                    grammar_list.append(c2)
+                    session_grammar.append(c2)
+
+            if hw > 0:
+                hw_list.append(hw)
 
             w_sum = 0.0
             w_tot = 0.0
             if hw > 0:
                 w_sum += hw * w_hw
                 w_tot += w_hw
-            if c1 > 0:
-                w_sum += c1 * w_c1
+            if session_vocab:
+                avg_sess_vocab = sum(session_vocab) / len(session_vocab)
+                w_sum += avg_sess_vocab * w_c1
                 w_tot += w_c1
-            if c2 > 0:
-                w_sum += c2 * w_c2
+            if session_grammar:
+                avg_sess_grammar = sum(session_grammar) / len(session_grammar)
+                w_sum += avg_sess_grammar * w_c2
                 w_tot += w_c2
+
             if w_tot > 0:
                 overall_session_scores.append(w_sum / w_tot)
+
+        c1_list = vocab_list
+        c2_list = grammar_list
 
         weighted_sum = 0.0
         weight_total = 0.0
@@ -2534,6 +2607,8 @@ def get_class_student_predictions(class_id: int) -> Dict[int, Dict[str, float]]:
             "pred_c1": _smart_pred(c1_list),
             "pred_c2": _smart_pred(c2_list),
             "pred_hw": _smart_pred(hw_list),
+            "pred_vocab": _smart_pred(c1_list),
+            "pred_grammar": _smart_pred(c2_list),
             "predicted_next": _smart_pred(overall_session_scores),
             "prediction_model": _model_name,
         }
@@ -2659,6 +2734,42 @@ def get_analytics_reports(class_id: Optional[int] = None, student_id: Optional[i
     for sr in raw_rankings:
         sid = sr.get("student_id")
         s_rows = student_rows_map.get(sid, [])
+
+        vocab_scores = []
+        grammar_scores = []
+        hw_scores = []
+        for r in s_rows:
+            if r.get("status") in ("Vắng mặt", "Nghỉ học"):
+                continue
+            c1 = float(r.get("check_1") or 0)
+            c2 = float(r.get("check_2") or 0)
+            hw = float(r.get("homework") or 0)
+            c1_s = str(r.get("check_1_skill") or "vocab").lower().strip()
+            c2_s = str(r.get("check_2_skill") or "grammar").lower().strip()
+
+            if c1 > 0:
+                if c1_s in ("grammar", "ngữ pháp"):
+                    grammar_scores.append(c1)
+                else:
+                    vocab_scores.append(c1)
+            if c2 > 0:
+                if c2_s in ("vocab", "từ vựng"):
+                    vocab_scores.append(c2)
+                else:
+                    grammar_scores.append(c2)
+            if hw > 0:
+                hw_scores.append(hw)
+
+        avg_vocab = trunc_1_dec(sum(vocab_scores) / len(vocab_scores)) if vocab_scores else 0.0
+        avg_grammar = trunc_1_dec(sum(grammar_scores) / len(grammar_scores)) if grammar_scores else 0.0
+        avg_hw = trunc_1_dec(sum(hw_scores) / len(hw_scores)) if hw_scores else 0.0
+
+        sr["avg_vocab"] = avg_vocab
+        sr["avg_grammar"] = avg_grammar
+        sr["avg_homework"] = avg_hw
+        sr["avg_check_1"] = avg_vocab  # alias for backward compatibility
+        sr["avg_check_2"] = avg_grammar  # alias for backward compatibility
+
         if s_rows:
             s_analytics = calculate_performance_analytics(s_rows)
             sr["ema_level"] = s_analytics.get("ema_level", 0.0)

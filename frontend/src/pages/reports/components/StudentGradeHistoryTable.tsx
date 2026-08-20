@@ -125,59 +125,141 @@ export const StudentGradeHistoryTable: React.FC<StudentGradeHistoryTableProps> =
       },
     },
     {
-      accessorKey: 'check_1',
-      header: () => <div className="text-center w-full">Check 1</div>,
-      meta: { headerText: 'Check 1', exportValue: (r: any) => Number(r.check_1) > 0 ? format1Dec(Number(r.check_1)) : '-' },
+      id: 'vocab',
+      header: () => <div className="text-center w-full">Từ Vựng</div>,
+      meta: {
+        headerText: 'Từ Vựng',
+        exportValue: (r: any) => {
+          const c1Val = Number(r.check_1) || 0;
+          const c2Val = Number(r.check_2) || 0;
+          const c1Skill = String(r.check_1_skill || (r.check_1_test_type === 'grammar' ? 'grammar' : 'vocab')).toLowerCase().trim();
+          const c2Skill = String(r.check_2_skill || (r.check_2_test_type === 'vocab' ? 'vocab' : 'grammar')).toLowerCase().trim();
+          const vScores: number[] = [];
+          if (c1Val > 0 && (c1Skill !== 'grammar' && c1Skill !== 'ngữ pháp')) vScores.push(c1Val);
+          if (c2Val > 0 && (c2Skill === 'vocab' || c2Skill === 'từ vựng')) vScores.push(c2Val);
+          return vScores.length > 0 ? vScores.map(v => format1Dec(v)).join(' | ') : '-';
+        }
+      },
       cell: ({ row }) => {
         const r = row.original;
-        const val = Number(r.check_1) || 0;
-        const skill = r.check_1_skill || (r.check_1_test_type ? (r.check_1_test_type === 'grammar' ? 'grammar' : r.check_1_test_type === 'vocab' ? 'vocab' : 'mixed') : 'vocab');
-        const style = getSkillStyle(skill);
-        const topic = r.check_1_topic || (skill === 'grammar' ? r.grammar_topic : r.topic);
-        return (
-          <div className="text-center py-0.5">
-            <div className={`font-extrabold ${style.scoreColor} font-mono text-base leading-tight`}>
-              {val > 0 ? format1Dec(val) : '-'}
-            </div>
-            {topic && (
-              <div className="mt-0.5 flex flex-col items-center">
-                <span className={`text-[10px] ${style.topicColor} font-medium truncate max-w-[140px] block`} title={topic}>
-                  {topic}
-                </span>
-                <span className={`text-[9px] px-1.5 py-0.2 rounded ${style.badgeClass} border font-semibold mt-0.5`}>
-                  {style.label}
-                </span>
+        const c1Val = Number(r.check_1) || 0;
+        const c2Val = Number(r.check_2) || 0;
+        const c1Skill = String(r.check_1_skill || (r.check_1_test_type === 'grammar' ? 'grammar' : 'vocab')).toLowerCase().trim();
+        const c2Skill = String(r.check_2_skill || (r.check_2_test_type === 'vocab' ? 'vocab' : 'grammar')).toLowerCase().trim();
+        const c1Topic = r.check_1_topic || (c1Skill === 'grammar' ? r.grammar_topic : r.topic) || '';
+        const c2Topic = r.check_2_topic || (c2Skill === 'vocab' ? r.topic : r.grammar_topic) || '';
+
+        const vocabChecks: { checkNum: number; score: number; topic: string }[] = [];
+        if (c1Val > 0 && c1Skill !== 'grammar' && c1Skill !== 'ngữ pháp') {
+          vocabChecks.push({ checkNum: 1, score: c1Val, topic: c1Topic });
+        }
+        if (c2Val > 0 && (c2Skill === 'vocab' || c2Skill === 'từ vựng')) {
+          vocabChecks.push({ checkNum: 2, score: c2Val, topic: c2Topic });
+        }
+
+        if (vocabChecks.length === 0) {
+          return <div className="text-center font-mono font-bold text-slate-500 text-sm">-</div>;
+        }
+
+        if (vocabChecks.length === 1) {
+          const chk = vocabChecks[0];
+          return (
+            <div className="text-center py-0.5">
+              <div className="font-extrabold text-blue-400 font-mono text-base leading-tight">
+                {format1Dec(chk.score)}
               </div>
-            )}
+              {chk.topic && (
+                <span className="text-[10px] text-blue-300/80 font-medium truncate max-w-[140px] block mx-auto mt-0.5" title={chk.topic}>
+                  {chk.topic}
+                </span>
+              )}
+            </div>
+          );
+        }
+
+        return (
+          <div className="flex flex-col items-center gap-1 py-0.5">
+            {vocabChecks.map((chk, idx) => (
+              <div key={idx} className="flex items-center gap-1 bg-blue-500/10 px-2 py-0.5 rounded border border-blue-500/20">
+                <span className="text-[10px] font-bold text-blue-300 font-mono">C{chk.checkNum}:</span>
+                <span className="font-extrabold text-blue-400 font-mono text-xs">{format1Dec(chk.score)}</span>
+                {chk.topic && (
+                  <span className="text-[9px] text-blue-300/70 truncate max-w-[90px]" title={chk.topic}>
+                    ({chk.topic})
+                  </span>
+                )}
+              </div>
+            ))}
           </div>
         );
       },
     },
     {
-      accessorKey: 'check_2',
-      header: () => <div className="text-center w-full">Check 2</div>,
-      meta: { headerText: 'Check 2', exportValue: (r: any) => Number(r.check_2) > 0 ? format1Dec(Number(r.check_2)) : '-' },
+      id: 'grammar',
+      header: () => <div className="text-center w-full">Ngữ Pháp</div>,
+      meta: {
+        headerText: 'Ngữ Pháp',
+        exportValue: (r: any) => {
+          const c1Val = Number(r.check_1) || 0;
+          const c2Val = Number(r.check_2) || 0;
+          const c1Skill = String(r.check_1_skill || (r.check_1_test_type === 'grammar' ? 'grammar' : 'vocab')).toLowerCase().trim();
+          const c2Skill = String(r.check_2_skill || (r.check_2_test_type === 'vocab' ? 'vocab' : 'grammar')).toLowerCase().trim();
+          const gScores: number[] = [];
+          if (c1Val > 0 && (c1Skill === 'grammar' || c1Skill === 'ngữ pháp')) gScores.push(c1Val);
+          if (c2Val > 0 && c2Skill !== 'vocab' && c2Skill !== 'từ vựng') gScores.push(c2Val);
+          return gScores.length > 0 ? gScores.map(v => format1Dec(v)).join(' | ') : '-';
+        }
+      },
       cell: ({ row }) => {
         const r = row.original;
-        const val = Number(r.check_2) || 0;
-        const skill = r.check_2_skill || (r.check_2_test_type ? (r.check_2_test_type === 'vocab' ? 'vocab' : r.check_2_test_type === 'grammar' ? 'grammar' : 'mixed') : 'grammar');
-        const style = getSkillStyle(skill);
-        const topic = r.check_2_topic || (skill === 'vocab' ? r.topic : r.grammar_topic);
-        return (
-          <div className="text-center py-0.5">
-            <div className={`font-extrabold ${style.scoreColor} font-mono text-base leading-tight`}>
-              {val > 0 ? format1Dec(val) : '-'}
-            </div>
-            {topic && (
-              <div className="mt-0.5 flex flex-col items-center">
-                <span className={`text-[10px] ${style.topicColor} font-medium truncate max-w-[140px] block`} title={topic}>
-                  {topic}
-                </span>
-                <span className={`text-[9px] px-1.5 py-0.2 rounded ${style.badgeClass} border font-semibold mt-0.5`}>
-                  {style.label}
-                </span>
+        const c1Val = Number(r.check_1) || 0;
+        const c2Val = Number(r.check_2) || 0;
+        const c1Skill = String(r.check_1_skill || (r.check_1_test_type === 'grammar' ? 'grammar' : 'vocab')).toLowerCase().trim();
+        const c2Skill = String(r.check_2_skill || (r.check_2_test_type === 'vocab' ? 'vocab' : 'grammar')).toLowerCase().trim();
+        const c1Topic = r.check_1_topic || (c1Skill === 'grammar' ? r.grammar_topic : r.topic) || '';
+        const c2Topic = r.check_2_topic || (c2Skill === 'vocab' ? r.topic : r.grammar_topic) || '';
+
+        const grammarChecks: { checkNum: number; score: number; topic: string }[] = [];
+        if (c1Val > 0 && (c1Skill === 'grammar' || c1Skill === 'ngữ pháp')) {
+          grammarChecks.push({ checkNum: 1, score: c1Val, topic: c1Topic });
+        }
+        if (c2Val > 0 && c2Skill !== 'vocab' && c2Skill !== 'từ vựng') {
+          grammarChecks.push({ checkNum: 2, score: c2Val, topic: c2Topic });
+        }
+
+        if (grammarChecks.length === 0) {
+          return <div className="text-center font-mono font-bold text-slate-500 text-sm">-</div>;
+        }
+
+        if (grammarChecks.length === 1) {
+          const chk = grammarChecks[0];
+          return (
+            <div className="text-center py-0.5">
+              <div className="font-extrabold text-purple-400 font-mono text-base leading-tight">
+                {format1Dec(chk.score)}
               </div>
-            )}
+              {chk.topic && (
+                <span className="text-[10px] text-purple-300/80 font-medium truncate max-w-[140px] block mx-auto mt-0.5" title={chk.topic}>
+                  {chk.topic}
+                </span>
+              )}
+            </div>
+          );
+        }
+
+        return (
+          <div className="flex flex-col items-center gap-1 py-0.5">
+            {grammarChecks.map((chk, idx) => (
+              <div key={idx} className="flex items-center gap-1 bg-purple-500/10 px-2 py-0.5 rounded border border-purple-500/20">
+                <span className="text-[10px] font-bold text-purple-300 font-mono">C{chk.checkNum}:</span>
+                <span className="font-extrabold text-purple-400 font-mono text-xs">{format1Dec(chk.score)}</span>
+                {chk.topic && (
+                  <span className="text-[9px] text-purple-300/70 truncate max-w-[90px]" title={chk.topic}>
+                    ({chk.topic})
+                  </span>
+                )}
+              </div>
+            ))}
           </div>
         );
       },

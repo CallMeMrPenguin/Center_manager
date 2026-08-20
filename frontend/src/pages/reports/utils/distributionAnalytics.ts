@@ -154,13 +154,22 @@ export function computeDistributionStats(
   const scoreEntries: ScoreRecord[] = [];
 
   const getRecordScore = (r: any): number | null => {
+    const c1Val = Number(r.check_1) || 0;
+    const c2Val = Number(r.check_2) || 0;
+    const c1Skill = String(r.check_1_skill || (r.check_1_test_type === 'grammar' ? 'grammar' : 'vocab')).toLowerCase().trim();
+    const c2Skill = String(r.check_2_skill || (r.check_2_test_type === 'vocab' ? 'vocab' : 'grammar')).toLowerCase().trim();
+
     if (gradeTypeFilter === 'check_1') {
-      const v = Number(r.check_1);
-      return v > 0 ? v : null;
+      const vScores: number[] = [];
+      if (c1Val > 0 && c1Skill !== 'grammar' && c1Skill !== 'ngữ pháp') vScores.push(c1Val);
+      if (c2Val > 0 && (c2Skill === 'vocab' || c2Skill === 'từ vựng')) vScores.push(c2Val);
+      return vScores.length > 0 ? vScores.reduce((a, b) => a + b, 0) / vScores.length : null;
     }
     if (gradeTypeFilter === 'check_2') {
-      const v = Number(r.check_2);
-      return v > 0 ? v : null;
+      const gScores: number[] = [];
+      if (c1Val > 0 && (c1Skill === 'grammar' || c1Skill === 'ngữ pháp')) gScores.push(c1Val);
+      if (c2Val > 0 && c2Skill !== 'vocab' && c2Skill !== 'từ vựng') gScores.push(c2Val);
+      return gScores.length > 0 ? gScores.reduce((a, b) => a + b, 0) / gScores.length : null;
     }
     if (gradeTypeFilter === 'homework') {
       const v = Number(r.homework);
@@ -208,21 +217,23 @@ export function computeDistributionStats(
       studentRankings.forEach((s) => {
         let sc: number | null = null;
         if (gradeTypeFilter === 'check_1') {
-          if (Number(s.avg_check_1 || 0) > 0) sc = Number(s.avg_check_1);
+          const v = Number(s.avg_vocab ?? s.avg_check_1 ?? 0);
+          if (v > 0) sc = v;
         } else if (gradeTypeFilter === 'check_2') {
-          if (Number(s.avg_check_2 || 0) > 0) sc = Number(s.avg_check_2);
+          const g = Number(s.avg_grammar ?? s.avg_check_2 ?? 0);
+          if (g > 0) sc = g;
         } else if (gradeTypeFilter === 'homework') {
           if (Number(s.avg_homework || 0) > 0) sc = Number(s.avg_homework);
         } else if (gradeTypeFilter === 'mock_test') {
           const m = Number(s.avg_mock_test || s.mock_test || 0);
           if (m > 0) sc = m;
-          else if (Number(s.avg_check_2 || 0) > 0) sc = Number(s.avg_check_2);
+          else if (Number(s.avg_grammar || s.avg_check_2 || 0) > 0) sc = Number(s.avg_grammar || s.avg_check_2);
         } else {
           if (s.overallAvg && Number(s.overallAvg) > 0) sc = Number(s.overallAvg);
           else if (s.ema_level && Number(s.ema_level) > 0) sc = Number(s.ema_level);
           else {
-            const c1 = Number(s.avg_check_1 || 0);
-            const c2 = Number(s.avg_check_2 || 0);
+            const c1 = Number(s.avg_vocab ?? s.avg_check_1 ?? 0);
+            const c2 = Number(s.avg_grammar ?? s.avg_check_2 ?? 0);
             const hw = Number(s.avg_homework || 0);
             if (c1 > 0 || c2 > 0 || hw > 0) {
               sc = trunc1Dec(c1 * 0.55 + c2 * 0.35 + hw * 0.1);

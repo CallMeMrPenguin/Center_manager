@@ -115,7 +115,7 @@ export const SkillAwarePredictionCard: React.FC<SkillAwarePredictionProps> = ({
           <div className="space-y-1">
             <span className="text-[10px] font-bold uppercase text-slate-400 flex items-center gap-1.5">
               <TrendingUp size={12} className="text-blue-400" />
-              Dự Báo Check 1 (Từ Vựng)
+              Dự Báo Từ Vựng
             </span>
             <div className="text-xl font-black text-blue-400 font-mono">
               {trunc1Dec(overview.avg_c1_pred)}đ
@@ -128,7 +128,7 @@ export const SkillAwarePredictionCard: React.FC<SkillAwarePredictionProps> = ({
           <div className="space-y-1">
             <span className="text-[10px] font-bold uppercase text-slate-400 flex items-center gap-1.5">
               <TrendingUp size={12} className="text-purple-400" />
-              Dự Báo Check 2 (Ngữ Pháp)
+              Dự Báo Ngữ Pháp
             </span>
             <div className="text-xl font-black text-purple-400 font-mono">
               {trunc1Dec(overview.avg_c2_pred)}đ

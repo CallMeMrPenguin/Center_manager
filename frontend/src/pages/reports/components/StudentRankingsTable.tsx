@@ -135,11 +135,12 @@ export const StudentRankingsTable: React.FC<StudentRankingsTableProps> = React.m
       },
     },
     {
-      accessorKey: 'avg_check_1',
-      header: () => <div className="text-center w-full">Check 1</div>,
-      meta: { headerText: 'Check 1', exportValue: (r: any) => Number(r.avg_check_1) > 0 ? format1Dec(Number(r.avg_check_1)) : '-' },
-      cell: ({ getValue }) => {
-        const val = Number(getValue()) || 0;
+      id: 'avg_vocab',
+      accessorFn: (r) => Number(r.avg_vocab ?? r.avg_check_1 ?? 0),
+      header: () => <div className="text-center w-full">Từ Vựng</div>,
+      meta: { headerText: 'Từ Vựng', exportValue: (r: any) => { const v = Number(r.avg_vocab ?? r.avg_check_1); return v > 0 ? format1Dec(v) : '-'; } },
+      cell: ({ row }) => {
+        const val = Number(row.original.avg_vocab ?? row.original.avg_check_1) || 0;
         return (
           <div className="text-center font-mono font-extrabold text-blue-400 text-sm sm:text-base">
             {val > 0 ? format1Dec(val) : '-'}
@@ -148,11 +149,12 @@ export const StudentRankingsTable: React.FC<StudentRankingsTableProps> = React.m
       },
     },
     {
-      accessorKey: 'avg_check_2',
-      header: () => <div className="text-center w-full">Check 2</div>,
-      meta: { headerText: 'Check 2', exportValue: (r: any) => Number(r.avg_check_2) > 0 ? format1Dec(Number(r.avg_check_2)) : '-' },
-      cell: ({ getValue }) => {
-        const val = Number(getValue()) || 0;
+      id: 'avg_grammar',
+      accessorFn: (r) => Number(r.avg_grammar ?? r.avg_check_2 ?? 0),
+      header: () => <div className="text-center w-full">Ngữ Pháp</div>,
+      meta: { headerText: 'Ngữ Pháp', exportValue: (r: any) => { const v = Number(r.avg_grammar ?? r.avg_check_2); return v > 0 ? format1Dec(v) : '-'; } },
+      cell: ({ row }) => {
+        const val = Number(row.original.avg_grammar ?? row.original.avg_check_2) || 0;
         return (
           <div className="text-center font-mono font-extrabold text-purple-400 text-sm sm:text-base">
             {val > 0 ? format1Dec(val) : '-'}
@@ -201,10 +203,10 @@ export const StudentRankingsTable: React.FC<StudentRankingsTableProps> = React.m
       meta: {
         headerText: 'Hạng',
         exportValue: (r: any) => {
-          const c1 = Number(r.avg_check_1 || 0);
-          const c2 = Number(r.avg_check_2 || 0);
+          const vocab = Number(r.avg_vocab ?? r.avg_check_1 ?? 0);
+          const grammar = Number(r.avg_grammar ?? r.avg_check_2 ?? 0);
           const hw = Number(r.avg_homework || 0);
-          const valid = [c1, c2, hw].filter(v => v > 0);
+          const valid = [vocab, grammar, hw].filter(v => v > 0);
           if (valid.length === 0) return 'Chưa xếp hạng';
           const avg = trunc1Dec(valid.reduce((a, b) => a + b, 0) / valid.length);
           const tier = getStudentTier(avg);
@@ -212,10 +214,10 @@ export const StudentRankingsTable: React.FC<StudentRankingsTableProps> = React.m
         }
       },
       accessorFn: (r: any) => {
-        const c1 = Number(r.avg_check_1 || 0);
-        const c2 = Number(r.avg_check_2 || 0);
+        const vocab = Number(r.avg_vocab ?? r.avg_check_1 ?? 0);
+        const grammar = Number(r.avg_grammar ?? r.avg_check_2 ?? 0);
         const hw = Number(r.avg_homework || 0);
-        const valid = [c1, c2, hw].filter(v => v > 0);
+        const valid = [vocab, grammar, hw].filter(v => v > 0);
         if (valid.length === 0) return 0;
         return trunc1Dec(valid.reduce((a, b) => a + b, 0) / valid.length);
       },
@@ -252,10 +254,10 @@ export const StudentRankingsTable: React.FC<StudentRankingsTableProps> = React.m
       meta: {
         headerText: 'Đánh Giá',
         exportValue: (r: any) => {
-          const c1 = Number(r.avg_check_1 || 0);
-          const c2 = Number(r.avg_check_2 || 0);
+          const vocab = Number(r.avg_vocab ?? r.avg_check_1 ?? 0);
+          const grammar = Number(r.avg_grammar ?? r.avg_check_2 ?? 0);
           const hw = Number(r.avg_homework || 0);
-          const valid = [c1, c2, hw].filter(v => v > 0);
+          const valid = [vocab, grammar, hw].filter(v => v > 0);
           if (valid.length === 0) return 'Chưa có điểm';
           const avg = trunc1Dec(valid.reduce((a, b) => a + b, 0) / valid.length);
           let label = 'Xuất Sắc';
@@ -271,10 +273,10 @@ export const StudentRankingsTable: React.FC<StudentRankingsTableProps> = React.m
         }
       },
       accessorFn: (r: any) => {
-        const c1 = Number(r.avg_check_1 || 0);
-        const c2 = Number(r.avg_check_2 || 0);
+        const vocab = Number(r.avg_vocab ?? r.avg_check_1 ?? 0);
+        const grammar = Number(r.avg_grammar ?? r.avg_check_2 ?? 0);
         const hw = Number(r.avg_homework || 0);
-        const valid = [c1, c2, hw].filter(v => v > 0);
+        const valid = [vocab, grammar, hw].filter(v => v > 0);
         if (valid.length === 0) return 0;
         return trunc1Dec(valid.reduce((a, b) => a + b, 0) / valid.length);
       },

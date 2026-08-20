@@ -139,20 +139,29 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
       };
     }
 
-    let sum1 = 0, count1 = 0;
-    let sum2 = 0, count2 = 0;
+    let sum1 = 0, count1 = 0; // Vocabulary
+    let sum2 = 0, count2 = 0; // Grammar
     let sumHw = 0, countHw = 0;
     let sumMock = 0, countMock = 0;
     let presentCount = 0;
 
     records.forEach(r => {
-      if (r.status === 'Có mặt') presentCount++;
+      if (r.status === 'Có mặt' || r.attendance === 'present') presentCount++;
       const val1 = Number(r.check_1);
       const val2 = Number(r.check_2);
       const valHw = Number(r.homework);
       const valMock = Number((r as any).mock_test);
-      if (val1 > 0) { sum1 += val1; count1++; }
-      if (val2 > 0) { sum2 += val2; count2++; }
+      const c1Skill = String(r.check_1_skill || 'vocab').toLowerCase().trim();
+      const c2Skill = String(r.check_2_skill || 'grammar').toLowerCase().trim();
+
+      if (val1 > 0) {
+        if (c1Skill === 'grammar' || c1Skill === 'ngữ pháp') { sum2 += val1; count2++; }
+        else { sum1 += val1; count1++; }
+      }
+      if (val2 > 0) {
+        if (c2Skill === 'vocab' || c2Skill === 'từ vựng') { sum1 += val2; count1++; }
+        else { sum2 += val2; count2++; }
+      }
       if (valHw > 0) { sumHw += valHw; countHw++; }
       if (valMock > 0) { sumMock += valMock; countMock++; }
     });
@@ -212,9 +221,21 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
     recordsToChart.forEach(r => {
       const d = r.date || 'Session';
       if (!dateMap[d]) dateMap[d] = { check1: [], check2: [], hw: [] };
-      if (Number(r.check_1) > 0) dateMap[d].check1.push(Number(r.check_1));
-      if (Number(r.check_2) > 0) dateMap[d].check2.push(Number(r.check_2));
-      if (Number(r.homework) > 0) dateMap[d].hw.push(Number(r.homework));
+      const val1 = Number(r.check_1);
+      const val2 = Number(r.check_2);
+      const valHw = Number(r.homework);
+      const c1Skill = String(r.check_1_skill || 'vocab').toLowerCase().trim();
+      const c2Skill = String(r.check_2_skill || 'grammar').toLowerCase().trim();
+
+      if (val1 > 0) {
+        if (c1Skill === 'grammar' || c1Skill === 'ngữ pháp') dateMap[d].check2.push(val1);
+        else dateMap[d].check1.push(val1);
+      }
+      if (val2 > 0) {
+        if (c2Skill === 'vocab' || c2Skill === 'từ vựng') dateMap[d].check1.push(val2);
+        else dateMap[d].check2.push(val2);
+      }
+      if (valHw > 0) dateMap[d].hw.push(valHw);
     });
 
     const dates = Object.keys(dateMap)
@@ -310,12 +331,12 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
     }
     return filteredRankings.filter(r => {
       let sc: number = 0;
-      if (selectedGradeTypeFilter === 'check_1') sc = Number(r.avg_check_1 || 0);
-      else if (selectedGradeTypeFilter === 'check_2') sc = Number(r.avg_check_2 || 0);
+      if (selectedGradeTypeFilter === 'check_1') sc = Number(r.avg_vocab ?? r.avg_check_1 ?? 0);
+      else if (selectedGradeTypeFilter === 'check_2') sc = Number(r.avg_grammar ?? r.avg_check_2 ?? 0);
       else if (selectedGradeTypeFilter === 'homework') sc = Number(r.avg_homework || 0);
-      else if (selectedGradeTypeFilter === 'mock_test') sc = Number(r.avg_mock_test || r.mock_test || r.avg_check_2 || 0);
+      else if (selectedGradeTypeFilter === 'mock_test') sc = Number(r.avg_mock_test || r.mock_test || r.avg_grammar || r.avg_check_2 || 0);
       else {
-        sc = Number(r.overallAvg) || Number(r.ema_level) || (Number(r.avg_check_1 || 0) * 0.55 + Number(r.avg_check_2 || 0) * 0.35 + Number(r.avg_homework || 0) * 0.1);
+        sc = Number(r.overallAvg) || Number(r.ema_level) || (Number(r.avg_vocab ?? r.avg_check_1 ?? 0) * 0.55 + Number(r.avg_grammar ?? r.avg_check_2 ?? 0) * 0.35 + Number(r.avg_homework || 0) * 0.1);
       }
       return sc >= selectedScoreBin.minScore && (selectedScoreBin.maxScore === 10 ? sc <= 10 : sc < selectedScoreBin.maxScore);
     });
