@@ -269,25 +269,28 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
 
     const result = selectedDates.map((d) => {
       const item = dateMap[d];
-      const validScores = [...item.check1, ...item.check2, ...item.hw];
-      const sessionFallback = validScores.length > 0 ? validScores.reduce((a, b) => a + b, 0) / validScores.length : 8.0;
+      const avg1 = item.check1.length > 0 ? item.check1.reduce((a, b) => a + b, 0) / item.check1.length : 0;
+      const avg2 = item.check2.length > 0 ? item.check2.reduce((a, b) => a + b, 0) / item.check2.length : 0;
+      const avghw = item.hw.length > 0 ? item.hw.reduce((a, b) => a + b, 0) / item.hw.length : 0;
 
-      const avg1 = item.check1.length > 0 ? item.check1.reduce((a, b) => a + b, 0) / item.check1.length : sessionFallback;
-      const avg2 = item.check2.length > 0 ? item.check2.reduce((a, b) => a + b, 0) / item.check2.length : sessionFallback;
-      const avghw = item.hw.length > 0 ? item.hw.reduce((a, b) => a + b, 0) / item.hw.length : sessionFallback;
-      const avgOverall = ((avg1 * w1) + (avg2 * w2) + (avghw * whw)) / wTot;
+      let wSum = 0;
+      let wActive = 0;
+      if (item.check1.length > 0) { wSum += avg1 * w1; wActive += w1; }
+      if (item.check2.length > 0) { wSum += avg2 * w2; wActive += w2; }
+      if (item.hw.length > 0) { wSum += avghw * whw; wActive += whw; }
+      const avgOverall = wActive > 0 ? wSum / wActive : 0;
 
       return {
         sessionName: formatSessionDate(d),
         fullDate: d,
-        check1: trunc1Dec(avg1),
-        check2: trunc1Dec(avg2),
-        homework: trunc1Dec(avghw),
+        check1: item.check1.length > 0 ? trunc1Dec(avg1) : 0,
+        check2: item.check2.length > 0 ? trunc1Dec(avg2) : 0,
+        homework: item.hw.length > 0 ? trunc1Dec(avghw) : 0,
         overall: trunc1Dec(avgOverall)
       };
     });
 
-    return result.length > 0 ? result : defaultData;
+    return result.length > 0 ? result : (recordsToChart && recordsToChart.length > 0 ? [] : defaultData);
   }, [activeSessionRecords, sessionRecords, timeView, gradeTypesList, selectedPhaseId]);
 
   // Fitted values computed client-side

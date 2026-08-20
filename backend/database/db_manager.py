@@ -2247,9 +2247,9 @@ def calculate_performance_analytics(session_records: List[Dict[str, Any]]) -> Di
     # Prediction helpers are module-level (see smart_predict / _ema_predict etc. above)
 
     slope_overall, pred_overall = smart_predict(overall_session_scores)
-    slope_c1, pred_c1 = smart_predict(c1_list) if c1_list else (0.0, trunc_1_dec(academic_10))
-    slope_c2, pred_c2 = smart_predict(c2_list) if c2_list else (0.0, trunc_1_dec(academic_10))
-    slope_hw, pred_hw = smart_predict(hw_list) if hw_list else (0.0, trunc_1_dec(academic_10))
+    slope_c1, pred_c1 = smart_predict(c1_list) if c1_list else (0.0, 0.0)
+    slope_c2, pred_c2 = smart_predict(c2_list) if c2_list else (0.0, 0.0)
+    slope_hw, pred_hw = smart_predict(hw_list) if hw_list else (0.0, 0.0)
 
     # ── Determine which model was selected (based on the overall series length) ─
     _N = len(overall_session_scores)

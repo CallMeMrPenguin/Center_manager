@@ -280,37 +280,34 @@ export function computeDistributionStats(
     }
   }
 
-  if (scoreEntries.length === 0) {
-    const fallback = [5.0, 5.5, 6.0, 6.5, 6.8, 7.0, 7.2, 7.5, 7.8, 8.0, 8.2, 8.5, 9.0, 9.2];
-    fallback.forEach((sc, i) => scoreEntries.push({ score: sc, studentId: i + 1, studentName: `Học sinh ${i + 1}` }));
-  }
-
   scoreEntries.sort((a, b) => a.score - b.score);
   const scores = scoreEntries.map((e) => e.score);
   const n = scores.length;
   const sum = scores.reduce((a, b) => a + b, 0);
-  const mean = trunc1Dec(sum / n);
+  const mean = n > 0 ? trunc1Dec(sum / n) : 0;
 
   const mid = Math.floor(n / 2);
-  const median = n % 2 !== 0 ? trunc1Dec(scores[mid]) : trunc1Dec((scores[mid - 1] + scores[mid]) / 2);
+  const median = n > 0
+    ? (n % 2 !== 0 ? trunc1Dec(scores[mid]) : trunc1Dec((scores[mid - 1] + scores[mid]) / 2))
+    : 0;
 
-  const min = trunc1Dec(scores[0]);
-  const max = trunc1Dec(scores[n - 1]);
+  const min = n > 0 ? trunc1Dec(scores[0]) : 0;
+  const max = n > 0 ? trunc1Dec(scores[n - 1]) : 0;
 
   const q1Index = Math.floor(n * 0.25);
   const q3Index = Math.floor(n * 0.75);
-  const q1 = trunc1Dec(scores[Math.min(q1Index, n - 1)]);
-  const q3 = trunc1Dec(scores[Math.min(q3Index, n - 1)]);
-  const iqr = trunc1Dec(Math.max(0, q3 - q1));
+  const q1 = n > 0 ? trunc1Dec(scores[Math.min(q1Index, n - 1)]) : 0;
+  const q3 = n > 0 ? trunc1Dec(scores[Math.min(q3Index, n - 1)]) : 0;
+  const iqr = n > 0 ? trunc1Dec(Math.max(0, q3 - q1)) : 0;
 
-  const variance = scores.reduce((acc, val) => acc + Math.pow(val - mean, 2), 0) / n;
-  const sd = trunc1Dec(Math.sqrt(variance));
-  const skewness = sd > 0 ? trunc1Dec((mean - median) / sd) : 0;
+  const variance = n > 0 ? scores.reduce((acc, val) => acc + Math.pow(val - mean, 2), 0) / n : 0;
+  const sd = n > 0 ? trunc1Dec(Math.sqrt(variance)) : 0;
+  const skewness = n > 0 && sd > 0 ? trunc1Dec((mean - median) / sd) : 0;
 
-  const passCount = scores.filter((s) => s >= 5.0).length;
-  const passPct = Math.round((passCount / n) * 100);
-  const excellentCount = scores.filter((s) => s >= 8.0).length;
-  const excellentPct = Math.round((excellentCount / n) * 100);
+  const passCount = n > 0 ? scores.filter((s) => s >= 5.0).length : 0;
+  const passPct = n > 0 ? Math.round((passCount / n) * 100) : 0;
+  const excellentCount = n > 0 ? scores.filter((s) => s >= 8.0).length : 0;
+  const excellentPct = n > 0 ? Math.round((excellentCount / n) * 100) : 0;
 
   const bandCounts: Record<string, number> = { weak: 0, average: 0, good: 0, excellent: 0 };
   scores.forEach((s) => {
@@ -323,7 +320,7 @@ export function computeDistributionStats(
   const bands: DistributionBand[] = DISTRIBUTION_BANDS_TEMPLATE.map((b) => ({
     ...b,
     count: bandCounts[b.id] || 0,
-    pct: Math.round(((bandCounts[b.id] || 0) / n) * 100),
+    pct: n > 0 ? Math.round(((bandCounts[b.id] || 0) / n) * 100) : 0,
   }));
 
   // 1. STANDARD 10 SCORE INTERVALS (0-1, 1-2, 2-3, ..., 9-10)
@@ -350,7 +347,7 @@ export function computeDistributionStats(
       minScore: minVal,
       maxScore: maxVal,
       count,
-      pct: Math.round((count / n) * 100),
+      pct: n > 0 ? Math.round((count / n) * 100) : 0,
       color,
       bandId,
       studentIds: matched.map((e) => e.studentId).filter(Boolean) as (number | string)[],
@@ -372,7 +369,7 @@ export function computeDistributionStats(
       minScore: 0,
       maxScore: 4.9,
       count: bandCounts.weak,
-      pct: Math.round((bandCounts.weak / n) * 100),
+      pct: n > 0 ? Math.round((bandCounts.weak / n) * 100) : 0,
       color: '#f43f5e',
       bandId: 'weak',
       studentIds: weakEntries.map((e) => e.studentId).filter(Boolean) as (number | string)[],
@@ -385,7 +382,7 @@ export function computeDistributionStats(
       minScore: 5.0,
       maxScore: 6.4,
       count: bandCounts.average,
-      pct: Math.round((bandCounts.average / n) * 100),
+      pct: n > 0 ? Math.round((bandCounts.average / n) * 100) : 0,
       color: '#f59e0b',
       bandId: 'average',
       studentIds: avgEntries.map((e) => e.studentId).filter(Boolean) as (number | string)[],
@@ -398,7 +395,7 @@ export function computeDistributionStats(
       minScore: 6.5,
       maxScore: 7.9,
       count: bandCounts.good,
-      pct: Math.round((bandCounts.good / n) * 100),
+      pct: n > 0 ? Math.round((bandCounts.good / n) * 100) : 0,
       color: '#06b6d4',
       bandId: 'good',
       studentIds: goodEntries.map((e) => e.studentId).filter(Boolean) as (number | string)[],
@@ -411,7 +408,7 @@ export function computeDistributionStats(
       minScore: 8.0,
       maxScore: 10.0,
       count: bandCounts.excellent,
-      pct: Math.round((bandCounts.excellent / n) * 100),
+      pct: n > 0 ? Math.round((bandCounts.excellent / n) * 100) : 0,
       color: '#10b981',
       bandId: 'excellent',
       studentIds: excelEntries.map((e) => e.studentId).filter(Boolean) as (number | string)[],
@@ -440,7 +437,7 @@ export function computeDistributionStats(
       minScore: minRange,
       maxScore: maxRange,
       count,
-      pct: Math.round((count / n) * 100),
+      pct: n > 0 ? Math.round((count / n) * 100) : 0,
       color,
       bandId,
       studentIds: matched.map((e) => e.studentId).filter(Boolean) as (number | string)[],
@@ -450,11 +447,13 @@ export function computeDistributionStats(
 
   // Bell curve points
   const curvePoints: { x: number; y: number }[] = [];
-  const effectiveSd = Math.max(0.6, sd);
-  for (let s = 0; s <= 10.0; s += 0.2) {
-    const exponent = -0.5 * Math.pow((s - mean) / effectiveSd, 2);
-    const density = (1 / (effectiveSd * Math.sqrt(2 * Math.PI))) * Math.exp(exponent);
-    curvePoints.push({ x: s, y: density });
+  if (n > 0) {
+    const effectiveSd = Math.max(0.6, sd);
+    for (let s = 0; s <= 10.0; s += 0.2) {
+      const exponent = -0.5 * Math.pow((s - mean) / effectiveSd, 2);
+      const density = (1 / (effectiveSd * Math.sqrt(2 * Math.PI))) * Math.exp(exponent);
+      curvePoints.push({ x: s, y: density });
+    }
   }
 
   const skillName = gradeTypeFilter === 'check_1' ? 'Từ Vựng'
@@ -464,30 +463,36 @@ export function computeDistributionStats(
     : 'Tổng Hợp';
 
   let skewnessLabel = 'Phân bố cân đối';
-  if (skewness > 0.15) skewnessLabel = 'Lệch phải (Top điểm cao kéo TB lên)';
+  if (n === 0) skewnessLabel = 'Chưa có dữ liệu';
+  else if (skewness > 0.15) skewnessLabel = 'Lệch phải (Top điểm cao kéo TB lên)';
   else if (skewness < -0.15) skewnessLabel = 'Lệch trái (Nhóm điểm thấp kéo TB xuống)';
 
   let sdLabel = 'Phân hóa vừa phải (Ổn định)';
-  if (sd < 1.0) sdLabel = 'Đồng đều cao (Ít chênh lệch)';
+  if (n === 0) sdLabel = 'Chưa có dữ liệu';
+  else if (sd < 1.0) sdLabel = 'Đồng đều cao (Ít chênh lệch)';
   else if (sd > 2.0) sdLabel = 'Phân hóa rất mạnh (Chênh lệch lớn)';
 
-  const iqrLabel = `Vùng 50% học sinh: ${format1Dec(q1)} - ${format1Dec(q3)}đ`;
-  let distributionShape = 'Phân phối chuẩn đối xứng';
-  let distributionRating = 'Chất Lượng Tốt';
+  const iqrLabel = n > 0 ? `Vùng 50% học sinh: ${format1Dec(q1)} - ${format1Dec(q3)}đ` : 'Chưa có dữ liệu';
+  let distributionShape = n > 0 ? 'Phân phối chuẩn đối xứng' : 'Chưa có dữ liệu';
+  let distributionRating = n > 0 ? 'Chất Lượng Tốt' : 'Chưa Có Dữ Liệu';
 
-  if (passPct < 70) distributionRating = 'Cần Can Thiệp Khẩn';
-  else if (excellentPct >= 40 && passPct >= 90) distributionRating = 'Xuất Sắc Vượt Trội';
-  else if (passPct >= 85) distributionRating = 'Đạt Chuẩn Tốt';
-  else distributionRating = 'Cần Củng Cố';
+  if (n > 0) {
+    if (passPct < 70) distributionRating = 'Cần Can Thiệp Khẩn';
+    else if (excellentPct >= 40 && passPct >= 90) distributionRating = 'Xuất Sắc Vượt Trội';
+    else if (passPct >= 85) distributionRating = 'Đạt Chuẩn Tốt';
+    else distributionRating = 'Cần Củng Cố';
+  }
 
   // Metrics breakdown
   const metrics: DistributionMetricItem[] = [
     {
       id: 'mean',
       label: 'Điểm trung bình',
-      value: format1Dec(mean),
+      value: n > 0 ? format1Dec(mean) : '-',
       color: '#3b82f6',
-      text: `Điểm trung bình ${format1Dec(mean)} → ${mean >= 8.0 ? 'mặt bằng kết quả rất tốt.' : mean >= 6.5 ? 'kết quả khá, cần nâng cao thêm.' : 'còn nhiều học sinh dưới chuẩn.'}`,
+      text: n > 0
+        ? `Điểm trung bình ${format1Dec(mean)} → ${mean >= 8.0 ? 'mặt bằng kết quả rất tốt.' : mean >= 6.5 ? 'kết quả khá, cần nâng cao thêm.' : 'còn nhiều học sinh dưới chuẩn.'}`
+        : 'Chưa có điểm kiểm tra ghi nhận cho kỹ năng này.',
       tooltipTitle: `Điểm Trung Bình ${skillName}`,
       tooltipDesc: `Mặt bằng điểm số trung bình của toàn bộ học sinh đối với phần ${skillName}.`,
       tooltipFormula: 'Mean = (Tổng điểm) / N',
@@ -496,9 +501,11 @@ export function computeDistributionStats(
     {
       id: 'median',
       label: 'Trung vị',
-      value: format1Dec(median),
+      value: n > 0 ? format1Dec(median) : '-',
       color: '#a855f7',
-      text: median > mean + 0.15
+      text: n === 0
+        ? 'Chưa có điểm kiểm tra ghi nhận cho kỹ năng này.'
+        : median > mean + 0.15
         ? `Trung vị ${format1Dec(median)} > TB ${format1Dec(mean)}: Có học sinh điểm thấp kéo điểm TB xuống; học sinh điển hình thực tế đạt kết quả cao hơn.`
         : median < mean - 0.15
         ? `Trung vị ${format1Dec(median)} < TB ${format1Dec(mean)}: Có nhóm xuất sắc kéo TB lên; quá nửa lớp đang dưới mức TB.`
@@ -511,9 +518,11 @@ export function computeDistributionStats(
     {
       id: 'sd',
       label: 'Độ lệch chuẩn (SD)',
-      value: format1Dec(sd),
+      value: n > 0 ? format1Dec(sd) : '-',
       color: '#06b6d4',
-      text: `SD = ${format1Dec(sd)} → ${sd < 1.0 ? 'độ phân tán thấp, lớp học cực kỳ đồng đều.' : sd <= 1.8 ? 'phân hóa vừa phải, khỏe mạnh.' : 'phân hóa mạnh, chênh lệch lớn giữa các nhóm.'}`,
+      text: n === 0
+        ? 'Chưa có dữ liệu độ phân tán.'
+        : `SD = ${format1Dec(sd)} → ${sd < 1.0 ? 'độ phân tán thấp, lớp học cực kỳ đồng đều.' : sd <= 1.8 ? 'phân hóa vừa phải, khỏe mạnh.' : 'phân hóa mạnh, chênh lệch lớn giữa các nhóm.'}`,
       tooltipTitle: `Độ Lệch Chuẩn ${skillName}`,
       tooltipDesc: `Mức độ dao động của điểm quanh điểm trung bình.`,
       tooltipFormula: 'σ = sqrt[Σ(xi - Mean)² / N]',
@@ -522,9 +531,11 @@ export function computeDistributionStats(
     {
       id: 'iqr',
       label: 'Khoảng tứ phân vị (IQR)',
-      value: format1Dec(iqr),
+      value: n > 0 ? format1Dec(iqr) : '-',
       color: '#f59e0b',
-      text: `IQR = ${format1Dec(iqr)}đ → 50% học sinh ở giữa tập trung từ ${format1Dec(q1)} đến ${format1Dec(q3)}đ.`,
+      text: n === 0
+        ? 'Chưa có dữ liệu tứ phân vị.'
+        : `IQR = ${format1Dec(iqr)}đ → 50% học sinh ở giữa tập trung từ ${format1Dec(q1)} đến ${format1Dec(q3)}đ.`,
       tooltipTitle: `Khoảng Tứ Phân Vị ${skillName}`,
       tooltipDesc: 'Độ rộng vùng điểm chứa 50% học sinh trung tâm.',
       tooltipFormula: 'IQR = Q3 - Q1',
@@ -533,9 +544,9 @@ export function computeDistributionStats(
     {
       id: 'weak',
       label: 'Tỷ lệ Yếu / Kém (< 5đ)',
-      value: `${bands[0].pct}%`,
+      value: n > 0 ? `${bands[0].pct}%` : '-',
       color: '#f43f5e',
-      text: `${bands[0].pct}% yếu/kém (< 5đ) → ${bands[0].count} lượt điểm chưa đạt chuẩn.`,
+      text: n > 0 ? `${bands[0].pct}% yếu/kém (< 5đ) → ${bands[0].count} lượt điểm chưa đạt chuẩn.` : 'Chưa có dữ liệu.',
       tooltipTitle: 'Tỷ Lệ Dưới 5.0',
       tooltipDesc: 'Tỷ lệ học sinh chưa đạt chuẩn kiến thức tối thiểu.',
       tooltipFormula: '(Số lượt < 5.0đ / N) × 100%',
@@ -544,9 +555,9 @@ export function computeDistributionStats(
     {
       id: 'excellent',
       label: 'Tỷ lệ Giỏi (≥ 8đ)',
-      value: `${bands[3].pct}%`,
+      value: n > 0 ? `${bands[3].pct}%` : '-',
       color: '#10b981',
-      text: `${bands[3].pct}% giỏi/xuất sắc (≥ 8đ) → ${bands[3].count} lượt điểm mũi nhọn.`,
+      text: n > 0 ? `${bands[3].pct}% giỏi/xuất sắc (≥ 8đ) → ${bands[3].count} lượt điểm mũi nhọn.` : 'Chưa có dữ liệu.',
       tooltipTitle: 'Tỷ Lệ Giỏi & Xuất Sắc',
       tooltipDesc: 'Tỷ lệ học sinh đạt chuẩn nâng cao.',
       tooltipFormula: '(Số lượt ≥ 8.0đ / N) × 100%',
@@ -555,26 +566,36 @@ export function computeDistributionStats(
   ];
 
   const goodAndAboveCount = bands[2].count + bands[3].count;
-  const goodAndAbovePct = Math.round((goodAndAboveCount / n) * 100);
+  const goodAndAbovePct = n > 0 ? Math.round((goodAndAboveCount / n) * 100) : 0;
 
-  const overviewSummary = `Chất lượng ${skillName.toLowerCase()} chung ${mean >= 7.5 ? 'rất tốt' : mean >= 6.0 ? 'khá' : 'trung bình'}. Nhóm đạt khá trở lên chiếm ${goodAndAbovePct}% (${goodAndAboveCount}/${n} lượt), trong khi nhóm dưới 5 điểm chiếm ${bands[0].pct}% (${bands[0].count} lượt).`;
-  const dispersionWarning = `Chỉ số IQR = ${format1Dec(iqr)}đ và SD = ${format1Dec(sd)} phản ánh ${sd > 1.8 ? 'độ phân hóa học lực đáng kể giữa nhóm đầu và nhóm cuối.' : 'mặt bằng học sinh tương đối ổn định.'}`;
-  const strategicAction = bands[0].pct > 15
+  const overviewSummary = n > 0
+    ? `Chất lượng ${skillName.toLowerCase()} chung ${mean >= 7.5 ? 'rất tốt' : mean >= 6.0 ? 'khá' : 'trung bình'}. Nhóm đạt khá trở lên chiếm ${goodAndAbovePct}% (${goodAndAboveCount}/${n} lượt), trong khi nhóm dưới 5 điểm chiếm ${bands[0].pct}% (${bands[0].count} lượt).`
+    : `Chưa có dữ liệu bài kiểm tra ${skillName.toLowerCase()} trong cơ sở dữ liệu.`;
+  const dispersionWarning = n > 0
+    ? `Chỉ số IQR = ${format1Dec(iqr)}đ và SD = ${format1Dec(sd)} phản ánh ${sd > 1.8 ? 'độ phân hóa học lực đáng kể giữa nhóm đầu và nhóm cuối.' : 'mặt bằng học sinh tương đối ổn định.'}`
+    : 'Chưa đủ dữ liệu để tính toán độ phân tán.';
+  const strategicAction = n === 0
+    ? `Tổ chức bài kiểm tra phần ${skillName.toLowerCase()} để hệ thống phân tích phổ điểm chi tiết.`
+    : bands[0].pct > 15
     ? `Trọng tâm là phụ đạo bổ trợ cho ${bands[0].count} học sinh đang dưới 5.0đ, đồng thời bồi dưỡng nâng cao cho nhóm khá.`
     : `Duy trì đà phát triển và bồi dưỡng nhóm khá (${bands[2].pct}%) vươn lên nhóm giỏi ≥ 8.0.`;
 
   const pedagogicalActions: string[] = [];
-  if (bands[0].pct > 15) {
-    pedagogicalActions.push(`Tổ chức phụ đạo bổ trợ cho ${bands[0].count} học sinh dưới 5.0đ ở phần ${skillName.toLowerCase()}.`);
-  }
-  if (sd > 1.8) {
-    pedagogicalActions.push(`Áp dụng bài tập phân hóa: Bài tập nền tảng cho nhóm dưới ${format1Dec(q1)}đ và bài nâng cao cho nhóm trên ${format1Dec(q3)}đ.`);
-  }
-  if (bands[3].pct >= 25) {
-    pedagogicalActions.push(`Cung cấp tài liệu chuyên sâu duy trì mũi nhọn cho ${bands[3].count} học sinh giỏi.`);
-  }
-  if (pedagogicalActions.length === 0) {
-    pedagogicalActions.push(`Duy trì tiến độ học tập và củng cố kiến thức quanh mức trung vị ${format1Dec(median)}đ.`);
+  if (n === 0) {
+    pedagogicalActions.push(`Nhập điểm kiểm tra cho phần ${skillName.toLowerCase()} trong trang Điểm Danh & Điểm để tự động kích hoạt biểu đồ phổ điểm.`);
+  } else {
+    if (bands[0].pct > 15) {
+      pedagogicalActions.push(`Tổ chức phụ đạo bổ trợ cho ${bands[0].count} học sinh dưới 5.0đ ở phần ${skillName.toLowerCase()}.`);
+    }
+    if (sd > 1.8) {
+      pedagogicalActions.push(`Áp dụng bài tập phân hóa: Bài tập nền tảng cho nhóm dưới ${format1Dec(q1)}đ và bài nâng cao cho nhóm trên ${format1Dec(q3)}đ.`);
+    }
+    if (bands[3].pct >= 25) {
+      pedagogicalActions.push(`Cung cấp tài liệu chuyên sâu duy trì mũi nhọn cho ${bands[3].count} học sinh giỏi.`);
+    }
+    if (pedagogicalActions.length === 0) {
+      pedagogicalActions.push(`Duy trì tiến độ học tập và củng cố kiến thức quanh mức trung vị ${format1Dec(median)}đ.`);
+    }
   }
 
   const subjectTitle = className ? `Đánh Giá Phổ Điểm - ${className}` : 'Đánh Giá Phổ Điểm & Phân Phối Học Lực';
@@ -595,11 +616,13 @@ export function computeDistributionStats(
     bands, scoreBins, scoreBins10, tierBins, curvePoints,
     evaluation,
     commentary: {
-      headline: `Phổ điểm ${skillName.toLowerCase()} đạt mức ${distributionRating.toLowerCase()} (TB: ${format1Dec(mean)}, Trung vị: ${format1Dec(median)}).`,
+      headline: n > 0
+        ? `Phổ điểm ${skillName.toLowerCase()} đạt mức ${distributionRating.toLowerCase()} (TB: ${format1Dec(mean)}, Trung vị: ${format1Dec(median)}).`
+        : `Chưa có dữ liệu điểm phần ${skillName.toLowerCase()}.`,
       overallSummary: overviewSummary,
       meanVsMedianInsight: metrics[1].text,
       dispersionInsight: metrics[2].text,
-      passExcellenceInsight: `${passPct}% đạt chuẩn, ${excellentPct}% giỏi`,
+      passExcellenceInsight: n > 0 ? `${passPct}% đạt chuẩn, ${excellentPct}% giỏi` : 'Chưa có dữ liệu',
       pedagogicalActions,
     },
   };

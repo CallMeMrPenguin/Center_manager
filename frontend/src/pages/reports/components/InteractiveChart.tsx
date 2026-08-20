@@ -157,10 +157,14 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = ({
 
   const makeBezierPath = useCallback(
     (key: 'check1' | 'check2' | 'homework') => {
-      const pts = sessionChartData.map((d, i) => ({
-        x: getSvgX(i, sessionChartData.length),
-        y: getSvgY(d[key]),
-      }));
+      const pts = sessionChartData
+        .map((d, i) => ({
+          x: getSvgX(i, sessionChartData.length),
+          y: getSvgY(d[key]),
+          val: d[key],
+        }))
+        .filter((p) => p.val > 0);
+
       if (pts.length === 0) return '';
       if (pts.length === 1) return `M ${pts[0].x} ${pts[0].y}`;
       let d = `M ${pts[0].x} ${pts[0].y}`;
@@ -182,18 +186,22 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = ({
 
   const makeAreaPath = useCallback(
     (key: 'check1' | 'check2' | 'homework') => {
-      const pts = sessionChartData.map((d, i) => ({
-        x: getSvgX(i, sessionChartData.length),
-        y: getSvgY(d[key]),
-      }));
-      if (pts.length === 0) return '';
+      const pts = sessionChartData
+        .map((d, i) => ({
+          x: getSvgX(i, sessionChartData.length),
+          y: getSvgY(d[key]),
+          val: d[key],
+        }))
+        .filter((p) => p.val > 0);
+
+      if (pts.length < 2) return '';
       const linePath = makeBezierPath(key);
       const bottomY = chartHeight - paddingBottom;
       const firstX = pts[0].x;
       const lastX = pts[pts.length - 1].x;
       return `${linePath} L ${lastX} ${bottomY} L ${firstX} ${bottomY} Z`;
     },
-    [sessionChartData, getSvgX, getSvgY, makeBezierPath]
+    [sessionChartData, getSvgX, getSvgY, makeBezierPath, chartHeight, paddingBottom]
   );
 
   return (
@@ -308,8 +316,10 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = ({
                   <div className="flex items-center justify-between gap-4">
                     <span className="text-blue-400 font-bold">Từ Vựng:</span>
                     <div className="flex items-center gap-1.5">
-                      <span className="font-mono font-extrabold text-white">{format1Dec(hoveredPoint.check1)}</span>
-                      {hoveredPoint.fittedC1 !== null && (
+                      <span className="font-mono font-extrabold text-white">
+                        {hoveredPoint.check1 > 0 ? format1Dec(hoveredPoint.check1) : '-'}
+                      </span>
+                      {hoveredPoint.check1 > 0 && hoveredPoint.fittedC1 !== null && (
                         <span className="text-[10px] font-mono text-slate-400">({format1Dec(hoveredPoint.fittedC1)})</span>
                       )}
                     </div>
@@ -317,8 +327,10 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = ({
                   <div className="flex items-center justify-between gap-4">
                     <span className="text-purple-400 font-bold">Ngữ Pháp:</span>
                     <div className="flex items-center gap-1.5">
-                      <span className="font-mono font-extrabold text-white">{format1Dec(hoveredPoint.check2)}</span>
-                      {hoveredPoint.fittedC2 !== null && (
+                      <span className="font-mono font-extrabold text-white">
+                        {hoveredPoint.check2 > 0 ? format1Dec(hoveredPoint.check2) : '-'}
+                      </span>
+                      {hoveredPoint.check2 > 0 && hoveredPoint.fittedC2 !== null && (
                         <span className="text-[10px] font-mono text-slate-400">({format1Dec(hoveredPoint.fittedC2)})</span>
                       )}
                     </div>
@@ -326,18 +338,30 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = ({
                   <div className="flex items-center justify-between gap-4">
                     <span className="text-emerald-400 font-bold">BTVN:</span>
                     <div className="flex items-center gap-1.5">
-                      <span className="font-mono font-extrabold text-white">{format1Dec(hoveredPoint.homework)}</span>
-                      {hoveredPoint.fittedHw !== null && (
+                      <span className="font-mono font-extrabold text-white">
+                        {hoveredPoint.homework > 0 ? format1Dec(hoveredPoint.homework) : '-'}
+                      </span>
+                      {hoveredPoint.homework > 0 && hoveredPoint.fittedHw !== null && (
                         <span className="text-[10px] font-mono text-slate-400">({format1Dec(hoveredPoint.fittedHw)})</span>
                       )}
                     </div>
                   </div>
-                  <div className="border-t border-white/10 pt-1 flex items-center justify-between gap-4">
-                    <span className="text-indigo-300 font-extrabold">Điểm TB Buổi:</span>
-                    <span className="font-mono font-black text-indigo-300">
-                      {format1Dec(trunc1Dec((hoveredPoint.check1 * 0.55) + (hoveredPoint.check2 * 0.35) + (hoveredPoint.homework * 0.10)))}
-                    </span>
-                  </div>
+                  {(() => {
+                    let wSum = 0;
+                    let wTot = 0;
+                    if (hoveredPoint.check1 > 0) { wSum += hoveredPoint.check1 * 0.55; wTot += 0.55; }
+                    if (hoveredPoint.check2 > 0) { wSum += hoveredPoint.check2 * 0.35; wTot += 0.35; }
+                    if (hoveredPoint.homework > 0) { wSum += hoveredPoint.homework * 0.10; wTot += 0.10; }
+                    const avgVal = wTot > 0 ? trunc1Dec(wSum / wTot) : 0;
+                    return (
+                      <div className="border-t border-white/10 pt-1 flex items-center justify-between gap-4">
+                        <span className="text-indigo-300 font-extrabold">Điểm TB Buổi:</span>
+                        <span className="font-mono font-black text-indigo-300">
+                          {avgVal > 0 ? format1Dec(avgVal) : '-'}
+                        </span>
+                      </div>
+                    );
+                  })()}
                 </div>
               </div>
             );
