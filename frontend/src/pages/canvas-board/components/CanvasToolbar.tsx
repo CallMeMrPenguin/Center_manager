@@ -1,15 +1,17 @@
 import React, { useState } from 'react';
 import {
-  MousePointer, Crop, Pen, Highlighter, Eraser, Minus, ArrowUpRight,
+  MousePointer, Type, Crop, Pen, Highlighter, Eraser, Minus, ArrowUpRight,
   Square, Circle, Palette, Sliders, Undo2, Redo2, Trash2
 } from 'lucide-react';
-import { CanvasTool, PRESET_COLORS } from '../types';
+import { CanvasTool, PRESET_COLORS, PRESET_BG_COLORS } from '../types';
 
 interface CanvasToolbarProps {
   activeTool: CanvasTool;
   setActiveTool: (tool: CanvasTool) => void;
   selectedColor: string;
   setSelectedColor: (color: string) => void;
+  selectedBgColor: string;
+  setSelectedBgColor: (color: string) => void;
   currentSize: number;
   penSize: number;
   setPenSize: (size: number) => void;
@@ -30,6 +32,8 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
   setActiveTool,
   selectedColor,
   setSelectedColor,
+  selectedBgColor,
+  setSelectedBgColor,
   currentSize,
   penSize,
   setPenSize,
@@ -51,16 +55,28 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
     <div className="p-2 bg-[#0a0d18] border-b border-white/10 flex items-center justify-between flex-wrap gap-2 shrink-0 z-30 select-none">
       {/* Tool Buttons */}
       <div className="flex items-center gap-1">
-        {/* Select & Move Object Tool */}
+        {/* Select */}
         <button
           onClick={() => setActiveTool('select')}
           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
             activeTool === 'select' ? 'bg-[#5c36f5] text-white shadow-md' : 'text-slate-400 hover:text-white hover:bg-white/5'
           }`}
-          title="Chọn & di chuyển ảnh (Bấm Delete để xóa ảnh)"
+          title="Chọn & di chuyển ảnh/chữ (Bấm Delete để xóa)"
         >
           <MousePointer size={13} />
-          <span>Chọn / Di chuyển</span>
+          <span>Chọn</span>
+        </button>
+
+        {/* Text Box */}
+        <button
+          onClick={() => setActiveTool('text')}
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
+            activeTool === 'text' ? 'bg-[#5c36f5] text-white shadow-md' : 'text-slate-400 hover:text-white hover:bg-white/5'
+          }`}
+          title="Thêm Text Box (Font Times New Roman, nền trắng, chữ đỏ mặc định)"
+        >
+          <Type size={13} />
+          <span>Chèn chữ</span>
         </button>
 
         {/* Crop Tool */}
@@ -159,7 +175,7 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
 
       {/* Right Controls */}
       <div className="flex items-center gap-2">
-        {/* Color Selector */}
+        {/* Color Popover (Text Color + Background Color for Text) */}
         {!['select', 'eraser', 'crop'].includes(activeTool) && (
           <div className="relative">
             <button
@@ -174,24 +190,47 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
             </button>
 
             {showColorPopover && (
-              <div className="absolute top-full right-0 mt-2 bg-[#0c0f1e] border border-[#212c4b] p-3 rounded-2xl shadow-2xl z-50 space-y-2.5 min-w-[210px]">
-                <div className="text-[11px] font-bold text-slate-300">Bảng màu gợi ý</div>
-                <div className="flex flex-wrap gap-2">
-                  {PRESET_COLORS.map(c => (
-                    <button
-                      key={c.value}
-                      onClick={() => {
-                        setSelectedColor(c.value);
-                        setShowColorPopover(false);
-                      }}
-                      className={`w-6 h-6 rounded-full transition cursor-pointer transform hover:scale-110 border ${
-                        selectedColor === c.value ? 'ring-2 ring-indigo-400 scale-110 border-white' : 'border-transparent'
-                      }`}
-                      style={{ backgroundColor: c.value }}
-                      title={c.label}
-                    />
-                  ))}
+              <div className="absolute top-full right-0 mt-2 bg-[#0c0f1e] border border-[#212c4b] p-3 rounded-2xl shadow-2xl z-50 space-y-3 min-w-[220px]">
+                {/* Ink Color */}
+                <div className="space-y-1.5">
+                  <div className="text-[11px] font-bold text-slate-300">Màu chữ / Nét vẽ</div>
+                  <div className="flex flex-wrap gap-2">
+                    {PRESET_COLORS.map(c => (
+                      <button
+                        key={c.value}
+                        onClick={() => {
+                          setSelectedColor(c.value);
+                          if (activeTool !== 'text') setShowColorPopover(false);
+                        }}
+                        className={`w-6 h-6 rounded-full transition cursor-pointer transform hover:scale-110 border ${
+                          selectedColor === c.value ? 'ring-2 ring-indigo-400 scale-110 border-white' : 'border-transparent'
+                        }`}
+                        style={{ backgroundColor: c.value }}
+                        title={c.label}
+                      />
+                    ))}
+                  </div>
                 </div>
+
+                {/* Background color for Text Box */}
+                {activeTool === 'text' && (
+                  <div className="space-y-1.5 pt-2 border-t border-white/10">
+                    <div className="text-[11px] font-bold text-slate-300">Màu nền Text Box</div>
+                    <div className="flex flex-wrap gap-2">
+                      {PRESET_BG_COLORS.map(c => (
+                        <button
+                          key={c.value}
+                          onClick={() => setSelectedBgColor(c.value)}
+                          className={`w-6 h-6 rounded-lg transition cursor-pointer transform hover:scale-110 border ${
+                            selectedBgColor === c.value ? 'ring-2 ring-indigo-400 scale-110 border-white' : 'border-white/20'
+                          }`}
+                          style={{ backgroundColor: c.value === 'transparent' ? '#182038' : c.value }}
+                          title={c.label}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 <div className="pt-2 border-t border-white/10 flex items-center justify-between">
                   <span className="text-[11px] font-bold text-slate-400">Màu tự chọn:</span>
@@ -227,7 +266,7 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
             {showSizePopover && (
               <div className="absolute top-full right-0 mt-2 bg-[#0c0f1e] border border-[#212c4b] p-3 rounded-2xl shadow-2xl z-50 space-y-2.5 min-w-[230px]">
                 <div className="flex items-center justify-between text-[11px] font-bold text-slate-300">
-                  <span>{activeTool === 'eraser' ? 'Kích thước tẩy' : 'Độ dày nét'}</span>
+                  <span>{activeTool === 'eraser' ? 'Kích thước tẩy' : activeTool === 'text' ? 'Cỡ chữ font' : 'Độ dày nét'}</span>
                   <div className="flex items-center gap-1">
                     <input
                       type="number"
@@ -250,7 +289,7 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
                   <input
                     type="range"
                     min={activeTool === 'pen' ? 1 : activeTool === 'highlighter' ? 8 : 4}
-                    max={activeTool === 'pen' ? 50 : activeTool === 'highlighter' ? 80 : 100}
+                    max={activeTool === 'pen' ? 50 : activeTool === 'highlighter' ? 80 : 120}
                     value={currentSize}
                     onChange={(e) => {
                       const val = parseInt(e.target.value);
