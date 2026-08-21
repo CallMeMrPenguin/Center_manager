@@ -133,8 +133,15 @@ export default function CanvasBoardPage() {
       } else if ((e.key === 'Delete' || e.key === 'Backspace') && !isInput && selectedId) {
         e.preventDefault();
         pushHistorySnapshot();
-        if (selectedType === 'image') setCanvasImages(prev => prev.filter(i => i.id !== selectedId));
-        else if (selectedType === 'text') setCanvasTextBoxes(prev => prev.filter(t => t.id !== selectedId));
+        if (selectedType === 'image') {
+          setCanvasImages(prev => prev.filter(i => i.id !== selectedId));
+          setPageStrokes(prev => ({
+            ...prev,
+            [currentPage]: (prev[currentPage] || []).filter(st => st.imageId !== selectedId),
+          }));
+        } else if (selectedType === 'text') {
+          setCanvasTextBoxes(prev => prev.filter(t => t.id !== selectedId));
+        }
         setSelectedId(null);
         setSelectedType(null);
         showToast("Đã xóa phần tử!", "success");
@@ -597,7 +604,11 @@ export default function CanvasBoardPage() {
               setPageStrokes(sPrev => ({
                 ...sPrev,
                 [currentPage]: (sPrev[currentPage] || []).map(st => {
-                  if (st.imageId === item.id || isStrokeFullyInsideImage(st, item)) {
+                  if (st.imageId === item.id) {
+                    return { ...st, points: st.points.map(p => ({ x: p.x + moveDx, y: p.y + moveDy })) };
+                  }
+                  // Only attach unassigned strokes that are 100% inside this item
+                  if (!st.imageId && isStrokeFullyInsideImage(st, item)) {
                     return { ...st, imageId: item.id, points: st.points.map(p => ({ x: p.x + moveDx, y: p.y + moveDy })) };
                   }
                   return st;
