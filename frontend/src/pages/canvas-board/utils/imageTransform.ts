@@ -45,12 +45,12 @@ export function hitTestImage(
 }
 
 /**
- * Auto-Alignment & Canva-Style Dimension Measurement Engine
+ * Canva & Figma Smart Equal Spacing & Midpoint / Center Alignment Engine
  */
 export function calculateAutoAlign(
   target: { x: number; y: number; width: number; height: number },
   otherItems: CanvasItemImage[],
-  snapThreshold = 10
+  snapThreshold = 12
 ): { snappedX: number; snappedY: number; guides: SnapGuide[] } {
   let snappedX = target.x;
   let snappedY = target.y;
@@ -60,137 +60,225 @@ export function calculateAutoAlign(
   const targetRight = target.x + target.width;
   const targetCenterY = target.y + target.height / 2;
   const targetBottom = target.y + target.height;
+  const targetMidY = target.y + target.height / 2;
+  const targetMidX = target.x + target.width / 2;
 
-  const candidateX: { pos: number; type: string; gap?: number; neighbor?: CanvasItemImage; isGapRight?: boolean }[] = [
-    { pos: 50, type: 'start' }
-  ];
-  const candidateY: { pos: number; type: string; gap?: number; neighbor?: CanvasItemImage; isGapBottom?: boolean }[] = [
-    { pos: 50, type: 'start' }
-  ];
+  // ─────────────────────────────────────────────────────────────
+  // 1. HORIZONTAL IN-BETWEEN (SANDWICH) EQUAL SPACING
+  // ─────────────────────────────────────────────────────────────
+  let foundHorizontalSandwich = false;
+  for (let i = 0; i < otherItems.length; i++) {
+    for (let j = 0; j < otherItems.length; j++) {
+      if (i === j) continue;
+      const leftItem = otherItems[i];
+      const rightItem = otherItems[j];
 
-  for (const item of otherItems) {
-    candidateX.push(
-      { pos: item.x, type: 'left' },
-      { pos: item.x + item.width / 2, type: 'center' },
-      { pos: item.x + item.width, type: 'right' },
-      { pos: item.x + item.width + 30, type: 'gap-right', gap: 30, neighbor: item, isGapRight: true },
-      { pos: item.x - target.width - 30, type: 'gap-left', gap: 30, neighbor: item, isGapRight: false }
-    );
-    candidateY.push(
-      { pos: item.y, type: 'top' },
-      { pos: item.y + item.height / 2, type: 'middle' },
-      { pos: item.y + item.height, type: 'bottom' },
-      { pos: item.y + item.height + 30, type: 'gap-bottom', gap: 30, neighbor: item, isGapBottom: true },
-      { pos: item.y - target.height - 30, type: 'gap-top', gap: 30, neighbor: item, isGapBottom: false }
-    );
-  }
+      // leftItem is strictly to the left of rightItem
+      if (leftItem.x + leftItem.width < rightItem.x) {
+        const availableSpace = rightItem.x - (leftItem.x + leftItem.width);
+        const equalGap = (availableSpace - target.width) / 2;
 
-  // Snap X
-  let minDiffX = snapThreshold + 1;
-  let chosenSnapX: number | null = null;
-  let guideLineX: SnapGuide | null = null;
+        if (equalGap > 5) {
+          const optimalX = leftItem.x + leftItem.width + equalGap;
+          if (Math.abs(target.x - optimalX) <= snapThreshold) {
+            snappedX = optimalX;
+            foundHorizontalSandwich = true;
 
-  for (const c of candidateX) {
-    if (Math.abs(target.x - c.pos) < minDiffX) {
-      minDiffX = Math.abs(target.x - c.pos);
-      chosenSnapX = c.pos;
-
-      let gapStart: Point | undefined;
-      let gapEnd: Point | undefined;
-      let gapCenter: Point | undefined;
-
-      if (c.neighbor && c.gap) {
-        const midY = target.y + target.height / 2;
-        if (c.isGapRight) {
-          gapStart = { x: c.neighbor.x + c.neighbor.width, y: midY };
-          gapEnd = { x: c.pos, y: midY };
-        } else {
-          gapStart = { x: c.pos + target.width, y: midY };
-          gapEnd = { x: c.neighbor.x, y: midY };
+            const gapRounded = Math.round(equalGap);
+            // Left guide
+            guides.push({
+              type: 'vertical',
+              pos: snappedX,
+              start: Math.min(leftItem.y, target.y) - 50,
+              end: Math.max(leftItem.y + leftItem.height, target.y + target.height) + 50,
+              gapText: `${gapRounded}px`,
+              gapStart: { x: leftItem.x + leftItem.width, y: targetMidY },
+              gapEnd: { x: snappedX, y: targetMidY },
+              gapCenter: { x: (leftItem.x + leftItem.width + snappedX) / 2, y: targetMidY },
+            });
+            // Right guide
+            guides.push({
+              type: 'vertical',
+              pos: snappedX + target.width,
+              start: Math.min(rightItem.y, target.y) - 50,
+              end: Math.max(rightItem.y + rightItem.height, target.y + target.height) + 50,
+              gapText: `${gapRounded}px`,
+              gapStart: { x: snappedX + target.width, y: targetMidY },
+              gapEnd: { x: rightItem.x, y: targetMidY },
+              gapCenter: { x: (snappedX + target.width + rightItem.x) / 2, y: targetMidY },
+            });
+            break;
+          }
         }
-        gapCenter = { x: (gapStart.x + gapEnd.x) / 2, y: midY };
       }
-
-      guideLineX = {
-        type: 'vertical',
-        pos: c.pos,
-        start: Math.min(target.y - 100, -500),
-        end: Math.max(target.y + target.height + 100, 2000),
-        gapText: c.gap ? `${c.gap}px` : undefined,
-        gapStart,
-        gapEnd,
-        gapCenter,
-      };
     }
-    if (Math.abs(targetCenterX - c.pos) < minDiffX) {
-      minDiffX = Math.abs(targetCenterX - c.pos);
-      chosenSnapX = c.pos - target.width / 2;
-      guideLineX = { type: 'vertical', pos: c.pos, start: Math.min(target.y - 100, -500), end: Math.max(target.y + target.height + 100, 2000) };
-    }
-    if (Math.abs(targetRight - c.pos) < minDiffX) {
-      minDiffX = Math.abs(targetRight - c.pos);
-      chosenSnapX = c.pos - target.width;
-      guideLineX = { type: 'vertical', pos: c.pos, start: Math.min(target.y - 100, -500), end: Math.max(target.y + target.height + 100, 2000) };
-    }
+    if (foundHorizontalSandwich) break;
   }
 
-  if (chosenSnapX !== null && minDiffX <= snapThreshold) {
-    snappedX = chosenSnapX;
-    if (guideLineX) guides.push(guideLineX);
-  }
+  // ─────────────────────────────────────────────────────────────
+  // 2. VERTICAL IN-BETWEEN (SANDWICH) EQUAL SPACING
+  // ─────────────────────────────────────────────────────────────
+  let foundVerticalSandwich = false;
+  for (let i = 0; i < otherItems.length; i++) {
+    for (let j = 0; j < otherItems.length; j++) {
+      if (i === j) continue;
+      const topItem = otherItems[i];
+      const bottomItem = otherItems[j];
 
-  // Snap Y
-  let minDiffY = snapThreshold + 1;
-  let chosenSnapY: number | null = null;
-  let guideLineY: SnapGuide | null = null;
+      if (topItem.y + topItem.height < bottomItem.y) {
+        const availableSpace = bottomItem.y - (topItem.y + topItem.height);
+        const equalGap = (availableSpace - target.height) / 2;
 
-  for (const c of candidateY) {
-    if (Math.abs(target.y - c.pos) < minDiffY) {
-      minDiffY = Math.abs(target.y - c.pos);
-      chosenSnapY = c.pos;
+        if (equalGap > 5) {
+          const optimalY = topItem.y + topItem.height + equalGap;
+          if (Math.abs(target.y - optimalY) <= snapThreshold) {
+            snappedY = optimalY;
+            foundVerticalSandwich = true;
 
-      let gapStart: Point | undefined;
-      let gapEnd: Point | undefined;
-      let gapCenter: Point | undefined;
-
-      if (c.neighbor && c.gap) {
-        const midX = target.x + target.width / 2;
-        if (c.isGapBottom) {
-          gapStart = { x: midX, y: c.neighbor.y + c.neighbor.height };
-          gapEnd = { x: midX, y: c.pos };
-        } else {
-          gapStart = { x: midX, y: c.pos + target.height };
-          gapEnd = { x: midX, y: c.neighbor.y };
+            const gapRounded = Math.round(equalGap);
+            // Top guide
+            guides.push({
+              type: 'horizontal',
+              pos: snappedY,
+              start: Math.min(topItem.x, target.x) - 50,
+              end: Math.max(topItem.x + topItem.width, target.x + target.width) + 50,
+              gapText: `${gapRounded}px`,
+              gapStart: { x: targetMidX, y: topItem.y + topItem.height },
+              gapEnd: { x: targetMidX, y: snappedY },
+              gapCenter: { x: targetMidX, y: (topItem.y + topItem.height + snappedY) / 2 },
+            });
+            // Bottom guide
+            guides.push({
+              type: 'horizontal',
+              pos: snappedY + target.height,
+              start: Math.min(bottomItem.x, target.x) - 50,
+              end: Math.max(bottomItem.x + bottomItem.width, target.x + target.width) + 50,
+              gapText: `${gapRounded}px`,
+              gapStart: { x: targetMidX, y: snappedY + target.height },
+              gapEnd: { x: targetMidX, y: bottomItem.y },
+              gapCenter: { x: targetMidX, y: (snappedY + target.height + bottomItem.y) / 2 },
+            });
+            break;
+          }
         }
-        gapCenter = { x: midX, y: (gapStart.y + gapEnd.y) / 2 };
       }
+    }
+    if (foundVerticalSandwich) break;
+  }
 
-      guideLineY = {
-        type: 'horizontal',
-        pos: c.pos,
-        start: Math.min(target.x - 100, -500),
-        end: Math.max(target.x + target.width + 100, 2000),
-        gapText: c.gap ? `${c.gap}px` : undefined,
-        gapStart,
-        gapEnd,
-        gapCenter,
-      };
+  // ─────────────────────────────────────────────────────────────
+  // 3. MATCHING EXISTING PAIR DISTANCES & AXES (If not in sandwich)
+  // ─────────────────────────────────────────────────────────────
+  if (!foundHorizontalSandwich) {
+    const candidateX: { pos: number; type: string; guide?: SnapGuide }[] = [
+      { pos: 50, type: 'start' }
+    ];
+
+    for (const item of otherItems) {
+      candidateX.push(
+        { pos: item.x, type: 'left' },
+        { pos: item.x + item.width / 2, type: 'center' },
+        { pos: item.x + item.width, type: 'right' }
+      );
     }
-    if (Math.abs(targetCenterY - c.pos) < minDiffY) {
-      minDiffY = Math.abs(targetCenterY - c.pos);
-      chosenSnapY = c.pos - target.height / 2;
-      guideLineY = { type: 'horizontal', pos: c.pos, start: Math.min(target.x - 100, -500), end: Math.max(target.x + target.width + 100, 2000) };
+
+    // Check if other pairs have a gap G, snap target to right of neighbor with gap G
+    for (let i = 0; i < otherItems.length; i++) {
+      for (let j = 0; j < otherItems.length; j++) {
+        if (i === j) continue;
+        const a = otherItems[i];
+        const b = otherItems[j];
+        if (a.x + a.width < b.x) {
+          const g = b.x - (a.x + a.width);
+          if (g > 10) {
+            // Snap to right of b with gap g
+            const snapPos = b.x + b.width + g;
+            candidateX.push({
+              pos: snapPos,
+              type: 'match-gap',
+              guide: {
+                type: 'vertical',
+                pos: snapPos,
+                start: Math.min(b.y, target.y) - 50,
+                end: Math.max(b.y + b.height, target.y + target.height) + 50,
+                gapText: `${Math.round(g)}px`,
+                gapStart: { x: b.x + b.width, y: targetMidY },
+                gapEnd: { x: snapPos, y: targetMidY },
+                gapCenter: { x: (b.x + b.width + snapPos) / 2, y: targetMidY },
+              }
+            });
+          }
+        }
+      }
     }
-    if (Math.abs(targetBottom - c.pos) < minDiffY) {
-      minDiffY = Math.abs(targetBottom - c.pos);
-      chosenSnapY = c.pos - target.height;
-      guideLineY = { type: 'horizontal', pos: c.pos, start: Math.min(target.x - 100, -500), end: Math.max(target.x + target.width + 100, 2000) };
+
+    let minDiffX = snapThreshold + 1;
+    let chosenSnapX: number | null = null;
+    let guideLineX: SnapGuide | null = null;
+
+    for (const c of candidateX) {
+      if (Math.abs(target.x - c.pos) < minDiffX) {
+        minDiffX = Math.abs(target.x - c.pos);
+        chosenSnapX = c.pos;
+        guideLineX = c.guide || { type: 'vertical', pos: c.pos, start: Math.min(target.y - 100, -500), end: Math.max(target.y + target.height + 100, 2000) };
+      }
+      if (Math.abs(targetCenterX - c.pos) < minDiffX) {
+        minDiffX = Math.abs(targetCenterX - c.pos);
+        chosenSnapX = c.pos - target.width / 2;
+        guideLineX = { type: 'vertical', pos: c.pos, start: Math.min(target.y - 100, -500), end: Math.max(target.y + target.height + 100, 2000) };
+      }
+      if (Math.abs(targetRight - c.pos) < minDiffX) {
+        minDiffX = Math.abs(targetRight - c.pos);
+        chosenSnapX = c.pos - target.width;
+        guideLineX = { type: 'vertical', pos: c.pos, start: Math.min(target.y - 100, -500), end: Math.max(target.y + target.height + 100, 2000) };
+      }
+    }
+
+    if (chosenSnapX !== null && minDiffX <= snapThreshold) {
+      snappedX = chosenSnapX;
+      if (guideLineX) guides.push(guideLineX);
     }
   }
 
-  if (chosenSnapY !== null && minDiffY <= snapThreshold) {
-    snappedY = chosenSnapY;
-    if (guideLineY) guides.push(guideLineY);
+  if (!foundVerticalSandwich) {
+    const candidateY: { pos: number; type: string; guide?: SnapGuide }[] = [
+      { pos: 50, type: 'start' }
+    ];
+
+    for (const item of otherItems) {
+      candidateY.push(
+        { pos: item.y, type: 'top' },
+        { pos: item.y + item.height / 2, type: 'middle' },
+        { pos: item.y + item.height, type: 'bottom' }
+      );
+    }
+
+    let minDiffY = snapThreshold + 1;
+    let chosenSnapY: number | null = null;
+    let guideLineY: SnapGuide | null = null;
+
+    for (const c of candidateY) {
+      if (Math.abs(target.y - c.pos) < minDiffY) {
+        minDiffY = Math.abs(target.y - c.pos);
+        chosenSnapY = c.pos;
+        guideLineY = c.guide || { type: 'horizontal', pos: c.pos, start: Math.min(target.x - 100, -500), end: Math.max(target.x + target.width + 100, 2000) };
+      }
+      if (Math.abs(targetCenterY - c.pos) < minDiffY) {
+        minDiffY = Math.abs(targetCenterY - c.pos);
+        chosenSnapY = c.pos - target.height / 2;
+        guideLineY = { type: 'horizontal', pos: c.pos, start: Math.min(target.x - 100, -500), end: Math.max(target.x + target.width + 100, 2000) };
+      }
+      if (Math.abs(targetBottom - c.pos) < minDiffY) {
+        minDiffY = Math.abs(targetBottom - c.pos);
+        chosenSnapY = c.pos - target.height;
+        guideLineY = { type: 'horizontal', pos: c.pos, start: Math.min(target.x - 100, -500), end: Math.max(target.x + target.width + 100, 2000) };
+      }
+    }
+
+    if (chosenSnapY !== null && minDiffY <= snapThreshold) {
+      snappedY = chosenSnapY;
+      if (guideLineY) guides.push(guideLineY);
+    }
   }
 
   return { snappedX, snappedY, guides };
