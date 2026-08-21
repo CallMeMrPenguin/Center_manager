@@ -73,7 +73,7 @@ export const DrawingToolbar: React.FC<DrawingToolbarProps> = ({
   return (
     <div
       style={toolbarPos ? { transform: `translate3d(${toolbarPos.x}px, ${toolbarPos.y}px, 0)` } : {}}
-      className="fixed top-20 right-8 z-[100] pointer-events-auto flex items-center gap-1.5 bg-[#12162a] border-2 border-[#5c36f5]/70 p-1.5 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.6),0_0_20px_rgba(92,54,245,0.35)] select-none ring-1 ring-white/15 transition-all"
+      className="fixed top-20 right-8 z-[100] pointer-events-auto flex items-center gap-1.5 bg-[#12162a] border-2 border-[#5c36f5]/70 p-1.5 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.6),0_0_20px_rgba(92,54,245,0.35)] select-none ring-1 ring-white/15"
     >
       {/* Draggable Grip Handle */}
       <div
