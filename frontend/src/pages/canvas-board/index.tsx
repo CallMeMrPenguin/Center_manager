@@ -41,10 +41,10 @@ export default function CanvasBoardPage() {
 
   const { zoom, setZoom, pan, setPan, isPanningRef, lastMousePosRef, isShiftPressedRef } = useCanvasViewport();
 
-  const [gridType, setGridType] = useState<GridType>('grid'); // Default: Ô LY (Ngang & Dọc)
+  const [gridType, setGridType] = useState<GridType>('grid');
   const [activeTool, setActiveTool] = useState<CanvasTool>('pen');
-  const [selectedColor, setSelectedColor] = useState<string>('#ff3344'); // Mực đỏ mặc định
-  const [selectedBgColor, setSelectedBgColor] = useState<string>('#ffffff'); // Nền trắng mặc định
+  const [selectedColor, setSelectedColor] = useState<string>('#ff3344');
+  const [selectedBgColor, setSelectedBgColor] = useState<string>('#ffffff');
   const [penSize, setPenSize] = useState<number>(4);
   const [hlSize, setHlSize] = useState<number>(24);
   const [eraserSize, setEraserSize] = useState<number>(50);
@@ -118,7 +118,7 @@ export default function CanvasBoardPage() {
     setCanvasTextBoxes(next.textBoxes);
   }, [redoStack, pageStrokes, canvasImages, canvasTextBoxes, currentPage]);
 
-  // Delete / Backspace listener
+  // Delete key handler
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement;
@@ -208,7 +208,7 @@ export default function CanvasBoardPage() {
     const vpRight = (rect.width - pan.x) / zoom;
     const vpBottom = (rect.height - pan.y) / zoom;
 
-    // 1. Grid (Only Dots, or Grid, or Ruled Lines)
+    // 1. Grid
     if (gridType !== 'none') {
       const gridSize = 44;
       const startX = Math.floor(vpLeft / gridSize) * gridSize;
@@ -218,14 +218,14 @@ export default function CanvasBoardPage() {
 
       ctx.save();
       if (gridType === 'dots') {
-        ctx.fillStyle = '#64748b'; // Only dots, zero lines!
+        ctx.fillStyle = '#64748b';
         for (let x = startX; x <= endX; x += gridSize) {
           for (let y = startY; y <= endY; y += gridSize) {
             ctx.beginPath(); ctx.arc(x, y, 1.8 / zoom, 0, Math.PI * 2); ctx.fill();
           }
         }
       } else if (gridType === 'grid') {
-        ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 1.4 / zoom; // Darker grid lines
+        ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 1.4 / zoom;
         ctx.beginPath();
         for (let x = startX; x <= endX; x += gridSize) { ctx.moveTo(x, startY); ctx.lineTo(x, endY); }
         for (let y = startY; y <= endY; y += gridSize) { ctx.moveTo(startX, y); ctx.lineTo(endX, y); }
@@ -251,11 +251,9 @@ export default function CanvasBoardPage() {
       if (item.id === selectedId && selectedType === 'image') {
         ctx.save();
         if (isCroppingImageId === item.id) {
-          // Word-style Crop Overlay
           const cb = activeCropBox || { x: item.x, y: item.y, width: item.width, height: item.height };
           ctx.strokeStyle = '#000000'; ctx.lineWidth = 3 / zoom;
           ctx.strokeRect(cb.x, cb.y, cb.width, cb.height);
-          // Crop corner handles
           ctx.fillStyle = '#000000';
           const chs = 14 / zoom;
           ctx.fillRect(cb.x, cb.y, chs, 4 / zoom); ctx.fillRect(cb.x, cb.y, 4 / zoom, chs);
@@ -275,19 +273,61 @@ export default function CanvasBoardPage() {
       }
     }
 
-    // 3. Auto Align Guides with Gap Badges
+    // 3. Canva-Style Dimension Guides with 2-Headed Arrows & Badges
     for (const guide of activeSnapGuidesRef.current) {
       ctx.save();
-      ctx.strokeStyle = '#00b0ff'; ctx.lineWidth = 1.5 / zoom; ctx.setLineDash([4 / zoom, 4 / zoom]);
+      ctx.strokeStyle = '#ec4899'; ctx.lineWidth = 1.5 / zoom; ctx.setLineDash([4 / zoom, 4 / zoom]);
       ctx.beginPath();
       if (guide.type === 'vertical') { ctx.moveTo(guide.pos, guide.start); ctx.lineTo(guide.pos, guide.end); }
       else { ctx.moveTo(guide.start, guide.pos); ctx.lineTo(guide.end, guide.pos); }
       ctx.stroke();
 
-      if (guide.gapText && guide.gapCenter) {
-        ctx.setLineDash([]); ctx.fillStyle = '#00b0ff';
-        ctx.font = `bold ${11 / zoom}px sans-serif`;
-        ctx.fillText(guide.gapText, guide.gapCenter.x, guide.gapCenter.y);
+      // Draw 2-Headed Canva Measurement Arrow (<|── 30px ──|>)
+      if (guide.gapStart && guide.gapEnd && guide.gapText && guide.gapCenter) {
+        ctx.setLineDash([]);
+        ctx.strokeStyle = '#ec4899'; ctx.fillStyle = '#ec4899';
+        ctx.lineWidth = 1.8 / zoom;
+
+        // Main dimension line
+        ctx.beginPath();
+        ctx.moveTo(guide.gapStart.x, guide.gapStart.y);
+        ctx.lineTo(guide.gapEnd.x, guide.gapEnd.y);
+        ctx.stroke();
+
+        // End ticks (| and |)
+        const tick = 7 / zoom;
+        if (guide.type === 'vertical') {
+          ctx.beginPath();
+          ctx.moveTo(guide.gapStart.x, guide.gapStart.y - tick); ctx.lineTo(guide.gapStart.x, guide.gapStart.y + tick);
+          ctx.moveTo(guide.gapEnd.x, guide.gapEnd.y - tick); ctx.lineTo(guide.gapEnd.x, guide.gapEnd.y + tick);
+          ctx.stroke();
+        } else {
+          ctx.beginPath();
+          ctx.moveTo(guide.gapStart.x - tick, guide.gapStart.y); ctx.lineTo(guide.gapStart.x + tick, guide.gapStart.y);
+          ctx.moveTo(guide.gapEnd.x - tick, guide.gapEnd.y); ctx.lineTo(guide.gapEnd.x + tick, guide.gapEnd.y);
+          ctx.stroke();
+        }
+
+        // Floating Pill Badge
+        const txt = guide.gapText;
+        const fontSize = 11 / zoom;
+        ctx.font = `bold ${fontSize}px sans-serif`;
+        const textWidth = ctx.measureText(txt).width;
+        const padX = 7 / zoom; const padY = 3 / zoom;
+        const pillW = textWidth + padX * 2;
+        const pillH = fontSize + padY * 2;
+        const pillX = guide.gapCenter.x - pillW / 2;
+        const pillY = guide.gapCenter.y - pillH / 2;
+
+        ctx.fillStyle = '#ec4899';
+        ctx.beginPath();
+        if (ctx.roundRect) ctx.roundRect(pillX, pillY, pillW, pillH, 4 / zoom);
+        else ctx.rect(pillX, pillY, pillW, pillH);
+        ctx.fill();
+
+        ctx.fillStyle = '#ffffff';
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText(txt, guide.gapCenter.x, guide.gapCenter.y);
       }
       ctx.restore();
     }
@@ -317,7 +357,6 @@ export default function CanvasBoardPage() {
     setZoom(scale); setPan({ x: (rect.width - first.width * scale) / 2, y: (rect.height - first.height * scale) / 2 });
   }, [canvasImages, setZoom, setPan]);
 
-  // Import handler (5 images per row)
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     if (files.length === 0) return;
@@ -365,7 +404,6 @@ export default function CanvasBoardPage() {
     }
   };
 
-  // Double click on image to enter Word-style Crop mode
   const handleDoubleClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -402,8 +440,8 @@ export default function CanvasBoardPage() {
       if (activeTool === 'text') {
         pushHistorySnapshot();
         const newTextBox: CanvasTextBox = {
-          id: 'text_' + Date.now(), x: worldPt.x, y: worldPt.y, width: 200, height: 60,
-          text: 'Nhấp đúp để nhập chữ...', color: selectedColor, bgColor: selectedBgColor,
+          id: 'text_' + Date.now(), x: worldPt.x, y: worldPt.y, width: 180, height: 46,
+          text: '', color: selectedColor, bgColor: selectedBgColor,
           fontSize: 20, fontFamily: 'Times New Roman',
         };
         setCanvasTextBoxes(prev => [...prev, newTextBox]);
@@ -483,13 +521,11 @@ export default function CanvasBoardPage() {
 
     const worldPt = getTransformedPoint(e, canvas, pan, zoom);
 
-    // Drag / Resize Image
     if (isDraggingItemRef.current && selectedId && selectedType === 'image') {
       const targetImg = canvasImages.find(i => i.id === selectedId);
       if (!targetImg) return;
 
       if (isCroppingImageId === selectedId) {
-        // Drag Word-style crop handles
         setActiveCropBox(prev => {
           const cb = prev || { x: targetImg.x, y: targetImg.y, width: targetImg.width, height: targetImg.height };
           let { x, y, width, height } = cb;
@@ -515,7 +551,6 @@ export default function CanvasBoardPage() {
               setPageStrokes(sPrev => ({
                 ...sPrev,
                 [currentPage]: (sPrev[currentPage] || []).map(st => {
-                  // ONLY MOVE STROKE IF 100% OF ITS POINTS ARE INSIDE THE IMAGE!
                   if (st.imageId === item.id || isStrokeFullyInsideImage(st, item)) {
                     return { ...st, imageId: item.id, points: st.points.map(p => ({ x: p.x + moveDx, y: p.y + moveDy })) };
                   }
@@ -579,7 +614,6 @@ export default function CanvasBoardPage() {
           color: selectedColor, size: activeTool === 'pen' ? penSize : activeTool === 'highlighter' ? hlSize : shapeSize,
           isShiftPressed: isShiftPressedRef.current,
         };
-        // ONLY ATTACH TO IMAGE IF 100% OF STROKE POINTS ARE INSIDE!
         const insideImg = canvasImages.find(img => isStrokeFullyInsideImage(tempStroke, img));
         if (insideImg) tempStroke.imageId = insideImg.id;
 
@@ -664,7 +698,6 @@ export default function CanvasBoardPage() {
             style={{ touchAction: 'none' }}
           />
 
-          {/* Interactive Editable Text Boxes Overlay */}
           <CanvasTextBoxOverlay
             textBoxes={canvasTextBoxes}
             selectedId={selectedType === 'text' ? selectedId : null}

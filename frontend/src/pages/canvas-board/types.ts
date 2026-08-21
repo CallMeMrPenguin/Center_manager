@@ -22,7 +22,7 @@ export interface CanvasItemImage {
   width: number;
   height: number;
   originalSrc?: string;
-  cropBox?: CropBox; // Word-style crop box
+  cropBox?: CropBox;
 }
 
 export interface CanvasTextBox {
@@ -54,6 +54,8 @@ export interface SnapGuide {
   start: number;
   end: number;
   gapText?: string;
+  gapStart?: Point;
+  gapEnd?: Point;
   gapCenter?: Point;
 }
 

@@ -14,7 +14,7 @@ export function isStrokeFullyInsideImage(stroke: StrokeRecord, image: CanvasItem
 }
 
 /**
- * Checks if a point is inside an image or its corner/edge handles.
+ * Checks if a point is inside an image or its handles.
  */
 export function hitTestImage(
   pt: Point,
@@ -25,13 +25,11 @@ export function hitTestImage(
   const { x, y, width, height } = image;
   const hs = handleSize;
 
-  // Corner handle checks
   if (Math.abs(pt.x - x) <= hs && Math.abs(pt.y - y) <= hs) return { hit: true, handle: 'tl' };
   if (Math.abs(pt.x - (x + width)) <= hs && Math.abs(pt.y - y) <= hs) return { hit: true, handle: 'tr' };
   if (Math.abs(pt.x - x) <= hs && Math.abs(pt.y - (y + height)) <= hs) return { hit: true, handle: 'bl' };
   if (Math.abs(pt.x - (x + width)) <= hs && Math.abs(pt.y - (y + height)) <= hs) return { hit: true, handle: 'br' };
 
-  // Word-style edge crop handles
   if (isCropping) {
     if (Math.abs(pt.y - y) <= hs && pt.x >= x && pt.x <= x + width) return { hit: true, handle: 't' };
     if (Math.abs(pt.y - (y + height)) <= hs && pt.x >= x && pt.x <= x + width) return { hit: true, handle: 'b' };
@@ -39,7 +37,6 @@ export function hitTestImage(
     if (Math.abs(pt.x - (x + width)) <= hs && pt.y >= y && pt.y <= y + height) return { hit: true, handle: 'r' };
   }
 
-  // Inside body
   if (pt.x >= x && pt.x <= x + width && pt.y >= y && pt.y <= y + height) {
     return { hit: true, handle: 'inside' };
   }
@@ -48,7 +45,7 @@ export function hitTestImage(
 }
 
 /**
- * Auto-Alignment & Distance Gap Measurement Engine
+ * Auto-Alignment & Canva-Style Dimension Measurement Engine
  */
 export function calculateAutoAlign(
   target: { x: number; y: number; width: number; height: number },
@@ -64,23 +61,27 @@ export function calculateAutoAlign(
   const targetCenterY = target.y + target.height / 2;
   const targetBottom = target.y + target.height;
 
-  const candidateX: { pos: number; type: string; gap?: number; neighbor?: CanvasItemImage }[] = [{ pos: 50, type: 'start' }];
-  const candidateY: { pos: number; type: string; gap?: number; neighbor?: CanvasItemImage }[] = [{ pos: 50, type: 'start' }];
+  const candidateX: { pos: number; type: string; gap?: number; neighbor?: CanvasItemImage; isGapRight?: boolean }[] = [
+    { pos: 50, type: 'start' }
+  ];
+  const candidateY: { pos: number; type: string; gap?: number; neighbor?: CanvasItemImage; isGapBottom?: boolean }[] = [
+    { pos: 50, type: 'start' }
+  ];
 
   for (const item of otherItems) {
     candidateX.push(
       { pos: item.x, type: 'left' },
       { pos: item.x + item.width / 2, type: 'center' },
       { pos: item.x + item.width, type: 'right' },
-      { pos: item.x + item.width + 30, type: 'gap-right', gap: 30, neighbor: item },
-      { pos: item.x - target.width - 30, type: 'gap-left', gap: 30, neighbor: item }
+      { pos: item.x + item.width + 30, type: 'gap-right', gap: 30, neighbor: item, isGapRight: true },
+      { pos: item.x - target.width - 30, type: 'gap-left', gap: 30, neighbor: item, isGapRight: false }
     );
     candidateY.push(
       { pos: item.y, type: 'top' },
       { pos: item.y + item.height / 2, type: 'middle' },
       { pos: item.y + item.height, type: 'bottom' },
-      { pos: item.y + item.height + 30, type: 'gap-bottom', gap: 30, neighbor: item },
-      { pos: item.y - target.height - 30, type: 'gap-top', gap: 30, neighbor: item }
+      { pos: item.y + item.height + 30, type: 'gap-bottom', gap: 30, neighbor: item, isGapBottom: true },
+      { pos: item.y - target.height - 30, type: 'gap-top', gap: 30, neighbor: item, isGapBottom: false }
     );
   }
 
@@ -93,17 +94,42 @@ export function calculateAutoAlign(
     if (Math.abs(target.x - c.pos) < minDiffX) {
       minDiffX = Math.abs(target.x - c.pos);
       chosenSnapX = c.pos;
+
+      let gapStart: Point | undefined;
+      let gapEnd: Point | undefined;
+      let gapCenter: Point | undefined;
+
+      if (c.neighbor && c.gap) {
+        const midY = target.y + target.height / 2;
+        if (c.isGapRight) {
+          gapStart = { x: c.neighbor.x + c.neighbor.width, y: midY };
+          gapEnd = { x: c.pos, y: midY };
+        } else {
+          gapStart = { x: c.pos + target.width, y: midY };
+          gapEnd = { x: c.neighbor.x, y: midY };
+        }
+        gapCenter = { x: (gapStart.x + gapEnd.x) / 2, y: midY };
+      }
+
       guideLineX = {
-        type: 'vertical', pos: c.pos, start: Math.min(target.y - 100, -500), end: Math.max(target.y + target.height + 100, 2000),
-        gapText: c.gap ? `${c.gap}px` : undefined, gapCenter: c.neighbor ? { x: (c.neighbor.x + c.neighbor.width + c.pos) / 2, y: target.y + target.height / 2 } : undefined
+        type: 'vertical',
+        pos: c.pos,
+        start: Math.min(target.y - 100, -500),
+        end: Math.max(target.y + target.height + 100, 2000),
+        gapText: c.gap ? `${c.gap}px` : undefined,
+        gapStart,
+        gapEnd,
+        gapCenter,
       };
     }
     if (Math.abs(targetCenterX - c.pos) < minDiffX) {
-      minDiffX = Math.abs(targetCenterX - c.pos); chosenSnapX = c.pos - target.width / 2;
+      minDiffX = Math.abs(targetCenterX - c.pos);
+      chosenSnapX = c.pos - target.width / 2;
       guideLineX = { type: 'vertical', pos: c.pos, start: Math.min(target.y - 100, -500), end: Math.max(target.y + target.height + 100, 2000) };
     }
     if (Math.abs(targetRight - c.pos) < minDiffX) {
-      minDiffX = Math.abs(targetRight - c.pos); chosenSnapX = c.pos - target.width;
+      minDiffX = Math.abs(targetRight - c.pos);
+      chosenSnapX = c.pos - target.width;
       guideLineX = { type: 'vertical', pos: c.pos, start: Math.min(target.y - 100, -500), end: Math.max(target.y + target.height + 100, 2000) };
     }
   }
@@ -120,18 +146,44 @@ export function calculateAutoAlign(
 
   for (const c of candidateY) {
     if (Math.abs(target.y - c.pos) < minDiffY) {
-      minDiffY = Math.abs(target.y - c.pos); chosenSnapY = c.pos;
+      minDiffY = Math.abs(target.y - c.pos);
+      chosenSnapY = c.pos;
+
+      let gapStart: Point | undefined;
+      let gapEnd: Point | undefined;
+      let gapCenter: Point | undefined;
+
+      if (c.neighbor && c.gap) {
+        const midX = target.x + target.width / 2;
+        if (c.isGapBottom) {
+          gapStart = { x: midX, y: c.neighbor.y + c.neighbor.height };
+          gapEnd = { x: midX, y: c.pos };
+        } else {
+          gapStart = { x: midX, y: c.pos + target.height };
+          gapEnd = { x: midX, y: c.neighbor.y };
+        }
+        gapCenter = { x: midX, y: (gapStart.y + gapEnd.y) / 2 };
+      }
+
       guideLineY = {
-        type: 'horizontal', pos: c.pos, start: Math.min(target.x - 100, -500), end: Math.max(target.x + target.width + 100, 2000),
-        gapText: c.gap ? `${c.gap}px` : undefined, gapCenter: c.neighbor ? { x: target.x + target.width / 2, y: (c.neighbor.y + c.neighbor.height + c.pos) / 2 } : undefined
+        type: 'horizontal',
+        pos: c.pos,
+        start: Math.min(target.x - 100, -500),
+        end: Math.max(target.x + target.width + 100, 2000),
+        gapText: c.gap ? `${c.gap}px` : undefined,
+        gapStart,
+        gapEnd,
+        gapCenter,
       };
     }
     if (Math.abs(targetCenterY - c.pos) < minDiffY) {
-      minDiffY = Math.abs(targetCenterY - c.pos); chosenSnapY = c.pos - target.height / 2;
+      minDiffY = Math.abs(targetCenterY - c.pos);
+      chosenSnapY = c.pos - target.height / 2;
       guideLineY = { type: 'horizontal', pos: c.pos, start: Math.min(target.x - 100, -500), end: Math.max(target.x + target.width + 100, 2000) };
     }
     if (Math.abs(targetBottom - c.pos) < minDiffY) {
-      minDiffY = Math.abs(targetBottom - c.pos); chosenSnapY = c.pos - target.height;
+      minDiffY = Math.abs(targetBottom - c.pos);
+      chosenSnapY = c.pos - target.height;
       guideLineY = { type: 'horizontal', pos: c.pos, start: Math.min(target.x - 100, -500), end: Math.max(target.x + target.width + 100, 2000) };
     }
   }

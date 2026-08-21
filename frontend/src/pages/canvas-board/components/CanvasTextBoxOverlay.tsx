@@ -34,6 +34,7 @@ export const CanvasTextBoxOverlay: React.FC<CanvasTextBoxOverlayProps> = ({
         const screenY = tb.y * zoom + pan.y;
         const screenW = Math.max(100, tb.width * zoom);
         const screenH = Math.max(40, tb.height * zoom);
+        const isEmpty = !tb.text || tb.text.trim() === '';
 
         return (
           <div
@@ -46,24 +47,25 @@ export const CanvasTextBoxOverlay: React.FC<CanvasTextBoxOverlayProps> = ({
               e.stopPropagation();
               setEditingId(tb.id);
             }}
-            className={`absolute select-none transition-shadow ${
-              isSelected ? 'ring-2 ring-[#5c36f5] shadow-lg' : ''
-            }`}
+            className="absolute select-none rounded-lg shadow-sm"
             style={{
               left: `${screenX}px`,
               top: `${screenY}px`,
               width: `${screenW}px`,
               height: `${screenH}px`,
-              backgroundColor: tb.bgColor,
+              backgroundColor: tb.bgColor === 'transparent' ? 'transparent' : '#ffffff',
+              colorScheme: 'light',
+              border: isSelected ? '2px solid #5c36f5' : '1px solid #cbd5e1',
               cursor: activeTool === 'select' ? (isEditing ? 'text' : 'move') : 'default',
               pointerEvents: activeTool === 'select' ? 'auto' : 'none',
-              borderRadius: '6px',
+              boxSizing: 'border-box',
             }}
           >
             {isEditing ? (
               <textarea
                 autoFocus
                 defaultValue={tb.text}
+                placeholder="Text..."
                 onBlur={(e) => {
                   setEditingId(null);
                   onUpdate({ ...tb, text: e.target.value });
@@ -71,27 +73,33 @@ export const CanvasTextBoxOverlay: React.FC<CanvasTextBoxOverlayProps> = ({
                 onChange={(e) => {
                   onUpdate({ ...tb, text: e.target.value });
                 }}
-                className="w-full h-full p-2 bg-transparent resize-none border-0 focus:outline-none font-serif leading-relaxed"
+                className="w-full h-full p-2 bg-white text-base resize-none border-0 focus:outline-none leading-relaxed placeholder:text-slate-400 placeholder:italic"
                 style={{
-                  color: tb.color,
-                  fontSize: `${Math.max(12, tb.fontSize * zoom)}px`,
-                  fontFamily: `"${tb.fontFamily}", Times New Roman, serif`,
+                  color: tb.color || '#ff3344',
+                  backgroundColor: '#ffffff',
+                  fontSize: `${Math.max(13, tb.fontSize * zoom)}px`,
+                  fontFamily: '"Times New Roman", Times, serif',
+                  colorScheme: 'light',
+                  boxSizing: 'border-box',
                 }}
               />
             ) : (
               <div
-                className="w-full h-full p-2 font-serif overflow-hidden whitespace-pre-wrap select-text leading-relaxed"
+                className={`w-full h-full p-2 overflow-hidden whitespace-pre-wrap leading-relaxed ${
+                  isEmpty ? 'text-slate-400 italic' : ''
+                }`}
                 style={{
-                  color: tb.color,
-                  fontSize: `${Math.max(12, tb.fontSize * zoom)}px`,
-                  fontFamily: `"${tb.fontFamily}", Times New Roman, serif`,
+                  color: isEmpty ? '#94a3b8' : (tb.color || '#ff3344'),
+                  fontSize: `${Math.max(13, tb.fontSize * zoom)}px`,
+                  fontFamily: '"Times New Roman", Times, serif',
+                  boxSizing: 'border-box',
                 }}
               >
-                {tb.text || 'Nhấp đúp để nhập chữ...'}
+                {isEmpty ? 'Text...' : tb.text}
               </div>
             )}
 
-            {/* Resize Handle at Bottom-Right */}
+            {/* Clean Resize Handle at Bottom-Right */}
             {isSelected && !isEditing && (
               <div
                 onPointerDown={(e) => {
@@ -120,8 +128,8 @@ export const CanvasTextBoxOverlay: React.FC<CanvasTextBoxOverlayProps> = ({
                   window.addEventListener('pointermove', onPointerMove);
                   window.addEventListener('pointerup', onPointerUp);
                 }}
-                className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-[#5c36f5] border-2 border-white rounded-tl cursor-se-resize shadow-md"
-                title="Kéo để thay đổi độ rộng & chiều cao text box"
+                className="absolute -bottom-1.5 -right-1.5 w-3 h-3 bg-[#5c36f5] border-2 border-white rounded-full cursor-se-resize shadow-md"
+                title="Kéo để thay đổi độ rộng text box"
               />
             )}
           </div>
