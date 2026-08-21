@@ -1,7 +1,6 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { Pen, Highlighter, Eraser, Trash2, MousePointer, Palette, Sliders, Undo2, Redo2 } from 'lucide-react';
-
-export type DrawTool = 'none' | 'pen' | 'highlighter' | 'eraser';
+import { DrawTool, Point, renderStroke, getTransformedPoint } from '../../../utils/drawingEngine';
 
 interface DrawingCanvasProps {
   questionId: number;
@@ -19,11 +18,6 @@ const PRESET_COLORS = [
   { label: 'Tím hồng', value: '#e040fb' },
   { label: 'Trắng', value: '#ffffff' },
 ];
-
-interface Point {
-  x: number;
-  y: number;
-}
 
 export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
   questionId,
@@ -43,15 +37,29 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
   const [showColorPopover, setShowColorPopover] = useState<boolean>(false);
   const [showSizePopover, setShowSizePopover] = useState<boolean>(false);
 
-  // Undo / Redo stacks (Data URLs per question session)
+  // Undo / Redo stacks
   const [undoStack, setUndoStack] = useState<string[]>([]);
   const [redoStack, setRedoStack] = useState<string[]>([]);
 
   const isDrawingRef = useRef(false);
   const currentPointsRef = useRef<Point[]>([]);
   const startSnapshotRef = useRef<ImageData | null>(null);
+  const isShiftPressedRef = useRef(false);
 
-  // Restore drawing when questionId changes or on mount
+  // Track Shift key for straight line constraint
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      isShiftPressedRef.current = e.shiftKey;
+    };
+    window.addEventListener('keydown', handleKey);
+    window.addEventListener('keyup', handleKey);
+    return () => {
+      window.removeEventListener('keydown', handleKey);
+      window.removeEventListener('keyup', handleKey);
+    };
+  }, []);
+
+  // Restore drawing when questionId changes
   useEffect(() => {
     const canvas = canvasRef.current;
     const container = containerRef.current;
@@ -157,16 +165,13 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
     img.src = next;
   }, [redoStack, questionId, onSaveDrawing]);
 
-  // Keyboard shortcut for Undo (Ctrl+Z) & Redo (Ctrl+Y or Ctrl+Shift+Z)
+  // Keyboard shortcut for Undo (Ctrl+Z) & Redo (Ctrl+Y)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
         e.preventDefault();
-        if (e.shiftKey) {
-          handleRedo();
-        } else {
-          handleUndo();
-        }
+        if (e.shiftKey) handleRedo();
+        else handleUndo();
       } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y') {
         e.preventDefault();
         handleRedo();
@@ -176,80 +181,28 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [handleUndo, handleRedo]);
 
-  const getCoordinates = (e: React.PointerEvent<HTMLCanvasElement> | PointerEvent) => {
-    const canvas = canvasRef.current;
-    if (!canvas) return { x: 0, y: 0 };
-    const rect = canvas.getBoundingClientRect();
-    return {
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top,
-    };
-  };
-
   const currentSize = activeTool === 'pen' ? penSize : activeTool === 'highlighter' ? hlSize : eraserSize;
-
-  // PROFESSIONAL STROKE RENDERING ENGINE (Bezier smoothing across all coalesced sensor events)
-  const drawStrokePath = (ctx: CanvasRenderingContext2D, points: Point[], tool: DrawTool) => {
-    if (points.length === 0) return;
-
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
-
-    if (tool === 'pen') {
-      ctx.globalCompositeOperation = 'source-over';
-      ctx.strokeStyle = selectedColor;
-      ctx.lineWidth = penSize;
-      ctx.globalAlpha = 1.0;
-    } else if (tool === 'highlighter') {
-      ctx.globalCompositeOperation = 'source-over';
-      ctx.strokeStyle = selectedColor;
-      ctx.lineWidth = hlSize;
-      ctx.globalAlpha = 0.35;
-    } else if (tool === 'eraser') {
-      ctx.globalCompositeOperation = 'destination-out';
-      ctx.lineWidth = eraserSize;
-      ctx.globalAlpha = 1.0;
-    }
-
-    if (points.length === 1) {
-      ctx.fillStyle = tool === 'eraser' ? '#000000' : selectedColor;
-      ctx.beginPath();
-      ctx.arc(points[0].x, points[0].y, ctx.lineWidth / 2, 0, Math.PI * 2);
-      ctx.fill();
-      return;
-    }
-
-    ctx.beginPath();
-    ctx.moveTo(points[0].x, points[0].y);
-
-    for (let i = 1; i < points.length - 1; i++) {
-      const midX = (points[i].x + points[i + 1].x) / 2;
-      const midY = (points[i].y + points[i + 1].y) / 2;
-      ctx.quadraticCurveTo(points[i].x, points[i].y, midX, midY);
-    }
-
-    const last = points[points.length - 1];
-    ctx.lineTo(last.x, last.y);
-    ctx.stroke();
-    ctx.globalAlpha = 1.0;
-  };
 
   const handlePointerDown = (e: React.PointerEvent<HTMLCanvasElement>) => {
     if (activeTool === 'none') return;
     e.currentTarget.setPointerCapture(e.pointerId);
     isDrawingRef.current = true;
 
-    const coords = getCoordinates(e);
-    currentPointsRef.current = [coords];
-
     const canvas = canvasRef.current;
     if (!canvas) return;
+    const coords = getTransformedPoint(e, canvas);
+    currentPointsRef.current = [coords];
+
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Snapshot before starting stroke
-    snapshotRef.current = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    drawStrokePath(ctx, currentPointsRef.current, activeTool);
+    startSnapshotRef.current = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    renderStroke(ctx, currentPointsRef.current, {
+      tool: activeTool,
+      color: selectedColor,
+      size: currentSize,
+      isShiftPressed: e.shiftKey || isShiftPressedRef.current,
+    });
   };
 
   const handlePointerMove = (e: React.PointerEvent<HTMLCanvasElement>) => {
@@ -259,24 +212,29 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Get ALL hardware coalesced pointer events to eliminate gaps when moving fast
     const nativeEvent = e.nativeEvent as PointerEvent;
     const coalesced = typeof nativeEvent.getCoalescedEvents === 'function'
       ? nativeEvent.getCoalescedEvents()
       : [nativeEvent];
 
     for (const evt of coalesced) {
-      const pt = getCoordinates(evt);
+      const pt = getTransformedPoint(evt, canvas);
       const prevPt = currentPointsRef.current[currentPointsRef.current.length - 1];
       if (!prevPt || Math.hypot(pt.x - prevPt.x, pt.y - prevPt.y) >= 1.2) {
         currentPointsRef.current.push(pt);
       }
     }
 
-    if (snapshotRef.current) {
-      ctx.putImageData(snapshotRef.current, 0, 0);
+    if (startSnapshotRef.current) {
+      ctx.putImageData(startSnapshotRef.current, 0, 0);
     }
-    drawStrokePath(ctx, currentPointsRef.current, activeTool);
+
+    renderStroke(ctx, currentPointsRef.current, {
+      tool: activeTool,
+      color: selectedColor,
+      size: currentSize,
+      isShiftPressed: e.shiftKey || isShiftPressedRef.current,
+    });
   };
 
   const handlePointerUp = (e: React.PointerEvent<HTMLCanvasElement>) => {
@@ -286,11 +244,9 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
     } catch {}
     isDrawingRef.current = false;
     currentPointsRef.current = [];
-    snapshotRef.current = null;
+    startSnapshotRef.current = null;
     saveCurrentState();
   };
-
-  const snapshotRef = useRef<ImageData | null>(null);
 
   const handleClearAll = () => {
     const canvas = canvasRef.current;
@@ -323,17 +279,10 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
 
       {/* FLOATING DRAWING TOOLBAR */}
       <div className="absolute top-3 right-3 z-30 pointer-events-auto flex items-center gap-1.5 bg-[#0a0d18] border border-[#212c4b] p-1.5 rounded-xl shadow-2xl">
-        {/* Pointer / Interact Mode */}
         <button
-          onClick={() => {
-            setActiveTool('none');
-            setShowColorPopover(false);
-            setShowSizePopover(false);
-          }}
+          onClick={() => { setActiveTool('none'); setShowColorPopover(false); setShowSizePopover(false); }}
           className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
-            activeTool === 'none'
-              ? 'bg-[#5c36f5] text-white shadow-md'
-              : 'text-slate-400 hover:text-white hover:bg-white/5'
+            activeTool === 'none' ? 'bg-[#5c36f5] text-white shadow-md' : 'text-slate-400 hover:text-white hover:bg-white/5'
           }`}
           title="Chế độ con trỏ chuột (Chọn đáp án)"
         >
@@ -341,53 +290,32 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
           <span className="hidden sm:inline">Chuột</span>
         </button>
 
-        {/* Pen Mode */}
         <button
-          onClick={() => {
-            setActiveTool('pen');
-            setShowColorPopover(false);
-            setShowSizePopover(false);
-          }}
+          onClick={() => { setActiveTool('pen'); setShowColorPopover(false); setShowSizePopover(false); }}
           className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
-            activeTool === 'pen'
-              ? 'bg-[#5c36f5] text-white shadow-md'
-              : 'text-slate-400 hover:text-white hover:bg-white/5'
+            activeTool === 'pen' ? 'bg-[#5c36f5] text-white shadow-md' : 'text-slate-400 hover:text-white hover:bg-white/5'
           }`}
-          title="Bút vẽ tự do"
+          title="Bút vẽ (Giữ Shift để vẽ đường thẳng)"
         >
           <Pen size={13} />
           <span className="hidden sm:inline">Bút</span>
         </button>
 
-        {/* Highlighter Mode */}
         <button
-          onClick={() => {
-            setActiveTool('highlighter');
-            setShowColorPopover(false);
-            setShowSizePopover(false);
-          }}
+          onClick={() => { setActiveTool('highlighter'); setShowColorPopover(false); setShowSizePopover(false); }}
           className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
-            activeTool === 'highlighter'
-              ? 'bg-[#5c36f5] text-white shadow-md'
-              : 'text-slate-400 hover:text-white hover:bg-white/5'
+            activeTool === 'highlighter' ? 'bg-[#5c36f5] text-white shadow-md' : 'text-slate-400 hover:text-white hover:bg-white/5'
           }`}
-          title="Bút dạ quang (Highlight)"
+          title="Bút dạ quang (Giữ Shift để gạch thẳng dòng)"
         >
           <Highlighter size={13} />
           <span className="hidden sm:inline">Dạ quang</span>
         </button>
 
-        {/* Eraser Mode */}
         <button
-          onClick={() => {
-            setActiveTool('eraser');
-            setShowColorPopover(false);
-            setShowSizePopover(false);
-          }}
+          onClick={() => { setActiveTool('eraser'); setShowColorPopover(false); setShowSizePopover(false); }}
           className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
-            activeTool === 'eraser'
-              ? 'bg-rose-600 text-white shadow-md'
-              : 'text-slate-400 hover:text-white hover:bg-white/5'
+            activeTool === 'eraser' ? 'bg-rose-600 text-white shadow-md' : 'text-slate-400 hover:text-white hover:bg-white/5'
           }`}
           title="Tẩy xóa nét vẽ"
         >
@@ -395,25 +323,18 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
           <span className="hidden sm:inline">Tẩy</span>
         </button>
 
-        {/* Color Picker (Only for Pen & Highlighter) */}
+        {/* Color Picker */}
         {activeTool !== 'none' && activeTool !== 'eraser' && (
           <div className="relative flex items-center">
             <button
-              onClick={() => {
-                setShowColorPopover(!showColorPopover);
-                setShowSizePopover(false);
-              }}
+              onClick={() => { setShowColorPopover(!showColorPopover); setShowSizePopover(false); }}
               className="flex items-center gap-1.5 px-2 py-1 rounded-lg hover:bg-white/10 transition cursor-pointer border border-white/10"
               title="Chọn màu mực vẽ hoặc tùy chỉnh màu"
             >
-              <div
-                className="w-4 h-4 rounded-full border border-white/40 shadow-sm"
-                style={{ backgroundColor: selectedColor }}
-              />
+              <div className="w-4 h-4 rounded-full border border-white/40 shadow-sm" style={{ backgroundColor: selectedColor }} />
               <Palette size={12} className="text-slate-400" />
             </button>
 
-            {/* Color Popover Card */}
             {showColorPopover && (
               <div className="absolute top-full right-0 mt-2 bg-[#0c0f1e] border border-[#212c4b] p-3 rounded-2xl shadow-2xl z-50 space-y-2.5 min-w-[210px]">
                 <div className="text-[11px] font-bold text-slate-300">Bảng màu gợi ý</div>
@@ -421,10 +342,7 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
                   {PRESET_COLORS.map(c => (
                     <button
                       key={c.value}
-                      onClick={() => {
-                        setSelectedColor(c.value);
-                        setShowColorPopover(false);
-                      }}
+                      onClick={() => { setSelectedColor(c.value); setShowColorPopover(false); }}
                       className={`w-6 h-6 rounded-full transition cursor-pointer transform hover:scale-110 border ${
                         selectedColor.toLowerCase() === c.value.toLowerCase() ? 'ring-2 ring-indigo-400 scale-110 border-white' : 'border-transparent'
                       }`}
@@ -443,9 +361,7 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
                       onChange={(e) => setSelectedColor(e.target.value)}
                       className="w-5 h-5 rounded-full cursor-pointer bg-transparent border-0"
                     />
-                    <span className="text-[10px] font-mono font-bold text-slate-300 uppercase">
-                      {selectedColor}
-                    </span>
+                    <span className="text-[10px] font-mono font-bold text-slate-300 uppercase">{selectedColor}</span>
                   </label>
                 </div>
               </div>
@@ -457,10 +373,7 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
         {activeTool !== 'none' && (
           <div className="relative flex items-center">
             <button
-              onClick={() => {
-                setShowSizePopover(!showSizePopover);
-                setShowColorPopover(false);
-              }}
+              onClick={() => { setShowSizePopover(!showSizePopover); setShowColorPopover(false); }}
               className="flex items-center gap-1.5 px-2 py-1 rounded-lg hover:bg-white/10 transition cursor-pointer border border-white/10 text-xs font-bold text-slate-300"
               title="Chỉnh độ lớn nét vẽ / kích cỡ tẩy"
             >
@@ -468,7 +381,6 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
               <span>{currentSize}px</span>
             </button>
 
-            {/* Size Slider Card */}
             {showSizePopover && (
               <div className="absolute top-full right-0 mt-2 bg-[#0c0f1e] border border-[#212c4b] p-3 rounded-2xl shadow-2xl z-50 space-y-2 min-w-[200px]">
                 <div className="flex items-center justify-between text-[11px] font-bold text-slate-300">
@@ -504,27 +416,24 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
           </div>
         )}
 
-        {/* Undo Button */}
         <button
           onClick={handleUndo}
           disabled={undoStack.length === 0}
           className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed ml-0.5"
-          title="Hoàn tác nét vẽ (Ctrl + Z)"
+          title="Hoàn tác (Ctrl + Z)"
         >
           <Undo2 size={13} />
         </button>
 
-        {/* Redo Button */}
         <button
           onClick={handleRedo}
           disabled={redoStack.length === 0}
           className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
-          title="Làm lại nét vẽ (Ctrl + Y)"
+          title="Làm lại (Ctrl + Y)"
         >
           <Redo2 size={13} />
         </button>
 
-        {/* Clear All Drawing Button */}
         <button
           onClick={handleClearAll}
           className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition cursor-pointer ml-0.5"

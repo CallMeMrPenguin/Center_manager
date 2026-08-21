@@ -148,7 +148,7 @@ export const TAB_DEFINITIONS: TabDefinition[] = [
   },
   {
     id: 'canvas-board',
-    label: 'Bảng Vẽ & PDF',
+    label: 'Canvas',
     icon: PenTool,
     section: 'resources',
     render: () => <CanvasBoardPage />
