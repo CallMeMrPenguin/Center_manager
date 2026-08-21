@@ -29,6 +29,7 @@ export default function KiemTraPage() {
   const [bookmarkedQuestions, setBookmarkedQuestions] = useState<Record<number, boolean>>({});
   const [timerRemaining, setTimerRemaining] = useState(0);
   const [questionTimer, setQuestionTimer] = useState(0);
+  const [isTimerPaused, setIsTimerPaused] = useState(false);
 
   // Fullscreen Management
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -119,6 +120,7 @@ export default function KiemTraPage() {
     setCurrentIndex(0);
     setUserAnswers({});
     setBookmarkedQuestions({});
+    setIsTimerPaused(false);
 
     if (timerMode === 'global') {
       setTimerRemaining(globalTimeSeconds);
@@ -131,7 +133,7 @@ export default function KiemTraPage() {
 
   // Global Timer Countdown Effect
   useEffect(() => {
-    if (step !== 'running' || timerMode !== 'global') return;
+    if (step !== 'running' || timerMode !== 'global' || isTimerPaused) return;
     if (timerRemaining <= 0) {
       setStep('results');
       showToast("Hết giờ làm bài! Bài thi đã tự động nộp.", "warning");
@@ -141,11 +143,11 @@ export default function KiemTraPage() {
       setTimerRemaining(prev => prev - 1);
     }, 1000);
     return () => clearInterval(interval);
-  }, [step, timerMode, timerRemaining]);
+  }, [step, timerMode, timerRemaining, isTimerPaused]);
 
   // Per Question Timer Effect
   useEffect(() => {
-    if (step !== 'running' || timerMode !== 'per_question') return;
+    if (step !== 'running' || timerMode !== 'per_question' || isTimerPaused) return;
     if (questionTimer <= 0) {
       if (currentIndex < activeQuestions.length - 1) {
         setCurrentIndex(prev => prev + 1);
@@ -159,7 +161,7 @@ export default function KiemTraPage() {
       setQuestionTimer(prev => prev - 1);
     }, 1000);
     return () => clearInterval(interval);
-  }, [step, timerMode, questionTimer, currentIndex, activeQuestions.length, perQuestionSeconds]);
+  }, [step, timerMode, questionTimer, currentIndex, activeQuestions.length, perQuestionSeconds, isTimerPaused]);
 
   const toggleBookmark = (questionId: number) => {
     setBookmarkedQuestions(prev => ({ ...prev, [questionId]: !prev[questionId] }));
@@ -286,10 +288,14 @@ export default function KiemTraPage() {
           toggleBookmark={toggleBookmark}
           timerMode={timerMode}
           timerRemaining={timerRemaining}
+          setTimerRemaining={setTimerRemaining}
+          globalTimeSeconds={globalTimeSeconds}
           questionTimer={questionTimer}
-          perQuestionSeconds={perQuestionSeconds}
           setQuestionTimer={setQuestionTimer}
+          perQuestionSeconds={perQuestionSeconds}
           formattedTimerRemaining={formattedTimerRemaining}
+          isTimerPaused={isTimerPaused}
+          setIsTimerPaused={setIsTimerPaused}
           isFullscreen={isFullscreen}
           onToggleFullscreen={toggleFullscreen}
           onFinishTest={() => setStep('results')}

@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
-import { Pen, Highlighter, Eraser, Trash2, MousePointer, Palette, Sliders } from 'lucide-react';
+import { Pen, Highlighter, Eraser, Trash2, MousePointer, Palette, Sliders, Undo2, Redo2 } from 'lucide-react';
 
 export type DrawTool = 'none' | 'pen' | 'highlighter' | 'eraser';
 
@@ -20,6 +20,11 @@ const PRESET_COLORS = [
   { label: 'Trắng', value: '#ffffff' },
 ];
 
+interface Point {
+  x: number;
+  y: number;
+}
+
 export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
   questionId,
   drawings,
@@ -38,9 +43,13 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
   const [showColorPopover, setShowColorPopover] = useState<boolean>(false);
   const [showSizePopover, setShowSizePopover] = useState<boolean>(false);
 
+  // Undo / Redo stacks (Data URLs per question session)
+  const [undoStack, setUndoStack] = useState<string[]>([]);
+  const [redoStack, setRedoStack] = useState<string[]>([]);
+
   const isDrawingRef = useRef(false);
-  const strokePointsRef = useRef<{ x: number; y: number }[]>([]);
-  const snapshotRef = useRef<ImageData | null>(null);
+  const currentPointsRef = useRef<Point[]>([]);
+  const startSnapshotRef = useRef<ImageData | null>(null);
 
   // Restore drawing when questionId changes or on mount
   useEffect(() => {
@@ -48,45 +57,126 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
     const container = containerRef.current;
     if (!canvas || !container) return;
 
-    const resizeAndRestore = () => {
-      const rect = container.getBoundingClientRect();
-      const dpr = window.devicePixelRatio || 1;
+    const rect = container.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
 
-      if (canvas.width !== rect.width * dpr || canvas.height !== rect.height * dpr) {
-        canvas.width = rect.width * dpr;
-        canvas.height = rect.height * dpr;
-        canvas.style.width = `${rect.width}px`;
-        canvas.style.height = `${rect.height}px`;
-      }
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+    canvas.style.width = `${rect.width}px`;
+    canvas.style.height = `${rect.height}px`;
 
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return;
-      ctx.setTransform(1, 0, 0, 1, 0, 0); // Reset transform
-      ctx.scale(dpr, dpr);
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.scale(dpr, dpr);
+    ctx.clearRect(0, 0, rect.width, rect.height);
 
-      ctx.clearRect(0, 0, rect.width, rect.height);
-
-      const savedData = drawings[questionId];
-      if (savedData) {
-        const img = new Image();
-        img.onload = () => {
-          ctx.drawImage(img, 0, 0, rect.width, rect.height);
-        };
-        img.src = savedData;
-      }
-    };
-
-    resizeAndRestore();
-  }, [questionId, drawings]);
+    const savedData = drawings[questionId];
+    if (savedData) {
+      const img = new Image();
+      img.onload = () => {
+        ctx.drawImage(img, 0, 0, rect.width, rect.height);
+      };
+      img.src = savedData;
+      setUndoStack([savedData]);
+    } else {
+      setUndoStack([]);
+    }
+    setRedoStack([]);
+  }, [questionId]);
 
   const saveCurrentState = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const dataUrl = canvas.toDataURL('image/png');
     onSaveDrawing(questionId, dataUrl);
+    setUndoStack(prev => [...prev.slice(-25), dataUrl]);
+    setRedoStack([]);
   }, [questionId, onSaveDrawing]);
 
-  const getCoordinates = (e: React.PointerEvent<HTMLCanvasElement>) => {
+  // Undo action
+  const handleUndo = useCallback(() => {
+    if (undoStack.length <= 1) {
+      if (undoStack.length === 1) {
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+        const rect = canvas.getBoundingClientRect();
+        ctx.clearRect(0, 0, rect.width, rect.height);
+        onClearDrawing(questionId);
+        setRedoStack(prev => [...prev, undoStack[0]]);
+        setUndoStack([]);
+      }
+      return;
+    }
+
+    const current = undoStack[undoStack.length - 1];
+    const previous = undoStack[undoStack.length - 2];
+    const newUndo = undoStack.slice(0, -1);
+
+    setRedoStack(prev => [...prev, current]);
+    setUndoStack(newUndo);
+
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    const rect = canvas.getBoundingClientRect();
+    ctx.clearRect(0, 0, rect.width, rect.height);
+
+    const img = new Image();
+    img.onload = () => {
+      ctx.drawImage(img, 0, 0, rect.width, rect.height);
+      onSaveDrawing(questionId, previous);
+    };
+    img.src = previous;
+  }, [undoStack, questionId, onSaveDrawing, onClearDrawing]);
+
+  // Redo action
+  const handleRedo = useCallback(() => {
+    if (redoStack.length === 0) return;
+    const next = redoStack[redoStack.length - 1];
+    const newRedo = redoStack.slice(0, -1);
+
+    setUndoStack(prev => [...prev, next]);
+    setRedoStack(newRedo);
+
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    const rect = canvas.getBoundingClientRect();
+    ctx.clearRect(0, 0, rect.width, rect.height);
+
+    const img = new Image();
+    img.onload = () => {
+      ctx.drawImage(img, 0, 0, rect.width, rect.height);
+      onSaveDrawing(questionId, next);
+    };
+    img.src = next;
+  }, [redoStack, questionId, onSaveDrawing]);
+
+  // Keyboard shortcut for Undo (Ctrl+Z) & Redo (Ctrl+Y or Ctrl+Shift+Z)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
+        e.preventDefault();
+        if (e.shiftKey) {
+          handleRedo();
+        } else {
+          handleUndo();
+        }
+      } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y') {
+        e.preventDefault();
+        handleRedo();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [handleUndo, handleRedo]);
+
+  const getCoordinates = (e: React.PointerEvent<HTMLCanvasElement> | PointerEvent) => {
     const canvas = canvasRef.current;
     if (!canvas) return { x: 0, y: 0 };
     const rect = canvas.getBoundingClientRect();
@@ -98,46 +188,68 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
 
   const currentSize = activeTool === 'pen' ? penSize : activeTool === 'highlighter' ? hlSize : eraserSize;
 
+  // PROFESSIONAL STROKE RENDERING ENGINE (Bezier smoothing across all coalesced sensor events)
+  const drawStrokePath = (ctx: CanvasRenderingContext2D, points: Point[], tool: DrawTool) => {
+    if (points.length === 0) return;
+
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+
+    if (tool === 'pen') {
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.strokeStyle = selectedColor;
+      ctx.lineWidth = penSize;
+      ctx.globalAlpha = 1.0;
+    } else if (tool === 'highlighter') {
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.strokeStyle = selectedColor;
+      ctx.lineWidth = hlSize;
+      ctx.globalAlpha = 0.35;
+    } else if (tool === 'eraser') {
+      ctx.globalCompositeOperation = 'destination-out';
+      ctx.lineWidth = eraserSize;
+      ctx.globalAlpha = 1.0;
+    }
+
+    if (points.length === 1) {
+      ctx.fillStyle = tool === 'eraser' ? '#000000' : selectedColor;
+      ctx.beginPath();
+      ctx.arc(points[0].x, points[0].y, ctx.lineWidth / 2, 0, Math.PI * 2);
+      ctx.fill();
+      return;
+    }
+
+    ctx.beginPath();
+    ctx.moveTo(points[0].x, points[0].y);
+
+    for (let i = 1; i < points.length - 1; i++) {
+      const midX = (points[i].x + points[i + 1].x) / 2;
+      const midY = (points[i].y + points[i + 1].y) / 2;
+      ctx.quadraticCurveTo(points[i].x, points[i].y, midX, midY);
+    }
+
+    const last = points[points.length - 1];
+    ctx.lineTo(last.x, last.y);
+    ctx.stroke();
+    ctx.globalAlpha = 1.0;
+  };
+
   const handlePointerDown = (e: React.PointerEvent<HTMLCanvasElement>) => {
     if (activeTool === 'none') return;
     e.currentTarget.setPointerCapture(e.pointerId);
     isDrawingRef.current = true;
 
     const coords = getCoordinates(e);
-    strokePointsRef.current = [coords];
+    currentPointsRef.current = [coords];
 
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Capture snapshot for smooth continuous redraws (especially for highlighter & curves)
-    const dpr = window.devicePixelRatio || 1;
+    // Snapshot before starting stroke
     snapshotRef.current = ctx.getImageData(0, 0, canvas.width, canvas.height);
-
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
-
-    if (activeTool === 'pen') {
-      ctx.globalCompositeOperation = 'source-over';
-      ctx.fillStyle = selectedColor;
-      ctx.beginPath();
-      ctx.arc(coords.x, coords.y, penSize / 2, 0, Math.PI * 2);
-      ctx.fill();
-    } else if (activeTool === 'highlighter') {
-      ctx.globalCompositeOperation = 'source-over';
-      ctx.fillStyle = selectedColor;
-      ctx.globalAlpha = 0.35;
-      ctx.beginPath();
-      ctx.arc(coords.x, coords.y, hlSize / 2, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.globalAlpha = 1.0;
-    } else if (activeTool === 'eraser') {
-      ctx.globalCompositeOperation = 'destination-out';
-      ctx.beginPath();
-      ctx.arc(coords.x, coords.y, eraserSize / 2, 0, Math.PI * 2);
-      ctx.fill();
-    }
+    drawStrokePath(ctx, currentPointsRef.current, activeTool);
   };
 
   const handlePointerMove = (e: React.PointerEvent<HTMLCanvasElement>) => {
@@ -147,74 +259,24 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    const coords = getCoordinates(e);
-    const pts = strokePointsRef.current;
-    pts.push(coords);
+    // Get ALL hardware coalesced pointer events to eliminate gaps when moving fast
+    const nativeEvent = e.nativeEvent as PointerEvent;
+    const coalesced = typeof nativeEvent.getCoalescedEvents === 'function'
+      ? nativeEvent.getCoalescedEvents()
+      : [nativeEvent];
 
-    if (pts.length < 2) return;
-
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
-
-    if (activeTool === 'pen') {
-      ctx.globalCompositeOperation = 'source-over';
-      ctx.strokeStyle = selectedColor;
-      ctx.lineWidth = penSize;
-      ctx.globalAlpha = 1.0;
-
-      // Draw quadratic bezier segment for silky smooth lines
-      const p1 = pts[pts.length - 2];
-      const p2 = pts[pts.length - 1];
-      const midX = (p1.x + p2.x) / 2;
-      const midY = (p1.y + p2.y) / 2;
-
-      ctx.beginPath();
-      ctx.moveTo(p1.x, p1.y);
-      ctx.quadraticCurveTo(p1.x, p1.y, midX, midY);
-      ctx.stroke();
-    } else if (activeTool === 'eraser') {
-      ctx.globalCompositeOperation = 'destination-out';
-      ctx.lineWidth = eraserSize;
-
-      const p1 = pts[pts.length - 2];
-      const p2 = pts[pts.length - 1];
-      const midX = (p1.x + p2.x) / 2;
-      const midY = (p1.y + p2.y) / 2;
-
-      ctx.beginPath();
-      ctx.moveTo(p1.x, p1.y);
-      ctx.quadraticCurveTo(p1.x, p1.y, midX, midY);
-      ctx.stroke();
-    } else if (activeTool === 'highlighter') {
-      // For Highlighter: Restore initial stroke snapshot and redraw the whole continuous path
-      // This guarantees 100% UNIFORM opacity with ZERO overlapping circle/dot artifacts!
-      if (snapshotRef.current) {
-        ctx.putImageData(snapshotRef.current, 0, 0);
+    for (const evt of coalesced) {
+      const pt = getCoordinates(evt);
+      const prevPt = currentPointsRef.current[currentPointsRef.current.length - 1];
+      if (!prevPt || Math.hypot(pt.x - prevPt.x, pt.y - prevPt.y) >= 1.2) {
+        currentPointsRef.current.push(pt);
       }
-
-      ctx.globalCompositeOperation = 'source-over';
-      ctx.strokeStyle = selectedColor;
-      ctx.lineWidth = hlSize;
-      ctx.globalAlpha = 0.35;
-
-      ctx.beginPath();
-      ctx.moveTo(pts[0].x, pts[0].y);
-
-      for (let i = 1; i < pts.length - 1; i++) {
-        const xc = (pts[i].x + pts[i + 1].x) / 2;
-        const yc = (pts[i].y + pts[i + 1].y) / 2;
-        ctx.quadraticCurveTo(pts[i].x, pts[i].y, xc, yc);
-      }
-
-      if (pts.length >= 2) {
-        const last = pts[pts.length - 1];
-        const prev = pts[pts.length - 2];
-        ctx.quadraticCurveTo(prev.x, prev.y, last.x, last.y);
-      }
-
-      ctx.stroke();
-      ctx.globalAlpha = 1.0;
     }
+
+    if (snapshotRef.current) {
+      ctx.putImageData(snapshotRef.current, 0, 0);
+    }
+    drawStrokePath(ctx, currentPointsRef.current, activeTool);
   };
 
   const handlePointerUp = (e: React.PointerEvent<HTMLCanvasElement>) => {
@@ -223,18 +285,23 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
       e.currentTarget.releasePointerCapture(e.pointerId);
     } catch {}
     isDrawingRef.current = false;
-    strokePointsRef.current = [];
+    currentPointsRef.current = [];
     snapshotRef.current = null;
     saveCurrentState();
   };
+
+  const snapshotRef = useRef<ImageData | null>(null);
 
   const handleClearAll = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const rect = canvas.getBoundingClientRect();
+    ctx.clearRect(0, 0, rect.width, rect.height);
     onClearDrawing(questionId);
+    setUndoStack([]);
+    setRedoStack([]);
   };
 
   return (
@@ -386,7 +453,7 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
           </div>
         )}
 
-        {/* Size Slider Popover (For Pen, Highlighter & Eraser) */}
+        {/* Size Slider Popover */}
         {activeTool !== 'none' && (
           <div className="relative flex items-center">
             <button
@@ -436,6 +503,26 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
             )}
           </div>
         )}
+
+        {/* Undo Button */}
+        <button
+          onClick={handleUndo}
+          disabled={undoStack.length === 0}
+          className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed ml-0.5"
+          title="Hoàn tác nét vẽ (Ctrl + Z)"
+        >
+          <Undo2 size={13} />
+        </button>
+
+        {/* Redo Button */}
+        <button
+          onClick={handleRedo}
+          disabled={redoStack.length === 0}
+          className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+          title="Làm lại nét vẽ (Ctrl + Y)"
+        >
+          <Redo2 size={13} />
+        </button>
 
         {/* Clear All Drawing Button */}
         <button

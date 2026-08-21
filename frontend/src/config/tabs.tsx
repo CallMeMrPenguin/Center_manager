@@ -2,7 +2,8 @@ import React from 'react';
 import { 
   FileCode, Database, BookOpen, Settings as SettingsIcon, FolderOpen, LucideIcon,
   LayoutDashboard, Users, UserCheck, Briefcase, ClipboardList, Award, 
-  CreditCard, Receipt, BarChart3, CalendarCheck, UserCog, FileCheck, GraduationCap
+  CreditCard, Receipt, BarChart3, CalendarCheck, UserCog, FileCheck, GraduationCap,
+  PenTool
 } from 'lucide-react';
 import TestFormatter from '../pages/test-formatter';
 import QuestionBank from '../pages/question-bank';
@@ -10,6 +11,7 @@ import VocabularyBank from '../pages/vocabulary-bank';
 import UnitConfig from '../pages/unit-config';
 import Settings from '../pages/settings';
 import DocumentManager from '../pages/document-manager';
+import CanvasBoardPage from '../pages/canvas-board';
 import WaitingForDevelopment from '../components/WaitingForDevelopment';
 import StudentsPage from '../pages/students';
 import TeachersPage from '../pages/teachers';
@@ -143,6 +145,13 @@ export const TAB_DEFINITIONS: TabDefinition[] = [
     icon: FolderOpen,
     section: 'resources',
     render: () => <DocumentManager />
+  },
+  {
+    id: 'canvas-board',
+    label: 'Bảng Vẽ & PDF',
+    icon: PenTool,
+    section: 'resources',
+    render: () => <CanvasBoardPage />
   },
   {
     id: 'payments',

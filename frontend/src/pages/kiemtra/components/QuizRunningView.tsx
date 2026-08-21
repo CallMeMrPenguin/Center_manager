@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Clock, Flag, ChevronLeft, ChevronRight, ArrowLeft, ArrowRight,
-  Maximize2, Minimize2
+  Maximize2, Minimize2, RotateCcw, Play, Pause, X, Move
 } from 'lucide-react';
 import { Question, TimerMode } from '../types';
 import { showToast } from '../../../components/Toast';
@@ -18,10 +18,14 @@ interface QuizRunningViewProps {
   toggleBookmark: (id: number) => void;
   timerMode: TimerMode;
   timerRemaining: number;
+  setTimerRemaining: (s: number | ((prev: number) => number)) => void;
+  globalTimeSeconds: number;
   questionTimer: number;
+  setQuestionTimer: (s: number | ((prev: number) => number)) => void;
   perQuestionSeconds: number;
-  setQuestionTimer: (s: number) => void;
   formattedTimerRemaining: string;
+  isTimerPaused: boolean;
+  setIsTimerPaused: React.Dispatch<React.SetStateAction<boolean>>;
   isFullscreen: boolean;
   onToggleFullscreen: () => void;
   onFinishTest: () => void;
@@ -37,10 +41,15 @@ export const QuizRunningView: React.FC<QuizRunningViewProps> = ({
   bookmarkedQuestions,
   toggleBookmark,
   timerMode,
+  timerRemaining,
+  setTimerRemaining,
+  globalTimeSeconds,
   questionTimer,
-  perQuestionSeconds,
   setQuestionTimer,
+  perQuestionSeconds,
   formattedTimerRemaining,
+  isTimerPaused,
+  setIsTimerPaused,
   isFullscreen,
   onToggleFullscreen,
   onFinishTest,
@@ -50,12 +59,78 @@ export const QuizRunningView: React.FC<QuizRunningViewProps> = ({
   const [eliminatedOptions, setEliminatedOptions] = useState<Record<number, string[]>>({});
   const [drawings, setDrawings] = useState<Record<number, string>>({});
 
-  // Auto collapse sidebar when in fullscreen mode
+  // Popout Draggable Timer State
+  const [showPopoutTimer, setShowPopoutTimer] = useState<boolean>(true);
+  const [timerPos, setTimerPos] = useState({ x: Math.max(20, window.innerWidth - 280), y: 90 });
+  const isDraggingTimerRef = useRef(false);
+  const dragOffsetRef = useRef({ x: 0, y: 0 });
+
+  // Auto collapse sidebar when entering fullscreen
   useEffect(() => {
     if (isFullscreen) {
       setIsSidebarCollapsed(true);
     }
   }, [isFullscreen]);
+
+  // Keyboard Arrow Left & Right question navigation
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.tagName === 'SELECT')) {
+        return;
+      }
+      if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        setCurrentIndex(p => Math.max(0, (typeof p === 'number' ? p : currentIndex) - 1));
+        if (timerMode === 'per_question') setQuestionTimer(perQuestionSeconds);
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        setCurrentIndex(p => Math.min(activeQuestions.length - 1, (typeof p === 'number' ? p : currentIndex) + 1));
+        if (timerMode === 'per_question') setQuestionTimer(perQuestionSeconds);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [currentIndex, activeQuestions.length, timerMode, perQuestionSeconds, setCurrentIndex, setQuestionTimer]);
+
+  // Draggable popout window listeners
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (isDraggingTimerRef.current) {
+        const newX = Math.max(10, Math.min(window.innerWidth - 240, e.clientX - dragOffsetRef.current.x));
+        const newY = Math.max(10, Math.min(window.innerHeight - 140, e.clientY - dragOffsetRef.current.y));
+        setTimerPos({ x: newX, y: newY });
+      }
+    };
+    const handleMouseUp = () => {
+      isDraggingTimerRef.current = false;
+    };
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseup', handleMouseUp);
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, []);
+
+  const handleTimerMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault();
+    isDraggingTimerRef.current = true;
+    dragOffsetRef.current = {
+      x: e.clientX - timerPos.x,
+      y: e.clientY - timerPos.y,
+    };
+  };
+
+  const handleResetTimer = () => {
+    if (timerMode === 'global') {
+      setTimerRemaining(globalTimeSeconds);
+      showToast("Đã đặt lại thời gian làm bài!", "success");
+    } else if (timerMode === 'per_question') {
+      setQuestionTimer(perQuestionSeconds);
+      showToast("Đã đặt lại thời gian câu hỏi!", "success");
+    }
+  };
 
   const totalQuestions = activeQuestions.length;
   const q = activeQuestions[currentIndex];
@@ -77,7 +152,6 @@ export const QuizRunningView: React.FC<QuizRunningViewProps> = ({
     const cleanOpts = q.options.map(o => cleanOptionPrefix(o));
     const cleanCorrect = cleanOptionPrefix((q.answer || '').trim());
 
-    // Candidates: wrong and not yet eliminated
     const wrongCandidates = cleanOpts.filter(o => 
       o.toLowerCase() !== cleanCorrect.toLowerCase() && !currentEliminated.includes(o)
     );
@@ -113,7 +187,6 @@ export const QuizRunningView: React.FC<QuizRunningViewProps> = ({
     showToast(`Đã kích hoạt trợ giúp 50/50!`, "success");
   };
 
-  // Reset Lifelines for current question
   const handleResetLifelines = () => {
     if (!q) return;
     setEliminatedOptions(prev => {
@@ -225,20 +298,19 @@ export const QuizRunningView: React.FC<QuizRunningViewProps> = ({
 
             {/* RIGHT CONTROLS */}
             <div className="flex items-center gap-2">
-              {timerMode === 'global' && (
-                <div className="flex items-center gap-2 bg-[#121626] border border-[#263152] px-3 py-1 rounded-xl shadow-inner">
-                  <Clock size={14} className="text-indigo-400" />
-                  <span className="text-xs text-slate-400 font-bold">Còn lại:</span>
-                  <span className="text-xs font-black text-white font-mono">{formattedTimerRemaining}</span>
-                </div>
-              )}
-
-              {timerMode === 'per_question' && (
-                <div className="flex items-center gap-2 bg-[#121626] border border-[#263152] px-3 py-1 rounded-xl shadow-inner">
-                  <Clock size={14} className="text-amber-400" />
-                  <span className="text-xs text-slate-400 font-bold">Câu:</span>
-                  <span className="text-xs font-black text-amber-400 font-mono">{questionTimer}s</span>
-                </div>
+              {timerMode !== 'none' && (
+                <button
+                  onClick={() => setShowPopoutTimer(!showPopoutTimer)}
+                  className={`flex items-center gap-2 px-3 py-1 rounded-xl border text-xs font-bold transition cursor-pointer ${
+                    showPopoutTimer
+                      ? 'bg-indigo-600/30 text-indigo-300 border-indigo-400 shadow-sm'
+                      : 'bg-[#121626] text-slate-400 border-[#263152] hover:text-white'
+                  }`}
+                  title="Bật / Ẩn cửa sổ đồng hồ nổi"
+                >
+                  <Clock size={13} className={timerMode === 'global' ? 'text-indigo-400' : 'text-amber-400'} />
+                  <span>{timerMode === 'global' ? formattedTimerRemaining : `${questionTimer}s`}</span>
+                </button>
               )}
 
               <button
@@ -394,7 +466,7 @@ export const QuizRunningView: React.FC<QuizRunningViewProps> = ({
             className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-bold disabled:opacity-30 cursor-pointer border border-white/5"
           >
             <ArrowLeft size={14} />
-            <span>Câu trước</span>
+            <span>Câu trước (←)</span>
           </button>
 
           <div className="text-xs font-black text-slate-400 font-mono">
@@ -409,7 +481,7 @@ export const QuizRunningView: React.FC<QuizRunningViewProps> = ({
               }}
               className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-[#5c36f5] hover:bg-[#7351f7] text-white text-xs font-extrabold shadow-[0_4px_16px_rgba(92,54,245,0.4)] transition cursor-pointer border border-white/20 active:scale-95"
             >
-              <span>Câu tiếp</span>
+              <span>Câu tiếp (→)</span>
               <ArrowRight size={14} />
             </button>
           ) : (
@@ -422,6 +494,66 @@ export const QuizRunningView: React.FC<QuizRunningViewProps> = ({
           )}
         </div>
       </div>
+
+      {/* DRAGGABLE POPOUT TIMER WINDOW */}
+      {timerMode !== 'none' && showPopoutTimer && (
+        <div
+          style={{ left: `${timerPos.x}px`, top: `${timerPos.y}px` }}
+          className="fixed z-50 bg-[#0c0f1e] border border-[#263152] rounded-2xl shadow-2xl p-3 w-56 select-none"
+        >
+          {/* Draggable Titlebar */}
+          <div
+            onMouseDown={handleTimerMouseDown}
+            className="flex items-center justify-between cursor-move pb-2 border-b border-white/10"
+          >
+            <div className="flex items-center gap-1.5 text-xs font-bold text-slate-300">
+              <Move size={12} className="text-indigo-400" />
+              <span>Đồng hồ nổi</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => setShowPopoutTimer(false)}
+                className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition cursor-pointer"
+                title="Đóng đồng hồ nổi"
+              >
+                <X size={12} />
+              </button>
+            </div>
+          </div>
+
+          {/* Large Digital Timer Countdown Display */}
+          <div className="py-3 text-center">
+            <div className={`text-3xl font-black font-mono tracking-tight ${
+              timerMode === 'global' ? 'text-indigo-400' : 'text-amber-400'
+            }`}>
+              {timerMode === 'global' ? formattedTimerRemaining : `${questionTimer}s`}
+            </div>
+            <div className="text-[10px] font-bold text-slate-400 uppercase mt-0.5">
+              {timerMode === 'global' ? 'Thời gian làm bài' : 'Thời gian câu hỏi'}
+            </div>
+          </div>
+
+          {/* Action Buttons: Reset & Pause/Play */}
+          <div className="flex items-center gap-2 pt-2 border-t border-white/10">
+            <button
+              onClick={() => setIsTimerPaused(!isTimerPaused)}
+              className="flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-white text-xs font-bold transition cursor-pointer border border-white/10"
+              title={isTimerPaused ? "Tiếp tục đếm giờ" : "Tạm dừng đếm giờ"}
+            >
+              {isTimerPaused ? <Play size={12} /> : <Pause size={12} />}
+              <span>{isTimerPaused ? 'Tiếp tục' : 'Tạm dừng'}</span>
+            </button>
+
+            <button
+              onClick={handleResetTimer}
+              className="flex items-center justify-center p-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white text-xs font-bold transition cursor-pointer border border-white/10"
+              title="Đặt lại thời gian về ban đầu"
+            >
+              <RotateCcw size={13} />
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
