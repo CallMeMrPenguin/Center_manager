@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { GripVertical, X, Play, Pause, RotateCcw, Plus, Minus } from 'lucide-react';
+import { GripVertical, X, Play, Pause, RotateCcw } from 'lucide-react';
 import { TimerMode } from '../types';
 
 interface QuizPopoutTimerProps {
@@ -31,10 +31,12 @@ export const QuizPopoutTimer: React.FC<QuizPopoutTimerProps> = ({
   onTogglePause,
   onReset,
 }) => {
-  const [scale, setScale] = useState<number>(1.0);
-  const [isHovered, setIsHovered] = useState<boolean>(false);
+  const [timerSize, setTimerSize] = useState<{ width: number; height: number }>({ width: 170, height: 95 });
   const isDraggingRef = useRef(false);
   const dragOffsetRef = useRef({ x: 0, y: 0 });
+
+  const isResizingRef = useRef(false);
+  const resizeStartRef = useRef({ x: 0, y: 0, width: 170, height: 95 });
 
   const handleMouseDown = (e: React.MouseEvent) => {
     isDraggingRef.current = true;
@@ -60,15 +62,37 @@ export const QuizPopoutTimer: React.FC<QuizPopoutTimerProps> = ({
     window.addEventListener('mouseup', onUp);
   };
 
-  const handleZoomIn = () => {
-    setScale(s => Math.min(2.5, +(s + 0.25).toFixed(2)));
+  const handleResizeMouseDown = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    isResizingRef.current = true;
+    resizeStartRef.current = {
+      x: e.clientX,
+      y: e.clientY,
+      width: timerSize.width,
+      height: timerSize.height,
+    };
+
+    const onMove = (moveEvt: MouseEvent) => {
+      if (!isResizingRef.current) return;
+      const dx = moveEvt.clientX - resizeStartRef.current.x;
+      const dy = moveEvt.clientY - resizeStartRef.current.y;
+      setTimerSize({
+        width: Math.max(130, Math.min(480, resizeStartRef.current.width + dx)),
+        height: Math.max(70, Math.min(320, resizeStartRef.current.height + dy)),
+      });
+    };
+
+    const onUp = () => {
+      isResizingRef.current = false;
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup', onUp);
+    };
+
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
   };
 
-  const handleZoomOut = () => {
-    setScale(s => Math.max(0.75, +(s - 0.25).toFixed(2)));
-  };
-
-  // Determine dynamic color status: green -> yellow -> red with breathing pulse
+  // Determine dynamic color status: green -> yellow -> red
   let timerStatus: 'green' | 'yellow' | 'red' = 'green';
   if (timerMode === 'per_question') {
     const ratio = questionTimer / Math.max(1, perQuestionSeconds);
@@ -91,111 +115,119 @@ export const QuizPopoutTimer: React.FC<QuizPopoutTimerProps> = ({
   }
 
   const rawTime = timerMode === 'per_question' ? `${questionTimer}s` : formattedTimerRemaining;
-  // Format spaced digits for modern digital clock look (e.g., "12 : 30")
   const displayTimeFormatted = rawTime.includes(':')
     ? rawTime.split(':').join(' : ')
     : rawTime;
 
+  const fontSizeRem = Math.max(1.2, Math.min(3.6, (timerSize.width / 170) * 1.65));
+
   return (
-    <div
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      style={timerPos ? { transform: `translate3d(${timerPos.x}px, ${timerPos.y}px, 0)` } : {}}
-      className={`fixed top-20 left-8 z-[100] pointer-events-auto bg-[#0d101f] border-2 p-3.5 rounded-3xl select-none shadow-[0_16px_40px_rgba(0,0,0,0.7)] ring-1 flex flex-col items-center gap-2.5 transition-all duration-200 ${
-        timerStatus === 'red'
-          ? 'border-rose-500/80 shadow-[0_0_30px_rgba(244,63,94,0.6)] ring-rose-500/50 animate-pulse'
-          : timerStatus === 'yellow'
-          ? 'border-amber-500/60 shadow-[0_0_20px_rgba(245,158,11,0.3)] ring-amber-500/30'
-          : 'border-[#5c36f5]/70 shadow-[0_8px_32px_rgba(0,0,0,0.6),0_0_20px_rgba(92,54,245,0.35)] ring-white/15'
-      }`}
-    >
-      {/* TOP HEADER: DRAG HANDLE & UTILITY BUTTONS */}
-      <div className="w-full flex items-center justify-between text-slate-400 px-1">
+    <>
+      <style>{`
+        @keyframes timerNumberBreathe {
+          0%, 100% { transform: scale(1); }
+          50% { transform: scale(1.18); }
+        }
+      `}</style>
+
+      <div
+        style={{
+          width: `${timerSize.width}px`,
+          height: `${timerSize.height}px`,
+          ...(timerPos ? { transform: `translate3d(${timerPos.x}px, ${timerPos.y}px, 0)` } : {}),
+        }}
+        className={`fixed top-20 left-8 z-[100] pointer-events-auto bg-[#0d101f] border-2 p-2.5 rounded-2xl select-none shadow-[0_16px_40px_rgba(0,0,0,0.7)] ring-1 flex flex-col justify-between relative group ${
+          timerStatus === 'red'
+            ? 'border-rose-500/80 ring-rose-500/40 shadow-[0_0_25px_rgba(244,63,94,0.4)]'
+            : timerStatus === 'yellow'
+            ? 'border-amber-500/60 ring-amber-500/30 shadow-[0_0_15px_rgba(245,158,11,0.25)]'
+            : 'border-[#5c36f5]/70 ring-white/15 shadow-[0_8px_32px_rgba(0,0,0,0.6)]'
+        }`}
+      >
+        {/* TOP HEADER ROW: DRAG HANDLE (LEFT) + ICON ACTIONS (RIGHT) */}
+        <div className="w-full flex items-center justify-between text-slate-400 shrink-0">
+          <div
+            onMouseDown={handleMouseDown}
+            className={`p-1 cursor-move transition-colors rounded-lg hover:bg-white/5 ${
+              timerStatus === 'red' ? 'text-rose-400 hover:text-rose-200' : 'text-indigo-400 hover:text-indigo-200'
+            }`}
+            title="Kéo thả để di chuyển đồng hồ"
+          >
+            <GripVertical size={14} />
+          </div>
+
+          {/* TOP-RIGHT ICON ACTIONS: RESET, START/STOP, CLOSE */}
+          <div className="flex items-center gap-1">
+            <button
+              onClick={onReset}
+              className="p-1 rounded-lg hover:bg-white/10 text-slate-300 hover:text-white transition cursor-pointer"
+              title="Đặt lại thời gian (Reset)"
+            >
+              <RotateCcw size={13} />
+            </button>
+
+            <button
+              onClick={onTogglePause}
+              className={`p-1 rounded-lg transition cursor-pointer ${
+                isTimerPaused
+                  ? 'hover:bg-emerald-500/20 text-emerald-400'
+                  : 'hover:bg-rose-500/20 text-rose-400'
+              }`}
+              title={isTimerPaused ? "Bắt đầu (Start)" : "Tạm dừng (Stop)"}
+            >
+              {isTimerPaused ? (
+                <Play size={13} className="fill-emerald-400" />
+              ) : (
+                <Pause size={13} className="fill-rose-400" />
+              )}
+            </button>
+
+            <button
+              onClick={onClose}
+              className="p-1 rounded-lg hover:bg-rose-500/20 text-slate-400 hover:text-rose-400 transition cursor-pointer"
+              title="Đóng đồng hồ nổi"
+            >
+              <X size={13} />
+            </button>
+          </div>
+        </div>
+
+        {/* CENTER: LARGE DIGITAL TIME WITH SCALE BREATHING ANIMATION ON NUMBERS ONLY */}
+        <div className="flex-1 flex items-center justify-center overflow-hidden px-1">
+          <span
+            style={{
+              fontSize: `${fontSizeRem.toFixed(2)}rem`,
+              animation: timerStatus === 'red' ? 'timerNumberBreathe 1s ease-in-out infinite' : 'none',
+              transformOrigin: 'center',
+            }}
+            className={`font-mono font-black tracking-wider transition-colors inline-block ${
+              timerStatus === 'red'
+                ? 'text-rose-400 drop-shadow-[0_0_12px_rgba(244,63,94,0.7)]'
+                : timerStatus === 'yellow'
+                ? 'text-amber-400 drop-shadow-[0_0_10px_rgba(245,158,11,0.5)]'
+                : 'text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]'
+            }`}
+          >
+            {displayTimeFormatted}
+          </span>
+        </div>
+
+        {/* CORNER DRAG RESIZE HANDLE */}
         <div
-          onMouseDown={handleMouseDown}
-          className={`p-1 cursor-move transition-colors rounded-lg hover:bg-white/5 ${
-            timerStatus === 'red' ? 'text-rose-400 hover:text-rose-200' : 'text-indigo-400 hover:text-indigo-200'
-          }`}
-          title="Kéo thả để di chuyển đồng hồ"
+          onMouseDown={handleResizeMouseDown}
+          className="absolute bottom-1 right-1 w-4 h-4 cursor-se-resize flex items-end justify-end p-0.5 text-slate-500 hover:text-indigo-400 opacity-60 hover:opacity-100 transition-opacity"
+          title="Kéo góc để phóng to/thu nhỏ kích thước"
         >
-          <GripVertical size={14} />
-        </div>
-
-        {/* UTILITY ZOOM & CLOSE BUTTONS (Revealed on hover) */}
-        <div className={`flex items-center gap-1 transition-opacity duration-200 ${isHovered ? 'opacity-100' : 'opacity-0'}`}>
-          <button
-            onClick={handleZoomOut}
-            disabled={scale <= 0.75}
-            className="p-1 rounded-md hover:bg-white/10 text-slate-300 hover:text-white transition disabled:opacity-30 cursor-pointer"
-            title="Thu nhỏ (-)"
-          >
-            <Minus size={11} />
-          </button>
-          <button
-            onClick={handleZoomIn}
-            disabled={scale >= 2.5}
-            className="p-1 rounded-md hover:bg-white/10 text-slate-300 hover:text-white transition disabled:opacity-30 cursor-pointer"
-            title="Phóng to (+)"
-          >
-            <Plus size={11} />
-          </button>
-          <button
-            onClick={onClose}
-            className="p-1 rounded-md hover:bg-rose-500/20 text-slate-400 hover:text-rose-400 transition cursor-pointer"
-            title="Đóng"
-          >
-            <X size={12} />
-          </button>
+          <svg width="8" height="8" viewBox="0 0 8 8" fill="currentColor">
+            <circle cx="7" cy="7" r="1" />
+            <circle cx="7" cy="4" r="1" />
+            <circle cx="4" cy="7" r="1" />
+            <circle cx="7" cy="1" r="1" />
+            <circle cx="4" cy="4" r="1" />
+            <circle cx="1" cy="7" r="1" />
+          </svg>
         </div>
       </div>
-
-      {/* LARGE DIGITAL CLOCK DISPLAY */}
-      <div className="px-3 py-1 flex items-center justify-center">
-        <span
-          style={{ fontSize: `${(1.75 * scale).toFixed(3)}rem` }}
-          className={`font-mono font-black tracking-wider transition-all drop-shadow-md ${
-            timerStatus === 'red'
-              ? 'text-rose-400'
-              : timerStatus === 'yellow'
-              ? 'text-amber-400'
-              : 'text-white'
-          }`}
-        >
-          {displayTimeFormatted}
-        </span>
-      </div>
-
-      {/* BOTTOM ACTION BUTTONS: RESET & START/STOP PILLS (Matching reference card) */}
-      <div className="flex items-center gap-2 w-full pt-0.5">
-        <button
-          onClick={onReset}
-          className="flex-1 flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-xl bg-white/10 hover:bg-white/15 active:scale-95 text-slate-200 text-xs font-bold transition cursor-pointer border border-white/10"
-          title="Đặt lại thời gian"
-        >
-          <RotateCcw size={12} />
-          <span>Reset</span>
-        </button>
-
-        {isTimerPaused ? (
-          <button
-            onClick={onTogglePause}
-            className="flex-1 flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-xl bg-[#5c36f5] hover:bg-[#7351f7] active:scale-95 text-white text-xs font-black transition cursor-pointer shadow-[0_4px_14px_rgba(92,54,245,0.4)] border border-white/20"
-            title="Bắt đầu đếm giờ"
-          >
-            <Play size={12} className="fill-white" />
-            <span>Start</span>
-          </button>
-        ) : (
-          <button
-            onClick={onTogglePause}
-            className="flex-1 flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-xl bg-[#ef4444] hover:bg-[#dc2626] active:scale-95 text-white text-xs font-black transition cursor-pointer shadow-[0_4px_14px_rgba(239,68,68,0.4)] border border-white/20"
-            title="Tạm dừng đếm giờ"
-          >
-            <Pause size={12} className="fill-white" />
-            <span>Stop</span>
-          </button>
-        )}
-      </div>
-    </div>
+    </>
   );
 };
