@@ -4,6 +4,7 @@ import { api } from '../../../api';
 import { MasteryHeatmap } from '../components/MasteryHeatmap';
 import { UnitBreakdownTable } from '../components/UnitBreakdownTable';
 import { StudentWeaknessDiagnosisCard } from '../components/StudentWeaknessDiagnosisCard';
+import { SegmentedControl } from '../../../components/SegmentedControl';
 import { computeMockSkillBreakdown, generateMockReportsData } from '../utils/mockReportsData';
 
 interface SkillBreakdownTabProps {
@@ -124,46 +125,18 @@ export const SkillBreakdownTab: React.FC<SkillBreakdownTabProps> = ({
 
       {/* 1. INTERNAL SUB-TAB SELECTOR (SLIDING PILL INDICATOR) */}
       <div className="flex flex-wrap items-center justify-between gap-4 border-b border-white/5 pb-2">
-        <div className="relative flex bg-[#0d1018] p-1 rounded-xl border border-white/10 text-xs shrink-0 font-bold select-none w-full sm:w-auto min-w-[540px]">
-          <div
-            className="absolute top-1 bottom-1 rounded-lg bg-[#5c36f5] shadow-[0_0_14px_rgba(92,54,245,0.5)] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] pointer-events-none"
-            style={{
-              left: activeSubTab === 'diagnosis'
-                ? '4px'
-                : activeSubTab === 'heatmap'
-                  ? 'calc(4px + (100% - 8px) * 1 / 3)'
-                  : 'calc(4px + (100% - 8px) * 2 / 3)',
-              width: 'calc((100% - 8px) / 3)',
-            }}
-          />
-          <button
-            type="button"
-            onClick={() => setActiveSubTab('diagnosis')}
-            className={`flex-1 relative z-10 py-2 text-center transition-colors cursor-pointer whitespace-nowrap ${
-              activeSubTab === 'diagnosis' ? 'text-white font-black' : 'text-slate-400 hover:text-white'
-            }`}
-          >
-            Học Sinh Cần Phụ Đạo
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveSubTab('heatmap')}
-            className={`flex-1 relative z-10 py-2 text-center transition-colors cursor-pointer whitespace-nowrap ${
-              activeSubTab === 'heatmap' ? 'text-white font-black' : 'text-slate-400 hover:text-white'
-            }`}
-          >
-            Ma Trận Nắm Vững
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveSubTab('units')}
-            className={`flex-1 relative z-10 py-2 text-center transition-colors cursor-pointer whitespace-nowrap ${
-              activeSubTab === 'units' ? 'text-white font-black' : 'text-slate-400 hover:text-white'
-            }`}
-          >
-            Thống Kê Theo Unit
-          </button>
-        </div>
+        <SegmentedControl<'diagnosis' | 'heatmap' | 'units'>
+          value={activeSubTab}
+          onChange={setActiveSubTab}
+          options={[
+            { value: 'diagnosis', label: 'Học Sinh Cần Phụ Đạo' },
+            { value: 'heatmap', label: 'Ma Trận Nắm Vững' },
+            { value: 'units', label: 'Thống Kê Theo Unit' },
+          ]}
+          activeColor="bg-[#5c36f5] shadow-[0_0_14px_rgba(92,54,245,0.5)]"
+          className="w-full sm:w-auto min-w-[540px]"
+          size="md"
+        />
       </div>
 
       {/* 2. SUB-TAB CONTENT VIEWS */}

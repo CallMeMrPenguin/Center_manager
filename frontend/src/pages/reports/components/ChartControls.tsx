@@ -1,6 +1,7 @@
 import React from 'react';
 import { BarChart3, TrendingUp, BarChart2, ZoomIn, ZoomOut, RotateCcw, Clock } from 'lucide-react';
 import { CustomSelect } from '../../../components/CustomSelect';
+import { SegmentedControl } from '../../../components/SegmentedControl';
 import { formatSessionDate } from '../utils';
 import { format1Dec } from '../../../utils';
 import { DistributionStats } from '../utils/distributionAnalytics';
@@ -57,40 +58,22 @@ export const ChartControls: React.FC<ChartControlsProps> = ({
         </div>
 
         {/* Sliding Pill Indicator for View Mode Switcher */}
-        <div className="relative flex bg-[#0d1222] border border-[#212c4b] p-1 rounded-xl text-xs font-black select-none w-72 sm:w-80 shrink-0">
-          <div
-            className="absolute top-1 bottom-1 rounded-lg bg-[#5c36f5] shadow-[0_0_14px_rgba(92,54,245,0.5)] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] pointer-events-none"
-            style={{
-              left: chartViewMode === 'timeline' ? '4px' : 'calc(50% + 1px)',
-              width: 'calc(50% - 4px)',
-            }}
-          />
-          <button
-            type="button"
-            onClick={() => setChartViewMode('timeline')}
-            className={`flex-1 relative z-10 py-1.5 px-2 text-center transition-colors cursor-pointer flex items-center justify-center gap-1.5 ${
-              chartViewMode === 'timeline' ? 'text-white font-black' : 'text-slate-400 hover:text-white'
-            }`}
-          >
-            <TrendingUp size={13} />
-            <span>Tiến Trình Thời Gian</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => setChartViewMode('distribution')}
-            className={`flex-1 relative z-10 py-1.5 px-2 text-center transition-colors cursor-pointer flex items-center justify-center gap-1.5 ${
-              chartViewMode === 'distribution' ? 'text-white font-black' : 'text-slate-400 hover:text-white'
-            }`}
-          >
-            <BarChart3 size={13} />
-            <span>Phổ Điểm Học Lực</span>
-          </button>
-        </div>
+        <SegmentedControl<'timeline' | 'distribution'>
+          value={chartViewMode}
+          onChange={setChartViewMode}
+          options={[
+            { value: 'timeline', label: 'Tiến Trình Thời Gian' },
+            { value: 'distribution', label: 'Phổ Điểm & Histogram' },
+          ]}
+          activeColor="bg-[#5c36f5] shadow-[0_0_14px_rgba(92,54,245,0.5)]"
+          className="w-72 sm:w-80 shrink-0"
+          size="sm"
+        />
       </div>
 
-      {/* 2. SECONDARY CONTROLS */}
+      {/* Dynamic Sub-Controls depending on Active Chart Mode */}
       {chartViewMode === 'timeline' ? (
-        <div className="flex flex-wrap items-center justify-between gap-4 pt-1">
+        <div className="flex flex-wrap items-center justify-between gap-3 pt-1 border-t border-white/5 text-xs">
           {/* Legend with Predictions */}
           <div className="flex flex-wrap items-center gap-3.5 text-[11px] font-bold">
             <span className="flex items-center gap-1.5 text-blue-400">
@@ -108,25 +91,25 @@ export const ChartControls: React.FC<ChartControlsProps> = ({
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
-            {/* Interactive Zoom Controls */}
-            <div className="flex items-center gap-1.5 bg-[#141b32] border border-[#232d4e] p-1 rounded-xl text-xs font-extrabold shrink-0">
+            {/* Zoom & Pan Controls */}
+            <div className="flex items-center bg-[#141b32] border border-[#232d4e] rounded-xl p-1 gap-1">
               <button
                 type="button"
-                onClick={() => setZoomLevel((prev) => Math.min(5.0, prev + 0.25))}
-                className="p-1 rounded-lg hover:bg-indigo-600/30 text-slate-300 hover:text-white transition cursor-pointer"
-                title="Phóng to (Zoom In)"
+                onClick={() => setZoomLevel((z) => Math.min(2.5, z + 0.2))}
+                title="Phóng to biểu đồ"
+                className="w-7 h-7 flex items-center justify-center rounded-lg bg-[#1a2340] hover:bg-indigo-600/30 text-slate-300 hover:text-indigo-300 transition cursor-pointer"
               >
                 <ZoomIn size={14} />
               </button>
               <button
                 type="button"
-                onClick={() => setZoomLevel((prev) => Math.max(1.0, prev - 0.25))}
-                className="p-1 rounded-lg hover:bg-indigo-600/30 text-slate-300 hover:text-white transition cursor-pointer"
-                title="Thu nhỏ (Zoom Out)"
+                onClick={() => setZoomLevel((z) => Math.max(0.6, z - 0.2))}
+                title="Thu nhỏ biểu đồ"
+                className="w-7 h-7 flex items-center justify-center rounded-lg bg-[#1a2340] hover:bg-indigo-600/30 text-slate-300 hover:text-indigo-300 transition cursor-pointer"
               >
                 <ZoomOut size={14} />
               </button>
-              <span className="text-[10px] text-indigo-300 font-mono px-1">
+              <span className="text-[10px] font-bold text-slate-400 px-1.5 tabular-nums">
                 {Math.round(zoomLevel * 100)}%
               </span>
               <button
@@ -135,52 +118,30 @@ export const ChartControls: React.FC<ChartControlsProps> = ({
                   setZoomLevel(1.0);
                   setPanOffset({ x: 0, y: 0 });
                 }}
-                className="p-1.5 rounded-lg hover:bg-rose-500/20 text-slate-400 hover:text-rose-300 transition cursor-pointer"
-                title="Đặt lại góc nhìn (Reset View)"
+                title="Đặt lại góc nhìn"
+                className="w-7 h-7 flex items-center justify-center rounded-lg bg-[#1a2340] hover:bg-indigo-600/30 text-slate-400 hover:text-indigo-300 transition cursor-pointer"
               >
                 <RotateCcw size={12} />
               </button>
             </div>
 
             {/* Time View Filter */}
-            <div className="relative flex bg-[#141b32] border border-[#232d4e] p-1 rounded-xl text-xs font-extrabold select-none w-64 shrink-0">
-              <div
-                className="absolute top-1 bottom-1 rounded-lg bg-indigo-600 shadow-[0_0_14px_rgba(99,102,241,0.5)] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] pointer-events-none"
-                style={{
-                  left:
-                    timeView === '1m'
-                      ? '4px'
-                      : timeView === '2m'
-                      ? 'calc(25% + 1px)'
-                      : timeView === '3m'
-                      ? 'calc(50% + 1px)'
-                      : 'calc(75% + 1px)',
-                  width: 'calc(25% - 4px)',
-                }}
-              />
-              {[
-                { id: '1m', label: '1 Tháng' },
-                { id: '2m', label: '2 Tháng' },
-                { id: '3m', label: '3 Tháng' },
-                { id: 'all', label: 'Tất Cả' },
-              ].map((t) => (
-                <button
-                  key={t.id}
-                  type="button"
-                  onClick={() => {
-                    setTimeView(t.id as any);
-                    setSelectedPhaseId('');
-                  }}
-                  className={`flex-1 relative z-10 py-1 text-center transition-colors cursor-pointer ${
-                    !selectedPhaseId && timeView === t.id
-                      ? 'text-white font-black'
-                      : 'text-slate-400 hover:text-white'
-                  }`}
-                >
-                  {t.label}
-                </button>
-              ))}
-            </div>
+            <SegmentedControl<'1m' | '2m' | '3m' | 'all'>
+              value={timeView}
+              onChange={(val) => {
+                setTimeView(val);
+                setSelectedPhaseId('');
+              }}
+              options={[
+                { value: '1m', label: '1 Tháng' },
+                { value: '2m', label: '2 Tháng' },
+                { value: '3m', label: '3 Tháng' },
+                { value: 'all', label: 'Tất Cả' },
+              ]}
+              activeColor="bg-indigo-600 shadow-[0_0_14px_rgba(99,102,241,0.5)]"
+              className="w-64 shrink-0"
+              size="sm"
+            />
 
             {/* Custom Time Phase Selector */}
             <div className="flex items-center gap-1.5">

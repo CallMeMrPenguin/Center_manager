@@ -10,6 +10,7 @@ import { useConfirm } from '../components/ConfirmDialog';
 import { CustomDatePicker } from '../components/CustomDatePicker';
 import { CustomSelect } from '../components/CustomSelect';
 import { DataTable } from '../components/DataTable';
+import { SegmentedControl } from '../components/SegmentedControl';
 
 import { getLocalDateStr, notifyDataChanged } from '../utils';
 
@@ -386,43 +387,18 @@ export default function SchedulePage() {
           />
         </div>
         <div className="flex items-center gap-2">
-          <div className="relative flex bg-[#0d1018] border border-white/10 p-1 rounded-xl text-[10px] font-black select-none w-64 shrink-0">
-            <div
-              className="absolute top-1 bottom-1 rounded-lg bg-[#5c36f5] shadow-[0_0_14px_rgba(92,54,245,0.5)] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] pointer-events-none"
-              style={{
-                left: viewMode === 'month'
-                  ? '4px'
-                  : viewMode === 'week'
-                  ? 'calc(33.333% + 1px)'
-                  : 'calc(66.666% + 1px)',
-                width: 'calc(33.333% - 4px)',
-              }}
-            />
-            <button
-              onClick={() => setViewMode('month')}
-              className={`flex-1 relative z-10 py-1 text-center transition-colors cursor-pointer ${
-                viewMode === 'month' ? 'text-white font-black' : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              LỊCH THÁNG
-            </button>
-            <button
-              onClick={() => setViewMode('week')}
-              className={`flex-1 relative z-10 py-1 text-center transition-colors cursor-pointer ${
-                viewMode === 'week' ? 'text-white font-black' : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              LỊCH TUẦN
-            </button>
-            <button
-              onClick={() => setViewMode('list')}
-              className={`flex-1 relative z-10 py-1 text-center transition-colors cursor-pointer ${
-                viewMode === 'list' ? 'text-white font-black' : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              DANH SÁCH
-            </button>
-          </div>
+          <SegmentedControl<'month' | 'week' | 'list'>
+            value={viewMode}
+            onChange={setViewMode}
+            options={[
+              { value: 'month', label: 'LỊCH THÁNG' },
+              { value: 'week', label: 'LỊCH TUẦN' },
+              { value: 'list', label: 'DANH SÁCH' },
+            ]}
+            activeColor="bg-[#5c36f5] shadow-[0_0_14px_rgba(92,54,245,0.5)]"
+            className="w-64 shrink-0"
+            size="sm"
+          />
         </div>
       </div>
 

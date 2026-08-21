@@ -14,6 +14,7 @@ import { EditGradeModal } from './components/EditGradeModal';
 import { ResetGradesModal } from './components/ResetGradesModal';
 import { TimePhaseModal } from './components/TimePhaseModal';
 import { TestDatasetModal } from './components/TestDatasetModal';
+import { SegmentedControl } from '../../components/SegmentedControl';
 import { useReportsData } from './hooks/useReportsData';
 import { getStudentTier, WarningSettings } from './types';
 import { generateAcademicYears, getCurrentAcademicYear, getSavedWarningSettings } from './utils';
@@ -135,49 +136,19 @@ export const ReportsPage: React.FC = () => {
 
       {/* 2. REPORT MODE TAB SWITCHER (4 TABS) */}
       <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[#181f36] pb-3">
-        <div className="relative flex bg-[#090d16] p-1 rounded-xl border border-[#1b253b] text-xs shrink-0 font-bold select-none w-full sm:w-auto min-w-[720px]">
-          <div
-            className="absolute top-1 bottom-1 rounded-lg bg-[#2563eb] shadow-[0_0_14px_rgba(37,99,235,0.45)] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] pointer-events-none"
-            style={{
-              left: activeReportTab === 'overview'
-                ? '4px'
-                : activeReportTab === 'deep'
-                  ? 'calc(4px + (100% - 8px) * 1 / 4)'
-                  : activeReportTab === 'skills'
-                    ? 'calc(4px + (100% - 8px) * 2 / 4)'
-                    : 'calc(4px + (100% - 8px) * 3 / 4)',
-              width: 'calc((100% - 8px) / 4)',
-            }}
-          />
-          <button
-            type="button"
-            onClick={() => setActiveReportTab('overview')}
-            className={`flex-1 relative z-10 py-2.5 text-center transition-colors cursor-pointer whitespace-nowrap ${activeReportTab === 'overview' ? 'text-white font-black' : 'text-slate-400 hover:text-white'}`}
-          >
-            Tổng Quan Học Lực
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveReportTab('deep')}
-            className={`flex-1 relative z-10 py-2.5 text-center transition-colors cursor-pointer whitespace-nowrap ${activeReportTab === 'deep' ? 'text-white font-black' : 'text-slate-400 hover:text-white'}`}
-          >
-            Thống Kê Sâu
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveReportTab('skills')}
-            className={`flex-1 relative z-10 py-2.5 text-center transition-colors cursor-pointer whitespace-nowrap ${activeReportTab === 'skills' ? 'text-white font-black' : 'text-slate-400 hover:text-white'}`}
-          >
-            Phân Tích Kỹ Năng & Unit
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveReportTab('benchmark')}
-            className={`flex-1 relative z-10 py-2.5 text-center transition-colors cursor-pointer whitespace-nowrap ${activeReportTab === 'benchmark' ? 'text-white font-black' : 'text-slate-400 hover:text-white'}`}
-          >
-            So Sánh Giữa Các Lớp
-          </button>
-        </div>
+        <SegmentedControl<'overview' | 'deep' | 'skills' | 'benchmark'>
+          value={activeReportTab}
+          onChange={setActiveReportTab}
+          options={[
+            { value: 'overview', label: 'Tổng Quan Học Lực' },
+            { value: 'deep', label: 'Thống Kê Sâu' },
+            { value: 'skills', label: 'Phân Tích Kỹ Năng & Unit' },
+            { value: 'benchmark', label: 'So Sánh Giữa Các Lớp' },
+          ]}
+          activeColor="bg-[#2563eb] shadow-[0_0_14px_rgba(37,99,235,0.45)]"
+          className="w-full sm:w-auto min-w-[720px]"
+          size="md"
+        />
       </div>
 
       {/* 3. ACTIVE SUB-TAB CONTAINER */}

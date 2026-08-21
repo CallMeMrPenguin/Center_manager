@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { ShieldAlert, Users2 } from 'lucide-react';
 import { TierDistributionCard } from '../components/TierDistributionCard';
 import { EarlyWarningSection } from '../components/EarlyWarningSection';
 import { SmartGroupingSection } from '../components/SmartGroupingSection';
 import { ScoreFluctuationsSection } from '../components/ScoreFluctuationsSection';
 import { LearningBottlenecksSection } from '../components/LearningBottlenecksSection';
+import { SegmentedControl } from '../../../components/SegmentedControl';
 import { WarningSettings } from '../types';
 
 interface DeepAnalysisTabProps {
@@ -50,35 +50,17 @@ export const DeepAnalysisTab: React.FC<DeepAnalysisTabProps> = ({
     <div className="flex flex-col gap-6 mb-8 select-none">
       {/* 1. INTERNAL SUB-TAB SELECTOR (SLIDING PILL INDICATOR) */}
       <div className="flex flex-wrap items-center justify-between gap-4 border-b border-white/5 pb-2">
-        <div className="relative flex bg-[#0d1018] p-1 rounded-xl border border-white/10 text-xs shrink-0 font-bold select-none w-full sm:w-auto min-w-[500px]">
-          <div
-            className="absolute top-1 bottom-1 rounded-lg bg-[#5c36f5] shadow-[0_0_14px_rgba(92,54,245,0.5)] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] pointer-events-none"
-            style={{
-              left: activeSubTab === 'warnings' ? '4px' : 'calc(50% + 1px)',
-              width: 'calc(50% - 4px)',
-            }}
-          />
-          <button
-            type="button"
-            onClick={() => setActiveSubTab('warnings')}
-            className={`flex-1 relative z-10 py-2 px-4 text-center transition-colors cursor-pointer flex items-center justify-center gap-1.5 whitespace-nowrap ${
-              activeSubTab === 'warnings' ? 'text-white font-black' : 'text-slate-400 hover:text-white'
-            }`}
-          >
-            <ShieldAlert size={13} />
-            <span>Phân Bố Cấp Bậc & Cảnh Báo Sớm</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveSubTab('pedagogy')}
-            className={`flex-1 relative z-10 py-2 px-4 text-center transition-colors cursor-pointer flex items-center justify-center gap-1.5 whitespace-nowrap ${
-              activeSubTab === 'pedagogy' ? 'text-white font-black' : 'text-slate-400 hover:text-white'
-            }`}
-          >
-            <Users2 size={13} />
-            <span>Nhóm Học & Biến Động Điểm</span>
-          </button>
-        </div>
+        <SegmentedControl<'warnings' | 'pedagogy'>
+          value={activeSubTab}
+          onChange={setActiveSubTab}
+          options={[
+            { value: 'warnings', label: 'Phân Bố Cấp Bậc & Cảnh Báo Sớm' },
+            { value: 'pedagogy', label: 'Nhóm Học & Biến Động Điểm' },
+          ]}
+          activeColor="bg-[#5c36f5] shadow-[0_0_14px_rgba(92,54,245,0.5)]"
+          className="w-full sm:w-auto min-w-[500px]"
+          size="md"
+        />
       </div>
 
       {/* 2. SUB-TAB CONTENT VIEWS */}

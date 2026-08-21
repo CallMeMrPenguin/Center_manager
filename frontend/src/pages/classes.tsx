@@ -14,6 +14,7 @@ import { CustomDatePicker } from '../components/CustomDatePicker';
 import { CustomSelect } from '../components/CustomSelect';
 import { getLocalDateStr, notifyDataChanged } from '../utils';
 import { DataTable } from '../components/DataTable';
+import { SegmentedControl } from '../components/SegmentedControl';
 import { ColumnDef } from '@tanstack/react-table';
 
 interface ClassItem {
@@ -1146,43 +1147,18 @@ export default function ClassesPage() {
             </div>
 
             {/* SUB TAB SELECTOR WITH SMOOTH SLIDING PILL ANIMATION */}
-            <div className="relative flex bg-[#0d1018] border border-white/10 p-1 rounded-xl text-xs font-bold select-none min-w-[460px]">
-              <div
-                className="absolute top-1 bottom-1 rounded-lg bg-[#5c36f5] shadow-[0_0_14px_rgba(92,54,245,0.5)] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] pointer-events-none"
-                style={{
-                  left: activeSubTab === 'grades'
-                    ? '4px'
-                    : activeSubTab === 'seating'
-                    ? 'calc(33.333% + 1px)'
-                    : 'calc(66.666% + 1px)',
-                  width: 'calc(33.333% - 4px)',
-                }}
-              />
-              <button
-                onClick={() => setActiveSubTab('grades')}
-                className={`flex-1 relative z-10 py-1.5 px-3 text-center transition-colors cursor-pointer ${
-                  activeSubTab === 'grades' ? 'text-white font-black' : 'text-slate-400 hover:text-white'
-                }`}
-              >
-                Điểm Danh & Điểm ({enrolledStudents.length})
-              </button>
-              <button
-                onClick={() => setActiveSubTab('seating')}
-                className={`flex-1 relative z-10 py-1.5 px-3 text-center transition-colors cursor-pointer ${
-                  activeSubTab === 'seating' ? 'text-white font-black' : 'text-slate-400 hover:text-white'
-                }`}
-              >
-                Sơ Đồ Lớp
-              </button>
-              <button
-                onClick={() => setActiveSubTab('relationships')}
-                className={`flex-1 relative z-10 py-1.5 px-3 text-center transition-colors cursor-pointer whitespace-nowrap ${
-                  activeSubTab === 'relationships' ? 'text-white font-black' : 'text-slate-400 hover:text-white'
-                }`}
-              >
-                <span>Nhóm Bạn & Xung Đột</span>
-              </button>
-            </div>
+            <SegmentedControl<'grades' | 'seating' | 'relationships'>
+              value={activeSubTab}
+              onChange={setActiveSubTab}
+              options={[
+                { value: 'grades', label: `Điểm Danh & Điểm (${enrolledStudents.length})` },
+                { value: 'seating', label: 'Sơ Đồ Lớp' },
+                { value: 'relationships', label: 'Nhóm Bạn & Xung Đột' },
+              ]}
+              activeColor="bg-[#5c36f5] shadow-[0_0_14px_rgba(92,54,245,0.5)]"
+              className="min-w-[460px]"
+              size="md"
+            />
           </div>
 
           {/* SUB TAB 3: RELATIONSHIPS & FRIEND GROUPS */}
