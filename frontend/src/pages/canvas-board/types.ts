@@ -24,6 +24,16 @@ export interface CanvasItemImage {
   originalSrc?: string;
 }
 
+export interface StrokeRecord {
+  id: string;
+  points: Point[];
+  tool: CanvasTool;
+  color: string;
+  size: number;
+  isShiftPressed?: boolean;
+  imageId?: string; // Attached image ID if drawn inside an image
+}
+
 export interface SnapGuide {
   type: 'vertical' | 'horizontal';
   pos: number;
@@ -39,12 +49,12 @@ export interface CropBox {
 }
 
 export const PRESET_COLORS = [
-  { label: 'Vàng', value: '#ffd600' },
   { label: 'Đỏ', value: '#ff3344' },
+  { label: 'Vàng', value: '#ffd600' },
   { label: 'Xanh lam', value: '#00b0ff' },
   { label: 'Xanh lá', value: '#00e676' },
   { label: 'Cam', value: '#ff9100' },
   { label: 'Tím hồng', value: '#e040fb' },
+  { label: 'Đen', value: '#1a1a1a' },
   { label: 'Trắng', value: '#ffffff' },
-  { label: 'Đen', value: '#000000' },
 ];

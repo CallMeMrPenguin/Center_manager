@@ -28,13 +28,12 @@ export function hitTestImage(
 }
 
 /**
- * Auto-Alignment & Magnetic Snapping Engine
- * Calculates snap offsets and returns visual guide lines when moving an image.
+ * Auto-Alignment & Equal Spacing Snapping Engine
  */
 export function calculateAutoAlign(
   target: { x: number; y: number; width: number; height: number },
   otherItems: CanvasItemImage[],
-  snapThreshold = 8
+  snapThreshold = 10
 ): { snappedX: number; snappedY: number; guides: SnapGuide[] } {
   let snappedX = target.x;
   let snappedY = target.y;
@@ -45,13 +44,9 @@ export function calculateAutoAlign(
   const targetCenterY = target.y + target.height / 2;
   const targetBottom = target.y + target.height;
 
-  // Candidate alignment lines from other items + canvas origin (0,0)
-  const candidateX: { pos: number; type: 'left' | 'center' | 'right' }[] = [
-    { pos: 0, type: 'center' }
-  ];
-  const candidateY: { pos: number; type: 'top' | 'middle' | 'bottom' }[] = [
-    { pos: 0, type: 'middle' }
-  ];
+  // Candidate alignment lines
+  const candidateX: { pos: number; type: string }[] = [{ pos: 50, type: 'start' }];
+  const candidateY: { pos: number; type: string }[] = [{ pos: 50, type: 'start' }];
 
   for (const item of otherItems) {
     candidateX.push(
@@ -66,25 +61,33 @@ export function calculateAutoAlign(
     );
   }
 
+  // Equal Spacing / Gap calculation (Horizontal gaps between elements)
+  if (otherItems.length >= 1) {
+    for (const item of otherItems) {
+      // Standard gap of 30px between cards
+      const rightSnap = item.x + item.width + 30;
+      const leftSnap = item.x - target.width - 30;
+      candidateX.push({ pos: rightSnap, type: 'gap-right' });
+      candidateX.push({ pos: leftSnap + target.width, type: 'gap-left' });
+    }
+  }
+
   // Snap X
   let minDiffX = snapThreshold + 1;
   let chosenSnapX: number | null = null;
   let guideLineX: number | null = null;
 
   for (const c of candidateX) {
-    // Snap target left to candidate
     if (Math.abs(target.x - c.pos) < minDiffX) {
       minDiffX = Math.abs(target.x - c.pos);
       chosenSnapX = c.pos;
       guideLineX = c.pos;
     }
-    // Snap target center to candidate
     if (Math.abs(targetCenterX - c.pos) < minDiffX) {
       minDiffX = Math.abs(targetCenterX - c.pos);
       chosenSnapX = c.pos - target.width / 2;
       guideLineX = c.pos;
     }
-    // Snap target right to candidate
     if (Math.abs(targetRight - c.pos) < minDiffX) {
       minDiffX = Math.abs(targetRight - c.pos);
       chosenSnapX = c.pos - target.width;
@@ -98,8 +101,8 @@ export function calculateAutoAlign(
       guides.push({
         type: 'vertical',
         pos: guideLineX,
-        start: Math.min(target.y - 100, -500),
-        end: Math.max(target.y + target.height + 100, 1500),
+        start: Math.min(target.y - 150, -500),
+        end: Math.max(target.y + target.height + 150, 2000),
       });
     }
   }
@@ -110,19 +113,16 @@ export function calculateAutoAlign(
   let guideLineY: number | null = null;
 
   for (const c of candidateY) {
-    // Snap target top to candidate
     if (Math.abs(target.y - c.pos) < minDiffY) {
       minDiffY = Math.abs(target.y - c.pos);
       chosenSnapY = c.pos;
       guideLineY = c.pos;
     }
-    // Snap target middle to candidate
     if (Math.abs(targetCenterY - c.pos) < minDiffY) {
       minDiffY = Math.abs(targetCenterY - c.pos);
       chosenSnapY = c.pos - target.height / 2;
       guideLineY = c.pos;
     }
-    // Snap target bottom to candidate
     if (Math.abs(targetBottom - c.pos) < minDiffY) {
       minDiffY = Math.abs(targetBottom - c.pos);
       chosenSnapY = c.pos - target.height;
@@ -136,8 +136,8 @@ export function calculateAutoAlign(
       guides.push({
         type: 'horizontal',
         pos: guideLineY,
-        start: Math.min(target.x - 100, -500),
-        end: Math.max(target.x + target.width + 100, 1500),
+        start: Math.min(target.x - 150, -500),
+        end: Math.max(target.x + target.width + 150, 2000),
       });
     }
   }
@@ -157,7 +157,6 @@ export async function cropImageItem(
   const normCropW = Math.min(imageItem.width, cropBox.width);
   const normCropH = Math.min(imageItem.height, cropBox.height);
 
-  // Map from display dimensions to source image natural dimensions
   const scaleX = imageItem.img.naturalWidth / imageItem.width;
   const scaleY = imageItem.img.naturalHeight / imageItem.height;
 

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
   MousePointer, Crop, Pen, Highlighter, Eraser, Minus, ArrowUpRight,
-  Square, Circle, Palette, Sliders, Undo2, Redo2, Trash2, Magnet
+  Square, Circle, Palette, Sliders, Undo2, Redo2, Trash2
 } from 'lucide-react';
 import { CanvasTool, PRESET_COLORS } from '../types';
 
@@ -23,10 +23,6 @@ interface CanvasToolbarProps {
   onUndo: () => void;
   onRedo: () => void;
   onClearPage: () => void;
-  isAutoAlignEnabled: boolean;
-  setIsAutoAlignEnabled: (val: boolean | ((prev: boolean) => boolean)) => void;
-  hasSelectedImage: boolean;
-  onDeleteSelectedImage: () => void;
 }
 
 export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
@@ -47,16 +43,12 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
   onUndo,
   onRedo,
   onClearPage,
-  isAutoAlignEnabled,
-  setIsAutoAlignEnabled,
-  hasSelectedImage,
-  onDeleteSelectedImage,
 }) => {
   const [showColorPopover, setShowColorPopover] = useState(false);
   const [showSizePopover, setShowSizePopover] = useState(false);
 
   return (
-    <div className="p-2 bg-[#0a0d18] border-b border-white/10 flex items-center justify-between flex-wrap gap-2 shrink-0 z-30">
+    <div className="p-2 bg-[#0a0d18] border-b border-white/10 flex items-center justify-between flex-wrap gap-2 shrink-0 z-30 select-none">
       {/* Tool Buttons */}
       <div className="flex items-center gap-1">
         {/* Select & Move Object Tool */}
@@ -65,7 +57,7 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
             activeTool === 'select' ? 'bg-[#5c36f5] text-white shadow-md' : 'text-slate-400 hover:text-white hover:bg-white/5'
           }`}
-          title="Chọn, di chuyển và kéo dãn ảnh (Left click để chọn & di chuyển)"
+          title="Chọn & di chuyển ảnh (Bấm Delete để xóa ảnh)"
         >
           <MousePointer size={13} />
           <span>Chọn / Di chuyển</span>
@@ -167,32 +159,6 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
 
       {/* Right Controls */}
       <div className="flex items-center gap-2">
-        {/* Auto Align Snap Toggle */}
-        <button
-          onClick={() => setIsAutoAlignEnabled(v => !v)}
-          className={`flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-bold transition cursor-pointer border ${
-            isAutoAlignEnabled
-              ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40 shadow-sm'
-              : 'bg-white/5 text-slate-400 border-white/10 hover:text-white'
-          }`}
-          title="Bật/Tắt tự động căn lề hút dính (Auto Align Snapping)"
-        >
-          <Magnet size={12} />
-          <span>Auto Align</span>
-        </button>
-
-        {/* Delete selected image */}
-        {hasSelectedImage && (
-          <button
-            onClick={onDeleteSelectedImage}
-            className="flex items-center gap-1 px-2.5 py-1 rounded-xl bg-rose-500/20 text-rose-300 border border-rose-500/40 text-xs font-bold hover:bg-rose-500/30 transition cursor-pointer"
-            title="Xóa ảnh đang chọn"
-          >
-            <Trash2 size={12} />
-            <span>Xóa ảnh</span>
-          </button>
-        )}
-
         {/* Color Selector */}
         {!['select', 'eraser', 'crop'].includes(activeTool) && (
           <div className="relative">
@@ -244,7 +210,7 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
           </div>
         )}
 
-        {/* Size Slider Popover */}
+        {/* Size Slider & Custom Input Popover */}
         {!['select', 'crop'].includes(activeTool) && (
           <div className="relative">
             <button

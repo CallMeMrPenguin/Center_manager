@@ -3,25 +3,18 @@ import ReactDOM from 'react-dom';
 import * as pdfjsLib from 'pdfjs-dist';
 import { Upload, RotateCcw, Download, Maximize2, Minimize2, Palette } from 'lucide-react';
 import { showToast } from '../../components/Toast';
-import { CanvasTool, Point, CanvasItemImage, SnapGuide, CropBox } from './types';
+import { CanvasTool, Point, CanvasItemImage, SnapGuide, CropBox, StrokeRecord } from './types';
 import { CanvasToolbar } from './components/CanvasToolbar';
 import { CanvasBottomBar, GridType } from './components/CanvasBottomBar';
 import { useCanvasViewport } from './hooks/useCanvasViewport';
 import { hitTestImage, calculateAutoAlign, cropImageItem, HandleType } from './utils/imageTransform';
+import { eraseStrokesAtPoint } from './utils/eraserEngine';
 import { renderStroke, getTransformedPoint } from '../../utils/drawingEngine';
 
 try {
   pdfjsLib.GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/build/pdf.worker.min.mjs', import.meta.url).toString();
 } catch (e) {
   pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
-}
-
-interface StrokeRecord {
-  points: Point[];
-  tool: CanvasTool;
-  color: string;
-  size: number;
-  isShiftPressed?: boolean;
 }
 
 interface HistorySnapshot {
@@ -42,17 +35,11 @@ export default function CanvasBoardPage() {
   const [docName, setDocName] = useState<string>('Bảng vẽ trắng (Canvas)');
 
   // Viewport Pan, Zoom & Navigation Hook
-  const {
-    zoom, setZoom, pan, setPan,
-    isPanningRef, lastMousePosRef, isShiftPressedRef
-  } = useCanvasViewport();
+  const { zoom, setZoom, pan, setPan, isPanningRef, lastMousePosRef, isShiftPressedRef } = useCanvasViewport();
 
   const [gridType, setGridType] = useState<GridType>('lines');
-  const [isAutoAlignEnabled, setIsAutoAlignEnabled] = useState(true);
-
-  // Tool state
   const [activeTool, setActiveTool] = useState<CanvasTool>('pen');
-  const [selectedColor, setSelectedColor] = useState<string>('#1a1a1a');
+  const [selectedColor, setSelectedColor] = useState<string>('#ff3344'); // Default RED ink
   const [penSize, setPenSize] = useState<number>(4);
   const [hlSize, setHlSize] = useState<number>(24);
   const [eraserSize, setEraserSize] = useState<number>(50);
@@ -90,7 +77,6 @@ export default function CanvasBoardPage() {
     }
   };
 
-  // Push state snapshot for Undo / Redo
   const pushHistorySnapshot = useCallback(() => {
     const snapshot: HistorySnapshot = {
       strokes: [...(pageStrokes[currentPage] || [])],
@@ -126,9 +112,12 @@ export default function CanvasBoardPage() {
     setCanvasImages(next.images);
   }, [redoStack, pageStrokes, canvasImages, currentPage]);
 
-  // Global Keyboard listener for Ctrl+Z & Ctrl+Y
+  // Global Keyboard: Ctrl+Z/Y and Delete/Backspace to delete selected image
   useEffect(() => {
-    const handleKeyShortcut = (e: KeyboardEvent) => {
+    const handleKey = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      const isInput = target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA');
+
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
         e.preventDefault();
         if (e.shiftKey) handleRedo();
@@ -136,13 +125,19 @@ export default function CanvasBoardPage() {
       } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y') {
         e.preventDefault();
         handleRedo();
+      } else if ((e.key === 'Delete' || e.key === 'Backspace') && !isInput && selectedImageId) {
+        e.preventDefault();
+        pushHistorySnapshot();
+        setCanvasImages(prev => prev.filter(i => i.id !== selectedImageId));
+        setSelectedImageId(null);
+        showToast("Đã xóa ảnh!", "success");
       }
     };
-    window.addEventListener('keydown', handleKeyShortcut);
-    return () => window.removeEventListener('keydown', handleKeyShortcut);
-  }, [handleUndo, handleRedo]);
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [handleUndo, handleRedo, selectedImageId, pushHistorySnapshot]);
 
-  // Render PDF page to image object
+  // Load PDF page to image object
   useEffect(() => {
     if (!pdfDoc) return;
     let isCancelled = false;
@@ -177,7 +172,7 @@ export default function CanvasBoardPage() {
 
   const currentStrokes = pageStrokes[currentPage] || [];
 
-  // Redraw Complete Canvas Viewport
+  // Redraw Canvas Viewport with High-Contrast Ruled Lines
   const redrawCanvas = useCallback(() => {
     const canvas = canvasRef.current;
     const container = containerRef.current;
@@ -197,20 +192,20 @@ export default function CanvasBoardPage() {
     if (!ctx) return;
 
     ctx.setTransform(1, 0, 0, 1, 0, 0);
-    ctx.fillStyle = '#ffffff'; // PURE WHITE BACKGROUND
+    ctx.fillStyle = '#ffffff'; // Pure White
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     ctx.scale(dpr, dpr);
     ctx.translate(pan.x, pan.y);
     ctx.scale(zoom, zoom);
 
-    // 1. Ruled Lines / Grid Pattern on White Canvas
+    // 1. High-Contrast Ruled Lines / Grid Lines
     if (gridType !== 'none') {
       const worldLeft = -pan.x / zoom;
       const worldTop = -pan.y / zoom;
       const worldRight = (rect.width - pan.x) / zoom;
       const worldBottom = (rect.height - pan.y) / zoom;
-      const gridSize = 36;
+      const gridSize = 44; // Clear notebook spacing
       const startX = Math.floor(worldLeft / gridSize) * gridSize;
       const endX = Math.ceil(worldRight / gridSize) * gridSize;
       const startY = Math.floor(worldTop / gridSize) * gridSize;
@@ -218,28 +213,28 @@ export default function CanvasBoardPage() {
 
       ctx.save();
       if (gridType === 'dots') {
-        ctx.fillStyle = '#94a3b8';
+        ctx.fillStyle = '#64748b';
         for (let x = startX; x <= endX; x += gridSize) {
           for (let y = startY; y <= endY; y += gridSize) {
             ctx.beginPath();
-            ctx.arc(x, y, 1.2 / zoom, 0, Math.PI * 2);
+            ctx.arc(x, y, 1.5 / zoom, 0, Math.PI * 2);
             ctx.fill();
           }
         }
       } else if (gridType === 'grid') {
-        ctx.strokeStyle = '#e2e8f0';
-        ctx.lineWidth = 1 / zoom;
+        ctx.strokeStyle = '#cbd5e1'; // Clear slate lines
+        ctx.lineWidth = 1.2 / zoom;
         ctx.beginPath();
         for (let x = startX; x <= endX; x += gridSize) { ctx.moveTo(x, startY); ctx.lineTo(x, endY); }
         for (let y = startY; y <= endY; y += gridSize) { ctx.moveTo(startX, y); ctx.lineTo(endX, y); }
         ctx.stroke();
       } else if (gridType === 'lines') {
-        ctx.strokeStyle = '#e2e8f0';
-        ctx.lineWidth = 1.2 / zoom;
+        ctx.strokeStyle = '#cbd5e1'; // Crisp horizontal lines
+        ctx.lineWidth = 1.4 / zoom;
         ctx.beginPath();
         for (let y = startY; y <= endY; y += gridSize) {
-          ctx.moveTo(startX, y);
-          ctx.lineTo(endX, y);
+          ctx.moveTo(worldLeft - 1000, y);
+          ctx.lineTo(worldRight + 1000, y);
         }
         ctx.stroke();
       }
@@ -250,7 +245,7 @@ export default function CanvasBoardPage() {
     for (const item of canvasImages) {
       ctx.save();
       ctx.shadowColor = 'rgba(0,0,0,0.15)';
-      ctx.shadowBlur = 15;
+      ctx.shadowBlur = 12;
       ctx.drawImage(item.img, item.x, item.y, item.width, item.height);
       ctx.restore();
 
@@ -286,13 +281,8 @@ export default function CanvasBoardPage() {
       ctx.lineWidth = 1.5 / zoom;
       ctx.setLineDash([4 / zoom, 4 / zoom]);
       ctx.beginPath();
-      if (guide.type === 'vertical') {
-        ctx.moveTo(guide.pos, guide.start);
-        ctx.lineTo(guide.pos, guide.end);
-      } else {
-        ctx.moveTo(guide.start, guide.pos);
-        ctx.lineTo(guide.end, guide.pos);
-      }
+      if (guide.type === 'vertical') { ctx.moveTo(guide.pos, guide.start); ctx.lineTo(guide.pos, guide.end); }
+      else { ctx.moveTo(guide.start, guide.pos); ctx.lineTo(guide.end, guide.pos); }
       ctx.stroke();
       ctx.restore();
     }
@@ -308,11 +298,11 @@ export default function CanvasBoardPage() {
     }
 
     // 5. Draw Active In-Progress Stroke
-    if (isDrawingRef.current && currentStrokePointsRef.current.length > 0) {
+    if (isDrawingRef.current && currentStrokePointsRef.current.length > 0 && activeTool !== 'eraser') {
       renderStroke(ctx, currentStrokePointsRef.current, {
         tool: activeTool,
         color: selectedColor,
-        size: activeTool === 'pen' ? penSize : activeTool === 'highlighter' ? hlSize : activeTool === 'eraser' ? eraserSize : shapeSize,
+        size: activeTool === 'pen' ? penSize : activeTool === 'highlighter' ? hlSize : shapeSize,
         isShiftPressed: isShiftPressedRef.current,
       });
     }
@@ -329,7 +319,7 @@ export default function CanvasBoardPage() {
       ctx.strokeRect(cb.x, cb.y, cb.width, cb.height);
       ctx.restore();
     }
-  }, [pan, zoom, gridType, canvasImages, selectedImageId, currentStrokes, activeTool, selectedColor, penSize, hlSize, eraserSize, shapeSize]);
+  }, [pan, zoom, gridType, canvasImages, selectedImageId, currentStrokes, activeTool, selectedColor, penSize, hlSize, shapeSize]);
 
   useEffect(() => { redrawCanvas(); }, [redrawCanvas]);
 
@@ -345,7 +335,7 @@ export default function CanvasBoardPage() {
     setPan({ x: (rect.width - first.width * scale) / 2, y: (rect.height - first.height * scale) / 2 });
   }, [canvasImages, setZoom, setPan]);
 
-  // Multiple File Import (PDF & Multiple Images)
+  // Multiple File Import (Max 5 images per row, then new row)
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     if (files.length === 0) return;
@@ -373,15 +363,20 @@ export default function CanvasBoardPage() {
           reader.onload = (event) => {
             const img = new Image();
             img.onload = () => {
-              const offsetX = 50 + (idx % 3) * 320;
-              const offsetY = 50 + Math.floor(idx / 3) * 280;
+              const col = idx % 5;
+              const row = Math.floor(idx / 5);
+              const imgW = 280;
+              const imgH = (imgW / img.width) * img.height;
+              const offsetX = 50 + col * (imgW + 30);
+              const offsetY = 50 + row * (imgH + 40);
+
               newItems.push({
                 id: 'img_' + Date.now() + '_' + idx,
                 img,
                 x: offsetX,
                 y: offsetY,
-                width: Math.min(img.width, 600),
-                height: (Math.min(img.width, 600) / img.width) * img.height,
+                width: imgW,
+                height: imgH,
                 originalSrc: event.target?.result as string,
               });
               resolve();
@@ -397,17 +392,17 @@ export default function CanvasBoardPage() {
       setCanvasImages(prev => [...prev, ...newItems]);
       setSelectedImageId(newItems[newItems.length - 1].id);
       setActiveTool('select');
-      showToast(`Đã thêm ${newItems.length} ảnh vào canvas!`, "success");
+      showToast(`Đã thêm ${newItems.length} ảnh (5 ảnh/hàng)!`, "success");
     }
   };
 
-  // Pointer down
+  // Pointer Down
   const handlePointerDown = (e: React.PointerEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     e.currentTarget.setPointerCapture(e.pointerId);
 
-    // RIGHT CLICK (Button 2): PAN VIEWPORT FREELY
+    // RIGHT CLICK (Button 2): PAN CANVAS FREELY
     if (e.button === 2) {
       isPanningRef.current = true;
       lastMousePosRef.current = { x: e.clientX, y: e.clientY };
@@ -456,6 +451,17 @@ export default function CanvasBoardPage() {
         return;
       }
 
+      if (activeTool === 'eraser') {
+        isDrawingRef.current = true;
+        pushHistorySnapshot();
+        const { remainingStrokes, erasedCount } = eraseStrokesAtPoint(currentStrokes, worldPt, eraserSize / 2);
+        if (erasedCount > 0) {
+          setPageStrokes(prev => ({ ...prev, [currentPage]: remainingStrokes }));
+        }
+        return;
+      }
+
+      // Drawing strokes: Check if stroke starts inside an image to attach it
       pushHistorySnapshot();
       isDrawingRef.current = true;
       currentStrokePointsRef.current = [worldPt];
@@ -463,14 +469,14 @@ export default function CanvasBoardPage() {
     }
   };
 
-  // Pointer move
+  // Pointer Move
   const handlePointerMove = (e: React.PointerEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
     setCursorPos({ x: e.clientX, y: e.clientY });
 
-    // 1. Right Click Pan
+    // Right Click Pan Viewport
     if (isPanningRef.current) {
       const dx = e.clientX - lastMousePosRef.current.x;
       const dy = e.clientY - lastMousePosRef.current.y;
@@ -481,19 +487,42 @@ export default function CanvasBoardPage() {
 
     const worldPt = getTransformedPoint(e, canvas, pan, zoom);
 
-    // 2. Drag / Resize Image
+    // Drag / Resize Image & Move Attached Drawing Strokes
     if (isDraggingImageRef.current && selectedImageId) {
       setCanvasImages(prev => prev.map(item => {
         if (item.id !== selectedImageId) return item;
         let newX = item.x, newY = item.y, newW = item.width, newH = item.height;
 
         if (resizeHandleRef.current === 'inside') {
-          let rawX = worldPt.x - imageDragOffsetRef.current.x;
-          let rawY = worldPt.y - imageDragOffsetRef.current.y;
-          if (isAutoAlignEnabled) {
-            const snap = calculateAutoAlign({ x: rawX, y: rawY, width: item.width, height: item.height }, prev.filter(i => i.id !== selectedImageId));
-            newX = snap.snappedX; newY = snap.snappedY; activeSnapGuidesRef.current = snap.guides;
-          } else { newX = rawX; newY = rawY; }
+          const rawX = worldPt.x - imageDragOffsetRef.current.x;
+          const rawY = worldPt.y - imageDragOffsetRef.current.y;
+          const otherItems = prev.filter(i => i.id !== selectedImageId);
+          const snap = calculateAutoAlign({ x: rawX, y: rawY, width: item.width, height: item.height }, otherItems);
+          newX = snap.snappedX; newY = snap.snappedY;
+          activeSnapGuidesRef.current = snap.guides;
+
+          // MOVE ATTACHED STROKES ALONG WITH THE IMAGE
+          const moveDx = newX - item.x;
+          const moveDy = newY - item.y;
+          if (moveDx !== 0 || moveDy !== 0) {
+            setPageStrokes(sPrev => ({
+              ...sPrev,
+              [currentPage]: (sPrev[currentPage] || []).map(st => {
+                if (st.imageId === item.id || (
+                  st.points[0] &&
+                  st.points[0].x >= item.x && st.points[0].x <= item.x + item.width &&
+                  st.points[0].y >= item.y && st.points[0].y <= item.y + item.height
+                )) {
+                  return {
+                    ...st,
+                    imageId: item.id,
+                    points: st.points.map(p => ({ x: p.x + moveDx, y: p.y + moveDy }))
+                  };
+                }
+                return st;
+              })
+            }));
+          }
         } else if (resizeHandleRef.current === 'br') {
           newW = Math.max(30, worldPt.x - item.x); newH = Math.max(30, worldPt.y - item.y);
         } else if (resizeHandleRef.current === 'bl') {
@@ -515,7 +544,17 @@ export default function CanvasBoardPage() {
       return;
     }
 
-    if (isDrawingRef.current && activeTool !== 'select') {
+    // Eraser Movement
+    if (activeTool === 'eraser' && isDrawingRef.current) {
+      const { remainingStrokes, erasedCount } = eraseStrokesAtPoint(currentStrokes, worldPt, eraserSize / 2);
+      if (erasedCount > 0) {
+        setPageStrokes(prev => ({ ...prev, [currentPage]: remainingStrokes }));
+      }
+      return;
+    }
+
+    // Drawing Strokes
+    if (isDrawingRef.current && activeTool !== 'select' && activeTool !== 'eraser') {
       const nativeEvent = e.nativeEvent as PointerEvent;
       const coalesced = typeof nativeEvent.getCoalescedEvents === 'function' ? nativeEvent.getCoalescedEvents() : [nativeEvent];
       for (const evt of coalesced) {
@@ -525,7 +564,7 @@ export default function CanvasBoardPage() {
     }
   };
 
-  // Pointer up
+  // Pointer Up
   const handlePointerUp = async (e: React.PointerEvent<HTMLCanvasElement>) => {
     try { e.currentTarget.releasePointerCapture(e.pointerId); } catch {}
     isPanningRef.current = false;
@@ -561,20 +600,30 @@ export default function CanvasBoardPage() {
       return;
     }
 
-    if (isDrawingRef.current && activeTool !== 'select') {
+    if (isDrawingRef.current && activeTool !== 'select' && activeTool !== 'eraser') {
       isDrawingRef.current = false;
       if (currentStrokePointsRef.current.length > 0) {
+        const startPt = currentStrokePointsRef.current[0];
+        const insideImg = canvasImages.find(img => 
+          startPt.x >= img.x && startPt.x <= img.x + img.width &&
+          startPt.y >= img.y && startPt.y <= img.y + img.height
+        );
+
         const newStroke: StrokeRecord = {
+          id: 'stroke_' + Date.now(),
           points: [...currentStrokePointsRef.current],
           tool: activeTool,
           color: selectedColor,
-          size: activeTool === 'pen' ? penSize : activeTool === 'highlighter' ? hlSize : activeTool === 'eraser' ? eraserSize : shapeSize,
+          size: activeTool === 'pen' ? penSize : activeTool === 'highlighter' ? hlSize : shapeSize,
           isShiftPressed: isShiftPressedRef.current,
+          imageId: insideImg?.id,
         };
         setPageStrokes(prev => ({ ...prev, [currentPage]: [...(prev[currentPage] || []), newStroke] }));
       }
       currentStrokePointsRef.current = [];
       redrawCanvas();
+    } else if (isDrawingRef.current) {
+      isDrawingRef.current = false;
     }
   };
 
@@ -669,15 +718,6 @@ export default function CanvasBoardPage() {
           onClearPage={() => {
             pushHistorySnapshot();
             setPageStrokes(prev => ({ ...prev, [currentPage]: [] }));
-          }}
-          isAutoAlignEnabled={isAutoAlignEnabled}
-          setIsAutoAlignEnabled={setIsAutoAlignEnabled}
-          hasSelectedImage={!!selectedImageId}
-          onDeleteSelectedImage={() => {
-            pushHistorySnapshot();
-            setCanvasImages(prev => prev.filter(i => i.id !== selectedImageId));
-            setSelectedImageId(null);
-            showToast("Đã xóa ảnh được chọn!", "success");
           }}
         />
 
