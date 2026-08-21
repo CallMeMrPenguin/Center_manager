@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
-import { Pen, Highlighter, Eraser, Trash2, MousePointer, Palette } from 'lucide-react';
+import { Pen, Highlighter, Eraser, Trash2, MousePointer, Palette, Sliders } from 'lucide-react';
 
 export type DrawTool = 'none' | 'pen' | 'highlighter' | 'eraser';
 
@@ -13,16 +13,11 @@ interface DrawingCanvasProps {
 const PRESET_COLORS = [
   { label: 'Vàng', value: '#ffd600' },
   { label: 'Đỏ', value: '#ff3344' },
-  { label: 'Xanh ngọc', value: '#00e5ff' },
+  { label: 'Xanh lam', value: '#00b0ff' },
   { label: 'Xanh lá', value: '#00e676' },
+  { label: 'Cam', value: '#ff9100' },
   { label: 'Tím hồng', value: '#e040fb' },
   { label: 'Trắng', value: '#ffffff' },
-];
-
-const STROKE_WIDTHS = [
-  { label: 'Mảnh', pen: 2.5, hl: 16 },
-  { label: 'Vừa', pen: 4.5, hl: 24 },
-  { label: 'Dày', pen: 7, hl: 36 },
 ];
 
 export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
@@ -33,12 +28,19 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
 }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
+
   const [activeTool, setActiveTool] = useState<DrawTool>('none');
   const [selectedColor, setSelectedColor] = useState<string>('#ffd600');
-  const [selectedSizeIndex, setSelectedSizeIndex] = useState<number>(1);
-  const [showColorPicker, setShowColorPicker] = useState<boolean>(false);
+  const [penSize, setPenSize] = useState<number>(4);
+  const [hlSize, setHlSize] = useState<number>(24);
+  const [eraserSize, setEraserSize] = useState<number>(30);
+
+  const [showColorPopover, setShowColorPopover] = useState<boolean>(false);
+  const [showSizePopover, setShowSizePopover] = useState<boolean>(false);
+
   const isDrawingRef = useRef(false);
-  const lastPointRef = useRef<{ x: number; y: number } | null>(null);
+  const strokePointsRef = useRef<{ x: number; y: number }[]>([]);
+  const snapshotRef = useRef<ImageData | null>(null);
 
   // Restore drawing when questionId changes or on mount
   useEffect(() => {
@@ -50,7 +52,6 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
       const rect = container.getBoundingClientRect();
       const dpr = window.devicePixelRatio || 1;
 
-      // Only resize if dimensions changed
       if (canvas.width !== rect.width * dpr || canvas.height !== rect.height * dpr) {
         canvas.width = rect.width * dpr;
         canvas.height = rect.height * dpr;
@@ -60,12 +61,11 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
 
       const ctx = canvas.getContext('2d');
       if (!ctx) return;
+      ctx.setTransform(1, 0, 0, 1, 0, 0); // Reset transform
       ctx.scale(dpr, dpr);
 
-      // Clear
       ctx.clearRect(0, 0, rect.width, rect.height);
 
-      // Restore saved drawing for this question
       const savedData = drawings[questionId];
       if (savedData) {
         const img = new Image();
@@ -86,7 +86,6 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
     onSaveDrawing(questionId, dataUrl);
   }, [questionId, onSaveDrawing]);
 
-  // Pointer event handlers for drawing
   const getCoordinates = (e: React.PointerEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
     if (!canvas) return { x: 0, y: 0 };
@@ -97,53 +96,62 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
     };
   };
 
+  const currentSize = activeTool === 'pen' ? penSize : activeTool === 'highlighter' ? hlSize : eraserSize;
+
   const handlePointerDown = (e: React.PointerEvent<HTMLCanvasElement>) => {
     if (activeTool === 'none') return;
     e.currentTarget.setPointerCapture(e.pointerId);
     isDrawingRef.current = true;
+
     const coords = getCoordinates(e);
-    lastPointRef.current = coords;
+    strokePointsRef.current = [coords];
 
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Draw single dot on click
+    // Capture snapshot for smooth continuous redraws (especially for highlighter & curves)
+    const dpr = window.devicePixelRatio || 1;
+    snapshotRef.current = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
 
     if (activeTool === 'pen') {
       ctx.globalCompositeOperation = 'source-over';
-      ctx.strokeStyle = selectedColor;
       ctx.fillStyle = selectedColor;
-      ctx.lineWidth = STROKE_WIDTHS[selectedSizeIndex].pen;
-      ctx.globalAlpha = 1.0;
+      ctx.beginPath();
+      ctx.arc(coords.x, coords.y, penSize / 2, 0, Math.PI * 2);
+      ctx.fill();
     } else if (activeTool === 'highlighter') {
       ctx.globalCompositeOperation = 'source-over';
-      ctx.strokeStyle = selectedColor;
       ctx.fillStyle = selectedColor;
-      ctx.lineWidth = STROKE_WIDTHS[selectedSizeIndex].hl;
       ctx.globalAlpha = 0.35;
+      ctx.beginPath();
+      ctx.arc(coords.x, coords.y, hlSize / 2, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.globalAlpha = 1.0;
     } else if (activeTool === 'eraser') {
       ctx.globalCompositeOperation = 'destination-out';
-      ctx.lineWidth = 28;
-      ctx.globalAlpha = 1.0;
+      ctx.beginPath();
+      ctx.arc(coords.x, coords.y, eraserSize / 2, 0, Math.PI * 2);
+      ctx.fill();
     }
-
-    ctx.beginPath();
-    ctx.arc(coords.x, coords.y, ctx.lineWidth / 2, 0, Math.PI * 2);
-    ctx.fill();
   };
 
   const handlePointerMove = (e: React.PointerEvent<HTMLCanvasElement>) => {
-    if (!isDrawingRef.current || activeTool === 'none' || !lastPointRef.current) return;
+    if (!isDrawingRef.current || activeTool === 'none') return;
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
     const coords = getCoordinates(e);
+    const pts = strokePointsRef.current;
+    pts.push(coords);
+
+    if (pts.length < 2) return;
 
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
@@ -151,25 +159,62 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
     if (activeTool === 'pen') {
       ctx.globalCompositeOperation = 'source-over';
       ctx.strokeStyle = selectedColor;
-      ctx.lineWidth = STROKE_WIDTHS[selectedSizeIndex].pen;
+      ctx.lineWidth = penSize;
       ctx.globalAlpha = 1.0;
-    } else if (activeTool === 'highlighter') {
-      ctx.globalCompositeOperation = 'source-over';
-      ctx.strokeStyle = selectedColor;
-      ctx.lineWidth = STROKE_WIDTHS[selectedSizeIndex].hl;
-      ctx.globalAlpha = 0.35;
+
+      // Draw quadratic bezier segment for silky smooth lines
+      const p1 = pts[pts.length - 2];
+      const p2 = pts[pts.length - 1];
+      const midX = (p1.x + p2.x) / 2;
+      const midY = (p1.y + p2.y) / 2;
+
+      ctx.beginPath();
+      ctx.moveTo(p1.x, p1.y);
+      ctx.quadraticCurveTo(p1.x, p1.y, midX, midY);
+      ctx.stroke();
     } else if (activeTool === 'eraser') {
       ctx.globalCompositeOperation = 'destination-out';
-      ctx.lineWidth = 28;
+      ctx.lineWidth = eraserSize;
+
+      const p1 = pts[pts.length - 2];
+      const p2 = pts[pts.length - 1];
+      const midX = (p1.x + p2.x) / 2;
+      const midY = (p1.y + p2.y) / 2;
+
+      ctx.beginPath();
+      ctx.moveTo(p1.x, p1.y);
+      ctx.quadraticCurveTo(p1.x, p1.y, midX, midY);
+      ctx.stroke();
+    } else if (activeTool === 'highlighter') {
+      // For Highlighter: Restore initial stroke snapshot and redraw the whole continuous path
+      // This guarantees 100% UNIFORM opacity with ZERO overlapping circle/dot artifacts!
+      if (snapshotRef.current) {
+        ctx.putImageData(snapshotRef.current, 0, 0);
+      }
+
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.strokeStyle = selectedColor;
+      ctx.lineWidth = hlSize;
+      ctx.globalAlpha = 0.35;
+
+      ctx.beginPath();
+      ctx.moveTo(pts[0].x, pts[0].y);
+
+      for (let i = 1; i < pts.length - 1; i++) {
+        const xc = (pts[i].x + pts[i + 1].x) / 2;
+        const yc = (pts[i].y + pts[i + 1].y) / 2;
+        ctx.quadraticCurveTo(pts[i].x, pts[i].y, xc, yc);
+      }
+
+      if (pts.length >= 2) {
+        const last = pts[pts.length - 1];
+        const prev = pts[pts.length - 2];
+        ctx.quadraticCurveTo(prev.x, prev.y, last.x, last.y);
+      }
+
+      ctx.stroke();
       ctx.globalAlpha = 1.0;
     }
-
-    ctx.beginPath();
-    ctx.moveTo(lastPointRef.current.x, lastPointRef.current.y);
-    ctx.lineTo(coords.x, coords.y);
-    ctx.stroke();
-
-    lastPointRef.current = coords;
   };
 
   const handlePointerUp = (e: React.PointerEvent<HTMLCanvasElement>) => {
@@ -178,7 +223,8 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
       e.currentTarget.releasePointerCapture(e.pointerId);
     } catch {}
     isDrawingRef.current = false;
-    lastPointRef.current = null;
+    strokePointsRef.current = [];
+    snapshotRef.current = null;
     saveCurrentState();
   };
 
@@ -202,9 +248,7 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
         onPointerCancel={handlePointerUp}
         className={`w-full h-full ${
           activeTool !== 'none'
-            ? activeTool === 'eraser'
-              ? 'pointer-events-auto cursor-crosshair'
-              : 'pointer-events-auto cursor-crosshair'
+            ? 'pointer-events-auto cursor-crosshair'
             : 'pointer-events-none'
         }`}
         style={{ touchAction: 'none' }}
@@ -214,13 +258,17 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
       <div className="absolute top-3 right-3 z-30 pointer-events-auto flex items-center gap-1.5 bg-[#0a0d18] border border-[#212c4b] p-1.5 rounded-xl shadow-2xl">
         {/* Pointer / Interact Mode */}
         <button
-          onClick={() => setActiveTool('none')}
+          onClick={() => {
+            setActiveTool('none');
+            setShowColorPopover(false);
+            setShowSizePopover(false);
+          }}
           className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
             activeTool === 'none'
               ? 'bg-[#5c36f5] text-white shadow-md'
               : 'text-slate-400 hover:text-white hover:bg-white/5'
           }`}
-          title="Chế độ chọn đáp án (Không vẽ)"
+          title="Chế độ con trỏ chuột (Chọn đáp án)"
         >
           <MousePointer size={13} />
           <span className="hidden sm:inline">Chuột</span>
@@ -228,7 +276,11 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
 
         {/* Pen Mode */}
         <button
-          onClick={() => setActiveTool('pen')}
+          onClick={() => {
+            setActiveTool('pen');
+            setShowColorPopover(false);
+            setShowSizePopover(false);
+          }}
           className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
             activeTool === 'pen'
               ? 'bg-[#5c36f5] text-white shadow-md'
@@ -242,7 +294,11 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
 
         {/* Highlighter Mode */}
         <button
-          onClick={() => setActiveTool('highlighter')}
+          onClick={() => {
+            setActiveTool('highlighter');
+            setShowColorPopover(false);
+            setShowSizePopover(false);
+          }}
           className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
             activeTool === 'highlighter'
               ? 'bg-[#5c36f5] text-white shadow-md'
@@ -256,7 +312,11 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
 
         {/* Eraser Mode */}
         <button
-          onClick={() => setActiveTool('eraser')}
+          onClick={() => {
+            setActiveTool('eraser');
+            setShowColorPopover(false);
+            setShowSizePopover(false);
+          }}
           className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
             activeTool === 'eraser'
               ? 'bg-rose-600 text-white shadow-md'
@@ -268,13 +328,16 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
           <span className="hidden sm:inline">Tẩy</span>
         </button>
 
-        {/* Color Picker Toggle */}
+        {/* Color Picker (Only for Pen & Highlighter) */}
         {activeTool !== 'none' && activeTool !== 'eraser' && (
           <div className="relative flex items-center">
             <button
-              onClick={() => setShowColorPicker(!showColorPicker)}
-              className="flex items-center gap-1 p-1.5 rounded-lg hover:bg-white/10 transition cursor-pointer border border-white/10"
-              title="Chọn màu mực vẽ"
+              onClick={() => {
+                setShowColorPopover(!showColorPopover);
+                setShowSizePopover(false);
+              }}
+              className="flex items-center gap-1.5 px-2 py-1 rounded-lg hover:bg-white/10 transition cursor-pointer border border-white/10"
+              title="Chọn màu mực vẽ hoặc tùy chỉnh màu"
             >
               <div
                 className="w-4 h-4 rounded-full border border-white/40 shadow-sm"
@@ -283,43 +346,94 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
               <Palette size={12} className="text-slate-400" />
             </button>
 
-            {/* Color Popover */}
-            {showColorPicker && (
-              <div className="absolute top-full right-0 mt-2 bg-[#0c0f1e] border border-[#212c4b] p-2.5 rounded-xl shadow-2xl flex items-center gap-2 z-50">
-                {PRESET_COLORS.map(c => (
-                  <button
-                    key={c.value}
-                    onClick={() => {
-                      setSelectedColor(c.value);
-                      setShowColorPicker(false);
-                    }}
-                    className={`w-6 h-6 rounded-full transition cursor-pointer transform hover:scale-110 border ${
-                      selectedColor === c.value ? 'ring-2 ring-indigo-400 scale-110 border-white' : 'border-transparent'
-                    }`}
-                    style={{ backgroundColor: c.value }}
-                    title={c.label}
-                  />
-                ))}
+            {/* Color Popover Card */}
+            {showColorPopover && (
+              <div className="absolute top-full right-0 mt-2 bg-[#0c0f1e] border border-[#212c4b] p-3 rounded-2xl shadow-2xl z-50 space-y-2.5 min-w-[210px]">
+                <div className="text-[11px] font-bold text-slate-300">Bảng màu gợi ý</div>
+                <div className="flex flex-wrap gap-2">
+                  {PRESET_COLORS.map(c => (
+                    <button
+                      key={c.value}
+                      onClick={() => {
+                        setSelectedColor(c.value);
+                        setShowColorPopover(false);
+                      }}
+                      className={`w-6 h-6 rounded-full transition cursor-pointer transform hover:scale-110 border ${
+                        selectedColor.toLowerCase() === c.value.toLowerCase() ? 'ring-2 ring-indigo-400 scale-110 border-white' : 'border-transparent'
+                      }`}
+                      style={{ backgroundColor: c.value }}
+                      title={c.label}
+                    />
+                  ))}
+                </div>
+
+                <div className="pt-2 border-t border-white/10 flex items-center justify-between">
+                  <span className="text-[11px] font-bold text-slate-400">Màu tự chọn:</span>
+                  <label className="relative cursor-pointer flex items-center gap-2 px-2 py-1 bg-white/5 hover:bg-white/10 rounded-lg border border-white/10">
+                    <input
+                      type="color"
+                      value={selectedColor}
+                      onChange={(e) => setSelectedColor(e.target.value)}
+                      className="w-5 h-5 rounded-full cursor-pointer bg-transparent border-0"
+                    />
+                    <span className="text-[10px] font-mono font-bold text-slate-300 uppercase">
+                      {selectedColor}
+                    </span>
+                  </label>
+                </div>
               </div>
             )}
           </div>
         )}
 
-        {/* Stroke Size Selector */}
-        {activeTool !== 'none' && activeTool !== 'eraser' && (
-          <div className="flex items-center gap-1 pl-1 border-l border-white/10">
-            {STROKE_WIDTHS.map((s, idx) => (
-              <button
-                key={idx}
-                onClick={() => setSelectedSizeIndex(idx)}
-                className={`w-6 h-6 rounded-lg text-[10px] font-black flex items-center justify-center transition cursor-pointer ${
-                  selectedSizeIndex === idx ? 'bg-white/20 text-white' : 'text-slate-400 hover:text-white'
-                }`}
-                title={`Nét ${s.label}`}
-              >
-                {idx === 0 ? '•' : idx === 1 ? '●' : '⬤'}
-              </button>
-            ))}
+        {/* Size Slider Popover (For Pen, Highlighter & Eraser) */}
+        {activeTool !== 'none' && (
+          <div className="relative flex items-center">
+            <button
+              onClick={() => {
+                setShowSizePopover(!showSizePopover);
+                setShowColorPopover(false);
+              }}
+              className="flex items-center gap-1.5 px-2 py-1 rounded-lg hover:bg-white/10 transition cursor-pointer border border-white/10 text-xs font-bold text-slate-300"
+              title="Chỉnh độ lớn nét vẽ / kích cỡ tẩy"
+            >
+              <Sliders size={12} className="text-slate-400" />
+              <span>{currentSize}px</span>
+            </button>
+
+            {/* Size Slider Card */}
+            {showSizePopover && (
+              <div className="absolute top-full right-0 mt-2 bg-[#0c0f1e] border border-[#212c4b] p-3 rounded-2xl shadow-2xl z-50 space-y-2 min-w-[200px]">
+                <div className="flex items-center justify-between text-[11px] font-bold text-slate-300">
+                  <span>{activeTool === 'eraser' ? 'Kích thước tẩy' : 'Độ dày nét'}</span>
+                  <span className="font-mono text-indigo-400 font-black">{currentSize}px</span>
+                </div>
+
+                <div className="flex items-center gap-3 pt-1">
+                  <input
+                    type="range"
+                    min={activeTool === 'pen' ? 1 : activeTool === 'highlighter' ? 8 : 10}
+                    max={activeTool === 'pen' ? 30 : activeTool === 'highlighter' ? 60 : 80}
+                    value={currentSize}
+                    onChange={(e) => {
+                      const val = parseInt(e.target.value);
+                      if (activeTool === 'pen') setPenSize(val);
+                      else if (activeTool === 'highlighter') setHlSize(val);
+                      else setEraserSize(val);
+                    }}
+                    className="flex-1 h-1.5 bg-white/10 rounded-lg appearance-none cursor-pointer accent-[#5c36f5]"
+                  />
+                  <div
+                    className="rounded-full shrink-0 border border-white/40"
+                    style={{
+                      width: Math.min(24, Math.max(4, currentSize / 2)),
+                      height: Math.min(24, Math.max(4, currentSize / 2)),
+                      backgroundColor: activeTool === 'eraser' ? '#ff3344' : selectedColor,
+                    }}
+                  />
+                </div>
+              </div>
+            )}
           </div>
         )}
 
