@@ -62,7 +62,7 @@ export default function CanvasBoardPage() {
   const activeSnapGuidesRef = useRef<SnapGuide[]>([]);
   const currentStrokePointsRef = useRef<Point[]>([]);
   const lastEraserWorldPtRef = useRef<Point | null>(null);
-  const [cursorPos, setCursorPos] = useState<Point>({ x: -100, y: -100 });
+  const hoverWorldPtRef = useRef<Point | null>(null);
 
   useEffect(() => {
     const handleFs = () => setIsFullscreen(!!document.fullscreenElement);
@@ -274,7 +274,7 @@ export default function CanvasBoardPage() {
       }
     }
 
-    // 3. Canva-Style Dimension Guides with 2-Headed Arrows & Badges
+    // 3. Canva-Style Dimension Guides
     for (const guide of activeSnapGuidesRef.current) {
       ctx.save();
       ctx.strokeStyle = '#ec4899'; ctx.lineWidth = 1.5 / zoom; ctx.setLineDash([4 / zoom, 4 / zoom]);
@@ -340,6 +340,20 @@ export default function CanvasBoardPage() {
         tool: activeTool, color: selectedColor, size: activeTool === 'pen' ? penSize : activeTool === 'highlighter' ? hlSize : shapeSize,
         isShiftPressed: isShiftPressedRef.current,
       });
+    }
+
+    // 6. 100% Mathematically Exact Eraser Circle Indicator (Rendered in world space with zero DOM offset!)
+    if (activeTool === 'eraser' && hoverWorldPtRef.current) {
+      const hp = hoverWorldPtRef.current;
+      ctx.save();
+      ctx.strokeStyle = '#ef4444';
+      ctx.lineWidth = 1.5 / zoom;
+      ctx.fillStyle = 'rgba(239, 68, 68, 0.18)';
+      ctx.beginPath();
+      ctx.arc(hp.x, hp.y, eraserSize / 2, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.restore();
     }
   }, [pan, zoom, gridType, canvasImages, selectedId, selectedType, isCroppingImageId, activeCropBox, currentStrokes, activeTool, selectedColor, penSize, hlSize, shapeSize]);
 
@@ -507,7 +521,6 @@ export default function CanvasBoardPage() {
   const handlePointerMove = (e: React.PointerEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    setCursorPos({ x: e.clientX, y: e.clientY });
 
     if (isPanningRef.current) {
       const dx = e.clientX - lastMousePosRef.current.x;
@@ -518,6 +531,7 @@ export default function CanvasBoardPage() {
     }
 
     const worldPt = getTransformedPoint(e, canvas, pan, zoom);
+    hoverWorldPtRef.current = worldPt;
 
     if (isDraggingItemRef.current && selectedId && selectedType === 'image') {
       const targetImg = canvasImages.find(i => i.id === selectedId);
@@ -584,6 +598,8 @@ export default function CanvasBoardPage() {
       const coalesced = typeof nativeEvent.getCoalescedEvents === 'function' ? nativeEvent.getCoalescedEvents() : [nativeEvent];
       for (const evt of coalesced) currentStrokePointsRef.current.push(getTransformedPoint(evt, canvas, pan, zoom));
       redrawCanvas();
+    } else {
+      redrawCanvas();
     }
   };
 
@@ -622,6 +638,11 @@ export default function CanvasBoardPage() {
       }
       currentStrokePointsRef.current = []; redrawCanvas();
     } else if (isDrawingRef.current) { isDrawingRef.current = false; }
+  };
+
+  const handlePointerLeave = () => {
+    hoverWorldPtRef.current = null;
+    redrawCanvas();
   };
 
   const handleWheel = (e: React.WheelEvent<HTMLCanvasElement>) => {
@@ -694,6 +715,7 @@ export default function CanvasBoardPage() {
             onPointerMove={handlePointerMove}
             onPointerUp={handlePointerUp}
             onPointerCancel={handlePointerUp}
+            onPointerLeave={handlePointerLeave}
             onWheel={handleWheel}
             className={`w-full h-full block ${activeTool === 'select' ? (isDraggingItemRef.current ? 'cursor-move' : 'cursor-default') : activeTool === 'eraser' ? 'cursor-none' : 'cursor-crosshair'}`}
             style={{ touchAction: 'none' }}
@@ -707,14 +729,6 @@ export default function CanvasBoardPage() {
             onUpdate={(updated) => setCanvasTextBoxes(prev => prev.map(t => t.id === updated.id ? updated : t))}
             zoom={zoom} pan={pan} activeTool={activeTool}
           />
-
-          {/* Eraser Live Circular Indicator */}
-          {activeTool === 'eraser' && cursorPos.x >= 0 && (
-            <div
-              className="pointer-events-none fixed rounded-full border-2 border-red-500 bg-red-400/20 shadow-sm z-50 transform -translate-x-1/2 -translate-y-1/2"
-              style={{ left: `${cursorPos.x}px`, top: `${cursorPos.y}px`, width: `${eraserSize * zoom}px`, height: `${eraserSize * zoom}px` }}
-            />
-          )}
 
           <CanvasBottomBar
             zoom={zoom} setZoom={setZoom} onResetZoom={() => { setZoom(1.0); setPan({ x: 100, y: 80 }); }}
