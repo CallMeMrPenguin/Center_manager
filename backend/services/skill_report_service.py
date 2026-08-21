@@ -20,7 +20,7 @@ def get_skill_breakdown_report(conn, class_id: Optional[int] = None, student_id:
 
     # 2. Fetch all mastery records for this scope
     query = """
-        SELECT sm.*, s.full_name as student_name, s.nickname, c.class_name
+        SELECT sm.*, s.full_name as student_name, s.nickname, c.class_name, c.grade
         FROM skill_mastery sm
         JOIN students s ON sm.student_id = s.id
         JOIN classes c ON sm.class_id = c.id
@@ -67,11 +67,18 @@ def get_skill_breakdown_report(conn, class_id: Optional[int] = None, student_id:
         "mastery_rate": mastery_rate
     }
 
-    # 4. Group by Unit / Topic Breakdown
+    # 4. Group by Unit / Topic Breakdown (Disambiguate if multiple grades/classes present)
+    distinct_grades = set(r.get("grade") or "" for r in mastery_rows if r.get("grade"))
+    has_multiple_grades = len(distinct_grades) > 1 and not class_id
+
     unit_map: Dict[tuple, List[Dict[str, Any]]] = {}
     for r in mastery_rows:
-        k = (r["skill"], r["unit_key"])
-        unit_map.setdefault(k, []).append(r)
+        grade_str = str(r.get("grade") or "")
+        clean_grade = "K" + "".join(filter(str.isdigit, grade_str)) if any(c.isdigit() for c in grade_str) else grade_str
+        display_ukey = f"[{clean_grade}] {r['unit_key']}" if (has_multiple_grades and clean_grade) else r["unit_key"]
+
+        k = (r["skill"], display_ukey)
+        unit_map.setdefault(k, []).append({**r, "_display_unit_key": display_ukey})
 
     unit_breakdown = []
     for (skill, ukey), items in unit_map.items():
@@ -123,15 +130,20 @@ def get_skill_breakdown_report(conn, class_id: Optional[int] = None, student_id:
     student_map: Dict[int, Dict[str, Any]] = {}
     for r in mastery_rows:
         sid = r["student_id"]
+        grade_str = str(r.get("grade") or "")
+        clean_grade = "K" + "".join(filter(str.isdigit, grade_str)) if any(c.isdigit() for c in grade_str) else grade_str
+        display_ukey = f"[{clean_grade}] {r['unit_key']}" if (has_multiple_grades and clean_grade) else r["unit_key"]
+
         if sid not in student_map:
             student_map[sid] = {
                 "student_id": sid,
                 "student_name": r["student_name"],
                 "nickname": r.get("nickname") or "",
                 "class_name": r.get("class_name") or "",
+                "grade": r.get("grade") or "",
                 "units": {}
             }
-        student_map[sid]["units"][r["unit_key"]] = {
+        student_map[sid]["units"][display_ukey] = {
             "skill": r["skill"],
             "ema_score": r["ema_score"],
             "last_score": r.get("last_score"),
