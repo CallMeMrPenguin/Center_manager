@@ -9,7 +9,7 @@ import { CanvasBottomBar, GridType } from './components/CanvasBottomBar';
 import { CanvasTextBoxOverlay } from './components/CanvasTextBoxOverlay';
 import { useCanvasViewport } from './hooks/useCanvasViewport';
 import { hitTestImage, calculateAutoAlign, applyWordCrop, isStrokeFullyInsideImage, HandleType } from './utils/imageTransform';
-import { eraseStrokesAtPoint } from './utils/eraserEngine';
+import { eraseStrokesAlongPath } from './utils/eraserEngine';
 import { renderStroke, getTransformedPoint } from '../../utils/drawingEngine';
 
 try {
@@ -61,6 +61,7 @@ export default function CanvasBoardPage() {
   const dragOffsetRef = useRef<Point>({ x: 0, y: 0 });
   const activeSnapGuidesRef = useRef<SnapGuide[]>([]);
   const currentStrokePointsRef = useRef<Point[]>([]);
+  const lastEraserWorldPtRef = useRef<Point | null>(null);
   const [cursorPos, setCursorPos] = useState<Point>({ x: -100, y: -100 });
 
   useEffect(() => {
@@ -282,19 +283,16 @@ export default function CanvasBoardPage() {
       else { ctx.moveTo(guide.start, guide.pos); ctx.lineTo(guide.end, guide.pos); }
       ctx.stroke();
 
-      // Draw 2-Headed Canva Measurement Arrow (<|── 30px ──|>)
       if (guide.gapStart && guide.gapEnd && guide.gapText && guide.gapCenter) {
         ctx.setLineDash([]);
         ctx.strokeStyle = '#ec4899'; ctx.fillStyle = '#ec4899';
         ctx.lineWidth = 1.8 / zoom;
 
-        // Main dimension line
         ctx.beginPath();
         ctx.moveTo(guide.gapStart.x, guide.gapStart.y);
         ctx.lineTo(guide.gapEnd.x, guide.gapEnd.y);
         ctx.stroke();
 
-        // End ticks (| and |)
         const tick = 7 / zoom;
         if (guide.type === 'vertical') {
           ctx.beginPath();
@@ -308,7 +306,6 @@ export default function CanvasBoardPage() {
           ctx.stroke();
         }
 
-        // Floating Pill Badge
         const txt = guide.gapText;
         const fontSize = 11 / zoom;
         ctx.font = `bold ${fontSize}px sans-serif`;
@@ -493,8 +490,9 @@ export default function CanvasBoardPage() {
       if (activeTool === 'eraser') {
         isDrawingRef.current = true;
         pushHistorySnapshot();
-        const { remainingStrokes, erasedCount } = eraseStrokesAtPoint(currentStrokes, worldPt, eraserSize / 2);
-        if (erasedCount > 0) setPageStrokes(prev => ({ ...prev, [currentPage]: remainingStrokes }));
+        lastEraserWorldPtRef.current = worldPt;
+        const newStrokes = eraseStrokesAlongPath(currentStrokes, worldPt, worldPt, eraserSize / 2);
+        setPageStrokes(prev => ({ ...prev, [currentPage]: newStrokes }));
         return;
       }
 
@@ -574,8 +572,10 @@ export default function CanvasBoardPage() {
     }
 
     if (activeTool === 'eraser' && isDrawingRef.current) {
-      const { remainingStrokes, erasedCount } = eraseStrokesAtPoint(currentStrokes, worldPt, eraserSize / 2);
-      if (erasedCount > 0) setPageStrokes(prev => ({ ...prev, [currentPage]: remainingStrokes }));
+      const prevPt = lastEraserWorldPtRef.current || worldPt;
+      const newStrokes = eraseStrokesAlongPath(currentStrokes, prevPt, worldPt, eraserSize / 2);
+      lastEraserWorldPtRef.current = worldPt;
+      setPageStrokes(prev => ({ ...prev, [currentPage]: newStrokes }));
       return;
     }
 
@@ -591,6 +591,7 @@ export default function CanvasBoardPage() {
   const handlePointerUp = async (e: React.PointerEvent<HTMLCanvasElement>) => {
     try { e.currentTarget.releasePointerCapture(e.pointerId); } catch {}
     isPanningRef.current = false; activeSnapGuidesRef.current = [];
+    lastEraserWorldPtRef.current = null;
 
     if (isDraggingItemRef.current) {
       isDraggingItemRef.current = false;
@@ -698,6 +699,7 @@ export default function CanvasBoardPage() {
             style={{ touchAction: 'none' }}
           />
 
+          {/* Interactive Editable Text Boxes Overlay */}
           <CanvasTextBoxOverlay
             textBoxes={canvasTextBoxes}
             selectedId={selectedType === 'text' ? selectedId : null}
