@@ -276,23 +276,25 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
         style={{ touchAction: 'none' }}
       />
 
-      {/* FLOATING DRAGGABLE DRAWING TOOLBAR - Positioned cleanly below top action bar */}
+      {/* FLOATING DRAGGABLE DRAWING TOOLBAR - Fixed on screen with rich contrast & vibrant border */}
       <div
         style={toolbarPos ? { transform: `translate3d(${toolbarPos.x}px, ${toolbarPos.y}px, 0)` } : {}}
-        className="absolute top-16 right-4 z-30 pointer-events-auto flex items-center gap-1 bg-[#0c0f1e]/95 border border-[#212c4b] p-1.5 rounded-xl shadow-2xl backdrop-blur-none"
+        className="fixed top-20 right-8 z-[100] pointer-events-auto flex items-center gap-1.5 bg-[#12162a] border-2 border-[#5c36f5]/70 p-1.5 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.6),0_0_20px_rgba(92,54,245,0.35)] select-none ring-1 ring-white/15"
       >
         <div
           onMouseDown={handleToolbarMouseDown}
-          className="p-1 text-slate-500 hover:text-slate-300 cursor-move"
+          className="p-1 text-indigo-400 hover:text-indigo-200 cursor-move"
           title="Kéo thả để di chuyển thanh công cụ vẽ"
         >
-          <GripVertical size={13} />
+          <GripVertical size={14} />
         </div>
 
         <button
           onClick={() => { setActiveTool('none'); setShowColorPopover(false); setShowSizePopover(false); }}
-          className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
-            activeTool === 'none' ? 'bg-[#5c36f5] text-white shadow-md' : 'text-slate-400 hover:text-white hover:bg-white/5'
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black transition cursor-pointer ${
+            activeTool === 'none'
+              ? 'bg-[#5c36f5] text-white shadow-[0_0_12px_rgba(92,54,245,0.7)]'
+              : 'text-slate-300 hover:text-white hover:bg-white/10'
           }`}
           title="Chế độ con trỏ chuột"
         >
@@ -302,10 +304,12 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
 
         <button
           onClick={() => { setActiveTool('pen'); setShowColorPopover(false); setShowSizePopover(false); }}
-          className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
-            activeTool === 'pen' ? 'bg-[#5c36f5] text-white shadow-md' : 'text-slate-400 hover:text-white hover:bg-white/5'
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black transition cursor-pointer ${
+            activeTool === 'pen'
+              ? 'bg-indigo-500 text-white shadow-[0_0_12px_rgba(99,102,241,0.7)]'
+              : 'text-slate-300 hover:text-white hover:bg-white/10'
           }`}
-          title="Bút vẽ"
+          title="Bút vẽ (Giữ Shift để kẻ đường thẳng)"
         >
           <Pen size={13} />
           <span className="hidden sm:inline">Bút</span>
@@ -313,10 +317,12 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
 
         <button
           onClick={() => { setActiveTool('highlighter'); setShowColorPopover(false); setShowSizePopover(false); }}
-          className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
-            activeTool === 'highlighter' ? 'bg-[#5c36f5] text-white shadow-md' : 'text-slate-400 hover:text-white hover:bg-white/5'
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black transition cursor-pointer ${
+            activeTool === 'highlighter'
+              ? 'bg-amber-500 text-black shadow-[0_0_12px_rgba(245,158,11,0.7)]'
+              : 'text-amber-400 hover:text-amber-200 hover:bg-amber-500/10'
           }`}
-          title="Dạ quang"
+          title="Dạ quang (Giữ Shift để gạch thẳng dòng)"
         >
           <Highlighter size={13} />
           <span className="hidden sm:inline">Dạ quang</span>
@@ -324,8 +330,10 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
 
         <button
           onClick={() => { setActiveTool('eraser'); setShowColorPopover(false); setShowSizePopover(false); }}
-          className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
-            activeTool === 'eraser' ? 'bg-rose-600 text-white shadow-md' : 'text-slate-400 hover:text-white hover:bg-white/5'
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black transition cursor-pointer ${
+            activeTool === 'eraser'
+              ? 'bg-rose-600 text-white shadow-[0_0_12px_rgba(225,29,72,0.7)]'
+              : 'text-rose-400 hover:text-rose-200 hover:bg-rose-500/10'
           }`}
           title="Tẩy xóa nét vẽ"
         >
@@ -337,23 +345,23 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
           <div className="relative flex items-center">
             <button
               onClick={() => { setShowColorPopover(!showColorPopover); setShowSizePopover(false); }}
-              className="flex items-center gap-1 px-2 py-1 rounded-lg hover:bg-white/10 transition cursor-pointer border border-white/10"
+              className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-[#1c2242] hover:bg-[#252d58] transition cursor-pointer border border-indigo-500/30"
               title="Chọn màu mực vẽ"
             >
-              <div className="w-3.5 h-3.5 rounded-full border border-white/40 shadow-sm" style={{ backgroundColor: selectedColor }} />
-              <Palette size={12} className="text-slate-400" />
+              <div className="w-4 h-4 rounded-full border-2 border-white shadow-[0_0_8px_rgba(255,255,255,0.5)]" style={{ backgroundColor: selectedColor }} />
+              <Palette size={12} className="text-slate-300" />
             </button>
 
             {showColorPopover && (
-              <div className="absolute top-full right-0 mt-2 bg-[#0c0f1e] border border-[#212c4b] p-3 rounded-2xl shadow-2xl z-50 space-y-2.5 min-w-[210px]">
-                <div className="text-[11px] font-bold text-slate-300">Bảng màu gợi ý</div>
+              <div className="absolute top-full right-0 mt-2 bg-[#12162a] border-2 border-[#5c36f5]/60 p-3 rounded-2xl shadow-2xl z-50 space-y-2.5 min-w-[210px]">
+                <div className="text-[11px] font-bold text-slate-200">Bảng màu gợi ý</div>
                 <div className="flex flex-wrap gap-2">
                   {PRESET_COLORS.map(c => (
                     <button
                       key={c.value}
                       onClick={() => { setSelectedColor(c.value); setShowColorPopover(false); }}
                       className={`w-6 h-6 rounded-full transition cursor-pointer transform hover:scale-110 border ${
-                        selectedColor.toLowerCase() === c.value.toLowerCase() ? 'ring-2 ring-indigo-400 scale-110 border-white' : 'border-transparent'
+                        selectedColor.toLowerCase() === c.value.toLowerCase() ? 'ring-2 ring-white scale-110 border-white' : 'border-transparent'
                       }`}
                       style={{ backgroundColor: c.value }}
                     />
@@ -368,16 +376,16 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
           <div className="relative flex items-center">
             <button
               onClick={() => { setShowSizePopover(!showSizePopover); setShowColorPopover(false); }}
-              className="flex items-center gap-1 px-2 py-1 rounded-lg hover:bg-white/10 transition cursor-pointer border border-white/10 text-xs font-bold text-slate-300"
+              className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-[#1c2242] hover:bg-[#252d58] transition cursor-pointer border border-indigo-500/30 text-xs font-black text-indigo-300"
               title="Chỉnh độ dày"
             >
-              <Sliders size={12} className="text-slate-400" />
+              <Sliders size={12} className="text-indigo-400" />
               <span>{currentSize}px</span>
             </button>
 
             {showSizePopover && (
-              <div className="absolute top-full right-0 mt-2 bg-[#0c0f1e] border border-[#212c4b] p-3 rounded-2xl shadow-2xl z-50 space-y-2 min-w-[180px]">
-                <div className="flex items-center justify-between text-[11px] font-bold text-slate-300">
+              <div className="absolute top-full right-0 mt-2 bg-[#12162a] border-2 border-[#5c36f5]/60 p-3 rounded-2xl shadow-2xl z-50 space-y-2 min-w-[180px]">
+                <div className="flex items-center justify-between text-[11px] font-bold text-slate-200">
                   <span>{activeTool === 'eraser' ? 'Kích thước tẩy' : 'Độ dày nét'}</span>
                   <span className="font-mono text-indigo-400 font-black">{currentSize}px</span>
                 </div>
@@ -402,7 +410,7 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
         <button
           onClick={handleUndo}
           disabled={undoStack.length === 0}
-          className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition cursor-pointer disabled:opacity-30"
+          className="p-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-white/10 transition cursor-pointer disabled:opacity-30"
           title="Hoàn tác (Ctrl + Z)"
         >
           <Undo2 size={13} />
@@ -411,7 +419,7 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
         <button
           onClick={handleRedo}
           disabled={redoStack.length === 0}
-          className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition cursor-pointer disabled:opacity-30"
+          className="p-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-white/10 transition cursor-pointer disabled:opacity-30"
           title="Làm lại (Ctrl + Y)"
         >
           <Redo2 size={13} />
@@ -419,7 +427,7 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
 
         <button
           onClick={handleClearAll}
-          className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition cursor-pointer ml-0.5"
+          className="p-1.5 rounded-lg text-slate-300 hover:text-rose-400 hover:bg-rose-500/20 transition cursor-pointer ml-0.5"
           title="Xóa toàn bộ nét vẽ"
         >
           <Trash2 size={13} />

@@ -66,19 +66,19 @@ export const QuizPopoutTimer: React.FC<QuizPopoutTimerProps> = ({
   return (
     <div
       style={timerPos ? { transform: `translate3d(${timerPos.x}px, ${timerPos.y}px, 0)` } : {}}
-      className="absolute top-16 left-4 z-30 pointer-events-auto flex items-center gap-1.5 bg-[#0c0f1e]/95 border border-[#212c4b] p-1.5 rounded-xl shadow-2xl select-none"
+      className="fixed top-20 left-8 z-[100] pointer-events-auto flex items-center gap-1.5 bg-[#12162a] border-2 border-[#5c36f5]/70 p-1.5 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.6),0_0_20px_rgba(92,54,245,0.35)] select-none ring-1 ring-white/15"
     >
       {/* Draggable Grip Handle */}
       <div
         onMouseDown={handleMouseDown}
-        className="p-1 text-slate-500 hover:text-slate-300 cursor-move"
+        className="p-1 text-indigo-400 hover:text-indigo-200 cursor-move"
         title="Kéo thả để di chuyển đồng hồ"
       >
-        <GripVertical size={13} />
+        <GripVertical size={14} />
       </div>
 
       {/* Clock Icon & Scalable Digital Countdown / Stopwatch */}
-      <div className="flex items-center gap-2 px-2.5 py-1 rounded-lg bg-white/5 border border-white/5 transition-all">
+      <div className="flex items-center gap-2 px-2.5 py-1 rounded-xl bg-[#1c2242] border border-indigo-500/30 transition-all">
         <Clock
           size={Math.round(14 * scale)}
           className={
@@ -136,7 +136,7 @@ export const QuizPopoutTimer: React.FC<QuizPopoutTimerProps> = ({
       {/* Close Floating Timer Button */}
       <button
         onClick={onClose}
-        className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition cursor-pointer"
+        className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-rose-500/20 transition cursor-pointer"
         title="Đóng đồng hồ nổi"
       >
         <X size={13} />
