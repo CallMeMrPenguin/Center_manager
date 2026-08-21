@@ -32,18 +32,28 @@
 @theme {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-surface-nav: var(--surface-nav);
+  --color-surface-raised: var(--surface-raised);
+  --color-surface-highlight: var(--surface-highlight);
   --color-primary: var(--primary);
   --color-primary-hover: var(--primary-hover);
   --color-primary-light: var(--primary-light);
+  --color-indigo: var(--indigo);
   --color-success: var(--success);
   --color-success-bg: var(--success-bg);
   --color-warning: var(--warning);
   --color-warning-bg: var(--warning-bg);
   --color-danger: var(--danger);
   --color-danger-bg: var(--danger-bg);
+  --color-info: var(--info);
+  --color-purple: var(--purple);
   --color-text-main: var(--text-main);
   --color-text-muted: var(--text-muted);
+  --color-text-subtle: var(--text-subtle);
   --color-border-color: var(--border-color);
+  --color-border-subtle: var(--border-subtle);
+  --color-border-active: var(--border-active);
   --color-slate-250: var(--slate-250);
   --color-slate-850: var(--slate-850);
   --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
@@ -61,8 +71,8 @@
 
 body {
   margin: 0;
-  background-color: #08090e;
-  color: #f8fafc;
+  background-color: var(--background);
+  color: var(--foreground);
   font-family: var(--font-sans);
   font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   letter-spacing: 0.01em;
