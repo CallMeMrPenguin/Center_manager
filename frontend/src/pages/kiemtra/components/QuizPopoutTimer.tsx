@@ -77,18 +77,8 @@ export const QuizPopoutTimer: React.FC<QuizPopoutTimerProps> = ({
         <GripVertical size={14} />
       </div>
 
-      {/* Clock Icon & Scalable Digital Countdown / Stopwatch */}
-      <div className="flex items-center gap-2 px-2.5 py-1 rounded-xl bg-[#1c2242] border border-indigo-500/30 transition-all">
-        <Clock
-          size={Math.round(14 * scale)}
-          className={
-            timerMode === 'none'
-              ? 'text-emerald-400'
-              : timerMode === 'global'
-              ? 'text-indigo-400'
-              : 'text-amber-400'
-          }
-        />
+      {/* Scalable Digital Countdown / Stopwatch (No Clock Icon) */}
+      <div className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-[#1c2242] border border-indigo-500/30 transition-all">
         <span
           style={{ fontSize: `${(0.875 * scale).toFixed(3)}rem` }}
           className="font-mono font-black text-white tracking-wide transition-all"
