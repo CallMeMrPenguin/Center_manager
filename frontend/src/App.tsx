@@ -260,37 +260,37 @@ function AppContent() {
 
         {/* SIDEBAR NAVIGATION (Floating circle toggle button on right edge) */}
         <aside
-          className={`relative ${isSidebarExpanded ? 'w-[19rem]' : 'w-[5.25rem]'} sidebar-glass-glow rounded-2xl flex flex-col h-full transition-[width] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] z-30 shrink-0 select-none`}
+          className={`relative ${isSidebarExpanded ? 'w-[15.25rem]' : 'w-[4.25rem]'} sidebar-glass-glow rounded-2xl flex flex-col h-full transition-[width] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] z-30 shrink-0 select-none`}
         >
           {/* Floating Circular Collapse / Expand Button on right edge */}
           <button
             type="button"
             onClick={toggleSidebar}
-            className="absolute -right-3 top-6.5 w-6 h-6 rounded-full bg-[#181d2e] hover:bg-[#5c36f5] text-slate-300 hover:text-white border border-white/20 shadow-[0_2px_10px_rgba(0,0,0,0.6)] flex items-center justify-center transition-all duration-200 hover:scale-115 cursor-pointer z-50 active:scale-95"
+            className="absolute -right-3 top-6 w-6 h-6 rounded-full bg-[#181d2e] hover:bg-[#5c36f5] text-slate-300 hover:text-white border border-white/20 shadow-[0_2px_10px_rgba(0,0,0,0.6)] flex items-center justify-center transition-all duration-200 hover:scale-110 cursor-pointer z-50 active:scale-95"
             title={isSidebarExpanded ? "Thu gọn thanh điều hướng" : "Mở rộng thanh điều hướng"}
           >
             {isSidebarExpanded ? <ChevronLeft size={13} strokeWidth={2.5} /> : <ChevronRight size={13} strokeWidth={2.5} />}
           </button>
 
           {/* Header logo / Title */}
-          <div className="flex items-center px-3.5 py-4 shrink-0 border-b border-white/5 min-w-0">
-            <div className="h-10 w-10 rounded-xl overflow-hidden flex items-center justify-center shrink-0 shadow-[0_0_16px_rgba(59,130,246,0.4)]">
+          <div className="flex items-center px-3 py-3.5 shrink-0 border-b border-white/5 min-w-0">
+            <div className="h-9 w-9 rounded-xl overflow-hidden flex items-center justify-center shrink-0 shadow-[0_0_14px_rgba(59,130,246,0.4)]">
               <img src="/logo.png" alt="Center Manager Logo" className="h-full w-full object-contain" />
             </div>
             <div className={`whitespace-nowrap overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${
-              isSidebarExpanded ? 'opacity-100 max-w-[14rem] ml-3 translate-x-0' : 'opacity-0 max-w-0 ml-0 -translate-x-3 pointer-events-none'
+              isSidebarExpanded ? 'opacity-100 max-w-[10.5rem] ml-2.5 translate-x-0' : 'opacity-0 max-w-0 ml-0 -translate-x-3 pointer-events-none'
             }`}>
-              <span className="text-base font-black tracking-wide uppercase text-white block leading-none">
+              <span className="text-sm font-black tracking-wide uppercase text-white block leading-none">
                 EduPlatform
               </span>
-              <span className="text-[10px] font-black tracking-[0.2em] uppercase text-indigo-400 block mt-1">
+              <span className="text-[9px] font-black tracking-[0.2em] uppercase text-indigo-400 block mt-1">
                 Center Manager
               </span>
             </div>
           </div>
 
           {/* Nav Menu */}
-          <nav className="flex-1 overflow-y-auto min-h-0 px-3 py-3 flex flex-col gap-2 scrollbar-none">
+          <nav className="flex-1 overflow-y-auto min-h-0 px-2 py-2.5 flex flex-col gap-1.5 scrollbar-none">
             {SECTIONS.map((section) => {
               const sectionTabs = orderedTabIds
                 .map((tabId, idx) => ({ tabId, idx }))
@@ -302,10 +302,10 @@ function AppContent() {
               if (sectionTabs.length === 0) return null;
 
               return (
-                <div key={section.id} className="flex flex-col gap-1 shrink-0">
+                <div key={section.id} className="flex flex-col gap-0.5 shrink-0">
                   {section.label && (
-                    <div className={`px-3 text-xs font-black uppercase tracking-wider text-slate-400 overflow-hidden whitespace-nowrap transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${
-                      isSidebarExpanded ? 'opacity-100 max-h-6 mt-1 mb-0.5' : 'opacity-0 max-h-0 mt-0 mb-0 pointer-events-none'
+                    <div className={`px-2.5 text-[10px] font-black uppercase tracking-wider text-slate-400 overflow-hidden whitespace-nowrap transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${
+                      isSidebarExpanded ? 'opacity-100 max-h-5 mt-1 mb-0.5' : 'opacity-0 max-h-0 mt-0 mb-0 pointer-events-none'
                     }`}>
                       {section.label}
                     </div>
@@ -323,25 +323,20 @@ function AppContent() {
                         onDragEnd={() => setDraggedIndex(null)}
                         onDrop={() => handleDrop(idx)}
                         onClick={() => setActiveTab(item.id)}
-                        className={`flex items-center w-full h-11 rounded-xl transition-all duration-150 relative group cursor-pointer active:scale-95 shrink-0 ${draggedIndex === idx ? 'opacity-40 border border-dashed border-indigo-400 bg-indigo-500/10' : ''
-                          }`}
+                        className={`flex items-center w-full h-9.5 px-2 rounded-xl transition-all duration-150 relative group cursor-pointer active:scale-95 shrink-0 ${
+                          isActive
+                            ? 'bg-indigo-500/25 border-2 border-indigo-400/90 shadow-[0_0_14px_rgba(92,54,245,0.4)]'
+                            : 'hover:bg-white/[0.05] border-2 border-transparent'
+                        } ${draggedIndex === idx ? 'opacity-40 border border-dashed border-indigo-400 bg-indigo-500/10' : ''}`}
                       >
-                        {isActive && (
-                          <div className={`absolute transition-all duration-300 pointer-events-none bg-indigo-500/25 border-2 border-indigo-400/90 shadow-[0_0_16px_rgba(92,54,245,0.5)] ${
-                            isSidebarExpanded
-                              ? 'top-[3px] left-[5px] w-[calc(100%-10px)] h-[calc(100%-6px)] rounded-xl'
-                              : 'top-[2px] left-[4px] w-10 h-10 rounded-full'
-                          }`} />
-                        )}
-
                         {/* ICON BOX */}
-                        <div className="w-12 h-11 flex items-center justify-center shrink-0 relative z-10">
-                          <Icon size={20} className={isActive ? 'text-white drop-shadow-[0_0_10px_rgba(255,255,255,1)]' : 'text-slate-400 group-hover:text-white'} />
+                        <div className="w-6 h-6 flex items-center justify-center shrink-0 relative z-10">
+                          <Icon size={17} className={isActive ? 'text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.8)]' : 'text-slate-400 group-hover:text-white'} />
                         </div>
 
                         {/* TEXT LABEL WITH SYNCHRONIZED SMOOTH FADE & SLIDE */}
-                        <span className={`text-sm relative z-10 whitespace-nowrap overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${
-                          isSidebarExpanded ? 'opacity-100 max-w-[13.5rem] ml-1.5 translate-x-0' : 'opacity-0 max-w-0 ml-0 -translate-x-3 pointer-events-none'
+                        <span className={`text-xs relative z-10 whitespace-nowrap overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${
+                          isSidebarExpanded ? 'opacity-100 max-w-[10.5rem] ml-2 translate-x-0' : 'opacity-0 max-w-0 ml-0 -translate-x-3 pointer-events-none'
                         } ${isActive ? "text-white font-black" : "text-slate-200 font-bold group-hover:text-white"}`}>
                           {item.label}
                         </span>
@@ -354,11 +349,11 @@ function AppContent() {
           </nav>
 
           {/* User profile section — click-to-open flyout popup */}
-          <div className="shrink-0 mt-auto p-2.5 border-t border-white/5 relative" ref={profileRef}>
+          <div className="shrink-0 mt-auto p-2 border-t border-white/5 relative" ref={profileRef}>
             {/* Profile flyout popup (opens upward) */}
             {profileOpen && (
-              <div className="absolute z-[250] bg-[#0d1018] border border-white/10 rounded-[14px] shadow-[0_12px_40px_rgba(0,0,0,0.85)] p-1.5 animate-mac-dropdown bottom-full left-0 mb-2 w-56 origin-bottom">
-                <div className="px-3.5 py-2.5 border-b border-white/5 select-none mb-1">
+              <div className="absolute z-[250] bg-[#0d1018] border border-white/10 rounded-[14px] shadow-[0_12px_40px_rgba(0,0,0,0.85)] p-1.5 animate-mac-dropdown bottom-full left-0 mb-2 w-52 origin-bottom">
+                <div className="px-3 py-2 border-b border-white/5 select-none mb-1">
                   <p className="text-[10px] font-black text-slate-500 uppercase tracking-wider">Tài Khoản</p>
                   <p className="text-xs font-extrabold text-white mt-0.5">Center Manager</p>
                 </div>
@@ -366,7 +361,7 @@ function AppContent() {
                 {/* Settings */}
                 <button
                   onClick={() => { setActiveTab('settings'); setProfileOpen(false); }}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-bold text-slate-300 hover:bg-white/[0.05] hover:text-white rounded-xl transition cursor-pointer text-left"
+                  className="w-full flex items-center gap-2 px-2.5 py-1.5 text-xs font-bold text-slate-300 hover:bg-white/[0.05] hover:text-white rounded-xl transition cursor-pointer text-left"
                 >
                   <SettingsIcon className="h-4 w-4 text-slate-400 shrink-0" />
                   <span>Cấu hình hệ thống</span>
@@ -379,7 +374,7 @@ function AppContent() {
                     catch (err) { showToast('Không thể mở: ' + err, 'error'); }
                     setProfileOpen(false);
                   }}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-bold text-slate-300 hover:bg-white/[0.05] hover:text-white rounded-xl transition cursor-pointer text-left"
+                  className="w-full flex items-center gap-2 px-2.5 py-1.5 text-xs font-bold text-slate-300 hover:bg-white/[0.05] hover:text-white rounded-xl transition cursor-pointer text-left"
                 >
                   <FolderOpen className="h-4 w-4 text-slate-400 shrink-0" />
                   <span>Mở thư mục Workspace</span>
@@ -392,7 +387,7 @@ function AppContent() {
                     if (ok) window.close();
                     setProfileOpen(false);
                   }}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 text-rose-400 hover:bg-rose-500/10 rounded-xl transition cursor-pointer text-left border-t border-white/5 mt-1 pt-2"
+                  className="w-full flex items-center gap-2 px-2.5 py-1.5 text-rose-400 hover:bg-rose-500/10 rounded-xl transition cursor-pointer text-left border-t border-white/5 mt-1 pt-2"
                 >
                   <LogOut className="h-4 w-4 text-rose-500 shrink-0" />
                   <span>Đóng ứng dụng</span>
@@ -403,25 +398,21 @@ function AppContent() {
             {/* Clickable Profile Row */}
             <button
               onClick={() => setProfileOpen(!profileOpen)}
-              className="flex items-center w-full h-11 px-2.5 rounded-xl hover:bg-white/[0.04] transition-colors cursor-pointer overflow-hidden"
+              className="flex items-center w-full h-10 px-2 rounded-xl hover:bg-white/[0.04] transition-colors cursor-pointer overflow-hidden"
             >
-              <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center font-black text-xs text-white shadow-[0_4px_14px_rgba(92,54,245,0.45)] shrink-0 border border-white/20 hover:shadow-[0_0_12px_rgba(92,54,245,0.5)] transition-all">
+              <div className="h-7.5 w-7.5 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center font-black text-xs text-white shadow-[0_2px_10px_rgba(92,54,245,0.4)] shrink-0 border border-white/20 hover:shadow-[0_0_12px_rgba(92,54,245,0.5)] transition-all">
                 CM
               </div>
               <div className={`transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] whitespace-nowrap overflow-hidden flex items-center justify-between flex-1 ${
-                isSidebarExpanded ? 'opacity-100 max-w-[13.5rem] ml-3 translate-x-0' : 'opacity-0 max-w-0 ml-0 -translate-x-3 pointer-events-none'
+                isSidebarExpanded ? 'opacity-100 max-w-[10.5rem] ml-2.5 translate-x-0' : 'opacity-0 max-w-0 ml-0 -translate-x-3 pointer-events-none'
               }`}>
                 <div className="min-w-0 flex-1 text-left">
                   <p className="text-xs font-black text-white truncate leading-snug">Center Manager</p>
-                  <p className="text-[10px] font-extrabold text-indigo-400 truncate">Hệ thống quản lý</p>
+                  <p className="text-[9px] font-extrabold text-indigo-400 truncate">Hệ thống quản lý</p>
                 </div>
                 <ChevronUp size={13} className={`text-slate-500 shrink-0 transition-transform ${profileOpen ? '' : 'rotate-180'}`} />
               </div>
             </button>
-
-            <div className="flex items-center justify-between text-[10px] text-slate-600 font-bold px-2 mt-1 transition-opacity duration-200 ease-out whitespace-nowrap overflow-hidden">
-              <span className="uppercase tracking-widest">{isSidebarExpanded ? 'v4.0.0' : 'v4'}</span>
-            </div>
           </div>
         </aside>
 
