@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
+import ReactDOM from 'react-dom';
 import * as pdfjsLib from 'pdfjs-dist';
-import { Upload, FileText, RotateCcw, Download, Maximize2, Minimize2 } from 'lucide-react';
+import { Upload, RotateCcw, Download, Maximize2, Minimize2, Palette } from 'lucide-react';
 import { showToast } from '../../components/Toast';
 import { CanvasTool, Point, CanvasItemImage, SnapGuide, CropBox } from './types';
 import { CanvasToolbar } from './components/CanvasToolbar';
@@ -23,6 +24,11 @@ interface StrokeRecord {
   isShiftPressed?: boolean;
 }
 
+interface HistorySnapshot {
+  strokes: StrokeRecord[];
+  images: CanvasItemImage[];
+}
+
 export default function CanvasBoardPage() {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -33,7 +39,7 @@ export default function CanvasBoardPage() {
   const [totalPages, setTotalPages] = useState<number>(1);
   const [canvasImages, setCanvasImages] = useState<CanvasItemImage[]>([]);
   const [selectedImageId, setSelectedImageId] = useState<string | null>(null);
-  const [docName, setDocName] = useState<string>('Bảng vẽ vô hạn (Canvas)');
+  const [docName, setDocName] = useState<string>('Bảng vẽ trắng (Canvas)');
 
   // Viewport Pan, Zoom & Navigation Hook
   const {
@@ -41,21 +47,22 @@ export default function CanvasBoardPage() {
     isPanningRef, lastMousePosRef, isShiftPressedRef
   } = useCanvasViewport();
 
-  const [gridType, setGridType] = useState<GridType>('dots');
+  const [gridType, setGridType] = useState<GridType>('lines');
   const [isAutoAlignEnabled, setIsAutoAlignEnabled] = useState(true);
 
   // Tool state
-  const [activeTool, setActiveTool] = useState<CanvasTool>('select');
-  const [selectedColor, setSelectedColor] = useState<string>('#ffd600');
+  const [activeTool, setActiveTool] = useState<CanvasTool>('pen');
+  const [selectedColor, setSelectedColor] = useState<string>('#1a1a1a');
   const [penSize, setPenSize] = useState<number>(4);
   const [hlSize, setHlSize] = useState<number>(24);
-  const [eraserSize, setEraserSize] = useState<number>(30);
+  const [eraserSize, setEraserSize] = useState<number>(50);
   const [shapeSize, setShapeSize] = useState<number>(3);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
   // Stroke history per page
   const [pageStrokes, setPageStrokes] = useState<Record<number, StrokeRecord[]>>({});
-  const [redoStack, setRedoStack] = useState<StrokeRecord[][]>([]);
+  const [undoStack, setUndoStack] = useState<HistorySnapshot[]>([]);
+  const [redoStack, setRedoStack] = useState<HistorySnapshot[]>([]);
 
   // Active interaction refs
   const isDrawingRef = useRef(false);
@@ -65,8 +72,77 @@ export default function CanvasBoardPage() {
   const activeSnapGuidesRef = useRef<SnapGuide[]>([]);
   const cropBoxRef = useRef<CropBox | null>(null);
   const currentStrokePointsRef = useRef<Point[]>([]);
+  const [cursorPos, setCursorPos] = useState<Point>({ x: -100, y: -100 });
 
-  // Render PDF page to image object on the canvas
+  // Fullscreen sync
+  useEffect(() => {
+    const handleFsChange = () => setIsFullscreen(!!document.fullscreenElement);
+    document.addEventListener('fullscreenchange', handleFsChange);
+    return () => document.removeEventListener('fullscreenchange', handleFsChange);
+  }, []);
+
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().then(() => setIsFullscreen(true)).catch(() => setIsFullscreen(p => !p));
+    } else {
+      if (document.exitFullscreen) document.exitFullscreen().catch(() => {});
+      setIsFullscreen(false);
+    }
+  };
+
+  // Push state snapshot for Undo / Redo
+  const pushHistorySnapshot = useCallback(() => {
+    const snapshot: HistorySnapshot = {
+      strokes: [...(pageStrokes[currentPage] || [])],
+      images: [...canvasImages],
+    };
+    setUndoStack(prev => [...prev.slice(-30), snapshot]);
+    setRedoStack([]);
+  }, [pageStrokes, canvasImages, currentPage]);
+
+  const handleUndo = useCallback(() => {
+    if (undoStack.length === 0) return;
+    const currentSnap: HistorySnapshot = {
+      strokes: [...(pageStrokes[currentPage] || [])],
+      images: [...canvasImages],
+    };
+    const previous = undoStack[undoStack.length - 1];
+    setRedoStack(r => [currentSnap, ...r]);
+    setUndoStack(u => u.slice(0, -1));
+    setPageStrokes(prev => ({ ...prev, [currentPage]: previous.strokes }));
+    setCanvasImages(previous.images);
+  }, [undoStack, pageStrokes, canvasImages, currentPage]);
+
+  const handleRedo = useCallback(() => {
+    if (redoStack.length === 0) return;
+    const [next, ...rest] = redoStack;
+    const currentSnap: HistorySnapshot = {
+      strokes: [...(pageStrokes[currentPage] || [])],
+      images: [...canvasImages],
+    };
+    setUndoStack(u => [...u, currentSnap]);
+    setRedoStack(rest);
+    setPageStrokes(prev => ({ ...prev, [currentPage]: next.strokes }));
+    setCanvasImages(next.images);
+  }, [redoStack, pageStrokes, canvasImages, currentPage]);
+
+  // Global Keyboard listener for Ctrl+Z & Ctrl+Y
+  useEffect(() => {
+    const handleKeyShortcut = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
+        e.preventDefault();
+        if (e.shiftKey) handleRedo();
+        else handleUndo();
+      } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y') {
+        e.preventDefault();
+        handleRedo();
+      }
+    };
+    window.addEventListener('keydown', handleKeyShortcut);
+    return () => window.removeEventListener('keydown', handleKeyShortcut);
+  }, [handleUndo, handleRedo]);
+
+  // Render PDF page to image object
   useEffect(() => {
     if (!pdfDoc) return;
     let isCancelled = false;
@@ -84,8 +160,8 @@ export default function CanvasBoardPage() {
             const newImgItem: CanvasItemImage = {
               id: 'pdf_page_' + currentPage,
               img,
-              x: 0,
-              y: 0,
+              x: 50,
+              y: 50,
               width: viewport.width / 2,
               height: viewport.height / 2,
             };
@@ -121,19 +197,20 @@ export default function CanvasBoardPage() {
     if (!ctx) return;
 
     ctx.setTransform(1, 0, 0, 1, 0, 0);
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = '#ffffff'; // PURE WHITE BACKGROUND
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     ctx.scale(dpr, dpr);
     ctx.translate(pan.x, pan.y);
     ctx.scale(zoom, zoom);
 
-    // 1. Infinite Grid Pattern
+    // 1. Ruled Lines / Grid Pattern on White Canvas
     if (gridType !== 'none') {
       const worldLeft = -pan.x / zoom;
       const worldTop = -pan.y / zoom;
       const worldRight = (rect.width - pan.x) / zoom;
       const worldBottom = (rect.height - pan.y) / zoom;
-      const gridSize = 40;
+      const gridSize = 36;
       const startX = Math.floor(worldLeft / gridSize) * gridSize;
       const endX = Math.ceil(worldRight / gridSize) * gridSize;
       const startY = Math.floor(worldTop / gridSize) * gridSize;
@@ -141,7 +218,7 @@ export default function CanvasBoardPage() {
 
       ctx.save();
       if (gridType === 'dots') {
-        ctx.fillStyle = '#263152';
+        ctx.fillStyle = '#94a3b8';
         for (let x = startX; x <= endX; x += gridSize) {
           for (let y = startY; y <= endY; y += gridSize) {
             ctx.beginPath();
@@ -150,25 +227,33 @@ export default function CanvasBoardPage() {
           }
         }
       } else if (gridType === 'grid') {
-        ctx.strokeStyle = '#182038';
+        ctx.strokeStyle = '#e2e8f0';
         ctx.lineWidth = 1 / zoom;
         ctx.beginPath();
         for (let x = startX; x <= endX; x += gridSize) { ctx.moveTo(x, startY); ctx.lineTo(x, endY); }
         for (let y = startY; y <= endY; y += gridSize) { ctx.moveTo(startX, y); ctx.lineTo(endX, y); }
         ctx.stroke();
+      } else if (gridType === 'lines') {
+        ctx.strokeStyle = '#e2e8f0';
+        ctx.lineWidth = 1.2 / zoom;
+        ctx.beginPath();
+        for (let y = startY; y <= endY; y += gridSize) {
+          ctx.moveTo(startX, y);
+          ctx.lineTo(endX, y);
+        }
+        ctx.stroke();
       }
       ctx.restore();
     }
 
-    // 2. Draw Images (PDF pages, uploaded photos)
+    // 2. Draw Images
     for (const item of canvasImages) {
       ctx.save();
-      ctx.shadowColor = 'rgba(0,0,0,0.5)';
-      ctx.shadowBlur = 20;
+      ctx.shadowColor = 'rgba(0,0,0,0.15)';
+      ctx.shadowBlur = 15;
       ctx.drawImage(item.img, item.x, item.y, item.width, item.height);
       ctx.restore();
 
-      // Draw selection box & resize handles
       if (item.id === selectedImageId) {
         ctx.save();
         ctx.strokeStyle = '#5c36f5';
@@ -177,7 +262,6 @@ export default function CanvasBoardPage() {
         ctx.strokeRect(item.x - 2 / zoom, item.y - 2 / zoom, item.width + 4 / zoom, item.height + 4 / zoom);
         ctx.setLineDash([]);
 
-        // Handles
         ctx.fillStyle = '#ffffff';
         ctx.strokeStyle = '#5c36f5';
         const hs = 8 / zoom;
@@ -198,7 +282,7 @@ export default function CanvasBoardPage() {
     // 3. Draw Auto Align Magnetic Guides
     for (const guide of activeSnapGuidesRef.current) {
       ctx.save();
-      ctx.strokeStyle = '#00e5ff';
+      ctx.strokeStyle = '#00b0ff';
       ctx.lineWidth = 1.5 / zoom;
       ctx.setLineDash([4 / zoom, 4 / zoom]);
       ctx.beginPath();
@@ -233,11 +317,11 @@ export default function CanvasBoardPage() {
       });
     }
 
-    // 6. Draw Active Crop Box
+    // 6. Draw Crop Box Overlay
     if (activeTool === 'crop' && cropBoxRef.current) {
       const cb = cropBoxRef.current;
       ctx.save();
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
       ctx.fillRect(-pan.x / zoom, -pan.y / zoom, rect.width / zoom, rect.height / zoom);
       ctx.clearRect(cb.x, cb.y, cb.width, cb.height);
       ctx.strokeStyle = '#ff9100';
@@ -247,135 +331,114 @@ export default function CanvasBoardPage() {
     }
   }, [pan, zoom, gridType, canvasImages, selectedImageId, currentStrokes, activeTool, selectedColor, penSize, hlSize, eraserSize, shapeSize]);
 
-  useEffect(() => {
-    redrawCanvas();
-  }, [redrawCanvas]);
+  useEffect(() => { redrawCanvas(); }, [redrawCanvas]);
 
-  // Center / Fit document
   const handleFitDocument = useCallback(() => {
     const container = containerRef.current;
     if (!container || canvasImages.length === 0) {
-      setZoom(1.0);
-      setPan({ x: 100, y: 80 });
-      return;
+      setZoom(1.0); setPan({ x: 100, y: 80 }); return;
     }
     const rect = container.getBoundingClientRect();
     const first = canvasImages[0];
     const scale = Math.min((rect.width - 80) / first.width, (rect.height - 80) / first.height, 1.5);
     setZoom(scale);
-    setPan({
-      x: (rect.width - first.width * scale) / 2,
-      y: (rect.height - first.height * scale) / 2,
-    });
+    setPan({ x: (rect.width - first.width * scale) / 2, y: (rect.height - first.height * scale) / 2 });
   }, [canvasImages, setZoom, setPan]);
 
-  // File upload handler
+  // Multiple File Import (PDF & Multiple Images)
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
 
-    setPageStrokes({});
-    setRedoStack([]);
-    setDocName(file.name);
+    pushHistorySnapshot();
+    const newItems: CanvasItemImage[] = [];
 
-    if (file.type === 'application/pdf' || file.name.endsWith('.pdf')) {
-      try {
-        const arrayBuffer = await file.arrayBuffer();
-        const loadedPdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-        setPdfDoc(loadedPdf);
-        setTotalPages(loadedPdf.numPages);
-        setCurrentPage(1);
-        showToast(`Đã mở PDF: ${file.name} (${loadedPdf.numPages} trang)`, "success");
-      } catch (err: any) {
-        showToast("Lỗi mở file PDF: " + err.message, "error");
-      }
-    } else if (file.type.startsWith('image/')) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const img = new Image();
-        img.onload = () => {
-          const newImgItem: CanvasItemImage = {
-            id: 'img_' + Date.now(),
-            img,
-            x: 50,
-            y: 50,
-            width: Math.min(img.width, 900),
-            height: (Math.min(img.width, 900) / img.width) * img.height,
-            originalSrc: event.target?.result as string,
+    for (let idx = 0; idx < files.length; idx++) {
+      const file = files[idx];
+      if (file.type === 'application/pdf' || file.name.endsWith('.pdf')) {
+        try {
+          const arrayBuffer = await file.arrayBuffer();
+          const loadedPdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+          setPdfDoc(loadedPdf);
+          setTotalPages(loadedPdf.numPages);
+          setCurrentPage(1);
+          setDocName(file.name);
+          showToast(`Đã mở PDF: ${file.name} (${loadedPdf.numPages} trang)`, "success");
+        } catch (err: any) {
+          showToast("Lỗi mở PDF: " + err.message, "error");
+        }
+      } else if (file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        await new Promise<void>((resolve) => {
+          reader.onload = (event) => {
+            const img = new Image();
+            img.onload = () => {
+              const offsetX = 50 + (idx % 3) * 320;
+              const offsetY = 50 + Math.floor(idx / 3) * 280;
+              newItems.push({
+                id: 'img_' + Date.now() + '_' + idx,
+                img,
+                x: offsetX,
+                y: offsetY,
+                width: Math.min(img.width, 600),
+                height: (Math.min(img.width, 600) / img.width) * img.height,
+                originalSrc: event.target?.result as string,
+              });
+              resolve();
+            };
+            img.src = event.target?.result as string;
           };
-          setCanvasImages(prev => [...prev, newImgItem]);
-          setSelectedImageId(newImgItem.id);
-          setActiveTool('select');
-          showToast(`Đã thêm ảnh vào canvas!`, "success");
-        };
-        img.src = event.target?.result as string;
-      };
-      reader.readAsDataURL(file);
+          reader.readAsDataURL(file);
+        });
+      }
+    }
+
+    if (newItems.length > 0) {
+      setCanvasImages(prev => [...prev, ...newItems]);
+      setSelectedImageId(newItems[newItems.length - 1].id);
+      setActiveTool('select');
+      showToast(`Đã thêm ${newItems.length} ảnh vào canvas!`, "success");
     }
   };
 
-  // Undo / Redo
-  const handleUndo = useCallback(() => {
-    if (currentStrokes.length === 0) return;
-    const last = currentStrokes[currentStrokes.length - 1];
-    setRedoStack(r => [[last], ...r]);
-    setPageStrokes(prev => ({ ...prev, [currentPage]: currentStrokes.slice(0, -1) }));
-  }, [currentStrokes, currentPage]);
-
-  const handleRedo = useCallback(() => {
-    if (redoStack.length === 0) return;
-    const [nextStrokes, ...rest] = redoStack;
-    setRedoStack(rest);
-    setPageStrokes(prev => ({ ...prev, [currentPage]: [...(prev[currentPage] || []), ...nextStrokes] }));
-  }, [redoStack, currentPage]);
-
-  // Pointer interactions
+  // Pointer down
   const handlePointerDown = (e: React.PointerEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     e.currentTarget.setPointerCapture(e.pointerId);
 
-    // RIGHT CLICK (Button 2): PAN CANVAS FREELY (Di chuyển tự do góc nhìn)
+    // RIGHT CLICK (Button 2): PAN VIEWPORT FREELY
     if (e.button === 2) {
       isPanningRef.current = true;
       lastMousePosRef.current = { x: e.clientX, y: e.clientY };
       return;
     }
 
-    // LEFT CLICK (Button 0): SELECT, MOVE OBJECT, CROP, OR DRAW
+    // LEFT CLICK (Button 0)
     if (e.button === 0) {
       const worldPt = getTransformedPoint(e, canvas, pan, zoom);
 
-      // In Select Tool
       if (activeTool === 'select') {
         let clickedItem: CanvasItemImage | null = null;
         let handle: HandleType = 'none';
 
-        // Check selected item handles first
         if (selectedImageId) {
           const selected = canvasImages.find(i => i.id === selectedImageId);
           if (selected) {
             const hit = hitTestImage(worldPt, selected, 12 / zoom);
-            if (hit.hit) {
-              clickedItem = selected;
-              handle = hit.handle;
-            }
+            if (hit.hit) { clickedItem = selected; handle = hit.handle; }
           }
         }
 
-        // Check all items if not on handle
         if (!clickedItem) {
           for (let i = canvasImages.length - 1; i >= 0; i--) {
             const hit = hitTestImage(worldPt, canvasImages[i], 12 / zoom);
-            if (hit.hit) {
-              clickedItem = canvasImages[i];
-              handle = hit.handle;
-              break;
-            }
+            if (hit.hit) { clickedItem = canvasImages[i]; handle = hit.handle; break; }
           }
         }
 
         if (clickedItem) {
+          pushHistorySnapshot();
           setSelectedImageId(clickedItem.id);
           resizeHandleRef.current = handle;
           isDraggingImageRef.current = true;
@@ -387,25 +450,27 @@ export default function CanvasBoardPage() {
         return;
       }
 
-      // In Crop Tool
       if (activeTool === 'crop') {
         cropBoxRef.current = { x: worldPt.x, y: worldPt.y, width: 0, height: 0 };
         isDrawingRef.current = true;
         return;
       }
 
-      // In Drawing Tools
+      pushHistorySnapshot();
       isDrawingRef.current = true;
       currentStrokePointsRef.current = [worldPt];
       redrawCanvas();
     }
   };
 
+  // Pointer move
   const handlePointerMove = (e: React.PointerEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    // 1. Right Click Pan Canvas Viewport
+    setCursorPos({ x: e.clientX, y: e.clientY });
+
+    // 1. Right Click Pan
     if (isPanningRef.current) {
       const dx = e.clientX - lastMousePosRef.current.x;
       const dy = e.clientY - lastMousePosRef.current.y;
@@ -416,57 +481,33 @@ export default function CanvasBoardPage() {
 
     const worldPt = getTransformedPoint(e, canvas, pan, zoom);
 
-    // 2. Dragging or Resizing Selected Image
+    // 2. Drag / Resize Image
     if (isDraggingImageRef.current && selectedImageId) {
       setCanvasImages(prev => prev.map(item => {
         if (item.id !== selectedImageId) return item;
-        let newX = item.x;
-        let newY = item.y;
-        let newW = item.width;
-        let newH = item.height;
+        let newX = item.x, newY = item.y, newW = item.width, newH = item.height;
 
         if (resizeHandleRef.current === 'inside') {
           let rawX = worldPt.x - imageDragOffsetRef.current.x;
           let rawY = worldPt.y - imageDragOffsetRef.current.y;
-
           if (isAutoAlignEnabled) {
-            const otherItems = prev.filter(i => i.id !== selectedImageId);
-            const snap = calculateAutoAlign({ x: rawX, y: rawY, width: item.width, height: item.height }, otherItems);
-            newX = snap.snappedX;
-            newY = snap.snappedY;
-            activeSnapGuidesRef.current = snap.guides;
-          } else {
-            newX = rawX;
-            newY = rawY;
-          }
+            const snap = calculateAutoAlign({ x: rawX, y: rawY, width: item.width, height: item.height }, prev.filter(i => i.id !== selectedImageId));
+            newX = snap.snappedX; newY = snap.snappedY; activeSnapGuidesRef.current = snap.guides;
+          } else { newX = rawX; newY = rawY; }
         } else if (resizeHandleRef.current === 'br') {
-          newW = Math.max(30, worldPt.x - item.x);
-          newH = Math.max(30, worldPt.y - item.y);
+          newW = Math.max(30, worldPt.x - item.x); newH = Math.max(30, worldPt.y - item.y);
         } else if (resizeHandleRef.current === 'bl') {
-          const right = item.x + item.width;
-          newX = Math.min(right - 30, worldPt.x);
-          newW = right - newX;
-          newH = Math.max(30, worldPt.y - item.y);
+          const right = item.x + item.width; newX = Math.min(right - 30, worldPt.x); newW = right - newX; newH = Math.max(30, worldPt.y - item.y);
         } else if (resizeHandleRef.current === 'tr') {
-          const bottom = item.y + item.height;
-          newY = Math.min(bottom - 30, worldPt.y);
-          newW = Math.max(30, worldPt.x - item.x);
-          newH = bottom - newY;
+          const bottom = item.y + item.height; newY = Math.min(bottom - 30, worldPt.y); newW = Math.max(30, worldPt.x - item.x); newH = bottom - newY;
         } else if (resizeHandleRef.current === 'tl') {
-          const right = item.x + item.width;
-          const bottom = item.y + item.height;
-          newX = Math.min(right - 30, worldPt.x);
-          newY = Math.min(bottom - 30, worldPt.y);
-          newW = right - newX;
-          newH = bottom - newY;
+          const right = item.x + item.width; const bottom = item.y + item.height; newX = Math.min(right - 30, worldPt.x); newY = Math.min(bottom - 30, worldPt.y); newW = right - newX; newH = bottom - newY;
         }
-
         return { ...item, x: newX, y: newY, width: newW, height: newH };
       }));
       return;
     }
 
-    // 3. Crop Box Drag
     if (activeTool === 'crop' && isDrawingRef.current && cropBoxRef.current) {
       cropBoxRef.current.width = worldPt.x - cropBoxRef.current.x;
       cropBoxRef.current.height = worldPt.y - cropBoxRef.current.y;
@@ -474,7 +515,6 @@ export default function CanvasBoardPage() {
       return;
     }
 
-    // 4. Drawing Strokes
     if (isDrawingRef.current && activeTool !== 'select') {
       const nativeEvent = e.nativeEvent as PointerEvent;
       const coalesced = typeof nativeEvent.getCoalescedEvents === 'function' ? nativeEvent.getCoalescedEvents() : [nativeEvent];
@@ -485,6 +525,7 @@ export default function CanvasBoardPage() {
     }
   };
 
+  // Pointer up
   const handlePointerUp = async (e: React.PointerEvent<HTMLCanvasElement>) => {
     try { e.currentTarget.releasePointerCapture(e.pointerId); } catch {}
     isPanningRef.current = false;
@@ -496,7 +537,6 @@ export default function CanvasBoardPage() {
       redrawCanvas();
     }
 
-    // Apply Image Crop
     if (activeTool === 'crop' && isDrawingRef.current && cropBoxRef.current) {
       isDrawingRef.current = false;
       const cb = cropBoxRef.current;
@@ -506,7 +546,6 @@ export default function CanvasBoardPage() {
         width: Math.abs(cb.width),
         height: Math.abs(cb.height),
       };
-
       if (normCb.width > 20 && normCb.height > 20) {
         const targetImg = selectedImageId ? canvasImages.find(i => i.id === selectedImageId) : canvasImages[0];
         if (targetImg) {
@@ -522,7 +561,6 @@ export default function CanvasBoardPage() {
       return;
     }
 
-    // Save Stroke
     if (isDrawingRef.current && activeTool !== 'select') {
       isDrawingRef.current = false;
       if (currentStrokePointsRef.current.length > 0) {
@@ -533,11 +571,7 @@ export default function CanvasBoardPage() {
           size: activeTool === 'pen' ? penSize : activeTool === 'highlighter' ? hlSize : activeTool === 'eraser' ? eraserSize : shapeSize,
           isShiftPressed: isShiftPressedRef.current,
         };
-        setPageStrokes(prev => ({
-          ...prev,
-          [currentPage]: [...(prev[currentPage] || []), newStroke]
-        }));
-        setRedoStack([]);
+        setPageStrokes(prev => ({ ...prev, [currentPage]: [...(prev[currentPage] || []), newStroke] }));
       }
       currentStrokePointsRef.current = [];
       redrawCanvas();
@@ -551,7 +585,6 @@ export default function CanvasBoardPage() {
     const rect = container.getBoundingClientRect();
     const mouseX = e.clientX - rect.left;
     const mouseY = e.clientY - rect.top;
-
     const zoomFactor = e.deltaY < 0 ? 1.12 : 0.89;
     const newZoom = Math.min(5.0, Math.max(0.15, zoom * zoomFactor));
 
@@ -572,19 +605,19 @@ export default function CanvasBoardPage() {
     showToast("Đã tải ảnh xuất thành công!", "success");
   };
 
-  return (
+  const mainContent = (
     <div className={`h-full flex flex-col bg-[#070913] ${isFullscreen ? 'fixed inset-0 z-[99999] p-2' : 'p-6 space-y-4 overflow-hidden'}`}>
       {/* HEADER BAR */}
       <div className="flex items-center justify-between bg-[#0c0f1e] border border-[#1d2744] px-5 py-3 rounded-2xl shadow-xl shrink-0">
         <div className="flex items-center gap-3">
           <div className="p-2 rounded-xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-400">
-            <FileText size={18} />
+            <Palette size={18} />
           </div>
           <div>
             <h1 className="text-sm font-black text-white flex items-center gap-2">
-              <span>Canvas Bảng Vẽ Vô Hạn</span>
+              <span>Canvas Bảng Vẽ Trắng</span>
               <span className="text-[10px] text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-lg border border-amber-500/20 font-bold">
-                Scratchpad (Tự do)
+                Scratchpad
               </span>
             </h1>
             <p className="text-[11px] text-slate-400 font-semibold truncate max-w-sm">{docName}</p>
@@ -594,13 +627,13 @@ export default function CanvasBoardPage() {
         <div className="flex items-center gap-2">
           <label className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#5c36f5] hover:bg-[#7351f7] text-white text-xs font-black transition cursor-pointer border border-white/20 shadow-sm">
             <Upload size={13} />
-            <span>Mở PDF / Ảnh</span>
-            <input type="file" accept=".pdf,image/*" onChange={handleFileUpload} className="hidden" />
+            <span>Mở Nhiều Ảnh / PDF</span>
+            <input type="file" accept=".pdf,image/*" multiple onChange={handleFileUpload} className="hidden" />
           </label>
 
-          <button onClick={() => { setPdfDoc(null); setCanvasImages([]); setSelectedImageId(null); setTotalPages(1); setCurrentPage(1); setDocName('Bảng vẽ vô hạn (Canvas)'); setPageStrokes({}); setRedoStack([]); setZoom(1.0); setPan({ x: 100, y: 80 }); }} className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-bold border border-white/10 transition cursor-pointer">
+          <button onClick={() => { setPdfDoc(null); setCanvasImages([]); setSelectedImageId(null); setTotalPages(1); setCurrentPage(1); setDocName('Bảng vẽ trắng (Canvas)'); setPageStrokes({}); setUndoStack([]); setRedoStack([]); setZoom(1.0); setPan({ x: 100, y: 80 }); }} className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-bold border border-white/10 transition cursor-pointer">
             <RotateCcw size={13} />
-            <span className="hidden sm:inline">Bảng trắng</span>
+            <span className="hidden sm:inline">Bảng trắng mới</span>
           </button>
 
           <button onClick={handleExportPNG} className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-bold border border-white/10 transition cursor-pointer">
@@ -608,14 +641,14 @@ export default function CanvasBoardPage() {
             <span className="hidden sm:inline">Tải ảnh</span>
           </button>
 
-          <button onClick={() => setIsFullscreen(!isFullscreen)} className="p-2 rounded-xl bg-[#121626] text-slate-300 hover:text-white border border-[#263152] transition cursor-pointer">
+          <button onClick={toggleFullscreen} className="p-2 rounded-xl bg-[#121626] text-slate-300 hover:text-white border border-[#263152] transition cursor-pointer">
             {isFullscreen ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
           </button>
         </div>
       </div>
 
       {/* INFINITE DRAWING WORKSPACE */}
-      <div className="flex-1 flex flex-col bg-[#080a14] border border-[#1d2744] rounded-2xl overflow-hidden shadow-2xl relative select-none">
+      <div className="flex-1 flex flex-col bg-[#ffffff] border border-[#1d2744] rounded-2xl overflow-hidden shadow-2xl relative select-none">
         <CanvasToolbar
           activeTool={activeTool}
           setActiveTool={setActiveTool}
@@ -629,18 +662,19 @@ export default function CanvasBoardPage() {
           eraserSize={eraserSize}
           setEraserSize={setEraserSize}
           setShapeSize={setShapeSize}
-          undoStackLength={currentStrokes.length}
+          undoStackLength={undoStack.length}
           redoStackLength={redoStack.length}
           onUndo={handleUndo}
           onRedo={handleRedo}
           onClearPage={() => {
+            pushHistorySnapshot();
             setPageStrokes(prev => ({ ...prev, [currentPage]: [] }));
-            setRedoStack([]);
           }}
           isAutoAlignEnabled={isAutoAlignEnabled}
           setIsAutoAlignEnabled={setIsAutoAlignEnabled}
           hasSelectedImage={!!selectedImageId}
           onDeleteSelectedImage={() => {
+            pushHistorySnapshot();
             setCanvasImages(prev => prev.filter(i => i.id !== selectedImageId));
             setSelectedImageId(null);
             showToast("Đã xóa ảnh được chọn!", "success");
@@ -648,7 +682,7 @@ export default function CanvasBoardPage() {
         />
 
         {/* FULL VIEWPORT CANVAS CONTAINER */}
-        <div ref={containerRef} className="flex-1 w-full h-full relative overflow-hidden bg-[#070913]">
+        <div ref={containerRef} className="flex-1 w-full h-full relative overflow-hidden bg-[#ffffff]">
           <canvas
             ref={canvasRef}
             onContextMenu={(e) => e.preventDefault()}
@@ -658,10 +692,23 @@ export default function CanvasBoardPage() {
             onPointerCancel={handlePointerUp}
             onWheel={handleWheel}
             className={`w-full h-full block ${
-              activeTool === 'select' ? (isDraggingImageRef.current ? 'cursor-move' : 'cursor-default') : 'cursor-crosshair'
+              activeTool === 'select' ? (isDraggingImageRef.current ? 'cursor-move' : 'cursor-default') : activeTool === 'eraser' ? 'cursor-none' : 'cursor-crosshair'
             }`}
             style={{ touchAction: 'none' }}
           />
+
+          {/* Eraser Live Circular Indicator */}
+          {activeTool === 'eraser' && cursorPos.x >= 0 && (
+            <div
+              className="pointer-events-none fixed rounded-full border-2 border-red-500 bg-red-400/20 shadow-sm z-50 transform -translate-x-1/2 -translate-y-1/2"
+              style={{
+                left: `${cursorPos.x}px`,
+                top: `${cursorPos.y}px`,
+                width: `${eraserSize * zoom}px`,
+                height: `${eraserSize * zoom}px`,
+              }}
+            />
+          )}
 
           <CanvasBottomBar
             zoom={zoom}
@@ -678,4 +725,10 @@ export default function CanvasBoardPage() {
       </div>
     </div>
   );
+
+  if (isFullscreen) {
+    return ReactDOM.createPortal(mainContent, document.body);
+  }
+
+  return mainContent;
 }

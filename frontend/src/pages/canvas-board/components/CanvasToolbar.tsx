@@ -259,16 +259,32 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
             </button>
 
             {showSizePopover && (
-              <div className="absolute top-full right-0 mt-2 bg-[#0c0f1e] border border-[#212c4b] p-3 rounded-2xl shadow-2xl z-50 space-y-2 min-w-[200px]">
+              <div className="absolute top-full right-0 mt-2 bg-[#0c0f1e] border border-[#212c4b] p-3 rounded-2xl shadow-2xl z-50 space-y-2.5 min-w-[230px]">
                 <div className="flex items-center justify-between text-[11px] font-bold text-slate-300">
-                  <span>Độ dày nét</span>
-                  <span className="font-mono text-indigo-400 font-black">{currentSize}px</span>
+                  <span>{activeTool === 'eraser' ? 'Kích thước tẩy' : 'Độ dày nét'}</span>
+                  <div className="flex items-center gap-1">
+                    <input
+                      type="number"
+                      min={1}
+                      max={150}
+                      value={currentSize}
+                      onChange={(e) => {
+                        const val = Math.max(1, Math.min(150, parseInt(e.target.value) || 1));
+                        if (activeTool === 'pen') setPenSize(val);
+                        else if (activeTool === 'highlighter') setHlSize(val);
+                        else if (activeTool === 'eraser') setEraserSize(val);
+                        else setShapeSize(val);
+                      }}
+                      className="w-14 bg-[#141829] border border-white/20 text-white rounded-lg px-2 py-0.5 text-xs font-mono font-bold text-center focus:outline-none focus:border-indigo-400"
+                    />
+                    <span className="text-[10px] text-slate-400 font-mono">px</span>
+                  </div>
                 </div>
                 <div className="flex items-center gap-3 pt-1">
                   <input
                     type="range"
                     min={activeTool === 'pen' ? 1 : activeTool === 'highlighter' ? 8 : 4}
-                    max={activeTool === 'pen' ? 30 : activeTool === 'highlighter' ? 60 : 80}
+                    max={activeTool === 'pen' ? 50 : activeTool === 'highlighter' ? 80 : 100}
                     value={currentSize}
                     onChange={(e) => {
                       const val = parseInt(e.target.value);
@@ -278,6 +294,14 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
                       else setShapeSize(val);
                     }}
                     className="flex-1 h-1.5 bg-white/10 rounded-lg appearance-none cursor-pointer accent-[#5c36f5]"
+                  />
+                  <div
+                    className="rounded-full shrink-0 border border-white/40"
+                    style={{
+                      width: Math.min(26, Math.max(4, currentSize / 2.5)),
+                      height: Math.min(26, Math.max(4, currentSize / 2.5)),
+                      backgroundColor: activeTool === 'eraser' ? '#ff3344' : selectedColor,
+                    }}
                   />
                 </div>
               </div>
