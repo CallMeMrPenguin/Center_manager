@@ -33,13 +33,9 @@ export const QuizImportView: React.FC<QuizImportViewProps> = ({
         rawQuestions = parsed;
       } else if (typeof parsed === 'object' && parsed !== null) {
         if (parsed.title) title = parsed.title;
-        if (Array.isArray(parsed.questions)) {
-          rawQuestions = parsed.questions;
-        } else if (Array.isArray(parsed.exercises)) {
-          rawQuestions = parsed.exercises;
-        } else if (Array.isArray(parsed.data)) {
-          rawQuestions = parsed.data;
-        }
+        if (Array.isArray(parsed.questions)) rawQuestions = parsed.questions;
+        else if (Array.isArray(parsed.exercises)) rawQuestions = parsed.exercises;
+        else if (Array.isArray(parsed.data)) rawQuestions = parsed.data;
       }
 
       if (!rawQuestions || !rawQuestions.length) {
@@ -51,26 +47,17 @@ export const QuizImportView: React.FC<QuizImportViewProps> = ({
 
       const questions: Question[] = rawQuestions.map((q: any, index: number) => {
         let rawQText = '';
-        if (Array.isArray(q.x)) {
-          rawQText = q.x.filter(Boolean).join('\n');
-        } else if (typeof q.x === 'string') {
-          rawQText = q.x;
-        } else if (Array.isArray(q.question)) {
-          rawQText = q.question.filter(Boolean).join('\n');
-        } else if (typeof q.question === 'string') {
-          rawQText = q.question;
-        } else if (q.sentence && q.prompt) {
+        if (Array.isArray(q.x)) rawQText = q.x.filter(Boolean).join('\n');
+        else if (typeof q.x === 'string') rawQText = q.x;
+        else if (Array.isArray(q.question)) rawQText = q.question.filter(Boolean).join('\n');
+        else if (typeof q.question === 'string') rawQText = q.question;
+        else if (q.sentence && q.prompt) {
           const promptStr = String(q.prompt).trim().startsWith('(') ? q.prompt.trim() : `(${q.prompt.trim()})`;
           rawQText = `${q.sentence.trim()}\n${promptStr}`;
-        } else if (q.sentence) {
-          rawQText = q.sentence;
-        } else if (q.passage) {
-          rawQText = q.passage;
-        } else if (q.content || q.stem) {
-          rawQText = q.content || q.stem;
-        } else {
-          rawQText = `Câu ${index + 1}`;
-        }
+        } else if (q.sentence) rawQText = q.sentence;
+        else if (q.passage) rawQText = q.passage;
+        else if (q.content || q.stem) rawQText = q.content || q.stem;
+        else rawQText = `Câu ${index + 1}`;
 
         const opts = q.options || q.o || [];
         const cleanedOpts = Array.isArray(opts) ? opts.map((o: any) => cleanOptionPrefix(String(o))) : [];
@@ -78,9 +65,7 @@ export const QuizImportView: React.FC<QuizImportViewProps> = ({
 
         if (/^[A-E]$/i.test(ans) && cleanedOpts.length > 0) {
           const idx = ans.toUpperCase().charCodeAt(0) - 65;
-          if (idx >= 0 && idx < cleanedOpts.length) {
-            ans = cleanedOpts[idx];
-          }
+          if (idx >= 0 && idx < cleanedOpts.length) ans = cleanedOpts[idx];
         }
 
         const qType = q.type || (q.t ? (q.t === 'fill' ? 'fill' : 'mcq') : (cleanedOpts.length > 0 ? 'mcq' : 'fill'));
@@ -115,7 +100,7 @@ export const QuizImportView: React.FC<QuizImportViewProps> = ({
           }`}
         >
           <Upload size={15} />
-          <span>Tải File (.DOCX / .JSON / .CSV)</span>
+          <span>Tải File Word (.DOCX)</span>
         </button>
 
         <button
@@ -136,16 +121,16 @@ export const QuizImportView: React.FC<QuizImportViewProps> = ({
           </div>
 
           <div className="space-y-1 max-w-md mx-auto">
-            <h3 className="text-lg font-black text-white">Tải Đề Thi Lên (DOCX / JSON / CSV)</h3>
+            <h3 className="text-lg font-black text-white">Tải Đề Thi Lên (.DOCX)</h3>
             <p className="text-xs text-slate-400">
-              Hỗ trợ file Word có đáp án bôi vàng trong câu hỏi hoặc bảng đáp án riêng ở cuối bài.
+              Hỗ trợ file Word (.docx) có đáp án bôi vàng trong câu hỏi hoặc bảng đáp án riêng ở cuối bài.
             </p>
           </div>
 
           <label className="inline-flex items-center gap-2 bg-[#5c36f5] hover:bg-[#7351f7] text-white px-6 py-3 rounded-xl font-extrabold text-xs shadow-[0_4px_16px_rgba(92,54,245,0.4)] transition cursor-pointer border border-white/20 active:scale-95">
             {loading ? <RefreshCw className="animate-spin" size={16} /> : <Upload size={16} />}
             <span>Chọn Đề Thi Từ Máy Tính</span>
-            <input type="file" accept=".docx,.json,.csv" onChange={onFileUpload} className="hidden" />
+            <input type="file" accept=".docx" onChange={onFileUpload} className="hidden" />
           </label>
         </div>
       ) : (

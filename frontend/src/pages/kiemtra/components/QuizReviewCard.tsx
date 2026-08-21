@@ -1,14 +1,16 @@
 import React from 'react';
 import { cleanOptionPrefix } from '../../../utils';
 import { Question } from '../types';
+import { DrawingCanvas } from './DrawingCanvas';
 
 interface QuizReviewCardProps {
   q: Question;
   idx: number;
   userAns: string;
   showAnswerToggle: boolean;
-  highlightMode: boolean;
-  onHighlightText: (qId: number) => void;
+  drawings: Record<number, string>;
+  onSaveDrawing: (qId: number, url: string) => void;
+  onClearDrawing: (qId: number) => void;
   renderFormattedText: (text: string) => React.ReactNode;
 }
 
@@ -17,8 +19,9 @@ export const QuizReviewCard = React.memo<QuizReviewCardProps>(({
   idx,
   userAns,
   showAnswerToggle,
-  highlightMode,
-  onHighlightText,
+  drawings,
+  onSaveDrawing,
+  onClearDrawing,
   renderFormattedText,
 }) => {
   const cleanUserAns = cleanOptionPrefix(userAns).trim().toLowerCase();
@@ -26,8 +29,16 @@ export const QuizReviewCard = React.memo<QuizReviewCardProps>(({
   const isCorrect = !!cleanUserAns && cleanUserAns === cleanRightAns;
 
   return (
-    <div className="bg-[#0d1018] border border-white/10 p-6 rounded-2xl space-y-3 shadow-xl">
-      <div className="text-xs sm:text-sm font-bold text-indigo-300 border-b border-indigo-500/20 pb-2 flex items-center justify-between">
+    <div className="bg-[#0d1018] border border-white/10 p-6 rounded-2xl space-y-3 shadow-xl relative overflow-hidden">
+      {/* Interactive Drawing Canvas on Review Card */}
+      <DrawingCanvas
+        questionId={q.id}
+        drawings={drawings}
+        onSaveDrawing={onSaveDrawing}
+        onClearDrawing={onClearDrawing}
+      />
+
+      <div className="text-xs sm:text-sm font-bold text-indigo-300 border-b border-indigo-500/20 pb-2 flex items-center justify-between relative z-10">
         <span>Câu {idx + 1}: {q.instruction || ''}</span>
         <span className={`px-3 py-1 rounded-xl text-xs font-black shrink-0 border ${
           isCorrect ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' : 'bg-rose-500/10 border-rose-500/30 text-rose-400'
@@ -36,17 +47,14 @@ export const QuizReviewCard = React.memo<QuizReviewCardProps>(({
         </span>
       </div>
 
-      <div className="flex items-start justify-between gap-3">
-        <span
-          onMouseUp={() => highlightMode && onHighlightText(q.id)}
-          className="text-base sm:text-lg font-black text-white leading-relaxed whitespace-pre-wrap flex-1"
-        >
+      <div className="flex items-start justify-between gap-3 relative z-10">
+        <span className="text-base sm:text-lg font-black text-white leading-relaxed whitespace-pre-wrap flex-1">
           {renderFormattedText(q.question)}
         </span>
       </div>
 
       {q.type === 'mcq' && q.options && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm font-bold pt-1">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm font-bold pt-1 relative z-10">
           {q.options.map((opt, oIdx) => {
             const cleanOpt = cleanOptionPrefix(opt);
             const optLower = cleanOpt.trim().toLowerCase();
@@ -85,14 +93,14 @@ export const QuizReviewCard = React.memo<QuizReviewCardProps>(({
       )}
 
       {q.type === 'fill' && (
-        <div className="text-sm font-semibold space-y-1.5 pt-1">
+        <div className="text-sm font-semibold space-y-1.5 pt-1 relative z-10">
           <p className="text-slate-300">Đã chọn: <span className="font-extrabold text-white">{userAns || '(Trống)'}</span></p>
           {showAnswerToggle && <p className="text-emerald-400 font-extrabold">Đáp án đúng: {q.answer}</p>}
         </div>
       )}
 
       {q.explanation && (
-        <p className="text-sm text-indigo-300 bg-indigo-500/10 border border-indigo-500/20 p-3 rounded-xl font-medium">
+        <p className="text-sm text-indigo-300 bg-indigo-500/10 border border-indigo-500/20 p-3 rounded-xl font-medium relative z-10">
           Giải thích: {q.explanation}
         </p>
       )}

@@ -1,5 +1,5 @@
-import React, { useRef } from 'react';
-import { GripVertical, Clock, X, Play, Pause, RotateCcw } from 'lucide-react';
+import React, { useRef, useState } from 'react';
+import { GripVertical, Clock, X, Play, Pause, RotateCcw, Plus, Minus } from 'lucide-react';
 import { TimerMode } from '../types';
 
 interface QuizPopoutTimerProps {
@@ -25,6 +25,7 @@ export const QuizPopoutTimer: React.FC<QuizPopoutTimerProps> = ({
   onTogglePause,
   onReset,
 }) => {
+  const [scale, setScale] = useState<number>(1.0);
   const isDraggingRef = useRef(false);
   const dragOffsetRef = useRef({ x: 0, y: 0 });
 
@@ -52,6 +53,16 @@ export const QuizPopoutTimer: React.FC<QuizPopoutTimerProps> = ({
     window.addEventListener('mouseup', onUp);
   };
 
+  const handleZoomIn = () => {
+    setScale(s => Math.min(2.5, +(s + 0.25).toFixed(2)));
+  };
+
+  const handleZoomOut = () => {
+    setScale(s => Math.max(0.75, +(s - 0.25).toFixed(2)));
+  };
+
+  const displayTime = timerMode === 'per_question' ? `${questionTimer}s` : formattedTimerRemaining;
+
   return (
     <div
       style={timerPos ? { transform: `translate3d(${timerPos.x}px, ${timerPos.y}px, 0)` } : {}}
@@ -66,10 +77,10 @@ export const QuizPopoutTimer: React.FC<QuizPopoutTimerProps> = ({
         <GripVertical size={13} />
       </div>
 
-      {/* Clock Icon & Digital Countdown / Stopwatch */}
-      <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-white/5 border border-white/5">
+      {/* Clock Icon & Scalable Digital Countdown / Stopwatch */}
+      <div className="flex items-center gap-2 px-2.5 py-1 rounded-lg bg-white/5 border border-white/5 transition-all">
         <Clock
-          size={13}
+          size={Math.round(14 * scale)}
           className={
             timerMode === 'none'
               ? 'text-emerald-400'
@@ -78,10 +89,31 @@ export const QuizPopoutTimer: React.FC<QuizPopoutTimerProps> = ({
               : 'text-amber-400'
           }
         />
-        <span className="font-mono text-xs sm:text-sm font-black text-white tracking-wide">
-          {timerMode === 'per_question' ? `${questionTimer}s` : formattedTimerRemaining}
+        <span
+          style={{ fontSize: `${(0.875 * scale).toFixed(3)}rem` }}
+          className="font-mono font-black text-white tracking-wide transition-all"
+        >
+          {displayTime}
         </span>
       </div>
+
+      {/* Zoom In & Zoom Out Buttons */}
+      <button
+        onClick={handleZoomOut}
+        disabled={scale <= 0.75}
+        className="p-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-white/10 transition cursor-pointer disabled:opacity-30"
+        title="Thu nhỏ đồng hồ (-)"
+      >
+        <Minus size={12} />
+      </button>
+      <button
+        onClick={handleZoomIn}
+        disabled={scale >= 2.5}
+        className="p-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-white/10 transition cursor-pointer disabled:opacity-30"
+        title="Phóng to đồng hồ (+)"
+      >
+        <Plus size={12} />
+      </button>
 
       {/* Play / Pause Toggle Button */}
       <button
