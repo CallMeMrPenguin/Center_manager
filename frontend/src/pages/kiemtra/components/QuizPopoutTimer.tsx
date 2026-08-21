@@ -68,7 +68,7 @@ export const QuizPopoutTimer: React.FC<QuizPopoutTimerProps> = ({
     setScale(s => Math.max(0.75, +(s - 0.25).toFixed(2)));
   };
 
-  // Determine dynamic color status: green -> yellow -> red with breathing effect
+  // Determine dynamic color status: green -> yellow -> red with breathing pulse
   let timerStatus: 'green' | 'yellow' | 'red' = 'green';
   if (timerMode === 'per_question') {
     const ratio = questionTimer / Math.max(1, perQuestionSeconds);
@@ -90,98 +90,112 @@ export const QuizPopoutTimer: React.FC<QuizPopoutTimerProps> = ({
     }
   }
 
-  const displayTime = timerMode === 'per_question' ? `${questionTimer}s` : formattedTimerRemaining;
+  const rawTime = timerMode === 'per_question' ? `${questionTimer}s` : formattedTimerRemaining;
+  // Format spaced digits for modern digital clock look (e.g., "12 : 30")
+  const displayTimeFormatted = rawTime.includes(':')
+    ? rawTime.split(':').join(' : ')
+    : rawTime;
 
   return (
     <div
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       style={timerPos ? { transform: `translate3d(${timerPos.x}px, ${timerPos.y}px, 0)` } : {}}
-      className={`fixed top-20 left-8 z-[100] pointer-events-auto flex items-center gap-1.5 bg-[#12162a] border-2 p-1.5 rounded-2xl select-none ring-1 ${
+      className={`fixed top-20 left-8 z-[100] pointer-events-auto bg-[#0d101f] border-2 p-3.5 rounded-3xl select-none shadow-[0_16px_40px_rgba(0,0,0,0.7)] ring-1 flex flex-col items-center gap-2.5 transition-all duration-200 ${
         timerStatus === 'red'
-          ? 'border-rose-500/80 shadow-[0_0_25px_rgba(244,63,94,0.65)] ring-rose-500/50 animate-pulse'
+          ? 'border-rose-500/80 shadow-[0_0_30px_rgba(244,63,94,0.6)] ring-rose-500/50 animate-pulse'
           : timerStatus === 'yellow'
-          ? 'border-amber-500/60 shadow-[0_0_15px_rgba(245,158,11,0.3)] ring-amber-500/30'
+          ? 'border-amber-500/60 shadow-[0_0_20px_rgba(245,158,11,0.3)] ring-amber-500/30'
           : 'border-[#5c36f5]/70 shadow-[0_8px_32px_rgba(0,0,0,0.6),0_0_20px_rgba(92,54,245,0.35)] ring-white/15'
       }`}
     >
-      {/* Draggable Grip Handle */}
-      <div
-        onMouseDown={handleMouseDown}
-        className={`p-1 cursor-move transition-colors ${
-          timerStatus === 'red' ? 'text-rose-400 hover:text-rose-200' : 'text-indigo-400 hover:text-indigo-200'
-        }`}
-        title="Kéo thả để di chuyển đồng hồ"
-      >
-        <GripVertical size={14} />
-      </div>
-
-      {/* Scalable Digital Countdown / Stopwatch */}
-      <div
-        className={`flex items-center gap-1.5 px-3 py-1 rounded-xl bg-[#1c2242] border transition-all ${
-          timerStatus === 'red'
-            ? 'border-rose-500/60 shadow-[0_0_12px_rgba(244,63,94,0.5)]'
-            : timerStatus === 'yellow'
-            ? 'border-amber-500/40'
-            : 'border-indigo-500/30'
-        }`}
-      >
-        <span
-          style={{ fontSize: `${(0.875 * scale).toFixed(3)}rem` }}
-          className={`font-mono font-black tracking-wide transition-all ${
-            timerStatus === 'red'
-              ? 'text-rose-400'
-              : timerStatus === 'yellow'
-              ? 'text-amber-400'
-              : 'text-emerald-400'
+      {/* TOP HEADER: DRAG HANDLE & UTILITY BUTTONS */}
+      <div className="w-full flex items-center justify-between text-slate-400 px-1">
+        <div
+          onMouseDown={handleMouseDown}
+          className={`p-1 cursor-move transition-colors rounded-lg hover:bg-white/5 ${
+            timerStatus === 'red' ? 'text-rose-400 hover:text-rose-200' : 'text-indigo-400 hover:text-indigo-200'
           }`}
+          title="Kéo thả để di chuyển đồng hồ"
         >
-          {displayTime}
-        </span>
-      </div>
+          <GripVertical size={14} />
+        </div>
 
-      {/* ACTION BUTTONS (Mặc định ẩn, mở khi di chuột vào) */}
-      {isHovered && (
-        <div className="flex items-center gap-1">
+        {/* UTILITY ZOOM & CLOSE BUTTONS (Revealed on hover) */}
+        <div className={`flex items-center gap-1 transition-opacity duration-200 ${isHovered ? 'opacity-100' : 'opacity-0'}`}>
           <button
             onClick={handleZoomOut}
             disabled={scale <= 0.75}
-            className="p-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-white/10 transition cursor-pointer disabled:opacity-30"
-            title="Thu nhỏ đồng hồ (-)"
+            className="p-1 rounded-md hover:bg-white/10 text-slate-300 hover:text-white transition disabled:opacity-30 cursor-pointer"
+            title="Thu nhỏ (-)"
           >
-            <Minus size={12} />
+            <Minus size={11} />
           </button>
           <button
             onClick={handleZoomIn}
             disabled={scale >= 2.5}
-            className="p-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-white/10 transition cursor-pointer disabled:opacity-30"
-            title="Phóng to đồng hồ (+)"
+            className="p-1 rounded-md hover:bg-white/10 text-slate-300 hover:text-white transition disabled:opacity-30 cursor-pointer"
+            title="Phóng to (+)"
           >
-            <Plus size={12} />
-          </button>
-          <button
-            onClick={onTogglePause}
-            className="p-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-white/10 transition cursor-pointer"
-            title={isTimerPaused ? "Tiếp tục đếm giờ" : "Tạm dừng đếm giờ"}
-          >
-            {isTimerPaused ? <Play size={13} className="text-emerald-400" /> : <Pause size={13} />}
-          </button>
-          <button
-            onClick={onReset}
-            className="p-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-white/10 transition cursor-pointer"
-            title="Đặt lại thời gian"
-          >
-            <RotateCcw size={13} />
+            <Plus size={11} />
           </button>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-rose-500/20 transition cursor-pointer"
-            title="Đóng đồng hồ nổi"
+            className="p-1 rounded-md hover:bg-rose-500/20 text-slate-400 hover:text-rose-400 transition cursor-pointer"
+            title="Đóng"
           >
-            <X size={13} />
+            <X size={12} />
           </button>
         </div>
-      )}
+      </div>
+
+      {/* LARGE DIGITAL CLOCK DISPLAY */}
+      <div className="px-3 py-1 flex items-center justify-center">
+        <span
+          style={{ fontSize: `${(1.75 * scale).toFixed(3)}rem` }}
+          className={`font-mono font-black tracking-wider transition-all drop-shadow-md ${
+            timerStatus === 'red'
+              ? 'text-rose-400'
+              : timerStatus === 'yellow'
+              ? 'text-amber-400'
+              : 'text-white'
+          }`}
+        >
+          {displayTimeFormatted}
+        </span>
+      </div>
+
+      {/* BOTTOM ACTION BUTTONS: RESET & START/STOP PILLS (Matching reference card) */}
+      <div className="flex items-center gap-2 w-full pt-0.5">
+        <button
+          onClick={onReset}
+          className="flex-1 flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-xl bg-white/10 hover:bg-white/15 active:scale-95 text-slate-200 text-xs font-bold transition cursor-pointer border border-white/10"
+          title="Đặt lại thời gian"
+        >
+          <RotateCcw size={12} />
+          <span>Reset</span>
+        </button>
+
+        {isTimerPaused ? (
+          <button
+            onClick={onTogglePause}
+            className="flex-1 flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-xl bg-[#5c36f5] hover:bg-[#7351f7] active:scale-95 text-white text-xs font-black transition cursor-pointer shadow-[0_4px_14px_rgba(92,54,245,0.4)] border border-white/20"
+            title="Bắt đầu đếm giờ"
+          >
+            <Play size={12} className="fill-white" />
+            <span>Start</span>
+          </button>
+        ) : (
+          <button
+            onClick={onTogglePause}
+            className="flex-1 flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-xl bg-[#ef4444] hover:bg-[#dc2626] active:scale-95 text-white text-xs font-black transition cursor-pointer shadow-[0_4px_14px_rgba(239,68,68,0.4)] border border-white/20"
+            title="Tạm dừng đếm giờ"
+          >
+            <Pause size={12} className="fill-white" />
+            <span>Stop</span>
+          </button>
+        )}
+      </div>
     </div>
   );
 };
