@@ -24,7 +24,7 @@ export const QuizResultsView: React.FC<QuizResultsViewProps> = ({
   onRetake,
   renderFormattedText,
 }) => {
-  const [showAnswerToggle, setShowAnswerToggle] = useState(true);
+  const [showAnswerToggle, setShowAnswerToggle] = useState(false);
   const [highlightMode, setHighlightMode] = useState(false);
   const [, setHighlights] = useState<Record<number, string[]>>({});
   const [reviewPage, setReviewPage] = useState(1);

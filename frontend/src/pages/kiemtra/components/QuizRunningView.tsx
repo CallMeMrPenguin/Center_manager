@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Clock, Flag, ChevronLeft, ChevronRight, ArrowLeft, ArrowRight,
   Maximize2, Minimize2
@@ -46,9 +46,16 @@ export const QuizRunningView: React.FC<QuizRunningViewProps> = ({
   onFinishTest,
   renderFormattedText,
 }) => {
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(isFullscreen);
   const [eliminatedOptions, setEliminatedOptions] = useState<Record<number, string[]>>({});
   const [drawings, setDrawings] = useState<Record<number, string>>({});
+
+  // Auto collapse sidebar when in fullscreen mode
+  useEffect(() => {
+    if (isFullscreen) {
+      setIsSidebarCollapsed(true);
+    }
+  }, [isFullscreen]);
 
   const totalQuestions = activeQuestions.length;
   const q = activeQuestions[currentIndex];
