@@ -3,11 +3,9 @@ import { Point } from '../types';
 
 export function useCanvasViewport() {
   const [zoom, setZoom] = useState<number>(1.0);
-  const [pan, setPan] = useState<Point>({ x: 0, y: 0 });
+  const [pan, setPan] = useState<Point>({ x: 100, y: 80 });
 
   const isPanningRef = useRef(false);
-  const isRightClickZoomingRef = useRef(false);
-  const rightClickStartRef = useRef<{ x: number; y: number; startZoom: number } | null>(null);
   const lastMousePosRef = useRef<Point>({ x: 0, y: 0 });
   const isShiftPressedRef = useRef(false);
   const isSpacePressedRef = useRef(false);
@@ -30,7 +28,7 @@ export function useCanvasViewport() {
     };
   }, []);
 
-  // Arrow Keys Navigation
+  // Arrow Keys Navigation (Moves view in 4 directions)
   useEffect(() => {
     const handleArrowNav = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement;
@@ -60,8 +58,6 @@ export function useCanvasViewport() {
     pan,
     setPan,
     isPanningRef,
-    isRightClickZoomingRef,
-    rightClickStartRef,
     lastMousePosRef,
     isShiftPressedRef,
     isSpacePressedRef,

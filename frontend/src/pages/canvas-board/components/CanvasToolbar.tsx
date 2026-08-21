@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
-  MousePointer, Pen, Highlighter, Eraser, Minus, ArrowUpRight,
-  Square, Circle, Palette, Sliders, Undo2, Redo2, Trash2
+  MousePointer, Crop, Pen, Highlighter, Eraser, Minus, ArrowUpRight,
+  Square, Circle, Palette, Sliders, Undo2, Redo2, Trash2, Magnet
 } from 'lucide-react';
 import { CanvasTool, PRESET_COLORS } from '../types';
 
@@ -23,6 +23,10 @@ interface CanvasToolbarProps {
   onUndo: () => void;
   onRedo: () => void;
   onClearPage: () => void;
+  isAutoAlignEnabled: boolean;
+  setIsAutoAlignEnabled: (val: boolean | ((prev: boolean) => boolean)) => void;
+  hasSelectedImage: boolean;
+  onDeleteSelectedImage: () => void;
 }
 
 export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
@@ -43,48 +47,75 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
   onUndo,
   onRedo,
   onClearPage,
+  isAutoAlignEnabled,
+  setIsAutoAlignEnabled,
+  hasSelectedImage,
+  onDeleteSelectedImage,
 }) => {
   const [showColorPopover, setShowColorPopover] = useState(false);
   const [showSizePopover, setShowSizePopover] = useState(false);
 
   return (
     <div className="p-2 bg-[#0a0d18] border-b border-white/10 flex items-center justify-between flex-wrap gap-2 shrink-0 z-30">
+      {/* Tool Buttons */}
       <div className="flex items-center gap-1">
+        {/* Select & Move Object Tool */}
         <button
-          onClick={() => setActiveTool('none')}
+          onClick={() => setActiveTool('select')}
           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
-            activeTool === 'none' ? 'bg-[#5c36f5] text-white shadow-md' : 'text-slate-400 hover:text-white hover:bg-white/5'
+            activeTool === 'select' ? 'bg-[#5c36f5] text-white shadow-md' : 'text-slate-400 hover:text-white hover:bg-white/5'
           }`}
+          title="Chọn, di chuyển và kéo dãn ảnh (Left click để chọn & di chuyển)"
         >
           <MousePointer size={13} />
-          <span>Chuột</span>
+          <span>Chọn / Di chuyển</span>
         </button>
 
+        {/* Crop Tool */}
+        <button
+          onClick={() => setActiveTool('crop')}
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
+            activeTool === 'crop' ? 'bg-amber-600 text-white shadow-md' : 'text-slate-400 hover:text-white hover:bg-white/5'
+          }`}
+          title="Cắt ảnh (Kéo chọn vùng ảnh để cắt)"
+        >
+          <Crop size={13} />
+          <span>Cắt ảnh</span>
+        </button>
+
+        <div className="h-5 w-px bg-white/10 mx-1" />
+
+        {/* Pen */}
         <button
           onClick={() => setActiveTool('pen')}
           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
             activeTool === 'pen' ? 'bg-[#5c36f5] text-white shadow-md' : 'text-slate-400 hover:text-white hover:bg-white/5'
           }`}
+          title="Bút vẽ (Giữ Shift để vẽ đường thẳng)"
         >
           <Pen size={13} />
-          <span>Bút vẽ</span>
+          <span>Bút</span>
         </button>
 
+        {/* Highlighter */}
         <button
           onClick={() => setActiveTool('highlighter')}
           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
             activeTool === 'highlighter' ? 'bg-[#5c36f5] text-white shadow-md' : 'text-slate-400 hover:text-white hover:bg-white/5'
           }`}
+          title="Dạ quang highlight"
         >
           <Highlighter size={13} />
           <span>Dạ quang</span>
         </button>
 
+        {/* Eraser */}
         <button
           onClick={() => setActiveTool('eraser')}
           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
             activeTool === 'eraser' ? 'bg-rose-600 text-white shadow-md' : 'text-slate-400 hover:text-white hover:bg-white/5'
           }`}
+          title="Tẩy xóa nét vẽ"
         >
           <Eraser size={13} />
           <span>Tẩy</span>
@@ -92,13 +123,13 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
 
         <div className="h-5 w-px bg-white/10 mx-1" />
 
-        {/* Shape tools */}
+        {/* Shapes */}
         <button
           onClick={() => setActiveTool('line')}
           className={`p-1.5 rounded-xl transition cursor-pointer ${
             activeTool === 'line' ? 'bg-[#5c36f5] text-white' : 'text-slate-400 hover:text-white hover:bg-white/5'
           }`}
-          title="Đường thẳng"
+          title="Đường thẳng (Giữ Shift để căn thẳng 45°)"
         >
           <Minus size={14} />
         </button>
@@ -134,9 +165,36 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
         </button>
       </div>
 
+      {/* Right Controls */}
       <div className="flex items-center gap-2">
+        {/* Auto Align Snap Toggle */}
+        <button
+          onClick={() => setIsAutoAlignEnabled(v => !v)}
+          className={`flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-bold transition cursor-pointer border ${
+            isAutoAlignEnabled
+              ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40 shadow-sm'
+              : 'bg-white/5 text-slate-400 border-white/10 hover:text-white'
+          }`}
+          title="Bật/Tắt tự động căn lề hút dính (Auto Align Snapping)"
+        >
+          <Magnet size={12} />
+          <span>Auto Align</span>
+        </button>
+
+        {/* Delete selected image */}
+        {hasSelectedImage && (
+          <button
+            onClick={onDeleteSelectedImage}
+            className="flex items-center gap-1 px-2.5 py-1 rounded-xl bg-rose-500/20 text-rose-300 border border-rose-500/40 text-xs font-bold hover:bg-rose-500/30 transition cursor-pointer"
+            title="Xóa ảnh đang chọn"
+          >
+            <Trash2 size={12} />
+            <span>Xóa ảnh</span>
+          </button>
+        )}
+
         {/* Color Selector */}
-        {activeTool !== 'none' && activeTool !== 'eraser' && (
+        {!['select', 'eraser', 'crop'].includes(activeTool) && (
           <div className="relative">
             <button
               onClick={() => {
@@ -151,7 +209,7 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
 
             {showColorPopover && (
               <div className="absolute top-full right-0 mt-2 bg-[#0c0f1e] border border-[#212c4b] p-3 rounded-2xl shadow-2xl z-50 space-y-2.5 min-w-[210px]">
-                <div className="text-[11px] font-bold text-slate-300">Bảng màu</div>
+                <div className="text-[11px] font-bold text-slate-300">Bảng màu gợi ý</div>
                 <div className="flex flex-wrap gap-2">
                   {PRESET_COLORS.map(c => (
                     <button
@@ -187,7 +245,7 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
         )}
 
         {/* Size Slider Popover */}
-        {activeTool !== 'none' && (
+        {!['select', 'crop'].includes(activeTool) && (
           <div className="relative">
             <button
               onClick={() => {

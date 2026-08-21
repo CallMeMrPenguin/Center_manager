@@ -3,7 +3,7 @@ export interface Point {
   y: number;
 }
 
-export type DrawTool = 'none' | 'pen' | 'highlighter' | 'eraser' | 'line' | 'arrow' | 'rect' | 'circle' | 'text';
+export type DrawTool = 'none' | 'select' | 'crop' | 'pen' | 'highlighter' | 'eraser' | 'line' | 'arrow' | 'rect' | 'circle' | 'text';
 
 export interface StrokeStyle {
   tool: DrawTool;

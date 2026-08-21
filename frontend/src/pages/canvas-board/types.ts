@@ -1,8 +1,41 @@
-export type CanvasTool = 'none' | 'pen' | 'highlighter' | 'eraser' | 'line' | 'arrow' | 'rect' | 'circle';
+export type CanvasTool = 
+  | 'select' 
+  | 'pen' 
+  | 'highlighter' 
+  | 'eraser' 
+  | 'line' 
+  | 'arrow' 
+  | 'rect' 
+  | 'circle' 
+  | 'crop';
 
 export interface Point {
   x: number;
   y: number;
+}
+
+export interface CanvasItemImage {
+  id: string;
+  img: HTMLImageElement;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  originalSrc?: string;
+}
+
+export interface SnapGuide {
+  type: 'vertical' | 'horizontal';
+  pos: number;
+  start: number;
+  end: number;
+}
+
+export interface CropBox {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
 }
 
 export const PRESET_COLORS = [
