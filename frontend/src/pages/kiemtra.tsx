@@ -299,6 +299,7 @@ export default function KiemTraPage() {
           isFullscreen={isFullscreen}
           onToggleFullscreen={toggleFullscreen}
           onFinishTest={() => setStep('results')}
+          onExitToImport={() => setStep('import')}
           renderFormattedText={renderFormattedText}
         />
       )}
