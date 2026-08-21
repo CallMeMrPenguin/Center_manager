@@ -46,10 +46,28 @@ interface RectItem {
 }
 
 /**
+ * Checks if two items share significant vertical overlap (i.e. they are on the same horizontal row band).
+ */
+function hasVerticalOverlap(a: RectItem, b: RectItem, minOverlap = 15): boolean {
+  const overlap = Math.min(a.y + a.height, b.y + b.height) - Math.max(a.y, b.y);
+  return overlap >= minOverlap;
+}
+
+/**
+ * Checks if two items share significant horizontal overlap (i.e. they are in the same vertical column band).
+ */
+function hasHorizontalOverlap(a: RectItem, b: RectItem, minOverlap = 15): boolean {
+  const overlap = Math.min(a.x + a.width, b.x + b.width) - Math.max(a.x, b.x);
+  return overlap >= minOverlap;
+}
+
+/**
  * Creates a horizontal Canva-style gap measurement guide touching the exact borders of leftItem and rightItem.
  */
 function createHorizontalGapGuide(leftItem: RectItem, rightItem: RectItem, gapVal: number): SnapGuide {
-  const midY = (Math.max(leftItem.y, rightItem.y) + Math.min(leftItem.y + leftItem.height, rightItem.y + rightItem.height)) / 2;
+  const overlapTop = Math.max(leftItem.y, rightItem.y);
+  const overlapBottom = Math.min(leftItem.y + leftItem.height, rightItem.y + rightItem.height);
+  const midY = overlapBottom > overlapTop ? (overlapTop + overlapBottom) / 2 : (leftItem.y + leftItem.height / 2 + rightItem.y + rightItem.height / 2) / 2;
   const startX = leftItem.x + leftItem.width;
   const endX = rightItem.x;
   const gapRounded = Math.round(gapVal);
@@ -70,7 +88,9 @@ function createHorizontalGapGuide(leftItem: RectItem, rightItem: RectItem, gapVa
  * Creates a vertical Canva-style gap measurement guide touching the exact borders of topItem and bottomItem.
  */
 function createVerticalGapGuide(topItem: RectItem, bottomItem: RectItem, gapVal: number): SnapGuide {
-  const midX = (Math.max(topItem.x, bottomItem.x) + Math.min(topItem.x + topItem.width, bottomItem.x + bottomItem.width)) / 2;
+  const overlapLeft = Math.max(topItem.x, bottomItem.x);
+  const overlapRight = Math.min(topItem.x + topItem.width, bottomItem.x + bottomItem.width);
+  const midX = overlapRight > overlapLeft ? (overlapLeft + overlapRight) / 2 : (topItem.x + topItem.width / 2 + bottomItem.x + bottomItem.width / 2) / 2;
   const startY = topItem.y + topItem.height;
   const endY = bottomItem.y;
   const gapRounded = Math.round(gapVal);
@@ -88,7 +108,7 @@ function createVerticalGapGuide(topItem: RectItem, bottomItem: RectItem, gapVal:
 }
 
 /**
- * Figma & Canva Professional Auto-Alignment & Border-Exact Gap Snapping Engine
+ * Figma & Canva Professional Auto-Alignment with Row/Column Projection Overlap
  */
 export function calculateAutoAlign(
   target: RectItem,
@@ -99,24 +119,22 @@ export function calculateAutoAlign(
   let snappedY = target.y;
   const guides: SnapGuide[] = [];
 
-  // Filter other items into valid arrays
-  if (otherItems.length === 0) {
-    return { snappedX, snappedY, guides };
-  }
+  if (otherItems.length === 0) return { snappedX, snappedY, guides };
 
   // ─────────────────────────────────────────────────────────────
-  // 1. HORIZONTAL GAP SNAPPING (Border-Exact)
+  // 1. HORIZONTAL GAP SNAPPING (Left -> Right in the same row)
+  // Only consider items that have vertical overlap with target!
   // ─────────────────────────────────────────────────────────────
+  const rowItems = otherItems.filter(item => hasVerticalOverlap(target, item, 20));
   let foundHorizontalGap = false;
 
-  // A. Sandwich / In-Between Snapping: Target is between leftItem and rightItem
-  for (let i = 0; i < otherItems.length; i++) {
-    for (let j = 0; j < otherItems.length; j++) {
+  // A. In-Between (Sandwich) Snapping in row
+  for (let i = 0; i < rowItems.length; i++) {
+    for (let j = 0; j < rowItems.length; j++) {
       if (i === j) continue;
-      const leftItem = otherItems[i];
-      const rightItem = otherItems[j];
+      const leftItem = rowItems[i];
+      const rightItem = rowItems[j];
 
-      // leftItem is strictly to the left of rightItem
       if (leftItem.x + leftItem.width < rightItem.x) {
         const availableSpace = rightItem.x - (leftItem.x + leftItem.width);
         const equalGap = (availableSpace - target.width) / 2;
@@ -128,9 +146,7 @@ export function calculateAutoAlign(
             foundHorizontalGap = true;
 
             const snappedTarget: RectItem = { ...target, x: snappedX };
-            // Guide 1: Touching leftItem right-border -> Target left-border
             guides.push(createHorizontalGapGuide(leftItem, snappedTarget, equalGap));
-            // Guide 2: Touching Target right-border -> rightItem left-border
             guides.push(createHorizontalGapGuide(snappedTarget, rightItem, equalGap));
             break;
           }
@@ -140,40 +156,36 @@ export function calculateAutoAlign(
     if (foundHorizontalGap) break;
   }
 
-  // B. Pattern / Equal Step Matching (e.g. A --G-- B --G-- Target or Target --G-- A --G-- B)
-  if (!foundHorizontalGap && otherItems.length >= 2) {
-    const sortedOthers = [...otherItems].sort((a, b) => a.x - b.x);
+  // B. Pattern / Equal Step Matching in row
+  if (!foundHorizontalGap && rowItems.length >= 2) {
+    const sortedRow = [...rowItems].sort((a, b) => a.x - b.x);
 
-    for (let k = 0; k < sortedOthers.length - 1; k++) {
-      const a = sortedOthers[k];
-      const b = sortedOthers[k + 1];
+    for (let k = 0; k < sortedRow.length - 1; k++) {
+      const a = sortedRow[k];
+      const b = sortedRow[k + 1];
       const g = b.x - (a.x + a.width);
 
       if (g > 3) {
-        // Test placing Target to the right of b: b --G-- Target
+        // Place Target to right of b
         const rightSnapX = b.x + b.width + g;
         if (Math.abs(target.x - rightSnapX) <= snapThreshold) {
           snappedX = rightSnapX;
           foundHorizontalGap = true;
 
           const snappedTarget: RectItem = { ...target, x: snappedX };
-          // Guide between A and B
           guides.push(createHorizontalGapGuide(a, b, g));
-          // Guide between B and Target
           guides.push(createHorizontalGapGuide(b, snappedTarget, g));
           break;
         }
 
-        // Test placing Target to the left of a: Target --G-- a
+        // Place Target to left of a
         const leftSnapX = a.x - target.width - g;
         if (Math.abs(target.x - leftSnapX) <= snapThreshold) {
           snappedX = leftSnapX;
           foundHorizontalGap = true;
 
           const snappedTarget: RectItem = { ...target, x: snappedX };
-          // Guide between Target and A
           guides.push(createHorizontalGapGuide(snappedTarget, a, g));
-          // Guide between A and B
           guides.push(createHorizontalGapGuide(a, b, g));
           break;
         }
@@ -182,16 +194,18 @@ export function calculateAutoAlign(
   }
 
   // ─────────────────────────────────────────────────────────────
-  // 2. VERTICAL GAP SNAPPING (Border-Exact)
+  // 2. VERTICAL GAP SNAPPING (Top -> Bottom in the same column)
+  // Only consider items that have horizontal overlap with target!
   // ─────────────────────────────────────────────────────────────
+  const colItems = otherItems.filter(item => hasHorizontalOverlap(target, item, 20));
   let foundVerticalGap = false;
 
-  // A. Vertical Sandwich Snapping: Target is between topItem and bottomItem
-  for (let i = 0; i < otherItems.length; i++) {
-    for (let j = 0; j < otherItems.length; j++) {
+  // A. In-Between (Sandwich) Snapping in column
+  for (let i = 0; i < colItems.length; i++) {
+    for (let j = 0; j < colItems.length; j++) {
       if (i === j) continue;
-      const topItem = otherItems[i];
-      const bottomItem = otherItems[j];
+      const topItem = colItems[i];
+      const bottomItem = colItems[j];
 
       if (topItem.y + topItem.height < bottomItem.y) {
         const availableSpace = bottomItem.y - (topItem.y + topItem.height);
@@ -214,17 +228,17 @@ export function calculateAutoAlign(
     if (foundVerticalGap) break;
   }
 
-  // B. Vertical Pattern / Equal Step Matching
-  if (!foundVerticalGap && otherItems.length >= 2) {
-    const sortedOthers = [...otherItems].sort((a, b) => a.y - b.y);
+  // B. Pattern / Equal Step Matching in column
+  if (!foundVerticalGap && colItems.length >= 2) {
+    const sortedCol = [...colItems].sort((a, b) => a.y - b.y);
 
-    for (let k = 0; k < sortedOthers.length - 1; k++) {
-      const a = sortedOthers[k];
-      const b = sortedOthers[k + 1];
+    for (let k = 0; k < sortedCol.length - 1; k++) {
+      const a = sortedCol[k];
+      const b = sortedCol[k + 1];
       const g = b.y - (a.y + a.height);
 
       if (g > 3) {
-        // Bottom placement: b --G-- Target
+        // Place Target below b
         const bottomSnapY = b.y + b.height + g;
         if (Math.abs(target.y - bottomSnapY) <= snapThreshold) {
           snappedY = bottomSnapY;
@@ -236,7 +250,7 @@ export function calculateAutoAlign(
           break;
         }
 
-        // Top placement: Target --G-- a
+        // Place Target above a
         const topSnapY = a.y - target.height - g;
         if (Math.abs(target.y - topSnapY) <= snapThreshold) {
           snappedY = topSnapY;
@@ -252,14 +266,14 @@ export function calculateAutoAlign(
   }
 
   // ─────────────────────────────────────────────────────────────
-  // 3. AXIS ALIGNMENT (Edges & Centers)
+  // 3. AXIS ALIGNMENT (Edges & Centers across the canvas)
   // ─────────────────────────────────────────────────────────────
-  const candidateX: { pos: number; type: string }[] = [{ pos: 50, type: 'start' }];
+  const candidateX: { pos: number; type: string; neighbor: CanvasItemImage }[] = [];
   for (const item of otherItems) {
     candidateX.push(
-      { pos: item.x, type: 'left' },
-      { pos: item.x + item.width / 2, type: 'center' },
-      { pos: item.x + item.width, type: 'right' }
+      { pos: item.x, type: 'left', neighbor: item },
+      { pos: item.x + item.width / 2, type: 'center', neighbor: item },
+      { pos: item.x + item.width, type: 'right', neighbor: item }
     );
   }
 
@@ -268,17 +282,20 @@ export function calculateAutoAlign(
   let guideLineX: SnapGuide | null = null;
 
   for (const c of candidateX) {
+    const minY = Math.min(target.y, c.neighbor.y) - 50;
+    const maxY = Math.max(target.y + target.height, c.neighbor.y + c.neighbor.height) + 50;
+
     if (Math.abs(target.x - c.pos) < minDiffX) {
       minDiffX = Math.abs(target.x - c.pos); chosenSnapX = c.pos;
-      guideLineX = { type: 'vertical', pos: c.pos, start: Math.min(target.y - 100, -500), end: Math.max(target.y + target.height + 100, 2000) };
+      guideLineX = { type: 'vertical', pos: c.pos, start: minY, end: maxY };
     }
     if (Math.abs((target.x + target.width / 2) - c.pos) < minDiffX) {
       minDiffX = Math.abs((target.x + target.width / 2) - c.pos); chosenSnapX = c.pos - target.width / 2;
-      guideLineX = { type: 'vertical', pos: c.pos, start: Math.min(target.y - 100, -500), end: Math.max(target.y + target.height + 100, 2000) };
+      guideLineX = { type: 'vertical', pos: c.pos, start: minY, end: maxY };
     }
     if (Math.abs((target.x + target.width) - c.pos) < minDiffX) {
       minDiffX = Math.abs((target.x + target.width) - c.pos); chosenSnapX = c.pos - target.width;
-      guideLineX = { type: 'vertical', pos: c.pos, start: Math.min(target.y - 100, -500), end: Math.max(target.y + target.height + 100, 2000) };
+      guideLineX = { type: 'vertical', pos: c.pos, start: minY, end: maxY };
     }
   }
 
@@ -287,12 +304,12 @@ export function calculateAutoAlign(
     if (guideLineX) guides.push(guideLineX);
   }
 
-  const candidateY: { pos: number; type: string }[] = [{ pos: 50, type: 'start' }];
+  const candidateY: { pos: number; type: string; neighbor: CanvasItemImage }[] = [];
   for (const item of otherItems) {
     candidateY.push(
-      { pos: item.y, type: 'top' },
-      { pos: item.y + item.height / 2, type: 'middle' },
-      { pos: item.y + item.height, type: 'bottom' }
+      { pos: item.y, type: 'top', neighbor: item },
+      { pos: item.y + item.height / 2, type: 'middle', neighbor: item },
+      { pos: item.y + item.height, type: 'bottom', neighbor: item }
     );
   }
 
@@ -301,17 +318,20 @@ export function calculateAutoAlign(
   let guideLineY: SnapGuide | null = null;
 
   for (const c of candidateY) {
+    const minX = Math.min(target.x, c.neighbor.x) - 50;
+    const maxX = Math.max(target.x + target.width, c.neighbor.x + c.neighbor.width) + 50;
+
     if (Math.abs(target.y - c.pos) < minDiffY) {
       minDiffY = Math.abs(target.y - c.pos); chosenSnapY = c.pos;
-      guideLineY = { type: 'horizontal', pos: c.pos, start: Math.min(target.x - 100, -500), end: Math.max(target.x + target.width + 100, 2000) };
+      guideLineY = { type: 'horizontal', pos: c.pos, start: minX, end: maxX };
     }
     if (Math.abs((target.y + target.height / 2) - c.pos) < minDiffY) {
       minDiffY = Math.abs((target.y + target.height / 2) - c.pos); chosenSnapY = c.pos - target.height / 2;
-      guideLineY = { type: 'horizontal', pos: c.pos, start: Math.min(target.x - 100, -500), end: Math.max(target.x + target.width + 100, 2000) };
+      guideLineY = { type: 'horizontal', pos: c.pos, start: minX, end: maxX };
     }
     if (Math.abs((target.y + target.height) - c.pos) < minDiffY) {
       minDiffY = Math.abs((target.y + target.height) - c.pos); chosenSnapY = c.pos - target.height;
-      guideLineY = { type: 'horizontal', pos: c.pos, start: Math.min(target.x - 100, -500), end: Math.max(target.x + target.width + 100, 2000) };
+      guideLineY = { type: 'horizontal', pos: c.pos, start: minX, end: maxX };
     }
   }
 
