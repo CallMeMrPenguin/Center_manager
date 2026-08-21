@@ -159,16 +159,21 @@ export default function CanvasBoardPage() {
         setSelectedId(null);
         setSelectedType(null);
         showToast("Đã xóa phần tử!", "success");
-      } else if (e.key === 'Escape' || e.key === 'Enter') {
-        if (isCroppingImageId) {
-          setIsCroppingImageId(null);
-          setActiveCropBox(null);
+      } else if (!isInput && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        if (e.key === '1') {
+          setActiveTool('select');
+        } else if (e.key === '2') {
+          setActiveTool('pen');
+        } else if (e.key === '3') {
+          setActiveTool('highlighter');
+        } else if (e.key === '4') {
+          setActiveTool('eraser');
         }
       }
     };
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
-  }, [handleUndo, handleRedo, selectedId, selectedType, isCroppingImageId, pushHistorySnapshot]);
+  }, [handleUndo, handleRedo, selectedId, selectedType, isCroppingImageId, pushHistorySnapshot, setActiveTool]);
 
   // PDF Loader
   useEffect(() => {

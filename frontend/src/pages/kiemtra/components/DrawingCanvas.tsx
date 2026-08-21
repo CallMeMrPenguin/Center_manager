@@ -160,11 +160,24 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      const isInput = target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable);
+
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
         e.preventDefault();
         if (e.shiftKey) handleRedo(); else handleUndo();
       } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y') {
         e.preventDefault(); handleRedo();
+      } else if (!isInput && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        if (e.key === '1') {
+          setActiveTool('none');
+        } else if (e.key === '2') {
+          setActiveTool('pen');
+        } else if (e.key === '3') {
+          setActiveTool('highlighter');
+        } else if (e.key === '4') {
+          setActiveTool('eraser');
+        }
       }
     };
     window.addEventListener('keydown', handleKeyDown);

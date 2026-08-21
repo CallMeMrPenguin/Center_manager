@@ -45,6 +45,7 @@ export const QuizRunningView: React.FC<QuizRunningViewProps> = ({
   bookmarkedQuestions,
   toggleBookmark,
   timerMode,
+  timerRemaining,
   setTimerRemaining,
   globalTimeSeconds,
   questionTimer,
@@ -171,14 +172,17 @@ export const QuizRunningView: React.FC<QuizRunningViewProps> = ({
           onClearDrawing={(id) => setDrawings(p => { const c = { ...p }; delete c[id]; return c; })}
         />
 
-        {/* FLOATING DRAGGABLE TIMER DOCK - Positioned at absolute top-16 left-4 */}
+        {/* FLOATING DRAGGABLE TIMER DOCK - Positioned at fixed top-20 left-8 */}
         {showPopoutTimer && (
           <QuizPopoutTimer
             timerMode={timerMode}
             timerPos={timerPos}
             setTimerPos={setTimerPos}
             formattedTimerRemaining={formattedTimerRemaining}
+            timerRemaining={timerRemaining}
+            globalTimeSeconds={globalTimeSeconds}
             questionTimer={questionTimer}
+            perQuestionSeconds={perQuestionSeconds}
             isTimerPaused={isTimerPaused}
             onClose={() => setShowPopoutTimer(false)}
             onTogglePause={() => setIsTimerPaused(!isTimerPaused)}
