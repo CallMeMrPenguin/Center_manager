@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Clock, Flag, ChevronLeft, ChevronRight, ArrowLeft, ArrowRight,
-  Maximize2, Minimize2, RotateCcw
+  Maximize2, Minimize2
 } from 'lucide-react';
 import { Question, TimerMode } from '../types';
 import { showToast } from '../../../components/Toast';
@@ -45,7 +45,6 @@ export const QuizRunningView: React.FC<QuizRunningViewProps> = ({
   bookmarkedQuestions,
   toggleBookmark,
   timerMode,
-  timerRemaining,
   setTimerRemaining,
   globalTimeSeconds,
   questionTimer,
@@ -66,9 +65,7 @@ export const QuizRunningView: React.FC<QuizRunningViewProps> = ({
 
   // Popout Draggable Timer State
   const [showPopoutTimer, setShowPopoutTimer] = useState<boolean>(true);
-  const [timerPos, setTimerPos] = useState({ x: Math.max(20, window.innerWidth - 280), y: 90 });
-  const isDraggingTimerRef = useRef(false);
-  const dragOffsetRef = useRef({ x: 0, y: 0 });
+  const [timerPos, setTimerPos] = useState<{ x: number; y: number } | null>(null);
 
   useEffect(() => {
     if (isFullscreen) setIsSidebarCollapsed(true);
@@ -94,23 +91,6 @@ export const QuizRunningView: React.FC<QuizRunningViewProps> = ({
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [currentIndex, activeQuestions.length, timerMode, perQuestionSeconds, setCurrentIndex, setQuestionTimer]);
-
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      if (isDraggingTimerRef.current) {
-        const newX = Math.max(10, Math.min(window.innerWidth - 240, e.clientX - dragOffsetRef.current.x));
-        const newY = Math.max(10, Math.min(window.innerHeight - 160, e.clientY - dragOffsetRef.current.y));
-        setTimerPos({ x: newX, y: newY });
-      }
-    };
-    const handleMouseUp = () => { isDraggingTimerRef.current = false; };
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('mouseup', handleMouseUp);
-    return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseup', handleMouseUp);
-    };
-  }, []);
 
   const handleResetTimer = () => {
     if (timerMode === 'global') {
@@ -191,6 +171,21 @@ export const QuizRunningView: React.FC<QuizRunningViewProps> = ({
           onClearDrawing={(id) => setDrawings(p => { const c = { ...p }; delete c[id]; return c; })}
         />
 
+        {/* FLOATING DRAGGABLE TIMER DOCK - Positioned at absolute top-16 left-4 */}
+        {showPopoutTimer && (
+          <QuizPopoutTimer
+            timerMode={timerMode}
+            timerPos={timerPos}
+            setTimerPos={setTimerPos}
+            formattedTimerRemaining={formattedTimerRemaining}
+            questionTimer={questionTimer}
+            isTimerPaused={isTimerPaused}
+            onClose={() => setShowPopoutTimer(false)}
+            onTogglePause={() => setIsTimerPaused(!isTimerPaused)}
+            onReset={handleResetTimer}
+          />
+        )}
+
         <div className="space-y-5 relative z-10">
           {/* TOP ACTION BAR */}
           <div className="flex items-center justify-between pb-4 border-b border-white/10">
@@ -215,28 +210,34 @@ export const QuizRunningView: React.FC<QuizRunningViewProps> = ({
                       onExitToImport();
                     }
                   }}
-                  className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white border border-white/10 text-xs font-bold transition cursor-pointer"
+                  className="px-3 py-1 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white border border-white/10 text-xs font-bold transition cursor-pointer"
                   title="Quay lại để chọn đề khác"
                 >
-                  <RotateCcw size={13} />
-                  <span className="hidden sm:inline">Đổi đề</span>
+                  Đổi đề
                 </button>
               )}
 
-              {timerMode !== 'none' && (
-                <button
-                  onClick={() => setShowPopoutTimer(!showPopoutTimer)}
-                  className={`flex items-center gap-2 px-3 py-1 rounded-xl border text-xs font-bold transition cursor-pointer ${
-                    showPopoutTimer
-                      ? 'bg-indigo-600/30 text-indigo-300 border-indigo-400 shadow-sm'
-                      : 'bg-[#121626] text-slate-400 border-[#263152] hover:text-white'
-                  }`}
-                  title="Bật / Ẩn cửa sổ đồng hồ nổi"
-                >
-                  <Clock size={13} className={timerMode === 'global' ? 'text-indigo-400' : 'text-amber-400'} />
-                  <span>{timerMode === 'global' ? formattedTimerRemaining : `${questionTimer}s`}</span>
-                </button>
-              )}
+              <button
+                onClick={() => setShowPopoutTimer(!showPopoutTimer)}
+                className={`flex items-center gap-1.5 px-3 py-1 rounded-xl border text-xs font-bold transition cursor-pointer ${
+                  showPopoutTimer
+                    ? 'bg-indigo-600/30 text-indigo-300 border-indigo-400 shadow-sm'
+                    : 'bg-[#121626] text-slate-400 border-[#263152] hover:text-white'
+                }`}
+                title="Bật / Ẩn đồng hồ nổi"
+              >
+                <Clock
+                  size={13}
+                  className={
+                    timerMode === 'none'
+                      ? 'text-emerald-400'
+                      : timerMode === 'global'
+                      ? 'text-indigo-400'
+                      : 'text-amber-400'
+                  }
+                />
+                <span>{timerMode === 'per_question' ? `${questionTimer}s` : formattedTimerRemaining}</span>
+              </button>
 
               <button
                 onClick={() => toggleBookmark(q.id)}
@@ -323,22 +324,6 @@ export const QuizRunningView: React.FC<QuizRunningViewProps> = ({
           )}
         </div>
       </div>
-
-      {/* DRAGGABLE POPOUT TIMER WINDOW */}
-      <QuizPopoutTimer
-        timerMode={timerMode}
-        timerPos={timerPos}
-        formattedTimerRemaining={formattedTimerRemaining}
-        questionTimer={questionTimer}
-        isTimerPaused={isTimerPaused}
-        onMouseDown={(e) => {
-          isDraggingTimerRef.current = true;
-          dragOffsetRef.current = { x: e.clientX - timerPos.x, y: e.clientY - timerPos.y };
-        }}
-        onClose={() => setShowPopoutTimer(false)}
-        onTogglePause={() => setIsTimerPaused(!isTimerPaused)}
-        onReset={handleResetTimer}
-      />
     </div>
   );
 };

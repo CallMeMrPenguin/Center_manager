@@ -29,6 +29,7 @@ export default function KiemTraPage() {
   const [bookmarkedQuestions, setBookmarkedQuestions] = useState<Record<number, boolean>>({});
   const [timerRemaining, setTimerRemaining] = useState(0);
   const [questionTimer, setQuestionTimer] = useState(0);
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [isTimerPaused, setIsTimerPaused] = useState(false);
 
   // Fullscreen Management
@@ -130,6 +131,7 @@ export default function KiemTraPage() {
     setUserAnswers({});
     setBookmarkedQuestions({});
     setIsTimerPaused(false);
+    setElapsedSeconds(0);
 
     if (timerMode === 'global') {
       setTimerRemaining(globalTimeSeconds);
@@ -139,6 +141,15 @@ export default function KiemTraPage() {
 
     setStep('running');
   };
+
+  // Stopwatch Effect for 'none' mode
+  useEffect(() => {
+    if (step !== 'running' || timerMode !== 'none' || isTimerPaused) return;
+    const interval = setInterval(() => {
+      setElapsedSeconds(prev => prev + 1);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [step, timerMode, isTimerPaused]);
 
   // Global Timer Countdown Effect
   useEffect(() => {
@@ -214,10 +225,15 @@ export default function KiemTraPage() {
   }, []);
 
   const formattedTimerRemaining = useMemo(() => {
-    const mins = Math.floor(timerRemaining / 60);
-    const secs = timerRemaining % 60;
+    if (timerMode === 'none') {
+      const mins = Math.floor(elapsedSeconds / 60);
+      const secs = elapsedSeconds % 60;
+      return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+    }
+    const mins = Math.max(0, Math.floor(timerRemaining / 60));
+    const secs = Math.max(0, timerRemaining % 60);
     return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
-  }, [timerRemaining]);
+  }, [timerMode, elapsedSeconds, timerRemaining]);
 
   // Main Content JSX
   const mainContent = (
