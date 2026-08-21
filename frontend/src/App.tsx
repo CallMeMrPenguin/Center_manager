@@ -260,7 +260,7 @@ function AppContent() {
 
         {/* SIDEBAR NAVIGATION (Floating circle toggle button on right edge) */}
         <aside
-          className={`relative ${isSidebarExpanded ? 'w-[270px]' : 'w-20'} sidebar-glass-glow rounded-2xl flex flex-col h-full transition-[width] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] z-30 shrink-0 select-none`}
+          className={`relative ${isSidebarExpanded ? 'w-[19rem]' : 'w-[5.25rem]'} sidebar-glass-glow rounded-2xl flex flex-col h-full transition-[width] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] z-30 shrink-0 select-none`}
         >
           {/* Floating Circular Collapse / Expand Button on right edge */}
           <button
@@ -278,7 +278,7 @@ function AppContent() {
               <img src="/logo.png" alt="Center Manager Logo" className="h-full w-full object-contain" />
             </div>
             <div className={`whitespace-nowrap overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${
-              isSidebarExpanded ? 'opacity-100 max-w-[200px] ml-3 translate-x-0' : 'opacity-0 max-w-0 ml-0 -translate-x-3 pointer-events-none'
+              isSidebarExpanded ? 'opacity-100 max-w-[14rem] ml-3 translate-x-0' : 'opacity-0 max-w-0 ml-0 -translate-x-3 pointer-events-none'
             }`}>
               <span className="text-base font-black tracking-wide uppercase text-white block leading-none">
                 EduPlatform
@@ -341,7 +341,7 @@ function AppContent() {
 
                         {/* TEXT LABEL WITH SYNCHRONIZED SMOOTH FADE & SLIDE */}
                         <span className={`text-sm relative z-10 whitespace-nowrap overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${
-                          isSidebarExpanded ? 'opacity-100 max-w-[195px] ml-1.5 translate-x-0' : 'opacity-0 max-w-0 ml-0 -translate-x-3 pointer-events-none'
+                          isSidebarExpanded ? 'opacity-100 max-w-[13.5rem] ml-1.5 translate-x-0' : 'opacity-0 max-w-0 ml-0 -translate-x-3 pointer-events-none'
                         } ${isActive ? "text-white font-black" : "text-slate-200 font-bold group-hover:text-white"}`}>
                           {item.label}
                         </span>
@@ -409,7 +409,7 @@ function AppContent() {
                 CM
               </div>
               <div className={`transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] whitespace-nowrap overflow-hidden flex items-center justify-between flex-1 ${
-                isSidebarExpanded ? 'opacity-100 max-w-[200px] ml-3 translate-x-0' : 'opacity-0 max-w-0 ml-0 -translate-x-3 pointer-events-none'
+                isSidebarExpanded ? 'opacity-100 max-w-[13.5rem] ml-3 translate-x-0' : 'opacity-0 max-w-0 ml-0 -translate-x-3 pointer-events-none'
               }`}>
                 <div className="min-w-0 flex-1 text-left">
                   <p className="text-xs font-black text-white truncate leading-snug">Center Manager</p>
