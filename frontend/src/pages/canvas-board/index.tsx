@@ -536,8 +536,11 @@ export default function CanvasBoardPage() {
         isDrawingRef.current = true;
         pushHistorySnapshot();
         lastEraserWorldPtRef.current = worldPt;
-        const newStrokes = eraseStrokesAlongPath(currentStrokes, worldPt, worldPt, eraserSize / 2);
-        setPageStrokes(prev => ({ ...prev, [currentPage]: newStrokes }));
+        const res = eraseStrokesAlongPath(currentStrokes, worldPt, worldPt, eraserSize / 2);
+        if (res.hasChanged) {
+          setPageStrokes(prev => ({ ...prev, [currentPage]: res.strokes }));
+        }
+        redrawCanvas();
         return;
       }
 
@@ -618,9 +621,12 @@ export default function CanvasBoardPage() {
 
     if (activeTool === 'eraser' && isDrawingRef.current) {
       const prevPt = lastEraserWorldPtRef.current || worldPt;
-      const newStrokes = eraseStrokesAlongPath(currentStrokes, prevPt, worldPt, eraserSize / 2);
+      const res = eraseStrokesAlongPath(currentStrokes, prevPt, worldPt, eraserSize / 2);
       lastEraserWorldPtRef.current = worldPt;
-      setPageStrokes(prev => ({ ...prev, [currentPage]: newStrokes }));
+      if (res.hasChanged) {
+        setPageStrokes(prev => ({ ...prev, [currentPage]: res.strokes }));
+      }
+      redrawCanvas();
       return;
     }
 
