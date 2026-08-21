@@ -37,6 +37,16 @@ def kill_port_8000():
     except Exception:
         pass
 
+import webbrowser
+
+def open_browser(url: str):
+    """Waits for backend to start, then opens default browser."""
+    time.sleep(1.2)
+    try:
+        webbrowser.open(url)
+    except Exception:
+        pass
+
 def main():
     version = get_app_version()
 
@@ -50,7 +60,7 @@ def main():
     except Exception as e:
         print(f"Cleanup warning: {e}")
 
-    # 2. Determine target URL (Vite DEV server or Built Backend)
+    # 3. Determine target URL (Vite DEV server or Built Backend)
     url = "http://localhost:8000"
     try:
         urllib.request.urlopen("http://localhost:5173", timeout=0.3)
@@ -59,6 +69,10 @@ def main():
     except Exception:
         print("Vite dev server not found. Running in PRODUCTION mode.")
 
+    is_background = "--background" in sys.argv or "--silent" in sys.argv
+    if not is_background:
+        threading.Thread(target=open_browser, args=(url,), daemon=True).start()
+
     print("\n" + "=" * 55)
     print(f"  CENTER MANAGER v{version} IS RUNNING")
     print(f"  Web URL: {url} (or http://127.0.0.1:8000)")
@@ -66,14 +80,14 @@ def main():
     print("  Press Ctrl+C to stop the server.")
     print("=" * 55 + "\n")
 
-    # 3. Start silent background update check (non-blocking)
+    # 4. Start silent background update check (non-blocking)
     try:
         from updater import background_check_on_startup
         background_check_on_startup()
     except Exception:
         pass  # Never crash startup due to updater issues
 
-    # 4. Run uvicorn FastAPI server
+    # 5. Run uvicorn FastAPI server
     backend_dir = os.path.join(ROOT, "backend")
     uvicorn.run("backend.main:app", host="0.0.0.0", port=8000, reload=True, reload_dirs=[backend_dir], log_level="warning")
 
