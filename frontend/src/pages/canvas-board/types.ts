@@ -7,8 +7,7 @@ export type CanvasTool =
   | 'line' 
   | 'arrow' 
   | 'rect' 
-  | 'circle' 
-  | 'crop';
+  | 'circle';
 
 export interface Point {
   x: number;
@@ -23,6 +22,7 @@ export interface CanvasItemImage {
   width: number;
   height: number;
   originalSrc?: string;
+  cropBox?: CropBox; // Word-style crop box
 }
 
 export interface CanvasTextBox {

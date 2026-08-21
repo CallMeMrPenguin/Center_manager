@@ -6,8 +6,9 @@ import { showToast } from '../../components/Toast';
 import { CanvasTool, Point, CanvasItemImage, CanvasTextBox, SnapGuide, CropBox, StrokeRecord } from './types';
 import { CanvasToolbar } from './components/CanvasToolbar';
 import { CanvasBottomBar, GridType } from './components/CanvasBottomBar';
+import { CanvasTextBoxOverlay } from './components/CanvasTextBoxOverlay';
 import { useCanvasViewport } from './hooks/useCanvasViewport';
-import { hitTestImage, calculateAutoAlign, cropImageItem, HandleType } from './utils/imageTransform';
+import { hitTestImage, calculateAutoAlign, applyWordCrop, isStrokeFullyInsideImage, HandleType } from './utils/imageTransform';
 import { eraseStrokesAtPoint } from './utils/eraserEngine';
 import { renderStroke, getTransformedPoint } from '../../utils/drawingEngine';
 
@@ -34,12 +35,13 @@ export default function CanvasBoardPage() {
   const [canvasTextBoxes, setCanvasTextBoxes] = useState<CanvasTextBox[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [selectedType, setSelectedType] = useState<'image' | 'text' | null>(null);
-  const [editingTextId, setEditingTextId] = useState<string | null>(null);
+  const [isCroppingImageId, setIsCroppingImageId] = useState<string | null>(null);
+  const [activeCropBox, setActiveCropBox] = useState<CropBox | null>(null);
   const [docName, setDocName] = useState<string>('Bảng vẽ trắng (Canvas)');
 
   const { zoom, setZoom, pan, setPan, isPanningRef, lastMousePosRef, isShiftPressedRef } = useCanvasViewport();
 
-  const [gridType, setGridType] = useState<GridType>('grid'); // Default: Ô LY (Cả ngang & dọc)
+  const [gridType, setGridType] = useState<GridType>('grid'); // Default: Ô LY (Ngang & Dọc)
   const [activeTool, setActiveTool] = useState<CanvasTool>('pen');
   const [selectedColor, setSelectedColor] = useState<string>('#ff3344'); // Mực đỏ mặc định
   const [selectedBgColor, setSelectedBgColor] = useState<string>('#ffffff'); // Nền trắng mặc định
@@ -58,7 +60,6 @@ export default function CanvasBoardPage() {
   const resizeHandleRef = useRef<HandleType>('none');
   const dragOffsetRef = useRef<Point>({ x: 0, y: 0 });
   const activeSnapGuidesRef = useRef<SnapGuide[]>([]);
-  const cropBoxRef = useRef<CropBox | null>(null);
   const currentStrokePointsRef = useRef<Point[]>([]);
   const [cursorPos, setCursorPos] = useState<Point>({ x: -100, y: -100 });
 
@@ -117,7 +118,7 @@ export default function CanvasBoardPage() {
     setCanvasTextBoxes(next.textBoxes);
   }, [redoStack, pageStrokes, canvasImages, canvasTextBoxes, currentPage]);
 
-  // Delete key handler
+  // Delete / Backspace listener
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement;
@@ -136,11 +137,16 @@ export default function CanvasBoardPage() {
         setSelectedId(null);
         setSelectedType(null);
         showToast("Đã xóa phần tử!", "success");
+      } else if (e.key === 'Escape' || e.key === 'Enter') {
+        if (isCroppingImageId) {
+          setIsCroppingImageId(null);
+          setActiveCropBox(null);
+        }
       }
     };
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
-  }, [handleUndo, handleRedo, selectedId, selectedType, pushHistorySnapshot]);
+  }, [handleUndo, handleRedo, selectedId, selectedType, isCroppingImageId, pushHistorySnapshot]);
 
   // PDF Loader
   useEffect(() => {
@@ -157,8 +163,7 @@ export default function CanvasBoardPage() {
           const img = new Image();
           img.onload = () => {
             const newImgItem: CanvasItemImage = {
-              id: 'pdf_page_' + currentPage,
-              img, x: 50, y: 50, width: viewport.width / 2, height: viewport.height / 2,
+              id: 'pdf_page_' + currentPage, img, x: 50, y: 50, width: viewport.width / 2, height: viewport.height / 2,
             };
             setCanvasImages([newImgItem]);
             setSelectedId(newImgItem.id);
@@ -173,7 +178,7 @@ export default function CanvasBoardPage() {
 
   const currentStrokes = pageStrokes[currentPage] || [];
 
-  // Redraw Canvas with Frustum Culling
+  // Redraw Canvas
   const redrawCanvas = useCallback(() => {
     const canvas = canvasRef.current;
     const container = containerRef.current;
@@ -198,13 +203,12 @@ export default function CanvasBoardPage() {
     ctx.translate(pan.x, pan.y);
     ctx.scale(zoom, zoom);
 
-    // Visible Viewport Bounds for Culling
     const vpLeft = -pan.x / zoom;
     const vpTop = -pan.y / zoom;
     const vpRight = (rect.width - pan.x) / zoom;
     const vpBottom = (rect.height - pan.y) / zoom;
 
-    // 1. Grid (Ô ly có cả kẻ ngang và kẻ dọc)
+    // 1. Grid (Only Dots, or Grid, or Ruled Lines)
     if (gridType !== 'none') {
       const gridSize = 44;
       const startX = Math.floor(vpLeft / gridSize) * gridSize;
@@ -213,12 +217,25 @@ export default function CanvasBoardPage() {
       const endY = Math.ceil(vpBottom / gridSize) * gridSize;
 
       ctx.save();
-      ctx.strokeStyle = '#cbd5e1';
-      ctx.lineWidth = 1.3 / zoom;
-      ctx.beginPath();
-      for (let x = startX; x <= endX; x += gridSize) { ctx.moveTo(x, startY); ctx.lineTo(x, endY); }
-      for (let y = startY; y <= endY; y += gridSize) { ctx.moveTo(startX, y); ctx.lineTo(endX, y); }
-      ctx.stroke();
+      if (gridType === 'dots') {
+        ctx.fillStyle = '#64748b'; // Only dots, zero lines!
+        for (let x = startX; x <= endX; x += gridSize) {
+          for (let y = startY; y <= endY; y += gridSize) {
+            ctx.beginPath(); ctx.arc(x, y, 1.8 / zoom, 0, Math.PI * 2); ctx.fill();
+          }
+        }
+      } else if (gridType === 'grid') {
+        ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 1.4 / zoom; // Darker grid lines
+        ctx.beginPath();
+        for (let x = startX; x <= endX; x += gridSize) { ctx.moveTo(x, startY); ctx.lineTo(x, endY); }
+        for (let y = startY; y <= endY; y += gridSize) { ctx.moveTo(startX, y); ctx.lineTo(endX, y); }
+        ctx.stroke();
+      } else if (gridType === 'lines') {
+        ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 1.4 / zoom;
+        ctx.beginPath();
+        for (let y = startY; y <= endY; y += gridSize) { ctx.moveTo(vpLeft - 500, y); ctx.lineTo(vpRight + 500, y); }
+        ctx.stroke();
+      }
       ctx.restore();
     }
 
@@ -233,39 +250,32 @@ export default function CanvasBoardPage() {
 
       if (item.id === selectedId && selectedType === 'image') {
         ctx.save();
-        ctx.strokeStyle = '#5c36f5'; ctx.lineWidth = 2 / zoom; ctx.setLineDash([6 / zoom, 6 / zoom]);
-        ctx.strokeRect(item.x - 2 / zoom, item.y - 2 / zoom, item.width + 4 / zoom, item.height + 4 / zoom);
-        ctx.setLineDash([]);
-        ctx.fillStyle = '#ffffff'; ctx.strokeStyle = '#5c36f5';
-        const hs = 8 / zoom;
-        const corners = [{ x: item.x, y: item.y }, { x: item.x + item.width, y: item.y }, { x: item.x, y: item.y + item.height }, { x: item.x + item.width, y: item.y + item.height }];
-        for (const c of corners) { ctx.fillRect(c.x - hs / 2, c.y - hs / 2, hs, hs); ctx.strokeRect(c.x - hs / 2, c.y - hs / 2, hs, hs); }
+        if (isCroppingImageId === item.id) {
+          // Word-style Crop Overlay
+          const cb = activeCropBox || { x: item.x, y: item.y, width: item.width, height: item.height };
+          ctx.strokeStyle = '#000000'; ctx.lineWidth = 3 / zoom;
+          ctx.strokeRect(cb.x, cb.y, cb.width, cb.height);
+          // Crop corner handles
+          ctx.fillStyle = '#000000';
+          const chs = 14 / zoom;
+          ctx.fillRect(cb.x, cb.y, chs, 4 / zoom); ctx.fillRect(cb.x, cb.y, 4 / zoom, chs);
+          ctx.fillRect(cb.x + cb.width - chs, cb.y, chs, 4 / zoom); ctx.fillRect(cb.x + cb.width - 4 / zoom, cb.y, 4 / zoom, chs);
+          ctx.fillRect(cb.x, cb.y + cb.height - 4 / zoom, chs, 4 / zoom); ctx.fillRect(cb.x, cb.y + cb.height - chs, 4 / zoom, chs);
+          ctx.fillRect(cb.x + cb.width - chs, cb.y + cb.height - 4 / zoom, chs, 4 / zoom); ctx.fillRect(cb.x + cb.width - 4 / zoom, cb.y + cb.height - chs, 4 / zoom, chs);
+        } else {
+          ctx.strokeStyle = '#5c36f5'; ctx.lineWidth = 2 / zoom; ctx.setLineDash([6 / zoom, 6 / zoom]);
+          ctx.strokeRect(item.x - 2 / zoom, item.y - 2 / zoom, item.width + 4 / zoom, item.height + 4 / zoom);
+          ctx.setLineDash([]);
+          ctx.fillStyle = '#ffffff'; ctx.strokeStyle = '#5c36f5';
+          const hs = 8 / zoom;
+          const corners = [{ x: item.x, y: item.y }, { x: item.x + item.width, y: item.y }, { x: item.x, y: item.y + item.height }, { x: item.x + item.width, y: item.y + item.height }];
+          for (const c of corners) { ctx.fillRect(c.x - hs / 2, c.y - hs / 2, hs, hs); ctx.strokeRect(c.x - hs / 2, c.y - hs / 2, hs, hs); }
+        }
         ctx.restore();
       }
     }
 
-    // 3. Text Boxes with Frustum Culling
-    for (const tb of canvasTextBoxes) {
-      if (tb.x + tb.width < vpLeft || tb.x > vpRight || tb.y + tb.height < vpTop || tb.y > vpBottom) continue;
-
-      ctx.save();
-      if (tb.bgColor !== 'transparent') {
-        ctx.fillStyle = tb.bgColor; ctx.shadowColor = 'rgba(0,0,0,0.1)'; ctx.shadowBlur = 8;
-        ctx.fillRect(tb.x, tb.y, tb.width, tb.height);
-      }
-      ctx.font = `${tb.fontSize}px "${tb.fontFamily}", serif`;
-      ctx.fillStyle = tb.color;
-      ctx.textBaseline = 'top';
-      ctx.fillText(tb.text || 'Nhập chữ...', tb.x + 8, tb.y + 8);
-
-      if (tb.id === selectedId && selectedType === 'text') {
-        ctx.strokeStyle = '#5c36f5'; ctx.lineWidth = 1.5 / zoom; ctx.setLineDash([4 / zoom, 4 / zoom]);
-        ctx.strokeRect(tb.x - 2 / zoom, tb.y - 2 / zoom, tb.width + 4 / zoom, tb.height + 4 / zoom);
-      }
-      ctx.restore();
-    }
-
-    // 4. Auto Align Guides with Gap Badges
+    // 3. Auto Align Guides with Gap Badges
     for (const guide of activeSnapGuidesRef.current) {
       ctx.save();
       ctx.strokeStyle = '#00b0ff'; ctx.lineWidth = 1.5 / zoom; ctx.setLineDash([4 / zoom, 4 / zoom]);
@@ -282,29 +292,19 @@ export default function CanvasBoardPage() {
       ctx.restore();
     }
 
-    // 5. Saved Strokes with Frustum Culling
+    // 4. Saved Strokes
     for (const stroke of currentStrokes) {
       renderStroke(ctx, stroke.points, { tool: stroke.tool, color: stroke.color, size: stroke.size, isShiftPressed: stroke.isShiftPressed });
     }
 
-    // 6. In-Progress Stroke
+    // 5. In-Progress Stroke
     if (isDrawingRef.current && currentStrokePointsRef.current.length > 0 && activeTool !== 'eraser') {
       renderStroke(ctx, currentStrokePointsRef.current, {
         tool: activeTool, color: selectedColor, size: activeTool === 'pen' ? penSize : activeTool === 'highlighter' ? hlSize : shapeSize,
         isShiftPressed: isShiftPressedRef.current,
       });
     }
-
-    // 7. Crop Overlay
-    if (activeTool === 'crop' && cropBoxRef.current) {
-      const cb = cropBoxRef.current;
-      ctx.save(); ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
-      ctx.fillRect(vpLeft, vpTop, rect.width / zoom, rect.height / zoom);
-      ctx.clearRect(cb.x, cb.y, cb.width, cb.height);
-      ctx.strokeStyle = '#ff9100'; ctx.lineWidth = 2 / zoom; ctx.strokeRect(cb.x, cb.y, cb.width, cb.height);
-      ctx.restore();
-    }
-  }, [pan, zoom, gridType, canvasImages, canvasTextBoxes, selectedId, selectedType, currentStrokes, activeTool, selectedColor, penSize, hlSize, shapeSize]);
+  }, [pan, zoom, gridType, canvasImages, selectedId, selectedType, isCroppingImageId, activeCropBox, currentStrokes, activeTool, selectedColor, penSize, hlSize, shapeSize]);
 
   useEffect(() => { redrawCanvas(); }, [redrawCanvas]);
 
@@ -361,7 +361,26 @@ export default function CanvasBoardPage() {
       setSelectedId(newItems[newItems.length - 1].id);
       setSelectedType('image');
       setActiveTool('select');
-      showToast(`Đã thêm ${newItems.length} ảnh (5 ảnh/hàng)!`, "success");
+      showToast(`Đã thêm ${newItems.length} ảnh!`, "success");
+    }
+  };
+
+  // Double click on image to enter Word-style Crop mode
+  const handleDoubleClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const worldPt = getTransformedPoint(e.nativeEvent as unknown as PointerEvent, canvas, pan, zoom);
+
+    for (let i = canvasImages.length - 1; i >= 0; i--) {
+      const img = canvasImages[i];
+      if (worldPt.x >= img.x && worldPt.x <= img.x + img.width && worldPt.y >= img.y && worldPt.y <= img.y + img.height) {
+        setIsCroppingImageId(img.id);
+        setActiveCropBox({ x: img.x, y: img.y, width: img.width, height: img.height });
+        setSelectedId(img.id);
+        setSelectedType('image');
+        showToast("Chế độ cắt ảnh: Kéo mép để cắt!", "success");
+        return;
+      }
     }
   };
 
@@ -380,25 +399,16 @@ export default function CanvasBoardPage() {
     if (e.button === 0) {
       const worldPt = getTransformedPoint(e, canvas, pan, zoom);
 
-      // Insert Text Box Tool
       if (activeTool === 'text') {
         pushHistorySnapshot();
         const newTextBox: CanvasTextBox = {
-          id: 'text_' + Date.now(),
-          x: worldPt.x,
-          y: worldPt.y,
-          width: 180,
-          height: 50,
-          text: 'Văn bản...',
-          color: selectedColor, // Mực đỏ mặc định
-          bgColor: selectedBgColor, // Nền trắng mặc định
-          fontSize: 20,
-          fontFamily: 'Times New Roman',
+          id: 'text_' + Date.now(), x: worldPt.x, y: worldPt.y, width: 200, height: 60,
+          text: 'Nhấp đúp để nhập chữ...', color: selectedColor, bgColor: selectedBgColor,
+          fontSize: 20, fontFamily: 'Times New Roman',
         };
         setCanvasTextBoxes(prev => [...prev, newTextBox]);
         setSelectedId(newTextBox.id);
         setSelectedType('text');
-        setEditingTextId(newTextBox.id);
         setActiveTool('select');
         redrawCanvas();
         return;
@@ -411,7 +421,7 @@ export default function CanvasBoardPage() {
         if (selectedId && selectedType === 'image') {
           const selected = canvasImages.find(i => i.id === selectedId);
           if (selected) {
-            const hit = hitTestImage(worldPt, selected, 12 / zoom);
+            const hit = hitTestImage(worldPt, selected, 12 / zoom, isCroppingImageId === selected.id);
             if (hit.hit) { clickedImg = selected; handle = hit.handle; }
           }
         }
@@ -431,28 +441,14 @@ export default function CanvasBoardPage() {
           isDraggingItemRef.current = true;
           dragOffsetRef.current = { x: worldPt.x - clickedImg.x, y: worldPt.y - clickedImg.y };
         } else {
-          // Check text boxes
-          const clickedText = canvasTextBoxes.find(t =>
-            worldPt.x >= t.x && worldPt.x <= t.x + t.width && worldPt.y >= t.y && worldPt.y <= t.y + t.height
-          );
-          if (clickedText) {
-            pushHistorySnapshot();
-            setSelectedId(clickedText.id);
-            setSelectedType('text');
-            isDraggingItemRef.current = true;
-            dragOffsetRef.current = { x: worldPt.x - clickedText.x, y: worldPt.y - clickedText.y };
-          } else {
-            setSelectedId(null);
-            setSelectedType(null);
+          setSelectedId(null);
+          setSelectedType(null);
+          if (isCroppingImageId) {
+            setIsCroppingImageId(null);
+            setActiveCropBox(null);
           }
         }
         redrawCanvas();
-        return;
-      }
-
-      if (activeTool === 'crop') {
-        cropBoxRef.current = { x: worldPt.x, y: worldPt.y, width: 0, height: 0 };
-        isDrawingRef.current = true;
         return;
       }
 
@@ -487,9 +483,23 @@ export default function CanvasBoardPage() {
 
     const worldPt = getTransformedPoint(e, canvas, pan, zoom);
 
-    // Drag / Resize Image / Text
-    if (isDraggingItemRef.current && selectedId) {
-      if (selectedType === 'image') {
+    // Drag / Resize Image
+    if (isDraggingItemRef.current && selectedId && selectedType === 'image') {
+      const targetImg = canvasImages.find(i => i.id === selectedId);
+      if (!targetImg) return;
+
+      if (isCroppingImageId === selectedId) {
+        // Drag Word-style crop handles
+        setActiveCropBox(prev => {
+          const cb = prev || { x: targetImg.x, y: targetImg.y, width: targetImg.width, height: targetImg.height };
+          let { x, y, width, height } = cb;
+          if (resizeHandleRef.current === 'r' || resizeHandleRef.current === 'br') width = Math.max(30, worldPt.x - x);
+          if (resizeHandleRef.current === 'b' || resizeHandleRef.current === 'br') height = Math.max(30, worldPt.y - y);
+          if (resizeHandleRef.current === 'l' || resizeHandleRef.current === 'tl') { const r = x + width; x = Math.min(r - 30, worldPt.x); width = r - x; }
+          if (resizeHandleRef.current === 't' || resizeHandleRef.current === 'tl') { const b = y + height; y = Math.min(b - 30, worldPt.y); height = b - y; }
+          return { x, y, width, height };
+        });
+      } else {
         setCanvasImages(prev => prev.map(item => {
           if (item.id !== selectedId) return item;
           let newX = item.x, newY = item.y, newW = item.width, newH = item.height;
@@ -505,7 +515,8 @@ export default function CanvasBoardPage() {
               setPageStrokes(sPrev => ({
                 ...sPrev,
                 [currentPage]: (sPrev[currentPage] || []).map(st => {
-                  if (st.imageId === item.id || (st.points[0] && st.points[0].x >= item.x && st.points[0].x <= item.x + item.width && st.points[0].y >= item.y && st.points[0].y <= item.y + item.height)) {
+                  // ONLY MOVE STROKE IF 100% OF ITS POINTS ARE INSIDE THE IMAGE!
+                  if (st.imageId === item.id || isStrokeFullyInsideImage(st, item)) {
                     return { ...st, imageId: item.id, points: st.points.map(p => ({ x: p.x + moveDx, y: p.y + moveDy })) };
                   }
                   return st;
@@ -523,14 +534,8 @@ export default function CanvasBoardPage() {
           }
           return { ...item, x: newX, y: newY, width: newW, height: newH };
         }));
-      } else if (selectedType === 'text') {
-        setCanvasTextBoxes(prev => prev.map(t => t.id === selectedId ? { ...t, x: worldPt.x - dragOffsetRef.current.x, y: worldPt.y - dragOffsetRef.current.y } : t));
       }
       return;
-    }
-
-    if (activeTool === 'crop' && isDrawingRef.current && cropBoxRef.current) {
-      cropBoxRef.current.width = worldPt.x - cropBoxRef.current.x; cropBoxRef.current.height = worldPt.y - cropBoxRef.current.y; redrawCanvas(); return;
     }
 
     if (activeTool === 'eraser' && isDrawingRef.current) {
@@ -552,34 +557,33 @@ export default function CanvasBoardPage() {
     try { e.currentTarget.releasePointerCapture(e.pointerId); } catch {}
     isPanningRef.current = false; activeSnapGuidesRef.current = [];
 
-    if (isDraggingItemRef.current) { isDraggingItemRef.current = false; resizeHandleRef.current = 'none'; redrawCanvas(); }
-
-    if (activeTool === 'crop' && isDrawingRef.current && cropBoxRef.current) {
-      isDrawingRef.current = false;
-      const cb = cropBoxRef.current;
-      const normCb: CropBox = { x: Math.min(cb.x, cb.x + cb.width), y: Math.min(cb.y, cb.y + cb.height), width: Math.abs(cb.width), height: Math.abs(cb.height) };
-      if (normCb.width > 20 && normCb.height > 20) {
-        const targetImg = selectedId && selectedType === 'image' ? canvasImages.find(i => i.id === selectedId) : canvasImages[0];
-        if (targetImg) {
-          const cropped = await cropImageItem(targetImg, normCb);
-          setCanvasImages(prev => prev.map(i => i.id === targetImg.id ? cropped : i));
-          setSelectedId(cropped.id); setSelectedType('image'); showToast("Đã cắt ảnh thành công!", "success");
+    if (isDraggingItemRef.current) {
+      isDraggingItemRef.current = false;
+      resizeHandleRef.current = 'none';
+      if (isCroppingImageId && activeCropBox) {
+        const target = canvasImages.find(i => i.id === isCroppingImageId);
+        if (target) {
+          const cropped = await applyWordCrop(target, activeCropBox);
+          setCanvasImages(prev => prev.map(i => i.id === target.id ? cropped : i));
+          setSelectedId(cropped.id);
         }
       }
-      cropBoxRef.current = null; setActiveTool('select'); redrawCanvas(); return;
+      redrawCanvas();
     }
 
     if (isDrawingRef.current && activeTool !== 'select' && activeTool !== 'eraser') {
       isDrawingRef.current = false;
       if (currentStrokePointsRef.current.length > 0) {
-        const startPt = currentStrokePointsRef.current[0];
-        const insideImg = canvasImages.find(img => startPt.x >= img.x && startPt.x <= img.x + img.width && startPt.y >= img.y && startPt.y <= img.y + img.height);
-        const newStroke: StrokeRecord = {
+        const tempStroke: StrokeRecord = {
           id: 'stroke_' + Date.now(), points: [...currentStrokePointsRef.current], tool: activeTool,
           color: selectedColor, size: activeTool === 'pen' ? penSize : activeTool === 'highlighter' ? hlSize : shapeSize,
-          isShiftPressed: isShiftPressedRef.current, imageId: insideImg?.id,
+          isShiftPressed: isShiftPressedRef.current,
         };
-        setPageStrokes(prev => ({ ...prev, [currentPage]: [...(prev[currentPage] || []), newStroke] }));
+        // ONLY ATTACH TO IMAGE IF 100% OF STROKE POINTS ARE INSIDE!
+        const insideImg = canvasImages.find(img => isStrokeFullyInsideImage(tempStroke, img));
+        if (insideImg) tempStroke.imageId = insideImg.id;
+
+        setPageStrokes(prev => ({ ...prev, [currentPage]: [...(prev[currentPage] || []), tempStroke] }));
       }
       currentStrokePointsRef.current = []; redrawCanvas();
     } else if (isDrawingRef.current) { isDrawingRef.current = false; }
@@ -650,6 +654,7 @@ export default function CanvasBoardPage() {
           <canvas
             ref={canvasRef}
             onContextMenu={(e) => e.preventDefault()}
+            onDoubleClick={handleDoubleClick}
             onPointerDown={handlePointerDown}
             onPointerMove={handlePointerMove}
             onPointerUp={handlePointerUp}
@@ -659,27 +664,14 @@ export default function CanvasBoardPage() {
             style={{ touchAction: 'none' }}
           />
 
-          {/* Inline Text Box Editing Overlay */}
-          {editingTextId && (
-            <div
-              className="absolute z-40 bg-white border-2 border-[#5c36f5] rounded shadow-xl p-1"
-              style={{
-                left: `${(canvasTextBoxes.find(t => t.id === editingTextId)?.x || 0) * zoom + pan.x}px`,
-                top: `${(canvasTextBoxes.find(t => t.id === editingTextId)?.y || 0) * zoom + pan.y}px`,
-              }}
-            >
-              <textarea
-                autoFocus
-                defaultValue={canvasTextBoxes.find(t => t.id === editingTextId)?.text || ''}
-                onBlur={(e) => {
-                  setCanvasTextBoxes(prev => prev.map(t => t.id === editingTextId ? { ...t, text: e.target.value, width: Math.max(120, e.target.value.length * 12) } : t));
-                  setEditingTextId(null);
-                }}
-                className="bg-transparent text-sm font-bold border-0 focus:outline-none resize-none font-serif"
-                style={{ color: selectedColor, minWidth: '150px', minHeight: '40px' }}
-              />
-            </div>
-          )}
+          {/* Interactive Editable Text Boxes Overlay */}
+          <CanvasTextBoxOverlay
+            textBoxes={canvasTextBoxes}
+            selectedId={selectedType === 'text' ? selectedId : null}
+            onSelect={(id) => { setSelectedId(id); setSelectedType('text'); }}
+            onUpdate={(updated) => setCanvasTextBoxes(prev => prev.map(t => t.id === updated.id ? updated : t))}
+            zoom={zoom} pan={pan} activeTool={activeTool}
+          />
 
           {/* Eraser Live Circular Indicator */}
           {activeTool === 'eraser' && cursorPos.x >= 0 && (

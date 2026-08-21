@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import {
-  MousePointer, Type, Crop, Pen, Highlighter, Eraser, Minus, ArrowUpRight,
+  MousePointer, Type, Pen, Highlighter, Eraser, Minus, ArrowUpRight,
   Square, Circle, Palette, Sliders, Undo2, Redo2, Trash2
 } from 'lucide-react';
 import { CanvasTool, PRESET_COLORS, PRESET_BG_COLORS } from '../types';
@@ -61,7 +61,7 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
             activeTool === 'select' ? 'bg-[#5c36f5] text-white shadow-md' : 'text-slate-400 hover:text-white hover:bg-white/5'
           }`}
-          title="Chọn & di chuyển ảnh/chữ (Bấm Delete để xóa)"
+          title="Chọn, di chuyển ảnh/chữ (Double-click ảnh để cắt kiểu Word)"
         >
           <MousePointer size={13} />
           <span>Chọn</span>
@@ -77,18 +77,6 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
         >
           <Type size={13} />
           <span>Chèn chữ</span>
-        </button>
-
-        {/* Crop Tool */}
-        <button
-          onClick={() => setActiveTool('crop')}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
-            activeTool === 'crop' ? 'bg-amber-600 text-white shadow-md' : 'text-slate-400 hover:text-white hover:bg-white/5'
-          }`}
-          title="Cắt ảnh (Kéo chọn vùng ảnh để cắt)"
-        >
-          <Crop size={13} />
-          <span>Cắt ảnh</span>
         </button>
 
         <div className="h-5 w-px bg-white/10 mx-1" />
@@ -175,8 +163,8 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
 
       {/* Right Controls */}
       <div className="flex items-center gap-2">
-        {/* Color Popover (Text Color + Background Color for Text) */}
-        {!['select', 'eraser', 'crop'].includes(activeTool) && (
+        {/* Color Popover */}
+        {!['select', 'eraser'].includes(activeTool) && (
           <div className="relative">
             <button
               onClick={() => {
@@ -249,8 +237,8 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
           </div>
         )}
 
-        {/* Size Slider & Custom Input Popover */}
-        {!['select', 'crop'].includes(activeTool) && (
+        {/* Size Slider Popover */}
+        {!['select'].includes(activeTool) && (
           <div className="relative">
             <button
               onClick={() => {
