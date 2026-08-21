@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import {
   Clock, Flag, ChevronLeft, ChevronRight, ArrowLeft, ArrowRight,
-  Maximize2, Minimize2, Sparkles, Percent, RotateCcw, X
+  Maximize2, Minimize2
 } from 'lucide-react';
 import { Question, TimerMode } from '../types';
 import { showToast } from '../../../components/Toast';
 import { cleanOptionPrefix } from '../../../utils';
+import { DrawingCanvas } from './DrawingCanvas';
 
 interface QuizRunningViewProps {
   activeQuestions: Question[];
@@ -47,7 +48,7 @@ export const QuizRunningView: React.FC<QuizRunningViewProps> = ({
 }) => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [eliminatedOptions, setEliminatedOptions] = useState<Record<number, string[]>>({});
-  const [showPopoutTimer, setShowPopoutTimer] = useState(true);
+  const [drawings, setDrawings] = useState<Record<number, string>>({});
 
   const totalQuestions = activeQuestions.length;
   const q = activeQuestions[currentIndex];
@@ -59,7 +60,7 @@ export const QuizRunningView: React.FC<QuizRunningViewProps> = ({
   const answeredCount = Object.keys(userAnswers).filter(k => (userAnswers[Number(k)] || '').trim() !== '').length;
   const progressPct = totalQuestions > 0 ? Math.round((answeredCount / totalQuestions) * 100) : 0;
 
-  // Lifeline: Eliminate 1 Random Wrong Option
+  // Lifeline: 25/75 (Eliminate 1 Random Wrong Option)
   const handleEliminateOne = () => {
     if (!q || q.type !== 'mcq' || !q.options || q.options.length <= 1) {
       showToast("Trợ giúp chỉ áp dụng cho câu hỏi trắc nghiệm!", "warning");
@@ -69,7 +70,7 @@ export const QuizRunningView: React.FC<QuizRunningViewProps> = ({
     const cleanOpts = q.options.map(o => cleanOptionPrefix(o));
     const cleanCorrect = cleanOptionPrefix((q.answer || '').trim());
 
-    // Candidates: options that are WRONG and NOT YET ELIMINATED
+    // Candidates: wrong and not yet eliminated
     const wrongCandidates = cleanOpts.filter(o => 
       o.toLowerCase() !== cleanCorrect.toLowerCase() && !currentEliminated.includes(o)
     );
@@ -82,7 +83,7 @@ export const QuizRunningView: React.FC<QuizRunningViewProps> = ({
     const randomPick = wrongCandidates[Math.floor(Math.random() * wrongCandidates.length)];
     const updated = [...currentEliminated, randomPick];
     setEliminatedOptions(prev => ({ ...prev, [q.id]: updated }));
-    showToast(`Đã loại trừ 1 phương án sai: "${randomPick}"`, "success");
+    showToast(`Đã loại trừ 1 phương án sai (25/75)`, "success");
   };
 
   // Lifeline: 50/50 Help (Eliminates half of the wrong options)
@@ -95,19 +96,17 @@ export const QuizRunningView: React.FC<QuizRunningViewProps> = ({
     const cleanOpts = q.options.map(o => cleanOptionPrefix(o));
     const cleanCorrect = cleanOptionPrefix((q.answer || '').trim());
 
-    // All wrong options
     const allWrong = cleanOpts.filter(o => o.toLowerCase() !== cleanCorrect.toLowerCase());
     const countToEliminate = Math.max(1, Math.floor(cleanOpts.length / 2));
 
-    // Shuffle wrong options and pick countToEliminate
     const shuffledWrong = [...allWrong].sort(() => Math.random() - 0.5);
     const chosenToEliminate = shuffledWrong.slice(0, countToEliminate);
 
     setEliminatedOptions(prev => ({ ...prev, [q.id]: chosenToEliminate }));
-    showToast(`Đã kích hoạt trợ giúp 50/50! Loại trừ ${chosenToEliminate.length} phương án sai.`, "success");
+    showToast(`Đã kích hoạt trợ giúp 50/50!`, "success");
   };
 
-  // Lifeline: Reset Lifelines for current question
+  // Reset Lifelines for current question
   const handleResetLifelines = () => {
     if (!q) return;
     setEliminatedOptions(prev => {
@@ -115,11 +114,23 @@ export const QuizRunningView: React.FC<QuizRunningViewProps> = ({
       delete copy[q.id];
       return copy;
     });
-    showToast("Đã khôi phục lại tất cả các phương án lựa chọn!", "success");
+    showToast("Đã khôi phục lại các lựa chọn!", "success");
   };
 
   const handleAnswerSelect = (questionId: number, answerVal: string) => {
     setUserAnswers(prev => ({ ...prev, [questionId]: answerVal }));
+  };
+
+  const handleSaveDrawing = (questionId: number, dataUrl: string) => {
+    setDrawings(prev => ({ ...prev, [questionId]: dataUrl }));
+  };
+
+  const handleClearDrawing = (questionId: number) => {
+    setDrawings(prev => {
+      const copy = { ...prev };
+      delete copy[questionId];
+      return copy;
+    });
   };
 
   if (!q) return null;
@@ -179,9 +190,18 @@ export const QuizRunningView: React.FC<QuizRunningViewProps> = ({
         </div>
       </div>
 
-      {/* MAIN QUESTION DISPLAY AREA */}
-      <div className="flex-1 flex flex-col bg-[#0c0f1e] border border-[#1d2744] rounded-2xl p-6 sm:p-8 shadow-2xl overflow-y-auto justify-between">
-        <div className="space-y-5">
+      {/* MAIN QUESTION DISPLAY AREA WITH INTERACTIVE DRAWING CANVAS */}
+      <div className="flex-1 flex flex-col bg-[#0c0f1e] border border-[#1d2744] rounded-2xl p-6 sm:p-8 shadow-2xl overflow-y-auto justify-between relative">
+        
+        {/* DRAWING / ANNOTATION CANVAS LAYER OVER QUESTION */}
+        <DrawingCanvas
+          questionId={q.id}
+          drawings={drawings}
+          onSaveDrawing={handleSaveDrawing}
+          onClearDrawing={handleClearDrawing}
+        />
+
+        <div className="space-y-5 relative z-10">
           {/* TOP ACTION BAR */}
           <div className="flex items-center justify-between pb-4 border-b border-white/10">
             <div className="flex items-center gap-3">
@@ -265,40 +285,32 @@ export const QuizRunningView: React.FC<QuizRunningViewProps> = ({
             <span>{renderFormattedText(q.question)}</span>
           </h2>
 
-          {/* LIFELINE / TRỢ GIÚP TOOLBAR FOR MCQ */}
+          {/* LIFELINE BUTTONS: 25/75 & 50/50 */}
           {q.type === 'mcq' && q.options && q.options.length > 1 && (
-            <div className="flex flex-wrap items-center gap-2 pt-1 pb-1">
-              <span className="text-[11px] font-black uppercase tracking-wider text-slate-400 flex items-center gap-1 mr-1">
-                <Sparkles size={13} className="text-amber-400" />
-                <span>Trợ giúp:</span>
-              </span>
-
+            <div className="flex items-center gap-2 pt-1 pb-1">
               <button
                 onClick={handleEliminateOne}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 text-xs font-black transition cursor-pointer active:scale-95 shadow-sm"
-                title="Bỏ 1 phương án sai ngẫu nhiên"
+                className="px-3.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-amber-300 border border-amber-500/30 text-xs font-black transition cursor-pointer active:scale-95 shadow-sm"
+                title="Bỏ 1 phương án sai (25/75)"
               >
-                <Sparkles size={13} />
-                <span>Bỏ 1 đáp án sai (-1)</span>
+                25/75
               </button>
 
               <button
                 onClick={handleFiftyFifty}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-purple-500/10 hover:bg-purple-500/20 text-purple-300 border border-purple-500/30 text-xs font-black transition cursor-pointer active:scale-95 shadow-sm"
+                className="px-3.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-purple-300 border border-purple-500/30 text-xs font-black transition cursor-pointer active:scale-95 shadow-sm"
                 title="Loại 50% phương án sai"
               >
-                <Percent size={13} />
-                <span>Trợ giúp 50/50</span>
+                50/50
               </button>
 
               {currentEliminated.length > 0 && (
                 <button
                   onClick={handleResetLifelines}
-                  className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 border border-white/10 text-xs font-bold transition cursor-pointer"
+                  className="px-2.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white border border-white/10 text-xs font-bold transition cursor-pointer"
                   title="Khôi phục lại các lựa chọn đã loại"
                 >
-                  <RotateCcw size={12} />
-                  <span>Khôi phục</span>
+                  Khôi phục
                 </button>
               )}
             </div>
@@ -365,7 +377,7 @@ export const QuizRunningView: React.FC<QuizRunningViewProps> = ({
         </div>
 
         {/* BOTTOM NAVIGATION BAR */}
-        <div className="flex items-center justify-between pt-6 border-t border-white/10 mt-6">
+        <div className="flex items-center justify-between pt-6 border-t border-white/10 mt-6 relative z-10">
           <button
             disabled={currentIndex === 0}
             onClick={() => {

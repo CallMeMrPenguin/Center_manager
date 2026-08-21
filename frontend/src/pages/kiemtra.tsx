@@ -1,17 +1,14 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import ReactDOM from 'react-dom';
 import { api } from '../api';
-import {
-  FileCheck, Award, CheckCircle, XCircle, RotateCcw,
-  Maximize2, Minimize2, Eye, EyeOff, Highlighter
-} from 'lucide-react';
-import { getLocalDateStr, notifyDataChanged, trunc1Dec, cleanOptionPrefix } from '../utils';
+import { FileCheck, Maximize2, Minimize2 } from 'lucide-react';
+import { trunc1Dec, cleanOptionPrefix } from '../utils';
 import { showToast } from '../components/Toast';
 import { Question, TestData, TimerMode } from './kiemtra/types';
 import { QuizImportView } from './kiemtra/components/QuizImportView';
 import { QuizSettingsView } from './kiemtra/components/QuizSettingsView';
 import { QuizRunningView } from './kiemtra/components/QuizRunningView';
-import { QuizReviewCard } from './kiemtra/components/QuizReviewCard';
+import { QuizResultsView } from './kiemtra/components/QuizResultsView';
 
 export default function KiemTraPage() {
   const [step, setStep] = useState<'import' | 'settings' | 'running' | 'results'>('import');
@@ -25,13 +22,6 @@ export default function KiemTraPage() {
   const [shuffleQuestions, setShuffleQuestions] = useState(true);
   const [shuffleOptions, setShuffleOptions] = useState(true);
 
-  // Student Score Assignment
-  const [classesList, setClassesList] = useState<any[]>([]);
-  const [studentsList, setStudentsList] = useState<any[]>([]);
-  const [selectedClassId, setSelectedClassId] = useState<number | ''>('');
-  const [selectedStudentId, setSelectedStudentId] = useState<number | ''>('');
-  const [scoreSlot, setScoreSlot] = useState<'check_1' | 'check_2' | 'homework'>('check_1');
-
   // Quiz Execution state
   const [activeQuestions, setActiveQuestions] = useState<Question[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -42,14 +32,6 @@ export default function KiemTraPage() {
 
   // Fullscreen Management
   const [isFullscreen, setIsFullscreen] = useState(false);
-
-  // Review & Annotation mode state
-  const [highlightMode, setHighlightMode] = useState(false);
-  const [highlights, setHighlights] = useState<Record<number, string[]>>({});
-  const [showAnswerToggle, setShowAnswerToggle] = useState(true);
-  const [isScoreSaved, setIsScoreSaved] = useState(false);
-  const [reviewPage, setReviewPage] = useState(1);
-  const pageSize = 10;
 
   // Sync fullscreen state with browser events (Esc / F11)
   useEffect(() => {
@@ -78,28 +60,6 @@ export default function KiemTraPage() {
       setIsFullscreen(false);
     }
   }, []);
-
-  useEffect(() => {
-    loadClasses();
-    const handleDataChanged = () => loadClasses();
-    window.addEventListener('data-changed', handleDataChanged);
-    return () => window.removeEventListener('data-changed', handleDataChanged);
-  }, []);
-
-  const loadClasses = async () => {
-    try {
-      const cls = await api.getClasses();
-      setClassesList(cls);
-    } catch (e) {}
-  };
-
-  useEffect(() => {
-    if (selectedClassId) {
-      api.getClassStudents(Number(selectedClassId)).then(setStudentsList).catch(() => {});
-    } else {
-      setStudentsList([]);
-    }
-  }, [selectedClassId]);
 
   // Handle File Upload (.docx / .json / .csv)
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -159,7 +119,6 @@ export default function KiemTraPage() {
     setCurrentIndex(0);
     setUserAnswers({});
     setBookmarkedQuestions({});
-    setIsScoreSaved(false);
 
     if (timerMode === 'global') {
       setTimerRemaining(globalTimeSeconds);
@@ -223,40 +182,6 @@ export default function KiemTraPage() {
   const calculatedScore = useMemo(() => {
     return totalQuestions > 0 ? trunc1Dec((correctCount / totalQuestions) * 10) : 0;
   }, [correctCount, totalQuestions]);
-
-  const handleSaveScoreToDB = async () => {
-    if (!selectedClassId || !selectedStudentId) {
-      showToast("Vui lòng chọn Lớp học và Học sinh ở bước Thiết lập để lưu điểm!", "error");
-      return;
-    }
-    try {
-      await api.upsertScore({
-        student_id: Number(selectedStudentId),
-        class_id: Number(selectedClassId),
-        test_title: testData?.title || 'Bài kiểm tra',
-        test_date: getLocalDateStr(),
-        score_type: scoreSlot,
-        score: calculatedScore,
-        max_score: 10,
-        notes: `Đúng ${correctCount}/${totalQuestions} câu`
-      });
-      setIsScoreSaved(true);
-      showToast("Đã lưu điểm thành công vào hệ thống!", "success");
-      notifyDataChanged();
-    } catch (err: any) {
-      showToast("Lỗi lưu điểm: " + err.message, "error");
-    }
-  };
-
-  const handleToggleHighlightText = (qId: number) => {
-    const selection = window.getSelection()?.toString().trim();
-    if (selection) {
-      setHighlights(prev => ({
-        ...prev,
-        [qId]: [...(prev[qId] || []), selection]
-      }));
-    }
-  };
 
   const renderFormattedText = useCallback((text: string) => {
     if (!text) return null;
@@ -344,14 +269,6 @@ export default function KiemTraPage() {
           setShuffleQuestions={setShuffleQuestions}
           shuffleOptions={shuffleOptions}
           setShuffleOptions={setShuffleOptions}
-          classesList={classesList}
-          studentsList={studentsList}
-          selectedClassId={selectedClassId}
-          setSelectedClassId={setSelectedClassId}
-          selectedStudentId={selectedStudentId}
-          setSelectedStudentId={setSelectedStudentId}
-          scoreSlot={scoreSlot}
-          setScoreSlot={setScoreSlot}
           onBack={() => setStep('import')}
           onStartTest={handleStartTest}
         />
@@ -382,154 +299,21 @@ export default function KiemTraPage() {
 
       {/* STEP 4: RESULTS & REVIEW */}
       {step === 'results' && (
-        <div className="space-y-6 max-w-5xl mx-auto w-full">
-          {/* KPI SCORE CARD */}
-          <div className="bg-[#0c0f1e] border border-[#1d2744] rounded-2xl p-6 sm:p-8 shadow-2xl text-center space-y-4 relative overflow-hidden">
-            <div className="h-16 w-16 rounded-2xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-indigo-400 shadow-[0_0_30px_rgba(92,54,245,0.4)] mx-auto">
-              <Award size={32} />
-            </div>
-
-            <div>
-              <h2 className="text-xl sm:text-2xl font-black text-white">Kết Quả Bài Kiểm Tra</h2>
-              <p className="text-xs text-slate-400 font-semibold">{testData?.title || 'Đề thi'}</p>
-            </div>
-
-            <div className="flex items-center justify-center gap-6 sm:gap-10 py-3">
-              <div className="text-center">
-                <div className="text-3xl sm:text-4xl font-black text-indigo-400 font-mono">
-                  {calculatedScore} / 10
-                </div>
-                <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mt-1">Điểm Số</div>
-              </div>
-
-              <div className="h-12 w-px bg-white/10" />
-
-              <div className="text-center">
-                <div className="text-3xl sm:text-4xl font-black text-emerald-400 font-mono">
-                  {correctCount} / {totalQuestions}
-                </div>
-                <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mt-1">Số Câu Đúng</div>
-              </div>
-
-              <div className="h-12 w-px bg-white/10" />
-
-              <div className="text-center">
-                <div className="text-3xl sm:text-4xl font-black text-rose-400 font-mono">
-                  {totalQuestions - correctCount} / {totalQuestions}
-                </div>
-                <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mt-1">Số Câu Sai</div>
-              </div>
-            </div>
-
-            <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
-              <button
-                onClick={() => setStep('settings')}
-                className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-white text-xs font-black transition cursor-pointer border border-white/10"
-              >
-                <RotateCcw size={14} />
-                <span>Làm Lại Bài Thi</span>
-              </button>
-
-              {selectedClassId && selectedStudentId && (
-                <button
-                  disabled={isScoreSaved}
-                  onClick={handleSaveScoreToDB}
-                  className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-black transition cursor-pointer border ${
-                    isScoreSaved
-                      ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
-                      : 'bg-[#5c36f5] hover:bg-[#7351f7] text-white border-white/20 shadow-[0_4px_14px_rgba(92,54,245,0.4)] active:scale-95'
-                  }`}
-                >
-                  <CheckCircle size={14} />
-                  <span>{isScoreSaved ? 'Đã Lưu Điểm Vào Sổ' : 'Lưu Điểm Vào Hệ Thống'}</span>
-                </button>
-              )}
-            </div>
-          </div>
-
-          {/* REVIEW CONTROLS */}
-          <div className="flex items-center justify-between bg-[#0c0f1e] border border-white/10 px-5 py-3 rounded-2xl shadow-lg">
-            <div className="text-xs font-black uppercase text-slate-300 tracking-wider">
-              Chi Tiết Bài Làm ({totalQuestions} Câu)
-            </div>
-
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setShowAnswerToggle(!showAnswerToggle)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer border ${
-                  showAnswerToggle ? 'bg-indigo-600 text-white border-indigo-400' : 'bg-white/5 text-slate-300 border-white/10'
-                }`}
-              >
-                {showAnswerToggle ? <Eye size={13} /> : <EyeOff size={13} />}
-                <span>{showAnswerToggle ? 'Ẩn Đáp Án' : 'Hiện Đáp Án'}</span>
-              </button>
-
-              <button
-                onClick={() => setHighlightMode(!highlightMode)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer border ${
-                  highlightMode ? 'bg-amber-500/20 text-amber-300 border-amber-500/40' : 'bg-white/5 text-slate-300 border-white/10'
-                }`}
-              >
-                <Highlighter size={13} />
-                <span>{highlightMode ? 'Đang Bật Highlight' : 'Bật Highlight Text'}</span>
-              </button>
-            </div>
-          </div>
-
-          {/* REVIEW LIST WITH PAGINATION */}
-          {(() => {
-            const totalPages = Math.ceil(activeQuestions.length / pageSize);
-            const startIdx = (reviewPage - 1) * pageSize;
-            const currentSlice = activeQuestions.slice(startIdx, startIdx + pageSize);
-
-            return (
-              <div className="space-y-4">
-                {currentSlice.map((item, localIdx) => {
-                  const globalIdx = startIdx + localIdx;
-                  return (
-                    <QuizReviewCard
-                      key={item.id}
-                      q={item}
-                      idx={globalIdx}
-                      userAns={userAnswers[item.id] || ''}
-                      showAnswerToggle={showAnswerToggle}
-                      highlightMode={highlightMode}
-                      onHighlightText={handleToggleHighlightText}
-                      renderFormattedText={renderFormattedText}
-                    />
-                  );
-                })}
-
-                {totalPages > 1 && (
-                  <div className="flex items-center justify-between pt-4">
-                    <button
-                      disabled={reviewPage === 1}
-                      onClick={() => setReviewPage(p => Math.max(1, p - 1))}
-                      className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-xs font-bold text-slate-300 disabled:opacity-30 cursor-pointer border border-white/5"
-                    >
-                      ← Trang trước
-                    </button>
-                    <span className="text-xs font-black text-slate-400 font-mono">
-                      Trang {reviewPage} / {totalPages}
-                    </span>
-                    <button
-                      disabled={reviewPage === totalPages}
-                      onClick={() => setReviewPage(p => Math.min(totalPages, p + 1))}
-                      className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-xs font-bold text-slate-300 disabled:opacity-30 cursor-pointer border border-white/5"
-                    >
-                      Trang sau →
-                    </button>
-                  </div>
-                )}
-              </div>
-            );
-          })()}
-        </div>
+        <QuizResultsView
+          testData={testData}
+          activeQuestions={activeQuestions}
+          userAnswers={userAnswers}
+          calculatedScore={calculatedScore}
+          correctCount={correctCount}
+          totalQuestions={totalQuestions}
+          onRetake={() => setStep('settings')}
+          renderFormattedText={renderFormattedText}
+        />
       )}
     </div>
   );
 
-  // If in Fullscreen mode, render via Portal to document.body to break free from any parent transform/stacking context!
+  // If in Fullscreen mode, render via Portal to document.body
   if (isFullscreen) {
     return ReactDOM.createPortal(mainContent, document.body);
   }
