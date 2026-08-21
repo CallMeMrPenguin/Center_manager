@@ -64,16 +64,30 @@ export default function CanvasBoardPage() {
   const lastEraserWorldPtRef = useRef<Point | null>(null);
   const hoverWorldPtRef = useRef<Point | null>(null);
 
+  const isCanvasFullscreenRef = useRef(false);
+
   useEffect(() => {
-    const handleFs = () => setIsFullscreen(!!document.fullscreenElement);
+    const handleFs = () => {
+      if (!document.fullscreenElement) {
+        isCanvasFullscreenRef.current = false;
+        setIsFullscreen(false);
+      } else if (isCanvasFullscreenRef.current) {
+        setIsFullscreen(true);
+      }
+    };
     document.addEventListener('fullscreenchange', handleFs);
     return () => document.removeEventListener('fullscreenchange', handleFs);
   }, []);
 
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen().then(() => setIsFullscreen(true)).catch(() => setIsFullscreen(p => !p));
+      isCanvasFullscreenRef.current = true;
+      document.documentElement.requestFullscreen().then(() => setIsFullscreen(true)).catch(() => {
+        isCanvasFullscreenRef.current = false;
+        setIsFullscreen(p => !p);
+      });
     } else {
+      isCanvasFullscreenRef.current = false;
       if (document.exitFullscreen) document.exitFullscreen().catch(() => {});
       setIsFullscreen(false);
     }

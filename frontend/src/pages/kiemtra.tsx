@@ -33,11 +33,17 @@ export default function KiemTraPage() {
 
   // Fullscreen Management
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const isQuizFullscreenRef = React.useRef(false);
 
   // Sync fullscreen state with browser events (Esc / F11)
   useEffect(() => {
     const handleFsChange = () => {
-      setIsFullscreen(!!document.fullscreenElement);
+      if (!document.fullscreenElement) {
+        isQuizFullscreenRef.current = false;
+        setIsFullscreen(false);
+      } else if (isQuizFullscreenRef.current) {
+        setIsFullscreen(true);
+      }
     };
     document.addEventListener('fullscreenchange', handleFsChange);
     document.addEventListener('webkitfullscreenchange', handleFsChange);
@@ -49,12 +55,15 @@ export default function KiemTraPage() {
 
   const toggleFullscreen = useCallback(() => {
     if (!document.fullscreenElement) {
+      isQuizFullscreenRef.current = true;
       document.documentElement.requestFullscreen().then(() => {
         setIsFullscreen(true);
       }).catch(() => {
+        isQuizFullscreenRef.current = false;
         setIsFullscreen(prev => !prev);
       });
     } else {
+      isQuizFullscreenRef.current = false;
       if (document.exitFullscreen) {
         document.exitFullscreen().catch(() => {});
       }

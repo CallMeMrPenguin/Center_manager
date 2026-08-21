@@ -211,15 +211,15 @@ export const QuizRunningView: React.FC<QuizRunningViewProps> = ({
               {onExitToImport && (
                 <button
                   onClick={() => {
-                    if (window.confirm("Bạn có chắc chắn muốn thoát bài làm hiện tại để chọn đề khác?")) {
+                    if (window.confirm("Bạn có chắc chắn muốn rời bài làm hiện tại để chọn đề khác?")) {
                       onExitToImport();
                     }
                   }}
                   className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white border border-white/10 text-xs font-bold transition cursor-pointer"
-                  title="Quay lại để chọn đề thi khác"
+                  title="Quay lại để chọn đề khác"
                 >
                   <RotateCcw size={13} />
-                  <span className="hidden sm:inline">Đổi đề thi</span>
+                  <span className="hidden sm:inline">Đổi đề</span>
                 </button>
               )}
 
