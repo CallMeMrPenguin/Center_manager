@@ -260,7 +260,7 @@ function AppContent() {
 
         {/* SIDEBAR NAVIGATION (Floating circle toggle button on right edge) */}
         <aside
-          className={`relative ${isSidebarExpanded ? 'w-[15.25rem]' : 'w-[4.25rem]'} sidebar-glass-glow rounded-2xl flex flex-col h-full transition-[width] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] z-30 shrink-0 select-none`}
+          className={`relative ${isSidebarExpanded ? 'w-[13.5rem]' : 'w-[3.75rem]'} sidebar-glass-glow rounded-2xl flex flex-col h-full transition-[width] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] z-30 shrink-0 select-none`}
         >
           {/* Floating Circular Collapse / Expand Button on right edge */}
           <button
@@ -273,24 +273,24 @@ function AppContent() {
           </button>
 
           {/* Header logo / Title */}
-          <div className="flex items-center px-3 py-3.5 shrink-0 border-b border-white/5 min-w-0">
-            <div className="h-9 w-9 rounded-xl overflow-hidden flex items-center justify-center shrink-0 shadow-[0_0_14px_rgba(59,130,246,0.4)]">
+          <div className="flex items-center px-2.5 py-3.5 shrink-0 border-b border-white/5 min-w-0">
+            <div className="h-8.5 w-8.5 rounded-xl overflow-hidden flex items-center justify-center shrink-0 shadow-[0_0_14px_rgba(59,130,246,0.4)]">
               <img src="/logo.png" alt="Center Manager Logo" className="h-full w-full object-contain" />
             </div>
             <div className={`whitespace-nowrap overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${
-              isSidebarExpanded ? 'opacity-100 max-w-[10.5rem] ml-2.5 translate-x-0' : 'opacity-0 max-w-0 ml-0 -translate-x-3 pointer-events-none'
+              isSidebarExpanded ? 'opacity-100 max-w-[9rem] ml-2 translate-x-0' : 'opacity-0 max-w-0 ml-0 -translate-x-3 pointer-events-none'
             }`}>
-              <span className="text-sm font-black tracking-wide uppercase text-white block leading-none">
+              <span className="text-xs font-black tracking-wide uppercase text-white block leading-none">
                 EduPlatform
               </span>
-              <span className="text-[9px] font-black tracking-[0.2em] uppercase text-indigo-400 block mt-1">
+              <span className="text-[8.5px] font-black tracking-[0.18em] uppercase text-indigo-400 block mt-1">
                 Center Manager
               </span>
             </div>
           </div>
 
           {/* Nav Menu */}
-          <nav className="flex-1 overflow-y-auto min-h-0 px-2 py-2.5 flex flex-col gap-1.5 scrollbar-none">
+          <nav className="flex-1 overflow-y-auto min-h-0 px-1.5 py-2 flex flex-col gap-1 scrollbar-none">
             {SECTIONS.map((section) => {
               const sectionTabs = orderedTabIds
                 .map((tabId, idx) => ({ tabId, idx }))
@@ -304,7 +304,7 @@ function AppContent() {
               return (
                 <div key={section.id} className="flex flex-col gap-0.5 shrink-0">
                   {section.label && (
-                    <div className={`px-2.5 text-[10px] font-black uppercase tracking-wider text-slate-400 overflow-hidden whitespace-nowrap transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${
+                    <div className={`px-2 text-[9.5px] font-black uppercase tracking-wider text-slate-400 overflow-hidden whitespace-nowrap transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${
                       isSidebarExpanded ? 'opacity-100 max-h-5 mt-1 mb-0.5' : 'opacity-0 max-h-0 mt-0 mb-0 pointer-events-none'
                     }`}>
                       {section.label}
@@ -323,20 +323,20 @@ function AppContent() {
                         onDragEnd={() => setDraggedIndex(null)}
                         onDrop={() => handleDrop(idx)}
                         onClick={() => setActiveTab(item.id)}
-                        className={`flex items-center w-full h-9.5 px-2 rounded-xl transition-all duration-150 relative group cursor-pointer active:scale-95 shrink-0 ${
+                        className={`flex items-center w-full h-9 px-2 rounded-xl transition-all duration-150 relative group cursor-pointer active:scale-95 shrink-0 ${
                           isActive
-                            ? 'bg-indigo-500/25 border-2 border-indigo-400/90 shadow-[0_0_14px_rgba(92,54,245,0.4)]'
+                            ? 'bg-indigo-500/25 border-2 border-indigo-400/90 shadow-[0_0_12px_rgba(92,54,245,0.4)]'
                             : 'hover:bg-white/[0.05] border-2 border-transparent'
                         } ${draggedIndex === idx ? 'opacity-40 border border-dashed border-indigo-400 bg-indigo-500/10' : ''}`}
                       >
                         {/* ICON BOX */}
-                        <div className="w-6 h-6 flex items-center justify-center shrink-0 relative z-10">
-                          <Icon size={17} className={isActive ? 'text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.8)]' : 'text-slate-400 group-hover:text-white'} />
+                        <div className="w-5.5 h-5.5 flex items-center justify-center shrink-0 relative z-10">
+                          <Icon size={16} className={isActive ? 'text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.8)]' : 'text-slate-400 group-hover:text-white'} />
                         </div>
 
                         {/* TEXT LABEL WITH SYNCHRONIZED SMOOTH FADE & SLIDE */}
                         <span className={`text-xs relative z-10 whitespace-nowrap overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${
-                          isSidebarExpanded ? 'opacity-100 max-w-[10.5rem] ml-2 translate-x-0' : 'opacity-0 max-w-0 ml-0 -translate-x-3 pointer-events-none'
+                          isSidebarExpanded ? 'opacity-100 max-w-[8.75rem] ml-2 translate-x-0' : 'opacity-0 max-w-0 ml-0 -translate-x-3 pointer-events-none'
                         } ${isActive ? "text-white font-black" : "text-slate-200 font-bold group-hover:text-white"}`}>
                           {item.label}
                         </span>
@@ -349,10 +349,10 @@ function AppContent() {
           </nav>
 
           {/* User profile section — click-to-open flyout popup */}
-          <div className="shrink-0 mt-auto p-2 border-t border-white/5 relative" ref={profileRef}>
+          <div className="shrink-0 mt-auto p-1.5 border-t border-white/5 relative" ref={profileRef}>
             {/* Profile flyout popup (opens upward) */}
             {profileOpen && (
-              <div className="absolute z-[250] bg-[#0d1018] border border-white/10 rounded-[14px] shadow-[0_12px_40px_rgba(0,0,0,0.85)] p-1.5 animate-mac-dropdown bottom-full left-0 mb-2 w-52 origin-bottom">
+              <div className="absolute z-[250] bg-[#0d1018] border border-white/10 rounded-[14px] shadow-[0_12px_40px_rgba(0,0,0,0.85)] p-1.5 animate-mac-dropdown bottom-full left-0 mb-2 w-48 origin-bottom">
                 <div className="px-3 py-2 border-b border-white/5 select-none mb-1">
                   <p className="text-[10px] font-black text-slate-500 uppercase tracking-wider">Tài Khoản</p>
                   <p className="text-xs font-extrabold text-white mt-0.5">Center Manager</p>
@@ -398,17 +398,17 @@ function AppContent() {
             {/* Clickable Profile Row */}
             <button
               onClick={() => setProfileOpen(!profileOpen)}
-              className="flex items-center w-full h-10 px-2 rounded-xl hover:bg-white/[0.04] transition-colors cursor-pointer overflow-hidden"
+              className="flex items-center w-full h-9 px-1.5 rounded-xl hover:bg-white/[0.04] transition-colors cursor-pointer overflow-hidden"
             >
-              <div className="h-7.5 w-7.5 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center font-black text-xs text-white shadow-[0_2px_10px_rgba(92,54,245,0.4)] shrink-0 border border-white/20 hover:shadow-[0_0_12px_rgba(92,54,245,0.5)] transition-all">
+              <div className="h-7 w-7 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center font-black text-[11px] text-white shadow-[0_2px_10px_rgba(92,54,245,0.4)] shrink-0 border border-white/20 hover:shadow-[0_0_12px_rgba(92,54,245,0.5)] transition-all">
                 CM
               </div>
               <div className={`transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] whitespace-nowrap overflow-hidden flex items-center justify-between flex-1 ${
-                isSidebarExpanded ? 'opacity-100 max-w-[10.5rem] ml-2.5 translate-x-0' : 'opacity-0 max-w-0 ml-0 -translate-x-3 pointer-events-none'
+                isSidebarExpanded ? 'opacity-100 max-w-[8.75rem] ml-2 translate-x-0' : 'opacity-0 max-w-0 ml-0 -translate-x-3 pointer-events-none'
               }`}>
                 <div className="min-w-0 flex-1 text-left">
                   <p className="text-xs font-black text-white truncate leading-snug">Center Manager</p>
-                  <p className="text-[9px] font-extrabold text-indigo-400 truncate">Hệ thống quản lý</p>
+                  <p className="text-[8.5px] font-extrabold text-indigo-400 truncate">Hệ thống quản lý</p>
                 </div>
                 <ChevronUp size={13} className={`text-slate-500 shrink-0 transition-transform ${profileOpen ? '' : 'rotate-180'}`} />
               </div>
