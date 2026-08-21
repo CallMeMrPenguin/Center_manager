@@ -27,6 +27,7 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
 }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const eraserIndicatorRef = useRef<HTMLDivElement | null>(null);
 
   const [activeTool, setActiveTool] = useState<DrawTool>('none');
   const [selectedColor, setSelectedColor] = useState<string>('#ffd600');
@@ -196,9 +197,16 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
   };
 
   const handlePointerMove = (e: React.PointerEvent<HTMLCanvasElement>) => {
-    if (!isDrawingRef.current || activeTool === 'none') return;
     const canvas = canvasRef.current;
     if (!canvas) return;
+    const coords = getTransformedPoint(e, canvas);
+
+    // Update circular eraser indicator position in real-time
+    if (eraserIndicatorRef.current && activeTool === 'eraser') {
+      eraserIndicatorRef.current.style.transform = `translate3d(${coords.x - eraserSize / 2}px, ${coords.y - eraserSize / 2}px, 0)`;
+    }
+
+    if (!isDrawingRef.current || activeTool === 'none') return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
@@ -272,8 +280,27 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onPointerCancel={handlePointerUp}
-        className={`w-full h-full ${activeTool !== 'none' ? 'pointer-events-auto cursor-crosshair' : 'pointer-events-none'}`}
+        onPointerEnter={() => { if (eraserIndicatorRef.current && activeTool === 'eraser') eraserIndicatorRef.current.style.display = 'block'; }}
+        onPointerLeave={() => { if (eraserIndicatorRef.current) eraserIndicatorRef.current.style.display = 'none'; }}
+        className={`w-full h-full ${
+          activeTool === 'eraser'
+            ? 'pointer-events-auto cursor-none'
+            : activeTool !== 'none'
+            ? 'pointer-events-auto cursor-crosshair'
+            : 'pointer-events-none'
+        }`}
         style={{ touchAction: 'none' }}
+      />
+
+      {/* 100% VISIBLE CIRCULAR ERASER BORDER INDICATOR (Matching Canvas Board standard) */}
+      <div
+        ref={eraserIndicatorRef}
+        style={{
+          width: `${eraserSize}px`,
+          height: `${eraserSize}px`,
+          display: activeTool === 'eraser' ? 'block' : 'none',
+        }}
+        className="pointer-events-none absolute top-0 left-0 rounded-full border-2 border-[#ef4444] bg-[#ef4444]/20 shadow-[0_0_12px_rgba(239,68,68,0.5)] ring-1 ring-white/70"
       />
 
       {/* FLOATING DRAGGABLE DRAWING TOOLBAR - Fixed on screen with rich contrast & vibrant border */}
