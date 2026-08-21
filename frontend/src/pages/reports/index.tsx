@@ -142,44 +142,40 @@ export const ReportsPage: React.FC = () => {
               left: activeReportTab === 'overview'
                 ? '4px'
                 : activeReportTab === 'deep'
-                  ? 'calc(25% + 1px)'
+                  ? 'calc(4px + (100% - 8px) * 1 / 4)'
                   : activeReportTab === 'skills'
-                    ? 'calc(50% + 1px)'
-                    : 'calc(75% + 1px)',
-              width: 'calc(25% - 4px)',
+                    ? 'calc(4px + (100% - 8px) * 2 / 4)'
+                    : 'calc(4px + (100% - 8px) * 3 / 4)',
+              width: 'calc((100% - 8px) / 4)',
             }}
           />
           <button
             type="button"
             onClick={() => setActiveReportTab('overview')}
-            className={`flex-1 relative z-10 py-2 px-3 text-center transition-colors cursor-pointer flex items-center justify-center gap-1.5 whitespace-nowrap ${activeReportTab === 'overview' ? 'text-white font-black' : 'text-slate-400 hover:text-white'}`}
+            className={`flex-1 relative z-10 py-2.5 text-center transition-colors cursor-pointer whitespace-nowrap ${activeReportTab === 'overview' ? 'text-white font-black' : 'text-slate-400 hover:text-white'}`}
           >
-            <Activity size={13} />
-            <span>Tổng Quan Học Lực</span>
+            Tổng Quan Học Lực
           </button>
           <button
             type="button"
             onClick={() => setActiveReportTab('deep')}
-            className={`flex-1 relative z-10 py-2 px-3 text-center transition-colors cursor-pointer flex items-center justify-center gap-1.5 whitespace-nowrap ${activeReportTab === 'deep' ? 'text-white font-black' : 'text-slate-400 hover:text-white'}`}
+            className={`flex-1 relative z-10 py-2.5 text-center transition-colors cursor-pointer whitespace-nowrap ${activeReportTab === 'deep' ? 'text-white font-black' : 'text-slate-400 hover:text-white'}`}
           >
-            <Layers size={13} />
-            <span>Thống Kê Sâu</span>
+            Thống Kê Sâu
           </button>
           <button
             type="button"
             onClick={() => setActiveReportTab('skills')}
-            className={`flex-1 relative z-10 py-2 px-3 text-center transition-colors cursor-pointer flex items-center justify-center gap-1.5 whitespace-nowrap ${activeReportTab === 'skills' ? 'text-white font-black' : 'text-slate-400 hover:text-white'}`}
+            className={`flex-1 relative z-10 py-2.5 text-center transition-colors cursor-pointer whitespace-nowrap ${activeReportTab === 'skills' ? 'text-white font-black' : 'text-slate-400 hover:text-white'}`}
           >
-            <GraduationCap size={13} />
-            <span>Phân Tích Kỹ Năng & Unit</span>
+            Phân Tích Kỹ Năng & Unit
           </button>
           <button
             type="button"
             onClick={() => setActiveReportTab('benchmark')}
-            className={`flex-1 relative z-10 py-2 px-3 text-center transition-colors cursor-pointer flex items-center justify-center gap-1.5 whitespace-nowrap ${activeReportTab === 'benchmark' ? 'text-white font-black' : 'text-slate-400 hover:text-white'}`}
+            className={`flex-1 relative z-10 py-2.5 text-center transition-colors cursor-pointer whitespace-nowrap ${activeReportTab === 'benchmark' ? 'text-white font-black' : 'text-slate-400 hover:text-white'}`}
           >
-            <GitCompare size={13} />
-            <span>So Sánh Giữa Các Lớp</span>
+            So Sánh Giữa Các Lớp
           </button>
         </div>
       </div>

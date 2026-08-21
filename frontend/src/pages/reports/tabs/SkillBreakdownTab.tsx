@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { AlertTriangle, LayoutGrid, BookOpen } from 'lucide-react';
+import { GraduationCap } from 'lucide-react';
 import { api } from '../../../api';
 import { MasteryHeatmap } from '../components/MasteryHeatmap';
 import { UnitBreakdownTable } from '../components/UnitBreakdownTable';
@@ -28,10 +28,10 @@ export const SkillBreakdownTab: React.FC<SkillBreakdownTabProps> = ({
   const [apiReportData, setApiReportData] = useState<any>(null);
 
   const fetchSkillData = useCallback(async () => {
-    if (isTestMode) return;
+    if (isTestMode || !selectedClassId) return;
     setLoading(true);
     try {
-      const cid = selectedClassId ? parseInt(selectedClassId) : undefined;
+      const cid = parseInt(selectedClassId);
       const sid = selectedStudentId ? parseInt(selectedStudentId) : undefined;
       const res = await api.getSkillBreakdown(cid, sid);
       setApiReportData(res);
@@ -47,6 +47,7 @@ export const SkillBreakdownTab: React.FC<SkillBreakdownTabProps> = ({
   }, [fetchSkillData]);
 
   const reportData = useMemo(() => {
+    if (!selectedClassId) return null;
     if (isTestMode) {
       const recs = (sessionRecords && sessionRecords.length > 0)
         ? sessionRecords
@@ -60,6 +61,23 @@ export const SkillBreakdownTab: React.FC<SkillBreakdownTabProps> = ({
     if (!selectedStudentId) return null;
     return studentRankings.find(s => String(s.student_id) === String(selectedStudentId)) || null;
   }, [selectedStudentId, studentRankings]);
+
+  // If viewing all classes ("Tất cả lớp học"), prompt the user to pick a specific class
+  if (!selectedClassId) {
+    return (
+      <div className="py-20 px-6 rounded-2xl bg-[#090d16] border border-[#1b253b] text-center flex flex-col items-center justify-center gap-3 select-none animate-cascade-1 shadow-lg">
+        <div className="w-12 h-12 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-blue-400 flex items-center justify-center">
+          <GraduationCap size={24} />
+        </div>
+        <h4 className="text-sm font-black text-white uppercase tracking-wider">
+          Vui lòng chọn một lớp học cụ thể
+        </h4>
+        <p className="text-xs text-slate-400 max-w-md">
+          Chương trình học và danh mục Unit khác nhau giữa các khối lớp. Vui lòng chọn lớp học ở thanh công cụ phía trên để xem Ma trận Nắm vững, Thống kê Unit và Học sinh Cần phụ đạo.
+        </p>
+      </div>
+    );
+  }
 
   if (loading && !reportData) {
     return (
@@ -113,40 +131,37 @@ export const SkillBreakdownTab: React.FC<SkillBreakdownTabProps> = ({
               left: activeSubTab === 'diagnosis'
                 ? '4px'
                 : activeSubTab === 'heatmap'
-                  ? 'calc((100% / 3) + 1px)'
-                  : 'calc(((100% / 3) * 2) + 1px)',
-              width: 'calc((100% / 3) - 4px)',
+                  ? 'calc(4px + (100% - 8px) * 1 / 3)'
+                  : 'calc(4px + (100% - 8px) * 2 / 3)',
+              width: 'calc((100% - 8px) / 3)',
             }}
           />
           <button
             type="button"
             onClick={() => setActiveSubTab('diagnosis')}
-            className={`flex-1 relative z-10 py-2 px-3 text-center transition-colors cursor-pointer flex items-center justify-center gap-1.5 whitespace-nowrap ${
+            className={`flex-1 relative z-10 py-2 text-center transition-colors cursor-pointer whitespace-nowrap ${
               activeSubTab === 'diagnosis' ? 'text-white font-black' : 'text-slate-400 hover:text-white'
             }`}
           >
-            <AlertTriangle size={13} />
-            <span>Học Sinh Cần Phụ Đạo</span>
+            Học Sinh Cần Phụ Đạo
           </button>
           <button
             type="button"
             onClick={() => setActiveSubTab('heatmap')}
-            className={`flex-1 relative z-10 py-2 px-3 text-center transition-colors cursor-pointer flex items-center justify-center gap-1.5 whitespace-nowrap ${
+            className={`flex-1 relative z-10 py-2 text-center transition-colors cursor-pointer whitespace-nowrap ${
               activeSubTab === 'heatmap' ? 'text-white font-black' : 'text-slate-400 hover:text-white'
             }`}
           >
-            <LayoutGrid size={13} />
-            <span>Ma Trận Nắm Vững</span>
+            Ma Trận Nắm Vững
           </button>
           <button
             type="button"
             onClick={() => setActiveSubTab('units')}
-            className={`flex-1 relative z-10 py-2 px-3 text-center transition-colors cursor-pointer flex items-center justify-center gap-1.5 whitespace-nowrap ${
+            className={`flex-1 relative z-10 py-2 text-center transition-colors cursor-pointer whitespace-nowrap ${
               activeSubTab === 'units' ? 'text-white font-black' : 'text-slate-400 hover:text-white'
             }`}
           >
-            <BookOpen size={13} />
-            <span>Thống Kê Theo Unit</span>
+            Thống Kê Theo Unit
           </button>
         </div>
       </div>
