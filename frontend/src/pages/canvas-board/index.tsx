@@ -275,25 +275,29 @@ export default function CanvasBoardPage() {
     }
 
     // 3. Canva-Style Dimension Guides
+    // Pass 1: Draw dashed guide lines
     for (const guide of activeSnapGuidesRef.current) {
       ctx.save();
-      ctx.strokeStyle = '#ec4899'; ctx.lineWidth = 1.5 / zoom; ctx.setLineDash([4 / zoom, 4 / zoom]);
+      ctx.strokeStyle = '#ec4899';
+      ctx.lineWidth = 1.5 / zoom;
+      ctx.setLineDash([4 / zoom, 4 / zoom]);
       ctx.beginPath();
       if (guide.type === 'vertical') { ctx.moveTo(guide.pos, guide.start); ctx.lineTo(guide.pos, guide.end); }
       else { ctx.moveTo(guide.start, guide.pos); ctx.lineTo(guide.end, guide.pos); }
       ctx.stroke();
+      ctx.restore();
+    }
 
+    // Pass 2: Draw dimension lines, tick marks and crystal-clear measurement badges
+    for (const guide of activeSnapGuidesRef.current) {
       if (guide.gapStart && guide.gapEnd && guide.gapText && guide.gapCenter) {
-        ctx.setLineDash([]);
-        ctx.strokeStyle = '#ec4899'; ctx.fillStyle = '#ec4899';
+        ctx.save();
+        ctx.strokeStyle = '#ec4899';
+        ctx.fillStyle = '#ec4899';
         ctx.lineWidth = 1.8 / zoom;
 
-        ctx.beginPath();
-        ctx.moveTo(guide.gapStart.x, guide.gapStart.y);
-        ctx.lineTo(guide.gapEnd.x, guide.gapEnd.y);
-        ctx.stroke();
-
-        const tick = 7 / zoom;
+        // End tick marks (| and |)
+        const tick = 8 / zoom;
         if (guide.type === 'vertical') {
           ctx.beginPath();
           ctx.moveTo(guide.gapStart.x, guide.gapStart.y - tick); ctx.lineTo(guide.gapStart.x, guide.gapStart.y + tick);
@@ -306,27 +310,54 @@ export default function CanvasBoardPage() {
           ctx.stroke();
         }
 
+        // Measure text for badge
         const txt = guide.gapText;
         const fontSize = 11 / zoom;
         ctx.font = `bold ${fontSize}px sans-serif`;
         const textWidth = ctx.measureText(txt).width;
-        const padX = 7 / zoom; const padY = 3 / zoom;
+        const padX = 8 / zoom;
+        const padY = 3.5 / zoom;
         const pillW = textWidth + padX * 2;
         const pillH = fontSize + padY * 2;
         const pillX = guide.gapCenter.x - pillW / 2;
         const pillY = guide.gapCenter.y - pillH / 2;
 
+        // Broken dimension line (stops cleanly at the badge edges so line NEVER cuts through text!)
+        ctx.beginPath();
+        if (guide.type === 'vertical') {
+          // Horizontal span between vertical guides
+          const minX = Math.min(guide.gapStart.x, guide.gapEnd.x);
+          const maxX = Math.max(guide.gapStart.x, guide.gapEnd.x);
+          const midY = guide.gapStart.y;
+          ctx.moveTo(minX, midY); ctx.lineTo(pillX, midY);
+          ctx.moveTo(pillX + pillW, midY); ctx.lineTo(maxX, midY);
+        } else {
+          // Vertical span between horizontal guides
+          const minY = Math.min(guide.gapStart.y, guide.gapEnd.y);
+          const maxY = Math.max(guide.gapStart.y, guide.gapEnd.y);
+          const midX = guide.gapStart.x;
+          ctx.moveTo(midX, minY); ctx.lineTo(midX, pillY);
+          ctx.moveTo(midX, pillY + pillH); ctx.lineTo(midX, maxY);
+        }
+        ctx.stroke();
+
+        // Opaque Pill Badge on top with subtle shadow
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.25)';
+        ctx.shadowBlur = 6 / zoom;
         ctx.fillStyle = '#ec4899';
         ctx.beginPath();
-        if (ctx.roundRect) ctx.roundRect(pillX, pillY, pillW, pillH, 4 / zoom);
+        if (ctx.roundRect) ctx.roundRect(pillX, pillY, pillW, pillH, 5 / zoom);
         else ctx.rect(pillX, pillY, pillW, pillH);
         ctx.fill();
 
+        // Pure white high-contrast text
+        ctx.shadowColor = 'transparent';
         ctx.fillStyle = '#ffffff';
-        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
         ctx.fillText(txt, guide.gapCenter.x, guide.gapCenter.y);
+        ctx.restore();
       }
-      ctx.restore();
     }
 
     // 4. Saved Strokes
