@@ -2,9 +2,6 @@ import { Point, CanvasItemImage, SnapGuide, CropBox, StrokeRecord } from '../typ
 
 export type HandleType = 'tl' | 'tr' | 'bl' | 'br' | 't' | 'b' | 'l' | 'r' | 'inside' | 'none';
 
-/**
- * Checks if a stroke is 100% fully contained within an image boundary.
- */
 export function isStrokeFullyInsideImage(stroke: StrokeRecord, image: CanvasItemImage): boolean {
   if (!stroke.points || stroke.points.length === 0) return false;
   return stroke.points.every(
@@ -13,9 +10,6 @@ export function isStrokeFullyInsideImage(stroke: StrokeRecord, image: CanvasItem
   );
 }
 
-/**
- * Checks if a point is inside an image or its handles.
- */
 export function hitTestImage(
   pt: Point,
   image: CanvasItemImage,
@@ -44,11 +38,19 @@ export function hitTestImage(
   return { hit: false, handle: 'none' };
 }
 
+interface Box {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  id?: string;
+}
+
 /**
- * Canva & Figma Smart Equal Spacing, Multi-Object Row/Column & Outermost Gap Snapping Engine
+ * Universal Multi-Object Equal Spacing & Row/Column Distribution Engine (Canva & Figma Standard)
  */
 export function calculateAutoAlign(
-  target: { x: number; y: number; width: number; height: number },
+  target: Box,
   otherItems: CanvasItemImage[],
   snapThreshold = 12
 ): { snappedX: number; snappedY: number; guides: SnapGuide[] } {
@@ -56,126 +58,132 @@ export function calculateAutoAlign(
   let snappedY = target.y;
   const guides: SnapGuide[] = [];
 
-  const targetCenterX = target.x + target.width / 2;
-  const targetRight = target.x + target.width;
-  const targetCenterY = target.y + target.height / 2;
-  const targetBottom = target.y + target.height;
   const targetMidY = target.y + target.height / 2;
   const targetMidX = target.x + target.width / 2;
 
   // ─────────────────────────────────────────────────────────────
-  // 1. HORIZONTAL EQUAL SPACING (Sandwich + Outermost Item Extension)
+  // 1. UNIVERSAL MULTI-OBJECT HORIZONTAL EQUAL DISTRIBUTION
   // ─────────────────────────────────────────────────────────────
   let foundHorizontalGap = false;
 
-  // A. Sandwich / In-Between Snapping
-  for (let i = 0; i < otherItems.length; i++) {
-    for (let j = 0; j < otherItems.length; j++) {
-      if (i === j) continue;
-      const leftItem = otherItems[i];
-      const rightItem = otherItems[j];
+  if (otherItems.length >= 2) {
+    // Sort all other items from left to right
+    const sortedOthers = [...otherItems].sort((a, b) => a.x - b.x);
 
-      if (leftItem.x + leftItem.width < rightItem.x) {
-        const availableSpace = rightItem.x - (leftItem.x + leftItem.width);
-        const equalGap = (availableSpace - target.width) / 2;
+    // Try placing target into every possible index in the row [0, 1, ..., sortedOthers.length]
+    for (let insertIdx = 0; insertIdx <= sortedOthers.length; insertIdx++) {
+      const fullRow: Box[] = [
+        ...sortedOthers.slice(0, insertIdx),
+        { ...target, x: target.x },
+        ...sortedOthers.slice(insertIdx),
+      ];
 
-        if (equalGap > 4) {
-          const optimalX = leftItem.x + leftItem.width + equalGap;
-          if (Math.abs(target.x - optimalX) <= snapThreshold) {
-            snappedX = optimalX;
+      // A. Interior multi-object equal distribution (between first and last items)
+      if (insertIdx > 0 && insertIdx < fullRow.length - 1) {
+        const first = fullRow[0];
+        const last = fullRow[fullRow.length - 1];
+        const totalSpan = (last.x + last.width) - first.x;
+        const totalWidths = fullRow.reduce((sum, item) => sum + item.width, 0);
+        const gapsCount = fullRow.length - 1;
+        const equalGap = (totalSpan - totalWidths) / gapsCount;
+
+        if (equalGap > 3) {
+          // Calculate expected X position of target at insertIdx
+          let expectedX = first.x;
+          for (let k = 0; k < insertIdx; k++) {
+            expectedX += fullRow[k].width + equalGap;
+          }
+
+          if (Math.abs(target.x - expectedX) <= snapThreshold) {
+            snappedX = expectedX;
             foundHorizontalGap = true;
             const gapRounded = Math.round(equalGap);
 
-            // Left guide
-            guides.push({
-              type: 'vertical', pos: snappedX,
-              start: Math.min(leftItem.y, target.y) - 40, end: Math.max(leftItem.y + leftItem.height, target.y + target.height) + 40,
-              gapText: `${gapRounded}px`,
-              gapStart: { x: leftItem.x + leftItem.width, y: targetMidY },
-              gapEnd: { x: snappedX, y: targetMidY },
-              gapCenter: { x: (leftItem.x + leftItem.width + snappedX) / 2, y: targetMidY },
-            });
-            // Right guide
-            guides.push({
-              type: 'vertical', pos: snappedX + target.width,
-              start: Math.min(rightItem.y, target.y) - 40, end: Math.max(rightItem.y + rightItem.height, target.y + target.height) + 40,
-              gapText: `${gapRounded}px`,
-              gapStart: { x: snappedX + target.width, y: targetMidY },
-              gapEnd: { x: rightItem.x, y: targetMidY },
-              gapCenter: { x: (snappedX + target.width + rightItem.x) / 2, y: targetMidY },
-            });
+            // Reconstruct exact positions with snapped target
+            const resolvedRow: Box[] = [];
+            let currX = first.x;
+            for (let k = 0; k < fullRow.length; k++) {
+              resolvedRow.push({ ...fullRow[k], x: currX });
+              currX += fullRow[k].width + equalGap;
+            }
+
+            // Generate Canva guides for ALL pairs in this entire row!
+            for (let k = 0; k < resolvedRow.length - 1; k++) {
+              const a = resolvedRow[k];
+              const b = resolvedRow[k + 1];
+              guides.push({
+                type: 'vertical',
+                pos: b.x,
+                start: Math.min(a.y, b.y, target.y) - 40,
+                end: Math.max(a.y + a.height, b.y + b.height, target.y + target.height) + 40,
+                gapText: `${gapRounded}px`,
+                gapStart: { x: a.x + a.width, y: targetMidY },
+                gapEnd: { x: b.x, y: targetMidY },
+                gapCenter: { x: (a.x + a.width + b.x) / 2, y: targetMidY },
+              });
+            }
             break;
           }
         }
       }
-    }
-    if (foundHorizontalGap) break;
-  }
 
-  // B. Outermost Item Row Extension (e.g. A --G-- B --G-- Target or Target --G-- A --G-- B)
-  if (!foundHorizontalGap) {
-    for (let i = 0; i < otherItems.length; i++) {
-      for (let j = 0; j < otherItems.length; j++) {
-        if (i === j) continue;
-        const a = otherItems[i];
-        const b = otherItems[j];
-
-        if (a.x + a.width < b.x) {
+      // B. Outermost left/right matching gap extension
+      if (insertIdx === 0 || insertIdx === fullRow.length - 1) {
+        // Find existing gaps in other items
+        for (let k = 0; k < sortedOthers.length - 1; k++) {
+          const a = sortedOthers[k];
+          const b = sortedOthers[k + 1];
           const g = b.x - (a.x + a.width);
-          if (g > 4) {
-            // Outermost Right Snap: target is placed after b
-            const rightSnapX = b.x + b.width + g;
-            if (Math.abs(target.x - rightSnapX) <= snapThreshold) {
-              snappedX = rightSnapX;
-              foundHorizontalGap = true;
-              const gapRounded = Math.round(g);
-
-              // 1. Existing A-B gap guide
-              guides.push({
-                type: 'vertical', pos: b.x,
-                start: Math.min(a.y, b.y, target.y) - 40, end: Math.max(a.y + a.height, b.y + b.height, target.y + target.height) + 40,
-                gapText: `${gapRounded}px`,
-                gapStart: { x: a.x + a.width, y: targetMidY },
-                gapEnd: { x: b.x, y: targetMidY },
-                gapCenter: { x: (a.x + a.width + b.x) / 2, y: targetMidY },
-              });
-              // 2. New B-Target gap guide
-              guides.push({
-                type: 'vertical', pos: snappedX,
-                start: Math.min(b.y, target.y) - 40, end: Math.max(b.y + b.height, target.y + target.height) + 40,
-                gapText: `${gapRounded}px`,
-                gapStart: { x: b.x + b.width, y: targetMidY },
-                gapEnd: { x: snappedX, y: targetMidY },
-                gapCenter: { x: (b.x + b.width + snappedX) / 2, y: targetMidY },
-              });
-              break;
+          if (g > 3) {
+            let snapPos: number | null = null;
+            if (insertIdx === fullRow.length - 1) {
+              const lastOther = sortedOthers[sortedOthers.length - 1];
+              snapPos = lastOther.x + lastOther.width + g;
+            } else if (insertIdx === 0) {
+              const firstOther = sortedOthers[0];
+              snapPos = firstOther.x - target.width - g;
             }
 
-            // Outermost Left Snap: target is placed before a
-            const leftSnapX = a.x - target.width - g;
-            if (Math.abs(target.x - leftSnapX) <= snapThreshold) {
-              snappedX = leftSnapX;
+            if (snapPos !== null && Math.abs(target.x - snapPos) <= snapThreshold) {
+              snappedX = snapPos;
               foundHorizontalGap = true;
               const gapRounded = Math.round(g);
 
-              // 1. New Target-A gap guide
-              guides.push({
-                type: 'vertical', pos: a.x,
-                start: Math.min(target.y, a.y) - 40, end: Math.max(target.y + target.height, a.y + a.height) + 40,
-                gapText: `${gapRounded}px`,
-                gapStart: { x: snappedX + target.width, y: targetMidY },
-                gapEnd: { x: a.x, y: targetMidY },
-                gapCenter: { x: (snappedX + target.width + a.x) / 2, y: targetMidY },
-              });
-              // 2. Existing A-B gap guide
-              guides.push({
-                type: 'vertical', pos: b.x,
-                start: Math.min(a.y, b.y, target.y) - 40, end: Math.max(a.y + a.height, b.y + b.height, target.y + target.height) + 40,
-                gapText: `${gapRounded}px`,
-                gapStart: { x: a.x + a.width, y: targetMidY },
-                gapEnd: { x: b.x, y: targetMidY },
-                gapCenter: { x: (a.x + a.width + b.x) / 2, y: targetMidY },
-              });
+              // Render guides for existing pairs AND new outer pair
+              for (let m = 0; m < sortedOthers.length - 1; m++) {
+                const p1 = sortedOthers[m];
+                const p2 = sortedOthers[m + 1];
+                guides.push({
+                  type: 'vertical', pos: p2.x,
+                  start: Math.min(p1.y, p2.y, target.y) - 40, end: Math.max(p1.y + p1.height, p2.y + p2.height, target.y + target.height) + 40,
+                  gapText: `${gapRounded}px`,
+                  gapStart: { x: p1.x + p1.width, y: targetMidY },
+                  gapEnd: { x: p2.x, y: targetMidY },
+                  gapCenter: { x: (p1.x + p1.width + p2.x) / 2, y: targetMidY },
+                });
+              }
+
+              if (insertIdx === fullRow.length - 1) {
+                const lastOther = sortedOthers[sortedOthers.length - 1];
+                guides.push({
+                  type: 'vertical', pos: snappedX,
+                  start: Math.min(lastOther.y, target.y) - 40, end: Math.max(lastOther.y + lastOther.height, target.y + target.height) + 40,
+                  gapText: `${gapRounded}px`,
+                  gapStart: { x: lastOther.x + lastOther.width, y: targetMidY },
+                  gapEnd: { x: snappedX, y: targetMidY },
+                  gapCenter: { x: (lastOther.x + lastOther.width + snappedX) / 2, y: targetMidY },
+                });
+              } else {
+                const firstOther = sortedOthers[0];
+                guides.push({
+                  type: 'vertical', pos: firstOther.x,
+                  start: Math.min(target.y, firstOther.y) - 40, end: Math.max(target.y + target.height, firstOther.y + firstOther.height) + 40,
+                  gapText: `${gapRounded}px`,
+                  gapStart: { x: snappedX + target.width, y: targetMidY },
+                  gapEnd: { x: firstOther.x, y: targetMidY },
+                  gapCenter: { x: (snappedX + target.width + firstOther.x) / 2, y: targetMidY },
+                });
+              }
               break;
             }
           }
@@ -186,114 +194,121 @@ export function calculateAutoAlign(
   }
 
   // ─────────────────────────────────────────────────────────────
-  // 2. VERTICAL EQUAL SPACING (Sandwich + Outermost Column Extension)
+  // 2. UNIVERSAL MULTI-OBJECT VERTICAL EQUAL DISTRIBUTION
   // ─────────────────────────────────────────────────────────────
   let foundVerticalGap = false;
 
-  // A. Sandwich / In-Between Snapping
-  for (let i = 0; i < otherItems.length; i++) {
-    for (let j = 0; j < otherItems.length; j++) {
-      if (i === j) continue;
-      const topItem = otherItems[i];
-      const bottomItem = otherItems[j];
+  if (otherItems.length >= 2) {
+    const sortedOthers = [...otherItems].sort((a, b) => a.y - b.y);
 
-      if (topItem.y + topItem.height < bottomItem.y) {
-        const availableSpace = bottomItem.y - (topItem.y + topItem.height);
-        const equalGap = (availableSpace - target.height) / 2;
+    for (let insertIdx = 0; insertIdx <= sortedOthers.length; insertIdx++) {
+      const fullCol: Box[] = [
+        ...sortedOthers.slice(0, insertIdx),
+        { ...target, y: target.y },
+        ...sortedOthers.slice(insertIdx),
+      ];
 
-        if (equalGap > 4) {
-          const optimalY = topItem.y + topItem.height + equalGap;
-          if (Math.abs(target.y - optimalY) <= snapThreshold) {
-            snappedY = optimalY;
+      // A. Interior multi-object vertical distribution
+      if (insertIdx > 0 && insertIdx < fullCol.length - 1) {
+        const first = fullCol[0];
+        const last = fullCol[fullCol.length - 1];
+        const totalSpan = (last.y + last.height) - first.y;
+        const totalHeights = fullCol.reduce((sum, item) => sum + item.height, 0);
+        const gapsCount = fullCol.length - 1;
+        const equalGap = (totalSpan - totalHeights) / gapsCount;
+
+        if (equalGap > 3) {
+          let expectedY = first.y;
+          for (let k = 0; k < insertIdx; k++) {
+            expectedY += fullCol[k].height + equalGap;
+          }
+
+          if (Math.abs(target.y - expectedY) <= snapThreshold) {
+            snappedY = expectedY;
             foundVerticalGap = true;
             const gapRounded = Math.round(equalGap);
 
-            // Top guide
-            guides.push({
-              type: 'horizontal', pos: snappedY,
-              start: Math.min(topItem.x, target.x) - 40, end: Math.max(topItem.x + topItem.width, target.x + target.width) + 40,
-              gapText: `${gapRounded}px`,
-              gapStart: { x: targetMidX, y: topItem.y + topItem.height },
-              gapEnd: { x: targetMidX, y: snappedY },
-              gapCenter: { x: targetMidX, y: (topItem.y + topItem.height + snappedY) / 2 },
-            });
-            // Bottom guide
-            guides.push({
-              type: 'horizontal', pos: snappedY + target.height,
-              start: Math.min(bottomItem.x, target.x) - 40, end: Math.max(bottomItem.x + bottomItem.width, target.x + target.width) + 40,
-              gapText: `${gapRounded}px`,
-              gapStart: { x: targetMidX, y: snappedY + target.height },
-              gapEnd: { x: targetMidX, y: bottomItem.y },
-              gapCenter: { x: targetMidX, y: (snappedY + target.height + bottomItem.y) / 2 },
-            });
+            const resolvedCol: Box[] = [];
+            let currY = first.y;
+            for (let k = 0; k < fullCol.length; k++) {
+              resolvedCol.push({ ...fullCol[k], y: currY });
+              currY += fullCol[k].height + equalGap;
+            }
+
+            for (let k = 0; k < resolvedCol.length - 1; k++) {
+              const a = resolvedCol[k];
+              const b = resolvedCol[k + 1];
+              guides.push({
+                type: 'horizontal',
+                pos: b.y,
+                start: Math.min(a.x, b.x, target.x) - 40,
+                end: Math.max(a.x + a.width, b.x + b.width, target.x + target.width) + 40,
+                gapText: `${gapRounded}px`,
+                gapStart: { x: targetMidX, y: a.y + a.height },
+                gapEnd: { x: targetMidX, y: b.y },
+                gapCenter: { x: targetMidX, y: (a.y + a.height + b.y) / 2 },
+              });
+            }
             break;
           }
         }
       }
-    }
-    if (foundVerticalGap) break;
-  }
 
-  // B. Outermost Item Column Extension (Top / Bottom)
-  if (!foundVerticalGap) {
-    for (let i = 0; i < otherItems.length; i++) {
-      for (let j = 0; j < otherItems.length; j++) {
-        if (i === j) continue;
-        const a = otherItems[i];
-        const b = otherItems[j];
-
-        if (a.y + a.height < b.y) {
+      // B. Outermost top/bottom matching gap extension
+      if (insertIdx === 0 || insertIdx === fullCol.length - 1) {
+        for (let k = 0; k < sortedOthers.length - 1; k++) {
+          const a = sortedOthers[k];
+          const b = sortedOthers[k + 1];
           const g = b.y - (a.y + a.height);
-          if (g > 4) {
-            // Outermost Bottom Snap
-            const bottomSnapY = b.y + b.height + g;
-            if (Math.abs(target.y - bottomSnapY) <= snapThreshold) {
-              snappedY = bottomSnapY;
-              foundVerticalGap = true;
-              const gapRounded = Math.round(g);
-
-              guides.push({
-                type: 'horizontal', pos: b.y,
-                start: Math.min(a.x, b.x, target.x) - 40, end: Math.max(a.x + a.width, b.x + b.width, target.x + target.width) + 40,
-                gapText: `${gapRounded}px`,
-                gapStart: { x: targetMidX, y: a.y + a.height },
-                gapEnd: { x: targetMidX, y: b.y },
-                gapCenter: { x: targetMidX, y: (a.y + a.height + b.y) / 2 },
-              });
-              guides.push({
-                type: 'horizontal', pos: snappedY,
-                start: Math.min(b.x, target.x) - 40, end: Math.max(b.x + b.width, target.x + target.width) + 40,
-                gapText: `${gapRounded}px`,
-                gapStart: { x: targetMidX, y: b.y + b.height },
-                gapEnd: { x: targetMidX, y: snappedY },
-                gapCenter: { x: targetMidX, y: (b.y + b.height + snappedY) / 2 },
-              });
-              break;
+          if (g > 3) {
+            let snapPos: number | null = null;
+            if (insertIdx === fullCol.length - 1) {
+              const lastOther = sortedOthers[sortedOthers.length - 1];
+              snapPos = lastOther.y + lastOther.height + g;
+            } else if (insertIdx === 0) {
+              const firstOther = sortedOthers[0];
+              snapPos = firstOther.y - target.height - g;
             }
 
-            // Outermost Top Snap
-            const topSnapY = a.y - target.height - g;
-            if (Math.abs(target.y - topSnapY) <= snapThreshold) {
-              snappedY = topSnapY;
+            if (snapPos !== null && Math.abs(target.y - snapPos) <= snapThreshold) {
+              snappedY = snapPos;
               foundVerticalGap = true;
               const gapRounded = Math.round(g);
 
-              guides.push({
-                type: 'horizontal', pos: a.y,
-                start: Math.min(target.x, a.x) - 40, end: Math.max(target.x + target.width, a.x + a.width) + 40,
-                gapText: `${gapRounded}px`,
-                gapStart: { x: targetMidX, y: snappedY + target.height },
-                gapEnd: { x: targetMidX, y: a.y },
-                gapCenter: { x: targetMidX, y: (snappedY + target.height + a.y) / 2 },
-              });
-              guides.push({
-                type: 'horizontal', pos: b.y,
-                start: Math.min(a.x, b.x, target.x) - 40, end: Math.max(a.x + a.width, b.x + b.width, target.x + target.width) + 40,
-                gapText: `${gapRounded}px`,
-                gapStart: { x: targetMidX, y: a.y + a.height },
-                gapEnd: { x: targetMidX, y: b.y },
-                gapCenter: { x: targetMidX, y: (a.y + a.height + b.y) / 2 },
-              });
+              for (let m = 0; m < sortedOthers.length - 1; m++) {
+                const p1 = sortedOthers[m];
+                const p2 = sortedOthers[m + 1];
+                guides.push({
+                  type: 'horizontal', pos: p2.y,
+                  start: Math.min(p1.x, p2.x, target.x) - 40, end: Math.max(p1.x + p1.width, p2.x + p2.width, target.x + target.width) + 40,
+                  gapText: `${gapRounded}px`,
+                  gapStart: { x: targetMidX, y: p1.y + p1.height },
+                  gapEnd: { x: targetMidX, y: p2.y },
+                  gapCenter: { x: targetMidX, y: (p1.y + p1.height + p2.y) / 2 },
+                });
+              }
+
+              if (insertIdx === fullCol.length - 1) {
+                const lastOther = sortedOthers[sortedOthers.length - 1];
+                guides.push({
+                  type: 'horizontal', pos: snappedY,
+                  start: Math.min(lastOther.x, target.x) - 40, end: Math.max(lastOther.x + lastOther.width, target.x + target.width) + 40,
+                  gapText: `${gapRounded}px`,
+                  gapStart: { x: targetMidX, y: lastOther.y + lastOther.height },
+                  gapEnd: { x: targetMidX, y: snappedY },
+                  gapCenter: { x: targetMidX, y: (lastOther.y + lastOther.height + snappedY) / 2 },
+                });
+              } else {
+                const firstOther = sortedOthers[0];
+                guides.push({
+                  type: 'horizontal', pos: firstOther.y,
+                  start: Math.min(target.x, firstOther.x) - 40, end: Math.max(target.x + target.width, firstOther.x + firstOther.width) + 40,
+                  gapText: `${gapRounded}px`,
+                  gapStart: { x: targetMidX, y: snappedY + target.height },
+                  gapEnd: { x: targetMidX, y: firstOther.y },
+                  gapCenter: { x: targetMidX, y: (snappedY + target.height + firstOther.y) / 2 },
+                });
+              }
               break;
             }
           }
@@ -304,84 +319,77 @@ export function calculateAutoAlign(
   }
 
   // ─────────────────────────────────────────────────────────────
-  // 3. STANDARD EDGE & CENTER AXIS ALIGNMENT
+  // 3. STANDARD AXIS ALIGNMENT (LEFT / CENTER / RIGHT / TOP / MIDDLE / BOTTOM)
   // ─────────────────────────────────────────────────────────────
-  if (!foundHorizontalGap) {
-    const candidateX: { pos: number; type: string }[] = [{ pos: 50, type: 'start' }];
-    for (const item of otherItems) {
-      candidateX.push(
-        { pos: item.x, type: 'left' },
-        { pos: item.x + item.width / 2, type: 'center' },
-        { pos: item.x + item.width, type: 'right' }
-      );
+  const candidateX: { pos: number; type: string }[] = [{ pos: 50, type: 'start' }];
+  for (const item of otherItems) {
+    candidateX.push(
+      { pos: item.x, type: 'left' },
+      { pos: item.x + item.width / 2, type: 'center' },
+      { pos: item.x + item.width, type: 'right' }
+    );
+  }
+
+  let minDiffX = snapThreshold + 1;
+  let chosenSnapX: number | null = null;
+  let guideLineX: SnapGuide | null = null;
+
+  for (const c of candidateX) {
+    if (Math.abs(target.x - c.pos) < minDiffX) {
+      minDiffX = Math.abs(target.x - c.pos); chosenSnapX = c.pos;
+      guideLineX = { type: 'vertical', pos: c.pos, start: Math.min(target.y - 100, -500), end: Math.max(target.y + target.height + 100, 2000) };
     }
-
-    let minDiffX = snapThreshold + 1;
-    let chosenSnapX: number | null = null;
-    let guideLineX: SnapGuide | null = null;
-
-    for (const c of candidateX) {
-      if (Math.abs(target.x - c.pos) < minDiffX) {
-        minDiffX = Math.abs(target.x - c.pos); chosenSnapX = c.pos;
-        guideLineX = { type: 'vertical', pos: c.pos, start: Math.min(target.y - 100, -500), end: Math.max(target.y + target.height + 100, 2000) };
-      }
-      if (Math.abs(targetCenterX - c.pos) < minDiffX) {
-        minDiffX = Math.abs(targetCenterX - c.pos); chosenSnapX = c.pos - target.width / 2;
-        guideLineX = { type: 'vertical', pos: c.pos, start: Math.min(target.y - 100, -500), end: Math.max(target.y + target.height + 100, 2000) };
-      }
-      if (Math.abs(targetRight - c.pos) < minDiffX) {
-        minDiffX = Math.abs(targetRight - c.pos); chosenSnapX = c.pos - target.width;
-        guideLineX = { type: 'vertical', pos: c.pos, start: Math.min(target.y - 100, -500), end: Math.max(target.y + target.height + 100, 2000) };
-      }
+    if (Math.abs((target.x + target.width / 2) - c.pos) < minDiffX) {
+      minDiffX = Math.abs((target.x + target.width / 2) - c.pos); chosenSnapX = c.pos - target.width / 2;
+      guideLineX = { type: 'vertical', pos: c.pos, start: Math.min(target.y - 100, -500), end: Math.max(target.y + target.height + 100, 2000) };
     }
-
-    if (chosenSnapX !== null && minDiffX <= snapThreshold) {
-      snappedX = chosenSnapX;
-      if (guideLineX) guides.push(guideLineX);
+    if (Math.abs((target.x + target.width) - c.pos) < minDiffX) {
+      minDiffX = Math.abs((target.x + target.width) - c.pos); chosenSnapX = c.pos - target.width;
+      guideLineX = { type: 'vertical', pos: c.pos, start: Math.min(target.y - 100, -500), end: Math.max(target.y + target.height + 100, 2000) };
     }
   }
 
-  if (!foundVerticalGap) {
-    const candidateY: { pos: number; type: string }[] = [{ pos: 50, type: 'start' }];
-    for (const item of otherItems) {
-      candidateY.push(
-        { pos: item.y, type: 'top' },
-        { pos: item.y + item.height / 2, type: 'middle' },
-        { pos: item.y + item.height, type: 'bottom' }
-      );
-    }
+  if (!foundHorizontalGap && chosenSnapX !== null && minDiffX <= snapThreshold) {
+    snappedX = chosenSnapX;
+    if (guideLineX) guides.push(guideLineX);
+  }
 
-    let minDiffY = snapThreshold + 1;
-    let chosenSnapY: number | null = null;
-    let guideLineY: SnapGuide | null = null;
+  const candidateY: { pos: number; type: string }[] = [{ pos: 50, type: 'start' }];
+  for (const item of otherItems) {
+    candidateY.push(
+      { pos: item.y, type: 'top' },
+      { pos: item.y + item.height / 2, type: 'middle' },
+      { pos: item.y + item.height, type: 'bottom' }
+    );
+  }
 
-    for (const c of candidateY) {
-      if (Math.abs(target.y - c.pos) < minDiffY) {
-        minDiffY = Math.abs(target.y - c.pos); chosenSnapY = c.pos;
-        guideLineY = { type: 'horizontal', pos: c.pos, start: Math.min(target.x - 100, -500), end: Math.max(target.x + target.width + 100, 2000) };
-      }
-      if (Math.abs(targetCenterY - c.pos) < minDiffY) {
-        minDiffY = Math.abs(targetCenterY - c.pos); chosenSnapY = c.pos - target.height / 2;
-        guideLineY = { type: 'horizontal', pos: c.pos, start: Math.min(target.x - 100, -500), end: Math.max(target.x + target.width + 100, 2000) };
-      }
-      if (Math.abs(targetBottom - c.pos) < minDiffY) {
-        minDiffY = Math.abs(targetBottom - c.pos); chosenSnapY = c.pos - target.height;
-        guideLineY = { type: 'horizontal', pos: c.pos, start: Math.min(target.x - 100, -500), end: Math.max(target.x + target.width + 100, 2000) };
-      }
-    }
+  let minDiffY = snapThreshold + 1;
+  let chosenSnapY: number | null = null;
+  let guideLineY: SnapGuide | null = null;
 
-    if (chosenSnapY !== null && minDiffY <= snapThreshold) {
-      snappedY = chosenSnapY;
-      if (guideLineY) guides.push(guideLineY);
+  for (const c of candidateY) {
+    if (Math.abs(target.y - c.pos) < minDiffY) {
+      minDiffY = Math.abs(target.y - c.pos); chosenSnapY = c.pos;
+      guideLineY = { type: 'horizontal', pos: c.pos, start: Math.min(target.x - 100, -500), end: Math.max(target.x + target.width + 100, 2000) };
     }
+    if (Math.abs((target.y + target.height / 2) - c.pos) < minDiffY) {
+      minDiffY = Math.abs((target.y + target.height / 2) - c.pos); chosenSnapY = c.pos - target.height / 2;
+      guideLineY = { type: 'horizontal', pos: c.pos, start: Math.min(target.x - 100, -500), end: Math.max(target.x + target.width + 100, 2000) };
+    }
+    if (Math.abs((target.y + target.height) - c.pos) < minDiffY) {
+      minDiffY = Math.abs((target.y + target.height) - c.pos); chosenSnapY = c.pos - target.height;
+      guideLineY = { type: 'horizontal', pos: c.pos, start: Math.min(target.x - 100, -500), end: Math.max(target.x + target.width + 100, 2000) };
+    }
+  }
+
+  if (!foundVerticalGap && chosenSnapY !== null && minDiffY <= snapThreshold) {
+    snappedY = chosenSnapY;
+    if (guideLineY) guides.push(guideLineY);
   }
 
   return { snappedX, snappedY, guides };
 }
 
-/**
- * Applies Word-style crop on an image item.
- */
 export async function applyWordCrop(
   imageItem: CanvasItemImage,
   cropBox: CropBox
