@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 import { Question, TestData } from '../types';
 import { QuizReviewCard } from './QuizReviewCard';
+import { DrawingCanvas } from './DrawingCanvas';
 
 interface QuizResultsViewProps {
   testData: TestData | null;
@@ -34,7 +35,15 @@ export const QuizResultsView: React.FC<QuizResultsViewProps> = ({
   const currentSlice = activeQuestions.slice(startIdx, startIdx + pageSize);
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto w-full">
+    <div className="space-y-6 max-w-5xl mx-auto w-full relative">
+      {/* SINGLE UNIFIED DRAWING CANVAS FOR ENTIRE REVIEW SCREEN */}
+      <DrawingCanvas
+        questionId={-999}
+        drawings={drawings}
+        onSaveDrawing={(qId, url) => setDrawings(prev => ({ ...prev, [qId]: url }))}
+        onClearDrawing={(qId) => setDrawings(prev => { const copy = { ...prev }; delete copy[qId]; return copy; })}
+      />
+
       {/* KPI SCORE CARD */}
       <div className="bg-[#0c0f1e] border border-[#1d2744] rounded-2xl p-6 sm:p-8 shadow-2xl text-center space-y-4 relative overflow-hidden">
         <div>
@@ -74,13 +83,13 @@ export const QuizResultsView: React.FC<QuizResultsViewProps> = ({
             onClick={onRetake}
             className="px-6 py-2.5 rounded-xl bg-[#5c36f5] hover:bg-[#7351f7] text-white text-xs font-black transition cursor-pointer shadow-[0_4px_14px_rgba(92,54,245,0.4)] border border-white/20 active:scale-95"
           >
-            Làm Lại Bài Thi
+            Làm lại
           </button>
         </div>
       </div>
 
       {/* REVIEW CONTROLS */}
-      <div className="flex items-center justify-between bg-[#0c0f1e] border border-white/10 px-5 py-3 rounded-2xl shadow-lg">
+      <div className="flex items-center justify-between bg-[#0c0f1e] border border-white/10 px-5 py-3 rounded-2xl shadow-lg relative z-10">
         <div className="text-xs font-black uppercase text-slate-300 tracking-wider">
           Chi Tiết Bài Làm ({totalQuestions} Câu)
         </div>
@@ -93,13 +102,13 @@ export const QuizResultsView: React.FC<QuizResultsViewProps> = ({
             }`}
           >
             {showAnswerToggle ? <Eye size={13} /> : <EyeOff size={13} />}
-            <span>{showAnswerToggle ? 'Ẩn Đáp Án' : 'Hiện Đáp Án'}</span>
+            <span>{showAnswerToggle ? 'Ẩn tất cả đáp án' : 'Hiện tất cả đáp án'}</span>
           </button>
         </div>
       </div>
 
       {/* REVIEW LIST WITH PAGINATION */}
-      <div className="space-y-4">
+      <div className="space-y-4 relative z-10">
         {currentSlice.map((item, localIdx) => {
           const globalIdx = startIdx + localIdx;
           return (
@@ -108,10 +117,7 @@ export const QuizResultsView: React.FC<QuizResultsViewProps> = ({
               q={item}
               idx={globalIdx}
               userAns={userAnswers[item.id] || ''}
-              showAnswerToggle={showAnswerToggle}
-              drawings={drawings}
-              onSaveDrawing={(qId, url) => setDrawings(prev => ({ ...prev, [qId]: url }))}
-              onClearDrawing={(qId) => setDrawings(prev => { const copy = { ...prev }; delete copy[qId]; return copy; })}
+              globalShowAnswer={showAnswerToggle}
               renderFormattedText={renderFormattedText}
             />
           );

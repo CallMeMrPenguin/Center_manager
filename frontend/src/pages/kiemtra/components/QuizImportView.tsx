@@ -121,15 +121,15 @@ export const QuizImportView: React.FC<QuizImportViewProps> = ({
           </div>
 
           <div className="space-y-1 max-w-md mx-auto">
-            <h3 className="text-lg font-black text-white">Tải Đề Thi Lên (.DOCX)</h3>
+            <h3 className="text-lg font-black text-white">Tải đề lên</h3>
             <p className="text-xs text-slate-400">
-              Hỗ trợ file Word (.docx) có đáp án bôi vàng trong câu hỏi hoặc bảng đáp án riêng ở cuối bài.
+              Hỗ trợ file word
             </p>
           </div>
 
           <label className="inline-flex items-center gap-2 bg-[#5c36f5] hover:bg-[#7351f7] text-white px-6 py-3 rounded-xl font-extrabold text-xs shadow-[0_4px_16px_rgba(92,54,245,0.4)] transition cursor-pointer border border-white/20 active:scale-95">
             {loading ? <RefreshCw className="animate-spin" size={16} /> : <Upload size={16} />}
-            <span>Chọn Đề Thi Từ Máy Tính</span>
+            <span>Chọn đề thi từ máy tính để import</span>
             <input type="file" accept=".docx" onChange={onFileUpload} className="hidden" />
           </label>
         </div>
