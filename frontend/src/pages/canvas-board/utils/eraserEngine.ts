@@ -22,9 +22,21 @@ function distPointToSegmentSq(px: number, py: number, ax: number, ay: number, bx
 }
 
 /**
- * Subdivides a sequence of points so consecutive points are separated by at most maxDist (e.g. 3px).
+ * Calculates total arc length of a sequence of points.
  */
-function densifyPoints(points: Point[], maxDist = 3): Point[] {
+function getSegmentLength(points: Point[]): number {
+  if (!points || points.length < 2) return 0;
+  let len = 0;
+  for (let i = 0; i < points.length - 1; i++) {
+    len += Math.hypot(points[i + 1].x - points[i].x, points[i + 1].y - points[i].y);
+  }
+  return len;
+}
+
+/**
+ * Subdivides a sequence of points so consecutive points are separated by at most maxDist (e.g. 2.5px).
+ */
+function densifyPoints(points: Point[], maxDist = 2.5): Point[] {
   if (points.length <= 1) return points;
   const dense: Point[] = [points[0]];
 
@@ -50,7 +62,7 @@ function densifyPoints(points: Point[], maxDist = 3): Point[] {
 }
 
 /**
- * High-Speed Partial Vector Eraser with Bounding Box Fast Rejection
+ * High-Speed Partial Vector Eraser with Micro-Speck Filtering & Residual Noise Pruning
  */
 export function eraseStrokesAlongPath(
   strokes: StrokeRecord[],
@@ -79,23 +91,22 @@ export function eraseStrokesAlongPath(
       if (p.y < minY) minY = p.y;
       if (p.y > maxY) maxY = p.y;
     }
-    // Check AABB overlap
     if (maxX >= sweepMinX && minX <= sweepMaxX && maxY >= sweepMinY && minY <= sweepMaxY) {
       hasAnyCandidate = true;
       break;
     }
   }
 
-  // If no strokes are anywhere near the eraser trajectory, EXIT IMMEDIATELY in 0.001ms!
+  // If no strokes are anywhere near the eraser trajectory, exit immediately
   if (!hasAnyCandidate) {
     return { strokes, hasChanged: false };
   }
 
   // 3. Sub-step along the path for candidate strokes
   const pathDist = Math.hypot(currentPt.x - prevPt.x, currentPt.y - prevPt.y);
-  const numSteps = Math.max(1, Math.min(8, Math.ceil(pathDist / Math.max(4, eraserRadius / 2))));
+  const numSteps = Math.max(1, Math.min(10, Math.ceil(pathDist / Math.max(3, eraserRadius / 3))));
 
-  let resultStrokes: StrokeRecord[] = [];
+  const resultStrokes: StrokeRecord[] = [];
   let globalChanged = false;
 
   for (const stroke of strokes) {
@@ -112,13 +123,13 @@ export function eraseStrokesAlongPath(
     }
 
     if (maxX < sweepMinX || minX > sweepMaxX || maxY < sweepMinY || minY > sweepMaxY) {
-      resultStrokes.push(stroke); // Untouched stroke
+      resultStrokes.push(stroke);
       continue;
     }
 
-    // Check if any segment of this stroke is actually hit
-    const strokePadding = Math.max(1, (stroke.size || 4) / 2);
-    const hitRadius = eraserRadius + strokePadding;
+    // Effective hit radius includes stroke padding plus slight buffer to avoid edge residue
+    const strokePadding = Math.max(1.5, (stroke.size || 4) / 2);
+    const hitRadius = eraserRadius + strokePadding + 1.0;
     const hitRadiusSq = hitRadius * hitRadius;
 
     let wasHit = false;
@@ -137,18 +148,17 @@ export function eraseStrokesAlongPath(
     }
 
     if (!wasHit) {
-      resultStrokes.push(stroke); // Untouched stroke
+      resultStrokes.push(stroke);
       continue;
     }
 
-    // This stroke was hit: Densify and split into remaining sub-segments
+    // Stroke was hit: Densify and split into clean sub-segments
     globalChanged = true;
-    const densePts = densifyPoints(pts, 3);
+    const densePts = densifyPoints(pts, 2.5);
     const subSegments: Point[][] = [];
     let currentSeg: Point[] = [];
 
     for (const p of densePts) {
-      // Check if point p is erased at any step along the path
       let pointErased = false;
       for (let s = 0; s <= numSteps; s++) {
         const t = s / numSteps;
@@ -176,11 +186,15 @@ export function eraseStrokesAlongPath(
       subSegments.push(currentSeg);
     }
 
+    // Prune micro-specks, residual cut stubs, and dangling single points!
+    const minResidualLength = Math.max(6, (stroke.size || 4) * 0.9);
+
     for (let i = 0; i < subSegments.length; i++) {
       const seg = subSegments[i];
-      if (seg.length > 0) {
+      // Discard single isolated points or segments shorter than the stroke thickness
+      if (seg.length >= 2 && getSegmentLength(seg) >= minResidualLength) {
         resultStrokes.push({
-          id: `${stroke.id}_cut_${Date.now()}_${i}`,
+          id: `${stroke.id}_cut_${Date.now()}_${i}_${Math.random().toString(36).substr(2, 4)}`,
           points: seg,
           tool: stroke.tool,
           color: stroke.color,
