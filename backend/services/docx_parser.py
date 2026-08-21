@@ -11,23 +11,66 @@ from docx.table import Table
 
 from services.compiler import get_instruction_map
 
-OPTION_PREFIX_RE = re.compile(r'^\s*(?:\*\*)?\s*([A-E])\s*(?:\.(?:\*\*)?|(?:\*\*)?\.)\s*(.*)', re.DOTALL)
-QUESTION_RE = re.compile(r'^\s*(?:\*\*)?Question\s+(\d+)\s*(?::)?\s*(?:\*\*)?\s*(?::)?\s*(.*)', re.IGNORECASE | re.DOTALL)
+OPTION_PREFIX_RE = re.compile(r'^\s*(?:\*\*)?\s*([A-E])\s*(?:\.(?:\*\*)?|(?:\*\*)?\.|(?:\*\*)?\))\s*(.*)', re.DOTALL)
+QUESTION_RE = re.compile(r'^\s*(?:\*\*)?(?:Question|Câu|Q|Sentence)\s*(\d+)\s*[:.\-]?\s*(?:\*\*)?\s*[:.\-]?\s*(.*)', re.IGNORECASE | re.DOTALL)
 
 def normalize_q_key(q_val):
     try:
         return int(q_val)
     except (ValueError, TypeError):
-        import re
         match = re.search(r'\d+', str(q_val))
         if match:
             return int(match.group(0))
     return str(q_val)
 
+def is_run_yellow_or_highlighted(run) -> bool:
+    """Checks if a docx Run has yellow highlight, general highlight, yellow shading, or colored emphasis."""
+    try:
+        if run.font.highlight_color is not None and run.font.highlight_color != WD_COLOR_INDEX.AUTO:
+            return True
+    except Exception:
+        pass
+
+    try:
+        r_elem = run._r
+        rPr = r_elem.rPr
+        if rPr is not None:
+            highlights = rPr.xpath('./w:highlight')
+            if highlights:
+                val = (highlights[0].get(qn('w:val')) or highlights[0].get('val') or '').lower()
+                if val and val != 'none':
+                    return True
+
+            shadings = rPr.xpath('./w:shd')
+            if shadings:
+                fill = (shadings[0].get(qn('w:fill')) or shadings[0].get('fill') or '').upper()
+                if fill and fill not in ('AUTO', 'NONE', 'FFFFFF', '000000', 'CLEAR'):
+                    return True
+
+            colors = rPr.xpath('./w:color')
+            if colors:
+                val = (colors[0].get(qn('w:val')) or colors[0].get('val') or '').upper()
+                if val in ('FFFF00', 'FFD700', 'FFCC00', 'FFE600', 'E6B800', 'FF0000', '00B050', '385723', 'ED7D31'):
+                    return True
+    except Exception:
+        pass
+
+    try:
+        if run.font.color and run.font.color.rgb:
+            rgb = run.font.color.rgb
+            if rgb == RGBColor(255, 0, 0) or (rgb[0] > 180 and rgb[1] > 180 and rgb[2] < 120):
+                return True
+    except Exception:
+        pass
+
+    return False
+
 def split_paragraph_runs_by_tab(paragraph):
     options_runs = []
     current_runs = []
+    
     for run in paragraph.runs:
+        is_highlighted = is_run_yellow_or_highlighted(run)
         if '\t' in run.text:
             parts = run.text.split('\t')
             if parts[0]:
@@ -37,7 +80,8 @@ def split_paragraph_runs_by_tab(paragraph):
                     'italic': run.italic,
                     'underline': run.underline,
                     'highlight': run.font.highlight_color,
-                    'color_rgb': run.font.color.rgb if run.font.color else None
+                    'color_rgb': run.font.color.rgb if run.font.color else None,
+                    'is_yellow': is_highlighted
                 })
             options_runs.append(current_runs)
             
@@ -48,7 +92,8 @@ def split_paragraph_runs_by_tab(paragraph):
                     'italic': run.italic,
                     'underline': run.underline,
                     'highlight': run.font.highlight_color,
-                    'color_rgb': run.font.color.rgb if run.font.color else None
+                    'color_rgb': run.font.color.rgb if run.font.color else None,
+                    'is_yellow': is_highlighted
                 }] if part else [])
                 
             current_runs = []
@@ -59,7 +104,8 @@ def split_paragraph_runs_by_tab(paragraph):
                     'italic': run.italic,
                     'underline': run.underline,
                     'highlight': run.font.highlight_color,
-                    'color_rgb': run.font.color.rgb if run.font.color else None
+                    'color_rgb': run.font.color.rgb if run.font.color else None,
+                    'is_yellow': is_highlighted
                 })
         else:
             current_runs.append({
@@ -68,10 +114,48 @@ def split_paragraph_runs_by_tab(paragraph):
                 'italic': run.italic,
                 'underline': run.underline,
                 'highlight': run.font.highlight_color,
-                'color_rgb': run.font.color.rgb if run.font.color else None
+                'color_rgb': run.font.color.rgb if run.font.color else None,
+                'is_yellow': is_highlighted
             })
+            
     if current_runs:
         options_runs.append(current_runs)
+        
+    # If not split by tabs, check if multiple options exist in a single line e.g. A. ... B. ... C. ... D. ...
+    if len(options_runs) == 1 and options_runs[0]:
+        combined_text = "".join(r['text'] for r in options_runs[0])
+        matches = list(re.finditer(r'(?:\s{2,}|\b|^)(?:[A-E]\.|\([A-E]\)|[A-E]\))\s+', combined_text))
+        if len(matches) > 1:
+            split_opts = []
+            flat_runs = options_runs[0]
+            for idx, m in enumerate(matches):
+                start_char = m.start()
+                end_char = matches[idx + 1].start() if idx + 1 < len(matches) else len(combined_text)
+                
+                curr_char = 0
+                opt_chunk = []
+                for r in flat_runs:
+                    r_len = len(r['text'])
+                    r_start = curr_char
+                    r_end = curr_char + r_len
+                    if r_end > start_char and r_start < end_char:
+                        overlap_start = max(0, start_char - r_start)
+                        overlap_end = min(r_len, end_char - r_start)
+                        opt_chunk.append({
+                            'text': r['text'][overlap_start:overlap_end],
+                            'bold': r['bold'],
+                            'italic': r['italic'],
+                            'underline': r['underline'],
+                            'highlight': r['highlight'],
+                            'color_rgb': r['color_rgb'],
+                            'is_yellow': r['is_yellow']
+                        })
+                    curr_char = r_end
+                if opt_chunk:
+                    split_opts.append(opt_chunk)
+            if split_opts:
+                return split_opts
+
     return options_runs
 
 def run_dicts_to_markdown(run_dicts):
@@ -84,10 +168,9 @@ def run_dicts_to_markdown(run_dicts):
             i += 1
             continue
         
-        # Check if underlined and next is bold '(A)' or similar
         if run['underline'] and (i + 1 < len(run_dicts)):
             next_run = run_dicts[i + 1]
-            if next_run['bold'] and next_run['text'].strip() in ['(A)', '(B)', '(C)', '(D)']:
+            if next_run['bold'] and next_run['text'].strip() in ['(A)', '(B)', '(C)', '(D)', '(E)']:
                 let = next_run['text'].strip().replace('(', '').replace(')', '')
                 clean_text = text.strip()
                 leading = text[:len(text)-len(text.lstrip())]
@@ -130,29 +213,59 @@ def parse_runs_to_markdown(paragraph) -> str:
             'italic': run.italic,
             'underline': run.underline,
             'highlight': run.font.highlight_color,
-            'color_rgb': run.font.color.rgb if run.font.color else None
+            'color_rgb': run.font.color.rgb if run.font.color else None,
+            'is_yellow': is_run_yellow_or_highlighted(run)
         })
     return run_dicts_to_markdown(run_dicts)
 
 def parse_answer_key_table(doc) -> Dict[int, str]:
-    answers = {}
-    for table in reversed(doc.tables):
-        is_answer_table = False
-        temp_answers = {}
-        for row in table.rows:
+    """Comprehensively parses answer keys from tables and bottom answer key sections in DOCX."""
+    answers: Dict[int, str] = {}
+    
+    # 1. Check all tables in the document
+    for table in doc.tables:
+        rows = table.rows
+        num_rows = len(rows)
+        if num_rows == 0:
+            continue
+            
+        # Format A: Check individual cells with '1.A', '1. A', '1 - A', '1A', 'Câu 1: A'
+        for row in rows:
             for cell in row.cells:
                 text = cell.text.strip()
                 if not text:
                     continue
-                match = re.match(r'^(\d+)\.\s*([A-E])$', text)
-                if match:
-                    is_answer_table = True
-                    q_num = int(match.group(1))
-                    ans = match.group(2)
-                    temp_answers[q_num] = ans
-        if is_answer_table:
-            answers.update(temp_answers)
-            break
+                matches = re.findall(r'(?:(?:Câu|Q|Question)\s*)?(\d+)\s*[:.\-]?\s*([A-E])\b', text, re.IGNORECASE)
+                for q_str, a_str in matches:
+                    answers[int(q_str)] = a_str.upper()
+                    
+        # Format B: Matrix table with Q numbers in row i and answers in row i+1
+        for r_idx in range(num_rows - 1):
+            row_q = [c.text.strip() for c in rows[r_idx].cells]
+            row_a = [c.text.strip() for c in rows[r_idx + 1].cells]
+            if len(row_q) == len(row_a) and len(row_q) >= 2:
+                for q_cell, a_cell in zip(row_q, row_a):
+                    q_m = re.match(r'^(?:(?:Câu|Q)\s*)?(\d+)$', q_cell, re.IGNORECASE)
+                    a_m = re.match(r'^([A-E])$', a_cell, re.IGNORECASE)
+                    if q_m and a_m:
+                        answers[int(q_m.group(1))] = a_m.group(1).upper()
+
+    # 2. Check paragraphs for dedicated Answer Key sections (e.g. at the bottom of the document)
+    is_in_answer_section = False
+    for p in doc.paragraphs:
+        p_text = p.text.strip()
+        if not p_text:
+            continue
+            
+        header_match = re.search(r'(?:BẢNG\s+)?ĐÁP\s*ÁN|ANSWER\s*KEY|HƯỚNG\s*DẪN\s*CHẤM|KEY\s*ĐÁP\s*ÁN', p_text, re.IGNORECASE)
+        if header_match:
+            is_in_answer_section = True
+            
+        if is_in_answer_section:
+            matches = re.findall(r'(?:(?:Câu|Q|Question)\s*)?(\d+)\s*[:.\-]?\s*([A-E])\b', p_text, re.IGNORECASE)
+            for q_str, a_str in matches:
+                answers[int(q_str)] = a_str.upper()
+                
     return answers
 
 def match_instruction(text: str) -> str:
@@ -319,16 +432,10 @@ def convert_docx_to_json(filepath: str) -> List[Dict[str, Any]]:
             opt_match = OPTION_PREFIX_RE.match(opt_md)
             if opt_match:
                 is_option_paragraph = True
-                opt_letter = opt_match.group(1)
+                opt_letter = opt_match.group(1).upper()
                 opt_val = opt_match.group(2).strip()
                 
-                is_correct = False
-                for r in option_runs:
-                    if r['highlight'] is not None:
-                        is_correct = True
-                    elif r['color_rgb'] == RGBColor(255, 0, 0):
-                        is_correct = True
-                        
+                is_correct = any(r.get('is_yellow') or r.get('highlight') is not None or r.get('color_rgb') == RGBColor(255, 0, 0) for r in option_runs)
                 parsed_options.append((opt_letter, opt_val, is_correct))
                 
         if is_option_paragraph:

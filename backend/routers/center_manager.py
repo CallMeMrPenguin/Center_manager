@@ -652,7 +652,11 @@ async def api_parse_kiemtra(file: UploadFile = File(None), raw_json: Optional[st
 
                     opts = q.get("options") or q.get("o") or []
                     cleaned_opts = [_clean_opt_prefix(o) for o in opts] if isinstance(opts, list) else []
-                    ans = q.get("answer") or q.get("a") or ""
+                    ans = str(q.get("answer") or q.get("a") or "").strip()
+                    if ans.upper() in ["A", "B", "C", "D", "E"] and cleaned_opts:
+                        let_idx = ord(ans.upper()) - 65
+                        if 0 <= let_idx < len(cleaned_opts):
+                            ans = cleaned_opts[let_idx]
                     q_type = q.get("type") or ("mcq" if cleaned_opts else "fill")
                     inst = q.get("instruction") or top_inst
                     normalized_qs.append({
@@ -686,13 +690,18 @@ async def api_parse_kiemtra(file: UploadFile = File(None), raw_json: Optional[st
                         if len(parts) == 2:
                             instruction = parts[0].replace("[Yêu cầu: ", "").strip()
                             q_raw_text = parts[1]
+                    ans = str(q.get("a", "")).strip()
+                    if ans.upper() in ["A", "B", "C", "D", "E"] and cleaned_opts:
+                        let_idx = ord(ans.upper()) - 65
+                        if 0 <= let_idx < len(cleaned_opts):
+                            ans = cleaned_opts[let_idx]
                     questions.append({
                         "id": idx,
                         "question": q_raw_text,
                         "instruction": instruction,
                         "type": "mcq" if cleaned_opts else "fill",
                         "options": cleaned_opts,
-                        "answer": q.get("a", ""),
+                        "answer": ans,
                         "explanation": ""
                     })
                 return {"title": file.filename, "questions": questions}
