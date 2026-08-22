@@ -101,14 +101,8 @@ const CheckScoreInput = React.memo(({
     }
   }, [rec[field]]);
 
-  const predKey = field === 'check_1' ? 'pred_c1' : field === 'check_2' ? 'pred_c2' : field === 'homework' ? 'pred_hw' : 'pred_mock';
-  const defaultPred = field === 'check_1' ? 8.5 : field === 'check_2' ? 8.0 : field === 'homework' ? 9.0 : 8.5;
-  const predVal = rec[predKey] !== undefined ? rec[predKey] : Math.min(10.0, Math.max(0.0, (Number(val) || defaultPred)));
-  const badgeColor = field === 'check_1' ? 'text-indigo-300' : field === 'check_2' ? 'text-purple-300' : field === 'homework' ? 'text-emerald-300' : 'text-amber-300';
-  const label = field === 'check_1' ? 'Check 1' : field === 'check_2' ? 'Check 2' : field === 'homework' ? 'HW' : 'Luyện Đề';
-
   return (
-    <div className="flex flex-col items-center justify-center gap-0.5">
+    <div className="flex items-center justify-center">
       <input
         type="text"
         value={val}
@@ -118,14 +112,14 @@ const CheckScoreInput = React.memo(({
           isFocused.current = false;
           const formatted = parseAndFormatScore(e.target.value);
           setVal(formatted);
-          onUpdateRecord(rec.student_id, field, formatted);
+          const currentVal = rec[field] !== null && rec[field] !== undefined ? String(rec[field]) : '';
+          if (formatted !== currentVal) {
+            onUpdateRecord(rec.student_id, field, formatted);
+          }
         }}
         placeholder="0-10"
-        className="w-20 bg-[#161a29] border border-white/10 rounded-lg px-2.5 py-1 text-white font-extrabold text-xs focus:outline-none focus:border-indigo-500 text-center"
+        className="w-20 bg-[#161a29] border border-white/10 rounded-lg px-2.5 py-1.5 text-white font-extrabold text-xs focus:outline-none focus:border-indigo-500 text-center"
       />
-      <div className={`text-[9px] ${badgeColor} font-bold text-center mt-0.5`} title={`Dự đoán điểm ${label}`}>
-        {rec.prediction_model ? `${rec.prediction_model}: ` : 'Dự đoán: '}{predVal}
-      </div>
     </div>
   );
 });

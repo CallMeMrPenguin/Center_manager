@@ -232,22 +232,12 @@ def api_get_attendance(class_id: int, date: str):
     students = get_class_students(class_id)
     existing = get_class_attendance_grades(class_id, date)
     existing_map = {r["student_id"]: r for r in existing}
-    student_preds = get_class_student_predictions(class_id)
     
     result = []
     for st in students:
-        preds = student_preds.get(st["id"], {
-            "pred_c1": 8.5,
-            "pred_c2": 8.0,
-            "pred_hw": 9.0,
-            "predicted_next": 8.5
-        })
         if st["id"] in existing_map:
             rec = dict(existing_map[st["id"]])
             rec["student_name"] = st["full_name"]
-            rec["pred_c1"] = preds["pred_c1"]
-            rec["pred_c2"] = preds["pred_c2"]
-            rec["pred_hw"] = preds["pred_hw"]
             result.append(rec)
         else:
             result.append({
@@ -259,10 +249,8 @@ def api_get_attendance(class_id: int, date: str):
                 "check_1": None,
                 "check_2": None,
                 "homework": None,
-                "notes": "",
-                "pred_c1": preds["pred_c1"],
-                "pred_c2": preds["pred_c2"],
-                "pred_hw": preds["pred_hw"]
+                "mock_test": None,
+                "notes": ""
             })
     return {"date": date, "records": result}
 
