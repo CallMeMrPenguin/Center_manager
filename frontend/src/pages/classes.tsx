@@ -257,10 +257,10 @@ export default function ClassesPage() {
   useEffect(() => {
     loadClasses();
     const handleDataChanged = () => {
+      // Chỉ reload danh sách lớp học (class cards).
+      // KHÔNG reload attendance/grades vì đó là live-edit surface —
+      // reload sẽ race condition với điểm đang được nhập và chưa save xong.
       loadClasses(true);
-      if (selectedClass) {
-        loadClassDetailData(selectedClass);
-      }
     };
     window.addEventListener('data-changed', handleDataChanged);
     return () => window.removeEventListener('data-changed', handleDataChanged);
@@ -337,7 +337,7 @@ export default function ClassesPage() {
     } else {
       setSelectedClassWeeklyDays([]);
     }
-  }, [selectedClass]);
+  }, [selectedClass?.id]);
 
   useEffect(() => {
     if (selectedClass && (activeSubTab === 'grades' || activeSubTab === 'seating')) {
