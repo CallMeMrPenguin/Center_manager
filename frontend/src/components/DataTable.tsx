@@ -179,14 +179,12 @@ function DraggableHeader({
   const style: React.CSSProperties = {
     transform: CSS.Transform.toString(transform),
     transition: (isResizing || isAnyColumnResizing) ? 'none' : transition,
-    opacity: isDragging ? 0.5 : 1,
+    opacity: isDragging ? 0.6 : 1,
     zIndex: isDragging ? 100 : undefined,
     position: 'relative',
     ...(isPinned === 'left' ? { position: 'sticky', left: header.column.getStart('left'), zIndex: 10, boxShadow: '2px 0 6px rgba(0,0,0,0.5)' } : {}),
     ...(isPinned === 'right' ? { position: 'sticky', right: header.column.getAfter('right'), zIndex: 10, boxShadow: '-2px 0 6px rgba(0,0,0,0.5)' } : {}),
   };
-
-  const alignClass = align === 'left' ? 'justify-start text-left' : 'justify-center text-center';
 
   return (
     <th
@@ -196,14 +194,21 @@ function DraggableHeader({
         isPinned ? 'bg-[#111827]' : ''
       }`}
     >
-      {/* Draggable Title Area (Centered by default across all columns) */}
+      {/* Draggable Title Area with dedicated touchAction none & grab cursor */}
       <div
         {...(enableReorder ? { ...attributes, ...listeners } : {})}
-        className={`flex items-center justify-center text-center gap-1.5 w-full py-3.5 px-3 overflow-hidden text-slate-200 text-sm sm:text-base font-black uppercase tracking-wider whitespace-nowrap ${
+        style={{ touchAction: enableReorder ? 'none' : 'auto' }}
+        className={`group flex items-center justify-center text-center gap-1.5 w-full py-3 px-2.5 overflow-hidden text-slate-200 text-sm sm:text-base font-black uppercase tracking-wider whitespace-nowrap ${
           enableReorder ? 'cursor-grab active:cursor-grabbing hover:text-white transition-colors' : ''
         }`}
         title={enableReorder ? 'Giữ chuột và kéo để thay đổi thứ tự cột' : undefined}
       >
+        {enableReorder && (
+          <GripVertical
+            size={13}
+            className="text-slate-600 group-hover:text-indigo-400 cursor-grab active:cursor-grabbing shrink-0 transition-colors"
+          />
+        )}
         {children}
       </div>
 
@@ -230,19 +235,21 @@ function DraggableHeader({
   );
 }
 
-// ─── Column Visibility & Alignment Dropdown ──────────────────────────────────
+// ─── Column Visibility, Alignment & Order Dropdown ───────────────────────────
 function ColumnVisibilityDropdown<TData>({
   table,
   columnAlignments,
   onToggleAlignment,
   onResetColumnWidths,
+  onMoveColumn,
 }: {
   table: ReturnType<typeof useReactTable<TData>>;
   columnAlignments: Record<string, 'center' | 'left'>;
   onToggleAlignment: (colId: string) => void;
   onResetColumnWidths?: () => void;
+  onMoveColumn?: (colId: string, direction: 'up' | 'down') => void;
 }) {
-  const [activeTab, setActiveTab] = useState<'visibility' | 'align'>('visibility');
+  const [activeTab, setActiveTab] = useState<'visibility' | 'order' | 'align'>('visibility');
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -262,7 +269,7 @@ function ColumnVisibilityDropdown<TData>({
         type="button"
         onClick={() => setOpen(v => !v)}
         className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#1c243c] hover:bg-[#253050] text-slate-300 hover:text-white border border-[#303d62] text-xs font-bold transition cursor-pointer"
-        title="Hiển thị & Căn chỉnh cột"
+        title="Hiển thị, Thứ tự & Căn chỉnh cột"
       >
         <SlidersHorizontal size={13} className="text-indigo-400" />
         <span className="hidden sm:inline">Cột</span>
@@ -270,22 +277,31 @@ function ColumnVisibilityDropdown<TData>({
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full mt-2 z-[60] w-64 bg-[#131929] border border-[#28334e] rounded-2xl shadow-2xl p-3 space-y-2 animate-mac-dropdown">
+        <div className="absolute right-0 top-full mt-2 z-[60] w-72 bg-[#131929] border border-[#28334e] rounded-2xl shadow-2xl p-3 space-y-2 animate-mac-dropdown">
           {/* TAB SWITCHER */}
-          <div className="flex bg-[#0b0e19] p-1 rounded-xl border border-white/5 text-xs font-bold">
+          <div className="flex bg-[#0b0e19] p-1 rounded-xl border border-white/5 text-xs font-bold gap-0.5">
             <button
               type="button"
               onClick={() => setActiveTab('visibility')}
-              className={`flex-1 py-1.5 text-center rounded-lg transition cursor-pointer ${
+              className={`flex-1 py-1.5 text-center rounded-lg transition cursor-pointer text-[11px] ${
                 activeTab === 'visibility' ? 'bg-[#5c36f5] text-white font-extrabold shadow-sm' : 'text-slate-400 hover:text-white'
               }`}
             >
-              Hiển Thị Cột
+              Hiển Thị
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('order')}
+              className={`flex-1 py-1.5 text-center rounded-lg transition cursor-pointer text-[11px] ${
+                activeTab === 'order' ? 'bg-[#5c36f5] text-white font-extrabold shadow-sm' : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              Thứ Tự
             </button>
             <button
               type="button"
               onClick={() => setActiveTab('align')}
-              className={`flex-1 py-1.5 text-center rounded-lg transition cursor-pointer ${
+              className={`flex-1 py-1.5 text-center rounded-lg transition cursor-pointer text-[11px] ${
                 activeTab === 'align' ? 'bg-[#5c36f5] text-white font-extrabold shadow-sm' : 'text-slate-400 hover:text-white'
               }`}
             >
@@ -305,28 +321,73 @@ function ColumnVisibilityDropdown<TData>({
                     className="text-[9px] text-slate-400 hover:text-white px-1.5 py-0.5 rounded bg-white/5 hover:bg-white/10 transition cursor-pointer">Ẩn hết</button>
                 </div>
               </div>
-              <div className="max-h-56 overflow-y-auto space-y-0.5 scrollbar-thin pr-1">
+              <div className="max-h-60 overflow-y-auto space-y-0.5 scrollbar-thin pr-1">
                 {allCols.map(col => (
                   <label key={col.id} className="flex items-center gap-2.5 text-xs text-slate-200 cursor-pointer hover:text-white px-1.5 py-1 rounded-lg hover:bg-[#1e2740] transition">
                     <input type="checkbox" checked={col.getIsVisible()} onChange={col.getToggleVisibilityHandler()}
                       className="accent-indigo-500 rounded cursor-pointer w-3.5 h-3.5" />
-                    <span className="truncate">{typeof col.columnDef.header === 'string' ? col.columnDef.header : col.id}</span>
+                    <span className="truncate">{getColumnHeaderText(col, table)}</span>
                   </label>
                 ))}
               </div>
             </div>
           )}
 
-          {/* TAB 2: ALIGNMENT */}
+          {/* TAB 2: COLUMN ORDER (UP / DOWN) */}
+          {activeTab === 'order' && (
+            <div className="space-y-1">
+              <div className="text-[10px] font-black uppercase text-indigo-400 tracking-wider border-b border-white/10 pb-1.5 mb-1 flex items-center justify-between">
+                <span>Thứ tự các cột</span>
+                <span className="text-[9px] text-slate-400 font-normal">Kéo header hoặc bấm nút</span>
+              </div>
+              <div className="max-h-60 overflow-y-auto space-y-1 scrollbar-thin pr-1">
+                {allCols.map((col, idx) => {
+                  const colName = getColumnHeaderText(col, table);
+                  const isFirst = idx === 0;
+                  const isLast = idx === allCols.length - 1;
+                  return (
+                    <div key={col.id} className="flex items-center justify-between gap-2 px-2 py-1 rounded-lg bg-[#0e1322] border border-white/5 text-xs text-slate-200">
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        <span className="text-[10px] font-mono text-slate-500 font-bold w-4">{idx + 1}.</span>
+                        <span className="truncate font-semibold text-slate-200">{colName}</span>
+                      </div>
+                      <div className="flex items-center gap-1 shrink-0">
+                        <button
+                          type="button"
+                          disabled={isFirst}
+                          onClick={() => onMoveColumn?.(col.id, 'up')}
+                          className="p-1 rounded bg-white/5 hover:bg-white/15 text-slate-300 disabled:opacity-20 disabled:cursor-not-allowed transition cursor-pointer"
+                          title="Chuyển sang trái"
+                        >
+                          <ChevronLeft size={12} />
+                        </button>
+                        <button
+                          type="button"
+                          disabled={isLast}
+                          onClick={() => onMoveColumn?.(col.id, 'down')}
+                          className="p-1 rounded bg-white/5 hover:bg-white/15 text-slate-300 disabled:opacity-20 disabled:cursor-not-allowed transition cursor-pointer"
+                          title="Chuyển sang phải"
+                        >
+                          <ChevronRight size={12} />
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* TAB 3: ALIGNMENT */}
           {activeTab === 'align' && (
             <div className="space-y-1">
               <div className="text-[10px] font-black uppercase text-indigo-400 tracking-wider border-b border-white/10 pb-1.5 mb-1">
                 <span>Tích = Căn Giữa | Bỏ tích = Trái</span>
               </div>
-              <div className="max-h-56 overflow-y-auto space-y-0.5 scrollbar-thin pr-1">
+              <div className="max-h-60 overflow-y-auto space-y-0.5 scrollbar-thin pr-1">
                 {allCols.map(col => {
                   const isCentered = columnAlignments[col.id] === 'center';
-                  const colName = typeof col.columnDef.header === 'string' ? col.columnDef.header : col.id;
+                  const colName = getColumnHeaderText(col, table);
                   return (
                     <label key={col.id} className="flex items-center justify-between gap-2 text-xs text-slate-200 cursor-pointer hover:text-white px-1.5 py-1 rounded-lg hover:bg-[#1e2740] transition">
                       <div className="flex items-center gap-2 min-w-0">
@@ -913,13 +974,42 @@ export function DataTable<TData>({
   const handleDragEnd = useCallback((event: DragEndEvent) => {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
-    const currentOrder = table.getState().columnOrder.length > 0
-      ? table.getState().columnOrder
-      : table.getAllLeafColumns().map(c => c.id);
+    const allLeafIds = table.getAllLeafColumns().map(c => c.id);
+    let currentOrder = table.getState().columnOrder.length > 0
+      ? [...table.getState().columnOrder]
+      : [...allLeafIds];
+
+    allLeafIds.forEach(id => {
+      if (!currentOrder.includes(id)) {
+        currentOrder.push(id);
+      }
+    });
+
     const oldIndex = currentOrder.indexOf(String(active.id));
     const newIndex = currentOrder.indexOf(String(over.id));
     if (oldIndex !== -1 && newIndex !== -1) {
       setColumnOrder(arrayMove(currentOrder, oldIndex, newIndex));
+    }
+  }, [table]);
+
+  const handleMoveColumn = useCallback((colId: string, direction: 'up' | 'down') => {
+    const allLeafIds = table.getAllLeafColumns().map(c => c.id);
+    let currentOrder = table.getState().columnOrder.length > 0
+      ? [...table.getState().columnOrder]
+      : [...allLeafIds];
+
+    allLeafIds.forEach(id => {
+      if (!currentOrder.includes(id)) {
+        currentOrder.push(id);
+      }
+    });
+
+    const index = currentOrder.indexOf(colId);
+    if (index === -1) return;
+    const targetIndex = direction === 'up' ? index - 1 : index + 1;
+    if (targetIndex >= 0 && targetIndex < currentOrder.length) {
+      const newOrder = arrayMove(currentOrder, index, targetIndex);
+      setColumnOrder(newOrder);
     }
   }, [table]);
 
@@ -1008,6 +1098,7 @@ export function DataTable<TData>({
                 columnAlignments={columnAlignments}
                 onToggleAlignment={handleToggleAlignment}
                 onResetColumnWidths={handleResetColumnWidths}
+                onMoveColumn={handleMoveColumn}
               />
             )}
           </div>

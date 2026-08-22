@@ -395,7 +395,7 @@ export default function StudentsPage() {
           searchPlaceholder="Tìm theo tên, SĐT, biệt danh, trường..."
           loadingMessage="Đang tải danh sách học sinh..."
           emptyMessage="Không tìm thấy học sinh nào phù hợp."
-          pageSize={10}
+          pageSize={20}
         />
       </div>
 
