@@ -46,11 +46,16 @@ export function computeWeaknessRemedialList({
 
       const weakUnits: StudentWeakUnitItem[] = [];
       Object.entries(st.units || {}).forEach(([uKey, uData]: [string, any]) => {
+        // Skip duplicate legacy raw key if compound key is present in st.units
+        if (!uKey.includes('__') && (st.units?.[`${uKey}__vocab`] || st.units?.[`${uKey}__grammar`])) {
+          return;
+        }
         if (uData.ema_score !== undefined && uData.ema_score !== null && uData.ema_score < 6.5) {
+          const cleanTopic = uData.unit_key || uKey.replace(/__(vocab|grammar)$/, '');
           weakUnits.push({
-            unit_key: uKey,
-            skill: (uData.skill as any) || 'grammar',
-            topic_name: uKey,
+            unit_key: cleanTopic,
+            skill: (uData.skill as any) || (uKey.endsWith('__vocab') ? 'vocab' : 'grammar'),
+            topic_name: cleanTopic,
             avg_score: trunc1Dec(uData.ema_score),
             test_count: uData.test_count || 1,
           });

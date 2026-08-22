@@ -119,11 +119,13 @@ def get_skill_breakdown_report(conn, class_id: Optional[int] = None, student_id:
     unique_units = []
     seen_units = set()
     for ub in unit_breakdown:
-        if ub["unit_key"] not in seen_units:
-            seen_units.add(ub["unit_key"])
+        k = (ub["unit_key"], ub["skill"])
+        if k not in seen_units:
+            seen_units.add(k)
             unique_units.append({
                 "unit_key": ub["unit_key"],
                 "skill": ub["skill"],
+                "unit_id": f"{ub['unit_key']}__{ub['skill']}",
                 "avg_score": ub["avg_score"]
             })
 
@@ -133,6 +135,7 @@ def get_skill_breakdown_report(conn, class_id: Optional[int] = None, student_id:
         grade_str = str(r.get("grade") or "")
         clean_grade = "K" + "".join(filter(str.isdigit, grade_str)) if any(c.isdigit() for c in grade_str) else grade_str
         display_ukey = f"[{clean_grade}] {r['unit_key']}" if (has_multiple_grades and clean_grade) else r["unit_key"]
+        unit_id = f"{display_ukey}__{r['skill']}"
 
         if sid not in student_map:
             student_map[sid] = {
@@ -143,7 +146,9 @@ def get_skill_breakdown_report(conn, class_id: Optional[int] = None, student_id:
                 "grade": r.get("grade") or "",
                 "units": {}
             }
-        student_map[sid]["units"][display_ukey] = {
+        
+        unit_data = {
+            "unit_key": display_ukey,
             "skill": r["skill"],
             "ema_score": r["ema_score"],
             "last_score": r.get("last_score"),
@@ -151,6 +156,9 @@ def get_skill_breakdown_report(conn, class_id: Optional[int] = None, student_id:
             "mastery_status": r["mastery_status"],
             "last_tested": r.get("last_tested")
         }
+        student_map[sid]["units"][unit_id] = unit_data
+        if display_ukey not in student_map[sid]["units"]:
+            student_map[sid]["units"][display_ukey] = unit_data
 
     heatmap_students = list(student_map.values())
     heatmap_students.sort(key=lambda s: s["student_name"])
@@ -179,6 +187,8 @@ def get_skill_breakdown_report(conn, class_id: Optional[int] = None, student_id:
             c1_cfg = cfg.get("check_1") or {}
             c2_cfg = cfg.get("check_2") or {}
 
+            c1_skill = c1_cfg.get("skill") or "vocab"
+            c2_skill = c2_cfg.get("skill") or "grammar"
             c1_units = c1_cfg.get("units") or ([c1_cfg.get("topic")] if c1_cfg.get("topic") else ["Chung"])
             c2_units = c2_cfg.get("units") or ([c2_cfg.get("topic") or c2_cfg.get("grammar_topic")] if (c2_cfg.get("topic") or c2_cfg.get("grammar_topic")) else ["Chung"])
 
@@ -190,11 +200,17 @@ def get_skill_breakdown_report(conn, class_id: Optional[int] = None, student_id:
                 s_units = st.get("units", {})
 
                 # Estimate c1 pred with multi-tier fallback
-                c1_matched = [s_units[u]["ema_score"] for u in c1_units if u in s_units and s_units[u].get("ema_score") is not None]
+                c1_matched = []
+                for u in c1_units:
+                    k1 = f"{u}__{c1_skill}"
+                    if k1 in s_units and s_units[k1].get("ema_score") is not None:
+                        c1_matched.append(s_units[k1]["ema_score"])
+                    elif u in s_units and s_units[u].get("ema_score") is not None and s_units[u].get("skill") == c1_skill:
+                        c1_matched.append(s_units[u]["ema_score"])
                 if c1_matched:
                     c1_pred = trunc_1_dec(sum(c1_matched) / len(c1_matched))
                 else:
-                    st_vocab = [v["ema_score"] for v in s_units.values() if v.get("skill") == "vocab" and v.get("ema_score") is not None]
+                    st_vocab = [v["ema_score"] for v in s_units.values() if v.get("skill") == c1_skill and v.get("ema_score") is not None]
                     if st_vocab:
                         c1_pred = trunc_1_dec(sum(st_vocab) / len(st_vocab))
                     elif vocab_avg > 0:
@@ -203,11 +219,17 @@ def get_skill_breakdown_report(conn, class_id: Optional[int] = None, student_id:
                         c1_pred = 7.0
 
                 # Estimate c2 pred with multi-tier fallback
-                c2_matched = [s_units[u]["ema_score"] for u in c2_units if u in s_units and s_units[u].get("ema_score") is not None]
+                c2_matched = []
+                for u in c2_units:
+                    k2 = f"{u}__{c2_skill}"
+                    if k2 in s_units and s_units[k2].get("ema_score") is not None:
+                        c2_matched.append(s_units[k2]["ema_score"])
+                    elif u in s_units and s_units[u].get("ema_score") is not None and s_units[u].get("skill") == c2_skill:
+                        c2_matched.append(s_units[u]["ema_score"])
                 if c2_matched:
                     c2_pred = trunc_1_dec(sum(c2_matched) / len(c2_matched))
                 else:
-                    st_grammar = [v["ema_score"] for v in s_units.values() if v.get("skill") == "grammar" and v.get("ema_score") is not None]
+                    st_grammar = [v["ema_score"] for v in s_units.values() if v.get("skill") == c2_skill and v.get("ema_score") is not None]
                     if st_grammar:
                         c2_pred = trunc_1_dec(sum(st_grammar) / len(st_grammar))
                     elif grammar_avg > 0:

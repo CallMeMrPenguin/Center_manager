@@ -2644,15 +2644,23 @@ def get_analytics_reports(class_id: Optional[int] = None, student_id: Optional[i
                     grammar_topic = c1_topic
                 else:
                     grammar_topic = ""
-                topic = c1_topic or c2_topic or (", ".join(c1_info.get("units", []) + c2_info.get("units", [])))
+                units_list = (c1_info.get("units") or []) + (c2_info.get("units") or [])
+                unit_str = ", ".join(dict.fromkeys(units_list)) if units_list else ""
+                topic = unit_str or c1_topic or c2_topic or "Chung"
             except Exception:
-                pass
+                unit_str = ""
+                units_list = []
+        else:
+            unit_str = ""
+            units_list = []
         r["check_1_skill"] = c1_skill
         r["check_2_skill"] = c2_skill
         r["check_1_topic"] = c1_topic
         r["check_2_topic"] = c2_topic
         r["grammar_topic"] = grammar_topic
         r["topic"] = topic
+        r["unit_key"] = unit_str
+        r["units"] = units_list
         all_rows.append(r)
 
     # Filter session records for the specific class / student view if requested

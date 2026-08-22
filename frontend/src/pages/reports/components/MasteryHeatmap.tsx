@@ -7,6 +7,7 @@ import { trunc1Dec } from '../../../utils';
 interface HeatmapUnit {
   unit_key: string;
   skill: string;
+  unit_id?: string;
   avg_score: number;
 }
 
@@ -137,52 +138,58 @@ export const MasteryHeatmap: React.FC<MasteryHeatmapProps> = ({
       },
     ];
 
-    const unitCols: ColumnDef<HeatmapStudent>[] = filteredUnits.map((u) => ({
-      id: `unit_${u.unit_key}`,
-      header: () => (
-        <div className="text-center py-1 select-none">
-          <div className="text-xs font-black text-white truncate max-w-[130px]" title={u.unit_key}>
-            {u.unit_key}
+    const unitCols: ColumnDef<HeatmapStudent>[] = filteredUnits.map((u) => {
+      const colKey = u.unit_id || `${u.unit_key}__${u.skill}`;
+      return {
+        id: `unit_${colKey}`,
+        header: () => (
+          <div className="text-center py-1 select-none">
+            <div className="text-xs font-black text-white truncate max-w-[130px]" title={u.unit_key}>
+              {u.unit_key}
+            </div>
+            <div className="flex items-center justify-center gap-1.5 mt-1">
+              <span
+                className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-full ${
+                  u.skill === 'vocab'
+                    ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30'
+                    : 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
+                }`}
+              >
+                {u.skill === 'vocab' ? 'Từ Vựng' : 'Ngữ Pháp'}
+              </span>
+              <span className="text-[10px] text-slate-400 font-semibold font-mono">
+                TB {trunc1Dec(u.avg_score)}
+              </span>
+            </div>
           </div>
-          <div className="flex items-center justify-center gap-1.5 mt-1">
-            <span
-              className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-full ${
-                u.skill === 'vocab'
-                  ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30'
-                  : 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
-              }`}
-            >
-              {u.skill === 'vocab' ? 'Từ Vựng' : 'Ngữ Pháp'}
-            </span>
-            <span className="text-[10px] text-slate-400 font-semibold font-mono">
-              TB {trunc1Dec(u.avg_score)}
-            </span>
-          </div>
-        </div>
-      ),
-      accessorFn: (row) => row.units?.[u.unit_key]?.ema_score ?? -1,
-      size: 110,
-      minSize: 95,
-      cell: ({ row }) => {
-        const uData = row.original.units?.[u.unit_key];
-        const ema = uData?.ema_score;
-        const style = getBadgeStyle(ema);
+        ),
+        accessorFn: (row) => {
+          const uData = row.units?.[colKey] || (row.units?.[u.unit_key]?.skill === u.skill ? row.units?.[u.unit_key] : undefined);
+          return uData?.ema_score ?? -1;
+        },
+        size: 110,
+        minSize: 95,
+        cell: ({ row }) => {
+          const uData = row.original.units?.[colKey] || (row.original.units?.[u.unit_key]?.skill === u.skill ? row.original.units?.[u.unit_key] : undefined);
+          const ema = uData?.ema_score;
+          const style = getBadgeStyle(ema);
 
-        return (
-          <div className="flex items-center justify-center py-0.5">
-            <span
-              onMouseMove={(e) => {
-                if (uData) handleCellMouseMove(e, row.original.student_name, u.unit_key, uData);
-              }}
-              onMouseLeave={() => setHoveredCell(null)}
-              className={`inline-flex items-center justify-center w-14 h-7 rounded-lg text-xs font-mono transition-all duration-150 cursor-pointer ${style.badgeClass}`}
-            >
-              {style.label}
-            </span>
-          </div>
-        );
-      },
-    }));
+          return (
+            <div className="flex items-center justify-center py-0.5">
+              <span
+                onMouseMove={(e) => {
+                  if (uData) handleCellMouseMove(e, row.original.student_name, u.unit_key, uData);
+                }}
+                onMouseLeave={() => setHoveredCell(null)}
+                className={`inline-flex items-center justify-center w-14 h-7 rounded-lg text-xs font-mono transition-all duration-150 cursor-pointer ${style.badgeClass}`}
+              >
+                {style.label}
+              </span>
+            </div>
+          );
+        },
+      };
+    });
 
     return [...baseCols, ...unitCols];
   }, [filteredUnits]);
