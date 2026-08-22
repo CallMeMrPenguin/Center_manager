@@ -312,9 +312,9 @@ def init_db():
         student_id INTEGER REFERENCES students(id) ON DELETE CASCADE NOT NULL,
         date TEXT NOT NULL,
         status TEXT CHECK(status IN ('Có mặt', 'Vắng mặt')) DEFAULT 'Có mặt',
-        check_1 REAL DEFAULT 0,
-        check_2 REAL DEFAULT 0,
-        homework REAL DEFAULT 0,
+        check_1 REAL DEFAULT NULL,
+        check_2 REAL DEFAULT NULL,
+        homework REAL DEFAULT NULL,
         notes TEXT,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         UNIQUE(class_id, student_id, date)
@@ -437,30 +437,12 @@ def init_db():
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_class_sessions_class_date ON class_sessions(class_id, date);")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_attendance_class_student_date ON class_attendance_grades(class_id, student_id, date);")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_custom_time_phases_class_dates ON custom_time_phases(class_id, from_date, to_date);")
-    # Cleanup / migration: Set status = 'Vắng mặt' ONLY for PAST attendance records (date < today) with no grades and no notes, while restoring today/future records to 'Có mặt'
+    # Migration: clean up any legacy 0-value scores → NULL (rule: missing grades = NULL, never 0)
     try:
-        cursor.execute("""
-            UPDATE class_attendance_grades
-            SET status = 'Vắng mặt'
-            WHERE date < DATE('now', 'localtime')
-              AND (check_1 IS NULL OR check_1 = 0)
-              AND (check_2 IS NULL OR check_2 = 0)
-              AND (homework IS NULL OR homework = 0)
-              AND (notes IS NULL OR TRIM(notes) = '')
-        """)
-        cursor.execute("""
-            UPDATE class_attendance_grades
-            SET status = 'Có mặt'
-            WHERE date >= DATE('now', 'localtime')
-              AND (check_1 IS NULL OR check_1 = 0)
-              AND (check_2 IS NULL OR check_2 = 0)
-              AND (homework IS NULL OR homework = 0)
-              AND (notes IS NULL OR TRIM(notes) = '')
-              AND status = 'Vắng mặt'
-        """)
         cursor.execute("UPDATE class_attendance_grades SET check_1 = NULL WHERE check_1 = 0")
         cursor.execute("UPDATE class_attendance_grades SET check_2 = NULL WHERE check_2 = 0")
         cursor.execute("UPDATE class_attendance_grades SET homework = NULL WHERE homework = 0")
+        cursor.execute("UPDATE class_attendance_grades SET mock_test = NULL WHERE mock_test = 0")
     except Exception as e:
         print("Attendance cleanup error:", e)
 

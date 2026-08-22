@@ -359,7 +359,9 @@ export default function ClassesPage() {
       let newStatus = rec.status;
       if (hasScore) {
         newStatus = 'Có mặt';
-      } else if (isPastDate && !hasScore && !hasNote) {
+      } else if (isPastDate && !hasScore && !hasNote && !rec.id) {
+        // Chỉ tự động đặt Vắng mặt cho record MỚI (chưa lưu DB, không có id)
+        // Không overwrite status thực của học sinh đã được lưu trước đó
         newStatus = 'Vắng mặt';
       } else if (!newStatus) {
         newStatus = 'Có mặt';
