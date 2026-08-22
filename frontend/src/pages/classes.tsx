@@ -92,9 +92,13 @@ const CheckScoreInput = React.memo(({
   parseAndFormatScore: (val: any) => string;
 }) => {
   const [val, setVal] = useState(rec[field] ?? '');
+  const isFocused = React.useRef(false);
 
   useEffect(() => {
-    setVal(rec[field] ?? '');
+    // Không reset val khi user đang gõ (focused), tránh mất điểm vừa nhập
+    if (!isFocused.current) {
+      setVal(rec[field] ?? '');
+    }
   }, [rec[field]]);
 
   const predKey = field === 'check_1' ? 'pred_c1' : field === 'check_2' ? 'pred_c2' : field === 'homework' ? 'pred_hw' : 'pred_mock';
@@ -109,7 +113,9 @@ const CheckScoreInput = React.memo(({
         type="text"
         value={val}
         onChange={(e) => setVal(e.target.value)}
+        onFocus={() => { isFocused.current = true; }}
         onBlur={(e) => {
+          isFocused.current = false;
           const formatted = parseAndFormatScore(e.target.value);
           setVal(formatted);
           onUpdateRecord(rec.student_id, field, formatted);
