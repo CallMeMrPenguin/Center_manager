@@ -19,6 +19,7 @@ import {
   ColumnOrderState,
   ColumnResizeMode,
   Row,
+  PaginationState,
 } from '@tanstack/react-table';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import {
@@ -606,7 +607,7 @@ export function DataTable<TData>({
   loading = false,
   loadingMessage = 'Đang tải dữ liệu...',
   emptyMessage = 'Không tìm thấy dữ liệu phù hợp.',
-  pageSize = 10,
+  pageSize = 20,
   showPagination = true,
   enableGlobalSearch = true,
   enableColumnVisibility = true,
@@ -712,6 +713,12 @@ export function DataTable<TData>({
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
   const [grouping, setGrouping] = useState<GroupingState>([]);
   const [expanded, setExpanded] = useState<ExpandedState>({});
+  const [pagination, setPagination] = useState<PaginationState>({ pageIndex: 0, pageSize });
+
+  useEffect(() => {
+    setPagination(prev => (prev.pageSize === pageSize ? prev : { ...prev, pageSize }));
+  }, [pageSize]);
+
   const [columnPinning, setColumnPinning] = useState<ColumnPinningState>(
     stickyFirstColumn
       ? { left: [columns[0] && (columns[0] as any).id || (columns[0] as any).accessorKey || ''], ...initialColumnPinning }
@@ -805,6 +812,8 @@ export function DataTable<TData>({
     data: processedData,
     columns: allColumns,
     columnResizeMode,
+    autoResetPageIndex: false,
+    autoResetExpanded: false,
     state: {
       globalFilter: '',
       sorting,
@@ -816,7 +825,9 @@ export function DataTable<TData>({
       columnPinning,
       columnOrder,
       columnSizing,
+      pagination,
     },
+    onPaginationChange: setPagination,
     onColumnSizingChange: setColumnSizing,
     onGlobalFilterChange: setGlobalFilter,
     onSortingChange: setSorting,
@@ -844,7 +855,6 @@ export function DataTable<TData>({
     enableGlobalFilter: false,
     enableMultiSort,
     isMultiSortEvent: () => true,   // always multi-sort on header click
-    initialState: { pagination: { pageSize } },
   });
 
   const isAnyColumnResizing = table.getState().columnSizingInfo.isResizingColumn !== false;

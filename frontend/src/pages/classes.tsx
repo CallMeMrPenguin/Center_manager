@@ -1262,7 +1262,7 @@ export default function ClassesPage() {
                 tableId="classes-attendance-table"
                 data={attendanceRecords}
                 columns={attendanceColumns}
-                pageSize={10}
+                pageSize={20}
                 exportFilename={`diem_danh_${selectedClass?.class_name || ''}_${attendanceDate}`}
                 onExportExcel={handleExportExcel}
                 onExportDocx={handleExportDocx}
