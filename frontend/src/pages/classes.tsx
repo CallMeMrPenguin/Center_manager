@@ -165,6 +165,7 @@ export default function ClassesPage() {
   // Attendance & Daily Grades state
   const [attendanceDate, setAttendanceDate] = useState(() => getLocalDateStr());
   const [attendanceRecords, setAttendanceRecords] = useState<any[]>([]);
+  const attendanceRecordsRef = React.useRef<any[]>([]);
   const [savingAttendance, setSavingAttendance] = useState(false);
   const [testConfigModalOpen, setTestConfigModalOpen] = useState(false);
 
@@ -282,7 +283,9 @@ export default function ClassesPage() {
   const loadAttendanceData = async (clsId: number, dateStr: string) => {
     try {
       const data = await api.getClassAttendance(clsId, dateStr);
-      setAttendanceRecords(data.records || []);
+      const recs = data.records || [];
+      attendanceRecordsRef.current = recs;
+      setAttendanceRecords(recs);
     } catch (err: any) {
       showToast("Không thể tải bảng điểm danh: " + err.message, "error");
     }
@@ -371,6 +374,7 @@ export default function ClassesPage() {
     setSavingAttendance(true);
     try {
       const { records: finalRecords } = applyAutoAttendanceStatus(attendanceRecords, attendanceDate);
+      attendanceRecordsRef.current = finalRecords;
       setAttendanceRecords(finalRecords);
       await api.saveClassAttendance(selectedClass.id, attendanceDate, finalRecords);
       showToast("Đã lưu bảng điểm danh và điểm học sinh!", "success");
@@ -406,29 +410,32 @@ export default function ClassesPage() {
   }, []);
 
   const handleUpdateRecord = useCallback(async (studentId: number, field: string, value: any) => {
-    let updatedRecords: any[] = [];
-    setAttendanceRecords((prev) => {
-      const newRecs = prev.map((rec) => {
-        if (rec.student_id !== studentId) return rec;
-        const updated = { ...rec, [field]: value };
-        const c1 = updated.check_1 !== null && updated.check_1 !== undefined && updated.check_1 !== '' ? Number(updated.check_1) : null;
-        const c2 = updated.check_2 !== null && updated.check_2 !== undefined && updated.check_2 !== '' ? Number(updated.check_2) : null;
-        const hw = updated.homework !== null && updated.homework !== undefined && updated.homework !== '' ? Number(updated.homework) : null;
-        const hasScore = (c1 !== null && c1 > 0) || (c2 !== null && c2 > 0) || (hw !== null && hw > 0);
+    // Build updated records using ref to avoid stale closure
+    const prev = attendanceRecordsRef.current;
+    const newRecs = prev.map((rec) => {
+      if (rec.student_id !== studentId) return rec;
+      const updated = { ...rec, [field]: value };
+      const c1 = updated.check_1 !== null && updated.check_1 !== undefined && updated.check_1 !== '' ? Number(updated.check_1) : null;
+      const c2 = updated.check_2 !== null && updated.check_2 !== undefined && updated.check_2 !== '' ? Number(updated.check_2) : null;
+      const hw = updated.homework !== null && updated.homework !== undefined && updated.homework !== '' ? Number(updated.homework) : null;
+      const hasScore = (c1 !== null && c1 > 0) || (c2 !== null && c2 > 0) || (hw !== null && hw > 0);
 
-        if (field !== 'status' && hasScore && updated.status === 'Vắng mặt') {
-          updated.status = 'Có mặt';
-        }
-        return updated;
-      });
-      updatedRecords = newRecs;
-      return newRecs;
+      if (field !== 'status' && hasScore && updated.status === 'Vắng mặt') {
+        updated.status = 'Có mặt';
+      }
+      return updated;
     });
 
-    if (selectedClass && updatedRecords.length > 0) {
+    // Update ref AND state together — ref is sync, state triggers re-render
+    attendanceRecordsRef.current = newRecs;
+    setAttendanceRecords(newRecs);
+
+    if (selectedClass && newRecs.length > 0) {
       try {
-        await api.saveClassAttendance(selectedClass.id, attendanceDate, updatedRecords);
-        notifyDataChanged();
+        // Save silently — do NOT call notifyDataChanged() here because that
+        // would trigger loadClassDetailData → loadAttendanceData which reloads
+        // all records from server and races with the value just entered.
+        await api.saveClassAttendance(selectedClass.id, attendanceDate, newRecs);
       } catch (err: any) {
         console.error("Tự động lưu thất bại:", err);
       }
