@@ -1,10 +1,4 @@
-import React, { useState, useRef, useMemo, useCallback } from 'react';
-import {
-  GitCompare,
-  Activity,
-  Layers,
-  GraduationCap,
-} from 'lucide-react';
+import React, { useState, useRef, useMemo } from 'react';
 import { OverviewTab } from './tabs/OverviewTab';
 import { DeepAnalysisTab } from './tabs/DeepAnalysisTab';
 import { SkillBreakdownTab } from './tabs/SkillBreakdownTab';
@@ -16,8 +10,8 @@ import { TimePhaseModal } from './components/TimePhaseModal';
 import { TestDatasetModal } from './components/TestDatasetModal';
 import { SegmentedControl } from '../../components/SegmentedControl';
 import { useReportsData } from './hooks/useReportsData';
-import { getStudentTier, WarningSettings } from './types';
-import { generateAcademicYears, getCurrentAcademicYear, getSavedWarningSettings } from './utils';
+import { getStudentTier } from './types';
+import { generateAcademicYears, getCurrentAcademicYear } from './utils';
 
 export const ReportsPage: React.FC = () => {
   const topRef = useRef<HTMLDivElement>(null);
@@ -31,18 +25,6 @@ export const ReportsPage: React.FC = () => {
   const [resetModalOpen, setResetModalOpen] = useState(false);
   const [phaseModalOpen, setPhaseModalOpen] = useState(false);
   const [testDatasetModalOpen, setTestDatasetModalOpen] = useState(false);
-
-  // Early warning settings
-  const [warningSettings, setWarningSettings] = useState<WarningSettings>(getSavedWarningSettings());
-  const [showWarningSettings, setShowWarningSettings] = useState(false);
-
-  const handleUpdateWarningSettings = useCallback((updates: Partial<WarningSettings>) => {
-    setWarningSettings(prev => {
-      const next = { ...prev, ...updates };
-      localStorage.setItem('cm_reports_warning_settings', JSON.stringify(next));
-      return next;
-    });
-  }, []);
 
   // Data fetching hook
   const {
@@ -72,6 +54,12 @@ export const ReportsPage: React.FC = () => {
     setCompareClassAId,
     compareClassBId,
     setCompareClassBId,
+    warningAbsentPct,
+    warningConsecutiveAbsent,
+    warningTrendThreshold,
+    showWarningSettings,
+    setShowWarningSettings,
+    handleUpdateWarningSettings,
     selectedStudentObj,
     engine,
     studentSessionsMap,
@@ -180,8 +168,8 @@ export const ReportsPage: React.FC = () => {
             selectedStudentId={selectedStudentId} studentRankings={studentRankings}
             sessionRecords={sessionRecords} filteredRankings={filteredRankings}
             selectedDistFilter={selectedDistFilter} setSelectedDistFilter={setSelectedDistFilter}
-            warningAbsentPct={warningSettings.absentPct} warningConsecutiveAbsent={warningSettings.consecutiveAbsent}
-            warningTrendThreshold={warningSettings.trendThreshold} showWarningSettings={showWarningSettings}
+            warningAbsentPct={warningAbsentPct} warningConsecutiveAbsent={warningConsecutiveAbsent}
+            warningTrendThreshold={warningTrendThreshold} showWarningSettings={showWarningSettings}
             setShowWarningSettings={setShowWarningSettings} onUpdateWarningSettings={handleUpdateWarningSettings}
             onSelectRankingStudent={handleSelectRankingStudent}
           />
@@ -240,4 +228,3 @@ export const ReportsPage: React.FC = () => {
 };
 
 export default ReportsPage;
-
