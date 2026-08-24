@@ -76,23 +76,22 @@ export const StudentProfileHeader: React.FC<StudentProfileHeaderProps> = ({
     : (scoreNum > 0 ? scoreNum * 10 : 0);
   const piScore = rawPi > 0 ? rawPi.toFixed(1) : (scoreNum > 0 ? (scoreNum * 10).toFixed(1) : '0.0');
 
-  // Dynamic Evaluation based on PI & Score
-  const getEvaluation = (score: number, piVal: number) => {
-    if (student.rating_label) {
-      return { text: student.rating_label, color: 'text-emerald-400' };
+  // Dynamic Evaluation based on Tier & Score
+  const getEvaluation = (score: number, currentTier: StudentTier) => {
+    if (score <= 0) return { text: 'Chưa Đánh Giá', color: 'text-slate-400' };
+    switch (currentTier.tier) {
+      case 8: return { text: 'Xuất Chúng (Vững Vàng)', color: 'text-amber-400' };
+      case 7: return { text: 'Vượt Trội (Ưu Tú)', color: 'text-rose-400' };
+      case 6: return { text: 'Ưu Tú (Tiến Bộ Nhanh)', color: 'text-purple-400' };
+      case 5: return { text: 'Xuất Sắc (Nắm Chắc)', color: 'text-cyan-400' };
+      case 4: return { text: 'Giỏi (Đang Tiến Bộ)', color: 'text-indigo-300' };
+      case 3: return { text: 'Khá (Đang Tiến Bộ)', color: 'text-yellow-400' };
+      case 2: return { text: 'Trung Bình (Cần Củng Cố)', color: 'text-sky-400' };
+      default: return { text: 'Yếu (Cần Phụ Đạo)', color: 'text-rose-400' };
     }
-    if (score >= 9.6 || piVal >= 96) return { text: 'Xuất Chúng (Vững Vàng)', color: 'text-amber-400' };
-    if (score >= 9.2 || piVal >= 92) return { text: 'Vượt Trội (Ưu Tú)', color: 'text-rose-400' };
-    if (score >= 8.7 || piVal >= 87) return { text: 'Ưu Tú (Tiến Bộ Nhanh)', color: 'text-purple-400' };
-    if (score >= 8.0 || piVal >= 80) return { text: 'Xuất Sắc (Nắm Chắc)', color: 'text-cyan-400' };
-    if (score >= 7.0 || piVal >= 70) return { text: 'Giỏi (Đang Tiến Bộ)', color: 'text-blue-400' };
-    if (score >= 6.0 || piVal >= 60) return { text: 'Khá (Đang Tiến Bộ)', color: 'text-blue-400' };
-    if (score >= 4.6 || piVal >= 46) return { text: 'Trung Bình (Cần Củng Cố)', color: 'text-amber-400' };
-    if (score > 0) return { text: 'Yếu (Cần Phụ Đạo)', color: 'text-rose-400' };
-    return { text: 'Chưa Đánh Giá', color: 'text-slate-400' };
   };
 
-  const evaluation = getEvaluation(scoreNum, rawPi);
+  const evaluation = getEvaluation(scoreNum, tier);
 
   return (
     <div className="select-none relative bg-[#0e1222] border border-[#1e2744] p-5 sm:p-6 rounded-2xl shadow-xl space-y-5">

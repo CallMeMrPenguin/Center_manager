@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { Info } from 'lucide-react';
 import { AnimatedProgressBar } from './AnimatedProgressBar';
 import { TIERS_CONFIG, getStudentTier } from '../types';
+import { computeStudentOverallScore } from '../utils';
 
 interface TierDistributionCardProps {
   studentRankings: any[];
@@ -28,7 +29,7 @@ export const TierDistributionCard: React.FC<TierDistributionCardProps> = ({
 
     const counts: Record<number, number> = {};
     rawList.forEach(s => {
-      const score = s.ema_level && Number(s.ema_level) > 0 ? Number(s.ema_level) : (Number(s.avg_check_1 || 0) * 0.55 + Number(s.avg_check_2 || 0) * 0.35 + Number(s.avg_homework || 0) * 0.1);
+      const score = computeStudentOverallScore(s);
       const tierObj = getStudentTier(score);
       counts[tierObj.tier] = (counts[tierObj.tier] || 0) + 1;
     });

@@ -249,3 +249,31 @@ export const computeClassAnalyticsSd = (records: any[]): number => {
 
   return w_tot > 0 ? trunc1Dec(w_sum / w_tot) : 0.0;
 };
+
+export const computeStudentOverallScore = (r: any): number => {
+  if (!r) return 0;
+  const v = Number(r.avg_vocab ?? r.avg_check_1 ?? 0);
+  const g = Number(r.avg_grammar ?? r.avg_check_2 ?? 0);
+  const h = Number(r.avg_homework ?? 0);
+
+  let wSum = 0;
+  let wTot = 0;
+  if (v > 0) { wSum += v * 0.55; wTot += 0.55; }
+  if (g > 0) { wSum += g * 0.35; wTot += 0.35; }
+  if (h > 0) { wSum += h * 0.10; wTot += 0.10; }
+
+  if (wTot === 0) {
+    if (r.academic_score !== undefined && Number(r.academic_score) > 0) {
+      return trunc1Dec(Number(r.academic_score));
+    }
+    if (r.overallAvg !== undefined && Number(r.overallAvg) > 0) {
+      return trunc1Dec(Number(r.overallAvg));
+    }
+    if (r.ema_level !== undefined && Number(r.ema_level) > 0) {
+      return trunc1Dec(Number(r.ema_level));
+    }
+    return 0;
+  }
+
+  return trunc1Dec(wSum / wTot);
+};

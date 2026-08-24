@@ -11,7 +11,7 @@ import { TestDatasetModal } from './components/TestDatasetModal';
 import { SegmentedControl } from '../../components/SegmentedControl';
 import { useReportsData } from './hooks/useReportsData';
 import { getStudentTier } from './types';
-import { generateAcademicYears, getCurrentAcademicYear } from './utils';
+import { generateAcademicYears, getCurrentAcademicYear, computeStudentOverallScore } from './utils';
 
 export const ReportsPage: React.FC = () => {
   const topRef = useRef<HTMLDivElement>(null);
@@ -77,12 +77,17 @@ export const ReportsPage: React.FC = () => {
     if (selectedDistFilter && selectedDistFilter !== 'all') {
       const targetTier = Number(selectedDistFilter);
       list = list.filter(s => {
-        const score = s.ema_level && Number(s.ema_level) > 0 ? Number(s.ema_level) : (Number(s.avg_check_1 || 0) * 0.55 + Number(s.avg_check_2 || 0) * 0.35 + Number(s.avg_homework || 0) * 0.1);
+        const score = computeStudentOverallScore(s);
         const tierObj = getStudentTier(score);
         return tierObj.tier === targetTier;
       });
     }
-    return list;
+    return [...list].sort((a, b) => {
+      const scA = computeStudentOverallScore(a);
+      const scB = computeStudentOverallScore(b);
+      if (scB !== scA) return scB - scA;
+      return (b.present_count || 0) - (a.present_count || 0);
+    });
   }, [studentRankings, selectedClassId, selectedDistFilter]);
 
   const handleSelectRankingStudent = (studentId: number) => {

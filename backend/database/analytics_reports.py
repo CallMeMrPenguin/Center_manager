@@ -165,6 +165,21 @@ def get_analytics_reports(class_id: Optional[int] = None, student_id: Optional[i
         sr["avg_check_1"] = avg_vocab
         sr["avg_check_2"] = avg_grammar
 
+        w_sum = 0.0
+        w_tot = 0.0
+        if avg_vocab > 0:
+            w_sum += avg_vocab * 0.55
+            w_tot += 0.55
+        if avg_grammar > 0:
+            w_sum += avg_grammar * 0.35
+            w_tot += 0.35
+        if avg_hw > 0:
+            w_sum += avg_hw * 0.10
+            w_tot += 0.10
+        overall_avg = trunc_1_dec(w_sum / w_tot) if w_tot > 0 else 0.0
+        sr["overall_avg"] = overall_avg
+        sr["academic_score"] = overall_avg
+
         if s_rows:
             s_analytics = calculate_performance_analytics(s_rows)
             sr["ema_level"] = s_analytics.get("ema_level", 0.0)
@@ -185,6 +200,8 @@ def get_analytics_reports(class_id: Optional[int] = None, student_id: Optional[i
             sr["predicted_next"] = 0.0
             sr["std_dev"] = 0.0
         enriched_rankings.append(sr)
+
+    enriched_rankings.sort(key=lambda x: (x.get("overall_avg", 0.0), x.get("present_count", 0)), reverse=True)
 
     class_rows_map: Dict[int, List[Dict[str, Any]]] = {}
     for r in all_rows:

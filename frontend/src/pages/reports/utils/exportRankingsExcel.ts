@@ -1,5 +1,6 @@
 import { getStudentTier } from '../types';
 import { format1Dec, trunc1Dec } from '../../../utils';
+import { computeStudentOverallScore } from '../utils';
 
 export async function exportRankingsExcel({
   classes,
@@ -29,20 +30,11 @@ export async function exportRankingsExcel({
         const c1 = Number(r.avg_vocab ?? r.avg_check_1 ?? 0);
         const c2 = Number(r.avg_grammar ?? r.avg_check_2 ?? 0);
         const hw = Number(r.avg_homework || 0);
-        const valid = [c1, c2, hw].filter(v => v > 0);
+        const avg = computeStudentOverallScore(r);
         let evalStr = 'Chưa có điểm';
-        if (valid.length > 0) {
-          const avg = trunc1Dec(valid.reduce((a, b) => a + b, 0) / valid.length);
-          let label = 'Xuất Sắc';
-          if (avg >= 9.7) label = 'Xuất Chúng';
-          else if (avg >= 9.4) label = 'Vượt Trội';
-          else if (avg >= 9.0) label = 'Ưu Tú';
-          else if (avg >= 8.5) label = 'Xuất Sắc';
-          else if (avg >= 7.5) label = 'Giỏi';
-          else if (avg >= 6.5) label = 'Khá';
-          else if (avg >= 5.0) label = 'Trung Bình';
-          else label = 'Yếu';
-          evalStr = `${label} (${format1Dec(avg)})`;
+        if (avg > 0) {
+          const tier = getStudentTier(avg);
+          evalStr = `${tier.title} (${format1Dec(avg)})`;
         }
 
         return [

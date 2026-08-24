@@ -8,6 +8,7 @@ import { getStudentTier } from '../types';
 import { format1Dec, trunc1Dec } from '../../../utils';
 import { exportRankingsExcel } from '../utils/exportRankingsExcel';
 import { DistributionScoreBin } from '../utils/distributionAnalytics';
+import { computeStudentOverallScore } from '../utils';
 
 interface StudentRankingsTableProps {
   loading: boolean;
@@ -203,24 +204,13 @@ export const StudentRankingsTable: React.FC<StudentRankingsTableProps> = React.m
       meta: {
         headerText: 'Hạng',
         exportValue: (r: any) => {
-          const vocab = Number(r.avg_vocab ?? r.avg_check_1 ?? 0);
-          const grammar = Number(r.avg_grammar ?? r.avg_check_2 ?? 0);
-          const hw = Number(r.avg_homework || 0);
-          const valid = [vocab, grammar, hw].filter(v => v > 0);
-          if (valid.length === 0) return 'Chưa xếp hạng';
-          const avg = trunc1Dec(valid.reduce((a, b) => a + b, 0) / valid.length);
+          const avg = computeStudentOverallScore(r);
+          if (avg === 0) return 'Chưa xếp hạng';
           const tier = getStudentTier(avg);
           return `${tier.name} (${tier.title})`;
         }
       },
-      accessorFn: (r: any) => {
-        const vocab = Number(r.avg_vocab ?? r.avg_check_1 ?? 0);
-        const grammar = Number(r.avg_grammar ?? r.avg_check_2 ?? 0);
-        const hw = Number(r.avg_homework || 0);
-        const valid = [vocab, grammar, hw].filter(v => v > 0);
-        if (valid.length === 0) return 0;
-        return trunc1Dec(valid.reduce((a, b) => a + b, 0) / valid.length);
-      },
+      accessorFn: (r: any) => computeStudentOverallScore(r),
       cell: ({ getValue }) => {
         const avg = getValue<number>();
         if (avg === 0) {
@@ -254,32 +244,13 @@ export const StudentRankingsTable: React.FC<StudentRankingsTableProps> = React.m
       meta: {
         headerText: 'Đánh Giá',
         exportValue: (r: any) => {
-          const vocab = Number(r.avg_vocab ?? r.avg_check_1 ?? 0);
-          const grammar = Number(r.avg_grammar ?? r.avg_check_2 ?? 0);
-          const hw = Number(r.avg_homework || 0);
-          const valid = [vocab, grammar, hw].filter(v => v > 0);
-          if (valid.length === 0) return 'Chưa có điểm';
-          const avg = trunc1Dec(valid.reduce((a, b) => a + b, 0) / valid.length);
-          let label = 'Xuất Sắc';
-          if (avg >= 9.6) label = 'Xuất Chúng';
-          else if (avg >= 9.2) label = 'Vượt Trội';
-          else if (avg >= 8.7) label = 'Ưu Tú';
-          else if (avg >= 8.0) label = 'Xuất Sắc';
-          else if (avg >= 7.0) label = 'Giỏi';
-          else if (avg >= 6.0) label = 'Khá';
-          else if (avg >= 4.6) label = 'Trung Bình';
-          else label = 'Yếu';
-          return `${label} (${format1Dec(avg)})`;
+          const avg = computeStudentOverallScore(r);
+          if (avg === 0) return 'Chưa có điểm';
+          const tier = getStudentTier(avg);
+          return `${tier.title} (${format1Dec(avg)})`;
         }
       },
-      accessorFn: (r: any) => {
-        const vocab = Number(r.avg_vocab ?? r.avg_check_1 ?? 0);
-        const grammar = Number(r.avg_grammar ?? r.avg_check_2 ?? 0);
-        const hw = Number(r.avg_homework || 0);
-        const valid = [vocab, grammar, hw].filter(v => v > 0);
-        if (valid.length === 0) return 0;
-        return trunc1Dec(valid.reduce((a, b) => a + b, 0) / valid.length);
-      },
+      accessorFn: (r: any) => computeStudentOverallScore(r),
       cell: ({ getValue }) => {
         const avg = getValue<number>();
         if (avg === 0) {
@@ -289,18 +260,19 @@ export const StudentRankingsTable: React.FC<StudentRankingsTableProps> = React.m
             </div>
           );
         }
-        let label = 'Xuất Sắc', cls = 'bg-cyan-500/15 text-cyan-300 border-cyan-500/35';
-        if (avg >= 9.6) { label = 'Xuất Chúng'; cls = 'bg-amber-500/15 text-amber-300 border-amber-500/40 font-black'; }
-        else if (avg >= 9.2) { label = 'Vượt Trội'; cls = 'bg-pink-500/15 text-pink-300 border-pink-500/35 font-bold'; }
-        else if (avg >= 8.7) { label = 'Ưu Tú'; cls = 'bg-purple-500/15 text-purple-300 border-purple-500/35 font-bold'; }
-        else if (avg >= 8.0) { label = 'Xuất Sắc'; cls = 'bg-cyan-500/15 text-cyan-300 border-cyan-500/35 font-bold'; }
-        else if (avg >= 7.0) { label = 'Giỏi'; cls = 'bg-indigo-500/15 text-indigo-300 border-indigo-500/35 font-semibold'; }
-        else if (avg >= 6.0) { label = 'Khá'; cls = 'bg-yellow-500/15 text-yellow-300 border-yellow-500/35 font-semibold'; }
-        else if (avg >= 4.6) { label = 'Trung Bình'; cls = 'bg-sky-500/15 text-sky-300 border-sky-500/35'; }
-        else { label = 'Yếu'; cls = 'bg-amber-700/15 text-amber-500 border-amber-700/35'; }
+        const tier = getStudentTier(avg);
+        let cls = 'bg-cyan-500/15 text-cyan-300 border-cyan-500/35';
+        if (tier.tier === 8) cls = 'bg-amber-500/15 text-amber-300 border-amber-500/40 font-black';
+        else if (tier.tier === 7) cls = 'bg-pink-500/15 text-pink-300 border-pink-500/35 font-bold';
+        else if (tier.tier === 6) cls = 'bg-purple-500/15 text-purple-300 border-purple-500/35 font-bold';
+        else if (tier.tier === 5) cls = 'bg-cyan-500/15 text-cyan-300 border-cyan-500/35 font-bold';
+        else if (tier.tier === 4) cls = 'bg-indigo-500/15 text-indigo-300 border-indigo-500/35 font-semibold';
+        else if (tier.tier === 3) cls = 'bg-yellow-500/15 text-yellow-300 border-yellow-500/35 font-semibold';
+        else if (tier.tier === 2) cls = 'bg-sky-500/15 text-sky-300 border-sky-500/35';
+        else cls = 'bg-amber-700/15 text-amber-500 border-amber-700/35';
         return (
           <div className="text-center">
-            <span className={`inline-block px-3 py-1 rounded-lg text-xs font-black border ${cls}`}>{label} ({format1Dec(avg)})</span>
+            <span className={`inline-block px-3 py-1 rounded-lg text-xs font-black border ${cls}`}>{tier.title} ({format1Dec(avg)})</span>
           </div>
         );
       },

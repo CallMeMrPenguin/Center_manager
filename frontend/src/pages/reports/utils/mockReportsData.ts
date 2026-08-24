@@ -83,18 +83,23 @@ export function computeDatasetFromRecords(
       avg_check_2: avgGrammar,
       avg_homework: avgHw,
       academic_score: overallAvg,
+      overall_avg: overallAvg,
+      overallAvg: overallAvg,
       ema_level: ema,
       trend_slope: 0.15,
       trend_label: trendLabel,
       performance_index: trunc1Dec(overallAvg * 10),
       consistency_score: 90.0,
-      rating_label: ema >= 9.6 ? 'Xuất Chúng' : ema >= 9.2 ? 'Vượt Trội' : ema >= 8.7 ? 'Ưu Tú' : ema >= 8.0 ? 'Xuất Sắc' : ema >= 7.0 ? 'Giỏi' : ema >= 6.0 ? 'Khá' : ema >= 4.6 ? 'Trung Bình' : 'Yếu',
+      rating_label: overallAvg >= 9.6 ? 'Xuất Chúng' : overallAvg >= 9.2 ? 'Vượt Trội' : overallAvg >= 8.7 ? 'Ưu Tú' : overallAvg >= 8.0 ? 'Xuất Sắc' : overallAvg >= 7.0 ? 'Giỏi' : overallAvg >= 6.0 ? 'Khá' : overallAvg >= 4.6 ? 'Trung Bình' : 'Yếu',
       predicted_next: trunc1Dec(Math.min(10.0, Math.max(1.0, ema + 0.1))),
       std_dev: 0.4,
     });
   });
 
-  rankings.sort((a, b) => b.ema_level - a.ema_level);
+  rankings.sort((a, b) => {
+    if (b.academic_score !== a.academic_score) return b.academic_score - a.academic_score;
+    return b.present_count - a.present_count;
+  });
 
   const summary = {
     academic_score: 84.5,

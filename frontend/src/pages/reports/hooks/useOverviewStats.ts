@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { formatSessionDate, getStandardMoetPhases } from '../utils';
+import { formatSessionDate, getStandardMoetPhases, computeStudentOverallScore } from '../utils';
 import { computeDistributionStats, GradeTypeFilterKey, DistributionScoreBin } from '../utils/distributionAnalytics';
 import { getStudentTier } from '../types';
 import { format1Dec, trunc1Dec } from '../../../utils';
@@ -139,13 +139,19 @@ export const useOverviewStats = ({
     if (c2 > 0) { overall += c2 * 0.35; totW += 0.35; }
     if (hw > 0) { overall += hw * 0.10; totW += 0.10; }
     if (mockTest > 0) { overall += mockTest * 0.15; totW += 0.15; }
-    if (totW > 0) overall = overall / totW;
+    if (totW > 0) overall = trunc1Dec(overall / totW);
 
     const attPct = records.length > 0 ? Math.round((presentCount / records.length) * 100) : 100;
 
     let rankStr = '#1';
     if (selectedStudentId && filteredRankings.length > 0) {
-      const idx = filteredRankings.findIndex(r => String(r.student_id) === selectedStudentId);
+      const sorted = [...filteredRankings].sort((a, b) => {
+        const scA = computeStudentOverallScore(a);
+        const scB = computeStudentOverallScore(b);
+        if (scB !== scA) return scB - scA;
+        return (b.present_count || 0) - (a.present_count || 0);
+      });
+      const idx = sorted.findIndex(r => String(r.student_id || r.id) === String(selectedStudentId));
       if (idx >= 0) rankStr = `#${idx + 1}`;
     }
 
