@@ -56,7 +56,7 @@ export const ChartControls: React.FC<ChartControlsProps> = ({
           </h3>
         </div>
 
-        {/* Sliding Pill Indicator for View Mode Switcher */}
+        {/* Sliding Pill Indicator for View Mode Switcher (Auto Content Fit) */}
         <SegmentedControl<'timeline' | 'distribution'>
           value={chartViewMode}
           onChange={setChartViewMode}
@@ -65,7 +65,6 @@ export const ChartControls: React.FC<ChartControlsProps> = ({
             { value: 'distribution', label: 'Phổ Điểm & Histogram' },
           ]}
           activeColor="bg-[#5c36f5] shadow-[0_0_14px_rgba(92,54,245,0.5)]"
-          className="w-72 sm:w-80 shrink-0"
           size="sm"
         />
       </div>
@@ -124,7 +123,7 @@ export const ChartControls: React.FC<ChartControlsProps> = ({
               </button>
             </div>
 
-            {/* Time View Filter */}
+            {/* Time View Filter (Auto Content Fit) */}
             <SegmentedControl<'1m' | '2m' | '3m' | 'all'>
               value={timeView}
               onChange={(val) => {
@@ -137,8 +136,7 @@ export const ChartControls: React.FC<ChartControlsProps> = ({
                 { value: '3m', label: '3 Tháng' },
                 { value: 'all', label: 'Tất Cả' },
               ]}
-              activeColor="bg-indigo-600 shadow-[0_0_14px_rgba(99,102,241,0.5)]"
-              className="w-60 shrink-0 h-8"
+              activeColor="bg-[#5c36f5] shadow-[0_0_14px_rgba(92,54,245,0.5)]"
               size="sm"
             />
 

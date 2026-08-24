@@ -396,7 +396,6 @@ export default function SchedulePage() {
               { value: 'list', label: 'DANH SÁCH' },
             ]}
             activeColor="bg-[#5c36f5] shadow-[0_0_14px_rgba(92,54,245,0.5)]"
-            className="w-64 shrink-0"
             size="sm"
           />
         </div>

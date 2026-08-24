@@ -1160,12 +1160,11 @@ export default function ClassesPage() {
               value={activeSubTab}
               onChange={setActiveSubTab}
               options={[
-                { value: 'grades', label: `Điểm Danh & Điểm (${enrolledStudents.length})` },
+                { value: 'grades', label: 'Điểm Danh & Điểm', badge: enrolledStudents.length },
                 { value: 'seating', label: 'Sơ Đồ Lớp' },
                 { value: 'relationships', label: 'Nhóm Bạn & Xung Đột' },
               ]}
               activeColor="bg-[#5c36f5] shadow-[0_0_14px_rgba(92,54,245,0.5)]"
-              className="min-w-[460px]"
               size="md"
             />
           </div>

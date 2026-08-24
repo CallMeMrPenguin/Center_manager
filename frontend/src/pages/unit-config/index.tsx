@@ -4,6 +4,7 @@ import { api } from '../../api';
 import { Settings, Save, RefreshCw, BookOpen, FileText } from 'lucide-react';
 import { showToast } from '../../components/Toast';
 import { DataTable } from '../../components/DataTable';
+import { SegmentedControl } from '../../components/SegmentedControl';
 import { ExerciseConfigTab } from './components/ExerciseConfigTab';
 
 interface UnitConfigItem {
@@ -269,30 +270,16 @@ export default function UnitConfig() {
       </div>
 
       {/* Sub-tabs Segmented Control */}
-      <div className="flex bg-[#090d16] p-1 rounded-xl border border-[#1b253b] max-w-md text-xs font-bold">
-        <button
-          onClick={() => setActiveTab('units')}
-          className={`flex-1 py-2 px-3 rounded-lg transition flex items-center justify-center gap-2 cursor-pointer ${
-            activeTab === 'units'
-              ? 'bg-[#5c36f5] text-white shadow-sm'
-              : 'text-slate-400 hover:text-white'
-          }`}
-        >
-          <BookOpen size={13} />
-          <span>Tên Unit & Ngữ Pháp</span>
-        </button>
-        <button
-          onClick={() => setActiveTab('exercises')}
-          className={`flex-1 py-2 px-3 rounded-lg transition flex items-center justify-center gap-2 cursor-pointer ${
-            activeTab === 'exercises'
-              ? 'bg-[#5c36f5] text-white shadow-sm'
-              : 'text-slate-400 hover:text-white'
-          }`}
-        >
-          <FileText size={13} />
-          <span>Hướng Dẫn Dạng Bài</span>
-        </button>
-      </div>
+      <SegmentedControl<'units' | 'exercises'>
+        value={activeTab}
+        onChange={setActiveTab}
+        options={[
+          { value: 'units', label: 'Tên Unit & Ngữ Pháp', icon: <BookOpen size={13} /> },
+          { value: 'exercises', label: 'Hướng Dẫn Dạng Bài', icon: <FileText size={13} /> },
+        ]}
+        activeColor="bg-[#5c36f5] shadow-[0_0_14px_rgba(92,54,245,0.5)]"
+        size="md"
+      />
 
       {/* Main Content Area */}
       {activeTab === 'units' ? (

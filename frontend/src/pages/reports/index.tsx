@@ -134,7 +134,6 @@ export const ReportsPage: React.FC = () => {
             { value: 'benchmark', label: 'So Sánh Giữa Các Lớp' },
           ]}
           activeColor="bg-[#2563eb] shadow-[0_0_14px_rgba(37,99,235,0.45)]"
-          className="w-full sm:w-auto min-w-[720px]"
           size="md"
         />
       </div>

@@ -134,7 +134,6 @@ export const SkillBreakdownTab: React.FC<SkillBreakdownTabProps> = ({
             { value: 'units', label: 'Thống Kê Theo Unit' },
           ]}
           activeColor="bg-[#5c36f5] shadow-[0_0_14px_rgba(92,54,245,0.5)]"
-          className="w-full sm:w-auto min-w-[540px]"
           size="md"
         />
       </div>

@@ -43,9 +43,13 @@ import autoTable from 'jspdf-autotable';
 import {
   ChevronLeft, ChevronRight, RefreshCw, AlertCircle,
   ArrowUp, ArrowDown, ArrowUpDown, Search, ChevronDown, ChevronUp,
-  CheckSquare, ChevronsLeft, ChevronsRight, X, SlidersHorizontal,
-  GripVertical, Download, FileSpreadsheet, FileText, Zap, RotateCcw,
+  Eye, Download, SlidersHorizontal, Check, X, FileSpreadsheet,
+  FileText, ChevronsLeft, ChevronsRight, Columns,
+  AlignLeft, AlignCenter, AlignRight, GripVertical, CheckSquare, Square,
+  Layers, ChevronRight as ChevronRightIcon, Plus, Trash2, Pin, PinOff,
+  RotateCcw, Zap
 } from 'lucide-react';
+import { SegmentedControl } from './SegmentedControl';
 import { filterWithNearMatchFallback } from '../utils/fuzzySearch';
 
 // ─── Header Text Extractor Helper ───────────────────────────────────────────
@@ -278,36 +282,19 @@ function ColumnVisibilityDropdown<TData>({
 
       {open && (
         <div className="absolute right-0 top-full mt-2 z-[60] w-72 bg-[#131929] border border-[#28334e] rounded-2xl shadow-2xl p-3 space-y-2 animate-mac-dropdown">
-          {/* TAB SWITCHER */}
-          <div className="flex bg-[#0b0e19] p-1 rounded-xl border border-white/5 text-xs font-bold gap-0.5">
-            <button
-              type="button"
-              onClick={() => setActiveTab('visibility')}
-              className={`flex-1 py-1.5 text-center rounded-lg transition cursor-pointer text-[11px] ${
-                activeTab === 'visibility' ? 'bg-[#5c36f5] text-white font-extrabold shadow-sm' : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              Hiển Thị
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveTab('order')}
-              className={`flex-1 py-1.5 text-center rounded-lg transition cursor-pointer text-[11px] ${
-                activeTab === 'order' ? 'bg-[#5c36f5] text-white font-extrabold shadow-sm' : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              Thứ Tự
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveTab('align')}
-              className={`flex-1 py-1.5 text-center rounded-lg transition cursor-pointer text-[11px] ${
-                activeTab === 'align' ? 'bg-[#5c36f5] text-white font-extrabold shadow-sm' : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              Căn Chỉnh
-            </button>
-          </div>
+          {/* TAB SWITCHER WITH SLIDING PILL */}
+          <SegmentedControl<'visibility' | 'order' | 'align'>
+            value={activeTab}
+            onChange={setActiveTab}
+            options={[
+              { value: 'visibility', label: 'Hiển Thị' },
+              { value: 'order', label: 'Thứ Tự' },
+              { value: 'align', label: 'Căn Chỉnh' },
+            ]}
+            activeColor="bg-[#5c36f5] shadow-[0_0_14px_rgba(92,54,245,0.5)]"
+            fit="fluid"
+            size="xs"
+          />
 
           {/* TAB 1: VISIBILITY */}
           {activeTab === 'visibility' && (
