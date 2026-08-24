@@ -1,5 +1,5 @@
 import React from 'react';
-import { BarChart3, TrendingUp, BarChart2, ZoomIn, ZoomOut, RotateCcw, Clock } from 'lucide-react';
+import { TrendingUp, BarChart2, ZoomIn, ZoomOut, RotateCcw, Clock } from 'lucide-react';
 import { CustomSelect } from '../../../components/CustomSelect';
 import { SegmentedControl } from '../../../components/SegmentedControl';
 import { formatSessionDate } from '../utils';
@@ -37,10 +37,9 @@ export const ChartControls: React.FC<ChartControlsProps> = ({
   chartViewMode,
   setChartViewMode,
   distributionStats,
-  isTestMode,
 }) => {
   return (
-    <div className="flex flex-col gap-4 border-b border-[#181f36] pb-3">
+    <div className="flex flex-col gap-3.5 border-b border-[#181f36] pb-3">
       {/* 1. TOP HEADER: View Mode Toggle & Mode Title */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         {/* Title */}
@@ -73,43 +72,43 @@ export const ChartControls: React.FC<ChartControlsProps> = ({
 
       {/* Dynamic Sub-Controls depending on Active Chart Mode */}
       {chartViewMode === 'timeline' ? (
-        <div className="flex flex-wrap items-center justify-between gap-3 pt-1 border-t border-white/5 text-xs">
+        <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-white/5 text-xs">
           {/* Legend with Predictions */}
-          <div className="flex flex-wrap items-center gap-3.5 text-[11px] font-bold">
-            <span className="flex items-center gap-1.5 text-blue-400">
-              <span className="w-2.5 h-2.5 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.8)]" />
+          <div className="flex flex-wrap items-center gap-3 text-[11px] font-bold">
+            <span className="flex items-center gap-1.5 text-blue-400 bg-blue-500/10 border border-blue-500/20 px-2.5 py-1 rounded-lg">
+              <span className="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.8)]" />
               Từ Vựng (Dự đoán: {format1Dec(engine.pred_c1)})
             </span>
-            <span className="flex items-center gap-1.5 text-purple-400">
-              <span className="w-2.5 h-2.5 rounded-full bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.8)]" />
+            <span className="flex items-center gap-1.5 text-purple-400 bg-purple-500/10 border border-purple-500/20 px-2.5 py-1 rounded-lg">
+              <span className="w-2 h-2 rounded-full bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.8)]" />
               Ngữ Pháp (Dự đoán: {format1Dec(engine.pred_c2)})
             </span>
-            <span className="flex items-center gap-1.5 text-emerald-400">
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]" />
+            <span className="flex items-center gap-1.5 text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-lg">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]" />
               BTVN (Dự đoán: {format1Dec(engine.pred_hw)})
             </span>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-wrap items-center gap-2.5">
             {/* Zoom & Pan Controls */}
-            <div className="flex items-center bg-[#141b32] border border-[#232d4e] rounded-xl p-1 gap-1">
+            <div className="flex items-center bg-[#090d16] border border-[#1b253b] rounded-xl p-0.5 gap-0.5 h-8">
               <button
                 type="button"
                 onClick={() => setZoomLevel((z) => Math.min(2.5, z + 0.2))}
                 title="Phóng to biểu đồ"
-                className="w-7 h-7 flex items-center justify-center rounded-lg bg-[#1a2340] hover:bg-indigo-600/30 text-slate-300 hover:text-indigo-300 transition cursor-pointer"
+                className="w-6.5 h-6.5 flex items-center justify-center rounded-lg bg-[#141b32] hover:bg-indigo-600/30 text-slate-300 hover:text-indigo-300 transition cursor-pointer"
               >
-                <ZoomIn size={14} />
+                <ZoomIn size={13} />
               </button>
               <button
                 type="button"
                 onClick={() => setZoomLevel((z) => Math.max(0.6, z - 0.2))}
                 title="Thu nhỏ biểu đồ"
-                className="w-7 h-7 flex items-center justify-center rounded-lg bg-[#1a2340] hover:bg-indigo-600/30 text-slate-300 hover:text-indigo-300 transition cursor-pointer"
+                className="w-6.5 h-6.5 flex items-center justify-center rounded-lg bg-[#141b32] hover:bg-indigo-600/30 text-slate-300 hover:text-indigo-300 transition cursor-pointer"
               >
-                <ZoomOut size={14} />
+                <ZoomOut size={13} />
               </button>
-              <span className="text-[10px] font-bold text-slate-400 px-1.5 tabular-nums">
+              <span className="text-[10px] font-bold text-slate-400 px-1 tabular-nums">
                 {Math.round(zoomLevel * 100)}%
               </span>
               <button
@@ -119,9 +118,9 @@ export const ChartControls: React.FC<ChartControlsProps> = ({
                   setPanOffset({ x: 0, y: 0 });
                 }}
                 title="Đặt lại góc nhìn"
-                className="w-7 h-7 flex items-center justify-center rounded-lg bg-[#1a2340] hover:bg-indigo-600/30 text-slate-400 hover:text-indigo-300 transition cursor-pointer"
+                className="w-6.5 h-6.5 flex items-center justify-center rounded-lg bg-[#141b32] hover:bg-indigo-600/30 text-slate-400 hover:text-indigo-300 transition cursor-pointer"
               >
-                <RotateCcw size={12} />
+                <RotateCcw size={11} />
               </button>
             </div>
 
@@ -139,12 +138,12 @@ export const ChartControls: React.FC<ChartControlsProps> = ({
                 { value: 'all', label: 'Tất Cả' },
               ]}
               activeColor="bg-indigo-600 shadow-[0_0_14px_rgba(99,102,241,0.5)]"
-              className="w-64 shrink-0"
+              className="w-60 shrink-0 h-8"
               size="sm"
             />
 
-            {/* Custom Time Phase Selector */}
-            <div className="flex items-center gap-1.5">
+            {/* Custom Time Phase Selector with explicit spacing */}
+            <div className="flex items-center gap-1.5 pl-1 border-l border-white/10">
               <CustomSelect
                 value={selectedPhaseId}
                 onChange={(val) => setSelectedPhaseId(String(val))}
@@ -155,12 +154,12 @@ export const ChartControls: React.FC<ChartControlsProps> = ({
                     label: `${p.phase_name} (${formatSessionDate(p.from_date)} - ${formatSessionDate(p.to_date)})`,
                   })),
                 ]}
-                className="w-44"
+                className="w-48"
               />
               <button
                 type="button"
                 onClick={onOpenPhaseModal}
-                className="p-2 rounded-xl bg-[#141b32] hover:bg-indigo-600/30 text-indigo-300 hover:text-white border border-[#232d4e] transition cursor-pointer"
+                className="h-8 w-8 flex items-center justify-center rounded-xl bg-[#090d16] hover:bg-indigo-600/30 text-indigo-300 hover:text-white border border-[#1b253b] transition cursor-pointer shrink-0"
                 title="Quản Lý Giai Đoạn Học Tập Tùy Chỉnh"
               >
                 <Clock size={14} />

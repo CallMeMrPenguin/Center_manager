@@ -250,13 +250,40 @@ export const ChartSvgPlot: React.FC<ChartSvgPlotProps> = React.memo(({
                           <circle cx={x} cy={yHw} r="3.5" fill="#ffffff" style={{ transformBox: 'fill-box', transformOrigin: 'center' }} className="transition-transform duration-150 group-hover:scale-125" />
                         </g>
                       )}
-                      {i === sessionChartData.length - 1 && (
-                        <g className="animate-point-pop" style={{ animationDelay: `${pointDelay}s` }}>
-                          {d.check1 > 0 && <text x={x + 14} y={y1 + 4} fill="#3b82f6" fontSize="12" fontWeight="900">{d.check1}</text>}
-                          {d.check2 > 0 && <text x={x + 14} y={y2 + 4} fill="#a855f7" fontSize="12" fontWeight="900">{d.check2}</text>}
-                          {d.homework > 0 && <text x={x + 14} y={yHw + 4} fill="#10b981" fontSize="12" fontWeight="900">{d.homework}</text>}
-                        </g>
-                      )}
+                      {i === sessionChartData.length - 1 && (() => {
+                        const lastLabels: { id: string; val: number; rawY: number; color: string }[] = [];
+                        if (d.check1 > 0) lastLabels.push({ id: 'c1', val: d.check1, rawY: y1, color: '#3b82f6' });
+                        if (d.check2 > 0) lastLabels.push({ id: 'c2', val: d.check2, rawY: y2, color: '#a855f7' });
+                        if (d.homework > 0) lastLabels.push({ id: 'hw', val: d.homework, rawY: yHw, color: '#10b981' });
+
+                        const sortedLabels = [...lastLabels].sort((a, b) => a.rawY - b.rawY);
+                        const adjustedLastYs: Record<string, number> = {};
+                        let prevLastY = -999;
+                        sortedLabels.forEach((item) => {
+                          let curY = item.rawY;
+                          if (curY - prevLastY < 16) curY = prevLastY + 16;
+                          adjustedLastYs[item.id] = curY;
+                          prevLastY = curY;
+                        });
+
+                        return (
+                          <g className="animate-point-pop" style={{ animationDelay: `${pointDelay}s` }}>
+                            {lastLabels.map((lbl) => (
+                              <text
+                                key={lbl.id}
+                                x={x + 14}
+                                y={(adjustedLastYs[lbl.id] ?? lbl.rawY) + 4}
+                                fill={lbl.color}
+                                fontSize="12"
+                                fontWeight="900"
+                                className="font-mono"
+                              >
+                                {format1Dec(lbl.val)}
+                              </text>
+                            ))}
+                          </g>
+                        );
+                      })()}
                     </g>
                   );
                 })}
