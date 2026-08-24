@@ -87,13 +87,13 @@ export function SegmentedControl<T extends string = string>({
   };
 
   const pyClass = sizeStyles[size] || sizeStyles.md;
-  const isFluid = fit === 'fluid';
+  const isExplicitlyFluid = fit === 'fluid' || className.includes('w-full') || className.includes('flex-1');
 
   return (
     <div
       ref={containerRef}
       className={`relative ${
-        isFluid ? 'flex w-full' : 'inline-flex w-fit'
+        isExplicitlyFluid ? 'flex w-full' : 'inline-flex w-fit'
       } items-center bg-[#090d16] p-1 rounded-xl border border-[#1b253b] font-bold select-none max-w-full overflow-x-auto scrollbar-none ${className}`}
     >
       {/* Dynamic Sliding Pill Indicator */}
@@ -120,7 +120,7 @@ export function SegmentedControl<T extends string = string>({
             type="button"
             onClick={() => onChange(opt.value)}
             className={`${
-              isFluid ? 'flex-1' : 'shrink-0'
+              isExplicitlyFluid ? 'flex-1' : 'shrink-0'
             } relative z-10 ${pyClass} text-center transition-colors duration-150 cursor-pointer flex items-center justify-center gap-1.5 whitespace-nowrap ${
               isActive ? 'text-white font-black' : 'text-slate-400 hover:text-white'
             }`}
