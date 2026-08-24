@@ -52,9 +52,10 @@ export function computeWeaknessRemedialList({
         }
         if (uData.ema_score !== undefined && uData.ema_score !== null && uData.ema_score < 6.5) {
           const cleanTopic = uData.unit_key || uKey.replace(/__(vocab|grammar)$/, '');
+          const isVocab = uData.skill === 'vocab' || uKey.endsWith('__vocab') || uKey.toLowerCase().includes('từ vựng') || uKey.toLowerCase().includes('vocab') || cleanTopic.toLowerCase().includes('từ vựng');
           weakUnits.push({
             unit_key: cleanTopic,
-            skill: (uData.skill as any) || (uKey.endsWith('__vocab') ? 'vocab' : 'grammar'),
+            skill: isVocab ? 'vocab' : 'grammar',
             topic_name: cleanTopic,
             avg_score: trunc1Dec(uData.ema_score),
             test_count: uData.test_count || 1,

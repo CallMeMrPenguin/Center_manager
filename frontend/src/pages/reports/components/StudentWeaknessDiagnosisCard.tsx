@@ -44,17 +44,58 @@ export const StudentWeaknessDiagnosisCard: React.FC<StudentWeaknessDiagnosisCard
   const filteredData = useMemo(() => {
     if (skillFilter === 'all') return studentRemedialList;
     if (skillFilter === 'grammar') {
-      return studentRemedialList.filter((r) => r.grammar_count > 0);
+      return studentRemedialList
+        .filter((r) => r.grammar_count > 0)
+        .map((r) => {
+          const gUnits = r.weak_units.filter((u) => u.skill === 'grammar');
+          const isUrgent = gUnits.some((u) => u.avg_score < 5.0);
+          return {
+            ...r,
+            weak_units: gUnits,
+            total_weak_count: gUnits.length,
+            status: isUrgent ? 'Cần Phụ Đạo Gấp' : 'Cần Củng Cố',
+            urgent_count: gUnits.filter((u) => u.avg_score < 5.0).length,
+          };
+        });
     }
-    return studentRemedialList.filter((r) => r.vocab_count > 0);
+    return studentRemedialList
+      .filter((r) => r.vocab_count > 0)
+      .map((r) => {
+        const vUnits = r.weak_units.filter((u) => u.skill === 'vocab');
+        const isUrgent = vUnits.some((u) => u.avg_score < 5.0);
+        return {
+          ...r,
+          weak_units: vUnits,
+          total_weak_count: vUnits.length,
+          status: isUrgent ? 'Cần Phụ Đạo Gấp' : 'Cần Củng Cố',
+          urgent_count: vUnits.filter((u) => u.avg_score < 5.0).length,
+        };
+      });
   }, [studentRemedialList, skillFilter]);
 
   const stats = useMemo(() => {
     const totalStudents = studentRemedialList.length;
+    const grammarStudents = studentRemedialList.filter((r) => r.grammar_count > 0).length;
+    const vocabStudents = studentRemedialList.filter((r) => r.vocab_count > 0).length;
     const urgentCount = studentRemedialList.filter((r) => r.urgent_count > 0).length;
+    const urgentGrammarCount = studentRemedialList.filter((r) =>
+      r.weak_units.some((u) => u.skill === 'grammar' && u.avg_score < 5.0)
+    ).length;
+    const urgentVocabCount = studentRemedialList.filter((r) =>
+      r.weak_units.some((u) => u.skill === 'vocab' && u.avg_score < 5.0)
+    ).length;
     const totalGrammarWeak = studentRemedialList.reduce((sum, r) => sum + r.grammar_count, 0);
     const totalVocabWeak = studentRemedialList.reduce((sum, r) => sum + r.vocab_count, 0);
-    return { totalStudents, urgentCount, totalGrammarWeak, totalVocabWeak };
+    return {
+      totalStudents,
+      grammarStudents,
+      vocabStudents,
+      urgentCount,
+      urgentGrammarCount,
+      urgentVocabCount,
+      totalGrammarWeak,
+      totalVocabWeak,
+    };
   }, [studentRemedialList]);
 
   const columns = useMemo<ColumnDef<StudentRemedialSummaryRow>[]>(
@@ -117,7 +158,12 @@ export const StudentWeaknessDiagnosisCard: React.FC<StudentWeaknessDiagnosisCard
       },
       {
         id: 'weak_topics_list',
-        header: 'Chuyên Đề Cần Ôn Tập & Điểm EMA',
+        header:
+          skillFilter === 'grammar'
+            ? 'Chuyên Đề Ngữ Pháp Cần Ôn Tập & Điểm EMA'
+            : skillFilter === 'vocab'
+            ? 'Chuyên Đề Từ Vựng Cần Ôn Tập & Điểm EMA'
+            : 'Chuyên Đề Cần Ôn Tập & Điểm EMA',
         meta: {
           headerText: 'Chuyên Đề Yếu',
           exportValue: (r: StudentRemedialSummaryRow) =>
@@ -153,7 +199,7 @@ export const StudentWeaknessDiagnosisCard: React.FC<StudentWeaknessDiagnosisCard
                         isUrgent ? 'bg-rose-400' : isGrammar ? 'bg-purple-400' : 'bg-blue-400'
                       }`}
                     />
-                    <span className="truncate max-w-[150px]" title={u.topic_name}>
+                    <span className="truncate max-w-[170px]" title={u.topic_name}>
                       {u.topic_name}
                     </span>
                     <span
@@ -172,11 +218,35 @@ export const StudentWeaknessDiagnosisCard: React.FC<StudentWeaknessDiagnosisCard
       },
       {
         id: 'weak_counts',
-        header: () => <div className="text-center w-full">Tổng Số Chuyên Đề Hổng</div>,
+        header: () => (
+          <div className="text-center w-full">
+            {skillFilter === 'grammar'
+              ? 'Số Chuyên Đề NP'
+              : skillFilter === 'vocab'
+              ? 'Số Chuyên Đề TV'
+              : 'Tổng Số Chuyên Đề Hổng'}
+          </div>
+        ),
         meta: { headerText: 'Số Chuyên Đề', exportValue: (r: StudentRemedialSummaryRow) => r.total_weak_count },
         accessorFn: (r: StudentRemedialSummaryRow) => r.total_weak_count,
         cell: ({ row }) => {
           const r = row.original;
+          if (skillFilter === 'grammar') {
+            return (
+              <div className="text-center font-mono font-bold text-xs">
+                <span className="text-purple-400 font-extrabold">{r.weak_units.length}</span>{' '}
+                <span className="text-slate-500">chuyên đề NP</span>
+              </div>
+            );
+          }
+          if (skillFilter === 'vocab') {
+            return (
+              <div className="text-center font-mono font-bold text-xs">
+                <span className="text-blue-400 font-extrabold">{r.weak_units.length}</span>{' '}
+                <span className="text-slate-500">chuyên đề TV</span>
+              </div>
+            );
+          }
           return (
             <div className="text-center font-mono font-bold text-xs space-x-1">
               <span className="text-white font-extrabold">{r.total_weak_count}</span>
@@ -188,7 +258,7 @@ export const StudentWeaknessDiagnosisCard: React.FC<StudentWeaknessDiagnosisCard
         },
       },
     ],
-    []
+    [skillFilter]
   );
 
   return (
@@ -230,7 +300,7 @@ export const StudentWeaknessDiagnosisCard: React.FC<StudentWeaknessDiagnosisCard
                 : 'text-slate-400 hover:text-white'
             }`}
           >
-            Hổng Ngữ Pháp
+            Hổng Ngữ Pháp ({stats.grammarStudents})
           </button>
           <button
             type="button"
@@ -241,7 +311,7 @@ export const StudentWeaknessDiagnosisCard: React.FC<StudentWeaknessDiagnosisCard
                 : 'text-slate-400 hover:text-white'
             }`}
           >
-            Hổng Từ Vựng
+            Hổng Từ Vựng ({stats.vocabStudents})
           </button>
         </div>
       </div>
@@ -250,10 +320,19 @@ export const StudentWeaknessDiagnosisCard: React.FC<StudentWeaknessDiagnosisCard
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
         <div className="bg-[#121626] border border-white/5 p-3 rounded-xl">
           <span className="text-slate-400 block text-[10px] uppercase font-bold">
-            Học Sinh Cần Bổ Trợ
+            {skillFilter === 'grammar'
+              ? 'Học Sinh Hổng Ngữ Pháp'
+              : skillFilter === 'vocab'
+              ? 'Học Sinh Hổng Từ Vựng'
+              : 'Học Sinh Cần Bổ Trợ'}
           </span>
           <span className="text-xl font-black text-amber-400 font-mono">
-            {stats.totalStudents} em
+            {skillFilter === 'grammar'
+              ? stats.grammarStudents
+              : skillFilter === 'vocab'
+              ? stats.vocabStudents
+              : stats.totalStudents}{' '}
+            em
           </span>
         </div>
         <div className="bg-[#121626] border border-rose-500/20 p-3 rounded-xl">
@@ -261,10 +340,20 @@ export const StudentWeaknessDiagnosisCard: React.FC<StudentWeaknessDiagnosisCard
             Cần Phụ Đạo Gấp (&lt;5đ)
           </span>
           <span className="text-xl font-black text-rose-400 font-mono">
-            {stats.urgentCount} em
+            {skillFilter === 'grammar'
+              ? stats.urgentGrammarCount
+              : skillFilter === 'vocab'
+              ? stats.urgentVocabCount
+              : stats.urgentCount}{' '}
+            em
           </span>
         </div>
-        <div className="bg-[#121626] border border-purple-500/20 p-3 rounded-xl">
+        <div
+          onClick={() => setSkillFilter('grammar')}
+          className={`bg-[#121626] border p-3 rounded-xl cursor-pointer transition-all ${
+            skillFilter === 'grammar' ? 'border-purple-500 ring-1 ring-purple-500/50' : 'border-purple-500/20 hover:border-purple-500/40'
+          }`}
+        >
           <span className="text-purple-400 block text-[10px] uppercase font-bold">
             Lượt Hổng Ngữ Pháp
           </span>
@@ -272,7 +361,12 @@ export const StudentWeaknessDiagnosisCard: React.FC<StudentWeaknessDiagnosisCard
             {stats.totalGrammarWeak} chuyên đề
           </span>
         </div>
-        <div className="bg-[#121626] border border-blue-500/20 p-3 rounded-xl">
+        <div
+          onClick={() => setSkillFilter('vocab')}
+          className={`bg-[#121626] border p-3 rounded-xl cursor-pointer transition-all ${
+            skillFilter === 'vocab' ? 'border-blue-500 ring-1 ring-blue-500/50' : 'border-blue-500/20 hover:border-blue-500/40'
+          }`}
+        >
           <span className="text-blue-400 block text-[10px] uppercase font-bold">
             Lượt Hổng Từ Vựng
           </span>
