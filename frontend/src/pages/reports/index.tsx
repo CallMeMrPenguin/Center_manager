@@ -7,7 +7,6 @@ import { ReportsHeader } from './components/ReportsHeader';
 import { EditGradeModal } from './components/EditGradeModal';
 import { ResetGradesModal } from './components/ResetGradesModal';
 import { TimePhaseModal } from './components/TimePhaseModal';
-import { TestDatasetModal } from './components/TestDatasetModal';
 import { SegmentedControl } from '../../components/SegmentedControl';
 import { useReportsData } from './hooks/useReportsData';
 import { getStudentTier } from './types';
@@ -24,22 +23,15 @@ export const ReportsPage: React.FC = () => {
   const [editingRecord, setEditingRecord] = useState<any>(null);
   const [resetModalOpen, setResetModalOpen] = useState(false);
   const [phaseModalOpen, setPhaseModalOpen] = useState(false);
-  const [testDatasetModalOpen, setTestDatasetModalOpen] = useState(false);
 
   // Data fetching hook
   const {
     loading,
     classes,
-    students,
     selectedClassId,
     setSelectedClassId,
     selectedStudentId,
     setSelectedStudentId,
-    isTestMode,
-    toggleTestMode,
-    saveTestRecords,
-    resetTestRecords,
-    mockDataset,
     sessionRecords,
     allSessionRecords,
     studentRankings,
@@ -112,8 +104,6 @@ export const ReportsPage: React.FC = () => {
       {/* 1. TOP BREADCRUMB & CONTROLS */}
       <ReportsHeader
         activeReportTab={activeReportTab}
-        isTestMode={isTestMode}
-        toggleTestMode={toggleTestMode}
         selectedAcademicYear={selectedAcademicYear}
         setSelectedAcademicYear={setSelectedAcademicYear}
         academicYears={academicYears}
@@ -124,7 +114,6 @@ export const ReportsPage: React.FC = () => {
         loading={loading}
         loadAnalyticsData={loadAnalyticsData}
         onOpenResetModal={() => setResetModalOpen(true)}
-        onOpenTestDatasetModal={() => setTestDatasetModalOpen(true)}
       />
 
       {/* 2. REPORT MODE TAB SWITCHER (4 TABS) */}
@@ -161,71 +150,83 @@ export const ReportsPage: React.FC = () => {
           />
         ) : activeReportTab === 'skills' ? (
           <SkillBreakdownTab
-            selectedClassId={selectedClassId} selectedStudentId={selectedStudentId}
+            selectedClassId={selectedClassId}
+            selectedStudentId={selectedStudentId}
             onSelectRankingStudent={(id) => setSelectedStudentId(prev => (!id || id === 0 || String(prev) === String(id)) ? '' : String(id))}
-            isTestMode={isTestMode} sessionRecords={sessionRecords}
+            sessionRecords={sessionRecords}
             studentRankings={studentRankings}
           />
         ) : activeReportTab === 'deep' ? (
           <DeepAnalysisTab
-            loading={loading} classes={classes} selectedClassId={selectedClassId}
-            selectedStudentId={selectedStudentId} studentRankings={studentRankings}
-            sessionRecords={sessionRecords} filteredRankings={filteredRankings}
-            selectedDistFilter={selectedDistFilter} setSelectedDistFilter={setSelectedDistFilter}
-            warningAbsentPct={warningAbsentPct} warningConsecutiveAbsent={warningConsecutiveAbsent}
-            warningTrendThreshold={warningTrendThreshold} showWarningSettings={showWarningSettings}
-            setShowWarningSettings={setShowWarningSettings} onUpdateWarningSettings={handleUpdateWarningSettings}
+            loading={loading}
+            classes={classes}
+            selectedClassId={selectedClassId}
+            selectedStudentId={selectedStudentId}
+            studentRankings={studentRankings}
+            sessionRecords={sessionRecords}
+            filteredRankings={filteredRankings}
+            selectedDistFilter={selectedDistFilter}
+            setSelectedDistFilter={setSelectedDistFilter}
+            warningAbsentPct={warningAbsentPct}
+            warningConsecutiveAbsent={warningConsecutiveAbsent}
+            warningTrendThreshold={warningTrendThreshold}
+            showWarningSettings={showWarningSettings}
+            setShowWarningSettings={setShowWarningSettings}
+            onUpdateWarningSettings={handleUpdateWarningSettings}
             onSelectRankingStudent={handleSelectRankingStudent}
           />
         ) : (
           <OverviewTab
-            loading={loading} classes={classes} selectedClassId={selectedClassId}
-            setSelectedClassId={setSelectedClassId} selectedStudentId={selectedStudentId}
-            setSelectedStudentId={setSelectedStudentId} selectedStudentObj={selectedStudentObj}
-            selectedAcademicYear={selectedAcademicYear} sessionRecords={sessionRecords}
-            studentRankings={studentRankings} filteredRankings={filteredRankings}
-            engine={engine} gradeTypesList={gradeTypesList} studentSessionsMap={studentSessionsMap}
-            timePhases={timePhases} selectedPhaseId={selectedPhaseId} setSelectedPhaseId={setSelectedPhaseId}
+            loading={loading}
+            classes={classes}
+            selectedClassId={selectedClassId}
+            setSelectedClassId={setSelectedClassId}
+            selectedStudentId={selectedStudentId}
+            setSelectedStudentId={setSelectedStudentId}
+            selectedStudentObj={selectedStudentObj}
+            selectedAcademicYear={selectedAcademicYear}
+            sessionRecords={sessionRecords}
+            studentRankings={studentRankings}
+            filteredRankings={filteredRankings}
+            engine={engine}
+            gradeTypesList={gradeTypesList}
+            studentSessionsMap={studentSessionsMap}
+            timePhases={timePhases}
+            selectedPhaseId={selectedPhaseId}
+            setSelectedPhaseId={setSelectedPhaseId}
             onOpenPhaseModal={() => setPhaseModalOpen(true)}
             onOpenEditModal={(rec) => { setEditingRecord(rec); setEditModalOpen(true); }}
             onSelectRankingStudent={handleSelectRankingStudent}
-            isTestMode={isTestMode}
           />
         )}
       </div>
 
       {/* 4. MODALS */}
       <EditGradeModal
-        record={editingRecord} isTestMode={isTestMode}
-        onSaveTestRecord={(updatedRec) => {
-          const list = [...(mockDataset?.session_records || sessionRecords)];
-          const idx = list.findIndex(r => r.session_id === updatedRec.session_id && String(r.student_id) === String(updatedRec.student_id));
-          if (idx !== -1) list[idx] = updatedRec;
-          else list.push(updatedRec);
-          saveTestRecords(list);
-        }}
+        record={editingRecord}
         onClose={() => { setEditingRecord(null); setEditModalOpen(false); }}
         onSuccess={() => loadAnalyticsData(true)}
       />
 
       <ResetGradesModal
-        isOpen={resetModalOpen} onClose={() => setResetModalOpen(false)}
-        selectedClassId={selectedClassId} selectedStudentId={selectedStudentId}
-        classes={classes} onSuccess={() => loadAnalyticsData(true)}
+        isOpen={resetModalOpen}
+        onClose={() => setResetModalOpen(false)}
+        selectedClassId={selectedClassId}
+        selectedStudentId={selectedStudentId}
+        classes={classes}
+        onSuccess={() => loadAnalyticsData(true)}
       />
 
       <TimePhaseModal
-        isOpen={phaseModalOpen} onClose={() => setPhaseModalOpen(false)}
-        classes={classes} selectedClassId={selectedClassId}
-        selectedAcademicYear={selectedAcademicYear} timePhases={timePhases}
-        onPhasesUpdated={loadTimePhases} selectedPhaseId={selectedPhaseId}
+        isOpen={phaseModalOpen}
+        onClose={() => setPhaseModalOpen(false)}
+        classes={classes}
+        selectedClassId={selectedClassId}
+        selectedAcademicYear={selectedAcademicYear}
+        timePhases={timePhases}
+        onPhasesUpdated={loadTimePhases}
+        selectedPhaseId={selectedPhaseId}
         setSelectedPhaseId={setSelectedPhaseId}
-      />
-
-      <TestDatasetModal
-        isOpen={testDatasetModalOpen} onClose={() => setTestDatasetModalOpen(false)}
-        classes={classes} students={students} sessionRecords={mockDataset?.session_records || sessionRecords}
-        onSaveRecords={saveTestRecords} onResetToDefault={resetTestRecords}
       />
     </div>
   );

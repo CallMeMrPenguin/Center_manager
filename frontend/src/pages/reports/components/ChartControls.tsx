@@ -20,7 +20,6 @@ interface ChartControlsProps {
   chartViewMode: 'timeline' | 'distribution';
   setChartViewMode: (mode: 'timeline' | 'distribution') => void;
   distributionStats?: DistributionStats;
-  isTestMode?: boolean;
 }
 
 export const ChartControls: React.FC<ChartControlsProps> = ({

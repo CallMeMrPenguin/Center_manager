@@ -18,7 +18,6 @@ interface StudentWeaknessDiagnosisCardProps {
   selectedStudentId?: string;
   onSelectStudent?: (studentId: number) => void;
   heatmapStudents?: any[];
-  isTestMode?: boolean;
 }
 
 export const StudentWeaknessDiagnosisCard: React.FC<StudentWeaknessDiagnosisCardProps> = ({
@@ -27,7 +26,6 @@ export const StudentWeaknessDiagnosisCard: React.FC<StudentWeaknessDiagnosisCard
   selectedStudentId,
   onSelectStudent,
   heatmapStudents,
-  isTestMode,
 }) => {
   const [skillFilter, setSkillFilter] = useState<'all' | 'grammar' | 'vocab'>('all');
 
@@ -37,9 +35,8 @@ export const StudentWeaknessDiagnosisCard: React.FC<StudentWeaknessDiagnosisCard
       sessionRecords,
       selectedClassId,
       selectedStudentId,
-      isTestMode,
     });
-  }, [heatmapStudents, sessionRecords, selectedClassId, selectedStudentId, isTestMode]);
+  }, [heatmapStudents, sessionRecords, selectedClassId, selectedStudentId]);
 
   const filteredData = useMemo(() => {
     if (skillFilter === 'all') return studentRemedialList;

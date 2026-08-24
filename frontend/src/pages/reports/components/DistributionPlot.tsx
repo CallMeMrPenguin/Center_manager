@@ -11,7 +11,6 @@ interface DistributionPlotProps {
   setSelectedGradeTypeFilter: (key: GradeTypeFilterKey) => void;
   selectedScoreBin?: DistributionScoreBin | null;
   onSelectScoreBin?: (bin: DistributionScoreBin) => void;
-  isTestMode?: boolean;
 }
 
 export const DistributionPlot: React.FC<DistributionPlotProps> = ({

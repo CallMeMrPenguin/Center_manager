@@ -24,7 +24,6 @@ interface StudentRankingsTableProps {
   hasSelectedStudent: boolean;
   selectedScoreBin?: DistributionScoreBin | null;
   onClearScoreBin?: () => void;
-  isTestMode?: boolean;
 }
 
 export const StudentRankingsTable: React.FC<StudentRankingsTableProps> = React.memo(({

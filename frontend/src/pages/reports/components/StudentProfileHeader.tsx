@@ -15,14 +15,12 @@ interface StudentProfileHeaderProps {
     level: string;
   };
   onClearStudent: () => void;
-  isTestMode?: boolean;
 }
 
 export const StudentProfileHeader: React.FC<StudentProfileHeaderProps> = ({
   student,
   stats,
   onClearStudent,
-  isTestMode,
 }) => {
   if (!student) return null;
 

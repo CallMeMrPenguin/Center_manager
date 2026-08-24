@@ -23,8 +23,7 @@ export function computeDistributionStats(
   studentRankings: any[],
   selectedStudentId?: string,
   className?: string,
-  gradeTypeFilter: GradeTypeFilterKey = 'overall',
-  isTestMode?: boolean
+  gradeTypeFilter: GradeTypeFilterKey = 'overall'
 ): DistributionStats {
   const scoreEntries: ScoreEntry[] = [];
 

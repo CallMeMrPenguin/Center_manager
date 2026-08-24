@@ -28,13 +28,11 @@ export function computeWeaknessRemedialList({
   sessionRecords,
   selectedClassId,
   selectedStudentId,
-  isTestMode,
 }: {
   heatmapStudents?: any[];
   sessionRecords: any[];
   selectedClassId: string;
   selectedStudentId?: string;
-  isTestMode?: boolean;
 }): StudentRemedialSummaryRow[] {
   if (heatmapStudents && heatmapStudents.length > 0) {
     const rows: StudentRemedialSummaryRow[] = [];
@@ -105,7 +103,7 @@ export function computeWeaknessRemedialList({
   }>();
 
   list.forEach(r => {
-    const uKey = r.topic || (isTestMode ? `Unit ${Math.min(12, Math.floor(((r.session_id || 1001) - 1001) / 2) + 1)}` : null);
+    const uKey = r.topic || r.unit_key || null;
     if (!uKey) return;
 
     if (r.attendance !== 'absent') {

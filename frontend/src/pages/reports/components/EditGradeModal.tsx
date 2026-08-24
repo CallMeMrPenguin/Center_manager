@@ -10,16 +10,12 @@ interface EditGradeModalProps {
   record: any | null;
   onClose: () => void;
   onSuccess: () => void;
-  isTestMode?: boolean;
-  onSaveTestRecord?: (updatedRecord: any) => void;
 }
 
 export const EditGradeModal: React.FC<EditGradeModalProps> = ({
   record,
   onClose,
   onSuccess,
-  isTestMode,
-  onSaveTestRecord,
 }) => {
   const [editStatus, setEditStatus] = useState<string>('Có mặt');
   const [editCheck1, setEditCheck1] = useState<string>('');
@@ -50,26 +46,6 @@ export const EditGradeModal: React.FC<EditGradeModalProps> = ({
       const c2 = editCheck2.trim() !== '' ? Math.max(0, Math.min(10, parseFloat(editCheck2.replace(',', '.')) || 0)) : null;
       const hw = editHomework.trim() !== '' ? Math.max(0, Math.min(10, parseFloat(editHomework.replace(',', '.')) || 0)) : null;
       const mock = editMockTest.trim() !== '' ? Math.max(0, Math.min(10, parseFloat(editMockTest.replace(',', '.')) || 0)) : null;
-
-      if (isTestMode) {
-        const updated = {
-          ...record,
-          attendance: editStatus.includes('Vắng') ? 'absent' : 'present',
-          status: editStatus,
-          check_1: c1,
-          check_2: c2,
-          homework: hw,
-          mock_test: mock,
-          notes: editNotes,
-        };
-        if (onSaveTestRecord) {
-          onSaveTestRecord(updated);
-        }
-        showToast(`Đã cập nhật điểm số test cho ${record.full_name || record.student_name || 'học sinh'}!`, "success");
-        onClose();
-        onSuccess();
-        return;
-      }
 
       await api.saveClassAttendance(record.class_id, record.date, [{
         student_id: record.student_id,

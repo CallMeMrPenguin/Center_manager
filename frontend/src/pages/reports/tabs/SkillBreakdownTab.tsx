@@ -5,13 +5,11 @@ import { MasteryHeatmap } from '../components/MasteryHeatmap';
 import { UnitBreakdownTable } from '../components/UnitBreakdownTable';
 import { StudentWeaknessDiagnosisCard } from '../components/StudentWeaknessDiagnosisCard';
 import { SegmentedControl } from '../../../components/SegmentedControl';
-import { computeMockSkillBreakdown, generateMockReportsData } from '../utils/mockReportsData';
 
 interface SkillBreakdownTabProps {
   selectedClassId: string;
   selectedStudentId: string;
   onSelectRankingStudent: (studentId: number) => void;
-  isTestMode?: boolean;
   sessionRecords?: any[];
   studentRankings?: any[];
 }
@@ -20,7 +18,6 @@ export const SkillBreakdownTab: React.FC<SkillBreakdownTabProps> = ({
   selectedClassId,
   selectedStudentId,
   onSelectRankingStudent,
-  isTestMode,
   sessionRecords = [],
   studentRankings = [],
 }) => {
@@ -29,7 +26,7 @@ export const SkillBreakdownTab: React.FC<SkillBreakdownTabProps> = ({
   const [apiReportData, setApiReportData] = useState<any>(null);
 
   const fetchSkillData = useCallback(async () => {
-    if (isTestMode || !selectedClassId) return;
+    if (!selectedClassId) return;
     setLoading(true);
     try {
       const cid = parseInt(selectedClassId);
@@ -41,7 +38,7 @@ export const SkillBreakdownTab: React.FC<SkillBreakdownTabProps> = ({
     } finally {
       setLoading(false);
     }
-  }, [selectedClassId, selectedStudentId, isTestMode]);
+  }, [selectedClassId, selectedStudentId]);
 
   useEffect(() => {
     fetchSkillData();
@@ -49,14 +46,8 @@ export const SkillBreakdownTab: React.FC<SkillBreakdownTabProps> = ({
 
   const reportData = useMemo(() => {
     if (!selectedClassId) return null;
-    if (isTestMode) {
-      const recs = (sessionRecords && sessionRecords.length > 0)
-        ? sessionRecords
-        : generateMockReportsData([], []).session_records;
-      return computeMockSkillBreakdown(recs, selectedClassId, selectedStudentId);
-    }
     return apiReportData;
-  }, [isTestMode, sessionRecords, selectedClassId, selectedStudentId, apiReportData]);
+  }, [selectedClassId, apiReportData]);
 
   const selectedStudent = useMemo(() => {
     if (!selectedStudentId) return null;
@@ -148,7 +139,6 @@ export const SkillBreakdownTab: React.FC<SkillBreakdownTabProps> = ({
             selectedClassId={selectedClassId}
             selectedStudentId={selectedStudentId}
             heatmapStudents={heatmapStudents}
-            isTestMode={isTestMode}
             onSelectStudent={(sid) => {
               onSelectRankingStudent(sid);
               setActiveSubTab('heatmap');

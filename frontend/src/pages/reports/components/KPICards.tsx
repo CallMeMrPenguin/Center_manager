@@ -19,7 +19,6 @@ interface KPICardsProps {
   };
   engine: any;
   hasSelectedStudent: boolean;
-  isTestMode?: boolean;
 }
 
 export const KPICards: React.FC<KPICardsProps> = React.memo(({ stats }) => {

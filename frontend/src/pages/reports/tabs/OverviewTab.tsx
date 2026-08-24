@@ -29,7 +29,6 @@ interface OverviewTabProps {
   onOpenPhaseModal: () => void;
   onOpenEditModal: (rec: any) => void;
   onSelectRankingStudent: (studentId: number) => void;
-  isTestMode?: boolean;
 }
 
 export const OverviewTab: React.FC<OverviewTabProps> = ({
@@ -53,7 +52,6 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
   onOpenPhaseModal,
   onOpenEditModal,
   onSelectRankingStudent,
-  isTestMode,
 }) => {
   const [timeView, setTimeView] = useState<'1m' | '2m' | '3m' | 'all'>('all');
   const [chartViewMode, setChartViewMode] = useState<'timeline' | 'distribution'>('timeline');
@@ -95,7 +93,6 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
     timeView,
     selectedGradeTypeFilter,
     selectedScoreBin,
-    isTestMode,
   });
 
   return (
@@ -107,7 +104,6 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
             student={selectedStudentObj}
             stats={stats}
             onClearStudent={() => setSelectedStudentId('')}
-            isTestMode={isTestMode}
           />
         </div>
       )}
@@ -118,7 +114,6 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
           stats={stats}
           engine={engine}
           hasSelectedStudent={!!selectedStudentObj}
-          isTestMode={isTestMode}
         />
       </div>
 
@@ -143,7 +138,6 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
           setSelectedGradeTypeFilter={setSelectedGradeTypeFilter}
           selectedScoreBin={selectedScoreBin}
           onSelectScoreBin={handleSelectScoreBin}
-          isTestMode={isTestMode}
         />
       </div>
 
@@ -174,7 +168,6 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
           hasSelectedStudent={!!selectedStudentObj}
           selectedScoreBin={selectedScoreBin}
           onClearScoreBin={() => setSelectedScoreBin(null)}
-          isTestMode={isTestMode}
         />
       </div>
 
@@ -187,7 +180,6 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
           stats={stats}
           onOpenEditModal={onOpenEditModal}
           hasSelectedStudent={!!selectedStudentObj}
-          isTestMode={isTestMode}
         />
       </div>
     </div>

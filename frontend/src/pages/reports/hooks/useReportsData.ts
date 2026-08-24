@@ -2,8 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { api } from '../../../api';
 import { showToast } from '../../../components/Toast';
 import { GradeTypeItem } from '../../../types';
-import { getSavedWarningSettings, DEFAULT_WARNING_SETTINGS, formatSessionDate, formatFullDate } from '../utils';
-import { generateMockReportsData, computeDatasetFromRecords } from '../utils/mockReportsData';
+import { getSavedWarningSettings, DEFAULT_WARNING_SETTINGS, formatFullDate } from '../utils';
 import { trunc1Dec } from '../../../utils';
 
 export function useReportsData() {
@@ -12,49 +11,6 @@ export function useReportsData() {
   const [selectedClassId, setSelectedClassId] = useState<string>('');
   const [students, setStudents] = useState<any[]>([]);
   const [selectedStudentId, setSelectedStudentId] = useState<string>('');
-
-  // Test Mode Toggle State & Custom Mock Records State
-  const [isTestMode, setIsTestMode] = useState<boolean>(() => {
-    return localStorage.getItem('cm_reports_test_mode') === 'true';
-  });
-
-  const [customMockRecords, setCustomMockRecords] = useState<any[] | null>(() => {
-    try {
-      const saved = localStorage.getItem('cm_custom_mock_records');
-      return saved ? JSON.parse(saved) : null;
-    } catch {
-      return null;
-    }
-  });
-
-  const toggleTestMode = useCallback(() => {
-    setIsTestMode(prev => {
-      const next = !prev;
-      localStorage.setItem('cm_reports_test_mode', String(next));
-      if (next) {
-        showToast("Đã BẬT Chế độ Test (20 buổi học mô phỏng / học sinh)", "success");
-      } else {
-        showToast("Đã TẮT Chế độ Test (Hiển thị dữ liệu thực từ cơ sở dữ liệu)", "warning");
-      }
-      return next;
-    });
-  }, []);
-
-  const saveTestRecords = useCallback((records: any[]) => {
-    try {
-      localStorage.setItem('cm_custom_mock_records', JSON.stringify(records));
-      setCustomMockRecords(records);
-    } catch (e: any) {
-      showToast("Lỗi lưu dữ liệu test: " + e.message, "error");
-    }
-  }, []);
-
-  const resetTestRecords = useCallback(() => {
-    try {
-      localStorage.removeItem('cm_custom_mock_records');
-      setCustomMockRecords(null);
-    } catch { }
-  }, []);
 
   // 2-Class Head-to-Head Comparison State
   const [compareClassAId, setCompareClassAId] = useState<string>('');
@@ -189,21 +145,9 @@ export function useReportsData() {
     loadTimePhases();
   }, [loadTimePhases]);
 
-  // Mock Dataset when Test Mode is Active
-  const mockDataset = useMemo(() => {
-    if (!isTestMode) {
-      return { session_records: [], student_rankings: [], analytics_summary: null, class_analytics_map: {} };
-    }
-    if (customMockRecords && customMockRecords.length > 0) {
-      return computeDatasetFromRecords(customMockRecords, classes, students);
-    }
-    return generateMockReportsData(classes, students);
-  }, [isTestMode, classes, students, customMockRecords]);
-
-  // Active data sources based on Test Mode toggle
+  // Clean real dataset sources
   const sessionRecords = useMemo(() => {
-    if (!isTestMode) return rawSessionRecords;
-    let list = mockDataset.session_records;
+    let list = rawSessionRecords;
     if (selectedClassId) {
       list = list.filter(r => String(r.class_id) === selectedClassId);
     }
@@ -211,48 +155,37 @@ export function useReportsData() {
       list = list.filter(r => String(r.student_id) === selectedStudentId);
     }
     return list;
-  }, [isTestMode, rawSessionRecords, mockDataset, selectedClassId, selectedStudentId]);
+  }, [rawSessionRecords, selectedClassId, selectedStudentId]);
 
   const allSessionRecords = useMemo(() => {
-    if (!isTestMode) return rawAllSessionRecords.length > 0 ? rawAllSessionRecords : rawSessionRecords;
-    return mockDataset.session_records;
-  }, [isTestMode, rawAllSessionRecords, rawSessionRecords, mockDataset]);
+    return rawAllSessionRecords.length > 0 ? rawAllSessionRecords : rawSessionRecords;
+  }, [rawAllSessionRecords, rawSessionRecords]);
 
   const studentRankings = useMemo(() => {
-    if (!isTestMode) {
-      let list = rawStudentRankings;
-      if (selectedClassId) {
-        list = list.filter(r => String(r.class_id) === selectedClassId);
-      }
-      return list;
-    }
-    let list = mockDataset.student_rankings;
+    let list = rawStudentRankings;
     if (selectedClassId) {
       list = list.filter(r => String(r.class_id) === selectedClassId);
     }
     return list;
-  }, [isTestMode, rawStudentRankings, mockDataset, selectedClassId]);
+  }, [rawStudentRankings, selectedClassId]);
 
   const allStudentRankings = useMemo(() => {
-    if (!isTestMode) return rawStudentRankings;
-    return mockDataset.student_rankings;
-  }, [isTestMode, rawStudentRankings, mockDataset]);
+    return rawStudentRankings;
+  }, [rawStudentRankings]);
 
   const analyticsSummary = useMemo(() => {
-    if (!isTestMode) return rawAnalyticsSummary;
-    return mockDataset.analytics_summary;
-  }, [isTestMode, rawAnalyticsSummary, mockDataset]);
+    return rawAnalyticsSummary;
+  }, [rawAnalyticsSummary]);
 
   const classAnalyticsMap = useMemo(() => {
-    if (!isTestMode) return rawClassAnalyticsMap;
-    return mockDataset.class_analytics_map;
-  }, [isTestMode, rawClassAnalyticsMap, mockDataset]);
+    return rawClassAnalyticsMap;
+  }, [rawClassAnalyticsMap]);
 
   // Selected Student Object (merging personal details and ranking performance)
   const selectedStudentObj = useMemo(() => {
     if (!selectedStudentId) return null;
     const rawStudent = (students || []).find((s: any) => String(s.id || s.student_id) === selectedStudentId);
-    const rankingObj = (isTestMode ? mockDataset.student_rankings : (rawStudentRankings || [])).find(
+    const rankingObj = (rawStudentRankings || []).find(
       (s: any) => String(s.student_id || s.id) === selectedStudentId
     );
 
@@ -281,35 +214,32 @@ export function useReportsData() {
       performance_index: rankingObj?.performance_index ?? rawStudent?.performance_index,
       rating_label: rankingObj?.rating_label || rawStudent?.rating_label,
     };
-  }, [selectedStudentId, isTestMode, mockDataset, students, rawStudentRankings]);
+  }, [selectedStudentId, students, rawStudentRankings]);
 
   // Analytics Engine math
   const engine = useMemo(() => {
     const raw = analyticsSummary || {
-      academic_score: 82.0,
-      trend_slope: 0.38,
-      trend_label: "Đang cải thiện",
-      consistency_score: 92.0,
-      std_dev: 0.45,
-      std_dev_c1: 0.35,
-      std_dev_c2: 0.50,
-      std_dev_hw: 0.20,
-      consistency_label: "Rất ổn định",
-      ema_level: 8.6,
-      ema_c1: 8.5,
-      ema_c2: 7.2,
-      ema_hw: 9.2,
-      predicted_next: 8.9,
-      pred_c1: 8.8,
-      pred_c2: 7.5,
-      pred_hw: 9.5,
-      attendance_pct: 96.0,
-      performance_index: 86.7,
-      rating_label: "Xuất Sắc",
-      recommendations: [
-        "Duy trì tiến độ học tập hiện tại",
-        "Dự đoán buổi tới: Check 1 (8.8), Check 2 (7.5), Homework (9.5)."
-      ]
+      academic_score: 0.0,
+      trend_slope: 0.0,
+      trend_label: "Chưa có dữ liệu",
+      consistency_score: 100.0,
+      std_dev: 0.0,
+      std_dev_c1: 0.0,
+      std_dev_c2: 0.0,
+      std_dev_hw: 0.0,
+      consistency_label: "Ổn định",
+      ema_level: 0.0,
+      ema_c1: 0.0,
+      ema_c2: 0.0,
+      ema_hw: 0.0,
+      predicted_next: 0.0,
+      pred_c1: 0.0,
+      pred_c2: 0.0,
+      pred_hw: 0.0,
+      attendance_pct: 100.0,
+      performance_index: 0.0,
+      rating_label: "Chưa có dữ liệu",
+      recommendations: ["Chưa có dữ liệu thống kê."]
     };
 
     const c1 = Math.min(10.0, Math.max(0.0, trunc1Dec(raw.pred_c1 ?? 0.0)));
@@ -350,12 +280,6 @@ export function useReportsData() {
     students,
     selectedStudentId,
     setSelectedStudentId,
-    isTestMode,
-    setIsTestMode,
-    toggleTestMode,
-    saveTestRecords,
-    resetTestRecords,
-    mockDataset,
     compareClassAId,
     setCompareClassAId,
     compareClassBId,

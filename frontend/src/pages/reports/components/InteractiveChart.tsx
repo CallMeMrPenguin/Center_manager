@@ -25,7 +25,6 @@ interface InteractiveChartProps {
   setSelectedGradeTypeFilter: (key: GradeTypeFilterKey) => void;
   selectedScoreBin?: DistributionScoreBin | null;
   onSelectScoreBin?: (bin: DistributionScoreBin) => void;
-  isTestMode?: boolean;
 }
 
 export const InteractiveChart: React.FC<InteractiveChartProps> = ({
@@ -47,7 +46,6 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = ({
   setSelectedGradeTypeFilter,
   selectedScoreBin,
   onSelectScoreBin,
-  isTestMode,
 }) => {
   const chartWrapperRef = useRef<HTMLDivElement>(null);
   const [hoveredPoint, setHoveredPoint] = useState<HoveredChartPoint | null>(null);
@@ -223,7 +221,6 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = ({
         chartViewMode={chartViewMode}
         setChartViewMode={setChartViewMode}
         distributionStats={distributionStats}
-        isTestMode={isTestMode}
       />
 
       {/* VIEW 1: TIMELINE LINE CHART */}
@@ -377,7 +374,6 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = ({
           setSelectedGradeTypeFilter={setSelectedGradeTypeFilter}
           selectedScoreBin={selectedScoreBin}
           onSelectScoreBin={onSelectScoreBin}
-          isTestMode={isTestMode}
         />
       )}
     </div>

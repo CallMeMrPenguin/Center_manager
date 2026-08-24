@@ -12,7 +12,6 @@ interface StudentGradeHistoryTableProps {
   stats: any;
   onOpenEditModal: (rec: any) => void;
   hasSelectedStudent: boolean;
-  isTestMode?: boolean;
 }
 
 const getSkillStyle = (skillKey?: string) => {
@@ -57,7 +56,6 @@ export const StudentGradeHistoryTable: React.FC<StudentGradeHistoryTableProps> =
   stats,
   onOpenEditModal,
   hasSelectedStudent,
-  isTestMode,
 }) => {
   const historyColumns = useMemo<ColumnDef<any>[]>(() => [
     {

@@ -5,18 +5,14 @@ import {
   Layers,
   GraduationCap,
   GitCompare,
-  FlaskConical,
   Calendar,
   RotateCcw,
   RefreshCw,
-  Edit3
 } from 'lucide-react';
 import { CustomSelect } from '../../../components/CustomSelect';
 
 interface ReportsHeaderProps {
   activeReportTab: 'overview' | 'deep' | 'skills' | 'benchmark';
-  isTestMode: boolean;
-  toggleTestMode: () => void;
   selectedAcademicYear: string;
   setSelectedAcademicYear: (y: string) => void;
   academicYears: string[];
@@ -27,13 +23,10 @@ interface ReportsHeaderProps {
   loading: boolean;
   loadAnalyticsData: () => void;
   onOpenResetModal: () => void;
-  onOpenTestDatasetModal: () => void;
 }
 
 export const ReportsHeader: React.FC<ReportsHeaderProps> = ({
   activeReportTab,
-  isTestMode,
-  toggleTestMode,
   selectedAcademicYear,
   setSelectedAcademicYear,
   academicYears,
@@ -44,7 +37,6 @@ export const ReportsHeader: React.FC<ReportsHeaderProps> = ({
   loading,
   loadAnalyticsData,
   onOpenResetModal,
-  onOpenTestDatasetModal,
 }) => {
   const tabMeta = useMemo(() => {
     switch (activeReportTab) {
@@ -94,22 +86,6 @@ export const ReportsHeader: React.FC<ReportsHeaderProps> = ({
 
         {/* Action Controls Bar */}
         <div className="flex items-center gap-2.5 flex-wrap">
-          {/* Test Mode Toggle */}
-          <button
-            type="button"
-            onClick={toggleTestMode}
-            className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold transition shadow-sm cursor-pointer border shrink-0 ${
-              isTestMode
-                ? 'bg-amber-500/20 text-amber-300 border-amber-500/50 shadow-[0_0_15px_rgba(245,158,11,0.3)]'
-                : 'bg-[#121626] text-slate-400 hover:text-white border-[#202842] hover:border-slate-600'
-            }`}
-            title={isTestMode ? "Chế độ Test đang BẬT: Nhấp để chuyển về dữ liệu thực" : "Nhấp để BẬT chế độ Test (20 buổi học / học sinh)"}
-          >
-            <FlaskConical size={14} className={isTestMode ? "text-amber-400 animate-pulse" : "text-slate-400"} />
-            <span>Chế Độ Test (20 Buổi)</span>
-            <span className={`w-2 h-2 rounded-full ${isTestMode ? 'bg-amber-400 animate-ping' : 'bg-slate-600'}`} />
-          </button>
-
           {/* Academic Year Selector */}
           <CustomSelect
             icon={<Calendar size={14} className="text-indigo-400" />}
@@ -151,41 +127,6 @@ export const ReportsHeader: React.FC<ReportsHeaderProps> = ({
           </button>
         </div>
       </div>
-
-      {/* Test Mode Active Banner */}
-      {isTestMode && (
-        <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-semibold shadow-[0_0_20px_rgba(245,158,11,0.15)]">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-xl bg-amber-500/20 text-amber-300 border border-amber-500/30">
-              <FlaskConical size={18} className="text-amber-400" />
-            </div>
-            <div>
-              <div className="font-black text-amber-200 uppercase tracking-wide flex items-center gap-2">
-                <span>Chế Độ Test Dữ Liệu Mẫu (20 Buổi Học / Học Sinh)</span>
-                <span className="px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-300 border border-amber-500/40 text-[10px]">Đang Bật</span>
-              </div>
-              <p className="text-[11px] text-amber-300/80 mt-0.5">
-                Đang mô phỏng 20 buổi học với hệ thống điểm Từ Vựng, Ngữ Pháp, BTVN và phân bố đủ 8 cấp bậc xếp hạng (Đồng $\to$ Quán Quân). Không ảnh hưởng đến dữ liệu thực.
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={onOpenTestDatasetModal}
-              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-indigo-600/30 hover:bg-indigo-600/50 text-indigo-200 border border-indigo-500/40 text-xs font-black transition cursor-pointer shrink-0 active:scale-95"
-            >
-              <Edit3 size={13} />
-              <span>Xem & Sửa Dữ Liệu Test</span>
-            </button>
-            <button
-              onClick={toggleTestMode}
-              className="px-3.5 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 border border-amber-500/40 text-xs font-black transition cursor-pointer shrink-0 active:scale-95"
-            >
-              Tắt Chế Độ Test
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

@@ -18,7 +18,6 @@ interface UseOverviewStatsParams {
   timeView: '1m' | '2m' | '3m' | 'all';
   selectedGradeTypeFilter: GradeTypeFilterKey;
   selectedScoreBin: DistributionScoreBin | null;
-  isTestMode?: boolean;
 }
 
 export const useOverviewStats = ({
@@ -35,7 +34,6 @@ export const useOverviewStats = ({
   timeView,
   selectedGradeTypeFilter,
   selectedScoreBin,
-  isTestMode,
 }: UseOverviewStatsParams) => {
   // Combined Standard MOET phases + Database Custom User Phases
   const combinedTimePhases = useMemo(() => {
@@ -283,8 +281,8 @@ export const useOverviewStats = ({
     const recs = activeSessionRecords.length > 0 ? activeSessionRecords : sessionRecords;
     const ranks = filteredRankings.length > 0 ? filteredRankings : studentRankings;
     const clsName = selectedClassObj ? selectedClassObj.class_name : undefined;
-    return computeDistributionStats(recs, ranks, selectedStudentId, clsName, selectedGradeTypeFilter, isTestMode);
-  }, [activeSessionRecords, sessionRecords, filteredRankings, studentRankings, selectedStudentId, selectedClassObj, selectedGradeTypeFilter, isTestMode]);
+    return computeDistributionStats(recs, ranks, selectedStudentId, clsName, selectedGradeTypeFilter);
+  }, [activeSessionRecords, sessionRecords, filteredRankings, studentRankings, selectedStudentId, selectedClassObj, selectedGradeTypeFilter]);
 
   // Rankings filtered by selected score bin
   const displayedRankings = useMemo(() => {
