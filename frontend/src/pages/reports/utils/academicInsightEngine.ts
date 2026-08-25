@@ -20,9 +20,7 @@ export interface AcademicInsightReport {
   conclusion: {
     overviewSummary: string;
     riskAlert: string;
-    strategicAction: string;
   };
-  pedagogicalActions: string[];
 }
 
 const n = (v: any): number => (v === '-' || v === undefined || v === null || isNaN(Number(v)) ? 0 : Number(v));
@@ -42,6 +40,7 @@ export function generateAcademicInsights(params: {
   const c1 = n(stats?.c1);
   const c2 = n(stats?.c2);
   const hw = n(stats?.hw);
+  const mockTest = n(stats?.mockTest);
   const overall = n(stats?.overall);
   const attPct = stats?.attendancePct ?? 100;
   const sessions = stats?.sessionCount ?? 0;
@@ -62,13 +61,15 @@ export function generateAcademicInsights(params: {
   const selectedClass = classes.find((c) => String(c.id) === String(selectedClassId));
   const className = selectedClass?.class_name ?? 'Lớp Học';
 
+  // ───────────────────────────────────────────────────────────────────────────
   // 1. INDIVIDUAL STUDENT VIEW
+  // ───────────────────────────────────────────────────────────────────────────
   if (hasSelectedStudent && selectedStudentObj) {
     const studentName = selectedStudentObj.full_name || 'Học sinh';
     const tier = getStudentTier(overall > 0 ? overall : ema);
     const metrics: InsightMetricItem[] = [];
 
-    // Năng lực thực chất & EMA
+    // Metric 1: Năng lực thực chất & EMA
     const emaDiff = ema > 0 && overall > 0 ? trunc1Dec(ema - overall) : 0;
     const emaStatusText =
       emaDiff > 0.3
@@ -88,7 +89,7 @@ export function generateAcademicInsights(params: {
       tooltipImpact: 'Phản ánh chính xác phong độ thực tại, loại bỏ sai lệch từ điểm số quá cũ ở đầu kỳ.',
     });
 
-    // Cân bằng kỹ năng
+    // Metric 2: Cân bằng kỹ năng
     const skillGap = Math.abs(c1 - c2);
     let skillBalanceText = '';
     let skillDotColor = '#10b981';
@@ -118,7 +119,7 @@ export function generateAcademicInsights(params: {
       tooltipImpact: 'Độ lệch > 1.5 điểm yêu cầu điều chỉnh phân bổ thời gian học tập cho kỹ năng còn yếu.',
     });
 
-    // Ý thức làm BTVN
+    // Metric 3: Ý thức làm BTVN
     if (hw > 0 && overall > 0) {
       const hwGap = trunc1Dec(hw - overall);
       const hwDot = hw < 6.0 ? '#f97316' : hwGap >= 1.5 ? '#3b82f6' : '#10b981';
@@ -141,7 +142,7 @@ export function generateAcademicInsights(params: {
       });
     }
 
-    // Tốc độ tăng trưởng
+    // Metric 4: Tốc độ tăng trưởng
     const trendText =
       trend > 0.3
         ? `Tốc độ tiến bộ vượt bậc (+${trend} đ/buổi, ${trendLabel}). Học sinh tiếp thu bài rất nhanh và có sự bứt phá mạnh mẽ qua từng chuyên đề.`
@@ -164,7 +165,7 @@ export function generateAcademicInsights(params: {
       tooltipImpact: 'Xác định đà phát triển của học sinh đang tiến lên hay sa sút để can thiệp sớm.',
     });
 
-    // Độ ổn định SD
+    // Metric 5: Độ ổn định SD
     const sdText =
       sd < 0.5
         ? `Độ lệch chuẩn cực thấp (σ = ${sd}, ${consistencyLabel}). Học sinh làm bài rất đều tay, phong độ vững vàng trong mọi bài kiểm tra.`
@@ -182,10 +183,10 @@ export function generateAcademicInsights(params: {
       tooltipTitle: 'Độ Lệch Chuẩn Điểm Số (SD - σ)',
       tooltipDesc: 'Đo lường mức độ phân tán của các điểm số xung quanh giá trị trung bình.',
       tooltipFormula: 'σ = sqrt( Tổng( (x_i - x_tb)^2 ) / n )',
-      tooltipImpact: 'Độ lệch chuẩn càng nhỏ thể hiện phong độ làm bài càng vững vàng và ít bị ảnh hưởng bởi tâm lý.',
+      tooltipImpact: 'Đo lường mức độ đồng đều hay khoảng cách chênh lệch học lực.',
     });
 
-    // Chỉ số PI & Dự báo
+    // Metric 6: Chỉ số PI & Dự báo
     metrics.push({
       id: 'performance_prediction',
       label: 'Chỉ Số Toàn Diện & Dự Báo',
@@ -194,10 +195,10 @@ export function generateAcademicInsights(params: {
       tooltipTitle: 'Chỉ Số Phong Độ PI & Dự Báo',
       tooltipDesc: 'Tổng hợp 5 trụ cột (40% EMA, 25% Trend, 15% Độ ổn định, 10% Lịch sử, 10% Chuyên cần) và mô hình chuỗi thời gian.',
       tooltipFormula: 'PI = 0.4*EMA + 0.25*Trend + 0.15*Consistency + 0.1*History + 0.1*Att',
-      tooltipImpact: 'Giúp giáo viên định hướng mức độ thử thách phù hợp cho buổi học tiếp theo.',
+      tooltipImpact: 'Định hướng mức độ thử thách phù hợp cho buổi học tiếp theo.',
     });
 
-    // Vị thế trong lớp & Chuyên cần
+    // Metric 7: Vị thế trong lớp & Chuyên cần
     const totalStudents = filteredRankings.length;
     const rankNum = parseInt(stats.rank?.replace('#', '') || '1') || 1;
     const pct = totalStudents > 0 ? Math.round((rankNum / totalStudents) * 100) : 100;
@@ -244,31 +245,13 @@ export function generateAcademicInsights(params: {
             ? `Điểm Ngữ Pháp (${c2} đ) chưa thật sự chắc chắn, cần ôn tập lại các cấu trúc trọng điểm.`
             : `Cần cải thiện độ ổn định và giảm biên độ dao động điểm số qua các buổi kiểm tra.`
           : `Hổng kiến thức nền tảng ở cả Từ Vựng (${c1} đ) và Ngữ Pháp (${c2} đ), nguy cơ không theo kịp tiến độ các bài học kế tiếp.`,
-        strategicAction: isGood
-          ? `Định hướng bồi dưỡng câu hỏi nâng cao, mở rộng vốn từ học thuật và rèn luyện kỹ năng giải đề chuẩn quốc tế.`
-          : isMedium
-          ? `Tập trung bổ trợ vào kỹ năng còn yếu (${c1 < c2 ? 'Từ Vựng' : 'Ngữ Pháp'}), rèn luyện phản xạ làm bài trắc nghiệm nhanh và chính xác.`
-          : `Thực hiện can thiệp học thuật ngay lập tức: củng cố lại lý thuyết căn bản, giảm tải câu hỏi khó và tăng cường luyện tập nhận biết.`,
       },
-      pedagogicalActions: isGood
-        ? [
-            `Giao thêm bài tập chuyên đề nâng cao mức độ vận dụng cao.`,
-            `Khuyến khích học sinh tham gia các kỳ thi thử thách hoặc kèm cặp hỗ trợ bạn cùng nhóm.`,
-          ]
-        : isMedium
-        ? [
-            `Lập sổ tay ghi chú từ vựng/ngữ pháp hay sai để học sinh tự rà soát hàng tuần.`,
-            `Đôn đốc hoàn thành 100% BTVN trước khi đến lớp để củng cố lý thuyết.`,
-          ]
-        : [
-            `Bố trí buổi phụ đạo hoặc ghép nhóm cùng bạn học khá để kèm cặp.`,
-            `Liên hệ phụ huynh để phối hợp giám sát việc tự học và làm bài tập về nhà mỗi ngày.`,
-            `Chia nhỏ khối lượng bài tập theo ngày để học sinh không bị áp lực dồn bài.`,
-          ],
     };
   }
 
+  // ───────────────────────────────────────────────────────────────────────────
   // 2. CLASS VIEW
+  // ───────────────────────────────────────────────────────────────────────────
   if (selectedClassId && !hasSelectedStudent) {
     const totalStudents = filteredRankings.length;
     const dist = distributionStats;
@@ -347,17 +330,13 @@ export function generateAcademicInsights(params: {
           weakRate > 0
             ? `Hiện có ${weakCount} học sinh (${weakRate}%) có điểm số dưới mức 5.0, cần có kế hoạch phụ đạo riêng để đảm bảo tỷ lệ hoàn thành chương trình.`
             : `Không có học sinh trong diện nguy cơ, lớp duy trì phong độ đồng đều.`,
-        strategicAction: `Tổ chức học tập theo mô hình ghép đôi (đôi bạn cùng tiến), phân hóa bài tập về nhà theo 3 mức độ (Cơ bản - Nâng cao - Thử thách).`,
       },
-      pedagogicalActions: [
-        `Dành 15 phút đầu mỗi buổi học để củng cố nhanh các lỗi sai ngữ pháp phổ biến của lớp.`,
-        `Thực hiện kiểm tra ngẫu nhiên bài tập về nhà tại lớp để rèn tính tự giác cho nhóm học sinh yếu.`,
-        `Tuyên dương định kỳ Top 3 học sinh có tiến bộ vượt bậc để tạo động lực thi đua chung.`,
-      ],
     };
   }
 
+  // ───────────────────────────────────────────────────────────────────────────
   // 3. CENTER-WIDE OVERVIEW VIEW
+  // ───────────────────────────────────────────────────────────────────────────
   const totalStudents = filteredRankings.length;
   const totalClasses = classes.length;
   const metrics: InsightMetricItem[] = [];
@@ -414,12 +393,6 @@ export function generateAcademicInsights(params: {
         riskCount > 0
           ? `Ghi nhận ${riskCount} học sinh (${riskPct}%) có nguy cơ hổng kiến thức căn bản trên toàn hệ thống.`
           : `Không có học sinh trong nhóm nguy cơ cao.`,
-      strategicAction: `Tổ chức chương trình kiểm tra chất lượng định kỳ và phát động phong trào thi đua học tập giữa các lớp.`,
     },
-    pedagogicalActions: [
-      `Tổ chức hội thảo chuyên môn giáo viên để chia sẻ kinh nghiệm giảng dạy các chuyên đề ngữ pháp khó.`,
-      `Xây dựng ngân hàng bài tập bổ trợ trực tuyến cho nhóm học sinh cần cải thiện điểm số.`,
-      `Thực hiện báo cáo định kỳ kết quả học tập gửi tới phụ huynh để duy trì kênh liên lạc chặt chẽ.`,
-    ],
   };
 }

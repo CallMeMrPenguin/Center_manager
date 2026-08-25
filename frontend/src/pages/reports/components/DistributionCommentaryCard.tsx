@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Info, BookOpen, CheckCircle2, X } from 'lucide-react';
+import { Info, BookOpen, X } from 'lucide-react';
 import { DistributionDetailedEvaluation } from '../utils/distributionAnalytics';
 
 interface DistributionCommentaryCardProps {
@@ -28,7 +28,7 @@ export const DistributionCommentaryCard: React.FC<DistributionCommentaryCardProp
   return (
     <div
       ref={containerRef}
-      className="bg-[#0b0f19] border border-[#1b253b] rounded-2xl p-6 shadow-xl space-y-6 select-none relative animate-cascade-3"
+      className="bg-[#0b0f19] border border-[#1b253b] rounded-2xl p-6 shadow-xl space-y-6 select-none relative animate-cascade-3 font-sans"
     >
       {/* 1. HEADER TITLE & RATING BADGE */}
       <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-white/10">
@@ -43,7 +43,7 @@ export const DistributionCommentaryCard: React.FC<DistributionCommentaryCardProp
         </span>
       </div>
 
-      {/* 2. POINT-BY-POINT METRIC BREAKDOWN */}
+      {/* 2. POINT-BY-POINT METRIC BREAKDOWN (Zero emojis, clean divide-y, glowing indicator dots) */}
       <div className="space-y-0.5 divide-y divide-white/5">
         {evaluation.metrics.map((item) => {
           const isTooltipActive = activeTooltipId === item.id;
@@ -113,11 +113,11 @@ export const DistributionCommentaryCard: React.FC<DistributionCommentaryCardProp
         })}
       </div>
 
-      {/* 3. KẾT LUẬN & ĐỊNH HƯỚNG SƯ PHẠM */}
+      {/* 3. KẾT LUẬN PHÂN TÍCH PHỔ ĐIỂM (Kept conclusion, removed recommendations/pedagogical directions) */}
       <div className="space-y-3 pt-2">
         <div className="flex items-center gap-2">
           <span className="text-xs font-black uppercase tracking-wider text-amber-400">
-            KẾT LUẬN & ĐỊNH HƯỚNG SƯ PHẠM
+            KẾT LUẬN
           </span>
         </div>
 
@@ -128,25 +128,6 @@ export const DistributionCommentaryCard: React.FC<DistributionCommentaryCardProp
         <p className="text-xs sm:text-sm font-medium text-slate-300 leading-relaxed border-l-2 border-indigo-500/80 pl-3.5 py-0.5">
           {evaluation.conclusion.dispersionWarning}
         </p>
-
-        <p className="text-xs sm:text-sm font-bold text-amber-300 leading-relaxed border-l-2 border-amber-400/80 pl-3.5 py-0.5">
-          {evaluation.conclusion.strategicAction}
-        </p>
-      </div>
-
-      {/* 4. HÀNH ĐỘNG SƯ PHẠM CỤ THỂ */}
-      <div className="space-y-2 pt-2 border-t border-white/5">
-        <span className="text-xs font-black uppercase tracking-wider text-slate-400 block">
-          KHUYẾN NGHỊ HÀNH ĐỘNG CỤ THỂ
-        </span>
-        <div className="space-y-2">
-          {evaluation.pedagogicalActions.map((action, idx) => (
-            <div key={idx} className="flex items-start gap-2.5 text-xs text-slate-200 py-0.5">
-              <CheckCircle2 size={15} className="text-emerald-400 shrink-0 mt-0.5" />
-              <span className="leading-relaxed font-medium">{action}</span>
-            </div>
-          ))}
-        </div>
       </div>
     </div>
   );
