@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { GraduationCap, ShieldCheck, ArrowRight, BookOpen, Shuffle } from 'lucide-react';
+import { GraduationCap, ShieldCheck, ArrowRight, Shuffle } from 'lucide-react';
 import { showToast } from '../../components/Toast';
 
 export interface AuthUser {
@@ -46,37 +46,19 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
     onLogin(adminUser);
   };
 
-  const handleManualLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!username.trim()) {
-      showToast('Vui lòng nhập tên đăng nhập!', 'error');
-      return;
-    }
-    const isStudent = username.toLowerCase().includes('student') || username.toLowerCase().includes('hocsinh');
-    const user: AuthUser = {
-      id: isStudent ? 'student_custom' : 'admin_001',
-      name: username.trim(),
-      role: isStudent ? 'student' : 'admin',
-      className: isStudent ? 'Lớp Tiếng Anh 7A1' : undefined,
-    };
-    localStorage.setItem('auth_user', JSON.stringify(user));
-    showToast(`Đăng nhập thành công: ${user.name}`, 'success');
-    onLogin(user);
-  };
-
   return (
     <div className="min-h-screen w-screen bg-[#08090e] flex items-center justify-center p-4 select-none relative overflow-hidden font-sans">
       <div className="w-full max-w-xl bg-[#0c0f1e] border border-[#212c4b] rounded-3xl p-6 sm:p-10 shadow-[0_25px_70px_rgba(0,0,0,0.9)] relative z-10 space-y-8">
-        {/* App Branding Header */}
+        {/* App Branding Header with Official Logo */}
         <div className="text-center space-y-2">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-[#5c36f5] to-indigo-700 text-white shadow-[0_0_25px_rgba(92,54,245,0.6)] mb-2">
-            <BookOpen size={28} />
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 p-2 shadow-[0_0_25px_rgba(92,54,245,0.4)] mb-2">
+            <img src="/logo.png" alt="Center Manager Logo" className="h-full w-full object-contain" />
           </div>
           <h1 className="text-2xl font-black text-white tracking-tight uppercase">
             Hệ Thống Quản Lý Trung Tâm
           </h1>
           <p className="text-xs text-slate-400 max-w-sm mx-auto">
-            Center Manager App — Nền tảng học tập, chấm thi & quản lý đào tạo trực tuyến
+            EduPlatform — Nền tảng học tập, chấm thi & quản lý đào tạo trực tuyến
           </p>
         </div>
 

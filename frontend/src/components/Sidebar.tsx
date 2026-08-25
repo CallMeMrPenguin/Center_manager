@@ -72,21 +72,25 @@ export const Sidebar: React.FC<SidebarProps> = ({
         {isSidebarExpanded ? <ChevronLeft size={13} /> : <ChevronRight size={13} />}
       </button>
 
-      {/* Brand Header */}
-      <div className="flex items-center gap-3 p-3.5 border-b border-white/5 shrink-0 overflow-hidden">
-        <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#5c36f5] to-indigo-700 text-white flex items-center justify-center shrink-0 shadow-[0_0_15px_rgba(92,54,245,0.5)] font-black text-xs">
-          CM
+      {/* Brand Header with App Logo */}
+      <div className="h-14 flex items-center px-3 border-b border-white/[0.08] shrink-0 overflow-hidden">
+        <div className="w-8 h-8 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center shrink-0 p-1 shadow-sm">
+          <img src="/logo.png" alt="Center Manager Logo" className="h-full w-full object-contain" />
         </div>
-        {isSidebarExpanded && (
-          <div className="truncate">
-            <h2 className="text-xs font-black text-white tracking-wider uppercase truncate">
-              {isStudent ? 'Cổng Học Sinh' : 'Center Manager'}
-            </h2>
-            <p className="text-[10px] text-slate-400 truncate">
-              {isStudent ? (currentUser?.name || 'Học Sinh') : 'Hệ Thống Trung Tâm'}
-            </p>
-          </div>
-        )}
+        <div
+          className={`whitespace-nowrap overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${
+            isSidebarExpanded
+              ? 'opacity-100 max-w-[10rem] ml-2 translate-x-0'
+              : 'opacity-0 max-w-0 ml-0 -translate-x-3 pointer-events-none'
+          }`}
+        >
+          <span className="text-xs font-black tracking-wide uppercase text-white block leading-none">
+            EduPlatform
+          </span>
+          <span className="text-[8.5px] font-black tracking-[0.18em] uppercase text-indigo-400 block mt-1">
+            {isStudent ? 'Cổng Học Sinh' : 'Center Manager'}
+          </span>
+        </div>
       </div>
 
       {/* Nav Menu */}
