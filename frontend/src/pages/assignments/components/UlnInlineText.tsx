@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect, useRef, memo } from 'react';
 import { Image as ImageIcon } from 'lucide-react';
 
 interface UlnInlineTextProps {
@@ -9,7 +9,64 @@ interface UlnInlineTextProps {
   isSubmitted?: boolean;
 }
 
-export const UlnInlineText: React.FC<UlnInlineTextProps> = ({
+// Fast self-contained inline input to guarantee 60fps zero-lag typing
+export const InlineInput = memo(({
+  inputKey,
+  initialVal,
+  disabled,
+  onCommit,
+}: {
+  inputKey: string;
+  initialVal: string;
+  disabled: boolean;
+  onCommit?: (key: string, val: string) => void;
+}) => {
+  const [val, setVal] = useState(initialVal);
+  const timerRef = useRef<any>(null);
+
+  useEffect(() => {
+    setVal(initialVal);
+  }, [initialVal]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const nextVal = e.target.value;
+    setVal(nextVal);
+    if (timerRef.current) clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => {
+      if (onCommit) onCommit(inputKey, nextVal);
+    }, 60);
+  };
+
+  const dynamicWidth = Math.max(65, Math.min(340, (val.length + 3) * 9.5)) + 'px';
+
+  return (
+    <input
+      type="text"
+      disabled={disabled}
+      value={val}
+      onChange={handleChange}
+      style={{
+        width: dynamicWidth,
+        colorScheme: 'light',
+        backgroundColor: 'transparent',
+        color: '#0f172a',
+        borderBottom: '2px solid #0f172a',
+        borderTop: 'none',
+        borderLeft: 'none',
+        borderRight: 'none',
+        borderRadius: '0px',
+        outline: 'none',
+        boxShadow: 'none',
+        transition: 'width 0.1s ease',
+      }}
+      className="white-paper-input inline-block mx-1 px-1 py-0.5 text-center text-sm font-bold text-slate-950"
+    />
+  );
+});
+
+InlineInput.displayName = 'InlineInput';
+
+export const UlnInlineText: React.FC<UlnInlineTextProps> = memo(({
   text,
   qKey = 'inline',
   answers = {},
@@ -25,11 +82,10 @@ export const UlnInlineText: React.FC<UlnInlineTextProps> = ({
   if (cleanText.includes('<blank>')) {
     const parts = cleanText.split('<blank>');
     return (
-      <span>
+      <span className="font-normal text-slate-900">
         {parts.map((p, idx) => {
           const blankKey = `${qKey}_blank_${idx}`;
           const currentVal = answers[blankKey] || '';
-          const dynamicWidth = Math.max(70, Math.min(340, (currentVal.length + 3) * 9.5)) + 'px';
 
           return (
             <React.Fragment key={idx}>
@@ -41,26 +97,11 @@ export const UlnInlineText: React.FC<UlnInlineTextProps> = ({
                 isSubmitted={isSubmitted}
               />
               {idx < parts.length - 1 && (
-                <input
-                  type="text"
+                <InlineInput
+                  inputKey={blankKey}
+                  initialVal={currentVal}
                   disabled={isSubmitted}
-                  value={currentVal}
-                  onChange={(e) => onInputChange && onInputChange(blankKey, e.target.value)}
-                  style={{
-                    width: dynamicWidth,
-                    colorScheme: 'light',
-                    backgroundColor: 'transparent',
-                    color: '#0f172a',
-                    borderBottom: '2px solid #0f172a',
-                    borderTop: 'none',
-                    borderLeft: 'none',
-                    borderRight: 'none',
-                    borderRadius: '0px',
-                    outline: 'none',
-                    boxShadow: 'none',
-                    transition: 'width 0.15s ease',
-                  }}
-                  className="white-paper-input inline-block mx-1 px-1 py-0.5 text-center text-sm font-bold text-slate-950"
+                  onCommit={onInputChange}
                 />
               )}
             </React.Fragment>
@@ -70,13 +111,13 @@ export const UlnInlineText: React.FC<UlnInlineTextProps> = ({
     );
   }
 
-  // Check if string starts with a number like "1. Australia" -> render number in bold red
+  // Check if string starts with a number like "1. Australia" -> render number in bold red and text in normal weight
   const numStartMatch = cleanText.match(/^([0-9]+)\.\s*(.*)/);
   if (numStartMatch) {
     return (
-      <span className="inline-flex items-baseline gap-1">
+      <span className="inline-flex items-baseline gap-1 font-normal text-slate-900">
         <span className="text-rose-600 font-bold shrink-0">{numStartMatch[1]}.</span>
-        <span>
+        <span className="font-normal text-slate-900">
           <UlnInlineText
             text={numStartMatch[2]}
             qKey={`${qKey}_tail`}
@@ -93,9 +134,9 @@ export const UlnInlineText: React.FC<UlnInlineTextProps> = ({
   const letterStartMatch = cleanText.match(/^([a-zA-Z])\.\s*(.*)/);
   if (letterStartMatch) {
     return (
-      <span className="inline-flex items-baseline gap-1">
+      <span className="inline-flex items-baseline gap-1 font-normal text-slate-900">
         <span className="text-blue-600 font-bold shrink-0">{letterStartMatch[1]}.</span>
-        <span>
+        <span className="font-normal text-slate-900">
           <UlnInlineText
             text={letterStartMatch[2]}
             qKey={`${qKey}_tail`}
@@ -183,8 +224,10 @@ export const UlnInlineText: React.FC<UlnInlineTextProps> = ({
           );
         }
 
-        return part;
+        return <span key={index} className="font-normal text-slate-900">{part}</span>;
       })}
     </>
   );
-};
+});
+
+UlnInlineText.displayName = 'UlnInlineText';

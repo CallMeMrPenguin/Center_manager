@@ -4,7 +4,7 @@ import { Assignment } from '../types';
 import { ExerciseItem } from './types';
 import { WhitePaperHeader } from './WhitePaperHeader';
 import { ExerciseItemView } from './ExerciseItemView';
-import { UlnDocumentRenderer } from './UlnDocumentRenderer';
+import { UlnDocumentRenderer, SectionProgressGroup } from './UlnDocumentRenderer';
 import { parseUlnContent } from '../utils/ulnParser';
 import { SAMPLE_UNIT12_ULN_TEXT } from '../constants/sampleUlnTest';
 import { cleanOptionPrefix, format1Dec } from '../../../utils';
@@ -29,10 +29,10 @@ export const WhitePaperAssignmentViewer: React.FC<WhitePaperAssignmentViewerProp
   const [userAnswers, setUserAnswers] = useState<Record<number, string>>({});
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [finalScore, setFinalScore] = useState<number>(0);
-  const [progress, setProgress] = useState<{ answered: number; total: number; map: Record<string, boolean> }>({
+  const [progress, setProgress] = useState<{ answered: number; total: number; sections: SectionProgressGroup[] }>({
     answered: 0,
     total: 0,
-    map: {},
+    sections: [],
   });
 
   // Parse ULN document nodes
@@ -163,45 +163,50 @@ export const WhitePaperAssignmentViewer: React.FC<WhitePaperAssignmentViewerProp
         </div>
       </div>
 
-      {/* 2. MAIN LAYOUT WITH PROGRESS SIDEBAR */}
+      {/* 2. MAIN LAYOUT WITH SECTION-GROUPED PROGRESS SIDEBAR */}
       <div className="flex gap-5 max-w-7xl mx-auto items-start">
         {/* Progress Sidebar */}
         {progress.total > 0 && (
-          <div className="w-56 shrink-0 bg-[#0c0f1e] border border-[#212c4b] rounded-2xl p-4 sticky top-20 shadow-xl space-y-3 hidden md:block">
+          <div className="w-64 shrink-0 bg-[#0c0f1e] border border-[#212c4b] rounded-2xl p-4 sticky top-20 shadow-xl space-y-3.5 hidden md:block">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1.5 text-xs font-bold text-slate-200">
                 <CheckCircle2 size={14} className="text-emerald-400" />
                 <span>Tiến Độ Làm Bài</span>
               </div>
-              <span className="text-xs font-black text-indigo-400">{progress.answered}/{progress.total}</span>
+              <span className="text-xs font-black text-indigo-400">{progress.answered}/{progress.total} ({pct}%)</span>
             </div>
 
             <div className="w-full bg-white/10 rounded-full h-2 overflow-hidden">
               <div className="bg-emerald-500 h-full rounded-full transition-all duration-300" style={{ width: `${pct}%` }} />
             </div>
 
-            <div className="grid grid-cols-5 gap-1.5 max-h-[60vh] overflow-y-auto pr-1">
-              {Array.from({ length: progress.total }).map((_, i) => {
-                const num = String(i + 1);
-                const isDone = !!progress.map[num];
-                return (
-                  <button
-                    key={i}
-                    type="button"
-                    onClick={() => {
-                      const el = document.getElementById(`q_target_${num}`);
-                      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    }}
-                    className={`h-7 rounded-lg text-xs font-bold transition flex items-center justify-center cursor-pointer ${
-                      isDone
-                        ? 'bg-emerald-500 text-white shadow-xs'
-                        : 'bg-white/5 hover:bg-white/15 text-slate-300 border border-white/10'
-                    }`}
-                  >
-                    {num}
-                  </button>
-                );
-              })}
+            <div className="space-y-3 max-h-[60vh] overflow-y-auto pr-1">
+              {progress.sections.map((sec, sIdx) => (
+                <div key={sIdx} className="space-y-1.5 pt-2 first:pt-0 border-t border-white/10 first:border-none">
+                  <div className="text-[10px] font-black text-indigo-300 truncate uppercase tracking-wider">
+                    {sec.title}
+                  </div>
+                  <div className="flex flex-wrap gap-1">
+                    {sec.items.map((item, itIdx) => (
+                      <button
+                        key={itIdx}
+                        type="button"
+                        onClick={() => {
+                          const el = document.getElementById(item.id);
+                          if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }}
+                        className={`w-6 h-6 rounded text-[11px] font-bold transition flex items-center justify-center cursor-pointer ${
+                          item.isAnswered
+                            ? 'bg-emerald-500 text-white shadow-xs'
+                            : 'bg-white/5 hover:bg-white/15 text-slate-300 border border-white/10'
+                        }`}
+                      >
+                        {item.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         )}
@@ -225,7 +230,7 @@ export const WhitePaperAssignmentViewer: React.FC<WhitePaperAssignmentViewerProp
             <UlnDocumentRenderer
               nodes={ulnNodes}
               isSubmitted={isSubmitted}
-              onProgressUpdate={(ans, tot, map) => setProgress({ answered: ans, total: tot, map })}
+              onProgressUpdate={(ans, tot, sec) => setProgress({ answered: ans, total: tot, sections: sec })}
             />
           ) : (
             <div className="space-y-6">
