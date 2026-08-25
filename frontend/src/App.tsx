@@ -330,7 +330,7 @@ function AppContent() {
                         } ${draggedIndex === idx ? 'opacity-40 border border-dashed border-indigo-400 bg-indigo-500/10' : ''}`}
                       >
                         {/* ICON BOX */}
-                        <div className="w-5.5 h-5.5 flex items-center justify-center shrink-0 relative z-10">
+                        <div className={`w-5.5 h-5.5 flex items-center justify-center shrink-0 relative z-10 transition-transform duration-150 ${!isSidebarExpanded ? 'group-hover:scale-115' : ''}`}>
                           <Icon size={16} className={isActive ? 'text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.8)]' : 'text-slate-400 group-hover:text-white'} />
                         </div>
 
@@ -340,6 +340,15 @@ function AppContent() {
                         } ${isActive ? "text-white font-black" : "text-slate-200 font-bold group-hover:text-white"}`}>
                           {item.label}
                         </span>
+
+                        {/* COLLAPSED DOCK FLYOUT TOOLTIP (Visible only when sidebar is collapsed) */}
+                        {!isSidebarExpanded && (
+                          <div className="absolute left-full top-1/2 -translate-y-1/2 ml-3 z-50 pointer-events-none opacity-0 group-hover:opacity-100 transition-all duration-150">
+                            <div className="px-2.5 py-1 rounded-lg bg-[#0c0f1e] border border-[#212c4b] text-white text-xs font-black whitespace-nowrap shadow-[0_8px_20px_rgba(0,0,0,0.9)]">
+                              {item.label}
+                            </div>
+                          </div>
+                        )}
                       </button>
                     );
                   })}

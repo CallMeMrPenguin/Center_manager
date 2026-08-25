@@ -48,21 +48,21 @@ export default function ToastContainer() {
     <div className="fixed bottom-5 right-5 z-[9999] flex flex-col gap-2 max-w-sm w-full">
       {toasts.map((toast) => {
         const classes = {
-          success: 'bg-[#0d1018]/95 border-l-4 border-l-emerald-500 border-white/10 text-slate-100 shadow-[0_12px_40px_rgba(0,0,0,0.85)]',
-          error: 'bg-[#0d1018]/95 border-l-4 border-l-rose-500 border-white/10 text-slate-100 shadow-[0_12px_40px_rgba(0,0,0,0.85)]',
-          warning: 'bg-[#0d1018]/95 border-l-4 border-l-amber-500 border-white/10 text-slate-100 shadow-[0_12px_40px_rgba(0,0,0,0.85)]',
+          success: 'bg-[#0c121e] border-l-4 border-l-emerald-500 border-white/10 text-slate-100 shadow-[0_16px_40px_rgba(0,0,0,0.9)]',
+          error: 'bg-[#150d18] border-l-4 border-l-rose-500 border-white/10 text-slate-100 shadow-[0_16px_40px_rgba(0,0,0,0.9)]',
+          warning: 'bg-[#16120c] border-l-4 border-l-amber-500 border-white/10 text-slate-100 shadow-[0_16px_40px_rgba(0,0,0,0.9)]',
         };
 
         const Icon = {
-          success: <CheckCircle2 className="text-emerald-400 shrink-0 text-glow-green" size={18} />,
-          error: <AlertCircle className="text-rose-400 shrink-0 text-glow-red" size={18} />,
-          warning: <Info className="text-amber-400 shrink-0 text-glow-blue" size={18} />,
+          success: <CheckCircle2 className="text-emerald-400 shrink-0" size={18} />,
+          error: <AlertCircle className="text-rose-400 shrink-0" size={18} />,
+          warning: <Info className="text-amber-400 shrink-0" size={18} />,
         };
 
         return (
           <div
             key={toast.id}
-            className={`flex items-center gap-3 p-3.5 rounded-[14px] border backdrop-blur-xl transition-all animate-mac-dropdown ${
+            className={`flex items-center gap-3 p-3.5 rounded-2xl border transition-all animate-mac-dropdown select-none ${
               classes[toast.type]
             }`}
           >
