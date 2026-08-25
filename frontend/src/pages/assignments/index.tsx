@@ -1,7 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { BookOpen, Calendar, Plus } from 'lucide-react';
 import { CustomSelect, SelectOption } from '../../components/CustomSelect';
-import { SegmentedControl } from '../../components/SegmentedControl';
 import { useAssignmentsData } from './hooks/useAssignmentsData';
 import { AssignmentsKpiCards } from './components/AssignmentsKpiCards';
 import { AssignmentModal } from './components/AssignmentModal';
@@ -78,9 +76,9 @@ export const AssignmentsPage: React.FC = () => {
 
   return (
     <div className="h-full w-full overflow-y-auto p-6 space-y-6 bg-[#080b14] text-slate-100 select-none font-sans scrollbar-thin">
-      {/* 1. Header Filter Bar (Teachers / Admins Only) */}
+      {/* 1. Header Filter Bar (Clean single visual boundary, no border-in-border, no icons) */}
       {!isStudent && (
-        <div className="bg-[#0c0f1e] border border-[#1e2742] rounded-2xl p-5 shadow-lg flex flex-wrap items-center justify-between gap-4">
+        <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex flex-wrap items-center gap-3 flex-1 min-w-[280px]">
             <div className="w-56 max-w-full">
               <CustomSelect
@@ -88,7 +86,6 @@ export const AssignmentsPage: React.FC = () => {
                 onChange={(val) => setSelectedClassId(String(val))}
                 options={classOptions}
                 placeholder="Chọn lớp học..."
-                icon={<BookOpen size={14} className="text-indigo-400" />}
               />
             </div>
 
@@ -98,7 +95,6 @@ export const AssignmentsPage: React.FC = () => {
                 onChange={(val) => setSelectedMonth(String(val))}
                 options={monthOptions}
                 placeholder="Chọn tháng..."
-                icon={<Calendar size={14} className="text-purple-400" />}
               />
             </div>
           </div>
@@ -106,10 +102,9 @@ export const AssignmentsPage: React.FC = () => {
           <button
             type="button"
             onClick={handleOpenCreateModal}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#5c36f5] hover:bg-[#6c48f7] text-white text-xs font-black shadow-[0_0_15px_rgba(92,54,245,0.4)] transition cursor-pointer active:scale-95 shrink-0"
+            className="px-4 py-2 rounded-xl bg-[#5c36f5] hover:bg-[#6c48f7] text-white text-xs font-black shadow-[0_0_15px_rgba(92,54,245,0.4)] transition cursor-pointer active:scale-95 shrink-0"
           >
-            <Plus size={15} />
-            <span>Giao BTVN Mới</span>
+            Giao BTVN Mới
           </button>
         </div>
       )}
@@ -117,30 +112,7 @@ export const AssignmentsPage: React.FC = () => {
       {/* 2. KPI Summary Cards (Admin only) */}
       {!isStudent && <AssignmentsKpiCards kpis={kpis} />}
 
-      {/* 3. Segmented Control Switcher (Admin only or when reviewing) */}
-      {!isStudent && (
-        <div className="flex items-center justify-between border-b border-[#181f36] pb-3">
-          <SegmentedControl<'list' | 'submissions' | 'runner'>
-            value={activeView}
-            onChange={setActiveView}
-            options={[
-              { value: 'list', label: 'Danh Sách Bài Tập' },
-              {
-                value: 'submissions',
-                label: currentAssignment ? `Nộp Bài: ${currentAssignment.title}` : 'Theo Dõi Nộp Bài',
-              },
-              {
-                value: 'runner',
-                label: currentAssignment ? `Phiếu Đề: ${currentAssignment.title}` : 'Phiếu Đề (Nền Trắng)',
-              },
-            ]}
-            activeColor="bg-[#5c36f5] shadow-[0_0_14px_rgba(92,54,245,0.5)]"
-            size="md"
-          />
-        </div>
-      )}
-
-      {/* 4. Active Tab Content */}
+      {/* 3. Active View Content */}
       <div className="space-y-4">
         {activeView === 'list' ? (
           <AssignmentListTab
@@ -151,7 +123,6 @@ export const AssignmentsPage: React.FC = () => {
             onViewSubmissions={handleViewSubmissions}
             onPlayPreview={handlePlayPreview}
             onOpenCreateModal={handleOpenCreateModal}
-            onEditAnswerKey={handleOpenAnswerKeyModal}
           />
         ) : activeView === 'submissions' && !isStudent ? (
           <SubmissionTab
@@ -177,6 +148,7 @@ export const AssignmentsPage: React.FC = () => {
             isPreview={!isStudent}
             studentName={isStudent ? 'Học Sinh' : 'Học Sinh Xem Trước'}
             onBack={() => setActiveView('list')}
+            onEditAnswerKey={!isStudent ? handleOpenAnswerKeyModal : undefined}
             onSubmitSuccess={() => {
               loadAssignments();
             }}
@@ -184,7 +156,7 @@ export const AssignmentsPage: React.FC = () => {
         )}
       </div>
 
-      {/* 5. Create / Edit Assignment Modal */}
+      {/* 4. Create / Edit Assignment Modal */}
       {!isStudent && (
         <AssignmentModal
           isOpen={isModalOpen}
@@ -196,7 +168,7 @@ export const AssignmentsPage: React.FC = () => {
         />
       )}
 
-      {/* 6. Answer Key Modal & Auto Re-Grader */}
+      {/* 5. Answer Key Modal & Auto Re-Grader */}
       {!isStudent && (
         <AnswerKeyModal
           isOpen={isAnswerKeyModalOpen}

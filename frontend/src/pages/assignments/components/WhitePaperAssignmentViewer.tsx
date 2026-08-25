@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useCallback } from 'react';
-import { ArrowLeft, Award, Save, Maximize2, Minimize2, CheckCircle2, ChevronRight, PenTool } from 'lucide-react';
+import { ArrowLeft, Award, Save, Maximize2, Minimize2, ChevronRight, PenTool, KeyRound } from 'lucide-react';
 import { Assignment } from '../types';
 import { ExerciseItem } from './types';
 import { WhitePaperHeader } from './WhitePaperHeader';
@@ -16,6 +16,7 @@ interface WhitePaperAssignmentViewerProps {
   studentName?: string;
   isPreview?: boolean;
   onBack: () => void;
+  onEditAnswerKey?: (assignment: Assignment) => void;
   onSubmitSuccess?: (score: number) => void;
 }
 
@@ -24,6 +25,7 @@ export const WhitePaperAssignmentViewer: React.FC<WhitePaperAssignmentViewerProp
   studentName = 'Học Sinh',
   isPreview = true,
   onBack,
+  onEditAnswerKey,
   onSubmitSuccess,
 }) => {
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -123,6 +125,19 @@ export const WhitePaperAssignmentViewer: React.FC<WhitePaperAssignmentViewerProp
 
         {/* Action Controls */}
         <div className="flex items-center gap-2 flex-wrap shrink-0">
+          {/* Answer Key Editor (Teacher Mode) */}
+          {isPreview && onEditAnswerKey && (
+            <button
+              type="button"
+              onClick={() => onEditAnswerKey(assignment)}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition cursor-pointer border bg-indigo-500/15 hover:bg-indigo-500/25 text-indigo-300 border-indigo-500/30 shadow-[0_0_12px_rgba(99,102,241,0.3)] active:scale-95"
+              title="Chỉnh sửa đáp án chuẩn & tự động tính lại điểm"
+            >
+              <KeyRound size={14} />
+              <span>Sửa Đáp Án (Key)</span>
+            </button>
+          )}
+
           {/* Correction Mode Canvas (Teacher Preview Only) */}
           {isPreview && (
             <button
@@ -168,57 +183,98 @@ export const WhitePaperAssignmentViewer: React.FC<WhitePaperAssignmentViewerProp
       </div>
 
       {/* 2. MAIN LAYOUT WITH LIGHT-THEME QUESTION PROGRESS SIDEBAR & WHITE PAPER */}
-      <div className="flex gap-5 max-w-7xl mx-auto items-start w-full">
-        {/* Light Theme Progress Sidebar (Matching Paper Sheet) */}
-        {progress.total > 0 && (
-          <div className="w-72 shrink-0 bg-white text-slate-900 border border-slate-200 rounded-2xl p-4 sticky top-16 shadow-xl space-y-3.5 hidden md:block select-none">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
-              <div className="flex items-center gap-1.5 text-xs font-black text-slate-800">
-                <CheckCircle2 size={15} className="text-emerald-600" />
-                <span>Tiến Độ Làm Bài</span>
-              </div>
-              <span className="text-xs font-black text-indigo-600">
-                {progress.answered}/{progress.total} ({pct}%)
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        {/* Left A4 Paper Test View */}
+        <div className="lg:col-span-9 flex justify-center">
+          <div className="relative w-full max-w-[850px] bg-white text-slate-900 rounded-none shadow-[0_20px_50px_rgba(0,0,0,0.4)] border border-slate-300 p-8 sm:p-14 min-h-[1100px] flex flex-col justify-between font-sans">
+            {/* Drawing Correction Layer (Fixed Full Canvas) */}
+            <DrawingCorrectionCanvas isActive={isCorrectionMode} />
+
+            <div className="space-y-6">
+              <WhitePaperHeader
+                assignment={assignment}
+                studentName={studentName}
+                isSubmitted={isSubmitted}
+                finalScore={String(finalScore)}
+                correctCount={progress.answered}
+                total={progress.total || 10}
+              />
+
+              {/* ULN Document Rendering */}
+              {ulnNodes.length > 0 ? (
+                <UlnDocumentRenderer
+                  nodes={ulnNodes}
+                  isSubmitted={isSubmitted}
+                  onProgressUpdate={(ans, tot, secs) => {
+                    setProgress({ answered: ans, total: tot, sections: secs });
+                  }}
+                />
+              ) : (
+                <div className="space-y-6 pt-4">
+                  {fallbackExercises.map((item) => (
+                    <ExerciseItemView
+                      key={item.id}
+                      exercise={item}
+                      userAnswer={userAnswers[item.id]}
+                      isSubmitted={isSubmitted}
+                      onSelectOption={handleSelectOption}
+                      renderFormattedText={(t) => <span>{t}</span>}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Test Footer */}
+            <div className="border-t-2 border-slate-800 pt-5 text-center text-xs text-slate-500 font-semibold">
+              <p>--- HẾT BÀI KIỂM TRA ---</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Question Navigation Sidebar (Light Clean Paper Theme) */}
+        <div className="lg:col-span-3 lg:sticky lg:top-24 space-y-4">
+          <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-xl text-slate-900 space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+              <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider">
+                Tiến Độ Làm Bài
+              </h4>
+              <span className="text-xs font-mono font-bold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">
+                {progress.answered}/{progress.total || 10} ({pct}%)
               </span>
             </div>
 
-            <div className="w-full bg-slate-100 border border-slate-200 rounded-full h-2.5 overflow-hidden">
+            {/* Progress Bar */}
+            <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden p-0.5 border border-slate-200">
               <div
                 className="bg-emerald-500 h-full rounded-full transition-all duration-300 shadow-xs"
                 style={{ width: `${pct}%` }}
               />
             </div>
 
-            <div className="space-y-3 max-h-[68vh] overflow-y-auto pr-1 scrollbar-thin">
-              {progress.sections.map((sec, sIdx) => (
-                <div key={sIdx} className="space-y-1.5 pt-2.5 first:pt-0 border-t border-slate-100 first:border-none">
-                  {/* Clickable Instruction Title */}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const el = document.getElementById(sec.id);
-                      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }}
-                    className="text-left w-full text-[11px] font-black text-indigo-700 hover:text-indigo-900 transition cursor-pointer leading-tight flex items-start gap-1"
-                  >
+            {/* Question Quick-Jump Grid */}
+            <div className="max-h-[60vh] overflow-y-auto pr-1 space-y-3 scrollbar-thin">
+              {progress.sections.map((sec) => (
+                <div key={sec.id} className="space-y-1.5">
+                  <div className="text-[11px] font-black text-slate-700 flex items-center gap-1">
                     <ChevronRight size={12} className="shrink-0 mt-0.5 text-indigo-500" />
-                    <span className="line-clamp-2">{sec.title}</span>
-                  </button>
-
-                  {/* Question Pills Matrix */}
-                  <div className="flex flex-wrap gap-1 pl-3.5">
-                    {sec.items.map((item, itIdx) => (
+                    <span className="truncate">{sec.title}</span>
+                  </div>
+                  <div className="grid grid-cols-5 gap-1.5">
+                    {sec.items.map((item) => (
                       <button
-                        key={itIdx}
+                        key={item.id}
                         type="button"
                         onClick={() => {
                           const el = document.getElementById(item.id);
-                          if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                          if (el) {
+                            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                          }
                         }}
-                        className={`w-6 h-6 rounded text-[11px] font-black transition flex items-center justify-center cursor-pointer ${
+                        className={`py-1.5 rounded-lg text-xs font-bold font-mono transition cursor-pointer border ${
                           item.isAnswered
                             ? 'bg-emerald-600 text-white shadow-xs ring-1 ring-emerald-500'
-                            : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300'
+                            : 'bg-slate-100 hover:bg-indigo-50 hover:border-indigo-300 text-slate-700 border-slate-200'
                         }`}
                       >
                         {item.label}
@@ -228,50 +284,6 @@ export const WhitePaperAssignmentViewer: React.FC<WhitePaperAssignmentViewerProp
                 </div>
               ))}
             </div>
-          </div>
-        )}
-
-        {/* 3. PURE WHITE PAPER WORKSHEET CANVAS (A4 PAPER SHEET STANDARD) */}
-        <div
-          style={{ colorScheme: 'light', userSelect: 'none', WebkitUserSelect: 'none' }}
-          className="relative white-paper-container flex-1 bg-white text-slate-950 shadow-2xl rounded-2xl p-6 sm:p-10 border border-slate-200 space-y-5"
-        >
-          {/* Drawing Correction Layer Overlay (Teacher Preview only) */}
-          {isPreview && <DrawingCorrectionCanvas isActive={isCorrectionMode} />}
-
-          <WhitePaperHeader
-            assignment={assignment}
-            studentName={studentName}
-            isSubmitted={isSubmitted}
-            finalScore={String(finalScore)}
-            correctCount={progress.answered}
-            total={progress.total}
-          />
-
-          {/* Sequential Questions */}
-          {ulnNodes.length > 0 ? (
-            <UlnDocumentRenderer
-              nodes={ulnNodes}
-              isSubmitted={false}
-              onProgressUpdate={(ans, tot, sec) => setProgress({ answered: ans, total: tot, sections: sec })}
-            />
-          ) : (
-            <div className="space-y-6">
-              {fallbackExercises.map((ex) => (
-                <ExerciseItemView
-                  key={ex.id}
-                  exercise={ex}
-                  userAnswer={userAnswers[ex.id]}
-                  isSubmitted={false}
-                  onSelectOption={handleSelectOption}
-                  renderFormattedText={(t) => t}
-                />
-              ))}
-            </div>
-          )}
-
-          <div className="border-t-2 border-slate-800 pt-5 text-center text-xs text-slate-500 font-semibold">
-            --- HẾT PHIẾU BÀI TẬP ---
           </div>
         </div>
       </div>

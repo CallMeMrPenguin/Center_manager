@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
-import { PlayCircle, Users, Edit3, Plus, KeyRound } from 'lucide-react';
+import { Edit3, Plus } from 'lucide-react';
 import { DataTable } from '../../../components/DataTable';
 import { Assignment } from '../types';
 
@@ -12,7 +12,6 @@ interface AssignmentListTabProps {
   onViewSubmissions: (assignment: Assignment) => void;
   onPlayPreview: (assignment: Assignment) => void;
   onOpenCreateModal: () => void;
-  onEditAnswerKey?: (assignment: Assignment) => void;
 }
 
 export const AssignmentListTab: React.FC<AssignmentListTabProps> = ({
@@ -23,7 +22,6 @@ export const AssignmentListTab: React.FC<AssignmentListTabProps> = ({
   onViewSubmissions,
   onPlayPreview,
   onOpenCreateModal,
-  onEditAnswerKey,
 }) => {
   const columns = useMemo<ColumnDef<Assignment>[]>(() => {
     // Student View: Simple list with only title, due date, status and single "Vào Làm Bài" action button
@@ -39,13 +37,9 @@ export const AssignmentListTab: React.FC<AssignmentListTabProps> = ({
           header: 'Tên Bài Tập',
           cell: ({ row }) => (
             <div className="space-y-0.5">
-              <button
-                type="button"
-                onClick={() => onPlayPreview(row.original)}
-                className="font-bold text-indigo-400 hover:text-indigo-300 hover:underline text-left cursor-pointer transition-colors block text-sm"
-              >
+              <span className="font-bold text-indigo-400 hover:text-indigo-300 hover:underline block text-sm">
                 {row.original.title}
-              </button>
+              </span>
               {row.original.description && (
                 <span className="text-[11px] text-slate-400 line-clamp-1 block">{row.original.description}</span>
               )}
@@ -74,11 +68,13 @@ export const AssignmentListTab: React.FC<AssignmentListTabProps> = ({
           cell: ({ row }) => (
             <button
               type="button"
-              onClick={() => onPlayPreview(row.original)}
-              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[#5c36f5] hover:bg-[#6c48f7] text-white text-xs font-black shadow-[0_0_12px_rgba(92,54,245,0.4)] transition cursor-pointer active:scale-95"
+              onClick={(e) => {
+                e.stopPropagation();
+                onPlayPreview(row.original);
+              }}
+              className="px-3.5 py-1.5 rounded-xl bg-[#5c36f5] hover:bg-[#6c48f7] text-white text-xs font-black shadow-[0_0_12px_rgba(92,54,245,0.4)] transition cursor-pointer active:scale-95"
             >
-              <PlayCircle size={14} />
-              <span>Vào Làm Bài</span>
+              Vào Làm Bài
             </button>
           ),
         },
@@ -102,13 +98,9 @@ export const AssignmentListTab: React.FC<AssignmentListTabProps> = ({
         header: 'Tiêu Đề Bài Tập',
         cell: ({ row }) => (
           <div className="space-y-0.5">
-            <button
-              type="button"
-              onClick={() => onPlayPreview(row.original)}
-              className="font-bold text-indigo-400 hover:text-indigo-300 hover:underline text-left cursor-pointer transition-colors block"
-            >
+            <span className="font-bold text-indigo-400 hover:text-indigo-300 hover:underline block">
               {row.original.title}
-            </button>
+            </span>
             {row.original.description && (
               <span className="text-[11px] text-slate-400 line-clamp-1 block">{row.original.description}</span>
             )}
@@ -156,42 +148,25 @@ export const AssignmentListTab: React.FC<AssignmentListTabProps> = ({
         enableSorting: false,
         enableGlobalFilter: false,
         cell: ({ row }) => (
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-2">
             <button
               type="button"
-              onClick={() => onPlayPreview(row.original)}
-              className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 hover:text-white text-xs font-bold border border-emerald-500/30 transition cursor-pointer active:scale-95"
-              title="Làm thử bài tập trực tuyến"
+              onClick={(e) => {
+                e.stopPropagation();
+                onPlayPreview(row.original);
+              }}
+              className="px-3 py-1 rounded-lg bg-indigo-500/15 hover:bg-indigo-500/25 text-indigo-300 hover:text-white text-xs font-black border border-indigo-500/30 transition cursor-pointer active:scale-95"
+              title="Xem trước đề & chỉnh sửa key"
             >
-              <PlayCircle size={13} />
-              <span>Làm thử</span>
+              Preview
             </button>
 
             <button
               type="button"
-              onClick={() => onViewSubmissions(row.original)}
-              className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-indigo-500/15 hover:bg-indigo-500/25 text-indigo-300 hover:text-white text-xs font-bold border border-indigo-500/30 transition cursor-pointer active:scale-95"
-              title="Xem danh sách nộp bài & chấm điểm"
-            >
-              <Users size={13} />
-              <span>Chấm bài</span>
-            </button>
-
-            {onEditAnswerKey && (
-              <button
-                type="button"
-                onClick={() => onEditAnswerKey(row.original)}
-                className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 hover:text-white text-xs font-bold border border-amber-500/30 transition cursor-pointer active:scale-95"
-                title="Chỉnh sửa đáp án & tự động tính lại điểm"
-              >
-                <KeyRound size={13} />
-                <span>Đáp án</span>
-              </button>
-            )}
-
-            <button
-              type="button"
-              onClick={() => onEditAssignment(row.original)}
+              onClick={(e) => {
+                e.stopPropagation();
+                onEditAssignment(row.original);
+              }}
               className="p-1.5 rounded-lg hover:bg-white/10 text-slate-400 hover:text-white transition cursor-pointer"
               title="Chỉnh sửa hoặc xóa bài tập"
             >
@@ -201,7 +176,7 @@ export const AssignmentListTab: React.FC<AssignmentListTabProps> = ({
         ),
       },
     ];
-  }, [isStudent, onPlayPreview, onViewSubmissions, onEditAssignment, onEditAnswerKey]);
+  }, [isStudent, onPlayPreview, onEditAssignment]);
 
   return (
     <DataTable<Assignment>
@@ -211,6 +186,13 @@ export const AssignmentListTab: React.FC<AssignmentListTabProps> = ({
       pageSize={20}
       exportFilename="danh_sach_bai_tap_venha"
       searchPlaceholder={isStudent ? 'Tìm bài tập...' : 'Tìm theo tiêu đề, lớp học...'}
+      onRowClick={(row) => {
+        if (isStudent) {
+          onPlayPreview(row);
+        } else {
+          onViewSubmissions(row);
+        }
+      }}
       emptyMessage={
         <div className="py-12 text-center space-y-3">
           <p className="text-slate-400 text-sm">Chưa có bài tập nào trong danh sách.</p>

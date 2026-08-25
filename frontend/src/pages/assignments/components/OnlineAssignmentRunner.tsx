@@ -8,6 +8,7 @@ interface OnlineAssignmentRunnerProps {
   studentName?: string;
   isPreview?: boolean;
   onBack: () => void;
+  onEditAnswerKey?: (assignment: Assignment) => void;
   onSubmitSuccess?: (score: number) => void;
 }
 
@@ -16,6 +17,7 @@ export const OnlineAssignmentRunner: React.FC<OnlineAssignmentRunnerProps> = ({
   studentName = 'Học Sinh',
   isPreview = true,
   onBack,
+  onEditAnswerKey,
   onSubmitSuccess,
 }) => {
   return (
@@ -24,6 +26,7 @@ export const OnlineAssignmentRunner: React.FC<OnlineAssignmentRunnerProps> = ({
       studentName={studentName}
       isPreview={isPreview}
       onBack={onBack}
+      onEditAnswerKey={onEditAnswerKey}
       onSubmitSuccess={onSubmitSuccess}
     />
   );
