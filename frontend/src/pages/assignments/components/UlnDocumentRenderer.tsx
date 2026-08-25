@@ -61,20 +61,21 @@ export const UlnDocumentRenderer: React.FC<UlnDocumentRendererProps> = memo(({
     if (progressTimerRef.current) clearTimeout(progressTimerRef.current);
     progressTimerRef.current = setTimeout(() => {
       const sectionGroups: SectionProgressGroup[] = [];
-      let currentSection: SectionProgressGroup = { id: 'sec_0', title: 'BÀI TẬP CHUNG', items: [] };
+      let currentGroup: SectionProgressGroup = { id: 'target_ins_0', title: 'BÀI TẬP 1', items: [] };
       let totalQuestions = 0;
       let totalAnswered = 0;
 
       nodes.forEach((node, nIdx) => {
-        if (node.type === 'h1' || node.type === 'h2') {
-          if (currentSection.items.length > 0) sectionGroups.push(currentSection);
-          currentSection = { id: `sec_${nIdx}`, title: node.text.replace(/\*\*/g, '').trim(), items: [] };
+        if (node.type === 'ins') {
+          if (currentGroup.items.length > 0) sectionGroups.push(currentGroup);
+          const cleanTitle = node.text.replace(/<@[0-9]+>/g, '').replace(/\[.*?\]/g, '').replace(/\*\*/g, '').trim();
+          currentGroup = { id: `target_ins_${nIdx}`, title: cleanTitle || `BÀI TẬP ${sectionGroups.length + 1}`, items: [] };
           return;
         }
         if (node.type === 'table') {
           node.rows.forEach((_, rIdx) => {
             const isAns = tableChecks[`${rIdx}`] !== undefined && tableChecks[`${rIdx}`] >= 0;
-            currentSection.items.push({ id: `target_table_${nIdx}_${rIdx}`, label: String(rIdx + 1), isAnswered: isAns });
+            currentGroup.items.push({ id: `target_table_${nIdx}_${rIdx}`, label: String(rIdx + 1), isAnswered: isAns });
             totalQuestions++;
             if (isAns) totalAnswered++;
           });
@@ -86,7 +87,7 @@ export const UlnDocumentRenderer: React.FC<UlnDocumentRendererProps> = memo(({
           for (let slot = 1; slot <= ansCount; slot++) {
             const key = `ins_${nIdx}_slot_${slot}`;
             const isAns = !!(answers[key] && answers[key].trim());
-            currentSection.items.push({ id: `target_tab_${nIdx}`, label: String(slot), isAnswered: isAns });
+            currentGroup.items.push({ id: `target_tab_${nIdx}`, label: String(slot), isAnswered: isAns });
             totalQuestions++;
             if (isAns) totalAnswered++;
           }
@@ -95,12 +96,12 @@ export const UlnDocumentRenderer: React.FC<UlnDocumentRendererProps> = memo(({
         if (node.type === 'question') {
           const qKey = `q_${nIdx}_${node.qNum || nIdx}`;
           const isAns = !!answers[qKey] || !!answers[`${qKey}_write`] || !!answers[`${qKey}_direct`] || Object.keys(answers).some((k) => k.startsWith(qKey) && answers[k]?.trim());
-          currentSection.items.push({ id: `q_target_${nIdx}`, label: node.qNum || String(currentSection.items.length + 1), isAnswered: isAns });
+          currentGroup.items.push({ id: `q_target_${nIdx}`, label: node.qNum || String(currentGroup.items.length + 1), isAnswered: isAns });
           totalQuestions++;
           if (isAns) totalAnswered++;
         }
       });
-      if (currentSection.items.length > 0) sectionGroups.push(currentSection);
+      if (currentGroup.items.length > 0) sectionGroups.push(currentGroup);
       onProgressUpdate(totalAnswered, Math.max(totalQuestions, 1), sectionGroups);
     }, 60);
   }, [answers, tableChecks, nodes, onProgressUpdate]);
@@ -131,7 +132,7 @@ export const UlnDocumentRenderer: React.FC<UlnDocumentRendererProps> = memo(({
         }
         if (node.type === 'ins') {
           return (
-            <div key={nIdx} className="pt-1 pb-0.5 text-xs sm:text-sm font-bold text-slate-950">
+            <div key={nIdx} id={`target_ins_${nIdx}`} className="pt-1.5 pb-0.5 text-xs sm:text-sm font-bold text-slate-950 scroll-mt-20">
               <UlnInlineText text={node.text} qKey={`ins_${nIdx}`} answers={answers} onInputChange={handleInputChange} isSubmitted={isSubmitted} />
             </div>
           );
@@ -230,7 +231,6 @@ export const UlnDocumentRenderer: React.FC<UlnDocumentRendererProps> = memo(({
           );
         }
         if (node.type === 'tab_cols') {
-          const gridClass = node.cols === 3 ? 'grid-cols-1 sm:grid-cols-3' : node.cols === 4 ? 'grid-cols-2 sm:grid-cols-4' : 'grid-cols-1 sm:grid-cols-2';
           const prevIns = [...nodes.slice(0, nIdx)].reverse().find((n) => n.type === 'ins') as UlnHeadingNode | undefined;
           const ansCount = prevIns && prevIns.answerCount ? prevIns.answerCount : node.items.length;
 
@@ -238,7 +238,7 @@ export const UlnDocumentRenderer: React.FC<UlnDocumentRendererProps> = memo(({
             <div key={nIdx} id={`target_tab_${nIdx}`} className="my-2 space-y-2 scroll-mt-20">
               <div className="space-y-1">
                 {node.items.map((row, rIdx) => (
-                  <div key={rIdx} className={`grid ${gridClass} gap-x-8 gap-y-1 text-xs sm:text-sm font-normal text-slate-950`}>
+                  <div key={rIdx} className={`grid ${node.cols === 3 ? 'grid-cols-1 sm:grid-cols-3' : node.cols === 4 ? 'grid-cols-2 sm:grid-cols-4' : 'grid-cols-1 sm:grid-cols-2'} gap-x-8 gap-y-1 text-xs sm:text-sm font-normal text-slate-950`}>
                     {row.map((item, cIdx) => (
                       <div key={cIdx} className="py-0.5">
                         <UlnInlineText text={item} qKey={`tab_${nIdx}_${rIdx}_${cIdx}`} answers={answers} onInputChange={handleInputChange} isSubmitted={isSubmitted} />
@@ -315,20 +315,25 @@ export const UlnDocumentRenderer: React.FC<UlnDocumentRendererProps> = memo(({
                   {node.options && node.options.length > 0 && (
                     <div className={`grid ${optGridClass} gap-x-6 gap-y-1 pt-1 font-normal`}>
                       {node.options.map((opt, optIdx) => {
-                        const optLetter = String.fromCharCode(65 + optIdx) + '.';
-                        const isSelected = currentAns === opt;
+                        const optLetter = String.fromCharCode(65 + optIdx);
+                        const optLetterWithDot = optLetter + '.';
+                        const cleanText = cleanOptionPrefix(opt);
+                        const isSelected = currentAns === opt || currentAns === cleanText || currentAns === optLetter || currentAns === optLetterWithDot;
+
                         return (
                           <button
                             key={optIdx}
                             type="button"
-                            onClick={() => handleSelectOption(qKey, opt)}
-                            className={`text-left flex items-start gap-1.5 transition cursor-pointer py-0.5 px-1 rounded text-xs sm:text-sm ${
-                              isSelected ? 'bg-blue-100/80 text-blue-950 font-bold' : 'hover:bg-slate-100/70 text-slate-900'
+                            onClick={() => handleSelectOption(qKey, optLetter)}
+                            className={`text-left flex items-start gap-1.5 transition cursor-pointer py-1 px-2 rounded-lg text-xs sm:text-sm ${
+                              isSelected
+                                ? 'bg-blue-600 text-white font-bold shadow-md ring-2 ring-blue-400'
+                                : 'hover:bg-slate-100 text-slate-900'
                             }`}
                           >
-                            <span className={`font-bold shrink-0 ${isSelected ? 'text-blue-700' : 'text-blue-600'}`}>{optLetter}</span>
-                            <span className="flex-1 font-normal">
-                              <UlnInlineText text={cleanOptionPrefix(opt)} qKey={`${qKey}_opt_${optIdx}`} answers={answers} onInputChange={handleInputChange} isSubmitted={isSubmitted} />
+                            <span className={`font-bold shrink-0 ${isSelected ? 'text-white' : 'text-blue-600'}`}>{optLetterWithDot}</span>
+                            <span className={`flex-1 font-normal ${isSelected ? 'text-white' : 'text-slate-900'}`}>
+                              {cleanText}
                             </span>
                           </button>
                         );

@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useCallback } from 'react';
-import { ArrowLeft, Award, Printer, Send, RefreshCw, Maximize2, Minimize2, CheckCircle2 } from 'lucide-react';
+import { ArrowLeft, Award, Printer, Save, RefreshCw, Maximize2, Minimize2, CheckCircle2, ChevronRight } from 'lucide-react';
 import { Assignment } from '../types';
 import { ExerciseItem } from './types';
 import { WhitePaperHeader } from './WhitePaperHeader';
@@ -28,6 +28,7 @@ export const WhitePaperAssignmentViewer: React.FC<WhitePaperAssignmentViewerProp
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [userAnswers, setUserAnswers] = useState<Record<number, string>>({});
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [submissionCount, setSubmissionCount] = useState(0);
   const [finalScore, setFinalScore] = useState<number>(0);
   const [progress, setProgress] = useState<{ answered: number; total: number; sections: SectionProgressGroup[] }>({
     answered: 0,
@@ -65,23 +66,18 @@ export const WhitePaperAssignmentViewer: React.FC<WhitePaperAssignmentViewerProp
   ], []);
 
   const handleSelectOption = useCallback((exId: number, opt: string) => {
-    if (isSubmitted) return;
     setUserAnswers((prev) => ({ ...prev, [exId]: opt }));
-  }, [isSubmitted]);
+  }, []);
 
   const handleSubmit = () => {
-    let correct = 0;
-    const total = fallbackExercises.length || progress.total || 10;
-    fallbackExercises.forEach((ex) => {
-      if (userAnswers[ex.id] && (userAnswers[ex.id] === ex.answer || cleanOptionPrefix(userAnswers[ex.id]) === cleanOptionPrefix(ex.answer))) {
-        correct++;
-      }
-    });
+    const total = progress.total || fallbackExercises.length || 10;
+    const answered = progress.answered || Object.keys(userAnswers).length;
+    const score = Number(format1Dec((answered / (total || 1)) * (assignment.max_score || 10)));
 
-    const score = Number(format1Dec((correct / (total || 1)) * (assignment.max_score || 10)));
     setFinalScore(score);
     setIsSubmitted(true);
-    showToast(`Đã nộp bài thành công! Điểm của bạn: ${score}/${assignment.max_score || 10}`, 'success');
+    setSubmissionCount((prev) => prev + 1);
+    showToast(`Đã nộp bài thành công! Điểm: ${score}/10.0 (Đã hoàn thành ${answered}/${total} câu)`, 'success');
     if (onSubmitSuccess) onSubmitSuccess(score);
   };
 
@@ -110,7 +106,7 @@ export const WhitePaperAssignmentViewer: React.FC<WhitePaperAssignmentViewerProp
               )}
             </div>
             <p className="text-xs text-slate-400 mt-0.5">
-              Học sinh: <strong className="text-slate-200">{studentName}</strong> | Trạng thái: <strong className="text-indigo-300">{isSubmitted ? 'Đã Nộp' : 'Đang Làm Bài'}</strong>
+              Học sinh: <strong className="text-slate-200">{studentName}</strong> | Trạng thái: <strong className="text-indigo-300">{isSubmitted ? `Đã nộp (${submissionCount} lần)` : 'Đang làm bài'}</strong>
             </p>
           </div>
         </div>
@@ -135,39 +131,29 @@ export const WhitePaperAssignmentViewer: React.FC<WhitePaperAssignmentViewerProp
             <span>In Đề / PDF</span>
           </button>
 
-          {!isSubmitted ? (
-            <button
-              type="button"
-              onClick={handleSubmit}
-              className="flex items-center gap-1.5 px-5 py-2 rounded-xl bg-[#5c36f5] hover:bg-[#6c48f7] text-white text-xs font-black shadow-[0_0_15px_rgba(92,54,245,0.4)] transition cursor-pointer active:scale-95"
-            >
-              <Send size={14} />
-              <span>Nộp Bài Thi</span>
-            </button>
-          ) : (
-            <div className="flex items-center gap-2">
-              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 text-xs font-black">
-                <Award size={15} />
-                <span>Điểm: {finalScore}/10.0</span>
-              </div>
-              <button
-                type="button"
-                onClick={() => { setIsSubmitted(false); setUserAnswers({}); }}
-                className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-bold transition cursor-pointer"
-              >
-                <RefreshCw size={13} />
-                <span>Làm lại</span>
-              </button>
+          {isSubmitted && (
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 text-xs font-black">
+              <Award size={15} />
+              <span>Điểm: {finalScore}/10.0 ({progress.answered}/{progress.total} câu)</span>
             </div>
           )}
+
+          <button
+            type="button"
+            onClick={handleSubmit}
+            className="flex items-center gap-1.5 px-5 py-2 rounded-xl bg-[#5c36f5] hover:bg-[#6c48f7] text-white text-xs font-black shadow-[0_0_15px_rgba(92,54,245,0.4)] transition cursor-pointer active:scale-95"
+          >
+            <Save size={14} />
+            <span>{isSubmitted ? 'Cập Nhật & Nộp Lại' : 'Nộp Bài'}</span>
+          </button>
         </div>
       </div>
 
-      {/* 2. MAIN LAYOUT WITH SECTION-GROUPED PROGRESS SIDEBAR */}
+      {/* 2. MAIN LAYOUT WITH INSTRUCTION-GROUPED PROGRESS SIDEBAR */}
       <div className="flex gap-5 max-w-7xl mx-auto items-start">
         {/* Progress Sidebar */}
         {progress.total > 0 && (
-          <div className="w-64 shrink-0 bg-[#0c0f1e] border border-[#212c4b] rounded-2xl p-4 sticky top-20 shadow-xl space-y-3.5 hidden md:block">
+          <div className="w-72 shrink-0 bg-[#0c0f1e] border border-[#212c4b] rounded-2xl p-4 sticky top-20 shadow-xl space-y-3.5 hidden md:block">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1.5 text-xs font-bold text-slate-200">
                 <CheckCircle2 size={14} className="text-emerald-400" />
@@ -180,13 +166,24 @@ export const WhitePaperAssignmentViewer: React.FC<WhitePaperAssignmentViewerProp
               <div className="bg-emerald-500 h-full rounded-full transition-all duration-300" style={{ width: `${pct}%` }} />
             </div>
 
-            <div className="space-y-3 max-h-[60vh] overflow-y-auto pr-1">
+            <div className="space-y-3 max-h-[65vh] overflow-y-auto pr-1">
               {progress.sections.map((sec, sIdx) => (
-                <div key={sIdx} className="space-y-1.5 pt-2 first:pt-0 border-t border-white/10 first:border-none">
-                  <div className="text-[10px] font-black text-indigo-300 truncate uppercase tracking-wider">
-                    {sec.title}
-                  </div>
-                  <div className="flex flex-wrap gap-1">
+                <div key={sIdx} className="space-y-1.5 pt-2.5 first:pt-0 border-t border-white/10 first:border-none">
+                  {/* Clickable Instruction Title */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const el = document.getElementById(sec.id);
+                      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }}
+                    className="text-left w-full text-[11px] font-black text-indigo-300 hover:text-indigo-200 transition cursor-pointer leading-tight flex items-start gap-1"
+                  >
+                    <ChevronRight size={12} className="shrink-0 mt-0.5 text-indigo-400" />
+                    <span className="line-clamp-2">{sec.title}</span>
+                  </button>
+
+                  {/* Question Pills Matrix */}
+                  <div className="flex flex-wrap gap-1 pl-3.5">
                     {sec.items.map((item, itIdx) => (
                       <button
                         key={itIdx}
@@ -229,7 +226,7 @@ export const WhitePaperAssignmentViewer: React.FC<WhitePaperAssignmentViewerProp
           {ulnNodes.length > 0 ? (
             <UlnDocumentRenderer
               nodes={ulnNodes}
-              isSubmitted={isSubmitted}
+              isSubmitted={false}
               onProgressUpdate={(ans, tot, sec) => setProgress({ answered: ans, total: tot, sections: sec })}
             />
           ) : (
@@ -239,7 +236,7 @@ export const WhitePaperAssignmentViewer: React.FC<WhitePaperAssignmentViewerProp
                   key={ex.id}
                   exercise={ex}
                   userAnswer={userAnswers[ex.id]}
-                  isSubmitted={isSubmitted}
+                  isSubmitted={false}
                   onSelectOption={handleSelectOption}
                   renderFormattedText={(t) => t}
                 />
