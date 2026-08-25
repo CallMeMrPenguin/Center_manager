@@ -12,12 +12,9 @@ export default function RankShowcasePage() {
   const [isCelebrationOpen, setIsCelebrationOpen] = useState(false);
 
   const [config, setConfig] = useState<RankShowcaseConfig>({
-    step: 3,
-    shape: 'square',
+    particleCount: 50,
     speed: 1.0,
-    scatterRadius: 160,
-    enableMouseRepel: true,
-    enableGlow: true,
+    enableMouseInteraction: true,
     autoReplay: false,
   });
 
@@ -41,7 +38,7 @@ export default function RankShowcasePage() {
               </span>
             </h1>
             <p className="text-xs text-slate-400 font-semibold">
-              Khám phá và tùy biến hiệu ứng hợp thể hạt vi mô (Pixel Assemble) trên toàn bộ 8 biểu tượng Rank
+              Khám phá hiệu ứng hội tụ bụi sáng (Energy Vortex Assemble), dập khóa biểu tượng và quét ánh kim (Metallic Sheen) trên toàn bộ 8 Rank HD
             </p>
           </div>
         </div>

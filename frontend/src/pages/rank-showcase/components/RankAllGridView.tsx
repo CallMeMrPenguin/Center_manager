@@ -1,7 +1,7 @@
 import React, { useRef } from 'react';
-import { Play, Sparkles, RefreshCw, Flame } from 'lucide-react';
+import { Play, Sparkles, RefreshCw, Flame, SunMedium } from 'lucide-react';
 import { TIERS_CONFIG, StudentTier } from '../../reports/types';
-import { RankParticleCanvas, RankParticleCanvasHandle } from './RankParticleCanvas';
+import { RankEmblemAssemble, RankEmblemAssembleHandle } from './RankEmblemAssemble';
 import { RankShowcaseConfig } from '../types';
 
 interface RankAllGridViewProps {
@@ -13,23 +13,29 @@ export const RankAllGridView: React.FC<RankAllGridViewProps> = ({
   config,
   onSelectTier,
 }) => {
-  const canvasRefs = useRef<Record<number, RankParticleCanvasHandle | null>>({});
+  const emblemRefs = useRef<Record<number, RankEmblemAssembleHandle | null>>({});
 
   const handleAssembleAll = () => {
-    Object.values(canvasRefs.current).forEach((c, idx) => {
-      setTimeout(() => c?.assemble(), idx * 100);
+    Object.values(emblemRefs.current).forEach((c, idx) => {
+      setTimeout(() => c?.assemble(), idx * 120);
     });
   };
 
   const handleDisassembleAll = () => {
-    Object.values(canvasRefs.current).forEach((c, idx) => {
+    Object.values(emblemRefs.current).forEach((c, idx) => {
       setTimeout(() => c?.disassemble(), idx * 80);
     });
   };
 
   const handleBlastAll = () => {
-    Object.values(canvasRefs.current).forEach((c, idx) => {
-      setTimeout(() => c?.blast(), idx * 60);
+    Object.values(emblemRefs.current).forEach((c, idx) => {
+      setTimeout(() => c?.blast(), idx * 70);
+    });
+  };
+
+  const handleSheenAll = () => {
+    Object.values(emblemRefs.current).forEach((c, idx) => {
+      setTimeout(() => c?.triggerSheen(), idx * 90);
     });
   };
 
@@ -40,9 +46,9 @@ export const RankAllGridView: React.FC<RankAllGridViewProps> = ({
         <div>
           <h3 className="text-sm font-black text-white flex items-center gap-2">
             <Sparkles size={16} className="text-amber-400" />
-            <span>Toàn Bộ 8 Cấp Bậc (All 8 Tiers)</span>
+            <span>Toàn Bộ 8 Cấp Bậc (All 8 Tiers Grid)</span>
           </h3>
-          <p className="text-xs text-slate-400 font-semibold">Khám phá hiệu ứng hội tụ hạt vi mô trên tất cả biểu tượng Rank</p>
+          <p className="text-xs text-slate-400 font-semibold">Tất cả biểu tượng giữ nguyên độ phân giải HD cùng bụi phát sáng và hiệu ứng dập khóa chuẩn game</p>
         </div>
 
         <div className="flex items-center gap-2 flex-wrap">
@@ -55,11 +61,11 @@ export const RankAllGridView: React.FC<RankAllGridViewProps> = ({
           </button>
 
           <button
-            onClick={handleDisassembleAll}
-            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-bold border border-white/10 transition cursor-pointer"
+            onClick={handleSheenAll}
+            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 text-xs font-bold border border-amber-500/30 transition cursor-pointer"
           >
-            <RefreshCw size={13} />
-            <span>Tan Biến Toàn Bộ</span>
+            <SunMedium size={13} />
+            <span>Quét Ánh Kim Toàn Bộ</span>
           </button>
 
           <button
@@ -67,7 +73,15 @@ export const RankAllGridView: React.FC<RankAllGridViewProps> = ({
             className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 text-xs font-bold border border-rose-500/30 transition cursor-pointer"
           >
             <Flame size={13} />
-            <span>Nổ Sóng Hạt</span>
+            <span>Sóng Nổ Hạt</span>
+          </button>
+
+          <button
+            onClick={handleDisassembleAll}
+            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-bold border border-white/10 transition cursor-pointer"
+          >
+            <RefreshCw size={13} />
+            <span>Tan Biến</span>
           </button>
         </div>
       </div>
@@ -83,7 +97,7 @@ export const RankAllGridView: React.FC<RankAllGridViewProps> = ({
               {/* Top Tier Badge */}
               <div className="w-full flex items-center justify-between">
                 <span
-                  className="text-[10px] font-black px-2 py-0.5 rounded-md border"
+                  className="text-[10px] font-black px-2.5 py-0.5 rounded-md border"
                   style={{
                     backgroundColor: `${tier.color}15`,
                     borderColor: `${tier.color}40`,
@@ -97,18 +111,16 @@ export const RankAllGridView: React.FC<RankAllGridViewProps> = ({
                 </span>
               </div>
 
-              {/* Particle Canvas Badge */}
-              <div className="my-3 relative flex items-center justify-center">
-                <RankParticleCanvas
-                  ref={(el) => { canvasRefs.current[tier.tier] = el; }}
+              {/* Game-Style Emblem Assemble Canvas */}
+              <div className="my-2 relative flex items-center justify-center">
+                <RankEmblemAssemble
+                  ref={(el) => { emblemRefs.current[tier.tier] = el; }}
                   imageSrc={tier.badge}
-                  size={150}
+                  size={160}
                   tierColor={tier.color}
-                  shape={config.shape}
-                  step={config.step}
-                  speed={config.speed}
-                  scatterRadius={100}
-                  enableMouseRepel={config.enableMouseRepel}
+                  tierName={tier.name}
+                  particleCount={30}
+                  enableMouseInteraction={config.enableMouseInteraction}
                 />
               </div>
 
@@ -121,21 +133,28 @@ export const RankAllGridView: React.FC<RankAllGridViewProps> = ({
               {/* Action Buttons */}
               <div className="flex items-center gap-1.5 mt-4 w-full pt-3 border-t border-white/5">
                 <button
-                  onClick={() => canvasRefs.current[tier.tier]?.assemble()}
+                  onClick={() => emblemRefs.current[tier.tier]?.assemble()}
                   className="flex-1 py-1 rounded-lg bg-white/5 hover:bg-[#5c36f5] hover:text-white text-slate-300 text-[11px] font-bold transition cursor-pointer border border-white/10"
                 >
                   Hợp thể
                 </button>
                 <button
-                  onClick={() => canvasRefs.current[tier.tier]?.blast()}
-                  className="p-1 rounded-lg bg-white/5 hover:bg-rose-500/20 hover:text-rose-300 text-slate-400 text-[11px] transition cursor-pointer border border-white/10"
+                  onClick={() => emblemRefs.current[tier.tier]?.triggerSheen()}
+                  className="p-1.5 rounded-lg bg-white/5 hover:bg-amber-500/20 hover:text-amber-300 text-slate-400 text-[11px] transition cursor-pointer border border-white/10"
+                  title="Quét ánh kim"
+                >
+                  <SunMedium size={13} />
+                </button>
+                <button
+                  onClick={() => emblemRefs.current[tier.tier]?.blast()}
+                  className="p-1.5 rounded-lg bg-white/5 hover:bg-rose-500/20 hover:text-rose-300 text-slate-400 text-[11px] transition cursor-pointer border border-white/10"
                   title="Sóng nổ"
                 >
                   <Flame size={13} />
                 </button>
                 <button
                   onClick={() => onSelectTier(tier)}
-                  className="p-1 rounded-lg bg-white/5 hover:bg-white/15 text-slate-400 hover:text-white text-[11px] transition cursor-pointer border border-white/10"
+                  className="p-1.5 rounded-lg bg-white/5 hover:bg-white/15 text-slate-400 hover:text-white text-[11px] transition cursor-pointer border border-white/10"
                   title="Mở sân khấu chi tiết"
                 >
                   <Sparkles size={13} />

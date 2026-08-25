@@ -1,7 +1,7 @@
 import React, { useRef, useState } from 'react';
-import { Sparkles, Trophy, X, ArrowRight, RefreshCw, CheckCircle2 } from 'lucide-react';
+import { Trophy, X, ArrowRight, RefreshCw, CheckCircle2, SunMedium } from 'lucide-react';
 import { TIERS_CONFIG, StudentTier } from '../../reports/types';
-import { RankParticleCanvas, RankParticleCanvasHandle } from './RankParticleCanvas';
+import { RankEmblemAssemble, RankEmblemAssembleHandle } from './RankEmblemAssemble';
 
 interface RankUpCelebrationModalProps {
   isOpen: boolean;
@@ -12,9 +12,9 @@ interface RankUpCelebrationModalProps {
 export const RankUpCelebrationModal: React.FC<RankUpCelebrationModalProps> = ({
   isOpen,
   onClose,
-  targetTier = TIERS_CONFIG[4], // Default Kim Cương
+  targetTier = TIERS_CONFIG[4],
 }) => {
-  const canvasRef = useRef<RankParticleCanvasHandle | null>(null);
+  const emblemRef = useRef<RankEmblemAssembleHandle | null>(null);
   const [selectedTierIndex, setSelectedTierIndex] = useState<number>(
     Math.max(1, targetTier.tier - 1)
   );
@@ -29,7 +29,7 @@ export const RankUpCelebrationModal: React.FC<RankUpCelebrationModalProps> = ({
       <div className="relative w-full max-w-lg bg-[#0c0f1e] border border-[#212c4b] rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 text-center overflow-hidden">
         {/* Ambient Top Glow */}
         <div
-          className="absolute -top-24 left-1/2 -translate-x-1/2 w-72 h-72 rounded-full opacity-20 pointer-events-none"
+          className="absolute -top-24 left-1/2 -translate-x-1/2 w-80 h-80 rounded-full opacity-25 pointer-events-none"
           style={{
             background: `radial-gradient(circle, ${currentTier.color} 0%, transparent 70%)`,
           }}
@@ -53,7 +53,7 @@ export const RankUpCelebrationModal: React.FC<RankUpCelebrationModalProps> = ({
             CHÚC MỪNG HỌC SINH!
           </h2>
           <p className="text-xs text-slate-400 font-semibold">
-            Nguyễn Văn An đã chính thức vượt ngưỡng điểm EMA và thăng hạng!
+            Nguyễn Văn An đã chính thức vượt ngưỡng điểm và đạt cấp bậc mới!
           </p>
         </div>
 
@@ -82,17 +82,16 @@ export const RankUpCelebrationModal: React.FC<RankUpCelebrationModalProps> = ({
           </div>
         </div>
 
-        {/* Big Particle Assemble Canvas Spotlight */}
+        {/* Big Game-Style Emblem Assemble Spotlight */}
         <div className="relative flex flex-col items-center justify-center py-2">
-          <RankParticleCanvas
-            ref={canvasRef}
+          <RankEmblemAssemble
+            ref={emblemRef}
             key={`modal_${currentTier.tier}`}
             imageSrc={currentTier.badge}
             size={220}
             tierColor={currentTier.color}
-            step={3}
-            speed={1.2}
-            scatterRadius={160}
+            tierName={currentTier.name}
+            particleCount={45}
           />
 
           <div
@@ -123,11 +122,19 @@ export const RankUpCelebrationModal: React.FC<RankUpCelebrationModalProps> = ({
         {/* Bottom Actions */}
         <div className="flex items-center gap-3 pt-2">
           <button
-            onClick={() => canvasRef.current?.assemble()}
+            onClick={() => emblemRef.current?.assemble()}
             className="flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-bold border border-white/10 transition cursor-pointer flex-1"
           >
             <RefreshCw size={13} />
             <span>Hợp Thể Lại</span>
+          </button>
+
+          <button
+            onClick={() => emblemRef.current?.triggerSheen()}
+            className="flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 text-xs font-bold border border-amber-500/30 transition cursor-pointer"
+            title="Quét ánh kim"
+          >
+            <SunMedium size={14} />
           </button>
 
           <button
