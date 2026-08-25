@@ -98,19 +98,8 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* 1. INDIVIDUAL STUDENT PROFILE */}
-      {selectedStudentObj && (
-        <div className="animate-cascade-1">
-          <StudentProfileHeader
-            student={selectedStudentObj}
-            stats={stats}
-            onClearStudent={() => setSelectedStudentId('')}
-          />
-        </div>
-      )}
-
-      {/* 2. FOUR/FIVE GLOWING KPI CARDS */}
-      <div className={selectedStudentObj ? 'animate-cascade-2' : 'animate-cascade-1'}>
+      {/* 1. FOUR/FIVE GLOWING KPI CARDS */}
+      <div className="animate-cascade-1">
         <KPICards
           stats={stats}
           engine={engine}
@@ -118,8 +107,8 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
         />
       </div>
 
-      {/* 3. INSIGHT COMMENTARY PANEL */}
-      <div className={selectedStudentObj ? 'animate-cascade-3' : 'animate-cascade-2'}>
+      {/* 2. INSIGHT COMMENTARY PANEL */}
+      <div className="animate-cascade-2">
         <InsightCommentary
           stats={stats}
           engine={engine}
@@ -132,8 +121,8 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
         />
       </div>
 
-      {/* 4. INTERACTIVE CHART (WITH TIMELINE & SCORE DISTRIBUTION TOGGLE) */}
-      <div className={selectedStudentObj ? 'animate-cascade-4' : 'animate-cascade-3'}>
+      {/* 3. INTERACTIVE CHART (WITH TIMELINE & SCORE DISTRIBUTION TOGGLE) */}
+      <div className="animate-cascade-3">
         <InteractiveChart
           sessionChartData={sessionChartData}
           engine={engine}
@@ -156,8 +145,8 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
         />
       </div>
 
-      {/* 5. SUMMARY STRIP (THẺ CÁC CHỈ SỐ DƯỚI GRAPH) */}
-      <div className={selectedStudentObj ? 'animate-cascade-5' : 'animate-cascade-4'}>
+      {/* 4. SUMMARY STRIP (THẺ CÁC CHỈ SỐ DƯỚI GRAPH) */}
+      <div className="animate-cascade-4">
         <SummaryStrip
           engine={engine}
           gradeTypesList={gradeTypesList}
@@ -166,6 +155,17 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
           distributionStats={distributionStats}
         />
       </div>
+
+      {/* 5. INDIVIDUAL STUDENT PROFILE (LUÔN Ở DƯỚI SUM CARD) */}
+      {selectedStudentObj && (
+        <div className="animate-cascade-5">
+          <StudentProfileHeader
+            student={selectedStudentObj}
+            stats={stats}
+            onClearStudent={() => setSelectedStudentId('')}
+          />
+        </div>
+      )}
 
       {/* 6. STUDENT RANKINGS TABLE */}
       <div className={selectedStudentObj ? 'animate-cascade-6' : 'animate-cascade-5'}>
