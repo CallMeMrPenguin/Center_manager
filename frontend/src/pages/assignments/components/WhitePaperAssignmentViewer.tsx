@@ -1,11 +1,13 @@
-import React, { useState, useMemo, useCallback } from 'react';
-import { ArrowLeft, Award, Save, Maximize2, Minimize2, ChevronRight, PenTool, KeyRound } from 'lucide-react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { ArrowLeft, Award, Save, Maximize2, Minimize2, ChevronRight, PenTool, KeyRound, Shield, ShieldOff } from 'lucide-react';
 import { Assignment } from '../types';
 import { ExerciseItem } from './types';
 import { WhitePaperHeader } from './WhitePaperHeader';
 import { ExerciseItemView } from './ExerciseItemView';
 import { UlnDocumentRenderer, SectionProgressGroup } from './UlnDocumentRenderer';
 import { DrawingCorrectionCanvas } from './DrawingCorrectionCanvas';
+import { ExamWarningModal } from './ExamWarningModal';
+import { useExamProctoring } from '../hooks/useExamProctoring';
 import { parseUlnContent } from '../utils/ulnParser';
 import { SAMPLE_UNIT12_ULN_TEXT } from '../constants/sampleUlnTest';
 import { format1Dec } from '../../../utils';
@@ -40,6 +42,40 @@ export const WhitePaperAssignmentViewer: React.FC<WhitePaperAssignmentViewerProp
     sections: [],
   });
 
+  // Anti-cheat Proctoring & Tab Switch detector
+  const {
+    isProctoringActive,
+    setIsProctoringActive,
+    violationCount,
+    showWarningModal,
+    lastViolationReason,
+    dismissWarning,
+  } = useExamProctoring({
+    enabled: true,
+    isStudent: !isPreview,
+  });
+
+  // Sync fullscreen state with browser events (F11 / Esc)
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+  }, []);
+
+  const toggleBrowserFullscreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(() => {});
+      setIsFullscreen(true);
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen().catch(() => {});
+      }
+      setIsFullscreen(false);
+    }
+  };
+
   // Parse ULN document nodes
   const ulnNodes = useMemo(() => {
     const raw = assignment.content_json && assignment.content_json.trim()
@@ -73,7 +109,7 @@ export const WhitePaperAssignmentViewer: React.FC<WhitePaperAssignmentViewerProp
     setFinalScore(score);
     setIsSubmitted(true);
     setSubmissionCount((prev) => prev + 1);
-    showToast(`Đã nộp bài thành công! Điểm: ${score}/10.0 (Đã hoàn thành ${answered}/${total} câu)`, 'success');
+    showToast(`Đã nộp bài thành công! Điểm: ${score}/10.0 (Đã làm ${answered}/${total} câu)`, 'success');
     if (onSubmitSuccess) onSubmitSuccess(score);
   };
 
@@ -92,7 +128,7 @@ export const WhitePaperAssignmentViewer: React.FC<WhitePaperAssignmentViewerProp
       } space-y-4 pb-12 select-none font-sans`}
       style={{ userSelect: 'none', WebkitUserSelect: 'none' }}
     >
-      {/* 1. STICKY TOP TITLE BAR (Permanently Fixed at Top on Scroll) */}
+      {/* 1. STICKY TOP TITLE BAR */}
       <div className="bg-[#0c0f1e]/95 border border-[#1e2742] rounded-2xl p-3.5 shadow-2xl flex flex-wrap items-center justify-between gap-3 sticky top-0 z-40">
         <div className="flex items-center gap-3 min-w-0">
           <button
@@ -105,12 +141,16 @@ export const WhitePaperAssignmentViewer: React.FC<WhitePaperAssignmentViewerProp
           </button>
           <div className="min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
-              <h3 className="text-sm font-black text-white truncate max-w-[280px] sm:max-w-md">
+              <h3 className="text-sm font-black text-white truncate max-w-[240px] sm:max-w-md">
                 {assignment.title}
               </h3>
-              {isPreview && (
+              {isPreview ? (
                 <span className="text-[10px] uppercase font-black px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30">
-                  Xem Trước Phiếu Bài Tập (Nền Trắng A4)
+                  Xem Trước Phiếu Bài Tập (A4)
+                </span>
+              ) : (
+                <span className="text-[10px] uppercase font-black px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
+                  Phòng Thi Trực Tuyến
                 </span>
               )}
             </div>
@@ -125,16 +165,31 @@ export const WhitePaperAssignmentViewer: React.FC<WhitePaperAssignmentViewerProp
 
         {/* Action Controls */}
         <div className="flex items-center gap-2 flex-wrap shrink-0">
+          {/* Proctoring Anti-cheat Toggle */}
+          <button
+            type="button"
+            onClick={() => setIsProctoringActive(!isProctoringActive)}
+            className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition cursor-pointer border ${
+              isProctoringActive
+                ? 'bg-rose-500/15 text-rose-300 border-rose-500/30 shadow-[0_0_10px_rgba(244,63,94,0.2)]'
+                : 'bg-white/5 text-slate-400 border-white/10 hover:text-white'
+            }`}
+            title="Bật/Tắt chế độ cảnh báo chuyển tab & bảo mật phòng thi"
+          >
+            {isProctoringActive ? <Shield size={14} className="text-rose-400" /> : <ShieldOff size={14} />}
+            <span>Giám Sát: {isProctoringActive ? 'BẬT' : 'TẮT'}</span>
+          </button>
+
           {/* Answer Key Editor (Teacher Mode) */}
           {isPreview && onEditAnswerKey && (
             <button
               type="button"
               onClick={() => onEditAnswerKey(assignment)}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition cursor-pointer border bg-indigo-500/15 hover:bg-indigo-500/25 text-indigo-300 border-indigo-500/30 shadow-[0_0_12px_rgba(99,102,241,0.3)] active:scale-95"
-              title="Chỉnh sửa đáp án chuẩn & tự động tính lại điểm"
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition cursor-pointer border bg-indigo-500/15 hover:bg-indigo-500/25 text-indigo-300 border-indigo-500/30 active:scale-95"
+              title="Chỉnh sửa đáp án chuẩn"
             >
               <KeyRound size={14} />
-              <span>Sửa Đáp Án (Key)</span>
+              <span>Sửa Đáp Án</span>
             </button>
           )}
 
@@ -150,15 +205,16 @@ export const WhitePaperAssignmentViewer: React.FC<WhitePaperAssignmentViewerProp
               }`}
             >
               <PenTool size={14} />
-              <span>{isCorrectionMode ? 'Đang Chữa Bài (Bút Vẽ)' : 'Chế Độ Chữa Bài'}</span>
+              <span>{isCorrectionMode ? 'Bút Vẽ Chữa Bài' : 'Chế Độ Chữa Bài'}</span>
             </button>
           )}
 
-          {/* Fullscreen Toggle Button */}
+          {/* Fullscreen Expansion Toggle Button */}
           <button
             type="button"
-            onClick={() => setIsFullscreen(!isFullscreen)}
+            onClick={toggleBrowserFullscreen}
             className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-200 text-xs font-bold border border-white/10 transition cursor-pointer active:scale-95"
+            title="Mở rộng toàn màn hình F11"
           >
             {isFullscreen ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
             <span>{isFullscreen ? 'Thu nhỏ' : 'Toàn màn hình'}</span>
@@ -167,7 +223,7 @@ export const WhitePaperAssignmentViewer: React.FC<WhitePaperAssignmentViewerProp
           {isSubmitted && (
             <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 text-xs font-black">
               <Award size={15} />
-              <span>Điểm: {finalScore}/10.0 ({progress.answered}/{progress.total} câu)</span>
+              <span>Điểm: {finalScore}/10.0</span>
             </div>
           )}
 
@@ -182,12 +238,12 @@ export const WhitePaperAssignmentViewer: React.FC<WhitePaperAssignmentViewerProp
         </div>
       </div>
 
-      {/* 2. MAIN LAYOUT: SIDEBAR ON THE LEFT, A4 WHITE PAPER ON THE RIGHT */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        {/* Left Question Navigation Sidebar (Clean Light Theme) */}
-        <div className="lg:col-span-3 lg:sticky lg:top-24 space-y-4 order-2 lg:order-1">
-          <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-xl text-slate-900 space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+      {/* 2. TIGHT DUAL-PANE LAYOUT: SIDEBAR ON LEFT TIGHTLY ADJACENT TO EXAM SHEET */}
+      <div className="max-w-6xl mx-auto flex flex-col lg:flex-row items-start justify-center gap-4 w-full">
+        {/* Left Question Navigation Sidebar (Sticky & Tight) */}
+        <div className="w-full lg:w-72 lg:sticky lg:top-20 shrink-0 space-y-3">
+          <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-xl text-slate-900 space-y-3.5">
+            <div className="flex items-center justify-between border-b border-slate-200 pb-2.5">
               <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider">
                 Tiến Độ Làm Bài
               </h4>
@@ -205,7 +261,7 @@ export const WhitePaperAssignmentViewer: React.FC<WhitePaperAssignmentViewerProp
             </div>
 
             {/* Question Quick-Jump Grid */}
-            <div className="max-h-[60vh] overflow-y-auto pr-1 space-y-3 scrollbar-thin">
+            <div className="max-h-[65vh] overflow-y-auto pr-1 space-y-3 scrollbar-thin">
               {progress.sections.map((sec) => (
                 <div key={sec.id} className="space-y-1.5">
                   <div className="text-[11px] font-black text-slate-700 flex items-center gap-1">
@@ -219,9 +275,7 @@ export const WhitePaperAssignmentViewer: React.FC<WhitePaperAssignmentViewerProp
                         type="button"
                         onClick={() => {
                           const el = document.getElementById(item.id);
-                          if (el) {
-                            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                          }
+                          if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
                         }}
                         className={`py-1.5 rounded-lg text-xs font-bold font-mono transition cursor-pointer border ${
                           item.isAnswered
@@ -239,9 +293,9 @@ export const WhitePaperAssignmentViewer: React.FC<WhitePaperAssignmentViewerProp
           </div>
         </div>
 
-        {/* Right A4 Paper Test View */}
-        <div className="lg:col-span-9 flex justify-center order-1 lg:order-2">
-          <div className="white-paper-container relative w-full max-w-[850px] bg-white text-slate-900 rounded-none shadow-[0_20px_50px_rgba(0,0,0,0.4)] border border-slate-300 p-8 sm:p-14 min-h-[1100px] flex flex-col justify-between font-sans">
+        {/* Right A4 Paper Test View (Expands to Wide Format in Fullscreen) */}
+        <div className={`flex-1 ${isFullscreen ? 'max-w-[1020px]' : 'max-w-[850px]'} w-full flex justify-center transition-all duration-200`}>
+          <div className="white-paper-container relative w-full bg-white text-slate-900 rounded-none shadow-[0_20px_50px_rgba(0,0,0,0.4)] border border-slate-300 p-6 sm:p-12 min-h-[1100px] flex flex-col justify-between font-sans">
             {/* Drawing Correction Layer (Fixed Full Canvas) */}
             <DrawingCorrectionCanvas isActive={isCorrectionMode} />
 
@@ -287,6 +341,14 @@ export const WhitePaperAssignmentViewer: React.FC<WhitePaperAssignmentViewerProp
           </div>
         </div>
       </div>
+
+      {/* Anti-cheat Tab Switch Warning Modal */}
+      <ExamWarningModal
+        isOpen={showWarningModal}
+        violationCount={violationCount}
+        reason={lastViolationReason}
+        onDismiss={dismissWarning}
+      />
     </div>
   );
 };
