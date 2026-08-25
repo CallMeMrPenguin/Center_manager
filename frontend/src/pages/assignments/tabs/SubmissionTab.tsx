@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
-import { ArrowLeft, Save, CheckCircle2, XCircle } from 'lucide-react';
+import { ArrowLeft, Save, CheckCircle2, XCircle, KeyRound } from 'lucide-react';
 import { DataTable } from '../../../components/DataTable';
 import { Assignment, AssignmentSubmission } from '../types';
 
@@ -10,6 +10,7 @@ interface SubmissionTabProps {
   loading: boolean;
   onBack: () => void;
   onSaveSubmissions: (updatedSubmissions: AssignmentSubmission[]) => void;
+  onEditAnswerKey?: (assignment: Assignment) => void;
 }
 
 export const SubmissionTab: React.FC<SubmissionTabProps> = ({
@@ -18,6 +19,7 @@ export const SubmissionTab: React.FC<SubmissionTabProps> = ({
   loading,
   onBack,
   onSaveSubmissions,
+  onEditAnswerKey,
 }) => {
   const [localList, setLocalList] = useState<AssignmentSubmission[]>([]);
   const [isDirty, setIsDirty] = useState(false);
@@ -103,47 +105,42 @@ export const SubmissionTab: React.FC<SubmissionTabProps> = ({
         accessorKey: 'submitted',
         header: 'Trạng Thái Nộp',
         cell: ({ row }) => {
-          const isSubmitted = row.original.submitted === 1;
+          const isSub = row.original.submitted === 1;
           return (
             <button
               type="button"
               onClick={() => handleToggleSubmitted(row.original.student_id)}
-              className={`px-3 py-1 rounded-xl text-xs font-black inline-flex items-center gap-1.5 border transition cursor-pointer active:scale-95 ${
-                isSubmitted
-                  ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/25'
-                  : 'bg-rose-500/10 text-rose-400 border-rose-500/20 hover:bg-rose-500/20'
+              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold transition cursor-pointer ${
+                isSub
+                  ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
+                  : 'bg-rose-500/15 text-rose-400 border border-rose-500/30'
               }`}
             >
-              {isSubmitted ? <CheckCircle2 size={13} /> : <XCircle size={13} />}
-              <span>{isSubmitted ? 'Đã Nộp' : 'Chưa Nộp'}</span>
+              {isSub ? <CheckCircle2 size={13} /> : <XCircle size={13} />}
+              <span>{isSub ? 'Đã nộp bài' : 'Chưa nộp'}</span>
             </button>
           );
         },
       },
       {
         accessorKey: 'score',
-        header: 'Điểm Số',
+        header: 'Điểm Số (Thang 10)',
         cell: ({ row }) => (
-          <div className="flex items-center gap-1">
-            <input
-              type="number"
-              min="0"
-              max={assignment?.max_score || 10}
-              step="0.5"
-              value={row.original.score !== null && row.original.score !== undefined ? row.original.score : ''}
-              onChange={(e) => handleScoreChange(row.original.student_id, e.target.value)}
-              placeholder="-"
-              className="w-16 bg-[#121626] border border-[#263152] focus:border-indigo-500 focus:outline-none rounded-lg px-2 py-1 text-xs font-mono font-bold text-indigo-300 text-center shadow-inner"
-            />
-            <span className="text-[10px] text-slate-500 font-mono">
-              /{assignment?.max_score || 10}
-            </span>
-          </div>
+          <input
+            type="number"
+            min="0"
+            max={assignment?.max_score || 10}
+            step="0.1"
+            value={row.original.score !== null && row.original.score !== undefined ? row.original.score : ''}
+            onChange={(e) => handleScoreChange(row.original.student_id, e.target.value)}
+            placeholder="-"
+            className="w-20 bg-[#121626] border border-[#263152] focus:border-indigo-500 focus:outline-none rounded-lg px-2.5 py-1 text-xs text-white font-mono font-bold text-center shadow-inner"
+          />
         ),
       },
       {
         accessorKey: 'notes',
-        header: 'Nhận Xét / Ghi Chú',
+        header: 'Ghi Chú / Nhận Xét',
         cell: ({ row }) => (
           <input
             type="text"
@@ -203,6 +200,18 @@ export const SubmissionTab: React.FC<SubmissionTabProps> = ({
 
         {/* Quick actions */}
         <div className="flex items-center gap-2 flex-wrap">
+          {onEditAnswerKey && (
+            <button
+              type="button"
+              onClick={() => onEditAnswerKey(assignment)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 text-xs font-bold border border-amber-500/30 transition cursor-pointer"
+              title="Chỉnh sửa đáp án & tự động tính lại điểm"
+            >
+              <KeyRound size={14} />
+              <span>Sửa Đáp Án & Chấm Lại</span>
+            </button>
+          )}
+
           <button
             type="button"
             onClick={() => handleMarkAll(1)}
@@ -220,32 +229,27 @@ export const SubmissionTab: React.FC<SubmissionTabProps> = ({
           <button
             type="button"
             onClick={() => onSaveSubmissions(localList)}
-            className={`flex items-center gap-1.5 px-4 py-1.5 rounded-xl text-xs font-black shadow-lg transition cursor-pointer active:scale-95 ${
+            disabled={!isDirty}
+            className={`flex items-center gap-1.5 px-4 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
               isDirty
-                ? 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-500/30 animate-pulse'
-                : 'bg-[#5c36f5] hover:bg-[#6c48f7] text-white shadow-indigo-500/30'
+                ? 'bg-[#5c36f5] hover:bg-[#6c48f7] text-white shadow-[0_0_12px_rgba(92,54,245,0.5)]'
+                : 'bg-white/5 text-slate-500 cursor-not-allowed'
             }`}
           >
             <Save size={14} />
-            <span>{isDirty ? 'Lưu Thay Đổi *' : 'Lưu Điểm'}</span>
+            <span>Lưu Thay Đổi</span>
           </button>
         </div>
       </div>
 
-      {/* Submissions DataTable */}
+      {/* Submissions TanStack DataTable */}
       <DataTable<AssignmentSubmission>
         data={localList}
         columns={columns}
         loading={loading}
-        loadingMessage="Đang tải danh sách nộp bài..."
-        emptyMessage="Không có học sinh nào trong lớp này"
         pageSize={20}
-        showPagination={true}
-        enableGlobalSearch={true}
-        enableColumnVisibility={true}
-        enableExport={true}
-        exportFilename={`nop_bai_${assignment.id}`}
-        searchPlaceholder="Tìm kiếm học sinh..."
+        exportFilename={`nop_bai_${assignment.title.toLowerCase().replace(/\s+/g, '_')}`}
+        searchPlaceholder="Tìm theo tên học sinh..."
       />
     </div>
   );

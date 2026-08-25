@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
-import { Edit3, Users, Plus, PlayCircle, CheckCircle2, Clock } from 'lucide-react';
+import { PlayCircle, Users, Edit3, Plus, KeyRound } from 'lucide-react';
 import { DataTable } from '../../../components/DataTable';
 import { Assignment } from '../types';
 
@@ -12,6 +12,7 @@ interface AssignmentListTabProps {
   onViewSubmissions: (assignment: Assignment) => void;
   onPlayPreview: (assignment: Assignment) => void;
   onOpenCreateModal: () => void;
+  onEditAnswerKey?: (assignment: Assignment) => void;
 }
 
 export const AssignmentListTab: React.FC<AssignmentListTabProps> = ({
@@ -22,24 +23,26 @@ export const AssignmentListTab: React.FC<AssignmentListTabProps> = ({
   onViewSubmissions,
   onPlayPreview,
   onOpenCreateModal,
+  onEditAnswerKey,
 }) => {
   const columns = useMemo<ColumnDef<Assignment>[]>(() => {
+    // Student View: Simple list with only title, due date, status and single "Vào Làm Bài" action button
     if (isStudent) {
       return [
         {
           accessorKey: 'assigned_date',
           header: 'Ngày Giao',
-          cell: (info) => <span className="font-bold text-slate-200">{info.getValue<string>()}</span>,
+          cell: (info) => <span className="font-bold text-slate-300 text-xs">{info.getValue<string>()}</span>,
         },
         {
           accessorKey: 'title',
-          header: 'Tiêu Đề Bài Tập',
+          header: 'Tên Bài Tập',
           cell: ({ row }) => (
             <div className="space-y-0.5">
               <button
                 type="button"
                 onClick={() => onPlayPreview(row.original)}
-                className="font-bold text-indigo-400 hover:text-indigo-300 hover:underline text-left cursor-pointer transition-colors block"
+                className="font-bold text-indigo-400 hover:text-indigo-300 hover:underline text-left cursor-pointer transition-colors block text-sm"
               >
                 {row.original.title}
               </button>
@@ -56,22 +59,9 @@ export const AssignmentListTab: React.FC<AssignmentListTabProps> = ({
             const val = info.getValue<string>();
             const today = new Date().toISOString().slice(0, 10);
             const isOverdue = val < today;
-            return <span className={`font-semibold ${isOverdue ? 'text-rose-400' : 'text-slate-300'}`}>{val}</span>;
-          },
-        },
-        {
-          id: 'student_status',
-          header: 'Trạng Thái',
-          cell: ({ row }) => {
-            const isDone = (row.original.submitted_count || 0) > 0;
             return (
-              <span className={`inline-flex items-center gap-1 text-xs font-black px-2.5 py-1 rounded-full border ${
-                isDone
-                  ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30'
-                  : 'bg-amber-500/15 text-amber-300 border-amber-500/30'
-              }`}>
-                {isDone ? <CheckCircle2 size={12} /> : <Clock size={12} />}
-                <span>{isDone ? 'Đã nộp bài' : 'Chưa nộp'}</span>
+              <span className={`text-xs font-semibold ${isOverdue ? 'text-rose-400 font-bold' : 'text-slate-300'}`}>
+                {val}
               </span>
             );
           },
@@ -187,48 +177,55 @@ export const AssignmentListTab: React.FC<AssignmentListTabProps> = ({
               <span>Chấm bài</span>
             </button>
 
+            {onEditAnswerKey && (
+              <button
+                type="button"
+                onClick={() => onEditAnswerKey(row.original)}
+                className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 hover:text-white text-xs font-bold border border-amber-500/30 transition cursor-pointer active:scale-95"
+                title="Chỉnh sửa đáp án & tự động tính lại điểm"
+              >
+                <KeyRound size={13} />
+                <span>Đáp án</span>
+              </button>
+            )}
+
             <button
               type="button"
               onClick={() => onEditAssignment(row.original)}
-              className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white transition cursor-pointer border border-white/5 active:scale-95"
-              title="Chỉnh sửa bài tập"
+              className="p-1.5 rounded-lg hover:bg-white/10 text-slate-400 hover:text-white transition cursor-pointer"
+              title="Chỉnh sửa hoặc xóa bài tập"
             >
-              <Edit3 size={13} />
+              <Edit3 size={15} />
             </button>
           </div>
         ),
       },
     ];
-  }, [isStudent, onEditAssignment, onViewSubmissions, onPlayPreview]);
+  }, [isStudent, onPlayPreview, onViewSubmissions, onEditAssignment, onEditAnswerKey]);
 
   return (
-    <div className="space-y-4">
-      <DataTable<Assignment>
-        data={assignments}
-        columns={columns}
-        loading={loading}
-        loadingMessage="Đang tải danh sách bài tập về nhà..."
-        emptyMessage="Chưa có bài tập về nhà nào được giao"
-        pageSize={20}
-        showPagination={true}
-        enableGlobalSearch={true}
-        enableColumnVisibility={!isStudent}
-        enableExport={!isStudent}
-        exportFilename="danh_sach_btvn"
-        searchPlaceholder="Tìm kiếm theo tiêu đề, lớp, ngày giao..."
-        toolbarRight={
-          !isStudent ? (
+    <DataTable<Assignment>
+      data={assignments}
+      columns={columns}
+      loading={loading}
+      pageSize={20}
+      exportFilename="danh_sach_bai_tap_venha"
+      searchPlaceholder={isStudent ? 'Tìm bài tập...' : 'Tìm theo tiêu đề, lớp học...'}
+      emptyMessage={
+        <div className="py-12 text-center space-y-3">
+          <p className="text-slate-400 text-sm">Chưa có bài tập nào trong danh sách.</p>
+          {!isStudent && (
             <button
               type="button"
               onClick={onOpenCreateModal}
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#5c36f5] hover:bg-[#6c48f7] text-white text-xs font-black shadow-[0_0_12px_rgba(92,54,245,0.4)] transition-all cursor-pointer active:scale-95 shrink-0"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#5c36f5] hover:bg-[#6c48f7] text-white text-xs font-bold shadow-lg cursor-pointer transition active:scale-95"
             >
               <Plus size={14} />
-              <span>Giao BTVN Mới</span>
+              <span>Giao Bài Tập Đầu Tiên</span>
             </button>
-          ) : undefined
-        }
-      />
-    </div>
+          )}
+        </div>
+      }
+    />
   );
 };

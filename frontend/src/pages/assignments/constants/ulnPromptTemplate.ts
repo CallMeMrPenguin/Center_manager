@@ -79,47 +79,77 @@ Place these tags at the very beginning of the line:
 - [text]{u,b}       -> Underlined + Bold text
 - [text]{upper}     -> Uppercase formatting
 - <blank>           -> Empty answer blank for students
+
+---
+
+### 3. MANDATORY ANSWER KEY GENERATION & MULTI-VARIATION RULES
+1. **NO ANSWER KEY IN SOURCE? YOU MUST GENERATE IT**:
+   If no answer key is provided in the input source, you MUST generate and provide the complete, accurate answer key for every question.
+2. **MULTIPLE ACCEPTABLE ANSWERS SEPARATED BY PIPE \`|\`**:
+   For questions with multiple valid answer possibilities (especially sentence rewriting, word forms, grammar variations, synonyms), separate all valid alternatives with \`|\`.
+3. **SENTENCE REWRITING WITH PREFIX HINTS**:
+   When a question provides a beginning prefix/prompt (e.g. \`1. He is too weak to lift the box. -> He isn't [_____]\`):
+   The answer key MUST include BOTH the blank-only answer AND the full sentence variant separated by \`|\`:
+   Example: \`strong enough to lift the box | He isn't strong enough to lift the box\`
+   This guarantees that whether a student inputs only the missing words or retypes the prefix, their submission is scored 100% accurately.
+4. **STANDARDIZED ANSWER KEY BLOCK**:
+   Always place the answer keys inside a structured \`[ANS]\` block at the end of the document:
+
+\`\`\`uln
+[H2] **ANSWER KEY**
+[ANS]
+1. A
+2. C
+3. capital
+4. symbol
+5. strong enough to lift the box | He isn't strong enough to lift the box
+6. If you do not hurry, you will be late | If you don't hurry, you will be late
+[/ANS]
+\`\`\`
 `;
 
 export const ULN_AI_CREATION_PROMPT = `Bạn là chuyên gia biên soạn đề thi tiếng Anh chuẩn Cambridge / Bộ Giáo Dục.
 Hãy tạo một đề thi hoàn chỉnh định dạng Universal Layout Notation (ULN) theo cấu trúc sau và đóng gói toàn bộ trong 1 khối code block duy nhất:
+LƯU Ý QUAN TRỌNG VỀ ĐÁP ÁN (ANSWER KEY):
+1. Luôn tự tạo Đáp án chính xác ở cuối bài trong khối [ANS]...[/ANS].
+2. Nếu câu có nhiều cách trả lời đúng (đặc biệt là Viết lại câu, chia thì, từ đồng nghĩa), dùng dấu gạch đứng | để ngăn cách tất cả các cách viết đúng.
+3. Đối với dạng Viết lại câu có từ gợi ý sẵn ở đầu: Đáp án cần cung cấp CẢ phần điền khuyết VÀ cả câu đầy đủ ngăn cách bằng dấu | (Ví dụ: \`strong enough to lift the box | He isn't strong enough to lift the box\`).
 
 \`\`\`uln
-[H1] **[TÊN BÀI THI / UNIT TITLE]**
+[H1] **UNIT 12: ENGLISH-SPEAKING COUNTRIES**
 
 [H2] **A. PHONETICS**
 [P0] [ins]**I. Choose the word whose underlined part is pronounced differently.**
 [NUM]
-[OPT] #1. [c]{u}at | [c]{u}ity | [c]{u}ar | [c]{u}up [/OPT]
+[OPT] #1. cap[i]{u}tal | r[i]{u}ver | s[i]{u}te | r[i]{u}ch [/OPT]
 [OPT] #2. l[oo]{u}k | b[oo]{u}k | f[oo]{u}d | f[oo]{u}t [/OPT]
 [/NUM]
 
 [H2] **B. VOCABULARY AND GRAMMAR**
-[P0] [ins]**I. Match the words with their definitions.** <@5>
-[NUM]
-[TAB2] [P0] #1. nickname | a. not able to fly
-[TAB2] [P0] #2. flightless | b. the beginning or cause of something
-[TAB2] [P0] #3. symbol | c. a sign or object used to represent something
-[TAB2] [P0] #4. attribute | d. to believe something is the result of something
-[TAB2] [P0] #5. origin | e. an informal name for someone or something
-[/NUM]
-
-[P0] [ins]**II. Complete the sentences with the words in the box.**
+[P0] [ins]**I. Complete the sentences with the words in the box.**
 [BOX] castle | coastline | symbol | tattoo | capital [/BOX]
 [NUM]
 [P0] #1. London is the <blank> of England.
 [P0] #2. The bald eagle is the national <blank> of the United States.
 [/NUM]
 
-[H2] **C. READING COMPREHENSION**
-[P0] [ins]**I. Read the passage and choose the best answers.**
-[QUOTE]
-[P0] **The Golden Gate Bridge**
-[P1] The Golden Gate Bridge is a suspension bridge spanning the Golden Gate strait...
-[/QUOTE]
+[H2] **C. SENTENCE REWRITE**
+[P0] [ins]**I. Rewrite each sentence so that it means the same as the first one.**
 [NUM]
-[P0] #1. Where is the Golden Gate Bridge located?
-[OPT] In San Francisco | In New York | In London | In Sydney [/OPT]
+[P0] #1. He is too weak to lift this heavy box.
+[P1] He isn't <blank>
+[P0] #2. Hurry up or you will miss the morning train.
+[P1] If you <blank>
 [/NUM]
+
+[H2] **ANSWER KEY**
+[ANS]
+1. C
+2. C
+3. capital
+4. symbol
+5. strong enough to lift this heavy box | He isn't strong enough to lift this heavy box
+6. don't hurry, you will miss the morning train | do not hurry, you will miss the morning train | If you don't hurry, you will miss the morning train | If you do not hurry, you will miss the morning train
+[/ANS]
 \`\`\`
 `;

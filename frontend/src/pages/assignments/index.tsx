@@ -1,19 +1,21 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { BookOpen, Calendar, Plus } from 'lucide-react';
 import { CustomSelect, SelectOption } from '../../components/CustomSelect';
 import { SegmentedControl } from '../../components/SegmentedControl';
 import { useAssignmentsData } from './hooks/useAssignmentsData';
 import { AssignmentsKpiCards } from './components/AssignmentsKpiCards';
 import { AssignmentModal } from './components/AssignmentModal';
+import { AnswerKeyModal } from './components/AnswerKeyModal';
 import { AssignmentListTab } from './tabs/AssignmentListTab';
 import { SubmissionTab } from './tabs/SubmissionTab';
 import { OnlineAssignmentRunner } from './components/OnlineAssignmentRunner';
 import { Assignment } from './types';
-import { isStudentUser, getCurrentUser } from '../../utils/authUtils';
+import { isStudentUser } from '../../utils/authUtils';
 
 export const AssignmentsPage: React.FC = () => {
   const isStudent = isStudentUser();
-  const currentUser = getCurrentUser();
+  const [answerKeyAssignment, setAnswerKeyAssignment] = useState<Assignment | null>(null);
+  const [isAnswerKeyModalOpen, setIsAnswerKeyModalOpen] = useState(false);
 
   const {
     classes,
@@ -67,6 +69,11 @@ export const AssignmentsPage: React.FC = () => {
   const handleOpenEditModal = (assign: Assignment) => {
     setEditingAssignment(assign);
     setIsModalOpen(true);
+  };
+
+  const handleOpenAnswerKeyModal = (assign: Assignment) => {
+    setAnswerKeyAssignment(assign);
+    setIsAnswerKeyModalOpen(true);
   };
 
   return (
@@ -144,6 +151,7 @@ export const AssignmentsPage: React.FC = () => {
             onViewSubmissions={handleViewSubmissions}
             onPlayPreview={handlePlayPreview}
             onOpenCreateModal={handleOpenCreateModal}
+            onEditAnswerKey={handleOpenAnswerKeyModal}
           />
         ) : activeView === 'submissions' && !isStudent ? (
           <SubmissionTab
@@ -152,6 +160,7 @@ export const AssignmentsPage: React.FC = () => {
             loading={submissionsLoading}
             onBack={() => setActiveView('list')}
             onSaveSubmissions={handleSaveSubmissions}
+            onEditAnswerKey={handleOpenAnswerKeyModal}
           />
         ) : (
           <OnlineAssignmentRunner
@@ -166,7 +175,7 @@ export const AssignmentsPage: React.FC = () => {
               }
             }
             isPreview={!isStudent}
-            studentName={isStudent ? currentUser?.name : 'Học Sinh Xem Trước'}
+            studentName={isStudent ? 'Học Sinh' : 'Học Sinh Xem Trước'}
             onBack={() => setActiveView('list')}
             onSubmitSuccess={() => {
               loadAssignments();
@@ -183,6 +192,16 @@ export const AssignmentsPage: React.FC = () => {
           assignment={editingAssignment}
           classes={classes}
           defaultClassId={selectedClassId}
+          onSuccess={loadAssignments}
+        />
+      )}
+
+      {/* 6. Answer Key Modal & Auto Re-Grader */}
+      {!isStudent && (
+        <AnswerKeyModal
+          isOpen={isAnswerKeyModalOpen}
+          onClose={() => setIsAnswerKeyModalOpen(false)}
+          assignment={answerKeyAssignment}
           onSuccess={loadAssignments}
         />
       )}
