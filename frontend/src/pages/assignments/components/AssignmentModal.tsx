@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Trash2, Save, BookOpen, Upload, FileCode, Sparkles, CheckCircle, Edit3 } from 'lucide-react';
+import { X, Trash2, Save, BookOpen, Upload, FileCode, Sparkles, CheckCircle, Edit3, FileText } from 'lucide-react';
 import { api } from '../../../api';
 import { showToast } from '../../../components/Toast';
 import { CustomSelect, SelectOption } from '../../../components/CustomSelect';
@@ -7,6 +7,7 @@ import { CustomDatePicker } from '../../../components/CustomDatePicker';
 import { Assignment } from '../types';
 import { SAMPLE_UNIT12_ULN_TEXT } from '../constants/sampleUlnTest';
 import { parseUlnContent } from '../utils/ulnParser';
+import { PromptTemplateModal } from './PromptTemplateModal';
 
 interface AssignmentModalProps {
   isOpen: boolean;
@@ -34,6 +35,7 @@ export const AssignmentModal: React.FC<AssignmentModalProps> = ({
   const [contentJson, setContentJson] = useState<string>('');
   const [questionCount, setQuestionCount] = useState<number>(0);
   const [showDirectPaste, setShowDirectPaste] = useState<boolean>(false);
+  const [showPromptModal, setShowPromptModal] = useState<boolean>(false);
   const [saving, setSaving] = useState<boolean>(false);
   const [deleting, setDeleting] = useState<boolean>(false);
   const [uploading, setUploading] = useState<boolean>(false);
@@ -257,19 +259,29 @@ export const AssignmentModal: React.FC<AssignmentModalProps> = ({
 
           {/* File Upload / Paste ULN Text */}
           <div className="bg-[#121626] border border-[#263152] rounded-xl p-3.5 space-y-2.5">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap gap-2">
               <label className="text-xs font-bold text-slate-200 flex items-center gap-1.5">
                 <FileCode size={14} className="text-indigo-400" />
                 <span>Nội Dung Đề Thi (.txt / .json / .uln / .docx)</span>
               </label>
-              <button
-                type="button"
-                onClick={handleLoadSample}
-                className="flex items-center gap-1 text-[11px] font-bold text-indigo-400 hover:text-indigo-300 transition cursor-pointer"
-              >
-                <Sparkles size={12} />
-                <span>Nạp Đề Mẫu Toàn Diện</span>
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShowPromptModal(true)}
+                  className="flex items-center gap-1 text-[11px] font-bold text-amber-400 hover:text-amber-300 transition cursor-pointer"
+                >
+                  <FileText size={12} />
+                  <span>Mẫu Prompt AI / OCR</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={handleLoadSample}
+                  className="flex items-center gap-1 text-[11px] font-bold text-indigo-400 hover:text-indigo-300 transition cursor-pointer"
+                >
+                  <Sparkles size={12} />
+                  <span>Nạp Đề Mẫu Toàn Diện</span>
+                </button>
+              </div>
             </div>
 
             <div className="flex items-center gap-2">
@@ -370,6 +382,11 @@ export const AssignmentModal: React.FC<AssignmentModalProps> = ({
           </div>
         </form>
       </div>
+
+      <PromptTemplateModal
+        isOpen={showPromptModal}
+        onClose={() => setShowPromptModal(false)}
+      />
     </div>
   );
 };
