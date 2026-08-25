@@ -284,7 +284,7 @@ export const UlnDocumentRenderer: React.FC<UlnDocumentRendererProps> = memo(({
           const currentAns = answers[qKey];
           const maxOptLen = Math.max(...(node.options || []).map((o) => cleanOptionPrefix(o).length), 0);
           const optGridClass = maxOptLen > 30 ? 'grid-cols-1' : maxOptLen > 14 ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-2 sm:grid-cols-4';
-          const hasNoBlankOrOpts = (!node.options || node.options.length === 0) && !node.hasWritingLine && !node.text.includes('<blank>');
+          const hasNoBlankOrOpts = (!node.options || node.options.length === 0) && !node.hasWritingLine && !node.text.includes('<blank>') && !node.subText;
 
           return (
             <div key={nIdx} id={`q_target_${nIdx}`} className="py-0.5 px-0.5 space-y-1 scroll-mt-20 font-normal">
@@ -333,7 +333,7 @@ export const UlnDocumentRenderer: React.FC<UlnDocumentRendererProps> = memo(({
                           >
                             <span className={`font-bold shrink-0 ${isSelected ? 'text-white' : 'text-blue-600'}`}>{optLetterWithDot}</span>
                             <span className={`flex-1 font-normal ${isSelected ? 'text-white' : 'text-slate-900'}`}>
-                              {cleanText}
+                              <UlnInlineText text={cleanText} qKey={`${qKey}_opt_${optIdx}`} answers={answers} onInputChange={handleInputChange} isSubmitted={isSubmitted} />
                             </span>
                           </button>
                         );

@@ -1,10 +1,11 @@
 import React, { useState, useMemo, useCallback } from 'react';
-import { ArrowLeft, Award, Printer, Save, RefreshCw, Maximize2, Minimize2, CheckCircle2, ChevronRight } from 'lucide-react';
+import { ArrowLeft, Award, Printer, Save, Maximize2, Minimize2, CheckCircle2, ChevronRight, PenTool } from 'lucide-react';
 import { Assignment } from '../types';
 import { ExerciseItem } from './types';
 import { WhitePaperHeader } from './WhitePaperHeader';
 import { ExerciseItemView } from './ExerciseItemView';
 import { UlnDocumentRenderer, SectionProgressGroup } from './UlnDocumentRenderer';
+import { DrawingCorrectionCanvas } from './DrawingCorrectionCanvas';
 import { parseUlnContent } from '../utils/ulnParser';
 import { SAMPLE_UNIT12_ULN_TEXT } from '../constants/sampleUlnTest';
 import { cleanOptionPrefix, format1Dec } from '../../../utils';
@@ -26,6 +27,7 @@ export const WhitePaperAssignmentViewer: React.FC<WhitePaperAssignmentViewerProp
   onSubmitSuccess,
 }) => {
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isCorrectionMode, setIsCorrectionMode] = useState(false);
   const [userAnswers, setUserAnswers] = useState<Record<number, string>>({});
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [submissionCount, setSubmissionCount] = useState(0);
@@ -54,14 +56,6 @@ export const WhitePaperAssignmentViewer: React.FC<WhitePaperAssignmentViewerProp
       text: 'Choose the word whose underlined part is pronounced differently:',
       options: ['[po]{u}ttery', 'fl[ow]{u}er', '[si]{u}lent', '[se]{u}rvice'],
       answer: 'pottery',
-    },
-    {
-      id: 2,
-      qNum: 2,
-      type: 'pr',
-      text: 'Choose the word whose underlined part is pronounced differently:',
-      options: ['g[i]{u}rl', 'exp[e]{u}rt', '[o]{u}pen', 'b[u]{u}rn'],
-      answer: 'open',
     },
   ], []);
 
@@ -113,6 +107,20 @@ export const WhitePaperAssignmentViewer: React.FC<WhitePaperAssignmentViewerProp
 
         {/* Action Controls */}
         <div className="flex items-center gap-2 flex-wrap">
+          {/* Chế độ Chữa bài (Bút vẽ / Chấm điểm) */}
+          <button
+            type="button"
+            onClick={() => setIsCorrectionMode(!isCorrectionMode)}
+            className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition cursor-pointer border ${
+              isCorrectionMode
+                ? 'bg-amber-400 text-slate-950 border-amber-300 font-black shadow-[0_0_15px_rgba(251,191,36,0.5)]'
+                : 'bg-white/5 hover:bg-white/10 text-slate-200 border-white/10'
+            }`}
+          >
+            <PenTool size={14} />
+            <span>{isCorrectionMode ? 'Đang Chữa Bài (Bút Vẽ)' : 'Chế Độ Chữa Bài'}</span>
+          </button>
+
           <button
             type="button"
             onClick={() => setIsFullscreen(!isFullscreen)}
@@ -211,8 +219,11 @@ export const WhitePaperAssignmentViewer: React.FC<WhitePaperAssignmentViewerProp
         {/* 3. PURE WHITE PAPER WORKSHEET CANVAS (A4 PAPER SHEET STANDARD) */}
         <div
           style={{ colorScheme: 'light' }}
-          className="white-paper-container flex-1 bg-white text-slate-950 shadow-2xl rounded-2xl p-6 sm:p-10 border border-slate-200 space-y-5 print:p-0 print:border-none print:shadow-none"
+          className="relative white-paper-container flex-1 bg-white text-slate-950 shadow-2xl rounded-2xl p-6 sm:p-10 border border-slate-200 space-y-5 print:p-0 print:border-none print:shadow-none"
         >
+          {/* Drawing Correction Layer Overlay */}
+          <DrawingCorrectionCanvas isActive={isCorrectionMode} />
+
           <WhitePaperHeader
             assignment={assignment}
             studentName={studentName}
