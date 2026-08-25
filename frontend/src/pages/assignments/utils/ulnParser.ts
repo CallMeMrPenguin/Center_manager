@@ -6,18 +6,27 @@ export interface UlnTableNode {
 
 export interface UlnBoxNode {
   type: 'box';
-  words: string[];
+  isFormula?: boolean;
+  content?: string;
+  words?: string[];
 }
 
 export interface UlnQuoteNode {
   type: 'quote';
+  title?: string;
   paragraphs: string[];
   notes?: string[];
 }
 
-export interface UlnTab2Node {
-  type: 'tab2';
-  items: { left: string; right: string }[];
+export interface UlnMultiColNode {
+  type: 'tab_cols';
+  cols: number; // 2, 3, or 4
+  items: string[][];
+}
+
+export interface UlnPicGridNode {
+  type: 'pic_grid';
+  rows: string[][];
 }
 
 export interface UlnDialogueOrderNode {
@@ -30,12 +39,14 @@ export interface UlnQuestionNode {
   qNum?: string;
   text: string;
   subText?: string;
+  hasWritingLine?: boolean;
   options?: string[];
   bracketHint?: string;
+  picRight?: string;
 }
 
 export interface UlnHeadingNode {
-  type: 'h1' | 'h2' | 'ins' | 'paragraph';
+  type: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'ins' | 'paragraph';
   text: string;
 }
 
@@ -43,7 +54,8 @@ export type UlnNode =
   | UlnTableNode
   | UlnBoxNode
   | UlnQuoteNode
-  | UlnTab2Node
+  | UlnMultiColNode
+  | UlnPicGridNode
   | UlnDialogueOrderNode
   | UlnQuestionNode
   | UlnHeadingNode;
@@ -62,7 +74,6 @@ export function cleanRawText(str: string): string {
 
 /**
  * Universal Layout Notation (ULN) Parser
- * Parses raw ULN string or JSON into an AST of blocks
  */
 export function parseUlnContent(rawContent: string): UlnNode[] {
   if (!rawContent || !rawContent.trim()) return [];
@@ -76,13 +87,12 @@ export function parseUlnContent(rawContent: string): UlnNode[] {
       if (typeof parsed === 'string') {
         return parseUlnText(parsed);
       }
-      // If it's a JSON array of questions, convert into UlnNodes
       const list = Array.isArray(parsed) ? parsed : (parsed.data || parsed.questions || []);
       if (list.length > 0) {
         return parseJsonQuestionList(list);
       }
     } catch {
-      // Not JSON, continue to ULN text parser
+      // Not JSON, parse as ULN text
     }
   }
 
@@ -136,23 +146,17 @@ function parseUlnText(text: string): UlnNode[] {
       continue;
     }
 
-    // 1. Heading 1 [H1]
-    if (line.startsWith('[H1]')) {
-      const content = cleanRawText(line.replace('[H1]', ''));
-      nodes.push({ type: 'h1', text: content });
+    // 1. Headings [H1] to [H6]
+    const hMatch = line.match(/^\[H([1-6])\]\s*(.*)/);
+    if (hMatch) {
+      const level = parseInt(hMatch[1]);
+      const type = `h${level}` as 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
+      nodes.push({ type, text: cleanRawText(hMatch[2]) });
       i++;
       continue;
     }
 
-    // 2. Heading 2 [H2]
-    if (line.startsWith('[H2]')) {
-      const content = cleanRawText(line.replace('[H2]', ''));
-      nodes.push({ type: 'h2', text: content });
-      i++;
-      continue;
-    }
-
-    // 3. Instruction [ins] or [P0] [ins]
+    // 2. Exercise Instruction [ins] or [P0] [ins]
     if (line.includes('[ins]')) {
       const content = cleanRawText(line.replace(/\[P[0-9]\]/g, '').replace('[ins]', ''));
       nodes.push({ type: 'ins', text: content });
@@ -160,7 +164,7 @@ function parseUlnText(text: string): UlnNode[] {
       continue;
     }
 
-    // 4. Word Box [BOX] ... [/BOX]
+    // 3. Word Box or Grammar Formula [BOX] ... [/BOX]
     if (line.startsWith('[BOX]')) {
       let boxContent = line.replace('[BOX]', '').replace('[/BOX]', '').trim();
       if (!line.includes('[/BOX]')) {
@@ -173,13 +177,34 @@ function parseUlnText(text: string): UlnNode[] {
           boxContent += ' ' + lines[i].replace('[/BOX]', '').trim();
         }
       }
-      const words = boxContent.split(/\s*\|\s*/).map((w) => w.trim()).filter(Boolean);
-      nodes.push({ type: 'box', words: words.length > 0 ? words : boxContent.split(/\s+/).filter(Boolean) });
+      if (boxContent.includes('|')) {
+        const words = boxContent.split(/\s*\|\s*/).map((w) => w.trim()).filter(Boolean);
+        nodes.push({ type: 'box', words });
+      } else {
+        nodes.push({ type: 'box', isFormula: true, content: boxContent });
+      }
       i++;
       continue;
     }
 
-    // 5. Table [TABLE] ... [/TABLE]
+    // 4. Picture Grid [PIC_GRID] ... [/PIC_GRID]
+    if (line.startsWith('[PIC_GRID]')) {
+      i++;
+      const gridRows: string[][] = [];
+      while (i < lines.length && !lines[i].includes('[/PIC_GRID]')) {
+        const pLine = lines[i].trim();
+        if (pLine) {
+          const cells = pLine.split('|').map((s) => s.trim()).filter(Boolean);
+          gridRows.push(cells);
+        }
+        i++;
+      }
+      nodes.push({ type: 'pic_grid', rows: gridRows });
+      i++;
+      continue;
+    }
+
+    // 5. Bordered Grid Table [TABLE] ... [/TABLE]
     if (line.startsWith('[TABLE]')) {
       i++;
       let headers: string[] = [];
@@ -200,9 +225,10 @@ function parseUlnText(text: string): UlnNode[] {
       continue;
     }
 
-    // 6. Quote / Reading Passage [QUOTE] ... [/QUOTE]
+    // 6. Reading Passage Quote [QUOTE] ... [/QUOTE]
     if (line.startsWith('[QUOTE]')) {
       i++;
+      let title: string | undefined;
       const paragraphs: string[] = [];
       const notes: string[] = [];
 
@@ -212,6 +238,8 @@ function parseUlnText(text: string): UlnNode[] {
           if (qLine.startsWith('[TAB2]') || qLine.startsWith('*-') || qLine.startsWith('-')) {
             const cleanNote = qLine.replace(/\[TAB[0-9]\]/g, '').replace(/\[P[0-9]\]/g, '').trim();
             notes.push(cleanNote);
+          } else if (qLine.startsWith('[P0] **') && !title) {
+            title = cleanRawText(qLine);
           } else {
             const cleanPara = qLine.replace(/\[P[0-9]\]/g, '').trim();
             paragraphs.push(cleanPara);
@@ -219,24 +247,24 @@ function parseUlnText(text: string): UlnNode[] {
         }
         i++;
       }
-      nodes.push({ type: 'quote', paragraphs, notes: notes.length > 0 ? notes : undefined });
+      nodes.push({ type: 'quote', title, paragraphs, notes: notes.length > 0 ? notes : undefined });
       i++;
       continue;
     }
 
-    // 7. Matching Pairs [TAB2] #1. Left | a. Right
-    if (line.includes('[TAB2]') && line.includes('|')) {
-      const tabItems: { left: string; right: string }[] = [];
-      while (i < lines.length && lines[i].includes('[TAB2]') && lines[i].includes('|')) {
+    // 7. Multi-Column Layouts [TAB2], [TAB3], [TAB4]
+    const tabMatch = line.match(/^\[TAB([2-4])\]/);
+    if (tabMatch && line.includes('|')) {
+      const colCount = parseInt(tabMatch[1]);
+      const items: string[][] = [];
+      while (i < lines.length && lines[i].includes(`[TAB${colCount}]`) && lines[i].includes('|')) {
         const itemLine = lines[i].replace(/\[TAB[0-9]\]/g, '').replace(/\[P[0-9]\]/g, '').trim();
         const parts = itemLine.split('|').map((p) => p.trim());
-        if (parts.length >= 2) {
-          tabItems.push({ left: parts[0], right: parts.slice(1).join(' | ') });
-        }
+        items.push(parts);
         i++;
       }
-      if (tabItems.length > 0) {
-        nodes.push({ type: 'tab2', items: tabItems });
+      if (items.length > 0) {
+        nodes.push({ type: 'tab_cols', cols: colCount, items });
         continue;
       }
     }
@@ -246,12 +274,10 @@ function parseUlnText(text: string): UlnNode[] {
       const optStr = line.replace('[OPT]', '').replace('[/OPT]', '').trim();
       const options = optStr.split(/\s*\|\s*/).map((o) => o.trim()).filter(Boolean);
 
-      // Check if previous node is a question to attach options to
       const lastNode = nodes[nodes.length - 1];
       if (lastNode && lastNode.type === 'question' && (!lastNode.options || lastNode.options.length === 0)) {
         lastNode.options = options;
       } else {
-        // If standalone, check if it has #num
         const numMatch = optStr.match(/^#([0-9]+)\.\s*(.*)/);
         if (numMatch) {
           const rawOpts = numMatch[2].split(/\s*\|\s*/).map((o) => o.trim());
@@ -273,7 +299,7 @@ function parseUlnText(text: string): UlnNode[] {
       continue;
     }
 
-    // 9. Dialogue / Order items (lines starting with <blank> or single digit)
+    // 9. Dialogue Reordering Lines (<blank> text or 1 text)
     if (line.startsWith('<blank>') || /^[0-9]\s+[A-Z]/.test(line)) {
       const dialogueItems: { initialNum?: string; text: string }[] = [];
       while (i < lines.length && (lines[i].trim().startsWith('<blank>') || /^[0-9]\s+[A-Z]/.test(lines[i].trim()))) {
@@ -299,11 +325,15 @@ function parseUlnText(text: string): UlnNode[] {
       let qText = qMatch[2].trim();
       let subText: string | undefined;
       let bracketHint: string | undefined;
+      let hasWritingLine = false;
 
-      // Check next line for subtext like [P1] B: ... or [P1] → ...
+      // Check next line for subtext like [P1] B: ..., [P1] → ..., or [P1] <blank>
       if (i + 1 < lines.length) {
         const nextLine = lines[i + 1].trim();
-        if (nextLine.startsWith('[P1]') || nextLine.startsWith('→') || nextLine.startsWith('B:')) {
+        if (nextLine === '[P1] <blank>' || nextLine === '<blank>') {
+          hasWritingLine = true;
+          i++;
+        } else if (nextLine.startsWith('[P1]') || nextLine.startsWith('→') || nextLine.startsWith('B:')) {
           subText = nextLine.replace(/^\[P1\]\s*/, '').trim();
           i++;
         }
@@ -321,6 +351,7 @@ function parseUlnText(text: string): UlnNode[] {
         text: qText,
         subText,
         bracketHint,
+        hasWritingLine,
       });
       i++;
       continue;

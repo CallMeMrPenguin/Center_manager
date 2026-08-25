@@ -1,6 +1,7 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import { UlnNode } from '../utils/ulnParser';
 import { cleanOptionPrefix } from '../../../utils';
+import { UlnInlineText } from './UlnInlineText';
 
 interface UlnDocumentRendererProps {
   nodes: UlnNode[];
@@ -32,66 +33,10 @@ export const UlnDocumentRenderer: React.FC<UlnDocumentRendererProps> = ({
     }));
   };
 
-  // Helper to render inline underline phonetics [text]{u}, bold, italic, <blank>
-  const renderFormattedInline = useCallback((text: string, qKey?: string) => {
-    if (!text) return null;
-
-    // Replace <blank> with interactive inline input or underline
-    if (text.includes('<blank>')) {
-      const parts = text.split('<blank>');
-      return (
-        <span>
-          {parts.map((p, idx) => (
-            <React.Fragment key={idx}>
-              {renderFormattedInline(p)}
-              {idx < parts.length - 1 && (
-                <input
-                  type="text"
-                  value={answers[`${qKey}_blank_${idx}`] || ''}
-                  onChange={(e) => handleInputChange(`${qKey}_blank_${idx}`, e.target.value)}
-                  placeholder="điền từ..."
-                  className="inline-block mx-1.5 px-2 py-0.5 min-w-[110px] text-center border-b-2 border-slate-700 bg-slate-50 focus:bg-indigo-50/50 focus:border-indigo-600 outline-none text-xs font-bold text-indigo-900 rounded-t"
-                />
-              )}
-            </React.Fragment>
-          ))}
-        </span>
-      );
-    }
-
-    const parts = text.split(/(\[[^\]]+\]\{[^}]+\}|\[[^\]]+\]|\*\*[^*]+\*\*|\*[^*]+\*)/g);
-    return parts.map((part, index) => {
-      if (part.includes('{u}') || part.includes('{u,b}')) {
-        const wordMatch = part.match(/\[([^\]]+)\]/);
-        const word = wordMatch ? wordMatch[1] : part;
-        return (
-          <span key={index} className="underline decoration-indigo-600 decoration-2 font-black text-indigo-900 px-0.5">
-            {word}
-          </span>
-        );
-      }
-      if (part.startsWith('**') && part.endsWith('**')) {
-        return (
-          <strong key={index} className="font-black text-slate-900">
-            {part.slice(2, -2)}
-          </strong>
-        );
-      }
-      if (part.startsWith('*') && part.endsWith('*')) {
-        return (
-          <em key={index} className="italic text-slate-700">
-            {part.slice(1, -1)}
-          </em>
-        );
-      }
-      return part;
-    });
-  }, [answers, isSubmitted]);
-
   return (
     <div className="space-y-6 font-sans select-none">
       {nodes.map((node, nIdx) => {
-        // 1. Heading 1 [H1]
+        // 1. Headings [H1] to [H6]
         if (node.type === 'h1') {
           return (
             <div key={nIdx} className="pt-6 pb-2 border-b-2 border-slate-900 text-center">
@@ -101,8 +46,6 @@ export const UlnDocumentRenderer: React.FC<UlnDocumentRendererProps> = ({
             </div>
           );
         }
-
-        // 2. Heading 2 [H2]
         if (node.type === 'h2') {
           return (
             <div key={nIdx} className="pt-4 border-t-2 border-slate-200">
@@ -112,30 +55,68 @@ export const UlnDocumentRenderer: React.FC<UlnDocumentRendererProps> = ({
             </div>
           );
         }
-
-        // 3. Instruction [ins]
-        if (node.type === 'ins') {
+        if (node.type === 'h3') {
           return (
-            <div key={nIdx} className="pt-1 text-xs sm:text-sm font-bold text-slate-800 italic">
-              {renderFormattedInline(node.text)}
+            <h3 key={nIdx} className="pt-2 text-sm font-bold text-indigo-900 capitalize">
+              {node.text}
+            </h3>
+          );
+        }
+        if (node.type === 'h4' || node.type === 'h5' || node.type === 'h6') {
+          return (
+            <div key={nIdx} className={`pt-1 text-xs text-slate-700 ${node.type === 'h6' ? 'italic' : 'font-semibold'}`}>
+              {node.text}
             </div>
           );
         }
 
-        // 4. Word Box [BOX]
+        // 2. Instruction [ins]
+        if (node.type === 'ins') {
+          return (
+            <div key={nIdx} className="pt-1 text-xs sm:text-sm font-bold text-slate-800 italic">
+              <UlnInlineText text={node.text} qKey={`ins_${nIdx}`} answers={answers} onInputChange={handleInputChange} isSubmitted={isSubmitted} />
+            </div>
+          );
+        }
+
+        // 3. Word Box [BOX] (Grammar Formula or Word Bank)
         if (node.type === 'box') {
+          if (node.isFormula) {
+            return (
+              <div key={nIdx} className="bg-indigo-50/70 border border-indigo-200 rounded-xl p-3 text-center my-2 font-semibold text-xs text-indigo-950">
+                <UlnInlineText text={node.content || ''} qKey={`box_${nIdx}`} answers={answers} onInputChange={handleInputChange} isSubmitted={isSubmitted} />
+              </div>
+            );
+          }
           return (
             <div key={nIdx} className="bg-slate-50 border border-dashed border-slate-300 rounded-xl p-3.5 text-center space-y-1.5 my-2">
               <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">
                 Khung Từ Vựng (Word Bank)
               </span>
               <div className="flex flex-wrap items-center justify-center gap-2">
-                {node.words.map((word, wIdx) => (
+                {(node.words || []).map((word, wIdx) => (
                   <span key={wIdx} className="px-3 py-1 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-800 shadow-sm">
                     {word}
                   </span>
                 ))}
               </div>
+            </div>
+          );
+        }
+
+        // 4. Picture Grid [PIC_GRID]
+        if (node.type === 'pic_grid') {
+          return (
+            <div key={nIdx} className="my-3 space-y-2">
+              {node.rows.map((row, rIdx) => (
+                <div key={rIdx} className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                  {row.map((item, cIdx) => (
+                    <div key={cIdx} className="p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-center text-xs font-bold text-slate-800 shadow-sm">
+                      <UlnInlineText text={item} qKey={`pic_${nIdx}_${rIdx}_${cIdx}`} answers={answers} onInputChange={handleInputChange} isSubmitted={isSubmitted} />
+                    </div>
+                  ))}
+                </div>
+              ))}
             </div>
           );
         }
@@ -168,7 +149,7 @@ export const UlnDocumentRenderer: React.FC<UlnDocumentRendererProps> = ({
                           className={`p-2.5 ${cIdx === 0 ? 'font-medium text-slate-900' : 'text-center border-l border-slate-300'}`}
                         >
                           {cIdx === 0 ? (
-                            renderFormattedInline(cell)
+                            <UlnInlineText text={cell} qKey={`cell_${nIdx}_${rIdx}_${cIdx}`} answers={answers} onInputChange={handleInputChange} isSubmitted={isSubmitted} />
                           ) : (
                             <button
                               type="button"
@@ -196,9 +177,14 @@ export const UlnDocumentRenderer: React.FC<UlnDocumentRendererProps> = ({
         if (node.type === 'quote') {
           return (
             <div key={nIdx} className="bg-indigo-50/40 border-l-4 border-indigo-500 rounded-r-xl p-4 my-2 text-xs font-serif text-slate-800 leading-relaxed space-y-2.5">
+              {node.title && (
+                <div className="font-sans font-black text-xs text-indigo-950 not-italic">
+                  {node.title}
+                </div>
+              )}
               {node.paragraphs.map((p, pIdx) => (
                 <p key={pIdx} className="text-justify indent-4">
-                  {renderFormattedInline(p)}
+                  <UlnInlineText text={p} qKey={`quote_${nIdx}_${pIdx}`} answers={answers} onInputChange={handleInputChange} isSubmitted={isSubmitted} />
                 </p>
               ))}
               {node.notes && node.notes.length > 0 && (
@@ -212,14 +198,20 @@ export const UlnDocumentRenderer: React.FC<UlnDocumentRendererProps> = ({
           );
         }
 
-        // 7. 2-Column Matching [TAB2]
-        if (node.type === 'tab2') {
+        // 7. Multi-Column Layouts [TAB2], [TAB3], [TAB4]
+        if (node.type === 'tab_cols') {
+          const gridClass = node.cols === 3 ? 'grid-cols-1 sm:grid-cols-3' : node.cols === 4 ? 'grid-cols-2 sm:grid-cols-4' : 'grid-cols-1 sm:grid-cols-2';
           return (
-            <div key={nIdx} className="grid grid-cols-1 sm:grid-cols-2 gap-2 my-2 bg-slate-50 border border-slate-200 rounded-xl p-3">
-              {node.items.map((item, iIdx) => (
-                <div key={iIdx} className="flex items-center justify-between gap-3 text-xs p-1.5 bg-white border border-slate-200 rounded-lg shadow-sm">
-                  <span className="font-bold text-slate-900">{renderFormattedInline(item.left)}</span>
-                  <span className="text-slate-600 font-medium">{renderFormattedInline(item.right)}</span>
+            <div key={nIdx} className="my-2 space-y-1.5">
+              {node.items.map((row, rIdx) => (
+                <div key={rIdx} className={`grid ${gridClass} gap-2`}>
+                  {row.map((item, cIdx) => (
+                    <div key={cIdx} className="flex items-center justify-between gap-2 p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs shadow-sm">
+                      <span className="font-semibold text-slate-900">
+                        <UlnInlineText text={item} qKey={`tab_${nIdx}_${rIdx}_${cIdx}`} answers={answers} onInputChange={handleInputChange} isSubmitted={isSubmitted} />
+                      </span>
+                    </div>
+                  ))}
                 </div>
               ))}
             </div>
@@ -238,7 +230,9 @@ export const UlnDocumentRenderer: React.FC<UlnDocumentRendererProps> = ({
                     placeholder="thứ tự..."
                     className="w-12 text-center p-1 font-bold text-xs bg-white border border-slate-300 rounded-lg outline-none focus:border-indigo-600"
                   />
-                  <span className="text-slate-800 flex-1">{renderFormattedInline(item.text)}</span>
+                  <span className="text-slate-800 flex-1">
+                    <UlnInlineText text={item.text} qKey={`d_${nIdx}_${dIdx}`} answers={answers} onInputChange={handleInputChange} isSubmitted={isSubmitted} />
+                  </span>
                 </div>
               ))}
             </div>
@@ -260,11 +254,25 @@ export const UlnDocumentRenderer: React.FC<UlnDocumentRendererProps> = ({
                 )}
                 <div className="flex-1 space-y-2">
                   <div className="text-xs sm:text-sm font-semibold text-slate-900 leading-relaxed">
-                    {renderFormattedInline(node.text, qKey)}
+                    <UlnInlineText text={node.text} qKey={qKey} answers={answers} onInputChange={handleInputChange} isSubmitted={isSubmitted} />
                   </div>
                   {node.subText && (
                     <div className="text-xs font-semibold text-slate-700 pl-2 border-l-2 border-slate-300">
-                      {renderFormattedInline(node.subText, `${qKey}_sub`)}
+                      <UlnInlineText text={node.subText} qKey={`${qKey}_sub`} answers={answers} onInputChange={handleInputChange} isSubmitted={isSubmitted} />
+                    </div>
+                  )}
+
+                  {/* Handwriting writing line [P1] <blank> */}
+                  {node.hasWritingLine && (
+                    <div className="pt-1">
+                      <input
+                        type="text"
+                        disabled={isSubmitted}
+                        value={answers[`${qKey}_write`] || ''}
+                        onChange={(e) => handleInputChange(`${qKey}_write`, e.target.value)}
+                        placeholder="viết câu trả lời tại đây..."
+                        className="w-full px-2 py-1.5 text-xs font-bold text-indigo-900 border-b-2 border-slate-400 bg-slate-50 focus:bg-indigo-50/50 focus:border-indigo-600 outline-none rounded-t"
+                      />
                     </div>
                   )}
 
@@ -294,7 +302,7 @@ export const UlnDocumentRenderer: React.FC<UlnDocumentRendererProps> = ({
                               {optLetter}
                             </span>
                             <span className="flex-1">
-                              {renderFormattedInline(cleanOptionPrefix(opt))}
+                              <UlnInlineText text={cleanOptionPrefix(opt)} qKey={`${qKey}_opt_${optIdx}`} answers={answers} onInputChange={handleInputChange} isSubmitted={isSubmitted} />
                             </span>
                           </button>
                         );
@@ -310,7 +318,7 @@ export const UlnDocumentRenderer: React.FC<UlnDocumentRendererProps> = ({
         // 10. Default Paragraph
         return (
           <div key={nIdx} className="text-xs text-slate-700 leading-relaxed">
-            {renderFormattedInline(node.text)}
+            <UlnInlineText text={node.text} qKey={`p_${nIdx}`} answers={answers} onInputChange={handleInputChange} isSubmitted={isSubmitted} />
           </div>
         );
       })}
