@@ -82,7 +82,7 @@ export function generateAcademicInsights(params: {
       id: 'actual_capacity',
       label: 'Năng Lực Thực Chất (EMA)',
       dotColor: ema >= 8.0 ? '#10b981' : ema >= 6.5 ? '#3b82f6' : ema >= 5.0 ? '#f59e0b' : '#ef4444',
-      text: `${emaStatusText} Chi tiết kỹ năng gần nhất: Từ Vựng đạt ${emaC1 || c1} đ | Ngữ Pháp đạt ${emaC2 || c2} đ | BTVN đạt ${emaHw || hw} đ.`,
+      text: `${emaStatusText} Chi tiết kỹ năng gần nhất: Từ Vựng đạt ${emaC1 || c1} đ, Ngữ Pháp đạt ${emaC2 || c2} đ, BTVN đạt ${emaHw || hw} đ.`,
       tooltipTitle: 'Điểm Trung Bình Trượt Hàm Mũ (EMA)',
       tooltipDesc: 'Tính toán năng lực thực chất bằng cách đặt trọng số cao hơn vào các buổi kiểm tra gần nhất.',
       tooltipFormula: 'EMA_mới = 0.5 × Điểm_mới + 0.5 × EMA_cũ',
@@ -118,7 +118,7 @@ export function generateAcademicInsights(params: {
       text: skillBalanceText,
       tooltipTitle: 'Phân Tích Cân Bằng Kỹ Năng',
       tooltipDesc: 'So sánh mức độ thành thạo giữa hai trụ cột cốt lõi: Vốn Từ Vựng và Cấu Trúc Ngữ Pháp.',
-      tooltipFormula: 'Skill Gap = |Điểm Từ Vựng - Điểm Ngữ Pháp|',
+      tooltipFormula: 'Skill Gap = abs(Điểm Từ Vựng - Điểm Ngữ Pháp)',
       tooltipImpact: 'Độ lệch > 1.5 điểm yêu cầu điều chỉnh phân bổ thời gian học tập cho kỹ năng còn yếu.',
     });
 
@@ -194,7 +194,7 @@ export function generateAcademicInsights(params: {
       id: 'performance_prediction',
       label: 'Chỉ Số Toàn Diện & Dự Báo',
       dotColor: pi >= 80 ? '#10b981' : pi >= 65 ? '#6366f1' : '#f59e0b',
-      text: `Chỉ số phong độ toàn diện đạt ${pi}/100 (Hạng ${tier.name}). Thuật toán ${predModel} dự báo buổi tới học sinh đạt ${predNext} điểm (Từ Vựng: ${predC1} đ | Ngữ Pháp: ${predC2} đ | BTVN: ${predHw} đ).`,
+      text: `Chỉ số phong độ toàn diện đạt ${pi}/100 (Hạng ${tier.name}). Thuật toán ${predModel} dự báo buổi tới học sinh đạt ${predNext} điểm (Từ Vựng: ${predC1} đ, Ngữ Pháp: ${predC2} đ, BTVN: ${predHw} đ).`,
       tooltipTitle: 'Chỉ Số Phong Độ PI & Dự Báo',
       tooltipDesc: 'Tổng hợp 5 trụ cột (40% EMA, 25% Trend, 15% Độ ổn định, 10% Lịch sử, 10% Chuyên cần) và mô hình chuỗi thời gian.',
       tooltipFormula: 'PI = 0.4*EMA + 0.25*Trend + 0.15*Consistency + 0.1*History + 0.1*Att',
@@ -291,7 +291,7 @@ export function generateAcademicInsights(params: {
       text: `Lớp có xu hướng mạnh về ${dominantSkill} (${dominantScore} đ) hơn ${subSkill} (${subScore} đ), độ chênh lệch bình quân ${gap.toFixed(1)} đ. ${gap >= 1.0 ? `Cần phân bổ thêm thời lượng bài giảng cho các tiết luyện tập ${subSkill}.` : `Hai kỹ năng đang được phát triển cân đối.`}`,
       tooltipTitle: 'Phân Tích Kỹ Năng Tập Thể',
       tooltipDesc: 'So sánh điểm trung bình giữa Từ Vựng và Ngữ Pháp trên quy mô toàn lớp.',
-      tooltipFormula: 'Độ lệch = |TB Từ Vựng - TB Ngữ Pháp|',
+      tooltipFormula: 'Độ lệch = abs(TB Từ Vựng - TB Ngữ Pháp)',
       tooltipImpact: 'Giúp điều chỉnh trọng tâm giảng dạy vào kỹ năng lớp đang còn yếu.',
     });
 

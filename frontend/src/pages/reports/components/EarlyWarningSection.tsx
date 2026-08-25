@@ -152,7 +152,7 @@ export const EarlyWarningSection: React.FC<EarlyWarningSectionProps> = ({
     {
       accessorKey: 'riskTags',
       header: 'Lý Do Cảnh Báo',
-      meta: { headerText: 'Lý Do Cảnh Báo', exportValue: (r: any) => (r.riskTags || []).join(' | ') },
+      meta: { headerText: 'Lý Do Cảnh Báo', exportValue: (r: any) => (r.riskTags || []).join(', ') },
       cell: ({ getValue }) => {
         const tags = getValue<string[]>() || [];
         return (
