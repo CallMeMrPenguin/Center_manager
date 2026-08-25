@@ -119,11 +119,13 @@ input[type=number] {
 
 .white-paper-container input[type="text"],
 .white-paper-container input,
-.white-paper-input {
+.white-paper-input,
+input.white-paper-input {
   color-scheme: light !important;
-  background-color: transparent !important;
-  background: transparent !important;
+  background-color: #ffffff !important;
+  background: #ffffff !important;
   color: #0f172a !important;
+  -webkit-text-fill-color: #0f172a !important;
   border-top: none !important;
   border-left: none !important;
   border-right: none !important;
@@ -135,15 +137,19 @@ input[type=number] {
   font-weight: 700 !important;
   font-size: 15px !important;
   line-height: 1.4 !important;
+  appearance: none !important;
+  -webkit-appearance: none !important;
 }
 
 .white-paper-container input[type="text"]:focus,
 .white-paper-container input:focus,
-.white-paper-input:focus {
-  background-color: #f1f5f9 !important;
-  background: #f1f5f9 !important;
-  border-bottom: 2px solid #4338ca !important;
+.white-paper-input:focus,
+input.white-paper-input:focus {
+  background-color: #eff6ff !important;
+  background: #eff6ff !important;
+  border-bottom: 2px solid #3b82f6 !important;
   color: #0f172a !important;
+  -webkit-text-fill-color: #0f172a !important;
 }
 
 select {

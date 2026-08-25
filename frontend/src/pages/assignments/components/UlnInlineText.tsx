@@ -48,8 +48,10 @@ export const InlineInput = memo(({
       style={{
         width: dynamicWidth,
         colorScheme: 'light',
-        backgroundColor: 'transparent',
+        backgroundColor: '#ffffff',
+        background: '#ffffff',
         color: '#0f172a',
+        WebkitTextFillColor: '#0f172a',
         borderBottom: '2px solid #0f172a',
         borderTop: 'none',
         borderLeft: 'none',
@@ -59,7 +61,7 @@ export const InlineInput = memo(({
         boxShadow: 'none',
         transition: 'width 0.1s ease',
       }}
-      className="white-paper-input inline-block mx-1 px-1 py-0.5 text-center text-sm font-bold text-slate-950"
+      className="white-paper-input inline-block mx-1 px-1.5 py-0.5 text-center text-sm font-bold text-slate-950 bg-white"
     />
   );
 });

@@ -30,7 +30,7 @@ export const WhitePaperAssignmentViewer: React.FC<WhitePaperAssignmentViewerProp
 }) => {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isCorrectionMode, setIsCorrectionMode] = useState(false);
-  const [userAnswers, setUserAnswers] = useState<Record<number, string>>({});
+  const [userAnswers, setUserAnswers] = useState<Record<string, string>>({});
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [submissionCount, setSubmissionCount] = useState(0);
   const [finalScore, setFinalScore] = useState<number>(0);
@@ -62,7 +62,7 @@ export const WhitePaperAssignmentViewer: React.FC<WhitePaperAssignmentViewerProp
   ], []);
 
   const handleSelectOption = useCallback((exId: number, opt: string) => {
-    setUserAnswers((prev) => ({ ...prev, [exId]: opt }));
+    setUserAnswers((prev) => ({ ...prev, [String(exId)]: opt }));
   }, []);
 
   const handleSubmit = () => {
@@ -182,58 +182,10 @@ export const WhitePaperAssignmentViewer: React.FC<WhitePaperAssignmentViewerProp
         </div>
       </div>
 
-      {/* 2. MAIN LAYOUT WITH LIGHT-THEME QUESTION PROGRESS SIDEBAR & WHITE PAPER */}
+      {/* 2. MAIN LAYOUT: SIDEBAR ON THE LEFT, A4 WHITE PAPER ON THE RIGHT */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        {/* Left A4 Paper Test View */}
-        <div className="lg:col-span-9 flex justify-center">
-          <div className="relative w-full max-w-[850px] bg-white text-slate-900 rounded-none shadow-[0_20px_50px_rgba(0,0,0,0.4)] border border-slate-300 p-8 sm:p-14 min-h-[1100px] flex flex-col justify-between font-sans">
-            {/* Drawing Correction Layer (Fixed Full Canvas) */}
-            <DrawingCorrectionCanvas isActive={isCorrectionMode} />
-
-            <div className="space-y-6">
-              <WhitePaperHeader
-                assignment={assignment}
-                studentName={studentName}
-                isSubmitted={isSubmitted}
-                finalScore={String(finalScore)}
-                correctCount={progress.answered}
-                total={progress.total || 10}
-              />
-
-              {/* ULN Document Rendering */}
-              {ulnNodes.length > 0 ? (
-                <UlnDocumentRenderer
-                  nodes={ulnNodes}
-                  isSubmitted={isSubmitted}
-                  onProgressUpdate={(ans, tot, secs) => {
-                    setProgress({ answered: ans, total: tot, sections: secs });
-                  }}
-                />
-              ) : (
-                <div className="space-y-6 pt-4">
-                  {fallbackExercises.map((item) => (
-                    <ExerciseItemView
-                      key={item.id}
-                      exercise={item}
-                      userAnswer={userAnswers[item.id]}
-                      isSubmitted={isSubmitted}
-                      onSelectOption={handleSelectOption}
-                      renderFormattedText={(t) => <span>{t}</span>}
-                    />
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Test Footer */}
-            <div className="border-t-2 border-slate-800 pt-5 text-center text-xs text-slate-500 font-semibold">
-              <p>--- HẾT BÀI KIỂM TRA ---</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Right Question Navigation Sidebar (Light Clean Paper Theme) */}
-        <div className="lg:col-span-3 lg:sticky lg:top-24 space-y-4">
+        {/* Left Question Navigation Sidebar (Clean Light Theme) */}
+        <div className="lg:col-span-3 lg:sticky lg:top-24 space-y-4 order-2 lg:order-1">
           <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-xl text-slate-900 space-y-4">
             <div className="flex items-center justify-between border-b border-slate-200 pb-3">
               <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider">
@@ -283,6 +235,54 @@ export const WhitePaperAssignmentViewer: React.FC<WhitePaperAssignmentViewerProp
                   </div>
                 </div>
               ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Right A4 Paper Test View */}
+        <div className="lg:col-span-9 flex justify-center order-1 lg:order-2">
+          <div className="white-paper-container relative w-full max-w-[850px] bg-white text-slate-900 rounded-none shadow-[0_20px_50px_rgba(0,0,0,0.4)] border border-slate-300 p-8 sm:p-14 min-h-[1100px] flex flex-col justify-between font-sans">
+            {/* Drawing Correction Layer (Fixed Full Canvas) */}
+            <DrawingCorrectionCanvas isActive={isCorrectionMode} />
+
+            <div className="space-y-6">
+              <WhitePaperHeader
+                assignment={assignment}
+                studentName={studentName}
+                isSubmitted={isSubmitted}
+                finalScore={String(finalScore)}
+                correctCount={progress.answered}
+                total={progress.total || 10}
+              />
+
+              {/* ULN Document Rendering */}
+              {ulnNodes.length > 0 ? (
+                <UlnDocumentRenderer
+                  nodes={ulnNodes}
+                  isSubmitted={isSubmitted}
+                  onProgressUpdate={(ans, tot, secs) => {
+                    setProgress({ answered: ans, total: tot, sections: secs });
+                  }}
+                />
+              ) : (
+                <div className="space-y-6 pt-4">
+                  {fallbackExercises.map((item) => (
+                    <ExerciseItemView
+                      key={item.id}
+                      exercise={item}
+                      userAnswer={userAnswers[String(item.id)]}
+                      isSubmitted={isSubmitted}
+                      onSelectOption={handleSelectOption}
+                      renderFormattedText={(t) => <span>{t}</span>}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Test Footer */}
+            <div className="border-t-2 border-slate-800 pt-5 text-center text-xs text-slate-500 font-semibold">
+              <p>--- HẾT BÀI KIỂM TRA ---</p>
             </div>
           </div>
         </div>
