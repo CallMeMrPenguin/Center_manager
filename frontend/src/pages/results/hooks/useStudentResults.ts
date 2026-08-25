@@ -1,6 +1,9 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { api } from '../../../api';
 import { StudentResultRecord, StudentProfileSummary } from '../types';
+import { useOverviewStats } from '../../reports/hooks/useOverviewStats';
+import { GradeTypeFilterKey, DistributionScoreBin } from '../../reports/utils/distributionAnalytics';
+import { GradeTypeItem } from '../../../types';
 
 export const trunc1Dec = (val: number | null | undefined): string => {
   if (val === null || val === undefined || isNaN(val)) return '-';
@@ -58,6 +61,24 @@ export function useStudentResults() {
   const [loading, setLoading] = useState<boolean>(true);
   const [rawRecords, setRawRecords] = useState<StudentResultRecord[]>([]);
 
+  // Interactive Chart & Commentary Controls State
+  const [timeView, setTimeView] = useState<'1m' | '2m' | '3m' | 'all'>('all');
+  const [chartViewMode, setChartViewMode] = useState<'timeline' | 'distribution'>('timeline');
+  const [selectedGradeTypeFilter, setSelectedGradeTypeFilter] = useState<GradeTypeFilterKey>('overall');
+  const [selectedScoreBin, setSelectedScoreBin] = useState<DistributionScoreBin | null>(null);
+  const [timePhases, setTimePhases] = useState<any[]>([]);
+  const [selectedPhaseId, setSelectedPhaseId] = useState<string>('');
+  const [rawRankings, setRawRankings] = useState<any[]>([]);
+  const [analyticsEngine, setAnalyticsEngine] = useState<any>(null);
+
+  // Grade types configuration
+  const [gradeTypesList] = useState<GradeTypeItem[]>([
+    { id: 'check_1', label: 'Kiểm Tra 1', weight: 40, color: '#3b82f6' },
+    { id: 'check_2', label: 'Kiểm Tra 2', weight: 40, color: '#a855f7' },
+    { id: 'homework', label: 'BTVN', weight: 20, color: '#10b981' },
+    { id: 'mock_test', label: 'Thi Thử', weight: 0, color: '#34d399' },
+  ]);
+
   // 1. Fetch Students & Classes list on mount
   useEffect(() => {
     let mounted = true;
@@ -102,7 +123,6 @@ export function useStudentResults() {
         const ids = (enrolledList || []).map((s: any) => s.id || s.student_id);
         setClassEnrolledStudentIds(ids);
 
-        // Auto-switch to first enrolled student in class if current selected student is not in this class
         if (ids.length > 0) {
           setSelectedStudentId((prev) => {
             if (prev && ids.includes(prev)) return prev;
@@ -123,11 +143,13 @@ export function useStudentResults() {
     return allStudents.filter((s) => classEnrolledStudentIds.includes(s.id));
   }, [allStudents, selectedClassId, classEnrolledStudentIds]);
 
-  // 3. Fetch specific student's grade records
+  // 3. Fetch grade analytics data for selected student and class
   const loadStudentData = useCallback(async (studentId: number) => {
     try {
       setLoading(true);
-      const res = await api.getGradeAnalytics(undefined, studentId);
+      const cid = selectedClassId !== 'all' ? Number(selectedClassId) : undefined;
+      const res = await api.getGradeAnalytics(cid, studentId);
+
       const recs = (res.session_records || []).map((r: any) => ({
         id: r.id,
         date: r.date,
@@ -143,13 +165,15 @@ export function useStudentResults() {
         notes: r.notes || '',
       }));
       setRawRecords(recs);
+      setRawRankings(res.student_rankings || []);
+      setAnalyticsEngine(res.analytics_summary || null);
     } catch (err) {
       console.error('Failed to load student grade records:', err);
       setRawRecords([]);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [selectedClassId]);
 
   useEffect(() => {
     if (selectedStudentId) {
@@ -227,6 +251,30 @@ export function useStudentResults() {
     };
   }, [currentStudent, filteredRecords]);
 
+  // Integrated Overview Stats from Reports Engine
+  const {
+    combinedTimePhases,
+    stats,
+    sessionChartData,
+    fittedLookup,
+    distributionStats,
+    displayedRankings,
+  } = useOverviewStats({
+    classes,
+    selectedClassId: selectedClassId === 'all' ? '' : selectedClassId,
+    selectedStudentId: selectedStudentId ? String(selectedStudentId) : '',
+    selectedAcademicYear: '2025-2026',
+    sessionRecords: filteredRecords,
+    studentRankings: rawRankings,
+    filteredRankings: rawRankings,
+    gradeTypesList,
+    timePhases,
+    selectedPhaseId,
+    timeView,
+    selectedGradeTypeFilter,
+    selectedScoreBin,
+  });
+
   return {
     students,
     allStudents,
@@ -239,6 +287,25 @@ export function useStudentResults() {
     loading,
     records: filteredRecords,
     summary,
+    // Analytics & Chart Properties from Reports Engine
+    stats,
+    engine: analyticsEngine,
+    sessionChartData,
+    fittedLookup,
+    distributionStats,
+    displayedRankings,
+    gradeTypesList,
+    timeView,
+    setTimeView,
+    chartViewMode,
+    setChartViewMode,
+    selectedGradeTypeFilter,
+    setSelectedGradeTypeFilter,
+    selectedScoreBin,
+    setSelectedScoreBin,
+    combinedTimePhases,
+    selectedPhaseId,
+    setSelectedPhaseId,
     refresh: () => {
       if (selectedStudentId) loadStudentData(selectedStudentId);
     },
