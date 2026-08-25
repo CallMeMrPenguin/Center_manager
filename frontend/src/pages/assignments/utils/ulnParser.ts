@@ -68,6 +68,7 @@ export function cleanRawText(str: string): string {
   return str
     .replace(/^\[P[0-9]\]\s*/g, '')
     .replace(/^\[ins\]\s*/g, '')
+    .replace(/^#\s*/g, '')
     .replace(/^\*\*([^*]+)\*\*$/g, '$1')
     .trim();
 }
@@ -284,13 +285,13 @@ function parseUlnText(text: string): UlnNode[] {
           nodes.push({
             type: 'question',
             qNum: numMatch[1],
-            text: `Câu ${numMatch[1]}`,
+            text: '',
             options: rawOpts,
           });
         } else {
           nodes.push({
             type: 'question',
-            text: 'Chọn đáp án đúng:',
+            text: '',
             options,
           });
         }
@@ -327,7 +328,7 @@ function parseUlnText(text: string): UlnNode[] {
     const qMatch = line.match(/(?:\[P[0-9]\]\s*)?#?([0-9]+)\.\s*(.*)/);
     if (qMatch) {
       const qNum = qMatch[1];
-      let qText = qMatch[2].trim();
+      let qText = qMatch[2].replace(/^#/, '').trim();
       let subText: string | undefined;
       let bracketHint: string | undefined;
       let hasWritingLine = false;
@@ -339,7 +340,7 @@ function parseUlnText(text: string): UlnNode[] {
           hasWritingLine = true;
           i++;
         } else if (nextLine.startsWith('[P1]') || nextLine.startsWith('→') || nextLine.startsWith('B:')) {
-          subText = nextLine.replace(/^\[P1\]\s*/, '').trim();
+          subText = nextLine.replace(/^\[P1\]\s*/, '').replace(/^#/, '').trim();
           i++;
         }
       }

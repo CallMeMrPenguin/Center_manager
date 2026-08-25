@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useCallback } from 'react';
-import { ArrowLeft, Award, Printer, Send, RefreshCw } from 'lucide-react';
+import { ArrowLeft, Award, Printer, Send, RefreshCw, Maximize2, Minimize2 } from 'lucide-react';
 import { Assignment } from '../types';
 import { ExerciseItem } from './types';
 import { WhitePaperHeader } from './WhitePaperHeader';
@@ -25,6 +25,7 @@ export const WhitePaperAssignmentViewer: React.FC<WhitePaperAssignmentViewerProp
   onBack,
   onSubmitSuccess,
 }) => {
+  const [isFullscreen, setIsFullscreen] = useState(false);
   // Parse ULN document nodes (uses full Unit 12 & Test Yourself 4 test for debugging)
   const ulnNodes = useMemo(() => {
     const raw = (assignment.content_json && assignment.content_json.trim())
@@ -184,7 +185,7 @@ export const WhitePaperAssignmentViewer: React.FC<WhitePaperAssignmentViewerProp
   }, []);
 
   return (
-    <div className="space-y-6 pb-12 select-none font-sans">
+    <div className={`${isFullscreen ? 'fixed inset-0 z-50 bg-[#06070a] overflow-y-auto p-4 sm:p-8' : ''} space-y-6 pb-12 select-none font-sans`}>
       {/* 1. TOP FLOATING NAVIGATION BAR */}
       <div className="bg-[#0c0f1e] border border-[#1e2742] rounded-2xl p-4 shadow-xl flex flex-wrap items-center justify-between gap-3 sticky top-2 z-40">
         <div className="flex items-center gap-3">
@@ -215,6 +216,16 @@ export const WhitePaperAssignmentViewer: React.FC<WhitePaperAssignmentViewerProp
 
         {/* Action Controls */}
         <div className="flex items-center gap-2 flex-wrap">
+          <button
+            type="button"
+            onClick={() => setIsFullscreen(!isFullscreen)}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-200 text-xs font-bold border border-white/10 transition cursor-pointer"
+            title={isFullscreen ? 'Thu nhỏ cửa sổ' : 'Toàn màn hình'}
+          >
+            {isFullscreen ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
+            <span>{isFullscreen ? 'Thu nhỏ' : 'Toàn màn hình'}</span>
+          </button>
+
           <button
             type="button"
             onClick={() => window.print()}
