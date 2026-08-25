@@ -54,7 +54,7 @@ export const ResultsPage: React.FC = () => {
 
   return (
     <div className="h-full w-full overflow-y-auto p-6 space-y-6 bg-[#080b14] text-slate-100 select-none font-sans scrollbar-thin">
-      {/* 1. Header Filter Bar & Student ID Card */}
+      {/* 1. Header Filter Bar & Student ID Card (Identical to Reports standard) */}
       <StudentProfileHeader
         students={students}
         selectedStudentId={selectedStudentId}
@@ -63,6 +63,7 @@ export const ResultsPage: React.FC = () => {
         selectedClassId={selectedClassId}
         onSelectClass={setSelectedClassId}
         summary={summary}
+        stats={stats}
         loading={loading}
         onRefresh={refresh}
         isStudent={isStudent}
