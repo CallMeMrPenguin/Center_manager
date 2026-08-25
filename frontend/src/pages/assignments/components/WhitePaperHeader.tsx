@@ -13,32 +13,12 @@ interface WhitePaperHeaderProps {
 export const WhitePaperHeader: React.FC<WhitePaperHeaderProps> = ({
   assignment,
   studentName,
-  isSubmitted,
-  finalScore,
-  correctCount,
-  total,
 }) => {
   return (
     <div className="space-y-4">
       {/* Header Banner */}
-      <div className="border-b-2 border-slate-800 pb-5 space-y-3 text-center sm:text-left">
-        <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 pb-3">
-          <div>
-            <span className="text-xs font-black uppercase tracking-widest text-indigo-700 block">
-              TRUNG TÂM BỒI DƯỠNG KIẾN THỨC
-            </span>
-            <span className="text-xs text-slate-500 font-semibold">
-              Năm học 2025 - 2026
-            </span>
-          </div>
-          <div className="text-right">
-            <span className="text-xs font-bold text-slate-700 block">
-              Hạn nộp: {assignment.due_date || 'Theo thông báo'}
-            </span>
-          </div>
-        </div>
-
-        <div className="py-2 text-center space-y-1">
+      <div className="border-b-2 border-slate-800 pb-4 space-y-3 text-center sm:text-left">
+        <div className="py-1 text-center space-y-1">
           <h1 className="text-2xl font-black tracking-tight text-slate-900 uppercase">
             {assignment.title || 'PHIẾU BÀI TẬP VỀ NHÀ'}
           </h1>
