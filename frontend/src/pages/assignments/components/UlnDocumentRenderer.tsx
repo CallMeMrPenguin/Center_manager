@@ -1,7 +1,9 @@
 import React, { useState, useCallback, useMemo, useEffect, useRef, memo } from 'react';
-import { UlnNode, UlnHeadingNode } from '../utils/ulnParser';
+import { UlnNode, UlnHeadingNode, UlnQuestionNode } from '../utils/ulnParser';
 import { UlnInlineText, InlineInput } from './UlnInlineText';
-import { cleanOptionPrefix } from '../../../utils';
+import { SessionCheckpointSeparator } from './SessionCheckpointSeparator';
+import { QuestionNodeView } from './QuestionNodeView';
+import { AssignmentDailyLog } from '../types';
 
 export interface SectionProgressGroup {
   id: string;
@@ -12,6 +14,8 @@ export interface SectionProgressGroup {
 interface UlnDocumentRendererProps {
   nodes: UlnNode[];
   initialAnswers?: Record<string, string>;
+  answerKeys?: Record<string, string>;
+  dailyLogs?: AssignmentDailyLog[];
   isSubmitted?: boolean;
   onProgressUpdate?: (answered: number, total: number, sections: SectionProgressGroup[]) => void;
 }
@@ -19,6 +23,8 @@ interface UlnDocumentRendererProps {
 export const UlnDocumentRenderer: React.FC<UlnDocumentRendererProps> = memo(({
   nodes,
   initialAnswers,
+  answerKeys = {},
+  dailyLogs = [],
   isSubmitted = false,
   onProgressUpdate,
 }) => {
@@ -99,23 +105,58 @@ export const UlnDocumentRenderer: React.FC<UlnDocumentRendererProps> = memo(({
     }, 60);
   }, [answers, tableChecks, nodes, onProgressUpdate]);
 
+  // Track H2 headings to insert dailyLogs session checkpoint separators between parts
+  let h2Count = 0;
+
   return (
     <div className="space-y-3 font-sans text-slate-950 select-text font-normal">
       {nodes.map((node, nIdx) => {
         const alignClass = 'align' in node && node.align === 'center' ? 'text-center' : 'align' in node && node.align === 'right' ? 'text-right' : 'text-left';
 
+        // Check if a daily log separator should be inserted before this section
+        let sessionSeparator: React.ReactNode = null;
+        if (dailyLogs && dailyLogs.length > 0) {
+          if (node.type === 'h2') {
+            if (h2Count < dailyLogs.length) {
+              sessionSeparator = (
+                <SessionCheckpointSeparator
+                  key={`session_sep_${h2Count}`}
+                  log={dailyLogs[h2Count]}
+                  sessionIndex={h2Count}
+                />
+              );
+            }
+            h2Count++;
+          } else if (nIdx === 0 && h2Count === 0 && dailyLogs[0]) {
+            sessionSeparator = (
+              <SessionCheckpointSeparator
+                key="session_sep_0"
+                log={dailyLogs[0]}
+                sessionIndex={0}
+              />
+            );
+            h2Count = 1;
+          }
+        }
+
         if (node.type === 'h1') {
           return (
-            <div key={nIdx} className={`pt-2 pb-1 border-b-2 border-slate-900 ${node.align === 'left' ? 'text-left' : node.align === 'right' ? 'text-right' : 'text-center'}`}>
-              <h1 className="text-base sm:text-lg font-black uppercase tracking-tight text-slate-950">{node.text}</h1>
-            </div>
+            <React.Fragment key={nIdx}>
+              {sessionSeparator}
+              <div className={`pt-2 pb-1 border-b-2 border-slate-900 ${node.align === 'left' ? 'text-left' : node.align === 'right' ? 'text-right' : 'text-center'}`}>
+                <h1 className="text-base sm:text-lg font-black uppercase tracking-tight text-slate-950">{node.text}</h1>
+              </div>
+            </React.Fragment>
           );
         }
         if (node.type === 'h2') {
           return (
-            <div key={nIdx} className={`pt-3 pb-1 border-b border-slate-400 ${alignClass}`}>
-              <h2 className="text-xs sm:text-sm font-black uppercase tracking-wide text-slate-950">{node.text}</h2>
-            </div>
+            <React.Fragment key={nIdx}>
+              {sessionSeparator}
+              <div className={`pt-3 pb-1 border-b border-slate-400 ${alignClass}`}>
+                <h2 className="text-xs sm:text-sm font-black uppercase tracking-wide text-slate-950">{node.text}</h2>
+              </div>
+            </React.Fragment>
           );
         }
         if (node.type === 'h3') {
@@ -294,93 +335,23 @@ export const UlnDocumentRenderer: React.FC<UlnDocumentRendererProps> = memo(({
           );
         }
         if (node.type === 'question') {
-          const qKey = `q_${nIdx}_${node.qNum || nIdx}`;
-          const currentAns = answers[qKey];
-          const maxOptLen = Math.max(...(node.options || []).map((o) => cleanOptionPrefix(o).length), 0);
-          const optGridClass = maxOptLen > 48 ? 'grid-cols-1' : maxOptLen > 24 ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-2 sm:grid-cols-4';
-          const hasNoBlankOrOpts = (!node.options || node.options.length === 0) && !node.hasWritingLine && !node.text.includes('<blank>') && !node.subText && (!node.subParagraphs || node.subParagraphs.length === 0);
-
-          const hasText = !!node.text && node.text.trim().length > 0;
-
           return (
-            <div key={nIdx} id={`q_target_${nIdx}`} className="py-1 px-0.5 scroll-mt-20 font-normal">
-              <div className="flex items-start gap-2">
-                {node.qNum && (
-                  <span className={`font-bold text-xs sm:text-sm text-rose-600 shrink-0 min-w-[22px] text-right ${hasText ? 'pt-0.5' : 'pt-1'}`}>
-                    {node.qNum}.
-                  </span>
-                )}
-                <div className="flex-1 space-y-1">
-                  {hasText && (
-                    <div className="text-xs sm:text-sm font-normal text-slate-900 leading-relaxed pt-0.5">
-                      <UlnInlineText text={node.text} qKey={qKey} answers={answers} onInputChange={handleInputChange} isSubmitted={isSubmitted} />
-                    </div>
-                  )}
-                  {node.subText && (
-                    <div className="text-xs sm:text-sm font-normal text-slate-800 pl-2 border-l-2 border-slate-400">
-                      <UlnInlineText text={node.subText} qKey={`${qKey}_sub`} answers={answers} onInputChange={handleInputChange} isSubmitted={isSubmitted} />
-                    </div>
-                  )}
-                  {node.subParagraphs && node.subParagraphs.length > 0 && (
-                    <div className="space-y-1 pl-2.5 border-l-2 border-slate-300 my-1">
-                      {node.subParagraphs.map((p, pIdx) => (
-                        <div key={pIdx} className="text-xs sm:text-sm font-normal text-slate-800 leading-relaxed">
-                          <UlnInlineText text={p} qKey={`${qKey}_sub_${pIdx}`} answers={answers} onInputChange={handleInputChange} isSubmitted={isSubmitted} />
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                  {hasNoBlankOrOpts && (
-                    <div className="pt-1 flex items-center gap-2">
-                      <span className="text-xs font-bold text-slate-500">Trả lời:</span>
-                      <InlineInput inputKey={`${qKey}_direct`} initialVal={answers[`${qKey}_direct`] || ''} disabled={isSubmitted} onCommit={handleInputChange} />
-                    </div>
-                  )}
-                  {node.hasWritingLine && (
-                    <div className="pt-0.5">
-                      <InlineInput inputKey={`${qKey}_write`} initialVal={answers[`${qKey}_write`] || ''} disabled={isSubmitted} onCommit={handleInputChange} />
-                    </div>
-                  )}
-                  {node.options && node.options.length > 0 && (
-                    <div className={`grid ${optGridClass} gap-x-6 gap-y-1.5 ${hasText ? 'pt-1' : 'pt-0'} font-normal`}>
-                      {node.options.map((opt, optIdx) => {
-                        const optLetter = String.fromCharCode(65 + optIdx);
-                        const optLetterWithDot = optLetter + '.';
-                        const cleanText = cleanOptionPrefix(opt);
-                        const isSelected = currentAns === opt || currentAns === cleanText || currentAns === optLetter || currentAns === optLetterWithDot;
-
-                        return (
-                          <button
-                            key={optIdx}
-                            type="button"
-                            onClick={() => handleSelectOption(qKey, optLetter)}
-                            className="text-left flex items-center gap-2 transition cursor-pointer py-1 px-1 rounded-md text-xs sm:text-sm group hover:bg-slate-50"
-                          >
-                            <span
-                              className={`w-5 h-5 min-w-[20px] rounded-full flex items-center justify-center font-bold text-xs transition-colors shrink-0 ${
-                                isSelected
-                                  ? 'bg-blue-600 text-white font-black shadow-xs'
-                                  : 'text-blue-700 bg-blue-50 group-hover:bg-blue-100'
-                              }`}
-                            >
-                              {optLetter}
-                            </span>
-                            <span className={`flex-1 font-normal break-words leading-tight ${isSelected ? 'font-bold text-blue-900' : 'text-slate-900'}`}>
-                              <UlnInlineText text={cleanText} qKey={`${qKey}_opt_${optIdx}`} answers={answers} onInputChange={handleInputChange} isSubmitted={isSubmitted} />
-                            </span>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
+            <QuestionNodeView
+              key={nIdx}
+              node={node as UlnQuestionNode}
+              nIdx={nIdx}
+              answers={answers}
+              answerKeys={answerKeys}
+              isSubmitted={isSubmitted}
+              onInputChange={handleInputChange}
+              onSelectOption={handleSelectOption}
+            />
           );
         }
+        const textVal = 'text' in node ? (node as any).text : '';
         return (
           <div key={nIdx} className={`text-xs sm:text-sm font-normal text-slate-900 leading-relaxed ${alignClass}`}>
-            <UlnInlineText text={node.text} qKey={`p_${nIdx}`} answers={answers} onInputChange={handleInputChange} isSubmitted={isSubmitted} />
+            <UlnInlineText text={textVal} qKey={`p_${nIdx}`} answers={answers} onInputChange={handleInputChange} isSubmitted={isSubmitted} />
           </div>
         );
       })}

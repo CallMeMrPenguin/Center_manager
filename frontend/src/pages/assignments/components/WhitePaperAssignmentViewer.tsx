@@ -3,13 +3,13 @@ import { ArrowLeft, Award, Save, Maximize2, Minimize2, ChevronRight, PenTool, Ke
 import { Assignment, AssignmentDailyLog } from '../types';
 import { ExerciseItem } from './types';
 import { WhitePaperHeader } from './WhitePaperHeader';
-import { PaperDailyProgressLog } from './PaperDailyProgressLog';
 import { ExerciseItemView } from './ExerciseItemView';
 import { UlnDocumentRenderer, SectionProgressGroup } from './UlnDocumentRenderer';
 import { DrawingCorrectionCanvas } from './DrawingCorrectionCanvas';
 import { ExamWarningModal } from './ExamWarningModal';
 import { useExamProctoring } from '../hooks/useExamProctoring';
 import { parseUlnContent } from '../utils/ulnParser';
+import { extractAnswerKeysFromUln } from '../utils/answerKeyEvaluator';
 import { SAMPLE_UNIT12_ULN_TEXT } from '../constants/sampleUlnTest';
 import { format1Dec } from '../../../utils';
 import { showToast } from '../../../components/Toast';
@@ -92,6 +92,11 @@ export const WhitePaperAssignmentViewer: React.FC<WhitePaperAssignmentViewerProp
     return parseUlnContent(raw);
   }, [assignment.content_json]);
 
+  // Extract answer keys from assignment content for instant student vs key comparison
+  const answerKeys = useMemo(() => {
+    return extractAnswerKeysFromUln(assignment.content_json || SAMPLE_UNIT12_ULN_TEXT);
+  }, [assignment.content_json]);
+
   // Fallback exercises
   const fallbackExercises: ExerciseItem[] = useMemo(() => [
     {
@@ -136,7 +141,7 @@ export const WhitePaperAssignmentViewer: React.FC<WhitePaperAssignmentViewerProp
       } space-y-4 pb-12 select-none font-sans`}
       style={{ userSelect: 'none', WebkitUserSelect: 'none' }}
     >
-      {/* 1. DOCKED TOP NAVIGATION BAR (Flush to top, zero gaps when scrolling) */}
+      {/* 1. DOCKED TOP NAVIGATION BAR */}
       <div className="sticky top-0 z-40 bg-[#0c0f1e] border-b border-[#1e2742] px-6 py-3 flex flex-wrap items-center justify-between gap-3 shadow-lg -mx-6 -mt-6 mb-6 before:absolute before:-top-40 before:inset-x-0 before:h-40 before:bg-[#0c0f1e] before:pointer-events-none">
         <div className="flex items-center gap-3 min-w-0">
           <button
@@ -235,7 +240,7 @@ export const WhitePaperAssignmentViewer: React.FC<WhitePaperAssignmentViewerProp
         </div>
       </div>
 
-      {/* 2. TIGHT DUAL-PANE LAYOUT: SIDEBAR ON LEFT TIGHTLY ADJACENT TO EXAM SHEET */}
+      {/* 2. DUAL-PANE LAYOUT: SIDEBAR ON LEFT TIGHTLY ADJACENT TO EXAM SHEET */}
       <div className="max-w-6xl mx-auto flex flex-col lg:flex-row items-start justify-center gap-4 w-full">
         {/* Left Question Navigation Sidebar (Sticky & Tight) */}
         <div className="w-full lg:w-72 lg:sticky lg:top-20 shrink-0 space-y-3">
@@ -306,16 +311,13 @@ export const WhitePaperAssignmentViewer: React.FC<WhitePaperAssignmentViewerProp
                 total={progress.total || 10}
               />
 
-              {/* Student Multi-Day Submission Log Directly Inside Paper */}
-              {dailyLogs.length > 0 && (
-                <PaperDailyProgressLog logs={dailyLogs} studentName={studentName} />
-              )}
-
-              {/* ULN Document Rendering */}
+              {/* ULN Document Rendering with In-Place Multi-Session Checkpoint Separators and Answer Key Comparisons */}
               {ulnNodes.length > 0 ? (
                 <UlnDocumentRenderer
                   nodes={ulnNodes}
                   initialAnswers={userAnswers}
+                  answerKeys={answerKeys}
+                  dailyLogs={dailyLogs}
                   isSubmitted={isSubmitted}
                   onProgressUpdate={(ans, tot, secs) => {
                     setProgress({ answered: ans, total: tot, sections: secs });
