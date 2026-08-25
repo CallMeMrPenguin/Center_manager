@@ -329,10 +329,9 @@ export function generateAcademicInsights(params: {
       metrics,
       conclusion: {
         overviewSummary: `Tập thể lớp ${className} có sĩ số ${totalStudents} học sinh, điểm trung bình đạt ${overall}/10 với tỷ lệ học sinh khá giỏi chiếm ${goodRate}%.`,
-        riskAlert:
-          weakRate > 0
-            ? `Hiện có ${weakCount} học sinh (${weakRate}%) có điểm số dưới mức 5.0 đ, cần có kế hoạch phụ đạo riêng để đảm bảo tỷ lệ hoàn thành chương trình.`
-            : `Không có học sinh trong diện nguy cơ, lớp duy trì phong độ đồng đều.`,
+        riskAlert: weakRate > 0
+          ? `Hiện có ${weakCount} học sinh (${weakRate}%) có điểm số dưới mức 5.0 đ, cần có kế hoạch phụ đạo riêng để đảm bảo tỷ lệ hoàn thành chương trình.`
+          : `Không có học sinh trong diện nguy cơ, lớp duy trì phong độ đồng đều.`,
       },
     };
   }
@@ -392,10 +391,9 @@ export function generateAcademicInsights(params: {
     metrics,
     conclusion: {
       overviewSummary: `Hệ thống đào tạo đang vận hành hiệu quả với ${totalStudents} học sinh, điểm trung bình toàn trung tâm đạt ${overall}/10 và ${excellentPct}% học sinh đạt mức Xuất Sắc.`,
-      riskAlert:
-        riskCount > 0
-          ? `Ghi nhận ${riskCount} học sinh (${riskPct}%) có nguy cơ hổng kiến thức căn bản trên toàn hệ thống.`
-          : `Không có học sinh trong nhóm nguy cơ cao.`,
+      riskAlert: riskCount > 0
+        ? `Ghi nhận ${riskCount} học sinh (${riskPct}%) có nguy cơ hổng kiến thức căn bản trên toàn hệ thống.`
+        : `Không có học sinh trong nhóm nguy cơ cao.`,
     },
   };
 }

@@ -1,3 +1,7 @@
+from typing import Optional, List, Dict, Any
+from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel
+
 from database.crud_assignments import (
     get_assignments,
     create_assignment,
