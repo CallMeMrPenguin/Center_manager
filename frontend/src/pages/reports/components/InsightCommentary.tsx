@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { BookOpen, Info, X } from 'lucide-react';
 import { generateAcademicInsights } from '../utils/academicInsightEngine';
+import { FormattedInsightText } from './FormattedInsightText';
 
 interface InsightCommentaryProps {
   stats: any;
@@ -86,7 +87,7 @@ export const InsightCommentary: React.FC<InsightCommentaryProps> = React.memo(({
         </span>
       </div>
 
-      {/* 2. POINT-BY-POINT METRIC BREAKDOWN (Zero emojis, clean divide-y, glowing indicator dots) */}
+      {/* 2. POINT-BY-POINT METRIC BREAKDOWN (Syntax highlighted, glowing indicator dots) */}
       <div className="space-y-0.5 divide-y divide-white/5">
         {report.metrics.map((item) => {
           const isTooltipActive = activeTooltipId === item.id;
@@ -102,8 +103,8 @@ export const InsightCommentary: React.FC<InsightCommentaryProps> = React.memo(({
                   className="w-2 h-2 rounded-full shrink-0 mt-1.5 shadow-[0_0_8px_rgba(255,255,255,0.4)]"
                   style={{ backgroundColor: item.dotColor }}
                 />
-                <p className="text-xs sm:text-sm font-medium text-slate-200 leading-relaxed">
-                  {item.text}
+                <p className="text-xs sm:text-sm font-medium text-slate-300 leading-relaxed">
+                  <FormattedInsightText text={item.text} />
                 </p>
               </div>
 
@@ -160,7 +161,7 @@ export const InsightCommentary: React.FC<InsightCommentaryProps> = React.memo(({
         })}
       </div>
 
-      {/* 3. KẾT LUẬN (Kept conclusion, removed recommendations) */}
+      {/* 3. KẾT LUẬN */}
       <div className="space-y-3 pt-2">
         <div className="flex items-center gap-2">
           <span className="text-xs font-black uppercase tracking-wider text-amber-400">
@@ -169,11 +170,11 @@ export const InsightCommentary: React.FC<InsightCommentaryProps> = React.memo(({
         </div>
 
         <p className="text-xs sm:text-sm font-semibold text-slate-200 leading-relaxed">
-          {report.conclusion.overviewSummary}
+          <FormattedInsightText text={report.conclusion.overviewSummary} />
         </p>
 
         <p className="text-xs sm:text-sm font-medium text-slate-300 leading-relaxed border-l-2 border-indigo-500/80 pl-3.5 py-0.5">
-          {report.conclusion.riskAlert}
+          <FormattedInsightText text={report.conclusion.riskAlert} />
         </p>
       </div>
     </div>

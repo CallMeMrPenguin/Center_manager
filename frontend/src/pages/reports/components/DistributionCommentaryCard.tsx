@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Info, BookOpen, X } from 'lucide-react';
 import { DistributionDetailedEvaluation } from '../utils/distributionAnalytics';
+import { FormattedInsightText } from './FormattedInsightText';
 
 interface DistributionCommentaryCardProps {
   evaluation: DistributionDetailedEvaluation;
@@ -43,7 +44,7 @@ export const DistributionCommentaryCard: React.FC<DistributionCommentaryCardProp
         </span>
       </div>
 
-      {/* 2. POINT-BY-POINT METRIC BREAKDOWN (Zero emojis, clean divide-y, glowing indicator dots) */}
+      {/* 2. POINT-BY-POINT METRIC BREAKDOWN (Syntax highlighted, glowing indicator dots) */}
       <div className="space-y-0.5 divide-y divide-white/5">
         {evaluation.metrics.map((item) => {
           const isTooltipActive = activeTooltipId === item.id;
@@ -59,8 +60,8 @@ export const DistributionCommentaryCard: React.FC<DistributionCommentaryCardProp
                   className="w-2 h-2 rounded-full shrink-0 mt-1.5 shadow-[0_0_8px_rgba(255,255,255,0.4)]"
                   style={{ backgroundColor: item.color }}
                 />
-                <p className="text-xs sm:text-sm font-medium text-slate-200 leading-relaxed">
-                  {item.text}
+                <p className="text-xs sm:text-sm font-medium text-slate-300 leading-relaxed">
+                  <FormattedInsightText text={item.text} />
                 </p>
               </div>
 
@@ -113,7 +114,7 @@ export const DistributionCommentaryCard: React.FC<DistributionCommentaryCardProp
         })}
       </div>
 
-      {/* 3. KẾT LUẬN PHÂN TÍCH PHỔ ĐIỂM (Kept conclusion, removed recommendations/pedagogical directions) */}
+      {/* 3. KẾT LUẬN PHÂN TÍCH PHỔ ĐIỂM */}
       <div className="space-y-3 pt-2">
         <div className="flex items-center gap-2">
           <span className="text-xs font-black uppercase tracking-wider text-amber-400">
@@ -122,11 +123,11 @@ export const DistributionCommentaryCard: React.FC<DistributionCommentaryCardProp
         </div>
 
         <p className="text-xs sm:text-sm font-semibold text-slate-200 leading-relaxed">
-          {evaluation.conclusion.overviewSummary}
+          <FormattedInsightText text={evaluation.conclusion.overviewSummary} />
         </p>
 
         <p className="text-xs sm:text-sm font-medium text-slate-300 leading-relaxed border-l-2 border-indigo-500/80 pl-3.5 py-0.5">
-          {evaluation.conclusion.dispersionWarning}
+          <FormattedInsightText text={evaluation.conclusion.dispersionWarning} />
         </p>
       </div>
     </div>
