@@ -73,8 +73,21 @@ export const QuestionNodeView: React.FC<QuestionNodeViewProps> = memo(({
                 const cleanUser = normalizeAnswerText(currentAns);
                 const cleanOpt = normalizeAnswerText(cleanText);
 
-                const isSelected = cleanUser === optLetter.toLowerCase() || cleanUser === cleanOpt || currentAns === opt || currentAns === optLetter;
-                const isKey = keyForThisQ ? checkAnswerCorrect(optLetter, keyForThisQ) || checkAnswerCorrect(cleanText, keyForThisQ) : false;
+                const isSelected =
+                  cleanUser === optLetter.toLowerCase() ||
+                  cleanUser === cleanOpt ||
+                  currentAns === opt ||
+                  currentAns === optLetter;
+
+                // Strict key check: if key is letter A/B/C/D, only match exact letter
+                const isKey = keyForThisQ
+                  ? /^[a-d](\s*\|\s*[a-d])*$/i.test(keyForThisQ.trim())
+                    ? keyForThisQ
+                        .split('|')
+                        .map((k) => k.trim().toUpperCase())
+                        .includes(optLetter)
+                    : checkAnswerCorrect(cleanText, keyForThisQ) || checkAnswerCorrect(optLetter, keyForThisQ)
+                  : false;
 
                 let optClass = 'bg-white border-slate-300 text-slate-900 hover:bg-slate-50';
                 let badgeLabel: React.ReactNode = null;

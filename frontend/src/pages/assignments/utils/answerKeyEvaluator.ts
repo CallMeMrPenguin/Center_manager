@@ -47,9 +47,11 @@ export function checkAnswerCorrect(
   // 2. Letter-only multiple choice match (e.g. user answered "A" or "A. apple" and key is "A")
   for (const k of validKeys) {
     if (/^[a-d]$/i.test(k)) {
-      // Key is single letter A/B/C/D
-      if (cleanUser === k.toLowerCase()) return true;
-      if (cleanUser.startsWith(`${k.toLowerCase()}.`) || cleanUser.startsWith(`${k.toLowerCase()} `)) return true;
+      const kLower = k.toLowerCase();
+      // Match exact single letter "a", "b", "c", "d"
+      if (cleanUser === kLower) return true;
+      // Match explicit letter prefix: "a. apple", "a) apple"
+      if (new RegExp(`^${kLower}[\\.\\)]\\s*`).test(cleanUser)) return true;
     }
   }
 
