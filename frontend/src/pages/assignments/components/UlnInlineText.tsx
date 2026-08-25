@@ -210,11 +210,30 @@ export const UlnInlineText: React.FC<UlnInlineTextProps> = memo(({
           );
         }
 
-        if (part.startsWith('*') && part.endsWith('*')) {
+        if (part.includes('{center}') || part.includes('{align:center}')) {
+          const m = part.match(/\[([^\]]+)\]/);
           return (
-            <em key={index} className="italic text-slate-800">
-              {part.slice(1, -1)}
-            </em>
+            <span key={index} className="block text-center w-full">
+              {m ? m[1] : part}
+            </span>
+          );
+        }
+
+        if (part.includes('{right}') || part.includes('{align:right}')) {
+          const m = part.match(/\[([^\]]+)\]/);
+          return (
+            <span key={index} className="block text-right w-full">
+              {m ? m[1] : part}
+            </span>
+          );
+        }
+
+        if (part.includes('{left}') || part.includes('{align:left}')) {
+          const m = part.match(/\[([^\]]+)\]/);
+          return (
+            <span key={index} className="block text-left w-full">
+              {m ? m[1] : part}
+            </span>
           );
         }
 

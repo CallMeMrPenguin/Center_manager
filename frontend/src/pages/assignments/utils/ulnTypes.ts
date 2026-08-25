@@ -44,11 +44,13 @@ export interface UlnQuestionNode {
   options?: string[];
   bracketHint?: string;
   picRight?: string;
+  align?: 'left' | 'center' | 'right';
 }
 
 export interface UlnHeadingNode {
   type: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'ins' | 'paragraph';
   text: string;
+  align?: 'left' | 'center' | 'right';
   answerCount?: number;
   answerKey?: string[];
 }

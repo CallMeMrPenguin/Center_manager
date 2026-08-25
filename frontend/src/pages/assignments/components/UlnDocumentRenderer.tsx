@@ -109,30 +109,32 @@ export const UlnDocumentRenderer: React.FC<UlnDocumentRendererProps> = memo(({
   return (
     <div className="space-y-3 font-sans text-slate-950 select-text font-normal">
       {nodes.map((node, nIdx) => {
+        const alignClass = 'align' in node && node.align === 'center' ? 'text-center' : 'align' in node && node.align === 'right' ? 'text-right' : 'text-left';
+
         if (node.type === 'h1') {
           return (
-            <div key={nIdx} className="pt-2 pb-1 border-b-2 border-slate-900 text-center">
+            <div key={nIdx} className={`pt-2 pb-1 border-b-2 border-slate-900 ${node.align === 'left' ? 'text-left' : node.align === 'right' ? 'text-right' : 'text-center'}`}>
               <h1 className="text-base sm:text-lg font-black uppercase tracking-tight text-slate-950">{node.text}</h1>
             </div>
           );
         }
         if (node.type === 'h2') {
           return (
-            <div key={nIdx} className="pt-3 pb-1 border-b border-slate-400">
+            <div key={nIdx} className={`pt-3 pb-1 border-b border-slate-400 ${alignClass}`}>
               <h2 className="text-xs sm:text-sm font-black uppercase tracking-wide text-slate-950">{node.text}</h2>
             </div>
           );
         }
         if (node.type === 'h3') {
           return (
-            <div key={nIdx} className="pt-2 pb-0.5">
+            <div key={nIdx} className={`pt-2 pb-0.5 ${alignClass}`}>
               <h3 className="text-xs sm:text-sm font-bold text-slate-900">{node.text}</h3>
             </div>
           );
         }
         if (node.type === 'h4' || node.type === 'h5' || node.type === 'h6') {
           return (
-            <div key={nIdx} className="pt-1 text-xs sm:text-sm font-semibold text-slate-800">
+            <div key={nIdx} className={`pt-1 text-xs sm:text-sm font-semibold text-slate-800 ${alignClass}`}>
               <span>{node.text}</span>
             </div>
           );
@@ -142,7 +144,7 @@ export const UlnDocumentRenderer: React.FC<UlnDocumentRendererProps> = memo(({
             <div
               key={nIdx}
               id={`target_ins_${nIdx}`}
-              className="pt-2.5 pb-1 font-black sm:font-bold text-xs sm:text-sm text-slate-950 leading-snug scroll-mt-20 [&_*]:font-bold [&_*]:text-slate-950"
+              className={`pt-2.5 pb-1 font-black sm:font-bold text-xs sm:text-sm text-slate-950 leading-snug scroll-mt-20 [&_*]:font-bold [&_*]:text-slate-950 ${alignClass}`}
             >
               <UlnInlineText text={node.text} qKey={`ins_${nIdx}`} answers={answers} onInputChange={handleInputChange} isSubmitted={isSubmitted} />
             </div>
@@ -376,7 +378,7 @@ export const UlnDocumentRenderer: React.FC<UlnDocumentRendererProps> = memo(({
           );
         }
         return (
-          <div key={nIdx} className="text-xs sm:text-sm font-normal text-slate-900 leading-relaxed">
+          <div key={nIdx} className={`text-xs sm:text-sm font-normal text-slate-900 leading-relaxed ${alignClass}`}>
             <UlnInlineText text={node.text} qKey={`p_${nIdx}`} answers={answers} onInputChange={handleInputChange} isSubmitted={isSubmitted} />
           </div>
         );

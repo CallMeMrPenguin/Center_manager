@@ -2,22 +2,35 @@ import { UlnNode, UlnHeadingNode } from './ulnTypes';
 
 export * from './ulnTypes';
 
-/**
- * Strips formatting markers from text like [P0], [P1], **bold**, etc.
- */
+export function extractAlignment(str: string): { text: string; align?: 'left' | 'center' | 'right' } {
+  let align: 'left' | 'center' | 'right' | undefined;
+  let text = str;
+
+  if (/\[(?:center|align:center|P[0-9]:center)\]/i.test(text)) {
+    align = 'center';
+    text = text.replace(/\[(?:center|align:center|P[0-9]:center)\]/gi, '').replace(/\[\/center\]/gi, '').trim();
+  } else if (/\[(?:right|align:right|P[0-9]:right)\]/i.test(text)) {
+    align = 'right';
+    text = text.replace(/\[(?:right|align:right|P[0-9]:right)\]/gi, '').replace(/\[\/right\]/gi, '').trim();
+  } else if (/\[(?:left|align:left|P[0-9]:left)\]/i.test(text)) {
+    align = 'left';
+    text = text.replace(/\[(?:left|align:left|P[0-9]:left)\]/gi, '').replace(/\[\/left\]/gi, '').trim();
+  }
+
+  return { text, align };
+}
+
 export function cleanRawText(str: string): string {
   if (!str) return '';
   return str
-    .replace(/^\[P[0-9]\]\s*/g, '')
-    .replace(/^\[ins\]\s*/g, '')
+    .replace(/^\[P[0-9](?::(?:center|right|left))?\]\s*/gi, '')
+    .replace(/^\[(?:ins|center|right|left|align:center|align:right|align:left)\]\s*/gi, '')
+    .replace(/\[\/(?:center|right|left)\]/gi, '')
     .replace(/^#\s*/g, '')
     .replace(/^\*\*([^*]+)\*\*$/g, '$1')
     .trim();
 }
 
-/**
- * Universal Layout Notation (ULN) Parser
- */
 export function parseUlnContent(rawContent: string): UlnNode[] {
   if (!rawContent || !rawContent.trim()) return [];
   const text = rawContent.trim();
@@ -71,9 +84,6 @@ function parseJsonQuestionList(dataList: any[]): UlnNode[] {
   return nodes;
 }
 
-/**
- * Line-by-line DSL Parser for ULN Content
- */
 export function parseUlnText(ulnText: string): UlnNode[] {
   const lines = ulnText.split('\n');
   const nodes: UlnNode[] = [];
@@ -113,32 +123,33 @@ export function parseUlnText(ulnText: string): UlnNode[] {
       }
       const keys = rawAns.split(/\s*\|\s*|\s*,\s*|\n+/).filter(Boolean);
       const lastIns = [...nodes].reverse().find((n) => n.type === 'ins') as UlnHeadingNode | undefined;
-      if (lastIns) {
-        lastIns.answerKey = keys;
-      }
+      if (lastIns) lastIns.answerKey = keys;
       i++;
       continue;
     }
 
+    // Extract line-level alignment if present ([center], [right], [left])
+    const { text: lineWithoutAlign, align: lineAlign } = extractAlignment(line);
+
     // 1. Headings [H1] - [H6]
-    const hMatch = line.match(/^\[H([1-6])\]\s*(.*)/i);
+    const hMatch = lineWithoutAlign.match(/^\[H([1-6])\]\s*(.*)/i);
     if (hMatch) {
       const level = parseInt(hMatch[1]) as 1 | 2 | 3 | 4 | 5 | 6;
-      nodes.push({ type: `h${level}` as any, text: cleanRawText(hMatch[2]) });
+      nodes.push({ type: `h${level}` as any, text: cleanRawText(hMatch[2]), align: lineAlign || (level === 1 ? 'center' : undefined) });
       i++;
       continue;
     }
 
     // 2. Exercise Instruction [ins]
     if (line.includes('[ins]')) {
-      let content = line.replace(/^\[P[0-9]\]\s*/g, '').replace(/^\[ins\]\s*/g, '').trim();
+      let content = lineWithoutAlign.replace(/^\[P[0-9]\]\s*/g, '').replace(/^\[ins\]\s*/g, '').trim();
       let answerCount: number | undefined;
       const countMatch = content.match(/<@(\d+)>/);
       if (countMatch) {
         answerCount = parseInt(countMatch[1]);
         content = content.replace(/<@\d+>/g, '').trim();
       }
-      nodes.push({ type: 'ins', text: content, answerCount });
+      nodes.push({ type: 'ins', text: content, align: lineAlign, answerCount });
       i++;
       continue;
     }
@@ -278,7 +289,7 @@ export function parseUlnText(ulnText: string): UlnNode[] {
     }
 
     // 10. Numbered Question Line
-    const qMatch = line.match(/^(?:\[P[0-9]\]\s*)?(?:(?:Question|Câu)\s+)?#?([0-9]+)\.\s*(.*)$/i);
+    const qMatch = lineWithoutAlign.match(/^(?:\[P[0-9]\]\s*)?(?:(?:Question|Câu)\s+)?#?([0-9]+)\.\s*(.*)$/i);
     if (qMatch) {
       const qNum = qMatch[1];
       let qText = qMatch[2].replace(/^#/, '').trim();
@@ -332,6 +343,7 @@ export function parseUlnText(ulnText: string): UlnNode[] {
         subParagraphs: subParagraphs.length > 0 ? subParagraphs : undefined,
         bracketHint,
         hasWritingLine,
+        align: lineAlign,
       });
       i++;
       continue;
@@ -339,8 +351,8 @@ export function parseUlnText(ulnText: string): UlnNode[] {
 
     // Default: Clean paragraph or container tags
     if (line !== '[NUM]' && line !== '[/NUM]') {
-      const cleanP = cleanRawText(line);
-      if (cleanP) nodes.push({ type: 'paragraph', text: cleanP });
+      const cleanP = cleanRawText(lineWithoutAlign);
+      if (cleanP) nodes.push({ type: 'paragraph', text: cleanP, align: lineAlign });
     }
     i++;
   }

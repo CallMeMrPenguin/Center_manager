@@ -85,6 +85,9 @@ All headings automatically have \`KeepWithNext = True\` in MS Word so they never
   - FAINT / BLURRY UNDERLINE INFERENCE MANDATE: If the underline in the source image is faint or blurry, infer and apply the correct underline position based on phonetic/grammar targets (e.g. \`[ed]{u}\`, \`[ch]{u}\`, \`[ea]{u}\`). NEVER drop the underline.
 - [text]{u,b}       -> Underlined + Bold text
 - [text]{upper}     -> Uppercase / Small Caps formatting
+- [center]text[/center] / [P0] [center]text / [text]{center} -> Căn giữa (Center align)
+- [right]text[/right]   / [P0] [right]text  / [text]{right}  -> Căn phải (Right align)
+- [left]text[/left]     / [P0] [left]text   / [text]{left}   -> Căn trái (Left align - mặc định)
 - <blank>           -> Empty student answer blank
 
 ---
