@@ -300,17 +300,22 @@ function parseUlnText(text: string): UlnNode[] {
     }
 
     // 9. Dialogue Reordering Lines (<blank> text or 1 text)
-    if (line.startsWith('<blank>') || /^[0-9]\s+[A-Z]/.test(line)) {
+    const strippedDialogueLine = line.replace(/^\[P[0-9]\]\s*/, '');
+    if (strippedDialogueLine.startsWith('<blank>') || /^[0-9]\s+[A-Z]/.test(strippedDialogueLine)) {
       const dialogueItems: { initialNum?: string; text: string }[] = [];
-      while (i < lines.length && (lines[i].trim().startsWith('<blank>') || /^[0-9]\s+[A-Z]/.test(lines[i].trim()))) {
-        const dLine = lines[i].replace(/\[P[0-9]\]/g, '').trim();
-        const numM = dLine.match(/^([0-9])\s+(.*)/);
-        if (numM) {
-          dialogueItems.push({ initialNum: numM[1], text: numM[2] });
+      while (i < lines.length) {
+        const currStripped = lines[i].replace(/^\[P[0-9]\]\s*/, '').trim();
+        if (currStripped.startsWith('<blank>') || /^[0-9]\s+[A-Z]/.test(currStripped)) {
+          const numM = currStripped.match(/^([0-9])\s+(.*)/);
+          if (numM) {
+            dialogueItems.push({ initialNum: numM[1], text: numM[2] });
+          } else {
+            dialogueItems.push({ text: currStripped.replace(/^<blank>\s*/, '') });
+          }
+          i++;
         } else {
-          dialogueItems.push({ text: dLine.replace(/^<blank>\s*/, '') });
+          break;
         }
-        i++;
       }
       if (dialogueItems.length > 0) {
         nodes.push({ type: 'dialogue_order', items: dialogueItems });

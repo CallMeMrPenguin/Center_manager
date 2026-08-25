@@ -6,6 +6,7 @@ import { WhitePaperHeader } from './WhitePaperHeader';
 import { ExerciseItemView } from './ExerciseItemView';
 import { UlnDocumentRenderer } from './UlnDocumentRenderer';
 import { parseUlnContent } from '../utils/ulnParser';
+import { SAMPLE_UNIT12_ULN_TEXT } from '../constants/sampleUlnTest';
 import { cleanOptionPrefix, format1Dec } from '../../../utils';
 import { showToast } from '../../../components/Toast';
 
@@ -24,12 +25,12 @@ export const WhitePaperAssignmentViewer: React.FC<WhitePaperAssignmentViewerProp
   onBack,
   onSubmitSuccess,
 }) => {
-  // Parse ULN document nodes if raw ULN text or JSON
+  // Parse ULN document nodes (uses full Unit 12 & Test Yourself 4 test for debugging)
   const ulnNodes = useMemo(() => {
-    if (assignment.content_json && assignment.content_json.trim()) {
-      return parseUlnContent(assignment.content_json);
-    }
-    return [];
+    const raw = (assignment.content_json && assignment.content_json.trim())
+      ? assignment.content_json
+      : SAMPLE_UNIT12_ULN_TEXT;
+    return parseUlnContent(raw);
   }, [assignment.content_json]);
 
   // Fallback exercises when no ULN text is provided

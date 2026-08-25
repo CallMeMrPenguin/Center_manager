@@ -16,7 +16,6 @@ interface SummaryStripProps {
 export const SummaryStrip: React.FC<SummaryStripProps> = React.memo(({
   engine,
   gradeTypesList,
-  hasSelectedStudent,
   chartViewMode = 'timeline',
   distributionStats,
 }) => {
@@ -29,13 +28,13 @@ export const SummaryStrip: React.FC<SummaryStripProps> = React.memo(({
       performance_index: e.performance_index != null ? Number(e.performance_index) : 85.0,
       predicted_next: e.predicted_next != null ? e.predicted_next : '8.5',
       prediction_model: e.prediction_model || 'Smart Predict',
-      pred_c1: e.pred_c1 != null ? e.pred_c1 : 8.5,
-      pred_c2: e.pred_c2 != null ? e.pred_c2 : 8.5,
-      pred_hw: e.pred_hw != null ? e.pred_hw : 9.0,
+      pred_c1: e.pred_c1 ?? 8.5,
+      pred_c2: e.pred_c2 ?? 8.5,
+      pred_hw: e.pred_hw ?? 9.0,
       ema_level: e.ema_level != null ? Number(e.ema_level) : 8.2,
-      ema_c1: e.ema_c1 != null ? e.ema_c1 : 8.2,
-      ema_c2: e.ema_c2 != null ? e.ema_c2 : 8.2,
-      ema_hw: e.ema_hw != null ? e.ema_hw : 9.0,
+      ema_c1: e.ema_c1 ?? 8.2,
+      ema_c2: e.ema_c2 ?? 8.2,
+      ema_hw: e.ema_hw ?? 9.0,
       std_dev: e.std_dev != null ? Number(e.std_dev) : 0.45,
       consistency_label: e.consistency_label || 'Ổn định',
       trend_slope: e.trend_slope != null ? Number(e.trend_slope) : 0.15,
@@ -46,38 +45,17 @@ export const SummaryStrip: React.FC<SummaryStripProps> = React.memo(({
     };
   }, [engine]);
 
-  // If in Distribution view mode, render DistributionSummaryStrip
   if (chartViewMode === 'distribution' && distributionStats) {
     return <DistributionSummaryStrip distributionStats={distributionStats} />;
   }
 
-  // 6-Tier Realistic Educational Scale for PI (Scale 0 - 100)
-  const pi = safeEngine.performance_index != null ? Number(safeEngine.performance_index) : 85.0;
-  let piColor = 'text-emerald-400';
-  let piLabel = 'Xuất Sắc (Vững Vàng)';
-  let piSubColor = 'text-emerald-400 font-bold';
-
-  if (pi < 35) {
-    piColor = 'text-rose-500';
-    piLabel = 'Kém (Cần Phụ Đạo)';
-    piSubColor = 'text-rose-400 font-extrabold';
-  } else if (pi < 50) {
-    piColor = 'text-orange-400';
-    piLabel = 'Yếu (Hổng Kiến Thức)';
-    piSubColor = 'text-orange-400 font-bold';
-  } else if (pi < 65) {
-    piColor = 'text-amber-400';
-    piLabel = 'Trung Bình (Cần Củng Cố)';
-    piSubColor = 'text-amber-400 font-bold';
-  } else if (pi < 80) {
-    piColor = 'text-cyan-400';
-    piLabel = 'Khá (Đang Tiến Bộ)';
-    piSubColor = 'text-cyan-400 font-bold';
-  } else if (pi < 90) {
-    piColor = 'text-blue-400';
-    piLabel = 'Giỏi / Rất Tốt';
-    piSubColor = 'text-blue-400 font-bold';
-  }
+  const pi = safeEngine.performance_index;
+  const piInfo = pi < 35 ? { color: 'text-rose-500', label: 'Kém (Cần Phụ Đạo)', sub: 'text-rose-400 font-extrabold' }
+    : pi < 50 ? { color: 'text-orange-400', label: 'Yếu (Hổng Kiến Thức)', sub: 'text-orange-400 font-bold' }
+    : pi < 65 ? { color: 'text-amber-400', label: 'Trung Bình (Cần Củng Cố)', sub: 'text-amber-400 font-bold' }
+    : pi < 80 ? { color: 'text-cyan-400', label: 'Khá (Đang Tiến Bộ)', sub: 'text-cyan-400 font-bold' }
+    : pi < 90 ? { color: 'text-blue-400', label: 'Giỏi / Rất Tốt', sub: 'text-blue-400 font-bold' }
+    : { color: 'text-emerald-400', label: 'Xuất Sắc (Vững Vàng)', sub: 'text-emerald-400 font-bold' };
 
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 bg-[#0c0f1e] border border-[#1e2746] rounded-xl text-center items-center relative shadow-md divide-y sm:divide-y-0 sm:divide-x divide-[#1e2746]">
@@ -95,39 +73,26 @@ export const SummaryStrip: React.FC<SummaryStripProps> = React.memo(({
           </button>
         </div>
         <span className="text-sm font-black text-indigo-400 font-mono">{safeEngine.predicted_next} Điểm</span>
-        <span className="text-[10px] text-slate-400 font-semibold block">{safeEngine.prediction_model ?? 'Smart Predict'}</span>
+        <span className="text-[10px] text-slate-400 font-semibold block">{safeEngine.prediction_model}</span>
 
         {activeTooltip === 'forecast' && (
           <SummaryTooltipCard
             title="Dự Đoán Điểm Buổi Tiếp Theo"
             titleColor="text-indigo-300"
             onClose={() => setActiveTooltip(null)}
-            whatItReflects="Điểm số dự kiến học sinh có khả năng đạt được trong buổi học tới dựa trên phân tích chuỗi thời gian và đà phong độ gần đây."
+            whatItReflects="Điểm số dự kiến học sinh có khả năng đạt được trong buổi học tới dựa trên phân tích chuỗi thời gian."
             footer={
               <>
                 <span className="font-bold text-slate-300 block">Mô hình tính toán ({safeEngine.prediction_model}):</span>
-                <div>Dưới 5 buổi: EMA (Trung bình trượt hàm mũ)</div>
-                <div>5 đến 19 buổi: Weighted OLS (Hồi quy trọng số lùi)</div>
-                <div>Từ 20 buổi trở lên: Holt-Winters (Dự phóng bậc cao)</div>
+                <div>Dưới 5 buổi: EMA | 5-19 buổi: Weighted OLS | 20+ buổi: Holt-Winters</div>
               </>
             }
           >
             <div className="bg-[#0d1120] p-2.5 rounded-lg border border-[#202948] space-y-1.5 font-mono text-[10px]">
-              <div className="text-slate-400 font-bold border-b border-white/5 pb-1">
-                Công thức: Dự Đoán = 55% Từ Vựng + 35% Ngữ Pháp + 10% BTVN
-              </div>
-              <div className="flex items-center justify-between text-blue-400">
-                <span>Từ Vựng Dự Đoán:</span>
-                <span className="font-black">{safeEngine.pred_c1 ?? 0} đ</span>
-              </div>
-              <div className="flex items-center justify-between text-purple-400">
-                <span>Ngữ Pháp Dự Đoán:</span>
-                <span className="font-black">{safeEngine.pred_c2 ?? 0} đ</span>
-              </div>
-              <div className="flex items-center justify-between text-emerald-400">
-                <span>BTVN Dự Đoán:</span>
-                <span className="font-black">{safeEngine.pred_hw ?? 0} đ</span>
-              </div>
+              <div className="text-slate-400 font-bold border-b border-white/5 pb-1">55% TV + 35% NP + 10% BTVN</div>
+              <div className="flex items-center justify-between text-blue-400"><span>Từ Vựng:</span><span className="font-black">{safeEngine.pred_c1} đ</span></div>
+              <div className="flex items-center justify-between text-purple-400"><span>Ngữ Pháp:</span><span className="font-black">{safeEngine.pred_c2} đ</span></div>
+              <div className="flex items-center justify-between text-emerald-400"><span>BTVN:</span><span className="font-black">{safeEngine.pred_hw} đ</span></div>
             </div>
           </SummaryTooltipCard>
         )}
@@ -157,35 +122,21 @@ export const SummaryStrip: React.FC<SummaryStripProps> = React.memo(({
             title="Trình Độ Năng Lực Hiện Tại (EMA)"
             titleColor="text-emerald-300"
             onClose={() => setActiveTooltip(null)}
-            whatItReflects="Năng lực học thuật thực chất trong 3-4 buổi học gần nhất. Thuật toán giảm dần ảnh hưởng từ các điểm số quá cũ ở đầu kỳ để phản ánh chính xác phong độ hiện tại."
+            whatItReflects="Năng lực học thuật thực chất trong 3-4 buổi học gần nhất qua thuật toán trung bình trượt hàm mũ."
             footer={
-              <div className="space-y-1">
-                <span className="text-[10px] font-black text-emerald-300 uppercase block">Thang Điểm Học Lực EMA:</span>
-                <div className="grid grid-cols-2 gap-1 text-[10px]">
-                  <span className="text-emerald-400">≥ 8.0: Xuất Sắc / Giỏi</span>
-                  <span className="text-blue-400">7.0 - 7.9: Khá</span>
-                  <span className="text-amber-400">4.6 - 6.9: Trung Bình</span>
-                  <span className="text-rose-400">Dưới 4.6: Yếu / Cần Bổ Trợ</span>
-                </div>
+              <div className="grid grid-cols-2 gap-1 text-[10px]">
+                <span className="text-emerald-400">≥ 8.0: Giỏi</span>
+                <span className="text-blue-400">7.0 - 7.9: Khá</span>
+                <span className="text-amber-400">4.6 - 6.9: Trung Bình</span>
+                <span className="text-rose-400">&lt; 4.6: Yếu</span>
               </div>
             }
           >
             <div className="bg-[#0d1120] p-2.5 rounded-lg border border-[#202948] space-y-1 font-mono text-[10px]">
-              <div className="text-slate-400 font-bold border-b border-white/5 pb-1">
-                Công thức: EMA_mới = 0.5 × Điểm_mới + 0.5 × EMA_cũ
-              </div>
-              <div className="flex items-center justify-between text-blue-400">
-                <span>Từ Vựng EMA (55%):</span>
-                <span className="font-black">{safeEngine.ema_c1 ?? 0} đ</span>
-              </div>
-              <div className="flex items-center justify-between text-purple-400">
-                <span>Ngữ Pháp EMA (35%):</span>
-                <span className="font-black">{safeEngine.ema_c2 ?? 0} đ</span>
-              </div>
-              <div className="flex items-center justify-between text-emerald-400">
-                <span>BTVN EMA (10%):</span>
-                <span className="font-black">{safeEngine.ema_hw ?? 0} đ</span>
-              </div>
+              <div className="text-slate-400 font-bold border-b border-white/5 pb-1">EMA = 0.5 × Mới + 0.5 × Cũ</div>
+              <div className="flex items-center justify-between text-blue-400"><span>Từ Vựng EMA:</span><span className="font-black">{safeEngine.ema_c1} đ</span></div>
+              <div className="flex items-center justify-between text-purple-400"><span>Ngữ Pháp EMA:</span><span className="font-black">{safeEngine.ema_c2} đ</span></div>
+              <div className="flex items-center justify-between text-emerald-400"><span>BTVN EMA:</span><span className="font-black">{safeEngine.ema_hw} đ</span></div>
             </div>
           </SummaryTooltipCard>
         )}
@@ -218,23 +169,18 @@ export const SummaryStrip: React.FC<SummaryStripProps> = React.memo(({
             title="Độ Ổn Định & Biến Động Điểm Số (SD)"
             titleColor="text-cyan-300"
             onClose={() => setActiveTooltip(null)}
-            whatItReflects="Độ lệch chuẩn điểm số đo mức độ ổn định hay trồi sụt của học sinh qua các buổi kiểm tra. Độ lệch càng nhỏ thể hiện học sinh làm bài càng đều tay và chắc chắn."
+            whatItReflects="Độ lệch chuẩn điểm số đo mức độ ổn định hay trồi sụt của học sinh qua các buổi kiểm tra."
             footer={
-              <div className="space-y-1">
-                <span className="text-[10px] font-black text-cyan-300 uppercase block">Thang Phân Loại Phong Độ:</span>
-                <div className="space-y-0.5 text-[10px]">
-                  <div className="text-emerald-400">σ dưới 0.5: Rất Ổn Định (Làm bài cực kỳ đều)</div>
-                  <div className="text-cyan-400">0.5 đến 1.0: Ổn Định (Phong độ vững vàng)</div>
-                  <div className="text-amber-400">1.1 đến 2.2: Biến Động (Có bài cao bài thấp)</div>
-                  <div className="text-rose-400">σ trên 2.2: Biến Động Mạnh (Cần theo dõi sát)</div>
-                </div>
+              <div className="space-y-0.5 text-[10px]">
+                <div className="text-emerald-400">σ &lt; 0.5: Rất Ổn Định</div>
+                <div className="text-cyan-400">0.5 - 1.0: Ổn Định</div>
+                <div className="text-amber-400">1.1 - 2.2: Biến Động</div>
+                <div className="text-rose-400">σ &gt; 2.2: Biến Động Mạnh</div>
               </div>
             }
           >
             <div className="bg-[#0d1120] p-2.5 rounded-lg border border-[#202948] space-y-1 font-mono text-[10px]">
-              <div className="text-slate-400 font-bold border-b border-white/5 pb-1">
-                Công thức: σ = Căn bậc hai của Phương sai điểm số
-              </div>
+              <div className="text-slate-400 font-bold border-b border-white/5 pb-1">σ = Căn bậc hai phương sai</div>
               {gradeTypesList.map(gt => (
                 <div key={gt.id} className="flex items-center justify-between" style={{ color: gt.color || '#3b82f6' }}>
                   <span>{gt.label} ({gt.weight}%):</span>
@@ -269,24 +215,18 @@ export const SummaryStrip: React.FC<SummaryStripProps> = React.memo(({
             title="Tốc Độ Tăng Trưởng (Trend Rate)"
             titleColor="text-purple-300"
             onClose={() => setActiveTooltip(null)}
-            whatItReflects="Mức độ tiến bộ hoặc sa sút trung bình sau mỗi buổi học (tính bằng số điểm tăng/giảm trên mỗi buổi)."
+            whatItReflects="Mức độ tiến bộ hoặc sa sút trung bình sau mỗi buổi học (số điểm tăng/giảm trên mỗi buổi)."
             footer={
-              <div className="space-y-1">
-                <span className="text-[10px] font-black text-purple-300 uppercase block">Thang Phân Loại Xu Hướng:</span>
-                <div className="space-y-0.5 text-[10px]">
-                  <div className="text-emerald-400">Trên +0.3 đ/buổi: Tăng trưởng mạnh</div>
-                  <div className="text-cyan-400">+0.1 đến +0.3 đ/buổi: Đang cải thiện tiến bộ</div>
-                  <div className="text-slate-300">-0.1 đến +0.1 đ/buổi: Duy trì ổn định</div>
-                  <div className="text-amber-400">-0.3 đến -0.1 đ/buổi: Giảm nhẹ</div>
-                  <div className="text-rose-400">Dưới -0.3 đ/buổi: Suy giảm nhanh (Cần trao đổi)</div>
-                </div>
+              <div className="space-y-0.5 text-[10px]">
+                <div className="text-emerald-400">&gt; +0.3: Tăng trưởng mạnh</div>
+                <div className="text-cyan-400">+0.1 đến +0.3: Cải thiện</div>
+                <div className="text-slate-300">-0.1 đến +0.1: Duy trì</div>
+                <div className="text-rose-400">&lt; -0.3: Suy giảm nhanh</div>
               </div>
             }
           >
             <div className="bg-[#0d1120] p-2.5 rounded-lg border border-[#202948] space-y-1 font-mono text-[10px]">
-              <div className="text-slate-400 font-bold border-b border-white/5 pb-1">
-                Công thức: Hệ số góc a trong đường hồi quy y = ax + b
-              </div>
+              <div className="text-slate-400 font-bold border-b border-white/5 pb-1">Hệ số góc a: y = ax + b</div>
               <div className="flex items-center justify-between text-purple-300 font-bold">
                 <span>Tốc độ thay đổi:</span>
                 <span>{safeEngine.trend_slope > 0 ? `+${safeEngine.trend_slope}` : safeEngine.trend_slope} đ/buổi</span>
@@ -299,9 +239,7 @@ export const SummaryStrip: React.FC<SummaryStripProps> = React.memo(({
       {/* 5. Performance Index (PI) */}
       <div className="relative group p-2.5 animate-cascade-5">
         <div className="flex items-center justify-center gap-1">
-          <span className="text-[10px] font-black uppercase text-slate-400 block">
-            Chỉ Số PI
-          </span>
+          <span className="text-[10px] font-black uppercase text-slate-400 block">Chỉ Số PI</span>
           <button
             type="button"
             onClick={() => setActiveTooltip(activeTooltip === 'pi' ? null : 'pi')}
@@ -311,42 +249,27 @@ export const SummaryStrip: React.FC<SummaryStripProps> = React.memo(({
             <Info size={11} />
           </button>
         </div>
-        <span className={`text-sm font-black font-mono ${piColor}`}>
-          {pi} / 100
-        </span>
-        <span className={`text-[10px] block truncate ${piSubColor}`}>
-          {piLabel}
-        </span>
+        <span className={`text-sm font-black font-mono ${piInfo.color}`}>{pi} / 100</span>
+        <span className={`text-[10px] block truncate ${piInfo.sub}`}>{piInfo.label}</span>
 
         {activeTooltip === 'pi' && (
           <SummaryTooltipCard
             title="Chỉ Số Phong Độ PI (Thang 0 - 100)"
             titleColor="text-indigo-300"
             onClose={() => setActiveTooltip(null)}
-            whatItReflects="Điểm số phong độ toàn diện chuẩn hóa theo thang 100, tổng hợp đồng thời cả 5 trụ cột học tập cốt lõi của học sinh."
+            whatItReflects="Điểm số phong độ toàn diện chuẩn hóa theo thang 100, tổng hợp đồng thời cả 5 trụ cột học tập cốt lõi."
             footer={
-              <div className="space-y-1">
-                <span className="text-[10px] font-black text-indigo-300 uppercase block">Thang Đánh Giá Học Lực PI:</span>
-                <div className="grid grid-cols-2 gap-1 text-[10px]">
-                  <span className="text-emerald-400">≥ 90: Xuất Sắc</span>
-                  <span className="text-blue-400">80 - 89: Giỏi / Rất Tốt</span>
-                  <span className="text-cyan-400">65 - 79: Khá</span>
-                  <span className="text-amber-400">50 - 64: Trung Bình</span>
-                  <span className="text-orange-400">35 - 49: Yếu (Hổng KT)</span>
-                  <span className="text-rose-400">Dưới 35: Kém (Phụ Đạo)</span>
-                </div>
+              <div className="grid grid-cols-2 gap-1 text-[10px]">
+                <span className="text-emerald-400">≥ 90: Xuất Sắc</span>
+                <span className="text-blue-400">80 - 89: Giỏi</span>
+                <span className="text-cyan-400">65 - 79: Khá</span>
+                <span className="text-rose-400">&lt; 35: Kém</span>
               </div>
             }
           >
             <div className="bg-[#0d1120] p-2.5 rounded-lg border border-[#202948] space-y-1 text-[10px]">
-              <div className="text-slate-400 font-bold border-b border-white/5 pb-1 font-mono">
-                Trọng số tính điểm PI:
-              </div>
-              <div className="text-slate-300">40% Năng lực hiện tại (Điểm EMA gần nhất)</div>
-              <div className="text-slate-300">25% Đà tiến bộ (Tốc độ tăng trưởng)</div>
-              <div className="text-slate-300">15% Độ ổn định (Mức độ đều tay)</div>
-              <div className="text-slate-300">10% Điểm lịch sử cả quá trình</div>
-              <div className="text-slate-300">10% Tỷ lệ chuyên cần đi học</div>
+              <div className="text-slate-400 font-bold border-b border-white/5 pb-1 font-mono">Trọng số tính điểm PI:</div>
+              <div className="text-slate-300">40% Năng lực EMA + 25% Đà tiến bộ + 15% Độ ổn định + 10% Điểm lịch sử + 10% Chuyên cần</div>
             </div>
           </SummaryTooltipCard>
         )}
@@ -371,7 +294,7 @@ export const SummaryStrip: React.FC<SummaryStripProps> = React.memo(({
               safeEngine.rating_label?.includes('Khá') ? 'text-cyan-400' :
                 safeEngine.rating_label?.includes('Giỏi') ? 'text-blue-400' : 'text-emerald-400'
           }`}>
-          {safeEngine.rating_label ?? 'Tốt'}
+          {safeEngine.rating_label}
         </span>
         <span className="text-[10px] text-slate-400 font-semibold block truncate">Đánh Giá Học Lực</span>
 
@@ -384,7 +307,7 @@ export const SummaryStrip: React.FC<SummaryStripProps> = React.memo(({
             whatItReflects="Đánh giá sư phạm tổng quát và các khuyến nghị can thiệp cụ thể dành cho giáo viên và phụ huynh."
           >
             <div className="space-y-1.5 text-[10px] text-slate-300 leading-relaxed">
-              {safeEngine.recommendations && safeEngine.recommendations.length > 0 ? (
+              {safeEngine.recommendations.length > 0 ? (
                 safeEngine.recommendations.map((rec: string, i: number) => (
                   <div key={i} className="flex items-start gap-1.5 bg-[#0d1120] p-2 rounded-lg border border-[#202948]">
                     <span className="text-indigo-400 font-bold shrink-0">›</span>
