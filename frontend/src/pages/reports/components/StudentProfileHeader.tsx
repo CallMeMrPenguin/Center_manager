@@ -69,7 +69,7 @@ export const StudentProfileHeader: React.FC<StudentProfileHeaderProps> = ({
     : 'Chưa phân lớp';
 
   // Calculate PI index (Performance Index on 0-100 scale)
-  const rawPi = student.performance_index != null
+  const rawPi = student?.performance_index != null
     ? Number(student.performance_index)
     : (scoreNum > 0 ? scoreNum * 10 : 0);
   const piScore = rawPi > 0 ? rawPi.toFixed(1) : (scoreNum > 0 ? (scoreNum * 10).toFixed(1) : '0.0');

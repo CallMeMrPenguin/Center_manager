@@ -208,28 +208,28 @@ export const StudentProfileHeader: React.FC<StudentProfileHeaderProps> = ({
               <div className="flex items-center justify-between py-2 border-b border-white/5 text-xs">
                 <span className="text-slate-400 font-medium">Chỉ số năng lực (PI):</span>
                 <span className="font-mono font-bold text-sky-400">
-                  {summary.performance_index} / 100
+                  {summary?.performance_index ?? '0.0'} / 100
                 </span>
               </div>
 
               <div className="flex items-center justify-between py-2 border-b border-white/5 text-xs">
                 <span className="text-slate-400 font-medium">Đánh giá chung:</span>
-                <span className={`font-bold ${summary.tier_color}`}>
-                  {summary.evaluation_text}
+                <span className={`font-bold ${summary?.tier_color || 'text-slate-400'}`}>
+                  {summary?.evaluation_text || 'Chưa đánh giá'}
                 </span>
               </div>
 
               <div className="flex items-center justify-between py-2 border-b border-white/5 text-xs">
                 <span className="text-slate-400 font-medium">Tổng số buổi đã học:</span>
                 <span className="font-bold text-slate-200">
-                  {summary.total_sessions} buổi ({summary.present_sessions} có mặt, {summary.absent_sessions} vắng)
+                  {summary?.total_sessions ?? 0} buổi ({summary?.present_sessions ?? 0} có mặt, {summary?.absent_sessions ?? 0} vắng)
                 </span>
               </div>
 
               <div className="flex items-center justify-between py-2 border-b border-white/5 text-xs">
                 <span className="text-slate-400 font-medium">Tỷ lệ chuyên cần:</span>
                 <span className="font-bold text-emerald-400">
-                  {Math.trunc(summary.attendance_rate)}%
+                  {Math.trunc(summary?.attendance_rate ?? 100)}%
                 </span>
               </div>
             </div>
