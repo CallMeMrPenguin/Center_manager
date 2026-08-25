@@ -415,6 +415,59 @@ def init_db():
     )
     """)
 
+    # 24. Assignments table
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS assignments (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        class_id INTEGER REFERENCES classes(id) ON DELETE CASCADE NOT NULL,
+        title TEXT NOT NULL,
+        description TEXT DEFAULT '',
+        assigned_date TEXT NOT NULL,
+        due_date TEXT NOT NULL,
+        max_score REAL DEFAULT 10,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+    """)
+
+    # 25. Assignment Submissions table
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS assignment_submissions (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        assignment_id INTEGER REFERENCES assignments(id) ON DELETE CASCADE NOT NULL,
+        student_id INTEGER REFERENCES students(id) ON DELETE CASCADE NOT NULL,
+        submitted INTEGER DEFAULT 0,
+        score REAL DEFAULT NULL,
+        notes TEXT DEFAULT '',
+        submitted_at TIMESTAMP DEFAULT NULL,
+        UNIQUE(assignment_id, student_id)
+    )
+    """)
+
+    # 26. App Users table (Local accounts management)
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS app_users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        display_name TEXT NOT NULL,
+        username TEXT UNIQUE NOT NULL,
+        password_hash TEXT NOT NULL,
+        role TEXT NOT NULL DEFAULT 'Giáo viên',
+        status TEXT CHECK(status IN ('Hoạt động', 'Tạm khóa')) DEFAULT 'Hoạt động',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        last_login TIMESTAMP DEFAULT NULL
+    )
+    """)
+
+    # 27. Role Permissions table
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS role_permissions (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        role TEXT NOT NULL,
+        tab_id TEXT NOT NULL,
+        can_access INTEGER DEFAULT 1,
+        UNIQUE(role, tab_id)
+    )
+    """)
+
     # Performance Indexes
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_question_bank_grade_unit ON question_bank(grade, unit);")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_vocabulary_list_grade_unit ON vocabulary_list(grade, unit);")
@@ -423,6 +476,23 @@ def init_db():
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_class_sessions_class_date ON class_sessions(class_id, date);")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_attendance_class_student_date ON class_attendance_grades(class_id, student_id, date);")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_custom_time_phases_class_dates ON custom_time_phases(class_id, from_date, to_date);")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_assignments_class_date ON assignments(class_id, assigned_date);")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_submissions_assign_student ON assignment_submissions(assignment_id, student_id);")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_app_users_username ON app_users(username);")
+
+    # Seed initial default admin user if none exists
+    try:
+        import hashlib
+        cursor.execute("SELECT COUNT(*) as count FROM app_users")
+        user_count = cursor.fetchone()["count"]
+        if user_count == 0:
+            default_pwd_hash = hashlib.sha256("admin123".encode("utf-8")).hexdigest()
+            cursor.execute("""
+                INSERT INTO app_users (display_name, username, password_hash, role, status)
+                VALUES ('Quản Trị Viên', 'admin', ?, 'Quản trị viên', 'Hoạt động')
+            """, (default_pwd_hash,))
+    except Exception as e:
+        print("Default user seed error:", e)
 
     # Migration: clean up any legacy 0-value scores → NULL (rule: missing grades = NULL, never 0)
     try:
@@ -442,3 +512,4 @@ def init_db():
     conn.commit()
     conn.close()
     print("Database initialized successfully.")
+

@@ -556,8 +556,41 @@ export const api = {
       grammar_topics?: string[];
     }>(`/api/suggestions/units${grade ? `?grade=${encodeURIComponent(grade)}` : ''}`),
 
+  // Assignments API (Bài Tập Về Nhà)
+  getAssignments: (classId?: number, month = '') => {
+    const params: string[] = [];
+    if (classId) params.push(`class_id=${classId}`);
+    if (month) params.push(`month=${encodeURIComponent(month)}`);
+    const query = params.length > 0 ? `?${params.join('&')}` : '';
+    return request<any[]>(`/api/assignments${query}`);
+  },
+  createAssignment: (data: any) =>
+    request<any>('/api/assignments', { method: 'POST', body: JSON.stringify(data) }),
+  updateAssignment: (id: number, data: any) =>
+    request<any>(`/api/assignments/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  deleteAssignment: (id: number) =>
+    request<any>(`/api/assignments/${id}`, { method: 'DELETE' }),
+  getAssignmentSubmissions: (id: number) =>
+    request<any[]>(`/api/assignments/${id}/submissions`),
+  updateAssignmentSubmissions: (id: number, submissions: any[]) =>
+    request<any>(`/api/assignments/${id}/submissions`, { method: 'PUT', body: JSON.stringify({ submissions }) }),
+
+  // Users & Permissions API (Quyền & Vai Trò)
+  getUsers: () => request<any[]>('/api/users'),
+  createUser: (data: any) =>
+    request<any>('/api/users', { method: 'POST', body: JSON.stringify(data) }),
+  updateUser: (id: number, data: any) =>
+    request<any>(`/api/users/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  deleteUser: (id: number) =>
+    request<any>(`/api/users/${id}`, { method: 'DELETE' }),
+  getRolePermissions: () =>
+    request<any[]>('/api/roles/permissions'),
+  saveRolePermissions: (permissions: any[]) =>
+    request<any>('/api/roles/permissions', { method: 'PUT', body: JSON.stringify({ permissions }) }),
+
   // Update API
   checkUpdate: () => request<any>('/api/system/update-check'),
   getUpdateStatus: () => request<any>('/api/system/update-status'),
   applyUpdate: () => request<any>('/api/system/update-apply', { method: 'POST' }),
 };
+

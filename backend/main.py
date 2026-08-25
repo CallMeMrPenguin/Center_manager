@@ -18,7 +18,9 @@ from routers import (
     documents,
     center_manager,
     seating,
-    skill_analytics
+    skill_analytics,
+    assignments,
+    users
 )
 
 # Initialize App & Database
@@ -42,6 +44,8 @@ app.include_router(documents.router)
 app.include_router(center_manager.router)
 app.include_router(seating.router)
 app.include_router(skill_analytics.router)
+app.include_router(assignments.router)
+app.include_router(users.router)
 
 # Directories & Cleanup Initialization
 from services.cleanup_service import cleanup_temp_folders

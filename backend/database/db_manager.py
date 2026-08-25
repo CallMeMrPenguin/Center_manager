@@ -134,6 +134,26 @@ from database.crud_relationships import (
     remove_trusted_swap_student,
 )
 
+# Assignments & Submissions
+from database.crud_assignments import (
+    get_assignments,
+    create_assignment,
+    update_assignment,
+    delete_assignment,
+    get_assignment_submissions,
+    batch_update_submissions,
+)
+
+# Users & Role Permissions
+from database.crud_users import (
+    get_users,
+    create_user,
+    update_user,
+    delete_user,
+    get_role_permissions,
+    save_role_permissions,
+)
+
 # Analytics & Predictions
 from database.analytics_predictions import (
     _ema_predict,
@@ -251,6 +271,20 @@ __all__ = [
     "get_trusted_swap_students",
     "add_trusted_swap_student",
     "remove_trusted_swap_student",
+    # Assignments & Submissions
+    "get_assignments",
+    "create_assignment",
+    "update_assignment",
+    "delete_assignment",
+    "get_assignment_submissions",
+    "batch_update_submissions",
+    # Users & Permissions
+    "get_users",
+    "create_user",
+    "update_user",
+    "delete_user",
+    "get_role_permissions",
+    "save_role_permissions",
     # Analytics
     "_ema_predict",
     "_weighted_ols_predict",

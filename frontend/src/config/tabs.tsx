@@ -21,6 +21,9 @@ import KiemTraPage from '../pages/kiemtra';
 import SchedulePage from '../pages/schedule';
 import ReportsPage from '../pages/reports';
 import UIShowcasePage from '../pages/ui-showcase';
+import ResultsPage from '../pages/results';
+import AssignmentsPage from '../pages/assignments';
+import UsersRolesPage from '../pages/users-roles';
 
 
 export interface TabDefinition {
@@ -118,14 +121,14 @@ export const TAB_DEFINITIONS: TabDefinition[] = [
     label: 'Bài Tập Về Nhà',
     icon: ClipboardList,
     section: 'assessments',
-    render: () => <WaitingForDevelopment title="Bài Tập Về Nhà" />
+    render: () => <AssignmentsPage />
   },
   {
     id: 'results',
     label: 'Kết Quả Học Tập',
     icon: Award,
     section: 'assessments',
-    render: () => <WaitingForDevelopment title="Kết Quả Học Tập" />
+    render: () => <ResultsPage />
   },
   {
     id: 'vocab-bank',
@@ -181,7 +184,7 @@ export const TAB_DEFINITIONS: TabDefinition[] = [
     label: 'Quyền & Vai Trò',
     icon: UserCog,
     section: 'settings',
-    render: () => <WaitingForDevelopment title="Quyền & Vai Trò" />
+    render: () => <UsersRolesPage />
   },
   {
     id: 'ui-showcase',
