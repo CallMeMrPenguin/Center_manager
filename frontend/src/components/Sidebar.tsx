@@ -120,58 +120,63 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   const isActive = activeTab === item.id;
 
                   return (
-                    <button
-                      key={item.id}
-                      draggable="true"
-                      onDragStart={() => handleDragStart(idx)}
-                      onDragOver={handleDragOver}
-                      onDragEnd={() => setDraggedIndex(null)}
-                      onDrop={() => handleDrop(idx)}
-                      onClick={() => setActiveTab(item.id)}
-                      className={`flex items-center w-full h-9 px-2 rounded-xl transition-all duration-150 relative group/item cursor-pointer active:scale-95 shrink-0 ${
-                        isActive
-                          ? 'bg-indigo-500/25 border-2 border-indigo-400/90 shadow-[0_0_12px_rgba(92,54,245,0.4)]'
-                          : 'hover:bg-white/[0.05] border-2 border-transparent'
-                      } ${
-                        draggedIndex === idx
-                          ? 'opacity-40 border border-dashed border-indigo-400 bg-indigo-500/10'
-                          : ''
-                      }`}
-                    >
-                      {/* Icon */}
-                      <div className="w-5.5 h-5.5 flex items-center justify-center shrink-0 relative z-10">
-                        <Icon
-                          size={16}
-                          className={
-                            isActive
-                              ? 'text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.8)]'
-                              : 'text-slate-400 group-hover/item:text-white'
-                          }
-                        />
-                      </div>
-
-                      {/* Label for expanded view */}
-                      {isSidebarExpanded && (
-                        <span
-                          className={`text-xs relative z-10 whitespace-nowrap overflow-hidden ml-2 ${
-                            isActive
-                              ? 'text-white font-black'
-                              : 'text-slate-200 font-bold group-hover/item:text-white'
-                          }`}
-                        >
-                          {item.label}
-                        </span>
-                      )}
-
-                      {/* Clean flyout tooltip on hover when collapsed */}
-                      {!isSidebarExpanded && (
-                        <div className="absolute left-full top-1/2 -translate-y-1/2 ml-3 z-50 pointer-events-none opacity-0 group-hover/item:opacity-100 transition-all duration-150 scale-95 group-hover/item:scale-100">
-                          <div className="px-2.5 py-1 rounded-xl bg-[#0c0f1e] border border-[#212c4b] text-white text-xs font-black whitespace-nowrap shadow-[0_8px_20px_rgba(0,0,0,0.9)]">
-                            {item.label}
-                          </div>
+                      <button
+                        key={item.id}
+                        draggable="true"
+                        onDragStart={() => handleDragStart(idx)}
+                        onDragOver={handleDragOver}
+                        onDragEnd={() => setDraggedIndex(null)}
+                        onDrop={() => handleDrop(idx)}
+                        onClick={() => setActiveTab(item.id)}
+                        className={`flex items-center w-full h-9 px-2 rounded-xl transition-all duration-200 ease-out relative group/item cursor-pointer shrink-0 ${
+                          isSidebarExpanded
+                            ? 'active:scale-95'
+                            : 'hover:scale-115 hover:z-30 hover:-translate-y-0.5 hover:shadow-[0_0_15px_rgba(92,54,245,0.5)]'
+                        } ${
+                          isActive
+                            ? 'bg-indigo-500/25 border-2 border-indigo-400/90 shadow-[0_0_12px_rgba(92,54,245,0.4)]'
+                            : 'hover:bg-white/[0.08] border-2 border-transparent'
+                        } ${
+                          draggedIndex === idx
+                            ? 'opacity-40 border border-dashed border-indigo-400 bg-indigo-500/10'
+                            : ''
+                        }`}
+                      >
+                        {/* Icon */}
+                        <div className="w-5.5 h-5.5 flex items-center justify-center shrink-0 relative z-10">
+                          <Icon
+                            size={16}
+                            className={
+                              isActive
+                                ? 'text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.8)]'
+                                : 'text-slate-400 group-hover/item:text-white transition-transform duration-150 group-hover/item:scale-110'
+                            }
+                          />
                         </div>
-                      )}
-                    </button>
+
+                        {/* Label for expanded view */}
+                        {isSidebarExpanded && (
+                          <span
+                            className={`text-xs relative z-10 whitespace-nowrap overflow-hidden ml-2 ${
+                              isActive
+                                ? 'text-white font-black'
+                                : 'text-slate-200 font-bold group-hover/item:text-white'
+                            }`}
+                          >
+                            {item.label}
+                          </span>
+                        )}
+
+                        {/* Clean flyout tooltip on hover when collapsed */}
+                        {!isSidebarExpanded && (
+                          <div className="absolute left-full top-1/2 -translate-y-1/2 ml-3.5 z-50 pointer-events-none opacity-0 group-hover/item:opacity-100 transition-all duration-200 translate-x-1 group-hover/item:translate-x-0">
+                            <div className="px-3 py-1.5 rounded-xl bg-[#0c0f1e] border border-[#212c4b] text-white text-xs font-black whitespace-nowrap shadow-[0_10px_25px_rgba(0,0,0,0.9)] flex items-center gap-1.5">
+                              <span className={`w-1.5 h-1.5 rounded-full ${isActive ? 'bg-indigo-400' : 'bg-slate-400'}`} />
+                              <span>{item.label}</span>
+                            </div>
+                          </div>
+                        )}
+                      </button>
                   );
                 })}
               </div>
