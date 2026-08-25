@@ -1,29 +1,32 @@
 import { useState, useEffect, useRef } from 'react';
 import { api } from './api';
 import { AppSettings } from './types';
-import {
-  FolderOpen, ChevronLeft, ChevronRight, LogOut,
-  Database, GraduationCap, Settings as SettingsIcon, ChevronUp
-} from 'lucide-react';
+import { Database } from 'lucide-react';
 import { TAB_DEFINITIONS } from './config/tabs';
 import { Sidebar } from './components/Sidebar';
-import ToastContainer, { showToast } from './components/Toast';
+import ToastContainer from './components/Toast';
 import { applyTheme } from './theme';
 import { ConfirmProvider, useConfirm } from './components/ConfirmDialog';
-
-const SECTIONS = [
-  { id: 'none', label: '' },
-  { id: 'main', label: 'Hệ thống' },
-  { id: 'assessments', label: 'Đánh giá & Đề thi' },
-  { id: 'resources', label: 'Tài nguyên' },
-  { id: 'finance', label: 'Tài chính' },
-  { id: 'analytics', label: 'Phân tích' },
-  { id: 'settings', label: 'Thiết lập' }
-];
+import { LoginPage, AuthUser } from './pages/auth/LoginPage';
 
 function AppContent() {
   const confirm = useConfirm();
-  const [activeTab, setActiveTab] = useState<string>('dashboard');
+  const [currentUser, setCurrentUser] = useState<AuthUser | null>(() => {
+    const saved = localStorage.getItem('auth_user');
+    return saved ? JSON.parse(saved) : null;
+  });
+
+  const [activeTab, setActiveTab] = useState<string>(() => {
+    const savedUser = localStorage.getItem('auth_user');
+    if (savedUser) {
+      try {
+        const u = JSON.parse(savedUser);
+        if (u.role === 'student') return 'assignments';
+      } catch {}
+    }
+    return 'dashboard';
+  });
+
   const [profileOpen, setProfileOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
 
@@ -37,201 +40,43 @@ function AppContent() {
     document.addEventListener('mousedown', handleOutside);
     return () => document.removeEventListener('mousedown', handleOutside);
   }, []);
+
   const [preloadedQuestions, setPreloadedQuestions] = useState<any[] | null>(null);
   const [preloadedVersions, setPreloadedVersions] = useState<number | null>(null);
   const [preloadedGrade, setPreloadedGrade] = useState<string | null>(null);
   const [preloadedUnit, setPreloadedUnit] = useState<string | null>(null);
   const [settings, setSettings] = useState<AppSettings | null>(null);
-  const [zoomLevel, setZoomLevel] = useState(() => {
-    const saved = localStorage.getItem('app_zoom');
-    return saved ? parseFloat(saved) : 1;
-  });
+
   const [isSidebarExpanded, setIsSidebarExpanded] = useState<boolean>(() => {
     const saved = localStorage.getItem('sidebar_expanded');
     return saved !== null ? JSON.parse(saved) : true;
   });
 
   const toggleSidebar = () => {
-    setIsSidebarExpanded(prev => {
+    setIsSidebarExpanded((prev) => {
       const next = !prev;
       localStorage.setItem('sidebar_expanded', JSON.stringify(next));
       return next;
     });
   };
 
-  useEffect(() => {
-    loadSettings();
-
-    // Load and apply theme settings on mount
-    let theme = {
-      bgImage: 'none',
-      opacity: 0.08,
-      blur: 24,
-      borderOpacity: 0.15,
-      saturate: 180
-    };
-    const savedTheme = localStorage.getItem('app_theme_settings');
-    if (savedTheme) {
-      try {
-        const parsed = JSON.parse(savedTheme);
-        theme = { ...theme, ...parsed };
-        if (theme.bgImage && (theme.bgImage.includes('supabase.co') || theme.bgImage === 'none')) {
-          theme.bgImage = 'none';
-        }
-      } catch (e) {
-        console.error("Failed to load theme settings:", e);
-      }
-    }
-    applyTheme(theme);
-
-    // Periodically refresh configuration settings & check server boot time for auto-reload
-    let lastBootTime: number | null = null;
-    const interval = setInterval(async () => {
-      loadSettings();
-      try {
-        const res = await fetch('/api/system/version');
-        if (res.ok) {
-          const data = await res.json();
-          if (lastBootTime !== null && lastBootTime !== data.boot_time) {
-            console.log("Server updated/restarted. Auto-reloading page...");
-            window.location.reload();
-          }
-          lastBootTime = data.boot_time;
-        }
-      } catch (e) { }
-    }, 3000);
-
-    return () => {
-      clearInterval(interval);
-    };
-  }, []);
-
-  const currentZoomRef = useRef<number>(zoomLevel);
-
-  const applyZoom = (newZoom: number) => {
-    const clamped = Math.round(Math.min(Math.max(newZoom, 0.6), 2) * 100) / 100;
-    currentZoomRef.current = clamped;
-    document.documentElement.style.fontSize = `${15 * clamped}px`;
-    localStorage.setItem('app_zoom', String(clamped));
-    setZoomLevel(clamped);
-  };
-
-  useEffect(() => {
-    document.documentElement.style.fontSize = `${15 * zoomLevel}px`;
-  }, []);
-
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.ctrlKey && (e.key === '=' || e.key === '+')) {
-        e.preventDefault();
-        applyZoom(currentZoomRef.current + 0.1);
-      } else if (e.ctrlKey && e.key === '-') {
-        e.preventDefault();
-        applyZoom(currentZoomRef.current - 0.1);
-      } else if (e.ctrlKey && e.key === '0') {
-        e.preventDefault();
-        applyZoom(1);
-      } else if (e.key === 'Escape') {
-        window.dispatchEvent(new CustomEvent('app-escape'));
-      }
-    };
-
-    const handleWheel = (e: WheelEvent) => {
-      if (e.ctrlKey) {
-        e.preventDefault();
-        const delta = e.deltaY < 0 ? 0.05 : -0.05;
-        applyZoom(currentZoomRef.current + delta);
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    window.addEventListener('wheel', handleWheel, { passive: false });
-
-    const handleSwitchTab = (e: any) => {
-      if (e.detail?.tabId) {
-        setActiveTab(e.detail.tabId);
-      }
-    };
-    window.addEventListener('switch-tab', handleSwitchTab);
-
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-      window.removeEventListener('wheel', handleWheel);
-      window.removeEventListener('switch-tab', handleSwitchTab);
-    };
-  }, []);
-  const loadSettings = async () => {
-    try {
-      const data = await api.getSettings();
-      setSettings(data);
-      if (data && (data as any).theme) {
-        applyTheme((data as any).theme);
-        try {
-          localStorage.setItem('app_theme_settings', JSON.stringify((data as any).theme));
-        } catch (e) { }
-      }
-    } catch (e) {
-      console.error("Failed to load settings:", e);
-    }
-  };
-
-
-
-  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [orderedTabIds, setOrderedTabIds] = useState<string[]>(() => {
-    const defaultIds = TAB_DEFINITIONS.map(tab => tab.id);
-
-    // Load from v2 (string IDs)
-    const savedV2 = localStorage.getItem('sidebar_menu_order_v2');
-    if (savedV2) {
+    const defaultIds = TAB_DEFINITIONS.map((t) => t.id);
+    const saved = localStorage.getItem('sidebar_menu_order_v2');
+    if (saved) {
       try {
-        const parsed = JSON.parse(savedV2) as string[];
-        const validParsed = parsed.filter(id => defaultIds.includes(id));
-
-        // Append missing tab IDs
-        defaultIds.forEach(id => {
-          if (!validParsed.includes(id)) {
-            validParsed.push(id);
-          }
-        });
-        return validParsed;
+        const parsed = JSON.parse(saved);
+        const valid = parsed.filter((id: string) => defaultIds.includes(id));
+        const missing = defaultIds.filter((id) => !valid.includes(id));
+        return [...valid, ...missing];
       } catch (e) {
-        console.error("Failed to parse sidebar_menu_order_v2:", e);
+        console.error('Failed to parse sidebar order', e);
       }
     }
-
-    // Migrate from legacy v1 (numeric indexes)
-    const savedV1 = localStorage.getItem('sidebar_menu_order');
-    if (savedV1) {
-      try {
-        const legacyMap: Record<number, string> = {
-          0: 'formatter',
-          1: 'question-bank',
-          2: 'vocab-bank',
-          3: 'unit-config',
-          4: 'file-manager',
-          5: 'settings'
-        };
-        const parsed = JSON.parse(savedV1) as number[];
-        const migrated = parsed
-          .map(idx => legacyMap[idx])
-          .filter(Boolean) as string[];
-
-        defaultIds.forEach(id => {
-          if (!migrated.includes(id)) {
-            migrated.push(id);
-          }
-        });
-
-        localStorage.setItem('sidebar_menu_order_v2', JSON.stringify(migrated));
-        return migrated;
-      } catch (e) {
-        console.error("Failed to migrate legacy sidebar_menu_order:", e);
-      }
-    }
-
     return defaultIds;
   });
+
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
 
   const handleDragStart = (index: number) => {
     setDraggedIndex(index);
@@ -244,22 +89,47 @@ function AppContent() {
   const handleDrop = (targetIndex: number) => {
     if (draggedIndex === null || draggedIndex === targetIndex) return;
     const newIds = [...orderedTabIds];
-    const draggedId = newIds[draggedIndex];
-
-    newIds.splice(draggedIndex, 1);
+    const [draggedId] = newIds.splice(draggedIndex, 1);
     newIds.splice(targetIndex, 0, draggedId);
-
     setOrderedTabIds(newIds);
     setDraggedIndex(null);
-
     localStorage.setItem('sidebar_menu_order_v2', JSON.stringify(newIds));
   };
+
+  const handleLogout = () => {
+    localStorage.removeItem('auth_user');
+    setCurrentUser(null);
+    setActiveTab('dashboard');
+  };
+
+  const handleLogin = (user: AuthUser) => {
+    setCurrentUser(user);
+    if (user.role === 'student') {
+      setActiveTab('assignments');
+    } else {
+      setActiveTab('dashboard');
+    }
+  };
+
+  // If user is not logged in, show LoginPage
+  if (!currentUser) {
+    return (
+      <>
+        <LoginPage onLogin={handleLogin} />
+        <ToastContainer />
+      </>
+    );
+  }
+
+  const isStudent = currentUser.role === 'student';
+  const visibleTabs = isStudent
+    ? TAB_DEFINITIONS.filter((t) => ['assignments', 'schedule', 'results'].includes(t.id))
+    : TAB_DEFINITIONS;
 
   return (
     <div className="relative flex flex-col h-screen w-screen bg-[#08090e] text-slate-50 overflow-hidden font-sans select-none">
       <div className="relative flex flex-row flex-1 overflow-hidden p-4 gap-4 z-10">
-
-        {/* SIDEBAR NAVIGATION (With continuous macOS Dock magnification when collapsed) */}
+        {/* SIDEBAR NAVIGATION */}
         <Sidebar
           isSidebarExpanded={isSidebarExpanded}
           toggleSidebar={toggleSidebar}
@@ -274,13 +144,14 @@ function AppContent() {
           profileOpen={profileOpen}
           setProfileOpen={setProfileOpen}
           profileRef={profileRef}
+          currentUser={currentUser}
+          onLogout={handleLogout}
         />
 
         {/* MAIN BODY SKELETON */}
         <div className="flex-1 flex flex-col overflow-hidden bg-transparent">
-          {/* PAGE CONTENT CONTAINER */}
           <main className="flex-1 overflow-hidden bg-transparent relative gradient-border-card rounded-2xl">
-            {TAB_DEFINITIONS.map((tab) => {
+            {visibleTabs.map((tab) => {
               const isActive = activeTab === tab.id;
               return (
                 <div key={tab.id} className={`h-full w-full ${isActive ? 'animate-tab-enter' : 'hidden'}`}>
@@ -298,13 +169,11 @@ function AppContent() {
                     },
                     onCreateTest: (questions, numVersions, grade, unit) => {
                       setPreloadedQuestions(questions);
-                      if (numVersions) {
-                        setPreloadedVersions(numVersions);
-                      }
+                      if (numVersions) setPreloadedVersions(numVersions);
                       setPreloadedGrade(grade || null);
                       setPreloadedUnit(unit || null);
                       setActiveTab('formatter');
-                    }
+                    },
                   })}
                 </div>
               );
@@ -314,10 +183,17 @@ function AppContent() {
       </div>
 
       {/* STATUS BAR */}
-      <footer className="h-7 bg-[#06070a]/90 backdrop-blur-md flex items-center justify-between px-6 text-[11px] text-slate-400 select-none shrink-0 font-semibold z-10 border-t border-white/[0.04]">
+      <footer className="h-7 bg-[#06070a]/90 flex items-center justify-between px-6 text-[11px] text-slate-400 select-none shrink-0 font-semibold z-10 border-t border-white/[0.04]">
         <div className="flex items-center gap-2">
           <Database size={12} className="text-emerald-400 drop-shadow-[0_0_6px_rgba(16,185,129,0.6)]" />
           <span>Hỗ trợ ngoại tuyến (Offline-First) — 100% bảo mật dữ liệu cục bộ</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-slate-500">Đang đăng nhập:</span>
+          <strong className="text-indigo-300">{currentUser.name}</strong>
+          <span className={`text-[10px] px-2 py-0.2 rounded-full font-black ${isStudent ? 'bg-emerald-500/20 text-emerald-300' : 'bg-indigo-500/20 text-indigo-300'}`}>
+            {isStudent ? 'Học sinh' : 'Quản trị viên'}
+          </span>
         </div>
       </footer>
 

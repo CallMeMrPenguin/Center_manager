@@ -30,7 +30,6 @@ const SIZES = [2, 4, 7];
 
 export const DrawingCorrectionCanvas: React.FC<DrawingCorrectionCanvasProps> = memo(({
   isActive,
-  onToggleActive,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [isDrawing, setIsDrawing] = useState(false);
@@ -40,28 +39,7 @@ export const DrawingCorrectionCanvas: React.FC<DrawingCorrectionCanvasProps> = m
   const [paths, setPaths] = useState<Path[]>([]);
   const currentPathRef = useRef<Point[]>([]);
 
-  // Sync canvas dimensions with parent container
-  const resizeCanvas = useCallback(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const parent = canvas.parentElement;
-    if (!parent) return;
-
-    const rect = parent.getBoundingClientRect();
-    if (canvas.width !== rect.width || canvas.height !== rect.height) {
-      canvas.width = rect.width;
-      canvas.height = rect.height;
-      redrawAll();
-    }
-  }, [paths]);
-
-  useEffect(() => {
-    if (!isActive) return;
-    resizeCanvas();
-    window.addEventListener('resize', resizeCanvas);
-    return () => window.removeEventListener('resize', resizeCanvas);
-  }, [isActive, resizeCanvas]);
-
+  // Function to redraw all strokes onto the canvas
   const redrawAll = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -73,7 +51,7 @@ export const DrawingCorrectionCanvas: React.FC<DrawingCorrectionCanvasProps> = m
     ctx.lineJoin = 'round';
 
     paths.forEach((p) => {
-      if (p.points.length < 2) return;
+      if (!p.points || p.points.length < 2) return;
       ctx.beginPath();
       ctx.strokeStyle = p.color;
       ctx.lineWidth = p.size;
@@ -92,6 +70,33 @@ export const DrawingCorrectionCanvas: React.FC<DrawingCorrectionCanvasProps> = m
     ctx.globalCompositeOperation = 'source-over';
   }, [paths]);
 
+  // Adjust canvas resolution once when activated or resized
+  const syncDimensions = useCallback(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const parent = canvas.parentElement;
+    if (!parent) return;
+
+    const targetW = Math.round(parent.clientWidth || 800);
+    const targetH = Math.round(parent.scrollHeight || parent.clientHeight || 1200);
+
+    if (canvas.width !== targetW || canvas.height !== targetH) {
+      canvas.width = targetW;
+      canvas.height = targetH;
+      redrawAll();
+    }
+  }, [redrawAll]);
+
+  useEffect(() => {
+    if (!isActive) return;
+    const timer = setTimeout(syncDimensions, 50);
+    window.addEventListener('resize', syncDimensions);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('resize', syncDimensions);
+    };
+  }, [isActive, syncDimensions]);
+
   useEffect(() => {
     redrawAll();
   }, [paths, redrawAll]);
@@ -100,9 +105,11 @@ export const DrawingCorrectionCanvas: React.FC<DrawingCorrectionCanvasProps> = m
     const canvas = canvasRef.current;
     if (!canvas) return { x: 0, y: 0 };
     const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / (rect.width || 1);
+    const scaleY = canvas.height / (rect.height || 1);
     return {
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top,
+      x: (e.clientX - rect.left) * scaleX,
+      y: (e.clientY - rect.top) * scaleY,
     };
   };
 
@@ -148,15 +155,13 @@ export const DrawingCorrectionCanvas: React.FC<DrawingCorrectionCanvasProps> = m
     if (!isDrawing) return;
     setIsDrawing(false);
     if (currentPathRef.current.length > 1) {
-      setPaths((prev) => [
-        ...prev,
-        {
-          points: [...currentPathRef.current],
-          color,
-          size,
-          isEraser,
-        },
-      ]);
+      const newPath: Path = {
+        points: [...currentPathRef.current],
+        color,
+        size,
+        isEraser,
+      };
+      setPaths((prev) => [...prev, newPath]);
     }
     currentPathRef.current = [];
   };
@@ -178,14 +183,14 @@ export const DrawingCorrectionCanvas: React.FC<DrawingCorrectionCanvasProps> = m
 
   return (
     <>
-      {/* 1. Floating Annotation Toolbar */}
-      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-[#0c0f1e]/95 border border-[#263152] rounded-2xl px-4 py-2.5 shadow-[0_10px_35px_rgba(0,0,0,0.8)] flex items-center gap-3 select-none animate-fade-in text-white text-xs">
+      {/* 1. Fixed Floating Annotation Toolbar at Top Center */}
+      <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-[#0c0f1e]/95 border border-[#263152] rounded-2xl px-4 py-2 shadow-[0_10px_35px_rgba(0,0,0,0.8)] flex items-center gap-3 select-none animate-fade-in text-white text-xs backdrop-blur-none">
         {/* Tool Mode: Pen / Eraser */}
         <div className="flex items-center gap-1 bg-white/5 p-1 rounded-xl border border-white/10">
           <button
             type="button"
             onClick={() => setIsEraser(false)}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-bold transition cursor-pointer ${
+            className={`flex items-center gap-1.5 px-3 py-1 rounded-lg font-bold transition cursor-pointer ${
               !isEraser ? 'bg-[#5c36f5] text-white shadow-sm' : 'text-slate-400 hover:text-white'
             }`}
           >
@@ -195,7 +200,7 @@ export const DrawingCorrectionCanvas: React.FC<DrawingCorrectionCanvasProps> = m
           <button
             type="button"
             onClick={() => setIsEraser(true)}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-bold transition cursor-pointer ${
+            className={`flex items-center gap-1.5 px-3 py-1 rounded-lg font-bold transition cursor-pointer ${
               isEraser ? 'bg-[#5c36f5] text-white shadow-sm' : 'text-slate-400 hover:text-white'
             }`}
           >
@@ -204,7 +209,7 @@ export const DrawingCorrectionCanvas: React.FC<DrawingCorrectionCanvasProps> = m
           </button>
         </div>
 
-        {/* Color Palette (When using pen) */}
+        {/* Color Palette */}
         {!isEraser && (
           <div className="flex items-center gap-1.5 px-2 border-l border-white/10">
             {COLORS.map((c) => (
@@ -213,12 +218,12 @@ export const DrawingCorrectionCanvas: React.FC<DrawingCorrectionCanvasProps> = m
                 type="button"
                 onClick={() => setColor(c.value)}
                 style={{ backgroundColor: c.value }}
-                className={`w-6 h-6 rounded-full transition cursor-pointer flex items-center justify-center ${
+                className={`w-5 h-5 rounded-full transition cursor-pointer flex items-center justify-center ${
                   color === c.value ? 'ring-2 ring-white scale-110' : 'opacity-70 hover:opacity-100'
                 }`}
                 title={c.label}
               >
-                {color === c.value && <Check size={11} className="text-white drop-shadow" />}
+                {color === c.value && <Check size={10} className="text-white drop-shadow" />}
               </button>
             ))}
           </div>
@@ -231,7 +236,7 @@ export const DrawingCorrectionCanvas: React.FC<DrawingCorrectionCanvasProps> = m
               key={s}
               type="button"
               onClick={() => setSize(s)}
-              className={`w-7 h-7 rounded-lg flex items-center justify-center font-bold text-xs transition cursor-pointer ${
+              className={`w-6 h-6 rounded-lg flex items-center justify-center font-bold text-xs transition cursor-pointer ${
                 size === s ? 'bg-white/20 text-white' : 'text-slate-400 hover:text-white'
               }`}
             >
@@ -252,7 +257,7 @@ export const DrawingCorrectionCanvas: React.FC<DrawingCorrectionCanvasProps> = m
             className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white disabled:opacity-40 transition cursor-pointer"
             title="Hoàn tác nét vẽ"
           >
-            <RotateCcw size={14} />
+            <RotateCcw size={13} />
           </button>
           <button
             type="button"
@@ -261,18 +266,18 @@ export const DrawingCorrectionCanvas: React.FC<DrawingCorrectionCanvasProps> = m
             className="p-1.5 rounded-lg bg-rose-500/15 text-rose-400 hover:bg-rose-500/25 disabled:opacity-40 transition cursor-pointer"
             title="Xóa toàn bộ nét vẽ"
           >
-            <Trash2 size={14} />
+            <Trash2 size={13} />
           </button>
         </div>
       </div>
 
-      {/* 2. Full Canvas Overlay on top of Worksheet */}
+      {/* 2. Full Canvas Overlay spanning entire worksheet container */}
       <canvas
         ref={canvasRef}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
-        className="absolute inset-0 z-20 pointer-events-auto touch-none cursor-crosshair"
+        className="absolute inset-0 z-20 pointer-events-auto touch-none cursor-crosshair w-full h-full"
       />
     </>
   );
