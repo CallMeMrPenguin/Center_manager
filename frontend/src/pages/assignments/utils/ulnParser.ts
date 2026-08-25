@@ -48,6 +48,8 @@ export interface UlnQuestionNode {
 export interface UlnHeadingNode {
   type: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'ins' | 'paragraph';
   text: string;
+  answerCount?: number;
+  answerKey?: string[];
 }
 
 export type UlnNode =
@@ -103,31 +105,15 @@ export function parseUlnContent(rawContent: string): UlnNode[] {
 function parseJsonQuestionList(list: any[]): UlnNode[] {
   const nodes: UlnNode[] = [];
   list.forEach((item, idx) => {
-    if (item.title_prefix || item.section_title) {
-      nodes.push({ type: 'h2', text: item.title_prefix || item.section_title });
-    }
-    if (item.w && Array.isArray(item.w) && item.w.length > 0) {
-      nodes.push({ type: 'box', words: item.w });
-    }
-    if (item.b && typeof item.b === 'string' && item.b.trim()) {
-      nodes.push({ type: 'quote', paragraphs: [item.b] });
-    }
+    if (item.title_prefix || item.section_title) nodes.push({ type: 'h2', text: item.title_prefix || item.section_title });
+    if (item.w && Array.isArray(item.w) && item.w.length > 0) nodes.push({ type: 'box', words: item.w });
+    if (item.b && typeof item.b === 'string' && item.b.trim()) nodes.push({ type: 'quote', paragraphs: [item.b] });
     if (item.k && Array.isArray(item.k)) {
       item.k.forEach((sub: any, sIdx: number) => {
-        nodes.push({
-          type: 'question',
-          qNum: String(sub.q || sIdx + 1),
-          text: sub.x || sub.text || `Câu hỏi ${sIdx + 1}`,
-          options: Array.isArray(sub.o) ? sub.o : undefined,
-        });
+        nodes.push({ type: 'question', qNum: String(sub.q || sIdx + 1), text: sub.x || sub.text || `Câu hỏi ${sIdx + 1}`, options: Array.isArray(sub.o) ? sub.o : undefined });
       });
     } else {
-      nodes.push({
-        type: 'question',
-        qNum: String(item.q || idx + 1),
-        text: item.x || item.text || `Câu hỏi ${idx + 1}`,
-        options: Array.isArray(item.o) ? item.o : undefined,
-      });
+      nodes.push({ type: 'question', qNum: String(item.q || idx + 1), text: item.x || item.text || `Câu hỏi ${idx + 1}`, options: Array.isArray(item.o) ? item.o : undefined });
     }
   });
   return nodes;
@@ -159,8 +145,29 @@ function parseUlnText(text: string): UlnNode[] {
 
     // 2. Exercise Instruction [ins] or [P0] [ins]
     if (line.includes('[ins]')) {
-      const content = cleanRawText(line.replace(/\[P[0-9]\]/g, '').replace('[ins]', ''));
-      nodes.push({ type: 'ins', text: content });
+      let content = cleanRawText(line.replace(/\[P[0-9]\]/g, '').replace('[ins]', '').replace('[/ins]', ''));
+      let answerCount: number | undefined;
+
+      // Check for <@number> at end e.g. <@10> or <@5>
+      const countMatch = content.match(/<@(\d+)>/);
+      if (countMatch) {
+        answerCount = parseInt(countMatch[1]);
+        content = content.replace(/<@\d+>/g, '').trim();
+      }
+
+      nodes.push({ type: 'ins', text: content, answerCount });
+      i++;
+      continue;
+    }
+
+    // Answer Key Line \ans: ... or [ANS] ... [/ANS]
+    if (line.startsWith('\\ans:') || line.startsWith('[ANS]')) {
+      const rawAns = line.replace('\\ans:', '').replace('[ANS]', '').replace('[/ANS]', '').trim();
+      const keys = rawAns.split(/\s*\|\s*|\s*,\s*|\s+/).filter(Boolean);
+      const lastIns = [...nodes].reverse().find((n) => n.type === 'ins') as UlnHeadingNode | undefined;
+      if (lastIns) {
+        lastIns.answerKey = keys;
+      }
       i++;
       continue;
     }

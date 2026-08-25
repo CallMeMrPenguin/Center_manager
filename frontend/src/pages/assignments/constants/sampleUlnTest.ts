@@ -33,7 +33,7 @@ export const SAMPLE_UNIT12_ULN_TEXT = `[H1] **UNIT 12: ENGLISH-SPEAKING COUNTRIE
 
 [H2] **B. VOCABULARY AND GRAMMAR**
 
-[P0] [ins]**I. Match each country with its capital city.**
+[P0] [ins]**I. Match each country with its capital city.** <@10>
 
 [NUM]
 [TAB2] [P0] #1. Australia | a. Ottawa
@@ -405,7 +405,7 @@ export const SAMPLE_UNIT12_ULN_TEXT = `[H1] **UNIT 12: ENGLISH-SPEAKING COUNTRIE
 [P0] #8. Northern Ireland is a popular place to go walking or doing outdoor activities.
 [/NUM]
 
-[P0] [ins]**VIII. Match sentences.**
+[P0] [ins]**VIII. Match sentences.** <@8>
 
 [NUM]
 [TAB2] [P0] #1. The national emblem of England is a rose. | a. Really? How was your journey?
