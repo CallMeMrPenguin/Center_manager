@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback, Fragment } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   useReactTable,
   getCoreRowModel,
@@ -756,6 +757,7 @@ export function DataTable<TData>({
   }, [initialColumnVisibility, storageKey]);
 
   const [globalFilter, setGlobalFilter] = useState('');
+  const [searchFocused, setSearchFocused] = useState(false);
   const [sorting, setSorting] = useState<SortingState>(initialSorting);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
@@ -1019,22 +1021,41 @@ export function DataTable<TData>({
           {/* Left */}
           <div className="flex flex-wrap items-center gap-2 flex-1 min-w-0">
             {enableGlobalSearch && (
-              <div className="relative flex-1 min-w-[160px] max-w-sm">
-                <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none" />
+              <motion.div
+                animate={{ width: searchFocused ? 320 : 220 }}
+                transition={{ type: 'spring', stiffness: 350, damping: 28 }}
+                className="relative min-w-[180px]"
+              >
+                <Search
+                  size={14}
+                  className={`absolute left-3 top-1/2 -translate-y-1/2 transition-colors duration-200 pointer-events-none ${
+                    searchFocused ? 'text-[#5c36f5]' : 'text-slate-500'
+                  }`}
+                />
                 <input
                   type="text"
                   value={globalFilter}
+                  onFocus={() => setSearchFocused(true)}
+                  onBlur={() => setSearchFocused(false)}
                   onChange={e => setGlobalFilter(e.target.value)}
                   placeholder={searchPlaceholder}
-                  className="w-full bg-[#13192c] border border-[#253050] text-white text-xs rounded-xl pl-8 pr-8 py-1.5 focus:outline-none focus:border-indigo-500/60 placeholder:text-slate-600 font-medium transition"
+                  className="w-full bg-[#13192c] border border-[#253050] text-white text-xs rounded-xl pl-8 pr-8 py-1.5 focus:outline-none focus:border-[#5c36f5] focus:ring-2 focus:ring-[#5c36f5]/20 placeholder:text-slate-500 font-semibold transition shadow-inner"
                 />
-                {globalFilter && (
-                  <button type="button" onClick={() => setGlobalFilter('')}
-                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition cursor-pointer">
-                    <X size={11} />
-                  </button>
-                )}
-              </div>
+                <AnimatePresence>
+                  {globalFilter && (
+                    <motion.button
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.8 }}
+                      type="button"
+                      onClick={() => setGlobalFilter('')}
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition cursor-pointer p-0.5 rounded-full hover:bg-white/10"
+                    >
+                      <X size={12} />
+                    </motion.button>
+                  )}
+                </AnimatePresence>
+              </motion.div>
             )}
             {toolbarLeft}
           </div>

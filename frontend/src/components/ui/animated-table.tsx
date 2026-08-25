@@ -1,15 +1,8 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Search,
-  ChevronDown,
-  ChevronRight,
-  ArrowUpDown,
-  ArrowUp,
-  ArrowDown,
-  SlidersHorizontal,
-  Check,
-  X,
+  Search, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown,
+  SlidersHorizontal, Check, X,
 } from 'lucide-react';
 
 export type SortDirection = 'asc' | 'desc' | null;
@@ -95,21 +88,15 @@ export function AnimatedTable<T extends { id?: string | number }>({
   const toggleSelectRow = (id: string | number, e: React.MouseEvent) => {
     e.stopPropagation();
     if (!onSelectionChange) return;
-    if (selectedIds.includes(id)) {
-      onSelectionChange(selectedIds.filter((item) => item !== id));
-    } else {
-      onSelectionChange([...selectedIds, id]);
-    }
+    onSelectionChange(
+      selectedIds.includes(id) ? selectedIds.filter((item) => item !== id) : [...selectedIds, id]
+    );
   };
 
   const toggleSelectAll = () => {
     if (!onSelectionChange) return;
     const allIds = data.map((d) => d.id).filter((id): id is string | number => id !== undefined);
-    if (selectedIds.length === allIds.length && allIds.length > 0) {
-      onSelectionChange([]);
-    } else {
-      onSelectionChange(allIds);
-    }
+    onSelectionChange(selectedIds.length === allIds.length && allIds.length > 0 ? [] : allIds);
   };
 
   const handleHeaderSort = (col: ColumnDef<T>) => {
@@ -126,18 +113,18 @@ export function AnimatedTable<T extends { id?: string | number }>({
   const displayedCols = columns.filter((col) => activeVisibleCols.includes(col.id));
 
   return (
-    <div className="space-y-3.5 select-none">
+    <div className="space-y-3.5 select-none font-sans">
       {/* TOOLBAR */}
       {(searchable || columnVisibility || selectedIds.length > 0) && (
         <div className="flex items-center justify-between gap-3 flex-wrap bg-[#0c0f1e]/98 border border-[#1e2746] p-3 rounded-2xl">
           <div className="flex items-center gap-3 flex-1">
             {searchable && (
               <motion.div
-                animate={{ width: searchFocused ? 320 : 240 }}
-                transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-                className="relative"
+                animate={{ width: searchFocused ? 320 : 220 }}
+                transition={{ type: 'spring', stiffness: 350, damping: 28 }}
+                className="relative min-w-[180px]"
               >
-                <Search size={15} className={`absolute left-3 top-1/2 -translate-y-1/2 transition-colors ${searchFocused ? 'text-[#5c36f5]' : 'text-slate-400'}`} />
+                <Search size={14} className={`absolute left-3 top-1/2 -translate-y-1/2 transition-colors ${searchFocused ? 'text-[#5c36f5]' : 'text-slate-400'}`} />
                 <input
                   type="text"
                   value={searchValue}
@@ -145,35 +132,25 @@ export function AnimatedTable<T extends { id?: string | number }>({
                   onBlur={() => setSearchFocused(false)}
                   onChange={(e) => onSearchChange?.(e.target.value)}
                   placeholder={searchPlaceholder}
-                  className="w-full bg-[#14192b] border border-white/10 rounded-xl pl-9 pr-8 py-1.5 text-xs text-white placeholder:text-slate-500 font-semibold focus:outline-none focus:border-[#5c36f5] focus:ring-2 focus:ring-[#5c36f5]/20 transition"
+                  className="w-full bg-[#14192b] border border-white/10 rounded-xl pl-9 pr-8 py-1.5 text-xs text-white placeholder:text-slate-500 font-semibold focus:outline-none focus:border-[#5c36f5] focus:ring-2 focus:ring-[#5c36f5]/25 transition shadow-inner"
                 />
-                {searchValue && (
-                  <button
-                    onClick={() => onSearchChange?.('')}
-                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
-                  >
-                    <X size={13} />
-                  </button>
-                )}
+                <AnimatePresence>
+                  {searchValue && (
+                    <motion.button initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.8 }}
+                      type="button" onClick={() => onSearchChange?.('')} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition cursor-pointer p-0.5 rounded-full hover:bg-white/10">
+                      <X size={12} />
+                    </motion.button>
+                  )}
+                </AnimatePresence>
               </motion.div>
             )}
 
-            {/* Selected items animated pill */}
             <AnimatePresence>
               {selectedIds.length > 0 && (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.85, x: -10 }}
-                  animate={{ opacity: 1, scale: 1, x: 0 }}
-                  exit={{ opacity: 0, scale: 0.85, x: -10 }}
-                  className="flex items-center gap-2 px-3 py-1 bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 rounded-xl text-xs font-black"
-                >
+                <motion.div initial={{ opacity: 0, scale: 0.85, x: -10 }} animate={{ opacity: 1, scale: 1, x: 0 }} exit={{ opacity: 0, scale: 0.85, x: -10 }}
+                  className="flex items-center gap-2 px-3 py-1 bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 rounded-xl text-xs font-black">
                   <span>Đã chọn: {selectedIds.length} dòng</span>
-                  <button
-                    onClick={() => onSelectionChange?.([])}
-                    className="text-indigo-400 hover:text-white"
-                  >
-                    <X size={12} />
-                  </button>
+                  <button onClick={() => onSelectionChange?.([])} className="text-indigo-400 hover:text-white cursor-pointer"><X size={12} /></button>
                 </motion.div>
               )}
             </AnimatePresence>
@@ -182,11 +159,8 @@ export function AnimatedTable<T extends { id?: string | number }>({
           <div className="flex items-center gap-2 relative">
             {columnVisibility && onVisibleColumnsChange && (
               <div className="relative">
-                <button
-                  type="button"
-                  onClick={() => setShowColMenu(!showColMenu)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-bold border border-white/10 transition cursor-pointer"
-                >
+                <button type="button" onClick={() => setShowColMenu(!showColMenu)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-bold border border-white/10 transition cursor-pointer">
                   <SlidersHorizontal size={13} />
                   <span>Hiển thị cột</span>
                 </button>
@@ -195,30 +169,14 @@ export function AnimatedTable<T extends { id?: string | number }>({
                   {showColMenu && (
                     <>
                       <div className="fixed inset-0 z-40" onClick={() => setShowColMenu(false)} />
-                      <motion.div
-                        initial={{ opacity: 0, scale: 0.95, y: -6 }}
-                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.95, y: -6 }}
-                        className="absolute right-0 top-full mt-2 z-50 w-52 bg-[#121626] border border-[#232d4e] rounded-2xl p-2.5 shadow-2xl space-y-1"
-                      >
-                        <div className="text-[10px] font-black uppercase text-slate-400 px-2 py-1 border-b border-white/5">
-                          Tùy chọn cột
-                        </div>
+                      <motion.div initial={{ opacity: 0, scale: 0.95, y: -6 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: -6 }}
+                        className="absolute right-0 top-full mt-2 z-50 w-52 bg-[#121626] border border-[#232d4e] rounded-2xl p-2.5 shadow-2xl space-y-1">
+                        <div className="text-[10px] font-black uppercase text-slate-400 px-2 py-1 border-b border-white/5">Tùy chọn cột</div>
                         {columns.map((col) => {
                           const isVis = activeVisibleCols.includes(col.id);
                           return (
-                            <button
-                              key={col.id}
-                              type="button"
-                              onClick={() => {
-                                if (isVis) {
-                                  onVisibleColumnsChange(activeVisibleCols.filter((id) => id !== col.id));
-                                } else {
-                                  onVisibleColumnsChange([...activeVisibleCols, col.id]);
-                                }
-                              }}
-                              className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-bold text-slate-300 hover:bg-white/5 hover:text-white transition"
-                            >
+                            <button key={col.id} type="button" onClick={() => onVisibleColumnsChange(isVis ? activeVisibleCols.filter((id) => id !== col.id) : [...activeVisibleCols, col.id])}
+                              className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-bold text-slate-300 hover:bg-white/5 hover:text-white transition">
                               <span>{typeof col.header === 'string' ? col.header : col.id}</span>
                               {isVis && <Check size={13} className="text-[#5c36f5]" />}
                             </button>
@@ -243,42 +201,20 @@ export function AnimatedTable<T extends { id?: string | number }>({
                 {expandable && <th className="w-8 px-3 py-3" />}
                 {selectable && (
                   <th className="w-10 px-3 py-3 text-center">
-                    <input
-                      type="checkbox"
-                      checked={isAllSelected}
-                      onChange={toggleSelectAll}
-                      className="w-4 h-4 rounded accent-[#5c36f5] cursor-pointer"
-                    />
+                    <input type="checkbox" checked={isAllSelected} onChange={toggleSelectAll} className="w-4 h-4 rounded accent-[#5c36f5] cursor-pointer" />
                   </th>
                 )}
                 {displayedCols.map((col) => {
                   const isSorted = sortColumn === col.id;
-                  const alignClass =
-                    col.align === 'center'
-                      ? 'text-center'
-                      : col.align === 'right'
-                      ? 'text-right'
-                      : 'text-left';
-
+                  const alignClass = col.align === 'center' ? 'text-center' : col.align === 'right' ? 'text-right' : 'text-left';
                   return (
-                    <th
-                      key={col.id}
-                      onClick={() => handleHeaderSort(col)}
-                      className={`px-4 py-3.5 ${alignClass} ${
-                        col.sortable ? 'cursor-pointer hover:text-white transition' : ''
-                      }`}
-                    >
+                    <th key={col.id} onClick={() => handleHeaderSort(col)}
+                      className={`px-4 py-3.5 ${alignClass} ${col.sortable ? 'cursor-pointer hover:text-white transition' : ''}`}>
                       <div className={`inline-flex items-center gap-1.5 ${alignClass}`}>
                         <span>{col.header}</span>
                         {col.sortable && (
                           <span className="text-slate-500">
-                            {isSorted && sortDirection === 'asc' ? (
-                              <ArrowUp size={13} className="text-indigo-400" />
-                            ) : isSorted && sortDirection === 'desc' ? (
-                              <ArrowDown size={13} className="text-indigo-400" />
-                            ) : (
-                              <ArrowUpDown size={12} />
-                            )}
+                            {isSorted && sortDirection === 'asc' ? <ArrowUp size={13} className="text-indigo-400" /> : isSorted && sortDirection === 'desc' ? <ArrowDown size={13} className="text-indigo-400" /> : <ArrowUpDown size={12} />}
                           </span>
                         )}
                       </div>
@@ -289,100 +225,62 @@ export function AnimatedTable<T extends { id?: string | number }>({
             </thead>
 
             <tbody className="divide-y divide-white/5 text-xs font-semibold text-slate-200">
-              {data.length === 0 ? (
-                <tr>
-                  <td
-                    colSpan={displayedCols.length + (selectable ? 1 : 0) + (expandable ? 1 : 0)}
-                    className="py-12 text-center text-slate-500 font-bold"
-                  >
-                    Không có dữ liệu phù hợp
-                  </td>
-                </tr>
-              ) : (
-                data.map((row, rowIdx) => {
-                  const rowId = row.id ?? rowIdx;
-                  const isSelected = selectedIds.includes(rowId);
-                  const isExpanded = expandedRowIds.has(rowId);
+              <AnimatePresence mode="popLayout" initial={false}>
+                {data.length === 0 ? (
+                  <motion.tr key="empty-row" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                    <td colSpan={displayedCols.length + (selectable ? 1 : 0) + (expandable ? 1 : 0)} className="py-12 text-center text-slate-500 font-bold">
+                      Không có dữ liệu phù hợp
+                    </td>
+                  </motion.tr>
+                ) : (
+                  data.map((row, rowIdx) => {
+                    const rowId = row.id ?? rowIdx;
+                    const isSelected = selectedIds.includes(rowId);
+                    const isExpanded = expandedRowIds.has(rowId);
 
-                  return (
-                    <React.Fragment key={String(rowId)}>
-                      <tr
-                        onClick={() => onRowClick?.(row)}
-                        className={`transition-colors cursor-pointer ${
-                          isSelected
-                            ? 'bg-[#181f3d] border-l-2 border-[#5c36f5]'
-                            : striped && rowIdx % 2 === 1
-                            ? 'bg-white/[0.015] hover:bg-white/[0.04]'
-                            : 'hover:bg-white/[0.04]'
-                        }`}
-                      >
-                        {expandable && (
-                          <td className="w-8 px-3 py-3 text-center">
-                            <motion.button
-                              type="button"
-                              animate={{ rotate: isExpanded ? 90 : 0 }}
-                              transition={{ duration: 0.2 }}
-                              onClick={(e) => toggleRowExpanded(rowId, e)}
-                              className="p-1 rounded-lg text-slate-400 hover:text-white transition cursor-pointer"
-                            >
-                              <ChevronRight size={14} />
-                            </motion.button>
-                          </td>
-                        )}
-
-                        {selectable && (
-                          <td className="w-10 px-3 py-3 text-center">
-                            <input
-                              type="checkbox"
-                              checked={isSelected}
-                              onChange={(e) => toggleSelectRow(rowId, e as any)}
-                              className="w-4 h-4 rounded accent-[#5c36f5] cursor-pointer"
-                            />
-                          </td>
-                        )}
-
-                        {displayedCols.map((col) => {
-                          const alignClass =
-                            col.align === 'center'
-                              ? 'text-center'
-                              : col.align === 'right'
-                              ? 'text-right'
-                              : 'text-left';
-
-                          return (
-                            <td key={col.id} className={`px-4 py-3 ${alignClass}`}>
-                              {col.cell
-                                ? col.cell(row)
-                                : col.accessorKey
-                                ? String(row[col.accessorKey] ?? '')
-                                : ''}
+                    return (
+                      <React.Fragment key={String(rowId)}>
+                        <motion.tr layout initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.97 }}
+                          transition={{ duration: 0.25, delay: Math.min(rowIdx * 0.02, 0.2) }}
+                          onClick={() => onRowClick?.(row)}
+                          className={`transition-colors cursor-pointer ${isSelected ? 'bg-[#181f3d] border-l-2 border-[#5c36f5]' : striped && rowIdx % 2 === 1 ? 'bg-white/[0.015] hover:bg-white/[0.04]' : 'hover:bg-white/[0.04]'}`}>
+                          {expandable && (
+                            <td className="w-8 px-3 py-3 text-center">
+                              <motion.button type="button" animate={{ rotate: isExpanded ? 90 : 0 }} transition={{ duration: 0.2 }}
+                                onClick={(e) => toggleRowExpanded(rowId, e)} className="p-1 rounded-lg text-slate-400 hover:text-white transition cursor-pointer">
+                                <ChevronRight size={14} />
+                              </motion.button>
                             </td>
-                          );
-                        })}
-                      </tr>
+                          )}
 
-                      {/* Expandable Sub-Row */}
-                      {expandable && isExpanded && renderExpandedRow && (
-                        <tr className="bg-[#0a0d18] border-b border-white/10">
-                          <td
-                            colSpan={displayedCols.length + (selectable ? 1 : 0) + 1}
-                            className="p-4"
-                          >
-                            <motion.div
-                              initial={{ opacity: 0, height: 0 }}
-                              animate={{ opacity: 1, height: 'auto' }}
-                              exit={{ opacity: 0, height: 0 }}
-                              transition={{ duration: 0.2 }}
-                            >
+                          {selectable && (
+                            <td className="w-10 px-3 py-3 text-center">
+                              <input type="checkbox" checked={isSelected} onChange={(e) => toggleSelectRow(rowId, e as any)} className="w-4 h-4 rounded accent-[#5c36f5] cursor-pointer" />
+                            </td>
+                          )}
+
+                          {displayedCols.map((col) => {
+                            const alignClass = col.align === 'center' ? 'text-center' : col.align === 'right' ? 'text-right' : 'text-left';
+                            return (
+                              <td key={col.id} className={`px-4 py-3 ${alignClass}`}>
+                                {col.cell ? col.cell(row) : col.accessorKey ? String(row[col.accessorKey] ?? '') : ''}
+                              </td>
+                            );
+                          })}
+                        </motion.tr>
+
+                        {expandable && isExpanded && renderExpandedRow && (
+                          <motion.tr key={`expanded-${rowId}`} initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="bg-[#0a0d18] border-b border-white/10">
+                            <td colSpan={displayedCols.length + (selectable ? 1 : 0) + 1} className="p-4">
                               {renderExpandedRow(row)}
-                            </motion.div>
-                          </td>
-                        </tr>
-                      )}
-                    </React.Fragment>
-                  );
-                })
-              )}
+                            </td>
+                          </motion.tr>
+                        )}
+                      </React.Fragment>
+                    );
+                  })
+                )}
+              </AnimatePresence>
             </tbody>
           </table>
         </div>
@@ -390,30 +288,13 @@ export function AnimatedTable<T extends { id?: string | number }>({
         {/* PAGINATION */}
         {pagination && (
           <div className="flex items-center justify-between px-4 py-3 bg-[#0c0f1e] border-t border-white/10 text-xs font-bold text-slate-400">
-            <div>
-              Hiển thị {data.length} / {pagination.totalItems} bản ghi
-            </div>
-
+            <div>Hiển thị {data.length} / {pagination.totalItems} bản ghi</div>
             <div className="flex items-center gap-2">
-              <button
-                type="button"
-                disabled={pagination.page <= 1}
-                onClick={() => pagination.onPageChange(pagination.page - 1)}
-                className="px-3 py-1 rounded-lg bg-white/5 hover:bg-white/10 disabled:opacity-40 text-slate-300 transition cursor-pointer"
-              >
-                Trước
-              </button>
-              <span className="px-2 font-mono text-white">
-                Trang {pagination.page} / {Math.max(1, Math.ceil(pagination.totalItems / pagination.pageSize))}
-              </span>
-              <button
-                type="button"
-                disabled={pagination.page >= Math.ceil(pagination.totalItems / pagination.pageSize)}
-                onClick={() => pagination.onPageChange(pagination.page + 1)}
-                className="px-3 py-1 rounded-lg bg-white/5 hover:bg-white/10 disabled:opacity-40 text-slate-300 transition cursor-pointer"
-              >
-                Sau
-              </button>
+              <button type="button" disabled={pagination.page <= 1} onClick={() => pagination.onPageChange(pagination.page - 1)}
+                className="px-3 py-1 rounded-lg bg-white/5 hover:bg-white/10 disabled:opacity-40 text-slate-300 transition cursor-pointer">Trước</button>
+              <span className="px-2 font-mono text-white">Trang {pagination.page} / {Math.max(1, Math.ceil(pagination.totalItems / pagination.pageSize))}</span>
+              <button type="button" disabled={pagination.page >= Math.ceil(pagination.totalItems / pagination.pageSize)} onClick={() => pagination.onPageChange(pagination.page + 1)}
+                className="px-3 py-1 rounded-lg bg-white/5 hover:bg-white/10 disabled:opacity-40 text-slate-300 transition cursor-pointer">Sau</button>
             </div>
           </div>
         )}
