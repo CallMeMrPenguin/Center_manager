@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
-import { UlnNode } from '../utils/ulnParser';
+import { UlnNode, UlnHeadingNode } from '../utils/ulnParser';
 import { UlnInlineText } from './UlnInlineText';
 import { cleanOptionPrefix } from '../../../utils';
 
@@ -46,94 +46,78 @@ export const UlnDocumentRenderer: React.FC<UlnDocumentRendererProps> = ({
     return set;
   }, [answers]);
 
-  // Track progress for Sidebar
+  // Real-time comprehensive progress tracker
   useEffect(() => {
     if (!onProgressUpdate) return;
-    const questions = nodes.filter((n) => n.type === 'question');
-    const total = questions.length;
+    let total = 0;
     let answered = 0;
     const answeredMap: Record<string, boolean> = {};
 
-    questions.forEach((q, idx) => {
+    const questionNodes = nodes.filter((n) => n.type === 'question');
+    questionNodes.forEach((q, idx) => {
       const qNum = q.qNum || String(idx + 1);
       const qKey = `q_${nodes.indexOf(q)}_${q.qNum || idx}`;
-      const isAns = !!answers[qKey] || !!answers[`${qKey}_write`] || Object.keys(answers).some((k) => k.startsWith(qKey) && answers[k]);
+      const isAns = !!answers[qKey] || !!answers[`${qKey}_write`] || Object.keys(answers).some((k) => k.startsWith(qKey) && answers[k]?.trim());
       answeredMap[qNum] = isAns;
+      total++;
       if (isAns) answered++;
     });
 
-    onProgressUpdate(answered, total, answeredMap);
-  }, [answers, nodes, onProgressUpdate]);
+    nodes.forEach((n, nIdx) => {
+      if (n.type === 'ins' && n.answerCount && n.answerCount > 0 && questionNodes.length === 0) {
+        for (let s = 1; s <= n.answerCount; s++) {
+          const key = `ins_${nIdx}_slot_${s}`;
+          const isAns = !!(answers[key] && answers[key].trim());
+          answeredMap[String(s)] = isAns;
+          total++;
+          if (isAns) answered++;
+        }
+      }
+    });
+
+    nodes.filter((n) => n.type === 'table').forEach((t) => {
+      t.rows.forEach((_, rIdx) => {
+        if (total < 10) {
+          total++;
+          if (tableChecks[`${rIdx}`] !== undefined && tableChecks[`${rIdx}`] >= 0) answered++;
+        }
+      });
+    });
+
+    onProgressUpdate(answered, Math.max(total, 1), answeredMap);
+  }, [answers, tableChecks, nodes, onProgressUpdate]);
 
   return (
     <div className="space-y-3 font-sans text-slate-950 select-text">
       {nodes.map((node, nIdx) => {
-        // 1. Headings [H1] to [H6]
         if (node.type === 'h1') {
           return (
             <div key={nIdx} className="pt-2 pb-1 border-b-2 border-slate-900 text-center">
-              <h1 className="text-base sm:text-lg font-black uppercase tracking-tight text-slate-950">
-                {node.text}
-              </h1>
+              <h1 className="text-base sm:text-lg font-black uppercase tracking-tight text-slate-950">{node.text}</h1>
             </div>
           );
         }
         if (node.type === 'h2') {
           return (
             <div key={nIdx} className="pt-2.5 pb-0.5 border-b border-slate-300">
-              <h2 className="text-sm font-bold text-slate-950 uppercase tracking-wide">
-                {node.text}
-              </h2>
+              <h2 className="text-sm font-bold text-slate-950 uppercase tracking-wide">{node.text}</h2>
             </div>
           );
         }
-        if (node.type === 'h3') {
+        if (node.type === 'h3' || node.type === 'h4' || node.type === 'h5' || node.type === 'h6') {
           return (
-            <h3 key={nIdx} className="pt-1.5 text-sm font-bold text-slate-950 capitalize">
-              {node.text}
-            </h3>
-          );
-        }
-        if (node.type === 'h4' || node.type === 'h5' || node.type === 'h6') {
-          return (
-            <div key={nIdx} className={`pt-0.5 text-xs sm:text-sm text-slate-900 ${node.type === 'h6' ? 'italic' : 'font-semibold'}`}>
+            <div key={nIdx} className={`pt-1 text-xs sm:text-sm text-slate-950 ${node.type === 'h3' ? 'font-bold capitalize' : node.type === 'h6' ? 'italic' : 'font-semibold'}`}>
               {node.text}
             </div>
           );
         }
-
-        // 2. Instruction [ins] with optional Quick Answer Input Strip (<@number>)
         if (node.type === 'ins') {
           return (
-            <div key={nIdx} className="pt-1 pb-0.5 space-y-1.5">
-              <div className="text-xs sm:text-sm font-bold text-slate-950">
-                <UlnInlineText text={node.text} qKey={`ins_${nIdx}`} answers={answers} onInputChange={handleInputChange} isSubmitted={isSubmitted} />
-              </div>
-              {node.answerCount && node.answerCount > 0 && (
-                <div className="flex flex-wrap items-center gap-2 p-2 bg-slate-50 border border-slate-300 rounded-lg text-xs">
-                  <span className="font-bold text-slate-700 shrink-0">Điền đáp án:</span>
-                  {Array.from({ length: node.answerCount }).map((_, slotIdx) => {
-                    const key = `ins_${nIdx}_slot_${slotIdx + 1}`;
-                    return (
-                      <div key={slotIdx} className="flex items-center gap-1">
-                        <span className="font-bold text-rose-600">{slotIdx + 1}.</span>
-                        <input
-                          type="text"
-                          disabled={isSubmitted}
-                          value={answers[key] || ''}
-                          onChange={(e) => handleInputChange(key, e.target.value)}
-                          className="white-paper-input w-12 text-center p-0.5 font-bold text-xs text-slate-950"
-                        />
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
+            <div key={nIdx} className="pt-1 pb-0.5 text-xs sm:text-sm font-bold text-slate-950">
+              <UlnInlineText text={node.text} qKey={`ins_${nIdx}`} answers={answers} onInputChange={handleInputChange} isSubmitted={isSubmitted} />
             </div>
           );
         }
-
-        // 3. Word Box [BOX] (Word Bank clean word list)
         if (node.type === 'box') {
           if (node.isFormula) {
             return (
@@ -148,14 +132,7 @@ export const UlnDocumentRenderer: React.FC<UlnDocumentRendererProps> = ({
                 {(node.words || []).map((word, wIdx) => {
                   const isUsed = usedWordsSet.has(word.trim().toLowerCase());
                   return (
-                    <span
-                      key={wIdx}
-                      className={`transition ${
-                        isUsed
-                          ? 'line-through text-slate-400 decoration-slate-900 decoration-2 font-medium'
-                          : 'text-slate-950 font-bold'
-                      }`}
-                    >
+                    <span key={wIdx} className={`transition ${isUsed ? 'line-through text-slate-400 decoration-slate-900 decoration-2 font-medium' : 'text-slate-950 font-bold'}`}>
                       {word}
                     </span>
                   );
@@ -164,8 +141,6 @@ export const UlnDocumentRenderer: React.FC<UlnDocumentRendererProps> = ({
             </div>
           );
         }
-
-        // 4. Picture Grid [PIC_GRID]
         if (node.type === 'pic_grid') {
           return (
             <div key={nIdx} className="my-1.5 space-y-1.5">
@@ -181,8 +156,6 @@ export const UlnDocumentRenderer: React.FC<UlnDocumentRendererProps> = ({
             </div>
           );
         }
-
-        // 5. Grid Table [TABLE] (Sharp dark borders & Clean checkboxes)
         if (node.type === 'table') {
           return (
             <div key={nIdx} className="my-1.5 overflow-x-auto">
@@ -191,12 +164,7 @@ export const UlnDocumentRenderer: React.FC<UlnDocumentRendererProps> = ({
                   <thead className="bg-slate-100 border-b-2 border-slate-800 text-slate-950 font-bold">
                     <tr>
                       {node.headers.map((h, hIdx) => (
-                        <th
-                          key={hIdx}
-                          className={`p-2 border border-slate-800 ${hIdx === 0 ? 'w-2/3' : 'text-center w-28'}`}
-                        >
-                          {h}
-                        </th>
+                        <th key={hIdx} className={`p-2 border border-slate-800 ${hIdx === 0 ? 'w-2/3' : 'text-center w-28'}`}>{h}</th>
                       ))}
                     </tr>
                   </thead>
@@ -205,10 +173,7 @@ export const UlnDocumentRenderer: React.FC<UlnDocumentRendererProps> = ({
                   {node.rows.map((row, rIdx) => (
                     <tr key={rIdx} className="hover:bg-slate-50">
                       {row.map((cell, cIdx) => (
-                        <td
-                          key={cIdx}
-                          className={`p-1.5 border border-slate-800 ${cIdx === 0 ? 'font-medium text-slate-950' : 'text-center'}`}
-                        >
+                        <td key={cIdx} className={`p-1.5 border border-slate-800 ${cIdx === 0 ? 'font-medium text-slate-950' : 'text-center'}`}>
                           {cIdx === 0 ? (
                             <UlnInlineText text={cell} qKey={`cell_${nIdx}_${rIdx}_${cIdx}`} answers={answers} onInputChange={handleInputChange} isSubmitted={isSubmitted} />
                           ) : (
@@ -216,13 +181,9 @@ export const UlnDocumentRenderer: React.FC<UlnDocumentRendererProps> = ({
                               type="button"
                               onClick={() => handleTableCheck(rIdx, cIdx)}
                               className={`w-5 h-5 rounded border-2 flex items-center justify-center mx-auto transition cursor-pointer font-bold text-xs ${
-                                tableChecks[`${rIdx}`] === cIdx
-                                  ? 'bg-slate-950 border-slate-950 text-white'
-                                  : 'border-slate-700 hover:border-slate-900 bg-white text-transparent'
+                                tableChecks[`${rIdx}`] === cIdx ? 'bg-slate-950 border-slate-950 text-white' : 'border-slate-700 hover:border-slate-900 bg-white text-transparent'
                               }`}
-                            >
-                              ✓
-                            </button>
+                            >✓</button>
                           )}
                         </td>
                       ))}
@@ -233,16 +194,10 @@ export const UlnDocumentRenderer: React.FC<UlnDocumentRendererProps> = ({
             </div>
           );
         }
-
-        // 6. Reading Passage Quote [QUOTE]
         if (node.type === 'quote') {
           return (
             <div key={nIdx} className="bg-slate-50/70 border-l-4 border-slate-700 rounded-r-lg p-3.5 my-2 text-xs sm:text-sm font-serif text-slate-950 leading-relaxed space-y-2 border border-slate-200">
-              {node.title && (
-                <div className="font-sans font-bold text-xs sm:text-sm text-slate-950 not-italic">
-                  {node.title}
-                </div>
-              )}
+              {node.title && <div className="font-sans font-bold text-xs sm:text-sm text-slate-950 not-italic">{node.title}</div>}
               {node.paragraphs.map((p, pIdx) => (
                 <p key={pIdx} className="text-justify indent-4 leading-relaxed text-slate-950">
                   <UlnInlineText text={p} qKey={`quote_${nIdx}_${pIdx}`} answers={answers} onInputChange={handleInputChange} isSubmitted={isSubmitted} />
@@ -250,34 +205,57 @@ export const UlnDocumentRenderer: React.FC<UlnDocumentRendererProps> = ({
               ))}
               {node.notes && node.notes.length > 0 && (
                 <div className="pt-1 border-t border-slate-300 grid grid-cols-1 sm:grid-cols-2 gap-1 text-[11px] sm:text-xs font-sans text-slate-700">
-                  {node.notes.map((note, nIdx2) => (
-                    <div key={nIdx2}>{note}</div>
-                  ))}
+                  {node.notes.map((note, nIdx2) => <div key={nIdx2}>{note}</div>)}
                 </div>
               )}
             </div>
           );
         }
-
-        // 7. Multi-Column Layouts [TAB2], [TAB3], [TAB4] (Clean text columns without pill boxes)
         if (node.type === 'tab_cols') {
           const gridClass = node.cols === 3 ? 'grid-cols-1 sm:grid-cols-3' : node.cols === 4 ? 'grid-cols-2 sm:grid-cols-4' : 'grid-cols-1 sm:grid-cols-2';
+          const prevIns = [...nodes.slice(0, nIdx)].reverse().find((n) => n.type === 'ins') as UlnHeadingNode | undefined;
+          const ansCount = prevIns && prevIns.answerCount ? prevIns.answerCount : node.items.length;
+
           return (
-            <div key={nIdx} className="my-1.5 space-y-1">
-              {node.items.map((row, rIdx) => (
-                <div key={rIdx} className={`grid ${gridClass} gap-x-8 gap-y-1 text-xs sm:text-sm font-medium text-slate-950`}>
-                  {row.map((item, cIdx) => (
-                    <div key={cIdx} className="py-0.5">
-                      <UlnInlineText text={item} qKey={`tab_${nIdx}_${rIdx}_${cIdx}`} answers={answers} onInputChange={handleInputChange} isSubmitted={isSubmitted} />
-                    </div>
-                  ))}
+            <div key={nIdx} className="my-2 space-y-2">
+              <div className="space-y-1">
+                {node.items.map((row, rIdx) => (
+                  <div key={rIdx} className={`grid ${gridClass} gap-x-8 gap-y-1 text-xs sm:text-sm font-medium text-slate-950`}>
+                    {row.map((item, cIdx) => (
+                      <div key={cIdx} className="py-0.5">
+                        <UlnInlineText text={item} qKey={`tab_${nIdx}_${rIdx}_${cIdx}`} answers={answers} onInputChange={handleInputChange} isSubmitted={isSubmitted} />
+                      </div>
+                    ))}
+                  </div>
+                ))}
+              </div>
+
+              {ansCount > 0 && (
+                <div className="flex flex-wrap items-center gap-2 p-2 bg-slate-50 border border-slate-300 rounded-lg text-xs mt-2">
+                  <span className="font-bold text-slate-700 shrink-0">Điền đáp án:</span>
+                  {Array.from({ length: ansCount }).map((_, slotIdx) => {
+                    const key = `ins_${nIdx}_slot_${slotIdx + 1}`;
+                    const currentVal = answers[key] || '';
+                    const dynWidth = Math.max(48, Math.min(120, (currentVal.length + 2) * 11)) + 'px';
+                    return (
+                      <div key={slotIdx} className="flex items-center gap-1">
+                        <span className="font-bold text-rose-600">{slotIdx + 1}.</span>
+                        <input
+                          type="text"
+                          disabled={isSubmitted}
+                          value={currentVal}
+                          onChange={(e) => handleInputChange(key, e.target.value)}
+                          style={{ width: dynWidth, transition: 'width 0.15s ease' }}
+                          className="white-paper-input text-center p-0.5 font-bold text-xs text-slate-950"
+                        />
+                      </div>
+                    );
+                  })}
                 </div>
-              ))}
+              )}
             </div>
           );
         }
-
-        // 8. Dialogue Reordering [dialogue_order]
         if (node.type === 'dialogue_order') {
           return (
             <div key={nIdx} className="space-y-1 my-1.5">
@@ -297,19 +275,11 @@ export const UlnDocumentRenderer: React.FC<UlnDocumentRendererProps> = ({
             </div>
           );
         }
-
-        // 9. Question Item [question] with Red Number and Blue Options
         if (node.type === 'question') {
           const qKey = `q_${nIdx}_${node.qNum || nIdx}`;
           const currentAns = answers[qKey];
-
-          // Dynamic intelligent option grid columns based on option length
           const maxOptLen = Math.max(...(node.options || []).map((o) => cleanOptionPrefix(o).length), 0);
-          const optGridClass = maxOptLen > 30
-            ? 'grid-cols-1'
-            : maxOptLen > 14
-            ? 'grid-cols-1 sm:grid-cols-2'
-            : 'grid-cols-2 sm:grid-cols-4';
+          const optGridClass = maxOptLen > 30 ? 'grid-cols-1' : maxOptLen > 14 ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-2 sm:grid-cols-4';
 
           return (
             <div key={nIdx} id={`q_target_${node.qNum || nIdx}`} className="py-0.5 px-0.5 space-y-1 scroll-mt-20">
@@ -330,8 +300,6 @@ export const UlnDocumentRenderer: React.FC<UlnDocumentRendererProps> = ({
                       <UlnInlineText text={node.subText} qKey={`${qKey}_sub`} answers={answers} onInputChange={handleInputChange} isSubmitted={isSubmitted} />
                     </div>
                   )}
-
-                  {/* Handwriting line [P1] <blank> */}
                   {node.hasWritingLine && (
                     <div className="pt-0.5">
                       <input
@@ -344,23 +312,18 @@ export const UlnDocumentRenderer: React.FC<UlnDocumentRendererProps> = ({
                       />
                     </div>
                   )}
-
-                  {/* Multiple Choice Options (No border cards, Blue letter with dot) */}
                   {node.options && node.options.length > 0 && (
                     <div className={`grid ${optGridClass} gap-x-6 gap-y-1 pt-1`}>
                       {node.options.map((opt, optIdx) => {
                         const optLetter = String.fromCharCode(65 + optIdx) + '.';
                         const isSelected = currentAns === opt;
-
                         return (
                           <button
                             key={optIdx}
                             type="button"
                             onClick={() => handleSelectOption(qKey, opt)}
                             className={`text-left flex items-start gap-1.5 transition cursor-pointer py-0.5 px-1 rounded text-xs sm:text-sm ${
-                              isSelected
-                                ? 'bg-blue-100/80 text-blue-950 font-bold'
-                                : 'hover:bg-slate-100/70 text-slate-950'
+                              isSelected ? 'bg-blue-100/80 text-blue-950 font-bold' : 'hover:bg-slate-100/70 text-slate-950'
                             }`}
                           >
                             <span className={`font-bold shrink-0 ${isSelected ? 'text-blue-700' : 'text-blue-600'}`}>
@@ -379,8 +342,6 @@ export const UlnDocumentRenderer: React.FC<UlnDocumentRendererProps> = ({
             </div>
           );
         }
-
-        // 10. Default Paragraph
         return (
           <div key={nIdx} className="text-xs sm:text-sm font-medium text-slate-950 leading-relaxed">
             <UlnInlineText text={node.text} qKey={`p_${nIdx}`} answers={answers} onInputChange={handleInputChange} isSubmitted={isSubmitted} />

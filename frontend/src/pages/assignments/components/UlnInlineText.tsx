@@ -21,42 +21,89 @@ export const UlnInlineText: React.FC<UlnInlineTextProps> = ({
   // Clean leading # before question/item numbers everywhere: e.g. "#1." -> "1."
   const cleanText = text.replace(/(^|\s)#([0-9]+)/g, '$1$2');
 
+  // Handle inline fill-in-the-blank <blank> with dynamic auto-expanding input width
   if (cleanText.includes('<blank>')) {
     const parts = cleanText.split('<blank>');
     return (
       <span>
-        {parts.map((p, idx) => (
-          <React.Fragment key={idx}>
-            <UlnInlineText
-              text={p}
-              qKey={`${qKey}_p${idx}`}
-              answers={answers}
-              onInputChange={onInputChange}
-              isSubmitted={isSubmitted}
-            />
-            {idx < parts.length - 1 && (
-              <input
-                type="text"
-                disabled={isSubmitted}
-                value={answers[`${qKey}_blank_${idx}`] || ''}
-                onChange={(e) => onInputChange && onInputChange(`${qKey}_blank_${idx}`, e.target.value)}
-                style={{
-                  colorScheme: 'light',
-                  backgroundColor: 'transparent',
-                  color: '#0f172a',
-                  borderBottom: '2px solid #0f172a',
-                  borderTop: 'none',
-                  borderLeft: 'none',
-                  borderRight: 'none',
-                  borderRadius: '0px',
-                  outline: 'none',
-                  boxShadow: 'none',
-                }}
-                className="white-paper-input inline-block mx-1 px-1.5 py-0.5 min-w-[85px] max-w-[190px] text-center text-sm font-bold text-slate-950"
+        {parts.map((p, idx) => {
+          const blankKey = `${qKey}_blank_${idx}`;
+          const currentVal = answers[blankKey] || '';
+          const dynamicWidth = Math.max(70, Math.min(340, (currentVal.length + 3) * 9.5)) + 'px';
+
+          return (
+            <React.Fragment key={idx}>
+              <UlnInlineText
+                text={p}
+                qKey={`${qKey}_p${idx}`}
+                answers={answers}
+                onInputChange={onInputChange}
+                isSubmitted={isSubmitted}
               />
-            )}
-          </React.Fragment>
-        ))}
+              {idx < parts.length - 1 && (
+                <input
+                  type="text"
+                  disabled={isSubmitted}
+                  value={currentVal}
+                  onChange={(e) => onInputChange && onInputChange(blankKey, e.target.value)}
+                  style={{
+                    width: dynamicWidth,
+                    colorScheme: 'light',
+                    backgroundColor: 'transparent',
+                    color: '#0f172a',
+                    borderBottom: '2px solid #0f172a',
+                    borderTop: 'none',
+                    borderLeft: 'none',
+                    borderRight: 'none',
+                    borderRadius: '0px',
+                    outline: 'none',
+                    boxShadow: 'none',
+                    transition: 'width 0.15s ease',
+                  }}
+                  className="white-paper-input inline-block mx-1 px-1 py-0.5 text-center text-sm font-bold text-slate-950"
+                />
+              )}
+            </React.Fragment>
+          );
+        })}
+      </span>
+    );
+  }
+
+  // Check if string starts with a number like "1. Australia" -> render number in bold red
+  const numStartMatch = cleanText.match(/^([0-9]+)\.\s*(.*)/);
+  if (numStartMatch) {
+    return (
+      <span className="inline-flex items-baseline gap-1">
+        <span className="text-rose-600 font-bold shrink-0">{numStartMatch[1]}.</span>
+        <span>
+          <UlnInlineText
+            text={numStartMatch[2]}
+            qKey={`${qKey}_tail`}
+            answers={answers}
+            onInputChange={onInputChange}
+            isSubmitted={isSubmitted}
+          />
+        </span>
+      </span>
+    );
+  }
+
+  // Check if string starts with a letter like "a. Ottawa" -> render letter in bold blue
+  const letterStartMatch = cleanText.match(/^([a-zA-Z])\.\s*(.*)/);
+  if (letterStartMatch) {
+    return (
+      <span className="inline-flex items-baseline gap-1">
+        <span className="text-blue-600 font-bold shrink-0">{letterStartMatch[1]}.</span>
+        <span>
+          <UlnInlineText
+            text={letterStartMatch[2]}
+            qKey={`${qKey}_tail`}
+            answers={answers}
+            onInputChange={onInputChange}
+            isSubmitted={isSubmitted}
+          />
+        </span>
       </span>
     );
   }
