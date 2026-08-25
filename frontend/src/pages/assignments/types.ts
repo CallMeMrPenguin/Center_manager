@@ -16,6 +16,16 @@ export interface Assignment {
   avg_score?: number | null;
 }
 
+export interface AssignmentDailyLog {
+  session: string;
+  date: string;
+  scope?: string;
+  answered_count?: number;
+  correct_count?: number;
+  score?: number;
+  teacher_comment?: string;
+}
+
 export interface AssignmentSubmission {
   submission_id?: number;
   assignment_id: number;
@@ -27,4 +37,6 @@ export interface AssignmentSubmission {
   score: number | null;
   notes?: string;
   submitted_at?: string | null;
+  answers_json?: string;
+  daily_logs?: string;
 }

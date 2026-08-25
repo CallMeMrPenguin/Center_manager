@@ -451,9 +451,19 @@ def init_db():
         score REAL DEFAULT NULL,
         notes TEXT DEFAULT '',
         submitted_at TIMESTAMP DEFAULT NULL,
+        answers_json TEXT DEFAULT '',
+        daily_logs TEXT DEFAULT '',
         UNIQUE(assignment_id, student_id)
     )
     """)
+    try:
+        cursor.execute("ALTER TABLE assignment_submissions ADD COLUMN answers_json TEXT DEFAULT ''")
+    except sqlite3.OperationalError:
+        pass
+    try:
+        cursor.execute("ALTER TABLE assignment_submissions ADD COLUMN daily_logs TEXT DEFAULT ''")
+    except sqlite3.OperationalError:
+        pass
 
     # 26. App Users table (Local accounts management)
     cursor.execute("""

@@ -163,7 +163,9 @@ def get_assignment_submissions(assignment_id: int) -> List[Dict[str, Any]]:
                 sub.submitted,
                 sub.score,
                 sub.notes,
-                sub.submitted_at
+                sub.submitted_at,
+                sub.answers_json,
+                sub.daily_logs
             FROM assignment_submissions sub
             JOIN students s ON sub.student_id = s.id
             WHERE sub.assignment_id = ?
@@ -177,7 +179,7 @@ def get_assignment_submissions(assignment_id: int) -> List[Dict[str, Any]]:
 
 def batch_update_submissions(assignment_id: int, submissions: List[Dict[str, Any]]):
     """
-    Upserts or updates submission status, scores, notes for an assignment.
+    Upserts or updates submission status, scores, notes, answers_json, daily_logs for an assignment.
     """
     conn = get_connection()
     try:
@@ -203,21 +205,46 @@ def batch_update_submissions(assignment_id: int, submissions: List[Dict[str, Any
 
             notes = (item.get("notes") or "").strip()
             submitted_at = now_str if submitted == 1 else None
+            answers_json = item.get("answers_json") or ""
+            daily_logs = item.get("daily_logs") or ""
 
             cursor.execute("""
-                INSERT INTO assignment_submissions (assignment_id, student_id, submitted, score, notes, submitted_at)
-                VALUES (?, ?, ?, ?, ?, ?)
+                INSERT INTO assignment_submissions (assignment_id, student_id, submitted, score, notes, submitted_at, answers_json, daily_logs)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                 ON CONFLICT(assignment_id, student_id) DO UPDATE SET
                     submitted = EXCLUDED.submitted,
                     score = EXCLUDED.score,
                     notes = EXCLUDED.notes,
+                    answers_json = CASE WHEN EXCLUDED.answers_json != '' THEN EXCLUDED.answers_json ELSE assignment_submissions.answers_json END,
+                    daily_logs = CASE WHEN EXCLUDED.daily_logs != '' THEN EXCLUDED.daily_logs ELSE assignment_submissions.daily_logs END,
                     submitted_at = CASE 
                         WHEN EXCLUDED.submitted = 1 AND assignment_submissions.submitted_at IS NULL THEN ?
                         WHEN EXCLUDED.submitted = 0 THEN NULL
                         ELSE assignment_submissions.submitted_at
                     END
-            """, (assignment_id, student_id, submitted, score, notes, submitted_at, now_str))
+            """, (assignment_id, student_id, submitted, score, notes, submitted_at, answers_json, daily_logs, now_str))
 
         conn.commit()
     finally:
         conn.close()
+
+def save_student_progress(assignment_id: int, student_id: int, answers_json: str, score: Optional[float] = None, daily_logs: str = "") -> bool:
+    """Saves or updates student's live answers and multi-day progress logs."""
+    conn = get_connection()
+    try:
+        cursor = conn.cursor()
+        now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        cursor.execute("""
+            INSERT INTO assignment_submissions (assignment_id, student_id, submitted, score, answers_json, daily_logs, submitted_at)
+            VALUES (?, ?, 1, ?, ?, ?, ?)
+            ON CONFLICT(assignment_id, student_id) DO UPDATE SET
+                answers_json = EXCLUDED.answers_json,
+                score = COALESCE(EXCLUDED.score, assignment_submissions.score),
+                daily_logs = CASE WHEN EXCLUDED.daily_logs != '' THEN EXCLUDED.daily_logs ELSE assignment_submissions.daily_logs END,
+                submitted_at = COALESCE(assignment_submissions.submitted_at, EXCLUDED.submitted_at)
+        """, (assignment_id, student_id, score, answers_json, daily_logs, now_str))
+        conn.commit()
+        return True
+    finally:
+        conn.close()
+

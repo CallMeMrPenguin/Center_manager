@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { ArrowLeft, Award, Save, Maximize2, Minimize2, ChevronRight, PenTool, KeyRound, Shield, ShieldOff } from 'lucide-react';
-import { Assignment } from '../types';
+import { Assignment, AssignmentDailyLog } from '../types';
 import { ExerciseItem } from './types';
 import { WhitePaperHeader } from './WhitePaperHeader';
 import { ExerciseItemView } from './ExerciseItemView';
 import { UlnDocumentRenderer, SectionProgressGroup } from './UlnDocumentRenderer';
 import { DrawingCorrectionCanvas } from './DrawingCorrectionCanvas';
+import { DailyProgressTimeline } from './DailyProgressTimeline';
 import { ExamWarningModal } from './ExamWarningModal';
 import { useExamProctoring } from '../hooks/useExamProctoring';
 import { parseUlnContent } from '../utils/ulnParser';
@@ -17,6 +18,10 @@ interface WhitePaperAssignmentViewerProps {
   assignment: Assignment;
   studentName?: string;
   isPreview?: boolean;
+  isReviewMode?: boolean;
+  initialAnswers?: Record<string, string>;
+  initialDailyLogs?: AssignmentDailyLog[];
+  initialScore?: number | null;
   onBack: () => void;
   onEditAnswerKey?: (assignment: Assignment) => void;
   onSubmitSuccess?: (score: number) => void;
@@ -26,16 +31,21 @@ export const WhitePaperAssignmentViewer: React.FC<WhitePaperAssignmentViewerProp
   assignment,
   studentName = 'Học Sinh',
   isPreview = true,
+  isReviewMode = false,
+  initialAnswers,
+  initialDailyLogs,
+  initialScore,
   onBack,
   onEditAnswerKey,
   onSubmitSuccess,
 }) => {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isCorrectionMode, setIsCorrectionMode] = useState(false);
-  const [userAnswers, setUserAnswers] = useState<Record<string, string>>({});
-  const [isSubmitted, setIsSubmitted] = useState(false);
-  const [submissionCount, setSubmissionCount] = useState(0);
-  const [finalScore, setFinalScore] = useState<number>(0);
+  const [userAnswers, setUserAnswers] = useState<Record<string, string>>(initialAnswers || {});
+  const [isSubmitted, setIsSubmitted] = useState(isReviewMode || (initialScore !== undefined && initialScore !== null));
+  const [submissionCount, setSubmissionCount] = useState(isReviewMode ? 1 : 0);
+  const [finalScore, setFinalScore] = useState<number>(initialScore ?? 0);
+  const [dailyLogs] = useState<AssignmentDailyLog[]>(initialDailyLogs || []);
   const [progress, setProgress] = useState<{ answered: number; total: number; sections: SectionProgressGroup[] }>({
     answered: 0,
     total: 0,
@@ -144,7 +154,11 @@ export const WhitePaperAssignmentViewer: React.FC<WhitePaperAssignmentViewerProp
               <h3 className="text-sm font-black text-white truncate max-w-[240px] sm:max-w-md">
                 {assignment.title}
               </h3>
-              {isPreview ? (
+              {isReviewMode ? (
+                <span className="text-[10px] uppercase font-black px-2 py-0.5 rounded-full bg-indigo-500/15 text-indigo-300 border border-indigo-500/30">
+                  Bài Làm Học Sinh: {studentName}
+                </span>
+              ) : isPreview ? (
                 <span className="text-[10px] uppercase font-black px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30">
                   Xem Trước Phiếu Bài Tập (A4)
                 </span>
@@ -166,7 +180,7 @@ export const WhitePaperAssignmentViewer: React.FC<WhitePaperAssignmentViewerProp
         {/* Action Controls */}
         <div className="flex items-center gap-2 flex-wrap shrink-0">
           {/* Proctoring Anti-cheat Toggle (Teacher Preview Mode Only) */}
-          {isPreview ? (
+          {isPreview && !isReviewMode ? (
             <button
               type="button"
               onClick={() => setIsProctoringActive(!isProctoringActive)}
@@ -183,38 +197,36 @@ export const WhitePaperAssignmentViewer: React.FC<WhitePaperAssignmentViewerProp
           ) : (
             <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-500/15 text-rose-300 border border-rose-500/30 text-xs font-bold shadow-[0_0_10px_rgba(244,63,94,0.2)]">
               <Shield size={14} className="text-rose-400" />
-              <span>Phòng Thi Được Giám Sát</span>
+              <span>{isReviewMode ? 'Chế Độ Xem Lại Bài Làm' : 'Phòng Thi Được Giám Sát'}</span>
             </div>
           )}
 
           {/* Answer Key Editor (Teacher Mode) */}
-          {isPreview && onEditAnswerKey && (
+          {isPreview && !isReviewMode && onEditAnswerKey && (
             <button
               type="button"
               onClick={() => onEditAnswerKey(assignment)}
               className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition cursor-pointer border bg-indigo-500/15 hover:bg-indigo-500/25 text-indigo-300 border-indigo-500/30 active:scale-95"
-              title="Chỉnh sửa đáp án chuẩn"
+              title="Chỉnh sửa bảng đáp án & tự động chấm lại điểm cho toàn bộ học sinh"
             >
-              <KeyRound size={14} />
-              <span>Sửa Đáp Án</span>
+              <KeyRound size={14} className="text-indigo-400" />
+              <span>Sửa Đáp Án Đề Thi</span>
             </button>
           )}
 
-          {/* Correction Mode Canvas (Teacher Preview Only) */}
-          {isPreview && (
-            <button
-              type="button"
-              onClick={() => setIsCorrectionMode(!isCorrectionMode)}
-              className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition cursor-pointer border ${
-                isCorrectionMode
-                  ? 'bg-amber-400 text-slate-950 border-amber-300 font-black shadow-[0_0_15px_rgba(251,191,36,0.5)]'
-                  : 'bg-white/5 hover:bg-white/10 text-slate-200 border-white/10'
-              }`}
-            >
-              <PenTool size={14} />
-              <span>{isCorrectionMode ? 'Bút Vẽ Chữa Bài' : 'Chế Độ Chữa Bài'}</span>
-            </button>
-          )}
+          <button
+            type="button"
+            onClick={() => setIsCorrectionMode(!isCorrectionMode)}
+            className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition cursor-pointer border ${
+              isCorrectionMode
+                ? 'bg-amber-500/20 text-amber-300 border-amber-500/40 shadow-[0_0_10px_rgba(245,158,11,0.2)]'
+                : 'bg-white/5 text-slate-300 border-white/10 hover:text-white'
+            }`}
+            title="Bật/Tắt bút chấm vẽ trực tiếp lên bài làm"
+          >
+            <PenTool size={14} />
+            <span>Bút Chấm Bài</span>
+          </button>
 
           {/* Fullscreen Expansion Toggle Button */}
           <button
@@ -234,14 +246,16 @@ export const WhitePaperAssignmentViewer: React.FC<WhitePaperAssignmentViewerProp
             </div>
           )}
 
-          <button
-            type="button"
-            onClick={handleSubmit}
-            className="flex items-center gap-1.5 px-5 py-2 rounded-xl bg-[#5c36f5] hover:bg-[#6c48f7] text-white text-xs font-black shadow-[0_0_15px_rgba(92,54,245,0.4)] transition cursor-pointer active:scale-95"
-          >
-            <Save size={14} />
-            <span>{isSubmitted ? 'Cập Nhật & Nộp Lại' : 'Nộp Bài'}</span>
-          </button>
+          {!isReviewMode && (
+            <button
+              type="button"
+              onClick={handleSubmit}
+              className="flex items-center gap-1.5 px-5 py-2 rounded-xl bg-[#5c36f5] hover:bg-[#6c48f7] text-white text-xs font-black shadow-[0_0_15px_rgba(92,54,245,0.4)] transition cursor-pointer active:scale-95"
+            >
+              <Save size={14} />
+              <span>{isSubmitted ? 'Cập Nhật & Nộp Lại' : 'Nộp Bài'}</span>
+            </button>
+          )}
         </div>
       </div>
 
@@ -301,7 +315,9 @@ export const WhitePaperAssignmentViewer: React.FC<WhitePaperAssignmentViewerProp
         </div>
 
         {/* Right A4 Paper Test View (Expands to Wide Format in Fullscreen) */}
-        <div className={`flex-1 ${isFullscreen ? 'max-w-[1020px]' : 'max-w-[850px]'} w-full flex justify-center transition-all duration-200`}>
+        <div className={`flex-1 ${isFullscreen ? 'max-w-[1020px]' : 'max-w-[850px]'} w-full space-y-4 transition-all duration-200`}>
+          {dailyLogs.length > 0 && <DailyProgressTimeline logs={dailyLogs} studentName={studentName} />}
+
           <div className="white-paper-container relative w-full bg-white text-slate-900 rounded-none shadow-[0_20px_50px_rgba(0,0,0,0.4)] border border-slate-300 p-6 sm:p-12 min-h-[1100px] flex flex-col justify-between font-sans">
             {/* Drawing Correction Layer (Fixed Full Canvas) */}
             <DrawingCorrectionCanvas isActive={isCorrectionMode} />
@@ -320,6 +336,7 @@ export const WhitePaperAssignmentViewer: React.FC<WhitePaperAssignmentViewerProp
               {ulnNodes.length > 0 ? (
                 <UlnDocumentRenderer
                   nodes={ulnNodes}
+                  initialAnswers={userAnswers}
                   isSubmitted={isSubmitted}
                   onProgressUpdate={(ans, tot, secs) => {
                     setProgress({ answered: ans, total: tot, sections: secs });

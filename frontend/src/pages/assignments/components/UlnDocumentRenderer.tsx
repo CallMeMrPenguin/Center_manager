@@ -6,52 +6,46 @@ import { cleanOptionPrefix } from '../../../utils';
 export interface SectionProgressGroup {
   id: string;
   title: string;
-  items: {
-    id: string;
-    label: string;
-    isAnswered: boolean;
-  }[];
+  items: { id: string; label: string; isAnswered: boolean }[];
 }
 
 interface UlnDocumentRendererProps {
   nodes: UlnNode[];
+  initialAnswers?: Record<string, string>;
   isSubmitted?: boolean;
   onProgressUpdate?: (answered: number, total: number, sections: SectionProgressGroup[]) => void;
 }
 
 export const UlnDocumentRenderer: React.FC<UlnDocumentRendererProps> = memo(({
   nodes,
+  initialAnswers,
   isSubmitted = false,
   onProgressUpdate,
 }) => {
-  const [answers, setAnswers] = useState<Record<string, string>>({});
+  const [answers, setAnswers] = useState<Record<string, string>>(initialAnswers || {});
   const [tableChecks, setTableChecks] = useState<Record<string, number>>({});
   const progressTimerRef = useRef<any>(null);
 
+  useEffect(() => {
+    if (initialAnswers && Object.keys(initialAnswers).length > 0) setAnswers(initialAnswers);
+  }, [initialAnswers]);
+
   const handleInputChange = useCallback((key: string, val: string) => {
-    if (isSubmitted) return;
-    setAnswers((prev) => ({ ...prev, [key]: val }));
+    if (!isSubmitted) setAnswers((prev) => ({ ...prev, [key]: val }));
   }, [isSubmitted]);
 
   const handleSelectOption = useCallback((qKey: string, opt: string) => {
-    if (isSubmitted) return;
-    setAnswers((prev) => ({ ...prev, [qKey]: opt }));
+    if (!isSubmitted) setAnswers((prev) => ({ ...prev, [qKey]: opt }));
   }, [isSubmitted]);
 
   const handleTableCheck = useCallback((rowIdx: number, colIdx: number) => {
-    if (isSubmitted) return;
-    setTableChecks((prev) => {
-      const key = `${rowIdx}`;
-      return { ...prev, [key]: prev[key] === colIdx ? -1 : colIdx };
-    });
+    if (!isSubmitted) setTableChecks((prev) => ({ ...prev, [`${rowIdx}`]: prev[`${rowIdx}`] === colIdx ? -1 : colIdx }));
   }, [isSubmitted]);
 
   const usedWordsSet = useMemo(() => {
     const set = new Set<string>();
     Object.values(answers).forEach((val) => {
-      if (val && typeof val === 'string') {
-        val.trim().toLowerCase().split(/\s+/).forEach((w) => set.add(w));
-      }
+      if (val && typeof val === 'string') val.trim().toLowerCase().split(/\s+/).forEach((w) => set.add(w));
     });
     return set;
   }, [answers]);
@@ -70,7 +64,6 @@ export const UlnDocumentRenderer: React.FC<UlnDocumentRendererProps> = memo(({
           if (currentGroup.items.length > 0) sectionGroups.push(currentGroup);
           const cleanTitle = node.text.replace(/<@[0-9]+>/g, '').replace(/\[.*?\]/g, '').replace(/\*\*/g, '').trim();
           currentGroup = { id: `target_ins_${nIdx}`, title: cleanTitle || `BÀI TẬP ${sectionGroups.length + 1}`, items: [] };
-          return;
         }
         if (node.type === 'table') {
           node.rows.forEach((_, rIdx) => {

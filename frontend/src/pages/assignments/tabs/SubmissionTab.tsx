@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
-import { ArrowLeft, Save, CheckCircle2, XCircle, KeyRound } from 'lucide-react';
+import { ArrowLeft, Save, KeyRound } from 'lucide-react';
 import { DataTable } from '../../../components/DataTable';
-import { Assignment, AssignmentSubmission } from '../types';
+import { Assignment, AssignmentSubmission, AssignmentDailyLog } from '../types';
+import { WhitePaperAssignmentViewer } from '../components/WhitePaperAssignmentViewer';
 
 interface SubmissionTabProps {
   assignment: Assignment | null;
@@ -23,6 +24,7 @@ export const SubmissionTab: React.FC<SubmissionTabProps> = ({
 }) => {
   const [localList, setLocalList] = useState<AssignmentSubmission[]>([]);
   const [isDirty, setIsDirty] = useState(false);
+  const [reviewingStudent, setReviewingStudent] = useState<AssignmentSubmission | null>(null);
 
   useEffect(() => {
     setLocalList(submissions);
@@ -109,14 +111,16 @@ export const SubmissionTab: React.FC<SubmissionTabProps> = ({
           return (
             <button
               type="button"
-              onClick={() => handleToggleSubmitted(row.original.student_id)}
-              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold transition cursor-pointer ${
+              onClick={(e) => {
+                e.stopPropagation();
+                handleToggleSubmitted(row.original.student_id);
+              }}
+              className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold transition cursor-pointer ${
                 isSub
                   ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
                   : 'bg-rose-500/15 text-rose-400 border border-rose-500/30'
               }`}
             >
-              {isSub ? <CheckCircle2 size={13} /> : <XCircle size={13} />}
               <span>{isSub ? 'Đã nộp bài' : 'Chưa nộp'}</span>
             </button>
           );
@@ -132,6 +136,7 @@ export const SubmissionTab: React.FC<SubmissionTabProps> = ({
             max={assignment?.max_score || 10}
             step="0.1"
             value={row.original.score !== null && row.original.score !== undefined ? row.original.score : ''}
+            onClick={(e) => e.stopPropagation()}
             onChange={(e) => handleScoreChange(row.original.student_id, e.target.value)}
             placeholder="-"
             className="w-20 bg-[#121626] border border-[#263152] focus:border-indigo-500 focus:outline-none rounded-lg px-2.5 py-1 text-xs text-white font-mono font-bold text-center shadow-inner"
@@ -145,10 +150,29 @@ export const SubmissionTab: React.FC<SubmissionTabProps> = ({
           <input
             type="text"
             value={row.original.notes || ''}
+            onClick={(e) => e.stopPropagation()}
             onChange={(e) => handleNotesChange(row.original.student_id, e.target.value)}
             placeholder="Nhận xét bài làm..."
             className="w-full max-w-xs bg-[#121626] border border-[#263152] focus:border-indigo-500 focus:outline-none rounded-lg px-2.5 py-1 text-xs text-slate-200 shadow-inner"
           />
+        ),
+      },
+      {
+        id: 'actions',
+        header: 'Xem Chi Tiết',
+        enableSorting: false,
+        enableGlobalFilter: false,
+        cell: ({ row }) => (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              setReviewingStudent(row.original);
+            }}
+            className="px-2.5 py-1 rounded-lg bg-indigo-500/15 hover:bg-indigo-500/25 text-indigo-300 border border-indigo-500/30 text-xs font-bold transition cursor-pointer"
+          >
+            Xem Bài Làm
+          </button>
         ),
       },
     ],
@@ -167,6 +191,40 @@ export const SubmissionTab: React.FC<SubmissionTabProps> = ({
           Quay lại danh sách bài tập
         </button>
       </div>
+    );
+  }
+
+  // Student Review Mode View
+  if (reviewingStudent) {
+    let parsedAnswers: Record<string, string> = {};
+    if (reviewingStudent.answers_json) {
+      try {
+        parsedAnswers = typeof reviewingStudent.answers_json === 'string'
+          ? JSON.parse(reviewingStudent.answers_json)
+          : reviewingStudent.answers_json;
+      } catch {}
+    }
+
+    let parsedDailyLogs: AssignmentDailyLog[] = [];
+    if (reviewingStudent.daily_logs) {
+      try {
+        parsedDailyLogs = typeof reviewingStudent.daily_logs === 'string'
+          ? JSON.parse(reviewingStudent.daily_logs)
+          : reviewingStudent.daily_logs;
+      } catch {}
+    }
+
+    return (
+      <WhitePaperAssignmentViewer
+        assignment={assignment}
+        studentName={reviewingStudent.student_name}
+        isPreview={true}
+        isReviewMode={true}
+        initialAnswers={parsedAnswers}
+        initialDailyLogs={parsedDailyLogs}
+        initialScore={reviewingStudent.score}
+        onBack={() => setReviewingStudent(null)}
+      />
     );
   }
 
@@ -248,6 +306,7 @@ export const SubmissionTab: React.FC<SubmissionTabProps> = ({
         columns={columns}
         loading={loading}
         pageSize={20}
+        onRowClick={(row) => setReviewingStudent(row)}
         exportFilename={`nop_bai_${assignment.title.toLowerCase().replace(/\s+/g, '_')}`}
         searchPlaceholder="Tìm theo tên học sinh..."
       />

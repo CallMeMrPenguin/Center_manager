@@ -1,16 +1,19 @@
-from fastapi import APIRouter, HTTPException
-from typing import Optional, List, Dict, Any
-from pydantic import BaseModel
 from database.crud_assignments import (
     get_assignments,
     create_assignment,
     update_assignment,
     delete_assignment,
     get_assignment_submissions,
-    batch_update_submissions
+    batch_update_submissions,
+    save_student_progress,
 )
 
 router = APIRouter(prefix="/api/assignments", tags=["Assignments"])
+
+class StudentProgressPayload(BaseModel):
+    answers_json: str
+    score: Optional[float] = None
+    daily_logs: Optional[str] = ""
 
 class AssignmentCreate(BaseModel):
     class_id: int
@@ -82,3 +85,18 @@ def save_submissions(assignment_id: int, payload: SubmissionBatchUpdate):
         return {"success": True}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/{assignment_id}/submissions/{student_id}/save-progress")
+def save_progress(assignment_id: int, student_id: int, payload: StudentProgressPayload):
+    try:
+        save_student_progress(
+            assignment_id=assignment_id,
+            student_id=student_id,
+            answers_json=payload.answers_json,
+            score=payload.score,
+            daily_logs=payload.daily_logs or ""
+        )
+        return {"success": True}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
