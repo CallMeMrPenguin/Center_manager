@@ -3,7 +3,7 @@ import {
   FileCode, Database, BookOpen, Settings as SettingsIcon, FolderOpen, LucideIcon,
   LayoutDashboard, Users, UserCheck, Briefcase, ClipboardList, Award, 
   CreditCard, Receipt, BarChart3, CalendarCheck, UserCog, FileCheck, GraduationCap,
-  PenTool, Sparkles
+  PenTool
 } from 'lucide-react';
 import TestFormatter from '../pages/test-formatter';
 import QuestionBank from '../pages/question-bank';
@@ -12,7 +12,6 @@ import UnitConfig from '../pages/unit-config';
 import Settings from '../pages/settings';
 import DocumentManager from '../pages/document-manager';
 import CanvasBoardPage from '../pages/canvas-board';
-import RankShowcasePage from '../pages/rank-showcase';
 import WaitingForDevelopment from '../components/WaitingForDevelopment';
 import StudentsPage from '../pages/students';
 import TeachersPage from '../pages/teachers';
@@ -118,13 +117,6 @@ export const TAB_DEFINITIONS: TabDefinition[] = [
     icon: ClipboardList,
     section: 'assessments',
     render: () => <WaitingForDevelopment title="Bài Tập Về Nhà" />
-  },
-  {
-    id: 'rank-showcase',
-    label: 'Hiệu Ứng Rank',
-    icon: Sparkles,
-    section: 'assessments',
-    render: () => <RankShowcasePage />
   },
   {
     id: 'results',
