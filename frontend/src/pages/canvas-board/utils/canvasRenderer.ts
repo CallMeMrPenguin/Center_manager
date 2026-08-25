@@ -93,18 +93,18 @@ export function renderCanvasFrame(options: RenderCanvasOptions) {
   const vpRight = (containerRect.width - pan.x) / zoom;
   const vpBottom = (containerRect.height - pan.y) / zoom;
 
-  // 1. Adaptive Grid with Level-Of-Detail (LOD) & Max Iteration Guard
+  // 1. Adaptive Grid with Level-Of-Detail (LOD) & Max Iteration Guard (Works up to 20,000% / 200x)
   if (gridType !== 'none') {
-    const baseGridSize = 44;
-    let step = baseGridSize;
+    let step = 44;
 
-    // Scale up grid step when zooming out to keep screen spacing >= 22px
-    while (step * zoom < 22) {
-      step *= 2;
-    }
-    // Scale down grid step when zooming in for fine alignment
-    while (step * zoom > 260 && step > 10) {
-      step /= 2;
+    if (zoom < 1) {
+      while (step * zoom < 22) {
+        step *= 2;
+      }
+    } else {
+      while (step * zoom > 140 && step > 0.0005) {
+        step /= 2;
+      }
     }
 
     const startX = Math.floor(vpLeft / step) * step;
@@ -112,15 +112,14 @@ export function renderCanvasFrame(options: RenderCanvasOptions) {
     const startY = Math.floor(vpTop / step) * step;
     const endY = Math.ceil(vpBottom / step) * step;
 
-    // Guard against excessive iterations
     const countX = Math.max(1, Math.round((endX - startX) / step));
     const countY = Math.max(1, Math.round((endY - startY) / step));
 
-    if (countX * countY <= 4000) {
+    if (countX * countY <= 3500) {
       ctx.save();
       if (gridType === 'dots') {
         ctx.fillStyle = '#94a3b8';
-        const dotRadius = Math.min(2.5, Math.max(0.8, 1.6 / zoom));
+        const dotRadius = Math.max(0.6 / zoom, 0.005);
         for (let x = startX; x <= endX; x += step) {
           for (let y = startY; y <= endY; y += step) {
             ctx.beginPath();
@@ -130,7 +129,7 @@ export function renderCanvasFrame(options: RenderCanvasOptions) {
         }
       } else if (gridType === 'grid') {
         ctx.strokeStyle = '#cbd5e1';
-        ctx.lineWidth = Math.min(2, Math.max(0.6, 1.2 / zoom));
+        ctx.lineWidth = Math.max(0.6 / zoom, 0.005);
         ctx.beginPath();
         for (let x = startX; x <= endX; x += step) {
           ctx.moveTo(x, startY);
@@ -143,7 +142,7 @@ export function renderCanvasFrame(options: RenderCanvasOptions) {
         ctx.stroke();
       } else if (gridType === 'lines') {
         ctx.strokeStyle = '#cbd5e1';
-        ctx.lineWidth = Math.min(2, Math.max(0.6, 1.2 / zoom));
+        ctx.lineWidth = Math.max(0.6 / zoom, 0.005);
         ctx.beginPath();
         for (let y = startY; y <= endY; y += step) {
           ctx.moveTo(vpLeft - 100, y);
@@ -172,11 +171,11 @@ export function renderCanvasFrame(options: RenderCanvasOptions) {
       if (isCroppingImageId === item.id) {
         const cb = activeCropBox || { x: item.x, y: item.y, width: item.width, height: item.height };
         ctx.strokeStyle = '#000000';
-        ctx.lineWidth = Math.max(1, 2.5 / zoom);
+        ctx.lineWidth = Math.max(1 / zoom, 0.005);
         ctx.strokeRect(cb.x, cb.y, cb.width, cb.height);
         ctx.fillStyle = '#000000';
-        const chs = Math.max(6, 14 / zoom);
-        const barThick = Math.max(2, 4 / zoom);
+        const chs = Math.max(14 / zoom, 0.05);
+        const barThick = Math.max(4 / zoom, 0.01);
         ctx.fillRect(cb.x, cb.y, chs, barThick);
         ctx.fillRect(cb.x, cb.y, barThick, chs);
         ctx.fillRect(cb.x + cb.width - chs, cb.y, chs, barThick);
@@ -187,13 +186,13 @@ export function renderCanvasFrame(options: RenderCanvasOptions) {
         ctx.fillRect(cb.x + cb.width - barThick, cb.y + cb.height - chs, barThick, chs);
       } else {
         ctx.strokeStyle = '#5c36f5';
-        ctx.lineWidth = Math.max(1, 2 / zoom);
-        ctx.setLineDash([Math.max(3, 6 / zoom), Math.max(3, 6 / zoom)]);
+        ctx.lineWidth = Math.max(2 / zoom, 0.005);
+        ctx.setLineDash([Math.max(6 / zoom, 0.02), Math.max(6 / zoom, 0.02)]);
         ctx.strokeRect(item.x - 1 / zoom, item.y - 1 / zoom, item.width + 2 / zoom, item.height + 2 / zoom);
         ctx.setLineDash([]);
         ctx.fillStyle = '#ffffff';
         ctx.strokeStyle = '#5c36f5';
-        const hs = Math.max(4, 8 / zoom);
+        const hs = Math.max(8 / zoom, 0.03);
         const corners = [
           { x: item.x, y: item.y },
           { x: item.x + item.width, y: item.y },
@@ -236,8 +235,8 @@ export function renderCanvasFrame(options: RenderCanvasOptions) {
   if (activeSnapGuides.length > 0) {
     ctx.save();
     ctx.strokeStyle = '#f43f5e';
-    ctx.lineWidth = Math.max(1, 1.5 / zoom);
-    ctx.setLineDash([Math.max(2, 4 / zoom), Math.max(2, 4 / zoom)]);
+    ctx.lineWidth = Math.max(1.5 / zoom, 0.005);
+    ctx.setLineDash([Math.max(4 / zoom, 0.02), Math.max(4 / zoom, 0.02)]);
 
     for (const guide of activeSnapGuides) {
       ctx.beginPath();
@@ -253,9 +252,9 @@ export function renderCanvasFrame(options: RenderCanvasOptions) {
       if (guide.gapStart && guide.gapEnd && guide.gapText) {
         ctx.save();
         ctx.strokeStyle = '#f43f5e';
-        ctx.lineWidth = Math.max(1, 1.8 / zoom);
+        ctx.lineWidth = Math.max(1.8 / zoom, 0.005);
         ctx.setLineDash([]);
-        const tick = Math.max(4, 8 / zoom);
+        const tick = Math.max(8 / zoom, 0.03);
 
         ctx.beginPath();
         if (guide.type === 'vertical') {
@@ -275,11 +274,11 @@ export function renderCanvasFrame(options: RenderCanvasOptions) {
         }
         ctx.stroke();
 
-        const fontSize = Math.max(8, 11 / zoom);
+        const fontSize = Math.max(11 / zoom, 0.04);
         ctx.font = `bold ${fontSize}px sans-serif`;
         const textMetrics = ctx.measureText(guide.gapText);
-        const padX = Math.max(4, 8 / zoom);
-        const padY = Math.max(2, 3.5 / zoom);
+        const padX = Math.max(8 / zoom, 0.03);
+        const padY = Math.max(3.5 / zoom, 0.015);
         const pillW = textMetrics.width + padX * 2;
         const pillH = fontSize + padY * 2;
         const center = guide.gapCenter || {
@@ -291,9 +290,9 @@ export function renderCanvasFrame(options: RenderCanvasOptions) {
 
         ctx.fillStyle = '#0f172a';
         ctx.strokeStyle = '#f43f5e';
-        ctx.lineWidth = Math.max(1, 1.2 / zoom);
+        ctx.lineWidth = Math.max(1.2 / zoom, 0.005);
         ctx.beginPath();
-        if (ctx.roundRect) ctx.roundRect(pillX, pillY, pillW, pillH, Math.max(2, 5 / zoom));
+        if (ctx.roundRect) ctx.roundRect(pillX, pillY, pillW, pillH, Math.max(5 / zoom, 0.02));
         else ctx.rect(pillX, pillY, pillW, pillH);
         ctx.fill();
         ctx.stroke();
@@ -312,7 +311,7 @@ export function renderCanvasFrame(options: RenderCanvasOptions) {
   if (activeTool === 'eraser' && hoverWorldPt) {
     ctx.save();
     ctx.strokeStyle = '#ef4444';
-    ctx.lineWidth = Math.max(1, 1.5 / zoom);
+    ctx.lineWidth = Math.max(1.5 / zoom, 0.005);
     ctx.fillStyle = 'rgba(239, 68, 68, 0.18)';
     ctx.beginPath();
     ctx.arc(hoverWorldPt.x, hoverWorldPt.y, eraserSize / 2, 0, Math.PI * 2);

@@ -510,8 +510,8 @@ export default function CanvasBoardPage() {
     const rect = container.getBoundingClientRect();
     const mouseX = e.clientX - rect.left;
     const mouseY = e.clientY - rect.top;
-    const zoomFactor = e.deltaY < 0 ? 1.12 : 0.89;
-    const newZoom = Math.min(30.0, Math.max(0.1, zoom * zoomFactor));
+    const zoomFactor = e.deltaY < 0 ? 1.15 : 1 / 1.15;
+    const newZoom = Math.min(200.0, Math.max(0.01, zoom * zoomFactor));
     setPan({
       x: mouseX - (mouseX - pan.x) * (newZoom / zoom),
       y: mouseY - (mouseY - pan.y) * (newZoom / zoom),

@@ -9,6 +9,7 @@ interface CanvasTextBoxOverlayProps {
   zoom: number;
   pan: Point;
   activeTool: string;
+  containerRect?: { width: number; height: number };
 }
 
 export const CanvasTextBoxOverlay: React.FC<CanvasTextBoxOverlayProps> = ({
@@ -19,6 +20,7 @@ export const CanvasTextBoxOverlay: React.FC<CanvasTextBoxOverlayProps> = ({
   zoom,
   pan,
   activeTool,
+  containerRect = { width: window.innerWidth, height: window.innerHeight },
 }) => {
   const [editingId, setEditingId] = useState<string | null>(null);
 
@@ -39,8 +41,21 @@ export const CanvasTextBoxOverlay: React.FC<CanvasTextBoxOverlayProps> = ({
         const isEditing = editingId === tb.id;
         const screenX = tb.x * zoom + pan.x;
         const screenY = tb.y * zoom + pan.y;
-        const screenW = Math.max(120, tb.width * zoom);
-        const screenH = Math.max(38, tb.height * zoom);
+        const screenW = tb.width * zoom;
+        const screenH = tb.height * zoom;
+
+        // Frustum culling: Don't render off-screen text boxes in the DOM
+        if (
+          !isSelected &&
+          !isEditing &&
+          (screenX + screenW < -100 ||
+            screenX > containerRect.width + 100 ||
+            screenY + screenH < -100 ||
+            screenY > containerRect.height + 100)
+        ) {
+          return null;
+        }
+
         const isEmpty = !tb.text || tb.text.trim() === '';
 
         return (
@@ -84,17 +99,19 @@ export const CanvasTextBoxOverlay: React.FC<CanvasTextBoxOverlayProps> = ({
             style={{
               left: `${screenX}px`,
               top: `${screenY}px`,
-              width: `${screenW}px`,
-              height: `${screenH}px`,
+              width: `${tb.width}px`,
+              height: `${tb.height}px`,
+              transform: `scale(${zoom})`,
+              transformOrigin: 'top left',
               backgroundColor: '#ffffff',
               colorScheme: 'light',
               borderRadius: '4px',
               border: isSelected ? '2px solid #5c36f5' : isEditing ? '2px solid #3b82f6' : '1px dashed #cbd5e1',
-              boxShadow: isSelected ? '0 2px 8px rgba(92, 54, 245, 0.25)' : '0 1px 4px rgba(0, 0, 0, 0.08)',
               cursor: activeTool === 'select' ? (isEditing ? 'text' : 'move') : 'default',
               pointerEvents: activeTool === 'select' ? 'auto' : 'none',
               boxSizing: 'border-box',
               zIndex: isSelected ? 40 : 20,
+              willChange: 'transform, left, top',
             }}
           >
             {isEditing ? (
@@ -113,7 +130,7 @@ export const CanvasTextBoxOverlay: React.FC<CanvasTextBoxOverlayProps> = ({
                 style={{
                   color: '#ff3344',
                   backgroundColor: '#ffffff',
-                  fontSize: `${Math.max(14, tb.fontSize * zoom)}px`,
+                  fontSize: `${tb.fontSize}px`,
                   fontFamily: '"Times New Roman", Times, serif',
                   colorScheme: 'light',
                   boxSizing: 'border-box',
@@ -127,9 +144,9 @@ export const CanvasTextBoxOverlay: React.FC<CanvasTextBoxOverlayProps> = ({
               <div
                 className="w-full h-full p-1.5 overflow-hidden whitespace-pre-wrap leading-normal"
                 style={{
-                  color: isEmpty ? '#94a3b8' : (tb.color || '#ff3344'),
+                  color: isEmpty ? '#94a3b8' : tb.color || '#ff3344',
                   backgroundColor: '#ffffff',
-                  fontSize: `${Math.max(14, tb.fontSize * zoom)}px`,
+                  fontSize: `${tb.fontSize}px`,
                   fontFamily: '"Times New Roman", Times, serif',
                   boxSizing: 'border-box',
                   fontStyle: isEmpty ? 'italic' : 'normal',
@@ -140,7 +157,7 @@ export const CanvasTextBoxOverlay: React.FC<CanvasTextBoxOverlayProps> = ({
               </div>
             )}
 
-            {/* Professional Corner Resize Handle */}
+            {/* Corner Resize Handle */}
             {isSelected && !isEditing && (
               <div
                 onPointerDown={(e) => {
@@ -155,8 +172,8 @@ export const CanvasTextBoxOverlay: React.FC<CanvasTextBoxOverlayProps> = ({
                     const dh = (moveEvt.clientY - resizeStartMouseRef.current.y) / zoom;
                     onUpdate({
                       ...tb,
-                      width: Math.max(90, resizeStartDimRef.current.width + dw),
-                      height: Math.max(32, resizeStartDimRef.current.height + dh),
+                      width: Math.max(60, resizeStartDimRef.current.width + dw),
+                      height: Math.max(24, resizeStartDimRef.current.height + dh),
                     });
                   };
 
@@ -170,6 +187,10 @@ export const CanvasTextBoxOverlay: React.FC<CanvasTextBoxOverlayProps> = ({
                   window.addEventListener('pointerup', onPointerUp);
                 }}
                 className="absolute -bottom-1.5 -right-1.5 w-3 h-3 bg-[#5c36f5] border-2 border-white rounded-[2px] cursor-se-resize shadow-md"
+                style={{
+                  transform: `scale(${Math.max(0.4, 1 / zoom)})`,
+                  transformOrigin: 'bottom right',
+                }}
                 title="Kéo để chỉnh kích thước"
               />
             )}
