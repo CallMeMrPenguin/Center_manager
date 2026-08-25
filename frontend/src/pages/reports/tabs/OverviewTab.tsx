@@ -5,6 +5,7 @@ import { InteractiveChart } from '../components/InteractiveChart';
 import { SummaryStrip } from '../components/SummaryStrip';
 import { StudentRankingsTable } from '../components/StudentRankingsTable';
 import { StudentGradeHistoryTable } from '../components/StudentGradeHistoryTable';
+import { InsightCommentary } from '../components/InsightCommentary';
 import { GradeTypeFilterKey, DistributionScoreBin } from '../utils/distributionAnalytics';
 import { useOverviewStats } from '../hooks/useOverviewStats';
 
@@ -117,8 +118,19 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
         />
       </div>
 
-      {/* 3. INTERACTIVE CHART (WITH TIMELINE & SCORE DISTRIBUTION TOGGLE) */}
+      {/* 3. INSIGHT COMMENTARY PANEL */}
       <div className={selectedStudentObj ? 'animate-cascade-3' : 'animate-cascade-2'}>
+        <InsightCommentary
+          stats={stats}
+          engine={engine}
+          hasSelectedStudent={!!selectedStudentObj}
+          selectedClassId={selectedClassId}
+          filteredRankings={filteredRankings}
+        />
+      </div>
+
+      {/* 4. INTERACTIVE CHART (WITH TIMELINE & SCORE DISTRIBUTION TOGGLE) */}
+      <div className={selectedStudentObj ? 'animate-cascade-4' : 'animate-cascade-3'}>
         <InteractiveChart
           sessionChartData={sessionChartData}
           engine={engine}
@@ -141,8 +153,8 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
         />
       </div>
 
-      {/* 4. SUMMARY STRIP */}
-      <div className={selectedStudentObj ? 'animate-cascade-4' : 'animate-cascade-3'}>
+      {/* 5. SUMMARY STRIP */}
+      <div className={selectedStudentObj ? 'animate-cascade-5' : 'animate-cascade-4'}>
         <SummaryStrip
           engine={engine}
           gradeTypesList={gradeTypesList}
@@ -152,8 +164,8 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
         />
       </div>
 
-      {/* 5. STUDENT RANKINGS TABLE */}
-      <div className={selectedStudentObj ? 'animate-cascade-5' : 'animate-cascade-4'}>
+      {/* 6. STUDENT RANKINGS TABLE */}
+      <div className={selectedStudentObj ? 'animate-cascade-6' : 'animate-cascade-5'}>
         <StudentRankingsTable
           loading={loading}
           classes={classes}
@@ -171,8 +183,8 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
         />
       </div>
 
-      {/* 6. STUDENT GRADE HISTORY TABLE */}
-      <div className={selectedStudentObj ? 'animate-cascade-6' : 'animate-cascade-5'}>
+      {/* 7. STUDENT GRADE HISTORY TABLE */}
+      <div className={selectedStudentObj ? 'animate-cascade-7' : 'animate-cascade-6'}>
         <StudentGradeHistoryTable
           loading={loading}
           sessionRecords={activeSessionRecords.length > 0 ? activeSessionRecords : sessionRecords}
