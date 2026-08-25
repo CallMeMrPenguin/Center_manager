@@ -1,7 +1,6 @@
 import React from 'react';
 import { ChevronLeft, ChevronRight, Settings as SettingsIcon, FolderOpen } from 'lucide-react';
 import { TAB_DEFINITIONS } from '../config/tabs';
-import { Dock, DockItem, DockIcon, DockLabel } from './ui/dock';
 import { api } from '../api';
 import { showToast } from './Toast';
 
@@ -12,7 +11,7 @@ export const SECTIONS = [
   { id: 'resources', label: 'Tài nguyên' },
   { id: 'finance', label: 'Tài chính' },
   { id: 'analytics', label: 'Phân tích' },
-  { id: 'settings', label: 'Thiết lập' }
+  { id: 'settings', label: 'Thiết lập' },
 ];
 
 interface SidebarProps {
@@ -48,15 +47,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
 }) => {
   return (
     <aside
-      className={`relative ${
-        isSidebarExpanded ? 'w-[13.5rem]' : 'w-[4.25rem]'
+      className={`group relative ${
+        isSidebarExpanded ? 'w-[13.5rem]' : 'w-[3.75rem]'
       } sidebar-glass-glow rounded-2xl flex flex-col h-full transition-[width] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] z-30 shrink-0 select-none bg-[#080a12] border border-white/10`}
     >
-      {/* Floating Circular Collapse / Expand Button on right edge */}
+      {/* Floating Collapse / Expand Button: Only shows up on hover over sidebar */}
       <button
         type="button"
         onClick={toggleSidebar}
-        className="absolute -right-3 top-6 w-6 h-6 rounded-full bg-[#181d2e] hover:bg-[#5c36f5] text-slate-300 hover:text-white border border-white/20 shadow-[0_2px_10px_rgba(0,0,0,0.6)] flex items-center justify-center transition-all duration-200 hover:scale-110 cursor-pointer z-50 active:scale-95"
+        className="absolute -right-3 top-6 w-6 h-6 rounded-full bg-[#181d2e] hover:bg-[#5c36f5] text-slate-300 hover:text-white border border-white/20 shadow-[0_2px_10px_rgba(0,0,0,0.6)] flex items-center justify-center transition-all duration-200 hover:scale-110 cursor-pointer z-50 active:scale-95 opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto"
         title={isSidebarExpanded ? 'Thu gọn thanh điều hướng' : 'Mở rộng thanh điều hướng'}
       >
         {isSidebarExpanded ? (
@@ -89,29 +88,35 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
       {/* Nav Menu */}
       <div className="flex-1 overflow-y-auto min-h-0 px-1.5 py-2 flex flex-col gap-1 scrollbar-none">
-        {/* EXPANDED SIDEBAR VIEW */}
-        {isSidebarExpanded ? (
-          SECTIONS.map((section) => {
-            const sectionTabs = orderedTabIds
-              .map((tabId, idx) => ({ tabId, idx }))
-              .filter(({ tabId }) => {
-                const item = TAB_DEFINITIONS.find((t) => t.id === tabId);
-                return item && item.section === section.id;
-              });
+        {SECTIONS.map((section, sIdx) => {
+          const sectionTabs = orderedTabIds
+            .map((tabId, idx) => ({ tabId, idx }))
+            .filter(({ tabId }) => {
+              const item = TAB_DEFINITIONS.find((t) => t.id === tabId);
+              return item && item.section === section.id;
+            });
 
-            if (sectionTabs.length === 0) return null;
+          if (sectionTabs.length === 0) return null;
 
-            return (
-              <div key={section.id} className="flex flex-col gap-0.5 shrink-0">
-                {section.label && (
+          return (
+            <React.Fragment key={section.id}>
+              {/* Section Divider in Collapsed State */}
+              {!isSidebarExpanded && sIdx > 0 && (
+                <div className="w-5 h-[1px] bg-white/10 mx-auto my-1.5 shrink-0" />
+              )}
+
+              <div className="flex flex-col gap-0.5 shrink-0">
+                {isSidebarExpanded && section.label && (
                   <div className="px-2 text-[9.5px] font-black uppercase tracking-wider text-slate-400 overflow-hidden whitespace-nowrap transition-all duration-300 mt-1 mb-0.5">
                     {section.label}
                   </div>
                 )}
+
                 {sectionTabs.map(({ tabId, idx }) => {
                   const item = TAB_DEFINITIONS.find((t) => t.id === tabId)!;
                   const Icon = item.icon;
                   const isActive = activeTab === item.id;
+
                   return (
                     <button
                       key={item.id}
@@ -121,7 +126,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       onDragEnd={() => setDraggedIndex(null)}
                       onDrop={() => handleDrop(idx)}
                       onClick={() => setActiveTab(item.id)}
-                      className={`flex items-center w-full h-9 px-2 rounded-xl transition-all duration-150 relative group cursor-pointer active:scale-95 shrink-0 ${
+                      className={`flex items-center w-full h-9 px-2 rounded-xl transition-all duration-150 relative group/item cursor-pointer active:scale-95 shrink-0 ${
                         isActive
                           ? 'bg-indigo-500/25 border-2 border-indigo-400/90 shadow-[0_0_12px_rgba(92,54,245,0.4)]'
                           : 'hover:bg-white/[0.05] border-2 border-transparent'
@@ -131,63 +136,46 @@ export const Sidebar: React.FC<SidebarProps> = ({
                           : ''
                       }`}
                     >
+                      {/* Icon */}
                       <div className="w-5.5 h-5.5 flex items-center justify-center shrink-0 relative z-10">
                         <Icon
                           size={16}
                           className={
                             isActive
                               ? 'text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.8)]'
-                              : 'text-slate-400 group-hover:text-white'
+                              : 'text-slate-400 group-hover/item:text-white'
                           }
                         />
                       </div>
 
-                      <span
-                        className={`text-xs relative z-10 whitespace-nowrap overflow-hidden ml-2 ${
-                          isActive
-                            ? 'text-white font-black'
-                            : 'text-slate-200 font-bold group-hover:text-white'
-                        }`}
-                      >
-                        {item.label}
-                      </span>
+                      {/* Label for expanded view */}
+                      {isSidebarExpanded && (
+                        <span
+                          className={`text-xs relative z-10 whitespace-nowrap overflow-hidden ml-2 ${
+                            isActive
+                              ? 'text-white font-black'
+                              : 'text-slate-200 font-bold group-hover/item:text-white'
+                          }`}
+                        >
+                          {item.label}
+                        </span>
+                      )}
+
+                      {/* Clean flyout tooltip on hover when collapsed */}
+                      {!isSidebarExpanded && (
+                        <div className="absolute left-full top-1/2 -translate-y-1/2 ml-3 z-50 pointer-events-none opacity-0 group-hover/item:opacity-100 transition-all duration-150 scale-95 group-hover/item:scale-100">
+                          <div className="px-2.5 py-1 rounded-xl bg-[#0c0f1e] border border-[#212c4b] text-white text-xs font-black whitespace-nowrap shadow-[0_8px_20px_rgba(0,0,0,0.9)]">
+                            {item.label}
+                          </div>
+                        </div>
+                      )}
                     </button>
                   );
                 })}
               </div>
-            );
-          })
-        ) : (
-          /* COLLAPSED SIDEBAR VIEW (ACTUAL MACOS DOCK MAGNIFICATION) */
-          <Dock orientation="vertical" magnification={52} distance={90} className="w-full bg-transparent border-0 shadow-none p-0">
-            {orderedTabIds.map((tabId, idx) => {
-              const item = TAB_DEFINITIONS.find((t) => t.id === tabId);
-              if (!item) return null;
-              const Icon = item.icon;
-              const isActive = activeTab === item.id;
-
-              return (
-                <DockItem
-                  key={item.id}
-                  onClick={() => setActiveTab(item.id)}
-                  className={`w-10 h-10 rounded-xl transition-colors ${
-                    isActive
-                      ? 'bg-indigo-500/30 border-2 border-indigo-400 shadow-[0_0_14px_rgba(92,54,245,0.6)]'
-                      : 'bg-white/[0.03] hover:bg-indigo-500/20 border border-white/10 hover:border-indigo-400/50'
-                  }`}
-                >
-                  <DockIcon>
-                    <Icon
-                      size={18}
-                      className={isActive ? 'text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.8)]' : 'text-slate-300'}
-                    />
-                  </DockIcon>
-                  <DockLabel>{item.label}</DockLabel>
-                </DockItem>
-              );
-            })}
-          </Dock>
-        )}
+            </React.Fragment>
+          );
+        })}
       </div>
 
       {/* User profile section */}
