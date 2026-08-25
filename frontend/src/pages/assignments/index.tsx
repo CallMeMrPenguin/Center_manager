@@ -9,8 +9,16 @@ import { AssignmentListTab } from './tabs/AssignmentListTab';
 import { SubmissionTab } from './tabs/SubmissionTab';
 import { OnlineAssignmentRunner } from './components/OnlineAssignmentRunner';
 import { Assignment } from './types';
+import { AuthUser } from '../auth/LoginPage';
 
 export const AssignmentsPage: React.FC = () => {
+  const currentUser: AuthUser | null = useMemo(() => {
+    const saved = localStorage.getItem('auth_user');
+    return saved ? JSON.parse(saved) : null;
+  }, []);
+
+  const isStudent = currentUser?.role === 'student';
+
   const {
     classes,
     selectedClassId,
@@ -67,63 +75,81 @@ export const AssignmentsPage: React.FC = () => {
 
   return (
     <div className="h-full w-full overflow-y-auto p-6 space-y-6 bg-[#080b14] text-slate-100 select-none font-sans scrollbar-thin">
-      {/* 1. Header Filter Bar */}
-      <div className="bg-[#0c0f1e] border border-[#1e2742] rounded-2xl p-5 shadow-lg flex flex-wrap items-center justify-between gap-4">
-        <div className="flex flex-wrap items-center gap-3 flex-1 min-w-[280px]">
-          <div className="w-56 max-w-full">
-            <CustomSelect
-              value={selectedClassId}
-              onChange={(val) => setSelectedClassId(String(val))}
-              options={classOptions}
-              placeholder="Chọn lớp học..."
-              icon={<BookOpen size={14} className="text-indigo-400" />}
-            />
+      {/* 1. Header Filter Bar (Teachers / Admins Only) */}
+      {!isStudent && (
+        <div className="bg-[#0c0f1e] border border-[#1e2742] rounded-2xl p-5 shadow-lg flex flex-wrap items-center justify-between gap-4">
+          <div className="flex flex-wrap items-center gap-3 flex-1 min-w-[280px]">
+            <div className="w-56 max-w-full">
+              <CustomSelect
+                value={selectedClassId}
+                onChange={(val) => setSelectedClassId(String(val))}
+                options={classOptions}
+                placeholder="Chọn lớp học..."
+                icon={<BookOpen size={14} className="text-indigo-400" />}
+              />
+            </div>
+
+            <div className="w-48 max-w-full">
+              <CustomSelect
+                value={selectedMonth}
+                onChange={(val) => setSelectedMonth(String(val))}
+                options={monthOptions}
+                placeholder="Chọn tháng..."
+                icon={<Calendar size={14} className="text-purple-400" />}
+              />
+            </div>
           </div>
 
-          <div className="w-48 max-w-full">
-            <CustomSelect
-              value={selectedMonth}
-              onChange={(val) => setSelectedMonth(String(val))}
-              options={monthOptions}
-              placeholder="Chọn tháng..."
-              icon={<Calendar size={14} className="text-purple-400" />}
-            />
+          <button
+            type="button"
+            onClick={handleOpenCreateModal}
+            className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#5c36f5] hover:bg-[#6c48f7] text-white text-xs font-black shadow-[0_0_15px_rgba(92,54,245,0.4)] transition cursor-pointer active:scale-95 shrink-0"
+          >
+            <Plus size={15} />
+            <span>Giao BTVN Mới</span>
+          </button>
+        </div>
+      )}
+
+      {/* Student Welcome Header Card */}
+      {isStudent && (
+        <div className="bg-[#0c0f1e] border border-[#1e2742] rounded-2xl p-5 shadow-lg flex items-center justify-between">
+          <div>
+            <h2 className="text-base font-black text-white">
+              Xin chào, <span className="text-emerald-400">{currentUser?.name}</span>!
+            </h2>
+            <p className="text-xs text-slate-400 mt-0.5">
+              {currentUser?.className || 'Lớp học của bạn'} — Danh sách bài tập về nhà & bài luyện thi cần hoàn thành
+            </p>
           </div>
         </div>
+      )}
 
-        <button
-          type="button"
-          onClick={handleOpenCreateModal}
-          className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#5c36f5] hover:bg-[#6c48f7] text-white text-xs font-black shadow-[0_0_15px_rgba(92,54,245,0.4)] transition cursor-pointer active:scale-95 shrink-0"
-        >
-          <Plus size={15} />
-          <span>Giao BTVN Mới</span>
-        </button>
-      </div>
+      {/* 2. KPI Summary Cards (Admin only) */}
+      {!isStudent && <AssignmentsKpiCards kpis={kpis} />}
 
-      {/* 2. KPI Summary Cards */}
-      <AssignmentsKpiCards kpis={kpis} />
-
-      {/* 3. Segmented Control Switcher */}
-      <div className="flex items-center justify-between border-b border-[#181f36] pb-3">
-        <SegmentedControl<'list' | 'submissions' | 'runner'>
-          value={activeView}
-          onChange={setActiveView}
-          options={[
-            { value: 'list', label: 'Danh Sách Bài Tập' },
-            {
-              value: 'submissions',
-              label: currentAssignment ? `Nộp Bài: ${currentAssignment.title}` : 'Theo Dõi Nộp Bài',
-            },
-            {
-              value: 'runner',
-              label: currentAssignment ? `Phiếu Đề: ${currentAssignment.title}` : 'Phiếu Đề (Nền Trắng)',
-            },
-          ]}
-          activeColor="bg-[#5c36f5] shadow-[0_0_14px_rgba(92,54,245,0.5)]"
-          size="md"
-        />
-      </div>
+      {/* 3. Segmented Control Switcher (Admin only or when reviewing) */}
+      {!isStudent && (
+        <div className="flex items-center justify-between border-b border-[#181f36] pb-3">
+          <SegmentedControl<'list' | 'submissions' | 'runner'>
+            value={activeView}
+            onChange={setActiveView}
+            options={[
+              { value: 'list', label: 'Danh Sách Bài Tập' },
+              {
+                value: 'submissions',
+                label: currentAssignment ? `Nộp Bài: ${currentAssignment.title}` : 'Theo Dõi Nộp Bài',
+              },
+              {
+                value: 'runner',
+                label: currentAssignment ? `Phiếu Đề: ${currentAssignment.title}` : 'Phiếu Đề (Nền Trắng)',
+              },
+            ]}
+            activeColor="bg-[#5c36f5] shadow-[0_0_14px_rgba(92,54,245,0.5)]"
+            size="md"
+          />
+        </div>
+      )}
 
       {/* 4. Active Tab Content */}
       <div className="space-y-4">
@@ -131,12 +157,13 @@ export const AssignmentsPage: React.FC = () => {
           <AssignmentListTab
             assignments={assignments}
             loading={loading}
+            isStudent={isStudent}
             onEditAssignment={handleOpenEditModal}
             onViewSubmissions={handleViewSubmissions}
             onPlayPreview={handlePlayPreview}
             onOpenCreateModal={handleOpenCreateModal}
           />
-        ) : activeView === 'submissions' ? (
+        ) : activeView === 'submissions' && !isStudent ? (
           <SubmissionTab
             assignment={currentAssignment}
             submissions={submissions}
@@ -156,7 +183,8 @@ export const AssignmentsPage: React.FC = () => {
                 max_score: 10,
               }
             }
-            isPreview={true}
+            isPreview={!isStudent}
+            studentName={isStudent ? currentUser?.name : 'Học Sinh Xem Trước'}
             onBack={() => setActiveView('list')}
             onSubmitSuccess={() => {
               loadAssignments();
@@ -166,17 +194,18 @@ export const AssignmentsPage: React.FC = () => {
       </div>
 
       {/* 5. Create / Edit Assignment Modal */}
-      <AssignmentModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        assignment={editingAssignment}
-        classes={classes}
-        defaultClassId={selectedClassId}
-        onSuccess={loadAssignments}
-      />
+      {!isStudent && (
+        <AssignmentModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          assignment={editingAssignment}
+          classes={classes}
+          defaultClassId={selectedClassId}
+          onSuccess={loadAssignments}
+        />
+      )}
     </div>
   );
 };
 
 export default AssignmentsPage;
-

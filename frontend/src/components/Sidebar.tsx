@@ -53,7 +53,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const isStudent = currentUser?.role === 'student';
 
   const visibleTabIds = isStudent
-    ? orderedTabIds.filter((id) => ['assignments', 'schedule', 'results'].includes(id))
+    ? orderedTabIds.filter((id) => id === 'assignments')
     : orderedTabIds;
 
   return (
@@ -191,7 +191,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           {isSidebarExpanded && (
             <div className="text-left truncate flex-1">
               <div className="text-xs font-bold text-slate-200 truncate">{currentUser?.name || 'Tài khoản'}</div>
-              <div className="text-[10px] text-indigo-400 font-medium">{isStudent ? 'Học sinh' : 'Quản trị viên'}</div>
+              <div className="text-[10px] text-indigo-400 font-medium">{isStudent ? (currentUser?.className || 'Học sinh') : 'Quản trị viên'}</div>
             </div>
           )}
         </button>

@@ -107,19 +107,21 @@ export const WhitePaperAssignmentViewer: React.FC<WhitePaperAssignmentViewerProp
 
         {/* Action Controls */}
         <div className="flex items-center gap-2 flex-wrap">
-          {/* Chế độ Chữa bài (Bút vẽ / Chấm điểm) */}
-          <button
-            type="button"
-            onClick={() => setIsCorrectionMode(!isCorrectionMode)}
-            className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition cursor-pointer border ${
-              isCorrectionMode
-                ? 'bg-amber-400 text-slate-950 border-amber-300 font-black shadow-[0_0_15px_rgba(251,191,36,0.5)]'
-                : 'bg-white/5 hover:bg-white/10 text-slate-200 border-white/10'
-            }`}
-          >
-            <PenTool size={14} />
-            <span>{isCorrectionMode ? 'Đang Chữa Bài (Bút Vẽ)' : 'Chế Độ Chữa Bài'}</span>
-          </button>
+          {/* Chế độ Chữa bài (Chỉ dành cho Giáo Viên / Quản Trị) */}
+          {isPreview && (
+            <button
+              type="button"
+              onClick={() => setIsCorrectionMode(!isCorrectionMode)}
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition cursor-pointer border ${
+                isCorrectionMode
+                  ? 'bg-amber-400 text-slate-950 border-amber-300 font-black shadow-[0_0_15px_rgba(251,191,36,0.5)]'
+                  : 'bg-white/5 hover:bg-white/10 text-slate-200 border-white/10'
+              }`}
+            >
+              <PenTool size={14} />
+              <span>{isCorrectionMode ? 'Đang Chữa Bài (Bút Vẽ)' : 'Chế Độ Chữa Bài'}</span>
+            </button>
+          )}
 
           <button
             type="button"
@@ -221,8 +223,8 @@ export const WhitePaperAssignmentViewer: React.FC<WhitePaperAssignmentViewerProp
           style={{ colorScheme: 'light' }}
           className="relative white-paper-container flex-1 bg-white text-slate-950 shadow-2xl rounded-2xl p-6 sm:p-10 border border-slate-200 space-y-5 print:p-0 print:border-none print:shadow-none"
         >
-          {/* Drawing Correction Layer Overlay */}
-          <DrawingCorrectionCanvas isActive={isCorrectionMode} />
+          {/* Drawing Correction Layer Overlay (Teacher Preview only) */}
+          {isPreview && <DrawingCorrectionCanvas isActive={isCorrectionMode} />}
 
           <WhitePaperHeader
             assignment={assignment}

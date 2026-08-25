@@ -1,12 +1,13 @@
 import React, { useMemo } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
-import { Edit3, Users, Plus, PlayCircle } from 'lucide-react';
+import { Edit3, Users, Plus, PlayCircle, CheckCircle2, Clock } from 'lucide-react';
 import { DataTable } from '../../../components/DataTable';
 import { Assignment } from '../types';
 
 interface AssignmentListTabProps {
   assignments: Assignment[];
   loading: boolean;
+  isStudent?: boolean;
   onEditAssignment: (assignment: Assignment) => void;
   onViewSubmissions: (assignment: Assignment) => void;
   onPlayPreview: (assignment: Assignment) => void;
@@ -16,30 +17,95 @@ interface AssignmentListTabProps {
 export const AssignmentListTab: React.FC<AssignmentListTabProps> = ({
   assignments,
   loading,
+  isStudent = false,
   onEditAssignment,
   onViewSubmissions,
   onPlayPreview,
   onOpenCreateModal,
 }) => {
-  const columns = useMemo<ColumnDef<Assignment>[]>(
-    () => [
+  const columns = useMemo<ColumnDef<Assignment>[]>(() => {
+    if (isStudent) {
+      return [
+        {
+          accessorKey: 'assigned_date',
+          header: 'Ngày Giao',
+          cell: (info) => <span className="font-bold text-slate-200">{info.getValue<string>()}</span>,
+        },
+        {
+          accessorKey: 'title',
+          header: 'Tiêu Đề Bài Tập',
+          cell: ({ row }) => (
+            <div className="space-y-0.5">
+              <button
+                type="button"
+                onClick={() => onPlayPreview(row.original)}
+                className="font-bold text-indigo-400 hover:text-indigo-300 hover:underline text-left cursor-pointer transition-colors block"
+              >
+                {row.original.title}
+              </button>
+              {row.original.description && (
+                <span className="text-[11px] text-slate-400 line-clamp-1 block">{row.original.description}</span>
+              )}
+            </div>
+          ),
+        },
+        {
+          accessorKey: 'due_date',
+          header: 'Hạn Nộp',
+          cell: (info) => {
+            const val = info.getValue<string>();
+            const today = new Date().toISOString().slice(0, 10);
+            const isOverdue = val < today;
+            return <span className={`font-semibold ${isOverdue ? 'text-rose-400' : 'text-slate-300'}`}>{val}</span>;
+          },
+        },
+        {
+          id: 'student_status',
+          header: 'Trạng Thái',
+          cell: ({ row }) => {
+            const isDone = (row.original.submitted_count || 0) > 0;
+            return (
+              <span className={`inline-flex items-center gap-1 text-xs font-black px-2.5 py-1 rounded-full border ${
+                isDone
+                  ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30'
+                  : 'bg-amber-500/15 text-amber-300 border-amber-500/30'
+              }`}>
+                {isDone ? <CheckCircle2 size={12} /> : <Clock size={12} />}
+                <span>{isDone ? 'Đã nộp bài' : 'Chưa nộp'}</span>
+              </span>
+            );
+          },
+        },
+        {
+          id: 'actions',
+          header: 'Thao Tác',
+          enableSorting: false,
+          enableGlobalFilter: false,
+          cell: ({ row }) => (
+            <button
+              type="button"
+              onClick={() => onPlayPreview(row.original)}
+              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[#5c36f5] hover:bg-[#6c48f7] text-white text-xs font-black shadow-[0_0_12px_rgba(92,54,245,0.4)] transition cursor-pointer active:scale-95"
+            >
+              <PlayCircle size={14} />
+              <span>Vào Làm Bài</span>
+            </button>
+          ),
+        },
+      ];
+    }
+
+    // Teacher / Admin View
+    return [
       {
         accessorKey: 'assigned_date',
         header: 'Ngày Giao',
-        cell: (info) => (
-          <span className="font-bold text-slate-200">
-            {info.getValue<string>()}
-          </span>
-        ),
+        cell: (info) => <span className="font-bold text-slate-200">{info.getValue<string>()}</span>,
       },
       {
         accessorKey: 'class_name',
         header: 'Lớp Học',
-        cell: (info) => (
-          <span className="font-semibold text-slate-300">
-            {info.getValue<string>() || '-'}
-          </span>
-        ),
+        cell: (info) => <span className="font-semibold text-slate-300">{info.getValue<string>() || '-'}</span>,
       },
       {
         accessorKey: 'title',
@@ -54,9 +120,7 @@ export const AssignmentListTab: React.FC<AssignmentListTabProps> = ({
               {row.original.title}
             </button>
             {row.original.description && (
-              <span className="text-[11px] text-slate-400 line-clamp-1 block">
-                {row.original.description}
-              </span>
+              <span className="text-[11px] text-slate-400 line-clamp-1 block">{row.original.description}</span>
             )}
           </div>
         ),
@@ -68,15 +132,7 @@ export const AssignmentListTab: React.FC<AssignmentListTabProps> = ({
           const val = info.getValue<string>();
           const today = new Date().toISOString().slice(0, 10);
           const isOverdue = val < today;
-          return (
-            <span
-              className={`font-semibold ${
-                isOverdue ? 'text-rose-400' : 'text-slate-300'
-              }`}
-            >
-              {val}
-            </span>
-          );
+          return <span className={`font-semibold ${isOverdue ? 'text-rose-400' : 'text-slate-300'}`}>{val}</span>;
         },
       },
       {
@@ -88,20 +144,10 @@ export const AssignmentListTab: React.FC<AssignmentListTabProps> = ({
           const rate = row.original.submission_rate || 0;
           return (
             <div className="flex items-center gap-2">
-              <span className="font-bold text-slate-200">
-                {submitted}/{total}
-              </span>
-              <span
-                className={`text-[10px] font-black px-2 py-0.5 rounded-full border ${
-                  rate >= 80
-                    ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
-                    : rate >= 50
-                    ? 'bg-amber-500/10 text-amber-400 border-amber-500/30'
-                    : 'bg-rose-500/10 text-rose-400 border-rose-500/30'
-                }`}
-              >
-                {rate}%
-              </span>
+              <span className="font-bold text-slate-200">{submitted}/{total}</span>
+              <span className={`text-[10px] font-black px-2 py-0.5 rounded-full border ${
+                rate >= 80 ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' : rate >= 50 ? 'bg-amber-500/10 text-amber-400 border-amber-500/30' : 'bg-rose-500/10 text-rose-400 border-rose-500/30'
+              }`}>{rate}%</span>
             </div>
           );
         },
@@ -111,11 +157,7 @@ export const AssignmentListTab: React.FC<AssignmentListTabProps> = ({
         header: 'Điểm TB',
         cell: (info) => {
           const val = info.getValue<number | null>();
-          return (
-            <span className="font-mono font-bold text-indigo-400">
-              {val !== null && val !== undefined ? val.toFixed(1) : '-'}
-            </span>
-          );
+          return <span className="font-mono font-bold text-indigo-400">{val !== null && val !== undefined ? val.toFixed(1) : '-'}</span>;
         },
       },
       {
@@ -125,18 +167,16 @@ export const AssignmentListTab: React.FC<AssignmentListTabProps> = ({
         enableGlobalFilter: false,
         cell: ({ row }) => (
           <div className="flex items-center gap-1.5">
-            {/* Play / Preview online test button */}
             <button
               type="button"
               onClick={() => onPlayPreview(row.original)}
               className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 hover:text-white text-xs font-bold border border-emerald-500/30 transition cursor-pointer active:scale-95"
-              title="Làm thử bài tập trực tuyến (Preview)"
+              title="Làm thử bài tập trực tuyến"
             >
               <PlayCircle size={13} />
               <span>Làm thử</span>
             </button>
 
-            {/* View submissions button */}
             <button
               type="button"
               onClick={() => onViewSubmissions(row.original)}
@@ -144,10 +184,9 @@ export const AssignmentListTab: React.FC<AssignmentListTabProps> = ({
               title="Xem danh sách nộp bài & chấm điểm"
             >
               <Users size={13} />
-              <span>Chấm điểm</span>
+              <span>Chấm bài</span>
             </button>
 
-            {/* Single Pen Edit Button (merged delete inside modal) */}
             <button
               type="button"
               onClick={() => onEditAssignment(row.original)}
@@ -159,10 +198,8 @@ export const AssignmentListTab: React.FC<AssignmentListTabProps> = ({
           </div>
         ),
       },
-    ],
-    [onEditAssignment, onViewSubmissions, onPlayPreview]
-  );
-
+    ];
+  }, [isStudent, onEditAssignment, onViewSubmissions, onPlayPreview]);
 
   return (
     <div className="space-y-4">
@@ -175,19 +212,21 @@ export const AssignmentListTab: React.FC<AssignmentListTabProps> = ({
         pageSize={20}
         showPagination={true}
         enableGlobalSearch={true}
-        enableColumnVisibility={true}
-        enableExport={true}
+        enableColumnVisibility={!isStudent}
+        enableExport={!isStudent}
         exportFilename="danh_sach_btvn"
         searchPlaceholder="Tìm kiếm theo tiêu đề, lớp, ngày giao..."
         toolbarRight={
-          <button
-            type="button"
-            onClick={onOpenCreateModal}
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#5c36f5] hover:bg-[#6c48f7] text-white text-xs font-black shadow-[0_0_12px_rgba(92,54,245,0.4)] transition-all cursor-pointer active:scale-95 shrink-0"
-          >
-            <Plus size={14} />
-            <span>Giao BTVN Mới</span>
-          </button>
+          !isStudent ? (
+            <button
+              type="button"
+              onClick={onOpenCreateModal}
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#5c36f5] hover:bg-[#6c48f7] text-white text-xs font-black shadow-[0_0_12px_rgba(92,54,245,0.4)] transition-all cursor-pointer active:scale-95 shrink-0"
+            >
+              <Plus size={14} />
+              <span>Giao BTVN Mới</span>
+            </button>
+          ) : undefined
         }
       />
     </div>
