@@ -118,8 +118,19 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
         />
       </div>
 
-      {/* 3. INSIGHT COMMENTARY PANEL */}
+      {/* 3. SUMMARY STRIP (SUM CARD AT TOP) */}
       <div className={selectedStudentObj ? 'animate-cascade-3' : 'animate-cascade-2'}>
+        <SummaryStrip
+          engine={engine}
+          gradeTypesList={gradeTypesList}
+          hasSelectedStudent={!!selectedStudentObj}
+          chartViewMode={chartViewMode}
+          distributionStats={distributionStats}
+        />
+      </div>
+
+      {/* 4. INSIGHT COMMENTARY PANEL */}
+      <div className={selectedStudentObj ? 'animate-cascade-4' : 'animate-cascade-3'}>
         <InsightCommentary
           stats={stats}
           engine={engine}
@@ -132,8 +143,8 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
         />
       </div>
 
-      {/* 4. INTERACTIVE CHART (WITH TIMELINE & SCORE DISTRIBUTION TOGGLE) */}
-      <div className={selectedStudentObj ? 'animate-cascade-4' : 'animate-cascade-3'}>
+      {/* 5. INTERACTIVE CHART (WITH TIMELINE & SCORE DISTRIBUTION TOGGLE) */}
+      <div className={selectedStudentObj ? 'animate-cascade-5' : 'animate-cascade-4'}>
         <InteractiveChart
           sessionChartData={sessionChartData}
           engine={engine}
@@ -153,17 +164,6 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
           setSelectedGradeTypeFilter={setSelectedGradeTypeFilter}
           selectedScoreBin={selectedScoreBin}
           onSelectScoreBin={handleSelectScoreBin}
-        />
-      </div>
-
-      {/* 5. SUMMARY STRIP */}
-      <div className={selectedStudentObj ? 'animate-cascade-5' : 'animate-cascade-4'}>
-        <SummaryStrip
-          engine={engine}
-          gradeTypesList={gradeTypesList}
-          hasSelectedStudent={!!selectedStudentObj}
-          chartViewMode={chartViewMode}
-          distributionStats={distributionStats}
         />
       </div>
 
