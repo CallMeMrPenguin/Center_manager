@@ -23,5 +23,18 @@ export default defineConfig({
       },
     },
   },
+  build: {
+    chunkSizeWarningLimit: 1500,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            if (id.includes('@tanstack')) return 'tanstack';
+            if (id.includes('lucide-react')) return 'icons';
+            if (id.includes('exceljs') || id.includes('jspdf')) return 'export-tools';
+          }
+        },
+      },
+    },
+  },
 })
-

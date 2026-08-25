@@ -1,5 +1,5 @@
-import React from 'react';
-import { AlertTriangle, ShieldAlert } from 'lucide-react';
+import React, { useEffect } from 'react';
+import { AlertTriangle, ShieldAlert, X } from 'lucide-react';
 
 interface ExamWarningModalProps {
   isOpen: boolean;
@@ -14,11 +14,29 @@ export const ExamWarningModal: React.FC<ExamWarningModalProps> = ({
   reason,
   onDismiss,
 }) => {
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onDismiss();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onDismiss]);
+
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[200] bg-black/90 flex items-center justify-center p-4 select-none font-sans">
-      <div className="bg-[#0f1322] border-2 border-rose-500/80 rounded-3xl w-full max-w-md p-6 shadow-[0_0_60px_rgba(244,63,94,0.4)] text-center space-y-5">
+    <div className="fixed inset-0 z-[200] bg-black/85 flex items-center justify-center p-4 select-none font-sans">
+      <div className="bg-[#0f1322] border-2 border-rose-500/80 rounded-3xl w-full max-w-md p-6 shadow-[0_0_60px_rgba(244,63,94,0.4)] text-center space-y-5 relative">
+        <button
+          type="button"
+          onClick={onDismiss}
+          className="absolute top-4 right-4 p-1.5 rounded-xl bg-white/5 hover:bg-white/15 text-slate-400 hover:text-white transition cursor-pointer"
+          title="Đóng cảnh báo (Esc)"
+        >
+          <X size={18} />
+        </button>
+
         <div className="w-16 h-16 rounded-2xl bg-rose-500/20 border border-rose-500/40 flex items-center justify-center mx-auto text-rose-400 animate-pulse">
           <ShieldAlert size={36} />
         </div>
@@ -46,7 +64,7 @@ export const ExamWarningModal: React.FC<ExamWarningModalProps> = ({
         </div>
 
         <p className="text-[11px] text-slate-400 italic">
-          Lưu ý: Mọi lần chuyển tab, thu nhỏ cửa sổ hoặc mất tiêu điểm đều được tự động lưu vào báo cáo chấm điểm gửi cho giáo viên.
+          Lưu ý: Mọi lần chuyển tab hoặc rời màn hình đều được lưu vào báo cáo bài làm của học sinh.
         </p>
 
         <button

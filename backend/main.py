@@ -47,9 +47,10 @@ app.include_router(skill_analytics.router)
 app.include_router(assignments.router)
 app.include_router(users.router)
 
-# Directories & Cleanup Initialization
+# Directories & Async Cleanup Initialization
+import threading
 from services.cleanup_service import cleanup_temp_folders
-cleanup_temp_folders(BASE_DIR)
+threading.Thread(target=cleanup_temp_folders, args=(BASE_DIR,), daemon=True).start()
 
 FILES_DIR = get_setting("files_dir")
 os.makedirs(FILES_DIR, exist_ok=True)

@@ -37,11 +37,17 @@ def kill_port_8000():
     except Exception:
         pass
 
-import webbrowser
-
 def open_browser(url: str):
-    """Waits for backend to start, then opens default browser."""
-    time.sleep(1.2)
+    """Waits until server responds, then opens default browser immediately."""
+    for _ in range(30):
+        time.sleep(0.1)
+        try:
+            target_check = "http://127.0.0.1:8000/api/system/version" if "8000" in url else url
+            with urllib.request.urlopen(target_check, timeout=0.2) as resp:
+                if resp.status == 200:
+                    break
+        except Exception:
+            pass
     try:
         webbrowser.open(url)
     except Exception:
@@ -53,10 +59,10 @@ def main():
     # 1. Clean up any leftover server process holding port 8000
     kill_port_8000()
 
-    # 2. Delete all temporary folders to Recycle Bin and create fresh replacement folders
+    # 2. Asynchronously clean up temp folders in background to eliminate startup delay
     try:
         from services.cleanup_service import cleanup_temp_folders
-        cleanup_temp_folders(ROOT)
+        threading.Thread(target=cleanup_temp_folders, args=(ROOT,), daemon=True).start()
     except Exception as e:
         print(f"Cleanup warning: {e}")
 

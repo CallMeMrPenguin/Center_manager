@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { showToast } from '../../../components/Toast';
 
 interface UseExamProctoringProps {
@@ -12,14 +12,21 @@ export const useExamProctoring = ({
   isStudent,
   onViolation,
 }: UseExamProctoringProps) => {
-  const [isProctoringActive, setIsProctoringActive] = useState<boolean>(isStudent ? true : enabled);
+  // Proctoring is strictly disabled unless both enabled and isStudent are true
+  const [isProctoringActive, setIsProctoringActive] = useState<boolean>(Boolean(isStudent && enabled));
   const [violationCount, setViolationCount] = useState<number>(0);
   const [showWarningModal, setShowWarningModal] = useState<boolean>(false);
   const [lastViolationReason, setLastViolationReason] = useState<string>('');
+  const lastViolationTimeRef = useRef<number>(0);
 
   const triggerViolation = useCallback(
     (reason: string) => {
-      if (!isProctoringActive) return;
+      if (!isProctoringActive || !isStudent) return;
+      const now = Date.now();
+      // Cooldown of 4 seconds between violation triggers to avoid flooding
+      if (now - lastViolationTimeRef.current < 4000) return;
+      lastViolationTimeRef.current = now;
+
       setViolationCount((prev) => {
         const next = prev + 1;
         if (onViolation) onViolation(next, reason);
@@ -28,11 +35,11 @@ export const useExamProctoring = ({
       setLastViolationReason(reason);
       setShowWarningModal(true);
     },
-    [isProctoringActive, onViolation]
+    [isProctoringActive, isStudent, onViolation]
   );
 
   useEffect(() => {
-    if (!isProctoringActive) return;
+    if (!isProctoringActive || !isStudent) return;
 
     // 1. Tab switch & visibility change detector
     const handleVisibilityChange = () => {
@@ -41,14 +48,8 @@ export const useExamProctoring = ({
       }
     };
 
-    // 2. Window blur detector (e.g. clicking outside or alt-tabbing)
-    const handleWindowBlur = () => {
-      triggerViolation('Mất tiêu điểm cửa sổ thi / Click chuột ra ngoài ứng dụng');
-    };
-
-    // 3. Block developer tools, inspection, copy & printing shortcuts
+    // 2. Block developer tools, inspection, copy & printing shortcuts
     const handleKeyDown = (e: KeyboardEvent) => {
-      // F12 or Ctrl+Shift+I / Ctrl+Shift+J / Ctrl+Shift+C (DevTools)
       if (
         e.key === 'F12' ||
         (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.key === 'J' || e.key === 'j' || e.key === 'C' || e.key === 'c')) ||
@@ -67,7 +68,7 @@ export const useExamProctoring = ({
       }
     };
 
-    // 4. Block context menu (right click)
+    // 3. Block context menu (right click) in student mode
     const handleContextMenu = (e: MouseEvent) => {
       e.preventDefault();
       e.stopPropagation();
@@ -75,30 +76,14 @@ export const useExamProctoring = ({
       return false;
     };
 
-    // 5. Block text selection
-    const handleSelectStart = (e: Event) => {
-      if (isStudent) {
-        const target = e.target as HTMLElement;
-        if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA')) {
-          return true; // Allow selecting text inside typing inputs
-        }
-        e.preventDefault();
-        return false;
-      }
-    };
-
     document.addEventListener('visibilitychange', handleVisibilityChange);
-    window.addEventListener('blur', handleWindowBlur);
     window.addEventListener('keydown', handleKeyDown, true);
     window.addEventListener('contextmenu', handleContextMenu, true);
-    document.addEventListener('selectstart', handleSelectStart, true);
 
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
-      window.removeEventListener('blur', handleWindowBlur);
       window.removeEventListener('keydown', handleKeyDown, true);
       window.removeEventListener('contextmenu', handleContextMenu, true);
-      document.removeEventListener('selectstart', handleSelectStart, true);
     };
   }, [isProctoringActive, isStudent, triggerViolation]);
 
@@ -109,6 +94,9 @@ export const useExamProctoring = ({
     showWarningModal,
     setShowWarningModal,
     lastViolationReason,
-    dismissWarning: () => setShowWarningModal(false),
+    dismissWarning: () => {
+      setShowWarningModal(false);
+      lastViolationTimeRef.current = Date.now() + 2000; // grace period after dismiss
+    },
   };
 };

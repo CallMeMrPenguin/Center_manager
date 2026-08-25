@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { ArrowLeft, Award, Save, Maximize2, Minimize2, ChevronRight, PenTool, KeyRound, Shield, ShieldOff } from 'lucide-react';
+import { ArrowLeft, Award, Save, Maximize2, Minimize2, ChevronRight, PenTool, KeyRound } from 'lucide-react';
 import { Assignment, AssignmentDailyLog } from '../types';
 import { ExerciseItem } from './types';
 import { WhitePaperHeader } from './WhitePaperHeader';
+import { PaperDailyProgressLog } from './PaperDailyProgressLog';
 import { ExerciseItemView } from './ExerciseItemView';
 import { UlnDocumentRenderer, SectionProgressGroup } from './UlnDocumentRenderer';
 import { DrawingCorrectionCanvas } from './DrawingCorrectionCanvas';
-import { DailyProgressTimeline } from './DailyProgressTimeline';
 import { ExamWarningModal } from './ExamWarningModal';
 import { useExamProctoring } from '../hooks/useExamProctoring';
 import { parseUlnContent } from '../utils/ulnParser';
@@ -52,17 +52,15 @@ export const WhitePaperAssignmentViewer: React.FC<WhitePaperAssignmentViewerProp
     sections: [],
   });
 
-  // Anti-cheat Proctoring & Tab Switch detector
+  // Anti-cheat Proctoring: strictly disabled for preview, review & teacher modes
   const {
-    isProctoringActive,
-    setIsProctoringActive,
     violationCount,
     showWarningModal,
     lastViolationReason,
     dismissWarning,
   } = useExamProctoring({
-    enabled: true,
-    isStudent: !isPreview,
+    enabled: !isPreview && !isReviewMode,
+    isStudent: !isPreview && !isReviewMode,
   });
 
   // Sync fullscreen state with browser events (F11 / Esc)
@@ -179,28 +177,6 @@ export const WhitePaperAssignmentViewer: React.FC<WhitePaperAssignmentViewerProp
 
         {/* Action Controls */}
         <div className="flex items-center gap-2 flex-wrap shrink-0">
-          {/* Proctoring Anti-cheat Toggle (Teacher Preview Mode Only) */}
-          {isPreview && !isReviewMode ? (
-            <button
-              type="button"
-              onClick={() => setIsProctoringActive(!isProctoringActive)}
-              className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition cursor-pointer border ${
-                isProctoringActive
-                  ? 'bg-rose-500/15 text-rose-300 border-rose-500/30 shadow-[0_0_10px_rgba(244,63,94,0.2)]'
-                  : 'bg-white/5 text-slate-400 border-white/10 hover:text-white'
-              }`}
-              title="Bật/Tắt chế độ cảnh báo chuyển tab & bảo mật phòng thi"
-            >
-              {isProctoringActive ? <Shield size={14} className="text-rose-400" /> : <ShieldOff size={14} />}
-              <span>Giám Sát: {isProctoringActive ? 'BẬT' : 'TẮT'}</span>
-            </button>
-          ) : (
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-500/15 text-rose-300 border border-rose-500/30 text-xs font-bold shadow-[0_0_10px_rgba(244,63,94,0.2)]">
-              <Shield size={14} className="text-rose-400" />
-              <span>{isReviewMode ? 'Chế Độ Xem Lại Bài Làm' : 'Phòng Thi Được Giám Sát'}</span>
-            </div>
-          )}
-
           {/* Answer Key Editor (Teacher Mode) */}
           {isPreview && !isReviewMode && onEditAnswerKey && (
             <button
@@ -316,8 +292,6 @@ export const WhitePaperAssignmentViewer: React.FC<WhitePaperAssignmentViewerProp
 
         {/* Right A4 Paper Test View (Expands to Wide Format in Fullscreen) */}
         <div className={`flex-1 ${isFullscreen ? 'max-w-[1020px]' : 'max-w-[850px]'} w-full space-y-4 transition-all duration-200`}>
-          {dailyLogs.length > 0 && <DailyProgressTimeline logs={dailyLogs} studentName={studentName} />}
-
           <div className="white-paper-container relative w-full bg-white text-slate-900 rounded-none shadow-[0_20px_50px_rgba(0,0,0,0.4)] border border-slate-300 p-6 sm:p-12 min-h-[1100px] flex flex-col justify-between font-sans">
             {/* Drawing Correction Layer (Fixed Full Canvas) */}
             <DrawingCorrectionCanvas isActive={isCorrectionMode} />
@@ -331,6 +305,11 @@ export const WhitePaperAssignmentViewer: React.FC<WhitePaperAssignmentViewerProp
                 correctCount={progress.answered}
                 total={progress.total || 10}
               />
+
+              {/* Student Multi-Day Submission Log Directly Inside Paper */}
+              {dailyLogs.length > 0 && (
+                <PaperDailyProgressLog logs={dailyLogs} studentName={studentName} />
+              )}
 
               {/* ULN Document Rendering */}
               {ulnNodes.length > 0 ? (
@@ -366,13 +345,15 @@ export const WhitePaperAssignmentViewer: React.FC<WhitePaperAssignmentViewerProp
         </div>
       </div>
 
-      {/* Anti-cheat Tab Switch Warning Modal */}
-      <ExamWarningModal
-        isOpen={showWarningModal}
-        violationCount={violationCount}
-        reason={lastViolationReason}
-        onDismiss={dismissWarning}
-      />
+      {/* Anti-cheat Tab Switch Warning Modal (Student Mode Only) */}
+      {!isPreview && !isReviewMode && (
+        <ExamWarningModal
+          isOpen={showWarningModal}
+          violationCount={violationCount}
+          reason={lastViolationReason}
+          onDismiss={dismissWarning}
+        />
+      )}
     </div>
   );
 };
