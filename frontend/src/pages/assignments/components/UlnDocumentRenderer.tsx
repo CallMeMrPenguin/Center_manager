@@ -83,7 +83,7 @@ export const UlnDocumentRenderer: React.FC<UlnDocumentRendererProps> = memo(({
         }
         if (node.type === 'tab_cols') {
           const prevIns = [...nodes.slice(0, nIdx)].reverse().find((n) => n.type === 'ins') as UlnHeadingNode | undefined;
-          const ansCount = prevIns && prevIns.answerCount ? prevIns.answerCount : node.items.length;
+          const ansCount = prevIns && prevIns.answerCount ? prevIns.answerCount : 0;
           for (let slot = 1; slot <= ansCount; slot++) {
             const key = `ins_${nIdx}_slot_${slot}`;
             const isAns = !!(answers[key] && answers[key].trim());
@@ -139,7 +139,11 @@ export const UlnDocumentRenderer: React.FC<UlnDocumentRendererProps> = memo(({
         }
         if (node.type === 'ins') {
           return (
-            <div key={nIdx} id={`target_ins_${nIdx}`} className="pt-2.5 pb-1 font-bold text-xs sm:text-sm text-slate-950 leading-snug scroll-mt-20">
+            <div
+              key={nIdx}
+              id={`target_ins_${nIdx}`}
+              className="pt-2.5 pb-1 font-black sm:font-bold text-xs sm:text-sm text-slate-950 leading-snug scroll-mt-20 [&_*]:font-bold [&_*]:text-slate-950"
+            >
               <UlnInlineText text={node.text} qKey={`ins_${nIdx}`} answers={answers} onInputChange={handleInputChange} isSubmitted={isSubmitted} />
             </div>
           );
@@ -247,7 +251,7 @@ export const UlnDocumentRenderer: React.FC<UlnDocumentRendererProps> = memo(({
         }
         if (node.type === 'tab_cols') {
           const prevIns = [...nodes.slice(0, nIdx)].reverse().find((n) => n.type === 'ins') as UlnHeadingNode | undefined;
-          const ansCount = prevIns && prevIns.answerCount ? prevIns.answerCount : node.items.length;
+          const ansCount = prevIns && prevIns.answerCount ? prevIns.answerCount : 0;
 
           return (
             <div key={nIdx} id={`target_tab_${nIdx}`} className="my-2 space-y-2 scroll-mt-20">

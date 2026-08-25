@@ -82,7 +82,7 @@ export const UlnInlineText: React.FC<UlnInlineTextProps> = memo(({
   if (cleanText.includes('<blank>')) {
     const parts = cleanText.split('<blank>');
     return (
-      <span className="font-normal text-slate-900">
+      <span className="text-slate-900">
         {parts.map((p, idx) => {
           const blankKey = `${qKey}_blank_${idx}`;
           const currentVal = answers[blankKey] || '';
@@ -115,9 +115,9 @@ export const UlnInlineText: React.FC<UlnInlineTextProps> = memo(({
   const numStartMatch = cleanText.match(/^([0-9]+)\.\s*(.*)/);
   if (numStartMatch) {
     return (
-      <span className="inline-flex items-baseline gap-1 font-normal text-slate-900">
+      <span className="inline-flex items-baseline gap-1 text-slate-900">
         <span className="text-rose-600 font-bold shrink-0">{numStartMatch[1]}.</span>
-        <span className="font-normal text-slate-900">
+        <span className="text-slate-900">
           <UlnInlineText
             text={numStartMatch[2]}
             qKey={`${qKey}_tail`}
@@ -134,9 +134,9 @@ export const UlnInlineText: React.FC<UlnInlineTextProps> = memo(({
   const letterStartMatch = cleanText.match(/^([a-zA-Z])\.\s*(.*)/);
   if (letterStartMatch) {
     return (
-      <span className="inline-flex items-baseline gap-1 font-normal text-slate-900">
+      <span className="inline-flex items-baseline gap-1 text-slate-900">
         <span className="text-blue-600 font-bold shrink-0">{letterStartMatch[1]}.</span>
-        <span className="font-normal text-slate-900">
+        <span className="text-slate-900">
           <UlnInlineText
             text={letterStartMatch[2]}
             qKey={`${qKey}_tail`}
@@ -202,7 +202,7 @@ export const UlnInlineText: React.FC<UlnInlineTextProps> = memo(({
 
         if (part.startsWith('**') && part.endsWith('**')) {
           return (
-            <strong key={index} className="font-bold text-slate-900">
+            <strong key={index} className="font-bold text-slate-950">
               {part.slice(2, -2)}
             </strong>
           );
@@ -216,15 +216,7 @@ export const UlnInlineText: React.FC<UlnInlineTextProps> = memo(({
           );
         }
 
-        if (part.startsWith('[') && part.endsWith(']')) {
-          return (
-            <span key={index} className="underline decoration-slate-900 decoration-2 font-bold text-slate-900 px-0.5">
-              {part.slice(1, -1)}
-            </span>
-          );
-        }
-
-        return <span key={index} className="font-normal text-slate-900">{part}</span>;
+        return <span key={index}>{part}</span>;
       })}
     </>
   );
