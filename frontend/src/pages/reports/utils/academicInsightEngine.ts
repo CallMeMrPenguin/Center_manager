@@ -271,7 +271,7 @@ export function generateAcademicInsights(params: {
       id: 'class_overall_quality',
       label: 'Mặt Bằng Học Lực Chung',
       dotColor: overall >= 7.5 ? '#10b981' : overall >= 6.0 ? '#3b82f6' : '#f59e0b',
-      text: `Điểm trung bình toàn lớp đạt ${overall}/10 trên tổng số ${sessions} buổi học ghi nhận. Tỷ lệ học sinh đạt chuẩn từ Khá trở lên (≥ 7.0 đ) chiếm ${goodRate}% (${goodCount}/${totalStudents} học sinh), tỷ lệ đạt yêu cầu chung chiếm ${passRate}%.`,
+      text: `Điểm trung bình toàn lớp đạt ${overall}/10 trên tổng số ${sessions} đầu điểm kiểm tra ghi nhận. Tỷ lệ học sinh đạt chuẩn từ Khá trở lên (≥ 7.0 đ) chiếm ${goodRate}% (${goodCount}/${totalStudents} học sinh), tỷ lệ đạt yêu cầu chung chiếm ${passRate}%.`,
       tooltipTitle: 'Chất Lượng Học Thuật Lớp',
       tooltipDesc: 'Đánh giá mức độ hoàn thành mục tiêu chuẩn đầu ra chung của toàn thể học sinh trong lớp.',
       tooltipFormula: 'Điểm TB Lớp = Tổng điểm học sinh / Sĩ số',

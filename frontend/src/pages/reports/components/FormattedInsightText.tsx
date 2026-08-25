@@ -32,7 +32,7 @@ const PATTERNS: Array<{
   { regex: /#[0-9]+(?:\/[0-9]+)?/g, className: 'text-amber-300 font-black font-mono' },
   { regex: /Top\s+\d+%/gi, className: 'text-cyan-300 font-bold' },
   { regex: /[+-]\d+(?:\.\d+)?\s*(?:đ\/buổi|điểm|đ)/g, className: 'text-emerald-400 font-bold font-mono' },
-  { regex: /\b\d+(?:\.\d+)?\s*(?:đ\/buổi|đ|điểm|\/10|\/100|%|lượt|buổi học|học sinh)\b/g, className: 'text-amber-300 font-bold font-mono' },
+  { regex: /\b\d+(?:\.\d+)?\s*(?:đ\/buổi|đ|điểm|\/10|\/100|%|lượt|đầu điểm|bài kiểm tra|buổi học|buổi điểm danh|học sinh)\b/g, className: 'text-amber-300 font-bold font-mono' },
 
   // Analytical qualitative phrases
   { regex: /\b(?:tiến bộ vượt bậc|bứt phá|xuất sắc|rất ổn định|vững vàng|chuyên cần xuất sắc|đối xứng chuẩn|rất tốt)\b/gi, className: 'text-emerald-400 font-bold' },
