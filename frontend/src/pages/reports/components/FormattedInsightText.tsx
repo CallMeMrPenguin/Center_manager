@@ -8,36 +8,43 @@ const PATTERNS: Array<{
   regex: RegExp;
   className: string;
 }> = [
-  // Ranks
-  { regex: /\bQuán Quân\b/g, className: 'text-amber-300 font-black' },
-  { regex: /\bCao Thủ\b/g, className: 'text-pink-400 font-black' },
-  { regex: /\bTinh Anh\b/g, className: 'text-purple-300 font-black' },
-  { regex: /\bKim Cương\b/g, className: 'text-cyan-400 font-black' },
-  { regex: /\bBạch Kim\b/g, className: 'text-indigo-300 font-bold' },
-  { regex: /\bVàng\b/g, className: 'text-yellow-400 font-bold' },
-  { regex: /\bBạc\b/g, className: 'text-sky-300 font-bold' },
-  { regex: /\bĐồng\b/g, className: 'text-amber-500 font-bold' },
+  // 1. Ranks
+  { regex: /Quán Quân/g, className: 'text-amber-300 font-black' },
+  { regex: /Cao Thủ/g, className: 'text-pink-400 font-black' },
+  { regex: /Tinh Anh/g, className: 'text-purple-300 font-black' },
+  { regex: /Kim Cương/g, className: 'text-cyan-400 font-black' },
+  { regex: /Bạch Kim/g, className: 'text-indigo-300 font-bold' },
+  { regex: /Vàng/g, className: 'text-yellow-400 font-bold' },
+  { regex: /Bạc/g, className: 'text-sky-300 font-bold' },
+  { regex: /Đồng/g, className: 'text-amber-500 font-bold' },
 
-  // Skills
-  { regex: /\bTừ Vựng\b/g, className: 'text-blue-400 font-bold' },
-  { regex: /\bNgữ Pháp\b/g, className: 'text-purple-400 font-bold' },
-  { regex: /\bBTVN\b/g, className: 'text-emerald-400 font-bold' },
-  { regex: /\bLuyện Đề\b/g, className: 'text-amber-400 font-bold' },
+  // 2. Skills
+  { regex: /Từ Vựng/g, className: 'text-blue-400 font-bold' },
+  { regex: /Ngữ Pháp/g, className: 'text-purple-400 font-bold' },
+  { regex: /BTVN/g, className: 'text-emerald-400 font-bold' },
+  { regex: /Luyện Đề/g, className: 'text-amber-400 font-bold' },
 
-  // Statistics & Metrics
-  { regex: /\b(?:EMA|EMA_mới|EMA_cũ)\b/g, className: 'text-emerald-400 font-bold' },
-  { regex: /\b(?:PI|Performance Index)\b/g, className: 'text-indigo-400 font-bold' },
+  // 3. Technical symbols & formulas
   { regex: /σ\s*=\s*\d+(?:\.\d+)?/g, className: 'text-cyan-300 font-bold font-mono' },
-  { regex: /IQR\s*=\s*\d+(?:\.\d+)?\s*đ?/g, className: 'text-amber-300 font-bold font-mono' },
+  { regex: /IQR\s*=\s*\d+(?:\.\d+)?(?:\s*đ)?/g, className: 'text-amber-300 font-bold font-mono' },
+  { regex: /(?:EMA_mới|EMA_cũ|EMA)/g, className: 'text-emerald-400 font-bold' },
+  { regex: /(?:Performance Index|PI)/g, className: 'text-indigo-400 font-bold' },
   { regex: /#[0-9]+(?:\/[0-9]+)?/g, className: 'text-amber-300 font-black font-mono' },
   { regex: /Top\s+\d+%/gi, className: 'text-cyan-300 font-bold' },
-  { regex: /[+-]\d+(?:\.\d+)?\s*(?:đ\/buổi|điểm|đ)/g, className: 'text-emerald-400 font-bold font-mono' },
-  { regex: /\b\d+(?:\.\d+)?\s*(?:đ\/buổi|đ|điểm|\/10|\/100|%|lượt|đầu điểm|bài kiểm tra|buổi học|buổi điểm danh|học sinh)\b/g, className: 'text-amber-300 font-bold font-mono' },
 
-  // Analytical qualitative phrases
-  { regex: /\b(?:tiến bộ vượt bậc|bứt phá|xuất sắc|rất ổn định|vững vàng|chuyên cần xuất sắc|đối xứng chuẩn|rất tốt)\b/gi, className: 'text-emerald-400 font-bold' },
-  { regex: /\b(?:suy giảm nhanh|hổng kiến thức|chưa đạt chuẩn|biến động rất mạnh|nguy cơ cao)\b/gi, className: 'text-rose-400 font-bold' },
-  { regex: /\b(?:mất cân bằng|suy giảm nhẹ|trồi sụt|cần hỗ trợ|cần phụ đạo|chững lại|phân cực học lực|lệch trái|lệch phải)\b/gi, className: 'text-amber-400 font-bold' },
+  // 4. Fractions, Signed Deltas, Percentages, Scores with units
+  { regex: /\b\d+(?:\.\d+)?\/\d+(?:\.\d+)?\b/g, className: 'text-amber-300 font-bold font-mono' },
+  { regex: /\b\d+(?:\.\d+)?%/g, className: 'text-amber-300 font-bold font-mono' },
+  { regex: /[+-]\d+(?:\.\d+)?\s*(?:đ\/buổi|điểm|đ)\b/g, className: 'text-emerald-400 font-bold font-mono' },
+  { regex: /\b\d+(?:\.\d+)?\s*(?:đ\/buổi|điểm|đ)\b/g, className: 'text-amber-300 font-bold font-mono' },
+
+  // 5. Analytical qualitative phrases
+  { regex: /(?:tiến bộ vượt bậc|tiến bộ đều đặn|bứt phá|xuất sắc|rất ổn định|vững vàng|chuyên cần xuất sắc|đối xứng chuẩn|rất tốt|đồng đều)/gi, className: 'text-emerald-400 font-bold' },
+  { regex: /(?:suy giảm nhanh|hổng kiến thức|chưa đạt chuẩn|biến động rất mạnh|nguy cơ cao)/gi, className: 'text-rose-400 font-bold' },
+  { regex: /(?:mất cân bằng|suy giảm nhẹ|trồi sụt|cần hỗ trợ|cần phụ đạo|chững lại|phân cực học lực|lệch trái|lệch phải|phân hóa)/gi, className: 'text-amber-400 font-bold' },
+
+  // 6. Standalone numbers / integers / floats (e.g. 57, 19, 2, 10, 7.1)
+  { regex: /\b\d+(?:\.\d+)?\b/g, className: 'text-amber-300 font-bold font-mono' },
 ];
 
 export const FormattedInsightText: React.FC<FormattedInsightTextProps> = React.memo(({ text }) => {
@@ -46,7 +53,7 @@ export const FormattedInsightText: React.FC<FormattedInsightTextProps> = React.m
   // Build a combined regex for replacement
   const combinedRegex = new RegExp(
     PATTERNS.map((p) => `(${p.regex.source})`).join('|'),
-    'g'
+    'gi'
   );
 
   const parts: React.ReactNode[] = [];
@@ -73,7 +80,7 @@ export const FormattedInsightText: React.FC<FormattedInsightTextProps> = React.m
     }
 
     parts.push(
-      <span key={`${matchIndex}-${matchedText}`} className={appliedClass}>
+      <span key={`${matchIndex}-${matchedText}-${lastIndex}`} className={appliedClass}>
         {matchedText}
       </span>
     );
