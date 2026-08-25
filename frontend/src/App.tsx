@@ -1,32 +1,15 @@
 import { useState, useEffect, useRef } from 'react';
-import { api } from './api';
-import { AppSettings } from './types';
 import { Database } from 'lucide-react';
 import { TAB_DEFINITIONS } from './config/tabs';
 import { Sidebar } from './components/Sidebar';
 import ToastContainer from './components/Toast';
-import { applyTheme } from './theme';
-import { ConfirmProvider, useConfirm } from './components/ConfirmDialog';
+import { ConfirmProvider } from './components/ConfirmDialog';
 import { LoginPage, AuthUser } from './pages/auth/LoginPage';
 
 function AppContent() {
-  const confirm = useConfirm();
-  const [currentUser, setCurrentUser] = useState<AuthUser | null>(() => {
-    const saved = localStorage.getItem('auth_user');
-    return saved ? JSON.parse(saved) : null;
-  });
-
-  const [activeTab, setActiveTab] = useState<string>(() => {
-    const savedUser = localStorage.getItem('auth_user');
-    if (savedUser) {
-      try {
-        const u = JSON.parse(savedUser);
-        if (u.role === 'student') return 'assignments';
-      } catch {}
-    }
-    return 'dashboard';
-  });
-
+  // Always start at Login screen on page load / refresh
+  const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
+  const [activeTab, setActiveTab] = useState<string>('dashboard');
   const [profileOpen, setProfileOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
 
@@ -45,7 +28,6 @@ function AppContent() {
   const [preloadedVersions, setPreloadedVersions] = useState<number | null>(null);
   const [preloadedGrade, setPreloadedGrade] = useState<string | null>(null);
   const [preloadedUnit, setPreloadedUnit] = useState<string | null>(null);
-  const [settings, setSettings] = useState<AppSettings | null>(null);
 
   const [isSidebarExpanded, setIsSidebarExpanded] = useState<boolean>(() => {
     const saved = localStorage.getItem('sidebar_expanded');
@@ -111,7 +93,7 @@ function AppContent() {
     }
   };
 
-  // If user is not logged in, show LoginPage
+  // If user is not logged in, always show LoginPage on refresh
   if (!currentUser) {
     return (
       <>
@@ -123,7 +105,7 @@ function AppContent() {
 
   const isStudent = currentUser.role === 'student';
   const visibleTabs = isStudent
-    ? TAB_DEFINITIONS.filter((t) => ['assignments', 'schedule', 'results'].includes(t.id))
+    ? TAB_DEFINITIONS.filter((t) => t.id === 'assignments' || t.id === 'results')
     : TAB_DEFINITIONS;
 
   return (
