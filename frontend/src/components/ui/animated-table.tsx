@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   Search,
   ChevronDown,
@@ -8,6 +9,7 @@ import {
   ArrowDown,
   SlidersHorizontal,
   Check,
+  X,
 } from 'lucide-react';
 
 export type SortDirection = 'asc' | 'desc' | null;
@@ -65,7 +67,7 @@ export function AnimatedTable<T extends { id?: string | number }>({
   searchable = true,
   searchValue = '',
   onSearchChange,
-  searchPlaceholder = 'Tìm kiếm dữ liệu...',
+  searchPlaceholder = 'Tìm kiếm...',
   columnVisibility = true,
   visibleColumns,
   onVisibleColumnsChange,
@@ -76,6 +78,7 @@ export function AnimatedTable<T extends { id?: string | number }>({
 }: AnimatedTableProps<T>) {
   const [expandedRowIds, setExpandedRowIds] = useState<Set<string | number>>(new Set());
   const [showColMenu, setShowColMenu] = useState(false);
+  const [searchFocused, setSearchFocused] = useState(false);
 
   const activeVisibleCols = visibleColumns || columns.map((c) => c.id);
 
@@ -120,26 +123,61 @@ export function AnimatedTable<T extends { id?: string | number }>({
   };
 
   const isAllSelected = data.length > 0 && selectedIds.length === data.length;
-
   const displayedCols = columns.filter((col) => activeVisibleCols.includes(col.id));
 
   return (
     <div className="space-y-3.5 select-none">
-      {/* TOOLBAR (SEARCH & COLUMN VISIBILITY) */}
-      {(searchable || columnVisibility) && (
-        <div className="flex items-center justify-between gap-3 flex-wrap bg-[#0c0f1e] border border-[#1e2746] p-3 rounded-2xl">
-          {searchable && (
-            <div className="relative flex-1 max-w-sm">
-              <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-              <input
-                type="text"
-                value={searchValue}
-                onChange={(e) => onSearchChange?.(e.target.value)}
-                placeholder={searchPlaceholder}
-                className="w-full bg-[#14192b] border border-white/10 rounded-xl pl-9 pr-3.5 py-1.5 text-xs text-white placeholder:text-slate-500 font-semibold focus:outline-none focus:border-[#5c36f5] transition"
-              />
-            </div>
-          )}
+      {/* TOOLBAR */}
+      {(searchable || columnVisibility || selectedIds.length > 0) && (
+        <div className="flex items-center justify-between gap-3 flex-wrap bg-[#0c0f1e]/98 border border-[#1e2746] p-3 rounded-2xl">
+          <div className="flex items-center gap-3 flex-1">
+            {searchable && (
+              <motion.div
+                animate={{ width: searchFocused ? 320 : 240 }}
+                transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+                className="relative"
+              >
+                <Search size={15} className={`absolute left-3 top-1/2 -translate-y-1/2 transition-colors ${searchFocused ? 'text-[#5c36f5]' : 'text-slate-400'}`} />
+                <input
+                  type="text"
+                  value={searchValue}
+                  onFocus={() => setSearchFocused(true)}
+                  onBlur={() => setSearchFocused(false)}
+                  onChange={(e) => onSearchChange?.(e.target.value)}
+                  placeholder={searchPlaceholder}
+                  className="w-full bg-[#14192b] border border-white/10 rounded-xl pl-9 pr-8 py-1.5 text-xs text-white placeholder:text-slate-500 font-semibold focus:outline-none focus:border-[#5c36f5] focus:ring-2 focus:ring-[#5c36f5]/20 transition"
+                />
+                {searchValue && (
+                  <button
+                    onClick={() => onSearchChange?.('')}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
+                  >
+                    <X size={13} />
+                  </button>
+                )}
+              </motion.div>
+            )}
+
+            {/* Selected items animated pill */}
+            <AnimatePresence>
+              {selectedIds.length > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.85, x: -10 }}
+                  animate={{ opacity: 1, scale: 1, x: 0 }}
+                  exit={{ opacity: 0, scale: 0.85, x: -10 }}
+                  className="flex items-center gap-2 px-3 py-1 bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 rounded-xl text-xs font-black"
+                >
+                  <span>Đã chọn: {selectedIds.length} dòng</span>
+                  <button
+                    onClick={() => onSelectionChange?.([])}
+                    className="text-indigo-400 hover:text-white"
+                  >
+                    <X size={12} />
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
 
           <div className="flex items-center gap-2 relative">
             {columnVisibility && onVisibleColumnsChange && (
@@ -153,47 +191,53 @@ export function AnimatedTable<T extends { id?: string | number }>({
                   <span>Hiển thị cột</span>
                 </button>
 
-                {showColMenu && (
-                  <>
-                    <div className="fixed inset-0 z-40" onClick={() => setShowColMenu(false)} />
-                    <div className="absolute right-0 top-full mt-2 z-50 w-52 bg-[#121626] border border-[#232d4e] rounded-2xl p-2.5 shadow-2xl space-y-1 animate-in fade-in zoom-in-95 duration-150">
-                      <div className="text-[10px] font-black uppercase text-slate-400 px-2 py-1 border-b border-white/5">
-                        Tùy chọn cột
-                      </div>
-                      {columns.map((col) => {
-                        const isVis = activeVisibleCols.includes(col.id);
-                        return (
-                          <button
-                            key={col.id}
-                            type="button"
-                            onClick={() => {
-                              if (isVis) {
-                                onVisibleColumnsChange(activeVisibleCols.filter((id) => id !== col.id));
-                              } else {
-                                onVisibleColumnsChange([...activeVisibleCols, col.id]);
-                              }
-                            }}
-                            className="w-full flex items-center justify-between px-2 py-1.5 rounded-lg text-xs font-bold text-slate-300 hover:bg-white/5 hover:text-white transition"
-                          >
-                            <span>{typeof col.header === 'string' ? col.header : col.id}</span>
-                            {isVis && <Check size={13} className="text-[#5c36f5]" />}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </>
-                )}
+                <AnimatePresence>
+                  {showColMenu && (
+                    <>
+                      <div className="fixed inset-0 z-40" onClick={() => setShowColMenu(false)} />
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.95, y: -6 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.95, y: -6 }}
+                        className="absolute right-0 top-full mt-2 z-50 w-52 bg-[#121626] border border-[#232d4e] rounded-2xl p-2.5 shadow-2xl space-y-1"
+                      >
+                        <div className="text-[10px] font-black uppercase text-slate-400 px-2 py-1 border-b border-white/5">
+                          Tùy chọn cột
+                        </div>
+                        {columns.map((col) => {
+                          const isVis = activeVisibleCols.includes(col.id);
+                          return (
+                            <button
+                              key={col.id}
+                              type="button"
+                              onClick={() => {
+                                if (isVis) {
+                                  onVisibleColumnsChange(activeVisibleCols.filter((id) => id !== col.id));
+                                } else {
+                                  onVisibleColumnsChange([...activeVisibleCols, col.id]);
+                                }
+                              }}
+                              className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-bold text-slate-300 hover:bg-white/5 hover:text-white transition"
+                            >
+                              <span>{typeof col.header === 'string' ? col.header : col.id}</span>
+                              {isVis && <Check size={13} className="text-[#5c36f5]" />}
+                            </button>
+                          );
+                        })}
+                      </motion.div>
+                    </>
+                  )}
+                </AnimatePresence>
               </div>
             )}
           </div>
         </div>
       )}
 
-      {/* TABLE CONTAINER */}
+      {/* TABLE */}
       <div className="bg-[#080b14] border border-[#1b2444] rounded-2xl overflow-hidden shadow-xl">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
-            {/* Table Header */}
             <thead>
               <tr className="bg-[#0e1325] border-b border-white/10 text-[11px] font-black text-slate-400 uppercase tracking-wider">
                 {expandable && <th className="w-8 px-3 py-3" />}
@@ -244,7 +288,6 @@ export function AnimatedTable<T extends { id?: string | number }>({
               </tr>
             </thead>
 
-            {/* Table Body */}
             <tbody className="divide-y divide-white/5 text-xs font-semibold text-slate-200">
               {data.length === 0 ? (
                 <tr>
@@ -275,13 +318,15 @@ export function AnimatedTable<T extends { id?: string | number }>({
                       >
                         {expandable && (
                           <td className="w-8 px-3 py-3 text-center">
-                            <button
+                            <motion.button
                               type="button"
+                              animate={{ rotate: isExpanded ? 90 : 0 }}
+                              transition={{ duration: 0.2 }}
                               onClick={(e) => toggleRowExpanded(rowId, e)}
                               className="p-1 rounded-lg text-slate-400 hover:text-white transition cursor-pointer"
                             >
-                              {isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
-                            </button>
+                              <ChevronRight size={14} />
+                            </motion.button>
                           </td>
                         )}
 
@@ -321,9 +366,16 @@ export function AnimatedTable<T extends { id?: string | number }>({
                         <tr className="bg-[#0a0d18] border-b border-white/10">
                           <td
                             colSpan={displayedCols.length + (selectable ? 1 : 0) + 1}
-                            className="p-4 animate-in fade-in duration-200"
+                            className="p-4"
                           >
-                            {renderExpandedRow(row)}
+                            <motion.div
+                              initial={{ opacity: 0, height: 0 }}
+                              animate={{ opacity: 1, height: 'auto' }}
+                              exit={{ opacity: 0, height: 0 }}
+                              transition={{ duration: 0.2 }}
+                            >
+                              {renderExpandedRow(row)}
+                            </motion.div>
                           </td>
                         </tr>
                       )}
@@ -335,7 +387,7 @@ export function AnimatedTable<T extends { id?: string | number }>({
           </table>
         </div>
 
-        {/* PAGINATION FOOTER */}
+        {/* PAGINATION */}
         {pagination && (
           <div className="flex items-center justify-between px-4 py-3 bg-[#0c0f1e] border-t border-white/10 text-xs font-bold text-slate-400">
             <div>

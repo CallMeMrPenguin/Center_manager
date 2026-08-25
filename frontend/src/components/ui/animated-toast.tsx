@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { CheckCircle2, AlertCircle, AlertTriangle, Info, X, RotateCcw, Loader2 } from 'lucide-react';
 
 export type ToastType = 'success' | 'error' | 'warning' | 'info' | 'default';
@@ -37,6 +38,7 @@ export const AnimatedToastProvider: React.FC<{
   maxToasts?: number;
 }> = ({ children, position = 'top-right', maxToasts = 3 }) => {
   const [toasts, setToasts] = useState<ToastItem[]>([]);
+  const [isHovered, setIsHovered] = useState(false);
 
   const removeToast = useCallback((id: string) => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
@@ -49,7 +51,7 @@ export const AnimatedToastProvider: React.FC<{
 
       setToasts((prev) => [newToast, ...prev].slice(0, maxToasts));
 
-      const duration = toast.duration || 4000;
+      const duration = toast.duration || 4500;
       setTimeout(() => {
         removeToast(id);
       }, duration);
@@ -69,23 +71,34 @@ export const AnimatedToastProvider: React.FC<{
     <ToastContext.Provider value={{ toasts, addToast, removeToast }}>
       {children}
 
-      {/* Render Stacked Toasts */}
-      <div className={`fixed z-[9999] pointer-events-none flex flex-col gap-2.5 ${positionClasses}`}>
-        {toasts.map((toast, index) => {
-          return (
-            <div
-              key={toast.id}
-              style={{
-                transform: `scale(${1 - index * 0.04}) translateY(${index * 4}px)`,
-                opacity: 1 - index * 0.15,
-                zIndex: 100 - index,
-              }}
-              className="pointer-events-auto transition-all duration-200"
-            >
-              <ToastCard toast={toast} onClose={() => removeToast(toast.id)} />
-            </div>
-          );
-        })}
+      {/* Render Stacked Toasts with Framer Motion 3D Depth */}
+      <div
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        className={`fixed z-[9999] pointer-events-none flex flex-col gap-2.5 ${positionClasses}`}
+      >
+        <AnimatePresence mode="popLayout">
+          {toasts.map((toast, index) => {
+            const scale = isHovered ? 1 : 1 - index * 0.05;
+            const y = isHovered ? 0 : index * 8;
+            const opacity = isHovered ? 1 : 1 - index * 0.18;
+
+            return (
+              <motion.div
+                key={toast.id}
+                layout
+                initial={{ opacity: 0, y: -20, scale: 0.9 }}
+                animate={{ opacity, y, scale }}
+                exit={{ opacity: 0, scale: 0.85, transition: { duration: 0.2 } }}
+                transition={{ type: 'spring', stiffness: 450, damping: 30 }}
+                style={{ zIndex: 100 - index }}
+                className="pointer-events-auto"
+              >
+                <ToastCard toast={toast} onClose={() => removeToast(toast.id)} />
+              </motion.div>
+            );
+          })}
+        </AnimatePresence>
       </div>
     </ToastContext.Provider>
   );
@@ -95,39 +108,39 @@ const ToastCard: React.FC<{ toast: ToastItem; onClose: () => void }> = ({ toast,
   const typeStyles = {
     success: {
       border: 'border-emerald-500/40',
-      bg: 'bg-[#0c121e]',
-      icon: <CheckCircle2 className="text-emerald-400 shrink-0" size={17} />,
+      bg: 'bg-[#0c1320]',
+      icon: <CheckCircle2 className="text-emerald-400 shrink-0" size={18} />,
       titleColor: 'text-emerald-300',
     },
     error: {
       border: 'border-rose-500/40',
-      bg: 'bg-[#150d18]',
-      icon: <AlertCircle className="text-rose-400 shrink-0" size={17} />,
+      bg: 'bg-[#180e1a]',
+      icon: <AlertCircle className="text-rose-400 shrink-0" size={18} />,
       titleColor: 'text-rose-300',
     },
     warning: {
       border: 'border-amber-500/40',
-      bg: 'bg-[#16120c]',
-      icon: <AlertTriangle className="text-amber-400 shrink-0" size={17} />,
+      bg: 'bg-[#18130c]',
+      icon: <AlertTriangle className="text-amber-400 shrink-0" size={18} />,
       titleColor: 'text-amber-300',
     },
     info: {
       border: 'border-indigo-500/40',
-      bg: 'bg-[#0c0f1e]',
-      icon: <Info className="text-indigo-400 shrink-0" size={17} />,
+      bg: 'bg-[#0c0f20]',
+      icon: <Info className="text-indigo-400 shrink-0" size={18} />,
       titleColor: 'text-indigo-300',
     },
     default: {
-      border: 'border-white/10',
-      bg: 'bg-[#0f1320]',
-      icon: <Info className="text-slate-400 shrink-0" size={17} />,
+      border: 'border-white/15',
+      bg: 'bg-[#0f1322]',
+      icon: <Info className="text-slate-400 shrink-0" size={18} />,
       titleColor: 'text-white',
     },
   }[toast.type || 'default'];
 
   return (
     <div
-      className={`w-84 sm:w-96 p-3.5 rounded-2xl border ${typeStyles.border} ${typeStyles.bg} shadow-[0_16px_40px_rgba(0,0,0,0.9)] flex items-start gap-3 select-none animate-in fade-in slide-in-from-top-3 duration-200`}
+      className={`w-84 sm:w-96 p-4 rounded-2xl border ${typeStyles.border} ${typeStyles.bg} shadow-[0_20px_50px_rgba(0,0,0,0.95)] flex items-start gap-3 select-none`}
     >
       <div className="mt-0.5">{typeStyles.icon}</div>
       <div className="flex-1 min-w-0">
@@ -170,23 +183,37 @@ export const StackedNotifications: React.FC<{
   onRemove: (id: string) => void;
   maxVisible?: number;
 }> = ({ toasts, onRemove, maxVisible = 3 }) => {
+  const [isHovered, setIsHovered] = useState(false);
   const visible = toasts.slice(0, maxVisible);
 
   return (
-    <div className="fixed top-5 right-5 z-[9999] flex flex-col gap-2.5 items-end pointer-events-none">
-      {visible.map((t, idx) => (
-        <div
-          key={t.id}
-          style={{
-            transform: `scale(${1 - idx * 0.04}) translateY(${idx * 4}px)`,
-            opacity: 1 - idx * 0.15,
-            zIndex: 100 - idx,
-          }}
-          className="pointer-events-auto transition-all duration-200"
-        >
-          <ToastCard toast={t} onClose={() => onRemove(t.id)} />
-        </div>
-      ))}
+    <div
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      className="fixed top-5 right-5 z-[9999] flex flex-col gap-2.5 items-end pointer-events-none"
+    >
+      <AnimatePresence mode="popLayout">
+        {visible.map((t, idx) => {
+          const scale = isHovered ? 1 : 1 - idx * 0.05;
+          const y = isHovered ? 0 : idx * 8;
+          const opacity = isHovered ? 1 : 1 - idx * 0.18;
+
+          return (
+            <motion.div
+              key={t.id}
+              layout
+              initial={{ opacity: 0, y: -20, scale: 0.9 }}
+              animate={{ opacity, y, scale }}
+              exit={{ opacity: 0, scale: 0.85 }}
+              transition={{ type: 'spring', stiffness: 450, damping: 30 }}
+              style={{ zIndex: 100 - idx }}
+              className="pointer-events-auto"
+            >
+              <ToastCard toast={t} onClose={() => onRemove(t.id)} />
+            </motion.div>
+          );
+        })}
+      </AnimatePresence>
     </div>
   );
 };
@@ -198,53 +225,40 @@ export const UndoToast: React.FC<{
   message?: string;
   duration?: number;
 }> = ({ open, onClose, onUndo, message = 'Đã thực hiện thay đổi', duration = 5000 }) => {
-  const [progress, setProgress] = useState(100);
-
-  useEffect(() => {
-    if (!open) {
-      setProgress(100);
-      return;
-    }
-
-    const interval = 50;
-    const step = (interval / duration) * 100;
-    const timer = setInterval(() => {
-      setProgress((p) => {
-        if (p <= step) {
-          clearInterval(timer);
-          onClose();
-          return 0;
-        }
-        return p - step;
-      });
-    }, interval);
-
-    return () => clearInterval(timer);
-  }, [open, duration, onClose]);
-
-  if (!open) return null;
-
   return (
-    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[9999] bg-[#0c0f1e] border border-[#212c4b] rounded-2xl p-3.5 shadow-2xl flex items-center gap-4 select-none animate-in fade-in slide-in-from-bottom-3 duration-200 min-w-[320px]">
-      <span className="text-xs font-bold text-white flex-1">{message}</span>
-      <button
-        type="button"
-        onClick={() => {
-          onUndo();
-          onClose();
-        }}
-        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#5c36f5] hover:bg-[#7351f7] text-white text-xs font-black transition cursor-pointer shadow-md"
-      >
-        <RotateCcw size={13} />
-        <span>Hoàn tác</span>
-      </button>
+    <AnimatePresence>
+      {open && (
+        <motion.div
+          initial={{ opacity: 0, y: 30, scale: 0.95 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, y: 20, scale: 0.95 }}
+          transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+          className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[9999] bg-[#0c0f1e] border border-[#212c4b] rounded-2xl p-4 shadow-2xl flex items-center gap-4 select-none min-w-[320px] overflow-hidden"
+        >
+          <span className="text-xs font-bold text-white flex-1">{message}</span>
+          <button
+            type="button"
+            onClick={() => {
+              onUndo();
+              onClose();
+            }}
+            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[#5c36f5] hover:bg-[#7351f7] text-white text-xs font-black transition cursor-pointer shadow-[0_0_14px_rgba(92,54,245,0.5)]"
+          >
+            <RotateCcw size={13} />
+            <span>Hoàn tác</span>
+          </button>
 
-      {/* Progress countdown bar */}
-      <div
-        className="absolute bottom-0 left-0 right-0 h-1 bg-[#5c36f5] rounded-b-2xl transition-all"
-        style={{ width: `${progress}%` }}
-      />
-    </div>
+          {/* Animated Progress countdown bar */}
+          <motion.div
+            initial={{ width: '100%' }}
+            animate={{ width: '0%' }}
+            transition={{ duration: duration / 1000, ease: 'linear' }}
+            onAnimationComplete={onClose}
+            className="absolute bottom-0 left-0 h-1 bg-[#5c36f5]"
+          />
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 };
 

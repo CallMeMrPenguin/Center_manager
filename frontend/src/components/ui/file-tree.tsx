@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   Folder,
   FolderOpen,
@@ -74,58 +75,82 @@ const FileTreeNodeItem: React.FC<{
 
   return (
     <div className="select-none text-xs">
-      <div
+      <motion.div
         onClick={handleClick}
-        style={{ paddingLeft: `${depth * 14 + 8}px` }}
-        className={`flex items-center gap-2 py-1.5 pr-2 rounded-xl transition cursor-pointer font-bold ${
+        whileHover={{ x: 3 }}
+        transition={{ duration: 0.15 }}
+        style={{ paddingLeft: `${depth * 16 + 8}px` }}
+        className={`relative flex items-center gap-2 py-1.5 pr-2.5 rounded-xl cursor-pointer font-bold transition-colors ${
           isSelected
-            ? 'bg-[#5c36f5] text-white shadow-[0_0_12px_rgba(92,54,245,0.4)] font-black'
-            : 'text-slate-300 hover:bg-white/5 hover:text-white'
+            ? 'text-white font-black'
+            : 'text-slate-300 hover:bg-white/[0.04] hover:text-white'
         }`}
       >
-        {isFolder ? (
-          <>
-            <span className="text-slate-500 hover:text-white">
-              {isExpanded ? <ChevronDown size={13} /> : <ChevronRight size={13} />}
+        {isSelected && (
+          <motion.div
+            layoutId="file-tree-active-node"
+            transition={{ type: 'spring', stiffness: 450, damping: 30 }}
+            className="absolute inset-0 bg-[#5c36f5] rounded-xl shadow-[0_0_14px_rgba(92,54,245,0.5)] z-0"
+          />
+        )}
+
+        <div className="relative z-10 flex items-center gap-2 w-full truncate">
+          {isFolder ? (
+            <>
+              <motion.span
+                animate={{ rotate: isExpanded ? 90 : 0 }}
+                transition={{ duration: 0.2 }}
+                className="text-slate-400"
+              >
+                <ChevronRight size={13} />
+              </motion.span>
+              {isExpanded ? (
+                <FolderOpen size={16} className="text-indigo-400 shrink-0" />
+              ) : (
+                <Folder size={16} className="text-indigo-400 shrink-0" />
+              )}
+            </>
+          ) : (
+            <>
+              <span className="w-3.5" />
+              {getFileIcon(node.name)}
+            </>
+          )}
+
+          <span className="truncate flex-1">{node.name}</span>
+
+          {isFolder && node.children && (
+            <span className="text-[10px] text-slate-400 font-mono bg-white/5 px-1.5 py-0.2 rounded-md">
+              {node.children.length}
             </span>
-            {isExpanded ? (
-              <FolderOpen size={16} className="text-indigo-400 shrink-0" />
-            ) : (
-              <Folder size={16} className="text-indigo-400 shrink-0" />
-            )}
-          </>
-        ) : (
-          <>
-            <span className="w-3.5" />
-            {getFileIcon(node.name)}
-          </>
-        )}
-
-        <span className="truncate flex-1">{node.name}</span>
-
-        {isFolder && node.children && (
-          <span className="text-[10px] text-slate-500 font-mono">
-            {node.children.length}
-          </span>
-        )}
-      </div>
-
-      {/* Children */}
-      {isFolder && isExpanded && node.children && (
-        <div className="space-y-0.5 animate-in fade-in duration-150">
-          {node.children.map((child) => (
-            <FileTreeNodeItem
-              key={child.id}
-              node={child}
-              depth={depth + 1}
-              selectedId={selectedId}
-              expandedIds={expandedIds}
-              onToggleExpand={onToggleExpand}
-              onSelect={onSelect}
-            />
-          ))}
+          )}
         </div>
-      )}
+      </motion.div>
+
+      {/* Accordion Expand / Collapse with Framer Motion */}
+      <AnimatePresence initial={false}>
+        {isFolder && isExpanded && node.children && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.2, ease: 'easeInOut' }}
+            className="overflow-hidden space-y-0.5"
+          >
+            {node.children.map((child) => (
+              <FileTreeNodeItem
+                key={child.id}
+                node={child}
+                depth={depth + 1}
+                selectedId={selectedId}
+                expandedIds={expandedIds}
+                onToggleExpand={onToggleExpand}
+                onSelect={onSelect}
+              />
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
@@ -154,7 +179,7 @@ export const FileTree: React.FC<FileTreeProps> = ({
   };
 
   return (
-    <div className={`space-y-0.5 p-2 bg-[#0c0f1e] border border-[#1e2746] rounded-2xl ${className}`}>
+    <div className={`space-y-1 p-2 bg-[#0c0f1e]/98 border border-[#1e2746] rounded-2xl ${className}`}>
       {data.map((node) => (
         <FileTreeNodeItem
           key={node.id}

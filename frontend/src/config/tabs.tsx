@@ -3,7 +3,7 @@ import {
   FileCode, Database, BookOpen, Settings as SettingsIcon, FolderOpen, LucideIcon,
   LayoutDashboard, Users, UserCheck, Briefcase, ClipboardList, Award, 
   CreditCard, Receipt, BarChart3, CalendarCheck, UserCog, FileCheck, GraduationCap,
-  PenTool
+  PenTool, Sparkles
 } from 'lucide-react';
 import TestFormatter from '../pages/test-formatter';
 import QuestionBank from '../pages/question-bank';
@@ -20,6 +20,8 @@ import CoursesPage from '../pages/courses';
 import KiemTraPage from '../pages/kiemtra';
 import SchedulePage from '../pages/schedule';
 import ReportsPage from '../pages/reports';
+import UIShowcasePage from '../pages/ui-showcase';
+
 
 export interface TabDefinition {
   id: string;
@@ -180,6 +182,13 @@ export const TAB_DEFINITIONS: TabDefinition[] = [
     icon: UserCog,
     section: 'settings',
     render: () => <WaitingForDevelopment title="Quyền & Vai Trò" />
+  },
+  {
+    id: 'ui-showcase',
+    label: 'UI Showcase',
+    icon: Sparkles,
+    section: 'settings',
+    render: () => <UIShowcasePage />
   },
   {
     id: 'settings',
