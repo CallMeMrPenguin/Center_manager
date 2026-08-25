@@ -107,20 +107,6 @@ export const AssignmentsPage: React.FC = () => {
         </div>
       )}
 
-      {/* Student Welcome Header Card */}
-      {isStudent && (
-        <div className="bg-[#0c0f1e] border border-[#1e2742] rounded-2xl p-5 shadow-lg flex items-center justify-between">
-          <div>
-            <h2 className="text-base font-black text-white">
-              Xin chào, <span className="text-emerald-400">{currentUser?.name}</span>!
-            </h2>
-            <p className="text-xs text-slate-400 mt-0.5">
-              {currentUser?.className || 'Lớp học của bạn'} — Danh sách bài tập về nhà & bài luyện thi cần hoàn thành
-            </p>
-          </div>
-        </div>
-      )}
-
       {/* 2. KPI Summary Cards (Admin only) */}
       {!isStudent && <AssignmentsKpiCards kpis={kpis} />}
 

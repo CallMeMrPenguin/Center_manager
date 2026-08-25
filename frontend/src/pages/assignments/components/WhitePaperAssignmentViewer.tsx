@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useCallback } from 'react';
-import { ArrowLeft, Award, Printer, Save, Maximize2, Minimize2, CheckCircle2, ChevronRight, PenTool } from 'lucide-react';
+import { ArrowLeft, Award, Save, Maximize2, Minimize2, CheckCircle2, ChevronRight, PenTool } from 'lucide-react';
 import { Assignment } from '../types';
 import { ExerciseItem } from './types';
 import { WhitePaperHeader } from './WhitePaperHeader';
@@ -8,7 +8,7 @@ import { UlnDocumentRenderer, SectionProgressGroup } from './UlnDocumentRenderer
 import { DrawingCorrectionCanvas } from './DrawingCorrectionCanvas';
 import { parseUlnContent } from '../utils/ulnParser';
 import { SAMPLE_UNIT12_ULN_TEXT } from '../constants/sampleUlnTest';
-import { cleanOptionPrefix, format1Dec } from '../../../utils';
+import { format1Dec } from '../../../utils';
 import { showToast } from '../../../components/Toast';
 
 interface WhitePaperAssignmentViewerProps {
@@ -78,21 +78,34 @@ export const WhitePaperAssignmentViewer: React.FC<WhitePaperAssignmentViewerProp
   const pct = progress.total > 0 ? Math.round((progress.answered / progress.total) * 100) : 0;
 
   return (
-    <div className={`${isFullscreen ? 'fixed inset-0 z-50 bg-[#06070a] overflow-y-auto p-3 sm:p-6' : ''} space-y-4 pb-12 select-none font-sans`}>
-      {/* 1. TOP FLOATING NAVIGATION BAR */}
-      <div className="bg-[#0c0f1e] border border-[#1e2742] rounded-2xl p-3.5 shadow-xl flex flex-wrap items-center justify-between gap-3 sticky top-2 z-40">
-        <div className="flex items-center gap-3">
+    <div
+      onContextMenu={(e) => e.preventDefault()}
+      onCopy={(e) => e.preventDefault()}
+      onCut={(e) => e.preventDefault()}
+      onDragStart={(e) => e.preventDefault()}
+      className={`${
+        isFullscreen
+          ? 'fixed inset-0 z-[100] bg-[#08090e] overflow-y-auto p-3 sm:p-6 flex flex-col'
+          : 'relative'
+      } space-y-4 pb-12 select-none font-sans`}
+      style={{ userSelect: 'none', WebkitUserSelect: 'none' }}
+    >
+      {/* 1. STICKY TOP TITLE BAR (Permanently Fixed at Top on Scroll) */}
+      <div className="bg-[#0c0f1e]/95 border border-[#1e2742] rounded-2xl p-3.5 shadow-2xl flex flex-wrap items-center justify-between gap-3 sticky top-0 z-40">
+        <div className="flex items-center gap-3 min-w-0">
           <button
             type="button"
             onClick={onBack}
-            className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white transition cursor-pointer"
+            className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white transition cursor-pointer shrink-0"
             title="Quay lại"
           >
             <ArrowLeft size={16} />
           </button>
-          <div>
+          <div className="min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
-              <h3 className="text-sm font-black text-white">{assignment.title}</h3>
+              <h3 className="text-sm font-black text-white truncate max-w-[280px] sm:max-w-md">
+                {assignment.title}
+              </h3>
               {isPreview && (
                 <span className="text-[10px] uppercase font-black px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30">
                   Xem Trước Phiếu Bài Tập (Nền Trắng A4)
@@ -100,14 +113,17 @@ export const WhitePaperAssignmentViewer: React.FC<WhitePaperAssignmentViewerProp
               )}
             </div>
             <p className="text-xs text-slate-400 mt-0.5">
-              Học sinh: <strong className="text-slate-200">{studentName}</strong> | Trạng thái: <strong className="text-indigo-300">{isSubmitted ? `Đã nộp (${submissionCount} lần)` : 'Đang làm bài'}</strong>
+              Học sinh: <strong className="text-slate-200">{studentName}</strong> | Trạng thái:{' '}
+              <strong className="text-indigo-300">
+                {isSubmitted ? `Đã nộp (${submissionCount} lần)` : 'Đang làm bài'}
+              </strong>
             </p>
           </div>
         </div>
 
         {/* Action Controls */}
-        <div className="flex items-center gap-2 flex-wrap">
-          {/* Chế độ Chữa bài (Chỉ dành cho Giáo Viên / Quản Trị) */}
+        <div className="flex items-center gap-2 flex-wrap shrink-0">
+          {/* Correction Mode Canvas (Teacher Preview Only) */}
           {isPreview && (
             <button
               type="button"
@@ -123,22 +139,14 @@ export const WhitePaperAssignmentViewer: React.FC<WhitePaperAssignmentViewerProp
             </button>
           )}
 
+          {/* Fullscreen Toggle Button */}
           <button
             type="button"
             onClick={() => setIsFullscreen(!isFullscreen)}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-200 text-xs font-bold border border-white/10 transition cursor-pointer"
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-200 text-xs font-bold border border-white/10 transition cursor-pointer active:scale-95"
           >
             {isFullscreen ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
             <span>{isFullscreen ? 'Thu nhỏ' : 'Toàn màn hình'}</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => window.print()}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-200 text-xs font-bold border border-white/10 transition cursor-pointer"
-          >
-            <Printer size={14} />
-            <span>In Đề / PDF</span>
           </button>
 
           {isSubmitted && (
@@ -159,26 +167,31 @@ export const WhitePaperAssignmentViewer: React.FC<WhitePaperAssignmentViewerProp
         </div>
       </div>
 
-      {/* 2. MAIN LAYOUT WITH INSTRUCTION-GROUPED PROGRESS SIDEBAR */}
-      <div className="flex gap-5 max-w-7xl mx-auto items-start">
-        {/* Progress Sidebar */}
+      {/* 2. MAIN LAYOUT WITH LIGHT-THEME QUESTION PROGRESS SIDEBAR & WHITE PAPER */}
+      <div className="flex gap-5 max-w-7xl mx-auto items-start w-full">
+        {/* Light Theme Progress Sidebar (Matching Paper Sheet) */}
         {progress.total > 0 && (
-          <div className="w-72 shrink-0 bg-[#0c0f1e] border border-[#212c4b] rounded-2xl p-4 sticky top-20 shadow-xl space-y-3.5 hidden md:block">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-1.5 text-xs font-bold text-slate-200">
-                <CheckCircle2 size={14} className="text-emerald-400" />
+          <div className="w-72 shrink-0 bg-white text-slate-900 border border-slate-200 rounded-2xl p-4 sticky top-16 shadow-xl space-y-3.5 hidden md:block select-none">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
+              <div className="flex items-center gap-1.5 text-xs font-black text-slate-800">
+                <CheckCircle2 size={15} className="text-emerald-600" />
                 <span>Tiến Độ Làm Bài</span>
               </div>
-              <span className="text-xs font-black text-indigo-400">{progress.answered}/{progress.total} ({pct}%)</span>
+              <span className="text-xs font-black text-indigo-600">
+                {progress.answered}/{progress.total} ({pct}%)
+              </span>
             </div>
 
-            <div className="w-full bg-white/10 rounded-full h-2 overflow-hidden">
-              <div className="bg-emerald-500 h-full rounded-full transition-all duration-300" style={{ width: `${pct}%` }} />
+            <div className="w-full bg-slate-100 border border-slate-200 rounded-full h-2.5 overflow-hidden">
+              <div
+                className="bg-emerald-500 h-full rounded-full transition-all duration-300 shadow-xs"
+                style={{ width: `${pct}%` }}
+              />
             </div>
 
-            <div className="space-y-3 max-h-[65vh] overflow-y-auto pr-1">
+            <div className="space-y-3 max-h-[68vh] overflow-y-auto pr-1 scrollbar-thin">
               {progress.sections.map((sec, sIdx) => (
-                <div key={sIdx} className="space-y-1.5 pt-2.5 first:pt-0 border-t border-white/10 first:border-none">
+                <div key={sIdx} className="space-y-1.5 pt-2.5 first:pt-0 border-t border-slate-100 first:border-none">
                   {/* Clickable Instruction Title */}
                   <button
                     type="button"
@@ -186,9 +199,9 @@ export const WhitePaperAssignmentViewer: React.FC<WhitePaperAssignmentViewerProp
                       const el = document.getElementById(sec.id);
                       if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
                     }}
-                    className="text-left w-full text-[11px] font-black text-indigo-300 hover:text-indigo-200 transition cursor-pointer leading-tight flex items-start gap-1"
+                    className="text-left w-full text-[11px] font-black text-indigo-700 hover:text-indigo-900 transition cursor-pointer leading-tight flex items-start gap-1"
                   >
-                    <ChevronRight size={12} className="shrink-0 mt-0.5 text-indigo-400" />
+                    <ChevronRight size={12} className="shrink-0 mt-0.5 text-indigo-500" />
                     <span className="line-clamp-2">{sec.title}</span>
                   </button>
 
@@ -202,10 +215,10 @@ export const WhitePaperAssignmentViewer: React.FC<WhitePaperAssignmentViewerProp
                           const el = document.getElementById(item.id);
                           if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
                         }}
-                        className={`w-6 h-6 rounded text-[11px] font-bold transition flex items-center justify-center cursor-pointer ${
+                        className={`w-6 h-6 rounded text-[11px] font-black transition flex items-center justify-center cursor-pointer ${
                           item.isAnswered
-                            ? 'bg-emerald-500 text-white shadow-xs'
-                            : 'bg-white/5 hover:bg-white/15 text-slate-300 border border-white/10'
+                            ? 'bg-emerald-600 text-white shadow-xs ring-1 ring-emerald-500'
+                            : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300'
                         }`}
                       >
                         {item.label}
@@ -220,8 +233,8 @@ export const WhitePaperAssignmentViewer: React.FC<WhitePaperAssignmentViewerProp
 
         {/* 3. PURE WHITE PAPER WORKSHEET CANVAS (A4 PAPER SHEET STANDARD) */}
         <div
-          style={{ colorScheme: 'light' }}
-          className="relative white-paper-container flex-1 bg-white text-slate-950 shadow-2xl rounded-2xl p-6 sm:p-10 border border-slate-200 space-y-5 print:p-0 print:border-none print:shadow-none"
+          style={{ colorScheme: 'light', userSelect: 'none', WebkitUserSelect: 'none' }}
+          className="relative white-paper-container flex-1 bg-white text-slate-950 shadow-2xl rounded-2xl p-6 sm:p-10 border border-slate-200 space-y-5"
         >
           {/* Drawing Correction Layer Overlay (Teacher Preview only) */}
           {isPreview && <DrawingCorrectionCanvas isActive={isCorrectionMode} />}
@@ -257,7 +270,7 @@ export const WhitePaperAssignmentViewer: React.FC<WhitePaperAssignmentViewerProp
             </div>
           )}
 
-          <div className="border-t-2 border-slate-800 pt-5 text-center text-xs text-slate-500 font-semibold print:block">
+          <div className="border-t-2 border-slate-800 pt-5 text-center text-xs text-slate-500 font-semibold">
             --- HẾT PHIẾU BÀI TẬP ---
           </div>
         </div>
