@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useStudentResults } from './hooks/useStudentResults';
 import { StudentProfileHeader } from './components/StudentProfileHeader';
 import { KPICards } from '../reports/components/KPICards';
@@ -6,8 +6,16 @@ import { InsightCommentary } from '../reports/components/InsightCommentary';
 import { InteractiveChart } from '../reports/components/InteractiveChart';
 import { SummaryStrip } from '../reports/components/SummaryStrip';
 import { ResultHistoryTable } from './components/ResultHistoryTable';
+import { AuthUser } from '../auth/LoginPage';
 
 export const ResultsPage: React.FC = () => {
+  const currentUser: AuthUser | null = useMemo(() => {
+    const saved = localStorage.getItem('auth_user');
+    return saved ? JSON.parse(saved) : null;
+  }, []);
+
+  const isStudent = currentUser?.role === 'student';
+
   const {
     students,
     selectedStudentId,
@@ -62,6 +70,7 @@ export const ResultsPage: React.FC = () => {
         summary={summary}
         loading={loading}
         onRefresh={refresh}
+        isStudent={isStudent}
       />
 
       {/* 2. Key Performance Indicators (KPICards from Reports) */}
@@ -87,7 +96,7 @@ export const ResultsPage: React.FC = () => {
         />
       </div>
 
-      {/* 4. Interactive Score Chart (UI & Logic directly from Reports) */}
+      {/* 4. Interactive Score Chart (Personal Progress timeline only for students) */}
       <div className="animate-cascade-3">
         <InteractiveChart
           sessionChartData={sessionChartData}
@@ -101,13 +110,14 @@ export const ResultsPage: React.FC = () => {
           selectedPhaseId={selectedPhaseId}
           setSelectedPhaseId={setSelectedPhaseId}
           onOpenPhaseModal={() => {}}
-          chartViewMode={chartViewMode}
+          chartViewMode={isStudent ? 'timeline' : chartViewMode}
           setChartViewMode={setChartViewMode}
           distributionStats={distributionStats}
           selectedGradeTypeFilter={selectedGradeTypeFilter}
           setSelectedGradeTypeFilter={setSelectedGradeTypeFilter}
           selectedScoreBin={selectedScoreBin}
           onSelectScoreBin={handleSelectScoreBin}
+          hideDistributionToggle={isStudent}
         />
       </div>
 
@@ -117,7 +127,7 @@ export const ResultsPage: React.FC = () => {
           engine={engine}
           gradeTypesList={gradeTypesList}
           hasSelectedStudent={!!currentStudent}
-          chartViewMode={chartViewMode}
+          chartViewMode={isStudent ? 'timeline' : chartViewMode}
           distributionStats={distributionStats}
         />
       </div>

@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { User, BookOpen, RefreshCw, Trophy, ShieldCheck, Sparkles } from 'lucide-react';
+import { User, BookOpen, RefreshCw, Trophy } from 'lucide-react';
 import { CustomSelect, SelectOption } from '../../../components/CustomSelect';
 import { StudentProfileSummary } from '../types';
 import { trunc1Dec } from '../hooks/useStudentResults';
@@ -14,6 +14,7 @@ interface StudentProfileHeaderProps {
   summary: StudentProfileSummary | null;
   loading: boolean;
   onRefresh: () => void;
+  isStudent?: boolean;
 }
 
 export const StudentProfileHeader: React.FC<StudentProfileHeaderProps> = ({
@@ -26,6 +27,7 @@ export const StudentProfileHeader: React.FC<StudentProfileHeaderProps> = ({
   summary,
   loading,
   onRefresh,
+  isStudent = false,
 }) => {
   const studentOptions: SelectOption[] = useMemo(() => {
     return students.map((s) => ({
@@ -46,46 +48,48 @@ export const StudentProfileHeader: React.FC<StudentProfileHeaderProps> = ({
 
   return (
     <div className="bg-[#0c0f1e] border border-[#1e2742] rounded-2xl p-5 shadow-2xl space-y-5">
-      {/* 1. TOP FILTER BAR */}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/5 pb-3.5">
-        <div className="flex flex-wrap items-center gap-3 flex-1 min-w-[280px]">
-          {/* Class Selector First */}
-          <div className="w-56 max-w-full">
-            <CustomSelect
-              value={selectedClassId}
-              onChange={(val) => onSelectClass(String(val))}
-              options={classOptions}
-              placeholder="Chọn lớp học..."
-              icon={<BookOpen size={14} className="text-indigo-400" />}
-            />
+      {/* 1. TOP FILTER BAR (Admin / Teacher Only) */}
+      {!isStudent && (
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/5 pb-3.5">
+          <div className="flex flex-wrap items-center gap-3 flex-1 min-w-[280px]">
+            {/* Class Selector First */}
+            <div className="w-56 max-w-full">
+              <CustomSelect
+                value={selectedClassId}
+                onChange={(val) => onSelectClass(String(val))}
+                options={classOptions}
+                placeholder="Chọn lớp học..."
+                icon={<BookOpen size={14} className="text-indigo-400" />}
+              />
+            </div>
+
+            {/* Student Selector (Filtered strictly by class) */}
+            <div className="w-72 max-w-full">
+              <CustomSelect
+                value={selectedStudentId || ''}
+                onChange={(val) => onSelectStudent(Number(val))}
+                options={studentOptions}
+                placeholder={students.length > 0 ? 'Chọn học sinh...' : 'Không có học sinh trong lớp'}
+                searchable
+                searchPlaceholder="Tìm tên học sinh..."
+                disabled={students.length === 0}
+                icon={<User size={14} className="text-sky-400" />}
+              />
+            </div>
           </div>
 
-          {/* Student Selector (Filtered strictly by class) */}
-          <div className="w-72 max-w-full">
-            <CustomSelect
-              value={selectedStudentId || ''}
-              onChange={(val) => onSelectStudent(Number(val))}
-              options={studentOptions}
-              placeholder={students.length > 0 ? "Chọn học sinh..." : "Không có học sinh trong lớp"}
-              searchable
-              searchPlaceholder="Tìm tên học sinh..."
-              disabled={students.length === 0}
-              icon={<User size={14} className="text-sky-400" />}
-            />
-          </div>
+          <button
+            type="button"
+            onClick={onRefresh}
+            disabled={loading}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#151a2e] hover:bg-[#1e2642] text-slate-300 hover:text-white text-xs font-bold border border-white/10 transition-all cursor-pointer active:scale-95 disabled:opacity-50"
+            title="Tải lại dữ liệu"
+          >
+            <RefreshCw size={13} className={loading ? 'animate-spin text-indigo-400' : 'text-slate-400'} />
+            <span>Làm mới</span>
+          </button>
         </div>
-
-        <button
-          type="button"
-          onClick={onRefresh}
-          disabled={loading}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#151a2e] hover:bg-[#1e2642] text-slate-300 hover:text-white text-xs font-bold border border-white/10 transition-all cursor-pointer active:scale-95 disabled:opacity-50"
-          title="Tải lại dữ liệu"
-        >
-          <RefreshCw size={13} className={loading ? 'animate-spin text-indigo-400' : 'text-slate-400'} />
-          <span>Làm mới</span>
-        </button>
-      </div>
+      )}
 
       {/* 2. STUDENT ID CARD (BÁO CÁO THỐNG KÊ STANDARD) */}
       {summary ? (

@@ -25,6 +25,7 @@ interface InteractiveChartProps {
   setSelectedGradeTypeFilter: (key: GradeTypeFilterKey) => void;
   selectedScoreBin?: DistributionScoreBin | null;
   onSelectScoreBin?: (bin: DistributionScoreBin) => void;
+  hideDistributionToggle?: boolean;
 }
 
 export const InteractiveChart: React.FC<InteractiveChartProps> = ({
@@ -46,6 +47,7 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = ({
   setSelectedGradeTypeFilter,
   selectedScoreBin,
   onSelectScoreBin,
+  hideDistributionToggle = false,
 }) => {
   const chartWrapperRef = useRef<HTMLDivElement>(null);
   const [hoveredPoint, setHoveredPoint] = useState<HoveredChartPoint | null>(null);
@@ -84,16 +86,18 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = ({
   }, []);
 
   const clampPanOffset = useCallback(
-    (x: number, y: number, currentZoom: number) => {
-      if (currentZoom <= 1.0) return { x: 0, y: 0 };
-      const maxPanX = plotAreaWidth * (currentZoom - 1);
-      const clampedX = Math.max(-maxPanX, Math.min(0, x));
-      return { x: clampedX, y: 0 };
+    (x: number, y: number, z: number) => {
+      if (z <= 1.0) return { x: 0, y: 0 };
+      const limX = (plotAreaWidth * (z - 1)) / 2;
+      const limY = (plotAreaHeight * (z - 1)) / 2;
+      return {
+        x: Math.max(-limX, Math.min(limX, x)),
+        y: Math.max(-limY, Math.min(limY, y)),
+      };
     },
-    [plotAreaWidth]
+    [plotAreaWidth, plotAreaHeight]
   );
 
-  // Auto reset or re-clamp panOffset whenever zoomLevel changes
   useEffect(() => {
     if (zoomLevel <= 1.0) {
       setPanOffset({ x: 0, y: 0 });
@@ -102,7 +106,6 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = ({
     }
   }, [zoomLevel, clampPanOffset]);
 
-  // Reset zoom & pan when timeView, selectedPhaseId, or sessionChartData changes
   useEffect(() => {
     setZoomLevel(1.0);
     setPanOffset({ x: 0, y: 0 });
@@ -133,51 +136,47 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = ({
 
   const getSvgX = useCallback(
     (index: number, total: number) => {
-      const currentPanX = zoomLevel > 1.0 ? panOffset.x : 0;
-      if (total <= 1) return paddingLeft + plotAreaWidth / 2 + currentPanX;
-      const baseSpacing = plotAreaWidth / (total - 1);
-      const effectiveSpacing = baseSpacing * zoomLevel;
-      const baseX = paddingLeft + index * effectiveSpacing;
-      return baseX + currentPanX;
+      if (total <= 1) return paddingLeft + plotAreaWidth / 2;
+      return paddingLeft + (index / (total - 1)) * plotAreaWidth;
     },
-    [plotAreaWidth, zoomLevel, panOffset.x]
+    [paddingLeft, plotAreaWidth]
   );
 
   const getSvgY = useCallback(
-    (val: number) => {
+    (score: number) => {
       const { minY, maxY } = yBounds;
-      if (maxY === minY) return paddingTop + plotAreaHeight / 2;
-      const pct = (val - minY) / (maxY - minY);
-      return paddingTop + (1 - pct) * plotAreaHeight;
+      const ratio = (score - minY) / (maxY - minY || 1);
+      return paddingTop + plotAreaHeight - ratio * plotAreaHeight;
     },
-    [yBounds, plotAreaHeight]
+    [paddingTop, plotAreaHeight, yBounds]
   );
 
   const makeBezierPath = useCallback(
     (key: 'check1' | 'check2' | 'homework') => {
       const pts = sessionChartData
-        .map((d, i) => ({
-          x: getSvgX(i, sessionChartData.length),
-          y: getSvgY(d[key]),
-          val: d[key],
-        }))
-        .filter((p) => p.val > 0);
+        .map((d, i) => {
+          const val = d[key];
+          if (val === null || val <= 0) return null;
+          return { x: getSvgX(i, sessionChartData.length), y: getSvgY(val) };
+        })
+        .filter(Boolean) as { x: number; y: number }[];
 
       if (pts.length === 0) return '';
       if (pts.length === 1) return `M ${pts[0].x} ${pts[0].y}`;
-      let d = `M ${pts[0].x} ${pts[0].y}`;
+
+      let path = `M ${pts[0].x} ${pts[0].y}`;
       for (let i = 0; i < pts.length - 1; i++) {
         const p0 = pts[i === 0 ? 0 : i - 1];
         const p1 = pts[i];
         const p2 = pts[i + 1];
-        const p3 = pts[i + 2 >= pts.length ? pts.length - 1 : i + 2];
+        const p3 = pts[i + 2] || p2;
         const cp1x = p1.x + (p2.x - p0.x) / 6;
         const cp1y = p1.y + (p2.y - p0.y) / 6;
         const cp2x = p2.x - (p3.x - p1.x) / 6;
         const cp2y = p2.y - (p3.y - p1.y) / 6;
-        d += ` C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${p2.x} ${p2.y}`;
+        path += ` C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${p2.x} ${p2.y}`;
       }
-      return d;
+      return path;
     },
     [sessionChartData, getSvgX, getSvgY]
   );
@@ -185,12 +184,12 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = ({
   const makeAreaPath = useCallback(
     (key: 'check1' | 'check2' | 'homework') => {
       const pts = sessionChartData
-        .map((d, i) => ({
-          x: getSvgX(i, sessionChartData.length),
-          y: getSvgY(d[key]),
-          val: d[key],
-        }))
-        .filter((p) => p.val > 0);
+        .map((d, i) => {
+          const val = d[key];
+          if (val === null || val <= 0) return null;
+          return { x: getSvgX(i, sessionChartData.length), y: getSvgY(val) };
+        })
+        .filter(Boolean) as { x: number; y: number }[];
 
       if (pts.length < 2) return '';
       const linePath = makeBezierPath(key);
@@ -221,6 +220,7 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = ({
         chartViewMode={chartViewMode}
         setChartViewMode={setChartViewMode}
         distributionStats={distributionStats}
+        hideDistributionToggle={hideDistributionToggle}
       />
 
       {/* VIEW 1: TIMELINE LINE CHART */}
