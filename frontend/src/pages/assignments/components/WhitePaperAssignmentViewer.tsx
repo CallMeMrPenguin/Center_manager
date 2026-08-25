@@ -165,20 +165,27 @@ export const WhitePaperAssignmentViewer: React.FC<WhitePaperAssignmentViewerProp
 
         {/* Action Controls */}
         <div className="flex items-center gap-2 flex-wrap shrink-0">
-          {/* Proctoring Anti-cheat Toggle */}
-          <button
-            type="button"
-            onClick={() => setIsProctoringActive(!isProctoringActive)}
-            className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition cursor-pointer border ${
-              isProctoringActive
-                ? 'bg-rose-500/15 text-rose-300 border-rose-500/30 shadow-[0_0_10px_rgba(244,63,94,0.2)]'
-                : 'bg-white/5 text-slate-400 border-white/10 hover:text-white'
-            }`}
-            title="Bật/Tắt chế độ cảnh báo chuyển tab & bảo mật phòng thi"
-          >
-            {isProctoringActive ? <Shield size={14} className="text-rose-400" /> : <ShieldOff size={14} />}
-            <span>Giám Sát: {isProctoringActive ? 'BẬT' : 'TẮT'}</span>
-          </button>
+          {/* Proctoring Anti-cheat Toggle (Teacher Preview Mode Only) */}
+          {isPreview ? (
+            <button
+              type="button"
+              onClick={() => setIsProctoringActive(!isProctoringActive)}
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition cursor-pointer border ${
+                isProctoringActive
+                  ? 'bg-rose-500/15 text-rose-300 border-rose-500/30 shadow-[0_0_10px_rgba(244,63,94,0.2)]'
+                  : 'bg-white/5 text-slate-400 border-white/10 hover:text-white'
+              }`}
+              title="Bật/Tắt chế độ cảnh báo chuyển tab & bảo mật phòng thi"
+            >
+              {isProctoringActive ? <Shield size={14} className="text-rose-400" /> : <ShieldOff size={14} />}
+              <span>Giám Sát: {isProctoringActive ? 'BẬT' : 'TẮT'}</span>
+            </button>
+          ) : (
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-500/15 text-rose-300 border border-rose-500/30 text-xs font-bold shadow-[0_0_10px_rgba(244,63,94,0.2)]">
+              <Shield size={14} className="text-rose-400" />
+              <span>Phòng Thi Được Giám Sát</span>
+            </div>
+          )}
 
           {/* Answer Key Editor (Teacher Mode) */}
           {isPreview && onEditAnswerKey && (

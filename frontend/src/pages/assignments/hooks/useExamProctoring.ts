@@ -12,7 +12,7 @@ export const useExamProctoring = ({
   isStudent,
   onViolation,
 }: UseExamProctoringProps) => {
-  const [isProctoringActive, setIsProctoringActive] = useState<boolean>(enabled);
+  const [isProctoringActive, setIsProctoringActive] = useState<boolean>(isStudent ? true : enabled);
   const [violationCount, setViolationCount] = useState<number>(0);
   const [showWarningModal, setShowWarningModal] = useState<boolean>(false);
   const [lastViolationReason, setLastViolationReason] = useState<string>('');
