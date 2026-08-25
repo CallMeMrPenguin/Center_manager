@@ -124,8 +124,11 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
           stats={stats}
           engine={engine}
           hasSelectedStudent={!!selectedStudentObj}
+          selectedStudentObj={selectedStudentObj}
           selectedClassId={selectedClassId}
-          filteredRankings={filteredRankings}
+          classes={classes}
+          filteredRankings={displayedRankings}
+          distributionStats={distributionStats}
         />
       </div>
 
