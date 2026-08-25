@@ -25,6 +25,7 @@ export default function CanvasBoardPage() {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const rafIdRef = useRef<number | null>(null);
 
   const [pdfDoc, setPdfDoc] = useState<any>(null);
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -186,50 +187,54 @@ export default function CanvasBoardPage() {
 
   const currentStrokes = pageStrokes[currentPage] || [];
 
-  // Redraw Canvas
+  // Redraw Canvas (RAF throttled for 60 FPS performance)
   const redrawCanvas = useCallback(() => {
-    const canvas = canvasRef.current;
-    const container = containerRef.current;
-    if (!canvas || !container) return;
+    if (rafIdRef.current) return;
+    rafIdRef.current = requestAnimationFrame(() => {
+      rafIdRef.current = null;
+      const canvas = canvasRef.current;
+      const container = containerRef.current;
+      if (!canvas || !container) return;
 
-    const rect = container.getBoundingClientRect();
-    const dpr = window.devicePixelRatio || 1;
+      const rect = container.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
 
-    if (canvas.width !== rect.width * dpr || canvas.height !== rect.height * dpr) {
-      canvas.width = rect.width * dpr;
-      canvas.height = rect.height * dpr;
-      canvas.style.width = `${rect.width}px`;
-      canvas.style.height = `${rect.height}px`;
-    }
+      if (canvas.width !== rect.width * dpr || canvas.height !== rect.height * dpr) {
+        canvas.width = rect.width * dpr;
+        canvas.height = rect.height * dpr;
+        canvas.style.width = `${rect.width}px`;
+        canvas.style.height = `${rect.height}px`;
+      }
 
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
 
-    renderCanvasFrame({
-      ctx,
-      canvas,
-      containerRect: rect,
-      dpr,
-      pan,
-      zoom,
-      gridType,
-      canvasImages,
-      selectedId,
-      selectedType,
-      isCroppingImageId,
-      activeCropBox,
-      currentStrokes,
-      inProgressStroke: isDrawingRef.current && currentStrokePointsRef.current.length > 0 ? {
-        points: currentStrokePointsRef.current,
-        tool: activeTool,
-        color: selectedColor,
-        size: activeTool === 'pen' ? penSize : activeTool === 'highlighter' ? hlSize : shapeSize,
-        isShiftPressed: isShiftPressedRef.current,
-      } : null,
-      activeSnapGuides: activeSnapGuidesRef.current,
-      hoverWorldPt: hoverWorldPtRef.current,
-      eraserSize,
-      activeTool,
+      renderCanvasFrame({
+        ctx,
+        canvas,
+        containerRect: rect,
+        dpr,
+        pan,
+        zoom,
+        gridType,
+        canvasImages,
+        selectedId,
+        selectedType,
+        isCroppingImageId,
+        activeCropBox,
+        currentStrokes,
+        inProgressStroke: isDrawingRef.current && currentStrokePointsRef.current.length > 0 ? {
+          points: currentStrokePointsRef.current,
+          tool: activeTool,
+          color: selectedColor,
+          size: activeTool === 'pen' ? penSize : activeTool === 'highlighter' ? hlSize : shapeSize,
+          isShiftPressed: isShiftPressedRef.current,
+        } : null,
+        activeSnapGuides: activeSnapGuidesRef.current,
+        hoverWorldPt: hoverWorldPtRef.current,
+        eraserSize,
+        activeTool,
+      });
     });
   }, [
     pan, zoom, gridType, canvasImages, selectedId, selectedType,
@@ -442,7 +447,14 @@ export default function CanvasBoardPage() {
     if (isDrawingRef.current && activeTool !== 'select' && activeTool !== 'eraser') {
       const nativeEvent = e.nativeEvent as PointerEvent;
       const coalesced = typeof nativeEvent.getCoalescedEvents === 'function' ? nativeEvent.getCoalescedEvents() : [nativeEvent];
-      for (const evt of coalesced) currentStrokePointsRef.current.push(getTransformedPoint(evt, canvas, pan, zoom));
+      const pts = currentStrokePointsRef.current;
+      for (const evt of coalesced) {
+        const pt = getTransformedPoint(evt, canvas, pan, zoom);
+        const lastPt = pts[pts.length - 1];
+        if (!lastPt || Math.hypot(pt.x - lastPt.x, pt.y - lastPt.y) >= 0.5) {
+          pts.push(pt);
+        }
+      }
       redrawCanvas();
     } else {
       redrawCanvas();
@@ -490,7 +502,7 @@ export default function CanvasBoardPage() {
     }
   };
 
-  // Smooth Wheel Zoom (Multiplicative scale with 1% to 20,000% range)
+  // High-performance smooth wheel zoom
   const handleWheel = (e: React.WheelEvent<HTMLCanvasElement>) => {
     e.preventDefault();
     const container = containerRef.current;
@@ -498,8 +510,8 @@ export default function CanvasBoardPage() {
     const rect = container.getBoundingClientRect();
     const mouseX = e.clientX - rect.left;
     const mouseY = e.clientY - rect.top;
-    const zoomFactor = e.deltaY < 0 ? 1.15 : 1 / 1.15;
-    const newZoom = Math.min(200.0, Math.max(0.01, zoom * zoomFactor));
+    const zoomFactor = e.deltaY < 0 ? 1.12 : 0.89;
+    const newZoom = Math.min(30.0, Math.max(0.1, zoom * zoomFactor));
     setPan({
       x: mouseX - (mouseX - pan.x) * (newZoom / zoom),
       y: mouseY - (mouseY - pan.y) * (newZoom / zoom),

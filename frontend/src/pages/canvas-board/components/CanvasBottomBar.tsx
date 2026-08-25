@@ -26,12 +26,6 @@ export const CanvasBottomBar: React.FC<CanvasBottomBarProps> = ({
   totalPages,
   setCurrentPage,
 }) => {
-  const formatZoomText = (z: number) => {
-    const pct = z * 100;
-    if (pct < 10) return `${pct.toFixed(1)}%`;
-    return `${Math.round(pct)}%`;
-  };
-
   return (
     <div className="absolute bottom-4 right-4 z-30 flex items-center gap-2 select-none">
       {/* Page Navigation for Multi-page PDF */}
@@ -76,7 +70,7 @@ export const CanvasBottomBar: React.FC<CanvasBottomBarProps> = ({
       {/* Zoom Controls */}
       <div className="flex items-center bg-[#0c0f1e] border border-[#212c4b] p-1 rounded-xl shadow-2xl gap-1">
         <button
-          onClick={() => setZoom(z => Math.max(0.01, z / 1.25))}
+          onClick={() => setZoom(z => Math.max(0.1, z / 1.25))}
           className="p-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-white/10 transition cursor-pointer"
           title="Thu nhỏ (-)"
         >
@@ -86,13 +80,13 @@ export const CanvasBottomBar: React.FC<CanvasBottomBarProps> = ({
         <button
           onClick={onResetZoom}
           className="px-2 py-1 rounded-lg text-xs font-mono font-bold text-slate-300 hover:text-white hover:bg-white/10 transition cursor-pointer min-w-[56px] text-center"
-          title="Đặt lại 100% hoặc tâm"
+          title="Đặt lại 100%"
         >
-          {formatZoomText(zoom)}
+          {Math.round(zoom * 100)}%
         </button>
 
         <button
-          onClick={() => setZoom(z => Math.min(200.0, z * 1.25))}
+          onClick={() => setZoom(z => Math.min(30.0, z * 1.25))}
           className="p-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-white/10 transition cursor-pointer"
           title="Phóng to (+)"
         >
