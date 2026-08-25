@@ -1,66 +1,9 @@
-export interface UlnTableNode {
-  type: 'table';
-  headers: string[];
-  rows: string[][];
-}
+import {
+  UlnNode,
+  UlnHeadingNode,
+} from './ulnTypes';
 
-export interface UlnBoxNode {
-  type: 'box';
-  isFormula?: boolean;
-  content?: string;
-  words?: string[];
-}
-
-export interface UlnQuoteNode {
-  type: 'quote';
-  title?: string;
-  paragraphs: string[];
-  notes?: string[];
-}
-
-export interface UlnMultiColNode {
-  type: 'tab_cols';
-  cols: number; // 2, 3, or 4
-  items: string[][];
-}
-
-export interface UlnPicGridNode {
-  type: 'pic_grid';
-  rows: string[][];
-}
-
-export interface UlnDialogueOrderNode {
-  type: 'dialogue_order';
-  items: { initialNum?: string; text: string }[];
-}
-
-export interface UlnQuestionNode {
-  type: 'question';
-  qNum?: string;
-  text: string;
-  subText?: string;
-  hasWritingLine?: boolean;
-  options?: string[];
-  bracketHint?: string;
-  picRight?: string;
-}
-
-export interface UlnHeadingNode {
-  type: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'ins' | 'paragraph';
-  text: string;
-  answerCount?: number;
-  answerKey?: string[];
-}
-
-export type UlnNode =
-  | UlnTableNode
-  | UlnBoxNode
-  | UlnQuoteNode
-  | UlnMultiColNode
-  | UlnPicGridNode
-  | UlnDialogueOrderNode
-  | UlnQuestionNode
-  | UlnHeadingNode;
+export * from './ulnTypes';
 
 /**
  * Strips formatting markers from text like [P0], [P1], **bold**, etc.
@@ -102,28 +45,62 @@ export function parseUlnContent(rawContent: string): UlnNode[] {
   return parseUlnText(text);
 }
 
-function parseJsonQuestionList(list: any[]): UlnNode[] {
+/**
+ * Parses JSON question list into ULN Nodes
+ */
+function parseJsonQuestionList(dataList: any[]): UlnNode[] {
   const nodes: UlnNode[] = [];
-  list.forEach((item, idx) => {
-    if (item.title_prefix || item.section_title) nodes.push({ type: 'h2', text: item.title_prefix || item.section_title });
-    if (item.w && Array.isArray(item.w) && item.w.length > 0) nodes.push({ type: 'box', words: item.w });
-    if (item.b && typeof item.b === 'string' && item.b.trim()) nodes.push({ type: 'quote', paragraphs: [item.b] });
+
+  dataList.forEach((item, idx) => {
+    // Instruction / Section header
+    if (item.x && (item.t === 'pr' || item.t === 'wb' || item.t === 'fb' || item.t === 'rw' || item.t === 'rd' || item.t === 'cz')) {
+      const title = `${item.title_prefix ? item.title_prefix + ' ' : ''}${item.x}`;
+      nodes.push({ type: 'ins', text: title });
+    }
+
+    // Word box if present
+    if (item.w && Array.isArray(item.w) && item.w.length > 0) {
+      nodes.push({ type: 'box', words: item.w });
+    }
+
+    // Passage text if present
+    if (item.b && typeof item.b === 'string') {
+      nodes.push({ type: 'quote', paragraphs: [item.b] });
+    }
+
+    // Sub questions
     if (item.k && Array.isArray(item.k)) {
       item.k.forEach((sub: any, sIdx: number) => {
-        nodes.push({ type: 'question', qNum: String(sub.q || sIdx + 1), text: sub.x || sub.text || `Câu hỏi ${sIdx + 1}`, options: Array.isArray(sub.o) ? sub.o : undefined });
+        nodes.push({
+          type: 'question',
+          qNum: sub.q || String(sIdx + 1),
+          text: sub.x || '',
+          options: sub.o,
+          hasWritingLine: !sub.o || sub.o.length === 0,
+        });
       });
-    } else {
-      nodes.push({ type: 'question', qNum: String(item.q || idx + 1), text: item.x || item.text || `Câu hỏi ${idx + 1}`, options: Array.isArray(item.o) ? item.o : undefined });
+    } else if (item.q || item.o || item.x) {
+      nodes.push({
+        type: 'question',
+        qNum: item.q || String(idx + 1),
+        text: item.x || '',
+        options: item.o,
+        hasWritingLine: !item.o || item.o.length === 0,
+      });
     }
   });
+
   return nodes;
 }
 
-function parseUlnText(text: string): UlnNode[] {
-  const lines = text.split(/\r?\n/);
+/**
+ * Line-by-line DSL Parser for ULN Content
+ */
+export function parseUlnText(ulnText: string): UlnNode[] {
+  const lines = ulnText.split('\n');
   const nodes: UlnNode[] = [];
-
   let i = 0;
+
   while (i < lines.length) {
     const rawLine = lines[i];
     const line = rawLine.trim();
@@ -133,22 +110,22 @@ function parseUlnText(text: string): UlnNode[] {
       continue;
     }
 
-    // 1. Headings [H1] to [H6]
-    const hMatch = line.match(/^\[H([1-6])\]\s*(.*)/);
+    // 1. Headings [H1] - [H6]
+    const hMatch = line.match(/^\[H([1-6])\]\s*(.*)/i);
     if (hMatch) {
-      const level = parseInt(hMatch[1]);
-      const type = `h${level}` as 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
-      nodes.push({ type, text: cleanRawText(hMatch[2]) });
+      const level = parseInt(hMatch[1]) as 1 | 2 | 3 | 4 | 5 | 6;
+      const headingType = `h${level}` as 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
+      const cleanHeading = cleanRawText(hMatch[2]);
+      nodes.push({ type: headingType, text: cleanHeading });
       i++;
       continue;
     }
 
-    // 2. Exercise Instruction [ins] or [P0] [ins]
+    // 2. Exercise Instruction [ins] (e.g. [P0] [ins]**I. Choose the best answer** <@10>)
     if (line.includes('[ins]')) {
-      let content = cleanRawText(line.replace(/\[P[0-9]\]/g, '').replace('[ins]', '').replace('[/ins]', ''));
+      let content = cleanRawText(line);
       let answerCount: number | undefined;
 
-      // Check for <@number> at end e.g. <@10> or <@5>
       const countMatch = content.match(/<@(\d+)>/);
       if (countMatch) {
         answerCount = parseInt(countMatch[1]);
@@ -331,28 +308,55 @@ function parseUlnText(text: string): UlnNode[] {
       }
     }
 
-    // 10. Numbered Question Line (e.g. [P0] #1. text, #1. text, 1. text)
-    const qMatch = line.match(/(?:\[P[0-9]\]\s*)?#?([0-9]+)\.\s*(.*)/);
+    // 10. Numbered Question Line (Anchored strictly to start of line to prevent false matches in money/numbers like $500.)
+    const qMatch = line.match(/^(?:\[P[0-9]\]\s*)?(?:(?:Question|Câu)\s+)?#?([0-9]+)\.\s*(.*)$/i);
     if (qMatch) {
       const qNum = qMatch[1];
       let qText = qMatch[2].replace(/^#/, '').trim();
       let subText: string | undefined;
+      const subParagraphs: string[] = [];
       let bracketHint: string | undefined;
       let hasWritingLine = false;
 
-      // Check next line for subtext like [P1] B: ..., [P1] → ..., or [P1] <blank>
-      if (i + 1 < lines.length) {
+      // Read following context lines [P1], sublines, or <blank> until next question or tag
+      while (i + 1 < lines.length) {
         const nextLine = lines[i + 1].trim();
+        if (!nextLine) {
+          i++;
+          continue;
+        }
         if (nextLine === '[P1] <blank>' || nextLine === '<blank>') {
           hasWritingLine = true;
           i++;
-        } else if (nextLine.startsWith('[P1]') || nextLine.startsWith('→') || nextLine.startsWith('B:')) {
-          subText = nextLine.replace(/^\[P1\]\s*/, '').replace(/^#/, '').trim();
-          i++;
+          continue;
         }
+        if (
+          nextLine.startsWith('[OPT]') ||
+          nextLine.startsWith('[NUM]') ||
+          nextLine.startsWith('[/NUM]') ||
+          nextLine.startsWith('[H') ||
+          nextLine.startsWith('[ins]') ||
+          nextLine.startsWith('[QUOTE]') ||
+          nextLine.startsWith('[TABLE]') ||
+          nextLine.startsWith('[BOX]') ||
+          /^(?:\[P[0-9]\]\s*)?(?:(?:Question|Câu)\s+)?#?[0-9]+\./i.test(nextLine)
+        ) {
+          break;
+        }
+
+        if (nextLine.startsWith('[P1]') || nextLine.startsWith('[P2]') || nextLine.startsWith('→') || nextLine.startsWith('B:')) {
+          const cleanSub = nextLine.replace(/^\[P[1-2]\]\s*/, '').replace(/^#/, '').trim();
+          if (cleanSub.includes('<blank>') || cleanSub.startsWith('→') || cleanSub.startsWith('B:')) {
+            subText = cleanSub;
+          } else {
+            subParagraphs.push(cleanSub);
+          }
+          i++;
+          continue;
+        }
+        break;
       }
 
-      // Check for bracket hints at end like (native/ local) or (not visit)
       const bracketM = qText.match(/\(([^)]+)\)$/);
       if (bracketM) {
         bracketHint = bracketM[1];
@@ -363,6 +367,7 @@ function parseUlnText(text: string): UlnNode[] {
         qNum,
         text: qText,
         subText,
+        subParagraphs: subParagraphs.length > 0 ? subParagraphs : undefined,
         bracketHint,
         hasWritingLine,
       });

@@ -118,56 +118,71 @@ export const UlnDocumentRenderer: React.FC<UlnDocumentRendererProps> = memo(({
         }
         if (node.type === 'h2') {
           return (
-            <div key={nIdx} className="pt-2.5 pb-0.5 border-b border-slate-300">
-              <h2 className="text-sm font-bold text-slate-950 uppercase tracking-wide">{node.text}</h2>
+            <div key={nIdx} className="pt-3 pb-1 border-b border-slate-400">
+              <h2 className="text-xs sm:text-sm font-black uppercase tracking-wide text-slate-950">{node.text}</h2>
             </div>
           );
         }
-        if (node.type === 'h3' || node.type === 'h4' || node.type === 'h5' || node.type === 'h6') {
+        if (node.type === 'h3') {
           return (
-            <div key={nIdx} className={`pt-1 text-xs sm:text-sm text-slate-950 ${node.type === 'h3' ? 'font-bold capitalize' : node.type === 'h6' ? 'italic' : 'font-semibold'}`}>
-              {node.text}
+            <div key={nIdx} className="pt-2 pb-0.5">
+              <h3 className="text-xs sm:text-sm font-bold text-slate-900">{node.text}</h3>
+            </div>
+          );
+        }
+        if (node.type === 'h4' || node.type === 'h5' || node.type === 'h6') {
+          return (
+            <div key={nIdx} className="pt-1 text-xs sm:text-sm font-semibold text-slate-800">
+              <span>{node.text}</span>
             </div>
           );
         }
         if (node.type === 'ins') {
           return (
-            <div key={nIdx} id={`target_ins_${nIdx}`} className="pt-1.5 pb-0.5 text-xs sm:text-sm font-bold text-slate-950 scroll-mt-20">
+            <div key={nIdx} id={`target_ins_${nIdx}`} className="pt-2.5 pb-1 font-bold text-xs sm:text-sm text-slate-950 leading-snug scroll-mt-20">
               <UlnInlineText text={node.text} qKey={`ins_${nIdx}`} answers={answers} onInputChange={handleInputChange} isSubmitted={isSubmitted} />
             </div>
           );
         }
         if (node.type === 'box') {
-          if (node.isFormula) {
+          if (node.words && node.words.length > 0) {
             return (
-              <div key={nIdx} className="bg-slate-50 border border-slate-700 rounded-lg p-2.5 text-center my-1.5 font-semibold text-xs sm:text-sm text-slate-950">
-                <UlnInlineText text={node.content || ''} qKey={`box_${nIdx}`} answers={answers} onInputChange={handleInputChange} isSubmitted={isSubmitted} />
-              </div>
-            );
-          }
-          return (
-            <div key={nIdx} className="border border-slate-800 rounded-lg p-2.5 text-center my-1.5 bg-slate-50/60 font-normal">
-              <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-1.5 text-xs sm:text-sm">
-                {(node.words || []).map((word, wIdx) => {
-                  const isUsed = usedWordsSet.has(word.trim().toLowerCase());
+              <div key={nIdx} className="p-2.5 my-2 border-2 border-slate-800 rounded-xl bg-slate-50 flex flex-wrap items-center justify-center gap-2 text-xs sm:text-sm font-semibold shadow-xs">
+                {node.words.map((w, wIdx) => {
+                  const isUsed = usedWordsSet.has(w.trim().toLowerCase());
                   return (
-                    <span key={wIdx} className={`transition ${isUsed ? 'line-through text-slate-400 decoration-slate-900 decoration-2 font-normal' : 'text-slate-950 font-bold'}`}>
-                      {word}
+                    <span
+                      key={wIdx}
+                      className={`px-3 py-1 rounded-md border font-mono transition-all duration-200 ${
+                        isUsed ? 'bg-slate-200 border-slate-300 text-slate-400 line-through opacity-60' : 'bg-white border-slate-400 text-slate-950 shadow-xs'
+                      }`}
+                    >
+                      {w}
                     </span>
                   );
                 })}
               </div>
+            );
+          }
+          return (
+            <div key={nIdx} className="p-3 my-2 border-2 border-slate-800 rounded-xl bg-slate-50 text-xs sm:text-sm font-medium text-slate-900 text-center shadow-xs leading-relaxed">
+              <UlnInlineText text={node.content || ''} qKey={`box_${nIdx}`} answers={answers} onInputChange={handleInputChange} isSubmitted={isSubmitted} />
             </div>
           );
         }
         if (node.type === 'pic_grid') {
           return (
-            <div key={nIdx} className="my-1.5 space-y-1.5 font-normal">
+            <div key={nIdx} className="my-2 space-y-2 font-normal">
               {node.rows.map((row, rIdx) => (
                 <div key={rIdx} className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                  {row.map((item, cIdx) => (
-                    <div key={cIdx} className="p-2 bg-slate-50 border border-slate-300 rounded text-center text-xs font-normal text-slate-950">
-                      <UlnInlineText text={item} qKey={`pic_${nIdx}_${rIdx}_${cIdx}`} answers={answers} onInputChange={handleInputChange} isSubmitted={isSubmitted} />
+                  {row.map((cell, cIdx) => (
+                    <div key={cIdx} className="p-2 border border-slate-300 rounded-lg text-center bg-slate-50/50 space-y-1">
+                      <div className="h-16 bg-slate-200/80 rounded border border-dashed border-slate-400 flex items-center justify-center text-xs text-slate-500 font-mono">
+                        [Picture]
+                      </div>
+                      <div className="text-xs font-semibold text-slate-900">
+                        <UlnInlineText text={cell} qKey={`pic_${nIdx}_${rIdx}_${cIdx}`} answers={answers} onInputChange={handleInputChange} isSubmitted={isSubmitted} />
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -283,13 +298,13 @@ export const UlnDocumentRenderer: React.FC<UlnDocumentRendererProps> = memo(({
           const qKey = `q_${nIdx}_${node.qNum || nIdx}`;
           const currentAns = answers[qKey];
           const maxOptLen = Math.max(...(node.options || []).map((o) => cleanOptionPrefix(o).length), 0);
-          const optGridClass = maxOptLen > 30 ? 'grid-cols-1' : maxOptLen > 14 ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-2 sm:grid-cols-4';
-          const hasNoBlankOrOpts = (!node.options || node.options.length === 0) && !node.hasWritingLine && !node.text.includes('<blank>') && !node.subText;
+          const optGridClass = maxOptLen > 48 ? 'grid-cols-1' : maxOptLen > 24 ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-2 sm:grid-cols-4';
+          const hasNoBlankOrOpts = (!node.options || node.options.length === 0) && !node.hasWritingLine && !node.text.includes('<blank>') && !node.subText && (!node.subParagraphs || node.subParagraphs.length === 0);
 
           return (
             <div key={nIdx} id={`q_target_${nIdx}`} className="py-0.5 px-0.5 space-y-1 scroll-mt-20 font-normal">
               <div className="flex items-start gap-2">
-                {node.qNum && <span className="font-bold text-xs sm:text-sm text-rose-600 pt-0.5 shrink-0 min-w-[20px] text-right">{node.qNum}.</span>}
+                {node.qNum && <span className="font-bold text-xs sm:text-sm text-rose-600 pt-0.5 shrink-0 min-w-[22px] text-right">{node.qNum}.</span>}
                 <div className="flex-1 space-y-1">
                   {node.text && (
                     <div className="text-xs sm:text-sm font-normal text-slate-900 leading-relaxed">
@@ -299,6 +314,15 @@ export const UlnDocumentRenderer: React.FC<UlnDocumentRendererProps> = memo(({
                   {node.subText && (
                     <div className="text-xs sm:text-sm font-normal text-slate-800 pl-2 border-l-2 border-slate-400">
                       <UlnInlineText text={node.subText} qKey={`${qKey}_sub`} answers={answers} onInputChange={handleInputChange} isSubmitted={isSubmitted} />
+                    </div>
+                  )}
+                  {node.subParagraphs && node.subParagraphs.length > 0 && (
+                    <div className="space-y-1 pl-2.5 border-l-2 border-slate-300 my-1">
+                      {node.subParagraphs.map((p, pIdx) => (
+                        <div key={pIdx} className="text-xs sm:text-sm font-normal text-slate-800 leading-relaxed">
+                          <UlnInlineText text={p} qKey={`${qKey}_sub_${pIdx}`} answers={answers} onInputChange={handleInputChange} isSubmitted={isSubmitted} />
+                        </div>
+                      ))}
                     </div>
                   )}
                   {hasNoBlankOrOpts && (
@@ -331,8 +355,10 @@ export const UlnDocumentRenderer: React.FC<UlnDocumentRendererProps> = memo(({
                                 : 'hover:bg-slate-100 text-slate-900'
                             }`}
                           >
-                            <span className={`font-bold shrink-0 ${isSelected ? 'text-white' : 'text-blue-600'}`}>{optLetterWithDot}</span>
-                            <span className={`flex-1 font-normal ${isSelected ? 'text-white' : 'text-slate-900'}`}>
+                            <span className={`font-bold shrink-0 w-5 min-w-[20px] text-left ${isSelected ? 'text-white' : 'text-blue-600'}`}>
+                              {optLetterWithDot}
+                            </span>
+                            <span className={`flex-1 font-normal break-words ${isSelected ? 'text-white' : 'text-slate-900'}`}>
                               <UlnInlineText text={cleanText} qKey={`${qKey}_opt_${optIdx}`} answers={answers} onInputChange={handleInputChange} isSubmitted={isSubmitted} />
                             </span>
                           </button>
