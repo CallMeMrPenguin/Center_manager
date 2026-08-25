@@ -75,15 +75,15 @@ export const ChartControls: React.FC<ChartControlsProps> = ({
           <div className="flex flex-wrap items-center gap-3 text-[11px] font-bold">
             <span className="flex items-center gap-1.5 text-blue-400 bg-blue-500/10 border border-blue-500/20 px-2.5 py-1 rounded-lg">
               <span className="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.8)]" />
-              Từ Vựng (Dự đoán: {format1Dec(engine.pred_c1)})
+              Từ Vựng (Dự đoán: {format1Dec(engine?.pred_c1 ?? 0)})
             </span>
             <span className="flex items-center gap-1.5 text-purple-400 bg-purple-500/10 border border-purple-500/20 px-2.5 py-1 rounded-lg">
               <span className="w-2 h-2 rounded-full bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.8)]" />
-              Ngữ Pháp (Dự đoán: {format1Dec(engine.pred_c2)})
+              Ngữ Pháp (Dự đoán: {format1Dec(engine?.pred_c2 ?? 0)})
             </span>
             <span className="flex items-center gap-1.5 text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-lg">
               <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]" />
-              BTVN (Dự đoán: {format1Dec(engine.pred_hw)})
+              BTVN (Dự đoán: {format1Dec(engine?.pred_hw ?? 0)})
             </span>
           </div>
 

@@ -4,6 +4,8 @@ import { Assignment } from '../types';
 import { ExerciseItem } from './types';
 import { WhitePaperHeader } from './WhitePaperHeader';
 import { ExerciseItemView } from './ExerciseItemView';
+import { UlnDocumentRenderer } from './UlnDocumentRenderer';
+import { parseUlnContent } from '../utils/ulnParser';
 import { cleanOptionPrefix, format1Dec } from '../../../utils';
 import { showToast } from '../../../components/Toast';
 
@@ -22,152 +24,105 @@ export const WhitePaperAssignmentViewer: React.FC<WhitePaperAssignmentViewerProp
   onBack,
   onSubmitSuccess,
 }) => {
-  // Parse questions from assignment.content_json or fallback to sample test
-  const exercises: ExerciseItem[] = useMemo(() => {
+  // Parse ULN document nodes if raw ULN text or JSON
+  const ulnNodes = useMemo(() => {
     if (assignment.content_json && assignment.content_json.trim()) {
-      try {
-        const parsed = JSON.parse(assignment.content_json);
-        const rawList = Array.isArray(parsed) ? parsed : (parsed.data || parsed.questions || []);
-
-        if (rawList.length > 0) {
-          const items: ExerciseItem[] = [];
-          let currentId = 1;
-
-          rawList.forEach((block: any, bIdx: number) => {
-            const sectionTitle = block.title_prefix ? `${block.title_prefix} ${block.x || ''}` : block.x || '';
-            const wordBank = block.w || [];
-            const passage = block.b || '';
-            const type = block.t || 'mcq';
-
-            if (block.k && Array.isArray(block.k) && block.k.length > 0) {
-              block.k.forEach((sub: any, sIdx: number) => {
-                items.push({
-                  id: currentId++,
-                  qNum: sub.q || sIdx + 1,
-                  type,
-                  sectionTitle: sIdx === 0 ? sectionTitle : undefined,
-                  wordBank: sIdx === 0 ? wordBank : undefined,
-                  passage: sIdx === 0 ? passage : undefined,
-                  text: sub.x || sub.text || `Câu hỏi ${sub.q || sIdx + 1}`,
-                  options: Array.isArray(sub.o) ? sub.o.map((o: any) => cleanOptionPrefix(String(o))) : undefined,
-                  answer: cleanOptionPrefix(String(sub.a || 'A')),
-                  explanation: sub.explanation || '',
-                });
-              });
-            } else {
-              items.push({
-                id: currentId++,
-                qNum: block.q || bIdx + 1,
-                type,
-                sectionTitle: block.title_prefix ? `${block.title_prefix} ${block.x || ''}` : undefined,
-                wordBank,
-                passage,
-                text: block.x || block.text || `Câu hỏi ${block.q || bIdx + 1}`,
-                options: Array.isArray(block.o) ? block.o.map((o: any) => cleanOptionPrefix(String(o))) : undefined,
-                answer: cleanOptionPrefix(String(block.a || 'A')),
-                explanation: block.explanation || '',
-              });
-            }
-          });
-          return items;
-        }
-      } catch (e) {
-        console.error('Failed to parse assignment content_json:', e);
-      }
+      return parseUlnContent(assignment.content_json);
     }
-
-    // Default Comprehensive Built-in Sample Test
-    return [
-      {
-        id: 1,
-        qNum: 1,
-        type: 'pr',
-        sectionTitle: 'A. PHONETICS - I. Choose the word that has the underlined part pronounced differently from the others.',
-        text: 'Choose the word whose underlined part is pronounced differently:',
-        options: ['[po]{u}ttery', 'fl[ow]{u}er', '[si]{u}lent', '[se]{u}rvice'],
-        answer: 'pottery',
-        explanation: 'Option A is pronounced /ɒ/, whereas others are /əʊ/ or /aɪ/.',
-      },
-      {
-        id: 2,
-        qNum: 2,
-        type: 'pr',
-        text: 'Choose the word whose underlined part is pronounced differently:',
-        options: ['g[i]{u}rl', 'exp[e]{u}rt', '[o]{u}pen', 'b[u]{u}rn'],
-        answer: 'open',
-        explanation: 'Option C is pronounced /əʊ/, whereas others are /ɜː/.',
-      },
-      {
-        id: 3,
-        qNum: 3,
-        type: 'wb',
-        sectionTitle: 'B. VOCABULARY - II. Complete the sentences with the words from the box.',
-        wordBank: ['gardening', 'painting', 'swimming', 'origami', 'karate'],
-        text: 'She usually goes <blank> with her friends in the pool near her school.',
-        options: ['gardening', 'painting', 'swimming', 'origami'],
-        answer: 'swimming',
-        explanation: 'Cụm từ: go swimming (đi bơi).',
-      },
-      {
-        id: 4,
-        qNum: 4,
-        type: 'wb',
-        text: 'Sarah likes <blank>. She plants lots of flowers and vegetables in her home garden.',
-        options: ['gardening', 'painting', 'swimming', 'karate'],
-        answer: 'gardening',
-        explanation: 'Làm vườn (gardening) phù hợp với "plants flowers and vegetables".',
-      },
-      {
-        id: 5,
-        qNum: 5,
-        type: 'fb',
-        sectionTitle: 'C. GRAMMAR - III. Put the verbs in brackets into the correct form.',
-        text: 'I <blank> (not visit) my parents very often because of my busy schedule.',
-        options: ['do not visit', 'does not visit', 'not visit', 'did not visit'],
-        answer: 'do not visit',
-        explanation: 'Thì hiện tại đơn với chủ ngữ I: do not visit.',
-      },
-      {
-        id: 6,
-        qNum: 6,
-        type: 'fb',
-        text: 'My brother <blank> (play) tennis every weekend, but he <blank> (not like) watching it on TV.',
-        options: ['plays / does not like', 'play / do not like', 'is playing / not like', 'played / didn\'t like'],
-        answer: 'plays / does not like',
-        explanation: 'Chủ ngữ "My brother" là ngôi thứ 3 số ít: plays và does not like.',
-      },
-      {
-        id: 7,
-        qNum: 7,
-        type: 'rd',
-        sectionTitle: 'D. READING - IV. Read the passage and answer the questions.',
-        passage: 'Ha Long Bay is a UNESCO World Heritage Site in Quang Ninh Province, Vietnam. The bay features thousands of limestone karsts and isles in various shapes and sizes. Many tourists visit Ha Long Bay each year to enjoy boat tours, explore caves, and discover the floating fishing villages.',
-        text: 'Where is Ha Long Bay located?',
-        options: ['In Quang Ninh Province', 'In Ha Noi City', 'In Da Nang City', 'In Hue City'],
-        answer: 'In Quang Ninh Province',
-        explanation: 'Thông tin trong đoạn 1: "in Quang Ninh Province, Vietnam".',
-      },
-      {
-        id: 8,
-        qNum: 8,
-        type: 'rd',
-        text: 'What is one of the main activities tourists do when visiting Ha Long Bay?',
-        options: ['Enjoy boat tours and explore caves', 'Climb snowy mountains', 'Drive fast cars in the desert', 'Build skyscrapers'],
-        answer: 'Enjoy boat tours and explore caves',
-        explanation: 'Thông tin trong bài: "enjoy boat tours, explore caves".',
-      },
-      {
-        id: 9,
-        qNum: 9,
-        type: 'rw',
-        sectionTitle: 'E. WRITING - V. Rewrite the following sentence so that it has the same meaning.',
-        text: 'Living in a big city is more expensive than living in the countryside.\n→ Living in the countryside is <blank>',
-        options: ['cheaper than living in a big city', 'more expensive than living in a big city', 'as expensive as a big city', 'cheap than living in a city'],
-        answer: 'cheaper than living in a big city',
-        explanation: 'So sánh hơn: more expensive than → cheaper than.',
-      },
-    ];
+    return [];
   }, [assignment.content_json]);
+
+  // Fallback exercises when no ULN text is provided
+  const fallbackExercises: ExerciseItem[] = useMemo(() => [
+    {
+      id: 1,
+      qNum: 1,
+      type: 'pr',
+      sectionTitle: 'A. PHONETICS - I. Choose the word that has the underlined part pronounced differently from the others.',
+      text: 'Choose the word whose underlined part is pronounced differently:',
+      options: ['[po]{u}ttery', 'fl[ow]{u}er', '[si]{u}lent', '[se]{u}rvice'],
+      answer: 'pottery',
+      explanation: 'Option A is pronounced /ɒ/, whereas others are /əʊ/ or /aɪ/.',
+    },
+    {
+      id: 2,
+      qNum: 2,
+      type: 'pr',
+      text: 'Choose the word whose underlined part is pronounced differently:',
+      options: ['g[i]{u}rl', 'exp[e]{u}rt', '[o]{u}pen', 'b[u]{u}rn'],
+      answer: 'open',
+      explanation: 'Option C is pronounced /əʊ/, whereas others are /ɜː/.',
+    },
+    {
+      id: 3,
+      qNum: 3,
+      type: 'wb',
+      sectionTitle: 'B. VOCABULARY - II. Complete the sentences with the words from the box.',
+      wordBank: ['gardening', 'painting', 'swimming', 'origami', 'karate'],
+      text: 'She usually goes <blank> with her friends in the pool near her school.',
+      options: ['gardening', 'painting', 'swimming', 'origami'],
+      answer: 'swimming',
+      explanation: 'Cụm từ: go swimming (đi bơi).',
+    },
+    {
+      id: 4,
+      qNum: 4,
+      type: 'wb',
+      text: 'Sarah likes <blank>. She plants lots of flowers and vegetables in her home garden.',
+      options: ['gardening', 'painting', 'swimming', 'karate'],
+      answer: 'gardening',
+      explanation: 'Làm vườn (gardening) phù hợp với "plants flowers and vegetables".',
+    },
+    {
+      id: 5,
+      qNum: 5,
+      type: 'fb',
+      sectionTitle: 'C. GRAMMAR - III. Put the verbs in brackets into the correct form.',
+      text: 'I <blank> (not visit) my parents very often because of my busy schedule.',
+      options: ['do not visit', 'does not visit', 'not visit', 'did not visit'],
+      answer: 'do not visit',
+      explanation: 'Thì hiện tại đơn với chủ ngữ I: do not visit.',
+    },
+    {
+      id: 6,
+      qNum: 6,
+      type: 'fb',
+      text: 'My brother <blank> (play) tennis every weekend, but he <blank> (not like) watching it on TV.',
+      options: ['plays / does not like', 'play / do not like', 'is playing / not like', 'played / didn\'t like'],
+      answer: 'plays / does not like',
+      explanation: 'Chủ ngữ "My brother" là ngôi thứ 3 số ít: plays và does not like.',
+    },
+    {
+      id: 7,
+      qNum: 7,
+      type: 'rd',
+      sectionTitle: 'D. READING - IV. Read the passage and answer the questions.',
+      passage: 'Ha Long Bay is a UNESCO World Heritage Site in Quang Ninh Province, Vietnam. The bay features thousands of limestone karsts and isles in various shapes and sizes. Many tourists visit Ha Long Bay each year to enjoy boat tours, explore caves, and discover the floating fishing villages.',
+      text: 'Where is Ha Long Bay located?',
+      options: ['In Quang Ninh Province', 'In Ha Noi City', 'In Da Nang City', 'In Hue City'],
+      answer: 'In Quang Ninh Province',
+      explanation: 'Thông tin trong đoạn 1: "in Quang Ninh Province, Vietnam".',
+    },
+    {
+      id: 8,
+      qNum: 8,
+      type: 'rd',
+      text: 'What is one of the main activities tourists do when visiting Ha Long Bay?',
+      options: ['Enjoy boat tours and explore caves', 'Climb snowy mountains', 'Drive fast cars in the desert', 'Build skyscrapers'],
+      answer: 'Enjoy boat tours and explore caves',
+      explanation: 'Thông tin trong bài: "enjoy boat tours, explore caves".',
+    },
+    {
+      id: 9,
+      qNum: 9,
+      type: 'rw',
+      sectionTitle: 'E. WRITING - V. Rewrite the following sentence so that it has the same meaning.',
+      text: 'Living in a big city is more expensive than living in the countryside.\n→ Living in the countryside is <blank>',
+      options: ['cheaper than living in a big city', 'more expensive than living in a big city', 'as expensive as a big city', 'cheap than living in a city'],
+      answer: 'cheaper than living in a big city',
+      explanation: 'So sánh hơn: more expensive than → cheaper than.',
+    },
+  ], []);
 
   const [userAnswers, setUserAnswers] = useState<Record<number, string>>({});
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -177,11 +132,11 @@ export const WhitePaperAssignmentViewer: React.FC<WhitePaperAssignmentViewerProp
     setUserAnswers((prev) => ({ ...prev, [id]: opt }));
   };
 
-  // Score Calculation
-  const total = exercises.length;
+  // Score Calculation for standard exercises
+  const total = fallbackExercises.length;
   const correctCount = useMemo(() => {
     let count = 0;
-    exercises.forEach((ex) => {
+    fallbackExercises.forEach((ex) => {
       const uAns = (userAnswers[ex.id] || '').trim().toLowerCase();
       const cAns = (ex.answer || '').trim().toLowerCase();
       if (uAns && (uAns === cAns || cleanOptionPrefix(uAns) === cleanOptionPrefix(cAns))) {
@@ -189,20 +144,13 @@ export const WhitePaperAssignmentViewer: React.FC<WhitePaperAssignmentViewerProp
       }
     });
     return count;
-  }, [exercises, userAnswers]);
+  }, [fallbackExercises, userAnswers]);
 
   const finalScore = useMemo(() => {
     return total > 0 ? format1Dec((correctCount / total) * 10) : '0.0';
   }, [correctCount, total]);
 
-
   const handleSubmit = () => {
-    const answeredCount = Object.keys(userAnswers).length;
-    if (answeredCount < total) {
-      if (!window.confirm(`Bạn mới hoàn thành ${answeredCount}/${total} câu hỏi. Bạn có chắc chắn muốn nộp bài?`)) {
-        return;
-      }
-    }
     setIsSubmitted(true);
     showToast(`Đã nộp bài thành công! Điểm số: ${finalScore}/10.0`, 'success');
     if (onSubmitSuccess) {
@@ -224,10 +172,9 @@ export const WhitePaperAssignmentViewer: React.FC<WhitePaperAssignmentViewerProp
         );
       }
       if (part.startsWith('[') && part.endsWith(']')) {
-        const content = part.slice(1, -1);
         return (
           <span key={index} className="underline decoration-indigo-600 decoration-2 font-black text-indigo-700 px-0.5">
-            {content}
+            {part.slice(1, -1)}
           </span>
         );
       }
@@ -260,7 +207,7 @@ export const WhitePaperAssignmentViewer: React.FC<WhitePaperAssignmentViewerProp
               )}
             </div>
             <p className="text-xs text-slate-400 mt-0.5">
-              Học sinh: <strong className="text-slate-200">{studentName}</strong> | Đã làm: <strong className="text-indigo-300">{Object.keys(userAnswers).length}/{total} câu</strong>
+              Học sinh: <strong className="text-slate-200">{studentName}</strong> | Trạng thái: <strong className="text-indigo-300">{isSubmitted ? 'Đã Nộp' : 'Đang Làm Bài'}</strong>
             </p>
           </div>
         </div>
@@ -290,7 +237,7 @@ export const WhitePaperAssignmentViewer: React.FC<WhitePaperAssignmentViewerProp
             <div className="flex items-center gap-2">
               <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 text-xs font-black">
                 <Award size={15} />
-                <span>Điểm: {finalScore}/10.0 ({correctCount}/{total})</span>
+                <span>Điểm: {finalScore}/10.0</span>
               </div>
               <button
                 type="button"
@@ -320,18 +267,22 @@ export const WhitePaperAssignmentViewer: React.FC<WhitePaperAssignmentViewerProp
         />
 
         {/* 3. SEQUENTIAL LIST OF ALL SECTIONS & QUESTIONS */}
-        <div className="space-y-8">
-          {exercises.map((ex) => (
-            <ExerciseItemView
-              key={ex.id}
-              exercise={ex}
-              userAnswer={userAnswers[ex.id]}
-              isSubmitted={isSubmitted}
-              onSelectOption={handleSelectOption}
-              renderFormattedText={renderFormattedText}
-            />
-          ))}
-        </div>
+        {ulnNodes.length > 0 ? (
+          <UlnDocumentRenderer nodes={ulnNodes} isSubmitted={isSubmitted} />
+        ) : (
+          <div className="space-y-8">
+            {fallbackExercises.map((ex) => (
+              <ExerciseItemView
+                key={ex.id}
+                exercise={ex}
+                userAnswer={userAnswers[ex.id]}
+                isSubmitted={isSubmitted}
+                onSelectOption={handleSelectOption}
+                renderFormattedText={renderFormattedText}
+              />
+            ))}
+          </div>
+        )}
 
         {/* Worksheet Footer */}
         <div className="border-t-2 border-slate-800 pt-6 text-center text-xs text-slate-500 font-semibold print:block">

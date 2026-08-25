@@ -151,13 +151,13 @@ export const ChartSvgPlot: React.FC<ChartSvgPlotProps> = React.memo(({
                 const forecastX = lastX + 45 * zoomLevel;
                 const preds: { id: string; label: string; score: number; lastVal: number; color: string; textColor: string; rawY: number }[] = [];
 
-                if (hasC1 && engine.pred_c1 > 0) {
+                if (hasC1 && engine && (engine.pred_c1 || 0) > 0) {
                   preds.push({ id: 'c1', label: 'Từ Vựng', score: engine.pred_c1, lastVal: sessionChartData[lastIdx].check1, color: '#3b82f6', textColor: '#60a5fa', rawY: getSvgY(engine.pred_c1) });
                 }
-                if (hasC2 && engine.pred_c2 > 0) {
+                if (hasC2 && engine && (engine.pred_c2 || 0) > 0) {
                   preds.push({ id: 'c2', label: 'Ngữ Pháp', score: engine.pred_c2, lastVal: sessionChartData[lastIdx].check2, color: '#a855f7', textColor: '#c084fc', rawY: getSvgY(engine.pred_c2) });
                 }
-                if (hasHw && engine.pred_hw > 0) {
+                if (hasHw && engine && (engine.pred_hw || 0) > 0) {
                   preds.push({ id: 'hw', label: 'BTVN', score: engine.pred_hw, lastVal: sessionChartData[lastIdx].homework, color: '#10b981', textColor: '#34d399', rawY: getSvgY(engine.pred_hw) });
                 }
 

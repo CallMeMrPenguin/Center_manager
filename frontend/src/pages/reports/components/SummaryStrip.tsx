@@ -94,15 +94,15 @@ export const SummaryStrip: React.FC<SummaryStripProps> = React.memo(({
               </div>
               <div className="flex items-center justify-between text-blue-400">
                 <span>Từ Vựng Dự Đoán:</span>
-                <span className="font-black">{engine.pred_c1 ?? 0} đ</span>
+                <span className="font-black">{engine?.pred_c1 ?? 0} đ</span>
               </div>
               <div className="flex items-center justify-between text-purple-400">
                 <span>Ngữ Pháp Dự Đoán:</span>
-                <span className="font-black">{engine.pred_c2 ?? 0} đ</span>
+                <span className="font-black">{engine?.pred_c2 ?? 0} đ</span>
               </div>
               <div className="flex items-center justify-between text-emerald-400">
                 <span>BTVN Dự Đoán:</span>
-                <span className="font-black">{engine.pred_hw ?? 0} đ</span>
+                <span className="font-black">{engine?.pred_hw ?? 0} đ</span>
               </div>
             </div>
           </SummaryTooltipCard>
