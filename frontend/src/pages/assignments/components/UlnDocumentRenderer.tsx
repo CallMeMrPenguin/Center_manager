@@ -45,13 +45,13 @@ export const UlnDocumentRenderer: React.FC<UlnDocumentRendererProps> = ({
   }, [answers]);
 
   return (
-    <div className="space-y-3 font-sans text-slate-900">
+    <div className="space-y-3 font-sans text-slate-950 select-text">
       {nodes.map((node, nIdx) => {
         // 1. Headings [H1] to [H6]
         if (node.type === 'h1') {
           return (
-            <div key={nIdx} className="pt-3 pb-1.5 border-b-2 border-slate-900 text-center">
-              <h1 className="text-lg sm:text-xl font-black uppercase tracking-tight text-slate-900">
+            <div key={nIdx} className="pt-2 pb-1 border-b-2 border-slate-900 text-center">
+              <h1 className="text-base sm:text-lg font-black uppercase tracking-tight text-slate-950">
                 {node.text}
               </h1>
             </div>
@@ -59,8 +59,8 @@ export const UlnDocumentRenderer: React.FC<UlnDocumentRendererProps> = ({
         }
         if (node.type === 'h2') {
           return (
-            <div key={nIdx} className="pt-3 pb-0.5 border-b border-slate-300">
-              <h2 className="text-sm sm:text-base font-bold text-slate-900 uppercase tracking-wide">
+            <div key={nIdx} className="pt-2.5 pb-0.5 border-b border-slate-300">
+              <h2 className="text-sm font-bold text-slate-950 uppercase tracking-wide">
                 {node.text}
               </h2>
             </div>
@@ -68,14 +68,14 @@ export const UlnDocumentRenderer: React.FC<UlnDocumentRendererProps> = ({
         }
         if (node.type === 'h3') {
           return (
-            <h3 key={nIdx} className="pt-1.5 text-sm font-bold text-slate-900 capitalize">
+            <h3 key={nIdx} className="pt-1.5 text-sm font-bold text-slate-950 capitalize">
               {node.text}
             </h3>
           );
         }
         if (node.type === 'h4' || node.type === 'h5' || node.type === 'h6') {
           return (
-            <div key={nIdx} className={`pt-0.5 text-xs sm:text-sm text-slate-800 ${node.type === 'h6' ? 'italic' : 'font-semibold'}`}>
+            <div key={nIdx} className={`pt-0.5 text-xs sm:text-sm text-slate-900 ${node.type === 'h6' ? 'italic' : 'font-semibold'}`}>
               {node.text}
             </div>
           );
@@ -84,33 +84,33 @@ export const UlnDocumentRenderer: React.FC<UlnDocumentRendererProps> = ({
         // 2. Instruction [ins]
         if (node.type === 'ins') {
           return (
-            <div key={nIdx} className="pt-1.5 pb-0.5 text-xs sm:text-sm font-bold italic text-slate-900">
+            <div key={nIdx} className="pt-1 pb-0.5 text-xs sm:text-sm font-bold text-slate-950">
               <UlnInlineText text={node.text} qKey={`ins_${nIdx}`} answers={answers} onInputChange={handleInputChange} isSubmitted={isSubmitted} />
             </div>
           );
         }
 
-        // 3. Word Box [BOX] (Word Bank with visible strikethrough)
+        // 3. Word Box [BOX] (Word Bank with clean word list without pill boxes)
         if (node.type === 'box') {
           if (node.isFormula) {
             return (
-              <div key={nIdx} className="bg-slate-50 border-2 border-slate-700 rounded-xl p-2.5 text-center my-1.5 font-semibold text-xs sm:text-sm text-slate-900">
+              <div key={nIdx} className="bg-slate-50 border border-slate-700 rounded-lg p-2.5 text-center my-1.5 font-semibold text-xs sm:text-sm text-slate-950">
                 <UlnInlineText text={node.content || ''} qKey={`box_${nIdx}`} answers={answers} onInputChange={handleInputChange} isSubmitted={isSubmitted} />
               </div>
             );
           }
           return (
-            <div key={nIdx} className="bg-slate-50 border-2 border-slate-700 rounded-xl p-2.5 text-center my-1.5">
-              <div className="flex flex-wrap items-center justify-center gap-2">
+            <div key={nIdx} className="border border-slate-800 rounded-lg p-2.5 text-center my-1.5 bg-slate-50/60">
+              <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-1.5 text-xs sm:text-sm">
                 {(node.words || []).map((word, wIdx) => {
                   const isUsed = usedWordsSet.has(word.trim().toLowerCase());
                   return (
                     <span
                       key={wIdx}
-                      className={`px-3 py-1 rounded-md text-xs sm:text-sm font-bold border transition duration-150 ${
+                      className={`transition ${
                         isUsed
-                          ? 'line-through text-slate-600 bg-slate-200/90 border-slate-300 decoration-slate-800 decoration-2 opacity-85'
-                          : 'bg-white border-slate-400 text-slate-900 shadow-xs hover:border-slate-600'
+                          ? 'line-through text-slate-400 decoration-slate-900 decoration-2 font-medium'
+                          : 'text-slate-950 font-bold'
                       }`}
                     >
                       {word}
@@ -129,7 +129,7 @@ export const UlnDocumentRenderer: React.FC<UlnDocumentRendererProps> = ({
               {node.rows.map((row, rIdx) => (
                 <div key={rIdx} className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                   {row.map((item, cIdx) => (
-                    <div key={cIdx} className="p-2 bg-slate-50 border border-slate-300 rounded-xl text-center text-xs font-bold text-slate-900 shadow-xs">
+                    <div key={cIdx} className="p-2 bg-slate-50 border border-slate-300 rounded text-center text-xs font-bold text-slate-950">
                       <UlnInlineText text={item} qKey={`pic_${nIdx}_${rIdx}_${cIdx}`} answers={answers} onInputChange={handleInputChange} isSubmitted={isSubmitted} />
                     </div>
                   ))}
@@ -143,9 +143,9 @@ export const UlnDocumentRenderer: React.FC<UlnDocumentRendererProps> = ({
         if (node.type === 'table') {
           return (
             <div key={nIdx} className="my-1.5 overflow-x-auto">
-              <table className="w-full text-xs sm:text-sm text-left border-collapse border-2 border-slate-800 shadow-xs">
+              <table className="w-full text-xs sm:text-sm text-left border-collapse border-2 border-slate-800">
                 {node.headers.length > 0 && (
-                  <thead className="bg-slate-100 border-b-2 border-slate-800 text-slate-900 font-bold">
+                  <thead className="bg-slate-100 border-b-2 border-slate-800 text-slate-950 font-bold">
                     <tr>
                       {node.headers.map((h, hIdx) => (
                         <th
@@ -164,7 +164,7 @@ export const UlnDocumentRenderer: React.FC<UlnDocumentRendererProps> = ({
                       {row.map((cell, cIdx) => (
                         <td
                           key={cIdx}
-                          className={`p-2 border border-slate-800 ${cIdx === 0 ? 'font-medium text-slate-900' : 'text-center'}`}
+                          className={`p-1.5 border border-slate-800 ${cIdx === 0 ? 'font-medium text-slate-950' : 'text-center'}`}
                         >
                           {cIdx === 0 ? (
                             <UlnInlineText text={cell} qKey={`cell_${nIdx}_${rIdx}_${cIdx}`} answers={answers} onInputChange={handleInputChange} isSubmitted={isSubmitted} />
@@ -172,9 +172,9 @@ export const UlnDocumentRenderer: React.FC<UlnDocumentRendererProps> = ({
                             <button
                               type="button"
                               onClick={() => handleTableCheck(rIdx, cIdx)}
-                              className={`w-6 h-6 rounded border-2 flex items-center justify-center mx-auto transition cursor-pointer font-bold text-sm ${
+                              className={`w-5 h-5 rounded border-2 flex items-center justify-center mx-auto transition cursor-pointer font-bold text-xs ${
                                 tableChecks[`${rIdx}`] === cIdx
-                                  ? 'bg-slate-900 border-slate-900 text-white'
+                                  ? 'bg-slate-950 border-slate-950 text-white'
                                   : 'border-slate-700 hover:border-slate-900 bg-white text-transparent'
                               }`}
                             >
@@ -194,9 +194,9 @@ export const UlnDocumentRenderer: React.FC<UlnDocumentRendererProps> = ({
         // 6. Reading Passage Quote [QUOTE]
         if (node.type === 'quote') {
           return (
-            <div key={nIdx} className="bg-slate-50 border-l-4 border-slate-800 rounded-r-lg p-3.5 my-1.5 text-xs sm:text-sm font-serif text-slate-900 leading-relaxed space-y-1.5">
+            <div key={nIdx} className="bg-slate-50 border-l-4 border-slate-800 p-3 my-1.5 text-xs sm:text-sm font-serif text-slate-950 leading-relaxed space-y-1.5">
               {node.title && (
-                <div className="font-sans font-bold text-xs sm:text-sm text-slate-900 not-italic">
+                <div className="font-sans font-bold text-xs sm:text-sm text-slate-950 not-italic">
                   {node.title}
                 </div>
               )}
@@ -206,7 +206,7 @@ export const UlnDocumentRenderer: React.FC<UlnDocumentRendererProps> = ({
                 </p>
               ))}
               {node.notes && node.notes.length > 0 && (
-                <div className="pt-1.5 border-t border-slate-300 grid grid-cols-1 sm:grid-cols-2 gap-1 text-[11px] sm:text-xs font-sans text-slate-700">
+                <div className="pt-1 border-t border-slate-300 grid grid-cols-1 sm:grid-cols-2 gap-1 text-[11px] sm:text-xs font-sans text-slate-700">
                   {node.notes.map((note, nIdx2) => (
                     <div key={nIdx2}>{note}</div>
                   ))}
@@ -216,15 +216,15 @@ export const UlnDocumentRenderer: React.FC<UlnDocumentRendererProps> = ({
           );
         }
 
-        // 7. Multi-Column Layouts [TAB2], [TAB3], [TAB4]
+        // 7. Multi-Column Layouts [TAB2], [TAB3], [TAB4] (Clean text columns without pill boxes)
         if (node.type === 'tab_cols') {
           const gridClass = node.cols === 3 ? 'grid-cols-1 sm:grid-cols-3' : node.cols === 4 ? 'grid-cols-2 sm:grid-cols-4' : 'grid-cols-1 sm:grid-cols-2';
           return (
-            <div key={nIdx} className="my-1 space-y-1">
+            <div key={nIdx} className="my-1.5 space-y-1">
               {node.items.map((row, rIdx) => (
-                <div key={rIdx} className={`grid ${gridClass} gap-2`}>
+                <div key={rIdx} className={`grid ${gridClass} gap-x-8 gap-y-1 text-xs sm:text-sm font-medium text-slate-950`}>
                   {row.map((item, cIdx) => (
-                    <div key={cIdx} className="flex items-center justify-between gap-2 p-1.5 bg-white border border-slate-300 rounded-lg text-xs sm:text-sm font-medium text-slate-900 shadow-xs">
+                    <div key={cIdx} className="py-0.5">
                       <UlnInlineText text={item} qKey={`tab_${nIdx}_${rIdx}_${cIdx}`} answers={answers} onInputChange={handleInputChange} isSubmitted={isSubmitted} />
                     </div>
                   ))}
@@ -239,14 +239,14 @@ export const UlnDocumentRenderer: React.FC<UlnDocumentRendererProps> = ({
           return (
             <div key={nIdx} className="space-y-1 my-1.5">
               {node.items.map((item, dIdx) => (
-                <div key={dIdx} className="flex items-center gap-2.5 p-1.5 bg-slate-50 border border-slate-300 rounded-lg text-xs sm:text-sm">
+                <div key={dIdx} className="flex items-center gap-2 py-0.5 text-xs sm:text-sm">
                   <input
                     type="text"
                     defaultValue={item.initialNum || ''}
-                    style={{ colorScheme: 'light', backgroundColor: '#ffffff', color: '#0f172a' }}
-                    className="white-paper-input w-10 text-center p-1 font-bold text-xs sm:text-sm bg-white border-2 border-slate-700 rounded outline-none focus:border-indigo-600"
+                    style={{ colorScheme: 'light', backgroundColor: 'transparent', color: '#0f172a', borderBottom: '2px solid #0f172a', borderTop: 'none', borderLeft: 'none', borderRight: 'none', borderRadius: '0px' }}
+                    className="white-paper-input w-9 text-center p-0.5 font-bold text-xs sm:text-sm text-slate-950"
                   />
-                  <span className="text-slate-900 font-medium flex-1">
+                  <span className="text-slate-950 font-medium flex-1">
                     <UlnInlineText text={item.text} qKey={`d_${nIdx}_${dIdx}`} answers={answers} onInputChange={handleInputChange} isSubmitted={isSubmitted} />
                   </span>
                 </div>
@@ -269,21 +269,21 @@ export const UlnDocumentRenderer: React.FC<UlnDocumentRendererProps> = ({
             : 'grid-cols-2 sm:grid-cols-4';
 
           return (
-            <div key={nIdx} className="py-0.5 px-1 hover:bg-slate-50/60 rounded-lg transition space-y-1">
+            <div key={nIdx} className="py-0.5 px-0.5 space-y-1">
               <div className="flex items-start gap-2">
                 {node.qNum && (
-                  <span className="font-bold text-xs sm:text-sm text-slate-900 pt-0.5 shrink-0">
+                  <span className="font-bold text-xs sm:text-sm text-slate-950 pt-0.5 shrink-0">
                     {node.qNum}.
                   </span>
                 )}
                 <div className="flex-1 space-y-1">
                   {node.text && (
-                    <div className="text-xs sm:text-sm font-medium text-slate-900 leading-relaxed">
+                    <div className="text-xs sm:text-sm font-medium text-slate-950 leading-relaxed">
                       <UlnInlineText text={node.text} qKey={qKey} answers={answers} onInputChange={handleInputChange} isSubmitted={isSubmitted} />
                     </div>
                   )}
                   {node.subText && (
-                    <div className="text-xs sm:text-sm font-medium text-slate-800 pl-2 border-l-2 border-slate-400">
+                    <div className="text-xs sm:text-sm font-medium text-slate-900 pl-2 border-l-2 border-slate-400">
                       <UlnInlineText text={node.subText} qKey={`${qKey}_sub`} answers={answers} onInputChange={handleInputChange} isSubmitted={isSubmitted} />
                     </div>
                   )}
@@ -296,8 +296,8 @@ export const UlnDocumentRenderer: React.FC<UlnDocumentRendererProps> = ({
                         disabled={isSubmitted}
                         value={answers[`${qKey}_write`] || ''}
                         onChange={(e) => handleInputChange(`${qKey}_write`, e.target.value)}
-                        style={{ colorScheme: 'light', backgroundColor: '#ffffff', color: '#0f172a', borderBottom: '2px solid #1e293b', borderTop: 'none', borderLeft: 'none', borderRight: 'none', borderRadius: '0px' }}
-                        className="white-paper-input w-full px-2 py-1 text-xs sm:text-sm font-bold text-slate-900"
+                        style={{ colorScheme: 'light', backgroundColor: 'transparent', color: '#0f172a', borderBottom: '2px solid #0f172a', borderTop: 'none', borderLeft: 'none', borderRight: 'none', borderRadius: '0px' }}
+                        className="white-paper-input w-full px-1 py-0.5 text-xs sm:text-sm font-bold text-slate-950"
                       />
                     </div>
                   )}
@@ -314,14 +314,14 @@ export const UlnDocumentRenderer: React.FC<UlnDocumentRendererProps> = ({
                             key={optIdx}
                             type="button"
                             onClick={() => handleSelectOption(qKey, opt)}
-                            className={`p-2 rounded-lg text-left border flex items-center gap-2 transition cursor-pointer text-xs sm:text-sm ${
+                            className={`p-1.5 sm:p-2 rounded-lg text-left border flex items-start gap-2 transition cursor-pointer text-xs sm:text-sm ${
                               isSelected
                                 ? 'bg-indigo-50 border-2 border-indigo-700 text-indigo-950 font-bold shadow-xs'
-                                : 'bg-white border-slate-300 hover:border-slate-500 text-slate-900 font-medium'
+                                : 'bg-white border-slate-300 hover:border-slate-500 text-slate-950 font-medium'
                             }`}
                           >
                             <span
-                              className={`w-5 h-5 rounded flex items-center justify-center text-xs font-bold shrink-0 ${
+                              className={`w-5 h-5 rounded flex items-center justify-center text-xs font-bold shrink-0 mt-0.5 ${
                                 isSelected ? 'bg-indigo-700 text-white' : 'bg-slate-200 text-slate-800'
                               }`}
                             >
@@ -343,7 +343,7 @@ export const UlnDocumentRenderer: React.FC<UlnDocumentRendererProps> = ({
 
         // 10. Default Paragraph
         return (
-          <div key={nIdx} className="text-xs sm:text-sm font-medium text-slate-900 leading-relaxed">
+          <div key={nIdx} className="text-xs sm:text-sm font-medium text-slate-950 leading-relaxed">
             <UlnInlineText text={node.text} qKey={`p_${nIdx}`} answers={answers} onInputChange={handleInputChange} isSubmitted={isSubmitted} />
           </div>
         );

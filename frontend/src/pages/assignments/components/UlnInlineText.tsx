@@ -42,15 +42,17 @@ export const UlnInlineText: React.FC<UlnInlineTextProps> = ({
                 onChange={(e) => onInputChange && onInputChange(`${qKey}_blank_${idx}`, e.target.value)}
                 style={{
                   colorScheme: 'light',
-                  backgroundColor: '#ffffff',
+                  backgroundColor: 'transparent',
                   color: '#0f172a',
-                  borderBottom: '2px solid #1e293b',
+                  borderBottom: '2px solid #0f172a',
                   borderTop: 'none',
                   borderLeft: 'none',
                   borderRight: 'none',
                   borderRadius: '0px',
+                  outline: 'none',
+                  boxShadow: 'none',
                 }}
-                className="white-paper-input inline-block mx-1.5 px-2 py-0.5 min-w-[100px] max-w-[190px] text-center text-sm font-bold text-slate-900"
+                className="white-paper-input inline-block mx-1 px-1.5 py-0.5 min-w-[85px] max-w-[190px] text-center text-sm font-bold text-slate-950"
               />
             )}
           </React.Fragment>
@@ -69,7 +71,7 @@ export const UlnInlineText: React.FC<UlnInlineTextProps> = ({
           const desc = part.startsWith('[PIC:') ? part.slice(5, -1).trim() : 'Hình ảnh';
           return (
             <span key={index} className="inline-flex items-center gap-1 px-2 py-0.5 bg-slate-100 border border-slate-400 rounded text-xs font-bold text-slate-900 mx-1">
-              <ImageIcon size={13} className="text-indigo-700 shrink-0" />
+              <ImageIcon size={13} className="text-slate-800 shrink-0" />
               <span>{desc}</span>
             </span>
           );

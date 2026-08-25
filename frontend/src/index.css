@@ -104,24 +104,46 @@ input[type=number] {
   -moz-appearance: textfield;
 }
 
-/* White Paper Continuous Worksheet Input Styles */
+/* White Paper Authentic Exam Worksheet Standard */
+.white-paper-container {
+  color-scheme: light !important;
+  color: #0f172a !important;
+  background-color: #ffffff !important;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+}
+
+.white-paper-container,
+.white-paper-container * {
+  color-scheme: light !important;
+}
+
+.white-paper-container input[type="text"],
+.white-paper-container input,
 .white-paper-input {
   color-scheme: light !important;
-  background-color: #ffffff !important;
+  background-color: transparent !important;
+  background: transparent !important;
   color: #0f172a !important;
   border-top: none !important;
   border-left: none !important;
   border-right: none !important;
-  border-bottom: 2px solid #1e293b !important;
+  border-bottom: 2px solid #0f172a !important;
   border-radius: 0 !important;
   outline: none !important;
-  padding: 1px 6px !important;
+  box-shadow: none !important;
+  padding: 0 4px !important;
   font-weight: 700 !important;
+  font-size: 15px !important;
+  line-height: 1.4 !important;
 }
 
+.white-paper-container input[type="text"]:focus,
+.white-paper-container input:focus,
 .white-paper-input:focus {
-  background-color: #f8fafc !important;
-  border-bottom-color: #4338ca !important;
+  background-color: #f1f5f9 !important;
+  background: #f1f5f9 !important;
+  border-bottom: 2px solid #4338ca !important;
+  color: #0f172a !important;
 }
 
 select {

@@ -268,7 +268,10 @@ export const WhitePaperAssignmentViewer: React.FC<WhitePaperAssignmentViewerProp
       </div>
 
       {/* 2. PURE WHITE PAPER WORKSHEET CANVAS (A4 PAPER SHEET STANDARD) */}
-      <div className="bg-white text-slate-900 shadow-2xl rounded-2xl p-6 sm:p-12 max-w-4xl mx-auto border border-slate-200 space-y-8 print:p-0 print:border-none print:shadow-none">
+      <div
+        style={{ colorScheme: 'light' }}
+        className="white-paper-container bg-white text-slate-950 shadow-2xl rounded-2xl p-6 sm:p-10 max-w-4xl mx-auto border border-slate-200 space-y-6 print:p-0 print:border-none print:shadow-none"
+      >
         <WhitePaperHeader
           assignment={assignment}
           studentName={studentName}
