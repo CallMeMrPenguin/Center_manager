@@ -343,7 +343,7 @@ export const UlnDocumentRenderer: React.FC<UlnDocumentRendererProps> = memo(({
                     </div>
                   )}
                   {node.options && node.options.length > 0 && (
-                    <div className={`grid ${optGridClass} gap-x-6 gap-y-1 pt-1 font-normal`}>
+                    <div className={`grid ${optGridClass} gap-x-6 gap-y-1.5 pt-1 font-normal`}>
                       {node.options.map((opt, optIdx) => {
                         const optLetter = String.fromCharCode(65 + optIdx);
                         const optLetterWithDot = optLetter + '.';
@@ -355,16 +355,18 @@ export const UlnDocumentRenderer: React.FC<UlnDocumentRendererProps> = memo(({
                             key={optIdx}
                             type="button"
                             onClick={() => handleSelectOption(qKey, optLetter)}
-                            className={`text-left flex items-start gap-1.5 transition cursor-pointer py-1 px-2 rounded-lg text-xs sm:text-sm ${
-                              isSelected
-                                ? 'bg-blue-600 text-white font-bold shadow-md ring-2 ring-blue-400'
-                                : 'hover:bg-slate-100 text-slate-900'
-                            }`}
+                            className="text-left flex items-start gap-2 transition cursor-pointer py-1 px-1 rounded-md text-xs sm:text-sm group hover:bg-slate-50"
                           >
-                            <span className={`font-bold shrink-0 w-5 min-w-[20px] text-left ${isSelected ? 'text-white' : 'text-blue-600'}`}>
-                              {optLetterWithDot}
+                            <span
+                              className={`w-5 h-5 min-w-[20px] rounded-full flex items-center justify-center font-bold text-xs transition-colors shrink-0 ${
+                                isSelected
+                                  ? 'bg-blue-600 text-white font-black shadow-xs'
+                                  : 'text-blue-700 bg-blue-50 group-hover:bg-blue-100'
+                              }`}
+                            >
+                              {optLetter}
                             </span>
-                            <span className={`flex-1 font-normal break-words ${isSelected ? 'text-white' : 'text-slate-900'}`}>
+                            <span className={`flex-1 font-normal break-words leading-tight pt-0.5 ${isSelected ? 'font-bold text-blue-900' : 'text-slate-900'}`}>
                               <UlnInlineText text={cleanText} qKey={`${qKey}_opt_${optIdx}`} answers={answers} onInputChange={handleInputChange} isSubmitted={isSubmitted} />
                             </span>
                           </button>
