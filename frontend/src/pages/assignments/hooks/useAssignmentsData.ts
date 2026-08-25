@@ -10,8 +10,8 @@ export function useAssignmentsData() {
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
-  // Active view: 'list' | 'submissions'
-  const [activeView, setActiveView] = useState<'list' | 'submissions'>('list');
+  // Active view: 'list' | 'submissions' | 'runner'
+  const [activeView, setActiveView] = useState<'list' | 'submissions' | 'runner'>('list');
   const [selectedAssignmentId, setSelectedAssignmentId] = useState<number | null>(null);
   const [submissions, setSubmissions] = useState<AssignmentSubmission[]>([]);
   const [submissionsLoading, setSubmissionsLoading] = useState<boolean>(false);
@@ -80,6 +80,13 @@ export function useAssignmentsData() {
     setActiveView('submissions');
   };
 
+  // Handler to open preview / runner test view for an assignment
+  const handlePlayPreview = (assign: Assignment) => {
+    setSelectedAssignmentId(assign.id);
+    setActiveView('runner');
+  };
+
+
   // Handler to save batch submissions
   const handleSaveSubmissions = async (updatedSubmissions: AssignmentSubmission[]) => {
     if (!selectedAssignmentId) return;
@@ -147,6 +154,8 @@ export function useAssignmentsData() {
     loadAssignments,
     loadSubmissions,
     handleViewSubmissions,
+    handlePlayPreview,
     handleSaveSubmissions,
   };
 }
+

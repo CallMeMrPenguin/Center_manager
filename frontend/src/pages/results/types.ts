@@ -19,6 +19,13 @@ export interface StudentProfileSummary {
   nickname?: string;
   grade?: string;
   school?: string;
+  gender?: string;
+  date_of_birth?: string;
+  father_name?: string;
+  father_phone?: string;
+  mother_name?: string;
+  mother_phone?: string;
+  address?: string;
   status?: string;
   enrolled_classes?: string;
   total_sessions: number;
@@ -33,4 +40,6 @@ export interface StudentProfileSummary {
   tier_label: string;
   tier_color: string;
   tier_badge_bg: string;
+  evaluation_text: string;
+  performance_index: string;
 }

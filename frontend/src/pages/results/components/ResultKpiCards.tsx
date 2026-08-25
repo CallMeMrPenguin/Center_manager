@@ -1,5 +1,5 @@
 import React from 'react';
-import { Award, CheckCircle2, FileText, UserCheck } from 'lucide-react';
+import { Award, CheckCircle2, FileText, Sparkles, UserCheck } from 'lucide-react';
 import { StudentProfileSummary } from '../types';
 import { trunc1Dec } from '../hooks/useStudentResults';
 
@@ -12,17 +12,17 @@ export const ResultKpiCards: React.FC<ResultKpiCardsProps> = ({ summary }) => {
 
   const cards = [
     {
-      title: 'Kiểm Tra 1 (Check 1)',
+      title: 'Kiểm Tra 1',
       value: trunc1Dec(summary.avg_check_1),
-      desc: 'Điểm trung bình Check 1',
+      desc: 'Điểm trung bình Kiểm tra 1',
       icon: <Award size={18} className="text-blue-400" />,
       cardClass: 'kpi-card-blue',
       textColor: 'text-blue-400',
     },
     {
-      title: 'Kiểm Tra 2 (Check 2)',
+      title: 'Kiểm Tra 2',
       value: trunc1Dec(summary.avg_check_2),
-      desc: 'Điểm trung bình Check 2',
+      desc: 'Điểm trung bình Kiểm tra 2',
       icon: <CheckCircle2 size={18} className="text-purple-400" />,
       cardClass: 'kpi-card-purple',
       textColor: 'text-purple-400',
@@ -36,17 +36,25 @@ export const ResultKpiCards: React.FC<ResultKpiCardsProps> = ({ summary }) => {
       textColor: 'text-amber-400',
     },
     {
-      title: 'Tỷ Lệ Điểm Danh',
-      value: `${Math.trunc(summary.attendance_rate)}%`,
-      desc: `${summary.present_sessions}/${summary.total_sessions} buổi có mặt`,
-      icon: <UserCheck size={18} className="text-emerald-400" />,
+      title: 'Thi Thử / Đánh Giá',
+      value: trunc1Dec(summary.avg_mock_test),
+      desc: 'Điểm trung bình Thi thử',
+      icon: <Sparkles size={18} className="text-emerald-400" />,
       cardClass: 'kpi-card-green',
       textColor: 'text-emerald-400',
+    },
+    {
+      title: 'Tỷ Lệ Chuyên Cần',
+      value: `${Math.trunc(summary.attendance_rate)}%`,
+      desc: `${summary.present_sessions}/${summary.total_sessions} buổi có mặt`,
+      icon: <UserCheck size={18} className="text-teal-400" />,
+      cardClass: 'kpi-card-blue',
+      textColor: 'text-teal-400',
     },
   ];
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
       {cards.map((card, idx) => (
         <div
           key={idx}
@@ -62,7 +70,7 @@ export const ResultKpiCards: React.FC<ResultKpiCardsProps> = ({ summary }) => {
           </div>
 
           <div className="space-y-1">
-            <div className={`text-2xl font-black ${card.textColor} tracking-tight`}>
+            <div className={`text-2xl font-black ${card.textColor} tracking-tight font-mono`}>
               {card.value}
             </div>
             <p className="text-[11px] font-medium text-slate-400">

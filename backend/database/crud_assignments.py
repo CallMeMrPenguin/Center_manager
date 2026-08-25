@@ -20,6 +20,8 @@ def get_assignments(class_id: Optional[int] = None, month: str = "") -> List[Dic
                 a.assigned_date,
                 a.due_date,
                 a.max_score,
+                a.content_json,
+                a.quiz_config,
                 a.created_at,
                 COUNT(sub.id) AS total_enrolled,
                 SUM(CASE WHEN sub.submitted = 1 THEN 1 ELSE 0 END) AS submitted_count,
@@ -68,11 +70,13 @@ def create_assignment(data: Dict[str, Any]) -> int:
         assigned_date = data.get("assigned_date") or datetime.now().strftime("%Y-%m-%d")
         due_date = data.get("due_date") or assigned_date
         max_score = float(data.get("max_score", 10))
+        content_json = data.get("content_json", "") or ""
+        quiz_config = data.get("quiz_config", "") or ""
 
         cursor.execute("""
-            INSERT INTO assignments (class_id, title, description, assigned_date, due_date, max_score)
-            VALUES (?, ?, ?, ?, ?, ?)
-        """, (class_id, title, description, assigned_date, due_date, max_score))
+            INSERT INTO assignments (class_id, title, description, assigned_date, due_date, max_score, content_json, quiz_config)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        """, (class_id, title, description, assigned_date, due_date, max_score, content_json, quiz_config))
         assignment_id = cursor.lastrowid
 
         # Auto-create submission records for all students currently in this class
@@ -99,15 +103,18 @@ def update_assignment(assignment_id: int, data: Dict[str, Any]):
         assigned_date = data.get("assigned_date")
         due_date = data.get("due_date")
         max_score = float(data.get("max_score", 10))
+        content_json = data.get("content_json", "") or ""
+        quiz_config = data.get("quiz_config", "") or ""
 
         cursor.execute("""
             UPDATE assignments
-            SET title = ?, description = ?, assigned_date = ?, due_date = ?, max_score = ?
+            SET title = ?, description = ?, assigned_date = ?, due_date = ?, max_score = ?, content_json = ?, quiz_config = ?
             WHERE id = ?
-        """, (title, description, assigned_date, due_date, max_score, assignment_id))
+        """, (title, description, assigned_date, due_date, max_score, content_json, quiz_config, assignment_id))
         conn.commit()
     finally:
         conn.close()
+
 
 def delete_assignment(assignment_id: int):
     """Deletes an assignment and cascades to submissions."""

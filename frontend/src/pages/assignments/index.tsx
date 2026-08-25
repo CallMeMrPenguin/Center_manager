@@ -7,6 +7,7 @@ import { AssignmentsKpiCards } from './components/AssignmentsKpiCards';
 import { AssignmentModal } from './components/AssignmentModal';
 import { AssignmentListTab } from './tabs/AssignmentListTab';
 import { SubmissionTab } from './tabs/SubmissionTab';
+import { OnlineAssignmentRunner } from './components/OnlineAssignmentRunner';
 import { Assignment } from './types';
 
 export const AssignmentsPage: React.FC = () => {
@@ -30,6 +31,7 @@ export const AssignmentsPage: React.FC = () => {
     kpis,
     loadAssignments,
     handleViewSubmissions,
+    handlePlayPreview,
     handleSaveSubmissions,
   } = useAssignmentsData();
 
@@ -104,7 +106,7 @@ export const AssignmentsPage: React.FC = () => {
 
       {/* 3. Segmented Control Switcher */}
       <div className="flex items-center justify-between border-b border-[#181f36] pb-3">
-        <SegmentedControl<'list' | 'submissions'>
+        <SegmentedControl<'list' | 'submissions' | 'runner'>
           value={activeView}
           onChange={setActiveView}
           options={[
@@ -112,6 +114,10 @@ export const AssignmentsPage: React.FC = () => {
             {
               value: 'submissions',
               label: currentAssignment ? `Nộp Bài: ${currentAssignment.title}` : 'Theo Dõi Nộp Bài',
+            },
+            {
+              value: 'runner',
+              label: currentAssignment ? `Làm Bài: ${currentAssignment.title}` : 'Làm Thử / Preview',
             },
           ]}
           activeColor="bg-[#5c36f5] shadow-[0_0_14px_rgba(92,54,245,0.5)]"
@@ -127,15 +133,34 @@ export const AssignmentsPage: React.FC = () => {
             loading={loading}
             onEditAssignment={handleOpenEditModal}
             onViewSubmissions={handleViewSubmissions}
+            onPlayPreview={handlePlayPreview}
             onOpenCreateModal={handleOpenCreateModal}
           />
-        ) : (
+        ) : activeView === 'submissions' ? (
           <SubmissionTab
             assignment={currentAssignment}
             submissions={submissions}
             loading={submissionsLoading}
             onBack={() => setActiveView('list')}
             onSaveSubmissions={handleSaveSubmissions}
+          />
+        ) : (
+          <OnlineAssignmentRunner
+            assignment={
+              currentAssignment || {
+                id: 0,
+                class_id: 0,
+                title: 'Bài Tập Về Nhà Mẫu',
+                due_date: new Date().toISOString().slice(0, 10),
+                assigned_date: new Date().toISOString().slice(0, 10),
+                max_score: 10,
+              }
+            }
+            isPreview={true}
+            onBack={() => setActiveView('list')}
+            onSubmitSuccess={() => {
+              loadAssignments();
+            }}
           />
         )}
       </div>
@@ -154,3 +179,4 @@ export const AssignmentsPage: React.FC = () => {
 };
 
 export default AssignmentsPage;
+

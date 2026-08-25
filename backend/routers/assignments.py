@@ -19,6 +19,8 @@ class AssignmentCreate(BaseModel):
     assigned_date: Optional[str] = None
     due_date: Optional[str] = None
     max_score: Optional[float] = 10.0
+    content_json: Optional[str] = ""
+    quiz_config: Optional[str] = ""
 
 class AssignmentUpdate(BaseModel):
     title: str
@@ -26,6 +28,9 @@ class AssignmentUpdate(BaseModel):
     assigned_date: str
     due_date: str
     max_score: Optional[float] = 10.0
+    content_json: Optional[str] = ""
+    quiz_config: Optional[str] = ""
+
 
 class SubmissionBatchUpdate(BaseModel):
     submissions: List[Dict[str, Any]]

@@ -88,10 +88,51 @@ def delete_user(user_id: int):
     finally:
         conn.close()
 
+def sync_student_accounts() -> Dict[str, Any]:
+    """
+    Auto-generates or syncs accounts for all students in the database.
+    Default username: hs_{id:04d}, Default password: '123456'
+    """
+    conn = get_connection()
+    try:
+        cursor = conn.cursor()
+        cursor.execute("SELECT id, full_name, nickname, status FROM students")
+        students = cursor.fetchall()
+        default_pwd_hash = hash_password("123456")
+        created_count = 0
+        updated_count = 0
+
+        for s in students:
+            sid = s["id"]
+            name = s["full_name"]
+            username = f"hs_{sid:04d}"
+            status = s["status"] if s["status"] in ('Hoạt động', 'Tạm khóa') else 'Hoạt động'
+
+            cursor.execute("SELECT id FROM app_users WHERE username = ?", (username,))
+            existing = cursor.fetchone()
+            if not existing:
+                cursor.execute("""
+                    INSERT INTO app_users (display_name, username, password_hash, role, status)
+                    VALUES (?, ?, ?, 'Học sinh', ?)
+                """, (name, username, default_pwd_hash, status))
+                created_count += 1
+            else:
+                cursor.execute("""
+                    UPDATE app_users
+                    SET display_name = ?, status = ?
+                    WHERE username = ?
+                """, (name, status, username))
+                updated_count += 1
+
+        conn.commit()
+        return {"success": True, "created": created_count, "synced": updated_count, "total_students": len(students)}
+    finally:
+        conn.close()
+
 # ----------------------------------------------------
 # ROLE PERMISSIONS
 # ----------------------------------------------------
-DEFAULT_ROLES = ["Quản trị viên", "Giáo viên", "Trợ giảng", "Kế toán"]
+DEFAULT_ROLES = ["Quản trị viên", "Giáo viên", "Trợ giảng", "Học sinh", "Kế toán"]
 
 def get_role_permissions() -> List[Dict[str, Any]]:
     """
@@ -126,3 +167,4 @@ def save_role_permissions(permissions: List[Dict[str, Any]]):
         conn.commit()
     finally:
         conn.close()
+

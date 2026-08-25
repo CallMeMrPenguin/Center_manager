@@ -3,13 +3,14 @@ import { api } from '../../../api';
 import { showToast } from '../../../components/Toast';
 import { AppUser, RolePermission } from '../types';
 
-export const ROLES = ['Quản trị viên', 'Giáo viên', 'Trợ giảng', 'Kế toán'];
+export const ROLES = ['Quản trị viên', 'Giáo viên', 'Trợ giảng', 'Học sinh', 'Kế toán'];
 
 export function useUsersData() {
   const [users, setUsers] = useState<AppUser[]>([]);
   const [permissions, setPermissions] = useState<RolePermission[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [savingPermissions, setSavingPermissions] = useState<boolean>(false);
+  const [syncingStudents, setSyncingStudents] = useState<boolean>(false);
 
   // Active view: 'users' | 'permissions' | 'system'
   const [activeTab, setActiveTab] = useState<'users' | 'permissions' | 'system'>('users');
@@ -47,6 +48,21 @@ export function useUsersData() {
     loadPermissions();
   }, [loadUsers, loadPermissions]);
 
+  // Sync accounts for all students
+  const handleSyncStudents = async () => {
+    try {
+      setSyncingStudents(true);
+      const res = await api.syncStudentAccounts();
+      showToast(`Đã đồng bộ tài khoản cho ${res.total_students || 0} học sinh!`, 'success');
+      loadUsers();
+    } catch (err) {
+      console.error('Failed to sync student accounts:', err);
+      showToast('Lỗi khi đồng bộ tài khoản học sinh: ' + err, 'error');
+    } finally {
+      setSyncingStudents(false);
+    }
+  };
+
   // Save role permissions batch
   const handleSavePermissions = async (updatedList: RolePermission[]) => {
     try {
@@ -67,6 +83,7 @@ export function useUsersData() {
     permissions,
     loading,
     savingPermissions,
+    syncingStudents,
     activeTab,
     setActiveTab,
     isModalOpen,
@@ -75,6 +92,8 @@ export function useUsersData() {
     setEditingUser,
     loadUsers,
     loadPermissions,
+    handleSyncStudents,
     handleSavePermissions,
   };
 }
+

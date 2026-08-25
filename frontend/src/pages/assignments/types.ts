@@ -7,6 +7,8 @@ export interface Assignment {
   assigned_date: string;
   due_date: string;
   max_score: number;
+  content_json?: string;
+  quiz_config?: string;
   created_at?: string;
   total_enrolled?: number;
   submitted_count?: number;

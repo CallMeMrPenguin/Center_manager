@@ -1,12 +1,14 @@
 import React, { useMemo } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
-import { Edit3, Plus, Shield, User, CheckCircle2, Lock } from 'lucide-react';
+import { Edit3, Plus, Shield, User, CheckCircle2, Lock, UserPlus, RefreshCw } from 'lucide-react';
 import { DataTable } from '../../../components/DataTable';
 import { AppUser } from '../types';
 
 interface UsersTabProps {
   users: AppUser[];
   loading: boolean;
+  syncing?: boolean;
+  onSyncStudents?: () => void;
   onEditUser: (user: AppUser) => void;
   onOpenCreateModal: () => void;
 }
@@ -14,9 +16,12 @@ interface UsersTabProps {
 export const UsersTab: React.FC<UsersTabProps> = ({
   users,
   loading,
+  syncing = false,
+  onSyncStudents,
   onEditUser,
   onOpenCreateModal,
 }) => {
+
   const columns = useMemo<ColumnDef<AppUser>[]>(
     () => [
       {
@@ -54,6 +59,8 @@ export const UsersTab: React.FC<UsersTabProps> = ({
             badgeClass = 'bg-indigo-500/15 text-indigo-300 border-indigo-500/30';
           } else if (role === 'Trợ giảng') {
             badgeClass = 'bg-blue-500/15 text-blue-300 border-blue-500/30';
+          } else if (role === 'Học sinh') {
+            badgeClass = 'bg-teal-500/15 text-teal-300 border-teal-500/30';
           } else if (role === 'Kế toán') {
             badgeClass = 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30';
           }
@@ -136,16 +143,32 @@ export const UsersTab: React.FC<UsersTabProps> = ({
         exportFilename="danh_sach_tai_khoan"
         searchPlaceholder="Tìm kiếm tài khoản theo tên, vai trò..."
         toolbarRight={
-          <button
-            type="button"
-            onClick={onOpenCreateModal}
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#5c36f5] hover:bg-[#6c48f7] text-white text-xs font-black shadow-[0_0_12px_rgba(92,54,245,0.4)] transition-all cursor-pointer active:scale-95 shrink-0"
-          >
-            <Plus size={14} />
-            <span>Thêm Tài Khoản</span>
-          </button>
+          <div className="flex items-center gap-2">
+            {onSyncStudents && (
+              <button
+                type="button"
+                onClick={onSyncStudents}
+                disabled={syncing}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-teal-500/15 hover:bg-teal-500/25 text-teal-300 hover:text-white text-xs font-bold border border-teal-500/30 transition cursor-pointer active:scale-95 disabled:opacity-50"
+                title="Tự động tạo hoặc đồng bộ tài khoản cho toàn bộ học sinh"
+              >
+                <RefreshCw size={13} className={syncing ? 'animate-spin' : ''} />
+                <span>{syncing ? 'Đang đồng bộ...' : 'Tạo TK Cho Toàn Bộ HS'}</span>
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={onOpenCreateModal}
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#5c36f5] hover:bg-[#6c48f7] text-white text-xs font-black shadow-[0_0_12px_rgba(92,54,245,0.4)] transition-all cursor-pointer active:scale-95 shrink-0"
+            >
+              <Plus size={14} />
+              <span>Thêm Tài Khoản</span>
+            </button>
+          </div>
         }
       />
     </div>
   );
 };
+
+

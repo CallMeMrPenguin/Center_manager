@@ -61,7 +61,16 @@ def remove_user(user_id: int):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@router.post("/users/sync-students")
+def sync_students():
+    try:
+        from database.crud_users import sync_student_accounts
+        return sync_student_accounts()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 # --- Role Permissions Endpoints ---
+
 @router.get("/roles/permissions")
 def list_role_permissions():
     try:

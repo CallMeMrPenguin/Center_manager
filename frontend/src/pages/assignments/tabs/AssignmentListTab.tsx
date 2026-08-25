@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
-import { Edit3, Users, Plus } from 'lucide-react';
+import { Edit3, Users, Plus, PlayCircle } from 'lucide-react';
 import { DataTable } from '../../../components/DataTable';
 import { Assignment } from '../types';
 
@@ -9,6 +9,7 @@ interface AssignmentListTabProps {
   loading: boolean;
   onEditAssignment: (assignment: Assignment) => void;
   onViewSubmissions: (assignment: Assignment) => void;
+  onPlayPreview: (assignment: Assignment) => void;
   onOpenCreateModal: () => void;
 }
 
@@ -17,6 +18,7 @@ export const AssignmentListTab: React.FC<AssignmentListTabProps> = ({
   loading,
   onEditAssignment,
   onViewSubmissions,
+  onPlayPreview,
   onOpenCreateModal,
 }) => {
   const columns = useMemo<ColumnDef<Assignment>[]>(
@@ -46,7 +48,7 @@ export const AssignmentListTab: React.FC<AssignmentListTabProps> = ({
           <div className="space-y-0.5">
             <button
               type="button"
-              onClick={() => onViewSubmissions(row.original)}
+              onClick={() => onPlayPreview(row.original)}
               className="font-bold text-indigo-400 hover:text-indigo-300 hover:underline text-left cursor-pointer transition-colors block"
             >
               {row.original.title}
@@ -123,6 +125,17 @@ export const AssignmentListTab: React.FC<AssignmentListTabProps> = ({
         enableGlobalFilter: false,
         cell: ({ row }) => (
           <div className="flex items-center gap-1.5">
+            {/* Play / Preview online test button */}
+            <button
+              type="button"
+              onClick={() => onPlayPreview(row.original)}
+              className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 hover:text-white text-xs font-bold border border-emerald-500/30 transition cursor-pointer active:scale-95"
+              title="Làm thử bài tập trực tuyến (Preview)"
+            >
+              <PlayCircle size={13} />
+              <span>Làm thử</span>
+            </button>
+
             {/* View submissions button */}
             <button
               type="button"
@@ -147,8 +160,9 @@ export const AssignmentListTab: React.FC<AssignmentListTabProps> = ({
         ),
       },
     ],
-    [onEditAssignment, onViewSubmissions]
+    [onEditAssignment, onViewSubmissions, onPlayPreview]
   );
+
 
   return (
     <div className="space-y-4">

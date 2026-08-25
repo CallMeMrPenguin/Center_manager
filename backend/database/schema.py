@@ -425,9 +425,21 @@ def init_db():
         assigned_date TEXT NOT NULL,
         due_date TEXT NOT NULL,
         max_score REAL DEFAULT 10,
+        content_json TEXT DEFAULT '',
+        quiz_config TEXT DEFAULT '',
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
     """)
+
+    # Try add content_json & quiz_config if table already exists
+    try:
+        cursor.execute("ALTER TABLE assignments ADD COLUMN content_json TEXT DEFAULT ''")
+    except sqlite3.OperationalError:
+        pass
+    try:
+        cursor.execute("ALTER TABLE assignments ADD COLUMN quiz_config TEXT DEFAULT ''")
+    except sqlite3.OperationalError:
+        pass
 
     # 25. Assignment Submissions table
     cursor.execute("""
@@ -458,6 +470,7 @@ def init_db():
     """)
 
     # 27. Role Permissions table
+
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS role_permissions (
         id INTEGER PRIMARY KEY AUTOINCREMENT,

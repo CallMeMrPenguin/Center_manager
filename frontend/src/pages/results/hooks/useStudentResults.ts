@@ -11,44 +11,50 @@ export const trunc1Dec = (val: number | null | undefined): string => {
 export const computeTier = (overall: number | null) => {
   if (overall === null) {
     return {
-      label: 'Chưa xếp loại',
+      label: 'Chưa Xếp Loại',
       color: 'text-slate-400',
-      badgeBg: 'bg-slate-500/10 border-slate-500/30',
+      badgeBg: 'bg-slate-500/15 border-slate-500/30',
+      evaluation: 'Chưa Đánh Giá',
     };
   }
   if (overall >= 8.5) {
     return {
       label: 'Xuất Sắc',
-      color: 'text-emerald-400',
-      badgeBg: 'bg-emerald-500/15 border-emerald-500/30',
+      color: 'text-amber-400',
+      badgeBg: 'bg-amber-500/15 border-amber-500/30',
+      evaluation: 'Xuất Chúng (Nắm Vững Kiến Thức)',
     };
   }
   if (overall >= 7.0) {
     return {
       label: 'Giỏi',
-      color: 'text-blue-400',
-      badgeBg: 'bg-blue-500/15 border-blue-500/30',
+      color: 'text-indigo-400',
+      badgeBg: 'bg-indigo-500/15 border-indigo-500/30',
+      evaluation: 'Ưu Tú (Tiến Bộ Nhanh)',
     };
   }
   if (overall >= 5.0) {
     return {
       label: 'Khá',
-      color: 'text-amber-400',
-      badgeBg: 'bg-amber-500/15 border-amber-500/30',
+      color: 'text-cyan-400',
+      badgeBg: 'bg-cyan-500/15 border-cyan-500/30',
+      evaluation: 'Khá (Đang Tiến Bộ)',
     };
   }
   return {
     label: 'Cần Cố Gắng',
     color: 'text-rose-400',
     badgeBg: 'bg-rose-500/15 border-rose-500/30',
+    evaluation: 'Cần Củng Cố & Phụ Đạo Thêm',
   };
 };
 
 export function useStudentResults() {
-  const [students, setStudents] = useState<any[]>([]);
+  const [allStudents, setAllStudents] = useState<any[]>([]);
   const [selectedStudentId, setSelectedStudentId] = useState<number | null>(null);
   const [classes, setClasses] = useState<any[]>([]);
   const [selectedClassId, setSelectedClassId] = useState<string>('all');
+  const [classEnrolledStudentIds, setClassEnrolledStudentIds] = useState<number[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [rawRecords, setRawRecords] = useState<StudentResultRecord[]>([]);
 
@@ -63,16 +69,15 @@ export function useStudentResults() {
           api.getClasses(''),
         ]);
         if (!mounted) return;
-        setStudents(studentsData || []);
+        setAllStudents(studentsData || []);
         setClasses(classesData || []);
 
-        // Pick first active student by default if none selected
         if (studentsData && studentsData.length > 0) {
           const first = studentsData.find((s: any) => s.status === 'Đang học') || studentsData[0];
           setSelectedStudentId(first.id);
         }
       } catch (err) {
-        console.error('Failed to load students / classes:', err);
+        console.error('Failed to load initial data:', err);
       } finally {
         if (mounted) setLoading(false);
       }
@@ -83,7 +88,42 @@ export function useStudentResults() {
     };
   }, []);
 
-  // 2. Fetch specific student's grade analytics records
+  // 2. When selectedClassId changes, fetch enrolled students for that class
+  useEffect(() => {
+    let mounted = true;
+    if (selectedClassId === 'all') {
+      setClassEnrolledStudentIds([]);
+      return;
+    }
+
+    api.getClassStudents(Number(selectedClassId))
+      .then((enrolledList) => {
+        if (!mounted) return;
+        const ids = (enrolledList || []).map((s: any) => s.id || s.student_id);
+        setClassEnrolledStudentIds(ids);
+
+        // Auto-switch to first enrolled student in class if current selected student is not in this class
+        if (ids.length > 0) {
+          setSelectedStudentId((prev) => {
+            if (prev && ids.includes(prev)) return prev;
+            return ids[0];
+          });
+        }
+      })
+      .catch((err) => console.error('Failed to fetch class students:', err));
+
+    return () => {
+      mounted = false;
+    };
+  }, [selectedClassId]);
+
+  // Students list filtered by class
+  const students = useMemo(() => {
+    if (selectedClassId === 'all') return allStudents;
+    return allStudents.filter((s) => classEnrolledStudentIds.includes(s.id));
+  }, [allStudents, selectedClassId, classEnrolledStudentIds]);
+
+  // 3. Fetch specific student's grade records
   const loadStudentData = useCallback(async (studentId: number) => {
     try {
       setLoading(true);
@@ -104,7 +144,7 @@ export function useStudentResults() {
       }));
       setRawRecords(recs);
     } catch (err) {
-      console.error('Failed to load grade analytics for student:', err);
+      console.error('Failed to load student grade records:', err);
       setRawRecords([]);
     } finally {
       setLoading(false);
@@ -121,8 +161,8 @@ export function useStudentResults() {
 
   // Current selected student object
   const currentStudent = useMemo(() => {
-    return students.find((s) => s.id === selectedStudentId) || null;
-  }, [students, selectedStudentId]);
+    return allStudents.find((s) => s.id === selectedStudentId) || null;
+  }, [allStudents, selectedStudentId]);
 
   // Filtered records by class
   const filteredRecords = useMemo(() => {
@@ -153,6 +193,7 @@ export function useStudentResults() {
     const overall_avg = allScores.length > 0 ? allScores.reduce((a, b) => a + b, 0) / allScores.length : null;
 
     const tier = computeTier(overall_avg);
+    const performance_index = overall_avg !== null ? (overall_avg * 10).toFixed(1) : '0.0';
 
     return {
       student_id: currentStudent.id,
@@ -160,6 +201,13 @@ export function useStudentResults() {
       nickname: currentStudent.nickname,
       grade: currentStudent.grade,
       school: currentStudent.school,
+      gender: currentStudent.gender,
+      date_of_birth: currentStudent.date_of_birth,
+      father_name: currentStudent.father_name,
+      father_phone: currentStudent.father_phone,
+      mother_name: currentStudent.mother_name,
+      mother_phone: currentStudent.mother_phone,
+      address: currentStudent.address,
       status: currentStudent.status,
       enrolled_classes: currentStudent.enrolled_classes,
       total_sessions: total,
@@ -174,11 +222,14 @@ export function useStudentResults() {
       tier_label: tier.label,
       tier_color: tier.color,
       tier_badge_bg: tier.badgeBg,
+      evaluation_text: tier.evaluation,
+      performance_index,
     };
   }, [currentStudent, filteredRecords]);
 
   return {
     students,
+    allStudents,
     selectedStudentId,
     setSelectedStudentId,
     currentStudent,

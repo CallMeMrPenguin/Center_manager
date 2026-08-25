@@ -52,7 +52,7 @@ export const ResultHistoryTable: React.FC<ResultHistoryTableProps> = ({ records,
       },
       {
         accessorKey: 'check_1',
-        header: 'Check 1',
+        header: 'Kiểm Tra 1',
         cell: (info) => {
           const val = info.getValue<number | null>();
           return (
@@ -64,7 +64,7 @@ export const ResultHistoryTable: React.FC<ResultHistoryTableProps> = ({ records,
       },
       {
         accessorKey: 'check_2',
-        header: 'Check 2',
+        header: 'Kiểm Tra 2',
         cell: (info) => {
           const val = info.getValue<number | null>();
           return (
