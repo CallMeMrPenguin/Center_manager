@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { ChevronLeft, ChevronRight, Settings as SettingsIcon, FolderOpen, LogOut } from 'lucide-react';
 import { TAB_DEFINITIONS } from '../config/tabs';
 import { api } from '../api';
@@ -47,13 +47,20 @@ export const Sidebar: React.FC<SidebarProps> = ({
   profileRef,
   onLogout,
 }) => {
+  const [hoveredTab, setHoveredTab] = useState<{
+    id: string;
+    label: string;
+    top: number;
+    isActive: boolean;
+  } | null>(null);
+
   return (
     <aside
       className={`group relative ${
         isSidebarExpanded ? 'w-56' : 'w-16'
       } bg-[#0c0f1e]/90 border border-[#212c4b] rounded-2xl flex flex-col transition-all duration-300 select-none shrink-0 z-30 shadow-xl overflow-visible`}
     >
-      {/* Floating Collapse / Expand Button: Only shows up on hover over sidebar */}
+      {/* Floating Collapse / Expand Button */}
       <button
         type="button"
         onClick={toggleSidebar}
@@ -68,7 +75,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       </button>
 
       {/* Header logo / Title */}
-      <div className="flex items-center px-2.5 py-3.5 shrink-0 border-b border-white/5 min-w-0">
+      <div className={`flex items-center ${isSidebarExpanded ? 'px-3 justify-start' : 'justify-center px-0'} py-3.5 shrink-0 border-b border-white/5 min-w-0`}>
         <div className="h-8.5 w-8.5 rounded-xl overflow-hidden flex items-center justify-center shrink-0 shadow-[0_0_14px_rgba(59,130,246,0.4)]">
           <img src="/logo.png" alt="Center Manager Logo" className="h-full w-full object-contain" />
         </div>
@@ -89,7 +96,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       </div>
 
       {/* Nav Menu */}
-      <div className="flex-1 overflow-y-auto min-h-0 px-1.5 py-2 flex flex-col gap-1 scrollbar-none">
+      <div className={`flex-1 overflow-y-auto min-h-0 ${isSidebarExpanded ? 'px-1.5' : 'px-1'} py-2 flex flex-col gap-1 scrollbar-none`}>
         {SECTIONS.map((section, sIdx) => {
           const sectionTabs = orderedTabIds
             .map((tabId, idx) => ({ tabId, idx }))
@@ -104,7 +111,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <React.Fragment key={section.id}>
               {/* Section Divider in Collapsed State */}
               {!isSidebarExpanded && sIdx > 0 && (
-                <div className="w-5 h-[1px] bg-white/10 mx-auto my-1.5 shrink-0" />
+                <div className="w-6 h-[1px] bg-white/10 mx-auto my-1.5 shrink-0" />
               )}
 
               <div className="flex flex-col gap-0.5 shrink-0">
@@ -120,63 +127,65 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   const isActive = activeTab === item.id;
 
                   return (
-                      <button
-                        key={item.id}
-                        draggable="true"
-                        onDragStart={() => handleDragStart(idx)}
-                        onDragOver={handleDragOver}
-                        onDragEnd={() => setDraggedIndex(null)}
-                        onDrop={() => handleDrop(idx)}
-                        onClick={() => setActiveTab(item.id)}
-                        className={`flex items-center w-full h-9 px-2 rounded-xl transition-all duration-200 ease-out relative group/item cursor-pointer shrink-0 ${
-                          isSidebarExpanded
-                            ? 'active:scale-95'
-                            : 'hover:scale-115 hover:z-30 hover:-translate-y-0.5 hover:shadow-[0_0_15px_rgba(92,54,245,0.5)]'
-                        } ${
-                          isActive
-                            ? 'bg-indigo-500/25 border-2 border-indigo-400/90 shadow-[0_0_12px_rgba(92,54,245,0.4)]'
-                            : 'hover:bg-white/[0.08] border-2 border-transparent'
-                        } ${
-                          draggedIndex === idx
-                            ? 'opacity-40 border border-dashed border-indigo-400 bg-indigo-500/10'
-                            : ''
-                        }`}
-                      >
-                        {/* Icon */}
-                        <div className="w-5.5 h-5.5 flex items-center justify-center shrink-0 relative z-10">
-                          <Icon
-                            size={16}
-                            className={
-                              isActive
-                                ? 'text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.8)]'
-                                : 'text-slate-400 group-hover/item:text-white transition-transform duration-150 group-hover/item:scale-110'
-                            }
-                          />
-                        </div>
+                    <button
+                      key={item.id}
+                      draggable="true"
+                      onDragStart={() => handleDragStart(idx)}
+                      onDragOver={handleDragOver}
+                      onDragEnd={() => setDraggedIndex(null)}
+                      onDrop={() => handleDrop(idx)}
+                      onClick={() => setActiveTab(item.id)}
+                      onMouseEnter={(e) => {
+                        if (!isSidebarExpanded) {
+                          const rect = e.currentTarget.getBoundingClientRect();
+                          setHoveredTab({
+                            id: item.id,
+                            label: item.label,
+                            top: rect.top + rect.height / 2,
+                            isActive,
+                          });
+                        }
+                      }}
+                      onMouseLeave={() => setHoveredTab(null)}
+                      className={`flex items-center transition-all duration-150 ease-out relative group/item cursor-pointer shrink-0 ${
+                        isSidebarExpanded
+                          ? 'w-full h-9 px-2.5 rounded-xl justify-start active:scale-95'
+                          : 'w-10 h-10 mx-auto rounded-xl justify-center p-0 hover:scale-105 active:scale-95'
+                      } ${
+                        isActive
+                          ? 'bg-indigo-500/25 border-2 border-indigo-400/90 shadow-[0_0_12px_rgba(92,54,245,0.4)]'
+                          : 'hover:bg-white/[0.08] border-2 border-transparent'
+                      } ${
+                        draggedIndex === idx
+                          ? 'opacity-40 border border-dashed border-indigo-400 bg-indigo-500/10'
+                          : ''
+                      }`}
+                    >
+                      {/* Centered Icon Container */}
+                      <div className="flex items-center justify-center shrink-0 relative z-10">
+                        <Icon
+                          size={17}
+                          className={
+                            isActive
+                              ? 'text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.8)]'
+                              : 'text-slate-400 group-hover/item:text-white transition-colors'
+                          }
+                        />
+                      </div>
 
-                        {/* Label for expanded view */}
-                        {isSidebarExpanded && (
-                          <span
-                            className={`text-xs relative z-10 whitespace-nowrap overflow-hidden ml-2 ${
-                              isActive
-                                ? 'text-white font-black'
-                                : 'text-slate-200 font-bold group-hover/item:text-white'
-                            }`}
-                          >
-                            {item.label}
-                          </span>
-                        )}
-
-                        {/* Clean flyout tooltip on hover when collapsed */}
-                        {!isSidebarExpanded && (
-                          <div className="absolute left-full top-1/2 -translate-y-1/2 ml-3.5 z-50 pointer-events-none opacity-0 group-hover/item:opacity-100 transition-all duration-200 translate-x-1 group-hover/item:translate-x-0">
-                            <div className="px-3 py-1.5 rounded-xl bg-[#0c0f1e] border border-[#212c4b] text-white text-xs font-black whitespace-nowrap shadow-[0_10px_25px_rgba(0,0,0,0.9)] flex items-center gap-1.5">
-                              <span className={`w-1.5 h-1.5 rounded-full ${isActive ? 'bg-indigo-400' : 'bg-slate-400'}`} />
-                              <span>{item.label}</span>
-                            </div>
-                          </div>
-                        )}
-                      </button>
+                      {/* Label for expanded view */}
+                      {isSidebarExpanded && (
+                        <span
+                          className={`text-xs relative z-10 whitespace-nowrap overflow-hidden ml-2.5 ${
+                            isActive
+                              ? 'text-white font-black'
+                              : 'text-slate-200 font-bold group-hover/item:text-white'
+                          }`}
+                        >
+                          {item.label}
+                        </span>
+                      )}
+                    </button>
                   );
                 })}
               </div>
@@ -184,6 +193,23 @@ export const Sidebar: React.FC<SidebarProps> = ({
           );
         })}
       </div>
+
+      {/* Floating Hover Tooltip for Collapsed Sidebar (Fixed Position to avoid overflow clipping) */}
+      {!isSidebarExpanded && hoveredTab && (
+        <div
+          className="fixed left-[72px] z-[9999] pointer-events-none transition-all duration-150 ease-out"
+          style={{ top: `${hoveredTab.top}px`, transform: 'translateY(-50%)' }}
+        >
+          <div className="px-3 py-1.5 rounded-xl bg-[#0c0f1e] border border-[#212c4b] text-white text-xs font-black whitespace-nowrap shadow-[0_10px_30px_rgba(0,0,0,0.95)] flex items-center gap-2 animate-in fade-in zoom-in-95 duration-150">
+            <span
+              className={`w-1.5 h-1.5 rounded-full ${
+                hoveredTab.isActive ? 'bg-indigo-400 shadow-[0_0_8px_#818cf8]' : 'bg-slate-400'
+              }`}
+            />
+            <span>{hoveredTab.label}</span>
+          </div>
+        </div>
+      )}
 
       {/* User profile section */}
       <div className="shrink-0 mt-auto p-1.5 border-t border-white/5 relative" ref={profileRef as any}>
@@ -238,9 +264,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
         <button
           onClick={() => setProfileOpen((prev) => !prev)}
-          className="w-full flex items-center justify-center p-1.5 rounded-xl hover:bg-white/5 text-slate-300 hover:text-white transition cursor-pointer border border-transparent hover:border-white/10"
+          className={`${
+            isSidebarExpanded ? 'w-full px-2.5 py-1.5' : 'w-10 h-10 mx-auto p-0'
+          } flex items-center justify-center rounded-xl hover:bg-white/5 text-slate-300 hover:text-white transition cursor-pointer border border-transparent hover:border-white/10`}
+          title="Tài khoản quản trị"
         >
-          <div className="w-7 h-7 rounded-xl bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 flex items-center justify-center font-black text-xs">
+          <div className="w-7 h-7 rounded-lg bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 flex items-center justify-center font-black text-xs">
             CM
           </div>
         </button>
