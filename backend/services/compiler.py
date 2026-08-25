@@ -37,7 +37,12 @@ INSTRUCTION_MAP_MCQ = {
     "fb": "Mark the letter A, B, C, or D on your answer sheet to indicate the word or phrase that best fits each blank in the following questions.",
     "rw": "Mark the letter A, B, C, or D on your answer sheet to indicate the sentence that is closest in meaning to each of the following questions.",
     "mq": "Mark the letter A, B, C, or D on your answer sheet to indicate the answer that best fits each of the following questions.",
-    "wb": "Complete each blank with ONE suitable word from the box."
+    "wb": "Complete each blank with ONE suitable word from the box.",
+    "wq": "Write questions for the underlined parts in each of the following sentences.",
+    "mt": "Match each item in the left column with the appropriate item in the right column.",
+    "tf": "Decide whether the following statements are True (T) or False (F).",
+    "pc": "Look at the pictures and name the activities or objects.",
+    "cl": "Put the words into the correct column depending on their category."
 }
 
 INSTRUCTION_MAP_NON_MCQ = {
@@ -54,8 +59,14 @@ INSTRUCTION_MAP_NON_MCQ = {
     "fb": "Complete each of the following sentences with the correct form of the word in brackets or a suitable word.",
     "rw": "Rewrite each of the following sentences so that it has a similar meaning to the original sentence.",
     "mq": "Complete each of the following questions.",
-    "wb": "Complete each blank with ONE suitable word from the box."
+    "wb": "Complete each blank with ONE suitable word from the box.",
+    "wq": "Write questions for the underlined parts in each of the following sentences.",
+    "mt": "Match each item in the left column with the appropriate item in the right column.",
+    "tf": "Decide whether the following statements are True (T) or False (F).",
+    "pc": "Look at the pictures and name the activities or objects.",
+    "cl": "Put the words into the correct column depending on their category."
 }
+
 
 def cm_to_pt(cm: float) -> float:
     return float(cm) * 28.346456692913385

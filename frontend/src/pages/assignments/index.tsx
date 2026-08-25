@@ -117,7 +117,7 @@ export const AssignmentsPage: React.FC = () => {
             },
             {
               value: 'runner',
-              label: currentAssignment ? `Làm Bài: ${currentAssignment.title}` : 'Làm Thử / Preview',
+              label: currentAssignment ? `Phiếu Đề: ${currentAssignment.title}` : 'Phiếu Đề (Nền Trắng)',
             },
           ]}
           activeColor="bg-[#5c36f5] shadow-[0_0_14px_rgba(92,54,245,0.5)]"
