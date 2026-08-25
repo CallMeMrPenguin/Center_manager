@@ -12,6 +12,8 @@ import { showToast } from '../../components/Toast';
 import { cleanOptionPrefix } from '../../utils';
 
 
+import { ULN_OCR_SYSTEM_PROMPT } from '../assignments/constants/ulnPromptTemplate';
+
 const DEFAULT_TEST_FORMATTER_PROMPTS: PromptItem[] = [
   {
     id: "tf_universal_v2",
@@ -74,6 +76,11 @@ INLINE TEXT FORMATTING RULES
 - Italic Text:             *word*        → e.g., "*Note:*"
 - Student Answer Blank:    <blank>       → e.g., "She usually goes <blank> with her friends."
 - Error ID Fragment:       [text](LTR)   → e.g., "She [go](A) to [school](B) yesterday."`
+  },
+  {
+    id: "tf_uln_dsl_v1",
+    title: "Universal Layout Notation (ULN) DSL Extraction & Compilation Agent Prompt",
+    content: ULN_OCR_SYSTEM_PROMPT,
   }
 ];
 

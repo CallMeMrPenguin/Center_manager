@@ -41,15 +41,27 @@ export default function PromptManager({ storageKey, tabTitle, defaultPrompts }: 
         const saved = await api.getPrompts(storageKey);
         if (!active) return;
         if (saved && Array.isArray(saved) && saved.length > 0) {
-          setPrompts(saved);
+          const existingIds = new Set(saved.map((p: any) => p.id));
+          const missingDefaults = defaultPrompts.filter((dp) => !existingIds.has(dp.id));
+          if (missingDefaults.length > 0) {
+            const merged = [...saved, ...missingDefaults];
+            setPrompts(merged);
+            await api.savePrompts(storageKey, merged);
+            localStorage.setItem(storageKey, JSON.stringify(merged));
+          } else {
+            setPrompts(saved);
+          }
         } else {
           // If no prompts saved on backend, check localStorage as fallback
           const localSaved = localStorage.getItem(storageKey);
           if (localSaved) {
             try {
               const parsed = JSON.parse(localSaved);
-              setPrompts(parsed);
-              await api.savePrompts(storageKey, parsed);
+              const existingIds = new Set(parsed.map((p: any) => p.id));
+              const missingDefaults = defaultPrompts.filter((dp) => !existingIds.has(dp.id));
+              const merged = missingDefaults.length > 0 ? [...parsed, ...missingDefaults] : parsed;
+              setPrompts(merged);
+              await api.savePrompts(storageKey, merged);
             } catch (e) {
               setPrompts(defaultPrompts);
               await api.savePrompts(storageKey, defaultPrompts);
