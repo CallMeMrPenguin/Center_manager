@@ -18,8 +18,11 @@ export const UlnInlineText: React.FC<UlnInlineTextProps> = ({
 }) => {
   if (!text) return null;
 
-  if (text.includes('<blank>')) {
-    const parts = text.split('<blank>');
+  // Clean leading # before question/item numbers everywhere: e.g. "#1." -> "1."
+  const cleanText = text.replace(/(^|\s)#([0-9]+)/g, '$1$2');
+
+  if (cleanText.includes('<blank>')) {
+    const parts = cleanText.split('<blank>');
     return (
       <span>
         {parts.map((p, idx) => (
@@ -37,8 +40,17 @@ export const UlnInlineText: React.FC<UlnInlineTextProps> = ({
                 disabled={isSubmitted}
                 value={answers[`${qKey}_blank_${idx}`] || ''}
                 onChange={(e) => onInputChange && onInputChange(`${qKey}_blank_${idx}`, e.target.value)}
-                style={{ colorScheme: 'light', backgroundColor: '#ffffff', color: '#0f172a' }}
-                className="inline-block mx-1.5 px-2 py-0.5 min-w-[110px] max-w-[200px] text-center border-b-2 border-slate-800 bg-white focus:bg-indigo-50 focus:border-indigo-600 outline-none text-sm font-bold text-slate-900 rounded-none shadow-xs"
+                style={{
+                  colorScheme: 'light',
+                  backgroundColor: '#ffffff',
+                  color: '#0f172a',
+                  borderBottom: '2px solid #1e293b',
+                  borderTop: 'none',
+                  borderLeft: 'none',
+                  borderRight: 'none',
+                  borderRadius: '0px',
+                }}
+                className="white-paper-input inline-block mx-1.5 px-2 py-0.5 min-w-[100px] max-w-[190px] text-center text-sm font-bold text-slate-900"
               />
             )}
           </React.Fragment>
@@ -48,7 +60,7 @@ export const UlnInlineText: React.FC<UlnInlineTextProps> = ({
   }
 
   const regex = /(\[[^\]]+\]\{[^}]+\}|\[PIC:[^\]]+\]|\[PIC\]|\*\*\*[^*]+\*\*\*|\*\*[^*]+\*\*|\*[^*]+\*|\[[^\]]+\])/g;
-  const parts = text.split(regex);
+  const parts = cleanText.split(regex);
 
   return (
     <>

@@ -216,7 +216,7 @@ function parseUlnText(text: string): UlnNode[] {
         if (tLine.startsWith('[TH]')) {
           headers = tLine.replace('[TH]', '').split('|').map((s) => s.trim());
         } else if (tLine.startsWith('[TR]')) {
-          const cells = tLine.replace('[TR]', '').split('|').map((s) => s.trim());
+          const cells = tLine.replace('[TR]', '').split('|').map((s) => s.replace(/(^|\s)#([0-9]+)/g, '$1$2').trim());
           rows.push(cells);
         }
         i++;
@@ -260,7 +260,7 @@ function parseUlnText(text: string): UlnNode[] {
       const items: string[][] = [];
       while (i < lines.length && lines[i].includes(`[TAB${colCount}]`) && lines[i].includes('|')) {
         const itemLine = lines[i].replace(/\[TAB[0-9]\]/g, '').replace(/\[P[0-9]\]/g, '').trim();
-        const parts = itemLine.split('|').map((p) => p.trim());
+        const parts = itemLine.split('|').map((p) => p.replace(/(^|\s)#([0-9]+)/g, '$1$2').trim());
         items.push(parts);
         i++;
       }
