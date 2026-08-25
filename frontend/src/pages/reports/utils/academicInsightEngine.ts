@@ -191,7 +191,7 @@ export function generateAcademicInsights(params: {
       id: 'performance_prediction',
       label: 'Chỉ Số Toàn Diện & Dự Báo',
       dotColor: pi >= 80 ? '#10b981' : pi >= 65 ? '#6366f1' : '#f59e0b',
-      text: `Chỉ số phong độ toàn diện đạt ${pi}/100 (${stats.level}). Thuật toán ${predModel} dự báo buổi tới học sinh có khả năng đạt ${predNext} điểm (Từ Vựng: ${predC1} đ, Ngữ Pháp: ${predC2} đ, BTVN: ${predHw} đ).`,
+      text: `Chỉ số phong độ toàn diện đạt ${pi}/100 (Hạng ${tier.name}). Thuật toán ${predModel} dự báo buổi tới học sinh có khả năng đạt ${predNext} điểm (Từ Vựng: ${predC1} đ, Ngữ Pháp: ${predC2} đ, BTVN: ${predHw} đ).`,
       tooltipTitle: 'Chỉ Số Phong Độ PI & Dự Báo',
       tooltipDesc: 'Tổng hợp 5 trụ cột (40% EMA, 25% Trend, 15% Độ ổn định, 10% Lịch sử, 10% Chuyên cần) và mô hình chuỗi thời gian.',
       tooltipFormula: 'PI = 0.4*EMA + 0.25*Trend + 0.15*Consistency + 0.1*History + 0.1*Att',
@@ -225,15 +225,15 @@ export function generateAcademicInsights(params: {
     const isMedium = overall >= 6.5;
     return {
       subjectTitle: `ĐÁNH GIÁ CHI TIẾT HỌC SINH: ${studentName.toUpperCase()}`,
-      overallBadge: `${tier.title.toUpperCase()} (PI ${pi})`,
+      overallBadge: `HẠNG ${tier.name.toUpperCase()} (PI ${pi})`,
       badgeColor: tier.color,
       metrics,
       conclusion: {
         overviewSummary: isGood
-          ? `Học sinh ${studentName} thể hiện năng lực học tập xuất sắc với nền tảng kiến thức vững vàng (PI ${pi}/100, Tier ${tier.title}).`
+          ? `Học sinh ${studentName} thể hiện năng lực học tập xuất sắc với nền tảng kiến thức vững vàng (PI ${pi}/100, Hạng ${tier.name}).`
           : isMedium
-          ? `Học sinh ${studentName} có học lực Khá vững (PI ${pi}/100, Tier ${tier.title}), có tiềm năng bứt phá lên nhóm Xuất Sắc nếu khắc phục các điểm nghẽn kỹ năng.`
-          : `Học sinh ${studentName} hiện đang ở nhóm Cần Hỗ Trợ (Học lực ${tier.title}, PI ${pi}/100), cần sự quan tâm sát sao từ giáo viên và gia đình.`,
+          ? `Học sinh ${studentName} có học lực Khá vững (PI ${pi}/100, Hạng ${tier.name}), có tiềm năng bứt phá lên nhóm Cao Thủ / Quán Quân nếu khắc phục các điểm nghẽn kỹ năng.`
+          : `Học sinh ${studentName} hiện đang ở nhóm Cần Hỗ Trợ (Hạng ${tier.name}, PI ${pi}/100), cần sự quan tâm sát sao từ giáo viên và gia đình.`,
         riskAlert: isGood
           ? skillGap >= 1.2
             ? `Lưu ý cân bằng giữa ${c1 < c2 ? 'Từ Vựng' : 'Ngữ Pháp'} để không bị mất điểm ở các câu phân loại cao cấp.`

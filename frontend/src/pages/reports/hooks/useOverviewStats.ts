@@ -167,7 +167,7 @@ export const useOverviewStats = ({
       mockTestDiff: '+0.0',
       overallDiff: '+0.0',
       rank: rankStr,
-      level: overall > 0 ? getStudentTier(overall).title : 'Chưa Có Điểm'
+      level: overall > 0 ? getStudentTier(overall).name : 'Chưa Có Điểm'
     };
   }, [activeSessionRecords, sessionRecords, selectedStudentId, filteredRankings]);
 
