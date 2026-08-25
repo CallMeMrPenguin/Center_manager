@@ -307,13 +307,19 @@ export const UlnDocumentRenderer: React.FC<UlnDocumentRendererProps> = memo(({
           const optGridClass = maxOptLen > 48 ? 'grid-cols-1' : maxOptLen > 24 ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-2 sm:grid-cols-4';
           const hasNoBlankOrOpts = (!node.options || node.options.length === 0) && !node.hasWritingLine && !node.text.includes('<blank>') && !node.subText && (!node.subParagraphs || node.subParagraphs.length === 0);
 
+          const hasText = !!node.text && node.text.trim().length > 0;
+
           return (
-            <div key={nIdx} id={`q_target_${nIdx}`} className="py-0.5 px-0.5 space-y-1 scroll-mt-20 font-normal">
+            <div key={nIdx} id={`q_target_${nIdx}`} className="py-1 px-0.5 scroll-mt-20 font-normal">
               <div className="flex items-start gap-2">
-                {node.qNum && <span className="font-bold text-xs sm:text-sm text-rose-600 pt-0.5 shrink-0 min-w-[22px] text-right">{node.qNum}.</span>}
+                {node.qNum && (
+                  <span className={`font-bold text-xs sm:text-sm text-rose-600 shrink-0 min-w-[22px] text-right ${hasText ? 'pt-0.5' : 'pt-1'}`}>
+                    {node.qNum}.
+                  </span>
+                )}
                 <div className="flex-1 space-y-1">
-                  {node.text && (
-                    <div className="text-xs sm:text-sm font-normal text-slate-900 leading-relaxed">
+                  {hasText && (
+                    <div className="text-xs sm:text-sm font-normal text-slate-900 leading-relaxed pt-0.5">
                       <UlnInlineText text={node.text} qKey={qKey} answers={answers} onInputChange={handleInputChange} isSubmitted={isSubmitted} />
                     </div>
                   )}
@@ -343,7 +349,7 @@ export const UlnDocumentRenderer: React.FC<UlnDocumentRendererProps> = memo(({
                     </div>
                   )}
                   {node.options && node.options.length > 0 && (
-                    <div className={`grid ${optGridClass} gap-x-6 gap-y-1.5 pt-1 font-normal`}>
+                    <div className={`grid ${optGridClass} gap-x-6 gap-y-1.5 ${hasText ? 'pt-1' : 'pt-0'} font-normal`}>
                       {node.options.map((opt, optIdx) => {
                         const optLetter = String.fromCharCode(65 + optIdx);
                         const optLetterWithDot = optLetter + '.';
@@ -355,7 +361,7 @@ export const UlnDocumentRenderer: React.FC<UlnDocumentRendererProps> = memo(({
                             key={optIdx}
                             type="button"
                             onClick={() => handleSelectOption(qKey, optLetter)}
-                            className="text-left flex items-start gap-2 transition cursor-pointer py-1 px-1 rounded-md text-xs sm:text-sm group hover:bg-slate-50"
+                            className="text-left flex items-center gap-2 transition cursor-pointer py-1 px-1 rounded-md text-xs sm:text-sm group hover:bg-slate-50"
                           >
                             <span
                               className={`w-5 h-5 min-w-[20px] rounded-full flex items-center justify-center font-bold text-xs transition-colors shrink-0 ${
@@ -366,7 +372,7 @@ export const UlnDocumentRenderer: React.FC<UlnDocumentRendererProps> = memo(({
                             >
                               {optLetter}
                             </span>
-                            <span className={`flex-1 font-normal break-words leading-tight pt-0.5 ${isSelected ? 'font-bold text-blue-900' : 'text-slate-900'}`}>
+                            <span className={`flex-1 font-normal break-words leading-tight ${isSelected ? 'font-bold text-blue-900' : 'text-slate-900'}`}>
                               <UlnInlineText text={cleanText} qKey={`${qKey}_opt_${optIdx}`} answers={answers} onInputChange={handleInputChange} isSubmitted={isSubmitted} />
                             </span>
                           </button>

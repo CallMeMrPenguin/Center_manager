@@ -286,7 +286,7 @@ export const WhitePaperAssignmentViewer: React.FC<WhitePaperAssignmentViewerProp
                         }}
                         className={`py-1.5 rounded-lg text-xs font-bold font-mono transition cursor-pointer border ${
                           item.isAnswered
-                            ? 'bg-emerald-600 text-white shadow-xs ring-1 ring-emerald-500'
+                            ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs'
                             : 'bg-slate-100 hover:bg-indigo-50 hover:border-indigo-300 text-slate-700 border-slate-200'
                         }`}
                       >
