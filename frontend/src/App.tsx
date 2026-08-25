@@ -104,6 +104,10 @@ function AppContent() {
   }
 
   const isStudent = currentUser.role === 'student';
+  const visibleTabIds = isStudent
+    ? orderedTabIds.filter((id) => id === 'assignments' || id === 'results')
+    : orderedTabIds;
+
   const visibleTabs = isStudent
     ? TAB_DEFINITIONS.filter((t) => t.id === 'assignments' || t.id === 'results')
     : TAB_DEFINITIONS;
@@ -117,7 +121,7 @@ function AppContent() {
           toggleSidebar={toggleSidebar}
           activeTab={activeTab}
           setActiveTab={setActiveTab}
-          orderedTabIds={orderedTabIds}
+          orderedTabIds={visibleTabIds}
           handleDragStart={handleDragStart}
           handleDragOver={handleDragOver}
           handleDrop={handleDrop}
@@ -126,7 +130,6 @@ function AppContent() {
           profileOpen={profileOpen}
           setProfileOpen={setProfileOpen}
           profileRef={profileRef}
-          currentUser={currentUser}
           onLogout={handleLogout}
         />
 

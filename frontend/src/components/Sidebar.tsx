@@ -3,7 +3,6 @@ import { ChevronLeft, ChevronRight, Settings as SettingsIcon, FolderOpen, LogOut
 import { TAB_DEFINITIONS } from '../config/tabs';
 import { api } from '../api';
 import { showToast } from './Toast';
-import { AuthUser } from '../pages/auth/LoginPage';
 
 export const SECTIONS = [
   { id: 'none', label: '' },
@@ -29,7 +28,6 @@ interface SidebarProps {
   profileOpen: boolean;
   setProfileOpen: (open: boolean | ((prev: boolean) => boolean)) => void;
   profileRef: React.RefObject<HTMLDivElement | null>;
-  currentUser?: AuthUser | null;
   onLogout?: () => void;
 }
 
@@ -47,40 +45,37 @@ export const Sidebar: React.FC<SidebarProps> = ({
   profileOpen,
   setProfileOpen,
   profileRef,
-  currentUser,
   onLogout,
 }) => {
-  const isStudent = currentUser?.role === 'student';
-
-  const visibleTabIds = isStudent
-    ? orderedTabIds.filter((id) => id === 'assignments' || id === 'results')
-    : orderedTabIds;
-
   return (
     <aside
       className={`group relative ${
         isSidebarExpanded ? 'w-56' : 'w-16'
       } bg-[#0c0f1e]/90 border border-[#212c4b] rounded-2xl flex flex-col transition-all duration-300 select-none shrink-0 z-30 shadow-xl overflow-visible`}
     >
-      {/* Floating Collapse / Expand Button: Appears on hover */}
+      {/* Floating Collapse / Expand Button: Only shows up on hover over sidebar */}
       <button
         type="button"
         onClick={toggleSidebar}
         className="absolute -right-3 top-6 w-6 h-6 rounded-full bg-[#181d2e] hover:bg-[#5c36f5] text-slate-300 hover:text-white border border-white/20 shadow-[0_2px_10px_rgba(0,0,0,0.6)] flex items-center justify-center transition-all duration-200 hover:scale-110 cursor-pointer z-50 active:scale-95 opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto"
         title={isSidebarExpanded ? 'Thu gọn thanh điều hướng' : 'Mở rộng thanh điều hướng'}
       >
-        {isSidebarExpanded ? <ChevronLeft size={13} /> : <ChevronRight size={13} />}
+        {isSidebarExpanded ? (
+          <ChevronLeft size={13} strokeWidth={2.5} />
+        ) : (
+          <ChevronRight size={13} strokeWidth={2.5} />
+        )}
       </button>
 
-      {/* Brand Header with App Logo */}
-      <div className="h-14 flex items-center px-3 border-b border-white/[0.08] shrink-0 overflow-hidden">
-        <div className="w-8 h-8 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center shrink-0 p-1 shadow-sm">
+      {/* Header logo / Title */}
+      <div className="flex items-center px-2.5 py-3.5 shrink-0 border-b border-white/5 min-w-0">
+        <div className="h-8.5 w-8.5 rounded-xl overflow-hidden flex items-center justify-center shrink-0 shadow-[0_0_14px_rgba(59,130,246,0.4)]">
           <img src="/logo.png" alt="Center Manager Logo" className="h-full w-full object-contain" />
         </div>
         <div
           className={`whitespace-nowrap overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${
             isSidebarExpanded
-              ? 'opacity-100 max-w-[10rem] ml-2 translate-x-0'
+              ? 'opacity-100 max-w-[9rem] ml-2 translate-x-0'
               : 'opacity-0 max-w-0 ml-0 -translate-x-3 pointer-events-none'
           }`}
         >
@@ -88,7 +83,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             EduPlatform
           </span>
           <span className="text-[8.5px] font-black tracking-[0.18em] uppercase text-indigo-400 block mt-1">
-            {isStudent ? 'Cổng Học Sinh' : 'Center Manager'}
+            Center Manager
           </span>
         </div>
       </div>
@@ -96,7 +91,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {/* Nav Menu */}
       <div className="flex-1 overflow-y-auto min-h-0 px-1.5 py-2 flex flex-col gap-1 scrollbar-none">
         {SECTIONS.map((section, sIdx) => {
-          const sectionTabs = visibleTabIds
+          const sectionTabs = orderedTabIds
             .map((tabId, idx) => ({ tabId, idx }))
             .filter(({ tabId }) => {
               const item = TAB_DEFINITIONS.find((t) => t.id === tabId);
@@ -127,8 +122,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   return (
                     <button
                       key={item.id}
-                      type="button"
-                      draggable={!isStudent}
+                      draggable="true"
                       onDragStart={() => handleDragStart(idx)}
                       onDragOver={handleDragOver}
                       onDragEnd={() => setDraggedIndex(null)}
@@ -140,7 +134,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                           : 'hover:bg-white/[0.05] border-2 border-transparent'
                       } ${
                         draggedIndex === idx
-                          ? 'opacity-40 border-dashed border-indigo-400'
+                          ? 'opacity-40 border border-dashed border-indigo-400 bg-indigo-500/10'
                           : ''
                       }`}
                     >
@@ -189,70 +183,60 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {/* User profile section */}
       <div className="shrink-0 mt-auto p-1.5 border-t border-white/5 relative" ref={profileRef as any}>
         {profileOpen && (
-          <div className="absolute z-[250] bg-[#0d1018] border border-white/10 rounded-[14px] shadow-[0_12px_40px_rgba(0,0,0,0.85)] p-1.5 animate-fade-in bottom-full left-1 mb-2 w-52 origin-bottom">
+          <div className="absolute z-[250] bg-[#0d1018] border border-white/10 rounded-[14px] shadow-[0_12px_40px_rgba(0,0,0,0.85)] p-1.5 animate-mac-dropdown bottom-full left-0 mb-2 w-48 origin-bottom">
             <div className="px-3 py-2 border-b border-white/5 select-none mb-1">
-              <p className="text-[10px] font-black text-slate-500 uppercase tracking-wider">
-                {isStudent ? 'Tài Khoản Học Sinh' : 'Tài Khoản Quản Trị'}
-              </p>
-              <p className="text-xs font-extrabold text-white mt-0.5 truncate">
-                {currentUser?.name || 'Center Manager'}
-              </p>
+              <p className="text-[10px] font-black text-slate-500 uppercase tracking-wider">Tài Khoản</p>
+              <p className="text-xs font-extrabold text-white mt-0.5">Center Manager</p>
             </div>
 
-            {!isStudent && (
-              <>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setActiveTab('settings');
-                    setProfileOpen(false);
-                  }}
-                  className="w-full flex items-center gap-2 px-2.5 py-1.5 text-xs font-bold text-slate-300 hover:bg-white/[0.05] hover:text-white rounded-xl transition cursor-pointer text-left"
-                >
-                  <SettingsIcon className="h-4 w-4 text-slate-400 shrink-0" />
-                  <span>Cấu hình hệ thống</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={async () => {
-                    try {
-                      await api.openWorkspaceFolder();
-                      showToast('Đã mở thư mục workspace!', 'success');
-                    } catch (err) {
-                      showToast('Không thể mở: ' + err, 'error');
-                    }
-                    setProfileOpen(false);
-                  }}
-                  className="w-full flex items-center gap-2 px-2.5 py-1.5 text-xs font-bold text-slate-300 hover:bg-white/[0.05] hover:text-white rounded-xl transition cursor-pointer text-left"
-                >
-                  <FolderOpen className="h-4 w-4 text-slate-400 shrink-0" />
-                  <span>Mở thư mục Workspace</span>
-                </button>
-              </>
-            )}
+            <button
+              onClick={() => {
+                setActiveTab('settings');
+                setProfileOpen(false);
+              }}
+              className="w-full flex items-center gap-2 px-2.5 py-1.5 text-xs font-bold text-slate-300 hover:bg-white/[0.05] hover:text-white rounded-xl transition cursor-pointer text-left"
+            >
+              <SettingsIcon className="h-4 w-4 text-slate-400 shrink-0" />
+              <span>Cấu hình hệ thống</span>
+            </button>
 
             <button
-              type="button"
-              onClick={() => {
+              onClick={async () => {
+                try {
+                  await api.openWorkspaceFolder();
+                  showToast('Đã mở thư mục workspace!', 'success');
+                } catch (err) {
+                  showToast('Không thể mở: ' + err, 'error');
+                }
                 setProfileOpen(false);
-                if (onLogout) onLogout();
               }}
-              className="w-full flex items-center gap-2 px-2.5 py-1.5 text-xs font-bold text-rose-400 hover:bg-rose-500/15 hover:text-rose-300 rounded-xl transition cursor-pointer text-left border-t border-white/5 mt-1 pt-2"
+              className="w-full flex items-center gap-2 px-2.5 py-1.5 text-xs font-bold text-slate-300 hover:bg-white/[0.05] hover:text-white rounded-xl transition cursor-pointer text-left"
             >
-              <LogOut className="h-4 w-4 text-rose-400 shrink-0" />
-              <span>Đổi vai trò / Đăng xuất</span>
+              <FolderOpen className="h-4 w-4 text-slate-400 shrink-0" />
+              <span>Mở thư mục Workspace</span>
             </button>
+
+            {onLogout && (
+              <button
+                onClick={() => {
+                  setProfileOpen(false);
+                  onLogout();
+                }}
+                className="w-full flex items-center gap-2 px-2.5 py-1.5 text-xs font-bold text-rose-400 hover:bg-rose-500/15 hover:text-rose-300 rounded-xl transition cursor-pointer text-left border-t border-white/5 mt-1 pt-2"
+              >
+                <LogOut className="h-4 w-4 text-rose-400 shrink-0" />
+                <span>Đổi vai trò / Đăng xuất</span>
+              </button>
+            )}
           </div>
         )}
 
         <button
-          type="button"
           onClick={() => setProfileOpen((prev) => !prev)}
           className="w-full flex items-center justify-center p-1.5 rounded-xl hover:bg-white/5 text-slate-300 hover:text-white transition cursor-pointer border border-transparent hover:border-white/10"
         >
           <div className="w-7 h-7 rounded-xl bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 flex items-center justify-center font-black text-xs">
-            {isStudent ? 'HS' : 'CM'}
+            CM
           </div>
         </button>
       </div>
