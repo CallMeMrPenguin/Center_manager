@@ -74,11 +74,45 @@ export const AssignmentsPage: React.FC = () => {
     setIsAnswerKeyModalOpen(true);
   };
 
+  if (activeView === 'runner') {
+    return (
+      <div className="relative">
+        <OnlineAssignmentRunner
+          assignment={
+            currentAssignment || {
+              id: 0,
+              class_id: 0,
+              title: 'Bài Tập Về Nhà Mẫu',
+              due_date: new Date().toISOString().slice(0, 10),
+              assigned_date: new Date().toISOString().slice(0, 10),
+              max_score: 10,
+            }
+          }
+          isPreview={!isStudent}
+          studentName={isStudent ? 'Học Sinh' : 'Học Sinh Xem Trước'}
+          onBack={() => setActiveView('list')}
+          onEditAnswerKey={!isStudent ? handleOpenAnswerKeyModal : undefined}
+          onSubmitSuccess={() => {
+            loadAssignments();
+          }}
+        />
+        {!isStudent && (
+          <AnswerKeyModal
+            isOpen={isAnswerKeyModalOpen}
+            onClose={() => setIsAnswerKeyModalOpen(false)}
+            assignment={answerKeyAssignment}
+            onSuccess={loadAssignments}
+          />
+        )}
+      </div>
+    );
+  }
+
   return (
-    <div className="h-full w-full overflow-y-auto p-6 space-y-6 bg-[#080b14] text-slate-100 select-none font-sans scrollbar-thin">
-      {/* 1. Header Filter Bar (Clean single visual boundary, no border-in-border, no icons) */}
+    <div className="space-y-6">
+      {/* 1. Header Toolbar */}
       {!isStudent && (
-        <div className="flex flex-wrap items-center justify-between gap-4">
+        <div className="flex flex-wrap items-center justify-between gap-4 pb-2">
           <div className="flex flex-wrap items-center gap-3 flex-1 min-w-[280px]">
             <div className="w-56 max-w-full">
               <CustomSelect
@@ -109,8 +143,8 @@ export const AssignmentsPage: React.FC = () => {
         </div>
       )}
 
-      {/* 2. KPI Summary Cards (Admin only) */}
-      {!isStudent && <AssignmentsKpiCards kpis={kpis} />}
+      {/* 2. KPI Summary Cards (Admin list view only) */}
+      {!isStudent && activeView === 'list' && <AssignmentsKpiCards kpis={kpis} />}
 
       {/* 3. Active View Content */}
       <div className="space-y-4">
@@ -124,7 +158,7 @@ export const AssignmentsPage: React.FC = () => {
             onPlayPreview={handlePlayPreview}
             onOpenCreateModal={handleOpenCreateModal}
           />
-        ) : activeView === 'submissions' && !isStudent ? (
+        ) : (
           <SubmissionTab
             assignment={currentAssignment}
             submissions={submissions}
@@ -132,26 +166,6 @@ export const AssignmentsPage: React.FC = () => {
             onBack={() => setActiveView('list')}
             onSaveSubmissions={handleSaveSubmissions}
             onEditAnswerKey={handleOpenAnswerKeyModal}
-          />
-        ) : (
-          <OnlineAssignmentRunner
-            assignment={
-              currentAssignment || {
-                id: 0,
-                class_id: 0,
-                title: 'Bài Tập Về Nhà Mẫu',
-                due_date: new Date().toISOString().slice(0, 10),
-                assigned_date: new Date().toISOString().slice(0, 10),
-                max_score: 10,
-              }
-            }
-            isPreview={!isStudent}
-            studentName={isStudent ? 'Học Sinh' : 'Học Sinh Xem Trước'}
-            onBack={() => setActiveView('list')}
-            onEditAnswerKey={!isStudent ? handleOpenAnswerKeyModal : undefined}
-            onSubmitSuccess={() => {
-              loadAssignments();
-            }}
           />
         )}
       </div>

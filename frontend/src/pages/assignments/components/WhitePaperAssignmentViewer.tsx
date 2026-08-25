@@ -128,8 +128,8 @@ export const WhitePaperAssignmentViewer: React.FC<WhitePaperAssignmentViewerProp
       } space-y-4 pb-12 select-none font-sans`}
       style={{ userSelect: 'none', WebkitUserSelect: 'none' }}
     >
-      {/* 1. DOCKED TOP NAVIGATION BAR (Fixed directly to page layout, zero floating card wrapping) */}
-      <div className="-mx-6 -mt-6 mb-6 bg-[#0c0f1e] border-b border-[#1e2742] px-6 py-3 flex flex-wrap items-center justify-between gap-3 sticky top-0 z-40 shadow-lg">
+      {/* 1. DOCKED TOP NAVIGATION BAR (Flush to top, zero gaps when scrolling) */}
+      <div className="sticky top-0 z-40 bg-[#0c0f1e] border-b border-[#1e2742] px-6 py-3 flex flex-wrap items-center justify-between gap-3 shadow-lg -mx-6 -mt-6 mb-6 before:absolute before:-top-40 before:inset-x-0 before:h-40 before:bg-[#0c0f1e] before:pointer-events-none">
         <div className="flex items-center gap-3 min-w-0">
           <button
             type="button"
