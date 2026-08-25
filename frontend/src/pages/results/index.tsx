@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import { useStudentResults } from './hooks/useStudentResults';
 import { StudentProfileHeader } from './components/StudentProfileHeader';
 import { KPICards } from '../reports/components/KPICards';
@@ -6,15 +6,10 @@ import { InsightCommentary } from '../reports/components/InsightCommentary';
 import { InteractiveChart } from '../reports/components/InteractiveChart';
 import { SummaryStrip } from '../reports/components/SummaryStrip';
 import { ResultHistoryTable } from './components/ResultHistoryTable';
-import { AuthUser } from '../auth/LoginPage';
+import { isStudentUser } from '../../utils/authUtils';
 
 export const ResultsPage: React.FC = () => {
-  const currentUser: AuthUser | null = useMemo(() => {
-    const saved = localStorage.getItem('auth_user');
-    return saved ? JSON.parse(saved) : null;
-  }, []);
-
-  const isStudent = currentUser?.role === 'student';
+  const isStudent = isStudentUser();
 
   const {
     students,

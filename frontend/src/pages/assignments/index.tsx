@@ -9,15 +9,11 @@ import { AssignmentListTab } from './tabs/AssignmentListTab';
 import { SubmissionTab } from './tabs/SubmissionTab';
 import { OnlineAssignmentRunner } from './components/OnlineAssignmentRunner';
 import { Assignment } from './types';
-import { AuthUser } from '../auth/LoginPage';
+import { isStudentUser, getCurrentUser } from '../../utils/authUtils';
 
 export const AssignmentsPage: React.FC = () => {
-  const currentUser: AuthUser | null = useMemo(() => {
-    const saved = localStorage.getItem('auth_user');
-    return saved ? JSON.parse(saved) : null;
-  }, []);
-
-  const isStudent = currentUser?.role === 'student';
+  const isStudent = isStudentUser();
+  const currentUser = getCurrentUser();
 
   const {
     classes,

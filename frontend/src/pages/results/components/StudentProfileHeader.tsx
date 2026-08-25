@@ -3,6 +3,7 @@ import { User, BookOpen, RefreshCw, Trophy } from 'lucide-react';
 import { CustomSelect, SelectOption } from '../../../components/CustomSelect';
 import { StudentProfileSummary } from '../types';
 import { trunc1Dec } from '../hooks/useStudentResults';
+import { isStudentUser } from '../../../utils/authUtils';
 
 interface StudentProfileHeaderProps {
   students: any[];
@@ -29,6 +30,8 @@ export const StudentProfileHeader: React.FC<StudentProfileHeaderProps> = ({
   onRefresh,
   isStudent = false,
 }) => {
+  const isStudentMode = isStudent || isStudentUser();
+
   const studentOptions: SelectOption[] = useMemo(() => {
     return students.map((s) => ({
       value: s.id,
@@ -48,8 +51,8 @@ export const StudentProfileHeader: React.FC<StudentProfileHeaderProps> = ({
 
   return (
     <div className="bg-[#0c0f1e] border border-[#1e2742] rounded-2xl p-5 shadow-2xl space-y-5">
-      {/* 1. TOP FILTER BAR (Admin / Teacher Only) */}
-      {!isStudent && (
+      {/* 1. TOP FILTER BAR (Admin / Teacher Only — Strictly NEVER rendered for students) */}
+      {!isStudentMode && (
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/5 pb-3.5">
           <div className="flex flex-wrap items-center gap-3 flex-1 min-w-[280px]">
             {/* Class Selector First */}

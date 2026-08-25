@@ -4,6 +4,7 @@ import { StudentResultRecord, StudentProfileSummary } from '../types';
 import { useOverviewStats } from '../../reports/hooks/useOverviewStats';
 import { GradeTypeFilterKey, DistributionScoreBin } from '../../reports/utils/distributionAnalytics';
 import { GradeTypeItem } from '../../../types';
+import { getCurrentUser } from '../../../utils/authUtils';
 
 export const trunc1Dec = (val: number | null | undefined): string => {
   if (val === null || val === undefined || isNaN(val)) return '-';
@@ -60,6 +61,8 @@ export function useStudentResults() {
   const [classEnrolledStudentIds, setClassEnrolledStudentIds] = useState<number[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [rawRecords, setRawRecords] = useState<StudentResultRecord[]>([]);
+  const [rawRankings, setRawRankings] = useState<any[]>([]);
+  const [analyticsEngine, setAnalyticsEngine] = useState<any | null>(null);
 
   // Interactive Chart & Commentary Controls State
   const [timeView, setTimeView] = useState<'1m' | '2m' | '3m' | 'all'>('all');
@@ -68,10 +71,7 @@ export function useStudentResults() {
   const [selectedScoreBin, setSelectedScoreBin] = useState<DistributionScoreBin | null>(null);
   const [timePhases, setTimePhases] = useState<any[]>([]);
   const [selectedPhaseId, setSelectedPhaseId] = useState<string>('');
-  const [rawRankings, setRawRankings] = useState<any[]>([]);
-  const [analyticsEngine, setAnalyticsEngine] = useState<any>(null);
 
-  // Grade types configuration
   const [gradeTypesList] = useState<GradeTypeItem[]>([
     { id: 'check_1', label: 'Kiểm Tra 1', weight: 40, color: '#3b82f6' },
     { id: 'check_2', label: 'Kiểm Tra 2', weight: 40, color: '#a855f7' },
@@ -94,8 +94,19 @@ export function useStudentResults() {
         setClasses(classesData || []);
 
         if (studentsData && studentsData.length > 0) {
-          const first = studentsData.find((s: any) => s.status === 'Đang học') || studentsData[0];
-          setSelectedStudentId(first.id);
+          const authUser = getCurrentUser();
+          if (authUser && authUser.role === 'student') {
+            const matched = studentsData.find(
+              (s: any) =>
+                (authUser.studentId && s.id === authUser.studentId) ||
+                s.full_name === authUser.name ||
+                String(s.id) === authUser.id
+            );
+            setSelectedStudentId(matched ? matched.id : studentsData[0].id);
+          } else {
+            const first = studentsData.find((s: any) => s.status === 'Đang học') || studentsData[0];
+            setSelectedStudentId(first.id);
+          }
         }
       } catch (err) {
         console.error('Failed to load initial data:', err);

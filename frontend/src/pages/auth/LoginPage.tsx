@@ -1,38 +1,48 @@
 import React, { useState } from 'react';
 import { GraduationCap, ShieldCheck, ArrowRight, Shuffle } from 'lucide-react';
 import { showToast } from '../../components/Toast';
-
-export interface AuthUser {
-  id: string;
-  name: string;
-  role: 'student' | 'admin';
-  avatar?: string;
-  className?: string;
-}
-
-const RANDOM_STUDENTS: AuthUser[] = [
-  { id: 'hs_001', name: 'Nguyễn Minh Anh', role: 'student', className: 'Lớp 8A1 (Anh Chuyên)' },
-  { id: 'hs_002', name: 'Trần Gia Bảo', role: 'student', className: 'Lớp 7A (Tiếng Anh Nâng Cao)' },
-  { id: 'hs_003', name: 'Lê Hoàng Long', role: 'student', className: 'Lớp 9A2 (Luyện Thi Vào 10)' },
-  { id: 'hs_004', name: 'Phạm Quỳnh Chi', role: 'student', className: 'Lớp 6B (Ngữ Pháp & Giao Tiếp)' },
-  { id: 'hs_005', name: 'Vũ Đức Nam', role: 'student', className: 'Lớp 8B (IELTS Foundation)' },
-  { id: 'hs_006', name: 'Đỗ Thảo Linh', role: 'student', className: 'Lớp 7B1 (Phát Âm & Nghe Nói)' },
-];
+import { api } from '../../api';
+import { AuthUser } from '../../utils/authUtils';
 
 interface LoginPageProps {
   onLogin: (user: AuthUser) => void;
 }
 
 export const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
-  const [username, setUsername] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleStudentQuickLogin = () => {
-    // Pick a random student from the student list
-    const randomIndex = Math.floor(Math.random() * RANDOM_STUDENTS.length);
-    const studentUser = RANDOM_STUDENTS[randomIndex];
-    localStorage.setItem('auth_user', JSON.stringify(studentUser));
-    showToast(`Đăng nhập thành công: ${studentUser.name} (${studentUser.className})`, 'success');
-    onLogin(studentUser);
+  const handleStudentQuickLogin = async () => {
+    try {
+      setLoading(true);
+      const studentList = await api.getStudents();
+      const picked = studentList && studentList.length > 0
+        ? studentList[Math.floor(Math.random() * studentList.length)]
+        : { id: 1, full_name: 'Trần Gia Bảo', class_name: 'Lớp 7A' };
+
+      const studentUser: AuthUser = {
+        id: String(picked.id),
+        studentId: picked.id,
+        name: picked.full_name,
+        role: 'student',
+        className: picked.class_name || picked.grade || 'Lớp học',
+      };
+      localStorage.setItem('auth_user', JSON.stringify(studentUser));
+      showToast(`Đăng nhập thành công: ${studentUser.name} (${studentUser.className})`, 'success');
+      onLogin(studentUser);
+    } catch {
+      const fallbackUser: AuthUser = {
+        id: '1',
+        studentId: 1,
+        name: 'Trần Gia Bảo',
+        role: 'student',
+        className: 'Lớp 7A (Tiếng Anh Nâng Cao)',
+      };
+      localStorage.setItem('auth_user', JSON.stringify(fallbackUser));
+      showToast(`Đăng nhập: ${fallbackUser.name}`, 'success');
+      onLogin(fallbackUser);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleAdminQuickLogin = () => {
@@ -73,7 +83,8 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
             <button
               type="button"
               onClick={handleStudentQuickLogin}
-              className="p-5 rounded-2xl bg-[#121729] hover:bg-[#181f38] border border-[#263152] hover:border-emerald-500/60 text-left transition cursor-pointer group shadow-lg flex flex-col justify-between space-y-4 relative overflow-hidden active:scale-98"
+              disabled={loading}
+              className="p-5 rounded-2xl bg-[#121729] hover:bg-[#181f38] border border-[#263152] hover:border-emerald-500/60 text-left transition cursor-pointer group shadow-lg flex flex-col justify-between space-y-4 relative overflow-hidden active:scale-98 disabled:opacity-60"
             >
               <div className="flex items-center justify-between">
                 <div className="w-10 h-10 rounded-xl bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 flex items-center justify-center">
@@ -90,12 +101,12 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
                   Đăng Nhập Học Sinh
                 </h3>
                 <p className="text-xs text-slate-400 mt-1 leading-relaxed">
-                  Đăng nhập ngẫu nhiên 1 học sinh trong lớp để làm bài & nộp bài.
+                  Đăng nhập ngẫu nhiên 1 học sinh trong lớp để làm bài & xem điểm.
                 </p>
               </div>
 
               <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-400 group-hover:translate-x-1 transition-transform">
-                <span>Vào làm bài ngay</span>
+                <span>Vào học sinh</span>
                 <ArrowRight size={13} />
               </div>
             </button>

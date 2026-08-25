@@ -4,7 +4,8 @@ import { TAB_DEFINITIONS } from './config/tabs';
 import { Sidebar } from './components/Sidebar';
 import ToastContainer from './components/Toast';
 import { ConfirmProvider } from './components/ConfirmDialog';
-import { LoginPage, AuthUser } from './pages/auth/LoginPage';
+import { LoginPage } from './pages/auth/LoginPage';
+import { AuthUser } from './utils/authUtils';
 
 function AppContent() {
   // Always start at Login screen on page load / refresh
