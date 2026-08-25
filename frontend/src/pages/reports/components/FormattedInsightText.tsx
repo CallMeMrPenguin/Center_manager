@@ -32,18 +32,26 @@ const PATTERNS: Array<{
   { regex: /#[0-9]+(?:\/[0-9]+)?/g, className: 'text-amber-300 font-black font-mono' },
   { regex: /Top\s+\d+%/gi, className: 'text-cyan-300 font-bold' },
 
-  // 4. Fractions, Signed Deltas, Percentages, Scores with units
+  // 4. Positive vs Negative Signed Changes (Strict Semantic Colors)
+  // Positive delta / growth: Green
+  { regex: /\+\d+(?:\.\d+)?\s*(?:đ\/buổi|điểm|đ)\b/g, className: 'text-emerald-400 font-bold font-mono' },
+  { regex: /\+\d+(?:\.\d+)?\b/g, className: 'text-emerald-400 font-bold font-mono' },
+
+  // Negative delta / drop / decrease: Red/Rose
+  { regex: /-\d+(?:\.\d+)?\s*(?:đ\/buổi|điểm|đ)\b/g, className: 'text-rose-400 font-bold font-mono' },
+  { regex: /-\d+(?:\.\d+)?\b/g, className: 'text-rose-400 font-bold font-mono' },
+
+  // 5. Fractions, Percentages, Neutral Scores with units
   { regex: /\b\d+(?:\.\d+)?\/\d+(?:\.\d+)?\b/g, className: 'text-amber-300 font-bold font-mono' },
   { regex: /\b\d+(?:\.\d+)?%/g, className: 'text-amber-300 font-bold font-mono' },
-  { regex: /[+-]\d+(?:\.\d+)?\s*(?:đ\/buổi|điểm|đ)\b/g, className: 'text-emerald-400 font-bold font-mono' },
   { regex: /\b\d+(?:\.\d+)?\s*(?:đ\/buổi|điểm|đ)\b/g, className: 'text-amber-300 font-bold font-mono' },
 
-  // 5. Analytical qualitative phrases
+  // 6. Analytical qualitative phrases
   { regex: /(?:tiến bộ vượt bậc|tiến bộ đều đặn|bứt phá|xuất sắc|rất ổn định|vững vàng|chuyên cần xuất sắc|đối xứng chuẩn|rất tốt|đồng đều)/gi, className: 'text-emerald-400 font-bold' },
-  { regex: /(?:suy giảm nhanh|hổng kiến thức|chưa đạt chuẩn|biến động rất mạnh|nguy cơ cao)/gi, className: 'text-rose-400 font-bold' },
+  { regex: /(?:suy giảm nhanh|hổng kiến thức|chưa đạt chuẩn|biến động rất mạnh|nguy cơ cao|sa sút)/gi, className: 'text-rose-400 font-bold' },
   { regex: /(?:mất cân bằng|suy giảm nhẹ|trồi sụt|cần hỗ trợ|cần phụ đạo|chững lại|phân cực học lực|lệch trái|lệch phải|phân hóa)/gi, className: 'text-amber-400 font-bold' },
 
-  // 6. Standalone numbers / integers / floats (e.g. 57, 19, 2, 10, 7.1)
+  // 7. Standalone neutral numbers / integers / floats (e.g. 57, 19, 2, 10, 7.1)
   { regex: /\b\d+(?:\.\d+)?\b/g, className: 'text-amber-300 font-bold font-mono' },
 ];
 
