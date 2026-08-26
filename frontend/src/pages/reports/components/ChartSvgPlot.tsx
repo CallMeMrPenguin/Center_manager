@@ -51,12 +51,11 @@ export const ChartSvgPlot: React.FC<ChartSvgPlotProps> = React.memo(({
   hoveredPoint,
   setHoveredPoint,
 }) => {
-  const uid = useId().replace(/:/g, '-');
-  const clipId = `chart-plot-clip${uid}`;
-  const curtainId = `chart-curtain-clip${uid}`;
-  const gradBlue = `area-gradient-blue${uid}`;
-  const gradPurple = `area-gradient-purple${uid}`;
-  const gradEmerald = `area-gradient-emerald${uid}`;
+  const uid = useId().replace(/[^a-zA-Z0-9]/g, '_');
+  const clipId = `chart_plot_clip_${uid}`;
+  const gradBlue = `area_grad_blue_${uid}`;
+  const gradPurple = `area_grad_purple_${uid}`;
+  const gradEmerald = `area_grad_emerald_${uid}`;
 
   return (
     <svg viewBox={`0 0 ${chartWidth} ${chartHeight}`} className="w-full h-[750px] overflow-visible">
@@ -64,57 +63,26 @@ export const ChartSvgPlot: React.FC<ChartSvgPlotProps> = React.memo(({
         <clipPath id={clipId}>
           <rect x={paddingLeft - 10} y={paddingTop - 20} width={plotAreaWidth + paddingRight + 40} height={plotAreaHeight + 40} />
         </clipPath>
-        <clipPath id={curtainId}>
-          <rect
-            key={`curtain-${selectedStudentId || selectedClassId || 'all'}-${timeView}`}
-            x={paddingLeft - 10}
-            y={paddingTop - 20}
-            width={plotAreaWidth + paddingRight + 40}
-            height={plotAreaHeight + 40}
-            className="animate-curtain-reveal"
-          />
-        </clipPath>
 
-        <linearGradient
-          id={gradBlue}
-          x1="0"
-          y1={paddingTop}
-          x2="0"
-          y2={chartHeight - paddingBottom}
-          gradientUnits="userSpaceOnUse"
-        >
-          <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.65" />
-          <stop offset="35%" stopColor="#3b82f6" stopOpacity="0.30" />
-          <stop offset="70%" stopColor="#3b82f6" stopOpacity="0.10" />
-          <stop offset="100%" stopColor="#3b82f6" stopOpacity="0.0" />
+        <linearGradient id={gradBlue} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.45" />
+          <stop offset="35%" stopColor="#3b82f6" stopOpacity="0.20" />
+          <stop offset="75%" stopColor="#2563eb" stopOpacity="0.05" />
+          <stop offset="100%" stopColor="#1d4ed8" stopOpacity="0.0" />
         </linearGradient>
 
-        <linearGradient
-          id={gradPurple}
-          x1="0"
-          y1={paddingTop}
-          x2="0"
-          y2={chartHeight - paddingBottom}
-          gradientUnits="userSpaceOnUse"
-        >
-          <stop offset="0%" stopColor="#c084fc" stopOpacity="0.65" />
-          <stop offset="35%" stopColor="#a855f7" stopOpacity="0.30" />
-          <stop offset="70%" stopColor="#9333ea" stopOpacity="0.10" />
-          <stop offset="100%" stopColor="#a855f7" stopOpacity="0.0" />
+        <linearGradient id={gradPurple} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#a855f7" stopOpacity="0.45" />
+          <stop offset="35%" stopColor="#a855f7" stopOpacity="0.20" />
+          <stop offset="75%" stopColor="#7e22ce" stopOpacity="0.05" />
+          <stop offset="100%" stopColor="#6b21a8" stopOpacity="0.0" />
         </linearGradient>
 
-        <linearGradient
-          id={gradEmerald}
-          x1="0"
-          y1={paddingTop}
-          x2="0"
-          y2={chartHeight - paddingBottom}
-          gradientUnits="userSpaceOnUse"
-        >
-          <stop offset="0%" stopColor="#34d399" stopOpacity="0.65" />
-          <stop offset="35%" stopColor="#10b981" stopOpacity="0.30" />
-          <stop offset="70%" stopColor="#059669" stopOpacity="0.10" />
-          <stop offset="100%" stopColor="#10b981" stopOpacity="0.0" />
+        <linearGradient id={gradEmerald} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#10b981" stopOpacity="0.45" />
+          <stop offset="35%" stopColor="#10b981" stopOpacity="0.20" />
+          <stop offset="75%" stopColor="#047857" stopOpacity="0.05" />
+          <stop offset="100%" stopColor="#065f46" stopOpacity="0.0" />
         </linearGradient>
       </defs>
 
