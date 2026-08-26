@@ -203,12 +203,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           className="fixed left-[72px] z-[9999] pointer-events-none transition-all duration-150 ease-out"
           style={{ top: `${hoveredTab.top}px`, transform: 'translateY(-50%)' }}
         >
-          <div className="px-3 py-1.5 rounded-xl bg-[#0c0f1e] border border-[#212c4b] text-white text-xs font-black whitespace-nowrap shadow-[0_10px_30px_rgba(0,0,0,0.95)] flex items-center gap-2 animate-in fade-in zoom-in-95 duration-150">
-            <span
-              className={`w-1.5 h-1.5 rounded-full ${
-                hoveredTab.isActive ? 'bg-indigo-400 shadow-[0_0_8px_#818cf8]' : 'bg-slate-400'
-              }`}
-            />
+          <div className="px-3 py-1.5 rounded-xl bg-[#0c0f1e] border border-[#212c4b] text-white text-xs font-black whitespace-nowrap shadow-[0_10px_30px_rgba(0,0,0,0.95)] flex items-center justify-center animate-in fade-in zoom-in-95 duration-150">
             <span>{hoveredTab.label}</span>
           </div>
         </div>

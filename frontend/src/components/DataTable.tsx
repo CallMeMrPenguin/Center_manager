@@ -369,11 +369,11 @@ function ColumnVisibilityDropdown<TData>({
           {activeTab === 'align' && (
             <div className="space-y-1">
               <div className="text-[10px] font-black uppercase text-indigo-400 tracking-wider border-b border-white/10 pb-1.5 mb-1">
-                <span>Tích = Căn Giữa | Bỏ tích = Trái</span>
+                <span>Tích = Căn Giữa | Bỏ tích = Căn Trái</span>
               </div>
               <div className="max-h-60 overflow-y-auto space-y-0.5 scrollbar-thin pr-1">
                 {allCols.map(col => {
-                  const isCentered = columnAlignments[col.id] === 'center';
+                  const isCentered = columnAlignments[col.id] !== 'left';
                   const colName = getColumnHeaderText(col, table);
                   return (
                     <label key={col.id} className="flex items-center justify-between gap-2 text-xs text-slate-200 cursor-pointer hover:text-white px-1.5 py-1 rounded-lg hover:bg-[#1e2740] transition">
@@ -382,12 +382,12 @@ function ColumnVisibilityDropdown<TData>({
                           type="checkbox"
                           checked={isCentered}
                           onChange={() => onToggleAlignment(col.id)}
-                          className="accent-indigo-500 rounded cursor-pointer w-3.5 h-3.5 shrink-0"
+                          className="accent-[#5c36f5] rounded cursor-pointer w-3.5 h-3.5 shrink-0"
                         />
                         <span className="truncate">{colName}</span>
                       </div>
                       <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded shrink-0 ${
-                        isCentered ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-slate-800 text-slate-400'
+                        isCentered ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/30' : 'bg-slate-800 text-slate-400'
                       }`}>
                         {isCentered ? 'Giữa' : 'Trái'}
                       </span>
@@ -737,7 +737,7 @@ export function DataTable<TData>({
 
   const handleToggleAlignment = useCallback((colId: string) => {
     setColumnAlignments(prev => {
-      const current = prev[colId] || 'left';
+      const current = prev[colId] ?? 'center';
       const next = current === 'center' ? 'left' : 'center';
       return { ...prev, [colId]: next };
     });
@@ -1274,7 +1274,7 @@ export function DataTable<TData>({
                             const isFirstCell = cellIdx === 0;
                             const isLastCell = cellIdx === row.getVisibleCells().length - 1;
                             const isSelectCol = cell.column.id === 'select' || cell.column.id === '_expander';
-                            const isCentered = isSelectCol || columnAlignments[cell.column.id] === 'center';
+                            const isCentered = isSelectCol || columnAlignments[cell.column.id] !== 'left';
 
                             return (
                               <td
