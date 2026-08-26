@@ -1,11 +1,11 @@
 import os
 import sys
 
-# Ensure backend directory is resolved in Vercel Serverless environment
-ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-BACKEND_DIR = os.path.join(ROOT_DIR, "backend")
+CUR_DIR = os.path.dirname(os.path.abspath(__file__))
+BACKEND_DIR = os.path.join(CUR_DIR, "backend")
 
-for p in [BACKEND_DIR, ROOT_DIR]:
+# Add api/ and api/backend/ to sys.path so all imports resolve seamlessly
+for p in [CUR_DIR, BACKEND_DIR]:
     if p not in sys.path:
         sys.path.insert(0, p)
 
@@ -14,6 +14,4 @@ os.environ["VERCEL"] = "1"
 
 from backend.main import app
 
-# Top-level ASGI handler assignment for Vercel Python Runtime
-app = app
 handler = app
