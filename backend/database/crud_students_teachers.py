@@ -12,10 +12,10 @@ def get_students(search: str = "", status: str = "") -> List[Dict[str, Any]]:
         query = """
             SELECT s.*, 
                    GROUP_CONCAT(DISTINCT c.class_name) as enrolled_classes,
-                   u.username as account_username,
-                   u.status as account_status,
-                   u.role as account_role,
-                   u.last_login as account_last_login
+                   MAX(u.username) as account_username,
+                   MAX(u.status) as account_status,
+                   MAX(u.role) as account_role,
+                   MAX(u.last_login) as account_last_login
             FROM students s
             LEFT JOIN class_students cs ON s.id = cs.student_id
             LEFT JOIN classes c ON cs.class_id = c.id
@@ -203,10 +203,10 @@ def get_teachers_cm(search: str = "", role: str = "") -> List[Dict[str, Any]]:
         cursor = conn.cursor()
         query = """
             SELECT t.*,
-                   u.username as account_username,
-                   u.status as account_status,
-                   u.role as account_role,
-                   u.last_login as account_last_login
+                   MAX(u.username) as account_username,
+                   MAX(u.status) as account_status,
+                   MAX(u.role) as account_role,
+                   MAX(u.last_login) as account_last_login
             FROM teachers_cm t
             LEFT JOIN app_users u ON (
                 LOWER(u.username) = LOWER('gv_' || printf('%04d', t.id))
