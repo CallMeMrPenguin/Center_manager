@@ -9,6 +9,7 @@ import {
   FolderOpen, ZoomIn, ZoomOut, Sparkles, X, Layout, ExternalLink
 } from 'lucide-react';
 import { showToast } from '../../components/Toast';
+import { SegmentedControl } from '../../components/SegmentedControl';
 import { cleanOptionPrefix } from '../../utils';
 
 
@@ -235,7 +236,7 @@ export default function TestFormatter({
 
   // Spreadsheet Export States
   const [showExportModal, setShowExportModal] = useState(false);
-  const [exportConfig, setExportConfig] = useState({
+  const [exportConfig, setExportConfig] = useState<{ format: 'xlsx' | 'csv'; defaultTime: number }>({
     format: 'xlsx',
     defaultTime: 30
   });
@@ -954,30 +955,16 @@ export default function TestFormatter({
             <div className="flex flex-col gap-3.5">
               <div className="flex flex-col gap-1.5">
                 <label className="text-[10px] font-bold text-slate-400 uppercase">Chọn Định dạng file:</label>
-                <div className="grid grid-cols-2 gap-2.5">
-                  <button
-                    type="button"
-                    onClick={() => setExportConfig(prev => ({ ...prev, format: 'xlsx' }))}
-                    className={`py-2 px-3 rounded-xl text-xs font-black transition border cursor-pointer ${
-                      exportConfig.format === 'xlsx'
-                        ? 'bg-indigo-500/20 text-indigo-300 border-indigo-500/50'
-                        : 'bg-[#181f36] text-slate-400 border-white/10 hover:bg-[#222a46]'
-                    }`}
-                  >
-                    Microsoft Excel (.xlsx)
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setExportConfig(prev => ({ ...prev, format: 'csv' }))}
-                    className={`py-2 px-3 rounded-xl text-xs font-black transition border cursor-pointer ${
-                      exportConfig.format === 'csv'
-                        ? 'bg-indigo-500/20 text-indigo-300 border-indigo-500/50'
-                        : 'bg-[#181f36] text-slate-400 border-white/10 hover:bg-[#222a46]'
-                    }`}
-                  >
-                    CSV File (.csv)
-                  </button>
-                </div>
+                <SegmentedControl<'xlsx' | 'csv'>
+                  value={exportConfig.format}
+                  onChange={(val) => setExportConfig((prev) => ({ ...prev, format: val as 'xlsx' | 'csv' }))}
+                  options={[
+                    { value: 'xlsx', label: 'Microsoft Excel (.xlsx)' },
+                    { value: 'csv', label: 'CSV File (.csv)' },
+                  ]}
+                  fit="fluid"
+                  size="sm"
+                />
               </div>
 
               <div className="flex flex-col gap-1.5">

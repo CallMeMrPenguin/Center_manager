@@ -25,6 +25,7 @@ import {
   AlertTriangle, CheckCircle2, X, Sparkles, FolderOpen, FileText, Check, HelpCircle
 } from 'lucide-react';
 import { showToast } from '../../components/Toast';
+import { SegmentedControl } from '../../components/SegmentedControl';
 
 const ColumnHeaderFilter = ({ 
   columnKey, 
@@ -1717,41 +1718,17 @@ export default function VocabularyBank({ isActive }: { isActive?: boolean }) {
             <div className="flex flex-col gap-3">
               <label className="text-xs font-bold text-slate-400">Chọn phạm vi muốn xóa:</label>
               
-              <div className="grid grid-cols-3 gap-2">
-                <button
-                  type="button"
-                  onClick={() => setDeleteModal(prev => ({ ...prev, scope: 'all' }))}
-                  className={`py-2 px-3 rounded-xl text-xs font-bold transition border ${
-                    deleteModal.scope === 'all'
-                      ? 'bg-rose-600/10 text-rose-400 border-rose-550'
-                      : 'bg-[#151f32]/30 text-slate-400 border-slate-850 hover:bg-[#151f32]/60'
-                  }`}
-                >
-                  Toàn bộ
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setDeleteModal(prev => ({ ...prev, scope: 'grade' }))}
-                  className={`py-2 px-3 rounded-xl text-xs font-bold transition border ${
-                    deleteModal.scope === 'grade'
-                      ? 'bg-rose-600/10 text-rose-400 border-rose-550'
-                      : 'bg-[#151f32]/30 text-slate-400 border-slate-850 hover:bg-[#151f32]/60'
-                  }`}
-                >
-                  Theo Lớp
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setDeleteModal(prev => ({ ...prev, scope: 'unit' }))}
-                  className={`py-2 px-3 rounded-xl text-xs font-bold transition border ${
-                    deleteModal.scope === 'unit'
-                      ? 'bg-rose-600/10 text-rose-400 border-rose-550'
-                      : 'bg-[#151f32]/30 text-slate-400 border-slate-850 hover:bg-[#151f32]/60'
-                  }`}
-                >
-                  Lớp & Unit
-                </button>
-              </div>
+              <SegmentedControl<'all' | 'grade' | 'unit'>
+                value={deleteModal.scope}
+                onChange={(scope) => setDeleteModal((prev) => ({ ...prev, scope }))}
+                options={[
+                  { value: 'all', label: 'Toàn bộ' },
+                  { value: 'grade', label: 'Theo Lớp' },
+                  { value: 'unit', label: 'Lớp & Unit' },
+                ]}
+                fit="fluid"
+                size="sm"
+              />
 
               {deleteModal.scope !== 'all' && (
                 <div className="flex flex-col gap-3.5 bg-[#151f32]/10 border border-slate-900/60 p-3.5 rounded-xl mt-1.5">

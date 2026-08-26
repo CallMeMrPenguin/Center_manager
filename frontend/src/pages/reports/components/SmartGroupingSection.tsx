@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { FolderTree, ChevronDown, ChevronUp, Copy, Check, FileSpreadsheet } from 'lucide-react';
 import { CustomSelect } from '../../../components/CustomSelect';
+import { SegmentedControl } from '../../../components/SegmentedControl';
 import { GroupCardItem } from './GroupCardItem';
 import { computeSmartGroups } from '../utils/computeSmartGroups';
 import { showToast } from '../../../components/Toast';
@@ -215,36 +216,29 @@ export const SmartGroupingSection: React.FC<SmartGroupingSectionProps> = ({
               )}
 
               {/* Algorithm Mode */}
-              <div className="flex items-center gap-1.5 bg-[#090d16] p-1 rounded-xl border border-[#182236] text-xs font-bold">
-                <span className="text-[10px] uppercase font-black text-slate-400 px-2">Thuật Toán:</span>
-                <button
-                  type="button"
-                  onClick={() => setGroupingMode('tier')}
-                  className={`px-2.5 py-1 rounded-lg transition cursor-pointer ${groupingMode === 'tier' ? 'bg-indigo-600 text-white shadow' : 'text-slate-400 hover:text-white'}`}
-                >
-                  Theo Chuẩn Học Lực (3 Nhóm)
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setGroupingMode('kmeans')}
-                  className={`px-2.5 py-1 rounded-lg transition cursor-pointer ${groupingMode === 'kmeans' ? 'bg-indigo-600 text-white shadow' : 'text-slate-400 hover:text-white'}`}
-                >
-                  Tự Động K-Means
-                </button>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] uppercase font-black text-slate-400">Thuật Toán:</span>
+                <SegmentedControl<'tier' | 'kmeans'>
+                  value={groupingMode}
+                  onChange={setGroupingMode}
+                  options={[
+                    { value: 'tier', label: 'Theo Chuẩn Học Lực (3 Nhóm)' },
+                    { value: 'kmeans', label: 'Tự Động K-Means' },
+                  ]}
+                  size="xs"
+                />
 
                 {groupingMode === 'kmeans' && (
-                  <div className="flex items-center gap-1 pl-2 border-l border-white/10">
-                    {[2, 3, 4].map(k => (
-                      <button
-                        key={k}
-                        type="button"
-                        onClick={() => setKmeansK(k)}
-                        className={`w-6 h-6 rounded-lg text-xs font-mono font-bold transition cursor-pointer ${kmeansK === k ? 'bg-purple-600 text-white shadow' : 'text-slate-400 hover:text-white'}`}
-                      >
-                        {k}
-                      </button>
-                    ))}
-                  </div>
+                  <SegmentedControl<string>
+                    value={String(kmeansK)}
+                    onChange={(val) => setKmeansK(Number(val))}
+                    options={[
+                      { value: '2', label: '2k' },
+                      { value: '3', label: '3k' },
+                      { value: '4', label: '4k' },
+                    ]}
+                    size="xs"
+                  />
                 )}
               </div>
             </div>

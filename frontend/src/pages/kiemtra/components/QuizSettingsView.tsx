@@ -1,5 +1,6 @@
 import React from 'react';
 import { Play, ArrowLeft } from 'lucide-react';
+import { SegmentedControl } from '../../../components/SegmentedControl';
 import { TestData, TimerMode } from '../types';
 
 interface QuizSettingsViewProps {
@@ -57,38 +58,17 @@ export const QuizSettingsView: React.FC<QuizSettingsViewProps> = ({
         <label className="block text-xs font-black uppercase text-slate-300 tracking-wider">
           Chế Độ Hạn Giờ (Timer)
         </label>
-        <div className="flex bg-[#070913] p-1 rounded-xl border border-white/10 text-xs font-bold select-none gap-1">
-          <button
-            onClick={() => setTimerMode('none')}
-            className={`flex-1 py-2 rounded-lg text-center transition-colors cursor-pointer ${
-              timerMode === 'none'
-                ? 'bg-[#5c36f5] text-white font-black shadow-md'
-                : 'text-slate-400 hover:text-white'
-            }`}
-          >
-            Không Giới Hạn
-          </button>
-          <button
-            onClick={() => setTimerMode('global')}
-            className={`flex-1 py-2 rounded-lg text-center transition-colors cursor-pointer ${
-              timerMode === 'global'
-                ? 'bg-[#5c36f5] text-white font-black shadow-md'
-                : 'text-slate-400 hover:text-white'
-            }`}
-          >
-            Tổng Thời Gian
-          </button>
-          <button
-            onClick={() => setTimerMode('per_question')}
-            className={`flex-1 py-2 rounded-lg text-center transition-colors cursor-pointer ${
-              timerMode === 'per_question'
-                ? 'bg-[#5c36f5] text-white font-black shadow-md'
-                : 'text-slate-400 hover:text-white'
-            }`}
-          >
-            Từng Câu Hỏi
-          </button>
-        </div>
+        <SegmentedControl<TimerMode>
+          value={timerMode}
+          onChange={setTimerMode}
+          options={[
+            { value: 'none', label: 'Không Giới Hạn' },
+            { value: 'global', label: 'Tổng Thời Gian' },
+            { value: 'per_question', label: 'Từng Câu Hỏi' },
+          ]}
+          fit="fluid"
+          size="md"
+        />
 
         {timerMode === 'global' && (
           <div className="flex items-center justify-between pt-1">

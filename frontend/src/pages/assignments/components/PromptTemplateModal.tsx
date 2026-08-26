@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { X, Copy, Check, Sparkles, FileText } from 'lucide-react';
+import { SegmentedControl } from '../../../components/SegmentedControl';
 import { ULN_OCR_SYSTEM_PROMPT, ULN_AI_CREATION_PROMPT } from '../constants/ulnPromptTemplate';
 import { showToast } from '../../../components/Toast';
 
@@ -46,32 +47,18 @@ export const PromptTemplateModal: React.FC<PromptTemplateModalProps> = ({
           </button>
         </div>
 
-        {/* Tab Selection */}
-        <div className="flex border-b border-white/10 px-5 pt-3 gap-3 shrink-0">
-          <button
-            type="button"
-            onClick={() => setActiveTab('ocr')}
-            className={`pb-2.5 text-xs font-black transition cursor-pointer flex items-center gap-1.5 border-b-2 ${
-              activeTab === 'ocr'
-                ? 'border-indigo-500 text-indigo-400'
-                : 'border-transparent text-slate-400 hover:text-slate-200'
-            }`}
-          >
-            <FileText size={14} />
-            <span>1. Prompt OCR & Trích Xuất Đề (Ảnh / PDF sang ULN)</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTab('ai')}
-            className={`pb-2.5 text-xs font-black transition cursor-pointer flex items-center gap-1.5 border-b-2 ${
-              activeTab === 'ai'
-                ? 'border-indigo-500 text-indigo-400'
-                : 'border-transparent text-slate-400 hover:text-slate-200'
-            }`}
-          >
-            <Sparkles size={14} />
-            <span>2. Prompt Sinh Đề Mới (AI Generator)</span>
-          </button>
+        {/* Tab Selection with Segmented Control */}
+        <div className="px-5 pt-3 pb-1 shrink-0">
+          <SegmentedControl<'ocr' | 'ai'>
+            value={activeTab}
+            onChange={setActiveTab}
+            options={[
+              { value: 'ocr', label: '1. Prompt OCR & Trích Xuất Đề (Ảnh/PDF sang ULN)', icon: <FileText size={14} /> },
+              { value: 'ai', label: '2. Prompt Sinh Đề Mới (AI Generator)', icon: <Sparkles size={14} /> },
+            ]}
+            fit="fluid"
+            size="sm"
+          />
         </div>
 
         {/* Body */}

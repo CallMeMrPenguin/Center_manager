@@ -673,10 +673,16 @@ export default function SchedulePage() {
               </div>
 
               {!editing && (
-                <div className="grid grid-cols-2 gap-2 bg-[#141928] p-1.5 rounded-xl border border-white/10">
-                  <button type="button" onClick={() => setMode('weekdays')} className={`py-1.5 px-2 rounded-xl text-xs font-bold transition cursor-pointer ${mode === 'weekdays' ? 'bg-indigo-500 text-white' : 'text-slate-400 hover:text-white'}`}>Chọn Ngày Trong Tuần</button>
-                  <button type="button" onClick={() => setMode('single')} className={`py-1.5 px-2 rounded-xl text-xs font-bold transition cursor-pointer ${mode === 'single' ? 'bg-indigo-500 text-white' : 'text-slate-400 hover:text-white'}`}>1 Ngày Cụ Thể</button>
-                </div>
+                <SegmentedControl<'weekdays' | 'single'>
+                  value={mode}
+                  onChange={setMode}
+                  options={[
+                    { value: 'weekdays', label: 'Chọn Ngày Trong Tuần' },
+                    { value: 'single', label: '1 Ngày Cụ Thể' },
+                  ]}
+                  fit="fluid"
+                  size="sm"
+                />
               )}
 
               {!editing && mode === 'weekdays' && (

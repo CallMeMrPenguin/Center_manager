@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { CheckCircle2, AlertCircle, AlertTriangle, Info, X, RotateCcw, Loader2 } from 'lucide-react';
+import { CheckCircle2, AlertCircle, AlertTriangle, Info, X, RotateCcw } from 'lucide-react';
 
 export type ToastType = 'success' | 'error' | 'warning' | 'info' | 'default';
 
@@ -32,11 +32,51 @@ const ToastContext = createContext<ToastContextType>({
 
 export const useAnimatedToast = () => useContext(ToastContext);
 
+export interface ShowToastOptions {
+  message: string;
+  title?: string;
+  type?: ToastType;
+  duration?: number;
+  action?: {
+    label: string;
+    onClick: () => void;
+  };
+}
+
+export function showToast(
+  messageOrOptions: string | ShowToastOptions,
+  type: ToastType = 'success',
+  actionLabel?: string,
+  onClickAction?: () => void
+) {
+  if (typeof window === 'undefined') return;
+
+  if (typeof messageOrOptions === 'object' && messageOrOptions !== null) {
+    const event = new CustomEvent('show-animated-toast', { detail: messageOrOptions });
+    window.dispatchEvent(event);
+  } else {
+    const action = actionLabel && onClickAction ? { label: actionLabel, onClick: onClickAction } : undefined;
+    const event = new CustomEvent('show-animated-toast', {
+      detail: {
+        message: messageOrOptions,
+        type,
+        action,
+      },
+    });
+    window.dispatchEvent(event);
+  }
+}
+
+showToast.success = (message: string, title?: string) => showToast({ message, type: 'success', title });
+showToast.error = (message: string, title?: string) => showToast({ message, type: 'error', title });
+showToast.warning = (message: string, title?: string) => showToast({ message, type: 'warning', title });
+showToast.info = (message: string, title?: string) => showToast({ message, type: 'info', title });
+
 export const AnimatedToastProvider: React.FC<{
   children: React.ReactNode;
-  position?: 'top-right' | 'top-center' | 'bottom-right';
+  position?: 'top-right' | 'top-center' | 'bottom-right' | 'bottom-left';
   maxToasts?: number;
-}> = ({ children, position = 'top-right', maxToasts = 3 }) => {
+}> = ({ children, position = 'bottom-right', maxToasts = 4 }) => {
   const [toasts, setToasts] = useState<ToastItem[]>([]);
   const [isHovered, setIsHovered] = useState(false);
 
@@ -51,7 +91,7 @@ export const AnimatedToastProvider: React.FC<{
 
       setToasts((prev) => [newToast, ...prev].slice(0, maxToasts));
 
-      const duration = toast.duration || 4500;
+      const duration = toast.duration || (toast.action ? 6000 : 4000);
       setTimeout(() => {
         removeToast(id);
       }, duration);
@@ -61,33 +101,51 @@ export const AnimatedToastProvider: React.FC<{
     [maxToasts, removeToast]
   );
 
+  useEffect(() => {
+    const handleCustomToast = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      if (detail && detail.message) {
+        addToast(detail);
+      }
+    };
+
+    window.addEventListener('show-animated-toast', handleCustomToast);
+    window.addEventListener('show-toast', handleCustomToast);
+    return () => {
+      window.removeEventListener('show-animated-toast', handleCustomToast);
+      window.removeEventListener('show-toast', handleCustomToast);
+    };
+  }, [addToast]);
+
   const positionClasses = {
     'top-right': 'top-5 right-5 items-end',
     'top-center': 'top-5 left-1/2 -translate-x-1/2 items-center',
     'bottom-right': 'bottom-5 right-5 items-end',
+    'bottom-left': 'bottom-5 left-5 items-start',
   }[position];
 
   return (
     <ToastContext.Provider value={{ toasts, addToast, removeToast }}>
       {children}
 
-      {/* Render Stacked Toasts with Framer Motion 3D Depth */}
+      {/* Render Stacked Toasts with Framer Motion 3D Depth & Zero-Blur GPU Surface */}
       <div
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
-        className={`fixed z-[9999] pointer-events-none flex flex-col gap-2.5 ${positionClasses}`}
+        className={`fixed z-[99999] pointer-events-none flex flex-col gap-2.5 ${positionClasses}`}
       >
         <AnimatePresence mode="popLayout">
           {toasts.map((toast, index) => {
-            const scale = isHovered ? 1 : 1 - index * 0.05;
-            const y = isHovered ? 0 : index * 8;
-            const opacity = isHovered ? 1 : 1 - index * 0.18;
+            const isBottom = position.startsWith('bottom');
+            const scale = isHovered ? 1 : 1 - index * 0.04;
+            const y = isHovered ? 0 : (isBottom ? -index * 6 : index * 6);
+            const opacity = isHovered ? 1 : 1 - index * 0.15;
 
             return (
               <motion.div
                 key={toast.id}
                 layout
-                initial={{ opacity: 0, y: -20, scale: 0.9 }}
+                initial={{ opacity: 0, y: isBottom ? 20 : -20, scale: 0.9 }}
                 animate={{ opacity, y, scale }}
                 exit={{ opacity: 0, scale: 0.85, transition: { duration: 0.2 } }}
                 transition={{ type: 'spring', stiffness: 450, damping: 30 }}
@@ -140,12 +198,12 @@ const ToastCard: React.FC<{ toast: ToastItem; onClose: () => void }> = ({ toast,
 
   return (
     <div
-      className={`w-84 sm:w-96 p-4 rounded-2xl border ${typeStyles.border} ${typeStyles.bg} shadow-[0_20px_50px_rgba(0,0,0,0.95)] flex items-start gap-3 select-none`}
+      className={`w-80 sm:w-96 p-3.5 rounded-2xl border ${typeStyles.border} ${typeStyles.bg} shadow-[0_16px_40px_rgba(0,0,0,0.95)] flex items-start gap-3 select-none`}
     >
       <div className="mt-0.5">{typeStyles.icon}</div>
       <div className="flex-1 min-w-0">
         {toast.title && (
-          <h4 className={`text-xs font-black ${typeStyles.titleColor} truncate`}>
+          <h4 className={`text-xs font-black ${typeStyles.titleColor} truncate mb-0.5`}>
             {toast.title}
           </h4>
         )}
@@ -190,19 +248,19 @@ export const StackedNotifications: React.FC<{
     <div
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className="fixed top-5 right-5 z-[9999] flex flex-col gap-2.5 items-end pointer-events-none"
+      className="fixed bottom-5 right-5 z-[99999] flex flex-col gap-2.5 items-end pointer-events-none"
     >
       <AnimatePresence mode="popLayout">
         {visible.map((t, idx) => {
-          const scale = isHovered ? 1 : 1 - idx * 0.05;
-          const y = isHovered ? 0 : idx * 8;
-          const opacity = isHovered ? 1 : 1 - idx * 0.18;
+          const scale = isHovered ? 1 : 1 - idx * 0.04;
+          const y = isHovered ? 0 : -idx * 6;
+          const opacity = isHovered ? 1 : 1 - idx * 0.15;
 
           return (
             <motion.div
               key={t.id}
               layout
-              initial={{ opacity: 0, y: -20, scale: 0.9 }}
+              initial={{ opacity: 0, y: 20, scale: 0.9 }}
               animate={{ opacity, y, scale }}
               exit={{ opacity: 0, scale: 0.85 }}
               transition={{ type: 'spring', stiffness: 450, damping: 30 }}
@@ -233,7 +291,7 @@ export const UndoToast: React.FC<{
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 20, scale: 0.95 }}
           transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-          className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[9999] bg-[#0c0f1e] border border-[#212c4b] rounded-2xl p-4 shadow-2xl flex items-center gap-4 select-none min-w-[320px] overflow-hidden"
+          className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[99999] bg-[#0c0f1e] border border-[#212c4b] rounded-2xl p-4 shadow-2xl flex items-center gap-4 select-none min-w-[320px] overflow-hidden"
         >
           <span className="text-xs font-bold text-white flex-1">{message}</span>
           <button
@@ -310,3 +368,5 @@ export function usePromiseToast() {
     [addToast, removeToast]
   );
 }
+
+export default AnimatedToastProvider;

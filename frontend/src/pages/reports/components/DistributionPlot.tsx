@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { SegmentedControl } from '../../../components/SegmentedControl';
 import { DistributionStats, GradeTypeFilterKey, DistributionScoreBin } from '../utils/distributionAnalytics';
 import { Histogram3DChart, GranularityMode } from './Histogram3DChart';
 import { DistributionCommentaryCard } from './DistributionCommentaryCard';
@@ -22,44 +23,24 @@ export const DistributionPlot: React.FC<DistributionPlotProps> = ({
 }) => {
   const [granularity, setGranularity] = useState<GranularityMode>('10bins');
 
-  const filterTabs: { id: GradeTypeFilterKey; label: string }[] = [
-    { id: 'overall', label: 'Tất Cả' },
-    { id: 'check_1', label: 'Từ Vựng' },
-    { id: 'check_2', label: 'Ngữ Pháp' },
-    { id: 'homework', label: 'BTVN' },
-    { id: 'mock_test', label: 'Luyện Đề' },
-  ];
-
-  const activeTabIndex = filterTabs.findIndex((t) => t.id === selectedGradeTypeFilter);
-
   return (
     <div className="flex flex-col gap-6 select-none animate-cascade-2">
       {/* 1. TOP CONTROLS: Skill/Test-type Segmented Pill & Academic Tiers */}
       <div className="flex flex-wrap items-center justify-between gap-4 pb-2 border-b border-white/10">
         {/* Sliding Pill Indicator for Grade Type Filter */}
-        <div className="relative flex bg-[#0c101d] border border-[#1e2947] p-1 rounded-xl text-xs sm:text-sm font-black select-none w-full sm:w-auto min-w-[420px] shrink-0">
-          <div
-            className="absolute top-1 bottom-1 rounded-lg bg-[#5c36f5] shadow-[0_0_14px_rgba(92,54,245,0.5)] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] pointer-events-none"
-            style={{
-              left: `calc((100% / 5) * ${activeTabIndex >= 0 ? activeTabIndex : 0} + 2px)`,
-              width: 'calc((100% / 5) - 4px)',
-            }}
-          />
-          {filterTabs.map((tab) => (
-            <button
-              key={tab.id}
-              type="button"
-              onClick={() => setSelectedGradeTypeFilter(tab.id)}
-              className={`flex-1 relative z-10 py-1.5 px-3 text-center transition-colors cursor-pointer whitespace-nowrap ${
-                selectedGradeTypeFilter === tab.id
-                  ? 'text-white font-black'
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
+        <SegmentedControl<GradeTypeFilterKey>
+          value={selectedGradeTypeFilter}
+          onChange={setSelectedGradeTypeFilter}
+          options={[
+            { value: 'overall', label: 'Tất Cả' },
+            { value: 'check_1', label: 'Từ Vựng' },
+            { value: 'check_2', label: 'Ngữ Pháp' },
+            { value: 'homework', label: 'BTVN' },
+            { value: 'mock_test', label: 'Luyện Đề' },
+          ]}
+          size="sm"
+          className="w-full sm:w-auto min-w-[380px]"
+        />
 
         {/* 4 Academic Tier Badges */}
         <div className="flex flex-wrap items-center gap-2.5 text-xs font-bold">

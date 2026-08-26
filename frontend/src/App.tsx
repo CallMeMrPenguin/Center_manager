@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Database } from 'lucide-react';
 import { TAB_DEFINITIONS } from './config/tabs';
 import { Sidebar } from './components/Sidebar';
-import ToastContainer, { showToast } from './components/Toast';
+import { showToast, AnimatedToastProvider } from './components/Toast';
 import { ConfirmProvider } from './components/ConfirmDialog';
 import { LoginPage } from './pages/auth/LoginPage';
 import { AuthUser, getCurrentUser, clearAuthUser } from './utils/authUtils';
@@ -104,12 +104,7 @@ function AppContent() {
 
   // If user is not logged in, show LoginPage
   if (!currentUser) {
-    return (
-      <>
-        <LoginPage onLogin={handleLogin} />
-        <ToastContainer />
-      </>
-    );
+    return <LoginPage onLogin={handleLogin} />;
   }
 
   const isStudent = currentUser.role === 'student';
@@ -191,17 +186,16 @@ function AppContent() {
           </span>
         </div>
       </footer>
-
-      {/* Toast container */}
-      <ToastContainer />
     </div>
   );
 }
 
 export default function App() {
   return (
-    <ConfirmProvider>
-      <AppContent />
-    </ConfirmProvider>
+    <AnimatedToastProvider position="bottom-right">
+      <ConfirmProvider>
+        <AppContent />
+      </ConfirmProvider>
+    </AnimatedToastProvider>
   );
 }

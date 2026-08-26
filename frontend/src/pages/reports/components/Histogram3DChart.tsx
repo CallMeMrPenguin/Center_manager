@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Layers } from 'lucide-react';
+import { SegmentedControl } from '../../../components/SegmentedControl';
 import { DistributionStats, DistributionScoreBin } from '../utils/distributionAnalytics';
 import { HistogramTooltip } from './HistogramTooltip';
 
@@ -115,40 +116,23 @@ export const Histogram3DChart: React.FC<Histogram3DChartProps> = ({
               </span>
             </h3>
             <p className="text-xs text-slate-400 mt-0.5">
-              Phân bố điểm theo mức {stats.evaluation?.skillName || 'Điểm Số'} • Bấm vào cột để lọc danh sách
+              Phân bố điểm theo mức {stats.evaluation?.skillName || 'Điểm Số'} - Bấm vào cột để lọc danh sách
             </p>
           </div>
         </div>
 
         {/* Segmented Pill for Granularity (2 Views: Chi Tiết & Tổng Quan) */}
         <div className="flex items-center gap-2">
-          <div className="relative flex bg-[#0c101d] border border-[#1e2947] p-1 rounded-xl text-xs font-bold select-none min-w-[190px]">
-            <div
-              className="absolute top-1 bottom-1 rounded-lg bg-[#5c36f5] shadow-[0_0_12px_rgba(92,54,245,0.5)] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] pointer-events-none"
-              style={{
-                left: granularity === '10bins' ? '4px' : 'calc(50% + 2px)',
-                width: 'calc(50% - 6px)',
-              }}
-            />
-            <button
-              type="button"
-              onClick={() => setGranularity('10bins')}
-              className={`flex-1 relative z-10 px-3.5 py-1 text-center transition-colors cursor-pointer ${
-                granularity === '10bins' ? 'text-white font-black' : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              Chi Tiết
-            </button>
-            <button
-              type="button"
-              onClick={() => setGranularity('tiers')}
-              className={`flex-1 relative z-10 px-3.5 py-1 text-center transition-colors cursor-pointer ${
-                granularity === 'tiers' ? 'text-white font-black' : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              Tổng Quan
-            </button>
-          </div>
+          <SegmentedControl<GranularityMode>
+            value={granularity}
+            onChange={setGranularity}
+            options={[
+              { value: '10bins', label: 'Chi Tiết' },
+              { value: 'tiers', label: 'Tổng Quan' },
+            ]}
+            size="xs"
+            className="min-w-[170px]"
+          />
         </div>
       </div>
 
