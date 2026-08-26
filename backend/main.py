@@ -28,29 +28,39 @@ init_db()
 app = FastAPI(title="Center Manager & Test Formatter API")
 
 # Configure CORS
+raw_origins = os.environ.get("ALLOWED_ORIGINS", "*")
+allowed_origins = [o.strip() for o in raw_origins.split(",") if o.strip()] if raw_origins != "*" else ["*"]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Mount Routers
+# App Mode (web = cloud-only center management, local = full desktop suite)
+APP_MODE = os.environ.get("APP_MODE", "local")
+
+# Mount Core Routers (Always available)
 app.include_router(system.router)
-app.include_router(questions.router)
-app.include_router(vocabulary.router)
-app.include_router(documents.router)
 app.include_router(center_manager.router)
 app.include_router(seating.router)
 app.include_router(skill_analytics.router)
 app.include_router(assignments.router)
 app.include_router(users.router)
 
-# Directories & Async Cleanup Initialization
-import threading
-from services.cleanup_service import cleanup_temp_folders
-threading.Thread(target=cleanup_temp_folders, args=(BASE_DIR,), daemon=True).start()
+# Mount Local-Only Routers (Only active in local desktop mode)
+if APP_MODE != "web":
+    app.include_router(questions.router)
+    app.include_router(vocabulary.router)
+    app.include_router(documents.router)
+
+# Directories & Async Cleanup Initialization (Local desktop mode only)
+if APP_MODE != "web":
+    import threading
+    from services.cleanup_service import cleanup_temp_folders
+    threading.Thread(target=cleanup_temp_folders, args=(BASE_DIR,), daemon=True).start()
 
 FILES_DIR = get_setting("files_dir")
 os.makedirs(FILES_DIR, exist_ok=True)

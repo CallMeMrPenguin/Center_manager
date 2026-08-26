@@ -42,6 +42,8 @@ export interface TabDefinition {
   }) => React.ReactNode;
 }
 
+const isLocalMode = import.meta.env.VITE_APP_MODE !== 'web';
+
 export const TAB_DEFINITIONS: TabDefinition[] = [
   {
     id: 'dashboard',
@@ -92,30 +94,33 @@ export const TAB_DEFINITIONS: TabDefinition[] = [
     section: 'assessments',
     render: () => <KiemTraPage />
   },
-  {
-    id: 'formatter',
-    label: 'Trình Tạo Đề Thi',
-    icon: FileCode,
-    section: 'assessments',
-    render: (props) => (
-      <TestFormatter
-        preloadedQuestions={props.preloadedQuestions}
-        preloadedVersions={props.preloadedVersions}
-        preloadedGrade={props.preloadedGrade}
-        preloadedUnit={props.preloadedUnit}
-        clearPreloadedQuestions={props.clearPreloadedQuestions}
-      />
-    )
-  },
-  {
-    id: 'question-bank',
-    label: 'Ngân Hàng Câu Hỏi',
-    icon: Database,
-    section: 'assessments',
-    render: (props) => (
-      <QuestionBank onCreateTest={props.onCreateTest} isActive={props.isActive} />
-    )
-  },
+  // --- Local Desktop Only Tabs (Soạn đề & Tài nguyên offline) ---
+  ...(isLocalMode ? [
+    {
+      id: 'formatter',
+      label: 'Trình Tạo Đề Thi',
+      icon: FileCode,
+      section: 'assessments' as const,
+      render: (props: any) => (
+        <TestFormatter
+          preloadedQuestions={props.preloadedQuestions}
+          preloadedVersions={props.preloadedVersions}
+          preloadedGrade={props.preloadedGrade}
+          preloadedUnit={props.preloadedUnit}
+          clearPreloadedQuestions={props.clearPreloadedQuestions}
+        />
+      )
+    },
+    {
+      id: 'question-bank',
+      label: 'Ngân Hàng Câu Hỏi',
+      icon: Database,
+      section: 'assessments' as const,
+      render: (props: any) => (
+        <QuestionBank onCreateTest={props.onCreateTest} isActive={props.isActive} />
+      )
+    },
+  ] : []),
   {
     id: 'assignments',
     label: 'Bài Tập Về Nhà',
@@ -130,27 +135,30 @@ export const TAB_DEFINITIONS: TabDefinition[] = [
     section: 'assessments',
     render: () => <ResultsPage />
   },
-  {
-    id: 'vocab-bank',
-    label: 'Từ Vựng Chủ Đề',
-    icon: BookOpen,
-    section: 'resources',
-    render: (props) => <VocabularyBank isActive={props.isActive} />
-  },
-  {
-    id: 'unit-config',
-    label: 'Cấu Hình Unit',
-    icon: SettingsIcon,
-    section: 'resources',
-    render: () => <UnitConfig />
-  },
-  {
-    id: 'file-manager',
-    label: 'Tài Liệu',
-    icon: FolderOpen,
-    section: 'resources',
-    render: () => <DocumentManager />
-  },
+  // --- Local Resources Only Tabs ---
+  ...(isLocalMode ? [
+    {
+      id: 'vocab-bank',
+      label: 'Từ Vựng Chủ Đề',
+      icon: BookOpen,
+      section: 'resources' as const,
+      render: (props: any) => <VocabularyBank isActive={props.isActive} />
+    },
+    {
+      id: 'unit-config',
+      label: 'Cấu Hình Unit',
+      icon: SettingsIcon,
+      section: 'resources' as const,
+      render: () => <UnitConfig />
+    },
+    {
+      id: 'file-manager',
+      label: 'Tài Liệu',
+      icon: FolderOpen,
+      section: 'resources' as const,
+      render: () => <DocumentManager />
+    },
+  ] : []),
   {
     id: 'canvas-board',
     label: 'Canvas',

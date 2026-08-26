@@ -1,9 +1,8 @@
 import { AppFile, AppSettings, LayoutSettings, SystemCheck } from './types';
 
 // In dev mode (localhost:5173), Vite proxies /api → FastAPI at :8000.
-// In production (served directly from FastAPI), /api calls hit the same origin.
-// Either way, relative paths work perfectly — no hardcoded base URL needed.
-const API_BASE = '';
+// In production on Vercel, requests point to VITE_API_URL or relative origin.
+const API_BASE = import.meta.env.VITE_API_URL ?? '';
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
   const url = `${API_BASE}${path}`;
