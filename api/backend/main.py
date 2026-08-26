@@ -74,6 +74,9 @@ if APP_MODE != "web":
         from services.cleanup_service import cleanup_temp_folders
         threading.Thread(target=cleanup_temp_folders, args=(BASE_DIR,), daemon=True).start()
 
+        from services.sync_worker import start_sync_worker
+        start_sync_worker()
+
         FILES_DIR = get_setting("files_dir")
         os.makedirs(FILES_DIR, exist_ok=True)
 

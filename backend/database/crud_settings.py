@@ -61,6 +61,11 @@ def save_db_setting(key: str, value: Any) -> bool:
         """, (key, val_str, now_str))
         conn.commit()
         conn.close()
+        try:
+            from services.sync_worker import trigger_instant_sync
+            trigger_instant_sync()
+        except Exception:
+            pass
     except Exception as e:
         print("[Settings DB] Error saving setting to DB:", e)
 

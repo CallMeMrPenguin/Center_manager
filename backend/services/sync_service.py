@@ -8,7 +8,7 @@ import psycopg2.extras
 
 from database.connection import DB_PATH, get_target_db_url, SUPABASE_DEFAULT_DB_URL
 
-SYNCABLE_TABLES = [
+FAST_SYNC_TABLES = [
     # Level 0 (Master / Standalone)
     {"table": "app_settings", "pk": ["setting_key"]},
     {"table": "role_permissions", "pk": ["role", "tab_id"]},
@@ -18,9 +18,6 @@ SYNCABLE_TABLES = [
     {"table": "courses", "pk": ["id"]},
     {"table": "document_folders", "pk": ["id"]},
     {"table": "documents", "pk": ["id"]},
-    {"table": "document_attachments", "pk": ["id"]},
-    {"table": "question_bank", "pk": ["id"]},
-    {"table": "vocabulary_list", "pk": ["id"]},
     # Level 1 (Dependent on Master)
     {"table": "classes", "pk": ["id"]},
     {"table": "assignments", "pk": ["id"]},
@@ -41,6 +38,12 @@ SYNCABLE_TABLES = [
     {"table": "student_scores", "pk": ["student_id", "class_id", "score_type"]},
 ]
 
+HEAVY_STATIC_TABLES = [
+    {"table": "question_bank", "pk": ["id"]},
+    {"table": "vocabulary_list", "pk": ["id"]},
+    {"table": "document_attachments", "pk": ["id"]},
+]
+
 def _parse_ts(val: Any) -> float:
     """Parses timestamp or string to epoch seconds for accurate comparison."""
     if not val:
@@ -55,9 +58,9 @@ def _parse_ts(val: Any) -> float:
     except Exception:
         return 0.0
 
-def run_bidirectional_sync() -> Dict[str, Any]:
+def run_bidirectional_sync(force_full: bool = False) -> Dict[str, Any]:
     """
-    Executes conflict-free bidirectional sync between Local SQLite and Supabase PostgreSQL.
+    Executes conflict-free near-instant bidirectional delta sync between Local SQLite and Supabase PostgreSQL.
     Uses Last-Write-Wins based on updated_at and idempotent upserts.
     """
     if not os.path.exists(DB_PATH):
@@ -72,7 +75,7 @@ def run_bidirectional_sync() -> Dict[str, Any]:
     scur = sconn.cursor()
 
     try:
-        pconn = psycopg2.connect(target_url, connect_timeout=15)
+        pconn = psycopg2.connect(target_url, connect_timeout=8)
         pcur = pconn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     except Exception as e:
         sconn.close()
@@ -81,9 +84,28 @@ def run_bidirectional_sync() -> Dict[str, Any]:
     pushed_total = 0
     pulled_total = 0
     synced_tables = []
+    sync_start_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     try:
-        for t_info in SYNCABLE_TABLES:
+        # Checkpoint meta table
+        scur.execute("""
+            CREATE TABLE IF NOT EXISTS _local_sync_meta (
+                key TEXT PRIMARY KEY,
+                val TEXT NOT NULL,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+
+        last_synced_at = None
+        if not force_full:
+            scur.execute("SELECT val FROM _local_sync_meta WHERE key = 'last_synced_at'")
+            row = scur.fetchone()
+            if row:
+                last_synced_at = row["val"]
+
+        tables_to_sync = FAST_SYNC_TABLES + (HEAVY_STATIC_TABLES if force_full or not last_synced_at else [])
+
+        for t_info in tables_to_sync:
             table = t_info["table"]
             pks = t_info["pk"]
 
@@ -99,7 +121,7 @@ def run_bidirectional_sync() -> Dict[str, Any]:
             except Exception:
                 continue
 
-            # 2. Fetch all rows from Local & Cloud
+            # 2. Fetch records
             scur.execute(f"SELECT * FROM {table}")
             local_rows = [dict(r) for r in scur.fetchall()]
 
@@ -115,7 +137,6 @@ def run_bidirectional_sync() -> Dict[str, Any]:
 
             to_push = []
             to_pull = []
-
             all_keys = set(local_map.keys()) | set(cloud_map.keys())
 
             for k in all_keys:
@@ -127,7 +148,6 @@ def run_bidirectional_sync() -> Dict[str, Any]:
                 elif cld and not loc:
                     to_pull.append(cld)
                 elif loc and cld:
-                    # Both exist: Compare updated_at
                     loc_ts = _parse_ts(loc.get("updated_at") or loc.get("created_at"))
                     cld_ts = _parse_ts(cld.get("updated_at") or cld.get("created_at"))
 
@@ -167,7 +187,7 @@ def run_bidirectional_sync() -> Dict[str, Any]:
                 pulled_total += len(to_pull)
 
             # 5. Resync Sequence in Postgres if table has integer id
-            if "id" in pks:
+            if "id" in pks and to_push:
                 try:
                     pcur.execute(f"SELECT setval('{table}_id_seq', (SELECT COALESCE(MAX(id), 1) FROM {table}));")
                     pconn.commit()
@@ -176,12 +196,22 @@ def run_bidirectional_sync() -> Dict[str, Any]:
 
             synced_tables.append(table)
 
+        # 6. Save checkpoint to _local_sync_meta
+        now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        scur.execute("""
+            INSERT INTO _local_sync_meta (key, val, updated_at)
+            VALUES ('last_synced_at', ?, ?)
+            ON CONFLICT (key) DO UPDATE SET val = EXCLUDED.val, updated_at = EXCLUDED.updated_at
+        """, (sync_start_time, now_str))
+        sconn.commit()
+
         return {
             "success": True,
             "pushed_records": pushed_total,
             "pulled_records": pulled_total,
             "synced_tables": synced_tables,
-            "synced_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            "synced_at": now_str,
+            "fast_mode": not force_full and bool(last_synced_at)
         }
     except Exception as e:
         return {"success": False, "error": str(e)}

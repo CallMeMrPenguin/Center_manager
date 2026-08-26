@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Database } from 'lucide-react';
 import { TAB_DEFINITIONS } from './config/tabs';
 import { Sidebar } from './components/Sidebar';
+import { SyncIndicator } from './components/SyncIndicator';
 import { showToast, AnimatedToastProvider } from './components/Toast';
 import { ConfirmProvider } from './components/ConfirmDialog';
 import { LoginPage } from './pages/auth/LoginPage';
@@ -173,15 +174,15 @@ function AppContent() {
       </div>
 
       {/* STATUS BAR */}
-      <footer className="h-7 bg-[#06070a]/90 flex items-center justify-between px-6 text-[11px] text-slate-400 select-none shrink-0 font-semibold z-10 border-t border-white/[0.04]">
-        <div className="flex items-center gap-2">
-          <Database size={12} className="text-emerald-400 drop-shadow-[0_0_6px_rgba(16,185,129,0.6)]" />
-          <span>Hỗ trợ ngoại tuyến (Offline-First) — 100% bảo mật dữ liệu cục bộ</span>
+      <footer className="h-8 bg-[#06070a] flex items-center justify-between px-6 text-[11px] text-slate-400 select-none shrink-0 font-semibold z-10 border-t border-white/[0.04]">
+        <div className="flex items-center gap-3">
+          <SyncIndicator />
+          <span className="hidden md:inline text-slate-400">Local-First Engine — Tự động đồng bộ với Supabase</span>
         </div>
         <div className="flex items-center gap-2">
           <span className="text-slate-500">Đang đăng nhập:</span>
           <strong className="text-indigo-300">{currentUser.name}</strong>
-          <span className={`text-[10px] px-2 py-0.2 rounded-full font-black ${isStudent ? 'bg-emerald-500/20 text-emerald-300' : 'bg-indigo-500/20 text-indigo-300'}`}>
+          <span className={`text-[10px] px-2 py-0.5 rounded-full font-black ${isStudent ? 'bg-emerald-500/20 text-emerald-300' : 'bg-indigo-500/20 text-indigo-300'}`}>
             {isStudent ? 'Học sinh' : 'Quản trị viên'}
           </span>
         </div>
