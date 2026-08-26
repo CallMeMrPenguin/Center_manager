@@ -12,11 +12,15 @@ IS_VERCEL = bool(
 
 SUPABASE_DEFAULT_DB_URL = "postgresql://postgres:Callmemrpenguin%402004@db.jttlekzqveygejvyhfqn.supabase.co:5432/postgres"
 
-DATABASE_URL = (
-    os.environ.get("DATABASE_URL")
-    or os.environ.get("POSTGRES_URL")
-    or (SUPABASE_DEFAULT_DB_URL if IS_VERCEL else None)
-)
+def get_target_db_url() -> str:
+    raw_url = os.environ.get("DATABASE_URL") or os.environ.get("POSTGRES_URL")
+    if not raw_url and IS_VERCEL:
+        raw_url = SUPABASE_DEFAULT_DB_URL
+    if raw_url and raw_url.startswith("postgres://"):
+        raw_url = "postgresql://" + raw_url[len("postgres://"):]
+    return raw_url
+
+DATABASE_URL = get_target_db_url()
 
 # Local SQLite Database Path
 DB_PATH = os.path.join(
@@ -135,13 +139,22 @@ class PgConnectionWrapper:
 
 
 def get_connection():
-    if DATABASE_URL:
+    target_url = get_target_db_url()
+    if target_url:
         try:
             import psycopg2
-            raw_conn = psycopg2.connect(DATABASE_URL)
+            raw_conn = psycopg2.connect(target_url, connect_timeout=10)
             return PgConnectionWrapper(raw_conn)
         except Exception as e:
-            print("[DB Connection] PostgreSQL connection error, falling back to SQLite:", e)
+            print("[DB Connection] Primary PostgreSQL connection failed:", e)
+            if target_url != SUPABASE_DEFAULT_DB_URL:
+                try:
+                    raw_conn = psycopg2.connect(SUPABASE_DEFAULT_DB_URL, connect_timeout=10)
+                    return PgConnectionWrapper(raw_conn)
+                except Exception as e2:
+                    print("[DB Connection] Fallback to direct DB URL failed:", e2)
+            if IS_VERCEL:
+                raise e
 
     conn = sqlite3.connect(DB_PATH, check_same_thread=False)
     conn.row_factory = sqlite3.Row
