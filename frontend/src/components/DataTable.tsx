@@ -864,6 +864,7 @@ export function DataTable<TData>({
   const table = useReactTable<TData>({
     data: processedData,
     columns: allColumns,
+    getRowId: (row: any, index: number) => String(row?.id ?? row?.student_id ?? row?._id ?? row?.key ?? index),
     columnResizeMode,
     autoResetPageIndex: false,
     autoResetExpanded: false,

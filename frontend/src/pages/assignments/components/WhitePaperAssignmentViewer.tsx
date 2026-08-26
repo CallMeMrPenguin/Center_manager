@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import ReactDOM from 'react-dom';
 import { ArrowLeft, Award, Save, Maximize2, Minimize2, ChevronRight, PenTool, KeyRound } from 'lucide-react';
 import { Assignment, AssignmentDailyLog } from '../types';
 import { ExerciseItem } from './types';
@@ -137,7 +138,7 @@ export const WhitePaperAssignmentViewer: React.FC<WhitePaperAssignmentViewerProp
 
   const pct = progress.total > 0 ? Math.round((progress.answered / progress.total) * 100) : 0;
 
-  return (
+  const mainContent = (
     <div
       onContextMenu={(e) => e.preventDefault()}
       onCopy={(e) => e.preventDefault()}
@@ -145,7 +146,7 @@ export const WhitePaperAssignmentViewer: React.FC<WhitePaperAssignmentViewerProp
       onDragStart={(e) => e.preventDefault()}
       className={`${
         isFullscreen
-          ? 'fixed inset-0 z-[100] bg-[#08090e] overflow-y-auto p-3 sm:p-6 flex flex-col'
+          ? 'fixed inset-0 z-[99999] bg-[#08090e] overflow-y-auto p-3 sm:p-6 flex flex-col'
           : 'relative'
       } space-y-4 pb-12 select-none font-sans`}
       style={{ userSelect: 'none', WebkitUserSelect: 'none' }}
@@ -308,7 +309,12 @@ export const WhitePaperAssignmentViewer: React.FC<WhitePaperAssignmentViewerProp
         <div className={`flex-1 ${isFullscreen ? 'max-w-[1020px]' : 'max-w-[850px]'} w-full space-y-4 transition-all duration-200`}>
           <div className="white-paper-container relative w-full bg-white text-slate-900 rounded-none shadow-[0_20px_50px_rgba(0,0,0,0.4)] border border-slate-300 p-6 sm:p-12 min-h-[1100px] flex flex-col justify-between font-sans">
             {/* Drawing Correction Layer (Fixed Full Canvas) */}
-            <DrawingCorrectionCanvas isActive={isCorrectionMode} />
+            <DrawingCorrectionCanvas
+              isActive={isCorrectionMode}
+              assignmentId={assignment.id}
+              studentName={studentName}
+              pageKey="white_paper"
+            />
 
             <div className="space-y-6">
               <WhitePaperHeader
@@ -367,4 +373,10 @@ export const WhitePaperAssignmentViewer: React.FC<WhitePaperAssignmentViewerProp
       )}
     </div>
   );
+
+  if (isFullscreen) {
+    return ReactDOM.createPortal(mainContent, document.body);
+  }
+
+  return mainContent;
 };

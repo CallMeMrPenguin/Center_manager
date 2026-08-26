@@ -72,13 +72,13 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
     }
   }, []);
 
-  // Resize canvas and restore saved drawings
-  useEffect(() => {
+  const syncCanvasSize = useCallback(() => {
     const canvas = canvasRef.current;
     const container = containerRef.current;
     if (!canvas || !container) return;
 
     const rect = container.getBoundingClientRect();
+    if (rect.width <= 0 || rect.height <= 0) return;
     const dpr = window.devicePixelRatio || 1;
 
     canvas.width = rect.width * dpr;
@@ -90,6 +90,34 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
     if (!ctx) return;
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.scale(dpr, dpr);
+
+    if (strokesRef.current.length > 0) {
+      redrawStrokes(strokesRef.current);
+    }
+  }, [redrawStrokes]);
+
+  // Observe container resize continuously
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    syncCanvasSize();
+    const observer = new ResizeObserver(() => {
+      syncCanvasSize();
+    });
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, [syncCanvasSize]);
+
+  // Restore or reset saved drawings on questionId change
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    const container = containerRef.current;
+    if (!canvas || !container) return;
+
+    syncCanvasSize();
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
 
     const savedData = drawings[questionId];
     if (savedData) {
@@ -103,16 +131,18 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
           return;
         }
       } catch {}
+      const rect = container.getBoundingClientRect();
       const img = new Image();
       img.onload = () => { ctx.drawImage(img, 0, 0, rect.width, rect.height); };
       img.src = savedData;
     } else {
       strokesRef.current = [];
+      const rect = container.getBoundingClientRect();
       ctx.clearRect(0, 0, rect.width, rect.height);
       setUndoStack([]);
     }
     setRedoStack([]);
-  }, [questionId, redrawStrokes]);
+  }, [questionId, syncCanvasSize, redrawStrokes]);
 
   const saveCurrentState = useCallback(() => {
     const serialized = JSON.stringify(strokesRef.current);

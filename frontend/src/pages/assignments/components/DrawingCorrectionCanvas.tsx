@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect, useCallback, memo } from 'react';
+import React, { useRef, useState, useEffect, useCallback, useMemo, memo } from 'react';
 import { Pen, Eraser, RotateCcw, Trash2, Check } from 'lucide-react';
 
 interface Point {
@@ -15,6 +15,9 @@ interface Path {
 
 interface DrawingCorrectionCanvasProps {
   isActive: boolean;
+  assignmentId?: number | string;
+  studentName?: string;
+  pageKey?: string;
   onToggleActive?: () => void;
 }
 
@@ -30,6 +33,9 @@ const SIZES = [2, 4, 7];
 
 export const DrawingCorrectionCanvas: React.FC<DrawingCorrectionCanvasProps> = memo(({
   isActive,
+  assignmentId,
+  studentName,
+  pageKey = 'default',
 }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [isDrawing, setIsDrawing] = useState(false);
@@ -37,10 +43,38 @@ export const DrawingCorrectionCanvas: React.FC<DrawingCorrectionCanvasProps> = m
   const [size, setSize] = useState(3);
   const [isEraser, setIsEraser] = useState(false);
   const [paths, setPaths] = useState<Path[]>([]);
+  const pathsRef = useRef<Path[]>([]);
   const currentPathRef = useRef<Point[]>([]);
 
+  // Unique storage key per assignment, student, and page
+  const storageKey = useMemo(() => {
+    return `drawing_correction_${assignmentId || 'preview'}_${studentName || 'anon'}_${pageKey}`;
+  }, [assignmentId, studentName, pageKey]);
+
+  // Keep pathsRef in sync with state for zero-delay drawing
+  useEffect(() => {
+    pathsRef.current = paths;
+  }, [paths]);
+
+  // Reset or load paths when assignment, student, or page changes
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(storageKey);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          setPaths(parsed);
+          pathsRef.current = parsed;
+          return;
+        }
+      }
+    } catch {}
+    setPaths([]);
+    pathsRef.current = [];
+  }, [storageKey]);
+
   // Function to redraw all strokes onto the canvas
-  const redrawAll = useCallback(() => {
+  const redrawAll = useCallback((currentStrokes?: Path[]) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
@@ -50,8 +84,9 @@ export const DrawingCorrectionCanvas: React.FC<DrawingCorrectionCanvasProps> = m
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
 
-    paths.forEach((p) => {
-      if (!p.points || p.points.length < 2) return;
+    const strokesToDraw = currentStrokes || pathsRef.current;
+    strokesToDraw.forEach((p) => {
+      if (!p.points || p.points.length === 0) return;
       ctx.beginPath();
       ctx.strokeStyle = p.color;
       ctx.lineWidth = p.size;
@@ -61,45 +96,73 @@ export const DrawingCorrectionCanvas: React.FC<DrawingCorrectionCanvasProps> = m
         ctx.globalCompositeOperation = 'source-over';
       }
 
-      ctx.moveTo(p.points[0].x, p.points[0].y);
-      for (let i = 1; i < p.points.length; i++) {
-        ctx.lineTo(p.points[i].x, p.points[i].y);
+      if (p.points.length === 1) {
+        ctx.arc(p.points[0].x, p.points[0].y, p.size / 2, 0, Math.PI * 2);
+        ctx.fillStyle = p.color;
+        ctx.fill();
+      } else {
+        ctx.moveTo(p.points[0].x, p.points[0].y);
+        for (let i = 1; i < p.points.length; i++) {
+          ctx.lineTo(p.points[i].x, p.points[i].y);
+        }
+        ctx.stroke();
       }
-      ctx.stroke();
     });
     ctx.globalCompositeOperation = 'source-over';
-  }, [paths]);
+  }, []);
 
-  // Adjust canvas resolution once when activated or resized
+  // Synchronize canvas resolution and dimensions to match the full worksheet parent
   const syncDimensions = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const parent = canvas.parentElement;
     if (!parent) return;
 
-    const targetW = Math.round(parent.clientWidth || 800);
-    const targetH = Math.round(parent.scrollHeight || parent.clientHeight || 1200);
+    const targetW = Math.max(parent.clientWidth || 800, parent.offsetWidth || 800);
+    const targetH = Math.max(parent.scrollHeight || 1200, parent.clientHeight || 1200, parent.offsetHeight || 1200);
 
     if (canvas.width !== targetW || canvas.height !== targetH) {
       canvas.width = targetW;
       canvas.height = targetH;
+      canvas.style.width = `${targetW}px`;
+      canvas.style.height = `${targetH}px`;
       redrawAll();
     }
   }, [redrawAll]);
 
+  // Continuously observe parent dimensions so canvas expands dynamically with full content
   useEffect(() => {
     if (!isActive) return;
-    const timer = setTimeout(syncDimensions, 50);
+    const canvas = canvasRef.current;
+    const parent = canvas?.parentElement;
+    if (!parent) return;
+
+    syncDimensions();
+
+    const resizeObserver = new ResizeObserver(() => {
+      syncDimensions();
+    });
+    resizeObserver.observe(parent);
+
     window.addEventListener('resize', syncDimensions);
     return () => {
-      clearTimeout(timer);
+      resizeObserver.disconnect();
       window.removeEventListener('resize', syncDimensions);
     };
   }, [isActive, syncDimensions]);
 
   useEffect(() => {
-    redrawAll();
-  }, [paths, redrawAll]);
+    if (isActive) {
+      redrawAll(paths);
+      try {
+        if (paths.length > 0) {
+          localStorage.setItem(storageKey, JSON.stringify(paths));
+        } else {
+          localStorage.removeItem(storageKey);
+        }
+      } catch {}
+    }
+  }, [paths, isActive, redrawAll, storageKey]);
 
   const getCanvasCoords = (e: React.PointerEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
@@ -119,6 +182,21 @@ export const DrawingCorrectionCanvas: React.FC<DrawingCorrectionCanvasProps> = m
     setIsDrawing(true);
     const pt = getCanvasCoords(e);
     currentPathRef.current = [pt];
+
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    ctx.beginPath();
+    ctx.arc(pt.x, pt.y, size / 2, 0, Math.PI * 2);
+    ctx.fillStyle = isEraser ? 'rgba(0,0,0,1)' : color;
+    if (isEraser) {
+      ctx.globalCompositeOperation = 'destination-out';
+      ctx.fill();
+      ctx.globalCompositeOperation = 'source-over';
+    } else {
+      ctx.fill();
+    }
   };
 
   const handlePointerMove = (e: React.PointerEvent<HTMLCanvasElement>) => {
@@ -151,10 +229,13 @@ export const DrawingCorrectionCanvas: React.FC<DrawingCorrectionCanvasProps> = m
     }
   };
 
-  const handlePointerUp = () => {
+  const handlePointerUp = (e: React.PointerEvent<HTMLCanvasElement>) => {
     if (!isDrawing) return;
+    try {
+      (e.target as HTMLElement).releasePointerCapture(e.pointerId);
+    } catch {}
     setIsDrawing(false);
-    if (currentPathRef.current.length > 1) {
+    if (currentPathRef.current.length > 0) {
       const newPath: Path = {
         points: [...currentPathRef.current],
         color,
@@ -172,6 +253,10 @@ export const DrawingCorrectionCanvas: React.FC<DrawingCorrectionCanvasProps> = m
 
   const handleClear = () => {
     setPaths([]);
+    pathsRef.current = [];
+    try {
+      localStorage.removeItem(storageKey);
+    } catch {}
     const canvas = canvasRef.current;
     if (canvas) {
       const ctx = canvas.getContext('2d');

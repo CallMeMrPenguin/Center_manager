@@ -93,6 +93,7 @@ export const AttendanceGradesTab: React.FC<AttendanceGradesTabProps> = ({
         cell: ({ row }) => (
           <CheckScoreInput
             rec={row.original}
+            rowIndex={row.index}
             field="check_1"
             onUpdateRecord={onUpdateRecord}
             parseAndFormatScore={parseAndFormatScore}
@@ -105,6 +106,7 @@ export const AttendanceGradesTab: React.FC<AttendanceGradesTabProps> = ({
         cell: ({ row }) => (
           <CheckScoreInput
             rec={row.original}
+            rowIndex={row.index}
             field="check_2"
             onUpdateRecord={onUpdateRecord}
             parseAndFormatScore={parseAndFormatScore}
@@ -117,6 +119,7 @@ export const AttendanceGradesTab: React.FC<AttendanceGradesTabProps> = ({
         cell: ({ row }) => (
           <CheckScoreInput
             rec={row.original}
+            rowIndex={row.index}
             field="homework"
             onUpdateRecord={onUpdateRecord}
             parseAndFormatScore={parseAndFormatScore}
@@ -129,6 +132,7 @@ export const AttendanceGradesTab: React.FC<AttendanceGradesTabProps> = ({
         cell: ({ row }) => (
           <CheckScoreInput
             rec={row.original}
+            rowIndex={row.index}
             field="mock_test"
             onUpdateRecord={onUpdateRecord}
             parseAndFormatScore={parseAndFormatScore}
