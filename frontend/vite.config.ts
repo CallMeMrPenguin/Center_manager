@@ -1,10 +1,29 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import path from 'path'
+import fs from 'fs'
+
+const buildTime = Date.now().toString();
+
+const versionTrackerPlugin = () => ({
+  name: 'version-tracker-plugin',
+  writeBundle(options: any) {
+    const outDir = options.dir || path.resolve(__dirname, 'dist');
+    const versionFile = path.resolve(outDir, 'version.json');
+    try {
+      fs.writeFileSync(versionFile, JSON.stringify({ buildTime, version: '1.0.0' }, null, 2), 'utf-8');
+    } catch (e) {
+      console.warn('Could not write version.json', e);
+    }
+  },
+});
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), versionTrackerPlugin()],
+  define: {
+    __APP_BUILD_TIME__: JSON.stringify(buildTime),
+  },
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),

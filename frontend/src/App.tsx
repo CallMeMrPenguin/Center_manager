@@ -6,8 +6,12 @@ import ToastContainer from './components/Toast';
 import { ConfirmProvider } from './components/ConfirmDialog';
 import { LoginPage } from './pages/auth/LoginPage';
 import { AuthUser } from './utils/authUtils';
+import { useAutoDeploymentRefresh } from './hooks/useAutoDeploymentRefresh';
 
 function AppContent() {
+  // Auto-detect and reload on new deployment
+  useAutoDeploymentRefresh();
+
   // Always start at Login screen on page load / refresh
   const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
   const [activeTab, setActiveTab] = useState<string>('dashboard');
