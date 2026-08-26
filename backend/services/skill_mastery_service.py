@@ -15,26 +15,47 @@ def init_skill_mastery_db(conn):
         pass
 
     # 2. Create skill_mastery table for persistent mastery tracking
-    cursor.execute("""
-    CREATE TABLE IF NOT EXISTS skill_mastery (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        student_id INTEGER REFERENCES students(id) ON DELETE CASCADE,
-        class_id   INTEGER REFERENCES classes(id)  ON DELETE CASCADE,
-        skill      TEXT NOT NULL,
-        unit_key   TEXT NOT NULL,
-        ema_score  REAL,
-        last_score REAL,
-        test_count INTEGER DEFAULT 0,
-        mastery_status TEXT,
-        last_tested TEXT,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        UNIQUE(student_id, class_id, skill, unit_key)
-    )
-    """)
+    try:
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS skill_mastery (
+            id SERIAL PRIMARY KEY,
+            student_id BIGINT REFERENCES students(id) ON DELETE CASCADE,
+            class_id   BIGINT REFERENCES classes(id)  ON DELETE CASCADE,
+            skill      TEXT NOT NULL,
+            unit_key   TEXT NOT NULL,
+            ema_score  REAL,
+            last_score REAL,
+            test_count INTEGER DEFAULT 0,
+            mastery_status TEXT,
+            last_tested TEXT,
+            updated_at TIMESTAMPTZ DEFAULT NOW(),
+            UNIQUE(student_id, class_id, skill, unit_key)
+        );
+        """)
+    except Exception:
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS skill_mastery (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            student_id INTEGER REFERENCES students(id) ON DELETE CASCADE,
+            class_id   INTEGER REFERENCES classes(id)  ON DELETE CASCADE,
+            skill      TEXT NOT NULL,
+            unit_key   TEXT NOT NULL,
+            ema_score  REAL,
+            last_score REAL,
+            test_count INTEGER DEFAULT 0,
+            mastery_status TEXT,
+            last_tested TEXT,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE(student_id, class_id, skill, unit_key)
+        );
+        """)
 
-    cursor.execute("CREATE INDEX IF NOT EXISTS idx_skill_mastery_class_student ON skill_mastery(class_id, student_id);")
-    cursor.execute("CREATE INDEX IF NOT EXISTS idx_skill_mastery_unit ON skill_mastery(skill, unit_key);")
-    conn.commit()
+    try:
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_skill_mastery_class_student ON skill_mastery(class_id, student_id);")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_skill_mastery_unit ON skill_mastery(skill, unit_key);")
+        conn.commit()
+    except Exception:
+        pass
 
 
 def parse_test_config(raw_config: Any) -> Optional[Dict[str, Any]]:

@@ -30,7 +30,6 @@ from database.db_manager import (
     get_analytics_reports, reset_student_grades, get_class_student_predictions,
     get_custom_time_phases, save_custom_time_phase, delete_custom_time_phase
 )
-from routers.questions import flatten_docx_to_questions
 
 router = APIRouter()
 

@@ -1,7 +1,6 @@
 import random
 from dataclasses import dataclass, field
 from typing import List, Dict, Any, Optional, Set, Tuple
-import networkx as nx
 
 @dataclass
 class Student:
