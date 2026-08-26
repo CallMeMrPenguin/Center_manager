@@ -80,8 +80,8 @@ def load_class_student_objects(class_id: int, absent_ids: Set[int]) -> List[Stud
         sid = s["id"]
         is_abs = sid in absent_ids
         gid = s.get("group_id")
-        gname = s.get("group_name") or s.get("seat_color") or s.get("grade_group")
-        gcolor = s.get("group_color")
+        gname = s.get("group_name")
+        gcolor = s.get("group_color") or s.get("seat_color")
         student_objs.append(Student(
             id=sid,
             name=s["full_name"],

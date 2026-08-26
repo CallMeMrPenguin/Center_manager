@@ -137,11 +137,11 @@ export const SeatingChartTab: React.FC<SeatingChartTabProps> = ({
           <button
             onClick={onBlossomSwap}
             className="group flex items-center gap-0 hover:gap-1.5 bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-500/40 px-3 py-1.5 rounded-xl font-extrabold text-xs transition-all duration-300 cursor-pointer"
-            title="Đổi Bàn (Blossom)"
+            title="Đổi Bài (Blossom)"
           >
             <FileCheck2 size={14} className="shrink-0" />
             <span className="max-w-0 opacity-0 group-hover:max-w-[120px] group-hover:opacity-100 transition-all duration-300 ease-in-out whitespace-nowrap overflow-hidden block">
-              Đổi Bàn
+              Đổi Bài
             </span>
           </button>
 

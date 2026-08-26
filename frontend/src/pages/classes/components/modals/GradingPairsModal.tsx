@@ -1,5 +1,5 @@
 import React from 'react';
-import { FileCheck2, X } from 'lucide-react';
+import { FileCheck2, X, ArrowLeftRight } from 'lucide-react';
 import { GradingPair } from '../../types';
 
 interface GradingPairsModalProps {
@@ -16,7 +16,7 @@ export const GradingPairsModal: React.FC<GradingPairsModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 animate-mac-dropdown">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 animate-mac-dropdown">
       <div className="bg-[#0f1320] border border-white/10 rounded-2xl w-full max-w-lg overflow-hidden shadow-[0_24px_80px_rgba(0,0,0,0.8)]">
         <div className="flex items-center justify-between p-5 border-b border-white/10 bg-[#14192b]">
           <h3 className="text-base font-black text-white flex items-center gap-2">
@@ -43,7 +43,10 @@ export const GradingPairsModal: React.FC<GradingPairsModalProps> = ({
                 }`}
               >
                 <span>{p.student1_name || p.grader_name}</span>
-                <span className="text-indigo-400 font-black text-xs">↔ Đổi bài với ↔</span>
+                <div className="flex items-center gap-1 text-indigo-400 font-extrabold text-xs">
+                  <ArrowLeftRight size={13} className="shrink-0" />
+                  <span>Đổi bài với</span>
+                </div>
                 <span>{p.student2_name || p.owner_name}</span>
               </div>
             ))}

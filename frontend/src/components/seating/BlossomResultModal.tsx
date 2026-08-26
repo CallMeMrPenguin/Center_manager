@@ -1,5 +1,5 @@
 import React from 'react';
-import { FileCheck2, X, AlertTriangle, CheckCircle2, UserX } from 'lucide-react';
+import { FileCheck2, X, AlertTriangle, CheckCircle2, UserX, ArrowLeftRight } from 'lucide-react';
 
 interface SwapPair {
   student1_id?: number;
@@ -30,7 +30,7 @@ export default function BlossomResultModal({ isOpen, onClose, pairs, unmatched =
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 animate-mac-dropdown">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 animate-mac-dropdown">
       <div className="bg-[#0f1320] border border-white/10 rounded-2xl w-full max-w-xl overflow-hidden shadow-[0_24px_80px_rgba(0,0,0,0.8)] flex flex-col max-h-[85vh]">
         {/* Header */}
         <div className="flex items-center justify-between p-5 border-b border-white/10 bg-[#14192b]">
@@ -86,8 +86,11 @@ export default function BlossomResultModal({ isOpen, onClose, pairs, unmatched =
                       </div>
                     </div>
 
-                    <div className="px-3 text-center shrink-0 flex flex-col items-center">
-                      <span className="text-indigo-400 font-black text-xs">↔ Đổi bài ↔</span>
+                    <div className="px-3 text-center shrink-0 flex flex-col items-center gap-0.5">
+                      <div className="flex items-center gap-1 text-indigo-400 font-extrabold text-[11px]">
+                        <ArrowLeftRight size={13} className="shrink-0" />
+                        <span>Đổi bài</span>
+                      </div>
                       {isTrusted && (
                         <span className="text-[9px] text-amber-400 font-extrabold">Đã tin cậy</span>
                       )}
