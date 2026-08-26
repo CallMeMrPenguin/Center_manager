@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Clock, Flag, ChevronLeft, ChevronRight, ArrowLeft, ArrowRight,
   Maximize2, Minimize2
@@ -63,6 +63,18 @@ export const QuizRunningView: React.FC<QuizRunningViewProps> = ({
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(isFullscreen);
   const [eliminatedOptions, setEliminatedOptions] = useState<Record<number, string[]>>({});
   const [drawings, setDrawings] = useState<Record<number, string>>({});
+
+  const handleSaveDrawing = useCallback((id: number, url: string) => {
+    setDrawings(p => ({ ...p, [id]: url }));
+  }, []);
+
+  const handleClearDrawing = useCallback((id: number) => {
+    setDrawings(p => {
+      const c = { ...p };
+      delete c[id];
+      return c;
+    });
+  }, []);
 
   // Popout Draggable Timer State
   const [showPopoutTimer, setShowPopoutTimer] = useState<boolean>(true);
@@ -168,8 +180,8 @@ export const QuizRunningView: React.FC<QuizRunningViewProps> = ({
         <DrawingCanvas
           questionId={q.id}
           drawings={drawings}
-          onSaveDrawing={(id, url) => setDrawings(p => ({ ...p, [id]: url }))}
-          onClearDrawing={(id) => setDrawings(p => { const c = { ...p }; delete c[id]; return c; })}
+          onSaveDrawing={handleSaveDrawing}
+          onClearDrawing={handleClearDrawing}
         />
 
         {/* FLOATING DRAGGABLE TIMER DOCK - Positioned at fixed top-20 left-8 */}

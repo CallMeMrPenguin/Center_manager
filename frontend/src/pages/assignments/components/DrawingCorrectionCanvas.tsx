@@ -153,7 +153,6 @@ export const DrawingCorrectionCanvas: React.FC<DrawingCorrectionCanvasProps> = m
 
   useEffect(() => {
     if (isActive) {
-      redrawAll(paths);
       try {
         if (paths.length > 0) {
           localStorage.setItem(storageKey, JSON.stringify(paths));
@@ -162,7 +161,7 @@ export const DrawingCorrectionCanvas: React.FC<DrawingCorrectionCanvasProps> = m
         }
       } catch {}
     }
-  }, [paths, isActive, redrawAll, storageKey]);
+  }, [paths, isActive, storageKey]);
 
   const getCanvasCoords = (e: React.PointerEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
@@ -243,12 +242,16 @@ export const DrawingCorrectionCanvas: React.FC<DrawingCorrectionCanvasProps> = m
         isEraser,
       };
       setPaths((prev) => [...prev, newPath]);
+      pathsRef.current = [...pathsRef.current, newPath];
     }
     currentPathRef.current = [];
   };
 
   const handleUndo = () => {
-    setPaths((prev) => prev.slice(0, -1));
+    const updated = paths.slice(0, -1);
+    setPaths(updated);
+    pathsRef.current = updated;
+    redrawAll(updated);
   };
 
   const handleClear = () => {

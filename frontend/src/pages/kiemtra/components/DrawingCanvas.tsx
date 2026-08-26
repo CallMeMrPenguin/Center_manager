@@ -109,11 +109,17 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
     return () => observer.disconnect();
   }, [syncCanvasSize]);
 
-  // Restore or reset saved drawings on questionId change
+  const lastLoadedQuestionIdRef = useRef<number | null>(null);
+
+  // Restore or reset saved drawings ONLY when questionId actually changes
   useEffect(() => {
     const canvas = canvasRef.current;
     const container = containerRef.current;
     if (!canvas || !container) return;
+
+    // If questionId is the same as current active question, strokes are already live in memory
+    if (lastLoadedQuestionIdRef.current === questionId) return;
+    lastLoadedQuestionIdRef.current = questionId;
 
     syncCanvasSize();
     const ctx = canvas.getContext('2d');
@@ -142,7 +148,7 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
       setUndoStack([]);
     }
     setRedoStack([]);
-  }, [questionId, syncCanvasSize, redrawStrokes]);
+  }, [questionId, syncCanvasSize, redrawStrokes, drawings]);
 
   const saveCurrentState = useCallback(() => {
     const serialized = JSON.stringify(strokesRef.current);
@@ -161,14 +167,11 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
       }
       return;
     }
-
     const current = undoStack[undoStack.length - 1];
     const previous = undoStack[undoStack.length - 2];
     const newUndo = undoStack.slice(0, -1);
-
     setRedoStack(prev => [...prev, current]);
     setUndoStack(newUndo);
-
     strokesRef.current = previous;
     redrawStrokes(previous);
     saveCurrentState();
@@ -179,10 +182,8 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
     if (redoStack.length === 0) return;
     const next = redoStack[redoStack.length - 1];
     const newRedo = redoStack.slice(0, -1);
-
     setUndoStack(prev => [...prev, next]);
     setRedoStack(newRedo);
-
     strokesRef.current = next;
     redrawStrokes(next);
     saveCurrentState();
@@ -192,22 +193,16 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
     const handleKeyDown = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement;
       const isInput = target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable);
-
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
         e.preventDefault();
         if (e.shiftKey) handleRedo(); else handleUndo();
       } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y') {
         e.preventDefault(); handleRedo();
       } else if (!isInput && !e.ctrlKey && !e.metaKey && !e.altKey) {
-        if (e.key === '1') {
-          setActiveTool('none');
-        } else if (e.key === '2') {
-          setActiveTool('pen');
-        } else if (e.key === '3') {
-          setActiveTool('highlighter');
-        } else if (e.key === '4') {
-          setActiveTool('eraser');
-        }
+        if (e.key === '1') setActiveTool('none');
+        else if (e.key === '2') setActiveTool('pen');
+        else if (e.key === '3') setActiveTool('highlighter');
+        else if (e.key === '4') setActiveTool('eraser');
       }
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -317,7 +312,6 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
       setUndoStack(prev => [...prev.slice(-30), updated]);
       setRedoStack([]);
       currentPointsRef.current = [];
-      redrawStrokes(updated);
       saveCurrentState();
     }
   };
@@ -387,24 +381,16 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
 
       {/* FLOATING COLLAPSIBLE DRAWING TOOLBAR */}
       <DrawingToolbar
-        activeTool={activeTool}
-        setActiveTool={setActiveTool}
-        selectedColor={selectedColor}
-        setSelectedColor={setSelectedColor}
+        activeTool={activeTool} setActiveTool={setActiveTool}
+        selectedColor={selectedColor} setSelectedColor={setSelectedColor}
         currentSize={currentSize}
-        penSize={penSize}
-        setPenSize={setPenSize}
-        hlSize={hlSize}
-        setHlSize={setHlSize}
-        eraserSize={eraserSize}
-        setEraserSize={setEraserSize}
-        canUndo={undoStack.length > 0}
-        canRedo={redoStack.length > 0}
-        onUndo={handleUndo}
-        onRedo={handleRedo}
+        penSize={penSize} setPenSize={setPenSize}
+        hlSize={hlSize} setHlSize={setHlSize}
+        eraserSize={eraserSize} setEraserSize={setEraserSize}
+        canUndo={undoStack.length > 0} canRedo={redoStack.length > 0}
+        onUndo={handleUndo} onRedo={handleRedo}
         onClearAll={handleClearAll}
-        toolbarPos={toolbarPos}
-        onMouseDown={handleToolbarMouseDown}
+        toolbarPos={toolbarPos} onMouseDown={handleToolbarMouseDown}
       />
     </div>
   );
