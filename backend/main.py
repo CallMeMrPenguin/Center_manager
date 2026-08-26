@@ -24,7 +24,14 @@ from routers import (
 )
 
 # App Mode (web = cloud-only center management, local = full desktop suite)
-APP_MODE = os.environ.get("APP_MODE", "local")
+IS_VERCEL = bool(
+    os.environ.get("VERCEL")
+    or os.environ.get("VERCEL_ENV")
+    or os.environ.get("AWS_LAMBDA_FUNCTION_NAME")
+    or os.environ.get("LAMBDA_TASK_ROOT")
+    or os.environ.get("APP_MODE") == "web"
+)
+APP_MODE = "web" if IS_VERCEL else os.environ.get("APP_MODE", "local")
 
 # Initialize SQLite Database only in local desktop mode
 if APP_MODE != "web":

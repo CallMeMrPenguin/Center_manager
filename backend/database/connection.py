@@ -2,7 +2,21 @@ import os
 import re
 import sqlite3
 
-DATABASE_URL = os.environ.get("DATABASE_URL") or os.environ.get("POSTGRES_URL")
+IS_VERCEL = bool(
+    os.environ.get("VERCEL")
+    or os.environ.get("VERCEL_ENV")
+    or os.environ.get("AWS_LAMBDA_FUNCTION_NAME")
+    or os.environ.get("LAMBDA_TASK_ROOT")
+    or os.environ.get("APP_MODE") == "web"
+)
+
+SUPABASE_DEFAULT_DB_URL = "postgresql://postgres:Callmemrpenguin%402004@db.jttlekzqveygejvyhfqn.supabase.co:5432/postgres"
+
+DATABASE_URL = (
+    os.environ.get("DATABASE_URL")
+    or os.environ.get("POSTGRES_URL")
+    or (SUPABASE_DEFAULT_DB_URL if IS_VERCEL else None)
+)
 
 # Local SQLite Database Path
 DB_PATH = os.path.join(
