@@ -57,6 +57,40 @@ class PgCursorWrapper:
             adapted,
             flags=re.IGNORECASE
         )
+        # 4. Translate SQLite AUTOINCREMENT -> BIGSERIAL PRIMARY KEY
+        adapted = re.sub(
+            r'INTEGER\s+PRIMARY\s+KEY\s+AUTOINCREMENT',
+            'BIGSERIAL PRIMARY KEY',
+            adapted,
+            flags=re.IGNORECASE
+        )
+        # 5. Translate ALTER TABLE ... ADD COLUMN ... -> ADD COLUMN IF NOT EXISTS
+        adapted = re.sub(
+            r'ALTER\s+TABLE\s+([^\s]+)\s+ADD\s+COLUMN\s+(?!IF\s+NOT\s+EXISTS)',
+            r'ALTER TABLE \1 ADD COLUMN IF NOT EXISTS ',
+            adapted,
+            flags=re.IGNORECASE
+        )
+        # 6. Translate CAST(... AS INTEGER) for PostgreSQL safe cast
+        adapted = re.sub(
+            r'CAST\s*\(\s*([a-zA-Z0-9_\.]+)\s+AS\s+INTEGER\s*\)',
+            r"COALESCE(NULLIF(regexp_replace(CAST(\1 AS TEXT), '[^0-9]', '', 'g'), '')::integer, 0)",
+            adapted,
+            flags=re.IGNORECASE
+        )
+        # 7. Translate SQLite datetime('now', '-N days') -> (NOW() - INTERVAL 'N days')
+        adapted = re.sub(
+            r"datetime\s*\(\s*'now'\s*,\s*'-(\d+)\s+days'\s*\)",
+            r"(NOW() - INTERVAL '\1 days')",
+            adapted,
+            flags=re.IGNORECASE
+        )
+        adapted = re.sub(
+            r"datetime\s*\(\s*'now'\s*\)",
+            r"NOW()",
+            adapted,
+            flags=re.IGNORECASE
+        )
         return adapted
 
     def execute(self, sql: str, params=None):

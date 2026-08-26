@@ -283,6 +283,74 @@ CREATE TABLE IF NOT EXISTS public.role_permissions (
 );
 
 -- -------------------------------------------------------------------------
+-- 15. QUESTION BANK & VOCABULARY
+-- -------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS public.question_bank (
+    id BIGSERIAL PRIMARY KEY,
+    grade TEXT,
+    unit TEXT,
+    test_type TEXT,
+    question_text TEXT,
+    question_type TEXT,
+    option_1 TEXT,
+    option_2 TEXT,
+    option_3 TEXT,
+    option_4 TEXT,
+    answer TEXT,
+    level TEXT,
+    frequency TEXT
+);
+
+CREATE TABLE IF NOT EXISTS public.vocabulary_list (
+    id BIGSERIAL PRIMARY KEY,
+    no TEXT,
+    grade TEXT,
+    unit TEXT,
+    vocabulary TEXT,
+    pos TEXT,
+    ipa TEXT,
+    meaning TEXT,
+    difficulty TEXT,
+    root_word TEXT
+);
+
+-- -------------------------------------------------------------------------
+-- 16. DOCUMENT MANAGER
+-- -------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS public.document_folders (
+    id BIGSERIAL PRIMARY KEY,
+    name TEXT NOT NULL,
+    parent_id BIGINT REFERENCES public.document_folders(id) ON DELETE SET NULL,
+    is_deleted INTEGER DEFAULT 0,
+    deleted_at TIMESTAMPTZ DEFAULT NULL,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.documents (
+    id BIGSERIAL PRIMARY KEY,
+    name TEXT NOT NULL,
+    filename TEXT NOT NULL,
+    filepath TEXT NOT NULL,
+    folder_id BIGINT REFERENCES public.document_folders(id) ON DELETE SET NULL,
+    file_type TEXT,
+    file_size BIGINT,
+    tags TEXT DEFAULT '',
+    is_deleted INTEGER DEFAULT 0,
+    deleted_at TIMESTAMPTZ DEFAULT NULL,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.document_attachments (
+    id BIGSERIAL PRIMARY KEY,
+    document_id BIGINT REFERENCES public.documents(id) ON DELETE CASCADE NOT NULL,
+    filename TEXT NOT NULL,
+    filepath TEXT NOT NULL,
+    file_type TEXT,
+    file_size BIGINT,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- -------------------------------------------------------------------------
 -- PERFORMANCE INDEXES
 -- -------------------------------------------------------------------------
 CREATE INDEX IF NOT EXISTS idx_class_sessions_class_date ON public.class_sessions(class_id, date);
@@ -291,6 +359,10 @@ CREATE INDEX IF NOT EXISTS idx_custom_time_phases_class_dates ON public.custom_t
 CREATE INDEX IF NOT EXISTS idx_assignments_class_date ON public.assignments(class_id, assigned_date);
 CREATE INDEX IF NOT EXISTS idx_submissions_assign_student ON public.assignment_submissions(assignment_id, student_id);
 CREATE INDEX IF NOT EXISTS idx_app_users_username ON public.app_users(username);
+CREATE INDEX IF NOT EXISTS idx_question_bank_grade_unit ON public.question_bank(grade, unit);
+CREATE INDEX IF NOT EXISTS idx_vocabulary_list_grade_unit ON public.vocabulary_list(grade, unit);
+CREATE INDEX IF NOT EXISTS idx_documents_folder_deleted ON public.documents(folder_id, is_deleted);
+CREATE INDEX IF NOT EXISTS idx_document_folders_parent_deleted ON public.document_folders(parent_id, is_deleted);
 
 -- -------------------------------------------------------------------------
 -- DEFAULT ADMIN SEED
@@ -325,3 +397,9 @@ ALTER TABLE public.assignments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.assignment_submissions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.app_users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.role_permissions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.question_bank ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.vocabulary_list ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.document_folders ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.documents ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.document_attachments ENABLE ROW LEVEL SECURITY;
+
