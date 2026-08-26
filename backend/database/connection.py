@@ -14,9 +14,7 @@ SUPABASE_DEFAULT_DB_URL = "postgresql://postgres.jttlekzqveygejvyhfqn:Callmemrpe
 SUPABASE_SESSION_POOLER_URL = "postgresql://postgres.jttlekzqveygejvyhfqn:Callmemrpenguin%402004@aws-0-ap-northeast-1.pooler.supabase.com:5432/postgres"
 
 def get_target_db_url() -> str:
-    raw_url = os.environ.get("DATABASE_URL") or os.environ.get("POSTGRES_URL")
-    if not raw_url and IS_VERCEL:
-        raw_url = SUPABASE_DEFAULT_DB_URL
+    raw_url = os.environ.get("DATABASE_URL") or os.environ.get("POSTGRES_URL") or SUPABASE_DEFAULT_DB_URL
     if raw_url and raw_url.startswith("postgres://"):
         raw_url = "postgresql://" + raw_url[len("postgres://"):]
     return raw_url
