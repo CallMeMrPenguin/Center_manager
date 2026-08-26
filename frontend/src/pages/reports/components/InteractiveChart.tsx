@@ -183,6 +183,7 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = ({
 
   const makeAreaPath = useCallback(
     (key: 'check1' | 'check2' | 'homework') => {
+      if (!sessionChartData || sessionChartData.length === 0) return '';
       const pts = sessionChartData
         .map((d, i) => {
           const val = d[key];
@@ -193,10 +194,11 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = ({
 
       if (pts.length < 2) return '';
       const linePath = makeBezierPath(key);
+      if (!linePath) return '';
       const bottomY = chartHeight - paddingBottom;
       const firstX = pts[0].x;
       const lastX = pts[pts.length - 1].x;
-      return `${linePath} L ${lastX} ${bottomY} L ${firstX} ${bottomY} Z`;
+      return `${linePath} L ${lastX.toFixed(2)} ${bottomY.toFixed(2)} L ${firstX.toFixed(2)} ${bottomY.toFixed(2)} Z`;
     },
     [sessionChartData, getSvgX, getSvgY, makeBezierPath, chartHeight, paddingBottom]
   );
