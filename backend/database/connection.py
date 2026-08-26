@@ -39,8 +39,26 @@ class PgCursorWrapper:
             return sql
         # 1. Translate parameter placeholder '?' -> '%s'
         adapted = sql.replace("?", "%s")
-        # 2. Translate GROUP_CONCAT -> string_agg if needed
-        # (Though we also created group_concat aggregate in PostgreSQL)
+        # 2. Translate GROUP_CONCAT to STRING_AGG for PostgreSQL
+        adapted = re.sub(
+            r'GROUP_CONCAT\s*\(\s*DISTINCT\s+([^,\)]+)(?:,\s*[\'"][^\'"]*[\'"])?\s*\)',
+            r"STRING_AGG(DISTINCT \1, ', ')",
+            adapted,
+            flags=re.IGNORECASE
+        )
+        adapted = re.sub(
+            r'GROUP_CONCAT\s*\(\s*([^,\)]+)(?:,\s*[\'"][^\'"]*[\'"])?\s*\)',
+            r"STRING_AGG(\1, ', ')",
+            adapted,
+            flags=re.IGNORECASE
+        )
+        # 3. Translate SQLite printf('%04d', id) -> LPAD(CAST(id AS TEXT), 4, '0')
+        adapted = re.sub(
+            r"printf\s*\(\s*'%0(\d+)d'\s*,\s*([^\)]+)\)",
+            r"LPAD(CAST(\2 AS TEXT), \1, '0')",
+            adapted,
+            flags=re.IGNORECASE
+        )
         return adapted
 
     def execute(self, sql: str, params=None):

@@ -124,11 +124,12 @@ export function SegmentedControl<T extends string = string>({
             {/* Icon */}
             {Icon && (
               <span className="relative z-10 shrink-0 flex items-center justify-center">
-                {typeof Icon === 'function' ? (
-                  <Icon size={iconSizes} />
-                ) : (
-                  Icon
-                )}
+                {React.isValidElement(Icon)
+                  ? Icon
+                  : typeof Icon === 'function' ||
+                    (typeof Icon === 'object' && Icon !== null && ('render' in Icon || '$$typeof' in Icon))
+                  ? React.createElement(Icon as any, { size: iconSizes })
+                  : null}
               </span>
             )}
 
