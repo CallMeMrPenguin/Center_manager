@@ -1,0 +1,13 @@
+installer/
+frontend/node_modules/
+assets/
+backups/
+TEST_FORMATTER/
+workspace_files/
+temp/
+scratch/
+*.db
+*.exe
+*.ico
+*.zip
+*.log
