@@ -36,6 +36,9 @@ class RolePermissionsBatch(BaseModel):
 
 # --- Auth Endpoints ---
 @router.post("/auth/login")
+@router.post("/auth/login/")
+@router.post("/users/login")
+@router.post("/users/login/")
 def login(payload: LoginRequest):
     try:
         user = authenticate_user(payload.username, payload.password)
