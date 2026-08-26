@@ -156,6 +156,14 @@ from database.crud_users import (
     save_role_permissions,
 )
 
+# App Settings & Grade Weights
+from database.crud_settings import (
+    get_db_setting,
+    save_db_setting,
+    get_db_grade_weights,
+    clear_settings_cache,
+)
+
 # Analytics & Predictions
 from database.analytics_predictions import (
     _ema_predict,

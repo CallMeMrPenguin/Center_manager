@@ -96,25 +96,32 @@ class PgCursorWrapper:
     def execute(self, sql: str, params=None):
         adapted_sql = self._adapt_sql(sql)
         
-        # If it is an INSERT statement and doesn't have RETURNING id, append RETURNING id
-        is_insert = bool(re.match(r'^\s*INSERT\s+INTO\s+', adapted_sql, re.IGNORECASE))
-        if is_insert and "RETURNING" not in adapted_sql.upper():
+        table_match = re.match(r'^\s*INSERT\s+INTO\s+([a-zA-Z0-9_\.]+)', adapted_sql, re.IGNORECASE)
+        table_name = table_match.group(1).lower().split('.')[-1] if table_match else ""
+        has_id_col = table_name not in {"app_settings", "role_permissions", "class_students", "friend_group_members", "conflict_group_members", "conflict_relationships", "trusted_swap_relationships", "trusted_swap_students"}
+
+        if table_match and has_id_col and "RETURNING" not in adapted_sql.upper():
             adapted_sql_with_returning = f"{adapted_sql.rstrip().rstrip(';')} RETURNING id;"
+            param_tuple = tuple(params) if isinstance(params, (list, tuple)) else params
             try:
+                self._cursor.execute("SAVEPOINT insert_sp;")
                 if params is None:
                     res = self._cursor.execute(adapted_sql_with_returning)
                 else:
-                    res = self._cursor.execute(adapted_sql_with_returning, tuple(params) if isinstance(params, (list, tuple)) else params)
+                    res = self._cursor.execute(adapted_sql_with_returning, param_tuple)
                 try:
                     row = self._cursor.fetchone()
                     if row and "id" in row:
                         self._last_insert_id = row["id"]
                 except Exception:
                     pass
+                self._cursor.execute("RELEASE SAVEPOINT insert_sp;")
                 return res
             except Exception:
-                # If table doesn't have 'id' column or RETURNING failed, fallback to standard execute
-                pass
+                try:
+                    self._cursor.execute("ROLLBACK TO SAVEPOINT insert_sp;")
+                except Exception:
+                    pass
 
         if params is None:
             return self._cursor.execute(adapted_sql)
@@ -180,6 +187,13 @@ class PgConnectionWrapper:
 
     def cursor(self):
         import psycopg2.extras
+        import psycopg2.extensions
+        try:
+            tx_status = self._conn.get_transaction_status()
+            if tx_status == psycopg2.extensions.TRANSACTION_STATUS_INERROR:
+                self._conn.rollback()
+        except Exception:
+            pass
         raw_cur = self._conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
         return PgCursorWrapper(raw_cur)
 
@@ -195,9 +209,16 @@ class PgConnectionWrapper:
         self._is_closed = True
         if self._pool:
             try:
+                import psycopg2.extensions
+                tx_status = self._conn.get_transaction_status()
+                if tx_status in (psycopg2.extensions.TRANSACTION_STATUS_INERROR, psycopg2.extensions.TRANSACTION_STATUS_INTRANS):
+                    self._conn.rollback()
                 self._pool.putconn(self._conn)
             except Exception:
-                pass
+                try:
+                    self._pool.putconn(self._conn, close=True)
+                except Exception:
+                    pass
         else:
             try:
                 self._conn.close()
@@ -229,6 +250,11 @@ def get_connection():
                 if getattr(raw_conn, 'closed', False):
                     pool.putconn(raw_conn, close=True)
                     raw_conn = pool.getconn()
+                else:
+                    try:
+                        raw_conn.rollback()
+                    except Exception:
+                        pass
                 return PgConnectionWrapper(raw_conn, pool=pool)
             except Exception as e:
                 print("[DB Connection] Pool getconn failed, falling back to direct connection:", e)

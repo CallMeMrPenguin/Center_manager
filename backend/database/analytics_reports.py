@@ -1,25 +1,43 @@
 import json
 from typing import List, Dict, Any, Optional
 from database.connection import get_connection
-from database.utils import trunc_1_dec
+from database.utils import trunc_1_dec, get_grade_weights
 from database.analytics_engine import calculate_performance_analytics
 
 def get_analytics_reports(class_id: Optional[int] = None, student_id: Optional[int] = None) -> Dict[str, Any]:
+    gw = get_grade_weights()
+    w_c1 = gw.get("check_1", 0.55)
+    w_c2 = gw.get("check_2", 0.35)
+    w_hw = gw.get("homework", 0.10)
+    w_mt = gw.get("mock_test", 0.0)
+
     conn = get_connection()
     try:
         cursor = conn.cursor()
-        cursor.execute("""
+        
+        # Scoped fetch for raw session records
+        ag_query = """
             SELECT ag.*, s.full_name as student_name, s.nickname, c.class_name, csess.test_config_json
             FROM class_attendance_grades ag
             JOIN students s ON ag.student_id = s.id
             JOIN classes c ON ag.class_id = c.id
             LEFT JOIN class_sessions csess ON ag.class_id = csess.class_id AND ag.date = csess.date
-            ORDER BY ag.date ASC
-        """)
+            WHERE 1=1
+        """
+        ag_params = []
+        if class_id:
+            ag_query += " AND ag.class_id = ?"
+            ag_params.append(class_id)
+        if student_id:
+            ag_query += " AND ag.student_id = ?"
+            ag_params.append(student_id)
+        ag_query += " ORDER BY ag.date ASC"
+
+        cursor.execute(ag_query, ag_params)
         raw_db_rows = [dict(r) for r in cursor.fetchall()]
 
-        # Rank query ordered with standard weighted average
-        rank_query = """
+        # Rank query computed directly in SQL using dynamic weights
+        rank_query = f"""
             SELECT 
                 s.id as student_id,
                 s.full_name,
@@ -47,14 +65,24 @@ def get_analytics_reports(class_id: Optional[int] = None, student_id: Optional[i
             JOIN class_students cs ON s.id = cs.student_id
             JOIN classes c ON cs.class_id = c.id
             LEFT JOIN class_attendance_grades ag ON s.id = ag.student_id AND c.id = ag.class_id
+            WHERE 1=1
+            {"AND c.id = ?" if class_id else ""}
+            {"AND s.id = ?" if student_id else ""}
             GROUP BY s.id, c.id
             ORDER BY (
-                COALESCE(AVG(CASE WHEN ag.check_1 > 0 THEN ag.check_1 END), 0) * 0.55 + 
-                COALESCE(AVG(CASE WHEN ag.check_2 > 0 THEN ag.check_2 END), 0) * 0.35 + 
-                COALESCE(AVG(CASE WHEN ag.homework > 0 THEN ag.homework END), 0) * 0.10
+                COALESCE(AVG(CASE WHEN ag.check_1 > 0 THEN ag.check_1 END), 0) * {w_c1} + 
+                COALESCE(AVG(CASE WHEN ag.check_2 > 0 THEN ag.check_2 END), 0) * {w_c2} + 
+                COALESCE(AVG(CASE WHEN ag.homework > 0 THEN ag.homework END), 0) * {w_hw} +
+                COALESCE(AVG(CASE WHEN ag.mock_test > 0 THEN ag.mock_test END), 0) * {w_mt}
             ) DESC
         """
-        cursor.execute(rank_query)
+        rank_params = []
+        if class_id:
+            rank_params.append(class_id)
+        if student_id:
+            rank_params.append(student_id)
+
+        cursor.execute(rank_query, rank_params)
         raw_rankings = [dict(r) for r in cursor.fetchall()]
     finally:
         conn.close()

@@ -21,25 +21,11 @@ def clean_num(val: Any) -> float:
         return 0.0
 
 def get_grade_weights() -> Dict[str, float]:
-    """Retrieves fractional weight map {grade_key: fraction_weight} from app settings."""
+    """Retrieves fractional weight map {grade_key: fraction_weight} from database app_settings."""
     try:
-        from config.settings import get_setting
-        gt_list = get_setting("grade_types")
-        if gt_list and isinstance(gt_list, list):
-            res = {}
-            for item in gt_list:
-                gid = str(item.get("id", "")).strip()
-                w = float(item.get("weight", 0)) / 100.0
-                if gid:
-                    res[gid] = w
-            if res:
-                return res
-        gw = get_setting("grade_weights") or {}
-        w_c1 = float(gw.get("check_1", 55.0)) / 100.0
-        w_c2 = float(gw.get("check_2", 35.0)) / 100.0
-        w_hw = float(gw.get("homework", 10.0)) / 100.0
-        return {"check_1": w_c1, "check_2": w_c2, "homework": w_hw}
+        from database.crud_settings import get_db_grade_weights
+        return get_db_grade_weights()
     except Exception:
-        return {"check_1": 0.55, "check_2": 0.35, "homework": 0.10}
+        return {"check_1": 0.55, "check_2": 0.35, "homework": 0.10, "mock_test": 0.0}
 
 _get_grade_weights = get_grade_weights

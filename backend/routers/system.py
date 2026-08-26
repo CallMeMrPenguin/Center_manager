@@ -219,12 +219,36 @@ def api_preview_pdf(req: CompileModel):
 
 @router.get("/api/settings")
 def api_get_settings():
-    return load_settings()
+    try:
+        from database.crud_settings import get_db_setting
+        base_settings = load_settings()
+        for k in ["grade_weights", "grade_types", "app_config"]:
+            val = get_db_setting(k)
+            if val is not None:
+                base_settings[k] = val
+        return base_settings
+    except Exception:
+        return load_settings()
 
 @router.post("/api/settings")
 def api_save_settings(settings: Dict[str, Any]):
-    save_settings(settings)
-    return {"success": True}
+    try:
+        from database.crud_settings import save_db_setting
+        save_settings(settings)
+        for k, v in settings.items():
+            save_db_setting(k, v)
+        return {"success": True}
+    except Exception as e:
+        save_settings(settings)
+        return {"success": True}
+
+@router.post("/api/sync/bidirectional")
+def api_run_sync():
+    from services.sync_service import run_bidirectional_sync
+    result = run_bidirectional_sync()
+    if not result.get("success"):
+        raise HTTPException(status_code=500, detail=result.get("error", "Sync failed"))
+    return result
 
 @router.get("/api/files")
 def api_get_files():

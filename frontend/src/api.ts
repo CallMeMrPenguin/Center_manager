@@ -329,8 +329,9 @@ export const api = {
   saveRolePermissions: (permissions: any[]) => request<any>('/api/roles/permissions', { method: 'PUT', body: JSON.stringify({ permissions }), tags: ['roles'] }),
   syncStudentAccounts: () => request<any>('/api/users/sync-students', { method: 'POST', tags: ['users', 'students'] }),
 
-  // Update API
+  // Update & Sync API
   checkUpdate: () => request<any>('/api/system/update-check'),
   getUpdateStatus: () => request<any>('/api/system/update-status'),
   applyUpdate: () => request<any>('/api/system/update-apply', { method: 'POST' }),
+  triggerSync: () => request<any>('/api/sync/bidirectional', { method: 'POST' }),
 };

@@ -373,6 +373,15 @@ def create_all_tables(cursor: sqlite3.Cursor):
     )
     """)
 
+    # 28. App Settings table (Synced global configurations & weights)
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS app_settings (
+        setting_key TEXT PRIMARY KEY,
+        setting_value TEXT NOT NULL,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+    """)
+
 
 def create_all_indexes(cursor: sqlite3.Cursor):
     """Creates database indexes for optimized query performance."""

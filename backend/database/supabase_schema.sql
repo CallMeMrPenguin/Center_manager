@@ -377,6 +377,12 @@ ON CONFLICT (username) DO NOTHING;
 -- -------------------------------------------------------------------------
 ALTER TABLE public.students ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.teachers_cm ENABLE ROW LEVEL SECURITY;
+CREATE TABLE IF NOT EXISTS public.app_settings (
+    setting_key TEXT PRIMARY KEY,
+    setting_value TEXT NOT NULL,
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
 ALTER TABLE public.classes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.class_students ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.class_schedule_weekly ENABLE ROW LEVEL SECURITY;
@@ -402,4 +408,5 @@ ALTER TABLE public.vocabulary_list ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.document_folders ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.documents ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.document_attachments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.app_settings ENABLE ROW LEVEL SECURITY;
 
