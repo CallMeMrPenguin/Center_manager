@@ -52,10 +52,11 @@ export const ChartSvgPlot: React.FC<ChartSvgPlotProps> = React.memo(({
   setHoveredPoint,
 }) => {
   const uid = useId().replace(/:/g, '-');
-  const clipId = `chart-plot-clip-${uid}`;
-  const gradBlue = `area-gradient-blue-${uid}`;
-  const gradPurple = `area-gradient-purple-${uid}`;
-  const gradEmerald = `area-gradient-emerald-${uid}`;
+  const clipId = `chart-plot-clip${uid}`;
+  const curtainId = `chart-curtain-clip${uid}`;
+  const gradBlue = `area-gradient-blue${uid}`;
+  const gradPurple = `area-gradient-purple${uid}`;
+  const gradEmerald = `area-gradient-emerald${uid}`;
 
   return (
     <svg viewBox={`0 0 ${chartWidth} ${chartHeight}`} className="w-full h-[750px] overflow-visible">
@@ -63,26 +64,57 @@ export const ChartSvgPlot: React.FC<ChartSvgPlotProps> = React.memo(({
         <clipPath id={clipId}>
           <rect x={paddingLeft - 10} y={paddingTop - 20} width={plotAreaWidth + paddingRight + 40} height={plotAreaHeight + 40} />
         </clipPath>
+        <clipPath id={curtainId}>
+          <rect
+            key={`curtain-${selectedStudentId || selectedClassId || 'all'}-${timeView}`}
+            x={paddingLeft - 10}
+            y={paddingTop - 20}
+            width={plotAreaWidth + paddingRight + 40}
+            height={plotAreaHeight + 40}
+            className="animate-curtain-reveal"
+          />
+        </clipPath>
 
-        <linearGradient id={gradBlue} gradientUnits="userSpaceOnUse" x1="0" y1={paddingTop} x2="0" y2={chartHeight - paddingBottom}>
-          <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.45" />
-          <stop offset="35%" stopColor="#3b82f6" stopOpacity="0.20" />
-          <stop offset="70%" stopColor="#2563eb" stopOpacity="0.06" />
-          <stop offset="100%" stopColor="#1d4ed8" stopOpacity="0.00" />
+        <linearGradient
+          id={gradBlue}
+          x1="0"
+          y1={paddingTop}
+          x2="0"
+          y2={chartHeight - paddingBottom}
+          gradientUnits="userSpaceOnUse"
+        >
+          <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.65" />
+          <stop offset="35%" stopColor="#3b82f6" stopOpacity="0.30" />
+          <stop offset="70%" stopColor="#3b82f6" stopOpacity="0.10" />
+          <stop offset="100%" stopColor="#3b82f6" stopOpacity="0.0" />
         </linearGradient>
 
-        <linearGradient id={gradPurple} gradientUnits="userSpaceOnUse" x1="0" y1={paddingTop} x2="0" y2={chartHeight - paddingBottom}>
-          <stop offset="0%" stopColor="#a855f7" stopOpacity="0.45" />
-          <stop offset="35%" stopColor="#9333ea" stopOpacity="0.20" />
-          <stop offset="70%" stopColor="#7e22ce" stopOpacity="0.06" />
-          <stop offset="100%" stopColor="#6b21a8" stopOpacity="0.00" />
+        <linearGradient
+          id={gradPurple}
+          x1="0"
+          y1={paddingTop}
+          x2="0"
+          y2={chartHeight - paddingBottom}
+          gradientUnits="userSpaceOnUse"
+        >
+          <stop offset="0%" stopColor="#c084fc" stopOpacity="0.65" />
+          <stop offset="35%" stopColor="#a855f7" stopOpacity="0.30" />
+          <stop offset="70%" stopColor="#9333ea" stopOpacity="0.10" />
+          <stop offset="100%" stopColor="#a855f7" stopOpacity="0.0" />
         </linearGradient>
 
-        <linearGradient id={gradEmerald} gradientUnits="userSpaceOnUse" x1="0" y1={paddingTop} x2="0" y2={chartHeight - paddingBottom}>
-          <stop offset="0%" stopColor="#10b981" stopOpacity="0.45" />
-          <stop offset="35%" stopColor="#059669" stopOpacity="0.20" />
-          <stop offset="70%" stopColor="#047857" stopOpacity="0.06" />
-          <stop offset="100%" stopColor="#065f46" stopOpacity="0.00" />
+        <linearGradient
+          id={gradEmerald}
+          x1="0"
+          y1={paddingTop}
+          x2="0"
+          y2={chartHeight - paddingBottom}
+          gradientUnits="userSpaceOnUse"
+        >
+          <stop offset="0%" stopColor="#34d399" stopOpacity="0.65" />
+          <stop offset="35%" stopColor="#10b981" stopOpacity="0.30" />
+          <stop offset="70%" stopColor="#059669" stopOpacity="0.10" />
+          <stop offset="100%" stopColor="#10b981" stopOpacity="0.0" />
         </linearGradient>
       </defs>
 
@@ -113,10 +145,10 @@ export const ChartSvgPlot: React.FC<ChartSvgPlotProps> = React.memo(({
           return (
             <>
               {/* Area Fills with Smooth Gradient Glow */}
-              <g className="pointer-events-none animate-area-glow">
-                {hasC1 && <path key={`area-c1-${selectedStudentId || selectedClassId || 'all'}-${timeView}-${sessionChartData.length}`} d={makeAreaPath('check1')} fill={`url(#${gradBlue})`} />}
-                {hasC2 && <path key={`area-c2-${selectedStudentId || selectedClassId || 'all'}-${timeView}-${sessionChartData.length}`} d={makeAreaPath('check2')} fill={`url(#${gradPurple})`} />}
-                {hasHw && <path key={`area-hw-${selectedStudentId || selectedClassId || 'all'}-${timeView}-${sessionChartData.length}`} d={makeAreaPath('homework')} fill={`url(#${gradEmerald})`} />}
+              <g className="transition-opacity duration-500 ease-out pointer-events-none">
+                {hasC1 && <path key={`area-c1-${selectedStudentId || selectedClassId || 'all'}-${timeView}-${sessionChartData.length}`} d={makeAreaPath('check1')} fill={`url(#${gradBlue})`} className="pointer-events-none" />}
+                {hasC2 && <path key={`area-c2-${selectedStudentId || selectedClassId || 'all'}-${timeView}-${sessionChartData.length}`} d={makeAreaPath('check2')} fill={`url(#${gradPurple})`} className="pointer-events-none" />}
+                {hasHw && <path key={`area-hw-${selectedStudentId || selectedClassId || 'all'}-${timeView}-${sessionChartData.length}`} d={makeAreaPath('homework')} fill={`url(#${gradEmerald})`} className="pointer-events-none" />}
               </g>
 
               {/* Check 1 Bezier */}
@@ -151,10 +183,10 @@ export const ChartSvgPlot: React.FC<ChartSvgPlotProps> = React.memo(({
                 const preds: { id: string; label: string; score: number; lastVal: number; color: string; textColor: string; rawY: number }[] = [];
 
                 if (hasC1 && engine && (engine.pred_c1 || 0) > 0) {
-                  preds.push({ id: 'c1', label: 'Từ Vựng', score: engine.pred_c1, lastVal: sessionChartData[lastIdx].check1, color: '#3b82f6', textColor: '#60a5fa', rawY: getSvgY(engine.pred_c1) });
+                  preds.push({ id: 'c1', label: 'Tß╗½ Vß╗▒ng', score: engine.pred_c1, lastVal: sessionChartData[lastIdx].check1, color: '#3b82f6', textColor: '#60a5fa', rawY: getSvgY(engine.pred_c1) });
                 }
                 if (hasC2 && engine && (engine.pred_c2 || 0) > 0) {
-                  preds.push({ id: 'c2', label: 'Ngữ Pháp', score: engine.pred_c2, lastVal: sessionChartData[lastIdx].check2, color: '#a855f7', textColor: '#c084fc', rawY: getSvgY(engine.pred_c2) });
+                  preds.push({ id: 'c2', label: 'Ngß╗» Ph├íp', score: engine.pred_c2, lastVal: sessionChartData[lastIdx].check2, color: '#a855f7', textColor: '#c084fc', rawY: getSvgY(engine.pred_c2) });
                 }
                 if (hasHw && engine && (engine.pred_hw || 0) > 0) {
                   preds.push({ id: 'hw', label: 'BTVN', score: engine.pred_hw, lastVal: sessionChartData[lastIdx].homework, color: '#10b981', textColor: '#34d399', rawY: getSvgY(engine.pred_hw) });
