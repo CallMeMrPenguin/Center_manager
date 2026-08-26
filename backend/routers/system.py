@@ -13,11 +13,18 @@ from pydantic import BaseModel
 from typing import List, Dict, Any, Optional
 
 from config.settings import load_settings, save_settings, get_setting, BASE_DIR
-from services.compiler import WordDocumentCompiler
-from services.combine_and_format import process_grade
-from services.format_vocabulary import format_vocabulary_file
-from services.csv_parser import parse_question_bank_csv
-from services.docx_parser import convert_docx_to_json
+try:
+    from services.compiler import WordDocumentCompiler
+    from services.combine_and_format import process_grade
+    from services.format_vocabulary import format_vocabulary_file
+    from services.csv_parser import parse_question_bank_csv
+    from services.docx_parser import convert_docx_to_json
+except Exception as _e:
+    WordDocumentCompiler = None
+    process_grade = None
+    format_vocabulary_file = None
+    parse_question_bank_csv = None
+    convert_docx_to_json = None
 
 # Import updater (lives at project root, BASE_DIR)
 try:

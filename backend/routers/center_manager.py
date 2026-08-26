@@ -7,9 +7,15 @@ from fastapi import APIRouter, HTTPException, UploadFile, File, Form
 from pydantic import BaseModel
 
 from config.settings import get_setting
-from services.csv_parser import parse_question_bank_csv
-from services.docx_parser import convert_docx_to_json
-from services.export_service import export_class_excel, export_class_docx
+try:
+    from services.csv_parser import parse_question_bank_csv
+    from services.docx_parser import convert_docx_to_json
+    from services.export_service import export_class_excel, export_class_docx
+except Exception as _e:
+    parse_question_bank_csv = None
+    convert_docx_to_json = None
+    export_class_excel = None
+    export_class_docx = None
 from database.db_manager import (
     get_connection,
     get_students, create_student, update_student, delete_student,
