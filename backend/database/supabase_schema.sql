@@ -299,3 +299,29 @@ CREATE INDEX IF NOT EXISTS idx_app_users_username ON public.app_users(username);
 INSERT INTO public.app_users (display_name, username, password_hash, role, status)
 VALUES ('Quản Trị Viên', 'admin', '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9', 'Quản trị viên', 'Hoạt động')
 ON CONFLICT (username) DO NOTHING;
+
+-- -------------------------------------------------------------------------
+-- ROW LEVEL SECURITY (RLS)
+-- -------------------------------------------------------------------------
+ALTER TABLE public.students ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.teachers_cm ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.classes ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.class_students ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.class_schedule_weekly ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.class_sessions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.class_seating ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.courses ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.student_scores ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.class_attendance_grades ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.friend_groups ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.friend_group_members ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.conflict_relationships ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.trusted_swap_relationships ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.conflict_groups ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.conflict_group_members ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.trusted_swap_students ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.custom_time_phases ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.assignments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.assignment_submissions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.app_users ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.role_permissions ENABLE ROW LEVEL SECURITY;
