@@ -134,7 +134,6 @@ export interface DataTableProps<TData> {
   tableId?: string;
 }
 
-// ─── Indeterminate Checkbox ──────────────────────────────────────────────────
 function IndeterminateCheckbox({
   indeterminate,
   className = '',
@@ -150,7 +149,7 @@ function IndeterminateCheckbox({
     <input
       type="checkbox"
       ref={ref}
-      className={`accent-indigo-500 cursor-pointer w-3.5 h-3.5 rounded ${className}`}
+      className={`accent-[#5c36f5] cursor-pointer w-4 h-4 rounded border-[#253050] bg-[#14192b] transition hover:scale-110 ${className}`}
       {...rest}
     />
   );
@@ -815,21 +814,25 @@ export function DataTable<TData>({
     if (enableRowExpansion && renderSubComponent) {
       cols.push({
         id: '_expander',
-        size: 36,
+        size: 40,
+        minSize: 40,
+        maxSize: 40,
         enableResizing: false,
         enableSorting: false,
         enableGlobalFilter: false,
         header: () => null,
-        cell: ({ row }) =>
-          row.getCanExpand() ? (
-            <button
-              type="button"
-              onClick={e => { e.stopPropagation(); row.toggleExpanded(); }}
-              className="p-1 rounded text-slate-400 hover:text-indigo-400 transition cursor-pointer"
-            >
-              {row.getIsExpanded() ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
-            </button>
-          ) : null,
+        cell: ({ row }) => (
+          <button
+            type="button"
+            onClick={e => { e.stopPropagation(); row.toggleExpanded(); }}
+            className="p-1 rounded-lg text-slate-400 hover:text-indigo-400 hover:bg-white/5 transition cursor-pointer flex items-center justify-center"
+            title={row.getIsExpanded() ? 'Thu gọn chi tiết' : 'Xem thông tin chi tiết'}
+          >
+            <motion.div animate={{ rotate: row.getIsExpanded() ? 90 : 0 }} transition={{ type: 'spring', stiffness: 400, damping: 25 }}>
+              <ChevronRight size={14} className={row.getIsExpanded() ? 'text-indigo-400' : 'text-slate-400'} />
+            </motion.div>
+          </button>
+        ),
       });
     }
 
@@ -898,7 +901,8 @@ export function DataTable<TData>({
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getGroupedRowModel: enableGrouping ? getGroupedRowModel() : undefined,
-    getExpandedRowModel: (enableRowExpansion || enableGrouping) ? getExpandedRowModel() : undefined,
+    getExpandedRowModel: (enableRowExpansion || enableGrouping || Boolean(renderSubComponent)) ? getExpandedRowModel() : undefined,
+    getRowCanExpand: () => Boolean(enableRowExpansion || renderSubComponent || enableGrouping),
     enableRowSelection,
     enableColumnResizing,
     enableGrouping,
@@ -1058,6 +1062,29 @@ export function DataTable<TData>({
               </motion.div>
             )}
             {toolbarLeft}
+
+            {/* Selection Count Badge */}
+            <AnimatePresence>
+              {selectedCount > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.85, x: -10 }}
+                  animate={{ opacity: 1, scale: 1, x: 0 }}
+                  exit={{ opacity: 0, scale: 0.85, x: -10 }}
+                  transition={{ type: 'spring', stiffness: 450, damping: 30 }}
+                  className="flex items-center gap-2 px-3 py-1.5 bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 rounded-xl text-xs font-black"
+                >
+                  <span>Đã chọn: {selectedCount} dòng</span>
+                  <button
+                    type="button"
+                    onClick={() => table.toggleAllRowsSelected(false)}
+                    className="text-indigo-400 hover:text-white transition cursor-pointer p-0.5 rounded hover:bg-white/10"
+                    title="Bỏ chọn tất cả"
+                  >
+                    <X size={12} />
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
 
           {/* Right */}

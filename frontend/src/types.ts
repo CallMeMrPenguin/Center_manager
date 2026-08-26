@@ -105,4 +105,23 @@ export interface Student {
   mother_phone?: string;
   address?: string;
   notes?: string;
+  account_username?: string;
+  account_password?: string;
+  account_status?: string;
+  account_role?: string;
+  account_last_login?: string;
+}
+
+export interface TeacherCM {
+  id?: number;
+  full_name: string;
+  role: 'Giáo viên' | 'Trợ giảng' | 'Quản trị viên' | string;
+  date_of_birth?: string;
+  phone?: string;
+  notes?: string;
+  account_username?: string;
+  account_password?: string;
+  account_status?: string;
+  account_role?: string;
+  account_last_login?: string;
 }
