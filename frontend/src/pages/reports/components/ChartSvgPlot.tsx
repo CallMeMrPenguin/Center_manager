@@ -57,33 +57,26 @@ export const ChartSvgPlot: React.FC<ChartSvgPlotProps> = React.memo(({
         <clipPath id="chart-plot-clip">
           <rect x={paddingLeft - 10} y={paddingTop - 20} width={plotAreaWidth + paddingRight + 40} height={plotAreaHeight + 40} />
         </clipPath>
-        <clipPath id="chart-curtain-clip">
-          <rect
-            key={`curtain-${selectedStudentId || selectedClassId || 'all'}-${timeView}`}
-            x={paddingLeft - 10}
-            y={paddingTop - 20}
-            width={plotAreaWidth + paddingRight + 40}
-            height={plotAreaHeight + 40}
-            className="animate-curtain-reveal"
-          />
-        </clipPath>
 
         <linearGradient id="area-gradient-blue" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.35" />
-          <stop offset="70%" stopColor="#3b82f6" stopOpacity="0.08" />
-          <stop offset="100%" stopColor="#3b82f6" stopOpacity="0.0" />
+          <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.45" />
+          <stop offset="35%" stopColor="#3b82f6" stopOpacity="0.20" />
+          <stop offset="70%" stopColor="#2563eb" stopOpacity="0.06" />
+          <stop offset="100%" stopColor="#1d4ed8" stopOpacity="0.00" />
         </linearGradient>
 
         <linearGradient id="area-gradient-purple" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#a855f7" stopOpacity="0.35" />
-          <stop offset="70%" stopColor="#a855f7" stopOpacity="0.08" />
-          <stop offset="100%" stopColor="#a855f7" stopOpacity="0.0" />
+          <stop offset="0%" stopColor="#a855f7" stopOpacity="0.45" />
+          <stop offset="35%" stopColor="#9333ea" stopOpacity="0.20" />
+          <stop offset="70%" stopColor="#7e22ce" stopOpacity="0.06" />
+          <stop offset="100%" stopColor="#6b21a8" stopOpacity="0.00" />
         </linearGradient>
 
         <linearGradient id="area-gradient-emerald" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#10b981" stopOpacity="0.35" />
-          <stop offset="70%" stopColor="#10b981" stopOpacity="0.08" />
-          <stop offset="100%" stopColor="#10b981" stopOpacity="0.0" />
+          <stop offset="0%" stopColor="#10b981" stopOpacity="0.45" />
+          <stop offset="35%" stopColor="#059669" stopOpacity="0.20" />
+          <stop offset="70%" stopColor="#047857" stopOpacity="0.06" />
+          <stop offset="100%" stopColor="#065f46" stopOpacity="0.00" />
         </linearGradient>
       </defs>
 
@@ -113,11 +106,11 @@ export const ChartSvgPlot: React.FC<ChartSvgPlotProps> = React.memo(({
 
           return (
             <>
-              {/* Area Fills */}
-              <g clipPath="url(#chart-curtain-clip)">
-                {hasC1 && <path d={makeAreaPath('check1')} fill="url(#area-gradient-blue)" />}
-                {hasC2 && <path d={makeAreaPath('check2')} fill="url(#area-gradient-purple)" />}
-                {hasHw && <path d={makeAreaPath('homework')} fill="url(#area-gradient-emerald)" />}
+              {/* Area Fills with Smooth Gradient Glow */}
+              <g className="pointer-events-none animate-area-glow">
+                {hasC1 && <path key={`area-c1-${selectedStudentId || selectedClassId || 'all'}-${timeView}-${sessionChartData.length}`} d={makeAreaPath('check1')} fill="url(#area-gradient-blue)" />}
+                {hasC2 && <path key={`area-c2-${selectedStudentId || selectedClassId || 'all'}-${timeView}-${sessionChartData.length}`} d={makeAreaPath('check2')} fill="url(#area-gradient-purple)" />}
+                {hasHw && <path key={`area-hw-${selectedStudentId || selectedClassId || 'all'}-${timeView}-${sessionChartData.length}`} d={makeAreaPath('homework')} fill="url(#area-gradient-emerald)" />}
               </g>
 
               {/* Check 1 Bezier */}

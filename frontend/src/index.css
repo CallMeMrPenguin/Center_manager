@@ -596,6 +596,15 @@ input[type="month"]::-webkit-calendar-picker-indicator {
   will-change: transform;
 }
 
+@keyframes areaGlowFade {
+  0%   { opacity: 0; }
+  100% { opacity: 1; }
+}
+.animate-area-glow {
+  animation: areaGlowFade 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.35s both;
+  will-change: opacity;
+}
+
 @keyframes pointPop {
   0%   { transform: scale(0); opacity: 0; }
   100% { transform: scale(1); opacity: 1; }
