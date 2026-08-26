@@ -6,16 +6,18 @@ from typing import List, Dict, Any, Optional
 from fastapi import APIRouter, HTTPException, UploadFile, File, Form
 from pydantic import BaseModel
 
-from config.settings import get_setting
+from config.settings import get_setting, BASE_DIR
 try:
     from services.csv_parser import parse_question_bank_csv
     from services.docx_parser import convert_docx_to_json
     from services.export_service import export_class_excel, export_class_docx
+    from routers.questions import flatten_docx_to_questions
 except Exception as _e:
     parse_question_bank_csv = None
     convert_docx_to_json = None
     export_class_excel = None
     export_class_docx = None
+    flatten_docx_to_questions = None
 from database.db_manager import (
     get_connection,
     get_students, create_student, update_student, delete_student,
@@ -324,6 +326,10 @@ def _clean_opt_prefix(val: Any) -> str:
 @router.post("/api/kiemtra/parse")
 async def api_parse_kiemtra(file: UploadFile = File(None), raw_json: Optional[str] = Form(None)):
     files_dir = get_setting("files_dir")
+    if not files_dir or not os.path.exists(files_dir):
+        files_dir = os.path.join(BASE_DIR, "workspace_files")
+    os.makedirs(files_dir, exist_ok=True)
+
     if file:
         filename = file.filename.lower()
         content = await file.read()
@@ -379,6 +385,10 @@ async def api_parse_kiemtra(file: UploadFile = File(None), raw_json: Optional[st
             with open(temp_path, "wb") as f:
                 f.write(content)
             try:
+                if convert_docx_to_json is None:
+                    from services.docx_parser import convert_docx_to_json
+                if flatten_docx_to_questions is None:
+                    from routers.questions import flatten_docx_to_questions
                 parsed_ex = convert_docx_to_json(temp_path)
                 flat_qs = flatten_docx_to_questions(parsed_ex)
                 questions = []
@@ -407,6 +417,8 @@ async def api_parse_kiemtra(file: UploadFile = File(None), raw_json: Optional[st
                         "explanation": ""
                     })
                 return {"title": file.filename, "questions": questions}
+            except Exception as e:
+                raise HTTPException(status_code=400, detail=f"Lỗi đọc file Word DOCX: {e}")
             finally:
                 if os.path.exists(temp_path):
                     os.remove(temp_path)
@@ -415,6 +427,8 @@ async def api_parse_kiemtra(file: UploadFile = File(None), raw_json: Optional[st
             with open(temp_path, "wb") as f:
                 f.write(content)
             try:
+                if parse_question_bank_csv is None:
+                    from services.csv_parser import parse_question_bank_csv
                 parsed_q = parse_question_bank_csv(temp_path)
                 questions = []
                 for idx, q in enumerate(parsed_q, 1):
@@ -429,6 +443,8 @@ async def api_parse_kiemtra(file: UploadFile = File(None), raw_json: Optional[st
                         "explanation": ""
                     })
                 return {"title": file.filename, "questions": questions}
+            except Exception as e:
+                raise HTTPException(status_code=400, detail=f"Lỗi đọc file CSV: {e}")
             finally:
                 if os.path.exists(temp_path):
                     os.remove(temp_path)
