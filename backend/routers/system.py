@@ -5,8 +5,6 @@ import shutil
 import time
 import threading
 import csv
-import tkinter as tk
-from tkinter import filedialog
 from fastapi import APIRouter, HTTPException, UploadFile, File, Form
 from fastapi.responses import FileResponse
 from pydantic import BaseModel

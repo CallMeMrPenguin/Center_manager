@@ -26,7 +26,6 @@ DEFAULT_SETTINGS = {
 
 def load_settings():
     if not os.path.exists(CONFIG_FILE):
-        save_settings(DEFAULT_SETTINGS)
         return DEFAULT_SETTINGS
     try:
         with open(CONFIG_FILE, "r", encoding="utf-8") as f:
@@ -49,7 +48,7 @@ def save_settings(settings):
             json.dump(settings, f, indent=4, ensure_ascii=False)
         return True
     except Exception as e:
-        print(f"Error saving settings: {e}")
+        # Ignore write error on read-only environments
         return False
 
 def get_setting(key):
