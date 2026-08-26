@@ -4,6 +4,7 @@ from pydantic import BaseModel
 
 from database.crud_assignments import (
     get_assignments,
+    get_assignment,
     create_assignment,
     update_assignment,
     delete_assignment,
@@ -46,6 +47,16 @@ class SubmissionBatchUpdate(BaseModel):
 def list_assignments(class_id: Optional[int] = None, month: Optional[str] = ""):
     try:
         data = get_assignments(class_id=class_id, month=month or "")
+        return data
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/{assignment_id}")
+def get_single_assignment(assignment_id: int):
+    try:
+        data = get_assignment(assignment_id)
+        if not data:
+            raise HTTPException(status_code=404, detail="Assignment not found")
         return data
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

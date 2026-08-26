@@ -137,11 +137,13 @@ from database.crud_relationships import (
 # Assignments & Submissions
 from database.crud_assignments import (
     get_assignments,
+    get_assignment,
     create_assignment,
     update_assignment,
     delete_assignment,
     get_assignment_submissions,
     batch_update_submissions,
+    save_student_progress,
 )
 
 # Users & Role Permissions
@@ -273,11 +275,13 @@ __all__ = [
     "remove_trusted_swap_student",
     # Assignments & Submissions
     "get_assignments",
+    "get_assignment",
     "create_assignment",
     "update_assignment",
     "delete_assignment",
     "get_assignment_submissions",
     "batch_update_submissions",
+    "save_student_progress",
     # Users & Permissions
     "get_users",
     "create_user",

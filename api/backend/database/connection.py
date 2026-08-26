@@ -156,9 +156,27 @@ class PgCursorWrapper:
         self.close()
 
 
+_pg_pool = None
+
+def get_pg_pool():
+    global _pg_pool
+    if _pg_pool is None:
+        try:
+            import psycopg2.pool
+            target_url = get_target_db_url()
+            if target_url:
+                _pg_pool = psycopg2.pool.ThreadedConnectionPool(minconn=1, maxconn=10, dsn=target_url, connect_timeout=10)
+        except Exception as e:
+            print("[DB Connection] Init pool failed, falling back to direct connect:", e)
+            _pg_pool = None
+    return _pg_pool
+
+
 class PgConnectionWrapper:
-    def __init__(self, raw_conn):
+    def __init__(self, raw_conn, pool=None):
         self._conn = raw_conn
+        self._pool = pool
+        self._is_closed = False
 
     def cursor(self):
         import psycopg2.extras
@@ -172,7 +190,19 @@ class PgConnectionWrapper:
         return self._conn.rollback()
 
     def close(self):
-        return self._conn.close()
+        if self._is_closed:
+            return
+        self._is_closed = True
+        if self._pool:
+            try:
+                self._pool.putconn(self._conn)
+            except Exception:
+                pass
+        else:
+            try:
+                self._conn.close()
+            except Exception:
+                pass
 
     def execute(self, sql, params=None):
         cur = self.cursor()
@@ -192,6 +222,17 @@ class PgConnectionWrapper:
 def get_connection():
     target_url = get_target_db_url()
     if target_url:
+        pool = get_pg_pool()
+        if pool:
+            try:
+                raw_conn = pool.getconn()
+                if getattr(raw_conn, 'closed', False):
+                    pool.putconn(raw_conn, close=True)
+                    raw_conn = pool.getconn()
+                return PgConnectionWrapper(raw_conn, pool=pool)
+            except Exception as e:
+                print("[DB Connection] Pool getconn failed, falling back to direct connection:", e)
+
         try:
             import psycopg2
             raw_conn = psycopg2.connect(target_url, connect_timeout=10)

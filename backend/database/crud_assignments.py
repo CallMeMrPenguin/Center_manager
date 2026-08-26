@@ -117,6 +117,22 @@ def update_assignment(assignment_id: int, data: Dict[str, Any]):
         conn.close()
 
 
+def get_assignment(assignment_id: int) -> Optional[Dict[str, Any]]:
+    """Returns single assignment with full content."""
+    conn = get_connection()
+    try:
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT a.*, c.class_name
+            FROM assignments a
+            JOIN classes c ON a.class_id = c.id
+            WHERE a.id = ?
+        """, (assignment_id,))
+        row = cursor.fetchone()
+        return dict(row) if row else None
+    finally:
+        conn.close()
+
 def delete_assignment(assignment_id: int):
     """Deletes an assignment and cascades to submissions."""
     conn = get_connection()
