@@ -385,10 +385,6 @@ async def api_parse_kiemtra(file: UploadFile = File(None), raw_json: Optional[st
             with open(temp_path, "wb") as f:
                 f.write(content)
             try:
-                if convert_docx_to_json is None:
-                    from services.docx_parser import convert_docx_to_json
-                if flatten_docx_to_questions is None:
-                    from routers.questions import flatten_docx_to_questions
                 parsed_ex = convert_docx_to_json(temp_path)
                 flat_qs = flatten_docx_to_questions(parsed_ex)
                 questions = []
@@ -427,8 +423,6 @@ async def api_parse_kiemtra(file: UploadFile = File(None), raw_json: Optional[st
             with open(temp_path, "wb") as f:
                 f.write(content)
             try:
-                if parse_question_bank_csv is None:
-                    from services.csv_parser import parse_question_bank_csv
                 parsed_q = parse_question_bank_csv(temp_path)
                 questions = []
                 for idx, q in enumerate(parsed_q, 1):
