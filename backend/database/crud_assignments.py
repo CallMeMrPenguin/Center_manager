@@ -40,7 +40,7 @@ def get_assignments(class_id: Optional[int] = None, month: str = "") -> List[Dic
             pattern = f"{month}%"
             params.extend([pattern, pattern])
 
-        query += " GROUP BY a.id ORDER BY a.assigned_date DESC, a.id DESC"
+        query += " GROUP BY a.id, c.class_name ORDER BY a.assigned_date DESC, a.id DESC"
         cursor.execute(query, params)
         rows = cursor.fetchall()
         
