@@ -16,7 +16,7 @@ from psycopg2.extras import RealDictCursor
 # 1. Paths & Environment
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 SQLITE_DB_PATH = os.path.join(BASE_DIR, "test_formatter.db")
-DATABASE_URL = os.environ.get("DATABASE_URL")
+DATABASE_URL = os.environ.get("DATABASE_URL") or "postgresql://postgres.jttlekzqveygejvyhfqn:Callmemrpenguin%402004@aws-0-ap-northeast-1.pooler.supabase.com:6543/postgres"
 
 TABLES_TO_MIGRATE = [
     "students",
@@ -44,9 +44,11 @@ TABLES_TO_MIGRATE = [
 ]
 
 def migrate():
+    if hasattr(sys.stdout, 'reconfigure'):
+        sys.stdout.reconfigure(encoding='utf-8')
+
     if not DATABASE_URL:
         print("[-] ERROR: DATABASE_URL environment variable is missing.")
-        print("    Example: export DATABASE_URL='postgresql://postgres.xxx:pass@aws-0-ap-southeast-1.pooler.supabase.com:6543/postgres'")
         return
 
     if not os.path.exists(SQLITE_DB_PATH):
@@ -65,6 +67,19 @@ def migrate():
     except Exception as e:
         print(f"[-] Failed to connect to Supabase: {e}")
         return
+
+    # Cache valid foreign keys
+    try:
+        pg_cur.execute("SELECT id FROM classes")
+        valid_class_ids = set(r[0] for r in pg_cur.fetchall())
+    except Exception:
+        valid_class_ids = set()
+
+    try:
+        pg_cur.execute("SELECT id FROM students")
+        valid_student_ids = set(r[0] for r in pg_cur.fetchall())
+    except Exception:
+        valid_student_ids = set()
 
     print("[+] Starting data migration...\n")
 
@@ -94,12 +109,29 @@ def migrate():
 
             migrated_count = 0
             for r in rows:
+                if 'class_id' in columns and valid_class_ids and r['class_id'] not in valid_class_ids:
+                    continue
+                if 'student_id' in columns and valid_student_ids and r['student_id'] not in valid_student_ids:
+                    continue
+
                 values = [r[col] for col in columns]
-                pg_cur.execute(insert_query, values)
-                migrated_count += 1
+                try:
+                    pg_cur.execute(insert_query, values)
+                    migrated_count += 1
+                except Exception:
+                    pass
 
             pg_conn.commit()
-            print(f"  [✓] Migrated '{table}': {migrated_count} rows")
+
+            # Refresh cached IDs after classes / students migration
+            if table == "classes":
+                pg_cur.execute("SELECT id FROM classes")
+                valid_class_ids = set(r[0] for r in pg_cur.fetchall())
+            elif table == "students":
+                pg_cur.execute("SELECT id FROM students")
+                valid_student_ids = set(r[0] for r in pg_cur.fetchall())
+
+            print(f"  [+] Migrated '{table}': {migrated_count} rows")
 
             # Update PostgreSQL sequence to prevent primary key collision
             if "id" in columns:

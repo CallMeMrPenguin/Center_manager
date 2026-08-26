@@ -69,20 +69,23 @@ export const ChartSvgPlot: React.FC<ChartSvgPlotProps> = React.memo(({
         </clipPath>
 
         <linearGradient id="area-gradient-blue" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.35" />
-          <stop offset="70%" stopColor="#3b82f6" stopOpacity="0.08" />
+          <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.48" />
+          <stop offset="40%" stopColor="#3b82f6" stopOpacity="0.22" />
+          <stop offset="80%" stopColor="#3b82f6" stopOpacity="0.06" />
           <stop offset="100%" stopColor="#3b82f6" stopOpacity="0.0" />
         </linearGradient>
 
         <linearGradient id="area-gradient-purple" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#a855f7" stopOpacity="0.35" />
-          <stop offset="70%" stopColor="#a855f7" stopOpacity="0.08" />
+          <stop offset="0%" stopColor="#a855f7" stopOpacity="0.48" />
+          <stop offset="40%" stopColor="#a855f7" stopOpacity="0.22" />
+          <stop offset="80%" stopColor="#a855f7" stopOpacity="0.06" />
           <stop offset="100%" stopColor="#a855f7" stopOpacity="0.0" />
         </linearGradient>
 
         <linearGradient id="area-gradient-emerald" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#10b981" stopOpacity="0.35" />
-          <stop offset="70%" stopColor="#10b981" stopOpacity="0.08" />
+          <stop offset="0%" stopColor="#10b981" stopOpacity="0.48" />
+          <stop offset="40%" stopColor="#10b981" stopOpacity="0.22" />
+          <stop offset="80%" stopColor="#10b981" stopOpacity="0.06" />
           <stop offset="100%" stopColor="#10b981" stopOpacity="0.0" />
         </linearGradient>
       </defs>
@@ -113,11 +116,11 @@ export const ChartSvgPlot: React.FC<ChartSvgPlotProps> = React.memo(({
 
           return (
             <>
-              {/* Area Fills */}
-              <g clipPath="url(#chart-curtain-clip)">
-                {hasC1 && <path d={makeAreaPath('check1')} fill="url(#area-gradient-blue)" />}
-                {hasC2 && <path d={makeAreaPath('check2')} fill="url(#area-gradient-purple)" />}
-                {hasHw && <path d={makeAreaPath('homework')} fill="url(#area-gradient-emerald)" />}
+              {/* Area Fills with Smooth Gradient Glow */}
+              <g className="transition-opacity duration-500 ease-out pointer-events-none">
+                {hasC1 && <path key={`area-c1-${selectedStudentId || selectedClassId || 'all'}-${timeView}`} d={makeAreaPath('check1')} fill="url(#area-gradient-blue)" className="pointer-events-none" />}
+                {hasC2 && <path key={`area-c2-${selectedStudentId || selectedClassId || 'all'}-${timeView}`} d={makeAreaPath('check2')} fill="url(#area-gradient-purple)" className="pointer-events-none" />}
+                {hasHw && <path key={`area-hw-${selectedStudentId || selectedClassId || 'all'}-${timeView}`} d={makeAreaPath('homework')} fill="url(#area-gradient-emerald)" className="pointer-events-none" />}
               </g>
 
               {/* Check 1 Bezier */}
