@@ -23,8 +23,16 @@ from routers import (
     users
 )
 
-# Initialize App & Database
-init_db()
+# App Mode (web = cloud-only center management, local = full desktop suite)
+APP_MODE = os.environ.get("APP_MODE", "local")
+
+# Initialize SQLite Database only in local desktop mode
+if APP_MODE != "web":
+    try:
+        init_db()
+    except Exception as e:
+        print("Local init_db notice:", e)
+
 app = FastAPI(title="Center Manager & Test Formatter API")
 
 # Configure CORS
@@ -39,10 +47,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# App Mode (web = cloud-only center management, local = full desktop suite)
-APP_MODE = os.environ.get("APP_MODE", "local")
-
-# Mount Core Routers (Always available)
+# Mount Core Routers (Always available on both Web and Local)
 app.include_router(system.router)
 app.include_router(center_manager.router)
 app.include_router(seating.router)
@@ -50,30 +55,30 @@ app.include_router(skill_analytics.router)
 app.include_router(assignments.router)
 app.include_router(users.router)
 
-# Mount Local-Only Routers (Only active in local desktop mode)
+# Mount Local-Only Routers & Background Tasks (Only active in local desktop mode)
 if APP_MODE != "web":
     app.include_router(questions.router)
     app.include_router(vocabulary.router)
     app.include_router(documents.router)
+    try:
+        import threading
+        from services.cleanup_service import cleanup_temp_folders
+        threading.Thread(target=cleanup_temp_folders, args=(BASE_DIR,), daemon=True).start()
 
-# Directories & Async Cleanup Initialization (Local desktop mode only)
-if APP_MODE != "web":
-    import threading
-    from services.cleanup_service import cleanup_temp_folders
-    threading.Thread(target=cleanup_temp_folders, args=(BASE_DIR,), daemon=True).start()
+        FILES_DIR = get_setting("files_dir")
+        os.makedirs(FILES_DIR, exist_ok=True)
 
-FILES_DIR = get_setting("files_dir")
-os.makedirs(FILES_DIR, exist_ok=True)
+        pdf_preview_dir = os.path.join(BASE_DIR, "backend", "temp_pdf_previews")
+        os.makedirs(pdf_preview_dir, exist_ok=True)
+        app.mount("/pdf-previews", StaticFiles(directory=pdf_preview_dir), name="pdf-previews")
+    except Exception as e:
+        print("Notice on mounting local folders:", e)
 
-pdf_preview_dir = os.path.join(BASE_DIR, "backend", "temp_pdf_previews")
-os.makedirs(pdf_preview_dir, exist_ok=True)
-app.mount("/pdf-previews", StaticFiles(directory=pdf_preview_dir), name="pdf-previews")
-
-# Static Frontend Serving for React
+# Static Frontend Serving for React (When running standalone desktop server)
 frontend_dist = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "frontend", "dist")
 frontend_assets = os.path.join(frontend_dist, "assets")
-os.makedirs(frontend_assets, exist_ok=True)
-app.mount("/assets", StaticFiles(directory=frontend_assets), name="assets")
+if os.path.exists(frontend_assets):
+    app.mount("/assets", StaticFiles(directory=frontend_assets), name="assets")
 
 @app.get("/{full_path:path}", response_class=HTMLResponse)
 def serve_frontend(full_path: str):
