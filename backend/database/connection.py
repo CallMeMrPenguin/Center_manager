@@ -10,7 +10,8 @@ IS_VERCEL = bool(
     or os.environ.get("APP_MODE") == "web"
 )
 
-SUPABASE_DEFAULT_DB_URL = "postgresql://postgres:Callmemrpenguin%402004@db.jttlekzqveygejvyhfqn.supabase.co:5432/postgres"
+SUPABASE_DEFAULT_DB_URL = "postgresql://postgres.jttlekzqveygejvyhfqn:Callmemrpenguin%402004@aws-0-ap-northeast-1.pooler.supabase.com:6543/postgres"
+SUPABASE_SESSION_POOLER_URL = "postgresql://postgres.jttlekzqveygejvyhfqn:Callmemrpenguin%402004@aws-0-ap-northeast-1.pooler.supabase.com:5432/postgres"
 
 def get_target_db_url() -> str:
     raw_url = os.environ.get("DATABASE_URL") or os.environ.get("POSTGRES_URL")
@@ -147,12 +148,13 @@ def get_connection():
             return PgConnectionWrapper(raw_conn)
         except Exception as e:
             print("[DB Connection] Primary PostgreSQL connection failed:", e)
-            if target_url != SUPABASE_DEFAULT_DB_URL:
-                try:
-                    raw_conn = psycopg2.connect(SUPABASE_DEFAULT_DB_URL, connect_timeout=10)
-                    return PgConnectionWrapper(raw_conn)
-                except Exception as e2:
-                    print("[DB Connection] Fallback to direct DB URL failed:", e2)
+            for fallback_url in [SUPABASE_DEFAULT_DB_URL, SUPABASE_SESSION_POOLER_URL]:
+                if target_url != fallback_url:
+                    try:
+                        raw_conn = psycopg2.connect(fallback_url, connect_timeout=10)
+                        return PgConnectionWrapper(raw_conn)
+                    except Exception as e2:
+                        print("[DB Connection] Fallback DB URL failed:", e2)
             if IS_VERCEL:
                 raise e
 

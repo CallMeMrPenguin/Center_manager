@@ -11,18 +11,6 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from config.settings import load_settings, get_setting, BASE_DIR
 from database.db_manager import init_db
 
-from routers import (
-    system,
-    questions,
-    vocabulary,
-    documents,
-    center_manager,
-    seating,
-    skill_analytics,
-    assignments,
-    users
-)
-
 # App Mode (web = cloud-only center management, local = full desktop suite)
 IS_VERCEL = bool(
     os.environ.get("VERCEL")
@@ -32,6 +20,16 @@ IS_VERCEL = bool(
     or os.environ.get("APP_MODE") == "web"
 )
 APP_MODE = "web" if IS_VERCEL else os.environ.get("APP_MODE", "local")
+
+# Core Routers
+from routers import (
+    system,
+    center_manager,
+    seating,
+    skill_analytics,
+    assignments,
+    users
+)
 
 # Initialize SQLite Database only in local desktop mode
 if APP_MODE != "web":
@@ -64,9 +62,13 @@ app.include_router(users.router)
 
 # Mount Local-Only Routers & Background Tasks (Only active in local desktop mode)
 if APP_MODE != "web":
-    app.include_router(questions.router)
-    app.include_router(vocabulary.router)
-    app.include_router(documents.router)
+    try:
+        from routers import questions, vocabulary, documents
+        app.include_router(questions.router)
+        app.include_router(vocabulary.router)
+        app.include_router(documents.router)
+    except Exception as e:
+        print("Notice on importing local desktop routers:", e)
     try:
         import threading
         from services.cleanup_service import cleanup_temp_folders
