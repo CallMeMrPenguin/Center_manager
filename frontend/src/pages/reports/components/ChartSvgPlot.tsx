@@ -69,24 +69,24 @@ export const ChartSvgPlot: React.FC<ChartSvgPlotProps> = React.memo(({
         </clipPath>
 
         <linearGradient id="area-gradient-blue" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.48" />
-          <stop offset="40%" stopColor="#3b82f6" stopOpacity="0.22" />
-          <stop offset="80%" stopColor="#3b82f6" stopOpacity="0.06" />
-          <stop offset="100%" stopColor="#3b82f6" stopOpacity="0.0" />
+          <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.65" />
+          <stop offset="30%" stopColor="#3b82f6" stopOpacity="0.35" />
+          <stop offset="65%" stopColor="#3b82f6" stopOpacity="0.12" />
+          <stop offset="100%" stopColor="#3b82f6" stopOpacity="0.01" />
         </linearGradient>
 
         <linearGradient id="area-gradient-purple" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#a855f7" stopOpacity="0.48" />
-          <stop offset="40%" stopColor="#a855f7" stopOpacity="0.22" />
-          <stop offset="80%" stopColor="#a855f7" stopOpacity="0.06" />
-          <stop offset="100%" stopColor="#a855f7" stopOpacity="0.0" />
+          <stop offset="0%" stopColor="#c084fc" stopOpacity="0.65" />
+          <stop offset="30%" stopColor="#a855f7" stopOpacity="0.35" />
+          <stop offset="65%" stopColor="#9333ea" stopOpacity="0.12" />
+          <stop offset="100%" stopColor="#a855f7" stopOpacity="0.01" />
         </linearGradient>
 
         <linearGradient id="area-gradient-emerald" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#10b981" stopOpacity="0.48" />
-          <stop offset="40%" stopColor="#10b981" stopOpacity="0.22" />
-          <stop offset="80%" stopColor="#10b981" stopOpacity="0.06" />
-          <stop offset="100%" stopColor="#10b981" stopOpacity="0.0" />
+          <stop offset="0%" stopColor="#34d399" stopOpacity="0.65" />
+          <stop offset="30%" stopColor="#10b981" stopOpacity="0.35" />
+          <stop offset="65%" stopColor="#059669" stopOpacity="0.12" />
+          <stop offset="100%" stopColor="#10b981" stopOpacity="0.01" />
         </linearGradient>
       </defs>
 

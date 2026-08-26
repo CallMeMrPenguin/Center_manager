@@ -71,7 +71,31 @@ def create_student(data: Dict[str, Any]) -> int:
             data.get("mother_phone"), data.get("address"), data.get("notes")
         ))
         conn.commit()
-        return cursor.lastrowid
+        new_id = cursor.lastrowid
+
+        # Auto-create corresponding app_user account and sync with Supabase Auth
+        if new_id:
+            username = f"hs_{new_id:04d}"
+            from database.crud_users import hash_password
+            pwd_hash = hash_password("123456")
+            user_status = "Hoạt động" if data.get("status") != "Đã nghỉ" else "Tạm khóa"
+            try:
+                cursor.execute("""
+                    INSERT INTO app_users (display_name, username, password_hash, role, status)
+                    VALUES (?, ?, ?, 'Học sinh', ?)
+                    ON CONFLICT(username) DO UPDATE SET display_name = EXCLUDED.display_name, status = EXCLUDED.status
+                """, (full_name, username, pwd_hash, user_status))
+                conn.commit()
+            except Exception as e:
+                print(f"[Student CRUD] Auto create user notice: {e}")
+
+            try:
+                from services.supabase_auth_service import sync_create_supabase_user
+                sync_create_supabase_user(username, "123456", full_name, "Học sinh")
+            except Exception as e:
+                print(f"[Supabase Auth] Sync student create warning: {e}")
+
+        return new_id
     finally:
         conn.close()
 
@@ -79,6 +103,9 @@ def update_student(student_id: int, data: Dict[str, Any]):
     conn = get_connection()
     try:
         cursor = conn.cursor()
+        new_full_name = data.get("full_name")
+        new_status = data.get("status")
+
         cursor.execute("""
             UPDATE students SET
                 full_name = ?, nickname = ?, gender = ?, grade = ?, date_of_birth = ?, enroll_date = ?, school = ?, status = ?,
@@ -86,13 +113,33 @@ def update_student(student_id: int, data: Dict[str, Any]):
                 updated_at = CURRENT_TIMESTAMP
             WHERE id = ?
         """, (
-            data.get("full_name"), data.get("nickname", ""), data.get("gender"), data.get("grade", "Lớp 6"), data.get("date_of_birth"),
-            data.get("enroll_date"), data.get("school"), data.get("status"),
+            new_full_name, data.get("nickname", ""), data.get("gender"), data.get("grade", "Lớp 6"), data.get("date_of_birth"),
+            data.get("enroll_date"), data.get("school"), new_status,
             data.get("father_name"), data.get("father_phone"), data.get("mother_name"),
             data.get("mother_phone"), data.get("address"), data.get("notes"),
             student_id
         ))
         conn.commit()
+
+        # Auto-update corresponding app_user account and sync to Supabase Auth
+        username = f"hs_{student_id:04d}"
+        user_status = "Hoạt động" if new_status != "Đã nghỉ" else "Tạm khóa"
+        if new_full_name:
+            try:
+                cursor.execute("""
+                    UPDATE app_users
+                    SET display_name = ?, status = ?
+                    WHERE username = ?
+                """, (new_full_name, user_status, username))
+                conn.commit()
+            except Exception as e:
+                print(f"[Student CRUD] Auto update user notice: {e}")
+
+            try:
+                from services.supabase_auth_service import sync_update_supabase_user
+                sync_update_supabase_user(username, display_name=new_full_name, role="Học sinh")
+            except Exception as e:
+                print(f"[Supabase Auth] Sync student update warning: {e}")
     finally:
         conn.close()
 
@@ -100,8 +147,19 @@ def delete_student(student_id: int):
     conn = get_connection()
     try:
         cursor = conn.cursor()
+        username = f"hs_{student_id:04d}"
         cursor.execute("DELETE FROM students WHERE id = ?", (student_id,))
+        try:
+            cursor.execute("DELETE FROM app_users WHERE username = ?", (username,))
+        except Exception:
+            pass
         conn.commit()
+
+        try:
+            from services.supabase_auth_service import sync_delete_supabase_user
+            sync_delete_supabase_user(username)
+        except Exception as e:
+            print(f"[Supabase Auth] Sync student delete warning: {e}")
     finally:
         conn.close()
 
