@@ -53,15 +53,32 @@ export const ChartSvgPlot: React.FC<ChartSvgPlotProps> = React.memo(({
 }) => {
   const uid = useId().replace(/[^a-zA-Z0-9]/g, '_');
   const clipId = `chart_plot_clip_${uid}`;
+  const curtainClipId = `chart_curtain_${uid}`;
   const gradBlue = `area_grad_blue_${uid}`;
   const gradPurple = `area_grad_purple_${uid}`;
   const gradEmerald = `area_grad_emerald_${uid}`;
+  const animKey = `${selectedStudentId || selectedClassId || 'all'}-${timeView}-${sessionChartData.length}`;
 
   return (
     <svg viewBox={`0 0 ${chartWidth} ${chartHeight}`} className="w-full h-[750px] overflow-visible">
       <defs>
         <clipPath id={clipId}>
           <rect x={paddingLeft - 10} y={paddingTop - 20} width={plotAreaWidth + paddingRight + 40} height={plotAreaHeight + 40} />
+        </clipPath>
+
+        <clipPath id={curtainClipId}>
+          <rect
+            key={`curtain-${animKey}`}
+            x={paddingLeft - 10}
+            y={paddingTop - 20}
+            width={plotAreaWidth + paddingRight + 40}
+            height={plotAreaHeight + 40}
+            className="animate-curtain-reveal"
+            style={{
+              transformBox: 'fill-box',
+              transformOrigin: 'left center',
+            }}
+          />
         </clipPath>
 
         <linearGradient id={gradBlue} x1="0" y1="0" x2="0" y2="1">
@@ -112,34 +129,34 @@ export const ChartSvgPlot: React.FC<ChartSvgPlotProps> = React.memo(({
 
           return (
             <>
-              {/* Area Fills with Smooth Gradient Glow */}
-              <g className="transition-opacity duration-500 ease-out pointer-events-none">
-                {hasC1 && <path key={`area-c1-${selectedStudentId || selectedClassId || 'all'}-${timeView}-${sessionChartData.length}`} d={makeAreaPath('check1')} fill={`url(#${gradBlue})`} className="pointer-events-none" />}
-                {hasC2 && <path key={`area-c2-${selectedStudentId || selectedClassId || 'all'}-${timeView}-${sessionChartData.length}`} d={makeAreaPath('check2')} fill={`url(#${gradPurple})`} className="pointer-events-none" />}
-                {hasHw && <path key={`area-hw-${selectedStudentId || selectedClassId || 'all'}-${timeView}-${sessionChartData.length}`} d={makeAreaPath('homework')} fill={`url(#${gradEmerald})`} className="pointer-events-none" />}
+              {/* Area Fills with Synchronized Smooth Curtain Reveal */}
+              <g clipPath={`url(#${curtainClipId})`} className="pointer-events-none">
+                {hasC1 && <path key={`area-c1-${animKey}`} d={makeAreaPath('check1')} fill={`url(#${gradBlue})`} />}
+                {hasC2 && <path key={`area-c2-${animKey}`} d={makeAreaPath('check2')} fill={`url(#${gradPurple})`} />}
+                {hasHw && <path key={`area-hw-${animKey}`} d={makeAreaPath('homework')} fill={`url(#${gradEmerald})`} />}
               </g>
 
               {/* Check 1 Bezier */}
               {hasC1 && (
                 <>
-                  <path key={`c1-glow-${selectedStudentId || selectedClassId || 'all'}-${timeView}`} d={makeBezierPath('check1')} fill="none" stroke="#3b82f6" strokeWidth="9" strokeOpacity="0.25" strokeLinecap="round" strokeLinejoin="round" pathLength={1000} className="animate-path-draw" />
-                  <path key={`c1-${selectedStudentId || selectedClassId || 'all'}-${timeView}`} d={makeBezierPath('check1')} fill="none" stroke="#3b82f6" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" pathLength={1000} className="animate-path-draw" />
+                  <path key={`c1-glow-${animKey}`} d={makeBezierPath('check1')} fill="none" stroke="#3b82f6" strokeWidth="9" strokeOpacity="0.25" strokeLinecap="round" strokeLinejoin="round" pathLength={1000} className="animate-path-draw" />
+                  <path key={`c1-${animKey}`} d={makeBezierPath('check1')} fill="none" stroke="#3b82f6" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" pathLength={1000} className="animate-path-draw" />
                 </>
               )}
 
               {/* Check 2 Bezier */}
               {hasC2 && (
                 <>
-                  <path key={`c2-glow-${selectedStudentId || selectedClassId || 'all'}-${timeView}`} d={makeBezierPath('check2')} fill="none" stroke="#a855f7" strokeWidth="9" strokeOpacity="0.25" strokeLinecap="round" strokeLinejoin="round" pathLength={1000} className="animate-path-draw" />
-                  <path key={`c2-${selectedStudentId || selectedClassId || 'all'}-${timeView}`} d={makeBezierPath('check2')} fill="none" stroke="#a855f7" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" pathLength={1000} className="animate-path-draw" />
+                  <path key={`c2-glow-${animKey}`} d={makeBezierPath('check2')} fill="none" stroke="#a855f7" strokeWidth="9" strokeOpacity="0.25" strokeLinecap="round" strokeLinejoin="round" pathLength={1000} className="animate-path-draw" />
+                  <path key={`c2-${animKey}`} d={makeBezierPath('check2')} fill="none" stroke="#a855f7" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" pathLength={1000} className="animate-path-draw" />
                 </>
               )}
 
               {/* Homework Bezier */}
               {hasHw && (
                 <>
-                  <path key={`hw-glow-${selectedStudentId || selectedClassId || 'all'}-${timeView}`} d={makeBezierPath('homework')} fill="none" stroke="#10b981" strokeWidth="9" strokeOpacity="0.25" strokeLinecap="round" strokeLinejoin="round" pathLength={1000} className="animate-path-draw" />
-                  <path key={`hw-${selectedStudentId || selectedClassId || 'all'}-${timeView}`} d={makeBezierPath('homework')} fill="none" stroke="#10b981" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" pathLength={1000} className="animate-path-draw" />
+                  <path key={`hw-glow-${animKey}`} d={makeBezierPath('homework')} fill="none" stroke="#10b981" strokeWidth="9" strokeOpacity="0.25" strokeLinecap="round" strokeLinejoin="round" pathLength={1000} className="animate-path-draw" />
+                  <path key={`hw-${animKey}`} d={makeBezierPath('homework')} fill="none" stroke="#10b981" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" pathLength={1000} className="animate-path-draw" />
                 </>
               )}
 
