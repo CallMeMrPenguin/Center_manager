@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useId } from 'react';
 import { ChartSessionItem, HoveredChartPoint } from '../types';
 import { format1Dec } from '../../../utils';
 
@@ -51,28 +51,34 @@ export const ChartSvgPlot: React.FC<ChartSvgPlotProps> = React.memo(({
   hoveredPoint,
   setHoveredPoint,
 }) => {
+  const uid = useId().replace(/:/g, '-');
+  const clipId = `chart-plot-clip-${uid}`;
+  const gradBlue = `area-gradient-blue-${uid}`;
+  const gradPurple = `area-gradient-purple-${uid}`;
+  const gradEmerald = `area-gradient-emerald-${uid}`;
+
   return (
     <svg viewBox={`0 0 ${chartWidth} ${chartHeight}`} className="w-full h-[750px] overflow-visible">
       <defs>
-        <clipPath id="chart-plot-clip">
+        <clipPath id={clipId}>
           <rect x={paddingLeft - 10} y={paddingTop - 20} width={plotAreaWidth + paddingRight + 40} height={plotAreaHeight + 40} />
         </clipPath>
 
-        <linearGradient id="area-gradient-blue" gradientUnits="userSpaceOnUse" x1="0" y1={paddingTop} x2="0" y2={chartHeight - paddingBottom}>
+        <linearGradient id={gradBlue} gradientUnits="userSpaceOnUse" x1="0" y1={paddingTop} x2="0" y2={chartHeight - paddingBottom}>
           <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.45" />
           <stop offset="35%" stopColor="#3b82f6" stopOpacity="0.20" />
           <stop offset="70%" stopColor="#2563eb" stopOpacity="0.06" />
           <stop offset="100%" stopColor="#1d4ed8" stopOpacity="0.00" />
         </linearGradient>
 
-        <linearGradient id="area-gradient-purple" gradientUnits="userSpaceOnUse" x1="0" y1={paddingTop} x2="0" y2={chartHeight - paddingBottom}>
+        <linearGradient id={gradPurple} gradientUnits="userSpaceOnUse" x1="0" y1={paddingTop} x2="0" y2={chartHeight - paddingBottom}>
           <stop offset="0%" stopColor="#a855f7" stopOpacity="0.45" />
           <stop offset="35%" stopColor="#9333ea" stopOpacity="0.20" />
           <stop offset="70%" stopColor="#7e22ce" stopOpacity="0.06" />
           <stop offset="100%" stopColor="#6b21a8" stopOpacity="0.00" />
         </linearGradient>
 
-        <linearGradient id="area-gradient-emerald" gradientUnits="userSpaceOnUse" x1="0" y1={paddingTop} x2="0" y2={chartHeight - paddingBottom}>
+        <linearGradient id={gradEmerald} gradientUnits="userSpaceOnUse" x1="0" y1={paddingTop} x2="0" y2={chartHeight - paddingBottom}>
           <stop offset="0%" stopColor="#10b981" stopOpacity="0.45" />
           <stop offset="35%" stopColor="#059669" stopOpacity="0.20" />
           <stop offset="70%" stopColor="#047857" stopOpacity="0.06" />
@@ -98,7 +104,7 @@ export const ChartSvgPlot: React.FC<ChartSvgPlotProps> = React.memo(({
       )}
 
       {/* Clipped Plot Area */}
-      <g clipPath="url(#chart-plot-clip)">
+      <g clipPath={`url(#${clipId})`}>
         {(() => {
           const hasC1 = sessionChartData.some((d) => (d.check1 || 0) > 0);
           const hasC2 = sessionChartData.some((d) => (d.check2 || 0) > 0);
@@ -108,9 +114,9 @@ export const ChartSvgPlot: React.FC<ChartSvgPlotProps> = React.memo(({
             <>
               {/* Area Fills with Smooth Gradient Glow */}
               <g className="pointer-events-none animate-area-glow">
-                {hasC1 && <path key={`area-c1-${selectedStudentId || selectedClassId || 'all'}-${timeView}-${sessionChartData.length}`} d={makeAreaPath('check1')} fill="url(#area-gradient-blue)" />}
-                {hasC2 && <path key={`area-c2-${selectedStudentId || selectedClassId || 'all'}-${timeView}-${sessionChartData.length}`} d={makeAreaPath('check2')} fill="url(#area-gradient-purple)" />}
-                {hasHw && <path key={`area-hw-${selectedStudentId || selectedClassId || 'all'}-${timeView}-${sessionChartData.length}`} d={makeAreaPath('homework')} fill="url(#area-gradient-emerald)" />}
+                {hasC1 && <path key={`area-c1-${selectedStudentId || selectedClassId || 'all'}-${timeView}-${sessionChartData.length}`} d={makeAreaPath('check1')} fill={`url(#${gradBlue})`} />}
+                {hasC2 && <path key={`area-c2-${selectedStudentId || selectedClassId || 'all'}-${timeView}-${sessionChartData.length}`} d={makeAreaPath('check2')} fill={`url(#${gradPurple})`} />}
+                {hasHw && <path key={`area-hw-${selectedStudentId || selectedClassId || 'all'}-${timeView}-${sessionChartData.length}`} d={makeAreaPath('homework')} fill={`url(#${gradEmerald})`} />}
               </g>
 
               {/* Check 1 Bezier */}
