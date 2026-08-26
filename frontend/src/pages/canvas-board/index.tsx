@@ -94,17 +94,34 @@ export default function CanvasBoardPage() {
     pushHistorySnapshot,
   });
 
-  // Fullscreen sync
+  // Fullscreen sync - only activate if Canvas initiated fullscreen
+  const isCanvasFullscreenRef = useRef(false);
   useEffect(() => {
-    const handleFs = () => setIsFullscreen(!!document.fullscreenElement);
+    const handleFs = () => {
+      if (!document.fullscreenElement) {
+        isCanvasFullscreenRef.current = false;
+        setIsFullscreen(false);
+      } else if (isCanvasFullscreenRef.current) {
+        setIsFullscreen(true);
+      }
+    };
     document.addEventListener('fullscreenchange', handleFs);
-    return () => document.removeEventListener('fullscreenchange', handleFs);
+    document.addEventListener('webkitfullscreenchange', handleFs);
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFs);
+      document.removeEventListener('webkitfullscreenchange', handleFs);
+    };
   }, []);
 
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen().then(() => setIsFullscreen(true)).catch(() => setIsFullscreen(p => !p));
+      isCanvasFullscreenRef.current = true;
+      document.documentElement.requestFullscreen().then(() => setIsFullscreen(true)).catch(() => {
+        isCanvasFullscreenRef.current = false;
+        setIsFullscreen(p => !p);
+      });
     } else {
+      isCanvasFullscreenRef.current = false;
       if (document.exitFullscreen) document.exitFullscreen().catch(() => {});
       setIsFullscreen(false);
     }

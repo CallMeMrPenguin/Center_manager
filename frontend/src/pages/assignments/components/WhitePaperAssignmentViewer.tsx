@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { ArrowLeft, Award, Save, Maximize2, Minimize2, ChevronRight, PenTool, KeyRound } from 'lucide-react';
 import { Assignment, AssignmentDailyLog } from '../types';
 import { ExerciseItem } from './types';
@@ -64,9 +64,15 @@ export const WhitePaperAssignmentViewer: React.FC<WhitePaperAssignmentViewerProp
   });
 
   // Sync fullscreen state with browser events (F11 / Esc)
+  const isViewerFullscreenRef = useRef(false);
   useEffect(() => {
     const handleFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement);
+      if (!document.fullscreenElement) {
+        isViewerFullscreenRef.current = false;
+        setIsFullscreen(false);
+      } else if (isViewerFullscreenRef.current) {
+        setIsFullscreen(true);
+      }
     };
     document.addEventListener('fullscreenchange', handleFullscreenChange);
     return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
@@ -74,9 +80,12 @@ export const WhitePaperAssignmentViewer: React.FC<WhitePaperAssignmentViewerProp
 
   const toggleBrowserFullscreen = () => {
     if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen().catch(() => {});
-      setIsFullscreen(true);
+      isViewerFullscreenRef.current = true;
+      document.documentElement.requestFullscreen().then(() => setIsFullscreen(true)).catch(() => {
+        isViewerFullscreenRef.current = false;
+      });
     } else {
+      isViewerFullscreenRef.current = false;
       if (document.exitFullscreen) {
         document.exitFullscreen().catch(() => {});
       }
