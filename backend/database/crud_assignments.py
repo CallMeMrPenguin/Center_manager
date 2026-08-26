@@ -84,8 +84,9 @@ def create_assignment(data: Dict[str, Any]) -> int:
         students = cursor.fetchall()
         for s in students:
             cursor.execute("""
-                INSERT OR IGNORE INTO assignment_submissions (assignment_id, student_id, submitted, score, notes)
+                INSERT INTO assignment_submissions (assignment_id, student_id, submitted, score, notes)
                 VALUES (?, ?, 0, NULL, '')
+                ON CONFLICT (assignment_id, student_id) DO NOTHING
             """, (assignment_id, s["student_id"]))
 
         conn.commit()
@@ -146,8 +147,9 @@ def get_assignment_submissions(assignment_id: int) -> List[Dict[str, Any]]:
         enrolled_students = cursor.fetchall()
         for s in enrolled_students:
             cursor.execute("""
-                INSERT OR IGNORE INTO assignment_submissions (assignment_id, student_id, submitted, score, notes)
+                INSERT INTO assignment_submissions (assignment_id, student_id, submitted, score, notes)
                 VALUES (?, ?, 0, NULL, '')
+                ON CONFLICT (assignment_id, student_id) DO NOTHING
             """, (assignment_id, s["student_id"]))
         conn.commit()
 
