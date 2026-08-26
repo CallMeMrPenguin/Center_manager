@@ -23,6 +23,101 @@ def get_users() -> List[Dict[str, Any]]:
     finally:
         conn.close()
 
+def authenticate_user(username: str, raw_password: str) -> Dict[str, Any]:
+    """
+    Authenticates a user by username and password.
+    Returns user dictionary with normalized role and student metadata if applicable.
+    """
+    clean_username = username.strip()
+    clean_password = raw_password.strip()
+    if not clean_username or not clean_password:
+        raise ValueError("Tên đăng nhập và mật khẩu không được để trống")
+
+    pwd_hash = hash_password(clean_password)
+    conn = get_connection()
+    try:
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT id, display_name, username, role, status, password_hash
+            FROM app_users
+            WHERE LOWER(username) = LOWER(?)
+        """, (clean_username,))
+        row = cursor.fetchone()
+        if not row:
+            raise ValueError("Tên đăng nhập hoặc mật khẩu không chính xác")
+
+        user_dict = dict(row)
+        if user_dict.get("status") == "Tạm khóa":
+            raise ValueError("Tài khoản của bạn đang bị tạm khóa. Vui lòng liên hệ quản trị viên.")
+
+        if user_dict.get("password_hash") != pwd_hash:
+            raise ValueError("Tên đăng nhập hoặc mật khẩu không chính xác")
+
+        # Update last_login
+        from datetime import datetime
+        now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        try:
+            cursor.execute("UPDATE app_users SET last_login = ? WHERE id = ?", (now_str, user_dict["id"]))
+            conn.commit()
+        except Exception:
+            pass
+
+        # Normalize role for frontend
+        raw_role = (user_dict.get("role") or "").lower()
+        if "quản trị" in raw_role or "admin" in raw_role:
+            norm_role = "admin"
+        elif "học sinh" in raw_role or "student" in raw_role:
+            norm_role = "student"
+        elif "trợ giảng" in raw_role or "assistant" in raw_role:
+            norm_role = "assistant"
+        elif "kế toán" in raw_role or "accountant" in raw_role:
+            norm_role = "accountant"
+        else:
+            norm_role = "teacher"
+
+        result = {
+            "id": str(user_dict["id"]),
+            "username": user_dict["username"],
+            "name": user_dict.get("display_name") or user_dict["username"],
+            "role": norm_role,
+            "rawRole": user_dict.get("role") or "Giáo viên",
+            "status": user_dict.get("status") or "Hoạt động",
+            "lastLogin": now_str
+        }
+
+        # If student account (e.g. hs_0004), resolve studentId and className
+        if norm_role == "student":
+            student_id = None
+            if clean_username.lower().startswith("hs_"):
+                try:
+                    student_id = int(clean_username[3:])
+                except Exception:
+                    pass
+
+            if student_id:
+                try:
+                    cursor.execute("""
+                        SELECT s.id, s.full_name, c.class_name, c.grade
+                        FROM students s
+                        LEFT JOIN class_students cs ON cs.student_id = s.id
+                        LEFT JOIN classes c ON c.id = cs.class_id
+                        WHERE s.id = ?
+                        LIMIT 1
+                    """, (student_id,))
+                    s_row = cursor.fetchone()
+                    if s_row:
+                        s_dict = dict(s_row)
+                        result["studentId"] = s_dict["id"]
+                        result["className"] = s_dict.get("class_name") or s_dict.get("grade") or "Lớp học"
+                except Exception:
+                    result["studentId"] = student_id
+                    result["className"] = "Lớp học"
+
+        return result
+    finally:
+        conn.close()
+
+
 def create_user(data: Dict[str, Any]) -> int:
     """Creates a new user account and auto-syncs with Supabase Auth."""
     conn = get_connection()

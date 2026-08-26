@@ -575,6 +575,11 @@ export const api = {
     request<any>(`/api/assignments/${id}/submissions`, { method: 'PUT', body: JSON.stringify({ submissions }) }),
 
   // Users & Permissions API (Quyền & Vai Trò)
+  login: (username: string, password: string) =>
+    request<{ success: boolean; user: any }>('/api/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({ username, password }),
+    }),
   getUsers: () => request<any[]>('/api/users'),
   createUser: (data: any) =>
     request<any>('/api/users', { method: 'POST', body: JSON.stringify(data) }),

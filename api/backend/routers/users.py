@@ -6,11 +6,16 @@ from database.crud_users import (
     create_user,
     update_user,
     delete_user,
+    authenticate_user,
     get_role_permissions,
     save_role_permissions,
 )
 
 router = APIRouter(prefix="/api", tags=["Users & Permissions"])
+
+class LoginRequest(BaseModel):
+    username: str
+    password: str
 
 class UserCreate(BaseModel):
     display_name: str
@@ -28,6 +33,17 @@ class UserUpdate(BaseModel):
 
 class RolePermissionsBatch(BaseModel):
     permissions: List[Dict[str, Any]]
+
+# --- Auth Endpoints ---
+@router.post("/auth/login")
+def login(payload: LoginRequest):
+    try:
+        user = authenticate_user(payload.username, payload.password)
+        return {"success": True, "user": user}
+    except ValueError as ve:
+        raise HTTPException(status_code=401, detail=str(ve))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Lỗi đăng nhập hệ thống: {e}")
 
 # --- Users Endpoints ---
 @router.get("/users")

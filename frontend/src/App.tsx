@@ -2,19 +2,22 @@ import { useState, useEffect, useRef } from 'react';
 import { Database } from 'lucide-react';
 import { TAB_DEFINITIONS } from './config/tabs';
 import { Sidebar } from './components/Sidebar';
-import ToastContainer from './components/Toast';
+import ToastContainer, { showToast } from './components/Toast';
 import { ConfirmProvider } from './components/ConfirmDialog';
 import { LoginPage } from './pages/auth/LoginPage';
-import { AuthUser } from './utils/authUtils';
+import { AuthUser, getCurrentUser, clearAuthUser } from './utils/authUtils';
 import { useAutoDeploymentRefresh } from './hooks/useAutoDeploymentRefresh';
 
 function AppContent() {
   // Auto-detect and reload on new deployment
   useAutoDeploymentRefresh();
 
-  // Always start at Login screen on page load / refresh
-  const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
-  const [activeTab, setActiveTab] = useState<string>('dashboard');
+  // Persistent Login session (auto-restores user on refresh / app reopening)
+  const [currentUser, setCurrentUser] = useState<AuthUser | null>(() => getCurrentUser());
+  const [activeTab, setActiveTab] = useState<string>(() => {
+    const user = getCurrentUser();
+    return user?.role === 'student' ? 'assignments' : 'dashboard';
+  });
   const [profileOpen, setProfileOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
 
@@ -84,9 +87,10 @@ function AppContent() {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('auth_user');
+    clearAuthUser();
     setCurrentUser(null);
     setActiveTab('dashboard');
+    showToast('Đã đăng xuất tài khoản', 'success');
   };
 
   const handleLogin = (user: AuthUser) => {
@@ -98,7 +102,7 @@ function AppContent() {
     }
   };
 
-  // If user is not logged in, always show LoginPage on refresh
+  // If user is not logged in, show LoginPage
   if (!currentUser) {
     return (
       <>
@@ -135,6 +139,7 @@ function AppContent() {
           profileOpen={profileOpen}
           setProfileOpen={setProfileOpen}
           profileRef={profileRef}
+          currentUser={currentUser}
           onLogout={handleLogout}
         />
 
