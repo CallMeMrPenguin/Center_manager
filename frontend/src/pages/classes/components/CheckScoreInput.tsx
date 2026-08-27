@@ -96,27 +96,7 @@ export const CheckScoreInput: React.FC<CheckScoreInputProps> = React.memo(({
       return;
     }
 
-    // 3. Tab Navigation
-    if (e.key === 'Tab') {
-      commitValue(currentVal);
-
-      if (e.shiftKey) {
-        // Shift + Tab -> Move to previous score input
-        if (currentIndex > 0) {
-          e.preventDefault();
-          focusTarget(inputs[currentIndex - 1]);
-        }
-      } else {
-        // Tab -> Move to next score input
-        if (currentIndex !== -1 && currentIndex < inputs.length - 1) {
-          e.preventDefault();
-          focusTarget(inputs[currentIndex + 1]);
-        }
-      }
-      return;
-    }
-
-    // 4. ArrowRight at end of selection/caret or empty -> Move to next input
+    // 3. ArrowRight at end of selection/caret or empty -> Move to next input
     if (e.key === 'ArrowRight') {
       const input = e.currentTarget;
       const isAtEnd = input.selectionStart === input.value.length && input.selectionEnd === input.value.length;
@@ -131,7 +111,7 @@ export const CheckScoreInput: React.FC<CheckScoreInputProps> = React.memo(({
       return;
     }
 
-    // 5. ArrowLeft at start of selection/caret or empty -> Move to previous input
+    // 4. ArrowLeft at start of selection/caret or empty -> Move to previous input
     if (e.key === 'ArrowLeft') {
       const input = e.currentTarget;
       const isAtStart = input.selectionStart === 0 && input.selectionEnd === 0;

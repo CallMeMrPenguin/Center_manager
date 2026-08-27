@@ -70,6 +70,7 @@ export const AttendanceGradesTab: React.FC<AttendanceGradesTabProps> = ({
             <div className="flex items-center justify-center">
               <button
                 type="button"
+                tabIndex={-1}
                 onClick={() => {
                   const newStatus = isAbsent ? 'Có mặt' : 'Vắng mặt';
                   onUpdateRecord(rec.student_id, 'status', newStatus);
@@ -150,6 +151,8 @@ export const AttendanceGradesTab: React.FC<AttendanceGradesTabProps> = ({
           return (
             <div className="flex items-center justify-center">
               <button
+                type="button"
+                tabIndex={-1}
                 onClick={() => {
                   onOpenStudentActionModal(
                     enrolledInfo || { id: rec.student_id, full_name: rec.student_name }
