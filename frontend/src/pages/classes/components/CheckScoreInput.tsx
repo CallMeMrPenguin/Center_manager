@@ -8,11 +8,7 @@ interface CheckScoreInputProps {
   parseAndFormatScore: (val: any) => string;
 }
 
-const getAllScoreInputs = (): HTMLInputElement[] => {
-  return Array.from(
-    document.querySelectorAll<HTMLInputElement>('input[data-score-input="true"]')
-  ).filter((el) => !el.disabled && el.offsetParent !== null);
-};
+const SCORE_FIELDS = ['check_1', 'check_2', 'homework', 'mock_test'] as const;
 
 const focusTarget = (target: HTMLInputElement | null | undefined) => {
   if (!target) return;
@@ -22,6 +18,42 @@ const focusTarget = (target: HTMLInputElement | null | undefined) => {
   } else {
     target.setSelectionRange(0, 0);
   }
+};
+
+const getNextInput = (currentRowIdx: number, currentField: string, isShift: boolean): HTMLInputElement | null => {
+  const fieldIdx = SCORE_FIELDS.indexOf(currentField as any);
+  if (fieldIdx === -1) return null;
+
+  if (isShift) {
+    // Shift + Tab: Move left in same row, or to last field of previous row
+    if (fieldIdx > 0) {
+      return document.querySelector<HTMLInputElement>(
+        `input[data-score-input="true"][data-row-index="${currentRowIdx}"][data-score-field="${SCORE_FIELDS[fieldIdx - 1]}"]`
+      );
+    } else if (currentRowIdx > 0) {
+      return document.querySelector<HTMLInputElement>(
+        `input[data-score-input="true"][data-row-index="${currentRowIdx - 1}"][data-score-field="${SCORE_FIELDS[SCORE_FIELDS.length - 1]}"]`
+      );
+    }
+  } else {
+    // Tab: Move right in same row, or to first field of next row
+    if (fieldIdx < SCORE_FIELDS.length - 1) {
+      return document.querySelector<HTMLInputElement>(
+        `input[data-score-input="true"][data-row-index="${currentRowIdx}"][data-score-field="${SCORE_FIELDS[fieldIdx + 1]}"]`
+      );
+    } else {
+      return document.querySelector<HTMLInputElement>(
+        `input[data-score-input="true"][data-row-index="${currentRowIdx + 1}"][data-score-field="${SCORE_FIELDS[0]}"]`
+      );
+    }
+  }
+  return null;
+};
+
+const getRowOffsetInput = (currentRowIdx: number, currentField: string, delta: number): HTMLInputElement | null => {
+  return document.querySelector<HTMLInputElement>(
+    `input[data-score-input="true"][data-row-index="${currentRowIdx + delta}"][data-score-field="${currentField}"]`
+  );
 };
 
 export const CheckScoreInput: React.FC<CheckScoreInputProps> = React.memo(({
@@ -56,47 +88,27 @@ export const CheckScoreInput: React.FC<CheckScoreInputProps> = React.memo(({
   }, [field, onUpdateRecord, parseAndFormatScore, rec]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    const inputs = getAllScoreInputs();
-    const currentIndex = inputRef.current ? inputs.indexOf(inputRef.current) : -1;
-
     // 1. Enter or ArrowDown -> Move down to same column in next row
     if (e.key === 'Enter' || e.key === 'ArrowDown') {
       e.preventDefault();
-      if (currentIndex !== -1) {
-        const nextDown = inputs.slice(currentIndex + 1).find(
-          (el) => el.dataset.scoreField === field
-        );
-        if (nextDown) {
-          focusTarget(nextDown);
-        }
-      }
+      const target = getRowOffsetInput(rowIndex, field, 1);
+      if (target) focusTarget(target);
       return;
     }
 
     // 2. ArrowUp -> Move up to same column in previous row
     if (e.key === 'ArrowUp') {
       e.preventDefault();
-      if (currentIndex !== -1) {
-        const prevUp = inputs
-          .slice(0, currentIndex)
-          .reverse()
-          .find((el) => el.dataset.scoreField === field);
-        if (prevUp) {
-          focusTarget(prevUp);
-        }
-      }
+      const target = getRowOffsetInput(rowIndex, field, -1);
+      if (target) focusTarget(target);
       return;
     }
 
-    // 3. Tab Navigation (1-press instant cell navigation)
+    // 3. Tab Navigation (Deterministic 1-press cell navigation)
     if (e.key === 'Tab') {
       e.preventDefault();
-      if (currentIndex !== -1) {
-        const nextIdx = e.shiftKey ? currentIndex - 1 : currentIndex + 1;
-        if (nextIdx >= 0 && nextIdx < inputs.length) {
-          focusTarget(inputs[nextIdx]);
-        }
-      }
+      const target = getNextInput(rowIndex, field, e.shiftKey);
+      if (target) focusTarget(target);
       return;
     }
 
@@ -106,9 +118,10 @@ export const CheckScoreInput: React.FC<CheckScoreInputProps> = React.memo(({
       const isAtEnd = input.selectionStart === input.value.length && input.selectionEnd === input.value.length;
       const isAllSelected = input.selectionStart === 0 && input.selectionEnd === input.value.length;
       if (isAtEnd || isAllSelected || input.value === '') {
-        if (currentIndex !== -1 && currentIndex < inputs.length - 1) {
+        const target = getNextInput(rowIndex, field, false);
+        if (target) {
           e.preventDefault();
-          focusTarget(inputs[currentIndex + 1]);
+          focusTarget(target);
         }
       }
       return;
@@ -120,9 +133,10 @@ export const CheckScoreInput: React.FC<CheckScoreInputProps> = React.memo(({
       const isAtStart = input.selectionStart === 0 && input.selectionEnd === 0;
       const isAllSelected = input.selectionStart === 0 && input.selectionEnd === input.value.length;
       if (isAtStart || isAllSelected || input.value === '') {
-        if (currentIndex > 0) {
+        const target = getNextInput(rowIndex, field, true);
+        if (target) {
           e.preventDefault();
-          focusTarget(inputs[currentIndex - 1]);
+          focusTarget(target);
         }
       }
       return;
