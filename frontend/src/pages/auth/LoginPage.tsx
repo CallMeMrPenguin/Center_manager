@@ -167,7 +167,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
 
         {/* Footer info */}
         <div className="text-center pt-2 border-t border-white/5 text-[11px] text-slate-500 font-medium">
-          Dữ liệu ngoại tuyến an toàn 100% — Phiên bản 1.0.0
+          Hệ Thống Trực Tuyến Đám Mây & Ngoại Tuyến Kết Hợp — Phiên bản 1.0.0
         </div>
       </div>
     </div>
