@@ -16,16 +16,12 @@ const getAllScoreInputs = (): HTMLInputElement[] => {
 
 const focusTarget = (target: HTMLInputElement | null | undefined) => {
   if (!target) return;
-  const applyFocus = () => {
-    target.focus();
-    if (target.value && target.value.trim().length > 0) {
-      target.select();
-    } else {
-      target.setSelectionRange(0, 0);
-    }
-  };
-  applyFocus();
-  requestAnimationFrame(applyFocus);
+  target.focus();
+  if (target.value && target.value.trim().length > 0) {
+    target.select();
+  } else {
+    target.setSelectionRange(0, 0);
+  }
 };
 
 export const CheckScoreInput: React.FC<CheckScoreInputProps> = React.memo(({
@@ -42,7 +38,6 @@ export const CheckScoreInput: React.FC<CheckScoreInputProps> = React.memo(({
   const lastCommittedRef = useRef<string>(initialPropVal);
 
   useEffect(() => {
-    // Synchronize prop updates when not actively typing/focused
     const propVal = rec[field] !== null && rec[field] !== undefined ? String(rec[field]) : '';
     if (!isFocusedRef.current) {
       setVal(propVal);
@@ -61,14 +56,12 @@ export const CheckScoreInput: React.FC<CheckScoreInputProps> = React.memo(({
   }, [field, onUpdateRecord, parseAndFormatScore, rec]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    const currentVal = e.currentTarget.value;
     const inputs = getAllScoreInputs();
     const currentIndex = inputRef.current ? inputs.indexOf(inputRef.current) : -1;
 
     // 1. Enter or ArrowDown -> Move down to same column in next row
     if (e.key === 'Enter' || e.key === 'ArrowDown') {
       e.preventDefault();
-      commitValue(currentVal);
       if (currentIndex !== -1) {
         const nextDown = inputs.slice(currentIndex + 1).find(
           (el) => el.dataset.scoreField === field
@@ -83,7 +76,6 @@ export const CheckScoreInput: React.FC<CheckScoreInputProps> = React.memo(({
     // 2. ArrowUp -> Move up to same column in previous row
     if (e.key === 'ArrowUp') {
       e.preventDefault();
-      commitValue(currentVal);
       if (currentIndex !== -1) {
         const prevUp = inputs
           .slice(0, currentIndex)
@@ -99,7 +91,6 @@ export const CheckScoreInput: React.FC<CheckScoreInputProps> = React.memo(({
     // 3. Tab Navigation (1-press instant cell navigation)
     if (e.key === 'Tab') {
       e.preventDefault();
-      commitValue(currentVal);
       if (currentIndex !== -1) {
         const nextIdx = e.shiftKey ? currentIndex - 1 : currentIndex + 1;
         if (nextIdx >= 0 && nextIdx < inputs.length) {
@@ -117,7 +108,6 @@ export const CheckScoreInput: React.FC<CheckScoreInputProps> = React.memo(({
       if (isAtEnd || isAllSelected || input.value === '') {
         if (currentIndex !== -1 && currentIndex < inputs.length - 1) {
           e.preventDefault();
-          commitValue(currentVal);
           focusTarget(inputs[currentIndex + 1]);
         }
       }
@@ -132,7 +122,6 @@ export const CheckScoreInput: React.FC<CheckScoreInputProps> = React.memo(({
       if (isAtStart || isAllSelected || input.value === '') {
         if (currentIndex > 0) {
           e.preventDefault();
-          commitValue(currentVal);
           focusTarget(inputs[currentIndex - 1]);
         }
       }
@@ -172,5 +161,6 @@ export const CheckScoreInput: React.FC<CheckScoreInputProps> = React.memo(({
 });
 
 CheckScoreInput.displayName = 'CheckScoreInput';
+
 
 
