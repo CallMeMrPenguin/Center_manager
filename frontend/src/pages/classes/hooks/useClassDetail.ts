@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, startTransition } from 'react';
 import { ClassItem, EnrolledStudent, AttendanceRecord } from '../types';
 import { api } from '../../../api';
 import { showToast } from '../../../components/Toast';
@@ -90,8 +90,18 @@ export function useClassDetail(selectedClass: ClassItem | null) {
     return String(numVal);
   }, []);
 
+  const saveDebounceRef = useRef<any>(null);
+
+  useEffect(() => {
+    return () => {
+      if (saveDebounceRef.current) {
+        clearTimeout(saveDebounceRef.current);
+      }
+    };
+  }, []);
+
   const handleUpdateRecord = useCallback(
-    async (studentId: number, field: string, value: any) => {
+    (studentId: number, field: string, value: any) => {
       const prev = attendanceRecordsRef.current;
       const newRecs = prev.map((rec) => {
         if (rec.student_id !== studentId) return rec;
@@ -108,14 +118,23 @@ export function useClassDetail(selectedClass: ClassItem | null) {
       });
 
       attendanceRecordsRef.current = newRecs;
-      setAttendanceRecords(newRecs);
+
+      // Non-blocking transition so fast typing/tabbing never loses focus or drops keyboard events
+      startTransition(() => {
+        setAttendanceRecords(newRecs);
+      });
 
       if (selectedClass && newRecs.length > 0) {
-        try {
-          await api.saveClassAttendance(selectedClass.id, attendanceDate, newRecs);
-        } catch (err: any) {
-          console.error('Tự động lưu thất bại:', err);
+        if (saveDebounceRef.current) {
+          clearTimeout(saveDebounceRef.current);
         }
+        saveDebounceRef.current = setTimeout(async () => {
+          try {
+            await api.saveClassAttendance(selectedClass.id, attendanceDate, attendanceRecordsRef.current);
+          } catch (err: any) {
+            console.error('Tự động lưu thất bại:', err);
+          }
+        }, 350);
       }
     },
     [selectedClass, attendanceDate]

@@ -96,7 +96,20 @@ export const CheckScoreInput: React.FC<CheckScoreInputProps> = React.memo(({
       return;
     }
 
-    // 3. ArrowRight at end of selection/caret or empty -> Move to next input
+    // 3. Tab Navigation (1-press instant cell navigation)
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      commitValue(currentVal);
+      if (currentIndex !== -1) {
+        const nextIdx = e.shiftKey ? currentIndex - 1 : currentIndex + 1;
+        if (nextIdx >= 0 && nextIdx < inputs.length) {
+          focusTarget(inputs[nextIdx]);
+        }
+      }
+      return;
+    }
+
+    // 4. ArrowRight at end of selection/caret or empty -> Move to next input
     if (e.key === 'ArrowRight') {
       const input = e.currentTarget;
       const isAtEnd = input.selectionStart === input.value.length && input.selectionEnd === input.value.length;
@@ -111,7 +124,7 @@ export const CheckScoreInput: React.FC<CheckScoreInputProps> = React.memo(({
       return;
     }
 
-    // 4. ArrowLeft at start of selection/caret or empty -> Move to previous input
+    // 5. ArrowLeft at start of selection/caret or empty -> Move to previous input
     if (e.key === 'ArrowLeft') {
       const input = e.currentTarget;
       const isAtStart = input.selectionStart === 0 && input.selectionEnd === 0;
