@@ -237,30 +237,32 @@ def api_delete_session(session_id: int):
 
 @router.get("/api/classes/{class_id}/attendance")
 def api_get_attendance(class_id: int, date: str):
-    students = get_class_students(class_id)
-    existing = get_class_attendance_grades(class_id, date)
-    existing_map = {r["student_id"]: r for r in existing}
-    
-    result = []
-    for st in students:
-        if st["id"] in existing_map:
-            rec = dict(existing_map[st["id"]])
-            rec["student_name"] = st["full_name"]
-            result.append(rec)
-        else:
-            result.append({
-                "class_id": class_id,
-                "student_id": st["id"],
-                "student_name": st["full_name"],
-                "date": date,
-                "status": "Có mặt",
-                "check_1": None,
-                "check_2": None,
-                "homework": None,
-                "mock_test": None,
-                "notes": ""
-            })
-    return {"date": date, "records": result}
+    conn = get_connection()
+    try:
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT 
+                s.id as student_id,
+                s.full_name as student_name,
+                s.nickname,
+                ag.id as id,
+                COALESCE(ag.status, 'Có mặt') as status,
+                ag.check_1,
+                ag.check_2,
+                ag.homework,
+                ag.mock_test,
+                COALESCE(ag.notes, '') as notes,
+                COALESCE(ag.date, ?) as date
+            FROM class_students cs
+            JOIN students s ON cs.student_id = s.id
+            LEFT JOIN class_attendance_grades ag ON ag.class_id = cs.class_id AND ag.student_id = s.id AND ag.date = ?
+            WHERE cs.class_id = ?
+            ORDER BY s.full_name ASC
+        """, (date, date, class_id))
+        rows = [dict(r) for r in cursor.fetchall()]
+        return {"date": date, "records": rows}
+    finally:
+        conn.close()
 
 @router.post("/api/classes/{class_id}/attendance")
 def api_save_attendance(class_id: int, payload: Dict[str, Any]):

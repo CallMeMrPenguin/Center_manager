@@ -12,6 +12,46 @@ export function useClassDetail(selectedClass: ClassItem | null) {
   const [savingAttendance, setSavingAttendance] = useState(false);
   const [selectedClassWeeklyDays, setSelectedClassWeeklyDays] = useState<number[]>([]);
 
+  // Parallelized loader for class students, attendance records, and schedule
+  const loadClassDetailData = useCallback(async (clsId: number, dateStr: string) => {
+    try {
+      const [attData, enrolled, slots] = await Promise.all([
+        api.getClassAttendance(clsId, dateStr),
+        api.getClassStudents(clsId),
+        api.getClassWeeklySchedule(clsId).catch(() => [])
+      ]);
+
+      const recs = attData?.records || [];
+      attendanceRecordsRef.current = recs;
+      setAttendanceRecords(recs);
+      setEnrolledStudents(enrolled || []);
+
+      if (slots && Array.isArray(slots)) {
+        const dayMap: Record<string, number> = {
+          'Chủ nhật': 0, 'Thứ 2': 1, 'Thứ 3': 2, 'Thứ 4': 3, 'Thứ 5': 4, 'Thứ 6': 5, 'Thứ 7': 6,
+        };
+        const days = slots.map((s: any) => dayMap[s.day_of_week]).filter((d: any) => d !== undefined);
+        setSelectedClassWeeklyDays(days);
+      } else {
+        setSelectedClassWeeklyDays([]);
+      }
+    } catch (err: any) {
+      showToast('Không thể tải dữ liệu lớp học: ' + err.message, 'error');
+    }
+  }, []);
+
+  // Single unified effect on class selection or date change
+  useEffect(() => {
+    if (selectedClass) {
+      loadClassDetailData(selectedClass.id, attendanceDate);
+    } else {
+      setSelectedClassWeeklyDays([]);
+      setEnrolledStudents([]);
+      setAttendanceRecords([]);
+      attendanceRecordsRef.current = [];
+    }
+  }, [selectedClass?.id, attendanceDate, loadClassDetailData]);
+
   const loadAttendanceData = useCallback(async (clsId: number, dateStr: string) => {
     try {
       const data = await api.getClassAttendance(clsId, dateStr);
@@ -33,40 +73,6 @@ export function useClassDetail(selectedClass: ClassItem | null) {
       return [];
     }
   }, []);
-
-  // Load weekly slots
-  useEffect(() => {
-    if (selectedClass) {
-      loadEnrolledStudents(selectedClass.id);
-      loadAttendanceData(selectedClass.id, attendanceDate);
-
-      api.getClassWeeklySchedule(selectedClass.id)
-        .then((slots) => {
-          if (slots && Array.isArray(slots)) {
-            const dayMap: Record<string, number> = {
-              'Chủ nhật': 0, 'Thứ 2': 1, 'Thứ 3': 2, 'Thứ 4': 3, 'Thứ 5': 4, 'Thứ 6': 5, 'Thứ 7': 6,
-            };
-            const days = slots.map((s: any) => dayMap[s.day_of_week]).filter((d: any) => d !== undefined);
-            setSelectedClassWeeklyDays(days);
-          } else {
-            setSelectedClassWeeklyDays([]);
-          }
-        })
-        .catch(() => setSelectedClassWeeklyDays([]));
-    } else {
-      setSelectedClassWeeklyDays([]);
-      setEnrolledStudents([]);
-      setAttendanceRecords([]);
-      attendanceRecordsRef.current = [];
-    }
-  }, [selectedClass?.id, loadEnrolledStudents, loadAttendanceData]);
-
-  // Reload attendance when date changes
-  useEffect(() => {
-    if (selectedClass) {
-      loadAttendanceData(selectedClass.id, attendanceDate);
-    }
-  }, [attendanceDate, selectedClass?.id, loadAttendanceData]);
 
   const parseAndFormatScore = useCallback((val: any): string => {
     if (val === undefined || val === null || val === '') return '';

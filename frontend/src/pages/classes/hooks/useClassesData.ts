@@ -30,12 +30,14 @@ export function useClassesData() {
     const isSilent = silent === true;
     if (!isSilent) setLoading(true);
     try {
-      const data = await api.getClasses(search);
-      setClasses(data);
-      const tch = await api.getTeachersCM();
-      setTeachers(tch);
-      const st = await api.getStudents();
-      setAllStudents(st);
+      const [data, tch, st] = await Promise.all([
+        api.getClasses(search),
+        api.getTeachersCM(),
+        api.getStudents()
+      ]);
+      setClasses(data || []);
+      setTeachers(tch || []);
+      setAllStudents(st || []);
     } catch (err: any) {
       if (!isSilent) showToast('Không thể tải danh sách lớp học: ' + err.message, 'error');
     } finally {
