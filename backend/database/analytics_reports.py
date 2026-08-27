@@ -31,8 +31,8 @@ def get_analytics_reports(class_id: Optional[int] = None, student_id: Optional[i
         cursor.execute(ag_query)
         raw_db_rows = [dict(r) for r in cursor.fetchall()]
 
-        # Rank query computed directly in SQL using dynamic weights across all students
-        rank_query = f"""
+        # Rank query: fast enrolled students fetch (counts & averages calculated cleanly in Python)
+        rank_query = """
             SELECT 
                 s.id as student_id,
                 s.full_name,
@@ -49,24 +49,10 @@ def get_analytics_reports(class_id: Optional[int] = None, student_id: Optional[i
                 s.address,
                 c.id as class_id,
                 c.class_name,
-                c.grade as class_grade,
-                COUNT(ag.id) as total_sessions,
-                SUM(CASE WHEN ag.status = 'Có mặt' THEN 1 ELSE 0 END) as present_count,
-                AVG(CASE WHEN ag.check_1 > 0 THEN ag.check_1 END) as avg_check_1,
-                AVG(CASE WHEN ag.check_2 > 0 THEN ag.check_2 END) as avg_check_2,
-                AVG(CASE WHEN ag.homework > 0 THEN ag.homework END) as avg_homework,
-                AVG(CASE WHEN (ag.mock_test > 0) THEN ag.mock_test END) as avg_mock_test
+                c.grade as class_grade
             FROM students s
             JOIN class_students cs ON s.id = cs.student_id
             JOIN classes c ON cs.class_id = c.id
-            LEFT JOIN class_attendance_grades ag ON s.id = ag.student_id AND c.id = ag.class_id
-            GROUP BY s.id, c.id
-            ORDER BY (
-                COALESCE(AVG(CASE WHEN ag.check_1 > 0 THEN ag.check_1 END), 0) * {w_c1} + 
-                COALESCE(AVG(CASE WHEN ag.check_2 > 0 THEN ag.check_2 END), 0) * {w_c2} + 
-                COALESCE(AVG(CASE WHEN ag.homework > 0 THEN ag.homework END), 0) * {w_hw} +
-                COALESCE(AVG(CASE WHEN ag.mock_test > 0 THEN ag.mock_test END), 0) * {w_mt}
-            ) DESC
         """
         cursor.execute(rank_query)
         raw_rankings = [dict(r) for r in cursor.fetchall()]
@@ -143,6 +129,8 @@ def get_analytics_reports(class_id: Optional[int] = None, student_id: Optional[i
     for sr in raw_rankings:
         sid = sr.get("student_id")
         s_rows = student_rows_map.get(sid, [])
+        sr["total_sessions"] = len(s_rows)
+        sr["present_count"] = sum(1 for r in s_rows if r.get("status") == "Có mặt")
 
         vocab_scores = []
         grammar_scores = []

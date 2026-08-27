@@ -154,11 +154,11 @@ export const api = {
   saveExerciseConfig: (config: Record<string, string>) => request<any>('/api/exercise-config', { method: 'POST', body: JSON.stringify(config) }),
 
   // Grade Analytics Reports API
-  getGradeAnalytics: (class_id?: number, student_id?: number) => {
+  getGradeAnalytics: (class_id?: number, student_id?: number, forceRefresh?: boolean) => {
     const p: Record<string, string> = {};
     if (class_id) p.class_id = String(class_id);
     if (student_id) p.student_id = String(student_id);
-    return request<any>(`/api/reports/grade-analytics?${new URLSearchParams(p)}`, { tags: ['reports', 'analytics', 'attendance'] });
+    return request<any>(`/api/reports/grade-analytics?${new URLSearchParams(p)}`, { tags: ['reports', 'analytics', 'attendance'], forceRefresh });
   },
   resetGrades: (params: any) =>
     request<{ status: string; reset_count: number }>('/api/reports/reset-grades', { method: 'POST', body: JSON.stringify(params), tags: ['attendance', 'reports', 'analytics'] }),

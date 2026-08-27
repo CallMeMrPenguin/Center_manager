@@ -50,17 +50,17 @@ export const EditGradeModal: React.FC<EditGradeModalProps> = ({
       await api.saveClassAttendance(record.class_id, record.date, [{
         student_id: record.student_id,
         status: editStatus,
-        check_1: c1 ?? 0,
-        check_2: c2 ?? 0,
-        homework: hw ?? 0,
-        mock_test: mock ?? 0,
+        check_1: c1 ?? null,
+        check_2: c2 ?? null,
+        homework: hw ?? null,
+        mock_test: mock ?? null,
         notes: editNotes,
       }]);
 
       showToast(`Đã cập nhật điểm số cho ${record.student_name || record.full_name || 'học sinh'}!`, "success");
       onClose();
       onSuccess();
-      notifyDataChanged();
+      notifyDataChanged(['attendance', 'reports', 'analytics']);
     } catch (err: any) {
       showToast("Lỗi khi cập nhật điểm: " + (err.message || err), "error");
     } finally {

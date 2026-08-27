@@ -94,7 +94,7 @@ export function useReportsData() {
     try {
       const cid = selectedClassId ? parseInt(selectedClassId) : undefined;
       const sid = selectedStudentId ? parseInt(selectedStudentId) : undefined;
-      const res = await api.getGradeAnalytics(cid, sid);
+      const res = await api.getGradeAnalytics(cid, sid, isSilent);
       const enrichedRecords = (res.session_records || []).map((r: any) => ({
         ...r,
         student_name: r.student_name || r.full_name || 'Học sinh',
@@ -142,7 +142,11 @@ export function useReportsData() {
       loadAnalyticsData(true);
     };
     window.addEventListener('data-changed', handleDataChanged);
-    return () => window.removeEventListener('data-changed', handleDataChanged);
+    window.addEventListener('data-invalidated', handleDataChanged);
+    return () => {
+      window.removeEventListener('data-changed', handleDataChanged);
+      window.removeEventListener('data-invalidated', handleDataChanged);
+    };
   }, [loadAnalyticsData]);
 
   useEffect(() => {

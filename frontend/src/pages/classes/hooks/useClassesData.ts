@@ -51,7 +51,11 @@ export function useClassesData() {
       loadClasses(true);
     };
     window.addEventListener('data-changed', handleDataChanged);
-    return () => window.removeEventListener('data-changed', handleDataChanged);
+    window.addEventListener('data-invalidated', handleDataChanged);
+    return () => {
+      window.removeEventListener('data-changed', handleDataChanged);
+      window.removeEventListener('data-invalidated', handleDataChanged);
+    };
   }, [loadClasses]);
 
   useEffect(() => {

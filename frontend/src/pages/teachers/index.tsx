@@ -48,7 +48,11 @@ export function TeachersPage() {
     loadData();
     const handleDataChanged = () => loadData(true);
     window.addEventListener('data-changed', handleDataChanged);
-    return () => window.removeEventListener('data-changed', handleDataChanged);
+    window.addEventListener('data-invalidated', handleDataChanged);
+    return () => {
+      window.removeEventListener('data-changed', handleDataChanged);
+      window.removeEventListener('data-invalidated', handleDataChanged);
+    };
   }, []);
 
   const handleOpenAdd = () => {

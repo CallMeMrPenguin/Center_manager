@@ -68,9 +68,10 @@ class DataCacheManager {
         this.cache.delete(key);
       }
     }
-    // Dispatch global data-invalidated event for listening components
+    // Dispatch global data-invalidated & data-changed events for all listening components
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new CustomEvent('data-invalidated', { detail: { tags } }));
+      window.dispatchEvent(new CustomEvent('data-changed', { detail: { tags } }));
     }
   }
 
@@ -79,6 +80,10 @@ class DataCacheManager {
    */
   public clearAll(): void {
     this.cache.clear();
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('data-invalidated', { detail: { tags: [] } }));
+      window.dispatchEvent(new CustomEvent('data-changed', { detail: { tags: [] } }));
+    }
   }
 }
 

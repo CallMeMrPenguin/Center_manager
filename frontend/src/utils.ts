@@ -1,3 +1,5 @@
+import { dataCache } from './utils/dataCache';
+
 export function getLocalDateStr(date: Date = new Date()): string {
   const y = date.getFullYear();
   const m = String(date.getMonth() + 1).padStart(2, '0');
@@ -5,8 +7,15 @@ export function getLocalDateStr(date: Date = new Date()): string {
   return `${y}-${m}-${d}`;
 }
 
-export function notifyDataChanged() {
-  window.dispatchEvent(new CustomEvent('data-changed'));
+export function notifyDataChanged(tags?: string[]) {
+  if (tags && tags.length > 0) {
+    dataCache.invalidateTags(tags);
+  } else {
+    dataCache.clearAll();
+  }
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent('data-changed', { detail: { tags: tags || [] } }));
+  }
 }
 
 /**

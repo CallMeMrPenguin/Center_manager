@@ -214,6 +214,55 @@ def connect_pg8000(url: str):
     )
 
 
+import queue
+import threading
+
+class FastPgPool:
+    def __init__(self, max_size=8):
+        self.max_size = max_size
+        self._pool = queue.Queue(maxsize=max_size)
+        self._lock = threading.Lock()
+
+    def get_conn(self, url: str):
+        while not self._pool.empty():
+            try:
+                conn = self._pool.get_nowait()
+                # Fast connection health ping
+                try:
+                    cur = conn.cursor()
+                    cur.execute("SELECT 1;")
+                    cur.fetchone()
+                    cur.close()
+                    return conn
+                except Exception:
+                    try:
+                        conn.close()
+                    except Exception:
+                        pass
+            except queue.Empty:
+                break
+        return connect_pg8000(url)
+
+    def return_conn(self, raw_conn):
+        if not raw_conn:
+            return
+        try:
+            try:
+                raw_conn.rollback()
+            except Exception:
+                pass
+            self._pool.put_nowait(raw_conn)
+        except queue.Full:
+            try:
+                raw_conn.close()
+            except Exception:
+                pass
+        except Exception:
+            pass
+
+_global_pg_pool = FastPgPool()
+
+
 class PgConnectionWrapper:
     def __init__(self, raw_conn, pool=None, is_pg8000=False):
         self._conn = raw_conn
@@ -226,7 +275,7 @@ class PgConnectionWrapper:
             if getattr(self._conn, 'closed', False):
                 target_url = get_target_db_url()
                 if self._is_pg8000:
-                    self._conn = connect_pg8000(target_url)
+                    self._conn = _global_pg_pool.get_conn(target_url)
                 else:
                     import psycopg2
                     self._conn = psycopg2.connect(target_url, connect_timeout=10)
@@ -238,7 +287,7 @@ class PgConnectionWrapper:
         except Exception:
             try:
                 target_url = get_target_db_url()
-                self._conn = connect_pg8000(target_url)
+                self._conn = _global_pg_pool.get_conn(target_url)
                 self._is_pg8000 = True
             except Exception:
                 pass
@@ -260,7 +309,9 @@ class PgConnectionWrapper:
         if self._is_closed:
             return
         self._is_closed = True
-        if self._pool:
+        if self._is_pg8000:
+            _global_pg_pool.return_conn(self._conn)
+        elif self._pool:
             try:
                 self._pool.putconn(self._conn)
             except Exception:
@@ -289,9 +340,9 @@ class PgConnectionWrapper:
 def get_connection():
     target_url = get_target_db_url()
     if target_url:
-        # 1. On Vercel / serverless cloud, use pg8000 (100% pure Python, zero C binary dependencies)
+        # 1. On Vercel / serverless cloud, use pg8000 with connection pooling
         try:
-            raw_conn = connect_pg8000(target_url)
+            raw_conn = _global_pg_pool.get_conn(target_url)
             return PgConnectionWrapper(raw_conn, is_pg8000=True)
         except Exception as e_pg8000:
             print("[DB Connection] pg8000 connection attempt note:", e_pg8000)
@@ -305,7 +356,7 @@ def get_connection():
             for fallback_url in [SUPABASE_DEFAULT_DB_URL, SUPABASE_SESSION_POOLER_URL]:
                 if target_url != fallback_url:
                     try:
-                        raw_conn = connect_pg8000(fallback_url)
+                        raw_conn = _global_pg_pool.get_conn(fallback_url)
                         return PgConnectionWrapper(raw_conn, is_pg8000=True)
                     except Exception:
                         pass
