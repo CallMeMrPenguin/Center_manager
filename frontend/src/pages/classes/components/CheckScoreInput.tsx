@@ -8,12 +8,25 @@ interface CheckScoreInputProps {
   parseAndFormatScore: (val: any) => string;
 }
 
-const SCORE_FIELDS: Array<'check_1' | 'check_2' | 'homework' | 'mock_test'> = [
-  'check_1',
-  'check_2',
-  'homework',
-  'mock_test',
-];
+const getAllScoreInputs = (): HTMLInputElement[] => {
+  return Array.from(
+    document.querySelectorAll<HTMLInputElement>('input[data-score-input="true"]')
+  ).filter((el) => !el.disabled && el.offsetParent !== null);
+};
+
+const focusTarget = (target: HTMLInputElement | null | undefined) => {
+  if (!target) return;
+  const applyFocus = () => {
+    target.focus();
+    if (target.value && target.value.trim().length > 0) {
+      target.select();
+    } else {
+      target.setSelectionRange(0, 0);
+    }
+  };
+  applyFocus();
+  requestAnimationFrame(applyFocus);
+};
 
 export const CheckScoreInput: React.FC<CheckScoreInputProps> = React.memo(({
   rec,
@@ -22,15 +35,18 @@ export const CheckScoreInput: React.FC<CheckScoreInputProps> = React.memo(({
   onUpdateRecord,
   parseAndFormatScore,
 }) => {
-  const [val, setVal] = useState<string>(() => (rec[field] !== null && rec[field] !== undefined ? String(rec[field]) : ''));
+  const initialPropVal = rec[field] !== null && rec[field] !== undefined ? String(rec[field]) : '';
+  const [val, setVal] = useState<string>(initialPropVal);
   const isFocusedRef = useRef(false);
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const lastCommittedRef = useRef<string>(initialPropVal);
 
   useEffect(() => {
     // Synchronize prop updates when not actively typing/focused
+    const propVal = rec[field] !== null && rec[field] !== undefined ? String(rec[field]) : '';
     if (!isFocusedRef.current) {
-      const propVal = rec[field] !== null && rec[field] !== undefined ? String(rec[field]) : '';
       setVal(propVal);
+      lastCommittedRef.current = propVal;
     }
   }, [rec[field]]);
 
@@ -38,29 +54,29 @@ export const CheckScoreInput: React.FC<CheckScoreInputProps> = React.memo(({
     const formatted = parseAndFormatScore(rawVal);
     setVal(formatted);
     const currentProp = rec[field] !== null && rec[field] !== undefined ? String(rec[field]) : '';
-    if (formatted !== currentProp) {
+    if (formatted !== currentProp && formatted !== lastCommittedRef.current) {
+      lastCommittedRef.current = formatted;
       onUpdateRecord(rec.student_id, field, formatted);
     }
   }, [field, onUpdateRecord, parseAndFormatScore, rec]);
 
-  const navigateToInput = (targetSelector: string) => {
-    const targetInput = document.querySelector<HTMLInputElement>(targetSelector);
-    if (targetInput) {
-      targetInput.focus();
-      targetInput.select();
-    }
-  };
-
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     const currentVal = e.currentTarget.value;
-    const currentFieldIndex = SCORE_FIELDS.indexOf(field);
+    const inputs = getAllScoreInputs();
+    const currentIndex = inputRef.current ? inputs.indexOf(inputRef.current) : -1;
 
     // 1. Enter or ArrowDown -> Move down to same column in next row
     if (e.key === 'Enter' || e.key === 'ArrowDown') {
       e.preventDefault();
       commitValue(currentVal);
-      const nextRow = rowIndex + 1;
-      navigateToInput(`input[data-score-input="true"][data-score-field="${field}"][data-row-index="${nextRow}"]`);
+      if (currentIndex !== -1) {
+        const nextDown = inputs.slice(currentIndex + 1).find(
+          (el) => el.dataset.scoreField === field
+        );
+        if (nextDown) {
+          focusTarget(nextDown);
+        }
+      }
       return;
     }
 
@@ -68,64 +84,66 @@ export const CheckScoreInput: React.FC<CheckScoreInputProps> = React.memo(({
     if (e.key === 'ArrowUp') {
       e.preventDefault();
       commitValue(currentVal);
-      const prevRow = Math.max(0, rowIndex - 1);
-      navigateToInput(`input[data-score-input="true"][data-score-field="${field}"][data-row-index="${prevRow}"]`);
+      if (currentIndex !== -1) {
+        const prevUp = inputs
+          .slice(0, currentIndex)
+          .reverse()
+          .find((el) => el.dataset.scoreField === field);
+        if (prevUp) {
+          focusTarget(prevUp);
+        }
+      }
       return;
     }
 
     // 3. Tab Navigation
     if (e.key === 'Tab') {
-      // Commit value before standard or custom tab focus movement
       commitValue(currentVal);
 
       if (e.shiftKey) {
-        // Shift + Tab -> Move to previous column, or last column of previous row
-        e.preventDefault();
-        if (currentFieldIndex > 0) {
-          const prevField = SCORE_FIELDS[currentFieldIndex - 1];
-          navigateToInput(`input[data-score-input="true"][data-score-field="${prevField}"][data-row-index="${rowIndex}"]`);
-        } else if (rowIndex > 0) {
-          const prevField = SCORE_FIELDS[SCORE_FIELDS.length - 1];
-          navigateToInput(`input[data-score-input="true"][data-score-field="${prevField}"][data-row-index="${rowIndex - 1}"]`);
+        // Shift + Tab -> Move to previous score input
+        if (currentIndex > 0) {
+          e.preventDefault();
+          focusTarget(inputs[currentIndex - 1]);
         }
       } else {
-        // Tab -> Move to next column, or first column of next row
-        e.preventDefault();
-        if (currentFieldIndex < SCORE_FIELDS.length - 1) {
-          const nextField = SCORE_FIELDS[currentFieldIndex + 1];
-          navigateToInput(`input[data-score-input="true"][data-score-field="${nextField}"][data-row-index="${rowIndex}"]`);
-        } else {
-          const nextField = SCORE_FIELDS[0];
-          navigateToInput(`input[data-score-input="true"][data-score-field="${nextField}"][data-row-index="${rowIndex + 1}"]`);
+        // Tab -> Move to next score input
+        if (currentIndex !== -1 && currentIndex < inputs.length - 1) {
+          e.preventDefault();
+          focusTarget(inputs[currentIndex + 1]);
         }
       }
       return;
     }
 
-    // 4. ArrowRight at end of selection/caret -> Move to next field in same row
+    // 4. ArrowRight at end of selection/caret or empty -> Move to next input
     if (e.key === 'ArrowRight') {
       const input = e.currentTarget;
-      if (input.selectionStart === input.value.length && input.selectionEnd === input.value.length) {
-        if (currentFieldIndex < SCORE_FIELDS.length - 1) {
+      const isAtEnd = input.selectionStart === input.value.length && input.selectionEnd === input.value.length;
+      const isAllSelected = input.selectionStart === 0 && input.selectionEnd === input.value.length;
+      if (isAtEnd || isAllSelected || input.value === '') {
+        if (currentIndex !== -1 && currentIndex < inputs.length - 1) {
           e.preventDefault();
           commitValue(currentVal);
-          const nextField = SCORE_FIELDS[currentFieldIndex + 1];
-          navigateToInput(`input[data-score-input="true"][data-score-field="${nextField}"][data-row-index="${rowIndex}"]`);
+          focusTarget(inputs[currentIndex + 1]);
         }
       }
+      return;
     }
 
-    // 5. ArrowLeft at start of selection/caret -> Move to previous field in same row
+    // 5. ArrowLeft at start of selection/caret or empty -> Move to previous input
     if (e.key === 'ArrowLeft') {
       const input = e.currentTarget;
-      if (input.selectionStart === 0 && input.selectionEnd === 0) {
-        if (currentFieldIndex > 0) {
+      const isAtStart = input.selectionStart === 0 && input.selectionEnd === 0;
+      const isAllSelected = input.selectionStart === 0 && input.selectionEnd === input.value.length;
+      if (isAtStart || isAllSelected || input.value === '') {
+        if (currentIndex > 0) {
           e.preventDefault();
           commitValue(currentVal);
-          const prevField = SCORE_FIELDS[currentFieldIndex - 1];
-          navigateToInput(`input[data-score-input="true"][data-score-field="${prevField}"][data-row-index="${rowIndex}"]`);
+          focusTarget(inputs[currentIndex - 1]);
         }
       }
+      return;
     }
   };
 
@@ -142,7 +160,11 @@ export const CheckScoreInput: React.FC<CheckScoreInputProps> = React.memo(({
         onChange={(e) => setVal(e.target.value)}
         onFocus={(e) => {
           isFocusedRef.current = true;
-          e.currentTarget.select();
+          if (e.currentTarget.value && e.currentTarget.value.trim().length > 0) {
+            e.currentTarget.select();
+          } else {
+            e.currentTarget.setSelectionRange(0, 0);
+          }
         }}
         onBlur={(e) => {
           isFocusedRef.current = false;
@@ -150,11 +172,12 @@ export const CheckScoreInput: React.FC<CheckScoreInputProps> = React.memo(({
         }}
         onKeyDown={handleKeyDown}
         placeholder="0-10"
-        className="w-20 bg-[#161a29] border border-white/10 rounded-lg px-2.5 py-1.5 text-white font-extrabold text-xs focus:outline-none focus:border-[#5c36f5] focus:ring-2 focus:ring-[#5c36f5]/40 text-center transition selection:bg-[#5c36f5] selection:text-white"
+        className="w-20 bg-[#161a29] border border-white/10 rounded-lg px-2.5 py-1.5 text-white font-extrabold text-xs focus:outline-none focus:border-[#5c36f5] focus:ring-2 focus:ring-[#5c36f5]/40 text-center transition selection:bg-[#5c36f5] selection:text-white caret-white"
       />
     </div>
   );
 });
 
 CheckScoreInput.displayName = 'CheckScoreInput';
+
 
