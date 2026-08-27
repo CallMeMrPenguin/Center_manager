@@ -83,62 +83,84 @@ if APP_MODE != "web":
     except Exception as e:
         print("Notice on mounting local folders:", e)
 
-# Static Frontend Serving for React (When running standalone desktop server)
-frontend_dist = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "frontend", "dist")
-frontend_assets = os.path.join(frontend_dist, "assets")
-if os.path.exists(frontend_assets):
-    app.mount("/assets", StaticFiles(directory=frontend_assets), name="assets")
+from starlette.types import ASGIApp, Scope, Receive, Send
 
-@app.get("/{full_path:path}", response_class=HTMLResponse)
-def serve_frontend(full_path: str):
-    if full_path.startswith("api/"):
-        raise HTTPException(status_code=404, detail="API route not found")
-    
-    target_file = os.path.join(frontend_dist, full_path)
-    if full_path and os.path.exists(target_file) and os.path.isfile(target_file):
-        return FileResponse(target_file)
+class VercelApiPrefixMiddleware:
+    """
+    Ensures that API requests reaching FastAPI on Vercel always have the '/api' prefix
+    even if Vercel serverless routing stripped '/api' from the incoming path.
+    """
+    def __init__(self, app: ASGIApp):
+        self.app = app
+
+    async def __call__(self, scope: Scope, receive: Receive, send: Send):
+        if scope["type"] == "http":
+            path = scope.get("path", "")
+            if path and not path.startswith("/api"):
+                # Prepend /api so FastAPI routes always match
+                scope["path"] = f"/api{path}" if path.startswith("/") else f"/api/{path}"
+                scope["raw_path"] = scope["path"].encode("utf-8")
+        await self.app(scope, receive, send)
+
+app.add_middleware(VercelApiPrefixMiddleware)
+
+# Static Frontend Serving for React (Only active in standalone local desktop server mode)
+if APP_MODE != "web":
+    frontend_dist = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "frontend", "dist")
+    frontend_assets = os.path.join(frontend_dist, "assets")
+    if os.path.exists(frontend_assets):
+        app.mount("/assets", StaticFiles(directory=frontend_assets), name="assets")
+
+    @app.get("/{full_path:path}", response_class=HTMLResponse)
+    def serve_frontend(full_path: str):
+        if full_path.startswith("api/"):
+            raise HTTPException(status_code=404, detail="API route not found")
         
-    index_file = os.path.join(frontend_dist, "index.html")
-    if os.path.exists(index_file):
-        settings = load_settings()
-        theme = settings.get("theme", {})
-        opacity = theme.get("opacity", 0.08)
-        if opacity is None or float(opacity) < 0.05:
-            opacity = 0.08
-        blur = theme.get("blur", 24)
-        border_opacity = theme.get("borderOpacity", 0.15)
-        saturate = theme.get("saturate", 180)
-        bg_image = theme.get("bgImage", "none")
-        if not bg_image or bg_image == 'none' or str(bg_image).startswith('data:') or 'supabase.co' in str(bg_image):
-            bg_image = "none"
+        target_file = os.path.join(frontend_dist, full_path)
+        if full_path and os.path.exists(target_file) and os.path.isfile(target_file):
+            return FileResponse(target_file)
+            
+        index_file = os.path.join(frontend_dist, "index.html")
+        if os.path.exists(index_file):
+            settings = load_settings()
+            theme = settings.get("theme", {})
+            opacity = theme.get("opacity", 0.08)
+            if opacity is None or float(opacity) < 0.05:
+                opacity = 0.08
+            blur = theme.get("blur", 24)
+            border_opacity = theme.get("borderOpacity", 0.15)
+            saturate = theme.get("saturate", 180)
+            bg_image = theme.get("bgImage", "none")
+            if not bg_image or bg_image == 'none' or str(bg_image).startswith('data:') or 'supabase.co' in str(bg_image):
+                bg_image = "none"
 
-        with open(index_file, "r", encoding="utf-8") as f:
-            html_content = f.read()
+            with open(index_file, "r", encoding="utf-8") as f:
+                html_content = f.read()
 
-        bg_css = "none" if bg_image == "none" else f"url('{bg_image}')"
-        theme_style = f"""
-        <style>
-            :root {{
-                --glass-bg-opacity: {opacity};
-                --glass-blur: {blur}px;
-                --glass-border-opacity: {border_opacity};
-                --glass-saturate: {saturate}%;
-                --bg-image: {bg_css};
-            }}
-        </style>
-        """
-        html_content = html_content.replace("</head>", f"{theme_style}</head>")
-        return HTMLResponse(content=html_content)
-        
-    return HTMLResponse(
-        content="""
-        <html>
-            <body style="font-family:sans-serif;background:#090b14;color:#fff;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;flex-direction:column;">
-                <h2>Frontend is ready...</h2>
-                <p style="color:#94a3b8;">Đang tải lại giao diện...</p>
-                <script>setTimeout(() => location.reload(), 1500);</script>
-            </body>
-        </html>
-        """,
-        status_code=200
-    )
+            bg_css = "none" if bg_image == "none" else f"url('{bg_image}')"
+            theme_style = f"""
+            <style>
+                :root {{
+                    --glass-bg-opacity: {opacity};
+                    --glass-blur: {blur}px;
+                    --glass-border-opacity: {border_opacity};
+                    --glass-saturate: {saturate}%;
+                    --bg-image: {bg_css};
+                }}
+            </style>
+            """
+            html_content = html_content.replace("</head>", f"{theme_style}</head>")
+            return HTMLResponse(content=html_content)
+            
+        return HTMLResponse(
+            content="""
+            <html>
+                <body style="font-family:sans-serif;background:#090b14;color:#fff;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;flex-direction:column;">
+                    <h2>Frontend is ready...</h2>
+                    <p style="color:#94a3b8;">Đang tải lại giao diện...</p>
+                    <script>setTimeout(() => location.reload(), 1500);</script>
+                </body>
+            </html>
+            """,
+            status_code=200
+        )
