@@ -3,8 +3,12 @@ import sys
 import sqlite3
 from typing import Dict, Any, List, Optional
 from datetime import datetime
-import psycopg2
-import psycopg2.extras
+
+try:
+    import psycopg2
+    import psycopg2.extras
+except ImportError:
+    psycopg2 = None
 
 from database.connection import DB_PATH, get_target_db_url, SUPABASE_DEFAULT_DB_URL
 
@@ -73,6 +77,10 @@ def run_bidirectional_sync(force_full: bool = False) -> Dict[str, Any]:
     sconn = sqlite3.connect(DB_PATH)
     sconn.row_factory = sqlite3.Row
     scur = sconn.cursor()
+
+    if psycopg2 is None:
+        sconn.close()
+        return {"success": False, "error": "psycopg2 is not installed"}
 
     try:
         pconn = psycopg2.connect(target_url, connect_timeout=8)

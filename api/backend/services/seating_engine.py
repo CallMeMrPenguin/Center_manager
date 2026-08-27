@@ -1,7 +1,10 @@
 import random
 from dataclasses import dataclass, field
 from typing import List, Dict, Any, Optional, Set, Tuple
-import networkx as nx
+try:
+    import networkx as nx
+except ImportError:
+    nx = None
 
 @dataclass
 class Student:
@@ -79,7 +82,7 @@ def can_sit_adjacent(a: Student, b: Student, rel: RelationshipData) -> bool:
 
 def generate_swap_pairs(students: List[Student], relationships: RelationshipData, seed: Optional[int] = None) -> Dict[str, Any]:
     """
-    Runs Edmonds' Blossom Matching on the student compatibility graph.
+    Runs Edmonds' Blossom Matching on the student compatibility graph (with greedy fallback).
     """
     if seed is not None:
         random.seed(seed)
@@ -96,24 +99,47 @@ def generate_swap_pairs(students: List[Student], relationships: RelationshipData
     shuffled_present = list(present)
     random.shuffle(shuffled_present)
 
-    G = nx.Graph()
-    for s in shuffled_present:
-        G.add_node(s.id, name=s.name, gender=s.gender)
+    matching = set()
+    if nx is not None:
+        G = nx.Graph()
+        for s in shuffled_present:
+            G.add_node(s.id, name=s.name, gender=s.gender)
 
-    for i in range(len(shuffled_present)):
-        for j in range(i + 1, len(shuffled_present)):
-            a, b = shuffled_present[i], shuffled_present[j]
-            if can_swap(a, b, relationships):
-                weight = 1.0
-                if a.gender != b.gender:
-                    weight += 2.0
-                if not relationships.same_group(a, b):
-                    weight += 1.0
-                # Add random weight jitter to produce varied optimal pairings on each run
-                weight += random.uniform(0.01, 0.5)
-                G.add_edge(a.id, b.id, weight=weight)
+        for i in range(len(shuffled_present)):
+            for j in range(i + 1, len(shuffled_present)):
+                a, b = shuffled_present[i], shuffled_present[j]
+                if can_swap(a, b, relationships):
+                    weight = 1.0
+                    if a.gender != b.gender:
+                        weight += 2.0
+                    if not relationships.same_group(a, b):
+                        weight += 1.0
+                    # Add random weight jitter to produce varied optimal pairings on each run
+                    weight += random.uniform(0.01, 0.5)
+                    G.add_edge(a.id, b.id, weight=weight)
 
-    matching = nx.max_weight_matching(G, maxcardinality=True, weight='weight')
+        matching = nx.max_weight_matching(G, maxcardinality=True, weight='weight')
+    else:
+        # Fallback greedy weighted matching if networkx is unavailable
+        candidate_edges = []
+        for i in range(len(shuffled_present)):
+            for j in range(i + 1, len(shuffled_present)):
+                a, b = shuffled_present[i], shuffled_present[j]
+                if can_swap(a, b, relationships):
+                    weight = 1.0
+                    if a.gender != b.gender:
+                        weight += 2.0
+                    if not relationships.same_group(a, b):
+                        weight += 1.0
+                    weight += random.uniform(0.01, 0.5)
+                    candidate_edges.append((weight, a.id, b.id))
+        candidate_edges.sort(key=lambda x: x[0], reverse=True)
+        used_ids = set()
+        for _, u, v in candidate_edges:
+            if u not in used_ids and v not in used_ids:
+                used_ids.add(u)
+                used_ids.add(v)
+                matching.add((u, v))
 
     student_map = {s.id: s for s in present}
     matched_ids = set()
