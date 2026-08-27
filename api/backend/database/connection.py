@@ -289,7 +289,7 @@ class PgConnectionWrapper:
 def get_connection():
     target_url = get_target_db_url()
     if target_url:
-        # 1. On Vercel / serverless cloud, prefer pg8000 (100% pure Python, zero binary issues)
+        # 1. On Vercel / serverless cloud, use pg8000 (100% pure Python, zero C binary dependencies)
         try:
             raw_conn = connect_pg8000(target_url)
             return PgConnectionWrapper(raw_conn, is_pg8000=True)
@@ -302,7 +302,6 @@ def get_connection():
             raw_conn = psycopg2.connect(target_url, connect_timeout=10)
             return PgConnectionWrapper(raw_conn, is_pg8000=False)
         except Exception as e_psycopg:
-            print("[DB Connection] psycopg2 connection failed:", e_psycopg)
             for fallback_url in [SUPABASE_DEFAULT_DB_URL, SUPABASE_SESSION_POOLER_URL]:
                 if target_url != fallback_url:
                     try:
@@ -311,7 +310,7 @@ def get_connection():
                     except Exception:
                         pass
             if IS_VERCEL:
-                raise e_pg8000
+                raise RuntimeError(f"Database connection failed: {e_pg8000}")
 
     conn = sqlite3.connect(DB_PATH, check_same_thread=False)
     conn.row_factory = sqlite3.Row
