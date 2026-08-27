@@ -79,15 +79,14 @@ def create_assignment(data: Dict[str, Any]) -> int:
         """, (class_id, title, description, assigned_date, due_date, max_score, content_json, quiz_config))
         assignment_id = cursor.lastrowid
 
-        # Auto-create submission records for all students currently in this class
-        cursor.execute("SELECT student_id FROM class_students WHERE class_id = ?", (class_id,))
-        students = cursor.fetchall()
-        for s in students:
-            cursor.execute("""
-                INSERT INTO assignment_submissions (assignment_id, student_id, submitted, score, notes)
-                VALUES (?, ?, 0, NULL, '')
-                ON CONFLICT (assignment_id, student_id) DO NOTHING
-            """, (assignment_id, s["student_id"]))
+        # Auto-create submission records for all students currently in this class in a single set-based query
+        cursor.execute("""
+            INSERT INTO assignment_submissions (assignment_id, student_id, submitted, score, notes)
+            SELECT ?, student_id, 0, NULL, ''
+            FROM class_students
+            WHERE class_id = ?
+            ON CONFLICT (assignment_id, student_id) DO NOTHING
+        """, (assignment_id, class_id))
 
         conn.commit()
         return assignment_id
@@ -158,15 +157,14 @@ def get_assignment_submissions(assignment_id: int) -> List[Dict[str, Any]]:
             return []
         class_id = assign_row["class_id"]
 
-        # Ensure all students in class_students have a submission row
-        cursor.execute("SELECT student_id FROM class_students WHERE class_id = ?", (class_id,))
-        enrolled_students = cursor.fetchall()
-        for s in enrolled_students:
-            cursor.execute("""
-                INSERT INTO assignment_submissions (assignment_id, student_id, submitted, score, notes)
-                VALUES (?, ?, 0, NULL, '')
-                ON CONFLICT (assignment_id, student_id) DO NOTHING
-            """, (assignment_id, s["student_id"]))
+        # Ensure all students in class_students have a submission row in a single set-based query
+        cursor.execute("""
+            INSERT INTO assignment_submissions (assignment_id, student_id, submitted, score, notes)
+            SELECT ?, student_id, 0, NULL, ''
+            FROM class_students
+            WHERE class_id = ?
+            ON CONFLICT (assignment_id, student_id) DO NOTHING
+        """, (assignment_id, class_id))
         conn.commit()
 
         # Query full submission list with student info

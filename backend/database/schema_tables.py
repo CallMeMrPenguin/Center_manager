@@ -394,4 +394,7 @@ def create_all_indexes(cursor: sqlite3.Cursor):
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_custom_time_phases_class_dates ON custom_time_phases(class_id, from_date, to_date);")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_assignments_class_date ON assignments(class_id, assigned_date);")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_submissions_assign_student ON assignment_submissions(assignment_id, student_id);")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_submissions_assignment_id ON assignment_submissions(assignment_id);")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_submissions_student_id ON assignment_submissions(student_id);")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_class_students_class_id ON class_students(class_id);")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_app_users_username ON app_users(username);")

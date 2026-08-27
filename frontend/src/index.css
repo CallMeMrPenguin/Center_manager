@@ -653,10 +653,10 @@ h6 {
   color: #ffffff !important;
 }
 
-input[type="text"]:not(.canvas-text-editor),
-input[type="number"]:not(.canvas-text-editor),
-input[type="password"]:not(.canvas-text-editor),
-textarea:not(.code-editor-textarea):not(.canvas-text-editor),
+input[type="text"]:not(.canvas-text-editor):not(.white-paper-input),
+input[type="number"]:not(.canvas-text-editor):not(.white-paper-input),
+input[type="password"]:not(.canvas-text-editor):not(.white-paper-input),
+textarea:not(.code-editor-textarea):not(.canvas-text-editor):not(.white-paper-input),
 select {
   background: #0d1018 !important;
   border: 1px solid rgba(255, 255, 255, 0.08) !important;
@@ -665,12 +665,31 @@ select {
   border-radius: 14px;
 }
 
-input:not(.canvas-text-editor):focus,
+input:not(.canvas-text-editor):not(.white-paper-input):focus,
 select:focus,
-textarea:not(.code-editor-textarea):not(.canvas-text-editor):focus {
+textarea:not(.code-editor-textarea):not(.canvas-text-editor):not(.white-paper-input):focus {
   outline: none;
   border-color: rgba(92, 54, 245, 0.6) !important;
   box-shadow: 0 0 0 2px rgba(92, 54, 245, 0.2) !important;
+}
+
+.white-paper-input {
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  -webkit-text-fill-color: #0f172a !important;
+  border: none !important;
+  border-bottom: 2px solid #0f172a !important;
+  border-radius: 0px !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.white-paper-input:focus {
+  outline: none !important;
+  border: none !important;
+  border-bottom: 2px solid #5c36f5 !important;
+  box-shadow: none !important;
 }
 
 .canvas-text-editor {
