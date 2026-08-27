@@ -92,9 +92,13 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
                 type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                placeholder="Nhập tên đăng nhập..."
+                placeholder="Nhập tên đăng nhập (admin, hs_0001...)"
                 disabled={loading}
                 autoFocus={!username}
+                autoCapitalize="none"
+                autoCorrect="off"
+                spellCheck={false}
+                inputMode="text"
                 className="w-full pl-10 pr-3.5 py-2.5 bg-[#121626] border border-[#212c4b] focus:border-[#5c36f5] focus:ring-1 focus:ring-[#5c36f5] rounded-xl text-white text-xs font-medium placeholder-slate-500 outline-none transition"
               />
             </div>
@@ -116,6 +120,9 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
                 placeholder="Nhập mật khẩu..."
                 disabled={loading}
                 autoFocus={!!username}
+                autoCapitalize="none"
+                autoCorrect="off"
+                spellCheck={false}
                 className="w-full pl-10 pr-10 py-2.5 bg-[#121626] border border-[#212c4b] focus:border-[#5c36f5] focus:ring-1 focus:ring-[#5c36f5] rounded-xl text-white text-xs font-medium placeholder-slate-500 outline-none transition"
               />
               <button

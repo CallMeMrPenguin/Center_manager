@@ -40,13 +40,10 @@ if APP_MODE != "web":
 
 app = FastAPI(title="Center Manager & Test Formatter API")
 
-# Configure CORS
-raw_origins = os.environ.get("ALLOWED_ORIGINS", "*")
-allowed_origins = [o.strip() for o in raw_origins.split(",") if o.strip()] if raw_origins != "*" else ["*"]
-
+# Configure CORS (Supports mobile, LAN, web, and Vercel domains seamlessly)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=allowed_origins,
+    allow_origin_regex=".*",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
