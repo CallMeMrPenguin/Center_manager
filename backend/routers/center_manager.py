@@ -129,20 +129,24 @@ def api_delete_student(student_id: int):
     return {"status": "success"}
 
 @router.get("/api/teachers_cm")
+@router.get("/api/teachers")
 def api_get_teachers_cm(search: str = "", role: str = ""):
     return get_teachers_cm(search, role)
 
 @router.post("/api/teachers_cm")
+@router.post("/api/teachers")
 def api_create_teacher_cm(payload: TeacherCMPayload):
     tid = create_teacher_cm(payload.dict())
     return {"id": tid, "status": "success"}
 
 @router.put("/api/teachers_cm/{teacher_id}")
+@router.put("/api/teachers/{teacher_id}")
 def api_update_teacher_cm(teacher_id: int, payload: TeacherCMPayload):
     update_teacher_cm(teacher_id, payload.dict())
     return {"status": "success"}
 
 @router.delete("/api/teachers_cm/{teacher_id}")
+@router.delete("/api/teachers/{teacher_id}")
 def api_delete_teacher_cm(teacher_id: int):
     delete_teacher_cm(teacher_id)
     return {"status": "success"}

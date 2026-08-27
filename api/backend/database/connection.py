@@ -169,6 +169,10 @@ _pg_pool = None
 
 def get_pg_pool():
     global _pg_pool
+    # On Vercel / serverless lambda, do NOT use ThreadedConnectionPool across frozen containers
+    # because frozen containers hold dead TCP sockets which cause EOF errors.
+    if IS_VERCEL:
+        return None
     if _pg_pool is None:
         try:
             import psycopg2.pool
@@ -191,11 +195,21 @@ class PgConnectionWrapper:
         import psycopg2.extras
         import psycopg2.extensions
         try:
-            tx_status = self._conn.get_transaction_status()
-            if tx_status == psycopg2.extensions.TRANSACTION_STATUS_INERROR:
-                self._conn.rollback()
+            if getattr(self._conn, 'closed', False):
+                import psycopg2
+                target_url = get_target_db_url()
+                self._conn = psycopg2.connect(target_url, connect_timeout=10)
+            else:
+                tx_status = self._conn.get_transaction_status()
+                if tx_status == psycopg2.extensions.TRANSACTION_STATUS_INERROR:
+                    self._conn.rollback()
         except Exception:
-            pass
+            try:
+                import psycopg2
+                target_url = get_target_db_url()
+                self._conn = psycopg2.connect(target_url, connect_timeout=10)
+            except Exception:
+                pass
         raw_cur = self._conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
         return PgCursorWrapper(raw_cur)
 
