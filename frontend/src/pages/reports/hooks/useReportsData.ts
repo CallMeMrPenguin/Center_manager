@@ -20,6 +20,7 @@ export function useReportsData() {
   const [rawSessionRecords, setRawSessionRecords] = useState<any[]>([]);
   const [rawAllSessionRecords, setRawAllSessionRecords] = useState<any[]>([]);
   const [rawStudentRankings, setRawStudentRankings] = useState<any[]>([]);
+  const [rawAllStudentRankings, setRawAllStudentRankings] = useState<any[]>([]);
   const [rawAnalyticsSummary, setRawAnalyticsSummary] = useState<any>(null);
   const [rawClassAnalyticsMap, setRawClassAnalyticsMap] = useState<Record<string, any>>({});
 
@@ -105,6 +106,7 @@ export function useReportsData() {
       setRawSessionRecords(enrichedRecords);
       setRawAllSessionRecords(enrichedAllRecords);
       setRawStudentRankings(res.student_rankings || []);
+      setRawAllStudentRankings(res.all_student_rankings || res.student_rankings || []);
       setRawAnalyticsSummary(res.analytics_summary || null);
       setRawClassAnalyticsMap(res.class_analytics_map || {});
     } catch (e: any) {
@@ -170,8 +172,8 @@ export function useReportsData() {
   }, [rawStudentRankings, selectedClassId]);
 
   const allStudentRankings = useMemo(() => {
-    return rawStudentRankings;
-  }, [rawStudentRankings]);
+    return rawAllStudentRankings.length > 0 ? rawAllStudentRankings : rawStudentRankings;
+  }, [rawAllStudentRankings, rawStudentRankings]);
 
   const analyticsSummary = useMemo(() => {
     return rawAnalyticsSummary;

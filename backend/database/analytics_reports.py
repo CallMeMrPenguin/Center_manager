@@ -15,25 +15,19 @@ def get_analytics_reports(class_id: Optional[int] = None, student_id: Optional[i
     try:
         cursor = conn.cursor()
         
-        # Scoped fetch for raw session records (fetches class/all to preserve leaderboard context)
+        # Scoped fetch for raw session records (fetches all to preserve cross-class benchmark context)
         ag_query = """
             SELECT ag.*, s.full_name as student_name, s.nickname, c.class_name, csess.test_config_json
             FROM class_attendance_grades ag
             JOIN students s ON ag.student_id = s.id
             JOIN classes c ON ag.class_id = c.id
             LEFT JOIN class_sessions csess ON ag.class_id = csess.class_id AND ag.date = csess.date
-            WHERE 1=1
+            ORDER BY ag.date ASC
         """
-        ag_params = []
-        if class_id:
-            ag_query += " AND ag.class_id = ?"
-            ag_params.append(class_id)
-        ag_query += " ORDER BY ag.date ASC"
-
-        cursor.execute(ag_query, ag_params)
+        cursor.execute(ag_query)
         raw_db_rows = [dict(r) for r in cursor.fetchall()]
 
-        # Rank query computed directly in SQL using dynamic weights across all students in scope
+        # Rank query computed directly in SQL using dynamic weights across all students
         rank_query = f"""
             SELECT 
                 s.id as student_id,
@@ -62,8 +56,6 @@ def get_analytics_reports(class_id: Optional[int] = None, student_id: Optional[i
             JOIN class_students cs ON s.id = cs.student_id
             JOIN classes c ON cs.class_id = c.id
             LEFT JOIN class_attendance_grades ag ON s.id = ag.student_id AND c.id = ag.class_id
-            WHERE 1=1
-            {"AND c.id = ?" if class_id else ""}
             GROUP BY s.id, c.id
             ORDER BY (
                 COALESCE(AVG(CASE WHEN ag.check_1 > 0 THEN ag.check_1 END), 0) * {w_c1} + 
@@ -72,11 +64,7 @@ def get_analytics_reports(class_id: Optional[int] = None, student_id: Optional[i
                 COALESCE(AVG(CASE WHEN ag.mock_test > 0 THEN ag.mock_test END), 0) * {w_mt}
             ) DESC
         """
-        rank_params = []
-        if class_id:
-            rank_params.append(class_id)
-
-        cursor.execute(rank_query, rank_params)
+        cursor.execute(rank_query)
         raw_rankings = [dict(r) for r in cursor.fetchall()]
     finally:
         conn.close()
@@ -237,10 +225,18 @@ def get_analytics_reports(class_id: Optional[int] = None, student_id: Optional[i
 
     analytics_summary = calculate_performance_analytics(rows)
 
+    # Scoped rankings for the selected class/student
+    scoped_rankings = [
+        sr for sr in enriched_rankings
+        if (not class_id or sr.get("class_id") == class_id) and
+           (not student_id or sr.get("student_id") == student_id)
+    ]
+
     return {
         "session_records": rows,
         "all_session_records": all_rows,
-        "student_rankings": enriched_rankings,
+        "student_rankings": scoped_rankings,
+        "all_student_rankings": enriched_rankings,
         "analytics_summary": analytics_summary,
         "class_analytics_map": class_analytics_map
     }

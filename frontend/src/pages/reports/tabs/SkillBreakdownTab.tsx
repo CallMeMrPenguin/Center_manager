@@ -1,10 +1,11 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { GraduationCap } from 'lucide-react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { GraduationCap, ArrowRight, RefreshCw } from 'lucide-react';
 import { api } from '../../../api';
 import { MasteryHeatmap } from '../components/MasteryHeatmap';
 import { UnitBreakdownTable } from '../components/UnitBreakdownTable';
 import { StudentWeaknessDiagnosisCard } from '../components/StudentWeaknessDiagnosisCard';
 import { SegmentedControl } from '../../../components/SegmentedControl';
+import { CustomSelect } from '../../../components/CustomSelect';
 
 interface SkillBreakdownTabProps {
   selectedClassId: string;
@@ -12,6 +13,8 @@ interface SkillBreakdownTabProps {
   onSelectRankingStudent: (studentId: number) => void;
   sessionRecords?: any[];
   studentRankings?: any[];
+  classes?: any[];
+  onSelectClass?: (classId: string) => void;
 }
 
 export const SkillBreakdownTab: React.FC<SkillBreakdownTabProps> = ({
@@ -20,25 +23,38 @@ export const SkillBreakdownTab: React.FC<SkillBreakdownTabProps> = ({
   onSelectRankingStudent,
   sessionRecords = [],
   studentRankings = [],
+  classes = [],
+  onSelectClass,
 }) => {
   const [activeSubTab, setActiveSubTab] = useState<'diagnosis' | 'heatmap' | 'units'>('diagnosis');
   const [loading, setLoading] = useState(false);
   const [apiReportData, setApiReportData] = useState<any>(null);
+  const cacheRef = useRef<Map<string, any>>(new Map());
 
-  const fetchSkillData = useCallback(async () => {
+  const cacheKey = `${selectedClassId}_${selectedStudentId || 'all'}`;
+
+  const fetchSkillData = useCallback(async (force = false) => {
     if (!selectedClassId) return;
+
+    // Check cache first for 0ms instantaneous display
+    if (!force && cacheRef.current.has(cacheKey)) {
+      setApiReportData(cacheRef.current.get(cacheKey));
+      return;
+    }
+
     setLoading(true);
     try {
       const cid = parseInt(selectedClassId);
       const sid = selectedStudentId ? parseInt(selectedStudentId) : undefined;
       const res = await api.getSkillBreakdown(cid, sid);
+      cacheRef.current.set(cacheKey, res);
       setApiReportData(res);
     } catch {
       setApiReportData(null);
     } finally {
       setLoading(false);
     }
-  }, [selectedClassId, selectedStudentId]);
+  }, [selectedClassId, selectedStudentId, cacheKey]);
 
   useEffect(() => {
     fetchSkillData();
@@ -46,35 +62,69 @@ export const SkillBreakdownTab: React.FC<SkillBreakdownTabProps> = ({
 
   const reportData = useMemo(() => {
     if (!selectedClassId) return null;
-    return apiReportData;
-  }, [selectedClassId, apiReportData]);
+    return apiReportData || (cacheRef.current.has(cacheKey) ? cacheRef.current.get(cacheKey) : null);
+  }, [selectedClassId, apiReportData, cacheKey]);
 
   const selectedStudent = useMemo(() => {
     if (!selectedStudentId) return null;
     return studentRankings.find(s => String(s.student_id) === String(selectedStudentId)) || null;
   }, [selectedStudentId, studentRankings]);
 
-  // If viewing all classes ("Tất cả lớp học"), prompt the user to pick a specific class
+  // If viewing all classes ("Tất cả lớp học"), prompt the user to pick a specific class with inline selector
   if (!selectedClassId) {
     return (
-      <div className="py-20 px-6 rounded-2xl bg-[#090d16] border border-[#1b253b] text-center flex flex-col items-center justify-center gap-3 select-none animate-cascade-1 shadow-lg">
-        <div className="w-12 h-12 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-blue-400 flex items-center justify-center">
-          <GraduationCap size={24} />
+      <div className="py-16 px-6 rounded-2xl bg-[#090d16] border border-[#1b253b] text-center flex flex-col items-center justify-center gap-4 select-none animate-cascade-1 shadow-lg max-w-2xl mx-auto">
+        <div className="w-14 h-14 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-blue-400 flex items-center justify-center shadow-[0_0_20px_rgba(59,130,246,0.15)]">
+          <GraduationCap size={28} />
         </div>
-        <h4 className="text-sm font-black text-white uppercase tracking-wider">
-          Vui lòng chọn một lớp học cụ thể
-        </h4>
-        <p className="text-xs text-slate-400 max-w-md">
-          Chương trình học và danh mục Unit khác nhau giữa các khối lớp. Vui lòng chọn lớp học ở thanh công cụ phía trên để xem Ma trận Nắm vững, Thống kê Unit và Học sinh Cần phụ đạo.
-        </p>
+        <div className="space-y-1.5">
+          <h4 className="text-base font-black text-white uppercase tracking-wider">
+            Chọn lớp học để phân tích kỹ năng & Unit
+          </h4>
+          <p className="text-xs text-slate-400 max-w-md mx-auto leading-relaxed">
+            Chương trình học và danh mục Unit khác nhau giữa các khối lớp. Chọn nhanh lớp học bên dưới để mở ngay Ma trận Nắm vững, Thống kê Unit và Danh sách Học sinh cần phụ đạo:
+          </p>
+        </div>
+
+        {classes && classes.length > 0 ? (
+          <div className="w-full max-w-xs space-y-3 pt-2">
+            <CustomSelect
+              icon={<GraduationCap size={15} className="text-indigo-400" />}
+              value=""
+              placeholder="-- Chọn lớp học --"
+              onChange={(val) => onSelectClass?.(String(val))}
+              options={classes.map((c) => ({
+                value: String(c.id),
+                label: `${c.class_name} (${c.grade || 'Lớp 6'})`,
+              }))}
+            />
+
+            <div className="flex flex-wrap gap-2 justify-center">
+              {classes.slice(0, 4).map((c) => (
+                <button
+                  key={c.id}
+                  type="button"
+                  onClick={() => onSelectClass?.(String(c.id))}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#141a2e] hover:bg-blue-600/20 text-slate-300 hover:text-blue-300 border border-[#233052] text-xs font-bold transition cursor-pointer"
+                >
+                  <span>{c.class_name}</span>
+                  <ArrowRight size={11} />
+                </button>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <p className="text-xs text-amber-400 font-bold">Chưa có lớp học nào trong hệ thống.</p>
+        )}
       </div>
     );
   }
 
   if (loading && !reportData) {
     return (
-      <div className="py-24 text-center text-slate-400 text-xs font-bold flex flex-col items-center justify-center gap-2">
-        <span className="text-indigo-400 font-black">Đang tính toán phân tích kỹ năng & độ nắm vững Bloom...</span>
+      <div className="py-24 text-center text-slate-400 text-xs font-bold flex flex-col items-center justify-center gap-3">
+        <RefreshCw size={24} className="text-indigo-400 animate-spin" />
+        <span className="text-indigo-300 font-black">Đang phân tích dữ liệu kỹ năng & Bloom taxonomy...</span>
       </div>
     );
   }
@@ -127,12 +177,18 @@ export const SkillBreakdownTab: React.FC<SkillBreakdownTabProps> = ({
           activeColor="bg-[#5c36f5] shadow-[0_0_14px_rgba(92,54,245,0.5)]"
           size="md"
         />
+
+        {loading && (
+          <div className="flex items-center gap-1.5 text-xs text-indigo-400 font-bold">
+            <RefreshCw size={12} className="animate-spin" />
+            <span>Đang cập nhật...</span>
+          </div>
+        )}
       </div>
 
       {/* 2. SUB-TAB CONTENT VIEWS */}
       {activeSubTab === 'diagnosis' && (
         <div className="animate-cascade-1">
-          {/* Bảng danh sách học sinh cần phụ đạo theo bài học */}
           <StudentWeaknessDiagnosisCard
             sessionRecords={sessionRecords}
             studentRankings={studentRankings}
@@ -159,10 +215,10 @@ export const SkillBreakdownTab: React.FC<SkillBreakdownTabProps> = ({
 
       {activeSubTab === 'units' && (
         <div className="animate-cascade-1">
-          {/* Unit & Topic Breakdown Table */}
           <UnitBreakdownTable data={unitBreakdown} />
         </div>
       )}
     </div>
   );
 };
+

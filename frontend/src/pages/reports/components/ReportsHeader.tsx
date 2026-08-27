@@ -95,17 +95,24 @@ export const ReportsHeader: React.FC<ReportsHeaderProps> = ({
             className="w-40 shrink-0"
           />
 
-          {/* Class Selector */}
-          <CustomSelect
-            icon={<GraduationCap size={14} className="text-indigo-400" />}
-            value={selectedClassId}
-            onChange={(val) => { setSelectedClassId(String(val)); setSelectedStudentId(''); }}
-            options={[
-              { value: '', label: 'Tất cả lớp học' },
-              ...classes.map(c => ({ value: String(c.id), label: `${c.class_name} (${c.grade || 'Lớp 6'})` }))
-            ]}
-            className="w-44 shrink-0"
-          />
+          {/* Class Selector (or Cross-class indicator on Benchmark tab) */}
+          {activeReportTab !== 'benchmark' ? (
+            <CustomSelect
+              icon={<GraduationCap size={14} className="text-indigo-400" />}
+              value={selectedClassId}
+              onChange={(val) => { setSelectedClassId(String(val)); setSelectedStudentId(''); }}
+              options={[
+                { value: '', label: 'Tất cả lớp học' },
+                ...classes.map(c => ({ value: String(c.id), label: `${c.class_name} (${c.grade || 'Lớp 6'})` }))
+              ]}
+              className="w-44 shrink-0"
+            />
+          ) : (
+            <div className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-300 text-xs font-bold shrink-0">
+              <GitCompare size={14} className="text-blue-400" />
+              <span>Chế độ so sánh tất cả lớp</span>
+            </div>
+          )}
 
           <button
             onClick={onOpenResetModal}

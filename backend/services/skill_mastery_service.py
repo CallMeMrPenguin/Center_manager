@@ -53,6 +53,8 @@ def init_skill_mastery_db(conn):
     try:
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_skill_mastery_class_student ON skill_mastery(class_id, student_id);")
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_skill_mastery_unit ON skill_mastery(skill, unit_key);")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_cag_class_date ON class_attendance_grades(class_id, date);")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_cs_class_date ON class_sessions(class_id, date);")
         conn.commit()
     except Exception:
         pass
@@ -263,6 +265,7 @@ def compute_skill_mastery_from_records(conn, class_id: Optional[int] = None, stu
     # Compute and persist in skill_mastery table
     now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     mastery_records = []
+    batch_params = []
 
     for (sid, cid, skill, unit_key), series in student_unit_series.items():
         series.sort(key=lambda x: x[0])
@@ -275,19 +278,7 @@ def compute_skill_mastery_from_records(conn, class_id: Optional[int] = None, stu
         test_cnt = eval_res["test_count"]
         status = eval_res["mastery_status"]
 
-        cursor.execute("""
-            INSERT INTO skill_mastery (
-                student_id, class_id, skill, unit_key, ema_score, last_score, test_count, mastery_status, last_tested, updated_at
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ON CONFLICT(student_id, class_id, skill, unit_key) DO UPDATE SET
-                ema_score = excluded.ema_score,
-                last_score = excluded.last_score,
-                test_count = excluded.test_count,
-                mastery_status = excluded.mastery_status,
-                last_tested = excluded.last_tested,
-                updated_at = excluded.updated_at
-        """, (sid, cid, skill, unit_key, ema, last_score, test_cnt, status, last_date, now_str))
-
+        batch_params.append((sid, cid, skill, unit_key, ema, last_score, test_cnt, status, last_date, now_str))
         mastery_records.append({
             "student_id": sid,
             "class_id": cid,
@@ -300,5 +291,19 @@ def compute_skill_mastery_from_records(conn, class_id: Optional[int] = None, stu
             "last_tested": last_date
         })
 
-    conn.commit()
+    if batch_params:
+        cursor.executemany("""
+            INSERT INTO skill_mastery (
+                student_id, class_id, skill, unit_key, ema_score, last_score, test_count, mastery_status, last_tested, updated_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ON CONFLICT(student_id, class_id, skill, unit_key) DO UPDATE SET
+                ema_score = excluded.ema_score,
+                last_score = excluded.last_score,
+                test_count = excluded.test_count,
+                mastery_status = excluded.mastery_status,
+                last_tested = excluded.last_tested,
+                updated_at = excluded.updated_at
+        """, batch_params)
+        conn.commit()
+
     return mastery_records

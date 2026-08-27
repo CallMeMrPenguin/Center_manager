@@ -155,6 +155,8 @@ export const ReportsPage: React.FC = () => {
             onSelectRankingStudent={(id) => setSelectedStudentId(prev => (!id || id === 0 || String(prev) === String(id)) ? '' : String(id))}
             sessionRecords={sessionRecords}
             studentRankings={studentRankings}
+            classes={classes}
+            onSelectClass={setSelectedClassId}
           />
         ) : activeReportTab === 'deep' ? (
           <DeepAnalysisTab
