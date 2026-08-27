@@ -101,7 +101,7 @@ export function useClassDetail(selectedClass: ClassItem | null) {
   }, []);
 
   const handleUpdateRecord = useCallback(
-    (studentId: number, field: string, value: any) => {
+    (studentId: number, field: string, value: any, syncParentState = false) => {
       const prev = attendanceRecordsRef.current;
       const newRecs = prev.map((rec) => {
         if (rec.student_id !== studentId) return rec;
@@ -119,11 +119,15 @@ export function useClassDetail(selectedClass: ClassItem | null) {
 
       attendanceRecordsRef.current = newRecs;
 
-      // Non-blocking transition so fast typing/tabbing never loses focus or drops keyboard events
-      startTransition(() => {
-        setAttendanceRecords(newRecs);
-      });
+      // Only re-render the whole table when attendance status changes or when explicitly requested
+      // This keeps cell-by-cell score tabbing 100% stable, fast, and free of focus-stealing re-renders!
+      if (syncParentState || field === 'status') {
+        startTransition(() => {
+          setAttendanceRecords(newRecs);
+        });
+      }
 
+      // Debounce auto-save to backend
       if (selectedClass && newRecs.length > 0) {
         if (saveDebounceRef.current) {
           clearTimeout(saveDebounceRef.current);
@@ -134,7 +138,7 @@ export function useClassDetail(selectedClass: ClassItem | null) {
           } catch (err: any) {
             console.error('Tự động lưu thất bại:', err);
           }
-        }, 350);
+        }, 800);
       }
     },
     [selectedClass, attendanceDate]
