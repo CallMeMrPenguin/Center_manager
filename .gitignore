@@ -4,6 +4,7 @@ GG_Sheet_API.json
 
 # Databases & local user files
 *.db
+*.db-*
 workspace_files/
 
 # Dependencies
@@ -13,6 +14,7 @@ node_modules/
 # Build outputs
 frontend/dist/
 dist/
+public/
 build/
 installer/build/
 installer/*.exe
