@@ -4,6 +4,6 @@
   "private": true,
   "scripts": {
     "sync:backend": "node -e \"const fs = require('fs'); fs.cpSync('backend', 'api/backend', { recursive: true, filter: (src) => !src.includes('__pycache__') && !src.includes('.db') && !src.includes('temp') });\"",
-    "build": "npm run sync:backend && cd frontend && npm install && npm run build"
+    "build": "npm run sync:backend && cd frontend && npm install && npm run build && node -e \"const fs = require('fs'); fs.cpSync('dist', '../dist', { recursive: true });\""
   }
 }
