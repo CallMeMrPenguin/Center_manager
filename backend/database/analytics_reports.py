@@ -15,7 +15,7 @@ def get_analytics_reports(class_id: Optional[int] = None, student_id: Optional[i
     try:
         cursor = conn.cursor()
         
-        # Scoped fetch for raw session records
+        # Scoped fetch for raw session records (fetches class/all to preserve leaderboard context)
         ag_query = """
             SELECT ag.*, s.full_name as student_name, s.nickname, c.class_name, csess.test_config_json
             FROM class_attendance_grades ag
@@ -28,15 +28,12 @@ def get_analytics_reports(class_id: Optional[int] = None, student_id: Optional[i
         if class_id:
             ag_query += " AND ag.class_id = ?"
             ag_params.append(class_id)
-        if student_id:
-            ag_query += " AND ag.student_id = ?"
-            ag_params.append(student_id)
         ag_query += " ORDER BY ag.date ASC"
 
         cursor.execute(ag_query, ag_params)
         raw_db_rows = [dict(r) for r in cursor.fetchall()]
 
-        # Rank query computed directly in SQL using dynamic weights
+        # Rank query computed directly in SQL using dynamic weights across all students in scope
         rank_query = f"""
             SELECT 
                 s.id as student_id,
@@ -67,7 +64,6 @@ def get_analytics_reports(class_id: Optional[int] = None, student_id: Optional[i
             LEFT JOIN class_attendance_grades ag ON s.id = ag.student_id AND c.id = ag.class_id
             WHERE 1=1
             {"AND c.id = ?" if class_id else ""}
-            {"AND s.id = ?" if student_id else ""}
             GROUP BY s.id, c.id
             ORDER BY (
                 COALESCE(AVG(CASE WHEN ag.check_1 > 0 THEN ag.check_1 END), 0) * {w_c1} + 
@@ -79,8 +75,6 @@ def get_analytics_reports(class_id: Optional[int] = None, student_id: Optional[i
         rank_params = []
         if class_id:
             rank_params.append(class_id)
-        if student_id:
-            rank_params.append(student_id)
 
         cursor.execute(rank_query, rank_params)
         raw_rankings = [dict(r) for r in cursor.fetchall()]

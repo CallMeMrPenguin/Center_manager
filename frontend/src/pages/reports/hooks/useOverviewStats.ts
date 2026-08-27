@@ -95,7 +95,7 @@ export const useOverviewStats = ({
         c1: '-', c2: '-', hw: '-', mockTest: '-', overall: '-',
         attendancePct: 100, sessionCount: 0,
         c1Diff: '+0.0', c2Diff: '+0.0', hwDiff: '+0.0', mockTestDiff: '+0.0', overallDiff: '+0.0',
-        rank: '#1', level: 'Chưa Có Điểm'
+        rank: '-', level: 'Chưa Có Điểm'
       };
     }
 
@@ -141,16 +141,23 @@ export const useOverviewStats = ({
 
     const attPct = records.length > 0 ? Math.round((presentCount / records.length) * 100) : 100;
 
-    let rankStr = '#1';
-    if (selectedStudentId && filteredRankings.length > 0) {
-      const sorted = [...filteredRankings].sort((a, b) => {
-        const scA = computeStudentOverallScore(a);
-        const scB = computeStudentOverallScore(b);
-        if (scB !== scA) return scB - scA;
-        return (b.present_count || 0) - (a.present_count || 0);
-      });
-      const idx = sorted.findIndex(r => String(r.student_id || r.id) === String(selectedStudentId));
-      if (idx >= 0) rankStr = `#${idx + 1}`;
+    let rankStr = '-';
+    if (selectedStudentId) {
+      const pool = (selectedClassId && studentRankings && studentRankings.length > 0
+        ? studentRankings.filter(r => String(r.class_id) === String(selectedClassId))
+        : (studentRankings && studentRankings.length > 0 ? studentRankings : filteredRankings)
+      ) || [];
+
+      if (pool.length > 0) {
+        const sorted = [...pool].sort((a, b) => {
+          const scA = computeStudentOverallScore(a);
+          const scB = computeStudentOverallScore(b);
+          if (scB !== scA) return scB - scA;
+          return (b.present_count || 0) - (a.present_count || 0);
+        });
+        const idx = sorted.findIndex(r => String(r.student_id || r.id) === String(selectedStudentId));
+        if (idx >= 0) rankStr = `#${idx + 1}`;
+      }
     }
 
     return {

@@ -132,10 +132,11 @@ export const StudentProfileHeader: React.FC<StudentProfileHeaderProps> = ({
                   ({student.nickname})
                 </span>
               )}
-              {/* #rank stays next to name */}
-              <span className="text-2xl sm:text-3xl font-black text-amber-400 font-mono tracking-tight ml-1">
-                {stats.rank}
-              </span>
+              {stats.rank && stats.rank !== '-' && (
+                <span className="text-2xl sm:text-3xl font-black text-amber-400 font-mono tracking-tight ml-1">
+                  {stats.rank}
+                </span>
+              )}
             </div>
           </div>
         </div>

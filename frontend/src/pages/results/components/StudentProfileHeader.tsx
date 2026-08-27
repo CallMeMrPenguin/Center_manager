@@ -139,7 +139,7 @@ export const StudentProfileHeader: React.FC<StudentProfileHeaderProps> = ({
     ? stats.sessionCount
     : summary?.total_sessions ?? 0;
 
-  const rankDisplay = stats?.rank ? String(stats.rank) : '#1';
+  const rankDisplay = stats?.rank && stats.rank !== '-' ? String(stats.rank) : '';
 
   return (
     <div className="select-none relative bg-[#0e1222] border border-[#1e2744] p-5 sm:p-6 rounded-2xl shadow-xl space-y-5">
@@ -215,9 +215,11 @@ export const StudentProfileHeader: React.FC<StudentProfileHeaderProps> = ({
                       ({summary.nickname})
                     </span>
                   )}
-                  <span className="text-2xl sm:text-3xl font-black text-amber-400 font-mono tracking-tight ml-1">
-                    {rankDisplay}
-                  </span>
+                  {rankDisplay && (
+                    <span className="text-2xl sm:text-3xl font-black text-amber-400 font-mono tracking-tight ml-1">
+                      {rankDisplay}
+                    </span>
+                  )}
                 </div>
               </div>
             </div>

@@ -269,6 +269,9 @@ export const computeStudentOverallScore = (r: any): number => {
     if (r.overallAvg !== undefined && Number(r.overallAvg) > 0) {
       return trunc1Dec(Number(r.overallAvg));
     }
+    if (r.overall_avg !== undefined && Number(r.overall_avg) > 0) {
+      return trunc1Dec(Number(r.overall_avg));
+    }
     if (r.ema_level !== undefined && Number(r.ema_level) > 0) {
       return trunc1Dec(Number(r.ema_level));
     }
