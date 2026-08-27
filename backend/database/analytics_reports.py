@@ -21,7 +21,11 @@ def get_analytics_reports(class_id: Optional[int] = None, student_id: Optional[i
             FROM class_attendance_grades ag
             JOIN students s ON ag.student_id = s.id
             JOIN classes c ON ag.class_id = c.id
-            LEFT JOIN class_sessions csess ON ag.class_id = csess.class_id AND ag.date = csess.date
+            LEFT JOIN (
+                SELECT class_id, date, MAX(test_config_json) as test_config_json
+                FROM class_sessions
+                GROUP BY class_id, date
+            ) csess ON ag.class_id = csess.class_id AND ag.date = csess.date
             ORDER BY ag.date ASC
         """
         cursor.execute(ag_query)

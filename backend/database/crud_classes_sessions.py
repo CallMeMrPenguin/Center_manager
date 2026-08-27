@@ -270,6 +270,23 @@ def add_class_session(class_id: int, date: str, start_time: str, duration: int, 
     conn = get_connection()
     try:
         cursor = conn.cursor()
+        cursor.execute("SELECT id FROM class_sessions WHERE class_id = ? AND date = ?", (class_id, date))
+        row = cursor.fetchone()
+        if row:
+            sess_id = row[0] if isinstance(row, (list, tuple)) else row["id"]
+            cursor.execute("""
+                UPDATE class_sessions SET
+                    start_time = COALESCE(?, start_time),
+                    duration = COALESCE(?, duration),
+                    status = COALESCE(?, status),
+                    teacher_id = COALESCE(?, teacher_id),
+                    notes = COALESCE(?, notes),
+                    color = COALESCE(?, color)
+                WHERE id = ?
+            """, (start_time, duration, status, teacher_id, notes, color, sess_id))
+            conn.commit()
+            return sess_id
+
         cursor.execute("""
             INSERT INTO class_sessions (class_id, date, start_time, duration, status, teacher_id, notes, color)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
