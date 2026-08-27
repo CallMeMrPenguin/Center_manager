@@ -1,6 +1,6 @@
 import sqlite3
 from database.connection import get_connection
-from database.schema_tables import create_all_tables, create_all_indexes
+from database.schema_tables import create_all_tables, create_all_indexes, create_post_migration_indexes
 
 def run_migrations(cursor: sqlite3.Cursor, conn: sqlite3.Connection):
     """Executes schema migrations and safe column additions."""
@@ -93,8 +93,9 @@ def init_db():
     cursor = conn.cursor()
 
     create_all_tables(cursor)
-    run_migrations(cursor, conn)
     create_all_indexes(cursor)
+    run_migrations(cursor, conn)
+    create_post_migration_indexes(cursor)
     seed_default_admin(cursor)
     cleanup_legacy_scores(cursor)
 
