@@ -4,6 +4,7 @@ pydantic>=2.5.0
 python-multipart>=0.0.6
 pg8000>=1.31.0
 scramp>=1.4.5
+packaging>=23.0
 psycopg2-binary>=2.9.9
 requests>=2.31.0
 python-docx>=1.1.0

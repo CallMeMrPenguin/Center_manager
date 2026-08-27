@@ -17,4 +17,13 @@ try:
 except Exception:
     from main import app
 
+@app.get("/api/health")
+@app.get("/health")
+def api_health_check():
+    return {
+        "status": "healthy",
+        "python": sys.version,
+        "mode": os.environ.get("APP_MODE")
+    }
+
 handler = app
