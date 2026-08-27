@@ -155,6 +155,8 @@ def _parse_score(val: Any) -> Optional[float]:
         return None
 
 def upsert_class_attendance_grades(class_id: int, date_str: str, records: List[Dict[str, Any]]):
+    if not records:
+        return
     conn = get_connection()
     try:
         cursor = conn.cursor()
@@ -170,13 +172,22 @@ def upsert_class_attendance_grades(class_id: int, date_str: str, records: List[D
             except Exception:
                 pass
 
+        # Validate student IDs in database to prevent foreign key errors
+        student_ids_in_req = [r.get("student_id") for r in records if r.get("student_id")]
+        if not student_ids_in_req:
+            return
+
+        placeholders = ','.join(['?'] * len(student_ids_in_req))
+        cursor.execute(f"SELECT id FROM students WHERE id IN ({placeholders})", student_ids_in_req)
+        valid_student_ids = {r[0] if isinstance(r, tuple) else r["id"] for r in cursor.fetchall()}
+
         today_str = datetime.now().strftime("%Y-%m-%d")
         is_past_date = str(date_str) < today_str
         batch_data = []
 
         for rec in records:
             student_id = rec.get("student_id")
-            if not student_id:
+            if not student_id or student_id not in valid_student_ids:
                 continue
 
             c1 = _parse_score(rec.get("check_1"))
