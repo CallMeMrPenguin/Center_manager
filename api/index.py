@@ -1,10 +1,10 @@
 import os
 import sys
+import traceback
 
 CUR_DIR = os.path.dirname(os.path.abspath(__file__))
 BACKEND_DIR = os.path.join(CUR_DIR, "backend")
 
-# Ensure BACKEND_DIR and CUR_DIR are at the front of sys.path
 for p in [BACKEND_DIR, CUR_DIR]:
     if p and p not in sys.path:
         sys.path.insert(0, p)
@@ -12,18 +12,25 @@ for p in [BACKEND_DIR, CUR_DIR]:
 os.environ["APP_MODE"] = "web"
 os.environ["VERCEL"] = "1"
 
+_import_error = None
 try:
-    from backend.main import app
+    try:
+        from backend.main import app
+    except Exception:
+        from main import app
 except Exception:
-    from main import app
+    _import_error = traceback.format_exc()
+    from fastapi import FastAPI
+    app = FastAPI()
 
-@app.get("/api/health")
-@app.get("/health")
-def api_health_check():
-    return {
-        "status": "healthy",
-        "python": sys.version,
-        "mode": os.environ.get("APP_MODE")
-    }
+    @app.get("/{full_path:path}")
+    def fallback_error(full_path: str):
+        return {
+            "error": "Backend Import Failed",
+            "traceback": _import_error,
+            "sys_path": sys.path,
+            "cur_dir_files": os.listdir(CUR_DIR) if os.path.exists(CUR_DIR) else [],
+            "backend_dir_files": os.listdir(BACKEND_DIR) if os.path.exists(BACKEND_DIR) else []
+        }
 
 handler = app
