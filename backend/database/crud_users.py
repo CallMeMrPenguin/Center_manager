@@ -230,8 +230,13 @@ def sync_student_accounts() -> Dict[str, Any]:
         cursor.execute("SELECT id, full_name, nickname, status FROM students")
         students = cursor.fetchall()
         default_pwd_hash = hash_password("123456")
-        created_count = 0
-        updated_count = 0
+
+        cursor.execute("SELECT LOWER(username) as username FROM app_users")
+        existing_usernames = {r["username"] for r in cursor.fetchall()}
+
+        to_insert = []
+        to_update = []
+        supabase_sync_list = []
 
         for s in students:
             sid = s["id"]
@@ -239,31 +244,37 @@ def sync_student_accounts() -> Dict[str, Any]:
             username = f"hs_{sid:04d}"
             status = s["status"] if s["status"] in ('Hoạt động', 'Tạm khóa') else 'Hoạt động'
 
-            cursor.execute("SELECT id FROM app_users WHERE username = ?", (username,))
-            existing = cursor.fetchone()
-            if not existing:
-                cursor.execute("""
-                    INSERT INTO app_users (display_name, username, password_hash, role, status)
-                    VALUES (?, ?, ?, 'Học sinh', ?)
-                """, (name, username, default_pwd_hash, status))
-                created_count += 1
+            if username.lower() not in existing_usernames:
+                to_insert.append((name, username, default_pwd_hash, status))
             else:
-                cursor.execute("""
-                    UPDATE app_users
-                    SET display_name = ?, status = ?
-                    WHERE username = ?
-                """, (name, status, username))
-                updated_count += 1
+                to_update.append((name, status, username))
 
-            # Sync to Supabase Auth
+            supabase_sync_list.append((username, name))
+
+        if to_insert:
+            cursor.executemany("""
+                INSERT INTO app_users (display_name, username, password_hash, role, status)
+                VALUES (?, ?, ?, 'Học sinh', ?)
+            """, to_insert)
+
+        if to_update:
+            cursor.executemany("""
+                UPDATE app_users
+                SET display_name = ?, status = ?
+                WHERE username = ?
+            """, to_update)
+
+        conn.commit()
+
+        # Background sync to Supabase Auth
+        for username, name in supabase_sync_list:
             try:
                 from services.supabase_auth_service import sync_create_supabase_user
                 sync_create_supabase_user(username, "123456", name, "Học sinh")
             except Exception:
                 pass
 
-        conn.commit()
-        return {"success": True, "created": created_count, "synced": updated_count, "total_students": len(students)}
+        return {"success": True, "created": len(to_insert), "synced": len(to_update), "total_students": len(students)}
     finally:
         conn.close()
 
@@ -292,16 +303,20 @@ def save_role_permissions(permissions: List[Dict[str, Any]]):
     conn = get_connection()
     try:
         cursor = conn.cursor()
+        batch_data = []
         for p in permissions:
             role = p.get("role")
             tab_id = p.get("tab_id")
             can_access = 1 if p.get("can_access") in (1, True, "1", "true") else 0
             if role and tab_id:
-                cursor.execute("""
-                    INSERT INTO role_permissions (role, tab_id, can_access)
-                    VALUES (?, ?, ?)
-                    ON CONFLICT(role, tab_id) DO UPDATE SET can_access = EXCLUDED.can_access
-                """, (role, tab_id, can_access))
+                batch_data.append((role, tab_id, can_access))
+
+        if batch_data:
+            cursor.executemany("""
+                INSERT INTO role_permissions (role, tab_id, can_access)
+                VALUES (?, ?, ?)
+                ON CONFLICT(role, tab_id) DO UPDATE SET can_access = EXCLUDED.can_access
+            """, batch_data)
         conn.commit()
     finally:
         conn.close()

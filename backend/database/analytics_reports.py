@@ -6,10 +6,10 @@ from database.analytics_engine import calculate_performance_analytics
 
 def get_analytics_reports(class_id: Optional[int] = None, student_id: Optional[int] = None) -> Dict[str, Any]:
     gw = get_grade_weights()
-    w_c1 = gw.get("check_1", 0.55)
-    w_c2 = gw.get("check_2", 0.35)
-    w_hw = gw.get("homework", 0.10)
-    w_mt = gw.get("mock_test", 0.0)
+    w_c1 = float(gw.get("check_1", 0.55))
+    w_c2 = float(gw.get("check_2", 0.35))
+    w_hw = float(gw.get("homework", 0.10))
+    w_mt = float(gw.get("mock_test", 0.0))
 
     conn = get_connection()
     try:
@@ -190,14 +190,14 @@ def get_analytics_reports(class_id: Optional[int] = None, student_id: Optional[i
         w_sum = 0.0
         w_tot = 0.0
         if avg_vocab > 0:
-            w_sum += avg_vocab * 0.55
-            w_tot += 0.55
+            w_sum += avg_vocab * w_c1
+            w_tot += w_c1
         if avg_grammar > 0:
-            w_sum += avg_grammar * 0.35
-            w_tot += 0.35
+            w_sum += avg_grammar * w_c2
+            w_tot += w_c2
         if avg_hw > 0:
-            w_sum += avg_hw * 0.10
-            w_tot += 0.10
+            w_sum += avg_hw * w_hw
+            w_tot += w_hw
         overall_avg = trunc_1_dec(w_sum / w_tot) if w_tot > 0 else 0.0
         sr["overall_avg"] = overall_avg
         sr["academic_score"] = overall_avg

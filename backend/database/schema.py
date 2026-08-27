@@ -88,23 +88,34 @@ def cleanup_legacy_scores(cursor: sqlite3.Cursor):
 
 
 def init_db():
-    """Initializes SQLite database schema, tables, migrations, and performance indexes."""
+    """Initializes database schema, tables, migrations, and performance indexes."""
     conn = get_connection()
-    cursor = conn.cursor()
-
-    create_all_tables(cursor)
-    create_all_indexes(cursor)
-    run_migrations(cursor, conn)
-    create_post_migration_indexes(cursor)
-    seed_default_admin(cursor)
-    cleanup_legacy_scores(cursor)
-
     try:
-        from services.skill_mastery_service import init_skill_mastery_db
-        init_skill_mastery_db(conn)
-    except Exception as e:
-        print("Skill mastery schema init error:", e)
+        cursor = conn.cursor()
 
-    conn.commit()
-    conn.close()
-    print("Database initialized successfully.")
+        create_all_tables(cursor)
+        conn.commit()
+
+        create_all_indexes(cursor)
+        conn.commit()
+
+        run_migrations(cursor, conn)
+        conn.commit()
+
+        create_post_migration_indexes(cursor)
+        conn.commit()
+
+        seed_default_admin(cursor)
+        cleanup_legacy_scores(cursor)
+        conn.commit()
+
+        try:
+            from services.skill_mastery_service import init_skill_mastery_db
+            init_skill_mastery_db(conn)
+            conn.commit()
+        except Exception as e:
+            print("Skill mastery schema init error:", e)
+
+        print("Database initialized successfully.")
+    finally:
+        conn.close()

@@ -201,6 +201,7 @@ def batch_update_submissions(assignment_id: int, submissions: List[Dict[str, Any
     try:
         cursor = conn.cursor()
         now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        batch_data = []
 
         for item in submissions:
             student_id = item.get("student_id")
@@ -224,7 +225,10 @@ def batch_update_submissions(assignment_id: int, submissions: List[Dict[str, Any
             answers_json = item.get("answers_json") or ""
             daily_logs = item.get("daily_logs") or ""
 
-            cursor.execute("""
+            batch_data.append((assignment_id, student_id, submitted, score, notes, submitted_at, answers_json, daily_logs, now_str))
+
+        if batch_data:
+            cursor.executemany("""
                 INSERT INTO assignment_submissions (assignment_id, student_id, submitted, score, notes, submitted_at, answers_json, daily_logs)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                 ON CONFLICT(assignment_id, student_id) DO UPDATE SET
@@ -238,7 +242,7 @@ def batch_update_submissions(assignment_id: int, submissions: List[Dict[str, Any
                         WHEN EXCLUDED.submitted = 0 THEN NULL
                         ELSE assignment_submissions.submitted_at
                     END
-            """, (assignment_id, student_id, submitted, score, notes, submitted_at, answers_json, daily_logs, now_str))
+            """, batch_data)
 
         conn.commit()
     finally:

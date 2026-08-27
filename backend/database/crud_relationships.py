@@ -10,17 +10,27 @@ def get_friend_groups(class_id: int) -> List[Dict[str, Any]]:
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM friend_groups WHERE class_id = ? ORDER BY id ASC", (class_id,))
         groups = [dict(g) for g in cursor.fetchall()]
-        
+        if not groups:
+            return []
+
+        cursor.execute("""
+            SELECT fgm.group_id, fgm.student_id, s.full_name
+            FROM friend_group_members fgm
+            JOIN students s ON fgm.student_id = s.id
+            WHERE fgm.class_id = ?
+            ORDER BY s.full_name ASC
+        """, (class_id,))
+        members_rows = cursor.fetchall()
+        members_by_group: Dict[int, List[Dict[str, Any]]] = {}
+        for m in members_rows:
+            members_by_group.setdefault(m["group_id"], []).append({
+                "student_id": m["student_id"],
+                "full_name": m["full_name"]
+            })
+
         for g in groups:
-            cursor.execute("""
-                SELECT fgm.student_id, s.full_name
-                FROM friend_group_members fgm
-                JOIN students s ON fgm.student_id = s.id
-                WHERE fgm.group_id = ?
-                ORDER BY s.full_name ASC
-            """, (g["id"],))
-            g["members"] = [dict(m) for m in cursor.fetchall()]
-            
+            g["members"] = members_by_group.get(g["id"], [])
+
         return groups
     finally:
         conn.close()
@@ -175,16 +185,26 @@ def get_conflict_groups(class_id: int) -> List[Dict[str, Any]]:
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM conflict_groups WHERE class_id = ? ORDER BY id ASC", (class_id,))
         groups = [dict(r) for r in cursor.fetchall()]
+        if not groups:
+            return []
+
+        cursor.execute("""
+            SELECT cgm.group_id, cgm.student_id, s.full_name
+            FROM conflict_group_members cgm
+            JOIN students s ON cgm.student_id = s.id
+            WHERE cgm.class_id = ?
+            ORDER BY s.full_name ASC
+        """, (class_id,))
+        members_rows = cursor.fetchall()
+        members_by_group: Dict[int, List[Dict[str, Any]]] = {}
+        for m in members_rows:
+            members_by_group.setdefault(m["group_id"], []).append({
+                "student_id": m["student_id"],
+                "full_name": m["full_name"]
+            })
 
         for g in groups:
-            gid = g["id"]
-            cursor.execute("""
-                SELECT cgm.student_id, s.full_name
-                FROM conflict_group_members cgm
-                JOIN students s ON cgm.student_id = s.id
-                WHERE cgm.group_id = ?
-            """, (gid,))
-            g["members"] = [dict(r) for r in cursor.fetchall()]
+            g["members"] = members_by_group.get(g["id"], [])
 
         return groups
     finally:
