@@ -51,6 +51,8 @@ export default function CanvasBoardPage() {
   const [isFullscreen, setIsFullscreen] = useState(false);
 
   const [pageStrokes, setPageStrokes] = useState<Record<number, StrokeRecord[]>>({});
+  const pageStrokesRef = useRef<Record<number, StrokeRecord[]>>(pageStrokes);
+  pageStrokesRef.current = pageStrokes;
 
   const isDrawingRef = useRef(false);
   const isDraggingItemRef = useRef(false);
@@ -239,7 +241,7 @@ export default function CanvasBoardPage() {
         selectedType,
         isCroppingImageId,
         activeCropBox,
-        currentStrokes,
+        currentStrokes: pageStrokesRef.current[currentPage] || currentStrokes,
         inProgressStroke: isDrawingRef.current && currentStrokePointsRef.current.length > 0 ? {
           points: currentStrokePointsRef.current,
           tool: activeTool,
@@ -454,9 +456,13 @@ export default function CanvasBoardPage() {
 
     if (activeTool === 'eraser' && isDrawingRef.current) {
       const prevPt = lastEraserWorldPtRef.current || worldPt;
-      const res = eraseStrokesAlongPath(currentStrokes, prevPt, worldPt, eraserSize / 2);
+      const strokesToErase = pageStrokesRef.current[currentPage] || currentStrokes;
+      const res = eraseStrokesAlongPath(strokesToErase, prevPt, worldPt, eraserSize / 2);
       lastEraserWorldPtRef.current = worldPt;
-      if (res.hasChanged) setPageStrokes(prev => ({ ...prev, [currentPage]: res.strokes }));
+      if (res.hasChanged) {
+        pageStrokesRef.current = { ...pageStrokesRef.current, [currentPage]: res.strokes };
+        setPageStrokes(prev => ({ ...prev, [currentPage]: res.strokes }));
+      }
       redrawCanvas();
       return;
     }
@@ -510,7 +516,11 @@ export default function CanvasBoardPage() {
         };
         const insideImg = canvasImages.find(img => isStrokeFullyInsideImage(tempStroke, img));
         if (insideImg) tempStroke.imageId = insideImg.id;
-        setPageStrokes(prev => ({ ...prev, [currentPage]: [...(prev[currentPage] || []), tempStroke] }));
+
+        const currentList = pageStrokesRef.current[currentPage] || [];
+        const nextList = [...currentList, tempStroke];
+        pageStrokesRef.current = { ...pageStrokesRef.current, [currentPage]: nextList };
+        setPageStrokes(prev => ({ ...prev, [currentPage]: nextList }));
       }
       currentStrokePointsRef.current = [];
       redrawCanvas();

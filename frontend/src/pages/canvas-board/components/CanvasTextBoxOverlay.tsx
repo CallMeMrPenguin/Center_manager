@@ -95,7 +95,7 @@ export const CanvasTextBoxOverlay: React.FC<CanvasTextBoxOverlayProps> = ({
               onSelect(tb.id);
               setEditingId(tb.id);
             }}
-            className="absolute select-none"
+            className="absolute select-none group"
             style={{
               left: `${screenX}px`,
               top: `${screenY}px`,
@@ -103,10 +103,13 @@ export const CanvasTextBoxOverlay: React.FC<CanvasTextBoxOverlayProps> = ({
               height: `${tb.height}px`,
               transform: `scale(${zoom})`,
               transformOrigin: 'top left',
-              backgroundColor: '#ffffff',
-              colorScheme: 'light',
-              borderRadius: '4px',
-              border: isSelected ? '2px solid #5c36f5' : isEditing ? '2px solid #3b82f6' : '1px dashed #cbd5e1',
+              backgroundColor: tb.bgColor && tb.bgColor !== 'transparent' ? tb.bgColor : 'transparent',
+              borderRadius: '2px',
+              border: isSelected
+                ? '2px solid #5c36f5'
+                : isEditing
+                ? '2px solid #3b82f6'
+                : '1px dashed transparent',
               cursor: activeTool === 'select' ? (isEditing ? 'text' : 'move') : 'default',
               pointerEvents: activeTool === 'select' ? 'auto' : 'none',
               boxSizing: 'border-box',
@@ -126,28 +129,22 @@ export const CanvasTextBoxOverlay: React.FC<CanvasTextBoxOverlayProps> = ({
                 onChange={(e) => {
                   onUpdate({ ...tb, text: e.target.value });
                 }}
-                className="w-full h-full p-1.5 resize-none border-0 focus:outline-none leading-normal"
+                className="canvas-text-editor w-full h-full p-1 leading-normal"
                 style={{
-                  color: '#ff3344',
-                  backgroundColor: '#ffffff',
+                  color: tb.color || '#ff3344',
                   fontSize: `${tb.fontSize}px`,
-                  fontFamily: '"Times New Roman", Times, serif',
-                  colorScheme: 'light',
-                  boxSizing: 'border-box',
-                  outline: 'none',
-                  border: 'none',
+                  fontFamily: tb.fontFamily || '"Times New Roman", Times, serif',
                   display: 'block',
                   lineHeight: '1.3',
                 }}
               />
             ) : (
               <div
-                className="w-full h-full p-1.5 overflow-hidden whitespace-pre-wrap leading-normal"
+                className="w-full h-full p-1 overflow-hidden whitespace-pre-wrap leading-normal"
                 style={{
                   color: isEmpty ? '#94a3b8' : tb.color || '#ff3344',
-                  backgroundColor: '#ffffff',
                   fontSize: `${tb.fontSize}px`,
-                  fontFamily: '"Times New Roman", Times, serif',
+                  fontFamily: tb.fontFamily || '"Times New Roman", Times, serif',
                   boxSizing: 'border-box',
                   fontStyle: isEmpty ? 'italic' : 'normal',
                   lineHeight: '1.3',

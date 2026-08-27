@@ -653,10 +653,10 @@ h6 {
   color: #ffffff !important;
 }
 
-input[type="text"],
-input[type="number"],
-input[type="password"],
-textarea:not(.code-editor-textarea),
+input[type="text"]:not(.canvas-text-editor),
+input[type="number"]:not(.canvas-text-editor),
+input[type="password"]:not(.canvas-text-editor),
+textarea:not(.code-editor-textarea):not(.canvas-text-editor),
 select {
   background: #0d1018 !important;
   border: 1px solid rgba(255, 255, 255, 0.08) !important;
@@ -665,12 +665,28 @@ select {
   border-radius: 14px;
 }
 
-input:focus,
+input:not(.canvas-text-editor):focus,
 select:focus,
-textarea:not(.code-editor-textarea):focus {
+textarea:not(.code-editor-textarea):not(.canvas-text-editor):focus {
   outline: none;
   border-color: rgba(92, 54, 245, 0.6) !important;
   box-shadow: 0 0 0 2px rgba(92, 54, 245, 0.2) !important;
+}
+
+.canvas-text-editor {
+  background: transparent !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  padding: 2px 4px !important;
+  resize: none !important;
+}
+
+.canvas-text-editor:focus {
+  outline: none !important;
+  border: none !important;
+  box-shadow: none !important;
 }
 
 .code-editor-textarea {

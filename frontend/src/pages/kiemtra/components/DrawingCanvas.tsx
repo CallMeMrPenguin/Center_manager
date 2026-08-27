@@ -27,12 +27,10 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
   const [hlSize, setHlSize] = useState<number>(24);
   const [eraserSize, setEraserSize] = useState<number>(30);
 
-  // Vector strokes state for 0-flicker & 0-lag performance
   const strokesRef = useRef<StrokeRecord[]>([]);
   const [undoStack, setUndoStack] = useState<StrokeRecord[][]>([]);
   const [redoStack, setRedoStack] = useState<StrokeRecord[][]>([]);
 
-  // Draggable toolbar state
   const [toolbarPos, setToolbarPos] = useState<{ x: number; y: number } | null>(null);
   const isDraggingToolbarRef = useRef(false);
   const toolbarDragOffsetRef = useRef({ x: 0, y: 0 });
@@ -77,14 +75,17 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
     const container = containerRef.current;
     if (!canvas || !container) return;
 
+    const parent = container.parentElement;
     const rect = container.getBoundingClientRect();
-    if (rect.width <= 0 || rect.height <= 0) return;
+    const w = Math.max(container.scrollWidth, container.clientWidth, parent?.scrollWidth || 0, rect.width);
+    const h = Math.max(container.scrollHeight, container.clientHeight, parent?.scrollHeight || 0, rect.height);
+    if (w <= 0 || h <= 0) return;
     const dpr = window.devicePixelRatio || 1;
 
-    canvas.width = rect.width * dpr;
-    canvas.height = rect.height * dpr;
-    canvas.style.width = `${rect.width}px`;
-    canvas.style.height = `${rect.height}px`;
+    canvas.width = w * dpr;
+    canvas.height = h * dpr;
+    canvas.style.width = `${w}px`;
+    canvas.style.height = `${h}px`;
 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
@@ -349,7 +350,7 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
   };
 
   return (
-    <div ref={containerRef} className="absolute inset-0 z-20 pointer-events-none overflow-hidden">
+    <div ref={containerRef} className="absolute inset-0 z-30 pointer-events-none overflow-hidden min-h-full min-w-full">
       <canvas
         ref={canvasRef}
         onPointerDown={handlePointerDown}

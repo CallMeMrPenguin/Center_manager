@@ -36,9 +36,9 @@ export const QuizResultsView: React.FC<QuizResultsViewProps> = ({
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto w-full relative">
-      {/* SINGLE UNIFIED DRAWING CANVAS FOR ENTIRE REVIEW SCREEN */}
+      {/* UNIFIED DRAWING CANVAS FOR CURRENT REVIEW PAGE */}
       <DrawingCanvas
-        questionId={-999}
+        questionId={-reviewPage}
         drawings={drawings}
         onSaveDrawing={(qId, url) => setDrawings(prev => ({ ...prev, [qId]: url }))}
         onClearDrawing={(qId) => setDrawings(prev => { const copy = { ...prev }; delete copy[qId]; return copy; })}
