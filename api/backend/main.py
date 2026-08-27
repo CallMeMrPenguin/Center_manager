@@ -49,6 +49,18 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+from fastapi.responses import JSONResponse
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request, exc):
+    import traceback
+    err_tb = traceback.format_exc()
+    print(f"[Unhandled Exception on {request.url.path}]: {exc}\n{err_tb}")
+    return JSONResponse(
+        status_code=500,
+        content={"success": False, "detail": str(exc), "path": request.url.path}
+    )
+
 # Mount Core Routers (Always available on both Web and Local)
 app.include_router(system.router)
 app.include_router(center_manager.router)
