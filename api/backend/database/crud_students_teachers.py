@@ -178,10 +178,22 @@ def delete_student(student_id: int):
     conn = get_connection()
     try:
         cursor = conn.cursor()
+        cursor.execute("SELECT full_name FROM students WHERE id = ?", (student_id,))
+        row = cursor.fetchone()
+        full_name = row["full_name"] if row else ""
+
         username = f"hs_{student_id:04d}"
         cursor.execute("DELETE FROM students WHERE id = ?", (student_id,))
+
         try:
-            cursor.execute("DELETE FROM app_users WHERE username = ? OR username = (SELECT username FROM app_users WHERE display_name = (SELECT full_name FROM students WHERE id = ?))", (username, student_id))
+            if full_name:
+                cursor.execute("""
+                    DELETE FROM app_users 
+                    WHERE username = ? 
+                       OR (role = 'Học sinh' AND LOWER(TRIM(display_name)) = LOWER(TRIM(?)))
+                """, (username, full_name))
+            else:
+                cursor.execute("DELETE FROM app_users WHERE username = ?", (username,))
         except Exception:
             pass
         conn.commit()

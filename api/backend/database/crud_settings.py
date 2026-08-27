@@ -1,16 +1,20 @@
+import time
 import json
-from typing import Dict, Any, Optional, List
+from typing import Dict, Any, Optional, List, Tuple
 from datetime import datetime
 from database.connection import get_connection
 
-_settings_cache: Dict[str, Any] = {}
-_cache_time: float = 0
+_settings_cache: Dict[str, Tuple[Any, float]] = {}
+CACHE_TTL_SECONDS = 30.0
 
 def get_db_setting(key: str, default: Any = None) -> Any:
-    """Retrieves a setting from app_settings database table, with fallback to config.json."""
+    """Retrieves a setting from app_settings database table with 30s in-memory TTL."""
     global _settings_cache
+    now = time.time()
     if key in _settings_cache:
-        return _settings_cache[key]
+        val, cached_at = _settings_cache[key]
+        if now - cached_at < CACHE_TTL_SECONDS:
+            return val
     
     try:
         conn = get_connection()
@@ -22,12 +26,12 @@ def get_db_setting(key: str, default: Any = None) -> Any:
             val_str = row["setting_value"] if isinstance(row, dict) else row[0]
             try:
                 val = json.loads(val_str)
-                _settings_cache[key] = val
+                _settings_cache[key] = (val, now)
                 return val
             except Exception:
-                _settings_cache[key] = val_str
+                _settings_cache[key] = (val_str, now)
                 return val_str
-    except Exception as e:
+    except Exception:
         # Fallback to local config.json if table not yet initialized or offline
         pass
 
@@ -42,9 +46,9 @@ def get_db_setting(key: str, default: Any = None) -> Any:
     return default
 
 def save_db_setting(key: str, value: Any) -> bool:
-    """Saves setting into app_settings table and invalidates memory cache."""
+    """Saves setting into app_settings table and updates memory cache."""
     global _settings_cache
-    _settings_cache[key] = value
+    _settings_cache[key] = (value, time.time())
 
     val_str = json.dumps(value, ensure_ascii=False) if not isinstance(value, str) else value
     now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")

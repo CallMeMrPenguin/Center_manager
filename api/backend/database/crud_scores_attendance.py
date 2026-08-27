@@ -145,6 +145,15 @@ def get_class_attendance_grades(class_id: int, date_str: str) -> List[Dict[str, 
     finally:
         conn.close()
 
+def _parse_score(val: Any) -> Optional[float]:
+    if val is None or val == "" or val == "null" or val == "undefined":
+        return None
+    try:
+        v = float(val)
+        return v if v >= 0 else None
+    except (ValueError, TypeError):
+        return None
+
 def upsert_class_attendance_grades(class_id: int, date_str: str, records: List[Dict[str, Any]]):
     conn = get_connection()
     try:
@@ -161,27 +170,19 @@ def upsert_class_attendance_grades(class_id: int, date_str: str, records: List[D
             except Exception:
                 pass
 
+        today_str = datetime.now().strftime("%Y-%m-%d")
+        is_past_date = str(date_str) < today_str
+        batch_data = []
+
         for rec in records:
             student_id = rec.get("student_id")
             if not student_id:
                 continue
-            
-            def parse_score(val):
-                if val is None or val == "" or val == "null" or val == "undefined":
-                    return None
-                try:
-                    v = float(val)
-                    return v if v >= 0 else None
-                except (ValueError, TypeError):
-                    return None
 
-            c1 = parse_score(rec.get("check_1"))
-            c2 = parse_score(rec.get("check_2"))
-            hw = parse_score(rec.get("homework"))
-            mock = parse_score(rec.get("mock_test"))
-
-            today_str = datetime.now().strftime("%Y-%m-%d")
-            is_past_date = str(date_str) < today_str
+            c1 = _parse_score(rec.get("check_1"))
+            c2 = _parse_score(rec.get("check_2"))
+            hw = _parse_score(rec.get("homework"))
+            mock = _parse_score(rec.get("mock_test"))
 
             has_score = (c1 is not None) or (c2 is not None) or (hw is not None) or (mock is not None)
             notes = (rec.get("notes") or "").strip()
@@ -196,7 +197,10 @@ def upsert_class_attendance_grades(class_id: int, date_str: str, records: List[D
             else:
                 status = "Có mặt"
 
-            cursor.execute("""
+            batch_data.append((class_id, student_id, date_str, status, c1, c2, hw, mock, notes))
+
+        if batch_data:
+            cursor.executemany("""
                 INSERT INTO class_attendance_grades (class_id, student_id, date, status, check_1, check_2, homework, mock_test, notes)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
                 ON CONFLICT(class_id, student_id, date) DO UPDATE SET
@@ -207,7 +211,7 @@ def upsert_class_attendance_grades(class_id: int, date_str: str, records: List[D
                     mock_test = EXCLUDED.mock_test,
                     notes = EXCLUDED.notes,
                     updated_at = CURRENT_TIMESTAMP
-            """, (class_id, student_id, date_str, status, c1, c2, hw, mock, notes))
+            """, batch_data)
         conn.commit()
     finally:
         conn.close()

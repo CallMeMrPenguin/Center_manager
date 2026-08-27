@@ -314,15 +314,16 @@ def get_active_grades() -> List[str]:
     conn = get_connection()
     try:
         cursor = conn.cursor()
-        cursor.execute("SELECT DISTINCT grade FROM question_bank WHERE grade IS NOT NULL AND grade != ''")
-        q_grades = [str(r[0]) for r in cursor.fetchall()]
-        
-        cursor.execute("SELECT DISTINCT grade FROM vocabulary_list WHERE grade IS NOT NULL AND grade != ''")
-        v_grades = [str(r[0]) for r in cursor.fetchall()]
+        cursor.execute("""
+            SELECT DISTINCT grade FROM question_bank WHERE grade IS NOT NULL AND grade != ''
+            UNION
+            SELECT DISTINCT grade FROM vocabulary_list WHERE grade IS NOT NULL AND grade != ''
+        """)
+        grades = [str(r[0]) for r in cursor.fetchall()]
         
         digits = []
         others = []
-        for g in set(q_grades + v_grades):
+        for g in grades:
             if g.isdigit():
                 digits.append(int(g))
             else:

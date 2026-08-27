@@ -386,12 +386,33 @@ def create_all_tables(cursor: sqlite3.Cursor):
 def create_all_indexes(cursor: sqlite3.Cursor):
     """Creates database indexes for optimized query performance."""
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_question_bank_grade_unit ON question_bank(grade, unit);")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_question_bank_type ON question_bank(question_type);")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_vocabulary_list_grade_unit ON vocabulary_list(grade, unit);")
-    cursor.execute("CREATE INDEX IF NOT EXISTS idx_documents_folder_deleted ON documents(folder_id, is_deleted);")
-    cursor.execute("CREATE INDEX IF NOT EXISTS idx_document_folders_parent_deleted ON document_folders(parent_id, is_deleted);")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_vocabulary_list_grade ON vocabulary_list(grade);")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_class_sessions_class_date ON class_sessions(class_id, date);")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_class_sessions_date ON class_sessions(date);")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_attendance_class_student_date ON class_attendance_grades(class_id, student_id, date);")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_attendance_class_date ON class_attendance_grades(class_id, date);")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_custom_time_phases_class_dates ON custom_time_phases(class_id, from_date, to_date);")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_assignments_class_date ON assignments(class_id, assigned_date);")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_assignments_due_date ON assignments(due_date);")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_submissions_assign_student ON assignment_submissions(assignment_id, student_id);")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_submissions_assignment_id ON assignment_submissions(assignment_id);")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_submissions_student_id ON assignment_submissions(student_id);")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_class_students_class_id ON class_students(class_id);")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_friend_group_members_cls_stu ON friend_group_members(class_id, student_id);")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_students_status ON students(status);")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_classes_status ON classes(status);")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_app_users_username ON app_users(username);")
+
+
+def create_post_migration_indexes(cursor: sqlite3.Cursor):
+    """Creates indexes on columns added dynamically via migrations."""
+    try:
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_documents_folder_deleted ON documents(folder_id, is_deleted);")
+    except Exception:
+        pass
+    try:
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_document_folders_parent_deleted ON document_folders(parent_id, is_deleted);")
+    except Exception:
+        pass

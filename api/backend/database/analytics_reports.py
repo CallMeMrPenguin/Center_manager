@@ -6,37 +6,28 @@ from database.analytics_engine import calculate_performance_analytics
 
 def get_analytics_reports(class_id: Optional[int] = None, student_id: Optional[int] = None) -> Dict[str, Any]:
     gw = get_grade_weights()
-    w_c1 = gw.get("check_1", 0.55)
-    w_c2 = gw.get("check_2", 0.35)
-    w_hw = gw.get("homework", 0.10)
-    w_mt = gw.get("mock_test", 0.0)
+    w_c1 = float(gw.get("check_1", 0.55))
+    w_c2 = float(gw.get("check_2", 0.35))
+    w_hw = float(gw.get("homework", 0.10))
+    w_mt = float(gw.get("mock_test", 0.0))
 
     conn = get_connection()
     try:
         cursor = conn.cursor()
         
-        # Scoped fetch for raw session records
+        # Scoped fetch for raw session records (fetches all to preserve cross-class benchmark context)
         ag_query = """
             SELECT ag.*, s.full_name as student_name, s.nickname, c.class_name, csess.test_config_json
             FROM class_attendance_grades ag
             JOIN students s ON ag.student_id = s.id
             JOIN classes c ON ag.class_id = c.id
             LEFT JOIN class_sessions csess ON ag.class_id = csess.class_id AND ag.date = csess.date
-            WHERE 1=1
+            ORDER BY ag.date ASC
         """
-        ag_params = []
-        if class_id:
-            ag_query += " AND ag.class_id = ?"
-            ag_params.append(class_id)
-        if student_id:
-            ag_query += " AND ag.student_id = ?"
-            ag_params.append(student_id)
-        ag_query += " ORDER BY ag.date ASC"
-
-        cursor.execute(ag_query, ag_params)
+        cursor.execute(ag_query)
         raw_db_rows = [dict(r) for r in cursor.fetchall()]
 
-        # Rank query computed directly in SQL using dynamic weights
+        # Rank query computed directly in SQL using dynamic weights across all students
         rank_query = f"""
             SELECT 
                 s.id as student_id,
@@ -65,9 +56,6 @@ def get_analytics_reports(class_id: Optional[int] = None, student_id: Optional[i
             JOIN class_students cs ON s.id = cs.student_id
             JOIN classes c ON cs.class_id = c.id
             LEFT JOIN class_attendance_grades ag ON s.id = ag.student_id AND c.id = ag.class_id
-            WHERE 1=1
-            {"AND c.id = ?" if class_id else ""}
-            {"AND s.id = ?" if student_id else ""}
             GROUP BY s.id, c.id
             ORDER BY (
                 COALESCE(AVG(CASE WHEN ag.check_1 > 0 THEN ag.check_1 END), 0) * {w_c1} + 
@@ -76,13 +64,7 @@ def get_analytics_reports(class_id: Optional[int] = None, student_id: Optional[i
                 COALESCE(AVG(CASE WHEN ag.mock_test > 0 THEN ag.mock_test END), 0) * {w_mt}
             ) DESC
         """
-        rank_params = []
-        if class_id:
-            rank_params.append(class_id)
-        if student_id:
-            rank_params.append(student_id)
-
-        cursor.execute(rank_query, rank_params)
+        cursor.execute(rank_query)
         raw_rankings = [dict(r) for r in cursor.fetchall()]
     finally:
         conn.close()
@@ -196,14 +178,14 @@ def get_analytics_reports(class_id: Optional[int] = None, student_id: Optional[i
         w_sum = 0.0
         w_tot = 0.0
         if avg_vocab > 0:
-            w_sum += avg_vocab * 0.55
-            w_tot += 0.55
+            w_sum += avg_vocab * w_c1
+            w_tot += w_c1
         if avg_grammar > 0:
-            w_sum += avg_grammar * 0.35
-            w_tot += 0.35
+            w_sum += avg_grammar * w_c2
+            w_tot += w_c2
         if avg_hw > 0:
-            w_sum += avg_hw * 0.10
-            w_tot += 0.10
+            w_sum += avg_hw * w_hw
+            w_tot += w_hw
         overall_avg = trunc_1_dec(w_sum / w_tot) if w_tot > 0 else 0.0
         sr["overall_avg"] = overall_avg
         sr["academic_score"] = overall_avg
@@ -243,10 +225,18 @@ def get_analytics_reports(class_id: Optional[int] = None, student_id: Optional[i
 
     analytics_summary = calculate_performance_analytics(rows)
 
+    # Scoped rankings for the selected class/student
+    scoped_rankings = [
+        sr for sr in enriched_rankings
+        if (not class_id or sr.get("class_id") == class_id) and
+           (not student_id or sr.get("student_id") == student_id)
+    ]
+
     return {
         "session_records": rows,
         "all_session_records": all_rows,
-        "student_rankings": enriched_rankings,
+        "student_rankings": scoped_rankings,
+        "all_student_rankings": enriched_rankings,
         "analytics_summary": analytics_summary,
         "class_analytics_map": class_analytics_map
     }

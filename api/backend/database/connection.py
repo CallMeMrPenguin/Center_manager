@@ -280,8 +280,11 @@ def get_connection():
     try:
         conn.execute("PRAGMA journal_mode = WAL;")
         conn.execute("PRAGMA synchronous = NORMAL;")
-        conn.execute("PRAGMA cache_size = -64000;")
+        conn.execute("PRAGMA cache_size = -64000;")      # 64MB page cache
         conn.execute("PRAGMA foreign_keys = ON;")
+        conn.execute("PRAGMA busy_timeout = 5000;")      # 5s retry on lock, prevents immediate deadlock errors
+        conn.execute("PRAGMA temp_store = MEMORY;")      # keep temp tables in RAM, not disk
+        conn.execute("PRAGMA mmap_size = 268435456;")    # 256MB memory-mapped I/O for faster sequential reads
     except Exception:
         pass
     return conn
