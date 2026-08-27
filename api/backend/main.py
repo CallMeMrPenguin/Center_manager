@@ -95,26 +95,27 @@ if APP_MODE != "web":
     except Exception as e:
         print("Notice on mounting local folders:", e)
 
-from starlette.types import ASGIApp, Scope, Receive, Send
+if IS_VERCEL:
+    from starlette.types import ASGIApp, Scope, Receive, Send
 
-class VercelApiPrefixMiddleware:
-    """
-    Ensures that API requests reaching FastAPI on Vercel always have the '/api' prefix
-    even if Vercel serverless routing stripped '/api' from the incoming path.
-    """
-    def __init__(self, app: ASGIApp):
-        self.app = app
+    class VercelApiPrefixMiddleware:
+        """
+        Ensures that API requests reaching FastAPI on Vercel always have the '/api' prefix
+        even if Vercel serverless routing stripped '/api' from the incoming path.
+        """
+        def __init__(self, app: ASGIApp):
+            self.app = app
 
-    async def __call__(self, scope: Scope, receive: Receive, send: Send):
-        if scope["type"] == "http":
-            path = scope.get("path", "")
-            if path and not path.startswith("/api"):
-                # Prepend /api so FastAPI routes always match
-                scope["path"] = f"/api{path}" if path.startswith("/") else f"/api/{path}"
-                scope["raw_path"] = scope["path"].encode("utf-8")
-        await self.app(scope, receive, send)
+        async def __call__(self, scope: Scope, receive: Receive, send: Send):
+            if scope["type"] == "http":
+                path = scope.get("path", "")
+                if path and not path.startswith("/api"):
+                    # Prepend /api so FastAPI routes always match
+                    scope["path"] = f"/api{path}" if path.startswith("/") else f"/api/{path}"
+                    scope["raw_path"] = scope["path"].encode("utf-8")
+            await self.app(scope, receive, send)
 
-app.add_middleware(VercelApiPrefixMiddleware)
+    app.add_middleware(VercelApiPrefixMiddleware)
 
 # Static Frontend Serving for React (Only active in standalone local desktop server mode)
 if APP_MODE != "web":
