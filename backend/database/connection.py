@@ -146,14 +146,41 @@ class PgCursorWrapper:
     def rowcount(self):
         return self._cursor.rowcount
 
+    def _row_to_dict(self, row):
+        if row is None:
+            return None
+        if isinstance(row, dict):
+            return row
+        if hasattr(self._cursor, 'description') and self._cursor.description:
+            col_names = [d[0] for d in self._cursor.description]
+            return dict(zip(col_names, row))
+        return row
+
     def fetchone(self):
-        return self._cursor.fetchone()
+        row = self._cursor.fetchone()
+        return self._row_to_dict(row)
 
     def fetchall(self):
-        return self._cursor.fetchall()
+        rows = self._cursor.fetchall()
+        if not rows:
+            return []
+        if isinstance(rows[0], dict):
+            return rows
+        if hasattr(self._cursor, 'description') and self._cursor.description:
+            col_names = [d[0] for d in self._cursor.description]
+            return [dict(zip(col_names, r)) for r in rows]
+        return rows
 
     def fetchmany(self, size=None):
-        return self._cursor.fetchmany(size) if size is not None else self._cursor.fetchmany()
+        rows = self._cursor.fetchmany(size) if size is not None else self._cursor.fetchmany()
+        if not rows:
+            return []
+        if isinstance(rows[0], dict):
+            return rows
+        if hasattr(self._cursor, 'description') and self._cursor.description:
+            col_names = [d[0] for d in self._cursor.description]
+            return [dict(zip(col_names, r)) for r in rows]
+        return rows
 
     def close(self):
         return self._cursor.close()
@@ -165,52 +192,62 @@ class PgCursorWrapper:
         self.close()
 
 
-_pg_pool = None
+import urllib.parse
 
-def get_pg_pool():
-    global _pg_pool
-    # On Vercel / serverless lambda, do NOT use ThreadedConnectionPool across frozen containers
-    # because frozen containers hold dead TCP sockets which cause EOF errors.
-    if IS_VERCEL:
-        return None
-    if _pg_pool is None:
-        try:
-            import psycopg2.pool
-            target_url = get_target_db_url()
-            if target_url:
-                _pg_pool = psycopg2.pool.ThreadedConnectionPool(minconn=1, maxconn=10, dsn=target_url, connect_timeout=10)
-        except Exception as e:
-            print("[DB Connection] Init pool failed, falling back to direct connect:", e)
-            _pg_pool = None
-    return _pg_pool
+def connect_pg8000(url: str):
+    """Pure-Python PostgreSQL connection with zero compiled C binary dependencies."""
+    import pg8000.dbapi
+    parsed = urllib.parse.urlparse(url)
+    user = urllib.parse.unquote(parsed.username or "postgres")
+    pwd = urllib.parse.unquote(parsed.password or "")
+    host = parsed.hostname
+    port = parsed.port or 5432
+    db = parsed.path.lstrip('/') or "postgres"
+    return pg8000.dbapi.connect(
+        user=user,
+        host=host,
+        port=port,
+        password=pwd,
+        database=db,
+        ssl_context=True,
+        timeout=10
+    )
 
 
 class PgConnectionWrapper:
-    def __init__(self, raw_conn, pool=None):
+    def __init__(self, raw_conn, pool=None, is_pg8000=False):
         self._conn = raw_conn
         self._pool = pool
+        self._is_pg8000 = is_pg8000
         self._is_closed = False
 
     def cursor(self):
-        import psycopg2.extras
-        import psycopg2.extensions
         try:
             if getattr(self._conn, 'closed', False):
-                import psycopg2
                 target_url = get_target_db_url()
-                self._conn = psycopg2.connect(target_url, connect_timeout=10)
-            else:
+                if self._is_pg8000:
+                    self._conn = connect_pg8000(target_url)
+                else:
+                    import psycopg2
+                    self._conn = psycopg2.connect(target_url, connect_timeout=10)
+            elif not self._is_pg8000:
+                import psycopg2.extensions
                 tx_status = self._conn.get_transaction_status()
                 if tx_status == psycopg2.extensions.TRANSACTION_STATUS_INERROR:
                     self._conn.rollback()
         except Exception:
             try:
-                import psycopg2
                 target_url = get_target_db_url()
-                self._conn = psycopg2.connect(target_url, connect_timeout=10)
+                self._conn = connect_pg8000(target_url)
+                self._is_pg8000 = True
             except Exception:
                 pass
-        raw_cur = self._conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+
+        if self._is_pg8000:
+            raw_cur = self._conn.cursor()
+        else:
+            import psycopg2.extras
+            raw_cur = self._conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
         return PgCursorWrapper(raw_cur)
 
     def commit(self):
@@ -225,16 +262,9 @@ class PgConnectionWrapper:
         self._is_closed = True
         if self._pool:
             try:
-                import psycopg2.extensions
-                tx_status = self._conn.get_transaction_status()
-                if tx_status in (psycopg2.extensions.TRANSACTION_STATUS_INERROR, psycopg2.extensions.TRANSACTION_STATUS_INTRANS):
-                    self._conn.rollback()
                 self._pool.putconn(self._conn)
             except Exception:
-                try:
-                    self._pool.putconn(self._conn, close=True)
-                except Exception:
-                    pass
+                pass
         else:
             try:
                 self._conn.close()
@@ -259,48 +289,30 @@ class PgConnectionWrapper:
 def get_connection():
     target_url = get_target_db_url()
     if target_url:
-        pool = get_pg_pool()
-        if pool:
-            try:
-                raw_conn = pool.getconn()
-                if getattr(raw_conn, 'closed', False):
-                    pool.putconn(raw_conn, close=True)
-                    raw_conn = pool.getconn()
-                else:
-                    try:
-                        raw_conn.rollback()
-                    except Exception:
-                        pass
-                return PgConnectionWrapper(raw_conn, pool=pool)
-            except Exception as e:
-                print("[DB Connection] Pool getconn failed, falling back to direct connection:", e)
+        # 1. On Vercel / serverless cloud, prefer pg8000 (100% pure Python, zero binary issues)
+        try:
+            raw_conn = connect_pg8000(target_url)
+            return PgConnectionWrapper(raw_conn, is_pg8000=True)
+        except Exception as e_pg8000:
+            print("[DB Connection] pg8000 connection attempt note:", e_pg8000)
 
+        # 2. Try psycopg2 if available locally
         try:
             import psycopg2
             raw_conn = psycopg2.connect(target_url, connect_timeout=10)
-            return PgConnectionWrapper(raw_conn)
-        except Exception as e:
-            print("[DB Connection] Primary PostgreSQL connection failed:", e)
+            return PgConnectionWrapper(raw_conn, is_pg8000=False)
+        except Exception as e_psycopg:
+            print("[DB Connection] psycopg2 connection failed:", e_psycopg)
             for fallback_url in [SUPABASE_DEFAULT_DB_URL, SUPABASE_SESSION_POOLER_URL]:
                 if target_url != fallback_url:
                     try:
-                        raw_conn = psycopg2.connect(fallback_url, connect_timeout=10)
-                        return PgConnectionWrapper(raw_conn)
-                    except Exception as e2:
-                        print("[DB Connection] Fallback DB URL failed:", e2)
+                        raw_conn = connect_pg8000(fallback_url)
+                        return PgConnectionWrapper(raw_conn, is_pg8000=True)
+                    except Exception:
+                        pass
             if IS_VERCEL:
-                raise e
+                raise e_pg8000
 
     conn = sqlite3.connect(DB_PATH, check_same_thread=False)
     conn.row_factory = sqlite3.Row
-    try:
-        conn.execute("PRAGMA journal_mode = WAL;")
-        conn.execute("PRAGMA synchronous = NORMAL;")
-        conn.execute("PRAGMA cache_size = -64000;")      # 64MB page cache
-        conn.execute("PRAGMA foreign_keys = ON;")
-        conn.execute("PRAGMA busy_timeout = 5000;")      # 5s retry on lock, prevents immediate deadlock errors
-        conn.execute("PRAGMA temp_store = MEMORY;")      # keep temp tables in RAM, not disk
-        conn.execute("PRAGMA mmap_size = 268435456;")    # 256MB memory-mapped I/O for faster sequential reads
-    except Exception:
-        pass
     return conn
