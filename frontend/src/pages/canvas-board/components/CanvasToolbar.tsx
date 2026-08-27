@@ -3,7 +3,7 @@ import {
   MousePointer, Type, Pen, Highlighter, Eraser, Minus, ArrowUpRight,
   Square, Circle, Palette, Sliders, Undo2, Redo2, Trash2
 } from 'lucide-react';
-import { CanvasTool, PRESET_COLORS, PRESET_BG_COLORS } from '../types';
+import { CanvasTool, PRESET_COLORS, PRESET_BG_COLORS, FONT_FAMILIES } from '../types';
 
 interface CanvasToolbarProps {
   activeTool: CanvasTool;
@@ -12,6 +12,10 @@ interface CanvasToolbarProps {
   setSelectedColor: (color: string) => void;
   selectedBgColor: string;
   setSelectedBgColor: (color: string) => void;
+  selectedFontFamily?: string;
+  setSelectedFontFamily?: (font: string) => void;
+  textSize?: number;
+  setTextSize?: (size: number) => void;
   currentSize: number;
   penSize: number;
   setPenSize: (size: number) => void;
@@ -34,6 +38,10 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
   setSelectedColor,
   selectedBgColor,
   setSelectedBgColor,
+  selectedFontFamily = '"Times New Roman", Times, serif',
+  setSelectedFontFamily,
+  textSize = 20,
+  setTextSize,
   currentSize,
   penSize,
   setPenSize,
@@ -159,6 +167,21 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
         >
           <Circle size={14} />
         </button>
+        {/* Font Family selector for Text tool */}
+        {activeTool === 'text' && setSelectedFontFamily && (
+          <div className="flex items-center gap-1.5 bg-[#141829] border border-white/15 px-2 py-1 rounded-xl ml-1">
+            <span className="text-[11px] font-bold text-slate-400">Kiểu:</span>
+            <select
+              value={selectedFontFamily}
+              onChange={(e) => setSelectedFontFamily(e.target.value)}
+              className="bg-[#141829] text-white text-xs font-bold focus:outline-none cursor-pointer border-0"
+            >
+              {FONT_FAMILIES.map(f => (
+                <option key={f.value} value={f.value} className="bg-[#0c0f1e] text-white">{f.label}</option>
+              ))}
+            </select>
+          </div>
+        )}
       </div>
 
       {/* Right Controls */}
@@ -248,22 +271,23 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
               className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition cursor-pointer text-xs font-bold text-slate-300"
             >
               <Sliders size={12} />
-              <span>{currentSize}px</span>
+              <span>{activeTool === 'text' ? (textSize || 20) : currentSize}px</span>
             </button>
 
             {showSizePopover && (
               <div className="absolute top-full right-0 mt-2 bg-[#0c0f1e] border border-[#212c4b] p-3 rounded-2xl shadow-2xl z-50 space-y-2.5 min-w-[230px]">
                 <div className="flex items-center justify-between text-[11px] font-bold text-slate-300">
-                  <span>{activeTool === 'eraser' ? 'Kích thước tẩy' : activeTool === 'text' ? 'Cỡ chữ font' : 'Độ dày nét'}</span>
+                  <span>{activeTool === 'eraser' ? 'Kích thước tẩy' : activeTool === 'text' ? 'Cỡ chữ' : 'Độ dày nét'}</span>
                   <div className="flex items-center gap-1">
                     <input
                       type="number"
                       min={1}
                       max={150}
-                      value={currentSize}
+                      value={activeTool === 'text' ? (textSize || 20) : currentSize}
                       onChange={(e) => {
                         const val = Math.max(1, Math.min(150, parseInt(e.target.value) || 1));
-                        if (activeTool === 'pen') setPenSize(val);
+                        if (activeTool === 'text' && setTextSize) setTextSize(val);
+                        else if (activeTool === 'pen') setPenSize(val);
                         else if (activeTool === 'highlighter') setHlSize(val);
                         else if (activeTool === 'eraser') setEraserSize(val);
                         else setShapeSize(val);
@@ -276,12 +300,13 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
                 <div className="flex items-center gap-3 pt-1">
                   <input
                     type="range"
-                    min={activeTool === 'pen' ? 1 : activeTool === 'highlighter' ? 8 : 4}
-                    max={activeTool === 'pen' ? 50 : activeTool === 'highlighter' ? 80 : 120}
-                    value={currentSize}
+                    min={activeTool === 'pen' ? 1 : activeTool === 'highlighter' ? 8 : activeTool === 'text' ? 10 : 4}
+                    max={activeTool === 'pen' ? 50 : activeTool === 'highlighter' ? 80 : activeTool === 'text' ? 80 : 120}
+                    value={activeTool === 'text' ? (textSize || 20) : currentSize}
                     onChange={(e) => {
                       const val = parseInt(e.target.value);
-                      if (activeTool === 'pen') setPenSize(val);
+                      if (activeTool === 'text' && setTextSize) setTextSize(val);
+                      else if (activeTool === 'pen') setPenSize(val);
                       else if (activeTool === 'highlighter') setHlSize(val);
                       else if (activeTool === 'eraser') setEraserSize(val);
                       else setShapeSize(val);
@@ -291,8 +316,8 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
                   <div
                     className="rounded-full shrink-0 border border-white/40"
                     style={{
-                      width: Math.min(26, Math.max(4, currentSize / 2.5)),
-                      height: Math.min(26, Math.max(4, currentSize / 2.5)),
+                      width: Math.min(26, Math.max(4, (activeTool === 'text' ? (textSize || 20) : currentSize) / 2.5)),
+                      height: Math.min(26, Math.max(4, (activeTool === 'text' ? (textSize || 20) : currentSize) / 2.5)),
                       backgroundColor: activeTool === 'eraser' ? '#ff3344' : selectedColor,
                     }}
                   />

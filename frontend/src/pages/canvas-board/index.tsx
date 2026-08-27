@@ -44,6 +44,8 @@ export default function CanvasBoardPage() {
   const [activeTool, setActiveTool] = useState<CanvasTool>('pen');
   const [selectedColor, setSelectedColor] = useState<string>('#ff3344');
   const [selectedBgColor, setSelectedBgColor] = useState<string>('#ffffff');
+  const [selectedFontFamily, setSelectedFontFamily] = useState<string>('"Times New Roman", Times, serif');
+  const [textSize, setTextSize] = useState<number>(20);
   const [penSize, setPenSize] = useState<number>(4);
   const [hlSize, setHlSize] = useState<number>(24);
   const [eraserSize, setEraserSize] = useState<number>(50);
@@ -320,8 +322,8 @@ export default function CanvasBoardPage() {
           text: '',
           color: selectedColor,
           bgColor: selectedBgColor,
-          fontSize: 20,
-          fontFamily: 'Times New Roman',
+          fontSize: textSize,
+          fontFamily: selectedFontFamily,
         };
         setCanvasTextBoxes(prev => [...prev, newTextBox]);
         setSelectedId(newTextBox.id);
@@ -618,7 +620,9 @@ export default function CanvasBoardPage() {
           activeTool={activeTool} setActiveTool={setActiveTool}
           selectedColor={selectedColor} setSelectedColor={setSelectedColor}
           selectedBgColor={selectedBgColor} setSelectedBgColor={setSelectedBgColor}
-          currentSize={activeTool === 'pen' ? penSize : activeTool === 'highlighter' ? hlSize : activeTool === 'eraser' ? eraserSize : shapeSize}
+          selectedFontFamily={selectedFontFamily} setSelectedFontFamily={setSelectedFontFamily}
+          textSize={textSize} setTextSize={setTextSize}
+          currentSize={activeTool === 'pen' ? penSize : activeTool === 'highlighter' ? hlSize : activeTool === 'eraser' ? eraserSize : activeTool === 'text' ? textSize : shapeSize}
           penSize={penSize} setPenSize={setPenSize} hlSize={hlSize} setHlSize={setHlSize} eraserSize={eraserSize} setEraserSize={setEraserSize} setShapeSize={setShapeSize}
           undoStackLength={undoStackLength} redoStackLength={redoStackLength} onUndo={handleUndo} onRedo={handleRedo}
           onClearPage={() => { pushHistorySnapshot(); setPageStrokes(prev => ({ ...prev, [currentPage]: [] })); }}
@@ -649,6 +653,11 @@ export default function CanvasBoardPage() {
             selectedId={selectedType === 'text' ? selectedId : null}
             onSelect={(id) => { setSelectedId(id); setSelectedType('text'); }}
             onUpdate={(updated) => setCanvasTextBoxes(prev => prev.map(t => t.id === updated.id ? updated : t))}
+            onDelete={(id) => {
+              pushHistorySnapshot();
+              setCanvasTextBoxes(prev => prev.filter(t => t.id !== id));
+              if (selectedId === id) { setSelectedId(null); setSelectedType(null); }
+            }}
             zoom={zoom} pan={pan} activeTool={activeTool}
           />
 

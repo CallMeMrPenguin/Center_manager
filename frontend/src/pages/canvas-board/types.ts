@@ -36,7 +36,20 @@ export interface CanvasTextBox {
   bgColor: string;
   fontSize: number;
   fontFamily: string;
+  fontWeight?: 'normal' | 'bold';
+  fontStyle?: 'normal' | 'italic';
 }
+
+export const FONT_FAMILIES = [
+  { label: 'Times New Roman', value: '"Times New Roman", Times, serif' },
+  { label: 'Arial', value: 'Arial, Helvetica, sans-serif' },
+  { label: 'Roboto', value: 'Roboto, sans-serif' },
+  { label: 'Montserrat', value: 'Montserrat, sans-serif' },
+  { label: 'Courier New', value: '"Courier New", Courier, monospace' },
+  { label: 'Georgia', value: 'Georgia, serif' },
+];
+
+export const FONT_SIZES = [12, 14, 16, 18, 20, 24, 28, 32, 36, 44, 56, 72];
 
 export interface StrokeRecord {
   id: string;

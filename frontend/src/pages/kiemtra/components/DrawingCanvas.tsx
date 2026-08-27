@@ -82,10 +82,12 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
     if (w <= 0 || h <= 0) return;
     const dpr = window.devicePixelRatio || 1;
 
-    canvas.width = w * dpr;
-    canvas.height = h * dpr;
+    canvas.width = Math.round(w * dpr);
+    canvas.height = Math.round(h * dpr);
     canvas.style.width = `${w}px`;
     canvas.style.height = `${h}px`;
+    container.style.width = `${w}px`;
+    container.style.height = `${h}px`;
 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
@@ -97,7 +99,7 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
     }
   }, [redrawStrokes]);
 
-  // Observe container resize continuously
+  // Observe container & parent resize continuously
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
@@ -107,6 +109,9 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
       syncCanvasSize();
     });
     observer.observe(container);
+    if (container.parentElement) {
+      observer.observe(container.parentElement);
+    }
     return () => observer.disconnect();
   }, [syncCanvasSize]);
 
@@ -372,11 +377,7 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
       {/* 100% VISIBLE CIRCULAR ERASER BORDER INDICATOR */}
       <div
         ref={eraserIndicatorRef}
-        style={{
-          width: `${eraserSize}px`,
-          height: `${eraserSize}px`,
-          display: activeTool === 'eraser' ? 'block' : 'none',
-        }}
+        style={{ width: `${eraserSize}px`, height: `${eraserSize}px`, display: activeTool === 'eraser' ? 'block' : 'none' }}
         className="pointer-events-none absolute top-0 left-0 rounded-full border-2 border-[#ef4444] bg-[#ef4444]/20 shadow-[0_0_12px_rgba(239,68,68,0.5)] ring-1 ring-white/70"
       />
 
@@ -385,12 +386,9 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
         activeTool={activeTool} setActiveTool={setActiveTool}
         selectedColor={selectedColor} setSelectedColor={setSelectedColor}
         currentSize={currentSize}
-        penSize={penSize} setPenSize={setPenSize}
-        hlSize={hlSize} setHlSize={setHlSize}
-        eraserSize={eraserSize} setEraserSize={setEraserSize}
+        penSize={penSize} setPenSize={setPenSize} hlSize={hlSize} setHlSize={setHlSize} eraserSize={eraserSize} setEraserSize={setEraserSize}
         canUndo={undoStack.length > 0} canRedo={redoStack.length > 0}
-        onUndo={handleUndo} onRedo={handleRedo}
-        onClearAll={handleClearAll}
+        onUndo={handleUndo} onRedo={handleRedo} onClearAll={handleClearAll}
         toolbarPos={toolbarPos} onMouseDown={handleToolbarMouseDown}
       />
     </div>

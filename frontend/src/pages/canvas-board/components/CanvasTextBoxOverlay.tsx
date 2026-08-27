@@ -1,11 +1,13 @@
 import React, { useState, useRef } from 'react';
-import { CanvasTextBox, Point } from '../types';
+import { Trash2 } from 'lucide-react';
+import { CanvasTextBox, Point, FONT_FAMILIES } from '../types';
 
 interface CanvasTextBoxOverlayProps {
   textBoxes: CanvasTextBox[];
   selectedId: string | null;
   onSelect: (id: string) => void;
   onUpdate: (updated: CanvasTextBox) => void;
+  onDelete?: (id: string) => void;
   zoom: number;
   pan: Point;
   activeTool: string;
@@ -17,6 +19,7 @@ export const CanvasTextBoxOverlay: React.FC<CanvasTextBoxOverlayProps> = ({
   selectedId,
   onSelect,
   onUpdate,
+  onDelete,
   zoom,
   pan,
   activeTool,
@@ -117,6 +120,125 @@ export const CanvasTextBoxOverlay: React.FC<CanvasTextBoxOverlayProps> = ({
               willChange: 'transform, left, top',
             }}
           >
+            {/* FLOATING FORMATTING BAR FOR SELECTED TEXT BOX */}
+            {isSelected && (
+              <div
+                onPointerDown={(e) => e.stopPropagation()}
+                className="absolute -top-11 left-0 flex items-center gap-1.5 bg-[#0c0f1e] border border-[#212c4b] px-2 py-1 rounded-xl shadow-2xl z-50 select-none whitespace-nowrap"
+                style={{
+                  transform: `scale(${Math.max(0.65, 1 / zoom)})`,
+                  transformOrigin: 'bottom left',
+                }}
+              >
+                {/* Font Family Selector */}
+                <select
+                  value={tb.fontFamily || '"Times New Roman", Times, serif'}
+                  onChange={(e) => {
+                    e.stopPropagation();
+                    onUpdate({ ...tb, fontFamily: e.target.value });
+                  }}
+                  className="bg-[#141829] border border-white/20 text-white rounded-lg px-2 py-0.5 text-xs font-semibold focus:outline-none cursor-pointer"
+                >
+                  {FONT_FAMILIES.map(f => (
+                    <option key={f.value} value={f.value} className="bg-[#0c0f1e] text-white">{f.label}</option>
+                  ))}
+                </select>
+
+                {/* Font Size Controls */}
+                <div className="flex items-center gap-1 bg-[#141829] border border-white/10 px-1.5 py-0.5 rounded-lg">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onUpdate({ ...tb, fontSize: Math.max(8, (tb.fontSize || 20) - 2) });
+                    }}
+                    className="text-slate-300 hover:text-white font-bold text-xs px-1 cursor-pointer"
+                    title="Giảm cỡ chữ"
+                  >-</button>
+                  <span className="text-xs font-mono font-bold text-indigo-300 min-w-[20px] text-center">
+                    {tb.fontSize || 20}
+                  </span>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onUpdate({ ...tb, fontSize: Math.min(96, (tb.fontSize || 20) + 2) });
+                    }}
+                    className="text-slate-300 hover:text-white font-bold text-xs px-1 cursor-pointer"
+                    title="Tăng cỡ chữ"
+                  >+</button>
+                </div>
+
+                {/* Bold Toggle */}
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onUpdate({ ...tb, fontWeight: tb.fontWeight === 'bold' ? 'normal' : 'bold' });
+                  }}
+                  className={`px-1.5 py-0.5 rounded-lg text-xs font-black transition cursor-pointer border ${
+                    tb.fontWeight === 'bold' ? 'bg-[#5c36f5] text-white border-indigo-400' : 'bg-transparent text-slate-300 border-white/10 hover:text-white'
+                  }`}
+                  title="In đậm (Bold)"
+                >
+                  B
+                </button>
+
+                {/* Italic Toggle */}
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onUpdate({ ...tb, fontStyle: tb.fontStyle === 'italic' ? 'normal' : 'italic' });
+                  }}
+                  className={`px-1.5 py-0.5 rounded-lg text-xs font-serif italic transition cursor-pointer border ${
+                    tb.fontStyle === 'italic' ? 'bg-[#5c36f5] text-white border-indigo-400' : 'bg-transparent text-slate-300 border-white/10 hover:text-white'
+                  }`}
+                  title="In nghiêng (Italic)"
+                >
+                  I
+                </button>
+
+                {/* Color Input */}
+                <label className="relative cursor-pointer flex items-center p-0.5 rounded-lg border border-white/15 hover:border-white/40" title="Đổi màu chữ">
+                  <input
+                    type="color"
+                    value={tb.color || '#ff3344'}
+                    onChange={(e) => {
+                      e.stopPropagation();
+                      onUpdate({ ...tb, color: e.target.value });
+                    }}
+                    className="w-4 h-4 rounded-full cursor-pointer bg-transparent border-0"
+                  />
+                </label>
+
+                {/* Background Toggle */}
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    const isTrans = !tb.bgColor || tb.bgColor === 'transparent';
+                    onUpdate({ ...tb, bgColor: isTrans ? '#ffffff' : 'transparent' });
+                  }}
+                  className={`px-1.5 py-0.5 rounded-lg text-[10px] font-bold border transition cursor-pointer ${
+                    tb.bgColor && tb.bgColor !== 'transparent' ? 'bg-white text-black border-slate-300' : 'text-slate-400 border-white/10 hover:text-white'
+                  }`}
+                  title="Bật/Tắt nền trắng"
+                >
+                  {tb.bgColor && tb.bgColor !== 'transparent' ? 'Nền trắng' : 'Nền trong'}
+                </button>
+
+                {/* Delete button */}
+                {onDelete && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onDelete(tb.id);
+                    }}
+                    className="p-1 text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition cursor-pointer ml-0.5"
+                    title="Xóa Text Box"
+                  >
+                    <Trash2 size={12} />
+                  </button>
+                )}
+              </div>
+            )}
+
             {isEditing ? (
               <textarea
                 autoFocus
@@ -132,8 +254,10 @@ export const CanvasTextBoxOverlay: React.FC<CanvasTextBoxOverlayProps> = ({
                 className="canvas-text-editor w-full h-full p-1 leading-normal"
                 style={{
                   color: tb.color || '#ff3344',
-                  fontSize: `${tb.fontSize}px`,
+                  fontSize: `${tb.fontSize || 20}px`,
                   fontFamily: tb.fontFamily || '"Times New Roman", Times, serif',
+                  fontWeight: tb.fontWeight || 'normal',
+                  fontStyle: tb.fontStyle || 'normal',
                   display: 'block',
                   lineHeight: '1.3',
                 }}
@@ -143,10 +267,11 @@ export const CanvasTextBoxOverlay: React.FC<CanvasTextBoxOverlayProps> = ({
                 className="w-full h-full p-1 overflow-hidden whitespace-pre-wrap leading-normal"
                 style={{
                   color: isEmpty ? '#94a3b8' : tb.color || '#ff3344',
-                  fontSize: `${tb.fontSize}px`,
+                  fontSize: `${tb.fontSize || 20}px`,
                   fontFamily: tb.fontFamily || '"Times New Roman", Times, serif',
+                  fontWeight: tb.fontWeight || 'normal',
                   boxSizing: 'border-box',
-                  fontStyle: isEmpty ? 'italic' : 'normal',
+                  fontStyle: isEmpty ? 'italic' : (tb.fontStyle || 'normal'),
                   lineHeight: '1.3',
                 }}
               >

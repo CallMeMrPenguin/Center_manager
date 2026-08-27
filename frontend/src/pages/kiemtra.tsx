@@ -237,7 +237,13 @@ export default function KiemTraPage() {
 
   // Main Content JSX
   const mainContent = (
-    <div className={`h-full flex flex-col bg-[#070913] ${isFullscreen ? 'fixed inset-0 z-[99999] p-6 overflow-y-auto' : 'p-6 space-y-6 overflow-y-auto'}`}>
+    <div className={`h-full flex flex-col bg-[#070913] ${
+      isFullscreen
+        ? 'fixed inset-0 z-[99999] p-6 overflow-hidden'
+        : step === 'running'
+        ? 'h-full p-6 overflow-hidden min-h-0'
+        : 'p-6 space-y-6 overflow-y-auto'
+    }`}>
       {/* PERSISTENT HEADER BAR */}
       {step !== 'running' && (
         <div className="flex items-center justify-between bg-[#0c0f1e] border border-[#1d2744] px-6 py-3.5 rounded-2xl shadow-2xl shrink-0">
