@@ -71,16 +71,18 @@ export function useReportsData() {
 
   const loadClassesAndStudents = async () => {
     try {
-      const classList = await api.getClasses();
-      setClasses(classList);
+      const [classList, studentList] = await Promise.all([
+        api.getClasses(),
+        api.getStudents()
+      ]);
+      setClasses(classList || []);
       if (classList && classList.length >= 2) {
         setCompareClassAId(prev => prev || String(classList[0].id));
         setCompareClassBId(prev => prev || String(classList[1].id));
       } else if (classList && classList.length === 1) {
         setCompareClassAId(prev => prev || String(classList[0].id));
       }
-      const studentList = await api.getStudents();
-      setStudents(studentList);
+      setStudents(studentList || []);
     } catch (err: any) {
       showToast("Không thể tải danh sách lớp/học sinh: " + err.message, "error");
     }
