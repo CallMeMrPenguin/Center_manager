@@ -8,6 +8,7 @@ import { ConfirmProvider } from './components/ConfirmDialog';
 import { LoginPage } from './pages/auth/LoginPage';
 import { AuthUser, getCurrentUser, clearAuthUser } from './utils/authUtils';
 import { useAutoDeploymentRefresh } from './hooks/useAutoDeploymentRefresh';
+import { useWarmupDataCache } from './hooks/useWarmupDataCache';
 
 function AppContent() {
   // Auto-detect and reload on new deployment
@@ -15,6 +16,9 @@ function AppContent() {
 
   // Persistent Login session (auto-restores user on refresh / app reopening)
   const [currentUser, setCurrentUser] = useState<AuthUser | null>(() => getCurrentUser());
+
+  // Background data cache warmup for 0ms instant tab switching
+  useWarmupDataCache(currentUser);
   const [activeTab, setActiveTab] = useState<string>(() => {
     const user = getCurrentUser();
     return user?.role === 'student' ? 'assignments' : 'dashboard';
