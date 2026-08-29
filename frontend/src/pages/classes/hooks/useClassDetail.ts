@@ -80,20 +80,26 @@ export function useClassDetail(selectedClass: ClassItem | null) {
     if (!valStr) return '';
     if (isNaN(Number(valStr))) return '';
 
-    const numVal = parseFloat(valStr);
+    let numVal = parseFloat(valStr);
+    if (numVal < 0) return '';
     if (numVal > 10) {
       if (valStr.startsWith('10')) {
-        return '10';
+        numVal = 10;
       } else {
         const digits = valStr.replace('.', '').replace('-', '');
         if (digits.length >= 2) {
-          return `${digits[0]}.${digits[1]}`;
+          numVal = parseFloat(`${digits[0]}.${digits[1]}`);
         } else if (digits.length === 1) {
-          return `${digits[0]}`;
+          numVal = parseFloat(digits[0]);
+        } else {
+          return '';
         }
       }
     }
-    return String(numVal);
+    if (numVal > 10) numVal = 10;
+    // 1-decimal truncation per Rule 17
+    const truncated = Math.floor(numVal * 10 + 0.0000001) / 10;
+    return truncated % 1 === 0 ? String(truncated.toFixed(0)) : truncated.toFixed(1);
   }, []);
 
   const saveDebounceRef = useRef<any>(null);
@@ -107,7 +113,7 @@ export function useClassDetail(selectedClass: ClassItem | null) {
   }, []);
 
   const handleUpdateRecord = useCallback(
-    (studentId: number, field: string, value: any, syncParentState = false) => {
+    (studentId: number, field: string, value: any) => {
       const prev = attendanceRecordsRef.current;
       const newRecs = prev.map((rec) => {
         if (rec.student_id !== studentId) return rec;
@@ -115,7 +121,8 @@ export function useClassDetail(selectedClass: ClassItem | null) {
         const c1 = updated.check_1 !== null && updated.check_1 !== undefined && updated.check_1 !== '' ? Number(updated.check_1) : null;
         const c2 = updated.check_2 !== null && updated.check_2 !== undefined && updated.check_2 !== '' ? Number(updated.check_2) : null;
         const hw = updated.homework !== null && updated.homework !== undefined && updated.homework !== '' ? Number(updated.homework) : null;
-        const hasScore = (c1 !== null && c1 > 0) || (c2 !== null && c2 > 0) || (hw !== null && hw > 0);
+        const mock = updated.mock_test !== null && updated.mock_test !== undefined && updated.mock_test !== '' ? Number(updated.mock_test) : null;
+        const hasScore = (c1 !== null && c1 > 0) || (c2 !== null && c2 > 0) || (hw !== null && hw > 0) || (mock !== null && mock > 0);
 
         if (field !== 'status' && hasScore && updated.status === 'Vắng mặt') {
           updated.status = 'Có mặt';
@@ -124,14 +131,10 @@ export function useClassDetail(selectedClass: ClassItem | null) {
       });
 
       attendanceRecordsRef.current = newRecs;
-
-      // Only re-render the whole table when attendance status changes or when explicitly requested
-      // This keeps cell-by-cell score tabbing 100% stable, fast, and free of focus-stealing re-renders!
-      if (syncParentState || field === 'status') {
-        startTransition(() => {
-          setAttendanceRecords(newRecs);
-        });
-      }
+      // Always sync state so TanStack DataTable sort, filter, and exports are 100% up to date
+      startTransition(() => {
+        setAttendanceRecords(newRecs);
+      });
 
       // Debounce auto-save to backend
       if (selectedClass && newRecs.length > 0) {
@@ -151,40 +154,39 @@ export function useClassDetail(selectedClass: ClassItem | null) {
     [selectedClass, attendanceDate]
   );
 
-  const applyAutoAttendanceStatus = useCallback((records: AttendanceRecord[], targetDateStr: string) => {
-    const todayStr = getLocalDateStr();
-    const isPastDate = targetDateStr < todayStr;
-
+  const applyAutoAttendanceStatus = useCallback((records: AttendanceRecord[]) => {
     const newRecords = records.map((rec) => {
       const c1 = rec.check_1 !== null && rec.check_1 !== undefined && rec.check_1 !== '' ? Number(rec.check_1) : null;
       const c2 = rec.check_2 !== null && rec.check_2 !== undefined && rec.check_2 !== '' ? Number(rec.check_2) : null;
       const hw = rec.homework !== null && rec.homework !== undefined && rec.homework !== '' ? Number(rec.homework) : null;
-      const hasScore = (c1 !== null && c1 > 0) || (c2 !== null && c2 > 0) || (hw !== null && hw > 0);
-      const hasNote = rec.notes && String(rec.notes).trim() !== '';
+      const mock = rec.mock_test !== null && rec.mock_test !== undefined && rec.mock_test !== '' ? Number(rec.mock_test) : null;
+      const hasScore = (c1 !== null && c1 > 0) || (c2 !== null && c2 > 0) || (hw !== null && hw > 0) || (mock !== null && mock > 0);
 
-      let newStatus = rec.status;
-      if (hasScore) {
-        newStatus = 'Có mặt';
-      } else if (isPastDate && !hasScore && !hasNote && !rec.id) {
-        newStatus = 'Vắng mặt';
-      } else if (!newStatus) {
-        newStatus = 'Có mặt';
+      let status = rec.status;
+      if (hasScore && !status) {
+        status = 'Có mặt';
+      } else if (!status) {
+        status = 'Có mặt';
       }
-      return { ...rec, status: newStatus };
+      return { ...rec, status };
     });
     return { records: newRecords };
   }, []);
 
   const handleSaveAttendance = async () => {
     if (!selectedClass) return;
+    if (saveDebounceRef.current) {
+      clearTimeout(saveDebounceRef.current);
+    }
     setSavingAttendance(true);
     try {
-      const { records: finalRecords } = applyAutoAttendanceStatus(attendanceRecords, attendanceDate);
+      const currentRecords = attendanceRecordsRef.current.length > 0 ? attendanceRecordsRef.current : attendanceRecords;
+      const { records: finalRecords } = applyAutoAttendanceStatus(currentRecords);
       attendanceRecordsRef.current = finalRecords;
       setAttendanceRecords(finalRecords);
       await api.saveClassAttendance(selectedClass.id, attendanceDate, finalRecords);
       showToast('Đã lưu bảng điểm danh và điểm học sinh!', 'success');
-      notifyDataChanged();
+      notifyDataChanged(['attendance', 'reports', 'analytics']);
     } catch (err: any) {
       showToast('Lưu thất bại: ' + err.message, 'error');
     } finally {
@@ -195,7 +197,8 @@ export function useClassDetail(selectedClass: ClassItem | null) {
   const handleExportExcel = async () => {
     if (!selectedClass) return;
     try {
-      const res = await api.exportClassExcel(selectedClass.id, attendanceDate, attendanceRecords);
+      const recordsToExport = attendanceRecordsRef.current.length > 0 ? attendanceRecordsRef.current : attendanceRecords;
+      const res = await api.exportClassExcel(selectedClass.id, attendanceDate, recordsToExport);
       if (res && res.filename) {
         showToast(`Đã xuất file Excel: ${res.filename}`, 'success', 'MỞ FILE', () => {
           api.openLocalFile(res.filename);
@@ -209,7 +212,8 @@ export function useClassDetail(selectedClass: ClassItem | null) {
   const handleExportDocx = async () => {
     if (!selectedClass) return;
     try {
-      const res = await api.exportClassDocx(selectedClass.id, attendanceDate, attendanceRecords);
+      const recordsToExport = attendanceRecordsRef.current.length > 0 ? attendanceRecordsRef.current : attendanceRecords;
+      const res = await api.exportClassDocx(selectedClass.id, attendanceDate, recordsToExport);
       if (res && res.filename) {
         showToast(`Đã xuất file Word: ${res.filename}`, 'success', 'MỞ FILE', () => {
           api.openLocalFile(res.filename);

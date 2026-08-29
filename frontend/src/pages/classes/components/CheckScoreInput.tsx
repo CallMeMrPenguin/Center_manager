@@ -21,40 +21,48 @@ const focusTarget = (target: HTMLInputElement | null | undefined) => {
   }
 };
 
-const getNextInput = (currentRowIdx: number, currentField: string, isShift: boolean): HTMLInputElement | null => {
-  const fieldIdx = SCORE_FIELDS.indexOf(currentField as any);
-  if (fieldIdx === -1) return null;
+const navigateScoreInputs = (currentInput: HTMLInputElement, isShift: boolean) => {
+  const allScoreInputs = Array.from(
+    document.querySelectorAll<HTMLInputElement>('input[data-score-input="true"]:not([disabled])')
+  );
+  if (allScoreInputs.length === 0) return;
 
-  if (isShift) {
-    // Shift + Tab: Move left in same row, or to last field of previous row
-    if (fieldIdx > 0) {
-      return document.querySelector<HTMLInputElement>(
-        `input[data-score-input="true"][data-row-index="${currentRowIdx}"][data-score-field="${SCORE_FIELDS[fieldIdx - 1]}"]`
-      );
-    } else if (currentRowIdx > 0) {
-      return document.querySelector<HTMLInputElement>(
-        `input[data-score-input="true"][data-row-index="${currentRowIdx - 1}"][data-score-field="${SCORE_FIELDS[SCORE_FIELDS.length - 1]}"]`
-      );
-    }
-  } else {
-    // Tab: Move right in same row, or to first field of next row
-    if (fieldIdx < SCORE_FIELDS.length - 1) {
-      return document.querySelector<HTMLInputElement>(
-        `input[data-score-input="true"][data-row-index="${currentRowIdx}"][data-score-field="${SCORE_FIELDS[fieldIdx + 1]}"]`
-      );
-    } else {
-      return document.querySelector<HTMLInputElement>(
-        `input[data-score-input="true"][data-row-index="${currentRowIdx + 1}"][data-score-field="${SCORE_FIELDS[0]}"]`
-      );
-    }
+  const currentIndex = allScoreInputs.indexOf(currentInput);
+  if (currentIndex === -1) {
+    focusTarget(allScoreInputs[0]);
+    return;
   }
-  return null;
+
+  let nextIndex: number;
+  if (isShift) {
+    nextIndex = currentIndex > 0 ? currentIndex - 1 : allScoreInputs.length - 1;
+  } else {
+    nextIndex = currentIndex < allScoreInputs.length - 1 ? currentIndex + 1 : 0;
+  }
+
+  focusTarget(allScoreInputs[nextIndex]);
 };
 
-const getRowOffsetInput = (currentRowIdx: number, currentField: string, delta: number): HTMLInputElement | null => {
-  return document.querySelector<HTMLInputElement>(
-    `input[data-score-input="true"][data-row-index="${currentRowIdx + delta}"][data-score-field="${currentField}"]`
+const navigateVerticalScoreInputs = (currentInput: HTMLInputElement, field: string, delta: number) => {
+  const columnInputs = Array.from(
+    document.querySelectorAll<HTMLInputElement>(`input[data-score-input="true"][data-score-field="${field}"]:not([disabled])`)
   );
+  if (columnInputs.length === 0) return;
+
+  const currentIndex = columnInputs.indexOf(currentInput);
+  if (currentIndex === -1) {
+    focusTarget(columnInputs[0]);
+    return;
+  }
+
+  let targetIndex: number;
+  if (delta > 0) {
+    targetIndex = currentIndex < columnInputs.length - 1 ? currentIndex + 1 : 0;
+  } else {
+    targetIndex = currentIndex > 0 ? currentIndex - 1 : columnInputs.length - 1;
+  }
+
+  focusTarget(columnInputs[targetIndex]);
 };
 
 export const CheckScoreInput: React.FC<CheckScoreInputProps> = React.memo(({
@@ -82,34 +90,34 @@ export const CheckScoreInput: React.FC<CheckScoreInputProps> = React.memo(({
     const formatted = parseAndFormatScore(rawVal);
     setVal(formatted);
     const currentProp = rec[field] !== null && rec[field] !== undefined ? String(rec[field]) : '';
-    if (formatted !== currentProp && formatted !== lastCommittedRef.current) {
+    if (formatted !== currentProp || formatted !== lastCommittedRef.current) {
       lastCommittedRef.current = formatted;
       onUpdateRecord(rec.student_id, field, formatted);
     }
   }, [field, onUpdateRecord, parseAndFormatScore, rec]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    // 1. Enter or ArrowDown -> Move down to same column in next row
+    // 1. Enter or ArrowDown -> Move down to same score column of next student
     if (e.key === 'Enter' || e.key === 'ArrowDown') {
       e.preventDefault();
-      const target = getRowOffsetInput(rowIndex, field, 1);
-      if (target) focusTarget(target);
+      commitValue(e.currentTarget.value);
+      navigateVerticalScoreInputs(e.currentTarget, field, 1);
       return;
     }
 
-    // 2. ArrowUp -> Move up to same column in previous row
+    // 2. ArrowUp -> Move up to same score column of previous student
     if (e.key === 'ArrowUp') {
       e.preventDefault();
-      const target = getRowOffsetInput(rowIndex, field, -1);
-      if (target) focusTarget(target);
+      commitValue(e.currentTarget.value);
+      navigateVerticalScoreInputs(e.currentTarget, field, -1);
       return;
     }
 
-    // 3. Tab Navigation (Deterministic 1-press cell navigation)
+    // 3. Tab Navigation -> Smoothly cycle ONLY between all score inputs
     if (e.key === 'Tab') {
       e.preventDefault();
-      const target = getNextInput(rowIndex, field, e.shiftKey);
-      if (target) focusTarget(target);
+      commitValue(e.currentTarget.value);
+      navigateScoreInputs(e.currentTarget, e.shiftKey);
       return;
     }
 
@@ -119,11 +127,9 @@ export const CheckScoreInput: React.FC<CheckScoreInputProps> = React.memo(({
       const isAtEnd = input.selectionStart === input.value.length && input.selectionEnd === input.value.length;
       const isAllSelected = input.selectionStart === 0 && input.selectionEnd === input.value.length;
       if (isAtEnd || isAllSelected || input.value === '') {
-        const target = getNextInput(rowIndex, field, false);
-        if (target) {
-          e.preventDefault();
-          focusTarget(target);
-        }
+        e.preventDefault();
+        commitValue(input.value);
+        navigateScoreInputs(input, false);
       }
       return;
     }
@@ -134,11 +140,9 @@ export const CheckScoreInput: React.FC<CheckScoreInputProps> = React.memo(({
       const isAtStart = input.selectionStart === 0 && input.selectionEnd === 0;
       const isAllSelected = input.selectionStart === 0 && input.selectionEnd === input.value.length;
       if (isAtStart || isAllSelected || input.value === '') {
-        const target = getNextInput(rowIndex, field, true);
-        if (target) {
-          e.preventDefault();
-          focusTarget(target);
-        }
+        e.preventDefault();
+        commitValue(input.value);
+        navigateScoreInputs(input, true);
       }
       return;
     }
