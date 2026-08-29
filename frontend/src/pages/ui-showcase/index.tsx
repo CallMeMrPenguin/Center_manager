@@ -264,15 +264,26 @@ export default function UIShowcasePage() {
               </p>
             </div>
 
-            <div className="p-6 bg-[#0c0f1e] border border-white/10 rounded-2xl leading-relaxed text-sm text-slate-300 space-y-4">
+            <div className="p-6 bg-[#0c0f1e] border border-white/10 rounded-2xl leading-loose text-sm text-slate-300 space-y-3">
               <p>
-                Hệ thống hỗ trợ phân tích điểm số cho học sinh{' '}
+                Hệ thống hỗ trợ phân tích dữ liệu học tập thông minh cho học sinh{' '}
                 <HoverPreviewLink previewKey="user-alice" className="text-blue-400 font-bold border-b border-blue-400/40 hover:text-blue-300">
-                  Alice Johnson
+                  Alice Johnson (12A1)
                 </HoverPreviewLink>{' '}
                 và học sinh{' '}
                 <HoverPreviewLink previewKey="user-bob" className="text-purple-400 font-bold border-b border-purple-400/40 hover:text-purple-300">
-                  Bob Smith
+                  Bob Smith (11B2)
+                </HoverPreviewLink>
+                .
+              </p>
+              <p>
+                Công nghệ tích hợp nền tảng AI sinh ảnh chất lượng cao như{' '}
+                <HoverPreviewLink previewKey="midjourney" className="text-emerald-400 font-bold border-b border-emerald-400/40 hover:text-emerald-300">
+                  Midjourney AI
+                </HoverPreviewLink>{' '}
+                cùng mô hình mã nguồn mở{' '}
+                <HoverPreviewLink previewKey="stable" className="text-amber-400 font-bold border-b border-amber-400/40 hover:text-amber-300">
+                  Stable Diffusion
                 </HoverPreviewLink>
                 .
               </p>

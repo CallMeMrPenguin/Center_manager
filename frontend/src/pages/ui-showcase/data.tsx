@@ -30,23 +30,41 @@ export const sampleTreeData: FileTreeNode[] = [
 
 // 2. Hover Preview Data
 export const samplePreviewData: Record<string, HoverPreviewItem> = {
+  'user-alice': {
+    image: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=560&h=320&fit=crop',
+    title: 'Alice Johnson',
+    subtitle: 'Học sinh lớp 12A1 Chuyên Anh. Đạt giải Nhì học sinh giỏi thành phố.',
+    badge: 'Học Sinh Giỏi',
+    details: {
+      'Điểm TB': '8.8 / 10',
+      'Xếp Hạng': 'Top 3 Toàn Khóa',
+      'Chuyên Cần': '98%',
+      'EMA Level': '8.9',
+    },
+  },
+  'user-bob': {
+    image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=560&h=320&fit=crop',
+    title: 'Bob Smith',
+    subtitle: 'Học sinh lớp 11B2. Tiến bộ vượt bậc trong 4 tuần gần nhất.',
+    badge: 'Tiến Bộ Nhanh',
+    details: {
+      'Điểm TB': '7.6 / 10',
+      'Xếp Hạng': 'Hạng 12',
+      'Chuyên Cần': '94%',
+      'EMA Level': '7.8',
+    },
+  },
   midjourney: {
     image: 'https://images.unsplash.com/photo-1695144244472-a4543101ef35?w=560&h=320&fit=crop',
-    title: 'Midjourney',
+    title: 'Midjourney AI',
     subtitle: 'Tạo tác phẩm nghệ thuật AI chất lượng cao với độ chi tiết ấn tượng.',
-    badge: 'AI Art',
+    badge: 'AI Engine',
   },
   stable: {
     image: 'https://images.unsplash.com/photo-1712002641088-9d76f9080889?w=560&h=320&fit=crop',
     title: 'Stable Diffusion',
     subtitle: 'Mô hình sinh hình ảnh mã nguồn mở linh hoạt và mạnh mẽ.',
     badge: 'Open Source',
-  },
-  leonardo: {
-    image: 'https://images.unsplash.com/photo-1718241905696-cb34c2c07bed?w=560&h=320&fit=crop',
-    title: 'Leonardo AI',
-    subtitle: 'Nền tảng sinh tài nguyên đồ họa phục vụ thiết kế game và sản phẩm.',
-    badge: 'Assets',
   },
 };
 
