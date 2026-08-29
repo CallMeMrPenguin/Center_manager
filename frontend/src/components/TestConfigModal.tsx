@@ -210,7 +210,7 @@ export const TestConfigModal: React.FC<TestConfigModalProps> = ({
         notes: config.notes,
       });
       showToast('Đã lưu cấu hình bài kiểm tra cho buổi học.', 'success');
-      notifyDataChanged();
+      notifyDataChanged(['schedule', 'attendance', 'reports', 'analytics', 'classes']);
       if (onSaved) onSaved(config);
       onClose();
     } catch (err: any) {

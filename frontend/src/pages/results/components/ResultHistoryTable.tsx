@@ -52,25 +52,59 @@ export const ResultHistoryTable: React.FC<ResultHistoryTableProps> = ({ records,
       },
       {
         accessorKey: 'check_1',
-        header: 'Kiểm Tra 1',
-        cell: (info) => {
-          const val = info.getValue<number | null>();
+        header: () => <div className="text-center w-full">Kiểm Tra 1</div>,
+        cell: ({ row }) => {
+          const r = row.original;
+          const val = r.check_1;
+          const isGrammar = r.check_1_skill === 'grammar';
+          const topic = r.check_1_topic || (isGrammar ? r.grammar_topic : r.topic);
           return (
-            <span className="font-mono font-bold text-blue-400">
-              {trunc1Dec(val)}
-            </span>
+            <div className="text-center py-0.5">
+              <span className={`font-mono font-bold ${isGrammar ? 'text-purple-400' : 'text-blue-400'}`}>
+                {trunc1Dec(val)}
+              </span>
+              {topic && (
+                <div className="mt-0.5 flex flex-col items-center">
+                  <span className={`text-[10px] ${isGrammar ? 'text-purple-300/80' : 'text-blue-300/80'} font-medium truncate max-w-[130px] block`} title={topic}>
+                    {topic}
+                  </span>
+                  <span className={`text-[9px] px-1.5 py-0.2 rounded border font-semibold mt-0.5 ${
+                    isGrammar ? 'bg-purple-500/15 text-purple-300 border-purple-500/30' : 'bg-blue-500/15 text-blue-300 border-blue-500/30'
+                  }`}>
+                    {isGrammar ? 'Ngữ Pháp' : 'Từ Vựng'}
+                  </span>
+                </div>
+              )}
+            </div>
           );
         },
       },
       {
         accessorKey: 'check_2',
-        header: 'Kiểm Tra 2',
-        cell: (info) => {
-          const val = info.getValue<number | null>();
+        header: () => <div className="text-center w-full">Kiểm Tra 2</div>,
+        cell: ({ row }) => {
+          const r = row.original;
+          const val = r.check_2;
+          const isGrammar = r.check_2_skill === 'grammar';
+          const topic = r.check_2_topic || (isGrammar ? r.grammar_topic : r.topic);
           return (
-            <span className="font-mono font-bold text-purple-400">
-              {trunc1Dec(val)}
-            </span>
+            <div className="text-center py-0.5">
+              <span className={`font-mono font-bold ${isGrammar ? 'text-purple-400' : 'text-blue-400'}`}>
+                {trunc1Dec(val)}
+              </span>
+              {topic && (
+                <div className="mt-0.5 flex flex-col items-center">
+                  <span className={`text-[10px] ${isGrammar ? 'text-purple-300/80' : 'text-blue-300/80'} font-medium truncate max-w-[130px] block`} title={topic}>
+                    {topic}
+                  </span>
+                  <span className={`text-[9px] px-1.5 py-0.2 rounded border font-semibold mt-0.5 ${
+                    isGrammar ? 'bg-purple-500/15 text-purple-300 border-purple-500/30' : 'bg-blue-500/15 text-blue-300 border-blue-500/30'
+                  }`}>
+                    {isGrammar ? 'Ngữ Pháp' : 'Từ Vựng'}
+                  </span>
+                </div>
+              )}
+            </div>
           );
         },
       },

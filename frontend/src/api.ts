@@ -299,10 +299,10 @@ export const api = {
     if (studentId) p.push(`student_id=${studentId}`);
     return request<any>(`/api/reports/skill-breakdown${p.length ? `?${p.join('&')}` : ''}`, { tags: ['reports', 'analytics'] });
   },
-  getSessionTestConfig: (classId: number, date: string) =>
-    request<{ configured: boolean; test_config: any; session_id: number | null }>(`/api/classes/${classId}/sessions/test-config?date=${encodeURIComponent(date)}`, { tags: ['schedule'] }),
+  getSessionTestConfig: (classId: number, date: string, forceRefresh = true) =>
+    request<{ configured: boolean; test_config: any; session_id: number | null }>(`/api/classes/${classId}/sessions/test-config?date=${encodeURIComponent(date)}`, { tags: ['schedule'], forceRefresh }),
   saveSessionTestConfig: (classId: number, data: any) =>
-    request<any>(`/api/classes/${classId}/sessions/test-config`, { method: 'POST', body: JSON.stringify(data), tags: ['schedule'] }),
+    request<any>(`/api/classes/${classId}/sessions/test-config`, { method: 'POST', body: JSON.stringify(data), tags: ['schedule', 'attendance', 'reports', 'analytics', 'classes'] }),
   getUnitSuggestions: (grade?: string) => request<any>(`/api/suggestions/units${grade ? `?grade=${encodeURIComponent(grade)}` : ''}`),
 
   // Assignments API (Bài Tập Về Nhà)

@@ -174,6 +174,12 @@ export function useStudentResults() {
         homework: r.homework !== undefined && r.homework !== null ? Number(r.homework) : null,
         mock_test: r.mock_test !== undefined && r.mock_test !== null ? Number(r.mock_test) : null,
         notes: r.notes || '',
+        check_1_topic: r.check_1_topic || '',
+        check_2_topic: r.check_2_topic || '',
+        check_1_skill: r.check_1_skill || 'vocab',
+        check_2_skill: r.check_2_skill || 'grammar',
+        grammar_topic: r.grammar_topic || '',
+        topic: r.topic || '',
       }));
       setRawRecords(recs);
       setRawRankings(res.all_student_rankings || res.student_rankings || []);

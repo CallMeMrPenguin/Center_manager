@@ -11,6 +11,12 @@ export interface StudentResultRecord {
   homework: number | null;
   mock_test: number | null;
   notes?: string;
+  check_1_topic?: string;
+  check_2_topic?: string;
+  check_1_skill?: string;
+  check_2_skill?: string;
+  grammar_topic?: string;
+  topic?: string;
 }
 
 export interface StudentProfileSummary {
