@@ -164,9 +164,9 @@ export const LiquidFillButton: React.FC<LiquidButtonProps> = ({
       ctx.scale(dpr, dpr);
       ctx.clearRect(0, 0, width, height);
 
-      // Smooth liquid level pouring acceleration
+      // Smooth liquid level pouring acceleration (viscous & graceful)
       const target = currentTargetFill;
-      const speed = target > currentLevel ? 0.055 : 0.085; // Viscous filling, crisp draining
+      const speed = target > currentLevel ? 0.028 : 0.055;
       currentLevel += (target - currentLevel) * speed;
 
       // Smooth slosh damping
@@ -174,9 +174,11 @@ export const LiquidFillButton: React.FC<LiquidButtonProps> = ({
       sloshTarget *= 0.94; // Decay slosh
 
       if (currentLevel > 0.3) {
-        step += 0.045;
-        const waterHeight = (currentLevel / 100) * height;
+        step += 0.038;
+        // Total water height covers slightly beyond top at 100% so full button is submerged
+        const waterHeight = (currentLevel / 100) * (height + 14);
         const baseSurfaceY = height - waterHeight;
+        const waveScale = Math.max(0, 1 - currentLevel / 95); // flatten wave smoothly as cup tops off
 
         // 1. Render Back Depth Wave
         ctx.fillStyle = theme.colorBack;
@@ -184,10 +186,10 @@ export const LiquidFillButton: React.FC<LiquidButtonProps> = ({
         ctx.moveTo(0, height);
         for (let x = 0; x <= width; x += 4) {
           const wave =
-            Math.sin(x * 0.035 + step * 1.2) * 3.5 +
+            (Math.sin(x * 0.035 + step * 1.2) * 3.5 +
             Math.cos(x * 0.02 - step * 0.8) * 2 +
-            ((x - width / 2) / width) * slosh;
-          const y = Math.min(height, Math.max(0, baseSurfaceY + wave));
+            ((x - width / 2) / width) * slosh) * waveScale;
+          const y = Math.min(height, Math.max(-10, baseSurfaceY + wave));
           ctx.lineTo(x, y);
         }
         ctx.lineTo(width, height);
@@ -201,10 +203,10 @@ export const LiquidFillButton: React.FC<LiquidButtonProps> = ({
         const frontPoints: { x: number; y: number }[] = [];
         for (let x = 0; x <= width; x += 4) {
           const wave =
-            Math.sin(x * 0.04 - step * 1.5) * 4.5 +
+            (Math.sin(x * 0.04 - step * 1.5) * 4.5 +
             Math.cos(x * 0.025 + step * 0.9) * 2.5 +
-            ((x - width / 2) / width) * slosh;
-          const y = Math.min(height, Math.max(0, baseSurfaceY + wave));
+            ((x - width / 2) / width) * slosh) * waveScale;
+          const y = Math.min(height, Math.max(-10, baseSurfaceY + wave));
           frontPoints.push({ x, y });
           ctx.lineTo(x, y);
         }
@@ -212,8 +214,8 @@ export const LiquidFillButton: React.FC<LiquidButtonProps> = ({
         ctx.closePath();
         ctx.fill();
 
-        // 3. Render Specular Surface Foam Line
-        if (frontPoints.length > 0) {
+        // 3. Render Specular Surface Foam Line (only when wave is visible)
+        if (frontPoints.length > 0 && waveScale > 0.05) {
           ctx.strokeStyle = theme.colorSurface;
           ctx.lineWidth = 1.5;
           ctx.beginPath();

@@ -1,26 +1,6 @@
 import React, { forwardRef, useEffect, useId, useState } from 'react';
 import { motion } from 'framer-motion';
 
-export interface BeamContainerProps extends React.HTMLAttributes<HTMLDivElement> {
-  children: React.ReactNode;
-  className?: string;
-}
-
-export const BeamContainer = forwardRef<HTMLDivElement, BeamContainerProps>(
-  ({ children, className = '', ...props }, ref) => {
-    return (
-      <div
-        ref={ref}
-        className={`relative overflow-hidden ${className}`}
-        {...props}
-      >
-        {children}
-      </div>
-    );
-  }
-);
-BeamContainer.displayName = 'BeamContainer';
-
 export interface BeamNodeProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
   className?: string;
@@ -31,7 +11,7 @@ export const BeamNode = forwardRef<HTMLDivElement, BeamNodeProps>(
     return (
       <div
         ref={ref}
-        className={`z-10 flex items-center justify-center rounded-2xl shadow-lg transition-transform duration-200 hover:scale-105 ${className}`}
+        className={`relative z-10 flex items-center justify-center rounded-2xl border border-white/15 bg-[#0e1326] p-3.5 shadow-[0_8px_24px_rgba(0,0,0,0.6)] ${className}`}
         {...props}
       >
         {children}
@@ -41,24 +21,44 @@ export const BeamNode = forwardRef<HTMLDivElement, BeamNodeProps>(
 );
 BeamNode.displayName = 'BeamNode';
 
+export interface BeamContainerProps extends React.HTMLAttributes<HTMLDivElement> {
+  children: React.ReactNode;
+  className?: string;
+}
+
+export const BeamContainer = forwardRef<HTMLDivElement, BeamContainerProps>(
+  ({ children, className = '', ...props }, ref) => {
+    return (
+      <div
+        ref={ref}
+        className={`relative flex w-full items-center justify-center overflow-hidden rounded-2xl border border-[#1e2744] bg-[#070a14] p-8 select-none ${className}`}
+        {...props}
+      >
+        {children}
+      </div>
+    );
+  }
+);
+BeamContainer.displayName = 'BeamContainer';
+
 export interface AnimatedBeamProps {
-  containerRef: React.RefObject<HTMLDivElement | null>;
-  fromRef: React.RefObject<HTMLDivElement | null>;
-  toRef: React.RefObject<HTMLDivElement | null>;
+  className?: string;
+  containerRef: React.RefObject<HTMLElement | null>;
+  fromRef: React.RefObject<HTMLElement | null>;
+  toRef: React.RefObject<HTMLElement | null>;
   curvature?: number;
   reverse?: boolean;
-  duration?: number;
-  delay?: number;
   pathColor?: string;
   pathWidth?: number;
   pathOpacity?: number;
   gradientStartColor?: string;
   gradientStopColor?: string;
+  delay?: number;
+  duration?: number;
   startXOffset?: number;
   startYOffset?: number;
   endXOffset?: number;
   endYOffset?: number;
-  className?: string;
 }
 
 export const AnimatedBeam: React.FC<AnimatedBeamProps> = ({
@@ -67,13 +67,13 @@ export const AnimatedBeam: React.FC<AnimatedBeamProps> = ({
   toRef,
   curvature = 0,
   reverse = false,
-  duration = 3,
+  duration = 2.4,
   delay = 0,
-  pathColor = '#212d52',
+  pathColor = 'rgba(255, 255, 255, 0.15)',
   pathWidth = 2,
-  pathOpacity = 0.4,
-  gradientStartColor = '#3b82f6',
-  gradientStopColor = '#8b5cf6',
+  pathOpacity = 0.6,
+  gradientStartColor = '#6366f1',
+  gradientStopColor = '#a855f7',
   startXOffset = 0,
   startYOffset = 0,
   endXOffset = 0,
@@ -125,7 +125,10 @@ export const AnimatedBeam: React.FC<AnimatedBeamProps> = ({
       setPathD(d);
     };
 
+    // Immediate & deferred execution to ensure layout completion
     updatePath();
+    const rafId = requestAnimationFrame(updatePath);
+    const timerId = setTimeout(updatePath, 80);
 
     const resizeObserver = new ResizeObserver(() => updatePath());
     if (containerRef.current) resizeObserver.observe(containerRef.current);
@@ -135,6 +138,8 @@ export const AnimatedBeam: React.FC<AnimatedBeamProps> = ({
     window.addEventListener('resize', updatePath);
 
     return () => {
+      cancelAnimationFrame(rafId);
+      clearTimeout(timerId);
       resizeObserver.disconnect();
       window.removeEventListener('resize', updatePath);
     };
@@ -148,7 +153,7 @@ export const AnimatedBeam: React.FC<AnimatedBeamProps> = ({
       width={svgDimensions.width}
       height={svgDimensions.height}
       xmlns="http://www.w3.org/2000/svg"
-      className={`pointer-events-none absolute left-0 top-0 transform-gpu ${className}`}
+      className={`pointer-events-none absolute left-0 top-0 transform-gpu z-0 ${className}`}
       viewBox={`0 0 ${svgDimensions.width} ${svgDimensions.height}`}
     >
       {/* 1. Static Background Track Path */}
@@ -160,23 +165,15 @@ export const AnimatedBeam: React.FC<AnimatedBeamProps> = ({
         strokeLinecap="round"
       />
 
-      {/* 2. Animated Magic UI Flowing Linear Gradient Beam */}
-      <path
-        d={pathD}
-        stroke={`url(#${gradientId})`}
-        strokeWidth={pathWidth + 1}
-        strokeLinecap="round"
-      />
-
-      {/* 3. Glowing Light Particle Pulse Traveling along the Curve */}
+      {/* 2. Flowing Luminous Beam Particle Dash */}
       <motion.path
         d={pathD}
-        stroke={gradientStopColor}
-        strokeWidth={pathWidth + 2}
+        stroke={`url(#${gradientId})`}
+        strokeWidth={pathWidth + 1.5}
         strokeLinecap="round"
-        strokeDasharray="45 220"
-        initial={{ strokeDashoffset: reverse ? -265 : 0 }}
-        animate={{ strokeDashoffset: reverse ? 0 : -265 }}
+        strokeDasharray="70 200"
+        initial={{ strokeDashoffset: reverse ? -270 : 270 }}
+        animate={{ strokeDashoffset: reverse ? 270 : -270 }}
         transition={{
           duration,
           delay,
@@ -188,34 +185,21 @@ export const AnimatedBeam: React.FC<AnimatedBeamProps> = ({
         }}
       />
 
+      {/* 3. Gradient Definition */}
       <defs>
-        <motion.linearGradient
+        <linearGradient
           id={gradientId}
           gradientUnits="userSpaceOnUse"
-          initial={{
-            x1: '0%',
-            x2: '0%',
-            y1: '0%',
-            y2: '0%',
-          }}
-          animate={{
-            x1: reverse ? ['90%', '-10%'] : ['-10%', '90%'],
-            x2: reverse ? ['100%', '0%'] : ['0%', '100%'],
-            y1: ['0%', '0%'],
-            y2: ['0%', '0%'],
-          }}
-          transition={{
-            delay,
-            duration,
-            ease: [0.16, 1, 0.3, 1],
-            repeat: Infinity,
-          }}
+          x1="0%"
+          y1="0%"
+          x2="100%"
+          y2="0%"
         >
-          <stop offset="0%" stopColor={gradientStartColor} stopOpacity="0" />
-          <stop offset="10%" stopColor={gradientStartColor} stopOpacity="1" />
-          <stop offset="35%" stopColor={gradientStopColor} stopOpacity="1" />
-          <stop offset="100%" stopColor={gradientStopColor} stopOpacity="0" />
-        </motion.linearGradient>
+          <stop offset="0%" stopColor={gradientStartColor} stopOpacity="0.2" />
+          <stop offset="40%" stopColor={gradientStartColor} stopOpacity="1" />
+          <stop offset="70%" stopColor={gradientStopColor} stopOpacity="1" />
+          <stop offset="100%" stopColor={gradientStopColor} stopOpacity="0.2" />
+        </linearGradient>
       </defs>
     </svg>
   );

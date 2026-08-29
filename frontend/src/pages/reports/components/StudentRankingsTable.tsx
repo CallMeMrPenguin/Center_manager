@@ -141,9 +141,22 @@ export const StudentRankingsTable: React.FC<StudentRankingsTableProps> = React.m
       meta: { headerText: 'Từ Vựng', exportValue: (r: any) => { const v = Number(r.avg_vocab ?? r.avg_check_1); return v > 0 ? format1Dec(v) : '-'; } },
       cell: ({ row }) => {
         const val = Number(row.original.avg_vocab ?? row.original.avg_check_1) || 0;
+        const pred = Number(row.original.pred_c1 ?? row.original.pred_vocab) || 0;
         return (
-          <div className="text-center font-mono font-extrabold text-blue-400 text-sm sm:text-base">
-            {val > 0 ? format1Dec(val) : '-'}
+          <div className="text-center py-0.5 flex flex-col items-center justify-center">
+            <span className="font-mono font-extrabold text-blue-400 text-sm sm:text-base">
+              {val > 0 ? format1Dec(val) : '-'}
+            </span>
+            {pred > 0 && (
+              <div className={`text-[10px] font-mono font-bold mt-1 px-1.5 py-0.5 rounded border inline-flex items-center gap-0.5 leading-none ${
+                pred >= 8.0 ? 'text-emerald-300 bg-emerald-500/15 border-emerald-500/30' :
+                pred >= 6.5 ? 'text-cyan-300 bg-cyan-500/15 border-cyan-500/30' :
+                pred >= 5.0 ? 'text-amber-300 bg-amber-500/15 border-amber-500/30' :
+                'text-rose-300 bg-rose-500/15 border-rose-500/30'
+              }`}>
+                <span>PD: {format1Dec(pred)}</span>
+              </div>
+            )}
           </div>
         );
       },
@@ -155,9 +168,22 @@ export const StudentRankingsTable: React.FC<StudentRankingsTableProps> = React.m
       meta: { headerText: 'Ngữ Pháp', exportValue: (r: any) => { const v = Number(r.avg_grammar ?? r.avg_check_2); return v > 0 ? format1Dec(v) : '-'; } },
       cell: ({ row }) => {
         const val = Number(row.original.avg_grammar ?? row.original.avg_check_2) || 0;
+        const pred = Number(row.original.pred_c2 ?? row.original.pred_grammar) || 0;
         return (
-          <div className="text-center font-mono font-extrabold text-purple-400 text-sm sm:text-base">
-            {val > 0 ? format1Dec(val) : '-'}
+          <div className="text-center py-0.5 flex flex-col items-center justify-center">
+            <span className="font-mono font-extrabold text-purple-400 text-sm sm:text-base">
+              {val > 0 ? format1Dec(val) : '-'}
+            </span>
+            {pred > 0 && (
+              <div className={`text-[10px] font-mono font-bold mt-1 px-1.5 py-0.5 rounded border inline-flex items-center gap-0.5 leading-none ${
+                pred >= 8.0 ? 'text-emerald-300 bg-emerald-500/15 border-emerald-500/30' :
+                pred >= 6.5 ? 'text-cyan-300 bg-cyan-500/15 border-cyan-500/30' :
+                pred >= 5.0 ? 'text-amber-300 bg-amber-500/15 border-amber-500/30' :
+                'text-rose-300 bg-rose-500/15 border-rose-500/30'
+              }`}>
+                <span>PD: {format1Dec(pred)}</span>
+              </div>
+            )}
           </div>
         );
       },
@@ -166,11 +192,24 @@ export const StudentRankingsTable: React.FC<StudentRankingsTableProps> = React.m
       accessorKey: 'avg_homework',
       header: () => <div className="text-center w-full">BTVN</div>,
       meta: { headerText: 'BTVN', exportValue: (r: any) => Number(r.avg_homework) > 0 ? format1Dec(Number(r.avg_homework)) : '-' },
-      cell: ({ getValue }) => {
+      cell: ({ row, getValue }) => {
         const val = Number(getValue()) || 0;
+        const pred = Number(row.original.pred_hw ?? row.original.pred_homework) || 0;
         return (
-          <div className="text-center font-mono font-extrabold text-emerald-400 text-sm sm:text-base">
-            {val > 0 ? format1Dec(val) : '-'}
+          <div className="text-center py-0.5 flex flex-col items-center justify-center">
+            <span className="font-mono font-extrabold text-emerald-400 text-sm sm:text-base">
+              {val > 0 ? format1Dec(val) : '-'}
+            </span>
+            {pred > 0 && (
+              <div className={`text-[10px] font-mono font-bold mt-1 px-1.5 py-0.5 rounded border inline-flex items-center gap-0.5 leading-none ${
+                pred >= 8.0 ? 'text-emerald-300 bg-emerald-500/15 border-emerald-500/30' :
+                pred >= 6.5 ? 'text-cyan-300 bg-cyan-500/15 border-cyan-500/30' :
+                pred >= 5.0 ? 'text-amber-300 bg-amber-500/15 border-amber-500/30' :
+                'text-rose-300 bg-rose-500/15 border-rose-500/30'
+              }`}>
+                <span>PD: {format1Dec(pred)}</span>
+              </div>
+            )}
           </div>
         );
       },
@@ -229,7 +268,7 @@ export const StudentRankingsTable: React.FC<StudentRankingsTableProps> = React.m
               className={`inline-block px-2.5 py-0.5 rounded-lg border font-mono font-black text-sm sm:text-base ${theme}`}
               title={`Dự đoán điểm buổi tới: ${formatted}`}
             >
-              {formatted}
+              PD: {formatted}
             </span>
           </div>
         );
@@ -288,8 +327,9 @@ export const StudentRankingsTable: React.FC<StudentRankingsTableProps> = React.m
         }
       },
       accessorFn: (r: any) => computeStudentOverallScore(r),
-      cell: ({ getValue }) => {
+      cell: ({ row, getValue }) => {
         const avg = getValue<number>();
+        const pred = Number(row.original.predicted_next ?? 0);
         if (avg === 0) {
           return (
             <div className="text-center">
@@ -308,8 +348,20 @@ export const StudentRankingsTable: React.FC<StudentRankingsTableProps> = React.m
         else if (tier.tier === 2) cls = 'bg-sky-500/15 text-sky-300 border-sky-500/35';
         else cls = 'bg-amber-700/15 text-amber-500 border-amber-700/35';
         return (
-          <div className="text-center">
-            <span className={`inline-block px-3 py-1 rounded-lg text-xs font-black border ${cls}`}>{tier.title} ({format1Dec(avg)})</span>
+          <div className="text-center py-0.5 flex flex-col items-center justify-center">
+            <span className={`inline-block px-3 py-1 rounded-lg text-xs font-black border ${cls}`}>
+              {tier.title} ({format1Dec(avg)})
+            </span>
+            {pred > 0 && (
+              <div className={`text-[10px] font-mono font-bold mt-1 px-1.5 py-0.5 rounded border inline-flex items-center gap-0.5 leading-none ${
+                pred >= 8.0 ? 'text-emerald-300 bg-emerald-500/15 border-emerald-500/30' :
+                pred >= 6.5 ? 'text-cyan-300 bg-cyan-500/15 border-cyan-500/30' :
+                pred >= 5.0 ? 'text-amber-300 bg-amber-500/15 border-amber-500/30' :
+                'text-rose-300 bg-rose-500/15 border-rose-500/30'
+              }`}>
+                <span>PD: {format1Dec(pred)}</span>
+              </div>
+            )}
           </div>
         );
       },

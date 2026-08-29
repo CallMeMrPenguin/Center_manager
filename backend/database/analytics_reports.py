@@ -191,6 +191,9 @@ def get_analytics_reports(class_id: Optional[int] = None, student_id: Optional[i
             sr["consistency_score"] = s_analytics.get("consistency_score", 100.0)
             sr["rating_label"] = s_analytics.get("rating_label", "Tốt")
             sr["predicted_next"] = s_analytics.get("predicted_next", 0.0)
+            sr["pred_c1"] = s_analytics.get("pred_c1", 0.0)
+            sr["pred_c2"] = s_analytics.get("pred_c2", 0.0)
+            sr["pred_hw"] = s_analytics.get("pred_hw", 0.0)
             sr["std_dev"] = s_analytics.get("std_dev", 0.0)
         else:
             sr["ema_level"] = 0.0
@@ -200,6 +203,9 @@ def get_analytics_reports(class_id: Optional[int] = None, student_id: Optional[i
             sr["consistency_score"] = 100.0
             sr["rating_label"] = "Chưa có dữ liệu"
             sr["predicted_next"] = 0.0
+            sr["pred_c1"] = 0.0
+            sr["pred_c2"] = 0.0
+            sr["pred_hw"] = 0.0
             sr["std_dev"] = 0.0
         enriched_rankings.append(sr)
 

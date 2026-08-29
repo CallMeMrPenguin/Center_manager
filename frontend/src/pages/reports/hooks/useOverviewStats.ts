@@ -176,7 +176,7 @@ export const useOverviewStats = ({
       rank: rankStr,
       level: overall > 0 ? getStudentTier(overall).name : 'Chưa Có Điểm'
     };
-  }, [activeSessionRecords, sessionRecords, selectedStudentId, filteredRankings]);
+  }, [activeSessionRecords, sessionRecords, selectedStudentId, selectedClassId, studentRankings, filteredRankings, gradeTypesList]);
 
   // Session chart data calculation
   const sessionChartData = useMemo(() => {
