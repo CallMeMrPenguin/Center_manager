@@ -1,13 +1,14 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Sparkles } from 'lucide-react';
+import { X } from 'lucide-react';
 
 interface SummaryTooltipCardProps {
   title: string;
   titleColor?: string;
   onClose?: () => void;
   whatItReflects: string;
-  alignRight?: boolean;
+  align?: 'left' | 'center' | 'right';
+  alignRight?: boolean; // backwards compatibility
   children?: React.ReactNode;
   footer?: React.ReactNode;
 }
@@ -17,10 +18,20 @@ export const SummaryTooltipCard: React.FC<SummaryTooltipCardProps> = ({
   titleColor = 'text-indigo-300',
   onClose,
   whatItReflects,
+  align,
   alignRight = false,
   children,
   footer,
 }) => {
+  const resolvedAlign = align || (alignRight ? 'right' : 'center');
+
+  const alignClasses =
+    resolvedAlign === 'left'
+      ? 'left-0 origin-bottom-left'
+      : resolvedAlign === 'right'
+      ? 'right-0 origin-bottom-right'
+      : 'left-1/2 -translate-x-1/2 origin-bottom';
+
   return (
     <AnimatePresence>
       <motion.div
@@ -28,15 +39,10 @@ export const SummaryTooltipCard: React.FC<SummaryTooltipCardProps> = ({
         animate={{ opacity: 1, y: 0, scale: 1 }}
         exit={{ opacity: 0, y: 8, scale: 0.95 }}
         transition={{ type: 'spring', stiffness: 420, damping: 28 }}
-        className={`absolute bottom-full mb-3 ${
-          alignRight ? 'right-0' : 'left-1/2 -translate-x-1/2'
-        } w-88 p-4 bg-[#0d1224] border border-[#232f54] text-slate-200 text-[11px] rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.95)] z-50 text-left font-sans space-y-2.5 pointer-events-auto select-none`}
+        className={`absolute bottom-full mb-3 ${alignClasses} w-88 max-w-[calc(100vw-32px)] p-4 bg-[#0d1224] border border-[#232f54] text-slate-200 text-[11px] rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.95)] z-50 text-left font-sans space-y-2.5 pointer-events-auto select-none`}
       >
         <div className="flex items-center justify-between border-b border-white/10 pb-2">
-          <div className="flex items-center gap-1.5">
-            <Sparkles size={13} className="text-indigo-400 shrink-0" />
-            <span className={`font-black text-xs ${titleColor}`}>{title}</span>
-          </div>
+          <span className={`font-black text-xs ${titleColor}`}>{title}</span>
           {onClose && (
             <button
               onClick={(e) => {

@@ -37,6 +37,7 @@ export const DistributionSummaryStrip: React.FC<DistributionSummaryStripProps> =
           <SummaryTooltipCard
             title="Điểm Trung Bình (Mean)"
             titleColor="text-blue-300"
+            align="left"
             onClose={() => setActiveTooltip(null)}
             whatItReflects="Mặt bằng chung toàn bộ điểm số của lớp/học sinh. Thước đo cơ bản nhất để so sánh độ vừa sức của đề thi."
             footer={
@@ -74,6 +75,7 @@ export const DistributionSummaryStrip: React.FC<DistributionSummaryStripProps> =
           <SummaryTooltipCard
             title="Trung Vị Điểm Số (Median)"
             titleColor="text-purple-300"
+            align="left"
             onClose={() => setActiveTooltip(null)}
             whatItReflects="Mức điểm của học sinh đứng chính giữa danh sách khi sắp xếp tăng dần. Phản ánh học sinh điển hình thực chất, không bị méo bởi 1 vài em quá giỏi hoặc quá yếu."
             footer={
@@ -112,6 +114,7 @@ export const DistributionSummaryStrip: React.FC<DistributionSummaryStripProps> =
           <SummaryTooltipCard
             title="Độ Lệch Chuẩn (Standard Deviation)"
             titleColor="text-cyan-300"
+            align="center"
             onClose={() => setActiveTooltip(null)}
             whatItReflects="Thước đo mức độ phân tán điểm số quanh điểm trung bình. Cho biết học sinh trong lớp làm bài đều nhau hay trình độ bị chênh lệch lớn."
             footer={
@@ -149,6 +152,7 @@ export const DistributionSummaryStrip: React.FC<DistributionSummaryStripProps> =
           <SummaryTooltipCard
             title="Khoảng Tứ Phân Vị (IQR = Q3 - Q1)"
             titleColor="text-amber-300"
+            align="center"
             onClose={() => setActiveTooltip(null)}
             whatItReflects="Độ rộng vùng điểm của 50% học sinh giữa bảng (bỏ qua 25% top đầu và 25% đáy). Giúp giáo viên thiết kế độ khó bài tập nhắm trúng đa số học sinh."
             footer={
@@ -190,6 +194,7 @@ export const DistributionSummaryStrip: React.FC<DistributionSummaryStripProps> =
           <SummaryTooltipCard
             title="Tỷ Lệ Đạt Chuẩn Kiến Thức"
             titleColor="text-emerald-300"
+            align="right"
             onClose={() => setActiveTooltip(null)}
             whatItReflects="Tỷ lệ học sinh đạt từ 5.0 điểm trở lên trong đợt đánh giá."
             footer={
@@ -235,7 +240,7 @@ export const DistributionSummaryStrip: React.FC<DistributionSummaryStripProps> =
           <SummaryTooltipCard
             title="Đánh Giá Tổng Quan Phổ Điểm"
             titleColor="text-indigo-300"
-            alignRight={true}
+            align="right"
             onClose={() => setActiveTooltip(null)}
             whatItReflects="Đánh giá tổng quát về hình thái phân bố điểm số và các biện pháp can thiệp sư phạm phù hợp."
           >

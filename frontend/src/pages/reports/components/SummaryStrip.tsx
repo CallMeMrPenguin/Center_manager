@@ -83,13 +83,18 @@ export const SummaryStrip: React.FC<SummaryStripProps> = React.memo(({
           <SummaryTooltipCard
             title="Dự Đoán Điểm Buổi Tiếp Theo"
             titleColor="text-indigo-300"
+            align="left"
             onClose={() => setActiveTooltip(null)}
             whatItReflects="Điểm số dự kiến học sinh có khả năng đạt được trong buổi học tới dựa trên phân tích chuỗi thời gian."
             footer={
-              <>
+              <div className="space-y-1">
                 <span className="font-bold text-slate-300 block">Mô hình tính toán ({safeEngine.prediction_model}):</span>
-                <div>Dưới 5 buổi: EMA | 5-19 buổi: Weighted OLS | 20+ buổi: Holt-Winters</div>
-              </>
+                <div className="flex flex-wrap items-center gap-1 text-[9.5px]">
+                  <span className="px-1.5 py-0.5 rounded bg-white/5 text-slate-300 font-mono border border-white/5">&lt;5 buổi: EMA</span>
+                  <span className="px-1.5 py-0.5 rounded bg-white/5 text-slate-300 font-mono border border-white/5">5-19 buổi: Weighted OLS</span>
+                  <span className="px-1.5 py-0.5 rounded bg-white/5 text-slate-300 font-mono border border-white/5">20+ buổi: Holt-Winters</span>
+                </div>
+              </div>
             }
           >
             <div className="bg-[#0d1120] p-2.5 rounded-lg border border-[#202948] space-y-1.5 font-mono text-[10px]">
@@ -129,6 +134,7 @@ export const SummaryStrip: React.FC<SummaryStripProps> = React.memo(({
           <SummaryTooltipCard
             title="Trình Độ Năng Lực Hiện Tại (EMA)"
             titleColor="text-emerald-300"
+            align="left"
             onClose={() => setActiveTooltip(null)}
             whatItReflects="Năng lực học thuật thực chất trong 3-4 buổi học gần nhất qua thuật toán trung bình trượt hàm mũ."
             footer={
@@ -180,6 +186,7 @@ export const SummaryStrip: React.FC<SummaryStripProps> = React.memo(({
           <SummaryTooltipCard
             title="Độ Ổn Định & Biến Động Điểm Số (SD)"
             titleColor="text-cyan-300"
+            align="center"
             onClose={() => setActiveTooltip(null)}
             whatItReflects="Độ lệch chuẩn điểm số đo mức độ ổn định hay trồi sụt của học sinh qua các buổi kiểm tra."
             footer={
@@ -230,6 +237,7 @@ export const SummaryStrip: React.FC<SummaryStripProps> = React.memo(({
           <SummaryTooltipCard
             title="Tốc Độ Tăng Trưởng (Trend Rate)"
             titleColor="text-purple-300"
+            align="center"
             onClose={() => setActiveTooltip(null)}
             whatItReflects="Mức độ tiến bộ hoặc sa sút trung bình sau mỗi buổi học (số điểm tăng/giảm trên mỗi buổi)."
             footer={
@@ -276,6 +284,7 @@ export const SummaryStrip: React.FC<SummaryStripProps> = React.memo(({
           <SummaryTooltipCard
             title="Chỉ Số Phong Độ PI (Thang 0 - 100)"
             titleColor="text-indigo-300"
+            align="right"
             onClose={() => setActiveTooltip(null)}
             whatItReflects="Điểm số phong độ toàn diện chuẩn hóa theo thang 100, tổng hợp đồng thời cả 5 trụ cột học tập cốt lõi."
             footer={
@@ -326,7 +335,7 @@ export const SummaryStrip: React.FC<SummaryStripProps> = React.memo(({
           <SummaryTooltipCard
             title="Nhận Xét & Khuyến Nghị Sư Phạm"
             titleColor="text-indigo-300"
-            alignRight={true}
+            align="right"
             onClose={() => setActiveTooltip(null)}
             whatItReflects="Đánh giá sư phạm tổng quát và các khuyến nghị can thiệp cụ thể dành cho giáo viên và phụ huynh."
           >

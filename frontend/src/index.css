@@ -745,34 +745,41 @@ textarea:not(.code-editor-textarea):not(.canvas-text-editor):not(.white-paper-in
   }
 }
 
-@keyframes liquidWave {
+@keyframes liquidWaveFront {
   0% {
     transform: translateX(0) translateZ(0);
-  }
-  50% {
-    transform: translateX(-25%) translateZ(0);
   }
   100% {
     transform: translateX(-50%) translateZ(0);
   }
 }
 
-@keyframes liquidWaveReverse {
+@keyframes liquidWaveBack {
   0% {
     transform: translateX(-50%) translateZ(0);
-  }
-  50% {
-    transform: translateX(-25%) translateZ(0);
   }
   100% {
     transform: translateX(0) translateZ(0);
   }
 }
 
-.animate-liquid-wave {
-  animation: liquidWave 3s cubic-bezier(0.36, 0.45, 0.63, 0.53) infinite;
+@keyframes liquidSway {
+  0%, 100% {
+    transform: translateY(0) scaleY(1);
+  }
+  50% {
+    transform: translateY(-2px) scaleY(1.1);
+  }
 }
 
-.animate-liquid-wave-reverse {
-  animation: liquidWaveReverse 4.5s cubic-bezier(0.36, 0.45, 0.63, 0.53) infinite;
+.animate-liquid-wave-front {
+  animation: liquidWaveFront 4s linear infinite;
+}
+
+.animate-liquid-wave-back {
+  animation: liquidWaveBack 6.5s linear infinite;
+}
+
+.animate-liquid-sway {
+  animation: liquidSway 2.5s ease-in-out infinite;
 }

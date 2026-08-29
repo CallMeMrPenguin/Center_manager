@@ -66,9 +66,11 @@ export function BeamDatabaseStatusDemo() {
                 {dbStatus === 'online' ? 'Đang Hoạt Động (Online)' : dbStatus === 'checking' ? 'Đang kiểm tra...' : 'Mất Kết Nối'}
               </span>
             </div>
-            <p className="text-xs text-slate-400 mt-0.5">
-              Độ trễ phản hồi: <span className="text-white font-mono font-bold">{latency !== null ? `${latency} ms` : '-'}</span> | Lần kiểm tra cuối: <span className="text-slate-300 font-mono">{lastCheck || '-'}</span>
-            </p>
+            <div className="flex flex-wrap items-center gap-2 text-xs text-slate-400 mt-0.5">
+              <span>Độ trễ phản hồi: <strong className="text-white font-mono">{latency !== null ? `${latency} ms` : '-'}</strong></span>
+              <span className="w-1 h-1 rounded-full bg-slate-600" />
+              <span>Lần kiểm tra cuối: <strong className="text-slate-300 font-mono">{lastCheck || '-'}</strong></span>
+            </div>
           </div>
         </div>
 

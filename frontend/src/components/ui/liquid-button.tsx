@@ -28,68 +28,68 @@ const VARIANT_CONFIG: Record<LiquidVariant, {
 }> = {
   indigo: {
     border: 'border-[#5c36f5]/40 hover:border-[#5c36f5]',
-    bgBase: 'bg-[#0c0f1e]',
-    textColor: 'text-indigo-200',
+    bgBase: 'bg-[#0b0e1e]',
+    textColor: 'text-indigo-100',
     textHover: 'group-hover:text-white',
     liquidColor: '#5c36f5',
-    liquidWave1: '#7351f7',
-    liquidWave2: '#4a25dd',
-    glowShadow: 'group-hover:shadow-[0_0_24px_rgba(92,54,245,0.65)]',
-    accent: '#8c6eff',
+    liquidWave1: '#704cf7',
+    liquidWave2: '#4122bd',
+    glowShadow: 'group-hover:shadow-[0_0_24px_rgba(92,54,245,0.6)]',
+    accent: '#9d84ff',
   },
   cyan: {
     border: 'border-cyan-500/40 hover:border-cyan-400',
-    bgBase: 'bg-[#081524]',
-    textColor: 'text-cyan-200',
+    bgBase: 'bg-[#061424]',
+    textColor: 'text-cyan-100',
     textHover: 'group-hover:text-white',
-    liquidColor: '#06b6d4',
-    liquidWave1: '#22d3ee',
-    liquidWave2: '#0891b2',
-    glowShadow: 'group-hover:shadow-[0_0_24px_rgba(6,182,212,0.65)]',
+    liquidColor: '#0891b2',
+    liquidWave1: '#06b6d4',
+    liquidWave2: '#0e7490',
+    glowShadow: 'group-hover:shadow-[0_0_24px_rgba(6,182,212,0.6)]',
     accent: '#67e8f9',
   },
   emerald: {
     border: 'border-emerald-500/40 hover:border-emerald-400',
-    bgBase: 'bg-[#061814]',
-    textColor: 'text-emerald-200',
+    bgBase: 'bg-[#051714]',
+    textColor: 'text-emerald-100',
     textHover: 'group-hover:text-white',
-    liquidColor: '#10b981',
-    liquidWave1: '#34d399',
-    liquidWave2: '#059669',
-    glowShadow: 'group-hover:shadow-[0_0_24px_rgba(16,185,129,0.65)]',
+    liquidColor: '#059669',
+    liquidWave1: '#10b981',
+    liquidWave2: '#047857',
+    glowShadow: 'group-hover:shadow-[0_0_24px_rgba(16,185,129,0.6)]',
     accent: '#6ee7b7',
   },
   amber: {
     border: 'border-amber-500/40 hover:border-amber-400',
-    bgBase: 'bg-[#1a1206]',
-    textColor: 'text-amber-200',
+    bgBase: 'bg-[#181105]',
+    textColor: 'text-amber-100',
     textHover: 'group-hover:text-white',
-    liquidColor: '#f59e0b',
-    liquidWave1: '#fbbf24',
-    liquidWave2: '#d97706',
-    glowShadow: 'group-hover:shadow-[0_0_24px_rgba(245,158,11,0.65)]',
+    liquidColor: '#d97706',
+    liquidWave1: '#f59e0b',
+    liquidWave2: '#b45309',
+    glowShadow: 'group-hover:shadow-[0_0_24px_rgba(245,158,11,0.6)]',
     accent: '#fde68a',
   },
   rose: {
     border: 'border-rose-500/40 hover:border-rose-400',
-    bgBase: 'bg-[#1c0a12]',
-    textColor: 'text-rose-200',
+    bgBase: 'bg-[#1a0810]',
+    textColor: 'text-rose-100',
     textHover: 'group-hover:text-white',
-    liquidColor: '#f43f5e',
-    liquidWave1: '#fb7185',
-    liquidWave2: '#e11d48',
-    glowShadow: 'group-hover:shadow-[0_0_24px_rgba(244,63,94,0.65)]',
+    liquidColor: '#e11d48',
+    liquidWave1: '#f43f5e',
+    liquidWave2: '#be123c',
+    glowShadow: 'group-hover:shadow-[0_0_24px_rgba(244,63,94,0.6)]',
     accent: '#fda4af',
   },
   purple: {
     border: 'border-purple-500/40 hover:border-purple-400',
-    bgBase: 'bg-[#140a20]',
-    textColor: 'text-purple-200',
+    bgBase: 'bg-[#13081e]',
+    textColor: 'text-purple-100',
     textHover: 'group-hover:text-white',
-    liquidColor: '#a855f7',
-    liquidWave1: '#c084fc',
-    liquidWave2: '#9333ea',
-    glowShadow: 'group-hover:shadow-[0_0_24px_rgba(168,85,247,0.65)]',
+    liquidColor: '#9333ea',
+    liquidWave1: '#a855f7',
+    liquidWave2: '#7e22ce',
+    glowShadow: 'group-hover:shadow-[0_0_24px_rgba(168,85,247,0.6)]',
     accent: '#d8b4fe',
   },
 };
@@ -159,7 +159,7 @@ export const LiquidFillButton: React.FC<LiquidButtonProps> = ({
       } font-black transition-all duration-300 cursor-pointer select-none active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none flex items-center justify-center gap-2 ${className}`}
       {...props}
     >
-      {/* Dynamic Rising Liquid Level (Water Pouring Simulation) */}
+      {/* Dynamic Rising Liquid Fill (Pro Sinusoidal Liquid Physics) */}
       <motion.div
         initial={false}
         animate={{
@@ -167,35 +167,40 @@ export const LiquidFillButton: React.FC<LiquidButtonProps> = ({
           opacity: currentFill > 0 ? 1 : 0,
         }}
         transition={{
-          height: { duration: 0.45, ease: [0.25, 1, 0.5, 1] },
-          opacity: { duration: 0.2 },
+          height: {
+            duration: currentFill > 0 ? 0.75 : 0.55,
+            ease: currentFill > 0 ? [0.22, 1, 0.36, 1] : [0.32, 0, 0.67, 0],
+          },
+          opacity: { duration: 0.25 },
         }}
-        style={{ backgroundColor: config.liquidColor }}
+        style={{
+          background: `linear-gradient(180deg, ${config.liquidWave1} 0%, ${config.liquidColor} 40%, ${config.bgBase} 100%)`,
+        }}
         className="absolute bottom-0 left-0 right-0 z-0 pointer-events-none origin-bottom"
       >
-        {/* Layer 1: Front Fluid Wave Crest */}
-        <div
-          className="absolute -top-3 left-0 w-[200%] h-4 animate-liquid-wave opacity-80 pointer-events-none"
-          style={{
-            backgroundImage: `radial-gradient(circle at 50% 100%, ${config.liquidWave1} 60%, transparent 62%)`,
-            backgroundSize: '24px 16px',
-            backgroundRepeat: 'repeat-x',
-          }}
-        />
+        {/* Layer 1: Back Wave Crest (Translucent Depth) */}
+        <div className="absolute -top-3.5 left-0 w-[200%] h-4 pointer-events-none opacity-50 animate-liquid-wave-back">
+          <svg viewBox="0 0 1000 30" preserveAspectRatio="none" className="w-full h-full">
+            <path
+              d="M 0,15 C 160,25 340,5 500,15 C 660,25 840,5 1000,15 L 1000,30 L 0,30 Z"
+              fill={config.liquidWave2}
+            />
+          </svg>
+        </div>
 
-        {/* Layer 2: Back Fluid Wave Crest for Depth */}
-        <div
-          className="absolute -top-3 left-0 w-[200%] h-4 animate-liquid-wave-reverse opacity-45 pointer-events-none"
-          style={{
-            backgroundImage: `radial-gradient(circle at 50% 100%, ${config.liquidWave2} 60%, transparent 62%)`,
-            backgroundSize: '32px 14px',
-            backgroundRepeat: 'repeat-x',
-          }}
-        />
+        {/* Layer 2: Front Wave Crest (Smooth Continuous Bezier Sine Wave) */}
+        <div className="absolute -top-3 left-0 w-[200%] h-4 pointer-events-none opacity-90 animate-liquid-wave-front">
+          <svg viewBox="0 0 1000 30" preserveAspectRatio="none" className="w-full h-full">
+            <path
+              d="M 0,12 C 125,2 275,22 400,12 C 525,2 675,22 800,12 C 925,2 1075,22 1200,12 L 1200,30 L 0,30 Z"
+              fill={config.liquidWave1}
+            />
+          </svg>
+        </div>
 
-        {/* Liquid Surface Specular Sheen */}
+        {/* Layer 3: Specular Water Surface Sheen */}
         <div
-          className="absolute top-0 left-0 right-0 h-1 opacity-70 pointer-events-none"
+          className="absolute top-0 left-0 right-0 h-1 opacity-70 pointer-events-none animate-liquid-sway"
           style={{
             background: `linear-gradient(90deg, transparent 0%, ${config.accent} 50%, transparent 100%)`,
           }}
@@ -204,7 +209,7 @@ export const LiquidFillButton: React.FC<LiquidButtonProps> = ({
 
       {/* Button Content (High Contrast Floating Layer) */}
       <span className={`relative z-10 flex items-center gap-2 ${config.textColor} ${config.textHover} transition-colors duration-200`}>
-        {icon && <span className="shrink-0 transition-transform duration-200 group-hover:scale-110">{icon}</span>}
+        {icon && <span className="shrink-0 transition-transform duration-300 group-hover:scale-110">{icon}</span>}
         <span className="font-extrabold tracking-wide">{children}</span>
       </span>
     </button>
