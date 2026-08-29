@@ -138,14 +138,8 @@ export function useClassDetail(selectedClass: ClassItem | null) {
     return { records: newRecords };
   }, []);
 
-  const autoSaveTimerRef = useRef<any>(null);
-
-  // Save changes silently to backend DB and invalidate caches
+  // Save changes silently to backend DB and invalidate caches (on tab change, unmount, etc.)
   const flushSaveAttendance = useCallback(async (silent = true) => {
-    if (autoSaveTimerRef.current) {
-      clearTimeout(autoSaveTimerRef.current);
-      autoSaveTimerRef.current = null;
-    }
     const classId = currentClassIdRef.current;
     const dateStr = currentDateRef.current;
     if (!isDirtyRef.current || !classId || !dateStr) return;
@@ -172,7 +166,6 @@ export function useClassDetail(selectedClass: ClassItem | null) {
       if (isDirtyRef.current && classId && dateStr) {
         const currentRecords = attendanceRecordsRef.current.length > 0 ? attendanceRecordsRef.current : [];
         const { records: finalRecords } = applyAutoAttendanceStatus(currentRecords);
-        // Attempt navigator.sendBeacon or async api call on page unload
         try {
           const payload = JSON.stringify({ date: dateStr, records: finalRecords });
           if (navigator.sendBeacon) {
@@ -198,9 +191,6 @@ export function useClassDetail(selectedClass: ClassItem | null) {
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
-      if (autoSaveTimerRef.current) {
-        clearTimeout(autoSaveTimerRef.current);
-      }
       const classId = currentClassIdRef.current;
       const dateStr = currentDateRef.current;
       if (isDirtyRef.current && classId && dateStr) {
@@ -230,16 +220,8 @@ export function useClassDetail(selectedClass: ClassItem | null) {
       attendanceRecordsRef.current = newRecs;
       setAttendanceRecords(newRecs);
       isDirtyRef.current = true;
-
-      // Debounced auto-save to database (800ms debounce)
-      if (autoSaveTimerRef.current) {
-        clearTimeout(autoSaveTimerRef.current);
-      }
-      autoSaveTimerRef.current = setTimeout(() => {
-        flushSaveAttendance(true);
-      }, 800);
     },
-    [flushSaveAttendance]
+    []
   );
 
   const handleDateChange = useCallback(async (newDate: string) => {
@@ -257,10 +239,6 @@ export function useClassDetail(selectedClass: ClassItem | null) {
 
   const handleSaveAttendance = async () => {
     if (!selectedClass) return;
-    if (autoSaveTimerRef.current) {
-      clearTimeout(autoSaveTimerRef.current);
-      autoSaveTimerRef.current = null;
-    }
     setSavingAttendance(true);
     try {
       const currentRecords = attendanceRecordsRef.current.length > 0 ? attendanceRecordsRef.current : attendanceRecords;
@@ -332,10 +310,6 @@ export function useClassDetail(selectedClass: ClassItem | null) {
 
   const handleDeleteAttendanceDate = async () => {
     if (!selectedClass || !attendanceDate) return;
-    if (autoSaveTimerRef.current) {
-      clearTimeout(autoSaveTimerRef.current);
-      autoSaveTimerRef.current = null;
-    }
     isDirtyRef.current = false;
     try {
       await api.deleteClassAttendance(selectedClass.id, attendanceDate);

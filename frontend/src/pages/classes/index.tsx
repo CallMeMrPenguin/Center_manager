@@ -204,13 +204,23 @@ export default function ClassesPage() {
               onUpdateRecord={handleUpdateRecord}
               parseAndFormatScore={parseAndFormatScore}
               onSaveAttendance={handleSaveAttendance}
-              onOpenTestConfigModal={() => setTestConfigModalOpen(true)}
-              onOpenEnrollModal={handleOpenEnrollModal}
-              onOpenStudentActionModal={(st) => {
+              onOpenTestConfigModal={async () => {
+                await flushSaveAttendance();
+                setTestConfigModalOpen(true);
+              }}
+              onOpenEnrollModal={async () => {
+                await flushSaveAttendance();
+                handleOpenEnrollModal();
+              }}
+              onOpenStudentActionModal={async (st) => {
+                await flushSaveAttendance();
                 setSelectedStudentForAction(st);
                 setActionModalOpen(true);
               }}
-              onOpenEditClass={handleOpenEditClass}
+              onOpenEditClass={async (cls) => {
+                await flushSaveAttendance();
+                handleOpenEditClass(cls);
+              }}
               onDeleteAttendanceDate={async () => {
                 if (!selectedClass) return;
                 const ok = await confirm({
@@ -223,8 +233,14 @@ export default function ClassesPage() {
                   await handleDeleteAttendanceDate();
                 }
               }}
-              onExportExcel={handleExportExcel}
-              onExportDocx={handleExportDocx}
+              onExportExcel={async () => {
+                await flushSaveAttendance();
+                handleExportExcel();
+              }}
+              onExportDocx={async () => {
+                await flushSaveAttendance();
+                handleExportDocx();
+              }}
             />
           )}
 

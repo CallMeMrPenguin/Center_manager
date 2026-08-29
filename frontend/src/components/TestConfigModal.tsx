@@ -1,49 +1,20 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { X, Layers, Save, Check } from 'lucide-react';
+import { X, Layers, Save } from 'lucide-react';
 import { CustomSelect } from './CustomSelect';
 import { CustomMultiSelect } from './CustomMultiSelect';
 import { api } from '../api';
 import { showToast } from './Toast';
 import { notifyDataChanged } from '../utils';
+import {
+  TestConfigModalProps,
+  SessionTestConfigData,
+  UnitDetail,
+  DEFAULT_CONFIG,
+  getPrimaryGrammarTopic,
+} from './test-config/types';
+import { GrammarTopicSelector } from './test-config/GrammarTopicSelector';
 
-export interface TestConfigItemData {
-  skill: string; // 'vocab' | 'grammar' | 'mixed'
-  units: string[];
-  topic: string;
-  grammar_topic: string;
-}
-
-export interface SessionTestConfigData {
-  mode: string;
-  check_1: TestConfigItemData;
-  check_2: TestConfigItemData;
-  notes: string;
-}
-
-interface UnitDetail {
-  unit: string;
-  unit_num: string;
-  name: string;
-  grammar: string;
-  grammar_topics?: string[];
-  label: string;
-}
-
-interface TestConfigModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  classId: number;
-  date: string;
-  grade?: string;
-  onSaved?: (config: SessionTestConfigData) => void;
-}
-
-const DEFAULT_CONFIG: SessionTestConfigData = {
-  mode: 'two_separate',
-  check_1: { skill: 'vocab', units: ['Unit 1'], topic: '', grammar_topic: '' },
-  check_2: { skill: 'grammar', units: ['Unit 1'], topic: '', grammar_topic: '' },
-  notes: '',
-};
+export * from './test-config/types';
 
 export const TestConfigModal: React.FC<TestConfigModalProps> = ({
   isOpen,
@@ -87,20 +58,22 @@ export const TestConfigModal: React.FC<TestConfigModalProps> = ({
             const c2 = resConfig.test_config.check_2 || {};
             const c1Units = normalizeUnits(c1);
             const c2Units = normalizeUnits(c2);
+            const u1 = list.find((u) => u.unit === c1Units[0]) || list[0];
+            const u2 = list.find((u) => u.unit === c2Units[0]) || list[0];
 
             setConfig({
               mode: 'two_separate',
               check_1: {
                 skill: c1.skill || 'vocab',
                 units: c1Units,
-                topic: c1.topic || list.find((u) => u.unit === c1Units[0])?.name || list[0]?.name || '',
-                grammar_topic: c1.grammar_topic || list.find((u) => u.unit === c1Units[0])?.grammar || '',
+                topic: c1.topic || u1?.name || '',
+                grammar_topic: c1.grammar_topic || getPrimaryGrammarTopic(u1),
               },
               check_2: {
                 skill: c2.skill || 'grammar',
                 units: c2Units,
-                topic: c2.topic || list.find((u) => u.unit === c2Units[0])?.name || '',
-                grammar_topic: c2.grammar_topic || list.find((u) => u.unit === c2Units[0])?.grammar || list[0]?.grammar || '',
+                topic: c2.topic || u2?.name || '',
+                grammar_topic: c2.grammar_topic || getPrimaryGrammarTopic(u2),
               },
               notes: resConfig.test_config.notes || '',
             });
@@ -118,7 +91,7 @@ export const TestConfigModal: React.FC<TestConfigModalProps> = ({
                 skill: 'grammar',
                 units: first ? [first.unit] : ['Unit 1'],
                 topic: '',
-                grammar_topic: first?.grammar || '',
+                grammar_topic: getPrimaryGrammarTopic(first),
               },
               notes: '',
             });
@@ -183,9 +156,8 @@ export const TestConfigModal: React.FC<TestConfigModalProps> = ({
   const handleMultiSelectUnits = (checkKey: 'check_1' | 'check_2', selectedUnits: string[]) => {
     const isMock = config[checkKey].skill === 'mock_test';
     const matchedNames = selectedUnits.map((ukey) => unitsDetailed.find((u) => u.unit === ukey)?.name).filter(Boolean);
-    const matchedGrammars = selectedUnits.map((ukey) => unitsDetailed.find((u) => u.unit === ukey)?.grammar).filter(Boolean);
     const topics = getAvailableGrammarTopics(selectedUnits);
-    const defaultGrammarTopic = isMock ? '' : (topics.length === 1 ? topics[0] : matchedGrammars.join(' , '));
+    const defaultGrammarTopic = isMock ? '' : (topics.length > 0 ? topics[0] : '');
 
     setConfig((prev) => ({
       ...prev,
@@ -218,75 +190,6 @@ export const TestConfigModal: React.FC<TestConfigModalProps> = ({
     } finally {
       setSaving(false);
     }
-  };
-
-  const renderGrammarTopicSelector = (checkKey: 'check_1' | 'check_2', availableTopics: string[]) => {
-    const item = config[checkKey];
-    if (item.skill !== 'grammar' && item.skill !== 'mixed') return null;
-    const currentTopic = item.grammar_topic || '';
-
-    return (
-      <div className="mt-2.5 pt-2 border-t border-white/5">
-        <label className="text-[11px] font-bold text-purple-300 block mb-1.5 flex items-center justify-between">
-          <span>Chủ Đề Ngữ Pháp Kiểm Tra (Chọn 1 hoặc nhiều chủ đề):</span>
-          {availableTopics.length > 1 && (
-            <span className="text-[10px] text-slate-400 font-normal">Unit có {availableTopics.length} chủ đề</span>
-          )}
-        </label>
-        {availableTopics.length > 0 ? (
-          <div className="flex flex-wrap gap-1.5 mb-2">
-            {availableTopics.map((topic) => {
-              const isSelected = currentTopic === topic || currentTopic.split(' , ').includes(topic);
-              return (
-                <button
-                  key={topic}
-                  type="button"
-                  onClick={() => {
-                    let nextTopic = topic;
-                    if (currentTopic.split(' , ').includes(topic)) {
-                      const remaining = currentTopic.split(' , ').filter(t => t !== topic);
-                      nextTopic = remaining.length > 0 ? remaining.join(' , ') : availableTopics.join(' , ');
-                    } else if (currentTopic && currentTopic !== availableTopics.join(' , ')) {
-                      nextTopic = `${currentTopic} , ${topic}`;
-                    }
-                    setConfig(prev => ({ ...prev, [checkKey]: { ...prev[checkKey], grammar_topic: nextTopic } }));
-                  }}
-                  className={`px-2.5 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1 cursor-pointer ${
-                    isSelected
-                      ? 'bg-purple-600 text-white shadow-[0_0_10px_rgba(168,85,247,0.4)] border border-purple-400'
-                      : 'bg-[#151a2e] text-slate-300 hover:text-white border border-[#212c4b] hover:border-purple-500/50'
-                  }`}
-                >
-                  {isSelected && <Check size={11} className="stroke-[3]" />}
-                  <span>{topic}</span>
-                </button>
-              );
-            })}
-            <button
-              type="button"
-              onClick={() => setConfig(prev => ({ ...prev, [checkKey]: { ...prev[checkKey], grammar_topic: availableTopics.join(' , ') } }))}
-              className={`px-2 py-1 rounded-lg text-[11px] font-semibold transition cursor-pointer ${
-                currentTopic === availableTopics.join(' , ')
-                  ? 'bg-indigo-600 text-white border border-indigo-400'
-                  : 'bg-white/5 text-slate-400 hover:text-white'
-              }`}
-            >
-              Tất cả chủ đề
-            </button>
-          </div>
-        ) : null}
-        <input
-          type="text"
-          value={item.grammar_topic}
-          onChange={(e) => {
-            const val = e.target.value;
-            setConfig(prev => ({ ...prev, [checkKey]: { ...prev[checkKey], grammar_topic: val } }));
-          }}
-          placeholder="Tên chủ đề ngữ pháp..."
-          className="w-full px-3 py-1.5 bg-[#0a0d17] border border-purple-500/30 focus:border-purple-500 rounded-lg text-xs text-white placeholder-slate-500 focus:outline-none"
-        />
-      </div>
-    );
   };
 
   return (
@@ -348,13 +251,19 @@ export const TestConfigModal: React.FC<TestConfigModalProps> = ({
                       values={config.check_1.units}
                       onChange={(units) => handleMultiSelectUnits('check_1', units)}
                       options={check1UnitOptions}
-                      placeholder={config.check_1.skill === 'mock_test' ? 'Luyện đề tổng hợp / Chọn Unit (nếu có)...' : 'Chọn các Unit...'}
+                      placeholder={config.check_1.skill === 'mock_test' ? 'Luyện đề tổng hợp / Chọn Unit...' : 'Chọn các Unit...'}
                       placement="bottom"
                       className="w-full"
                     />
                   </div>
                 </div>
-                {renderGrammarTopicSelector('check_1', check1GrammarTopics)}
+                {(config.check_1.skill === 'grammar' || config.check_1.skill === 'mixed') && (
+                  <GrammarTopicSelector
+                    currentTopic={config.check_1.grammar_topic}
+                    availableTopics={check1GrammarTopics}
+                    onChange={(topic) => setConfig((prev) => ({ ...prev, check_1: { ...prev.check_1, grammar_topic: topic } }))}
+                  />
+                )}
               </div>
 
               {/* CHECK 2 */}
@@ -385,13 +294,19 @@ export const TestConfigModal: React.FC<TestConfigModalProps> = ({
                       values={config.check_2.units}
                       onChange={(units) => handleMultiSelectUnits('check_2', units)}
                       options={check2UnitOptions}
-                      placeholder={config.check_2.skill === 'mock_test' ? 'Luyện đề tổng hợp / Chọn Unit (nếu có)...' : 'Chọn các Unit...'}
+                      placeholder={config.check_2.skill === 'mock_test' ? 'Luyện đề tổng hợp / Chọn Unit...' : 'Chọn các Unit...'}
                       placement="top"
                       className="w-full"
                     />
                   </div>
                 </div>
-                {renderGrammarTopicSelector('check_2', check2GrammarTopics)}
+                {(config.check_2.skill === 'grammar' || config.check_2.skill === 'mixed') && (
+                  <GrammarTopicSelector
+                    currentTopic={config.check_2.grammar_topic}
+                    availableTopics={check2GrammarTopics}
+                    onChange={(topic) => setConfig((prev) => ({ ...prev, check_2: { ...prev.check_2, grammar_topic: topic } }))}
+                  />
+                )}
               </div>
             </>
           )}
