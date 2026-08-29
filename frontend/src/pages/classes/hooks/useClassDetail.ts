@@ -103,17 +103,21 @@ export function useClassDetail(selectedClass: ClassItem | null) {
   }, []);
 
   const saveDebounceRef = useRef<any>(null);
+  const syncStateDebounceRef = useRef<any>(null);
 
   useEffect(() => {
     return () => {
       if (saveDebounceRef.current) {
         clearTimeout(saveDebounceRef.current);
       }
+      if (syncStateDebounceRef.current) {
+        clearTimeout(syncStateDebounceRef.current);
+      }
     };
   }, []);
 
   const handleUpdateRecord = useCallback(
-    (studentId: number, field: string, value: any) => {
+    (studentId: number, field: string, value: any, syncImmediate = false) => {
       const prev = attendanceRecordsRef.current;
       const newRecs = prev.map((rec) => {
         if (rec.student_id !== studentId) return rec;
@@ -131,10 +135,20 @@ export function useClassDetail(selectedClass: ClassItem | null) {
       });
 
       attendanceRecordsRef.current = newRecs;
-      // Always sync state so TanStack DataTable sort, filter, and exports are 100% up to date
-      startTransition(() => {
+
+      // Status buttons require immediate UI feedback
+      if (syncImmediate || field === 'status') {
+        if (syncStateDebounceRef.current) clearTimeout(syncStateDebounceRef.current);
         setAttendanceRecords(newRecs);
-      });
+      } else {
+        // Debounce React parent table state sync so cell tabbing is 100% smooth, non-blocking, and never loses cursor
+        if (syncStateDebounceRef.current) {
+          clearTimeout(syncStateDebounceRef.current);
+        }
+        syncStateDebounceRef.current = setTimeout(() => {
+          setAttendanceRecords(newRecs);
+        }, 1200);
+      }
 
       // Debounce auto-save silently to backend without triggering disruptive global page refetches
       if (selectedClass && newRecs.length > 0) {
@@ -147,7 +161,7 @@ export function useClassDetail(selectedClass: ClassItem | null) {
           } catch (err: any) {
             console.error('Tự động lưu thất bại:', err);
           }
-        }, 800);
+        }, 1000);
       }
     },
     [selectedClass, attendanceDate]
@@ -176,6 +190,9 @@ export function useClassDetail(selectedClass: ClassItem | null) {
     if (!selectedClass) return;
     if (saveDebounceRef.current) {
       clearTimeout(saveDebounceRef.current);
+    }
+    if (syncStateDebounceRef.current) {
+      clearTimeout(syncStateDebounceRef.current);
     }
     setSavingAttendance(true);
     try {
