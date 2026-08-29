@@ -228,20 +228,16 @@ export function useClassDetail(selectedClass: ClassItem | null) {
       });
 
       attendanceRecordsRef.current = newRecs;
+      setAttendanceRecords(newRecs);
       isDirtyRef.current = true;
 
-      // Status buttons require immediate UI feedback
-      if (field === 'status') {
-        setAttendanceRecords(newRecs);
-      }
-
-      // Debounced auto-save to database (1000ms debounce)
+      // Debounced auto-save to database (800ms debounce)
       if (autoSaveTimerRef.current) {
         clearTimeout(autoSaveTimerRef.current);
       }
       autoSaveTimerRef.current = setTimeout(() => {
         flushSaveAttendance(true);
-      }, 1000);
+      }, 800);
     },
     [flushSaveAttendance]
   );

@@ -321,9 +321,10 @@ export default function ClassesPage() {
           classId={selectedClass.id}
           date={attendanceDate}
           grade={selectedClass.grade}
-          onSaved={() => {
+          onSaved={async () => {
+            await flushSaveAttendance(true);
             loadAttendanceData(selectedClass.id, attendanceDate);
-            notifyDataChanged();
+            notifyDataChanged(['schedule', 'attendance', 'reports', 'analytics', 'classes']);
           }}
         />
       )}

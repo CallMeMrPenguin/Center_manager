@@ -188,11 +188,11 @@ export const CheckScoreInput: React.FC<CheckScoreInputProps> = React.memo(({
         data-row-index={rowIndex}
         value={val}
         onChange={(e) => {
-          const raw = e.target.value;
+          const raw = e.target.value.replace(/[^0-9.,]/g, '');
           setVal(raw);
-          const formatted = parseAndFormatScore(raw);
-          lastCommittedRef.current = formatted;
-          onUpdateRecord(rec.student_id, field, formatted);
+          const parsed = parseAndFormatScore(raw);
+          lastCommittedRef.current = parsed !== '' ? parsed : raw;
+          onUpdateRecord(rec.student_id, field, parsed !== '' ? parsed : raw);
         }}
         onFocus={(e) => {
           isFocusedRef.current = true;
