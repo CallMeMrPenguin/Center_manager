@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { format1Dec } from '../../../utils';
 
 interface CheckScoreInputProps {
   rec: any;
@@ -143,8 +144,28 @@ export const CheckScoreInput: React.FC<CheckScoreInputProps> = React.memo(({
     }
   };
 
+  // Resolve corresponding predicted score for this cell
+  let rawPred: any = null;
+  if (field === 'check_1') {
+    rawPred = rec.pred_check_1 ?? rec.pred_c1;
+  } else if (field === 'check_2') {
+    rawPred = rec.pred_check_2 ?? rec.pred_c2;
+  } else if (field === 'homework') {
+    rawPred = rec.pred_homework ?? rec.pred_hw;
+  } else if (field === 'mock_test') {
+    rawPred = rec.pred_mock_test ?? rec.pred_mt;
+  }
+
+  const hasPred =
+    rawPred !== null &&
+    rawPred !== undefined &&
+    rawPred !== '' &&
+    !isNaN(Number(rawPred)) &&
+    Number(rawPred) > 0;
+  const formattedPred = hasPred ? format1Dec(rawPred) : null;
+
   return (
-    <div className="flex items-center justify-center">
+    <div className="flex flex-col items-center justify-center py-1">
       <input
         ref={inputRef}
         type="text"
@@ -168,13 +189,33 @@ export const CheckScoreInput: React.FC<CheckScoreInputProps> = React.memo(({
         }}
         onKeyDown={handleKeyDown}
         placeholder="0-10"
-        className="w-20 bg-[#161a29] border border-white/10 rounded-lg px-2.5 py-1.5 text-white font-extrabold text-xs focus:outline-none focus:border-[#5c36f5] focus:ring-2 focus:ring-[#5c36f5]/40 text-center transition selection:bg-[#5c36f5] selection:text-white caret-white"
+        className="w-20 bg-[#161a29] border border-white/10 rounded-lg px-2 py-1 text-white font-extrabold text-xs focus:outline-none focus:border-[#5c36f5] focus:ring-2 focus:ring-[#5c36f5]/40 text-center transition selection:bg-[#5c36f5] selection:text-white caret-white"
       />
+
+      {/* Prediction indicator below input */}
+      <div className="mt-1 h-4 flex items-center justify-center">
+        {formattedPred ? (
+          <button
+            type="button"
+            tabIndex={-1}
+            onClick={() => {
+              setVal(formattedPred);
+              commitValue(formattedPred);
+            }}
+            title={`Điểm dự đoán: ${formattedPred} (Nhấn để áp dụng)`}
+            className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-indigo-500/15 hover:bg-indigo-500/30 border border-indigo-500/25 text-[10px] text-indigo-300 font-mono font-bold transition cursor-pointer active:scale-95 select-none"
+          >
+            <span className="text-[8.5px] text-indigo-300/70 font-sans font-semibold uppercase tracking-wider">Dự đoán</span>
+            <span className="font-extrabold text-indigo-200">{formattedPred}</span>
+          </button>
+        ) : (
+          <span className="text-[10px] text-slate-600 font-mono select-none" title="Chưa có dữ liệu dự đoán">
+            -
+          </span>
+        )}
+      </div>
     </div>
   );
 });
 
 CheckScoreInput.displayName = 'CheckScoreInput';
-
-
-

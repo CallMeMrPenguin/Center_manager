@@ -171,6 +171,7 @@ from database.analytics_predictions import (
     _holtwinters_predict,
     smart_predict,
     get_class_student_predictions,
+    get_class_attendance_with_predictions,
 )
 from database.analytics_engine import calculate_performance_analytics
 from database.analytics_reports import (
@@ -304,6 +305,7 @@ __all__ = [
     "smart_predict",
     "calculate_performance_analytics",
     "get_class_student_predictions",
+    "get_class_attendance_with_predictions",
     "get_analytics_reports",
     "reset_student_grades",
     "get_custom_time_phases",

@@ -28,7 +28,7 @@ from database.db_manager import (
     get_class_sessions, add_class_session, update_class_session, delete_class_session,
     get_courses, create_course, update_course, delete_course,
     get_student_scores, upsert_student_score, delete_student_score,
-    get_class_attendance_grades, upsert_class_attendance_grades,
+    get_class_attendance_grades, upsert_class_attendance_grades, get_class_attendance_with_predictions,
     get_analytics_reports, reset_student_grades, get_class_student_predictions,
     get_custom_time_phases, save_custom_time_phase, delete_custom_time_phase
 )
@@ -241,32 +241,7 @@ def api_delete_session(session_id: int):
 
 @router.get("/api/classes/{class_id}/attendance")
 def api_get_attendance(class_id: int, date: str):
-    conn = get_connection()
-    try:
-        cursor = conn.cursor()
-        cursor.execute("""
-            SELECT 
-                s.id as student_id,
-                s.full_name as student_name,
-                s.nickname,
-                ag.id as id,
-                COALESCE(ag.status, 'Có mặt') as status,
-                ag.check_1,
-                ag.check_2,
-                ag.homework,
-                ag.mock_test,
-                COALESCE(ag.notes, '') as notes,
-                COALESCE(ag.date, ?) as date
-            FROM class_students cs
-            JOIN students s ON cs.student_id = s.id
-            LEFT JOIN class_attendance_grades ag ON ag.class_id = cs.class_id AND ag.student_id = s.id AND ag.date = ?
-            WHERE cs.class_id = ?
-            ORDER BY s.full_name ASC
-        """, (date, date, class_id))
-        rows = [dict(r) for r in cursor.fetchall()]
-        return {"date": date, "records": rows}
-    finally:
-        conn.close()
+    return get_class_attendance_with_predictions(class_id, date)
 
 @router.post("/api/classes/{class_id}/attendance")
 def api_save_attendance(class_id: int, payload: Dict[str, Any]):
