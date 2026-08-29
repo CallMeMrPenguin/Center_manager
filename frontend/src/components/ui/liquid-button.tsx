@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState } from 'react';
 
 export type LiquidVariant = 'indigo' | 'cyan' | 'emerald' | 'amber' | 'rose' | 'purple';
 export type LiquidSize = 'sm' | 'md' | 'lg';
@@ -14,119 +14,92 @@ interface LiquidButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement
   glow?: boolean;
 }
 
-interface Bubble {
-  x: number;
-  y: number;
-  radius: number;
-  speed: number;
-  sway: number;
-  swaySpeed: number;
-  opacity: number;
-}
-
 const THEMES: Record<LiquidVariant, {
   border: string;
-  bgBase: string;
+  colorHex: string;
+  colorBack: string;
   textColor: string;
   textHover: string;
   glowShadow: string;
-  colorFront: string;
-  colorBack: string;
-  colorSurface: string;
-  bubbleColor: string;
 }> = {
   indigo: {
-    border: 'border-[#5c36f5]/40 hover:border-[#5c36f5]',
-    bgBase: 'bg-[#0a0d1c]',
-    textColor: 'text-indigo-200',
+    border: 'border-2 border-[#5c36f5]',
+    colorHex: '#5c36f5',
+    colorBack: 'rgba(92, 54, 245, 0.55)',
+    textColor: 'text-indigo-300',
     textHover: 'group-hover:text-white',
-    glowShadow: 'group-hover:shadow-[0_0_26px_rgba(92,54,245,0.7)]',
-    colorFront: 'rgba(92, 54, 245, 0.92)',
-    colorBack: 'rgba(65, 34, 189, 0.55)',
-    colorSurface: '#a594fd',
-    bubbleColor: 'rgba(255, 255, 255, 0.65)',
+    glowShadow: 'hover:shadow-[0_0_24px_rgba(92,54,245,0.65)]',
   },
   cyan: {
-    border: 'border-cyan-500/40 hover:border-cyan-400',
-    bgBase: 'bg-[#051322]',
-    textColor: 'text-cyan-200',
-    textHover: 'group-hover:text-white',
-    glowShadow: 'group-hover:shadow-[0_0_26px_rgba(6,182,212,0.7)]',
-    colorFront: 'rgba(8, 145, 178, 0.92)',
-    colorBack: 'rgba(6, 182, 212, 0.5)',
-    colorSurface: '#67e8f9',
-    bubbleColor: 'rgba(255, 255, 255, 0.7)',
+    border: 'border-2 border-[#38bdf8]',
+    colorHex: '#38bdf8',
+    colorBack: 'rgba(56, 189, 248, 0.55)',
+    textColor: 'text-[#38bdf8]',
+    textHover: 'group-hover:text-[#0b1329]',
+    glowShadow: 'hover:shadow-[0_0_24px_rgba(56,189,248,0.65)]',
   },
   emerald: {
-    border: 'border-emerald-500/40 hover:border-emerald-400',
-    bgBase: 'bg-[#041512]',
-    textColor: 'text-emerald-200',
-    textHover: 'group-hover:text-white',
-    glowShadow: 'group-hover:shadow-[0_0_26px_rgba(16,185,129,0.7)]',
-    colorFront: 'rgba(5, 150, 105, 0.92)',
-    colorBack: 'rgba(16, 185, 129, 0.5)',
-    colorSurface: '#6ee7b7',
-    bubbleColor: 'rgba(255, 255, 255, 0.7)',
+    border: 'border-2 border-[#34d399]',
+    colorHex: '#34d399',
+    colorBack: 'rgba(52, 211, 153, 0.55)',
+    textColor: 'text-[#34d399]',
+    textHover: 'group-hover:text-[#062017]',
+    glowShadow: 'hover:shadow-[0_0_24px_rgba(52,211,153,0.65)]',
   },
   amber: {
-    border: 'border-amber-500/40 hover:border-amber-400',
-    bgBase: 'bg-[#160f04]',
-    textColor: 'text-amber-200',
-    textHover: 'group-hover:text-white',
-    glowShadow: 'group-hover:shadow-[0_0_26px_rgba(245,158,11,0.7)]',
-    colorFront: 'rgba(217, 119, 6, 0.92)',
-    colorBack: 'rgba(245, 158, 11, 0.5)',
-    colorSurface: '#fde68a',
-    bubbleColor: 'rgba(255, 255, 255, 0.7)',
+    border: 'border-2 border-[#fbbf24]',
+    colorHex: '#fbbf24',
+    colorBack: 'rgba(251, 191, 36, 0.55)',
+    textColor: 'text-[#fbbf24]',
+    textHover: 'group-hover:text-[#211604]',
+    glowShadow: 'hover:shadow-[0_0_24px_rgba(251,191,36,0.65)]',
   },
   rose: {
-    border: 'border-rose-500/40 hover:border-rose-400',
-    bgBase: 'bg-[#18070e]',
-    textColor: 'text-rose-200',
+    border: 'border-2 border-[#fb7185]',
+    colorHex: '#fb7185',
+    colorBack: 'rgba(251, 113, 133, 0.55)',
+    textColor: 'text-[#fb7185]',
     textHover: 'group-hover:text-white',
-    glowShadow: 'group-hover:shadow-[0_0_26px_rgba(244,63,94,0.7)]',
-    colorFront: 'rgba(225, 29, 72, 0.92)',
-    colorBack: 'rgba(244, 63, 94, 0.5)',
-    colorSurface: '#fda4af',
-    bubbleColor: 'rgba(255, 255, 255, 0.7)',
+    glowShadow: 'hover:shadow-[0_0_24px_rgba(251,113,133,0.65)]',
   },
   purple: {
-    border: 'border-purple-500/40 hover:border-purple-400',
-    bgBase: 'bg-[#11071c]',
-    textColor: 'text-purple-200',
-    textHover: 'group-hover:text-white',
-    glowShadow: 'group-hover:shadow-[0_0_26px_rgba(168,85,247,0.7)]',
-    colorFront: 'rgba(147, 51, 234, 0.92)',
-    colorBack: 'rgba(168, 85, 247, 0.5)',
-    colorSurface: '#d8b4fe',
-    bubbleColor: 'rgba(255, 255, 255, 0.7)',
+    border: 'border-2 border-[#c084fc]',
+    colorHex: '#c084fc',
+    colorBack: 'rgba(192, 132, 252, 0.55)',
+    textColor: 'text-[#c084fc]',
+    textHover: 'group-hover:text-[#180829]',
+    glowShadow: 'hover:shadow-[0_0_24px_rgba(192,132,252,0.65)]',
   },
 };
 
 const SIZES: Record<LiquidSize, {
   padding: string;
   fontSize: string;
+  iconSize: number;
   height: string;
 }> = {
   sm: {
-    padding: 'px-3.5 py-1.5',
+    padding: 'px-4 py-2',
     fontSize: 'text-xs',
-    height: 'h-8',
+    iconSize: 13,
+    height: 'h-9',
   },
   md: {
-    padding: 'px-5 py-2.5',
+    padding: 'px-6 py-3',
     fontSize: 'text-sm',
-    height: 'h-11',
+    iconSize: 16,
+    height: 'h-12',
   },
   lg: {
-    padding: 'px-7 py-3.5',
+    padding: 'px-8 py-4',
     fontSize: 'text-base',
+    iconSize: 18,
     height: 'h-14',
   },
 };
 
 export const LiquidFillButton: React.FC<LiquidButtonProps> = ({
-  variant = 'indigo',
+  variant = 'cyan',
   size = 'md',
   icon,
   children,
@@ -139,199 +112,62 @@ export const LiquidFillButton: React.FC<LiquidButtonProps> = ({
   ...props
 }) => {
   const [isHovered, setIsHovered] = useState(false);
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const containerRef = useRef<HTMLButtonElement | null>(null);
-
-  const theme = THEMES[variant] || THEMES.indigo;
+  const theme = THEMES[variant] || THEMES.cyan;
   const sizeConf = SIZES[size] || SIZES.md;
 
-  const currentTargetFill = typeof fillPercentage === 'number'
-    ? Math.min(100, Math.max(0, fillPercentage))
-    : autoFillOnHover
-    ? isHovered
-      ? 100
-      : 0
-    : 0;
-
-  // Fluid physics animation loop
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    let animId: number;
-    let currentLevel = 0; // 0 to 100
-    let step = 0;
-    let slosh = 0;
-    let sloshTarget = 0;
-
-    const bubbles: Bubble[] = [];
-
-    const spawnBubble = (width: number, height: number, waterY: number) => {
-      if (bubbles.length < 8 && Math.random() < 0.25) {
-        bubbles.push({
-          x: Math.random() * width,
-          y: height - 2,
-          radius: 1 + Math.random() * 2,
-          speed: 0.8 + Math.random() * 1.5,
-          sway: Math.random() * Math.PI * 2,
-          swaySpeed: 0.04 + Math.random() * 0.04,
-          opacity: 0.3 + Math.random() * 0.5,
-        });
-      }
-    };
-
-    const render = () => {
-      const rect = canvas.getBoundingClientRect();
-      const dpr = window.devicePixelRatio || 1;
-      const width = rect.width;
-      const height = rect.height;
-
-      if (canvas.width !== width * dpr || canvas.height !== height * dpr) {
-        canvas.width = width * dpr;
-        canvas.height = height * dpr;
-      }
-
-      ctx.save();
-      ctx.scale(dpr, dpr);
-      ctx.clearRect(0, 0, width, height);
-
-      // Smooth liquid level pouring acceleration
-      const target = currentTargetFill;
-      const speed = target > currentLevel ? 0.055 : 0.085; // Viscous filling, crisp draining
-      currentLevel += (target - currentLevel) * speed;
-
-      // Smooth slosh damping
-      slosh += (sloshTarget - slosh) * 0.08;
-      sloshTarget *= 0.94; // Decay slosh
-
-      if (currentLevel > 0.3) {
-        step += 0.045;
-        const waterHeight = (currentLevel / 100) * height;
-        const baseSurfaceY = height - waterHeight;
-
-        // 1. Render Back Depth Wave
-        ctx.fillStyle = theme.colorBack;
-        ctx.beginPath();
-        ctx.moveTo(0, height);
-        for (let x = 0; x <= width; x += 4) {
-          const wave =
-            Math.sin(x * 0.035 + step * 1.2) * 3.5 +
-            Math.cos(x * 0.02 - step * 0.8) * 2 +
-            ((x - width / 2) / width) * slosh;
-          const y = Math.min(height, Math.max(0, baseSurfaceY + wave));
-          ctx.lineTo(x, y);
-        }
-        ctx.lineTo(width, height);
-        ctx.closePath();
-        ctx.fill();
-
-        // 2. Render Front Primary Wave
-        ctx.fillStyle = theme.colorFront;
-        ctx.beginPath();
-        ctx.moveTo(0, height);
-        const frontPoints: { x: number; y: number }[] = [];
-        for (let x = 0; x <= width; x += 4) {
-          const wave =
-            Math.sin(x * 0.04 - step * 1.5) * 4.5 +
-            Math.cos(x * 0.025 + step * 0.9) * 2.5 +
-            ((x - width / 2) / width) * slosh;
-          const y = Math.min(height, Math.max(0, baseSurfaceY + wave));
-          frontPoints.push({ x, y });
-          ctx.lineTo(x, y);
-        }
-        ctx.lineTo(width, height);
-        ctx.closePath();
-        ctx.fill();
-
-        // 3. Render Specular Surface Foam Line
-        if (frontPoints.length > 0) {
-          ctx.strokeStyle = theme.colorSurface;
-          ctx.lineWidth = 1.5;
-          ctx.beginPath();
-          ctx.moveTo(frontPoints[0].x, frontPoints[0].y);
-          for (let i = 1; i < frontPoints.length; i++) {
-            ctx.lineTo(frontPoints[i].x, frontPoints[i].y);
-          }
-          ctx.stroke();
-        }
-
-        // 4. Render Rising Micro Bubbles
-        spawnBubble(width, height, baseSurfaceY);
-        for (let i = bubbles.length - 1; i >= 0; i--) {
-          const b = bubbles[i];
-          b.y -= b.speed;
-          b.sway += b.swaySpeed;
-          const currentX = b.x + Math.sin(b.sway) * 2;
-
-          if (b.y <= baseSurfaceY || b.y <= 0) {
-            bubbles.splice(i, 1);
-          } else {
-            ctx.fillStyle = theme.bubbleColor;
-            ctx.beginPath();
-            ctx.arc(currentX, b.y, b.radius, 0, Math.PI * 2);
-            ctx.fill();
-          }
-        }
-      }
-
-      ctx.restore();
-
-      // Only continue loop if there is active liquid or movement
-      if (currentLevel > 0.1 || currentTargetFill > 0) {
-        animId = requestAnimationFrame(render);
-      }
-    };
-
-    animId = requestAnimationFrame(render);
-
-    const handleMouseMove = (e: MouseEvent) => {
-      if (!containerRef.current) return;
-      const rect = containerRef.current.getBoundingClientRect();
-      const mouseX = e.clientX - rect.left;
-      const normX = (mouseX / rect.width - 0.5) * 2; // -1 to 1
-      sloshTarget = normX * 8; // Impart tilt ripple
-    };
-
-    const container = containerRef.current;
-    if (container) {
-      container.addEventListener('mousemove', handleMouseMove);
+  // Calculate top position based on hover or manual fillPercentage
+  const getTopPosition = () => {
+    if (typeof fillPercentage === 'number') {
+      const clamped = Math.min(100, Math.max(0, fillPercentage));
+      // 0% -> top: 105%, 100% -> top: -65%
+      return `${105 - clamped * 1.7}%`;
     }
+    if (autoFillOnHover) {
+      return isHovered ? '-60%' : '105%';
+    }
+    return '105%';
+  };
 
-    return () => {
-      cancelAnimationFrame(animId);
-      if (container) {
-        container.removeEventListener('mousemove', handleMouseMove);
-      }
-    };
-  }, [currentTargetFill, theme]);
+  const topPos = getTopPosition();
 
   return (
     <button
-      ref={containerRef}
       type="button"
       disabled={disabled}
       onClick={onClick}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className={`group relative overflow-hidden rounded-2xl border ${theme.border} ${theme.bgBase} ${
+      className={`group relative overflow-hidden rounded-full ${theme.border} bg-transparent ${
         sizeConf.padding
-      } ${sizeConf.fontSize} ${
+      } ${sizeConf.fontSize} ${theme.textColor} ${theme.textHover} ${
         glow ? theme.glowShadow : ''
-      } font-black transition-all duration-300 cursor-pointer select-none active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none flex items-center justify-center gap-2 ${className}`}
+      } font-bold transition-all duration-400 cursor-pointer select-none active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none flex items-center justify-center gap-2.5 ${className}`}
       {...props}
     >
-      {/* Real-time HTML5 60FPS Fluid Physics Water Simulation Canvas */}
-      <canvas
-        ref={canvasRef}
-        className="absolute inset-0 w-full h-full pointer-events-none z-0 rounded-2xl"
+      {/* 1. Back Depth Rotating Liquid Wave */}
+      <div
+        className="absolute w-[260%] h-[260%] left-[-80%] pointer-events-none animate-liquid-rotate-wave-back transition-[top] duration-700 ease-out z-0"
+        style={{
+          top: topPos,
+          backgroundColor: theme.colorBack,
+          borderRadius: '40%',
+        }}
       />
 
-      {/* Button Content (High Contrast Pure White Floating Layer) */}
-      <span className={`relative z-10 flex items-center gap-2 ${theme.textColor} ${theme.textHover} transition-colors duration-200`}>
+      {/* 2. Front Primary Rotating 45% Wave (User's Exact Liquid Algorithm) */}
+      <div
+        className="absolute w-[240%] h-[240%] left-[-70%] pointer-events-none animate-liquid-rotate-wave transition-[top] duration-600 ease-out z-0"
+        style={{
+          top: topPos,
+          backgroundColor: theme.colorHex,
+          borderRadius: '45%',
+        }}
+      />
+
+      {/* 3. Button Content */}
+      <span className="relative z-10 flex items-center gap-2 pointer-events-none font-black tracking-wide transition-colors duration-400">
         {icon && <span className="shrink-0 transition-transform duration-300 group-hover:scale-110">{icon}</span>}
-        <span className="font-extrabold tracking-wide">{children}</span>
+        <span>{children}</span>
       </span>
     </button>
   );

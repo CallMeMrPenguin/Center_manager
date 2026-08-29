@@ -772,14 +772,28 @@ textarea:not(.code-editor-textarea):not(.canvas-text-editor):not(.white-paper-in
   }
 }
 
-.animate-liquid-wave-front {
-  animation: liquidWaveFront 4s linear infinite;
+@keyframes liquidRotateWave {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
-.animate-liquid-wave-back {
-  animation: liquidWaveBack 6.5s linear infinite;
+@keyframes liquidRotateWaveReverse {
+  from {
+    transform: rotate(360deg);
+  }
+  to {
+    transform: rotate(0deg);
+  }
 }
 
-.animate-liquid-sway {
-  animation: liquidSway 2.5s ease-in-out infinite;
+.animate-liquid-rotate-wave {
+  animation: liquidRotateWave 4s linear infinite;
+}
+
+.animate-liquid-rotate-wave-back {
+  animation: liquidRotateWaveReverse 6.5s linear infinite;
 }
