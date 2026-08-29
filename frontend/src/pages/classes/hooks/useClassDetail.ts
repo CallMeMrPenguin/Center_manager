@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback, startTransition } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { ClassItem, EnrolledStudent, AttendanceRecord } from '../types';
 import { api } from '../../../api';
 import { showToast } from '../../../components/Toast';
@@ -11,6 +11,18 @@ export function useClassDetail(selectedClass: ClassItem | null) {
   const attendanceRecordsRef = useRef<AttendanceRecord[]>([]);
   const [savingAttendance, setSavingAttendance] = useState(false);
   const [selectedClassWeeklyDays, setSelectedClassWeeklyDays] = useState<number[]>([]);
+
+  const isDirtyRef = useRef(false);
+  const currentClassIdRef = useRef<number | null>(selectedClass?.id ?? null);
+  const currentDateRef = useRef<string>(attendanceDate);
+
+  useEffect(() => {
+    currentClassIdRef.current = selectedClass?.id ?? null;
+  }, [selectedClass?.id]);
+
+  useEffect(() => {
+    currentDateRef.current = attendanceDate;
+  }, [attendanceDate]);
 
   // Parallelized loader for class students, attendance records, and schedule
   const loadClassDetailData = useCallback(async (clsId: number, dateStr: string) => {
@@ -25,6 +37,7 @@ export function useClassDetail(selectedClass: ClassItem | null) {
       attendanceRecordsRef.current = recs;
       setAttendanceRecords(recs);
       setEnrolledStudents(enrolled || []);
+      isDirtyRef.current = false;
 
       if (slots && Array.isArray(slots)) {
         const dayMap: Record<string, number> = {
@@ -49,6 +62,7 @@ export function useClassDetail(selectedClass: ClassItem | null) {
       setEnrolledStudents([]);
       setAttendanceRecords([]);
       attendanceRecordsRef.current = [];
+      isDirtyRef.current = false;
     }
   }, [selectedClass?.id, attendanceDate, loadClassDetailData]);
 
@@ -58,6 +72,7 @@ export function useClassDetail(selectedClass: ClassItem | null) {
       const recs = data.records || [];
       attendanceRecordsRef.current = recs;
       setAttendanceRecords(recs);
+      isDirtyRef.current = false;
     } catch (err: any) {
       showToast('Không thể tải bảng điểm danh: ' + err.message, 'error');
     }
@@ -102,71 +117,6 @@ export function useClassDetail(selectedClass: ClassItem | null) {
     return truncated % 1 === 0 ? String(truncated.toFixed(0)) : truncated.toFixed(1);
   }, []);
 
-  const saveDebounceRef = useRef<any>(null);
-  const syncStateDebounceRef = useRef<any>(null);
-
-  useEffect(() => {
-    return () => {
-      if (saveDebounceRef.current) {
-        clearTimeout(saveDebounceRef.current);
-      }
-      if (syncStateDebounceRef.current) {
-        clearTimeout(syncStateDebounceRef.current);
-      }
-    };
-  }, []);
-
-  const handleUpdateRecord = useCallback(
-    (studentId: number, field: string, value: any, syncImmediate = false) => {
-      const prev = attendanceRecordsRef.current;
-      const newRecs = prev.map((rec) => {
-        if (rec.student_id !== studentId) return rec;
-        const updated = { ...rec, [field]: value };
-        const c1 = updated.check_1 !== null && updated.check_1 !== undefined && updated.check_1 !== '' ? Number(updated.check_1) : null;
-        const c2 = updated.check_2 !== null && updated.check_2 !== undefined && updated.check_2 !== '' ? Number(updated.check_2) : null;
-        const hw = updated.homework !== null && updated.homework !== undefined && updated.homework !== '' ? Number(updated.homework) : null;
-        const mock = updated.mock_test !== null && updated.mock_test !== undefined && updated.mock_test !== '' ? Number(updated.mock_test) : null;
-        const hasScore = (c1 !== null && c1 > 0) || (c2 !== null && c2 > 0) || (hw !== null && hw > 0) || (mock !== null && mock > 0);
-
-        if (field !== 'status' && hasScore && updated.status === 'Vắng mặt') {
-          updated.status = 'Có mặt';
-        }
-        return updated;
-      });
-
-      attendanceRecordsRef.current = newRecs;
-
-      // Status buttons require immediate UI feedback
-      if (syncImmediate || field === 'status') {
-        if (syncStateDebounceRef.current) clearTimeout(syncStateDebounceRef.current);
-        setAttendanceRecords(newRecs);
-      } else {
-        // Debounce React parent table state sync so cell tabbing is 100% smooth, non-blocking, and never loses cursor
-        if (syncStateDebounceRef.current) {
-          clearTimeout(syncStateDebounceRef.current);
-        }
-        syncStateDebounceRef.current = setTimeout(() => {
-          setAttendanceRecords(newRecs);
-        }, 1200);
-      }
-
-      // Debounce auto-save silently to backend without triggering disruptive global page refetches
-      if (selectedClass && newRecs.length > 0) {
-        if (saveDebounceRef.current) {
-          clearTimeout(saveDebounceRef.current);
-        }
-        saveDebounceRef.current = setTimeout(async () => {
-          try {
-            await api.saveClassAttendance(selectedClass.id, attendanceDate, attendanceRecordsRef.current);
-          } catch (err: any) {
-            console.error('Tự động lưu thất bại:', err);
-          }
-        }, 1000);
-      }
-    },
-    [selectedClass, attendanceDate]
-  );
-
   const applyAutoAttendanceStatus = useCallback((records: AttendanceRecord[]) => {
     const newRecords = records.map((rec) => {
       const c1 = rec.check_1 !== null && rec.check_1 !== undefined && rec.check_1 !== '' ? Number(rec.check_1) : null;
@@ -186,20 +136,81 @@ export function useClassDetail(selectedClass: ClassItem | null) {
     return { records: newRecords };
   }, []);
 
+  // Save changes silently when leaving tab, switching subtab, or navigating away
+  const flushSaveAttendance = useCallback(async () => {
+    const classId = currentClassIdRef.current;
+    const dateStr = currentDateRef.current;
+    if (!isDirtyRef.current || !classId || !dateStr) return;
+    try {
+      const currentRecords = attendanceRecordsRef.current.length > 0 ? attendanceRecordsRef.current : attendanceRecords;
+      const { records: finalRecords } = applyAutoAttendanceStatus(currentRecords);
+      isDirtyRef.current = false;
+      await api.saveClassAttendance(classId, dateStr, finalRecords);
+    } catch (err: any) {
+      console.error('Tự động lưu khi rời phần/chuyển tab thất bại:', err);
+    }
+  }, [applyAutoAttendanceStatus, attendanceRecords]);
+
+  // Flush on unmount
+  useEffect(() => {
+    return () => {
+      const classId = currentClassIdRef.current;
+      const dateStr = currentDateRef.current;
+      if (isDirtyRef.current && classId && dateStr) {
+        api.saveClassAttendance(classId, dateStr, attendanceRecordsRef.current).catch(() => {});
+      }
+    };
+  }, []);
+
+  const handleUpdateRecord = useCallback(
+    (studentId: number, field: string, value: any) => {
+      const prev = attendanceRecordsRef.current;
+      const newRecs = prev.map((rec) => {
+        if (rec.student_id !== studentId) return rec;
+        const updated = { ...rec, [field]: value };
+        const c1 = updated.check_1 !== null && updated.check_1 !== undefined && updated.check_1 !== '' ? Number(updated.check_1) : null;
+        const c2 = updated.check_2 !== null && updated.check_2 !== undefined && updated.check_2 !== '' ? Number(updated.check_2) : null;
+        const hw = updated.homework !== null && updated.homework !== undefined && updated.homework !== '' ? Number(updated.homework) : null;
+        const mock = updated.mock_test !== null && updated.mock_test !== undefined && updated.mock_test !== '' ? Number(updated.mock_test) : null;
+        const hasScore = (c1 !== null && c1 > 0) || (c2 !== null && c2 > 0) || (hw !== null && hw > 0) || (mock !== null && mock > 0);
+
+        if (field !== 'status' && hasScore && updated.status === 'Vắng mặt') {
+          updated.status = 'Có mặt';
+        }
+        return updated;
+      });
+
+      attendanceRecordsRef.current = newRecs;
+      isDirtyRef.current = true;
+
+      // Status buttons require immediate UI feedback
+      if (field === 'status') {
+        setAttendanceRecords(newRecs);
+      }
+    },
+    []
+  );
+
+  const handleDateChange = useCallback(async (newDate: string) => {
+    if (newDate === attendanceDate) return;
+    if (isDirtyRef.current && selectedClass) {
+      try {
+        await api.saveClassAttendance(selectedClass.id, attendanceDate, attendanceRecordsRef.current);
+        isDirtyRef.current = false;
+      } catch (e) {}
+    }
+    setAttendanceDate(newDate);
+  }, [attendanceDate, selectedClass]);
+
   const handleSaveAttendance = async () => {
     if (!selectedClass) return;
-    if (saveDebounceRef.current) {
-      clearTimeout(saveDebounceRef.current);
-    }
-    if (syncStateDebounceRef.current) {
-      clearTimeout(syncStateDebounceRef.current);
-    }
     setSavingAttendance(true);
     try {
       const currentRecords = attendanceRecordsRef.current.length > 0 ? attendanceRecordsRef.current : attendanceRecords;
       const { records: finalRecords } = applyAutoAttendanceStatus(currentRecords);
       attendanceRecordsRef.current = finalRecords;
       setAttendanceRecords(finalRecords);
+      isDirtyRef.current = false;
       await api.saveClassAttendance(selectedClass.id, attendanceDate, finalRecords);
       showToast('Đã lưu bảng điểm danh và điểm học sinh!', 'success');
       notifyDataChanged(['attendance', 'reports', 'analytics']);
@@ -256,7 +267,7 @@ export function useClassDetail(selectedClass: ClassItem | null) {
   return {
     enrolledStudents,
     attendanceDate,
-    setAttendanceDate,
+    setAttendanceDate: handleDateChange,
     attendanceRecords,
     savingAttendance,
     selectedClassWeeklyDays,
@@ -265,6 +276,7 @@ export function useClassDetail(selectedClass: ClassItem | null) {
     handleUpdateRecord,
     parseAndFormatScore,
     handleSaveAttendance,
+    flushSaveAttendance,
     handleExportExcel,
     handleExportDocx,
     handleUnenrollStudent,

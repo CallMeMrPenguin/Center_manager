@@ -44,6 +44,7 @@ export default function ClassesPage() {
     handleUpdateRecord,
     parseAndFormatScore,
     handleSaveAttendance,
+    flushSaveAttendance,
     handleExportExcel,
     handleExportDocx,
     handleUnenrollStudent,
@@ -126,7 +127,10 @@ export default function ClassesPage() {
           <div className="flex flex-wrap items-center justify-between gap-4 bg-[#0f1320] border border-white/10 p-4 rounded-2xl">
             <div className="flex items-center gap-3">
               <button
-                onClick={() => setSelectedClass(null)}
+                onClick={() => {
+                  flushSaveAttendance();
+                  setSelectedClass(null);
+                }}
                 className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white transition cursor-pointer border border-white/5"
                 title="Quay lại danh sách lớp"
               >
@@ -148,7 +152,12 @@ export default function ClassesPage() {
             {/* Sliding Pill Indicator Segmented Control (Rule 7) */}
             <SegmentedControl<'grades' | 'seating' | 'relationships'>
               value={activeSubTab}
-              onChange={setActiveSubTab}
+              onChange={(tab) => {
+                if (activeSubTab === 'grades' && tab !== 'grades') {
+                  flushSaveAttendance();
+                }
+                setActiveSubTab(tab);
+              }}
               options={[
                 { value: 'grades', label: 'Điểm Danh & Điểm', badge: enrolledStudents.length },
                 { value: 'seating', label: 'Sơ Đồ Lớp' },
