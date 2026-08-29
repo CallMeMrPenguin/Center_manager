@@ -198,6 +198,44 @@ export const StudentRankingsTable: React.FC<StudentRankingsTableProps> = React.m
       },
     },
     {
+      id: 'predicted_next',
+      accessorFn: (r) => Number(r.predicted_next ?? 0),
+      header: () => <div className="text-center w-full">Dự Đoán</div>,
+      meta: {
+        headerText: 'Dự Đoán',
+        exportValue: (r: any) => {
+          const p = Number(r.predicted_next ?? 0);
+          return p > 0 ? format1Dec(p) : '-';
+        },
+      },
+      cell: ({ getValue }) => {
+        const val = Number(getValue()) || 0;
+        if (val <= 0) {
+          return <div className="text-center font-mono text-slate-500 text-sm sm:text-base">-</div>;
+        }
+        const formatted = format1Dec(val);
+        const theme =
+          val >= 8.0
+            ? 'text-emerald-300 bg-emerald-500/15 border-emerald-500/30'
+            : val >= 6.5
+            ? 'text-cyan-300 bg-cyan-500/15 border-cyan-500/30'
+            : val >= 5.0
+            ? 'text-amber-300 bg-amber-500/15 border-amber-500/30'
+            : 'text-rose-300 bg-rose-500/15 border-rose-500/30';
+
+        return (
+          <div className="text-center">
+            <span
+              className={`inline-block px-2.5 py-0.5 rounded-lg border font-mono font-black text-sm sm:text-base ${theme}`}
+              title={`Dự đoán điểm buổi tới: ${formatted}`}
+            >
+              {formatted}
+            </span>
+          </div>
+        );
+      },
+    },
+    {
       id: 'rankTier',
       header: () => <div className="text-center w-full">Hạng</div>,
       meta: {

@@ -194,21 +194,32 @@ export const CheckScoreInput: React.FC<CheckScoreInputProps> = React.memo(({
 
       {/* Prediction indicator below input */}
       <div className="mt-1 h-4 flex items-center justify-center">
-        {formattedPred ? (
-          <button
-            type="button"
-            tabIndex={-1}
-            onClick={() => {
-              setVal(formattedPred);
-              commitValue(formattedPred);
-            }}
-            title={`Điểm dự đoán: ${formattedPred} (Nhấn để áp dụng)`}
-            className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-indigo-500/15 hover:bg-indigo-500/30 border border-indigo-500/25 text-[10px] text-indigo-300 font-mono font-bold transition cursor-pointer active:scale-95 select-none"
-          >
-            <span className="text-[8.5px] text-indigo-300/70 font-sans font-semibold uppercase tracking-wider">Dự đoán</span>
-            <span className="font-extrabold text-indigo-200">{formattedPred}</span>
-          </button>
-        ) : (
+        {formattedPred && hasPred ? (() => {
+          const num = Number(rawPred);
+          const theme =
+            num >= 8.0
+              ? 'text-emerald-300 bg-emerald-500/15 border-emerald-500/30 hover:bg-emerald-500/25'
+              : num >= 6.5
+              ? 'text-cyan-300 bg-cyan-500/15 border-cyan-500/30 hover:bg-cyan-500/25'
+              : num >= 5.0
+              ? 'text-amber-300 bg-amber-500/15 border-amber-500/30 hover:bg-amber-500/25'
+              : 'text-rose-300 bg-rose-500/15 border-rose-500/30 hover:bg-rose-500/25';
+
+          return (
+            <button
+              type="button"
+              tabIndex={-1}
+              onClick={() => {
+                setVal(formattedPred);
+                commitValue(formattedPred);
+              }}
+              title={`Điểm dự đoán: ${formattedPred} (Nhấn để áp dụng)`}
+              className={`px-1.5 py-0.2 rounded border font-mono font-black text-[11px] transition cursor-pointer active:scale-95 select-none ${theme}`}
+            >
+              {formattedPred}
+            </button>
+          );
+        })() : (
           <span className="text-[10px] text-slate-600 font-mono select-none" title="Chưa có dữ liệu dự đoán">
             -
           </span>

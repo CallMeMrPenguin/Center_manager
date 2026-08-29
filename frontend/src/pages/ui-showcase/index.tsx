@@ -1,15 +1,14 @@
 import React, { useState } from 'react';
 import {
-  Calendar, Compass, Mail, Music, Calculator, Sparkles, Layers,
+  Calendar, Compass, Sparkles, Layers,
   MousePointerClick, FolderTree, Table as TableIcon, BellRing, Droplets,
-  Save, Play, FileSpreadsheet, Zap
+  Activity, SunMoon
 } from 'lucide-react';
 import { AnimatedCalendar } from '../../components/ui/calender';
 import { SegmentedButton } from '../../components/ui/segmented-button';
 import { Dock, DockItem, DockIcon, DockLabel } from '../../components/ui/dock';
 import { FileTree } from '../../components/ui/file-tree';
 import { HoverPreviewProvider, HoverPreviewLink } from '../../components/ui/hover-preview';
-import { LiquidFillButton, LiquidVariant } from '../../components/ui/liquid-button';
 import {
   useAnimatedToast,
   StackedNotifications,
@@ -19,11 +18,14 @@ import {
 } from '../../components/ui/animated-toast';
 import { AnimatedTable, SortDirection } from '../../components/ui/animated-table';
 import { sampleTreeData, samplePreviewData, tableSampleData, tableColumns, UserData } from './data';
+import { LiquidButtonDemo } from './components/LiquidButtonDemo';
+import { BeamDatabaseStatusDemo } from './components/BeamDatabaseStatusDemo';
+import { AnimatedThemeToggleDemo } from '../../components/ui/animated-theme-toggle';
 
 export default function UIShowcasePage() {
-  const [activeSubTab, setActiveSubTab] = useState<'calendar' | 'segmented' | 'dock' | 'tree' | 'hover' | 'toast' | 'table' | 'liquid'>('calendar');
-  const [liquidFillLevel, setLiquidFillLevel] = useState(65);
-  const [selectedLiquidVariant, setSelectedLiquidVariant] = useState<LiquidVariant>('indigo');
+  const [activeSubTab, setActiveSubTab] = useState<
+    'beam' | 'toggle' | 'liquid' | 'calendar' | 'segmented' | 'dock' | 'tree' | 'hover' | 'toast' | 'table'
+  >('beam');
   const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
   const [selectedNavTab, setSelectedNavTab] = useState('overview');
   const [treeSelectedId, setTreeSelectedId] = useState('button');
@@ -67,13 +69,15 @@ export default function UIShowcasePage() {
           <div>
             <h1 className="text-xl font-black text-white">UI Component Showcase & Playground</h1>
             <p className="text-xs text-slate-400 font-semibold mt-0.5">
-              Trải nghiệm tương tác trực tiếp bộ 7 component động hiệu ứng cao cấp với theme Dark Space.
+              Trải nghiệm tương tác trực tiếp bộ component động hiệu ứng cao cấp với theme Dark Space.
             </p>
           </div>
         </div>
 
         <SegmentedButton
           buttons={[
+            { id: 'beam', label: 'Animated Beam', icon: Activity },
+            { id: 'toggle', label: 'Theme Toggle', icon: SunMoon },
             { id: 'liquid', label: 'Liquid Button', icon: Droplets },
             { id: 'calendar', label: 'Calendar', icon: Calendar },
             { id: 'segmented', label: 'Segmented', icon: Layers },
@@ -90,271 +94,206 @@ export default function UIShowcasePage() {
         />
       </div>
 
-      {/* 0. LIQUID FILL BUTTON TAB */}
-      {activeSubTab === 'liquid' && (
-        <div className="space-y-6">
-          <div className="bg-[#080b14] border border-[#1b2444] p-6 rounded-2xl space-y-5">
-            <div className="flex flex-wrap items-center justify-between gap-4 border-b border-white/10 pb-4">
-              <div>
-                <h3 className="text-base font-black text-white flex items-center gap-2">
-                  <Droplets size={18} className="text-cyan-400" />
-                  <span>Liquid Wave Fill Button (Hiệu Ứng Rót Nước Đầy Cốc)</span>
-                </h3>
-                <p className="text-xs text-slate-400 font-medium mt-1">
-                  Khi rê chuột qua, lớp chất lỏng chuyển động dạng sóng sin dâng từ đáy lên đỉnh như nước đổ vào cốc, tích hợp hiệu ứng khúc xạ phát sáng.
-                </p>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-bold text-slate-400">Độ rót thử nghiệm:</span>
-                <input
-                  type="range"
-                  min="0"
-                  max="100"
-                  value={liquidFillLevel}
-                  onChange={(e) => setLiquidFillLevel(Number(e.target.value))}
-                  className="w-32 accent-[#5c36f5] cursor-pointer"
-                />
-                <span className="text-xs font-mono font-black text-indigo-400 w-10">{liquidFillLevel}%</span>
-              </div>
-            </div>
+      {/* 1. ANIMATED BEAM & DATABASE CONNECTION MONITOR */}
+      {activeSubTab === 'beam' && <BeamDatabaseStatusDemo />}
 
-            {/* Live Hover Demo Matrix */}
-            <div className="space-y-4">
-              <span className="text-xs font-bold uppercase text-slate-400 block tracking-wider">
-                1. Tự Động Đổ Đầy Khi Hover (6 Hệ Màu Chất Lỏng)
-              </span>
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-                <LiquidFillButton variant="indigo" icon={<Save size={16} />}>
-                  Lưu Bảng Điểm
-                </LiquidFillButton>
-                <LiquidFillButton variant="cyan" icon={<Droplets size={16} />}>
-                  Nước Đại Dương
-                </LiquidFillButton>
-                <LiquidFillButton variant="emerald" icon={<FileSpreadsheet size={16} />}>
-                  Xuất Excel
-                </LiquidFillButton>
-                <LiquidFillButton variant="amber" icon={<Zap size={16} />}>
-                  Smart Predict
-                </LiquidFillButton>
-                <LiquidFillButton variant="rose" icon={<Sparkles size={16} />}>
-                  Mật Nho Ruby
-                </LiquidFillButton>
-                <LiquidFillButton variant="purple" icon={<Play size={16} />}>
-                  Luyện Đề Thi
-                </LiquidFillButton>
-              </div>
-            </div>
+      {/* 2. ANIMATED THEME TOGGLE TAB */}
+      {activeSubTab === 'toggle' && <AnimatedThemeToggleDemo />}
 
-            {/* Size Matrix */}
-            <div className="space-y-4 pt-2 border-t border-white/5">
-              <span className="text-xs font-bold uppercase text-slate-400 block tracking-wider">
-                2. Các Kích Thước (Size Matrix)
-              </span>
-              <div className="flex flex-wrap items-center gap-4">
-                <LiquidFillButton size="sm" variant="indigo" icon={<Save size={13} />}>
-                  Nhỏ (SM)
-                </LiquidFillButton>
-                <LiquidFillButton size="md" variant="cyan" icon={<Droplets size={16} />}>
-                  Vừa (MD Standard)
-                </LiquidFillButton>
-                <LiquidFillButton size="lg" variant="purple" icon={<Sparkles size={18} />}>
-                  Lớn (LG Hero Action)
-                </LiquidFillButton>
-              </div>
-            </div>
+      {/* 3. LIQUID FILL BUTTON TAB */}
+      {activeSubTab === 'liquid' && <LiquidButtonDemo />}
 
-            {/* Controlled Level Bar */}
-            <div className="space-y-4 pt-2 border-t border-white/5">
-              <span className="text-xs font-bold uppercase text-slate-400 block tracking-wider">
-                3. Điều Khiển Mức Chất Lỏng Theo Phần Trăm (Progress Simulation)
-              </span>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="p-4 bg-[#0c0f1e] border border-white/10 rounded-2xl space-y-3 flex flex-col items-center">
-                  <span className="text-xs font-bold text-slate-300">Theo Slider ({liquidFillLevel}%)</span>
-                  <LiquidFillButton
-                    variant="indigo"
-                    autoFillOnHover={false}
-                    fillPercentage={liquidFillLevel}
-                    icon={<Droplets size={16} />}
-                  >
-                    Mức Nước {liquidFillLevel}%
-                  </LiquidFillButton>
-                </div>
-                <div className="p-4 bg-[#0c0f1e] border border-white/10 rounded-2xl space-y-3 flex flex-col items-center">
-                  <span className="text-xs font-bold text-slate-300">Đầy 50% (Cyan)</span>
-                  <LiquidFillButton
-                    variant="cyan"
-                    autoFillOnHover={false}
-                    fillPercentage={50}
-                    icon={<Zap size={16} />}
-                  >
-                    Đang Tải 50%
-                  </LiquidFillButton>
-                </div>
-                <div className="p-4 bg-[#0c0f1e] border border-white/10 rounded-2xl space-y-3 flex flex-col items-center">
-                  <span className="text-xs font-bold text-slate-300">Đầy 90% (Emerald)</span>
-                  <LiquidFillButton
-                    variant="emerald"
-                    autoFillOnHover={false}
-                    fillPercentage={90}
-                    icon={<Play size={16} />}
-                  >
-                    Hoàn Tất 90%
-                  </LiquidFillButton>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* 1. ANIMATED CALENDAR TAB */}
+      {/* 4. ANIMATED CALENDAR TAB */}
       {activeSubTab === 'calendar' && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-[#080b14] border border-[#1b2444] p-6 rounded-2xl">
           <div className="space-y-4">
             <h3 className="text-base font-black text-white flex items-center gap-2">
               <Calendar size={18} className="text-indigo-400" />
-              <span>Animated Calendar (Inline & Popover)</span>
+              <span>Animated Calendar (Inline & Selection)</span>
             </h3>
             <p className="text-xs text-slate-400 font-medium">
               Chuyển tháng với hiệu ứng trượt mượt mà (AnimatePresence), ngày được chọn có thanh trượt spring phát sáng.
             </p>
             <div className="p-4 bg-[#0c0f1e] border border-white/10 rounded-2xl space-y-3">
-              <span className="text-xs font-bold text-slate-300 block">Dạng Popover Trigger:</span>
-              <AnimatedCalendar
-                value={selectedDate}
-                onChange={setSelectedDate}
-                highlightDaysOfWeek={[1, 3, 5]}
-                placeholder="Chọn ngày học..."
-              />
-              {selectedDate && (
-                <p className="text-xs text-indigo-300 font-mono font-bold mt-2">
-                  Ngày đã chọn: {selectedDate.toLocaleDateString('vi-VN')}
-                </p>
-              )}
+              <span className="text-xs font-bold text-slate-300 block">Dạng Chọn Ngày:</span>
+              <div className="text-xs text-indigo-300 font-mono">
+                Ngày đã chọn: {selectedDate ? selectedDate.toLocaleDateString('vi-VN') : 'Chưa chọn'}
+              </div>
             </div>
           </div>
 
           <div className="flex flex-col items-center justify-center p-4 bg-[#0c0f1e] border border-white/10 rounded-2xl">
-            <span className="text-xs font-black uppercase text-indigo-400 mb-3 block">Dạng Lịch Inline</span>
-            <AnimatedCalendar inline value={selectedDate} onChange={setSelectedDate} highlightDaysOfWeek={[1, 3, 5]} />
+            <span className="text-xs font-bold text-slate-400 mb-3 block">Dạng Inline Calendar Grid:</span>
+            <AnimatedCalendar value={selectedDate} onChange={setSelectedDate} mode="single" />
           </div>
         </div>
       )}
 
-      {/* 2. SEGMENTED BUTTON TAB */}
+      {/* 5. SEGMENTED BUTTON TAB */}
       {activeSubTab === 'segmented' && (
         <div className="bg-[#080b14] border border-[#1b2444] p-6 rounded-2xl space-y-6">
-          <h3 className="text-base font-black text-white flex items-center gap-2">
-            <Layers size={18} className="text-indigo-400" />
-            <span>Segmented Button (Framer Motion Spring Indicator)</span>
-          </h3>
-          <div className="space-y-4 max-w-xl">
-            <div>
-              <span className="text-xs font-bold text-slate-400 block mb-2">Kích thước Lớn (Size LG) + Badges:</span>
-              <SegmentedButton
-                buttons={[
-                  { id: 'overview', label: 'Tổng Quan', badge: 12 },
-                  { id: 'analytics', label: 'Phân Tích', badge: 'Hot' },
-                  { id: 'reports', label: 'Báo Cáo', badge: 3 },
-                  { id: 'settings', label: 'Cấu Hình' },
-                ]}
-                activeId={selectedNavTab}
-                onChange={setSelectedNavTab}
-                size="lg"
-              />
-            </div>
+          <div>
+            <h3 className="text-base font-black text-white flex items-center gap-2">
+              <Layers size={18} className="text-indigo-400" />
+              <span>Sliding Pill Segmented Button</span>
+            </h3>
+            <p className="text-xs text-slate-400 font-medium mt-1">
+              Thanh trượt vật lý spring pill indicator cực mượt, hỗ trợ icons, badge và responsive.
+            </p>
+          </div>
+
+          <div className="space-y-4">
+            <span className="text-xs font-bold uppercase text-slate-400 block tracking-wider">Kích thước vừa (md):</span>
+            <SegmentedButton
+              buttons={[
+                { id: 'overview', label: 'Tổng Quan' },
+                { id: 'analytics', label: 'Phân Tích' },
+                { id: 'reports', label: 'Báo Cáo' },
+                { id: 'settings', label: 'Cài Đặt' },
+              ]}
+              activeId={selectedNavTab}
+              onChange={setSelectedNavTab}
+              size="md"
+            />
           </div>
         </div>
       )}
 
-      {/* 3. DOCK ANIMATION TAB */}
+      {/* 6. MACOS DOCK TAB */}
       {activeSubTab === 'dock' && (
-        <div className="bg-[#080b14] border border-[#1b2444] p-6 rounded-2xl space-y-6">
-          <h3 className="text-base font-black text-white flex items-center gap-2">
-            <Compass size={18} className="text-indigo-400" />
-            <span>macOS Dock Magnification Physics</span>
-          </h3>
-          <div className="flex flex-col items-center justify-center p-12 bg-[#0c0f1e] border border-white/10 rounded-2xl min-h-[220px]">
-            <Dock orientation="horizontal" magnification={70} distance={140}>
-              <DockItem><DockIcon><Compass /></DockIcon><DockLabel>Safari</DockLabel></DockItem>
-              <DockItem><DockIcon><Mail /></DockIcon><DockLabel>Mail</DockLabel></DockItem>
-              <DockItem><DockIcon><Calendar /></DockIcon><DockLabel>Calendar</DockLabel></DockItem>
-              <DockItem><DockIcon><Music /></DockIcon><DockLabel>Music</DockLabel></DockItem>
-              <DockItem><DockIcon><Calculator /></DockIcon><DockLabel>Calculator</DockLabel></DockItem>
+        <div className="bg-[#080b14] border border-[#1b2444] p-8 rounded-2xl space-y-8 min-h-[360px] flex flex-col justify-between">
+          <div>
+            <h3 className="text-base font-black text-white flex items-center gap-2">
+              <Compass size={18} className="text-indigo-400" />
+              <span>macOS Interactive Magnification Dock</span>
+            </h3>
+            <p className="text-xs text-slate-400 font-medium mt-1">
+              Hiệu ứng phóng đại mượt mà khi rê chuột theo khoảng cách con trỏ (framer-motion useMotionValue).
+            </p>
+          </div>
+
+          <div className="flex justify-center pb-6">
+            <Dock>
+              <DockItem onClick={() => addToast({ message: 'Mở La Bàn', type: 'info' })}>
+                <DockIcon>
+                  <Compass className="w-6 h-6 text-blue-400" />
+                </DockIcon>
+                <DockLabel>La Bàn</DockLabel>
+              </DockItem>
+              <DockItem onClick={() => addToast({ message: 'Mở Lịch Học', type: 'info' })}>
+                <DockIcon>
+                  <Calendar className="w-6 h-6 text-purple-400" />
+                </DockIcon>
+                <DockLabel>Lịch Học</DockLabel>
+              </DockItem>
+              <DockItem onClick={() => addToast({ message: 'Mở Lớp Học', type: 'info' })}>
+                <DockIcon>
+                  <Layers className="w-6 h-6 text-emerald-400" />
+                </DockIcon>
+                <DockLabel>Lớp Học</DockLabel>
+              </DockItem>
             </Dock>
           </div>
         </div>
       )}
 
-      {/* 4. FILE TREE TAB */}
+      {/* 7. FILE TREE TAB */}
       {activeSubTab === 'tree' && (
-        <div className="bg-[#080b14] border border-[#1b2444] p-6 rounded-2xl space-y-6">
+        <div className="bg-[#080b14] border border-[#1b2444] p-6 rounded-2xl space-y-4">
           <h3 className="text-base font-black text-white flex items-center gap-2">
             <FolderTree size={18} className="text-indigo-400" />
-            <span>Animated Recursive File Tree</span>
+            <span>Interactive Animated File Tree</span>
           </h3>
-          <div className="max-w-md">
-            <FileTree data={sampleTreeData} selectedId={treeSelectedId} onSelect={(node) => setTreeSelectedId(node.id)} />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="p-4 bg-[#0c0f1e] border border-white/10 rounded-2xl max-h-[380px] overflow-y-auto">
+              <FileTree data={sampleTreeData} selectedId={treeSelectedId} onSelect={(node) => setTreeSelectedId(node.id)} />
+            </div>
+            <div className="p-4 bg-[#0c0f1e] border border-white/10 rounded-2xl flex flex-col justify-center text-xs space-y-2">
+              <span className="font-bold text-slate-400">Node đang chọn:</span>
+              <span className="font-mono text-sm text-indigo-400 font-black">{treeSelectedId}</span>
+            </div>
           </div>
         </div>
       )}
 
-      {/* 5. HOVER PREVIEW TAB */}
+      {/* 8. HOVER PREVIEW TAB */}
       {activeSubTab === 'hover' && (
-        <div className="bg-[#080b14] border border-[#1b2444] p-6 rounded-2xl space-y-6">
-          <h3 className="text-base font-black text-white flex items-center gap-2">
-            <MousePointerClick size={18} className="text-indigo-400" />
-            <span>Dynamic Hover Preview Link</span>
-          </h3>
-          <HoverPreviewProvider data={samplePreviewData} className="p-8 bg-[#0c0f1e] border border-white/10 rounded-2xl">
-            <p className="max-w-2xl text-base text-slate-300 leading-relaxed font-semibold">
-              Khám phá <HoverPreviewLink previewKey="midjourney">Midjourney</HoverPreviewLink> cho ảnh nghệ thuật, dùng{' '}
-              <HoverPreviewLink previewKey="stable">Stable Diffusion</HoverPreviewLink> mã nguồn mở hoặc tạo assets cùng{' '}
-              <HoverPreviewLink previewKey="leonardo">Leonardo AI</HoverPreviewLink>.
-            </p>
-          </HoverPreviewProvider>
-        </div>
+        <HoverPreviewProvider data={samplePreviewData}>
+          <div className="bg-[#080b14] border border-[#1b2444] p-6 rounded-2xl space-y-6">
+            <div>
+              <h3 className="text-base font-black text-white flex items-center gap-2">
+                <MousePointerClick size={18} className="text-indigo-400" />
+                <span>Cursor Hover Preview (Floating Rich Cards)</span>
+              </h3>
+              <p className="text-xs text-slate-400 font-medium mt-1">
+                Rê chuột lên bất kỳ từ khóa nào dưới đây để xem trước thẻ metadata nổi với hình ảnh và thống kê chi tiết.
+              </p>
+            </div>
+
+            <div className="p-6 bg-[#0c0f1e] border border-white/10 rounded-2xl leading-relaxed text-sm text-slate-300 space-y-4">
+              <p>
+                Hệ thống hỗ trợ phân tích điểm số cho học sinh{' '}
+                <HoverPreviewLink previewKey="user-alice" className="text-blue-400 font-bold border-b border-blue-400/40 hover:text-blue-300">
+                  Alice Johnson
+                </HoverPreviewLink>{' '}
+                và học sinh{' '}
+                <HoverPreviewLink previewKey="user-bob" className="text-purple-400 font-bold border-b border-purple-400/40 hover:text-purple-300">
+                  Bob Smith
+                </HoverPreviewLink>
+                .
+              </p>
+            </div>
+          </div>
+        </HoverPreviewProvider>
       )}
 
-      {/* 6. TOAST SUITE TAB */}
+      {/* 9. STACKED TOAST TAB */}
       {activeSubTab === 'toast' && (
         <div className="bg-[#080b14] border border-[#1b2444] p-6 rounded-2xl space-y-6">
           <h3 className="text-base font-black text-white flex items-center gap-2">
             <BellRing size={18} className="text-indigo-400" />
-            <span>Animated Toast Suite</span>
+            <span>Interactive Animated Toasts & Undo Bar</span>
           </h3>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div className="p-4 bg-[#0c0f1e] border border-white/10 rounded-2xl space-y-3">
-              <h4 className="text-xs font-black text-white uppercase">1. Stacked Toasts</h4>
-              <div className="flex flex-wrap gap-2">
-                <button onClick={() => addStackedToast('success')} className="px-3 py-1.5 bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 rounded-xl text-xs font-bold hover:bg-emerald-500/30 cursor-pointer">+ Success</button>
-                <button onClick={() => addStackedToast('error')} className="px-3 py-1.5 bg-rose-500/20 text-rose-300 border border-rose-500/30 rounded-xl text-xs font-bold hover:bg-rose-500/30 cursor-pointer">+ Error</button>
-              </div>
-            </div>
-            <div className="p-4 bg-[#0c0f1e] border border-white/10 rounded-2xl space-y-3">
-              <h4 className="text-xs font-black text-white uppercase">2. Undo Toast</h4>
-              <button onClick={() => setUndoToastOpen(true)} className="w-full py-2 bg-rose-500/20 text-rose-300 border border-rose-500/40 rounded-xl text-xs font-black hover:bg-rose-500/30 cursor-pointer">Xóa Mục & Hiện Hoàn Tác</button>
-            </div>
-            <div className="p-4 bg-[#0c0f1e] border border-white/10 rounded-2xl space-y-3">
-              <h4 className="text-xs font-black text-white uppercase">3. Promise Toast</h4>
-              <button onClick={handleTestPromise} className="w-full py-2 bg-[#5c36f5] hover:bg-[#7351f7] text-white rounded-xl text-xs font-black transition cursor-pointer shadow-[0_0_14px_rgba(92,54,245,0.5)]">Chạy Async Promise</button>
-            </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <button type="button" onClick={() => addStackedToast('success')} className="p-3 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 rounded-xl font-bold text-xs hover:bg-emerald-500/20 cursor-pointer">
+              Thêm Success Toast
+            </button>
+            <button type="button" onClick={() => addStackedToast('error')} className="p-3 bg-rose-500/10 border border-rose-500/30 text-rose-400 rounded-xl font-bold text-xs hover:bg-rose-500/20 cursor-pointer">
+              Thêm Error Toast
+            </button>
+            <button type="button" onClick={() => addStackedToast('warning')} className="p-3 bg-amber-500/10 border border-amber-500/30 text-amber-400 rounded-xl font-bold text-xs hover:bg-amber-500/20 cursor-pointer">
+              Thêm Warning Toast
+            </button>
+            <button type="button" onClick={() => addStackedToast('info')} className="p-3 bg-blue-500/10 border border-blue-500/30 text-blue-400 rounded-xl font-bold text-xs hover:bg-blue-500/20 cursor-pointer">
+              Thêm Info Toast
+            </button>
           </div>
+
+          <div className="flex flex-wrap gap-3 pt-4 border-t border-white/5">
+            <button type="button" onClick={() => setUndoToastOpen(true)} className="px-4 py-2 bg-indigo-500/20 border border-indigo-500/40 text-indigo-300 rounded-xl font-bold text-xs hover:bg-indigo-500/30 cursor-pointer">
+              Mở Action Undo Toast
+            </button>
+            <button type="button" onClick={handleTestPromise} className="px-4 py-2 bg-purple-500/20 border border-purple-500/40 text-purple-300 rounded-xl font-bold text-xs hover:bg-purple-500/30 cursor-pointer">
+              Thử Promise Toast (2s)
+            </button>
+          </div>
+
           <StackedNotifications toasts={stackedToasts} onRemove={(id) => setStackedToasts((prev) => prev.filter((t) => t.id !== id))} />
-          <UndoToast open={undoToastOpen} onClose={() => setUndoToastOpen(false)} onUndo={() => addToast({ title: 'Hoàn tác', message: 'Đã khôi phục dữ liệu!', type: 'success' })} message="Đã xóa mục thành công" />
+          <UndoToast open={undoToastOpen} message="Đã xóa bản ghi học sinh." onUndo={() => { setUndoToastOpen(false); addToast({ message: 'Đã hoàn tác xóa thành công!', type: 'success' }); }} onClose={() => setUndoToastOpen(false)} />
         </div>
       )}
 
-      {/* 7. ANIMATED TABLE TAB */}
+      {/* 10. ANIMATED TABLE TAB */}
       {activeSubTab === 'table' && (
-        <div className="bg-[#080b14] border border-[#1b2444] p-6 rounded-2xl space-y-6">
+        <div className="bg-[#080b14] border border-[#1b2444] p-6 rounded-2xl space-y-4">
           <h3 className="text-base font-black text-white flex items-center gap-2">
             <TableIcon size={18} className="text-indigo-400" />
-            <span>Animated Table</span>
+            <span>Interactive Animated Data Table</span>
           </h3>
+
           <AnimatedTable<UserData>
-            data={tableSampleData.filter((u) => u.name.toLowerCase().includes(tableSearch.toLowerCase()))}
+            data={tableSampleData}
             columns={tableColumns}
             selectable
             selectedIds={tableSelectedIds}

@@ -7,7 +7,7 @@
   color-scheme: dark;
   --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
   --background: #06070a;
-  --foreground: #f8fafc;
+  --foreground: #ffffff;
   --primary: #5c36f5;
   --primary-hover: #7351f7;
   --primary-light: rgba(92, 54, 245, 0.14);
@@ -17,7 +17,7 @@
   --warning-bg: rgba(245, 158, 11, 0.12);
   --danger: #ef4444;
   --danger-bg: rgba(239, 68, 68, 0.12);
-  --text-main: #f8fafc;
+  --text-main: #ffffff;
   --text-muted: #94a3b8;
   --border-color: rgba(255, 255, 255, 0.04);
   --slate-250: rgba(255, 255, 255, 0.05);
