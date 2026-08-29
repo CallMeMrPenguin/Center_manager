@@ -146,17 +146,17 @@ def get_class_attendance_grades(class_id: int, date_str: str) -> List[Dict[str, 
     finally:
         conn.close()
 
-def _parse_score(val: Any) -> Optional[float]:
+def _parse_score(val: Any, is_present: bool = True) -> Optional[float]:
     if val is None or val == "" or val == "null" or val == "undefined":
-        return None
+        return 0.0 if is_present else None
     try:
         val_str = str(val).strip().replace(',', '.')
         if not val_str or val_str in ("null", "undefined", "none"):
-            return None
+            return 0.0 if is_present else None
         v = float(val_str)
-        return v if v >= 0 else None
+        return max(0.0, min(10.0, v))
     except (ValueError, TypeError):
-        return None
+        return 0.0 if is_present else None
 
 def upsert_class_attendance_grades(class_id: int, date_str: str, records: List[Dict[str, Any]]):
     if not records:
@@ -213,23 +213,21 @@ def upsert_class_attendance_grades(class_id: int, date_str: str, records: List[D
             if student_id not in valid_student_ids:
                 continue
 
-            c1 = _parse_score(rec.get("check_1"))
-            c2 = _parse_score(rec.get("check_2"))
-            hw = _parse_score(rec.get("homework"))
-            mock = _parse_score(rec.get("mock_test"))
-
-            has_score = (c1 is not None) or (c2 is not None) or (hw is not None) or (mock is not None)
             notes = (rec.get("notes") or "").strip()
             raw_status = rec.get("status")
 
             if raw_status:
-                status = raw_status
-            elif has_score:
-                status = "Có mặt"
+                status = str(raw_status).strip()
             elif is_past_date and not notes:
                 status = "Vắng mặt"
             else:
                 status = "Có mặt"
+
+            is_present = status not in ("Vắng mặt", "Nghỉ học")
+            c1 = _parse_score(rec.get("check_1"), is_present=is_present)
+            c2 = _parse_score(rec.get("check_2"), is_present=is_present)
+            hw = _parse_score(rec.get("homework"), is_present=is_present)
+            mock = _parse_score(rec.get("mock_test"), is_present=is_present)
 
             batch_data.append((class_id, student_id, date_str, status, c1, c2, hw, mock, notes))
 

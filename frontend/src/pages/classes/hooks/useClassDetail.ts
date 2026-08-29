@@ -121,19 +121,26 @@ export function useClassDetail(selectedClass: ClassItem | null) {
 
   const applyAutoAttendanceStatus = useCallback((records: AttendanceRecord[]) => {
     const newRecords = records.map((rec) => {
-      const c1 = rec.check_1 !== null && rec.check_1 !== undefined && rec.check_1 !== '' ? Number(rec.check_1) : null;
-      const c2 = rec.check_2 !== null && rec.check_2 !== undefined && rec.check_2 !== '' ? Number(rec.check_2) : null;
-      const hw = rec.homework !== null && rec.homework !== undefined && rec.homework !== '' ? Number(rec.homework) : null;
-      const mock = rec.mock_test !== null && rec.mock_test !== undefined && rec.mock_test !== '' ? Number(rec.mock_test) : null;
-      const hasScore = (c1 !== null && c1 > 0) || (c2 !== null && c2 > 0) || (hw !== null && hw > 0) || (mock !== null && mock > 0);
+      const isAbsent = rec.status === 'Vắng mặt' || rec.status === 'Nghỉ học';
 
-      let status = rec.status;
-      if (hasScore && !status) {
-        status = 'Có mặt';
-      } else if (!status) {
-        status = 'Có mặt';
-      }
-      return { ...rec, status };
+      const formatScoreField = (val: any) => {
+        if (isAbsent) {
+          return val !== null && val !== undefined && val !== '' ? String(val) : null;
+        }
+        // If present and score is empty/null/blank -> default to 0
+        if (val === null || val === undefined || val === '') return '0';
+        return String(val);
+      };
+
+      const status = rec.status || 'Có mặt';
+      return {
+        ...rec,
+        status,
+        check_1: formatScoreField(rec.check_1),
+        check_2: formatScoreField(rec.check_2),
+        homework: formatScoreField(rec.homework),
+        mock_test: formatScoreField(rec.mock_test),
+      };
     });
     return { records: newRecords };
   }, []);

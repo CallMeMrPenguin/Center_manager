@@ -150,10 +150,10 @@ def get_class_student_predictions(class_id: int, target_date: Optional[str] = No
             if status in ("Vắng mặt", "Nghỉ học"):
                 continue
 
-            c1 = float(r.get("check_1")) if r.get("check_1") is not None and float(r.get("check_1") or 0) > 0 else None
-            c2 = float(r.get("check_2")) if r.get("check_2") is not None and float(r.get("check_2") or 0) > 0 else None
-            hw = float(r.get("homework")) if r.get("homework") is not None and float(r.get("homework") or 0) > 0 else None
-            mt = float(r.get("mock_test")) if r.get("mock_test") is not None and float(r.get("mock_test") or 0) > 0 else None
+            c1 = float(r.get("check_1")) if r.get("check_1") is not None else None
+            c2 = float(r.get("check_2")) if r.get("check_2") is not None else None
+            hw = float(r.get("homework")) if r.get("homework") is not None else None
+            mt = float(r.get("mock_test")) if r.get("mock_test") is not None else None
 
             r_c1_skill = r.get("c1_skill", "vocab")
             r_c2_skill = r.get("c2_skill", "grammar")
@@ -179,7 +179,8 @@ def get_class_student_predictions(class_id: int, target_date: Optional[str] = No
                     grammar_scores.append(c2)
                     sess_grammar.append(c2)
 
-            if hw is not None:
+            # Homework: only counted if > 0 (0 can be forgotten worksheet, so skipped)
+            if hw is not None and hw > 0:
                 hw_list.append(hw)
 
             if mt is not None:
@@ -212,9 +213,11 @@ def get_class_student_predictions(class_id: int, target_date: Optional[str] = No
                     w_sum += c2 * w_c2
                     w_tot += w_c2
 
-            if hw is not None:
+            # Homework 0 is skipped; only hw > 0 is included in session overall
+            if hw is not None and hw > 0:
                 w_sum += hw * w_hw
                 w_tot += w_hw
+
             if mt is not None and w_mt > 0:
                 w_sum += mt * w_mt
                 w_tot += w_mt
