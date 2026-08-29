@@ -143,10 +143,21 @@ export const useOverviewStats = ({
 
     let rankStr = '-';
     if (selectedStudentId) {
-      const rawPool = (selectedClassId && studentRankings && studentRankings.length > 0
-        ? studentRankings.filter(r => String(r.class_id) === String(selectedClassId))
-        : (studentRankings && studentRankings.length > 0 ? studentRankings : filteredRankings)
-      ) || [];
+      // Find the specific class for this student so rank is always within their class
+      let targetClassId = selectedClassId;
+      if (!targetClassId || targetClassId === 'all') {
+        const studentEnrollment = (studentRankings || []).find(
+          r => String(r.student_id || r.id) === String(selectedStudentId) && r.class_id
+        );
+        if (studentEnrollment && studentEnrollment.class_id) {
+          targetClassId = String(studentEnrollment.class_id);
+        }
+      }
+
+      // Filter pool strictly to classmates in the same class
+      const rawPool = targetClassId
+        ? (studentRankings || []).filter(r => String(r.class_id) === String(targetClassId))
+        : (studentRankings && studentRankings.length > 0 ? studentRankings : filteredRankings) || [];
 
       // Deduplicate by student_id to ensure a clean unique ranking pool
       const studentMap = new Map<string, any>();

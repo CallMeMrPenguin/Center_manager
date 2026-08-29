@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useId } from 'react';
 
 export type LiquidVariant = 'indigo' | 'cyan' | 'emerald' | 'amber' | 'rose' | 'purple';
 export type LiquidSize = 'sm' | 'md' | 'lg';
@@ -121,10 +121,13 @@ export const LiquidFillButton: React.FC<LiquidButtonProps> = ({
   onClick,
   ...props
 }) => {
+  const rawId = useId();
+  const clipId = `wavy-liquid-clip-${rawId.replace(/:/g, '')}`;
+
   const [isHovered, setIsHovered] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLButtonElement | null>(null);
-  const overlayTextRef = useRef<HTMLDivElement | null>(null);
+  const clipPathRef = useRef<SVGPathElement | null>(null);
 
   const theme = THEMES[variant] || THEMES.indigo;
   const sizeConf = SIZES[size] || SIZES.md;
@@ -170,17 +173,13 @@ export const LiquidFillButton: React.FC<LiquidButtonProps> = ({
       const speed = target > currentLevel ? 0.016 : 0.038;
       currentLevel += (target - currentLevel) * speed;
 
-      // Sync progressive text clipping in real-time
-      if (overlayTextRef.current) {
-        const clipTop = Math.max(0, Math.min(100, 100 - currentLevel));
-        overlayTextRef.current.style.clipPath = `inset(${clipTop}% 0 0 0)`;
-      }
-
       // Smooth slosh damping
       slosh += (sloshTarget - slosh) * 0.06;
       sloshTarget *= 0.92;
 
-      if (currentLevel > 0.1) {
+      let frontPoints: { x: number; y: number }[] = [];
+
+      if (currentLevel > 0.05) {
         step += 0.03;
         // Total water height covers slightly beyond top at 100% so full button is submerged
         const waterHeight = (currentLevel / 100) * (height + 16);
@@ -203,11 +202,10 @@ export const LiquidFillButton: React.FC<LiquidButtonProps> = ({
         ctx.closePath();
         ctx.fill();
 
-        // 2. Render Front Primary Wave
+        // 2. Render Front Primary Wave & Collect Coordinates for Wavy Text Clipping
         ctx.fillStyle = theme.colorFront;
         ctx.beginPath();
         ctx.moveTo(-4, height + 4);
-        const frontPoints: { x: number; y: number }[] = [];
         for (let x = -4; x <= width + 4; x += 4) {
           const wave =
             (Math.sin(x * 0.04 - step * 1.3) * 4.5 +
@@ -221,7 +219,7 @@ export const LiquidFillButton: React.FC<LiquidButtonProps> = ({
         ctx.closePath();
         ctx.fill();
 
-        // 3. Render Specular Surface Foam Line (only when wave is visible)
+        // 3. Render Specular Surface Foam Line
         if (frontPoints.length > 0 && waveScale > 0.04) {
           ctx.strokeStyle = theme.colorSurface;
           ctx.lineWidth = 1.5;
@@ -235,6 +233,21 @@ export const LiquidFillButton: React.FC<LiquidButtonProps> = ({
       }
 
       ctx.restore();
+
+      // 4. Update SVG Clip Path for Dynamic Wavy Text Color Transition
+      if (clipPathRef.current) {
+        if (frontPoints.length > 0) {
+          // Construct closed polygon tracing from bottom-left -> along wave crests -> bottom-right
+          const pathString =
+            `M -10 ${height + 20} ` +
+            frontPoints.map((p) => `L ${p.x.toFixed(1)} ${p.y.toFixed(1)}`).join(' ') +
+            ` L ${width + 10} ${height + 20} Z`;
+          clipPathRef.current.setAttribute('d', pathString);
+        } else {
+          // When empty, place clip polygon outside visible boundary
+          clipPathRef.current.setAttribute('d', `M -10 ${height + 20} L ${width + 10} ${height + 20} L ${width + 10} ${height + 30} L -10 ${height + 30} Z`);
+        }
+      }
 
       // Continue animation loop if liquid is actively filling, draining or present
       if (currentLevel > 0.05 || currentTargetFill > 0) {
@@ -280,11 +293,20 @@ export const LiquidFillButton: React.FC<LiquidButtonProps> = ({
       } font-black transition-all duration-300 cursor-pointer select-none active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none flex items-center justify-center gap-2 ${className}`}
       {...props}
     >
-      {/* Real-time HTML5 60FPS Fluid Physics Water Simulation Canvas with -inset-[4px] to eliminate any border gaps */}
+      {/* Real-time HTML5 60FPS Fluid Physics Water Simulation Canvas */}
       <canvas
         ref={canvasRef}
         className="absolute -inset-[4px] w-[calc(100%+8px)] h-[calc(100%+8px)] pointer-events-none z-0 rounded-2xl"
       />
+
+      {/* SVG ClipPath Definition synchronized with undulating wave coordinates */}
+      <svg className="absolute w-0 h-0 pointer-events-none overflow-hidden" aria-hidden="true">
+        <defs>
+          <clipPath id={clipId} clipPathUnits="userSpaceOnUse">
+            <path ref={clipPathRef} d="M 0 100 L 100 100 Z" />
+          </clipPath>
+        </defs>
+      </svg>
 
       {/* Layer 1: Base Unsubmerged Text (Behind water) */}
       <div className={`relative z-10 flex items-center justify-center gap-2 ${theme.textBase} font-extrabold tracking-wide`}>
@@ -292,10 +314,9 @@ export const LiquidFillButton: React.FC<LiquidButtonProps> = ({
         <span>{children}</span>
       </div>
 
-      {/* Layer 2: Submerged Text Layer (Color changes progressively as water rises via CSS clipPath) */}
+      {/* Layer 2: Submerged Text Layer (Color changes progressively along the WAVY fluid wave boundary) */}
       <div
-        ref={overlayTextRef}
-        style={{ clipPath: 'inset(100% 0 0 0)' }}
+        style={{ clipPath: `url(#${clipId})` }}
         className={`absolute inset-0 z-20 flex items-center justify-center gap-2 ${theme.textFilled} font-extrabold tracking-wide pointer-events-none ${sizeConf.padding}`}
       >
         {icon && <span className="shrink-0">{icon}</span>}
