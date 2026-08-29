@@ -218,8 +218,12 @@ export function useClassDetail(selectedClass: ClassItem | null) {
       });
 
       attendanceRecordsRef.current = newRecs;
-      setAttendanceRecords(newRecs);
       isDirtyRef.current = true;
+
+      // Status buttons require immediate UI feedback
+      if (field === 'status') {
+        setAttendanceRecords(newRecs);
+      }
     },
     []
   );

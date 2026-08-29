@@ -1,3 +1,4 @@
+import threading
 from datetime import datetime
 from typing import List, Dict, Any, Optional
 from database.connection import get_connection
@@ -250,23 +251,25 @@ def upsert_class_attendance_grades(class_id: int, date_str: str, records: List[D
         conn.close()
 
 def _sync_cloud_delete(sql_pg: str, params: tuple):
-    try:
-        from database.connection import get_target_db_url, IS_VERCEL
-        if IS_VERCEL:
-            return
-        import psycopg2
-        target_url = get_target_db_url()
-        if not target_url:
-            return
-        pconn = psycopg2.connect(target_url, connect_timeout=5)
+    def _task():
         try:
-            pcur = pconn.cursor()
-            pcur.execute(sql_pg, params)
-            pconn.commit()
-        finally:
-            pconn.close()
-    except Exception:
-        pass
+            from database.connection import get_target_db_url, IS_VERCEL
+            if IS_VERCEL:
+                return
+            import psycopg2
+            target_url = get_target_db_url()
+            if not target_url:
+                return
+            pconn = psycopg2.connect(target_url, connect_timeout=4)
+            try:
+                pcur = pconn.cursor()
+                pcur.execute(sql_pg, params)
+                pconn.commit()
+            finally:
+                pconn.close()
+        except Exception:
+            pass
+    threading.Thread(target=_task, daemon=True).start()
 
 def delete_class_attendance_date(class_id: int, date_str: str) -> Dict[str, Any]:
     """Deletes all attendance records and sessions for a class on a specific date (e.g. wrong date recorded)."""
