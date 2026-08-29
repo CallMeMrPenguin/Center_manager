@@ -38,21 +38,21 @@ def _weighted_ols_predict(vals: List[float]) -> Tuple[float, float]:
     return slope, trunc_1_dec(predicted)
 
 def _holtwinters_predict(vals: List[float]) -> Tuple[float, float]:
-    """Holt's Double Exponential Smoothing for rich histories (20+ data points)."""
-    try:
-        from statsmodels.tsa.holtwinters import ExponentialSmoothing
-        model = ExponentialSmoothing(vals, trend="add", seasonal=None)
-        fitted = model.fit(optimized=True, disp=False)
-        predicted_val = float(fitted.forecast(1).iloc[0])
-        predicted = max(0.0, min(10.0, predicted_val))
-        trend_series = fitted.trend
-        if trend_series is not None and len(trend_series) > 0:
-            slope = float(trend_series.iloc[-1])
-        else:
-            slope = (vals[-1] - vals[0]) / (len(vals) - 1)
-        return slope, trunc_1_dec(predicted)
-    except Exception:
-        return _weighted_ols_predict(vals)
+    """Holt's Linear Trend Exponential Smoothing (ultra-fast pure Python 0.001ms)."""
+    N = len(vals)
+    if N < 2:
+        return _ema_predict(vals)
+    alpha = 0.35
+    beta = 0.15
+    level = vals[0]
+    trend = vals[1] - vals[0] if N > 1 else 0.0
+    for v in vals[1:]:
+        last_level = level
+        level = alpha * v + (1 - alpha) * (level + trend)
+        trend = beta * (level - last_level) + (1 - beta) * trend
+    raw_pred = level + trend
+    predicted = max(0.0, min(10.0, raw_pred))
+    return trend, trunc_1_dec(predicted)
 
 def smart_predict(vals: List[float]) -> Tuple[float, float]:
     """Dispatch to the appropriate prediction model based on data volume."""

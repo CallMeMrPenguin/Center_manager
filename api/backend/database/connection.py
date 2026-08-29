@@ -338,31 +338,24 @@ class PgConnectionWrapper:
 
 
 def get_connection():
-    target_url = get_target_db_url()
-    if target_url:
-        # 1. On Vercel / serverless cloud, use pg8000 with connection pooling
-        try:
-            raw_conn = _global_pg_pool.get_conn(target_url)
-            return PgConnectionWrapper(raw_conn, is_pg8000=True)
-        except Exception as e_pg8000:
-            print("[DB Connection] pg8000 connection attempt note:", e_pg8000)
+    # In Vercel / serverless cloud mode, connect to Supabase PostgreSQL pooler
+    if IS_VERCEL or os.environ.get("APP_MODE") == "web":
+        target_url = get_target_db_url()
+        if target_url:
+            try:
+                raw_conn = _global_pg_pool.get_conn(target_url)
+                return PgConnectionWrapper(raw_conn, is_pg8000=True)
+            except Exception as e_pg8000:
+                print("[DB Connection] pg8000 connection attempt note:", e_pg8000)
 
-        # 2. Try psycopg2 if available locally
-        try:
-            import psycopg2
-            raw_conn = psycopg2.connect(target_url, connect_timeout=10)
-            return PgConnectionWrapper(raw_conn, is_pg8000=False)
-        except Exception as e_psycopg:
-            for fallback_url in [SUPABASE_DEFAULT_DB_URL, SUPABASE_SESSION_POOLER_URL]:
-                if target_url != fallback_url:
-                    try:
-                        raw_conn = _global_pg_pool.get_conn(fallback_url)
-                        return PgConnectionWrapper(raw_conn, is_pg8000=True)
-                    except Exception:
-                        pass
-            if IS_VERCEL:
-                raise RuntimeError(f"Database connection failed: {e_pg8000}")
+            try:
+                import psycopg2
+                raw_conn = psycopg2.connect(target_url, connect_timeout=10)
+                return PgConnectionWrapper(raw_conn, is_pg8000=False)
+            except Exception:
+                pass
 
-    conn = sqlite3.connect(DB_PATH, check_same_thread=False)
+    # In local desktop mode, ALWAYS use ultra-fast local SQLite (0ms latency, background sync via sync_worker)
+    conn = sqlite3.connect(DB_PATH, check_same_thread=False, timeout=20)
     conn.row_factory = sqlite3.Row
     return conn

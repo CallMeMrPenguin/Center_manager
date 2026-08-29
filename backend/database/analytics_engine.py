@@ -181,13 +181,20 @@ def calculate_performance_analytics(session_records: List[Dict[str, Any]]) -> Di
         return [trunc_1_dec(max(0.0, min(10.0, slope * x + intercept))) for x in x_vals]
 
     def _fitted_holtwinters(vals: List[float]) -> List[float]:
-        try:
-            from statsmodels.tsa.holtwinters import ExponentialSmoothing
-            model = ExponentialSmoothing(vals, trend="add", seasonal=None)
-            fitted_model = model.fit(optimized=True, disp=False)
-            return [trunc_1_dec(max(0.0, min(10.0, float(v)))) for v in fitted_model.fittedvalues]
-        except Exception:
-            return _fitted_wols(vals)
+        N = len(vals)
+        if N < 2:
+            return _fitted_ema(vals)
+        alpha = 0.35
+        beta = 0.15
+        level = vals[0]
+        trend = vals[1] - vals[0] if N > 1 else 0.0
+        fitted = [trunc_1_dec(vals[0])]
+        for v in vals[1:]:
+            last_level = level
+            level = alpha * v + (1 - alpha) * (level + trend)
+            trend = beta * (level - last_level) + (1 - beta) * trend
+            fitted.append(trunc_1_dec(max(0.0, min(10.0, level + trend))))
+        return fitted
 
     def get_fitted_values(vals: List[float]) -> List[float]:
         N = len(vals)
