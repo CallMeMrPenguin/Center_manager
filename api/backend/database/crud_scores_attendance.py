@@ -149,7 +149,10 @@ def _parse_score(val: Any) -> Optional[float]:
     if val is None or val == "" or val == "null" or val == "undefined":
         return None
     try:
-        v = float(val)
+        val_str = str(val).strip().replace(',', '.')
+        if not val_str or val_str in ("null", "undefined", "none"):
+            return None
+        v = float(val_str)
         return v if v >= 0 else None
     except (ValueError, TypeError):
         return None
@@ -173,21 +176,40 @@ def upsert_class_attendance_grades(class_id: int, date_str: str, records: List[D
                 pass
 
         # Validate student IDs in database to prevent foreign key errors
-        student_ids_in_req = [r.get("student_id") for r in records if r.get("student_id")]
+        student_ids_in_req = []
+        for r in records:
+            sid_val = r.get("student_id")
+            if sid_val is not None:
+                try:
+                    student_ids_in_req.append(int(sid_val))
+                except (ValueError, TypeError):
+                    pass
+
         if not student_ids_in_req:
             return
 
         placeholders = ','.join(['?'] * len(student_ids_in_req))
         cursor.execute(f"SELECT id FROM students WHERE id IN ({placeholders})", student_ids_in_req)
-        valid_student_ids = {r[0] if isinstance(r, tuple) else r["id"] for r in cursor.fetchall()}
+        valid_student_ids = set()
+        for r in cursor.fetchall():
+            try:
+                v_id = r["id"] if (hasattr(r, "keys") and "id" in r.keys()) or isinstance(r, dict) else r[0]
+                valid_student_ids.add(int(v_id))
+            except Exception:
+                pass
 
         today_str = datetime.now().strftime("%Y-%m-%d")
         is_past_date = str(date_str) < today_str
         batch_data = []
 
         for rec in records:
-            student_id = rec.get("student_id")
-            if not student_id or student_id not in valid_student_ids:
+            sid_raw = rec.get("student_id")
+            try:
+                student_id = int(sid_raw)
+            except (ValueError, TypeError):
+                continue
+
+            if student_id not in valid_student_ids:
                 continue
 
             c1 = _parse_score(rec.get("check_1"))

@@ -138,31 +138,76 @@ export function useClassDetail(selectedClass: ClassItem | null) {
     return { records: newRecords };
   }, []);
 
-  // Save changes silently when leaving tab, switching subtab, or navigating away
-  const flushSaveAttendance = useCallback(async () => {
+  const autoSaveTimerRef = useRef<any>(null);
+
+  // Save changes silently to backend DB and invalidate caches
+  const flushSaveAttendance = useCallback(async (silent = true) => {
+    if (autoSaveTimerRef.current) {
+      clearTimeout(autoSaveTimerRef.current);
+      autoSaveTimerRef.current = null;
+    }
     const classId = currentClassIdRef.current;
     const dateStr = currentDateRef.current;
     if (!isDirtyRef.current || !classId || !dateStr) return;
+
     try {
       const currentRecords = attendanceRecordsRef.current.length > 0 ? attendanceRecordsRef.current : attendanceRecords;
       const { records: finalRecords } = applyAutoAttendanceStatus(currentRecords);
       isDirtyRef.current = false;
       await api.saveClassAttendance(classId, dateStr, finalRecords);
+      if (!silent) {
+        showToast('Đã tự động lưu bảng điểm!', 'success');
+      }
+      notifyDataChanged(['attendance', 'reports', 'analytics']);
     } catch (err: any) {
-      console.error('Tự động lưu khi rời phần/chuyển tab thất bại:', err);
+      console.error('Tự động lưu bảng điểm thất bại:', err);
     }
   }, [applyAutoAttendanceStatus, attendanceRecords]);
 
-  // Flush on unmount
+  // Flush on unmount, page refresh (F5), or tab hide
   useEffect(() => {
+    const handleBeforeUnload = () => {
+      const classId = currentClassIdRef.current;
+      const dateStr = currentDateRef.current;
+      if (isDirtyRef.current && classId && dateStr) {
+        const currentRecords = attendanceRecordsRef.current.length > 0 ? attendanceRecordsRef.current : [];
+        const { records: finalRecords } = applyAutoAttendanceStatus(currentRecords);
+        // Attempt navigator.sendBeacon or async api call on page unload
+        try {
+          const payload = JSON.stringify({ date: dateStr, records: finalRecords });
+          if (navigator.sendBeacon) {
+            navigator.sendBeacon(`/api/classes/${classId}/attendance`, new Blob([payload], { type: 'application/json' }));
+          } else {
+            api.saveClassAttendance(classId, dateStr, finalRecords).catch(() => {});
+          }
+        } catch {
+          api.saveClassAttendance(classId, dateStr, finalRecords).catch(() => {});
+        }
+      }
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden' && isDirtyRef.current) {
+        flushSaveAttendance(true);
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
     return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      if (autoSaveTimerRef.current) {
+        clearTimeout(autoSaveTimerRef.current);
+      }
       const classId = currentClassIdRef.current;
       const dateStr = currentDateRef.current;
       if (isDirtyRef.current && classId && dateStr) {
         api.saveClassAttendance(classId, dateStr, attendanceRecordsRef.current).catch(() => {});
       }
     };
-  }, []);
+  }, [applyAutoAttendanceStatus, flushSaveAttendance]);
 
   const handleUpdateRecord = useCallback(
     (studentId: number, field: string, value: any) => {
@@ -189,8 +234,16 @@ export function useClassDetail(selectedClass: ClassItem | null) {
       if (field === 'status') {
         setAttendanceRecords(newRecs);
       }
+
+      // Debounced auto-save to database (1000ms debounce)
+      if (autoSaveTimerRef.current) {
+        clearTimeout(autoSaveTimerRef.current);
+      }
+      autoSaveTimerRef.current = setTimeout(() => {
+        flushSaveAttendance(true);
+      }, 1000);
     },
-    []
+    [flushSaveAttendance]
   );
 
   const handleDateChange = useCallback(async (newDate: string) => {
@@ -199,6 +252,7 @@ export function useClassDetail(selectedClass: ClassItem | null) {
       try {
         await api.saveClassAttendance(selectedClass.id, attendanceDate, attendanceRecordsRef.current);
         isDirtyRef.current = false;
+        notifyDataChanged(['attendance', 'reports', 'analytics']);
       } catch (e) {}
     }
     sessionStorage.setItem('center_manager_last_att_date', newDate);
@@ -207,6 +261,10 @@ export function useClassDetail(selectedClass: ClassItem | null) {
 
   const handleSaveAttendance = async () => {
     if (!selectedClass) return;
+    if (autoSaveTimerRef.current) {
+      clearTimeout(autoSaveTimerRef.current);
+      autoSaveTimerRef.current = null;
+    }
     setSavingAttendance(true);
     try {
       const currentRecords = attendanceRecordsRef.current.length > 0 ? attendanceRecordsRef.current : attendanceRecords;
@@ -215,7 +273,7 @@ export function useClassDetail(selectedClass: ClassItem | null) {
       setAttendanceRecords(finalRecords);
       isDirtyRef.current = false;
       await api.saveClassAttendance(selectedClass.id, attendanceDate, finalRecords);
-      showToast('Đã lưu bảng điểm danh và điểm học sinh!', 'success');
+      showToast('Đã lưu bảng điểm danh và điểm học sinh vào cơ sở dữ liệu!', 'success');
       notifyDataChanged(['attendance', 'reports', 'analytics']);
     } catch (err: any) {
       showToast('Lưu thất bại: ' + err.message, 'error');
