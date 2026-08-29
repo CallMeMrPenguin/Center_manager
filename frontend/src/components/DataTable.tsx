@@ -1256,7 +1256,7 @@ export function DataTable<TData>({
                       <Fragment key={row.id}>
                         <tr
                           className={`
-                            group transition-colors duration-150 animate-row-enter
+                            group transition-colors duration-150
                             ${onRowClick ? 'cursor-pointer' : ''}
                             ${row.getIsSelected()
                               ? 'bg-indigo-500/10 hover:bg-indigo-500/15'
@@ -1264,9 +1264,6 @@ export function DataTable<TData>({
                               ? 'bg-[#0d1018] hover:bg-[#131928]'
                               : 'bg-[#0b0f1c] hover:bg-[#131928]'}
                           `}
-                          style={{
-                            animationDelay: `${Math.min(rowIdx * 0.025 + 0.05, 0.6)}s`,
-                          }}
                           onClick={() => onRowClick?.(row.original)}
                         >
                           {row.getVisibleCells().map((cell, cellIdx) => {

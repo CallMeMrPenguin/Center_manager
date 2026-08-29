@@ -136,7 +136,7 @@ export function useClassDetail(selectedClass: ClassItem | null) {
         setAttendanceRecords(newRecs);
       });
 
-      // Debounce auto-save to backend
+      // Debounce auto-save silently to backend without triggering disruptive global page refetches
       if (selectedClass && newRecs.length > 0) {
         if (saveDebounceRef.current) {
           clearTimeout(saveDebounceRef.current);
@@ -144,7 +144,6 @@ export function useClassDetail(selectedClass: ClassItem | null) {
         saveDebounceRef.current = setTimeout(async () => {
           try {
             await api.saveClassAttendance(selectedClass.id, attendanceDate, attendanceRecordsRef.current);
-            notifyDataChanged(['attendance', 'reports', 'analytics']);
           } catch (err: any) {
             console.error('Tự động lưu thất bại:', err);
           }

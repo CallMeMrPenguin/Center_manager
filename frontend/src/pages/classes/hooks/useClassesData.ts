@@ -54,8 +54,11 @@ export function useClassesData() {
 
   useEffect(() => {
     loadClasses();
-    const handleDataChanged = () => {
-      loadClasses(true);
+    const handleDataChanged = (e: any) => {
+      const tags = e?.detail?.tags;
+      if (!tags || tags.length === 0 || tags.includes('classes')) {
+        loadClasses(true);
+      }
     };
     window.addEventListener('data-changed', handleDataChanged);
     window.addEventListener('data-invalidated', handleDataChanged);

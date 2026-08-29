@@ -19,6 +19,15 @@ const focusTarget = (target: HTMLInputElement | null | undefined) => {
   } else {
     target.setSelectionRange(0, 0);
   }
+  // Double-tap focus on next frame to guarantee focus retention across React concurrent render ticks
+  requestAnimationFrame(() => {
+    if (document.activeElement !== target) {
+      target.focus();
+      if (target.value && target.value.trim().length > 0) {
+        target.select();
+      }
+    }
+  });
 };
 
 const navigateScoreInputs = (currentInput: HTMLInputElement, isShift: boolean) => {
