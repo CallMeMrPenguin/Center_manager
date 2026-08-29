@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ChevronLeft } from 'lucide-react';
 import { useClassesData } from './hooks/useClassesData';
 import { useClassDetail } from './hooks/useClassDetail';
@@ -105,6 +105,26 @@ export default function ClassesPage() {
     setEnrollModalOpen(true);
   };
 
+  // Auto-restore selected class on page refresh from sessionStorage
+  useEffect(() => {
+    const storedClassId = sessionStorage.getItem('center_manager_last_class_id');
+    if (storedClassId && !selectedClass && classes.length > 0) {
+      const found = classes.find((c) => String(c.id) === storedClassId);
+      if (found) {
+        setSelectedClass(found);
+      }
+    }
+  }, [classes, selectedClass, setSelectedClass]);
+
+  const handleSelectClass = (cls: ClassItem | null) => {
+    if (cls) {
+      sessionStorage.setItem('center_manager_last_class_id', String(cls.id));
+    } else {
+      sessionStorage.removeItem('center_manager_last_class_id');
+    }
+    setSelectedClass(cls);
+  };
+
   return (
     <div className="h-full flex flex-col p-6 space-y-6 overflow-y-auto">
       {/* 1. CLASS LIST VIEW (NO CLASS SELECTED) */}
@@ -117,7 +137,7 @@ export default function ClassesPage() {
           onSearchChange={setSearch}
           onRefresh={() => loadClasses(false)}
           onCreateClass={handleOpenCreateClass}
-          onSelectClass={setSelectedClass}
+          onSelectClass={handleSelectClass}
           onEditClass={handleOpenEditClass}
         />
       ) : (
@@ -129,7 +149,7 @@ export default function ClassesPage() {
               <button
                 onClick={() => {
                   flushSaveAttendance();
-                  setSelectedClass(null);
+                  handleSelectClass(null);
                 }}
                 className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white transition cursor-pointer border border-white/5"
                 title="Quay lại danh sách lớp"

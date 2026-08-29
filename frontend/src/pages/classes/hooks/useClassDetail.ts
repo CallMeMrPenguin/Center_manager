@@ -6,7 +6,9 @@ import { getLocalDateStr, notifyDataChanged } from '../../../utils';
 
 export function useClassDetail(selectedClass: ClassItem | null) {
   const [enrolledStudents, setEnrolledStudents] = useState<EnrolledStudent[]>([]);
-  const [attendanceDate, setAttendanceDate] = useState(() => getLocalDateStr());
+  const [attendanceDate, setAttendanceDate] = useState(() => {
+    return sessionStorage.getItem('center_manager_last_att_date') || getLocalDateStr();
+  });
   const [attendanceRecords, setAttendanceRecords] = useState<AttendanceRecord[]>([]);
   const attendanceRecordsRef = useRef<AttendanceRecord[]>([]);
   const [savingAttendance, setSavingAttendance] = useState(false);
@@ -199,6 +201,7 @@ export function useClassDetail(selectedClass: ClassItem | null) {
         isDirtyRef.current = false;
       } catch (e) {}
     }
+    sessionStorage.setItem('center_manager_last_att_date', newDate);
     setAttendanceDate(newDate);
   }, [attendanceDate, selectedClass]);
 
