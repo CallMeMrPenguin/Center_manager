@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { ChartControls } from './ChartControls';
 import { ChartSvgPlot } from './ChartSvgPlot';
 import { DistributionPlot } from './DistributionPlot';
@@ -297,70 +298,76 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = ({
             }
 
             return (
-              <div
-                className="absolute z-30 pointer-events-none bg-[#12172b] border border-[#2c375e] p-3 rounded-xl shadow-[0_10px_30px_rgba(0,0,0,0.8)] text-xs font-sans transition-all duration-75 min-w-[190px]"
-                style={{
-                  left: `${left}px`,
-                  top: `${top}px`,
-                  transform,
-                }}
-              >
-                <div className="font-extrabold text-white border-b border-white/10 pb-1.5 flex items-center justify-between gap-4">
-                  <span>{hoveredPoint.sessionName}</span>
-                  <span className="text-[10px] text-slate-400 font-mono">{hoveredPoint.fullDate}</span>
-                </div>
-                <div className="space-y-1.5 pt-1.5">
-                  <div className="flex items-center justify-between gap-4">
-                    <span className="text-blue-400 font-bold">Từ Vựng:</span>
-                    <div className="flex items-center gap-1.5">
-                      <span className="font-mono font-extrabold text-white">
-                        {hoveredPoint.check1 > 0 ? format1Dec(hoveredPoint.check1) : '-'}
-                      </span>
-                      {hoveredPoint.check1 > 0 && hoveredPoint.fittedC1 !== null && (
-                        <span className="text-[10px] font-mono text-slate-400">({format1Dec(hoveredPoint.fittedC1)})</span>
-                      )}
-                    </div>
+              <AnimatePresence>
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.94, y: 6 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.94, y: 4 }}
+                  transition={{ type: 'spring', stiffness: 450, damping: 28 }}
+                  className="absolute z-30 pointer-events-none bg-[#0d1224] border border-[#232f54] p-3.5 rounded-2xl shadow-[0_16px_40px_rgba(0,0,0,0.95)] text-xs font-sans min-w-[210px] select-none"
+                  style={{
+                    left: `${left}px`,
+                    top: `${top}px`,
+                    transform,
+                  }}
+                >
+                  <div className="font-black text-white border-b border-white/10 pb-1.5 flex items-center justify-between gap-4">
+                    <span className="text-indigo-200">{hoveredPoint.sessionName}</span>
+                    <span className="text-[10px] text-slate-400 font-mono bg-white/5 px-1.5 py-0.5 rounded">{hoveredPoint.fullDate}</span>
                   </div>
-                  <div className="flex items-center justify-between gap-4">
-                    <span className="text-purple-400 font-bold">Ngữ Pháp:</span>
-                    <div className="flex items-center gap-1.5">
-                      <span className="font-mono font-extrabold text-white">
-                        {hoveredPoint.check2 > 0 ? format1Dec(hoveredPoint.check2) : '-'}
-                      </span>
-                      {hoveredPoint.check2 > 0 && hoveredPoint.fittedC2 !== null && (
-                        <span className="text-[10px] font-mono text-slate-400">({format1Dec(hoveredPoint.fittedC2)})</span>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between gap-4">
-                    <span className="text-emerald-400 font-bold">BTVN:</span>
-                    <div className="flex items-center gap-1.5">
-                      <span className="font-mono font-extrabold text-white">
-                        {hoveredPoint.homework > 0 ? format1Dec(hoveredPoint.homework) : '-'}
-                      </span>
-                      {hoveredPoint.homework > 0 && hoveredPoint.fittedHw !== null && (
-                        <span className="text-[10px] font-mono text-slate-400">({format1Dec(hoveredPoint.fittedHw)})</span>
-                      )}
-                    </div>
-                  </div>
-                  {(() => {
-                    let wSum = 0;
-                    let wTot = 0;
-                    if (hoveredPoint.check1 > 0) { wSum += hoveredPoint.check1 * 0.55; wTot += 0.55; }
-                    if (hoveredPoint.check2 > 0) { wSum += hoveredPoint.check2 * 0.35; wTot += 0.35; }
-                    if (hoveredPoint.homework > 0) { wSum += hoveredPoint.homework * 0.10; wTot += 0.10; }
-                    const avgVal = wTot > 0 ? trunc1Dec(wSum / wTot) : 0;
-                    return (
-                      <div className="border-t border-white/10 pt-1 flex items-center justify-between gap-4">
-                        <span className="text-indigo-300 font-extrabold">Điểm TB Buổi:</span>
-                        <span className="font-mono font-black text-indigo-300">
-                          {avgVal > 0 ? format1Dec(avgVal) : '-'}
+                  <div className="space-y-1.5 pt-2">
+                    <div className="flex items-center justify-between gap-4">
+                      <span className="text-blue-400 font-bold">Từ Vựng:</span>
+                      <div className="flex items-center gap-1.5">
+                        <span className="font-mono font-black text-white">
+                          {hoveredPoint.check1 > 0 ? format1Dec(hoveredPoint.check1) : '-'}
                         </span>
+                        {hoveredPoint.check1 > 0 && hoveredPoint.fittedC1 !== null && (
+                          <span className="text-[10px] font-mono text-slate-400">({format1Dec(hoveredPoint.fittedC1)})</span>
+                        )}
                       </div>
-                    );
-                  })()}
-                </div>
-              </div>
+                    </div>
+                    <div className="flex items-center justify-between gap-4">
+                      <span className="text-purple-400 font-bold">Ngữ Pháp:</span>
+                      <div className="flex items-center gap-1.5">
+                        <span className="font-mono font-black text-white">
+                          {hoveredPoint.check2 > 0 ? format1Dec(hoveredPoint.check2) : '-'}
+                        </span>
+                        {hoveredPoint.check2 > 0 && hoveredPoint.fittedC2 !== null && (
+                          <span className="text-[10px] font-mono text-slate-400">({format1Dec(hoveredPoint.fittedC2)})</span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between gap-4">
+                      <span className="text-emerald-400 font-bold">BTVN:</span>
+                      <div className="flex items-center gap-1.5">
+                        <span className="font-mono font-black text-white">
+                          {hoveredPoint.homework > 0 ? format1Dec(hoveredPoint.homework) : '-'}
+                        </span>
+                        {hoveredPoint.homework > 0 && hoveredPoint.fittedHw !== null && (
+                          <span className="text-[10px] font-mono text-slate-400">({format1Dec(hoveredPoint.fittedHw)})</span>
+                        )}
+                      </div>
+                    </div>
+                    {(() => {
+                      let wSum = 0;
+                      let wTot = 0;
+                      if (hoveredPoint.check1 > 0) { wSum += hoveredPoint.check1 * 0.55; wTot += 0.55; }
+                      if (hoveredPoint.check2 > 0) { wSum += hoveredPoint.check2 * 0.35; wTot += 0.35; }
+                      if (hoveredPoint.homework > 0) { wSum += hoveredPoint.homework * 0.10; wTot += 0.10; }
+                      const avgVal = wTot > 0 ? trunc1Dec(wSum / wTot) : 0;
+                      return (
+                        <div className="border-t border-white/10 pt-1.5 flex items-center justify-between gap-4">
+                          <span className="text-indigo-300 font-extrabold">Điểm TB Buổi:</span>
+                          <span className="font-mono font-black text-indigo-300">
+                            {avgVal > 0 ? format1Dec(avgVal) : '-'}
+                          </span>
+                        </div>
+                      );
+                    })()}
+                  </div>
+                </motion.div>
+              </AnimatePresence>
             );
           })()}
         </div>

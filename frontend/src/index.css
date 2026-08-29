@@ -744,3 +744,35 @@ textarea:not(.code-editor-textarea):not(.canvas-text-editor):not(.white-paper-in
     transform: translateX(250%) skewX(-25deg);
   }
 }
+
+@keyframes liquidWave {
+  0% {
+    transform: translateX(0) translateZ(0);
+  }
+  50% {
+    transform: translateX(-25%) translateZ(0);
+  }
+  100% {
+    transform: translateX(-50%) translateZ(0);
+  }
+}
+
+@keyframes liquidWaveReverse {
+  0% {
+    transform: translateX(-50%) translateZ(0);
+  }
+  50% {
+    transform: translateX(-25%) translateZ(0);
+  }
+  100% {
+    transform: translateX(0) translateZ(0);
+  }
+}
+
+.animate-liquid-wave {
+  animation: liquidWave 3s cubic-bezier(0.36, 0.45, 0.63, 0.53) infinite;
+}
+
+.animate-liquid-wave-reverse {
+  animation: liquidWaveReverse 4.5s cubic-bezier(0.36, 0.45, 0.63, 0.53) infinite;
+}

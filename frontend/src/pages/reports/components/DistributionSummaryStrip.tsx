@@ -14,13 +14,17 @@ export const DistributionSummaryStrip: React.FC<DistributionSummaryStripProps> =
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 bg-[#0c0f1e] border border-[#1e2746] rounded-xl text-center items-center relative shadow-md divide-y sm:divide-y-0 sm:divide-x divide-[#1e2746]">
       {/* 1. Điểm Trung Bình (Mean) */}
-      <div className="relative group p-2.5 animate-cascade-1">
+      <div
+        className="relative group p-2.5 animate-cascade-1 cursor-pointer transition-colors hover:bg-white/[0.02]"
+        onMouseEnter={() => setActiveTooltip('dist-mean')}
+        onMouseLeave={() => setActiveTooltip(null)}
+        onClick={() => setActiveTooltip(activeTooltip === 'dist-mean' ? null : 'dist-mean')}
+      >
         <div className="flex items-center justify-center gap-1">
-          <span className="text-[10px] font-black uppercase text-slate-400 block">Điểm Trung Bình</span>
+          <span className="text-[10px] font-black uppercase text-slate-400 block group-hover:text-blue-300 transition-colors">Điểm Trung Bình</span>
           <button
             type="button"
-            onClick={() => setActiveTooltip(activeTooltip === 'dist-mean' ? null : 'dist-mean')}
-            className="text-slate-500 hover:text-indigo-400 cursor-pointer"
+            className="text-slate-500 group-hover:text-blue-400 transition-colors"
             title="Xem chi tiết Điểm Trung Bình"
           >
             <Info size={11} />
@@ -47,13 +51,17 @@ export const DistributionSummaryStrip: React.FC<DistributionSummaryStripProps> =
       </div>
 
       {/* 2. Trung Vị (Median) */}
-      <div className="relative group p-2.5 animate-cascade-2">
+      <div
+        className="relative group p-2.5 animate-cascade-2 cursor-pointer transition-colors hover:bg-white/[0.02]"
+        onMouseEnter={() => setActiveTooltip('dist-median')}
+        onMouseLeave={() => setActiveTooltip(null)}
+        onClick={() => setActiveTooltip(activeTooltip === 'dist-median' ? null : 'dist-median')}
+      >
         <div className="flex items-center justify-center gap-1">
-          <span className="text-[10px] font-black uppercase text-slate-400 block">Trung Vị (Median)</span>
+          <span className="text-[10px] font-black uppercase text-slate-400 block group-hover:text-purple-300 transition-colors">Trung Vị (Median)</span>
           <button
             type="button"
-            onClick={() => setActiveTooltip(activeTooltip === 'dist-median' ? null : 'dist-median')}
-            className="text-slate-500 hover:text-indigo-400 cursor-pointer"
+            className="text-slate-500 group-hover:text-purple-400 transition-colors"
             title="Xem chi tiết Trung Vị"
           >
             <Info size={11} />
@@ -79,13 +87,17 @@ export const DistributionSummaryStrip: React.FC<DistributionSummaryStripProps> =
       </div>
 
       {/* 3. Độ Lệch Chuẩn (SD) */}
-      <div className="relative group p-2.5 animate-cascade-3">
+      <div
+        className="relative group p-2.5 animate-cascade-3 cursor-pointer transition-colors hover:bg-white/[0.02]"
+        onMouseEnter={() => setActiveTooltip('dist-sd')}
+        onMouseLeave={() => setActiveTooltip(null)}
+        onClick={() => setActiveTooltip(activeTooltip === 'dist-sd' ? null : 'dist-sd')}
+      >
         <div className="flex items-center justify-center gap-1">
-          <span className="text-[10px] font-black uppercase text-slate-400 block">Độ Lệch Chuẩn (SD)</span>
+          <span className="text-[10px] font-black uppercase text-slate-400 block group-hover:text-cyan-300 transition-colors">Độ Lệch Chuẩn (SD)</span>
           <button
             type="button"
-            onClick={() => setActiveTooltip(activeTooltip === 'dist-sd' ? null : 'dist-sd')}
-            className="text-slate-500 hover:text-cyan-400 cursor-pointer"
+            className="text-slate-500 group-hover:text-cyan-400 transition-colors"
             title="Xem chi tiết Độ Lệch Chuẩn"
           >
             <Info size={11} />
@@ -114,13 +126,17 @@ export const DistributionSummaryStrip: React.FC<DistributionSummaryStripProps> =
       </div>
 
       {/* 4. Khoảng Tứ Phân Vị (IQR) */}
-      <div className="relative group p-2.5 animate-cascade-4">
+      <div
+        className="relative group p-2.5 animate-cascade-4 cursor-pointer transition-colors hover:bg-white/[0.02]"
+        onMouseEnter={() => setActiveTooltip('dist-iqr')}
+        onMouseLeave={() => setActiveTooltip(null)}
+        onClick={() => setActiveTooltip(activeTooltip === 'dist-iqr' ? null : 'dist-iqr')}
+      >
         <div className="flex items-center justify-center gap-1">
-          <span className="text-[10px] font-black uppercase text-slate-400 block">Khoảng Tứ Phân Vị</span>
+          <span className="text-[10px] font-black uppercase text-slate-400 block group-hover:text-amber-300 transition-colors">Khoảng Tứ Phân Vị</span>
           <button
             type="button"
-            onClick={() => setActiveTooltip(activeTooltip === 'dist-iqr' ? null : 'dist-iqr')}
-            className="text-slate-500 hover:text-amber-400 cursor-pointer"
+            className="text-slate-500 group-hover:text-amber-400 transition-colors"
             title="Xem chi tiết Khoảng Tứ Phân Vị"
           >
             <Info size={11} />
@@ -147,13 +163,17 @@ export const DistributionSummaryStrip: React.FC<DistributionSummaryStripProps> =
       </div>
 
       {/* 5. Tỷ Lệ Đạt Yêu Cầu (>= 5.0) */}
-      <div className="relative group p-2.5 animate-cascade-5">
+      <div
+        className="relative group p-2.5 animate-cascade-5 cursor-pointer transition-colors hover:bg-white/[0.02]"
+        onMouseEnter={() => setActiveTooltip('dist-pass')}
+        onMouseLeave={() => setActiveTooltip(null)}
+        onClick={() => setActiveTooltip(activeTooltip === 'dist-pass' ? null : 'dist-pass')}
+      >
         <div className="flex items-center justify-center gap-1">
-          <span className="text-[10px] font-black uppercase text-slate-400 block">Tỷ Lệ Đạt (≥5.0)</span>
+          <span className="text-[10px] font-black uppercase text-slate-400 block group-hover:text-emerald-300 transition-colors">Tỷ Lệ Đạt (≥5.0)</span>
           <button
             type="button"
-            onClick={() => setActiveTooltip(activeTooltip === 'dist-pass' ? null : 'dist-pass')}
-            className="text-slate-500 hover:text-emerald-400 cursor-pointer"
+            className="text-slate-500 group-hover:text-emerald-400 transition-colors"
             title="Xem chi tiết Tỷ lệ Đạt"
           >
             <Info size={11} />
@@ -184,13 +204,17 @@ export const DistributionSummaryStrip: React.FC<DistributionSummaryStripProps> =
       </div>
 
       {/* 6. Đánh Giá Phổ Điểm */}
-      <div className="relative group p-2.5 animate-cascade-6">
+      <div
+        className="relative group p-2.5 animate-cascade-6 cursor-pointer transition-colors hover:bg-white/[0.02]"
+        onMouseEnter={() => setActiveTooltip('dist-rating')}
+        onMouseLeave={() => setActiveTooltip(null)}
+        onClick={() => setActiveTooltip(activeTooltip === 'dist-rating' ? null : 'dist-rating')}
+      >
         <div className="flex items-center justify-center gap-1">
-          <span className="text-[10px] font-black uppercase text-slate-400 block">Đánh Giá Phổ Điểm</span>
+          <span className="text-[10px] font-black uppercase text-slate-400 block group-hover:text-indigo-300 transition-colors">Đánh Giá Phổ Điểm</span>
           <button
             type="button"
-            onClick={() => setActiveTooltip(activeTooltip === 'dist-rating' ? null : 'dist-rating')}
-            className="text-slate-500 hover:text-indigo-400 cursor-pointer"
+            className="text-slate-500 group-hover:text-indigo-400 transition-colors"
             title="Xem khuyến nghị sư phạm"
           >
             <Info size={11} />

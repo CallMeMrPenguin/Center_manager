@@ -250,7 +250,7 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: -6 }}
             transition={{ type: 'spring', stiffness: 450, damping: 30 }}
-            className={`absolute top-full ${align === 'right' ? 'right-0 origin-top-right' : 'left-0 origin-top-left'} mt-2 z-[9999] w-76 p-4 bg-[#0c0f1e]/98 border border-[#212c4b] rounded-2xl shadow-[0_24px_60px_rgba(0,0,0,0.95)] select-none space-y-3`}
+            className={`absolute top-full ${align === 'right' ? 'right-0 origin-top-right' : 'left-0 origin-top-left'} mt-2 z-[9999] w-80 p-4 bg-[#0c0f1e]/98 border border-[#212c4b] rounded-2xl shadow-[0_24px_60px_rgba(0,0,0,0.95)] select-none space-y-3`}
           >
             {/* Header: Month/Year Nav */}
             <div className="flex items-center justify-between">
@@ -278,7 +278,7 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
             </div>
 
             {/* Weekdays */}
-            <div className="grid grid-cols-7 gap-1 text-center">
+            <div className="grid grid-cols-7 gap-1 text-center px-1">
               {WEEKDAY_NAMES.map((name, idx) => (
                 <span
                   key={name}
@@ -291,8 +291,8 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
               ))}
             </div>
 
-            {/* Animated Month Sliding Grid */}
-            <div className="overflow-hidden relative min-h-[210px]">
+            {/* Animated Month Sliding Grid with shadow bleed buffer */}
+            <div className="overflow-hidden relative min-h-[210px] p-1.5 -m-1.5">
               <AnimatePresence mode="wait" initial={false}>
                 <motion.div
                   key={`${currentYear}-${currentMonth}`}
@@ -300,14 +300,14 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: direction * -25 }}
                   transition={{ duration: 0.2, ease: 'easeInOut' }}
-                  className="grid grid-cols-7 gap-1"
+                  className="grid grid-cols-7 gap-1 p-0.5"
                 >
                   {daysInMonth.map((item, idx) => (
                     <button
                       key={idx}
                       type="button"
                       onClick={() => handleSelectDate(item.isoStr)}
-                      className={`h-8 rounded-xl text-xs font-bold relative flex items-center justify-center cursor-pointer transition-colors ${
+                      className={`h-8 w-full rounded-xl text-xs font-bold relative flex items-center justify-center cursor-pointer transition-colors ${
                         item.isSelected
                           ? 'text-white font-black z-10'
                           : item.isToday
@@ -320,12 +320,12 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
                       }`}
                       title={item.isStudyDay ? `Ngày học của lớp (${item.dayNumber}/${currentMonth + 1}/${currentYear})` : undefined}
                     >
-                      {/* Selected Spring Pill Indicator */}
+                      {/* Selected Spring Pill Indicator with safe bounds */}
                       {item.isSelected && (
                         <motion.div
                           layoutId="custom-datepicker-selected"
                           transition={{ type: 'spring', stiffness: 500, damping: 35 }}
-                          className="absolute inset-0 rounded-xl bg-[#5c36f5] shadow-[0_0_16px_rgba(92,54,245,0.7)] z-0"
+                          className="absolute inset-0 rounded-xl bg-[#5c36f5] shadow-[0_0_12px_rgba(92,54,245,0.7)] z-0"
                         />
                       )}
 

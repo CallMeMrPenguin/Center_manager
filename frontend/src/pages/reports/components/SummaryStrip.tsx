@@ -60,13 +60,17 @@ export const SummaryStrip: React.FC<SummaryStripProps> = React.memo(({
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 bg-[#0c0f1e] border border-[#1e2746] rounded-xl text-center items-center relative shadow-md divide-y sm:divide-y-0 sm:divide-x divide-[#1e2746]">
       {/* 1. Next Session Prediction */}
-      <div className="relative group p-2.5 animate-cascade-1">
+      <div
+        className="relative group p-2.5 animate-cascade-1 cursor-pointer transition-colors hover:bg-white/[0.02]"
+        onMouseEnter={() => setActiveTooltip('forecast')}
+        onMouseLeave={() => setActiveTooltip(null)}
+        onClick={() => setActiveTooltip(activeTooltip === 'forecast' ? null : 'forecast')}
+      >
         <div className="flex items-center justify-center gap-1">
-          <span className="text-[10px] font-black uppercase text-slate-400 block">Dự Đoán Buổi Tới</span>
+          <span className="text-[10px] font-black uppercase text-slate-400 block group-hover:text-indigo-300 transition-colors">Dự Đoán Buổi Tới</span>
           <button
             type="button"
-            onClick={() => setActiveTooltip(activeTooltip === 'forecast' ? null : 'forecast')}
-            className="text-slate-500 hover:text-indigo-400 cursor-pointer"
+            className="text-slate-500 group-hover:text-indigo-400 transition-colors"
             title="Xem chi tiết dự đoán"
           >
             <Info size={11} />
@@ -99,13 +103,17 @@ export const SummaryStrip: React.FC<SummaryStripProps> = React.memo(({
       </div>
 
       {/* 2. EMA Skill Level */}
-      <div className="relative group p-2.5 animate-cascade-2">
+      <div
+        className="relative group p-2.5 animate-cascade-2 cursor-pointer transition-colors hover:bg-white/[0.02]"
+        onMouseEnter={() => setActiveTooltip('ema')}
+        onMouseLeave={() => setActiveTooltip(null)}
+        onClick={() => setActiveTooltip(activeTooltip === 'ema' ? null : 'ema')}
+      >
         <div className="flex items-center justify-center gap-1">
-          <span className="text-[10px] font-black uppercase text-slate-400 block">Trình Độ EMA</span>
+          <span className="text-[10px] font-black uppercase text-slate-400 block group-hover:text-emerald-300 transition-colors">Trình Độ EMA</span>
           <button
             type="button"
-            onClick={() => setActiveTooltip(activeTooltip === 'ema' ? null : 'ema')}
-            className="text-slate-500 hover:text-emerald-400 cursor-pointer"
+            className="text-slate-500 group-hover:text-emerald-400 transition-colors"
             title="Xem chi tiết EMA"
           >
             <Info size={11} />
@@ -143,13 +151,17 @@ export const SummaryStrip: React.FC<SummaryStripProps> = React.memo(({
       </div>
 
       {/* 3. Volatility / Standard Deviation (SD) */}
-      <div className="relative group p-2.5 animate-cascade-3">
+      <div
+        className="relative group p-2.5 animate-cascade-3 cursor-pointer transition-colors hover:bg-white/[0.02]"
+        onMouseEnter={() => setActiveTooltip('sd')}
+        onMouseLeave={() => setActiveTooltip(null)}
+        onClick={() => setActiveTooltip(activeTooltip === 'sd' ? null : 'sd')}
+      >
         <div className="flex items-center justify-center gap-1">
-          <span className="text-[10px] font-black uppercase text-slate-400 block">Độ Biến Động (SD)</span>
+          <span className="text-[10px] font-black uppercase text-slate-400 block group-hover:text-cyan-300 transition-colors">Độ Biến Động (SD)</span>
           <button
             type="button"
-            onClick={() => setActiveTooltip(activeTooltip === 'sd' ? null : 'sd')}
-            className="text-slate-500 hover:text-cyan-400 cursor-pointer"
+            className="text-slate-500 group-hover:text-cyan-400 transition-colors"
             title="Xem chi tiết độ biến động"
           >
             <Info size={11} />
@@ -193,13 +205,17 @@ export const SummaryStrip: React.FC<SummaryStripProps> = React.memo(({
       </div>
 
       {/* 4. Growth Rate (Trend Rate) */}
-      <div className="relative group p-2.5 animate-cascade-4">
+      <div
+        className="relative group p-2.5 animate-cascade-4 cursor-pointer transition-colors hover:bg-white/[0.02]"
+        onMouseEnter={() => setActiveTooltip('trend')}
+        onMouseLeave={() => setActiveTooltip(null)}
+        onClick={() => setActiveTooltip(activeTooltip === 'trend' ? null : 'trend')}
+      >
         <div className="flex items-center justify-center gap-1">
-          <span className="text-[10px] font-black uppercase text-slate-400 block">Tốc Độ Tăng Trưởng</span>
+          <span className="text-[10px] font-black uppercase text-slate-400 block group-hover:text-purple-300 transition-colors">Tốc Độ Tăng Trưởng</span>
           <button
             type="button"
-            onClick={() => setActiveTooltip(activeTooltip === 'trend' ? null : 'trend')}
-            className="text-slate-500 hover:text-purple-400 cursor-pointer"
+            className="text-slate-500 group-hover:text-purple-400 transition-colors"
             title="Xem chi tiết tốc độ tăng trưởng"
           >
             <Info size={11} />
@@ -237,13 +253,17 @@ export const SummaryStrip: React.FC<SummaryStripProps> = React.memo(({
       </div>
 
       {/* 5. Performance Index (PI) */}
-      <div className="relative group p-2.5 animate-cascade-5">
+      <div
+        className="relative group p-2.5 animate-cascade-5 cursor-pointer transition-colors hover:bg-white/[0.02]"
+        onMouseEnter={() => setActiveTooltip('pi')}
+        onMouseLeave={() => setActiveTooltip(null)}
+        onClick={() => setActiveTooltip(activeTooltip === 'pi' ? null : 'pi')}
+      >
         <div className="flex items-center justify-center gap-1">
-          <span className="text-[10px] font-black uppercase text-slate-400 block">Chỉ Số PI</span>
+          <span className="text-[10px] font-black uppercase text-slate-400 block group-hover:text-indigo-300 transition-colors">Chỉ Số PI</span>
           <button
             type="button"
-            onClick={() => setActiveTooltip(activeTooltip === 'pi' ? null : 'pi')}
-            className="text-slate-500 hover:text-indigo-400 cursor-pointer"
+            className="text-slate-500 group-hover:text-indigo-400 transition-colors"
             title="Xem chi tiết chỉ số PI"
           >
             <Info size={11} />
@@ -276,13 +296,17 @@ export const SummaryStrip: React.FC<SummaryStripProps> = React.memo(({
       </div>
 
       {/* 6. Overall Rating */}
-      <div className="relative group p-2.5 animate-cascade-6">
+      <div
+        className="relative group p-2.5 animate-cascade-6 cursor-pointer transition-colors hover:bg-white/[0.02]"
+        onMouseEnter={() => setActiveTooltip('rating')}
+        onMouseLeave={() => setActiveTooltip(null)}
+        onClick={() => setActiveTooltip(activeTooltip === 'rating' ? null : 'rating')}
+      >
         <div className="flex items-center justify-center gap-1">
-          <span className="text-[10px] font-black uppercase text-slate-400 block">Xếp Loại Chung</span>
+          <span className="text-[10px] font-black uppercase text-slate-400 block group-hover:text-indigo-300 transition-colors">Xếp Loại Chung</span>
           <button
             type="button"
-            onClick={() => setActiveTooltip(activeTooltip === 'rating' ? null : 'rating')}
-            className="text-slate-500 hover:text-indigo-400 cursor-pointer"
+            className="text-slate-500 group-hover:text-indigo-400 transition-colors"
             title="Xem khuyến nghị sư phạm"
           >
             <Info size={11} />

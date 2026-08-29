@@ -137,7 +137,7 @@ export const AnimatedCalendar: React.FC<AnimatedCalendarProps> = ({
   };
 
   const calendarGrid = (
-    <div className="p-4 bg-[#0c0f1e]/98 border border-[#212c4b] rounded-2xl shadow-[0_24px_60px_rgba(0,0,0,0.95)] select-none w-76 space-y-3">
+    <div className="p-4 bg-[#0c0f1e]/98 border border-[#212c4b] rounded-2xl shadow-[0_24px_60px_rgba(0,0,0,0.95)] select-none w-80 space-y-3">
       {/* Month & Year Navigation */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
@@ -164,7 +164,7 @@ export const AnimatedCalendar: React.FC<AnimatedCalendarProps> = ({
       </div>
 
       {/* Weekday Names */}
-      <div className="grid grid-cols-7 gap-1 text-center">
+      <div className="grid grid-cols-7 gap-1 text-center px-1">
         {WEEKDAY_NAMES.map((name, idx) => (
           <span
             key={name}
@@ -177,8 +177,8 @@ export const AnimatedCalendar: React.FC<AnimatedCalendarProps> = ({
         ))}
       </div>
 
-      {/* Animated Month Slide Grid */}
-      <div className="overflow-hidden relative min-h-[210px]">
+      {/* Animated Month Slide Grid with safe padding buffer */}
+      <div className="overflow-hidden relative min-h-[210px] p-1.5 -m-1.5">
         <AnimatePresence mode="wait" initial={false}>
           <motion.div
             key={`${currentYear}-${currentMonth}`}
@@ -186,7 +186,7 @@ export const AnimatedCalendar: React.FC<AnimatedCalendarProps> = ({
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: direction * -25 }}
             transition={{ duration: 0.2, ease: 'easeInOut' }}
-            className="grid grid-cols-7 gap-1"
+            className="grid grid-cols-7 gap-1 p-0.5"
           >
             {daysInMonth.map((item, idx) => {
               return (
@@ -194,7 +194,7 @@ export const AnimatedCalendar: React.FC<AnimatedCalendarProps> = ({
                   key={idx}
                   type="button"
                   onClick={() => handleSelectDay(item.date)}
-                  className={`h-8 rounded-xl text-xs font-bold relative flex items-center justify-center cursor-pointer transition-colors ${
+                  className={`h-8 w-full rounded-xl text-xs font-bold relative flex items-center justify-center cursor-pointer transition-colors ${
                     item.isSelected
                       ? 'text-white font-black z-10'
                       : item.isToday
@@ -211,7 +211,7 @@ export const AnimatedCalendar: React.FC<AnimatedCalendarProps> = ({
                     <motion.div
                       layoutId="calendar-selected-indicator"
                       transition={{ type: 'spring', stiffness: 500, damping: 35 }}
-                      className="absolute inset-0 rounded-xl bg-[#5c36f5] shadow-[0_0_16px_rgba(92,54,245,0.7)] z-0"
+                      className="absolute inset-0 rounded-xl bg-[#5c36f5] shadow-[0_0_12px_rgba(92,54,245,0.7)] z-0"
                     />
                   )}
 
