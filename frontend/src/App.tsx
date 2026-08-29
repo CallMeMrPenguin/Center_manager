@@ -23,6 +23,22 @@ function AppContent() {
     const user = getCurrentUser();
     return user?.role === 'student' ? 'assignments' : 'dashboard';
   });
+
+  // Track visited tabs to mount on-demand and keep alive for 0ms instant tab switching
+  const [visitedTabIds, setVisitedTabIds] = useState<Set<string>>(() => {
+    const initial = getCurrentUser()?.role === 'student' ? 'assignments' : 'dashboard';
+    return new Set([initial]);
+  });
+
+  const handleSelectTab = (tabId: string) => {
+    setActiveTab(tabId);
+    setVisitedTabIds((prev) => {
+      if (prev.has(tabId)) return prev;
+      const next = new Set(prev);
+      next.add(tabId);
+      return next;
+    });
+  };
   const [profileOpen, setProfileOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
 
@@ -95,16 +111,15 @@ function AppContent() {
     clearAuthUser();
     setCurrentUser(null);
     setActiveTab('dashboard');
+    setVisitedTabIds(new Set(['dashboard']));
     showToast('Đã đăng xuất tài khoản', 'success');
   };
 
   const handleLogin = (user: AuthUser) => {
     setCurrentUser(user);
-    if (user.role === 'student') {
-      setActiveTab('assignments');
-    } else {
-      setActiveTab('dashboard');
-    }
+    const targetTab = user.role === 'student' ? 'assignments' : 'dashboard';
+    setActiveTab(targetTab);
+    setVisitedTabIds(new Set([targetTab]));
   };
 
   // If user is not logged in, show LoginPage
@@ -129,7 +144,7 @@ function AppContent() {
           isSidebarExpanded={isSidebarExpanded}
           toggleSidebar={toggleSidebar}
           activeTab={activeTab}
-          setActiveTab={setActiveTab}
+          setActiveTab={handleSelectTab}
           orderedTabIds={visibleTabIds}
           handleDragStart={handleDragStart}
           handleDragOver={handleDragOver}
@@ -148,9 +163,10 @@ function AppContent() {
           <main className="flex-1 overflow-hidden bg-transparent relative gradient-border-card rounded-2xl">
             {visibleTabs.map((tab) => {
               const isActive = activeTab === tab.id;
+              const isVisited = visitedTabIds.has(tab.id);
               return (
                 <div key={tab.id} className={`h-full w-full ${isActive ? 'animate-tab-enter' : 'hidden'}`}>
-                  {tab.render({
+                  {isVisited && tab.render({
                     isActive,
                     preloadedQuestions,
                     preloadedVersions,
@@ -167,7 +183,7 @@ function AppContent() {
                       if (numVersions) setPreloadedVersions(numVersions);
                       setPreloadedGrade(grade || null);
                       setPreloadedUnit(unit || null);
-                      setActiveTab('formatter');
+                      handleSelectTab('formatter');
                     },
                   })}
                 </div>

@@ -363,6 +363,7 @@ def get_connection():
         conn.execute("PRAGMA synchronous=NORMAL;")
         conn.execute("PRAGMA temp_store=MEMORY;")
         conn.execute("PRAGMA cache_size=-16000;")
+        conn.execute("PRAGMA busy_timeout=5000;")
     except Exception:
         pass
     return conn
