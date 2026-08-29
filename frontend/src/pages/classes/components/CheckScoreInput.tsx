@@ -106,8 +106,14 @@ export const CheckScoreInput: React.FC<CheckScoreInputProps> = React.memo(({
   }, [field, onUpdateRecord, parseAndFormatScore, rec]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    // 1. Enter or ArrowDown -> Move down to same score column of next student
-    if (e.key === 'Enter' || e.key === 'ArrowDown') {
+    // 1. Enter or ArrowDown -> Move down to same score column of next student (Shift+Enter moves up)
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      commitValue(e.currentTarget.value);
+      navigateVerticalScoreInputs(e.currentTarget, field, e.shiftKey ? -1 : 1);
+      return;
+    }
+    if (e.key === 'ArrowDown') {
       e.preventDefault();
       commitValue(e.currentTarget.value);
       navigateVerticalScoreInputs(e.currentTarget, field, 1);
@@ -122,7 +128,15 @@ export const CheckScoreInput: React.FC<CheckScoreInputProps> = React.memo(({
       return;
     }
 
-    // 3. Tab Navigation -> Smoothly cycle ONLY between all score inputs
+    // 3. Escape -> Cancel editing and revert to previous committed value
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      setVal(lastCommittedRef.current);
+      onUpdateRecord(rec.student_id, field, lastCommittedRef.current);
+      return;
+    }
+
+    // 4. Tab Navigation -> Smoothly cycle ONLY between all score inputs
     if (e.key === 'Tab') {
       e.preventDefault();
       commitValue(e.currentTarget.value);
