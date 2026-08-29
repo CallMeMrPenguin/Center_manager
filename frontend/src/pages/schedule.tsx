@@ -738,9 +738,23 @@ export default function SchedulePage() {
                 />
               </div>
 
-              <div className="flex items-center justify-end gap-3 pt-2 border-t border-white/10">
-                <button type="button" onClick={() => setModalOpen(false)} className="px-4 py-2 rounded-xl bg-white/5 text-slate-300 text-xs font-bold hover:bg-white/10 transition cursor-pointer">Hủy</button>
-                <button type="submit" className="px-5 py-2 rounded-xl bg-[#5c36f5] text-white text-xs font-extrabold border border-white/20 hover:bg-[#7351f7] transition shadow-lg cursor-pointer">Lưu Buổi Học</button>
+              <div className="flex items-center justify-between gap-3 pt-2 border-t border-white/10">
+                {editing ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setModalOpen(false);
+                      del(editing);
+                    }}
+                    className="px-4 py-2 rounded-xl bg-rose-500/15 text-rose-300 text-xs font-bold hover:bg-rose-500/25 border border-rose-500/30 transition cursor-pointer"
+                  >
+                    Xóa Buổi Học
+                  </button>
+                ) : <div />}
+                <div className="flex items-center gap-3">
+                  <button type="button" onClick={() => setModalOpen(false)} className="px-4 py-2 rounded-xl bg-white/5 text-slate-300 text-xs font-bold hover:bg-white/10 transition cursor-pointer">Hủy</button>
+                  <button type="submit" className="px-5 py-2 rounded-xl bg-[#5c36f5] text-white text-xs font-extrabold border border-white/20 hover:bg-[#7351f7] transition shadow-lg cursor-pointer">Lưu Buổi Học</button>
+                </div>
               </div>
             </form>
           </div>

@@ -14,10 +14,12 @@ import RelationshipsTab from '../../components/seating/RelationshipsTab';
 import BlossomResultModal from '../../components/seating/BlossomResultModal';
 import { TestConfigModal } from '../../components/TestConfigModal';
 import { SegmentedControl } from '../../components/SegmentedControl';
+import { useConfirm } from '../../components/ConfirmDialog';
 import { ClassItem, EnrolledStudent } from './types';
 import { notifyDataChanged } from '../../utils';
 
 export default function ClassesPage() {
+  const confirm = useConfirm();
   const {
     classes,
     filteredClasses,
@@ -45,6 +47,7 @@ export default function ClassesPage() {
     parseAndFormatScore,
     handleSaveAttendance,
     flushSaveAttendance,
+    handleDeleteAttendanceDate,
     handleExportExcel,
     handleExportDocx,
     handleUnenrollStudent,
@@ -208,6 +211,18 @@ export default function ClassesPage() {
                 setActionModalOpen(true);
               }}
               onOpenEditClass={handleOpenEditClass}
+              onDeleteAttendanceDate={async () => {
+                if (!selectedClass) return;
+                const ok = await confirm({
+                  title: 'Xóa Buổi Học / Điểm Danh',
+                  message: `Bạn có chắc chắn muốn xóa toàn bộ lịch học và điểm danh ngày ${attendanceDate} của lớp "${selectedClass.class_name}"? Thao tác này giúp bạn làm sạch dữ liệu nếu lỡ lưu sai ngày.`,
+                  confirmText: 'Xóa Buổi Này',
+                  type: 'danger',
+                });
+                if (ok) {
+                  await handleDeleteAttendanceDate();
+                }
+              }}
               onExportExcel={handleExportExcel}
               onExportDocx={handleExportDocx}
             />

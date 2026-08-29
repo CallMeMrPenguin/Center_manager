@@ -248,3 +248,47 @@ def upsert_class_attendance_grades(class_id: int, date_str: str, records: List[D
         conn.commit()
     finally:
         conn.close()
+
+def _sync_cloud_delete(sql_pg: str, params: tuple):
+    try:
+        from database.connection import get_target_db_url, IS_VERCEL
+        if IS_VERCEL:
+            return
+        import psycopg2
+        target_url = get_target_db_url()
+        if not target_url:
+            return
+        pconn = psycopg2.connect(target_url, connect_timeout=5)
+        try:
+            pcur = pconn.cursor()
+            pcur.execute(sql_pg, params)
+            pconn.commit()
+        finally:
+            pconn.close()
+    except Exception:
+        pass
+
+def delete_class_attendance_date(class_id: int, date_str: str) -> Dict[str, Any]:
+    """Deletes all attendance records and sessions for a class on a specific date (e.g. wrong date recorded)."""
+    conn = get_connection()
+    try:
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM class_attendance_grades WHERE class_id = ? AND date = ?", (class_id, date_str))
+        deleted_grades = cursor.rowcount
+        cursor.execute("DELETE FROM class_sessions WHERE class_id = ? AND date = ?", (class_id, date_str))
+        deleted_sessions = cursor.rowcount
+        conn.commit()
+    finally:
+        conn.close()
+
+    # Propagate delete to cloud database to avoid pull re-insertion
+    _sync_cloud_delete("DELETE FROM class_attendance_grades WHERE class_id = %s AND date = %s", (class_id, date_str))
+    _sync_cloud_delete("DELETE FROM class_sessions WHERE class_id = %s AND date = %s", (class_id, date_str))
+
+    return {
+        "status": "success",
+        "class_id": class_id,
+        "date": date_str,
+        "deleted_grades": deleted_grades,
+        "deleted_sessions": deleted_sessions
+    }

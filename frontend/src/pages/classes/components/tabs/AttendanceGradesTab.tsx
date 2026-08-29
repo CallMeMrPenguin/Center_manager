@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
-import { Calendar, Layers, UserPlus, Save, Edit3 } from 'lucide-react';
+import { Calendar, Layers, UserPlus, Save, Edit3, Trash2 } from 'lucide-react';
 import { ClassItem, EnrolledStudent, AttendanceRecord } from '../../types';
 import { CustomDatePicker } from '../../../../components/CustomDatePicker';
 import { DataTable } from '../../../../components/DataTable';
@@ -21,6 +21,7 @@ interface AttendanceGradesTabProps {
   onOpenEnrollModal: () => void;
   onOpenStudentActionModal: (student: EnrolledStudent) => void;
   onOpenEditClass: (cls: ClassItem) => void;
+  onDeleteAttendanceDate?: () => void;
   onExportExcel: () => void;
   onExportDocx: () => void;
 }
@@ -40,6 +41,7 @@ export const AttendanceGradesTab: React.FC<AttendanceGradesTabProps> = ({
   onOpenEnrollModal,
   onOpenStudentActionModal,
   onOpenEditClass,
+  onDeleteAttendanceDate,
   onExportExcel,
   onExportDocx,
 }) => {
@@ -232,6 +234,19 @@ export const AttendanceGradesTab: React.FC<AttendanceGradesTabProps> = ({
             highlightDaysOfWeek={selectedClassWeeklyDays}
             className="w-44"
           />
+          {onDeleteAttendanceDate && (
+            <button
+              type="button"
+              onClick={onDeleteAttendanceDate}
+              className="group flex items-center gap-0 hover:gap-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/25 px-2.5 py-1.5 rounded-xl font-bold text-xs transition-all duration-300 cursor-pointer"
+              title={`Xóa buổi học và điểm danh ngày ${attendanceDate} (phòng trường hợp chọn sai ngày)`}
+            >
+              <Trash2 size={13} className="shrink-0" />
+              <span className="max-w-0 opacity-0 group-hover:max-w-[130px] group-hover:opacity-100 transition-all duration-300 ease-in-out whitespace-nowrap overflow-hidden block">
+                Xóa Buổi Này
+              </span>
+            </button>
+          )}
         </div>
 
         <div className="flex items-center gap-2">

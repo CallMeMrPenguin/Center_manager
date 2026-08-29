@@ -28,7 +28,7 @@ from database.db_manager import (
     get_class_sessions, add_class_session, update_class_session, delete_class_session,
     get_courses, create_course, update_course, delete_course,
     get_student_scores, upsert_student_score, delete_student_score,
-    get_class_attendance_grades, upsert_class_attendance_grades, get_class_attendance_with_predictions,
+    get_class_attendance_grades, upsert_class_attendance_grades, delete_class_attendance_date, get_class_attendance_with_predictions,
     get_analytics_reports, reset_student_grades, get_class_student_predictions,
     get_custom_time_phases, save_custom_time_phase, delete_custom_time_phase
 )
@@ -251,6 +251,12 @@ def api_save_attendance(class_id: int, payload: Dict[str, Any]):
         raise HTTPException(status_code=400, detail="Thiếu ngày điểm danh")
     upsert_class_attendance_grades(class_id, date_str, records)
     return {"status": "success"}
+
+@router.delete("/api/classes/{class_id}/attendance")
+def api_delete_attendance(class_id: int, date: str):
+    if not date:
+        raise HTTPException(status_code=400, detail="Thiếu ngày cần xóa")
+    return delete_class_attendance_date(class_id, date)
 
 @router.post("/api/classes/{class_id}/export/excel")
 def api_export_class_excel(class_id: int, payload: Dict[str, Any]):

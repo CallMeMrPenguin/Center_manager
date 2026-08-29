@@ -251,6 +251,8 @@ export const api = {
     request<{ date: string; records: any[] }>(`/api/classes/${classId}/attendance?date=${encodeURIComponent(date)}`, { tags: ['attendance'], forceRefresh }),
   saveClassAttendance: (classId: number, date: string, records: any[]) =>
     request<any>(`/api/classes/${classId}/attendance`, { method: 'POST', body: JSON.stringify({ date, records }), tags: ['attendance', 'reports', 'analytics'] }),
+  deleteClassAttendance: (classId: number, date: string) =>
+    request<{ status: string; deleted_grades: number; deleted_sessions: number }>(`/api/classes/${classId}/attendance?date=${encodeURIComponent(date)}`, { method: 'DELETE', tags: ['attendance', 'schedule', 'sessions', 'reports', 'analytics', 'classes'] }),
   exportClassExcel: (classId: number, date: string, records?: any[]) =>
     request<{ filename: string; status: string }>(`/api/classes/${classId}/export/excel`, { method: 'POST', body: JSON.stringify({ date, records }) }),
   exportClassDocx: (classId: number, date: string, records?: any[]) =>

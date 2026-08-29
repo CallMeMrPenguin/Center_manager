@@ -344,14 +344,48 @@ def update_class_session(session_id: int, data: Dict[str, Any], class_id: int = 
     finally:
         conn.close()
 
+def _sync_cloud_delete(sql_pg: str, params: tuple):
+    try:
+        from database.connection import get_target_db_url, IS_VERCEL
+        if IS_VERCEL:
+            return
+        import psycopg2
+        target_url = get_target_db_url()
+        if not target_url:
+            return
+        pconn = psycopg2.connect(target_url, connect_timeout=5)
+        try:
+            pcur = pconn.cursor()
+            pcur.execute(sql_pg, params)
+            pconn.commit()
+        finally:
+            pconn.close()
+    except Exception:
+        pass
+
 def delete_class_session(session_id: int):
     conn = get_connection()
+    target_cid = None
+    target_date = None
     try:
         cursor = conn.cursor()
+        if session_id > 0:
+            cursor.execute("SELECT class_id, date FROM class_sessions WHERE id = ?", (session_id,))
+            row = cursor.fetchone()
+            if row:
+                target_cid = row[0] if isinstance(row, (list, tuple)) else row["class_id"]
+                target_date = row[1] if isinstance(row, (list, tuple)) else row["date"]
+                if target_cid and target_date:
+                    cursor.execute("DELETE FROM class_attendance_grades WHERE class_id = ? AND date = ?", (target_cid, target_date))
         cursor.execute("DELETE FROM class_sessions WHERE id = ?", (session_id,))
         conn.commit()
     finally:
         conn.close()
+
+    if session_id > 0:
+        _sync_cloud_delete("DELETE FROM class_sessions WHERE id = %s", (session_id,))
+        if target_cid and target_date:
+            _sync_cloud_delete("DELETE FROM class_attendance_grades WHERE class_id = %s AND date = %s", (target_cid, target_date))
 
 def get_class_seating(class_id: int) -> Dict[str, Any]:
     conn = get_connection()

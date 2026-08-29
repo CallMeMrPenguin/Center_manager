@@ -108,6 +108,7 @@ from database.crud_scores_attendance import (
     delete_student_score,
     get_class_attendance_grades,
     upsert_class_attendance_grades,
+    delete_class_attendance_date,
 )
 
 # Seating Relationships (Friend Groups, Conflict Groups, Trusted Swaps)
@@ -261,6 +262,7 @@ __all__ = [
     "delete_student_score",
     "get_class_attendance_grades",
     "upsert_class_attendance_grades",
+    "delete_class_attendance_date",
     # Relationships
     "get_friend_groups",
     "create_friend_group",

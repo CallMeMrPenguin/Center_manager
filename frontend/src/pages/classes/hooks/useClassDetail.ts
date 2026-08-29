@@ -330,6 +330,23 @@ export function useClassDetail(selectedClass: ClassItem | null) {
     }
   };
 
+  const handleDeleteAttendanceDate = async () => {
+    if (!selectedClass || !attendanceDate) return;
+    if (autoSaveTimerRef.current) {
+      clearTimeout(autoSaveTimerRef.current);
+      autoSaveTimerRef.current = null;
+    }
+    isDirtyRef.current = false;
+    try {
+      await api.deleteClassAttendance(selectedClass.id, attendanceDate);
+      showToast(`Đã xóa lịch học và điểm danh ngày ${attendanceDate}!`, 'success');
+      await loadAttendanceData(selectedClass.id, attendanceDate);
+      notifyDataChanged(['attendance', 'schedule', 'sessions', 'reports', 'analytics', 'classes']);
+    } catch (err: any) {
+      showToast('Xóa lịch học thất bại: ' + err.message, 'error');
+    }
+  };
+
   return {
     enrolledStudents,
     attendanceDate,
@@ -343,6 +360,7 @@ export function useClassDetail(selectedClass: ClassItem | null) {
     parseAndFormatScore,
     handleSaveAttendance,
     flushSaveAttendance,
+    handleDeleteAttendanceDate,
     handleExportExcel,
     handleExportDocx,
     handleUnenrollStudent,
