@@ -96,25 +96,25 @@ def get_class_student_predictions(class_id: int, target_date: Optional[str] = No
 
     target_c1_obj = target_cfg.get("check_1") or {}
     target_c2_obj = target_cfg.get("check_2") or {}
-    target_c1_units = set(target_c1_obj.get("units") or ([target_c1_obj.get("topic")] if target_c1_obj.get("topic") else []))
-    target_c2_units = set(target_c2_obj.get("units") or ([target_c2_obj.get("topic") or target_c2_obj.get("grammar_topic")] if (target_c2_obj.get("topic") or target_c2_obj.get("grammar_topic")) else []))
+    target_c1_skill = str(target_c1_obj.get("skill") or "vocab").lower().strip()
+    target_c2_skill = str(target_c2_obj.get("skill") or "grammar").lower().strip()
 
     records_by_student: Dict[int, List[Dict[str, Any]]] = {}
     for r in rows:
         cfg_str = r.get("test_config_json")
-        c1_units: List[str] = []
-        c2_units: List[str] = []
+        c1_skill = "vocab"
+        c2_skill = "grammar"
         if cfg_str:
             try:
                 cfg = json.loads(cfg_str)
-                c1_obj = cfg.get("check_1") or {}
-                c2_obj = cfg.get("check_2") or {}
-                c1_units = c1_obj.get("units") or ([c1_obj.get("topic")] if c1_obj.get("topic") else [])
-                c2_units = c2_obj.get("units") or ([c2_obj.get("topic") or c2_obj.get("grammar_topic")] if (c2_obj.get("topic") or c2_obj.get("grammar_topic")) else [])
+                c1_info = cfg.get("check_1") or {}
+                c2_info = cfg.get("check_2") or {}
+                c1_skill = str(c1_info.get("skill") or "vocab").lower().strip()
+                c2_skill = str(c2_info.get("skill") or "grammar").lower().strip()
             except Exception:
                 pass
-        r["check_1_units"] = c1_units
-        r["check_2_units"] = c2_units
+        r["c1_skill"] = c1_skill
+        r["c2_skill"] = c2_skill
 
         sid = r["student_id"]
         if sid not in records_by_student:
@@ -138,12 +138,11 @@ def get_class_student_predictions(class_id: int, target_date: Optional[str] = No
         else:
             hist_recs = all_recs
 
-        c1_list: List[float] = []
-        c2_list: List[float] = []
+        vocab_scores: List[float] = []
+        grammar_scores: List[float] = []
+        all_check_scores: List[float] = []
         hw_list: List[float] = []
         mt_list: List[float] = []
-        c1_matched: List[float] = []
-        c2_matched: List[float] = []
         overall_session_scores: List[float] = []
 
         for r in hist_recs:
@@ -156,15 +155,29 @@ def get_class_student_predictions(class_id: int, target_date: Optional[str] = No
             hw = float(r.get("homework")) if r.get("homework") is not None and float(r.get("homework") or 0) > 0 else None
             mt = float(r.get("mock_test")) if r.get("mock_test") is not None and float(r.get("mock_test") or 0) > 0 else None
 
+            r_c1_skill = r.get("c1_skill", "vocab")
+            r_c2_skill = r.get("c2_skill", "grammar")
+
+            sess_vocab = []
+            sess_grammar = []
+
             if c1 is not None:
-                c1_list.append(c1)
-                if target_c1_units and any(u in target_c1_units for u in r.get("check_1_units", [])):
-                    c1_matched.append(c1)
+                all_check_scores.append(c1)
+                if r_c1_skill in ("grammar", "ngữ pháp"):
+                    grammar_scores.append(c1)
+                    sess_grammar.append(c1)
+                else:
+                    vocab_scores.append(c1)
+                    sess_vocab.append(c1)
 
             if c2 is not None:
-                c2_list.append(c2)
-                if target_c2_units and any(u in target_c2_units for u in r.get("check_2_units", [])):
-                    c2_matched.append(c2)
+                all_check_scores.append(c2)
+                if r_c2_skill in ("vocab", "từ vựng"):
+                    vocab_scores.append(c2)
+                    sess_vocab.append(c2)
+                else:
+                    grammar_scores.append(c2)
+                    sess_grammar.append(c2)
 
             if hw is not None:
                 hw_list.append(hw)
@@ -175,12 +188,30 @@ def get_class_student_predictions(class_id: int, target_date: Optional[str] = No
             # Session weighted score
             w_sum = 0.0
             w_tot = 0.0
-            if c1 is not None:
+            if sess_vocab:
+                avg_sv = sum(sess_vocab) / len(sess_vocab)
+                w_sum += avg_sv * w_c1
+                w_tot += w_c1
+            elif c1 is not None and r_c1_skill not in ("grammar", "ngữ pháp"):
                 w_sum += c1 * w_c1
                 w_tot += w_c1
-            if c2 is not None:
+
+            if sess_grammar:
+                avg_sg = sum(sess_grammar) / len(sess_grammar)
+                w_sum += avg_sg * w_c2
+                w_tot += w_c2
+            elif c2 is not None and r_c2_skill not in ("vocab", "từ vựng"):
                 w_sum += c2 * w_c2
                 w_tot += w_c2
+
+            if not sess_grammar and not sess_vocab:
+                if c1 is not None:
+                    w_sum += c1 * w_c1
+                    w_tot += w_c1
+                if c2 is not None:
+                    w_sum += c2 * w_c2
+                    w_tot += w_c2
+
             if hw is not None:
                 w_sum += hw * w_hw
                 w_tot += w_hw
@@ -205,8 +236,21 @@ def get_class_student_predictions(class_id: int, target_date: Optional[str] = No
             _, pv = smart_predict(vals)
             return trunc_1_dec(pv)
 
-        pred_c1_val = _pred_opt(c1_matched) if c1_matched else _pred_opt(c1_list)
-        pred_c2_val = _pred_opt(c2_matched) if c2_matched else _pred_opt(c2_list)
+        # Predict based on configured skill type (entire vocab or grammar history, or both of same type)
+        if target_c1_skill in ("grammar", "ngữ pháp"):
+            pred_c1_val = _pred_opt(grammar_scores) or _pred_opt(all_check_scores) or _pred_opt(overall_session_scores)
+        elif target_c1_skill in ("vocab", "từ vựng"):
+            pred_c1_val = _pred_opt(vocab_scores) or _pred_opt(all_check_scores) or _pred_opt(overall_session_scores)
+        else:
+            pred_c1_val = _pred_opt(all_check_scores) or _pred_opt(overall_session_scores)
+
+        if target_c2_skill in ("vocab", "từ vựng"):
+            pred_c2_val = _pred_opt(vocab_scores) or _pred_opt(all_check_scores) or _pred_opt(overall_session_scores)
+        elif target_c2_skill in ("grammar", "ngữ pháp"):
+            pred_c2_val = _pred_opt(grammar_scores) or _pred_opt(all_check_scores) or _pred_opt(overall_session_scores)
+        else:
+            pred_c2_val = _pred_opt(all_check_scores) or _pred_opt(overall_session_scores)
+
         pred_hw_val = _pred_opt(hw_list)
         pred_mt_val = _pred_opt(mt_list)
         pred_next_val = _pred_opt(overall_session_scores)
