@@ -154,7 +154,7 @@ export const api = {
   saveExerciseConfig: (config: Record<string, string>) => request<any>('/api/exercise-config', { method: 'POST', body: JSON.stringify(config) }),
 
   // Grade Analytics Reports API
-  getGradeAnalytics: (class_id?: number, student_id?: number, forceRefresh?: boolean) => {
+  getGradeAnalytics: (class_id?: number, student_id?: number, forceRefresh = true) => {
     const p: Record<string, string> = {};
     if (class_id) p.class_id = String(class_id);
     if (student_id) p.student_id = String(student_id);

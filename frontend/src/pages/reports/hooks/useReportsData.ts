@@ -94,7 +94,7 @@ export function useReportsData() {
     try {
       const cid = selectedClassId ? parseInt(selectedClassId) : undefined;
       const sid = selectedStudentId ? parseInt(selectedStudentId) : undefined;
-      const res = await api.getGradeAnalytics(cid, sid, isSilent);
+      const res = await api.getGradeAnalytics(cid, sid, true);
       const enrichedRecords = (res.session_records || []).map((r: any) => ({
         ...r,
         student_name: r.student_name || r.full_name || 'Học sinh',

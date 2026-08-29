@@ -19,7 +19,6 @@ export function useWarmupDataCache(currentUser: AuthUser | null) {
           // Student role warmup
           await Promise.allSettled([
             api.getAssignments(),
-            api.getGradeAnalytics(undefined, currentUser.studentId ? Number(currentUser.studentId) : undefined),
           ]);
         } else {
           // Teacher / Admin role warmup
@@ -28,7 +27,6 @@ export function useWarmupDataCache(currentUser: AuthUser | null) {
             api.getStudents(),
             api.getTeachersCM(),
             api.getCourses(),
-            api.getGradeAnalytics(),
             api.getSettings(),
             api.getActiveGrades(),
             api.getUnitConfig(),

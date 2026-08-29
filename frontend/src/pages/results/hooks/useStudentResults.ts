@@ -159,7 +159,7 @@ export function useStudentResults() {
     try {
       setLoading(true);
       const cid = selectedClassId !== 'all' ? Number(selectedClassId) : undefined;
-      const res = await api.getGradeAnalytics(cid, studentId);
+      const res = await api.getGradeAnalytics(cid, studentId, true);
 
       const recs = (res.session_records || []).map((r: any) => ({
         id: r.id,
