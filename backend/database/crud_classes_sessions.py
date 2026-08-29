@@ -96,7 +96,7 @@ def get_class_students(class_id: int) -> List[Dict[str, Any]]:
             JOIN students s ON cs.student_id = s.id
             LEFT JOIN friend_group_members fgm ON fgm.class_id = cs.class_id AND fgm.student_id = s.id
             LEFT JOIN friend_groups fg ON fgm.group_id = fg.id
-            WHERE cs.class_id = ?
+            WHERE cs.class_id = ? AND (s.status IS NULL OR s.status NOT IN ('Đã nghỉ', 'Nghỉ', 'Nghỉ học', 'Tạm nghỉ'))
             ORDER BY s.full_name ASC
         """, (class_id,))
         rows = cursor.fetchall()
@@ -124,6 +124,8 @@ def unenroll_student_from_class(class_id: int, student_id: int):
     try:
         cursor = conn.cursor()
         cursor.execute("DELETE FROM class_students WHERE class_id = ? AND student_id = ?", (class_id, student_id))
+        cursor.execute("DELETE FROM friend_group_members WHERE class_id = ? AND student_id = ?", (class_id, student_id))
+        cursor.execute("DELETE FROM conflict_group_members WHERE class_id = ? AND student_id = ?", (class_id, student_id))
         conn.commit()
     finally:
         conn.close()

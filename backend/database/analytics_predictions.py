@@ -291,7 +291,7 @@ def get_class_attendance_with_predictions(class_id: int, date_str: str) -> Dict[
             FROM class_students cs
             JOIN students s ON cs.student_id = s.id
             LEFT JOIN class_attendance_grades ag ON ag.class_id = cs.class_id AND ag.student_id = s.id AND ag.date = ?
-            WHERE cs.class_id = ?
+            WHERE cs.class_id = ? AND (s.status IS NULL OR s.status NOT IN ('Đã nghỉ', 'Nghỉ', 'Nghỉ học', 'Tạm nghỉ'))
             ORDER BY s.full_name ASC
         """, (date_str, date_str, class_id))
         rows = [dict(r) for r in cursor.fetchall()]

@@ -259,9 +259,18 @@ export function useClassDetail(selectedClass: ClassItem | null) {
     try {
       await api.unenrollStudent(selectedClass.id, stId);
       showToast('Đã xoá học sinh khỏi lớp!', 'success');
-      loadEnrolledStudents(selectedClass.id);
-      loadAttendanceData(selectedClass.id, attendanceDate);
-      notifyDataChanged();
+      // Optimistically update enrolled students and attendance records immediately
+      setEnrolledStudents((prev) => prev.filter((s) => s.id !== stId));
+      const nextRecs = attendanceRecordsRef.current.filter((r) => r.student_id !== stId);
+      attendanceRecordsRef.current = nextRecs;
+      setAttendanceRecords(nextRecs);
+
+      // Re-fetch fresh state from server
+      await Promise.all([
+        loadEnrolledStudents(selectedClass.id),
+        loadAttendanceData(selectedClass.id, attendanceDate),
+      ]);
+      notifyDataChanged(['classes', 'students', 'attendance', 'seating']);
     } catch (err: any) {
       showToast('Không thể bỏ ghi danh: ' + err.message, 'error');
     }

@@ -135,11 +135,21 @@ def update_student(student_id: int, data: Dict[str, Any]):
         ))
         conn.commit()
 
+        # If student is set to inactive ('Đã nghỉ', 'Nghỉ', 'Nghỉ học', 'Tạm nghỉ'), auto-unenroll from all active classes
+        if new_status in ("Đã nghỉ", "Nghỉ", "Nghỉ học", "Tạm nghỉ"):
+            try:
+                cursor.execute("DELETE FROM class_students WHERE student_id = ?", (student_id,))
+                cursor.execute("DELETE FROM friend_group_members WHERE student_id = ?", (student_id,))
+                cursor.execute("DELETE FROM conflict_group_members WHERE student_id = ?", (student_id,))
+                conn.commit()
+            except Exception as e:
+                print(f"[Student CRUD] Auto-unenroll inactive student notice: {e}")
+
         # Auto-update corresponding app_user account and sync to Supabase Auth
         custom_user = str(data.get("account_username") or "").strip()
         default_user = f"hs_{student_id:04d}"
         username = custom_user if custom_user else default_user
-        user_status = data.get("account_status") or ("Hoạt động" if new_status != "Đã nghỉ" else "Tạm khóa")
+        user_status = data.get("account_status") or ("Hoạt động" if new_status not in ("Đã nghỉ", "Nghỉ", "Nghỉ học") else "Tạm khóa")
         raw_pwd = str(data.get("account_password") or "").strip()
 
         if new_full_name:

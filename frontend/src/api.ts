@@ -226,13 +226,14 @@ export const api = {
   createClass: (data: any) => request<any>('/api/classes', { method: 'POST', body: JSON.stringify(data), tags: ['classes', 'schedule'] }),
   updateClass: (id: number, data: any) => request<any>(`/api/classes/${id}`, { method: 'PUT', body: JSON.stringify(data), tags: ['classes', 'schedule'] }),
   deleteClass: (id: number) => request<any>(`/api/classes/${id}`, { method: 'DELETE', tags: ['classes', 'schedule'] }),
-  getClassStudents: (classId: number) => request<any[]>(`/api/classes/${classId}/students`, { tags: ['classes', 'students'] }),
+  getClassStudents: (classId: number, forceRefresh = true) =>
+    request<any[]>(`/api/classes/${classId}/students`, { tags: ['classes', 'students', 'attendance', 'seating'], forceRefresh }),
   enrollStudent: (classId: number, studentId: number, seatColor?: string, gradeGroup?: string) =>
-    request<any>(`/api/classes/${classId}/students`, { method: 'POST', body: JSON.stringify({ student_id: studentId, seat_color: seatColor, grade_group: gradeGroup }), tags: ['classes', 'students'] }),
+    request<any>(`/api/classes/${classId}/students`, { method: 'POST', body: JSON.stringify({ student_id: studentId, seat_color: seatColor, grade_group: gradeGroup }), tags: ['classes', 'students', 'attendance', 'seating'] }),
   unenrollStudent: (classId: number, studentId: number) =>
-    request<any>(`/api/classes/${classId}/students/${studentId}`, { method: 'DELETE', tags: ['classes', 'students'] }),
+    request<any>(`/api/classes/${classId}/students/${studentId}`, { method: 'DELETE', tags: ['classes', 'students', 'attendance', 'seating'] }),
   updateStudentGroups: (classId: number, studentId: number, seatColor?: string, gradeGroup?: string) =>
-    request<any>(`/api/classes/${classId}/students/${studentId}/groups`, { method: 'PUT', body: JSON.stringify({ student_id: studentId, seat_color: seatColor, grade_group: gradeGroup }), tags: ['classes', 'students'] }),
+    request<any>(`/api/classes/${classId}/students/${studentId}/groups`, { method: 'PUT', body: JSON.stringify({ student_id: studentId, seat_color: seatColor, grade_group: gradeGroup }), tags: ['classes', 'students', 'attendance', 'seating'] }),
   getClassWeeklySchedule: (classId: number) => request<any[]>(`/api/classes/${classId}/schedule/weekly`, { tags: ['schedule'] }),
   addClassWeeklySlot: (classId: number, data: any) => request<any>(`/api/classes/${classId}/schedule/weekly`, { method: 'POST', body: JSON.stringify(data), tags: ['schedule'] }),
   replaceClassWeeklySlots: (classId: number, slots: any[]) => request<any>(`/api/classes/${classId}/schedule/weekly/replace`, { method: 'POST', body: JSON.stringify(slots), tags: ['schedule'] }),
