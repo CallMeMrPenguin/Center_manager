@@ -165,16 +165,31 @@ export const ChartSvgPlot: React.FC<ChartSvgPlotProps> = React.memo(({
                 const lastIdx = sessionChartData.length - 1;
                 const lastX = getSvgX(lastIdx, sessionChartData.length);
                 const forecastX = lastX + 45 * zoomLevel;
-                const preds: { id: string; label: string; score: number; lastVal: number; color: string; textColor: string; rawY: number }[] = [];
+
+                const getLastValidPoint = (key: 'check1' | 'check2' | 'homework') => {
+                  for (let i = sessionChartData.length - 1; i >= 0; i--) {
+                    const val = sessionChartData[i][key];
+                    if (val !== undefined && val !== null && val > 0) {
+                      return { val, x: getSvgX(i, sessionChartData.length), y: getSvgY(val) };
+                    }
+                  }
+                  const defVal = sessionChartData[lastIdx]?.[key] || 0;
+                  return { val: defVal, x: lastX, y: getSvgY(defVal) };
+                };
+
+                const preds: { id: string; label: string; score: number; startX: number; startY: number; color: string; textColor: string; rawY: number }[] = [];
 
                 if (hasC1 && engine && (engine.pred_c1 || 0) > 0) {
-                  preds.push({ id: 'c1', label: 'Tß╗½ Vß╗▒ng', score: engine.pred_c1, lastVal: sessionChartData[lastIdx].check1, color: '#3b82f6', textColor: '#60a5fa', rawY: getSvgY(engine.pred_c1) });
+                  const pt = getLastValidPoint('check1');
+                  preds.push({ id: 'c1', label: 'Từ Vựng', score: engine.pred_c1, startX: pt.x, startY: pt.y, color: '#3b82f6', textColor: '#60a5fa', rawY: getSvgY(engine.pred_c1) });
                 }
                 if (hasC2 && engine && (engine.pred_c2 || 0) > 0) {
-                  preds.push({ id: 'c2', label: 'Ngß╗» Ph├íp', score: engine.pred_c2, lastVal: sessionChartData[lastIdx].check2, color: '#a855f7', textColor: '#c084fc', rawY: getSvgY(engine.pred_c2) });
+                  const pt = getLastValidPoint('check2');
+                  preds.push({ id: 'c2', label: 'Ngữ Pháp', score: engine.pred_c2, startX: pt.x, startY: pt.y, color: '#a855f7', textColor: '#c084fc', rawY: getSvgY(engine.pred_c2) });
                 }
                 if (hasHw && engine && (engine.pred_hw || 0) > 0) {
-                  preds.push({ id: 'hw', label: 'BTVN', score: engine.pred_hw, lastVal: sessionChartData[lastIdx].homework, color: '#10b981', textColor: '#34d399', rawY: getSvgY(engine.pred_hw) });
+                  const pt = getLastValidPoint('homework');
+                  preds.push({ id: 'hw', label: 'BTVN', score: engine.pred_hw, startX: pt.x, startY: pt.y, color: '#10b981', textColor: '#34d399', rawY: getSvgY(engine.pred_hw) });
                 }
 
                 if (preds.length === 0) return null;
@@ -193,7 +208,7 @@ export const ChartSvgPlot: React.FC<ChartSvgPlotProps> = React.memo(({
                   <g key={`forecast-${selectedStudentId || selectedClassId || 'all'}-${timeView}-${sessionChartData.length}`} className="animate-point-pop" style={{ animationDelay: '1.9s' }}>
                     {preds.map(p => (
                       <g key={p.id}>
-                        <line x1={lastX} y1={getSvgY(p.lastVal)} x2={forecastX} y2={p.rawY} stroke={p.color} strokeWidth="2.5" strokeDasharray="4 4" strokeLinecap="round" />
+                        <line x1={p.startX} y1={p.startY} x2={forecastX} y2={p.rawY} stroke={p.color} strokeWidth="2.5" strokeDasharray="4 4" strokeLinecap="round" />
                         <circle cx={forecastX} cy={p.rawY} r="6" fill={p.color} stroke="#ffffff" strokeWidth="2" />
                         <text x={forecastX + 9} y={(adjustedYs[p.id] ?? p.rawY) + 4} fill={p.textColor} fontSize="11" fontWeight="900" className="font-mono">{format1Dec(p.score)}</text>
                       </g>

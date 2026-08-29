@@ -23,7 +23,7 @@ export function useWarmupDataCache(currentUser: AuthUser | null) {
           ]);
         } else {
           // Teacher / Admin role warmup
-          await Promise.allSettled([
+          const results = await Promise.allSettled([
             api.getClasses(),
             api.getStudents(),
             api.getTeachersCM(),
@@ -34,14 +34,28 @@ export function useWarmupDataCache(currentUser: AuthUser | null) {
             api.getUnitConfig(),
             api.getAssignments(),
           ]);
+
+          // Preload active class details so clicking into any class is 0ms instant even on Vercel
+          const classResult = results[0];
+          if (classResult.status === 'fulfilled' && Array.isArray(classResult.value)) {
+            const todayStr = new Date().toISOString().split('T')[0];
+            const activeClasses = classResult.value.slice(0, 6);
+            await Promise.allSettled(
+              activeClasses.flatMap((cls: any) => [
+                api.getClassStudents(cls.id),
+                api.getClassAttendance(cls.id, todayStr),
+                api.getClassWeeklySchedule(cls.id).catch(() => []),
+              ])
+            );
+          }
         }
       } catch (err) {
         console.warn('Background cache warmup notice:', err);
       }
     };
 
-    // Trigger after initial frame to let UI render immediately first
-    const timer = setTimeout(warmup, 100);
+    // Trigger immediately to populate cache
+    const timer = setTimeout(warmup, 50);
     return () => clearTimeout(timer);
   }, [currentUser]);
 }
