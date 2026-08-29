@@ -246,8 +246,8 @@ export const api = {
     request<any>(`/api/classes/${classId}/seating`, { method: 'PUT', body: JSON.stringify({ num_rows: numRows, layout_json: layoutJson }), tags: ['seating'] }),
   mixClassSeating: (classId: number, numCols: number, desksPerCol: number, colsConfig?: any[], date?: string) =>
     request<any>(`/api/classes/${classId}/seating/mix`, { method: 'POST', body: JSON.stringify({ num_cols: numCols, desks_per_col: desksPerCol, cols_config: colsConfig, date }), tags: ['seating'] }),
-  generateGradingPairs: (classId: number) => request<any>(`/api/classes/${classId}/seating/grading-pairs`, { method: 'POST' }),
-  getClassAttendance: (classId: number, date: string) => request<{ date: string; records: any[] }>(`/api/classes/${classId}/attendance?date=${encodeURIComponent(date)}`, { tags: ['attendance'] }),
+  getClassAttendance: (classId: number, date: string, forceRefresh = true) =>
+    request<{ date: string; records: any[] }>(`/api/classes/${classId}/attendance?date=${encodeURIComponent(date)}`, { tags: ['attendance'], forceRefresh }),
   saveClassAttendance: (classId: number, date: string, records: any[]) =>
     request<any>(`/api/classes/${classId}/attendance`, { method: 'POST', body: JSON.stringify({ date, records }), tags: ['attendance', 'reports', 'analytics'] }),
   exportClassExcel: (classId: number, date: string, records?: any[]) =>

@@ -38,12 +38,10 @@ export function useWarmupDataCache(currentUser: AuthUser | null) {
           // Preload active class details so clicking into any class is 0ms instant even on Vercel
           const classResult = results[0];
           if (classResult.status === 'fulfilled' && Array.isArray(classResult.value)) {
-            const todayStr = new Date().toISOString().split('T')[0];
             const activeClasses = classResult.value.slice(0, 6);
             await Promise.allSettled(
               activeClasses.flatMap((cls: any) => [
                 api.getClassStudents(cls.id),
-                api.getClassAttendance(cls.id, todayStr),
                 api.getClassWeeklySchedule(cls.id).catch(() => []),
               ])
             );
