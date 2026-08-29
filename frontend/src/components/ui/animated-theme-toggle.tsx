@@ -1,153 +1,264 @@
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Sun, Moon, Sparkles } from 'lucide-react';
+import { motion, useMotionValue, useTransform } from 'framer-motion';
 
-interface AnimatedThemeToggleProps {
-  initialTheme?: 'dark' | 'light';
-  onToggle?: (theme: 'dark' | 'light') => void;
-  size?: 'sm' | 'md' | 'lg';
+export interface AnimatedThemeToggleProps {
   className?: string;
+  isDark?: boolean;
+  onToggle?: (isDark: boolean) => void;
+  size?: 'sm' | 'md' | 'lg';
 }
 
 export const AnimatedThemeToggle: React.FC<AnimatedThemeToggleProps> = ({
-  initialTheme = 'dark',
+  className = '',
+  isDark: controlledDark,
   onToggle,
   size = 'md',
-  className = '',
 }) => {
-  const [theme, setTheme] = useState<'dark' | 'light'>(initialTheme);
+  const [internalDark, setInternalDark] = useState(true);
+  const isDark = controlledDark !== undefined ? controlledDark : internalDark;
 
-  const handleToggle = () => {
-    const next = theme === 'dark' ? 'light' : 'dark';
-    setTheme(next);
-    onToggle?.(next);
+  const toggleTheme = () => {
+    const next = !isDark;
+    setInternalDark(next);
+    if (onToggle) onToggle(next);
   };
 
-  const isDark = theme === 'dark';
-
-  const sizeStyles = {
-    sm: {
-      btn: 'w-14 h-7 p-0.5',
-      thumb: 'w-6 h-6',
-      icon: 12,
-    },
-    md: {
-      btn: 'w-20 h-10 p-1',
-      thumb: 'w-8 h-8',
-      icon: 16,
-    },
-    lg: {
-      btn: 'w-24 h-12 p-1.5',
-      thumb: 'w-9 h-9',
-      icon: 20,
-    },
-  }[size];
+  const sizeClasses =
+    size === 'sm'
+      ? 'h-8 px-2.5 rounded-lg'
+      : size === 'lg'
+      ? 'h-12 px-4 rounded-2xl'
+      : 'h-10 px-3 rounded-xl';
 
   return (
     <button
       type="button"
-      onClick={handleToggle}
-      aria-label="Chuyển đổi giao diện sáng tối"
-      className={`relative inline-flex items-center rounded-full transition-colors duration-500 cursor-pointer select-none focus:outline-none focus:ring-2 focus:ring-[#5c36f5]/50 border ${
-        isDark
-          ? 'bg-[#0b0e1b] border-[#202b50] shadow-[0_0_20px_rgba(92,54,245,0.25)]'
-          : 'bg-[#e2e8f0] border-amber-300/80 shadow-[0_0_20px_rgba(245,158,11,0.3)]'
-      } ${sizeStyles.btn} ${className}`}
+      onClick={toggleTheme}
+      className={`inline-flex items-center justify-center border border-white/15 bg-[#0c0f1e] hover:bg-white/10 text-white transition-colors cursor-pointer shadow-lg active:scale-95 ${sizeClasses} ${className}`}
+      aria-label={isDark ? 'Chuyển sang chế độ sáng' : 'Chuyển sang chế độ tối'}
     >
-      {/* Background Decor Stars / Clouds */}
-      <div className="absolute inset-0 overflow-hidden rounded-full pointer-events-none">
-        <AnimatePresence mode="wait">
-          {isDark ? (
-            <motion.div
-              key="dark-sky"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.3 }}
-              className="absolute inset-0 flex items-center justify-start pl-2"
-            >
-              <div className="w-1 h-1 rounded-full bg-white/70 shadow-[0_0_4px_#ffffff] animate-ping" />
-              <div className="w-0.5 h-0.5 rounded-full bg-indigo-300 ml-2 mb-2 opacity-80" />
-            </motion.div>
-          ) : (
-            <motion.div
-              key="light-sky"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.3 }}
-              className="absolute inset-0 flex items-center justify-end pr-2.5"
-            >
-              <Sparkles size={11} className="text-amber-500 opacity-80 animate-pulse" />
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-
-      {/* Morphing Sliding Thumb */}
-      <motion.div
-        layout
-        transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-        className={`relative z-10 flex items-center justify-center rounded-full shadow-lg ${
-          isDark
-            ? 'bg-[#1b223d] text-indigo-300 ml-auto border border-[#3b4b80] shadow-[0_0_12px_rgba(92,54,245,0.5)]'
-            : 'bg-gradient-to-tr from-amber-400 to-yellow-300 text-slate-900 mr-auto shadow-[0_0_15px_rgba(245,158,11,0.7)]'
-        } ${sizeStyles.thumb}`}
-      >
-        <AnimatePresence mode="wait" initial={false}>
-          {isDark ? (
-            <motion.div
-              key="moon"
-              initial={{ rotate: -90, scale: 0.5, opacity: 0 }}
-              animate={{ rotate: 0, scale: 1, opacity: 1 }}
-              exit={{ rotate: 90, scale: 0.5, opacity: 0 }}
-              transition={{ duration: 0.25 }}
-            >
-              <Moon size={sizeStyles.icon} className="fill-indigo-300/30 text-indigo-300" />
-            </motion.div>
-          ) : (
-            <motion.div
-              key="sun"
-              initial={{ rotate: 90, scale: 0.5, opacity: 0 }}
-              animate={{ rotate: 0, scale: 1, opacity: 1 }}
-              exit={{ rotate: -90, scale: 0.5, opacity: 0 }}
-              transition={{ duration: 0.25 }}
-            >
-              <Sun size={sizeStyles.icon} className="text-amber-950 stroke-[2.5]" />
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </motion.div>
+      <SolarSwitch isDark={isDark} size={size} />
     </button>
   );
 };
 
-export function AnimatedThemeToggleDemo() {
-  const [current, setCurrent] = useState<'dark' | 'light'>('dark');
+interface SolarSwitchProps {
+  isDark: boolean;
+  size?: 'sm' | 'md' | 'lg';
+}
+
+const SolarSwitch: React.FC<SolarSwitchProps> = ({ isDark, size = 'md' }) => {
+  const duration = 0.65;
+
+  const moonVariants = {
+    checked: {
+      scale: 1,
+      opacity: 1,
+      rotate: 0,
+    },
+    unchecked: {
+      scale: 0,
+      opacity: 0,
+      rotate: -45,
+    },
+  };
+
+  const sunVariants = {
+    checked: {
+      scale: 0,
+      opacity: 0,
+      rotate: 45,
+    },
+    unchecked: {
+      scale: 1,
+      opacity: 1,
+      rotate: 0,
+    },
+  };
+
+  const scaleMoon = useMotionValue(isDark ? 1 : 0);
+  const scaleSun = useMotionValue(isDark ? 0 : 1);
+  const pathLengthMoon = useTransform(scaleMoon, [0.6, 1], [0, 1]);
+  const pathLengthSun = useTransform(scaleSun, [0.6, 1], [0, 1]);
+
+  const svgDim = size === 'sm' ? '16' : size === 'lg' ? '24' : '20';
 
   return (
-    <div className="flex flex-col items-center justify-center gap-6 p-8 bg-[#0c0f1e] border border-white/10 rounded-2xl">
-      <div className="text-center space-y-1">
-        <h4 className="text-sm font-black text-white">Animated Theme Toggle Demo</h4>
-        <p className="text-xs text-slate-400">
-          Chế độ hiện tại: <span className="font-bold font-mono text-indigo-400 uppercase">{current}</span>
-        </p>
-      </div>
+    <motion.div
+      animate={isDark ? 'checked' : 'unchecked'}
+      className="flex items-center justify-center"
+    >
+      <motion.svg
+        width={svgDim}
+        height={svgDim}
+        viewBox="0 0 25 25"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        className="shrink-0"
+      >
+        {/* Sun Center Circle */}
+        <motion.path
+          d="M12.4058 17.7625C15.1672 17.7625 17.4058 15.5239 17.4058 12.7625C17.4058 10.0011 15.1672 7.76251 12.4058 7.76251C9.64434 7.76251 7.40576 10.0011 7.40576 12.7625C7.40576 15.5239 9.64434 17.7625 12.4058 17.7625Z"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          variants={sunVariants}
+          custom={isDark}
+          transition={{ duration }}
+          style={{
+            pathLength: pathLengthSun,
+            scale: scaleSun,
+          }}
+        />
 
-      <div className="flex items-center gap-8">
-        <div className="flex flex-col items-center gap-2">
-          <span className="text-[10px] font-bold text-slate-400 uppercase">Small (SM)</span>
-          <AnimatedThemeToggle size="sm" initialTheme={current} onToggle={setCurrent} />
+        {/* Sun Rays */}
+        <motion.path
+          d="M12.4058 1.76251V3.76251"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          variants={sunVariants}
+          custom={isDark}
+          transition={{ duration }}
+          style={{ pathLength: pathLengthSun, scale: scaleSun }}
+        />
+        <motion.path
+          d="M12.4058 21.7625V23.7625"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          variants={sunVariants}
+          custom={isDark}
+          transition={{ duration }}
+          style={{ pathLength: pathLengthSun, scale: scaleSun }}
+        />
+        <motion.path
+          d="M4.62598 4.98248L6.04598 6.40248"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          variants={sunVariants}
+          custom={isDark}
+          transition={{ duration }}
+          style={{ pathLength: pathLengthSun, scale: scaleSun }}
+        />
+        <motion.path
+          d="M18.7656 19.1225L20.1856 20.5425"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          variants={sunVariants}
+          custom={isDark}
+          transition={{ duration }}
+          style={{ pathLength: pathLengthSun, scale: scaleSun }}
+        />
+        <motion.path
+          d="M1.40576 12.7625H3.40576"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          variants={sunVariants}
+          custom={isDark}
+          transition={{ duration }}
+          style={{ pathLength: pathLengthSun, scale: scaleSun }}
+        />
+        <motion.path
+          d="M21.4058 12.7625H23.4058"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          variants={sunVariants}
+          custom={isDark}
+          transition={{ duration }}
+          style={{ pathLength: pathLengthSun, scale: scaleSun }}
+        />
+        <motion.path
+          d="M4.62598 20.5425L6.04598 19.1225"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          variants={sunVariants}
+          custom={isDark}
+          transition={{ duration }}
+          style={{ pathLength: pathLengthSun, scale: scaleSun }}
+        />
+        <motion.path
+          d="M18.7656 6.40248L20.1856 4.98248"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          variants={sunVariants}
+          custom={isDark}
+          transition={{ duration }}
+          style={{ pathLength: pathLengthSun, scale: scaleSun }}
+        />
+
+        {/* Crescent Moon */}
+        <motion.path
+          d="M21.1918 13.2013C21.0345 14.9035 20.3957 16.5257 19.35 17.8781C18.3044 19.2305 16.8953 20.2571 15.2875 20.8379C13.6797 21.4186 11.9398 21.5294 10.2713 21.1574C8.60281 20.7854 7.07479 19.9459 5.86602 18.7371C4.65725 17.5283 3.81774 16.0003 3.4457 14.3318C3.07367 12.6633 3.18451 10.9234 3.76526 9.31561C4.346 7.70783 5.37263 6.29868 6.72501 5.25307C8.07739 4.20746 9.69959 3.56862 11.4018 3.41132C10.4052 4.75958 9.92564 6.42077 10.0503 8.09273C10.175 9.76469 10.8957 11.3364 12.0812 12.5219C13.2667 13.7075 14.8384 14.4281 16.5104 14.5528C18.1823 14.6775 19.8435 14.1979 21.1918 13.2013Z"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          transition={{ duration }}
+          variants={moonVariants}
+          custom={isDark}
+          style={{
+            pathLength: pathLengthMoon,
+            scale: scaleMoon,
+          }}
+        />
+      </motion.svg>
+    </motion.div>
+  );
+};
+
+export function AnimatedThemeToggleDemo() {
+  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
+
+  return (
+    <div className="space-y-6">
+      <div className="bg-[#080b14] border border-[#1b2444] p-8 rounded-2xl space-y-6 flex flex-col items-center justify-center min-h-[300px]">
+        <div className="text-center space-y-1">
+          <h3 className="text-base font-black text-white">Animated Theme Toggle</h3>
+          <p className="text-xs text-slate-400">
+            Hiệu ứng chuyển đổi Sun - Moon với kỹ thuật vẽ nét SVG morphing mượt mà.
+          </p>
         </div>
 
-        <div className="flex flex-col items-center gap-2">
-          <span className="text-[10px] font-bold text-slate-400 uppercase">Medium (MD)</span>
-          <AnimatedThemeToggle size="md" initialTheme={current} onToggle={setCurrent} />
-        </div>
+        {/* Demo container requested by user */}
+        <div className="flex flex-col items-center justify-center p-8 bg-[#0c0f1e] border border-white/10 rounded-2xl space-y-4">
+          <div className="flex items-center gap-6">
+            <AnimatedThemeToggle
+              size="sm"
+              isDark={theme === 'dark'}
+              onToggle={(isDark) => setTheme(isDark ? 'dark' : 'light')}
+            />
+            <AnimatedThemeToggle
+              size="md"
+              isDark={theme === 'dark'}
+              onToggle={(isDark) => setTheme(isDark ? 'dark' : 'light')}
+            />
+            <AnimatedThemeToggle
+              size="lg"
+              isDark={theme === 'dark'}
+              onToggle={(isDark) => setTheme(isDark ? 'dark' : 'light')}
+            />
+          </div>
 
-        <div className="flex flex-col items-center gap-2">
-          <span className="text-[10px] font-bold text-slate-400 uppercase">Large (LG)</span>
-          <AnimatedThemeToggle size="lg" initialTheme={current} onToggle={setCurrent} />
+          <span className="text-xs font-bold text-slate-300">
+            Trạng thái hiện tại:{' '}
+            <strong className="text-indigo-400 font-mono uppercase">{theme} MODE</strong>
+          </span>
         </div>
       </div>
     </div>

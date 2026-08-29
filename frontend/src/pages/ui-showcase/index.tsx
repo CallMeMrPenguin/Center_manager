@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import {
   Calendar, Compass, Sparkles, Layers,
   MousePointerClick, FolderTree, Table as TableIcon, BellRing, Droplets,
-  Activity, SunMoon
+  Activity, SunMoon, Wand2, LayoutGrid
 } from 'lucide-react';
 import { AnimatedCalendar } from '../../components/ui/calender';
 import { SegmentedButton } from '../../components/ui/segmented-button';
@@ -22,10 +22,28 @@ import { LiquidButtonDemo } from './components/LiquidButtonDemo';
 import { BeamDatabaseStatusDemo } from './components/BeamDatabaseStatusDemo';
 import { AnimatedThemeToggleDemo } from '../../components/ui/animated-theme-toggle';
 
+type SubTabId = 'beam' | 'toggle' | 'liquid' | 'dock' | 'hover' | 'calendar' | 'segmented' | 'tree' | 'toast' | 'table';
+
+const FX_BUTTONS = [
+  { id: 'beam', label: 'Animated Beam', icon: Activity },
+  { id: 'toggle', label: 'Theme Toggle', icon: SunMoon },
+  { id: 'liquid', label: 'Liquid Button', icon: Droplets },
+  { id: 'dock', label: 'Dock', icon: Compass },
+  { id: 'hover', label: 'Hover Preview', icon: MousePointerClick },
+];
+
+const COMPONENT_BUTTONS = [
+  { id: 'calendar', label: 'Calendar', icon: Calendar },
+  { id: 'segmented', label: 'Segmented', icon: Layers },
+  { id: 'tree', label: 'File Tree', icon: FolderTree },
+  { id: 'toast', label: 'Toasts', icon: BellRing },
+  { id: 'table', label: 'Table', icon: TableIcon },
+];
+
 export default function UIShowcasePage() {
-  const [activeSubTab, setActiveSubTab] = useState<
-    'beam' | 'toggle' | 'liquid' | 'calendar' | 'segmented' | 'dock' | 'tree' | 'hover' | 'toast' | 'table'
-  >('beam');
+  const [category, setCategory] = useState<'fx' | 'components'>('fx');
+  const [activeSubTab, setActiveSubTab] = useState<SubTabId>('beam');
+
   const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
   const [selectedNavTab, setSelectedNavTab] = useState('overview');
   const [treeSelectedId, setTreeSelectedId] = useState('button');
@@ -38,6 +56,15 @@ export default function UIShowcasePage() {
   const [stackedToasts, setStackedToasts] = useState<StackedToast[]>([]);
   const { addToast } = useAnimatedToast();
   const promiseToast = usePromiseToast();
+
+  const handleCategoryChange = (cat: 'fx' | 'components') => {
+    setCategory(cat);
+    if (cat === 'fx' && !FX_BUTTONS.some(b => b.id === activeSubTab)) {
+      setActiveSubTab('beam');
+    } else if (cat === 'components' && !COMPONENT_BUTTONS.some(b => b.id === activeSubTab)) {
+      setActiveSubTab('calendar');
+    }
+  };
 
   const addStackedToast = (type: 'success' | 'error' | 'warning' | 'info') => {
     const newToast: StackedToast = {
@@ -58,40 +85,47 @@ export default function UIShowcasePage() {
     });
   };
 
+  const currentButtons = category === 'fx' ? FX_BUTTONS : COMPONENT_BUTTONS;
+
   return (
     <div className="h-full flex flex-col p-6 space-y-6 overflow-y-auto select-none">
-      {/* HEADER */}
-      <div className="flex flex-wrap items-center justify-between gap-4 bg-[#0c0f1e] border border-white/10 p-5 rounded-2xl">
+      {/* HEADER WITH CATEGORY SELECTOR & COMPACT SEGMENTED PILLS */}
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-[#0c0f1e] border border-white/10 p-5 rounded-2xl">
         <div className="flex items-center gap-3">
-          <div className="p-3 bg-[#5c36f5]/20 text-[#5c36f5] rounded-2xl border border-[#5c36f5]/30">
+          <div className="p-3 bg-[#5c36f5]/20 text-[#5c36f5] rounded-2xl border border-[#5c36f5]/30 shrink-0">
             <Sparkles size={24} />
           </div>
           <div>
             <h1 className="text-xl font-black text-white">UI Component Showcase & Playground</h1>
             <p className="text-xs text-slate-400 font-semibold mt-0.5">
-              Trải nghiệm tương tác trực tiếp bộ component động hiệu ứng cao cấp với theme Dark Space.
+              Bộ sưu tập component tương tác cao cấp với theme Dark Space.
             </p>
           </div>
         </div>
 
-        <SegmentedButton
-          buttons={[
-            { id: 'beam', label: 'Animated Beam', icon: Activity },
-            { id: 'toggle', label: 'Theme Toggle', icon: SunMoon },
-            { id: 'liquid', label: 'Liquid Button', icon: Droplets },
-            { id: 'calendar', label: 'Calendar', icon: Calendar },
-            { id: 'segmented', label: 'Segmented', icon: Layers },
-            { id: 'dock', label: 'Dock', icon: Compass },
-            { id: 'tree', label: 'File Tree', icon: FolderTree },
-            { id: 'hover', label: 'Hover Preview', icon: MousePointerClick },
-            { id: 'toast', label: 'Toasts', icon: BellRing },
-            { id: 'table', label: 'Table', icon: TableIcon },
-          ]}
-          activeId={activeSubTab}
-          onChange={(id) => setActiveSubTab(id as any)}
-          fullWidth={false}
-          size="sm"
-        />
+        {/* 2-Tier Compact Category + Subtab Controls */}
+        <div className="flex flex-wrap items-center gap-3">
+          {/* Category Toggle */}
+          <SegmentedButton
+            buttons={[
+              { id: 'fx', label: 'Hiệu Ứng FX', icon: Wand2 },
+              { id: 'components', label: 'Giao Diện & Data', icon: LayoutGrid },
+            ]}
+            activeId={category}
+            onChange={(id) => handleCategoryChange(id as 'fx' | 'components')}
+            fullWidth={false}
+            size="sm"
+          />
+
+          {/* Subtab Segmented Pill Group (5 items per category) */}
+          <SegmentedButton
+            buttons={currentButtons}
+            activeId={activeSubTab}
+            onChange={(id) => setActiveSubTab(id as SubTabId)}
+            fullWidth={false}
+            size="sm"
+          />
+        </div>
       </div>
 
       {/* 1. ANIMATED BEAM & DATABASE CONNECTION MONITOR */}
