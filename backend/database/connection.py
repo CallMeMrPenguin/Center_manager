@@ -358,4 +358,11 @@ def get_connection():
     # In local desktop mode, ALWAYS use ultra-fast local SQLite (0ms latency, background sync via sync_worker)
     conn = sqlite3.connect(DB_PATH, check_same_thread=False, timeout=20)
     conn.row_factory = sqlite3.Row
+    try:
+        conn.execute("PRAGMA journal_mode=WAL;")
+        conn.execute("PRAGMA synchronous=NORMAL;")
+        conn.execute("PRAGMA temp_store=MEMORY;")
+        conn.execute("PRAGMA cache_size=-16000;")
+    except Exception:
+        pass
     return conn
