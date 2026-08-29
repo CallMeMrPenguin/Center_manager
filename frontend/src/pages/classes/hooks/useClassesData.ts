@@ -4,13 +4,17 @@ import { api } from '../../../api';
 import { showToast } from '../../../components/Toast';
 import { useConfirm } from '../../../components/ConfirmDialog';
 import { notifyDataChanged } from '../../../utils';
+import { dataCache } from '../../../utils/dataCache';
 
 export function useClassesData() {
   const confirm = useConfirm();
-  const [classes, setClasses] = useState<ClassItem[]>([]);
-  const [teachers, setTeachers] = useState<TeacherCM[]>([]);
+  const cachedClasses = dataCache.get<ClassItem[]>('/api/classes?search=')?.data;
+  const cachedTeachers = dataCache.get<TeacherCM[]>('/api/teachers_cm?search=&role=')?.data;
+
+  const [classes, setClasses] = useState<ClassItem[]>(() => cachedClasses || []);
+  const [teachers, setTeachers] = useState<TeacherCM[]>(() => cachedTeachers || []);
   const [allStudents, setAllStudents] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(() => !cachedClasses || cachedClasses.length === 0);
   const [search, setSearch] = useState('');
   const [selectedClass, setSelectedClass] = useState<ClassItem | null>(null);
 
@@ -27,23 +31,26 @@ export function useClassesData() {
   }, [classes, search]);
 
   const loadClasses = useCallback(async (silent?: boolean | any) => {
-    const isSilent = silent === true;
+    const hasExistingData = classes.length > 0 || (cachedClasses && cachedClasses.length > 0);
+    const isSilent = silent === true || hasExistingData;
     if (!isSilent) setLoading(true);
     try {
-      const [data, tch, st] = await Promise.all([
-        api.getClasses(search),
-        api.getTeachersCM(),
-        api.getStudents()
-      ]);
+      // 1. Fetch and render classes immediately
+      const data = await api.getClasses(search);
       setClasses(data || []);
-      setTeachers(tch || []);
-      setAllStudents(st || []);
+      if (!isSilent) setLoading(false);
+
+      // 2. Fetch ancillary modal data (teachers & students) in parallel background
+      Promise.all([
+        api.getTeachersCM().then(t => setTeachers(t || [])).catch(() => {}),
+        api.getStudents().then(s => setAllStudents(s || [])).catch(() => {})
+      ]);
     } catch (err: any) {
       if (!isSilent) showToast('Không thể tải danh sách lớp học: ' + err.message, 'error');
     } finally {
-      if (!isSilent) setLoading(false);
+      setLoading(false);
     }
-  }, [search]);
+  }, [search, classes.length, cachedClasses]);
 
   useEffect(() => {
     loadClasses();

@@ -11,11 +11,13 @@ import { DataTable } from '../../components/DataTable';
 import { notifyDataChanged } from '../../utils';
 import { TeacherDetailCard } from './components/TeacherDetailCard';
 import { TeacherModal } from './components/TeacherModal';
+import { dataCache } from '../../utils/dataCache';
 
 export function TeachersPage() {
   const confirm = useConfirm();
-  const [teachers, setTeachers] = useState<TeacherCM[]>([]);
-  const [loading, setLoading] = useState(true);
+  const cachedTeachers = dataCache.get<TeacherCM[]>('/api/teachers_cm?search=&role=')?.data;
+  const [teachers, setTeachers] = useState<TeacherCM[]>(() => cachedTeachers || []);
+  const [loading, setLoading] = useState(() => !cachedTeachers || cachedTeachers.length === 0);
   const [selectedTeachers, setSelectedTeachers] = useState<TeacherCM[]>([]);
 
   const [modalOpen, setModalOpen] = useState(false);
@@ -33,14 +35,16 @@ export function TeachersPage() {
   });
 
   const loadData = async (silent = false) => {
-    if (!silent) setLoading(true);
+    const hasData = teachers.length > 0 || (cachedTeachers && cachedTeachers.length > 0);
+    const isSilent = silent || hasData;
+    if (!isSilent) setLoading(true);
     try {
       const data = await api.getTeachersCM();
-      setTeachers(data);
+      setTeachers(data || []);
     } catch (err: any) {
-      if (!silent) showToast('Không thể tải danh sách giáo viên: ' + err.message, 'error');
+      if (!isSilent) showToast('Không thể tải danh sách giáo viên: ' + err.message, 'error');
     } finally {
-      if (!silent) setLoading(false);
+      setLoading(false);
     }
   };
 
