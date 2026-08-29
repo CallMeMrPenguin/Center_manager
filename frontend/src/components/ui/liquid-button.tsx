@@ -17,72 +17,72 @@ interface LiquidButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement
 const THEMES: Record<LiquidVariant, {
   border: string;
   bgBase: string;
-  textColor: string;
-  textHover: string;
+  textBase: string;
+  textFilled: string;
   glowShadow: string;
   colorFront: string;
   colorBack: string;
   colorSurface: string;
 }> = {
   indigo: {
-    border: 'border-[#5c36f5]/40 hover:border-[#5c36f5]',
-    bgBase: 'bg-[#0a0d1c]',
-    textColor: 'text-indigo-200',
-    textHover: 'group-hover:text-white',
-    glowShadow: 'group-hover:shadow-[0_0_26px_rgba(92,54,245,0.7)]',
-    colorFront: 'rgba(92, 54, 245, 0.92)',
-    colorBack: 'rgba(65, 34, 189, 0.55)',
-    colorSurface: '#a594fd',
+    border: 'border-[#5c36f5]/50 hover:border-[#5c36f5]',
+    bgBase: 'bg-[#080b18]',
+    textBase: 'text-indigo-300/80',
+    textFilled: 'text-white',
+    glowShadow: 'group-hover:shadow-[0_0_28px_rgba(92,54,245,0.75)]',
+    colorFront: 'rgba(92, 54, 245, 0.95)',
+    colorBack: 'rgba(65, 34, 189, 0.65)',
+    colorSurface: '#c4b5fd',
   },
   cyan: {
-    border: 'border-cyan-500/40 hover:border-cyan-400',
-    bgBase: 'bg-[#051322]',
-    textColor: 'text-cyan-200',
-    textHover: 'group-hover:text-white',
-    glowShadow: 'group-hover:shadow-[0_0_26px_rgba(6,182,212,0.7)]',
-    colorFront: 'rgba(8, 145, 178, 0.92)',
-    colorBack: 'rgba(6, 182, 212, 0.5)',
-    colorSurface: '#67e8f9',
+    border: 'border-cyan-500/50 hover:border-cyan-400',
+    bgBase: 'bg-[#04121d]',
+    textBase: 'text-cyan-300/80',
+    textFilled: 'text-white',
+    glowShadow: 'group-hover:shadow-[0_0_28px_rgba(6,182,212,0.75)]',
+    colorFront: 'rgba(8, 145, 178, 0.95)',
+    colorBack: 'rgba(6, 182, 212, 0.6)',
+    colorSurface: '#a5f3fc',
   },
   emerald: {
-    border: 'border-emerald-500/40 hover:border-emerald-400',
-    bgBase: 'bg-[#041512]',
-    textColor: 'text-emerald-200',
-    textHover: 'group-hover:text-white',
-    glowShadow: 'group-hover:shadow-[0_0_26px_rgba(16,185,129,0.7)]',
-    colorFront: 'rgba(5, 150, 105, 0.92)',
-    colorBack: 'rgba(16, 185, 129, 0.5)',
-    colorSurface: '#6ee7b7',
+    border: 'border-emerald-500/50 hover:border-emerald-400',
+    bgBase: 'bg-[#031510]',
+    textBase: 'text-emerald-300/80',
+    textFilled: 'text-white',
+    glowShadow: 'group-hover:shadow-[0_0_28px_rgba(16,185,129,0.75)]',
+    colorFront: 'rgba(5, 150, 105, 0.95)',
+    colorBack: 'rgba(16, 185, 129, 0.6)',
+    colorSurface: '#a7f3d0',
   },
   amber: {
-    border: 'border-amber-500/40 hover:border-amber-400',
-    bgBase: 'bg-[#160f04]',
-    textColor: 'text-amber-200',
-    textHover: 'group-hover:text-white',
-    glowShadow: 'group-hover:shadow-[0_0_26px_rgba(245,158,11,0.7)]',
-    colorFront: 'rgba(217, 119, 6, 0.92)',
-    colorBack: 'rgba(245, 158, 11, 0.5)',
-    colorSurface: '#fde68a',
+    border: 'border-amber-500/50 hover:border-amber-400',
+    bgBase: 'bg-[#150f03]',
+    textBase: 'text-amber-300/80',
+    textFilled: 'text-white',
+    glowShadow: 'group-hover:shadow-[0_0_28px_rgba(245,158,11,0.75)]',
+    colorFront: 'rgba(217, 119, 6, 0.95)',
+    colorBack: 'rgba(245, 158, 11, 0.6)',
+    colorSurface: '#fef08a',
   },
   rose: {
-    border: 'border-rose-500/40 hover:border-rose-400',
-    bgBase: 'bg-[#18070e]',
-    textColor: 'text-rose-200',
-    textHover: 'group-hover:text-white',
-    glowShadow: 'group-hover:shadow-[0_0_26px_rgba(244,63,94,0.7)]',
-    colorFront: 'rgba(225, 29, 72, 0.92)',
-    colorBack: 'rgba(244, 63, 94, 0.5)',
-    colorSurface: '#fda4af',
+    border: 'border-rose-500/50 hover:border-rose-400',
+    bgBase: 'bg-[#16060c]',
+    textBase: 'text-rose-300/80',
+    textFilled: 'text-white',
+    glowShadow: 'group-hover:shadow-[0_0_28px_rgba(244,63,94,0.75)]',
+    colorFront: 'rgba(225, 29, 72, 0.95)',
+    colorBack: 'rgba(244, 63, 94, 0.6)',
+    colorSurface: '#fecdd3',
   },
   purple: {
-    border: 'border-purple-500/40 hover:border-purple-400',
-    bgBase: 'bg-[#11071c]',
-    textColor: 'text-purple-200',
-    textHover: 'group-hover:text-white',
-    glowShadow: 'group-hover:shadow-[0_0_26px_rgba(168,85,247,0.7)]',
-    colorFront: 'rgba(147, 51, 234, 0.92)',
-    colorBack: 'rgba(168, 85, 247, 0.5)',
-    colorSurface: '#d8b4fe',
+    border: 'border-purple-500/50 hover:border-purple-400',
+    bgBase: 'bg-[#10061a]',
+    textBase: 'text-purple-300/80',
+    textFilled: 'text-white',
+    glowShadow: 'group-hover:shadow-[0_0_28px_rgba(168,85,247,0.75)]',
+    colorFront: 'rgba(147, 51, 234, 0.95)',
+    colorBack: 'rgba(168, 85, 247, 0.6)',
+    colorSurface: '#e9d5ff',
   },
 };
 
@@ -92,17 +92,17 @@ const SIZES: Record<LiquidSize, {
   height: string;
 }> = {
   sm: {
-    padding: 'px-3.5 py-1.5',
+    padding: 'px-4 py-2',
     fontSize: 'text-xs',
-    height: 'h-8',
+    height: 'h-9',
   },
   md: {
-    padding: 'px-5 py-2.5',
+    padding: 'px-6 py-3',
     fontSize: 'text-sm',
-    height: 'h-11',
+    height: 'h-12',
   },
   lg: {
-    padding: 'px-7 py-3.5',
+    padding: 'px-8 py-4',
     fontSize: 'text-base',
     height: 'h-14',
   },
@@ -124,6 +124,7 @@ export const LiquidFillButton: React.FC<LiquidButtonProps> = ({
   const [isHovered, setIsHovered] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLButtonElement | null>(null);
+  const overlayTextRef = useRef<HTMLDivElement | null>(null);
 
   const theme = THEMES[variant] || THEMES.indigo;
   const sizeConf = SIZES[size] || SIZES.md;
@@ -164,58 +165,64 @@ export const LiquidFillButton: React.FC<LiquidButtonProps> = ({
       ctx.scale(dpr, dpr);
       ctx.clearRect(0, 0, width, height);
 
-      // Smooth liquid level pouring acceleration (viscous & graceful)
+      // Smooth liquid pouring speed (gentle, steady, graceful fill)
       const target = currentTargetFill;
-      const speed = target > currentLevel ? 0.028 : 0.055;
+      const speed = target > currentLevel ? 0.016 : 0.038;
       currentLevel += (target - currentLevel) * speed;
 
-      // Smooth slosh damping
-      slosh += (sloshTarget - slosh) * 0.08;
-      sloshTarget *= 0.94; // Decay slosh
+      // Sync progressive text clipping in real-time
+      if (overlayTextRef.current) {
+        const clipTop = Math.max(0, Math.min(100, 100 - currentLevel));
+        overlayTextRef.current.style.clipPath = `inset(${clipTop}% 0 0 0)`;
+      }
 
-      if (currentLevel > 0.3) {
-        step += 0.038;
+      // Smooth slosh damping
+      slosh += (sloshTarget - slosh) * 0.06;
+      sloshTarget *= 0.92;
+
+      if (currentLevel > 0.1) {
+        step += 0.03;
         // Total water height covers slightly beyond top at 100% so full button is submerged
-        const waterHeight = (currentLevel / 100) * (height + 14);
+        const waterHeight = (currentLevel / 100) * (height + 16);
         const baseSurfaceY = height - waterHeight;
-        const waveScale = Math.max(0, 1 - currentLevel / 95); // flatten wave smoothly as cup tops off
+        const waveScale = Math.max(0, 1 - currentLevel / 92); // flatten wave smoothly as cup tops off
 
         // 1. Render Back Depth Wave
         ctx.fillStyle = theme.colorBack;
         ctx.beginPath();
-        ctx.moveTo(0, height);
-        for (let x = 0; x <= width; x += 4) {
+        ctx.moveTo(-4, height + 4);
+        for (let x = -4; x <= width + 4; x += 4) {
           const wave =
-            (Math.sin(x * 0.035 + step * 1.2) * 3.5 +
-            Math.cos(x * 0.02 - step * 0.8) * 2 +
+            (Math.sin(x * 0.035 + step * 1.1) * 3.5 +
+            Math.cos(x * 0.02 - step * 0.7) * 2 +
             ((x - width / 2) / width) * slosh) * waveScale;
-          const y = Math.min(height, Math.max(-10, baseSurfaceY + wave));
+          const y = Math.min(height + 4, Math.max(-12, baseSurfaceY + wave));
           ctx.lineTo(x, y);
         }
-        ctx.lineTo(width, height);
+        ctx.lineTo(width + 4, height + 4);
         ctx.closePath();
         ctx.fill();
 
         // 2. Render Front Primary Wave
         ctx.fillStyle = theme.colorFront;
         ctx.beginPath();
-        ctx.moveTo(0, height);
+        ctx.moveTo(-4, height + 4);
         const frontPoints: { x: number; y: number }[] = [];
-        for (let x = 0; x <= width; x += 4) {
+        for (let x = -4; x <= width + 4; x += 4) {
           const wave =
-            (Math.sin(x * 0.04 - step * 1.5) * 4.5 +
-            Math.cos(x * 0.025 + step * 0.9) * 2.5 +
+            (Math.sin(x * 0.04 - step * 1.3) * 4.5 +
+            Math.cos(x * 0.025 + step * 0.8) * 2.5 +
             ((x - width / 2) / width) * slosh) * waveScale;
-          const y = Math.min(height, Math.max(-10, baseSurfaceY + wave));
+          const y = Math.min(height + 4, Math.max(-12, baseSurfaceY + wave));
           frontPoints.push({ x, y });
           ctx.lineTo(x, y);
         }
-        ctx.lineTo(width, height);
+        ctx.lineTo(width + 4, height + 4);
         ctx.closePath();
         ctx.fill();
 
         // 3. Render Specular Surface Foam Line (only when wave is visible)
-        if (frontPoints.length > 0 && waveScale > 0.05) {
+        if (frontPoints.length > 0 && waveScale > 0.04) {
           ctx.strokeStyle = theme.colorSurface;
           ctx.lineWidth = 1.5;
           ctx.beginPath();
@@ -229,8 +236,8 @@ export const LiquidFillButton: React.FC<LiquidButtonProps> = ({
 
       ctx.restore();
 
-      // Only continue loop if there is active liquid or movement
-      if (currentLevel > 0.1 || currentTargetFill > 0) {
+      // Continue animation loop if liquid is actively filling, draining or present
+      if (currentLevel > 0.05 || currentTargetFill > 0) {
         animId = requestAnimationFrame(render);
       }
     };
@@ -241,8 +248,8 @@ export const LiquidFillButton: React.FC<LiquidButtonProps> = ({
       if (!containerRef.current) return;
       const rect = containerRef.current.getBoundingClientRect();
       const mouseX = e.clientX - rect.left;
-      const normX = (mouseX / rect.width - 0.5) * 2; // -1 to 1
-      sloshTarget = normX * 8; // Impart tilt ripple
+      const normX = (mouseX / rect.width - 0.5) * 2;
+      sloshTarget = normX * 7;
     };
 
     const container = containerRef.current;
@@ -273,17 +280,27 @@ export const LiquidFillButton: React.FC<LiquidButtonProps> = ({
       } font-black transition-all duration-300 cursor-pointer select-none active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none flex items-center justify-center gap-2 ${className}`}
       {...props}
     >
-      {/* Real-time HTML5 60FPS Fluid Physics Water Simulation Canvas */}
+      {/* Real-time HTML5 60FPS Fluid Physics Water Simulation Canvas with -inset-[4px] to eliminate any border gaps */}
       <canvas
         ref={canvasRef}
-        className="absolute inset-0 w-full h-full pointer-events-none z-0 rounded-2xl"
+        className="absolute -inset-[4px] w-[calc(100%+8px)] h-[calc(100%+8px)] pointer-events-none z-0 rounded-2xl"
       />
 
-      {/* Button Content (High Contrast Pure White Floating Layer) */}
-      <span className={`relative z-10 flex items-center gap-2 ${theme.textColor} ${theme.textHover} transition-colors duration-200`}>
-        {icon && <span className="shrink-0 transition-transform duration-300 group-hover:scale-110">{icon}</span>}
-        <span className="font-extrabold tracking-wide">{children}</span>
-      </span>
+      {/* Layer 1: Base Unsubmerged Text (Behind water) */}
+      <div className={`relative z-10 flex items-center justify-center gap-2 ${theme.textBase} font-extrabold tracking-wide`}>
+        {icon && <span className="shrink-0">{icon}</span>}
+        <span>{children}</span>
+      </div>
+
+      {/* Layer 2: Submerged Text Layer (Color changes progressively as water rises via CSS clipPath) */}
+      <div
+        ref={overlayTextRef}
+        style={{ clipPath: 'inset(100% 0 0 0)' }}
+        className={`absolute inset-0 z-20 flex items-center justify-center gap-2 ${theme.textFilled} font-extrabold tracking-wide pointer-events-none ${sizeConf.padding}`}
+      >
+        {icon && <span className="shrink-0">{icon}</span>}
+        <span>{children}</span>
+      </div>
     </button>
   );
 };

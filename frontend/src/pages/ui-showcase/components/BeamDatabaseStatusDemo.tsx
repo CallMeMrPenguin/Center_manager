@@ -100,56 +100,56 @@ export function BeamDatabaseStatusDemo() {
 
         <BeamContainer
           ref={containerRef}
-          className="mx-auto flex w-full items-center justify-between rounded-2xl border border-white/10 bg-[#0a0d1a] p-10 shadow-[0_12px_40px_rgba(0,0,0,0.8)] min-h-[260px]"
+          className="mx-auto flex w-full items-center justify-between rounded-2xl border border-white/10 bg-[#0a0d1a] px-8 py-16 sm:px-14 md:px-20 shadow-[0_12px_40px_rgba(0,0,0,0.8)] min-h-[380px]"
         >
           {/* Node 1: User */}
-          <div className="flex flex-col items-center gap-2">
+          <div className="flex flex-col items-center gap-3 shrink-0 z-10">
             <BeamNode
               ref={userRef}
-              className="h-14 w-14 border-2 border-blue-500/30 bg-blue-500/10 shadow-[0_0_20px_rgba(59,130,246,0.2)]"
+              className="h-16 w-16 border-2 border-blue-500/40 bg-blue-500/10 shadow-[0_0_24px_rgba(59,130,246,0.3)]"
             >
-              <User className="h-7 w-7 text-blue-400" />
+              <User className="h-8 w-8 text-blue-400" />
             </BeamNode>
-            <span className="font-bold text-[11px] text-slate-300 uppercase tracking-wider">
+            <span className="font-extrabold text-xs text-slate-200 uppercase tracking-wider whitespace-nowrap">
               Người Dùng
             </span>
           </div>
 
           {/* Node 2: AI Agent */}
-          <div className="flex flex-col items-center gap-2">
+          <div className="flex flex-col items-center gap-3 shrink-0 z-10">
             <BeamNode
               ref={aiRef}
-              className="h-18 w-18 border-2 border-purple-500/30 bg-purple-500/15 shadow-[0_0_25px_rgba(168,85,247,0.3)]"
+              className="h-20 w-20 border-2 border-purple-500/40 bg-purple-500/15 shadow-[0_0_30px_rgba(168,85,247,0.35)]"
             >
-              <Bot className="h-9 w-9 text-purple-300" />
+              <Bot className="h-10 w-10 text-purple-300" />
             </BeamNode>
-            <span className="font-bold text-[11px] text-indigo-300 uppercase tracking-wider">
+            <span className="font-extrabold text-xs text-indigo-300 uppercase tracking-wider whitespace-nowrap">
               AI Predict Core
             </span>
           </div>
 
           {/* Node 3 & 4: Search & Database Result */}
-          <div className="flex flex-col gap-8">
-            <div className="flex flex-col items-center gap-2">
+          <div className="flex flex-col gap-14 shrink-0 z-10">
+            <div className="flex flex-col items-center gap-3">
               <BeamNode
                 ref={searchRef}
-                className="h-14 w-14 border-2 border-amber-500/30 bg-amber-500/10 shadow-[0_0_20px_rgba(245,158,11,0.2)]"
+                className="h-16 w-16 border-2 border-amber-500/40 bg-amber-500/10 shadow-[0_0_24px_rgba(245,158,11,0.3)]"
               >
-                <Search className="h-6 w-6 text-amber-400" />
+                <Search className="h-7 w-7 text-amber-400" />
               </BeamNode>
-              <span className="font-bold text-[11px] text-slate-300 uppercase tracking-wider">
+              <span className="font-extrabold text-xs text-slate-200 uppercase tracking-wider whitespace-nowrap">
                 Truy Vấn DB
               </span>
             </div>
 
-            <div className="flex flex-col items-center gap-2">
+            <div className="flex flex-col items-center gap-3">
               <BeamNode
                 ref={resultRef}
-                className="h-14 w-14 border-2 border-emerald-500/30 bg-emerald-500/10 shadow-[0_0_20px_rgba(16,185,129,0.2)]"
+                className="h-16 w-16 border-2 border-emerald-500/40 bg-emerald-500/10 shadow-[0_0_24px_rgba(16,185,129,0.3)]"
               >
-                <Zap className="h-6 w-6 text-emerald-400" />
+                <Zap className="h-7 w-7 text-emerald-400" />
               </BeamNode>
-              <span className="font-bold text-[11px] text-slate-300 uppercase tracking-wider">
+              <span className="font-extrabold text-xs text-slate-200 uppercase tracking-wider whitespace-nowrap">
                 Kết Quả
               </span>
             </div>
@@ -160,8 +160,8 @@ export function BeamDatabaseStatusDemo() {
             containerRef={containerRef}
             fromRef={userRef}
             toRef={aiRef}
-            duration={3}
-            curvature={0.2}
+            duration={2.8}
+            curvature={0.15}
             gradientStartColor="#3b82f6"
             gradientStopColor="#8b5cf6"
           />
@@ -169,9 +169,9 @@ export function BeamDatabaseStatusDemo() {
             containerRef={containerRef}
             fromRef={aiRef}
             toRef={searchRef}
-            duration={3}
-            delay={0.5}
-            curvature={-0.3}
+            duration={2.8}
+            delay={0.4}
+            curvature={-0.25}
             gradientStartColor="#8b5cf6"
             gradientStopColor="#f59e0b"
           />
@@ -179,9 +179,9 @@ export function BeamDatabaseStatusDemo() {
             containerRef={containerRef}
             fromRef={searchRef}
             toRef={aiRef}
-            duration={3}
-            delay={1.5}
-            curvature={-0.3}
+            duration={2.8}
+            delay={1.4}
+            curvature={-0.25}
             reverse
             gradientStartColor="#f59e0b"
             gradientStopColor="#8b5cf6"
@@ -190,9 +190,9 @@ export function BeamDatabaseStatusDemo() {
             containerRef={containerRef}
             fromRef={aiRef}
             toRef={resultRef}
-            duration={3}
-            delay={2.5}
-            curvature={0.3}
+            duration={2.8}
+            delay={2.4}
+            curvature={0.25}
             gradientStartColor="#8b5cf6"
             gradientStopColor="#10b981"
           />

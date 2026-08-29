@@ -169,11 +169,11 @@ export const AnimatedBeam: React.FC<AnimatedBeamProps> = ({
       <motion.path
         d={pathD}
         stroke={`url(#${gradientId})`}
-        strokeWidth={pathWidth + 1.5}
+        strokeWidth={pathWidth + 2.5}
         strokeLinecap="round"
-        strokeDasharray="70 200"
-        initial={{ strokeDashoffset: reverse ? -270 : 270 }}
-        animate={{ strokeDashoffset: reverse ? 270 : -270 }}
+        strokeDasharray="160 360"
+        initial={{ strokeDashoffset: reverse ? -520 : 520 }}
+        animate={{ strokeDashoffset: reverse ? 520 : -520 }}
         transition={{
           duration,
           delay,
@@ -181,7 +181,7 @@ export const AnimatedBeam: React.FC<AnimatedBeamProps> = ({
           ease: 'linear',
         }}
         style={{
-          filter: `drop-shadow(0 0 6px ${gradientStopColor}) drop-shadow(0 0 12px ${gradientStartColor})`,
+          filter: `drop-shadow(0 0 8px ${gradientStopColor}) drop-shadow(0 0 16px ${gradientStartColor})`,
         }}
       />
 
