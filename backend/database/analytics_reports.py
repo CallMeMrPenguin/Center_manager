@@ -223,11 +223,10 @@ def get_analytics_reports(class_id: Optional[int] = None, student_id: Optional[i
 
     analytics_summary = calculate_performance_analytics(rows)
 
-    # Scoped rankings for the selected class/student
+    # Scoped rankings for the selected class
     scoped_rankings = [
         sr for sr in enriched_rankings
-        if (not class_id or sr.get("class_id") == class_id) and
-           (not student_id or sr.get("student_id") == student_id)
+        if (not class_id or sr.get("class_id") == class_id)
     ]
 
     return {

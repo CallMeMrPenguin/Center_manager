@@ -176,7 +176,7 @@ export function useStudentResults() {
         notes: r.notes || '',
       }));
       setRawRecords(recs);
-      setRawRankings(res.student_rankings || []);
+      setRawRankings(res.all_student_rankings || res.student_rankings || []);
       setAnalyticsEngine(res.analytics_summary || null);
     } catch (err) {
       console.error('Failed to load student grade records:', err);

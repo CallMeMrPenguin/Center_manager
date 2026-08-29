@@ -143,10 +143,20 @@ export const useOverviewStats = ({
 
     let rankStr = '-';
     if (selectedStudentId) {
-      const pool = (selectedClassId && studentRankings && studentRankings.length > 0
+      const rawPool = (selectedClassId && studentRankings && studentRankings.length > 0
         ? studentRankings.filter(r => String(r.class_id) === String(selectedClassId))
         : (studentRankings && studentRankings.length > 0 ? studentRankings : filteredRankings)
       ) || [];
+
+      // Deduplicate by student_id to ensure a clean unique ranking pool
+      const studentMap = new Map<string, any>();
+      rawPool.forEach(r => {
+        const sid = String(r.student_id || r.id);
+        if (!studentMap.has(sid)) {
+          studentMap.set(sid, r);
+        }
+      });
+      const pool = Array.from(studentMap.values());
 
       if (pool.length > 0) {
         const sorted = [...pool].sort((a, b) => {
