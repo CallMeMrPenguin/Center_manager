@@ -148,15 +148,15 @@ def get_class_attendance_grades(class_id: int, date_str: str) -> List[Dict[str, 
 
 def _parse_score(val: Any, is_present: bool = True) -> Optional[float]:
     if val is None or val == "" or val == "null" or val == "undefined":
-        return 0.0 if is_present else None
+        return None
     try:
         val_str = str(val).strip().replace(',', '.')
         if not val_str or val_str in ("null", "undefined", "none"):
-            return 0.0 if is_present else None
+            return None
         v = float(val_str)
         return max(0.0, min(10.0, v))
     except (ValueError, TypeError):
-        return 0.0 if is_present else None
+        return None
 
 def upsert_class_attendance_grades(class_id: int, date_str: str, records: List[Dict[str, Any]]):
     if not records:

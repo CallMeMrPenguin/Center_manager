@@ -2,7 +2,7 @@ import os
 import sys
 import sqlite3
 from typing import Dict, Any, List, Optional
-from datetime import datetime
+from datetime import datetime, timezone
 
 try:
     import psycopg2
@@ -55,10 +55,18 @@ def _parse_ts(val: Any) -> float:
     if isinstance(val, (int, float)):
         return float(val)
     if isinstance(val, datetime):
-        return val.timestamp()
+        if val.tzinfo is not None:
+            return val.timestamp()
+        return val.replace(tzinfo=timezone.utc).timestamp()
     try:
-        s = str(val).replace("T", " ").split("+")[0].split(".")[0]
-        return datetime.strptime(s, "%Y-%m-%d %H:%M:%S").timestamp()
+        s = str(val).strip().replace("T", " ")
+        if "+" in s:
+            return datetime.fromisoformat(s).timestamp()
+        elif s.endswith("Z"):
+            return datetime.fromisoformat(s[:-1]).replace(tzinfo=timezone.utc).timestamp()
+        else:
+            base = s.split(".")[0]
+            return datetime.strptime(base, "%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone.utc).timestamp()
     except Exception:
         return 0.0
 
@@ -169,7 +177,7 @@ def run_bidirectional_sync(force_full: bool = False) -> Dict[str, Any]:
                 cols = list(to_push[0].keys())
                 col_names = ", ".join(cols)
                 pk_names = ", ".join(pks)
-                update_cols = [c for c in cols if c not in pks]
+                update_cols = [c for c in cols if c not in pks and c != "id"]
                 
                 if update_cols:
                     update_clause = ", ".join([f"{c} = EXCLUDED.{c}" for c in update_cols])

@@ -250,6 +250,11 @@ def api_save_attendance(class_id: int, payload: Dict[str, Any]):
     if not date_str:
         raise HTTPException(status_code=400, detail="Thiếu ngày điểm danh")
     upsert_class_attendance_grades(class_id, date_str, records)
+    try:
+        from services.sync_worker import trigger_instant_sync
+        trigger_instant_sync()
+    except Exception:
+        pass
     return {"status": "success"}
 
 @router.delete("/api/classes/{class_id}/attendance")

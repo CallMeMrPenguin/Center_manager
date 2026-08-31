@@ -127,8 +127,8 @@ export function useClassDetail(selectedClass: ClassItem | null) {
         if (isAbsent) {
           return val !== null && val !== undefined && val !== '' ? String(val) : null;
         }
-        // If present and score is empty/null/blank -> default to 0
-        if (val === null || val === undefined || val === '') return '0';
+        // Missing / empty score should remain null, never default to '0' per Rule 8
+        if (val === null || val === undefined || val === '') return null;
         return String(val);
       };
 
