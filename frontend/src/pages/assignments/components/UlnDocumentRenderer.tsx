@@ -17,6 +17,7 @@ interface UlnDocumentRendererProps {
   answerKeys?: Record<string, string>;
   dailyLogs?: AssignmentDailyLog[];
   isSubmitted?: boolean;
+  showAnswerKeys?: boolean;
   onProgressUpdate?: (answered: number, total: number, sections: SectionProgressGroup[]) => void;
 }
 
@@ -26,6 +27,7 @@ export const UlnDocumentRenderer: React.FC<UlnDocumentRendererProps> = memo(({
   answerKeys = {},
   dailyLogs = [],
   isSubmitted = false,
+  showAnswerKeys = true,
   onProgressUpdate,
 }) => {
   const [answers, setAnswers] = useState<Record<string, string>>(initialAnswers || {});
@@ -343,6 +345,7 @@ export const UlnDocumentRenderer: React.FC<UlnDocumentRendererProps> = memo(({
               answers={answers}
               answerKeys={answerKeys}
               isSubmitted={isSubmitted}
+              showAnswerKeys={showAnswerKeys}
               onInputChange={handleInputChange}
               onSelectOption={handleSelectOption}
             />

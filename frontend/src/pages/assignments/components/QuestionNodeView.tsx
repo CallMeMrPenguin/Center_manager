@@ -10,6 +10,7 @@ interface QuestionNodeViewProps {
   answers: Record<string, string>;
   answerKeys?: Record<string, string>;
   isSubmitted?: boolean;
+  showAnswerKeys?: boolean;
   onInputChange: (key: string, val: string) => void;
   onSelectOption: (qKey: string, opt: string) => void;
 }
@@ -20,6 +21,7 @@ export const QuestionNodeView: React.FC<QuestionNodeViewProps> = memo(({
   answers,
   answerKeys = {},
   isSubmitted = false,
+  showAnswerKeys = true,
   onInputChange,
   onSelectOption,
 }) => {
@@ -43,30 +45,66 @@ export const QuestionNodeView: React.FC<QuestionNodeViewProps> = memo(({
             {node.qNum}.
           </span>
         )}
-        <div className="flex-1 space-y-1">
+        <div className="flex-1 space-y-1.5">
+          {/* Question Text */}
           {hasText && (
             <div className="text-xs sm:text-sm font-normal text-slate-900 leading-relaxed pt-0.5">
               <UlnInlineText text={node.text} qKey={qKey} answers={answers} onInputChange={onInputChange} isSubmitted={isSubmitted} />
             </div>
           )}
+
+          {/* Sub-Paragraphs (Letter, Arrangement, Dialogue Lines) */}
+          {node.subParagraphs && node.subParagraphs.length > 0 && (
+            <div className="space-y-1 py-1 text-xs sm:text-sm text-slate-800 font-normal bg-slate-50/50 p-2.5 rounded-xl border border-slate-200">
+              {node.subParagraphs.map((para, pIdx) => {
+                const isListItem = /^[a-z]\.\s/i.test(para.trim());
+                const isSalutation = /^(Dear|Yours sincerely|Sincerely|Best regards|Thanks|Customer:|Assistant:|Celine:|Steward:)/i.test(para.trim());
+                return (
+                  <div
+                    key={pIdx}
+                    className={`${
+                      isListItem
+                        ? 'pl-5 -indent-5 leading-relaxed font-normal text-slate-800'
+                        : isSalutation
+                        ? 'font-bold text-slate-900 italic py-0.5'
+                        : 'leading-relaxed text-slate-800'
+                    }`}
+                  >
+                    <UlnInlineText
+                      text={para}
+                      qKey={`${qKey}_para_${pIdx}`}
+                      answers={answers}
+                      onInputChange={onInputChange}
+                      isSubmitted={isSubmitted}
+                    />
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
           {node.subText && (
             <div className="text-xs sm:text-sm font-normal text-slate-800 pl-2 border-l-2 border-slate-400">
               <UlnInlineText text={node.subText} qKey={`${qKey}_sub`} answers={answers} onInputChange={onInputChange} isSubmitted={isSubmitted} />
             </div>
           )}
+
           {hasNoBlankOrOpts && (
             <div className="pt-1 flex items-center gap-2">
               <span className="text-xs font-bold text-slate-500">Trả lời:</span>
               <InlineInput inputKey={`${qKey}_direct`} initialVal={answers[`${qKey}_direct`] || ''} disabled={isSubmitted} onCommit={onInputChange} />
             </div>
           )}
+
           {node.hasWritingLine && (
             <div className="pt-0.5">
               <InlineInput inputKey={`${qKey}_write`} initialVal={answers[`${qKey}_write`] || ''} disabled={isSubmitted} onCommit={onInputChange} />
             </div>
           )}
+
+          {/* Multiple Choice Options */}
           {node.options && node.options.length > 0 && (
-            <div className={`grid ${optGridClass} gap-2 ${hasText ? 'pt-1.5' : 'pt-0'} font-normal`}>
+            <div className={`grid ${optGridClass} gap-2 ${hasText || (node.subParagraphs && node.subParagraphs.length > 0) ? 'pt-1.5' : 'pt-0'} font-normal`}>
               {node.options.map((opt, optIdx) => {
                 const optLetter = String.fromCharCode(65 + optIdx);
                 const cleanText = cleanOptionPrefix(opt);
@@ -90,45 +128,50 @@ export const QuestionNodeView: React.FC<QuestionNodeViewProps> = memo(({
                   : false;
 
                 let optClass = 'bg-white border-slate-300 text-slate-900 hover:bg-slate-50';
+                let circleClass = 'text-blue-700 bg-blue-100 group-hover:bg-blue-200';
                 let badgeLabel: React.ReactNode = null;
 
-                if (isSubmitted) {
+                if (isSubmitted && showAnswerKeys) {
                   if (isSelected && isKey) {
-                    optClass = 'bg-emerald-100/90 border-emerald-600 text-emerald-950 font-bold shadow-xs ring-1 ring-emerald-500';
-                    badgeLabel = <span className="ml-auto text-[10px] font-black px-2 py-0.5 rounded bg-emerald-600 text-white shrink-0">✓ Đúng</span>;
+                    optClass = 'bg-emerald-600 border-emerald-700 text-white font-bold shadow-sm ring-2 ring-emerald-400';
+                    circleClass = 'bg-white text-emerald-700 font-black';
+                    badgeLabel = <span className="ml-auto text-[10px] font-black px-2 py-0.5 rounded bg-emerald-800 text-white shrink-0">✓ Đúng</span>;
                   } else if (isSelected && !isKey) {
-                    optClass = 'bg-rose-100/90 border-rose-500 text-rose-950 font-bold shadow-xs ring-1 ring-rose-400';
-                    badgeLabel = <span className="ml-auto text-[10px] font-black px-2 py-0.5 rounded bg-rose-600 text-white shrink-0">✗ Sai</span>;
+                    optClass = 'bg-rose-600 border-rose-700 text-white font-bold shadow-sm ring-2 ring-rose-400';
+                    circleClass = 'bg-white text-rose-700 font-black';
+                    badgeLabel = <span className="ml-auto text-[10px] font-black px-2 py-0.5 rounded bg-rose-800 text-white shrink-0">✗ Sai</span>;
                   } else if (!isSelected && isKey) {
                     optClass = 'bg-emerald-50 border-2 border-dashed border-emerald-500 text-emerald-950 font-bold shadow-xs';
+                    circleClass = 'bg-emerald-200 text-emerald-900 font-black';
                     badgeLabel = <span className="ml-auto text-[10px] font-black px-2 py-0.5 rounded bg-emerald-700 text-white shrink-0">★ Key</span>;
                   }
                 } else if (isSelected) {
-                  optClass = 'bg-blue-50 border-blue-500 text-blue-950 font-bold shadow-xs';
+                  // User selected state: Vivid blue background with crisp pure white text
+                  optClass = 'bg-[#2563eb] border-[#1d4ed8] text-white font-bold shadow-md shadow-blue-500/25 ring-2 ring-blue-400';
+                  circleClass = 'bg-white text-[#1d4ed8] font-black';
                 }
 
                 return (
                   <button
                     key={optIdx}
                     type="button"
+                    disabled={isSubmitted}
                     onClick={() => onSelectOption(qKey, optLetter)}
-                    className={`text-left flex items-center gap-2 transition cursor-pointer py-1.5 px-2.5 rounded-lg border text-xs sm:text-sm group ${optClass}`}
+                    className={`text-left flex items-center gap-2 transition cursor-pointer py-2 px-3 rounded-xl border text-xs sm:text-sm group ${optClass}`}
                   >
                     <span
-                      className={`w-5 h-5 min-w-[20px] rounded-full flex items-center justify-center font-bold text-xs transition-colors shrink-0 ${
-                        isSelected && isSubmitted && !isKey
-                          ? 'bg-rose-600 text-white'
-                          : isKey && isSubmitted
-                          ? 'bg-emerald-600 text-white'
-                          : isSelected
-                          ? 'bg-blue-600 text-white'
-                          : 'text-blue-700 bg-blue-100 group-hover:bg-blue-200'
-                      }`}
+                      className={`w-6 h-6 min-w-[24px] rounded-full flex items-center justify-center font-bold text-xs transition-colors shrink-0 ${circleClass}`}
                     >
                       {optLetter}
                     </span>
                     <span className="flex-1 break-words leading-tight">
-                      <UlnInlineText text={cleanText} qKey={`${qKey}_opt_${optIdx}`} answers={answers} onInputChange={onInputChange} isSubmitted={isSubmitted} />
+                      <UlnInlineText
+                        text={cleanText}
+                        qKey={`${qKey}_opt_${optIdx}`}
+                        answers={answers}
+                        onInputChange={onInputChange}
+                        isSubmitted={isSubmitted}
+                      />
                     </span>
                     {badgeLabel}
                   </button>
@@ -138,7 +181,7 @@ export const QuestionNodeView: React.FC<QuestionNodeViewProps> = memo(({
           )}
 
           {/* Submission Answer vs Key Feedback Strip */}
-          {isSubmitted && keyForThisQ && (
+          {isSubmitted && showAnswerKeys && keyForThisQ && (
             <div className={`mt-2 p-2 rounded-xl border flex flex-wrap items-center justify-between gap-2 text-xs ${
               isQuestionCorrect
                 ? 'bg-emerald-50/90 border-emerald-300 text-emerald-950 font-medium'

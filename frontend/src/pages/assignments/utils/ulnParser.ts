@@ -297,6 +297,7 @@ export function parseUlnText(ulnText: string): UlnNode[] {
       const subParagraphs: string[] = [];
       let bracketHint: string | undefined;
       let hasWritingLine = false;
+      let qOptions: string[] | undefined;
 
       while (i + 1 < lines.length) {
         const nextLine = lines[i + 1].trim();
@@ -306,8 +307,13 @@ export function parseUlnText(ulnText: string): UlnNode[] {
           i++;
           continue;
         }
+        if (nextLine.startsWith('[OPT]')) {
+          const optStr = nextLine.replace('[OPT]', '').replace('[/OPT]', '').trim();
+          qOptions = optStr.split(/\s*\|\s*/).map((o) => o.trim()).filter(Boolean);
+          i++;
+          break;
+        }
         if (
-          nextLine.startsWith('[OPT]') ||
           nextLine.startsWith('[NUM]') ||
           nextLine.startsWith('[/NUM]') ||
           nextLine.startsWith('[H') ||
@@ -319,8 +325,16 @@ export function parseUlnText(ulnText: string): UlnNode[] {
         ) {
           break;
         }
-        if (nextLine.startsWith('[P1]') || nextLine.startsWith('[P2]') || nextLine.startsWith('→') || nextLine.startsWith('B:')) {
-          const cleanSub = nextLine.replace(/^\[P[1-2]\]\s*/, '').replace(/^#/, '').trim();
+        if (
+          nextLine.startsWith('[P') ||
+          nextLine.startsWith('→') ||
+          nextLine.startsWith('B:') ||
+          nextLine.startsWith('A:') ||
+          /^[a-z]\.\s/i.test(nextLine) ||
+          /^[a-z]\)\s/i.test(nextLine) ||
+          !nextLine.startsWith('[')
+        ) {
+          const cleanSub = nextLine.replace(/^\[P[0-9]\]\s*/, '').replace(/^#/, '').trim();
           if (cleanSub.includes('<blank>') || cleanSub.startsWith('→') || cleanSub.startsWith('B:')) {
             subText = cleanSub;
           } else {
@@ -339,6 +353,7 @@ export function parseUlnText(ulnText: string): UlnNode[] {
         type: 'question',
         qNum,
         text: qText,
+        options: qOptions,
         subText,
         subParagraphs: subParagraphs.length > 0 ? subParagraphs : undefined,
         bracketHint,

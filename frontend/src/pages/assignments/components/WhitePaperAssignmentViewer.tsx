@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import ReactDOM from 'react-dom';
-import { ArrowLeft, Award, Save, Maximize2, Minimize2, ChevronRight, PenTool, KeyRound, RefreshCw, Layers } from 'lucide-react';
+import { ArrowLeft, Award, Save, Maximize2, Minimize2, PenTool, KeyRound, RefreshCw, Layers, ShieldCheck, Clock } from 'lucide-react';
 import { Assignment, AssignmentDailyLog, AssignmentQuizConfig } from '../types';
 import { ExerciseItem } from './types';
 import { WhitePaperHeader } from './WhitePaperHeader';
@@ -9,6 +9,7 @@ import { UlnDocumentRenderer, SectionProgressGroup } from './UlnDocumentRenderer
 import { DrawingCorrectionCanvas } from './DrawingCorrectionCanvas';
 import { ExamWarningModal } from './ExamWarningModal';
 import { ExamTimerHeader } from './ExamTimerHeader';
+import { ExamSidebarProgress } from './ExamSidebarProgress';
 import { useExamProctoring } from '../hooks/useExamProctoring';
 import { parseUlnContent } from '../utils/ulnParser';
 import { filterNodesByAssignedSections } from '../utils/ulnSectionExtractor';
@@ -69,6 +70,22 @@ export const WhitePaperAssignmentViewer: React.FC<WhitePaperAssignmentViewerProp
   const assignmentType = quizConfig.assignment_type || 'homework_1';
   const isTimedExam = assignmentType === 'homework_2' && !!quizConfig.time_limit_minutes && !isPreview && !isReviewMode;
   const isMaxAttemptsReached = !!quizConfig.max_attempts && quizConfig.max_attempts > 0 && submissionCount >= quizConfig.max_attempts;
+
+  // Answer Key visibility rule:
+  // - Teacher preview / review: always visible
+  // - Practice mode: immediately visible after submitting
+  // - Homework 1 / Homework 2: only revealed on the next day / past due date
+  const canShowAnswers = useMemo(() => {
+    if (isPreview || isReviewMode) return true;
+    if (assignmentType === 'practice') return isSubmitted;
+    if (isSubmitted) {
+      const todayStr = new Date().toISOString().slice(0, 10);
+      const isPastDueDate = !!assignment.due_date && todayStr > assignment.due_date;
+      const isPastAssignedDate = !!assignment.assigned_date && todayStr > assignment.assigned_date;
+      return isPastDueDate || isPastAssignedDate;
+    }
+    return false;
+  }, [isPreview, isReviewMode, assignmentType, isSubmitted, assignment.due_date, assignment.assigned_date]);
 
   // Anti-cheat Proctoring: strictly enabled for student homework_2 exams
   const {
@@ -158,12 +175,12 @@ export const WhitePaperAssignmentViewer: React.FC<WhitePaperAssignmentViewerProp
 
     const typeMsg =
       assignmentType === 'homework_2'
-        ? ' (Đã lưu điểm vào Homework 2)'
+        ? ' (Đã lưu điểm vào BTVN 2)'
         : assignmentType === 'homework_1'
-        ? ' (Đã lưu điểm vào Homework 1)'
+        ? ' (Đã lưu điểm vào BTVN 1)'
         : ' (Bài Ôn Luyện)';
 
-    showToast(`Đã nộp bài thành công! Điểm: ${score}/10.0 (Làm ${answered}/${total} câu)${typeMsg}`, 'success');
+    showToast(`Đã nộp bài thành công! Điểm: ${score}/10.0${typeMsg}`, 'success');
     if (onSubmitSuccess) onSubmitSuccess(score);
   };
 
@@ -236,7 +253,7 @@ export const WhitePaperAssignmentViewer: React.FC<WhitePaperAssignmentViewerProp
           )}
 
           {/* Retry Wrong Questions Mode (Practice Only) */}
-          {assignmentType === 'practice' && isSubmitted && (
+          {assignmentType === 'practice' && isSubmitted && canShowAnswers && (
             <button
               type="button"
               onClick={() => setRetryWrongOnly(!retryWrongOnly)}
@@ -292,7 +309,7 @@ export const WhitePaperAssignmentViewer: React.FC<WhitePaperAssignmentViewerProp
             </div>
           )}
 
-          {!isReviewMode && (
+          {!isReviewMode && !isSubmitted && (
             <button
               type="button"
               onClick={handleSubmit}
@@ -300,7 +317,7 @@ export const WhitePaperAssignmentViewer: React.FC<WhitePaperAssignmentViewerProp
               className="flex items-center gap-1.5 px-5 py-2 rounded-xl bg-[#5c36f5] hover:bg-[#6c48f7] disabled:opacity-40 text-white text-xs font-black shadow-[0_0_15px_rgba(92,54,245,0.4)] transition cursor-pointer active:scale-95"
             >
               <Save size={14} />
-              <span>{isSubmitted ? 'Nộp Lại' : 'Nộp Bài'}</span>
+              <span>Nộp Bài</span>
             </button>
           )}
         </div>
@@ -309,60 +326,29 @@ export const WhitePaperAssignmentViewer: React.FC<WhitePaperAssignmentViewerProp
       {/* 2. DUAL-PANE LAYOUT: SIDEBAR ON LEFT TIGHTLY ADJACENT TO EXAM SHEET */}
       <div className="max-w-6xl mx-auto flex flex-col lg:flex-row items-start justify-center gap-4 w-full">
         {/* Left Question Navigation Sidebar */}
-        <div className="w-full lg:w-72 lg:sticky lg:top-20 shrink-0 space-y-3">
-          <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-xl text-slate-900 space-y-3.5">
-            <div className="flex items-center justify-between border-b border-slate-200 pb-2.5">
-              <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider">
-                Tiến Độ Làm Bài
-              </h4>
-              <span className="text-xs font-mono font-bold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">
-                {progress.answered}/{progress.total || 10} ({pct}%)
-              </span>
-            </div>
-
-            {/* Progress Bar */}
-            <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden p-0.5 border border-slate-200">
-              <div
-                className="bg-emerald-500 h-full rounded-full transition-all duration-300 shadow-xs"
-                style={{ width: `${pct}%` }}
-              />
-            </div>
-
-            {/* Question Quick-Jump Grid */}
-            <div className="max-h-[65vh] overflow-y-auto pr-1 space-y-3 scrollbar-thin">
-              {progress.sections.map((sec) => (
-                <div key={sec.id} className="space-y-1.5">
-                  <div className="text-[11px] font-black text-slate-700 flex items-center gap-1">
-                    <ChevronRight size={12} className="shrink-0 mt-0.5 text-indigo-500" />
-                    <span className="truncate">{sec.title}</span>
-                  </div>
-                  <div className="grid grid-cols-5 gap-1.5">
-                    {sec.items.map((item) => (
-                      <button
-                        key={item.id}
-                        type="button"
-                        onClick={() => {
-                          const el = document.getElementById(item.id);
-                          if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                        }}
-                        className={`py-1.5 rounded-lg text-xs font-bold font-mono transition cursor-pointer border ${
-                          item.isAnswered
-                            ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs'
-                            : 'bg-slate-100 hover:bg-indigo-50 hover:border-indigo-300 text-slate-700 border-slate-200'
-                        }`}
-                      >
-                        {item.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
+        <ExamSidebarProgress
+          answered={progress.answered}
+          total={progress.total || 10}
+          pct={pct}
+          sections={progress.sections}
+        />
 
         {/* Right A4 Paper Test View */}
         <div className={`flex-1 ${isFullscreen ? 'max-w-[1020px]' : 'max-w-[850px]'} w-full space-y-4 transition-all duration-200`}>
+          {/* Post-submission Next-Day Notice for Homework Mode */}
+          {isSubmitted && !canShowAnswers && !isPreview && !isReviewMode && (
+            <div className="p-3.5 rounded-2xl bg-indigo-950/80 border border-indigo-500/40 text-indigo-200 text-xs flex items-center gap-2.5 shadow-lg">
+              <ShieldCheck size={18} className="text-indigo-400 shrink-0" />
+              <div className="flex-1">
+                <strong className="text-white">Đã nộp bài thành công (Điểm: {finalScore}/10.0)!</strong>
+                <p className="text-indigo-300/80 mt-0.5 flex items-center gap-1">
+                  <Clock size={12} />
+                  <span>Đáp án chi tiết & giải thích sẽ tự động hiển thị vào ngày mai (hoặc sau hạn nộp bài).</span>
+                </p>
+              </div>
+            </div>
+          )}
+
           <div className="white-paper-container relative w-full bg-white text-slate-900 rounded-none shadow-[0_20px_50px_rgba(0,0,0,0.4)] border border-slate-300 p-6 sm:p-12 min-h-[1100px] flex flex-col justify-between font-sans">
             <DrawingCorrectionCanvas
               isActive={isCorrectionMode}
@@ -388,6 +374,7 @@ export const WhitePaperAssignmentViewer: React.FC<WhitePaperAssignmentViewerProp
                   answerKeys={answerKeys}
                   dailyLogs={dailyLogs}
                   isSubmitted={isSubmitted}
+                  showAnswerKeys={canShowAnswers}
                   onProgressUpdate={(ans, tot, secs) => {
                     setProgress({ answered: ans, total: tot, sections: secs });
                   }}

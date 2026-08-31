@@ -84,7 +84,7 @@ export const UlnInlineText: React.FC<UlnInlineTextProps> = memo(({
   if (cleanText.includes('<blank>')) {
     const parts = cleanText.split('<blank>');
     return (
-      <span className="text-slate-900">
+      <span>
         {parts.map((p, idx) => {
           const blankKey = `${qKey}_blank_${idx}`;
           const currentVal = answers[blankKey] || '';
@@ -117,9 +117,9 @@ export const UlnInlineText: React.FC<UlnInlineTextProps> = memo(({
   const numStartMatch = cleanText.match(/^([0-9]+)\.\s*(.*)/);
   if (numStartMatch) {
     return (
-      <span className="inline-flex items-baseline gap-1 text-slate-900">
+      <span className="inline-flex items-baseline gap-1">
         <span className="text-rose-600 font-bold shrink-0">{numStartMatch[1]}.</span>
-        <span className="text-slate-900">
+        <span>
           <UlnInlineText
             text={numStartMatch[2]}
             qKey={`${qKey}_tail`}
@@ -136,9 +136,9 @@ export const UlnInlineText: React.FC<UlnInlineTextProps> = memo(({
   const letterStartMatch = cleanText.match(/^([a-zA-Z])\.\s*(.*)/);
   if (letterStartMatch) {
     return (
-      <span className="inline-flex items-baseline gap-1 text-slate-900">
+      <span className="inline-flex items-baseline gap-1">
         <span className="text-blue-600 font-bold shrink-0">{letterStartMatch[1]}.</span>
-        <span className="text-slate-900">
+        <span>
           <UlnInlineText
             text={letterStartMatch[2]}
             qKey={`${qKey}_tail`}
