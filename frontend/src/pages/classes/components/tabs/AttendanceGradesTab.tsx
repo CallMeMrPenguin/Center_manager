@@ -118,12 +118,25 @@ export const AttendanceGradesTab: React.FC<AttendanceGradesTabProps> = ({
       },
       {
         accessorKey: 'homework',
-        header: 'Homework',
+        header: 'BTVN 1',
         cell: ({ row }) => (
           <CheckScoreInput
             rec={row.original}
             rowIndex={row.index}
             field="homework"
+            onUpdateRecord={onUpdateRecord}
+            parseAndFormatScore={parseAndFormatScore}
+          />
+        ),
+      },
+      {
+        accessorKey: 'homework_2',
+        header: 'BTVN 2',
+        cell: ({ row }) => (
+          <CheckScoreInput
+            rec={row.original}
+            rowIndex={row.index}
+            field="homework_2"
             onUpdateRecord={onUpdateRecord}
             parseAndFormatScore={parseAndFormatScore}
           />

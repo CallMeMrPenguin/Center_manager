@@ -17,7 +17,7 @@ export async function exportRankingsExcel({
     const ExcelJS = (await import('exceljs')).default;
     const workbook = new ExcelJS.Workbook();
     // Headers without Rank ('Hạng') column
-    const headers = ['STT', 'Họ và Tên', 'Lớp Học', 'Buổi Học', 'Điểm Danh %', 'Từ Vựng', 'Ngữ Pháp', 'BTVN', 'Đánh Giá'];
+    const headers = ['STT', 'Họ và Tên', 'Lớp Học', 'Buổi Học', 'Điểm Danh %', 'Từ Vựng', 'Ngữ Pháp', 'BTVN 1', 'BTVN 2', 'Đánh Giá'];
 
     const addClassSheet = (sheetName: string, items: any[]) => {
       const safeName = sheetName.replace(/[\*\?:\/\\\[\]]/g, '').slice(0, 31) || 'Lớp';
@@ -29,7 +29,8 @@ export async function exportRankingsExcel({
         const pct = total > 0 ? Math.round((present / total) * 100) : 100;
         const c1 = Number(r.avg_vocab ?? r.avg_check_1 ?? 0);
         const c2 = Number(r.avg_grammar ?? r.avg_check_2 ?? 0);
-        const hw = Number(r.avg_homework || 0);
+        const hw = Number(r.avg_homework ?? r.avg_homework_1 ?? 0);
+        const hw2 = Number(r.avg_homework_2 ?? 0);
         const avg = computeStudentOverallScore(r);
         let evalStr = 'Chưa có điểm';
         if (avg > 0) {
@@ -46,6 +47,7 @@ export async function exportRankingsExcel({
           c1 > 0 ? format1Dec(c1) : '-',
           c2 > 0 ? format1Dec(c2) : '-',
           hw > 0 ? format1Dec(hw) : '-',
+          hw2 > 0 ? format1Dec(hw2) : '-',
           evalStr
         ];
       });

@@ -24,6 +24,7 @@ def run_migrations(cursor: sqlite3.Cursor, conn: sqlite3.Connection):
         ("classes", "color TEXT DEFAULT '#7c3aed'"),
         ("class_sessions", "color TEXT DEFAULT NULL"),
         ("class_attendance_grades", "mock_test REAL DEFAULT NULL"),
+        ("class_attendance_grades", "homework_2 REAL DEFAULT NULL"),
         ("class_seating", "rows INTEGER DEFAULT 4"),
         ("class_seating", "cols INTEGER DEFAULT 6"),
         ("class_seating", "snapshot_name TEXT DEFAULT 'Bản chính'"),

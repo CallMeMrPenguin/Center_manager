@@ -21,6 +21,7 @@ export const EditGradeModal: React.FC<EditGradeModalProps> = ({
   const [editCheck1, setEditCheck1] = useState<string>('');
   const [editCheck2, setEditCheck2] = useState<string>('');
   const [editHomework, setEditHomework] = useState<string>('');
+  const [editHomework2, setEditHomework2] = useState<string>('');
   const [editMockTest, setEditMockTest] = useState<string>('');
   const [editNotes, setEditNotes] = useState<string>('');
   const [saving, setSaving] = useState(false);
@@ -31,6 +32,7 @@ export const EditGradeModal: React.FC<EditGradeModalProps> = ({
       setEditCheck1(record.check_1 !== null && record.check_1 !== undefined && Number(record.check_1) > 0 ? String(record.check_1) : '');
       setEditCheck2(record.check_2 !== null && record.check_2 !== undefined && Number(record.check_2) > 0 ? String(record.check_2) : '');
       setEditHomework(record.homework !== null && record.homework !== undefined && Number(record.homework) > 0 ? String(record.homework) : '');
+      setEditHomework2(record.homework_2 !== null && record.homework_2 !== undefined && Number(record.homework_2) > 0 ? String(record.homework_2) : '');
       setEditMockTest(record.mock_test !== null && record.mock_test !== undefined && Number(record.mock_test) > 0 ? String(record.mock_test) : '');
       setEditNotes(record.notes || '');
     }
@@ -45,6 +47,7 @@ export const EditGradeModal: React.FC<EditGradeModalProps> = ({
       const c1 = editCheck1.trim() !== '' ? Math.max(0, Math.min(10, parseFloat(editCheck1.replace(',', '.')) || 0)) : null;
       const c2 = editCheck2.trim() !== '' ? Math.max(0, Math.min(10, parseFloat(editCheck2.replace(',', '.')) || 0)) : null;
       const hw = editHomework.trim() !== '' ? Math.max(0, Math.min(10, parseFloat(editHomework.replace(',', '.')) || 0)) : null;
+      const hw2 = editHomework2.trim() !== '' ? Math.max(0, Math.min(10, parseFloat(editHomework2.replace(',', '.')) || 0)) : null;
       const mock = editMockTest.trim() !== '' ? Math.max(0, Math.min(10, parseFloat(editMockTest.replace(',', '.')) || 0)) : null;
 
       await api.saveClassAttendance(record.class_id, record.date, [{
@@ -53,6 +56,7 @@ export const EditGradeModal: React.FC<EditGradeModalProps> = ({
         check_1: c1 ?? null,
         check_2: c2 ?? null,
         homework: hw ?? null,
+        homework_2: hw2 ?? null,
         mock_test: mock ?? null,
         notes: editNotes,
       }]);
@@ -126,10 +130,10 @@ export const EditGradeModal: React.FC<EditGradeModalProps> = ({
             </div>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
             <div>
               <label className="block text-[11px] font-extrabold text-blue-400 uppercase tracking-wider mb-1">
-                {record.check_1_skill === 'grammar' ? 'Check 1 (Ngữ Pháp)' : record.check_1_skill === 'vocab' ? 'Check 1 (Từ Vựng)' : 'Check 1'}
+                {record.check_1_skill === 'grammar' ? 'Check 1 (NP)' : record.check_1_skill === 'vocab' ? 'Check 1 (TV)' : 'Check 1'}
               </label>
               <input
                 type="text"
@@ -142,7 +146,7 @@ export const EditGradeModal: React.FC<EditGradeModalProps> = ({
 
             <div>
               <label className="block text-[11px] font-extrabold text-purple-400 uppercase tracking-wider mb-1">
-                {record.check_2_skill === 'vocab' ? 'Check 2 (Từ Vựng)' : record.check_2_skill === 'grammar' ? 'Check 2 (Ngữ Pháp)' : 'Check 2'}
+                {record.check_2_skill === 'vocab' ? 'Check 2 (TV)' : record.check_2_skill === 'grammar' ? 'Check 2 (NP)' : 'Check 2'}
               </label>
               <input
                 type="text"
@@ -155,7 +159,7 @@ export const EditGradeModal: React.FC<EditGradeModalProps> = ({
 
             <div>
               <label className="block text-[11px] font-extrabold text-emerald-400 uppercase tracking-wider mb-1">
-                BTVN
+                BTVN 1
               </label>
               <input
                 type="text"
@@ -163,6 +167,19 @@ export const EditGradeModal: React.FC<EditGradeModalProps> = ({
                 value={editHomework}
                 onChange={(e) => setEditHomework(e.target.value)}
                 className="w-full bg-[#161c30] border border-emerald-500/30 rounded-xl px-3 py-2 text-xs font-mono font-extrabold text-white focus:outline-none focus:border-emerald-400"
+              />
+            </div>
+
+            <div>
+              <label className="block text-[11px] font-extrabold text-teal-400 uppercase tracking-wider mb-1">
+                BTVN 2
+              </label>
+              <input
+                type="text"
+                placeholder="0.0"
+                value={editHomework2}
+                onChange={(e) => setEditHomework2(e.target.value)}
+                className="w-full bg-[#161c30] border border-teal-500/30 rounded-xl px-3 py-2 text-xs font-mono font-extrabold text-white focus:outline-none focus:border-teal-400"
               />
             </div>
 

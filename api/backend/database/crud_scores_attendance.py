@@ -227,19 +227,21 @@ def upsert_class_attendance_grades(class_id: int, date_str: str, records: List[D
             c1 = _parse_score(rec.get("check_1"), is_present=is_present)
             c2 = _parse_score(rec.get("check_2"), is_present=is_present)
             hw = _parse_score(rec.get("homework"), is_present=is_present)
+            hw2 = _parse_score(rec.get("homework_2"), is_present=is_present)
             mock = _parse_score(rec.get("mock_test"), is_present=is_present)
 
-            batch_data.append((class_id, student_id, date_str, status, c1, c2, hw, mock, notes))
+            batch_data.append((class_id, student_id, date_str, status, c1, c2, hw, hw2, mock, notes))
 
         if batch_data:
             cursor.executemany("""
-                INSERT INTO class_attendance_grades (class_id, student_id, date, status, check_1, check_2, homework, mock_test, notes)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO class_attendance_grades (class_id, student_id, date, status, check_1, check_2, homework, homework_2, mock_test, notes)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 ON CONFLICT(class_id, student_id, date) DO UPDATE SET
                     status = EXCLUDED.status,
                     check_1 = EXCLUDED.check_1,
                     check_2 = EXCLUDED.check_2,
                     homework = EXCLUDED.homework,
+                    homework_2 = EXCLUDED.homework_2,
                     mock_test = EXCLUDED.mock_test,
                     notes = EXCLUDED.notes,
                     updated_at = CURRENT_TIMESTAMP

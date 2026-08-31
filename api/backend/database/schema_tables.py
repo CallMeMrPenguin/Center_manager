@@ -222,6 +222,7 @@ def create_all_tables(cursor: sqlite3.Cursor):
         check_1 REAL DEFAULT NULL,
         check_2 REAL DEFAULT NULL,
         homework REAL DEFAULT NULL,
+        homework_2 REAL DEFAULT NULL,
         notes TEXT,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         UNIQUE(class_id, student_id, date)

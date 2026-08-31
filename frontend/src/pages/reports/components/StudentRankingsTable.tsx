@@ -223,12 +223,13 @@ export const StudentRankingsTable: React.FC<StudentRankingsTableProps> = React.m
       cell: ({ row }) => {
         const r = row.original;
         const sSessions = (studentSessionsMap[r.student_id] || [])
-          .filter(sess => Number(sess.check_1) > 0 || Number(sess.check_2) > 0 || Number(sess.homework) > 0);
+          .filter(sess => Number(sess.check_1) > 0 || Number(sess.check_2) > 0 || Number(sess.homework) > 0 || Number(sess.homework_2) > 0);
         const recentScores = sSessions.slice(-5).map(sess => {
           const c1 = Number(sess.check_1 || 0);
           const c2 = Number(sess.check_2 || 0);
           const hw = Number(sess.homework || 0);
-          const valid = [c1, c2, hw].filter(v => v > 0);
+          const hw2 = Number(sess.homework_2 || 0);
+          const valid = [c1, c2, hw, hw2].filter(v => v > 0);
           return valid.length > 0 ? valid.reduce((a, b) => a + b, 0) / valid.length : 0;
         }).filter(v => v > 0);
         const slope = Number(r.trend_slope || 0);

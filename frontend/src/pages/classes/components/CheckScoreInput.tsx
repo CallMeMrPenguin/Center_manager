@@ -4,12 +4,12 @@ import { format1Dec } from '../../../utils';
 interface CheckScoreInputProps {
   rec: any;
   rowIndex?: number;
-  field: 'check_1' | 'check_2' | 'homework' | 'mock_test';
+  field: 'check_1' | 'check_2' | 'homework' | 'homework_2' | 'mock_test';
   onUpdateRecord: (studentId: number, field: string, value: any) => void;
   parseAndFormatScore: (val: any) => string;
 }
 
-const SCORE_FIELDS = ['check_1', 'check_2', 'homework', 'mock_test'] as const;
+const SCORE_FIELDS = ['check_1', 'check_2', 'homework', 'homework_2', 'mock_test'] as const;
 
 const focusTarget = (target: HTMLInputElement | null | undefined) => {
   if (!target) return;

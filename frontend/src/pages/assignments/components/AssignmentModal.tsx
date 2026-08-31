@@ -1,13 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { X, Trash2, Save, BookOpen, Upload, Sparkles, CheckCircle, FileText } from 'lucide-react';
 import { api } from '../../../api';
 import { showToast } from '../../../components/Toast';
 import { CustomSelect, SelectOption } from '../../../components/CustomSelect';
 import { CustomDatePicker } from '../../../components/CustomDatePicker';
-import { Assignment } from '../types';
+import { Assignment, AssignmentType } from '../types';
 import { SAMPLE_UNIT12_ULN_TEXT } from '../constants/sampleUlnTest';
 import { parseUlnContent } from '../utils/ulnParser';
+import { extractUlnSections } from '../utils/ulnSectionExtractor';
 import { PromptTemplateModal } from './PromptTemplateModal';
+import { AssignmentTypeConfigSelector } from './AssignmentTypeConfigSelector';
+import { SectionScopeSelector } from './SectionScopeSelector';
 
 interface AssignmentModalProps {
   isOpen: boolean;
@@ -34,10 +37,24 @@ export const AssignmentModal: React.FC<AssignmentModalProps> = ({
   const [maxScore, setMaxScore] = useState<number>(10);
   const [contentJson, setContentJson] = useState<string>('');
   const [questionCount, setQuestionCount] = useState<number>(0);
+
+  // New features: 3 assignment types & section scope limiter
+  const [assignmentType, setAssignmentType] = useState<AssignmentType>('homework_1');
+  const [timeLimit, setTimeLimit] = useState<number | null>(null);
+  const [maxAttempts, setMaxAttempts] = useState<number>(1);
+  const [proctoringEnabled, setProctoringEnabled] = useState<boolean>(false);
+  const [selectedSectionIds, setSelectedSectionIds] = useState<number[]>([]);
+
   const [showPromptModal, setShowPromptModal] = useState<boolean>(false);
   const [saving, setSaving] = useState<boolean>(false);
   const [deleting, setDeleting] = useState<boolean>(false);
   const [uploading, setUploading] = useState<boolean>(false);
+
+  // Derived sections
+  const sections = useMemo(() => {
+    const nodes = parseUlnContent(contentJson);
+    return extractUlnSections(nodes);
+  }, [contentJson]);
 
   useEffect(() => {
     if (assignment) {
@@ -48,8 +65,33 @@ export const AssignmentModal: React.FC<AssignmentModalProps> = ({
       setDueDate(assignment.due_date);
       setMaxScore(assignment.max_score || 10);
       setContentJson(assignment.content_json || '');
+
       const parsed = parseUlnContent(assignment.content_json || '');
       setQuestionCount(parsed.filter((n) => n.type === 'question').length);
+
+      if (assignment.quiz_config) {
+        try {
+          const cfg = JSON.parse(assignment.quiz_config);
+          setAssignmentType(cfg.assignment_type || 'homework_1');
+          setTimeLimit(cfg.time_limit_minutes ?? null);
+          setMaxAttempts(cfg.max_attempts ?? 1);
+          setProctoringEnabled(cfg.proctoring_enabled ?? false);
+          if (Array.isArray(cfg.assigned_sections) && cfg.assigned_sections.length > 0) {
+            setSelectedSectionIds(cfg.assigned_sections);
+          } else {
+            const secs = extractUlnSections(parsed);
+            setSelectedSectionIds(secs.map((s) => s.id));
+          }
+        } catch {
+          setAssignmentType('homework_1');
+          const secs = extractUlnSections(parsed);
+          setSelectedSectionIds(secs.map((s) => s.id));
+        }
+      } else {
+        setAssignmentType('homework_1');
+        const secs = extractUlnSections(parsed);
+        setSelectedSectionIds(secs.map((s) => s.id));
+      }
     } else {
       const today = new Date().toISOString().slice(0, 10);
       const nextWeek = new Date(Date.now() + 7 * 86400000).toISOString().slice(0, 10);
@@ -62,8 +104,20 @@ export const AssignmentModal: React.FC<AssignmentModalProps> = ({
       setMaxScore(10);
       setContentJson('');
       setQuestionCount(0);
+      setAssignmentType('homework_1');
+      setTimeLimit(null);
+      setMaxAttempts(1);
+      setProctoringEnabled(false);
+      setSelectedSectionIds([]);
     }
   }, [assignment, classes, defaultClassId, isOpen]);
+
+  // Keep selected sections synced when sections change in new assignment mode
+  useEffect(() => {
+    if (!assignment && sections.length > 0 && selectedSectionIds.length === 0) {
+      setSelectedSectionIds(sections.map((s) => s.id));
+    }
+  }, [sections, assignment]);
 
   if (!isOpen) return null;
 
@@ -81,9 +135,11 @@ export const AssignmentModal: React.FC<AssignmentModalProps> = ({
         const nodes = parseUlnContent(text);
         const qCount = nodes.filter((n) => n.type === 'question').length;
         setQuestionCount(qCount);
+        const secs = extractUlnSections(nodes);
+        setSelectedSectionIds(secs.map((s) => s.id));
         if (!title.trim()) {
           const h1Node = nodes.find((n) => n.type === 'h1');
-          setTitle((h1Node && 'text' in h1Node ? h1Node.text : '') || file.name.replace(/\.[^/.]+$/, ''));
+          setTitle((h1Node && 'text' in h1Node ? (h1Node as any).text : '') || file.name.replace(/\.[^/.]+$/, ''));
         }
         showToast(`Đã nạp file với ${qCount} câu hỏi!`, 'success');
       } else {
@@ -101,6 +157,8 @@ export const AssignmentModal: React.FC<AssignmentModalProps> = ({
     const nodes = parseUlnContent(SAMPLE_UNIT12_ULN_TEXT);
     const qCount = nodes.filter((n) => n.type === 'question').length;
     setQuestionCount(qCount);
+    const secs = extractUlnSections(nodes);
+    setSelectedSectionIds(secs.map((s) => s.id));
     if (!title) setTitle('Unit 12: English-Speaking Countries (Standard Test)');
     showToast(`Đã nạp đề mẫu với ${qCount} câu hỏi!`, 'success');
   };
@@ -109,6 +167,14 @@ export const AssignmentModal: React.FC<AssignmentModalProps> = ({
     setContentJson(val);
     const nodes = parseUlnContent(val);
     setQuestionCount(nodes.filter((n) => n.type === 'question').length);
+    const secs = extractUlnSections(nodes);
+    setSelectedSectionIds(secs.map((s) => s.id));
+  };
+
+  const handleToggleSection = (secId: number) => {
+    setSelectedSectionIds((prev) =>
+      prev.includes(secId) ? prev.filter((id) => id !== secId) : [...prev, secId]
+    );
   };
 
   const handleSave = async (e: React.FormEvent) => {
@@ -118,8 +184,21 @@ export const AssignmentModal: React.FC<AssignmentModalProps> = ({
       return;
     }
 
+    if (sections.length > 0 && selectedSectionIds.length === 0) {
+      showToast('Vui lòng chọn ít nhất 1 bài tập trong đề để giao!', 'warning');
+      return;
+    }
+
     setSaving(true);
     try {
+      const quizConfig = {
+        assignment_type: assignmentType,
+        assigned_sections: selectedSectionIds.length === sections.length ? [] : selectedSectionIds,
+        time_limit_minutes: assignmentType === 'homework_2' ? timeLimit : null,
+        max_attempts: assignmentType === 'homework_2' ? maxAttempts : 0,
+        proctoring_enabled: assignmentType === 'homework_2' ? proctoringEnabled : false,
+      };
+
       const payload = {
         class_id: classId,
         title: title.trim(),
@@ -128,6 +207,7 @@ export const AssignmentModal: React.FC<AssignmentModalProps> = ({
         due_date: dueDate,
         max_score: maxScore,
         content_json: contentJson.trim(),
+        quiz_config: JSON.stringify(quizConfig),
       };
 
       if (assignment) {
@@ -173,9 +253,9 @@ export const AssignmentModal: React.FC<AssignmentModalProps> = ({
               </div>
               <div>
                 <h2 className="text-base font-black text-white">
-                  {assignment ? 'Chỉnh Sửa Bài Tập Về Nhà' : 'Giao Bài Tập Về Nhà Mới'}
+                  {assignment ? 'Chỉnh Sửa Bài Tập' : 'Giao Bài Tập Mới'}
                 </h2>
-                <p className="text-xs text-slate-400 mt-0.5">Quản lý nội dung đề thi, hạn nộp và lớp áp dụng</p>
+                <p className="text-xs text-slate-400 mt-0.5">Quản lý nội dung đề, kiểu bài, phạm vi giao và lớp áp dụng</p>
               </div>
             </div>
             <button
@@ -230,8 +310,20 @@ export const AssignmentModal: React.FC<AssignmentModalProps> = ({
               />
             </div>
 
-            {/* Content ULN / Textarea (Always Open By Default) */}
-            <div className="space-y-2 pt-1 border-t border-white/10">
+            {/* 3 Assignment Types Selector */}
+            <AssignmentTypeConfigSelector
+              assignmentType={assignmentType}
+              onChangeAssignmentType={setAssignmentType}
+              timeLimit={timeLimit}
+              onChangeTimeLimit={setTimeLimit}
+              maxAttempts={maxAttempts}
+              onChangeMaxAttempts={setMaxAttempts}
+              proctoringEnabled={proctoringEnabled}
+              onChangeProctoring={setProctoringEnabled}
+            />
+
+            {/* Content ULN / Textarea */}
+            <div className="space-y-2 pt-2 border-t border-white/10">
               <div className="flex items-center justify-between gap-2 flex-wrap">
                 <label className="text-xs font-bold text-slate-300">Nội Dung Đề Bài (ULN Format)</label>
                 <div className="flex items-center gap-3">
@@ -241,7 +333,7 @@ export const AssignmentModal: React.FC<AssignmentModalProps> = ({
                     className="flex items-center gap-1 text-[11px] font-bold text-amber-400 hover:text-amber-300 transition cursor-pointer"
                   >
                     <FileText size={12} />
-                    <span>Mẫu Prompt AI / OCR</span>
+                    <span>Mẫu Prompt AI</span>
                   </button>
                   <button
                     type="button"
@@ -249,36 +341,45 @@ export const AssignmentModal: React.FC<AssignmentModalProps> = ({
                     className="flex items-center gap-1 text-[11px] font-bold text-indigo-400 hover:text-indigo-300 transition cursor-pointer"
                   >
                     <Sparkles size={12} />
-                    <span>Nạp Đề Mẫu Toàn Diện</span>
+                    <span>Nạp Đề Mẫu</span>
                   </button>
                 </div>
               </div>
 
-              <div className="space-y-1.5">
-                <textarea
-                  rows={7}
-                  value={contentJson}
-                  onChange={(e) => handleTextareaChange(e.target.value)}
-                  placeholder="Dán nội dung đề định dạng ULN / Text hoặc JSON vào đây..."
-                  className="w-full bg-[#0d1018] border border-[#263152] focus:border-indigo-500 focus:outline-none rounded-xl p-3 font-mono text-xs text-slate-200 resize-y leading-relaxed"
-                />
-              </div>
+              <textarea
+                rows={5}
+                value={contentJson}
+                onChange={(e) => handleTextareaChange(e.target.value)}
+                placeholder="Dán nội dung đề định dạng ULN hoặc Text vào đây..."
+                className="w-full bg-[#0d1018] border border-[#263152] focus:border-indigo-500 focus:outline-none rounded-xl p-3 font-mono text-xs text-slate-200 resize-y leading-relaxed"
+              />
 
               <div className="flex items-center justify-between gap-2 flex-wrap">
                 <label className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-dashed border-white/20 text-slate-300 hover:text-white text-xs font-bold transition cursor-pointer">
                   <Upload size={13} />
-                  <span>{uploading ? 'Đang đọc file...' : 'Tải File Đề (.txt, .json, .uln)'}</span>
+                  <span>{uploading ? 'Đang đọc...' : 'Tải File Đề (.txt, .json, .uln)'}</span>
                   <input type="file" accept=".txt,.json,.uln" onChange={handleFileUpload} className="hidden" />
                 </label>
 
                 {questionCount > 0 && (
                   <div className="flex items-center gap-1.5 text-xs text-emerald-400 font-bold bg-emerald-500/10 px-2.5 py-1 rounded-lg border border-emerald-500/20">
                     <CheckCircle size={13} />
-                    <span>Đã nhận diện {questionCount} câu hỏi!</span>
+                    <span>Đã nhận diện {questionCount} câu hỏi ({sections.length} bài)</span>
                   </div>
                 )}
               </div>
             </div>
+
+            {/* Section Scope Limiter: Checkboxes for choosing exercises */}
+            {sections.length > 1 && (
+              <SectionScopeSelector
+                sections={sections}
+                selectedSectionIds={selectedSectionIds}
+                onToggleSection={handleToggleSection}
+                onSelectAll={() => setSelectedSectionIds(sections.map((s) => s.id))}
+                onDeselectAll={() => setSelectedSectionIds([])}
+              />
+            )}
 
             {/* Dates */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -302,7 +403,7 @@ export const AssignmentModal: React.FC<AssignmentModalProps> = ({
                 rows={2}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                placeholder="Học sinh làm trực tiếp trên phiếu đề A4 hoặc in ra giấy..."
+                placeholder="Hướng dẫn cho học sinh khi làm bài..."
                 className="w-full bg-[#121626] border border-[#263152] focus:border-indigo-500 focus:outline-none rounded-xl p-3 text-xs font-medium text-white shadow-inner resize-none"
               />
             </div>

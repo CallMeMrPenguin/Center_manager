@@ -1,0 +1,106 @@
+import { UlnNode } from './ulnTypes';
+import { UlnSectionItem } from '../types';
+
+/**
+ * Extracts distinct exercise/sections from parsed ULN nodes.
+ * A section starts at an `ins`, `h1`, `h2`, `h3` heading or before a block of questions.
+ */
+export function extractUlnSections(nodes: UlnNode[]): UlnSectionItem[] {
+  if (!nodes || nodes.length === 0) return [];
+  const sections: UlnSectionItem[] = [];
+  let currentSection: UlnSectionItem | null = null;
+  let currentQCount = 0;
+  let currentQNums: string[] = [];
+
+  for (let idx = 0; idx < nodes.length; idx++) {
+    const node = nodes[idx];
+    const isHeading = node.type === 'ins' || node.type === 'h1' || node.type === 'h2' || node.type === 'h3';
+
+    if (isHeading && 'text' in node && node.text.trim()) {
+      if (currentSection) {
+        (currentSection as UlnSectionItem).endNodeIndex = idx - 1;
+        (currentSection as UlnSectionItem).questionCount = currentQCount;
+        (currentSection as UlnSectionItem).questionNumbers = [...currentQNums];
+        sections.push(currentSection);
+      }
+      currentQCount = 0;
+      currentQNums = [];
+      const cleanTitle = (node.text || '').replace(/^\*\*|\*\*$/g, '').trim();
+      currentSection = {
+        id: sections.length + 1,
+        title: cleanTitle || `Bài tập ${sections.length + 1}`,
+        startNodeIndex: idx,
+        endNodeIndex: idx,
+        questionCount: 0,
+        questionNumbers: [],
+      };
+    } else if (node.type === 'question') {
+      if (!currentSection) {
+        currentSection = {
+          id: 1,
+          title: 'Bài tập 1: Khởi động',
+          startNodeIndex: 0,
+          endNodeIndex: idx,
+          questionCount: 0,
+          questionNumbers: [],
+        };
+      }
+      currentQCount++;
+      if (node.qNum) {
+        currentQNums.push(String(node.qNum));
+      }
+    }
+  }
+
+  const finalSec: UlnSectionItem | null = currentSection;
+  if (finalSec) {
+    finalSec.endNodeIndex = nodes.length - 1;
+    finalSec.questionCount = currentQCount;
+    finalSec.questionNumbers = [...currentQNums];
+    sections.push(finalSec);
+  }
+
+  // If no explicit heading found but questions exist, create a default single section
+  if (sections.length === 0) {
+    const questions = nodes.filter((n) => n.type === 'question');
+    if (questions.length > 0) {
+      sections.push({
+        id: 1,
+        title: 'Toàn bộ bài tập',
+        startNodeIndex: 0,
+        endNodeIndex: nodes.length - 1,
+        questionCount: questions.length,
+        questionNumbers: questions.map((q) => (q as any).qNum || ''),
+      });
+    }
+  }
+
+  return sections;
+}
+
+/**
+ * Filters ULN nodes to only include those that belong to the assigned section IDs.
+ * If assignedSections is empty or undefined, returns all nodes.
+ */
+export function filterNodesByAssignedSections(nodes: UlnNode[], assignedSections?: number[]): UlnNode[] {
+  if (!nodes || nodes.length === 0) return [];
+  if (!assignedSections || assignedSections.length === 0) return nodes;
+
+  const sections = extractUlnSections(nodes);
+  if (sections.length === 0) return nodes;
+
+  const allowedSet = new Set(assignedSections);
+  const activeRanges = sections.filter((s) => allowedSet.has(s.id));
+  if (activeRanges.length === 0) return nodes;
+
+  // Collect all nodes in active section ranges
+  const filtered: UlnNode[] = [];
+  nodes.forEach((node, idx) => {
+    const isInAnySection = activeRanges.some((sec) => idx >= sec.startNodeIndex && idx <= sec.endNodeIndex);
+    if (isInAnySection) {
+      filtered.push(node);
+    }
+  });
+
+  return filtered;
+}

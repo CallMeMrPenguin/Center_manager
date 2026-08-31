@@ -254,13 +254,15 @@ export const computeStudentOverallScore = (r: any): number => {
   if (!r) return 0;
   const v = Number(r.avg_vocab ?? r.avg_check_1 ?? 0);
   const g = Number(r.avg_grammar ?? r.avg_check_2 ?? 0);
-  const h = Number(r.avg_homework ?? 0);
+  const h = Number(r.avg_homework ?? r.avg_homework_1 ?? 0);
+  const h2 = Number(r.avg_homework_2 ?? 0);
 
   let wSum = 0;
   let wTot = 0;
-  if (v > 0) { wSum += v * 0.55; wTot += 0.55; }
-  if (g > 0) { wSum += g * 0.35; wTot += 0.35; }
+  if (v > 0) { wSum += v * 0.50; wTot += 0.50; }
+  if (g > 0) { wSum += g * 0.30; wTot += 0.30; }
   if (h > 0) { wSum += h * 0.10; wTot += 0.10; }
+  if (h2 > 0) { wSum += h2 * 0.10; wTot += 0.10; }
 
   if (wTot === 0) {
     if (r.academic_score !== undefined && Number(r.academic_score) > 0) {

@@ -182,8 +182,8 @@ export const StudentGradeHistoryTable: React.FC<StudentGradeHistoryTableProps> =
     },
     {
       accessorKey: 'homework',
-      header: () => <div className="text-center w-full">BTVN</div>,
-      meta: { headerText: 'BTVN', exportValue: (r: any) => Number(r.homework) > 0 ? format1Dec(Number(r.homework)) : '-' },
+      header: () => <div className="text-center w-full">BTVN 1</div>,
+      meta: { headerText: 'BTVN 1', exportValue: (r: any) => Number(r.homework) > 0 ? format1Dec(Number(r.homework)) : '-' },
       cell: ({ row }) => {
         const r = row.original;
         const val = Number(r.homework) || 0;
@@ -198,6 +198,22 @@ export const StudentGradeHistoryTable: React.FC<StudentGradeHistoryTableProps> =
                 {topic}
               </span>
             )}
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: 'homework_2',
+      header: () => <div className="text-center w-full">BTVN 2</div>,
+      meta: { headerText: 'BTVN 2', exportValue: (r: any) => Number(r.homework_2) > 0 ? format1Dec(Number(r.homework_2)) : '-' },
+      cell: ({ row }) => {
+        const r = row.original;
+        const val = Number(r.homework_2) || 0;
+        return (
+          <div className="text-center py-0.5">
+            <div className="font-extrabold text-teal-400 font-mono text-base leading-tight">
+              {val > 0 ? format1Dec(val) : '-'}
+            </div>
           </div>
         );
       },

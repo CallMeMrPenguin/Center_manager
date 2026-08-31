@@ -139,6 +139,7 @@ export function useClassDetail(selectedClass: ClassItem | null) {
         check_1: formatScoreField(rec.check_1),
         check_2: formatScoreField(rec.check_2),
         homework: formatScoreField(rec.homework),
+        homework_2: formatScoreField(rec.homework_2),
         mock_test: formatScoreField(rec.mock_test),
       };
     });

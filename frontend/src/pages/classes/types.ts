@@ -39,10 +39,12 @@ export interface AttendanceRecord {
   check_1?: string | number | null;
   check_2?: string | number | null;
   homework?: string | number | null;
+  homework_2?: string | number | null;
   mock_test?: string | number | null;
   pred_check_1?: string | number | null;
   pred_check_2?: string | number | null;
   pred_homework?: string | number | null;
+  pred_homework_2?: string | number | null;
   pred_mock_test?: string | number | null;
   pred_c1?: string | number | null;
   pred_c2?: string | number | null;

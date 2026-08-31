@@ -1,3 +1,24 @@
+export type AssignmentType = 'practice' | 'homework_1' | 'homework_2';
+
+export interface AssignmentQuizConfig {
+  assignment_type?: AssignmentType;
+  assigned_sections?: number[]; // 1-based section indices e.g. [1, 2, 3, 4, 5, 6]
+  time_limit_minutes?: number | null; // e.g. 30, 45 or null
+  max_attempts?: number; // e.g. 1, 2, 0 (unlimited)
+  proctoring_enabled?: boolean; // anti-cheat screen monitor
+  allow_retry_wrong?: boolean; // retry wrong only
+  auto_convert_to_practice?: boolean; // convert to practice upon locking
+}
+
+export interface UlnSectionItem {
+  id: number; // 1-based index
+  title: string;
+  startNodeIndex: number;
+  endNodeIndex: number;
+  questionCount: number;
+  questionNumbers: string[];
+}
+
 export interface Assignment {
   id: number;
   class_id: number;

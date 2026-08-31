@@ -249,7 +249,7 @@ def batch_update_submissions(assignment_id: int, submissions: List[Dict[str, Any
         conn.close()
 
 def save_student_progress(assignment_id: int, student_id: int, answers_json: str, score: Optional[float] = None, daily_logs: str = "") -> bool:
-    """Saves or updates student's live answers and multi-day progress logs."""
+    """Saves or updates student's live answers and multi-day progress logs, and syncs score to class_attendance_grades."""
     conn = get_connection()
     try:
         cursor = conn.cursor()
@@ -263,6 +263,37 @@ def save_student_progress(assignment_id: int, student_id: int, answers_json: str
                 daily_logs = CASE WHEN EXCLUDED.daily_logs != '' THEN EXCLUDED.daily_logs ELSE assignment_submissions.daily_logs END,
                 submitted_at = COALESCE(assignment_submissions.submitted_at, EXCLUDED.submitted_at)
         """, (assignment_id, student_id, score, answers_json, daily_logs, now_str))
+
+        # Auto-sync score to class_attendance_grades if score is provided
+        if score is not None:
+            try:
+                cursor.execute("SELECT class_id, assigned_date, due_date, quiz_config FROM assignments WHERE id = ?", (assignment_id,))
+                assign_info = cursor.fetchone()
+                if assign_info:
+                    class_id = assign_info["class_id"]
+                    target_date = assign_info["due_date"] or assign_info["assigned_date"]
+                    quiz_cfg_str = assign_info["quiz_config"] or ""
+                    import json
+                    quiz_type = "homework_1"
+                    if quiz_cfg_str:
+                        try:
+                            cfg = json.loads(quiz_cfg_str)
+                            quiz_type = cfg.get("assignment_type", "homework_1")
+                        except Exception:
+                            pass
+                    
+                    if quiz_type in ("homework_1", "homework_2"):
+                        score_col = "homework_2" if quiz_type == "homework_2" else "homework"
+                        cursor.execute(f"""
+                            INSERT INTO class_attendance_grades (class_id, student_id, date, status, {score_col})
+                            VALUES (?, ?, ?, 'Có mặt', ?)
+                            ON CONFLICT(class_id, student_id, date) DO UPDATE SET
+                                {score_col} = EXCLUDED.{score_col},
+                                updated_at = CURRENT_TIMESTAMP
+                        """, (class_id, student_id, target_date, score))
+            except Exception as sync_err:
+                print("Auto-sync assignment score error:", sync_err)
+
         conn.commit()
         return True
     finally:
