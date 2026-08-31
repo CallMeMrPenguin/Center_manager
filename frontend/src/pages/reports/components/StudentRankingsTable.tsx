@@ -293,26 +293,23 @@ export const StudentRankingsTable: React.FC<StudentRankingsTableProps> = React.m
         const avg = getValue<number>();
         if (avg === 0) {
           return (
-            <div className="text-center">
-              <span className="inline-block px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-500/10 text-slate-400 border border-slate-500/30">Chưa có điểm</span>
+            <div className="text-center py-0.5 flex flex-col items-center justify-center">
+              <span className="font-mono font-extrabold text-slate-500 text-sm sm:text-base">-</span>
+              <div className="text-[10px] font-mono font-bold mt-1 px-1.5 py-0.5 rounded border inline-flex items-center gap-0.5 leading-none bg-slate-500/10 text-slate-400 border-slate-500/30">
+                <span>Chưa có điểm</span>
+              </div>
             </div>
           );
         }
         const tier = getStudentTier(avg);
-        let cls = 'bg-cyan-500/15 text-cyan-300 border-cyan-500/35';
-        if (tier.tier === 8) cls = 'bg-amber-500/15 text-amber-300 border-amber-500/40 font-black';
-        else if (tier.tier === 7) cls = 'bg-pink-500/15 text-pink-300 border-pink-500/35 font-bold';
-        else if (tier.tier === 6) cls = 'bg-purple-500/15 text-purple-300 border-purple-500/35 font-bold';
-        else if (tier.tier === 5) cls = 'bg-cyan-500/15 text-cyan-300 border-cyan-500/35 font-bold';
-        else if (tier.tier === 4) cls = 'bg-indigo-500/15 text-indigo-300 border-indigo-500/35 font-semibold';
-        else if (tier.tier === 3) cls = 'bg-yellow-500/15 text-yellow-300 border-yellow-500/35 font-semibold';
-        else if (tier.tier === 2) cls = 'bg-sky-500/15 text-sky-300 border-sky-500/35';
-        else cls = 'bg-amber-700/15 text-amber-500 border-amber-700/35';
         return (
           <div className="text-center py-0.5 flex flex-col items-center justify-center">
-            <span className={`inline-block px-3 py-1 rounded-lg text-xs font-black border ${cls}`}>
-              {tier.title} ({format1Dec(avg)})
+            <span className={`font-mono font-extrabold text-sm sm:text-base ${tier.text}`}>
+              {format1Dec(avg)}
             </span>
+            <div className={`text-[10px] font-mono font-bold mt-1 px-2 py-0.5 rounded border inline-flex items-center gap-0.5 leading-none ${tier.bg} ${tier.border} ${tier.text}`}>
+              <span>{tier.title}</span>
+            </div>
           </div>
         );
       },
