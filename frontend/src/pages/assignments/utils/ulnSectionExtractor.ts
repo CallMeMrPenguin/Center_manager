@@ -78,29 +78,42 @@ export function extractUlnSections(nodes: UlnNode[]): UlnSectionItem[] {
   return sections;
 }
 
+export interface NodeSectionInfo {
+  sectionId: number;
+  sectionTitle: string;
+  isAssigned: boolean;
+}
+
 /**
- * Filters ULN nodes to only include those that belong to the assigned section IDs.
- * If assignedSections is empty or undefined, returns all nodes.
+ * Builds a lookup map from node index to section assignment status.
+ * If assignedSections is empty or undefined, all nodes are treated as assigned.
  */
-export function filterNodesByAssignedSections(nodes: UlnNode[], assignedSections?: number[]): UlnNode[] {
-  if (!nodes || nodes.length === 0) return [];
-  if (!assignedSections || assignedSections.length === 0) return nodes;
-
+export function getNodeSectionMap(nodes: UlnNode[], assignedSections?: number[]): Map<number, NodeSectionInfo> {
+  const map = new Map<number, NodeSectionInfo>();
+  if (!nodes || nodes.length === 0) return map;
   const sections = extractUlnSections(nodes);
-  if (sections.length === 0) return nodes;
+  const isAllAssigned = !assignedSections || assignedSections.length === 0;
+  const assignedSet = new Set(assignedSections || []);
 
-  const allowedSet = new Set(assignedSections);
-  const activeRanges = sections.filter((s) => allowedSet.has(s.id));
-  if (activeRanges.length === 0) return nodes;
-
-  // Collect all nodes in active section ranges
-  const filtered: UlnNode[] = [];
-  nodes.forEach((node, idx) => {
-    const isInAnySection = activeRanges.some((sec) => idx >= sec.startNodeIndex && idx <= sec.endNodeIndex);
-    if (isInAnySection) {
-      filtered.push(node);
+  sections.forEach((sec) => {
+    const isAssigned = isAllAssigned || assignedSet.has(sec.id);
+    for (let idx = sec.startNodeIndex; idx <= sec.endNodeIndex; idx++) {
+      map.set(idx, {
+        sectionId: sec.id,
+        sectionTitle: sec.title,
+        isAssigned,
+      });
     }
   });
 
-  return filtered;
+  return map;
+}
+
+/**
+ * Backward-compatible helper: returns all nodes when assignedSections is set (viewing full test with gray-out),
+ * or filters when explicitly needed.
+ */
+export function filterNodesByAssignedSections(nodes: UlnNode[], assignedSections?: number[]): UlnNode[] {
+  // Always return all nodes so student can see the full exam paper with unassigned parts grayed out
+  return nodes || [];
 }

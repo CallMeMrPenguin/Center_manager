@@ -1,5 +1,5 @@
 import React, { memo } from 'react';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, Lock } from 'lucide-react';
 import { SectionProgressGroup } from './UlnDocumentRenderer';
 
 interface ExamSidebarProgressProps {
@@ -37,33 +37,58 @@ export const ExamSidebarProgress: React.FC<ExamSidebarProgressProps> = memo(({
 
         {/* Question Quick-Jump Grid */}
         <div className="max-h-[65vh] overflow-y-auto pr-1 space-y-3 scrollbar-thin">
-          {sections.map((sec) => (
-            <div key={sec.id} className="space-y-1.5">
-              <div className="text-[11px] font-black text-slate-700 flex items-center gap-1">
-                <ChevronRight size={12} className="shrink-0 mt-0.5 text-indigo-500" />
-                <span className="truncate">{sec.title}</span>
+          {sections.map((sec) => {
+            const isSecAssigned = sec.isAssigned !== false;
+            return (
+              <div key={sec.id} className={`space-y-1.5 ${isSecAssigned ? '' : 'opacity-50'}`}>
+                <div className="text-[11px] font-black text-slate-700 flex items-center justify-between gap-1">
+                  <div className="flex items-center gap-1 min-w-0">
+                    <ChevronRight size={12} className="shrink-0 mt-0.5 text-indigo-500" />
+                    <span className={`truncate ${isSecAssigned ? '' : 'text-slate-400'}`}>{sec.title}</span>
+                  </div>
+                  {!isSecAssigned && (
+                    <span className="text-[9px] font-semibold text-slate-400 bg-slate-100 px-1.5 py-0.2 rounded shrink-0 flex items-center gap-0.5">
+                      <Lock size={9} />
+                      <span>Không giao</span>
+                    </span>
+                  )}
+                </div>
+                <div className="grid grid-cols-5 gap-1.5">
+                  {sec.items.map((item) => {
+                    const isItemAssigned = item.isAssigned !== false;
+                    if (!isItemAssigned) {
+                      return (
+                        <div
+                          key={item.id}
+                          className="py-1.5 rounded-lg text-xs font-bold font-mono text-center border bg-slate-100/40 text-slate-300 border-slate-200/40 cursor-not-allowed select-none"
+                          title="Không yêu cầu làm"
+                        >
+                          {item.label}
+                        </div>
+                      );
+                    }
+                    return (
+                      <button
+                        key={item.id}
+                        type="button"
+                        onClick={() => {
+                          const el = document.getElementById(item.id);
+                          if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }}
+                        className={`py-1.5 rounded-lg text-xs font-bold font-mono transition cursor-pointer border ${
+                          item.isAnswered
+                            ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs'
+                            : 'bg-slate-100 hover:bg-indigo-50 hover:border-indigo-300 text-slate-700 border-slate-200'
+                        }`}
+                      >
+                        {item.label}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
-              <div className="grid grid-cols-5 gap-1.5">
-                {sec.items.map((item) => (
-                  <button
-                    key={item.id}
-                    type="button"
-                    onClick={() => {
-                      const el = document.getElementById(item.id);
-                      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    }}
-                    className={`py-1.5 rounded-lg text-xs font-bold font-mono transition cursor-pointer border ${
-                      item.isAnswered
-                        ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs'
-                        : 'bg-slate-100 hover:bg-indigo-50 hover:border-indigo-300 text-slate-700 border-slate-200'
-                    }`}
-                  >
-                    {item.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </div>

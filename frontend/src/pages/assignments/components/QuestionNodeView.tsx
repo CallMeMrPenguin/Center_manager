@@ -11,6 +11,7 @@ interface QuestionNodeViewProps {
   answerKeys?: Record<string, string>;
   isSubmitted?: boolean;
   showAnswerKeys?: boolean;
+  isAssigned?: boolean;
   onInputChange: (key: string, val: string) => void;
   onSelectOption: (qKey: string, opt: string) => void;
 }
@@ -22,6 +23,7 @@ export const QuestionNodeView: React.FC<QuestionNodeViewProps> = memo(({
   answerKeys = {},
   isSubmitted = false,
   showAnswerKeys = true,
+  isAssigned = true,
   onInputChange,
   onSelectOption,
 }) => {
@@ -36,38 +38,41 @@ export const QuestionNodeView: React.FC<QuestionNodeViewProps> = memo(({
   const optGridClass = maxOptLen > 48 ? 'grid-cols-1' : maxOptLen > 24 ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-2 sm:grid-cols-4';
   const hasNoBlankOrOpts = (!node.options || node.options.length === 0) && !node.hasWritingLine && !node.text.includes('<blank>') && !node.subText && (!node.subParagraphs || node.subParagraphs.length === 0);
   const hasText = !!node.text && node.text.trim().length > 0;
+  const isDisabled = isSubmitted || !isAssigned;
 
   return (
-    <div id={`q_target_${nIdx}`} className="py-1 px-0.5 scroll-mt-20 font-normal">
+    <div
+      id={`q_target_${nIdx}`}
+      className={`py-1 px-0.5 scroll-mt-20 font-normal transition-all ${
+        !isAssigned ? 'opacity-40 grayscale pointer-events-none select-none' : ''
+      }`}
+    >
       <div className="flex items-start gap-2">
         {node.qNum && (
           <span className={`font-bold text-xs sm:text-sm text-rose-600 shrink-0 min-w-[22px] text-right ${hasText ? 'pt-0.5' : 'pt-1'}`}>
             {node.qNum}.
           </span>
         )}
-        <div className="flex-1 space-y-1.5">
+        <div className="flex-1 space-y-1.5 min-w-0">
           {/* Question Text */}
           {hasText && (
             <div className="text-xs sm:text-sm font-normal text-slate-900 leading-relaxed pt-0.5">
-              <UlnInlineText text={node.text} qKey={qKey} answers={answers} onInputChange={onInputChange} isSubmitted={isSubmitted} />
+              <UlnInlineText text={node.text} qKey={qKey} answers={answers} onInputChange={onInputChange} isSubmitted={isDisabled} />
             </div>
           )}
 
           {/* Sub-Paragraphs (Letter, Arrangement, Dialogue Lines) */}
           {node.subParagraphs && node.subParagraphs.length > 0 && (
-            <div className="space-y-1 py-1 text-xs sm:text-sm text-slate-800 font-normal bg-slate-50/50 p-2.5 rounded-xl border border-slate-200">
+            <div className="space-y-1 py-1.5 px-3 text-xs sm:text-sm text-slate-800 font-normal bg-slate-50/70 rounded-xl border border-slate-200">
               {node.subParagraphs.map((para, pIdx) => {
-                const isListItem = /^[a-z]\.\s/i.test(para.trim());
-                const isSalutation = /^(Dear|Yours sincerely|Sincerely|Best regards|Thanks|Customer:|Assistant:|Celine:|Steward:)/i.test(para.trim());
+                const isSalutation = /^(Dear|Yours sincerely|Sincerely|Best regards|Thanks)/i.test(para.trim());
                 return (
                   <div
                     key={pIdx}
                     className={`${
-                      isListItem
-                        ? 'pl-5 -indent-5 leading-relaxed font-normal text-slate-800'
-                        : isSalutation
+                      isSalutation
                         ? 'font-bold text-slate-900 italic py-0.5'
-                        : 'leading-relaxed text-slate-800'
+                        : 'leading-relaxed text-slate-800 py-0.5'
                     }`}
                   >
                     <UlnInlineText
@@ -75,7 +80,7 @@ export const QuestionNodeView: React.FC<QuestionNodeViewProps> = memo(({
                       qKey={`${qKey}_para_${pIdx}`}
                       answers={answers}
                       onInputChange={onInputChange}
-                      isSubmitted={isSubmitted}
+                      isSubmitted={isDisabled}
                     />
                   </div>
                 );
@@ -85,20 +90,20 @@ export const QuestionNodeView: React.FC<QuestionNodeViewProps> = memo(({
 
           {node.subText && (
             <div className="text-xs sm:text-sm font-normal text-slate-800 pl-2 border-l-2 border-slate-400">
-              <UlnInlineText text={node.subText} qKey={`${qKey}_sub`} answers={answers} onInputChange={onInputChange} isSubmitted={isSubmitted} />
+              <UlnInlineText text={node.subText} qKey={`${qKey}_sub`} answers={answers} onInputChange={onInputChange} isSubmitted={isDisabled} />
             </div>
           )}
 
           {hasNoBlankOrOpts && (
             <div className="pt-1 flex items-center gap-2">
               <span className="text-xs font-bold text-slate-500">Trả lời:</span>
-              <InlineInput inputKey={`${qKey}_direct`} initialVal={answers[`${qKey}_direct`] || ''} disabled={isSubmitted} onCommit={onInputChange} />
+              <InlineInput inputKey={`${qKey}_direct`} initialVal={answers[`${qKey}_direct`] || ''} disabled={isDisabled} onCommit={onInputChange} />
             </div>
           )}
 
           {node.hasWritingLine && (
             <div className="pt-0.5">
-              <InlineInput inputKey={`${qKey}_write`} initialVal={answers[`${qKey}_write`] || ''} disabled={isSubmitted} onCommit={onInputChange} />
+              <InlineInput inputKey={`${qKey}_write`} initialVal={answers[`${qKey}_write`] || ''} disabled={isDisabled} onCommit={onInputChange} />
             </div>
           )}
 
@@ -131,7 +136,7 @@ export const QuestionNodeView: React.FC<QuestionNodeViewProps> = memo(({
                 let circleClass = 'text-blue-700 bg-blue-100 group-hover:bg-blue-200';
                 let badgeLabel: React.ReactNode = null;
 
-                if (isSubmitted && showAnswerKeys) {
+                if (isSubmitted && showAnswerKeys && isAssigned) {
                   if (isSelected && isKey) {
                     optClass = 'bg-emerald-600 border-emerald-700 text-white font-bold shadow-sm ring-2 ring-emerald-400';
                     circleClass = 'bg-white text-emerald-700 font-black';
@@ -155,7 +160,7 @@ export const QuestionNodeView: React.FC<QuestionNodeViewProps> = memo(({
                   <button
                     key={optIdx}
                     type="button"
-                    disabled={isSubmitted}
+                    disabled={isDisabled}
                     onClick={() => onSelectOption(qKey, optLetter)}
                     className={`text-left flex items-center gap-2 transition cursor-pointer py-2 px-3 rounded-xl border text-xs sm:text-sm group ${optClass}`}
                   >
@@ -170,7 +175,7 @@ export const QuestionNodeView: React.FC<QuestionNodeViewProps> = memo(({
                         qKey={`${qKey}_opt_${optIdx}`}
                         answers={answers}
                         onInputChange={onInputChange}
-                        isSubmitted={isSubmitted}
+                        isSubmitted={isDisabled}
                       />
                     </span>
                     {badgeLabel}
@@ -181,7 +186,7 @@ export const QuestionNodeView: React.FC<QuestionNodeViewProps> = memo(({
           )}
 
           {/* Submission Answer vs Key Feedback Strip */}
-          {isSubmitted && showAnswerKeys && keyForThisQ && (
+          {isSubmitted && showAnswerKeys && keyForThisQ && isAssigned && (
             <div className={`mt-2 p-2 rounded-xl border flex flex-wrap items-center justify-between gap-2 text-xs ${
               isQuestionCorrect
                 ? 'bg-emerald-50/90 border-emerald-300 text-emerald-950 font-medium'
