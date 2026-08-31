@@ -17,8 +17,11 @@ import { SAMPLE_UNIT12_ULN_TEXT } from '../constants/sampleUlnTest';
 import { format1Dec } from '../../../utils';
 import { showToast } from '../../../components/Toast';
 
+import { api } from '../../../api';
+
 interface WhitePaperAssignmentViewerProps {
   assignment: Assignment;
+  studentId?: number;
   studentName?: string;
   isPreview?: boolean;
   isReviewMode?: boolean;
@@ -32,6 +35,7 @@ interface WhitePaperAssignmentViewerProps {
 
 export const WhitePaperAssignmentViewer: React.FC<WhitePaperAssignmentViewerProps> = ({
   assignment,
+  studentId,
   studentName = 'Học Sinh',
   isPreview = true,
   isReviewMode = false,
@@ -168,6 +172,16 @@ export const WhitePaperAssignmentViewer: React.FC<WhitePaperAssignmentViewerProp
         : assignmentType === 'homework_1'
         ? ' (Đã lưu điểm vào BTVN 1)'
         : ' (Bài Ôn Luyện)';
+
+    if (studentId && assignment.id) {
+      api.saveStudentAssignmentProgress(
+        assignment.id,
+        studentId,
+        JSON.stringify(userAnswers),
+        score,
+        dailyLogs.length > 0 ? JSON.stringify(dailyLogs) : ''
+      ).catch((err: any) => console.error('Save progress error:', err));
+    }
 
     showToast(`Đã nộp bài thành công! Điểm: ${score}/10.0${typeMsg}`, 'success');
     if (onSubmitSuccess) onSubmitSuccess(score);

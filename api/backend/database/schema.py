@@ -32,6 +32,10 @@ def run_migrations(cursor: sqlite3.Cursor, conn: sqlite3.Connection):
         ("assignments", "quiz_config TEXT DEFAULT ''"),
         ("assignment_submissions", "answers_json TEXT DEFAULT ''"),
         ("assignment_submissions", "daily_logs TEXT DEFAULT ''"),
+        ("assignment_submissions", "attempts_count INTEGER DEFAULT 1"),
+        ("assignment_submissions", "max_score REAL DEFAULT NULL"),
+        ("assignment_submissions", "min_score REAL DEFAULT NULL"),
+        ("assignment_submissions", "avg_score REAL DEFAULT NULL"),
     ]
 
     for table, col_def in safe_columns:

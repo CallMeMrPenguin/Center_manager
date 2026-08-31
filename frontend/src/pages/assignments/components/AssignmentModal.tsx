@@ -38,19 +38,18 @@ export const AssignmentModal: React.FC<AssignmentModalProps> = ({
   const [contentJson, setContentJson] = useState<string>('');
   const [questionCount, setQuestionCount] = useState<number>(0);
 
-  // New features: 3 assignment types & section scope limiter
   const [assignmentType, setAssignmentType] = useState<AssignmentType>('homework_1');
   const [timeLimit, setTimeLimit] = useState<number | null>(null);
   const [maxAttempts, setMaxAttempts] = useState<number>(1);
   const [proctoringEnabled, setProctoringEnabled] = useState<boolean>(false);
   const [selectedSectionIds, setSelectedSectionIds] = useState<number[]>([]);
+  const [upcomingSessions, setUpcomingSessions] = useState<{ date: string; label: string }[]>([]);
 
   const [showPromptModal, setShowPromptModal] = useState<boolean>(false);
   const [saving, setSaving] = useState<boolean>(false);
   const [deleting, setDeleting] = useState<boolean>(false);
   const [uploading, setUploading] = useState<boolean>(false);
 
-  // Derived sections
   const sections = useMemo(() => {
     const nodes = parseUlnContent(contentJson);
     return extractUlnSections(nodes);
@@ -112,12 +111,69 @@ export const AssignmentModal: React.FC<AssignmentModalProps> = ({
     }
   }, [assignment, classes, defaultClassId, isOpen]);
 
-  // Keep selected sections synced when sections change in new assignment mode
+  // Keep selected sections synced in new assignment mode
   useEffect(() => {
     if (!assignment && sections.length > 0 && selectedSectionIds.length === 0) {
       setSelectedSectionIds(sections.map((s) => s.id));
     }
   }, [sections, assignment]);
+
+  // Load upcoming class sessions for quick due-date presets
+  useEffect(() => {
+    if (!classId) return;
+    let isMounted = true;
+
+    const fetchSessions = async () => {
+      try {
+        const sessions = await api.getClassSessions(classId);
+        if (!isMounted) return;
+        const baseDate = assignedDate || new Date().toISOString().slice(0, 10);
+        const futureSessions = (sessions || [])
+          .filter((s: any) => s.date && s.date >= baseDate)
+          .sort((a: any, b: any) => a.date.localeCompare(b.date));
+
+        const presets: { date: string; label: string }[] = [];
+        if (futureSessions.length > 0) {
+          const s1 = futureSessions[0];
+          const d1 = new Date(s1.date);
+          const dayName1 = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'][d1.getDay()];
+          const dateFmt1 = `${String(d1.getDate()).padStart(2, '0')}/${String(d1.getMonth() + 1).padStart(2, '0')}`;
+          presets.push({
+            date: s1.date,
+            label: `Buổi tới (${dayName1}, ${dateFmt1})`,
+          });
+
+          if (futureSessions.length > 1) {
+            const s2 = futureSessions[1];
+            const d2 = new Date(s2.date);
+            const dayName2 = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'][d2.getDay()];
+            const dateFmt2 = `${String(d2.getDate()).padStart(2, '0')}/${String(d2.getMonth() + 1).padStart(2, '0')}`;
+            presets.push({
+              date: s2.date,
+              label: `Sau 2 buổi (${dayName2}, ${dateFmt2})`,
+            });
+          }
+        }
+
+        const dNextWeek = new Date(new Date(baseDate).getTime() + 7 * 86400000);
+        const nwDateStr = dNextWeek.toISOString().slice(0, 10);
+        const nwFmt = `${String(dNextWeek.getDate()).padStart(2, '0')}/${String(dNextWeek.getMonth() + 1).padStart(2, '0')}`;
+        presets.push({
+          date: nwDateStr,
+          label: `+1 tuần (${nwFmt})`,
+        });
+
+        setUpcomingSessions(presets);
+      } catch {
+        const baseDate = assignedDate || new Date().toISOString().slice(0, 10);
+        const dNextWeek = new Date(new Date(baseDate).getTime() + 7 * 86400000);
+        setUpcomingSessions([{ date: dNextWeek.toISOString().slice(0, 10), label: '+1 tuần' }]);
+      }
+    };
+
+    fetchSessions();
+    return () => { isMounted = false; };
+  }, [classId, assignedDate]);
 
   if (!isOpen) return null;
 
@@ -169,12 +225,6 @@ export const AssignmentModal: React.FC<AssignmentModalProps> = ({
     setQuestionCount(nodes.filter((n) => n.type === 'question').length);
     const secs = extractUlnSections(nodes);
     setSelectedSectionIds(secs.map((s) => s.id));
-  };
-
-  const handleToggleSection = (secId: number) => {
-    setSelectedSectionIds((prev) =>
-      prev.includes(secId) ? prev.filter((id) => id !== secId) : [...prev, secId]
-    );
   };
 
   const handleSave = async (e: React.FormEvent) => {
@@ -375,7 +425,7 @@ export const AssignmentModal: React.FC<AssignmentModalProps> = ({
               <SectionScopeSelector
                 sections={sections}
                 selectedSectionIds={selectedSectionIds}
-                onToggleSection={handleToggleSection}
+                onToggleSection={(secId) => setSelectedSectionIds((prev) => prev.includes(secId) ? prev.filter((id) => id !== secId) : [...prev, secId])}
                 onSelectAll={() => setSelectedSectionIds(sections.map((s) => s.id))}
                 onDeselectAll={() => setSelectedSectionIds([])}
               />
@@ -394,6 +444,30 @@ export const AssignmentModal: React.FC<AssignmentModalProps> = ({
                   Hạn Nộp <span className="text-rose-400">*</span>
                 </label>
                 <CustomDatePicker value={dueDate} onChange={setDueDate} placeholder="Chọn hạn nộp..." />
+
+                {/* Quick Session Due Date Presets */}
+                {upcomingSessions.length > 0 && (
+                  <div className="flex items-center gap-1.5 flex-wrap pt-1">
+                    <span className="text-[10px] text-slate-400 font-semibold">Chọn nhanh:</span>
+                    {upcomingSessions.map((preset, pIdx) => {
+                      const isSelected = dueDate === preset.date;
+                      return (
+                        <button
+                          key={pIdx}
+                          type="button"
+                          onClick={() => setDueDate(preset.date)}
+                          className={`px-2 py-0.5 rounded-lg text-[11px] font-bold transition cursor-pointer border ${
+                            isSelected
+                              ? 'bg-indigo-500/25 border-indigo-500/50 text-indigo-300 shadow-xs'
+                              : 'bg-white/5 hover:bg-white/10 text-slate-300 border-white/10 hover:text-white'
+                          }`}
+                        >
+                          {preset.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             </div>
 

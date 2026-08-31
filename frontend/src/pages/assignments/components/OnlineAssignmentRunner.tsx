@@ -14,6 +14,7 @@ interface OnlineAssignmentRunnerProps {
 
 export const OnlineAssignmentRunner: React.FC<OnlineAssignmentRunnerProps> = ({
   assignment,
+  studentId,
   studentName = 'Học Sinh',
   isPreview = true,
   onBack,
@@ -23,6 +24,7 @@ export const OnlineAssignmentRunner: React.FC<OnlineAssignmentRunnerProps> = ({
   return (
     <WhitePaperAssignmentViewer
       assignment={assignment}
+      studentId={studentId}
       studentName={studentName}
       isPreview={isPreview}
       onBack={onBack}

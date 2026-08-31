@@ -178,6 +178,10 @@ def get_assignment_submissions(assignment_id: int) -> List[Dict[str, Any]]:
                 s.grade,
                 sub.submitted,
                 sub.score,
+                sub.attempts_count,
+                sub.max_score,
+                sub.min_score,
+                sub.avg_score,
                 sub.notes,
                 sub.submitted_at,
                 sub.answers_json,
@@ -249,20 +253,66 @@ def batch_update_submissions(assignment_id: int, submissions: List[Dict[str, Any
         conn.close()
 
 def save_student_progress(assignment_id: int, student_id: int, answers_json: str, score: Optional[float] = None, daily_logs: str = "") -> bool:
-    """Saves or updates student's live answers and multi-day progress logs, and syncs score to class_attendance_grades."""
+    """Saves or updates student's live answers, attempt counts, min/max/avg scores, and multi-day progress logs."""
     conn = get_connection()
     try:
         cursor = conn.cursor()
         now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        cursor.execute("""
-            INSERT INTO assignment_submissions (assignment_id, student_id, submitted, score, answers_json, daily_logs, submitted_at)
-            VALUES (?, ?, 1, ?, ?, ?, ?)
-            ON CONFLICT(assignment_id, student_id) DO UPDATE SET
-                answers_json = EXCLUDED.answers_json,
-                score = COALESCE(EXCLUDED.score, assignment_submissions.score),
-                daily_logs = CASE WHEN EXCLUDED.daily_logs != '' THEN EXCLUDED.daily_logs ELSE assignment_submissions.daily_logs END,
-                submitted_at = COALESCE(assignment_submissions.submitted_at, EXCLUDED.submitted_at)
-        """, (assignment_id, student_id, score, answers_json, daily_logs, now_str))
+
+        # Check existing submission to calculate attempts, max, min, avg score
+        cursor.execute("SELECT score, attempts_count, max_score, min_score, avg_score, submitted FROM assignment_submissions WHERE assignment_id = ? AND student_id = ?", (assignment_id, student_id))
+        prev = cursor.fetchone()
+
+        if prev and prev["submitted"] == 1:
+            prev_attempts = prev["attempts_count"] or 1
+            new_attempts = prev_attempts + 1
+            prev_max = prev["max_score"] if prev["max_score"] is not None else prev["score"]
+            prev_min = prev["min_score"] if prev["min_score"] is not None else prev["score"]
+            prev_avg = prev["avg_score"] if prev["avg_score"] is not None else prev["score"]
+
+            if score is not None:
+                new_max = max(prev_max, score) if prev_max is not None else score
+                new_min = min(prev_min, score) if prev_min is not None else score
+                if prev_avg is not None:
+                    new_avg = round(((prev_avg * prev_attempts) + score) / new_attempts, 1)
+                else:
+                    new_avg = score
+            else:
+                new_max = prev_max
+                new_min = prev_min
+                new_avg = prev_avg
+
+            cursor.execute("""
+                UPDATE assignment_submissions SET
+                    submitted = 1,
+                    answers_json = ?,
+                    score = COALESCE(?, score),
+                    attempts_count = ?,
+                    max_score = ?,
+                    min_score = ?,
+                    avg_score = ?,
+                    daily_logs = CASE WHEN ? != '' THEN ? ELSE daily_logs END,
+                    submitted_at = COALESCE(submitted_at, ?)
+                WHERE assignment_id = ? AND student_id = ?
+            """, (answers_json, score, new_attempts, new_max, new_min, new_avg, daily_logs, daily_logs, now_str, assignment_id, student_id))
+        else:
+            new_max = score
+            new_min = score
+            new_avg = score
+            cursor.execute("""
+                INSERT INTO assignment_submissions (assignment_id, student_id, submitted, score, attempts_count, max_score, min_score, avg_score, answers_json, daily_logs, submitted_at)
+                VALUES (?, ?, 1, ?, 1, ?, ?, ?, ?, ?, ?)
+                ON CONFLICT(assignment_id, student_id) DO UPDATE SET
+                    submitted = 1,
+                    answers_json = EXCLUDED.answers_json,
+                    score = COALESCE(EXCLUDED.score, assignment_submissions.score),
+                    attempts_count = 1,
+                    max_score = COALESCE(EXCLUDED.max_score, assignment_submissions.max_score),
+                    min_score = COALESCE(EXCLUDED.min_score, assignment_submissions.min_score),
+                    avg_score = COALESCE(EXCLUDED.avg_score, assignment_submissions.avg_score),
+                    daily_logs = CASE WHEN EXCLUDED.daily_logs != '' THEN EXCLUDED.daily_logs ELSE assignment_submissions.daily_logs END,
+                    submitted_at = COALESCE(assignment_submissions.submitted_at, EXCLUDED.submitted_at)
+            """, (assignment_id, student_id, score, new_max, new_min, new_avg, answers_json, daily_logs, now_str))
 
         # Auto-sync score to class_attendance_grades if score is provided
         if score is not None:

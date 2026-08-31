@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
-import { ArrowLeft, Save, KeyRound } from 'lucide-react';
+import { ArrowLeft, Save, KeyRound, RotateCcw } from 'lucide-react';
 import { DataTable } from '../../../components/DataTable';
-import { Assignment, AssignmentSubmission, AssignmentDailyLog } from '../types';
+import { Assignment, AssignmentSubmission, AssignmentDailyLog, AssignmentQuizConfig } from '../types';
 import { WhitePaperAssignmentViewer } from '../components/WhitePaperAssignmentViewer';
+import { format1Dec } from '../../../utils';
 
 interface SubmissionTabProps {
   assignment: Assignment | null;
@@ -25,6 +26,17 @@ export const SubmissionTab: React.FC<SubmissionTabProps> = ({
   const [localList, setLocalList] = useState<AssignmentSubmission[]>([]);
   const [isDirty, setIsDirty] = useState(false);
   const [reviewingStudent, setReviewingStudent] = useState<AssignmentSubmission | null>(null);
+
+  const quizConfig: AssignmentQuizConfig = useMemo(() => {
+    if (!assignment?.quiz_config) return { assignment_type: 'homework_1' };
+    try {
+      return JSON.parse(assignment.quiz_config);
+    } catch {
+      return { assignment_type: 'homework_1' };
+    }
+  }, [assignment?.quiz_config]);
+
+  const isPracticeMode = quizConfig.assignment_type === 'practice';
 
   useEffect(() => {
     setLocalList(submissions);
@@ -127,8 +139,47 @@ export const SubmissionTab: React.FC<SubmissionTabProps> = ({
         },
       },
       {
+        accessorKey: 'attempts_count',
+        header: 'Số Lần Làm',
+        cell: ({ row }) => {
+          const count = row.original.attempts_count || (row.original.submitted ? 1 : 0);
+          return (
+            <div className="flex items-center gap-1.5 font-mono text-xs text-slate-300 font-bold">
+              <RotateCcw size={12} className="text-cyan-400" />
+              <span>{count} lần</span>
+            </div>
+          );
+        },
+      },
+      {
+        id: 'score_stats',
+        header: 'Thấp / Cao / TB',
+        enableSorting: false,
+        cell: ({ row }) => {
+          const min = row.original.min_score;
+          const max = row.original.max_score;
+          const avg = row.original.avg_score;
+          if (min === null && max === null && avg === null) {
+            return <span className="text-xs text-slate-500">-</span>;
+          }
+          return (
+            <div className="flex items-center gap-1.5 text-[11px] font-mono font-bold flex-wrap">
+              <span className="px-1.5 py-0.5 rounded bg-rose-500/10 text-rose-300 border border-rose-500/20" title="Điểm thấp nhất">
+                Min: {min !== null && min !== undefined ? format1Dec(min) : '-'}
+              </span>
+              <span className="px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-300 border border-emerald-500/20" title="Điểm cao nhất">
+                Max: {max !== null && max !== undefined ? format1Dec(max) : '-'}
+              </span>
+              <span className="px-1.5 py-0.5 rounded bg-indigo-500/10 text-indigo-300 border border-indigo-500/20" title="Điểm trung bình">
+                TB: {avg !== null && avg !== undefined ? format1Dec(avg) : '-'}
+              </span>
+            </div>
+          );
+        },
+      },
+      {
         accessorKey: 'score',
-        header: 'Điểm Số (Thang 10)',
+        header: 'Điểm Lần Cuối',
         cell: ({ row }) => (
           <input
             type="number"
@@ -249,6 +300,11 @@ export const SubmissionTab: React.FC<SubmissionTabProps> = ({
               <span className="text-xs px-2 py-0.5 rounded-md bg-indigo-500/20 text-indigo-300 font-bold border border-indigo-500/30">
                 {assignment.class_name}
               </span>
+              {isPracticeMode && (
+                <span className="text-[10px] uppercase font-black px-2 py-0.5 rounded-full bg-cyan-500/15 text-cyan-300 border border-cyan-500/30">
+                  Bài Ôn Luyện
+                </span>
+              )}
             </div>
             <p className="text-xs text-slate-400 mt-0.5">
               Hạn nộp: <strong className="text-slate-300">{assignment.due_date}</strong> (Điểm tối đa: {assignment.max_score || 10})

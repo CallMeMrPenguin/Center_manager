@@ -56,8 +56,13 @@ export interface AssignmentSubmission {
   grade?: string;
   submitted: number; // 0 or 1
   score: number | null;
+  attempts_count?: number;
+  max_score?: number | null;
+  min_score?: number | null;
+  avg_score?: number | null;
   notes?: string;
   submitted_at?: string | null;
   answers_json?: string;
   daily_logs?: string;
 }
+

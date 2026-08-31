@@ -321,6 +321,12 @@ export const api = {
   getAssignmentSubmissions: (id: number) => request<any[]>(`/api/assignments/${id}/submissions`, { tags: ['assignments'] }),
   updateAssignmentSubmissions: (id: number, submissions: any[]) =>
     request<any>(`/api/assignments/${id}/submissions`, { method: 'PUT', body: JSON.stringify({ submissions }), tags: ['assignments'] }),
+  saveStudentAssignmentProgress: (assignmentId: number, studentId: number, answersJson: string, score?: number, dailyLogs = '') =>
+    request<{ success: boolean }>(`/api/assignments/${assignmentId}/submissions/${studentId}/save-progress`, {
+      method: 'POST',
+      body: JSON.stringify({ answers_json: answersJson, score, daily_logs: dailyLogs }),
+      tags: ['assignments', 'attendance', 'reports'],
+    }),
 
   // Users & Permissions API (Quyền & Vai Trò)
   login: (username: string, password: string) => request<{ success: boolean; user: any }>('/api/auth/login', { method: 'POST', body: JSON.stringify({ username, password }) }),
