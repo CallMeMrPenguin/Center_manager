@@ -303,6 +303,7 @@ export function useClassDetail(selectedClass: ClassItem | null) {
     try {
       await api.unenrollStudent(selectedClass.id, stId);
       showToast('Đã xoá học sinh khỏi lớp!', 'success');
+      isDirtyRef.current = false;
       // Optimistically update enrolled students and attendance records immediately
       setEnrolledStudents((prev) => prev.filter((s) => s.id !== stId));
       const nextRecs = attendanceRecordsRef.current.filter((r) => r.student_id !== stId);

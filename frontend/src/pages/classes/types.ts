@@ -15,6 +15,7 @@ export interface ClassItem {
 export interface EnrolledStudent {
   id: number;
   full_name: string;
+  nickname?: string;
   grade?: string;
   school?: string;
   gender?: string;

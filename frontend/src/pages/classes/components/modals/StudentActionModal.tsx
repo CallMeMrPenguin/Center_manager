@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Edit3, X, Trash2 } from 'lucide-react';
 import { ClassItem, EnrolledStudent } from '../../types';
 
@@ -7,7 +7,7 @@ interface StudentActionModalProps {
   student: EnrolledStudent | null;
   selectedClass: ClassItem | null;
   onClose: () => void;
-  onUnenroll: (studentId: number) => void;
+  onUnenroll: (studentId: number) => Promise<void> | void;
 }
 
 export const StudentActionModal: React.FC<StudentActionModalProps> = ({
@@ -17,10 +17,20 @@ export const StudentActionModal: React.FC<StudentActionModalProps> = ({
   onClose,
   onUnenroll,
 }) => {
+  const [removing, setRemoving] = useState(false);
   if (!isOpen || !student) return null;
 
+  const handleUnenroll = async () => {
+    setRemoving(true);
+    try {
+      await onUnenroll(student.id);
+    } finally {
+      setRemoving(false);
+    }
+  };
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 animate-mac-dropdown">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 animate-mac-dropdown">
       <div className="bg-[#0f1320] border border-white/10 rounded-2xl w-full max-w-sm overflow-hidden shadow-[0_24px_80px_rgba(0,0,0,0.8)]">
         <div className="flex items-center justify-between p-5 border-b border-white/10 bg-[#14192b]">
           <h3 className="text-base font-black text-white flex items-center gap-2">
@@ -41,15 +51,17 @@ export const StudentActionModal: React.FC<StudentActionModalProps> = ({
           <div className="pt-2 border-t border-white/10 flex flex-col gap-2">
             <button
               type="button"
-              onClick={() => onUnenroll(student.id)}
-              className="w-full py-2.5 rounded-xl bg-rose-500/15 hover:bg-rose-500/30 text-rose-300 border border-rose-500/30 text-xs font-black flex items-center justify-center gap-2 transition cursor-pointer"
+              disabled={removing}
+              onClick={handleUnenroll}
+              className="w-full py-2.5 rounded-xl bg-rose-500/15 hover:bg-rose-500/30 text-rose-300 border border-rose-500/30 text-xs font-black flex items-center justify-center gap-2 transition cursor-pointer disabled:opacity-50"
             >
               <Trash2 size={14} />
-              <span>Rút Học Sinh Khỏi Lớp Này</span>
+              <span>{removing ? 'Đang rút khỏi lớp...' : 'Rút Học Sinh Khỏi Lớp Này'}</span>
             </button>
 
             <button
               type="button"
+              disabled={removing}
               onClick={onClose}
               className="w-full py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 text-xs font-bold transition cursor-pointer"
             >

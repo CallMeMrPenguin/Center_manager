@@ -308,6 +308,7 @@ export default function ClassesPage() {
         allStudents={allStudents}
         enrolledStudents={enrolledStudents}
         onClose={() => setEnrollModalOpen(false)}
+        onUnenroll={handleUnenrollStudent}
         onEnrolled={async () => {
           if (selectedClass) {
             await Promise.all([
@@ -325,8 +326,8 @@ export default function ClassesPage() {
         student={selectedStudentForAction}
         selectedClass={selectedClass}
         onClose={() => setActionModalOpen(false)}
-        onUnenroll={(stId) => {
-          handleUnenrollStudent(stId);
+        onUnenroll={async (stId) => {
+          await handleUnenrollStudent(stId);
           setActionModalOpen(false);
         }}
       />
