@@ -174,10 +174,20 @@ export const BatchEnrollModal: React.FC<BatchEnrollModalProps> = ({
                         {isChecked && <span className="text-xs font-black">✓</span>}
                       </div>
                       <div>
-                        <span className="font-extrabold text-sm text-white block">{s.full_name}</span>
-                        <span className="text-[11px] text-slate-400 font-medium">
-                          {s.grade || 'Lớp 6'} | {s.school || 'Chưa xếp trường'} | {s.gender || 'Nam'}
-                        </span>
+                        <div className="flex items-center gap-2">
+                          <span className="font-extrabold text-sm text-white">{s.full_name}</span>
+                          {s.nickname && <span className="text-xs text-indigo-300 font-bold">({s.nickname})</span>}
+                          {s.status && s.status !== 'Đang học' && (
+                            <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                              {s.status} (kích hoạt lại)
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-1.5 mt-1 text-[11px] font-medium">
+                          <span className="bg-white/5 px-1.5 py-0.5 rounded text-slate-300">{s.grade || 'Lớp 6'}</span>
+                          {s.school && <span className="bg-white/5 px-1.5 py-0.5 rounded text-slate-400">{s.school}</span>}
+                          {s.gender && <span className="bg-white/5 px-1.5 py-0.5 rounded text-slate-400">{s.gender}</span>}
+                        </div>
                       </div>
                     </div>
                   </div>

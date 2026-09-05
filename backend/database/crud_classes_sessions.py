@@ -97,7 +97,7 @@ def get_class_students(class_id: int) -> List[Dict[str, Any]]:
             JOIN students s ON cs.student_id = s.id
             LEFT JOIN friend_group_members fgm ON fgm.class_id = cs.class_id AND fgm.student_id = s.id
             LEFT JOIN friend_groups fg ON fgm.group_id = fg.id
-            WHERE cs.class_id = ? AND (s.status IS NULL OR s.status NOT IN ('Đã nghỉ', 'Nghỉ', 'Nghỉ học', 'Tạm nghỉ'))
+            WHERE cs.class_id = ?
             ORDER BY s.full_name ASC
         """, (class_id,))
         rows = cursor.fetchall()
@@ -116,6 +116,17 @@ def enroll_student_to_class(class_id: int, student_id: int, seat_color: str = No
                 seat_color = EXCLUDED.seat_color,
                 grade_group = EXCLUDED.grade_group
         """, (class_id, student_id, seat_color, grade_group))
+        
+        # When a student is enrolled to a class, ensure their status is active ('Đang học')
+        cursor.execute("UPDATE students SET status = 'Đang học' WHERE id = ?", (student_id,))
+        
+        # Reactivate corresponding student user account if it was locked
+        default_user = f"hs_{student_id:04d}"
+        cursor.execute("""
+            UPDATE app_users SET status = 'Hoạt động'
+            WHERE role = 'Học sinh' AND (username = ? OR username = ?)
+        """, (default_user, f"hs_{student_id}"))
+        
         conn.commit()
     finally:
         conn.close()

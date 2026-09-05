@@ -177,11 +177,21 @@ def api_get_class_students(class_id: int):
 @router.post("/api/classes/{class_id}/students")
 def api_enroll_student(class_id: int, payload: EnrollPayload):
     enroll_student_to_class(class_id, payload.student_id, payload.seat_color, payload.grade_group)
+    try:
+        from services.sync_worker import trigger_instant_sync
+        trigger_instant_sync()
+    except Exception:
+        pass
     return {"status": "success"}
 
 @router.delete("/api/classes/{class_id}/students/{student_id}")
 def api_unenroll_student(class_id: int, student_id: int):
     unenroll_student_from_class(class_id, student_id)
+    try:
+        from services.sync_worker import trigger_instant_sync
+        trigger_instant_sync()
+    except Exception:
+        pass
     return {"status": "success"}
 
 @router.put("/api/classes/{class_id}/students/{student_id}/groups")

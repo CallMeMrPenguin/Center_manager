@@ -308,11 +308,13 @@ export default function ClassesPage() {
         allStudents={allStudents}
         enrolledStudents={enrolledStudents}
         onClose={() => setEnrollModalOpen(false)}
-        onEnrolled={() => {
+        onEnrolled={async () => {
           if (selectedClass) {
-            loadEnrolledStudents(selectedClass.id);
-            loadAttendanceData(selectedClass.id, attendanceDate);
-            notifyDataChanged();
+            await Promise.all([
+              loadEnrolledStudents(selectedClass.id),
+              loadAttendanceData(selectedClass.id, attendanceDate),
+            ]);
+            notifyDataChanged(['classes', 'students', 'attendance', 'seating']);
           }
         }}
       />
