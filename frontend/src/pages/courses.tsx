@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
 import { 
-  Briefcase, Plus, Edit3, Trash2, DollarSign, Clock, RefreshCw, X
+  Briefcase, Plus, Edit3, DollarSign, Clock, RefreshCw, X
 } from 'lucide-react';
 import { api } from '../api';
 import { showToast } from '../components/Toast';
 import { useConfirm } from '../components/ConfirmDialog';
 import { DataTable } from '../components/DataTable';
+import { CustomSelect } from '../components/CustomSelect';
 
 interface Course {
   id: number;
@@ -173,21 +174,16 @@ export default function CoursesPage() {
     {
       id: 'actions',
       header: 'Thao Tác',
+      enableSorting: false,
+      enableGlobalFilter: false,
       cell: ({ row }) => (
-        <div className="flex items-center justify-end gap-1.5">
+        <div className="flex items-center justify-end">
           <button
             onClick={() => handleOpenEdit(row.original)}
-            className="p-1.5 rounded-lg bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/20 transition cursor-pointer"
-            title="Sửa"
+            className="p-1.5 rounded-lg bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/20 transition cursor-pointer"
+            title="Chỉnh sửa khóa học"
           >
-            <Edit3 size={13} />
-          </button>
-          <button
-            onClick={() => handleDelete(row.original)}
-            className="p-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 transition cursor-pointer"
-            title="Xóa"
-          >
-            <Trash2 size={13} />
+            <Edit3 size={14} />
           </button>
         </div>
       ),
@@ -319,30 +315,41 @@ export default function CoursesPage() {
                 <label className="block text-[11px] font-extrabold text-slate-300 uppercase tracking-wider mb-1.5">
                   Trạng Thái
                 </label>
-                <select
+                <CustomSelect
                   value={formData.status || 'Đang mở'}
-                  onChange={(e) => setFormData({ ...formData, status: e.target.value as any })}
-                  className="w-full bg-[#181d2e] border border-white/10 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-indigo-500 font-semibold cursor-pointer"
-                >
-                  <option value="Đang mở">Đang mở</option>
-                  <option value="Đã đóng">Đã đóng</option>
-                </select>
+                  onChange={(val) => setFormData({ ...formData, status: val as any })}
+                  options={[
+                    { value: 'Đang mở', label: 'Đang mở' },
+                    { value: 'Đã đóng', label: 'Đã đóng' },
+                  ]}
+                />
               </div>
 
-              <div className="flex items-center justify-end gap-3 pt-3 border-t border-white/10">
-                <button
-                  type="button"
-                  onClick={() => setModalOpen(false)}
-                  className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-bold transition cursor-pointer"
-                >
-                  Hủy Bỏ
-                </button>
-                <button
-                  type="submit"
-                  className="px-5 py-2 rounded-xl bg-[#5c36f5] hover:bg-[#7351f7] text-white text-xs font-extrabold shadow-[0_4px_12px_rgba(92,54,245,0.4)] transition cursor-pointer border border-white/20"
-                >
-                  Lưu Khóa Học
-                </button>
+              <div className="flex items-center justify-between pt-3 border-t border-white/10">
+                {editingCourse ? (
+                  <button
+                    type="button"
+                    onClick={() => handleDelete(editingCourse)}
+                    className="px-3.5 py-2 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 text-rose-400 border border-rose-500/30 text-xs font-bold transition cursor-pointer"
+                  >
+                    Xóa Khóa Học
+                  </button>
+                ) : <div />}
+                <div className="flex items-center gap-2.5">
+                  <button
+                    type="button"
+                    onClick={() => setModalOpen(false)}
+                    className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-bold transition cursor-pointer"
+                  >
+                    Hủy Bỏ
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-extrabold transition cursor-pointer border border-blue-400/30"
+                  >
+                    Lưu Khóa Học
+                  </button>
+                </div>
               </div>
             </form>
           </div>

@@ -19,18 +19,51 @@ function AppContent() {
 
   // Background data cache warmup for 0ms instant tab switching
   useWarmupDataCache(currentUser);
-  const [activeTab, setActiveTab] = useState<string>(() => {
+  // Helper to parse current hash into valid tabId
+  const getInitialTab = (): string => {
     const user = getCurrentUser();
-    return user?.role === 'student' ? 'assignments' : 'dashboard';
-  });
+    const isStudent = user?.role === 'student';
+    const hash = window.location.hash.replace(/^#\/?/, '').trim();
+    if (hash && TAB_DEFINITIONS.some((t) => t.id === hash)) {
+      if (isStudent && hash !== 'assignments' && hash !== 'results') {
+        return 'assignments';
+      }
+      return hash;
+    }
+    return isStudent ? 'assignments' : 'dashboard';
+  };
+
+  const [activeTab, setActiveTab] = useState<string>(() => getInitialTab());
 
   // Track visited tabs to mount on-demand and keep alive for 0ms instant tab switching
   const [visitedTabIds, setVisitedTabIds] = useState<Set<string>>(() => {
-    const initial = getCurrentUser()?.role === 'student' ? 'assignments' : 'dashboard';
-    return new Set([initial]);
+    return new Set([getInitialTab()]);
   });
 
+  // Keep URL hash in sync with browser navigation (Back/Forward buttons)
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash.replace(/^#\/?/, '').trim();
+      if (hash && TAB_DEFINITIONS.some((t) => t.id === hash)) {
+        if (currentUser?.role === 'student' && hash !== 'assignments' && hash !== 'results') {
+          return;
+        }
+        setActiveTab(hash);
+        setVisitedTabIds((prev) => new Set([...prev, hash]));
+      }
+    };
+    window.addEventListener('hashchange', handleHashChange);
+    // Ensure initial hash matches active tab if empty
+    if (!window.location.hash) {
+      window.location.hash = activeTab;
+    }
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, [currentUser, activeTab]);
+
   const handleSelectTab = (tabId: string) => {
+    if (window.location.hash !== `#${tabId}`) {
+      window.location.hash = tabId;
+    }
     setActiveTab(tabId);
     setVisitedTabIds((prev) => {
       if (prev.has(tabId)) return prev;
@@ -112,6 +145,7 @@ function AppContent() {
     setCurrentUser(null);
     setActiveTab('dashboard');
     setVisitedTabIds(new Set(['dashboard']));
+    window.location.hash = 'dashboard';
     showToast('Đã đăng xuất tài khoản', 'success');
   };
 
@@ -120,6 +154,7 @@ function AppContent() {
     const targetTab = user.role === 'student' ? 'assignments' : 'dashboard';
     setActiveTab(targetTab);
     setVisitedTabIds(new Set([targetTab]));
+    window.location.hash = targetTab;
   };
 
   // If user is not logged in, show LoginPage
@@ -137,7 +172,7 @@ function AppContent() {
     : TAB_DEFINITIONS;
 
   return (
-    <div className="relative flex flex-col h-screen w-screen bg-[#08090e] text-slate-50 overflow-hidden font-sans select-none">
+    <div className="relative flex flex-col h-screen w-screen bg-[#07090e] text-slate-50 overflow-hidden font-sans select-none">
       <div className="relative flex flex-row flex-1 overflow-hidden p-4 gap-4 z-10">
         {/* SIDEBAR NAVIGATION */}
         <Sidebar
@@ -160,7 +195,7 @@ function AppContent() {
 
         {/* MAIN BODY SKELETON */}
         <div className="flex-1 flex flex-col overflow-hidden bg-transparent">
-          <main className="flex-1 overflow-hidden bg-transparent relative gradient-border-card rounded-2xl">
+          <main className="flex-1 overflow-hidden bg-[#0c0f1e] border border-[#1e2742] relative rounded-2xl shadow-2xl">
             {visibleTabs.map((tab) => {
               const isActive = activeTab === tab.id;
               const isVisited = visitedTabIds.has(tab.id);

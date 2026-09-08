@@ -13,6 +13,7 @@ import Settings from '../pages/settings';
 import DocumentManager from '../pages/document-manager';
 import CanvasBoardPage from '../pages/canvas-board';
 import WaitingForDevelopment from '../components/WaitingForDevelopment';
+import DashboardPage from '../pages/dashboard';
 import StudentsPage from '../pages/students';
 import TeachersPage from '../pages/teachers';
 import ClassesPage from '../pages/classes';
@@ -60,7 +61,7 @@ export const TAB_DEFINITIONS: TabDefinition[] = [
     label: 'Bảng Điều Khiển',
     icon: LayoutDashboard,
     section: 'none',
-    render: () => <WaitingForDevelopment title="Bảng Điều Khiển" />
+    render: () => <DashboardPage />
   },
   {
     id: 'students',

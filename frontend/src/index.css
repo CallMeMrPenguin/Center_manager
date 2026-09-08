@@ -8,9 +8,9 @@
   --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
   --background: #06070a;
   --foreground: #ffffff;
-  --primary: #5c36f5;
-  --primary-hover: #7351f7;
-  --primary-light: rgba(92, 54, 245, 0.14);
+  --primary: #2563eb;
+  --primary-hover: #3b82f6;
+  --primary-light: rgba(37, 99, 235, 0.14);
   --success: #10b981;
   --success-bg: rgba(16, 185, 129, 0.12);
   --warning: #f59e0b;
@@ -194,12 +194,10 @@ input[type="month"]::-webkit-calendar-picker-indicator {
 }
 
 .ambient-bg-dark {
-  background-color: #08090e;
+  background-color: #07090e;
   background-image:
-    radial-gradient(ellipse 65% 40% at 20% 0%, rgba(92, 54, 245, 0.22), transparent 75%),
-    radial-gradient(ellipse 55% 45% at 85% 15%, rgba(236, 72, 153, 0.16), transparent 70%),
-    radial-gradient(ellipse 60% 45% at 50% 90%, rgba(6, 182, 212, 0.16), transparent 75%),
-    radial-gradient(ellipse 40% 30% at 80% 85%, rgba(147, 51, 234, 0.12), transparent 60%);
+    radial-gradient(ellipse 60% 40% at 50% 0%, rgba(37, 99, 235, 0.08), transparent 70%),
+    radial-gradient(ellipse 50% 35% at 85% 85%, rgba(15, 23, 42, 0.5), transparent 70%);
   background-attachment: fixed;
 }
 
@@ -229,7 +227,7 @@ input[type="month"]::-webkit-calendar-picker-indicator {
 }
 
 .event-float:hover {
-  transform: translateY(-2px) scale(1.02);
+  transform: translateY(-2px);
 }
 
 .sidebar-glass-glow {
@@ -237,7 +235,7 @@ input[type="month"]::-webkit-calendar-picker-indicator {
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
   border: 1px solid rgba(255, 255, 255, 0.08) !important;
-  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.65), 0 0 20px rgba(92, 54, 245, 0.15) !important;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.65) !important;
   transition: width 250ms cubic-bezier(0.4, 0, 0.2, 1);
   will-change: width;
 }
@@ -252,74 +250,62 @@ input[type="month"]::-webkit-calendar-picker-indicator {
 
 .kpi-editorial-card {
   position: relative;
-  border: 1.5px solid transparent !important;
-  background-clip: padding-box, border-box !important;
-  background-origin: padding-box, border-box !important;
-  background-image: linear-gradient(#141824, #141824), linear-gradient(135deg, rgba(92, 54, 245, 0.85) 0%, rgba(168, 85, 247, 0.65) 50%, rgba(6, 182, 212, 0.85) 100%) !important;
-  border-radius: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  background: #0f1424 !important;
+  border-radius: 20px;
   overflow: hidden;
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35), 0 0 20px rgba(92, 54, 245, 0.15);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
 }
 
 .kpi-card-green {
   position: relative;
-  border: 1.5px solid transparent !important;
-  background-clip: padding-box, border-box !important;
-  background-origin: padding-box, border-box !important;
-  background-image: linear-gradient(#0d111c, #0d111c), linear-gradient(135deg, rgba(16, 185, 129, 0.45) 0%, rgba(16, 185, 129, 0.15) 100%) !important;
-  border-radius: 22px;
-  box-shadow: inset 0 0 15px rgba(16, 185, 129, 0.35), 0 12px 30px rgba(0, 0, 0, 0.45), 0 0 25px rgba(16, 185, 129, 0.15) !important;
+  border: 1px solid rgba(16, 185, 129, 0.25) !important;
+  background: #0d161a !important;
+  border-radius: 20px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
 }
 
 .kpi-card-red {
   position: relative;
-  border: 1.5px solid transparent !important;
-  background-clip: padding-box, border-box !important;
-  background-origin: padding-box, border-box !important;
-  background-image: linear-gradient(#0d111c, #0d111c), linear-gradient(135deg, rgba(239, 68, 68, 0.45) 0%, rgba(239, 68, 68, 0.15) 100%) !important;
-  border-radius: 22px;
-  box-shadow: inset 0 0 15px rgba(239, 68, 68, 0.35), 0 12px 30px rgba(0, 0, 0, 0.45), 0 0 25px rgba(239, 68, 68, 0.15) !important;
+  border: 1px solid rgba(239, 68, 68, 0.25) !important;
+  background: #190e14 !important;
+  border-radius: 20px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
 }
 
 .kpi-card-blue {
   position: relative;
-  border: 1.5px solid transparent !important;
-  background-clip: padding-box, border-box !important;
-  background-origin: padding-box, border-box !important;
-  background-image: linear-gradient(#0d111c, #0d111c), linear-gradient(135deg, rgba(59, 130, 246, 0.45) 0%, rgba(59, 130, 246, 0.15) 100%) !important;
-  border-radius: 22px;
-  box-shadow: inset 0 0 15px rgba(59, 130, 246, 0.35), 0 12px 30px rgba(0, 0, 0, 0.45), 0 0 25px rgba(59, 130, 246, 0.15) !important;
+  border: 1px solid rgba(37, 99, 235, 0.25) !important;
+  background: #0d1222 !important;
+  border-radius: 20px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
 }
 
 .kpi-card-purple {
   position: relative;
-  border: 1.5px solid transparent !important;
-  background-clip: padding-box, border-box !important;
-  background-origin: padding-box, border-box !important;
-  background-image: linear-gradient(#0d111c, #0d111c), linear-gradient(135deg, rgba(168, 85, 247, 0.45) 0%, rgba(168, 85, 247, 0.15) 100%) !important;
-  border-radius: 22px;
-  box-shadow: inset 0 0 15px rgba(168, 85, 247, 0.35), 0 12px 30px rgba(0, 0, 0, 0.45), 0 0 25px rgba(168, 85, 247, 0.15) !important;
+  border: 1px solid rgba(168, 85, 247, 0.25) !important;
+  background: #140e20 !important;
+  border-radius: 20px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
 }
 
 .kpi-card-amber {
   position: relative;
-  border: 1.5px solid transparent !important;
-  background-clip: padding-box, border-box !important;
-  background-origin: padding-box, border-box !important;
-  background-image: linear-gradient(#0d111c, #0d111c), linear-gradient(135deg, rgba(245, 158, 11, 0.45) 0%, rgba(245, 158, 11, 0.15) 100%) !important;
-  border-radius: 22px;
-  box-shadow: inset 0 0 15px rgba(245, 158, 11, 0.35), 0 12px 30px rgba(0, 0, 0, 0.45), 0 0 25px rgba(245, 158, 11, 0.15) !important;
+  border: 1px solid rgba(245, 158, 11, 0.25) !important;
+  background: #18130d !important;
+  border-radius: 20px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
 }
 
 .schedule-inward-glow {
-  box-shadow: inset 0 0 14px var(--glow-color-alpha, rgba(99, 102, 241, 0.35)), inset 0 0 2px var(--glow-color, #6366f1), 0 4px 14px rgba(0, 0, 0, 0.4) !important;
-  border-radius: 16px !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+  border-radius: 12px !important;
 }
 
 .today-inward-glow {
-  background-color: #1f2042 !important;
-  box-shadow: inset 0 0 20px rgba(92, 54, 245, 0.25) !important;
-  outline: 2px solid #5c36f5;
+  background-color: #141b2f !important;
+  box-shadow: inset 0 0 12px rgba(37, 99, 235, 0.2) !important;
+  outline: 2px solid #2563eb;
   outline-offset: -2px;
   z-index: 10;
 }
@@ -669,8 +655,8 @@ input:not(.canvas-text-editor):not(.white-paper-input):focus,
 select:focus,
 textarea:not(.code-editor-textarea):not(.canvas-text-editor):not(.white-paper-input):focus {
   outline: none;
-  border-color: rgba(92, 54, 245, 0.6) !important;
-  box-shadow: 0 0 0 2px rgba(92, 54, 245, 0.2) !important;
+  border-color: rgba(37, 99, 235, 0.6) !important;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2) !important;
 }
 
 .white-paper-input {
@@ -688,7 +674,7 @@ textarea:not(.code-editor-textarea):not(.canvas-text-editor):not(.white-paper-in
 .white-paper-input:focus {
   outline: none !important;
   border: none !important;
-  border-bottom: 2px solid #5c36f5 !important;
+  border-bottom: 2px solid #2563eb !important;
   box-shadow: none !important;
 }
 
@@ -721,15 +707,15 @@ textarea:not(.code-editor-textarea):not(.canvas-text-editor):not(.white-paper-in
 
 .code-editor-textarea:focus {
   outline: none !important;
-  border-color: rgba(92, 54, 245, 0.7) !important;
-  box-shadow: 0 0 0 2px rgba(92, 54, 245, 0.25) !important;
+  border-color: rgba(37, 99, 235, 0.7) !important;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.25) !important;
 }
 
 .filter-dropdown-menu {
   background-color: #12172a !important;
   background: #12172a !important;
   border: 1px solid #28345a !important;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.75), 0 0 20px rgba(92, 54, 245, 0.15) !important;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.75) !important;
   border-radius: 16px !important;
   opacity: 1 !important;
   backdrop-filter: none !important;

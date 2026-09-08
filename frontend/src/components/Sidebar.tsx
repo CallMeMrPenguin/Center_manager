@@ -67,7 +67,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       <button
         type="button"
         onClick={toggleSidebar}
-        className="absolute -right-3 top-6 w-6 h-6 rounded-full bg-[#181d2e] hover:bg-[#5c36f5] text-slate-300 hover:text-white border border-white/20 shadow-[0_2px_10px_rgba(0,0,0,0.6)] flex items-center justify-center transition-all duration-200 hover:scale-110 cursor-pointer z-50 active:scale-95 opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto"
+        className="absolute -right-3 top-6 w-6 h-6 rounded-full bg-[#181d2e] hover:bg-[#2563eb] text-slate-300 hover:text-white border border-white/20 shadow-[0_2px_10px_rgba(0,0,0,0.6)] flex items-center justify-center transition-all duration-200 hover:scale-110 cursor-pointer z-50 active:scale-95 opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto"
         title={isSidebarExpanded ? 'Thu gọn thanh điều hướng' : 'Mở rộng thanh điều hướng'}
       >
         {isSidebarExpanded ? (
@@ -92,7 +92,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <span className="text-xs font-black tracking-wide uppercase text-white block leading-none">
             EduPlatform
           </span>
-          <span className="text-[8.5px] font-black tracking-[0.18em] uppercase text-indigo-400 block mt-1">
+          <span className="text-[8.5px] font-black tracking-[0.18em] uppercase text-blue-400 block mt-1">
             Center Manager
           </span>
         </div>
@@ -156,11 +156,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
                           : 'w-10 h-10 mx-auto rounded-xl justify-center p-0 hover:scale-105 active:scale-95'
                       } ${
                         isActive
-                          ? 'bg-indigo-500/25 border-2 border-indigo-400/90 shadow-[0_0_12px_rgba(92,54,245,0.4)]'
-                          : 'hover:bg-white/[0.08] border-2 border-transparent'
+                          ? 'bg-blue-600/20 border-2 border-blue-500/80 text-white'
+                          : 'hover:bg-white/[0.08] border-2 border-transparent text-slate-300'
                       } ${
                         draggedIndex === idx
-                          ? 'opacity-40 border border-dashed border-indigo-400 bg-indigo-500/10'
+                          ? 'opacity-40 border border-dashed border-blue-400 bg-blue-500/10'
                           : ''
                       }`}
                     >
