@@ -1,0 +1,67 @@
+import React from 'react';
+import { Users, GraduationCap, CalendarCheck, UserCheck } from 'lucide-react';
+import { DashboardStats } from '../types';
+
+interface DashboardStatsGridProps {
+  stats: DashboardStats;
+}
+
+export const DashboardStatsGrid: React.FC<DashboardStatsGridProps> = ({ stats }) => {
+  return (
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="bg-[#0e1322] border border-[#1e2742] rounded-2xl p-4.5 flex flex-col justify-between">
+        <div className="flex items-center justify-between">
+          <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Học sinh đang học</span>
+          <div className="p-2 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20">
+            <Users size={16} />
+          </div>
+        </div>
+        <div className="mt-4 flex items-baseline justify-between">
+          <span className="text-2xl font-black text-white tracking-tight">{stats.totalStudents}</span>
+          <span className="text-[11px] font-bold text-blue-400">Đang theo học</span>
+        </div>
+      </div>
+
+      <div className="bg-[#0e1322] border border-[#1e2742] rounded-2xl p-4.5 flex flex-col justify-between">
+        <div className="flex items-center justify-between">
+          <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Lớp học hoạt động</span>
+          <div className="p-2 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+            <GraduationCap size={16} />
+          </div>
+        </div>
+        <div className="mt-4 flex items-baseline justify-between">
+          <span className="text-2xl font-black text-white tracking-tight">{stats.activeClasses}</span>
+          <span className="text-[11px] font-bold text-indigo-400">Lớp trong kỳ</span>
+        </div>
+      </div>
+
+      <div className="bg-[#0e1322] border border-[#1e2742] rounded-2xl p-4.5 flex flex-col justify-between">
+        <div className="flex items-center justify-between">
+          <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Điểm danh hôm nay</span>
+          <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+            <CalendarCheck size={16} />
+          </div>
+        </div>
+        <div className="mt-4 flex items-baseline justify-between">
+          <span className="text-2xl font-black text-white tracking-tight">
+            {stats.attendanceCompletedCount} / {stats.todaySessionsCount}
+          </span>
+          <span className="text-[11px] font-bold text-emerald-400">Ca đã điểm danh</span>
+        </div>
+      </div>
+
+      <div className="bg-[#0e1322] border border-[#1e2742] rounded-2xl p-4.5 flex flex-col justify-between">
+        <div className="flex items-center justify-between">
+          <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Đội ngũ giáo viên</span>
+          <div className="p-2 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20">
+            <UserCheck size={16} />
+          </div>
+        </div>
+        <div className="mt-4 flex items-baseline justify-between">
+          <span className="text-2xl font-black text-white tracking-tight">{stats.totalTeachers}</span>
+          <span className="text-[11px] font-bold text-amber-400">Giảng viên/Trợ giảng</span>
+        </div>
+      </div>
+    </div>
+  );
+};

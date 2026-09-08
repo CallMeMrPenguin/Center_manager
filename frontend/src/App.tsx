@@ -19,16 +19,21 @@ function AppContent() {
 
   // Background data cache warmup for 0ms instant tab switching
   useWarmupDataCache(currentUser);
-  // Helper to parse current hash into valid tabId
+  // Helper to parse current URL path into valid tabId
   const getInitialTab = (): string => {
     const user = getCurrentUser();
     const isStudent = user?.role === 'student';
-    const hash = window.location.hash.replace(/^#\/?/, '').trim();
-    if (hash && TAB_DEFINITIONS.some((t) => t.id === hash)) {
-      if (isStudent && hash !== 'assignments' && hash !== 'results') {
+    // 1. Check path first (/students -> students)
+    const rawPath = window.location.pathname.replace(/^\//, '').split('/')[0].trim();
+    // 2. Check legacy hash fallback if someone opens old bookmark (/#/students -> students)
+    const rawHash = window.location.hash.replace(/^#\/?/, '').trim();
+    const candidate = rawPath || rawHash;
+
+    if (candidate && TAB_DEFINITIONS.some((t) => t.id === candidate)) {
+      if (isStudent && candidate !== 'assignments' && candidate !== 'results') {
         return 'assignments';
       }
-      return hash;
+      return candidate;
     }
     return isStudent ? 'assignments' : 'dashboard';
   };
@@ -40,29 +45,33 @@ function AppContent() {
     return new Set([getInitialTab()]);
   });
 
-  // Keep URL hash in sync with browser navigation (Back/Forward buttons)
+  // Keep URL pathname in sync with browser navigation (Back/Forward buttons)
   useEffect(() => {
-    const handleHashChange = () => {
-      const hash = window.location.hash.replace(/^#\/?/, '').trim();
-      if (hash && TAB_DEFINITIONS.some((t) => t.id === hash)) {
-        if (currentUser?.role === 'student' && hash !== 'assignments' && hash !== 'results') {
+    const handlePopState = () => {
+      const path = window.location.pathname.replace(/^\//, '').split('/')[0].trim();
+      if (path && TAB_DEFINITIONS.some((t) => t.id === path)) {
+        if (currentUser?.role === 'student' && path !== 'assignments' && path !== 'results') {
           return;
         }
-        setActiveTab(hash);
-        setVisitedTabIds((prev) => new Set([...prev, hash]));
+        setActiveTab(path);
+        setVisitedTabIds((prev) => new Set([...prev, path]));
       }
     };
-    window.addEventListener('hashchange', handleHashChange);
-    // Ensure initial hash matches active tab if empty
-    if (!window.location.hash) {
-      window.location.hash = activeTab;
+    window.addEventListener('popstate', handlePopState);
+
+    // If on root '/' or using legacy '#', clean up URL to clean path without reload
+    const currentTarget = `/${activeTab}`;
+    if (window.location.pathname !== currentTarget || window.location.hash) {
+      window.history.replaceState({ tabId: activeTab }, '', currentTarget);
     }
-    return () => window.removeEventListener('hashchange', handleHashChange);
+
+    return () => window.removeEventListener('popstate', handlePopState);
   }, [currentUser, activeTab]);
 
   const handleSelectTab = (tabId: string) => {
-    if (window.location.hash !== `#${tabId}`) {
-      window.location.hash = tabId;
+    const targetPath = `/${tabId}`;
+    if (window.location.pathname !== targetPath) {
+      window.history.pushState({ tabId }, '', targetPath);
     }
     setActiveTab(tabId);
     setVisitedTabIds((prev) => {
@@ -145,7 +154,7 @@ function AppContent() {
     setCurrentUser(null);
     setActiveTab('dashboard');
     setVisitedTabIds(new Set(['dashboard']));
-    window.location.hash = 'dashboard';
+    window.history.pushState({ tabId: 'dashboard' }, '', '/dashboard');
     showToast('Đã đăng xuất tài khoản', 'success');
   };
 
@@ -154,7 +163,7 @@ function AppContent() {
     const targetTab = user.role === 'student' ? 'assignments' : 'dashboard';
     setActiveTab(targetTab);
     setVisitedTabIds(new Set([targetTab]));
-    window.location.hash = targetTab;
+    window.history.pushState({ tabId: targetTab }, '', `/${targetTab}`);
   };
 
   // If user is not logged in, show LoginPage

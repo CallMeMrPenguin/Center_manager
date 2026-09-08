@@ -108,8 +108,17 @@ export default function ClassesPage() {
     setEnrollModalOpen(true);
   };
 
-  // Auto-restore selected class on page refresh from sessionStorage
+  // Auto-restore or navigate to selected class from dashboard 1-click roll-call
   useEffect(() => {
+    const handleNavigate = (e: any) => {
+      const cid = e?.detail?.classId;
+      if (cid && classes.length > 0) {
+        const found = classes.find((c) => c.id === Number(cid));
+        if (found) setSelectedClass(found);
+      }
+    };
+    window.addEventListener('navigate-to-class', handleNavigate);
+
     const storedClassId = sessionStorage.getItem('center_manager_last_class_id');
     if (storedClassId && !selectedClass && classes.length > 0) {
       const found = classes.find((c) => String(c.id) === storedClassId);
@@ -117,6 +126,7 @@ export default function ClassesPage() {
         setSelectedClass(found);
       }
     }
+    return () => window.removeEventListener('navigate-to-class', handleNavigate);
   }, [classes, selectedClass, setSelectedClass]);
 
   const handleSelectClass = (cls: ClassItem | null) => {
