@@ -6,6 +6,7 @@ import { DataTable } from '../../../../components/DataTable';
 import { CheckScoreInput } from '../CheckScoreInput';
 import { SessionOverviewBanner } from './SessionOverviewBanner';
 import { showToast } from '../../../../components/Toast';
+import { format1Dec } from '../../../../utils';
 
 interface AttendanceGradesTabProps {
   selectedClass: ClassItem;
@@ -139,6 +140,61 @@ export const AttendanceGradesTab: React.FC<AttendanceGradesTabProps> = ({
             parseAndFormatScore={parseAndFormatScore}
           />
         ),
+      },
+      {
+        id: 'score_discrepancy',
+        header: 'Độ Lệch',
+        accessorFn: (rec) => {
+          if (rec.status === 'Vắng mặt') return -999;
+          const hw =
+            rec.homework !== null && rec.homework !== undefined && rec.homework !== ''
+              ? Number(rec.homework)
+              : null;
+          if (hw === null || isNaN(hw) || hw <= 0) return -999;
+
+          const c1 =
+            rec.check_1 !== null && rec.check_1 !== undefined && rec.check_1 !== ''
+              ? Number(rec.check_1)
+              : null;
+          const c2 =
+            rec.check_2 !== null && rec.check_2 !== undefined && rec.check_2 !== ''
+              ? Number(rec.check_2)
+              : null;
+
+          const validC1 = c1 !== null && !isNaN(c1);
+          const validC2 = c2 !== null && !isNaN(c2);
+
+          if (!validC1 && !validC2) return -999;
+
+          const checkAvg = validC1 && validC2 ? (c1! + c2!) / 2 : validC1 ? c1! : c2!;
+          const diff = hw - checkAvg;
+          return diff > 0 ? diff : -999;
+        },
+        cell: ({ getValue }) => {
+          const val = getValue<number>();
+          if (val === undefined || val === null || val <= 0) {
+            return (
+              <div className="flex items-center justify-center">
+                <span className="text-slate-600 font-bold text-xs">-</span>
+              </div>
+            );
+          }
+          const isLarge = val >= 1.5;
+          return (
+            <div className="flex items-center justify-center">
+              <span
+                className={`px-2 py-0.5 rounded-lg text-xs font-black transition ${
+                  isLarge
+                    ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 shadow-[0_0_8px_rgba(245,158,11,0.2)]'
+                    : 'bg-white/5 text-slate-300 border border-white/10'
+                }`}
+                title={`Độ lệch: BTVN cao hơn TB Check trên lớp +${format1Dec(val)} điểm`}
+              >
+                +{format1Dec(val)}
+              </span>
+            </div>
+          );
+        },
       },
       {
         id: 'actions',
