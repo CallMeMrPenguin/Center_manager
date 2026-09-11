@@ -6,13 +6,8 @@ import { ClassListView } from './components/ClassListView';
 import { ClassDetailHeader } from './components/ClassDetailHeader';
 import { AttendanceGradesTab } from './components/tabs/AttendanceGradesTab';
 import { SeatingChartTab } from './components/tabs/SeatingChartTab';
-import { ClassFormModal } from './components/modals/ClassFormModal';
-import { BatchEnrollModal } from './components/modals/BatchEnrollModal';
-import { StudentActionModal } from './components/modals/StudentActionModal';
-import { GradingPairsModal } from './components/modals/GradingPairsModal';
+import { ClassModalsContainer } from './components/modals/ClassModalsContainer';
 import RelationshipsTab from '../../components/seating/RelationshipsTab';
-import BlossomResultModal from '../../components/seating/BlossomResultModal';
-import { TestConfigModal } from '../../components/TestConfigModal';
 import { useConfirm } from '../../components/ConfirmDialog';
 import { ClassItem, EnrolledStudent } from './types';
 import { notifyDataChanged } from '../../utils';
@@ -83,6 +78,7 @@ export default function ClassesPage() {
     handleAutoMixSeating,
     handleGeneticMixSeating,
     handleBlossomSwap,
+    handleSwapStudents,
   } = useSeatingLayout(selectedClass, enrolledStudents, attendanceRecords, attendanceDate);
 
   // Sub-tabs & modal local states with deep link initialization
@@ -91,6 +87,8 @@ export default function ClassesPage() {
     if (tab === 'seating' || tab === 'relationships' || tab === 'grades') return tab;
     return 'grades';
   });
+
+  const [cheatingModalOpen, setCheatingModalOpen] = useState(false);
 
   const [classModalOpen, setClassModalOpen] = useState(false);
   const [editingClass, setEditingClass] = useState<ClassItem | null>(null);
@@ -282,6 +280,7 @@ export default function ClassesPage() {
                 await flushSaveAttendance();
                 handleExportDocx();
               }}
+              onOpenCheatingModal={() => setCheatingModalOpen(true)}
             />
           )}
 
@@ -311,6 +310,7 @@ export default function ClassesPage() {
               onDropOnSeat={handleDropOnSeat}
               onDragStartSeat={setDraggedSeat}
               onDragStartUnassigned={setDraggedUnassigned}
+              onOpenCheatingModal={() => setCheatingModalOpen(true)}
             />
           )}
 
@@ -328,29 +328,27 @@ export default function ClassesPage() {
         </div>
       )}
 
-      {/* MODAL 1: CREATE / EDIT CLASS */}
-      <ClassFormModal
-        isOpen={classModalOpen}
+      {/* UNIFIED MODALS CONTAINER */}
+      <ClassModalsContainer
+        classModalOpen={classModalOpen}
         editingClass={editingClass}
         teachers={teachers}
-        onClose={() => setClassModalOpen(false)}
-        onSaved={() => {
+        onCloseClassModal={() => setClassModalOpen(false)}
+        onClassSaved={() => {
           setClassModalOpen(false);
           loadClasses(true);
           notifyDataChanged();
         }}
         onDeleteClass={handleDeleteClass}
-      />
 
-      {/* MODAL 2: BATCH ENROLL STUDENTS */}
-      <BatchEnrollModal
-        isOpen={enrollModalOpen}
+        enrollModalOpen={enrollModalOpen}
         selectedClass={selectedClass}
         allStudents={allStudents}
         enrolledStudents={enrolledStudents}
-        onClose={() => setEnrollModalOpen(false)}
-        onUnenroll={handleUnenrollStudent}
-        onEnrolled={async () => {
+        attendanceDate={attendanceDate}
+        onCloseEnrollModal={() => setEnrollModalOpen(false)}
+        onUnenrollStudent={handleUnenrollStudent}
+        onBatchEnrolled={async () => {
           if (selectedClass) {
             await Promise.all([
               loadEnrolledStudents(selectedClass.id),
@@ -359,50 +357,36 @@ export default function ClassesPage() {
             notifyDataChanged(['classes', 'students', 'attendance', 'seating']);
           }
         }}
-      />
 
-      {/* MODAL 3: STUDENT ACTION / UNENROLL */}
-      <StudentActionModal
-        isOpen={actionModalOpen}
-        student={selectedStudentForAction}
-        selectedClass={selectedClass}
-        onClose={() => setActionModalOpen(false)}
-        onUnenroll={async (stId) => {
-          await handleUnenrollStudent(stId);
-          setActionModalOpen(false);
-        }}
-      />
+        actionModalOpen={actionModalOpen}
+        selectedStudentForAction={selectedStudentForAction}
+        onCloseActionModal={() => setActionModalOpen(false)}
 
-      {/* MODAL 4: GRADING PAIRS */}
-      <GradingPairsModal
-        isOpen={gradingPairsModal}
+        gradingPairsModal={gradingPairsModal}
         gradingPairs={gradingPairs}
-        onClose={() => setGradingPairsModal(false)}
-      />
+        onCloseGradingPairsModal={() => setGradingPairsModal(false)}
 
-      {/* MODAL 5: BLOSSOM MATCHING RESULT */}
-      <BlossomResultModal
-        isOpen={blossomModalOpen}
-        onClose={() => setBlossomModalOpen(false)}
-        pairs={blossomPairs}
-        unmatched={blossomUnmatched}
-      />
+        blossomModalOpen={blossomModalOpen}
+        blossomPairs={blossomPairs}
+        blossomUnmatched={blossomUnmatched}
+        onCloseBlossomModal={() => setBlossomModalOpen(false)}
 
-      {/* MODAL 6: SESSION TEST CONFIG */}
-      {selectedClass && (
-        <TestConfigModal
-          isOpen={testConfigModalOpen}
-          onClose={() => setTestConfigModalOpen(false)}
-          classId={selectedClass.id}
-          date={attendanceDate}
-          grade={selectedClass.grade}
-          onSaved={async () => {
-            await flushSaveAttendance(true);
+        testConfigModalOpen={testConfigModalOpen}
+        onCloseTestConfigModal={() => setTestConfigModalOpen(false)}
+        onTestConfigSaved={async () => {
+          await flushSaveAttendance(true);
+          if (selectedClass) {
             loadAttendanceData(selectedClass.id, attendanceDate);
-            notifyDataChanged(['schedule', 'attendance', 'reports', 'analytics', 'classes']);
-          }}
-        />
-      )}
+          }
+          notifyDataChanged(['schedule', 'attendance', 'reports', 'analytics', 'classes']);
+        }}
+
+        cheatingModalOpen={cheatingModalOpen}
+        seatingGrid={seatingGrid}
+        attendanceRecords={attendanceRecords}
+        onCloseCheatingModal={() => setCheatingModalOpen(false)}
+        onSwapSeats={handleSwapStudents}
+      />
     </div>
   );
 }

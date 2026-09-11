@@ -5,6 +5,7 @@ import {
   ChevronUp,
   CheckCircle2,
   SlidersHorizontal,
+  Eye,
 } from 'lucide-react';
 import { AttendanceRecord } from '../../types';
 import { trunc1Dec, format1Dec } from '../../../../utils';
@@ -14,12 +15,14 @@ interface SessionOverviewBannerProps {
   attendanceRecords: AttendanceRecord[];
   attendanceDate: string;
   onFilterStudent?: (studentName: string) => void;
+  onOpenCheatingModal?: () => void;
 }
 
 export const SessionOverviewBanner: React.FC<SessionOverviewBannerProps> = ({
   attendanceRecords,
   attendanceDate,
   onFilterStudent,
+  onOpenCheatingModal,
 }) => {
   const [isExpanded, setIsExpanded] = useState(true);
   const {
@@ -144,6 +147,18 @@ export const SessionOverviewBanner: React.FC<SessionOverviewBannerProps> = ({
                   {opt.label}
                 </button>
               ))}
+
+              {onOpenCheatingModal && (
+                <button
+                  type="button"
+                  onClick={onOpenCheatingModal}
+                  className="ml-2 flex items-center gap-1.5 px-3 py-1 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/35 font-extrabold transition cursor-pointer shadow-sm"
+                  title="Dự đoán tỉ lệ học sinh nhìn bài dựa vào vị trí chỗ ngồi và điểm số"
+                >
+                  <Eye size={13} />
+                  <span>Dò Nhìn Bài</span>
+                </button>
+              )}
             </div>
           </div>
 

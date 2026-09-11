@@ -305,5 +305,25 @@ export function useSeatingLayout(
     handleAutoMixSeating,
     handleGeneticMixSeating,
     handleBlossomSwap,
+    handleSwapStudents: (studentAId: number, studentBId: number) => {
+      const newGrid: SeatingCol[] = JSON.parse(JSON.stringify(seatingGrid));
+      let seatA: any = null;
+      let seatB: any = null;
+
+      newGrid.forEach((col) => {
+        col.seats.forEach((seat) => {
+          if (seat.student_id === studentAId) seatA = seat;
+          if (seat.student_id === studentBId) seatB = seat;
+        });
+      });
+
+      if (seatA && seatB) {
+        const tempId = seatA.student_id;
+        const tempName = seatA.student_name;
+        seatA.student_id = seatB.student_id;
+        seatA.student_name = seatB.student_name;
+        setSeatingGrid(newGrid);
+      }
+    },
   };
 }

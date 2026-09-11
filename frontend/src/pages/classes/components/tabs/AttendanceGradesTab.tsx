@@ -18,6 +18,7 @@ interface AttendanceGradesTabProps {
   onOpenStudentActionModal: (student: EnrolledStudent) => void;
   onExportExcel: () => void;
   onExportDocx: () => void;
+  onOpenCheatingModal?: () => void;
 }
 
 export const AttendanceGradesTab: React.FC<AttendanceGradesTabProps> = ({
@@ -30,6 +31,7 @@ export const AttendanceGradesTab: React.FC<AttendanceGradesTabProps> = ({
   onOpenStudentActionModal,
   onExportExcel,
   onExportDocx,
+  onOpenCheatingModal,
 }) => {
   const attendanceColumns = useMemo<ColumnDef<any>[]>(
     () => [
@@ -242,6 +244,7 @@ export const AttendanceGradesTab: React.FC<AttendanceGradesTabProps> = ({
         attendanceRecords={attendanceRecords}
         attendanceDate={attendanceDate}
         onFilterStudent={handleFilterStudentChip}
+        onOpenCheatingModal={onOpenCheatingModal}
       />
 
       {/* 2. UNIFIED ATTENDANCE & GRADES DATATABLE */}
