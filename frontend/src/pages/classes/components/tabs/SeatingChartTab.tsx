@@ -1,7 +1,7 @@
 import React from 'react';
 import {
   Calendar, ChevronLeft, ChevronRight, Shuffle, RefreshCw,
-  FileCheck2, Save, Move, Minus, Plus, Eye,
+  FileCheck2, Save, Move, Minus, Plus,
 } from 'lucide-react';
 import { EnrolledStudent, SeatingCol } from '../../types';
 import { CustomDatePicker } from '../../../../components/CustomDatePicker';
@@ -30,7 +30,6 @@ interface SeatingChartTabProps {
   onDropOnSeat: (targetColIdx: number, targetDeskIdx: number, targetPosIdx: number) => void;
   onDragStartSeat: (seatPos: { colIdx: number; deskIdx: number; posIdx: number }) => void;
   onDragStartUnassigned: (student: EnrolledStudent) => void;
-  onOpenCheatingModal?: () => void;
 }
 
 export const SeatingChartTab: React.FC<SeatingChartTabProps> = ({
@@ -57,7 +56,6 @@ export const SeatingChartTab: React.FC<SeatingChartTabProps> = ({
   onDropOnSeat,
   onDragStartSeat,
   onDragStartUnassigned,
-  onOpenCheatingModal,
 }) => {
   return (
     <div className="space-y-4">
@@ -146,19 +144,6 @@ export const SeatingChartTab: React.FC<SeatingChartTabProps> = ({
               Đổi Bài
             </span>
           </button>
-
-          {onOpenCheatingModal && (
-            <button
-              onClick={onOpenCheatingModal}
-              className="group flex items-center gap-0 hover:gap-1.5 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 px-3 py-1.5 rounded-xl font-extrabold text-xs transition-all duration-300 cursor-pointer"
-              title="Dự Đoán Tỉ Lệ Nhìn Bài (AI Peeking Risk)"
-            >
-              <Eye size={14} className="shrink-0" />
-              <span className="max-w-0 opacity-0 group-hover:max-w-[160px] group-hover:opacity-100 transition-all duration-300 ease-in-out whitespace-nowrap overflow-hidden block">
-                Dò Nhìn Bài
-              </span>
-            </button>
-          )}
 
           <button
             onClick={onSaveSeating}

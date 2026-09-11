@@ -78,7 +78,6 @@ export default function ClassesPage() {
     handleAutoMixSeating,
     handleGeneticMixSeating,
     handleBlossomSwap,
-    handleSwapStudents,
   } = useSeatingLayout(selectedClass, enrolledStudents, attendanceRecords, attendanceDate);
 
   // Sub-tabs & modal local states with deep link initialization
@@ -87,8 +86,6 @@ export default function ClassesPage() {
     if (tab === 'seating' || tab === 'relationships' || tab === 'grades') return tab;
     return 'grades';
   });
-
-  const [cheatingModalOpen, setCheatingModalOpen] = useState(false);
 
   const [classModalOpen, setClassModalOpen] = useState(false);
   const [editingClass, setEditingClass] = useState<ClassItem | null>(null);
@@ -280,7 +277,6 @@ export default function ClassesPage() {
                 await flushSaveAttendance();
                 handleExportDocx();
               }}
-              onOpenCheatingModal={() => setCheatingModalOpen(true)}
             />
           )}
 
@@ -310,7 +306,6 @@ export default function ClassesPage() {
               onDropOnSeat={handleDropOnSeat}
               onDragStartSeat={setDraggedSeat}
               onDragStartUnassigned={setDraggedUnassigned}
-              onOpenCheatingModal={() => setCheatingModalOpen(true)}
             />
           )}
 
@@ -380,12 +375,6 @@ export default function ClassesPage() {
           }
           notifyDataChanged(['schedule', 'attendance', 'reports', 'analytics', 'classes']);
         }}
-
-        cheatingModalOpen={cheatingModalOpen}
-        seatingGrid={seatingGrid}
-        attendanceRecords={attendanceRecords}
-        onCloseCheatingModal={() => setCheatingModalOpen(false)}
-        onSwapSeats={handleSwapStudents}
       />
     </div>
   );

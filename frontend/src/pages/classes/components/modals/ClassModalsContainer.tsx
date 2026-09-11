@@ -1,10 +1,9 @@
 import React from 'react';
-import { ClassItem, EnrolledStudent, SeatingCol, AttendanceRecord, GradingPair, TeacherCM } from '../../types';
+import { ClassItem, EnrolledStudent, TeacherCM, GradingPair } from '../../types';
 import { ClassFormModal } from './ClassFormModal';
 import { BatchEnrollModal } from './BatchEnrollModal';
 import { StudentActionModal } from './StudentActionModal';
 import { GradingPairsModal } from './GradingPairsModal';
-import { CheatingPredictionModal } from './CheatingPredictionModal';
 import BlossomResultModal from '../../../../components/seating/BlossomResultModal';
 import { TestConfigModal } from '../../../../components/TestConfigModal';
 
@@ -47,13 +46,6 @@ interface ClassModalsContainerProps {
   testConfigModalOpen: boolean;
   onCloseTestConfigModal: () => void;
   onTestConfigSaved: () => Promise<void>;
-
-  // 7. Cheating Prediction
-  cheatingModalOpen: boolean;
-  seatingGrid: SeatingCol[];
-  attendanceRecords: AttendanceRecord[];
-  onCloseCheatingModal: () => void;
-  onSwapSeats: (studentAId: number, studentBId: number) => void;
 }
 
 export const ClassModalsContainer: React.FC<ClassModalsContainerProps> = ({
@@ -89,12 +81,6 @@ export const ClassModalsContainer: React.FC<ClassModalsContainerProps> = ({
   attendanceDate,
   onCloseTestConfigModal,
   onTestConfigSaved,
-
-  cheatingModalOpen,
-  seatingGrid,
-  attendanceRecords,
-  onCloseCheatingModal,
-  onSwapSeats,
 }) => {
   return (
     <>
@@ -157,16 +143,6 @@ export const ClassModalsContainer: React.FC<ClassModalsContainerProps> = ({
           onSaved={onTestConfigSaved}
         />
       )}
-
-      {/* 7. CHEATING / PEEKING PREDICTION MODAL */}
-      <CheatingPredictionModal
-        isOpen={cheatingModalOpen}
-        onClose={onCloseCheatingModal}
-        seatingGrid={seatingGrid}
-        attendanceRecords={attendanceRecords}
-        attendanceDate={attendanceDate}
-        onSwapSeats={onSwapSeats}
-      />
     </>
   );
 };
