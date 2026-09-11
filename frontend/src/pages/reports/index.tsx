@@ -12,9 +12,15 @@ import { useReportsData } from './hooks/useReportsData';
 import { getStudentTier } from './types';
 import { generateAcademicYears, getCurrentAcademicYear, computeStudentOverallScore } from './utils';
 
+import { getUrlParam, setUrlParams, useUrlSync } from '../../utils/navigation';
+
 export const ReportsPage: React.FC = () => {
   const topRef = useRef<HTMLDivElement>(null);
-  const [activeReportTab, setActiveReportTab] = useState<'overview' | 'deep' | 'skills' | 'benchmark'>('overview');
+  const [activeReportTab, setActiveReportTab] = useState<'overview' | 'deep' | 'skills' | 'benchmark'>(() => {
+    const tab = getUrlParam('tab') || getUrlParam('subtab');
+    if (tab === 'deep' || tab === 'skills' || tab === 'benchmark' || tab === 'overview') return tab;
+    return 'overview';
+  });
   const [selectedAcademicYear, setSelectedAcademicYear] = useState<string>(getCurrentAcademicYear());
 
   // Filter and modal states
@@ -58,6 +64,18 @@ export const ReportsPage: React.FC = () => {
     loadAnalyticsData,
     loadTimePhases,
   } = useReportsData();
+
+  const handleTabChange = (tab: 'overview' | 'deep' | 'skills' | 'benchmark') => {
+    setActiveReportTab(tab);
+    setUrlParams({ tab });
+  };
+
+  useUrlSync(() => {
+    const tab = getUrlParam('tab') || getUrlParam('subtab');
+    if (tab === 'deep' || tab === 'skills' || tab === 'benchmark' || tab === 'overview') {
+      setActiveReportTab(tab);
+    }
+  });
 
   const academicYears = useMemo(() => generateAcademicYears(sessionRecords), [sessionRecords]);
 
@@ -120,7 +138,7 @@ export const ReportsPage: React.FC = () => {
       <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[#181f36] pb-3">
         <SegmentedControl<'overview' | 'deep' | 'skills' | 'benchmark'>
           value={activeReportTab}
-          onChange={setActiveReportTab}
+          onChange={handleTabChange}
           options={[
             { value: 'overview', label: 'Tổng Quan Học Lực' },
             { value: 'deep', label: 'Thống Kê Sâu' },

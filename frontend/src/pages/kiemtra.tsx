@@ -9,9 +9,26 @@ import { QuizImportView } from './kiemtra/components/QuizImportView';
 import { QuizSettingsView } from './kiemtra/components/QuizSettingsView';
 import { QuizRunningView } from './kiemtra/components/QuizRunningView';
 import { QuizResultsView } from './kiemtra/components/QuizResultsView';
+import { getUrlParam, setUrlParams, useUrlSync } from '../utils/navigation';
 
 export default function KiemTraPage() {
-  const [step, setStep] = useState<'import' | 'settings' | 'running' | 'results'>('import');
+  const [step, setStep] = useState<'import' | 'settings' | 'running' | 'results'>(() => {
+    const s = getUrlParam('step');
+    if (s === 'settings' || s === 'running' || s === 'results' || s === 'import') return s;
+    return 'import';
+  });
+
+  const handleSetStep = useCallback((newStep: 'import' | 'settings' | 'running' | 'results') => {
+    setStep(newStep);
+    setUrlParams({ step: newStep });
+  }, []);
+
+  useUrlSync(() => {
+    const s = getUrlParam('step');
+    if (s === 'settings' || s === 'running' || s === 'results' || s === 'import') {
+      setStep(s);
+    }
+  });
   const [loading, setLoading] = useState(false);
   const [testData, setTestData] = useState<TestData | null>(null);
 
@@ -283,7 +300,7 @@ export default function KiemTraPage() {
           onFileUpload={handleFileUpload}
           onDataLoaded={(data) => {
             setTestData(data);
-            setStep('settings');
+            handleSetStep('settings');
           }}
         />
       )}
@@ -302,7 +319,7 @@ export default function KiemTraPage() {
           setShuffleQuestions={setShuffleQuestions}
           shuffleOptions={shuffleOptions}
           setShuffleOptions={setShuffleOptions}
-          onBack={() => setStep('import')}
+          onBack={() => handleSetStep('import')}
           onStartTest={handleStartTest}
         />
       )}
@@ -329,8 +346,8 @@ export default function KiemTraPage() {
           setIsTimerPaused={setIsTimerPaused}
           isFullscreen={isFullscreen}
           onToggleFullscreen={toggleFullscreen}
-          onFinishTest={() => setStep('results')}
-          onExitToImport={() => setStep('import')}
+          onFinishTest={() => handleSetStep('results')}
+          onExitToImport={() => handleSetStep('import')}
           renderFormattedText={renderFormattedText}
         />
       )}
@@ -344,7 +361,7 @@ export default function KiemTraPage() {
           calculatedScore={calculatedScore}
           correctCount={correctCount}
           totalQuestions={totalQuestions}
-          onRetake={() => setStep('settings')}
+          onRetake={() => handleSetStep('settings')}
           renderFormattedText={renderFormattedText}
         />
       )}

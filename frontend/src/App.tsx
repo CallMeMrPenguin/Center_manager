@@ -59,10 +59,12 @@ function AppContent() {
     };
     window.addEventListener('popstate', handlePopState);
 
-    // If on root '/' or using legacy '#', clean up URL to clean path without reload
-    const currentTarget = `/${activeTab}`;
-    if (window.location.pathname !== currentTarget || window.location.hash) {
-      window.history.replaceState({ tabId: activeTab }, '', currentTarget);
+    // If on root '/' or using legacy '#', clean up URL to clean path without reload while preserving search params
+    const currentPath = window.location.pathname;
+    const expectedPath = `/${activeTab}`;
+    if (currentPath !== expectedPath || window.location.hash) {
+      const target = `${expectedPath}${window.location.search || ''}`;
+      window.history.replaceState({ tabId: activeTab }, '', target);
     }
 
     return () => window.removeEventListener('popstate', handlePopState);

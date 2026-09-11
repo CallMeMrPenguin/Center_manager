@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { ChevronLeft } from 'lucide-react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useClassesData } from './hooks/useClassesData';
 import { useClassDetail } from './hooks/useClassDetail';
 import { useSeatingLayout } from './hooks/useSeatingLayout';
 import { ClassListView } from './components/ClassListView';
+import { ClassDetailHeader } from './components/ClassDetailHeader';
 import { AttendanceGradesTab } from './components/tabs/AttendanceGradesTab';
 import { SeatingChartTab } from './components/tabs/SeatingChartTab';
 import { ClassFormModal } from './components/modals/ClassFormModal';
@@ -13,10 +13,10 @@ import { GradingPairsModal } from './components/modals/GradingPairsModal';
 import RelationshipsTab from '../../components/seating/RelationshipsTab';
 import BlossomResultModal from '../../components/seating/BlossomResultModal';
 import { TestConfigModal } from '../../components/TestConfigModal';
-import { SegmentedControl } from '../../components/SegmentedControl';
 import { useConfirm } from '../../components/ConfirmDialog';
 import { ClassItem, EnrolledStudent } from './types';
 import { notifyDataChanged } from '../../utils';
+import { getUrlParam, setUrlParams, useUrlSync } from '../../utils/navigation';
 
 export default function ClassesPage() {
   const confirm = useConfirm();
@@ -85,8 +85,13 @@ export default function ClassesPage() {
     handleBlossomSwap,
   } = useSeatingLayout(selectedClass, enrolledStudents, attendanceRecords, attendanceDate);
 
-  // Sub-tabs & modal local states
-  const [activeSubTab, setActiveSubTab] = useState<'grades' | 'seating' | 'relationships'>('grades');
+  // Sub-tabs & modal local states with deep link initialization
+  const [activeSubTab, setActiveSubTab] = useState<'grades' | 'seating' | 'relationships'>(() => {
+    const tab = getUrlParam('tab') || getUrlParam('subtab');
+    if (tab === 'seating' || tab === 'relationships' || tab === 'grades') return tab;
+    return 'grades';
+  });
+
   const [classModalOpen, setClassModalOpen] = useState(false);
   const [editingClass, setEditingClass] = useState<ClassItem | null>(null);
   const [enrollModalOpen, setEnrollModalOpen] = useState(false);
@@ -108,13 +113,46 @@ export default function ClassesPage() {
     setEnrollModalOpen(true);
   };
 
-  // Auto-restore or navigate to selected class from dashboard 1-click roll-call
+  // Sync state from URL (Browser Back/Forward or direct links)
+  const syncFromUrl = useCallback(() => {
+    const urlClassId = getUrlParam('id') || getUrlParam('classId');
+    const urlTab = getUrlParam('tab') || getUrlParam('subtab');
+
+    if (urlTab === 'seating' || urlTab === 'relationships' || urlTab === 'grades') {
+      setActiveSubTab(urlTab);
+    }
+
+    if (urlClassId && classes.length > 0) {
+      const found = classes.find((c) => String(c.id) === urlClassId);
+      if (found && selectedClass?.id !== found.id) {
+        setSelectedClass(found);
+      }
+    } else if (!urlClassId && selectedClass) {
+      setSelectedClass(null);
+    }
+  }, [classes, selectedClass, setSelectedClass]);
+
+  useUrlSync(syncFromUrl);
+
+  // Auto-restore or navigate to selected class on initial mount or event
   useEffect(() => {
+    const urlClassId = getUrlParam('id') || getUrlParam('classId');
+    if (urlClassId && classes.length > 0) {
+      const found = classes.find((c) => String(c.id) === urlClassId);
+      if (found) {
+        setSelectedClass(found);
+        return;
+      }
+    }
+
     const handleNavigate = (e: any) => {
       const cid = e?.detail?.classId;
       if (cid && classes.length > 0) {
         const found = classes.find((c) => c.id === Number(cid));
-        if (found) setSelectedClass(found);
+        if (found) {
+          setSelectedClass(found);
+          setUrlParams({ id: String(found.id), tab: activeSubTab });
+        }
       }
     };
     window.addEventListener('navigate-to-class', handleNavigate);
@@ -124,18 +162,31 @@ export default function ClassesPage() {
       const found = classes.find((c) => String(c.id) === storedClassId);
       if (found) {
         setSelectedClass(found);
+        setUrlParams({ id: String(found.id), tab: activeSubTab }, { replace: true });
       }
     }
     return () => window.removeEventListener('navigate-to-class', handleNavigate);
-  }, [classes, selectedClass, setSelectedClass]);
+  }, [classes, selectedClass, setSelectedClass, activeSubTab]);
 
   const handleSelectClass = (cls: ClassItem | null) => {
     if (cls) {
       sessionStorage.setItem('center_manager_last_class_id', String(cls.id));
+      setUrlParams({ id: String(cls.id), tab: activeSubTab });
     } else {
       sessionStorage.removeItem('center_manager_last_class_id');
+      setUrlParams({ id: null, tab: null });
     }
     setSelectedClass(cls);
+  };
+
+  const handleChangeSubTab = (tab: 'grades' | 'seating' | 'relationships') => {
+    if (activeSubTab === 'grades' && tab !== 'grades') {
+      flushSaveAttendance();
+    }
+    setActiveSubTab(tab);
+    if (selectedClass) {
+      setUrlParams({ tab });
+    }
   };
 
   return (
@@ -154,52 +205,60 @@ export default function ClassesPage() {
           onEditClass={handleOpenEditClass}
         />
       ) : (
-        /* 2. CLASS DETAIL VIEW */
+        /* 2. CLASS DETAIL VIEW (UNIFIED MASTER HEADER + SELECTED TAB) */
         <div className="space-y-6">
-          {/* HEADER BACK NAVIGATION & SUB-TAB SELECTOR */}
-          <div className="flex flex-wrap items-center justify-between gap-4 bg-[#0f1320] border border-white/10 p-4 rounded-2xl">
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => {
-                  flushSaveAttendance();
-                  handleSelectClass(null);
-                }}
-                className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white transition cursor-pointer border border-white/5"
-                title="Quay lại danh sách lớp"
-              >
-                <ChevronLeft size={16} />
-              </button>
-              <div>
-                <div className="flex items-center gap-2">
-                  <h2 className="text-lg font-black text-white">{selectedClass.class_name}</h2>
-                  <span className="px-2 py-0.5 text-[10px] font-black bg-indigo-500/20 text-indigo-300 rounded-md border border-indigo-500/30">
-                    {selectedClass.grade || 'Lớp 6'}
-                  </span>
-                </div>
-                <p className="text-xs text-slate-400 font-semibold">
-                  GV: {selectedClass.teacher_name || 'Chưa phân công'} | Phòng: {selectedClass.room || 'N/A'}
-                </p>
-              </div>
-            </div>
-
-            {/* Sliding Pill Indicator Segmented Control (Rule 7) */}
-            <SegmentedControl<'grades' | 'seating' | 'relationships'>
-              value={activeSubTab}
-              onChange={(tab) => {
-                if (activeSubTab === 'grades' && tab !== 'grades') {
-                  flushSaveAttendance();
-                }
-                setActiveSubTab(tab);
-              }}
-              options={[
-                { value: 'grades', label: 'Điểm Danh & Điểm', badge: enrolledStudents.length },
-                { value: 'seating', label: 'Sơ Đồ Lớp' },
-                { value: 'relationships', label: 'Nhóm Bạn & Xung Đột' },
-              ]}
-              activeColor="bg-[#5c36f5] shadow-[0_0_14px_rgba(92,54,245,0.5)]"
-              size="md"
-            />
-          </div>
+          {/* UNIFIED MASTER HEADER (Single visual boundary per Rule 5) */}
+          <ClassDetailHeader
+            selectedClass={selectedClass}
+            activeSubTab={activeSubTab}
+            onChangeSubTab={handleChangeSubTab}
+            enrolledCount={enrolledStudents.length}
+            attendanceDate={attendanceDate}
+            onDateChange={setAttendanceDate}
+            selectedClassWeeklyDays={selectedClassWeeklyDays}
+            onBack={() => {
+              flushSaveAttendance();
+              handleSelectClass(null);
+            }}
+            onOpenEditClass={(cls) => {
+              flushSaveAttendance();
+              handleOpenEditClass(cls);
+            }}
+            onDeleteAttendanceDate={
+              activeSubTab === 'grades'
+                ? async () => {
+                    if (!selectedClass) return;
+                    const ok = await confirm({
+                      title: 'Xóa Buổi Học / Điểm Danh',
+                      message: `Bạn có chắc chắn muốn xóa toàn bộ lịch học và điểm danh ngày ${attendanceDate} của lớp "${selectedClass.class_name}"? Thao tác này giúp bạn làm sạch dữ liệu nếu lỡ lưu sai ngày.`,
+                      confirmText: 'Xóa Buổi Này',
+                      type: 'danger',
+                    });
+                    if (ok) {
+                      await handleDeleteAttendanceDate();
+                    }
+                  }
+                : undefined
+            }
+            onOpenTestConfigModal={
+              activeSubTab === 'grades'
+                ? async () => {
+                    await flushSaveAttendance();
+                    setTestConfigModalOpen(true);
+                  }
+                : undefined
+            }
+            onOpenEnrollModal={
+              activeSubTab === 'grades'
+                ? async () => {
+                    await flushSaveAttendance();
+                    handleOpenEnrollModal();
+                  }
+                : undefined
+            }
+            onSaveAttendance={activeSubTab === 'grades' ? handleSaveAttendance : undefined}
+            savingAttendance={savingAttendance}
+          />
 
           {/* TAB 1: ATTENDANCE & GRADES */}
           {activeSubTab === 'grades' && (
@@ -208,40 +267,12 @@ export default function ClassesPage() {
               enrolledStudents={enrolledStudents}
               attendanceDate={attendanceDate}
               attendanceRecords={attendanceRecords}
-              savingAttendance={savingAttendance}
-              selectedClassWeeklyDays={selectedClassWeeklyDays}
-              onDateChange={setAttendanceDate}
               onUpdateRecord={handleUpdateRecord}
               parseAndFormatScore={parseAndFormatScore}
-              onSaveAttendance={handleSaveAttendance}
-              onOpenTestConfigModal={async () => {
-                await flushSaveAttendance();
-                setTestConfigModalOpen(true);
-              }}
-              onOpenEnrollModal={async () => {
-                await flushSaveAttendance();
-                handleOpenEnrollModal();
-              }}
               onOpenStudentActionModal={async (st) => {
                 await flushSaveAttendance();
                 setSelectedStudentForAction(st);
                 setActionModalOpen(true);
-              }}
-              onOpenEditClass={async (cls) => {
-                await flushSaveAttendance();
-                handleOpenEditClass(cls);
-              }}
-              onDeleteAttendanceDate={async () => {
-                if (!selectedClass) return;
-                const ok = await confirm({
-                  title: 'Xóa Buổi Học / Điểm Danh',
-                  message: `Bạn có chắc chắn muốn xóa toàn bộ lịch học và điểm danh ngày ${attendanceDate} của lớp "${selectedClass.class_name}"? Thao tác này giúp bạn làm sạch dữ liệu nếu lỡ lưu sai ngày.`,
-                  confirmText: 'Xóa Buổi Này',
-                  type: 'danger',
-                });
-                if (ok) {
-                  await handleDeleteAttendanceDate();
-                }
               }}
               onExportExcel={async () => {
                 await flushSaveAttendance();
@@ -342,7 +373,7 @@ export default function ClassesPage() {
         }}
       />
 
-      {/* MODAL 4: GRADING PAIRS (PAPER SWAP) */}
+      {/* MODAL 4: GRADING PAIRS */}
       <GradingPairsModal
         isOpen={gradingPairsModal}
         gradingPairs={gradingPairs}

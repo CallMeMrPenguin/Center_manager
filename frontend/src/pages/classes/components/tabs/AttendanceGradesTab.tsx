@@ -1,27 +1,20 @@
 import React, { useMemo } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
-import { Calendar, Layers, UserPlus, Save, Edit3, Trash2 } from 'lucide-react';
+import { Edit3 } from 'lucide-react';
 import { ClassItem, EnrolledStudent, AttendanceRecord } from '../../types';
-import { CustomDatePicker } from '../../../../components/CustomDatePicker';
 import { DataTable } from '../../../../components/DataTable';
 import { CheckScoreInput } from '../CheckScoreInput';
+import { SessionOverviewBanner } from './SessionOverviewBanner';
+import { showToast } from '../../../../components/Toast';
 
 interface AttendanceGradesTabProps {
   selectedClass: ClassItem;
   enrolledStudents: EnrolledStudent[];
   attendanceDate: string;
   attendanceRecords: AttendanceRecord[];
-  savingAttendance: boolean;
-  selectedClassWeeklyDays: number[];
-  onDateChange: (date: string) => void;
   onUpdateRecord: (studentId: number, field: string, value: any) => void;
   parseAndFormatScore: (val: any) => string;
-  onSaveAttendance: () => void;
-  onOpenTestConfigModal: () => void;
-  onOpenEnrollModal: () => void;
   onOpenStudentActionModal: (student: EnrolledStudent) => void;
-  onOpenEditClass: (cls: ClassItem) => void;
-  onDeleteAttendanceDate?: () => void;
   onExportExcel: () => void;
   onExportDocx: () => void;
 }
@@ -31,17 +24,9 @@ export const AttendanceGradesTab: React.FC<AttendanceGradesTabProps> = ({
   enrolledStudents,
   attendanceDate,
   attendanceRecords,
-  savingAttendance,
-  selectedClassWeeklyDays,
-  onDateChange,
   onUpdateRecord,
   parseAndFormatScore,
-  onSaveAttendance,
-  onOpenTestConfigModal,
-  onOpenEnrollModal,
   onOpenStudentActionModal,
-  onOpenEditClass,
-  onDeleteAttendanceDate,
   onExportExcel,
   onExportDocx,
 }) => {
@@ -186,121 +171,23 @@ export const AttendanceGradesTab: React.FC<AttendanceGradesTabProps> = ({
     [enrolledStudents, onUpdateRecord, parseAndFormatScore, onOpenStudentActionModal]
   );
 
+  const handleFilterStudentChip = (name: string) => {
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(name);
+      showToast(`Đã sao chép "${name}" để dán tìm kiếm`, 'info');
+    }
+  };
+
   return (
     <div className="space-y-4">
-      {/* CLASS SUMMARY CARD */}
-      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 bg-[#0d1018] border border-white/10 p-4 rounded-2xl">
-        <div className="space-y-1">
-          <span className="text-[10px] font-black uppercase text-indigo-400 block tracking-wider">
-            Giáo Viên & Phòng
-          </span>
-          <span className="text-sm font-black text-white block">
-            {selectedClass.teacher_name || 'Chưa phân công'}
-          </span>
-          <span className="text-[11px] text-slate-400 block">
-            Phòng: {selectedClass.room || 'Chưa xếp phòng'}
-          </span>
-        </div>
-        <div className="space-y-1">
-          <span className="text-[10px] font-black uppercase text-indigo-400 block tracking-wider">
-            Khối & Môn Học
-          </span>
-          <span className="text-sm font-black text-white block">
-            {selectedClass.grade || 'Khác'}
-          </span>
-          <span className="text-[11px] text-slate-400 block">
-            Môn: {selectedClass.subject || 'N/A'}
-          </span>
-        </div>
-        <div className="space-y-1 col-span-2 flex items-center justify-between">
-          <div>
-            <span className="text-[10px] font-black uppercase text-indigo-400 block tracking-wider">
-              Ghi Chú Lớp Học
-            </span>
-            <span className="text-xs text-slate-300 block italic max-w-sm truncate">
-              {selectedClass.notes || 'Không có ghi chú'}
-            </span>
-          </div>
-          <button
-            onClick={() => onOpenEditClass(selectedClass)}
-            className="group flex items-center gap-0 hover:gap-1.5 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/20 px-3 py-1.5 rounded-xl font-bold text-xs transition-all duration-300 cursor-pointer"
-            title="Sửa Thông Tin"
-          >
-            <Edit3 size={13} className="shrink-0" />
-            <span className="max-w-0 opacity-0 group-hover:max-w-[140px] group-hover:opacity-100 transition-all duration-300 ease-in-out whitespace-nowrap overflow-hidden block">
-              Sửa Thông Tin
-            </span>
-          </button>
-        </div>
-      </div>
+      {/* 1. SESSION OVERVIEW BANNER (NEW REQUIREMENT) */}
+      <SessionOverviewBanner
+        attendanceRecords={attendanceRecords}
+        attendanceDate={attendanceDate}
+        onFilterStudent={handleFilterStudentChip}
+      />
 
-      {/* ACTION TOOLBAR */}
-      <div className="flex flex-wrap justify-between items-center bg-[#0d1018] border border-white/10 p-4 rounded-2xl gap-3">
-        <div className="flex items-center gap-3">
-          <span className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
-            <Calendar size={15} className="text-indigo-400" />
-            <span>Ngày học:</span>
-          </span>
-          <CustomDatePicker
-            value={attendanceDate}
-            onChange={onDateChange}
-            highlightDaysOfWeek={selectedClassWeeklyDays}
-            className="w-44"
-          />
-          {onDeleteAttendanceDate && (
-            <button
-              type="button"
-              onClick={onDeleteAttendanceDate}
-              className="group flex items-center gap-0 hover:gap-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/25 px-2.5 py-1.5 rounded-xl font-bold text-xs transition-all duration-300 cursor-pointer"
-              title={`Xóa buổi học và điểm danh ngày ${attendanceDate} (phòng trường hợp chọn sai ngày)`}
-            >
-              <Trash2 size={13} className="shrink-0" />
-              <span className="max-w-0 opacity-0 group-hover:max-w-[130px] group-hover:opacity-100 transition-all duration-300 ease-in-out whitespace-nowrap overflow-hidden block">
-                Xóa Buổi Này
-              </span>
-            </button>
-          )}
-        </div>
-
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={onOpenTestConfigModal}
-            className="group flex items-center gap-0 hover:gap-1.5 bg-blue-500/15 hover:bg-blue-500/25 text-blue-300 border border-blue-500/30 px-3.5 py-1.5 rounded-xl font-bold text-xs transition-all duration-300 cursor-pointer"
-            title="Cấu Hình Bài Kiểm Tra (Check 1 & Check 2)"
-          >
-            <Layers size={14} className="shrink-0" />
-            <span className="max-w-0 opacity-0 group-hover:max-w-[180px] group-hover:opacity-100 transition-all duration-300 ease-in-out whitespace-nowrap overflow-hidden block">
-              Cấu Hình Bài Kiểm Tra
-            </span>
-          </button>
-
-          <button
-            onClick={onOpenEnrollModal}
-            className="group flex items-center gap-0 hover:gap-1.5 bg-indigo-500/15 hover:bg-indigo-500/25 text-indigo-300 border border-indigo-500/30 px-3.5 py-1.5 rounded-xl font-bold text-xs transition-all duration-300 cursor-pointer"
-            title="Ghi Danh Học Sinh"
-          >
-            <UserPlus size={14} className="shrink-0" />
-            <span className="max-w-0 opacity-0 group-hover:max-w-[160px] group-hover:opacity-100 transition-all duration-300 ease-in-out whitespace-nowrap overflow-hidden block">
-              Ghi Danh Học Sinh
-            </span>
-          </button>
-
-          <button
-            onClick={onSaveAttendance}
-            disabled={savingAttendance}
-            className="group flex items-center gap-0 hover:gap-1.5 bg-[#5c36f5] hover:bg-[#7351f7] text-white px-3.5 py-1.5 rounded-xl font-extrabold text-xs shadow-[0_4px_12px_rgba(92,54,245,0.4)] transition-all duration-300 cursor-pointer border border-white/20"
-            title="Lưu Bảng Điểm"
-          >
-            <Save size={14} className="shrink-0" />
-            <span className="max-w-0 opacity-0 group-hover:max-w-[140px] group-hover:opacity-100 transition-all duration-300 ease-in-out whitespace-nowrap overflow-hidden block">
-              {savingAttendance ? 'Đang lưu...' : 'Lưu Bảng Điểm'}
-            </span>
-          </button>
-        </div>
-      </div>
-
-      {/* UNIFIED ATTENDANCE & GRADES DATATABLE */}
+      {/* 2. UNIFIED ATTENDANCE & GRADES DATATABLE */}
       <DataTable
         tableId="classes-attendance-table"
         data={attendanceRecords}

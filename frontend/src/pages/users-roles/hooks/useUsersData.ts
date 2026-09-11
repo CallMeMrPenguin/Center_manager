@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { api } from '../../../api';
 import { showToast } from '../../../components/Toast';
 import { AppUser, RolePermission } from '../types';
+import { getUrlParam, setUrlParams, useUrlSync } from '../../../utils/navigation';
 
 export const ROLES = ['Quản trị viên', 'Giáo viên', 'Trợ giảng', 'Học sinh', 'Kế toán'];
 
@@ -13,7 +14,23 @@ export function useUsersData() {
   const [syncingStudents, setSyncingStudents] = useState<boolean>(false);
 
   // Active view: 'users' | 'permissions' | 'system'
-  const [activeTab, setActiveTab] = useState<'users' | 'permissions' | 'system'>('users');
+  const [activeTab, setActiveTabState] = useState<'users' | 'permissions' | 'system'>(() => {
+    const tab = getUrlParam('tab');
+    if (tab === 'permissions' || tab === 'system' || tab === 'users') return tab;
+    return 'users';
+  });
+
+  const setActiveTab = useCallback((tab: 'users' | 'permissions' | 'system') => {
+    setActiveTabState(tab);
+    setUrlParams({ tab });
+  }, []);
+
+  useUrlSync(() => {
+    const tab = getUrlParam('tab');
+    if (tab === 'permissions' || tab === 'system' || tab === 'users') {
+      setActiveTabState(tab);
+    }
+  });
 
   // User modal state
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);

@@ -17,11 +17,28 @@ import {
 } from './types';
 import { SessionModal } from './components/SessionModal';
 import { ScheduleCalendarView } from './components/ScheduleCalendarView';
+import { getUrlParam, setUrlParams, useUrlSync } from '../../utils/navigation';
 
 export default function SchedulePage() {
   const confirm = useConfirm();
   const [loading, setLoading] = useState(true);
-  const [viewMode, setViewMode] = useState<'month' | 'week' | 'list'>('month');
+  const [viewMode, setViewMode] = useState<'month' | 'week' | 'list'>(() => {
+    const v = getUrlParam('view');
+    if (v === 'month' || v === 'week' || v === 'list') return v;
+    return 'month';
+  });
+
+  const handleChangeViewMode = (mode: 'month' | 'week' | 'list') => {
+    setViewMode(mode);
+    setUrlParams({ view: mode });
+  };
+
+  useUrlSync(() => {
+    const v = getUrlParam('view');
+    if (v === 'month' || v === 'week' || v === 'list') {
+      setViewMode(v);
+    }
+  });
   const [selectedMonth, setSelectedMonth] = useState(() => {
     const d = new Date();
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
@@ -436,7 +453,7 @@ export default function SchedulePage() {
         <div className="flex items-center gap-2">
           <SegmentedControl<'month' | 'week' | 'list'>
             value={viewMode}
-            onChange={setViewMode}
+            onChange={handleChangeViewMode}
             options={[
               { value: 'month', label: 'LỊCH THÁNG' },
               { value: 'week', label: 'LỊCH TUẦN' },
