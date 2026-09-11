@@ -167,7 +167,8 @@ export const AttendanceGradesTab: React.FC<AttendanceGradesTabProps> = ({
           if (!validC1 && !validC2) return -999;
 
           const checkAvg = validC1 && validC2 ? (c1! + c2!) / 2 : validC1 ? c1! : c2!;
-          const diff = hw - checkAvg;
+          const rawDiff = hw - checkAvg;
+          const diff = Math.abs(rawDiff);
           return diff > 0 ? diff : -999;
         },
         cell: ({ getValue }) => {
@@ -188,9 +189,9 @@ export const AttendanceGradesTab: React.FC<AttendanceGradesTabProps> = ({
                     ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 shadow-[0_0_8px_rgba(245,158,11,0.2)]'
                     : 'bg-white/5 text-slate-300 border border-white/10'
                 }`}
-                title={`Độ lệch: BTVN cao hơn TB Check trên lớp +${format1Dec(val)} điểm`}
+                title={`Độ lệch tuyệt đối: |BTVN - TB Check| = ${format1Dec(val)} điểm`}
               >
-                +{format1Dec(val)}
+                {format1Dec(val)}
               </span>
             </div>
           );

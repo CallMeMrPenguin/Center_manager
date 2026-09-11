@@ -306,11 +306,11 @@ export const SessionOverviewBanner: React.FC<SessionOverviewBannerProps> = ({
                         type="button"
                         onClick={() => onFilterStudent?.(s.student_name)}
                         className="px-2 py-1 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/25 text-xs font-bold flex items-center justify-between transition cursor-pointer text-left"
-                        title={`BTVN: ${format1Dec(s.homework)} | TB Check: ${format1Dec(s.checkAvg)}. Bấm để sao chép.`}
+                        title={`BTVN: ${format1Dec(s.homework)}, TB Check: ${format1Dec(s.checkAvg)} (Lệch: ${format1Dec(s.diff)} đ). Bấm để sao chép.`}
                       >
                         <span className="truncate max-w-[120px]">{s.student_name}</span>
                         <span className="text-amber-400 font-black shrink-0">
-                          +{format1Dec(s.diff)} đ
+                          {format1Dec(s.diff)} đ
                         </span>
                       </button>
                     ))}
@@ -322,7 +322,7 @@ export const SessionOverviewBanner: React.FC<SessionOverviewBannerProps> = ({
                 )}
               </div>
               <span className="text-[10px] text-slate-500 mt-2 block font-medium">
-                Công thức: BTVN - TB(Check 1,2) &gt; 0 (Bỏ qua BTVN=0)
+                Công thức: |BTVN - TB(Check 1,2)| (Bỏ qua BTVN=0)
               </span>
             </div>
           </div>

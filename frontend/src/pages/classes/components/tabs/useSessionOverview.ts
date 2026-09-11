@@ -7,6 +7,7 @@ export interface DiscrepancyStudent {
   homework: number;
   checkAvg: number;
   diff: number;
+  rawDiff?: number;
   c1: number | null;
   c2: number | null;
 }
@@ -132,14 +133,16 @@ export function useSessionOverview(attendanceRecords: AttendanceRecord[]) {
         checkAvg = c2Val!;
       }
 
-      const diff = hwVal - checkAvg;
-      if (diff > 0 && diff >= divergenceMin) {
+      const rawDiff = hwVal - checkAvg;
+      const diff = Math.abs(rawDiff);
+      if (diff >= divergenceMin) {
         list.push({
           student_id: rec.student_id,
           student_name: rec.student_name,
           homework: hwVal,
           checkAvg,
           diff,
+          rawDiff,
           c1: validC1 ? c1Val : null,
           c2: validC2 ? c2Val : null,
         });
