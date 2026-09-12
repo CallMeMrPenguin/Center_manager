@@ -7,8 +7,9 @@ import {
   SlidersHorizontal,
 } from 'lucide-react';
 import { AttendanceRecord } from '../../types';
-import { trunc1Dec, format1Dec } from '../../../../utils';
+import { trunc1Dec } from '../../../../utils';
 import { useSessionOverview } from './useSessionOverview';
+import { BelowThresholdCard, DivergenceCard } from './SessionOverviewCards';
 
 interface SessionOverviewBannerProps {
   attendanceRecords: AttendanceRecord[];
@@ -28,9 +29,18 @@ export const SessionOverviewBanner: React.FC<SessionOverviewBannerProps> = ({
     divergenceStudents,
     hasAlerts,
     thresholdMode,
-    setThresholdMode,
     divergenceMin,
     setDivergenceMin,
+    threshC1Input,
+    threshC2Input,
+    threshHwInput,
+    handleC1Change,
+    handleC2Change,
+    handleHwChange,
+    handleApplyAllCustom,
+    handleSetStandard,
+    handleSetClassAvg,
+    handleSetCustom,
   } = useSessionOverview(attendanceRecords);
 
   return (
@@ -65,15 +75,19 @@ export const SessionOverviewBanner: React.FC<SessionOverviewBannerProps> = ({
         {/* RIGHT: CLASS AVERAGE STATS & EXPAND TOGGLE */}
         <div className="flex items-center gap-2">
           {/* Average metrics pills */}
-          <div className="hidden sm:flex items-center gap-2 bg-[#080b14] px-3 py-1.5 rounded-xl border border-white/5 text-xs font-bold">
-            <span className="text-slate-400">TB Check 1:</span>
-            <span className="text-blue-400 font-extrabold">{trunc1Dec(stats.avgC1)}</span>
-            <span className="w-1 h-1 rounded-full bg-slate-600 mx-1" />
-            <span className="text-slate-400">TB Check 2:</span>
-            <span className="text-purple-400 font-extrabold">{trunc1Dec(stats.avgC2)}</span>
-            <span className="w-1 h-1 rounded-full bg-slate-600 mx-1" />
-            <span className="text-slate-400">TB BTVN:</span>
-            <span className="text-emerald-400 font-extrabold">{trunc1Dec(stats.avgHw)}</span>
+          <div className="hidden sm:flex items-center gap-2.5 bg-[#080b14] px-3 py-1.5 rounded-xl border border-white/5 text-xs font-bold">
+            <div className="flex items-center gap-1">
+              <span className="text-slate-400">TB Check 1:</span>
+              <span className="text-blue-400 font-extrabold">{trunc1Dec(stats.avgC1)}</span>
+            </div>
+            <div className="flex items-center gap-1 pl-2.5 border-l border-white/10">
+              <span className="text-slate-400">TB Check 2:</span>
+              <span className="text-purple-400 font-extrabold">{trunc1Dec(stats.avgC2)}</span>
+            </div>
+            <div className="flex items-center gap-1 pl-2.5 border-l border-white/10">
+              <span className="text-slate-400">TB BTVN:</span>
+              <span className="text-emerald-400 font-extrabold">{trunc1Dec(stats.avgHw)}</span>
+            </div>
           </div>
 
           <button
@@ -92,14 +106,14 @@ export const SessionOverviewBanner: React.FC<SessionOverviewBannerProps> = ({
         <div className="mt-4 pt-3 border-t border-white/5 space-y-4">
           {/* CONTROL STRIP: THRESHOLD SELECTION & DISCREPANCY SENSITIVITY */}
           <div className="flex flex-wrap items-center justify-between gap-3 text-xs bg-[#080b14] p-2.5 rounded-xl border border-white/5">
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <span className="text-slate-400 font-bold flex items-center gap-1">
                 <SlidersHorizontal size={12} className="text-indigo-400" />
-                Chuẩn điểm dưới TB:
+                Chuẩn điểm dưới:
               </span>
               <button
                 type="button"
-                onClick={() => setThresholdMode('standard')}
+                onClick={handleSetStandard}
                 className={`px-2.5 py-1 rounded-lg font-bold transition cursor-pointer ${
                   thresholdMode === 'standard'
                     ? 'bg-indigo-600 text-white shadow-sm'
@@ -110,7 +124,7 @@ export const SessionOverviewBanner: React.FC<SessionOverviewBannerProps> = ({
               </button>
               <button
                 type="button"
-                onClick={() => setThresholdMode('classAvg')}
+                onClick={handleSetClassAvg}
                 className={`px-2.5 py-1 rounded-lg font-bold transition cursor-pointer ${
                   thresholdMode === 'classAvg'
                     ? 'bg-indigo-600 text-white shadow-sm'
@@ -119,6 +133,35 @@ export const SessionOverviewBanner: React.FC<SessionOverviewBannerProps> = ({
               >
                 Dưới TB Buổi Học
               </button>
+              <button
+                type="button"
+                onClick={handleSetCustom}
+                className={`px-2.5 py-1 rounded-lg font-bold transition cursor-pointer ${
+                  thresholdMode === 'custom'
+                    ? 'bg-indigo-600 text-white shadow-sm'
+                    : 'text-slate-400 hover:text-white bg-white/5'
+                }`}
+              >
+                Tùy chỉnh
+              </button>
+
+              {thresholdMode === 'custom' && (
+                <div className="flex items-center gap-1 text-[11px] text-slate-400 bg-white/5 px-2 py-1 rounded-lg">
+                  <span>Tất cả:</span>
+                  <span className="text-indigo-400 font-bold">&lt;</span>
+                  <input
+                    type="number"
+                    step="0.1"
+                    min="0"
+                    max="10"
+                    placeholder="Điểm"
+                    onChange={(e) => handleApplyAllCustom(e.target.value)}
+                    className="w-10 bg-transparent text-white font-bold text-center focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    title="Nhập mức điểm áp dụng chung cho cả 3 cột Check 1, Check 2, BTVN"
+                  />
+                  <span>đ</span>
+                </div>
+              )}
             </div>
 
             <div className="flex items-center gap-2">
@@ -149,182 +192,41 @@ export const SessionOverviewBanner: React.FC<SessionOverviewBannerProps> = ({
 
           {/* 3. METRIC CARDS GRID */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-            {/* CARD 1: CHECK 1 DƯỚI TB */}
-            <div className="bg-[#080b14] border border-blue-500/20 rounded-xl p-3 flex flex-col justify-between">
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs font-black text-blue-400 uppercase tracking-wider">
-                    Dưới TB Check 1
-                  </span>
-                  <span
-                    className={`px-2 py-0.5 rounded-md font-extrabold text-[11px] ${
-                      belowAvgData.belowC1.length > 0
-                        ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30'
-                        : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
-                    }`}
-                  >
-                    {belowAvgData.belowC1.length} HS
-                  </span>
-                </div>
-                {belowAvgData.belowC1.length > 0 ? (
-                  <div className="flex flex-wrap gap-1.5 max-h-28 overflow-y-auto pr-1">
-                    {belowAvgData.belowC1.map((s) => (
-                      <button
-                        key={s.student_id}
-                        type="button"
-                        onClick={() => onFilterStudent?.(s.student_name)}
-                        className="px-2 py-0.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/25 text-rose-300 border border-rose-500/25 text-xs font-bold flex items-center gap-1 transition cursor-pointer"
-                        title="Bấm để sao chép tên tìm kiếm"
-                      >
-                        <span>{s.student_name}</span>
-                        <span className="text-rose-400 font-black">({format1Dec(s.score)})</span>
-                      </button>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-[11px] text-slate-500 italic py-2">
-                    Không có học sinh dưới điểm chuẩn
-                  </p>
-                )}
-              </div>
-              <span className="text-[10px] text-slate-500 mt-2 block font-medium">
-                Ngưỡng: &lt; {format1Dec(belowAvgData.threshC1)}
-              </span>
-            </div>
+            {/* CARD 1: CHECK 1 */}
+            <BelowThresholdCard
+              title="Check 1"
+              theme="blue"
+              threshInput={threshC1Input}
+              onThreshChange={handleC1Change}
+              students={belowAvgData.belowC1}
+              onFilterStudent={onFilterStudent}
+            />
 
-            {/* CARD 2: CHECK 2 DƯỚI TB */}
-            <div className="bg-[#080b14] border border-purple-500/20 rounded-xl p-3 flex flex-col justify-between">
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs font-black text-purple-400 uppercase tracking-wider">
-                    Dưới TB Check 2
-                  </span>
-                  <span
-                    className={`px-2 py-0.5 rounded-md font-extrabold text-[11px] ${
-                      belowAvgData.belowC2.length > 0
-                        ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30'
-                        : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
-                    }`}
-                  >
-                    {belowAvgData.belowC2.length} HS
-                  </span>
-                </div>
-                {belowAvgData.belowC2.length > 0 ? (
-                  <div className="flex flex-wrap gap-1.5 max-h-28 overflow-y-auto pr-1">
-                    {belowAvgData.belowC2.map((s) => (
-                      <button
-                        key={s.student_id}
-                        type="button"
-                        onClick={() => onFilterStudent?.(s.student_name)}
-                        className="px-2 py-0.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/25 text-rose-300 border border-rose-500/25 text-xs font-bold flex items-center gap-1 transition cursor-pointer"
-                        title="Bấm để sao chép tên tìm kiếm"
-                      >
-                        <span>{s.student_name}</span>
-                        <span className="text-rose-400 font-black">({format1Dec(s.score)})</span>
-                      </button>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-[11px] text-slate-500 italic py-2">
-                    Không có học sinh dưới điểm chuẩn
-                  </p>
-                )}
-              </div>
-              <span className="text-[10px] text-slate-500 mt-2 block font-medium">
-                Ngưỡng: &lt; {format1Dec(belowAvgData.threshC2)}
-              </span>
-            </div>
+            {/* CARD 2: CHECK 2 */}
+            <BelowThresholdCard
+              title="Check 2"
+              theme="purple"
+              threshInput={threshC2Input}
+              onThreshChange={handleC2Change}
+              students={belowAvgData.belowC2}
+              onFilterStudent={onFilterStudent}
+            />
 
-            {/* CARD 3: BTVN DƯỚI TB */}
-            <div className="bg-[#080b14] border border-emerald-500/20 rounded-xl p-3 flex flex-col justify-between">
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs font-black text-emerald-400 uppercase tracking-wider">
-                    Dưới TB BTVN
-                  </span>
-                  <span
-                    className={`px-2 py-0.5 rounded-md font-extrabold text-[11px] ${
-                      belowAvgData.belowHw.length > 0
-                        ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30'
-                        : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
-                    }`}
-                  >
-                    {belowAvgData.belowHw.length} HS
-                  </span>
-                </div>
-                {belowAvgData.belowHw.length > 0 ? (
-                  <div className="flex flex-wrap gap-1.5 max-h-28 overflow-y-auto pr-1">
-                    {belowAvgData.belowHw.map((s) => (
-                      <button
-                        key={s.student_id}
-                        type="button"
-                        onClick={() => onFilterStudent?.(s.student_name)}
-                        className="px-2 py-0.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/25 text-rose-300 border border-rose-500/25 text-xs font-bold flex items-center gap-1 transition cursor-pointer"
-                        title="Bấm để sao chép tên tìm kiếm"
-                      >
-                        <span>{s.student_name}</span>
-                        <span className="text-rose-400 font-black">({format1Dec(s.score)})</span>
-                      </button>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-[11px] text-slate-500 italic py-2">
-                    Không có học sinh dưới điểm chuẩn
-                  </p>
-                )}
-              </div>
-              <span className="text-[10px] text-slate-500 mt-2 block font-medium">
-                Ngưỡng: &lt; {format1Dec(belowAvgData.threshHw)}
-              </span>
-            </div>
+            {/* CARD 3: BTVN */}
+            <BelowThresholdCard
+              title="BTVN"
+              theme="emerald"
+              threshInput={threshHwInput}
+              onThreshChange={handleHwChange}
+              students={belowAvgData.belowHw}
+              onFilterStudent={onFilterStudent}
+            />
 
-            {/* CARD 4: CẢNH BÁO LỆCH ĐIỂM LỚN (BTVN > TRÊN LỚP) */}
-            <div className="bg-[#080b14] border border-amber-500/30 rounded-xl p-3 flex flex-col justify-between">
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-1">
-                    <AlertTriangle size={13} className="text-amber-400" />
-                    <span className="text-xs font-black text-amber-400 uppercase tracking-wider">
-                      Điểm Lệch Lớn
-                    </span>
-                  </div>
-                  <span
-                    className={`px-2 py-0.5 rounded-md font-extrabold text-[11px] ${
-                      divergenceStudents.length > 0
-                        ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
-                        : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
-                    }`}
-                  >
-                    {divergenceStudents.length} HS
-                  </span>
-                </div>
-                {divergenceStudents.length > 0 ? (
-                  <div className="flex flex-col gap-1.5 max-h-28 overflow-y-auto pr-1">
-                    {divergenceStudents.map((s) => (
-                      <button
-                        key={s.student_id}
-                        type="button"
-                        onClick={() => onFilterStudent?.(s.student_name)}
-                        className="px-2 py-1 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/25 text-xs font-bold flex items-center justify-between transition cursor-pointer text-left"
-                        title={`BTVN: ${format1Dec(s.homework)}, TB Check: ${format1Dec(s.checkAvg)} (Lệch: ${format1Dec(s.diff)} đ). Bấm để sao chép.`}
-                      >
-                        <span className="truncate max-w-[120px]">{s.student_name}</span>
-                        <span className="text-amber-400 font-black shrink-0">
-                          {format1Dec(s.diff)} đ
-                        </span>
-                      </button>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-[11px] text-slate-500 italic py-2">
-                    Không có trường hợp lệch điểm bất thường
-                  </p>
-                )}
-              </div>
-              <span className="text-[10px] text-slate-500 mt-2 block font-medium">
-                Công thức: |BTVN - TB(Check 1,2)| (Bỏ qua BTVN=0)
-              </span>
-            </div>
+            {/* CARD 4: CẢNH BÁO ĐỘ LỆCH (BTVN > TRÊN LỚP) */}
+            <DivergenceCard
+              students={divergenceStudents}
+              onFilterStudent={onFilterStudent}
+            />
           </div>
         </div>
       )}
