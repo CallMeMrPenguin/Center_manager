@@ -36,12 +36,14 @@ export const AttendanceGradesTab: React.FC<AttendanceGradesTabProps> = ({
       {
         id: 'stt',
         header: 'STT',
+        meta: { headerText: 'STT', exportValue: (_: any, idx: number) => idx + 1 },
         enableSorting: false,
         cell: ({ row }) => <span className="font-bold text-slate-400">{row.index + 1}</span>,
       },
       {
         accessorKey: 'student_name',
         header: 'Họ và Tên Học Sinh',
+        meta: { headerText: 'Họ và Tên Học Sinh', exportValue: (r: any) => r.student_name },
         cell: ({ row }) => (
           <span className="font-extrabold text-white text-base block truncate">
             {row.original.student_name}
@@ -51,6 +53,7 @@ export const AttendanceGradesTab: React.FC<AttendanceGradesTabProps> = ({
       {
         accessorKey: 'status',
         header: 'Điểm Danh',
+        meta: { headerText: 'Điểm Danh', exportValue: (r: any) => r.status || 'Có mặt' },
         cell: ({ row }) => {
           const rec = row.original;
           const isAbsent = rec.status === 'Vắng mặt';
@@ -79,6 +82,7 @@ export const AttendanceGradesTab: React.FC<AttendanceGradesTabProps> = ({
       {
         accessorKey: 'check_1',
         header: 'Check 1',
+        meta: { headerText: 'Check 1', exportValue: (r: any) => Number(r.check_1) > 0 ? format1Dec(Number(r.check_1)) : '-' },
         cell: ({ row }) => (
           <CheckScoreInput
             rec={row.original}
@@ -92,6 +96,7 @@ export const AttendanceGradesTab: React.FC<AttendanceGradesTabProps> = ({
       {
         accessorKey: 'check_2',
         header: 'Check 2',
+        meta: { headerText: 'Check 2', exportValue: (r: any) => Number(r.check_2) > 0 ? format1Dec(Number(r.check_2)) : '-' },
         cell: ({ row }) => (
           <CheckScoreInput
             rec={row.original}
@@ -105,6 +110,7 @@ export const AttendanceGradesTab: React.FC<AttendanceGradesTabProps> = ({
       {
         accessorKey: 'homework',
         header: 'BTVN 1',
+        meta: { headerText: 'BTVN 1', exportValue: (r: any) => Number(r.homework) > 0 ? format1Dec(Number(r.homework)) : '-' },
         cell: ({ row }) => (
           <CheckScoreInput
             rec={row.original}
@@ -118,6 +124,7 @@ export const AttendanceGradesTab: React.FC<AttendanceGradesTabProps> = ({
       {
         accessorKey: 'homework_2',
         header: 'BTVN 2',
+        meta: { headerText: 'BTVN 2', exportValue: (r: any) => Number(r.homework_2) > 0 ? format1Dec(Number(r.homework_2)) : '-' },
         cell: ({ row }) => (
           <CheckScoreInput
             rec={row.original}
@@ -131,6 +138,7 @@ export const AttendanceGradesTab: React.FC<AttendanceGradesTabProps> = ({
       {
         accessorKey: 'mock_test',
         header: 'Luyện Đề',
+        meta: { headerText: 'Luyện Đề', exportValue: (r: any) => Number(r.mock_test) > 0 ? format1Dec(Number(r.mock_test)) : '-' },
         cell: ({ row }) => (
           <CheckScoreInput
             rec={row.original}
@@ -144,6 +152,22 @@ export const AttendanceGradesTab: React.FC<AttendanceGradesTabProps> = ({
       {
         id: 'score_discrepancy',
         header: 'Độ Lệch',
+        meta: {
+          headerText: 'Độ Lệch',
+          exportValue: (rec: any) => {
+            if (rec.status === 'Vắng mặt') return '-';
+            const hw = Number(rec.homework);
+            const c1 = Number(rec.check_1);
+            const c2 = Number(rec.check_2);
+            if (!hw || hw <= 0) return '-';
+            const validC1 = !isNaN(c1) && c1 > 0;
+            const validC2 = !isNaN(c2) && c2 > 0;
+            if (!validC1 && !validC2) return '-';
+            const checkAvg = validC1 && validC2 ? (c1 + c2) / 2 : validC1 ? c1 : c2;
+            const diff = Math.abs(hw - checkAvg);
+            return diff > 0 ? format1Dec(diff) : '-';
+          },
+        },
         accessorFn: (rec) => {
           if (rec.status === 'Vắng mặt') return -999;
           const hw =

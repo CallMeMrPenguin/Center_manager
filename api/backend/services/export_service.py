@@ -126,7 +126,7 @@ def export_class_excel(class_id: int, date_str: Optional[str] = None, records: O
     ws = wb.active
     ws.title = "Báo Cáo Lớp Học"
     
-    ws.merge_cells("A1:I1")
+    ws.merge_cells("A1:K1")
     ws["A1"] = f"BÁO CÁO ĐIỂM DANH & ĐIỂM BÀI HỌC - {class_name.upper()} ({date_str})"
     ws["A1"].font = Font(size=14, bold=True, color="FFFFFF")
     ws["A1"].fill = PatternFill(start_color="1E1B4B", end_color="1E1B4B", fill_type="solid")
@@ -140,7 +140,7 @@ def export_class_excel(class_id: int, date_str: Optional[str] = None, records: O
         info_parts.append(f"Check 2: {c2_content}")
         
     if info_parts:
-        ws.merge_cells("A2:I2")
+        ws.merge_cells("A2:K2")
         ws["A2"] = "Nội dung kiểm tra: " + "   —   ".join(info_parts)
         ws["A2"].font = Font(name="Times New Roman", size=11, bold=True, color="312E81")
         ws["A2"].fill = PatternFill(start_color="EEF2FF", end_color="EEF2FF", fill_type="solid")
@@ -151,7 +151,19 @@ def export_class_excel(class_id: int, date_str: Optional[str] = None, records: O
 
     c1_hdr = f"Check 1\n({c1_content})" if c1_content else "Check 1"
     c2_hdr = f"Check 2\n({c2_content})" if c2_content else "Check 2"
-    headers = ["STT", "Họ và Tên", "Điểm Danh", c1_hdr, c2_hdr, "BTVN", "BTVN - Check 2", "Check 2 - Check 1", "Cần Cố Gắng (Dưới TB)"]
+    headers = [
+        "STT",
+        "Họ và Tên",
+        "Điểm Danh",
+        c1_hdr,
+        c2_hdr,
+        "BTVN 1",
+        "BTVN 2",
+        "Luyện Đề",
+        "BTVN - Check 2",
+        "Check 2 - Check 1",
+        "Cần Cố Gắng (Dưới TB)"
+    ]
     ws.row_dimensions[3].height = 54 if (c1_content or c2_content) else 26
     
     header_fill = PatternFill(start_color="312E81", end_color="312E81", fill_type="solid")
@@ -181,7 +193,9 @@ def export_class_excel(class_id: int, date_str: Optional[str] = None, records: O
         status_val = str(r.get("status", "Có mặt"))
         c1 = clean_num(r.get("check_1"))
         c2 = clean_num(r.get("check_2"))
-        hw = clean_num(r.get("homework"))
+        hw1 = clean_num(r.get("homework"))
+        hw2 = clean_num(r.get("homework_2"))
+        mt = clean_num(r.get("mock_test"))
 
         ws.cell(row=curr_row, column=1, value=f"=ROW()-3")
         ws.cell(row=curr_row, column=2, value=st_name)
@@ -189,24 +203,44 @@ def export_class_excel(class_id: int, date_str: Optional[str] = None, records: O
         
         c1_cell = ws.cell(row=curr_row, column=4, value=c1)
         c2_cell = ws.cell(row=curr_row, column=5, value=c2)
-        hw_cell = ws.cell(row=curr_row, column=6, value=hw)
+        hw1_cell = ws.cell(row=curr_row, column=6, value=hw1)
+        hw2_cell = ws.cell(row=curr_row, column=7, value=hw2)
+        mt_cell = ws.cell(row=curr_row, column=8, value=mt)
         
         c1_cell.number_format = '0.0'
         c2_cell.number_format = '0.0'
-        hw_cell.number_format = '0.0'
+        hw1_cell.number_format = '0.0'
+        hw2_cell.number_format = '0.0'
+        mt_cell.number_format = '0.0'
 
-        c7_cell = ws.cell(row=curr_row, column=7, value=f"=ROUNDUP(ABS(F{curr_row}-E{curr_row}), 1)")
-        c8_cell = ws.cell(row=curr_row, column=8, value=f"=ROUNDUP(ABS(E{curr_row}-D{curr_row}), 1)")
-        c7_cell.number_format = '0.0'
-        c8_cell.number_format = '0.0'
+        c9_cell = ws.cell(row=curr_row, column=9, value=f"=ROUNDUP(ABS(F{curr_row}-E{curr_row}), 1)")
+        c10_cell = ws.cell(row=curr_row, column=10, value=f"=ROUNDUP(ABS(E{curr_row}-D{curr_row}), 1)")
+        c9_cell.number_format = '0.0'
+        c10_cell.number_format = '0.0'
 
         ws.cell(
             row=curr_row,
-            column=9,
-            value=f'=IF(C{curr_row}="Vắng mặt", "Vắng mặt", IF(_xlfn.TEXTJOIN(", ", TRUE, IF(AND(D{curr_row}>0, D{curr_row}<D${avg_row_idx}), "Check 1", ""), IF(AND(E{curr_row}>0, E{curr_row}<E${avg_row_idx}), "Check 2", ""), IF(AND(F{curr_row}>0, F{curr_row}<F${avg_row_idx}), "BTVN", ""))="", "Đạt yêu cầu", "Cần cố gắng (" & _xlfn.TEXTJOIN(", ", TRUE, IF(AND(D{curr_row}>0, D{curr_row}<D${avg_row_idx}), "Check 1", ""), IF(AND(E{curr_row}>0, E{curr_row}<E${avg_row_idx}), "Check 2", ""), IF(AND(F{curr_row}>0, F{curr_row}<F${avg_row_idx}), "BTVN", "")) & ")"))'
+            column=11,
+            value=(
+                f'=IF(C{curr_row}="Vắng mặt", "Vắng mặt", '
+                f'IF(_xlfn.TEXTJOIN(", ", TRUE, '
+                f'IF(AND(D{curr_row}>0, D{curr_row}<D${avg_row_idx}), "Check 1", ""), '
+                f'IF(AND(E{curr_row}>0, E{curr_row}<E${avg_row_idx}), "Check 2", ""), '
+                f'IF(AND(F{curr_row}>0, F{curr_row}<F${avg_row_idx}), "BTVN 1", ""), '
+                f'IF(AND(G{curr_row}>0, G{curr_row}<G${avg_row_idx}), "BTVN 2", ""), '
+                f'IF(AND(H{curr_row}>0, H{curr_row}<H${avg_row_idx}), "Luyện Đề", "")'
+                f')="", "Đạt yêu cầu", '
+                f'"Cần cố gắng (" & _xlfn.TEXTJOIN(", ", TRUE, '
+                f'IF(AND(D{curr_row}>0, D{curr_row}<D${avg_row_idx}), "Check 1", ""), '
+                f'IF(AND(E{curr_row}>0, E{curr_row}<E${avg_row_idx}), "Check 2", ""), '
+                f'IF(AND(F{curr_row}>0, F{curr_row}<F${avg_row_idx}), "BTVN 1", ""), '
+                f'IF(AND(G{curr_row}>0, G{curr_row}<G${avg_row_idx}), "BTVN 2", ""), '
+                f'IF(AND(H{curr_row}>0, H{curr_row}<H${avg_row_idx}), "Luyện Đề", "")'
+                f') & ")"))'
+            )
         )
 
-        for col_num in range(1, 10):
+        for col_num in range(1, 12):
             c_cell = ws.cell(row=curr_row, column=col_num)
             c_cell.font = data_font
             c_cell.border = thin_border
@@ -214,7 +248,7 @@ def export_class_excel(class_id: int, date_str: Optional[str] = None, records: O
 
     ts = datetime.now().strftime("%Y%m%d_%H%M%S")
     if len(attendance) > 0:
-        table_ref = f"A3:I{end_row}"
+        table_ref = f"A3:K{end_row}"
         tab = Table(displayName=f"ClassTable_{ts}", ref=table_ref)
         tab.tableStyleInfo = TableStyleInfo(
             name="TableStyleMedium9",
@@ -230,20 +264,20 @@ def export_class_excel(class_id: int, date_str: Optional[str] = None, records: O
         grey_font = Font(color="64748B", bold=True)
 
         rule_red = FormulaRule(
-            formula=['NOT(ISERROR(SEARCH("Cần cố gắng", I4)))'],
+            formula=['NOT(ISERROR(SEARCH("Cần cố gắng", K4)))'],
             font=red_font
         )
         rule_green = FormulaRule(
-            formula=['NOT(ISERROR(SEARCH("Đạt yêu cầu", I4)))'],
+            formula=['NOT(ISERROR(SEARCH("Đạt yêu cầu", K4)))'],
             font=green_font
         )
         rule_grey = FormulaRule(
-            formula=['NOT(ISERROR(SEARCH("Vắng mặt", I4)))'],
+            formula=['NOT(ISERROR(SEARCH("Vắng mặt", K4)))'],
             font=grey_font
         )
-        ws.conditional_formatting.add(f"I4:I{end_row}", rule_red)
-        ws.conditional_formatting.add(f"I4:I{end_row}", rule_green)
-        ws.conditional_formatting.add(f"I4:I{end_row}", rule_grey)
+        ws.conditional_formatting.add(f"K4:K{end_row}", rule_red)
+        ws.conditional_formatting.add(f"K4:K{end_row}", rule_green)
+        ws.conditional_formatting.add(f"K4:K{end_row}", rule_grey)
 
     # Average row
     ws.cell(row=avg_row_idx, column=1, value="")
@@ -253,34 +287,42 @@ def export_class_excel(class_id: int, date_str: Optional[str] = None, records: O
     if len(attendance) > 0:
         c1_vals = [clean_num(r.get("check_1")) for r in attendance if clean_num(r.get("check_1")) > 0 and str(r.get("status")) != "Vắng mặt"]
         c2_vals = [clean_num(r.get("check_2")) for r in attendance if clean_num(r.get("check_2")) > 0 and str(r.get("status")) != "Vắng mặt"]
-        hw_vals = [clean_num(r.get("homework")) for r in attendance if clean_num(r.get("homework")) > 0 and str(r.get("status")) != "Vắng mặt"]
+        hw1_vals = [clean_num(r.get("homework")) for r in attendance if clean_num(r.get("homework")) > 0 and str(r.get("status")) != "Vắng mặt"]
+        hw2_vals = [clean_num(r.get("homework_2")) for r in attendance if clean_num(r.get("homework_2")) > 0 and str(r.get("status")) != "Vắng mặt"]
+        mt_vals = [clean_num(r.get("mock_test")) for r in attendance if clean_num(r.get("mock_test")) > 0 and str(r.get("status")) != "Vắng mặt"]
         
         avg_1 = trunc_1_dec(sum(c1_vals) / len(c1_vals)) if c1_vals else 0.0
         avg_2 = trunc_1_dec(sum(c2_vals) / len(c2_vals)) if c2_vals else 0.0
-        avg_hw = trunc_1_dec(sum(hw_vals) / len(hw_vals)) if hw_vals else 0.0
+        avg_hw1 = trunc_1_dec(sum(hw1_vals) / len(hw1_vals)) if hw1_vals else 0.0
+        avg_hw2 = trunc_1_dec(sum(hw2_vals) / len(hw2_vals)) if hw2_vals else 0.0
+        avg_mt = trunc_1_dec(sum(mt_vals) / len(mt_vals)) if mt_vals else 0.0
 
         c1_avg_cell = ws.cell(row=avg_row_idx, column=4, value=avg_1)
         c2_avg_cell = ws.cell(row=avg_row_idx, column=5, value=avg_2)
-        hw_avg_cell = ws.cell(row=avg_row_idx, column=6, value=avg_hw)
+        hw1_avg_cell = ws.cell(row=avg_row_idx, column=6, value=avg_hw1)
+        hw2_avg_cell = ws.cell(row=avg_row_idx, column=7, value=avg_hw2)
+        mt_avg_cell = ws.cell(row=avg_row_idx, column=8, value=avg_mt)
 
         c1_avg_cell.number_format = '0.0'
         c2_avg_cell.number_format = '0.0'
-        hw_avg_cell.number_format = '0.0'
+        hw1_avg_cell.number_format = '0.0'
+        hw2_avg_cell.number_format = '0.0'
+        mt_avg_cell.number_format = '0.0'
 
-        diff_hw_c2 = trunc_1_dec(abs(avg_hw - avg_2))
+        diff_hw_c2 = trunc_1_dec(abs(avg_hw1 - avg_2))
         diff_c2_c1 = trunc_1_dec(abs(avg_2 - avg_1))
 
-        c7_avg_cell = ws.cell(row=avg_row_idx, column=7, value=diff_hw_c2)
-        c8_avg_cell = ws.cell(row=avg_row_idx, column=8, value=diff_c2_c1)
+        c9_avg_cell = ws.cell(row=avg_row_idx, column=9, value=diff_hw_c2)
+        c10_avg_cell = ws.cell(row=avg_row_idx, column=10, value=diff_c2_c1)
 
-        c7_avg_cell.number_format = '0.0'
-        c8_avg_cell.number_format = '0.0'
+        c9_avg_cell.number_format = '0.0'
+        c10_avg_cell.number_format = '0.0'
 
-        ws.cell(row=avg_row_idx, column=9, value=f"=IF(D{avg_row_idx}>0, \"Đã tính TB lớp\", \"Chưa đủ điểm\")")
+        ws.cell(row=avg_row_idx, column=11, value=f"=IF(D{avg_row_idx}>0, \"Đã tính TB lớp\", \"Chưa đủ điểm\")")
 
     avg_fill = PatternFill(start_color="FEF3C7", end_color="FEF3C7", fill_type="solid")
     avg_font = Font(name="Times New Roman", bold=True, size=13, color="92400E")
-    for col_num in range(1, 10):
+    for col_num in range(1, 12):
         c_cell = ws.cell(row=avg_row_idx, column=col_num)
         c_cell.font = avg_font
         c_cell.fill = avg_fill
@@ -292,7 +334,9 @@ def export_class_excel(class_id: int, date_str: Optional[str] = None, records: O
     summary_labels = [
         (c1_sum_label, 4, "D"),
         (c2_sum_label, 5, "E"),
-        ("BTVN", 6, "F")
+        ("BTVN 1", 6, "F"),
+        ("BTVN 2", 7, "G"),
+        ("Luyện Đề", 8, "H")
     ]
 
     for idx, (m_label, col_num, col_let) in enumerate(summary_labels):
@@ -306,7 +350,7 @@ def export_class_excel(class_id: int, date_str: Optional[str] = None, records: O
         )
         sum_title.font = Font(name="Times New Roman", bold=True, color="7F1D1D", size=13)
         sum_title.alignment = Alignment(horizontal="left", vertical="center", wrap_text=True)
-        ws.merge_cells(f"C{r_idx}:I{r_idx}")
+        ws.merge_cells(f"C{r_idx}:K{r_idx}")
         val_cell = ws.cell(
             row=r_idx,
             column=3,
@@ -316,8 +360,8 @@ def export_class_excel(class_id: int, date_str: Optional[str] = None, records: O
         val_cell.alignment = Alignment(horizontal="left", vertical="center")
         ws.row_dimensions[r_idx].height = 28 if (c1_content or c2_content) else 22
 
-    total_max_row = avg_row_idx + 5
-    for col_idx in range(1, 10):
+    total_max_row = avg_row_idx + 2 + len(summary_labels)
+    for col_idx in range(1, 12):
         col_let = openpyxl.utils.get_column_letter(col_idx)
         max_len = 0
         for r_idx in range(3, total_max_row + 1):
@@ -326,29 +370,29 @@ def export_class_excel(class_id: int, date_str: Optional[str] = None, records: O
             cell_val = ws.cell(row=r_idx, column=col_idx).value
             val_str = str(cell_val) if cell_val is not None else ""
             if val_str.startswith("="):
-                if col_idx == 9:
-                    val_str = "Cần cố gắng (Check 1, Check 2, BTVN)"
+                if col_idx == 11:
+                    val_str = "Cần cố gắng (Check 1, Check 2, BTVN 1, BTVN 2, Luyện Đề)"
                 elif col_idx == 2:
                     val_str = "Check 1 dưới TB (< 10.0)"
                 elif col_idx == 1:
                     val_str = "999"
-                elif col_idx in (7, 8):
+                elif col_idx in (9, 10):
                     val_str = "10.0"
                 else:
-                    val_str = ""
+                    val_str = "10.0"
             elif "\n" in val_str:
                 val_str = max(val_str.split("\n"), key=len)
 
             if len(val_str) > max_len:
                 max_len = len(val_str)
 
-        extra_padding = 12 if col_idx == 9 else (8 if col_idx == 2 else 5)
+        extra_padding = 12 if col_idx == 11 else (8 if col_idx == 2 else 5)
         if col_idx in (4, 5) and (c1_content or c2_content):
             col_width = 26
         elif col_idx == 2:
             col_width = max(max_len + extra_padding, 40 if (c1_content or c2_content) else 36)
-        elif col_idx == 9:
-            col_width = max(max_len + extra_padding, 54)
+        elif col_idx == 11:
+            col_width = max(max_len + extra_padding, 56)
         elif col_idx == 3:
             col_width = max(max_len + extra_padding, 16)
         else:
@@ -401,29 +445,32 @@ def export_class_docx(class_id: int, date_str: Optional[str] = None, records: Op
         cfg_run.font.color.rgb = RGBColor(49, 46, 129)
     
     doc.add_paragraph()
-    table = doc.add_table(rows=1, cols=6)
-    table.alignment = WD_TABLE_ALIGNMENT.CENTER
-    hdr_cells = table.rows[0].cells
     c1_hdr = f"Check 1\n({c1_content})" if c1_content else "Check 1"
     c2_hdr = f"Check 2\n({c2_content})" if c2_content else "Check 2"
-    headers = ["STT", "Họ và Tên", "Điểm Danh", c1_hdr, c2_hdr, "BTVN"]
+    headers = ["STT", "Họ và Tên", "Điểm Danh", c1_hdr, c2_hdr, "BTVN 1", "BTVN 2", "Luyện Đề"]
+    table = doc.add_table(rows=1, cols=len(headers))
+    table.alignment = WD_TABLE_ALIGNMENT.CENTER
+    hdr_cells = table.rows[0].cells
     for i, h in enumerate(headers):
         hdr_cells[i].text = h
         hdr_cells[i].paragraphs[0].runs[0].font.bold = True
         
     for idx, r in enumerate(attendance, 1):
-        c1 = r.get("check_1", 0)
-        c2 = r.get("check_2", 0)
-        hw = r.get("homework", 0)
-        hw_str = "Không BTVN" if hw == 0 else str(hw)
+        c1 = clean_num(r.get("check_1"))
+        c2 = clean_num(r.get("check_2"))
+        hw1 = clean_num(r.get("homework"))
+        hw2 = clean_num(r.get("homework_2"))
+        mt = clean_num(r.get("mock_test"))
         
         row_cells = table.add_row().cells
         row_cells[0].text = str(idx)
-        row_cells[1].text = r.get("student_name", "")
-        row_cells[2].text = r.get("status", "")
-        row_cells[3].text = str(c1)
-        row_cells[4].text = str(c2)
-        row_cells[5].text = hw_str
+        row_cells[1].text = str(r.get("student_name", ""))
+        row_cells[2].text = str(r.get("status", "Có mặt"))
+        row_cells[3].text = str(c1) if c1 > 0 else "-"
+        row_cells[4].text = str(c2) if c2 > 0 else "-"
+        row_cells[5].text = str(hw1) if hw1 > 0 else "-"
+        row_cells[6].text = str(hw2) if hw2 > 0 else "-"
+        row_cells[7].text = str(mt) if mt > 0 else "-"
         
     files_dir = get_setting("files_dir")
     os.makedirs(files_dir, exist_ok=True)
