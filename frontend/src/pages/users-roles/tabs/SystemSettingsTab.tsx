@@ -46,23 +46,23 @@ export const SystemSettingsTab: React.FC = () => {
         </div>
       </div>
 
-      {/* 2. Supabase Cloud Sync (Future Ready) */}
+      {/* 2. VPS PostgreSQL Cloud Sync (Future Ready) */}
       <div className="bg-[#0c0f1e] border border-[#1e2742] rounded-2xl p-5 shadow-lg space-y-4">
         <div className="flex items-center gap-2.5 border-b border-white/10 pb-3">
           <Cloud size={18} className="text-sky-400" />
           <h3 className="text-sm font-black text-white uppercase tracking-wider">
-            Đồng Bộ Đám Mây & Supabase Auth
+            Đồng Bộ Máy Chủ PostgreSQL (VPS)
           </h3>
         </div>
 
         <p className="text-xs text-slate-300 leading-relaxed">
-          Hệ thống hiện tại hoạt động theo kiến trúc <strong>Offline-First</strong> độc lập và bảo mật 100% trên máy tính của bạn. Trong các bản cập nhật tiếp theo, tài khoản và phân quyền sẽ được tích hợp với <strong>Supabase</strong> để tự động đồng bộ hóa dữ liệu 2 chiều khi có kết nối Internet.
+          Hệ thống hoạt động theo kiến trúc <strong>Offline-First</strong> độc lập và bảo mật trên máy tính của bạn với SQLite, đồng thời sẵn sàng kết nối và tự động đồng bộ hóa 2 chiều với máy chủ cơ sở dữ liệu <strong>PostgreSQL trên VPS</strong> của trung tâm khi có kết nối mạng.
         </p>
 
         <div className="bg-[#121626] border border-[#232c49] rounded-xl p-4 space-y-3">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-slate-300">
-              Supabase Project URL
+              PostgreSQL VPS Host / URL
             </span>
             <span className="text-xs text-slate-500 font-mono">
               Chưa cấu hình (Sẵn sàng)
@@ -71,10 +71,10 @@ export const SystemSettingsTab: React.FC = () => {
 
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-slate-300">
-              Trạng thái đồng bộ đám mây
+              Trạng thái đồng bộ máy chủ
             </span>
             <span className="text-xs px-2.5 py-0.5 rounded-full font-bold bg-sky-500/10 text-sky-400 border border-sky-500/20">
-              Sẵn sàng cho Supabase
+              Sẵn sàng cho VPS PostgreSQL
             </span>
           </div>
         </div>

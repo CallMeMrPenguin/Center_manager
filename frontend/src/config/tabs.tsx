@@ -45,7 +45,7 @@ export interface TabDefinition {
 
 // Auto-detect environment:
 // 1. If VITE_APP_MODE is explicitly set, honor it.
-// 2. Otherwise auto-detect: if domain is not localhost/127.0.0.1 (e.g. *.vercel.app), default to Web mode.
+// 2. Otherwise auto-detect: if domain is not localhost/127.0.0.1 (e.g. remote web domain), default to Web mode.
 const isRunningOnWeb = typeof window !== 'undefined' && 
   window.location.hostname !== 'localhost' && 
   window.location.hostname !== '127.0.0.1' &&

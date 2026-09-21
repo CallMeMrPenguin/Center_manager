@@ -29,7 +29,7 @@ cd Center_manager
 docker compose up -d --build
 ```
 Hệ thống sẽ:
-1. Tạo container PostgreSQL 16 và tự động chạy schema khởi tạo ban đầu (`supabase_schema.sql`).
+1. Tạo container PostgreSQL 16 và tự động chạy schema khởi tạo ban đầu (`postgres_schema.sql`).
 2. Khởi tạo container FastAPI backend kết nối nội bộ tốc độ cao với PostgreSQL qua `DATABASE_URL`.
 3. Mở cổng `8000` cho API.
 

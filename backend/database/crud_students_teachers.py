@@ -83,7 +83,7 @@ def create_student(data: Dict[str, Any]) -> int:
         conn.commit()
         new_id = cursor.lastrowid
 
-        # Auto-create corresponding app_user account and sync with Supabase Auth
+        # Auto-create corresponding app_user account
         if new_id:
             custom_user = str(data.get("account_username") or "").strip()
             username = custom_user if custom_user else f"hs_{new_id:04d}"
@@ -103,11 +103,7 @@ def create_student(data: Dict[str, Any]) -> int:
             except Exception as e:
                 print(f"[Student CRUD] Auto create user notice: {e}")
 
-            try:
-                from services.supabase_auth_service import sync_create_supabase_user
-                sync_create_supabase_user(username, raw_pwd, full_name, "Học sinh")
-            except Exception as e:
-                print(f"[Supabase Auth] Sync student create warning: {e}")
+
 
         return new_id
     finally:
@@ -145,7 +141,7 @@ def update_student(student_id: int, data: Dict[str, Any]):
             except Exception as e:
                 print(f"[Student CRUD] Auto-unenroll inactive student notice: {e}")
 
-        # Auto-update corresponding app_user account and sync to Supabase Auth
+        # Auto-update corresponding app_user account
         custom_user = str(data.get("account_username") or "").strip()
         default_user = f"hs_{student_id:04d}"
         username = custom_user if custom_user else default_user
@@ -176,11 +172,7 @@ def update_student(student_id: int, data: Dict[str, Any]):
             except Exception as e:
                 print(f"[Student CRUD] Auto update user notice: {e}")
 
-            try:
-                from services.supabase_auth_service import sync_update_supabase_user
-                sync_update_supabase_user(username, display_name=new_full_name, role="Học sinh")
-            except Exception as e:
-                print(f"[Supabase Auth] Sync student update warning: {e}")
+
     finally:
         conn.close()
 
@@ -235,11 +227,7 @@ def delete_student(student_id: int):
             pass
         conn.commit()
 
-        try:
-            from services.supabase_auth_service import sync_delete_supabase_user
-            sync_delete_supabase_user(username)
-        except Exception as e:
-            print(f"[Supabase Auth] Sync student delete warning: {e}")
+
     finally:
         conn.close()
 
@@ -319,11 +307,7 @@ def create_teacher_cm(data: Dict[str, Any]) -> int:
             except Exception as e:
                 print(f"[Teacher CRUD] Auto create user notice: {e}")
 
-            try:
-                from services.supabase_auth_service import sync_create_supabase_user
-                sync_create_supabase_user(username, raw_pwd, full_name, account_role)
-            except Exception as e:
-                print(f"[Supabase Auth] Sync teacher create warning: {e}")
+
 
         return new_id
     finally:
@@ -380,11 +364,7 @@ def update_teacher_cm(teacher_id: int, data: Dict[str, Any]):
         except Exception as e:
             print(f"[Teacher CRUD] Auto update user notice: {e}")
 
-        try:
-            from services.supabase_auth_service import sync_update_supabase_user
-            sync_update_supabase_user(username, display_name=full_name, role=account_role)
-        except Exception as e:
-            print(f"[Supabase Auth] Sync teacher update warning: {e}")
+
     finally:
         conn.close()
 
@@ -399,11 +379,5 @@ def delete_teacher_cm(teacher_id: int):
         except Exception:
             pass
         conn.commit()
-
-        try:
-            from services.supabase_auth_service import sync_delete_supabase_user
-            sync_delete_supabase_user(username)
-        except Exception as e:
-            print(f"[Supabase Auth] Sync teacher delete warning: {e}")
     finally:
         conn.close()

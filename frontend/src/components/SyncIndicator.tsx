@@ -71,7 +71,7 @@ export const SyncIndicator: React.FC = () => {
         status === 'offline'
           ? 'Ngoại tuyến (Offline): Dữ liệu được lưu an toàn tại máy và sẽ tự động đồng bộ khi có mạng lại. Bấm để thử lại.'
           : isSyncing
-          ? 'Đang đồng bộ với đám mây Supabase...'
+          ? 'Đang đồng bộ với máy chủ trung tâm...'
           : `Đã đồng bộ an toàn ${lastSyncedAt ? `(${lastSyncedAt.split(' ')[1] || lastSyncedAt})` : ''}. Bấm để ép đồng bộ ngay.`
       }
       className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold border transition-all duration-200 cursor-pointer select-none ${

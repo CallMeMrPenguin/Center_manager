@@ -1,6 +1,6 @@
 -- =========================================================================
--- Center Manager App — Supabase PostgreSQL Schema
--- Run this script in the Supabase Dashboard -> SQL Editor
+-- Center Manager App — VPS PostgreSQL Schema
+-- Run this script in psql or any PostgreSQL client on your server
 -- =========================================================================
 
 -- Enable UUID extension if needed

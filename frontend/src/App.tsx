@@ -243,7 +243,7 @@ function AppContent() {
       <footer className="h-8 bg-[#06070a] flex items-center justify-between px-6 text-[11px] text-slate-400 select-none shrink-0 font-semibold z-10 border-t border-white/[0.04]">
         <div className="flex items-center gap-3">
           <SyncIndicator />
-          <span className="hidden md:inline text-slate-400">Local-First Engine — Tự động đồng bộ với Supabase</span>
+          <span className="hidden md:inline text-slate-400">Local-First Engine — Tự động đồng bộ với máy chủ PostgreSQL</span>
         </div>
         <div className="flex items-center gap-2">
           <span className="text-slate-500">Đang đăng nhập:</span>

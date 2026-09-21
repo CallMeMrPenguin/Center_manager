@@ -172,7 +172,7 @@ def unenroll_student_from_class(class_id: int, student_id: int):
     finally:
         conn.close()
 
-    # Synchronously delete from Supabase so bidirectional sync does not resurrect the student
+    # Synchronously delete from remote PostgreSQL so bidirectional sync does not resurrect the student
     _sync_cloud_delete_sync("DELETE FROM class_students WHERE class_id = %s AND student_id = %s", (class_id, student_id))
     _sync_cloud_delete_sync("DELETE FROM friend_group_members WHERE class_id = %s AND student_id = %s", (class_id, student_id))
     _sync_cloud_delete_sync("DELETE FROM conflict_group_members WHERE class_id = %s AND student_id = %s", (class_id, student_id))
@@ -404,9 +404,10 @@ def _sync_cloud_delete(sql_pg: str, params: tuple):
 
 def _sync_cloud_delete_sync(sql_pg: str, params: tuple):
     try:
-        from database.connection import get_target_db_url, IS_VERCEL
-        if IS_VERCEL:
+        import os
+        if os.environ.get("APP_MODE") in ("web", "vps", "server"):
             return
+        from database.connection import get_target_db_url
         import psycopg2
         target_url = get_target_db_url()
         if not target_url:

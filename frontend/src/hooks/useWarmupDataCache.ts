@@ -33,7 +33,7 @@ export function useWarmupDataCache(currentUser: AuthUser | null) {
             api.getAssignments(),
           ]);
 
-          // Preload active class details so clicking into any class is 0ms instant even on Vercel
+          // Preload active class details so clicking into any class is 0ms instant even on remote server
           const classResult = results[0];
           if (classResult.status === 'fulfilled' && Array.isArray(classResult.value)) {
             const activeClasses = classResult.value.slice(0, 6);

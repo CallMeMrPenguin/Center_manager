@@ -34,6 +34,8 @@ class UserUpdate(BaseModel):
 class RolePermissionsBatch(BaseModel):
     permissions: List[Dict[str, Any]]
 
+from services.auth_security import create_access_token
+
 # --- Auth Endpoints ---
 @router.post("/auth/login")
 @router.post("/auth/login/")
@@ -42,7 +44,8 @@ class RolePermissionsBatch(BaseModel):
 def login(payload: LoginRequest):
     try:
         user = authenticate_user(payload.username, payload.password)
-        return {"success": True, "user": user}
+        token = create_access_token(user)
+        return {"success": True, "user": user, "token": token}
     except ValueError as ve:
         raise HTTPException(status_code=401, detail=str(ve))
     except Exception as e:

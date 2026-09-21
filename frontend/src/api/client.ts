@@ -1,4 +1,5 @@
 import { dataCache } from '../utils/dataCache';
+import { getAuthToken } from '../utils/authUtils';
 
 export const API_BASE = import.meta.env.VITE_API_URL ?? '';
 
@@ -16,6 +17,18 @@ export async function request<T>(path: string, options?: RequestOptions): Promis
   const cacheKey = path;
   const tags = options?.tags || [];
 
+  const token = getAuthToken();
+  const defaultHeaders: Record<string, string> = {
+    'Content-Type': 'application/json',
+  };
+  if (token) {
+    defaultHeaders['Authorization'] = `Bearer ${token}`;
+  }
+  const mergedHeaders = {
+    ...defaultHeaders,
+    ...((options?.headers as Record<string, string>) || {}),
+  };
+
   // In-memory SWR caching for GET requests
   if (isGet && !options?.forceRefresh) {
     const cached = dataCache.get<T>(cacheKey);
@@ -27,8 +40,8 @@ export async function request<T>(path: string, options?: RequestOptions): Promis
         if (now - lastReval > REVALIDATE_THROTTLE_MS) {
           revalidateTracker.set(cacheKey, now);
           fetch(`${API_BASE}${path}`, {
-            headers: { 'Content-Type': 'application/json' },
             ...options,
+            headers: mergedHeaders,
           })
             .then((res) => (res.ok ? res.json() : null))
             .then((freshData) => {
@@ -43,10 +56,8 @@ export async function request<T>(path: string, options?: RequestOptions): Promis
 
   const url = `${API_BASE}${path}`;
   const response = await fetch(url, {
-    headers: {
-      'Content-Type': 'application/json',
-    },
     ...options,
+    headers: mergedHeaders,
   });
 
   if (!response.ok) {

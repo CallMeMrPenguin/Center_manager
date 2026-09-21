@@ -128,7 +128,7 @@ def authenticate_user(username: str, raw_password: str) -> Dict[str, Any]:
 
 
 def create_user(data: Dict[str, Any]) -> int:
-    """Creates a new user account and auto-syncs with Supabase Auth."""
+    """Creates a new user account."""
     conn = get_connection()
     try:
         cursor = conn.cursor()
@@ -152,19 +152,12 @@ def create_user(data: Dict[str, Any]) -> int:
         conn.commit()
         new_id = cursor.lastrowid
 
-        # Auto-sync with Supabase auth.users
-        try:
-            from services.supabase_auth_service import sync_create_supabase_user
-            sync_create_supabase_user(username, raw_password, display_name, role)
-        except Exception as e:
-            print(f"Supabase Auth sync background warning: {e}")
-
         return new_id
     finally:
         conn.close()
 
 def update_user(user_id: int, data: Dict[str, Any]):
-    """Updates user information, optionally updating password in DB and Supabase Auth."""
+    """Updates user information, optionally updating password in DB."""
     conn = get_connection()
     try:
         cursor = conn.cursor()
@@ -189,17 +182,11 @@ def update_user(user_id: int, data: Dict[str, Any]):
             """, (display_name, username, role, status, user_id))
         conn.commit()
 
-        # Auto-sync password/metadata update with Supabase auth.users
-        try:
-            from services.supabase_auth_service import sync_update_supabase_user
-            sync_update_supabase_user(username, password=raw_password, display_name=display_name, role=role)
-        except Exception as e:
-            print(f"Supabase Auth update background warning: {e}")
     finally:
         conn.close()
 
 def delete_user(user_id: int):
-    """Deletes a user account from DB and Supabase Auth."""
+    """Deletes a user account from DB."""
     conn = get_connection()
     try:
         cursor = conn.cursor()
@@ -210,18 +197,12 @@ def delete_user(user_id: int):
         cursor.execute("DELETE FROM app_users WHERE id = ?", (user_id,))
         conn.commit()
 
-        if username:
-            try:
-                from services.supabase_auth_service import sync_delete_supabase_user
-                sync_delete_supabase_user(username)
-            except Exception as e:
-                print(f"Supabase Auth delete background warning: {e}")
     finally:
         conn.close()
 
 def sync_student_accounts() -> Dict[str, Any]:
     """
-    Auto-generates or syncs accounts for all students in the database and Supabase Auth.
+    Auto-generates or syncs accounts for all students in the database.
     Default username: hs_{id:04d}, Default password: '123456'
     """
     conn = get_connection()
@@ -236,7 +217,6 @@ def sync_student_accounts() -> Dict[str, Any]:
 
         to_insert = []
         to_update = []
-        supabase_sync_list = []
 
         for s in students:
             sid = s["id"]
@@ -248,8 +228,6 @@ def sync_student_accounts() -> Dict[str, Any]:
                 to_insert.append((name, username, default_pwd_hash, status))
             else:
                 to_update.append((name, status, username))
-
-            supabase_sync_list.append((username, name))
 
         if to_insert:
             cursor.executemany("""
@@ -265,14 +243,6 @@ def sync_student_accounts() -> Dict[str, Any]:
             """, to_update)
 
         conn.commit()
-
-        # Background sync to Supabase Auth
-        for username, name in supabase_sync_list:
-            try:
-                from services.supabase_auth_service import sync_create_supabase_user
-                sync_create_supabase_user(username, "123456", name, "Học sinh")
-            except Exception:
-                pass
 
         return {"success": True, "created": len(to_insert), "synced": len(to_update), "total_students": len(students)}
     finally:

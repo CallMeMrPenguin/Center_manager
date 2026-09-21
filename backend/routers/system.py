@@ -244,8 +244,8 @@ def api_save_settings(settings: Dict[str, Any]):
 
 @router.get("/api/sync/status")
 def api_get_sync_status():
-    if os.environ.get("APP_MODE") == "web" or os.environ.get("VERCEL"):
-        return {"status": "synced", "last_synced_at": "Trực tuyến (Cloud Live)", "syncing": False}
+    if os.environ.get("APP_MODE") in ("web", "vps", "server"):
+        return {"status": "synced", "last_synced_at": "Trực tuyến (PostgreSQL Live)", "syncing": False}
     try:
         from services.sync_worker import get_sync_status
         return get_sync_status()
@@ -254,8 +254,8 @@ def api_get_sync_status():
 
 @router.post("/api/sync/trigger")
 def api_trigger_sync():
-    if os.environ.get("APP_MODE") == "web" or os.environ.get("VERCEL"):
-        return {"success": True, "message": "Đang kết nối trực tiếp đám mây Supabase"}
+    if os.environ.get("APP_MODE") in ("web", "vps", "server"):
+        return {"success": True, "message": "Đang kết nối trực tiếp máy chủ PostgreSQL"}
     try:
         from services.sync_worker import trigger_instant_sync
         trigger_instant_sync()

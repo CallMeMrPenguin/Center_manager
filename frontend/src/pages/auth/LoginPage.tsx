@@ -41,7 +41,10 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
       setLoading(true);
       const res = await api.login(cleanUser, cleanPass);
       if (res && res.success && res.user) {
-        const authUser: AuthUser = res.user;
+        const authUser: AuthUser = {
+          ...res.user,
+          token: res.token,
+        };
         saveAuthUser(authUser, rememberMe);
         showToast(`Đăng nhập thành công: ${authUser.name}`, 'success');
         onLogin(authUser);

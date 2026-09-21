@@ -10,7 +10,7 @@ try:
 except ImportError:
     psycopg2 = None
 
-from database.connection import DB_PATH, get_target_db_url, SUPABASE_DEFAULT_DB_URL
+from database.connection import DB_PATH, get_target_db_url
 
 FAST_SYNC_TABLES = [
     # Level 0 (Master / Standalone)
@@ -58,27 +58,28 @@ def _parse_ts(val: Any) -> float:
         if val.tzinfo is not None:
             return val.timestamp()
         return val.replace(tzinfo=timezone.utc).timestamp()
+    if isinstance(val, str):
+        val = val.strip()
+        for fmt in ("%Y-%m-%d %H:%M:%S", "%Y-%m-%d %H:%M:%S.%f", "%Y-%m-%d"):
+            try:
+                dt = datetime.strptime(val, fmt)
+                return dt.replace(tzinfo=timezone.utc).timestamp()
+            except ValueError:
+                continue
     try:
-        s = str(val).strip().replace("T", " ")
-        if "+" in s:
-            return datetime.fromisoformat(s).timestamp()
-        elif s.endswith("Z"):
-            return datetime.fromisoformat(s[:-1]).replace(tzinfo=timezone.utc).timestamp()
-        else:
-            base = s.split(".")[0]
-            return datetime.strptime(base, "%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone.utc).timestamp()
+        return float(val)
     except Exception:
         return 0.0
 
 def run_bidirectional_sync(force_full: bool = False) -> Dict[str, Any]:
     """
-    Executes conflict-free near-instant bidirectional delta sync between Local SQLite and Supabase PostgreSQL.
+    Executes conflict-free near-instant bidirectional delta sync between Local SQLite and remote PostgreSQL.
     Uses Last-Write-Wins based on updated_at and idempotent upserts.
     """
     if not os.path.exists(DB_PATH):
         return {"success": False, "error": "Local SQLite database not found"}
 
-    target_url = get_target_db_url() or SUPABASE_DEFAULT_DB_URL
+    target_url = get_target_db_url()
     if not target_url:
         return {"success": False, "error": "No remote PostgreSQL database URL configured"}
 
@@ -95,7 +96,7 @@ def run_bidirectional_sync(force_full: bool = False) -> Dict[str, Any]:
         pcur = pconn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     except Exception as e:
         sconn.close()
-        return {"success": False, "error": f"Failed to connect to Supabase: {str(e)}"}
+        return {"success": False, "error": f"Failed to connect to remote PostgreSQL: {str(e)}"}
 
     pushed_total = 0
     pulled_total = 0

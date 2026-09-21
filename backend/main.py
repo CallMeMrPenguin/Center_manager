@@ -11,15 +11,8 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from config.settings import load_settings, get_setting, BASE_DIR
 from database.db_manager import init_db
 
-# App Mode (web = cloud-only center management, local = full desktop suite)
-IS_VERCEL = bool(
-    os.environ.get("VERCEL")
-    or os.environ.get("VERCEL_ENV")
-    or os.environ.get("AWS_LAMBDA_FUNCTION_NAME")
-    or os.environ.get("LAMBDA_TASK_ROOT")
-    or os.environ.get("APP_MODE") == "web"
-)
-APP_MODE = "web" if IS_VERCEL else os.environ.get("APP_MODE", "local")
+# App Mode (web/vps = remote PostgreSQL server mode, local = desktop SQLite suite)
+APP_MODE = os.environ.get("APP_MODE", "local")
 
 # Core Routers
 from routers import (
@@ -40,7 +33,9 @@ if APP_MODE != "web":
 
 app = FastAPI(title="Center Manager & Test Formatter API")
 
-# Configure CORS (Supports mobile, LAN, web, and Vercel domains seamlessly)
+from middlewares.security_middleware import SecurityGuardMiddleware
+
+# Configure CORS (Supports mobile, LAN, and remote web domains seamlessly)
 app.add_middleware(
     CORSMiddleware,
     allow_origin_regex=".*",
@@ -48,6 +43,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+# Anti-tampering & authentication security guard
+app.add_middleware(SecurityGuardMiddleware)
 
 from fastapi.responses import JSONResponse
 
@@ -95,27 +92,6 @@ if APP_MODE != "web":
     except Exception as e:
         print("Notice on mounting local folders:", e)
 
-if IS_VERCEL:
-    from starlette.types import ASGIApp, Scope, Receive, Send
-
-    class VercelApiPrefixMiddleware:
-        """
-        Ensures that API requests reaching FastAPI on Vercel always have the '/api' prefix
-        even if Vercel serverless routing stripped '/api' from the incoming path.
-        """
-        def __init__(self, app: ASGIApp):
-            self.app = app
-
-        async def __call__(self, scope: Scope, receive: Receive, send: Send):
-            if scope["type"] == "http":
-                path = scope.get("path", "")
-                if path and not path.startswith("/api"):
-                    # Prepend /api so FastAPI routes always match
-                    scope["path"] = f"/api{path}" if path.startswith("/") else f"/api/{path}"
-                    scope["raw_path"] = scope["path"].encode("utf-8")
-            await self.app(scope, receive, send)
-
-    app.add_middleware(VercelApiPrefixMiddleware)
 
 # Static Frontend Serving for React (Only active in standalone local desktop server mode)
 if APP_MODE != "web":
@@ -144,7 +120,7 @@ if APP_MODE != "web":
             border_opacity = theme.get("borderOpacity", 0.15)
             saturate = theme.get("saturate", 180)
             bg_image = theme.get("bgImage", "none")
-            if not bg_image or bg_image == 'none' or str(bg_image).startswith('data:') or 'supabase.co' in str(bg_image):
+            if not bg_image or bg_image == 'none' or str(bg_image).startswith('data:'):
                 bg_image = "none"
 
             with open(index_file, "r", encoding="utf-8") as f:

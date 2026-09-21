@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { showToast } from '../components/Toast';
 
 /**
- * Hook to detect new deployments on Vercel/Web and auto-refresh smoothly.
+ * Hook to detect new deployments on Web/VPS and auto-refresh smoothly.
  */
 export function useAutoDeploymentRefresh() {
   useEffect(() => {

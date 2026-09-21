@@ -2,23 +2,12 @@ import os
 import re
 import sqlite3
 
-IS_VERCEL = bool(
-    os.environ.get("VERCEL")
-    or os.environ.get("VERCEL_ENV")
-    or os.environ.get("AWS_LAMBDA_FUNCTION_NAME")
-    or os.environ.get("LAMBDA_TASK_ROOT")
-    or os.environ.get("APP_MODE") == "web"
-)
-
-SUPABASE_DEFAULT_DB_URL = "postgresql://postgres.jttlekzqveygejvyhfqn:Callmemrpenguin%402004@aws-0-ap-northeast-1.pooler.supabase.com:6543/postgres?sslmode=require"
-SUPABASE_SESSION_POOLER_URL = "postgresql://postgres.jttlekzqveygejvyhfqn:Callmemrpenguin%402004@aws-0-ap-northeast-1.pooler.supabase.com:5432/postgres?sslmode=require"
+DEFAULT_POSTGRES_URL = os.environ.get("DATABASE_URL") or os.environ.get("POSTGRES_URL") or "postgresql://postgres:postgres@localhost:5432/center_manager"
 
 def get_target_db_url() -> str:
-    raw_url = os.environ.get("DATABASE_URL") or os.environ.get("POSTGRES_URL") or SUPABASE_DEFAULT_DB_URL
+    raw_url = os.environ.get("DATABASE_URL") or os.environ.get("POSTGRES_URL") or DEFAULT_POSTGRES_URL
     if raw_url and raw_url.startswith("postgres://"):
         raw_url = "postgresql://" + raw_url[len("postgres://"):]
-    if raw_url and "sslmode=" not in raw_url and "supabase.co" in raw_url:
-        raw_url += ("&" if "?" in raw_url else "?") + "sslmode=require"
     return raw_url
 
 DATABASE_URL = get_target_db_url()
@@ -343,7 +332,6 @@ def get_connection():
         os.environ.get("DATABASE_URL")
         or os.environ.get("POSTGRES_URL")
         or os.environ.get("DB_ENGINE") == "postgres"
-        or IS_VERCEL
         or os.environ.get("APP_MODE") in ("web", "vps", "server")
     )
     if is_postgres_target:

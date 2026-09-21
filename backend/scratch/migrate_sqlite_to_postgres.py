@@ -1,7 +1,7 @@
 """
-Center Manager — SQLite to Supabase One-Click Data Migration Script
+Center Manager — SQLite to PostgreSQL Migration Script
 Usage:
-    python backend/scratch/migrate_sqlite_to_supabase.py
+    python backend/scratch/migrate_sqlite_to_postgres.py
 
 Requirements:
     pip install psycopg2-binary
@@ -16,7 +16,7 @@ from psycopg2.extras import RealDictCursor
 # 1. Paths & Environment
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 SQLITE_DB_PATH = os.path.join(BASE_DIR, "test_formatter.db")
-DATABASE_URL = os.environ.get("DATABASE_URL") or "postgresql://postgres.jttlekzqveygejvyhfqn:Callmemrpenguin%402004@aws-0-ap-northeast-1.pooler.supabase.com:6543/postgres"
+DATABASE_URL = os.environ.get("DATABASE_URL") or "postgresql://postgres:password@localhost:5432/center_manager"
 
 TABLES_TO_MIGRATE = [
     "students",
@@ -60,18 +60,19 @@ def migrate():
     sqlite_conn.row_factory = sqlite3.Row
     sqlite_cur = sqlite_conn.cursor()
 
-    print("[+] Connecting to Supabase PostgreSQL...")
+    print("[+] Connecting to PostgreSQL...")
     try:
         pg_conn = psycopg2.connect(DATABASE_URL)
-        pg_cur = pg_conn.cursor()
+        pg_cur = pg_conn.cursor(cursor_factory=RealDictCursor)
+        print("[+] Connected to PostgreSQL successfully.")
     except Exception as e:
-        print(f"[-] Failed to connect to Supabase: {e}")
+        print(f"[-] Failed to connect to PostgreSQL: {e}")
         return
 
     # Cache valid foreign keys
     try:
         pg_cur.execute("SELECT id FROM classes")
-        valid_class_ids = set(r[0] for r in pg_cur.fetchall())
+        valid_class_ids = set(r['id'] for r in pg_cur.fetchall())
     except Exception:
         valid_class_ids = set()
 

@@ -146,15 +146,23 @@ def get_class_attendance_grades(class_id: int, date_str: str) -> List[Dict[str, 
     finally:
         conn.close()
 
+import math
+
+VALID_STATUSES = {"Có mặt", "Đi muộn", "Có phép", "Vắng mặt", "Nghỉ học", "Chưa học"}
+
 def _parse_score(val: Any, is_present: bool = True) -> Optional[float]:
     if val is None or val == "" or val == "null" or val == "undefined":
         return None
     try:
         val_str = str(val).strip().replace(',', '.')
-        if not val_str or val_str in ("null", "undefined", "none"):
+        if not val_str or val_str.lower() in ("null", "undefined", "none", "nan"):
             return None
         v = float(val_str)
-        return max(0.0, min(10.0, v))
+        # Strict anti-tampering bounds: Reject invalid scores outside [0.0, 10.0]
+        if v < 0.0 or v > 10.0:
+            return None
+        # Rule 17 Standard: Strict 1-decimal truncation without rounding up or down
+        return math.floor(v * 10.0 + 1e-9) / 10.0
     except (ValueError, TypeError):
         return None
 
@@ -213,10 +221,11 @@ def upsert_class_attendance_grades(class_id: int, date_str: str, records: List[D
             if student_id not in valid_student_ids:
                 continue
 
-            notes = (rec.get("notes") or "").strip()
+            # Anti-tampering: truncate notes to max 500 chars to avoid memory exhaustion
+            notes = (rec.get("notes") or "").strip()[:500]
             raw_status = rec.get("status")
 
-            if raw_status:
+            if raw_status and str(raw_status).strip() in VALID_STATUSES:
                 status = str(raw_status).strip()
             elif is_past_date and not notes:
                 status = "Vắng mặt"
@@ -253,9 +262,10 @@ def upsert_class_attendance_grades(class_id: int, date_str: str, records: List[D
 def _sync_cloud_delete(sql_pg: str, params: tuple):
     def _task():
         try:
-            from database.connection import get_target_db_url, IS_VERCEL
-            if IS_VERCEL:
+            import os
+            if os.environ.get("APP_MODE") in ("web", "vps", "server"):
                 return
+            from database.connection import get_target_db_url
             import psycopg2
             target_url = get_target_db_url()
             if not target_url:
