@@ -62,7 +62,7 @@ export const StudentGradeHistoryTable: React.FC<StudentGradeHistoryTableProps> =
       id: 'stt',
       header: () => <div className="text-center w-full">STT</div>,
       meta: { headerText: 'STT', exportValue: (_: any, idx: number) => idx + 1 },
-      cell: ({ row }) => <div className="text-center font-bold text-slate-400">{row.index + 1}</div>,
+      cell: ({ row }) => <div className="text-center font-extrabold text-slate-700 dark:text-slate-300">{row.index + 1}</div>,
       enableSorting: false,
       enableGlobalFilter: false,
     },
@@ -71,7 +71,7 @@ export const StudentGradeHistoryTable: React.FC<StudentGradeHistoryTableProps> =
       header: 'Thời Gian',
       meta: { headerText: 'Thời Gian', exportValue: (r: any) => formatFullDate(r.date) },
       cell: (info) => (
-        <span className="font-mono text-base font-bold text-indigo-300">
+        <span className="font-mono text-base font-bold text-indigo-600 dark:text-indigo-300">
           {formatFullDate(info.getValue<string>())}
         </span>
       ),
@@ -90,9 +90,9 @@ export const StudentGradeHistoryTable: React.FC<StudentGradeHistoryTableProps> =
         const nick = r.nickname;
         return (
           <div className="flex flex-col py-0.5">
-            <span className="font-bold text-slate-100 text-sm">{name}</span>
+            <span className="font-extrabold text-slate-900 dark:text-white text-sm">{name}</span>
             {nick && (
-              <span className="text-[11px] text-indigo-400 font-semibold">{nick}</span>
+              <span className="text-[11px] text-indigo-600 dark:text-indigo-400 font-semibold">{nick}</span>
             )}
           </div>
         );
@@ -103,7 +103,7 @@ export const StudentGradeHistoryTable: React.FC<StudentGradeHistoryTableProps> =
       header: 'Lớp Học',
       meta: { headerText: 'Lớp Học', exportValue: (r: any) => r.class_name || 'Lớp học' },
       cell: (info) => (
-        <span className="font-bold text-slate-300">
+        <span className="font-bold text-slate-700 dark:text-slate-300">
           {info.getValue<string>() || 'Lớp học'}
         </span>
       ),

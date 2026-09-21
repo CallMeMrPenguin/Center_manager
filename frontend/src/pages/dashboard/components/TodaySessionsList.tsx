@@ -27,7 +27,7 @@ export const TodaySessionsList: React.FC<TodaySessionsListProps> = ({ sessions, 
       const text = diff > 90 ? `Bắt đầu lúc ${startTime}` : `Còn ${diff} phút`;
       return { text, badgeCls: 'bg-blue-500/15 text-blue-600 dark:text-blue-300 border-blue-500/30' };
     }
-    return { text: 'Đã kết thúc', badgeCls: 'bg-slate-500/15 text-slate-500 dark:text-slate-400 border-slate-500/30' };
+    return { text: 'Đã kết thúc', badgeCls: 'bg-slate-200 dark:bg-slate-500/15 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-500/30' };
   };
 
   return (
@@ -41,7 +41,7 @@ export const TodaySessionsList: React.FC<TodaySessionsListProps> = ({ sessions, 
             <h2 className="text-sm font-extrabold text-slate-900 dark:text-white tracking-wide">
               Lịch Giảng Dạy & Trạng Thái Điểm Danh
             </h2>
-            <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
+            <span className="text-[11px] text-slate-600 dark:text-slate-400 font-semibold">
               {sessions.length} ca học trong ngày hôm nay
             </span>
           </div>
@@ -60,7 +60,7 @@ export const TodaySessionsList: React.FC<TodaySessionsListProps> = ({ sessions, 
         <div className="py-12 flex flex-col items-center justify-center text-center text-slate-400">
           <CheckCircle2 size={36} className="text-slate-400 dark:text-slate-600 mb-2" />
           <span className="text-sm font-bold text-slate-700 dark:text-slate-300">Không có ca học nào trong ngày hôm nay</span>
-          <span className="text-xs text-slate-400 dark:text-slate-500 mt-1">Các buổi học tiếp theo sẽ hiển thị tại đây</span>
+          <span className="text-xs text-slate-500 dark:text-slate-400 mt-1 font-medium">Các buổi học tiếp theo sẽ hiển thị tại đây</span>
         </div>
       ) : (
         <div className="space-y-2.5 overflow-y-auto max-h-[380px] pr-1">
@@ -95,7 +95,7 @@ export const TodaySessionsList: React.FC<TodaySessionsListProps> = ({ sessions, 
                         </span>
                       )}
                     </div>
-                    <div className="flex items-center gap-3 text-xs text-slate-500 dark:text-slate-400 font-medium mt-1">
+                    <div className="flex items-center gap-3 text-xs text-slate-600 dark:text-slate-400 font-semibold mt-1">
                       <span>Giáo viên: {sess.teacher_name}</span>
                       <span>Phòng: {sess.room}</span>
                       <span>Thời lượng: {sess.duration} phút</span>

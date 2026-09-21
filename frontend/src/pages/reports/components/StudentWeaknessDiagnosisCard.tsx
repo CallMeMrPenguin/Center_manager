@@ -102,7 +102,7 @@ export const StudentWeaknessDiagnosisCard: React.FC<StudentWeaknessDiagnosisCard
         header: () => <div className="text-center w-full">STT</div>,
         meta: { headerText: 'STT', exportValue: (_: any, idx: number) => idx + 1 },
         cell: ({ row }) => (
-          <div className="text-center font-bold text-slate-400 text-xs">{row.index + 1}</div>
+          <div className="text-center font-extrabold text-slate-700 dark:text-slate-300 text-xs">{row.index + 1}</div>
         ),
         enableSorting: false,
         enableGlobalFilter: false,
@@ -117,13 +117,13 @@ export const StudentWeaknessDiagnosisCard: React.FC<StudentWeaknessDiagnosisCard
         cell: ({ row }) => {
           const r = row.original;
           return (
-            <div className="font-extrabold text-white text-sm flex items-center justify-between gap-2">
+            <div className="font-extrabold text-slate-900 dark:text-white text-sm flex items-center justify-between gap-2">
               <span>
                 {r.student_name}
                 {r.nickname ? ` - ${r.nickname}` : ''}
               </span>
               {r.class_name && (
-                <span className="text-[10px] text-slate-400 font-normal">({r.class_name})</span>
+                <span className="text-[10px] text-slate-600 dark:text-slate-400 font-medium">({r.class_name})</span>
               )}
             </div>
           );

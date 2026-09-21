@@ -134,7 +134,7 @@ export default function DashboardPage() {
           <h1 className="text-xl font-black text-slate-900 dark:text-white tracking-tight uppercase">
             Bảng Điều Khiển Trung Tâm
           </h1>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+          <p className="text-xs text-slate-600 dark:text-slate-400 font-medium mt-0.5">
             Dữ liệu vận hành tự động và lịch giảng dạy ngày {todayStr}
           </p>
         </div>

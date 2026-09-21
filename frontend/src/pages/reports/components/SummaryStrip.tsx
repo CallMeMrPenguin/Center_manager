@@ -67,17 +67,17 @@ export const SummaryStrip: React.FC<SummaryStripProps> = React.memo(({
         onClick={() => setActiveTooltip(activeTooltip === 'forecast' ? null : 'forecast')}
       >
         <div className="flex items-center justify-center gap-1">
-          <span className="text-[10px] font-black uppercase text-slate-400 block group-hover:text-indigo-300 transition-colors">Dự Đoán Buổi Tới</span>
+          <span className="text-[10px] font-black uppercase text-slate-700 dark:text-slate-400 block group-hover:text-indigo-600 dark:group-hover:text-indigo-300 transition-colors">Dự Đoán Buổi Tới</span>
           <button
             type="button"
-            className="text-slate-500 group-hover:text-indigo-400 transition-colors"
+            className="text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white transition-colors"
             title="Xem chi tiết dự đoán"
           >
             <Info size={11} />
           </button>
         </div>
         <span className="text-sm font-black text-indigo-400 font-mono">{safeEngine.predicted_next} Điểm</span>
-        <span className="text-[10px] text-slate-400 font-semibold block">{safeEngine.prediction_model}</span>
+        <span className="text-[10px] text-slate-600 dark:text-slate-400 font-semibold block">{safeEngine.prediction_model}</span>
 
         {activeTooltip === 'forecast' && (
           <SummaryTooltipCard
@@ -115,10 +115,10 @@ export const SummaryStrip: React.FC<SummaryStripProps> = React.memo(({
         onClick={() => setActiveTooltip(activeTooltip === 'ema' ? null : 'ema')}
       >
         <div className="flex items-center justify-center gap-1">
-          <span className="text-[10px] font-black uppercase text-slate-400 block group-hover:text-emerald-300 transition-colors">Trình Độ EMA</span>
+          <span className="text-[10px] font-black uppercase text-slate-700 dark:text-slate-400 block group-hover:text-emerald-600 dark:group-hover:text-emerald-300 transition-colors">Trình Độ EMA</span>
           <button
             type="button"
-            className="text-slate-500 group-hover:text-emerald-400 transition-colors"
+            className="text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white transition-colors"
             title="Xem chi tiết EMA"
           >
             <Info size={11} />
@@ -128,7 +128,7 @@ export const SummaryStrip: React.FC<SummaryStripProps> = React.memo(({
           safeEngine.ema_level < 6.0 ? 'text-amber-400' :
             safeEngine.ema_level < 8.0 ? 'text-blue-400' : 'text-emerald-400'
           }`}>{safeEngine.ema_level}</span>
-        <span className="text-[10px] text-slate-400 font-semibold block">Học Lực Gần Nhất</span>
+        <span className="text-[10px] text-slate-600 dark:text-slate-400 font-semibold block">Học Lực Gần Nhất</span>
 
         {activeTooltip === 'ema' && (
           <SummaryTooltipCard
@@ -164,10 +164,10 @@ export const SummaryStrip: React.FC<SummaryStripProps> = React.memo(({
         onClick={() => setActiveTooltip(activeTooltip === 'sd' ? null : 'sd')}
       >
         <div className="flex items-center justify-center gap-1">
-          <span className="text-[10px] font-black uppercase text-slate-400 block group-hover:text-cyan-300 transition-colors">Độ Biến Động (SD)</span>
+          <span className="text-[10px] font-black uppercase text-slate-700 dark:text-slate-400 block group-hover:text-cyan-600 dark:group-hover:text-cyan-300 transition-colors">Độ Biến Động (SD)</span>
           <button
             type="button"
-            className="text-slate-500 group-hover:text-cyan-400 transition-colors"
+            className="text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white transition-colors"
             title="Xem chi tiết độ biến động"
           >
             <Info size={11} />
@@ -177,9 +177,9 @@ export const SummaryStrip: React.FC<SummaryStripProps> = React.memo(({
           safeEngine.std_dev > 1.0 ? 'text-amber-400' :
             safeEngine.std_dev < 0.5 ? 'text-emerald-400' : 'text-cyan-400'
           }`}>σ = {safeEngine.std_dev}</span>
-        <span className={`text-[10px] font-semibold block truncate ${safeEngine.consistency_label?.includes('mạnh') ? 'text-rose-400 font-extrabold' :
-          safeEngine.consistency_label?.includes('Biến động') ? 'text-amber-400 font-bold' :
-            safeEngine.consistency_label?.includes('Rất ổn định') ? 'text-emerald-400 font-bold' : 'text-slate-400'
+        <span className={`text-[10px] font-semibold block truncate ${safeEngine.consistency_label?.includes('mạnh') ? 'text-rose-500 dark:text-rose-400 font-extrabold' :
+          safeEngine.consistency_label?.includes('Biến động') ? 'text-amber-600 dark:text-amber-400 font-bold' :
+            safeEngine.consistency_label?.includes('Rất ổn định') ? 'text-emerald-600 dark:text-emerald-400 font-bold' : 'text-slate-600 dark:text-slate-400'
           }`}>{safeEngine.consistency_label}</span>
 
         {activeTooltip === 'sd' && (
@@ -219,18 +219,18 @@ export const SummaryStrip: React.FC<SummaryStripProps> = React.memo(({
         onClick={() => setActiveTooltip(activeTooltip === 'trend' ? null : 'trend')}
       >
         <div className="flex items-center justify-center gap-1">
-          <span className="text-[10px] font-black uppercase text-slate-400 block group-hover:text-purple-300 transition-colors">Tốc Độ Tăng Trưởng</span>
+          <span className="text-[10px] font-black uppercase text-slate-700 dark:text-slate-400 block group-hover:text-purple-600 dark:group-hover:text-purple-300 transition-colors">Tốc Độ Tăng Trưởng</span>
           <button
             type="button"
-            className="text-slate-500 group-hover:text-purple-400 transition-colors"
+            className="text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white transition-colors"
             title="Xem chi tiết tốc độ tăng trưởng"
           >
             <Info size={11} />
           </button>
         </div>
-        <span className="text-sm font-black text-purple-300 font-mono">{safeEngine.trend_slope > 0 ? `+${safeEngine.trend_slope}` : safeEngine.trend_slope}/buổi</span>
-        <span className={`text-[10px] font-bold block truncate ${safeEngine.trend_label?.includes('Giảm') || safeEngine.trend_label?.includes('Suy giảm') ? 'text-rose-400' :
-          safeEngine.trend_label?.includes('Ổn định') ? 'text-slate-300' : 'text-emerald-400'
+        <span className="text-sm font-black text-purple-400 font-mono">{safeEngine.trend_slope > 0 ? `+${safeEngine.trend_slope}` : safeEngine.trend_slope}/buổi</span>
+        <span className={`text-[10px] font-bold block truncate ${safeEngine.trend_label?.includes('Giảm') || safeEngine.trend_label?.includes('Suy giảm') ? 'text-rose-500 dark:text-rose-400' :
+          safeEngine.trend_label?.includes('Ổn định') ? 'text-slate-600 dark:text-slate-300' : 'text-emerald-600 dark:text-emerald-400'
           }`}>{safeEngine.trend_label}</span>
 
         {activeTooltip === 'trend' && (
@@ -268,10 +268,10 @@ export const SummaryStrip: React.FC<SummaryStripProps> = React.memo(({
         onClick={() => setActiveTooltip(activeTooltip === 'pi' ? null : 'pi')}
       >
         <div className="flex items-center justify-center gap-1">
-          <span className="text-[10px] font-black uppercase text-slate-400 block group-hover:text-indigo-300 transition-colors">Chỉ Số PI</span>
+          <span className="text-[10px] font-black uppercase text-slate-700 dark:text-slate-400 block group-hover:text-indigo-600 dark:group-hover:text-indigo-300 transition-colors">Chỉ Số PI</span>
           <button
             type="button"
-            className="text-slate-500 group-hover:text-indigo-400 transition-colors"
+            className="text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white transition-colors"
             title="Xem chi tiết chỉ số PI"
           >
             <Info size={11} />
@@ -312,10 +312,10 @@ export const SummaryStrip: React.FC<SummaryStripProps> = React.memo(({
         onClick={() => setActiveTooltip(activeTooltip === 'rating' ? null : 'rating')}
       >
         <div className="flex items-center justify-center gap-1">
-          <span className="text-[10px] font-black uppercase text-slate-400 block group-hover:text-indigo-300 transition-colors">Xếp Loại Chung</span>
+          <span className="text-[10px] font-black uppercase text-slate-700 dark:text-slate-400 block group-hover:text-indigo-600 dark:group-hover:text-indigo-300 transition-colors">Xếp Loại Chung</span>
           <button
             type="button"
-            className="text-slate-500 group-hover:text-indigo-400 transition-colors"
+            className="text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white transition-colors"
             title="Xem khuyến nghị sư phạm"
           >
             <Info size={11} />
@@ -329,7 +329,7 @@ export const SummaryStrip: React.FC<SummaryStripProps> = React.memo(({
           }`}>
           {safeEngine.rating_label}
         </span>
-        <span className="text-[10px] text-slate-400 font-semibold block truncate">Đánh Giá Học Lực</span>
+        <span className="text-[10px] text-slate-600 dark:text-slate-400 font-semibold block truncate">Đánh Giá Học Lực</span>
 
         {activeTooltip === 'rating' && (
           <SummaryTooltipCard

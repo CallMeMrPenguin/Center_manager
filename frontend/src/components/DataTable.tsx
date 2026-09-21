@@ -1034,7 +1034,7 @@ export function DataTable<TData>({
                 <Search
                   size={14}
                   className={`absolute left-3 top-1/2 -translate-y-1/2 transition-colors duration-200 pointer-events-none ${
-                    searchFocused ? 'text-[#5c36f5]' : 'text-slate-400 dark:text-slate-500'
+                    searchFocused ? 'text-[#5c36f5]' : 'text-slate-500 dark:text-slate-400'
                   }`}
                 />
                 <input
@@ -1044,7 +1044,7 @@ export function DataTable<TData>({
                   onBlur={() => setSearchFocused(false)}
                   onChange={e => setGlobalFilter(e.target.value)}
                   placeholder={searchPlaceholder}
-                  className="w-full bg-white dark:bg-[#13192c] border border-slate-200 dark:border-[#253050] text-slate-900 dark:text-white text-xs rounded-xl pl-8 pr-8 py-1.5 focus:outline-none focus:border-[#5c36f5] focus:ring-2 focus:ring-[#5c36f5]/20 placeholder:text-slate-400 dark:placeholder:text-slate-500 font-semibold transition shadow-sm dark:shadow-inner"
+                  className="w-full bg-white dark:bg-[#13192c] border border-slate-200 dark:border-[#253050] text-slate-900 dark:text-white text-xs rounded-xl pl-8 pr-8 py-1.5 focus:outline-none focus:border-[#5c36f5] focus:ring-2 focus:ring-[#5c36f5]/20 placeholder:text-slate-500 dark:placeholder:text-slate-400 font-semibold transition shadow-sm dark:shadow-inner"
                 />
                 <AnimatePresence>
                   {globalFilter && (
@@ -1327,7 +1327,7 @@ export function DataTable<TData>({
               <div className="flex items-center gap-3 flex-wrap">
                 <span>
                   Trang <span className="text-slate-900 dark:text-white font-extrabold">{pageIndex + 1}</span> / {pageCount}
-                  <span className="text-slate-400 dark:text-slate-600 ml-2">({totalFiltered.toLocaleString()} bản ghi)</span>
+                  <span className="text-slate-600 dark:text-slate-400 ml-2 font-medium">({totalFiltered.toLocaleString()} bản ghi)</span>
                 </span>
                 
               </div>

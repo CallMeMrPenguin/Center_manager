@@ -55,7 +55,7 @@ export const StudentRankingsTable: React.FC<StudentRankingsTableProps> = React.m
       id: 'stt',
       header: () => <div className="text-center w-full">STT</div>,
       meta: { headerText: 'STT', exportValue: (_: any, idx: number) => idx + 1 },
-      cell: ({ row }) => <div className="text-center font-bold text-slate-500 dark:text-slate-300 text-sm sm:text-base">{row.index + 1}</div>,
+      cell: ({ row }) => <div className="text-center font-extrabold text-slate-700 dark:text-slate-300 text-sm sm:text-base">{row.index + 1}</div>,
       enableSorting: false,
       enableGlobalFilter: false,
     },

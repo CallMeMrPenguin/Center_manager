@@ -21,17 +21,17 @@ export const DistributionSummaryStrip: React.FC<DistributionSummaryStripProps> =
         onClick={() => setActiveTooltip(activeTooltip === 'dist-mean' ? null : 'dist-mean')}
       >
         <div className="flex items-center justify-center gap-1">
-          <span className="text-[10px] font-black uppercase text-slate-400 block group-hover:text-blue-300 transition-colors">Điểm Trung Bình</span>
+          <span className="text-[10px] font-black uppercase text-slate-700 dark:text-slate-400 block group-hover:text-blue-600 dark:group-hover:text-blue-300 transition-colors">Điểm Trung Bình</span>
           <button
             type="button"
-            className="text-slate-500 group-hover:text-blue-400 transition-colors"
+            className="text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white transition-colors"
             title="Xem chi tiết Điểm Trung Bình"
           >
             <Info size={11} />
           </button>
         </div>
         <span className="text-sm font-black text-blue-400 font-mono">{format1Dec(distributionStats.mean)} Điểm</span>
-        <span className="text-[10px] text-slate-400 font-semibold block truncate">Mặt Bằng Điểm Số</span>
+        <span className="text-[10px] text-slate-600 dark:text-slate-400 font-semibold block truncate">Mặt Bằng Điểm Số</span>
 
         {activeTooltip === 'dist-mean' && (
           <SummaryTooltipCard
@@ -59,17 +59,17 @@ export const DistributionSummaryStrip: React.FC<DistributionSummaryStripProps> =
         onClick={() => setActiveTooltip(activeTooltip === 'dist-median' ? null : 'dist-median')}
       >
         <div className="flex items-center justify-center gap-1">
-          <span className="text-[10px] font-black uppercase text-slate-400 block group-hover:text-purple-300 transition-colors">Trung Vị (Median)</span>
+          <span className="text-[10px] font-black uppercase text-slate-700 dark:text-slate-400 block group-hover:text-purple-600 dark:group-hover:text-purple-300 transition-colors">Trung Vị (Median)</span>
           <button
             type="button"
-            className="text-slate-500 group-hover:text-purple-400 transition-colors"
+            className="text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white transition-colors"
             title="Xem chi tiết Trung Vị"
           >
             <Info size={11} />
           </button>
         </div>
         <span className="text-sm font-black text-purple-400 font-mono">{format1Dec(distributionStats.median)} Điểm</span>
-        <span className="text-[10px] text-slate-400 font-semibold block truncate">Học Sinh Điển Hình</span>
+        <span className="text-[10px] text-slate-600 dark:text-slate-400 font-semibold block truncate">Học Sinh Điển Hình</span>
 
         {activeTooltip === 'dist-median' && (
           <SummaryTooltipCard
@@ -96,10 +96,10 @@ export const DistributionSummaryStrip: React.FC<DistributionSummaryStripProps> =
         onClick={() => setActiveTooltip(activeTooltip === 'dist-sd' ? null : 'dist-sd')}
       >
         <div className="flex items-center justify-center gap-1">
-          <span className="text-[10px] font-black uppercase text-slate-400 block group-hover:text-cyan-300 transition-colors">Độ Lệch Chuẩn (SD)</span>
+          <span className="text-[10px] font-black uppercase text-slate-700 dark:text-slate-400 block group-hover:text-cyan-600 dark:group-hover:text-cyan-300 transition-colors">Độ Lệch Chuẩn (SD)</span>
           <button
             type="button"
-            className="text-slate-500 group-hover:text-cyan-400 transition-colors"
+            className="text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white transition-colors"
             title="Xem chi tiết Độ Lệch Chuẩn"
           >
             <Info size={11} />
@@ -108,7 +108,7 @@ export const DistributionSummaryStrip: React.FC<DistributionSummaryStripProps> =
         <span className={`text-sm font-black font-mono ${
           distributionStats.sd > 2.0 ? 'text-rose-500' : distributionStats.sd > 1.2 ? 'text-cyan-400' : 'text-emerald-400'
         }`}>σ = {format1Dec(distributionStats.sd)}</span>
-        <span className="text-[10px] text-slate-400 font-semibold block truncate">Độ Phân Hóa Lớp</span>
+        <span className="text-[10px] text-slate-600 dark:text-slate-400 font-semibold block truncate">Độ Phân Hóa Lớp</span>
 
         {activeTooltip === 'dist-sd' && (
           <SummaryTooltipCard
@@ -136,17 +136,17 @@ export const DistributionSummaryStrip: React.FC<DistributionSummaryStripProps> =
         onClick={() => setActiveTooltip(activeTooltip === 'dist-iqr' ? null : 'dist-iqr')}
       >
         <div className="flex items-center justify-center gap-1">
-          <span className="text-[10px] font-black uppercase text-slate-400 block group-hover:text-amber-300 transition-colors">Khoảng Tứ Phân Vị</span>
+          <span className="text-[10px] font-black uppercase text-slate-700 dark:text-slate-400 block group-hover:text-amber-600 dark:group-hover:text-amber-300 transition-colors">Khoảng Tứ Phân Vị</span>
           <button
             type="button"
-            className="text-slate-500 group-hover:text-amber-400 transition-colors"
+            className="text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white transition-colors"
             title="Xem chi tiết Khoảng Tứ Phân Vị"
           >
             <Info size={11} />
           </button>
         </div>
         <span className="text-sm font-black text-amber-400 font-mono">IQR: {format1Dec(distributionStats.iqr)} đ</span>
-        <span className="text-[10px] text-slate-400 font-semibold block truncate">Vùng 50% Giữa Bảng</span>
+        <span className="text-[10px] text-slate-600 dark:text-slate-400 font-semibold block truncate">Vùng 50% Giữa Bảng</span>
 
         {activeTooltip === 'dist-iqr' && (
           <SummaryTooltipCard
@@ -174,10 +174,10 @@ export const DistributionSummaryStrip: React.FC<DistributionSummaryStripProps> =
         onClick={() => setActiveTooltip(activeTooltip === 'dist-pass' ? null : 'dist-pass')}
       >
         <div className="flex items-center justify-center gap-1">
-          <span className="text-[10px] font-black uppercase text-slate-400 block group-hover:text-emerald-300 transition-colors">Tỷ Lệ Đạt (≥5.0)</span>
+          <span className="text-[10px] font-black uppercase text-slate-700 dark:text-slate-400 block group-hover:text-emerald-600 dark:group-hover:text-emerald-300 transition-colors">Tỷ Lệ Đạt (≥5.0)</span>
           <button
             type="button"
-            className="text-slate-500 group-hover:text-emerald-400 transition-colors"
+            className="text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white transition-colors"
             title="Xem chi tiết Tỷ lệ Đạt"
           >
             <Info size={11} />
@@ -186,7 +186,7 @@ export const DistributionSummaryStrip: React.FC<DistributionSummaryStripProps> =
         <span className={`text-sm font-black font-mono ${
           distributionStats.passPct >= 85 ? 'text-emerald-400' : distributionStats.passPct >= 70 ? 'text-amber-400' : 'text-rose-500'
         }`}>{distributionStats.passPct}%</span>
-        <span className="text-[10px] text-slate-400 font-semibold block truncate">
+        <span className="text-[10px] text-slate-600 dark:text-slate-400 font-semibold block truncate">
           {distributionStats.passCount}/{distributionStats.n} Học Sinh Đạt
         </span>
 
@@ -216,10 +216,10 @@ export const DistributionSummaryStrip: React.FC<DistributionSummaryStripProps> =
         onClick={() => setActiveTooltip(activeTooltip === 'dist-rating' ? null : 'dist-rating')}
       >
         <div className="flex items-center justify-center gap-1">
-          <span className="text-[10px] font-black uppercase text-slate-400 block group-hover:text-indigo-300 transition-colors">Đánh Giá Phổ Điểm</span>
+          <span className="text-[10px] font-black uppercase text-slate-700 dark:text-slate-400 block group-hover:text-indigo-600 dark:group-hover:text-indigo-300 transition-colors">Đánh Giá Phổ Điểm</span>
           <button
             type="button"
-            className="text-slate-500 group-hover:text-indigo-400 transition-colors"
+            className="text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white transition-colors"
             title="Xem khuyến nghị sư phạm"
           >
             <Info size={11} />
@@ -232,7 +232,7 @@ export const DistributionSummaryStrip: React.FC<DistributionSummaryStripProps> =
         }`}>
           {distributionStats.distributionRating}
         </span>
-        <span className="text-[10px] text-slate-400 font-semibold block truncate">
+        <span className="text-[10px] text-slate-600 dark:text-slate-400 font-semibold block truncate">
           {distributionStats.distributionShape}
         </span>
 
