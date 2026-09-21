@@ -554,20 +554,20 @@ export default function TestFormatter({
   };
 
   return (
-    <div className="h-full w-full bg-[#0d101d] flex relative overflow-hidden select-none">
+    <div className="h-full w-full bg-slate-100 dark:bg-[#0d101d] flex relative overflow-hidden select-none">
       
       {/* 1. SLIDING CONFIGS PANEL (SLIDEBAR) */}
-      <aside className={`w-80 bg-[#121629] border-r border-[#202842] p-5 flex flex-col justify-between overflow-y-auto shrink-0 transition-all duration-300 absolute lg:relative z-20 h-full ${
+      <aside className={`w-80 bg-white dark:bg-[#121629] border-r border-slate-200 dark:border-[#202842] p-5 flex flex-col justify-between overflow-y-auto shrink-0 transition-all duration-300 absolute lg:relative z-20 h-full ${
         showConfig ? 'left-0 opacity-100' : '-left-80 lg:-ml-80 opacity-0 pointer-events-none'
       }`}>
         <div>
-          <div className="flex items-center justify-between mb-4 pb-2 border-b border-[#202842]">
-            <h2 className="text-[0.73rem] font-black text-indigo-400 uppercase tracking-widest flex items-center gap-1.5">
+          <div className="flex items-center justify-between mb-4 pb-2 border-b border-slate-200 dark:border-[#202842]">
+            <h2 className="text-[0.73rem] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest flex items-center gap-1.5">
               <Settings size={12} /> CẤU HÌNH LỀ & CHỮ
             </h2>
             <button 
               onClick={() => setShowConfig(false)}
-              className="p-1 rounded-xl bg-[#1a2038] text-slate-400 hover:text-white hover:bg-[#252e4e] cursor-pointer"
+              className="p-1 rounded-xl bg-slate-100 dark:bg-[#1a2038] text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-[#252e4e] cursor-pointer"
             >
               <X size={12} />
             </button>
@@ -575,11 +575,11 @@ export default function TestFormatter({
           
           {/* Active Profile Select */}
           <div className="flex flex-col gap-1 mb-4">
-            <label className="text-[0.6rem] font-bold text-slate-400 uppercase">Hồ sơ thiết lập</label>
+            <label className="text-[0.6rem] font-bold text-slate-500 dark:text-slate-400 uppercase">Hồ sơ thiết lập</label>
             <select
               value={activeProfile}
               onChange={(e) => handleProfileChange(e.target.value)}
-              className="bg-[#181f36] border border-[#283354] px-3 py-2 rounded-xl text-xs text-white font-bold cursor-pointer"
+              className="bg-slate-50 dark:bg-[#181f36] border border-slate-200 dark:border-[#283354] px-3 py-2 rounded-xl text-xs text-slate-900 dark:text-white font-bold cursor-pointer"
             >
               <option value="Mặc định">Mặc định</option>
               {Object.keys(profiles).map(name => (
@@ -589,7 +589,7 @@ export default function TestFormatter({
             {activeProfile !== "Mặc định" && (
               <button 
                 onClick={handleDeleteProfile}
-                className="mt-1 flex items-center gap-1 text-[0.66rem] text-rose-400 hover:text-rose-300 font-bold justify-end cursor-pointer"
+                className="mt-1 flex items-center gap-1 text-[0.66rem] text-rose-500 dark:text-rose-400 hover:text-rose-600 dark:hover:text-rose-300 font-bold justify-end cursor-pointer"
               >
                 <Trash2 size={10} /> Xóa hồ sơ này
               </button>
@@ -597,8 +597,8 @@ export default function TestFormatter({
           </div>
 
           {/* Margins */}
-          <h3 className="text-[0.66rem] font-bold text-slate-400 uppercase tracking-wider mb-1 mt-2">Căn lề trang (cm)</h3>
-          <div className="grid grid-cols-2 gap-2 bg-[#181f36] p-2.5 rounded-xl border border-[#252e4e]">
+          <h3 className="text-[0.66rem] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1 mt-2">Căn lề trang (cm)</h3>
+          <div className="grid grid-cols-2 gap-2 bg-slate-50 dark:bg-[#181f36] p-2.5 rounded-xl border border-slate-200 dark:border-[#252e4e]">
             {renderSettingInput("Lề trên", "margin_top", 0.5, 5, 0.1)}
             {renderSettingInput("Lề dưới", "margin_bottom", 0.5, 5, 0.1)}
             {renderSettingInput("Lề trái", "margin_left", 0.5, 5, 0.1)}
@@ -606,14 +606,14 @@ export default function TestFormatter({
           </div>
 
           {/* Typography */}
-          <h3 className="text-[0.66rem] font-bold text-slate-400 uppercase tracking-wider mt-4 mb-1">Typography & Font</h3>
-          <div className="flex flex-col gap-2 bg-[#181f36] p-2.5 rounded-xl border border-[#252e4e]">
+          <h3 className="text-[0.66rem] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mt-4 mb-1">Typography & Font</h3>
+          <div className="flex flex-col gap-2 bg-slate-50 dark:bg-[#181f36] p-2.5 rounded-xl border border-slate-200 dark:border-[#252e4e]">
             <div className="flex flex-col gap-1">
-              <label className="text-[0.6rem] text-slate-400 font-bold">Phông chữ</label>
+              <label className="text-[0.6rem] text-slate-500 dark:text-slate-400 font-bold">Phông chữ</label>
               <select
                 value={layout.font_name}
                 onChange={(e) => setLayout(prev => ({ ...prev, font_name: e.target.value }))}
-                className="bg-[#121629] border border-[#283354] px-2.5 py-1.5 rounded-lg text-xs text-white"
+                className="bg-white dark:bg-[#121629] border border-slate-200 dark:border-[#283354] px-2.5 py-1.5 rounded-lg text-xs text-slate-900 dark:text-white"
               >
                 {["Times New Roman", "Arial", "Calibri", "Segoe UI", "Georgia"].map(font => (
                   <option key={font} value={font}>{font}</option>
@@ -626,23 +626,23 @@ export default function TestFormatter({
           </div>
 
           {/* Mix Options Option */}
-          <h3 className="text-[0.66rem] font-bold text-slate-400 uppercase tracking-wider mt-4 mb-1">Cấu hình Đề thi</h3>
-          <div className="flex flex-col gap-2.5 bg-[#181f36] p-2.5 rounded-xl border border-[#252e4e] mt-1">
+          <h3 className="text-[0.66rem] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mt-4 mb-1">Cấu hình Đề thi</h3>
+          <div className="flex flex-col gap-2.5 bg-slate-50 dark:bg-[#181f36] p-2.5 rounded-xl border border-slate-200 dark:border-[#252e4e] mt-1">
             <div className="flex items-center gap-2.5">
               <input 
                 type="checkbox" 
                 id="mix-options-checkbox"
                 checked={mixOptions}
                 onChange={(e) => setMixOptions(e.target.checked)}
-                className="rounded border-[#283354] text-indigo-500 bg-[#121629] focus:ring-indigo-500 h-4 w-4 cursor-pointer"
+                className="rounded border-slate-300 dark:border-[#283354] text-indigo-500 bg-white dark:bg-[#121629] focus:ring-indigo-500 h-4 w-4 cursor-pointer"
               />
-              <label htmlFor="mix-options-checkbox" className="text-xs font-bold text-slate-200 cursor-pointer select-none">
+              <label htmlFor="mix-options-checkbox" className="text-xs font-bold text-slate-800 dark:text-slate-200 cursor-pointer select-none">
                 Trộn thứ tự đáp án (Mix Options)
               </label>
             </div>
             
-            <div className="flex flex-col gap-1 mt-1 border-t border-[#252e4e] pt-2">
-              <label htmlFor="num-versions-input" className="text-[0.66rem] font-bold text-slate-300">
+            <div className="flex flex-col gap-1 mt-1 border-t border-slate-200 dark:border-[#252e4e] pt-2">
+              <label htmlFor="num-versions-input" className="text-[0.66rem] font-bold text-slate-700 dark:text-slate-300">
                 Số lượng mã đề (Versions):
               </label>
               <input 
@@ -652,22 +652,22 @@ export default function TestFormatter({
                 max={50}
                 value={numVersions}
                 onChange={(e) => setNumVersions(parseInt(e.target.value) || 1)}
-                className="bg-[#121629] border border-[#283354] px-2.5 py-1.5 rounded-lg text-xs text-white font-bold w-full focus:outline-none focus:border-indigo-500"
+                className="bg-white dark:bg-[#121629] border border-slate-200 dark:border-[#283354] px-2.5 py-1.5 rounded-lg text-xs text-slate-900 dark:text-white font-bold w-full focus:outline-none focus:border-indigo-500"
               />
             </div>
           </div>
         </div>
 
         {/* Profile Save Box */}
-        <div className="mt-4 border-t border-[#202842] pt-3 flex flex-col gap-1.5">
-          <label className="text-[0.6rem] font-bold text-slate-400 uppercase">Lưu cấu hình hiện tại</label>
+        <div className="mt-4 border-t border-slate-200 dark:border-[#202842] pt-3 flex flex-col gap-1.5">
+          <label className="text-[0.6rem] font-bold text-slate-500 dark:text-slate-400 uppercase">Lưu cấu hình hiện tại</label>
           <div className="flex gap-2">
             <input
               type="text"
               placeholder="e.g. Đề thi THPT"
               value={newProfileName}
               onChange={(e) => setNewProfileName(e.target.value)}
-              className="bg-[#181f36] border border-[#283354] px-3 py-1.5 rounded-xl text-xs text-white placeholder-slate-500 flex-1 focus:outline-none"
+              className="bg-slate-50 dark:bg-[#181f36] border border-slate-200 dark:border-[#283354] px-3 py-1.5 rounded-xl text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 flex-1 focus:outline-none"
             />
             <button
               onClick={handleSaveProfile}
@@ -684,17 +684,17 @@ export default function TestFormatter({
       <div className="flex-1 flex flex-row overflow-hidden relative">
         
         {/* LEFT COMPONENT: EDITOR */}
-        <section className="flex-1 flex flex-col border-r border-[#202842] overflow-hidden bg-[#0f1322]">
+        <section className="flex-1 flex flex-col border-r border-slate-200 dark:border-[#202842] overflow-hidden bg-slate-50 dark:bg-[#0f1322]">
           
           {/* Editor Topbar */}
-          <div className="h-14 border-b border-[#202842] bg-[#121629] flex items-center justify-between px-6 shrink-0 gap-3 relative z-30">
+          <div className="h-14 border-b border-slate-200 dark:border-[#202842] bg-white dark:bg-[#121629] flex items-center justify-between px-6 shrink-0 gap-3 relative z-30">
             <div className="flex items-center gap-3 group/left-toolbar">
               <button 
                 onClick={() => setShowConfig(!showConfig)}
                 className={`p-2.5 rounded-xl border transition-all duration-300 flex items-center text-xs font-bold cursor-pointer ${
                   showConfig 
                     ? 'bg-[#5c36f5] text-white border-transparent px-3 shadow-md shadow-indigo-500/20' 
-                    : 'bg-[#181f36] text-slate-300 border-[#283354] hover:bg-[#222a46] hover:text-white shadow-sm'
+                    : 'bg-slate-100 dark:bg-[#181f36] text-slate-700 dark:text-slate-300 border-slate-200 dark:border-[#283354] hover:bg-slate-200 dark:hover:bg-[#222a46] hover:text-slate-900 dark:hover:text-white shadow-sm'
                 }`}
                 title={showConfig ? "Ẩn cấu hình lề và cỡ chữ" : "Hiện cấu hình lề và cỡ chữ"}
               >
@@ -712,24 +712,24 @@ export default function TestFormatter({
                 defaultPrompts={DEFAULT_TEST_FORMATTER_PROMPTS} 
               />
 
-              <label className="group px-3 py-2 rounded-xl bg-[#181f36] border border-[#283354] hover:bg-[#222a46] text-slate-300 hover:text-white text-xs font-bold transition-all flex items-center cursor-pointer shadow-sm" title="Nạp dữ liệu từ file JSON">
+              <label className="group px-3 py-2 rounded-xl bg-slate-100 dark:bg-[#181f36] border border-slate-200 dark:border-[#283354] hover:bg-slate-200 dark:hover:bg-[#222a46] text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white text-xs font-bold transition-all flex items-center cursor-pointer shadow-sm" title="Nạp dữ liệu từ file JSON">
                 <Upload size={14} className="shrink-0" />
                 <span className="max-w-0 opacity-0 group-hover:max-w-xs group-hover:opacity-100 group-hover:ml-1.5 transition-all duration-300 whitespace-nowrap overflow-hidden inline-block">Nạp JSON</span>
                 <input type="file" accept=".json" onChange={handleDirectFileUpload} className="hidden" />
               </label>
 
-              <label className="group px-3 py-2 rounded-xl bg-[#181f36] border border-[#283354] hover:bg-[#222a46] text-slate-300 hover:text-white text-xs font-bold transition-all flex items-center cursor-pointer shadow-sm" title="Chuyển đổi file Word (.docx) sang JSON">
-                <Upload size={14} className="text-amber-400 shrink-0" />
+              <label className="group px-3 py-2 rounded-xl bg-slate-100 dark:bg-[#181f36] border border-slate-200 dark:border-[#283354] hover:bg-slate-200 dark:hover:bg-[#222a46] text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white text-xs font-bold transition-all flex items-center cursor-pointer shadow-sm" title="Chuyển đổi file Word (.docx) sang JSON">
+                <Upload size={14} className="text-amber-500 dark:text-amber-400 shrink-0" />
                 <span className="max-w-0 opacity-0 group-hover:max-w-xs group-hover:opacity-100 group-hover:ml-1.5 transition-all duration-300 whitespace-nowrap overflow-hidden inline-block">Nhập từ DOCX</span>
                 <input type="file" accept=".docx" onChange={handleDocxFileUpload} className="hidden" />
               </label>
 
-              <label className="group flex items-center px-3 py-2 rounded-xl bg-[#181f36] border border-[#283354] text-slate-300 text-xs font-bold cursor-pointer select-none hover:text-white transition shadow-sm" title="Lưu vào quản lý Tài liệu">
+              <label className="group flex items-center px-3 py-2 rounded-xl bg-slate-100 dark:bg-[#181f36] border border-slate-200 dark:border-[#283354] text-slate-700 dark:text-slate-300 text-xs font-bold cursor-pointer select-none hover:text-slate-900 dark:hover:text-white transition shadow-sm" title="Lưu vào quản lý Tài liệu">
                 <input 
                   type="checkbox" 
                   checked={saveToDocs} 
                   onChange={(e) => setSaveToDocs(e.target.checked)} 
-                  className="rounded border-[#283354] bg-[#121629] text-indigo-500 cursor-pointer shrink-0"
+                  className="rounded border-slate-300 dark:border-[#283354] bg-white dark:bg-[#121629] text-indigo-500 cursor-pointer shrink-0"
                 />
                 <span className="max-w-0 opacity-0 group-hover:max-w-xs group-hover:opacity-100 group-hover:ml-1.5 transition-all duration-300 whitespace-nowrap overflow-hidden inline-block">Lưu vào Tài liệu</span>
               </label>
@@ -772,7 +772,7 @@ export default function TestFormatter({
           </div>
 
           {/* Text Area Content - Uncontrolled Isolated Editor to eliminate 60FPS typing lag */}
-          <div className="flex-1 relative p-4 bg-[#0f1322] flex flex-col gap-4">
+          <div className="flex-1 relative p-4 bg-slate-100 dark:bg-[#0f1322] flex flex-col gap-4">
             <FastJsonEditor
               initialValue={jsonText}
               onParsedDataChange={handleParsedDataChange}
@@ -781,17 +781,17 @@ export default function TestFormatter({
             {/* Validation Info Overlay */}
             <div className="absolute bottom-8 right-8 flex items-center gap-2 select-none">
               {jsonError ? (
-                <div className="flex items-center gap-1.5 text-rose-300 font-bold text-[0.66rem] bg-rose-500/20 border border-rose-500/40 px-3 py-1.5 rounded-xl shadow-lg">
+                <div className="flex items-center gap-1.5 text-rose-600 dark:text-rose-300 font-bold text-[0.66rem] bg-rose-50 dark:bg-rose-500/20 border border-rose-200 dark:border-rose-500/40 px-3 py-1.5 rounded-xl shadow-lg">
                   <AlertCircle size={12} />
                   <span className="truncate max-w-xs">{jsonError}</span>
                 </div>
               ) : exercisesData.length > 0 ? (
-                <div className="flex items-center gap-1.5 text-emerald-300 font-bold text-[0.66rem] bg-emerald-500/20 border border-emerald-500/40 px-3 py-1.5 rounded-xl shadow-lg">
+                <div className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-300 font-bold text-[0.66rem] bg-emerald-50 dark:bg-emerald-500/20 border border-emerald-200 dark:border-emerald-500/40 px-3 py-1.5 rounded-xl shadow-lg">
                   <CheckCircle size={12} />
                   <span>Hợp lệ ({exercisesData.length} câu)</span>
                 </div>
               ) : (
-                <div className="flex items-center gap-1.5 text-slate-400 font-bold text-[0.66rem] bg-[#181f36] border border-[#283354] px-3 py-1.5 rounded-xl">
+                <div className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400 font-bold text-[0.66rem] bg-white dark:bg-[#181f36] border border-slate-200 dark:border-[#283354] px-3 py-1.5 rounded-xl">
                   <AlertCircle size={12} />
                   <span>Trống</span>
                 </div>
@@ -801,20 +801,20 @@ export default function TestFormatter({
           
           {/* BANNER TO OPEN COMPILED FILES */}
           {lastCompiledFiles && lastCompiledFiles.length > 0 && (
-            <div className="bg-[#12182b] border-t border-indigo-500/30 px-6 py-3 flex flex-wrap items-center justify-between shrink-0 shadow-lg gap-3">
+            <div className="bg-white dark:bg-[#12182b] border-t border-slate-200 dark:border-indigo-500/30 px-6 py-3 flex flex-wrap items-center justify-between shrink-0 shadow-lg gap-3">
               <div className="flex items-center gap-2">
-                <FileText size={15} className="text-indigo-400" />
-                <h4 className="text-xs font-bold text-white">Đã xuất bản đề thi thành công ({lastCompiledFiles.length} mã đề)!</h4>
+                <FileText size={15} className="text-indigo-600 dark:text-indigo-400" />
+                <h4 className="text-xs font-bold text-slate-900 dark:text-white">Đã xuất bản đề thi thành công ({lastCompiledFiles.length} mã đề)!</h4>
               </div>
               <div className="flex items-center gap-2 flex-wrap">
                 {lastCompiledFiles.map((fileItem: any, i: number) => {
                   const fname = typeof fileItem === 'string' ? fileItem : (fileItem.filename || '');
                   if (!fname) return null;
                   return (
-                    <div key={i} className="flex items-center gap-1 bg-[#1a2238] border border-indigo-500/30 px-2 py-1 rounded-xl text-xs">
+                    <div key={i} className="flex items-center gap-1 bg-slate-100 dark:bg-[#1a2238] border border-slate-200 dark:border-indigo-500/30 px-2 py-1 rounded-xl text-xs">
                       <button
                         onClick={() => triggerDownload(api.downloadFileUrl(fname), fname)}
-                        className="text-indigo-300 hover:text-white font-bold flex items-center gap-1 cursor-pointer text-[0.66rem]"
+                        className="text-indigo-600 dark:text-indigo-300 hover:text-indigo-700 dark:hover:text-white font-bold flex items-center gap-1 cursor-pointer text-[0.66rem]"
                         title="Tải về file"
                       >
                         <Download size={11} />
@@ -826,7 +826,7 @@ export default function TestFormatter({
                           try { await api.openLocalFile(fileToOpen); showToast(`Đang mở tệp: ${fname}`, "success"); }
                           catch (e: any) { showToast("Lỗi mở file: " + (e.message || e), "error"); }
                         }}
-                        className="text-slate-400 hover:text-emerald-400 p-1 cursor-pointer"
+                        className="text-slate-500 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 p-1 cursor-pointer"
                         title="Mở file bằng Word"
                       >
                         <Eye size={11} />
@@ -844,7 +844,7 @@ export default function TestFormatter({
                   <FolderOpen size={11} />
                   <span>MỞ THƯ MỤC CHỨA ĐỀ</span>
                 </button>
-                <button onClick={() => setLastCompiledFiles([])} className="p-1 text-slate-400 hover:text-white cursor-pointer ml-1">
+                <button onClick={() => setLastCompiledFiles([])} className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-white cursor-pointer ml-1">
                   <X size={13} />
                 </button>
               </div>
@@ -853,13 +853,13 @@ export default function TestFormatter({
         </section>
         
         {/* RIGHT COMPONENT: PREVIEW PANEL */}
-        <section className="flex-1 flex flex-col overflow-hidden bg-[#0d101d]">
+        <section className="flex-1 flex flex-col overflow-hidden bg-slate-100 dark:bg-[#0d101d]">
           
           {/* Preview Panel Topbar */}
-          <div className="h-14 border-b border-[#202842] bg-[#121629] flex items-center justify-between px-6 shrink-0">
+          <div className="h-14 border-b border-slate-200 dark:border-[#202842] bg-white dark:bg-[#121629] flex items-center justify-between px-6 shrink-0">
             <div className="flex items-center gap-2">
-              <Eye size={14} className="text-indigo-400" />
-              <span className="text-xs font-black text-white">XEM TRƯỚC BẢN IN PDF</span>
+              <Eye size={14} className="text-indigo-600 dark:text-indigo-400" />
+              <span className="text-xs font-black text-slate-900 dark:text-white">XEM TRƯỚC BẢN IN PDF</span>
             </div>
 
             {/* Zoom controls and generate controls */}
@@ -875,20 +875,20 @@ export default function TestFormatter({
               </button>
               {pdfUrl && (
                 <div className="flex items-center gap-2">
-                  <div className="flex items-center bg-[#181f36] rounded-xl border border-[#283354] p-1 shadow-inner gap-0.5">
+                  <div className="flex items-center bg-slate-100 dark:bg-[#181f36] rounded-xl border border-slate-200 dark:border-[#283354] p-1 shadow-inner gap-0.5">
                     <button 
                       onClick={() => setPdfZoom(prev => Math.max(prev - 10, 50))}
-                      className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition cursor-pointer"
+                      className="p-1 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-white/10 transition cursor-pointer"
                       title="Thu nhỏ"
                     >
                       <ZoomOut size={13} />
                     </button>
-                    <span className="px-2 text-[0.66rem] font-extrabold text-slate-300 font-mono w-12 text-center select-none">
+                    <span className="px-2 text-[0.66rem] font-extrabold text-slate-700 dark:text-slate-300 font-mono w-12 text-center select-none">
                       {pdfZoom}%
                     </span>
                     <button 
                       onClick={() => setPdfZoom(prev => Math.min(prev + 10, 200))}
-                      className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition cursor-pointer"
+                      className="p-1 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-white/10 transition cursor-pointer"
                       title="Phóng to"
                     >
                       <ZoomIn size={13} />
@@ -896,7 +896,7 @@ export default function TestFormatter({
                   </div>
                   <button 
                     onClick={() => window.open(pdfUrl, '_blank')}
-                    className="p-2 rounded-xl bg-[#181f36] border border-[#283354] hover:bg-[#222a46] text-slate-300 hover:text-white transition cursor-pointer flex items-center text-[0.66rem] font-extrabold shadow-sm"
+                    className="p-2 rounded-xl bg-slate-100 dark:bg-[#181f36] border border-slate-200 dark:border-[#283354] hover:bg-slate-200 dark:hover:bg-[#222a46] text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition cursor-pointer flex items-center text-[0.66rem] font-extrabold shadow-sm"
                     title="Xem trong trình duyệt"
                   >
                     <ExternalLink size={13} className="shrink-0" />
@@ -908,14 +908,14 @@ export default function TestFormatter({
           </div>
 
           {/* PDF Frame Container */}
-          <div className="flex-1 bg-[#101424] p-6 relative overflow-hidden flex justify-center items-center">
+          <div className="flex-1 bg-slate-200/50 dark:bg-[#101424] p-6 relative overflow-hidden flex justify-center items-center">
             {pdfLoading ? (
-              <div className="absolute inset-0 flex flex-col justify-center items-center text-slate-300 z-10 bg-[#101424]/90">
-                <RefreshCw className="animate-spin h-8 w-8 text-indigo-400 mb-3" />
+              <div className="absolute inset-0 flex flex-col justify-center items-center text-slate-700 dark:text-slate-300 z-10 bg-white/90 dark:bg-[#101424]/90">
+                <RefreshCw className="animate-spin h-8 w-8 text-indigo-500 dark:text-indigo-400 mb-3" />
                 <p className="font-bold text-xs">Đang xuất file Word và chuyển sang PDF...</p>
               </div>
             ) : pdfUrl ? (
-              <div className="w-full h-full rounded-2xl overflow-hidden border border-[#283354] shadow-2xl relative bg-[#181f36]">
+              <div className="w-full h-full rounded-2xl overflow-hidden border border-slate-200 dark:border-[#283354] shadow-2xl relative bg-white dark:bg-[#181f36]">
                 <iframe 
                   src={`${pdfUrl}#zoom=${pdfZoom}`} 
                   className="w-full h-full border-none" 
@@ -923,13 +923,13 @@ export default function TestFormatter({
                 />
               </div>
             ) : (
-              <div className="max-w-sm flex flex-col justify-center items-center text-center text-slate-400 px-6">
-                <div className="p-4 bg-[#181f36] border border-[#283354] rounded-2xl mb-4 text-indigo-400 shadow-md">
+              <div className="max-w-sm flex flex-col justify-center items-center text-center text-slate-500 dark:text-slate-400 px-6">
+                <div className="p-4 bg-white dark:bg-[#181f36] border border-slate-200 dark:border-[#283354] rounded-2xl mb-4 text-indigo-500 dark:text-indigo-400 shadow-md">
                   <FileText size={32} />
                 </div>
-                <h4 className="text-xs font-black text-white">Xem Trước Đề Thi</h4>
-                <p className="text-[0.66rem] text-slate-400 mt-2 leading-relaxed font-semibold">
-                  Nhấn nút <strong className="text-indigo-300">"Cập Nhật Xem Trước PDF"</strong> ở góc trên bên phải để xuất bản in PDF trực tiếp từ Microsoft Word.
+                <h4 className="text-xs font-black text-slate-900 dark:text-white">Xem Trước Đề Thi</h4>
+                <p className="text-[0.66rem] text-slate-500 dark:text-slate-400 mt-2 leading-relaxed font-semibold">
+                  Nhấn nút <strong className="text-indigo-600 dark:text-indigo-300">"Cập Nhật Xem Trước PDF"</strong> ở góc trên bên phải để xuất bản in PDF trực tiếp từ Microsoft Word.
                 </p>
               </div>
             )}

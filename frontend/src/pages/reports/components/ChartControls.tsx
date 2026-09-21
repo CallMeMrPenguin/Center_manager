@@ -40,17 +40,17 @@ export const ChartControls: React.FC<ChartControlsProps> = ({
   hideDistributionToggle = false,
 }) => {
   return (
-    <div className="flex flex-col gap-3.5 border-b border-[#181f36] pb-3">
+    <div className="flex flex-col gap-3.5 border-b border-slate-200 dark:border-[#181f36] pb-3">
       {/* 1. TOP HEADER: View Mode Toggle & Mode Title */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         {/* Title */}
         <div className="flex items-center gap-3">
           {chartViewMode === 'timeline' ? (
-            <TrendingUp size={18} className="text-indigo-400" />
+            <TrendingUp size={18} className="text-indigo-500 dark:text-indigo-400" />
           ) : (
-            <BarChart2 size={18} className="text-cyan-400" />
+            <BarChart2 size={18} className="text-cyan-500 dark:text-cyan-400" />
           )}
-          <h3 className="text-sm font-black text-white uppercase tracking-wider">
+          <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider">
             {chartViewMode === 'timeline'
               ? 'TIẾN ĐỘ HỌC TẬP QUA CÁC KỲ & DỰ ĐOÁN XU HƯỚNG'
               : 'PHỔ ĐIỂM HỌC LỰC & PHÂN PHỐI NĂNG LỰC'}
@@ -74,18 +74,18 @@ export const ChartControls: React.FC<ChartControlsProps> = ({
 
       {/* Dynamic Sub-Controls depending on Active Chart Mode */}
       {chartViewMode === 'timeline' ? (
-        <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-white/5 text-xs">
+        <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-200 dark:border-white/5 text-xs">
           {/* Legend with Predictions */}
           <div className="flex flex-wrap items-center gap-3 text-[11px] font-bold">
-            <span className="flex items-center gap-1.5 text-blue-400 bg-blue-500/10 border border-blue-500/20 px-2.5 py-1 rounded-lg">
+            <span className="flex items-center gap-1.5 text-blue-600 dark:text-blue-400 bg-blue-500/10 border border-blue-500/20 px-2.5 py-1 rounded-lg">
               <span className="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.8)]" />
               Từ Vựng (Dự đoán: {format1Dec(engine?.pred_c1 ?? 0)})
             </span>
-            <span className="flex items-center gap-1.5 text-purple-400 bg-purple-500/10 border border-purple-500/20 px-2.5 py-1 rounded-lg">
+            <span className="flex items-center gap-1.5 text-purple-600 dark:text-purple-400 bg-purple-500/10 border border-purple-500/20 px-2.5 py-1 rounded-lg">
               <span className="w-2 h-2 rounded-full bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.8)]" />
               Ngữ Pháp (Dự đoán: {format1Dec(engine?.pred_c2 ?? 0)})
             </span>
-            <span className="flex items-center gap-1.5 text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-lg">
+            <span className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-lg">
               <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]" />
               BTVN (Dự đoán: {format1Dec(engine?.pred_hw ?? 0)})
             </span>
@@ -128,11 +128,11 @@ export const ChartControls: React.FC<ChartControlsProps> = ({
             )}
 
             {/* Zoom controls */}
-            <div className="flex items-center gap-1 bg-[#121626] border border-white/10 rounded-xl p-1">
+            <div className="flex items-center gap-1 bg-slate-100 dark:bg-[#121626] border border-slate-200 dark:border-white/10 rounded-xl p-1">
               <button
                 type="button"
                 onClick={() => setZoomLevel((z) => Math.min(2.5, z + 0.2))}
-                className="p-1.5 hover:bg-white/10 text-slate-300 hover:text-white rounded-lg transition cursor-pointer"
+                className="p-1.5 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white rounded-lg transition cursor-pointer"
                 title="Phóng to biểu đồ"
               >
                 <ZoomIn size={13} />
@@ -140,7 +140,7 @@ export const ChartControls: React.FC<ChartControlsProps> = ({
               <button
                 type="button"
                 onClick={() => setZoomLevel((z) => Math.max(0.6, z - 0.2))}
-                className="p-1.5 hover:bg-white/10 text-slate-300 hover:text-white rounded-lg transition cursor-pointer"
+                className="p-1.5 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white rounded-lg transition cursor-pointer"
                 title="Thu nhỏ biểu đồ"
               >
                 <ZoomOut size={13} />
@@ -151,7 +151,7 @@ export const ChartControls: React.FC<ChartControlsProps> = ({
                   setZoomLevel(1.0);
                   setPanOffset({ x: 0, y: 0 });
                 }}
-                className="p-1.5 hover:bg-white/10 text-slate-300 hover:text-white rounded-lg transition cursor-pointer"
+                className="p-1.5 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white rounded-lg transition cursor-pointer"
                 title="Đặt lại góc nhìn ban đầu"
               >
                 <RotateCcw size={13} />
@@ -160,8 +160,8 @@ export const ChartControls: React.FC<ChartControlsProps> = ({
           </div>
         </div>
       ) : (
-        <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-white/5 text-xs">
-          <div className="text-xs text-slate-400 font-semibold">
+        <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-200 dark:border-white/5 text-xs">
+          <div className="text-xs text-slate-500 dark:text-slate-400 font-semibold">
             Biểu đồ phân phối phổ điểm học lực & tỷ lệ phân bố toàn lớp
           </div>
         </div>

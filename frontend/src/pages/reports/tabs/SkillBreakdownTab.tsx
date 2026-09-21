@@ -73,15 +73,15 @@ export const SkillBreakdownTab: React.FC<SkillBreakdownTabProps> = ({
   // If viewing all classes ("Tất cả lớp học"), prompt the user to pick a specific class with inline selector
   if (!selectedClassId) {
     return (
-      <div className="py-16 px-6 rounded-2xl bg-[#090d16] border border-[#1b253b] text-center flex flex-col items-center justify-center gap-4 select-none animate-cascade-1 shadow-lg max-w-2xl mx-auto">
-        <div className="w-14 h-14 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-blue-400 flex items-center justify-center shadow-[0_0_20px_rgba(59,130,246,0.15)]">
+      <div className="py-16 px-6 rounded-2xl bg-white dark:bg-[#090d16] border border-slate-200 dark:border-[#1b253b] text-center flex flex-col items-center justify-center gap-4 select-none animate-cascade-1 shadow-sm dark:shadow-lg max-w-2xl mx-auto">
+        <div className="w-14 h-14 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-blue-600 dark:text-blue-400 flex items-center justify-center shadow-[0_0_20px_rgba(59,130,246,0.15)]">
           <GraduationCap size={28} />
         </div>
         <div className="space-y-1.5">
-          <h4 className="text-base font-black text-white uppercase tracking-wider">
+          <h4 className="text-base font-black text-slate-900 dark:text-white uppercase tracking-wider">
             Chọn lớp học để phân tích kỹ năng & Unit
           </h4>
-          <p className="text-xs text-slate-400 max-w-md mx-auto leading-relaxed">
+          <p className="text-xs text-slate-600 dark:text-slate-400 max-w-md mx-auto leading-relaxed">
             Chương trình học và danh mục Unit khác nhau giữa các khối lớp. Chọn nhanh lớp học bên dưới để mở ngay Ma trận Nắm vững, Thống kê Unit và Danh sách Học sinh cần phụ đạo:
           </p>
         </div>
@@ -89,7 +89,7 @@ export const SkillBreakdownTab: React.FC<SkillBreakdownTabProps> = ({
         {classes && classes.length > 0 ? (
           <div className="w-full max-w-xs space-y-3 pt-2">
             <CustomSelect
-              icon={<GraduationCap size={15} className="text-indigo-400" />}
+              icon={<GraduationCap size={15} className="text-indigo-500 dark:text-indigo-400" />}
               value=""
               placeholder="-- Chọn lớp học --"
               onChange={(val) => onSelectClass?.(String(val))}
@@ -105,7 +105,7 @@ export const SkillBreakdownTab: React.FC<SkillBreakdownTabProps> = ({
                   key={c.id}
                   type="button"
                   onClick={() => onSelectClass?.(String(c.id))}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#141a2e] hover:bg-blue-600/20 text-slate-300 hover:text-blue-300 border border-[#233052] text-xs font-bold transition cursor-pointer"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-[#141a2e] hover:bg-blue-50 dark:hover:bg-blue-600/20 text-slate-700 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-300 border border-slate-200 dark:border-[#233052] text-xs font-bold transition cursor-pointer"
                 >
                   <span>{c.class_name}</span>
                   <ArrowRight size={11} />
@@ -114,7 +114,7 @@ export const SkillBreakdownTab: React.FC<SkillBreakdownTabProps> = ({
             </div>
           </div>
         ) : (
-          <p className="text-xs text-amber-400 font-bold">Chưa có lớp học nào trong hệ thống.</p>
+          <p className="text-xs text-amber-500 font-bold">Chưa có lớp học nào trong hệ thống.</p>
         )}
       </div>
     );
@@ -122,9 +122,9 @@ export const SkillBreakdownTab: React.FC<SkillBreakdownTabProps> = ({
 
   if (loading && !reportData) {
     return (
-      <div className="py-24 text-center text-slate-400 text-xs font-bold flex flex-col items-center justify-center gap-3">
-        <RefreshCw size={24} className="text-indigo-400 animate-spin" />
-        <span className="text-indigo-300 font-black">Đang phân tích dữ liệu kỹ năng & Bloom taxonomy...</span>
+      <div className="py-24 text-center text-slate-500 dark:text-slate-400 text-xs font-bold flex flex-col items-center justify-center gap-3">
+        <RefreshCw size={24} className="text-indigo-500 dark:text-indigo-400 animate-spin" />
+        <span className="text-indigo-600 dark:text-indigo-300 font-black">Đang phân tích dữ liệu kỹ năng & Bloom taxonomy...</span>
       </div>
     );
   }
@@ -137,27 +137,27 @@ export const SkillBreakdownTab: React.FC<SkillBreakdownTabProps> = ({
     <div className="flex flex-col gap-6 mb-8 select-none">
       {/* 0. ACTIVE STUDENT FILTER BANNER */}
       {selectedStudent && (
-        <div className="bg-[#101528] border border-indigo-500/40 p-4 rounded-2xl flex items-center justify-between gap-4 shadow-lg animate-cascade-1">
+        <div className="bg-white dark:bg-[#101528] border border-indigo-200 dark:border-indigo-500/40 p-4 rounded-2xl flex items-center justify-between gap-4 shadow-sm dark:shadow-lg animate-cascade-1">
           <div className="flex items-center gap-3.5">
             <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-indigo-600 to-purple-600 text-white font-black text-sm flex items-center justify-center border border-white/20">
               {selectedStudent.full_name.slice(0, 2).toUpperCase()}
             </div>
             <div>
-              <span className="text-[10px] font-black uppercase text-indigo-400 block tracking-wider">
+              <span className="text-[10px] font-black uppercase text-indigo-600 dark:text-indigo-400 block tracking-wider">
                 ĐANG PHÂN TÍCH KỸ NĂNG HỌC SINH
               </span>
               <div className="flex items-center gap-2 mt-0.5">
-                <h3 className="text-base font-black text-white">
-                  {selectedStudent.full_name} {selectedStudent.nickname && <span className="text-indigo-300 font-bold">({selectedStudent.nickname})</span>}
+                <h3 className="text-base font-black text-slate-900 dark:text-white">
+                  {selectedStudent.full_name} {selectedStudent.nickname && <span className="text-indigo-600 dark:text-indigo-300 font-bold">({selectedStudent.nickname})</span>}
                 </h3>
-                <span className="text-xs px-2 py-0.5 rounded-md bg-[#1e2748] text-indigo-300 font-bold border border-indigo-500/20">{selectedStudent.class_name}</span>
+                <span className="text-xs px-2 py-0.5 rounded-md bg-indigo-50 dark:bg-[#1e2748] text-indigo-700 dark:text-indigo-300 font-bold border border-indigo-200 dark:border-indigo-500/20">{selectedStudent.class_name}</span>
               </div>
             </div>
           </div>
           <button
             type="button"
             onClick={() => onSelectRankingStudent(0)}
-            className="px-3 py-1.5 rounded-xl bg-[#1c2442] hover:bg-rose-500/20 text-slate-300 hover:text-rose-300 border border-white/10 text-xs font-bold transition cursor-pointer"
+            className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-rose-50 dark:bg-[#1c2442] dark:hover:bg-rose-500/20 text-slate-600 hover:text-rose-600 dark:text-slate-300 dark:hover:text-rose-300 border border-slate-200 dark:border-white/10 text-xs font-bold transition cursor-pointer"
           >
             Bỏ Lọc Học Sinh ✕
           </button>
@@ -165,7 +165,7 @@ export const SkillBreakdownTab: React.FC<SkillBreakdownTabProps> = ({
       )}
 
       {/* 1. INTERNAL SUB-TAB SELECTOR (SLIDING PILL INDICATOR) */}
-      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-white/5 pb-2">
+      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 dark:border-white/5 pb-2">
         <SegmentedControl<'diagnosis' | 'heatmap' | 'units'>
           value={activeSubTab}
           onChange={setActiveSubTab}

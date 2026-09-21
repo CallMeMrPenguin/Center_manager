@@ -923,9 +923,9 @@ export default function VocabularyBank({ isActive }: { isActive?: boolean }) {
       {/* HEADER SECTION */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <div>
-          <h1 className="text-xl font-black text-white flex items-center gap-2.5 drop-shadow-md">
+          <h1 className="text-xl font-black text-slate-900 dark:text-white flex items-center gap-2.5 drop-shadow-md">
             <Database className="text-blue-500 drop-shadow-[0_0_10px_rgba(59,130,246,0.5)]" size={22} />
-            <span className="bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">DANH SÁCH TỪ VỰNG CHỦ ĐỀ</span>
+            <span className="text-slate-900 dark:text-white">DANH SÁCH TỪ VỰNG CHỦ ĐỀ</span>
           </h1>
           <p className="text-xs text-slate-400 mt-1">
             Quản lý kho từ vựng tiếng Anh chủ đề local. Phân cấp từ gốc cốt lõi [ ] và các nhóm từ word family {'{ }'}.
@@ -1077,8 +1077,8 @@ export default function VocabularyBank({ isActive }: { isActive?: boolean }) {
         </div>
       )}
 
-      {/* TABLE WORKSPACE WITH SOLID DARK BACKGROUND (NO TRANSPARENCY) */}
-      <div className="flex-auto bg-[#0c0f1d] border border-[#1e2744] rounded-2xl shadow-2xl overflow-hidden opacity-100 backdrop-blur-none flex flex-col min-h-0">
+      {/* TABLE WORKSPACE WITH SOLID BACKGROUND */}
+      <div className="flex-auto bg-white dark:bg-[#0c0f1d] border border-slate-200 dark:border-[#1e2744] rounded-2xl shadow-xl overflow-hidden opacity-100 backdrop-blur-none flex flex-col min-h-0">
         {loading && vocabList.length === 0 ? (
           <div className="flex-1 flex flex-col items-center justify-center gap-2">
             <RefreshCw className="animate-spin text-blue-500" size={28} />
@@ -1086,10 +1086,10 @@ export default function VocabularyBank({ isActive }: { isActive?: boolean }) {
           </div>
         ) : vocabList.length === 0 ? (
           <div className="flex-1 flex flex-col items-center justify-center text-center p-10">
-            <div className="h-14 w-14 rounded-full bg-slate-900 flex items-center justify-center border border-slate-850 mb-4 text-slate-500">
+            <div className="h-14 w-14 rounded-full bg-slate-100 dark:bg-slate-900 flex items-center justify-center border border-slate-200 dark:border-slate-850 mb-4 text-slate-500">
               <Database size={24} />
             </div>
-            <h3 className="text-sm font-bold text-slate-200">Không tìm thấy từ vựng</h3>
+            <h3 className="text-sm font-bold text-slate-800 dark:text-slate-200">Không tìm thấy từ vựng</h3>
             <p className="text-xs text-slate-500 max-w-xs mt-1">
               Kho từ vựng hiện tại trống hoặc bộ lọc không trả về kết quả. Vui lòng tải tệp CSV từ vựng lên.
             </p>
@@ -1099,7 +1099,7 @@ export default function VocabularyBank({ isActive }: { isActive?: boolean }) {
             <div className="overflow-auto table-scroll-container">
               <table className="w-full border-collapse text-left">
                 <thead>
-                  <tr className="bg-[#121626] border-b border-[#232d4e] text-[0.66rem] text-slate-400 font-extrabold uppercase tracking-wider sticky top-0 z-10 opacity-100">
+                  <tr className="bg-slate-50 dark:bg-[#121626] border-b border-slate-200 dark:border-[#232d4e] text-[0.66rem] text-slate-600 dark:text-slate-400 font-extrabold uppercase tracking-wider sticky top-0 z-10 opacity-100">
                     <th className="py-4 px-5 w-12 text-center">
                       <button
                         onClick={handleSelectAllOnPage}

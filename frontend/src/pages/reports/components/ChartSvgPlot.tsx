@@ -57,6 +57,7 @@ export const ChartSvgPlot: React.FC<ChartSvgPlotProps> = React.memo(({
   const gradBlue = `area_grad_blue_${uid}`;
   const gradPurple = `area_grad_purple_${uid}`;
   const gradEmerald = `area_grad_emerald_${uid}`;
+  const isDark = typeof document !== 'undefined' ? document.documentElement.classList.contains('dark') : true;
   const animKey = `${selectedStudentId || selectedClassId || 'all'}-${timeView}-${sessionChartData.length}`;
 
   return (
@@ -109,8 +110,8 @@ export const ChartSvgPlot: React.FC<ChartSvgPlotProps> = React.memo(({
         if (y < paddingTop - 12 || y > chartHeight - paddingBottom + 12) return null;
         return (
           <g key={val}>
-            <line x1={paddingLeft} y1={y} x2={chartWidth - paddingRight} y2={y} stroke="#171e34" strokeWidth="1" strokeDasharray={val === 7.5 ? "4 4" : "0"} />
-            <text x={paddingLeft - 14} y={y + 4} fill="#64748b" fontSize="11" fontWeight="bold" textAnchor="end">{val.toFixed(1)}</text>
+            <line x1={paddingLeft} y1={y} x2={chartWidth - paddingRight} y2={y} stroke={isDark ? "#171e34" : "#e2e8f0"} strokeWidth="1" strokeDasharray={val === 7.5 ? "4 4" : "0"} />
+            <text x={paddingLeft - 14} y={y + 4} fill={isDark ? "#64748b" : "#64748b"} fontSize="11" fontWeight="bold" textAnchor="end">{val.toFixed(1)}</text>
           </g>
         );
       })}
@@ -333,7 +334,7 @@ export const ChartSvgPlot: React.FC<ChartSvgPlotProps> = React.memo(({
             key={`xlabel-${selectedStudentId || selectedClassId || 'all'}-${timeView}-${i}`}
             x={x}
             y={chartHeight - 12}
-            fill={hoveredPoint?.index === i ? "#ffffff" : "#94a3b8"}
+            fill={hoveredPoint?.index === i ? (isDark ? "#ffffff" : "#0f172a") : (isDark ? "#94a3b8" : "#64748b")}
             fontSize="11"
             fontWeight="extrabold"
             textAnchor="middle"

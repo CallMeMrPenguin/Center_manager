@@ -193,15 +193,15 @@ export const EarlyWarningSection: React.FC<EarlyWarningSectionProps> = ({
   ], [onSelectRankingStudent]);
 
   return (
-    <div className="bg-[#120d18] border border-rose-500/30 rounded-2xl p-4 sm:p-5 shadow-2xl transition-all animate-cascade-2">
+    <div className="bg-white dark:bg-[#120d18] border border-rose-200 dark:border-rose-500/30 rounded-2xl p-4 sm:p-5 shadow-sm dark:shadow-2xl transition-all animate-cascade-2">
       <div onClick={() => setIsWarningSectionOpen(!isWarningSectionOpen)} className="flex flex-wrap items-center justify-between gap-4 cursor-pointer select-none">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-rose-500/20 border border-rose-500/40 flex items-center justify-center text-rose-400 shadow-md shadow-rose-500/10 shrink-0">
+          <div className="w-9 h-9 rounded-xl bg-rose-500/20 border border-rose-500/40 flex items-center justify-center text-rose-500 dark:text-rose-400 shadow-md shadow-rose-500/10 shrink-0">
             <BellRing size={18} />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h4 className="text-sm font-black uppercase text-white tracking-wider flex items-center gap-1.5">
+              <h4 className="text-sm font-black uppercase text-slate-900 dark:text-white tracking-wider flex items-center gap-1.5">
                 CẢNH BÁO SỚM & HỌC SINH NGUY CƠ
               </h4>
               {atRiskStudents.length > 0 ? (
@@ -209,12 +209,12 @@ export const EarlyWarningSection: React.FC<EarlyWarningSectionProps> = ({
                   {atRiskStudents.length} CẦN LƯU Ý
                 </span>
               ) : (
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-600 dark:text-emerald-300 border border-emerald-500/30">
                   An Toàn
                 </span>
               )}
             </div>
-            <p className="text-xs text-slate-400 font-semibold mt-0.5">
+            <p className="text-xs text-slate-500 dark:text-slate-400 font-semibold mt-0.5">
               Tự động rà soát học sinh có tỷ lệ vắng &gt;={warningAbsentPct}%, vắng liên tiếp &gt;={warningConsecutiveAbsent} buổi hoặc điểm dốc giảm &lt;={warningTrendThreshold}/buổi.
             </p>
           </div>
@@ -222,47 +222,47 @@ export const EarlyWarningSection: React.FC<EarlyWarningSectionProps> = ({
         <div className="flex items-center gap-2">
           <button
             onClick={(e) => { e.stopPropagation(); setShowWarningSettings(!showWarningSettings); }}
-            className="p-1.5 rounded-lg bg-[#1e1322] hover:bg-rose-500/20 text-rose-300 border border-rose-500/30 text-xs font-bold transition cursor-pointer flex items-center gap-1"
+            className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-[#1e1322] dark:hover:bg-rose-500/20 text-rose-600 dark:text-rose-300 border border-rose-200 dark:border-rose-500/30 text-xs font-bold transition cursor-pointer flex items-center gap-1"
           >
             <SlidersHorizontal size={13} />
             <span className="text-[11px]">Ngưỡng</span>
           </button>
-          <div className="p-1 rounded-lg text-slate-400 hover:text-white">
+          <div className="p-1 rounded-lg text-slate-400 hover:text-slate-900 dark:hover:text-white">
             {isWarningSectionOpen ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
           </div>
         </div>
       </div>
 
       {isWarningSectionOpen && (
-        <div className="mt-4 pt-4 border-t border-rose-500/20 space-y-4">
+        <div className="mt-4 pt-4 border-t border-rose-200 dark:border-rose-500/20 space-y-4">
           {showWarningSettings && (
-            <div className="p-4 rounded-xl bg-[#180e1e] border border-rose-500/30 grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="p-4 rounded-xl bg-slate-50 dark:bg-[#180e1e] border border-rose-200 dark:border-rose-500/30 grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
-                <label className="block text-[10px] font-black uppercase text-slate-300 mb-1">Tỷ lệ vắng tối đa (%)</label>
+                <label className="block text-[10px] font-black uppercase text-slate-700 dark:text-slate-300 mb-1">Tỷ lệ vắng tối đa (%)</label>
                 <input
                   type="number"
                   value={warningAbsentPct}
                   onChange={(e) => onUpdateWarningSettings({ absentPct: Number(e.target.value) || 0 })}
-                  className="w-full bg-[#120a16] border border-rose-500/30 rounded-lg px-2.5 py-1.5 text-xs text-white font-mono"
+                  className="w-full bg-white dark:bg-[#120a16] border border-rose-200 dark:border-rose-500/30 rounded-lg px-2.5 py-1.5 text-xs text-slate-900 dark:text-white font-mono"
                 />
               </div>
               <div>
-                <label className="block text-[10px] font-black uppercase text-slate-300 mb-1">Vắng liên tiếp (Buổi)</label>
+                <label className="block text-[10px] font-black uppercase text-slate-700 dark:text-slate-300 mb-1">Vắng liên tiếp (Buổi)</label>
                 <input
                   type="number"
                   value={warningConsecutiveAbsent}
                   onChange={(e) => onUpdateWarningSettings({ consecutiveAbsent: Number(e.target.value) || 0 })}
-                  className="w-full bg-[#120a16] border border-rose-500/30 rounded-lg px-2.5 py-1.5 text-xs text-white font-mono"
+                  className="w-full bg-white dark:bg-[#120a16] border border-rose-200 dark:border-rose-500/30 rounded-lg px-2.5 py-1.5 text-xs text-slate-900 dark:text-white font-mono"
                 />
               </div>
               <div>
-                <label className="block text-[10px] font-black uppercase text-slate-300 mb-1">Ngưỡng dốc giảm (Điểm/b)</label>
+                <label className="block text-[10px] font-black uppercase text-slate-700 dark:text-slate-300 mb-1">Ngưỡng dốc giảm (Điểm/b)</label>
                 <input
                   type="number"
                   step="0.05"
                   value={warningTrendThreshold}
                   onChange={(e) => onUpdateWarningSettings({ trendThreshold: Number(e.target.value) || 0 })}
-                  className="w-full bg-[#120a16] border border-rose-500/30 rounded-lg px-2.5 py-1.5 text-xs text-white font-mono"
+                  className="w-full bg-white dark:bg-[#120a16] border border-rose-200 dark:border-rose-500/30 rounded-lg px-2.5 py-1.5 text-xs text-slate-900 dark:text-white font-mono"
                 />
               </div>
             </div>

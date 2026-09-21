@@ -77,7 +77,7 @@ export const ExerciseConfigTab: React.FC<ExerciseConfigTabProps> = ({
         accessorKey: 'label',
         header: 'Tên Dạng Bài',
         cell: (info) => (
-          <span className="font-bold text-white text-xs">{info.getValue<string>()}</span>
+          <span className="font-bold text-slate-900 dark:text-white text-xs">{info.getValue<string>()}</span>
         ),
       },
       {
@@ -91,7 +91,7 @@ export const ExerciseConfigTab: React.FC<ExerciseConfigTabProps> = ({
               type="text"
               value={editValue}
               onChange={(e) => setEditValue(e.target.value)}
-              className="w-full px-3 py-1.5 bg-[#0c0f1d] border border-indigo-500 rounded-lg focus:outline-none text-xs text-white"
+              className="w-full px-3 py-1.5 bg-slate-50 dark:bg-[#0c0f1d] border border-indigo-500 rounded-lg focus:outline-none text-xs text-slate-900 dark:text-white"
               autoFocus
               onKeyDown={(e) => {
                 if (e.key === 'Enter') handleSave(item.code, editValue);
@@ -99,8 +99,8 @@ export const ExerciseConfigTab: React.FC<ExerciseConfigTabProps> = ({
               }}
             />
           ) : (
-            <span className="text-xs text-slate-300 italic font-medium">
-              {item.instruction || <span className="text-slate-600">(Mặc định hệ thống)</span>}
+            <span className="text-xs text-slate-700 dark:text-slate-300 italic font-medium">
+              {item.instruction || <span className="text-slate-400 dark:text-slate-600">(Mặc định hệ thống)</span>}
             </span>
           );
         },
@@ -123,7 +123,7 @@ export const ExerciseConfigTab: React.FC<ExerciseConfigTabProps> = ({
               </button>
               <button
                 onClick={() => setEditingKey(null)}
-                className="px-2.5 py-1 bg-[#151f32] hover:bg-slate-800 text-slate-400 rounded-lg font-bold text-xs cursor-pointer"
+                className="px-2.5 py-1 bg-slate-100 dark:bg-[#151f32] hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-lg font-bold text-xs cursor-pointer"
               >
                 Hủy
               </button>
@@ -135,7 +135,7 @@ export const ExerciseConfigTab: React.FC<ExerciseConfigTabProps> = ({
                   setEditingKey(item.code);
                   setEditValue(item.instruction);
                 }}
-                className="px-3 py-1 bg-[#121626] border border-[#202842] hover:border-indigo-500 text-slate-300 hover:text-white rounded-lg font-bold text-xs transition cursor-pointer"
+                className="px-3 py-1 bg-slate-100 hover:bg-slate-200 dark:bg-[#121626] border border-slate-200 dark:border-[#202842] hover:border-indigo-500 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white rounded-lg font-bold text-xs transition cursor-pointer"
               >
                 Chỉnh sửa
               </button>
@@ -148,17 +148,17 @@ export const ExerciseConfigTab: React.FC<ExerciseConfigTabProps> = ({
   );
 
   return (
-    <div className="flex flex-col gap-4 bg-[#0c0f1d] border border-white/10 p-5 rounded-2xl w-full shadow-lg">
-      <div className="flex justify-between items-center border-b border-white/5 pb-3">
+    <div className="flex flex-col gap-4 bg-white dark:bg-[#0c0f1d] border border-slate-200 dark:border-white/10 p-5 rounded-2xl w-full shadow-sm dark:shadow-lg">
+      <div className="flex justify-between items-center border-b border-slate-200 dark:border-white/5 pb-3">
         <div>
-          <h3 className="text-sm font-black text-white uppercase tracking-wider">
+          <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider">
             Cấu Hình Tiêu Đề Hướng Dẫn Dạng Bài
           </h3>
-          <p className="text-xs text-slate-400 mt-0.5">
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
             Tiêu đề này sẽ được in ở đầu mỗi phần bài tập trong đề thi và tài liệu khi xuất file.
           </p>
         </div>
-        <span className="text-xs bg-[#121626] border border-[#202842] px-3 py-1 rounded-xl text-slate-300 font-bold">
+        <span className="text-xs bg-slate-100 dark:bg-[#121626] border border-slate-200 dark:border-[#202842] px-3 py-1 rounded-xl text-slate-700 dark:text-slate-300 font-bold">
           {Object.keys(EXERCISE_TYPE_LABELS).length} Dạng Bài
         </span>
       </div>

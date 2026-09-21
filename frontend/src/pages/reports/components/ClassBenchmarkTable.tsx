@@ -98,8 +98,8 @@ export const ClassBenchmarkTable: React.FC<ClassBenchmarkTableProps> = ({
       meta: { headerText: 'Tên Lớp Học' },
       cell: ({ row }) => (
         <div>
-          <span className="font-bold text-white block text-sm">{row.original.class_name}</span>
-          <span className="text-[10px] text-slate-400 font-semibold">{row.original.grade}</span>
+          <span className="font-bold text-slate-900 dark:text-white block text-sm">{row.original.class_name}</span>
+          <span className="text-[10px] text-slate-500 dark:text-slate-400 font-semibold">{row.original.grade}</span>
         </div>
       ),
     },
@@ -107,7 +107,7 @@ export const ClassBenchmarkTable: React.FC<ClassBenchmarkTableProps> = ({
       accessorKey: 'studentCount',
       header: () => <div className="text-center w-full">Sĩ Số</div>,
       meta: { headerText: 'Sĩ Số' },
-      cell: ({ getValue }) => <div className="text-center font-mono font-bold text-slate-200">{getValue<number>()} học sinh</div>,
+      cell: ({ getValue }) => <div className="text-center font-mono font-bold text-slate-800 dark:text-slate-200">{getValue<number>()} học sinh</div>,
     },
     {
       accessorKey: 'attendancePct',
@@ -162,16 +162,16 @@ export const ClassBenchmarkTable: React.FC<ClassBenchmarkTableProps> = ({
   ], []);
 
   return (
-    <div className="bg-[#0b0f19] border border-[#1b253b] rounded-2xl p-6 shadow-xl space-y-4 animate-cascade-2">
-      <div className="flex items-center gap-3 border-b border-[#161f33] pb-4">
-        <div className="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-indigo-400 shrink-0">
+    <div className="bg-white dark:bg-[#0b0f19] border border-slate-200 dark:border-[#1b253b] rounded-2xl p-6 shadow-sm dark:shadow-xl space-y-4 animate-cascade-2">
+      <div className="flex items-center gap-3 border-b border-slate-200 dark:border-[#161f33] pb-4">
+        <div className="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-indigo-500 dark:text-indigo-400 shrink-0">
           <Scale size={20} />
         </div>
         <div>
-          <h3 className="text-base font-black text-white uppercase tracking-wider">
+          <h3 className="text-base font-black text-slate-900 dark:text-white uppercase tracking-wider">
             BẢNG XẾP HẠNG & SO SÁNH TỔNG QUAN CÁC LỚP
           </h3>
-          <p className="text-xs text-slate-400 font-semibold mt-0.5">
+          <p className="text-xs text-slate-500 dark:text-slate-400 font-semibold mt-0.5">
             Đánh giá toàn diện sĩ số, mức điểm EMA, độ lệch chuẩn và tỷ lệ tăng trưởng giữa các lớp học trong trung tâm.
           </p>
         </div>

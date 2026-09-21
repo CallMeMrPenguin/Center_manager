@@ -298,23 +298,23 @@ export default function RelationshipsTab({ classId, enrolledStudents, onRefreshC
   };
 
   return (
-    <div className="space-y-6 pb-8">
+    <div className="space-y-6 pb-8 font-sans">
       {/* SECTION 1: FRIEND GROUPS */}
-      <div className="bg-[#0d1018] border border-white/10 p-5 rounded-2xl space-y-4">
+      <div className="bg-white dark:bg-[#0d1018] border border-slate-200 dark:border-white/10 p-5 rounded-2xl space-y-4 shadow-sm dark:shadow-none transition-colors">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
-            <h3 className="text-base font-black text-white flex items-center gap-2">
-              <Users className="h-5 w-5 text-indigo-400" />
+            <h3 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
+              <Users className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
               <span>Nhóm Bạn Bè (Friend Groups)</span>
             </h3>
-            <p className="text-xs text-slate-400 font-medium mt-1">
+            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-1">
               Tất cả các học sinh cùng nằm trong 1 Nhóm Bạn Bè sẽ tự động bị tính là xung đột (không ngồi cạnh nhau và tuyệt đối **không đổi bài kiểm tra cho nhau**).
             </p>
           </div>
 
           <button
             onClick={() => setCreatingFriendGroup(true)}
-            className="group flex items-center gap-0 hover:gap-1.5 bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-2 rounded-xl text-xs font-extrabold transition-all duration-300 cursor-pointer border border-white/10 shadow-md"
+            className="group flex items-center gap-0 hover:gap-1.5 bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-2 rounded-xl text-xs font-extrabold transition-all duration-300 cursor-pointer border border-indigo-700 shadow-md"
             title="Tạo Nhóm Bạn"
           >
             <Plus size={14} className="shrink-0" />
@@ -326,32 +326,32 @@ export default function RelationshipsTab({ classId, enrolledStudents, onRefreshC
 
         {/* Create Friend Group Form */}
         {creatingFriendGroup && (
-          <form onSubmit={handleCreateFriendGroup} className="bg-[#141928] p-4 rounded-xl border border-indigo-500/30 space-y-3">
+          <form onSubmit={handleCreateFriendGroup} className="bg-slate-50 dark:bg-[#141928] p-4 rounded-xl border border-indigo-200 dark:border-indigo-500/30 space-y-3">
             <div className="flex items-center gap-3">
               <div className="flex-1">
-                <label className="block text-[10px] font-black uppercase text-slate-400 mb-1">Tên Nhóm Bạn</label>
+                <label className="block text-[10px] font-black uppercase text-slate-500 dark:text-slate-400 mb-1">Tên Nhóm Bạn</label>
                 <input
                   type="text"
                   required
                   value={newFriendGroupName}
                   onChange={(e) => setNewFriendGroupName(e.target.value)}
                   placeholder="Ví dụ: Nhóm Bạn Thân 1, Nhóm A..."
-                  className="w-full bg-[#0d1018] border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500 font-semibold"
+                  className="w-full bg-white dark:bg-[#0d1018] border border-slate-200 dark:border-white/10 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500 font-semibold"
                 />
               </div>
             </div>
 
-            <div className="flex justify-end gap-2 pt-2 border-t border-white/5">
+            <div className="flex justify-end gap-2 pt-2 border-t border-slate-200 dark:border-white/5">
               <button
                 type="button"
                 onClick={() => setCreatingFriendGroup(false)}
-                className="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 text-xs font-bold transition cursor-pointer"
+                className="px-3 py-1.5 rounded-lg bg-slate-200 dark:bg-white/5 hover:bg-slate-300 dark:hover:bg-white/10 text-slate-700 dark:text-slate-400 text-xs font-bold transition cursor-pointer"
               >
                 Hủy
               </button>
               <button
                 type="submit"
-                className="px-4 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-extrabold transition border border-white/10 cursor-pointer"
+                className="px-4 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-extrabold transition border border-indigo-700 cursor-pointer"
               >
                 Lưu Nhóm
               </button>
@@ -362,30 +362,30 @@ export default function RelationshipsTab({ classId, enrolledStudents, onRefreshC
         {/* Friend Groups Cards */}
         {loading ? (
           <div className="py-6 text-center text-xs text-slate-400 flex items-center justify-center gap-2">
-            <RefreshCw size={16} className="animate-spin text-indigo-400" />
+            <RefreshCw size={16} className="animate-spin text-indigo-500" />
             <span>Đang tải danh sách...</span>
           </div>
         ) : friendGroups.length === 0 ? (
-          <div className="p-5 text-center text-xs text-slate-500 font-medium bg-[#121624] rounded-xl border border-white/5">
+          <div className="p-5 text-center text-xs text-slate-500 font-medium bg-slate-50 dark:bg-[#121624] rounded-xl border border-slate-200 dark:border-white/5">
             Chưa có nhóm bạn nào được tạo. Bấm "Tạo Nhóm Bạn" để thêm nhóm.
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {friendGroups.map(group => (
-              <div key={group.id} className="bg-[#121624] border border-indigo-500/20 rounded-xl p-4 space-y-3 flex flex-col justify-between">
+              <div key={group.id} className="bg-slate-50 dark:bg-[#121624] border border-slate-200 dark:border-indigo-500/20 rounded-xl p-4 space-y-3 flex flex-col justify-between shadow-sm dark:shadow-none">
                 <div>
-                  <div className="flex items-center justify-between gap-2 pb-2.5 border-b border-white/5">
+                  <div className="flex items-center justify-between gap-2 pb-2.5 border-b border-slate-200 dark:border-white/5">
                     <div className="flex items-center gap-2">
-                      <Users size={16} className="text-indigo-400" />
-                      <span className="text-sm font-black text-white">{group.group_name}</span>
-                      <span className="text-[10px] font-bold text-indigo-300 bg-indigo-500/15 px-2 py-0.5 rounded-full border border-indigo-500/20">
+                      <Users size={16} className="text-indigo-600 dark:text-indigo-400" />
+                      <span className="text-sm font-black text-slate-900 dark:text-white">{group.group_name}</span>
+                      <span className="text-[10px] font-bold text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-500/15 px-2 py-0.5 rounded-full border border-indigo-200 dark:border-indigo-500/20">
                         {group.members.length} học sinh
                       </span>
                     </div>
 
                     <button
                       onClick={() => handleDeleteFriendGroup(group)}
-                      className="p-1 rounded-lg hover:bg-rose-500/20 text-slate-400 hover:text-rose-300 transition cursor-pointer"
+                      className="p-1 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-500/20 text-slate-400 hover:text-rose-600 dark:hover:text-rose-300 transition cursor-pointer"
                       title="Xóa nhóm"
                     >
                       <Trash2 size={14} />
@@ -395,17 +395,17 @@ export default function RelationshipsTab({ classId, enrolledStudents, onRefreshC
                   {/* Members list */}
                   <div className="flex flex-wrap gap-1.5 mt-3">
                     {group.members.length === 0 ? (
-                      <span className="text-xs text-slate-500 italic">Chưa có thành viên</span>
+                      <span className="text-xs text-slate-400 italic">Chưa có thành viên</span>
                     ) : (
                       group.members.map(m => (
                         <span
                           key={m.student_id}
-                          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold bg-indigo-500/10 border border-indigo-500/25 text-indigo-200"
+                          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500/25 text-indigo-800 dark:text-indigo-200"
                         >
                           <span>{m.full_name}</span>
                           <button
                             onClick={() => handleRemoveFriendGroupMember(group.id, m.student_id)}
-                            className="hover:bg-rose-500/30 rounded p-0.5 text-slate-400 hover:text-rose-300 transition cursor-pointer"
+                            className="hover:bg-rose-100 dark:hover:bg-rose-500/30 rounded p-0.5 text-slate-400 hover:text-rose-600 dark:hover:text-rose-300 transition cursor-pointer"
                             title="Gỡ khỏi nhóm"
                           >
                             <X size={12} />
@@ -417,10 +417,10 @@ export default function RelationshipsTab({ classId, enrolledStudents, onRefreshC
                 </div>
 
                 {/* Add member button launching multi-select modal */}
-                <div className="pt-2 border-t border-white/5">
+                <div className="pt-2 border-t border-slate-200 dark:border-white/5">
                   <button
                     onClick={() => handleOpenAddMemberModal(group, 'friend')}
-                    className="text-xs font-bold text-indigo-400 hover:text-indigo-300 flex items-center gap-1 cursor-pointer"
+                    className="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 flex items-center gap-1 cursor-pointer"
                   >
                     <UserPlus size={13} />
                     <span>+ Thêm học sinh vào nhóm (Chọn nhiều)</span>
@@ -433,21 +433,21 @@ export default function RelationshipsTab({ classId, enrolledStudents, onRefreshC
       </div>
 
       {/* SECTION 2: CONFLICT GROUPS */}
-      <div className="bg-[#0d1018] border border-white/10 p-5 rounded-2xl space-y-4">
+      <div className="bg-white dark:bg-[#0d1018] border border-slate-200 dark:border-white/10 p-5 rounded-2xl space-y-4 shadow-sm dark:shadow-none transition-colors">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
-            <h3 className="text-base font-black text-white flex items-center gap-2">
-              <ShieldAlert className="h-5 w-5 text-rose-400" />
+            <h3 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
+              <ShieldAlert className="h-5 w-5 text-rose-500 dark:text-rose-400" />
               <span>Nhóm Xung Đột (Conflict Groups)</span>
             </h3>
-            <p className="text-xs text-slate-400 font-medium mt-1">
+            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-1">
               Các học sinh thuộc cùng một Nhóm Xung Đột sẽ tuyệt đối không được ngồi cạnh nhau (hoặc cùng khối 2x2) và không được đổi bài kiểm tra cho nhau.
             </p>
           </div>
 
           <button
             onClick={() => setCreatingConflictGroup(true)}
-            className="group flex items-center gap-0 hover:gap-1.5 bg-rose-600 hover:bg-rose-500 text-white px-3 py-2 rounded-xl text-xs font-extrabold transition-all duration-300 cursor-pointer border border-white/10 shadow-md"
+            className="group flex items-center gap-0 hover:gap-1.5 bg-rose-600 hover:bg-rose-500 text-white px-3 py-2 rounded-xl text-xs font-extrabold transition-all duration-300 cursor-pointer border border-rose-700 shadow-md"
             title="Tạo Nhóm Xung Đột"
           >
             <Plus size={14} className="shrink-0" />
@@ -459,32 +459,32 @@ export default function RelationshipsTab({ classId, enrolledStudents, onRefreshC
 
         {/* Create Conflict Group Form */}
         {creatingConflictGroup && (
-          <form onSubmit={handleCreateConflictGroup} className="bg-[#141928] p-4 rounded-xl border border-rose-500/30 space-y-3">
+          <form onSubmit={handleCreateConflictGroup} className="bg-slate-50 dark:bg-[#141928] p-4 rounded-xl border border-rose-200 dark:border-rose-500/30 space-y-3">
             <div className="flex items-center gap-3">
               <div className="flex-1">
-                <label className="block text-[10px] font-black uppercase text-slate-400 mb-1">Tên Nhóm Xung Đột</label>
+                <label className="block text-[10px] font-black uppercase text-slate-500 dark:text-slate-400 mb-1">Tên Nhóm Xung Đột</label>
                 <input
                   type="text"
                   required
                   value={newConflictGroupName}
                   onChange={(e) => setNewConflictGroupName(e.target.value)}
                   placeholder="Ví dụ: Nhóm Mâu Thuẫn 1, Nhóm Xung Đột A..."
-                  className="w-full bg-[#0d1018] border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-rose-500 font-semibold"
+                  className="w-full bg-white dark:bg-[#0d1018] border border-slate-200 dark:border-white/10 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-rose-500 font-semibold"
                 />
               </div>
             </div>
 
-            <div className="flex justify-end gap-2 pt-2 border-t border-white/5">
+            <div className="flex justify-end gap-2 pt-2 border-t border-slate-200 dark:border-white/5">
               <button
                 type="button"
                 onClick={() => setCreatingConflictGroup(false)}
-                className="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 text-xs font-bold transition cursor-pointer"
+                className="px-3 py-1.5 rounded-lg bg-slate-200 dark:bg-white/5 hover:bg-slate-300 dark:hover:bg-white/10 text-slate-700 dark:text-slate-400 text-xs font-bold transition cursor-pointer"
               >
                 Hủy
               </button>
               <button
                 type="submit"
-                className="px-4 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-500 text-white text-xs font-extrabold transition border border-white/10 cursor-pointer"
+                className="px-4 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-500 text-white text-xs font-extrabold transition border border-rose-700 cursor-pointer"
               >
                 Lưu Nhóm
               </button>
@@ -495,30 +495,30 @@ export default function RelationshipsTab({ classId, enrolledStudents, onRefreshC
         {/* Conflict Groups Cards */}
         {loading ? (
           <div className="py-6 text-center text-xs text-slate-400 flex items-center justify-center gap-2">
-            <RefreshCw size={16} className="animate-spin text-rose-400" />
+            <RefreshCw size={16} className="animate-spin text-rose-500" />
             <span>Đang tải danh sách...</span>
           </div>
         ) : conflictGroups.length === 0 ? (
-          <div className="p-5 text-center text-xs text-slate-500 font-medium bg-[#121624] rounded-xl border border-white/5">
+          <div className="p-5 text-center text-xs text-slate-500 font-medium bg-slate-50 dark:bg-[#121624] rounded-xl border border-slate-200 dark:border-white/5">
             Chưa có nhóm xung đột nào. Bấm "Tạo Nhóm Xung Đột" để thêm nhóm.
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {conflictGroups.map(group => (
-              <div key={group.id} className="bg-[#121624] border border-rose-500/20 rounded-xl p-4 space-y-3 flex flex-col justify-between">
+              <div key={group.id} className="bg-slate-50 dark:bg-[#121624] border border-slate-200 dark:border-rose-500/20 rounded-xl p-4 space-y-3 flex flex-col justify-between shadow-sm dark:shadow-none">
                 <div>
-                  <div className="flex items-center justify-between gap-2 pb-2.5 border-b border-white/5">
+                  <div className="flex items-center justify-between gap-2 pb-2.5 border-b border-slate-200 dark:border-white/5">
                     <div className="flex items-center gap-2">
-                      <ShieldAlert size={16} className="text-rose-400" />
-                      <span className="text-sm font-black text-white">{group.group_name}</span>
-                      <span className="text-[10px] font-bold text-rose-300 bg-rose-500/15 px-2 py-0.5 rounded-full border border-rose-500/20">
+                      <ShieldAlert size={16} className="text-rose-500 dark:text-rose-400" />
+                      <span className="text-sm font-black text-slate-900 dark:text-white">{group.group_name}</span>
+                      <span className="text-[10px] font-bold text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-500/15 px-2 py-0.5 rounded-full border border-rose-200 dark:border-rose-500/20">
                         {group.members.length} học sinh
                       </span>
                     </div>
 
                     <button
                       onClick={() => handleDeleteConflictGroup(group)}
-                      className="p-1 rounded-lg hover:bg-rose-500/20 text-slate-400 hover:text-rose-300 transition cursor-pointer"
+                      className="p-1 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-500/20 text-slate-400 hover:text-rose-600 dark:hover:text-rose-300 transition cursor-pointer"
                       title="Xóa nhóm xung đột"
                     >
                       <Trash2 size={14} />
@@ -528,17 +528,17 @@ export default function RelationshipsTab({ classId, enrolledStudents, onRefreshC
                   {/* Members list */}
                   <div className="flex flex-wrap gap-1.5 mt-3">
                     {group.members.length === 0 ? (
-                      <span className="text-xs text-slate-500 italic">Chưa có thành viên</span>
+                      <span className="text-xs text-slate-400 italic">Chưa có thành viên</span>
                     ) : (
                       group.members.map(m => (
                         <span
                           key={m.student_id}
-                          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold bg-rose-500/10 border border-rose-500/25 text-rose-200"
+                          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/25 text-rose-800 dark:text-rose-200"
                         >
                           <span>{m.full_name}</span>
                           <button
                             onClick={() => handleRemoveConflictGroupMember(group.id, m.student_id)}
-                            className="hover:bg-rose-500/30 rounded p-0.5 text-slate-400 hover:text-rose-300 transition cursor-pointer"
+                            className="hover:bg-rose-100 dark:hover:bg-rose-500/30 rounded p-0.5 text-slate-400 hover:text-rose-600 dark:hover:text-rose-300 transition cursor-pointer"
                             title="Gỡ khỏi nhóm"
                           >
                             <X size={12} />
@@ -550,10 +550,10 @@ export default function RelationshipsTab({ classId, enrolledStudents, onRefreshC
                 </div>
 
                 {/* Add member button launching multi-select modal */}
-                <div className="pt-2 border-t border-white/5">
+                <div className="pt-2 border-t border-slate-200 dark:border-white/5">
                   <button
                     onClick={() => handleOpenAddMemberModal(group, 'conflict')}
-                    className="text-xs font-bold text-rose-400 hover:text-rose-300 flex items-center gap-1 cursor-pointer"
+                    className="text-xs font-bold text-rose-600 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-300 flex items-center gap-1 cursor-pointer"
                   >
                     <UserPlus size={13} />
                     <span>+ Thêm học sinh vào nhóm xung đột (Chọn nhiều)</span>
@@ -566,21 +566,21 @@ export default function RelationshipsTab({ classId, enrolledStudents, onRefreshC
       </div>
 
       {/* SECTION 3: TRUSTED SWAP INDIVIDUALS */}
-      <div className="bg-[#0d1018] border border-white/10 p-5 rounded-2xl space-y-4">
+      <div className="bg-white dark:bg-[#0d1018] border border-slate-200 dark:border-white/10 p-5 rounded-2xl space-y-4 shadow-sm dark:shadow-none transition-colors">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
-            <h3 className="text-base font-black text-white flex items-center gap-2">
-              <ShieldCheck className="h-5 w-5 text-amber-400" />
+            <h3 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
+              <ShieldCheck className="h-5 w-5 text-amber-500 dark:text-amber-400" />
               <span>Học Sinh Tin Cậy Đổi Bài Cùng Giới (Trusted Swap Individuals)</span>
             </h3>
-            <p className="text-xs text-slate-400 font-medium mt-1">
+            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-1">
               Theo mặc định, thuật toán đổi bài không cho phép học sinh cùng giới tính đổi bài cho nhau. Học sinh nằm trong danh sách tin cậy này được cấp quyền đặc biệt để **đổi bài kiểm tra với bạn cùng giới** (tuy nhiên **tuyệt đối không được đổi bài với bạn thân trong cùng Nhóm Bạn**).
             </p>
           </div>
 
           <button
             onClick={handleOpenAddTrustedModal}
-            className="group flex items-center gap-0 hover:gap-1.5 bg-amber-600 hover:bg-amber-500 text-white px-3 py-2 rounded-xl text-xs font-extrabold transition-all duration-300 cursor-pointer border border-white/10 shadow-lg"
+            className="group flex items-center gap-0 hover:gap-1.5 bg-amber-600 hover:bg-amber-500 text-white px-3 py-2 rounded-xl text-xs font-extrabold transition-all duration-300 cursor-pointer border border-amber-700 shadow-lg"
             title="Thêm Học Sinh Tin Cậy"
           >
             <UserCheck size={14} className="shrink-0" />
@@ -593,7 +593,7 @@ export default function RelationshipsTab({ classId, enrolledStudents, onRefreshC
         {/* Trusted Swap List */}
         <div className="space-y-2 pt-2">
           {trustedSwaps.length === 0 ? (
-            <div className="p-5 rounded-xl bg-[#121624] border border-white/5 text-center text-xs text-slate-500 font-medium">
+            <div className="p-5 rounded-xl bg-slate-50 dark:bg-[#121624] border border-slate-200 dark:border-white/5 text-center text-xs text-slate-500 font-medium">
               Chưa có học sinh nào được thêm vào danh sách tin cậy đổi bài cùng giới. Bấm nút phía trên để chọn nhiều học sinh.
             </div>
           ) : (
@@ -601,17 +601,17 @@ export default function RelationshipsTab({ classId, enrolledStudents, onRefreshC
               {trustedSwaps.map(ts => (
                 <div
                   key={ts.id}
-                  className="px-3 py-2 rounded-xl bg-amber-500/10 border border-amber-500/25 flex items-center gap-2 text-xs font-extrabold text-amber-200"
+                  className="px-3 py-2 rounded-xl bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/25 flex items-center gap-2 text-xs font-extrabold text-amber-900 dark:text-amber-200"
                 >
-                  <ShieldCheck size={15} className="text-amber-400" />
+                  <ShieldCheck size={15} className="text-amber-500 dark:text-amber-400" />
                   <span>{ts.student_name}</span>
-                  <span className="text-[10px] text-amber-400/80 bg-amber-500/20 px-1.5 py-0.5 rounded font-mono">
+                  <span className="text-[10px] text-amber-700 dark:text-amber-400/80 bg-amber-100 dark:bg-amber-500/20 px-1.5 py-0.5 rounded font-mono">
                     {ts.gender || 'Nam'}
                   </span>
 
                   <button
                     onClick={() => handleDeleteTrustedSwapStudent(ts.student_id)}
-                    className="p-1 rounded-lg hover:bg-rose-500/30 text-amber-300 hover:text-rose-300 transition ml-1 cursor-pointer"
+                    className="p-1 rounded-lg hover:bg-rose-100 dark:hover:bg-rose-500/30 text-slate-400 hover:text-rose-600 dark:hover:text-rose-300 transition ml-1 cursor-pointer"
                     title="Gỡ khỏi danh sách tin cậy"
                   >
                     <Trash2 size={13} />
@@ -626,21 +626,21 @@ export default function RelationshipsTab({ classId, enrolledStudents, onRefreshC
       {/* MULTI-SELECT ADD MEMBER MODAL (PAGINATED 10/PAGE & HIGH PERFORMANCE) */}
       {addMemberModalGroup && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 animate-mac-dropdown">
-          <div className="bg-[#0f1320] border border-white/10 rounded-2xl w-full max-w-lg overflow-hidden shadow-[0_24px_80px_rgba(0,0,0,0.8)] flex flex-col max-h-[85vh]">
-            <div className="flex items-center justify-between p-5 border-b border-white/10 bg-[#14192b]">
-              <h3 className="text-base font-black text-white flex items-center gap-2">
+          <div className="bg-white dark:bg-[#0f1320] border border-slate-200 dark:border-white/10 rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl flex flex-col max-h-[85vh]">
+            <div className="flex items-center justify-between p-5 border-b border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#14192b]">
+              <h3 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
                 {addMemberModalGroup.type === 'friend' ? (
-                  <Users className="h-5 w-5 text-indigo-400" />
+                  <Users className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
                 ) : addMemberModalGroup.type === 'conflict' ? (
-                  <ShieldAlert className="h-5 w-5 text-rose-400" />
+                  <ShieldAlert className="h-5 w-5 text-rose-500 dark:text-rose-400" />
                 ) : (
-                  <ShieldCheck className="h-5 w-5 text-amber-400" />
+                  <ShieldCheck className="h-5 w-5 text-amber-500 dark:text-amber-400" />
                 )}
                 <span>{addMemberModalGroup.type === 'trusted' ? addMemberModalGroup.name : `Thêm Thành Viên Vào ${addMemberModalGroup.name}`}</span>
               </h3>
               <button
                 onClick={() => setAddMemberModalGroup(null)}
-                className="p-1.5 rounded-xl hover:bg-white/10 text-slate-400 hover:text-white transition cursor-pointer"
+                className="p-1.5 rounded-xl hover:bg-slate-200 dark:hover:bg-white/10 text-slate-400 hover:text-slate-800 dark:hover:text-white transition cursor-pointer"
               >
                 <X size={16} />
               </button>
@@ -658,7 +658,7 @@ export default function RelationshipsTab({ classId, enrolledStudents, onRefreshC
                     setCurrentPage(1);
                   }}
                   placeholder="Tìm theo tên học sinh..."
-                  className="w-full bg-[#141928] border border-white/10 text-white text-xs rounded-xl pl-9 pr-3 py-2 focus:outline-none focus:border-indigo-500 font-semibold"
+                  className="w-full bg-slate-50 dark:bg-[#141928] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white text-xs rounded-xl pl-9 pr-3 py-2 focus:outline-none focus:border-indigo-500 font-semibold"
                 />
               </div>
 
@@ -667,21 +667,21 @@ export default function RelationshipsTab({ classId, enrolledStudents, onRefreshC
                 <button
                   type="button"
                   onClick={toggleSelectAllPage}
-                  className="flex items-center gap-1.5 text-xs font-bold text-indigo-400 hover:text-indigo-300 transition cursor-pointer"
+                  className="flex items-center gap-1.5 text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition cursor-pointer"
                 >
                   {isPageAllSelected ? <CheckSquare size={16} /> : <Square size={16} />}
                   <span>{isPageAllSelected ? 'Bỏ chọn trang này' : 'Chọn tất cả trang này'}</span>
                 </button>
 
-                <span className="text-xs font-extrabold text-slate-300 bg-white/5 px-2.5 py-1 rounded-lg border border-white/5">
-                  Đã chọn: <span className="text-indigo-400 font-black">{selectedStudentIds.length}</span> học sinh
+                <span className="text-xs font-extrabold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-white/5 px-2.5 py-1 rounded-lg border border-slate-200 dark:border-white/5">
+                  Đã chọn: <span className="text-indigo-600 dark:text-indigo-400 font-black">{selectedStudentIds.length}</span> học sinh
                 </span>
               </div>
 
               {/* STUDENT LIST (10 ITEMS PER PAGE - ZERO LAG) */}
               <div className="flex-1 overflow-y-auto space-y-1.5 pr-1 min-h-[260px] max-h-[380px]">
                 {pagedCandidates.length === 0 ? (
-                  <div className="py-12 text-center text-xs text-slate-500 font-bold bg-[#121624] rounded-xl border border-white/5">
+                  <div className="py-12 text-center text-xs text-slate-400 dark:text-slate-500 font-bold bg-slate-50 dark:bg-[#121624] rounded-xl border border-slate-200 dark:border-white/5">
                     Không tìm thấy học sinh phù hợp chưa thuộc danh sách này.
                   </div>
                 ) : (
@@ -692,18 +692,18 @@ export default function RelationshipsTab({ classId, enrolledStudents, onRefreshC
                         key={s.id}
                         onClick={() => toggleStudentSelection(s.id)}
                         className={`p-3 rounded-xl border flex items-center justify-between text-xs cursor-pointer transition ${isChecked
-                            ? 'bg-indigo-500/15 border-indigo-500/40 text-white shadow-sm'
-                            : 'bg-[#121624] border-white/5 text-slate-300 hover:bg-white/[0.04]'
+                            ? 'bg-indigo-50 dark:bg-indigo-500/15 border-indigo-300 dark:border-indigo-500/40 text-indigo-900 dark:text-white shadow-sm'
+                            : 'bg-slate-50 dark:bg-[#121624] border-slate-200 dark:border-white/5 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/[0.04]'
                           }`}
                       >
                         <div className="flex items-center gap-3">
-                          <div className={`w-5 h-5 rounded-md border flex items-center justify-center transition ${isChecked ? 'bg-indigo-600 border-indigo-400 text-white' : 'border-white/20 bg-white/5'
+                          <div className={`w-5 h-5 rounded-md border flex items-center justify-center transition ${isChecked ? 'bg-indigo-600 border-indigo-400 text-white' : 'border-slate-300 dark:border-white/20 bg-white dark:bg-white/5'
                             }`}>
                             {isChecked && <span className="text-xs font-black">✓</span>}
                           </div>
                           <div>
-                            <span className="font-extrabold text-sm text-white block">{s.full_name}</span>
-                            <span className="text-[11px] text-slate-400 font-medium">
+                            <span className="font-extrabold text-sm text-slate-900 dark:text-white block">{s.full_name}</span>
+                            <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
                               {s.grade || 'Lớp 6'} | {s.gender || 'Nam'}
                             </span>
                           </div>
@@ -716,26 +716,26 @@ export default function RelationshipsTab({ classId, enrolledStudents, onRefreshC
 
               {/* PAGINATION BAR (10 PER PAGE) */}
               {totalPages > 1 && (
-                <div className="flex items-center justify-between border-t border-white/10 pt-3 text-xs font-bold text-slate-300">
+                <div className="flex items-center justify-between border-t border-slate-200 dark:border-white/10 pt-3 text-xs font-bold text-slate-600 dark:text-slate-300">
                   <button
                     type="button"
                     disabled={currentPage === 1}
                     onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 disabled:opacity-40 transition cursor-pointer"
+                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 disabled:opacity-40 transition cursor-pointer"
                   >
                     <ChevronLeft size={14} />
                     <span>Trang trước</span>
                   </button>
 
-                  <span className="text-slate-400 font-extrabold">
-                    Trang <span className="text-white">{currentPage}</span> / {totalPages} (Tổng {candidateStudents.length} học sinh)
+                  <span className="text-slate-500 dark:text-slate-400 font-extrabold">
+                    Trang <span className="text-slate-900 dark:text-white">{currentPage}</span> / {totalPages} (Tổng {candidateStudents.length} học sinh)
                   </span>
 
                   <button
                     type="button"
                     disabled={currentPage === totalPages}
                     onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 disabled:opacity-40 transition cursor-pointer"
+                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 disabled:opacity-40 transition cursor-pointer"
                   >
                     <span>Trang sau</span>
                     <ChevronRight size={14} />
@@ -744,18 +744,18 @@ export default function RelationshipsTab({ classId, enrolledStudents, onRefreshC
               )}
 
               {/* ACTION FOOTER */}
-              <div className="flex items-center justify-end gap-3 pt-3 border-t border-white/10">
+              <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-200 dark:border-white/10">
                 <button
                   type="button"
                   onClick={() => setAddMemberModalGroup(null)}
-                  className="px-4 py-2 rounded-xl bg-white/5 text-slate-300 text-xs font-bold hover:bg-white/10 transition cursor-pointer"
+                  className="px-4 py-2 rounded-xl bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-300 text-xs font-bold hover:bg-slate-200 dark:hover:bg-white/10 transition cursor-pointer"
                 >
                   Hủy
                 </button>
                 <button
                   type="submit"
                   disabled={selectedStudentIds.length === 0 || submittingBatch}
-                  className="px-5 py-2 rounded-xl bg-[#5c36f5] hover:bg-[#7351f7] disabled:opacity-50 text-white text-xs font-extrabold border border-white/20 shadow-md transition cursor-pointer"
+                  className="px-5 py-2 rounded-xl bg-[#5c36f5] hover:bg-[#7351f7] disabled:opacity-50 text-white text-xs font-extrabold shadow-md transition cursor-pointer"
                 >
                   {submittingBatch ? 'Đang thêm...' : `Thêm (${selectedStudentIds.length}) học sinh vào danh sách`}
                 </button>

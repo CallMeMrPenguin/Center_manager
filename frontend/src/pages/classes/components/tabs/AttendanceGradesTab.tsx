@@ -45,7 +45,7 @@ export const AttendanceGradesTab: React.FC<AttendanceGradesTabProps> = ({
         header: 'Họ và Tên Học Sinh',
         meta: { headerText: 'Họ và Tên Học Sinh', exportValue: (r: any) => r.student_name },
         cell: ({ row }) => (
-          <span className="font-extrabold text-white text-base block truncate">
+          <span className="font-extrabold text-slate-900 dark:text-white text-base block truncate">
             {row.original.student_name}
           </span>
         ),

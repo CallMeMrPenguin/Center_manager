@@ -142,10 +142,10 @@ export const StudentProfileHeader: React.FC<StudentProfileHeaderProps> = ({
   const rankDisplay = stats?.rank && stats.rank !== '-' ? String(stats.rank) : '';
 
   return (
-    <div className="select-none relative bg-[#0e1222] border border-[#1e2744] p-5 sm:p-6 rounded-2xl shadow-xl space-y-5">
+    <div className="select-none relative bg-white dark:bg-[#0e1222] border border-slate-200 dark:border-[#1e2744] p-5 sm:p-6 rounded-2xl shadow-sm dark:shadow-xl space-y-5">
       {/* 1. TOP FILTER BAR (Admin / Teacher Only) */}
       {!isStudentMode && (
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-4">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 dark:border-white/10 pb-4">
           <div className="flex flex-wrap items-center gap-3 flex-1 min-w-[280px]">
             <div className="w-56 max-w-full">
               <CustomSelect
@@ -175,7 +175,7 @@ export const StudentProfileHeader: React.FC<StudentProfileHeaderProps> = ({
             type="button"
             onClick={onRefresh}
             disabled={loading}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#151a2e] hover:bg-[#1e2642] text-slate-300 hover:text-white text-xs font-bold border border-white/10 transition-all cursor-pointer active:scale-95 disabled:opacity-50"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-[#151a2e] dark:hover:bg-[#1e2642] text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white text-xs font-bold border border-slate-200 dark:border-white/10 transition-all cursor-pointer active:scale-95 disabled:opacity-50"
             title="Tải lại dữ liệu"
           >
             <RefreshCw size={13} className={loading ? 'animate-spin text-indigo-400' : 'text-slate-400'} />
@@ -197,26 +197,26 @@ export const StudentProfileHeader: React.FC<StudentProfileHeaderProps> = ({
 
               <div className="min-w-0 space-y-1">
                 <div className="flex flex-wrap items-center gap-3">
-                  <span className="font-mono text-xs font-bold text-indigo-400">
+                  <span className="font-mono text-xs font-bold text-indigo-600 dark:text-indigo-400">
                     ID: HS-{studentIdStr}
                   </span>
-                  <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-400">
-                    <span className="w-2 h-2 rounded-full bg-emerald-400" />
+                  <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500" />
                     {summary.status || 'Đang theo học'}
                   </span>
                 </div>
 
                 <div className="flex flex-wrap items-baseline gap-2.5">
-                  <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+                  <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
                     {summary.full_name}
                   </h2>
                   {summary.nickname && (
-                    <span className="text-lg font-bold text-indigo-300">
+                    <span className="text-lg font-bold text-indigo-600 dark:text-indigo-300">
                       ({summary.nickname})
                     </span>
                   )}
                   {rankDisplay && (
-                    <span className="text-2xl sm:text-3xl font-black text-amber-400 font-mono tracking-tight ml-1">
+                    <span className="text-2xl sm:text-3xl font-black text-amber-500 dark:text-amber-400 font-mono tracking-tight ml-1">
                       {rankDisplay}
                     </span>
                   )}
@@ -243,58 +243,58 @@ export const StudentProfileHeader: React.FC<StudentProfileHeaderProps> = ({
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 pt-2">
             {/* LEFT COLUMN: Thông Tin Học Sinh */}
             <div className="space-y-0.5">
-              <div className="flex items-center justify-between pb-2 border-b border-white/10">
-                <span className="text-xs font-black uppercase tracking-wider text-slate-400">
+              <div className="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-white/10">
+                <span className="text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">
                   Thông Tin Học Sinh
                 </span>
                 <span className="text-xs text-slate-500 font-medium">Hồ sơ cá nhân</span>
               </div>
 
-              <div className="flex items-center justify-between py-2.5 border-b border-white/10 text-sm">
-                <span className="text-slate-400 font-medium">Khối / Lớp:</span>
-                <span className="font-bold text-white text-right truncate max-w-[200px] sm:max-w-none">
+              <div className="flex items-center justify-between py-2.5 border-b border-slate-200 dark:border-white/10 text-sm">
+                <span className="text-slate-500 dark:text-slate-400 font-medium">Khối / Lớp:</span>
+                <span className="font-bold text-slate-900 dark:text-white text-right truncate max-w-[200px] sm:max-w-none">
                   {gradeDisplay}
                 </span>
               </div>
 
-              <div className="flex items-center justify-between py-2.5 border-b border-white/10 text-sm">
-                <span className="text-slate-400 font-medium">Trường học:</span>
-                <span className="font-bold text-white text-right truncate max-w-[200px] sm:max-w-none">
+              <div className="flex items-center justify-between py-2.5 border-b border-slate-200 dark:border-white/10 text-sm">
+                <span className="text-slate-500 dark:text-slate-400 font-medium">Trường học:</span>
+                <span className="font-bold text-slate-900 dark:text-white text-right truncate max-w-[200px] sm:max-w-none">
                   {summary.school || 'Trung tâm'}
                 </span>
               </div>
 
-              <div className="flex items-center justify-between py-2.5 border-b border-white/10 text-sm">
-                <span className="text-slate-400 font-medium">Ngày sinh:</span>
-                <span className="font-semibold text-slate-200">
+              <div className="flex items-center justify-between py-2.5 border-b border-slate-200 dark:border-white/10 text-sm">
+                <span className="text-slate-500 dark:text-slate-400 font-medium">Ngày sinh:</span>
+                <span className="font-semibold text-slate-800 dark:text-slate-200">
                   {summary.date_of_birth || 'Chưa cập nhật'}
                 </span>
               </div>
 
-              <div className="flex items-center justify-between py-2.5 border-b border-white/10 text-sm">
-                <span className="text-slate-400 font-medium">Giới tính:</span>
-                <span className="font-semibold text-slate-200">
+              <div className="flex items-center justify-between py-2.5 border-b border-slate-200 dark:border-white/10 text-sm">
+                <span className="text-slate-500 dark:text-slate-400 font-medium">Giới tính:</span>
+                <span className="font-semibold text-slate-800 dark:text-slate-200">
                   {summary.gender || 'Chưa cập nhật'}
                 </span>
               </div>
 
-              <div className="flex items-center justify-between py-2.5 border-b border-white/10 text-sm">
-                <span className="text-slate-400 font-medium">Phụ huynh:</span>
-                <span className="font-semibold text-slate-200 text-right truncate max-w-[200px] sm:max-w-none">
+              <div className="flex items-center justify-between py-2.5 border-b border-slate-200 dark:border-white/10 text-sm">
+                <span className="text-slate-500 dark:text-slate-400 font-medium">Phụ huynh:</span>
+                <span className="font-semibold text-slate-800 dark:text-slate-200 text-right truncate max-w-[200px] sm:max-w-none">
                   {summary.father_name || summary.mother_name || 'Chưa cập nhật'}
                 </span>
               </div>
 
-              <div className="flex items-center justify-between py-2.5 border-b border-white/10 text-sm">
-                <span className="text-slate-400 font-medium">Điện thoại:</span>
-                <span className="font-semibold text-slate-200 font-mono">
+              <div className="flex items-center justify-between py-2.5 border-b border-slate-200 dark:border-white/10 text-sm">
+                <span className="text-slate-500 dark:text-slate-400 font-medium">Điện thoại:</span>
+                <span className="font-semibold text-slate-800 dark:text-slate-200 font-mono">
                   {summary.father_phone || summary.mother_phone || 'Chưa cập nhật'}
                 </span>
               </div>
 
-              <div className="flex items-center justify-between py-2.5 border-b border-white/10 text-sm">
-                <span className="text-slate-400 font-medium">Địa chỉ:</span>
-                <span className="font-semibold text-slate-200 text-right truncate max-w-[220px]">
+              <div className="flex items-center justify-between py-2.5 border-b border-slate-200 dark:border-white/10 text-sm">
+                <span className="text-slate-500 dark:text-slate-400 font-medium">Địa chỉ:</span>
+                <span className="font-semibold text-slate-800 dark:text-slate-200 text-right truncate max-w-[220px]">
                   {summary.address || 'Chưa cập nhật'}
                 </span>
               </div>
@@ -302,74 +302,74 @@ export const StudentProfileHeader: React.FC<StudentProfileHeaderProps> = ({
 
             {/* RIGHT COLUMN: Kết Quả Học Tập & Đánh Giá */}
             <div className="space-y-0.5">
-              <div className="flex items-center justify-between pb-2 border-b border-white/10">
-                <span className="text-xs font-black uppercase tracking-wider text-slate-400">
+              <div className="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-white/10">
+                <span className="text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">
                   Kết Quả Học Tập & Đánh Giá
                 </span>
                 <span className="text-xs text-slate-500 font-medium">Thống kê chi tiết</span>
               </div>
 
               {/* Điểm Tổng Kết */}
-              <div className="flex items-center justify-between py-2.5 border-b border-white/10 text-sm">
-                <span className="text-slate-300 font-bold">Điểm Tổng Kết</span>
-                <span className="text-xl sm:text-2xl font-black text-emerald-400 font-mono">
+              <div className="flex items-center justify-between py-2.5 border-b border-slate-200 dark:border-white/10 text-sm">
+                <span className="text-slate-700 dark:text-slate-300 font-bold">Điểm Tổng Kết</span>
+                <span className="text-xl sm:text-2xl font-black text-emerald-500 dark:text-emerald-400 font-mono">
                   {overallDisplay}
                 </span>
               </div>
 
               {/* Chỉ Số PI */}
-              <div className="flex items-center justify-between py-2.5 border-b border-white/10 text-sm">
-                <span className="text-slate-300 font-bold">Chỉ Số PI (Hiệu Suất)</span>
+              <div className="flex items-center justify-between py-2.5 border-b border-slate-200 dark:border-white/10 text-sm">
+                <span className="text-slate-700 dark:text-slate-300 font-bold">Chỉ Số PI (Hiệu Suất)</span>
                 <div className="flex items-baseline gap-1">
-                  <span className="text-lg sm:text-xl font-black text-cyan-400 font-mono">
+                  <span className="text-lg sm:text-xl font-black text-cyan-600 dark:text-cyan-400 font-mono">
                     {piScore}
                   </span>
-                  <span className="text-xs text-slate-400 font-bold">/ 100</span>
+                  <span className="text-xs text-slate-500 dark:text-slate-400 font-bold">/ 100</span>
                 </div>
               </div>
 
               {/* Đánh Giá Năng Lực */}
-              <div className="flex items-center justify-between py-2.5 border-b border-white/10 text-sm">
-                <span className="text-slate-300 font-bold">Đánh Giá Năng Lực</span>
+              <div className="flex items-center justify-between py-2.5 border-b border-slate-200 dark:border-white/10 text-sm">
+                <span className="text-slate-700 dark:text-slate-300 font-bold">Đánh Giá Năng Lực</span>
                 <span className={`text-sm font-black ${evaluation.color}`}>
                   {evaluation.text}
                 </span>
               </div>
 
               {/* Từ Vựng */}
-              <div className="flex items-center justify-between py-2.5 border-b border-white/10 text-sm">
-                <span className="text-slate-400 font-medium">Từ Vựng</span>
-                <span className="text-base sm:text-lg font-black text-blue-400 font-mono">
+              <div className="flex items-center justify-between py-2.5 border-b border-slate-200 dark:border-white/10 text-sm">
+                <span className="text-slate-500 dark:text-slate-400 font-medium">Từ Vựng</span>
+                <span className="text-base sm:text-lg font-black text-blue-500 dark:text-blue-400 font-mono">
                   {c1Display}
                 </span>
               </div>
 
               {/* Ngữ Pháp */}
-              <div className="flex items-center justify-between py-2.5 border-b border-white/10 text-sm">
-                <span className="text-slate-400 font-medium">Ngữ Pháp</span>
-                <span className="text-base sm:text-lg font-black text-purple-400 font-mono">
+              <div className="flex items-center justify-between py-2.5 border-b border-slate-200 dark:border-white/10 text-sm">
+                <span className="text-slate-500 dark:text-slate-400 font-medium">Ngữ Pháp</span>
+                <span className="text-base sm:text-lg font-black text-purple-500 dark:text-purple-400 font-mono">
                   {c2Display}
                 </span>
               </div>
 
               {/* BTVN */}
-              <div className="flex items-center justify-between py-2.5 border-b border-white/10 text-sm">
-                <span className="text-slate-400 font-medium">BTVN</span>
-                <span className="text-base sm:text-lg font-black text-amber-400 font-mono">
+              <div className="flex items-center justify-between py-2.5 border-b border-slate-200 dark:border-white/10 text-sm">
+                <span className="text-slate-500 dark:text-slate-400 font-medium">BTVN</span>
+                <span className="text-base sm:text-lg font-black text-amber-500 dark:text-amber-400 font-mono">
                   {hwDisplay}
                 </span>
               </div>
 
               {/* Chuyên Cần */}
-              <div className="flex items-center justify-between py-2.5 border-b border-white/10 text-sm">
-                <span className="text-slate-400 font-medium">Chuyên Cần</span>
+              <div className="flex items-center justify-between py-2.5 border-b border-slate-200 dark:border-white/10 text-sm">
+                <span className="text-slate-500 dark:text-slate-400 font-medium">Chuyên Cần</span>
                 <div className="flex items-baseline gap-2">
                   {sessionCountDisplay > 0 && (
-                    <span className="text-xs text-slate-400">
+                    <span className="text-xs text-slate-500 dark:text-slate-400">
                       ({sessionCountDisplay} buổi)
                     </span>
                   )}
-                  <span className="text-base sm:text-lg font-black text-sky-400 font-mono">
+                  <span className="text-base sm:text-lg font-black text-sky-500 dark:text-sky-400 font-mono">
                     {attendanceDisplay}%
                   </span>
                 </div>

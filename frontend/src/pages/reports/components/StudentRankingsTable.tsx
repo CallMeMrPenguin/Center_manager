@@ -55,7 +55,7 @@ export const StudentRankingsTable: React.FC<StudentRankingsTableProps> = React.m
       id: 'stt',
       header: () => <div className="text-center w-full">STT</div>,
       meta: { headerText: 'STT', exportValue: (_: any, idx: number) => idx + 1 },
-      cell: ({ row }) => <div className="text-center font-bold text-slate-300 text-sm sm:text-base">{row.index + 1}</div>,
+      cell: ({ row }) => <div className="text-center font-bold text-slate-500 dark:text-slate-300 text-sm sm:text-base">{row.index + 1}</div>,
       enableSorting: false,
       enableGlobalFilter: false,
     },
@@ -67,9 +67,9 @@ export const StudentRankingsTable: React.FC<StudentRankingsTableProps> = React.m
         const r = row.original;
         const isSelected = String(r.student_id) === selectedStudentId;
         return (
-          <div className="font-extrabold text-white text-base sm:text-lg flex items-center justify-between gap-2">
+          <div className="font-extrabold text-slate-900 dark:text-white text-base sm:text-lg flex items-center justify-between gap-2">
             <span>{r.full_name}{r.nickname ? ` - ${r.nickname}` : ''}</span>
-            {isSelected && <span className="text-xs text-indigo-400 bg-indigo-500/20 px-2 py-0.5 rounded font-mono">Đang chọn</span>}
+            {isSelected && <span className="text-xs text-indigo-600 dark:text-indigo-400 bg-indigo-500/15 px-2 py-0.5 rounded font-mono">Đang chọn</span>}
           </div>
         );
       },
@@ -79,7 +79,7 @@ export const StudentRankingsTable: React.FC<StudentRankingsTableProps> = React.m
       header: 'Lớp Học',
       meta: { headerText: 'Lớp Học', exportValue: (r: any) => r.class_name || 'Lớp học' },
       cell: (info) => (
-        <span className="font-bold text-slate-300 text-sm sm:text-base">
+        <span className="font-bold text-slate-700 dark:text-slate-300 text-sm sm:text-base">
           {info.getValue<string>() || 'Lớp học'}
         </span>
       ),

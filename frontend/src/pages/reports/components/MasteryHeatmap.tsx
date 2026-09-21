@@ -58,32 +58,32 @@ export const MasteryHeatmap: React.FC<MasteryHeatmapProps> = ({
   const getBadgeStyle = (ema?: number) => {
     if (ema === undefined || ema === null) {
       return {
-        badgeClass: 'text-slate-600 font-normal',
+        badgeClass: 'text-slate-400 dark:text-slate-600 font-normal',
         label: '-',
       };
     }
     const score = Number(ema);
     if (score >= 8.0) {
       return {
-        badgeClass: 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 hover:bg-emerald-500/35 hover:scale-105 shadow-[0_0_8px_rgba(16,185,129,0.15)] font-black',
+        badgeClass: 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 hover:bg-emerald-500/25 hover:scale-105 font-black',
         label: trunc1Dec(score),
       };
     }
     if (score >= 6.5) {
       return {
-        badgeClass: 'bg-amber-500/20 text-amber-300 border border-amber-500/40 hover:bg-amber-500/35 hover:scale-105 shadow-[0_0_8px_rgba(245,158,11,0.15)] font-bold',
+        badgeClass: 'bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30 hover:bg-amber-500/25 hover:scale-105 font-bold',
         label: trunc1Dec(score),
       };
     }
     if (score >= 5.0) {
       return {
-        badgeClass: 'bg-orange-500/20 text-orange-300 border border-orange-500/40 hover:bg-orange-500/35 hover:scale-105 shadow-[0_0_8px_rgba(249,115,22,0.15)] font-bold',
+        badgeClass: 'bg-orange-500/15 text-orange-700 dark:text-orange-300 border border-orange-500/30 hover:bg-orange-500/25 hover:scale-105 font-bold',
         label: trunc1Dec(score),
       };
     }
     // Score < 5.0: Rose/Red
     return {
-      badgeClass: 'bg-rose-500/25 text-rose-300 border border-rose-500/50 hover:bg-rose-500/40 hover:scale-105 shadow-[0_0_8px_rgba(244,63,94,0.2)] font-black',
+      badgeClass: 'bg-rose-500/15 text-rose-700 dark:text-rose-300 border border-rose-500/30 hover:bg-rose-500/25 hover:scale-105 font-black',
       label: trunc1Dec(score),
     };
   };
@@ -107,7 +107,7 @@ export const MasteryHeatmap: React.FC<MasteryHeatmapProps> = ({
       {
         id: 'stt',
         header: () => <div className="text-center w-full">STT</div>,
-        cell: ({ row }) => <div className="text-center font-bold text-slate-400">{row.index + 1}</div>,
+        cell: ({ row }) => <div className="text-center font-bold text-slate-500 dark:text-slate-400">{row.index + 1}</div>,
         enableSorting: false,
         enableGlobalFilter: false,
         size: 55,
@@ -120,16 +120,16 @@ export const MasteryHeatmap: React.FC<MasteryHeatmapProps> = ({
         minSize: 160,
         cell: ({ row }) => (
           <div className="flex flex-col gap-1 py-1">
-            <span className="font-bold text-white group-hover:text-indigo-300 transition text-xs">
+            <span className="font-bold text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-300 transition text-xs">
               {row.original.student_name}
             </span>
             <div className="flex items-center gap-1.5 flex-wrap">
               {row.original.nickname && (
-                <span className="text-[10px] font-extrabold text-indigo-300 bg-indigo-500/15 px-1.5 py-0.2 rounded border border-indigo-500/20">
+                <span className="text-[10px] font-extrabold text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-500/15 px-1.5 py-0.2 rounded border border-indigo-200 dark:border-indigo-500/20">
                   {row.original.nickname}
                 </span>
               )}
-              <span className="text-[10px] text-slate-400 font-semibold bg-[#121626] px-1.5 py-0.2 rounded border border-white/5">
+              <span className="text-[10px] text-slate-600 dark:text-slate-400 font-semibold bg-slate-100 dark:bg-[#121626] px-1.5 py-0.2 rounded border border-slate-200 dark:border-white/5">
                 {row.original.class_name || 'Lớp học'}
               </span>
             </div>
@@ -144,20 +144,20 @@ export const MasteryHeatmap: React.FC<MasteryHeatmapProps> = ({
         id: `unit_${colKey}`,
         header: () => (
           <div className="text-center py-1 select-none">
-            <div className="text-xs font-black text-white truncate max-w-[130px]" title={u.unit_key}>
+            <div className="text-xs font-black text-slate-900 dark:text-white truncate max-w-[130px]" title={u.unit_key}>
               {u.unit_key}
             </div>
             <div className="flex items-center justify-center gap-1.5 mt-1">
               <span
                 className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-full ${
                   u.skill === 'vocab'
-                    ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30'
-                    : 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
+                    ? 'bg-blue-500/15 text-blue-700 dark:text-blue-300 border border-blue-500/30'
+                    : 'bg-purple-500/15 text-purple-700 dark:text-purple-300 border border-purple-500/30'
                 }`}
               >
                 {u.skill === 'vocab' ? 'Từ Vựng' : 'Ngữ Pháp'}
               </span>
-              <span className="text-[10px] text-slate-400 font-semibold font-mono">
+              <span className="text-[10px] text-slate-500 dark:text-slate-400 font-semibold font-mono">
                 TB {trunc1Dec(u.avg_score)}
               </span>
             </div>
@@ -262,24 +262,24 @@ export const MasteryHeatmap: React.FC<MasteryHeatmapProps> = ({
       />
 
       {/* 4-Color Scale Legend */}
-      <div className="flex flex-wrap items-center justify-between gap-4 pt-3 border-t border-white/5 text-[11px] text-slate-400">
+      <div className="flex flex-wrap items-center justify-between gap-4 pt-3 border-t border-slate-200 dark:border-white/5 text-[11px] text-slate-600 dark:text-slate-400">
         <div className="flex flex-wrap items-center gap-4">
-          <span className="font-bold text-slate-300">Thang Điểm 4 Mức:</span>
+          <span className="font-bold text-slate-800 dark:text-slate-300">Thang Điểm 4 Mức:</span>
           <div className="flex items-center gap-1.5">
             <span className="w-3 h-3 rounded bg-emerald-500/30 border border-emerald-500/60 block" />
-            <span className="text-emerald-300 font-bold">Xanh: Nắm Vững (&ge; 8.0)</span>
+            <span className="text-emerald-700 dark:text-emerald-300 font-bold">Xanh: Nắm Vững (&ge; 8.0)</span>
           </div>
           <div className="flex items-center gap-1.5">
             <span className="w-3 h-3 rounded bg-amber-500/30 border border-amber-500/60 block" />
-            <span className="text-amber-300 font-bold">Vàng: Đang Tiến Bộ (6.5 – 7.9)</span>
+            <span className="text-amber-700 dark:text-amber-300 font-bold">Vàng: Đang Tiến Bộ (6.5 – 7.9)</span>
           </div>
           <div className="flex items-center gap-1.5">
             <span className="w-3 h-3 rounded bg-orange-500/30 border border-orange-500/60 block" />
-            <span className="text-orange-300 font-bold">Cam: Cần Củng Cố (5.0 – 6.4)</span>
+            <span className="text-orange-700 dark:text-orange-300 font-bold">Cam: Cần Củng Cố (5.0 – 6.4)</span>
           </div>
           <div className="flex items-center gap-1.5">
             <span className="w-3 h-3 rounded bg-rose-500/30 border border-rose-500/60 block" />
-            <span className="text-rose-300 font-bold">Đỏ: Chưa Đạt (&lt; 5.0)</span>
+            <span className="text-rose-700 dark:text-rose-300 font-bold">Đỏ: Chưa Đạt (&lt; 5.0)</span>
           </div>
         </div>
 
@@ -297,58 +297,58 @@ export const MasteryHeatmap: React.FC<MasteryHeatmapProps> = ({
             top: hoveredCell.y,
             transform: hoveredCell.showBelow ? 'translate(-50%, 0)' : 'translate(-50%, -100%)',
           }}
-          className="z-50 pointer-events-none bg-[#0e1224] border-2 border-indigo-500/60 rounded-2xl p-4 shadow-[0_15px_35px_rgba(0,0,0,0.85)] text-xs text-white space-y-2.5 min-w-[240px] select-none"
+          className="z-50 pointer-events-none bg-white dark:bg-[#0e1224] border-2 border-indigo-400 dark:border-indigo-500/60 rounded-2xl p-4 shadow-xl dark:shadow-[0_15px_35px_rgba(0,0,0,0.85)] text-xs text-slate-900 dark:text-white space-y-2.5 min-w-[240px] select-none"
         >
           {/* Header */}
-          <div className="flex items-center justify-between border-b border-white/10 pb-2">
-            <span className="font-black text-white text-sm">{hoveredCell.studentName}</span>
+          <div className="flex items-center justify-between border-b border-slate-200 dark:border-white/10 pb-2">
+            <span className="font-black text-slate-900 dark:text-white text-sm">{hoveredCell.studentName}</span>
             <span className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full border ${
               hoveredCell.data.skill === 'vocab'
-                ? 'bg-blue-500/20 text-blue-300 border-blue-500/40'
-                : 'bg-purple-500/20 text-purple-300 border-purple-500/40'
+                ? 'bg-blue-500/15 text-blue-700 dark:text-blue-300 border-blue-500/40'
+                : 'bg-purple-500/15 text-purple-700 dark:text-purple-300 border-purple-500/40'
             }`}>
               {hoveredCell.data.skill === 'vocab' ? 'Từ Vựng' : 'Ngữ Pháp'}
             </span>
           </div>
 
           {/* Unit Title */}
-          <div className="text-xs font-bold text-indigo-300">
+          <div className="text-xs font-bold text-indigo-600 dark:text-indigo-300">
             {hoveredCell.unitKey}
           </div>
 
           {/* Stats */}
-          <div className="space-y-1.5 bg-[#080b16] p-2.5 rounded-xl border border-white/5 font-mono text-[11px]">
+          <div className="space-y-1.5 bg-slate-50 dark:bg-[#080b16] p-2.5 rounded-xl border border-slate-200 dark:border-white/5 font-mono text-[11px]">
             <div className="flex justify-between items-center">
-              <span className="text-slate-400">Điểm EMA Tích Lũy:</span>
+              <span className="text-slate-500 dark:text-slate-400">Điểm EMA Tích Lũy:</span>
               <span className={`font-black text-sm ${
-                hoveredCell.data.ema_score >= 8.0 ? 'text-emerald-400' :
-                hoveredCell.data.ema_score >= 6.5 ? 'text-amber-400' :
-                hoveredCell.data.ema_score >= 5.0 ? 'text-orange-400' : 'text-rose-400'
+                hoveredCell.data.ema_score >= 8.0 ? 'text-emerald-600 dark:text-emerald-400' :
+                hoveredCell.data.ema_score >= 6.5 ? 'text-amber-600 dark:text-amber-400' :
+                hoveredCell.data.ema_score >= 5.0 ? 'text-orange-600 dark:text-orange-400' : 'text-rose-600 dark:text-rose-400'
               }`}>
                 {trunc1Dec(hoveredCell.data.ema_score)} / 10
               </span>
             </div>
 
             {hoveredCell.data.last_score !== undefined && (
-              <div className="flex justify-between items-center text-slate-300">
-                <span className="text-slate-400">Điểm Test Gần Nhất:</span>
-                <span className="font-bold text-white">{trunc1Dec(hoveredCell.data.last_score)}đ</span>
+              <div className="flex justify-between items-center text-slate-700 dark:text-slate-300">
+                <span className="text-slate-500 dark:text-slate-400">Điểm Test Gần Nhất:</span>
+                <span className="font-bold text-slate-900 dark:text-white">{trunc1Dec(hoveredCell.data.last_score)}đ</span>
               </div>
             )}
 
-            <div className="flex justify-between items-center text-slate-300">
-              <span className="text-slate-400">Số Lần Đã Test:</span>
-              <span className="font-bold text-indigo-300">{hoveredCell.data.test_count} buổi</span>
+            <div className="flex justify-between items-center text-slate-700 dark:text-slate-300">
+              <span className="text-slate-500 dark:text-slate-400">Số Lần Đã Test:</span>
+              <span className="font-bold text-indigo-600 dark:text-indigo-300">{hoveredCell.data.test_count} buổi</span>
             </div>
           </div>
 
           {/* Status Badge */}
           <div className="flex items-center justify-between pt-1 text-[11px]">
-            <span className="text-slate-400 font-medium">Trạng thái:</span>
+            <span className="text-slate-500 dark:text-slate-400 font-medium">Trạng thái:</span>
             <span className={`font-black px-2 py-0.5 rounded-md ${
-              hoveredCell.data.ema_score >= 8.0 ? 'bg-emerald-500/20 text-emerald-300' :
-              hoveredCell.data.ema_score >= 6.5 ? 'bg-amber-500/20 text-amber-300' :
-              hoveredCell.data.ema_score >= 5.0 ? 'bg-orange-500/20 text-orange-300' : 'bg-rose-500/20 text-rose-300'
+              hoveredCell.data.ema_score >= 8.0 ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300' :
+              hoveredCell.data.ema_score >= 6.5 ? 'bg-amber-500/15 text-amber-700 dark:text-amber-300' :
+              hoveredCell.data.ema_score >= 5.0 ? 'bg-orange-500/15 text-orange-700 dark:text-orange-300' : 'bg-rose-500/15 text-rose-700 dark:text-rose-300'
             }`}>
               {hoveredCell.data.ema_score >= 8.0 ? 'Nắm Vững' :
                hoveredCell.data.ema_score >= 6.5 ? 'Đang Tiến Bộ' :

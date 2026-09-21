@@ -33,8 +33,8 @@ export const KPICards: React.FC<KPICardsProps> = React.memo(({ stats }) => {
             TỪ VỰNG TRUNG BÌNH
           </span>
           <div className="flex items-baseline gap-1.5">
-            <span className="text-3xl font-black text-white font-mono">{stats.c1}</span>
-            <span className="text-xs text-slate-400 font-bold font-mono">/ 10</span>
+            <span className="text-3xl font-black text-slate-900 dark:text-white font-mono">{stats.c1}</span>
+            <span className="text-xs text-slate-500 dark:text-slate-400 font-bold font-mono">/ 10</span>
           </div>
         </div>
         <div className="mt-2 text-[10px] font-bold text-blue-400">
@@ -49,8 +49,8 @@ export const KPICards: React.FC<KPICardsProps> = React.memo(({ stats }) => {
             NGỮ PHÁP TRUNG BÌNH
           </span>
           <div className="flex items-baseline gap-1.5">
-            <span className="text-3xl font-black text-white font-mono">{stats.c2}</span>
-            <span className="text-xs text-slate-400 font-bold font-mono">/ 10</span>
+            <span className="text-3xl font-black text-slate-900 dark:text-white font-mono">{stats.c2}</span>
+            <span className="text-xs text-slate-500 dark:text-slate-400 font-bold font-mono">/ 10</span>
           </div>
         </div>
         <div className="mt-2 text-[10px] font-bold text-purple-400">
@@ -61,15 +61,15 @@ export const KPICards: React.FC<KPICardsProps> = React.memo(({ stats }) => {
       {/* 3. BTVN TRUNG BÌNH */}
       <div className="kpi-card-green p-5 flex flex-col justify-between shadow-2xl transition-all duration-200 min-h-[105px] animate-cascade-3">
         <div>
-          <span className="text-[10px] font-black uppercase tracking-wider text-emerald-400 block mb-1">
+          <span className="text-[10px] font-black uppercase tracking-wider text-emerald-500 dark:text-emerald-400 block mb-1">
             BTVN TRUNG BÌNH
           </span>
           <div className="flex items-baseline gap-1.5">
-            <span className="text-3xl font-black text-white font-mono">{stats.hw}</span>
-            <span className="text-xs text-slate-400 font-bold font-mono">/ 10</span>
+            <span className="text-3xl font-black text-slate-900 dark:text-white font-mono">{stats.hw}</span>
+            <span className="text-xs text-slate-500 dark:text-slate-400 font-bold font-mono">/ 10</span>
           </div>
         </div>
-        <div className="mt-2 text-[10px] font-bold text-emerald-400">
+        <div className="mt-2 text-[10px] font-bold text-emerald-500 dark:text-emerald-400">
           <span>{stats.hwDiff} so với kỳ trước</span>
         </div>
       </div>
@@ -78,15 +78,15 @@ export const KPICards: React.FC<KPICardsProps> = React.memo(({ stats }) => {
       {hasMockTest && (
         <div className="kpi-card-blue p-5 flex flex-col justify-between shadow-2xl transition-all duration-200 min-h-[105px] animate-cascade-4" style={{ borderColor: 'rgba(245, 158, 11, 0.45)' }}>
           <div>
-            <span className="text-[10px] font-black uppercase tracking-wider text-amber-400 block mb-1">
+            <span className="text-[10px] font-black uppercase tracking-wider text-amber-500 dark:text-amber-400 block mb-1">
               LUYỆN ĐỀ
             </span>
             <div className="flex items-baseline gap-1.5">
-              <span className="text-3xl font-black text-white font-mono">{stats.mockTest}</span>
-              <span className="text-xs text-slate-400 font-bold font-mono">/ 10</span>
+              <span className="text-3xl font-black text-slate-900 dark:text-white font-mono">{stats.mockTest}</span>
+              <span className="text-xs text-slate-500 dark:text-slate-400 font-bold font-mono">/ 10</span>
             </div>
           </div>
-          <div className="mt-2 text-[10px] font-bold text-amber-400">
+          <div className="mt-2 text-[10px] font-bold text-amber-500 dark:text-amber-400">
             <span>{stats.mockTestDiff || '+0.0'} so với kỳ trước</span>
           </div>
         </div>
@@ -95,15 +95,15 @@ export const KPICards: React.FC<KPICardsProps> = React.memo(({ stats }) => {
       {/* 5. TỔNG ĐIỂM TRUNG BÌNH */}
       <div className={`kpi-card-amber p-5 flex flex-col justify-between shadow-2xl transition-all duration-200 min-h-[105px] ${hasMockTest ? 'animate-cascade-5' : 'animate-cascade-4'}`}>
         <div>
-          <span className="text-[10px] font-black uppercase tracking-wider text-amber-400 block mb-1">
+          <span className="text-[10px] font-black uppercase tracking-wider text-amber-500 dark:text-amber-400 block mb-1">
             TỔNG ĐIỂM TRUNG BÌNH
           </span>
           <div className="flex items-baseline gap-1.5">
-            <span className="text-3xl font-black text-white font-mono">{stats.overall}</span>
-            <span className="text-xs text-slate-400 font-bold font-mono">/ 10</span>
+            <span className="text-3xl font-black text-slate-900 dark:text-white font-mono">{stats.overall}</span>
+            <span className="text-xs text-slate-500 dark:text-slate-400 font-bold font-mono">/ 10</span>
           </div>
         </div>
-        <div className="mt-2 text-[10px] font-bold text-amber-400">
+        <div className="mt-2 text-[10px] font-bold text-amber-500 dark:text-amber-400">
           <span>{stats.overallDiff} so với kỳ trước</span>
         </div>
       </div>

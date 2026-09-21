@@ -129,9 +129,9 @@ export const ScoreFluctuationsSection: React.FC<ScoreFluctuationsSectionProps> =
         const r = row.original;
         const isSelected = String(r.student_id) === selectedStudentId;
         return (
-          <div className="font-extrabold text-white text-sm flex items-center justify-between gap-2">
+          <div className="font-extrabold text-slate-900 dark:text-white text-sm flex items-center justify-between gap-2">
             <span>{r.full_name}{r.nickname ? ` - ${r.nickname}` : ''}</span>
-            {isSelected && <span className="text-[10px] text-indigo-400 bg-indigo-500/20 px-2 py-0.5 rounded font-mono font-bold">Đang chọn</span>}
+            {isSelected && <span className="text-[10px] text-indigo-500 dark:text-indigo-400 bg-indigo-500/10 dark:bg-indigo-500/20 px-2 py-0.5 rounded font-mono font-bold">Đang chọn</span>}
           </div>
         );
       },
@@ -141,7 +141,7 @@ export const ScoreFluctuationsSection: React.FC<ScoreFluctuationsSectionProps> =
       header: 'Lớp Học',
       meta: { headerText: 'Lớp Học', exportValue: (r: any) => r.class_name || 'Lớp học' },
       cell: (info) => (
-        <span className="inline-block px-2.5 py-0.5 rounded-lg text-xs font-black bg-[#1c2442] text-indigo-300 border border-[#303d68]">
+        <span className="inline-block px-2.5 py-0.5 rounded-lg text-xs font-black bg-indigo-50 dark:bg-[#1c2442] text-indigo-600 dark:text-indigo-300 border border-indigo-200 dark:border-[#303d68]">
           {info.getValue<string>() || 'Lớp học'}
         </span>
       ),
@@ -150,7 +150,7 @@ export const ScoreFluctuationsSection: React.FC<ScoreFluctuationsSectionProps> =
       accessorKey: 'baseline',
       header: () => <div className="text-center w-full">Đầu Vào (3 buổi đầu)</div>,
       meta: { headerText: 'Đầu Vào (3 buổi đầu)', exportValue: (r: any) => r.baseline > 0 ? format1Dec(r.baseline) : '-' },
-      cell: ({ getValue }) => <div className="text-center font-mono font-bold text-slate-300 text-sm">{getValue<number>() > 0 ? format1Dec(getValue<number>()) : '-'}</div>,
+      cell: ({ getValue }) => <div className="text-center font-mono font-bold text-slate-700 dark:text-slate-300 text-sm">{getValue<number>() > 0 ? format1Dec(getValue<number>()) : '-'}</div>,
     },
     {
       accessorKey: 'current',
@@ -226,22 +226,22 @@ export const ScoreFluctuationsSection: React.FC<ScoreFluctuationsSectionProps> =
   ], [selectedStudentId, onSelectRankingStudent]);
 
   return (
-    <div className="bg-[#0b0f19] border border-[#1b253b] rounded-2xl p-6 shadow-xl space-y-6 animate-cascade-4">
-      <div onClick={() => setIsGrowthSectionOpen(!isGrowthSectionOpen)} className="flex flex-wrap items-center justify-between gap-4 cursor-pointer select-none border-b border-[#161f33] pb-4">
+    <div className="bg-white dark:bg-[#0b0f19] border border-slate-200 dark:border-[#1b253b] rounded-2xl p-6 shadow-sm dark:shadow-xl space-y-6 animate-cascade-4">
+      <div onClick={() => setIsGrowthSectionOpen(!isGrowthSectionOpen)} className="flex flex-wrap items-center justify-between gap-4 cursor-pointer select-none border-b border-slate-200 dark:border-[#161f33] pb-4">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 shrink-0">
+          <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-500 dark:text-cyan-400 shrink-0">
             <Activity size={20} />
           </div>
           <div>
-            <h3 className="text-sm font-black text-white uppercase tracking-wider">
+            <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider">
               THEO DÕI BIẾN ĐỘNG & ĐÀ BỨT PHÁ ĐIỂM SỐ
             </h3>
-            <p className="text-xs text-slate-400 font-semibold mt-0.5">
+            <p className="text-xs text-slate-500 dark:text-slate-400 font-semibold mt-0.5">
               So sánh mức điểm 3 buổi đầu vào so với 3 buổi học gần nhất của từng học sinh.
             </p>
           </div>
         </div>
-        <div className="p-1 rounded-lg text-slate-400 hover:text-white">
+        <div className="p-1 rounded-lg text-slate-400 hover:text-slate-900 dark:hover:text-white">
           {isGrowthSectionOpen ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
         </div>
       </div>

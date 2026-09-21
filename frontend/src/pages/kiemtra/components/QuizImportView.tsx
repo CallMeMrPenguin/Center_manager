@@ -92,11 +92,11 @@ export const QuizImportView: React.FC<QuizImportViewProps> = ({
   return (
     <div className="space-y-6 max-w-4xl mx-auto w-full flex-1 flex flex-col justify-center">
       {/* TAB MODE TOGGLE */}
-      <div className="flex items-center justify-center gap-2 p-1.5 bg-[#0c0f1d] border border-white/10 rounded-2xl w-fit mx-auto shadow-lg">
+      <div className="flex items-center justify-center gap-2 p-1.5 bg-slate-100 dark:bg-[#0c0f1d] border border-slate-200 dark:border-white/10 rounded-2xl w-fit mx-auto shadow-sm dark:shadow-lg">
         <button
           onClick={() => setImportTab('file')}
           className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black transition cursor-pointer ${
-            importTab === 'file' ? 'bg-[#5c36f5] text-white shadow-md' : 'text-slate-400 hover:text-white hover:bg-white/5'
+            importTab === 'file' ? 'bg-[#5c36f5] text-white shadow-md' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200 dark:text-slate-400 dark:hover:text-white dark:hover:bg-white/5'
           }`}
         >
           <Upload size={15} />
@@ -106,7 +106,7 @@ export const QuizImportView: React.FC<QuizImportViewProps> = ({
         <button
           onClick={() => setImportTab('json')}
           className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black transition cursor-pointer ${
-            importTab === 'json' ? 'bg-[#5c36f5] text-white shadow-md' : 'text-slate-400 hover:text-white hover:bg-white/5'
+            importTab === 'json' ? 'bg-[#5c36f5] text-white shadow-md' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200 dark:text-slate-400 dark:hover:text-white dark:hover:bg-white/5'
           }`}
         >
           <Code size={15} />
@@ -115,15 +115,15 @@ export const QuizImportView: React.FC<QuizImportViewProps> = ({
       </div>
 
       {importTab === 'file' ? (
-        <div className="p-10 bg-[#0d1018] border border-dashed border-white/20 rounded-2xl text-center space-y-5 shadow-2xl">
-          <div className="h-20 w-20 rounded-2xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-indigo-400 shadow-[0_0_30px_rgba(92,54,245,0.3)] mx-auto">
+        <div className="p-10 bg-white dark:bg-[#0d1018] border border-dashed border-slate-300 dark:border-white/20 rounded-2xl text-center space-y-5 shadow-sm dark:shadow-2xl">
+          <div className="h-20 w-20 rounded-2xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-indigo-500 dark:text-indigo-400 shadow-[0_0_30px_rgba(92,54,245,0.2)] mx-auto">
             <Upload size={36} />
           </div>
 
           <div className="space-y-1 max-w-md mx-auto">
-            <h3 className="text-lg font-black text-white">Tải đề lên</h3>
-            <p className="text-xs text-slate-400">
-              Hỗ trợ file word
+            <h3 className="text-lg font-black text-slate-900 dark:text-white">Tải đề lên</h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              Hỗ trợ file word (.docx) theo định dạng chuẩn
             </p>
           </div>
 
@@ -134,13 +134,13 @@ export const QuizImportView: React.FC<QuizImportViewProps> = ({
           </label>
         </div>
       ) : (
-        <div className="p-6 bg-[#0d1018] border border-white/10 rounded-2xl space-y-4 shadow-2xl">
+        <div className="p-6 bg-white dark:bg-[#0d1018] border border-slate-200 dark:border-white/10 rounded-2xl space-y-4 shadow-sm dark:shadow-2xl">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Code size={18} className="text-indigo-400" />
-              <h3 className="text-sm font-black text-white uppercase tracking-wider">Dán Nội Dung JSON Đề Thi</h3>
+              <Code size={18} className="text-indigo-500 dark:text-indigo-400" />
+              <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider">Dán Nội Dung JSON Đề Thi</h3>
             </div>
-            <span className="text-[11px] text-slate-400 font-medium">Hỗ trợ các dạng JSON mảng hoặc object đề thi</span>
+            <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">Hỗ trợ các dạng JSON mảng hoặc object đề thi</span>
           </div>
 
           <textarea
@@ -148,11 +148,11 @@ export const QuizImportView: React.FC<QuizImportViewProps> = ({
             value={pastedJson}
             onChange={(e) => setPastedJson(e.target.value)}
             placeholder={`Dán nội dung JSON đề thi vào đây, ví dụ:\n[\n  {\n    "question": "We have English lessons _____ Tuesday.",\n    "options": ["on", "up", "at", "in"],\n    "answer": "on"\n  }\n]`}
-            className="w-full bg-[#060810] border border-white/10 rounded-xl p-4 text-xs font-mono text-slate-200 focus:outline-none focus:border-indigo-500/60 leading-relaxed resize-y"
+            className="w-full bg-slate-50 dark:bg-[#060810] border border-slate-200 dark:border-white/10 rounded-xl p-4 text-xs font-mono text-slate-900 dark:text-slate-200 focus:outline-none focus:border-indigo-500/60 leading-relaxed resize-y"
           />
 
           <div className="flex items-center justify-between pt-2">
-            <p className="text-[11px] text-slate-400">
+            <p className="text-[11px] text-slate-500 dark:text-slate-400">
               Gợi ý: Bạn có thể copy JSON từ ChatGPT, Claude hoặc Prompt Generator.
             </p>
             <button

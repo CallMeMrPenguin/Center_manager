@@ -51,23 +51,23 @@ export const SeatingChartTab: React.FC<SeatingChartTabProps> = ({
   onDragStartUnassigned,
 }) => {
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 font-sans">
       {/* TOOLBAR */}
-      <div className="flex flex-wrap items-center justify-between gap-3 bg-[#0d1018] border border-white/10 p-3.5 rounded-2xl">
-        <div className="flex flex-wrap items-center gap-3 text-xs font-bold text-slate-300">
-          <div className="flex items-center gap-1.5 bg-[#121624] border border-white/10 px-2.5 py-1 rounded-xl">
-            <span className="text-[11px]">Tổng Cột:</span>
+      <div className="flex flex-wrap items-center justify-between gap-3 bg-white dark:bg-[#0d1018] border border-slate-200 dark:border-white/10 p-3.5 rounded-2xl shadow-sm dark:shadow-none transition-colors">
+        <div className="flex flex-wrap items-center gap-3 text-xs font-bold text-slate-700 dark:text-slate-300">
+          <div className="flex items-center gap-1.5 bg-slate-50 dark:bg-[#121624] border border-slate-200 dark:border-white/10 px-2.5 py-1 rounded-xl">
+            <span className="text-[11px] text-slate-500 dark:text-slate-400">Tổng Cột:</span>
             <button
               onClick={onRemoveColumn}
-              className="w-5 h-5 rounded bg-white/5 hover:bg-white/10 text-white font-extrabold flex items-center justify-center cursor-pointer"
+              className="w-5 h-5 rounded bg-slate-200 dark:bg-white/5 hover:bg-slate-300 dark:hover:bg-white/10 text-slate-800 dark:text-white font-extrabold flex items-center justify-center cursor-pointer"
               title="Xóa 1 cột"
             >
               -
             </button>
-            <span className="font-extrabold text-indigo-400 px-1">{seatingGrid.length || numCols}</span>
+            <span className="font-extrabold text-indigo-600 dark:text-indigo-400 px-1">{seatingGrid.length || numCols}</span>
             <button
               onClick={onAddColumn}
-              className="w-5 h-5 rounded bg-white/5 hover:bg-white/10 text-white font-extrabold flex items-center justify-center cursor-pointer"
+              className="w-5 h-5 rounded bg-slate-200 dark:bg-white/5 hover:bg-slate-300 dark:hover:bg-white/10 text-slate-800 dark:text-white font-extrabold flex items-center justify-center cursor-pointer"
               title="Thêm 1 cột"
             >
               +
@@ -75,8 +75,8 @@ export const SeatingChartTab: React.FC<SeatingChartTabProps> = ({
           </div>
 
           {absentStudentIds.size > 0 && (
-            <span className="flex items-center gap-1.5 bg-rose-500/20 text-rose-300 border border-rose-500/30 px-2.5 py-1 rounded-xl text-xs font-bold">
-              <span className="w-2 h-2 rounded-full bg-rose-400 animate-pulse" />
+            <span className="flex items-center gap-1.5 bg-rose-50 dark:bg-rose-500/20 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-500/30 px-2.5 py-1 rounded-xl text-xs font-bold">
+              <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
               <span>Vắng mặt: {absentStudentIds.size} học sinh</span>
             </span>
           )}
@@ -84,7 +84,7 @@ export const SeatingChartTab: React.FC<SeatingChartTabProps> = ({
           {!showUnassignedPanel && (
             <button
               onClick={() => onToggleUnassignedPanel(true)}
-              className="flex items-center gap-1.5 bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 border border-indigo-500/40 px-3 py-1.5 rounded-xl font-extrabold text-xs transition cursor-pointer"
+              className="flex items-center gap-1.5 bg-indigo-50 dark:bg-indigo-500/20 hover:bg-indigo-100 dark:hover:bg-indigo-500/30 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-500/40 px-3 py-1.5 rounded-xl font-extrabold text-xs transition cursor-pointer"
               title="Hiện danh sách học sinh chưa xếp chỗ"
             >
               <ChevronRight size={14} />
@@ -96,7 +96,7 @@ export const SeatingChartTab: React.FC<SeatingChartTabProps> = ({
         <div className="flex items-center gap-2 flex-wrap">
           <button
             onClick={onAutoMixSeating}
-            className="group flex items-center gap-0 hover:gap-1.5 bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 border border-indigo-500/40 px-3 py-1.5 rounded-xl font-extrabold text-xs transition-all duration-300 cursor-pointer"
+            className="group flex items-center gap-0 hover:gap-1.5 bg-indigo-50 dark:bg-indigo-500/20 hover:bg-indigo-100 dark:hover:bg-indigo-500/30 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-500/40 px-3 py-1.5 rounded-xl font-extrabold text-xs transition-all duration-300 cursor-pointer"
             title="Trộn Ngẫu Nhiên"
           >
             <Shuffle size={14} className="shrink-0" />
@@ -108,7 +108,7 @@ export const SeatingChartTab: React.FC<SeatingChartTabProps> = ({
           <button
             onClick={onGeneticMixSeating}
             disabled={mixingGA}
-            className="group flex items-center gap-0 hover:gap-1.5 bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/40 px-3 py-1.5 rounded-xl font-extrabold text-xs transition-all duration-300 cursor-pointer disabled:opacity-50"
+            className="group flex items-center gap-0 hover:gap-1.5 bg-cyan-50 dark:bg-cyan-500/20 hover:bg-cyan-100 dark:hover:bg-cyan-500/30 text-cyan-700 dark:text-cyan-300 border border-cyan-200 dark:border-cyan-500/40 px-3 py-1.5 rounded-xl font-extrabold text-xs transition-all duration-300 cursor-pointer disabled:opacity-50"
             title="Trộn Thông Minh (AI/GA)"
           >
             <RefreshCw size={14} className={`shrink-0 ${mixingGA ? 'animate-spin' : ''}`} />
@@ -119,7 +119,7 @@ export const SeatingChartTab: React.FC<SeatingChartTabProps> = ({
 
           <button
             onClick={onBlossomSwap}
-            className="group flex items-center gap-0 hover:gap-1.5 bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-500/40 px-3 py-1.5 rounded-xl font-extrabold text-xs transition-all duration-300 cursor-pointer"
+            className="group flex items-center gap-0 hover:gap-1.5 bg-purple-50 dark:bg-purple-500/20 hover:bg-purple-100 dark:hover:bg-purple-500/30 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-500/40 px-3 py-1.5 rounded-xl font-extrabold text-xs transition-all duration-300 cursor-pointer"
             title="Đổi Bài (Blossom)"
           >
             <FileCheck2 size={14} className="shrink-0" />
@@ -130,7 +130,7 @@ export const SeatingChartTab: React.FC<SeatingChartTabProps> = ({
 
           <button
             onClick={onSaveSeating}
-            className="group flex items-center gap-0 hover:gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white px-3.5 py-1.5 rounded-xl font-extrabold text-xs shadow-[0_4px_12px_rgba(16,185,129,0.3)] transition-all duration-300 cursor-pointer border border-white/10"
+            className="group flex items-center gap-0 hover:gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white px-3.5 py-1.5 rounded-xl font-extrabold text-xs shadow-[0_4px_12px_rgba(16,185,129,0.3)] transition-all duration-300 cursor-pointer border border-emerald-500/40"
             title="Lưu Sơ Đồ"
           >
             <Save size={14} className="shrink-0" />
@@ -145,23 +145,23 @@ export const SeatingChartTab: React.FC<SeatingChartTabProps> = ({
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 transition-all duration-300">
         {/* UNASSIGNED ROSTER SIDEBAR WITH COLLAPSE BUTTON */}
         {showUnassignedPanel && (
-          <div className="bg-[#0d1018] border border-white/10 p-4 rounded-2xl space-y-3 transition-all duration-300">
+          <div className="bg-white dark:bg-[#0d1018] border border-slate-200 dark:border-white/10 p-4 rounded-2xl space-y-3 shadow-sm dark:shadow-none transition-all duration-300">
             <div className="flex items-center justify-between">
-              <h4 className="text-xs font-black uppercase text-slate-300 flex items-center gap-2">
+              <h4 className="text-xs font-black uppercase text-slate-800 dark:text-slate-300 flex items-center gap-2">
                 <span>Học Sinh Chưa Xếp Chỗ</span>
-                <span className="px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-400 text-[10px]">
+                <span className="px-2 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-400 text-[10px] font-bold">
                   {unassignedStudents.length}
                 </span>
               </h4>
               <button
                 onClick={() => onToggleUnassignedPanel(false)}
-                className="p-1 rounded-lg hover:bg-white/10 text-slate-400 hover:text-white transition cursor-pointer"
+                className="p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white transition cursor-pointer"
                 title="Thu gọn khung này"
               >
                 <ChevronLeft size={16} />
               </button>
             </div>
-            <p className="text-[10px] text-slate-500">Kéo và thả học sinh vào vị trí bàn học bên phải.</p>
+            <p className="text-[10px] text-slate-500 dark:text-slate-400">Kéo và thả học sinh vào vị trí bàn học bên phải.</p>
 
             <div className="space-y-2 max-h-[calc(100vh-320px)] min-h-[240px] overflow-y-auto pr-1">
               {unassignedStudents.map((st) => {
@@ -171,20 +171,20 @@ export const SeatingChartTab: React.FC<SeatingChartTabProps> = ({
                     key={st.id}
                     draggable
                     onDragStart={() => onDragStartUnassigned(st)}
-                    className={`p-2.5 rounded-xl border cursor-grab active:cursor-grabbing text-xs font-extrabold flex items-center justify-between shadow-md transition ${
+                    className={`p-2.5 rounded-xl border cursor-grab active:cursor-grabbing text-xs font-extrabold flex items-center justify-between shadow-sm transition ${
                       isStAbsent
-                        ? 'bg-rose-500/10 border-rose-500/30 text-rose-300 hover:border-rose-400'
-                        : 'bg-[#14192b] border-white/10 text-white hover:border-indigo-500/60'
+                        ? 'bg-rose-50 dark:bg-rose-500/10 border-rose-200 dark:border-rose-500/30 text-rose-700 dark:text-rose-300 hover:border-rose-400'
+                        : 'bg-slate-50 dark:bg-[#14192b] border-slate-200 dark:border-white/10 text-slate-900 dark:text-white hover:border-indigo-400 dark:hover:border-indigo-500/60'
                     }`}
                   >
                     <div className="flex items-center gap-2 truncate">
-                      <Move size={12} className="text-slate-500 shrink-0" />
-                      <span className={`truncate ${isStAbsent ? 'line-through text-rose-200 opacity-80' : ''}`}>
+                      <Move size={12} className="text-slate-400 dark:text-slate-500 shrink-0" />
+                      <span className={`truncate ${isStAbsent ? 'line-through text-rose-600 dark:text-rose-200 opacity-80' : ''}`}>
                         {st.full_name}
                       </span>
                     </div>
                     {isStAbsent && (
-                      <span className="text-[9px] font-black px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/40 shrink-0 ml-1">
+                      <span className="text-[9px] font-black px-1.5 py-0.5 rounded bg-rose-100 dark:bg-rose-500/20 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-500/40 shrink-0 ml-1">
                         Vắng
                       </span>
                     )}
@@ -192,7 +192,7 @@ export const SeatingChartTab: React.FC<SeatingChartTabProps> = ({
                 );
               })}
               {unassignedStudents.length === 0 && (
-                <div className="text-center py-8 text-[11px] text-slate-500 font-bold">
+                <div className="text-center py-8 text-[11px] text-slate-400 dark:text-slate-500 font-bold">
                   Đã xếp đủ tất cả học sinh!
                 </div>
               )}
@@ -204,29 +204,29 @@ export const SeatingChartTab: React.FC<SeatingChartTabProps> = ({
         <div
           className={`${
             showUnassignedPanel ? 'md:col-span-3' : 'md:col-span-4'
-          } bg-[#080a10] border border-white/10 rounded-2xl p-6 overflow-x-auto min-h-[420px] flex justify-center items-start gap-8 transition-all`}
+          } bg-slate-100 dark:bg-[#080a10] border border-slate-200 dark:border-white/10 rounded-2xl p-6 overflow-x-auto min-h-[420px] flex justify-center items-start gap-8 transition-all shadow-inner`}
         >
           {seatingGrid.map((col, colIdx) => (
             <div key={colIdx} className="flex flex-col items-center gap-4">
               {/* PER-COLUMN DESK CONTROLS */}
-              <div className="flex items-center gap-2 bg-[#121624] border border-white/10 px-3 py-1 rounded-xl text-xs font-bold text-slate-300">
-                <span className="text-[10px] font-black uppercase text-indigo-400">Cột {colIdx + 1}</span>
-                <div className="flex items-center gap-1 bg-white/5 rounded-lg p-0.5">
+              <div className="flex items-center gap-2 bg-white dark:bg-[#121624] border border-slate-200 dark:border-white/10 px-3 py-1 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-300 shadow-sm">
+                <span className="text-[10px] font-black uppercase text-indigo-600 dark:text-indigo-400">Cột {colIdx + 1}</span>
+                <div className="flex items-center gap-1 bg-slate-100 dark:bg-white/5 rounded-lg p-0.5">
                   <button
                     type="button"
                     onClick={() => onRemoveDeskFromCol(colIdx)}
-                    className="w-5 h-5 rounded hover:bg-white/10 flex items-center justify-center text-rose-400 font-extrabold cursor-pointer"
+                    className="w-5 h-5 rounded hover:bg-slate-200 dark:hover:bg-white/10 flex items-center justify-center text-rose-500 dark:text-rose-400 font-extrabold cursor-pointer"
                     title="Xóa 1 bàn ở cột này"
                   >
                     <Minus size={11} />
                   </button>
-                  <span className="text-[10px] font-extrabold text-white px-1">
+                  <span className="text-[10px] font-extrabold text-slate-900 dark:text-white px-1">
                     {col.desks_in_col || desksPerCol} bàn
                   </span>
                   <button
                     type="button"
                     onClick={() => onAddDeskToCol(colIdx)}
-                    className="w-5 h-5 rounded hover:bg-white/10 flex items-center justify-center text-emerald-400 font-extrabold cursor-pointer"
+                    className="w-5 h-5 rounded hover:bg-slate-200 dark:hover:bg-white/10 flex items-center justify-center text-emerald-600 dark:text-emerald-400 font-extrabold cursor-pointer"
                     title="Thêm 1 bàn vào cột này"
                   >
                     <Plus size={11} />
@@ -241,8 +241,8 @@ export const SeatingChartTab: React.FC<SeatingChartTabProps> = ({
                 const isRightAbsent = seatRight?.student_id ? absentStudentIds.has(seatRight.student_id) : false;
 
                 return (
-                  <div key={deskIdx} className="bg-[#121626] border border-white/10 p-3 rounded-2xl shadow-md w-60 flex flex-col gap-2">
-                    <div className="text-[9px] font-bold text-slate-500 uppercase tracking-wider text-center border-b border-white/5 pb-1">
+                  <div key={deskIdx} className="bg-white dark:bg-[#121626] border border-slate-200 dark:border-white/10 p-3 rounded-2xl shadow-sm dark:shadow-md w-60 flex flex-col gap-2">
+                    <div className="text-[9px] font-bold text-slate-500 uppercase tracking-wider text-center border-b border-slate-100 dark:border-white/5 pb-1">
                       Bàn {deskIdx + 1}
                     </div>
 
@@ -256,9 +256,9 @@ export const SeatingChartTab: React.FC<SeatingChartTabProps> = ({
                         className={`group/seat relative p-2 rounded-xl border flex flex-col items-center justify-center min-h-[56px] text-center transition cursor-pointer ${
                           seatLeft?.student_name
                             ? isLeftAbsent
-                              ? 'bg-rose-500/15 border-rose-500/40 text-rose-200 cursor-grab active:cursor-grabbing hover:border-rose-400 shadow-[0_0_12px_rgba(244,63,94,0.15)]'
-                              : 'bg-indigo-500/10 border-indigo-500/30 text-white cursor-grab active:cursor-grabbing hover:border-indigo-400'
-                            : 'bg-white/[0.02] border-dashed border-white/10 text-slate-600 hover:border-white/20'
+                              ? 'bg-rose-50 dark:bg-rose-500/15 border-rose-300 dark:border-rose-500/40 text-rose-700 dark:text-rose-200 cursor-grab active:cursor-grabbing hover:border-rose-400 shadow-sm'
+                              : 'bg-indigo-50 dark:bg-indigo-500/10 border-indigo-200 dark:border-indigo-500/30 text-slate-900 dark:text-white cursor-grab active:cursor-grabbing hover:border-indigo-400 shadow-sm'
+                            : 'bg-slate-50 dark:bg-white/[0.02] border-dashed border-slate-300 dark:border-white/10 text-slate-400 dark:text-slate-600 hover:border-indigo-300 dark:hover:border-white/20'
                         }`}
                       >
                         {seatLeft?.student_name ? (
@@ -274,17 +274,17 @@ export const SeatingChartTab: React.FC<SeatingChartTabProps> = ({
                             >
                               ×
                             </button>
-                            <span className={`text-xs font-extrabold truncate w-full ${isLeftAbsent ? 'line-through text-rose-200 opacity-90' : ''}`}>
+                            <span className={`text-xs font-extrabold truncate w-full ${isLeftAbsent ? 'line-through text-rose-600 dark:text-rose-200 opacity-90' : ''}`}>
                               {seatLeft.student_name}
                             </span>
                             {isLeftAbsent && (
-                              <span className="mt-0.5 px-1.5 py-0.5 rounded text-[9px] font-black bg-rose-500/30 text-rose-300 border border-rose-500/50">
+                              <span className="mt-0.5 px-1.5 py-0.5 rounded text-[9px] font-black bg-rose-100 dark:bg-rose-500/30 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-500/50">
                                 Vắng mặt
                               </span>
                             )}
                           </>
                         ) : (
-                          <span className="text-[10px] text-slate-500">Thả vào đây</span>
+                          <span className="text-[10px] text-slate-400 dark:text-slate-500">Thả vào đây</span>
                         )}
                       </div>
 
@@ -297,9 +297,9 @@ export const SeatingChartTab: React.FC<SeatingChartTabProps> = ({
                         className={`group/seat relative p-2 rounded-xl border flex flex-col items-center justify-center min-h-[56px] text-center transition cursor-pointer ${
                           seatRight?.student_name
                             ? isRightAbsent
-                              ? 'bg-rose-500/15 border-rose-500/40 text-rose-200 cursor-grab active:cursor-grabbing hover:border-rose-400 shadow-[0_0_12px_rgba(244,63,94,0.15)]'
-                              : 'bg-indigo-500/10 border-indigo-500/30 text-white cursor-grab active:cursor-grabbing hover:border-indigo-400'
-                            : 'bg-white/[0.02] border-dashed border-white/10 text-slate-600 hover:border-white/20'
+                              ? 'bg-rose-50 dark:bg-rose-500/15 border-rose-300 dark:border-rose-500/40 text-rose-700 dark:text-rose-200 cursor-grab active:cursor-grabbing hover:border-rose-400 shadow-sm'
+                              : 'bg-indigo-50 dark:bg-indigo-500/10 border-indigo-200 dark:border-indigo-500/30 text-slate-900 dark:text-white cursor-grab active:cursor-grabbing hover:border-indigo-400 shadow-sm'
+                            : 'bg-slate-50 dark:bg-white/[0.02] border-dashed border-slate-300 dark:border-white/10 text-slate-400 dark:text-slate-600 hover:border-indigo-300 dark:hover:border-white/20'
                         }`}
                       >
                         {seatRight?.student_name ? (
@@ -315,17 +315,17 @@ export const SeatingChartTab: React.FC<SeatingChartTabProps> = ({
                             >
                               ×
                             </button>
-                            <span className={`text-xs font-extrabold truncate w-full ${isRightAbsent ? 'line-through text-rose-200 opacity-90' : ''}`}>
+                            <span className={`text-xs font-extrabold truncate w-full ${isRightAbsent ? 'line-through text-rose-600 dark:text-rose-200 opacity-90' : ''}`}>
                               {seatRight.student_name}
                             </span>
                             {isRightAbsent && (
-                              <span className="mt-0.5 px-1.5 py-0.5 rounded text-[9px] font-black bg-rose-500/30 text-rose-300 border border-rose-500/50">
+                              <span className="mt-0.5 px-1.5 py-0.5 rounded text-[9px] font-black bg-rose-100 dark:bg-rose-500/30 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-500/50">
                                 Vắng mặt
                               </span>
                             )}
                           </>
                         ) : (
-                          <span className="text-[10px] text-slate-500">Thả vào đây</span>
+                          <span className="text-[10px] text-slate-400 dark:text-slate-500">Thả vào đây</span>
                         )}
                       </div>
                     </div>

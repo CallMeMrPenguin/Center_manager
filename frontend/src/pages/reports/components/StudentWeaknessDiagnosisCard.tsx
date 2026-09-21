@@ -259,31 +259,31 @@ export const StudentWeaknessDiagnosisCard: React.FC<StudentWeaknessDiagnosisCard
   );
 
   return (
-    <div className="bg-[#0c0f1d] border border-white/10 rounded-2xl p-5 shadow-xl space-y-4 select-none">
+    <div className="bg-white dark:bg-[#0c0f1d] border border-slate-200 dark:border-white/10 rounded-2xl p-5 shadow-sm dark:shadow-xl space-y-4 select-none">
       {/* 1. Header with Stats & Filter Pills */}
-      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-white/5 pb-4">
+      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 dark:border-white/5 pb-4">
         <div>
           <div className="flex items-center gap-2">
-            <h3 className="text-base font-black text-white flex items-center gap-2">
-              <AlertTriangle size={18} className="text-amber-400" />
+            <h3 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
+              <AlertTriangle size={18} className="text-amber-500 dark:text-amber-400" />
               Chẩn Đoán Lỗ Hổng Kiến Thức & Danh Sách Cần Phụ Đạo
             </h3>
           </div>
-          <p className="text-xs text-slate-400 mt-0.5">
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
             Tổng hợp các Unit/chuyên đề có điểm EMA dưới 6.5đ để giáo viên lên lộ trình bổ trợ cá
             nhân hóa
           </p>
         </div>
 
         {/* Filter Pills */}
-        <div className="flex items-center gap-2 bg-[#121626] border border-white/10 p-1 rounded-xl text-xs font-bold">
+        <div className="flex items-center gap-2 bg-slate-100 dark:bg-[#121626] border border-slate-200 dark:border-white/10 p-1 rounded-xl text-xs font-bold">
           <button
             type="button"
             onClick={() => setSkillFilter('all')}
             className={`px-3 py-1 rounded-lg transition-colors cursor-pointer ${
               skillFilter === 'all'
                 ? 'bg-indigo-600 text-white font-black'
-                : 'text-slate-400 hover:text-white'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
             Tất Cả ({stats.totalStudents})
@@ -294,7 +294,7 @@ export const StudentWeaknessDiagnosisCard: React.FC<StudentWeaknessDiagnosisCard
             className={`px-3 py-1 rounded-lg transition-colors cursor-pointer ${
               skillFilter === 'grammar'
                 ? 'bg-purple-600 text-white font-black'
-                : 'text-slate-400 hover:text-white'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
             Hổng Ngữ Pháp ({stats.grammarStudents})
@@ -305,7 +305,7 @@ export const StudentWeaknessDiagnosisCard: React.FC<StudentWeaknessDiagnosisCard
             className={`px-3 py-1 rounded-lg transition-colors cursor-pointer ${
               skillFilter === 'vocab'
                 ? 'bg-blue-600 text-white font-black'
-                : 'text-slate-400 hover:text-white'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
             Hổng Từ Vựng ({stats.vocabStudents})
@@ -315,15 +315,15 @@ export const StudentWeaknessDiagnosisCard: React.FC<StudentWeaknessDiagnosisCard
 
       {/* 2. Overview Strip */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-        <div className="bg-[#121626] border border-white/5 p-3 rounded-xl">
-          <span className="text-slate-400 block text-[10px] uppercase font-bold">
+        <div className="bg-slate-50 dark:bg-[#121626] border border-slate-200 dark:border-white/5 p-3 rounded-xl">
+          <span className="text-slate-500 dark:text-slate-400 block text-[10px] uppercase font-bold">
             {skillFilter === 'grammar'
               ? 'Học Sinh Hổng Ngữ Pháp'
               : skillFilter === 'vocab'
               ? 'Học Sinh Hổng Từ Vựng'
               : 'Học Sinh Cần Bổ Trợ'}
           </span>
-          <span className="text-xl font-black text-amber-400 font-mono">
+          <span className="text-xl font-black text-amber-500 dark:text-amber-400 font-mono">
             {skillFilter === 'grammar'
               ? stats.grammarStudents
               : skillFilter === 'vocab'
@@ -332,11 +332,11 @@ export const StudentWeaknessDiagnosisCard: React.FC<StudentWeaknessDiagnosisCard
             em
           </span>
         </div>
-        <div className="bg-[#121626] border border-rose-500/20 p-3 rounded-xl">
-          <span className="text-rose-400 block text-[10px] uppercase font-bold">
+        <div className="bg-slate-50 dark:bg-[#121626] border border-rose-200 dark:border-rose-500/20 p-3 rounded-xl">
+          <span className="text-rose-500 dark:text-rose-400 block text-[10px] uppercase font-bold">
             Cần Phụ Đạo Gấp (&lt;5đ)
           </span>
-          <span className="text-xl font-black text-rose-400 font-mono">
+          <span className="text-xl font-black text-rose-500 dark:text-rose-400 font-mono">
             {skillFilter === 'grammar'
               ? stats.urgentGrammarCount
               : skillFilter === 'vocab'
@@ -347,27 +347,27 @@ export const StudentWeaknessDiagnosisCard: React.FC<StudentWeaknessDiagnosisCard
         </div>
         <div
           onClick={() => setSkillFilter('grammar')}
-          className={`bg-[#121626] border p-3 rounded-xl cursor-pointer transition-all ${
-            skillFilter === 'grammar' ? 'border-purple-500 ring-1 ring-purple-500/50' : 'border-purple-500/20 hover:border-purple-500/40'
+          className={`bg-slate-50 dark:bg-[#121626] border p-3 rounded-xl cursor-pointer transition-all ${
+            skillFilter === 'grammar' ? 'border-purple-500 ring-1 ring-purple-500/50' : 'border-purple-200 dark:border-purple-500/20 hover:border-purple-400 dark:hover:border-purple-500/40'
           }`}
         >
-          <span className="text-purple-400 block text-[10px] uppercase font-bold">
+          <span className="text-purple-600 dark:text-purple-400 block text-[10px] uppercase font-bold">
             Lượt Hổng Ngữ Pháp
           </span>
-          <span className="text-xl font-black text-purple-400 font-mono">
+          <span className="text-xl font-black text-purple-600 dark:text-purple-400 font-mono">
             {stats.totalGrammarWeak} chuyên đề
           </span>
         </div>
         <div
           onClick={() => setSkillFilter('vocab')}
-          className={`bg-[#121626] border p-3 rounded-xl cursor-pointer transition-all ${
-            skillFilter === 'vocab' ? 'border-blue-500 ring-1 ring-blue-500/50' : 'border-blue-500/20 hover:border-blue-500/40'
+          className={`bg-slate-50 dark:bg-[#121626] border p-3 rounded-xl cursor-pointer transition-all ${
+            skillFilter === 'vocab' ? 'border-blue-500 ring-1 ring-blue-500/50' : 'border-blue-200 dark:border-blue-500/20 hover:border-blue-400 dark:hover:border-blue-500/40'
           }`}
         >
-          <span className="text-blue-400 block text-[10px] uppercase font-bold">
+          <span className="text-blue-600 dark:text-blue-400 block text-[10px] uppercase font-bold">
             Lượt Hổng Từ Vựng
           </span>
-          <span className="text-xl font-black text-blue-400 font-mono">
+          <span className="text-xl font-black text-blue-600 dark:text-blue-400 font-mono">
             {stats.totalVocabWeak} chuyên đề
           </span>
         </div>

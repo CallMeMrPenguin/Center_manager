@@ -13,28 +13,28 @@ export const GroupCardItem: React.FC<GroupCardItemProps> = ({
   onSelectRankingStudent,
 }) => {
   return (
-    <div className={`rounded-2xl border ${group.borderCls} bg-[#0c101c] overflow-hidden flex flex-col justify-between shadow-xl`}>
+    <div className={`rounded-2xl border ${group.borderCls} bg-white dark:bg-[#0c101c] overflow-hidden flex flex-col justify-between shadow-sm dark:shadow-xl`}>
       {/* Group Header */}
-      <div className={`p-4 ${group.headerBg} border-b border-white/5 space-y-2`}>
+      <div className={`p-4 ${group.headerBg} border-b border-slate-200 dark:border-white/5 space-y-2`}>
         <div className="flex items-center justify-between">
-          <h4 className="text-sm font-black text-white">{group.title}</h4>
+          <h4 className="text-sm font-black text-slate-900 dark:text-white">{group.title}</h4>
           <span className={`text-[10px] font-mono font-black px-2.5 py-0.5 rounded-full border ${group.badgeCls}`}>
             {group.students.length} Học Sinh
           </span>
         </div>
 
-        <div className="flex items-center justify-between text-[11px] text-slate-300 font-bold">
+        <div className="flex items-center justify-between text-[11px] text-slate-700 dark:text-slate-300 font-bold">
           <span>{group.subtitle}</span>
           <div className="flex items-center gap-2 font-mono text-[10px]">
-            <span>EMA: <strong className="text-white">{group.avgEma}</strong></span>
+            <span>EMA: <strong className="text-slate-900 dark:text-white">{group.avgEma}</strong></span>
             <span>|</span>
-            <span>σ: <strong className="text-white">{group.groupSd}</strong></span>
+            <span>σ: <strong className="text-slate-900 dark:text-white">{group.groupSd}</strong></span>
           </div>
         </div>
 
         {/* Pedagogy Focus Box */}
-        <div className="p-2.5 rounded-xl bg-black/40 border border-white/5 text-[11px] text-slate-300">
-          <span className="text-[10px] font-black uppercase text-slate-400 block mb-0.5">Định Hướng Sư Phạm:</span>
+        <div className="p-2.5 rounded-xl bg-slate-100 dark:bg-black/40 border border-slate-200 dark:border-white/5 text-[11px] text-slate-700 dark:text-slate-300">
+          <span className="text-[10px] font-black uppercase text-slate-500 dark:text-slate-400 block mb-0.5">Định Hướng Sư Phạm:</span>
           {group.pedagogyAdvice}
         </div>
       </div>
@@ -53,15 +53,15 @@ export const GroupCardItem: React.FC<GroupCardItemProps> = ({
             <div
               key={s.student_id || sIdx}
               onClick={() => onSelectRankingStudent && onSelectRankingStudent(s.student_id)}
-              className="flex items-center justify-between gap-2 p-2 rounded-xl bg-[#111628] hover:bg-[#18203a] border border-white/5 transition cursor-pointer"
+              className="flex items-center justify-between gap-2 p-2 rounded-xl bg-slate-50 hover:bg-slate-100 dark:bg-[#111628] dark:hover:bg-[#18203a] border border-slate-200 dark:border-white/5 transition cursor-pointer"
             >
               <div className="flex items-center gap-2 min-w-0">
                 <span className="text-[10px] font-bold text-slate-500 font-mono w-4 shrink-0">{sIdx + 1}.</span>
                 <div className="min-w-0">
-                  <span className="text-xs font-extrabold text-white truncate block">
+                  <span className="text-xs font-extrabold text-slate-900 dark:text-white truncate block">
                     {s.full_name} {s.nickname ? `(${s.nickname})` : ''}
                   </span>
-                  <span className="text-[10px] text-slate-400 font-semibold">{s.class_name || 'Lớp học'}</span>
+                  <span className="text-[10px] text-slate-500 dark:text-slate-400 font-semibold">{s.class_name || 'Lớp học'}</span>
                 </div>
               </div>
 

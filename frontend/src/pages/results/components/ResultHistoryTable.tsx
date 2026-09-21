@@ -16,7 +16,7 @@ export const ResultHistoryTable: React.FC<ResultHistoryTableProps> = ({ records,
         accessorKey: 'date',
         header: 'Ngày Học',
         cell: (info) => (
-          <span className="font-bold text-slate-200">
+          <span className="font-bold text-slate-800 dark:text-slate-200">
             {info.getValue<string>() || '-'}
           </span>
         ),
@@ -25,7 +25,7 @@ export const ResultHistoryTable: React.FC<ResultHistoryTableProps> = ({ records,
         accessorKey: 'class_name',
         header: 'Lớp Học',
         cell: (info) => (
-          <span className="font-semibold text-slate-300">
+          <span className="font-semibold text-slate-700 dark:text-slate-300">
             {info.getValue<string>() || '-'}
           </span>
         ),
@@ -147,7 +147,7 @@ export const ResultHistoryTable: React.FC<ResultHistoryTableProps> = ({ records,
 
   return (
     <div className="space-y-2">
-      <h3 className="text-xs font-black uppercase tracking-wider text-slate-300">
+      <h3 className="text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300">
         Lịch Sử Điểm Từng Buổi Học
       </h3>
 

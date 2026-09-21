@@ -570,16 +570,16 @@ export default function CanvasBoardPage() {
   };
 
   const mainContent = (
-    <div className={`h-full flex flex-col bg-[#070913] ${isFullscreen ? 'fixed inset-0 z-[99999] p-2' : 'p-6 space-y-4 overflow-hidden'}`}>
-      <div className="flex items-center justify-between bg-[#0c0f1e] border border-[#1d2744] px-5 py-3 rounded-2xl shadow-xl shrink-0">
+    <div className={`h-full flex flex-col bg-slate-100 dark:bg-[#070913] ${isFullscreen ? 'fixed inset-0 z-[99999] p-2' : 'p-6 space-y-4 overflow-hidden'}`}>
+      <div className="flex items-center justify-between bg-white dark:bg-[#0c0f1e] border border-slate-200 dark:border-[#1d2744] px-5 py-3 rounded-2xl shadow-xl shrink-0">
         <div className="flex items-center gap-3">
-          <div className="p-2 rounded-xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-400"><Palette size={18} /></div>
+          <div className="p-2 rounded-xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-500 dark:text-indigo-400"><Palette size={18} /></div>
           <div>
-            <h1 className="text-sm font-black text-white flex items-center gap-2">
+            <h1 className="text-sm font-black text-slate-900 dark:text-white flex items-center gap-2">
               <span>Canvas Bảng Vẽ Trắng</span>
-              <span className="text-[10px] text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-lg border border-amber-500/20 font-bold">Scratchpad</span>
+              <span className="text-[10px] text-amber-500 dark:text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-lg border border-amber-500/20 font-bold">Scratchpad</span>
             </h1>
-            <p className="text-[11px] text-slate-400 font-semibold truncate max-w-sm">{docName}</p>
+            <p className="text-[11px] text-slate-500 dark:text-slate-400 font-semibold truncate max-w-sm">{docName}</p>
           </div>
         </div>
 
@@ -602,20 +602,20 @@ export default function CanvasBoardPage() {
               setZoom(1.0);
               setPan({ x: 100, y: 80 });
             }}
-            className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-bold border border-white/10 transition cursor-pointer"
+            className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-700 dark:text-slate-300 text-xs font-bold border border-slate-200 dark:border-white/10 transition cursor-pointer"
           >
             <RotateCcw size={13} /> <span className="hidden sm:inline">Bảng mới</span>
           </button>
-          <button onClick={handleExportPNG} className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-bold border border-white/10 transition cursor-pointer">
+          <button onClick={handleExportPNG} className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-700 dark:text-slate-300 text-xs font-bold border border-slate-200 dark:border-white/10 transition cursor-pointer">
             <Download size={13} /> <span className="hidden sm:inline">Tải ảnh</span>
           </button>
-          <button onClick={toggleFullscreen} className="p-2 rounded-xl bg-[#121626] text-slate-300 hover:text-white border border-[#263152] transition cursor-pointer">
+          <button onClick={toggleFullscreen} className="p-2 rounded-xl bg-white dark:bg-[#121626] text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-[#263152] transition cursor-pointer">
             {isFullscreen ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
           </button>
         </div>
       </div>
 
-      <div className="flex-1 flex flex-col bg-[#ffffff] border border-[#1d2744] rounded-2xl overflow-hidden shadow-2xl relative select-none">
+      <div className="flex-1 flex flex-col bg-white dark:bg-[#0c0f1e] border border-slate-200 dark:border-[#1d2744] rounded-2xl overflow-hidden shadow-2xl relative select-none">
         <CanvasToolbar
           activeTool={activeTool} setActiveTool={setActiveTool}
           selectedColor={selectedColor} setSelectedColor={setSelectedColor}

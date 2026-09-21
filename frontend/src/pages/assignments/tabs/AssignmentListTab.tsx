@@ -86,23 +86,23 @@ export const AssignmentListTab: React.FC<AssignmentListTabProps> = ({
       {
         accessorKey: 'assigned_date',
         header: 'Ngày Giao',
-        cell: (info) => <span className="font-bold text-slate-200">{info.getValue<string>()}</span>,
+        cell: (info) => <span className="font-bold text-slate-800 dark:text-slate-200">{info.getValue<string>()}</span>,
       },
       {
         accessorKey: 'class_name',
         header: 'Lớp Học',
-        cell: (info) => <span className="font-semibold text-slate-300">{info.getValue<string>() || '-'}</span>,
+        cell: (info) => <span className="font-semibold text-slate-700 dark:text-slate-300">{info.getValue<string>() || '-'}</span>,
       },
       {
         accessorKey: 'title',
         header: 'Tiêu Đề Bài Tập',
         cell: ({ row }) => (
           <div className="space-y-0.5">
-            <span className="font-bold text-indigo-400 hover:text-indigo-300 hover:underline block">
+            <span className="font-bold text-indigo-600 dark:text-indigo-400 hover:underline block">
               {row.original.title}
             </span>
             {row.original.description && (
-              <span className="text-[11px] text-slate-400 line-clamp-1 block">{row.original.description}</span>
+              <span className="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-1 block">{row.original.description}</span>
             )}
           </div>
         ),
@@ -114,7 +114,7 @@ export const AssignmentListTab: React.FC<AssignmentListTabProps> = ({
           const val = info.getValue<string>();
           const today = new Date().toISOString().slice(0, 10);
           const isOverdue = val < today;
-          return <span className={`font-semibold ${isOverdue ? 'text-rose-400' : 'text-slate-300'}`}>{val}</span>;
+          return <span className={`font-semibold ${isOverdue ? 'text-rose-500 dark:text-rose-400 font-bold' : 'text-slate-700 dark:text-slate-300'}`}>{val}</span>;
         },
       },
       {
@@ -126,9 +126,9 @@ export const AssignmentListTab: React.FC<AssignmentListTabProps> = ({
           const rate = row.original.submission_rate || 0;
           return (
             <div className="flex items-center gap-2">
-              <span className="font-bold text-slate-200">{submitted}/{total}</span>
+              <span className="font-bold text-slate-800 dark:text-slate-200">{submitted}/{total}</span>
               <span className={`text-[10px] font-black px-2 py-0.5 rounded-full border ${
-                rate >= 80 ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' : rate >= 50 ? 'bg-amber-500/10 text-amber-400 border-amber-500/30' : 'bg-rose-500/10 text-rose-400 border-rose-500/30'
+                rate >= 80 ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30' : rate >= 50 ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30' : 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/30'
               }`}>{rate}%</span>
             </div>
           );

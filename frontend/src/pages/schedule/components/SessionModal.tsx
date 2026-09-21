@@ -44,16 +44,16 @@ export const SessionModal: React.FC<SessionModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 animate-mac-backdrop">
-      <div className="bg-[#0f1320] border border-white/10 rounded-2xl w-full max-w-lg overflow-hidden shadow-[0_24px_80px_rgba(0,0,0,0.8)] animate-mac-modal">
-        <div className="flex items-center justify-between p-5 border-b border-white/10 bg-[#14192b]">
-          <h3 className="text-sm font-black text-white flex items-center gap-2">
-            <CalendarIcon className="h-4 w-4 text-blue-400" />
+      <div className="bg-white dark:bg-[#0f1320] border border-slate-200 dark:border-white/10 rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl dark:shadow-[0_24px_80px_rgba(0,0,0,0.8)] animate-mac-modal">
+        <div className="flex items-center justify-between p-5 border-b border-slate-200 dark:border-white/10 bg-slate-100 dark:bg-[#14192b]">
+          <h3 className="text-sm font-black text-slate-900 dark:text-white flex items-center gap-2">
+            <CalendarIcon className="h-4 w-4 text-blue-500 dark:text-blue-400" />
             {editing ? 'Cập Nhật Buổi Học' : 'Thêm Buổi Học Mới'}
           </h3>
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 rounded-xl hover:bg-white/10 text-slate-400 hover:text-white cursor-pointer"
+            className="p-1.5 rounded-xl hover:bg-slate-200 dark:hover:bg-white/10 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white cursor-pointer transition"
           >
             <X size={14} />
           </button>
@@ -61,7 +61,7 @@ export const SessionModal: React.FC<SessionModalProps> = ({
 
         <form onSubmit={onSave} className="p-5 space-y-4 overflow-y-auto max-h-[80vh]">
           <div>
-            <label className="block text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1.5">
+            <label className="block text-[10px] font-extrabold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1.5">
               Lớp Học *
             </label>
             <CustomSelect
@@ -82,11 +82,11 @@ export const SessionModal: React.FC<SessionModalProps> = ({
           </div>
 
           <div>
-            <label className="block text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1.5 flex items-center gap-1">
-              <Palette size={10} className="text-blue-400" />
+            <label className="block text-[10px] font-extrabold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1.5 flex items-center gap-1">
+              <Palette size={10} className="text-blue-500 dark:text-blue-400" />
               Màu Sắc Lịch Trình
             </label>
-            <div className="flex items-center gap-1.5 flex-wrap bg-[#141928] p-2.5 rounded-xl border border-white/10">
+            <div className="flex items-center gap-1.5 flex-wrap bg-slate-50 dark:bg-[#141928] p-2.5 rounded-xl border border-slate-200 dark:border-white/10">
               {PALETTE_20.slice(0, 10).map((c) => (
                 <button
                   key={c}
@@ -94,7 +94,7 @@ export const SessionModal: React.FC<SessionModalProps> = ({
                   onClick={() => setColor(c)}
                   style={{ backgroundColor: c }}
                   className={`h-7 w-7 rounded-xl transition-all cursor-pointer border ${
-                    color === c ? 'border-white scale-110 ring-2 ring-blue-400' : 'border-transparent opacity-75 hover:opacity-100'
+                    color === c ? 'border-blue-500 dark:border-white scale-110 ring-2 ring-blue-400' : 'border-transparent opacity-75 hover:opacity-100'
                   }`}
                 />
               ))}
@@ -125,10 +125,10 @@ export const SessionModal: React.FC<SessionModalProps> = ({
 
           {!editing && mode === 'weekdays' && (
             <div>
-              <label className="block text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-2">
+              <label className="block text-[10px] font-extrabold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-2">
                 Cấu Hình Theo Thứ — Tháng {selectedMonth}
               </label>
-              <div className="space-y-2 bg-[#141928] p-3 rounded-xl border border-white/10">
+              <div className="space-y-2 bg-slate-50 dark:bg-[#141928] p-3 rounded-xl border border-slate-200 dark:border-white/10">
                 {DAYS.map((day) => {
                   const cfg = dayCfgs[day];
                   return (
@@ -142,12 +142,12 @@ export const SessionModal: React.FC<SessionModalProps> = ({
                           }))
                         }
                         className={`shrink-0 h-5 w-5 rounded-lg border-2 flex items-center justify-center text-[9px] font-black transition cursor-pointer ${
-                          cfg.checked ? 'bg-blue-600 border-blue-400 text-white' : 'bg-transparent border-white/20 text-transparent'
+                          cfg.checked ? 'bg-blue-600 border-blue-400 text-white' : 'bg-transparent border-slate-300 dark:border-white/20 text-transparent'
                         }`}
                       >
                         ✓
                       </button>
-                      <span className={`text-xs font-bold w-16 shrink-0 ${cfg.checked ? 'text-white' : 'text-slate-500'}`}>
+                      <span className={`text-xs font-bold w-16 shrink-0 ${cfg.checked ? 'text-slate-900 dark:text-white' : 'text-slate-400 dark:text-slate-500'}`}>
                         {day}
                       </span>
                       <input
@@ -160,7 +160,7 @@ export const SessionModal: React.FC<SessionModalProps> = ({
                             [day]: { ...p[day], time: e.target.value },
                           }))
                         }
-                        className={`flex-1 bg-[#0d1018] border border-white/10 rounded-lg px-2 py-1 text-xs text-white focus:outline-none focus:border-blue-500 ${
+                        className={`flex-1 bg-white dark:bg-[#0d1018] border border-slate-300 dark:border-white/10 rounded-lg px-2 py-1 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 ${
                           !cfg.checked ? 'opacity-30' : ''
                         }`}
                       />
@@ -177,11 +177,11 @@ export const SessionModal: React.FC<SessionModalProps> = ({
                             [day]: { ...p[day], duration: parseInt(e.target.value) || 90 },
                           }))
                         }
-                        className={`w-14 bg-[#0d1018] border border-white/10 rounded-lg px-2 py-1 text-xs text-white focus:outline-none focus:border-blue-500 ${
+                        className={`w-14 bg-white dark:bg-[#0d1018] border border-slate-300 dark:border-white/10 rounded-lg px-2 py-1 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 ${
                           !cfg.checked ? 'opacity-30' : ''
                         }`}
                       />
-                      <span className={`text-[10px] text-slate-500 shrink-0 ${!cfg.checked ? 'opacity-30' : ''}`}>p</span>
+                      <span className={`text-[10px] text-slate-400 dark:text-slate-500 shrink-0 ${!cfg.checked ? 'opacity-30' : ''}`}>p</span>
                     </div>
                   );
                 })}
@@ -192,14 +192,14 @@ export const SessionModal: React.FC<SessionModalProps> = ({
           {(editing || mode === 'single') && (
             <>
               <div>
-                <label className="block text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1.5">
+                <label className="block text-[10px] font-extrabold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1.5">
                   Ngày Học *
                 </label>
                 <CustomDatePicker value={form.date || ''} onChange={(val) => setForm({ ...form, date: val })} />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1.5">
+                  <label className="block text-[10px] font-extrabold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1.5">
                     Giờ Bắt Đầu *
                   </label>
                   <input
@@ -207,18 +207,18 @@ export const SessionModal: React.FC<SessionModalProps> = ({
                     required
                     value={form.start_time || '18:00'}
                     onChange={(e) => setForm({ ...form, start_time: e.target.value })}
-                    className="w-full bg-[#181d2e] border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500"
+                    className="w-full bg-white dark:bg-[#181d2e] border border-slate-300 dark:border-white/10 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-blue-500"
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1.5">
+                  <label className="block text-[10px] font-extrabold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1.5">
                     Thời Lượng (phút)
                   </label>
                   <input
                     type="number"
                     value={form.duration || 90}
                     onChange={(e) => setForm({ ...form, duration: parseInt(e.target.value) || 90 })}
-                    className="w-full bg-[#181d2e] border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500"
+                    className="w-full bg-white dark:bg-[#181d2e] border border-slate-300 dark:border-white/10 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-blue-500"
                   />
                 </div>
               </div>
@@ -226,7 +226,7 @@ export const SessionModal: React.FC<SessionModalProps> = ({
           )}
 
           <div>
-            <label className="block text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1.5">
+            <label className="block text-[10px] font-extrabold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1.5">
               Trạng Thái
             </label>
             <CustomSelect
@@ -240,12 +240,12 @@ export const SessionModal: React.FC<SessionModalProps> = ({
             />
           </div>
 
-          <div className="flex items-center justify-between gap-3 pt-2 border-t border-white/10">
+          <div className="flex items-center justify-between gap-3 pt-3 border-t border-slate-200 dark:border-white/10">
             {editing ? (
               <button
                 type="button"
                 onClick={() => onDelete(editing)}
-                className="px-4 py-2 rounded-xl bg-rose-500/15 text-rose-300 text-xs font-bold hover:bg-rose-500/25 border border-rose-500/30 transition cursor-pointer"
+                className="px-4 py-2 rounded-xl bg-rose-500/15 text-rose-600 dark:text-rose-300 text-xs font-bold hover:bg-rose-500/25 border border-rose-500/30 transition cursor-pointer"
               >
                 Xóa Buổi Học
               </button>
@@ -256,7 +256,7 @@ export const SessionModal: React.FC<SessionModalProps> = ({
               <button
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2 rounded-xl bg-white/5 text-slate-300 text-xs font-bold hover:bg-white/10 transition cursor-pointer"
+                className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 text-slate-700 dark:text-slate-300 text-xs font-bold transition cursor-pointer"
               >
                 Hủy
               </button>

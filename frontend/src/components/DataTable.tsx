@@ -194,8 +194,8 @@ function DraggableHeader({
     <th
       ref={setNodeRef}
       style={style}
-      className={`select-none relative border-b border-[#28334e] bg-[#111827] ${
-        isPinned ? 'bg-[#111827]' : ''
+      className={`select-none relative border-b border-slate-200 dark:border-[#28334e] bg-slate-100 dark:bg-[#111827] ${
+        isPinned ? 'bg-slate-100 dark:bg-[#111827]' : ''
       }`}
     >
       {/* Draggable Title Area with dedicated touchAction none & grab cursor */}

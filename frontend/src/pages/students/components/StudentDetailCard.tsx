@@ -1,7 +1,7 @@
 import React from 'react';
 import { 
-  User, Phone, Home, GraduationCap, Calendar, Edit3, 
-  Shield, KeyRound, Clock, BookOpen, AlertCircle, Sparkles
+  Phone, Home, GraduationCap, Edit3, 
+  KeyRound, AlertCircle
 } from 'lucide-react';
 import { Student } from '../../../types';
 
@@ -16,26 +16,26 @@ export const StudentDetailCard: React.FC<StudentDetailCardProps> = ({ student, o
   const accountStatus = student.account_status || (student.status !== 'Đã nghỉ' ? 'Hoạt động' : 'Tạm khóa');
 
   return (
-    <div className="bg-[#0b0f1d] border border-[#1e2746] rounded-2xl p-5 shadow-2xl space-y-4 animate-fade-in font-sans">
+    <div className="bg-white dark:bg-[#0b0f1d] border border-slate-200 dark:border-[#1e2746] rounded-2xl p-5 shadow-md dark:shadow-2xl space-y-4 font-sans">
       {/* Top Header Strip */}
-      <div className="flex flex-wrap items-center justify-between gap-4 pb-3 border-b border-white/10">
+      <div className="flex flex-wrap items-center justify-between gap-4 pb-3 border-b border-slate-200 dark:border-white/10">
         <div className="flex items-center gap-3.5">
           {/* Avatar Icon */}
-          <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center text-white font-black text-lg shadow-[0_0_15px_rgba(92,54,245,0.4)] shrink-0 border border-white/20">
+          <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center text-white font-black text-lg shadow-sm dark:shadow-[0_0_15px_rgba(92,54,245,0.4)] shrink-0 border border-white/20">
             {initial}
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h3 className="text-base font-black text-white">
+              <h3 className="text-base font-black text-slate-900 dark:text-white">
                 {student.full_name}
               </h3>
               {student.nickname && (
-                <span className="text-xs font-bold text-indigo-300 bg-indigo-500/20 px-2 py-0.5 rounded-lg border border-indigo-500/30">
+                <span className="text-xs font-bold text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-500/20 px-2 py-0.5 rounded-lg border border-indigo-200 dark:border-indigo-500/30">
                   {student.nickname}
                 </span>
               )}
             </div>
-            <p className="text-xs text-slate-400 font-semibold mt-0.5 flex items-center gap-2">
+            <p className="text-xs text-slate-500 dark:text-slate-400 font-semibold mt-0.5 flex items-center gap-2">
               <span>{student.grade || 'Lớp 6'}</span>
               <span>•</span>
               <span>{student.gender || 'Nam'}</span>
@@ -64,28 +64,28 @@ export const StudentDetailCard: React.FC<StudentDetailCardProps> = ({ student, o
       {/* 3-Column Detailed Information Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
         {/* Column 1: Academic & Personal Info */}
-        <div className="bg-[#101526] p-3.5 rounded-xl border border-white/5 space-y-2.5">
-          <h4 className="text-[10px] font-black uppercase text-indigo-400 tracking-wider flex items-center gap-1.5">
+        <div className="bg-slate-50 dark:bg-[#101526] p-3.5 rounded-xl border border-slate-200 dark:border-white/5 space-y-2.5">
+          <h4 className="text-[10px] font-black uppercase text-indigo-600 dark:text-indigo-400 tracking-wider flex items-center gap-1.5">
             <GraduationCap size={12} />
             <span>Học Tập & Cá Nhân</span>
           </h4>
-          <div className="space-y-1.5 text-slate-300 font-semibold">
+          <div className="space-y-1.5 text-slate-700 dark:text-slate-300 font-semibold">
             <div className="flex justify-between">
               <span className="text-slate-500 font-medium">Lớp đang học:</span>
-              <span className="font-bold text-white text-right">{student.enrolled_classes || 'Chưa xếp lớp'}</span>
+              <span className="font-bold text-slate-900 dark:text-white text-right">{student.enrolled_classes || 'Chưa xếp lớp'}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-slate-500 font-medium">Ngày sinh:</span>
-              <span className="font-bold text-white">{student.date_of_birth || '-'}</span>
+              <span className="font-bold text-slate-900 dark:text-white">{student.date_of_birth || '-'}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-slate-500 font-medium">Ngày nhập học:</span>
-              <span className="font-bold text-white">{student.enroll_date || '-'}</span>
+              <span className="font-bold text-slate-900 dark:text-white">{student.enroll_date || '-'}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-slate-500 font-medium">Trạng thái:</span>
-              <span className={`px-2 py-0.2 rounded-full text-[10px] font-black ${
-                student.status === 'Đang học' ? 'bg-emerald-500/20 text-emerald-300' : 'bg-rose-500/20 text-rose-300'
+              <span className={`px-2 py-0.5 rounded-full text-[10px] font-black ${
+                student.status === 'Đang học' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-500/20 dark:text-emerald-300 dark:border-emerald-500/30' : 'bg-rose-50 text-rose-700 border border-rose-200 dark:bg-rose-500/20 dark:text-rose-300 dark:border-rose-500/30'
               }`}>
                 {student.status || 'Đang học'}
               </span>
@@ -94,49 +94,49 @@ export const StudentDetailCard: React.FC<StudentDetailCardProps> = ({ student, o
         </div>
 
         {/* Column 2: Parent Contacts & Address */}
-        <div className="bg-[#101526] p-3.5 rounded-xl border border-white/5 space-y-2.5">
-          <h4 className="text-[10px] font-black uppercase text-cyan-400 tracking-wider flex items-center gap-1.5">
+        <div className="bg-slate-50 dark:bg-[#101526] p-3.5 rounded-xl border border-slate-200 dark:border-white/5 space-y-2.5">
+          <h4 className="text-[10px] font-black uppercase text-cyan-600 dark:text-cyan-400 tracking-wider flex items-center gap-1.5">
             <Phone size={12} />
             <span>Liên Hệ Phụ Huynh</span>
           </h4>
-          <div className="space-y-1.5 text-slate-300 font-semibold">
+          <div className="space-y-1.5 text-slate-700 dark:text-slate-300 font-semibold">
             <div>
               <span className="text-slate-500 font-medium block text-[11px]">Bố:</span>
-              <span className="text-white font-bold">{student.father_name || 'Chưa có thông tin'}</span>
+              <span className="text-slate-900 dark:text-white font-bold">{student.father_name || 'Chưa có thông tin'}</span>
               {student.father_phone && (
-                <a href={`tel:${student.father_phone}`} className="ml-1 text-cyan-400 hover:underline">
+                <a href={`tel:${student.father_phone}`} className="ml-1 text-indigo-600 dark:text-cyan-400 hover:underline">
                   ({student.father_phone})
                 </a>
               )}
             </div>
             <div>
               <span className="text-slate-500 font-medium block text-[11px]">Mẹ:</span>
-              <span className="text-white font-bold">{student.mother_name || 'Chưa có thông tin'}</span>
+              <span className="text-slate-900 dark:text-white font-bold">{student.mother_name || 'Chưa có thông tin'}</span>
               {student.mother_phone && (
-                <a href={`tel:${student.mother_phone}`} className="ml-1 text-cyan-400 hover:underline">
+                <a href={`tel:${student.mother_phone}`} className="ml-1 text-indigo-600 dark:text-cyan-400 hover:underline">
                   ({student.mother_phone})
                 </a>
               )}
             </div>
             {student.address && (
-              <div className="pt-1 border-t border-white/5 flex items-start gap-1">
+              <div className="pt-1 border-t border-slate-200 dark:border-white/5 flex items-start gap-1">
                 <Home size={12} className="text-slate-500 mt-0.5 shrink-0" />
-                <span className="text-slate-300 text-[11px] truncate">{student.address}</span>
+                <span className="text-slate-600 dark:text-slate-300 text-[11px] truncate">{student.address}</span>
               </div>
             )}
           </div>
         </div>
 
         {/* Column 3: System Login Account Credentials */}
-        <div className="bg-[#101526] p-3.5 rounded-xl border border-white/5 space-y-2.5">
-          <h4 className="text-[10px] font-black uppercase text-emerald-400 tracking-wider flex items-center gap-1.5">
+        <div className="bg-slate-50 dark:bg-[#101526] p-3.5 rounded-xl border border-slate-200 dark:border-white/5 space-y-2.5">
+          <h4 className="text-[10px] font-black uppercase text-emerald-600 dark:text-emerald-400 tracking-wider flex items-center gap-1.5">
             <KeyRound size={12} />
             <span>Tài Khoản Đăng Nhập App</span>
           </h4>
-          <div className="space-y-1.5 text-slate-300 font-semibold">
+          <div className="space-y-1.5 text-slate-700 dark:text-slate-300 font-semibold">
             <div className="flex justify-between items-center">
               <span className="text-slate-500 font-medium">Tên đăng nhập:</span>
-              <span className="font-mono font-black text-indigo-300 bg-indigo-500/15 px-2 py-0.5 rounded-md border border-indigo-500/30">
+              <span className="font-mono font-black text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-500/15 px-2 py-0.5 rounded-md border border-indigo-200 dark:border-indigo-500/30">
                 {username}
               </span>
             </div>
@@ -146,14 +146,14 @@ export const StudentDetailCard: React.FC<StudentDetailCardProps> = ({ student, o
             </div>
             <div className="flex justify-between items-center">
               <span className="text-slate-500 font-medium">Trạng thái TK:</span>
-              <span className={`px-2 py-0.2 rounded-full text-[10px] font-black ${
-                accountStatus === 'Hoạt động' ? 'bg-emerald-500/20 text-emerald-300' : 'bg-rose-500/20 text-rose-300'
+              <span className={`px-2 py-0.5 rounded-full text-[10px] font-black ${
+                accountStatus === 'Hoạt động' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-500/20 dark:text-emerald-300 dark:border-emerald-500/30' : 'bg-rose-50 text-rose-700 border border-rose-200 dark:bg-rose-500/20 dark:text-rose-300 dark:border-rose-500/30'
               }`}>
                 {accountStatus}
               </span>
             </div>
             {student.account_last_login && (
-              <div className="flex justify-between items-center text-[10px] text-slate-500 pt-1 border-t border-white/5">
+              <div className="flex justify-between items-center text-[10px] text-slate-500 pt-1 border-t border-slate-200 dark:border-white/5">
                 <span>Đăng nhập cuối:</span>
                 <span>{student.account_last_login}</span>
               </div>
@@ -164,10 +164,10 @@ export const StudentDetailCard: React.FC<StudentDetailCardProps> = ({ student, o
 
       {/* Notes Row */}
       {student.notes && (
-        <div className="bg-[#141a2e] px-4 py-2.5 rounded-xl border border-white/5 text-xs text-slate-300 flex items-start gap-2">
-          <AlertCircle size={14} className="text-amber-400 mt-0.5 shrink-0" />
+        <div className="bg-amber-50 dark:bg-[#141a2e] px-4 py-2.5 rounded-xl border border-amber-200 dark:border-white/5 text-xs text-amber-900 dark:text-slate-300 flex items-start gap-2">
+          <AlertCircle size={14} className="text-amber-500 mt-0.5 shrink-0" />
           <div>
-            <strong className="text-white">Ghi chú:</strong> {student.notes}
+            <strong className="text-amber-950 dark:text-white">Ghi chú:</strong> {student.notes}
           </div>
         </div>
       )}

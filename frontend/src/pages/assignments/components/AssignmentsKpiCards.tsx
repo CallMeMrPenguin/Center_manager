@@ -51,13 +51,13 @@ export const AssignmentsKpiCards: React.FC<AssignmentsKpiCardsProps> = ({ kpis }
       {cards.map((card, idx) => (
         <div
           key={idx}
-          className={`${card.cardClass} bg-[#0c0f1e] border border-white/10 rounded-2xl p-4 flex flex-col justify-between shadow-md relative overflow-hidden transition-all duration-200 hover:border-white/20`}
+          className={`${card.cardClass} bg-white dark:bg-[#0c0f1e] border border-slate-200 dark:border-white/10 rounded-2xl p-4 flex flex-col justify-between shadow-sm dark:shadow-md relative overflow-hidden transition-all duration-200 hover:border-slate-300 dark:hover:border-white/20`}
         >
           <div className="flex items-center justify-between gap-2 mb-2">
-            <span className="text-xs font-black uppercase tracking-wider text-slate-400">
+            <span className="text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">
               {card.title}
             </span>
-            <div className="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center shrink-0 border border-white/5">
+            <div className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-white/5 flex items-center justify-center shrink-0 border border-slate-200 dark:border-white/5">
               {card.icon}
             </div>
           </div>
@@ -66,7 +66,7 @@ export const AssignmentsKpiCards: React.FC<AssignmentsKpiCardsProps> = ({ kpis }
             <div className={`text-2xl font-black ${card.textColor} tracking-tight`}>
               {card.value}
             </div>
-            <p className="text-[11px] font-medium text-slate-400">
+            <p className="text-[11px] font-medium text-slate-500 dark:text-slate-400">
               {card.desc}
             </p>
           </div>

@@ -44,17 +44,17 @@ export const SessionOverviewBanner: React.FC<SessionOverviewBannerProps> = ({
   } = useSessionOverview(attendanceRecords);
 
   return (
-    <div className="bg-[#0c0f1e] border border-[#1e2742] rounded-2xl p-4 shadow-xl transition-all">
+    <div className="bg-white dark:bg-[#0c0f1e] border border-slate-200 dark:border-[#1e2742] rounded-2xl p-4 shadow-sm dark:shadow-xl transition-all">
       {/* 1. MASTER HEADER STRIP (No medal icon per user request) */}
       <div className="flex flex-wrap items-center justify-between gap-3 select-none">
         <div>
           <div className="flex items-center gap-2">
-            <h3 className="text-sm font-black text-white tracking-wide uppercase">
+            <h3 className="text-sm font-black text-slate-900 dark:text-white tracking-wide uppercase">
               Tổng Quan Buổi Học
             </h3>
-            <span className="text-[11px] font-bold text-slate-400">({attendanceDate})</span>
+            <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400">({attendanceDate})</span>
             {hasAlerts ? (
-              <span className="px-2 py-0.5 text-[10px] font-black rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40">
+              <span className="px-2 py-0.5 text-[10px] font-black rounded-full bg-amber-50 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-500/40">
                 {belowAvgData.belowC1.length +
                   belowAvgData.belowC2.length +
                   belowAvgData.belowHw.length +
@@ -62,12 +62,12 @@ export const SessionOverviewBanner: React.FC<SessionOverviewBannerProps> = ({
                 Cảnh báo
               </span>
             ) : (
-              <span className="px-2 py-0.5 text-[10px] font-black rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 flex items-center gap-1">
+              <span className="px-2 py-0.5 text-[10px] font-black rounded-full bg-emerald-50 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/40 flex items-center gap-1">
                 <CheckCircle2 size={11} /> 100% Đạt Chuẩn
               </span>
             )}
           </div>
-          <p className="text-[11px] text-slate-400 font-medium">
+          <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
             Đánh giá điểm trung bình và phát hiện sớm các trường hợp lệch điểm bất thường
           </p>
         </div>
@@ -75,25 +75,25 @@ export const SessionOverviewBanner: React.FC<SessionOverviewBannerProps> = ({
         {/* RIGHT: CLASS AVERAGE STATS & EXPAND TOGGLE */}
         <div className="flex items-center gap-2">
           {/* Average metrics pills */}
-          <div className="hidden sm:flex items-center gap-2.5 bg-[#080b14] px-3 py-1.5 rounded-xl border border-white/5 text-xs font-bold">
+          <div className="hidden sm:flex items-center gap-2.5 bg-slate-100 dark:bg-[#080b14] px-3 py-1.5 rounded-xl border border-slate-200 dark:border-white/5 text-xs font-bold">
             <div className="flex items-center gap-1">
-              <span className="text-slate-400">TB Check 1:</span>
-              <span className="text-blue-400 font-extrabold">{trunc1Dec(stats.avgC1)}</span>
+              <span className="text-slate-500 dark:text-slate-400">TB Check 1:</span>
+              <span className="text-blue-600 dark:text-blue-400 font-extrabold">{trunc1Dec(stats.avgC1)}</span>
             </div>
-            <div className="flex items-center gap-1 pl-2.5 border-l border-white/10">
-              <span className="text-slate-400">TB Check 2:</span>
-              <span className="text-purple-400 font-extrabold">{trunc1Dec(stats.avgC2)}</span>
+            <div className="flex items-center gap-1 pl-2.5 border-l border-slate-200 dark:border-white/10">
+              <span className="text-slate-500 dark:text-slate-400">TB Check 2:</span>
+              <span className="text-purple-600 dark:text-purple-400 font-extrabold">{trunc1Dec(stats.avgC2)}</span>
             </div>
-            <div className="flex items-center gap-1 pl-2.5 border-l border-white/10">
-              <span className="text-slate-400">TB BTVN:</span>
-              <span className="text-emerald-400 font-extrabold">{trunc1Dec(stats.avgHw)}</span>
+            <div className="flex items-center gap-1 pl-2.5 border-l border-slate-200 dark:border-white/10">
+              <span className="text-slate-500 dark:text-slate-400">TB BTVN:</span>
+              <span className="text-emerald-600 dark:text-emerald-400 font-extrabold">{trunc1Dec(stats.avgHw)}</span>
             </div>
           </div>
 
           <button
             type="button"
             onClick={() => setIsExpanded((prev) => !prev)}
-            className="p-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white transition border border-white/5 cursor-pointer"
+            className="p-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition border border-slate-200 dark:border-white/5 cursor-pointer"
             title={isExpanded ? 'Thu gọn tổng quan' : 'Mở rộng tổng quan'}
           >
             {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
@@ -103,9 +103,9 @@ export const SessionOverviewBanner: React.FC<SessionOverviewBannerProps> = ({
 
       {/* 2. EXPANDED CONTENT BODY */}
       {isExpanded && (
-        <div className="mt-4 pt-3 border-t border-white/5 space-y-4">
+        <div className="mt-4 pt-3 border-t border-slate-200 dark:border-white/5 space-y-4">
           {/* CONTROL STRIP: THRESHOLD SELECTION & DISCREPANCY SENSITIVITY */}
-          <div className="flex flex-wrap items-center justify-between gap-3 text-xs bg-[#080b14] p-2.5 rounded-xl border border-white/5">
+          <div className="flex flex-wrap items-center justify-between gap-3 text-xs bg-slate-50 dark:bg-[#080b14] p-2.5 rounded-xl border border-slate-200 dark:border-white/5">
             <div className="flex flex-wrap items-center gap-2">
               <span className="text-slate-400 font-bold flex items-center gap-1">
                 <SlidersHorizontal size={12} className="text-indigo-400" />

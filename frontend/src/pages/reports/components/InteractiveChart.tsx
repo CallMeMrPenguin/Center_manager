@@ -229,7 +229,7 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = ({
         <div
           className={`relative overflow-hidden cursor-${
             isDragging ? 'grabbing' : zoomLevel > 1.0 ? 'grab' : 'default'
-          } select-none rounded-xl bg-[#080b14]/50 border border-[#141b2e]`}
+          } select-none rounded-2xl bg-white dark:bg-[#080b14]/50 border border-slate-200 dark:border-[#141b2e] shadow-sm dark:shadow-none`}
           onMouseDown={(e) => {
             if (zoomLevel > 1.0 && e.button === 0) {
               setIsDragging(true);
@@ -304,22 +304,22 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = ({
                   animate={{ opacity: 1, scale: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.94, y: 4 }}
                   transition={{ type: 'spring', stiffness: 450, damping: 28 }}
-                  className="absolute z-30 pointer-events-none bg-[#0d1224] border border-[#232f54] p-3.5 rounded-2xl shadow-[0_16px_40px_rgba(0,0,0,0.95)] text-xs font-sans min-w-[210px] select-none"
+                  className="absolute z-30 pointer-events-none bg-white dark:bg-[#0d1224] border border-slate-200 dark:border-[#232f54] p-3.5 rounded-2xl shadow-xl dark:shadow-[0_16px_40px_rgba(0,0,0,0.95)] text-xs font-sans min-w-[210px] select-none"
                   style={{
                     left: `${left}px`,
                     top: `${top}px`,
                     transform,
                   }}
                 >
-                  <div className="font-black text-white border-b border-white/10 pb-1.5 flex items-center justify-between gap-4">
-                    <span className="text-indigo-200">{hoveredPoint.sessionName}</span>
-                    <span className="text-[10px] text-slate-400 font-mono bg-white/5 px-1.5 py-0.5 rounded">{hoveredPoint.fullDate}</span>
+                  <div className="font-black text-slate-900 dark:text-white border-b border-slate-200 dark:border-white/10 pb-1.5 flex items-center justify-between gap-4">
+                    <span className="text-indigo-600 dark:text-indigo-200">{hoveredPoint.sessionName}</span>
+                    <span className="text-[10px] text-slate-500 dark:text-slate-400 font-mono bg-slate-100 dark:bg-white/5 px-1.5 py-0.5 rounded">{hoveredPoint.fullDate}</span>
                   </div>
                   <div className="space-y-1.5 pt-2">
                     <div className="flex items-center justify-between gap-4">
-                      <span className="text-blue-400 font-bold">Từ Vựng:</span>
+                      <span className="text-blue-500 dark:text-blue-400 font-bold">Từ Vựng:</span>
                       <div className="flex items-center gap-1.5">
-                        <span className="font-mono font-black text-white">
+                        <span className="font-mono font-black text-slate-900 dark:text-white">
                           {hoveredPoint.check1 > 0 ? format1Dec(hoveredPoint.check1) : '-'}
                         </span>
                         {hoveredPoint.check1 > 0 && hoveredPoint.fittedC1 !== null && (
@@ -328,9 +328,9 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = ({
                       </div>
                     </div>
                     <div className="flex items-center justify-between gap-4">
-                      <span className="text-purple-400 font-bold">Ngữ Pháp:</span>
+                      <span className="text-purple-500 dark:text-purple-400 font-bold">Ngữ Pháp:</span>
                       <div className="flex items-center gap-1.5">
-                        <span className="font-mono font-black text-white">
+                        <span className="font-mono font-black text-slate-900 dark:text-white">
                           {hoveredPoint.check2 > 0 ? format1Dec(hoveredPoint.check2) : '-'}
                         </span>
                         {hoveredPoint.check2 > 0 && hoveredPoint.fittedC2 !== null && (
@@ -339,9 +339,9 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = ({
                       </div>
                     </div>
                     <div className="flex items-center justify-between gap-4">
-                      <span className="text-emerald-400 font-bold">BTVN:</span>
+                      <span className="text-emerald-500 dark:text-emerald-400 font-bold">BTVN:</span>
                       <div className="flex items-center gap-1.5">
-                        <span className="font-mono font-black text-white">
+                        <span className="font-mono font-black text-slate-900 dark:text-white">
                           {hoveredPoint.homework > 0 ? format1Dec(hoveredPoint.homework) : '-'}
                         </span>
                         {hoveredPoint.homework > 0 && hoveredPoint.fittedHw !== null && (
@@ -357,9 +357,9 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = ({
                       if (hoveredPoint.homework > 0) { wSum += hoveredPoint.homework * 0.10; wTot += 0.10; }
                       const avgVal = wTot > 0 ? trunc1Dec(wSum / wTot) : 0;
                       return (
-                        <div className="border-t border-white/10 pt-1.5 flex items-center justify-between gap-4">
-                          <span className="text-indigo-300 font-extrabold">Điểm TB Buổi:</span>
-                          <span className="font-mono font-black text-indigo-300">
+                        <div className="border-t border-slate-200 dark:border-white/10 pt-1.5 flex items-center justify-between gap-4">
+                          <span className="text-indigo-600 dark:text-indigo-300 font-extrabold">Điểm TB Buổi:</span>
+                          <span className="font-mono font-black text-indigo-600 dark:text-indigo-300">
                             {avgVal > 0 ? format1Dec(avgVal) : '-'}
                           </span>
                         </div>

@@ -150,24 +150,24 @@ export const SmartGroupingSection: React.FC<SmartGroupingSectionProps> = ({
   }, [smartGroups, classes, selectedClassId]);
 
   return (
-    <div className="bg-[#0b0f19] border border-[#1b253b] rounded-2xl p-6 shadow-xl space-y-6 animate-cascade-3">
+    <div className="bg-white dark:bg-[#0b0f19] border border-slate-200 dark:border-[#1b253b] rounded-2xl p-6 shadow-sm dark:shadow-xl space-y-6 animate-cascade-3">
       {/* Header Bar */}
-      <div onClick={() => setIsGroupingSectionOpen(!isGroupingSectionOpen)} className="flex flex-wrap items-center justify-between gap-4 cursor-pointer select-none border-b border-[#161f33] pb-4">
+      <div onClick={() => setIsGroupingSectionOpen(!isGroupingSectionOpen)} className="flex flex-wrap items-center justify-between gap-4 cursor-pointer select-none border-b border-slate-200 dark:border-[#161f33] pb-4">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400 shrink-0">
+          <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-500 dark:text-purple-400 shrink-0">
             <FolderTree size={20} />
           </div>
           <div>
-            <h3 className="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2">
+            <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
               GỢI Ý PHÂN NHÓM HỌC TẬP THÔNG MINH
             </h3>
-            <p className="text-xs text-slate-400 font-semibold mt-0.5">
+            <p className="text-xs text-slate-500 dark:text-slate-400 font-semibold mt-0.5">
               Tự động chia học sinh thành các nhóm năng lực để giảng dạy phân hóa và giao bài tập phù hợp.
             </p>
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <div className="p-1 rounded-lg text-slate-400 hover:text-white">
+          <div className="p-1 rounded-lg text-slate-400 hover:text-slate-900 dark:hover:text-white">
             {isGroupingSectionOpen ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
           </div>
         </div>
@@ -176,7 +176,7 @@ export const SmartGroupingSection: React.FC<SmartGroupingSectionProps> = ({
       {isGroupingSectionOpen && (
         <div className="space-y-6">
           {/* Scope, Algorithm & Export Toolbar */}
-          <div className="flex flex-wrap items-center justify-between gap-4 bg-[#0e1322] p-4 rounded-xl border border-[#1e2744]">
+          <div className="flex flex-wrap items-center justify-between gap-4 bg-slate-50 dark:bg-[#0e1322] p-4 rounded-xl border border-slate-200 dark:border-[#1e2744]">
             <div className="flex flex-wrap items-center gap-4">
               {/* Scope Selector */}
               <div className="flex items-center gap-1.5 bg-[#090d16] p-1 rounded-xl border border-[#182236] text-xs font-bold">

@@ -36,22 +36,22 @@ export const CanvasBottomBar: React.FC<CanvasBottomBarProps> = ({
     <div className="absolute bottom-4 right-4 z-30 flex items-center gap-2 select-none">
       {/* Page Navigation for Multi-page PDF */}
       {totalPages > 1 && (
-        <div className="flex items-center gap-1.5 bg-[#0c0f1e] border border-[#212c4b] px-3 py-1.5 rounded-xl shadow-2xl">
+        <div className="flex items-center gap-1.5 bg-white dark:bg-[#0c0f1e] border border-slate-200 dark:border-[#212c4b] px-3 py-1.5 rounded-xl shadow-xl">
           <button
             disabled={currentPage === 1}
             onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-            className="p-1 rounded-lg text-slate-300 hover:text-white disabled:opacity-30 cursor-pointer"
+            className="p-1 rounded-lg text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white disabled:opacity-30 cursor-pointer"
             title="Trang trước"
           >
             <ChevronLeft size={14} />
           </button>
-          <span className="text-xs font-mono font-bold text-white px-1">
+          <span className="text-xs font-mono font-bold text-slate-900 dark:text-white px-1">
             Trang {currentPage} / {totalPages}
           </span>
           <button
             disabled={currentPage === totalPages}
             onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-            className="p-1 rounded-lg text-slate-300 hover:text-white disabled:opacity-30 cursor-pointer"
+            className="p-1 rounded-lg text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white disabled:opacity-30 cursor-pointer"
             title="Trang sau"
           >
             <ChevronRight size={14} />
@@ -60,11 +60,11 @@ export const CanvasBottomBar: React.FC<CanvasBottomBarProps> = ({
       )}
 
       {/* Grid Pattern Toggle */}
-      <div className="flex items-center bg-[#0c0f1e] border border-[#212c4b] p-1 rounded-xl shadow-2xl gap-0.5">
+      <div className="flex items-center bg-white dark:bg-[#0c0f1e] border border-slate-200 dark:border-[#212c4b] p-1 rounded-xl shadow-xl gap-0.5">
         <button
           onClick={() => setGridType(gridType === 'none' ? 'dots' : gridType === 'dots' ? 'grid' : gridType === 'grid' ? 'lines' : 'none')}
           className={`flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-bold transition cursor-pointer ${
-            gridType !== 'none' ? 'bg-[#5c36f5] text-white shadow-sm' : 'text-slate-400 hover:text-white'
+            gridType !== 'none' ? 'bg-[#5c36f5] text-white shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
           }`}
           title="Chuyển kiểu nền: Trơn / Lưới chấm / Ô ly / Kẻ dòng"
         >
@@ -74,10 +74,10 @@ export const CanvasBottomBar: React.FC<CanvasBottomBarProps> = ({
       </div>
 
       {/* Zoom Controls */}
-      <div className="flex items-center bg-[#0c0f1e] border border-[#212c4b] p-1 rounded-xl shadow-2xl gap-1">
+      <div className="flex items-center bg-white dark:bg-[#0c0f1e] border border-slate-200 dark:border-[#212c4b] p-1 rounded-xl shadow-xl gap-1">
         <button
           onClick={() => setZoom(z => Math.max(0.01, z / 1.25))}
-          className="p-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-white/10 transition cursor-pointer"
+          className="p-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10 transition cursor-pointer"
           title="Thu nhỏ (-)"
         >
           <ZoomOut size={14} />
@@ -85,7 +85,7 @@ export const CanvasBottomBar: React.FC<CanvasBottomBarProps> = ({
 
         <button
           onClick={onResetZoom}
-          className="px-2 py-1 rounded-lg text-xs font-mono font-bold text-slate-300 hover:text-white hover:bg-white/10 transition cursor-pointer min-w-[62px] text-center"
+          className="px-2 py-1 rounded-lg text-xs font-mono font-bold text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10 transition cursor-pointer min-w-[62px] text-center"
           title="Đặt lại 100%"
         >
           {formatZoomText(zoom)}
@@ -93,7 +93,7 @@ export const CanvasBottomBar: React.FC<CanvasBottomBarProps> = ({
 
         <button
           onClick={() => setZoom(z => Math.min(200.0, z * 1.25))}
-          className="p-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-white/10 transition cursor-pointer"
+          className="p-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10 transition cursor-pointer"
           title="Phóng to (+)"
         >
           <ZoomIn size={14} />
@@ -101,7 +101,7 @@ export const CanvasBottomBar: React.FC<CanvasBottomBarProps> = ({
 
         <button
           onClick={onFitDocument}
-          className="p-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-white/10 transition cursor-pointer"
+          className="p-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10 transition cursor-pointer"
           title="Vừa màn hình (Fit)"
         >
           <Maximize size={13} />

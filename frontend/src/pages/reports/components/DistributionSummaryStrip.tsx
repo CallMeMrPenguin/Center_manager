@@ -12,10 +12,10 @@ export const DistributionSummaryStrip: React.FC<DistributionSummaryStripProps> =
   const [activeTooltip, setActiveTooltip] = useState<string | null>(null);
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 bg-[#0c0f1e] border border-[#1e2746] rounded-xl text-center items-center relative shadow-md divide-y sm:divide-y-0 sm:divide-x divide-[#1e2746]">
+    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 bg-white dark:bg-[#0c0f1e] border border-slate-200 dark:border-[#1e2746] rounded-xl text-center items-center relative shadow-sm dark:shadow-md divide-y sm:divide-y-0 sm:divide-x divide-slate-200 dark:divide-[#1e2746]">
       {/* 1. Điểm Trung Bình (Mean) */}
       <div
-        className="relative group p-2.5 animate-cascade-1 cursor-pointer transition-colors hover:bg-white/[0.02]"
+        className="relative group p-2.5 animate-cascade-1 cursor-pointer transition-colors hover:bg-slate-50 dark:hover:bg-white/[0.02]"
         onMouseEnter={() => setActiveTooltip('dist-mean')}
         onMouseLeave={() => setActiveTooltip(null)}
         onClick={() => setActiveTooltip(activeTooltip === 'dist-mean' ? null : 'dist-mean')}

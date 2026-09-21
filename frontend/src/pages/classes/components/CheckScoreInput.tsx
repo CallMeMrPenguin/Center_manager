@@ -222,7 +222,7 @@ export const CheckScoreInput: React.FC<CheckScoreInputProps> = React.memo(({
         }}
         onKeyDown={handleKeyDown}
         placeholder="0-10"
-        className="w-20 bg-[#161a29] border border-white/10 rounded-lg px-2 py-1 text-white font-extrabold text-xs focus:outline-none focus:border-[#5c36f5] focus:ring-2 focus:ring-[#5c36f5]/40 text-center transition selection:bg-[#5c36f5] selection:text-white caret-white"
+        className="w-20 bg-slate-50 dark:bg-[#161a29] border border-slate-300 dark:border-white/10 rounded-lg px-2 py-1 text-slate-900 dark:text-white font-extrabold text-xs focus:outline-none focus:border-[#5c36f5] focus:ring-2 focus:ring-[#5c36f5]/40 text-center transition selection:bg-[#5c36f5] selection:text-white caret-slate-900 dark:caret-white"
       />
 
       {/* Prediction indicator below input */}

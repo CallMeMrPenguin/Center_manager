@@ -60,14 +60,14 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
   const [showSizePopover, setShowSizePopover] = useState(false);
 
   return (
-    <div className="p-2 bg-[#0a0d18] border-b border-white/10 flex items-center justify-between flex-wrap gap-2 shrink-0 z-30 select-none">
+    <div className="p-2 bg-slate-50 dark:bg-[#0a0d18] border-b border-slate-200 dark:border-white/10 flex items-center justify-between flex-wrap gap-2 shrink-0 z-30 select-none">
       {/* Tool Buttons */}
       <div className="flex items-center gap-1">
         {/* Select */}
         <button
           onClick={() => setActiveTool('select')}
           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
-            activeTool === 'select' ? 'bg-[#5c36f5] text-white shadow-md' : 'text-slate-400 hover:text-white hover:bg-white/5'
+            activeTool === 'select' ? 'bg-[#5c36f5] text-white shadow-md' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-white/5'
           }`}
           title="Chọn, di chuyển ảnh/chữ (Double-click ảnh để cắt kiểu Word)"
         >
@@ -79,7 +79,7 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
         <button
           onClick={() => setActiveTool('text')}
           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
-            activeTool === 'text' ? 'bg-[#5c36f5] text-white shadow-md' : 'text-slate-400 hover:text-white hover:bg-white/5'
+            activeTool === 'text' ? 'bg-[#5c36f5] text-white shadow-md' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-white/5'
           }`}
           title="Thêm Text Box (Font Times New Roman, nền trắng, chữ đỏ mặc định)"
         >
@@ -87,13 +87,13 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
           <span>Chèn chữ</span>
         </button>
 
-        <div className="h-5 w-px bg-white/10 mx-1" />
+        <div className="h-5 w-px bg-slate-200 dark:bg-white/10 mx-1" />
 
         {/* Pen */}
         <button
           onClick={() => setActiveTool('pen')}
           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
-            activeTool === 'pen' ? 'bg-[#5c36f5] text-white shadow-md' : 'text-slate-400 hover:text-white hover:bg-white/5'
+            activeTool === 'pen' ? 'bg-[#5c36f5] text-white shadow-md' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-white/5'
           }`}
           title="Bút vẽ (Giữ Shift để vẽ đường thẳng)"
         >
@@ -105,7 +105,7 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
         <button
           onClick={() => setActiveTool('highlighter')}
           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
-            activeTool === 'highlighter' ? 'bg-[#5c36f5] text-white shadow-md' : 'text-slate-400 hover:text-white hover:bg-white/5'
+            activeTool === 'highlighter' ? 'bg-[#5c36f5] text-white shadow-md' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-white/5'
           }`}
           title="Dạ quang highlight"
         >
@@ -117,7 +117,7 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
         <button
           onClick={() => setActiveTool('eraser')}
           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
-            activeTool === 'eraser' ? 'bg-rose-600 text-white shadow-md' : 'text-slate-400 hover:text-white hover:bg-white/5'
+            activeTool === 'eraser' ? 'bg-rose-600 text-white shadow-md' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-white/5'
           }`}
           title="Tẩy xóa nét vẽ"
         >
@@ -125,13 +125,13 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
           <span>Tẩy</span>
         </button>
 
-        <div className="h-5 w-px bg-white/10 mx-1" />
+        <div className="h-5 w-px bg-slate-200 dark:bg-white/10 mx-1" />
 
         {/* Shapes */}
         <button
           onClick={() => setActiveTool('line')}
           className={`p-1.5 rounded-xl transition cursor-pointer ${
-            activeTool === 'line' ? 'bg-[#5c36f5] text-white' : 'text-slate-400 hover:text-white hover:bg-white/5'
+            activeTool === 'line' ? 'bg-[#5c36f5] text-white' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-white/5'
           }`}
           title="Đường thẳng (Giữ Shift để căn thẳng 45°)"
         >
@@ -141,7 +141,7 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
         <button
           onClick={() => setActiveTool('arrow')}
           className={`p-1.5 rounded-xl transition cursor-pointer ${
-            activeTool === 'arrow' ? 'bg-[#5c36f5] text-white' : 'text-slate-400 hover:text-white hover:bg-white/5'
+            activeTool === 'arrow' ? 'bg-[#5c36f5] text-white' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-white/5'
           }`}
           title="Mũi tên"
         >
@@ -151,7 +151,7 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
         <button
           onClick={() => setActiveTool('rect')}
           className={`p-1.5 rounded-xl transition cursor-pointer ${
-            activeTool === 'rect' ? 'bg-[#5c36f5] text-white' : 'text-slate-400 hover:text-white hover:bg-white/5'
+            activeTool === 'rect' ? 'bg-[#5c36f5] text-white' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-white/5'
           }`}
           title="Hình chữ nhật"
         >
@@ -161,7 +161,7 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
         <button
           onClick={() => setActiveTool('circle')}
           className={`p-1.5 rounded-xl transition cursor-pointer ${
-            activeTool === 'circle' ? 'bg-[#5c36f5] text-white' : 'text-slate-400 hover:text-white hover:bg-white/5'
+            activeTool === 'circle' ? 'bg-[#5c36f5] text-white' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-white/5'
           }`}
           title="Hình tròn"
         >
@@ -169,15 +169,15 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
         </button>
         {/* Font Family selector for Text tool */}
         {activeTool === 'text' && setSelectedFontFamily && (
-          <div className="flex items-center gap-1.5 bg-[#141829] border border-white/15 px-2 py-1 rounded-xl ml-1">
-            <span className="text-[11px] font-bold text-slate-400">Kiểu:</span>
+          <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-[#141829] border border-slate-200 dark:border-white/15 px-2 py-1 rounded-xl ml-1">
+            <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400">Kiểu:</span>
             <select
               value={selectedFontFamily}
               onChange={(e) => setSelectedFontFamily(e.target.value)}
-              className="bg-[#141829] text-white text-xs font-bold focus:outline-none cursor-pointer border-0"
+              className="bg-transparent text-slate-900 dark:text-white text-xs font-bold focus:outline-none cursor-pointer border-0"
             >
               {FONT_FAMILIES.map(f => (
-                <option key={f.value} value={f.value} className="bg-[#0c0f1e] text-white">{f.label}</option>
+                <option key={f.value} value={f.value} className="bg-white dark:bg-[#0c0f1e] text-slate-900 dark:text-white">{f.label}</option>
               ))}
             </select>
           </div>

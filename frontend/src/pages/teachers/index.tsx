@@ -158,7 +158,7 @@ export function TeachersPage() {
       id: 'stt',
       header: () => <div className="text-center w-full">STT</div>,
       size: 55,
-      cell: ({ row }) => <div className="text-center font-bold text-slate-400">{row.index + 1}</div>,
+      cell: ({ row }) => <div className="text-center font-bold text-slate-500 dark:text-slate-400">{row.index + 1}</div>,
     },
     {
       id: 'name',
@@ -169,10 +169,10 @@ export function TeachersPage() {
         const initial = t.full_name?.trim() ? t.full_name.trim().charAt(0).toUpperCase() : 'G';
         return (
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-[#1e2540] border border-[#343e68] flex items-center justify-center text-[#a5b4fc] font-black text-xs shrink-0 shadow-inner">
+            <div className="w-8 h-8 rounded-full bg-indigo-50 border border-indigo-200 text-indigo-700 dark:bg-[#1e2540] dark:border-[#343e68] dark:text-[#a5b4fc] flex items-center justify-center font-black text-xs shrink-0 shadow-inner">
               {initial}
             </div>
-            <span className="font-extrabold text-white text-sm">{t.full_name}</span>
+            <span className="font-extrabold text-slate-900 dark:text-white text-sm">{t.full_name}</span>
           </div>
         );
       },
@@ -187,8 +187,8 @@ export function TeachersPage() {
         return (
           <span className={`inline-block px-2.5 py-1 rounded-xl text-xs font-black border ${
             val === 'Giáo viên'
-              ? 'bg-[#1e2540] border-[#343e68] text-[#a5b4fc]'
-              : 'bg-[#132a22] border-[#059669] text-[#34d399]'
+              ? 'bg-indigo-50 border-indigo-200 text-indigo-700 dark:bg-[#1e2540] dark:border-[#343e68] dark:text-[#a5b4fc]'
+              : 'bg-emerald-50 border-emerald-200 text-emerald-700 dark:bg-[#132a22] dark:border-[#059669] dark:text-[#34d399]'
           }`}>
             {val}
           </span>
@@ -202,7 +202,7 @@ export function TeachersPage() {
         const t = row.original;
         const username = t.account_username || `gv_${String(t.id || 0).padStart(4, '0')}`;
         return (
-          <span className="font-mono text-xs font-black text-indigo-300 bg-indigo-500/15 px-2 py-0.5 rounded-lg border border-indigo-500/25">
+          <span className="font-mono text-xs font-black text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-500/15 px-2 py-0.5 rounded-lg border border-indigo-200 dark:border-indigo-500/25">
             {username}
           </span>
         );
@@ -215,11 +215,11 @@ export function TeachersPage() {
       cell: (info) => {
         const ph = info.getValue<string>();
         return ph ? (
-          <a href={`tel:${ph}`} className="text-slate-300 hover:text-cyan-300 text-xs font-semibold">
+          <a href={`tel:${ph}`} className="text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-cyan-300 text-xs font-semibold">
             {ph}
           </a>
         ) : (
-          <span className="text-slate-600 text-xs">-</span>
+          <span className="text-slate-400 dark:text-slate-600 text-xs">-</span>
         );
       },
     },
@@ -228,7 +228,7 @@ export function TeachersPage() {
       accessorKey: 'date_of_birth',
       header: 'Ngày Sinh',
       size: 120,
-      cell: (info) => <span className="text-slate-300 text-xs font-medium">{info.getValue<string>() || '-'}</span>,
+      cell: (info) => <span className="text-slate-700 dark:text-slate-300 text-xs font-medium">{info.getValue<string>() || '-'}</span>,
     },
     {
       id: 'account_status',
@@ -240,8 +240,8 @@ export function TeachersPage() {
           <div className="text-center">
             <span className={`inline-block px-2.5 py-0.5 rounded-full text-[11px] font-black ${
               status === 'Hoạt động'
-                ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                : 'bg-rose-500/20 text-rose-400 border border-rose-500/30'
+                ? 'bg-emerald-50 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/30'
+                : 'bg-rose-50 dark:bg-rose-500/20 text-rose-700 dark:text-rose-400 border border-rose-200 dark:border-rose-500/30'
             }`}>
               {status}
             </span>
@@ -258,7 +258,7 @@ export function TeachersPage() {
           <button
             type="button"
             onClick={() => handleOpenEdit(row.original)}
-            className="p-1.5 rounded-xl bg-white/5 hover:bg-[#5c36f5]/20 text-slate-400 hover:text-indigo-300 hover:border-[#5c36f5]/40 border border-transparent transition cursor-pointer"
+            className="p-1.5 rounded-xl bg-slate-100 hover:bg-indigo-50 dark:bg-white/5 dark:hover:bg-[#5c36f5]/20 text-slate-600 hover:text-indigo-600 dark:text-slate-400 dark:hover:text-indigo-300 border border-slate-200 dark:border-transparent transition cursor-pointer"
             title="Sửa thông tin giáo viên"
           >
             <Edit3 size={15} />
