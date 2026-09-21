@@ -205,7 +205,7 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = ({
   return (
     <div
       ref={chartWrapperRef}
-      className="bg-[#0b0f19] border border-[#1b253b] p-6 rounded-2xl shadow-xl flex flex-col gap-6 relative select-none animate-cascade-2"
+      className="bg-white dark:bg-[#0b0f19] border border-slate-200/90 dark:border-[#1b253b] p-6 rounded-2xl shadow-[0_2px_8px_-2px_rgba(0,0,0,0.06),0_1px_3px_-1px_rgba(0,0,0,0.06)] dark:shadow-xl flex flex-col gap-6 relative select-none animate-cascade-2 transition-colors"
     >
       <ChartControls
         engine={engine}

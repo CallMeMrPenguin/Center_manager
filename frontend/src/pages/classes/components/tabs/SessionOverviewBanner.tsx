@@ -107,8 +107,8 @@ export const SessionOverviewBanner: React.FC<SessionOverviewBannerProps> = ({
           {/* CONTROL STRIP: THRESHOLD SELECTION & DISCREPANCY SENSITIVITY */}
           <div className="flex flex-wrap items-center justify-between gap-3 text-xs bg-slate-50 dark:bg-[#080b14] p-2.5 rounded-xl border border-slate-200 dark:border-white/5">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-slate-400 font-bold flex items-center gap-1">
-                <SlidersHorizontal size={12} className="text-indigo-400" />
+              <span className="text-slate-600 dark:text-slate-400 font-bold flex items-center gap-1">
+                <SlidersHorizontal size={12} className="text-indigo-500 dark:text-indigo-400" />
                 Chuẩn điểm dưới:
               </span>
               <button
@@ -117,7 +117,7 @@ export const SessionOverviewBanner: React.FC<SessionOverviewBannerProps> = ({
                 className={`px-2.5 py-1 rounded-lg font-bold transition cursor-pointer ${
                   thresholdMode === 'standard'
                     ? 'bg-indigo-600 text-white shadow-sm'
-                    : 'text-slate-400 hover:text-white bg-white/5'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white bg-slate-200/70 dark:bg-white/5'
                 }`}
               >
                 Dưới 5.0 (Chuẩn VN)
@@ -128,7 +128,7 @@ export const SessionOverviewBanner: React.FC<SessionOverviewBannerProps> = ({
                 className={`px-2.5 py-1 rounded-lg font-bold transition cursor-pointer ${
                   thresholdMode === 'classAvg'
                     ? 'bg-indigo-600 text-white shadow-sm'
-                    : 'text-slate-400 hover:text-white bg-white/5'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white bg-slate-200/70 dark:bg-white/5'
                 }`}
               >
                 Dưới TB Buổi Học
@@ -139,16 +139,16 @@ export const SessionOverviewBanner: React.FC<SessionOverviewBannerProps> = ({
                 className={`px-2.5 py-1 rounded-lg font-bold transition cursor-pointer ${
                   thresholdMode === 'custom'
                     ? 'bg-indigo-600 text-white shadow-sm'
-                    : 'text-slate-400 hover:text-white bg-white/5'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white bg-slate-200/70 dark:bg-white/5'
                 }`}
               >
                 Tùy chỉnh
               </button>
 
               {thresholdMode === 'custom' && (
-                <div className="flex items-center gap-1 text-[11px] text-slate-400 bg-white/5 px-2 py-1 rounded-lg">
+                <div className="flex items-center gap-1 text-[11px] text-slate-600 dark:text-slate-400 bg-slate-200/70 dark:bg-white/5 px-2 py-1 rounded-lg">
                   <span>Tất cả:</span>
-                  <span className="text-indigo-400 font-bold">&lt;</span>
+                  <span className="text-indigo-600 dark:text-indigo-400 font-bold">&lt;</span>
                   <input
                     type="number"
                     step="0.1"
@@ -156,7 +156,7 @@ export const SessionOverviewBanner: React.FC<SessionOverviewBannerProps> = ({
                     max="10"
                     placeholder="Điểm"
                     onChange={(e) => handleApplyAllCustom(e.target.value)}
-                    className="w-10 bg-transparent text-white font-bold text-center focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    className="w-10 bg-transparent text-slate-900 dark:text-white font-bold text-center focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     title="Nhập mức điểm áp dụng chung cho cả 3 cột Check 1, Check 2, BTVN"
                   />
                   <span>đ</span>
@@ -165,8 +165,8 @@ export const SessionOverviewBanner: React.FC<SessionOverviewBannerProps> = ({
             </div>
 
             <div className="flex items-center gap-2">
-              <span className="text-slate-400 font-bold flex items-center gap-1">
-                <AlertTriangle size={12} className="text-amber-400" />
+              <span className="text-slate-600 dark:text-slate-400 font-bold flex items-center gap-1">
+                <AlertTriangle size={12} className="text-amber-500 dark:text-amber-400" />
                 Mức độ lệch BTVN &gt; Check:
               </span>
               {[
@@ -180,8 +180,8 @@ export const SessionOverviewBanner: React.FC<SessionOverviewBannerProps> = ({
                   onClick={() => setDivergenceMin(opt.val)}
                   className={`px-2.5 py-1 rounded-lg font-bold transition cursor-pointer ${
                     divergenceMin === opt.val
-                      ? 'bg-amber-500 text-black shadow-sm'
-                      : 'text-slate-400 hover:text-white bg-white/5'
+                      ? 'bg-amber-500 text-black shadow-sm font-black'
+                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white bg-slate-200/70 dark:bg-white/5'
                   }`}
                 >
                   {opt.label}

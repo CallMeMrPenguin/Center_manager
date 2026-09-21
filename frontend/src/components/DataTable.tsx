@@ -1259,10 +1259,10 @@ export function DataTable<TData>({
                             group transition-colors duration-150
                             ${onRowClick ? 'cursor-pointer' : ''}
                             ${row.getIsSelected()
-                              ? 'bg-indigo-500/10 hover:bg-indigo-500/15'
+                              ? 'bg-indigo-500/15 hover:bg-indigo-500/25 dark:bg-indigo-500/20 dark:hover:bg-indigo-500/30'
                               : rowIdx % 2 === 0
-                              ? 'bg-white dark:bg-[#0d1018] hover:bg-slate-50 dark:hover:bg-[#131928]'
-                              : 'bg-slate-50/70 dark:bg-[#0b0f1c] hover:bg-slate-50 dark:hover:bg-[#131928]'}
+                              ? 'bg-white dark:bg-[#0d1018] hover:bg-blue-50/90 dark:hover:bg-[#131928]'
+                              : 'bg-slate-50/80 dark:bg-[#0b0f1c] hover:bg-blue-50/90 dark:hover:bg-[#131928]'}
                           `}
                           onClick={() => onRowClick?.(row.original)}
                         >

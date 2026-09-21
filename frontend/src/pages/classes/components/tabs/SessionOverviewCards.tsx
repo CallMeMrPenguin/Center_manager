@@ -51,7 +51,7 @@ export const BelowThresholdCard: React.FC<BelowThresholdCardProps> = ({
 
   return (
     <div
-      className={`bg-slate-50 dark:bg-[#080b14] border ${styles.border} rounded-xl p-3 flex flex-col justify-between min-h-[140px] shadow-sm dark:shadow-none transition-colors`}
+      className={`bg-white dark:bg-[#080b14] border ${styles.border} rounded-xl p-3 flex flex-col justify-between min-h-[140px] shadow-[0_2px_8px_-2px_rgba(0,0,0,0.06),0_1px_3px_-1px_rgba(0,0,0,0.06)] dark:shadow-none transition-colors`}
     >
       <div>
         <div className="flex items-center justify-between mb-2 gap-2">
@@ -119,7 +119,7 @@ export const DivergenceCard: React.FC<DivergenceCardProps> = ({
   onFilterStudent,
 }) => {
   return (
-    <div className="bg-slate-50 dark:bg-[#080b14] border border-amber-200 dark:border-amber-500/30 rounded-xl p-3 flex flex-col justify-between min-h-[140px] shadow-sm dark:shadow-none transition-colors">
+    <div className="bg-white dark:bg-[#080b14] border border-amber-200 dark:border-amber-500/30 rounded-xl p-3 flex flex-col justify-between min-h-[140px] shadow-[0_2px_8px_-2px_rgba(0,0,0,0.06),0_1px_3px_-1px_rgba(0,0,0,0.06)] dark:shadow-none transition-colors">
       <div>
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-1.5">

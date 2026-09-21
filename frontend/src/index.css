@@ -759,36 +759,78 @@ input[type="month"] {
   scrollbar-color: rgba(59, 130, 246, 0.3) rgba(11, 15, 25, 0.6);
 }
 
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
+.dark h1,
+.dark h2,
+.dark h3,
+.dark h4,
+.dark h5,
+.dark h6 {
   letter-spacing: -0.02em;
   font-family: var(--font-sans);
   font-weight: 700 !important;
   color: #ffffff !important;
 }
 
-input[type="text"]:not(.canvas-text-editor):not(.white-paper-input),
-input[type="number"]:not(.canvas-text-editor):not(.white-paper-input),
-input[type="password"]:not(.canvas-text-editor):not(.white-paper-input),
-textarea:not(.code-editor-textarea):not(.canvas-text-editor):not(.white-paper-input),
-select {
-  background: #0d1018 !important;
-  border: 1px solid rgba(255, 255, 255, 0.08) !important;
-  color: #ffffff !important;
+html:not(.dark) h1,
+html:not(.dark) h2,
+html:not(.dark) h3,
+html:not(.dark) h4,
+html:not(.dark) h5,
+html:not(.dark) h6 {
+  letter-spacing: -0.02em;
+  font-family: var(--font-sans);
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.dark input[type="text"]:not(.canvas-text-editor):not(.white-paper-input),
+.dark input[type="number"]:not(.canvas-text-editor):not(.white-paper-input),
+.dark input[type="password"]:not(.canvas-text-editor):not(.white-paper-input),
+.dark textarea:not(.code-editor-textarea):not(.canvas-text-editor):not(.white-paper-input),
+.dark select {
+  background-color: #0d1018;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #ffffff;
   font-weight: 600;
   border-radius: 14px;
 }
 
-input:not(.canvas-text-editor):not(.white-paper-input):focus,
-select:focus,
-textarea:not(.code-editor-textarea):not(.canvas-text-editor):not(.white-paper-input):focus {
+html:not(.dark) input[type="text"]:not(.canvas-text-editor):not(.white-paper-input),
+html:not(.dark) input[type="number"]:not(.canvas-text-editor):not(.white-paper-input),
+html:not(.dark) input[type="password"]:not(.canvas-text-editor):not(.white-paper-input),
+html:not(.dark) textarea:not(.code-editor-textarea):not(.canvas-text-editor):not(.white-paper-input),
+html:not(.dark) select {
+  background-color: #ffffff;
+  border: 1px solid #cbd5e1;
+  color: #0f172a;
+  font-weight: 600;
+  border-radius: 14px;
+}
+
+.dark input:not(.canvas-text-editor):not(.white-paper-input):focus,
+.dark select:focus,
+.dark textarea:not(.code-editor-textarea):not(.canvas-text-editor):not(.white-paper-input):focus {
   outline: none;
-  border-color: rgba(37, 99, 235, 0.6) !important;
-  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2) !important;
+  border-color: rgba(92, 54, 245, 0.6);
+  box-shadow: 0 0 0 2px rgba(92, 54, 245, 0.25);
+}
+
+html:not(.dark) input:not(.canvas-text-editor):not(.white-paper-input):focus,
+html:not(.dark) select:focus,
+html:not(.dark) textarea:not(.code-editor-textarea):not(.canvas-text-editor):not(.white-paper-input):focus {
+  outline: none;
+  border-color: rgba(92, 54, 245, 0.6);
+  box-shadow: 0 0 0 2px rgba(92, 54, 245, 0.2);
+}
+
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: #64748b;
+}
+
+html:not(.dark) input::placeholder,
+html:not(.dark) textarea::placeholder {
+  color: #94a3b8;
 }
 
 .white-paper-input {
@@ -843,7 +885,7 @@ textarea:not(.code-editor-textarea):not(.canvas-text-editor):not(.white-paper-in
   box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.25) !important;
 }
 
-.filter-dropdown-menu {
+.dark .filter-dropdown-menu {
   background-color: #12172a !important;
   background: #12172a !important;
   border: 1px solid #28345a !important;
@@ -852,6 +894,18 @@ textarea:not(.code-editor-textarea):not(.canvas-text-editor):not(.white-paper-in
   opacity: 1 !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
+}
+
+html:not(.dark) .filter-dropdown-menu {
+  background-color: #ffffff !important;
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.12) !important;
+  border-radius: 16px !important;
+  opacity: 1 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  color: #0f172a !important;
 }
 
 @keyframes sheen {
