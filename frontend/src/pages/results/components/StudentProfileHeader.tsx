@@ -230,7 +230,7 @@ export const StudentProfileHeader: React.FC<StudentProfileHeaderProps> = ({
                 <img
                   src={tier.badge}
                   alt={tier.name}
-                  className={`w-full h-full object-contain ${tier.scale || 'scale-100'} drop-shadow-[0_4px_16px_rgba(0,0,0,0.6)]`}
+                  className={`w-full h-full object-contain ${tier.scale || 'scale-100'}`}
                 />
               </div>
               <span className={`text-2xl sm:text-3xl font-black leading-none ${rankTheme.badgeText}`}>

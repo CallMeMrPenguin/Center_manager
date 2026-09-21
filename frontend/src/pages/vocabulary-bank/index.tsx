@@ -1413,8 +1413,12 @@ export default function VocabularyBank({ isActive }: { isActive?: boolean }) {
                       <tr 
                         key={v.id}
                         onClick={() => handleSelectRow(v.id)}
-                        className={`hover:bg-slate-100 dark:hover:bg-slate-800/40 transition cursor-pointer ${
-                          isSelected ? 'bg-blue-50 dark:bg-blue-600/5' : ''
+                        className={`transition cursor-pointer ${
+                          isSelected 
+                            ? 'bg-blue-100/90 dark:bg-blue-600/15' 
+                            : idx % 2 === 0 
+                            ? 'bg-white dark:bg-[#0d1018] hover:bg-blue-100/70 dark:hover:bg-[#131928]' 
+                            : 'bg-slate-100/85 dark:bg-[#0b0f1c] hover:bg-blue-100/70 dark:hover:bg-[#131928]'
                         }`}
                       >
                         {/* Checkbox */}
@@ -1433,28 +1437,28 @@ export default function VocabularyBank({ isActive }: { isActive?: boolean }) {
 
                         {/* No. */}
                         {visibleCols.no && (
-                          <td className="py-3.5 px-3 text-slate-550 font-bold">
+                          <td className="py-3.5 px-3 text-slate-700 dark:text-slate-300 font-extrabold">
                             {(currentPage - 1) * pageSize + idx + 1}
                           </td>
                         )}
 
                         {/* Grade */}
                         {visibleCols.grade && (
-                          <td className="py-3.5 px-3 font-semibold text-slate-400">
+                          <td className="py-3.5 px-3 font-extrabold text-slate-800 dark:text-slate-200">
                             {v.grade ? `Lớp ${v.grade}` : '-'}
                           </td>
                         )}
 
                         {/* Unit */}
                         {visibleCols.unit && (
-                          <td className="py-3.5 px-3 font-semibold text-slate-400">
+                          <td className="py-3.5 px-3 font-extrabold text-slate-800 dark:text-slate-200">
                             {v.unit ? `Unit ${v.unit}` : '-'}
                           </td>
                         )}
 
                         {/* Vocabulary word */}
                         {visibleCols.vocabulary && (
-                          <td className="py-3.5 px-4">
+                          <td className="py-3.5 px-4 font-black text-slate-900 dark:text-white text-base">
                             {renderFormattedVocab(v.vocabulary)}
                           </td>
                         )}
@@ -1462,7 +1466,7 @@ export default function VocabularyBank({ isActive }: { isActive?: boolean }) {
                         {/* POS */}
                         {visibleCols.pos && (
                           <td className="py-3.5 px-3">
-                            <span className="px-2 py-0.5 rounded text-[0.66rem] font-bold bg-slate-100 dark:bg-[#111827] border border-slate-200 dark:border-slate-855 text-slate-700 dark:text-slate-400 italic">
+                            <span className="px-2 py-0.5 rounded text-[0.66rem] font-bold bg-slate-100 dark:bg-[#111827] border border-slate-300 dark:border-slate-855 text-slate-800 dark:text-slate-300 italic">
                               {v.pos || '-'}
                             </span>
                           </td>
@@ -1470,14 +1474,14 @@ export default function VocabularyBank({ isActive }: { isActive?: boolean }) {
 
                         {/* IPA */}
                         {visibleCols.ipa && (
-                          <td className="py-3.5 px-4 text-slate-600 dark:text-slate-440 font-mono text-[0.73rem]">
+                          <td className="py-3.5 px-4 text-slate-700 dark:text-slate-300 font-mono text-[0.73rem] font-bold">
                             {v.ipa || '-'}
                           </td>
                         )}
 
                         {/* Meaning */}
                         {visibleCols.meaning && (
-                          <td className="py-3.5 px-5 font-semibold text-slate-800 dark:text-slate-300 break-words max-w-xs">
+                          <td className="py-3.5 px-5 font-bold text-slate-900 dark:text-white break-words max-w-xs text-sm">
                             {v.meaning || '-'}
                           </td>
                         )}

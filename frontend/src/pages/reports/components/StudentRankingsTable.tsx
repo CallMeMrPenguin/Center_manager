@@ -266,7 +266,7 @@ export const StudentRankingsTable: React.FC<StudentRankingsTableProps> = React.m
               <img
                 src={tier.badge}
                 alt={tier.name}
-                className={`w-full h-full object-contain ${tier.scale || 'scale-100'} drop-shadow-[0_4px_12px_rgba(0,0,0,0.6)] transform hover:scale-115 transition-transform duration-200`}
+                className={`w-full h-full object-contain ${tier.scale || 'scale-100'} transform hover:scale-115 transition-transform duration-200`}
               />
             </div>
             <div className="text-left">

@@ -81,7 +81,7 @@ export const TierDistributionCard: React.FC<TierDistributionCardProps> = ({
               className={`flex items-center justify-between gap-4 py-2 px-3 rounded-xl transition-all cursor-pointer select-none ${isSelected ? 'bg-indigo-50 dark:bg-white/10 ring-1 ring-indigo-200 dark:ring-white/20' : 'hover:bg-slate-50 dark:hover:bg-white/5'}`}
             >
               <div className="flex items-center gap-3 w-36 shrink-0">
-                <img src={t.badge} alt={t.name} className="w-9 h-9 object-contain shrink-0 drop-shadow-[0_2px_8px_rgba(0,0,0,0.5)]" />
+                <img src={t.badge} alt={t.name} className="w-9 h-9 object-contain shrink-0" />
                 <span className="text-sm font-bold text-slate-800 dark:text-slate-200">{t.name}</span>
               </div>
               <div className="flex-1 h-3 bg-slate-100 dark:bg-[#0e1424] rounded-full overflow-hidden p-0.5 border border-slate-200 dark:border-white/5 mx-2">

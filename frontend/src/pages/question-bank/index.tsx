@@ -1703,7 +1703,7 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
                       </td>
                     </tr>
                   )}
-                  {paginatedQuestions.map((q: DbQuestion) => {
+                  {paginatedQuestions.map((q: DbQuestion, rowIdx: number) => {
                     const isSelected = selectedSet.has(q.id);
                     const isEditing = editingId === q.id;
                     
@@ -1855,8 +1855,12 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
                       <tr 
                         key={q.id}
                         onClick={() => handleSelectRow(q.id)}
-                        className={`hover:bg-slate-100 dark:hover:bg-slate-800/40 transition cursor-pointer ${
-                          isSelected ? 'bg-blue-50 dark:bg-blue-600/5' : ''
+                        className={`transition cursor-pointer ${
+                          isSelected 
+                            ? 'bg-blue-100/90 dark:bg-blue-600/15' 
+                            : rowIdx % 2 === 0 
+                            ? 'bg-white dark:bg-[#0d1018] hover:bg-blue-100/70 dark:hover:bg-[#131928]' 
+                            : 'bg-slate-100/85 dark:bg-[#0b0f1c] hover:bg-blue-100/70 dark:hover:bg-[#131928]'
                         }`}
                       >
                         {/* Checkbox */}
@@ -1875,14 +1879,14 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
 
                         {/* Grade */}
                         {visibleCols.grade && (
-                          <td className="py-3 px-3 font-bold text-slate-400 whitespace-nowrap">
+                          <td className="py-3 px-3 font-extrabold text-slate-800 dark:text-slate-200 whitespace-nowrap">
                             {q.grade || '-'}
                           </td>
                         )}
 
                         {/* Unit */}
                         {visibleCols.unit && (
-                          <td className="py-3 px-3 font-bold text-slate-400 whitespace-nowrap">
+                          <td className="py-3 px-3 font-extrabold text-slate-800 dark:text-slate-200 whitespace-nowrap">
                             {q.unit || '-'}
                           </td>
                         )}
@@ -1890,7 +1894,7 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
                         {/* Question Type */}
                         {visibleCols['type'] && (
                           <td className="py-3 px-3 whitespace-nowrap">
-                            <span className="px-2 py-0.5 rounded text-[0.66rem] font-bold bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-850 text-slate-800 dark:text-slate-300">
+                            <span className="px-2 py-0.5 rounded text-[0.66rem] font-black bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-850 text-slate-900 dark:text-slate-200">
                               {TYPE_MAP[q.t] || q.t || 'Khác'}
                             </span>
                           </td>
@@ -1898,14 +1902,14 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
 
                         {/* Question text */}
                         {visibleCols.content && (
-                          <td className="py-3 px-4 font-semibold text-slate-900 dark:text-slate-200 break-words max-w-sm">
-                            {q.x || <span className="text-slate-400 italic">Dạng phát âm/trọng âm</span>}
+                          <td className="py-3 px-4 font-extrabold text-slate-900 dark:text-white break-words max-w-sm text-sm">
+                            {q.x || <span className="text-slate-500 italic">Dạng phát âm/trọng âm</span>}
                           </td>
                         )}
 
                         {/* Options */}
                         {visibleCols.options && (
-                          <td className="py-3 px-4 text-slate-600 dark:text-slate-400">
+                          <td className="py-3 px-4 text-slate-800 dark:text-slate-300">
                             {q.o && q.o.length > 0 ? (
                               <div className="grid grid-cols-2 gap-1.5 text-[0.66rem]">
                                 {q.o.map((opt: string, i: number) => {
@@ -1916,8 +1920,8 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
                                       key={i} 
                                       className={`flex items-center gap-1.5 px-2 py-1 rounded border transition-colors ${
                                         isAnswer 
-                                          ? 'border-emerald-500/40 text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 font-bold' 
-                                          : 'bg-slate-100 dark:bg-[#090D18]/80 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300'
+                                          ? 'border-emerald-500/40 text-emerald-800 dark:text-emerald-300 bg-emerald-500/15 font-extrabold' 
+                                          : 'bg-white dark:bg-[#090D18]/80 border-slate-300 dark:border-slate-800 text-slate-800 dark:text-slate-200 font-medium'
                                       }`}
                                     >
                                       <span className="font-extrabold text-[0.6rem] uppercase">{letter}.</span>
@@ -1927,7 +1931,7 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
                                 })}
                               </div>
                             ) : (
-                              <span className="text-slate-400 italic">Không có tùy chọn</span>
+                              <span className="text-slate-500 italic">Không có tùy chọn</span>
                             )}
                           </td>
                         )}

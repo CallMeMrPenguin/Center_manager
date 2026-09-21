@@ -33,7 +33,7 @@ export function SegmentedControl<T extends string = string>({
   defaultActive,
   onChange,
   className = '',
-  activeColor = 'bg-[#5c36f5] shadow-[0_0_18px_rgba(92,54,245,0.65)]',
+  activeColor = 'bg-[#5c36f5]',
   size = 'md',
   fit = 'content',
   fullWidth,
@@ -107,17 +107,17 @@ export function SegmentedControl<T extends string = string>({
             {isActive && (
               <motion.div
                 layoutId={`${baseLayoutId}-active`}
-                transition={{ type: 'spring', stiffness: 450, damping: 35 }}
-                className={`absolute inset-0 rounded-lg ${activeColor} border border-white/20 z-0 pointer-events-none`}
+                transition={{ type: 'spring', stiffness: 450, damping: 32 }}
+                className={`absolute inset-0 rounded-lg ${activeColor} shadow-[0_3px_10px_rgba(92,54,245,0.4),0_1px_3px_rgba(0,0,0,0.12)] dark:shadow-[0_0_18px_rgba(92,54,245,0.65)] border border-indigo-400/40 dark:border-white/20 z-0 pointer-events-none`}
               />
             )}
 
-            {/* Hover Glow Pill */}
+            {/* Hover Pill */}
             {isHovered && (
               <motion.div
                 layoutId={`${baseLayoutId}-hover`}
                 transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-                className="absolute inset-0 rounded-lg bg-white dark:bg-white/[0.06] border border-slate-300 dark:border-white/10 shadow-xs z-0 pointer-events-none"
+                className="absolute inset-0 rounded-lg bg-black/[0.06] dark:bg-white/[0.06] border border-black/[0.04] dark:border-white/10 z-0 pointer-events-none"
               />
             )}
 

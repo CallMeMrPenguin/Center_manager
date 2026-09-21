@@ -249,7 +249,7 @@ export const HeadToHeadDuel: React.FC<HeadToHeadDuelProps> = ({
             <img
               src={getStudentTier(Number(classComparisonData.classA.topStudent.ema_level || 0)).badge}
               alt="Rank"
-              className="w-10 h-10 object-contain shrink-0 drop-shadow-md"
+              className="w-10 h-10 object-contain shrink-0"
             />
           ) : (
             <Award size={28} className="text-slate-400 dark:text-slate-500" />
@@ -273,7 +273,7 @@ export const HeadToHeadDuel: React.FC<HeadToHeadDuelProps> = ({
             <img
               src={getStudentTier(Number(classComparisonData.classB.topStudent.ema_level || 0)).badge}
               alt="Rank"
-              className="w-10 h-10 object-contain shrink-0 drop-shadow-md"
+              className="w-10 h-10 object-contain shrink-0"
             />
           ) : (
             <Award size={28} className="text-slate-400 dark:text-slate-500" />

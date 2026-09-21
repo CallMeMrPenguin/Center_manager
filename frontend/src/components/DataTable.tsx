@@ -1261,8 +1261,8 @@ export function DataTable<TData>({
                             ${row.getIsSelected()
                               ? 'bg-indigo-500/15 hover:bg-indigo-500/25 dark:bg-indigo-500/20 dark:hover:bg-indigo-500/30'
                               : rowIdx % 2 === 0
-                              ? 'bg-white dark:bg-[#0d1018] hover:bg-blue-50/90 dark:hover:bg-[#131928]'
-                              : 'bg-slate-50/80 dark:bg-[#0b0f1c] hover:bg-blue-50/90 dark:hover:bg-[#131928]'}
+                              ? 'bg-white dark:bg-[#0d1018] hover:bg-blue-100/70 dark:hover:bg-[#131928]'
+                              : 'bg-slate-100/85 dark:bg-[#0b0f1c] hover:bg-blue-100/70 dark:hover:bg-[#131928]'}
                           `}
                           onClick={() => onRowClick?.(row.original)}
                         >
