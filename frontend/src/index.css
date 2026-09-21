@@ -911,10 +911,10 @@ html:not(.dark) textarea::placeholder {
 }
 
 .dark .filter-dropdown-menu {
-  background-color: #12172a !important;
-  background: #12172a !important;
-  border: 1px solid #28345a !important;
-  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.75) !important;
+  background-color: #161d36 !important;
+  background: #161d36 !important;
+  border: 2px solid #3b4d82 !important;
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(255, 255, 255, 0.08) !important;
   border-radius: 16px !important;
   opacity: 1 !important;
   backdrop-filter: none !important;
@@ -924,8 +924,8 @@ html:not(.dark) textarea::placeholder {
 html:not(.dark) .filter-dropdown-menu {
   background-color: #ffffff !important;
   background: #ffffff !important;
-  border: 1px solid #cbd5e1 !important;
-  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.16) !important;
+  border: 2px solid #94a3b8 !important;
+  box-shadow: 0 20px 48px rgba(15, 23, 42, 0.22), 0 0 0 1px rgba(0, 0, 0, 0.05) !important;
   border-radius: 16px !important;
   opacity: 1 !important;
   backdrop-filter: none !important;
@@ -1025,9 +1025,24 @@ html:not(.dark) .recharts-default-tooltip {
 }
 
 /* ─── SMOOTH THEME CROSSFADE TRANSITION ─────────────────────────────────── */
+html, body, #root {
+  transition: background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1), color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 html.theme-transition,
-html.theme-transition *,
-html.theme-transition *:before,
-html.theme-transition *:after {
-  transition: background-color 0.35s ease-out, border-color 0.35s ease-out, color 0.35s ease-out, box-shadow 0.35s ease-out !important;
+html.theme-transition body,
+html.theme-transition #root,
+html.theme-transition header,
+html.theme-transition nav,
+html.theme-transition aside,
+html.theme-transition main,
+html.theme-transition table,
+html.theme-transition thead,
+html.theme-transition tbody,
+html.theme-transition tr,
+html.theme-transition th,
+html.theme-transition td,
+html.theme-transition .kpi-editorial-card,
+html.theme-transition .filter-dropdown-menu {
+  transition: background-color 0.35s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.35s cubic-bezier(0.4, 0, 0.2, 1), color 0.25s ease, box-shadow 0.35s ease !important;
 }

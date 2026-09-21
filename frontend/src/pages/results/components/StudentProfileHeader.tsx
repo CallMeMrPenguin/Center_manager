@@ -61,14 +61,14 @@ export const StudentProfileHeader: React.FC<StudentProfileHeaderProps> = ({
 
   const getRankTheme = (t: number) => {
     switch (t) {
-      case 8: return { badgeText: 'text-amber-400 font-black' };
-      case 7: return { badgeText: 'text-rose-400 font-black' };
-      case 6: return { badgeText: 'text-purple-400 font-black' };
-      case 5: return { badgeText: 'text-cyan-400 font-black' };
-      case 4: return { badgeText: 'text-indigo-300 font-bold' };
-      case 3: return { badgeText: 'text-yellow-400 font-bold' };
-      case 2: return { badgeText: 'text-sky-300 font-bold' };
-      default: return { badgeText: 'text-amber-500 font-bold' };
+      case 8: return { badgeText: 'text-amber-700 dark:text-amber-400 font-black' };
+      case 7: return { badgeText: 'text-rose-700 dark:text-rose-400 font-black' };
+      case 6: return { badgeText: 'text-purple-700 dark:text-purple-400 font-black' };
+      case 5: return { badgeText: 'text-cyan-700 dark:text-cyan-400 font-black' };
+      case 4: return { badgeText: 'text-indigo-700 dark:text-indigo-300 font-black' };
+      case 3: return { badgeText: 'text-amber-700 dark:text-yellow-400 font-black' };
+      case 2: return { badgeText: 'text-sky-700 dark:text-sky-300 font-black' };
+      default: return { badgeText: 'text-amber-700 dark:text-amber-500 font-black' };
     }
   };
 
@@ -92,16 +92,16 @@ export const StudentProfileHeader: React.FC<StudentProfileHeaderProps> = ({
   const piScore = rawPi > 0 ? rawPi.toFixed(1) : (scoreNum > 0 ? (scoreNum * 10).toFixed(1) : '0.0');
 
   const getEvaluation = (score: number, currentTier: StudentTier) => {
-    if (score <= 0) return { text: 'Chưa Đánh Giá', color: 'text-slate-400' };
+    if (score <= 0) return { text: 'Chưa Đánh Giá', color: 'text-slate-600 dark:text-slate-400 font-extrabold' };
     switch (currentTier.tier) {
-      case 8: return { text: 'Xuất Chúng (Vững Vàng)', color: 'text-amber-400' };
-      case 7: return { text: 'Vượt Trội (Ưu Tú)', color: 'text-rose-400' };
-      case 6: return { text: 'Ưu Tú (Tiến Bộ Nhanh)', color: 'text-purple-400' };
-      case 5: return { text: 'Xuất Sắc (Nắm Chắc)', color: 'text-cyan-400' };
-      case 4: return { text: 'Giỏi (Đang Tiến Bộ)', color: 'text-indigo-300' };
-      case 3: return { text: 'Khá (Đang Tiến Bộ)', color: 'text-yellow-400' };
-      case 2: return { text: 'Trung Bình (Cần Củng Cố)', color: 'text-sky-400' };
-      default: return { text: 'Yếu (Cần Phụ Đạo)', color: 'text-rose-400' };
+      case 8: return { text: 'Xuất Chúng (Vững Vàng)', color: 'text-amber-700 dark:text-amber-400 font-black' };
+      case 7: return { text: 'Vượt Trội (Ưu Tú)', color: 'text-rose-700 dark:text-rose-400 font-black' };
+      case 6: return { text: 'Ưu Tú (Tiến Bộ Nhanh)', color: 'text-purple-700 dark:text-purple-400 font-black' };
+      case 5: return { text: 'Xuất Sắc (Nắm Chắc)', color: 'text-cyan-700 dark:text-cyan-400 font-black' };
+      case 4: return { text: 'Giỏi (Đang Tiến Bộ)', color: 'text-indigo-700 dark:text-indigo-300 font-black' };
+      case 3: return { text: 'Khá (Đang Tiến Bộ)', color: 'text-amber-700 dark:text-yellow-400 font-black' };
+      case 2: return { text: 'Trung Bình (Cần Củng Cố)', color: 'text-sky-700 dark:text-sky-400 font-black' };
+      default: return { text: 'Yếu (Cần Phụ Đạo)', color: 'text-rose-700 dark:text-rose-400 font-black' };
     }
   };
 

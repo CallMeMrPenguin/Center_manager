@@ -89,7 +89,7 @@ export const ClassBenchmarkTable: React.FC<ClassBenchmarkTableProps> = ({
       id: 'stt',
       header: () => <div className="text-center w-full">STT</div>,
       meta: { headerText: 'STT' },
-      cell: ({ row }) => <div className="text-center font-bold text-slate-400">{row.index + 1}</div>,
+      cell: ({ row }) => <div className="text-center font-extrabold text-slate-700 dark:text-slate-300">{row.index + 1}</div>,
       enableSorting: false,
     },
     {
@@ -98,8 +98,8 @@ export const ClassBenchmarkTable: React.FC<ClassBenchmarkTableProps> = ({
       meta: { headerText: 'Tên Lớp Học' },
       cell: ({ row }) => (
         <div>
-          <span className="font-bold text-slate-900 dark:text-white block text-sm">{row.original.class_name}</span>
-          <span className="text-[10px] text-slate-500 dark:text-slate-400 font-semibold">{row.original.grade}</span>
+          <span className="font-extrabold text-slate-900 dark:text-white block text-sm sm:text-base">{row.original.class_name}</span>
+          <span className="text-[11px] text-slate-600 dark:text-slate-400 font-bold">{row.original.grade}</span>
         </div>
       ),
     },
@@ -107,7 +107,7 @@ export const ClassBenchmarkTable: React.FC<ClassBenchmarkTableProps> = ({
       accessorKey: 'studentCount',
       header: () => <div className="text-center w-full">Sĩ Số</div>,
       meta: { headerText: 'Sĩ Số' },
-      cell: ({ getValue }) => <div className="text-center font-mono font-bold text-slate-800 dark:text-slate-200">{getValue<number>()} học sinh</div>,
+      cell: ({ getValue }) => <div className="text-center font-mono font-extrabold text-slate-900 dark:text-slate-100">{getValue<number>()} học sinh</div>,
     },
     {
       accessorKey: 'attendancePct',
@@ -117,9 +117,9 @@ export const ClassBenchmarkTable: React.FC<ClassBenchmarkTableProps> = ({
         const val = getValue<number>();
         return (
           <div className="text-center">
-            <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-mono font-black border ${val >= 90 ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' :
-              val >= 80 ? 'bg-blue-500/20 text-blue-300 border-blue-500/30' :
-                'bg-rose-500/20 text-rose-300 border-rose-500/30'
+            <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-mono font-black border ${val >= 90 ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-emerald-500/30' :
+              val >= 80 ? 'bg-blue-500/15 text-blue-700 dark:text-blue-400 border-blue-500/30' :
+                'bg-rose-500/15 text-rose-700 dark:text-rose-400 border-rose-500/30'
               }`}>{val}%</span>
           </div>
         );
@@ -129,19 +129,19 @@ export const ClassBenchmarkTable: React.FC<ClassBenchmarkTableProps> = ({
       accessorKey: 'avgEma',
       header: () => <div className="text-center w-full">Điểm EMA TB</div>,
       meta: { headerText: 'Điểm EMA TB' },
-      cell: ({ getValue }) => <div className="text-center font-mono font-black text-indigo-300 text-sm">{getValue<number>() > 0 ? format1Dec(getValue<number>()) : '-'}</div>,
+      cell: ({ getValue }) => <div className="text-center font-mono font-black text-indigo-700 dark:text-indigo-400 text-base">{getValue<number>() > 0 ? format1Dec(getValue<number>()) : '-'}</div>,
     },
     {
       accessorKey: 'improvingPct',
       header: () => <div className="text-center w-full">Tỷ Lệ Tiến Bộ</div>,
       meta: { headerText: 'Tỷ Lệ Tiến Bộ' },
-      cell: ({ getValue }) => <div className="text-center font-mono font-bold text-emerald-400">{getValue<number>()}% lớp</div>,
+      cell: ({ getValue }) => <div className="text-center font-mono font-black text-emerald-700 dark:text-emerald-400 text-base">{getValue<number>()}% lớp</div>,
     },
     {
       accessorKey: 'classSd',
       header: () => <div className="text-center w-full">Độ Lệch Chuẩn (σ)</div>,
       meta: { headerText: 'Độ Lệch Chuẩn (σ)' },
-      cell: ({ getValue }) => <div className="text-center font-mono font-bold text-cyan-300">σ = {getValue<number>()}</div>,
+      cell: ({ getValue }) => <div className="text-center font-mono font-black text-cyan-700 dark:text-cyan-400 text-base">σ = {getValue<number>()}</div>,
     },
     {
       accessorKey: 'evaluation',
@@ -152,7 +152,7 @@ export const ClassBenchmarkTable: React.FC<ClassBenchmarkTableProps> = ({
         const isExcel = ev.includes('Xuất sắc') || ev.includes('Tiến bộ');
         return (
           <div className="text-center">
-            <span className={`inline-block px-2.5 py-1 rounded-xl text-[10px] font-black border ${isExcel ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' : 'bg-amber-500/10 text-amber-400 border-amber-500/30'}`}>
+            <span className={`inline-block px-2.5 py-1 rounded-xl text-xs font-black border ${isExcel ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-emerald-500/30' : 'bg-amber-500/15 text-amber-700 dark:text-amber-400 border-amber-500/30'}`}>
               {ev}
             </span>
           </div>

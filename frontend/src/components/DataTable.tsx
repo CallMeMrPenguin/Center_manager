@@ -281,7 +281,7 @@ function ColumnVisibilityDropdown<TData>({
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full mt-2 z-[60] w-72 bg-white dark:bg-[#131929] border border-slate-200 dark:border-[#28334e] rounded-2xl shadow-2xl p-3 space-y-2 animate-mac-dropdown">
+        <div className="absolute right-0 top-full mt-2 z-[60] w-72 bg-white dark:bg-[#151c35] border-2 border-slate-300 dark:border-[#334375] rounded-2xl shadow-[0_16px_48px_rgba(15,23,42,0.22)] dark:shadow-[0_24px_64px_rgba(0,0,0,0.95)] ring-1 ring-black/5 dark:ring-white/10 p-3 space-y-2 animate-mac-dropdown">
           {/* TAB SWITCHER WITH SLIDING PILL */}
           <SegmentedControl<'visibility' | 'order' | 'align'>
             value={activeTab}
@@ -615,32 +615,32 @@ function ExportDropdown<TData>({
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full mt-2 z-[60] w-44 bg-white dark:bg-[#131929] border border-slate-200 dark:border-[#28334e] rounded-2xl shadow-2xl p-2 space-y-1 animate-mac-dropdown">
+        <div className="absolute right-0 top-full mt-2 z-[60] w-48 bg-white dark:bg-[#151c35] border-2 border-slate-300 dark:border-[#334375] rounded-2xl shadow-[0_16px_48px_rgba(15,23,42,0.22)] dark:shadow-[0_24px_64px_rgba(0,0,0,0.95)] ring-1 ring-black/5 dark:ring-white/10 p-2 space-y-1 animate-mac-dropdown">
           <button
             type="button"
             onClick={exportExcel}
-            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 hover:text-emerald-600 dark:hover:text-white hover:bg-emerald-500/10 hover:border hover:border-emerald-500/20 transition cursor-pointer"
+            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-black text-slate-900 dark:text-slate-100 hover:text-emerald-700 dark:hover:text-emerald-400 hover:bg-emerald-500/15 transition cursor-pointer"
           >
-            <FileSpreadsheet size={13} className="text-emerald-500 dark:text-emerald-400" />
-            Excel (.xlsx)
+            <FileSpreadsheet size={14} className="text-emerald-600 dark:text-emerald-400 shrink-0" />
+            <span>Excel (.xlsx)</span>
           </button>
           {onExportDocx && (
             <button
               type="button"
               onClick={() => { onExportDocx(); setOpen(false); }}
-              className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 hover:text-blue-600 dark:hover:text-white hover:bg-blue-500/10 hover:border hover:border-blue-500/20 transition cursor-pointer"
+              className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-black text-slate-900 dark:text-slate-100 hover:text-blue-700 dark:hover:text-blue-400 hover:bg-blue-500/15 transition cursor-pointer"
             >
-              <FileText size={13} className="text-blue-500 dark:text-blue-400" />
-              Word (.docx)
+              <FileText size={14} className="text-blue-600 dark:text-blue-400 shrink-0" />
+              <span>Word (.docx)</span>
             </button>
           )}
           <button
             type="button"
             onClick={exportPDF}
-            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 hover:text-rose-600 dark:hover:text-white hover:bg-rose-500/10 hover:border hover:border-rose-500/20 transition cursor-pointer"
+            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-black text-slate-900 dark:text-slate-100 hover:text-rose-700 dark:hover:text-rose-400 hover:bg-rose-500/15 transition cursor-pointer"
           >
-            <FileText size={13} className="text-rose-500 dark:text-rose-400" />
-            PDF (.pdf)
+            <FileText size={14} className="text-rose-600 dark:text-rose-400 shrink-0" />
+            <span>PDF (.pdf)</span>
           </button>
         </div>
       )}

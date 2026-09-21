@@ -38,7 +38,7 @@ export const AttendanceGradesTab: React.FC<AttendanceGradesTabProps> = ({
         header: 'STT',
         meta: { headerText: 'STT', exportValue: (_: any, idx: number) => idx + 1 },
         enableSorting: false,
-        cell: ({ row }) => <span className="font-bold text-slate-400">{row.index + 1}</span>,
+        cell: ({ row }) => <div className="text-center font-extrabold text-slate-700 dark:text-slate-300 text-sm sm:text-base">{row.index + 1}</div>,
       },
       {
         accessorKey: 'student_name',
@@ -68,11 +68,11 @@ export const AttendanceGradesTab: React.FC<AttendanceGradesTabProps> = ({
                 }}
                 className={`px-3 py-1.5 rounded-xl font-black text-xs transition cursor-pointer border flex items-center justify-center gap-1.5 ${
                   isAbsent
-                    ? 'bg-rose-500/20 border-rose-500/50 text-rose-300 hover:bg-rose-500/30'
-                    : 'bg-emerald-500/20 border-emerald-500/50 text-emerald-300 hover:bg-emerald-500/30'
+                    ? 'bg-rose-500/20 border-rose-500/50 text-rose-700 dark:text-rose-300 hover:bg-rose-500/30'
+                    : 'bg-emerald-500/20 border-emerald-500/50 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-500/30'
                 }`}
               >
-                <span className={`w-2 h-2 rounded-full ${isAbsent ? 'bg-rose-400' : 'bg-emerald-400'}`} />
+                <span className={`w-2 h-2 rounded-full ${isAbsent ? 'bg-rose-500' : 'bg-emerald-500'}`} />
                 <span>{rec.status || 'Có mặt'}</span>
               </button>
             </div>

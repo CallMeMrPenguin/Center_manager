@@ -101,7 +101,7 @@ export const EarlyWarningSection: React.FC<EarlyWarningSectionProps> = ({
       id: 'stt',
       header: () => <div className="text-center w-full">STT</div>,
       meta: { headerText: 'STT', exportValue: (_: any, idx: number) => idx + 1 },
-      cell: ({ row }) => <div className="text-center font-bold text-slate-400">{row.index + 1}</div>,
+      cell: ({ row }) => <div className="text-center font-extrabold text-slate-700 dark:text-slate-300">{row.index + 1}</div>,
       enableSorting: false,
       enableGlobalFilter: false,
     },
@@ -113,12 +113,12 @@ export const EarlyWarningSection: React.FC<EarlyWarningSectionProps> = ({
         const r = row.original;
         return (
           <div className="flex items-center gap-2.5">
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs text-white shrink-0 ${r.isUrgent ? 'bg-rose-600' : 'bg-amber-600'}`}>
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center font-black text-xs text-white shrink-0 ${r.isUrgent ? 'bg-rose-600' : 'bg-amber-600'}`}>
               {r.full_name ? r.full_name.slice(0, 2).toUpperCase() : 'HS'}
             </div>
             <div>
-              <span className="font-extrabold text-white text-sm block">{r.full_name} {r.nickname ? `(${r.nickname})` : ''}</span>
-              <span className="text-[10px] text-slate-400 font-semibold">{r.class_name || 'Lớp học'}</span>
+              <span className="font-extrabold text-slate-900 dark:text-white text-sm block">{r.full_name} {r.nickname ? `(${r.nickname})` : ''}</span>
+              <span className="text-[11px] text-slate-600 dark:text-slate-400 font-bold">{r.class_name || 'Lớp học'}</span>
             </div>
           </div>
         );
@@ -129,7 +129,7 @@ export const EarlyWarningSection: React.FC<EarlyWarningSectionProps> = ({
       header: 'Lớp Học',
       meta: { headerText: 'Lớp Học', exportValue: (r: any) => r.class_name || 'Lớp học' },
       cell: (info) => (
-        <span className="inline-block px-2.5 py-0.5 rounded-lg text-xs font-black bg-[#1c2442] text-rose-300 border border-rose-500/20">
+        <span className="inline-block px-2.5 py-0.5 rounded-lg text-xs font-black bg-rose-500/15 text-rose-700 dark:text-rose-300 border border-rose-500/30">
           {info.getValue<string>() || 'Lớp học'}
         </span>
       ),
@@ -142,7 +142,7 @@ export const EarlyWarningSection: React.FC<EarlyWarningSectionProps> = ({
         const isUrgent = getValue<boolean>();
         return (
           <div className="text-center">
-            <span className={`inline-block px-2.5 py-0.5 rounded-lg text-[10px] font-black border ${isUrgent ? 'bg-rose-500/20 text-rose-300 border-rose-500/40' : 'bg-amber-500/20 text-amber-300 border-amber-500/40'}`}>
+            <span className={`inline-block px-2.5 py-0.5 rounded-lg text-xs font-black border ${isUrgent ? 'bg-rose-500/15 text-rose-700 dark:text-rose-400 border-rose-500/30' : 'bg-amber-500/15 text-amber-700 dark:text-amber-400 border-amber-500/30'}`}>
               {isUrgent ? 'Nguy Cơ Cao' : 'Cần Theo Dõi'}
             </span>
           </div>
@@ -158,7 +158,7 @@ export const EarlyWarningSection: React.FC<EarlyWarningSectionProps> = ({
         return (
           <div className="flex flex-wrap gap-1.5">
             {tags.map((tag: string, idx: number) => (
-              <span key={idx} className="text-[10px] font-bold px-2 py-0.5 rounded bg-black/40 text-rose-300 border border-rose-500/20">{tag}</span>
+              <span key={idx} className="text-[10px] font-extrabold px-2 py-0.5 rounded bg-rose-50 dark:bg-black/40 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-500/30">{tag}</span>
             ))}
           </div>
         );
@@ -170,7 +170,7 @@ export const EarlyWarningSection: React.FC<EarlyWarningSectionProps> = ({
       meta: { headerText: 'Điểm EMA', exportValue: (r: any) => r.ema_level ? format1Dec(Number(r.ema_level)) : '-' },
       cell: (info) => {
         const val = Number(info.getValue()) || 0;
-        return <div className="text-center font-extrabold text-white font-mono text-sm">{val > 0 ? format1Dec(val) : '-'}</div>;
+        return <div className="text-center font-black text-slate-900 dark:text-white font-mono text-base">{val > 0 ? format1Dec(val) : '-'}</div>;
       },
     },
     {
@@ -183,7 +183,7 @@ export const EarlyWarningSection: React.FC<EarlyWarningSectionProps> = ({
         <div className="text-center">
           <button
             onClick={(e) => { e.stopPropagation(); onSelectRankingStudent(row.original.student_id); }}
-            className="px-2.5 py-1 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 hover:text-white transition cursor-pointer border border-rose-500/30 text-[11px] font-bold inline-flex items-center"
+            className="px-2.5 py-1 rounded-lg bg-rose-500/15 hover:bg-rose-500/25 text-rose-700 dark:text-rose-300 hover:text-rose-800 dark:hover:text-white transition cursor-pointer border border-rose-500/30 text-[11px] font-black inline-flex items-center"
           >
             <span>Xem chi tiết</span>
           </button>

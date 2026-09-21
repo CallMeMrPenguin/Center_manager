@@ -97,12 +97,12 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
         type="button"
         disabled={disabled}
         onClick={() => setIsOpen(!isOpen)}
-        className={`w-full flex items-center justify-between bg-white dark:bg-[#121626] border border-slate-200 dark:border-[#263152] hover:border-indigo-500/50 rounded-xl px-3.5 py-2 text-xs font-bold text-slate-800 dark:text-white transition-all cursor-pointer shadow-sm dark:shadow-inner focus:outline-none focus:ring-1 focus:ring-indigo-500 ${
+        className={`w-full flex items-center justify-between bg-white dark:bg-[#101426] border-2 border-slate-300 dark:border-[#2a375f] hover:border-indigo-500 rounded-xl px-3.5 py-2 text-xs font-extrabold text-slate-900 dark:text-white transition-all cursor-pointer shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
           disabled ? 'opacity-40 cursor-not-allowed' : ''
         }`}
       >
         <div className="flex items-center gap-2 truncate">
-          {icon && <span className="text-indigo-500 dark:text-indigo-400 shrink-0">{icon}</span>}
+          {icon && <span className="text-indigo-600 dark:text-indigo-400 shrink-0 font-bold">{icon}</span>}
           {selectedOption?.icon && <span className="shrink-0">{selectedOption.icon}</span>}
           <span className="truncate">
             {selectedOption ? selectedOption.label : placeholder}
@@ -110,30 +110,30 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
         </div>
         <ChevronDown
           size={14}
-          className={`text-indigo-500 dark:text-indigo-400 shrink-0 transition-transform duration-200 ${
+          className={`text-indigo-600 dark:text-indigo-400 shrink-0 transition-transform duration-200 ${
             isOpen ? 'rotate-180' : ''
           }`}
         />
       </button>
 
-      {/* CUSTOM DUAL THEME POPOVER MENU */}
+      {/* CUSTOM DUAL THEME POPOVER MENU WITH ELEVATED SOLID CONTRAST */}
       {isOpen && !disabled && (
         <div
           className={`absolute left-0 right-0 ${
             openUpwards ? 'bottom-full mb-2' : 'top-full mt-2'
-          } z-[9999] bg-white dark:bg-[#0c0f1e] border border-slate-200 dark:border-[#212c4b] rounded-2xl shadow-xl dark:shadow-[0_20px_60px_rgba(0,0,0,0.95)] p-1.5 space-y-1 max-h-64 flex flex-col select-none animate-slide-up`}
+          } z-[9999] bg-white dark:bg-[#151c35] border-2 border-slate-300 dark:border-[#334375] rounded-2xl shadow-[0_16px_48px_rgba(15,23,42,0.22)] dark:shadow-[0_24px_64px_rgba(0,0,0,0.95)] ring-1 ring-black/5 dark:ring-white/10 p-2 space-y-1.5 max-h-64 flex flex-col select-none animate-slide-up`}
         >
           {searchable && (
-            <div className="p-1 border-b border-slate-100 dark:border-white/5 shrink-0">
+            <div className="p-1 border-b border-slate-200 dark:border-white/10 shrink-0">
               <div className="relative">
-                <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-500" />
                 <input
                   ref={searchInputRef}
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder={searchPlaceholder}
-                  className="w-full bg-slate-50 dark:bg-[#161a29] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white placeholder:text-slate-400 text-xs rounded-lg pl-8 pr-2.5 py-1.5 focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-slate-100 dark:bg-[#0c1020] border-2 border-slate-300 dark:border-[#2a375f] text-slate-900 dark:text-white placeholder:text-slate-500 font-bold text-xs rounded-xl pl-8 pr-2.5 py-1.5 focus:outline-none focus:border-indigo-500"
                 />
               </div>
             </div>
@@ -141,12 +141,12 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
 
           <div className="overflow-y-auto space-y-1 flex-1 scrollbar-thin">
             {isNearMatch && filteredOptions.length > 0 && (
-              <div className="px-2.5 py-1 text-[10px] font-bold text-amber-600 dark:text-amber-400 bg-amber-500/10 rounded-lg">
+              <div className="px-2.5 py-1 text-[10px] font-black text-amber-700 dark:text-amber-400 bg-amber-500/15 rounded-lg border border-amber-500/30">
                 Gợi ý gần đúng nhất ({filteredOptions.length}):
               </div>
             )}
             {filteredOptions.length === 0 ? (
-              <div className="px-3 py-3 text-xs text-slate-400 dark:text-slate-500 text-center font-semibold">
+              <div className="px-3 py-3 text-xs text-slate-500 dark:text-slate-400 text-center font-bold">
                 Không tìm thấy tùy chọn
               </div>
             ) : (
@@ -157,17 +157,17 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
                     key={String(opt.value)}
                     type="button"
                     onClick={() => handleSelect(opt.value)}
-                    className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-extrabold transition-all cursor-pointer text-left ${
+                    className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs transition-all cursor-pointer text-left ${
                       isSelected
-                        ? 'bg-[#5c36f5] text-white shadow-sm'
-                        : 'text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white'
+                        ? 'bg-[#5c36f5] text-white shadow-md font-black'
+                        : 'text-slate-900 dark:text-slate-100 hover:bg-indigo-50 dark:hover:bg-white/10 hover:text-indigo-900 dark:hover:text-white font-extrabold'
                     }`}
                   >
                     <div className="flex items-center gap-2 truncate">
                       {opt.icon && <span className="shrink-0">{opt.icon}</span>}
                       <span className="truncate">{opt.label}</span>
                     </div>
-                    {isSelected && <Check size={14} className="text-white shrink-0" />}
+                    {isSelected && <Check size={14} className="text-white shrink-0 stroke-[2.5]" />}
                   </button>
                 );
               })

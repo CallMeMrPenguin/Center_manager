@@ -222,7 +222,7 @@ export const CheckScoreInput: React.FC<CheckScoreInputProps> = React.memo(({
         }}
         onKeyDown={handleKeyDown}
         placeholder="0-10"
-        className="w-20 bg-slate-50 dark:bg-[#161a29] border border-slate-300 dark:border-white/10 rounded-lg px-2 py-1 text-slate-900 dark:text-white font-extrabold text-xs focus:outline-none focus:border-[#5c36f5] focus:ring-2 focus:ring-[#5c36f5]/40 text-center transition selection:bg-[#5c36f5] selection:text-white caret-slate-900 dark:caret-white"
+        className="w-20 bg-white dark:bg-[#161a29] border-2 border-slate-300 dark:border-[#2a375f] rounded-lg px-2 py-1 text-slate-900 dark:text-white font-extrabold text-xs focus:outline-none focus:border-[#5c36f5] focus:ring-2 focus:ring-[#5c36f5]/40 text-center transition selection:bg-[#5c36f5] selection:text-white caret-slate-900 dark:caret-white shadow-xs"
       />
 
       {/* Prediction indicator below input */}
@@ -231,12 +231,12 @@ export const CheckScoreInput: React.FC<CheckScoreInputProps> = React.memo(({
           const num = Number(rawPred);
           const theme =
             num >= 8.0
-              ? 'text-emerald-300 bg-emerald-500/15 border-emerald-500/30 hover:bg-emerald-500/25'
+              ? 'text-emerald-800 dark:text-emerald-300 bg-emerald-500/15 border-emerald-500/30 hover:bg-emerald-500/25'
               : num >= 6.5
-              ? 'text-cyan-300 bg-cyan-500/15 border-cyan-500/30 hover:bg-cyan-500/25'
+              ? 'text-cyan-800 dark:text-cyan-300 bg-cyan-500/15 border-cyan-500/30 hover:bg-cyan-500/25'
               : num >= 5.0
-              ? 'text-amber-300 bg-amber-500/15 border-amber-500/30 hover:bg-amber-500/25'
-              : 'text-rose-300 bg-rose-500/15 border-rose-500/30 hover:bg-rose-500/25';
+              ? 'text-amber-800 dark:text-amber-300 bg-amber-500/15 border-amber-500/30 hover:bg-amber-500/25'
+              : 'text-rose-800 dark:text-rose-300 bg-rose-500/15 border-rose-500/30 hover:bg-rose-500/25';
 
           return (
             <button

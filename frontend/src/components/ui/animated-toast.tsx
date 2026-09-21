@@ -165,40 +165,40 @@ export const AnimatedToastProvider: React.FC<{
 const ToastCard: React.FC<{ toast: ToastItem; onClose: () => void }> = ({ toast, onClose }) => {
   const typeStyles = {
     success: {
-      border: 'border-emerald-500/40',
-      bg: 'bg-[#0c1320]',
-      icon: <CheckCircle2 className="text-emerald-400 shrink-0" size={18} />,
-      titleColor: 'text-emerald-300',
+      border: 'border-emerald-500/40 dark:border-emerald-500/50',
+      bg: 'bg-white dark:bg-[#161d36]',
+      icon: <CheckCircle2 className="text-emerald-600 dark:text-emerald-400 shrink-0" size={18} />,
+      titleColor: 'text-emerald-800 dark:text-emerald-300',
     },
     error: {
-      border: 'border-rose-500/40',
-      bg: 'bg-[#180e1a]',
-      icon: <AlertCircle className="text-rose-400 shrink-0" size={18} />,
-      titleColor: 'text-rose-300',
+      border: 'border-rose-500/40 dark:border-rose-500/50',
+      bg: 'bg-white dark:bg-[#161d36]',
+      icon: <AlertCircle className="text-rose-600 dark:text-rose-400 shrink-0" size={18} />,
+      titleColor: 'text-rose-800 dark:text-rose-300',
     },
     warning: {
-      border: 'border-amber-500/40',
-      bg: 'bg-[#18130c]',
-      icon: <AlertTriangle className="text-amber-400 shrink-0" size={18} />,
-      titleColor: 'text-amber-300',
+      border: 'border-amber-500/40 dark:border-amber-500/50',
+      bg: 'bg-white dark:bg-[#161d36]',
+      icon: <AlertTriangle className="text-amber-600 dark:text-amber-400 shrink-0" size={18} />,
+      titleColor: 'text-amber-800 dark:text-amber-300',
     },
     info: {
-      border: 'border-indigo-500/40',
-      bg: 'bg-[#0c0f20]',
-      icon: <Info className="text-indigo-400 shrink-0" size={18} />,
-      titleColor: 'text-indigo-300',
+      border: 'border-indigo-500/40 dark:border-indigo-500/50',
+      bg: 'bg-white dark:bg-[#161d36]',
+      icon: <Info className="text-indigo-600 dark:text-indigo-400 shrink-0" size={18} />,
+      titleColor: 'text-indigo-800 dark:text-indigo-300',
     },
     default: {
-      border: 'border-white/15',
-      bg: 'bg-[#0f1322]',
-      icon: <Info className="text-slate-400 shrink-0" size={18} />,
-      titleColor: 'text-white',
+      border: 'border-slate-300 dark:border-[#3b4d82]',
+      bg: 'bg-white dark:bg-[#161d36]',
+      icon: <Info className="text-slate-500 dark:text-slate-400 shrink-0" size={18} />,
+      titleColor: 'text-slate-900 dark:text-white',
     },
   }[toast.type || 'default'];
 
   return (
     <div
-      className={`w-80 sm:w-96 p-3.5 rounded-2xl border ${typeStyles.border} ${typeStyles.bg} shadow-[0_16px_40px_rgba(0,0,0,0.95)] flex items-start gap-3 select-none`}
+      className={`w-80 sm:w-96 p-3.5 rounded-2xl border-2 ${typeStyles.border} ${typeStyles.bg} shadow-[0_16px_40px_rgba(15,23,42,0.18)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.95)] flex items-start gap-3 select-none ring-1 ring-black/5 dark:ring-white/10`}
     >
       <div className="mt-0.5">{typeStyles.icon}</div>
       <div className="flex-1 min-w-0">
@@ -207,7 +207,7 @@ const ToastCard: React.FC<{ toast: ToastItem; onClose: () => void }> = ({ toast,
             {toast.title}
           </h4>
         )}
-        <p className="text-xs text-slate-200 font-semibold leading-snug break-words">
+        <p className="text-xs text-slate-800 dark:text-slate-100 font-bold leading-snug break-words">
           {toast.message}
         </p>
 
@@ -218,7 +218,7 @@ const ToastCard: React.FC<{ toast: ToastItem; onClose: () => void }> = ({ toast,
               toast.action?.onClick();
               onClose();
             }}
-            className="mt-2 text-xs font-black text-indigo-400 hover:text-indigo-300 underline cursor-pointer"
+            className="mt-2 text-xs font-black text-indigo-600 dark:text-indigo-400 hover:underline cursor-pointer"
           >
             {toast.action.label}
           </button>
@@ -228,7 +228,7 @@ const ToastCard: React.FC<{ toast: ToastItem; onClose: () => void }> = ({ toast,
       <button
         type="button"
         onClick={onClose}
-        className="p-1 rounded-lg text-slate-500 hover:text-white hover:bg-white/10 transition cursor-pointer shrink-0"
+        className="p-1 rounded-lg text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10 transition cursor-pointer shrink-0"
       >
         <X size={14} />
       </button>
@@ -291,9 +291,9 @@ export const UndoToast: React.FC<{
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 20, scale: 0.95 }}
           transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-          className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[99999] bg-[#0c0f1e] border border-[#212c4b] rounded-2xl p-4 shadow-2xl flex items-center gap-4 select-none min-w-[320px] overflow-hidden"
+          className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[99999] bg-white dark:bg-[#161d36] border-2 border-slate-300 dark:border-[#3b4d82] rounded-2xl p-4 shadow-2xl flex items-center gap-4 select-none min-w-[320px] overflow-hidden ring-1 ring-black/5 dark:ring-white/10"
         >
-          <span className="text-xs font-bold text-white flex-1">{message}</span>
+          <span className="text-xs font-black text-slate-900 dark:text-white flex-1">{message}</span>
           <button
             type="button"
             onClick={() => {
