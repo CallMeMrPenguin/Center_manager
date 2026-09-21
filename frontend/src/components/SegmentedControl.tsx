@@ -76,7 +76,7 @@ export function SegmentedControl<T extends string = string>({
   return (
     <div
       onMouseLeave={() => setHoveredVal(null)}
-      className={`relative flex items-center bg-[#090c15] p-1 rounded-xl border border-[#1b233d] select-none shrink-0 ${
+      className={`relative flex items-center bg-slate-200/80 dark:bg-[#090c15] p-1 rounded-xl border border-slate-300/80 dark:border-[#1b233d] select-none shrink-0 transition-colors duration-150 ${
         isFluid ? 'w-full' : 'inline-flex w-fit'
       } ${className}`}
     >
@@ -97,10 +97,10 @@ export function SegmentedControl<T extends string = string>({
               isFluid ? 'flex-1' : 'shrink-0'
             } ${sizeClasses} ${
               item.disabled
-                ? 'opacity-30 cursor-not-allowed text-slate-500'
+                ? 'opacity-30 cursor-not-allowed text-slate-400 dark:text-slate-500'
                 : isActive
                 ? 'text-white font-black'
-                : 'text-slate-400 hover:text-white'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
             {/* Active Sliding Pill with Framer Motion Spring */}
@@ -117,7 +117,7 @@ export function SegmentedControl<T extends string = string>({
               <motion.div
                 layoutId={`${baseLayoutId}-hover`}
                 transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-                className="absolute inset-0 rounded-lg bg-white/[0.06] border border-white/10 z-0 pointer-events-none"
+                className="absolute inset-0 rounded-lg bg-white/70 dark:bg-white/[0.06] border border-black/5 dark:border-white/10 z-0 pointer-events-none"
               />
             )}
 
@@ -142,7 +142,7 @@ export function SegmentedControl<T extends string = string>({
                 className={`relative z-10 ml-0.5 px-1.5 py-0.2 rounded-full text-[10px] font-black shrink-0 transition-colors font-mono ${
                   isActive
                     ? 'bg-white/25 text-white shadow-sm'
-                    : 'bg-white/10 text-slate-400'
+                    : 'bg-slate-300 dark:bg-white/10 text-slate-700 dark:text-slate-400'
                 }`}
               >
                 {item.badge}

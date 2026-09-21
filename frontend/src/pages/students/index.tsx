@@ -258,21 +258,23 @@ export function StudentsPage() {
   );
 
   return (
-    <div className="h-full w-full flex flex-col p-6 space-y-4 bg-[#080b14] text-slate-100 select-none font-sans overflow-hidden">
+    <div className="h-full w-full flex flex-col p-6 space-y-4 bg-slate-100 dark:bg-[#080b14] text-slate-800 dark:text-slate-100 select-none font-sans overflow-hidden transition-colors duration-200">
       {/* Top Header Toolbar */}
       <div className="flex flex-wrap items-center justify-between gap-4 shrink-0">
         <div className="flex items-center gap-3">
-          <div className="p-3 bg-[#5c36f5]/20 text-[#5c36f5] rounded-2xl border border-[#5c36f5]/30 shadow-[0_0_15px_rgba(92,54,245,0.3)]">
+          <div className="p-3 bg-[#5c36f5]/15 text-[#5c36f5] rounded-2xl border border-[#5c36f5]/25 shadow-sm">
             <Users size={22} />
           </div>
           <div>
-            <h1 className="text-lg font-black text-white">Quản Lý Hồ Sơ Học Sinh</h1>
-            <div className="flex items-center gap-3 text-xs text-slate-400 font-semibold mt-0.5">
-              <span>Tổng số: <strong className="text-white">{students.length}</strong></span>
-              <span>•</span>
-              <span className="text-emerald-400">Đang học: <strong>{totalActive}</strong></span>
-              <span>•</span>
-              <span className="text-rose-400">Đã nghỉ: <strong>{totalQuit}</strong></span>
+            <h1 className="text-lg font-black text-slate-900 dark:text-white">Quản Lý Hồ Sơ Học Sinh</h1>
+            <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 font-semibold mt-0.5">
+              <span>Tổng số: <strong className="text-slate-900 dark:text-white">{students.length}</strong></span>
+              <span className="px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 font-bold">
+                Đang học: {totalActive}
+              </span>
+              <span className="px-2 py-0.5 rounded-md bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20 font-bold">
+                Đã nghỉ: {totalQuit}
+              </span>
             </div>
           </div>
         </div>
@@ -281,7 +283,7 @@ export function StudentsPage() {
           <button
             type="button"
             onClick={() => setCsvModalOpen(true)}
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-bold border border-white/10 transition cursor-pointer"
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white hover:bg-slate-50 dark:bg-white/5 dark:hover:bg-white/10 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white text-xs font-bold border border-slate-200 dark:border-white/10 transition cursor-pointer shadow-sm"
           >
             <Upload size={14} />
             <span>Nhập CSV</span>
@@ -290,7 +292,7 @@ export function StudentsPage() {
           <button
             type="button"
             onClick={handleOpenAdd}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#5c36f5] hover:bg-[#6e4af7] text-white text-xs font-black shadow-[0_0_15px_rgba(92,54,245,0.45)] transition cursor-pointer"
+            className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#5c36f5] hover:bg-[#6e4af7] text-white text-xs font-black shadow-[0_0_15px_rgba(92,54,245,0.35)] transition cursor-pointer"
           >
             <UserPlus size={15} />
             <span>Thêm Học Sinh Mới</span>
@@ -299,7 +301,7 @@ export function StudentsPage() {
       </div>
 
       {/* Main Table */}
-      <div className="flex-1 min-h-0 bg-[#0d1018] rounded-2xl border border-[#1b2444] overflow-hidden shadow-xl">
+      <div className="flex-1 min-h-0 bg-white dark:bg-[#0d1018] rounded-2xl border border-slate-200 dark:border-[#1b2444] overflow-hidden shadow-sm dark:shadow-xl">
         <DataTable<Student>
           data={students}
           columns={columns}

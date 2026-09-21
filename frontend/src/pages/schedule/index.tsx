@@ -301,7 +301,7 @@ export default function SchedulePage() {
     {
       accessorKey: 'date',
       header: 'Ngày Học',
-      cell: (info) => <span className="font-bold text-white text-base">{info.getValue<string>()}</span>,
+      cell: (info) => <span className="font-bold text-slate-900 dark:text-white text-base">{info.getValue<string>()}</span>,
     },
     {
       accessorKey: 'class_name',
@@ -318,7 +318,7 @@ export default function SchedulePage() {
       cell: ({ row }) => {
         const s = row.original;
         return (
-          <span className="text-slate-200 text-base font-semibold">
+          <span className="text-slate-800 dark:text-slate-200 text-base font-semibold">
             {s.start_time} – {calcEndTime(s.start_time, s.duration)} ({s.duration}p)
           </span>
         );
@@ -327,7 +327,7 @@ export default function SchedulePage() {
     {
       accessorKey: 'teacher_name',
       header: 'Giáo Viên',
-      cell: (info) => <span className="text-slate-300 text-base font-semibold">{info.getValue<string>() || 'Mặc định'}</span>,
+      cell: (info) => <span className="text-slate-700 dark:text-slate-300 text-base font-semibold">{info.getValue<string>() || 'Mặc định'}</span>,
     },
     {
       accessorKey: 'status',
@@ -337,10 +337,10 @@ export default function SchedulePage() {
         return (
           <span className={`inline-block px-2.5 py-0.5 rounded-xl text-xs font-black border ${
             st === 'Đã học'
-              ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
+              ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400'
               : st === 'Hủy'
-              ? 'bg-rose-500/10 border-rose-500/30 text-rose-400'
-              : 'bg-blue-500/10 border-blue-500/30 text-blue-400'
+              ? 'bg-rose-500/10 border-rose-500/30 text-rose-600 dark:text-rose-400'
+              : 'bg-blue-500/10 border-blue-500/30 text-blue-600 dark:text-blue-400'
           }`}>
             {st}
           </span>
@@ -349,14 +349,14 @@ export default function SchedulePage() {
     },
     {
       id: 'actions',
-      header: () => <div className="text-right w-full">Thao Tác</div>,
-      enableSorting: false,
-      enableGlobalFilter: false,
+      header: () => <div className="text-center w-full">Thao Tác</div>,
+      size: 70,
       cell: ({ row }) => (
-        <div className="flex items-center justify-end">
+        <div className="flex items-center justify-center">
           <button
+            type="button"
             onClick={() => openEdit(row.original)}
-            className="p-1.5 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/20 transition cursor-pointer"
+            className="p-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition cursor-pointer border border-slate-200 dark:border-white/5"
             title="Sửa buổi học"
           >
             <Edit3 size={13} />
@@ -367,15 +367,15 @@ export default function SchedulePage() {
   ], []);
 
   return (
-    <div className="h-full flex flex-col p-5 gap-5 overflow-y-auto bg-[#090d16] text-slate-100 font-sans">
+    <div className="h-full flex flex-col p-5 gap-5 overflow-y-auto bg-slate-100 dark:bg-[#090d16] text-slate-800 dark:text-slate-100 font-sans transition-colors duration-200">
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-xl font-black text-white flex items-center gap-2.5">
-            <CalendarIcon className="h-6 w-6 text-blue-400" />
+          <h1 className="text-xl font-black text-slate-900 dark:text-white flex items-center gap-2.5">
+            <CalendarIcon className="h-6 w-6 text-blue-600 dark:text-blue-400" />
             BẢNG LỊCH HỌC
           </h1>
-          <p className="text-[11px] text-slate-400 font-semibold mt-0.5">
+          <p className="text-[11px] text-slate-500 dark:text-slate-400 font-semibold mt-0.5">
             Quản lý và theo dõi lịch học toàn trung tâm.
           </p>
         </div>
@@ -383,15 +383,15 @@ export default function SchedulePage() {
           <button
             type="button"
             onClick={loadData}
-            className="p-2.5 rounded-xl bg-[#14192b] hover:bg-[#1e2640] text-slate-300 hover:text-white border border-[#28334e] transition cursor-pointer shadow-sm"
+            className="p-2.5 rounded-xl bg-white hover:bg-slate-50 dark:bg-[#14192b] dark:hover:bg-[#1e2640] text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-[#28334e] transition cursor-pointer shadow-sm"
             title="Tải lại lịch học"
           >
-            <RefreshCw size={14} className={loading ? 'animate-spin text-blue-400' : ''} />
+            <RefreshCw size={14} className={loading ? 'animate-spin text-blue-500 dark:text-blue-400' : ''} />
           </button>
           <button
             type="button"
             onClick={() => openAdd()}
-            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white px-3.5 py-2.5 rounded-xl font-extrabold text-xs transition cursor-pointer border border-blue-400/30"
+            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white px-3.5 py-2.5 rounded-xl font-extrabold text-xs transition cursor-pointer border border-blue-400/30 shadow-md"
             title="Thêm Lịch Học"
           >
             <Plus size={14} />
@@ -402,43 +402,43 @@ export default function SchedulePage() {
 
       {/* KPI Cards */}
       <div className="grid grid-cols-3 gap-4 shrink-0">
-        <div className="bg-[#0e1322] border border-[#1e2742] p-4 flex items-center justify-between rounded-2xl">
+        <div className="bg-white dark:bg-[#0e1322] border border-slate-200 dark:border-[#1e2742] p-4 flex items-center justify-between rounded-2xl shadow-sm dark:shadow-none transition-colors duration-200">
           <div>
-            <p className="text-[9px] font-black uppercase tracking-widest text-slate-400">Trong Tháng</p>
-            <p className="text-2xl font-black text-white">{total}</p>
+            <p className="text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">Trong Tháng</p>
+            <p className="text-2xl font-black text-slate-900 dark:text-white">{total}</p>
           </div>
-          <div className="p-2.5 bg-blue-500/10 border border-blue-500/20 rounded-xl text-blue-400">
+          <div className="p-2.5 bg-blue-500/10 border border-blue-500/20 rounded-xl text-blue-600 dark:text-blue-400">
             <CalendarIcon size={18} />
           </div>
         </div>
-        <div className="bg-[#0e1322] border border-[#1e2742] p-4 flex items-center justify-between rounded-2xl">
+        <div className="bg-white dark:bg-[#0e1322] border border-slate-200 dark:border-[#1e2742] p-4 flex items-center justify-between rounded-2xl shadow-sm dark:shadow-none transition-colors duration-200">
           <div>
-            <p className="text-[9px] font-black uppercase tracking-widest text-emerald-400">Đã Hoàn Thành</p>
-            <p className="text-2xl font-black text-emerald-400">{done}</p>
+            <p className="text-[9px] font-black uppercase tracking-widest text-emerald-600 dark:text-emerald-400">Đã Hoàn Thành</p>
+            <p className="text-2xl font-black text-emerald-600 dark:text-emerald-400">{done}</p>
           </div>
-          <div className="p-2.5 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-emerald-400">
+          <div className="p-2.5 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-emerald-600 dark:text-emerald-400">
             <CheckCircle2 size={18} />
           </div>
         </div>
-        <div className="bg-[#0e1322] border border-[#1e2742] p-4 flex items-center justify-between rounded-2xl">
+        <div className="bg-white dark:bg-[#0e1322] border border-slate-200 dark:border-[#1e2742] p-4 flex items-center justify-between rounded-2xl shadow-sm dark:shadow-none transition-colors duration-200">
           <div>
-            <p className="text-[9px] font-black uppercase tracking-widest text-cyan-400">Sắp Diễn Ra</p>
-            <p className="text-2xl font-black text-cyan-400">{upcoming}</p>
+            <p className="text-[9px] font-black uppercase tracking-widest text-cyan-600 dark:text-cyan-400">Sắp Diễn Ra</p>
+            <p className="text-2xl font-black text-cyan-600 dark:text-cyan-400">{upcoming}</p>
           </div>
-          <div className="p-2.5 bg-cyan-500/10 border border-cyan-500/20 rounded-xl text-cyan-400">
+          <div className="p-2.5 bg-cyan-500/10 border border-cyan-500/20 rounded-xl text-cyan-600 dark:text-cyan-400">
             <Clock size={18} />
           </div>
         </div>
       </div>
 
       {/* Toolbar */}
-      <div className="flex flex-wrap items-center justify-between gap-3 bg-[#0e1322] border border-[#1e2742] p-3 rounded-2xl shrink-0">
+      <div className="flex flex-wrap items-center justify-between gap-3 bg-white dark:bg-[#0e1322] border border-slate-200 dark:border-[#1e2742] p-3 rounded-2xl shrink-0 shadow-sm dark:shadow-none transition-colors duration-200">
         <div className="flex items-center gap-2">
           <input
             type="month"
             value={selectedMonth}
             onChange={(e) => setSelectedMonth(e.target.value)}
-            className="bg-[#141b2d] border border-[#232f4d] text-white text-xs font-bold rounded-xl px-3 py-2 focus:outline-none focus:border-blue-500 cursor-pointer"
+            className="bg-slate-50 dark:bg-[#141b2d] border border-slate-200 dark:border-[#232f4d] text-slate-900 dark:text-white text-xs font-bold rounded-xl px-3 py-2 focus:outline-none focus:border-blue-500 cursor-pointer"
           />
           <CustomSelect
             value={classFilter}
@@ -506,7 +506,7 @@ export default function SchedulePage() {
       {ctxMenu && (
         <div
           style={{ top: ctxMenu.y, left: ctxMenu.x }}
-          className="fixed z-[999] bg-[#0d1018] border border-white/10 rounded-xl shadow-[0_20px_60px_rgba(0,0,0,0.8)] py-1.5 min-w-[150px] animate-mac-dropdown"
+          className="fixed z-[999] bg-white dark:bg-[#0d1018] border border-slate-200 dark:border-white/10 rounded-xl shadow-xl dark:shadow-[0_20px_60px_rgba(0,0,0,0.8)] py-1.5 min-w-[150px] animate-mac-dropdown"
         >
           <button
             type="button"
@@ -514,9 +514,9 @@ export default function SchedulePage() {
               openAdd(ctxMenu.dateStr);
               setCtxMenu(null);
             }}
-            className="w-full text-left px-4 py-2 text-xs font-bold text-slate-300 hover:text-white hover:bg-blue-600/20 transition flex items-center gap-2 cursor-pointer"
+            className="w-full text-left px-4 py-2 text-xs font-bold text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-blue-600/20 transition flex items-center gap-2 cursor-pointer"
           >
-            <Plus className="h-3.5 w-3.5 text-blue-400" />
+            <Plus className="h-3.5 w-3.5 text-blue-500 dark:text-blue-400" />
             <span>Thêm buổi học</span>
           </button>
         </div>

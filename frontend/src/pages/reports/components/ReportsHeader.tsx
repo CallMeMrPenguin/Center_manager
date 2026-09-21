@@ -71,14 +71,14 @@ export const ReportsHeader: React.FC<ReportsHeaderProps> = ({
   return (
     <div className="space-y-4">
       {/* Top Breadcrumb & Actions Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[#181f36] pb-4">
+      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 dark:border-[#181f36] pb-4">
         <div>
-          <div className="flex items-center gap-2 text-[11px] font-black uppercase text-indigo-400 tracking-wider">
+          <div className="flex items-center gap-2 text-[11px] font-black uppercase text-indigo-600 dark:text-indigo-400 tracking-wider">
             <span>BÁO CÁO THỐNG KÊ</span>
-            <ChevronRight size={12} className="text-slate-500" />
-            <span className="text-white transition-colors duration-200">{tabMeta.breadcrumb}</span>
+            <ChevronRight size={12} className="text-slate-400 dark:text-slate-500" />
+            <span className="text-slate-900 dark:text-white transition-colors duration-200">{tabMeta.breadcrumb}</span>
           </div>
-          <h1 className="text-2xl font-black text-white mt-1 tracking-tight flex items-center gap-3">
+          <h1 className="text-2xl font-black text-slate-900 dark:text-white mt-1 tracking-tight flex items-center gap-3">
             {tabMeta.icon}
             <span>{tabMeta.title}</span>
           </h1>
@@ -88,7 +88,7 @@ export const ReportsHeader: React.FC<ReportsHeaderProps> = ({
         <div className="flex items-center gap-2.5 flex-wrap">
           {/* Academic Year Selector */}
           <CustomSelect
-            icon={<Calendar size={14} className="text-indigo-400" />}
+            icon={<Calendar size={14} className="text-indigo-500 dark:text-indigo-400" />}
             value={selectedAcademicYear}
             onChange={(val) => setSelectedAcademicYear(String(val))}
             options={academicYears.map(y => ({ value: y, label: `Năm học ${y}` }))}
@@ -98,7 +98,7 @@ export const ReportsHeader: React.FC<ReportsHeaderProps> = ({
           {/* Class Selector (or Cross-class indicator on Benchmark tab) */}
           {activeReportTab !== 'benchmark' ? (
             <CustomSelect
-              icon={<GraduationCap size={14} className="text-indigo-400" />}
+              icon={<GraduationCap size={14} className="text-indigo-500 dark:text-indigo-400" />}
               value={selectedClassId}
               onChange={(val) => { setSelectedClassId(String(val)); setSelectedStudentId(''); }}
               options={[
@@ -108,15 +108,15 @@ export const ReportsHeader: React.FC<ReportsHeaderProps> = ({
               className="w-44 shrink-0"
             />
           ) : (
-            <div className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-300 text-xs font-bold shrink-0">
-              <GitCompare size={14} className="text-blue-400" />
+            <div className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-600 dark:text-blue-300 text-xs font-bold shrink-0">
+              <GitCompare size={14} className="text-blue-500 dark:text-blue-400" />
               <span>Chế độ so sánh tất cả lớp</span>
             </div>
           )}
 
           <button
             onClick={onOpenResetModal}
-            className="group flex items-center gap-0 hover:gap-1.5 px-3 py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 hover:text-white border border-rose-500/30 text-xs font-bold transition-all duration-300 cursor-pointer shadow-sm active:scale-95 shrink-0"
+            className="group flex items-center gap-0 hover:gap-1.5 px-3 py-2 rounded-xl bg-rose-50 dark:bg-rose-500/10 hover:bg-rose-100 dark:hover:bg-rose-500/20 text-rose-600 dark:text-rose-300 hover:text-rose-700 dark:hover:text-white border border-rose-200 dark:border-rose-500/30 text-xs font-bold transition-all duration-300 cursor-pointer shadow-sm active:scale-95 shrink-0"
             title="Đặt Lại Điểm Số"
           >
             <RotateCcw size={14} className="shrink-0" />
@@ -127,10 +127,10 @@ export const ReportsHeader: React.FC<ReportsHeaderProps> = ({
 
           <button
             onClick={() => loadAnalyticsData()}
-            className="p-2.5 rounded-xl bg-[#121626] hover:bg-[#1e2640] text-slate-300 hover:text-white border border-[#202842] transition cursor-pointer shadow-sm shrink-0"
+            className="p-2.5 rounded-xl bg-white hover:bg-slate-50 dark:bg-[#121626] dark:hover:bg-[#1e2640] text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-[#202842] transition cursor-pointer shadow-sm shrink-0"
             title="Làm mới báo cáo"
           >
-            <RefreshCw size={14} className={loading ? "animate-spin text-indigo-400" : ""} />
+            <RefreshCw size={14} className={loading ? "animate-spin text-indigo-500 dark:text-indigo-400" : ""} />
           </button>
         </div>
       </div>

@@ -17,8 +17,8 @@ export const ClassCard: React.FC<ClassCardProps> = ({
 }) => {
   const cardColor = getClassColor(cls, index);
   const borderColor = hexToRGBA(cardColor, 0.35);
-  const glowShadow = `0 0 24px ${hexToRGBA(cardColor, 0.22)}`;
-  const hoverGlowShadow = `0 0 38px ${hexToRGBA(cardColor, 0.4)}`;
+  const glowShadow = `0 0 24px ${hexToRGBA(cardColor, 0.15)}`;
+  const hoverGlowShadow = `0 0 32px ${hexToRGBA(cardColor, 0.3)}`;
 
   return (
     <div
@@ -27,7 +27,7 @@ export const ClassCard: React.FC<ClassCardProps> = ({
         borderColor: borderColor,
         boxShadow: glowShadow,
       }}
-      className="bg-[#0a0d1a] border rounded-[28px] p-6 space-y-5 cursor-pointer transition-all duration-300 group relative overflow-hidden hover:-translate-y-1 hover:brightness-110"
+      className="bg-white dark:bg-[#0a0d1a] border rounded-[28px] p-6 space-y-5 cursor-pointer transition-all duration-300 group relative overflow-hidden hover:-translate-y-1 hover:brightness-105 shadow-sm dark:shadow-none"
       onMouseEnter={(e) => {
         e.currentTarget.style.boxShadow = hoverGlowShadow;
         e.currentTarget.style.borderColor = hexToRGBA(cardColor, 0.6);
@@ -42,7 +42,7 @@ export const ClassCard: React.FC<ClassCardProps> = ({
         <span
           style={{
             backgroundColor: cardColor,
-            boxShadow: `0 4px 14px ${hexToRGBA(cardColor, 0.45)}`,
+            boxShadow: `0 4px 14px ${hexToRGBA(cardColor, 0.35)}`,
           }}
           className="text-xs font-black uppercase px-4 py-1.5 rounded-full tracking-wider text-white shadow-md"
         >
@@ -67,14 +67,14 @@ export const ClassCard: React.FC<ClassCardProps> = ({
       </div>
 
       {/* Class Title */}
-      <h3 className="text-2xl font-black text-white tracking-tight group-hover:text-slate-100 transition-colors">
+      <h3 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight group-hover:text-indigo-600 dark:group-hover:text-slate-100 transition-colors">
         {cls.class_name}
       </h3>
 
       {/* 3 Detail Info Rows */}
       <div className="space-y-2.5">
         {/* Teacher */}
-        <div className="flex items-center gap-3 bg-[#0e1325] border border-white/5 p-3 rounded-2xl">
+        <div className="flex items-center gap-3 bg-slate-50 dark:bg-[#0e1325] border border-slate-200 dark:border-white/5 p-3 rounded-2xl transition-colors">
           <div
             style={{
               backgroundColor: hexToRGBA(cardColor, 0.15),
@@ -85,13 +85,13 @@ export const ClassCard: React.FC<ClassCardProps> = ({
             <User size={18} />
           </div>
           <div className="min-w-0 flex-1">
-            <span className="text-[11px] font-medium text-slate-400 block leading-tight">Giáo viên</span>
-            <span className="text-sm font-bold text-white block truncate">{cls.teacher_name || 'Chưa phân công'}</span>
+            <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400 block leading-tight">Giáo viên</span>
+            <span className="text-sm font-bold text-slate-900 dark:text-white block truncate">{cls.teacher_name || 'Chưa phân công'}</span>
           </div>
         </div>
 
         {/* Room */}
-        <div className="flex items-center gap-3 bg-[#0e1325] border border-white/5 p-3 rounded-2xl">
+        <div className="flex items-center gap-3 bg-slate-50 dark:bg-[#0e1325] border border-slate-200 dark:border-white/5 p-3 rounded-2xl transition-colors">
           <div
             style={{
               backgroundColor: hexToRGBA(cardColor, 0.15),
@@ -102,13 +102,13 @@ export const ClassCard: React.FC<ClassCardProps> = ({
             <MapPin size={18} />
           </div>
           <div className="min-w-0 flex-1">
-            <span className="text-[11px] font-medium text-slate-400 block leading-tight">Phòng</span>
-            <span className="text-sm font-bold text-white block truncate">{cls.room || 'Chưa xếp'}</span>
+            <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400 block leading-tight">Phòng</span>
+            <span className="text-sm font-bold text-slate-900 dark:text-white block truncate">{cls.room || 'Chưa xếp'}</span>
           </div>
         </div>
 
         {/* Students */}
-        <div className="flex items-center gap-3 bg-[#0e1325] border border-white/5 p-3 rounded-2xl">
+        <div className="flex items-center gap-3 bg-slate-50 dark:bg-[#0e1325] border border-slate-200 dark:border-white/5 p-3 rounded-2xl transition-colors">
           <div
             style={{
               backgroundColor: hexToRGBA(cardColor, 0.15),
@@ -119,8 +119,8 @@ export const ClassCard: React.FC<ClassCardProps> = ({
             <Users size={18} />
           </div>
           <div className="min-w-0 flex-1">
-            <span className="text-[11px] font-medium text-slate-400 block leading-tight">Học sinh</span>
-            <span className="text-sm font-bold text-white block">{cls.student_count || 0} học sinh</span>
+            <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400 block leading-tight">Học sinh</span>
+            <span className="text-sm font-bold text-slate-900 dark:text-white block">{cls.student_count || 0} học sinh</span>
           </div>
         </div>
       </div>

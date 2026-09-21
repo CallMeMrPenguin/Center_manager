@@ -202,15 +202,15 @@ function DraggableHeader({
       <div
         {...(enableReorder ? { ...attributes, ...listeners } : {})}
         style={{ touchAction: enableReorder ? 'none' : 'auto' }}
-        className={`group flex items-center justify-center text-center gap-1.5 w-full py-3 px-2.5 overflow-hidden text-slate-200 text-sm sm:text-base font-black uppercase tracking-wider whitespace-nowrap ${
-          enableReorder ? 'cursor-grab active:cursor-grabbing hover:text-white transition-colors' : ''
+        className={`group flex items-center justify-center text-center gap-1.5 w-full py-3 px-2.5 overflow-hidden text-slate-700 dark:text-slate-200 text-sm sm:text-base font-black uppercase tracking-wider whitespace-nowrap ${
+          enableReorder ? 'cursor-grab active:cursor-grabbing hover:text-slate-900 dark:hover:text-white transition-colors' : ''
         }`}
         title={enableReorder ? 'Giữ chuột và kéo để thay đổi thứ tự cột' : undefined}
       >
         {enableReorder && (
           <GripVertical
             size={13}
-            className="text-slate-600 group-hover:text-indigo-400 cursor-grab active:cursor-grabbing shrink-0 transition-colors"
+            className="text-slate-400 dark:text-slate-600 group-hover:text-indigo-500 dark:group-hover:text-indigo-400 cursor-grab active:cursor-grabbing shrink-0 transition-colors"
           />
         )}
         {children}
@@ -272,16 +272,16 @@ function ColumnVisibilityDropdown<TData>({
       <button
         type="button"
         onClick={() => setOpen(v => !v)}
-        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#1c243c] hover:bg-[#253050] text-slate-300 hover:text-white border border-[#303d62] text-xs font-bold transition cursor-pointer"
+        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-[#1c243c] dark:hover:bg-[#253050] text-slate-700 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white border border-slate-300 dark:border-[#303d62] text-xs font-bold transition cursor-pointer"
         title="Hiển thị, Thứ tự & Căn chỉnh cột"
       >
-        <SlidersHorizontal size={13} className="text-indigo-400" />
+        <SlidersHorizontal size={13} className="text-indigo-500 dark:text-indigo-400" />
         <span className="hidden sm:inline">Cột</span>
         {open ? <ChevronUp size={11} /> : <ChevronDown size={11} />}
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full mt-2 z-[60] w-72 bg-[#131929] border border-[#28334e] rounded-2xl shadow-2xl p-3 space-y-2 animate-mac-dropdown">
+        <div className="absolute right-0 top-full mt-2 z-[60] w-72 bg-white dark:bg-[#131929] border border-slate-200 dark:border-[#28334e] rounded-2xl shadow-2xl p-3 space-y-2 animate-mac-dropdown">
           {/* TAB SWITCHER WITH SLIDING PILL */}
           <SegmentedControl<'visibility' | 'order' | 'align'>
             value={activeTab}
@@ -299,18 +299,18 @@ function ColumnVisibilityDropdown<TData>({
           {/* TAB 1: VISIBILITY */}
           {activeTab === 'visibility' && (
             <div className="space-y-1">
-              <div className="text-[10px] font-black uppercase text-indigo-400 tracking-wider border-b border-white/10 pb-1.5 mb-1 flex items-center justify-between">
+              <div className="text-[10px] font-black uppercase text-indigo-500 dark:text-indigo-400 tracking-wider border-b border-slate-200 dark:border-white/10 pb-1.5 mb-1 flex items-center justify-between">
                 <span>Chọn cột hiển thị</span>
                 <div className="flex gap-1">
                   <button type="button" onClick={() => table.toggleAllColumnsVisible(true)}
-                    className="text-[9px] text-slate-400 hover:text-white px-1.5 py-0.5 rounded bg-white/5 hover:bg-white/10 transition cursor-pointer">Tất cả</button>
+                    className="text-[9px] text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white px-1.5 py-0.5 rounded bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 transition cursor-pointer">Tất cả</button>
                   <button type="button" onClick={() => table.toggleAllColumnsVisible(false)}
-                    className="text-[9px] text-slate-400 hover:text-white px-1.5 py-0.5 rounded bg-white/5 hover:bg-white/10 transition cursor-pointer">Ẩn hết</button>
+                    className="text-[9px] text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white px-1.5 py-0.5 rounded bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 transition cursor-pointer">Ẩn hết</button>
                 </div>
               </div>
               <div className="max-h-60 overflow-y-auto space-y-0.5 scrollbar-thin pr-1">
                 {allCols.map(col => (
-                  <label key={col.id} className="flex items-center gap-2.5 text-xs text-slate-200 cursor-pointer hover:text-white px-1.5 py-1 rounded-lg hover:bg-[#1e2740] transition">
+                  <label key={col.id} className="flex items-center gap-2.5 text-xs text-slate-700 dark:text-slate-200 cursor-pointer hover:text-slate-900 dark:hover:text-white px-1.5 py-1 rounded-lg hover:bg-slate-100 dark:hover:bg-[#1e2740] transition">
                     <input type="checkbox" checked={col.getIsVisible()} onChange={col.getToggleVisibilityHandler()}
                       className="accent-indigo-500 rounded cursor-pointer w-3.5 h-3.5" />
                     <span className="truncate">{getColumnHeaderText(col, table)}</span>
@@ -323,9 +323,9 @@ function ColumnVisibilityDropdown<TData>({
           {/* TAB 2: COLUMN ORDER (UP / DOWN) */}
           {activeTab === 'order' && (
             <div className="space-y-1">
-              <div className="text-[10px] font-black uppercase text-indigo-400 tracking-wider border-b border-white/10 pb-1.5 mb-1 flex items-center justify-between">
+              <div className="text-[10px] font-black uppercase text-indigo-500 dark:text-indigo-400 tracking-wider border-b border-slate-200 dark:border-white/10 pb-1.5 mb-1 flex items-center justify-between">
                 <span>Thứ tự các cột</span>
-                <span className="text-[9px] text-slate-400 font-normal">Kéo header hoặc bấm nút</span>
+                <span className="text-[9px] text-slate-500 dark:text-slate-400 font-normal">Kéo header hoặc bấm nút</span>
               </div>
               <div className="max-h-60 overflow-y-auto space-y-1 scrollbar-thin pr-1">
                 {allCols.map((col, idx) => {
@@ -333,17 +333,17 @@ function ColumnVisibilityDropdown<TData>({
                   const isFirst = idx === 0;
                   const isLast = idx === allCols.length - 1;
                   return (
-                    <div key={col.id} className="flex items-center justify-between gap-2 px-2 py-1 rounded-lg bg-[#0e1322] border border-white/5 text-xs text-slate-200">
+                    <div key={col.id} className="flex items-center justify-between gap-2 px-2 py-1 rounded-lg bg-slate-50 dark:bg-[#0e1322] border border-slate-200 dark:border-white/5 text-xs text-slate-800 dark:text-slate-200">
                       <div className="flex items-center gap-1.5 min-w-0">
-                        <span className="text-[10px] font-mono text-slate-500 font-bold w-4">{idx + 1}.</span>
-                        <span className="truncate font-semibold text-slate-200">{colName}</span>
+                        <span className="text-[10px] font-mono text-slate-400 dark:text-slate-500 font-bold w-4">{idx + 1}.</span>
+                        <span className="truncate font-semibold text-slate-800 dark:text-slate-200">{colName}</span>
                       </div>
                       <div className="flex items-center gap-1 shrink-0">
                         <button
                           type="button"
                           disabled={isFirst}
                           onClick={() => onMoveColumn?.(col.id, 'up')}
-                          className="p-1 rounded bg-white/5 hover:bg-white/15 text-slate-300 disabled:opacity-20 disabled:cursor-not-allowed transition cursor-pointer"
+                          className="p-1 rounded bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/15 text-slate-700 dark:text-slate-300 disabled:opacity-20 disabled:cursor-not-allowed transition cursor-pointer"
                           title="Chuyển sang trái"
                         >
                           <ChevronLeft size={12} />
@@ -352,7 +352,7 @@ function ColumnVisibilityDropdown<TData>({
                           type="button"
                           disabled={isLast}
                           onClick={() => onMoveColumn?.(col.id, 'down')}
-                          className="p-1 rounded bg-white/5 hover:bg-white/15 text-slate-300 disabled:opacity-20 disabled:cursor-not-allowed transition cursor-pointer"
+                          className="p-1 rounded bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/15 text-slate-700 dark:text-slate-300 disabled:opacity-20 disabled:cursor-not-allowed transition cursor-pointer"
                           title="Chuyển sang phải"
                         >
                           <ChevronRight size={12} />
@@ -368,7 +368,7 @@ function ColumnVisibilityDropdown<TData>({
           {/* TAB 3: ALIGNMENT */}
           {activeTab === 'align' && (
             <div className="space-y-1">
-              <div className="text-[10px] font-black uppercase text-indigo-400 tracking-wider border-b border-white/10 pb-1.5 mb-1">
+              <div className="text-[10px] font-black uppercase text-indigo-500 dark:text-indigo-400 tracking-wider border-b border-slate-200 dark:border-white/10 pb-1.5 mb-1">
                 <span>Tích = Căn Giữa | Bỏ tích = Căn Trái</span>
               </div>
               <div className="max-h-60 overflow-y-auto space-y-0.5 scrollbar-thin pr-1">
@@ -376,7 +376,7 @@ function ColumnVisibilityDropdown<TData>({
                   const isCentered = columnAlignments[col.id] !== 'left';
                   const colName = getColumnHeaderText(col, table);
                   return (
-                    <label key={col.id} className="flex items-center justify-between gap-2 text-xs text-slate-200 cursor-pointer hover:text-white px-1.5 py-1 rounded-lg hover:bg-[#1e2740] transition">
+                    <label key={col.id} className="flex items-center justify-between gap-2 text-xs text-slate-700 dark:text-slate-200 cursor-pointer hover:text-slate-900 dark:hover:text-white px-1.5 py-1 rounded-lg hover:bg-slate-100 dark:hover:bg-[#1e2740] transition">
                       <div className="flex items-center gap-2 min-w-0">
                         <input
                           type="checkbox"
@@ -387,7 +387,7 @@ function ColumnVisibilityDropdown<TData>({
                         <span className="truncate">{colName}</span>
                       </div>
                       <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded shrink-0 ${
-                        isCentered ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/30' : 'bg-slate-800 text-slate-400'
+                        isCentered ? 'bg-indigo-500/20 text-indigo-600 dark:text-indigo-300 border border-indigo-500/30' : 'bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
                       }`}>
                         {isCentered ? 'Giữa' : 'Trái'}
                       </span>
@@ -400,7 +400,7 @@ function ColumnVisibilityDropdown<TData>({
 
           {/* RESET BUTTON */}
           {onResetColumnWidths && (
-            <div className="pt-2 border-t border-white/10 mt-1">
+            <div className="pt-2 border-t border-slate-200 dark:border-white/10 mt-1">
               <button
                 type="button"
                 onClick={() => {
@@ -606,40 +606,40 @@ function ExportDropdown<TData>({
       <button
         type="button"
         onClick={() => setOpen(v => !v)}
-        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#1c243c] hover:bg-[#253050] text-slate-300 hover:text-white border border-[#303d62] text-xs font-bold transition cursor-pointer"
+        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-[#1c243c] dark:hover:bg-[#253050] text-slate-700 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white border border-slate-300 dark:border-[#303d62] text-xs font-bold transition cursor-pointer"
         title="Xuất dữ liệu"
       >
-        <Download size={13} className="text-emerald-400" />
+        <Download size={13} className="text-emerald-500 dark:text-emerald-400" />
         <span className="hidden sm:inline">Xuất</span>
         {open ? <ChevronUp size={11} /> : <ChevronDown size={11} />}
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full mt-2 z-[60] w-44 bg-[#131929] border border-[#28334e] rounded-2xl shadow-2xl p-2 space-y-1 animate-mac-dropdown">
+        <div className="absolute right-0 top-full mt-2 z-[60] w-44 bg-white dark:bg-[#131929] border border-slate-200 dark:border-[#28334e] rounded-2xl shadow-2xl p-2 space-y-1 animate-mac-dropdown">
           <button
             type="button"
             onClick={exportExcel}
-            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-slate-200 hover:text-white hover:bg-emerald-500/10 hover:border hover:border-emerald-500/20 transition cursor-pointer"
+            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 hover:text-emerald-600 dark:hover:text-white hover:bg-emerald-500/10 hover:border hover:border-emerald-500/20 transition cursor-pointer"
           >
-            <FileSpreadsheet size={13} className="text-emerald-400" />
+            <FileSpreadsheet size={13} className="text-emerald-500 dark:text-emerald-400" />
             Excel (.xlsx)
           </button>
           {onExportDocx && (
             <button
               type="button"
               onClick={() => { onExportDocx(); setOpen(false); }}
-              className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-slate-200 hover:text-white hover:bg-blue-500/10 hover:border hover:border-blue-500/20 transition cursor-pointer"
+              className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 hover:text-blue-600 dark:hover:text-white hover:bg-blue-500/10 hover:border hover:border-blue-500/20 transition cursor-pointer"
             >
-              <FileText size={13} className="text-blue-400" />
+              <FileText size={13} className="text-blue-500 dark:text-blue-400" />
               Word (.docx)
             </button>
           )}
           <button
             type="button"
             onClick={exportPDF}
-            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-slate-200 hover:text-white hover:bg-rose-500/10 hover:border hover:border-rose-500/20 transition cursor-pointer"
+            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 hover:text-rose-600 dark:hover:text-white hover:bg-rose-500/10 hover:border hover:border-rose-500/20 transition cursor-pointer"
           >
-            <FileText size={13} className="text-rose-400" />
+            <FileText size={13} className="text-rose-500 dark:text-rose-400" />
             PDF (.pdf)
           </button>
         </div>
@@ -1022,7 +1022,7 @@ export function DataTable<TData>({
 
       {/* ── TOOLBAR ─────────────────────────────────────────────────────────── */}
       {(enableGlobalSearch || enableColumnVisibility || enableExport || toolbarLeft || toolbarRight) && (
-        <div className="flex flex-wrap items-center gap-2 px-3 py-2.5 border-b border-[#1e2740] bg-[#0b0e1a] shrink-0">
+        <div className="flex flex-wrap items-center gap-2 px-3 py-2.5 border-b border-slate-200 dark:border-[#1e2740] bg-slate-50 dark:bg-[#0b0e1a] shrink-0">
           {/* Left */}
           <div className="flex flex-wrap items-center gap-2 flex-1 min-w-0">
             {enableGlobalSearch && (
@@ -1034,7 +1034,7 @@ export function DataTable<TData>({
                 <Search
                   size={14}
                   className={`absolute left-3 top-1/2 -translate-y-1/2 transition-colors duration-200 pointer-events-none ${
-                    searchFocused ? 'text-[#5c36f5]' : 'text-slate-500'
+                    searchFocused ? 'text-[#5c36f5]' : 'text-slate-400 dark:text-slate-500'
                   }`}
                 />
                 <input
@@ -1044,7 +1044,7 @@ export function DataTable<TData>({
                   onBlur={() => setSearchFocused(false)}
                   onChange={e => setGlobalFilter(e.target.value)}
                   placeholder={searchPlaceholder}
-                  className="w-full bg-[#13192c] border border-[#253050] text-white text-xs rounded-xl pl-8 pr-8 py-1.5 focus:outline-none focus:border-[#5c36f5] focus:ring-2 focus:ring-[#5c36f5]/20 placeholder:text-slate-500 font-semibold transition shadow-inner"
+                  className="w-full bg-white dark:bg-[#13192c] border border-slate-200 dark:border-[#253050] text-slate-900 dark:text-white text-xs rounded-xl pl-8 pr-8 py-1.5 focus:outline-none focus:border-[#5c36f5] focus:ring-2 focus:ring-[#5c36f5]/20 placeholder:text-slate-400 dark:placeholder:text-slate-500 font-semibold transition shadow-sm dark:shadow-inner"
                 />
                 <AnimatePresence>
                   {globalFilter && (
@@ -1054,7 +1054,7 @@ export function DataTable<TData>({
                       exit={{ opacity: 0, scale: 0.8 }}
                       type="button"
                       onClick={() => setGlobalFilter('')}
-                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition cursor-pointer p-0.5 rounded-full hover:bg-white/10"
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-800 dark:hover:text-white transition cursor-pointer p-0.5 rounded-full hover:bg-slate-200 dark:hover:bg-white/10"
                     >
                       <X size={12} />
                     </motion.button>
@@ -1193,7 +1193,7 @@ export function DataTable<TData>({
                   </colgroup>
 
                   {/* ── THEAD (All headers centered by default) ────────────────── */}
-                  <thead className={`bg-[#111827] ${stickyHeader ? 'sticky top-0 z-20' : ''}`}>
+                  <thead className={`bg-slate-100 dark:bg-[#111827] border-b border-slate-200 dark:border-[#1e2740] ${stickyHeader ? 'sticky top-0 z-20' : ''}`}>
                     {table.getHeaderGroups().map(headerGroup => (
                       <tr key={headerGroup.id}>
                         {headerGroup.headers.map(header => {
@@ -1212,7 +1212,7 @@ export function DataTable<TData>({
                             >
                               <div
                                 className={`inline-flex items-center justify-center gap-1.5 max-w-full ${
-                                  header.column.getCanSort() ? 'cursor-pointer select-none hover:text-white transition-colors' : ''
+                                  header.column.getCanSort() ? 'cursor-pointer select-none hover:text-slate-900 dark:hover:text-white transition-colors' : ''
                                 }`}
                                 onClick={header.column.getCanSort() ? header.column.getToggleSortingHandler() : undefined}
                               >
@@ -1223,10 +1223,10 @@ export function DataTable<TData>({
                                 {header.column.getCanSort() && (
                                   <span className="shrink-0 inline-flex items-center">
                                     {header.column.getIsSorted() === 'asc'
-                                      ? <ArrowUp size={12} className="text-indigo-400" />
+                                      ? <ArrowUp size={12} className="text-indigo-500 dark:text-indigo-400" />
                                       : header.column.getIsSorted() === 'desc'
-                                      ? <ArrowDown size={12} className="text-indigo-400" />
-                                      : <ArrowUpDown size={12} className="text-slate-600 hover:text-slate-400 transition" />}
+                                      ? <ArrowDown size={12} className="text-indigo-500 dark:text-indigo-400" />
+                                      : <ArrowUpDown size={12} className="text-slate-400 dark:text-slate-600 hover:text-slate-600 dark:hover:text-slate-400 transition" />}
                                   </span>
                                 )}
 
@@ -1234,7 +1234,7 @@ export function DataTable<TData>({
                                 {header.column.getIsSorted() && enableMultiSort && (() => {
                                   const idx = sorting.findIndex(s => s.id === header.column.id);
                                   return sorting.length > 1 && idx !== -1 ? (
-                                    <span className="text-[9px] font-black text-indigo-300 bg-indigo-500/20 rounded px-1 shrink-0">{idx + 1}</span>
+                                    <span className="text-[9px] font-black text-indigo-600 dark:text-indigo-300 bg-indigo-500/20 rounded px-1 shrink-0">{idx + 1}</span>
                                   ) : null;
                                 })()}
                               </div>
@@ -1246,7 +1246,7 @@ export function DataTable<TData>({
                   </thead>
 
                   {/* ── TBODY ─────────────────────────────────────────────── */}
-                  <tbody className="bg-[#0d1018]">
+                  <tbody className="bg-white dark:bg-[#0d1018]">
                     {/* Virtual padding top */}
                     {useVirt && paddingTop > 0 && (
                       <tr><td style={{ height: paddingTop }} colSpan={allColumns.length} /></tr>
@@ -1261,8 +1261,8 @@ export function DataTable<TData>({
                             ${row.getIsSelected()
                               ? 'bg-indigo-500/10 hover:bg-indigo-500/15'
                               : rowIdx % 2 === 0
-                              ? 'bg-[#0d1018] hover:bg-[#131928]'
-                              : 'bg-[#0b0f1c] hover:bg-[#131928]'}
+                              ? 'bg-white dark:bg-[#0d1018] hover:bg-slate-50 dark:hover:bg-[#131928]'
+                              : 'bg-slate-50/70 dark:bg-[#0b0f1c] hover:bg-slate-50 dark:hover:bg-[#131928]'}
                           `}
                           onClick={() => onRowClick?.(row.original)}
                         >
@@ -1278,8 +1278,8 @@ export function DataTable<TData>({
                               <td
                                 key={cell.id}
                                 className={`
-                                  py-3.5 ${isSelectCol ? 'px-1' : 'px-4'} font-semibold text-slate-200 text-base
-                                  border-b border-[#161e30] overflow-hidden
+                                  py-3.5 ${isSelectCol ? 'px-1' : 'px-4'} font-semibold text-slate-800 dark:text-slate-200 text-base
+                                  border-b border-slate-200 dark:border-[#161e30] overflow-hidden
                                   ${isCentered ? 'text-center' : 'text-left'}
                                   ${isPinned ? 'bg-inherit' : ''}
                                   ${isLastRow && isFirstCell ? 'rounded-bl-xl' : ''}
@@ -1287,11 +1287,8 @@ export function DataTable<TData>({
                                 `}
                                 style={{
                                   boxSizing: 'border-box',
-                                  ...(isPinned === 'left' ? { position: 'sticky', left: cell.column.getStart('left'), zIndex: 3, boxShadow: '2px 0 6px rgba(0,0,0,0.4)' } : {}),
-                                  ...(isPinned === 'right' ? { position: 'sticky', right: cell.column.getAfter('right'), zIndex: 3, boxShadow: '-2px 0 6px rgba(0,0,0,0.4)' } : {}),
-                                  backgroundColor: isPinned
-                                    ? (row.getIsSelected() ? 'rgba(99,102,241,0.1)' : rowIdx % 2 === 0 ? '#0d1018' : '#0b0f1c')
-                                    : undefined,
+                                  ...(isPinned === 'left' ? { position: 'sticky', left: cell.column.getStart('left'), zIndex: 3, boxShadow: '2px 0 6px rgba(0,0,0,0.1)' } : {}),
+                                  ...(isPinned === 'right' ? { position: 'sticky', right: cell.column.getAfter('right'), zIndex: 3, boxShadow: '-2px 0 6px rgba(0,0,0,0.1)' } : {}),
                                 }}
                               >
                                 <div className={`w-full flex items-center ${isCentered ? 'justify-center text-center' : 'justify-start text-left'}`}>
@@ -1304,7 +1301,7 @@ export function DataTable<TData>({
 
                         {/* Expanded sub-row */}
                         {row.getIsExpanded() && renderSubComponent && (
-                          <tr className="bg-[#090c16] border-b border-[#1a2236]">
+                          <tr className="bg-slate-50 dark:bg-[#090c16] border-b border-slate-200 dark:border-[#1a2236]">
                             <td colSpan={row.getVisibleCells().length} className="px-5 py-4">
                               {renderSubComponent({ row })}
                             </td>
@@ -1325,12 +1322,12 @@ export function DataTable<TData>({
 
           {/* ── PAGINATION ──────────────────────────────────────────────────── */}
           {showPagination && pageCount > 0 && !useVirt && (
-            <div className="shrink-0 px-4 py-2.5 bg-[#090c16] border-t border-[#1a2236] flex flex-wrap items-center justify-between gap-3 text-xs text-slate-400 font-bold">
+            <div className="shrink-0 px-4 py-2.5 bg-slate-50 dark:bg-[#090c16] border-t border-slate-200 dark:border-[#1a2236] flex flex-wrap items-center justify-between gap-3 text-xs text-slate-600 dark:text-slate-400 font-bold">
               {/* Left info */}
               <div className="flex items-center gap-3 flex-wrap">
                 <span>
-                  Trang <span className="text-white">{pageIndex + 1}</span> / {pageCount}
-                  <span className="text-slate-600 ml-2">({totalFiltered.toLocaleString()} bản ghi)</span>
+                  Trang <span className="text-slate-900 dark:text-white font-extrabold">{pageIndex + 1}</span> / {pageCount}
+                  <span className="text-slate-400 dark:text-slate-600 ml-2">({totalFiltered.toLocaleString()} bản ghi)</span>
                 </span>
                 
               </div>
@@ -1338,11 +1335,11 @@ export function DataTable<TData>({
               {/* Right nav */}
               <div className="flex items-center gap-1">
                 <button type="button" onClick={() => table.setPageIndex(0)} disabled={!table.getCanPreviousPage()}
-                  className="p-1.5 rounded-lg bg-[#141c2e] hover:bg-[#1e2a42] text-slate-300 disabled:opacity-30 border border-white/10 transition cursor-pointer disabled:cursor-not-allowed" title="Trang đầu">
+                  className="p-1.5 rounded-lg bg-white dark:bg-[#141c2e] hover:bg-slate-100 dark:hover:bg-[#1e2a42] text-slate-700 dark:text-slate-300 disabled:opacity-30 border border-slate-200 dark:border-white/10 transition cursor-pointer disabled:cursor-not-allowed" title="Trang đầu">
                   <ChevronsLeft size={13} />
                 </button>
                 <button type="button" onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()}
-                  className="px-2.5 py-1.5 rounded-lg bg-[#141c2e] hover:bg-[#1e2a42] text-slate-300 disabled:opacity-30 border border-white/10 transition flex items-center gap-1 cursor-pointer disabled:cursor-not-allowed">
+                  className="px-2.5 py-1.5 rounded-lg bg-white dark:bg-[#141c2e] hover:bg-slate-100 dark:hover:bg-[#1e2a42] text-slate-700 dark:text-slate-300 disabled:opacity-30 border border-slate-200 dark:border-white/10 transition flex items-center gap-1 cursor-pointer disabled:cursor-not-allowed">
                   <ChevronLeft size={13} /><span>Trước</span>
                 </button>
 
@@ -1361,7 +1358,7 @@ export function DataTable<TData>({
                         className={`w-7 h-7 rounded-lg text-[11px] font-extrabold border transition cursor-pointer ${
                           pageNum === pageIndex
                             ? 'bg-indigo-600 border-indigo-500 text-white shadow-[0_0_8px_rgba(99,102,241,0.4)]'
-                            : 'bg-[#141c2e] border-white/10 text-slate-400 hover:bg-[#1e2a42] hover:text-white'
+                            : 'bg-white dark:bg-[#141c2e] border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-[#1e2a42] hover:text-slate-900 dark:hover:text-white'
                         }`}
                       >
                         {pageNum + 1}
@@ -1371,11 +1368,11 @@ export function DataTable<TData>({
                 </div>
 
                 <button type="button" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}
-                  className="px-2.5 py-1.5 rounded-lg bg-[#141c2e] hover:bg-[#1e2a42] text-slate-300 disabled:opacity-30 border border-white/10 transition flex items-center gap-1 cursor-pointer disabled:cursor-not-allowed">
+                  className="px-2.5 py-1.5 rounded-lg bg-white dark:bg-[#141c2e] hover:bg-slate-100 dark:hover:bg-[#1e2a42] text-slate-700 dark:text-slate-300 disabled:opacity-30 border border-slate-200 dark:border-white/10 transition flex items-center gap-1 cursor-pointer disabled:cursor-not-allowed">
                   <span>Sau</span><ChevronRight size={13} />
                 </button>
                 <button type="button" onClick={() => table.setPageIndex(pageCount - 1)} disabled={!table.getCanNextPage()}
-                  className="p-1.5 rounded-lg bg-[#141c2e] hover:bg-[#1e2a42] text-slate-300 disabled:opacity-30 border border-white/10 transition cursor-pointer disabled:cursor-not-allowed" title="Trang cuối">
+                  className="p-1.5 rounded-lg bg-white dark:bg-[#141c2e] hover:bg-slate-100 dark:hover:bg-[#1e2a42] text-slate-700 dark:text-slate-300 disabled:opacity-30 border border-slate-200 dark:border-white/10 transition cursor-pointer disabled:cursor-not-allowed" title="Trang cuối">
                   <ChevronsRight size={13} />
                 </button>
               </div>
@@ -1384,14 +1381,14 @@ export function DataTable<TData>({
 
           {/* Virtual scroll info bar (replaces pagination) */}
           {useVirt && (
-            <div className="shrink-0 px-4 py-2 bg-[#090c16] border-t border-[#1a2236] flex items-center justify-between text-[10px] text-slate-500 font-bold">
+            <div className="shrink-0 px-4 py-2 bg-slate-50 dark:bg-[#090c16] border-t border-slate-200 dark:border-[#1a2236] flex items-center justify-between text-[10px] text-slate-500 font-bold">
               <div className="flex items-center gap-2">
-                <Zap size={10} className="text-amber-400" />
+                <Zap size={10} className="text-amber-500 dark:text-amber-400" />
                 <span>Virtual scroll — {allRows.length.toLocaleString()} hàng</span>
-                {hasActiveFilter && <span className="text-indigo-400">({totalFiltered.toLocaleString()} kết quả)</span>}
+                {hasActiveFilter && <span className="text-indigo-500 dark:text-indigo-400">({totalFiltered.toLocaleString()} kết quả)</span>}
               </div>
               {enableExport && (
-                <span className="text-slate-600">Xuất để lưu toàn bộ dữ liệu</span>
+                <span className="text-slate-500 dark:text-slate-600">Xuất để lưu toàn bộ dữ liệu</span>
               )}
             </div>
           )}

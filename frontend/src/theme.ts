@@ -1,171 +1,251 @@
 /**
  * CENTER MANAGER APP — CENTRALIZED COLOR SYSTEM & THEME CONFIGURATION
  * ═══════════════════════════════════════════════════════════════════════════
- * File duy nhất quản lý TOÀN BỘ mã màu, bảng màu giao diện, biến CSS,
- * màu sắc biểu đồ, màu badge và màu sắc các thành phần trong toàn bộ app.
- * Để thay đổi bất kỳ màu sắc nào trong ứng dụng, bạn chỉ cần sửa file này!
+ * Manages complete Dark Space and Light Executive theme tokens,
+ * CSS variables, chart palettes, and real-time document styling.
  */
 
-export const THEME_COLORS = {
-  // ─── 1. BỀ MẶT GIAO DIỆN (SURFACES & BACKGROUNDS) ───────────────────────
-  appBackground: '#090b14',          // Nền chính tối sâu của toàn bộ ứng dụng
-  sidebarBackground: '#080a12',      // Nền sidebar thanh điều hướng bên trái
-  cardBackground: '#0e1222',         // Nền các thẻ card, container bảng, panel
-  cardBackgroundRaised: '#12172b',   // Nền bề mặt nổi: Nút bấm, sub-card, input box
-  cardBackgroundHighlight: '#1a223e',// Nền khi hover chuột vào item/nút
-  navBackground: '#090d16',          // Nền thanh điều hướng phụ, segmented tab bar
-  modalBackdrop: 'rgba(0, 0, 0, 0.85)', // Nền che mờ modal popup
+export type ThemeMode = 'dark' | 'light';
 
-  // ─── 2. ĐƯỜNG VIỀN GIAO DIỆN (BORDERS) ─────────────────────────────────
-  borderPrimary: '#1b253b',          // Viền card, viền bảng chính
-  borderSubtle: '#181f36',           // Viền ngăn cách nhẹ giữa các phần tử
-  borderActive: '#2563eb',           // Viền khi được chọn, viền active
-  borderHover: '#3b82f6',            // Viền khi hover
-  borderGlow: 'rgba(59, 130, 246, 0.35)',
+export const DARK_THEME_COLORS = {
+  // ─── 1. SURFACES & BACKGROUNDS ───────────────────────────────────────────
+  appBackground: '#07090e',
+  sidebarBackground: '#0c0f1e',
+  cardBackground: '#0c0f1e',
+  cardBackgroundRaised: '#121626',
+  cardBackgroundHighlight: '#1a223e',
+  navBackground: '#090d16',
+  modalBackdrop: 'rgba(0, 0, 0, 0.85)',
 
-  // ─── 3. MÀU CHỮ VÀ VĂN BẢN (TYPOGRAPHY) ────────────────────────────────
-  textPrimary: '#ffffff',            // Chữ chính màu trắng sáng tuyệt đối
-  textSecondary: '#cbd5e1',          // Chữ phụ (Slate 300)
-  textMuted: '#94a3b8',              // Chữ chú thích, mô tả (Slate 400)
-  textSubtle: '#64748b',             // Chữ mờ tối (Slate 500)
+  // ─── 2. BORDERS ─────────────────────────────────────────────────────────
+  borderPrimary: '#212c4b',
+  borderSubtle: '#181f36',
+  borderActive: '#5c36f5',
+  borderHover: '#3b82f6',
+  borderGlow: 'rgba(92, 54, 245, 0.4)',
 
-  // ─── 4. MÀU CHỦ ĐẠO & ĐIỂM NHẤN (ACCENT & BRAND COLORS) ────────────────
-  primary: '#2563eb',                // Màu xanh dương chủ đạo (Royal Blue)
-  primaryHover: '#1d4ed8',           // Xanh dương đậm khi hover
+  // ─── 3. TYPOGRAPHY ──────────────────────────────────────────────────────
+  textPrimary: '#ffffff',
+  textSecondary: '#cbd5e1',
+  textMuted: '#94a3b8',
+  textSubtle: '#64748b',
+
+  // ─── 4. ACCENT & BRAND ──────────────────────────────────────────────────
+  primary: '#2563eb',
+  primaryHover: '#1d4ed8',
   primaryGlow: 'rgba(37, 99, 235, 0.45)',
   primaryLight: 'rgba(37, 99, 235, 0.15)',
 
-  indigo: '#5c36f5',                 // Màu tím Indigo (Pill highlight, accent)
+  indigo: '#5c36f5',
   indigoHover: '#4f2ee0',
   indigoGlow: 'rgba(92, 54, 245, 0.5)',
   indigoLight: 'rgba(92, 54, 245, 0.15)',
 
-  // ─── 5. MÀU TRẠNG THÁI VÀ CHỈ SỐ (SEMANTIC STATUS COLORS) ──────────────
-  // Thành công / Xuất sắc / Có mặt (Xanh lá)
+  // ─── 5. SEMANTIC STATUS ─────────────────────────────────────────────────
   success: '#10b981',
   successText: '#34d399',
   successBg: 'rgba(16, 185, 129, 0.15)',
   successBorder: 'rgba(16, 185, 129, 0.35)',
 
-  // Cảnh báo / Khá / Cần chú ý (Hổ phách / Cam)
   warning: '#f59e0b',
   warningText: '#fbbf24',
   warningBg: 'rgba(245, 158, 11, 0.15)',
   warningBorder: 'rgba(245, 158, 11, 0.35)',
 
-  // Nguy cơ / Giảm sút / Vắng mặt / Xóa (Đỏ hồng)
   danger: '#ef4444',
   dangerText: '#f87171',
   dangerBg: 'rgba(239, 68, 68, 0.15)',
   dangerBorder: 'rgba(239, 68, 68, 0.35)',
 
-  // Thông tin / Tiến bộ / Phân tích (Xanh Cyan / Sky)
   info: '#06b6d4',
   infoText: '#22d3ee',
   infoBg: 'rgba(6, 182, 212, 0.15)',
   infoBorder: 'rgba(6, 182, 212, 0.35)',
 
-  // Cao thủ / Nâng cao (Tím Purple)
   purple: '#a855f7',
   purpleText: '#c084fc',
   purpleBg: 'rgba(168, 85, 247, 0.15)',
   purpleBorder: 'rgba(168, 85, 247, 0.35)',
 
-  // ─── 6. BẢNG MÀU 8 CẤP BẬC HỌC LỰC (TIER COLORS) ───────────────────────
+  // ─── 6. TIERS ───────────────────────────────────────────────────────────
   tiers: {
-    tier8_quanQuan: '#10b981',     // Quán Quân - Emerald
-    tier7_caoThu: '#06b6d4',       // Cao Thủ - Cyan
-    tier6_tinhAnh: '#3b82f6',      // Tinh Anh - Blue
-    tier5_kimCuong: '#8b5cf6',     // Kim Cương - Purple
-    tier4_bachKim: '#ec4899',      // Bạch Kim - Pink
-    tier3_vang: '#f59e0b',         // Vàng - Amber
-    tier2_bac: '#94a3b8',          // Bạc - Slate
-    tier1_dong: '#d97706',         // Đồng - Bronze/Brown
+    tier8_quanQuan: '#10b981',
+    tier7_caoThu: '#06b6d4',
+    tier6_tinhAnh: '#3b82f6',
+    tier5_kimCuong: '#8b5cf6',
+    tier4_bachKim: '#ec4899',
+    tier3_vang: '#f59e0b',
+    tier2_bac: '#94a3b8',
+    tier1_dong: '#d97706',
   },
 
-  // ─── 7. MÀU SẮC BIỂU ĐỒ & ĐỒ THỊ (CHART PALETTE) ────────────────────────
+  // ─── 7. CHARTS ──────────────────────────────────────────────────────────
   charts: {
-    check1_vocab: '#3b82f6',       // Check 1 / Từ vựng: Xanh dương
-    check2_grammar: '#a855f7',     // Check 2 / Ngữ pháp: Tím
-    homework: '#10b981',           // BTVN: Xanh lá
-    ema_overall: '#f59e0b',        // Điểm EMA tổng thể: Vàng hổ phách
+    check1_vocab: '#3b82f6',
+    check2_grammar: '#a855f7',
+    homework: '#10b981',
+    ema_overall: '#f59e0b',
     gridLine: 'rgba(255, 255, 255, 0.06)',
     axisText: '#94a3b8',
-  }
+  },
 } as const;
 
-export type ThemeColorsType = typeof THEME_COLORS;
+export const LIGHT_THEME_COLORS = {
+  // ─── 1. SURFACES & BACKGROUNDS (Pro Anti-Glare Slate) ────────────────────
+  appBackground: '#f8fafc', // Slate 50
+  sidebarBackground: '#ffffff',
+  cardBackground: '#ffffff',
+  cardBackgroundRaised: '#f1f5f9', // Slate 100
+  cardBackgroundHighlight: '#e2e8f0', // Slate 200
+  navBackground: '#f1f5f9',
+  modalBackdrop: 'rgba(15, 23, 42, 0.65)',
+
+  // ─── 2. BORDERS ─────────────────────────────────────────────────────────
+  borderPrimary: '#e2e8f0', // Slate 200
+  borderSubtle: '#f1f5f9', // Slate 100
+  borderActive: '#2563eb', // Blue 600
+  borderHover: '#cbd5e1', // Slate 300
+  borderGlow: 'rgba(37, 99, 235, 0.2)',
+
+  // ─── 3. TYPOGRAPHY (High Contrast WCAG AAA) ─────────────────────────────
+  textPrimary: '#0f172a', // Slate 900
+  textSecondary: '#334155', // Slate 700
+  textMuted: '#64748b', // Slate 500
+  textSubtle: '#94a3b8', // Slate 400
+
+  // ─── 4. ACCENT & BRAND ──────────────────────────────────────────────────
+  primary: '#2563eb',
+  primaryHover: '#1d4ed8',
+  primaryGlow: 'rgba(37, 99, 235, 0.25)',
+  primaryLight: 'rgba(37, 99, 235, 0.08)',
+
+  indigo: '#4f46e5', // Indigo 600
+  indigoHover: '#4338ca',
+  indigoGlow: 'rgba(79, 70, 229, 0.25)',
+  indigoLight: 'rgba(79, 70, 229, 0.08)',
+
+  // ─── 5. SEMANTIC STATUS ─────────────────────────────────────────────────
+  success: '#059669',
+  successText: '#065f46',
+  successBg: 'rgba(5, 150, 105, 0.1)',
+  successBorder: '#a7f3d0',
+
+  warning: '#d97706',
+  warningText: '#92400e',
+  warningBg: 'rgba(217, 119, 6, 0.1)',
+  warningBorder: '#fde68a',
+
+  danger: '#dc2626',
+  dangerText: '#991b1b',
+  dangerBg: 'rgba(220, 38, 38, 0.1)',
+  dangerBorder: '#fecaca',
+
+  info: '#0284c7',
+  infoText: '#075985',
+  infoBg: 'rgba(2, 132, 199, 0.1)',
+  infoBorder: '#bae6fd',
+
+  purple: '#7c3aed',
+  purpleText: '#5b21b6',
+  purpleBg: 'rgba(124, 58, 237, 0.1)',
+  purpleBorder: '#ddd6fe',
+
+  // ─── 6. TIERS ───────────────────────────────────────────────────────────
+  tiers: {
+    tier8_quanQuan: '#059669',
+    tier7_caoThu: '#0284c7',
+    tier6_tinhAnh: '#2563eb',
+    tier5_kimCuong: '#7c3aed',
+    tier4_bachKim: '#db2777',
+    tier3_vang: '#d97706',
+    tier2_bac: '#64748b',
+    tier1_dong: '#b45309',
+  },
+
+  // ─── 7. CHARTS ──────────────────────────────────────────────────────────
+  charts: {
+    check1_vocab: '#2563eb',
+    check2_grammar: '#7c3aed',
+    homework: '#059669',
+    ema_overall: '#d97706',
+    gridLine: 'rgba(15, 23, 42, 0.08)',
+    axisText: '#64748b',
+  },
+} as const;
+
+export const THEME_COLORS = DARK_THEME_COLORS;
+export type ThemeColorsType = typeof DARK_THEME_COLORS;
+
+export function getStoredTheme(): ThemeMode {
+  try {
+    const saved = localStorage.getItem('app_theme');
+    if (saved === 'light' || saved === 'dark') return saved;
+  } catch {}
+  return 'dark';
+}
+
+export function setStoredTheme(mode: ThemeMode): void {
+  try {
+    localStorage.setItem('app_theme', mode);
+  } catch {}
+}
 
 /**
- * Hàm nạp cấu hình Theme và cập nhật toàn bộ CSS Custom Properties lên document :root
+ * Applies active theme tokens to CSS custom properties and document elements.
  */
-export const applyTheme = (customTheme?: any) => {
+export const applyTheme = (mode?: ThemeMode, customTheme?: any) => {
+  const currentMode = mode || getStoredTheme();
+  const tokens = currentMode === 'light' ? LIGHT_THEME_COLORS : DARK_THEME_COLORS;
   const root = document.documentElement;
 
-  // 1. Áp dụng bảng màu chuẩn
-  root.style.setProperty('--background', THEME_COLORS.appBackground);
-  root.style.setProperty('--surface', THEME_COLORS.cardBackground);
-  root.style.setProperty('--surface-nav', THEME_COLORS.navBackground);
-  root.style.setProperty('--surface-raised', THEME_COLORS.cardBackgroundRaised);
-  root.style.setProperty('--surface-highlight', THEME_COLORS.cardBackgroundHighlight);
-
-  root.style.setProperty('--border-color', THEME_COLORS.borderPrimary);
-  root.style.setProperty('--border-subtle', THEME_COLORS.borderSubtle);
-  root.style.setProperty('--border-active', THEME_COLORS.borderActive);
-
-  root.style.setProperty('--foreground', THEME_COLORS.textPrimary);
-  root.style.setProperty('--text-main', THEME_COLORS.textPrimary);
-  root.style.setProperty('--text-muted', THEME_COLORS.textMuted);
-  root.style.setProperty('--text-subtle', THEME_COLORS.textSubtle);
-
-  root.style.setProperty('--primary', THEME_COLORS.primary);
-  root.style.setProperty('--primary-hover', THEME_COLORS.primaryHover);
-  root.style.setProperty('--primary-glow', THEME_COLORS.primaryGlow);
-
-  root.style.setProperty('--indigo', THEME_COLORS.indigo);
-  root.style.setProperty('--indigo-glow', THEME_COLORS.indigoGlow);
-
-  root.style.setProperty('--success', THEME_COLORS.success);
-  root.style.setProperty('--warning', THEME_COLORS.warning);
-  root.style.setProperty('--danger', THEME_COLORS.danger);
-  root.style.setProperty('--info', THEME_COLORS.info);
-  root.style.setProperty('--purple', THEME_COLORS.purple);
-
-  // 2. Glassmorphism & background image settings
-  const opacity = customTheme?.opacity !== undefined ? customTheme.opacity : 0.08;
-  const blur = customTheme?.blur !== undefined ? customTheme.blur : 24;
-  const borderOpacity = customTheme?.borderOpacity !== undefined ? customTheme.borderOpacity : 0.15;
-  const saturate = customTheme?.saturate !== undefined ? customTheme.saturate : 180;
-
-  root.style.setProperty('--glass-bg-opacity', String(opacity));
-  root.style.setProperty('--glass-blur', `${blur}px`);
-  root.style.setProperty('--glass-border-opacity', String(borderOpacity));
-  root.style.setProperty('--glass-saturate', `${saturate}%`);
-
-  const bgImg = (!customTheme?.bgImage || customTheme.bgImage === 'none')
-    ? 'none'
-    : customTheme.bgImage;
-  root.style.setProperty('--bg-image', bgImg === 'none' ? 'none' : `url('${bgImg}')`);
-
-  let styleEl = document.getElementById('dynamic-glass-blur-styles') as HTMLStyleElement;
-  if (!styleEl) {
-    styleEl = document.createElement('style');
-    styleEl.id = 'dynamic-glass-blur-styles';
-    document.head.appendChild(styleEl);
+  // Toggle class and color-scheme on root element
+  if (currentMode === 'light') {
+    root.classList.remove('dark');
+    root.classList.add('light');
+    root.style.colorScheme = 'light';
+  } else {
+    root.classList.remove('light');
+    root.classList.add('dark');
+    root.style.colorScheme = 'dark';
   }
 
-  const glassClasses = [
-    '.glass-panel',
-    '.glass-panel-dark',
-    '.premium-card'
-  ];
+  // 1. Core Surfaces & Backgrounds
+  root.style.setProperty('--background', tokens.appBackground);
+  root.style.setProperty('--surface', tokens.cardBackground);
+  root.style.setProperty('--surface-nav', tokens.navBackground);
+  root.style.setProperty('--surface-raised', tokens.cardBackgroundRaised);
+  root.style.setProperty('--surface-highlight', tokens.cardBackgroundHighlight);
 
-  styleEl.innerHTML = `
-    ${glassClasses.join(',\n')} {
-      background-color: rgba(${customTheme?.bgColorRGB || '255, 255, 255'}, ${opacity});
-      backdrop-filter: none;
-      -webkit-backdrop-filter: none;
-      border-color: rgba(255, 255, 255, ${borderOpacity});
-    }
-  `;
+  // 2. Borders
+  root.style.setProperty('--border-color', tokens.borderPrimary);
+  root.style.setProperty('--border-subtle', tokens.borderSubtle);
+  root.style.setProperty('--border-active', tokens.borderActive);
+
+  // 3. Typography
+  root.style.setProperty('--foreground', tokens.textPrimary);
+  root.style.setProperty('--text-main', tokens.textPrimary);
+  root.style.setProperty('--text-muted', tokens.textMuted);
+  root.style.setProperty('--text-subtle', tokens.textSubtle);
+
+  // 4. Accent & Brand
+  root.style.setProperty('--primary', tokens.primary);
+  root.style.setProperty('--primary-hover', tokens.primaryHover);
+  root.style.setProperty('--primary-glow', tokens.primaryGlow);
+  root.style.setProperty('--primary-light', tokens.primaryLight);
+
+  root.style.setProperty('--indigo', tokens.indigo);
+  root.style.setProperty('--indigo-glow', tokens.indigoGlow);
+
+  // 5. Semantic Status
+  root.style.setProperty('--success', tokens.success);
+  root.style.setProperty('--success-bg', tokens.successBg);
+  root.style.setProperty('--warning', tokens.warning);
+  root.style.setProperty('--warning-bg', tokens.warningBg);
+  root.style.setProperty('--danger', tokens.danger);
+  root.style.setProperty('--danger-bg', tokens.dangerBg);
+  root.style.setProperty('--info', tokens.info);
+  root.style.setProperty('--purple', tokens.purple);
+
+  // 6. Theme Mode flag for CSS
+  root.style.setProperty('--theme-mode', currentMode);
 };

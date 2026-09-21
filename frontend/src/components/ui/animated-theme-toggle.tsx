@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { motion, useMotionValue, useTransform } from 'framer-motion';
+import { useTheme } from '../../context/ThemeContext';
 
 export interface AnimatedThemeToggleProps {
   className?: string;
@@ -14,28 +15,32 @@ export const AnimatedThemeToggle: React.FC<AnimatedThemeToggleProps> = ({
   onToggle,
   size = 'md',
 }) => {
-  const [internalDark, setInternalDark] = useState(true);
-  const isDark = controlledDark !== undefined ? controlledDark : internalDark;
+  const themeCtx = useTheme();
+  const isDark = controlledDark !== undefined ? controlledDark : themeCtx.isDark;
 
   const toggleTheme = () => {
     const next = !isDark;
-    setInternalDark(next);
-    if (onToggle) onToggle(next);
+    if (onToggle) {
+      onToggle(next);
+    } else {
+      themeCtx.toggleTheme();
+    }
   };
 
   const sizeClasses =
     size === 'sm'
-      ? 'h-8 px-2.5 rounded-lg'
+      ? 'h-7 w-7 sm:h-8 sm:w-8 rounded-lg'
       : size === 'lg'
-      ? 'h-12 px-4 rounded-2xl'
-      : 'h-10 px-3 rounded-xl';
+      ? 'h-11 w-11 rounded-2xl'
+      : 'h-8.5 w-8.5 sm:h-9 sm:w-9 rounded-xl';
 
   return (
     <button
       type="button"
       onClick={toggleTheme}
-      className={`inline-flex items-center justify-center border border-white/15 bg-[#0c0f1e] hover:bg-white/10 text-white transition-colors cursor-pointer shadow-lg active:scale-95 ${sizeClasses} ${className}`}
-      aria-label={isDark ? 'Chuyển sang chế độ sáng' : 'Chuyển sang chế độ tối'}
+      className={`inline-flex items-center justify-center border border-slate-200 dark:border-white/15 bg-white dark:bg-[#0c0f1e] hover:bg-slate-100 dark:hover:bg-white/10 text-amber-500 dark:text-amber-300 transition-all cursor-pointer shadow-sm dark:shadow-md active:scale-95 shrink-0 ${sizeClasses} ${className}`}
+      aria-label={isDark ? 'Chuyển sang giao diện sáng' : 'Chuyển sang giao diện tối'}
+      title={isDark ? 'Giao diện Tối (Bấm để đổi sang Sáng)' : 'Giao diện Sáng (Bấm để đổi sang Tối)'}
     >
       <SolarSwitch isDark={isDark} size={size} />
     </button>

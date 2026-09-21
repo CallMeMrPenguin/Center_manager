@@ -3,6 +3,7 @@ import { Lock, User, Eye, EyeOff, LogIn } from 'lucide-react';
 import { showToast } from '../../components/Toast';
 import { api } from '../../api';
 import { AuthUser, saveAuthUser, getSavedUsername } from '../../utils/authUtils';
+import { AnimatedThemeToggle } from '../../components/ui/animated-theme-toggle';
 
 interface LoginPageProps {
   onLogin: (user: AuthUser) => void;
@@ -65,17 +66,22 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
   };
 
   return (
-    <div className="min-h-screen w-screen bg-[#08090e] flex items-center justify-center p-4 sm:p-6 select-none relative overflow-hidden font-sans">
-      <div className="w-full max-w-md bg-[#0c0f1e] border border-[#212c4b] rounded-3xl p-7 sm:p-9 shadow-[0_25px_70px_rgba(0,0,0,0.9)] relative z-10 space-y-6">
+    <div className="min-h-screen w-screen bg-slate-100 dark:bg-[#08090e] flex items-center justify-center p-4 sm:p-6 select-none relative overflow-hidden font-sans transition-colors duration-200">
+      {/* Theme Toggle in top-right corner */}
+      <div className="absolute top-5 right-5 z-20">
+        <AnimatedThemeToggle className="bg-white/80 dark:bg-[#131929] border border-slate-200 dark:border-[#28334e] shadow-md" />
+      </div>
+
+      <div className="w-full max-w-md bg-white dark:bg-[#0c0f1e] border border-slate-200 dark:border-[#212c4b] rounded-3xl p-7 sm:p-9 shadow-xl dark:shadow-[0_25px_70px_rgba(0,0,0,0.9)] relative z-10 space-y-6 transition-colors duration-200">
         {/* App Branding Header */}
         <div className="text-center space-y-2">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 p-2.5 shadow-[0_0_25px_rgba(92,54,245,0.4)] mb-1">
+          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 p-2.5 shadow-[0_0_25px_rgba(92,54,245,0.25)] mb-1">
             <img src="/logo.png" alt="Center Manager Logo" className="h-full w-full object-contain" />
           </div>
-          <h1 className="text-xl font-black text-white tracking-tight uppercase">
+          <h1 className="text-xl font-black text-slate-900 dark:text-white tracking-tight uppercase">
             Hệ Thống Quản Lý Trung Tâm
           </h1>
-          <p className="text-xs text-slate-400 max-w-xs mx-auto">
+          <p className="text-xs text-slate-500 dark:text-slate-400 max-w-xs mx-auto">
             EduPlatform — Đăng nhập tài khoản để tiếp tục
           </p>
         </div>
@@ -84,7 +90,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
         <form onSubmit={handleFormSubmit} className="space-y-4">
           {/* Username Field */}
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-slate-300 block">
+            <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block">
               Tên đăng nhập
             </label>
             <div className="relative">
@@ -102,14 +108,14 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
                 autoCorrect="off"
                 spellCheck={false}
                 inputMode="text"
-                className="w-full pl-10 pr-3.5 py-2.5 bg-[#121626] border border-[#212c4b] focus:border-[#5c36f5] focus:ring-1 focus:ring-[#5c36f5] rounded-xl text-white text-xs font-medium placeholder-slate-500 outline-none transition"
+                className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50 dark:bg-[#121626] border border-slate-200 dark:border-[#212c4b] focus:border-[#5c36f5] focus:ring-1 focus:ring-[#5c36f5] rounded-xl text-slate-900 dark:text-white text-xs font-medium placeholder-slate-400 dark:placeholder-slate-500 outline-none transition"
               />
             </div>
           </div>
 
           {/* Password Field */}
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-slate-300 block">
+            <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block">
               Mật khẩu
             </label>
             <div className="relative">
@@ -126,12 +132,12 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
                 autoCapitalize="none"
                 autoCorrect="off"
                 spellCheck={false}
-                className="w-full pl-10 pr-10 py-2.5 bg-[#121626] border border-[#212c4b] focus:border-[#5c36f5] focus:ring-1 focus:ring-[#5c36f5] rounded-xl text-white text-xs font-medium placeholder-slate-500 outline-none transition"
+                className="w-full pl-10 pr-10 py-2.5 bg-slate-50 dark:bg-[#121626] border border-slate-200 dark:border-[#212c4b] focus:border-[#5c36f5] focus:ring-1 focus:ring-[#5c36f5] rounded-xl text-slate-900 dark:text-white text-xs font-medium placeholder-slate-400 dark:placeholder-slate-500 outline-none transition"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-white transition cursor-pointer"
+                className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-800 dark:hover:text-white transition cursor-pointer"
               >
                 {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
               </button>
@@ -140,12 +146,12 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
 
           {/* Remember Me Checkbox */}
           <div className="flex items-center justify-between pt-1">
-            <label className="flex items-center gap-2 cursor-pointer text-xs text-slate-300 font-medium select-none">
+            <label className="flex items-center gap-2 cursor-pointer text-xs text-slate-600 dark:text-slate-300 font-medium select-none">
               <input
                 type="checkbox"
                 checked={rememberMe}
                 onChange={(e) => setRememberMe(e.target.checked)}
-                className="w-4 h-4 rounded border-[#212c4b] bg-[#121626] text-[#5c36f5] focus:ring-0 focus:ring-offset-0 cursor-pointer accent-[#5c36f5]"
+                className="w-4 h-4 rounded border-slate-300 dark:border-[#212c4b] bg-slate-50 dark:bg-[#121626] text-[#5c36f5] focus:ring-0 focus:ring-offset-0 cursor-pointer accent-[#5c36f5]"
               />
               <span>Ghi nhớ đăng nhập</span>
             </label>
@@ -169,7 +175,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
         </form>
 
         {/* Footer info */}
-        <div className="text-center pt-2 border-t border-white/5 text-[11px] text-slate-500 font-medium">
+        <div className="text-center pt-2 border-t border-slate-200 dark:border-white/5 text-[11px] text-slate-400 dark:text-slate-500 font-medium">
           Hệ Thống Trực Tuyến Đám Mây & Ngoại Tuyến Kết Hợp — Phiên bản 1.0.0
         </div>
       </div>

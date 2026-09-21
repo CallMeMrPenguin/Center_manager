@@ -31,11 +31,11 @@ export const ClassListView: React.FC<ClassListViewProps> = ({
       {/* HEADER SECTION */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-black tracking-tight text-white flex items-center gap-3">
-            <BookOpen className="h-7 w-7 text-indigo-400" />
+          <h1 className="text-2xl font-black tracking-tight text-slate-900 dark:text-white flex items-center gap-3">
+            <BookOpen className="h-7 w-7 text-indigo-500 dark:text-indigo-400" />
             Quản Lý Lớp Học & Sơ Đồ Chỗ Ngồi
           </h1>
-          <p className="text-xs text-slate-400 font-semibold mt-1">
+          <p className="text-xs text-slate-500 dark:text-slate-400 font-semibold mt-1">
             Tạo lớp, điểm danh, xếp sơ đồ chỗ ngồi thông minh và phân công đổi bài tự động.
           </p>
         </div>
@@ -43,10 +43,10 @@ export const ClassListView: React.FC<ClassListViewProps> = ({
         <div className="flex items-center gap-3">
           <button
             onClick={onRefresh}
-            className="p-2.5 rounded-xl bg-[#121626] hover:bg-[#1e2640] text-slate-300 hover:text-white border border-[#202842] transition cursor-pointer shadow-sm"
+            className="p-2.5 rounded-xl bg-white hover:bg-slate-50 dark:bg-[#121626] dark:hover:bg-[#1e2640] text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-[#202842] transition cursor-pointer shadow-sm"
             title="Làm mới danh sách lớp"
           >
-            <RefreshCw size={14} className={loading ? 'animate-spin text-indigo-400' : ''} />
+            <RefreshCw size={14} className={loading ? 'animate-spin text-indigo-500 dark:text-indigo-400' : ''} />
           </button>
 
           <button
@@ -63,7 +63,7 @@ export const ClassListView: React.FC<ClassListViewProps> = ({
       </div>
 
       {/* SEARCH & FILTER */}
-      <div className="flex items-center justify-between bg-[#0f131f] border border-white/10 p-3.5 rounded-2xl">
+      <div className="flex items-center justify-between bg-white dark:bg-[#0f131f] border border-slate-200 dark:border-white/10 p-3.5 rounded-2xl shadow-sm transition-colors duration-200">
         <div className="relative flex-1 max-w-md">
           <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
           <input
@@ -71,7 +71,7 @@ export const ClassListView: React.FC<ClassListViewProps> = ({
             value={search}
             onChange={(e) => onSearchChange(e.target.value)}
             placeholder="Tìm lớp học theo tên lớp, giáo viên, phòng..."
-            className="w-full bg-[#161a29] border border-white/10 text-white text-xs rounded-xl pl-10 pr-4 py-2 focus:outline-none focus:border-indigo-500 placeholder:text-slate-500 font-medium"
+            className="w-full bg-slate-50 dark:bg-[#161a29] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white text-xs rounded-xl pl-10 pr-4 py-2 focus:outline-none focus:border-indigo-500 placeholder:text-slate-400 dark:placeholder:text-slate-500 font-medium transition"
           />
         </div>
       </div>
@@ -80,13 +80,13 @@ export const ClassListView: React.FC<ClassListViewProps> = ({
       <div className="flex-1 min-h-[360px]">
         {loading && classes.length === 0 ? (
           <div className="flex flex-col items-center justify-center text-slate-400 gap-3 py-20">
-            <RefreshCw className="h-7 w-7 text-indigo-400 animate-spin" />
+            <RefreshCw className="h-7 w-7 text-indigo-500 dark:text-indigo-400 animate-spin" />
             <span className="text-xs font-bold">Đang tải danh sách lớp...</span>
           </div>
         ) : classes.length === 0 ? (
           <div className="flex flex-col items-center justify-center text-slate-400 gap-3 py-20 text-center">
-            <AlertCircle className="h-10 w-10 text-indigo-400/60" />
-            <p className="text-sm font-black text-white">Chưa có lớp học nào được tạo</p>
+            <AlertCircle className="h-10 w-10 text-indigo-500/60 dark:text-indigo-400/60" />
+            <p className="text-sm font-black text-slate-900 dark:text-white">Chưa có lớp học nào được tạo</p>
             <p className="text-xs text-slate-500">Bấm "Tạo Lớp Học Mới" để bắt đầu quản lý.</p>
           </div>
         ) : (

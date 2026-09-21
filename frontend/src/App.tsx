@@ -9,6 +9,8 @@ import { LoginPage } from './pages/auth/LoginPage';
 import { AuthUser, getCurrentUser, clearAuthUser } from './utils/authUtils';
 import { useAutoDeploymentRefresh } from './hooks/useAutoDeploymentRefresh';
 import { useWarmupDataCache } from './hooks/useWarmupDataCache';
+import { ThemeProvider, useTheme } from './context/ThemeContext';
+import { AnimatedThemeToggle } from './components/ui/animated-theme-toggle';
 
 function AppContent() {
   // Auto-detect and reload on new deployment
@@ -182,8 +184,10 @@ function AppContent() {
     ? TAB_DEFINITIONS.filter((t) => t.id === 'assignments' || t.id === 'results')
     : TAB_DEFINITIONS;
 
+  const { isDark } = useTheme();
+
   return (
-    <div className="relative flex flex-col h-screen w-screen bg-[#07090e] text-slate-50 overflow-hidden font-sans select-none">
+    <div className="relative flex flex-col h-screen w-screen bg-slate-100 dark:bg-[#07090e] text-slate-900 dark:text-slate-50 overflow-hidden font-sans select-none transition-colors duration-200">
       <div className="relative flex flex-row flex-1 overflow-hidden p-4 gap-4 z-10">
         {/* SIDEBAR NAVIGATION */}
         <Sidebar
@@ -206,7 +210,7 @@ function AppContent() {
 
         {/* MAIN BODY SKELETON */}
         <div className="flex-1 flex flex-col overflow-hidden bg-transparent">
-          <main className="flex-1 overflow-hidden bg-[#0c0f1e] border border-[#1e2742] relative rounded-2xl shadow-2xl">
+          <main className="flex-1 overflow-hidden bg-white dark:bg-[#0c0f1e] border border-slate-200 dark:border-[#1e2742] relative rounded-2xl shadow-xl transition-colors duration-200">
             {visibleTabs.map((tab) => {
               const isActive = activeTab === tab.id;
               const isVisited = visitedTabIds.has(tab.id);
@@ -240,15 +244,17 @@ function AppContent() {
       </div>
 
       {/* STATUS BAR */}
-      <footer className="h-8 bg-[#06070a] flex items-center justify-between px-6 text-[11px] text-slate-400 select-none shrink-0 font-semibold z-10 border-t border-white/[0.04]">
+      <footer className="h-8 bg-white dark:bg-[#06070a] flex items-center justify-between px-6 text-[11px] text-slate-500 dark:text-slate-400 select-none shrink-0 font-semibold z-10 border-t border-slate-200 dark:border-white/[0.04] transition-colors duration-200">
         <div className="flex items-center gap-3">
           <SyncIndicator />
-          <span className="hidden md:inline text-slate-400">Local-First Engine — Tự động đồng bộ với máy chủ PostgreSQL</span>
+          <div className="w-[1px] h-3.5 bg-slate-200 dark:bg-white/10" />
+          <AnimatedThemeToggle size="sm" />
+          <span className="hidden md:inline text-slate-500 dark:text-slate-400">Local-First Engine — Tự động đồng bộ với máy chủ PostgreSQL</span>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-slate-500">Đang đăng nhập:</span>
-          <strong className="text-indigo-300">{currentUser.name}</strong>
-          <span className={`text-[10px] px-2 py-0.5 rounded-full font-black ${isStudent ? 'bg-emerald-500/20 text-emerald-300' : 'bg-indigo-500/20 text-indigo-300'}`}>
+          <span className="text-slate-400 dark:text-slate-500">Đang đăng nhập:</span>
+          <strong className="text-indigo-600 dark:text-indigo-300 font-bold">{currentUser.name}</strong>
+          <span className={`text-[10px] px-2 py-0.5 rounded-full font-black ${isStudent ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300' : 'bg-indigo-500/15 text-indigo-700 dark:text-indigo-300'}`}>
             {isStudent ? 'Học sinh' : 'Quản trị viên'}
           </span>
         </div>
@@ -259,10 +265,12 @@ function AppContent() {
 
 export default function App() {
   return (
-    <AnimatedToastProvider position="bottom-right">
-      <ConfirmProvider>
-        <AppContent />
-      </ConfirmProvider>
-    </AnimatedToastProvider>
+    <ThemeProvider>
+      <AnimatedToastProvider position="bottom-right">
+        <ConfirmProvider>
+          <AppContent />
+        </ConfirmProvider>
+      </AnimatedToastProvider>
+    </ThemeProvider>
   );
 }

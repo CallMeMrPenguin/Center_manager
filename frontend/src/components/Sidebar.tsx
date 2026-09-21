@@ -4,6 +4,7 @@ import { TAB_DEFINITIONS } from '../config/tabs';
 import { api } from '../api';
 import { showToast } from './Toast';
 import { AuthUser } from '../utils/authUtils';
+import { AnimatedThemeToggle } from './ui/animated-theme-toggle';
 
 export const SECTIONS = [
   { id: 'none', label: '' },
@@ -19,17 +20,17 @@ interface SidebarProps {
   isSidebarExpanded: boolean;
   toggleSidebar: () => void;
   activeTab: string;
-  setActiveTab: (tab: string) => void;
+  setActiveTab: (id: string) => void;
   orderedTabIds: string[];
-  handleDragStart: (idx: number) => void;
+  handleDragStart: (index: number) => void;
   handleDragOver: (e: React.DragEvent) => void;
-  handleDrop: (idx: number) => void;
+  handleDrop: (index: number) => void;
   draggedIndex: number | null;
-  setDraggedIndex: (idx: number | null) => void;
+  setDraggedIndex: (index: number | null) => void;
   profileOpen: boolean;
-  setProfileOpen: (open: boolean | ((prev: boolean) => boolean)) => void;
+  setProfileOpen: React.Dispatch<React.SetStateAction<boolean>>;
   profileRef: React.RefObject<HTMLDivElement | null>;
-  currentUser?: AuthUser | null;
+  currentUser: AuthUser | null;
   onLogout?: () => void;
 }
 
@@ -61,13 +62,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
     <aside
       className={`group relative ${
         isSidebarExpanded ? 'w-56' : 'w-16'
-      } bg-[#0c0f1e]/90 border border-[#212c4b] rounded-2xl flex flex-col transition-all duration-300 select-none shrink-0 z-30 shadow-xl overflow-visible`}
+      } bg-white/95 dark:bg-[#0c0f1e]/90 border border-slate-200 dark:border-[#212c4b] rounded-2xl flex flex-col transition-all duration-300 select-none shrink-0 z-30 shadow-xl overflow-visible`}
     >
       {/* Floating Collapse / Expand Button */}
       <button
         type="button"
         onClick={toggleSidebar}
-        className="absolute -right-3 top-6 w-6 h-6 rounded-full bg-[#181d2e] hover:bg-[#2563eb] text-slate-300 hover:text-white border border-white/20 shadow-[0_2px_10px_rgba(0,0,0,0.6)] flex items-center justify-center transition-all duration-200 hover:scale-110 cursor-pointer z-50 active:scale-95 opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto"
+        className="absolute -right-3 top-6 w-6 h-6 rounded-full bg-white dark:bg-[#181d2e] hover:bg-[#2563eb] text-slate-500 dark:text-slate-300 hover:text-white border border-slate-200 dark:border-white/20 shadow-[0_2px_10px_rgba(0,0,0,0.1)] dark:shadow-[0_2px_10px_rgba(0,0,0,0.6)] flex items-center justify-center transition-all duration-200 hover:scale-110 cursor-pointer z-50 active:scale-95 opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto"
         title={isSidebarExpanded ? 'Thu gọn thanh điều hướng' : 'Mở rộng thanh điều hướng'}
       >
         {isSidebarExpanded ? (
@@ -78,7 +79,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       </button>
 
       {/* Header logo / Title */}
-      <div className={`flex items-center ${isSidebarExpanded ? 'px-3 justify-start' : 'justify-center px-0'} py-3.5 shrink-0 border-b border-white/5 min-w-0`}>
+      <div className={`flex items-center ${isSidebarExpanded ? 'px-3 justify-start' : 'justify-center px-0'} py-3.5 shrink-0 border-b border-slate-100 dark:border-white/5 min-w-0`}>
         <div className="h-8.5 w-8.5 rounded-xl overflow-hidden flex items-center justify-center shrink-0 shadow-[0_0_14px_rgba(59,130,246,0.4)]">
           <img src="/logo.png" alt="Center Manager Logo" className="h-full w-full object-contain" />
         </div>
@@ -89,10 +90,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
               : 'opacity-0 max-w-0 ml-0 -translate-x-3 pointer-events-none'
           }`}
         >
-          <span className="text-xs font-black tracking-wide uppercase text-white block leading-none">
+          <span className="text-xs font-black tracking-wide uppercase text-slate-900 dark:text-white block leading-none">
             EduPlatform
           </span>
-          <span className="text-[8.5px] font-black tracking-[0.18em] uppercase text-blue-400 block mt-1">
+          <span className="text-[8.5px] font-black tracking-[0.18em] uppercase text-blue-600 dark:text-blue-400 block mt-1">
             Center Manager
           </span>
         </div>
@@ -156,8 +157,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
                           : 'w-10 h-10 mx-auto rounded-xl justify-center p-0 hover:scale-105 active:scale-95'
                       } ${
                         isActive
-                          ? 'bg-blue-600/20 border-2 border-blue-500/80 text-white'
-                          : 'hover:bg-white/[0.08] border-2 border-transparent text-slate-300'
+                          ? 'bg-blue-600/10 dark:bg-blue-600/20 border-2 border-blue-600 dark:border-blue-500/80 text-blue-700 dark:text-white'
+                          : 'hover:bg-slate-100 dark:hover:bg-white/[0.08] border-2 border-transparent text-slate-600 dark:text-slate-300'
                       } ${
                         draggedIndex === idx
                           ? 'opacity-40 border border-dashed border-blue-400 bg-blue-500/10'
@@ -170,8 +171,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
                           size={17}
                           className={
                             isActive
-                              ? 'text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.8)]'
-                              : 'text-slate-400 group-hover/item:text-white transition-colors'
+                              ? 'text-blue-600 dark:text-white drop-shadow-sm dark:drop-shadow-[0_0_8px_rgba(255,255,255,0.8)]'
+                              : 'text-slate-400 group-hover/item:text-slate-900 dark:group-hover/item:text-white transition-colors'
                           }
                         />
                       </div>
@@ -181,8 +182,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
                         <span
                           className={`text-xs relative z-10 whitespace-nowrap overflow-hidden ml-2.5 ${
                             isActive
-                              ? 'text-white font-black'
-                              : 'text-slate-200 font-bold group-hover/item:text-white'
+                              ? 'text-blue-700 dark:text-white font-black'
+                              : 'text-slate-700 dark:text-slate-200 font-bold group-hover/item:text-slate-900 dark:group-hover/item:text-white'
                           }`}
                         >
                           {item.label}
@@ -197,34 +198,40 @@ export const Sidebar: React.FC<SidebarProps> = ({
         })}
       </div>
 
-      {/* Floating Hover Tooltip for Collapsed Sidebar (Fixed Position to avoid overflow clipping) */}
+      {/* Floating Hover Tooltip for Collapsed Sidebar */}
       {!isSidebarExpanded && hoveredTab && (
         <div
           className="fixed left-[72px] z-[9999] pointer-events-none transition-all duration-150 ease-out"
           style={{ top: `${hoveredTab.top}px`, transform: 'translateY(-50%)' }}
         >
-          <div className="px-3 py-1.5 rounded-xl bg-[#0c0f1e] border border-[#212c4b] text-white text-xs font-black whitespace-nowrap shadow-[0_10px_30px_rgba(0,0,0,0.95)] flex items-center justify-center animate-in fade-in zoom-in-95 duration-150">
+          <div className="px-3 py-1.5 rounded-xl bg-white dark:bg-[#0c0f1e] border border-slate-200 dark:border-[#212c4b] text-slate-900 dark:text-white text-xs font-black whitespace-nowrap shadow-xl dark:shadow-[0_10px_30px_rgba(0,0,0,0.95)] flex items-center justify-center animate-in fade-in zoom-in-95 duration-150">
             <span>{hoveredTab.label}</span>
           </div>
         </div>
       )}
 
-      {/* User profile section */}
-      <div className="shrink-0 mt-auto p-1.5 border-t border-white/5 relative" ref={profileRef as any}>
+      {/* User profile & Theme Toggle section */}
+      <div className="shrink-0 mt-auto p-1.5 border-t border-slate-100 dark:border-white/5 relative" ref={profileRef as any}>
         {profileOpen && (
-          <div className="absolute z-[250] bg-[#0d1018] border border-white/10 rounded-[14px] shadow-[0_12px_40px_rgba(0,0,0,0.85)] p-1.5 animate-mac-dropdown bottom-full left-0 mb-2 w-52 origin-bottom">
-            <div className="px-3 py-2 border-b border-white/5 select-none mb-1">
-              <p className="text-[10px] font-black text-slate-500 uppercase tracking-wider">
+          <div className="absolute z-[250] bg-white dark:bg-[#0d1018] border border-slate-200 dark:border-white/10 rounded-[14px] shadow-2xl p-1.5 animate-mac-dropdown bottom-full left-0 mb-2 w-52 origin-bottom">
+            <div className="px-3 py-2 border-b border-slate-100 dark:border-white/5 select-none mb-1">
+              <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-wider">
                 {currentUser?.rawRole || (currentUser?.role === 'admin' ? 'Quản trị viên' : currentUser?.role === 'student' ? 'Học sinh' : 'Tài Khoản')}
               </p>
-              <p className="text-xs font-extrabold text-white mt-0.5 truncate">
+              <p className="text-xs font-extrabold text-slate-900 dark:text-white mt-0.5 truncate">
                 {currentUser?.name || 'Center Manager'}
               </p>
               {currentUser?.username && (
-                <p className="text-[10px] font-mono text-indigo-400 mt-0.5">
+                <p className="text-[10px] font-mono text-indigo-600 dark:text-indigo-400 mt-0.5">
                   @{currentUser.username} {currentUser.className ? `• ${currentUser.className}` : ''}
                 </p>
               )}
+            </div>
+
+            {/* Quick theme switcher row in popup */}
+            <div className="px-2.5 py-1.5 flex items-center justify-between border-b border-slate-100 dark:border-white/5 mb-1">
+              <span className="text-xs font-bold text-slate-600 dark:text-slate-300">Chế độ hiển thị</span>
+              <AnimatedThemeToggle size="sm" />
             </div>
 
             {currentUser?.role !== 'student' && (
@@ -233,7 +240,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   setActiveTab('settings');
                   setProfileOpen(false);
                 }}
-                className="w-full flex items-center gap-2 px-2.5 py-1.5 text-xs font-bold text-slate-300 hover:bg-white/[0.05] hover:text-white rounded-xl transition cursor-pointer text-left"
+                className="w-full flex items-center gap-2 px-2.5 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/[0.05] hover:text-slate-900 dark:hover:text-white rounded-xl transition cursor-pointer text-left"
               >
                 <SettingsIcon className="h-4 w-4 text-slate-400 shrink-0" />
                 <span>Cấu hình hệ thống</span>
@@ -251,7 +258,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   }
                   setProfileOpen(false);
                 }}
-                className="w-full flex items-center gap-2 px-2.5 py-1.5 text-xs font-bold text-slate-300 hover:bg-white/[0.05] hover:text-white rounded-xl transition cursor-pointer text-left"
+                className="w-full flex items-center gap-2 px-2.5 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/[0.05] hover:text-slate-900 dark:hover:text-white rounded-xl transition cursor-pointer text-left"
               >
                 <FolderOpen className="h-4 w-4 text-slate-400 shrink-0" />
                 <span>Mở thư mục Workspace</span>
@@ -264,36 +271,40 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   setProfileOpen(false);
                   onLogout();
                 }}
-                className="w-full flex items-center gap-2 px-2.5 py-1.5 text-xs font-bold text-rose-400 hover:bg-rose-500/15 hover:text-rose-300 rounded-xl transition cursor-pointer text-left border-t border-white/5 mt-1 pt-2"
+                className="w-full flex items-center gap-2 px-2.5 py-1.5 text-xs font-bold text-rose-500 dark:text-rose-400 hover:bg-rose-500/10 dark:hover:bg-rose-500/15 rounded-xl transition cursor-pointer text-left border-t border-slate-100 dark:border-white/5 mt-1 pt-2"
               >
-                <LogOut className="h-4 w-4 text-rose-400 shrink-0" />
+                <LogOut className="h-4 w-4 text-rose-500 dark:text-rose-400 shrink-0" />
                 <span>Đăng xuất tài khoản</span>
               </button>
             )}
           </div>
         )}
 
-        <button
-          onClick={() => setProfileOpen((prev) => !prev)}
-          className={`${
-            isSidebarExpanded ? 'w-full px-2 py-1.5 justify-start gap-2.5' : 'w-10 h-10 mx-auto p-0 justify-center'
-          } flex items-center rounded-xl hover:bg-white/5 text-slate-300 hover:text-white transition cursor-pointer border border-transparent hover:border-white/10`}
-          title={currentUser ? `${currentUser.name} (${currentUser.role})` : 'Tài khoản người dùng'}
-        >
-          <div className="w-7 h-7 rounded-lg bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 flex items-center justify-center font-black text-xs shrink-0">
-            {currentUser?.name ? currentUser.name.slice(0, 2).toUpperCase() : 'CM'}
-          </div>
-          {isSidebarExpanded && (
-            <div className="flex flex-col text-left overflow-hidden min-w-0">
-              <span className="text-xs font-black text-white truncate leading-tight">
-                {currentUser?.name || 'Center Manager'}
-              </span>
-              <span className="text-[10px] font-semibold text-indigo-400 truncate">
-                {currentUser?.rawRole || (currentUser?.role === 'admin' ? 'Quản trị' : 'Học sinh')}
-              </span>
+        <div className={`flex items-center ${isSidebarExpanded ? 'gap-1.5' : 'flex-col gap-1.5'}`}>
+          <button
+            onClick={() => setProfileOpen((prev) => !prev)}
+            className={`${
+              isSidebarExpanded ? 'flex-1 px-2 py-1.5 justify-start gap-2.5' : 'w-10 h-10 mx-auto p-0 justify-center'
+            } flex items-center rounded-xl hover:bg-slate-100 dark:hover:bg-white/5 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition cursor-pointer border border-transparent hover:border-slate-200 dark:hover:border-white/10`}
+            title={currentUser ? `${currentUser.name} (${currentUser.role})` : 'Tài khoản người dùng'}
+          >
+            <div className="w-7 h-7 rounded-lg bg-indigo-500/15 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 border border-indigo-500/25 dark:border-indigo-500/30 flex items-center justify-center font-black text-xs shrink-0">
+              {currentUser?.name ? currentUser.name.slice(0, 2).toUpperCase() : 'CM'}
             </div>
-          )}
-        </button>
+            {isSidebarExpanded && (
+              <div className="flex flex-col text-left overflow-hidden min-w-0">
+                <span className="text-xs font-black text-slate-900 dark:text-white truncate leading-tight">
+                  {currentUser?.name || 'Center Manager'}
+                </span>
+                <span className="text-[10px] font-semibold text-indigo-600 dark:text-indigo-400 truncate">
+                  {currentUser?.rawRole || (currentUser?.role === 'admin' ? 'Quản trị' : 'Học sinh')}
+                </span>
+              </div>
+            )}
+          </button>
+
+          <AnimatedThemeToggle size="sm" />
+        </div>
       </div>
     </aside>
   );

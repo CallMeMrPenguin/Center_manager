@@ -97,12 +97,12 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
         type="button"
         disabled={disabled}
         onClick={() => setIsOpen(!isOpen)}
-        className={`w-full flex items-center justify-between bg-[#121626] border border-[#263152] hover:border-indigo-500/50 rounded-xl px-3.5 py-2 text-xs font-bold text-white transition-all cursor-pointer shadow-inner focus:outline-none focus:ring-1 focus:ring-indigo-500 ${
+        className={`w-full flex items-center justify-between bg-white dark:bg-[#121626] border border-slate-200 dark:border-[#263152] hover:border-indigo-500/50 rounded-xl px-3.5 py-2 text-xs font-bold text-slate-800 dark:text-white transition-all cursor-pointer shadow-sm dark:shadow-inner focus:outline-none focus:ring-1 focus:ring-indigo-500 ${
           disabled ? 'opacity-40 cursor-not-allowed' : ''
         }`}
       >
         <div className="flex items-center gap-2 truncate">
-          {icon && <span className="text-indigo-400 shrink-0">{icon}</span>}
+          {icon && <span className="text-indigo-500 dark:text-indigo-400 shrink-0">{icon}</span>}
           {selectedOption?.icon && <span className="shrink-0">{selectedOption.icon}</span>}
           <span className="truncate">
             {selectedOption ? selectedOption.label : placeholder}
@@ -110,21 +110,21 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
         </div>
         <ChevronDown
           size={14}
-          className={`text-indigo-400 shrink-0 transition-transform duration-200 ${
+          className={`text-indigo-500 dark:text-indigo-400 shrink-0 transition-transform duration-200 ${
             isOpen ? 'rotate-180' : ''
           }`}
         />
       </button>
 
-      {/* CUSTOM DARK POPOVER MENU */}
+      {/* CUSTOM DUAL THEME POPOVER MENU */}
       {isOpen && !disabled && (
         <div
           className={`absolute left-0 right-0 ${
             openUpwards ? 'bottom-full mb-2' : 'top-full mt-2'
-          } z-[9999] bg-[#0c0f1e] border border-[#212c4b] rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.95)] p-1.5 space-y-1 max-h-64 flex flex-col select-none animate-slide-up`}
+          } z-[9999] bg-white dark:bg-[#0c0f1e] border border-slate-200 dark:border-[#212c4b] rounded-2xl shadow-xl dark:shadow-[0_20px_60px_rgba(0,0,0,0.95)] p-1.5 space-y-1 max-h-64 flex flex-col select-none animate-slide-up`}
         >
           {searchable && (
-            <div className="p-1 border-b border-white/5 shrink-0">
+            <div className="p-1 border-b border-slate-100 dark:border-white/5 shrink-0">
               <div className="relative">
                 <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
                 <input
@@ -133,7 +133,7 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder={searchPlaceholder}
-                  className="w-full bg-[#161a29] border border-white/10 text-white text-xs rounded-lg pl-8 pr-2.5 py-1.5 focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-slate-50 dark:bg-[#161a29] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white placeholder:text-slate-400 text-xs rounded-lg pl-8 pr-2.5 py-1.5 focus:outline-none focus:border-indigo-500"
                 />
               </div>
             </div>
@@ -141,12 +141,12 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
 
           <div className="overflow-y-auto space-y-1 flex-1 scrollbar-thin">
             {isNearMatch && filteredOptions.length > 0 && (
-              <div className="px-2.5 py-1 text-[10px] font-bold text-amber-400 bg-amber-500/10 rounded-lg">
+              <div className="px-2.5 py-1 text-[10px] font-bold text-amber-600 dark:text-amber-400 bg-amber-500/10 rounded-lg">
                 Gợi ý gần đúng nhất ({filteredOptions.length}):
               </div>
             )}
             {filteredOptions.length === 0 ? (
-              <div className="px-3 py-3 text-xs text-slate-500 text-center font-semibold">
+              <div className="px-3 py-3 text-xs text-slate-400 dark:text-slate-500 text-center font-semibold">
                 Không tìm thấy tùy chọn
               </div>
             ) : (
@@ -160,7 +160,7 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
                     className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-extrabold transition-all cursor-pointer text-left ${
                       isSelected
                         ? 'bg-[#5c36f5] text-white shadow-sm'
-                        : 'text-slate-200 hover:bg-white/10 hover:text-white'
+                        : 'text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white'
                     }`}
                   >
                     <div className="flex items-center gap-2 truncate">

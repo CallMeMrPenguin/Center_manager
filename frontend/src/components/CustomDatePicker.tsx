@@ -223,18 +223,18 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between gap-2 px-3 py-1.5 rounded-xl bg-[#0c0f1e] border border-[#212c4b] hover:border-[#5c36f5] text-white text-xs font-bold transition-all cursor-pointer shadow-sm focus:outline-none focus:ring-1 focus:ring-[#5c36f5]"
+        className="w-full flex items-center justify-between gap-2 px-3 py-1.5 rounded-xl bg-white dark:bg-[#0c0f1e] border border-slate-200 dark:border-[#212c4b] hover:border-[#5c36f5] text-slate-900 dark:text-white text-xs font-bold transition-all cursor-pointer shadow-sm focus:outline-none focus:ring-1 focus:ring-[#5c36f5]"
       >
         <div className="flex items-center gap-2 truncate">
-          <CalendarIcon size={14} className="text-indigo-400 shrink-0" />
-          <span className={displayFormatted ? 'text-white font-black' : 'text-slate-400 font-normal'}>
+          <CalendarIcon size={14} className="text-indigo-500 dark:text-indigo-400 shrink-0" />
+          <span className={displayFormatted ? 'text-slate-900 dark:text-white font-black' : 'text-slate-400 font-normal'}>
             {displayFormatted || placeholder}
           </span>
         </div>
         {value && (
           <span
             onClick={handleClear}
-            className="p-0.5 hover:text-rose-400 text-slate-500 transition cursor-pointer shrink-0"
+            className="p-0.5 hover:text-rose-500 text-slate-400 dark:text-slate-500 transition cursor-pointer shrink-0"
             title="Xóa ngày"
           >
             <X size={13} />
@@ -250,27 +250,27 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: -6 }}
             transition={{ type: 'spring', stiffness: 450, damping: 30 }}
-            className={`absolute top-full ${align === 'right' ? 'right-0 origin-top-right' : 'left-0 origin-top-left'} mt-2 z-[9999] w-80 p-4 bg-[#0c0f1e]/98 border border-[#212c4b] rounded-2xl shadow-[0_24px_60px_rgba(0,0,0,0.95)] select-none space-y-3`}
+            className={`absolute top-full ${align === 'right' ? 'right-0 origin-top-right' : 'left-0 origin-top-left'} mt-2 z-[9999] w-80 p-4 bg-white dark:bg-[#0c0f1e]/98 border border-slate-200 dark:border-[#212c4b] rounded-2xl shadow-2xl dark:shadow-[0_24px_60px_rgba(0,0,0,0.95)] select-none space-y-3`}
           >
             {/* Header: Month/Year Nav */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="text-sm font-black text-white">{MONTH_NAMES[currentMonth]}</span>
-                <span className="text-xs font-bold text-slate-400">{currentYear}</span>
+                <span className="text-sm font-black text-slate-900 dark:text-white">{MONTH_NAMES[currentMonth]}</span>
+                <span className="text-xs font-bold text-slate-500 dark:text-slate-400">{currentYear}</span>
               </div>
 
               <div className="flex items-center gap-1">
                 <button
                   type="button"
                   onClick={handlePrevMonth}
-                  className="p-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-white/10 transition cursor-pointer"
+                  className="p-1.5 rounded-xl text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10 transition cursor-pointer"
                 >
                   <ChevronLeft size={15} />
                 </button>
                 <button
                   type="button"
                   onClick={handleNextMonth}
-                  className="p-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-white/10 transition cursor-pointer"
+                  className="p-1.5 rounded-xl text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10 transition cursor-pointer"
                 >
                   <ChevronRight size={15} />
                 </button>
@@ -283,7 +283,7 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
                 <span
                   key={name}
                   className={`text-[10px] font-black uppercase py-1 ${
-                    idx === 0 ? 'text-rose-400' : 'text-slate-400'
+                    idx === 0 ? 'text-rose-500 dark:text-rose-400' : 'text-slate-400 dark:text-slate-400'
                   }`}
                 >
                   {name}
@@ -311,12 +311,12 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
                         item.isSelected
                           ? 'text-white font-black z-10'
                           : item.isToday
-                          ? 'text-white font-extrabold border border-indigo-400/50'
+                          ? 'text-indigo-600 dark:text-white font-extrabold border border-indigo-400/50'
                           : item.isCurrentMonth
                           ? item.isStudyDay
-                            ? 'text-indigo-300 font-extrabold hover:bg-indigo-500/20'
-                            : 'text-slate-200 hover:bg-white/10 hover:text-white'
-                          : 'text-slate-600 hover:bg-white/5'
+                            ? 'text-indigo-600 dark:text-indigo-300 font-extrabold hover:bg-indigo-50 dark:hover:bg-indigo-500/20'
+                            : 'text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white'
+                          : 'text-slate-300 dark:text-slate-600 hover:bg-slate-50 dark:hover:bg-white/5'
                       }`}
                       title={item.isStudyDay ? `Ngày học của lớp (${item.dayNumber}/${currentMonth + 1}/${currentYear})` : undefined}
                     >
@@ -332,10 +332,10 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
                       <span className="relative z-10">{item.dayNumber}</span>
 
                       {item.isToday && !item.isSelected && (
-                        <span className="absolute bottom-1 w-1 h-1 rounded-full bg-indigo-400" />
+                        <span className="absolute bottom-1 w-1 h-1 rounded-full bg-indigo-500 dark:bg-indigo-400" />
                       )}
                       {item.isStudyDay && !item.isSelected && !item.isToday && (
-                        <span className="absolute bottom-1 w-1 h-1 rounded-full bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.9)]" />
+                        <span className="absolute bottom-1 w-1 h-1 rounded-full bg-emerald-500 dark:bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.9)]" />
                       )}
                     </button>
                   ))}
@@ -344,17 +344,17 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
             </div>
 
             {/* Quick Actions Footer */}
-            <div className="pt-2 border-t border-white/10 flex items-center justify-between text-xs">
+            <div className="pt-2 border-t border-slate-100 dark:border-white/10 flex items-center justify-between text-xs">
               <button
                 type="button"
                 onClick={handleSelectToday}
-                className="text-indigo-400 hover:text-indigo-300 font-bold transition cursor-pointer flex items-center gap-1"
+                className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-bold transition cursor-pointer flex items-center gap-1"
               >
                 <Sparkles size={12} />
                 <span>Hôm nay</span>
               </button>
               {displayFormatted && (
-                <span className="text-[11px] font-mono text-slate-400 font-bold">
+                <span className="text-[11px] font-mono text-slate-500 dark:text-slate-400 font-bold">
                   {displayFormatted}
                 </span>
               )}
