@@ -92,19 +92,19 @@ export const DARK_THEME_COLORS = {
 
 export const LIGHT_THEME_COLORS = {
   // ─── 1. SURFACES & BACKGROUNDS (Pro Anti-Glare Slate) ────────────────────
-  appBackground: '#f8fafc', // Slate 50
+  appBackground: '#edf2f7', // Slate 100/200 - High Contrast Canvas
   sidebarBackground: '#ffffff',
   cardBackground: '#ffffff',
-  cardBackgroundRaised: '#f1f5f9', // Slate 100
-  cardBackgroundHighlight: '#e2e8f0', // Slate 200
-  navBackground: '#f1f5f9',
+  cardBackgroundRaised: '#e2e8f0', // Slate 200
+  cardBackgroundHighlight: '#cbd5e1', // Slate 300
+  navBackground: '#edf2f7',
   modalBackdrop: 'rgba(15, 23, 42, 0.65)',
 
   // ─── 2. BORDERS ─────────────────────────────────────────────────────────
-  borderPrimary: '#e2e8f0', // Slate 200
-  borderSubtle: '#f1f5f9', // Slate 100
+  borderPrimary: '#cbd5e1', // Slate 300 - Crisp boundary on white cards
+  borderSubtle: '#e2e8f0', // Slate 200
   borderActive: '#2563eb', // Blue 600
-  borderHover: '#cbd5e1', // Slate 300
+  borderHover: '#94a3b8', // Slate 400
   borderGlow: 'rgba(37, 99, 235, 0.2)',
 
   // ─── 3. TYPOGRAPHY (High Contrast WCAG AAA) ─────────────────────────────

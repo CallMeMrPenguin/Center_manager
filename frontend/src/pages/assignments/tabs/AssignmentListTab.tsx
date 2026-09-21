@@ -114,7 +114,7 @@ export const AssignmentListTab: React.FC<AssignmentListTabProps> = ({
           const val = info.getValue<string>();
           const today = new Date().toISOString().slice(0, 10);
           const isOverdue = val < today;
-          return <span className={`font-semibold ${isOverdue ? 'text-rose-500 dark:text-rose-400 font-bold' : 'text-slate-700 dark:text-slate-300'}`}>{val}</span>;
+          return <span className={`font-bold ${isOverdue ? 'text-rose-700 dark:text-rose-400 font-extrabold' : 'text-slate-900 dark:text-slate-300'}`}>{val}</span>;
         },
       },
       {
@@ -126,9 +126,9 @@ export const AssignmentListTab: React.FC<AssignmentListTabProps> = ({
           const rate = row.original.submission_rate || 0;
           return (
             <div className="flex items-center gap-2">
-              <span className="font-bold text-slate-800 dark:text-slate-200">{submitted}/{total}</span>
+              <span className="font-extrabold text-slate-900 dark:text-slate-100">{submitted}/{total}</span>
               <span className={`text-[10px] font-black px-2 py-0.5 rounded-full border ${
-                rate >= 80 ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30' : rate >= 50 ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30' : 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/30'
+                rate >= 80 ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-emerald-500/30' : rate >= 50 ? 'bg-amber-500/15 text-amber-700 dark:text-amber-400 border-amber-500/30' : 'bg-rose-500/15 text-rose-700 dark:text-rose-400 border-rose-500/30'
               }`}>{rate}%</span>
             </div>
           );
@@ -139,7 +139,7 @@ export const AssignmentListTab: React.FC<AssignmentListTabProps> = ({
         header: 'Điểm TB',
         cell: (info) => {
           const val = info.getValue<number | null>();
-          return <span className="font-mono font-bold text-indigo-400">{val !== null && val !== undefined ? val.toFixed(1) : '-'}</span>;
+          return <span className="font-mono font-black text-base text-indigo-700 dark:text-indigo-400">{val !== null && val !== undefined ? val.toFixed(1) : '-'}</span>;
         },
       },
       {
@@ -155,7 +155,7 @@ export const AssignmentListTab: React.FC<AssignmentListTabProps> = ({
                 e.stopPropagation();
                 onPlayPreview(row.original);
               }}
-              className="px-3 py-1 rounded-lg bg-indigo-500/15 hover:bg-indigo-500/25 text-indigo-300 hover:text-white text-xs font-black border border-indigo-500/30 transition cursor-pointer active:scale-95"
+              className="px-3 py-1 rounded-lg bg-indigo-500/15 hover:bg-indigo-500/25 text-indigo-700 dark:text-indigo-300 hover:text-indigo-900 dark:hover:text-white text-xs font-black border border-indigo-500/30 transition cursor-pointer active:scale-95"
               title="Xem trước đề & chỉnh sửa key"
             >
               Preview

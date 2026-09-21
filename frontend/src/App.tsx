@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from 'react';
 import { Database } from 'lucide-react';
 import { TAB_DEFINITIONS } from './config/tabs';
 import { Sidebar } from './components/Sidebar';
-import { SyncIndicator } from './components/SyncIndicator';
 import { showToast, AnimatedToastProvider } from './components/Toast';
 import { ConfirmProvider } from './components/ConfirmDialog';
 import { LoginPage } from './pages/auth/LoginPage';
@@ -246,10 +245,8 @@ function AppContent() {
       {/* STATUS BAR */}
       <footer className="h-8 bg-white dark:bg-[#06070a] flex items-center justify-between px-6 text-[11px] text-slate-500 dark:text-slate-400 select-none shrink-0 font-semibold z-10 border-t border-slate-200 dark:border-white/[0.04] transition-colors duration-200">
         <div className="flex items-center gap-3">
-          <SyncIndicator />
-          <div className="w-[1px] h-3.5 bg-slate-200 dark:bg-white/10" />
           <AnimatedThemeToggle size="sm" />
-          <span className="hidden md:inline text-slate-500 dark:text-slate-400">Local-First Engine — Tự động đồng bộ với máy chủ PostgreSQL</span>
+          <span className="hidden md:inline text-slate-500 dark:text-slate-400">Center Manager Desktop</span>
         </div>
         <div className="flex items-center gap-2">
           <span className="text-slate-400 dark:text-slate-500">Đang đăng nhập:</span>

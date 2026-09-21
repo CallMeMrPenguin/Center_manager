@@ -1278,7 +1278,7 @@ export function DataTable<TData>({
                               <td
                                 key={cell.id}
                                 className={`
-                                  py-3.5 ${isSelectCol ? 'px-1' : 'px-4'} font-semibold text-slate-800 dark:text-slate-200 text-base
+                                  py-3.5 ${isSelectCol ? 'px-1' : 'px-4'} font-bold text-slate-900 dark:text-slate-100 text-base
                                   border-b border-slate-200 dark:border-[#161e30] overflow-hidden
                                   ${isCentered ? 'text-center' : 'text-left'}
                                   ${isPinned ? 'bg-inherit' : ''}

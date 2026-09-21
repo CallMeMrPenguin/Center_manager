@@ -74,13 +74,13 @@ export const DistributionSummaryStrip: React.FC<DistributionSummaryStripProps> =
         {activeTooltip === 'dist-median' && (
           <SummaryTooltipCard
             title="Trung Vị Điểm Số (Median)"
-            titleColor="text-purple-300"
+            titleColor="text-purple-700 dark:text-purple-300"
             align="left"
             onClose={() => setActiveTooltip(null)}
             whatItReflects="Mức điểm của học sinh đứng chính giữa danh sách khi sắp xếp tăng dần. Phản ánh học sinh điển hình thực chất, không bị méo bởi 1 vài em quá giỏi hoặc quá yếu."
             footer={
-              <div className="text-[10px] space-y-1 text-slate-300">
-                <span className="font-bold text-purple-300 block">So sánh với Điểm Trung Bình:</span>
+              <div className="text-[10px] space-y-1 text-slate-700 dark:text-slate-300 font-semibold">
+                <span className="font-bold text-purple-700 dark:text-purple-300 block">So sánh với Điểm Trung Bình:</span>
                 <div>{distributionStats.skewnessLabel}</div>
               </div>
             }
@@ -90,7 +90,7 @@ export const DistributionSummaryStrip: React.FC<DistributionSummaryStripProps> =
 
       {/* 3. Độ Lệch Chuẩn (SD) */}
       <div
-        className="relative group p-2.5 animate-cascade-3 cursor-pointer transition-colors hover:bg-white/[0.02]"
+        className="relative group p-2.5 animate-cascade-3 cursor-pointer transition-colors hover:bg-slate-50 dark:hover:bg-white/[0.02]"
         onMouseEnter={() => setActiveTooltip('dist-sd')}
         onMouseLeave={() => setActiveTooltip(null)}
         onClick={() => setActiveTooltip(activeTooltip === 'dist-sd' ? null : 'dist-sd')}
@@ -106,19 +106,19 @@ export const DistributionSummaryStrip: React.FC<DistributionSummaryStripProps> =
           </button>
         </div>
         <span className={`text-sm font-black font-mono ${
-          distributionStats.sd > 2.0 ? 'text-rose-500' : distributionStats.sd > 1.2 ? 'text-cyan-400' : 'text-emerald-400'
+          distributionStats.sd > 2.0 ? 'text-rose-700 dark:text-rose-400' : distributionStats.sd > 1.2 ? 'text-cyan-700 dark:text-cyan-400' : 'text-emerald-700 dark:text-emerald-400'
         }`}>σ = {format1Dec(distributionStats.sd)}</span>
         <span className="text-[10px] text-slate-600 dark:text-slate-400 font-semibold block truncate">Độ Phân Hóa Lớp</span>
 
         {activeTooltip === 'dist-sd' && (
           <SummaryTooltipCard
             title="Độ Lệch Chuẩn (Standard Deviation)"
-            titleColor="text-cyan-300"
+            titleColor="text-cyan-700 dark:text-cyan-300"
             align="center"
             onClose={() => setActiveTooltip(null)}
             whatItReflects="Thước đo mức độ phân tán điểm số quanh điểm trung bình. Cho biết học sinh trong lớp làm bài đều nhau hay trình độ bị chênh lệch lớn."
             footer={
-              <div className="text-[10px] space-y-1 text-slate-300">
+              <div className="text-[10px] space-y-1 text-slate-700 dark:text-slate-300 font-semibold">
                 <div>σ dưới 1.0: Cả lớp rất đồng đều (ít chênh lệch)</div>
                 <div>σ từ 1.2 - 2.0: Phân hóa vừa phải (khỏe mạnh)</div>
                 <div>σ trên 2.0: Chênh lệch rất lớn (cần chia nhóm dạy)</div>
@@ -130,7 +130,7 @@ export const DistributionSummaryStrip: React.FC<DistributionSummaryStripProps> =
 
       {/* 4. Khoảng Tứ Phân Vị (IQR) */}
       <div
-        className="relative group p-2.5 animate-cascade-4 cursor-pointer transition-colors hover:bg-white/[0.02]"
+        className="relative group p-2.5 animate-cascade-4 cursor-pointer transition-colors hover:bg-slate-50 dark:hover:bg-white/[0.02]"
         onMouseEnter={() => setActiveTooltip('dist-iqr')}
         onMouseLeave={() => setActiveTooltip(null)}
         onClick={() => setActiveTooltip(activeTooltip === 'dist-iqr' ? null : 'dist-iqr')}
@@ -145,18 +145,18 @@ export const DistributionSummaryStrip: React.FC<DistributionSummaryStripProps> =
             <Info size={11} />
           </button>
         </div>
-        <span className="text-sm font-black text-amber-400 font-mono">IQR: {format1Dec(distributionStats.iqr)} đ</span>
+        <span className="text-sm font-black text-amber-700 dark:text-amber-400 font-mono">IQR: {format1Dec(distributionStats.iqr)} đ</span>
         <span className="text-[10px] text-slate-600 dark:text-slate-400 font-semibold block truncate">Vùng 50% Giữa Bảng</span>
 
         {activeTooltip === 'dist-iqr' && (
           <SummaryTooltipCard
             title="Khoảng Tứ Phân Vị (IQR = Q3 - Q1)"
-            titleColor="text-amber-300"
+            titleColor="text-amber-700 dark:text-amber-300"
             align="center"
             onClose={() => setActiveTooltip(null)}
             whatItReflects="Độ rộng vùng điểm của 50% học sinh giữa bảng (bỏ qua 25% top đầu và 25% đáy). Giúp giáo viên thiết kế độ khó bài tập nhắm trúng đa số học sinh."
             footer={
-              <div className="text-[10px] space-y-1 text-slate-300">
+              <div className="text-[10px] space-y-1 text-slate-700 dark:text-slate-300 font-semibold">
                 <div>Q1 (Mốc 25%): {format1Dec(distributionStats.q1)} điểm</div>
                 <div>Q3 (Mốc 75%): {format1Dec(distributionStats.q3)} điểm</div>
                 <div>Vùng tập trung: {format1Dec(distributionStats.q1)}đ đến {format1Dec(distributionStats.q3)}đ</div>
@@ -168,7 +168,7 @@ export const DistributionSummaryStrip: React.FC<DistributionSummaryStripProps> =
 
       {/* 5. Tỷ Lệ Đạt Yêu Cầu (>= 5.0) */}
       <div
-        className="relative group p-2.5 animate-cascade-5 cursor-pointer transition-colors hover:bg-white/[0.02]"
+        className="relative group p-2.5 animate-cascade-5 cursor-pointer transition-colors hover:bg-slate-50 dark:hover:bg-white/[0.02]"
         onMouseEnter={() => setActiveTooltip('dist-pass')}
         onMouseLeave={() => setActiveTooltip(null)}
         onClick={() => setActiveTooltip(activeTooltip === 'dist-pass' ? null : 'dist-pass')}
@@ -184,7 +184,7 @@ export const DistributionSummaryStrip: React.FC<DistributionSummaryStripProps> =
           </button>
         </div>
         <span className={`text-sm font-black font-mono ${
-          distributionStats.passPct >= 85 ? 'text-emerald-400' : distributionStats.passPct >= 70 ? 'text-amber-400' : 'text-rose-500'
+          distributionStats.passPct >= 85 ? 'text-emerald-700 dark:text-emerald-400' : distributionStats.passPct >= 70 ? 'text-amber-700 dark:text-amber-400' : 'text-rose-700 dark:text-rose-500'
         }`}>{distributionStats.passPct}%</span>
         <span className="text-[10px] text-slate-600 dark:text-slate-400 font-semibold block truncate">
           {distributionStats.passCount}/{distributionStats.n} Học Sinh Đạt
@@ -193,12 +193,12 @@ export const DistributionSummaryStrip: React.FC<DistributionSummaryStripProps> =
         {activeTooltip === 'dist-pass' && (
           <SummaryTooltipCard
             title="Tỷ Lệ Đạt Chuẩn Kiến Thức"
-            titleColor="text-emerald-300"
+            titleColor="text-emerald-700 dark:text-emerald-300"
             align="right"
             onClose={() => setActiveTooltip(null)}
             whatItReflects="Tỷ lệ học sinh đạt từ 5.0 điểm trở lên trong đợt đánh giá."
             footer={
-              <div className="text-[10px] space-y-1 text-slate-300">
+              <div className="text-[10px] space-y-1 text-slate-700 dark:text-slate-300 font-semibold">
                 <div>Đạt yêu cầu (≥ 5.0đ): {distributionStats.passPct}% ({distributionStats.passCount} học sinh)</div>
                 <div>Giỏi & Xuất Sắc (≥ 8.0đ): {distributionStats.excellentPct}% ({distributionStats.excellentCount} học sinh)</div>
                 <div>Chưa đạt (dưới 5.0đ): {100 - distributionStats.passPct}% ({distributionStats.n - distributionStats.passCount} học sinh)</div>
@@ -210,7 +210,7 @@ export const DistributionSummaryStrip: React.FC<DistributionSummaryStripProps> =
 
       {/* 6. Đánh Giá Phổ Điểm */}
       <div
-        className="relative group p-2.5 animate-cascade-6 cursor-pointer transition-colors hover:bg-white/[0.02]"
+        className="relative group p-2.5 animate-cascade-6 cursor-pointer transition-colors hover:bg-slate-50 dark:hover:bg-white/[0.02]"
         onMouseEnter={() => setActiveTooltip('dist-rating')}
         onMouseLeave={() => setActiveTooltip(null)}
         onClick={() => setActiveTooltip(activeTooltip === 'dist-rating' ? null : 'dist-rating')}
@@ -226,9 +226,9 @@ export const DistributionSummaryStrip: React.FC<DistributionSummaryStripProps> =
           </button>
         </div>
         <span className={`text-xs font-black truncate block ${
-          distributionStats.distributionRating.includes('Xuất Sắc') ? 'text-emerald-400' :
-          distributionStats.distributionRating.includes('Tốt') ? 'text-cyan-400' :
-          distributionStats.distributionRating.includes('Khẩn') ? 'text-rose-500 animate-pulse' : 'text-amber-400'
+          distributionStats.distributionRating.includes('Xuất Sắc') ? 'text-emerald-700 dark:text-emerald-400' :
+          distributionStats.distributionRating.includes('Tốt') ? 'text-cyan-700 dark:text-cyan-400' :
+          distributionStats.distributionRating.includes('Khẩn') ? 'text-rose-700 dark:text-rose-500 animate-pulse' : 'text-amber-700 dark:text-amber-400'
         }`}>
           {distributionStats.distributionRating}
         </span>
@@ -239,13 +239,13 @@ export const DistributionSummaryStrip: React.FC<DistributionSummaryStripProps> =
         {activeTooltip === 'dist-rating' && (
           <SummaryTooltipCard
             title="Đánh Giá Tổng Quan Phổ Điểm"
-            titleColor="text-indigo-300"
+            titleColor="text-indigo-700 dark:text-indigo-300"
             align="right"
             onClose={() => setActiveTooltip(null)}
             whatItReflects="Đánh giá tổng quát về hình thái phân bố điểm số và các biện pháp can thiệp sư phạm phù hợp."
           >
-            <div className="space-y-1.5 text-[10px] text-slate-300 leading-relaxed">
-              <div className="p-2 rounded-lg bg-[#0d1120] border border-[#202948]">
+            <div className="space-y-1.5 text-[10px] text-slate-800 dark:text-slate-300 leading-relaxed">
+              <div className="p-2 rounded-lg bg-slate-50 dark:bg-[#0d1120] border border-slate-300 dark:border-[#202948] font-semibold">
                 {distributionStats.commentary.headline}
               </div>
             </div>

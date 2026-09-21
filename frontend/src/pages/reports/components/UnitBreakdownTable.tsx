@@ -41,10 +41,10 @@ export const UnitBreakdownTable: React.FC<UnitBreakdownTableProps> = ({ data }) 
             <span
               className={`text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-full border ${
                 isVocab
-                  ? 'text-blue-500 dark:text-blue-400 bg-blue-500/10 border-blue-500/20'
+                  ? 'text-blue-700 dark:text-blue-400 bg-blue-500/15 border-blue-500/30'
                   : isGrammar
-                  ? 'text-purple-500 dark:text-purple-400 bg-purple-500/10 border-purple-500/20'
-                  : 'text-indigo-500 dark:text-indigo-400 bg-indigo-500/10 border-indigo-500/20'
+                  ? 'text-purple-700 dark:text-purple-400 bg-purple-500/15 border-purple-500/30'
+                  : 'text-indigo-700 dark:text-indigo-400 bg-indigo-500/15 border-indigo-500/30'
               }`}
             >
               {isVocab ? 'Từ Vựng' : isGrammar ? 'Ngữ Pháp' : 'Tổng Hợp'}
@@ -59,16 +59,16 @@ export const UnitBreakdownTable: React.FC<UnitBreakdownTableProps> = ({ data }) 
           const score = getValue<number>();
           const colorClass =
             score >= 8.0
-              ? 'text-emerald-500 dark:text-emerald-400 font-black'
+              ? 'text-emerald-700 dark:text-emerald-400 font-black'
               : score >= 6.5
-              ? 'text-blue-500 dark:text-blue-400 font-bold'
+              ? 'text-blue-700 dark:text-blue-400 font-extrabold'
               : score >= 5.0
-              ? 'text-amber-500 dark:text-amber-400 font-bold'
-              : 'text-rose-500 dark:text-rose-400 font-black';
+              ? 'text-amber-700 dark:text-amber-400 font-extrabold'
+              : 'text-rose-700 dark:text-rose-400 font-black';
           return (
             <div className="text-left font-mono">
-              <span className={`text-xs ${colorClass}`}>{trunc1Dec(score)}</span>
-              <span className="text-[10px] text-slate-400 dark:text-slate-500 ml-1">/ 10</span>
+              <span className={`text-sm ${colorClass}`}>{trunc1Dec(score)}</span>
+              <span className="text-[10px] text-slate-500 dark:text-slate-400 ml-1 font-bold">/ 10</span>
             </div>
           );
         },
@@ -77,7 +77,7 @@ export const UnitBreakdownTable: React.FC<UnitBreakdownTableProps> = ({ data }) 
         accessorKey: 'student_count',
         header: 'Số Học Sinh',
         cell: ({ getValue }) => (
-          <span className="text-xs text-slate-700 dark:text-slate-300 font-medium">
+          <span className="text-xs text-slate-900 dark:text-slate-200 font-bold">
             {getValue<number>()} học sinh
           </span>
         ),
@@ -94,8 +94,8 @@ export const UnitBreakdownTable: React.FC<UnitBreakdownTableProps> = ({ data }) 
           return (
             <div className="min-w-[130px] max-w-[160px] space-y-1.5 py-0.5">
               <div className="flex items-center justify-between gap-2 text-xs">
-                <span className="font-bold text-slate-900 dark:text-white font-mono shrink-0">{pct}%</span>
-                <span className="text-[10px] text-slate-500 dark:text-slate-400 font-mono shrink-0">
+                <span className="font-black text-slate-900 dark:text-white font-mono shrink-0">{pct}%</span>
+                <span className="text-[10px] text-slate-600 dark:text-slate-400 font-mono shrink-0 font-bold">
                   {mastered}/{total} HS
                 </span>
               </div>
@@ -123,10 +123,10 @@ export const UnitBreakdownTable: React.FC<UnitBreakdownTableProps> = ({ data }) 
         cell: ({ getValue }) => {
           const count = getValue<number>();
           if (count === 0) {
-            return <span className="text-xs text-emerald-600 dark:text-emerald-400 font-bold font-mono">0 học sinh</span>;
+            return <span className="text-xs text-emerald-700 dark:text-emerald-400 font-extrabold font-mono">0 học sinh</span>;
           }
           return (
-            <span className="text-xs font-bold text-amber-600 dark:text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-md border border-amber-500/20 font-mono">
+            <span className="text-xs font-extrabold text-amber-700 dark:text-amber-400 bg-amber-500/15 px-2 py-0.5 rounded-md border border-amber-500/30 font-mono">
               {count} học sinh
             </span>
           );
@@ -136,7 +136,7 @@ export const UnitBreakdownTable: React.FC<UnitBreakdownTableProps> = ({ data }) 
         accessorKey: 'recommendation',
         header: 'Định Hướng Sư Phạm',
         cell: ({ getValue }) => (
-          <span className="text-xs text-slate-600 dark:text-slate-400 italic">
+          <span className="text-xs text-slate-700 dark:text-slate-300 font-medium">
             {getValue<string>()}
           </span>
         ),

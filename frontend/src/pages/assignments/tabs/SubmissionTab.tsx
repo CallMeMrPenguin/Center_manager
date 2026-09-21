@@ -110,7 +110,7 @@ export const SubmissionTab: React.FC<SubmissionTabProps> = ({
         accessorKey: 'grade',
         header: 'Khối Lớp',
         cell: (info) => (
-          <span className="text-xs text-slate-400 font-medium">
+          <span className="text-xs text-slate-700 dark:text-slate-300 font-bold">
             {info.getValue<string>() || '-'}
           </span>
         ),
@@ -127,10 +127,10 @@ export const SubmissionTab: React.FC<SubmissionTabProps> = ({
                 e.stopPropagation();
                 handleToggleSubmitted(row.original.student_id);
               }}
-              className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold transition cursor-pointer ${
+              className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-black transition cursor-pointer ${
                 isSub
-                  ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
-                  : 'bg-rose-500/15 text-rose-400 border border-rose-500/30'
+                  ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30'
+                  : 'bg-rose-500/15 text-rose-700 dark:text-rose-400 border border-rose-500/30'
               }`}
             >
               <span>{isSub ? 'Đã nộp bài' : 'Chưa nộp'}</span>
@@ -144,8 +144,8 @@ export const SubmissionTab: React.FC<SubmissionTabProps> = ({
         cell: ({ row }) => {
           const count = row.original.attempts_count || (row.original.submitted ? 1 : 0);
           return (
-            <div className="flex items-center gap-1.5 font-mono text-xs text-slate-300 font-bold">
-              <RotateCcw size={12} className="text-cyan-400" />
+            <div className="flex items-center gap-1.5 font-mono text-xs text-slate-900 dark:text-slate-200 font-bold">
+              <RotateCcw size={12} className="text-cyan-700 dark:text-cyan-400" />
               <span>{count} lần</span>
             </div>
           );
@@ -163,14 +163,14 @@ export const SubmissionTab: React.FC<SubmissionTabProps> = ({
             return <span className="text-xs text-slate-500">-</span>;
           }
           return (
-            <div className="flex items-center gap-1.5 text-[11px] font-mono font-bold flex-wrap">
-              <span className="px-1.5 py-0.5 rounded bg-rose-500/10 text-rose-300 border border-rose-500/20" title="Điểm thấp nhất">
+            <div className="flex items-center gap-1.5 text-[11px] font-mono font-black flex-wrap">
+              <span className="px-1.5 py-0.5 rounded bg-rose-500/15 text-rose-700 dark:text-rose-300 border border-rose-500/30" title="Điểm thấp nhất">
                 Min: {min !== null && min !== undefined ? format1Dec(min) : '-'}
               </span>
-              <span className="px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-300 border border-emerald-500/20" title="Điểm cao nhất">
+              <span className="px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30" title="Điểm cao nhất">
                 Max: {max !== null && max !== undefined ? format1Dec(max) : '-'}
               </span>
-              <span className="px-1.5 py-0.5 rounded bg-indigo-500/10 text-indigo-300 border border-indigo-500/20" title="Điểm trung bình">
+              <span className="px-1.5 py-0.5 rounded bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 border border-indigo-500/30" title="Điểm trung bình">
                 TB: {avg !== null && avg !== undefined ? format1Dec(avg) : '-'}
               </span>
             </div>

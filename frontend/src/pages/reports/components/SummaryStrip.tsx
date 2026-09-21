@@ -97,11 +97,11 @@ export const SummaryStrip: React.FC<SummaryStripProps> = React.memo(({
               </div>
             }
           >
-            <div className="bg-[#0d1120] p-2.5 rounded-lg border border-[#202948] space-y-1.5 font-mono text-[10px]">
-              <div className="text-slate-400 font-bold border-b border-white/5 pb-1">55% TV + 35% NP + 10% BTVN</div>
-              <div className="flex items-center justify-between text-blue-400"><span>Từ Vựng:</span><span className="font-black">{safeEngine.pred_c1} đ</span></div>
-              <div className="flex items-center justify-between text-purple-400"><span>Ngữ Pháp:</span><span className="font-black">{safeEngine.pred_c2} đ</span></div>
-              <div className="flex items-center justify-between text-emerald-400"><span>BTVN:</span><span className="font-black">{safeEngine.pred_hw} đ</span></div>
+            <div className="bg-slate-50 dark:bg-[#0d1120] p-2.5 rounded-lg border border-slate-300 dark:border-[#202948] space-y-1.5 font-mono text-[10px]">
+              <div className="text-slate-700 dark:text-slate-400 font-bold border-b border-slate-200 dark:border-white/5 pb-1">55% TV + 35% NP + 10% BTVN</div>
+              <div className="flex items-center justify-between text-blue-700 dark:text-blue-400 font-extrabold"><span>Từ Vựng:</span><span className="font-black">{safeEngine.pred_c1} đ</span></div>
+              <div className="flex items-center justify-between text-purple-700 dark:text-purple-400 font-extrabold"><span>Ngữ Pháp:</span><span className="font-black">{safeEngine.pred_c2} đ</span></div>
+              <div className="flex items-center justify-between text-emerald-700 dark:text-emerald-400 font-extrabold"><span>BTVN:</span><span className="font-black">{safeEngine.pred_hw} đ</span></div>
             </div>
           </SummaryTooltipCard>
         )}
@@ -109,48 +109,48 @@ export const SummaryStrip: React.FC<SummaryStripProps> = React.memo(({
 
       {/* 2. EMA Skill Level */}
       <div
-        className="relative group p-2.5 animate-cascade-2 cursor-pointer transition-colors hover:bg-white/[0.02]"
+        className="relative group p-2.5 animate-cascade-2 cursor-pointer transition-colors hover:bg-slate-50 dark:hover:bg-white/[0.02]"
         onMouseEnter={() => setActiveTooltip('ema')}
         onMouseLeave={() => setActiveTooltip(null)}
         onClick={() => setActiveTooltip(activeTooltip === 'ema' ? null : 'ema')}
       >
         <div className="flex items-center justify-center gap-1">
-          <span className="text-[10px] font-black uppercase text-slate-700 dark:text-slate-400 block group-hover:text-emerald-600 dark:group-hover:text-emerald-300 transition-colors">Trình Độ EMA</span>
+          <span className="text-[10px] font-black uppercase text-slate-800 dark:text-slate-300 block group-hover:text-emerald-700 dark:group-hover:text-emerald-300 transition-colors">Trình Độ EMA</span>
           <button
             type="button"
-            className="text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white transition-colors"
+            className="text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors"
             title="Xem chi tiết EMA"
           >
             <Info size={11} />
           </button>
         </div>
-        <span className={`text-sm font-black font-mono ${safeEngine.ema_level < 4.6 ? 'text-rose-500' :
-          safeEngine.ema_level < 6.0 ? 'text-amber-400' :
-            safeEngine.ema_level < 8.0 ? 'text-blue-400' : 'text-emerald-400'
+        <span className={`text-base font-black font-mono ${safeEngine.ema_level < 4.6 ? 'text-rose-700 dark:text-rose-400' :
+          safeEngine.ema_level < 6.0 ? 'text-amber-700 dark:text-amber-400' :
+            safeEngine.ema_level < 8.0 ? 'text-blue-700 dark:text-blue-400' : 'text-emerald-700 dark:text-emerald-400'
           }`}>{safeEngine.ema_level}</span>
-        <span className="text-[10px] text-slate-600 dark:text-slate-400 font-semibold block">Học Lực Gần Nhất</span>
+        <span className="text-[10px] text-slate-700 dark:text-slate-300 font-bold block">Học Lực Gần Nhất</span>
 
         {activeTooltip === 'ema' && (
           <SummaryTooltipCard
             title="Trình Độ Năng Lực Hiện Tại (EMA)"
-            titleColor="text-emerald-300"
+            titleColor="text-emerald-700 dark:text-emerald-300"
             align="left"
             onClose={() => setActiveTooltip(null)}
             whatItReflects="Năng lực học thuật thực chất trong 3-4 buổi học gần nhất qua thuật toán trung bình trượt hàm mũ."
             footer={
-              <div className="grid grid-cols-2 gap-1 text-[10px]">
-                <span className="text-emerald-400">≥ 8.0: Giỏi</span>
-                <span className="text-blue-400">7.0 - 7.9: Khá</span>
-                <span className="text-amber-400">4.6 - 6.9: Trung Bình</span>
-                <span className="text-rose-400">&lt; 4.6: Yếu</span>
+              <div className="grid grid-cols-2 gap-1 text-[10px] font-bold">
+                <span className="text-emerald-700 dark:text-emerald-400">≥ 8.0: Giỏi</span>
+                <span className="text-blue-700 dark:text-blue-400">7.0 - 7.9: Khá</span>
+                <span className="text-amber-700 dark:text-amber-400">4.6 - 6.9: Trung Bình</span>
+                <span className="text-rose-700 dark:text-rose-400">&lt; 4.6: Yếu</span>
               </div>
             }
           >
-            <div className="bg-[#0d1120] p-2.5 rounded-lg border border-[#202948] space-y-1 font-mono text-[10px]">
-              <div className="text-slate-400 font-bold border-b border-white/5 pb-1">EMA = 0.5 × Mới + 0.5 × Cũ</div>
-              <div className="flex items-center justify-between text-blue-400"><span>Từ Vựng EMA:</span><span className="font-black">{safeEngine.ema_c1} đ</span></div>
-              <div className="flex items-center justify-between text-purple-400"><span>Ngữ Pháp EMA:</span><span className="font-black">{safeEngine.ema_c2} đ</span></div>
-              <div className="flex items-center justify-between text-emerald-400"><span>BTVN EMA:</span><span className="font-black">{safeEngine.ema_hw} đ</span></div>
+            <div className="bg-slate-50 dark:bg-[#0d1120] p-2.5 rounded-lg border border-slate-300 dark:border-[#202948] space-y-1 font-mono text-[10px]">
+              <div className="text-slate-700 dark:text-slate-400 font-bold border-b border-slate-200 dark:border-white/5 pb-1">EMA = 0.5 × Mới + 0.5 × Cũ</div>
+              <div className="flex items-center justify-between text-blue-700 dark:text-blue-400 font-extrabold"><span>Từ Vựng EMA:</span><span className="font-black">{safeEngine.ema_c1} đ</span></div>
+              <div className="flex items-center justify-between text-purple-700 dark:text-purple-400 font-extrabold"><span>Ngữ Pháp EMA:</span><span className="font-black">{safeEngine.ema_c2} đ</span></div>
+              <div className="flex items-center justify-between text-emerald-700 dark:text-emerald-400 font-extrabold"><span>BTVN EMA:</span><span className="font-black">{safeEngine.ema_hw} đ</span></div>
             </div>
           </SummaryTooltipCard>
         )}
@@ -158,50 +158,50 @@ export const SummaryStrip: React.FC<SummaryStripProps> = React.memo(({
 
       {/* 3. Volatility / Standard Deviation (SD) */}
       <div
-        className="relative group p-2.5 animate-cascade-3 cursor-pointer transition-colors hover:bg-white/[0.02]"
+        className="relative group p-2.5 animate-cascade-3 cursor-pointer transition-colors hover:bg-slate-50 dark:hover:bg-white/[0.02]"
         onMouseEnter={() => setActiveTooltip('sd')}
         onMouseLeave={() => setActiveTooltip(null)}
         onClick={() => setActiveTooltip(activeTooltip === 'sd' ? null : 'sd')}
       >
         <div className="flex items-center justify-center gap-1">
-          <span className="text-[10px] font-black uppercase text-slate-700 dark:text-slate-400 block group-hover:text-cyan-600 dark:group-hover:text-cyan-300 transition-colors">Độ Biến Động (SD)</span>
+          <span className="text-[10px] font-black uppercase text-slate-800 dark:text-slate-300 block group-hover:text-cyan-700 dark:group-hover:text-cyan-300 transition-colors">Độ Biến Động (SD)</span>
           <button
             type="button"
-            className="text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white transition-colors"
+            className="text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors"
             title="Xem chi tiết độ biến động"
           >
             <Info size={11} />
           </button>
         </div>
-        <span className={`text-sm font-black font-mono ${safeEngine.std_dev > 2.0 ? 'text-rose-500' :
-          safeEngine.std_dev > 1.0 ? 'text-amber-400' :
-            safeEngine.std_dev < 0.5 ? 'text-emerald-400' : 'text-cyan-400'
+        <span className={`text-base font-black font-mono ${safeEngine.std_dev > 2.0 ? 'text-rose-700 dark:text-rose-400' :
+          safeEngine.std_dev > 1.0 ? 'text-amber-700 dark:text-amber-400' :
+            safeEngine.std_dev < 0.5 ? 'text-emerald-700 dark:text-emerald-400' : 'text-cyan-700 dark:text-cyan-400'
           }`}>σ = {safeEngine.std_dev}</span>
-        <span className={`text-[10px] font-semibold block truncate ${safeEngine.consistency_label?.includes('mạnh') ? 'text-rose-500 dark:text-rose-400 font-extrabold' :
-          safeEngine.consistency_label?.includes('Biến động') ? 'text-amber-600 dark:text-amber-400 font-bold' :
-            safeEngine.consistency_label?.includes('Rất ổn định') ? 'text-emerald-600 dark:text-emerald-400 font-bold' : 'text-slate-600 dark:text-slate-400'
+        <span className={`text-[10px] font-bold block truncate ${safeEngine.consistency_label?.includes('mạnh') ? 'text-rose-700 dark:text-rose-400 font-extrabold' :
+          safeEngine.consistency_label?.includes('Biến động') ? 'text-amber-700 dark:text-amber-400 font-bold' :
+            safeEngine.consistency_label?.includes('Rất ổn định') ? 'text-emerald-700 dark:text-emerald-400 font-bold' : 'text-slate-700 dark:text-slate-300'
           }`}>{safeEngine.consistency_label}</span>
 
         {activeTooltip === 'sd' && (
           <SummaryTooltipCard
             title="Độ Ổn Định & Biến Động Điểm Số (SD)"
-            titleColor="text-cyan-300"
+            titleColor="text-cyan-700 dark:text-cyan-300"
             align="center"
             onClose={() => setActiveTooltip(null)}
             whatItReflects="Độ lệch chuẩn điểm số đo mức độ ổn định hay trồi sụt của học sinh qua các buổi kiểm tra."
             footer={
-              <div className="space-y-0.5 text-[10px]">
-                <div className="text-emerald-400">σ &lt; 0.5: Rất Ổn Định</div>
-                <div className="text-cyan-400">0.5 - 1.0: Ổn Định</div>
-                <div className="text-amber-400">1.1 - 2.2: Biến Động</div>
-                <div className="text-rose-400">σ &gt; 2.2: Biến Động Mạnh</div>
+              <div className="space-y-0.5 text-[10px] font-bold">
+                <div className="text-emerald-700 dark:text-emerald-400">σ &lt; 0.5: Rất Ổn Định</div>
+                <div className="text-cyan-700 dark:text-cyan-400">0.5 - 1.0: Ổn Định</div>
+                <div className="text-amber-700 dark:text-amber-400">1.1 - 2.2: Biến Động</div>
+                <div className="text-rose-700 dark:text-rose-400">σ &gt; 2.2: Biến Động Mạnh</div>
               </div>
             }
           >
-            <div className="bg-[#0d1120] p-2.5 rounded-lg border border-[#202948] space-y-1 font-mono text-[10px]">
-              <div className="text-slate-400 font-bold border-b border-white/5 pb-1">σ = Căn bậc hai phương sai</div>
+            <div className="bg-slate-50 dark:bg-[#0d1120] p-2.5 rounded-lg border border-slate-300 dark:border-[#202948] space-y-1 font-mono text-[10px]">
+              <div className="text-slate-700 dark:text-slate-400 font-bold border-b border-slate-200 dark:border-white/5 pb-1">σ = Căn bậc hai phương sai</div>
               {gradeTypesList.map(gt => (
-                <div key={gt.id} className="flex items-center justify-between" style={{ color: gt.color || '#3b82f6' }}>
+                <div key={gt.id} className="flex items-center justify-between font-extrabold" style={{ color: gt.color || '#2563eb' }}>
                   <span>{gt.label} ({gt.weight}%):</span>
                   <span className="font-black">σ = {((safeEngine as any)[`std_dev_${gt.id}`] ?? safeEngine.std_dev ?? 0)}</span>
                 </div>
@@ -213,45 +213,45 @@ export const SummaryStrip: React.FC<SummaryStripProps> = React.memo(({
 
       {/* 4. Growth Rate (Trend Rate) */}
       <div
-        className="relative group p-2.5 animate-cascade-4 cursor-pointer transition-colors hover:bg-white/[0.02]"
+        className="relative group p-2.5 animate-cascade-4 cursor-pointer transition-colors hover:bg-slate-50 dark:hover:bg-white/[0.02]"
         onMouseEnter={() => setActiveTooltip('trend')}
         onMouseLeave={() => setActiveTooltip(null)}
         onClick={() => setActiveTooltip(activeTooltip === 'trend' ? null : 'trend')}
       >
         <div className="flex items-center justify-center gap-1">
-          <span className="text-[10px] font-black uppercase text-slate-700 dark:text-slate-400 block group-hover:text-purple-600 dark:group-hover:text-purple-300 transition-colors">Tốc Độ Tăng Trưởng</span>
+          <span className="text-[10px] font-black uppercase text-slate-800 dark:text-slate-300 block group-hover:text-purple-700 dark:group-hover:text-purple-300 transition-colors">Tốc Độ Tăng Trưởng</span>
           <button
             type="button"
-            className="text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white transition-colors"
+            className="text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors"
             title="Xem chi tiết tốc độ tăng trưởng"
           >
             <Info size={11} />
           </button>
         </div>
-        <span className="text-sm font-black text-purple-400 font-mono">{safeEngine.trend_slope > 0 ? `+${safeEngine.trend_slope}` : safeEngine.trend_slope}/buổi</span>
-        <span className={`text-[10px] font-bold block truncate ${safeEngine.trend_label?.includes('Giảm') || safeEngine.trend_label?.includes('Suy giảm') ? 'text-rose-500 dark:text-rose-400' :
-          safeEngine.trend_label?.includes('Ổn định') ? 'text-slate-600 dark:text-slate-300' : 'text-emerald-600 dark:text-emerald-400'
+        <span className="text-base font-black text-purple-700 dark:text-purple-400 font-mono">{safeEngine.trend_slope > 0 ? `+${safeEngine.trend_slope}` : safeEngine.trend_slope}/buổi</span>
+        <span className={`text-[10px] font-bold block truncate ${safeEngine.trend_label?.includes('Giảm') || safeEngine.trend_label?.includes('Suy giảm') ? 'text-rose-700 dark:text-rose-400' :
+          safeEngine.trend_label?.includes('Ổn định') ? 'text-slate-700 dark:text-slate-300' : 'text-emerald-700 dark:text-emerald-400'
           }`}>{safeEngine.trend_label}</span>
 
         {activeTooltip === 'trend' && (
           <SummaryTooltipCard
             title="Tốc Độ Tăng Trưởng (Trend Rate)"
-            titleColor="text-purple-300"
+            titleColor="text-purple-700 dark:text-purple-300"
             align="center"
             onClose={() => setActiveTooltip(null)}
             whatItReflects="Mức độ tiến bộ hoặc sa sút trung bình sau mỗi buổi học (số điểm tăng/giảm trên mỗi buổi)."
             footer={
-              <div className="space-y-0.5 text-[10px]">
-                <div className="text-emerald-400">&gt; +0.3: Tăng trưởng mạnh</div>
-                <div className="text-cyan-400">+0.1 đến +0.3: Cải thiện</div>
-                <div className="text-slate-300">-0.1 đến +0.1: Duy trì</div>
-                <div className="text-rose-400">&lt; -0.3: Suy giảm nhanh</div>
+              <div className="space-y-0.5 text-[10px] font-bold">
+                <div className="text-emerald-700 dark:text-emerald-400">&gt; +0.3: Tăng trưởng mạnh</div>
+                <div className="text-cyan-700 dark:text-cyan-400">+0.1 đến +0.3: Cải thiện</div>
+                <div className="text-slate-700 dark:text-slate-300">-0.1 đến +0.1: Duy trì</div>
+                <div className="text-rose-700 dark:text-rose-400">&lt; -0.3: Suy giảm nhanh</div>
               </div>
             }
           >
-            <div className="bg-[#0d1120] p-2.5 rounded-lg border border-[#202948] space-y-1 font-mono text-[10px]">
-              <div className="text-slate-400 font-bold border-b border-white/5 pb-1">Hệ số góc a: y = ax + b</div>
-              <div className="flex items-center justify-between text-purple-300 font-bold">
+            <div className="bg-slate-50 dark:bg-[#0d1120] p-2.5 rounded-lg border border-slate-300 dark:border-[#202948] space-y-1 font-mono text-[10px]">
+              <div className="text-slate-700 dark:text-slate-400 font-bold border-b border-slate-200 dark:border-white/5 pb-1">Hệ số góc a: y = ax + b</div>
+              <div className="flex items-center justify-between text-purple-700 dark:text-purple-300 font-extrabold">
                 <span>Tốc độ thay đổi:</span>
                 <span>{safeEngine.trend_slope > 0 ? `+${safeEngine.trend_slope}` : safeEngine.trend_slope} đ/buổi</span>
               </div>
@@ -262,43 +262,43 @@ export const SummaryStrip: React.FC<SummaryStripProps> = React.memo(({
 
       {/* 5. Performance Index (PI) */}
       <div
-        className="relative group p-2.5 animate-cascade-5 cursor-pointer transition-colors hover:bg-white/[0.02]"
+        className="relative group p-2.5 animate-cascade-5 cursor-pointer transition-colors hover:bg-slate-50 dark:hover:bg-white/[0.02]"
         onMouseEnter={() => setActiveTooltip('pi')}
         onMouseLeave={() => setActiveTooltip(null)}
         onClick={() => setActiveTooltip(activeTooltip === 'pi' ? null : 'pi')}
       >
         <div className="flex items-center justify-center gap-1">
-          <span className="text-[10px] font-black uppercase text-slate-700 dark:text-slate-400 block group-hover:text-indigo-600 dark:group-hover:text-indigo-300 transition-colors">Chỉ Số PI</span>
+          <span className="text-[10px] font-black uppercase text-slate-800 dark:text-slate-300 block group-hover:text-indigo-700 dark:group-hover:text-indigo-300 transition-colors">Chỉ Số PI</span>
           <button
             type="button"
-            className="text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white transition-colors"
+            className="text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors"
             title="Xem chi tiết chỉ số PI"
           >
             <Info size={11} />
           </button>
         </div>
-        <span className={`text-sm font-black font-mono ${piInfo.color}`}>{pi} / 100</span>
-        <span className={`text-[10px] block truncate ${piInfo.sub}`}>{piInfo.label}</span>
+        <span className={`text-base font-black font-mono ${piInfo.color}`}>{pi} / 100</span>
+        <span className={`text-[10px] font-bold block truncate ${piInfo.sub}`}>{piInfo.label}</span>
 
         {activeTooltip === 'pi' && (
           <SummaryTooltipCard
             title="Chỉ Số Phong Độ PI (Thang 0 - 100)"
-            titleColor="text-indigo-300"
+            titleColor="text-indigo-700 dark:text-indigo-300"
             align="right"
             onClose={() => setActiveTooltip(null)}
             whatItReflects="Điểm số phong độ toàn diện chuẩn hóa theo thang 100, tổng hợp đồng thời cả 5 trụ cột học tập cốt lõi."
             footer={
-              <div className="grid grid-cols-2 gap-1 text-[10px]">
-                <span className="text-emerald-400">≥ 90: Xuất Sắc</span>
-                <span className="text-blue-400">80 - 89: Giỏi</span>
-                <span className="text-cyan-400">65 - 79: Khá</span>
-                <span className="text-rose-400">&lt; 35: Kém</span>
+              <div className="grid grid-cols-2 gap-1 text-[10px] font-bold">
+                <span className="text-emerald-700 dark:text-emerald-400">≥ 90: Xuất Sắc</span>
+                <span className="text-blue-700 dark:text-blue-400">80 - 89: Giỏi</span>
+                <span className="text-cyan-700 dark:text-cyan-400">65 - 79: Khá</span>
+                <span className="text-rose-700 dark:text-rose-400">&lt; 35: Kém</span>
               </div>
             }
           >
-            <div className="bg-[#0d1120] p-2.5 rounded-lg border border-[#202948] space-y-1 text-[10px]">
-              <div className="text-slate-400 font-bold border-b border-white/5 pb-1 font-mono">Trọng số tính điểm PI:</div>
-              <div className="text-slate-300">40% Năng lực EMA + 25% Đà tiến bộ + 15% Độ ổn định + 10% Điểm lịch sử + 10% Chuyên cần</div>
+            <div className="bg-slate-50 dark:bg-[#0d1120] p-2.5 rounded-lg border border-slate-300 dark:border-[#202948] space-y-1 text-[10px]">
+              <div className="text-slate-700 dark:text-slate-400 font-bold border-b border-slate-200 dark:border-white/5 pb-1 font-mono">Trọng số tính điểm PI:</div>
+              <div className="text-slate-700 dark:text-slate-300 font-medium">40% Năng lực EMA + 25% Đà tiến bộ + 15% Độ ổn định + 10% Điểm lịch sử + 10% Chuyên cần</div>
             </div>
           </SummaryTooltipCard>
         )}
@@ -306,49 +306,49 @@ export const SummaryStrip: React.FC<SummaryStripProps> = React.memo(({
 
       {/* 6. Overall Rating */}
       <div
-        className="relative group p-2.5 animate-cascade-6 cursor-pointer transition-colors hover:bg-white/[0.02]"
+        className="relative group p-2.5 animate-cascade-6 cursor-pointer transition-colors hover:bg-slate-50 dark:hover:bg-white/[0.02]"
         onMouseEnter={() => setActiveTooltip('rating')}
         onMouseLeave={() => setActiveTooltip(null)}
         onClick={() => setActiveTooltip(activeTooltip === 'rating' ? null : 'rating')}
       >
         <div className="flex items-center justify-center gap-1">
-          <span className="text-[10px] font-black uppercase text-slate-700 dark:text-slate-400 block group-hover:text-indigo-600 dark:group-hover:text-indigo-300 transition-colors">Xếp Loại Chung</span>
+          <span className="text-[10px] font-black uppercase text-slate-800 dark:text-slate-300 block group-hover:text-indigo-700 dark:group-hover:text-indigo-300 transition-colors">Xếp Loại Chung</span>
           <button
             type="button"
-            className="text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white transition-colors"
+            className="text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors"
             title="Xem khuyến nghị sư phạm"
           >
             <Info size={11} />
           </button>
         </div>
-        <span className={`text-xs font-black flex items-center justify-center gap-1 ${safeEngine.rating_label?.includes('Kém') || safeEngine.rating_label?.includes('NGUY CƠ') ? 'text-rose-500 font-extrabold animate-pulse' :
-          safeEngine.rating_label?.includes('Yếu') ? 'text-orange-400' :
-            safeEngine.rating_label?.includes('Trung Bình') ? 'text-amber-400' :
-              safeEngine.rating_label?.includes('Khá') ? 'text-cyan-400' :
-                safeEngine.rating_label?.includes('Giỏi') ? 'text-blue-400' : 'text-emerald-400'
+        <span className={`text-xs font-black flex items-center justify-center gap-1 ${safeEngine.rating_label?.includes('Kém') || safeEngine.rating_label?.includes('NGUY CƠ') ? 'text-rose-700 dark:text-rose-400 font-extrabold animate-pulse' :
+          safeEngine.rating_label?.includes('Yếu') ? 'text-orange-700 dark:text-orange-400 font-bold' :
+            safeEngine.rating_label?.includes('Trung Bình') ? 'text-amber-700 dark:text-amber-400 font-bold' :
+              safeEngine.rating_label?.includes('Khá') ? 'text-cyan-700 dark:text-cyan-400 font-bold' :
+                safeEngine.rating_label?.includes('Giỏi') ? 'text-blue-700 dark:text-blue-400 font-bold' : 'text-emerald-700 dark:text-emerald-400 font-bold'
           }`}>
           {safeEngine.rating_label}
         </span>
-        <span className="text-[10px] text-slate-600 dark:text-slate-400 font-semibold block truncate">Đánh Giá Học Lực</span>
+        <span className="text-[10px] text-slate-700 dark:text-slate-300 font-bold block truncate">Đánh Giá Học Lực</span>
 
         {activeTooltip === 'rating' && (
           <SummaryTooltipCard
             title="Nhận Xét & Khuyến Nghị Sư Phạm"
-            titleColor="text-indigo-300"
+            titleColor="text-indigo-700 dark:text-indigo-300"
             align="right"
             onClose={() => setActiveTooltip(null)}
             whatItReflects="Đánh giá sư phạm tổng quát và các khuyến nghị can thiệp cụ thể dành cho giáo viên và phụ huynh."
           >
-            <div className="space-y-1.5 text-[10px] text-slate-300 leading-relaxed">
+            <div className="space-y-1.5 text-[10px] text-slate-700 dark:text-slate-300 leading-relaxed">
               {safeEngine.recommendations.length > 0 ? (
                 safeEngine.recommendations.map((rec: string, i: number) => (
-                  <div key={i} className="flex items-start gap-1.5 bg-[#0d1120] p-2 rounded-lg border border-[#202948]">
-                    <span className="text-indigo-400 font-bold shrink-0">›</span>
+                  <div key={i} className="flex items-start gap-1.5 bg-slate-50 dark:bg-[#0d1120] p-2 rounded-lg border border-slate-300 dark:border-[#202948]">
+                    <span className="text-indigo-600 dark:text-indigo-400 font-bold shrink-0">›</span>
                     <span>{rec}</span>
                   </div>
                 ))
               ) : (
-                <div className="bg-[#0d1120] p-2 rounded-lg border border-[#202948]">
+                <div className="bg-slate-50 dark:bg-[#0d1120] p-2 rounded-lg border border-slate-300 dark:border-[#202948]">
                   Đánh giá: Học sinh duy trì phong độ tốt. Tiếp tục phát huy trong các kỳ tới.
                 </div>
               )}

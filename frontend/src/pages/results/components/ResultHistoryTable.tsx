@@ -40,11 +40,11 @@ export const ResultHistoryTable: React.FC<ResultHistoryTableProps> = ({ records,
             <span
               className={`px-2.5 py-0.5 rounded-full text-xs font-black inline-flex items-center gap-1 border ${
                 isPresent
-                  ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
-                  : 'bg-rose-500/10 text-rose-400 border-rose-500/20'
+                  ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-emerald-500/30'
+                  : 'bg-rose-500/15 text-rose-700 dark:text-rose-400 border-rose-500/30'
               }`}
             >
-              <span className={`w-1.5 h-1.5 rounded-full ${isPresent ? 'bg-emerald-400' : 'bg-rose-400'}`} />
+              <span className={`w-1.5 h-1.5 rounded-full ${isPresent ? 'bg-emerald-500' : 'bg-rose-500'}`} />
               {status || 'Có mặt'}
             </span>
           );
@@ -60,16 +60,16 @@ export const ResultHistoryTable: React.FC<ResultHistoryTableProps> = ({ records,
           const topic = r.check_1_topic || (isGrammar ? r.grammar_topic : r.topic);
           return (
             <div className="text-center py-0.5">
-              <span className={`font-mono font-bold ${isGrammar ? 'text-purple-400' : 'text-blue-400'}`}>
+              <span className={`font-mono font-black text-base ${isGrammar ? 'text-purple-700 dark:text-purple-400' : 'text-blue-700 dark:text-blue-400'}`}>
                 {trunc1Dec(val)}
               </span>
               {topic && (
                 <div className="mt-0.5 flex flex-col items-center">
-                  <span className={`text-[10px] ${isGrammar ? 'text-purple-300/80' : 'text-blue-300/80'} font-medium truncate max-w-[130px] block`} title={topic}>
+                  <span className={`text-[10px] ${isGrammar ? 'text-purple-700 dark:text-purple-300' : 'text-blue-700 dark:text-blue-300'} font-semibold truncate max-w-[130px] block`} title={topic}>
                     {topic}
                   </span>
-                  <span className={`text-[9px] px-1.5 py-0.2 rounded border font-semibold mt-0.5 ${
-                    isGrammar ? 'bg-purple-500/15 text-purple-300 border-purple-500/30' : 'bg-blue-500/15 text-blue-300 border-blue-500/30'
+                  <span className={`text-[9px] px-1.5 py-0.2 rounded border font-bold mt-0.5 ${
+                    isGrammar ? 'bg-purple-500/15 text-purple-800 dark:text-purple-300 border-purple-500/30' : 'bg-blue-500/15 text-blue-800 dark:text-blue-300 border-blue-500/30'
                   }`}>
                     {isGrammar ? 'Ngữ Pháp' : 'Từ Vựng'}
                   </span>
@@ -89,16 +89,16 @@ export const ResultHistoryTable: React.FC<ResultHistoryTableProps> = ({ records,
           const topic = r.check_2_topic || (isGrammar ? r.grammar_topic : r.topic);
           return (
             <div className="text-center py-0.5">
-              <span className={`font-mono font-bold ${isGrammar ? 'text-purple-400' : 'text-blue-400'}`}>
+              <span className={`font-mono font-black text-base ${isGrammar ? 'text-purple-700 dark:text-purple-400' : 'text-blue-700 dark:text-blue-400'}`}>
                 {trunc1Dec(val)}
               </span>
               {topic && (
                 <div className="mt-0.5 flex flex-col items-center">
-                  <span className={`text-[10px] ${isGrammar ? 'text-purple-300/80' : 'text-blue-300/80'} font-medium truncate max-w-[130px] block`} title={topic}>
+                  <span className={`text-[10px] ${isGrammar ? 'text-purple-700 dark:text-purple-300' : 'text-blue-700 dark:text-blue-300'} font-semibold truncate max-w-[130px] block`} title={topic}>
                     {topic}
                   </span>
-                  <span className={`text-[9px] px-1.5 py-0.2 rounded border font-semibold mt-0.5 ${
-                    isGrammar ? 'bg-purple-500/15 text-purple-300 border-purple-500/30' : 'bg-blue-500/15 text-blue-300 border-blue-500/30'
+                  <span className={`text-[9px] px-1.5 py-0.2 rounded border font-bold mt-0.5 ${
+                    isGrammar ? 'bg-purple-500/15 text-purple-800 dark:text-purple-300 border-purple-500/30' : 'bg-blue-500/15 text-blue-800 dark:text-blue-300 border-blue-500/30'
                   }`}>
                     {isGrammar ? 'Ngữ Pháp' : 'Từ Vựng'}
                   </span>
@@ -114,7 +114,7 @@ export const ResultHistoryTable: React.FC<ResultHistoryTableProps> = ({ records,
         cell: (info) => {
           const val = info.getValue<number | null>();
           return (
-            <span className="font-mono font-bold text-amber-400">
+            <span className="font-mono font-black text-base text-amber-700 dark:text-amber-400">
               {trunc1Dec(val)}
             </span>
           );
@@ -126,7 +126,7 @@ export const ResultHistoryTable: React.FC<ResultHistoryTableProps> = ({ records,
         cell: (info) => {
           const val = info.getValue<number | null>();
           return (
-            <span className="font-mono font-bold text-emerald-400">
+            <span className="font-mono font-black text-base text-emerald-700 dark:text-emerald-400">
               {trunc1Dec(val)}
             </span>
           );
@@ -136,7 +136,7 @@ export const ResultHistoryTable: React.FC<ResultHistoryTableProps> = ({ records,
         accessorKey: 'notes',
         header: 'Ghi Chú',
         cell: (info) => (
-          <span className="text-xs text-slate-400 max-w-[200px] truncate block">
+          <span className="text-xs text-slate-700 dark:text-slate-300 font-medium max-w-[200px] truncate block">
             {info.getValue<string>() || '-'}
           </span>
         ),

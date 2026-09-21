@@ -76,7 +76,7 @@ export function SegmentedControl<T extends string = string>({
   return (
     <div
       onMouseLeave={() => setHoveredVal(null)}
-      className={`relative flex items-center bg-slate-200/90 dark:bg-[#090c15] p-1 rounded-xl border border-slate-300 dark:border-[#1b233d] shadow-[inset_0_1px_2px_rgba(0,0,0,0.08)] select-none shrink-0 transition-colors duration-150 ${
+      className={`relative flex items-center bg-slate-200 dark:bg-[#090c15] p-1.5 rounded-xl border border-slate-400/80 dark:border-[#1b233d] shadow-[inset_0_1px_3px_rgba(0,0,0,0.12)] select-none shrink-0 transition-colors duration-150 ${
         isFluid ? 'w-full' : 'inline-flex w-fit'
       } ${className}`}
     >
@@ -100,7 +100,7 @@ export function SegmentedControl<T extends string = string>({
                 ? 'opacity-30 cursor-not-allowed text-slate-400 dark:text-slate-500'
                 : isActive
                 ? 'text-white font-black'
-                : 'text-slate-800 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white font-extrabold'
+                : 'text-slate-900 dark:text-slate-300 hover:text-black dark:hover:text-white font-black'
             }`}
           >
             {/* Active Sliding Pill with Framer Motion Spring */}
@@ -108,7 +108,7 @@ export function SegmentedControl<T extends string = string>({
               <motion.div
                 layoutId={`${baseLayoutId}-active`}
                 transition={{ type: 'spring', stiffness: 450, damping: 32 }}
-                className={`absolute inset-0 rounded-lg ${activeColor} shadow-[0_3px_10px_rgba(92,54,245,0.4),0_1px_3px_rgba(0,0,0,0.12)] dark:shadow-[0_0_18px_rgba(92,54,245,0.65)] border border-indigo-400/40 dark:border-white/20 z-0 pointer-events-none`}
+                className={`absolute inset-0 rounded-lg ${activeColor} shadow-[0_4px_14px_rgba(92,54,245,0.45),0_1px_3px_rgba(0,0,0,0.2)] dark:shadow-[0_0_18px_rgba(92,54,245,0.65)] border border-indigo-500/50 dark:border-white/20 z-0 pointer-events-none`}
               />
             )}
 

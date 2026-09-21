@@ -18,33 +18,33 @@ const getSkillStyle = (skillKey?: string) => {
   const norm = (skillKey || '').toLowerCase().trim();
   if (norm === 'grammar' || norm === 'ngữ pháp') {
     return {
-      scoreColor: 'text-purple-400',
-      topicColor: 'text-purple-300/80',
-      badgeClass: 'bg-purple-500/15 text-purple-300 border-purple-500/30',
+      scoreColor: 'text-purple-700 dark:text-purple-400 font-black',
+      topicColor: 'text-purple-700 dark:text-purple-300 font-semibold',
+      badgeClass: 'bg-purple-500/15 text-purple-800 dark:text-purple-300 border-purple-500/30 font-bold',
       label: 'Ngữ Pháp',
     };
   }
   if (norm === 'mixed' || norm === 'tổng hợp') {
     return {
-      scoreColor: 'text-amber-400',
-      topicColor: 'text-amber-300/80',
-      badgeClass: 'bg-amber-500/15 text-amber-300 border-amber-500/30',
+      scoreColor: 'text-amber-700 dark:text-amber-400 font-black',
+      topicColor: 'text-amber-700 dark:text-amber-300 font-semibold',
+      badgeClass: 'bg-amber-500/15 text-amber-800 dark:text-amber-300 border-amber-500/30 font-bold',
       label: 'Tổng Hợp',
     };
   }
   if (norm === 'mock_test' || norm === 'luyện đề') {
     return {
-      scoreColor: 'text-rose-400',
-      topicColor: 'text-rose-300/80',
-      badgeClass: 'bg-rose-500/15 text-rose-300 border-rose-500/30',
+      scoreColor: 'text-rose-700 dark:text-rose-400 font-black',
+      topicColor: 'text-rose-700 dark:text-rose-300 font-semibold',
+      badgeClass: 'bg-rose-500/15 text-rose-800 dark:text-rose-300 border-rose-500/30 font-bold',
       label: 'Luyện Đề',
     };
   }
   // Default to vocab (Từ vựng) - Blue
   return {
-    scoreColor: 'text-blue-400',
-    topicColor: 'text-blue-300/80',
-    badgeClass: 'bg-blue-500/15 text-blue-300 border-blue-500/30',
+    scoreColor: 'text-blue-700 dark:text-blue-400 font-black',
+    topicColor: 'text-blue-700 dark:text-blue-300 font-semibold',
+    badgeClass: 'bg-blue-500/15 text-blue-800 dark:text-blue-300 border-blue-500/30 font-bold',
     label: 'Từ Vựng',
   };
 };
@@ -116,7 +116,7 @@ export const StudentGradeHistoryTable: React.FC<StudentGradeHistoryTableProps> =
         const st = getValue<string>() || 'Có mặt';
         const isAbsent = st.includes('Vắng') || st.includes('Nghỉ');
         return (
-          <div className={`text-center font-bold text-sm sm:text-base ${isAbsent ? 'text-rose-400' : 'text-emerald-400'}`}>
+          <div className={`text-center font-extrabold text-sm sm:text-base ${isAbsent ? 'text-rose-700 dark:text-rose-400' : 'text-emerald-700 dark:text-emerald-400'}`}>
             {st}
           </div>
         );
@@ -134,15 +134,15 @@ export const StudentGradeHistoryTable: React.FC<StudentGradeHistoryTableProps> =
         const topic = r.check_1_topic || (skill === 'grammar' ? r.grammar_topic : r.topic);
         return (
           <div className="text-center py-0.5">
-            <div className={`font-extrabold ${style.scoreColor} font-mono text-base leading-tight`}>
+            <div className={`font-black ${style.scoreColor} font-mono text-base leading-tight`}>
               {val > 0 ? format1Dec(val) : '-'}
             </div>
             {topic && (
               <div className="mt-0.5 flex flex-col items-center">
-                <span className={`text-[10px] ${style.topicColor} font-medium truncate max-w-[140px] block`} title={topic}>
+                <span className={`text-[10px] ${style.topicColor} font-semibold truncate max-w-[140px] block`} title={topic}>
                   {topic}
                 </span>
-                <span className={`text-[9px] px-1.5 py-0.2 rounded ${style.badgeClass} border font-semibold mt-0.5`}>
+                <span className={`text-[9px] px-1.5 py-0.2 rounded ${style.badgeClass} border font-bold mt-0.5`}>
                   {style.label}
                 </span>
               </div>
@@ -163,15 +163,15 @@ export const StudentGradeHistoryTable: React.FC<StudentGradeHistoryTableProps> =
         const topic = r.check_2_topic || (skill === 'vocab' ? r.topic : r.grammar_topic);
         return (
           <div className="text-center py-0.5">
-            <div className={`font-extrabold ${style.scoreColor} font-mono text-base leading-tight`}>
+            <div className={`font-black ${style.scoreColor} font-mono text-base leading-tight`}>
               {val > 0 ? format1Dec(val) : '-'}
             </div>
             {topic && (
               <div className="mt-0.5 flex flex-col items-center">
-                <span className={`text-[10px] ${style.topicColor} font-medium truncate max-w-[140px] block`} title={topic}>
+                <span className={`text-[10px] ${style.topicColor} font-semibold truncate max-w-[140px] block`} title={topic}>
                   {topic}
                 </span>
-                <span className={`text-[9px] px-1.5 py-0.2 rounded ${style.badgeClass} border font-semibold mt-0.5`}>
+                <span className={`text-[9px] px-1.5 py-0.2 rounded ${style.badgeClass} border font-bold mt-0.5`}>
                   {style.label}
                 </span>
               </div>
@@ -190,11 +190,11 @@ export const StudentGradeHistoryTable: React.FC<StudentGradeHistoryTableProps> =
         const topic = r.homework_topic || '';
         return (
           <div className="text-center py-0.5">
-            <div className="font-extrabold text-emerald-400 font-mono text-base leading-tight">
+            <div className="font-black text-emerald-700 dark:text-emerald-400 font-mono text-base leading-tight">
               {val > 0 ? format1Dec(val) : '-'}
             </div>
             {topic && (
-              <span className="block text-[10px] text-emerald-300/80 font-medium truncate max-w-[140px] mx-auto mt-0.5" title={topic}>
+              <span className="block text-[10px] text-emerald-800 dark:text-emerald-300 font-semibold truncate max-w-[140px] mx-auto mt-0.5" title={topic}>
                 {topic}
               </span>
             )}
@@ -211,7 +211,7 @@ export const StudentGradeHistoryTable: React.FC<StudentGradeHistoryTableProps> =
         const val = Number(r.homework_2) || 0;
         return (
           <div className="text-center py-0.5">
-            <div className="font-extrabold text-teal-400 font-mono text-base leading-tight">
+            <div className="font-black text-teal-700 dark:text-teal-400 font-mono text-base leading-tight">
               {val > 0 ? format1Dec(val) : '-'}
             </div>
           </div>
@@ -222,7 +222,7 @@ export const StudentGradeHistoryTable: React.FC<StudentGradeHistoryTableProps> =
       accessorKey: 'notes',
       header: 'Ghi Chú',
       meta: { headerText: 'Ghi Chú', exportValue: (r: any) => r.notes || '-' },
-      cell: (info) => <span className="text-xs text-slate-400 truncate max-w-xs block">{info.getValue<string>() || '-'}</span>,
+      cell: (info) => <span className="text-xs text-slate-700 dark:text-slate-300 font-medium truncate max-w-xs block">{info.getValue<string>() || '-'}</span>,
     },
     {
       id: 'actions',
@@ -234,7 +234,7 @@ export const StudentGradeHistoryTable: React.FC<StudentGradeHistoryTableProps> =
         <div className="text-center">
           <button
             onClick={(e) => { e.stopPropagation(); onOpenEditModal(row.original); }}
-            className="px-2.5 py-1 rounded-lg bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 hover:text-indigo-300 transition cursor-pointer border border-indigo-500/20 inline-flex items-center gap-1 text-[11px] font-bold"
+            className="px-2.5 py-1 rounded-lg bg-indigo-500/15 hover:bg-indigo-500/25 text-indigo-700 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 transition cursor-pointer border border-indigo-500/30 inline-flex items-center gap-1 text-[11px] font-black"
             title="Sửa điểm buổi học này"
           >
             <Edit3 size={12} />

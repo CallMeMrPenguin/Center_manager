@@ -42,14 +42,14 @@
 
 :root.light, html.light {
   color-scheme: light;
-  --background: #f8fafc;
+  --background: #edf2f7;
   --foreground: #0f172a;
   --surface: #ffffff;
-  --surface-nav: #f1f5f9;
-  --surface-raised: #f1f5f9;
-  --surface-highlight: #e2e8f0;
-  --border-color: #e2e8f0;
-  --border-subtle: #f1f5f9;
+  --surface-nav: #edf2f7;
+  --surface-raised: #e2e8f0;
+  --surface-highlight: #cbd5e1;
+  --border-color: #cbd5e1;
+  --border-subtle: #e2e8f0;
   --border-active: #2563eb;
   --primary: #2563eb;
   --primary-hover: #1d4ed8;
@@ -1022,4 +1022,12 @@ html:not(.dark) .recharts-default-tooltip {
 
 .animate-liquid-rotate-wave-back {
   animation: liquidRotateWaveReverse 6.5s linear infinite;
+}
+
+/* ─── SMOOTH THEME CROSSFADE TRANSITION ─────────────────────────────────── */
+html.theme-transition,
+html.theme-transition *,
+html.theme-transition *:before,
+html.theme-transition *:after {
+  transition: background-color 0.35s ease-out, border-color 0.35s ease-out, color 0.35s ease-out, box-shadow 0.35s ease-out !important;
 }
