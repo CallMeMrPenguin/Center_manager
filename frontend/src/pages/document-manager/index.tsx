@@ -832,7 +832,7 @@ export default function DocumentManager() {
       <button
         key={node.id}
         onClick={() => handleBatchMove(String(node.id))}
-        className="w-full text-left px-3 py-2 bg-slate-900/30 hover:bg-slate-850 text-xs font-bold rounded-xl text-slate-300 border border-slate-855 hover:border-slate-755 transition cursor-pointer flex items-center gap-1.5"
+        className="w-full text-left px-3 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-900/30 dark:hover:bg-slate-850 text-xs font-bold rounded-xl text-slate-800 dark:text-slate-300 border border-slate-300 dark:border-slate-855 hover:border-slate-400 transition cursor-pointer flex items-center gap-1.5"
       >
         <span>{"\u00A0\u00A0".repeat(depth) + "📁"}</span>
         <span>{node.name}</span>
@@ -844,13 +844,13 @@ export default function DocumentManager() {
   return (
     <div className="flex flex-col gap-6 h-full p-1">
       {/* Header Panel */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-slate-900/40 p-5 rounded-2xl border border-slate-800/60 backdrop-blur-xl">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white dark:bg-[#0c0f1d] p-5 rounded-2xl border border-slate-300 dark:border-slate-800 shadow-sm">
         <div>
-          <h1 className="text-xl font-extrabold text-white flex items-center gap-2">
+          <h1 className="text-xl font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
             <FolderOpen className="text-blue-500" size={22} />
             Quản Lý Tài Liệu
           </h1>
-          <p className="text-[10px] text-slate-400 font-medium mt-1">
+          <p className="text-[10px] text-slate-600 dark:text-slate-400 font-medium mt-1">
             Lưu trữ tài liệu và file nghe. Hỗ trợ cây thư mục kéo thả trực quan và tải lên hàng loạt.
           </p>
         </div>
@@ -862,7 +862,7 @@ export default function DocumentManager() {
               setNewFolderParentId(selectedFolderId !== 'null' ? selectedFolderId : '');
               setShowFolderModal(true);
             }}
-            className="flex-1 sm:flex-initial px-3.5 py-2.5 bg-slate-855 hover:bg-slate-800 text-xs text-slate-200 font-bold rounded-xl border border-slate-700/50 hover:border-slate-500 transition flex items-center justify-center gap-1.5 cursor-pointer shadow-lg"
+            className="flex-1 sm:flex-initial px-3.5 py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-xs text-slate-800 dark:text-slate-200 font-bold rounded-xl border border-slate-300 dark:border-slate-700 transition flex items-center justify-center gap-1.5 cursor-pointer shadow-xs"
           >
             <FolderPlus size={14} />
             Tạo Thư Mục
@@ -876,7 +876,7 @@ export default function DocumentManager() {
               setUploadTags([]);
               setShowUploadModal(true);
             }}
-            className="flex-1 sm:flex-initial px-4 py-2.5 bg-blue-600 hover:bg-blue-500 text-xs text-white font-extrabold rounded-xl transition flex items-center justify-center gap-1.5 cursor-pointer shadow-lg shadow-blue-600/20"
+            className="flex-1 sm:flex-initial px-4 py-2.5 bg-blue-600 hover:bg-blue-500 text-xs text-white font-extrabold rounded-xl transition flex items-center justify-center gap-1.5 cursor-pointer shadow-sm shadow-blue-600/20"
           >
             <Upload size={14} />
             Tải Lên Tệp
@@ -886,10 +886,10 @@ export default function DocumentManager() {
 
       {/* Floating Batch Actions Bar */}
       {selectedDocIds.length > 0 && (
-        <div className="flex items-center justify-between bg-blue-900/20 border border-blue-500/40 px-5 py-3.5 rounded-2xl animate-scale-up backdrop-blur-lg">
+        <div className="flex items-center justify-between bg-blue-50 dark:bg-blue-900/20 border border-blue-400 dark:border-blue-500/40 px-5 py-3.5 rounded-2xl animate-scale-up shadow-sm">
           <div className="flex items-center gap-3">
-            <CheckSquare className="text-blue-400" size={16} />
-            <span className="text-xs font-extrabold text-blue-200">
+            <CheckSquare className="text-blue-600 dark:text-blue-400" size={16} />
+            <span className="text-xs font-extrabold text-blue-900 dark:text-blue-200">
               Đã chọn {selectedDocIds.length} tài liệu
             </span>
           </div>
@@ -900,7 +900,7 @@ export default function DocumentManager() {
                 setBatchTags([]);
                 setShowBatchTagsModal(true);
               }}
-              className="px-3.5 py-2 bg-slate-850 hover:bg-slate-800 text-[10px] text-slate-200 font-bold rounded-xl border border-slate-700/50 transition flex items-center gap-1.5 cursor-pointer shadow-md"
+              className="px-3.5 py-2 bg-white dark:bg-slate-850 hover:bg-slate-100 dark:hover:bg-slate-800 text-[10px] text-slate-800 dark:text-slate-200 font-bold rounded-xl border border-slate-300 dark:border-slate-700 transition flex items-center gap-1.5 cursor-pointer shadow-xs"
             >
               <Tag size={12} />
               Gắn nhãn đồng loạt
@@ -908,7 +908,7 @@ export default function DocumentManager() {
             
             <button
               onClick={() => setShowBatchMoveModal(true)}
-              className="px-3.5 py-2 bg-slate-850 hover:bg-slate-800 text-[10px] text-slate-200 font-bold rounded-xl border border-slate-700/50 transition flex items-center gap-1.5 cursor-pointer shadow-md"
+              className="px-3.5 py-2 bg-white dark:bg-slate-850 hover:bg-slate-100 dark:hover:bg-slate-800 text-[10px] text-slate-800 dark:text-slate-200 font-bold rounded-xl border border-slate-300 dark:border-slate-700 transition flex items-center gap-1.5 cursor-pointer shadow-xs"
             >
               <Move size={12} />
               Di chuyển đồng loạt
@@ -916,7 +916,7 @@ export default function DocumentManager() {
 
             <button
               onClick={handleBatchDelete}
-              className="px-3.5 py-2 bg-red-650/20 hover:bg-red-650/40 text-[10px] text-red-400 font-bold rounded-xl border border-red-500/20 transition flex items-center gap-1.5 cursor-pointer shadow-md"
+              className="px-3.5 py-2 bg-red-50 dark:bg-red-650/20 hover:bg-red-100 dark:hover:bg-red-650/40 text-[10px] text-red-600 dark:text-red-400 font-bold rounded-xl border border-red-300 dark:border-red-500/20 transition flex items-center gap-1.5 cursor-pointer shadow-xs"
             >
               <Trash2 size={12} />
               Xóa đồng loạt
@@ -924,7 +924,7 @@ export default function DocumentManager() {
 
             <button
               onClick={() => setSelectedDocIds([])}
-              className="p-2 hover:bg-slate-850 text-slate-400 hover:text-white rounded-xl transition cursor-pointer"
+              className="p-2 hover:bg-slate-100 dark:hover:bg-slate-850 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white rounded-xl transition cursor-pointer"
               title="Hủy chọn"
             >
               <X size={14} />
@@ -941,12 +941,12 @@ export default function DocumentManager() {
           <div className="lg:col-span-1 flex flex-col gap-5 h-full max-h-[75vh] overflow-y-auto pr-1 transition-all duration-300">
             
             {/* Folders tree explorer */}
-            <div className="bg-slate-900/30 border border-slate-800/80 rounded-2xl p-4 flex flex-col gap-3">
+            <div className="bg-white dark:bg-[#0c0f1d] border border-slate-300 dark:border-slate-800 rounded-2xl p-4 flex flex-col gap-3 shadow-sm">
               <div className="flex items-center justify-between px-1">
-                <h3 className="text-[10px] font-bold text-slate-455 uppercase tracking-widest">Cấu trúc thư mục</h3>
+                <h3 className="text-[10px] font-extrabold text-slate-700 dark:text-slate-400 uppercase tracking-widest">Cấu trúc thư mục</h3>
                 <button
                   onClick={() => setSidebarCollapsed(true)}
-                  className="p-1 hover:bg-slate-800 text-slate-500 hover:text-slate-200 rounded transition cursor-pointer"
+                  className="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 hover:text-slate-900 dark:hover:text-slate-200 rounded transition cursor-pointer"
                   title="Thu gọn sidebar"
                 >
                   <ChevronLeft size={13} />
@@ -962,12 +962,12 @@ export default function DocumentManager() {
                   onDrop={(e) => handleDrop(e, null)}
                   className={`w-full text-left px-3 py-2 rounded-xl text-xs font-semibold flex items-center justify-between transition cursor-pointer ${
                     selectedFolderId === 'null' 
-                      ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20' 
-                      : 'text-slate-355 hover:bg-slate-800/40 hover:text-white border border-transparent'
-                  } ${dragOverFolderId === 'null' ? 'bg-blue-600/10 border-blue-500/40 border border-dashed' : ''}`}
+                      ? 'bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 border border-blue-400 dark:border-blue-500/20 font-bold' 
+                      : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/40 hover:text-slate-900 dark:hover:text-white border border-transparent'
+                  } ${dragOverFolderId === 'null' ? 'bg-blue-100 dark:bg-blue-600/10 border-blue-500 border border-dashed' : ''}`}
                 >
                   <span className="flex items-center gap-2">
-                    <FolderOpen size={14} className={selectedFolderId === 'null' ? 'text-blue-500' : 'text-slate-400'} />
+                    <FolderOpen size={14} className={selectedFolderId === 'null' ? 'text-blue-600 dark:text-blue-500' : 'text-slate-500 dark:text-slate-400'} />
                     Trang chủ (Tài liệu)
                   </span>
                 </button>
@@ -976,18 +976,18 @@ export default function DocumentManager() {
                   onClick={() => { setSelectedFolderId('__TRASH__'); setSelectedTag(''); }}
                   className={`w-full text-left px-3 py-2 rounded-xl text-xs font-semibold flex items-center justify-between transition cursor-pointer ${
                     selectedFolderId === '__TRASH__' 
-                      ? 'bg-red-500/10 text-red-450 border border-red-500/20' 
-                      : 'text-slate-355 hover:bg-slate-800/40 hover:text-white border border-transparent'
+                      ? 'bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-400 border border-red-300 dark:border-red-500/20 font-bold' 
+                      : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/40 hover:text-slate-900 dark:hover:text-white border border-transparent'
                   }`}
                 >
                   <span className="flex items-center gap-2">
-                    <Trash2 size={14} className={selectedFolderId === '__TRASH__' ? 'text-red-500' : 'text-slate-400'} />
+                    <Trash2 size={14} className={selectedFolderId === '__TRASH__' ? 'text-red-600 dark:text-red-500' : 'text-slate-500 dark:text-slate-400'} />
                     Thùng rác
                   </span>
                 </button>
 
                 {/* Recursive Folder Tree */}
-                <div className="flex flex-col gap-1 border-t border-slate-850/30 pt-2">
+                <div className="flex flex-col gap-1 border-t border-slate-200 dark:border-slate-800 pt-2">
                   {folderTree.map(rootNode => renderFolderNode(rootNode))}
                 </div>
               </div>
@@ -995,15 +995,15 @@ export default function DocumentManager() {
 
             {/* Tags cloud */}
             {allUniqueTags.length > 0 && (
-              <div className="bg-slate-900/30 border border-slate-800/80 rounded-2xl p-4 flex flex-col gap-3">
-                <h3 className="text-[10px] font-bold text-slate-455 uppercase tracking-widest px-1">Nhãn dán (Tags)</h3>
+              <div className="bg-white dark:bg-[#0c0f1d] border border-slate-300 dark:border-slate-800 rounded-2xl p-4 flex flex-col gap-3 shadow-sm">
+                <h3 className="text-[10px] font-extrabold text-slate-700 dark:text-slate-400 uppercase tracking-widest px-1">Nhãn dán (Tags)</h3>
                 <div className="flex flex-wrap gap-1.5">
                   <button
                     onClick={() => setSelectedTag('')}
                     className={`px-2 py-1 rounded-lg text-[10px] font-bold transition cursor-pointer ${
                       selectedTag === ''
-                        ? 'bg-slate-700 text-white'
-                        : 'bg-slate-800/60 text-slate-400 hover:bg-slate-850 hover:text-white'
+                        ? 'bg-blue-600 text-white shadow-xs'
+                        : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-transparent'
                     }`}
                   >
                     Tất cả nhãn
@@ -1014,8 +1014,8 @@ export default function DocumentManager() {
                       onClick={() => setSelectedTag(tag)}
                       className={`px-2 py-1 rounded-lg text-[10px] font-bold transition flex items-center gap-1 cursor-pointer ${
                         selectedTag === tag
-                          ? 'bg-blue-500/20 text-blue-450 border border-blue-500/30'
-                          : 'bg-slate-800/60 text-slate-400 hover:bg-slate-850 hover:text-white border border-transparent'
+                          ? 'bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-400 border border-blue-300 dark:border-blue-500/30'
+                          : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-transparent'
                       }`}
                     >
                       <Tag size={8} />
@@ -1036,7 +1036,7 @@ export default function DocumentManager() {
               <button
                 type="button"
                 onClick={() => setSidebarCollapsed(false)}
-                className="px-3.5 py-2.5 bg-slate-900/40 hover:bg-slate-850 border border-slate-805 text-xs text-slate-300 rounded-xl transition flex items-center gap-1.5 cursor-pointer"
+                className="px-3.5 py-2.5 bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-300 dark:border-slate-800 text-xs text-slate-800 dark:text-slate-300 rounded-xl transition flex items-center gap-1.5 cursor-pointer shadow-xs"
                 title="Mở rộng thư mục"
               >
                 <FolderOpen size={14} className="text-blue-500" />
@@ -1045,18 +1045,18 @@ export default function DocumentManager() {
             )}
             
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-555" size={14} />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" size={14} />
               <input
                 type="text"
                 placeholder="Tìm kiếm tài liệu..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-4 py-2.5 bg-slate-900/40 focus:bg-slate-900/80 border border-slate-800/80 focus:border-blue-500/50 rounded-xl text-xs text-white placeholder-slate-500 outline-none transition"
+                className="w-full pl-9 pr-4 py-2.5 bg-white dark:bg-slate-900 focus:bg-white dark:focus:bg-slate-900 border border-slate-300 dark:border-slate-800 focus:border-blue-500 rounded-xl text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 outline-none transition shadow-xs"
               />
             </div>
             <button
               type="submit"
-              className="px-4 py-2.5 bg-slate-850 hover:bg-slate-800 border border-slate-700/50 text-xs text-slate-200 font-bold rounded-xl transition cursor-pointer"
+              className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs text-slate-800 dark:text-slate-200 font-bold rounded-xl transition cursor-pointer shadow-xs"
             >
               Tìm kiếm
             </button>
@@ -1068,7 +1068,7 @@ export default function DocumentManager() {
                   setSelectedTag('');
                   setSelectedFolderId('null');
                 }}
-                className="px-3 py-2.5 bg-slate-800/30 hover:bg-slate-800 text-xs text-slate-400 hover:text-white rounded-xl transition cursor-pointer"
+                className="px-3 py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-xs text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white rounded-xl transition cursor-pointer border border-slate-300 dark:border-transparent"
               >
                 Đặt lại
               </button>
@@ -1076,21 +1076,21 @@ export default function DocumentManager() {
           </form>
 
           {/* Directory path indicator (Clickable Breadcrumbs) */}
-          <div className="flex items-center justify-between text-[10px] text-slate-405 font-semibold bg-slate-900/10 px-4 py-2 rounded-xl border border-slate-850/40">
+          <div className="flex items-center justify-between text-[10px] text-slate-600 dark:text-slate-400 font-semibold bg-white dark:bg-slate-900/40 px-4 py-2 rounded-xl border border-slate-300 dark:border-slate-800 shadow-xs">
             <div className="flex items-center gap-1.5 flex-wrap">
               <span 
                 onClick={() => { setSelectedFolderId('null'); setSelectedTag(''); }}
-                className="hover:text-blue-450 hover:underline cursor-pointer transition flex items-center gap-1 text-slate-400 font-bold"
+                className="hover:text-blue-600 dark:hover:text-blue-400 hover:underline cursor-pointer transition flex items-center gap-1 text-slate-800 dark:text-slate-300 font-bold"
               >
                 Trang chủ
               </span>
               {breadcrumbs.map((b, idx) => (
                 <div key={b.id} className="flex items-center gap-1.5">
-                  <ChevronRight size={10} className="text-slate-600" />
+                  <ChevronRight size={10} className="text-slate-400 dark:text-slate-600" />
                   <span 
                     onClick={() => { setSelectedFolderId(String(b.id)); setSelectedTag(''); }}
-                    className={`hover:text-blue-450 hover:underline cursor-pointer transition ${
-                      idx === breadcrumbs.length - 1 ? 'text-blue-400 font-extrabold' : 'text-slate-400'
+                    className={`hover:text-blue-600 dark:hover:text-blue-400 hover:underline cursor-pointer transition ${
+                      idx === breadcrumbs.length - 1 ? 'text-blue-600 dark:text-blue-400 font-extrabold' : 'text-slate-700 dark:text-slate-300'
                     }`}
                   >
                     {b.name}
@@ -1099,8 +1099,8 @@ export default function DocumentManager() {
               ))}
               {selectedTag && (
                 <>
-                  <ChevronRight size={10} className="text-slate-600" />
-                  <span className="bg-blue-500/10 text-blue-400 border border-blue-500/20 px-1.5 py-0.5 rounded flex items-center gap-1">
+                  <ChevronRight size={10} className="text-slate-400 dark:text-slate-600" />
+                  <span className="bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 border border-blue-300 dark:border-blue-500/20 px-1.5 py-0.5 rounded flex items-center gap-1 font-bold">
                     <Tag size={8} /> Tag: {selectedTag}
                   </span>
                 </>
@@ -1110,10 +1110,10 @@ export default function DocumentManager() {
             {documents.length > 0 && (
               <button
                 onClick={handleToggleSelectAll}
-                className="flex items-center gap-1 text-slate-400 hover:text-white transition font-extrabold cursor-pointer"
+                className="flex items-center gap-1 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition font-extrabold cursor-pointer"
               >
                 {selectedDocIds.length === documents.length ? (
-                  <CheckSquare size={13} className="text-blue-500" />
+                  <CheckSquare size={13} className="text-blue-600 dark:text-blue-500" />
                 ) : (
                   <Square size={13} />
                 )}
@@ -1125,16 +1125,16 @@ export default function DocumentManager() {
           {/* Staged drag and drop root overlay zone */}
           <div className="flex-1 overflow-y-auto pr-1">
             {loading ? (
-              <div className="flex flex-col items-center justify-center py-20 gap-3 text-slate-400">
+              <div className="flex flex-col items-center justify-center py-20 gap-3 text-slate-500">
                 <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                <span className="text-xs">Đang tải tài liệu...</span>
+                <span className="text-xs font-bold">Đang tải tài liệu...</span>
               </div>
             ) : visibleSubfolders.length === 0 && documents.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-24 gap-4 bg-slate-900/10 border border-dashed border-slate-805 rounded-2xl">
-                <FolderOpen className="text-slate-600" size={40} />
+              <div className="flex flex-col items-center justify-center py-24 gap-4 bg-white dark:bg-slate-900/20 border border-dashed border-slate-300 dark:border-slate-800 rounded-2xl shadow-sm">
+                <FolderOpen className="text-slate-400 dark:text-slate-600" size={40} />
                 <div className="text-center">
-                  <h4 className="text-xs font-bold text-slate-350">Thư mục trống</h4>
-                  <p className="text-[10px] text-slate-505 mt-1">Hãy tạo thư mục con hoặc tải tệp tin lên</p>
+                  <h4 className="text-xs font-bold text-slate-800 dark:text-slate-300">Thư mục trống</h4>
+                  <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1">Hãy tạo thư mục con hoặc tải tệp tin lên</p>
                 </div>
               </div>
             ) : (
@@ -1143,7 +1143,7 @@ export default function DocumentManager() {
                 {/* 1. Subfolders Section (Double-click/Click to navigate) */}
                 {visibleSubfolders.length > 0 && (
                   <div className="flex flex-col gap-2">
-                    <h3 className="text-[10px] font-bold text-slate-500 uppercase tracking-wider px-1">Thư mục con</h3>
+                    <h3 className="text-[10px] font-extrabold text-slate-600 dark:text-slate-400 uppercase tracking-wider px-1">Thư mục con</h3>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                       {visibleSubfolders.map(sub => {
                         const isDragOverThis = dragOverFolderId === String(sub.id);
@@ -1158,13 +1158,13 @@ export default function DocumentManager() {
                             onDrop={(e) => !isTrash && handleDrop(e, String(sub.id))}
                             onDoubleClick={() => { if (!isTrash) { setSelectedFolderId(String(sub.id)); setSelectedTag(''); } }}
                             onClick={() => { if (!isTrash) { setSelectedFolderId(String(sub.id)); setSelectedTag(''); } }}
-                            className={`flex items-center justify-between p-3.5 bg-slate-900/40 hover:bg-slate-900/60 border border-slate-850/60 hover:border-slate-700/60 rounded-2xl transition cursor-pointer select-none group/fcard ${
-                              isDragOverThis ? 'bg-blue-600/10 border-blue-500/40 border-2 scale-102 border-dashed shadow-lg' : ''
+                            className={`flex items-center justify-between p-3.5 bg-white dark:bg-[#0c0f1d] hover:bg-slate-50 dark:hover:bg-slate-800/60 border border-slate-300 dark:border-slate-800 hover:border-slate-400 dark:hover:border-slate-700 rounded-2xl transition cursor-pointer select-none group/fcard shadow-sm ${
+                              isDragOverThis ? 'bg-blue-50 dark:bg-blue-600/10 border-blue-500 border-2 scale-102 border-dashed shadow-lg' : ''
                             }`}
                           >
                             <div className="flex items-center gap-2.5 min-w-0">
                               <Folder size={18} className="text-amber-500 fill-amber-500/10 flex-shrink-0" />
-                              <span className="text-xs font-bold text-slate-200 truncate">{sub.name}</span>
+                              <span className="text-xs font-bold text-slate-900 dark:text-slate-200 truncate">{sub.name}</span>
                             </div>
                             
                             <div className="flex items-center gap-1 shrink-0 opacity-0 group-hover/fcard:opacity-100 transition">
@@ -1175,7 +1175,7 @@ export default function DocumentManager() {
                                       e.stopPropagation();
                                       handleRestoreFolder(sub.id);
                                     }}
-                                    className="p-1 hover:bg-slate-800 text-green-400 rounded transition cursor-pointer"
+                                    className="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 text-green-600 dark:text-green-400 rounded transition cursor-pointer"
                                     title="Khôi phục thư mục"
                                   >
                                     <Plus size={11} />
@@ -1185,7 +1185,7 @@ export default function DocumentManager() {
                                       e.stopPropagation();
                                       handlePermanentDeleteFolder(sub.id, sub.name);
                                     }}
-                                    className="p-1 hover:bg-slate-800 text-red-500 rounded transition cursor-pointer"
+                                    className="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 text-red-600 dark:text-red-500 rounded transition cursor-pointer"
                                     title="Xóa vĩnh viễn"
                                   >
                                     <Trash2 size={11} />
@@ -1197,7 +1197,7 @@ export default function DocumentManager() {
                                     e.stopPropagation();
                                     handleDeleteFolder(sub);
                                   }}
-                                  className="p-1 hover:bg-slate-855 text-slate-600 hover:text-red-405 rounded-lg transition cursor-pointer"
+                                  className="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-red-600 dark:hover:text-red-400 rounded-lg transition cursor-pointer"
                                   title="Xóa thư mục"
                                 >
                                   <Trash2 size={11} />
@@ -1214,7 +1214,7 @@ export default function DocumentManager() {
                 {/* 2. Files Section */}
                 {documents.length > 0 && (
                   <div className="flex flex-col gap-2">
-                    <h3 className="text-[10px] font-bold text-slate-500 uppercase tracking-wider px-1">Tệp tin</h3>
+                    <h3 className="text-[10px] font-extrabold text-slate-600 dark:text-slate-400 uppercase tracking-wider px-1">Tệp tin</h3>
                     <div className={`grid gap-4 ${sidebarCollapsed ? 'grid-cols-1 md:grid-cols-3' : 'grid-cols-1 md:grid-cols-2'}`}>
                       {documents.map(doc => {
                         const isSelected = selectedDocIds.includes(doc.id);
@@ -1224,12 +1224,12 @@ export default function DocumentManager() {
                             key={doc.id}
                             draggable={!isTrash}
                             onDragStart={(e) => handleDragStartDoc(e, doc.id)}
-                            className={`flex flex-col justify-between border rounded-2xl p-4 transition shadow-md hover:shadow-lg relative group ${
+                            className={`flex flex-col justify-between border rounded-2xl p-4 transition shadow-sm hover:shadow-md relative group ${
                               isTrash ? '' : 'cursor-grab active:cursor-grabbing'
                             } ${
                               isSelected 
-                                ? 'bg-blue-900/10 border-blue-500/50' 
-                                : 'bg-slate-900/30 hover:bg-slate-900/50 border-slate-800/80 hover:border-slate-700/60'
+                                ? 'bg-blue-50 dark:bg-blue-900/15 border-blue-500' 
+                                : 'bg-white dark:bg-[#0c0f1d] hover:bg-slate-50/80 dark:hover:bg-slate-800/40 border-slate-300 dark:border-slate-800 hover:border-slate-400 dark:hover:border-slate-700'
                             }`}
                           >
                             {/* Checkbox Overlay for Selection */}
@@ -1239,7 +1239,7 @@ export default function DocumentManager() {
                                 className={`absolute top-3.5 right-3.5 p-1 rounded-lg border transition-all cursor-pointer z-10 ${
                                   isSelected 
                                     ? 'bg-blue-600 border-blue-500 text-white' 
-                                    : 'bg-slate-950 border-slate-805 text-transparent hover:text-slate-700 hover:border-slate-700'
+                                    : 'bg-white dark:bg-slate-950 border-slate-300 dark:border-slate-700 text-transparent hover:text-slate-600 hover:border-slate-400'
                                 }`}
                               >
                                 <Plus size={10} className={isSelected ? "" : "opacity-0"} />
@@ -1248,7 +1248,7 @@ export default function DocumentManager() {
 
                             <div className="flex items-start gap-3 pr-6">
                               {/* Icon */}
-                              <div className="p-2.5 bg-slate-850 rounded-xl border border-slate-800">
+                              <div className="p-2.5 bg-slate-100 dark:bg-slate-850 rounded-xl border border-slate-200 dark:border-slate-800">
                                 {getFileIcon(doc.file_type)}
                               </div>
 
@@ -1258,8 +1258,8 @@ export default function DocumentManager() {
                                   onClick={() => !isTrash && handleOpenFileNative(doc.filepath)}
                                   className={`text-xs font-bold truncate ${
                                     isTrash 
-                                      ? 'text-slate-400' 
-                                      : 'text-slate-200 hover:text-blue-455 transition cursor-pointer'
+                                      ? 'text-slate-500 dark:text-slate-400' 
+                                      : 'text-slate-900 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-400 transition cursor-pointer'
                                   }`}
                                   title={isTrash ? doc.name : "Nhấp để mở tệp tin"}
                                 >
@@ -1269,9 +1269,9 @@ export default function DocumentManager() {
                                   {doc.filename}
                                 </p>
                                 
-                                <div className="flex items-center gap-2 mt-2 text-[9px] text-slate-400 font-semibold">
+                                <div className="flex items-center gap-2 mt-2 text-[9px] text-slate-500 dark:text-slate-400 font-semibold">
                                   <span>{formatBytes(doc.file_size)}</span>
-                                  <span className="text-slate-700">•</span>
+                                  <span className="text-slate-300 dark:text-slate-700">•</span>
                                   <span>{new Date(doc.created_at).toLocaleDateString('vi-VN')}</span>
                                 </div>
                               </div>
@@ -1283,7 +1283,7 @@ export default function DocumentManager() {
                                 {doc.tags.split(',').map(tag => (
                                   <span 
                                     key={tag}
-                                    className="bg-slate-800 text-slate-400 text-[8px] font-bold px-1.5 py-0.5 rounded flex items-center gap-0.5"
+                                    className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-400 border border-slate-200 dark:border-transparent text-[8px] font-bold px-1.5 py-0.5 rounded flex items-center gap-0.5"
                                   >
                                     <Tag size={6} />
                                     {tag.trim()}
@@ -1293,18 +1293,18 @@ export default function DocumentManager() {
                             )}
 
                             {/* Actions */}
-                            <div className="flex items-center justify-between border-t border-slate-800/60 pt-3 mt-4">
+                            <div className="flex items-center justify-between border-t border-slate-200 dark:border-slate-800 pt-3 mt-4">
                               {isTrash ? (
                                 <div className="flex gap-2 w-full justify-between animate-scale-up">
                                   <button
                                     onClick={() => handleRestoreDocument(doc.id)}
-                                    className="px-3.5 py-2 bg-green-600/10 hover:bg-green-600/20 text-[10px] text-green-400 font-bold rounded-xl border border-green-500/20 transition cursor-pointer"
+                                    className="px-3.5 py-2 bg-green-50 dark:bg-green-600/10 hover:bg-green-100 dark:hover:bg-green-600/20 text-[10px] text-green-700 dark:text-green-400 font-bold rounded-xl border border-green-300 dark:border-green-500/20 transition cursor-pointer"
                                   >
                                     Khôi phục
                                   </button>
                                   <button
                                     onClick={() => handlePermanentDeleteDocument(doc.id, doc.name)}
-                                    className="px-3.5 py-2 bg-red-650/10 hover:bg-red-650/20 text-[10px] text-red-405 font-bold rounded-xl border border-red-500/20 transition cursor-pointer"
+                                    className="px-3.5 py-2 bg-red-50 dark:bg-red-650/10 hover:bg-red-100 dark:hover:bg-red-650/20 text-[10px] text-red-700 dark:text-red-400 font-bold rounded-xl border border-red-300 dark:border-red-500/20 transition cursor-pointer"
                                   >
                                     Xóa vĩnh viễn
                                   </button>
@@ -1315,14 +1315,14 @@ export default function DocumentManager() {
                                     <a
                                       href={api.downloadDocumentUrl(doc.id)}
                                       download={doc.filename}
-                                      className="p-2 bg-slate-850 hover:bg-slate-800 border border-slate-850/60 text-slate-355 hover:text-white rounded-xl transition cursor-pointer"
+                                      className="p-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white rounded-xl transition cursor-pointer"
                                       title="Tải tệp tin về máy"
                                     >
                                       <Download size={12} />
                                     </a>
                                     <button
                                       onClick={() => handleOpenFileNative(doc.filepath)}
-                                      className="p-2 bg-slate-855 hover:bg-slate-800 border border-slate-855/60 text-slate-355 hover:text-white rounded-xl transition cursor-pointer"
+                                      className="p-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white rounded-xl transition cursor-pointer"
                                       title="Mở trực tiếp trên máy tính"
                                     >
                                       <ExternalLink size={12} />
@@ -1333,8 +1333,8 @@ export default function DocumentManager() {
                                       onClick={() => setActiveDocForAttachments(doc)}
                                       className={`px-2.5 py-1.5 text-[9px] font-bold rounded-xl border transition flex items-center gap-1 cursor-pointer ${
                                         doc.attachments && doc.attachments.length > 0
-                                          ? 'bg-blue-600/15 border-blue-500/30 text-blue-405 hover:bg-blue-600/30'
-                                          : 'bg-slate-850 border-slate-855/60 text-slate-355 hover:text-white hover:bg-slate-800'
+                                          ? 'bg-blue-50 dark:bg-blue-600/15 border-blue-300 dark:border-blue-500/30 text-blue-700 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-600/30'
+                                          : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
                                       }`}
                                       title="Quản lý tệp đính kèm (Audio/Video/Đáp án)"
                                     >
@@ -1356,7 +1356,7 @@ export default function DocumentManager() {
                                         setEditingTagsDoc(doc);
                                         setTempTags(doc.tags ? doc.tags.split(',').map(t => t.trim()) : []);
                                       }}
-                                      className="p-2 hover:bg-slate-855 text-slate-500 hover:text-slate-300 rounded-xl transition cursor-pointer"
+                                      className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 hover:text-slate-900 dark:hover:text-slate-300 rounded-xl transition cursor-pointer"
                                       title="Sửa nhãn dán"
                                     >
                                       <Tag size={12} />
@@ -1364,7 +1364,7 @@ export default function DocumentManager() {
 
                                     <button
                                       onClick={() => handleDeleteDocument(doc)}
-                                      className="p-2 hover:bg-slate-855 text-slate-500 hover:text-red-404 rounded-xl transition cursor-pointer"
+                                      className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-red-600 dark:hover:text-red-400 rounded-xl transition cursor-pointer"
                                       title="Xóa tệp"
                                     >
                                       <Trash2 size={12} />

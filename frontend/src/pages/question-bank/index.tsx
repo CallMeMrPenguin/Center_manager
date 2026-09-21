@@ -1379,7 +1379,7 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
   };
 
   return (
-    <div className="flex flex-col h-full bg-transparent text-slate-100 p-8 overflow-y-auto">
+    <div className="flex flex-col h-full bg-transparent text-slate-900 dark:text-slate-100 p-8 overflow-y-auto">
       
       {/* HEADER SECTION */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
@@ -1388,9 +1388,9 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
             <Database className="text-blue-500 drop-shadow-[0_0_10px_rgba(59,130,246,0.5)]" size={22} />
             <span className="text-slate-900 dark:text-white">NGÂN HÀNG CÂU HỎI LOCAL</span>
           </h1>
-          <p className="text-xs text-slate-400 mt-1">
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
             Quản lý ngân hàng câu hỏi trắc nghiệm ngoại tuyến. Tự động trộn đáp án bằng Fisher-Yates & cấu hình tạo đề tự động.
-            <span className="ml-3 px-2 py-0.5 rounded-md bg-blue-500/10 border border-blue-500/20 text-blue-400 font-extrabold text-[10px]">
+            <span className="ml-3 px-2 py-0.5 rounded-md bg-blue-500/10 border border-blue-500/20 text-blue-600 dark:text-blue-400 font-extrabold text-[10px]">
               TỔNG SỐ CÂU HỎI THEO BỘ LỌC: {filteredAndSortedQuestions.length}
             </span>
           </p>
@@ -1419,7 +1419,7 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
           <button
             onClick={handleResetFrequency}
             disabled={loading}
-            className="group flex items-center gap-0 hover:gap-1.5 px-3 py-2.5 bg-slate-900 border border-slate-800 hover:bg-gradient-to-tr hover:from-blue-600/10 hover:to-indigo-600/10 hover:border-blue-500/30 text-slate-350 hover:text-white text-xs font-bold rounded-xl cursor-pointer transition-all duration-300 shadow-sm"
+            className="group flex items-center gap-0 hover:gap-1.5 px-3 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-350 hover:text-slate-900 dark:hover:text-white text-xs font-bold rounded-xl cursor-pointer transition-all duration-300 shadow-sm"
             title={selectedIds.length > 0 ? "Reset tần suất các câu hỏi đã chọn" : "Reset tần suất cho toàn bộ câu hỏi"}
           >
             <RefreshCw size={14} className="text-amber-500" />
@@ -1430,7 +1430,7 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
           {(Object.values(columnFilters).some(f => f.search !== '' || f.selectedValues.length > 0) || sortConfig !== null) && (
             <button
               onClick={resetFilters}
-              className="group flex items-center gap-0 hover:gap-1.5 px-3 py-2.5 bg-slate-950 border border-slate-850 hover:bg-rose-950/20 hover:border-rose-900/50 text-slate-400 hover:text-rose-450 text-xs font-bold rounded-xl cursor-pointer transition-all duration-300"
+              className="group flex items-center gap-0 hover:gap-1.5 px-3 py-2.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-850 hover:bg-rose-50 dark:hover:bg-rose-950/20 hover:border-rose-300 dark:hover:border-rose-900/50 text-slate-600 dark:text-slate-400 hover:text-rose-600 dark:hover:text-rose-450 text-xs font-bold rounded-xl cursor-pointer transition-all duration-300 shadow-sm"
               title="Xóa bộ lọc"
             >
               <RefreshCw size={14} />
@@ -1442,7 +1442,7 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
           <div className="relative" ref={colMenuRef}>
             <button
               onClick={() => setShowColMenu(!showColMenu)}
-              className="group flex items-center gap-0 hover:gap-1.5 px-3 py-2.5 bg-slate-900 border border-slate-800 hover:bg-gradient-to-tr hover:from-blue-600/10 hover:to-indigo-600/10 hover:border-blue-500/30 text-slate-350 hover:text-white text-xs font-bold rounded-xl cursor-pointer transition-all duration-300 shadow-sm"
+              className="group flex items-center gap-0 hover:gap-1.5 px-3 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-350 hover:text-slate-900 dark:hover:text-white text-xs font-bold rounded-xl cursor-pointer transition-all duration-300 shadow-sm"
               title="Cột hiển thị"
             >
               <Eye size={14} />
@@ -1450,8 +1450,8 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
             </button>
             
             {showColMenu && (
-              <div className="absolute right-0 mt-2 w-52 filter-dropdown-menu z-20 py-2.5 px-3 flex flex-col gap-1.5">
-                <p className="text-[0.66rem] text-slate-500 font-extrabold uppercase tracking-wider px-2 pb-1 border-b border-slate-900">Ẩn / Hiện Cột</p>
+              <div className="absolute right-0 mt-2 w-52 filter-dropdown-menu z-20 py-2.5 px-3 flex flex-col gap-1.5 bg-white dark:bg-[#0c0f1e] border border-slate-200 dark:border-slate-800 shadow-xl rounded-xl">
+                <p className="text-[0.66rem] text-slate-500 font-extrabold uppercase tracking-wider px-2 pb-1 border-b border-slate-200 dark:border-slate-800">Ẩn / Hiện Cột</p>
                 {Object.entries({
                   grade: 'Khối',
                   unit: 'Unit',
@@ -1462,12 +1462,12 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
                   level: 'Độ khó',
                   frequency: 'Tần suất'
                 }).map(([key, label]) => (
-                  <label key={key} className="flex items-center gap-2.5 px-2 py-1 hover:bg-slate-900 rounded-lg cursor-pointer text-xs font-medium text-slate-300 hover:text-white transition">
+                  <label key={key} className="flex items-center gap-2.5 px-2 py-1 hover:bg-slate-100 dark:hover:bg-slate-900 rounded-lg cursor-pointer text-xs font-medium text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition">
                     <input
                       type="checkbox"
                       checked={visibleCols[key]}
                       onChange={() => toggleCol(key)}
-                      className="rounded border-slate-800 text-blue-600 bg-slate-950 focus:ring-blue-500 focus:ring-offset-slate-900 cursor-pointer h-3.5 w-3.5"
+                      className="rounded border-slate-300 dark:border-slate-800 text-blue-600 bg-white dark:bg-slate-950 focus:ring-blue-500 cursor-pointer h-3.5 w-3.5"
                     />
                     {label}
                   </label>
@@ -1479,10 +1479,10 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
           {/* CSV Import */}
           <button
             onClick={() => setShowImportModal(true)}
-            className="group flex items-center gap-0 hover:gap-1.5 px-3 py-2.5 bg-slate-900 border border-slate-800 hover:bg-gradient-to-tr hover:from-blue-600/10 hover:to-indigo-600/10 hover:border-blue-500/30 text-slate-200 text-xs font-bold rounded-xl cursor-pointer transition-all duration-300 shadow-sm"
+            className="group flex items-center gap-0 hover:gap-1.5 px-3 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 hover:text-slate-900 dark:hover:text-white text-xs font-bold rounded-xl cursor-pointer transition-all duration-300 shadow-sm"
             title="Nhập CSV Câu Hỏi"
           >
-            <Upload size={14} className="text-blue-400" />
+            <Upload size={14} className="text-blue-500 dark:text-blue-400" />
             <span className="max-w-0 overflow-hidden group-hover:max-w-[140px] transition-all duration-300 whitespace-nowrap block">Nhập CSV Câu Hỏi</span>
           </button>
           
@@ -1511,15 +1511,15 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
       </div>
 
       {/* TABLE WORKSPACE WITH SOLID BACKGROUND */}
-      <div className="flex-auto bg-white dark:bg-[#0c0f1d] border border-slate-200 dark:border-[#1e2744] rounded-2xl shadow-xl overflow-hidden opacity-100 backdrop-blur-none flex flex-col min-h-0">
+      <div className="flex-auto bg-white dark:bg-[#0c0f1d] border border-slate-300 dark:border-slate-800 rounded-2xl shadow-sm overflow-hidden opacity-100 backdrop-blur-none flex flex-col min-h-0">
         {loading && questions.length === 0 ? (
           <div className="flex-1 flex flex-col items-center justify-center gap-2">
             <RefreshCw className="animate-spin text-blue-500" size={28} />
-            <span className="text-xs text-slate-500 font-semibold">Đang xử lý dữ liệu...</span>
+            <span className="text-xs text-slate-600 dark:text-slate-400 font-semibold">Đang xử lý dữ liệu...</span>
           </div>
         ) : questions.length === 0 ? (
           <div className="flex-1 flex flex-col items-center justify-center text-center p-10">
-            <div className="h-14 w-14 rounded-full bg-slate-100 dark:bg-slate-900 flex items-center justify-center border border-slate-200 dark:border-slate-850 mb-4 text-slate-500">
+            <div className="h-14 w-14 rounded-full bg-slate-100 dark:bg-slate-900 flex items-center justify-center border border-slate-300 dark:border-slate-800 mb-4 text-slate-500">
               <Database size={24} />
             </div>
             <h3 className="text-sm font-bold text-slate-800 dark:text-slate-200">Không tìm thấy câu hỏi</h3>
@@ -1532,7 +1532,7 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
             <div className="overflow-auto table-scroll-container">
               <table className="w-full border-collapse text-left">
                 <thead>
-                  <tr className="bg-slate-50 dark:bg-[#121626] border-b border-slate-200 dark:border-[#232d4e] text-[0.66rem] text-slate-600 dark:text-slate-400 font-extrabold uppercase tracking-wider sticky top-0 z-10 opacity-100">
+                  <tr className="bg-slate-100 dark:bg-[#121626] border-b border-slate-300 dark:border-slate-800 text-[0.66rem] text-slate-800 dark:text-slate-300 font-black uppercase tracking-wider sticky top-0 z-10 opacity-100">
                     <th className="py-4 px-5 w-12 text-center">
                       <button
                         onClick={handleSelectAllOnPage}
@@ -1855,8 +1855,8 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
                       <tr 
                         key={q.id}
                         onClick={() => handleSelectRow(q.id)}
-                        className={`hover:bg-slate-900/20 transition cursor-pointer ${
-                          isSelected ? 'bg-blue-600/5' : ''
+                        className={`hover:bg-slate-100 dark:hover:bg-slate-800/40 transition cursor-pointer ${
+                          isSelected ? 'bg-blue-50 dark:bg-blue-600/5' : ''
                         }`}
                       >
                         {/* Checkbox */}
@@ -1890,7 +1890,7 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
                         {/* Question Type */}
                         {visibleCols['type'] && (
                           <td className="py-3 px-3 whitespace-nowrap">
-                            <span className="px-2 py-0.5 rounded text-[0.66rem] font-bold bg-slate-900 border border-slate-850 text-slate-300">
+                            <span className="px-2 py-0.5 rounded text-[0.66rem] font-bold bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-850 text-slate-800 dark:text-slate-300">
                               {TYPE_MAP[q.t] || q.t || 'Khác'}
                             </span>
                           </td>
@@ -1898,14 +1898,14 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
 
                         {/* Question text */}
                         {visibleCols.content && (
-                          <td className="py-3 px-4 font-semibold text-slate-200 break-words max-w-sm">
-                            {q.x || <span className="text-slate-650 italic">Dạng phát âm/trọng âm</span>}
+                          <td className="py-3 px-4 font-semibold text-slate-900 dark:text-slate-200 break-words max-w-sm">
+                            {q.x || <span className="text-slate-400 italic">Dạng phát âm/trọng âm</span>}
                           </td>
                         )}
 
                         {/* Options */}
                         {visibleCols.options && (
-                          <td className="py-3 px-4 text-slate-400">
+                          <td className="py-3 px-4 text-slate-600 dark:text-slate-400">
                             {q.o && q.o.length > 0 ? (
                               <div className="grid grid-cols-2 gap-1.5 text-[0.66rem]">
                                 {q.o.map((opt: string, i: number) => {
@@ -1914,10 +1914,10 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
                                   return (
                                     <div 
                                       key={i} 
-                                      className={`flex items-center gap-1.5 px-2 py-1 rounded bg-[#090D18]/80 border ${
+                                      className={`flex items-center gap-1.5 px-2 py-1 rounded border transition-colors ${
                                         isAnswer 
-                                          ? 'border-emerald-500/30 text-emerald-400 bg-emerald-500/5' 
-                                          : 'border-slate-900 text-slate-450'
+                                          ? 'border-emerald-500/40 text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 font-bold' 
+                                          : 'bg-slate-100 dark:bg-[#090D18]/80 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300'
                                       }`}
                                     >
                                       <span className="font-extrabold text-[0.6rem] uppercase">{letter}.</span>
@@ -1927,7 +1927,7 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
                                 })}
                               </div>
                             ) : (
-                              <span className="text-slate-655 italic">Không có tùy chọn</span>
+                              <span className="text-slate-400 italic">Không có tùy chọn</span>
                             )}
                           </td>
                         )}
@@ -1936,11 +1936,11 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
                         {visibleCols.answer && (
                           <td className="py-3 px-3 text-center whitespace-nowrap">
                             {q.a ? (
-                              <span className="px-2 py-0.5 rounded-full text-[0.66rem] font-extrabold bg-emerald-500/10 text-emerald-450 border border-emerald-500/25">
+                              <span className="px-2 py-0.5 rounded-full text-[0.66rem] font-extrabold bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30">
                                 {q.a}
                               </span>
                             ) : (
-                              <span className="text-slate-600">-</span>
+                              <span className="text-slate-400">-</span>
                             )}
                           </td>
                         )}
@@ -1950,14 +1950,14 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
                           <td className="py-3 px-3 text-center whitespace-nowrap">
                             {q.level ? (
                               <span className={`px-2 py-0.5 rounded text-[0.6rem] font-black tracking-wider ${
-                                q.level.includes('NHẬN BIẾT') ? 'bg-blue-500/10 text-blue-400 border border-blue-500/25' :
-                                q.level.includes('THÔNG HIỂU') ? 'bg-amber-500/10 text-amber-400 border border-amber-500/25' :
-                                'bg-rose-500/10 text-rose-450 border border-rose-500/25'
+                                q.level.includes('NHẬN BIẾT') ? 'bg-blue-500/10 text-blue-700 dark:text-blue-400 border border-blue-500/25' :
+                                q.level.includes('THÔNG HIỂU') ? 'bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/25' :
+                                'bg-rose-500/10 text-rose-700 dark:text-rose-450 border border-rose-500/25'
                               }`}>
                                 {q.level}
                               </span>
                             ) : (
-                              <span className="text-slate-650">-</span>
+                              <span className="text-slate-400">-</span>
                             )}
                           </td>
                         )}
@@ -1965,7 +1965,7 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
                         {/* Frequency */}
                         {visibleCols.frequency && (
                           <td className="py-3 px-3 text-center whitespace-nowrap">
-                            <span className="px-2 py-0.5 rounded-md text-[0.66rem] font-extrabold bg-slate-900 border border-slate-800 text-slate-350 font-mono">
+                            <span className="px-2 py-0.5 rounded-md text-[0.66rem] font-extrabold bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-350 font-mono">
                               {q.frequency || '0'}
                             </span>
                           </td>
@@ -1978,7 +1978,7 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
                               setEditingId(q.id);
                               setEditRow({ ...q });
                             }}
-                            className="px-2.5 py-1 bg-slate-900 border border-slate-850 hover:border-slate-700 text-slate-300 hover:text-white text-[0.66rem] font-bold rounded-lg cursor-pointer transition animate-fade-in"
+                            className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 border border-slate-200 dark:border-slate-850 hover:border-slate-400 dark:hover:border-slate-700 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white text-[0.66rem] font-bold rounded-lg cursor-pointer transition animate-fade-in shadow-xs"
                           >
                             Sửa
                           </button>
@@ -1992,38 +1992,38 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
 
             {/* PAGINATION FOOTER CONTROL PANEL */}
             {filteredAndSortedQuestions.length > 0 && (
-              <div className="h-14 bg-[#14192b] border-t border-[#28334e] px-6 flex items-center justify-end shrink-0 select-none">
+              <div className="h-14 bg-slate-100 dark:bg-[#14192b] border-t border-slate-300 dark:border-[#28334e] px-6 flex items-center justify-end shrink-0 select-none">
                 <div className="flex items-center gap-1.5">
                   <button
                     disabled={currentPage === 1}
                     onClick={() => setCurrentPage(1)}
-                    className="p-1.5 rounded-lg bg-slate-900 hover:bg-slate-850 disabled:opacity-40 text-slate-400 hover:text-white transition cursor-pointer text-xs font-black disabled:cursor-not-allowed"
+                    className="p-1.5 rounded-lg bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-850 disabled:opacity-40 text-slate-800 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white border border-slate-300 dark:border-transparent transition cursor-pointer text-xs font-black disabled:cursor-not-allowed shadow-xs"
                   >
                     {"<<"}
                   </button>
                   <button
                     disabled={currentPage === 1}
                     onClick={() => setCurrentPage(prev => prev - 1)}
-                    className="p-1.5 rounded-lg bg-slate-900 hover:bg-slate-850 disabled:opacity-40 text-slate-400 hover:text-white transition cursor-pointer text-xs font-black disabled:cursor-not-allowed"
+                    className="p-1.5 rounded-lg bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-850 disabled:opacity-40 text-slate-800 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white border border-slate-300 dark:border-transparent transition cursor-pointer text-xs font-black disabled:cursor-not-allowed shadow-xs"
                   >
                     {"<"}
                   </button>
                   
-                  <span className="px-3 text-xs text-slate-300 font-extrabold font-mono">
+                  <span className="px-3 text-xs text-slate-900 dark:text-slate-300 font-black font-mono">
                     Trang {currentPage} / {Math.max(1, totalPages)}
                   </span>
 
                   <button
                     disabled={currentPage === totalPages || totalPages === 0}
                     onClick={() => setCurrentPage(prev => prev + 1)}
-                    className="p-1.5 rounded-lg bg-slate-900 hover:bg-slate-850 disabled:opacity-40 text-slate-400 hover:text-white transition cursor-pointer text-xs font-black disabled:cursor-not-allowed"
+                    className="p-1.5 rounded-lg bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-850 disabled:opacity-40 text-slate-800 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white border border-slate-300 dark:border-transparent transition cursor-pointer text-xs font-black disabled:cursor-not-allowed shadow-xs"
                   >
                     {">"}
                   </button>
                   <button
                     disabled={currentPage === totalPages || totalPages === 0}
                     onClick={() => setCurrentPage(totalPages)}
-                    className="p-1.5 rounded-lg bg-slate-900 hover:bg-slate-850 disabled:opacity-40 text-slate-400 hover:text-white transition cursor-pointer text-xs font-black disabled:cursor-not-allowed"
+                    className="p-1.5 rounded-lg bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-850 disabled:opacity-40 text-slate-800 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white border border-slate-300 dark:border-transparent transition cursor-pointer text-xs font-black disabled:cursor-not-allowed shadow-xs"
                   >
                     {">>"}
                   </button>
@@ -2034,10 +2034,10 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
         )}
 
         {/* Count Stats Footer */}
-        <div className="h-12 bg-slate-950 border-t border-slate-900 flex items-center justify-between px-6 text-[0.66rem] font-bold text-slate-500 uppercase tracking-wider">
+        <div className="h-12 bg-slate-100 dark:bg-slate-950 border-t border-slate-300 dark:border-slate-900 flex items-center justify-between px-6 text-[0.66rem] font-bold text-slate-700 dark:text-slate-400 uppercase tracking-wider">
           <span>Tổng số câu hỏi: {questions.length}</span>
           {selectedIds.length > 0 && (
-            <span className="text-blue-400 font-extrabold">Đã chọn: {selectedIds.length} câu hỏi</span>
+            <span className="text-blue-600 dark:text-blue-400 font-extrabold">Đã chọn: {selectedIds.length} câu hỏi</span>
           )}
         </div>
       </div>

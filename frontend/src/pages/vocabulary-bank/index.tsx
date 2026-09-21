@@ -894,20 +894,20 @@ export default function VocabularyBank({ isActive }: { isActive?: boolean }) {
     return (
       <div className="flex items-center gap-1.5 flex-wrap font-sans text-xs">
         {prefix && (
-          <span className="text-rose-450 font-extrabold italic text-[0.73rem]" title="Tiền tố phủ định">
+          <span className="text-rose-600 dark:text-rose-450 font-extrabold italic text-[0.73rem]" title="Tiền tố phủ định">
             {prefix}
           </span>
         )}
         {isCore ? (
-          <span className="px-2 py-0.5 rounded bg-blue-500/10 border border-blue-500/20 text-blue-400 font-black tracking-wide" title="Từ gốc cốt lõi">
+          <span className="px-2 py-0.5 rounded bg-blue-500/10 border border-blue-500/20 text-blue-600 dark:text-blue-400 font-black tracking-wide" title="Từ gốc cốt lõi">
             {cleanWord}
           </span>
         ) : isRelated ? (
-          <span className="px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-bold" title="Word Family liên quan mật thiết">
+          <span className="px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 dark:text-emerald-400 font-bold" title="Word Family liên quan mật thiết">
             {cleanWord}
           </span>
         ) : (
-          <span className="text-slate-400 font-normal italic" title="Word Family bổ sung ít liên quan">
+          <span className="text-slate-600 dark:text-slate-400 font-normal italic" title="Word Family bổ sung ít liên quan">
             {cleanWord}
           </span>
         )}
@@ -915,10 +915,8 @@ export default function VocabularyBank({ isActive }: { isActive?: boolean }) {
     );
   };
 
-
-
   return (
-    <div className="flex flex-col h-full bg-transparent text-slate-100 p-8 overflow-y-auto">
+    <div className="flex flex-col h-full bg-transparent text-slate-900 dark:text-slate-100 p-8 overflow-y-auto">
       
       {/* HEADER SECTION */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
@@ -927,9 +925,9 @@ export default function VocabularyBank({ isActive }: { isActive?: boolean }) {
             <Database className="text-blue-500 drop-shadow-[0_0_10px_rgba(59,130,246,0.5)]" size={22} />
             <span className="text-slate-900 dark:text-white">DANH SÁCH TỪ VỰNG CHỦ ĐỀ</span>
           </h1>
-          <p className="text-xs text-slate-400 mt-1">
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
             Quản lý kho từ vựng tiếng Anh chủ đề local. Phân cấp từ gốc cốt lõi [ ] và các nhóm từ word family {'{ }'}.
-            <span className="ml-3 px-2 py-0.5 rounded-md bg-blue-500/10 border border-blue-500/20 text-blue-400 font-extrabold text-[10px]">
+            <span className="ml-3 px-2 py-0.5 rounded-md bg-blue-500/10 border border-blue-500/20 text-blue-600 dark:text-blue-400 font-extrabold text-[10px]">
               TỔNG SỐ TỪ VỰNG THEO BỘ LỌC: {filteredAndSortedVocab.length}
             </span>
           </p>
@@ -947,7 +945,7 @@ export default function VocabularyBank({ isActive }: { isActive?: boolean }) {
           {/* Export Word Button */}
           <button
             onClick={() => setShowExportModal(true)}
-            className="group flex items-center gap-0 hover:gap-1.5 px-3 py-2.5 bg-gradient-to-tr from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-black rounded-xl cursor-pointer transition-all duration-300 shadow-md shadow-blue-500/10"
+            className="group flex items-center gap-0 hover:gap-1.5 px-3.5 py-2.5 bg-gradient-to-tr from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-black rounded-xl cursor-pointer transition-all duration-300 shadow-md shadow-blue-500/10"
             title="Xuất Word (.docx)"
           >
             <Download size={14} />
@@ -958,7 +956,7 @@ export default function VocabularyBank({ isActive }: { isActive?: boolean }) {
           {(Object.values(columnFilters).some(f => f.search !== '' || f.selectedValues.length > 0) || sortConfig !== null) && (
             <button
               onClick={resetFilters}
-              className="group flex items-center gap-0 hover:gap-1.5 px-3 py-2.5 bg-slate-950 border border-slate-850 hover:bg-rose-950/20 hover:border-rose-900/50 text-slate-400 hover:text-rose-455 text-xs font-bold rounded-xl cursor-pointer transition-all duration-300"
+              className="group flex items-center gap-0 hover:gap-1.5 px-3 py-2.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-850 hover:bg-rose-50 dark:hover:bg-rose-950/20 hover:border-rose-300 dark:hover:border-rose-900/50 text-slate-600 dark:text-slate-400 hover:text-rose-600 dark:hover:text-rose-455 text-xs font-bold rounded-xl cursor-pointer transition-all duration-300 shadow-sm"
               title="Xóa bộ lọc"
             >
               <RefreshCw size={14} />
@@ -970,7 +968,7 @@ export default function VocabularyBank({ isActive }: { isActive?: boolean }) {
           <div className="relative" ref={colMenuRef}>
             <button
               onClick={() => setShowColMenu(!showColMenu)}
-              className="group flex items-center gap-0 hover:gap-1.5 px-3 py-2.5 bg-slate-900 border border-slate-800 hover:bg-gradient-to-tr hover:from-blue-600/10 hover:to-indigo-600/10 hover:border-blue-500/30 text-slate-350 hover:text-white text-xs font-bold rounded-xl cursor-pointer transition-all duration-300 shadow-sm"
+              className="group flex items-center gap-0 hover:gap-1.5 px-3 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-350 hover:text-slate-900 dark:hover:text-white text-xs font-bold rounded-xl cursor-pointer transition-all duration-300 shadow-sm"
               title="Cột hiển thị"
             >
               <Eye size={14} />
@@ -978,8 +976,8 @@ export default function VocabularyBank({ isActive }: { isActive?: boolean }) {
             </button>
             
             {showColMenu && (
-              <div className="absolute right-0 mt-2 w-52 filter-dropdown-menu z-20 py-2.5 px-3 flex flex-col gap-1.5">
-                <p className="text-[0.66rem] text-slate-500 font-extrabold uppercase tracking-wider px-2 pb-1 border-b border-slate-900">Ẩn / Hiện Cột</p>
+              <div className="absolute right-0 mt-2 w-52 filter-dropdown-menu z-20 py-2.5 px-3 flex flex-col gap-1.5 bg-white dark:bg-[#0c0f1e] border border-slate-200 dark:border-slate-800 shadow-xl rounded-xl">
+                <p className="text-[0.66rem] text-slate-500 font-extrabold uppercase tracking-wider px-2 pb-1 border-b border-slate-200 dark:border-slate-800">Ẩn / Hiện Cột</p>
                 {Object.entries({
                   no: 'Số thứ tự (No.)',
                   grade: 'Khối lớp',
@@ -991,12 +989,12 @@ export default function VocabularyBank({ isActive }: { isActive?: boolean }) {
                   difficulty: 'Độ khó',
                   rootWord: 'Từ gốc'
                 }).map(([key, label]) => (
-                  <label key={key} className="flex items-center gap-2.5 px-2 py-1 hover:bg-slate-900 rounded-lg cursor-pointer text-xs font-medium text-slate-300 hover:text-white transition">
+                  <label key={key} className="flex items-center gap-2.5 px-2 py-1 hover:bg-slate-100 dark:hover:bg-slate-900 rounded-lg cursor-pointer text-xs font-medium text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition">
                     <input
                       type="checkbox"
                       checked={visibleCols[key]}
                       onChange={() => toggleCol(key)}
-                      className="rounded border-slate-800 text-blue-600 bg-slate-950 focus:ring-blue-500 focus:ring-offset-slate-900 cursor-pointer h-3.5 w-3.5"
+                      className="rounded border-slate-300 dark:border-slate-800 text-blue-600 bg-white dark:bg-slate-950 focus:ring-blue-500 cursor-pointer h-3.5 w-3.5"
                     />
                     {label}
                   </label>
@@ -1008,10 +1006,10 @@ export default function VocabularyBank({ isActive }: { isActive?: boolean }) {
           {/* CSV Import */}
           <button
             onClick={() => setShowImportModal(true)}
-            className="group flex items-center gap-0 hover:gap-1.5 px-3 py-2.5 bg-slate-900 border border-slate-800 hover:bg-gradient-to-tr hover:from-blue-600/10 hover:to-indigo-600/10 hover:border-blue-500/30 text-slate-200 text-xs font-bold rounded-xl cursor-pointer transition-all duration-300 shadow-sm"
+            className="group flex items-center gap-0 hover:gap-1.5 px-3 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 hover:text-slate-900 dark:hover:text-white text-xs font-bold rounded-xl cursor-pointer transition-all duration-300 shadow-sm"
             title="Nhập CSV Từ Vựng"
           >
-            <Upload size={14} className="text-blue-400" />
+            <Upload size={14} className="text-blue-500 dark:text-blue-400" />
             <span className="max-w-0 overflow-hidden group-hover:max-w-[140px] transition-all duration-300 whitespace-nowrap block">Nhập CSV Từ Vựng</span>
           </button>
           
@@ -1019,7 +1017,7 @@ export default function VocabularyBank({ isActive }: { isActive?: boolean }) {
             <button
               onClick={handleDeleteSelected}
               disabled={loading}
-              className="group flex items-center gap-0 hover:gap-1.5 px-3 py-2.5 bg-rose-500/10 border border-rose-500/25 hover:bg-rose-500/20 text-rose-450 text-xs font-bold rounded-xl cursor-pointer transition-all duration-300"
+              className="group flex items-center gap-0 hover:gap-1.5 px-3 py-2.5 bg-rose-500/10 border border-rose-500/25 hover:bg-rose-500/20 text-rose-600 dark:text-rose-450 text-xs font-bold rounded-xl cursor-pointer transition-all duration-300"
               title={`Xóa (${selectedIds.length})`}
             >
               <Trash2 size={14} />
@@ -1030,7 +1028,7 @@ export default function VocabularyBank({ isActive }: { isActive?: boolean }) {
           <button
             onClick={() => setDeleteModal(prev => ({ ...prev, show: true }))}
             disabled={loading}
-            className="group flex items-center gap-0 hover:gap-1.5 px-3 py-2.5 bg-slate-950 border border-slate-850 hover:bg-rose-950/20 hover:border-rose-900/50 text-slate-400 hover:text-rose-450 text-xs font-bold rounded-xl cursor-pointer transition-all duration-300"
+            className="group flex items-center gap-0 hover:gap-1.5 px-3 py-2.5 bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-850 hover:bg-rose-50 dark:hover:bg-rose-950/20 hover:border-rose-300 dark:hover:border-rose-900/50 text-slate-700 dark:text-slate-400 hover:text-rose-600 dark:hover:text-rose-450 text-xs font-bold rounded-xl cursor-pointer transition-all duration-300 shadow-xs"
             title="Xóa danh sách từ vựng trong cơ sở dữ liệu"
           >
             <Trash2 size={14} className="text-rose-500" />
@@ -1078,15 +1076,15 @@ export default function VocabularyBank({ isActive }: { isActive?: boolean }) {
       )}
 
       {/* TABLE WORKSPACE WITH SOLID BACKGROUND */}
-      <div className="flex-auto bg-white dark:bg-[#0c0f1d] border border-slate-200 dark:border-[#1e2744] rounded-2xl shadow-xl overflow-hidden opacity-100 backdrop-blur-none flex flex-col min-h-0">
+      <div className="flex-auto bg-white dark:bg-[#0c0f1d] border border-slate-300 dark:border-slate-800 rounded-2xl shadow-sm overflow-hidden opacity-100 backdrop-blur-none flex flex-col min-h-0">
         {loading && vocabList.length === 0 ? (
           <div className="flex-1 flex flex-col items-center justify-center gap-2">
             <RefreshCw className="animate-spin text-blue-500" size={28} />
-            <span className="text-xs text-slate-500 font-semibold">Đang truy vấn dữ liệu...</span>
+            <span className="text-xs text-slate-600 dark:text-slate-400 font-semibold">Đang truy vấn dữ liệu...</span>
           </div>
         ) : vocabList.length === 0 ? (
           <div className="flex-1 flex flex-col items-center justify-center text-center p-10">
-            <div className="h-14 w-14 rounded-full bg-slate-100 dark:bg-slate-900 flex items-center justify-center border border-slate-200 dark:border-slate-850 mb-4 text-slate-500">
+            <div className="h-14 w-14 rounded-full bg-slate-100 dark:bg-slate-900 flex items-center justify-center border border-slate-300 dark:border-slate-800 mb-4 text-slate-500">
               <Database size={24} />
             </div>
             <h3 className="text-sm font-bold text-slate-800 dark:text-slate-200">Không tìm thấy từ vựng</h3>
@@ -1099,7 +1097,7 @@ export default function VocabularyBank({ isActive }: { isActive?: boolean }) {
             <div className="overflow-auto table-scroll-container">
               <table className="w-full border-collapse text-left">
                 <thead>
-                  <tr className="bg-slate-50 dark:bg-[#121626] border-b border-slate-200 dark:border-[#232d4e] text-[0.66rem] text-slate-600 dark:text-slate-400 font-extrabold uppercase tracking-wider sticky top-0 z-10 opacity-100">
+                  <tr className="bg-slate-100 dark:bg-[#121626] border-b border-slate-300 dark:border-slate-800 text-[0.66rem] text-slate-800 dark:text-slate-300 font-black uppercase tracking-wider sticky top-0 z-10 opacity-100">
                     <th className="py-4 px-5 w-12 text-center">
                       <button
                         onClick={handleSelectAllOnPage}
@@ -1415,8 +1413,8 @@ export default function VocabularyBank({ isActive }: { isActive?: boolean }) {
                       <tr 
                         key={v.id}
                         onClick={() => handleSelectRow(v.id)}
-                        className={`hover:bg-slate-900/20 transition cursor-pointer ${
-                          isSelected ? 'bg-blue-600/5' : ''
+                        className={`hover:bg-slate-100 dark:hover:bg-slate-800/40 transition cursor-pointer ${
+                          isSelected ? 'bg-blue-50 dark:bg-blue-600/5' : ''
                         }`}
                       >
                         {/* Checkbox */}
@@ -1464,7 +1462,7 @@ export default function VocabularyBank({ isActive }: { isActive?: boolean }) {
                         {/* POS */}
                         {visibleCols.pos && (
                           <td className="py-3.5 px-3">
-                            <span className="px-2 py-0.5 rounded text-[0.66rem] font-bold bg-[#111827] border border-slate-855 text-slate-400 italic">
+                            <span className="px-2 py-0.5 rounded text-[0.66rem] font-bold bg-slate-100 dark:bg-[#111827] border border-slate-200 dark:border-slate-855 text-slate-700 dark:text-slate-400 italic">
                               {v.pos || '-'}
                             </span>
                           </td>
@@ -1472,14 +1470,14 @@ export default function VocabularyBank({ isActive }: { isActive?: boolean }) {
 
                         {/* IPA */}
                         {visibleCols.ipa && (
-                          <td className="py-3.5 px-4 text-slate-440 font-mono text-[0.73rem]">
+                          <td className="py-3.5 px-4 text-slate-600 dark:text-slate-440 font-mono text-[0.73rem]">
                             {v.ipa || '-'}
                           </td>
                         )}
 
                         {/* Meaning */}
                         {visibleCols.meaning && (
-                          <td className="py-3.5 px-5 font-semibold text-slate-300 break-words max-w-xs">
+                          <td className="py-3.5 px-5 font-semibold text-slate-800 dark:text-slate-300 break-words max-w-xs">
                             {v.meaning || '-'}
                           </td>
                         )}
@@ -1489,21 +1487,21 @@ export default function VocabularyBank({ isActive }: { isActive?: boolean }) {
                           <td className="py-3.5 px-3 text-center">
                             {v.difficulty ? (
                               <span className={`px-2 py-0.5 rounded text-[0.6rem] font-black tracking-wider ${
-                                v.difficulty.startsWith('A') || v.difficulty === '1' ? 'bg-blue-500/10 text-blue-400 border border-blue-500/25' :
-                                v.difficulty.startsWith('B') || v.difficulty === '2' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/25' :
-                                'bg-rose-500/10 text-rose-455 border border-rose-500/25'
+                                v.difficulty.startsWith('A') || v.difficulty === '1' ? 'bg-blue-500/10 text-blue-700 dark:text-blue-400 border border-blue-500/25' :
+                                v.difficulty.startsWith('B') || v.difficulty === '2' ? 'bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/25' :
+                                'bg-rose-500/10 text-rose-700 dark:text-rose-455 border border-rose-500/25'
                               }`}>
                                 {v.difficulty}
                               </span>
                             ) : (
-                              <span className="text-slate-655">-</span>
+                              <span className="text-slate-400">-</span>
                             )}
                           </td>
                         )}
 
                         {/* Root Word */}
                         {visibleCols.rootWord && (
-                          <td className="py-3.5 px-4 text-slate-450 italic">
+                          <td className="py-3.5 px-4 text-slate-600 dark:text-slate-450 italic">
                             {v.root_word || '-'}
                           </td>
                         )}
@@ -1515,7 +1513,7 @@ export default function VocabularyBank({ isActive }: { isActive?: boolean }) {
                               setEditingId(v.id);
                               setEditRow({ ...v });
                             }}
-                            className="px-2.5 py-1 bg-slate-900 border border-slate-850 hover:border-slate-700 text-slate-300 hover:text-white text-[0.66rem] font-bold rounded-lg cursor-pointer transition animate-fade-in"
+                            className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 border border-slate-200 dark:border-slate-850 hover:border-slate-400 dark:hover:border-slate-700 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white text-[0.66rem] font-bold rounded-lg cursor-pointer transition animate-fade-in shadow-xs"
                           >
                             Sửa
                           </button>
@@ -1529,38 +1527,38 @@ export default function VocabularyBank({ isActive }: { isActive?: boolean }) {
 
             {/* Pagination Controls */}
             {filteredAndSortedVocab.length > 0 && (
-              <div className="h-14 bg-[#14192b] border-t border-[#28334e] px-6 flex items-center justify-end shrink-0 select-none">
+              <div className="h-14 bg-slate-100 dark:bg-[#14192b] border-t border-slate-300 dark:border-[#28334e] px-6 flex items-center justify-end shrink-0 select-none">
                 <div className="flex items-center gap-1.5">
                   <button
                     disabled={currentPage === 1}
                     onClick={() => setCurrentPage(1)}
-                    className="p-1.5 rounded-lg bg-slate-900 hover:bg-slate-850 disabled:opacity-40 text-slate-400 hover:text-white transition cursor-pointer text-xs font-black disabled:cursor-not-allowed"
+                    className="p-1.5 rounded-lg bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-850 disabled:opacity-40 text-slate-800 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white border border-slate-300 dark:border-transparent transition cursor-pointer text-xs font-black disabled:cursor-not-allowed shadow-xs"
                   >
                     {"<<"}
                   </button>
                   <button
                     disabled={currentPage === 1}
                     onClick={() => setCurrentPage(prev => prev - 1)}
-                    className="p-1.5 rounded-lg bg-slate-900 hover:bg-slate-850 disabled:opacity-40 text-slate-400 hover:text-white transition cursor-pointer text-xs font-black disabled:cursor-not-allowed"
+                    className="p-1.5 rounded-lg bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-850 disabled:opacity-40 text-slate-800 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white border border-slate-300 dark:border-transparent transition cursor-pointer text-xs font-black disabled:cursor-not-allowed shadow-xs"
                   >
                     {"<"}
                   </button>
                   
-                  <span className="px-3 text-xs text-slate-300 font-extrabold font-mono">
+                  <span className="px-3 text-xs text-slate-900 dark:text-slate-300 font-black font-mono">
                     Trang {currentPage} / {Math.max(1, totalPages)}
                   </span>
 
                   <button
                     disabled={currentPage === totalPages || totalPages === 0}
                     onClick={() => setCurrentPage(prev => prev + 1)}
-                    className="p-1.5 rounded-lg bg-slate-900 hover:bg-slate-850 disabled:opacity-40 text-slate-400 hover:text-white transition cursor-pointer text-xs font-black disabled:cursor-not-allowed"
+                    className="p-1.5 rounded-lg bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-850 disabled:opacity-40 text-slate-800 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white border border-slate-300 dark:border-transparent transition cursor-pointer text-xs font-black disabled:cursor-not-allowed shadow-xs"
                   >
                     {">"}
                   </button>
                   <button
                     disabled={currentPage === totalPages || totalPages === 0}
                     onClick={() => setCurrentPage(totalPages)}
-                    className="p-1.5 rounded-lg bg-slate-900 hover:bg-slate-850 disabled:opacity-40 text-slate-400 hover:text-white transition cursor-pointer text-xs font-black disabled:cursor-not-allowed"
+                    className="p-1.5 rounded-lg bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-850 disabled:opacity-40 text-slate-800 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white border border-slate-300 dark:border-transparent transition cursor-pointer text-xs font-black disabled:cursor-not-allowed shadow-xs"
                   >
                     {">>"}
                   </button>
@@ -1571,10 +1569,10 @@ export default function VocabularyBank({ isActive }: { isActive?: boolean }) {
         )}
 
         {/* Count Stats Footer */}
-        <div className="h-12 bg-slate-950 border-t border-slate-900 flex items-center justify-between px-6 text-[0.66rem] font-bold text-slate-500 uppercase tracking-wider">
+        <div className="h-12 bg-slate-100 dark:bg-slate-950 border-t border-slate-300 dark:border-slate-900 flex items-center justify-between px-6 text-[0.66rem] font-bold text-slate-700 dark:text-slate-400 uppercase tracking-wider">
           <span>Tổng số từ vựng: {vocabList.length}</span>
           {selectedIds.length > 0 && (
-            <span className="text-blue-400 font-extrabold">Đã chọn: {selectedIds.length} từ</span>
+            <span className="text-blue-600 dark:text-blue-400 font-extrabold">Đã chọn: {selectedIds.length} từ</span>
           )}
         </div>
       </div>
