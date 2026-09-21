@@ -102,7 +102,7 @@ export const InsightCommentary: React.FC<InsightCommentaryProps> = React.memo(({
                   className="w-2 h-2 rounded-full shrink-0 mt-1.5 shadow-[0_0_8px_rgba(255,255,255,0.4)]"
                   style={{ backgroundColor: item.dotColor }}
                 />
-                <p className="text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-200 leading-relaxed">
+                <p className="text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-100 leading-relaxed">
                   {item.text}
                 </p>
               </div>
@@ -172,7 +172,7 @@ export const InsightCommentary: React.FC<InsightCommentaryProps> = React.memo(({
           {report.conclusion.overviewSummary}
         </p>
 
-        <p className="text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-300 leading-relaxed border-l-2 border-indigo-500/80 pl-3.5 py-0.5">
+        <p className="text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-200 leading-relaxed border-l-2 border-indigo-500/80 pl-3.5 py-0.5">
           {report.conclusion.riskAlert}
         </p>
       </div>

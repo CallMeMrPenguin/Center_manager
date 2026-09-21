@@ -194,7 +194,7 @@ function DraggableHeader({
     <th
       ref={setNodeRef}
       style={style}
-      className={`select-none relative border-b border-slate-200 dark:border-[#28334e] bg-slate-100 dark:bg-[#111827] ${
+      className={`select-none relative border-b-2 border-slate-300 dark:border-[#28334e] bg-slate-100 dark:bg-[#111827] ${
         isPinned ? 'bg-slate-100 dark:bg-[#111827]' : ''
       }`}
     >
@@ -202,8 +202,8 @@ function DraggableHeader({
       <div
         {...(enableReorder ? { ...attributes, ...listeners } : {})}
         style={{ touchAction: enableReorder ? 'none' : 'auto' }}
-        className={`group flex items-center justify-center text-center gap-1.5 w-full py-3 px-2.5 overflow-hidden text-slate-700 dark:text-slate-200 text-sm sm:text-base font-black uppercase tracking-wider whitespace-nowrap ${
-          enableReorder ? 'cursor-grab active:cursor-grabbing hover:text-slate-900 dark:hover:text-white transition-colors' : ''
+        className={`group flex items-center justify-center text-center gap-1.5 w-full py-3 px-2.5 overflow-hidden text-slate-900 dark:text-slate-100 text-sm sm:text-base font-black uppercase tracking-wider whitespace-nowrap ${
+          enableReorder ? 'cursor-grab active:cursor-grabbing hover:text-blue-600 dark:hover:text-white transition-colors' : ''
         }`}
         title={enableReorder ? 'Giữ chuột và kéo để thay đổi thứ tự cột' : undefined}
       >

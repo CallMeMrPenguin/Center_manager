@@ -366,10 +366,10 @@ input[type="month"] {
 /* Light mode defaults for KPI cards */
 .kpi-card-green {
   position: relative;
-  border: 1px solid rgba(16, 185, 129, 0.3) !important;
+  border: 1.5px solid rgba(16, 185, 129, 0.5) !important;
   background: #ffffff !important;
   border-radius: 20px;
-  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.08) !important;
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.12), 0 2px 6px rgba(15, 23, 42, 0.05) !important;
 }
 .dark .kpi-card-green {
   border: 1px solid rgba(16, 185, 129, 0.25) !important;
@@ -379,10 +379,10 @@ input[type="month"] {
 
 .kpi-card-red {
   position: relative;
-  border: 1px solid rgba(239, 68, 68, 0.3) !important;
+  border: 1.5px solid rgba(239, 68, 68, 0.5) !important;
   background: #ffffff !important;
   border-radius: 20px;
-  box-shadow: 0 4px 16px rgba(239, 68, 68, 0.08) !important;
+  box-shadow: 0 6px 20px rgba(239, 68, 68, 0.12), 0 2px 6px rgba(15, 23, 42, 0.05) !important;
 }
 .dark .kpi-card-red {
   border: 1px solid rgba(239, 68, 68, 0.25) !important;
@@ -392,10 +392,10 @@ input[type="month"] {
 
 .kpi-card-blue {
   position: relative;
-  border: 1px solid rgba(37, 99, 235, 0.3) !important;
+  border: 1.5px solid rgba(37, 99, 235, 0.5) !important;
   background: #ffffff !important;
   border-radius: 20px;
-  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.08) !important;
+  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.12), 0 2px 6px rgba(15, 23, 42, 0.05) !important;
 }
 .dark .kpi-card-blue {
   border: 1px solid rgba(37, 99, 235, 0.25) !important;
@@ -405,10 +405,10 @@ input[type="month"] {
 
 .kpi-card-purple {
   position: relative;
-  border: 1px solid rgba(168, 85, 247, 0.3) !important;
+  border: 1.5px solid rgba(168, 85, 247, 0.5) !important;
   background: #ffffff !important;
   border-radius: 20px;
-  box-shadow: 0 4px 16px rgba(168, 85, 247, 0.08) !important;
+  box-shadow: 0 6px 20px rgba(168, 85, 247, 0.12), 0 2px 6px rgba(15, 23, 42, 0.05) !important;
 }
 .dark .kpi-card-purple {
   border: 1px solid rgba(168, 85, 247, 0.25) !important;
@@ -418,10 +418,10 @@ input[type="month"] {
 
 .kpi-card-amber {
   position: relative;
-  border: 1px solid rgba(245, 158, 11, 0.3) !important;
+  border: 1.5px solid rgba(245, 158, 11, 0.5) !important;
   background: #ffffff !important;
   border-radius: 20px;
-  box-shadow: 0 4px 16px rgba(245, 158, 11, 0.08) !important;
+  box-shadow: 0 6px 20px rgba(245, 158, 11, 0.12), 0 2px 6px rgba(15, 23, 42, 0.05) !important;
 }
 .dark .kpi-card-amber {
   border: 1px solid rgba(245, 158, 11, 0.25) !important;

@@ -103,21 +103,21 @@ export const StudentRankingsTable: React.FC<StudentRankingsTableProps> = React.m
         const present = r.present_count || 0;
         const pct = total > 0 ? Math.round((present / total) * 100) : 100;
 
-        let pctColor = 'text-emerald-400';
-        let subColor = 'text-emerald-300';
+        let pctColor = 'text-emerald-700 dark:text-emerald-400';
+        let subColor = 'text-emerald-800 dark:text-emerald-300';
         let badgeBg = 'bg-emerald-500/15 border-emerald-500/30';
         if (total > 0) {
           if (pct < 50) {
-            pctColor = 'text-rose-400';
-            subColor = 'text-rose-300';
+            pctColor = 'text-rose-700 dark:text-rose-400';
+            subColor = 'text-rose-800 dark:text-rose-300';
             badgeBg = 'bg-rose-500/15 border-rose-500/30';
           } else if (pct < 75) {
-            pctColor = 'text-orange-400';
-            subColor = 'text-orange-300';
+            pctColor = 'text-orange-700 dark:text-orange-400';
+            subColor = 'text-orange-800 dark:text-orange-300';
             badgeBg = 'bg-orange-500/15 border-orange-500/30';
           } else if (pct < 90) {
-            pctColor = 'text-amber-400';
-            subColor = 'text-amber-300';
+            pctColor = 'text-amber-700 dark:text-amber-400';
+            subColor = 'text-amber-800 dark:text-amber-300';
             badgeBg = 'bg-amber-500/15 border-amber-500/30';
           }
         }
@@ -144,15 +144,15 @@ export const StudentRankingsTable: React.FC<StudentRankingsTableProps> = React.m
         const pred = Number(row.original.pred_c1 ?? row.original.pred_vocab) || 0;
         return (
           <div className="text-center py-0.5 flex flex-col items-center justify-center">
-            <span className="font-mono font-extrabold text-blue-400 text-sm sm:text-base">
+            <span className="font-mono font-extrabold text-blue-600 dark:text-blue-400 text-sm sm:text-base">
               {val > 0 ? format1Dec(val) : '-'}
             </span>
             {pred > 0 && (
               <div className={`text-[10px] font-mono font-bold mt-1 px-1.5 py-0.5 rounded border inline-flex items-center gap-0.5 leading-none ${
-                pred >= 8.0 ? 'text-emerald-300 bg-emerald-500/15 border-emerald-500/30' :
-                pred >= 6.5 ? 'text-cyan-300 bg-cyan-500/15 border-cyan-500/30' :
-                pred >= 5.0 ? 'text-amber-300 bg-amber-500/15 border-amber-500/30' :
-                'text-rose-300 bg-rose-500/15 border-rose-500/30'
+                pred >= 8.0 ? 'text-emerald-800 dark:text-emerald-300 bg-emerald-500/15 border-emerald-500/30' :
+                pred >= 6.5 ? 'text-cyan-800 dark:text-cyan-300 bg-cyan-500/15 border-cyan-500/30' :
+                pred >= 5.0 ? 'text-amber-800 dark:text-amber-300 bg-amber-500/15 border-amber-500/30' :
+                'text-rose-800 dark:text-rose-300 bg-rose-500/15 border-rose-500/30'
               }`}>
                 <span>PD: {format1Dec(pred)}</span>
               </div>
@@ -171,15 +171,15 @@ export const StudentRankingsTable: React.FC<StudentRankingsTableProps> = React.m
         const pred = Number(row.original.pred_c2 ?? row.original.pred_grammar) || 0;
         return (
           <div className="text-center py-0.5 flex flex-col items-center justify-center">
-            <span className="font-mono font-extrabold text-purple-400 text-sm sm:text-base">
+            <span className="font-mono font-extrabold text-purple-600 dark:text-purple-400 text-sm sm:text-base">
               {val > 0 ? format1Dec(val) : '-'}
             </span>
             {pred > 0 && (
               <div className={`text-[10px] font-mono font-bold mt-1 px-1.5 py-0.5 rounded border inline-flex items-center gap-0.5 leading-none ${
-                pred >= 8.0 ? 'text-emerald-300 bg-emerald-500/15 border-emerald-500/30' :
-                pred >= 6.5 ? 'text-cyan-300 bg-cyan-500/15 border-cyan-500/30' :
-                pred >= 5.0 ? 'text-amber-300 bg-amber-500/15 border-amber-500/30' :
-                'text-rose-300 bg-rose-500/15 border-rose-500/30'
+                pred >= 8.0 ? 'text-emerald-800 dark:text-emerald-300 bg-emerald-500/15 border-emerald-500/30' :
+                pred >= 6.5 ? 'text-cyan-800 dark:text-cyan-300 bg-cyan-500/15 border-cyan-500/30' :
+                pred >= 5.0 ? 'text-amber-800 dark:text-amber-300 bg-amber-500/15 border-amber-500/30' :
+                'text-rose-800 dark:text-rose-300 bg-rose-500/15 border-rose-500/30'
               }`}>
                 <span>PD: {format1Dec(pred)}</span>
               </div>
@@ -197,15 +197,15 @@ export const StudentRankingsTable: React.FC<StudentRankingsTableProps> = React.m
         const pred = Number(row.original.pred_hw ?? row.original.pred_homework) || 0;
         return (
           <div className="text-center py-0.5 flex flex-col items-center justify-center">
-            <span className="font-mono font-extrabold text-emerald-400 text-sm sm:text-base">
+            <span className="font-mono font-extrabold text-emerald-600 dark:text-emerald-400 text-sm sm:text-base">
               {val > 0 ? format1Dec(val) : '-'}
             </span>
             {pred > 0 && (
               <div className={`text-[10px] font-mono font-bold mt-1 px-1.5 py-0.5 rounded border inline-flex items-center gap-0.5 leading-none ${
-                pred >= 8.0 ? 'text-emerald-300 bg-emerald-500/15 border-emerald-500/30' :
-                pred >= 6.5 ? 'text-cyan-300 bg-cyan-500/15 border-cyan-500/30' :
-                pred >= 5.0 ? 'text-amber-300 bg-amber-500/15 border-amber-500/30' :
-                'text-rose-300 bg-rose-500/15 border-rose-500/30'
+                pred >= 8.0 ? 'text-emerald-800 dark:text-emerald-300 bg-emerald-500/15 border-emerald-500/30' :
+                pred >= 6.5 ? 'text-cyan-800 dark:text-cyan-300 bg-cyan-500/15 border-cyan-500/30' :
+                pred >= 5.0 ? 'text-amber-800 dark:text-amber-300 bg-amber-500/15 border-amber-500/30' :
+                'text-rose-800 dark:text-rose-300 bg-rose-500/15 border-rose-500/30'
               }`}>
                 <span>PD: {format1Dec(pred)}</span>
               </div>

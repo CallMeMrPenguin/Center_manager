@@ -62,13 +62,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
     <aside
       className={`group relative ${
         isSidebarExpanded ? 'w-56' : 'w-16'
-      } bg-white/95 dark:bg-[#0c0f1e]/90 border border-slate-200 dark:border-[#212c4b] rounded-2xl flex flex-col transition-all duration-300 select-none shrink-0 z-30 shadow-xl overflow-visible`}
+      } bg-white dark:bg-[#0c0f1e] border-r-2 border-slate-300 dark:border-[#212c4b] flex flex-col transition-all duration-300 select-none shrink-0 z-30 shadow-[6px_0_30px_rgba(15,23,42,0.1)] dark:shadow-[6px_0_30px_rgba(0,0,0,0.6)] overflow-visible`}
     >
       {/* Floating Collapse / Expand Button */}
       <button
         type="button"
         onClick={toggleSidebar}
-        className="absolute -right-3 top-6 w-6 h-6 rounded-full bg-white dark:bg-[#181d2e] hover:bg-[#2563eb] text-slate-500 dark:text-slate-300 hover:text-white border border-slate-200 dark:border-white/20 shadow-[0_2px_10px_rgba(0,0,0,0.1)] dark:shadow-[0_2px_10px_rgba(0,0,0,0.6)] flex items-center justify-center transition-all duration-200 hover:scale-110 cursor-pointer z-50 active:scale-95 opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto"
+        className="absolute -right-3 top-6 w-6 h-6 rounded-full bg-white dark:bg-[#181d2e] hover:bg-[#2563eb] text-slate-600 dark:text-slate-300 hover:text-white border border-slate-300 dark:border-white/20 shadow-md flex items-center justify-center transition-all duration-200 hover:scale-110 cursor-pointer z-50 active:scale-95 opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto"
         title={isSidebarExpanded ? 'Thu gọn thanh điều hướng' : 'Mở rộng thanh điều hướng'}
       >
         {isSidebarExpanded ? (
@@ -120,7 +120,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
               <div className="flex flex-col gap-0.5 shrink-0">
                 {isSidebarExpanded && section.label && (
-                  <div className="px-2 text-[9.5px] font-black uppercase tracking-wider text-slate-400 overflow-hidden whitespace-nowrap transition-all duration-300 mt-1 mb-0.5">
+                  <div className="px-2 text-[9.5px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 overflow-hidden whitespace-nowrap transition-all duration-300 mt-1 mb-0.5">
                     {section.label}
                   </div>
                 )}
@@ -157,8 +157,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
                           : 'w-10 h-10 mx-auto rounded-xl justify-center p-0 hover:scale-105 active:scale-95'
                       } ${
                         isActive
-                          ? 'bg-blue-600/10 dark:bg-blue-600/20 border-2 border-blue-600 dark:border-blue-500/80 text-blue-700 dark:text-white'
-                          : 'hover:bg-slate-100 dark:hover:bg-white/[0.08] border-2 border-transparent text-slate-600 dark:text-slate-300'
+                          ? 'bg-blue-600 dark:bg-blue-600 text-white font-black shadow-md shadow-blue-500/25'
+                          : 'hover:bg-slate-100 dark:hover:bg-white/[0.08] text-slate-800 dark:text-slate-200'
                       } ${
                         draggedIndex === idx
                           ? 'opacity-40 border border-dashed border-blue-400 bg-blue-500/10'
@@ -171,8 +171,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
                           size={17}
                           className={
                             isActive
-                              ? 'text-blue-600 dark:text-white drop-shadow-sm dark:drop-shadow-[0_0_8px_rgba(255,255,255,0.8)]'
-                              : 'text-slate-400 group-hover/item:text-slate-900 dark:group-hover/item:text-white transition-colors'
+                              ? 'text-white drop-shadow-sm'
+                              : 'text-slate-500 dark:text-slate-400 group-hover/item:text-slate-900 dark:group-hover/item:text-white transition-colors'
                           }
                         />
                       </div>
@@ -182,8 +182,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
                         <span
                           className={`text-xs relative z-10 whitespace-nowrap overflow-hidden ml-2.5 ${
                             isActive
-                              ? 'text-blue-700 dark:text-white font-black'
-                              : 'text-slate-700 dark:text-slate-200 font-bold group-hover/item:text-slate-900 dark:group-hover/item:text-white'
+                              ? 'text-white font-black'
+                              : 'text-slate-800 dark:text-slate-200 font-bold group-hover/item:text-slate-900 dark:group-hover/item:text-white'
                           }`}
                         >
                           {item.label}
