@@ -124,9 +124,7 @@ def export_class_excel(class_id: int, date_str: Optional[str] = None, records: O
     
     wb = openpyxl.Workbook()
     ws = wb.active
-    ws.title = "Báo Cáo Lớp Học"
-    
-    ws.merge_cells("A1:K1")
+    ws.title     ws.merge_cells("A1:J1")
     ws["A1"] = f"BÁO CÁO ĐIỂM DANH & ĐIỂM BÀI HỌC - {class_name.upper()} ({date_str})"
     ws["A1"].font = Font(size=14, bold=True, color="FFFFFF")
     ws["A1"].fill = PatternFill(start_color="1E1B4B", end_color="1E1B4B", fill_type="solid")
@@ -140,7 +138,7 @@ def export_class_excel(class_id: int, date_str: Optional[str] = None, records: O
         info_parts.append(f"Check 2: {c2_content}")
         
     if info_parts:
-        ws.merge_cells("A2:K2")
+        ws.merge_cells("A2:J2")
         ws["A2"] = "Nội dung kiểm tra: " + "   —   ".join(info_parts)
         ws["A2"].font = Font(name="Times New Roman", size=11, bold=True, color="312E81")
         ws["A2"].fill = PatternFill(start_color="EEF2FF", end_color="EEF2FF", fill_type="solid")
@@ -160,8 +158,7 @@ def export_class_excel(class_id: int, date_str: Optional[str] = None, records: O
         "BTVN 1",
         "BTVN 2",
         "Luyện Đề",
-        "BTVN - Check 2",
-        "Check 2 - Check 1",
+        "Độ Lệch",
         "Cần Cố Gắng (Dưới TB)"
     ]
     ws.row_dimensions[3].height = 54 if (c1_content or c2_content) else 26
@@ -213,14 +210,22 @@ def export_class_excel(class_id: int, date_str: Optional[str] = None, records: O
         hw2_cell.number_format = '0.0'
         mt_cell.number_format = '0.0'
 
-        c9_cell = ws.cell(row=curr_row, column=9, value=f"=ROUNDUP(ABS(F{curr_row}-E{curr_row}), 1)")
-        c10_cell = ws.cell(row=curr_row, column=10, value=f"=ROUNDUP(ABS(E{curr_row}-D{curr_row}), 1)")
+        # Formula: |BTVN - Average(Check 1, Check 2)|
+        c9_cell = ws.cell(
+            row=curr_row,
+            column=9,
+            value=(
+                f'=IF(F{curr_row}>0, '
+                f'IF(AND(D{curr_row}>0, E{curr_row}>0), ROUNDUP(ABS(F{curr_row}-AVERAGE(D{curr_row},E{curr_row})), 1), '
+                f'IF(D{curr_row}>0, ROUNDUP(ABS(F{curr_row}-D{curr_row}), 1), '
+                f'IF(E{curr_row}>0, ROUNDUP(ABS(F{curr_row}-E{curr_row}), 1), ""))), "")'
+            )
+        )
         c9_cell.number_format = '0.0'
-        c10_cell.number_format = '0.0'
 
         ws.cell(
             row=curr_row,
-            column=11,
+            column=10,
             value=(
                 f'=IF(C{curr_row}="Vắng mặt", "Vắng mặt", '
                 f'IF(_xlfn.TEXTJOIN(", ", TRUE, '
@@ -240,7 +245,7 @@ def export_class_excel(class_id: int, date_str: Optional[str] = None, records: O
             )
         )
 
-        for col_num in range(1, 12):
+        for col_num in range(1, 11):
             c_cell = ws.cell(row=curr_row, column=col_num)
             c_cell.font = data_font
             c_cell.border = thin_border
@@ -248,7 +253,7 @@ def export_class_excel(class_id: int, date_str: Optional[str] = None, records: O
 
     ts = datetime.now().strftime("%Y%m%d_%H%M%S")
     if len(attendance) > 0:
-        table_ref = f"A3:K{end_row}"
+        table_ref = f"A3:J{end_row}"
         tab = Table(displayName=f"ClassTable_{ts}", ref=table_ref)
         tab.tableStyleInfo = TableStyleInfo(
             name="TableStyleMedium9",
@@ -264,20 +269,20 @@ def export_class_excel(class_id: int, date_str: Optional[str] = None, records: O
         grey_font = Font(color="64748B", bold=True)
 
         rule_red = FormulaRule(
-            formula=['NOT(ISERROR(SEARCH("Cần cố gắng", K4)))'],
+            formula=['NOT(ISERROR(SEARCH("Cần cố gắng", J4)))'],
             font=red_font
         )
         rule_green = FormulaRule(
-            formula=['NOT(ISERROR(SEARCH("Đạt yêu cầu", K4)))'],
+            formula=['NOT(ISERROR(SEARCH("Đạt yêu cầu", J4)))'],
             font=green_font
         )
         rule_grey = FormulaRule(
-            formula=['NOT(ISERROR(SEARCH("Vắng mặt", K4)))'],
+            formula=['NOT(ISERROR(SEARCH("Vắng mặt", J4)))'],
             font=grey_font
         )
-        ws.conditional_formatting.add(f"K4:K{end_row}", rule_red)
-        ws.conditional_formatting.add(f"K4:K{end_row}", rule_green)
-        ws.conditional_formatting.add(f"K4:K{end_row}", rule_grey)
+        ws.conditional_formatting.add(f"J4:J{end_row}", rule_red)
+        ws.conditional_formatting.add(f"J4:J{end_row}", rule_green)
+        ws.conditional_formatting.add(f"J4:J{end_row}", rule_grey)
 
     # Average row
     ws.cell(row=avg_row_idx, column=1, value="")
@@ -296,7 +301,7 @@ def export_class_excel(class_id: int, date_str: Optional[str] = None, records: O
         avg_hw1 = trunc_1_dec(sum(hw1_vals) / len(hw1_vals)) if hw1_vals else 0.0
         avg_hw2 = trunc_1_dec(sum(hw2_vals) / len(hw2_vals)) if hw2_vals else 0.0
         avg_mt = trunc_1_dec(sum(mt_vals) / len(mt_vals)) if mt_vals else 0.0
-
+        
         c1_avg_cell = ws.cell(row=avg_row_idx, column=4, value=avg_1)
         c2_avg_cell = ws.cell(row=avg_row_idx, column=5, value=avg_2)
         hw1_avg_cell = ws.cell(row=avg_row_idx, column=6, value=avg_hw1)
@@ -309,20 +314,18 @@ def export_class_excel(class_id: int, date_str: Optional[str] = None, records: O
         hw2_avg_cell.number_format = '0.0'
         mt_avg_cell.number_format = '0.0'
 
-        diff_hw_c2 = trunc_1_dec(abs(avg_hw1 - avg_2))
-        diff_c2_c1 = trunc_1_dec(abs(avg_2 - avg_1))
+        check_avgs = [a for a in (avg_1, avg_2) if a > 0]
+        check_combined_avg = sum(check_avgs) / len(check_avgs) if check_avgs else 0.0
+        diff_hw_check = trunc_1_dec(abs(avg_hw1 - check_combined_avg)) if avg_hw1 > 0 and check_combined_avg > 0 else 0.0
 
-        c9_avg_cell = ws.cell(row=avg_row_idx, column=9, value=diff_hw_c2)
-        c10_avg_cell = ws.cell(row=avg_row_idx, column=10, value=diff_c2_c1)
-
+        c9_avg_cell = ws.cell(row=avg_row_idx, column=9, value=diff_hw_check)
         c9_avg_cell.number_format = '0.0'
-        c10_avg_cell.number_format = '0.0'
 
-        ws.cell(row=avg_row_idx, column=11, value=f"=IF(D{avg_row_idx}>0, \"Đã tính TB lớp\", \"Chưa đủ điểm\")")
+        ws.cell(row=avg_row_idx, column=10, value=f"=IF(D{avg_row_idx}>0, \"Đã tính TB lớp\", \"Chưa đủ điểm\")")
 
     avg_fill = PatternFill(start_color="FEF3C7", end_color="FEF3C7", fill_type="solid")
     avg_font = Font(name="Times New Roman", bold=True, size=13, color="92400E")
-    for col_num in range(1, 12):
+    for col_num in range(1, 11):
         c_cell = ws.cell(row=avg_row_idx, column=col_num)
         c_cell.font = avg_font
         c_cell.fill = avg_fill
@@ -350,7 +353,7 @@ def export_class_excel(class_id: int, date_str: Optional[str] = None, records: O
         )
         sum_title.font = Font(name="Times New Roman", bold=True, color="7F1D1D", size=13)
         sum_title.alignment = Alignment(horizontal="left", vertical="center", wrap_text=True)
-        ws.merge_cells(f"C{r_idx}:K{r_idx}")
+        ws.merge_cells(f"C{r_idx}:J{r_idx}")
         val_cell = ws.cell(
             row=r_idx,
             column=3,
@@ -361,7 +364,7 @@ def export_class_excel(class_id: int, date_str: Optional[str] = None, records: O
         ws.row_dimensions[r_idx].height = 28 if (c1_content or c2_content) else 22
 
     total_max_row = avg_row_idx + 2 + len(summary_labels)
-    for col_idx in range(1, 12):
+    for col_idx in range(1, 11):
         col_let = openpyxl.utils.get_column_letter(col_idx)
         max_len = 0
         for r_idx in range(3, total_max_row + 1):
@@ -370,13 +373,13 @@ def export_class_excel(class_id: int, date_str: Optional[str] = None, records: O
             cell_val = ws.cell(row=r_idx, column=col_idx).value
             val_str = str(cell_val) if cell_val is not None else ""
             if val_str.startswith("="):
-                if col_idx == 11:
+                if col_idx == 10:
                     val_str = "Cần cố gắng (Check 1, Check 2, BTVN 1, BTVN 2, Luyện Đề)"
                 elif col_idx == 2:
                     val_str = "Check 1 dưới TB (< 10.0)"
                 elif col_idx == 1:
                     val_str = "999"
-                elif col_idx in (9, 10):
+                elif col_idx == 9:
                     val_str = "10.0"
                 else:
                     val_str = "10.0"
@@ -386,12 +389,12 @@ def export_class_excel(class_id: int, date_str: Optional[str] = None, records: O
             if len(val_str) > max_len:
                 max_len = len(val_str)
 
-        extra_padding = 12 if col_idx == 11 else (8 if col_idx == 2 else 5)
+        extra_padding = 12 if col_idx == 10 else (8 if col_idx == 2 else 5)
         if col_idx in (4, 5) and (c1_content or c2_content):
             col_width = 26
         elif col_idx == 2:
             col_width = max(max_len + extra_padding, 40 if (c1_content or c2_content) else 36)
-        elif col_idx == 11:
+        elif col_idx == 10:
             col_width = max(max_len + extra_padding, 56)
         elif col_idx == 3:
             col_width = max(max_len + extra_padding, 16)

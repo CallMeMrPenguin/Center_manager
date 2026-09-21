@@ -286,13 +286,10 @@ export default function ClassesPage() {
               seatingGrid={seatingGrid}
               numCols={numCols}
               desksPerCol={desksPerCol}
-              attendanceDate={attendanceDate}
-              selectedClassWeeklyDays={selectedClassWeeklyDays}
               absentStudentIds={absentStudentIds}
               unassignedStudents={unassignedStudents}
               showUnassignedPanel={showUnassignedPanel}
               mixingGA={mixingGA}
-              onDateChange={setAttendanceDate}
               onToggleUnassignedPanel={setShowUnassignedPanel}
               onAddColumn={handleAddColumn}
               onRemoveColumn={handleRemoveColumn}

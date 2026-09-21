@@ -1,22 +1,18 @@
 import React from 'react';
 import {
-  Calendar, ChevronLeft, ChevronRight, Shuffle, RefreshCw,
+  ChevronLeft, ChevronRight, Shuffle, RefreshCw,
   FileCheck2, Save, Move, Minus, Plus,
 } from 'lucide-react';
 import { EnrolledStudent, SeatingCol } from '../../types';
-import { CustomDatePicker } from '../../../../components/CustomDatePicker';
 
 interface SeatingChartTabProps {
   seatingGrid: SeatingCol[];
   numCols: number;
   desksPerCol: number;
-  attendanceDate: string;
-  selectedClassWeeklyDays: number[];
   absentStudentIds: Set<number>;
   unassignedStudents: EnrolledStudent[];
   showUnassignedPanel: boolean;
   mixingGA: boolean;
-  onDateChange: (date: string) => void;
   onToggleUnassignedPanel: (show: boolean) => void;
   onAddColumn: () => void;
   onRemoveColumn: () => void;
@@ -36,13 +32,10 @@ export const SeatingChartTab: React.FC<SeatingChartTabProps> = ({
   seatingGrid,
   numCols,
   desksPerCol,
-  attendanceDate,
-  selectedClassWeeklyDays,
   absentStudentIds,
   unassignedStudents,
   showUnassignedPanel,
   mixingGA,
-  onDateChange,
   onToggleUnassignedPanel,
   onAddColumn,
   onRemoveColumn,
@@ -79,16 +72,6 @@ export const SeatingChartTab: React.FC<SeatingChartTabProps> = ({
             >
               +
             </button>
-          </div>
-
-          <div className="flex items-center gap-2 bg-[#121624] border border-white/10 px-2.5 py-1 rounded-xl">
-            <Calendar size={13} className="text-indigo-400" />
-            <CustomDatePicker
-              value={attendanceDate}
-              onChange={onDateChange}
-              highlightDaysOfWeek={selectedClassWeeklyDays}
-              className="w-36 text-xs"
-            />
           </div>
 
           {absentStudentIds.size > 0 && (

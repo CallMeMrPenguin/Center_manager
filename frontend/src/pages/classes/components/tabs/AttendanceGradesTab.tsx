@@ -268,14 +268,13 @@ export const AttendanceGradesTab: React.FC<AttendanceGradesTabProps> = ({
         onFilterStudent={handleFilterStudentChip}
       />
 
-      {/* 2. UNIFIED ATTENDANCE & GRADES DATATABLE */}
+      {/* 2. UNIFIED ATTENDANCE & GRADES DATATABLE (Client-side Excel export respects toggled visible columns) */}
       <DataTable
         tableId="classes-attendance-table"
         data={attendanceRecords}
         columns={attendanceColumns}
         pageSize={20}
         exportFilename={`diem_danh_${selectedClass?.class_name || ''}_${attendanceDate}`}
-        onExportExcel={onExportExcel}
         onExportDocx={onExportDocx}
       />
     </div>

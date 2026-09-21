@@ -1,4 +1,5 @@
 import calendar
+import json
 import threading
 from datetime import datetime
 from typing import List, Dict, Any, Optional
@@ -85,6 +86,7 @@ def delete_class(class_id: int):
         conn.commit()
     finally:
         conn.close()
+    _sync_cloud_delete_sync("DELETE FROM classes WHERE id = %s", (class_id,))
 
 def get_class_students(class_id: int) -> List[Dict[str, Any]]:
     conn = get_connection()
@@ -116,6 +118,17 @@ def enroll_student_to_class(class_id: int, student_id: int, seat_color: str = No
                 seat_color = EXCLUDED.seat_color,
                 grade_group = EXCLUDED.grade_group
         """, (class_id, student_id, seat_color, grade_group))
+        
+        # When a student is enrolled to a class, ensure their status is active ('Đang học')
+        cursor.execute("UPDATE students SET status = 'Đang học' WHERE id = ?", (student_id,))
+        
+        # Reactivate corresponding student user account if it was locked
+        default_user = f"hs_{student_id:04d}"
+        cursor.execute("""
+            UPDATE app_users SET status = 'Hoạt động'
+            WHERE role = 'Học sinh' AND (username = ? OR username = ?)
+        """, (default_user, f"hs_{student_id}"))
+        
         conn.commit()
     finally:
         conn.close()
@@ -125,9 +138,48 @@ def unenroll_student_from_class(class_id: int, student_id: int):
     try:
         cursor = conn.cursor()
         cursor.execute("DELETE FROM class_students WHERE class_id = ? AND student_id = ?", (class_id, student_id))
+        cursor.execute("DELETE FROM friend_group_members WHERE class_id = ? AND student_id = ?", (class_id, student_id))
+        cursor.execute("DELETE FROM conflict_group_members WHERE class_id = ? AND student_id = ?", (class_id, student_id))
+        cursor.execute("DELETE FROM trusted_swap_students WHERE class_id = ? AND student_id = ?", (class_id, student_id))
+        cursor.execute("DELETE FROM conflict_relationships WHERE class_id = ? AND (student_id1 = ? OR student_id2 = ?)", (class_id, student_id, student_id))
+        cursor.execute("DELETE FROM trusted_swap_relationships WHERE class_id = ? AND (student_id1 = ? OR student_id2 = ?)", (class_id, student_id, student_id))
+        cursor.execute("DELETE FROM class_attendance_grades WHERE class_id = ? AND student_id = ?", (class_id, student_id))
+
+        # Clear from class_seating layout
+        try:
+            cursor.execute("SELECT id, layout_json FROM class_seating WHERE class_id = ?", (class_id,))
+            s_row = cursor.fetchone()
+            if s_row:
+                raw_layout = s_row[1] if isinstance(s_row, (tuple, list)) else s_row["layout_json"]
+                if raw_layout and str(student_id) in str(raw_layout):
+                    layout = json.loads(raw_layout)
+                    modified = False
+                    for col in layout:
+                        for seat in col.get("seats", []):
+                            if seat.get("student_id") == student_id:
+                                seat["student_id"] = None
+                                seat["student_name"] = None
+                                seat["seat_color"] = None
+                                seat["grade_group"] = None
+                                modified = True
+                    if modified:
+                        sid = s_row[0] if isinstance(s_row, (tuple, list)) else s_row["id"]
+                        cursor.execute("UPDATE class_seating SET layout_json = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?", (json.dumps(layout, ensure_ascii=False), sid))
+        except Exception:
+            pass
+
         conn.commit()
     finally:
         conn.close()
+
+    # Synchronously delete from Supabase so bidirectional sync does not resurrect the student
+    _sync_cloud_delete_sync("DELETE FROM class_students WHERE class_id = %s AND student_id = %s", (class_id, student_id))
+    _sync_cloud_delete_sync("DELETE FROM friend_group_members WHERE class_id = %s AND student_id = %s", (class_id, student_id))
+    _sync_cloud_delete_sync("DELETE FROM conflict_group_members WHERE class_id = %s AND student_id = %s", (class_id, student_id))
+    _sync_cloud_delete_sync("DELETE FROM trusted_swap_students WHERE class_id = %s AND student_id = %s", (class_id, student_id))
+    _sync_cloud_delete_sync("DELETE FROM conflict_relationships WHERE class_id = %s AND (student_id1 = %s OR student_id2 = %s)", (class_id, student_id, student_id))
+    _sync_cloud_delete_sync("DELETE FROM trusted_swap_relationships WHERE class_id = %s AND (student_id1 = %s OR student_id2 = %s)", (class_id, student_id, student_id))
+    _sync_cloud_delete_sync("DELETE FROM class_attendance_grades WHERE class_id = %s AND student_id = %s", (class_id, student_id))
 
 def update_class_student_groups(class_id: int, student_id: int, seat_color: str, grade_group: str):
     conn = get_connection()
@@ -347,24 +399,27 @@ def update_class_session(session_id: int, data: Dict[str, Any], class_id: int = 
 
 def _sync_cloud_delete(sql_pg: str, params: tuple):
     def _task():
-        try:
-            from database.connection import get_target_db_url, IS_VERCEL
-            if IS_VERCEL:
-                return
-            import psycopg2
-            target_url = get_target_db_url()
-            if not target_url:
-                return
-            pconn = psycopg2.connect(target_url, connect_timeout=4)
-            try:
-                pcur = pconn.cursor()
-                pcur.execute(sql_pg, params)
-                pconn.commit()
-            finally:
-                pconn.close()
-        except Exception:
-            pass
+        _sync_cloud_delete_sync(sql_pg, params)
     threading.Thread(target=_task, daemon=True).start()
+
+def _sync_cloud_delete_sync(sql_pg: str, params: tuple):
+    try:
+        from database.connection import get_target_db_url, IS_VERCEL
+        if IS_VERCEL:
+            return
+        import psycopg2
+        target_url = get_target_db_url()
+        if not target_url:
+            return
+        pconn = psycopg2.connect(target_url, connect_timeout=5)
+        try:
+            with pconn.cursor() as pcur:
+                pcur.execute(sql_pg, params)
+            pconn.commit()
+        finally:
+            pconn.close()
+    except Exception:
+        pass
 
 def delete_class_session(session_id: int):
     conn = get_connection()
@@ -396,7 +451,27 @@ def get_class_seating(class_id: int) -> Dict[str, Any]:
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM class_seating WHERE class_id = ?", (class_id,))
         row = cursor.fetchone()
-        return dict(row) if row else {"class_id": class_id, "num_rows": 4, "layout_json": "[]"}
+        if not row:
+            return {"class_id": class_id, "num_rows": 4, "layout_json": "[]"}
+        res = dict(row)
+        layout_str = res.get("layout_json")
+        if layout_str and layout_str != "[]":
+            try:
+                cursor.execute("SELECT student_id FROM class_students WHERE class_id = ?", (class_id,))
+                active_ids = {r[0] if isinstance(r, (list, tuple)) else r["student_id"] for r in cursor.fetchall()}
+                grid = json.loads(layout_str)
+                changed = False
+                for col in grid:
+                    for s in col.get("seats", []):
+                        if s.get("student_id") and s["student_id"] not in active_ids:
+                            s["student_id"] = None
+                            s["student_name"] = None
+                            changed = True
+                if changed:
+                    res["layout_json"] = json.dumps(grid, ensure_ascii=False)
+            except Exception:
+                pass
+        return res
     finally:
         conn.close()
 

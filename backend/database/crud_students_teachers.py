@@ -194,6 +194,33 @@ def delete_student(student_id: int):
 
         username = f"hs_{student_id:04d}"
         cursor.execute("DELETE FROM students WHERE id = ?", (student_id,))
+        cursor.execute("DELETE FROM class_students WHERE student_id = ?", (student_id,))
+        cursor.execute("DELETE FROM friend_group_members WHERE student_id = ?", (student_id,))
+        cursor.execute("DELETE FROM conflict_group_members WHERE student_id = ?", (student_id,))
+        cursor.execute("DELETE FROM trusted_swap_students WHERE student_id = ?", (student_id,))
+        cursor.execute("DELETE FROM conflict_relationships WHERE student_id1 = ? OR student_id2 = ?", (student_id, student_id))
+        cursor.execute("DELETE FROM trusted_swap_relationships WHERE student_id1 = ? OR student_id2 = ?", (student_id, student_id))
+
+        # Clear student from all class seating layouts
+        try:
+            cursor.execute("SELECT id, layout_json FROM class_seating WHERE layout_json LIKE ?", (f'%{student_id}%',))
+            for s_row in cursor.fetchall():
+                sid = s_row["id"] if hasattr(s_row, "__getitem__") else s_row[0]
+                raw_json = s_row["layout_json"] if hasattr(s_row, "__getitem__") else s_row[1]
+                if raw_json:
+                    import json
+                    grid = json.loads(raw_json)
+                    mod = False
+                    for col in grid:
+                        for st in col.get("seats", []):
+                            if st.get("student_id") == student_id:
+                                st["student_id"] = None
+                                st["student_name"] = None
+                                mod = True
+                    if mod:
+                        cursor.execute("UPDATE class_seating SET layout_json = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?", (json.dumps(grid, ensure_ascii=False), sid))
+        except Exception:
+            pass
 
         try:
             if full_name:

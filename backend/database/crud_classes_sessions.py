@@ -399,23 +399,7 @@ def update_class_session(session_id: int, data: Dict[str, Any], class_id: int = 
 
 def _sync_cloud_delete(sql_pg: str, params: tuple):
     def _task():
-        try:
-            from database.connection import get_target_db_url, IS_VERCEL
-            if IS_VERCEL:
-                return
-            import psycopg2
-            target_url = get_target_db_url()
-            if not target_url:
-                return
-            pconn = psycopg2.connect(target_url, connect_timeout=4)
-            try:
-                pcur = pconn.cursor()
-                pcur.execute(sql_pg, params)
-                pconn.commit()
-            finally:
-                pconn.close()
-        except Exception:
-            pass
+        _sync_cloud_delete_sync(sql_pg, params)
     threading.Thread(target=_task, daemon=True).start()
 
 def _sync_cloud_delete_sync(sql_pg: str, params: tuple):
@@ -467,7 +451,27 @@ def get_class_seating(class_id: int) -> Dict[str, Any]:
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM class_seating WHERE class_id = ?", (class_id,))
         row = cursor.fetchone()
-        return dict(row) if row else {"class_id": class_id, "num_rows": 4, "layout_json": "[]"}
+        if not row:
+            return {"class_id": class_id, "num_rows": 4, "layout_json": "[]"}
+        res = dict(row)
+        layout_str = res.get("layout_json")
+        if layout_str and layout_str != "[]":
+            try:
+                cursor.execute("SELECT student_id FROM class_students WHERE class_id = ?", (class_id,))
+                active_ids = {r[0] if isinstance(r, (list, tuple)) else r["student_id"] for r in cursor.fetchall()}
+                grid = json.loads(layout_str)
+                changed = False
+                for col in grid:
+                    for s in col.get("seats", []):
+                        if s.get("student_id") and s["student_id"] not in active_ids:
+                            s["student_id"] = None
+                            s["student_name"] = None
+                            changed = True
+                if changed:
+                    res["layout_json"] = json.dumps(grid, ensure_ascii=False)
+            except Exception:
+                pass
+        return res
     finally:
         conn.close()
 

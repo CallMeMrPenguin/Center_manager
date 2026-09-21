@@ -64,7 +64,22 @@ export function useSeatingLayout(
       const seating = await api.getClassSeating(clsId);
       if (seating && seating.layout_json && seating.layout_json !== '[]') {
         try {
-          const parsed = JSON.parse(seating.layout_json);
+          const parsed: SeatingCol[] = JSON.parse(seating.layout_json);
+          const validStudentMap = new Map(studentsList.map((s) => [s.id, s.full_name]));
+          parsed.forEach((col) => {
+            if (col.seats) {
+              col.seats.forEach((seat) => {
+                if (seat.student_id) {
+                  if (!validStudentMap.has(seat.student_id)) {
+                    seat.student_id = null;
+                    seat.student_name = null;
+                  } else {
+                    seat.student_name = validStudentMap.get(seat.student_id) || seat.student_name;
+                  }
+                }
+              });
+            }
+          });
           setSeatingGrid(parsed);
           setNumCols(parsed.length || 3);
           if (parsed.length > 0 && parsed[0].desks_in_col) {

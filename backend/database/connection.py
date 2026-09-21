@@ -338,16 +338,18 @@ class PgConnectionWrapper:
 
 
 def get_connection():
-    # In Vercel / serverless cloud mode, connect to Supabase PostgreSQL pooler
-    if IS_VERCEL or os.environ.get("APP_MODE") == "web":
+    # If running on VPS / web / Docker with PostgreSQL (via DATABASE_URL, POSTGRES_URL, DB_ENGINE=postgres or APP_MODE=web)
+    is_postgres_target = bool(
+        os.environ.get("DATABASE_URL")
+        or os.environ.get("POSTGRES_URL")
+        or os.environ.get("DB_ENGINE") == "postgres"
+        or IS_VERCEL
+        or os.environ.get("APP_MODE") in ("web", "vps", "server")
+    )
+    if is_postgres_target:
         target_url = get_target_db_url()
         if target_url:
-            try:
-                raw_conn = _global_pg_pool.get_conn(target_url)
-                return PgConnectionWrapper(raw_conn, is_pg8000=True)
-            except Exception as e_pg8000:
-                print("[DB Connection] pg8000 connection attempt note:", e_pg8000)
-
+            # 1. First try psycopg2 for native C-accelerated VPS connections
             try:
                 import psycopg2
                 raw_conn = psycopg2.connect(target_url, connect_timeout=10)
@@ -355,10 +357,18 @@ def get_connection():
             except Exception:
                 pass
 
+            # 2. Fallback to pg8000 connection pooler (pure Python, zero C dependencies)
+            try:
+                raw_conn = _global_pg_pool.get_conn(target_url)
+                return PgConnectionWrapper(raw_conn, is_pg8000=True)
+            except Exception as e_pg8000:
+                print("[DB Connection] pg8000 connection attempt note:", e_pg8000)
+
     # In local desktop mode, ALWAYS use ultra-fast local SQLite (0ms latency, background sync via sync_worker)
     conn = sqlite3.connect(DB_PATH, check_same_thread=False, timeout=20)
     conn.row_factory = sqlite3.Row
     try:
+        conn.execute("PRAGMA foreign_keys=ON;")
         conn.execute("PRAGMA journal_mode=WAL;")
         conn.execute("PRAGMA synchronous=NORMAL;")
         conn.execute("PRAGMA temp_store=MEMORY;")
