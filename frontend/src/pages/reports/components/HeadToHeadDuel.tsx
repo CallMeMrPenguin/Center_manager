@@ -105,7 +105,7 @@ export const HeadToHeadDuel: React.FC<HeadToHeadDuelProps> = ({
       {/* 4 Duel KPI Comparison Rounded Square Cards - Centered Title & VS Layout */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 animate-cascade-2">
         {/* 1. EMA Comparison */}
-        <div className="p-4 rounded-2xl bg-slate-50 dark:bg-[#0e1322] border border-slate-200 dark:border-[#1b253b] flex flex-col justify-between gap-3 shadow-sm dark:shadow-md">
+        <div className="p-4 rounded-2xl bg-white dark:bg-[#0e1322] border border-slate-200/90 dark:border-[#1b253b] flex flex-col justify-between gap-3 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.06),0_1px_3px_-1px_rgba(0,0,0,0.06)] hover:shadow-md transition-shadow">
           <div className="flex items-center justify-center gap-2 border-b border-slate-200 dark:border-white/5 pb-2 text-center">
             <BarChart3 size={14} className="text-blue-500 dark:text-blue-400" />
             <span className="text-xs font-black uppercase tracking-wider text-blue-600 dark:text-blue-400">ĐIỂM EMA TRUNG BÌNH</span>
@@ -123,11 +123,11 @@ export const HeadToHeadDuel: React.FC<HeadToHeadDuelProps> = ({
           </div>
           <div className="pt-2 border-t border-slate-200 dark:border-white/5 text-[11px] font-black flex items-center justify-center">
             {classComparisonData.emaDiff > 0 ? (
-              <span className="text-emerald-700 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-lg border border-emerald-500/20 whitespace-nowrap">
+              <span className="text-emerald-700 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-lg border border-emerald-500/20 whitespace-nowrap shadow-2xs">
                 {classComparisonData.classA.name} cao hơn +{format1Dec(classComparisonData.emaDiff)} đ
               </span>
             ) : classComparisonData.emaDiff < 0 ? (
-              <span className="text-cyan-700 dark:text-cyan-400 bg-cyan-500/10 px-2.5 py-1 rounded-lg border border-cyan-500/20 whitespace-nowrap">
+              <span className="text-cyan-700 dark:text-cyan-400 bg-cyan-500/10 px-2.5 py-1 rounded-lg border border-cyan-500/20 whitespace-nowrap shadow-2xs">
                 {classComparisonData.classB.name} cao hơn +{format1Dec(Math.abs(classComparisonData.emaDiff))} đ
               </span>
             ) : (
@@ -137,7 +137,7 @@ export const HeadToHeadDuel: React.FC<HeadToHeadDuelProps> = ({
         </div>
 
         {/* 2. Attendance % Comparison */}
-        <div className="p-4 rounded-2xl bg-slate-50 dark:bg-[#0e1322] border border-slate-200 dark:border-[#1b253b] flex flex-col justify-between gap-3 shadow-sm dark:shadow-md">
+        <div className="p-4 rounded-2xl bg-white dark:bg-[#0e1322] border border-slate-200/90 dark:border-[#1b253b] flex flex-col justify-between gap-3 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.06),0_1px_3px_-1px_rgba(0,0,0,0.06)] hover:shadow-md transition-shadow">
           <div className="flex items-center justify-center gap-2 border-b border-slate-200 dark:border-white/5 pb-2 text-center">
             <Users size={14} className="text-emerald-500 dark:text-emerald-400" />
             <span className="text-xs font-black uppercase tracking-wider text-emerald-600 dark:text-emerald-400">CHUYÊN CẦN %</span>
@@ -155,11 +155,11 @@ export const HeadToHeadDuel: React.FC<HeadToHeadDuelProps> = ({
           </div>
           <div className="pt-2 border-t border-slate-200 dark:border-white/5 text-[11px] font-black flex items-center justify-center">
             {classComparisonData.attDiff > 0 ? (
-              <span className="text-emerald-700 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-lg border border-emerald-500/20 whitespace-nowrap">
+              <span className="text-emerald-700 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-lg border border-emerald-500/20 whitespace-nowrap shadow-2xs">
                 {classComparisonData.classA.name} chuyên cần hơn +{classComparisonData.attDiff}%
               </span>
             ) : classComparisonData.attDiff < 0 ? (
-              <span className="text-teal-700 dark:text-teal-400 bg-teal-500/10 px-2.5 py-1 rounded-lg border border-teal-500/20 whitespace-nowrap">
+              <span className="text-teal-700 dark:text-teal-400 bg-teal-500/10 px-2.5 py-1 rounded-lg border border-teal-500/20 whitespace-nowrap shadow-2xs">
                 {classComparisonData.classB.name} chuyên cần hơn +{Math.abs(classComparisonData.attDiff)}%
               </span>
             ) : (
@@ -169,7 +169,7 @@ export const HeadToHeadDuel: React.FC<HeadToHeadDuelProps> = ({
         </div>
 
         {/* 3. Improving % Comparison */}
-        <div className="p-4 rounded-2xl bg-slate-50 dark:bg-[#0e1322] border border-slate-200 dark:border-[#1b253b] flex flex-col justify-between gap-3 shadow-sm dark:shadow-md">
+        <div className="p-4 rounded-2xl bg-white dark:bg-[#0e1322] border border-slate-200/90 dark:border-[#1b253b] flex flex-col justify-between gap-3 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.06),0_1px_3px_-1px_rgba(0,0,0,0.06)] hover:shadow-md transition-shadow">
           <div className="flex items-center justify-center gap-2 border-b border-slate-200 dark:border-white/5 pb-2 text-center">
             <TrendingUp size={14} className="text-sky-500 dark:text-sky-400" />
             <span className="text-xs font-black uppercase tracking-wider text-sky-600 dark:text-sky-400">TỶ LỆ TIẾN BỘ</span>
@@ -187,11 +187,11 @@ export const HeadToHeadDuel: React.FC<HeadToHeadDuelProps> = ({
           </div>
           <div className="pt-2 border-t border-slate-200 dark:border-white/5 text-[11px] font-black flex items-center justify-center">
             {classComparisonData.impDiff > 0 ? (
-              <span className="text-blue-700 dark:text-blue-400 bg-blue-500/10 px-2.5 py-1 rounded-lg border border-blue-500/20 whitespace-nowrap">
+              <span className="text-blue-700 dark:text-blue-400 bg-blue-500/10 px-2.5 py-1 rounded-lg border border-blue-500/20 whitespace-nowrap shadow-2xs">
                 {classComparisonData.classA.name} tiến bộ hơn +{classComparisonData.impDiff}%
               </span>
             ) : classComparisonData.impDiff < 0 ? (
-              <span className="text-cyan-700 dark:text-cyan-400 bg-cyan-500/10 px-2.5 py-1 rounded-lg border border-cyan-500/20 whitespace-nowrap">
+              <span className="text-cyan-700 dark:text-cyan-400 bg-cyan-500/10 px-2.5 py-1 rounded-lg border border-cyan-500/20 whitespace-nowrap shadow-2xs">
                 {classComparisonData.classB.name} tiến bộ hơn +{Math.abs(classComparisonData.impDiff)}%
               </span>
             ) : (
@@ -201,7 +201,7 @@ export const HeadToHeadDuel: React.FC<HeadToHeadDuelProps> = ({
         </div>
 
         {/* 4. Std Dev / Homogeneity Comparison */}
-        <div className="p-4 rounded-2xl bg-slate-50 dark:bg-[#0e1322] border border-slate-200 dark:border-[#1b253b] flex flex-col justify-between gap-3 shadow-sm dark:shadow-md">
+        <div className="p-4 rounded-2xl bg-white dark:bg-[#0e1322] border border-slate-200/90 dark:border-[#1b253b] flex flex-col justify-between gap-3 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.06),0_1px_3px_-1px_rgba(0,0,0,0.06)] hover:shadow-md transition-shadow">
           <div className="flex items-center justify-center gap-2 border-b border-slate-200 dark:border-white/5 pb-2 text-center">
             <Activity size={14} className="text-amber-500 dark:text-amber-400" />
             <span className="text-xs font-black uppercase tracking-wider text-amber-600 dark:text-amber-400">ĐỘ LỆCH CHUẨN (SD)</span>
@@ -219,11 +219,11 @@ export const HeadToHeadDuel: React.FC<HeadToHeadDuelProps> = ({
           </div>
           <div className="pt-2 border-t border-slate-200 dark:border-white/5 text-[11px] font-black flex items-center justify-center">
             {classComparisonData.classA.classSd < classComparisonData.classB.classSd ? (
-              <span className="text-emerald-700 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-lg border border-emerald-500/20 whitespace-nowrap">
+              <span className="text-emerald-700 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-lg border border-emerald-500/20 whitespace-nowrap shadow-2xs">
                 {classComparisonData.classA.name} đồng đều học lực hơn
               </span>
             ) : classComparisonData.classA.classSd > classComparisonData.classB.classSd ? (
-              <span className="text-amber-700 dark:text-yellow-400 bg-yellow-500/10 px-2.5 py-1 rounded-lg border border-yellow-500/20 whitespace-nowrap">
+              <span className="text-amber-700 dark:text-yellow-400 bg-yellow-500/10 px-2.5 py-1 rounded-lg border border-yellow-500/20 whitespace-nowrap shadow-2xs">
                 {classComparisonData.classB.name} đồng đều học lực hơn
               </span>
             ) : (
@@ -244,7 +244,7 @@ export const HeadToHeadDuel: React.FC<HeadToHeadDuelProps> = ({
       {/* Leading Student Badges */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1 animate-cascade-4">
         {/* Class A Top Student */}
-        <div className="p-4 rounded-2xl bg-slate-50 dark:bg-[#0e1322] border border-slate-200 dark:border-[#1e2744] flex items-center gap-3.5 shadow-sm dark:shadow-md">
+        <div className="p-4 rounded-2xl bg-white dark:bg-[#0e1322] border border-slate-200/90 dark:border-[#1e2744] flex items-center gap-3.5 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.06),0_1px_3px_-1px_rgba(0,0,0,0.06)] hover:shadow-md transition-shadow">
           {classComparisonData.classA.topStudent ? (
             <img
               src={getStudentTier(Number(classComparisonData.classA.topStudent.ema_level || 0)).badge}
@@ -268,7 +268,7 @@ export const HeadToHeadDuel: React.FC<HeadToHeadDuelProps> = ({
         </div>
 
         {/* Class B Top Student */}
-        <div className="p-4 rounded-2xl bg-slate-50 dark:bg-[#0e1322] border border-slate-200 dark:border-[#1e2744] flex items-center gap-3.5 shadow-sm dark:shadow-md">
+        <div className="p-4 rounded-2xl bg-white dark:bg-[#0e1322] border border-slate-200/90 dark:border-[#1e2744] flex items-center gap-3.5 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.06),0_1px_3px_-1px_rgba(0,0,0,0.06)] hover:shadow-md transition-shadow">
           {classComparisonData.classB.topStudent ? (
             <img
               src={getStudentTier(Number(classComparisonData.classB.topStudent.ema_level || 0)).badge}

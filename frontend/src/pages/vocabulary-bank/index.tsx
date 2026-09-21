@@ -176,7 +176,7 @@ const ColumnHeaderFilter = ({
                 value={searchText}
                 onChange={(e) => setSearchText(e.target.value)}
                 placeholder="Nhập từ khóa tìm..."
-                className="w-full px-2.5 py-1.5 bg-[#070B14] border border-slate-800 focus:border-blue-500/50 text-xs rounded-lg outline-none text-slate-200 placeholder-slate-655 transition"
+                className="w-full px-2.5 py-1.5 bg-white dark:bg-[#070B14] border border-slate-300 dark:border-slate-800 focus:border-blue-500 text-xs rounded-lg outline-none text-slate-900 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 transition shadow-xs"
               />
             </div>
           )}
@@ -211,7 +211,7 @@ const ColumnHeaderFilter = ({
                 value={localSearch}
                 onChange={(e) => setLocalSearch(e.target.value)}
                 placeholder="Tìm giá trị lọc..."
-                className="w-full px-2 py-1 bg-[#070B14] border border-slate-850 focus:border-blue-500/50 text-[0.66rem] rounded mb-1.5 outline-none text-slate-300 placeholder-slate-650"
+                className="w-full px-2 py-1 bg-white dark:bg-[#070B14] border border-slate-300 dark:border-slate-850 focus:border-blue-500 text-[0.66rem] rounded mb-1.5 outline-none text-slate-900 dark:text-slate-300 placeholder-slate-400 dark:placeholder-slate-500 shadow-xs"
               />
 
               <div className="max-h-36 overflow-y-auto pr-1 flex flex-col gap-1">
@@ -1301,7 +1301,7 @@ export default function VocabularyBank({ isActive }: { isActive?: boolean }) {
                                 type="text" 
                                 value={editRow.grade || ''} 
                                 onChange={(e) => setEditRow({ ...editRow, grade: e.target.value })}
-                                className="w-full bg-[#070b14] border border-slate-800 text-xs rounded px-2 py-1.5 outline-none text-slate-200 focus:border-blue-500/50"
+                                className="w-full bg-white dark:bg-[#070b14] border border-slate-300 dark:border-slate-800 text-xs rounded px-2 py-1.5 outline-none text-slate-900 dark:text-slate-200 focus:border-blue-500 shadow-xs"
                               />
                             </td>
                           )}
@@ -1313,7 +1313,7 @@ export default function VocabularyBank({ isActive }: { isActive?: boolean }) {
                                 type="text" 
                                 value={editRow.unit || ''} 
                                 onChange={(e) => setEditRow({ ...editRow, unit: e.target.value })}
-                                className="w-full bg-[#070b14] border border-slate-800 text-xs rounded px-2 py-1.5 outline-none text-slate-200 focus:border-blue-500/50"
+                                className="w-full bg-white dark:bg-[#070b14] border border-slate-300 dark:border-slate-800 text-xs rounded px-2 py-1.5 outline-none text-slate-900 dark:text-slate-200 focus:border-blue-500 shadow-xs"
                               />
                             </td>
                           )}
@@ -1325,7 +1325,7 @@ export default function VocabularyBank({ isActive }: { isActive?: boolean }) {
                                 type="text" 
                                 value={editRow.vocabulary || ''} 
                                 onChange={(e) => setEditRow({ ...editRow, vocabulary: e.target.value })}
-                                className="w-full bg-[#070b14] border border-slate-800 text-xs rounded px-2 py-1.5 outline-none text-slate-200 focus:border-blue-500/50"
+                                className="w-full bg-white dark:bg-[#070b14] border border-slate-300 dark:border-slate-800 text-xs rounded px-2 py-1.5 outline-none text-slate-900 dark:text-slate-200 focus:border-blue-500 shadow-xs"
                               />
                             </td>
                           )}
@@ -1337,7 +1337,7 @@ export default function VocabularyBank({ isActive }: { isActive?: boolean }) {
                                 type="text" 
                                 value={editRow.pos || ''} 
                                 onChange={(e) => setEditRow({ ...editRow, pos: e.target.value })}
-                                className="w-full bg-[#070b14] border border-slate-800 text-xs rounded px-2 py-1.5 outline-none text-slate-200 focus:border-blue-500/50"
+                                className="w-full bg-white dark:bg-[#070b14] border border-slate-300 dark:border-slate-800 text-xs rounded px-2 py-1.5 outline-none text-slate-900 dark:text-slate-200 focus:border-blue-500 shadow-xs"
                               />
                             </td>
                           )}
@@ -1349,7 +1349,7 @@ export default function VocabularyBank({ isActive }: { isActive?: boolean }) {
                                 type="text" 
                                 value={editRow.ipa || ''} 
                                 onChange={(e) => setEditRow({ ...editRow, ipa: e.target.value })}
-                                className="w-full bg-[#070b14] border border-slate-800 text-xs rounded px-2 py-1.5 outline-none text-slate-200 focus:border-blue-500/50"
+                                className="w-full bg-white dark:bg-[#070b14] border border-slate-300 dark:border-slate-800 text-xs rounded px-2 py-1.5 outline-none text-slate-900 dark:text-slate-200 focus:border-blue-500 shadow-xs"
                               />
                             </td>
                           )}
@@ -1361,7 +1361,7 @@ export default function VocabularyBank({ isActive }: { isActive?: boolean }) {
                                 type="text" 
                                 value={editRow.meaning || ''} 
                                 onChange={(e) => setEditRow({ ...editRow, meaning: e.target.value })}
-                                className="w-full bg-[#070b14] border border-slate-800 text-xs rounded px-2 py-1.5 outline-none text-slate-200 focus:border-blue-500/50"
+                                className="w-full bg-white dark:bg-[#070b14] border border-slate-300 dark:border-slate-800 text-xs rounded px-2 py-1.5 outline-none text-slate-900 dark:text-slate-200 focus:border-blue-500 shadow-xs"
                               />
                             </td>
                           )}
@@ -1373,7 +1373,7 @@ export default function VocabularyBank({ isActive }: { isActive?: boolean }) {
                                 type="text" 
                                 value={editRow.difficulty || ''} 
                                 onChange={(e) => setEditRow({ ...editRow, difficulty: e.target.value })}
-                                className="w-full bg-[#070b14] border border-slate-800 text-xs rounded px-2 py-1.5 outline-none text-slate-200 focus:border-blue-500/50"
+                                className="w-full bg-white dark:bg-[#070b14] border border-slate-300 dark:border-slate-800 text-xs rounded px-2 py-1.5 outline-none text-slate-900 dark:text-slate-200 focus:border-blue-500 shadow-xs"
                               />
                             </td>
                           )}
@@ -1385,7 +1385,7 @@ export default function VocabularyBank({ isActive }: { isActive?: boolean }) {
                                 type="text" 
                                 value={editRow.root_word || ''} 
                                 onChange={(e) => setEditRow({ ...editRow, root_word: e.target.value })}
-                                className="w-full bg-[#070b14] border border-slate-800 text-xs rounded px-2 py-1.5 outline-none text-slate-200 focus:border-blue-500/50"
+                                className="w-full bg-white dark:bg-[#070b14] border border-slate-300 dark:border-slate-800 text-xs rounded px-2 py-1.5 outline-none text-slate-900 dark:text-slate-200 focus:border-blue-500 shadow-xs"
                               />
                             </td>
                           )}
@@ -1813,7 +1813,7 @@ export default function VocabularyBank({ isActive }: { isActive?: boolean }) {
                 <select
                   value={exportGrade}
                   onChange={(e) => setExportGrade(e.target.value)}
-                  className="w-full px-3.5 py-2.5 bg-[#080c14] border border-slate-800 text-xs rounded-xl text-slate-300 outline-none font-bold cursor-pointer"
+                  className="w-full px-3.5 py-2.5 bg-white dark:bg-[#080c14] border border-slate-300 dark:border-slate-800 text-xs rounded-xl text-slate-900 dark:text-slate-300 outline-none font-bold cursor-pointer shadow-xs"
                 >
                   {gradesList.map(g => (
                     <option key={g} value={g}>Lớp {g}</option>
@@ -1828,17 +1828,17 @@ export default function VocabularyBank({ isActive }: { isActive?: boolean }) {
                   value={exportUnit}
                   onChange={(e) => setExportUnit(e.target.value)}
                   placeholder="e.g. 1, 2, 3..."
-                  className="w-full px-3.5 py-2.5 bg-[#080c14] border border-slate-800 text-xs rounded-xl text-slate-200 outline-none font-bold"
+                  className="w-full px-3.5 py-2.5 bg-white dark:bg-[#080c14] border border-slate-300 dark:border-slate-800 text-xs rounded-xl text-slate-900 dark:text-slate-200 outline-none font-bold shadow-xs"
                 />
               </div>
 
               {/* Save to Documents checkbox */}
-              <label className="flex items-center gap-2 mt-2 px-1 text-slate-350 text-xs font-bold cursor-pointer select-none hover:text-white transition">
+              <label className="flex items-center gap-2 mt-2 px-1 text-slate-600 dark:text-slate-350 text-xs font-bold cursor-pointer select-none hover:text-slate-900 dark:hover:text-white transition">
                 <input 
                   type="checkbox" 
                   checked={saveToDocs} 
                   onChange={(e) => setSaveToDocs(e.target.checked)} 
-                  className="rounded border-slate-700 bg-slate-950 text-blue-655 focus:ring-blue-500 cursor-pointer"
+                  className="rounded border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-blue-655 focus:ring-blue-500 cursor-pointer"
                 />
                 <span>Lưu vào Tài liệu (Documents)</span>
               </label>
@@ -1849,7 +1849,7 @@ export default function VocabularyBank({ isActive }: { isActive?: boolean }) {
                   <select
                     value={saveFolderId}
                     onChange={(e) => setSaveFolderId(e.target.value)}
-                    className="w-full px-3.5 py-2.5 bg-[#080c14] border border-slate-800 text-xs text-slate-300 rounded-xl outline-none cursor-pointer transition font-bold"
+                    className="w-full px-3.5 py-2.5 bg-white dark:bg-[#080c14] border border-slate-300 dark:border-slate-800 text-xs text-slate-900 dark:text-slate-300 rounded-xl outline-none cursor-pointer transition font-bold shadow-xs"
                   >
                     <option value="">📁 Trang chủ (Cấp cao nhất)</option>
                     {folderOptions.map(opt => (
@@ -1960,7 +1960,7 @@ export default function VocabularyBank({ isActive }: { isActive?: boolean }) {
                   }}
                   placeholder="Dán nội dung CSV tại đây..."
                   rows={6}
-                  className="bg-[#070b14] border border-slate-800 focus:border-blue-500/50 p-3 rounded-xl text-xs text-slate-200 outline-none placeholder-slate-600 transition font-mono mt-1"
+                  className="bg-white dark:bg-[#070b14] border border-slate-300 dark:border-slate-800 focus:border-blue-500 p-3 rounded-xl text-xs text-slate-900 dark:text-slate-200 outline-none placeholder-slate-400 dark:placeholder-slate-600 transition font-mono mt-1 shadow-xs"
                 />
               </div>
 

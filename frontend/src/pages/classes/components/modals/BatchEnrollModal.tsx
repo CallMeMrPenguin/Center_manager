@@ -122,21 +122,21 @@ export const BatchEnrollModal: React.FC<BatchEnrollModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 animate-mac-dropdown">
-      <div className="bg-[#0f1320] border border-white/10 rounded-2xl w-full max-w-xl overflow-hidden shadow-[0_24px_80px_rgba(0,0,0,0.8)] flex flex-col max-h-[85vh]">
+      <div className="bg-white dark:bg-[#0f1320] border border-slate-200 dark:border-white/10 rounded-2xl w-full max-w-xl overflow-hidden shadow-[0_24px_80px_rgba(0,0,0,0.15)] dark:shadow-[0_24px_80px_rgba(0,0,0,0.8)] flex flex-col max-h-[85vh]">
         {/* MODAL HEADER */}
-        <div className="flex items-center justify-between p-5 border-b border-white/10 bg-[#14192b]">
-          <h3 className="text-base font-black text-white flex items-center gap-2">
-            <Users className="h-5 w-5 text-indigo-400" />
+        <div className="flex items-center justify-between p-5 border-b border-slate-100 dark:border-white/10 bg-slate-50 dark:bg-[#14192b]">
+          <h3 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
+            <Users className="h-5 w-5 text-indigo-500 dark:text-indigo-400" />
             <span>Quản Lý Học Sinh Lớp: {selectedClass.class_name}</span>
           </h3>
-          <button onClick={onClose} className="p-1.5 rounded-xl hover:bg-white/10 text-slate-400 hover:text-white">
+          <button onClick={onClose} className="p-1.5 rounded-xl hover:bg-slate-200 dark:hover:bg-white/10 text-slate-400 hover:text-slate-900 dark:hover:text-white cursor-pointer">
             <X size={16} />
           </button>
         </div>
 
         {/* SLIDING SEGMENTED CONTROL TAB PILL */}
         <div className="px-5 pt-4">
-          <div className="relative flex bg-[#0d1018] p-1 rounded-xl border border-white/10 text-xs shrink-0 font-bold select-none">
+          <div className="relative flex bg-slate-100 dark:bg-[#0d1018] p-1 rounded-xl border border-slate-200 dark:border-white/10 text-xs shrink-0 font-bold select-none shadow-[inset_0_1px_2px_rgba(0,0,0,0.05)]">
             <div
               className="absolute top-1 bottom-1 rounded-lg bg-[#5c36f5] shadow-[0_0_14px_rgba(92,54,245,0.5)] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] pointer-events-none"
               style={{
@@ -148,7 +148,7 @@ export const BatchEnrollModal: React.FC<BatchEnrollModalProps> = ({
               type="button"
               onClick={() => setActiveTab('available')}
               className={`flex-1 relative z-10 py-1.5 text-center transition-colors cursor-pointer flex items-center justify-center gap-1.5 ${
-                activeTab === 'available' ? 'text-white font-black' : 'text-slate-400 hover:text-white'
+                activeTab === 'available' ? 'text-white font-black' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
               <span>Thêm Học Sinh Mới</span>
@@ -160,7 +160,7 @@ export const BatchEnrollModal: React.FC<BatchEnrollModalProps> = ({
               type="button"
               onClick={() => setActiveTab('enrolled')}
               className={`flex-1 relative z-10 py-1.5 text-center transition-colors cursor-pointer flex items-center justify-center gap-1.5 ${
-                activeTab === 'enrolled' ? 'text-white font-black' : 'text-slate-400 hover:text-white'
+                activeTab === 'enrolled' ? 'text-white font-black' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
               <span>Đang Trong Lớp</span>
@@ -175,16 +175,16 @@ export const BatchEnrollModal: React.FC<BatchEnrollModalProps> = ({
         {activeTab === 'available' && (
           <form onSubmit={handleBatchEnrollStudents} className="p-5 flex flex-col space-y-4 overflow-hidden flex-1">
             {/* TOP CONTROLS: SEARCH & GRADE FILTER */}
-            <div className="space-y-3 bg-[#141928] p-3.5 rounded-xl border border-white/5">
-              <div className="flex items-center justify-between text-xs font-bold text-slate-300">
+            <div className="space-y-3 bg-slate-50 dark:bg-[#141928] p-3.5 rounded-xl border border-slate-200 dark:border-white/5">
+              <div className="flex items-center justify-between text-xs font-bold text-slate-700 dark:text-slate-300">
                 <span>Lọc học sinh thuộc khối {selectedClass.grade}:</span>
                 <button
                   type="button"
                   onClick={() => setFilterByClassGrade(!filterByClassGrade)}
                   className={`px-3 py-1 rounded-lg text-[11px] font-black border transition ${
                     filterByClassGrade
-                      ? 'bg-indigo-500/20 border-indigo-400 text-indigo-300'
-                      : 'bg-slate-700 text-slate-400'
+                      ? 'bg-indigo-500/20 border-indigo-400 text-indigo-600 dark:text-indigo-300'
+                      : 'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-400'
                   }`}
                 >
                   {filterByClassGrade ? 'BẬT (Khối ' + selectedClass.grade + ')' : 'TẮT (Hiện Tất Cả)'}
@@ -198,7 +198,7 @@ export const BatchEnrollModal: React.FC<BatchEnrollModalProps> = ({
                   value={enrollSearch}
                   onChange={(e) => setEnrollSearch(e.target.value)}
                   placeholder="Tìm theo tên học sinh, trường học..."
-                  className="w-full bg-[#0d1018] border border-white/10 text-white text-xs rounded-xl pl-9 pr-3 py-2 focus:outline-none focus:border-indigo-500 font-semibold"
+                  className="w-full bg-white dark:bg-[#0d1018] border border-slate-300 dark:border-white/10 text-slate-900 dark:text-white text-xs rounded-xl pl-9 pr-3 py-2 focus:outline-none focus:border-indigo-500 font-semibold shadow-xs"
                 />
               </div>
             </div>
@@ -301,7 +301,7 @@ export const BatchEnrollModal: React.FC<BatchEnrollModalProps> = ({
                 value={enrolledSearch}
                 onChange={(e) => setEnrolledSearch(e.target.value)}
                 placeholder="Tìm học sinh trong lớp theo tên, biệt danh..."
-                className="w-full bg-[#0d1018] border border-white/10 text-white text-xs rounded-xl pl-9 pr-3 py-2 focus:outline-none focus:border-indigo-500 font-semibold"
+                className="w-full bg-white dark:bg-[#0d1018] border border-slate-300 dark:border-white/10 text-slate-900 dark:text-white text-xs rounded-xl pl-9 pr-3 py-2 focus:outline-none focus:border-indigo-500 font-semibold shadow-xs"
               />
             </div>
 

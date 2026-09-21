@@ -120,19 +120,19 @@ export const UserModal: React.FC<UserModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/85 select-none animate-fade-in">
-      <div className="bg-[#0c0f1e] border border-[#212c4b] rounded-2xl w-full max-w-md shadow-[0_20px_60px_rgba(0,0,0,0.9)] overflow-hidden flex flex-col max-h-[90vh]">
+      <div className="bg-white dark:bg-[#0c0f1e] border border-slate-200 dark:border-[#212c4b] rounded-2xl w-full max-w-md shadow-[0_20px_60px_rgba(0,0,0,0.15)] dark:shadow-[0_20px_60px_rgba(0,0,0,0.9)] overflow-hidden flex flex-col max-h-[90vh]">
         {/* Modal Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-white/10 shrink-0">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 dark:border-white/10 shrink-0">
           <div className="flex items-center gap-2">
-            <UserCheck size={18} className="text-indigo-400" />
-            <h3 className="text-sm font-black text-white uppercase tracking-wider">
+            <UserCheck size={18} className="text-indigo-500 dark:text-indigo-400" />
+            <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider">
               {user ? 'Chỉnh Sửa Tài Khoản' : 'Thêm Tài Khoản Mới'}
             </h3>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="w-7 h-7 rounded-xl bg-white/5 hover:bg-white/10 flex items-center justify-center text-slate-400 hover:text-white transition cursor-pointer"
+            className="w-7 h-7 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 flex items-center justify-center text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition cursor-pointer"
           >
             <X size={15} />
           </button>
@@ -142,64 +142,64 @@ export const UserModal: React.FC<UserModalProps> = ({
         <form onSubmit={handleSave} className="p-5 space-y-4 overflow-y-auto flex-1 scrollbar-thin">
           {/* Display Name */}
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-slate-300">
-              Tên Hiển Thị <span className="text-rose-400">*</span>
+            <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+              Tên Hiển Thị <span className="text-rose-500 dark:text-rose-400">*</span>
             </label>
             <input
               type="text"
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
               placeholder="Ví dụ: Nguyễn Văn An"
-              className="w-full bg-[#121626] border border-[#263152] focus:border-indigo-500 focus:outline-none rounded-xl px-3.5 py-2 text-xs font-bold text-white shadow-inner"
+              className="w-full bg-white dark:bg-[#121626] border border-slate-300 dark:border-[#263152] focus:border-indigo-500 focus:outline-none rounded-xl px-3.5 py-2 text-xs font-bold text-slate-900 dark:text-white shadow-xs"
               required
             />
           </div>
 
           {/* Username */}
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-slate-300">
-              Tên Đăng Nhập <span className="text-rose-400">*</span>
+            <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+              Tên Đăng Nhập <span className="text-rose-500 dark:text-rose-400">*</span>
             </label>
             <input
               type="text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               placeholder="Ví dụ: teacher_an"
-              className="w-full bg-[#121626] border border-[#263152] focus:border-indigo-500 focus:outline-none rounded-xl px-3.5 py-2 text-xs font-bold text-white shadow-inner"
+              className="w-full bg-white dark:bg-[#121626] border border-slate-300 dark:border-[#263152] focus:border-indigo-500 focus:outline-none rounded-xl px-3.5 py-2 text-xs font-bold text-slate-900 dark:text-white shadow-xs"
               required
             />
           </div>
 
           {/* Password */}
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-slate-300">
-              {user ? 'Mật Khẩu Mới (Để trống nếu không đổi)' : 'Mật Khẩu'} {!user && <span className="text-rose-400">*</span>}
+            <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+              {user ? 'Mật Khẩu Mới (Để trống nếu không đổi)' : 'Mật Khẩu'} {!user && <span className="text-rose-500 dark:text-rose-400">*</span>}
             </label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder={user ? '••••••••' : 'Nhập mật khẩu...'}
-              className="w-full bg-[#121626] border border-[#263152] focus:border-indigo-500 focus:outline-none rounded-xl px-3.5 py-2 text-xs font-bold text-white shadow-inner"
+              className="w-full bg-white dark:bg-[#121626] border border-slate-300 dark:border-[#263152] focus:border-indigo-500 focus:outline-none rounded-xl px-3.5 py-2 text-xs font-bold text-slate-900 dark:text-white shadow-xs"
             />
           </div>
 
           {/* Role */}
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-slate-300">
+            <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
               Vai Trò & Quyền Hạn
             </label>
             <CustomSelect
               value={role}
               onChange={(val) => setRole(String(val))}
               options={roleOptions}
-              icon={<Shield size={14} className="text-indigo-400" />}
+              icon={<Shield size={14} className="text-indigo-500 dark:text-indigo-400" />}
             />
           </div>
 
           {/* Status */}
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-slate-300">
+            <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
               Trạng Thái Tài Khoản
             </label>
             <CustomSelect
@@ -210,14 +210,14 @@ export const UserModal: React.FC<UserModalProps> = ({
           </div>
 
           {/* Modal Actions */}
-          <div className="flex items-center justify-between gap-3 pt-3 border-t border-white/10">
+          <div className="flex items-center justify-between gap-3 pt-3 border-t border-slate-100 dark:border-white/10">
             {/* Merged Single Pen Action: Delete inside Edit Modal */}
             {user ? (
               <button
                 type="button"
                 onClick={handleDelete}
                 disabled={deleting || user.username === 'admin'}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-xs font-bold border border-rose-500/30 transition cursor-pointer active:scale-95 disabled:opacity-40"
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 text-xs font-bold border border-rose-500/30 transition cursor-pointer active:scale-95 disabled:opacity-40"
               >
                 <Trash2 size={14} />
                 <span>{deleting ? 'Đang xóa...' : 'Xóa tài khoản'}</span>
@@ -230,7 +230,7 @@ export const UserModal: React.FC<UserModalProps> = ({
               <button
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-bold transition cursor-pointer"
+                className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 text-slate-700 dark:text-slate-300 text-xs font-bold transition cursor-pointer"
               >
                 Hủy
               </button>

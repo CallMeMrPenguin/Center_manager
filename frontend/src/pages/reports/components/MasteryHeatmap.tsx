@@ -195,7 +195,7 @@ export const MasteryHeatmap: React.FC<MasteryHeatmapProps> = ({
   }, [filteredUnits]);
 
   const toolbarLeft = (
-    <div className="relative flex bg-[#0d1018] p-1 rounded-xl border border-white/10 text-xs font-bold shrink-0 w-64">
+    <div className="relative flex bg-slate-100 dark:bg-[#0d1018] p-1 rounded-xl border border-slate-200 dark:border-white/10 text-xs font-bold shrink-0 w-64 shadow-[inset_0_1px_2px_rgba(0,0,0,0.05)] select-none">
       <div
         className="absolute top-1 bottom-1 rounded-lg bg-[#5c36f5] shadow-[0_0_14px_rgba(92,54,245,0.5)] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] pointer-events-none"
         style={{
@@ -210,7 +210,7 @@ export const MasteryHeatmap: React.FC<MasteryHeatmapProps> = ({
       <button
         onClick={() => setSkillFilter('all')}
         className={`flex-1 relative z-10 py-1 text-center transition cursor-pointer ${
-          skillFilter === 'all' ? 'text-white font-black' : 'text-slate-400 hover:text-white'
+          skillFilter === 'all' ? 'text-white font-black' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
         }`}
       >
         Tất Cả
@@ -218,7 +218,7 @@ export const MasteryHeatmap: React.FC<MasteryHeatmapProps> = ({
       <button
         onClick={() => setSkillFilter('vocab')}
         className={`flex-1 relative z-10 py-1 text-center transition cursor-pointer ${
-          skillFilter === 'vocab' ? 'text-white font-black' : 'text-slate-400 hover:text-white'
+          skillFilter === 'vocab' ? 'text-white font-black' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
         }`}
       >
         Từ Vựng
@@ -226,7 +226,7 @@ export const MasteryHeatmap: React.FC<MasteryHeatmapProps> = ({
       <button
         onClick={() => setSkillFilter('grammar')}
         className={`flex-1 relative z-10 py-1 text-center transition cursor-pointer ${
-          skillFilter === 'grammar' ? 'text-white font-black' : 'text-slate-400 hover:text-white'
+          skillFilter === 'grammar' ? 'text-white font-black' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
         }`}
       >
         Ngữ Pháp

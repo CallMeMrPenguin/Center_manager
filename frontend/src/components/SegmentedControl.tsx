@@ -76,7 +76,7 @@ export function SegmentedControl<T extends string = string>({
   return (
     <div
       onMouseLeave={() => setHoveredVal(null)}
-      className={`relative flex items-center bg-slate-200/80 dark:bg-[#090c15] p-1 rounded-xl border border-slate-300/80 dark:border-[#1b233d] select-none shrink-0 transition-colors duration-150 ${
+      className={`relative flex items-center bg-slate-100 dark:bg-[#090c15] p-1 rounded-xl border border-slate-200 dark:border-[#1b233d] shadow-[inset_0_1px_2px_rgba(0,0,0,0.05)] select-none shrink-0 transition-colors duration-150 ${
         isFluid ? 'w-full' : 'inline-flex w-fit'
       } ${className}`}
     >
@@ -117,7 +117,7 @@ export function SegmentedControl<T extends string = string>({
               <motion.div
                 layoutId={`${baseLayoutId}-hover`}
                 transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-                className="absolute inset-0 rounded-lg bg-white/70 dark:bg-white/[0.06] border border-black/5 dark:border-white/10 z-0 pointer-events-none"
+                className="absolute inset-0 rounded-lg bg-white/90 dark:bg-white/[0.06] border border-slate-200/70 dark:border-white/10 shadow-xs z-0 pointer-events-none"
               />
             )}
 

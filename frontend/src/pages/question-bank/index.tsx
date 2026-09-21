@@ -217,7 +217,7 @@ const ColumnHeaderFilter = ({
                 value={searchText}
                 onChange={(e) => setSearchText(e.target.value)}
                 placeholder="Nhập từ khóa tìm..."
-                className="w-full px-2.5 py-1.5 bg-[#070B14] border border-slate-800 focus:border-blue-500/50 text-xs rounded-lg outline-none text-slate-200 placeholder-slate-655 transition"
+                className="w-full px-2.5 py-1.5 bg-white dark:bg-[#070B14] border border-slate-300 dark:border-slate-800 focus:border-blue-500 text-xs rounded-lg outline-none text-slate-900 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 transition shadow-xs"
               />
             </div>
           )}
@@ -252,7 +252,7 @@ const ColumnHeaderFilter = ({
                 value={localSearch}
                 onChange={(e) => setLocalSearch(e.target.value)}
                 placeholder="Tìm giá trị lọc..."
-                className="w-full px-2 py-1 bg-[#070B14] border border-slate-850 focus:border-blue-500/50 text-[0.66rem] rounded mb-1.5 outline-none text-slate-300 placeholder-slate-650"
+                className="w-full px-2 py-1 bg-white dark:bg-[#070B14] border border-slate-300 dark:border-slate-850 focus:border-blue-500 text-[0.66rem] rounded mb-1.5 outline-none text-slate-900 dark:text-slate-300 placeholder-slate-400 dark:placeholder-slate-500 shadow-xs"
               />
 
               <div className="max-h-36 overflow-y-auto pr-1 flex flex-col gap-1">
@@ -1720,7 +1720,7 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
                                 type="text" 
                                 value={editRow.grade || ''} 
                                 onChange={(e) => setEditRow({ ...editRow, grade: e.target.value })}
-                                className="w-full bg-[#070b14] border border-slate-800 text-xs rounded px-2 py-1.5 outline-none text-slate-200 focus:border-blue-500/50"
+                                className="w-full bg-white dark:bg-[#070b14] border border-slate-300 dark:border-slate-800 text-xs rounded px-2 py-1.5 outline-none text-slate-900 dark:text-slate-200 focus:border-blue-500 shadow-xs"
                               />
                             </td>
                           )}
@@ -1732,7 +1732,7 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
                                 type="text" 
                                 value={editRow.unit || ''} 
                                 onChange={(e) => setEditRow({ ...editRow, unit: e.target.value })}
-                                className="w-full bg-[#070b14] border border-slate-800 text-xs rounded px-2 py-1.5 outline-none text-slate-200 focus:border-blue-500/50"
+                                className="w-full bg-white dark:bg-[#070b14] border border-slate-300 dark:border-slate-800 text-xs rounded px-2 py-1.5 outline-none text-slate-900 dark:text-slate-200 focus:border-blue-500 shadow-xs"
                               />
                             </td>
                           )}
@@ -1743,7 +1743,7 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
                               <select 
                                 value={editRow.t || ''} 
                                 onChange={(e) => setEditRow({ ...editRow, t: e.target.value })}
-                                className="w-full bg-[#070b14] border border-slate-800 text-xs rounded px-2 py-1.5 outline-none text-slate-200 focus:border-blue-500/50 cursor-pointer"
+                                className="w-full bg-white dark:bg-[#070b14] border border-slate-300 dark:border-slate-800 text-xs rounded px-2 py-1.5 outline-none text-slate-900 dark:text-slate-200 focus:border-blue-500 cursor-pointer shadow-xs"
                               >
                                 {Object.entries(TYPE_MAP).map(([k, v]) => (
                                   <option key={k} value={k}>{v}</option>
@@ -1758,7 +1758,7 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
                               <textarea 
                                 value={editRow.x || ''} 
                                 onChange={(e) => setEditRow({ ...editRow, x: e.target.value })}
-                                className="w-full bg-[#070b14] border border-slate-800 text-xs rounded px-2 py-1 outline-none text-slate-200 focus:border-blue-500/50"
+                                className="w-full bg-white dark:bg-[#070b14] border border-slate-300 dark:border-slate-800 text-xs rounded px-2 py-1 outline-none text-slate-900 dark:text-slate-200 focus:border-blue-500 shadow-xs"
                                 rows={2}
                               />
                             </td>
@@ -1779,7 +1779,7 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
                                       setEditRow({ ...editRow, o: newOpts });
                                     }}
                                     placeholder={String.fromCharCode(65 + optIdx)}
-                                    className="w-full bg-[#070b14] border border-slate-800 text-[0.66rem] rounded px-1.5 py-0.5 outline-none text-slate-300 focus:border-blue-500/50"
+                                    className="w-full bg-white dark:bg-[#070b14] border border-slate-300 dark:border-slate-800 text-[0.66rem] rounded px-1.5 py-0.5 outline-none text-slate-900 dark:text-slate-300 focus:border-blue-500 shadow-xs"
                                   />
                                 ))}
                               </div>
@@ -1792,7 +1792,7 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
                               <select 
                                 value={editRow.a || ''} 
                                 onChange={(e) => setEditRow({ ...editRow, a: e.target.value })}
-                                className="w-full bg-[#070b14] border border-slate-800 text-xs rounded px-1.5 py-1.5 outline-none text-slate-200 focus:border-blue-500/50 cursor-pointer"
+                                className="w-full bg-white dark:bg-[#070b14] border border-slate-300 dark:border-slate-800 text-xs rounded px-1.5 py-1.5 outline-none text-slate-900 dark:text-slate-200 focus:border-blue-500 cursor-pointer shadow-xs"
                               >
                                 <option value="A">A</option>
                                 <option value="B">B</option>
@@ -1808,7 +1808,7 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
                               <select 
                                 value={editRow.level || ''} 
                                 onChange={(e) => setEditRow({ ...editRow, level: e.target.value })}
-                                className="w-full bg-[#070b14] border border-slate-800 text-xs rounded px-1.5 py-1.5 outline-none text-slate-200 focus:border-blue-500/50 cursor-pointer"
+                                className="w-full bg-white dark:bg-[#070b14] border border-slate-300 dark:border-slate-800 text-xs rounded px-1.5 py-1.5 outline-none text-slate-900 dark:text-slate-200 focus:border-blue-500 cursor-pointer shadow-xs"
                               >
                                 <option value="NHẬN BIẾT">NHẬN BIẾT</option>
                                 <option value="THÔNG HIỂU">THÔNG HIỂU</option>
@@ -1825,7 +1825,7 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
                                 type="text" 
                                 value={editRow.frequency || ''} 
                                 onChange={(e) => setEditRow({ ...editRow, frequency: e.target.value })}
-                                className="w-full bg-[#070b14] border border-slate-800 text-xs rounded px-1.5 py-1.5 outline-none text-slate-200 focus:border-blue-500/50"
+                                className="w-full bg-white dark:bg-[#070b14] border border-slate-300 dark:border-slate-800 text-xs rounded px-1.5 py-1.5 outline-none text-slate-900 dark:text-slate-200 focus:border-blue-500 shadow-xs"
                               />
                             </td>
                           )}
@@ -2360,19 +2360,19 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
                     const val = parseInt(e.target.value) || 1;
                     setCreateTestConfig(prev => ({ ...prev, numVersions: val }));
                   }}
-                  className="bg-[#070b14] border border-slate-800 px-3.5 py-2.5 rounded-xl text-xs text-white focus:outline-none font-bold"
+                  className="bg-white dark:bg-[#070b14] border border-slate-300 dark:border-slate-800 px-3.5 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white focus:outline-none font-bold shadow-xs"
                 />
               </div>
 
               {/* Filters (Active if source is 'bank') */}
               {createTestConfig.source !== 'selected' && (
-                <div className="bg-[#080b12] border border-slate-855 p-4 rounded-2xl grid grid-cols-3 gap-3 animate-fade-in">
+                <div className="bg-slate-50 dark:bg-[#080b12] border border-slate-200 dark:border-slate-855 p-4 rounded-2xl grid grid-cols-3 gap-3 animate-fade-in">
                   <div className="flex flex-col gap-1.5">
                     <label className="text-[10px] font-bold text-slate-500 uppercase">Khối lớp:</label>
                     <select
                       value={createTestConfig.grade}
                       onChange={(e) => setCreateTestConfig(prev => ({ ...prev, grade: e.target.value }))}
-                      className="bg-[#070b14] border border-slate-800 px-3 py-2 rounded-xl text-xs text-white focus:outline-none cursor-pointer"
+                      className="bg-white dark:bg-[#070b14] border border-slate-300 dark:border-slate-800 px-3 py-2 rounded-xl text-xs text-slate-900 dark:text-white focus:outline-none cursor-pointer shadow-xs"
                     >
                       <option value="">Tất cả</option>
                       {availableGrades.map(g => (
@@ -2388,7 +2388,7 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
                       value={createTestConfig.unit}
                       onChange={(e) => setCreateTestConfig(prev => ({ ...prev, unit: e.target.value }))}
                       placeholder="Ví dụ: 1 hoặc 2"
-                      className="bg-[#070b14] border border-slate-800 px-3 py-2 rounded-xl text-xs text-white focus:outline-none"
+                      className="bg-white dark:bg-[#070b14] border border-slate-300 dark:border-slate-800 px-3 py-2 rounded-xl text-xs text-slate-900 dark:text-white focus:outline-none shadow-xs"
                     />
                   </div>
 
@@ -2405,7 +2405,7 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
                           targetDifficulty: val || "NHẬN BIẾT"
                         }));
                       }}
-                      className="bg-[#070b14] border border-slate-800 px-3 py-2 rounded-xl text-xs text-white focus:outline-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="bg-white dark:bg-[#070b14] border border-slate-300 dark:border-slate-800 px-3 py-2 rounded-xl text-xs text-slate-900 dark:text-white focus:outline-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shadow-xs"
                     >
                       <option value="">Tất cả</option>
                       {levelsList.map(lvl => (
@@ -2479,7 +2479,7 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
                               const val = Math.max(0, Math.min(100, parseInt(e.target.value) || 0));
                               setCreateTestConfig(prev => ({ ...prev, difficultyPctNhanBiet: val }));
                             }}
-                            className="bg-[#070b14] border border-slate-850 px-2.5 py-1.5 rounded-xl text-xs text-white font-bold text-center focus:outline-none"
+                            className="bg-white dark:bg-[#070b14] border border-slate-300 dark:border-slate-850 px-2.5 py-1.5 rounded-xl text-xs text-slate-900 dark:text-white font-bold text-center focus:outline-none shadow-xs"
                           />
                         </div>
                         <div className="flex flex-col gap-1">
@@ -2493,7 +2493,7 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
                               const val = Math.max(0, Math.min(100, parseInt(e.target.value) || 0));
                               setCreateTestConfig(prev => ({ ...prev, difficultyPctThongHieu: val }));
                             }}
-                            className="bg-[#070b14] border border-slate-850 px-2.5 py-1.5 rounded-xl text-xs text-white font-bold text-center focus:outline-none"
+                            className="bg-white dark:bg-[#070b14] border border-slate-300 dark:border-slate-850 px-2.5 py-1.5 rounded-xl text-xs text-slate-900 dark:text-white font-bold text-center focus:outline-none shadow-xs"
                           />
                         </div>
                         <div className="flex flex-col gap-1">
@@ -2507,7 +2507,7 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
                               const val = Math.max(0, Math.min(100, parseInt(e.target.value) || 0));
                               setCreateTestConfig(prev => ({ ...prev, difficultyPctVanDung: val }));
                             }}
-                            className="bg-[#070b14] border border-slate-850 px-2.5 py-1.5 rounded-xl text-xs text-white font-bold text-center focus:outline-none"
+                            className="bg-white dark:bg-[#070b14] border border-slate-300 dark:border-slate-850 px-2.5 py-1.5 rounded-xl text-xs text-slate-900 dark:text-white font-bold text-center focus:outline-none shadow-xs"
                           />
                         </div>
                       </div>
@@ -2764,7 +2764,7 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
                   }}
                   placeholder="Dán nội dung CSV tại đây..."
                   rows={6}
-                  className="bg-[#070b14] border border-slate-800 focus:border-blue-500/50 p-3 rounded-xl text-xs text-slate-200 outline-none placeholder-slate-600 font-mono mt-1 w-full resize-y"
+                  className="bg-white dark:bg-[#070b14] border border-slate-300 dark:border-slate-800 focus:border-blue-500 p-3 rounded-xl text-xs text-slate-900 dark:text-slate-200 outline-none placeholder-slate-400 dark:placeholder-slate-600 font-mono mt-1 w-full resize-y shadow-xs"
                 />
               </div>
 

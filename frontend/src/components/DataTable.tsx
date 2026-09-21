@@ -149,7 +149,7 @@ function IndeterminateCheckbox({
     <input
       type="checkbox"
       ref={ref}
-      className={`accent-[#5c36f5] cursor-pointer w-4 h-4 rounded border-[#253050] bg-[#14192b] transition hover:scale-110 ${className}`}
+      className={`accent-[#5c36f5] cursor-pointer w-4 h-4 rounded border-slate-300 dark:border-[#253050] bg-white dark:bg-[#14192b] transition hover:scale-110 ${className}`}
       {...rest}
     />
   );

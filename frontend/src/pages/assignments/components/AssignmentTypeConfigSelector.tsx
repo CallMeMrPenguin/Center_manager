@@ -31,14 +31,14 @@ export const AssignmentTypeConfigSelector: React.FC<AssignmentTypeConfigSelector
   const activeIndex = TYPE_OPTIONS.findIndex((o) => o.id === assignmentType);
 
   return (
-    <div className="space-y-3 pt-2 border-t border-white/10">
+    <div className="space-y-3 pt-2 border-t border-slate-100 dark:border-white/10">
       <div className="space-y-1.5">
-        <label className="text-xs font-bold text-slate-300">
-          Kiểu Bài Giao <span className="text-rose-400">*</span>
+        <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+          Kiểu Bài Giao <span className="text-rose-500 dark:text-rose-400">*</span>
         </label>
 
         {/* Sliding Pill Segmented Control */}
-        <div className="relative flex bg-[#0d1018] p-1 rounded-xl border border-white/10 text-xs shrink-0 font-bold select-none">
+        <div className="relative flex bg-slate-100 dark:bg-[#0d1018] p-1 rounded-xl border border-slate-200 dark:border-white/10 text-xs shrink-0 font-bold select-none shadow-[inset_0_1px_2px_rgba(0,0,0,0.05)]">
           <div
             className="absolute top-1 bottom-1 rounded-lg bg-[#5c36f5] shadow-[0_0_14px_rgba(92,54,245,0.5)] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] pointer-events-none"
             style={{
@@ -54,7 +54,7 @@ export const AssignmentTypeConfigSelector: React.FC<AssignmentTypeConfigSelector
                 type="button"
                 onClick={() => onChangeAssignmentType(opt.id)}
                 className={`flex-1 relative z-10 py-1.5 text-center transition-colors cursor-pointer text-xs ${
-                  active ? 'text-white font-black' : 'text-slate-400 hover:text-white'
+                  active ? 'text-white font-black' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                 }`}
               >
                 {opt.label}
@@ -63,23 +63,23 @@ export const AssignmentTypeConfigSelector: React.FC<AssignmentTypeConfigSelector
           })}
         </div>
 
-        <p className="text-[11px] text-indigo-300/80 px-1 font-medium">
+        <p className="text-[11px] text-indigo-600 dark:text-indigo-300/80 px-1 font-medium">
           {TYPE_OPTIONS[activeIndex]?.desc}
         </p>
       </div>
 
       {/* Extra Config for Homework 2 */}
       {assignmentType === 'homework_2' && (
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-3 rounded-xl bg-[#121626] border border-[#212c4b]">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-3 rounded-xl bg-slate-50 dark:bg-[#121626] border border-slate-200 dark:border-[#212c4b]">
           <div className="space-y-1">
-            <label className="text-[11px] font-bold text-slate-300">Thời Gian Làm Bài</label>
+            <label className="text-[11px] font-bold text-slate-700 dark:text-slate-300">Thời Gian Làm Bài</label>
             <select
               value={timeLimit || 0}
               onChange={(e) => {
                 const v = Number(e.target.value);
                 onChangeTimeLimit(v > 0 ? v : null);
               }}
-              className="w-full bg-[#0c0f1e] border border-[#212c4b] text-white rounded-lg px-2.5 py-1.5 text-xs font-bold"
+              className="w-full bg-white dark:bg-[#0c0f1e] border border-slate-300 dark:border-[#212c4b] text-slate-900 dark:text-white rounded-lg px-2.5 py-1.5 text-xs font-bold shadow-xs"
             >
               <option value="0">Không giới hạn</option>
               <option value="15">15 phút</option>
@@ -91,11 +91,11 @@ export const AssignmentTypeConfigSelector: React.FC<AssignmentTypeConfigSelector
           </div>
 
           <div className="space-y-1">
-            <label className="text-[11px] font-bold text-slate-300">Số Lần Nộp Tối Đa</label>
+            <label className="text-[11px] font-bold text-slate-700 dark:text-slate-300">Số Lần Nộp Tối Đa</label>
             <select
               value={maxAttempts}
               onChange={(e) => onChangeMaxAttempts(Number(e.target.value))}
-              className="w-full bg-[#0c0f1e] border border-[#212c4b] text-white rounded-lg px-2.5 py-1.5 text-xs font-bold"
+              className="w-full bg-white dark:bg-[#0c0f1e] border border-slate-300 dark:border-[#212c4b] text-slate-900 dark:text-white rounded-lg px-2.5 py-1.5 text-xs font-bold shadow-xs"
             >
               <option value="1">1 lần (Khóa sau khi nộp)</option>
               <option value="2">2 lần</option>
@@ -105,12 +105,12 @@ export const AssignmentTypeConfigSelector: React.FC<AssignmentTypeConfigSelector
           </div>
 
           <div className="space-y-1 flex flex-col justify-end">
-            <label className="flex items-center gap-2 cursor-pointer text-xs font-bold text-slate-300 py-1.5">
+            <label className="flex items-center gap-2 cursor-pointer text-xs font-bold text-slate-700 dark:text-slate-300 py-1.5">
               <input
                 type="checkbox"
                 checked={proctoringEnabled}
                 onChange={(e) => onChangeProctoring(e.target.checked)}
-                className="w-4 h-4 rounded border-white/20 accent-[#5c36f5] cursor-pointer"
+                className="w-4 h-4 rounded border-slate-300 dark:border-white/20 accent-[#5c36f5] cursor-pointer"
               />
               <span>Theo dõi màn hình</span>
             </label>

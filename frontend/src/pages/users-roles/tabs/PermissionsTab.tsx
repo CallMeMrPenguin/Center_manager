@@ -79,15 +79,15 @@ export const PermissionsTab: React.FC<PermissionsTabProps> = ({
   return (
     <div className="space-y-4">
       {/* Top Header Card */}
-      <div className="bg-[#0c0f1e] border border-[#1e2742] rounded-2xl p-4 shadow-lg flex flex-wrap items-center justify-between gap-3">
+      <div className="bg-white dark:bg-[#0c0f1e] border border-slate-200/90 dark:border-[#1e2742] rounded-2xl p-4 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.06),0_1px_3px_-1px_rgba(0,0,0,0.06)] flex flex-wrap items-center justify-between gap-3">
         <div>
           <div className="flex items-center gap-2">
-            <Shield size={18} className="text-indigo-400" />
-            <h3 className="text-sm font-black text-white uppercase tracking-wider">
+            <Shield size={18} className="text-indigo-500 dark:text-indigo-400" />
+            <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider">
               Ma Trận Phân Quyền Truy Cập Tab
             </h3>
           </div>
-          <p className="text-xs text-slate-400 mt-0.5">
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
             Cấu hình các tab được phép hiển thị và truy cập cho từng vai trò người dùng trong hệ thống.
           </p>
         </div>
@@ -108,34 +108,34 @@ export const PermissionsTab: React.FC<PermissionsTabProps> = ({
       </div>
 
       {/* Permission Matrix Table */}
-      <div className="bg-[#0c0f1e] border border-[#1e2742] rounded-2xl overflow-hidden shadow-lg">
+      <div className="bg-white dark:bg-[#0c0f1e] border border-slate-200/90 dark:border-[#1e2742] rounded-2xl overflow-hidden shadow-[0_2px_8px_-2px_rgba(0,0,0,0.06),0_1px_3px_-1px_rgba(0,0,0,0.06)]">
         <div className="overflow-x-auto scrollbar-thin">
           <table className="w-full text-left border-collapse select-none">
             <thead>
-              <tr className="bg-[#11162a] border-b border-white/10 text-xs font-black uppercase text-slate-300">
+              <tr className="bg-slate-50 dark:bg-[#11162a] border-b border-slate-200 dark:border-white/10 text-xs font-black uppercase text-slate-700 dark:text-slate-300">
                 <th className="py-3.5 px-4 min-w-[200px]">Tính Năng / Tab</th>
                 {ROLES.map((role) => (
                   <th key={role} className="py-3.5 px-4 text-center min-w-[140px]">
                     <span className="inline-flex items-center gap-1">
-                      {role === 'Quản trị viên' && <Lock size={12} className="text-purple-400" />}
+                      {role === 'Quản trị viên' && <Lock size={12} className="text-purple-500 dark:text-purple-400" />}
                       <span>{role}</span>
                     </span>
                   </th>
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/5 text-xs">
+            <tbody className="divide-y divide-slate-100 dark:divide-white/5 text-xs">
               {TAB_DEFINITIONS.map((tab) => {
                 const Icon = tab.icon;
                 return (
                   <tr
                     key={tab.id}
-                    className="hover:bg-white/[0.02] transition-colors"
+                    className="hover:bg-slate-50/80 dark:hover:bg-white/[0.02] transition-colors"
                   >
                     {/* Tab Name & Icon */}
-                    <td className="py-3 px-4 font-bold text-slate-200">
+                    <td className="py-3 px-4 font-bold text-slate-800 dark:text-slate-200">
                       <div className="flex items-center gap-2.5">
-                        <div className="w-7 h-7 rounded-lg bg-white/5 flex items-center justify-center text-slate-400 shrink-0">
+                        <div className="w-7 h-7 rounded-lg bg-slate-100 dark:bg-white/5 flex items-center justify-center text-slate-600 dark:text-slate-400 shrink-0">
                           <Icon size={14} />
                         </div>
                         <span>{tab.label}</span>
@@ -156,10 +156,10 @@ export const PermissionsTab: React.FC<PermissionsTabProps> = ({
                             disabled={isAdmin}
                             className={`w-6 h-6 rounded-lg mx-auto flex items-center justify-center transition cursor-pointer ${
                               isAdmin
-                                ? 'bg-purple-500/20 text-purple-300 border border-purple-500/40 cursor-default'
+                                ? 'bg-purple-500/20 text-purple-700 dark:text-purple-300 border border-purple-500/40 cursor-default'
                                 : isChecked
                                 ? 'bg-[#5c36f5] text-white shadow-[0_0_8px_rgba(92,54,245,0.5)] border border-[#714df6]'
-                                : 'bg-[#121626] border border-[#263152] hover:border-slate-500 text-transparent'
+                                : 'bg-slate-100 dark:bg-[#121626] border border-slate-300 dark:border-[#263152] hover:border-slate-400 dark:hover:border-slate-500 text-transparent'
                             }`}
                           >
                             <Check size={13} strokeWidth={3} className={isChecked || isAdmin ? 'opacity-100' : 'opacity-0'} />
