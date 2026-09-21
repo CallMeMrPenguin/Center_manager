@@ -28,7 +28,7 @@ export const DistributionCommentaryCard: React.FC<DistributionCommentaryCardProp
   return (
     <div
       ref={containerRef}
-      className="bg-white dark:bg-[#0b0f19] border border-slate-200/90 dark:border-[#1b253b] rounded-2xl p-6 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.06),0_1px_3px_-1px_rgba(0,0,0,0.06)] dark:shadow-xl space-y-6 select-none relative animate-cascade-3 font-sans transition-colors"
+      className="bg-white dark:bg-[#0b0f19] border border-slate-300/80 dark:border-[#1b253b] rounded-2xl p-6 shadow-[0_4px_20px_-4px_rgba(15,23,42,0.08),0_2px_4px_-1px_rgba(15,23,42,0.04)] dark:shadow-xl space-y-6 select-none relative animate-cascade-3 font-sans transition-colors"
     >
       {/* 1. HEADER TITLE & RATING BADGE */}
       <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-white/10">

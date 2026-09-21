@@ -226,7 +226,7 @@ export const ScoreFluctuationsSection: React.FC<ScoreFluctuationsSectionProps> =
   ], [selectedStudentId, onSelectRankingStudent]);
 
   return (
-    <div className="bg-white dark:bg-[#0b0f19] border border-slate-200 dark:border-[#1b253b] rounded-2xl p-6 shadow-sm dark:shadow-xl space-y-6 animate-cascade-4">
+    <div className="bg-white dark:bg-[#0b0f19] border border-slate-300/80 dark:border-[#1b253b] rounded-2xl p-6 shadow-[0_4px_20px_-4px_rgba(15,23,42,0.08),0_2px_4px_-1px_rgba(15,23,42,0.04)] dark:shadow-xl space-y-6 animate-cascade-4">
       <div onClick={() => setIsGrowthSectionOpen(!isGrowthSectionOpen)} className="flex flex-wrap items-center justify-between gap-4 cursor-pointer select-none border-b border-slate-200 dark:border-[#161f33] pb-4">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-500 dark:text-cyan-400 shrink-0">

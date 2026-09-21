@@ -318,8 +318,8 @@ export const StudentRankingsTable: React.FC<StudentRankingsTableProps> = React.m
   ], [selectedStudentId, studentSessionsMap]);
 
   return (
-    <div className={`bg-white dark:bg-[#0d1120] border border-slate-200/90 dark:border-[#1d2644] rounded-2xl flex flex-col shadow-[0_2px_8px_-2px_rgba(0,0,0,0.06),0_1px_3px_-1px_rgba(0,0,0,0.06)] dark:shadow-2xl mb-8 transition-colors ${hasSelectedStudent ? 'animate-cascade-4' : 'animate-cascade-3'}`}>
-      <div className="px-5 py-4 border-b border-slate-100 dark:border-[#181f36] flex flex-wrap items-center justify-between gap-4">
+    <div className={`bg-white dark:bg-[#0d1120] border border-slate-300/80 dark:border-[#1d2644] rounded-2xl flex flex-col shadow-[0_4px_20px_-4px_rgba(15,23,42,0.08),0_2px_4px_-1px_rgba(15,23,42,0.04)] dark:shadow-2xl mb-8 transition-colors ${hasSelectedStudent ? 'animate-cascade-4' : 'animate-cascade-3'}`}>
+      <div className="px-5 py-4 border-b border-slate-200 dark:border-[#181f36] flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <GraduationCap size={18} className="text-indigo-500 dark:text-indigo-400" />
           <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider">

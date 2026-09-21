@@ -47,7 +47,7 @@ export const HeadToHeadDuel: React.FC<HeadToHeadDuelProps> = ({
   if (!classComparisonData) return null;
 
   return (
-    <div className="bg-white dark:bg-[#0b0f19] border border-slate-200 dark:border-[#1b253b] rounded-2xl p-6 shadow-sm dark:shadow-xl space-y-6 animate-cascade-1">
+    <div className="bg-white dark:bg-[#0b0f19] border border-slate-300/80 dark:border-[#1b253b] rounded-2xl p-6 shadow-[0_4px_20px_-4px_rgba(15,23,42,0.08),0_2px_4px_-1px_rgba(15,23,42,0.04)] dark:shadow-xl space-y-6 animate-cascade-1">
       {/* Header & Dual Class Selector */}
       <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 dark:border-[#161f33] pb-5">
         <div className="flex items-center gap-3">

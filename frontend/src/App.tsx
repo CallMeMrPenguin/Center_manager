@@ -187,7 +187,7 @@ function AppContent() {
   const { isDark } = useTheme();
 
   return (
-    <div className="relative flex flex-col h-screen w-screen bg-slate-100 dark:bg-[#07090e] text-slate-900 dark:text-slate-50 overflow-hidden font-sans select-none transition-colors duration-200">
+    <div className="relative flex flex-col h-screen w-screen bg-slate-200/70 dark:bg-[#07090e] text-slate-900 dark:text-slate-50 overflow-hidden font-sans select-none transition-colors duration-200">
       <div className="relative flex flex-row flex-1 overflow-hidden p-4 gap-4 z-10">
         {/* SIDEBAR NAVIGATION */}
         <Sidebar
@@ -210,7 +210,7 @@ function AppContent() {
 
         {/* MAIN BODY SKELETON */}
         <div className="flex-1 flex flex-col overflow-hidden bg-transparent">
-          <main className="flex-1 overflow-hidden bg-white dark:bg-[#0c0f1e] border border-slate-200 dark:border-[#1e2742] relative rounded-2xl shadow-xl transition-colors duration-200">
+          <main className="flex-1 overflow-hidden bg-[#eef2f6] dark:bg-[#0c0f1e] border border-slate-300 dark:border-[#1e2742] relative rounded-2xl shadow-xl transition-colors duration-200">
             {visibleTabs.map((tab) => {
               const isActive = activeTab === tab.id;
               const isVisited = visitedTabIds.has(tab.id);

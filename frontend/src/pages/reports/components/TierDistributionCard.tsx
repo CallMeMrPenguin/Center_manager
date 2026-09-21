@@ -45,7 +45,7 @@ export const TierDistributionCard: React.FC<TierDistributionCardProps> = ({
   }, [studentRankings, selectedClassId]);
 
   return (
-    <div className="bg-white dark:bg-[#0b0f19] border border-slate-200 dark:border-[#1b253b] p-6 rounded-2xl shadow-sm dark:shadow-xl flex flex-col gap-5 animate-cascade-1">
+    <div className="bg-white dark:bg-[#0b0f19] border border-slate-300/80 dark:border-[#1b253b] p-6 rounded-2xl shadow-[0_4px_20px_-4px_rgba(15,23,42,0.08),0_2px_4px_-1px_rgba(15,23,42,0.04)] dark:shadow-xl flex flex-col gap-5 animate-cascade-1">
       <div className="flex items-center justify-between gap-2 border-b border-slate-200 dark:border-[#161f33] pb-4">
         <div className="flex items-center gap-2">
           <h4 className="text-sm font-black uppercase text-slate-900 dark:text-white tracking-wider">PHÂN BỐ HẠNG BẬC HỌC LỰC</h4>

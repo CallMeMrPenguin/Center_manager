@@ -92,14 +92,14 @@ export const StudentProfileHeader: React.FC<StudentProfileHeaderProps> = ({
   const evaluation = getEvaluation(scoreNum, tier);
 
   return (
-    <div className="select-none relative bg-[#0e1222] border border-[#1e2744] p-5 sm:p-6 rounded-2xl shadow-xl space-y-5">
+    <div className="select-none relative bg-white dark:bg-[#0e1222] border border-slate-300/80 dark:border-[#1e2744] p-5 sm:p-6 rounded-2xl shadow-[0_4px_20px_-4px_rgba(15,23,42,0.08),0_2px_4px_-1px_rgba(15,23,42,0.05)] dark:shadow-xl space-y-5 transition-colors">
       {/* Top-Right Deselect Button (X icon only) */}
       <button
         onClick={onClearStudent}
-        className="absolute top-4 right-4 w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition cursor-pointer z-20"
+        className="absolute top-4 right-4 w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10 transition cursor-pointer z-20"
         title="Bỏ chọn học sinh"
       >
-        <X className="w-5 h-5 text-white" />
+        <X className="w-5 h-5 text-slate-600 dark:text-white" />
       </button>
 
       {/* TOP HEADER: Left: Avatar + Name + Nickname + #Rank | Right: Big Rank Icon + Rank Name */}
@@ -114,26 +114,26 @@ export const StudentProfileHeader: React.FC<StudentProfileHeaderProps> = ({
           {/* Identity Info */}
           <div className="min-w-0 space-y-1">
             <div className="flex flex-wrap items-center gap-3">
-              <span className="font-mono text-xs font-bold text-indigo-400">
+              <span className="font-mono text-xs font-bold text-indigo-600 dark:text-indigo-400">
                 ID: HS-{studentIdStr}
               </span>
-              <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-400">
-                <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
+              <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+                <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
                 {student.status || 'Đang theo học'}
               </span>
             </div>
 
             <div className="flex flex-wrap items-baseline gap-2.5">
-              <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+              <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
                 {student.full_name}
               </h2>
               {student.nickname && (
-                <span className="text-lg font-bold text-indigo-300">
+                <span className="text-lg font-bold text-indigo-600 dark:text-indigo-300">
                   ({student.nickname})
                 </span>
               )}
               {stats.rank && stats.rank !== '-' && (
-                <span className="text-2xl sm:text-3xl font-black text-amber-400 font-mono tracking-tight ml-1">
+                <span className="text-2xl sm:text-3xl font-black text-amber-500 dark:text-amber-400 font-mono tracking-tight ml-1">
                   {stats.rank}
                 </span>
               )}
@@ -160,51 +160,51 @@ export const StudentProfileHeader: React.FC<StudentProfileHeaderProps> = ({
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 pt-2">
         {/* LEFT COLUMN: Thông Tin Cá Nhân (Lined Rows) */}
         <div className="space-y-0.5">
-          <div className="flex items-center justify-between pb-2 border-b border-white/10">
-            <span className="text-xs font-black uppercase tracking-wider text-slate-400">
+          <div className="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-white/10">
+            <span className="text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">
               Thông Tin Học Sinh
             </span>
-            <span className="text-xs text-slate-500 font-medium">Hồ sơ cá nhân</span>
+            <span className="text-xs text-slate-400 dark:text-slate-500 font-medium">Hồ sơ cá nhân</span>
           </div>
 
-          <div className="flex items-center justify-between py-2.5 border-b border-white/10 text-sm">
-            <span className="text-slate-400 font-medium">Khối / Lớp:</span>
-            <span className="font-bold text-white text-right truncate max-w-[200px] sm:max-w-none">
+          <div className="flex items-center justify-between py-2.5 border-b border-slate-200 dark:border-white/10 text-sm">
+            <span className="text-slate-500 dark:text-slate-400 font-medium">Khối / Lớp:</span>
+            <span className="font-bold text-slate-900 dark:text-white text-right truncate max-w-[200px] sm:max-w-none">
               {gradeDisplay}
             </span>
           </div>
 
-          <div className="flex items-center justify-between py-2.5 border-b border-white/10 text-sm">
-            <span className="text-slate-400 font-medium">Trường học:</span>
-            <span className="font-bold text-white text-right truncate max-w-[200px] sm:max-w-none">
+          <div className="flex items-center justify-between py-2.5 border-b border-slate-200 dark:border-white/10 text-sm">
+            <span className="text-slate-500 dark:text-slate-400 font-medium">Trường học:</span>
+            <span className="font-bold text-slate-900 dark:text-white text-right truncate max-w-[200px] sm:max-w-none">
               {student.school || 'Trung tâm'}
             </span>
           </div>
 
-          <div className="flex items-center justify-between py-2.5 border-b border-white/10 text-sm">
-            <span className="text-slate-400 font-medium">Ngày sinh:</span>
-            <span className="font-semibold text-slate-200">
+          <div className="flex items-center justify-between py-2.5 border-b border-slate-200 dark:border-white/10 text-sm">
+            <span className="text-slate-500 dark:text-slate-400 font-medium">Ngày sinh:</span>
+            <span className="font-semibold text-slate-700 dark:text-slate-200">
               {student.date_of_birth || 'Chưa cập nhật'}
             </span>
           </div>
 
-          <div className="flex items-center justify-between py-2.5 border-b border-white/10 text-sm">
-            <span className="text-slate-400 font-medium">Giới tính:</span>
-            <span className="font-semibold text-slate-200">
+          <div className="flex items-center justify-between py-2.5 border-b border-slate-200 dark:border-white/10 text-sm">
+            <span className="text-slate-500 dark:text-slate-400 font-medium">Giới tính:</span>
+            <span className="font-semibold text-slate-700 dark:text-slate-200">
               {student.gender || 'Chưa cập nhật'}
             </span>
           </div>
 
-          <div className="flex items-center justify-between py-2.5 border-b border-white/10 text-sm">
-            <span className="text-slate-400 font-medium">Phụ huynh:</span>
-            <span className="font-semibold text-slate-200 text-right truncate max-w-[200px] sm:max-w-none">
+          <div className="flex items-center justify-between py-2.5 border-b border-slate-200 dark:border-white/10 text-sm">
+            <span className="text-slate-500 dark:text-slate-400 font-medium">Phụ huynh:</span>
+            <span className="font-semibold text-slate-700 dark:text-slate-200 text-right truncate max-w-[200px] sm:max-w-none">
               {student.father_name || student.mother_name || 'Chưa cập nhật'}
             </span>
           </div>
 
-          <div className="flex items-center justify-between py-2.5 border-b border-white/10 text-sm">
-            <span className="text-slate-400 font-medium">Điện thoại:</span>
-            <span className="font-semibold text-slate-200 font-mono">
+          <div className="flex items-center justify-between py-2.5 border-b border-slate-200 dark:border-white/10 text-sm">
+            <span className="text-slate-500 dark:text-slate-400 font-medium">Điện thoại:</span>
+            <span className="font-semibold text-slate-700 dark:text-slate-200 font-mono">
               {student.father_phone ||
                 student.mother_phone ||
                 student.phone ||
@@ -212,11 +212,11 @@ export const StudentProfileHeader: React.FC<StudentProfileHeaderProps> = ({
             </span>
           </div>
 
-          <div className="flex items-center justify-between py-2.5 border-b border-white/10 text-sm">
-            <span className="text-slate-400 font-medium">
+          <div className="flex items-center justify-between py-2.5 border-b border-slate-200 dark:border-white/10 text-sm">
+            <span className="text-slate-500 dark:text-slate-400 font-medium">
               {student.address ? 'Địa chỉ:' : 'Nhập học:'}
             </span>
-            <span className="font-semibold text-slate-200 text-right truncate max-w-[220px]">
+            <span className="font-semibold text-slate-700 dark:text-slate-200 text-right truncate max-w-[220px]">
               {student.address || student.enroll_date || 'Chưa cập nhật'}
             </span>
           </div>
@@ -224,26 +224,26 @@ export const StudentProfileHeader: React.FC<StudentProfileHeaderProps> = ({
 
         {/* RIGHT COLUMN: Điểm Số, Chỉ Số PI & Đánh Giá (Lined Rows, No Icons) */}
         <div className="space-y-0.5">
-          <div className="flex items-center justify-between pb-2 border-b border-white/10">
-            <span className="text-xs font-black uppercase tracking-wider text-slate-400">
+          <div className="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-white/10">
+            <span className="text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">
               Kết Quả Học Tập & Đánh Giá
             </span>
-            <span className="text-xs text-slate-500 font-medium">Thống kê chi tiết</span>
+            <span className="text-xs text-slate-400 dark:text-slate-500 font-medium">Thống kê chi tiết</span>
           </div>
 
           {/* Điểm Tổng Kết */}
-          <div className="flex items-center justify-between py-2.5 border-b border-white/10 text-sm">
-            <span className="text-slate-300 font-bold">Điểm Tổng Kết</span>
-            <span className="text-xl sm:text-2xl font-black text-emerald-400 font-mono">
+          <div className="flex items-center justify-between py-2.5 border-b border-slate-200 dark:border-white/10 text-sm">
+            <span className="text-slate-700 dark:text-slate-300 font-bold">Điểm Tổng Kết</span>
+            <span className="text-xl sm:text-2xl font-black text-emerald-500 dark:text-emerald-400 font-mono">
               {stats.overall}
             </span>
           </div>
 
           {/* Chỉ Số PI (Performance Index) */}
-          <div className="flex items-center justify-between py-2.5 border-b border-white/10 text-sm">
-            <span className="text-slate-300 font-bold">Chỉ Số PI (Hiệu Suất)</span>
+          <div className="flex items-center justify-between py-2.5 border-b border-slate-200 dark:border-white/10 text-sm">
+            <span className="text-slate-700 dark:text-slate-300 font-bold">Chỉ Số PI (Hiệu Suất)</span>
             <div className="flex items-baseline gap-1">
-              <span className="text-lg sm:text-xl font-black text-cyan-400 font-mono">
+              <span className="text-lg sm:text-xl font-black text-cyan-600 dark:text-cyan-400 font-mono">
                 {piScore}
               </span>
               <span className="text-xs text-slate-400 font-bold">/ 100</span>
@@ -251,47 +251,47 @@ export const StudentProfileHeader: React.FC<StudentProfileHeaderProps> = ({
           </div>
 
           {/* Đánh Giá Năng Lực */}
-          <div className="flex items-center justify-between py-2.5 border-b border-white/10 text-sm">
-            <span className="text-slate-300 font-bold">Đánh Giá Năng Lực</span>
+          <div className="flex items-center justify-between py-2.5 border-b border-slate-200 dark:border-white/10 text-sm">
+            <span className="text-slate-700 dark:text-slate-300 font-bold">Đánh Giá Năng Lực</span>
             <span className={`text-sm font-black ${evaluation.color}`}>
               {evaluation.text}
             </span>
           </div>
 
           {/* Từ Vựng */}
-          <div className="flex items-center justify-between py-2.5 border-b border-white/10 text-sm">
-            <span className="text-slate-400 font-medium">Từ Vựng</span>
-            <span className="text-base sm:text-lg font-black text-blue-400 font-mono">
+          <div className="flex items-center justify-between py-2.5 border-b border-slate-200 dark:border-white/10 text-sm">
+            <span className="text-slate-500 dark:text-slate-400 font-medium">Từ Vựng</span>
+            <span className="text-base sm:text-lg font-black text-blue-600 dark:text-blue-400 font-mono">
               {stats.c1 ?? '-'}
             </span>
           </div>
 
           {/* Ngữ Pháp */}
-          <div className="flex items-center justify-between py-2.5 border-b border-white/10 text-sm">
-            <span className="text-slate-400 font-medium">Ngữ Pháp</span>
-            <span className="text-base sm:text-lg font-black text-purple-400 font-mono">
+          <div className="flex items-center justify-between py-2.5 border-b border-slate-200 dark:border-white/10 text-sm">
+            <span className="text-slate-500 dark:text-slate-400 font-medium">Ngữ Pháp</span>
+            <span className="text-base sm:text-lg font-black text-purple-600 dark:text-purple-400 font-mono">
               {stats.c2 ?? '-'}
             </span>
           </div>
 
           {/* BTVN */}
-          <div className="flex items-center justify-between py-2.5 border-b border-white/10 text-sm">
-            <span className="text-slate-400 font-medium">BTVN</span>
-            <span className="text-base sm:text-lg font-black text-amber-400 font-mono">
+          <div className="flex items-center justify-between py-2.5 border-b border-slate-200 dark:border-white/10 text-sm">
+            <span className="text-slate-500 dark:text-slate-400 font-medium">BTVN</span>
+            <span className="text-base sm:text-lg font-black text-amber-600 dark:text-amber-400 font-mono">
               {stats.hw ?? '-'}
             </span>
           </div>
 
           {/* Chuyên Cần */}
-          <div className="flex items-center justify-between py-2.5 border-b border-white/10 text-sm">
-            <span className="text-slate-400 font-medium">Chuyên Cần</span>
+          <div className="flex items-center justify-between py-2.5 border-b border-slate-200 dark:border-white/10 text-sm">
+            <span className="text-slate-500 dark:text-slate-400 font-medium">Chuyên Cần</span>
             <div className="flex items-baseline gap-2">
               {stats.sessionCount !== undefined && stats.sessionCount > 0 && (
                 <span className="text-xs text-slate-400">
                   ({stats.sessionCount} buổi)
                 </span>
               )}
-              <span className="text-base sm:text-lg font-black text-sky-400 font-mono">
+              <span className="text-base sm:text-lg font-black text-sky-600 dark:text-sky-400 font-mono">
                 {stats.attendancePct}%
               </span>
             </div>
