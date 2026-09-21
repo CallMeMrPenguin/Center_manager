@@ -139,26 +139,17 @@ export const ChartSvgPlot: React.FC<ChartSvgPlotProps> = React.memo(({
 
               {/* Check 1 Bezier */}
               {hasC1 && (
-                <>
-                  <path key={`c1-glow-${animKey}`} d={makeBezierPath('check1')} fill="none" stroke="#3b82f6" strokeWidth="9" strokeOpacity="0.25" strokeLinecap="round" strokeLinejoin="round" pathLength={1000} className="animate-path-draw" />
-                  <path key={`c1-${animKey}`} d={makeBezierPath('check1')} fill="none" stroke="#3b82f6" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" pathLength={1000} className="animate-path-draw" />
-                </>
+                <path key={`c1-${animKey}`} d={makeBezierPath('check1')} fill="none" stroke="#3b82f6" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" pathLength={1000} className="animate-path-draw" />
               )}
 
               {/* Check 2 Bezier */}
               {hasC2 && (
-                <>
-                  <path key={`c2-glow-${animKey}`} d={makeBezierPath('check2')} fill="none" stroke="#a855f7" strokeWidth="9" strokeOpacity="0.25" strokeLinecap="round" strokeLinejoin="round" pathLength={1000} className="animate-path-draw" />
-                  <path key={`c2-${animKey}`} d={makeBezierPath('check2')} fill="none" stroke="#a855f7" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" pathLength={1000} className="animate-path-draw" />
-                </>
+                <path key={`c2-${animKey}`} d={makeBezierPath('check2')} fill="none" stroke="#a855f7" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" pathLength={1000} className="animate-path-draw" />
               )}
 
               {/* Homework Bezier */}
               {hasHw && (
-                <>
-                  <path key={`hw-glow-${animKey}`} d={makeBezierPath('homework')} fill="none" stroke="#10b981" strokeWidth="9" strokeOpacity="0.25" strokeLinecap="round" strokeLinejoin="round" pathLength={1000} className="animate-path-draw" />
-                  <path key={`hw-${animKey}`} d={makeBezierPath('homework')} fill="none" stroke="#10b981" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" pathLength={1000} className="animate-path-draw" />
-                </>
+                <path key={`hw-${animKey}`} d={makeBezierPath('homework')} fill="none" stroke="#10b981" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" pathLength={1000} className="animate-path-draw" />
               )}
 
               {/* Forecast projections */}
