@@ -39,9 +39,9 @@ export const SummaryTooltipCard: React.FC<SummaryTooltipCardProps> = ({
         animate={{ opacity: 1, y: 0, scale: 1 }}
         exit={{ opacity: 0, y: 8, scale: 0.95 }}
         transition={{ type: 'spring', stiffness: 420, damping: 28 }}
-        className={`absolute bottom-full mb-3 ${alignClasses} w-88 max-w-[calc(100vw-32px)] p-4 bg-[#0d1224] border border-[#232f54] text-slate-200 text-[11px] rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.95)] z-50 text-left font-sans space-y-2.5 pointer-events-auto select-none`}
+        className={`absolute bottom-full mb-3 ${alignClasses} w-88 max-w-[calc(100vw-32px)] p-4 bg-white dark:bg-[#0d1224] border border-slate-300 dark:border-[#232f54] text-slate-800 dark:text-slate-200 text-[11px] rounded-2xl shadow-xl dark:shadow-[0_20px_50px_rgba(0,0,0,0.95)] z-50 text-left font-sans space-y-2.5 pointer-events-auto select-none`}
       >
-        <div className="flex items-center justify-between border-b border-white/10 pb-2">
+        <div className="flex items-center justify-between border-b border-slate-200 dark:border-white/10 pb-2">
           <span className={`font-black text-xs ${titleColor}`}>{title}</span>
           {onClose && (
             <button
@@ -50,7 +50,7 @@ export const SummaryTooltipCard: React.FC<SummaryTooltipCardProps> = ({
                 onClose();
               }}
               type="button"
-              className="text-slate-400 hover:text-white transition cursor-pointer p-0.5"
+              className="text-slate-400 hover:text-slate-700 dark:hover:text-white transition cursor-pointer p-0.5"
             >
               <X size={13} />
             </button>
@@ -58,16 +58,16 @@ export const SummaryTooltipCard: React.FC<SummaryTooltipCardProps> = ({
         </div>
 
         <div className="space-y-1 text-[11px]">
-          <span className="font-bold text-slate-300 block text-[10px] uppercase tracking-wider text-indigo-400/90">
+          <span className="font-bold block text-[10px] uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
             Chỉ số này phản ánh gì:
           </span>
-          <p className="text-[11px] text-slate-300 leading-relaxed font-medium">{whatItReflects}</p>
+          <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed font-medium">{whatItReflects}</p>
         </div>
 
         {children}
 
         {footer && (
-          <div className="pt-2 border-t border-white/10 text-[10px] text-slate-400 space-y-1">
+          <div className="pt-2 border-t border-slate-200 dark:border-white/10 text-[10px] text-slate-500 dark:text-slate-400 space-y-1">
             {footer}
           </div>
         )}

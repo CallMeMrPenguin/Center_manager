@@ -76,7 +76,7 @@ export function SegmentedControl<T extends string = string>({
   return (
     <div
       onMouseLeave={() => setHoveredVal(null)}
-      className={`relative flex items-center bg-slate-100 dark:bg-[#090c15] p-1 rounded-xl border border-slate-200 dark:border-[#1b233d] shadow-[inset_0_1px_2px_rgba(0,0,0,0.05)] select-none shrink-0 transition-colors duration-150 ${
+      className={`relative flex items-center bg-slate-200/90 dark:bg-[#090c15] p-1 rounded-xl border border-slate-300 dark:border-[#1b233d] shadow-[inset_0_1px_2px_rgba(0,0,0,0.08)] select-none shrink-0 transition-colors duration-150 ${
         isFluid ? 'w-full' : 'inline-flex w-fit'
       } ${className}`}
     >
@@ -100,7 +100,7 @@ export function SegmentedControl<T extends string = string>({
                 ? 'opacity-30 cursor-not-allowed text-slate-400 dark:text-slate-500'
                 : isActive
                 ? 'text-white font-black'
-                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                : 'text-slate-800 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white font-extrabold'
             }`}
           >
             {/* Active Sliding Pill with Framer Motion Spring */}
@@ -117,7 +117,7 @@ export function SegmentedControl<T extends string = string>({
               <motion.div
                 layoutId={`${baseLayoutId}-hover`}
                 transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-                className="absolute inset-0 rounded-lg bg-white/90 dark:bg-white/[0.06] border border-slate-200/70 dark:border-white/10 shadow-xs z-0 pointer-events-none"
+                className="absolute inset-0 rounded-lg bg-white dark:bg-white/[0.06] border border-slate-300 dark:border-white/10 shadow-xs z-0 pointer-events-none"
               />
             )}
 

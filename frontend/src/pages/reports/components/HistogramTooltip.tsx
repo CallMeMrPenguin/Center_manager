@@ -33,13 +33,13 @@ export const HistogramTooltip: React.FC<HistogramTooltipProps> = ({
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 4 }}
         transition={{ type: 'spring', stiffness: 450, damping: 28 }}
-        className="absolute z-30 pointer-events-none bg-[#0d1224] border border-[#232f54] p-3.5 rounded-2xl shadow-[0_16px_40px_rgba(0,0,0,0.95)] text-xs min-w-[230px] select-none"
+        className="absolute z-30 pointer-events-none bg-white dark:bg-[#0d1224] border border-slate-300 dark:border-[#232f54] p-3.5 rounded-2xl shadow-xl dark:shadow-[0_16px_40px_rgba(0,0,0,0.95)] text-xs min-w-[230px] select-none"
         style={{
           left: `${tipLeft}px`,
           top: `${tipTop}px`,
         }}
       >
-        <div className="flex items-center justify-between border-b border-white/10 pb-2 font-bold text-white">
+        <div className="flex items-center justify-between border-b border-slate-200 dark:border-white/10 pb-2 font-bold text-slate-900 dark:text-white">
           <span className="flex items-center gap-1.5 text-xs sm:text-sm">
             <span
               className="w-2.5 h-2.5 rounded-md shadow-sm"
@@ -47,43 +47,43 @@ export const HistogramTooltip: React.FC<HistogramTooltipProps> = ({
             />
             <span>Mức: {hoveredBin.rangeLabel}</span>
           </span>
-          <span className="font-mono text-xs px-2 py-0.5 rounded-lg bg-white/10 text-white font-black">
+          <span className="font-mono text-xs px-2 py-0.5 rounded-lg bg-slate-100 dark:bg-white/10 text-slate-900 dark:text-white font-black">
             {hoveredBin.pct}%
           </span>
         </div>
 
-        <div className="pt-2 space-y-1.5 text-slate-300 text-[11px]">
+        <div className="pt-2 space-y-1.5 text-slate-700 dark:text-slate-300 text-[11px]">
           <div className="flex items-center justify-between">
-            <span className="text-slate-400 flex items-center gap-1">
-              <Users size={12} className="text-slate-500" />
+            <span className="text-slate-500 dark:text-slate-400 flex items-center gap-1">
+              <Users size={12} className="text-slate-400 dark:text-slate-500" />
               <span>Số lượng:</span>
             </span>
-            <span className="font-mono font-black text-white">
+            <span className="font-mono font-black text-slate-900 dark:text-white">
               {hoveredBin.count} học sinh
             </span>
           </div>
 
           <div className="flex items-center justify-between">
-            <span className="text-slate-400">Tỷ lệ phổ điểm:</span>
-            <span className="font-mono font-black text-indigo-400">
+            <span className="text-slate-500 dark:text-slate-400">Tỷ lệ phổ điểm:</span>
+            <span className="font-mono font-black text-indigo-600 dark:text-indigo-400">
               {hoveredBin.pct}%
             </span>
           </div>
 
           {hoveredBin.studentNames && hoveredBin.studentNames.length > 0 && (
-            <div className="pt-1.5 border-t border-white/10 text-[11px]">
-              <span className="text-slate-400 block mb-1 font-semibold text-[10px] uppercase tracking-wider">
+            <div className="pt-1.5 border-t border-slate-200 dark:border-white/10 text-[11px]">
+              <span className="text-slate-500 dark:text-slate-400 block mb-1 font-semibold text-[10px] uppercase tracking-wider">
                 Học sinh tiêu biểu:
               </span>
-              <span className="font-bold text-indigo-200 truncate block bg-[#13192f] p-1.5 rounded-lg border border-white/5">
+              <span className="font-bold text-indigo-900 dark:text-indigo-200 truncate block bg-indigo-50/70 dark:bg-[#13192f] p-1.5 rounded-lg border border-indigo-100 dark:border-white/5">
                 {hoveredBin.studentNames.slice(0, 3).join(', ')}
                 {hoveredBin.studentNames.length > 3 ? ` (+${hoveredBin.studentNames.length - 3})` : ''}
               </span>
             </div>
           )}
 
-          <div className="text-[10px] text-indigo-300 flex items-center gap-1 pt-1 border-t border-white/10 font-medium">
-            <Sparkles size={11} className="text-indigo-400 shrink-0" />
+          <div className="text-[10px] text-indigo-600 dark:text-indigo-300 flex items-center gap-1 pt-1 border-t border-slate-200 dark:border-white/10 font-medium">
+            <Sparkles size={11} className="text-indigo-500 dark:text-indigo-400 shrink-0" />
             <span>Nhấn cột để lọc danh sách chi tiết</span>
           </div>
         </div>

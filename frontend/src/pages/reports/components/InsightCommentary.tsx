@@ -124,7 +124,7 @@ export const InsightCommentary: React.FC<InsightCommentaryProps> = React.memo(({
 
                 {/* Floating Popover Card */}
                 {isTooltipActive && (
-                  <div className="absolute right-0 top-full mt-2 z-50 w-72 sm:w-80 p-3.5 rounded-xl bg-white dark:bg-[#12172b] border border-slate-200 dark:border-[#2c375e] text-xs shadow-2xl space-y-2 animate-in fade-in zoom-in-95 duration-150">
+                  <div className="absolute right-0 top-full mt-2 z-50 w-72 sm:w-80 p-3.5 rounded-xl bg-white dark:bg-[#12172b] border border-slate-300 dark:border-[#2c375e] text-xs shadow-2xl space-y-2 animate-in fade-in zoom-in-95 duration-150">
                     <div className="flex items-center justify-between text-indigo-600 dark:text-indigo-300 font-bold border-b border-slate-200 dark:border-white/10 pb-1.5">
                       <span className="uppercase text-[10px] tracking-wider">
                         Ý Nghĩa: {item.tooltipTitle}
@@ -141,7 +141,7 @@ export const InsightCommentary: React.FC<InsightCommentaryProps> = React.memo(({
                       {item.tooltipDesc}
                     </p>
                     {item.tooltipFormula && (
-                      <div className="bg-slate-50 dark:bg-[#090d18] p-2.5 rounded-lg border border-slate-200 dark:border-[#1e2744] space-y-1 font-mono text-[10px]">
+                      <div className="bg-slate-50 dark:bg-[#090d18] p-2.5 rounded-lg border border-slate-300 dark:border-[#1e2744] space-y-1 font-mono text-[10px]">
                         <div className="text-indigo-600 dark:text-indigo-400 font-bold">
                           {item.tooltipFormula}
                         </div>

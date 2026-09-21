@@ -70,10 +70,10 @@ export const HoverPreviewProvider: React.FC<{
             transform: isTooCloseToTop ? 'translateX(-50%)' : 'translateX(-50%) translateY(-100%)',
             zIndex: 99999,
           }}
-          className="pointer-events-none w-[300px] bg-[#0c0f1e] border border-[#263563] rounded-2xl p-4 shadow-[0_25px_60px_rgba(0,0,0,0.95)] space-y-3 font-sans select-none"
+          className="pointer-events-none w-[300px] bg-white dark:bg-[#0c0f1e] border border-slate-300 dark:border-[#263563] rounded-2xl p-4 shadow-xl dark:shadow-[0_25px_60px_rgba(0,0,0,0.95)] space-y-3 font-sans select-none"
         >
           {activeItem.image && (
-            <div className="w-full h-36 rounded-xl overflow-hidden bg-[#151c36] border border-white/10 relative">
+            <div className="w-full h-36 rounded-xl overflow-hidden bg-slate-100 dark:bg-[#151c36] border border-slate-200 dark:border-white/10 relative">
               <motion.img
                 initial={{ scale: 1.08 }}
                 animate={{ scale: 1 }}
@@ -82,32 +82,32 @@ export const HoverPreviewProvider: React.FC<{
                 alt={activeItem.title}
                 className="w-full h-full object-cover"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#0c0f1e] via-transparent to-transparent opacity-60" />
+              <div className="absolute inset-0 bg-gradient-to-t from-white/80 dark:from-[#0c0f1e] via-transparent to-transparent opacity-60" />
             </div>
           )}
 
           <div>
             <div className="flex items-center justify-between gap-2">
-              <h4 className="text-xs font-black text-white truncate">{activeItem.title}</h4>
+              <h4 className="text-xs font-black text-slate-900 dark:text-white truncate">{activeItem.title}</h4>
               {activeItem.badge && (
-                <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 shrink-0">
+                <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-500/30 shrink-0">
                   {activeItem.badge}
                 </span>
               )}
             </div>
             {activeItem.subtitle && (
-              <p className="text-[11px] text-slate-300 font-medium line-clamp-2 mt-1 leading-snug">
+              <p className="text-[11px] text-slate-600 dark:text-slate-300 font-medium line-clamp-2 mt-1 leading-snug">
                 {activeItem.subtitle}
               </p>
             )}
           </div>
 
           {activeItem.details && (
-            <div className="grid grid-cols-2 gap-2 pt-2 border-t border-white/10 text-[10px]">
+            <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-200 dark:border-white/10 text-[10px]">
               {Object.entries(activeItem.details).map(([k, v]) => (
-                <div key={k} className="bg-[#12182c] px-2 py-1 rounded-lg border border-white/5">
-                  <span className="text-slate-400 block">{k}:</span>
-                  <span className="text-white font-bold font-mono">{v}</span>
+                <div key={k} className="bg-slate-50 dark:bg-[#12182c] px-2 py-1 rounded-lg border border-slate-200 dark:border-white/5">
+                  <span className="text-slate-500 dark:text-slate-400 block">{k}:</span>
+                  <span className="text-slate-900 dark:text-white font-bold font-mono">{v}</span>
                 </div>
               ))}
             </div>

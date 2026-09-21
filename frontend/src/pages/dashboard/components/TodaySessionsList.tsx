@@ -31,8 +31,8 @@ export const TodaySessionsList: React.FC<TodaySessionsListProps> = ({ sessions, 
   };
 
   return (
-    <div className="bg-white dark:bg-[#0e1322] border border-slate-200 dark:border-[#1e2742] rounded-2xl p-5 flex flex-col shadow-sm dark:shadow-none transition-colors duration-200">
-      <div className="flex items-center justify-between pb-3.5 mb-4 border-b border-slate-200 dark:border-[#1c2438]">
+    <div className="bg-white dark:bg-[#0e1322] border border-slate-300 dark:border-[#1e2742] rounded-2xl p-5 flex flex-col shadow-sm dark:shadow-none transition-colors duration-200">
+      <div className="flex items-center justify-between pb-3.5 mb-4 border-b border-slate-300 dark:border-[#1c2438]">
         <div className="flex items-center gap-2.5">
           <div className="p-1.5 rounded-lg bg-blue-500/15 text-blue-500 dark:text-blue-400">
             <Clock size={16} />
@@ -69,7 +69,7 @@ export const TodaySessionsList: React.FC<TodaySessionsListProps> = ({ sessions, 
             return (
               <div
                 key={sess.id}
-                className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-xl bg-slate-50 dark:bg-[#13192c] border border-slate-200 dark:border-[#1e2844] hover:border-blue-500/40 transition"
+                className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-xl bg-slate-50 dark:bg-[#13192c] border border-slate-300 dark:border-[#1e2844] hover:border-blue-500/40 transition"
               >
                 <div className="flex items-start sm:items-center gap-3">
                   <div className="px-2.5 py-1 rounded-lg bg-blue-500/10 border border-blue-500/20 text-blue-600 dark:text-blue-400 font-mono text-xs font-black shrink-0">

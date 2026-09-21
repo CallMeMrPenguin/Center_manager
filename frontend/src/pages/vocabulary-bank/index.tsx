@@ -126,16 +126,16 @@ const ColumnHeaderFilter = ({
 
       {isOpen && (
         <div 
-          className={`absolute top-full mt-1.5 w-64 filter-dropdown-menu z-50 py-3.5 px-3 flex flex-col gap-3 text-slate-200 normal-case font-normal ${
+          className={`absolute top-full mt-1.5 w-64 filter-dropdown-menu z-50 py-3.5 px-3 flex flex-col gap-3 text-slate-900 dark:text-slate-200 normal-case font-normal ${
             isRightAligned ? 'right-0 left-auto' : 'left-0 right-auto'
           }`}
           style={{ '--filter-menu-max-height': `${maxHeight}px` } as React.CSSProperties}
         >
-          <div className="flex items-center justify-between pb-2 border-b border-slate-900">
-            <span className="text-[0.66rem] font-bold text-slate-450 uppercase tracking-wider">Lọc: {columnLabel}</span>
+          <div className="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-slate-900">
+            <span className="text-[0.66rem] font-bold text-slate-600 dark:text-slate-450 uppercase tracking-wider">Lọc: {columnLabel}</span>
             <button 
               onClick={() => onToggleOpen(null as any)}
-              className="text-slate-500 hover:text-white transition"
+              className="text-slate-400 hover:text-slate-900 dark:hover:text-white transition"
             >
               <X size={12} />
             </button>
@@ -148,8 +148,8 @@ const ColumnHeaderFilter = ({
                 onSort({ key: columnKey, direction: 'asc' });
                 onToggleOpen(null as any);
               }}
-              className={`w-full text-left px-2.5 py-1.5 text-xs rounded-lg hover:bg-slate-900 transition flex items-center gap-2 font-medium ${
-                sortConfig?.key === columnKey && sortConfig.direction === 'asc' ? 'text-blue-400 bg-blue-500/5' : 'text-slate-300'
+              className={`w-full text-left px-2.5 py-1.5 text-xs rounded-lg hover:bg-slate-100 dark:hover:bg-slate-900 transition flex items-center gap-2 font-medium ${
+                sortConfig?.key === columnKey && sortConfig.direction === 'asc' ? 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-500/5' : 'text-slate-700 dark:text-slate-300'
               }`}
             >
               <span className="text-[0.66rem] font-bold">↑</span> Sắp xếp tăng dần (A-Z)
@@ -159,8 +159,8 @@ const ColumnHeaderFilter = ({
                 onSort({ key: columnKey, direction: 'desc' });
                 onToggleOpen(null as any);
               }}
-              className={`w-full text-left px-2.5 py-1.5 text-xs rounded-lg hover:bg-slate-900 transition flex items-center gap-2 font-medium ${
-                sortConfig?.key === columnKey && sortConfig.direction === 'desc' ? 'text-blue-400 bg-blue-500/5' : 'text-slate-300'
+              className={`w-full text-left px-2.5 py-1.5 text-xs rounded-lg hover:bg-slate-100 dark:hover:bg-slate-900 transition flex items-center gap-2 font-medium ${
+                sortConfig?.key === columnKey && sortConfig.direction === 'desc' ? 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-500/5' : 'text-slate-700 dark:text-slate-300'
               }`}
             >
               <span className="text-[0.66rem] font-bold">↓</span> Sắp xếp giảm dần (Z-A)
@@ -169,7 +169,7 @@ const ColumnHeaderFilter = ({
 
           {/* Search Input for Cell Contents */}
           {columnKey !== 'options' && (
-            <div className="flex flex-col gap-1 border-t border-slate-900/60 pt-2.5">
+            <div className="flex flex-col gap-1 border-t border-slate-200 dark:border-slate-900/60 pt-2.5">
               <span className="text-[0.6rem] font-bold text-slate-500 uppercase">Tìm trong cột</span>
               <input
                 type="text"
@@ -183,7 +183,7 @@ const ColumnHeaderFilter = ({
 
           {/* Unique Values Checklist */}
           {columnKey !== 'options' && (
-            <div className="flex flex-col gap-1 border-t border-slate-900/60 pt-2.5">
+            <div className="flex flex-col gap-1 border-t border-slate-200 dark:border-slate-900/60 pt-2.5">
               <div className="flex items-center justify-between mb-1">
                 <span className="text-[0.6rem] font-bold text-slate-500 uppercase">Bộ lọc giá trị</span>
                 <div className="flex gap-2">
@@ -191,7 +191,7 @@ const ColumnHeaderFilter = ({
                     onClick={() => {
                       onUpdateFilter(columnKey, searchText, []);
                     }}
-                    className="text-[0.6rem] text-blue-400 hover:underline font-bold"
+                    className="text-[0.6rem] text-blue-600 dark:text-blue-400 hover:underline font-bold"
                   >
                     Tất cả
                   </button>
@@ -199,7 +199,7 @@ const ColumnHeaderFilter = ({
                     onClick={() => {
                       onUpdateFilter(columnKey, searchText, ['__NONE__']);
                     }}
-                    className="text-[0.6rem] text-rose-400 hover:underline font-bold"
+                    className="text-[0.6rem] text-rose-600 dark:text-rose-400 hover:underline font-bold"
                   >
                     Xóa
                   </button>
@@ -216,7 +216,7 @@ const ColumnHeaderFilter = ({
 
               <div className="max-h-36 overflow-y-auto pr-1 flex flex-col gap-1">
                 {displayedValues.length === 0 ? (
-                  <span className="text-[0.66rem] text-slate-600 italic px-2">Không có giá trị</span>
+                  <span className="text-[0.66rem] text-slate-500 italic px-2">Không có giá trị</span>
                 ) : (
                   <>
                     {displayedValues.map((val) => {
@@ -251,19 +251,19 @@ const ColumnHeaderFilter = ({
                       };
 
                       return (
-                        <label key={val} className="flex items-center gap-2 px-2 py-1 hover:bg-slate-900 rounded cursor-pointer text-[0.73rem] text-slate-300 hover:text-white transition">
+                        <label key={val} className="flex items-center gap-2 px-2 py-1 hover:bg-slate-100 dark:hover:bg-slate-900 rounded cursor-pointer text-[0.73rem] text-slate-700 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white transition">
                           <input
                             type="checkbox"
                             checked={isChecked()}
                             onChange={handleToggleVal}
-                            className="rounded border-slate-800 text-blue-600 bg-slate-950 focus:ring-blue-500 cursor-pointer h-3.5 w-3.5"
+                            className="rounded border-slate-300 dark:border-slate-800 text-blue-600 bg-white dark:bg-slate-950 focus:ring-blue-500 cursor-pointer h-3.5 w-3.5"
                           />
                           <span className="truncate">{val}</span>
                         </label>
                       );
                     })}
                     {filteredValues.length > 50 && (
-                      <span className="text-[10px] text-slate-500 italic px-2 pt-1 border-t border-slate-900/40">
+                      <span className="text-[10px] text-slate-500 italic px-2 pt-1 border-t border-slate-200 dark:border-slate-900/40">
                         Hiển thị 50 / {filteredValues.length} giá trị (gõ thêm để tìm...)
                       </span>
                     )}
