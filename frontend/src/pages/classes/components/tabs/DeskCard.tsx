@@ -80,13 +80,9 @@ export const DeskCard: React.FC<DeskCardProps> = ({
             }`}>
               {seat.student_name}
             </span>
-            {isAbsent ? (
+            {isAbsent && (
               <span className="inline-flex items-center gap-1 text-[9px] font-bold text-rose-600 dark:text-rose-300 mt-0.5">
                 <AlertCircle size={9} /> Vắng mặt
-              </span>
-            ) : (
-              <span className="text-[10px] text-slate-500 dark:text-slate-400 font-semibold block">
-                {posIdx === 0 ? 'Ghế trái' : 'Ghế phải'}
               </span>
             )}
           </div>

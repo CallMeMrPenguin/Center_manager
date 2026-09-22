@@ -64,19 +64,6 @@ export const SeatingChartTab: React.FC<SeatingChartTabProps> = ({
     );
   }, [unassignedStudents, searchQuery]);
 
-  const totalSeats = useMemo(() => {
-    return seatingGrid.reduce((acc, col) => acc + (col.desks_in_col || desksPerCol) * 2, 0);
-  }, [seatingGrid, desksPerCol]);
-
-  const totalOccupied = useMemo(() => {
-    return seatingGrid.reduce((acc, col) => {
-      if (!col.seats) return acc;
-      return acc + col.seats.filter((s) => Boolean(s?.student_name)).length;
-    }, 0);
-  }, [seatingGrid]);
-
-  const occupancyPct = totalSeats > 0 ? Math.round((totalOccupied / totalSeats) * 100) : 0;
-
   return (
     <div className="space-y-4 font-sans select-none">
       {/* 1. TOP CLASSROOM ACTION TOOLBAR */}
@@ -255,13 +242,8 @@ export const SeatingChartTab: React.FC<SeatingChartTabProps> = ({
             showUnassignedPanel ? 'md:col-span-3' : 'md:col-span-4'
           } bg-[#e2e8f0]/80 dark:bg-[#080a10] border border-slate-300 dark:border-white/10 rounded-2xl p-6 overflow-x-auto min-h-[460px] flex flex-col items-center gap-6 transition-all shadow-inner`}
         >
-          {/* TEACHER PODIUM & BLACKBOARD (FRONT OF CLASSROOM) */}
-          <ClassroomPodium
-            totalOccupied={totalOccupied}
-            totalSeats={totalSeats}
-            occupancyPct={occupancyPct}
-            teacherName={teacherName}
-          />
+          {/* BÀN GIÁO VIÊN (CLASSROOM FRONT REFERENCE) */}
+          <ClassroomPodium />
 
           {/* COLUMNS / DÃY BÀN HỌC */}
           <div className="flex justify-center items-start gap-8 w-full">
