@@ -49,9 +49,11 @@ export const QuestionNodeView: React.FC<QuestionNodeViewProps> = memo(({
     >
       <div className="flex items-start gap-2">
         {node.qNum && (
-          <span className={`font-bold text-xs sm:text-sm text-rose-600 shrink-0 min-w-[22px] text-right ${hasText ? 'pt-0.5' : 'pt-1'}`}>
-            {node.qNum}.
-          </span>
+          <div className={`shrink-0 min-w-[24px] text-right ${hasText ? 'pt-0.5' : 'h-[38px] flex items-center justify-end'}`}>
+            <span className="font-bold text-xs sm:text-sm text-rose-600">
+              {node.qNum}.
+            </span>
+          </div>
         )}
         <div className="flex-1 space-y-1.5 min-w-0">
           {/* Question Text */}
@@ -132,28 +134,28 @@ export const QuestionNodeView: React.FC<QuestionNodeViewProps> = memo(({
                     : checkAnswerCorrect(cleanText, keyForThisQ) || checkAnswerCorrect(optLetter, keyForThisQ)
                   : false;
 
-                let optClass = 'bg-white border-slate-300 text-slate-900 hover:bg-slate-50';
-                let circleClass = 'text-blue-700 bg-blue-100 group-hover:bg-blue-200';
+                let optClass = 'bg-slate-200/70 hover:bg-slate-300/80 dark:bg-white/10 dark:hover:bg-white/15 text-slate-900 dark:text-white shadow-2xs hover:shadow-xs';
+                let circleClass = 'text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-900/40 group-hover:bg-blue-200 dark:group-hover:bg-blue-900/60';
                 let badgeLabel: React.ReactNode = null;
 
                 if (isSubmitted && showAnswerKeys && isAssigned) {
                   if (isSelected && isKey) {
-                    optClass = 'bg-emerald-600 border-emerald-700 text-white font-bold shadow-sm ring-2 ring-emerald-400';
+                    optClass = 'bg-emerald-600 text-white font-bold shadow-sm';
                     circleClass = 'bg-white text-emerald-700 font-black';
                     badgeLabel = <span className="ml-auto text-[10px] font-black px-2 py-0.5 rounded bg-emerald-800 text-white shrink-0">✓ Đúng</span>;
                   } else if (isSelected && !isKey) {
-                    optClass = 'bg-rose-600 border-rose-700 text-white font-bold shadow-sm ring-2 ring-rose-400';
+                    optClass = 'bg-rose-600 text-white font-bold shadow-sm';
                     circleClass = 'bg-white text-rose-700 font-black';
                     badgeLabel = <span className="ml-auto text-[10px] font-black px-2 py-0.5 rounded bg-rose-800 text-white shrink-0">✗ Sai</span>;
                   } else if (!isSelected && isKey) {
-                    optClass = 'bg-emerald-50 border-2 border-dashed border-emerald-500 text-emerald-950 font-bold shadow-xs';
+                    optClass = 'bg-emerald-100 text-emerald-950 font-bold shadow-xs';
                     circleClass = 'bg-emerald-200 text-emerald-900 font-black';
                     badgeLabel = <span className="ml-auto text-[10px] font-black px-2 py-0.5 rounded bg-emerald-700 text-white shrink-0">★ Key</span>;
                   }
                 } else if (isSelected) {
                   // User selected state: Vivid blue background with crisp pure white text
-                  optClass = 'bg-[#2563eb] border-[#1d4ed8] text-white font-bold shadow-md shadow-blue-500/25 ring-2 ring-blue-400';
-                  circleClass = 'bg-white text-[#1d4ed8] font-black';
+                  optClass = 'bg-[#2563eb] text-white font-bold shadow-xs';
+                  circleClass = 'bg-white text-[#2563eb] font-black';
                 }
 
                 return (
@@ -162,7 +164,7 @@ export const QuestionNodeView: React.FC<QuestionNodeViewProps> = memo(({
                     type="button"
                     disabled={isDisabled}
                     onClick={() => onSelectOption(qKey, optLetter)}
-                    className={`text-left flex items-center gap-2 transition cursor-pointer py-2 px-3 rounded-xl border text-xs sm:text-sm group ${optClass}`}
+                    className={`text-left flex items-center gap-2 transition cursor-pointer py-2 px-3 rounded-xl border-0 text-xs sm:text-sm group ${optClass}`}
                   >
                     <span
                       className={`w-6 h-6 min-w-[24px] rounded-full flex items-center justify-center font-bold text-xs transition-colors shrink-0 ${circleClass}`}
@@ -187,20 +189,20 @@ export const QuestionNodeView: React.FC<QuestionNodeViewProps> = memo(({
 
           {/* Submission Answer vs Key Feedback Strip */}
           {isSubmitted && showAnswerKeys && keyForThisQ && isAssigned && (
-            <div className={`mt-2 p-2 rounded-xl border flex flex-wrap items-center justify-between gap-2 text-xs ${
+            <div className={`mt-2 p-2 rounded-xl border-0 shadow-2xs flex flex-wrap items-center justify-between gap-2 text-xs ${
               isQuestionCorrect
-                ? 'bg-emerald-50/90 border-emerald-300 text-emerald-950 font-medium'
-                : 'bg-rose-50/90 border-rose-300 text-rose-950 font-medium'
+                ? 'bg-emerald-500/15 text-emerald-950 dark:text-emerald-200 font-medium'
+                : 'bg-rose-500/15 text-rose-950 dark:text-rose-200 font-medium'
             }`}>
               <div className="flex items-center gap-2">
-                <span className="font-bold">{isQuestionCorrect ? '✅ Trả lời đúng' : '❌ Trả lời sai'}</span>
-                <span className="text-slate-400">|</span>
+                <span className="font-bold">{isQuestionCorrect ? 'Trả lời đúng' : 'Trả lời sai'}</span>
+                <span className="text-slate-400">/</span>
                 <span>Đã chọn: <strong className={isQuestionCorrect ? 'text-emerald-700 font-bold' : 'text-rose-700 font-bold'}>{currentAns || 'Chưa làm'}</strong></span>
               </div>
               {!isQuestionCorrect && (
-                <div className="flex items-center gap-1.5 text-emerald-900 font-bold">
+                <div className="flex items-center gap-1.5 text-emerald-900 dark:text-emerald-300 font-bold">
                   <span>Đáp án đúng:</span>
-                  <span className="px-2 py-0.5 rounded bg-emerald-200 text-emerald-950 font-mono border border-emerald-400">
+                  <span className="px-2 py-0.5 rounded bg-emerald-200 text-emerald-950 font-mono border-0 shadow-2xs">
                     {keyForThisQ}
                   </span>
                 </div>

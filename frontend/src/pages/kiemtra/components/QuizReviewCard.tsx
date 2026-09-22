@@ -65,20 +65,20 @@ export const QuizReviewCard = React.memo<QuizReviewCardProps>(({
             return (
               <div
                 key={oIdx}
-                className={`p-3.5 rounded-xl border flex items-center gap-3 ${
+                className={`p-3.5 rounded-xl border-0 shadow-2xs flex items-center gap-3 ${
                   isRightChoice && isAnswerVisible
-                    ? 'bg-emerald-500/10 dark:bg-emerald-500/20 border-emerald-500/40 text-emerald-700 dark:text-emerald-300 font-extrabold shadow-xs'
+                    ? 'bg-emerald-500/15 dark:bg-emerald-500/25 text-emerald-800 dark:text-emerald-200 font-extrabold shadow-xs'
                     : isUserChoice
-                    ? 'bg-rose-500/10 dark:bg-rose-500/20 border-rose-500/40 text-rose-700 dark:text-rose-300'
-                    : 'bg-slate-50 dark:bg-[#141b30] border-slate-200 dark:border-white/5 text-slate-800 dark:text-slate-300'
+                    ? 'bg-rose-500/15 dark:bg-rose-500/25 text-rose-800 dark:text-rose-200 font-bold'
+                    : 'bg-slate-200/80 dark:bg-[#141b30] text-slate-800 dark:text-slate-300'
                 }`}
               >
-                <span className="w-6 h-6 rounded-lg bg-slate-200 dark:bg-white/10 text-xs font-black flex items-center justify-center shrink-0 text-slate-800 dark:text-white">
+                <span className="w-6 h-6 rounded-lg bg-white/70 dark:bg-white/10 text-xs font-black flex items-center justify-center shrink-0 text-slate-800 dark:text-white">
                   {String.fromCharCode(65 + oIdx)}
                 </span>
                 <span className="flex-1">{renderFormattedText(cleanOpt)}</span>
                 {isRightChoice && isAnswerVisible && (
-                  <span className="text-[11px] font-black text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-md border border-emerald-500/20">
+                  <span className="text-[11px] font-black text-emerald-700 dark:text-emerald-300 bg-emerald-500/20 px-2 py-0.5 rounded-md border-0 shadow-2xs">
                     Đáp án đúng
                   </span>
                 )}

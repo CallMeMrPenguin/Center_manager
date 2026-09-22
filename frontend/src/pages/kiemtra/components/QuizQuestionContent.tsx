@@ -84,12 +84,12 @@ export const QuizQuestionContent: React.FC<QuizQuestionContentProps> = ({
                 key={oIdx}
                 disabled={isEliminated}
                 onClick={() => onAnswerSelect(question.id, cleanOpt)}
-                className={`px-4 py-2 sm:px-5 sm:py-2.5 md:px-6 md:py-2.5 rounded-2xl border text-left font-black transition-all duration-200 cursor-pointer flex items-center gap-3.5 sm:gap-5 ${
+                className={`px-4 py-2 sm:px-5 sm:py-2.5 md:px-6 md:py-2.5 rounded-2xl border-0 shadow-2xs text-left font-black transition-all duration-200 cursor-pointer flex items-center gap-3.5 sm:gap-5 ${
                   isEliminated
-                    ? 'opacity-25 pointer-events-none line-through border-dashed border-red-500/40 bg-red-500/10 text-slate-500 cursor-not-allowed'
+                    ? 'opacity-25 pointer-events-none line-through bg-red-500/10 text-slate-500 cursor-not-allowed'
                     : isSelected
-                    ? 'bg-blue-500/15 dark:bg-blue-600/30 border-blue-500 text-slate-900 dark:text-white shadow-md ring-2 ring-blue-500'
-                    : 'bg-slate-50 dark:bg-[#141b30] border-slate-200 dark:border-white/10 text-slate-800 dark:text-slate-100 hover:bg-slate-100 dark:hover:bg-white/5 hover:border-slate-300 dark:hover:border-white/20'
+                    ? 'bg-blue-500/20 dark:bg-blue-600/30 text-slate-900 dark:text-white shadow-md ring-2 ring-blue-500'
+                    : 'bg-slate-200/80 hover:bg-slate-300 dark:bg-white/10 dark:hover:bg-white/15 text-slate-800 dark:text-slate-100'
                 }`}
               >
                 <span

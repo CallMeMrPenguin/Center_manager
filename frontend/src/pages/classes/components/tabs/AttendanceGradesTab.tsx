@@ -211,15 +211,15 @@ export const AttendanceGradesTab: React.FC<AttendanceGradesTabProps> = ({
           }
           const badgeClass =
             val >= 2.5
-              ? 'bg-rose-100 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border-rose-300 dark:border-rose-700/60'
+              ? 'bg-rose-100 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300'
               : val >= 1.5
-              ? 'bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border-amber-300 dark:border-amber-700/60'
-              : 'bg-slate-100 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 border-slate-300 dark:border-slate-700';
+              ? 'bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300'
+              : 'bg-slate-200 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200';
 
           return (
             <div className="flex items-center justify-center">
               <span
-                className={`px-2.5 py-0.5 rounded-lg text-xs font-black font-mono border shadow-xs transition ${badgeClass}`}
+                className={`px-2.5 py-0.5 rounded-lg text-xs font-black font-mono border-0 shadow-2xs transition ${badgeClass}`}
                 title={`Độ lệch tuyệt đối: |BTVN - TB Check| = ${format1Dec(val)} điểm`}
               >
                 {format1Dec(val)}
@@ -246,7 +246,7 @@ export const AttendanceGradesTab: React.FC<AttendanceGradesTabProps> = ({
                     enrolledInfo || { id: rec.student_id, full_name: rec.student_name }
                   );
                 }}
-                className="p-1.5 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/25 text-indigo-300 border border-indigo-500/30 transition cursor-pointer"
+                className="p-1.5 rounded-xl bg-indigo-100 hover:bg-indigo-200 dark:bg-indigo-500/20 dark:hover:bg-indigo-500/30 text-indigo-700 dark:text-indigo-300 border-0 shadow-2xs hover:shadow-xs transition cursor-pointer"
                 title="Tùy chọn học sinh"
               >
                 <Edit3 size={14} />

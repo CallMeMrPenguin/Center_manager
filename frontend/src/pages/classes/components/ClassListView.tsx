@@ -43,7 +43,7 @@ export const ClassListView: React.FC<ClassListViewProps> = ({
         <div className="flex items-center gap-3">
           <button
             onClick={onRefresh}
-            className="p-2.5 rounded-xl bg-white hover:bg-slate-50 dark:bg-[#141417] dark:hover:bg-[#1c1c21] text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-[#27272a] transition cursor-pointer shadow-sm"
+            className="p-2.5 rounded-xl bg-slate-200 hover:bg-slate-300 dark:bg-white/10 dark:hover:bg-white/20 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white border-0 shadow-xs transition cursor-pointer"
             title="Làm mới danh sách lớp"
           >
             <RefreshCw size={14} className={loading ? 'animate-spin text-indigo-500 dark:text-indigo-400' : ''} />
@@ -51,7 +51,7 @@ export const ClassListView: React.FC<ClassListViewProps> = ({
 
           <button
             onClick={onCreateClass}
-            className="group flex items-center gap-0 hover:gap-2 bg-[#2563eb] hover:bg-[#1d4ed8] text-white px-3.5 py-2.5 rounded-xl font-bold text-xs shadow-[0_4px_16px_rgba(37,99,235,0.4)] transition-all duration-300 cursor-pointer border border-white/20 active:scale-95"
+            className="group flex items-center gap-0 hover:gap-2 bg-[#2563eb] hover:bg-[#1d4ed8] text-white px-3.5 py-2.5 rounded-xl font-bold text-xs border-0 shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer active:scale-95"
             title="Tạo Lớp Học Mới"
           >
             <Plus size={16} className="shrink-0" />

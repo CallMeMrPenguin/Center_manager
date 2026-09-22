@@ -1,6 +1,13 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Sparkles, X } from 'lucide-react';
+import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, X } from 'lucide-react';
+import {
+  MONTH_NAMES,
+  WEEKDAY_NAMES,
+  parseLocalDate,
+  formatToISODate,
+} from './datepicker/datePickerUtils';
+import { MonthGridPicker } from './datepicker/MonthGridPicker';
 
 interface CustomDatePickerProps {
   value: string; // 'YYYY-MM-DD' or 'YYYY-MM'
@@ -14,41 +21,6 @@ interface CustomDatePickerProps {
   highlightDates?: string[]; // e.g. ['2026-07-28', '2026-07-30']
   maxHighlightDate?: string; // default today 'YYYY-MM-DD'
 }
-
-const MONTH_NAMES = [
-  'Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6',
-  'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'
-];
-
-const WEEKDAY_NAMES = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
-
-const parseLocalDate = (val: string | null | undefined): Date | null => {
-  if (!val || typeof val !== 'string' || !val.trim()) return null;
-  const parts = val.trim().split('-');
-  if (parts.length === 3) {
-    const y = parseInt(parts[0], 10);
-    const m = parseInt(parts[1], 10) - 1;
-    const d = parseInt(parts[2], 10);
-    if (!isNaN(y) && !isNaN(m) && !isNaN(d)) {
-      return new Date(y, m, d);
-    }
-  } else if (parts.length === 2) {
-    const y = parseInt(parts[0], 10);
-    const m = parseInt(parts[1], 10) - 1;
-    if (!isNaN(y) && !isNaN(m)) {
-      return new Date(y, m, 1);
-    }
-  }
-  const parsed = new Date(val);
-  return isNaN(parsed.getTime()) ? null : parsed;
-};
-
-const formatToISODate = (d: Date): string => {
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${y}-${m}-${day}`;
-};
 
 export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
   value,
@@ -66,7 +38,6 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
 
   const selectedDate = useMemo(() => parseLocalDate(value), [value]);
-
   const [viewDate, setViewDate] = useState<Date>(() => selectedDate || new Date());
 
   useEffect(() => {
@@ -236,11 +207,11 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
 
   return (
     <div className={`relative inline-block ${className}`} ref={containerRef}>
-      {/* TRIGGER BUTTON */}
+      {/* TRIGGER BUTTON (Slightly darker slate, zero border) */}
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between gap-2 px-3.5 py-2 rounded-xl bg-slate-200/80 hover:bg-slate-200 dark:bg-[#1c202c] dark:hover:bg-[#252a3a] text-slate-900 dark:text-white text-xs font-bold transition-all cursor-pointer shadow-xs hover:shadow-sm border-0 outline-none"
+        className="w-full flex items-center justify-between gap-2 px-3.5 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 dark:bg-[#202538] dark:hover:bg-[#2a3149] text-slate-900 dark:text-white text-xs font-bold transition-all cursor-pointer shadow-xs hover:shadow-sm border-0 outline-none"
       >
         <div className="flex items-center gap-2 truncate">
           <CalendarIcon size={14} className="text-blue-600 dark:text-blue-400 shrink-0 font-bold" />
@@ -259,7 +230,7 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
         )}
       </button>
 
-      {/* ANIMATED POPOVER CARD (ZERO BORDERS) */}
+      {/* ANIMATED POPOVER CARD (Matching button background, zero border) */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -267,54 +238,20 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: -6 }}
             transition={{ type: 'spring', stiffness: 450, damping: 30 }}
-            className={`absolute top-full ${align === 'right' ? 'right-0 origin-top-right' : 'left-0 origin-top-left'} mt-2 z-[9999] w-80 p-4 bg-white dark:bg-[#181a20] rounded-2xl shadow-[0_20px_50px_rgba(15,23,42,0.22)] dark:shadow-[0_24px_64px_rgba(0,0,0,0.9)] border-0 outline-none select-none space-y-3`}
+            className={`absolute top-full ${align === 'right' ? 'right-0 origin-top-right' : 'left-0 origin-top-left'} mt-2 z-[9999] w-80 p-4 bg-slate-200 dark:bg-[#202538] rounded-2xl shadow-[0_20px_50px_rgba(15,23,42,0.25)] dark:shadow-[0_24px_64px_rgba(0,0,0,0.9)] border-0 outline-none select-none space-y-3`}
           >
             {mode === 'month' ? (
-              <div className="space-y-3">
-                <div className="flex items-center justify-between pb-1 border-b border-slate-100 dark:border-white/5">
-                  <span className="text-sm font-black text-slate-900 dark:text-white">Năm {currentYear}</span>
-                  <div className="flex items-center gap-1">
-                    <button
-                      type="button"
-                      onClick={() => setViewDate(new Date(currentYear - 1, currentMonth, 1))}
-                      className="p-1.5 rounded-xl text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#1c1c21] transition cursor-pointer font-bold"
-                    >
-                      <ChevronLeft size={15} />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setViewDate(new Date(currentYear + 1, currentMonth, 1))}
-                      className="p-1.5 rounded-xl text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#1c1c21] transition cursor-pointer font-bold"
-                    >
-                      <ChevronRight size={15} />
-                    </button>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-3 gap-2">
-                  {MONTH_NAMES.map((name, idx) => {
-                    const monthStr = `${currentYear}-${String(idx + 1).padStart(2, '0')}`;
-                    const isSelected = value.startsWith(monthStr);
-                    return (
-                      <button
-                        key={name}
-                        type="button"
-                        onClick={() => {
-                          onChange(monthStr);
-                          setIsOpen(false);
-                        }}
-                        className={`py-2.5 px-2 rounded-xl text-xs font-black transition cursor-pointer border-0 outline-none ${
-                          isSelected
-                            ? 'bg-[#2563eb] text-white shadow-xs'
-                            : 'bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 text-slate-800 dark:text-slate-200'
-                        }`}
-                      >
-                        {name}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
+              <MonthGridPicker
+                currentYear={currentYear}
+                currentMonth={currentMonth}
+                value={value}
+                onSelectMonth={(monthStr) => {
+                  onChange(monthStr);
+                  setIsOpen(false);
+                }}
+                onPrevYear={() => setViewDate(new Date(currentYear - 1, currentMonth, 1))}
+                onNextYear={() => setViewDate(new Date(currentYear + 1, currentMonth, 1))}
+              />
             ) : (
               <>
                 {/* Header: Month/Year Nav */}
@@ -328,103 +265,102 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
                     <button
                       type="button"
                       onClick={handlePrevMonth}
-                      className="p-1.5 rounded-xl text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#1c1c21] transition cursor-pointer font-bold"
+                      className="p-1.5 rounded-xl text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-300/60 dark:hover:bg-[#1c1c21] transition cursor-pointer font-bold border-0"
                     >
                       <ChevronLeft size={15} />
                     </button>
                     <button
                       type="button"
                       onClick={handleNextMonth}
-                      className="p-1.5 rounded-xl text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#1c1c21] transition cursor-pointer font-bold"
+                      className="p-1.5 rounded-xl text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-300/60 dark:hover:bg-[#1c1c21] transition cursor-pointer font-bold border-0"
                     >
                       <ChevronRight size={15} />
                     </button>
                   </div>
                 </div>
 
-            {/* Weekdays */}
-            <div className="grid grid-cols-7 gap-1 text-center px-1">
-              {WEEKDAY_NAMES.map((name, idx) => (
-                <span
-                  key={name}
-                  className={`text-[10px] font-black uppercase py-1 ${
-                    idx === 0 ? 'text-rose-600 dark:text-rose-400' : 'text-slate-600 dark:text-slate-400'
-                  }`}
-                >
-                  {name}
-                </span>
-              ))}
-            </div>
-
-            {/* Animated Month Sliding Grid with shadow bleed buffer */}
-            <div className="overflow-hidden relative min-h-[210px] p-1.5 -m-1.5">
-              <AnimatePresence mode="wait" initial={false}>
-                <motion.div
-                  key={`${currentYear}-${currentMonth}`}
-                  initial={{ opacity: 0, x: direction * 25 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: direction * -25 }}
-                  transition={{ duration: 0.2, ease: 'easeInOut' }}
-                  className="grid grid-cols-7 gap-1 p-0.5"
-                >
-                  {daysInMonth.map((item, idx) => (
-                    <button
-                      key={idx}
-                      type="button"
-                      onClick={() => handleSelectDate(item.isoStr)}
-                      className={`h-8 w-full rounded-xl text-xs font-bold relative flex items-center justify-center cursor-pointer transition-colors border-0 outline-none ${
-                        item.isSelected
-                          ? 'text-white font-black z-10'
-                          : item.isToday
-                          ? 'text-blue-600 dark:text-blue-400 font-extrabold bg-blue-500/15'
-                          : item.isCurrentMonth
-                          ? item.isStudyDay
-                            ? 'text-blue-600 dark:text-blue-300 font-black hover:bg-blue-50 dark:hover:bg-blue-500/20'
-                            : 'text-slate-900 dark:text-slate-100 font-extrabold hover:bg-slate-100 dark:hover:bg-[#1c1c21] hover:text-black dark:hover:text-white'
-                          : 'text-slate-400 dark:text-slate-600 hover:bg-slate-50 dark:hover:bg-white/5'
+                {/* Weekdays */}
+                <div className="grid grid-cols-7 gap-1 text-center px-1">
+                  {WEEKDAY_NAMES.map((name, idx) => (
+                    <span
+                      key={name}
+                      className={`text-[10px] font-black uppercase py-1 ${
+                        idx === 0 ? 'text-rose-600 dark:text-rose-400' : 'text-slate-600 dark:text-slate-400'
                       }`}
-                      title={item.isStudyDay ? `Ngày học của lớp (${item.dayNumber}/${currentMonth + 1}/${currentYear})` : undefined}
                     >
-              {/* Selected Spring Pill Indicator with safe bounds */}
-                      {item.isSelected && (
-                        <motion.div
-                          layoutId="custom-datepicker-selected"
-                          transition={{ type: 'spring', stiffness: 500, damping: 35 }}
-                          className="absolute inset-0 rounded-xl bg-[#2563eb] shadow-xs z-0"
-                        />
-                      )}
-
-                      <span className="relative z-10">{item.dayNumber}</span>
-
-                      {item.isToday && !item.isSelected && (
-                        <span className="absolute bottom-1 w-1 h-1 rounded-full bg-blue-500 dark:bg-blue-400" />
-                      )}
-                      {item.isStudyDay && !item.isSelected && !item.isToday && (
-                        <span className="absolute bottom-1 w-1 h-1 rounded-full bg-emerald-500 dark:bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.9)]" />
-                      )}
-                    </button>
+                      {name}
+                    </span>
                   ))}
-                </motion.div>
-              </AnimatePresence>
-            </div>
+                </div>
 
-            {/* Quick Actions Footer */}
-            <div className="pt-2 flex items-center justify-between text-xs">
-              <button
-                type="button"
-                onClick={handleSelectToday}
-                className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-bold transition cursor-pointer flex items-center gap-1"
-              >
-                <Sparkles size={12} />
-                <span>Hôm nay</span>
-              </button>
-              {displayFormatted && (
-                <span className="text-[11px] font-mono text-slate-500 dark:text-slate-400 font-bold">
-                  {displayFormatted}
-                </span>
-              )}
-            </div>
-            </>
+                {/* Animated Month Sliding Grid with shadow bleed buffer */}
+                <div className="overflow-hidden relative min-h-[210px] p-1.5 -m-1.5">
+                  <AnimatePresence mode="wait" initial={false}>
+                    <motion.div
+                      key={`${currentYear}-${currentMonth}`}
+                      initial={{ opacity: 0, x: direction * 25 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: direction * -25 }}
+                      transition={{ duration: 0.2, ease: 'easeInOut' }}
+                      className="grid grid-cols-7 gap-1 p-0.5"
+                    >
+                      {daysInMonth.map((item, idx) => (
+                        <button
+                          key={idx}
+                          type="button"
+                          onClick={() => handleSelectDate(item.isoStr)}
+                          className={`h-8 w-full rounded-xl text-xs font-bold relative flex items-center justify-center cursor-pointer transition-colors border-0 outline-none ${
+                            item.isSelected
+                              ? 'text-white font-black z-10'
+                              : item.isToday
+                              ? 'text-blue-600 dark:text-blue-400 font-extrabold bg-blue-500/20'
+                              : item.isCurrentMonth
+                              ? item.isStudyDay
+                                ? 'text-blue-600 dark:text-blue-300 font-black hover:bg-blue-100 dark:hover:bg-blue-500/20'
+                                : 'text-slate-900 dark:text-slate-100 font-extrabold hover:bg-slate-300/60 dark:hover:bg-[#1c1c21] hover:text-black dark:hover:text-white'
+                              : 'text-slate-400 dark:text-slate-600 hover:bg-slate-300/40 dark:hover:bg-white/5'
+                          }`}
+                          title={item.isStudyDay ? `Ngày học của lớp (${item.dayNumber}/${currentMonth + 1}/${currentYear})` : undefined}
+                        >
+                          {/* Selected Spring Pill Indicator */}
+                          {item.isSelected && (
+                            <motion.div
+                              layoutId="custom-datepicker-selected"
+                              transition={{ type: 'spring', stiffness: 500, damping: 35 }}
+                              className="absolute inset-0 rounded-xl bg-[#2563eb] shadow-xs z-0"
+                            />
+                          )}
+
+                          <span className="relative z-10">{item.dayNumber}</span>
+
+                          {item.isToday && !item.isSelected && (
+                            <span className="absolute bottom-1 w-1 h-1 rounded-full bg-blue-500 dark:bg-blue-400" />
+                          )}
+                          {item.isStudyDay && !item.isSelected && !item.isToday && (
+                            <span className="absolute bottom-1 w-1 h-1 rounded-full bg-emerald-500 dark:bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.9)]" />
+                          )}
+                        </button>
+                      ))}
+                    </motion.div>
+                  </AnimatePresence>
+                </div>
+
+                {/* Quick Actions Footer - No icon beside 'Hôm nay' */}
+                <div className="pt-2 flex items-center justify-between text-xs border-t border-slate-300/50 dark:border-white/5">
+                  <button
+                    type="button"
+                    onClick={handleSelectToday}
+                    className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-black transition cursor-pointer border-0"
+                  >
+                    Hôm nay
+                  </button>
+                  {displayFormatted && (
+                    <span className="text-[11px] font-mono text-slate-600 dark:text-slate-400 font-bold">
+                      {displayFormatted}
+                    </span>
+                  )}
+                </div>
+              </>
             )}
           </motion.div>
         )}

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { X, Trash2, Save, BookOpen, Upload, Sparkles, CheckCircle, FileText } from 'lucide-react';
+import { X, Trash2, Save, BookOpen, Upload, Sparkles, CheckCircle, FileText, Eye } from 'lucide-react';
 import { api } from '../../../api';
 import { showToast } from '../../../components/Toast';
 import { CustomSelect, SelectOption } from '../../../components/CustomSelect';
@@ -19,6 +19,7 @@ interface AssignmentModalProps {
   classes: any[];
   defaultClassId?: string;
   onSuccess: () => void;
+  onPreview?: (assignment: Assignment) => void;
 }
 
 export const AssignmentModal: React.FC<AssignmentModalProps> = ({
@@ -28,6 +29,7 @@ export const AssignmentModal: React.FC<AssignmentModalProps> = ({
   classes,
   defaultClassId,
   onSuccess,
+  onPreview,
 }) => {
   const [classId, setClassId] = useState<number>(0);
   const [title, setTitle] = useState<string>('');
@@ -484,30 +486,46 @@ export const AssignmentModal: React.FC<AssignmentModalProps> = ({
 
             {/* Actions */}
             <div className="flex items-center justify-between gap-3 pt-3 border-t border-slate-200">
-              {assignment ? (
-                <button
-                  type="button"
-                  onClick={handleDelete}
-                  disabled={deleting}
-                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-bold border border-rose-200 transition cursor-pointer"
-                >
-                  <Trash2 size={14} />
-                  <span>{deleting ? 'Đang xóa...' : 'Xóa'}</span>
-                </button>
-              ) : <div />}
+              <div className="flex items-center gap-2">
+                {assignment ? (
+                  <button
+                    type="button"
+                    onClick={handleDelete}
+                    disabled={deleting}
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-rose-100 hover:bg-rose-200 text-rose-700 text-xs font-bold border-0 shadow-2xs transition cursor-pointer"
+                  >
+                    <Trash2 size={14} />
+                    <span>{deleting ? 'Đang xóa...' : 'Xóa'}</span>
+                  </button>
+                ) : null}
+                {assignment && onPreview && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onClose();
+                      onPreview(assignment);
+                    }}
+                    className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-indigo-100 hover:bg-indigo-200 text-indigo-700 text-xs font-bold border-0 shadow-2xs transition cursor-pointer"
+                    title="Xem trước đề bài & làm thử"
+                  >
+                    <Eye size={14} />
+                    <span>Xem Trước Đề</span>
+                  </button>
+                )}
+              </div>
 
               <div className="flex items-center gap-2">
                 <button
                   type="button"
                   onClick={onClose}
-                  className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition cursor-pointer"
+                  className="px-4 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-bold border-0 shadow-2xs transition cursor-pointer"
                 >
                   Hủy
                 </button>
                 <button
                   type="submit"
                   disabled={saving}
-                  className="flex items-center gap-1.5 px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-black shadow-md shadow-blue-500/20 transition cursor-pointer active:scale-95 disabled:opacity-50"
+                  className="flex items-center gap-1.5 px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-black shadow-md shadow-blue-500/20 border-0 transition cursor-pointer active:scale-95 disabled:opacity-50"
                 >
                   <Save size={14} />
                   <span>{saving ? 'Đang lưu...' : 'Lưu Bài Tập'}</span>

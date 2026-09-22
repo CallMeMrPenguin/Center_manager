@@ -50,7 +50,7 @@ export const ClassDetailHeader: React.FC<ClassDetailHeaderProps> = ({
           <button
             type="button"
             onClick={onBack}
-            className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition cursor-pointer border border-slate-200 dark:border-white/5 shrink-0"
+            className="p-2 rounded-xl bg-slate-200 hover:bg-slate-300 dark:bg-white/10 dark:hover:bg-white/15 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition cursor-pointer border-0 shadow-xs shrink-0"
             title="Quay lại danh sách lớp"
           >
             <ChevronLeft size={18} />
@@ -62,13 +62,8 @@ export const ClassDetailHeader: React.FC<ClassDetailHeaderProps> = ({
                 {selectedClass.class_name}
               </h2>
 
-              {/* Badges without pipe characters per Rule 6 */}
-              <span className="px-2.5 py-0.5 text-xs font-black bg-indigo-500/10 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-300 rounded-lg border border-indigo-500/20 dark:border-indigo-500/30">
-                {selectedClass.grade || 'Khối khác'}
-              </span>
-
               {selectedClass.subject && (
-                <span className="px-2.5 py-0.5 text-xs font-bold bg-sky-500/10 dark:bg-sky-500/20 text-sky-600 dark:text-sky-300 rounded-lg border border-sky-500/20 dark:border-sky-500/30 flex items-center gap-1">
+                <span className="px-2.5 py-0.5 text-xs font-bold bg-sky-500/10 dark:bg-sky-500/20 text-sky-600 dark:text-sky-300 rounded-lg border-0 shadow-2xs flex items-center gap-1">
                   <BookOpen size={11} />
                   <span>{selectedClass.subject}</span>
                 </span>
@@ -78,7 +73,7 @@ export const ClassDetailHeader: React.FC<ClassDetailHeaderProps> = ({
               <button
                 type="button"
                 onClick={() => onOpenEditClass(selectedClass)}
-                className="p-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-500/10 dark:hover:bg-indigo-500/25 text-indigo-600 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-500/30 transition cursor-pointer"
+                className="p-1.5 rounded-lg bg-indigo-100 hover:bg-indigo-200 dark:bg-indigo-500/20 dark:hover:bg-indigo-500/30 text-indigo-700 dark:text-indigo-300 border-0 shadow-xs transition cursor-pointer"
                 title="Sửa thông tin lớp học"
               >
                 <Edit3 size={13} />
@@ -134,7 +129,7 @@ export const ClassDetailHeader: React.FC<ClassDetailHeaderProps> = ({
             <button
               type="button"
               onClick={onDeleteAttendanceDate}
-              className="group flex items-center gap-0 hover:gap-1.5 bg-rose-50 dark:bg-rose-500/10 hover:bg-rose-100 dark:hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-500/25 px-2.5 py-1.5 rounded-xl font-bold text-xs transition-all duration-300 cursor-pointer"
+              className="group flex items-center gap-0 hover:gap-1.5 bg-rose-100 dark:bg-rose-500/20 hover:bg-rose-200 dark:hover:bg-rose-500/30 text-rose-700 dark:text-rose-300 border-0 shadow-xs hover:shadow-sm px-2.5 py-1.5 rounded-xl font-bold text-xs transition-all duration-300 cursor-pointer"
               title={`Xóa buổi học và điểm danh ngày ${attendanceDate}`}
             >
               <Trash2 size={13} className="shrink-0" />
@@ -151,7 +146,7 @@ export const ClassDetailHeader: React.FC<ClassDetailHeaderProps> = ({
             <button
               type="button"
               onClick={onOpenEnrollModal}
-              className="group flex items-center gap-0 hover:gap-1.5 bg-indigo-50 dark:bg-indigo-500/15 hover:bg-indigo-100 dark:hover:bg-indigo-500/25 text-indigo-600 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-500/30 px-3.5 py-1.5 rounded-xl font-bold text-xs transition-all duration-300 cursor-pointer"
+              className="group flex items-center gap-0 hover:gap-1.5 bg-blue-100 dark:bg-blue-500/20 hover:bg-blue-200 dark:hover:bg-blue-500/30 text-blue-700 dark:text-blue-300 border-0 shadow-xs hover:shadow-sm px-3.5 py-1.5 rounded-xl font-bold text-xs transition-all duration-300 cursor-pointer"
               title="Ghi Danh Học Sinh Vào Lớp"
             >
               <UserPlus size={14} className="shrink-0" />

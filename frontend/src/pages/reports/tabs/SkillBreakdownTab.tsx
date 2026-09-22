@@ -95,7 +95,7 @@ export const SkillBreakdownTab: React.FC<SkillBreakdownTabProps> = ({
               onChange={(val) => onSelectClass?.(String(val))}
               options={classes.map((c) => ({
                 value: String(c.id),
-                label: `${c.class_name} (${c.grade || 'Lớp 6'})`,
+                label: c.class_name,
               }))}
             />
 

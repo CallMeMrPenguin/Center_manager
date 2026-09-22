@@ -333,7 +333,7 @@ export const StudentRankingsTable: React.FC<StudentRankingsTableProps> = React.m
             onChange={(val) => { setSelectedClassId(String(val)); setSelectedStudentId(''); }}
             options={[
               { value: '', label: 'Tất cả lớp học' },
-              ...classes.map(c => ({ value: String(c.id), label: `${c.class_name} (${c.grade || 'Lớp 6'})` }))
+              ...classes.map(c => ({ value: String(c.id), label: c.class_name }))
             ]}
             className="w-52"
           />

@@ -333,7 +333,7 @@ function ColumnVisibilityDropdown<TData>({
                   const isFirst = idx === 0;
                   const isLast = idx === allCols.length - 1;
                   return (
-                    <div key={col.id} className="flex items-center justify-between gap-2 px-2 py-1 rounded-lg bg-slate-50 dark:bg-[#18181b] border border-slate-200 dark:border-[#27272a] text-xs text-slate-800 dark:text-slate-200">
+                    <div key={col.id} className="flex items-center justify-between gap-2 px-2 py-1 rounded-lg bg-slate-100 dark:bg-[#18181b] border-0 shadow-2xs text-xs text-slate-800 dark:text-slate-200">
                       <div className="flex items-center gap-1.5 min-w-0">
                         <span className="text-[10px] font-mono text-slate-400 dark:text-slate-500 font-bold w-4">{idx + 1}.</span>
                         <span className="truncate font-semibold text-slate-800 dark:text-slate-200">{colName}</span>
@@ -387,7 +387,7 @@ function ColumnVisibilityDropdown<TData>({
                         <span className="truncate">{colName}</span>
                       </div>
                       <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded shrink-0 ${
-                        isCentered ? 'bg-indigo-500/20 text-indigo-600 dark:text-indigo-300 border border-indigo-500/30' : 'bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
+                        isCentered ? 'bg-indigo-500/20 text-indigo-600 dark:text-indigo-300 border-0 shadow-2xs' : 'bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-0'
                       }`}>
                         {isCentered ? 'Giữa' : 'Trái'}
                       </span>
@@ -407,7 +407,7 @@ function ColumnVisibilityDropdown<TData>({
                   onResetColumnWidths();
                   setOpen(false);
                 }}
-                className="w-full flex items-center justify-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 border border-indigo-500/20 text-xs font-extrabold transition cursor-pointer"
+                className="w-full flex items-center justify-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-indigo-500/15 hover:bg-indigo-500/25 text-indigo-600 dark:text-indigo-300 border-0 shadow-2xs text-xs font-extrabold transition cursor-pointer"
                 title="Đặt lại độ rộng, thứ tự, căn chỉnh và hiển thị cột về mặc định"
               >
                 <RotateCcw size={12} />
@@ -1098,7 +1098,7 @@ export function DataTable<TData>({
                   animate={{ opacity: 1, scale: 1, x: 0 }}
                   exit={{ opacity: 0, scale: 0.85, x: -10 }}
                   transition={{ type: 'spring', stiffness: 450, damping: 30 }}
-                  className="flex items-center gap-2 px-3 py-1.5 bg-blue-500/20 text-blue-700 dark:text-blue-300 border border-blue-500/30 rounded-xl text-xs font-black"
+                  className="flex items-center gap-2 px-3 py-1.5 bg-blue-500/20 text-blue-700 dark:text-blue-300 border-0 shadow-2xs rounded-xl text-xs font-black"
                 >
                   <span>Đã chọn: {selectedCount} dòng</span>
                   <button
@@ -1118,7 +1118,7 @@ export function DataTable<TData>({
           <div className="flex items-center gap-2 shrink-0 flex-wrap justify-end">
             {/* Active filter badge */}
             {hasActiveFilter && (
-              <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-700 dark:text-blue-300 text-[10px] font-bold">
+              <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-blue-500/10 border-0 shadow-2xs text-blue-700 dark:text-blue-300 text-[10px] font-bold">
                 <span>{totalFiltered.toLocaleString()} kết quả</span>
                 <button type="button" onClick={() => { setGlobalFilter(''); setColumnFilters([]); }}
                   className="text-blue-500 dark:text-blue-400 hover:text-blue-700 dark:hover:text-white cursor-pointer"><X size={10} /></button>
@@ -1127,7 +1127,7 @@ export function DataTable<TData>({
 
             {/* Virtualizer badge */}
             {useVirt && !loading && (
-              <div className="hidden sm:flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-300 text-[10px] font-bold">
+              <div className="hidden sm:flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-amber-500/10 border-0 shadow-2xs text-amber-300 text-[10px] font-bold">
                 <Zap size={10} />
                 <span>Virtual</span>
               </div>
@@ -1135,7 +1135,7 @@ export function DataTable<TData>({
 
             {/* Row selection badge */}
             {enableRowSelection && selectedCount > 0 && (
-              <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-[10px] font-bold">
+              <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-emerald-500/10 border-0 shadow-2xs text-emerald-300 text-[10px] font-bold">
                 <CheckSquare size={10} />
                 <span>{selectedCount} đã chọn</span>
                 <button type="button" onClick={() => setRowSelection({})}
@@ -1285,10 +1285,10 @@ export function DataTable<TData>({
                             group transition-colors duration-150 animate-row-enter
                             ${onRowClick ? 'cursor-pointer' : ''}
                             ${row.getIsSelected()
-                              ? 'bg-indigo-500/15 hover:bg-indigo-500/25 dark:bg-indigo-500/20 dark:hover:bg-indigo-500/30'
+                              ? 'bg-blue-500/15 hover:bg-blue-500/25 dark:bg-blue-500/20 dark:hover:bg-blue-500/30'
                               : rowIdx % 2 === 0
-                              ? 'bg-white dark:bg-[#141417] hover:bg-slate-100 dark:hover:bg-[#1f1f23]'
-                              : 'bg-[#e2e8f0] dark:bg-[#18181c] hover:bg-slate-100 dark:hover:bg-[#1f1f23]'}
+                              ? 'bg-white dark:bg-[#141417] hover:bg-blue-50/90 dark:hover:bg-[#20273c]'
+                              : 'bg-slate-100/70 dark:bg-[#18181c] hover:bg-blue-50/90 dark:hover:bg-[#20273c]'}
                           `}
                           onClick={() => onRowClick?.(row.original)}
                         >
@@ -1361,11 +1361,11 @@ export function DataTable<TData>({
               {/* Right nav */}
               <div className="flex items-center gap-1">
                 <button type="button" onClick={() => table.setPageIndex(0)} disabled={!table.getCanPreviousPage()}
-                  className="p-1.5 rounded-lg bg-white dark:bg-[#1c1c21] hover:bg-slate-100 dark:hover:bg-[#27272f] text-slate-700 dark:text-slate-300 disabled:opacity-30 border border-slate-300 dark:border-[#27272a] transition cursor-pointer disabled:cursor-not-allowed" title="Trang đầu">
+                  className="p-1.5 rounded-lg bg-slate-200 hover:bg-slate-300 dark:bg-[#202538] dark:hover:bg-[#2a3149] text-slate-700 dark:text-slate-300 disabled:opacity-30 border-0 shadow-2xs transition cursor-pointer disabled:cursor-not-allowed" title="Trang đầu">
                   <ChevronsLeft size={13} />
                 </button>
                 <button type="button" onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()}
-                  className="px-2.5 py-1.5 rounded-lg bg-white dark:bg-[#1c1c21] hover:bg-slate-100 dark:hover:bg-[#27272f] text-slate-700 dark:text-slate-300 disabled:opacity-30 border border-slate-300 dark:border-[#27272a] transition flex items-center gap-1 cursor-pointer disabled:cursor-not-allowed">
+                  className="px-2.5 py-1.5 rounded-lg bg-slate-200 hover:bg-slate-300 dark:bg-[#202538] dark:hover:bg-[#2a3149] text-slate-700 dark:text-slate-300 disabled:opacity-30 border-0 shadow-2xs transition flex items-center gap-1 cursor-pointer disabled:cursor-not-allowed">
                   <ChevronLeft size={13} /><span>Trước</span>
                 </button>
 
@@ -1381,10 +1381,10 @@ export function DataTable<TData>({
                         key={pageNum}
                         type="button"
                         onClick={() => table.setPageIndex(pageNum)}
-                        className={`w-7 h-7 rounded-lg text-[11px] font-extrabold border transition cursor-pointer ${
+                        className={`w-7 h-7 rounded-lg text-[11px] font-extrabold border-0 shadow-2xs transition cursor-pointer ${
                           pageNum === pageIndex
-                            ? 'bg-[#2563eb] border-blue-500 text-white shadow-[0_0_8px_rgba(37,99,235,0.4)]'
-                            : 'bg-white dark:bg-[#1c1c21] border-slate-200 dark:border-[#27272a] text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-[#27272f] hover:text-slate-900 dark:hover:text-white'
+                            ? 'bg-[#2563eb] text-white shadow-[0_0_8px_rgba(37,99,235,0.4)]'
+                            : 'bg-slate-200 hover:bg-slate-300 dark:bg-[#202538] dark:hover:bg-[#2a3149] text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
                         }`}
                       >
                         {pageNum + 1}
@@ -1394,11 +1394,11 @@ export function DataTable<TData>({
                 </div>
 
                 <button type="button" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}
-                  className="px-2.5 py-1.5 rounded-lg bg-white dark:bg-[#1c1c21] hover:bg-slate-100 dark:hover:bg-[#27272f] text-slate-700 dark:text-slate-300 disabled:opacity-30 border border-slate-200 dark:border-[#27272a] transition flex items-center gap-1 cursor-pointer disabled:cursor-not-allowed">
+                  className="px-2.5 py-1.5 rounded-lg bg-slate-200 hover:bg-slate-300 dark:bg-[#202538] dark:hover:bg-[#2a3149] text-slate-700 dark:text-slate-300 disabled:opacity-30 border-0 shadow-2xs transition flex items-center gap-1 cursor-pointer disabled:cursor-not-allowed">
                   <span>Sau</span><ChevronRight size={13} />
                 </button>
                 <button type="button" onClick={() => table.setPageIndex(pageCount - 1)} disabled={!table.getCanNextPage()}
-                  className="p-1.5 rounded-lg bg-white dark:bg-[#1c1c21] hover:bg-slate-100 dark:hover:bg-[#27272f] text-slate-700 dark:text-slate-300 disabled:opacity-30 border border-slate-200 dark:border-[#27272a] transition cursor-pointer disabled:cursor-not-allowed" title="Trang cuối">
+                  className="p-1.5 rounded-lg bg-slate-200 hover:bg-slate-300 dark:bg-[#202538] dark:hover:bg-[#2a3149] text-slate-700 dark:text-slate-300 disabled:opacity-30 border-0 shadow-2xs transition cursor-pointer disabled:cursor-not-allowed" title="Trang cuối">
                   <ChevronsRight size={13} />
                 </button>
               </div>

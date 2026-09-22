@@ -602,14 +602,14 @@ export default function CanvasBoardPage() {
               setZoom(1.0);
               setPan({ x: 100, y: 80 });
             }}
-            className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-700 dark:text-slate-300 text-xs font-bold border border-slate-200 dark:border-white/10 transition cursor-pointer"
+            className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-slate-200 hover:bg-slate-300 dark:bg-[#202538] dark:hover:bg-[#2a3149] text-slate-700 dark:text-slate-300 text-xs font-bold border-0 shadow-2xs transition cursor-pointer"
           >
             <RotateCcw size={13} /> <span className="hidden sm:inline">Bảng mới</span>
           </button>
-          <button onClick={handleExportPNG} className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-700 dark:text-slate-300 text-xs font-bold border border-slate-200 dark:border-white/10 transition cursor-pointer">
+          <button onClick={handleExportPNG} className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-slate-200 hover:bg-slate-300 dark:bg-[#202538] dark:hover:bg-[#2a3149] text-slate-700 dark:text-slate-300 text-xs font-bold border-0 shadow-2xs transition cursor-pointer">
             <Download size={13} /> <span className="hidden sm:inline">Tải ảnh</span>
           </button>
-          <button onClick={toggleFullscreen} className="p-2 rounded-xl bg-white dark:bg-[#121626] text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-[#263152] transition cursor-pointer">
+          <button onClick={toggleFullscreen} className="p-2 rounded-xl bg-slate-200 hover:bg-slate-300 dark:bg-[#202538] dark:hover:bg-[#2a3149] text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white border-0 shadow-2xs transition cursor-pointer">
             {isFullscreen ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
           </button>
         </div>

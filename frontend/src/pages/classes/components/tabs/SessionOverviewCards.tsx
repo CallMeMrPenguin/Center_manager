@@ -56,19 +56,17 @@ export const BelowThresholdCard: React.FC<BelowThresholdCardProps> = ({
             <span className={`text-xs font-black ${styles.title} uppercase tracking-wider shrink-0`}>
               {title}
             </span>
-            <div className={`flex items-center gap-0.5 ${styles.inputBox} px-2 py-0.5 rounded-lg transition-colors`}>
-              <span className={`text-[11px] ${styles.lt} font-black select-none`}>&lt;</span>
-              <input
-                type="number"
-                step="0.1"
-                min="0"
-                max="10"
-                value={threshInput}
-                onChange={(e) => onThreshChange(e.target.value)}
-                className={`w-10 bg-transparent ${styles.input} font-black font-mono text-xs text-center focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none`}
-                title={`Nhập điểm lọc cho ${title} (mặc định theo TB)`}
-              />
-            </div>
+            <span className={`text-xs ${styles.lt} font-black select-none`}>&lt;</span>
+            <input
+              type="number"
+              step="0.1"
+              min="0"
+              max="10"
+              value={threshInput}
+              onChange={(e) => onThreshChange(e.target.value)}
+              className={`w-11 px-1 py-0.5 rounded-lg border-0 ${styles.inputBox} ${styles.input} font-black font-mono text-xs text-center focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none`}
+              title={`Nhập điểm lọc cho ${title} (mặc định theo TB)`}
+            />
           </div>
           <span
             className={`px-2.5 py-0.5 rounded-full font-black text-xs shrink-0 shadow-xs ${
@@ -128,19 +126,17 @@ export const DivergenceCard: React.FC<DivergenceCardProps> = ({
             <span className="text-xs font-black text-amber-800 dark:text-amber-300 uppercase tracking-wider shrink-0">
               Độ Lệch
             </span>
-            <div className="flex items-center gap-0.5 bg-white dark:bg-[#121626] px-2 py-0.5 rounded-lg shadow-2xs transition-colors">
-              <span className="text-[11px] text-amber-700 dark:text-amber-400 font-black select-none">&gt;</span>
-              <input
-                type="number"
-                step="0.1"
-                min="0"
-                max="10"
-                value={threshInput}
-                onChange={(e) => onThreshChange(e.target.value)}
-                className="w-10 bg-transparent text-amber-900 dark:text-amber-100 font-black font-mono text-xs text-center focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                title="Nhập ngưỡng độ lệch BTVN > Check (mặc định 1.5)"
-              />
-            </div>
+            <span className="text-xs text-amber-700 dark:text-amber-400 font-black select-none">&gt;</span>
+            <input
+              type="number"
+              step="0.1"
+              min="0"
+              max="10"
+              value={threshInput}
+              onChange={(e) => onThreshChange(e.target.value)}
+              className="w-11 px-1 py-0.5 rounded-lg border-0 bg-white dark:bg-[#121626] shadow-2xs text-amber-900 dark:text-amber-100 font-black font-mono text-xs text-center focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+              title="Nhập ngưỡng độ lệch BTVN > Check (mặc định 1.5)"
+            />
           </div>
           <span
             className={`px-2.5 py-0.5 rounded-full font-black text-xs shrink-0 shadow-xs ${

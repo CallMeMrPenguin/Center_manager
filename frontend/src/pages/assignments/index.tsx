@@ -179,6 +179,7 @@ export const AssignmentsPage: React.FC = () => {
           classes={classes}
           defaultClassId={selectedClassId}
           onSuccess={loadAssignments}
+          onPreview={handlePlayPreview}
         />
       )}
 

@@ -228,7 +228,7 @@ export const TimePhaseModal: React.FC<TimePhaseModalProps> = ({
                 onChange={(val) => setPhaseClassId(String(val))}
                 options={[
                   { value: '', label: 'Tất cả lớp học' },
-                  ...classes.map(c => ({ value: String(c.id), label: `${c.class_name} (${c.grade || 'Lớp 6'})` }))
+                  ...classes.map(c => ({ value: String(c.id), label: c.class_name }))
                 ]}
               />
             </div>

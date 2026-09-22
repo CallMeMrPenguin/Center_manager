@@ -262,7 +262,7 @@ export function TeachersPage() {
           <button
             type="button"
             onClick={() => handleOpenEdit(row.original)}
-            className="p-1.5 rounded-xl bg-slate-100 hover:bg-blue-50 dark:bg-white/5 dark:hover:bg-blue-500/20 text-slate-600 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-300 border border-slate-200 dark:border-transparent transition cursor-pointer"
+            className="p-1.5 rounded-xl bg-slate-200 hover:bg-slate-300 dark:bg-white/10 dark:hover:bg-white/20 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white border-0 shadow-2xs hover:shadow-xs transition cursor-pointer"
             title="Sửa thông tin giáo viên"
           >
             <Edit3 size={15} />
@@ -280,17 +280,17 @@ export function TeachersPage() {
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-4 shrink-0">
         <div className="flex items-center gap-3">
-          <div className="p-3 bg-blue-500/15 text-blue-600 dark:text-blue-400 rounded-2xl border border-blue-500/25 shadow-sm">
+          <div className="p-3 bg-blue-500/15 text-blue-600 dark:text-blue-400 rounded-2xl border-0 shadow-xs">
             <UserCheck size={22} />
           </div>
           <div>
             <h1 className="text-lg font-black text-slate-900 dark:text-white">Quản Lý Nhân Sự & Giáo Viên</h1>
             <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 font-semibold mt-0.5">
               <span>Tổng số: <strong className="text-slate-900 dark:text-white">{teachers.length}</strong></span>
-              <span className="px-2 py-0.5 rounded-md bg-blue-500/10 text-blue-600 dark:text-blue-300 border border-blue-500/20 font-bold">
+              <span className="px-2 py-0.5 rounded-md bg-blue-500/10 text-blue-600 dark:text-blue-300 border-0 shadow-2xs font-bold">
                 Giáo viên: {teacherCount}
               </span>
-              <span className="px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 font-bold">
+              <span className="px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-0 shadow-2xs font-bold">
                 Trợ giảng: {assistantCount}
               </span>
             </div>
@@ -300,7 +300,7 @@ export function TeachersPage() {
         <button
           type="button"
           onClick={handleOpenAdd}
-          className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-xs font-black shadow-[0_0_15px_rgba(37,99,235,0.35)] transition cursor-pointer"
+          className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-xs font-black border-0 shadow-md transition cursor-pointer"
         >
           <UserPlus size={15} />
           <span>Thêm Giáo Viên Mới</span>

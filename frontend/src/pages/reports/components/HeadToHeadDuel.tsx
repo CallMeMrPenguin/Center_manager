@@ -72,12 +72,12 @@ export const HeadToHeadDuel: React.FC<HeadToHeadDuelProps> = ({
               <CustomSelect
                 value={compareClassAId}
                 onChange={(val) => setCompareClassAId(String(val))}
-                options={classes.map((c) => ({ value: String(c.id), label: `${c.class_name} (${c.grade || 'Lớp 6'})` }))}
+                options={classes.map((c) => ({ value: String(c.id), label: c.class_name }))}
               />
             </div>
           </div>
 
-          <div className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-[#131b2e] border border-slate-200 dark:border-[#22304d] font-mono font-black text-xs text-blue-600 dark:text-blue-300 uppercase tracking-wider shrink-0">
+          <div className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-[#131b2e] border-0 shadow-2xs font-mono font-black text-xs text-blue-600 dark:text-blue-300 uppercase tracking-wider shrink-0">
             VS
           </div>
 
@@ -90,7 +90,7 @@ export const HeadToHeadDuel: React.FC<HeadToHeadDuelProps> = ({
               <CustomSelect
                 value={compareClassBId}
                 onChange={(val) => setCompareClassBId(String(val))}
-                options={classes.map((c) => ({ value: String(c.id), label: `${c.class_name} (${c.grade || 'Lớp 6'})` }))}
+                options={classes.map((c) => ({ value: String(c.id), label: c.class_name }))}
               />
             </div>
           </div>

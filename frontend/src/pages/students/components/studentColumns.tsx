@@ -138,12 +138,12 @@ export const createStudentColumns = (
     size: 80,
     cell: ({ row }) => (
       <div className="flex items-center justify-center">
-        <button
-          type="button"
-          onClick={() => handleOpenEdit(row.original)}
-          className="p-1.5 rounded-xl bg-slate-100 hover:bg-blue-50 dark:bg-white/5 dark:hover:bg-blue-500/20 text-slate-700 hover:text-blue-600 dark:text-slate-300 dark:hover:text-blue-300 border border-slate-300 dark:border-transparent transition cursor-pointer"
-          title="Sửa thông tin học sinh"
-        >
+          <button
+            type="button"
+            onClick={() => handleOpenEdit(row.original)}
+            className="p-1.5 rounded-xl bg-slate-200 hover:bg-slate-300 dark:bg-white/10 dark:hover:bg-white/20 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white border-0 shadow-2xs hover:shadow-xs transition cursor-pointer"
+            title="Sửa thông tin học sinh"
+          >
           <Edit3 size={15} />
         </button>
       </div>

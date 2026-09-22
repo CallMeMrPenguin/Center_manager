@@ -103,12 +103,12 @@ export const ReportsHeader: React.FC<ReportsHeaderProps> = ({
               onChange={(val) => { setSelectedClassId(String(val)); setSelectedStudentId(''); }}
               options={[
                 { value: '', label: 'Tất cả lớp học' },
-                ...classes.map(c => ({ value: String(c.id), label: `${c.class_name} (${c.grade || 'Lớp 6'})` }))
+                ...classes.map(c => ({ value: String(c.id), label: c.class_name }))
               ]}
               className="w-44 shrink-0"
             />
           ) : (
-            <div className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-600 dark:text-blue-300 text-xs font-bold shrink-0">
+            <div className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-300 text-xs font-bold shrink-0 border-0 shadow-2xs">
               <GitCompare size={14} className="text-blue-500 dark:text-blue-400" />
               <span>Chế độ so sánh tất cả lớp</span>
             </div>
@@ -116,7 +116,7 @@ export const ReportsHeader: React.FC<ReportsHeaderProps> = ({
 
           <button
             onClick={onOpenResetModal}
-            className="group flex items-center gap-0 hover:gap-1.5 px-3 py-2 rounded-xl bg-rose-50 dark:bg-rose-500/10 hover:bg-rose-100 dark:hover:bg-rose-500/20 text-rose-600 dark:text-rose-300 hover:text-rose-700 dark:hover:text-white border border-rose-200 dark:border-rose-500/30 text-xs font-bold transition-all duration-300 cursor-pointer shadow-sm active:scale-95 shrink-0"
+            className="group flex items-center gap-0 hover:gap-1.5 px-3 py-2 rounded-xl bg-rose-100 dark:bg-rose-500/20 hover:bg-rose-200 dark:hover:bg-rose-500/30 text-rose-700 dark:text-rose-300 hover:text-rose-800 dark:hover:text-white border-0 shadow-xs hover:shadow-sm text-xs font-bold transition-all duration-300 cursor-pointer active:scale-95 shrink-0"
             title="Đặt Lại Điểm Số"
           >
             <RotateCcw size={14} className="shrink-0" />
@@ -127,7 +127,7 @@ export const ReportsHeader: React.FC<ReportsHeaderProps> = ({
 
           <button
             onClick={() => loadAnalyticsData()}
-            className="p-2.5 rounded-xl bg-white hover:bg-slate-50 dark:bg-[#141417] dark:hover:bg-[#1c1c21] text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-[#27272a] transition cursor-pointer shadow-sm shrink-0"
+            className="p-2.5 rounded-xl bg-slate-200 hover:bg-slate-300 dark:bg-white/10 dark:hover:bg-white/20 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white border-0 shadow-xs transition cursor-pointer shrink-0"
             title="Làm mới báo cáo"
           >
             <RefreshCw size={14} className={loading ? "animate-spin text-indigo-500 dark:text-indigo-400" : ""} />

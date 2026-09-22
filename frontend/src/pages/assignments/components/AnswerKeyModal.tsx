@@ -342,10 +342,10 @@ export const AnswerKeyModal: React.FC<AnswerKeyModalProps> = ({
                                     key={optIdx}
                                     type="button"
                                     onClick={() => handleQuickOptionSelect(group.sectionId, q.id, letter)}
-                                    className={`w-7 h-7 rounded-lg text-xs font-black font-mono transition cursor-pointer border flex items-center justify-center ${
+                                    className={`w-7 h-7 rounded-lg text-xs font-black font-mono transition cursor-pointer border-0 shadow-2xs flex items-center justify-center ${
                                       isCurrent
-                                        ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
-                                        : 'bg-white hover:bg-slate-100 text-slate-700 border-slate-300'
+                                        ? 'bg-blue-600 text-white shadow-xs'
+                                        : 'bg-slate-200 hover:bg-slate-300 text-slate-800'
                                     }`}
                                     title={cleanOptionPrefix(opt)}
                                   >

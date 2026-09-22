@@ -93,14 +93,14 @@ export const ExerciseItemView: React.FC<ExerciseItemViewProps> = ({
                       key={optIdx}
                       type="button"
                       onClick={() => onSelectOption(exercise.id, opt)}
-                      className={`p-2.5 rounded-xl text-left border flex items-center gap-2.5 transition cursor-pointer text-xs select-none ${
+                      className={`p-2.5 rounded-xl text-left border-0 shadow-2xs hover:shadow-xs flex items-center gap-2.5 transition cursor-pointer text-xs select-none ${
                         isOptCorrect
-                          ? 'bg-emerald-100 border-emerald-500 text-emerald-950 font-bold shadow-sm'
+                          ? 'bg-emerald-100 text-emerald-950 font-bold shadow-sm'
                           : isOptWrong
-                          ? 'bg-rose-100 border-rose-400 text-rose-950 font-bold line-through'
+                          ? 'bg-rose-100 text-rose-950 font-bold line-through'
                           : isSelected
-                          ? 'bg-indigo-100 border-indigo-600 text-indigo-950 font-black shadow-sm'
-                          : 'bg-slate-50 border-slate-200 text-slate-800 hover:border-indigo-300 hover:bg-indigo-50/50'
+                          ? 'bg-[#2563eb] text-white font-black shadow-sm'
+                          : 'bg-slate-100 hover:bg-slate-200 dark:bg-white/10 dark:hover:bg-white/15 text-slate-800 dark:text-slate-100'
                       }`}
                     >
                       <span
