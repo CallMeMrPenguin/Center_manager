@@ -71,53 +71,53 @@ export const ClassCard: React.FC<ClassCardProps> = ({
       {/* 3 Detail Info Rows */}
       <div className="space-y-2.5">
         {/* Teacher */}
-        <div className="flex items-center gap-3 bg-slate-50 dark:bg-[#1c1c21] border border-slate-200 dark:border-white/5 p-3 rounded-2xl transition-colors">
+        <div className="flex items-center gap-3.5 bg-slate-100/80 hover:bg-slate-100 dark:bg-[#1c2033] dark:hover:bg-[#22273e] p-3 rounded-2xl transition-colors">
           <div
             style={{
-              backgroundColor: hexToRGBA(cardColor, 0.15),
+              backgroundColor: hexToRGBA(cardColor, 0.2),
               color: cardColor,
             }}
-            className="p-2.5 rounded-xl flex items-center justify-center shrink-0"
+            className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 shadow-2xs"
           >
-            <User size={18} />
+            <User size={19} strokeWidth={2.5} />
           </div>
           <div className="min-w-0 flex-1">
-            <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400 block leading-tight">Giáo viên</span>
-            <span className="text-sm font-bold text-slate-900 dark:text-white block truncate">{cls.teacher_name || 'Chưa phân công'}</span>
+            <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 block leading-tight">Giáo viên</span>
+            <span className="text-sm font-black text-slate-900 dark:text-white block truncate">{cls.teacher_name || 'Chưa phân công'}</span>
           </div>
         </div>
 
         {/* Room */}
-        <div className="flex items-center gap-3 bg-slate-50 dark:bg-[#1c1c21] border border-slate-200 dark:border-white/5 p-3 rounded-2xl transition-colors">
+        <div className="flex items-center gap-3.5 bg-slate-100/80 hover:bg-slate-100 dark:bg-[#1c2033] dark:hover:bg-[#22273e] p-3 rounded-2xl transition-colors">
           <div
             style={{
-              backgroundColor: hexToRGBA(cardColor, 0.15),
+              backgroundColor: hexToRGBA(cardColor, 0.2),
               color: cardColor,
             }}
-            className="p-2.5 rounded-xl flex items-center justify-center shrink-0"
+            className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 shadow-2xs"
           >
-            <MapPin size={18} />
+            <MapPin size={19} strokeWidth={2.5} />
           </div>
           <div className="min-w-0 flex-1">
-            <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400 block leading-tight">Phòng</span>
-            <span className="text-sm font-bold text-slate-900 dark:text-white block truncate">{cls.room || 'Chưa xếp'}</span>
+            <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 block leading-tight">Phòng</span>
+            <span className="text-sm font-black text-slate-900 dark:text-white block truncate">{cls.room || 'Chưa xếp'}</span>
           </div>
         </div>
 
         {/* Students */}
-        <div className="flex items-center gap-3 bg-slate-50 dark:bg-[#1c1c21] border border-slate-200 dark:border-white/5 p-3 rounded-2xl transition-colors">
+        <div className="flex items-center gap-3.5 bg-slate-100/80 hover:bg-slate-100 dark:bg-[#1c2033] dark:hover:bg-[#22273e] p-3 rounded-2xl transition-colors">
           <div
             style={{
-              backgroundColor: hexToRGBA(cardColor, 0.15),
+              backgroundColor: hexToRGBA(cardColor, 0.2),
               color: cardColor,
             }}
-            className="p-2.5 rounded-xl flex items-center justify-center shrink-0"
+            className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 shadow-2xs"
           >
-            <Users size={18} />
+            <Users size={19} strokeWidth={2.5} />
           </div>
           <div className="min-w-0 flex-1">
-            <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400 block leading-tight">Học sinh</span>
-            <span className="text-sm font-bold text-slate-900 dark:text-white block">{cls.student_count || 0} học sinh</span>
+            <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 block leading-tight">Học sinh</span>
+            <span className="text-sm font-black text-slate-900 dark:text-white block font-mono">{cls.student_count || 0} học sinh</span>
           </div>
         </div>
       </div>

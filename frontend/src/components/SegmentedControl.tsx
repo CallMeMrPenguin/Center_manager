@@ -56,39 +56,31 @@ export function SegmentedControl<T extends string = string>({
 
   const [indicatorStyle, setIndicatorStyle] = useState<{ left: number; width: number }>({ left: 0, width: 0 });
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
-  const [hoverStyle, setHoverStyle] = useState<{ left: number; width: number }>({ left: 0, width: 0 });
 
   const buttonRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const updateIndicator = useCallback(() => {
     const activeIndex = items.findIndex((btn) => (btn.value ?? btn.id) === activeVal);
-    if (activeIndex !== -1) {
-      const activeElement = buttonRefs.current[activeIndex];
-      if (activeElement) {
-        setIndicatorStyle({
-          left: activeElement.offsetLeft,
-          width: activeElement.offsetWidth,
-        });
-      }
+    const targetIndex =
+      hoveredIndex !== null && hoveredIndex >= 0 && hoveredIndex < items.length
+        ? hoveredIndex
+        : activeIndex >= 0
+        ? activeIndex
+        : 0;
+
+    const targetElement = buttonRefs.current[targetIndex];
+    if (targetElement) {
+      setIndicatorStyle({
+        left: targetElement.offsetLeft,
+        width: targetElement.offsetWidth,
+      });
     }
-  }, [activeVal, items]);
+  }, [activeVal, hoveredIndex, items]);
 
   useEffect(() => {
     updateIndicator();
   }, [updateIndicator]);
-
-  useEffect(() => {
-    if (hoveredIndex !== null) {
-      const hoveredElement = buttonRefs.current[hoveredIndex];
-      if (hoveredElement) {
-        setHoverStyle({
-          left: hoveredElement.offsetLeft,
-          width: hoveredElement.offsetWidth,
-        });
-      }
-    }
-  }, [hoveredIndex]);
 
   // Recalculate on window resize or tab switch
   useEffect(() => {
@@ -132,24 +124,7 @@ export function SegmentedControl<T extends string = string>({
         isFluid ? 'w-full' : 'inline-flex w-fit'
       } ${className}`}
     >
-      {/* 1. Gliding Spring Hover Indicator */}
-      <motion.div
-        aria-hidden="true"
-        className="absolute top-0.5 bottom-0.5 rounded-md bg-white/90 dark:bg-white/15 shadow-sm border border-slate-300/80 dark:border-white/10 pointer-events-none z-0"
-        initial={false}
-        animate={{
-          left: hoverStyle.left,
-          width: hoverStyle.width,
-          opacity: hoveredIndex !== null ? 1 : 0,
-        }}
-        transition={{
-          type: 'spring',
-          stiffness: 400,
-          damping: 30,
-        }}
-      />
-
-      {/* 2. Tactile Spring Active Indicator Pill with Bevel Shadows */}
+      {/* 1. Fluid Gliding Highlight Pill (Always active, glides to hovered item, returns to active) */}
       <motion.div
         aria-hidden="true"
         className={`absolute top-0.5 bottom-0.5 rounded-md pointer-events-none z-0 ${
@@ -164,15 +139,17 @@ export function SegmentedControl<T extends string = string>({
         }}
         transition={{
           type: 'spring',
-          stiffness: 400,
-          damping: 30,
+          stiffness: 450,
+          damping: 32,
         }}
       />
 
-      {/* 3. Button Items */}
+      {/* 2. Button Items */}
       {items.map((item, index) => {
         const itemVal = (item.value ?? item.id) as T;
         const isActive = itemVal === activeVal;
+        const isHovered = hoveredIndex === index;
+        const isTarget = hoveredIndex !== null ? isHovered : isActive;
         const Icon = item.icon;
 
         return (
@@ -190,8 +167,10 @@ export function SegmentedControl<T extends string = string>({
             } ${sizeClasses} ${
               item.disabled
                 ? 'opacity-35 cursor-not-allowed text-slate-400 dark:text-slate-500'
-                : isActive
+                : isTarget
                 ? 'text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.35)]'
+                : isActive
+                ? 'text-blue-600 dark:text-blue-400 font-black'
                 : 'text-slate-800 dark:text-neutral-200 hover:text-black dark:hover:text-white'
             }`}
           >

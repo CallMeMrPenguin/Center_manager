@@ -37,7 +37,7 @@ export const SessionOverviewBanner: React.FC<SessionOverviewBannerProps> = ({
   } = useSessionOverview(attendanceRecords);
 
   return (
-    <div className="bg-white dark:bg-[#0c0f1e] rounded-2xl p-4 shadow-[0_4px_24px_rgba(0,0,0,0.08)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.45)] transition-all">
+    <div className="bg-white dark:bg-[#0c0f1e] rounded-2xl p-4 border border-slate-200/80 dark:border-white/10 shadow-[0_4px_24px_rgba(0,0,0,0.06)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.45)] transition-all">
       {/* 1. MASTER HEADER STRIP */}
       <div className="flex flex-wrap items-center justify-between gap-3 select-none">
         <div>
@@ -47,7 +47,7 @@ export const SessionOverviewBanner: React.FC<SessionOverviewBannerProps> = ({
             </h3>
             <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400">({attendanceDate})</span>
             {hasAlerts ? (
-              <span className="px-2 py-0.5 text-[10px] font-black rounded-full bg-amber-50 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-500/40">
+              <span className="px-2.5 py-0.5 text-xs font-black rounded-full bg-amber-500 text-white shadow-xs">
                 {belowAvgData.belowC1.length +
                   belowAvgData.belowC2.length +
                   belowAvgData.belowHw.length +
@@ -55,8 +55,8 @@ export const SessionOverviewBanner: React.FC<SessionOverviewBannerProps> = ({
                 Cảnh báo
               </span>
             ) : (
-              <span className="px-2 py-0.5 text-[10px] font-black rounded-full bg-emerald-50 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/40 flex items-center gap-1">
-                <CheckCircle2 size={11} /> 100% Đạt Chuẩn
+              <span className="px-2.5 py-0.5 text-xs font-black rounded-full bg-emerald-500 text-white shadow-xs flex items-center gap-1">
+                <CheckCircle2 size={12} /> 100% Đạt Chuẩn
               </span>
             )}
           </div>
@@ -65,10 +65,10 @@ export const SessionOverviewBanner: React.FC<SessionOverviewBannerProps> = ({
         {/* RIGHT: CLASS AVERAGE STATS & EXPAND TOGGLE */}
         <div className="flex items-center gap-2">
           {/* Average metrics pills */}
-          <div className="hidden sm:flex items-center gap-2.5 bg-slate-100 dark:bg-[#080b14] px-3 py-1.5 rounded-xl border border-slate-200 dark:border-white/5 text-xs font-bold">
+          <div className="hidden sm:flex items-center gap-2.5 bg-slate-50 dark:bg-[#121626] px-3 py-1.5 rounded-xl border border-slate-200 dark:border-white/10 shadow-2xs text-xs font-bold">
             <div className="flex items-center gap-1">
               <span className="text-slate-500 dark:text-slate-400">TB Check 1:</span>
-              <span className="text-blue-600 dark:text-blue-400 font-extrabold">{trunc1Dec(stats.avgC1)}</span>
+              <span className="text-blue-600 dark:text-blue-400 font-black font-mono">{trunc1Dec(stats.avgC1)}</span>
             </div>
             <div className="flex items-center gap-1 pl-2.5 border-l border-slate-200 dark:border-white/10">
               <span className="text-slate-500 dark:text-slate-400">TB Check 2:</span>
