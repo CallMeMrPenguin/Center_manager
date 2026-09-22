@@ -27,6 +27,36 @@
 
 ---
 
+# Walkthrough: UI Redesign & Streamlining
+
+## 1. Tổng Quan Buổi Học (`SessionOverviewBanner.tsx` & `SessionOverviewCards.tsx`)
+- **Bỏ Chú Thích & Thanh Chuẩn Nhanh**: Loại bỏ hoàn toàn dòng mô tả phụ và thanh nút chọn nhanh (`Dưới 5.0 (Chuẩn VN)`, `Dưới TB Buổi Học`, `Tùy chỉnh`). Mặc định hiển thị học sinh có điểm nhỏ hơn điểm trung bình buổi học trừ khi có giá trị được nhập vào trực tiếp tại card.
+- **Card Độ Lệch Thống Nhất Giao Diện**: Độ lệch hiển thị chuẩn form giống hệt 3 card còn lại (`Check 1`, `Check 2`, `BTVN`) với ô nhập ngưỡng trực tiếp ngay tiêu đề (`> [input] đ`) và danh sách học sinh dưới dạng badge pill nổi bật.
+- **Bỏ Viền Card Mà Vẫn Nổi**: Bỏ các đường viền thô cứng (`border-0`), thay bằng nền màu pastel thanh nhã (`bg-blue-50/70`, `bg-purple-50/70`, `bg-emerald-50/70`, `bg-amber-50/70`), đổ bóng nhẹ (`shadow-xs` / `shadow-sm`) và các tag học sinh màu trắng nổi khối rõ nét.
+
+## 2. So Sánh & Thống Kê Sâu (`HeadToHeadDuel.tsx`, `DualComparisonBars.tsx`, `TierDistributionCard.tsx`, `UnitBreakdownTable.tsx`)
+- **Đổi Tiêu Đề**: Đổi "SO SÁNH ĐỐI ĐẦU 2 LỚP HỌC" thành **"SO SÁNH 2 LỚP HỌC"**.
+- **Tăng Độ Tương Phản & Ranh Giới**: Phân định rõ ràng giữa container ngoài và các card bên trong bằng viền tương phản cao (`border-slate-300 dark:border-[#1b253b]`) và nền khác biệt (`bg-slate-50/70 dark:bg-[#0e1322]`).
+- **Chuẩn Hóa Typography (Đồng Bộ Bảng Xếp Hạng)**:
+  - Tên lớp học, danh mục, tiêu đề thang điểm: tăng kích thước từ `text-[10px]/text-xs` lên `text-xs sm:text-sm font-extrabold`.
+  - Tên học sinh: tăng lên `text-base sm:text-lg font-extrabold`.
+  - Điểm số và thông số thống kê: chuyển sang font mono sắc nét, kích thước lớn `text-sm/text-base font-black font-mono` (điểm đối đầu lớn `text-3xl font-black font-mono`).
+  - Thanh đo phổ điểm / thanh năng lực: tăng chiều cao track từ `h-2` lên `h-4` với viền rõ ràng, dễ nhìn.
+
+## 3. Chuyển Đổi Nút Tương Tác Sang Màu Xanh Dương & Bo Sát Nút Segmented Control
+- **Segmented Control Bo Sát**:
+  - Giảm padding container từ `p-1` xuống `p-0.5`, bo góc `rounded-lg`.
+  - Con trượt lướt (sliding pill indicator) chuyển sang bo sát viền nút (`top-0.5 bottom-0.5 rounded-md`).
+- **Đồng Bộ Nút Màu Xanh Dương Toàn Bộ Ứng Dụng**:
+  - Chuyển tất cả các nút bấm, icon trạng thái active, thanh trượt segmented pill từ màu tím/indigo (`bg-[#5c36f5]`, `bg-indigo-600`) sang màu xanh dương chuẩn (`bg-blue-600 hover:bg-blue-500`, viền `border-blue-500`, shadow xanh đồng bộ).
+  - Áp dụng trên tất cả các màn hình: Điểm danh & Điểm, Nhóm bạn & Xung đột, Đăng ký học sinh, Quản lý tài khoản & Phân quyền, Thẻ giáo viên & học sinh, Bài tập & Nộp bài, Bảng vẽ Whiteboard & Chèn ảnh, Báo cáo & Thống kê, Cài đặt hệ thống, Bảng dữ liệu TanStack DataTable.
+
+## 4. Kiểm Thử & Xác Nhận
+- `npm run build`: Hoàn thành với mã thoát `0`, không có bất kỳ lỗi TypeScript hay Vite bundle nào.
+- Git commit & push: Đã đồng bộ toàn bộ thay đổi lên nhánh `main` trên GitHub remote.
+
+---
+
 ## 3. Tầng Bảo Mật Xác Thực & Chống Can Thiệp Dữ Liệu (DevTools/Script Anti-Tampering)
 Để ngăn chặn triệt để học sinh hoặc người dùng tò mò mở Chrome DevTools (F12) / Console / Network Tab hoặc chạy script cURL/fetch can thiệp sửa điểm và thuật toán:
 
