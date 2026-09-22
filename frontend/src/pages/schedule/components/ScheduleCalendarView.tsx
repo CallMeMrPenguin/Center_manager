@@ -59,22 +59,30 @@ export const ScheduleCalendarView: React.FC<ScheduleCalendarViewProps> = ({
           </div>
         </div>
         <div className="p-3 overflow-y-auto max-h-[calc(100vh-270px)]">
-          <div className="grid grid-cols-7 gap-2 auto-rows-fr">
+          <div className="grid grid-cols-7 gap-1.5 auto-rows-fr">
             {Array.from({ length: totalCells }).map((_, idx) => {
               const dayNum = idx - startOff + 1;
               const isCurr = dayNum > 0 && dayNum <= daysInMonth;
+              const isWknd = (idx % 7) >= 5;
+
               if (!isCurr) {
+                const prevMoLastDate = new Date(yr, mo - 1, 0).getDate();
+                const trailingDayNum = dayNum <= 0 ? prevMoLastDate + dayNum : dayNum - daysInMonth;
+
                 return (
                   <div
                     key={idx}
-                    className="min-h-[115px] rounded-xl bg-slate-50/40 dark:bg-[#0c101c]/30 p-2.5 opacity-25 select-none border border-dashed border-slate-200/60 dark:border-white/5"
-                  />
+                    className="min-h-[115px] rounded-xl bg-slate-100/35 dark:bg-[#090d18]/30 p-2.5 opacity-35 select-none border border-dashed border-slate-300/60 dark:border-white/5 pointer-events-none flex flex-col justify-between"
+                  >
+                    <span className="text-[11px] font-bold text-slate-400 dark:text-slate-600">
+                      {trailingDayNum}
+                    </span>
+                  </div>
                 );
               }
 
               const dateStr = `${yr}-${String(mo).padStart(2, '0')}-${String(dayNum).padStart(2, '0')}`;
               const isToday = dateStr === today;
-              const isWknd = (idx % 7) >= 5;
               const daySess = sessions
                 .filter((s) => s.date === dateStr)
                 .sort((a, b) => a.start_time.localeCompare(b.start_time));
@@ -89,10 +97,10 @@ export const ScheduleCalendarView: React.FC<ScheduleCalendarViewProps> = ({
                   }}
                   className={`min-h-[115px] rounded-xl p-2.5 flex flex-col gap-2 transition-all cursor-pointer border shadow-2xs hover:shadow-xs ${
                     isToday
-                      ? 'bg-blue-50/80 dark:bg-[#131b32] border-blue-400 dark:border-blue-500/40 shadow-xs'
+                      ? 'bg-blue-50/80 dark:bg-[#131b32] border-blue-500 dark:border-blue-400 shadow-xs'
                       : isWknd
-                      ? 'bg-slate-50/90 dark:bg-[#0e1322] border-slate-200/90 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20 hover:bg-slate-100/80 dark:hover:bg-[#12192d]'
-                      : 'bg-white dark:bg-[#111728] border-slate-200/90 dark:border-white/10 hover:border-blue-300 dark:hover:border-blue-500/30 hover:bg-blue-50/20 dark:hover:bg-[#131b30]'
+                      ? 'bg-rose-50/50 dark:bg-[#19111e] border-rose-200 dark:border-rose-500/25 hover:border-rose-300 dark:hover:border-rose-500/40 hover:bg-rose-100/50 dark:hover:bg-[#201528]'
+                      : 'bg-white dark:bg-[#111728] border-slate-300 dark:border-[#27324d] hover:border-blue-300 dark:hover:border-blue-500/30 hover:bg-blue-50/20 dark:hover:bg-[#131b30]'
                   }`}
                 >
                   <div className="flex items-center justify-between">
@@ -101,8 +109,8 @@ export const ScheduleCalendarView: React.FC<ScheduleCalendarViewProps> = ({
                         isToday
                           ? 'bg-blue-600 text-white font-black'
                           : isWknd
-                          ? 'text-rose-500 dark:text-rose-300'
-                          : 'text-slate-800 dark:text-slate-300'
+                          ? 'text-rose-600 dark:text-rose-400 font-black'
+                          : 'text-slate-800 dark:text-slate-200'
                       }`}
                     >
                       {dayNum}

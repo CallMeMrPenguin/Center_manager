@@ -29,10 +29,10 @@ export const UsersTab: React.FC<UsersTabProps> = ({
         header: 'Tên Hiển Thị',
         cell: ({ row }) => (
           <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-xl bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 flex items-center justify-center font-bold text-xs shrink-0">
+            <div className="w-8 h-8 rounded-xl bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300 border-0 flex items-center justify-center font-black text-xs shrink-0 shadow-2xs">
               {row.original.display_name.charAt(0).toUpperCase()}
             </div>
-            <span className="font-bold text-slate-100">
+            <span className="font-extrabold text-slate-900 dark:text-white text-sm">
               {row.original.display_name}
             </span>
           </div>
@@ -42,7 +42,7 @@ export const UsersTab: React.FC<UsersTabProps> = ({
         accessorKey: 'username',
         header: 'Tên Đăng Nhập',
         cell: (info) => (
-          <span className="font-mono text-xs font-semibold text-slate-300">
+          <span className="font-mono text-xs font-bold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-white/5 px-2 py-0.5 rounded-md">
             @{info.getValue<string>()}
           </span>
         ),
@@ -52,17 +52,17 @@ export const UsersTab: React.FC<UsersTabProps> = ({
         header: 'Vai Trò',
         cell: (info) => {
           const role = info.getValue<string>();
-          let badgeClass = 'bg-slate-500/15 text-slate-300 border-slate-500/30';
+          let badgeClass = 'bg-slate-100 text-slate-800 border-slate-200 dark:bg-slate-500/20 dark:text-slate-300 dark:border-slate-500/30';
           if (role === 'Quản trị viên') {
-            badgeClass = 'bg-purple-500/15 text-purple-300 border-purple-500/30';
+            badgeClass = 'bg-purple-100 text-purple-800 border-purple-200 dark:bg-purple-500/20 dark:text-purple-300 dark:border-purple-500/30';
           } else if (role === 'Giáo viên') {
-            badgeClass = 'bg-indigo-500/15 text-indigo-300 border-indigo-500/30';
+            badgeClass = 'bg-indigo-100 text-indigo-800 border-indigo-200 dark:bg-indigo-500/20 dark:text-indigo-300 dark:border-indigo-500/30';
           } else if (role === 'Trợ giảng') {
-            badgeClass = 'bg-blue-500/15 text-blue-300 border-blue-500/30';
+            badgeClass = 'bg-sky-100 text-sky-800 border-sky-200 dark:bg-sky-500/20 dark:text-sky-300 dark:border-sky-500/30';
           } else if (role === 'Học sinh') {
-            badgeClass = 'bg-teal-500/15 text-teal-300 border-teal-500/30';
+            badgeClass = 'bg-teal-100 text-teal-800 border-teal-200 dark:bg-teal-500/20 dark:text-teal-300 dark:border-teal-500/30';
           } else if (role === 'Kế toán') {
-            badgeClass = 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30';
+            badgeClass = 'bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-500/20 dark:text-emerald-300 dark:border-emerald-500/30';
           }
           return (
             <span className={`text-xs px-2.5 py-0.5 rounded-full font-black border inline-flex items-center gap-1 ${badgeClass}`}>
@@ -82,8 +82,8 @@ export const UsersTab: React.FC<UsersTabProps> = ({
             <span
               className={`px-2.5 py-0.5 rounded-full text-xs font-black inline-flex items-center gap-1 border ${
                 isActive
-                  ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
-                  : 'bg-rose-500/10 text-rose-400 border-rose-500/20'
+                  ? 'bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-500/20 dark:text-emerald-300 dark:border-emerald-500/30'
+                  : 'bg-rose-100 text-rose-800 border-rose-200 dark:bg-rose-500/20 dark:text-rose-300 dark:border-rose-500/30'
               }`}
             >
               {isActive ? <CheckCircle2 size={12} /> : <Lock size={12} />}
@@ -98,7 +98,7 @@ export const UsersTab: React.FC<UsersTabProps> = ({
         cell: (info) => {
           const val = info.getValue<string>();
           return (
-            <span className="text-xs text-slate-400 font-medium">
+            <span className="text-xs text-slate-600 dark:text-slate-400 font-bold font-mono">
               {val ? val.slice(0, 10) : '-'}
             </span>
           );
@@ -115,7 +115,7 @@ export const UsersTab: React.FC<UsersTabProps> = ({
             <button
               type="button"
               onClick={() => onEditUser(row.original)}
-              className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white transition cursor-pointer border border-white/5 active:scale-95"
+              className="p-1.5 rounded-lg btn-neutral text-slate-700 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition cursor-pointer border-0 shadow-2xs active:scale-95"
               title="Chỉnh sửa tài khoản"
             >
               <Edit3 size={13} />
@@ -149,7 +149,7 @@ export const UsersTab: React.FC<UsersTabProps> = ({
                 type="button"
                 onClick={onSyncStudents}
                 disabled={syncing}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-teal-500/15 hover:bg-teal-500/25 text-teal-300 hover:text-white text-xs font-bold border border-teal-500/30 transition cursor-pointer active:scale-95 disabled:opacity-50"
+                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold border-0 shadow-xs transition cursor-pointer active:scale-95 disabled:opacity-50"
                 title="Tự động tạo hoặc đồng bộ tài khoản cho toàn bộ học sinh"
               >
                 <RefreshCw size={13} className={syncing ? 'animate-spin' : ''} />
@@ -159,7 +159,7 @@ export const UsersTab: React.FC<UsersTabProps> = ({
             <button
               type="button"
               onClick={onOpenCreateModal}
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-black shadow-sm transition-all cursor-pointer active:scale-95 shrink-0"
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-black shadow-xs border-0 transition-all cursor-pointer active:scale-95 shrink-0"
             >
               <Plus size={14} />
               <span>Thêm Tài Khoản</span>

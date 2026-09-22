@@ -74,16 +74,19 @@ export const InsightCommentary: React.FC<InsightCommentaryProps> = React.memo(({
             {report.subjectTitle}
           </h4>
         </div>
-        <span
-          className="px-3 py-1 rounded-lg text-xs font-black border"
-          style={{
-            backgroundColor: `${report.badgeColor}15`,
-            color: report.badgeColor,
-            borderColor: `${report.badgeColor}40`,
-          }}
-        >
-          {report.overallBadge}
-        </span>
+        {/* Rating Badge (Hidden when viewing All Classes) */}
+        {report.overallBadge && selectedClassId !== 'all' && Boolean(selectedClassId) && (
+          <span
+            className="px-3 py-1 rounded-lg text-xs font-black border"
+            style={{
+              backgroundColor: `${report.badgeColor}15`,
+              color: report.badgeColor,
+              borderColor: `${report.badgeColor}40`,
+            }}
+          >
+            {report.overallBadge}
+          </span>
+        )}
       </div>
 
       {/* 2. POINT-BY-POINT METRIC BREAKDOWN (Zero emojis, clean divide-y, glowing indicator dots) */}

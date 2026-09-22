@@ -79,15 +79,15 @@ export const PermissionsTab: React.FC<PermissionsTabProps> = ({
   return (
     <div className="space-y-4">
       {/* Top Header Card */}
-      <div className="bg-white dark:bg-[#0c0f1e] border border-slate-200/90 dark:border-[#1e2742] rounded-2xl p-4 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.06),0_1px_3px_-1px_rgba(0,0,0,0.06)] flex flex-wrap items-center justify-between gap-3">
+      <div className="bg-white dark:bg-[#111728] border-0 rounded-2xl p-5 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.06),0_2px_6px_-2px_rgba(0,0,0,0.04)] flex flex-wrap items-center justify-between gap-3">
         <div>
           <div className="flex items-center gap-2">
-            <Shield size={18} className="text-indigo-500 dark:text-indigo-400" />
+            <Shield size={18} className="text-blue-600 dark:text-blue-400" />
             <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider">
               Ma Trận Phân Quyền Truy Cập Tab
             </h3>
           </div>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 font-medium">
             Cấu hình các tab được phép hiển thị và truy cập cho từng vai trò người dùng trong hệ thống.
           </p>
         </div>
@@ -96,7 +96,7 @@ export const PermissionsTab: React.FC<PermissionsTabProps> = ({
           type="button"
           onClick={handleSave}
           disabled={saving}
-          className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-black shadow-lg transition cursor-pointer active:scale-95 disabled:opacity-50 ${
+          className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-black shadow-xs transition cursor-pointer active:scale-95 disabled:opacity-50 border-0 ${
             isDirty
               ? 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-500/30 animate-pulse'
               : 'bg-blue-600 hover:bg-blue-500 text-white shadow-blue-500/30'
@@ -108,11 +108,11 @@ export const PermissionsTab: React.FC<PermissionsTabProps> = ({
       </div>
 
       {/* Permission Matrix Table */}
-      <div className="bg-white dark:bg-[#0c0f1e] border border-slate-200/90 dark:border-[#1e2742] rounded-2xl overflow-hidden shadow-[0_2px_8px_-2px_rgba(0,0,0,0.06),0_1px_3px_-1px_rgba(0,0,0,0.06)]">
+      <div className="bg-white dark:bg-[#111728] border-0 rounded-2xl overflow-hidden shadow-[0_4px_20px_-4px_rgba(0,0,0,0.06),0_2px_6px_-2px_rgba(0,0,0,0.04)]">
         <div className="overflow-x-auto scrollbar-thin">
           <table className="w-full text-left border-collapse select-none">
             <thead>
-              <tr className="bg-slate-200 dark:bg-[#0b0e1a] border-b-2 border-slate-300 dark:border-[#212c4b] text-xs font-black uppercase text-slate-900 dark:text-white">
+              <tr className="bg-slate-100 dark:bg-[#161d30] border-b border-slate-200 dark:border-white/10 text-xs font-black uppercase text-slate-900 dark:text-white">
                 <th className="py-3.5 px-4 min-w-[200px]">Tính Năng / Tab</th>
                 {ROLES.map((role) => (
                   <th key={role} className="py-3.5 px-4 text-center min-w-[140px]">
@@ -124,15 +124,15 @@ export const PermissionsTab: React.FC<PermissionsTabProps> = ({
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-300 dark:divide-[#212c4b] text-xs">
+            <tbody className="divide-y divide-slate-200 dark:divide-white/5 text-xs">
               {TAB_DEFINITIONS.map((tab, idx) => {
                 const Icon = tab.icon;
                 return (
                   <tr
                     key={tab.id}
                     className={`${
-                      idx % 2 === 0 ? 'bg-white dark:bg-[#0f1528]' : 'bg-[#e2e8f0] dark:bg-[#151e38]'
-                    } hover:bg-indigo-50/80 dark:hover:bg-indigo-950/40 transition-colors`}
+                      idx % 2 === 0 ? 'bg-white dark:bg-[#111728]' : 'bg-slate-50/70 dark:bg-[#141b2e]'
+                    } hover:bg-blue-100/70 dark:hover:bg-blue-950/40 transition-colors`}
                   >
                     {/* Tab Name & Icon */}
                     <td className="py-3 px-4 font-bold text-slate-800 dark:text-slate-200">

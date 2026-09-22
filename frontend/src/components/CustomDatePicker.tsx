@@ -207,11 +207,11 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
 
   return (
     <div className={`relative inline-block ${className}`} ref={containerRef}>
-      {/* TRIGGER BUTTON (Solid white in light mode, zero border) */}
+      {/* TRIGGER BUTTON (Synced with button shade setting via btn-neutral) */}
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between gap-2 px-3.5 py-2 rounded-xl bg-white hover:bg-slate-50 dark:bg-[#181d2e] dark:hover:bg-[#1f273e] text-slate-900 dark:text-white text-xs font-bold transition-all cursor-pointer shadow-xs hover:shadow-sm border-0 outline-none"
+        className="w-full flex items-center justify-between gap-2 px-3.5 py-2 rounded-xl btn-neutral text-slate-900 dark:text-white text-xs font-bold transition-all cursor-pointer shadow-xs hover:shadow-sm border-0 outline-none"
       >
         <div className="flex items-center gap-2 truncate">
           <CalendarIcon size={14} className="text-blue-600 dark:text-blue-400 shrink-0 font-bold" />

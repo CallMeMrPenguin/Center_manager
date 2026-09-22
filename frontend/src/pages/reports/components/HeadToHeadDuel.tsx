@@ -97,140 +97,206 @@ export const HeadToHeadDuel: React.FC<HeadToHeadDuelProps> = ({
         </div>
       </div>
 
-      {/* 2. 4 Duel KPI Comparison Cards — Standalone White Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 animate-cascade-2">
-        {/* Card 1: EMA */}
-        <div className="bg-white dark:bg-[#111728] border-0 p-5 rounded-2xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.06),0_2px_6px_-2px_rgba(0,0,0,0.04)] flex flex-col justify-between gap-3 hover:shadow-md transition-shadow">
-          <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/5 pb-2.5">
-            <span className="text-xs font-black uppercase tracking-wider text-blue-700 dark:text-blue-300">ĐIỂM EMA TRUNG BÌNH</span>
-            <div className="p-1.5 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400">
-              <BarChart3 size={15} />
+      {/* 2. Dual Class Champion Overview Arena — 2 Standalone Symmetrical Cards */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 animate-cascade-2">
+        {/* Class A Champion Card */}
+        <div className="bg-white dark:bg-[#111728] border-0 rounded-2xl p-6 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.06),0_2px_6px_-2px_rgba(0,0,0,0.04)] hover:shadow-md transition-shadow flex flex-col justify-between gap-5">
+          <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/5 pb-4">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <span
+                className="w-3.5 h-3.5 rounded-full shrink-0 shadow-sm"
+                style={{ backgroundColor: getClassColor(compareClassAId, 0) }}
+              />
+              <span className="text-lg font-black text-blue-600 dark:text-blue-400 truncate">
+                {classComparisonData.classA.name}
+              </span>
+            </div>
+            <span className="text-xs font-bold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-white/5 px-3 py-1 rounded-xl shrink-0">
+              {classComparisonData.classA.studentCount} Học Sinh
+            </span>
+          </div>
+
+          {/* Big Stat Display */}
+          <div className="flex items-baseline justify-between gap-4">
+            <div>
+              <span className="text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 block mb-1">
+                Điểm EMA Trung Bình
+              </span>
+              <div className="text-4xl font-black font-mono text-blue-600 dark:text-blue-400">
+                {classComparisonData.classA.avgEma > 0 ? format1Dec(classComparisonData.classA.avgEma) : '-'}
+                <span className="text-sm font-bold text-slate-400 dark:text-slate-500 ml-1">đ</span>
+              </div>
+            </div>
+
+            {classComparisonData.emaDiff !== 0 && (
+              <div className="text-right">
+                <span
+                  className={`text-xs font-black px-2.5 py-1 rounded-xl whitespace-nowrap inline-block ${
+                    classComparisonData.emaDiff > 0
+                      ? 'text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-500/15'
+                      : 'text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-white/5'
+                  }`}
+                >
+                  {classComparisonData.emaDiff > 0
+                    ? `Dẫn đầu +${format1Dec(classComparisonData.emaDiff)} đ`
+                    : `Thấp hơn -${format1Dec(Math.abs(classComparisonData.emaDiff))} đ`}
+                </span>
+              </div>
+            )}
+          </div>
+
+          {/* 3 Key Metrics Row */}
+          <div className="grid grid-cols-3 gap-3 py-3 border-y border-slate-100 dark:border-white/5">
+            <div>
+              <span className="text-[11px] font-black uppercase text-slate-500 dark:text-slate-400 block mb-0.5">
+                Chuyên Cần
+              </span>
+              <span className="text-lg font-black font-mono text-emerald-600 dark:text-emerald-400">
+                {classComparisonData.classA.attendancePct}%
+              </span>
+            </div>
+            <div>
+              <span className="text-[11px] font-black uppercase text-slate-500 dark:text-slate-400 block mb-0.5">
+                Tiến Bộ
+              </span>
+              <span className="text-lg font-black font-mono text-indigo-600 dark:text-indigo-400">
+                {classComparisonData.classA.improvingPct}%
+              </span>
+            </div>
+            <div>
+              <span className="text-[11px] font-black uppercase text-slate-500 dark:text-slate-400 block mb-0.5">
+                Độ Lệch SD
+              </span>
+              <span className="text-lg font-black font-mono text-amber-600 dark:text-amber-400">
+                {classComparisonData.classA.classSd}
+              </span>
             </div>
           </div>
-          <div className="flex items-center justify-between gap-2 px-1">
-            <div className="text-left">
-              <span className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 block font-extrabold truncate max-w-[110px]">{classComparisonData.classA.name}</span>
-              <span className="text-3xl font-black font-mono text-blue-600 dark:text-blue-400">{classComparisonData.classA.avgEma > 0 ? format1Dec(classComparisonData.classA.avgEma) : '-'}</span>
-            </div>
-            <span className="text-xs font-black text-slate-400 dark:text-slate-500 font-mono">VS</span>
-            <div className="text-right">
-              <span className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 block font-extrabold truncate max-w-[110px]">{classComparisonData.classB.name}</span>
-              <span className="text-3xl font-black font-mono text-cyan-600 dark:text-cyan-400">{classComparisonData.classB.avgEma > 0 ? format1Dec(classComparisonData.classB.avgEma) : '-'}</span>
-            </div>
-          </div>
-          <div className="pt-2 border-t border-slate-100 dark:border-white/5 text-xs font-black flex items-center justify-center">
-            {classComparisonData.emaDiff > 0 ? (
-              <span className="text-emerald-700 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-lg whitespace-nowrap">
-                {classComparisonData.classA.name} cao hơn +{format1Dec(classComparisonData.emaDiff)} đ
-              </span>
-            ) : classComparisonData.emaDiff < 0 ? (
-              <span className="text-cyan-700 dark:text-cyan-400 bg-cyan-500/10 px-2.5 py-1 rounded-lg whitespace-nowrap">
-                {classComparisonData.classB.name} cao hơn +{format1Dec(Math.abs(classComparisonData.emaDiff))} đ
-              </span>
+
+          {/* Integrated Top Student */}
+          <div className="flex items-center gap-3 pt-1">
+            {classComparisonData.classA.topStudent ? (
+              <img
+                src={getStudentTier(Number(classComparisonData.classA.topStudent.ema_level || 0)).badge}
+                alt="Rank"
+                className="w-9 h-9 object-contain shrink-0"
+              />
             ) : (
-              <span className="text-slate-600 dark:text-slate-400 bg-slate-500/10 px-2.5 py-1 rounded-lg whitespace-nowrap">Hai lớp bằng điểm nhau</span>
+              <Award size={24} className="text-slate-400 shrink-0" />
+            )}
+            <div className="flex-1 min-w-0">
+              <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 block">
+                Học Sinh Dẫn Đầu Lớp
+              </span>
+              <span className="text-sm font-extrabold text-slate-900 dark:text-white truncate block">
+                {classComparisonData.classA.topStudent ? classComparisonData.classA.topStudent.full_name : 'Chưa có'}
+              </span>
+            </div>
+            {classComparisonData.classA.topStudent && (
+              <span className="text-xs font-mono font-black px-2.5 py-1 rounded-lg bg-blue-50 dark:bg-blue-500/15 text-blue-700 dark:text-blue-300 shrink-0">
+                EMA {format1Dec(Number(classComparisonData.classA.topStudent.ema_level || 0))}
+              </span>
             )}
           </div>
         </div>
 
-        {/* Card 2: Chuyên Cần */}
-        <div className="bg-white dark:bg-[#111728] border-0 p-5 rounded-2xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.06),0_2px_6px_-2px_rgba(0,0,0,0.04)] flex flex-col justify-between gap-3 hover:shadow-md transition-shadow">
-          <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/5 pb-2.5">
-            <span className="text-xs font-black uppercase tracking-wider text-emerald-700 dark:text-emerald-300">CHUYÊN CẦN %</span>
-            <div className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
-              <Users size={15} />
-            </div>
-          </div>
-          <div className="flex items-center justify-between gap-2 px-1">
-            <div className="text-left">
-              <span className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 block font-extrabold truncate max-w-[110px]">{classComparisonData.classA.name}</span>
-              <span className="text-3xl font-black font-mono text-emerald-600 dark:text-emerald-400">{classComparisonData.classA.attendancePct}%</span>
-            </div>
-            <span className="text-xs font-black text-slate-400 dark:text-slate-500 font-mono">VS</span>
-            <div className="text-right">
-              <span className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 block font-extrabold truncate max-w-[110px]">{classComparisonData.classB.name}</span>
-              <span className="text-3xl font-black font-mono text-teal-600 dark:text-teal-400">{classComparisonData.classB.attendancePct}%</span>
-            </div>
-          </div>
-          <div className="pt-2 border-t border-slate-100 dark:border-white/5 text-xs font-black flex items-center justify-center">
-            {classComparisonData.attDiff > 0 ? (
-              <span className="text-emerald-700 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-lg whitespace-nowrap">
-                {classComparisonData.classA.name} chuyên cần hơn +{classComparisonData.attDiff}%
+        {/* Class B Champion Card */}
+        <div className="bg-white dark:bg-[#111728] border-0 rounded-2xl p-6 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.06),0_2px_6px_-2px_rgba(0,0,0,0.04)] hover:shadow-md transition-shadow flex flex-col justify-between gap-5">
+          <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/5 pb-4">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <span
+                className="w-3.5 h-3.5 rounded-full shrink-0 shadow-sm"
+                style={{ backgroundColor: getClassColor(compareClassBId, 1) }}
+              />
+              <span className="text-lg font-black text-cyan-600 dark:text-cyan-400 truncate">
+                {classComparisonData.classB.name}
               </span>
-            ) : classComparisonData.attDiff < 0 ? (
-              <span className="text-teal-700 dark:text-teal-400 bg-teal-500/10 px-2.5 py-1 rounded-lg whitespace-nowrap">
-                {classComparisonData.classB.name} chuyên cần hơn +{Math.abs(classComparisonData.attDiff)}%
+            </div>
+            <span className="text-xs font-bold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-white/5 px-3 py-1 rounded-xl shrink-0">
+              {classComparisonData.classB.studentCount} Học Sinh
+            </span>
+          </div>
+
+          {/* Big Stat Display */}
+          <div className="flex items-baseline justify-between gap-4">
+            <div>
+              <span className="text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 block mb-1">
+                Điểm EMA Trung Bình
               </span>
-            ) : (
-              <span className="text-slate-600 dark:text-slate-400 bg-slate-500/10 px-2.5 py-1 rounded-lg whitespace-nowrap">Tỷ lệ chuyên cần ngang nhau</span>
+              <div className="text-4xl font-black font-mono text-cyan-600 dark:text-cyan-400">
+                {classComparisonData.classB.avgEma > 0 ? format1Dec(classComparisonData.classB.avgEma) : '-'}
+                <span className="text-sm font-bold text-slate-400 dark:text-slate-500 ml-1">đ</span>
+              </div>
+            </div>
+
+            {classComparisonData.emaDiff !== 0 && (
+              <div className="text-right">
+                <span
+                  className={`text-xs font-black px-2.5 py-1 rounded-xl whitespace-nowrap inline-block ${
+                    classComparisonData.emaDiff < 0
+                      ? 'text-cyan-700 dark:text-cyan-300 bg-cyan-50 dark:bg-cyan-500/15'
+                      : 'text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-white/5'
+                  }`}
+                >
+                  {classComparisonData.emaDiff < 0
+                    ? `Dẫn đầu +${format1Dec(Math.abs(classComparisonData.emaDiff))} đ`
+                    : `Thấp hơn -${format1Dec(classComparisonData.emaDiff)} đ`}
+                </span>
+              </div>
             )}
           </div>
-        </div>
 
-        {/* Card 3: Tiến Bộ */}
-        <div className="bg-white dark:bg-[#111728] border-0 p-5 rounded-2xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.06),0_2px_6px_-2px_rgba(0,0,0,0.04)] flex flex-col justify-between gap-3 hover:shadow-md transition-shadow">
-          <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/5 pb-2.5">
-            <span className="text-xs font-black uppercase tracking-wider text-indigo-700 dark:text-indigo-300">TỶ LỆ TIẾN BỘ</span>
-            <div className="p-1.5 rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400">
-              <TrendingUp size={15} />
+          {/* 3 Key Metrics Row */}
+          <div className="grid grid-cols-3 gap-3 py-3 border-y border-slate-100 dark:border-white/5">
+            <div>
+              <span className="text-[11px] font-black uppercase text-slate-500 dark:text-slate-400 block mb-0.5">
+                Chuyên Cần
+              </span>
+              <span className="text-lg font-black font-mono text-teal-600 dark:text-teal-400">
+                {classComparisonData.classB.attendancePct}%
+              </span>
+            </div>
+            <div>
+              <span className="text-[11px] font-black uppercase text-slate-500 dark:text-slate-400 block mb-0.5">
+                Tiến Bộ
+              </span>
+              <span className="text-lg font-black font-mono text-cyan-600 dark:text-cyan-300">
+                {classComparisonData.classB.improvingPct}%
+              </span>
+            </div>
+            <div>
+              <span className="text-[11px] font-black uppercase text-slate-500 dark:text-slate-400 block mb-0.5">
+                Độ Lệch SD
+              </span>
+              <span className="text-lg font-black font-mono text-yellow-600 dark:text-yellow-400">
+                {classComparisonData.classB.classSd}
+              </span>
             </div>
           </div>
-          <div className="flex items-center justify-between gap-2 px-1">
-            <div className="text-left">
-              <span className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 block font-extrabold truncate max-w-[110px]">{classComparisonData.classA.name}</span>
-              <span className="text-3xl font-black font-mono text-indigo-600 dark:text-indigo-400">{classComparisonData.classA.improvingPct}%</span>
-            </div>
-            <span className="text-xs font-black text-slate-400 dark:text-slate-500 font-mono">VS</span>
-            <div className="text-right">
-              <span className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 block font-extrabold truncate max-w-[110px]">{classComparisonData.classB.name}</span>
-              <span className="text-3xl font-black font-mono text-cyan-600 dark:text-cyan-300">{classComparisonData.classB.improvingPct}%</span>
-            </div>
-          </div>
-          <div className="pt-2 border-t border-slate-100 dark:border-white/5 text-xs font-black flex items-center justify-center">
-            {classComparisonData.impDiff > 0 ? (
-              <span className="text-indigo-700 dark:text-indigo-400 bg-indigo-500/10 px-2.5 py-1 rounded-lg whitespace-nowrap">
-                {classComparisonData.classA.name} tiến bộ hơn +{classComparisonData.impDiff}%
-              </span>
-            ) : classComparisonData.impDiff < 0 ? (
-              <span className="text-cyan-700 dark:text-cyan-400 bg-cyan-500/10 px-2.5 py-1 rounded-lg whitespace-nowrap">
-                {classComparisonData.classB.name} tiến bộ hơn +{Math.abs(classComparisonData.impDiff)}%
-              </span>
+
+          {/* Integrated Top Student */}
+          <div className="flex items-center gap-3 pt-1">
+            {classComparisonData.classB.topStudent ? (
+              <img
+                src={getStudentTier(Number(classComparisonData.classB.topStudent.ema_level || 0)).badge}
+                alt="Rank"
+                className="w-9 h-9 object-contain shrink-0"
+              />
             ) : (
-              <span className="text-slate-600 dark:text-slate-400 bg-slate-500/10 px-2.5 py-1 rounded-lg whitespace-nowrap">Tỷ lệ tiến bộ bằng nhau</span>
+              <Award size={24} className="text-slate-400 shrink-0" />
             )}
-          </div>
-        </div>
-
-        {/* Card 4: Độ Lệch Chuẩn (SD) */}
-        <div className="bg-white dark:bg-[#111728] border-0 p-5 rounded-2xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.06),0_2px_6px_-2px_rgba(0,0,0,0.04)] flex flex-col justify-between gap-3 hover:shadow-md transition-shadow">
-          <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/5 pb-2.5">
-            <span className="text-xs font-black uppercase tracking-wider text-amber-700 dark:text-amber-300">ĐỘ LỆCH CHUẨN (SD)</span>
-            <div className="p-1.5 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400">
-              <Activity size={15} />
-            </div>
-          </div>
-          <div className="flex items-center justify-between gap-2 px-1">
-            <div className="text-left">
-              <span className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 block font-extrabold truncate max-w-[110px]">{classComparisonData.classA.name}</span>
-              <span className="text-3xl font-black font-mono text-amber-600 dark:text-amber-400">{classComparisonData.classA.classSd}</span>
-            </div>
-            <span className="text-xs font-black text-slate-400 dark:text-slate-500 font-mono">VS</span>
-            <div className="text-right">
-              <span className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 block font-extrabold truncate max-w-[110px]">{classComparisonData.classB.name}</span>
-              <span className="text-3xl font-black font-mono text-yellow-600 dark:text-yellow-400">{classComparisonData.classB.classSd}</span>
-            </div>
-          </div>
-          <div className="pt-2 border-t border-slate-100 dark:border-white/5 text-xs font-black flex items-center justify-center">
-            {classComparisonData.classA.classSd < classComparisonData.classB.classSd ? (
-              <span className="text-emerald-700 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-lg whitespace-nowrap">
-                {classComparisonData.classA.name} đồng đều học lực hơn
+            <div className="flex-1 min-w-0">
+              <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 block">
+                Học Sinh Dẫn Đầu Lớp
               </span>
-            ) : classComparisonData.classA.classSd > classComparisonData.classB.classSd ? (
-              <span className="text-amber-700 dark:text-yellow-400 bg-yellow-500/10 px-2.5 py-1 rounded-lg whitespace-nowrap">
-                {classComparisonData.classB.name} đồng đều học lực hơn
+              <span className="text-sm font-extrabold text-slate-900 dark:text-white truncate block">
+                {classComparisonData.classB.topStudent ? classComparisonData.classB.topStudent.full_name : 'Chưa có'}
               </span>
-            ) : (
-              <span className="text-slate-600 dark:text-slate-400 bg-slate-500/10 px-2.5 py-1 rounded-lg whitespace-nowrap">Mức độ phân tán ngang nhau</span>
+            </div>
+            {classComparisonData.classB.topStudent && (
+              <span className="text-xs font-mono font-black px-2.5 py-1 rounded-lg bg-cyan-50 dark:bg-cyan-500/15 text-cyan-700 dark:text-cyan-300 shrink-0">
+                EMA {format1Dec(Number(classComparisonData.classB.topStudent.ema_level || 0))}
+              </span>
             )}
           </div>
         </div>
@@ -243,57 +309,6 @@ export const HeadToHeadDuel: React.FC<HeadToHeadDuelProps> = ({
         compareClassAId={compareClassAId}
         compareClassBId={compareClassBId}
       />
-
-      {/* 4. Leading Student Badges — 2 Standalone White Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1 animate-cascade-4">
-        {/* Class A Top Student */}
-        <div className="p-5 rounded-2xl bg-white dark:bg-[#111728] border-0 flex items-center gap-3.5 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.06),0_2px_6px_-2px_rgba(0,0,0,0.04)] hover:shadow-md transition-shadow">
-          {classComparisonData.classA.topStudent ? (
-            <img
-              src={getStudentTier(Number(classComparisonData.classA.topStudent.ema_level || 0)).badge}
-              alt="Rank"
-              className="w-11 h-11 object-contain shrink-0"
-            />
-          ) : (
-            <Award size={28} className="text-slate-400 dark:text-slate-500" />
-          )}
-          <div className="flex-1 min-w-0">
-            <span className="text-xs font-black uppercase text-blue-600 dark:text-blue-400 block truncate">Học Sinh Dẫn Đầu ({classComparisonData.classA.name})</span>
-            <span className="text-base font-extrabold text-slate-900 dark:text-white block truncate">
-              {classComparisonData.classA.topStudent ? classComparisonData.classA.topStudent.full_name : 'Chưa có'}
-            </span>
-          </div>
-          {classComparisonData.classA.topStudent && (
-            <span className="text-sm font-mono font-black px-2.5 py-1 rounded-lg bg-blue-500/15 text-blue-700 dark:text-blue-300 border border-blue-500/30 shrink-0">
-              EMA {format1Dec(Number(classComparisonData.classA.topStudent.ema_level || 0))}
-            </span>
-          )}
-        </div>
-
-        {/* Class B Top Student */}
-        <div className="p-5 rounded-2xl bg-white dark:bg-[#111728] border-0 flex items-center gap-3.5 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.06),0_2px_6px_-2px_rgba(0,0,0,0.04)] hover:shadow-md transition-shadow">
-          {classComparisonData.classB.topStudent ? (
-            <img
-              src={getStudentTier(Number(classComparisonData.classB.topStudent.ema_level || 0)).badge}
-              alt="Rank"
-              className="w-11 h-11 object-contain shrink-0"
-            />
-          ) : (
-            <Award size={28} className="text-slate-400 dark:text-slate-500" />
-          )}
-          <div className="flex-1 min-w-0">
-            <span className="text-xs font-black uppercase text-cyan-600 dark:text-cyan-400 block truncate">Học Sinh Dẫn Đầu ({classComparisonData.classB.name})</span>
-            <span className="text-base font-extrabold text-slate-900 dark:text-white block truncate">
-              {classComparisonData.classB.topStudent ? classComparisonData.classB.topStudent.full_name : 'Chưa có'}
-            </span>
-          </div>
-          {classComparisonData.classB.topStudent && (
-            <span className="text-sm font-mono font-black px-2.5 py-1 rounded-lg bg-cyan-500/15 text-cyan-700 dark:text-cyan-300 border border-cyan-500/30 shrink-0">
-              EMA {format1Dec(Number(classComparisonData.classB.topStudent.ema_level || 0))}
-            </span>
-          )}
-        </div>
-      </div>
     </div>
   );
 };

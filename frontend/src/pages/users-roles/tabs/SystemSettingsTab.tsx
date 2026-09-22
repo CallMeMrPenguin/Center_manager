@@ -7,7 +7,7 @@ export const SystemSettingsTab: React.FC = () => {
 
 
       {/* 2. Offline-First & Local DB Status */}
-      <div className="bg-white dark:bg-[#0c0f1e] border border-slate-200 dark:border-[#1e2742] rounded-2xl p-5 shadow-sm dark:shadow-lg space-y-4">
+      <div className="bg-white dark:bg-[#111728] border-0 rounded-2xl p-5 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.06),0_2px_6px_-2px_rgba(0,0,0,0.04)] space-y-4">
         <div className="flex items-center gap-2.5 border-b border-slate-200 dark:border-white/10 pb-3">
           <Database size={18} className="text-emerald-500 dark:text-emerald-400" />
           <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider">
@@ -16,7 +16,7 @@ export const SystemSettingsTab: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="bg-slate-50 dark:bg-[#121626] border border-slate-200 dark:border-[#232c49] rounded-xl p-3.5 space-y-1">
+          <div className="bg-slate-50 dark:bg-[#151c30] border-0 shadow-2xs rounded-xl p-3.5 space-y-1">
             <span className="text-[10px] uppercase font-black tracking-wider text-slate-500 dark:text-slate-400 block">
               Trạng Thái Cơ Sở Dữ Liệu
             </span>
@@ -26,7 +26,7 @@ export const SystemSettingsTab: React.FC = () => {
             </div>
           </div>
 
-          <div className="bg-slate-50 dark:bg-[#121626] border border-slate-200 dark:border-[#232c49] rounded-xl p-3.5 space-y-1">
+          <div className="bg-slate-50 dark:bg-[#151c30] border-0 shadow-2xs rounded-xl p-3.5 space-y-1">
             <span className="text-[10px] uppercase font-black tracking-wider text-slate-500 dark:text-slate-400 block">
               Mã Hóa Mật Khẩu
             </span>
@@ -36,7 +36,7 @@ export const SystemSettingsTab: React.FC = () => {
             </div>
           </div>
 
-          <div className="bg-slate-50 dark:bg-[#121626] border border-slate-200 dark:border-[#232c49] rounded-xl p-3.5 space-y-1">
+          <div className="bg-slate-50 dark:bg-[#151c30] border-0 shadow-2xs rounded-xl p-3.5 space-y-1">
             <span className="text-[10px] uppercase font-black tracking-wider text-slate-500 dark:text-slate-400 block">
               Tự Động Sao Lưu
             </span>
@@ -49,7 +49,7 @@ export const SystemSettingsTab: React.FC = () => {
       </div>
 
       {/* 3. VPS PostgreSQL Cloud Sync (Future Ready) */}
-      <div className="bg-white dark:bg-[#0c0f1e] border border-slate-200 dark:border-[#1e2742] rounded-2xl p-5 shadow-sm dark:shadow-lg space-y-4">
+      <div className="bg-white dark:bg-[#111728] border-0 rounded-2xl p-5 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.06),0_2px_6px_-2px_rgba(0,0,0,0.04)] space-y-4">
         <div className="flex items-center gap-2.5 border-b border-slate-200 dark:border-white/10 pb-3">
           <Cloud size={18} className="text-sky-500 dark:text-sky-400" />
           <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider">

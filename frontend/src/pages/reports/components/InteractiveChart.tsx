@@ -232,7 +232,7 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = ({
         <div
           className={`relative overflow-hidden cursor-${
             isDragging ? 'grabbing' : zoomLevel > 1.0 ? 'grab' : 'default'
-          } select-none rounded-2xl bg-white dark:bg-[#1c1c21] border border-slate-200 dark:border-[#27272a] shadow-sm dark:shadow-none`}
+          } select-none rounded-2xl bg-white dark:bg-[#1c1c21] border-0`}
           onMouseDown={(e) => {
             if (zoomLevel > 1.0 && e.button === 0) {
               setIsDragging(true);

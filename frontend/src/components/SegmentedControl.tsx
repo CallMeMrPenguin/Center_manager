@@ -61,20 +61,20 @@ export function SegmentedControl<T extends string = string>({
   const buttonRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const activeIndex = items.findIndex((btn) => (btn.value ?? btn.id) === activeVal);
-    const activeElement = buttonRefs.current[activeIndex];
+  const activeIndex = items.findIndex((btn) => (btn.value ?? btn.id) === activeVal);
 
+  useEffect(() => {
+    const activeElement = buttonRefs.current[activeIndex];
     if (activeElement) {
       setIndicatorStyle({
         left: activeElement.offsetLeft,
         width: activeElement.offsetWidth,
       });
     }
-  }, [activeVal, items]);
+  }, [activeIndex, items]);
 
   useEffect(() => {
-    if (hoveredIndex !== null) {
+    if (hoveredIndex !== null && hoveredIndex !== activeIndex) {
       const hoveredElement = buttonRefs.current[hoveredIndex];
       if (hoveredElement) {
         setHoverStyle({
@@ -82,29 +82,12 @@ export function SegmentedControl<T extends string = string>({
           width: hoveredElement.offsetWidth,
         });
       }
-    } else {
-      if (containerRef.current) {
-        setHoverStyle({
-          left: 0,
-          width: containerRef.current.offsetWidth,
-        });
-      }
     }
-  }, [hoveredIndex]);
-
-  useEffect(() => {
-    if (containerRef.current) {
-      setHoverStyle({
-        left: 0,
-        width: containerRef.current.offsetWidth,
-      });
-    }
-  }, [items]);
+  }, [hoveredIndex, activeIndex]);
 
   // Recalculate on window resize or tab switch
   useEffect(() => {
     const handleResize = () => {
-      const activeIndex = items.findIndex((btn) => (btn.value ?? btn.id) === activeVal);
       const activeElement = buttonRefs.current[activeIndex];
       if (activeElement) {
         setIndicatorStyle({
@@ -112,16 +95,10 @@ export function SegmentedControl<T extends string = string>({
           width: activeElement.offsetWidth,
         });
       }
-      if (hoveredIndex === null && containerRef.current) {
-        setHoverStyle({
-          left: 0,
-          width: containerRef.current.offsetWidth,
-        });
-      }
     };
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
-  }, [activeVal, hoveredIndex, items]);
+  }, [activeIndex]);
 
   const handleButtonClick = (buttonVal: T, disabled?: boolean) => {
     if (disabled) return;
@@ -147,6 +124,8 @@ export function SegmentedControl<T extends string = string>({
     lg: 16,
   }[size];
 
+  const isHoverPillVisible = hoveredIndex !== null && hoveredIndex !== activeIndex;
+
   return (
     <div
       ref={containerRef}
@@ -156,18 +135,20 @@ export function SegmentedControl<T extends string = string>({
         isFluid ? 'w-full' : 'w-fit'
       } ${className}`}
     >
-      {/* 1. Full-width Initial Hover Background that Collapses onto Hovered Item (Dynamic Highlight) */}
+      {/* 1. Subtle Hover Background only on Hovered Inactive Item (Fades in/out) */}
       <motion.div
         aria-hidden="true"
         className="absolute top-0 bottom-0 rounded-full segmented-hover-pill pointer-events-none z-0"
+        initial={false}
         animate={{
           left: hoverStyle.left,
           width: hoverStyle.width,
+          opacity: isHoverPillVisible ? 1 : 0,
         }}
         transition={{
-          type: 'spring',
-          stiffness: 400,
-          damping: 30,
+          left: { type: 'spring', stiffness: 450, damping: 35 },
+          width: { type: 'spring', stiffness: 450, damping: 35 },
+          opacity: { duration: 0.15 },
         }}
       />
 
