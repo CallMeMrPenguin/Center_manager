@@ -757,6 +757,20 @@ export function DataTable<TData>({
 
   const [globalFilter, setGlobalFilter] = useState('');
   const [searchFocused, setSearchFocused] = useState(false);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (!enableGlobalSearch) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === '/' && document.activeElement?.tagName !== 'INPUT' && document.activeElement?.tagName !== 'TEXTAREA') {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [enableGlobalSearch]);
+
   const [sorting, setSorting] = useState<SortingState>(initialSorting);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
@@ -1027,25 +1041,37 @@ export function DataTable<TData>({
           <div className="flex flex-wrap items-center gap-2 flex-1 min-w-0">
             {enableGlobalSearch && (
               <motion.div
-                animate={{ width: searchFocused ? 320 : 220 }}
-                transition={{ type: 'spring', stiffness: 350, damping: 28 }}
+                animate={{ width: searchFocused ? 340 : 220 }}
+                transition={{ type: 'spring', stiffness: 350, damping: 26 }}
                 className="relative min-w-[180px]"
               >
-                <Search
-                  size={14}
-                  className={`absolute left-3 top-1/2 -translate-y-1/2 transition-colors duration-200 pointer-events-none ${
-                    searchFocused ? 'text-[#5c36f5]' : 'text-slate-500 dark:text-slate-400'
-                  }`}
-                />
+                <motion.div
+                  animate={{ scale: searchFocused ? 1.15 : 1 }}
+                  transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none flex items-center justify-center"
+                >
+                  <Search
+                    size={14}
+                    className={`transition-colors duration-200 ${
+                      searchFocused ? 'text-[#5c36f5] dark:text-indigo-400' : 'text-slate-400 dark:text-slate-500'
+                    }`}
+                  />
+                </motion.div>
                 <input
+                  ref={searchInputRef}
                   type="text"
                   value={globalFilter}
                   onFocus={() => setSearchFocused(true)}
                   onBlur={() => setSearchFocused(false)}
                   onChange={e => setGlobalFilter(e.target.value)}
                   placeholder={searchPlaceholder}
-                  className="w-full bg-white dark:bg-[#13192c] border border-slate-300 dark:border-[#253050] text-slate-900 dark:text-white text-xs rounded-xl pl-8 pr-8 py-1.5 focus:outline-none focus:border-[#5c36f5] focus:ring-2 focus:ring-[#5c36f5]/20 placeholder:text-slate-500 dark:placeholder:text-slate-400 font-semibold transition shadow-sm dark:shadow-inner"
+                  className="w-full bg-white dark:bg-[#13192c] border border-slate-300 dark:border-[#253050] text-slate-900 dark:text-white text-xs rounded-xl pl-8 pr-8 py-1.5 focus:outline-none focus:border-[#5c36f5] focus:ring-2 focus:ring-[#5c36f5]/25 placeholder:text-slate-400 dark:placeholder:text-slate-500 font-semibold transition shadow-sm dark:shadow-inner"
                 />
+                {!globalFilter && !searchFocused && (
+                  <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] font-mono font-bold text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-white/10 px-1.5 py-0.5 rounded border border-slate-200 dark:border-white/10 pointer-events-none select-none">
+                    /
+                  </span>
+                )}
                 <AnimatePresence>
                   {globalFilter && (
                     <motion.button
@@ -1256,7 +1282,7 @@ export function DataTable<TData>({
                       <Fragment key={row.id}>
                         <tr
                           className={`
-                            group transition-colors duration-150
+                            group transition-colors duration-150 animate-row-enter
                             ${onRowClick ? 'cursor-pointer' : ''}
                             ${row.getIsSelected()
                               ? 'bg-indigo-500/15 hover:bg-indigo-500/25 dark:bg-indigo-500/20 dark:hover:bg-indigo-500/30'

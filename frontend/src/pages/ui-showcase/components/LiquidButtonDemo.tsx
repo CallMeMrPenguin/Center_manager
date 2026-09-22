@@ -7,19 +7,16 @@ export function LiquidButtonDemo() {
 
   return (
     <div className="space-y-6">
-      <div className="bg-[#080b14] border border-[#1b2444] p-6 rounded-2xl space-y-5">
-        <div className="flex flex-wrap items-center justify-between gap-4 border-b border-white/10 pb-4">
+      <div className="bg-white dark:bg-[#0f1528] border border-slate-200/90 dark:border-[#1b2444] p-6 rounded-2xl space-y-5 shadow-sm">
+        <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 dark:border-white/10 pb-4">
           <div>
-            <h3 className="text-base font-black text-white flex items-center gap-2">
-              <Droplets size={18} className="text-cyan-400" />
+            <h3 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
+              <Droplets size={18} className="text-cyan-500 dark:text-cyan-400" />
               <span>Liquid Wave Fill Button (Hiệu Ứng Rót Nước Đầy Cốc)</span>
             </h3>
-            <p className="text-xs text-slate-400 font-medium mt-1">
-              Khi rê chuột qua, lớp chất lỏng chuyển động dạng sóng sin dâng từ đáy lên đỉnh như nước đổ vào cốc, tích hợp hiệu ứng khúc xạ phát sáng.
-            </p>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-xs font-bold text-slate-400">Độ rót thử nghiệm:</span>
+            <span className="text-xs font-bold text-slate-600 dark:text-slate-400">Độ rót thử nghiệm:</span>
             <input
               type="range"
               min="0"
@@ -28,13 +25,13 @@ export function LiquidButtonDemo() {
               onChange={(e) => setLiquidFillLevel(Number(e.target.value))}
               className="w-32 accent-[#5c36f5] cursor-pointer"
             />
-            <span className="text-xs font-mono font-black text-indigo-400 w-10">{liquidFillLevel}%</span>
+            <span className="text-xs font-mono font-black text-indigo-600 dark:text-indigo-400 w-10">{liquidFillLevel}%</span>
           </div>
         </div>
 
         {/* Live Hover Demo Matrix */}
         <div className="space-y-4">
-          <span className="text-xs font-bold uppercase text-slate-400 block tracking-wider">
+          <span className="text-xs font-bold uppercase text-slate-600 dark:text-slate-400 block tracking-wider">
             1. Tự Động Đổ Đầy Khi Hover (6 Hệ Màu Chất Lỏng)
           </span>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
@@ -60,8 +57,8 @@ export function LiquidButtonDemo() {
         </div>
 
         {/* Size Matrix */}
-        <div className="space-y-4 pt-2 border-t border-white/5">
-          <span className="text-xs font-bold uppercase text-slate-400 block tracking-wider">
+        <div className="space-y-4 pt-2 border-t border-slate-100 dark:border-white/5">
+          <span className="text-xs font-bold uppercase text-slate-600 dark:text-slate-400 block tracking-wider">
             2. Các Kích Thước (Size Matrix)
           </span>
           <div className="flex flex-wrap items-center gap-4">
@@ -78,13 +75,13 @@ export function LiquidButtonDemo() {
         </div>
 
         {/* Controlled Level Bar */}
-        <div className="space-y-4 pt-2 border-t border-white/5">
-          <span className="text-xs font-bold uppercase text-slate-400 block tracking-wider">
+        <div className="space-y-4 pt-2 border-t border-slate-100 dark:border-white/5">
+          <span className="text-xs font-bold uppercase text-slate-600 dark:text-slate-400 block tracking-wider">
             3. Điều Khiển Mức Chất Lỏng Theo Phần Trăm (Progress Simulation)
           </span>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div className="p-4 bg-[#0c0f1e] border border-white/10 rounded-2xl space-y-3 flex flex-col items-center">
-              <span className="text-xs font-bold text-slate-300">Theo Slider ({liquidFillLevel}%)</span>
+            <div className="p-4 bg-slate-50 dark:bg-[#0c0f1e] border border-slate-200 dark:border-white/10 rounded-2xl space-y-3 flex flex-col items-center">
+              <span className="text-xs font-bold text-slate-700 dark:text-slate-300">Theo Slider ({liquidFillLevel}%)</span>
               <LiquidFillButton
                 variant="indigo"
                 autoFillOnHover={false}
@@ -94,8 +91,8 @@ export function LiquidButtonDemo() {
                 Mức Nước {liquidFillLevel}%
               </LiquidFillButton>
             </div>
-            <div className="p-4 bg-[#0c0f1e] border border-white/10 rounded-2xl space-y-3 flex flex-col items-center">
-              <span className="text-xs font-bold text-slate-300">Đầy 50% (Cyan)</span>
+            <div className="p-4 bg-slate-50 dark:bg-[#0c0f1e] border border-slate-200 dark:border-white/10 rounded-2xl space-y-3 flex flex-col items-center">
+              <span className="text-xs font-bold text-slate-700 dark:text-slate-300">Đầy 50% (Cyan)</span>
               <LiquidFillButton
                 variant="cyan"
                 autoFillOnHover={false}
@@ -105,8 +102,8 @@ export function LiquidButtonDemo() {
                 Đang Tải 50%
               </LiquidFillButton>
             </div>
-            <div className="p-4 bg-[#0c0f1e] border border-white/10 rounded-2xl space-y-3 flex flex-col items-center">
-              <span className="text-xs font-bold text-slate-300">Đầy 90% (Emerald)</span>
+            <div className="p-4 bg-slate-50 dark:bg-[#0c0f1e] border border-slate-200 dark:border-white/10 rounded-2xl space-y-3 flex flex-col items-center">
+              <span className="text-xs font-bold text-slate-700 dark:text-slate-300">Đầy 90% (Emerald)</span>
               <LiquidFillButton
                 variant="emerald"
                 autoFillOnHover={false}

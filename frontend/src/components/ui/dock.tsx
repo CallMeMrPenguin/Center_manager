@@ -48,7 +48,7 @@ export const Dock: React.FC<DockProps> = ({
           orientation === 'vertical'
             ? 'flex-col items-center gap-2 p-2'
             : 'flex-row items-end gap-2 p-2.5'
-        } bg-[#0b0e1a]/95 border border-[#1e2746] rounded-2xl shadow-[0_16px_40px_rgba(0,0,0,0.85)] ${className}`}
+        } bg-white/95 dark:bg-[#0b0e1a]/95 border border-slate-200 dark:border-[#1e2746] rounded-2xl shadow-md dark:shadow-[0_16px_40px_rgba(0,0,0,0.85)] ${className}`}
       >
         {children}
       </motion.div>
@@ -89,7 +89,7 @@ export const DockItem: React.FC<DockItemProps> = ({
       ref={ref}
       style={{ width: size, height: size }}
       onClick={onClick}
-      className={`relative group flex items-center justify-center cursor-pointer rounded-xl bg-white/[0.04] hover:bg-indigo-500/20 border border-white/10 hover:border-indigo-400/60 shadow-lg transition-colors ${className}`}
+      className={`relative group flex items-center justify-center cursor-pointer rounded-xl bg-slate-100 hover:bg-indigo-50 dark:bg-white/[0.04] dark:hover:bg-indigo-500/20 border border-slate-200 hover:border-indigo-400 dark:border-white/10 dark:hover:border-indigo-400/60 shadow-sm dark:shadow-lg transition-colors ${className}`}
     >
       {children}
     </motion.div>
@@ -101,7 +101,7 @@ export const DockIcon: React.FC<{ children: React.ReactNode; className?: string 
   className = '',
 }) => {
   return (
-    <div className={`w-full h-full flex items-center justify-center text-slate-300 group-hover:text-white transition-colors [&>svg]:w-1/2 [&>svg]:h-1/2 ${className}`}>
+    <div className={`w-full h-full flex items-center justify-center text-slate-600 group-hover:text-slate-900 dark:text-slate-300 dark:group-hover:text-white transition-colors [&>svg]:w-1/2 [&>svg]:h-1/2 ${className}`}>
       {children}
     </div>
   );
@@ -122,7 +122,7 @@ export const DockLabel: React.FC<{ children: React.ReactNode; className?: string
     <div
       className={`absolute ${positionClasses} z-50 pointer-events-none opacity-0 group-hover:opacity-100 transition-all duration-200 scale-95 group-hover:scale-100 ${className}`}
     >
-      <div className="px-2.5 py-1 rounded-xl bg-[#0c0f1e] border border-[#212c4b] text-white text-xs font-black whitespace-nowrap shadow-[0_8px_24px_rgba(0,0,0,0.9)]">
+      <div className="px-2.5 py-1 rounded-xl bg-white dark:bg-[#0c0f1e] border border-slate-200 dark:border-[#212c4b] text-slate-900 dark:text-white text-xs font-black whitespace-nowrap shadow-xl dark:shadow-[0_8px_24px_rgba(0,0,0,0.9)]">
         {children}
       </div>
     </div>

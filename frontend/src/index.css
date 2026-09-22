@@ -6,14 +6,14 @@
 :root {
   color-scheme: dark;
   --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-  --background: #080b14;
+  --background: #060811;
   --foreground: #ffffff;
-  --surface: #0c0f1e;
-  --surface-nav: #090d16;
-  --surface-raised: #121626;
-  --surface-highlight: #1a223e;
+  --surface: #0f1528;
+  --surface-nav: #0a0e1c;
+  --surface-raised: #151d36;
+  --surface-highlight: #1d284a;
   --border-color: #212c4b;
-  --border-subtle: #181f36;
+  --border-subtle: #18223e;
   --border-active: #5c36f5;
   --primary: #2563eb;
   --primary-hover: #3b82f6;

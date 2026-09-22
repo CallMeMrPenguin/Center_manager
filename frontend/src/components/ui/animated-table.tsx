@@ -116,7 +116,7 @@ export function AnimatedTable<T extends { id?: string | number }>({
     <div className="space-y-3.5 select-none font-sans">
       {/* TOOLBAR */}
       {(searchable || columnVisibility || selectedIds.length > 0) && (
-        <div className="flex items-center justify-between gap-3 flex-wrap bg-[#0c0f1e]/98 border border-[#1e2746] p-3 rounded-2xl">
+        <div className="flex items-center justify-between gap-3 flex-wrap bg-white dark:bg-[#0c0f1e]/98 border border-slate-200 dark:border-[#1e2746] p-3 rounded-2xl shadow-sm">
           <div className="flex items-center gap-3 flex-1">
             {searchable && (
               <motion.div
@@ -132,12 +132,12 @@ export function AnimatedTable<T extends { id?: string | number }>({
                   onBlur={() => setSearchFocused(false)}
                   onChange={(e) => onSearchChange?.(e.target.value)}
                   placeholder={searchPlaceholder}
-                  className="w-full bg-[#14192b] border border-white/10 rounded-xl pl-9 pr-8 py-1.5 text-xs text-white placeholder:text-slate-500 font-semibold focus:outline-none focus:border-[#5c36f5] focus:ring-2 focus:ring-[#5c36f5]/25 transition shadow-inner"
+                  className="w-full bg-slate-50 dark:bg-[#14192b] border border-slate-200 dark:border-white/10 rounded-xl pl-9 pr-8 py-1.5 text-xs text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 font-semibold focus:outline-none focus:border-[#5c36f5] focus:ring-2 focus:ring-[#5c36f5]/25 transition shadow-inner"
                 />
                 <AnimatePresence>
                   {searchValue && (
                     <motion.button initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.8 }}
-                      type="button" onClick={() => onSearchChange?.('')} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition cursor-pointer p-0.5 rounded-full hover:bg-white/10">
+                      type="button" onClick={() => onSearchChange?.('')} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 dark:hover:text-white transition cursor-pointer p-0.5 rounded-full hover:bg-slate-200 dark:hover:bg-white/10">
                       <X size={12} />
                     </motion.button>
                   )}
@@ -148,9 +148,9 @@ export function AnimatedTable<T extends { id?: string | number }>({
             <AnimatePresence>
               {selectedIds.length > 0 && (
                 <motion.div initial={{ opacity: 0, scale: 0.85, x: -10 }} animate={{ opacity: 1, scale: 1, x: 0 }} exit={{ opacity: 0, scale: 0.85, x: -10 }}
-                  className="flex items-center gap-2 px-3 py-1 bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 rounded-xl text-xs font-black">
+                  className="flex items-center gap-2 px-3 py-1 bg-indigo-500/20 text-indigo-600 dark:text-indigo-300 border border-indigo-500/30 rounded-xl text-xs font-black">
                   <span>Đã chọn: {selectedIds.length} dòng</span>
-                  <button onClick={() => onSelectionChange?.([])} className="text-indigo-400 hover:text-white cursor-pointer"><X size={12} /></button>
+                  <button onClick={() => onSelectionChange?.([])} className="text-indigo-400 hover:text-indigo-600 dark:hover:text-white cursor-pointer"><X size={12} /></button>
                 </motion.div>
               )}
             </AnimatePresence>
@@ -160,7 +160,7 @@ export function AnimatedTable<T extends { id?: string | number }>({
             {columnVisibility && onVisibleColumnsChange && (
               <div className="relative">
                 <button type="button" onClick={() => setShowColMenu(!showColMenu)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-bold border border-white/10 transition cursor-pointer">
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 text-slate-700 dark:text-slate-300 text-xs font-bold border border-slate-200 dark:border-white/10 transition cursor-pointer">
                   <SlidersHorizontal size={13} />
                   <span>Hiển thị cột</span>
                 </button>
@@ -170,13 +170,13 @@ export function AnimatedTable<T extends { id?: string | number }>({
                     <>
                       <div className="fixed inset-0 z-40" onClick={() => setShowColMenu(false)} />
                       <motion.div initial={{ opacity: 0, scale: 0.95, y: -6 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: -6 }}
-                        className="absolute right-0 top-full mt-2 z-50 w-52 bg-[#121626] border border-[#232d4e] rounded-2xl p-2.5 shadow-2xl space-y-1">
-                        <div className="text-[10px] font-black uppercase text-slate-400 px-2 py-1 border-b border-white/5">Tùy chọn cột</div>
+                        className="absolute right-0 top-full mt-2 z-50 w-52 bg-white dark:bg-[#121626] border border-slate-200 dark:border-[#232d4e] rounded-2xl p-2.5 shadow-2xl space-y-1">
+                        <div className="text-[10px] font-black uppercase text-slate-500 dark:text-slate-400 px-2 py-1 border-b border-slate-100 dark:border-white/5">Tùy chọn cột</div>
                         {columns.map((col) => {
                           const isVis = activeVisibleCols.includes(col.id);
                           return (
                             <button key={col.id} type="button" onClick={() => onVisibleColumnsChange(isVis ? activeVisibleCols.filter((id) => id !== col.id) : [...activeVisibleCols, col.id])}
-                              className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-bold text-slate-300 hover:bg-white/5 hover:text-white transition">
+                              className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white transition">
                               <span>{typeof col.header === 'string' ? col.header : col.id}</span>
                               {isVis && <Check size={13} className="text-[#5c36f5]" />}
                             </button>
@@ -193,11 +193,11 @@ export function AnimatedTable<T extends { id?: string | number }>({
       )}
 
       {/* TABLE */}
-      <div className="bg-[#080b14] border border-[#1b2444] rounded-2xl overflow-hidden shadow-xl">
+      <div className="bg-white dark:bg-[#0f1528] border border-slate-200 dark:border-[#1b2444] rounded-2xl overflow-hidden shadow-sm dark:shadow-xl">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-[#0e1325] border-b border-white/10 text-[11px] font-black text-slate-400 uppercase tracking-wider">
+              <tr className="bg-slate-100 dark:bg-[#0e1325] border-b border-slate-200 dark:border-white/10 text-[11px] font-black text-slate-600 dark:text-slate-400 uppercase tracking-wider">
                 {expandable && <th className="w-8 px-3 py-3" />}
                 {selectable && (
                   <th className="w-10 px-3 py-3 text-center">
@@ -209,12 +209,12 @@ export function AnimatedTable<T extends { id?: string | number }>({
                   const alignClass = col.align === 'center' ? 'text-center' : col.align === 'right' ? 'text-right' : 'text-left';
                   return (
                     <th key={col.id} onClick={() => handleHeaderSort(col)}
-                      className={`px-4 py-3.5 ${alignClass} ${col.sortable ? 'cursor-pointer hover:text-white transition' : ''}`}>
+                      className={`px-4 py-3.5 ${alignClass} ${col.sortable ? 'cursor-pointer hover:text-slate-900 dark:hover:text-white transition' : ''}`}>
                       <div className={`inline-flex items-center gap-1.5 ${alignClass}`}>
                         <span>{col.header}</span>
                         {col.sortable && (
-                          <span className="text-slate-500">
-                            {isSorted && sortDirection === 'asc' ? <ArrowUp size={13} className="text-indigo-400" /> : isSorted && sortDirection === 'desc' ? <ArrowDown size={13} className="text-indigo-400" /> : <ArrowUpDown size={12} />}
+                          <span className="text-slate-400 dark:text-slate-500">
+                            {isSorted && sortDirection === 'asc' ? <ArrowUp size={13} className="text-indigo-600 dark:text-indigo-400" /> : isSorted && sortDirection === 'desc' ? <ArrowDown size={13} className="text-indigo-600 dark:text-indigo-400" /> : <ArrowUpDown size={12} />}
                           </span>
                         )}
                       </div>
@@ -224,7 +224,7 @@ export function AnimatedTable<T extends { id?: string | number }>({
               </tr>
             </thead>
 
-            <tbody className="divide-y divide-white/5 text-xs font-semibold text-slate-200">
+            <tbody className="divide-y divide-slate-200 dark:divide-white/5 text-xs font-semibold text-slate-800 dark:text-slate-200">
               <AnimatePresence mode="popLayout" initial={false}>
                 {data.length === 0 ? (
                   <motion.tr key="empty-row" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
@@ -243,11 +243,11 @@ export function AnimatedTable<T extends { id?: string | number }>({
                         <motion.tr layout initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.97 }}
                           transition={{ duration: 0.25, delay: Math.min(rowIdx * 0.02, 0.2) }}
                           onClick={() => onRowClick?.(row)}
-                          className={`transition-colors cursor-pointer ${isSelected ? 'bg-[#181f3d] border-l-2 border-[#5c36f5]' : striped && rowIdx % 2 === 1 ? 'bg-white/[0.015] hover:bg-white/[0.04]' : 'hover:bg-white/[0.04]'}`}>
+                          className={`transition-colors cursor-pointer ${isSelected ? 'bg-indigo-50 dark:bg-[#181f3d] border-l-2 border-[#5c36f5]' : striped && rowIdx % 2 === 1 ? 'bg-slate-50/60 dark:bg-white/[0.015] hover:bg-indigo-50/40 dark:hover:bg-white/[0.04]' : 'hover:bg-indigo-50/40 dark:hover:bg-white/[0.04]'}`}>
                           {expandable && (
                             <td className="w-8 px-3 py-3 text-center">
                               <motion.button type="button" animate={{ rotate: isExpanded ? 90 : 0 }} transition={{ duration: 0.2 }}
-                                onClick={(e) => toggleRowExpanded(rowId, e)} className="p-1 rounded-lg text-slate-400 hover:text-white transition cursor-pointer">
+                                onClick={(e) => toggleRowExpanded(rowId, e)} className="p-1 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-white transition cursor-pointer">
                                 <ChevronRight size={14} />
                               </motion.button>
                             </td>
@@ -270,7 +270,7 @@ export function AnimatedTable<T extends { id?: string | number }>({
                         </motion.tr>
 
                         {expandable && isExpanded && renderExpandedRow && (
-                          <motion.tr key={`expanded-${rowId}`} initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="bg-[#0a0d18] border-b border-white/10">
+                          <motion.tr key={`expanded-${rowId}`} initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="bg-slate-50 dark:bg-[#0a0d18] border-b border-slate-200 dark:border-white/10">
                             <td colSpan={displayedCols.length + (selectable ? 1 : 0) + 1} className="p-4">
                               {renderExpandedRow(row)}
                             </td>
@@ -287,14 +287,14 @@ export function AnimatedTable<T extends { id?: string | number }>({
 
         {/* PAGINATION */}
         {pagination && (
-          <div className="flex items-center justify-between px-4 py-3 bg-[#0c0f1e] border-t border-white/10 text-xs font-bold text-slate-400">
+          <div className="flex items-center justify-between px-4 py-3 bg-slate-50 dark:bg-[#0c0f1e] border-t border-slate-200 dark:border-white/10 text-xs font-bold text-slate-600 dark:text-slate-400">
             <div>Hiển thị {data.length} / {pagination.totalItems} bản ghi</div>
             <div className="flex items-center gap-2">
               <button type="button" disabled={pagination.page <= 1} onClick={() => pagination.onPageChange(pagination.page - 1)}
-                className="px-3 py-1 rounded-lg bg-white/5 hover:bg-white/10 disabled:opacity-40 text-slate-300 transition cursor-pointer">Trước</button>
-              <span className="px-2 font-mono text-white">Trang {pagination.page} / {Math.max(1, Math.ceil(pagination.totalItems / pagination.pageSize))}</span>
+                className="px-3 py-1 rounded-lg bg-white hover:bg-slate-100 dark:bg-white/5 dark:hover:bg-white/10 disabled:opacity-40 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-transparent transition cursor-pointer">Trước</button>
+              <span className="px-2 font-mono text-slate-900 dark:text-white">Trang {pagination.page} / {Math.max(1, Math.ceil(pagination.totalItems / pagination.pageSize))}</span>
               <button type="button" disabled={pagination.page >= Math.ceil(pagination.totalItems / pagination.pageSize)} onClick={() => pagination.onPageChange(pagination.page + 1)}
-                className="px-3 py-1 rounded-lg bg-white/5 hover:bg-white/10 disabled:opacity-40 text-slate-300 transition cursor-pointer">Sau</button>
+                className="px-3 py-1 rounded-lg bg-white hover:bg-slate-100 dark:bg-white/5 dark:hover:bg-white/10 disabled:opacity-40 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-transparent transition cursor-pointer">Sau</button>
             </div>
           </div>
         )}

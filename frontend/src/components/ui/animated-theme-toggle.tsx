@@ -232,16 +232,13 @@ export function AnimatedThemeToggleDemo() {
 
   return (
     <div className="space-y-6">
-      <div className="bg-[#080b14] border border-[#1b2444] p-8 rounded-2xl space-y-6 flex flex-col items-center justify-center min-h-[300px]">
+      <div className="bg-white dark:bg-[#0f1528] border border-slate-200 dark:border-[#1b2444] p-8 rounded-2xl space-y-6 flex flex-col items-center justify-center min-h-[300px] shadow-sm">
         <div className="text-center space-y-1">
-          <h3 className="text-base font-black text-white">Animated Theme Toggle</h3>
-          <p className="text-xs text-slate-400">
-            Hiệu ứng chuyển đổi Sun - Moon với kỹ thuật vẽ nét SVG morphing mượt mà.
-          </p>
+          <h3 className="text-base font-black text-slate-900 dark:text-white">Animated Theme Toggle</h3>
         </div>
 
         {/* Demo container requested by user */}
-        <div className="flex flex-col items-center justify-center p-8 bg-[#0c0f1e] border border-white/10 rounded-2xl space-y-4">
+        <div className="flex flex-col items-center justify-center p-8 bg-slate-50 dark:bg-[#0c0f1e] border border-slate-200 dark:border-white/10 rounded-2xl space-y-4">
           <div className="flex items-center gap-6">
             <AnimatedThemeToggle
               size="sm"
@@ -260,9 +257,9 @@ export function AnimatedThemeToggleDemo() {
             />
           </div>
 
-          <span className="text-xs font-bold text-slate-300">
+          <span className="text-xs font-bold text-slate-700 dark:text-slate-300">
             Trạng thái hiện tại:{' '}
-            <strong className="text-indigo-400 font-mono uppercase">{theme} MODE</strong>
+            <strong className="text-indigo-600 dark:text-indigo-400 font-mono uppercase">{theme} MODE</strong>
           </span>
         </div>
       </div>

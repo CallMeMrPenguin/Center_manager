@@ -88,18 +88,15 @@ export default function UIShowcasePage() {
   const currentButtons = category === 'fx' ? FX_BUTTONS : COMPONENT_BUTTONS;
 
   return (
-    <div className="h-full flex flex-col p-6 space-y-6 overflow-y-auto select-none">
+    <div className="h-full flex flex-col p-6 space-y-6 overflow-y-auto select-none bg-[#e2e8f0] dark:bg-[#060811] text-slate-800 dark:text-slate-100">
       {/* HEADER WITH CATEGORY SELECTOR & COMPACT SEGMENTED PILLS */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-white dark:bg-[#0c0f1e] border border-slate-200/90 dark:border-white/10 p-5 rounded-2xl shadow-[0_2px_8px_-2px_rgba(0,0,0,0.06),0_1px_3px_-1px_rgba(0,0,0,0.06)]">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-white dark:bg-[#0f1528] border border-slate-200/90 dark:border-white/10 p-5 rounded-2xl shadow-sm">
         <div className="flex items-center gap-3">
           <div className="p-3 bg-[#5c36f5]/20 text-[#5c36f5] rounded-2xl border border-[#5c36f5]/30 shrink-0">
             <Sparkles size={24} />
           </div>
           <div>
             <h1 className="text-xl font-black text-slate-900 dark:text-white">UI Component Showcase & Playground</h1>
-            <p className="text-xs text-slate-500 dark:text-slate-400 font-semibold mt-0.5">
-              Bộ sưu tập component tương tác cao cấp với theme Dark Space.
-            </p>
           </div>
         </div>
 
@@ -139,15 +136,12 @@ export default function UIShowcasePage() {
 
       {/* 4. ANIMATED CALENDAR TAB */}
       {activeSubTab === 'calendar' && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-white dark:bg-[#080b14] border border-slate-200/90 dark:border-[#1b2444] p-6 rounded-2xl shadow-[0_2px_8px_-2px_rgba(0,0,0,0.06),0_1px_3px_-1px_rgba(0,0,0,0.06)]">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-white dark:bg-[#0f1528] border border-slate-200/90 dark:border-[#1b2444] p-6 rounded-2xl shadow-sm">
           <div className="space-y-4">
             <h3 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
               <Calendar size={18} className="text-indigo-500 dark:text-indigo-400" />
               <span>Animated Calendar (Inline & Selection)</span>
             </h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
-              Chuyển tháng với hiệu ứng trượt mượt mà (AnimatePresence), ngày được chọn có thanh trượt spring phát sáng.
-            </p>
             <div className="p-4 bg-slate-50 dark:bg-[#0c0f1e] border border-slate-200 dark:border-white/10 rounded-2xl space-y-3">
               <span className="text-xs font-bold text-slate-700 dark:text-slate-300 block">Dạng Chọn Ngày:</span>
               <div className="text-xs text-indigo-600 dark:text-indigo-300 font-mono">
@@ -165,15 +159,12 @@ export default function UIShowcasePage() {
 
       {/* 5. SEGMENTED BUTTON TAB */}
       {activeSubTab === 'segmented' && (
-        <div className="bg-white dark:bg-[#080b14] border border-slate-200/90 dark:border-[#1b2444] p-6 rounded-2xl shadow-[0_2px_8px_-2px_rgba(0,0,0,0.06),0_1px_3px_-1px_rgba(0,0,0,0.06)] space-y-6">
+        <div className="bg-white dark:bg-[#0f1528] border border-slate-200/90 dark:border-[#1b2444] p-6 rounded-2xl shadow-sm space-y-6">
           <div>
             <h3 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
               <Layers size={18} className="text-indigo-500 dark:text-indigo-400" />
               <span>Sliding Pill Segmented Button</span>
             </h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-1">
-              Thanh trượt vật lý spring pill indicator cực mượt, hỗ trợ icons, badge và responsive.
-            </p>
           </div>
 
           <div className="space-y-4">
@@ -195,15 +186,12 @@ export default function UIShowcasePage() {
 
       {/* 6. MACOS DOCK TAB */}
       {activeSubTab === 'dock' && (
-        <div className="bg-white dark:bg-[#080b14] border border-slate-200/90 dark:border-[#1b2444] p-8 rounded-2xl shadow-[0_2px_8px_-2px_rgba(0,0,0,0.06),0_1px_3px_-1px_rgba(0,0,0,0.06)] space-y-8 min-h-[360px] flex flex-col justify-between">
+        <div className="bg-white dark:bg-[#0f1528] border border-slate-200/90 dark:border-[#1b2444] p-8 rounded-2xl shadow-sm space-y-8 min-h-[360px] flex flex-col justify-between">
           <div>
             <h3 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
               <Compass size={18} className="text-indigo-500 dark:text-indigo-400" />
               <span>macOS Interactive Magnification Dock</span>
             </h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-1">
-              Hiệu ứng phóng đại mượt mà khi rê chuột theo khoảng cách con trỏ (framer-motion useMotionValue).
-            </p>
           </div>
 
           <div className="flex justify-center pb-6">
@@ -233,7 +221,7 @@ export default function UIShowcasePage() {
 
       {/* 7. FILE TREE TAB */}
       {activeSubTab === 'tree' && (
-        <div className="bg-white dark:bg-[#080b14] border border-slate-200/90 dark:border-[#1b2444] p-6 rounded-2xl shadow-[0_2px_8px_-2px_rgba(0,0,0,0.06),0_1px_3px_-1px_rgba(0,0,0,0.06)] space-y-4">
+        <div className="bg-white dark:bg-[#0f1528] border border-slate-200/90 dark:border-[#1b2444] p-6 rounded-2xl shadow-sm space-y-4">
           <h3 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
             <FolderTree size={18} className="text-indigo-500 dark:text-indigo-400" />
             <span>Interactive Animated File Tree</span>
@@ -253,15 +241,12 @@ export default function UIShowcasePage() {
       {/* 8. HOVER PREVIEW TAB */}
       {activeSubTab === 'hover' && (
         <HoverPreviewProvider data={samplePreviewData}>
-          <div className="bg-white dark:bg-[#080b14] border border-slate-200/90 dark:border-[#1b2444] p-6 rounded-2xl shadow-[0_2px_8px_-2px_rgba(0,0,0,0.06),0_1px_3px_-1px_rgba(0,0,0,0.06)] space-y-6">
+          <div className="bg-white dark:bg-[#0f1528] border border-slate-200/90 dark:border-[#1b2444] p-6 rounded-2xl shadow-sm space-y-6">
             <div>
               <h3 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
                 <MousePointerClick size={18} className="text-indigo-500 dark:text-indigo-400" />
                 <span>Cursor Hover Preview (Floating Rich Cards)</span>
               </h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-1">
-                Rê chuột lên bất kỳ từ khóa nào dưới đây để xem trước thẻ metadata nổi với hình ảnh và thống kê chi tiết.
-              </p>
             </div>
 
             <div className="p-6 bg-slate-50 dark:bg-[#0c0f1e] border border-slate-200 dark:border-white/10 rounded-2xl leading-loose text-sm text-slate-700 dark:text-slate-300 space-y-3">
@@ -294,7 +279,7 @@ export default function UIShowcasePage() {
 
       {/* 9. STACKED TOAST TAB */}
       {activeSubTab === 'toast' && (
-        <div className="bg-white dark:bg-[#080b14] border border-slate-200/90 dark:border-[#1b2444] p-6 rounded-2xl shadow-[0_2px_8px_-2px_rgba(0,0,0,0.06),0_1px_3px_-1px_rgba(0,0,0,0.06)] space-y-6">
+        <div className="bg-white dark:bg-[#0f1528] border border-slate-200/90 dark:border-[#1b2444] p-6 rounded-2xl shadow-sm space-y-6">
           <h3 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
             <BellRing size={18} className="text-indigo-500 dark:text-indigo-400" />
             <span>Interactive Animated Toasts & Undo Bar</span>
@@ -331,7 +316,7 @@ export default function UIShowcasePage() {
 
       {/* 10. ANIMATED TABLE TAB */}
       {activeSubTab === 'table' && (
-        <div className="bg-white dark:bg-[#080b14] border border-slate-200/90 dark:border-[#1b2444] p-6 rounded-2xl shadow-[0_2px_8px_-2px_rgba(0,0,0,0.06),0_1px_3px_-1px_rgba(0,0,0,0.06)] space-y-4">
+        <div className="bg-white dark:bg-[#0f1528] border border-slate-200/90 dark:border-[#1b2444] p-6 rounded-2xl shadow-sm space-y-4">
           <h3 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
             <TableIcon size={18} className="text-indigo-500 dark:text-indigo-400" />
             <span>Interactive Animated Data Table</span>

@@ -844,15 +844,12 @@ export default function DocumentManager() {
   return (
     <div className="flex flex-col gap-6 h-full p-1">
       {/* Header Panel */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white dark:bg-[#0c0f1d] p-5 rounded-2xl border border-slate-300 dark:border-slate-800 shadow-sm">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white dark:bg-[#0f1528] p-5 rounded-2xl border border-slate-300 dark:border-slate-800 shadow-sm">
         <div>
           <h1 className="text-xl font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
             <FolderOpen className="text-blue-500" size={22} />
             Quản Lý Tài Liệu
           </h1>
-          <p className="text-[10px] text-slate-600 dark:text-slate-400 font-medium mt-1">
-            Lưu trữ tài liệu và file nghe. Hỗ trợ cây thư mục kéo thả trực quan và tải lên hàng loạt.
-          </p>
         </div>
 
         <div className="flex items-center gap-2 self-stretch sm:self-auto">

@@ -93,7 +93,7 @@ export function VercelTabs<T extends string = string>({
       {/* 1. Smooth Hover Highlight Pill */}
       <div
         aria-hidden="true"
-        className="absolute top-1 flex items-center rounded-lg bg-slate-200/80 dark:bg-white/10 transition-all duration-300 ease-out pointer-events-none"
+        className="absolute top-1 flex items-center rounded-lg bg-white dark:bg-white/15 shadow-[0_2px_8px_rgba(0,0,0,0.08)] dark:shadow-[0_0_12px_rgba(255,255,255,0.06)] border border-slate-300/90 dark:border-white/15 transition-all duration-300 ease-out pointer-events-none"
         style={{
           ...hoverStyle,
           height: size === 'sm' ? '28px' : size === 'md' ? '34px' : '40px',
@@ -104,8 +104,8 @@ export function VercelTabs<T extends string = string>({
       {/* 2. Active Indicator Line with Glowing Accent */}
       <div
         aria-hidden="true"
-        className={`absolute bottom-0 h-[2.5px] rounded-full transition-all duration-300 ease-out pointer-events-none ${
-          indicatorColor || 'bg-indigo-600 dark:bg-indigo-400 shadow-[0_0_12px_rgba(99,102,241,0.6)]'
+        className={`absolute bottom-0 h-[3px] rounded-full transition-all duration-300 ease-out pointer-events-none ${
+          indicatorColor || 'bg-indigo-600 dark:bg-indigo-400 shadow-[0_0_12px_rgba(99,102,241,0.7)]'
         }`}
         style={activeStyle}
       />
@@ -128,7 +128,7 @@ export function VercelTabs<T extends string = string>({
             className={`z-10 relative flex items-center justify-center cursor-pointer rounded-lg border-0 bg-transparent outline-none transition-colors duration-200 font-bold whitespace-nowrap pb-1.5 ${sizeStyles} ${
               isActive
                 ? 'text-indigo-600 dark:text-white font-black'
-                : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
+                : 'text-slate-700 hover:text-slate-950 dark:text-slate-400 dark:hover:text-white'
             }`}
           >
             {tab.icon && <span className="shrink-0">{tab.icon}</span>}

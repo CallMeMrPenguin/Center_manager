@@ -258,17 +258,14 @@ export default function Settings() {
   };
 
   return (
-    <div className="h-full w-full bg-[#e2e8f0] dark:bg-[#080b14] overflow-y-auto px-8 py-6 select-none text-slate-800 dark:text-slate-200 flex flex-col gap-6">
+    <div className="h-full w-full bg-[#e2e8f0] dark:bg-[#060811] overflow-y-auto px-8 py-6 select-none text-slate-800 dark:text-slate-200 flex flex-col gap-6">
       
       {/* Page Title */}
       <div className="pb-2">
-        <h1 className="text-xl font-bold tracking-tight text-white mb-1 flex items-center gap-2">
+        <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white mb-1 flex items-center gap-2">
           <SettingsIcon size={20} className="text-blue-500" />
           Cấu Hình Hệ Thống
         </h1>
-        <p className="text-xs text-slate-400">
-          Chẩn đoán kết nối Microsoft Word local, cấu hình thư mục lưu trữ tệp tin và quản lý các hồ sơ định dạng mẫu.
-        </p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

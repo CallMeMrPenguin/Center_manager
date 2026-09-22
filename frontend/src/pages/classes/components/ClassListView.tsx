@@ -1,5 +1,6 @@
-import React from 'react';
-import { BookOpen, Plus, Search, RefreshCw, AlertCircle } from 'lucide-react';
+import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { BookOpen, Plus, Search, RefreshCw, AlertCircle, X } from 'lucide-react';
 import { ClassItem } from '../types';
 import { ClassCard } from './ClassCard';
 
@@ -26,6 +27,8 @@ export const ClassListView: React.FC<ClassListViewProps> = ({
   onSelectClass,
   onEditClass,
 }) => {
+  const [searchFocused, setSearchFocused] = useState(false);
+
   return (
     <div className="space-y-6">
       {/* HEADER SECTION */}
@@ -35,9 +38,6 @@ export const ClassListView: React.FC<ClassListViewProps> = ({
             <BookOpen className="h-7 w-7 text-indigo-500 dark:text-indigo-400" />
             Quản Lý Lớp Học & Sơ Đồ Chỗ Ngồi
           </h1>
-          <p className="text-xs text-slate-500 dark:text-slate-400 font-semibold mt-1">
-            Tạo lớp, điểm danh, xếp sơ đồ chỗ ngồi thông minh và phân công đổi bài tự động.
-          </p>
         </div>
 
         <div className="flex items-center gap-3">
@@ -63,17 +63,48 @@ export const ClassListView: React.FC<ClassListViewProps> = ({
       </div>
 
       {/* SEARCH & FILTER */}
-      <div className="flex items-center justify-between bg-white dark:bg-[#0f131f] border border-slate-200 dark:border-white/10 p-3.5 rounded-2xl shadow-sm">
-        <div className="relative flex-1 max-w-md">
-          <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+      <div className="flex items-center justify-between bg-white dark:bg-[#0f1528] border border-slate-200 dark:border-white/10 p-3.5 rounded-2xl shadow-sm">
+        <motion.div
+          animate={{ width: searchFocused ? 420 : 300 }}
+          transition={{ type: 'spring', stiffness: 350, damping: 26 }}
+          className="relative min-w-[220px]"
+        >
+          <motion.div
+            animate={{ scale: searchFocused ? 1.15 : 1 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+            className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none flex items-center justify-center"
+          >
+            <Search
+              size={15}
+              className={`transition-colors duration-200 ${
+                searchFocused ? 'text-[#5c36f5] dark:text-indigo-400' : 'text-slate-400 dark:text-slate-500'
+              }`}
+            />
+          </motion.div>
           <input
             type="text"
             value={search}
+            onFocus={() => setSearchFocused(true)}
+            onBlur={() => setSearchFocused(false)}
             onChange={(e) => onSearchChange(e.target.value)}
             placeholder="Tìm lớp học theo tên lớp, giáo viên, phòng..."
-            className="w-full bg-slate-50 dark:bg-[#161a29] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white text-xs rounded-xl pl-10 pr-4 py-2 focus:outline-none focus:border-indigo-500 placeholder:text-slate-400 dark:placeholder:text-slate-500 font-medium transition"
+            className="w-full bg-slate-50 dark:bg-[#161a29] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white text-xs rounded-xl pl-10 pr-8 py-2 focus:outline-none focus:border-[#5c36f5] focus:ring-2 focus:ring-[#5c36f5]/25 placeholder:text-slate-400 dark:placeholder:text-slate-500 font-medium transition shadow-inner"
           />
-        </div>
+          <AnimatePresence>
+            {search && (
+              <motion.button
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.8 }}
+                type="button"
+                onClick={() => onSearchChange('')}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 dark:hover:text-white transition cursor-pointer p-0.5 rounded-full hover:bg-slate-200 dark:hover:bg-white/10"
+              >
+                <X size={13} />
+              </motion.button>
+            )}
+          </AnimatePresence>
+        </motion.div>
       </div>
 
       {/* CLASS GRID LIST */}

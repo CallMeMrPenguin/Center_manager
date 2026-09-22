@@ -179,7 +179,7 @@ export const FileTree: React.FC<FileTreeProps> = ({
   };
 
   return (
-    <div className={`space-y-1 p-2 bg-[#0c0f1e]/98 border border-[#1e2746] rounded-2xl ${className}`}>
+    <div className={`space-y-1 p-2 bg-white dark:bg-[#0c0f1e]/98 border border-slate-200 dark:border-[#1e2746] rounded-2xl shadow-sm text-slate-800 dark:text-slate-200 ${className}`}>
       {data.map((node) => (
         <FileTreeNodeItem
           key={node.id}

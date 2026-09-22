@@ -200,7 +200,6 @@ export default function CoursesPage() {
           </div>
           <div>
             <h1 className="text-lg font-black text-slate-900 dark:text-white tracking-wide">Quản Lý Khóa Học</h1>
-            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5">Danh mục khóa học, học phí và lộ trình đào tạo</p>
           </div>
         </div>
 

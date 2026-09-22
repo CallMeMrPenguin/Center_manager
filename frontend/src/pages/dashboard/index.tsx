@@ -127,16 +127,13 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="h-full w-full overflow-y-auto p-6 space-y-6 bg-[#e2e8f0] dark:bg-[#080b14] text-slate-800 dark:text-slate-100 select-none font-sans scrollbar-thin">
+    <div className="h-full w-full overflow-y-auto p-6 space-y-6 bg-[#e2e8f0] dark:bg-[#060811] text-slate-800 dark:text-slate-100 select-none font-sans scrollbar-thin">
       {/* 1. Top Executive Status Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-300 dark:border-[#1c2438]">
         <div>
           <h1 className="text-xl font-black text-slate-900 dark:text-white tracking-tight uppercase">
             Bảng Điều Khiển Trung Tâm
           </h1>
-          <p className="text-xs text-slate-600 dark:text-slate-400 font-medium mt-0.5">
-            Dữ liệu vận hành tự động và lịch giảng dạy ngày {todayStr}
-          </p>
         </div>
         <div className="flex items-center gap-2">
           <button

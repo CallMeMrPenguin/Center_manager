@@ -135,7 +135,7 @@ export function SegmentedControl<T extends string = string>({
       {/* 1. Gliding Spring Hover Indicator */}
       <motion.div
         aria-hidden="true"
-        className="absolute top-1 bottom-1 rounded-lg bg-black/8 dark:bg-white/10 pointer-events-none z-0"
+        className="absolute top-1 bottom-1 rounded-lg bg-white/90 dark:bg-white/15 shadow-sm border border-slate-300/80 dark:border-white/10 pointer-events-none z-0"
         initial={false}
         animate={{
           left: hoverStyle.left,

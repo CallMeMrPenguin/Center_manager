@@ -85,16 +85,13 @@ export function BeamDatabaseStatusDemo() {
       </div>
 
       {/* 2. Interactive Animated Beam Diagram */}
-      <div className="bg-white dark:bg-[#080b14] border border-slate-200 dark:border-[#1b2444] p-6 rounded-2xl space-y-4 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.06),0_1px_3px_-1px_rgba(0,0,0,0.06)]">
+      <div className="bg-white dark:bg-[#0f1528] border border-slate-200 dark:border-[#1b2444] p-6 rounded-2xl space-y-4 shadow-sm">
         <div className="flex items-center justify-between border-b border-slate-200 dark:border-white/10 pb-3">
           <div>
             <h3 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
               <Activity size={18} className="text-purple-600 dark:text-purple-400" />
               <span>Animated Beam Flow (Luồng Truy Vấn & Trả Về Dữ Liệu)</span>
             </h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5">
-              Mô phỏng đường truyền dữ liệu động với đường cong Bezier và gradient chuyển động theo thời gian thực.
-            </p>
           </div>
         </div>
 

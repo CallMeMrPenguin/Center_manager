@@ -367,7 +367,7 @@ export default function SchedulePage() {
   ], []);
 
   return (
-    <div className="h-full flex flex-col p-5 gap-5 overflow-y-auto bg-[#e2e8f0] dark:bg-[#080b14] text-slate-800 dark:text-slate-100 font-sans">
+    <div className="h-full flex flex-col p-5 gap-5 overflow-y-auto bg-[#e2e8f0] dark:bg-[#060811] text-slate-800 dark:text-slate-100 font-sans">
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
@@ -375,9 +375,6 @@ export default function SchedulePage() {
             <CalendarIcon className="h-6 w-6 text-blue-600 dark:text-blue-400" />
             BẢNG LỊCH HỌC
           </h1>
-          <p className="text-[11px] text-slate-500 dark:text-slate-400 font-semibold mt-0.5">
-            Quản lý và theo dõi lịch học toàn trung tâm.
-          </p>
         </div>
         <div className="flex items-center gap-2">
           <button

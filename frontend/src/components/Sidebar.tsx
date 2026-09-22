@@ -5,6 +5,7 @@ import { api } from '../api';
 import { showToast } from './Toast';
 import { AuthUser } from '../utils/authUtils';
 import { AnimatedThemeToggle } from './ui/animated-theme-toggle';
+import { Dock, DockItem, DockIcon, DockLabel } from './ui/dock';
 
 export const SECTIONS = [
   { id: 'none', label: '' },
@@ -51,18 +52,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
   currentUser,
   onLogout,
 }) => {
-  const [hoveredTab, setHoveredTab] = useState<{
-    id: string;
-    label: string;
-    top: number;
-    isActive: boolean;
-  } | null>(null);
-
   return (
     <aside
       className={`group relative ${
         isSidebarExpanded ? 'w-56' : 'w-16'
-      } bg-white dark:bg-[#0c0f1e] border-r-2 border-slate-300 dark:border-[#212c4b] flex flex-col transition-all duration-300 select-none shrink-0 z-30 overflow-visible`}
+      } bg-white dark:bg-[#0a0e1c] border-r border-slate-200 dark:border-[#1e2746] flex flex-col transition-all duration-300 select-none shrink-0 z-30 overflow-visible`}
     >
       {/* Floating Collapse / Expand Button */}
       <button
@@ -101,88 +95,64 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
       {/* Nav Menu */}
       <div className={`flex-1 overflow-y-auto min-h-0 ${isSidebarExpanded ? 'px-1.5' : 'px-1'} py-2 flex flex-col gap-1 scrollbar-none`}>
-        {SECTIONS.map((section, sIdx) => {
-          const sectionTabs = orderedTabIds
-            .map((tabId, idx) => ({ tabId, idx }))
-            .filter(({ tabId }) => {
-              const item = TAB_DEFINITIONS.find((t) => t.id === tabId);
-              return item && item.section === section.id;
-            });
+        {isSidebarExpanded ? (
+          /* EXPANDED SIDEBAR VIEW */
+          SECTIONS.map((section, sIdx) => {
+            const sectionTabs = orderedTabIds
+              .map((tabId, idx) => ({ tabId, idx }))
+              .filter(({ tabId }) => {
+                const item = TAB_DEFINITIONS.find((t) => t.id === tabId);
+                return item && item.section === section.id;
+              });
 
-          if (sectionTabs.length === 0) return null;
+            if (sectionTabs.length === 0) return null;
 
-          return (
-            <React.Fragment key={section.id}>
-              {/* Section Divider in Collapsed & Expanded State */}
-              {sIdx > 0 && (
-                isSidebarExpanded ? (
-                  <div className="h-[1px] bg-slate-200 dark:bg-white/10 mx-2 my-1.5 shrink-0" />
-                ) : (
-                  <div className="w-7 h-[1.5px] bg-slate-300 dark:bg-white/20 mx-auto my-2 shrink-0 rounded-full" />
-                )
-              )}
+            return (
+              <React.Fragment key={section.id}>
+                {sIdx > 0 && <div className="h-[1px] bg-slate-200 dark:bg-white/10 mx-2 my-1.5 shrink-0" />}
 
-              <div className="flex flex-col gap-0.5 shrink-0">
-                {isSidebarExpanded && section.label && (
-                  <div className="px-2 text-[9.5px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 overflow-hidden whitespace-nowrap transition-all duration-300 mt-1 mb-0.5">
-                    {section.label}
-                  </div>
-                )}
+                <div className="flex flex-col gap-0.5 shrink-0">
+                  {section.label && (
+                    <div className="px-2 text-[9.5px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 overflow-hidden whitespace-nowrap transition-all duration-300 mt-1 mb-0.5">
+                      {section.label}
+                    </div>
+                  )}
 
-                {sectionTabs.map(({ tabId, idx }) => {
-                  const item = TAB_DEFINITIONS.find((t) => t.id === tabId)!;
-                  const Icon = item.icon;
-                  const isActive = activeTab === item.id;
+                  {sectionTabs.map(({ tabId, idx }) => {
+                    const item = TAB_DEFINITIONS.find((t) => t.id === tabId)!;
+                    const Icon = item.icon;
+                    const isActive = activeTab === item.id;
 
-                  return (
-                    <button
-                      key={item.id}
-                      draggable="true"
-                      onDragStart={() => handleDragStart(idx)}
-                      onDragOver={handleDragOver}
-                      onDragEnd={() => setDraggedIndex(null)}
-                      onDrop={() => handleDrop(idx)}
-                      onClick={() => setActiveTab(item.id)}
-                      onMouseEnter={(e) => {
-                        if (!isSidebarExpanded) {
-                          const rect = e.currentTarget.getBoundingClientRect();
-                          setHoveredTab({
-                            id: item.id,
-                            label: item.label,
-                            top: rect.top + rect.height / 2,
-                            isActive,
-                          });
-                        }
-                      }}
-                      onMouseLeave={() => setHoveredTab(null)}
-                      className={`flex items-center transition-all duration-150 ease-out relative group/item cursor-pointer shrink-0 ${
-                        isSidebarExpanded
-                          ? 'w-full h-9 px-2.5 rounded-xl justify-start active:scale-95'
-                          : 'w-10 h-10 mx-auto rounded-xl justify-center p-0 hover:scale-105 active:scale-95'
-                      } ${
-                        isActive
-                          ? 'bg-blue-600 dark:bg-blue-600 text-white font-black shadow-md shadow-blue-500/25'
-                          : 'hover:bg-slate-100 dark:hover:bg-white/[0.08] text-slate-800 dark:text-slate-200'
-                      } ${
-                        draggedIndex === idx
-                          ? 'opacity-40 border border-dashed border-blue-400 bg-blue-500/10'
-                          : ''
-                      }`}
-                    >
-                      {/* Centered Icon Container */}
-                      <div className="flex items-center justify-center shrink-0 relative z-10">
-                        <Icon
-                          size={17}
-                          className={
-                            isActive
-                              ? 'text-white drop-shadow-sm'
-                              : 'text-slate-500 dark:text-slate-400 group-hover/item:text-slate-900 dark:group-hover/item:text-white transition-colors'
-                          }
-                        />
-                      </div>
+                    return (
+                      <button
+                        key={item.id}
+                        draggable="true"
+                        onDragStart={() => handleDragStart(idx)}
+                        onDragOver={handleDragOver}
+                        onDragEnd={() => setDraggedIndex(null)}
+                        onDrop={() => handleDrop(idx)}
+                        onClick={() => setActiveTab(item.id)}
+                        className={`flex items-center w-full h-9 px-2.5 rounded-xl justify-start transition-all duration-150 ease-out relative group/item cursor-pointer shrink-0 active:scale-95 ${
+                          isActive
+                            ? 'bg-blue-600 dark:bg-blue-600 text-white font-black shadow-md shadow-blue-500/25'
+                            : 'hover:bg-slate-100 dark:hover:bg-white/[0.08] text-slate-800 dark:text-slate-200'
+                        } ${
+                          draggedIndex === idx
+                            ? 'opacity-40 border border-dashed border-blue-400 bg-blue-500/10'
+                            : ''
+                        }`}
+                      >
+                        <div className="flex items-center justify-center shrink-0 relative z-10">
+                          <Icon
+                            size={17}
+                            className={
+                              isActive
+                                ? 'text-white drop-shadow-sm'
+                                : 'text-slate-500 dark:text-slate-400 group-hover/item:text-slate-900 dark:group-hover/item:text-white transition-colors'
+                            }
+                          />
+                        </div>
 
-                      {/* Label for expanded view */}
-                      {isSidebarExpanded && (
                         <span
                           className={`text-xs relative z-10 whitespace-nowrap overflow-hidden ml-2.5 ${
                             isActive
@@ -192,27 +162,67 @@ export const Sidebar: React.FC<SidebarProps> = ({
                         >
                           {item.label}
                         </span>
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-            </React.Fragment>
-          );
-        })}
-      </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </React.Fragment>
+            );
+          })
+        ) : (
+          /* COLLAPSED SIDEBAR VIEW — MACOS VERTICAL DOCK MAGNIFICATION */
+          <Dock orientation="vertical" magnification={50} distance={85} className="w-full bg-transparent border-0 shadow-none p-0 gap-1">
+            {SECTIONS.map((section, sIdx) => {
+              const sectionTabs = orderedTabIds
+                .map((tabId, idx) => ({ tabId, idx }))
+                .filter(({ tabId }) => {
+                  const item = TAB_DEFINITIONS.find((t) => t.id === tabId);
+                  return item && item.section === section.id;
+                });
 
-      {/* Floating Hover Tooltip for Collapsed Sidebar */}
-      {!isSidebarExpanded && hoveredTab && (
-        <div
-          className="fixed left-[72px] z-[9999] pointer-events-none transition-all duration-150 ease-out"
-          style={{ top: `${hoveredTab.top}px`, transform: 'translateY(-50%)' }}
-        >
-          <div className="px-3 py-1.5 rounded-xl bg-white dark:bg-[#0c0f1e] border border-slate-200 dark:border-[#212c4b] text-slate-900 dark:text-white text-xs font-black whitespace-nowrap shadow-xl dark:shadow-[0_10px_30px_rgba(0,0,0,0.95)] flex items-center justify-center animate-in fade-in zoom-in-95 duration-150">
-            <span>{hoveredTab.label}</span>
-          </div>
-        </div>
-      )}
+              if (sectionTabs.length === 0) return null;
+
+              return (
+                <React.Fragment key={section.id}>
+                  {sIdx > 0 && (
+                    <div className="w-7 h-[1.5px] bg-slate-300 dark:bg-white/20 mx-auto my-1 shrink-0 rounded-full" />
+                  )}
+
+                  {sectionTabs.map(({ tabId, idx }) => {
+                    const item = TAB_DEFINITIONS.find((t) => t.id === tabId)!;
+                    const Icon = item.icon;
+                    const isActive = activeTab === item.id;
+
+                    return (
+                      <DockItem
+                        key={item.id}
+                        onClick={() => setActiveTab(item.id)}
+                        className={`rounded-xl transition-colors ${
+                          isActive
+                            ? 'bg-blue-600 dark:bg-blue-600 text-white font-black shadow-md shadow-blue-500/30'
+                            : 'bg-white hover:bg-slate-100 dark:bg-white/[0.04] dark:hover:bg-white/[0.1] text-slate-700 dark:text-slate-300 border border-slate-200/80 dark:border-white/10'
+                        }`}
+                      >
+                        <DockIcon>
+                          <Icon
+                            size={18}
+                            className={
+                              isActive
+                                ? 'text-white drop-shadow-sm'
+                                : 'text-slate-500 dark:text-slate-400 group-hover:text-slate-900 dark:group-hover:text-white'
+                            }
+                          />
+                        </DockIcon>
+                        <DockLabel>{item.label}</DockLabel>
+                      </DockItem>
+                    );
+                  })}
+                </React.Fragment>
+              );
+            })}
+          </Dock>
+        )}
+      </div>
 
       {/* User profile & Theme Toggle section */}
       <div className="shrink-0 mt-auto p-1.5 border-t border-slate-100 dark:border-white/5 relative" ref={profileRef as any}>

@@ -243,7 +243,7 @@ export default function UnitConfig() {
   );
 
   return (
-    <div className="h-full w-full bg-[#e2e8f0] dark:bg-[#080b14] overflow-y-auto p-6 select-none text-slate-800 dark:text-slate-100 flex flex-col gap-6">
+    <div className="h-full w-full bg-[#e2e8f0] dark:bg-[#060811] overflow-y-auto p-6 select-none text-slate-800 dark:text-slate-100 flex flex-col gap-6">
       {/* Page Title */}
       <div className="pb-3 border-b border-slate-200 dark:border-[#181f36] flex flex-wrap justify-between items-center gap-4">
         <div>
@@ -251,9 +251,6 @@ export default function UnitConfig() {
             <Settings size={22} className="text-indigo-500 dark:text-indigo-400" />
             <span>Cấu Hình Tên Unit & Ngữ Pháp Theo Khối Lớp</span>
           </h1>
-          <p className="text-xs text-slate-500 dark:text-slate-400">
-            Quản lý tên bài học và chủ đề ngữ pháp theo từng khối lớp từ 6 đến 12 để phục vụ kiểm tra và xuất tài liệu.
-          </p>
         </div>
         <button
           onClick={() => {

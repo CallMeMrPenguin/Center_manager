@@ -119,7 +119,7 @@ export const ReportsPage: React.FC = () => {
   };
 
   return (
-    <div ref={topRef} className="h-full w-full overflow-y-auto p-6 space-y-6 bg-[#e2e8f0] dark:bg-[#080b14] text-slate-800 dark:text-slate-100 select-none font-sans scrollbar-thin">
+    <div ref={topRef} className="h-full w-full overflow-y-auto p-6 space-y-6 bg-[#e2e8f0] dark:bg-[#060811] text-slate-800 dark:text-slate-100 select-none font-sans scrollbar-thin">
       {/* 1. TOP BREADCRUMB & CONTROLS */}
       <ReportsHeader
         activeReportTab={activeReportTab}

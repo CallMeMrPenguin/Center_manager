@@ -916,7 +916,7 @@ export default function VocabularyBank({ isActive }: { isActive?: boolean }) {
   };
 
   return (
-    <div className="flex flex-col h-full bg-[#e2e8f0] dark:bg-[#080b14] text-slate-900 dark:text-slate-100 p-8 overflow-y-auto">
+    <div className="flex flex-col h-full bg-[#e2e8f0] dark:bg-[#060811] text-slate-900 dark:text-slate-100 p-8 overflow-y-auto">
       
       {/* HEADER SECTION */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
@@ -925,12 +925,11 @@ export default function VocabularyBank({ isActive }: { isActive?: boolean }) {
             <Database className="text-blue-500 drop-shadow-[0_0_10px_rgba(59,130,246,0.5)]" size={22} />
             <span className="text-slate-900 dark:text-white">DANH SÁCH TỪ VỰNG CHỦ ĐỀ</span>
           </h1>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            Quản lý kho từ vựng tiếng Anh chủ đề local. Phân cấp từ gốc cốt lõi [ ] và các nhóm từ word family {'{ }'}.
-            <span className="ml-3 px-2 py-0.5 rounded-md bg-blue-500/10 border border-blue-500/20 text-blue-600 dark:text-blue-400 font-extrabold text-[10px]">
+          <div className="mt-1.5">
+            <span className="px-2 py-0.5 rounded-md bg-blue-500/10 border border-blue-500/20 text-blue-600 dark:text-blue-400 font-extrabold text-[10px]">
               TỔNG SỐ TỪ VỰNG THEO BỘ LỌC: {filteredAndSortedVocab.length}
             </span>
-          </p>
+          </div>
         </div>
 
         {/* Action Buttons */}
