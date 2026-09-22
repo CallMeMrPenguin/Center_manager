@@ -367,7 +367,7 @@ export default function SchedulePage() {
   ], []);
 
   return (
-    <div className="h-full flex flex-col p-5 gap-5 overflow-y-auto bg-[#e2e8f0] dark:bg-[#060811] text-slate-800 dark:text-slate-100 font-sans">
+    <div className="h-full flex flex-col p-5 gap-5 overflow-y-auto bg-[#e2e8f0] dark:bg-[#09090b] text-slate-800 dark:text-slate-100 font-sans">
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
@@ -380,7 +380,7 @@ export default function SchedulePage() {
           <button
             type="button"
             onClick={loadData}
-            className="p-2.5 rounded-xl bg-white hover:bg-slate-50 dark:bg-[#14192b] dark:hover:bg-[#1e2640] text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-[#28334e] transition cursor-pointer shadow-sm"
+            className="p-2.5 rounded-xl bg-white hover:bg-slate-50 dark:bg-[#141417] dark:hover:bg-[#1c1c21] text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-[#27272a] transition cursor-pointer shadow-sm"
             title="Tải lại lịch học"
           >
             <RefreshCw size={14} className={loading ? 'animate-spin text-blue-500 dark:text-blue-400' : ''} />
@@ -399,7 +399,7 @@ export default function SchedulePage() {
 
       {/* KPI Cards */}
       <div className="grid grid-cols-3 gap-4 shrink-0">
-        <div className="bg-white dark:bg-[#0f1528] p-4.5 flex items-center justify-between rounded-2xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.06),0_2px_6px_-2px_rgba(0,0,0,0.04)] dark:shadow-none transition-colors duration-200">
+        <div className="bg-white dark:bg-[#141417] border border-slate-200 dark:border-[#27272a] p-4.5 flex items-center justify-between rounded-2xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.06),0_2px_6px_-2px_rgba(0,0,0,0.04)] dark:shadow-none transition-colors duration-200">
           <div>
             <p className="text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">Trong Tháng</p>
             <p className="text-2xl font-black text-slate-900 dark:text-white">{total}</p>
@@ -408,7 +408,7 @@ export default function SchedulePage() {
             <CalendarIcon size={18} />
           </div>
         </div>
-        <div className="bg-white dark:bg-[#0f1528] p-4.5 flex items-center justify-between rounded-2xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.06),0_2px_6px_-2px_rgba(0,0,0,0.04)] dark:shadow-none transition-colors duration-200">
+        <div className="bg-white dark:bg-[#141417] border border-slate-200 dark:border-[#27272a] p-4.5 flex items-center justify-between rounded-2xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.06),0_2px_6px_-2px_rgba(0,0,0,0.04)] dark:shadow-none transition-colors duration-200">
           <div>
             <p className="text-[9px] font-black uppercase tracking-widest text-emerald-600 dark:text-emerald-400">Đã Hoàn Thành</p>
             <p className="text-2xl font-black text-emerald-600 dark:text-emerald-400">{done}</p>
@@ -417,7 +417,7 @@ export default function SchedulePage() {
             <CheckCircle2 size={18} />
           </div>
         </div>
-        <div className="bg-white dark:bg-[#0f1528] p-4.5 flex items-center justify-between rounded-2xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.06),0_2px_6px_-2px_rgba(0,0,0,0.04)] dark:shadow-none transition-colors duration-200">
+        <div className="bg-white dark:bg-[#141417] border border-slate-200 dark:border-[#27272a] p-4.5 flex items-center justify-between rounded-2xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.06),0_2px_6px_-2px_rgba(0,0,0,0.04)] dark:shadow-none transition-colors duration-200">
           <div>
             <p className="text-[9px] font-black uppercase tracking-widest text-cyan-600 dark:text-cyan-400">Sắp Diễn Ra</p>
             <p className="text-2xl font-black text-cyan-600 dark:text-cyan-400">{upcoming}</p>
@@ -429,13 +429,13 @@ export default function SchedulePage() {
       </div>
 
       {/* Toolbar */}
-      <div className="flex flex-wrap items-center justify-between gap-3 bg-white dark:bg-[#0f1528] p-3 rounded-2xl shrink-0 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.06),0_2px_6px_-2px_rgba(0,0,0,0.04)] dark:shadow-none transition-colors duration-200">
+      <div className="flex flex-wrap items-center justify-between gap-3 bg-white dark:bg-[#141417] border border-slate-200 dark:border-[#27272a] p-3 rounded-2xl shrink-0 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.06),0_2px_6px_-2px_rgba(0,0,0,0.04)] dark:shadow-none transition-colors duration-200">
         <div className="flex items-center gap-2">
           <input
             type="month"
             value={selectedMonth}
             onChange={(e) => setSelectedMonth(e.target.value)}
-            className="bg-slate-50 dark:bg-[#141b2d] border border-slate-200 dark:border-[#232f4d] text-slate-900 dark:text-white text-xs font-bold rounded-xl px-3 py-2 focus:outline-none focus:border-blue-500 cursor-pointer"
+            className="bg-slate-50 dark:bg-[#1c1c21] border border-slate-200 dark:border-[#27272a] text-slate-900 dark:text-white text-xs font-bold rounded-xl px-3 py-2 focus:outline-none focus:border-blue-500 cursor-pointer"
           />
           <CustomSelect
             value={classFilter}
@@ -503,7 +503,7 @@ export default function SchedulePage() {
       {ctxMenu && (
         <div
           style={{ top: ctxMenu.y, left: ctxMenu.x }}
-          className="fixed z-[999] bg-white dark:bg-[#161d36] border-2 border-slate-300 dark:border-[#3b4d82] rounded-2xl shadow-[0_20px_50px_rgba(15,23,42,0.25)] dark:shadow-[0_24px_64px_rgba(0,0,0,0.95)] ring-1 ring-black/5 dark:ring-white/10 py-2 min-w-[170px] animate-mac-dropdown select-none"
+          className="fixed z-[999] bg-white dark:bg-[#141417] border border-slate-300 dark:border-[#27272a] rounded-2xl shadow-[0_20px_50px_rgba(15,23,42,0.25)] dark:shadow-[0_24px_64px_rgba(0,0,0,0.95)] ring-1 ring-black/5 dark:ring-white/10 py-2 min-w-[170px] animate-mac-dropdown select-none"
         >
           <button
             type="button"

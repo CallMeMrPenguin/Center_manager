@@ -554,14 +554,14 @@ export default function TestFormatter({
   };
 
   return (
-    <div className="h-full w-full bg-[#e2e8f0] dark:bg-[#060811] flex relative overflow-hidden select-none">
+    <div className="h-full w-full bg-[#e2e8f0] dark:bg-[#09090b] flex relative overflow-hidden select-none">
       
       {/* 1. SLIDING CONFIGS PANEL (SLIDEBAR) */}
-      <aside className={`w-80 bg-white dark:bg-[#121629] border-r border-slate-200 dark:border-[#202842] p-5 flex flex-col justify-between overflow-y-auto shrink-0 transition-all duration-300 absolute lg:relative z-20 h-full ${
+      <aside className={`w-80 bg-white dark:bg-[#141417] border-r border-slate-200 dark:border-[#27272a] p-5 flex flex-col justify-between overflow-y-auto shrink-0 transition-all duration-300 absolute lg:relative z-20 h-full ${
         showConfig ? 'left-0 opacity-100' : '-left-80 lg:-ml-80 opacity-0 pointer-events-none'
       }`}>
         <div>
-          <div className="flex items-center justify-between mb-4 pb-2 border-b border-slate-200 dark:border-[#202842]">
+          <div className="flex items-center justify-between mb-4 pb-2 border-b border-slate-200 dark:border-[#27272a]">
             <h2 className="text-[0.73rem] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest flex items-center gap-1.5">
               <Settings size={12} /> CẤU HÌNH LỀ & CHỮ
             </h2>

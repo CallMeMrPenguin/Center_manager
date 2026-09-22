@@ -258,7 +258,7 @@ export default function Settings() {
   };
 
   return (
-    <div className="h-full w-full bg-[#e2e8f0] dark:bg-[#060811] overflow-y-auto px-8 py-6 select-none text-slate-800 dark:text-slate-200 flex flex-col gap-6">
+    <div className="h-full w-full bg-[#e2e8f0] dark:bg-[#09090b] overflow-y-auto px-8 py-6 select-none text-slate-800 dark:text-slate-200 flex flex-col gap-6">
       
       {/* Page Title */}
       <div className="pb-2">
@@ -274,7 +274,7 @@ export default function Settings() {
         <div className="lg:col-span-2 flex flex-col gap-6">
           
           {/* System Diagnostics Box */}
-          <div className="bg-white dark:bg-[#0f1528] rounded-2xl p-6 flex flex-col gap-4 shadow-sm dark:shadow-none border border-slate-200 dark:border-[#1e2746]">
+          <div className="bg-white dark:bg-[#141417] rounded-2xl p-6 flex flex-col gap-4 shadow-sm dark:shadow-none border border-slate-200 dark:border-[#27272a]">
             <div className="flex justify-between items-center border-b border-slate-200 dark:border-white/10 pb-3">
               <h3 className="text-xs font-extrabold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
                 <Cpu size={14} className="text-blue-500 dark:text-blue-400" /> Chẩn đoán môi trường chạy máy tính
@@ -282,7 +282,7 @@ export default function Settings() {
               <button
                 onClick={runDiagnostics}
                 disabled={loadingDiagnostics}
-                className="group p-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-[#151d36] dark:hover:bg-[#1d2748] border border-slate-300 dark:border-[#212c4b] rounded-xl text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-all duration-300 flex items-center gap-0 hover:gap-1 text-[10px] font-bold cursor-pointer"
+                className="group p-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-[#1c1c21] dark:hover:bg-[#27272f] border border-slate-300 dark:border-[#27272a] rounded-xl text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-all duration-300 flex items-center gap-0 hover:gap-1 text-[10px] font-bold cursor-pointer"
               >
                 <RefreshCw size={10} className={loadingDiagnostics ? "animate-spin" : ""} />
                 <span className="max-w-0 overflow-hidden group-hover:max-w-[100px] transition-all duration-300 whitespace-nowrap block">Kiểm tra lại</span>
@@ -339,7 +339,7 @@ export default function Settings() {
           </div>
 
           {/* Directory Configuration Box */}
-          <div className="bg-white dark:bg-[#0f1528] rounded-2xl p-6 flex flex-col gap-4 shadow-sm dark:shadow-none border border-slate-200 dark:border-[#1e2746]">
+          <div className="bg-white dark:bg-[#141417] rounded-2xl p-6 flex flex-col gap-4 shadow-sm dark:shadow-none border border-slate-200 dark:border-[#27272a]">
             <h3 className="text-xs font-extrabold text-slate-900 dark:text-white uppercase tracking-wider border-b border-slate-200 dark:border-white/10 pb-3 flex items-center gap-2">
               <HardDrive size={14} className="text-blue-500 dark:text-blue-400" /> Thiết lập hệ thống tệp tin
             </h3>
@@ -360,12 +360,12 @@ export default function Settings() {
                       }
                     }}
                     placeholder="Workspace Files Directory Path..."
-                    className="bg-slate-50 dark:bg-[#0b0f19] border border-slate-300 dark:border-[#212c4b] px-3.5 py-2 rounded-xl text-xs text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500 flex-1 font-mono"
+                    className="bg-slate-50 dark:bg-[#1c1c21] border border-slate-300 dark:border-[#27272a] px-3.5 py-2 rounded-xl text-xs text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500 flex-1 font-mono"
                   />
                   <button
                     type="button"
                     onClick={handleBrowseDirectory}
-                    className="px-4 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-[#151d36] dark:hover:bg-[#1d2748] border border-slate-300 dark:border-[#212c4b] text-slate-800 dark:text-slate-200 font-extrabold text-[10px] rounded-xl cursor-pointer transition whitespace-nowrap"
+                    className="px-4 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-[#1c1c21] dark:hover:bg-[#27272f] border border-slate-300 dark:border-[#27272a] text-slate-800 dark:text-slate-200 font-extrabold text-[10px] rounded-xl cursor-pointer transition whitespace-nowrap"
                   >
                     Duyệt...
                   </button>
@@ -388,7 +388,7 @@ export default function Settings() {
           </div>
 
           {/* Dynamic Grade Types & Proportions Box */}
-          <div className="bg-white dark:bg-[#0f1528] rounded-2xl p-6 flex flex-col gap-4 shadow-sm dark:shadow-none border border-slate-200 dark:border-[#1e2746]">
+          <div className="bg-white dark:bg-[#141417] rounded-2xl p-6 flex flex-col gap-4 shadow-sm dark:shadow-none border border-slate-200 dark:border-[#27272a]">
             <div className="flex flex-wrap justify-between items-center border-b border-slate-200 dark:border-white/10 pb-3 gap-2">
               <h3 className="text-xs font-extrabold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
                 <SettingsIcon size={14} className="text-indigo-500 dark:text-indigo-400" /> Quản Lý Loại Điểm & Trọng Số (%)
@@ -419,7 +419,7 @@ export default function Settings() {
 
             <div className="flex flex-col gap-3">
               {gradeTypes.map((gt, idx) => (
-                <div key={gt.id || idx} className="flex items-center gap-3 bg-slate-50 dark:bg-[#0b0f19] p-3 rounded-xl border border-slate-200 dark:border-[#212c4b]">
+                <div key={gt.id || idx} className="flex items-center gap-3 bg-slate-50 dark:bg-[#1c1c21] p-3 rounded-xl border border-slate-200 dark:border-[#27272a]">
                   <div 
                     className="w-3 h-8 rounded-lg shrink-0" 
                     style={{ backgroundColor: gt.color || '#5c36f5' }} 
@@ -518,7 +518,7 @@ export default function Settings() {
         </div>
 
         {/* Right Column: Profiles CRUD List */}
-        <div className="bg-white dark:bg-[#0f1528] rounded-2xl p-6 flex flex-col gap-4 shadow-sm dark:shadow-none border border-slate-200 dark:border-[#1e2746] self-start">
+        <div className="bg-white dark:bg-[#141417] rounded-2xl p-6 flex flex-col gap-4 shadow-sm dark:shadow-none border border-slate-200 dark:border-[#27272a] self-start">
           <h3 className="text-xs font-extrabold text-slate-900 dark:text-white uppercase tracking-wider border-b border-slate-200 dark:border-white/10 pb-3 flex items-center gap-2">
             <ShieldCheck size={14} className="text-blue-500 dark:text-blue-400" /> Hồ sơ định dạng đã lưu
           </h3>
@@ -556,7 +556,7 @@ export default function Settings() {
       </div>
 
       {/* Update Section — full width below grid */}
-      <div className="bg-white dark:bg-[#0f1528] rounded-2xl p-6 flex flex-col gap-4 shadow-sm dark:shadow-none border border-slate-200 dark:border-[#1e2746]">
+      <div className="bg-white dark:bg-[#141417] rounded-2xl p-6 flex flex-col gap-4 shadow-sm dark:shadow-none border border-slate-200 dark:border-[#27272a]">
         <div className="flex justify-between items-center border-b border-slate-200 dark:border-white/10 pb-3">
           <h3 className="text-xs font-extrabold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
             <ArrowUpCircle size={14} className="text-blue-500 dark:text-blue-400" /> Cập Nhật Ứng Dụng
@@ -622,7 +622,7 @@ export default function Settings() {
               <button
                 onClick={handleCheckUpdate}
                 disabled={checkingUpdate || applyingUpdate}
-                className="group flex items-center gap-0 hover:gap-1.5 p-2 bg-slate-100 hover:bg-slate-200 dark:bg-[#151d36] dark:hover:bg-[#1d2748] border border-slate-300 dark:border-[#212c4b] rounded-xl text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-all duration-300 cursor-pointer disabled:opacity-40"
+                className="group flex items-center gap-0 hover:gap-1.5 p-2 bg-slate-100 hover:bg-slate-200 dark:bg-[#1c1c21] dark:hover:bg-[#27272f] border border-slate-300 dark:border-[#27272a] rounded-xl text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-all duration-300 cursor-pointer disabled:opacity-40"
                 title="Kiểm tra bản cập nhật"
               >
                 <RefreshCw size={13} className={checkingUpdate ? "animate-spin" : ""} />

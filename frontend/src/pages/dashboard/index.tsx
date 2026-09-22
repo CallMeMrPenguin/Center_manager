@@ -127,9 +127,9 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="h-full w-full overflow-y-auto p-6 space-y-6 bg-[#e2e8f0] dark:bg-[#030509] text-slate-800 dark:text-slate-100 select-none font-sans scrollbar-thin">
+    <div className="h-full w-full overflow-y-auto p-6 space-y-6 bg-[#e2e8f0] dark:bg-[#09090b] text-slate-800 dark:text-slate-100 select-none font-sans scrollbar-thin">
       {/* 1. Top Executive Status Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-300 dark:border-[#1c2438]">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-300 dark:border-[#27272a]">
         <div>
           <h1 className="text-xl font-black text-slate-900 dark:text-white tracking-tight uppercase">
             Bảng Điều Khiển Trung Tâm
@@ -140,7 +140,7 @@ export default function DashboardPage() {
             type="button"
             onClick={loadDashboardData}
             disabled={loading}
-            className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white hover:bg-slate-50 dark:bg-[#141d38] dark:hover:bg-[#1c284e] border border-slate-300 dark:border-[#232f4d] text-xs font-bold text-slate-700 dark:text-slate-200 hover:text-slate-900 dark:hover:text-white transition cursor-pointer shadow-sm"
+            className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white hover:bg-slate-50 dark:bg-[#141417] dark:hover:bg-[#1c1c21] border border-slate-300 dark:border-[#27272a] text-xs font-bold text-slate-700 dark:text-slate-200 hover:text-slate-900 dark:hover:text-white transition cursor-pointer shadow-sm"
           >
             <RefreshCw size={13} className={loading ? 'animate-spin' : ''} />
             <span>Cập nhật số liệu</span>

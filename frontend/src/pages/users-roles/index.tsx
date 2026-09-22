@@ -38,11 +38,11 @@ export const UsersRolesPage: React.FC = () => {
   };
 
   return (
-    <div className="h-full w-full overflow-y-auto p-6 space-y-6 bg-[#e2e8f0] dark:bg-[#060811] text-slate-900 dark:text-slate-100 select-none font-sans scrollbar-thin">
+    <div className="h-full w-full overflow-y-auto p-6 space-y-6 bg-[#e2e8f0] dark:bg-[#09090b] text-slate-900 dark:text-slate-100 select-none font-sans scrollbar-thin">
       {/* 1. Header Banner */}
-      <div className="bg-white dark:bg-[#0c0f1e] border border-slate-200/90 dark:border-[#1e2742] rounded-2xl p-5 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.06),0_1px_3px_-1px_rgba(0,0,0,0.06)] flex flex-wrap items-center justify-between gap-4">
+      <div className="bg-white dark:bg-[#141417] border border-slate-200/90 dark:border-[#27272a] rounded-2xl p-5 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.06),0_1px_3px_-1px_rgba(0,0,0,0.06)] flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 border border-indigo-500/30 flex items-center justify-center font-black shrink-0 shadow-[0_0_15px_rgba(99,102,241,0.3)]">
+          <div className="w-10 h-10 rounded-2xl bg-blue-500/20 text-blue-600 dark:text-blue-400 border border-blue-500/30 flex items-center justify-center font-black shrink-0 shadow-[0_0_15px_rgba(37,99,235,0.3)]">
             <UserCog size={20} />
           </div>
           <div>
@@ -61,7 +61,7 @@ export const UsersRolesPage: React.FC = () => {
             { value: 'permissions', label: 'Phân Quyền Vai Trò' },
             { value: 'system', label: 'Hệ Thống & Đồng Bộ' },
           ]}
-          activeColor="bg-[#5c36f5] shadow-[0_0_14px_rgba(92,54,245,0.5)]"
+          activeColor="bg-[#2563eb] shadow-[0_0_14px_rgba(37,99,235,0.4)]"
           size="md"
         />
       </div>

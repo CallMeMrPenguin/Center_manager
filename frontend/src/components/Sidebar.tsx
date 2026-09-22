@@ -56,13 +56,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
     <aside
       className={`group relative ${
         isSidebarExpanded ? 'w-56' : 'w-16'
-      } bg-white dark:bg-[#0a0e1c] border-r border-slate-200 dark:border-[#1e2746] flex flex-col transition-all duration-300 select-none shrink-0 z-30 overflow-visible`}
+      } bg-white dark:bg-[#0c0c0e] border-r border-slate-200 dark:border-[#27272a] flex flex-col transition-all duration-300 select-none shrink-0 z-30 overflow-visible`}
     >
       {/* Floating Collapse / Expand Button */}
       <button
         type="button"
         onClick={toggleSidebar}
-        className="absolute -right-3 top-6 w-6 h-6 rounded-full bg-white dark:bg-[#181d2e] hover:bg-[#2563eb] text-slate-600 dark:text-slate-300 hover:text-white border border-slate-300 dark:border-white/20 shadow-md flex items-center justify-center transition-all duration-200 hover:scale-110 cursor-pointer z-50 active:scale-95 opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto"
+        className="absolute -right-3 top-6 w-6 h-6 rounded-full bg-white dark:bg-[#1c1c21] hover:bg-[#2563eb] text-slate-600 dark:text-slate-300 hover:text-white border border-slate-300 dark:border-[#27272a] shadow-md flex items-center justify-center transition-all duration-200 hover:scale-110 cursor-pointer z-50 active:scale-95 opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto"
         title={isSidebarExpanded ? 'Thu gọn thanh điều hướng' : 'Mở rộng thanh điều hướng'}
       >
         {isSidebarExpanded ? (
@@ -216,7 +216,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {/* User profile & Theme Toggle section */}
       <div className="shrink-0 mt-auto p-1.5 border-t border-slate-100 dark:border-white/5 relative" ref={profileRef as any}>
         {profileOpen && (
-          <div className="absolute z-[250] bg-white dark:bg-[#0d1018] border border-slate-200 dark:border-white/10 rounded-[14px] shadow-2xl p-1.5 animate-mac-dropdown bottom-full left-0 mb-2 w-52 origin-bottom">
+          <div className="absolute z-[250] bg-white dark:bg-[#141417] border border-slate-200 dark:border-[#27272a] rounded-[14px] shadow-2xl p-1.5 animate-mac-dropdown bottom-full left-0 mb-2 w-52 origin-bottom">
             <div className="px-3 py-2 border-b border-slate-100 dark:border-white/5 select-none mb-1">
               <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-wider">
                 {currentUser?.rawRole || (currentUser?.role === 'admin' ? 'Quản trị viên' : currentUser?.role === 'student' ? 'Học sinh' : 'Tài Khoản')}

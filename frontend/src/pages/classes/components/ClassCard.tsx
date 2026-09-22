@@ -26,7 +26,7 @@ export const ClassCard: React.FC<ClassCardProps> = ({
       style={{
         boxShadow: glowShadow,
       }}
-      className="bg-white dark:bg-[#141d38] rounded-[28px] p-6 space-y-5 cursor-pointer transition-all duration-300 group relative overflow-hidden hover:-translate-y-1 hover:brightness-105"
+      className="bg-white dark:bg-[#141417] rounded-[28px] p-6 space-y-5 cursor-pointer transition-all duration-300 group relative overflow-hidden hover:-translate-y-1 hover:brightness-105"
       onMouseEnter={(e) => {
         e.currentTarget.style.boxShadow = hoverGlowShadow;
       }}
@@ -71,7 +71,7 @@ export const ClassCard: React.FC<ClassCardProps> = ({
       {/* 3 Detail Info Rows */}
       <div className="space-y-2.5">
         {/* Teacher */}
-        <div className="flex items-center gap-3 bg-slate-50 dark:bg-[#1c284e] border border-slate-200 dark:border-white/5 p-3 rounded-2xl transition-colors">
+        <div className="flex items-center gap-3 bg-slate-50 dark:bg-[#1c1c21] border border-slate-200 dark:border-white/5 p-3 rounded-2xl transition-colors">
           <div
             style={{
               backgroundColor: hexToRGBA(cardColor, 0.15),
@@ -88,7 +88,7 @@ export const ClassCard: React.FC<ClassCardProps> = ({
         </div>
 
         {/* Room */}
-        <div className="flex items-center gap-3 bg-slate-50 dark:bg-[#1c284e] border border-slate-200 dark:border-white/5 p-3 rounded-2xl transition-colors">
+        <div className="flex items-center gap-3 bg-slate-50 dark:bg-[#1c1c21] border border-slate-200 dark:border-white/5 p-3 rounded-2xl transition-colors">
           <div
             style={{
               backgroundColor: hexToRGBA(cardColor, 0.15),
@@ -105,7 +105,7 @@ export const ClassCard: React.FC<ClassCardProps> = ({
         </div>
 
         {/* Students */}
-        <div className="flex items-center gap-3 bg-slate-50 dark:bg-[#1c284e] border border-slate-200 dark:border-white/5 p-3 rounded-2xl transition-colors">
+        <div className="flex items-center gap-3 bg-slate-50 dark:bg-[#1c1c21] border border-slate-200 dark:border-white/5 p-3 rounded-2xl transition-colors">
           <div
             style={{
               backgroundColor: hexToRGBA(cardColor, 0.15),

@@ -243,9 +243,9 @@ export default function UnitConfig() {
   );
 
   return (
-    <div className="h-full w-full bg-[#e2e8f0] dark:bg-[#060811] overflow-y-auto p-6 select-none text-slate-800 dark:text-slate-100 flex flex-col gap-6">
+    <div className="h-full w-full bg-[#e2e8f0] dark:bg-[#09090b] overflow-y-auto p-6 select-none text-slate-800 dark:text-slate-100 flex flex-col gap-6">
       {/* Page Title */}
-      <div className="pb-3 border-b border-slate-200 dark:border-[#181f36] flex flex-wrap justify-between items-center gap-4">
+      <div className="pb-3 border-b border-slate-200 dark:border-[#27272a] flex flex-wrap justify-between items-center gap-4">
         <div>
           <h1 className="text-xl font-black tracking-tight text-slate-900 dark:text-white mb-1 flex items-center gap-2">
             <Settings size={22} className="text-indigo-500 dark:text-indigo-400" />

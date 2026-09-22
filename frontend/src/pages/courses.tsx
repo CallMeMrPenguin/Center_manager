@@ -193,7 +193,7 @@ export default function CoursesPage() {
   return (
     <div className="p-6 h-full flex flex-col gap-5 text-slate-800 dark:text-slate-200">
       {/* HEADER BAR */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-[#141d38] border border-slate-200 dark:border-white/10 p-5 rounded-2xl shadow-sm dark:shadow-xl">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-[#141417] border border-slate-200 dark:border-[#27272a] p-5 rounded-2xl shadow-sm dark:shadow-xl">
         <div className="flex items-center gap-3">
           <div className="p-2.5 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
             <Briefcase size={22} />
@@ -206,7 +206,7 @@ export default function CoursesPage() {
         <div className="flex items-center gap-3 shrink-0">
           <button
             onClick={loadData}
-            className="p-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-[#1c284e] dark:hover:bg-[#253564] text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-[#24335c] transition cursor-pointer shadow-sm"
+            className="p-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-[#1c1c21] dark:hover:bg-[#27272f] text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-[#27272a] transition cursor-pointer shadow-sm"
             title="Tải lại danh sách khóa học"
           >
             <RefreshCw size={14} className={loading ? 'animate-spin text-blue-500 dark:text-blue-400' : ''} />
@@ -223,7 +223,7 @@ export default function CoursesPage() {
       </div>
 
       {/* TABLE */}
-      <div className="flex-1 min-h-[380px] bg-white dark:bg-[#141d38] border border-slate-200 dark:border-white/10 rounded-2xl overflow-hidden flex flex-col">
+      <div className="flex-1 min-h-[380px] bg-white dark:bg-[#141417] border border-slate-200 dark:border-[#27272a] rounded-2xl overflow-hidden flex flex-col">
         <DataTable
           tableId="courses-table"
           exportFilename="danh_sach_khoa_hoc"
@@ -240,8 +240,8 @@ export default function CoursesPage() {
       {/* MODAL */}
       {modalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 animate-mac-backdrop">
-          <div className="bg-white dark:bg-[#141d38] border border-slate-200 dark:border-white/10 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl dark:shadow-[0_24px_80px_rgba(0,0,0,0.8)]">
-            <div className="flex items-center justify-between p-5 border-b border-slate-200 dark:border-white/10 bg-slate-100 dark:bg-[#1c284e]">
+          <div className="bg-white dark:bg-[#141417] border border-slate-200 dark:border-[#27272a] rounded-2xl w-full max-w-md overflow-hidden shadow-2xl dark:shadow-[0_24px_80px_rgba(0,0,0,0.8)]">
+            <div className="flex items-center justify-between p-5 border-b border-slate-200 dark:border-[#27272a] bg-slate-100 dark:bg-[#1c1c21]">
               <h3 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
                 <Briefcase className="h-5 w-5 text-blue-500 dark:text-blue-400" />
                 <span>{editingCourse ? 'Cập Nhật Khóa Học' : 'Tạo Khóa Học Mới'}</span>
@@ -265,7 +265,7 @@ export default function CoursesPage() {
                   value={formData.course_name || ''}
                   onChange={(e) => setFormData({ ...formData, course_name: e.target.value })}
                   placeholder="Ví dụ: Tiếng Anh Giao Tiếp Căn Bản"
-                  className="w-full bg-slate-50 dark:bg-[#1c284e] border border-slate-300 dark:border-white/10 rounded-xl px-3.5 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 font-semibold"
+                  className="w-full bg-slate-50 dark:bg-[#1c1c21] border border-slate-300 dark:border-[#27272a] rounded-xl px-3.5 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 font-semibold"
                 />
               </div>
 

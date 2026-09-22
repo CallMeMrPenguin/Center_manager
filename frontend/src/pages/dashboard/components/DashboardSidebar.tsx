@@ -24,7 +24,7 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ alerts, onNa
   return (
     <div className="space-y-6">
       {/* 1. Quick Launchpad */}
-      <div className="bg-white dark:bg-[#141d38] rounded-2xl p-5 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.06),0_2px_6px_-2px_rgba(0,0,0,0.04)] dark:shadow-none transition-colors duration-200">
+      <div className="bg-white dark:bg-[#141417] border border-slate-200 dark:border-[#27272a] rounded-2xl p-5 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.06),0_2px_6px_-2px_rgba(0,0,0,0.04)] dark:shadow-none transition-colors duration-200">
         <h2 className="text-xs font-extrabold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-3.5">
           Phím Tác Vụ Nhanh
         </h2>
@@ -32,7 +32,7 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ alerts, onNa
           <button
             type="button"
             onClick={() => onNavigate('students')}
-            className="flex items-center gap-2 p-3 rounded-xl bg-slate-50 hover:bg-slate-100 dark:bg-[#1c284e] dark:hover:bg-[#253564] border border-slate-200 dark:border-[#233156] text-left transition cursor-pointer"
+            className="flex items-center gap-2 p-3 rounded-xl bg-slate-50 hover:bg-slate-100 dark:bg-[#1c1c21] dark:hover:bg-[#27272f] border border-slate-200 dark:border-[#27272a] text-left transition cursor-pointer"
           >
             <PlusCircle size={15} className="text-blue-500 dark:text-blue-400 shrink-0" />
             <span className="text-xs font-bold text-slate-800 dark:text-slate-200">Tiếp nhận học sinh</span>
@@ -41,7 +41,7 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ alerts, onNa
           <button
             type="button"
             onClick={() => onNavigate('schedule')}
-            className="flex items-center gap-2 p-3 rounded-xl bg-slate-50 hover:bg-slate-100 dark:bg-[#1c284e] dark:hover:bg-[#253564] border border-slate-200 dark:border-[#233156] text-left transition cursor-pointer"
+            className="flex items-center gap-2 p-3 rounded-xl bg-slate-50 hover:bg-slate-100 dark:bg-[#1c1c21] dark:hover:bg-[#27272f] border border-slate-200 dark:border-[#27272a] text-left transition cursor-pointer"
           >
             <Calendar size={15} className="text-emerald-500 dark:text-emerald-400 shrink-0" />
             <span className="text-xs font-bold text-slate-800 dark:text-slate-200">Xếp lịch học</span>
@@ -50,7 +50,7 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ alerts, onNa
           <button
             type="button"
             onClick={() => onNavigate('kiemtra')}
-            className="flex items-center gap-2 p-3 rounded-xl bg-slate-50 hover:bg-slate-100 dark:bg-[#1c284e] dark:hover:bg-[#253564] border border-slate-200 dark:border-[#233156] text-left transition cursor-pointer"
+            className="flex items-center gap-2 p-3 rounded-xl bg-slate-50 hover:bg-slate-100 dark:bg-[#1c1c21] dark:hover:bg-[#27272f] border border-slate-200 dark:border-[#27272a] text-left transition cursor-pointer"
           >
             <FileCheck size={15} className="text-amber-500 dark:text-amber-400 shrink-0" />
             <span className="text-xs font-bold text-slate-800 dark:text-slate-200">Tạo đề thi</span>
@@ -59,7 +59,7 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ alerts, onNa
           <button
             type="button"
             onClick={() => onNavigate('reports')}
-            className="flex items-center gap-2 p-3 rounded-xl bg-slate-50 hover:bg-slate-100 dark:bg-[#1c284e] dark:hover:bg-[#253564] border border-slate-200 dark:border-[#233156] text-left transition cursor-pointer"
+            className="flex items-center gap-2 p-3 rounded-xl bg-slate-50 hover:bg-slate-100 dark:bg-[#1c1c21] dark:hover:bg-[#27272f] border border-slate-200 dark:border-[#27272a] text-left transition cursor-pointer"
           >
             <BarChart3 size={15} className="text-indigo-500 dark:text-indigo-400 shrink-0" />
             <span className="text-xs font-bold text-slate-800 dark:text-slate-200">Báo cáo học vụ</span>
@@ -68,7 +68,7 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ alerts, onNa
       </div>
 
       {/* 2. Operational Shift Noticeboard */}
-      <div className="bg-white dark:bg-[#141d38] rounded-2xl p-5 flex flex-col gap-2 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.06),0_2px_6px_-2px_rgba(0,0,0,0.04)] dark:shadow-none transition-colors duration-200">
+      <div className="bg-white dark:bg-[#141417] border border-slate-200 dark:border-[#27272a] rounded-2xl p-5 flex flex-col gap-2 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.06),0_2px_6px_-2px_rgba(0,0,0,0.04)] dark:shadow-none transition-colors duration-200">
         <div className="flex items-center justify-between">
           <span className="text-xs font-extrabold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
             Bảng Ghi Chú Ca Trực
@@ -84,12 +84,12 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ alerts, onNa
           onChange={handleNoteChange}
           placeholder="Ghi chú dặn dò ca trực hôm nay (in đề, học sinh xin về sớm, dặn phụ huynh)..."
           rows={3}
-          className="w-full bg-slate-50 dark:bg-[#1c284e] border border-slate-200 dark:border-[#233156] focus:border-blue-500 rounded-xl p-2.5 text-xs text-slate-900 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 font-medium outline-none resize-none transition"
+          className="w-full bg-slate-50 dark:bg-[#1c1c21] border border-slate-200 dark:border-[#27272a] focus:border-blue-500 rounded-xl p-2.5 text-xs text-slate-900 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 font-medium outline-none resize-none transition"
         />
       </div>
 
       {/* 3. Attention Radar */}
-      <div className="bg-white dark:bg-[#141d38] rounded-2xl p-5 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.06),0_2px_6px_-2px_rgba(0,0,0,0.04)] dark:shadow-none transition-colors duration-200">
+      <div className="bg-white dark:bg-[#141417] border border-slate-200 dark:border-[#27272a] rounded-2xl p-5 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.06),0_2px_6px_-2px_rgba(0,0,0,0.04)] dark:shadow-none transition-colors duration-200">
         <div className="flex items-center justify-between mb-3.5">
           <span className="text-xs font-extrabold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
             Học Sinh Cần Lưu Ý
@@ -108,7 +108,7 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ alerts, onNa
             {alerts.map((al) => (
               <div
                 key={al.student_id}
-                className="flex items-center justify-between p-2.5 rounded-lg bg-slate-50 dark:bg-[#1c284e] border border-slate-300 dark:border-[#233156] text-xs"
+                className="flex items-center justify-between p-2.5 rounded-lg bg-slate-50 dark:bg-[#1c1c21] border border-slate-300 dark:border-[#27272a] text-xs"
               >
                 <div className="flex items-center gap-2">
                   <AlertTriangle size={13} className="text-amber-500 dark:text-amber-400 shrink-0" />

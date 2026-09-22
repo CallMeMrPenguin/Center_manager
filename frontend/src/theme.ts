@@ -9,26 +9,26 @@ export type ThemeMode = 'dark' | 'light';
 
 export const DARK_THEME_COLORS = {
   // ─── 1. SURFACES & BACKGROUNDS ───────────────────────────────────────────
-  appBackground: '#030509',
-  sidebarBackground: '#080c18',
-  cardBackground: '#141d38',
-  cardBackgroundRaised: '#1c284e',
-  cardBackgroundHighlight: '#28396e',
-  navBackground: '#080c18',
+  appBackground: '#09090b',
+  sidebarBackground: '#0c0c0e',
+  cardBackground: '#141417',
+  cardBackgroundRaised: '#1c1c21',
+  cardBackgroundHighlight: '#27272f',
+  navBackground: '#0c0c0e',
   modalBackdrop: 'rgba(0, 0, 0, 0.85)',
 
   // ─── 2. BORDERS ─────────────────────────────────────────────────────────
-  borderPrimary: '#24335c',
-  borderSubtle: '#1a2544',
+  borderPrimary: '#27272a',
+  borderSubtle: '#1e1e22',
   borderActive: '#2563eb',
   borderHover: '#3b82f6',
-  borderGlow: 'rgba(37, 99, 235, 0.4)',
+  borderGlow: 'rgba(37, 99, 235, 0.35)',
 
   // ─── 3. TYPOGRAPHY ──────────────────────────────────────────────────────
-  textPrimary: '#ffffff',
+  textPrimary: '#f4f4f5',
   textSecondary: '#cbd5e1',
-  textMuted: '#94a3b8',
-  textSubtle: '#64748b',
+  textMuted: '#a1a1aa',
+  textSubtle: '#71717a',
 
   // ─── 4. ACCENT & BRAND ──────────────────────────────────────────────────
   primary: '#2563eb',

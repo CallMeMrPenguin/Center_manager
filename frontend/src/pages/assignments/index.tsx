@@ -76,7 +76,7 @@ export const AssignmentsPage: React.FC = () => {
 
   if (activeView === 'runner') {
     return (
-      <div className="h-full w-full overflow-y-auto p-6 bg-[#e2e8f0] dark:bg-[#060811] text-slate-900 dark:text-slate-100 font-sans scrollbar-thin">
+      <div className="h-full w-full overflow-y-auto p-6 bg-[#e2e8f0] dark:bg-[#09090b] text-slate-900 dark:text-slate-100 font-sans scrollbar-thin">
         <OnlineAssignmentRunner
           assignment={
             currentAssignment || {
@@ -109,7 +109,7 @@ export const AssignmentsPage: React.FC = () => {
   }
 
   return (
-    <div className="h-full w-full overflow-y-auto p-6 space-y-6 bg-[#e2e8f0] dark:bg-[#060811] text-slate-900 dark:text-slate-100 select-none font-sans scrollbar-thin">
+    <div className="h-full w-full overflow-y-auto p-6 space-y-6 bg-[#e2e8f0] dark:bg-[#09090b] text-slate-900 dark:text-slate-100 select-none font-sans scrollbar-thin">
       {/* 1. Header Toolbar */}
       {!isStudent && (
         <div className="flex flex-wrap items-center justify-between gap-4 pb-2">

@@ -43,7 +43,7 @@ export const ClassListView: React.FC<ClassListViewProps> = ({
         <div className="flex items-center gap-3">
           <button
             onClick={onRefresh}
-            className="p-2.5 rounded-xl bg-white hover:bg-slate-50 dark:bg-[#121626] dark:hover:bg-[#1e2640] text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-[#202842] transition cursor-pointer shadow-sm"
+            className="p-2.5 rounded-xl bg-white hover:bg-slate-50 dark:bg-[#141417] dark:hover:bg-[#1c1c21] text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-[#27272a] transition cursor-pointer shadow-sm"
             title="Làm mới danh sách lớp"
           >
             <RefreshCw size={14} className={loading ? 'animate-spin text-indigo-500 dark:text-indigo-400' : ''} />
@@ -63,7 +63,7 @@ export const ClassListView: React.FC<ClassListViewProps> = ({
       </div>
 
       {/* SEARCH & FILTER */}
-      <div className="flex items-center justify-between bg-white dark:bg-[#141d38] border border-slate-200 dark:border-white/10 p-3.5 rounded-2xl shadow-sm">
+      <div className="flex items-center justify-between bg-white dark:bg-[#141417] border border-slate-200 dark:border-[#27272a] p-3.5 rounded-2xl shadow-sm">
         <motion.div
           animate={{ width: searchFocused ? 420 : 300 }}
           transition={{ type: 'spring', stiffness: 350, damping: 26 }}
@@ -88,7 +88,7 @@ export const ClassListView: React.FC<ClassListViewProps> = ({
             onBlur={() => setSearchFocused(false)}
             onChange={(e) => onSearchChange(e.target.value)}
             placeholder="Tìm lớp học theo tên lớp, giáo viên, phòng..."
-            className="w-full bg-slate-50 dark:bg-[#1c284e] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white text-xs rounded-xl pl-10 pr-8 py-2 focus:outline-none focus:border-[#2563eb] focus:ring-2 focus:ring-[#2563eb]/25 placeholder:text-slate-400 dark:placeholder:text-slate-500 font-medium transition shadow-inner"
+            className="w-full bg-slate-50 dark:bg-[#1c1c21] border border-slate-200 dark:border-[#27272a] text-slate-900 dark:text-white text-xs rounded-xl pl-10 pr-8 py-2 focus:outline-none focus:border-[#2563eb] focus:ring-2 focus:ring-[#2563eb]/25 placeholder:text-slate-400 dark:placeholder:text-slate-500 font-medium transition shadow-inner"
           />
           <AnimatePresence>
             {search && (

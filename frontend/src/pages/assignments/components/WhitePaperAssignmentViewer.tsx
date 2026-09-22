@@ -197,7 +197,7 @@ export const WhitePaperAssignmentViewer: React.FC<WhitePaperAssignmentViewerProp
       onDragStart={(e) => e.preventDefault()}
       className={`${
         isFullscreen
-          ? 'fixed inset-0 z-[99999] bg-slate-100 dark:bg-[#030509] overflow-y-auto p-3 sm:p-6 flex flex-col'
+          ? 'fixed inset-0 z-[99999] bg-slate-100 dark:bg-[#09090b] overflow-y-auto p-3 sm:p-6 flex flex-col'
           : 'relative'
       } space-y-4 pb-12 select-none font-sans`}
       style={{ userSelect: 'none', WebkitUserSelect: 'none' }}

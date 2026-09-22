@@ -1379,7 +1379,7 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
   };
 
   return (
-    <div className="flex flex-col h-full bg-[#e2e8f0] dark:bg-[#060811] text-slate-900 dark:text-slate-100 p-8 overflow-y-auto">
+    <div className="flex flex-col h-full bg-[#e2e8f0] dark:bg-[#09090b] text-slate-900 dark:text-slate-100 p-8 overflow-y-auto">
       
       {/* HEADER SECTION */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">

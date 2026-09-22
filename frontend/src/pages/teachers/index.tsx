@@ -276,7 +276,7 @@ export function TeachersPage() {
   const assistantCount = teachers.filter((t) => t.role === 'Trợ giảng').length;
 
   return (
-    <div className="h-full w-full flex flex-col p-6 space-y-4 bg-[#e2e8f0] dark:bg-[#030509] text-slate-800 dark:text-slate-100 select-none font-sans overflow-hidden">
+    <div className="h-full w-full flex flex-col p-6 space-y-4 bg-[#e2e8f0] dark:bg-[#09090b] text-slate-800 dark:text-slate-100 select-none font-sans overflow-hidden">
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-4 shrink-0">
         <div className="flex items-center gap-3">
@@ -308,7 +308,7 @@ export function TeachersPage() {
       </div>
 
       {/* Main Table */}
-      <div className="flex-1 min-h-0 bg-white dark:bg-[#141d38] rounded-2xl overflow-hidden shadow-[0_4px_24px_rgba(0,0,0,0.08)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.5)]">
+      <div className="flex-1 min-h-0 bg-white dark:bg-[#141417] rounded-2xl overflow-hidden shadow-[0_4px_24px_rgba(0,0,0,0.08)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.5)]">
         <DataTable<TeacherCM>
           data={teachers}
           columns={columns}

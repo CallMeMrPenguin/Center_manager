@@ -88,9 +88,9 @@ export default function UIShowcasePage() {
   const currentButtons = category === 'fx' ? FX_BUTTONS : COMPONENT_BUTTONS;
 
   return (
-    <div className="h-full flex flex-col p-6 space-y-6 overflow-y-auto select-none bg-[#e2e8f0] dark:bg-[#060811] text-slate-800 dark:text-slate-100">
+    <div className="h-full flex flex-col p-6 space-y-6 overflow-y-auto select-none bg-[#e2e8f0] dark:bg-[#09090b] text-slate-800 dark:text-slate-100">
       {/* HEADER WITH CATEGORY SELECTOR & COMPACT SEGMENTED PILLS */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-white dark:bg-[#0f1528] border border-slate-200/90 dark:border-white/10 p-5 rounded-2xl shadow-sm">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-white dark:bg-[#141417] border border-slate-200/90 dark:border-[#27272a] p-5 rounded-2xl shadow-sm">
         <div className="flex items-center gap-3">
           <div className="p-3 bg-[#5c36f5]/20 text-[#5c36f5] rounded-2xl border border-[#5c36f5]/30 shrink-0">
             <Sparkles size={24} />
@@ -136,7 +136,7 @@ export default function UIShowcasePage() {
 
       {/* 4. ANIMATED CALENDAR TAB */}
       {activeSubTab === 'calendar' && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-white dark:bg-[#0f1528] border border-slate-200/90 dark:border-[#1b2444] p-6 rounded-2xl shadow-sm">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-white dark:bg-[#141417] border border-slate-200/90 dark:border-[#27272a] p-6 rounded-2xl shadow-sm">
           <div className="space-y-4">
             <h3 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
               <Calendar size={18} className="text-indigo-500 dark:text-indigo-400" />
@@ -159,7 +159,7 @@ export default function UIShowcasePage() {
 
       {/* 5. SEGMENTED BUTTON TAB */}
       {activeSubTab === 'segmented' && (
-        <div className="bg-white dark:bg-[#0f1528] border border-slate-200/90 dark:border-[#1b2444] p-6 rounded-2xl shadow-sm space-y-6">
+        <div className="bg-white dark:bg-[#141417] border border-slate-200/90 dark:border-[#27272a] p-6 rounded-2xl shadow-sm space-y-6">
           <div>
             <h3 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
               <Layers size={18} className="text-indigo-500 dark:text-indigo-400" />
@@ -186,7 +186,7 @@ export default function UIShowcasePage() {
 
       {/* 6. MACOS DOCK TAB */}
       {activeSubTab === 'dock' && (
-        <div className="bg-white dark:bg-[#0f1528] border border-slate-200/90 dark:border-[#1b2444] p-8 rounded-2xl shadow-sm space-y-8 min-h-[360px] flex flex-col justify-between">
+        <div className="bg-white dark:bg-[#141417] border border-slate-200/90 dark:border-[#27272a] p-8 rounded-2xl shadow-sm space-y-8 min-h-[360px] flex flex-col justify-between">
           <div>
             <h3 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
               <Compass size={18} className="text-indigo-500 dark:text-indigo-400" />
@@ -221,7 +221,7 @@ export default function UIShowcasePage() {
 
       {/* 7. FILE TREE TAB */}
       {activeSubTab === 'tree' && (
-        <div className="bg-white dark:bg-[#0f1528] border border-slate-200/90 dark:border-[#1b2444] p-6 rounded-2xl shadow-sm space-y-4">
+        <div className="bg-white dark:bg-[#141417] border border-slate-200/90 dark:border-[#27272a] p-6 rounded-2xl shadow-sm space-y-4">
           <h3 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
             <FolderTree size={18} className="text-indigo-500 dark:text-indigo-400" />
             <span>Interactive Animated File Tree</span>
@@ -241,7 +241,7 @@ export default function UIShowcasePage() {
       {/* 8. HOVER PREVIEW TAB */}
       {activeSubTab === 'hover' && (
         <HoverPreviewProvider data={samplePreviewData}>
-          <div className="bg-white dark:bg-[#0f1528] border border-slate-200/90 dark:border-[#1b2444] p-6 rounded-2xl shadow-sm space-y-6">
+          <div className="bg-white dark:bg-[#141417] border border-slate-200/90 dark:border-[#27272a] p-6 rounded-2xl shadow-sm space-y-6">
             <div>
               <h3 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
                 <MousePointerClick size={18} className="text-indigo-500 dark:text-indigo-400" />
@@ -279,7 +279,7 @@ export default function UIShowcasePage() {
 
       {/* 9. STACKED TOAST TAB */}
       {activeSubTab === 'toast' && (
-        <div className="bg-white dark:bg-[#0f1528] border border-slate-200/90 dark:border-[#1b2444] p-6 rounded-2xl shadow-sm space-y-6">
+        <div className="bg-white dark:bg-[#141417] border border-slate-200/90 dark:border-[#27272a] p-6 rounded-2xl shadow-sm space-y-6">
           <h3 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
             <BellRing size={18} className="text-indigo-500 dark:text-indigo-400" />
             <span>Interactive Animated Toasts & Undo Bar</span>
@@ -316,7 +316,7 @@ export default function UIShowcasePage() {
 
       {/* 10. ANIMATED TABLE TAB */}
       {activeSubTab === 'table' && (
-        <div className="bg-white dark:bg-[#0f1528] border border-slate-200/90 dark:border-[#1b2444] p-6 rounded-2xl shadow-sm space-y-4">
+        <div className="bg-white dark:bg-[#141417] border border-slate-200/90 dark:border-[#27272a] p-6 rounded-2xl shadow-sm space-y-4">
           <h3 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
             <TableIcon size={18} className="text-indigo-500 dark:text-indigo-400" />
             <span>Interactive Animated Data Table</span>

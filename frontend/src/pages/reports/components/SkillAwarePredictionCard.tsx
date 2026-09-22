@@ -44,7 +44,7 @@ export const SkillAwarePredictionCard: React.FC<SkillAwarePredictionProps> = ({
 }) => {
   if (!prediction || !prediction.has_upcoming_config) {
     return (
-      <div className="bg-[#0c0f1d] border border-white/10 rounded-2xl p-5 shadow-lg select-none">
+      <div className="bg-[#141417] border border-[#27272a] rounded-2xl p-5 shadow-lg select-none">
         <div className="flex items-center justify-between">
           <div>
             <h3 className="text-sm font-black text-white uppercase tracking-wider">
@@ -63,7 +63,7 @@ export const SkillAwarePredictionCard: React.FC<SkillAwarePredictionProps> = ({
   const overview = prediction.class_overview;
 
   return (
-    <div className="bg-[#0c0f1d] border border-indigo-500/30 rounded-2xl p-5 shadow-xl space-y-5 select-none relative overflow-hidden">
+    <div className="bg-[#141417] border border-blue-500/30 rounded-2xl p-5 shadow-xl space-y-5 select-none relative overflow-hidden">
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-4 border-b border-white/5 pb-4">
         <div>
@@ -81,13 +81,13 @@ export const SkillAwarePredictionCard: React.FC<SkillAwarePredictionProps> = ({
 
         {/* Content Badges */}
         <div className="flex flex-wrap items-center gap-2 text-xs">
-          <div className="bg-[#121626] border border-blue-500/30 px-3 py-1.5 rounded-xl flex items-center gap-2">
+          <div className="bg-[#1c1c21] border border-blue-500/30 px-3 py-1.5 rounded-xl flex items-center gap-2">
             <span className="text-[10px] font-black uppercase text-blue-400">Từ Vựng:</span>
             <span className="text-white font-bold">
               {prediction.check_1_info?.units?.join(', ') || 'Chung'}
             </span>
           </div>
-          <div className="bg-[#121626] border border-purple-500/30 px-3 py-1.5 rounded-xl flex items-center gap-2">
+          <div className="bg-[#1c1c21] border border-purple-500/30 px-3 py-1.5 rounded-xl flex items-center gap-2">
             <span className="text-[10px] font-black uppercase text-purple-400">Ngữ Pháp:</span>
             <span className="text-white font-bold">
               {prediction.check_2_info?.topic || prediction.check_2_info?.units?.join(', ') || 'Chung'}
@@ -98,7 +98,7 @@ export const SkillAwarePredictionCard: React.FC<SkillAwarePredictionProps> = ({
 
       {/* Class Readiness Overview KPI Strip */}
       {overview && (
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-[#080c18] border border-white/5 p-3.5 rounded-xl">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-[#1c1c21] border border-[#27272a] p-3.5 rounded-xl">
           <div className="space-y-1">
             <span className="text-[10px] font-bold uppercase text-slate-400 flex items-center gap-1.5">
               <CheckCircle2 size={12} className="text-emerald-400" />
@@ -173,7 +173,7 @@ export const SkillAwarePredictionCard: React.FC<SkillAwarePredictionProps> = ({
               <div
                 key={st.student_id}
                 onClick={() => onSelectStudent && onSelectStudent(st.student_id)}
-                className="bg-[#121626] border border-amber-500/20 hover:border-amber-500/40 p-3.5 rounded-xl space-y-2 cursor-pointer transition group active:scale-[0.99]"
+                className="bg-[#1c1c21] border border-amber-500/20 hover:border-amber-500/40 p-3.5 rounded-xl space-y-2 cursor-pointer transition group active:scale-[0.99]"
               >
                 <div className="flex items-center justify-between">
                   <span className="font-bold text-white group-hover:text-indigo-300 transition text-xs">
@@ -195,7 +195,7 @@ export const SkillAwarePredictionCard: React.FC<SkillAwarePredictionProps> = ({
             ))}
           </div>
         ) : (
-          <div className="bg-[#121626] border border-emerald-500/20 p-4 rounded-xl text-xs text-slate-300 flex items-center gap-2">
+          <div className="bg-[#1c1c21] border border-emerald-500/20 p-4 rounded-xl text-xs text-slate-300 flex items-center gap-2">
             <CheckCircle2 size={16} className="text-emerald-400 shrink-0" />
             <span>
               Dựa trên dữ liệu lịch sử, các học sinh trong lớp đều có điểm EMA &ge; 6.5 đối với các chủ đề sẽ kiểm tra trong buổi học tiếp theo.

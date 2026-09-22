@@ -6,20 +6,20 @@
 :root {
   color-scheme: dark;
   --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-  --background: #060811;
-  --foreground: #ffffff;
-  --surface: #0f1528;
-  --surface-nav: #0a0e1c;
-  --surface-raised: #151d36;
-  --surface-highlight: #1d284a;
-  --border-color: #212c4b;
-  --border-subtle: #18223e;
-  --border-active: #5c36f5;
+  --background: #09090b;
+  --foreground: #f4f4f5;
+  --surface: #141417;
+  --surface-nav: #0c0c0e;
+  --surface-raised: #1c1c21;
+  --surface-highlight: #27272f;
+  --border-color: #27272a;
+  --border-subtle: #1e1e22;
+  --border-active: #2563eb;
   --primary: #2563eb;
   --primary-hover: #3b82f6;
-  --primary-light: rgba(37, 99, 235, 0.14);
-  --indigo: #5c36f5;
-  --indigo-glow: rgba(92, 54, 245, 0.5);
+  --primary-light: rgba(37, 99, 235, 0.12);
+  --indigo: #2563eb;
+  --indigo-glow: rgba(37, 99, 235, 0.35);
   --success: #10b981;
   --success-bg: rgba(16, 185, 129, 0.12);
   --warning: #f59e0b;
@@ -28,11 +28,11 @@
   --danger-bg: rgba(239, 68, 68, 0.12);
   --info: #06b6d4;
   --purple: #a855f7;
-  --text-main: #ffffff;
-  --text-muted: #94a3b8;
-  --text-subtle: #64748b;
+  --text-main: #f4f4f5;
+  --text-muted: #a1a1aa;
+  --text-subtle: #71717a;
   --slate-250: rgba(255, 255, 255, 0.05);
-  --slate-850: #0f121a;
+  --slate-850: #141417;
   --glass-bg-opacity: 0.08;
   --glass-blur: 24px;
   --glass-border-opacity: 0.15;
@@ -73,20 +73,20 @@
 
 :root.dark, html.dark {
   color-scheme: dark;
-  --background: #030509;
-  --foreground: #ffffff;
-  --surface: #141d38;
-  --surface-nav: #080c18;
-  --surface-raised: #1c284e;
-  --surface-highlight: #28396e;
-  --border-color: #24335c;
-  --border-subtle: #1a2544;
+  --background: #09090b;
+  --foreground: #f4f4f5;
+  --surface: #141417;
+  --surface-nav: #0c0c0e;
+  --surface-raised: #1c1c21;
+  --surface-highlight: #27272f;
+  --border-color: #27272a;
+  --border-subtle: #1e1e22;
   --border-active: #2563eb;
   --primary: #2563eb;
   --primary-hover: #3b82f6;
-  --primary-light: rgba(37, 99, 235, 0.14);
+  --primary-light: rgba(37, 99, 235, 0.12);
   --indigo: #2563eb;
-  --indigo-glow: rgba(37, 99, 235, 0.4);
+  --indigo-glow: rgba(37, 99, 235, 0.35);
   --success: #10b981;
   --success-bg: rgba(16, 185, 129, 0.12);
   --warning: #f59e0b;
@@ -95,11 +95,11 @@
   --danger-bg: rgba(239, 68, 68, 0.12);
   --info: #06b6d4;
   --purple: #a855f7;
-  --text-main: #ffffff;
-  --text-muted: #94a3b8;
-  --text-subtle: #64748b;
+  --text-main: #f4f4f5;
+  --text-muted: #a1a1aa;
+  --text-subtle: #71717a;
   --slate-250: rgba(255, 255, 255, 0.05);
-  --slate-850: #0f121a;
+  --slate-850: #141417;
 }
 
 @theme {
@@ -354,9 +354,9 @@ input[type="month"] {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
 }
 .dark .kpi-editorial-card {
-  border: 1px solid rgba(255, 255, 255, 0.08) !important;
-  background: #0f1424 !important;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  border: 1px solid #27272a !important;
+  background: #141417 !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
 }
 
 /* Light mode defaults for KPI cards */
@@ -368,9 +368,9 @@ input[type="month"] {
   box-shadow: 0 4px 20px rgba(15, 23, 42, 0.07), 0 1px 3px rgba(15, 23, 42, 0.04) !important;
 }
 .dark .kpi-card-green {
-  border: none !important;
-  background: #0d161a !important;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
+  border: 1px solid rgba(16, 185, 129, 0.25) !important;
+  background: #141816 !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4) !important;
 }
 
 .kpi-card-red {
@@ -382,8 +382,8 @@ input[type="month"] {
 }
 .dark .kpi-card-red {
   border: 1px solid rgba(239, 68, 68, 0.25) !important;
-  background: #2a1118 !important;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
+  background: #1a1415 !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4) !important;
 }
 
 .kpi-card-blue {
@@ -395,8 +395,8 @@ input[type="month"] {
 }
 .dark .kpi-card-blue {
   border: 1px solid rgba(59, 130, 246, 0.25) !important;
-  background: #142044 !important;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
+  background: #14161f !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4) !important;
 }
 
 .kpi-card-purple {
@@ -408,8 +408,8 @@ input[type="month"] {
 }
 .dark .kpi-card-purple {
   border: 1px solid rgba(168, 85, 247, 0.25) !important;
-  background: #201344 !important;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
+  background: #18141f !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4) !important;
 }
 
 .kpi-card-amber {
@@ -421,8 +421,8 @@ input[type="month"] {
 }
 .dark .kpi-card-amber {
   border: 1px solid rgba(245, 158, 11, 0.25) !important;
-  background: #2c1b0c !important;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
+  background: #1a1713 !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4) !important;
 }
 
 .schedule-inward-glow {

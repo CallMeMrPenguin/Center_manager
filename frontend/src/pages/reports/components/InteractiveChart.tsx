@@ -205,7 +205,7 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = ({
   return (
     <div
       ref={chartWrapperRef}
-      className="bg-white dark:bg-[#141d38] border border-slate-200 dark:border-[#24335c] p-6 rounded-2xl shadow-sm dark:shadow-xl flex flex-col gap-6 relative select-none animate-cascade-2 transition-colors"
+      className="bg-white dark:bg-[#141417] border border-slate-200 dark:border-[#27272a] p-6 rounded-2xl shadow-sm dark:shadow-xl flex flex-col gap-6 relative select-none animate-cascade-2 transition-colors"
     >
       <ChartControls
         engine={engine}
@@ -229,7 +229,7 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = ({
         <div
           className={`relative overflow-hidden cursor-${
             isDragging ? 'grabbing' : zoomLevel > 1.0 ? 'grab' : 'default'
-          } select-none rounded-2xl bg-white dark:bg-[#0b1021] border border-slate-200 dark:border-[#1e2a4a] shadow-sm dark:shadow-none`}
+          } select-none rounded-2xl bg-white dark:bg-[#1c1c21] border border-slate-200 dark:border-[#27272a] shadow-sm dark:shadow-none`}
           onMouseDown={(e) => {
             if (zoomLevel > 1.0 && e.button === 0) {
               setIsDragging(true);
@@ -304,7 +304,7 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = ({
                   animate={{ opacity: 1, scale: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.94, y: 4 }}
                   transition={{ type: 'spring', stiffness: 450, damping: 28 }}
-                  className="absolute z-30 pointer-events-none bg-white dark:bg-[#0d1224] border border-slate-200 dark:border-[#232f54] p-3.5 rounded-2xl shadow-xl dark:shadow-[0_16px_40px_rgba(0,0,0,0.95)] text-xs font-sans min-w-[210px] select-none"
+                  className="absolute z-30 pointer-events-none bg-white dark:bg-[#141417] border border-slate-200 dark:border-[#27272a] p-3.5 rounded-2xl shadow-xl dark:shadow-[0_16px_40px_rgba(0,0,0,0.95)] text-xs font-sans min-w-[210px] select-none"
                   style={{
                     left: `${left}px`,
                     top: `${top}px`,

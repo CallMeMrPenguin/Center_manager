@@ -97,12 +97,12 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
         type="button"
         disabled={disabled}
         onClick={() => setIsOpen(!isOpen)}
-        className={`w-full flex items-center justify-between bg-white dark:bg-[#101426] border-2 border-slate-300 dark:border-[#2a375f] hover:border-indigo-500 rounded-xl px-3.5 py-2 text-xs font-extrabold text-slate-900 dark:text-white transition-all cursor-pointer shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
+        className={`w-full flex items-center justify-between bg-white dark:bg-[#141417] border-2 border-slate-300 dark:border-[#27272a] hover:border-blue-500 rounded-xl px-3.5 py-2 text-xs font-extrabold text-slate-900 dark:text-white transition-all cursor-pointer shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
           disabled ? 'opacity-40 cursor-not-allowed' : ''
         }`}
       >
         <div className="flex items-center gap-2 truncate">
-          {icon && <span className="text-indigo-600 dark:text-indigo-400 shrink-0 font-bold">{icon}</span>}
+          {icon && <span className="text-blue-600 dark:text-blue-400 shrink-0 font-bold">{icon}</span>}
           {selectedOption?.icon && <span className="shrink-0">{selectedOption.icon}</span>}
           <span className="truncate">
             {selectedOption ? selectedOption.label : placeholder}
@@ -110,7 +110,7 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
         </div>
         <ChevronDown
           size={14}
-          className={`text-indigo-600 dark:text-indigo-400 shrink-0 transition-transform duration-200 ${
+          className={`text-blue-600 dark:text-blue-400 shrink-0 transition-transform duration-200 ${
             isOpen ? 'rotate-180' : ''
           }`}
         />
@@ -121,7 +121,7 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
         <div
           className={`absolute left-0 right-0 ${
             openUpwards ? 'bottom-full mb-2' : 'top-full mt-2'
-          } z-[9999] bg-white dark:bg-[#151c35] border-2 border-slate-300 dark:border-[#334375] rounded-2xl shadow-[0_16px_48px_rgba(15,23,42,0.22)] dark:shadow-[0_24px_64px_rgba(0,0,0,0.95)] ring-1 ring-black/5 dark:ring-white/10 p-2 space-y-1.5 max-h-64 flex flex-col select-none animate-slide-up`}
+          } z-[9999] bg-white dark:bg-[#141417] border-2 border-slate-300 dark:border-[#27272a] rounded-2xl shadow-[0_16px_48px_rgba(15,23,42,0.22)] dark:shadow-[0_24px_64px_rgba(0,0,0,0.95)] ring-1 ring-black/5 dark:ring-white/10 p-2 space-y-1.5 max-h-64 flex flex-col select-none animate-slide-up`}
         >
           {searchable && (
             <div className="p-1 border-b border-slate-200 dark:border-white/10 shrink-0">
@@ -133,7 +133,7 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder={searchPlaceholder}
-                  className="w-full bg-slate-100 dark:bg-[#0c1020] border-2 border-slate-300 dark:border-[#2a375f] text-slate-900 dark:text-white placeholder:text-slate-500 font-bold text-xs rounded-xl pl-8 pr-2.5 py-1.5 focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-slate-100 dark:bg-[#1c1c21] border-2 border-slate-300 dark:border-[#27272a] text-slate-900 dark:text-white placeholder:text-slate-500 font-bold text-xs rounded-xl pl-8 pr-2.5 py-1.5 focus:outline-none focus:border-blue-500"
                 />
               </div>
             </div>
@@ -159,8 +159,8 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
                     onClick={() => handleSelect(opt.value)}
                     className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs transition-all cursor-pointer text-left ${
                       isSelected
-                        ? 'bg-[#5c36f5] text-white shadow-md font-black'
-                        : 'text-slate-900 dark:text-slate-100 hover:bg-indigo-50 dark:hover:bg-white/10 hover:text-indigo-900 dark:hover:text-white font-extrabold'
+                        ? 'bg-[#2563eb] text-white shadow-md font-black'
+                        : 'text-slate-900 dark:text-slate-100 hover:bg-slate-100 dark:hover:bg-[#1c1c21] hover:text-blue-600 dark:hover:text-white font-extrabold'
                     }`}
                   >
                     <div className="flex items-center gap-2 truncate">
