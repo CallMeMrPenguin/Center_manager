@@ -290,7 +290,7 @@ export const AttendanceGradesTab: React.FC<AttendanceGradesTabProps> = ({
                 <button
                   type="button"
                   onClick={onOpenTestConfigModal}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-50 hover:bg-blue-100 dark:bg-blue-500/15 dark:hover:bg-blue-500/25 text-blue-600 hover:text-blue-700 dark:text-blue-300 dark:hover:text-white border border-blue-300/80 dark:border-blue-500/30 text-xs font-bold transition cursor-pointer shadow-xs"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white hover:bg-blue-50 dark:bg-[#1a2238] dark:hover:bg-[#202b48] text-blue-600 hover:text-blue-700 dark:text-blue-300 dark:hover:text-white border-0 text-xs font-bold transition cursor-pointer shadow-xs hover:shadow-sm"
                   title="Cấu Hình Bài Kiểm Tra (Check 1 & Check 2)"
                 >
                   <Layers size={13} className="text-blue-500 dark:text-blue-400 shrink-0" />
@@ -303,7 +303,7 @@ export const AttendanceGradesTab: React.FC<AttendanceGradesTabProps> = ({
                   type="button"
                   onClick={onSaveAttendance}
                   disabled={savingAttendance}
-                  className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-black shadow-sm transition cursor-pointer border border-white/20 disabled:opacity-50"
+                  className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-black shadow-xs hover:shadow-sm transition cursor-pointer border-0 disabled:opacity-50"
                   title="Lưu Bảng Điểm Danh & Điểm Số"
                 >
                   <Save size={13} className="shrink-0" />

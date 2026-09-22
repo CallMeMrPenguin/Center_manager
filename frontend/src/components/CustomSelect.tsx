@@ -97,7 +97,7 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
         type="button"
         disabled={disabled}
         onClick={() => setIsOpen(!isOpen)}
-        className={`w-full flex items-center justify-between btn-neutral rounded-xl px-3.5 py-2 text-xs font-bold text-slate-900 dark:text-white transition-all cursor-pointer shadow-xs hover:shadow-sm border-0 outline-none ${
+        className={`w-full flex items-center justify-between bg-white hover:bg-slate-50 dark:bg-[#181d2e] dark:hover:bg-[#1f273e] rounded-xl px-3.5 py-2 text-xs font-bold text-slate-900 dark:text-white transition-all cursor-pointer shadow-xs hover:shadow-sm border-0 outline-none ${
           disabled ? 'opacity-40 cursor-not-allowed' : ''
         }`}
       >

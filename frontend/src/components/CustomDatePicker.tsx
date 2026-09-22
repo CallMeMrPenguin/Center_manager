@@ -207,11 +207,11 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
 
   return (
     <div className={`relative inline-block ${className}`} ref={containerRef}>
-      {/* TRIGGER BUTTON (Softer shade, zero border) */}
+      {/* TRIGGER BUTTON (Solid white in light mode, zero border) */}
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between gap-2 px-3.5 py-2 rounded-xl btn-neutral text-slate-900 dark:text-white text-xs font-bold transition-all cursor-pointer shadow-xs hover:shadow-sm border-0 outline-none"
+        className="w-full flex items-center justify-between gap-2 px-3.5 py-2 rounded-xl bg-white hover:bg-slate-50 dark:bg-[#181d2e] dark:hover:bg-[#1f273e] text-slate-900 dark:text-white text-xs font-bold transition-all cursor-pointer shadow-xs hover:shadow-sm border-0 outline-none"
       >
         <div className="flex items-center gap-2 truncate">
           <CalendarIcon size={14} className="text-blue-600 dark:text-blue-400 shrink-0 font-bold" />
@@ -230,7 +230,7 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
         )}
       </button>
 
-      {/* ANIMATED POPOVER CARD (Matching softer button background, zero border) */}
+      {/* ANIMATED POPOVER CARD (Solid white in light mode, zero border) */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -238,7 +238,7 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: -6 }}
             transition={{ type: 'spring', stiffness: 450, damping: 30 }}
-            className={`absolute top-full ${align === 'right' ? 'right-0 origin-top-right' : 'left-0 origin-top-left'} mt-2 z-[9999] w-80 p-4 bg-[var(--btn-neutral-bg,#f1f5f9)] dark:bg-[var(--btn-neutral-dark-bg,#181d2e)] rounded-2xl shadow-[0_20px_50px_rgba(15,23,42,0.18)] dark:shadow-[0_24px_64px_rgba(0,0,0,0.9)] border-0 outline-none select-none space-y-3`}
+            className={`absolute top-full ${align === 'right' ? 'right-0 origin-top-right' : 'left-0 origin-top-left'} mt-2 z-[9999] w-80 p-4 bg-white dark:bg-[#181d2e] rounded-2xl shadow-[0_20px_50px_rgba(15,23,42,0.18)] dark:shadow-[0_24px_64px_rgba(0,0,0,0.9)] border-0 outline-none select-none space-y-3`}
           >
             {mode === 'month' ? (
               <MonthGridPicker

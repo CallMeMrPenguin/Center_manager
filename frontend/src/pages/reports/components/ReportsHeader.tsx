@@ -116,7 +116,7 @@ export const ReportsHeader: React.FC<ReportsHeaderProps> = ({
 
           <button
             onClick={onOpenResetModal}
-            className="group flex items-center gap-0 hover:gap-1.5 px-3 py-2 rounded-xl bg-rose-100 dark:bg-rose-500/20 hover:bg-rose-200 dark:hover:bg-rose-500/30 text-rose-700 dark:text-rose-300 hover:text-rose-800 dark:hover:text-white border-0 shadow-xs hover:shadow-sm text-xs font-bold transition-all duration-300 cursor-pointer active:scale-95 shrink-0"
+            className="group flex items-center gap-0 hover:gap-1.5 px-3 py-2 rounded-xl bg-white hover:bg-rose-50 dark:bg-[#181d2e] dark:hover:bg-rose-500/20 text-rose-600 hover:text-rose-700 dark:text-rose-300 dark:hover:text-rose-200 border-0 shadow-xs hover:shadow-sm text-xs font-bold transition-all duration-300 cursor-pointer active:scale-95 shrink-0"
             title="Đặt Lại Điểm Số"
           >
             <RotateCcw size={14} className="shrink-0" />
@@ -127,7 +127,7 @@ export const ReportsHeader: React.FC<ReportsHeaderProps> = ({
 
           <button
             onClick={() => loadAnalyticsData()}
-            className="p-2.5 rounded-xl bg-slate-200 hover:bg-slate-300 dark:bg-white/10 dark:hover:bg-white/20 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white border-0 shadow-xs transition cursor-pointer shrink-0"
+            className="p-2.5 rounded-xl bg-white hover:bg-slate-50 dark:bg-[#181d2e] dark:hover:bg-white/10 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white border-0 shadow-xs hover:shadow-sm transition cursor-pointer shrink-0"
             title="Làm mới báo cáo"
           >
             <RefreshCw size={14} className={loading ? "animate-spin text-indigo-500 dark:text-indigo-400" : ""} />
