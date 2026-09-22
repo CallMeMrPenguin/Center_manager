@@ -56,7 +56,7 @@ export const ChartSvgPlot: React.FC<ChartSvgPlotProps> = React.memo(({
   const clipId = `chart_plot_clip_${uid}`;
   const curtainClipId = `chart_curtain_${uid}`;
   const gradBlue = `area_grad_blue_${uid}`;
-  const gradPurple = `area_grad_purple_${uid}`;
+  const gradCyan = `area_grad_cyan_${uid}`;
   const gradEmerald = `area_grad_emerald_${uid}`;
   const { isDark } = useTheme();
   const animKey = `${selectedStudentId || selectedClassId || 'all'}-${timeView}-${sessionChartData.length}`;
@@ -90,11 +90,11 @@ export const ChartSvgPlot: React.FC<ChartSvgPlotProps> = React.memo(({
           <stop offset="100%" stopColor="#1d4ed8" stopOpacity="0.0" />
         </linearGradient>
 
-        <linearGradient id={gradPurple} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#a855f7" stopOpacity="0.45" />
-          <stop offset="35%" stopColor="#a855f7" stopOpacity="0.20" />
-          <stop offset="75%" stopColor="#7e22ce" stopOpacity="0.05" />
-          <stop offset="100%" stopColor="#6b21a8" stopOpacity="0.0" />
+        <linearGradient id={gradCyan} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#06b6d4" stopOpacity="0.45" />
+          <stop offset="35%" stopColor="#06b6d4" stopOpacity="0.20" />
+          <stop offset="75%" stopColor="#0891b2" stopOpacity="0.05" />
+          <stop offset="100%" stopColor="#0e7490" stopOpacity="0.0" />
         </linearGradient>
 
         <linearGradient id={gradEmerald} x1="0" y1="0" x2="0" y2="1">
@@ -134,7 +134,7 @@ export const ChartSvgPlot: React.FC<ChartSvgPlotProps> = React.memo(({
               {/* Area Fills with Synchronized Smooth Curtain Reveal */}
               <g clipPath={`url(#${curtainClipId})`} className="pointer-events-none">
                 {hasC1 && <path key={`area-c1-${animKey}`} d={makeAreaPath('check1')} fill={`url(#${gradBlue})`} />}
-                {hasC2 && <path key={`area-c2-${animKey}`} d={makeAreaPath('check2')} fill={`url(#${gradPurple})`} />}
+                {hasC2 && <path key={`area-c2-${animKey}`} d={makeAreaPath('check2')} fill={`url(#${gradCyan})`} />}
                 {hasHw && <path key={`area-hw-${animKey}`} d={makeAreaPath('homework')} fill={`url(#${gradEmerald})`} />}
               </g>
 
@@ -145,7 +145,7 @@ export const ChartSvgPlot: React.FC<ChartSvgPlotProps> = React.memo(({
 
               {/* Check 2 Bezier */}
               {hasC2 && (
-                <path key={`c2-${animKey}`} d={makeBezierPath('check2')} fill="none" stroke="#a855f7" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" pathLength={1000} className="animate-path-draw" />
+                <path key={`c2-${animKey}`} d={makeBezierPath('check2')} fill="none" stroke="#06b6d4" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" pathLength={1000} className="animate-path-draw" />
               )}
 
               {/* Homework Bezier */}
@@ -178,7 +178,7 @@ export const ChartSvgPlot: React.FC<ChartSvgPlotProps> = React.memo(({
                 }
                 if (hasC2 && engine && (engine.pred_c2 || 0) > 0) {
                   const pt = getLastValidPoint('check2');
-                  preds.push({ id: 'c2', label: 'Ngữ Pháp', score: engine.pred_c2, startX: pt.x, startY: pt.y, color: '#a855f7', textColor: '#c084fc', rawY: getSvgY(engine.pred_c2) });
+                  preds.push({ id: 'c2', label: 'Ngữ Pháp', score: engine.pred_c2, startX: pt.x, startY: pt.y, color: '#06b6d4', textColor: '#22d3ee', rawY: getSvgY(engine.pred_c2) });
                 }
                 if (hasHw && engine && (engine.pred_hw || 0) > 0) {
                   const pt = getLastValidPoint('homework');
@@ -255,7 +255,7 @@ export const ChartSvgPlot: React.FC<ChartSvgPlotProps> = React.memo(({
                       onMouseLeave={() => setHoveredPoint(null)}
                     >
                       <rect x={x - 25} y={paddingTop} width={50} height={plotAreaHeight} fill="transparent" />
-                      <line x1={x} y1={paddingTop} x2={x} y2={chartHeight - paddingBottom} stroke="#5c36f5" strokeWidth="1.5" strokeDasharray="3 3" className="opacity-0 group-hover:opacity-100 transition-opacity" />
+                      <line x1={x} y1={paddingTop} x2={x} y2={chartHeight - paddingBottom} stroke="#2563eb" strokeWidth="1.5" strokeDasharray="3 3" className="opacity-0 group-hover:opacity-100 transition-opacity" />
                       {d.check1 > 0 && (
                         <g className="animate-point-pop" style={{ animationDelay: `${pointDelay}s` }}>
                           <circle cx={x} cy={y1} r="7" fill="#3b82f6" style={{ transformBox: 'fill-box', transformOrigin: 'center' }} className="transition-transform duration-150 group-hover:scale-125" />
@@ -264,7 +264,7 @@ export const ChartSvgPlot: React.FC<ChartSvgPlotProps> = React.memo(({
                       )}
                       {d.check2 > 0 && (
                         <g className="animate-point-pop" style={{ animationDelay: `${pointDelay}s` }}>
-                          <circle cx={x} cy={y2} r="7" fill="#a855f7" style={{ transformBox: 'fill-box', transformOrigin: 'center' }} className="transition-transform duration-150 group-hover:scale-125" />
+                          <circle cx={x} cy={y2} r="7" fill="#06b6d4" style={{ transformBox: 'fill-box', transformOrigin: 'center' }} className="transition-transform duration-150 group-hover:scale-125" />
                           <circle cx={x} cy={y2} r="3.5" fill="#ffffff" style={{ transformBox: 'fill-box', transformOrigin: 'center' }} className="transition-transform duration-150 group-hover:scale-125" />
                         </g>
                       )}
@@ -277,7 +277,7 @@ export const ChartSvgPlot: React.FC<ChartSvgPlotProps> = React.memo(({
                       {i === sessionChartData.length - 1 && (() => {
                         const lastLabels: { id: string; val: number; rawY: number; color: string }[] = [];
                         if (d.check1 > 0) lastLabels.push({ id: 'c1', val: d.check1, rawY: y1, color: '#3b82f6' });
-                        if (d.check2 > 0) lastLabels.push({ id: 'c2', val: d.check2, rawY: y2, color: '#a855f7' });
+                        if (d.check2 > 0) lastLabels.push({ id: 'c2', val: d.check2, rawY: y2, color: '#06b6d4' });
                         if (d.homework > 0) lastLabels.push({ id: 'hw', val: d.homework, rawY: yHw, color: '#10b981' });
 
                         const sortedLabels = [...lastLabels].sort((a, b) => a.rawY - b.rawY);

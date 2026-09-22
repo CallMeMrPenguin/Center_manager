@@ -4,7 +4,6 @@ import { TAB_DEFINITIONS } from '../config/tabs';
 import { api } from '../api';
 import { showToast } from './Toast';
 import { AuthUser } from '../utils/authUtils';
-import { AnimatedThemeToggle } from './ui/animated-theme-toggle';
 import { Dock, DockItem, DockIcon, DockLabel } from './ui/dock';
 
 export const SECTIONS = [
@@ -231,12 +230,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
               )}
             </div>
 
-            {/* Quick theme switcher row in popup */}
-            <div className="px-2.5 py-1.5 flex items-center justify-between border-b border-slate-100 dark:border-white/5 mb-1">
-              <span className="text-xs font-bold text-slate-600 dark:text-slate-300">Chế độ hiển thị</span>
-              <AnimatedThemeToggle size="sm" />
-            </div>
-
             {currentUser?.role !== 'student' && (
               <button
                 onClick={() => {
@@ -283,30 +276,28 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </div>
         )}
 
-        <div className={`flex items-center ${isSidebarExpanded ? 'gap-1.5' : 'flex-col gap-1.5'}`}>
+        <div className="flex items-center w-full">
           <button
             onClick={() => setProfileOpen((prev) => !prev)}
             className={`${
-              isSidebarExpanded ? 'flex-1 px-2 py-1.5 justify-start gap-2.5' : 'w-10 h-10 mx-auto p-0 justify-center'
-            } flex items-center rounded-xl hover:bg-slate-100 dark:hover:bg-white/5 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition cursor-pointer border border-transparent hover:border-slate-200 dark:hover:border-white/10`}
+              isSidebarExpanded ? 'w-full px-2 py-1.5 justify-start gap-2.5' : 'w-10 h-10 mx-auto p-0 justify-center'
+            } flex items-center rounded-xl hover:bg-slate-100 text-slate-700 hover:text-slate-900 transition cursor-pointer border border-transparent hover:border-slate-200`}
             title={currentUser ? `${currentUser.name} (${currentUser.role})` : 'Tài khoản người dùng'}
           >
-            <div className="w-7 h-7 rounded-lg bg-indigo-500/15 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 border border-indigo-500/25 dark:border-indigo-500/30 flex items-center justify-center font-black text-xs shrink-0">
+            <div className="w-7 h-7 rounded-lg bg-blue-500/15 text-blue-600 border border-blue-500/25 flex items-center justify-center font-black text-xs shrink-0">
               {currentUser?.name ? currentUser.name.slice(0, 2).toUpperCase() : 'CM'}
             </div>
             {isSidebarExpanded && (
               <div className="flex flex-col text-left overflow-hidden min-w-0">
-                <span className="text-xs font-black text-slate-900 dark:text-white truncate leading-tight">
+                <span className="text-xs font-black text-slate-900 truncate leading-tight">
                   {currentUser?.name || 'Center Manager'}
                 </span>
-                <span className="text-[10px] font-semibold text-indigo-600 dark:text-indigo-400 truncate">
+                <span className="text-[10px] font-semibold text-blue-600 truncate">
                   {currentUser?.rawRole || (currentUser?.role === 'admin' ? 'Quản trị' : 'Học sinh')}
                 </span>
               </div>
             )}
           </button>
-
-          <AnimatedThemeToggle size="sm" />
         </div>
       </div>
     </aside>

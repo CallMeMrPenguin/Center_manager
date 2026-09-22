@@ -312,7 +312,7 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = ({
                   }}
                 >
                   <div className="font-black text-slate-900 dark:text-white border-b border-slate-200 dark:border-white/10 pb-1.5 flex items-center justify-between gap-4">
-                    <span className="text-indigo-600 dark:text-indigo-200">{hoveredPoint.sessionName}</span>
+                    <span className="text-blue-600 dark:text-blue-400">{hoveredPoint.sessionName}</span>
                     <span className="text-[10px] text-slate-500 dark:text-slate-400 font-mono bg-slate-100 dark:bg-white/5 px-1.5 py-0.5 rounded">{hoveredPoint.fullDate}</span>
                   </div>
                   <div className="space-y-1.5 pt-2">
@@ -328,7 +328,7 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = ({
                       </div>
                     </div>
                     <div className="flex items-center justify-between gap-4">
-                      <span className="text-purple-500 dark:text-purple-400 font-bold">Ngữ Pháp:</span>
+                      <span className="text-cyan-600 dark:text-cyan-400 font-bold">Ngữ Pháp:</span>
                       <div className="flex items-center gap-1.5">
                         <span className="font-mono font-black text-slate-900 dark:text-white">
                           {hoveredPoint.check2 > 0 ? format1Dec(hoveredPoint.check2) : '-'}
@@ -358,8 +358,8 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = ({
                       const avgVal = wTot > 0 ? trunc1Dec(wSum / wTot) : 0;
                       return (
                         <div className="border-t border-slate-200 dark:border-white/10 pt-1.5 flex items-center justify-between gap-4">
-                          <span className="text-indigo-600 dark:text-indigo-300 font-extrabold">Điểm TB Buổi:</span>
-                          <span className="font-mono font-black text-indigo-600 dark:text-indigo-300">
+                          <span className="text-blue-600 dark:text-blue-400 font-extrabold">Điểm TB Buổi:</span>
+                          <span className="font-mono font-black text-blue-600 dark:text-blue-400">
                             {avgVal > 0 ? format1Dec(avgVal) : '-'}
                           </span>
                         </div>

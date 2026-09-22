@@ -9,26 +9,26 @@ export type ThemeMode = 'dark' | 'light';
 
 export const DARK_THEME_COLORS = {
   // ─── 1. SURFACES & BACKGROUNDS ───────────────────────────────────────────
-  appBackground: '#09090b',
-  sidebarBackground: '#0c0c0e',
-  cardBackground: '#141417',
-  cardBackgroundRaised: '#1c1c21',
-  cardBackgroundHighlight: '#27272f',
-  navBackground: '#0c0c0e',
+  appBackground: '#08090d',
+  sidebarBackground: '#0d1017',
+  cardBackground: '#161922',
+  cardBackgroundRaised: '#202534',
+  cardBackgroundHighlight: '#2a3144',
+  navBackground: '#0d1017',
   modalBackdrop: 'rgba(0, 0, 0, 0.85)',
 
   // ─── 2. BORDERS ─────────────────────────────────────────────────────────
-  borderPrimary: '#27272a',
-  borderSubtle: '#1e1e22',
+  borderPrimary: '#2e374a',
+  borderSubtle: '#222736',
   borderActive: '#2563eb',
   borderHover: '#3b82f6',
   borderGlow: 'rgba(37, 99, 235, 0.35)',
 
   // ─── 3. TYPOGRAPHY ──────────────────────────────────────────────────────
-  textPrimary: '#f4f4f5',
+  textPrimary: '#f8fafc',
   textSecondary: '#cbd5e1',
-  textMuted: '#a1a1aa',
-  textSubtle: '#71717a',
+  textMuted: '#94a3b8',
+  textSubtle: '#64748b',
 
   // ─── 4. ACCENT & BRAND ──────────────────────────────────────────────────
   primary: '#2563eb',
@@ -62,18 +62,18 @@ export const DARK_THEME_COLORS = {
   infoBg: 'rgba(6, 182, 212, 0.15)',
   infoBorder: 'rgba(6, 182, 212, 0.35)',
 
-  purple: '#a855f7',
-  purpleText: '#c084fc',
-  purpleBg: 'rgba(168, 85, 247, 0.15)',
-  purpleBorder: 'rgba(168, 85, 247, 0.35)',
+  purple: '#06b6d4',
+  purpleText: '#22d3ee',
+  purpleBg: 'rgba(6, 182, 212, 0.15)',
+  purpleBorder: 'rgba(6, 182, 212, 0.35)',
 
   // ─── 6. TIERS ───────────────────────────────────────────────────────────
   tiers: {
     tier8_quanQuan: '#10b981',
     tier7_caoThu: '#06b6d4',
     tier6_tinhAnh: '#3b82f6',
-    tier5_kimCuong: '#8b5cf6',
-    tier4_bachKim: '#ec4899',
+    tier5_kimCuong: '#0ea5e9',
+    tier4_bachKim: '#38bdf8',
     tier3_vang: '#f59e0b',
     tier2_bac: '#94a3b8',
     tier1_dong: '#d97706',
@@ -82,10 +82,10 @@ export const DARK_THEME_COLORS = {
   // ─── 7. CHARTS ──────────────────────────────────────────────────────────
   charts: {
     check1_vocab: '#3b82f6',
-    check2_grammar: '#a855f7',
+    check2_grammar: '#06b6d4',
     homework: '#10b981',
     ema_overall: '#f59e0b',
-    gridLine: 'rgba(255, 255, 255, 0.06)',
+    gridLine: 'rgba(255, 255, 255, 0.08)',
     axisText: '#94a3b8',
   },
 } as const;
@@ -165,7 +165,7 @@ export const LIGHT_THEME_COLORS = {
   // ─── 7. CHARTS ──────────────────────────────────────────────────────────
   charts: {
     check1_vocab: '#2563eb',
-    check2_grammar: '#7c3aed',
+    check2_grammar: '#06b6d4',
     homework: '#059669',
     ema_overall: '#d97706',
     gridLine: 'rgba(15, 23, 42, 0.08)',
@@ -173,20 +173,16 @@ export const LIGHT_THEME_COLORS = {
   },
 } as const;
 
-export const THEME_COLORS = DARK_THEME_COLORS;
-export type ThemeColorsType = typeof DARK_THEME_COLORS;
+export const THEME_COLORS = LIGHT_THEME_COLORS;
+export type ThemeColorsType = typeof LIGHT_THEME_COLORS;
 
 export function getStoredTheme(): ThemeMode {
-  try {
-    const saved = localStorage.getItem('app_theme');
-    if (saved === 'light' || saved === 'dark') return saved;
-  } catch {}
-  return 'dark';
+  return 'light';
 }
 
 export function setStoredTheme(mode: ThemeMode): void {
   try {
-    localStorage.setItem('app_theme', mode);
+    localStorage.setItem('app_theme', 'light');
   } catch {}
 }
 
@@ -194,40 +190,16 @@ export function setStoredTheme(mode: ThemeMode): void {
  * Applies active theme tokens to CSS custom properties and document elements.
  */
 export const applyTheme = (mode?: ThemeMode, customTheme?: any) => {
-  const currentMode = mode || getStoredTheme();
-  const tokens = currentMode === 'light' ? LIGHT_THEME_COLORS : DARK_THEME_COLORS;
+  const tokens = LIGHT_THEME_COLORS;
   const root = document.documentElement;
 
-  // 1. Temporarily disable ALL CSS transitions & animations across the DOM
-  // This guarantees 100% instant, simultaneous theme switching with zero staggered/sequential transitions
-  if (typeof document !== 'undefined') {
-    let styleEl = document.getElementById('theme-transition-killer') as HTMLStyleElement | null;
-    if (!styleEl) {
-      styleEl = document.createElement('style');
-      styleEl.id = 'theme-transition-killer';
-      styleEl.textContent = `*, *::before, *::after {
-        -webkit-transition: none !important;
-        -moz-transition: none !important;
-        -o-transition: none !important;
-        -ms-transition: none !important;
-        transition: none !important;
-        -webkit-animation-duration: 0s !important;
-        animation-duration: 0s !important;
-      }`;
-      document.head.appendChild(styleEl);
-    }
-  }
-
-  // 2. Toggle class and color-scheme on root element
-  if (currentMode === 'light') {
-    root.classList.remove('dark');
-    root.classList.add('light');
-    root.style.colorScheme = 'light';
-  } else {
-    root.classList.remove('light');
-    root.classList.add('dark');
-    root.style.colorScheme = 'dark';
-  }
+  // 1. Enforce light theme classes and color scheme
+  root.classList.remove('dark');
+  root.classList.add('light');
+  root.style.colorScheme = 'light';
+  try {
+    localStorage.setItem('app_theme', 'light');
+  } catch {}
 
   // 3. Update CSS variables
   root.style.setProperty('--background', tokens.appBackground);
@@ -263,7 +235,7 @@ export const applyTheme = (mode?: ThemeMode, customTheme?: any) => {
   root.style.setProperty('--purple', tokens.purple);
 
   // Theme Mode flag for CSS
-  root.style.setProperty('--theme-mode', currentMode);
+  root.style.setProperty('--theme-mode', 'light');
 
   // 4. Force synchronous reflow to ensure the browser commits all new colors in one paint without transitions
   if (typeof window !== 'undefined' && document.body) {

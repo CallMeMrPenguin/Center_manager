@@ -43,9 +43,9 @@ export const KPICards: React.FC<KPICardsProps> = React.memo(({ stats }) => {
       </div>
 
       {/* 2. NGỮ PHÁP TRUNG BÌNH */}
-      <div className="kpi-card-purple p-5 flex flex-col justify-between transition-all duration-200 min-h-[105px] animate-cascade-2">
+      <div className="kpi-card-cyan p-5 flex flex-col justify-between transition-all duration-200 min-h-[105px] animate-cascade-2">
         <div>
-          <span className="text-[10px] font-black uppercase tracking-wider text-purple-700 dark:text-purple-400 block mb-1">
+          <span className="text-[10px] font-black uppercase tracking-wider text-cyan-700 dark:text-cyan-400 block mb-1">
             NGỮ PHÁP TRUNG BÌNH
           </span>
           <div className="flex items-baseline gap-1.5">
@@ -53,7 +53,7 @@ export const KPICards: React.FC<KPICardsProps> = React.memo(({ stats }) => {
             <span className="text-xs text-slate-500 dark:text-slate-400 font-bold font-mono">/ 10</span>
           </div>
         </div>
-        <div className="mt-2 text-[10px] font-bold text-purple-700 dark:text-purple-400">
+        <div className="mt-2 text-[10px] font-bold text-cyan-700 dark:text-cyan-400">
           <span>{stats.c2Diff} so với kỳ trước</span>
         </div>
       </div>

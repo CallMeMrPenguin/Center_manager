@@ -9,7 +9,6 @@ import { AuthUser, getCurrentUser, clearAuthUser } from './utils/authUtils';
 import { useAutoDeploymentRefresh } from './hooks/useAutoDeploymentRefresh';
 import { useWarmupDataCache } from './hooks/useWarmupDataCache';
 import { ThemeProvider } from './context/ThemeContext';
-import { AnimatedThemeToggle } from './components/ui/animated-theme-toggle';
 
 function AppContent() {
   // Auto-detect and reload on new deployment
@@ -242,8 +241,8 @@ function AppContent() {
 
       {/* STATUS BAR */}
       <footer className="h-8 bg-white dark:bg-[#06070a] flex items-center justify-between px-6 text-[11px] text-slate-500 dark:text-slate-400 select-none shrink-0 font-semibold z-10 border-t border-slate-200 dark:border-white/[0.04]">
-        <div className="flex items-center gap-3">
-          <AnimatedThemeToggle size="sm" />
+        <div className="flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block" />
           <span className="hidden md:inline text-slate-500 dark:text-slate-400">Center Manager Desktop</span>
         </div>
         <div className="flex items-center gap-2">

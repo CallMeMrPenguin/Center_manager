@@ -9,44 +9,36 @@ interface ThemeContextType {
 }
 
 const ThemeContext = createContext<ThemeContextType>({
-  theme: 'dark',
+  theme: 'light',
   toggleTheme: () => {},
   setTheme: () => {},
-  isDark: true,
+  isDark: false,
 });
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [theme, setThemeState] = useState<ThemeMode>(() => {
-    const initial = getStoredTheme();
-    applyTheme(initial);
-    return initial;
+    applyTheme('light');
+    return 'light';
   });
-  const themeRef = React.useRef(theme);
-  themeRef.current = theme;
 
-  const setTheme = useCallback((mode: ThemeMode) => {
-    themeRef.current = mode;
-    applyTheme(mode);
-    setStoredTheme(mode);
-    setThemeState(mode);
+  const setTheme = useCallback((_mode: ThemeMode) => {
+    applyTheme('light');
+    setThemeState('light');
   }, []);
 
   const toggleTheme = useCallback(() => {
-    const next = themeRef.current === 'dark' ? 'light' : 'dark';
-    themeRef.current = next;
-    applyTheme(next);
-    setStoredTheme(next);
-    setThemeState(next);
+    applyTheme('light');
+    setThemeState('light');
   }, []);
 
   const contextValue = useMemo(
     () => ({
-      theme,
+      theme: 'light' as ThemeMode,
       toggleTheme,
       setTheme,
-      isDark: theme === 'dark',
+      isDark: false,
     }),
-    [theme, toggleTheme, setTheme]
+    [toggleTheme, setTheme]
   );
 
   return (

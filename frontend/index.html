@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="vi" class="dark font-sans antialiased h-full">
+<html lang="vi" class="light font-sans antialiased h-full">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
@@ -15,16 +15,10 @@
     <script>
       (function() {
         try {
-          var mode = localStorage.getItem('app_theme');
-          if (mode === 'light') {
-            document.documentElement.classList.remove('dark');
-            document.documentElement.classList.add('light');
-            document.documentElement.style.colorScheme = 'light';
-          } else {
-            document.documentElement.classList.remove('light');
-            document.documentElement.classList.add('dark');
-            document.documentElement.style.colorScheme = 'dark';
-          }
+          localStorage.setItem('app_theme', 'light');
+          document.documentElement.classList.remove('dark');
+          document.documentElement.classList.add('light');
+          document.documentElement.style.colorScheme = 'light';
         } catch (e) {}
       })();
     </script>

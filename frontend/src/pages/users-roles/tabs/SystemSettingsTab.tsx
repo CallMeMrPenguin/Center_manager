@@ -1,92 +1,10 @@
 import React from 'react';
-import { Database, Cloud, ShieldCheck, KeyRound, Sun, Moon, Sparkles } from 'lucide-react';
-import { useTheme } from '../../../context/ThemeContext';
-import { AnimatedThemeToggle } from '../../../components/ui/animated-theme-toggle';
+import { Database, Cloud, ShieldCheck, KeyRound } from 'lucide-react';
 
 export const SystemSettingsTab: React.FC = () => {
-  const { theme, setTheme } = useTheme();
-
   return (
     <div className="space-y-4 select-none">
-      {/* 1. Theme & Appearance Settings */}
-      <div className="bg-white dark:bg-[#0c0f1e] border border-slate-200 dark:border-[#1e2742] rounded-2xl p-5 shadow-sm dark:shadow-lg space-y-4">
-        <div className="flex items-center justify-between border-b border-slate-200 dark:border-white/10 pb-3">
-          <div className="flex items-center gap-2.5">
-            <Sparkles size={18} className="text-indigo-500 dark:text-indigo-400" />
-            <div>
-              <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider">
-                Giao Diện & Trải Nghiệm Người Dùng
-              </h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
-                Lựa chọn bảng màu tối ưu cho môi trường làm việc của bạn
-              </p>
-            </div>
-          </div>
-          <AnimatedThemeToggle />
-        </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {/* Light Theme Card */}
-          <button
-            type="button"
-            onClick={() => setTheme('light')}
-            className={`p-4 rounded-xl border text-left cursor-pointer flex flex-col gap-2 relative overflow-hidden ${
-              theme === 'light'
-                ? 'bg-indigo-50/70 border-indigo-500 shadow-md ring-2 ring-indigo-500/20'
-                : 'bg-slate-50 hover:bg-slate-100 dark:bg-[#121626] dark:hover:bg-[#181e33] border-slate-200 dark:border-[#232c49]'
-            }`}
-          >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="p-2 rounded-lg bg-amber-500/10 text-amber-500">
-                  <Sun size={18} />
-                </div>
-                <span className="font-bold text-sm text-slate-900 dark:text-slate-100">
-                  Giao Diện Sáng (Light Executive)
-                </span>
-              </div>
-              {theme === 'light' && (
-                <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-indigo-500 text-white">
-                  Đang dùng
-                </span>
-              )}
-            </div>
-            <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-              Tông màu Cool Slate chống lóa mắt, độ tương phản chuẩn Apple HIG & Linear cho môi trường ánh sáng tự nhiên.
-            </p>
-          </button>
-
-          {/* Dark Theme Card */}
-          <button
-            type="button"
-            onClick={() => setTheme('dark')}
-            className={`p-4 rounded-xl border text-left cursor-pointer flex flex-col gap-2 relative overflow-hidden ${
-              theme === 'dark'
-                ? 'bg-indigo-950/40 border-indigo-500 shadow-md ring-2 ring-indigo-500/20'
-                : 'bg-slate-50 hover:bg-slate-100 dark:bg-[#121626] dark:hover:bg-[#181e33] border-slate-200 dark:border-[#232c49]'
-            }`}
-          >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="p-2 rounded-lg bg-indigo-500/10 text-indigo-400">
-                  <Moon size={18} />
-                </div>
-                <span className="font-bold text-sm text-slate-900 dark:text-slate-100">
-                  Giao Diện Tối (Dark Space)
-                </span>
-              </div>
-              {theme === 'dark' && (
-                <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-indigo-500 text-white">
-                  Đang dùng
-                </span>
-              )}
-            </div>
-            <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-              Tông màu Deep Space Indigo huyền bí, êm dịu cho mắt khi làm việc buổi tối và tiết kiệm pin màn hình OLED.
-            </p>
-          </button>
-        </div>
-      </div>
 
       {/* 2. Offline-First & Local DB Status */}
       <div className="bg-white dark:bg-[#0c0f1e] border border-slate-200 dark:border-[#1e2742] rounded-2xl p-5 shadow-sm dark:shadow-lg space-y-4">

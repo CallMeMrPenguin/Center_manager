@@ -3,7 +3,6 @@ import { Lock, User, Eye, EyeOff, LogIn } from 'lucide-react';
 import { showToast } from '../../components/Toast';
 import { api } from '../../api';
 import { AuthUser, saveAuthUser, getSavedUsername } from '../../utils/authUtils';
-import { AnimatedThemeToggle } from '../../components/ui/animated-theme-toggle';
 
 interface LoginPageProps {
   onLogin: (user: AuthUser) => void;
@@ -67,11 +66,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
 
   return (
     <div className="min-h-screen w-screen bg-slate-100 dark:bg-[#08090e] flex items-center justify-center p-4 sm:p-6 select-none relative overflow-hidden font-sans transition-colors duration-200">
-      {/* Theme Toggle in top-right corner */}
-      <div className="absolute top-5 right-5 z-20">
-        <AnimatedThemeToggle className="bg-white/80 dark:bg-[#131929] border border-slate-200 dark:border-[#28334e] shadow-md" />
-      </div>
-
       <div className="w-full max-w-md bg-white dark:bg-[#0c0f1e] border border-slate-200 dark:border-[#212c4b] rounded-3xl p-7 sm:p-9 shadow-xl dark:shadow-[0_25px_70px_rgba(0,0,0,0.9)] relative z-10 space-y-6 transition-colors duration-200">
         {/* App Branding Header */}
         <div className="text-center space-y-2">

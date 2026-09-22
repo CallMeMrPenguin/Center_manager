@@ -46,7 +46,7 @@ export const ChartControls: React.FC<ChartControlsProps> = ({
         {/* Title */}
         <div className="flex items-center gap-3">
           {chartViewMode === 'timeline' ? (
-            <TrendingUp size={18} className="text-indigo-500 dark:text-indigo-400" />
+            <TrendingUp size={18} className="text-blue-500 dark:text-blue-400" />
           ) : (
             <BarChart2 size={18} className="text-cyan-500 dark:text-cyan-400" />
           )}
@@ -66,7 +66,7 @@ export const ChartControls: React.FC<ChartControlsProps> = ({
               { value: 'timeline', label: 'Tiến Trình Thời Gian' },
               { value: 'distribution', label: 'Phổ Điểm & Histogram' },
             ]}
-            activeColor="bg-[#5c36f5] shadow-[0_0_14px_rgba(92,54,245,0.5)]"
+            activeColor="bg-[#2563eb] shadow-[0_0_12px_rgba(37,99,235,0.5)]"
             size="sm"
           />
         )}
@@ -81,8 +81,8 @@ export const ChartControls: React.FC<ChartControlsProps> = ({
               <span className="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.8)]" />
               Từ Vựng (Dự đoán: {format1Dec(engine?.pred_c1 ?? 0)})
             </span>
-            <span className="flex items-center gap-1.5 text-purple-600 dark:text-purple-400 bg-purple-500/10 border border-purple-500/20 px-2.5 py-1 rounded-lg">
-              <span className="w-2 h-2 rounded-full bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.8)]" />
+            <span className="flex items-center gap-1.5 text-cyan-600 dark:text-cyan-400 bg-cyan-500/10 border border-cyan-500/20 px-2.5 py-1 rounded-lg">
+              <span className="w-2 h-2 rounded-full bg-cyan-500 shadow-[0_0_8px_rgba(6,182,212,0.8)]" />
               Ngữ Pháp (Dự đoán: {format1Dec(engine?.pred_c2 ?? 0)})
             </span>
             <span className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-lg">
@@ -103,7 +103,7 @@ export const ChartControls: React.FC<ChartControlsProps> = ({
                   { value: '3m', label: '3T' },
                   { value: 'all', label: 'Tất cả' },
                 ]}
-                activeColor="bg-[#5c36f5] shadow-[0_0_12px_rgba(92,54,245,0.4)]"
+                activeColor="bg-[#2563eb] shadow-[0_0_12px_rgba(37,99,235,0.4)]"
                 size="sm"
               />
             </div>
@@ -122,13 +122,13 @@ export const ChartControls: React.FC<ChartControlsProps> = ({
                     })),
                   ]}
                   placeholder="Giai đoạn..."
-                  icon={<Clock size={13} className="text-indigo-400" />}
+                  icon={<Clock size={13} className="text-blue-400" />}
                 />
               </div>
             )}
 
             {/* Zoom controls */}
-            <div className="flex items-center gap-1 bg-slate-100 dark:bg-[#121626] border border-slate-200 dark:border-white/10 rounded-xl p-1">
+            <div className="flex items-center gap-1 bg-slate-100 dark:bg-[#202534] border border-slate-200 dark:border-[#2e374a] rounded-xl p-1">
               <button
                 type="button"
                 onClick={() => setZoomLevel((z) => Math.min(2.5, z + 0.2))}
