@@ -73,20 +73,20 @@
 
 :root.dark, html.dark {
   color-scheme: dark;
-  --background: #060811;
+  --background: #030509;
   --foreground: #ffffff;
-  --surface: #0f1528;
-  --surface-nav: #0a0e1c;
-  --surface-raised: #151d36;
-  --surface-highlight: #1d284a;
+  --surface: #10172c;
+  --surface-nav: #070a14;
+  --surface-raised: #18223e;
+  --surface-highlight: #222f56;
   --border-color: #212c4b;
   --border-subtle: #18223e;
-  --border-active: #5c36f5;
+  --border-active: #2563eb;
   --primary: #2563eb;
   --primary-hover: #3b82f6;
   --primary-light: rgba(37, 99, 235, 0.14);
-  --indigo: #5c36f5;
-  --indigo-glow: rgba(92, 54, 245, 0.5);
+  --indigo: #2563eb;
+  --indigo-glow: rgba(37, 99, 235, 0.4);
   --success: #10b981;
   --success-bg: rgba(16, 185, 129, 0.12);
   --warning: #f59e0b;

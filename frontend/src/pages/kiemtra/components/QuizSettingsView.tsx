@@ -135,7 +135,7 @@ export const QuizSettingsView: React.FC<QuizSettingsViewProps> = ({
       <div className="pt-4 border-t border-slate-200 dark:border-white/10">
         <button
           onClick={onStartTest}
-          className="w-full flex items-center justify-center gap-2 bg-[#5c36f5] hover:bg-[#7351f7] text-white py-3.5 rounded-xl font-black text-sm shadow-[0_4px_20px_rgba(92,54,245,0.45)] transition cursor-pointer border border-white/20 active:scale-[0.99]"
+          className="w-full flex items-center justify-center gap-2 bg-[#2563eb] hover:bg-[#1d4ed8] text-white py-3.5 rounded-xl font-black text-sm shadow-[0_4px_20px_rgba(37,99,235,0.45)] transition cursor-pointer border border-white/20 active:scale-[0.99]"
         >
           <Play size={17} className="fill-white" />
           <span>BẮT ĐẦU LÀM BÀI THI</span>

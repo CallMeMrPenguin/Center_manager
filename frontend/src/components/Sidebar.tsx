@@ -197,6 +197,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       <DockItem
                         key={item.id}
                         isActive={isActive}
+                        title={item.label}
                         onClick={() => setActiveTab(item.id)}
                       >
                         <DockIcon isActive={isActive}>

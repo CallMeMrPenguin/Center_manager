@@ -45,43 +45,43 @@ export const QuizResultsView: React.FC<QuizResultsViewProps> = ({
       />
 
       {/* KPI SCORE CARD */}
-      <div className="bg-[#0c0f1e] border border-[#1d2744] rounded-2xl p-6 sm:p-8 shadow-2xl text-center space-y-4 relative overflow-hidden">
+      <div className="bg-white dark:bg-[#10172c] border border-slate-200 dark:border-white/10 rounded-2xl p-6 sm:p-8 shadow-sm dark:shadow-2xl text-center space-y-4 relative overflow-hidden">
         <div>
-          <h2 className="text-xl sm:text-2xl font-black text-white">Kết Quả Bài Kiểm Tra</h2>
-          <p className="text-xs text-slate-400 font-semibold mt-1">{testData?.title || 'Đề thi'}</p>
+          <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">Kết Quả Bài Kiểm Tra</h2>
+          <p className="text-xs text-slate-500 dark:text-slate-400 font-semibold mt-1">{testData?.title || 'Đề thi'}</p>
         </div>
 
         <div className="flex items-center justify-center gap-6 sm:gap-10 py-3">
           <div className="text-center">
-            <div className="text-3xl sm:text-4xl font-black text-indigo-400 font-mono">
+            <div className="text-3xl sm:text-4xl font-black text-blue-600 dark:text-blue-400 font-mono">
               {calculatedScore} / 10
             </div>
-            <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mt-1">Điểm Số</div>
+            <div className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mt-1">Điểm Số</div>
           </div>
 
-          <div className="h-12 w-px bg-white/10" />
+          <div className="h-12 w-px bg-slate-200 dark:bg-white/10" />
 
           <div className="text-center">
-            <div className="text-3xl sm:text-4xl font-black text-emerald-400 font-mono">
+            <div className="text-3xl sm:text-4xl font-black text-emerald-600 dark:text-emerald-400 font-mono">
               {correctCount} / {totalQuestions}
             </div>
-            <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mt-1">Số Câu Đúng</div>
+            <div className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mt-1">Số Câu Đúng</div>
           </div>
 
-          <div className="h-12 w-px bg-white/10" />
+          <div className="h-12 w-px bg-slate-200 dark:bg-white/10" />
 
           <div className="text-center">
-            <div className="text-3xl sm:text-4xl font-black text-rose-400 font-mono">
+            <div className="text-3xl sm:text-4xl font-black text-rose-600 dark:text-rose-400 font-mono">
               {totalQuestions - correctCount} / {totalQuestions}
             </div>
-            <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mt-1">Số Câu Sai</div>
+            <div className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mt-1">Số Câu Sai</div>
           </div>
         </div>
 
         <div className="flex items-center justify-center gap-3 pt-2">
           <button
             onClick={onRetake}
-            className="px-6 py-2.5 rounded-xl bg-[#5c36f5] hover:bg-[#7351f7] text-white text-xs font-black transition cursor-pointer shadow-[0_4px_14px_rgba(92,54,245,0.4)] border border-white/20 active:scale-95"
+            className="px-6 py-2.5 rounded-xl bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-xs font-black transition cursor-pointer shadow-[0_4px_14px_rgba(37,99,235,0.4)] border border-white/20 active:scale-95"
           >
             Làm lại
           </button>
@@ -89,8 +89,8 @@ export const QuizResultsView: React.FC<QuizResultsViewProps> = ({
       </div>
 
       {/* REVIEW CONTROLS */}
-      <div className="flex items-center justify-between bg-[#0c0f1e] border border-white/10 px-5 py-3 rounded-2xl shadow-lg relative z-10">
-        <div className="text-xs font-black uppercase text-slate-300 tracking-wider">
+      <div className="flex items-center justify-between bg-white dark:bg-[#10172c] border border-slate-200 dark:border-white/10 px-5 py-3 rounded-2xl shadow-sm dark:shadow-lg relative z-10">
+        <div className="text-xs font-black uppercase text-slate-700 dark:text-slate-300 tracking-wider">
           Chi Tiết Bài Làm ({totalQuestions} Câu)
         </div>
 

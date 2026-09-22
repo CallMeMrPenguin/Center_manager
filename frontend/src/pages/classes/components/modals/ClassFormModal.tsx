@@ -271,7 +271,7 @@ export const ClassFormModal: React.FC<ClassFormModalProps> = ({
               </button>
               <button
                 type="submit"
-                className="px-5 py-2 rounded-xl bg-[#5c36f5] hover:bg-[#7351f7] text-white text-xs font-extrabold cursor-pointer shadow-[0_4px_12px_rgba(92,54,245,0.4)] transition"
+                className="px-5 py-2 rounded-xl bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-xs font-extrabold cursor-pointer shadow-[0_4px_12px_rgba(37,99,235,0.4)] transition"
               >
                 Lưu Lớp Học
               </button>

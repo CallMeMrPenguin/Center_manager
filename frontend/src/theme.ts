@@ -9,20 +9,20 @@ export type ThemeMode = 'dark' | 'light';
 
 export const DARK_THEME_COLORS = {
   // ─── 1. SURFACES & BACKGROUNDS ───────────────────────────────────────────
-  appBackground: '#07090e',
-  sidebarBackground: '#0c0f1e',
-  cardBackground: '#0c0f1e',
-  cardBackgroundRaised: '#121626',
-  cardBackgroundHighlight: '#1a223e',
-  navBackground: '#090d16',
+  appBackground: '#030509',
+  sidebarBackground: '#070a14',
+  cardBackground: '#10172c',
+  cardBackgroundRaised: '#18223e',
+  cardBackgroundHighlight: '#222f56',
+  navBackground: '#070a14',
   modalBackdrop: 'rgba(0, 0, 0, 0.85)',
 
   // ─── 2. BORDERS ─────────────────────────────────────────────────────────
   borderPrimary: '#212c4b',
   borderSubtle: '#181f36',
-  borderActive: '#5c36f5',
+  borderActive: '#2563eb',
   borderHover: '#3b82f6',
-  borderGlow: 'rgba(92, 54, 245, 0.4)',
+  borderGlow: 'rgba(37, 99, 235, 0.4)',
 
   // ─── 3. TYPOGRAPHY ──────────────────────────────────────────────────────
   textPrimary: '#ffffff',
@@ -36,10 +36,10 @@ export const DARK_THEME_COLORS = {
   primaryGlow: 'rgba(37, 99, 235, 0.45)',
   primaryLight: 'rgba(37, 99, 235, 0.15)',
 
-  indigo: '#5c36f5',
-  indigoHover: '#4f2ee0',
-  indigoGlow: 'rgba(92, 54, 245, 0.5)',
-  indigoLight: 'rgba(92, 54, 245, 0.15)',
+  indigo: '#2563eb',
+  indigoHover: '#1d4ed8',
+  indigoGlow: 'rgba(37, 99, 235, 0.45)',
+  indigoLight: 'rgba(37, 99, 235, 0.15)',
 
   // ─── 5. SEMANTIC STATUS ─────────────────────────────────────────────────
   success: '#10b981',

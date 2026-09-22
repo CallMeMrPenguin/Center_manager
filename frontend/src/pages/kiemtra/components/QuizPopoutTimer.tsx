@@ -136,20 +136,20 @@ export const QuizPopoutTimer: React.FC<QuizPopoutTimerProps> = ({
           height: `${timerSize.height}px`,
           ...(timerPos ? { transform: `translate3d(${timerPos.x}px, ${timerPos.y}px, 0)` } : {}),
         }}
-        className={`fixed top-20 left-8 z-[100] pointer-events-auto bg-[#0d101f] border-2 p-2.5 rounded-2xl select-none shadow-[0_16px_40px_rgba(0,0,0,0.7)] ring-1 flex flex-col justify-between relative group ${
+        className={`fixed top-20 left-8 z-[100] pointer-events-auto bg-white dark:bg-[#0d101f] text-slate-900 dark:text-white border-2 p-2.5 rounded-2xl select-none shadow-[0_16px_40px_rgba(0,0,0,0.15)] dark:shadow-[0_16px_40px_rgba(0,0,0,0.7)] ring-1 flex flex-col justify-between relative group ${
           timerStatus === 'red'
             ? 'border-rose-500/80 ring-rose-500/40 shadow-[0_0_25px_rgba(244,63,94,0.4)]'
             : timerStatus === 'yellow'
             ? 'border-amber-500/60 ring-amber-500/30 shadow-[0_0_15px_rgba(245,158,11,0.25)]'
-            : 'border-[#5c36f5]/70 ring-white/15 shadow-[0_8px_32px_rgba(0,0,0,0.6)]'
+            : 'border-[#2563eb]/70 ring-blue-500/20 shadow-[0_8px_32px_rgba(37,99,235,0.2)]'
         }`}
       >
         {/* TOP HEADER ROW: DRAG HANDLE (LEFT) + ICON ACTIONS (RIGHT) */}
-        <div className="w-full flex items-center justify-between text-slate-400 shrink-0">
+        <div className="w-full flex items-center justify-between text-slate-500 dark:text-slate-400 shrink-0">
           <div
             onMouseDown={handleMouseDown}
-            className={`p-1 cursor-move transition-colors rounded-lg hover:bg-white/5 ${
-              timerStatus === 'red' ? 'text-rose-400 hover:text-rose-200' : 'text-indigo-400 hover:text-indigo-200'
+            className={`p-1 cursor-move transition-colors rounded-lg hover:bg-slate-100 dark:hover:bg-white/5 ${
+              timerStatus === 'red' ? 'text-rose-500 dark:text-rose-400' : 'text-blue-500 dark:text-blue-400'
             }`}
             title="Kéo thả để di chuyển đồng hồ"
           >
@@ -160,7 +160,7 @@ export const QuizPopoutTimer: React.FC<QuizPopoutTimerProps> = ({
           <div className="flex items-center gap-1">
             <button
               onClick={onReset}
-              className="p-1 rounded-lg hover:bg-white/10 text-slate-300 hover:text-white transition cursor-pointer"
+              className="p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition cursor-pointer"
               title="Đặt lại thời gian (Reset)"
             >
               <RotateCcw size={13} />

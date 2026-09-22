@@ -176,7 +176,7 @@ export const QuizRunningView: React.FC<QuizRunningViewProps> = ({
       />
 
       {/* MAIN QUESTION DISPLAY AREA WITH INTERACTIVE DRAWING CANVAS */}
-      <div className="flex-1 flex flex-col bg-[#0c0f1e] border border-[#1d2744] rounded-2xl p-6 sm:p-8 shadow-2xl overflow-y-auto justify-between relative">
+      <div className="flex-1 flex flex-col bg-white dark:bg-[#10172c] border border-slate-200 dark:border-white/10 rounded-2xl p-6 sm:p-8 shadow-sm dark:shadow-2xl overflow-y-auto justify-between relative">
         <DrawingCanvas
           questionId={q.id}
           drawings={drawings}
@@ -204,13 +204,13 @@ export const QuizRunningView: React.FC<QuizRunningViewProps> = ({
 
         <div className="space-y-5 relative z-10">
           {/* TOP ACTION BAR */}
-          <div className="flex items-center justify-between pb-4 border-b border-white/10">
+          <div className="flex items-center justify-between pb-4 border-b border-slate-200 dark:border-white/10">
             <div className="flex items-center gap-3">
-              <div className="flex items-center gap-2 bg-indigo-500/10 border border-indigo-500/20 px-3 py-1 rounded-xl">
-                <span className="text-xs text-indigo-300 font-extrabold">{progressPct}% Hoàn thành</span>
-                <div className="w-20 h-2 bg-[#161a29] rounded-full overflow-hidden border border-white/10">
+              <div className="flex items-center gap-2 bg-blue-500/10 border border-blue-500/20 px-3 py-1 rounded-xl">
+                <span className="text-xs text-blue-600 dark:text-blue-300 font-extrabold">{progressPct}% Hoàn thành</span>
+                <div className="w-20 h-2 bg-slate-200 dark:bg-[#161a29] rounded-full overflow-hidden border border-slate-300 dark:border-white/10">
                   <div
-                    className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full transition-all duration-300"
+                    className="h-full bg-blue-600 rounded-full transition-all duration-300"
                     style={{ width: `${progressPct}%` }}
                   />
                 </div>
@@ -226,7 +226,7 @@ export const QuizRunningView: React.FC<QuizRunningViewProps> = ({
                       onExitToImport();
                     }
                   }}
-                  className="px-3 py-1 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white border border-white/10 text-xs font-bold transition cursor-pointer"
+                  className="px-3 py-1 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 text-slate-700 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white border border-slate-200 dark:border-white/10 text-xs font-bold transition cursor-pointer"
                   title="Quay lại để chọn đề khác"
                 >
                   Đổi đề
@@ -237,8 +237,8 @@ export const QuizRunningView: React.FC<QuizRunningViewProps> = ({
                 onClick={() => setShowPopoutTimer(!showPopoutTimer)}
                 className={`flex items-center gap-1.5 px-3 py-1 rounded-xl border text-xs font-bold transition cursor-pointer ${
                   showPopoutTimer
-                    ? 'bg-indigo-600/30 text-indigo-300 border-indigo-400 shadow-sm'
-                    : 'bg-[#121626] text-slate-400 border-[#263152] hover:text-white'
+                    ? 'bg-blue-500/15 text-blue-600 dark:text-blue-300 border-blue-500/30 shadow-sm'
+                    : 'bg-slate-100 dark:bg-[#121626] text-slate-700 dark:text-slate-400 border-slate-200 dark:border-[#263152] hover:text-slate-900 dark:hover:text-white'
                 }`}
                 title="Bật / Ẩn đồng hồ nổi"
               >
@@ -246,10 +246,10 @@ export const QuizRunningView: React.FC<QuizRunningViewProps> = ({
                   size={13}
                   className={
                     timerMode === 'none'
-                      ? 'text-emerald-400'
+                      ? 'text-emerald-500 dark:text-emerald-400'
                       : timerMode === 'global'
-                      ? 'text-indigo-400'
-                      : 'text-amber-400'
+                      ? 'text-blue-500 dark:text-blue-400'
+                      : 'text-amber-500 dark:text-amber-400'
                   }
                 />
                 <span>{timerMode === 'per_question' ? `${questionTimer}s` : formattedTimerRemaining}</span>
@@ -258,7 +258,7 @@ export const QuizRunningView: React.FC<QuizRunningViewProps> = ({
               <button
                 onClick={() => toggleBookmark(q.id)}
                 className={`flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-bold transition cursor-pointer border ${
-                  isBookmarked ? 'bg-rose-500/20 border-rose-500/40 text-rose-300' : 'bg-white/5 border-white/10 text-slate-400 hover:text-slate-200'
+                  isBookmarked ? 'bg-rose-500/20 border-rose-500/40 text-rose-600 dark:text-rose-300' : 'bg-slate-100 dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
                 }`}
                 title="Đánh dấu câu hỏi để xem lại"
               >
@@ -269,7 +269,7 @@ export const QuizRunningView: React.FC<QuizRunningViewProps> = ({
               <button
                 onClick={onToggleFullscreen}
                 className={`flex items-center gap-1.5 px-3 py-1 rounded-xl border text-xs font-black transition cursor-pointer ${
-                  isFullscreen ? 'bg-indigo-600 text-white border-indigo-400 shadow-md' : 'bg-[#121626] text-slate-300 hover:text-white border-[#263152]'
+                  isFullscreen ? 'bg-blue-600 text-white border-blue-500 shadow-md' : 'bg-slate-100 dark:bg-[#121626] text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white border-slate-200 dark:border-[#263152]'
                 }`}
                 title={isFullscreen ? "Thoát toàn màn hình (Esc)" : "Toàn màn hình"}
               >
@@ -279,7 +279,7 @@ export const QuizRunningView: React.FC<QuizRunningViewProps> = ({
 
               <button
                 onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-                className="p-1.5 rounded-xl bg-[#121626] hover:bg-[#1e2640] text-slate-300 hover:text-white border border-[#263152] transition cursor-pointer"
+                className="p-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-[#121626] dark:hover:bg-[#1e2640] text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-[#263152] transition cursor-pointer"
                 title={isSidebarCollapsed ? "Mở rộng danh sách câu hỏi" : "Thu gọn danh sách"}
               >
                 {isSidebarCollapsed ? <ChevronRight size={15} /> : <ChevronLeft size={15} />}
@@ -302,20 +302,20 @@ export const QuizRunningView: React.FC<QuizRunningViewProps> = ({
         </div>
 
         {/* BOTTOM NAVIGATION BAR */}
-        <div className="flex items-center justify-between pt-6 border-t border-white/10 mt-6 relative z-10">
+        <div className="flex items-center justify-between pt-6 border-t border-slate-200 dark:border-white/10 mt-6 relative z-10">
           <button
             disabled={currentIndex === 0}
             onClick={() => {
               setCurrentIndex(p => Math.max(0, (typeof p === 'number' ? p : currentIndex) - 1));
               if (timerMode === 'per_question') setQuestionTimer(perQuestionSeconds);
             }}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-bold disabled:opacity-30 cursor-pointer border border-white/5"
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 text-slate-700 dark:text-slate-300 text-xs font-bold disabled:opacity-30 cursor-pointer border border-slate-200 dark:border-white/5 transition"
           >
             <ArrowLeft size={14} />
             <span>Câu trước</span>
           </button>
 
-          <div className="text-xs font-black text-slate-400 font-mono">
+          <div className="text-xs font-black text-slate-500 dark:text-slate-400 font-mono">
             {currentIndex + 1} / {totalQuestions}
           </div>
 
@@ -325,7 +325,7 @@ export const QuizRunningView: React.FC<QuizRunningViewProps> = ({
                 setCurrentIndex(p => Math.min(activeQuestions.length - 1, (typeof p === 'number' ? p : currentIndex) + 1));
                 if (timerMode === 'per_question') setQuestionTimer(perQuestionSeconds);
               }}
-              className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-[#5c36f5] hover:bg-[#7351f7] text-white text-xs font-extrabold shadow-[0_4px_16px_rgba(92,54,245,0.4)] transition cursor-pointer border border-white/20 active:scale-95"
+              className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-xs font-extrabold shadow-[0_4px_16px_rgba(37,99,235,0.4)] transition cursor-pointer border border-white/20 active:scale-95"
             >
               <span>Câu tiếp</span>
               <ArrowRight size={14} />
