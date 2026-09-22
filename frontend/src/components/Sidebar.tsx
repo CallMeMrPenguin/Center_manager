@@ -94,7 +94,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       </div>
 
       {/* Nav Menu */}
-      <div className={`flex-1 overflow-y-auto min-h-0 ${isSidebarExpanded ? 'px-1.5' : 'px-1'} py-2 flex flex-col gap-1 scrollbar-none`}>
+      <div className={`flex-1 ${isSidebarExpanded ? 'overflow-y-auto px-1.5' : 'overflow-visible px-1'} min-h-0 py-2 flex flex-col gap-1 scrollbar-none`}>
         {isSidebarExpanded ? (
           /* EXPANDED SIDEBAR VIEW */
           SECTIONS.map((section, sIdx) => {
@@ -171,7 +171,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           })
         ) : (
           /* COLLAPSED SIDEBAR VIEW — MACOS VERTICAL DOCK MAGNIFICATION */
-          <Dock orientation="vertical" magnification={50} distance={85} className="w-full bg-transparent border-0 shadow-none p-0 gap-1">
+          <Dock orientation="vertical" magnification={52} distance={85} className="w-full bg-transparent border-0 shadow-none p-0 gap-1">
             {SECTIONS.map((section, sIdx) => {
               const sectionTabs = orderedTabIds
                 .map((tabId, idx) => ({ tabId, idx }))
@@ -197,7 +197,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       <DockItem
                         key={item.id}
                         isActive={isActive}
-                        title={item.label}
                         onClick={() => setActiveTab(item.id)}
                       >
                         <DockIcon isActive={isActive}>

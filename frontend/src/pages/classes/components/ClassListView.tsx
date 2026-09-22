@@ -51,7 +51,7 @@ export const ClassListView: React.FC<ClassListViewProps> = ({
 
           <button
             onClick={onCreateClass}
-            className="group flex items-center gap-0 hover:gap-2 bg-[#5c36f5] hover:bg-[#7351f7] text-white px-3.5 py-2.5 rounded-xl font-bold text-xs shadow-[0_4px_16px_rgba(92,54,245,0.4)] transition-all duration-300 cursor-pointer border border-white/20 active:scale-95"
+            className="group flex items-center gap-0 hover:gap-2 bg-[#2563eb] hover:bg-[#1d4ed8] text-white px-3.5 py-2.5 rounded-xl font-bold text-xs shadow-[0_4px_16px_rgba(37,99,235,0.4)] transition-all duration-300 cursor-pointer border border-white/20 active:scale-95"
             title="Tạo Lớp Học Mới"
           >
             <Plus size={16} className="shrink-0" />
@@ -63,7 +63,7 @@ export const ClassListView: React.FC<ClassListViewProps> = ({
       </div>
 
       {/* SEARCH & FILTER */}
-      <div className="flex items-center justify-between bg-white dark:bg-[#0f1528] border border-slate-200 dark:border-white/10 p-3.5 rounded-2xl shadow-sm">
+      <div className="flex items-center justify-between bg-white dark:bg-[#141d38] border border-slate-200 dark:border-white/10 p-3.5 rounded-2xl shadow-sm">
         <motion.div
           animate={{ width: searchFocused ? 420 : 300 }}
           transition={{ type: 'spring', stiffness: 350, damping: 26 }}
@@ -77,7 +77,7 @@ export const ClassListView: React.FC<ClassListViewProps> = ({
             <Search
               size={15}
               className={`transition-colors duration-200 ${
-                searchFocused ? 'text-[#5c36f5] dark:text-indigo-400' : 'text-slate-400 dark:text-slate-500'
+                searchFocused ? 'text-[#2563eb] dark:text-blue-400' : 'text-slate-400 dark:text-slate-500'
               }`}
             />
           </motion.div>
@@ -88,7 +88,7 @@ export const ClassListView: React.FC<ClassListViewProps> = ({
             onBlur={() => setSearchFocused(false)}
             onChange={(e) => onSearchChange(e.target.value)}
             placeholder="Tìm lớp học theo tên lớp, giáo viên, phòng..."
-            className="w-full bg-slate-50 dark:bg-[#161a29] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white text-xs rounded-xl pl-10 pr-8 py-2 focus:outline-none focus:border-[#5c36f5] focus:ring-2 focus:ring-[#5c36f5]/25 placeholder:text-slate-400 dark:placeholder:text-slate-500 font-medium transition shadow-inner"
+            className="w-full bg-slate-50 dark:bg-[#1c284e] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white text-xs rounded-xl pl-10 pr-8 py-2 focus:outline-none focus:border-[#2563eb] focus:ring-2 focus:ring-[#2563eb]/25 placeholder:text-slate-400 dark:placeholder:text-slate-500 font-medium transition shadow-inner"
           />
           <AnimatePresence>
             {search && (

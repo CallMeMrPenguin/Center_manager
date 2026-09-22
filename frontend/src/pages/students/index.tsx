@@ -258,11 +258,11 @@ export function StudentsPage() {
   );
 
   return (
-    <div className="h-full w-full flex flex-col p-6 space-y-4 bg-[#e2e8f0] dark:bg-[#060811] text-slate-800 dark:text-slate-100 select-none font-sans overflow-hidden">
+    <div className="h-full w-full flex flex-col p-6 space-y-4 bg-[#e2e8f0] dark:bg-[#030509] text-slate-800 dark:text-slate-100 select-none font-sans overflow-hidden">
       {/* Top Header Toolbar */}
       <div className="flex flex-wrap items-center justify-between gap-4 shrink-0">
         <div className="flex items-center gap-3">
-          <div className="p-3 bg-[#5c36f5]/15 text-[#5c36f5] rounded-2xl border border-[#5c36f5]/25 shadow-sm">
+          <div className="p-3 bg-blue-500/15 text-blue-600 dark:text-blue-400 rounded-2xl border border-blue-500/25 shadow-sm">
             <Users size={22} />
           </div>
           <div>
@@ -292,7 +292,7 @@ export function StudentsPage() {
           <button
             type="button"
             onClick={handleOpenAdd}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#5c36f5] hover:bg-[#6e4af7] text-white text-xs font-black shadow-[0_0_15px_rgba(92,54,245,0.35)] transition cursor-pointer"
+            className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-xs font-black shadow-[0_0_15px_rgba(37,99,235,0.35)] transition cursor-pointer"
           >
             <UserPlus size={15} />
             <span>Thêm Học Sinh Mới</span>
@@ -301,7 +301,7 @@ export function StudentsPage() {
       </div>
 
       {/* Main Table */}
-      <div className="flex-1 min-h-0 bg-white dark:bg-[#0d1018] rounded-2xl overflow-hidden shadow-[0_4px_24px_rgba(0,0,0,0.08)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.5)]">
+      <div className="flex-1 min-h-0 bg-white dark:bg-[#141d38] rounded-2xl overflow-hidden shadow-[0_4px_24px_rgba(0,0,0,0.08)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.5)]">
         <DataTable<Student>
           data={students}
           columns={columns}

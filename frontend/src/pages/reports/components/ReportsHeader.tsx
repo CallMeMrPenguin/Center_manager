@@ -127,7 +127,7 @@ export const ReportsHeader: React.FC<ReportsHeaderProps> = ({
 
           <button
             onClick={() => loadAnalyticsData()}
-            className="p-2.5 rounded-xl bg-white hover:bg-slate-50 dark:bg-[#121626] dark:hover:bg-[#1e2640] text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-[#202842] transition cursor-pointer shadow-sm shrink-0"
+            className="p-2.5 rounded-xl bg-white hover:bg-slate-50 dark:bg-[#141d38] dark:hover:bg-[#1c284e] text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-[#24335c] transition cursor-pointer shadow-sm shrink-0"
             title="Làm mới báo cáo"
           >
             <RefreshCw size={14} className={loading ? "animate-spin text-indigo-500 dark:text-indigo-400" : ""} />

@@ -10,16 +10,16 @@ export type ThemeMode = 'dark' | 'light';
 export const DARK_THEME_COLORS = {
   // ─── 1. SURFACES & BACKGROUNDS ───────────────────────────────────────────
   appBackground: '#030509',
-  sidebarBackground: '#070a14',
-  cardBackground: '#10172c',
-  cardBackgroundRaised: '#18223e',
-  cardBackgroundHighlight: '#222f56',
-  navBackground: '#070a14',
+  sidebarBackground: '#080c18',
+  cardBackground: '#141d38',
+  cardBackgroundRaised: '#1c284e',
+  cardBackgroundHighlight: '#28396e',
+  navBackground: '#080c18',
   modalBackdrop: 'rgba(0, 0, 0, 0.85)',
 
   // ─── 2. BORDERS ─────────────────────────────────────────────────────────
-  borderPrimary: '#212c4b',
-  borderSubtle: '#181f36',
+  borderPrimary: '#24335c',
+  borderSubtle: '#1a2544',
   borderActive: '#2563eb',
   borderHover: '#3b82f6',
   borderGlow: 'rgba(37, 99, 235, 0.4)',
