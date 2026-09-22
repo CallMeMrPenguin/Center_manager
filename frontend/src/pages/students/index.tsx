@@ -258,7 +258,7 @@ export function StudentsPage() {
   );
 
   return (
-    <div className="h-full w-full flex flex-col p-6 space-y-4 bg-slate-100 dark:bg-[#080b14] text-slate-800 dark:text-slate-100 select-none font-sans overflow-hidden transition-colors duration-200">
+    <div className="h-full w-full flex flex-col p-6 space-y-4 bg-slate-100 dark:bg-[#080b14] text-slate-800 dark:text-slate-100 select-none font-sans overflow-hidden">
       {/* Top Header Toolbar */}
       <div className="flex flex-wrap items-center justify-between gap-4 shrink-0">
         <div className="flex items-center gap-3">

@@ -1023,26 +1023,4 @@ html:not(.dark) .recharts-default-tooltip {
 .animate-liquid-rotate-wave-back {
   animation: liquidRotateWaveReverse 6.5s linear infinite;
 }
-
-/* ─── SMOOTH THEME CROSSFADE TRANSITION ─────────────────────────────────── */
-html, body, #root {
-  transition: background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1), color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-html.theme-transition,
-html.theme-transition body,
-html.theme-transition #root,
-html.theme-transition header,
-html.theme-transition nav,
-html.theme-transition aside,
-html.theme-transition main,
-html.theme-transition table,
-html.theme-transition thead,
-html.theme-transition tbody,
-html.theme-transition tr,
-html.theme-transition th,
-html.theme-transition td,
-html.theme-transition .kpi-editorial-card,
-html.theme-transition .filter-dropdown-menu {
-  transition: background-color 0.35s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.35s cubic-bezier(0.4, 0, 0.2, 1), color 0.25s ease, box-shadow 0.35s ease !important;
-}
+

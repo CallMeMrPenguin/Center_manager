@@ -367,7 +367,7 @@ export default function SchedulePage() {
   ], []);
 
   return (
-    <div className="h-full flex flex-col p-5 gap-5 overflow-y-auto bg-slate-100 dark:bg-[#090d16] text-slate-800 dark:text-slate-100 font-sans transition-colors duration-200">
+    <div className="h-full flex flex-col p-5 gap-5 overflow-y-auto bg-slate-100 dark:bg-[#090d16] text-slate-800 dark:text-slate-100 font-sans">
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
@@ -402,7 +402,7 @@ export default function SchedulePage() {
 
       {/* KPI Cards */}
       <div className="grid grid-cols-3 gap-4 shrink-0">
-        <div className="bg-white dark:bg-[#0e1322] border border-slate-200 dark:border-[#1e2742] p-4 flex items-center justify-between rounded-2xl shadow-sm dark:shadow-none transition-colors duration-200">
+        <div className="bg-white dark:bg-[#0e1322] border border-slate-200 dark:border-[#1e2742] p-4 flex items-center justify-between rounded-2xl shadow-sm dark:shadow-none">
           <div>
             <p className="text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">Trong Tháng</p>
             <p className="text-2xl font-black text-slate-900 dark:text-white">{total}</p>
@@ -411,7 +411,7 @@ export default function SchedulePage() {
             <CalendarIcon size={18} />
           </div>
         </div>
-        <div className="bg-white dark:bg-[#0e1322] border border-slate-200 dark:border-[#1e2742] p-4 flex items-center justify-between rounded-2xl shadow-sm dark:shadow-none transition-colors duration-200">
+        <div className="bg-white dark:bg-[#0e1322] border border-slate-200 dark:border-[#1e2742] p-4 flex items-center justify-between rounded-2xl shadow-sm dark:shadow-none">
           <div>
             <p className="text-[9px] font-black uppercase tracking-widest text-emerald-600 dark:text-emerald-400">Đã Hoàn Thành</p>
             <p className="text-2xl font-black text-emerald-600 dark:text-emerald-400">{done}</p>
@@ -420,7 +420,7 @@ export default function SchedulePage() {
             <CheckCircle2 size={18} />
           </div>
         </div>
-        <div className="bg-white dark:bg-[#0e1322] border border-slate-200 dark:border-[#1e2742] p-4 flex items-center justify-between rounded-2xl shadow-sm dark:shadow-none transition-colors duration-200">
+        <div className="bg-white dark:bg-[#0e1322] border border-slate-200 dark:border-[#1e2742] p-4 flex items-center justify-between rounded-2xl shadow-sm dark:shadow-none">
           <div>
             <p className="text-[9px] font-black uppercase tracking-widest text-cyan-600 dark:text-cyan-400">Sắp Diễn Ra</p>
             <p className="text-2xl font-black text-cyan-600 dark:text-cyan-400">{upcoming}</p>
@@ -432,7 +432,7 @@ export default function SchedulePage() {
       </div>
 
       {/* Toolbar */}
-      <div className="flex flex-wrap items-center justify-between gap-3 bg-white dark:bg-[#0e1322] border border-slate-200 dark:border-[#1e2742] p-3 rounded-2xl shrink-0 shadow-sm dark:shadow-none transition-colors duration-200">
+      <div className="flex flex-wrap items-center justify-between gap-3 bg-white dark:bg-[#0e1322] border border-slate-200 dark:border-[#1e2742] p-3 rounded-2xl shrink-0 shadow-sm dark:shadow-none">
         <div className="flex items-center gap-2">
           <input
             type="month"

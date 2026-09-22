@@ -38,7 +38,7 @@ export const AnimatedThemeToggle: React.FC<AnimatedThemeToggleProps> = ({
     <button
       type="button"
       onClick={toggleTheme}
-      className={`inline-flex items-center justify-center border border-slate-200 dark:border-white/15 bg-white dark:bg-[#0c0f1e] hover:bg-slate-100 dark:hover:bg-white/10 text-amber-500 dark:text-amber-300 transition-all cursor-pointer shadow-sm dark:shadow-md active:scale-95 shrink-0 ${sizeClasses} ${className}`}
+      className={`inline-flex items-center justify-center border border-slate-200 dark:border-white/15 bg-white dark:bg-[#0c0f1e] hover:bg-slate-100 dark:hover:bg-white/10 text-amber-500 dark:text-amber-300 cursor-pointer shadow-sm dark:shadow-md active:scale-95 shrink-0 ${sizeClasses} ${className}`}
       aria-label={isDark ? 'Chuyển sang giao diện sáng' : 'Chuyển sang giao diện tối'}
       title={isDark ? 'Giao diện Tối (Bấm để đổi sang Sáng)' : 'Giao diện Sáng (Bấm để đổi sang Tối)'}
     >
@@ -53,7 +53,7 @@ interface SolarSwitchProps {
 }
 
 const SolarSwitch: React.FC<SolarSwitchProps> = ({ isDark, size = 'md' }) => {
-  const duration = 0.65;
+  const duration = 0.2;
 
   const moonVariants = {
     checked: {

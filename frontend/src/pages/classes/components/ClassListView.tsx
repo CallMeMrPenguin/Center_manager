@@ -63,7 +63,7 @@ export const ClassListView: React.FC<ClassListViewProps> = ({
       </div>
 
       {/* SEARCH & FILTER */}
-      <div className="flex items-center justify-between bg-white dark:bg-[#0f131f] border border-slate-200 dark:border-white/10 p-3.5 rounded-2xl shadow-sm transition-colors duration-200">
+      <div className="flex items-center justify-between bg-white dark:bg-[#0f131f] border border-slate-200 dark:border-white/10 p-3.5 rounded-2xl shadow-sm">
         <div className="relative flex-1 max-w-md">
           <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
           <input

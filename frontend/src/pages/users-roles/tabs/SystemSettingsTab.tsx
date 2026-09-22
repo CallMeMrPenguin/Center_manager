@@ -9,7 +9,7 @@ export const SystemSettingsTab: React.FC = () => {
   return (
     <div className="space-y-4 select-none">
       {/* 1. Theme & Appearance Settings */}
-      <div className="bg-white dark:bg-[#0c0f1e] border border-slate-200 dark:border-[#1e2742] rounded-2xl p-5 shadow-sm dark:shadow-lg space-y-4 transition-colors duration-200">
+      <div className="bg-white dark:bg-[#0c0f1e] border border-slate-200 dark:border-[#1e2742] rounded-2xl p-5 shadow-sm dark:shadow-lg space-y-4">
         <div className="flex items-center justify-between border-b border-slate-200 dark:border-white/10 pb-3">
           <div className="flex items-center gap-2.5">
             <Sparkles size={18} className="text-indigo-500 dark:text-indigo-400" />
@@ -30,7 +30,7 @@ export const SystemSettingsTab: React.FC = () => {
           <button
             type="button"
             onClick={() => setTheme('light')}
-            className={`p-4 rounded-xl border text-left transition-all duration-200 cursor-pointer flex flex-col gap-2 relative overflow-hidden ${
+            className={`p-4 rounded-xl border text-left cursor-pointer flex flex-col gap-2 relative overflow-hidden ${
               theme === 'light'
                 ? 'bg-indigo-50/70 border-indigo-500 shadow-md ring-2 ring-indigo-500/20'
                 : 'bg-slate-50 hover:bg-slate-100 dark:bg-[#121626] dark:hover:bg-[#181e33] border-slate-200 dark:border-[#232c49]'
@@ -60,7 +60,7 @@ export const SystemSettingsTab: React.FC = () => {
           <button
             type="button"
             onClick={() => setTheme('dark')}
-            className={`p-4 rounded-xl border text-left transition-all duration-200 cursor-pointer flex flex-col gap-2 relative overflow-hidden ${
+            className={`p-4 rounded-xl border text-left cursor-pointer flex flex-col gap-2 relative overflow-hidden ${
               theme === 'dark'
                 ? 'bg-indigo-950/40 border-indigo-500 shadow-md ring-2 ring-indigo-500/20'
                 : 'bg-slate-50 hover:bg-slate-100 dark:bg-[#121626] dark:hover:bg-[#181e33] border-slate-200 dark:border-[#232c49]'
@@ -89,7 +89,7 @@ export const SystemSettingsTab: React.FC = () => {
       </div>
 
       {/* 2. Offline-First & Local DB Status */}
-      <div className="bg-white dark:bg-[#0c0f1e] border border-slate-200 dark:border-[#1e2742] rounded-2xl p-5 shadow-sm dark:shadow-lg space-y-4 transition-colors duration-200">
+      <div className="bg-white dark:bg-[#0c0f1e] border border-slate-200 dark:border-[#1e2742] rounded-2xl p-5 shadow-sm dark:shadow-lg space-y-4">
         <div className="flex items-center gap-2.5 border-b border-slate-200 dark:border-white/10 pb-3">
           <Database size={18} className="text-emerald-500 dark:text-emerald-400" />
           <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider">
@@ -131,7 +131,7 @@ export const SystemSettingsTab: React.FC = () => {
       </div>
 
       {/* 3. VPS PostgreSQL Cloud Sync (Future Ready) */}
-      <div className="bg-white dark:bg-[#0c0f1e] border border-slate-200 dark:border-[#1e2742] rounded-2xl p-5 shadow-sm dark:shadow-lg space-y-4 transition-colors duration-200">
+      <div className="bg-white dark:bg-[#0c0f1e] border border-slate-200 dark:border-[#1e2742] rounded-2xl p-5 shadow-sm dark:shadow-lg space-y-4">
         <div className="flex items-center gap-2.5 border-b border-slate-200 dark:border-white/10 pb-3">
           <Cloud size={18} className="text-sky-500 dark:text-sky-400" />
           <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider">

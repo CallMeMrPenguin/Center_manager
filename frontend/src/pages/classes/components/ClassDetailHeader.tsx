@@ -50,7 +50,7 @@ export const ClassDetailHeader: React.FC<ClassDetailHeaderProps> = ({
   savingAttendance,
 }) => {
   return (
-    <div className="bg-white dark:bg-[#0c0f1e] border border-slate-200 dark:border-[#1e2742] rounded-2xl p-4 shadow-sm dark:shadow-xl space-y-4 transition-colors duration-200">
+    <div className="bg-white dark:bg-[#0c0f1e] border border-slate-200 dark:border-[#1e2742] rounded-2xl p-4 shadow-sm dark:shadow-xl space-y-4">
       {/* ROW 1: BACK + CLASS IDENTITY + BADGES + SUB-TAB SELECTOR */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         {/* LEFT: BACK BUTTON & CLASS INFO */}
