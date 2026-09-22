@@ -21,6 +21,7 @@ interface ChartControlsProps {
   setChartViewMode: (mode: 'timeline' | 'distribution') => void;
   distributionStats?: DistributionStats;
   hideDistributionToggle?: boolean;
+  gradeTypesList?: any[];
 }
 
 export const ChartControls: React.FC<ChartControlsProps> = ({
@@ -38,7 +39,20 @@ export const ChartControls: React.FC<ChartControlsProps> = ({
   setChartViewMode,
   distributionStats,
   hideDistributionToggle = false,
+  gradeTypesList,
 }) => {
+  const c1Item = gradeTypesList?.find((g: any) => g.id === 'check_1');
+  const c2Item = gradeTypesList?.find((g: any) => g.id === 'check_2');
+  const hwItem = gradeTypesList?.find((g: any) => g.id === 'homework');
+
+  const c1Color = c1Item?.color || '#3b82f6';
+  const c2Color = c2Item?.color || '#a855f7';
+  const hwColor = hwItem?.color || '#10b981';
+
+  const c1Label = c1Item?.label || 'Từ Vựng';
+  const c2Label = c2Item?.label || 'Ngữ Pháp';
+  const hwLabel = hwItem?.label || 'BTVN';
+
   return (
     <div className="flex flex-col gap-3.5 border-b border-slate-200 dark:border-[#181f36] pb-3">
       {/* 1. TOP HEADER: View Mode Toggle & Mode Title */}
@@ -77,17 +91,38 @@ export const ChartControls: React.FC<ChartControlsProps> = ({
         <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-200 dark:border-white/5 text-xs">
           {/* Legend with Predictions */}
           <div className="flex flex-wrap items-center gap-3 text-[11px] font-bold">
-            <span className="flex items-center gap-1.5 text-blue-600 dark:text-blue-400 bg-blue-500/10 border border-blue-500/20 px-2.5 py-1 rounded-lg">
-              <span className="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.8)]" />
-              Từ Vựng (Dự đoán: {format1Dec(engine?.pred_c1 ?? 0)})
+            <span
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg border font-extrabold"
+              style={{
+                color: c1Color,
+                backgroundColor: `${c1Color}18`,
+                borderColor: `${c1Color}35`,
+              }}
+            >
+              <span className="w-2 h-2 rounded-full shadow-xs" style={{ backgroundColor: c1Color }} />
+              {c1Label} (Dự đoán: {format1Dec(engine?.pred_c1 ?? 0)})
             </span>
-            <span className="flex items-center gap-1.5 text-cyan-600 dark:text-cyan-400 bg-cyan-500/10 border border-cyan-500/20 px-2.5 py-1 rounded-lg">
-              <span className="w-2 h-2 rounded-full bg-cyan-500 shadow-[0_0_8px_rgba(6,182,212,0.8)]" />
-              Ngữ Pháp (Dự đoán: {format1Dec(engine?.pred_c2 ?? 0)})
+            <span
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg border font-extrabold"
+              style={{
+                color: c2Color,
+                backgroundColor: `${c2Color}18`,
+                borderColor: `${c2Color}35`,
+              }}
+            >
+              <span className="w-2 h-2 rounded-full shadow-xs" style={{ backgroundColor: c2Color }} />
+              {c2Label} (Dự đoán: {format1Dec(engine?.pred_c2 ?? 0)})
             </span>
-            <span className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-lg">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]" />
-              BTVN (Dự đoán: {format1Dec(engine?.pred_hw ?? 0)})
+            <span
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg border font-extrabold"
+              style={{
+                color: hwColor,
+                backgroundColor: `${hwColor}18`,
+                borderColor: `${hwColor}35`,
+              }}
+            >
+              <span className="w-2 h-2 rounded-full shadow-xs" style={{ backgroundColor: hwColor }} />
+              {hwLabel} (Dự đoán: {format1Dec(engine?.pred_hw ?? 0)})
             </span>
           </div>
 

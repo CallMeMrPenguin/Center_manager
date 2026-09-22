@@ -38,13 +38,12 @@ export const ResultHistoryTable: React.FC<ResultHistoryTableProps> = ({ records,
           const isPresent = status === 'Có mặt';
           return (
             <span
-              className={`px-2.5 py-0.5 rounded-full text-xs font-black inline-flex items-center gap-1 border ${
+              className={`px-2.5 py-0.5 rounded-full text-xs font-black inline-flex items-center justify-center border ${
                 isPresent
                   ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-emerald-500/30'
                   : 'bg-rose-500/15 text-rose-700 dark:text-rose-400 border-rose-500/30'
               }`}
             >
-              <span className={`w-1.5 h-1.5 rounded-full ${isPresent ? 'bg-emerald-500' : 'bg-rose-500'}`} />
               {status || 'Có mặt'}
             </span>
           );

@@ -72,13 +72,12 @@ export const AttendanceGradesTab: React.FC<AttendanceGradesTabProps> = ({
                   const newStatus = isAbsent ? 'Có mặt' : 'Vắng mặt';
                   onUpdateRecord(rec.student_id, 'status', newStatus);
                 }}
-                className={`px-3 py-1.5 rounded-xl font-black text-xs transition cursor-pointer border flex items-center justify-center gap-1.5 ${
+                className={`px-3 py-1.5 rounded-xl font-black text-xs transition cursor-pointer border flex items-center justify-center ${
                   isAbsent
                     ? 'bg-rose-500/20 border-rose-500/50 text-rose-700 dark:text-rose-300 hover:bg-rose-500/30'
                     : 'bg-emerald-500/20 border-emerald-500/50 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-500/30'
                 }`}
               >
-                <span className={`w-2 h-2 rounded-full ${isAbsent ? 'bg-rose-500' : 'bg-emerald-500'}`} />
                 <span>{rec.status || 'Có mặt'}</span>
               </button>
             </div>
@@ -206,19 +205,21 @@ export const AttendanceGradesTab: React.FC<AttendanceGradesTabProps> = ({
           if (val === undefined || val === null || val <= 0) {
             return (
               <div className="flex items-center justify-center">
-                <span className="text-slate-600 font-bold text-xs">-</span>
+                <span className="text-slate-400 dark:text-slate-500 font-bold font-mono text-xs">-</span>
               </div>
             );
           }
-          const isLarge = val >= 1.5;
+          const badgeClass =
+            val >= 2.5
+              ? 'bg-rose-100 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border-rose-300 dark:border-rose-700/60'
+              : val >= 1.5
+              ? 'bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border-amber-300 dark:border-amber-700/60'
+              : 'bg-slate-100 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 border-slate-300 dark:border-slate-700';
+
           return (
             <div className="flex items-center justify-center">
               <span
-                className={`px-2 py-0.5 rounded-lg text-xs font-black transition ${
-                  isLarge
-                    ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 shadow-[0_0_8px_rgba(245,158,11,0.2)]'
-                    : 'bg-white/5 text-slate-300 border border-white/10'
-                }`}
+                className={`px-2.5 py-0.5 rounded-lg text-xs font-black font-mono border shadow-xs transition ${badgeClass}`}
                 title={`Độ lệch tuyệt đối: |BTVN - TB Check| = ${format1Dec(val)} điểm`}
               >
                 {format1Dec(val)}

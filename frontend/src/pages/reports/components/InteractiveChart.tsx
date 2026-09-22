@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { ChartControls } from './ChartControls';
 import { ChartSvgPlot } from './ChartSvgPlot';
+import { ChartHoverTooltip } from './ChartHoverTooltip';
 import { DistributionPlot } from './DistributionPlot';
 import { ChartSessionItem, HoveredChartPoint } from '../types';
 import { DistributionStats, GradeTypeFilterKey, DistributionScoreBin } from '../utils/distributionAnalytics';
@@ -27,6 +27,7 @@ interface InteractiveChartProps {
   selectedScoreBin?: DistributionScoreBin | null;
   onSelectScoreBin?: (bin: DistributionScoreBin) => void;
   hideDistributionToggle?: boolean;
+  gradeTypesList?: any[];
 }
 
 export const InteractiveChart: React.FC<InteractiveChartProps> = ({
@@ -49,6 +50,7 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = ({
   selectedScoreBin,
   onSelectScoreBin,
   hideDistributionToggle = false,
+  gradeTypesList,
 }) => {
   const chartWrapperRef = useRef<HTMLDivElement>(null);
   const [hoveredPoint, setHoveredPoint] = useState<HoveredChartPoint | null>(null);
@@ -222,6 +224,7 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = ({
         setChartViewMode={setChartViewMode}
         distributionStats={distributionStats}
         hideDistributionToggle={hideDistributionToggle}
+        gradeTypesList={gradeTypesList}
       />
 
       {/* VIEW 1: TIMELINE LINE CHART */}
@@ -271,105 +274,15 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = ({
             fittedLookup={fittedLookup}
             hoveredPoint={hoveredPoint}
             setHoveredPoint={setHoveredPoint}
+            gradeTypesList={gradeTypesList}
           />
 
           {/* Floating Hover Tooltip Card */}
-          {hoveredPoint && (() => {
-            const cardWidth = 200;
-            const cardHeight = 160;
-            const pointX = hoveredPoint.x;
-            const pointY = hoveredPoint.y ?? 100;
-
-            let left = pointX;
-            let top = pointY - 14;
-            let transform = 'translate(-50%, -100%)';
-
-            if (pointY < cardHeight + 20) {
-              top = pointY + 18;
-              transform = 'translate(-50%, 0)';
-            }
-
-            if (pointX < cardWidth / 2 + 16) {
-              left = 16;
-              transform = transform.replace('-50%', '0%');
-            } else if (pointX > chartWidth - (cardWidth / 2 + 16)) {
-              left = chartWidth - 16;
-              transform = transform.replace('-50%', '-100%');
-            }
-
-            return (
-              <AnimatePresence>
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.94, y: 6 }}
-                  animate={{ opacity: 1, scale: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.94, y: 4 }}
-                  transition={{ type: 'spring', stiffness: 450, damping: 28 }}
-                  className="absolute z-30 pointer-events-none bg-white dark:bg-[#141417] border border-slate-200 dark:border-[#27272a] p-3.5 rounded-2xl shadow-xl dark:shadow-[0_16px_40px_rgba(0,0,0,0.95)] text-xs font-sans min-w-[210px] select-none"
-                  style={{
-                    left: `${left}px`,
-                    top: `${top}px`,
-                    transform,
-                  }}
-                >
-                  <div className="font-black text-slate-900 dark:text-white border-b border-slate-200 dark:border-white/10 pb-1.5 flex items-center justify-between gap-4">
-                    <span className="text-blue-600 dark:text-blue-400">{hoveredPoint.sessionName}</span>
-                    <span className="text-[10px] text-slate-500 dark:text-slate-400 font-mono bg-slate-100 dark:bg-white/5 px-1.5 py-0.5 rounded">{hoveredPoint.fullDate}</span>
-                  </div>
-                  <div className="space-y-1.5 pt-2">
-                    <div className="flex items-center justify-between gap-4">
-                      <span className="text-blue-500 dark:text-blue-400 font-bold">Từ Vựng:</span>
-                      <div className="flex items-center gap-1.5">
-                        <span className="font-mono font-black text-slate-900 dark:text-white">
-                          {hoveredPoint.check1 > 0 ? format1Dec(hoveredPoint.check1) : '-'}
-                        </span>
-                        {hoveredPoint.check1 > 0 && hoveredPoint.fittedC1 !== null && (
-                          <span className="text-[10px] font-mono text-slate-400">({format1Dec(hoveredPoint.fittedC1)})</span>
-                        )}
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-between gap-4">
-                      <span className="text-cyan-600 dark:text-cyan-400 font-bold">Ngữ Pháp:</span>
-                      <div className="flex items-center gap-1.5">
-                        <span className="font-mono font-black text-slate-900 dark:text-white">
-                          {hoveredPoint.check2 > 0 ? format1Dec(hoveredPoint.check2) : '-'}
-                        </span>
-                        {hoveredPoint.check2 > 0 && hoveredPoint.fittedC2 !== null && (
-                          <span className="text-[10px] font-mono text-slate-400">({format1Dec(hoveredPoint.fittedC2)})</span>
-                        )}
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-between gap-4">
-                      <span className="text-emerald-500 dark:text-emerald-400 font-bold">BTVN:</span>
-                      <div className="flex items-center gap-1.5">
-                        <span className="font-mono font-black text-slate-900 dark:text-white">
-                          {hoveredPoint.homework > 0 ? format1Dec(hoveredPoint.homework) : '-'}
-                        </span>
-                        {hoveredPoint.homework > 0 && hoveredPoint.fittedHw !== null && (
-                          <span className="text-[10px] font-mono text-slate-400">({format1Dec(hoveredPoint.fittedHw)})</span>
-                        )}
-                      </div>
-                    </div>
-                    {(() => {
-                      let wSum = 0;
-                      let wTot = 0;
-                      if (hoveredPoint.check1 > 0) { wSum += hoveredPoint.check1 * 0.55; wTot += 0.55; }
-                      if (hoveredPoint.check2 > 0) { wSum += hoveredPoint.check2 * 0.35; wTot += 0.35; }
-                      if (hoveredPoint.homework > 0) { wSum += hoveredPoint.homework * 0.10; wTot += 0.10; }
-                      const avgVal = wTot > 0 ? trunc1Dec(wSum / wTot) : 0;
-                      return (
-                        <div className="border-t border-slate-200 dark:border-white/10 pt-1.5 flex items-center justify-between gap-4">
-                          <span className="text-blue-600 dark:text-blue-400 font-extrabold">Điểm TB Buổi:</span>
-                          <span className="font-mono font-black text-blue-600 dark:text-blue-400">
-                            {avgVal > 0 ? format1Dec(avgVal) : '-'}
-                          </span>
-                        </div>
-                      );
-                    })()}
-                  </div>
-                </motion.div>
-              </AnimatePresence>
-            );
-          })()}
+          <ChartHoverTooltip
+            hoveredPoint={hoveredPoint}
+            chartWidth={chartWidth}
+            gradeTypesList={gradeTypesList}
+          />
         </div>
       ) : (
         /* VIEW 2: SCORE DISTRIBUTION ACROSS SKILLS */

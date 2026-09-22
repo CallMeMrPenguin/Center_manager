@@ -114,6 +114,7 @@ export const ResultsPage: React.FC = () => {
           selectedScoreBin={selectedScoreBin}
           onSelectScoreBin={handleSelectScoreBin}
           hideDistributionToggle={isStudent}
+          gradeTypesList={gradeTypesList}
         />
       </div>
 

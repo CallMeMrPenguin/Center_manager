@@ -153,6 +153,7 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
           setSelectedGradeTypeFilter={setSelectedGradeTypeFilter}
           selectedScoreBin={selectedScoreBin}
           onSelectScoreBin={handleSelectScoreBin}
+          gradeTypesList={gradeTypesList}
         />
       </div>
 
