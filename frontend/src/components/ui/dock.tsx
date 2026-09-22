@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useRef } from 'react';
+import React, { createContext, useContext, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, useMotionValue, useSpring, useTransform, MotionValue } from 'framer-motion';
 
 interface DockContextType {
@@ -9,6 +10,16 @@ interface DockContextType {
 }
 
 const DockContext = createContext<DockContextType | null>(null);
+
+interface ItemContextType {
+  isHovered: boolean;
+  tooltipPos: { top: number; left: number };
+}
+
+const ItemContext = createContext<ItemContextType>({
+  isHovered: false,
+  tooltipPos: { top: 0, left: 0 },
+});
 
 export interface DockProps {
   children: React.ReactNode;
@@ -70,6 +81,9 @@ export const DockItem: React.FC<{
   const context = useContext(DockContext);
   const ref = useRef<HTMLDivElement>(null);
 
+  const [isHovered, setIsHovered] = useState(false);
+  const [tooltipPos, setTooltipPos] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
+
   const mousePos = context?.mousePos ?? new MotionValue(Infinity);
   const orientation = context?.orientation ?? 'vertical';
   const distance = context?.distance ?? 85;
@@ -95,17 +109,36 @@ export const DockItem: React.FC<{
   const activeStyles = '!bg-[#2563eb] !text-white !border-0 shadow-md shadow-blue-500/30';
   const inactiveStyles = 'bg-transparent hover:bg-slate-200/70 dark:hover:bg-white/[0.08] text-slate-700 dark:text-slate-300 border-0 shadow-none';
 
+  const handleMouseEnter = () => {
+    if (ref.current) {
+      const rect = ref.current.getBoundingClientRect();
+      setTooltipPos({
+        top: rect.top + rect.height / 2,
+        left: rect.right + 12,
+      });
+    }
+    setIsHovered(true);
+  };
+
+  const handleMouseLeave = () => {
+    setIsHovered(false);
+  };
+
   return (
-    <motion.div
-      ref={ref}
-      style={{ scale }}
-      onClick={onClick}
-      className={`relative group flex items-center justify-center w-10 h-10 mx-auto rounded-xl cursor-pointer shrink-0 ${
-        isActive ? activeStyles : inactiveStyles
-      } ${className}`}
-    >
-      {children}
-    </motion.div>
+    <ItemContext.Provider value={{ isHovered, tooltipPos }}>
+      <motion.div
+        ref={ref}
+        style={{ scale }}
+        onClick={onClick}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        className={`relative flex items-center justify-center w-10 h-10 mx-auto rounded-xl cursor-pointer shrink-0 ${
+          isActive ? activeStyles : inactiveStyles
+        } ${className}`}
+      >
+        {children}
+      </motion.div>
+    </ItemContext.Provider>
   );
 };
 
@@ -131,14 +164,27 @@ export const DockLabel: React.FC<{ children: React.ReactNode; className?: string
   children,
   className = '',
 }) => {
-  return (
+  const { isHovered, tooltipPos } = useContext(ItemContext);
+
+  if (!isHovered || typeof document === 'undefined') return null;
+
+  return createPortal(
     <div
-      className={`absolute left-full top-1/2 -translate-y-1/2 ml-3 z-50 pointer-events-none opacity-0 group-hover:opacity-100 transition-all duration-150 scale-95 group-hover:scale-100 whitespace-nowrap shadow-xl ${className}`}
+      style={{
+        position: 'fixed',
+        top: `${tooltipPos.top}px`,
+        left: `${tooltipPos.left}px`,
+        transform: 'translateY(-50%)',
+        zIndex: 99999,
+        pointerEvents: 'none',
+      }}
+      className={`whitespace-nowrap select-none animate-in fade-in zoom-in-95 duration-150 ${className}`}
     >
       <div className="px-2.5 py-1 rounded-xl bg-white dark:bg-[#0c0f1e] border border-slate-200 dark:border-[#212c4b] text-slate-900 dark:text-white text-xs font-black whitespace-nowrap shadow-xl dark:shadow-[0_8px_24px_rgba(0,0,0,0.9)]">
         {children}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

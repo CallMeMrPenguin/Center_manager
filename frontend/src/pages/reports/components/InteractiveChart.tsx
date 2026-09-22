@@ -205,7 +205,7 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = ({
   return (
     <div
       ref={chartWrapperRef}
-      className="bg-white dark:bg-[#0b0f19] p-6 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.08)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.45)] flex flex-col gap-6 relative select-none animate-cascade-2 transition-colors"
+      className="bg-white dark:bg-[#141d38] border border-slate-200 dark:border-[#24335c] p-6 rounded-2xl shadow-sm dark:shadow-xl flex flex-col gap-6 relative select-none animate-cascade-2 transition-colors"
     >
       <ChartControls
         engine={engine}
@@ -229,7 +229,7 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = ({
         <div
           className={`relative overflow-hidden cursor-${
             isDragging ? 'grabbing' : zoomLevel > 1.0 ? 'grab' : 'default'
-          } select-none rounded-2xl bg-white dark:bg-[#080b14]/50 border border-slate-200 dark:border-[#141b2e] shadow-sm dark:shadow-none`}
+          } select-none rounded-2xl bg-white dark:bg-[#0b1021] border border-slate-200 dark:border-[#1e2a4a] shadow-sm dark:shadow-none`}
           onMouseDown={(e) => {
             if (zoomLevel > 1.0 && e.button === 0) {
               setIsDragging(true);

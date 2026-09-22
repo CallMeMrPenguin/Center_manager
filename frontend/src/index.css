@@ -381,8 +381,8 @@ input[type="month"] {
   box-shadow: 0 4px 20px rgba(15, 23, 42, 0.07), 0 1px 3px rgba(15, 23, 42, 0.04) !important;
 }
 .dark .kpi-card-red {
-  border: none !important;
-  background: #190e14 !important;
+  border: 1px solid rgba(239, 68, 68, 0.25) !important;
+  background: #2a1118 !important;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
 }
 
@@ -394,8 +394,8 @@ input[type="month"] {
   box-shadow: 0 4px 20px rgba(15, 23, 42, 0.07), 0 1px 3px rgba(15, 23, 42, 0.04) !important;
 }
 .dark .kpi-card-blue {
-  border: none !important;
-  background: #0d1222 !important;
+  border: 1px solid rgba(59, 130, 246, 0.25) !important;
+  background: #142044 !important;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
 }
 
@@ -407,8 +407,8 @@ input[type="month"] {
   box-shadow: 0 4px 20px rgba(15, 23, 42, 0.07), 0 1px 3px rgba(15, 23, 42, 0.04) !important;
 }
 .dark .kpi-card-purple {
-  border: none !important;
-  background: #140e20 !important;
+  border: 1px solid rgba(168, 85, 247, 0.25) !important;
+  background: #201344 !important;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
 }
 
@@ -420,8 +420,8 @@ input[type="month"] {
   box-shadow: 0 4px 20px rgba(15, 23, 42, 0.07), 0 1px 3px rgba(15, 23, 42, 0.04) !important;
 }
 .dark .kpi-card-amber {
-  border: none !important;
-  background: #18130d !important;
+  border: 1px solid rgba(245, 158, 11, 0.25) !important;
+  background: #2c1b0c !important;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
 }
 

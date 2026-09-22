@@ -246,8 +246,8 @@ export const StudentGradeHistoryTable: React.FC<StudentGradeHistoryTableProps> =
   ], [onOpenEditModal]);
 
   return (
-    <div className={`bg-white dark:bg-[#0d1120] rounded-2xl flex flex-col shadow-[0_4px_24px_rgba(0,0,0,0.08)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.5)] mb-8 transition-colors ${hasSelectedStudent ? 'animate-cascade-5' : 'animate-cascade-4'}`}>
-      <div className="px-5 py-4 border-b border-slate-200 dark:border-[#181f36] flex flex-wrap items-center justify-between gap-4">
+    <div className={`bg-white dark:bg-[#141d38] border border-slate-200 dark:border-[#24335c] rounded-2xl flex flex-col shadow-sm dark:shadow-xl mb-8 transition-colors ${hasSelectedStudent ? 'animate-cascade-5' : 'animate-cascade-4'}`}>
+      <div className="px-5 py-4 border-b border-slate-200 dark:border-[#24335c] flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <History size={18} className="text-indigo-500 dark:text-indigo-400" />
           <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider">
