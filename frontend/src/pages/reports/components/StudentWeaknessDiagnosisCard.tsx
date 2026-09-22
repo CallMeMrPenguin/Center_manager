@@ -102,7 +102,7 @@ export const StudentWeaknessDiagnosisCard: React.FC<StudentWeaknessDiagnosisCard
         header: () => <div className="text-center w-full">STT</div>,
         meta: { headerText: 'STT', exportValue: (_: any, idx: number) => idx + 1 },
         cell: ({ row }) => (
-          <div className="text-center font-extrabold text-slate-700 dark:text-slate-300 text-xs">{row.index + 1}</div>
+          <div className="text-center font-extrabold text-slate-700 dark:text-slate-300 text-sm sm:text-base">{row.index + 1}</div>
         ),
         enableSorting: false,
         enableGlobalFilter: false,
@@ -117,13 +117,13 @@ export const StudentWeaknessDiagnosisCard: React.FC<StudentWeaknessDiagnosisCard
         cell: ({ row }) => {
           const r = row.original;
           return (
-            <div className="font-extrabold text-slate-900 dark:text-white text-sm flex items-center justify-between gap-2">
+            <div className="font-extrabold text-slate-900 dark:text-white text-base sm:text-lg flex items-center justify-between gap-2">
               <span>
                 {r.student_name}
                 {r.nickname ? ` - ${r.nickname}` : ''}
               </span>
               {r.class_name && (
-                <span className="text-[10px] text-slate-600 dark:text-slate-400 font-medium">({r.class_name})</span>
+                <span className="text-xs text-slate-500 dark:text-slate-400 font-semibold">({r.class_name})</span>
               )}
             </div>
           );
@@ -142,11 +142,11 @@ export const StudentWeaknessDiagnosisCard: React.FC<StudentWeaknessDiagnosisCard
               <span
                 className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-black border ${
                   isUrgent
-                    ? 'bg-rose-500/15 text-rose-300 border-rose-500/40 animate-pulse'
-                    : 'bg-amber-500/15 text-amber-300 border-amber-500/40'
+                    ? 'bg-rose-500/15 text-rose-700 dark:text-rose-300 border-rose-500/40 animate-pulse'
+                    : 'bg-amber-500/15 text-amber-700 dark:text-amber-300 border-amber-500/40'
                 }`}
               >
-                {isUrgent && <AlertTriangle size={12} className="text-rose-400" />}
+                {isUrgent && <AlertTriangle size={12} className="text-rose-500" />}
                 {r.status}
               </span>
             </div>
@@ -183,25 +183,25 @@ export const StudentWeaknessDiagnosisCard: React.FC<StudentWeaknessDiagnosisCard
                 return (
                   <span
                     key={`${u.unit_key}-${i}`}
-                    className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold border ${
+                    className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-bold border ${
                       isUrgent
-                        ? 'bg-rose-950/60 border-rose-500/50 text-rose-200'
+                        ? 'bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/60 dark:border-rose-500/50 dark:text-rose-200'
                         : isGrammar
-                        ? 'bg-purple-950/50 border-purple-500/40 text-purple-200'
-                        : 'bg-blue-950/50 border-blue-500/40 text-blue-200'
+                        ? 'bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950/50 dark:border-purple-500/40 dark:text-purple-200'
+                        : 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/50 dark:border-blue-500/40 dark:text-blue-200'
                     }`}
                   >
                     <span
                       className={`w-1.5 h-1.5 rounded-full ${
-                        isUrgent ? 'bg-rose-400' : isGrammar ? 'bg-purple-400' : 'bg-blue-400'
+                        isUrgent ? 'bg-rose-500' : isGrammar ? 'bg-purple-500' : 'bg-blue-500'
                       }`}
                     />
-                    <span className="truncate max-w-[170px]" title={u.topic_name}>
+                    <span className="truncate max-w-[180px]" title={u.topic_name}>
                       {u.topic_name}
                     </span>
                     <span
                       className={`font-mono font-black ${
-                        isUrgent ? 'text-rose-300' : 'text-slate-300'
+                        isUrgent ? 'text-rose-600 dark:text-rose-300' : 'text-slate-700 dark:text-slate-300'
                       }`}
                     >
                       {format1Dec(u.avg_score)}đ
@@ -259,7 +259,7 @@ export const StudentWeaknessDiagnosisCard: React.FC<StudentWeaknessDiagnosisCard
   );
 
   return (
-    <div className="bg-white dark:bg-[#0c0f1d] border border-slate-200 dark:border-white/10 rounded-2xl p-5 shadow-sm dark:shadow-xl space-y-4 select-none">
+    <div className="bg-white dark:bg-[#0c0f1d] border border-slate-300 dark:border-white/10 rounded-2xl p-5 shadow-sm dark:shadow-xl space-y-4 select-none">
       {/* 1. Header with Stats & Filter Pills */}
       <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 dark:border-white/5 pb-4">
         <div>
@@ -276,13 +276,13 @@ export const StudentWeaknessDiagnosisCard: React.FC<StudentWeaknessDiagnosisCard
         </div>
 
         {/* Filter Pills */}
-        <div className="flex items-center gap-2 bg-slate-100 dark:bg-[#121626] border border-slate-200 dark:border-white/10 p-1 rounded-xl text-xs font-bold">
+        <div className="flex items-center gap-1 bg-slate-100 dark:bg-[#121626] border border-slate-200 dark:border-white/10 p-0.5 rounded-lg text-xs font-bold">
           <button
             type="button"
             onClick={() => setSkillFilter('all')}
-            className={`px-3 py-1 rounded-lg transition-colors cursor-pointer ${
+            className={`px-3 py-1 rounded-md transition-colors cursor-pointer ${
               skillFilter === 'all'
-                ? 'bg-indigo-600 text-white font-black'
+                ? 'bg-blue-600 text-white font-black shadow-sm'
                 : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
@@ -291,9 +291,9 @@ export const StudentWeaknessDiagnosisCard: React.FC<StudentWeaknessDiagnosisCard
           <button
             type="button"
             onClick={() => setSkillFilter('grammar')}
-            className={`px-3 py-1 rounded-lg transition-colors cursor-pointer ${
+            className={`px-3 py-1 rounded-md transition-colors cursor-pointer ${
               skillFilter === 'grammar'
-                ? 'bg-purple-600 text-white font-black'
+                ? 'bg-blue-600 text-white font-black shadow-sm'
                 : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
@@ -302,9 +302,9 @@ export const StudentWeaknessDiagnosisCard: React.FC<StudentWeaknessDiagnosisCard
           <button
             type="button"
             onClick={() => setSkillFilter('vocab')}
-            className={`px-3 py-1 rounded-lg transition-colors cursor-pointer ${
+            className={`px-3 py-1 rounded-md transition-colors cursor-pointer ${
               skillFilter === 'vocab'
-                ? 'bg-blue-600 text-white font-black'
+                ? 'bg-blue-600 text-white font-black shadow-sm'
                 : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
             }`}
           >

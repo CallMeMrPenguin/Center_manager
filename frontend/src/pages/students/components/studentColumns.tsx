@@ -141,7 +141,7 @@ export const createStudentColumns = (
         <button
           type="button"
           onClick={() => handleOpenEdit(row.original)}
-          className="p-1.5 rounded-xl bg-slate-100 hover:bg-indigo-50 dark:bg-white/5 dark:hover:bg-[#5c36f5]/20 text-slate-700 hover:text-indigo-600 dark:text-slate-300 dark:hover:text-indigo-300 border border-slate-300 dark:border-transparent transition cursor-pointer"
+          className="p-1.5 rounded-xl bg-slate-100 hover:bg-blue-50 dark:bg-white/5 dark:hover:bg-blue-500/20 text-slate-700 hover:text-blue-600 dark:text-slate-300 dark:hover:text-blue-300 border border-slate-300 dark:border-transparent transition cursor-pointer"
           title="Sửa thông tin học sinh"
         >
           <Edit3 size={15} />

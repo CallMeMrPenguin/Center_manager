@@ -46,7 +46,7 @@ export const TeacherDetailCard: React.FC<TeacherDetailCardProps> = ({ teacher, o
         <button
           type="button"
           onClick={onEdit}
-          className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[#5c36f5] hover:bg-[#6e4af7] text-white text-xs font-black shadow-[0_0_14px_rgba(92,54,245,0.45)] transition cursor-pointer"
+          className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-black shadow-sm transition cursor-pointer"
         >
           <Edit3 size={13} />
           <span>Sửa thông tin & Tài khoản</span>

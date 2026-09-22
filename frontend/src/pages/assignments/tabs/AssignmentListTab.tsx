@@ -72,7 +72,7 @@ export const AssignmentListTab: React.FC<AssignmentListTabProps> = ({
                 e.stopPropagation();
                 onPlayPreview(row.original);
               }}
-              className="px-3.5 py-1.5 rounded-xl bg-[#5c36f5] hover:bg-[#6c48f7] text-white text-xs font-black shadow-[0_0_12px_rgba(92,54,245,0.4)] transition cursor-pointer active:scale-95"
+              className="px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-black shadow-sm transition cursor-pointer active:scale-95"
             >
               Vào Làm Bài
             </button>
@@ -200,7 +200,7 @@ export const AssignmentListTab: React.FC<AssignmentListTabProps> = ({
             <button
               type="button"
               onClick={onOpenCreateModal}
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#5c36f5] hover:bg-[#6c48f7] text-white text-xs font-bold shadow-lg cursor-pointer transition active:scale-95"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold shadow-sm cursor-pointer transition active:scale-95"
             >
               <Plus size={14} />
               <span>Giao Bài Tập Đầu Tiên</span>

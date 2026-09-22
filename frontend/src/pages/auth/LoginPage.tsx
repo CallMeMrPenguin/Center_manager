@@ -102,7 +102,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
                 autoCorrect="off"
                 spellCheck={false}
                 inputMode="text"
-                className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50 dark:bg-[#121626] border border-slate-200 dark:border-[#212c4b] focus:border-[#5c36f5] focus:ring-1 focus:ring-[#5c36f5] rounded-xl text-slate-900 dark:text-white text-xs font-medium placeholder-slate-400 dark:placeholder-slate-500 outline-none transition"
+                className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50 dark:bg-[#121626] border border-slate-200 dark:border-[#212c4b] focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-xl text-slate-900 dark:text-white text-xs font-medium placeholder-slate-400 dark:placeholder-slate-500 outline-none transition"
               />
             </div>
           </div>
@@ -126,7 +126,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
                 autoCapitalize="none"
                 autoCorrect="off"
                 spellCheck={false}
-                className="w-full pl-10 pr-10 py-2.5 bg-slate-50 dark:bg-[#121626] border border-slate-200 dark:border-[#212c4b] focus:border-[#5c36f5] focus:ring-1 focus:ring-[#5c36f5] rounded-xl text-slate-900 dark:text-white text-xs font-medium placeholder-slate-400 dark:placeholder-slate-500 outline-none transition"
+                className="w-full pl-10 pr-10 py-2.5 bg-slate-50 dark:bg-[#121626] border border-slate-200 dark:border-[#212c4b] focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-xl text-slate-900 dark:text-white text-xs font-medium placeholder-slate-400 dark:placeholder-slate-500 outline-none transition"
               />
               <button
                 type="button"
@@ -145,7 +145,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
                 type="checkbox"
                 checked={rememberMe}
                 onChange={(e) => setRememberMe(e.target.checked)}
-                className="w-4 h-4 rounded border-slate-300 dark:border-[#212c4b] bg-slate-50 dark:bg-[#121626] text-[#5c36f5] focus:ring-0 focus:ring-offset-0 cursor-pointer accent-[#5c36f5]"
+                className="w-4 h-4 rounded border-slate-300 dark:border-[#212c4b] bg-slate-50 dark:bg-[#121626] text-blue-600 focus:ring-0 focus:ring-offset-0 cursor-pointer accent-blue-600"
               />
               <span>Ghi nhớ đăng nhập</span>
             </label>
@@ -155,7 +155,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 px-4 rounded-xl bg-[#5c36f5] hover:bg-[#4f2ee8] text-white font-extrabold text-xs tracking-wide uppercase transition-all duration-200 cursor-pointer shadow-[0_0_20px_rgba(92,54,245,0.4)] flex items-center justify-center gap-2 active:scale-98 disabled:opacity-50 mt-2"
+            className="w-full py-3 px-4 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-extrabold text-xs tracking-wide uppercase transition-all duration-200 cursor-pointer shadow-md shadow-blue-500/30 flex items-center justify-center gap-2 active:scale-98 disabled:opacity-50 mt-2"
           >
             {loading ? (
               <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />

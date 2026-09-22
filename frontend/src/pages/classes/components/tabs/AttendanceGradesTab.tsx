@@ -302,7 +302,7 @@ export const AttendanceGradesTab: React.FC<AttendanceGradesTabProps> = ({
                   type="button"
                   onClick={onSaveAttendance}
                   disabled={savingAttendance}
-                  className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[#5c36f5] hover:bg-[#7351f7] text-white text-xs font-black shadow-[0_2px_10px_rgba(92,54,245,0.4)] transition cursor-pointer border border-white/20 disabled:opacity-50"
+                  className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-black shadow-sm transition cursor-pointer border border-white/20 disabled:opacity-50"
                   title="Lưu Bảng Điểm Danh & Điểm Số"
                 >
                   <Save size={13} className="shrink-0" />

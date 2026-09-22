@@ -57,7 +57,6 @@ export const DeepAnalysisTab: React.FC<DeepAnalysisTabProps> = ({
             { value: 'warnings', label: 'Phân Bố Cấp Bậc & Cảnh Báo Sớm' },
             { value: 'pedagogy', label: 'Nhóm Học & Biến Động Điểm' },
           ]}
-          activeColor="bg-[#5c36f5] shadow-[0_0_14px_rgba(92,54,245,0.5)]"
           size="md"
         />
       </div>

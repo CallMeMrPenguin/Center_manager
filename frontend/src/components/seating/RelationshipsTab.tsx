@@ -314,7 +314,7 @@ export default function RelationshipsTab({ classId, enrolledStudents, onRefreshC
 
           <button
             onClick={() => setCreatingFriendGroup(true)}
-            className="group flex items-center gap-0 hover:gap-1.5 bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-2 rounded-xl text-xs font-extrabold transition-all duration-300 cursor-pointer border border-indigo-700 shadow-md"
+            className="group flex items-center gap-0 hover:gap-1.5 bg-blue-600 hover:bg-blue-500 text-white px-3 py-2 rounded-xl text-xs font-extrabold transition-all duration-300 cursor-pointer border border-blue-500 shadow-sm"
             title="Tạo Nhóm Bạn"
           >
             <Plus size={14} className="shrink-0" />
@@ -326,7 +326,7 @@ export default function RelationshipsTab({ classId, enrolledStudents, onRefreshC
 
         {/* Create Friend Group Form */}
         {creatingFriendGroup && (
-          <form onSubmit={handleCreateFriendGroup} className="bg-slate-50 dark:bg-[#141928] p-4 rounded-xl border border-indigo-200 dark:border-indigo-500/30 space-y-3">
+          <form onSubmit={handleCreateFriendGroup} className="bg-slate-50 dark:bg-[#141928] p-4 rounded-xl border border-blue-200 dark:border-blue-500/30 space-y-3">
             <div className="flex items-center gap-3">
               <div className="flex-1">
                 <label className="block text-[10px] font-black uppercase text-slate-500 dark:text-slate-400 mb-1">Tên Nhóm Bạn</label>
@@ -336,7 +336,7 @@ export default function RelationshipsTab({ classId, enrolledStudents, onRefreshC
                   value={newFriendGroupName}
                   onChange={(e) => setNewFriendGroupName(e.target.value)}
                   placeholder="Ví dụ: Nhóm Bạn Thân 1, Nhóm A..."
-                  className="w-full bg-white dark:bg-[#0d1018] border border-slate-200 dark:border-white/10 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500 font-semibold"
+                  className="w-full bg-white dark:bg-[#0d1018] border border-slate-200 dark:border-white/10 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 font-semibold"
                 />
               </div>
             </div>
@@ -351,7 +351,7 @@ export default function RelationshipsTab({ classId, enrolledStudents, onRefreshC
               </button>
               <button
                 type="submit"
-                className="px-4 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-extrabold transition border border-indigo-700 cursor-pointer"
+                className="px-4 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-extrabold transition border border-blue-500 cursor-pointer shadow-sm"
               >
                 Lưu Nhóm
               </button>
@@ -692,12 +692,12 @@ export default function RelationshipsTab({ classId, enrolledStudents, onRefreshC
                         key={s.id}
                         onClick={() => toggleStudentSelection(s.id)}
                         className={`p-3 rounded-xl border flex items-center justify-between text-xs cursor-pointer transition ${isChecked
-                            ? 'bg-indigo-50 dark:bg-indigo-500/15 border-indigo-300 dark:border-indigo-500/40 text-indigo-900 dark:text-white shadow-sm'
+                            ? 'bg-blue-50 dark:bg-blue-500/15 border-blue-300 dark:border-blue-500/40 text-blue-900 dark:text-white shadow-sm'
                             : 'bg-slate-50 dark:bg-[#121624] border-slate-200 dark:border-white/5 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/[0.04]'
                           }`}
                       >
                         <div className="flex items-center gap-3">
-                          <div className={`w-5 h-5 rounded-md border flex items-center justify-center transition ${isChecked ? 'bg-indigo-600 border-indigo-400 text-white' : 'border-slate-300 dark:border-white/20 bg-white dark:bg-white/5'
+                          <div className={`w-5 h-5 rounded-md border flex items-center justify-center transition ${isChecked ? 'bg-blue-600 border-blue-400 text-white' : 'border-slate-300 dark:border-white/20 bg-white dark:bg-white/5'
                             }`}>
                             {isChecked && <span className="text-xs font-black">✓</span>}
                           </div>
@@ -755,7 +755,7 @@ export default function RelationshipsTab({ classId, enrolledStudents, onRefreshC
                 <button
                   type="submit"
                   disabled={selectedStudentIds.length === 0 || submittingBatch}
-                  className="px-5 py-2 rounded-xl bg-[#5c36f5] hover:bg-[#7351f7] disabled:opacity-50 text-white text-xs font-extrabold shadow-md transition cursor-pointer"
+                  className="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-xs font-extrabold shadow-sm transition cursor-pointer"
                 >
                   {submittingBatch ? 'Đang thêm...' : `Thêm (${selectedStudentIds.length}) học sinh vào danh sách`}
                 </button>

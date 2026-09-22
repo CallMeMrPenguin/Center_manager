@@ -377,7 +377,7 @@ export default function Settings() {
                 <span className="text-[10px] text-slate-500 font-mono">ID thiết bị máy chủ: {settings?.machine_id || 'LOCAL_HOST'}</span>
                 <button
                   onClick={handleSaveSettings}
-                  className="group px-3.5 py-2 rounded-xl bg-[#5c36f5] hover:bg-[#4f2ce0] text-white font-bold text-xs transition-all duration-300 flex items-center gap-1.5 cursor-pointer shadow-sm shadow-indigo-500/20"
+                  className="group px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs transition-all duration-300 flex items-center gap-1.5 cursor-pointer shadow-sm"
                 >
                   <Save size={13} />
                   <span>Lưu cấu hình</span>
@@ -473,13 +473,13 @@ export default function Settings() {
                   value={newGradeLabel}
                   onChange={(e) => setNewGradeLabel(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleAddGradeType()}
-                  className="bg-white dark:bg-[#121626] border border-slate-300 dark:border-[#283558] px-3 py-2 rounded-lg text-xs text-slate-900 dark:text-white font-bold focus:outline-none focus:border-indigo-500 flex-1"
+                  className="bg-white dark:bg-[#121626] border border-slate-300 dark:border-[#283558] px-3 py-2 rounded-lg text-xs text-slate-900 dark:text-white font-bold focus:outline-none focus:border-blue-500 flex-1"
                   autoFocus
                 />
                 <button
                   type="button"
                   onClick={handleAddGradeType}
-                  className="px-3 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-lg transition cursor-pointer"
+                  className="px-3 py-2 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs rounded-lg transition cursor-pointer"
                 >
                   Xác Nhận
                 </button>
@@ -506,7 +506,7 @@ export default function Settings() {
               <button
                 type="button"
                 onClick={handleSaveGradeTypes}
-                className="px-4 py-2 rounded-xl bg-[#5c36f5] hover:bg-[#4f2ce0] text-white font-bold text-xs transition-all duration-300 flex items-center gap-1.5 cursor-pointer shadow-sm shadow-indigo-500/20"
+                className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs transition-all duration-300 flex items-center gap-1.5 cursor-pointer shadow-sm"
               >
                 <Save size={14} />
                 <span>Lưu Trọng Số Điểm</span>
@@ -613,7 +613,7 @@ export default function Settings() {
               {updateState?.has_update && !applyingUpdate && (
                 <button
                   onClick={handleApplyUpdate}
-                  className="flex items-center gap-1.5 px-3.5 py-2 bg-[#5c36f5] hover:bg-[#4f2ce0] text-white font-extrabold text-[10px] rounded-xl transition-all duration-300 cursor-pointer shadow-sm shadow-indigo-500/20"
+                  className="flex items-center gap-1.5 px-3.5 py-2 bg-blue-600 hover:bg-blue-500 text-white font-extrabold text-[10px] rounded-xl transition-all duration-300 cursor-pointer shadow-sm"
                 >
                   <Download size={12} />
                   Cài Đặt Ngay

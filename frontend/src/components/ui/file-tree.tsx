@@ -90,7 +90,7 @@ const FileTreeNodeItem: React.FC<{
           <motion.div
             layoutId="file-tree-active-node"
             transition={{ type: 'spring', stiffness: 450, damping: 30 }}
-            className="absolute inset-0 bg-[#5c36f5] rounded-xl shadow-[0_0_14px_rgba(92,54,245,0.5)] z-0"
+            className="absolute inset-0 bg-blue-600 rounded-xl shadow-sm border border-blue-500/60 z-0"
           />
         )}
 

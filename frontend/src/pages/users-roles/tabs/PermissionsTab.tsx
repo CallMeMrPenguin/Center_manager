@@ -99,7 +99,7 @@ export const PermissionsTab: React.FC<PermissionsTabProps> = ({
           className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-black shadow-lg transition cursor-pointer active:scale-95 disabled:opacity-50 ${
             isDirty
               ? 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-500/30 animate-pulse'
-              : 'bg-[#5c36f5] hover:bg-[#6c48f7] text-white shadow-indigo-500/30'
+              : 'bg-blue-600 hover:bg-blue-500 text-white shadow-blue-500/30'
           }`}
         >
           <Save size={14} />
@@ -160,7 +160,7 @@ export const PermissionsTab: React.FC<PermissionsTabProps> = ({
                               isAdmin
                                 ? 'bg-purple-500/20 text-purple-700 dark:text-purple-300 border border-purple-500/40 cursor-default'
                                 : isChecked
-                                ? 'bg-[#5c36f5] text-white shadow-[0_0_8px_rgba(92,54,245,0.5)] border border-[#714df6]'
+                                ? 'bg-blue-600 text-white shadow-sm border border-blue-500'
                                 : 'bg-slate-100 dark:bg-[#121626] border border-slate-300 dark:border-[#263152] hover:border-slate-400 dark:hover:border-slate-500 text-transparent'
                             }`}
                           >

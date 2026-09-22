@@ -124,7 +124,7 @@ export function AnimatedTable<T extends { id?: string | number }>({
                 transition={{ type: 'spring', stiffness: 350, damping: 28 }}
                 className="relative min-w-[180px]"
               >
-                <Search size={14} className={`absolute left-3 top-1/2 -translate-y-1/2 transition-colors ${searchFocused ? 'text-[#5c36f5]' : 'text-slate-400'}`} />
+                <Search size={14} className={`absolute left-3 top-1/2 -translate-y-1/2 transition-colors ${searchFocused ? 'text-blue-600' : 'text-slate-400'}`} />
                 <input
                   type="text"
                   value={searchValue}
@@ -132,7 +132,7 @@ export function AnimatedTable<T extends { id?: string | number }>({
                   onBlur={() => setSearchFocused(false)}
                   onChange={(e) => onSearchChange?.(e.target.value)}
                   placeholder={searchPlaceholder}
-                  className="w-full bg-slate-50 dark:bg-[#14192b] border border-slate-200 dark:border-white/10 rounded-xl pl-9 pr-8 py-1.5 text-xs text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 font-semibold focus:outline-none focus:border-[#5c36f5] focus:ring-2 focus:ring-[#5c36f5]/25 transition shadow-inner"
+                  className="w-full bg-slate-50 dark:bg-[#14192b] border border-slate-200 dark:border-white/10 rounded-xl pl-9 pr-8 py-1.5 text-xs text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 font-semibold focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/25 transition shadow-inner"
                 />
                 <AnimatePresence>
                   {searchValue && (
@@ -148,9 +148,9 @@ export function AnimatedTable<T extends { id?: string | number }>({
             <AnimatePresence>
               {selectedIds.length > 0 && (
                 <motion.div initial={{ opacity: 0, scale: 0.85, x: -10 }} animate={{ opacity: 1, scale: 1, x: 0 }} exit={{ opacity: 0, scale: 0.85, x: -10 }}
-                  className="flex items-center gap-2 px-3 py-1 bg-indigo-500/20 text-indigo-600 dark:text-indigo-300 border border-indigo-500/30 rounded-xl text-xs font-black">
+                  className="flex items-center gap-2 px-3 py-1 bg-blue-500/20 text-blue-700 dark:text-blue-300 border border-blue-500/30 rounded-xl text-xs font-black">
                   <span>Đã chọn: {selectedIds.length} dòng</span>
-                  <button onClick={() => onSelectionChange?.([])} className="text-indigo-400 hover:text-indigo-600 dark:hover:text-white cursor-pointer"><X size={12} /></button>
+                  <button onClick={() => onSelectionChange?.([])} className="text-blue-500 hover:text-blue-700 dark:hover:text-white cursor-pointer"><X size={12} /></button>
                 </motion.div>
               )}
             </AnimatePresence>
@@ -178,7 +178,7 @@ export function AnimatedTable<T extends { id?: string | number }>({
                             <button key={col.id} type="button" onClick={() => onVisibleColumnsChange(isVis ? activeVisibleCols.filter((id) => id !== col.id) : [...activeVisibleCols, col.id])}
                               className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white transition">
                               <span>{typeof col.header === 'string' ? col.header : col.id}</span>
-                              {isVis && <Check size={13} className="text-[#5c36f5]" />}
+                              {isVis && <Check size={13} className="text-blue-600" />}
                             </button>
                           );
                         })}
@@ -201,7 +201,7 @@ export function AnimatedTable<T extends { id?: string | number }>({
                 {expandable && <th className="w-8 px-3 py-3" />}
                 {selectable && (
                   <th className="w-10 px-3 py-3 text-center">
-                    <input type="checkbox" checked={isAllSelected} onChange={toggleSelectAll} className="w-4 h-4 rounded accent-[#5c36f5] cursor-pointer" />
+                    <input type="checkbox" checked={isAllSelected} onChange={toggleSelectAll} className="w-4 h-4 rounded accent-blue-600 cursor-pointer" />
                   </th>
                 )}
                 {displayedCols.map((col) => {
@@ -214,7 +214,7 @@ export function AnimatedTable<T extends { id?: string | number }>({
                         <span>{col.header}</span>
                         {col.sortable && (
                           <span className="text-slate-400 dark:text-slate-500">
-                            {isSorted && sortDirection === 'asc' ? <ArrowUp size={13} className="text-indigo-600 dark:text-indigo-400" /> : isSorted && sortDirection === 'desc' ? <ArrowDown size={13} className="text-indigo-600 dark:text-indigo-400" /> : <ArrowUpDown size={12} />}
+                            {isSorted && sortDirection === 'asc' ? <ArrowUp size={13} className="text-blue-600 dark:text-blue-400" /> : isSorted && sortDirection === 'desc' ? <ArrowDown size={13} className="text-blue-600 dark:text-blue-400" /> : <ArrowUpDown size={12} />}
                           </span>
                         )}
                       </div>
@@ -243,7 +243,7 @@ export function AnimatedTable<T extends { id?: string | number }>({
                         <motion.tr layout initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.97 }}
                           transition={{ duration: 0.25, delay: Math.min(rowIdx * 0.02, 0.2) }}
                           onClick={() => onRowClick?.(row)}
-                          className={`transition-colors cursor-pointer ${isSelected ? 'bg-indigo-50 dark:bg-[#181f3d] border-l-2 border-[#5c36f5]' : striped && rowIdx % 2 === 1 ? 'bg-slate-50/60 dark:bg-white/[0.015] hover:bg-indigo-50/40 dark:hover:bg-white/[0.04]' : 'hover:bg-indigo-50/40 dark:hover:bg-white/[0.04]'}`}>
+                          className={`transition-colors cursor-pointer ${isSelected ? 'bg-blue-50 dark:bg-blue-950/30 border-l-2 border-blue-600' : striped && rowIdx % 2 === 1 ? 'bg-slate-50/60 dark:bg-white/[0.015] hover:bg-blue-50/40 dark:hover:bg-white/[0.04]' : 'hover:bg-blue-50/40 dark:hover:bg-white/[0.04]'}`}>
                           {expandable && (
                             <td className="w-8 px-3 py-3 text-center">
                               <motion.button type="button" animate={{ rotate: isExpanded ? 90 : 0 }} transition={{ duration: 0.2 }}
@@ -255,7 +255,7 @@ export function AnimatedTable<T extends { id?: string | number }>({
 
                           {selectable && (
                             <td className="w-10 px-3 py-3 text-center">
-                              <input type="checkbox" checked={isSelected} onChange={(e) => toggleSelectRow(rowId, e as any)} className="w-4 h-4 rounded accent-[#5c36f5] cursor-pointer" />
+                              <input type="checkbox" checked={isSelected} onChange={(e) => toggleSelectRow(rowId, e as any)} className="w-4 h-4 rounded accent-blue-600 cursor-pointer" />
                             </td>
                           )}
 

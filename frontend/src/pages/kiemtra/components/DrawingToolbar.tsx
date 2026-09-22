@@ -146,7 +146,7 @@ export const DrawingToolbar: React.FC<DrawingToolbarProps> = ({
           onClick={(e) => { e.stopPropagation(); setActiveTool('pen'); setShowColorPopover(false); setShowSizePopover(false); }}
           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black transition cursor-pointer shrink-0 ${
             activeTool === 'pen'
-              ? 'bg-indigo-600 text-white shadow-xs'
+              ? 'bg-blue-600 text-white shadow-xs'
               : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
           }`}
           title="Bút vẽ (Phím 2 | Giữ Shift kẻ đường thẳng)"

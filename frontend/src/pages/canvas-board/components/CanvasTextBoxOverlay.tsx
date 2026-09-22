@@ -109,7 +109,7 @@ export const CanvasTextBoxOverlay: React.FC<CanvasTextBoxOverlayProps> = ({
               backgroundColor: tb.bgColor && tb.bgColor !== 'transparent' ? tb.bgColor : 'transparent',
               borderRadius: '2px',
               border: isSelected
-                ? '2px solid #5c36f5'
+                ? '2px solid #2563eb'
                 : isEditing
                 ? '2px solid #3b82f6'
                 : '1px dashed transparent',
@@ -308,7 +308,7 @@ export const CanvasTextBoxOverlay: React.FC<CanvasTextBoxOverlayProps> = ({
                   window.addEventListener('pointermove', onPointerMove);
                   window.addEventListener('pointerup', onPointerUp);
                 }}
-                className="absolute -bottom-1.5 -right-1.5 w-3 h-3 bg-[#5c36f5] border-2 border-white rounded-[2px] cursor-se-resize shadow-md"
+                className="absolute -bottom-1.5 -right-1.5 w-3 h-3 bg-blue-600 border-2 border-white rounded-[2px] cursor-se-resize shadow-md"
                 style={{
                   transform: `scale(${Math.max(0.4, 1 / zoom)})`,
                   transformOrigin: 'bottom right',

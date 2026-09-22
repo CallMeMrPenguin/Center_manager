@@ -1,10 +1,8 @@
 import React, { useState } from 'react';
 import {
-  AlertTriangle,
   ChevronDown,
   ChevronUp,
   CheckCircle2,
-  SlidersHorizontal,
 } from 'lucide-react';
 import { AttendanceRecord } from '../../types';
 import { trunc1Dec } from '../../../../utils';
@@ -28,24 +26,19 @@ export const SessionOverviewBanner: React.FC<SessionOverviewBannerProps> = ({
     belowAvgData,
     divergenceStudents,
     hasAlerts,
-    thresholdMode,
-    divergenceMin,
-    setDivergenceMin,
+    divInput,
+    handleDivChange,
     threshC1Input,
     threshC2Input,
     threshHwInput,
     handleC1Change,
     handleC2Change,
     handleHwChange,
-    handleApplyAllCustom,
-    handleSetStandard,
-    handleSetClassAvg,
-    handleSetCustom,
   } = useSessionOverview(attendanceRecords);
 
   return (
     <div className="bg-white dark:bg-[#0c0f1e] rounded-2xl p-4 shadow-[0_4px_24px_rgba(0,0,0,0.08)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.45)] transition-all">
-      {/* 1. MASTER HEADER STRIP (No medal icon per user request) */}
+      {/* 1. MASTER HEADER STRIP */}
       <div className="flex flex-wrap items-center justify-between gap-3 select-none">
         <div>
           <div className="flex items-center gap-2">
@@ -67,9 +60,6 @@ export const SessionOverviewBanner: React.FC<SessionOverviewBannerProps> = ({
               </span>
             )}
           </div>
-          <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
-            Đánh giá điểm trung bình và phát hiện sớm các trường hợp lệch điểm bất thường
-          </p>
         </div>
 
         {/* RIGHT: CLASS AVERAGE STATS & EXPAND TOGGLE */}
@@ -103,94 +93,7 @@ export const SessionOverviewBanner: React.FC<SessionOverviewBannerProps> = ({
 
       {/* 2. EXPANDED CONTENT BODY */}
       {isExpanded && (
-        <div className="mt-4 pt-3 border-t border-slate-200 dark:border-white/5 space-y-4">
-          {/* CONTROL STRIP: THRESHOLD SELECTION & DISCREPANCY SENSITIVITY */}
-          <div className="flex flex-wrap items-center justify-between gap-3 text-xs bg-slate-50 dark:bg-[#080b14] p-2.5 rounded-xl border border-slate-200 dark:border-white/5">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="text-slate-600 dark:text-slate-400 font-bold flex items-center gap-1">
-                <SlidersHorizontal size={12} className="text-indigo-500 dark:text-indigo-400" />
-                Chuẩn điểm dưới:
-              </span>
-              <button
-                type="button"
-                onClick={handleSetStandard}
-                className={`px-2.5 py-1 rounded-lg font-bold transition cursor-pointer ${
-                  thresholdMode === 'standard'
-                    ? 'bg-indigo-600 text-white shadow-sm'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white bg-slate-200/70 dark:bg-white/5'
-                }`}
-              >
-                Dưới 5.0 (Chuẩn VN)
-              </button>
-              <button
-                type="button"
-                onClick={handleSetClassAvg}
-                className={`px-2.5 py-1 rounded-lg font-bold transition cursor-pointer ${
-                  thresholdMode === 'classAvg'
-                    ? 'bg-indigo-600 text-white shadow-sm'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white bg-slate-200/70 dark:bg-white/5'
-                }`}
-              >
-                Dưới TB Buổi Học
-              </button>
-              <button
-                type="button"
-                onClick={handleSetCustom}
-                className={`px-2.5 py-1 rounded-lg font-bold transition cursor-pointer ${
-                  thresholdMode === 'custom'
-                    ? 'bg-indigo-600 text-white shadow-sm'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white bg-slate-200/70 dark:bg-white/5'
-                }`}
-              >
-                Tùy chỉnh
-              </button>
-
-              {thresholdMode === 'custom' && (
-                <div className="flex items-center gap-1 text-[11px] text-slate-600 dark:text-slate-400 bg-slate-200/70 dark:bg-white/5 px-2 py-1 rounded-lg">
-                  <span>Tất cả:</span>
-                  <span className="text-indigo-600 dark:text-indigo-400 font-bold">&lt;</span>
-                  <input
-                    type="number"
-                    step="0.1"
-                    min="0"
-                    max="10"
-                    placeholder="Điểm"
-                    onChange={(e) => handleApplyAllCustom(e.target.value)}
-                    className="w-10 bg-transparent text-slate-900 dark:text-white font-bold text-center focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                    title="Nhập mức điểm áp dụng chung cho cả 3 cột Check 1, Check 2, BTVN"
-                  />
-                  <span>đ</span>
-                </div>
-              )}
-            </div>
-
-            <div className="flex items-center gap-2">
-              <span className="text-slate-600 dark:text-slate-400 font-bold flex items-center gap-1">
-                <AlertTriangle size={12} className="text-amber-500 dark:text-amber-400" />
-                Mức độ lệch BTVN &gt; Check:
-              </span>
-              {[
-                { label: '≥ 1.5 đ', val: 1.5 },
-                { label: '≥ 2.0 đ', val: 2.0 },
-                { label: 'Tất cả (> 0)', val: 0.1 },
-              ].map((opt) => (
-                <button
-                  key={opt.val}
-                  type="button"
-                  onClick={() => setDivergenceMin(opt.val)}
-                  className={`px-2.5 py-1 rounded-lg font-bold transition cursor-pointer ${
-                    divergenceMin === opt.val
-                      ? 'bg-amber-500 text-black shadow-sm font-black'
-                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white bg-slate-200/70 dark:bg-white/5'
-                  }`}
-                >
-                  {opt.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* 3. METRIC CARDS GRID */}
+        <div className="mt-3 pt-3 border-t border-slate-100 dark:border-white/5">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
             {/* CARD 1: CHECK 1 */}
             <BelowThresholdCard
@@ -222,8 +125,10 @@ export const SessionOverviewBanner: React.FC<SessionOverviewBannerProps> = ({
               onFilterStudent={onFilterStudent}
             />
 
-            {/* CARD 4: CẢNH BÁO ĐỘ LỆCH (BTVN > TRÊN LỚP) */}
+            {/* CARD 4: CẢNH BÁO ĐỘ LỆCH */}
             <DivergenceCard
+              threshInput={divInput}
+              onThreshChange={handleDivChange}
               students={divergenceStudents}
               onFilterStudent={onFilterStudent}
             />
@@ -233,3 +138,4 @@ export const SessionOverviewBanner: React.FC<SessionOverviewBannerProps> = ({
     </div>
   );
 };
+

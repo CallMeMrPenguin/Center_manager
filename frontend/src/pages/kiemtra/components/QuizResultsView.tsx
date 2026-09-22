@@ -98,7 +98,7 @@ export const QuizResultsView: React.FC<QuizResultsViewProps> = ({
           <button
             onClick={() => setShowAnswerToggle(!showAnswerToggle)}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer border ${
-              showAnswerToggle ? 'bg-indigo-600 text-white border-indigo-400' : 'bg-white/5 text-slate-300 border-white/10'
+              showAnswerToggle ? 'bg-blue-600 text-white border-blue-500 shadow-sm' : 'bg-white/5 text-slate-300 border-white/10'
             }`}
           >
             {showAnswerToggle ? <Eye size={13} /> : <EyeOff size={13} />}

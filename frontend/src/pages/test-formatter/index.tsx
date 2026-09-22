@@ -671,7 +671,7 @@ export default function TestFormatter({
             />
             <button
               onClick={handleSaveProfile}
-              className="px-3 bg-[#5c36f5] hover:bg-[#7351f7] rounded-xl text-white font-bold text-xs flex items-center justify-center transition cursor-pointer"
+              className="px-3 bg-blue-600 hover:bg-blue-500 rounded-xl text-white font-bold text-xs flex items-center justify-center transition cursor-pointer"
               title="Lưu hồ sơ"
             >
               <Save size={13} />
@@ -693,7 +693,7 @@ export default function TestFormatter({
                 onClick={() => setShowConfig(!showConfig)}
                 className={`p-2.5 rounded-xl border transition-all duration-300 flex items-center text-xs font-bold cursor-pointer ${
                   showConfig 
-                    ? 'bg-[#5c36f5] text-white border-transparent px-3 shadow-md shadow-indigo-500/20' 
+                    ? 'bg-blue-600 text-white border-transparent px-3 shadow-sm' 
                     : 'bg-slate-100 dark:bg-[#181f36] text-slate-700 dark:text-slate-300 border-slate-200 dark:border-[#283354] hover:bg-slate-200 dark:hover:bg-[#222a46] hover:text-slate-900 dark:hover:text-white shadow-sm'
                 }`}
                 title={showConfig ? "Ẩn cấu hình lề và cỡ chữ" : "Hiện cấu hình lề và cỡ chữ"}
@@ -739,7 +739,7 @@ export default function TestFormatter({
                 <button
                   onClick={() => setShowExportMenu(!showExportMenu)}
                   disabled={compiling}
-                  className="group px-3 py-2 rounded-xl bg-[#5c36f5] hover:bg-[#7351f7] disabled:opacity-50 text-white text-xs font-black transition-all flex items-center cursor-pointer shadow-md shadow-indigo-500/20 border border-white/20"
+                  className="group px-3 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-xs font-black transition-all flex items-center cursor-pointer shadow-sm border border-white/20"
                   title="Xuất đề thi ra Word / Excel"
                 >
                   <Download size={14} className={`shrink-0 ${compiling ? "animate-spin" : ""}`} />
@@ -839,7 +839,7 @@ export default function TestFormatter({
                     try { await api.openWorkspaceFolder(); showToast("Đang mở thư mục chứa đề thi...", "success"); }
                     catch (e) { showToast("Lỗi mở thư mục: " + e, "error"); }
                   }}
-                  className="px-3 py-1.5 bg-[#5c36f5] hover:bg-[#7351f7] text-white font-extrabold text-[0.66rem] rounded-xl flex items-center gap-1.5 transition cursor-pointer shadow ml-1"
+                  className="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white font-extrabold text-[0.66rem] rounded-xl flex items-center gap-1.5 transition cursor-pointer shadow-sm ml-1"
                 >
                   <FolderOpen size={11} />
                   <span>MỞ THƯ MỤC CHỨA ĐỀ</span>
@@ -867,7 +867,7 @@ export default function TestFormatter({
               <button 
                 onClick={handleGeneratePdfPreview}
                 disabled={pdfLoading}
-                className="px-3 py-1.5 rounded-xl bg-[#5c36f5] hover:bg-[#7351f7] text-white font-extrabold text-[0.66rem] flex items-center transition shadow-md cursor-pointer disabled:opacity-50 border border-white/20"
+                className="px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-extrabold text-[0.66rem] flex items-center transition shadow-sm cursor-pointer disabled:opacity-50 border border-white/20"
                 title="Tạo lại bản xem trước PDF từ nội dung JSON"
               >
                 <RefreshCw size={12} className={`shrink-0 ${pdfLoading ? "animate-spin" : ""}`} />
@@ -990,7 +990,7 @@ export default function TestFormatter({
 
             <div className="flex justify-end gap-3 pt-3 border-t border-slate-200 mt-2">
               <button onClick={() => setShowExportModal(false)} className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl border border-slate-200 transition cursor-pointer">Hủy</button>
-              <button onClick={handleExportTestSpreadsheet} className="px-5 py-2 bg-[#5c36f5] hover:bg-[#7351f7] text-white text-xs font-extrabold rounded-xl shadow-md cursor-pointer">Xuất file</button>
+              <button onClick={handleExportTestSpreadsheet} className="px-5 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-extrabold rounded-xl shadow-sm cursor-pointer">Xuất file</button>
             </div>
           </div>
         </div>

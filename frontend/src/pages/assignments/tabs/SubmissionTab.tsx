@@ -346,7 +346,7 @@ export const SubmissionTab: React.FC<SubmissionTabProps> = ({
             disabled={!isDirty}
             className={`flex items-center gap-1.5 px-4 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
               isDirty
-                ? 'bg-[#5c36f5] hover:bg-[#6c48f7] text-white shadow-[0_0_12px_rgba(92,54,245,0.5)]'
+                ? 'bg-blue-600 hover:bg-blue-500 text-white shadow-sm'
                 : 'bg-white/5 text-slate-500 cursor-not-allowed'
             }`}
           >

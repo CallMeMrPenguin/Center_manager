@@ -136,12 +136,12 @@ export const BatchEnrollModal: React.FC<BatchEnrollModalProps> = ({
 
         {/* SLIDING SEGMENTED CONTROL TAB PILL */}
         <div className="px-5 pt-4">
-          <div className="relative flex bg-slate-100 dark:bg-[#0d1018] p-1 rounded-xl border border-slate-200 dark:border-white/10 text-xs shrink-0 font-bold select-none shadow-[inset_0_1px_2px_rgba(0,0,0,0.05)]">
+          <div className="relative flex bg-slate-100 dark:bg-[#0d1018] p-0.5 rounded-lg border border-slate-200 dark:border-white/10 text-xs shrink-0 font-bold select-none shadow-[inset_0_1px_2px_rgba(0,0,0,0.05)]">
             <div
-              className="absolute top-1 bottom-1 rounded-lg bg-[#5c36f5] shadow-[0_0_14px_rgba(92,54,245,0.5)] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] pointer-events-none"
+              className="absolute top-0.5 bottom-0.5 rounded-md bg-blue-600 shadow-sm border border-blue-500/60 transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] pointer-events-none"
               style={{
-                left: activeTab === 'available' ? '4px' : 'calc(50% + 1px)',
-                width: 'calc(50% - 4px)',
+                left: activeTab === 'available' ? '2px' : 'calc(50% + 1px)',
+                width: 'calc(50% - 3px)',
               }}
             />
             <button
@@ -282,7 +282,7 @@ export const BatchEnrollModal: React.FC<BatchEnrollModalProps> = ({
               <button
                 type="submit"
                 disabled={selectedStudentIdsToEnroll.length === 0 || enrollingBatch}
-                className="px-5 py-2 rounded-xl bg-[#5c36f5] hover:bg-[#7351f7] disabled:opacity-50 text-white text-xs font-extrabold border border-white/20 shadow-md transition cursor-pointer"
+                className="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-xs font-extrabold border border-white/20 shadow-sm transition cursor-pointer"
               >
                 {enrollingBatch ? 'Đang thêm...' : `Thêm (${selectedStudentIdsToEnroll.length}) học sinh vào lớp`}
               </button>

@@ -14,7 +14,7 @@ export const GrammarTopicSelector: React.FC<GrammarTopicSelectorProps> = ({
 }) => {
   return (
     <div className="mt-2.5 pt-2 border-t border-white/5">
-      <label className="text-[11px] font-bold text-purple-300 block mb-1.5 flex items-center justify-between">
+      <label className="text-[11px] font-bold text-blue-400 dark:text-blue-300 block mb-1.5 flex items-center justify-between">
         <span>Chủ Đề Ngữ Pháp Kiểm Tra:</span>
         {availableTopics.length > 1 && (
           <span className="text-[10px] text-slate-400 font-normal">Chọn 1 chủ đề hoặc tất cả</span>
@@ -31,8 +31,8 @@ export const GrammarTopicSelector: React.FC<GrammarTopicSelectorProps> = ({
                 onClick={() => onChange(topic)}
                 className={`px-2.5 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1 cursor-pointer ${
                   isSelected
-                    ? 'bg-purple-600 text-white shadow-[0_0_10px_rgba(168,85,247,0.4)] border border-purple-400'
-                    : 'bg-slate-100 text-slate-700 hover:text-slate-900 border border-slate-200 hover:border-purple-300'
+                    ? 'bg-blue-600 text-white shadow-sm border border-blue-400'
+                    : 'bg-slate-100 text-slate-700 hover:text-slate-900 border border-slate-200 hover:border-blue-300'
                 }`}
               >
                 {isSelected && <Check size={11} className="stroke-[3]" />}
@@ -46,7 +46,7 @@ export const GrammarTopicSelector: React.FC<GrammarTopicSelectorProps> = ({
               onClick={() => onChange(availableTopics.join(' , '))}
               className={`px-2 py-1 rounded-lg text-[11px] font-semibold transition cursor-pointer ${
                 currentTopic === availableTopics.join(' , ')
-                  ? 'bg-indigo-600 text-white border border-indigo-400'
+                  ? 'bg-blue-600 text-white border border-blue-400 shadow-sm'
                   : 'bg-slate-100 text-slate-600 hover:text-slate-900 border border-slate-200'
               }`}
             >
@@ -60,7 +60,7 @@ export const GrammarTopicSelector: React.FC<GrammarTopicSelectorProps> = ({
         value={currentTopic}
         onChange={(e) => onChange(e.target.value)}
         placeholder="Tên chủ đề ngữ pháp..."
-        className="w-full px-3 py-1.5 bg-white border border-purple-200 focus:border-purple-500 rounded-lg text-xs text-slate-800 placeholder-slate-400 focus:outline-none shadow-xs"
+        className="w-full px-3 py-1.5 bg-white border border-blue-200 focus:border-blue-500 rounded-lg text-xs text-slate-800 placeholder-slate-400 focus:outline-none shadow-xs"
       />
     </div>
   );

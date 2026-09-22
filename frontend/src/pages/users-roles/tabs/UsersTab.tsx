@@ -159,7 +159,7 @@ export const UsersTab: React.FC<UsersTabProps> = ({
             <button
               type="button"
               onClick={onOpenCreateModal}
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#5c36f5] hover:bg-[#6c48f7] text-white text-xs font-black shadow-[0_0_12px_rgba(92,54,245,0.4)] transition-all cursor-pointer active:scale-95 shrink-0"
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-black shadow-sm transition-all cursor-pointer active:scale-95 shrink-0"
             >
               <Plus size={14} />
               <span>Thêm Tài Khoản</span>

@@ -584,7 +584,7 @@ export default function CanvasBoardPage() {
         </div>
 
         <div className="flex items-center gap-2">
-          <label className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#5c36f5] hover:bg-[#7351f7] text-white text-xs font-black transition cursor-pointer border border-white/20 shadow-sm">
+          <label className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-black transition cursor-pointer border border-white/20 shadow-sm">
             <Upload size={13} />
             <span>Import</span>
             <input ref={fileInputRef} type="file" accept=".pdf,image/*" multiple onChange={handleFileInputChange} className="hidden" />

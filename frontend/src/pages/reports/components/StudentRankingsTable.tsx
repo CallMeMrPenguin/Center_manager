@@ -342,9 +342,9 @@ export const StudentRankingsTable: React.FC<StudentRankingsTableProps> = React.m
 
       {/* Active Histogram Score Bin Filter Bar */}
       {selectedScoreBin && (
-        <div className="mx-5 my-3 flex items-center justify-between bg-indigo-950/70 border border-indigo-500/40 px-4 py-2.5 rounded-xl text-xs font-bold text-indigo-200 shadow-lg">
+        <div className="mx-5 my-3 flex items-center justify-between bg-blue-950/70 border border-blue-500/40 px-4 py-2.5 rounded-xl text-xs font-bold text-blue-200 shadow-lg">
           <div className="flex items-center gap-2.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-indigo-400 animate-pulse" />
+            <span className="w-2.5 h-2.5 rounded-full bg-blue-400 animate-pulse" />
             <span>
               Đang lọc theo mức điểm: <strong className="text-white font-mono text-sm">{selectedScoreBin.rangeLabel}</strong> ({filteredRankings.length} học sinh)
             </span>
@@ -352,7 +352,7 @@ export const StudentRankingsTable: React.FC<StudentRankingsTableProps> = React.m
           <button
             type="button"
             onClick={onClearScoreBin}
-            className="px-3 py-1 rounded-lg bg-indigo-600/40 hover:bg-indigo-600/70 text-white font-bold transition cursor-pointer border border-indigo-400/30"
+            className="px-3 py-1 rounded-lg bg-blue-600/40 hover:bg-blue-600/70 text-white font-bold transition cursor-pointer border border-blue-400/30"
           >
             ✕ Bỏ lọc phổ điểm
           </button>

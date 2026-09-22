@@ -222,7 +222,7 @@ export const EditGradeModal: React.FC<EditGradeModalProps> = ({
             <button
               type="submit"
               disabled={saving}
-              className="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-extrabold border border-indigo-700 transition cursor-pointer shadow-md flex items-center gap-1.5 disabled:opacity-50"
+              className="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-extrabold border border-blue-500 transition cursor-pointer shadow-sm flex items-center gap-1.5 disabled:opacity-50"
             >
               <Save size={13} />
               <span>{saving ? 'Đang lưu...' : 'Lưu Điểm Số'}</span>

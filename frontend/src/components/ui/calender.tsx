@@ -211,14 +211,14 @@ export const AnimatedCalendar: React.FC<AnimatedCalendarProps> = ({
                     <motion.div
                       layoutId="calendar-selected-indicator"
                       transition={{ type: 'spring', stiffness: 500, damping: 35 }}
-                      className="absolute inset-0 rounded-xl bg-[#5c36f5] shadow-[0_0_12px_rgba(92,54,245,0.7)] z-0"
+                      className="absolute inset-0 rounded-xl bg-blue-600 shadow-sm border border-blue-500/60 z-0"
                     />
                   )}
 
                   <span className="relative z-10">{item.dayNumber}</span>
 
                   {item.isToday && !item.isSelected && (
-                    <span className="absolute bottom-1 w-1 h-1 rounded-full bg-indigo-500" />
+                    <span className="absolute bottom-1 w-1 h-1 rounded-full bg-blue-500" />
                   )}
                   {item.isHighlightedDayOfWeek && !item.isSelected && !item.isToday && (
                     <span className="absolute bottom-1 w-1 h-1 rounded-full bg-cyan-500" />
@@ -259,10 +259,10 @@ export const AnimatedCalendar: React.FC<AnimatedCalendarProps> = ({
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center justify-between gap-2 px-3 py-1.5 rounded-xl bg-white dark:bg-[#0c0f1e] border border-slate-200 dark:border-[#212c4b] hover:border-[#5c36f5] text-slate-900 dark:text-white text-xs font-bold transition cursor-pointer shadow-sm w-full"
+        className="flex items-center justify-between gap-2 px-3 py-1.5 rounded-xl bg-white dark:bg-[#0c0f1e] border border-slate-200 dark:border-[#212c4b] hover:border-blue-500 text-slate-900 dark:text-white text-xs font-bold transition cursor-pointer shadow-sm w-full"
       >
         <div className="flex items-center gap-2 truncate">
-          <CalendarIcon size={14} className="text-indigo-600 dark:text-white shrink-0" />
+          <CalendarIcon size={14} className="text-blue-600 dark:text-white shrink-0" />
           <span className={selectedDate ? 'text-slate-900 dark:text-white' : 'text-slate-400'}>
             {formatDisplay(selectedDate)}
           </span>

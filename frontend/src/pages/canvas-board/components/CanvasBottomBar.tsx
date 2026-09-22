@@ -64,7 +64,7 @@ export const CanvasBottomBar: React.FC<CanvasBottomBarProps> = ({
         <button
           onClick={() => setGridType(gridType === 'none' ? 'dots' : gridType === 'dots' ? 'grid' : gridType === 'grid' ? 'lines' : 'none')}
           className={`flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-bold transition cursor-pointer ${
-            gridType !== 'none' ? 'bg-[#5c36f5] text-white shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+            gridType !== 'none' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
           }`}
           title="Chuyển kiểu nền: Trơn / Lưới chấm / Ô ly / Kẻ dòng"
         >

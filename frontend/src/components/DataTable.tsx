@@ -1053,7 +1053,7 @@ export function DataTable<TData>({
                   <Search
                     size={14}
                     className={`transition-colors duration-200 ${
-                      searchFocused ? 'text-[#5c36f5] dark:text-indigo-400' : 'text-slate-400 dark:text-slate-500'
+                      searchFocused ? 'text-blue-600 dark:text-blue-400' : 'text-slate-400 dark:text-slate-500'
                     }`}
                   />
                 </motion.div>
@@ -1098,13 +1098,13 @@ export function DataTable<TData>({
                   animate={{ opacity: 1, scale: 1, x: 0 }}
                   exit={{ opacity: 0, scale: 0.85, x: -10 }}
                   transition={{ type: 'spring', stiffness: 450, damping: 30 }}
-                  className="flex items-center gap-2 px-3 py-1.5 bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 rounded-xl text-xs font-black"
+                  className="flex items-center gap-2 px-3 py-1.5 bg-blue-500/20 text-blue-700 dark:text-blue-300 border border-blue-500/30 rounded-xl text-xs font-black"
                 >
                   <span>Đã chọn: {selectedCount} dòng</span>
                   <button
                     type="button"
                     onClick={() => table.toggleAllRowsSelected(false)}
-                    className="text-indigo-400 hover:text-white transition cursor-pointer p-0.5 rounded hover:bg-white/10"
+                    className="text-blue-500 dark:text-blue-400 hover:text-blue-700 dark:hover:text-white transition cursor-pointer p-0.5 rounded hover:bg-white/10"
                     title="Bỏ chọn tất cả"
                   >
                     <X size={12} />
@@ -1118,10 +1118,10 @@ export function DataTable<TData>({
           <div className="flex items-center gap-2 shrink-0 flex-wrap justify-end">
             {/* Active filter badge */}
             {hasActiveFilter && (
-              <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-[10px] font-bold">
+              <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-700 dark:text-blue-300 text-[10px] font-bold">
                 <span>{totalFiltered.toLocaleString()} kết quả</span>
                 <button type="button" onClick={() => { setGlobalFilter(''); setColumnFilters([]); }}
-                  className="text-indigo-400 hover:text-white cursor-pointer"><X size={10} /></button>
+                  className="text-blue-500 dark:text-blue-400 hover:text-blue-700 dark:hover:text-white cursor-pointer"><X size={10} /></button>
               </div>
             )}
 
@@ -1411,7 +1411,7 @@ export function DataTable<TData>({
               <div className="flex items-center gap-2">
                 <Zap size={10} className="text-amber-500 dark:text-amber-400" />
                 <span>Virtual scroll — {allRows.length.toLocaleString()} hàng</span>
-                {hasActiveFilter && <span className="text-indigo-500 dark:text-indigo-400">({totalFiltered.toLocaleString()} kết quả)</span>}
+                {hasActiveFilter && <span className="text-blue-600 dark:text-blue-400">({totalFiltered.toLocaleString()} kết quả)</span>}
               </div>
               {enableExport && (
                 <span className="text-slate-500 dark:text-slate-600">Xuất để lưu toàn bộ dữ liệu</span>

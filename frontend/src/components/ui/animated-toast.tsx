@@ -300,7 +300,7 @@ export const UndoToast: React.FC<{
               onUndo();
               onClose();
             }}
-            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[#5c36f5] hover:bg-[#7351f7] text-white text-xs font-black transition cursor-pointer shadow-[0_0_14px_rgba(92,54,245,0.5)]"
+            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-black transition cursor-pointer shadow-sm"
           >
             <RotateCcw size={13} />
             <span>Hoàn tác</span>
@@ -312,7 +312,7 @@ export const UndoToast: React.FC<{
             animate={{ width: '0%' }}
             transition={{ duration: duration / 1000, ease: 'linear' }}
             onAnimationComplete={onClose}
-            className="absolute bottom-0 left-0 h-1 bg-[#5c36f5]"
+            className="absolute bottom-0 left-0 h-1 bg-blue-600"
           />
         </motion.div>
       )}

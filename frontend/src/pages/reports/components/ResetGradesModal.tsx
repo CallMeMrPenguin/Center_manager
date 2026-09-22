@@ -80,7 +80,7 @@ export const ResetGradesModal: React.FC<ResetGradesModalProps> = ({
                 type="button"
                 onClick={() => setResetScope('class')}
                 className={`py-2 px-3 rounded-xl text-xs font-bold transition cursor-pointer border ${resetScope === 'class'
-                  ? 'bg-indigo-600 text-white border-indigo-600 shadow'
+                  ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
                   : 'bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200'
                   }`}
               >
@@ -93,7 +93,7 @@ export const ResetGradesModal: React.FC<ResetGradesModalProps> = ({
                 disabled={!selectedStudentId}
                 className={`py-2 px-3 rounded-xl text-xs font-bold transition cursor-pointer border ${!selectedStudentId ? 'opacity-40 cursor-not-allowed bg-slate-100 text-slate-400 border-slate-200' :
                   resetScope === 'student'
-                    ? 'bg-indigo-600 text-white border-indigo-600 shadow'
+                    ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
                     : 'bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200'
                   }`}
               >

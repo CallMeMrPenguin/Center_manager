@@ -14,12 +14,21 @@ export interface DiscrepancyStudent {
 }
 
 export function useSessionOverview(attendanceRecords: AttendanceRecord[]) {
-  const [thresholdMode, setThresholdMode] = useState<'standard' | 'classAvg' | 'custom'>('standard');
-  const [divergenceMin, setDivergenceMin] = useState<number>(1.5);
-
   const [customC1, setCustomC1] = useState<string>('');
   const [customC2, setCustomC2] = useState<string>('');
   const [customHw, setCustomHw] = useState<string>('');
+  const [customDiv, setCustomDiv] = useState<string>('');
+
+  const divergenceMin = useMemo(() => {
+    if (customDiv.trim() !== '') {
+      const n = parseFloat(customDiv);
+      return isNaN(n) ? 1.5 : n;
+    }
+    return 1.5;
+  }, [customDiv]);
+
+  const divInput = customDiv !== '' ? customDiv : '1.5';
+  const handleDivChange = (val: string) => setCustomDiv(val);
 
   // 1. Calculate class statistics
   const stats = useMemo(() => {
@@ -67,106 +76,39 @@ export function useSessionOverview(attendanceRecords: AttendanceRecord[]) {
   const avgC2Trunc = trunc1Dec(stats.avgC2);
   const avgHwTrunc = trunc1Dec(stats.avgHw);
 
-  // Computed effective thresholds
+  // Computed effective thresholds: defaults to class average unless a custom value is typed
   const threshC1 = useMemo(() => {
-    if (thresholdMode === 'standard') return 5.0;
-    if (thresholdMode === 'classAvg') return avgC1Trunc;
-    const n = parseFloat(customC1);
-    return isNaN(n) ? 0 : n;
-  }, [thresholdMode, avgC1Trunc, customC1]);
+    if (customC1.trim() !== '') {
+      const n = parseFloat(customC1);
+      return isNaN(n) ? avgC1Trunc : n;
+    }
+    return avgC1Trunc;
+  }, [avgC1Trunc, customC1]);
 
   const threshC2 = useMemo(() => {
-    if (thresholdMode === 'standard') return 5.0;
-    if (thresholdMode === 'classAvg') return avgC2Trunc;
-    const n = parseFloat(customC2);
-    return isNaN(n) ? 0 : n;
-  }, [thresholdMode, avgC2Trunc, customC2]);
+    if (customC2.trim() !== '') {
+      const n = parseFloat(customC2);
+      return isNaN(n) ? avgC2Trunc : n;
+    }
+    return avgC2Trunc;
+  }, [avgC2Trunc, customC2]);
 
   const threshHw = useMemo(() => {
-    if (thresholdMode === 'standard') return 5.0;
-    if (thresholdMode === 'classAvg') return avgHwTrunc;
-    const n = parseFloat(customHw);
-    return isNaN(n) ? 0 : n;
-  }, [thresholdMode, avgHwTrunc, customHw]);
+    if (customHw.trim() !== '') {
+      const n = parseFloat(customHw);
+      return isNaN(n) ? avgHwTrunc : n;
+    }
+    return avgHwTrunc;
+  }, [avgHwTrunc, customHw]);
 
   // Display strings for the inputs
-  const threshC1Input =
-    thresholdMode === 'custom'
-      ? customC1
-      : thresholdMode === 'classAvg'
-      ? format1Dec(avgC1Trunc)
-      : '5.0';
+  const threshC1Input = customC1 !== '' ? customC1 : (avgC1Trunc > 0 ? format1Dec(avgC1Trunc) : '');
+  const threshC2Input = customC2 !== '' ? customC2 : (avgC2Trunc > 0 ? format1Dec(avgC2Trunc) : '');
+  const threshHwInput = customHw !== '' ? customHw : (avgHwTrunc > 0 ? format1Dec(avgHwTrunc) : '');
 
-  const threshC2Input =
-    thresholdMode === 'custom'
-      ? customC2
-      : thresholdMode === 'classAvg'
-      ? format1Dec(avgC2Trunc)
-      : '5.0';
-
-  const threshHwInput =
-    thresholdMode === 'custom'
-      ? customHw
-      : thresholdMode === 'classAvg'
-      ? format1Dec(avgHwTrunc)
-      : '5.0';
-
-  const handleC1Change = (val: string) => {
-    setCustomC1(val);
-    if (thresholdMode !== 'custom') {
-      setCustomC2(threshC2Input);
-      setCustomHw(threshHwInput);
-      setThresholdMode('custom');
-    }
-  };
-
-  const handleC2Change = (val: string) => {
-    setCustomC2(val);
-    if (thresholdMode !== 'custom') {
-      setCustomC1(threshC1Input);
-      setCustomHw(threshHwInput);
-      setThresholdMode('custom');
-    }
-  };
-
-  const handleHwChange = (val: string) => {
-    setCustomHw(val);
-    if (thresholdMode !== 'custom') {
-      setCustomC1(threshC1Input);
-      setCustomC2(threshC2Input);
-      setThresholdMode('custom');
-    }
-  };
-
-  const handleApplyAllCustom = (val: string) => {
-    setCustomC1(val);
-    setCustomC2(val);
-    setCustomHw(val);
-    setThresholdMode('custom');
-  };
-
-  const handleSetStandard = () => {
-    setThresholdMode('standard');
-    setCustomC1('5.0');
-    setCustomC2('5.0');
-    setCustomHw('5.0');
-  };
-
-  const handleSetClassAvg = () => {
-    setThresholdMode('classAvg');
-    setCustomC1(format1Dec(avgC1Trunc));
-    setCustomC2(format1Dec(avgC2Trunc));
-    setCustomHw(format1Dec(avgHwTrunc));
-  };
-
-  const handleSetCustom = () => {
-    if (thresholdMode !== 'custom') {
-      setCustomC1(threshC1Input);
-      setCustomC2(threshC2Input);
-      setCustomHw(threshHwInput);
-      setThresholdMode('custom');
-    }
-  };
+  const handleC1Change = (val: string) => setCustomC1(val);
+  const handleC2Change = (val: string) => setCustomC2(val);
+  const handleHwChange = (val: string) => setCustomHw(val);
 
   // 2. Identify students below threshold
   const belowAvgData = useMemo(() => {
@@ -270,19 +212,13 @@ export function useSessionOverview(attendanceRecords: AttendanceRecord[]) {
     belowAvgData,
     divergenceStudents,
     hasAlerts,
-    thresholdMode,
-    setThresholdMode,
-    divergenceMin,
-    setDivergenceMin,
+    divInput,
+    handleDivChange,
     threshC1Input,
     threshC2Input,
     threshHwInput,
     handleC1Change,
     handleC2Change,
     handleHwChange,
-    handleApplyAllCustom,
-    handleSetStandard,
-    handleSetClassAvg,
-    handleSetCustom,
   };
 }

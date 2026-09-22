@@ -47,7 +47,7 @@ export const HeadToHeadDuel: React.FC<HeadToHeadDuelProps> = ({
   if (!classComparisonData) return null;
 
   return (
-    <div className="bg-white dark:bg-[#0b0f19] border border-slate-300/80 dark:border-[#1b253b] rounded-2xl p-6 shadow-[0_4px_20px_-4px_rgba(15,23,42,0.08),0_2px_4px_-1px_rgba(15,23,42,0.04)] dark:shadow-xl space-y-6 animate-cascade-1">
+    <div className="bg-white dark:bg-[#0b0f19] border border-slate-300 dark:border-[#1b253b] rounded-2xl p-6 shadow-md dark:shadow-xl space-y-6 animate-cascade-1">
       {/* Header & Dual Class Selector */}
       <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 dark:border-[#161f33] pb-5">
         <div className="flex items-center gap-3">
@@ -56,7 +56,7 @@ export const HeadToHeadDuel: React.FC<HeadToHeadDuelProps> = ({
           </div>
           <div>
             <h3 className="text-base font-black text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
-              SO SÁNH ĐỐI ĐẦU 2 LỚP HỌC
+              SO SÁNH 2 LỚP HỌC
             </h3>
           </div>
         </div>
@@ -100,23 +100,23 @@ export const HeadToHeadDuel: React.FC<HeadToHeadDuelProps> = ({
       {/* 4 Duel KPI Comparison Rounded Square Cards - Centered Title & VS Layout */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 animate-cascade-2">
         {/* 1. EMA Comparison */}
-        <div className="p-4 rounded-2xl bg-white dark:bg-[#0e1322] border border-slate-200/90 dark:border-[#1b253b] flex flex-col justify-between gap-3 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.06),0_1px_3px_-1px_rgba(0,0,0,0.06)] hover:shadow-md transition-shadow">
+        <div className="p-4 rounded-2xl bg-slate-50/70 dark:bg-[#0e1322] border border-slate-300/80 dark:border-[#1b253b] flex flex-col justify-between gap-3 shadow-xs hover:shadow-md transition-shadow">
           <div className="flex items-center justify-center gap-2 border-b border-slate-200 dark:border-white/5 pb-2 text-center">
-            <BarChart3 size={14} className="text-blue-500 dark:text-blue-400" />
+            <BarChart3 size={15} className="text-blue-500 dark:text-blue-400" />
             <span className="text-xs font-black uppercase tracking-wider text-blue-600 dark:text-blue-400">ĐIỂM EMA TRUNG BÌNH</span>
           </div>
           <div className="flex items-center justify-between gap-2 px-1">
             <div className="text-left">
-              <span className="text-[11px] text-slate-500 dark:text-slate-400 block font-semibold truncate max-w-[100px]">{classComparisonData.classA.name}</span>
-              <span className="text-2xl font-black font-mono text-blue-600 dark:text-blue-400">{classComparisonData.classA.avgEma > 0 ? format1Dec(classComparisonData.classA.avgEma) : '-'}</span>
+              <span className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 block font-extrabold truncate max-w-[110px]">{classComparisonData.classA.name}</span>
+              <span className="text-3xl font-black font-mono text-blue-600 dark:text-blue-400">{classComparisonData.classA.avgEma > 0 ? format1Dec(classComparisonData.classA.avgEma) : '-'}</span>
             </div>
-            <span className="text-xs font-black text-slate-400 dark:text-slate-600 font-mono">VS</span>
+            <span className="text-sm font-black text-slate-400 dark:text-slate-500 font-mono">VS</span>
             <div className="text-right">
-              <span className="text-[11px] text-slate-500 dark:text-slate-400 block font-semibold truncate max-w-[100px]">{classComparisonData.classB.name}</span>
-              <span className="text-2xl font-black font-mono text-cyan-600 dark:text-cyan-400">{classComparisonData.classB.avgEma > 0 ? format1Dec(classComparisonData.classB.avgEma) : '-'}</span>
+              <span className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 block font-extrabold truncate max-w-[110px]">{classComparisonData.classB.name}</span>
+              <span className="text-3xl font-black font-mono text-cyan-600 dark:text-cyan-400">{classComparisonData.classB.avgEma > 0 ? format1Dec(classComparisonData.classB.avgEma) : '-'}</span>
             </div>
           </div>
-          <div className="pt-2 border-t border-slate-200 dark:border-white/5 text-[11px] font-black flex items-center justify-center">
+          <div className="pt-2 border-t border-slate-200 dark:border-white/5 text-xs font-black flex items-center justify-center">
             {classComparisonData.emaDiff > 0 ? (
               <span className="text-emerald-700 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-lg border border-emerald-500/20 whitespace-nowrap shadow-2xs">
                 {classComparisonData.classA.name} cao hơn +{format1Dec(classComparisonData.emaDiff)} đ
@@ -132,23 +132,23 @@ export const HeadToHeadDuel: React.FC<HeadToHeadDuelProps> = ({
         </div>
 
         {/* 2. Attendance % Comparison */}
-        <div className="p-4 rounded-2xl bg-white dark:bg-[#0e1322] border border-slate-200/90 dark:border-[#1b253b] flex flex-col justify-between gap-3 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.06),0_1px_3px_-1px_rgba(0,0,0,0.06)] hover:shadow-md transition-shadow">
+        <div className="p-4 rounded-2xl bg-slate-50/70 dark:bg-[#0e1322] border border-slate-300/80 dark:border-[#1b253b] flex flex-col justify-between gap-3 shadow-xs hover:shadow-md transition-shadow">
           <div className="flex items-center justify-center gap-2 border-b border-slate-200 dark:border-white/5 pb-2 text-center">
-            <Users size={14} className="text-emerald-500 dark:text-emerald-400" />
+            <Users size={15} className="text-emerald-500 dark:text-emerald-400" />
             <span className="text-xs font-black uppercase tracking-wider text-emerald-600 dark:text-emerald-400">CHUYÊN CẦN %</span>
           </div>
           <div className="flex items-center justify-between gap-2 px-1">
             <div className="text-left">
-              <span className="text-[11px] text-slate-500 dark:text-slate-400 block font-semibold truncate max-w-[100px]">{classComparisonData.classA.name}</span>
-              <span className="text-2xl font-black font-mono text-emerald-600 dark:text-emerald-400">{classComparisonData.classA.attendancePct}%</span>
+              <span className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 block font-extrabold truncate max-w-[110px]">{classComparisonData.classA.name}</span>
+              <span className="text-3xl font-black font-mono text-emerald-600 dark:text-emerald-400">{classComparisonData.classA.attendancePct}%</span>
             </div>
-            <span className="text-xs font-black text-slate-400 dark:text-slate-600 font-mono">VS</span>
+            <span className="text-sm font-black text-slate-400 dark:text-slate-500 font-mono">VS</span>
             <div className="text-right">
-              <span className="text-[11px] text-slate-500 dark:text-slate-400 block font-semibold truncate max-w-[100px]">{classComparisonData.classB.name}</span>
-              <span className="text-2xl font-black font-mono text-teal-600 dark:text-teal-400">{classComparisonData.classB.attendancePct}%</span>
+              <span className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 block font-extrabold truncate max-w-[110px]">{classComparisonData.classB.name}</span>
+              <span className="text-3xl font-black font-mono text-teal-600 dark:text-teal-400">{classComparisonData.classB.attendancePct}%</span>
             </div>
           </div>
-          <div className="pt-2 border-t border-slate-200 dark:border-white/5 text-[11px] font-black flex items-center justify-center">
+          <div className="pt-2 border-t border-slate-200 dark:border-white/5 text-xs font-black flex items-center justify-center">
             {classComparisonData.attDiff > 0 ? (
               <span className="text-emerald-700 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-lg border border-emerald-500/20 whitespace-nowrap shadow-2xs">
                 {classComparisonData.classA.name} chuyên cần hơn +{classComparisonData.attDiff}%
@@ -164,23 +164,23 @@ export const HeadToHeadDuel: React.FC<HeadToHeadDuelProps> = ({
         </div>
 
         {/* 3. Improving % Comparison */}
-        <div className="p-4 rounded-2xl bg-white dark:bg-[#0e1322] border border-slate-200/90 dark:border-[#1b253b] flex flex-col justify-between gap-3 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.06),0_1px_3px_-1px_rgba(0,0,0,0.06)] hover:shadow-md transition-shadow">
+        <div className="p-4 rounded-2xl bg-slate-50/70 dark:bg-[#0e1322] border border-slate-300/80 dark:border-[#1b253b] flex flex-col justify-between gap-3 shadow-xs hover:shadow-md transition-shadow">
           <div className="flex items-center justify-center gap-2 border-b border-slate-200 dark:border-white/5 pb-2 text-center">
-            <TrendingUp size={14} className="text-sky-500 dark:text-sky-400" />
+            <TrendingUp size={15} className="text-sky-500 dark:text-sky-400" />
             <span className="text-xs font-black uppercase tracking-wider text-sky-600 dark:text-sky-400">TỶ LỆ TIẾN BỘ</span>
           </div>
           <div className="flex items-center justify-between gap-2 px-1">
             <div className="text-left">
-              <span className="text-[11px] text-slate-500 dark:text-slate-400 block font-semibold truncate max-w-[100px]">{classComparisonData.classA.name}</span>
-              <span className="text-2xl font-black font-mono text-blue-600 dark:text-blue-400">{classComparisonData.classA.improvingPct}%</span>
+              <span className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 block font-extrabold truncate max-w-[110px]">{classComparisonData.classA.name}</span>
+              <span className="text-3xl font-black font-mono text-blue-600 dark:text-blue-400">{classComparisonData.classA.improvingPct}%</span>
             </div>
-            <span className="text-xs font-black text-slate-400 dark:text-slate-600 font-mono">VS</span>
+            <span className="text-sm font-black text-slate-400 dark:text-slate-500 font-mono">VS</span>
             <div className="text-right">
-              <span className="text-[11px] text-slate-500 dark:text-slate-400 block font-semibold truncate max-w-[100px]">{classComparisonData.classB.name}</span>
-              <span className="text-2xl font-black font-mono text-cyan-600 dark:text-cyan-300">{classComparisonData.classB.improvingPct}%</span>
+              <span className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 block font-extrabold truncate max-w-[110px]">{classComparisonData.classB.name}</span>
+              <span className="text-3xl font-black font-mono text-cyan-600 dark:text-cyan-300">{classComparisonData.classB.improvingPct}%</span>
             </div>
           </div>
-          <div className="pt-2 border-t border-slate-200 dark:border-white/5 text-[11px] font-black flex items-center justify-center">
+          <div className="pt-2 border-t border-slate-200 dark:border-white/5 text-xs font-black flex items-center justify-center">
             {classComparisonData.impDiff > 0 ? (
               <span className="text-blue-700 dark:text-blue-400 bg-blue-500/10 px-2.5 py-1 rounded-lg border border-blue-500/20 whitespace-nowrap shadow-2xs">
                 {classComparisonData.classA.name} tiến bộ hơn +{classComparisonData.impDiff}%
@@ -196,23 +196,23 @@ export const HeadToHeadDuel: React.FC<HeadToHeadDuelProps> = ({
         </div>
 
         {/* 4. Std Dev / Homogeneity Comparison */}
-        <div className="p-4 rounded-2xl bg-white dark:bg-[#0e1322] border border-slate-200/90 dark:border-[#1b253b] flex flex-col justify-between gap-3 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.06),0_1px_3px_-1px_rgba(0,0,0,0.06)] hover:shadow-md transition-shadow">
+        <div className="p-4 rounded-2xl bg-slate-50/70 dark:bg-[#0e1322] border border-slate-300/80 dark:border-[#1b253b] flex flex-col justify-between gap-3 shadow-xs hover:shadow-md transition-shadow">
           <div className="flex items-center justify-center gap-2 border-b border-slate-200 dark:border-white/5 pb-2 text-center">
-            <Activity size={14} className="text-amber-500 dark:text-amber-400" />
+            <Activity size={15} className="text-amber-500 dark:text-amber-400" />
             <span className="text-xs font-black uppercase tracking-wider text-amber-600 dark:text-amber-400">ĐỘ LỆCH CHUẨN (SD)</span>
           </div>
           <div className="flex items-center justify-between gap-2 px-1">
             <div className="text-left">
-              <span className="text-[11px] text-slate-500 dark:text-slate-400 block font-semibold truncate max-w-[100px]">{classComparisonData.classA.name}</span>
-              <span className="text-2xl font-black font-mono text-amber-600 dark:text-amber-300">σ={classComparisonData.classA.classSd}</span>
+              <span className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 block font-extrabold truncate max-w-[110px]">{classComparisonData.classA.name}</span>
+              <span className="text-3xl font-black font-mono text-amber-600 dark:text-amber-300">σ={classComparisonData.classA.classSd}</span>
             </div>
-            <span className="text-xs font-black text-slate-400 dark:text-slate-600 font-mono">VS</span>
+            <span className="text-sm font-black text-slate-400 dark:text-slate-500 font-mono">VS</span>
             <div className="text-right">
-              <span className="text-[11px] text-slate-500 dark:text-slate-400 block font-semibold truncate max-w-[100px]">{classComparisonData.classB.name}</span>
-              <span className="text-2xl font-black font-mono text-amber-600 dark:text-yellow-300">σ={classComparisonData.classB.classSd}</span>
+              <span className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 block font-extrabold truncate max-w-[110px]">{classComparisonData.classB.name}</span>
+              <span className="text-3xl font-black font-mono text-amber-600 dark:text-yellow-300">σ={classComparisonData.classB.classSd}</span>
             </div>
           </div>
-          <div className="pt-2 border-t border-slate-200 dark:border-white/5 text-[11px] font-black flex items-center justify-center">
+          <div className="pt-2 border-t border-slate-200 dark:border-white/5 text-xs font-black flex items-center justify-center">
             {classComparisonData.classA.classSd < classComparisonData.classB.classSd ? (
               <span className="text-emerald-700 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-lg border border-emerald-500/20 whitespace-nowrap shadow-2xs">
                 {classComparisonData.classA.name} đồng đều học lực hơn
@@ -239,48 +239,48 @@ export const HeadToHeadDuel: React.FC<HeadToHeadDuelProps> = ({
       {/* Leading Student Badges */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1 animate-cascade-4">
         {/* Class A Top Student */}
-        <div className="p-4 rounded-2xl bg-white dark:bg-[#0e1322] border border-slate-200/90 dark:border-[#1e2744] flex items-center gap-3.5 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.06),0_1px_3px_-1px_rgba(0,0,0,0.06)] hover:shadow-md transition-shadow">
+        <div className="p-4 rounded-2xl bg-slate-50/70 dark:bg-[#0e1322] border border-slate-300/80 dark:border-[#1e2744] flex items-center gap-3.5 shadow-xs hover:shadow-md transition-shadow">
           {classComparisonData.classA.topStudent ? (
             <img
               src={getStudentTier(Number(classComparisonData.classA.topStudent.ema_level || 0)).badge}
               alt="Rank"
-              className="w-10 h-10 object-contain shrink-0"
+              className="w-11 h-11 object-contain shrink-0"
             />
           ) : (
             <Award size={28} className="text-slate-400 dark:text-slate-500" />
           )}
           <div className="flex-1">
-            <span className="text-[10px] font-black uppercase text-blue-600 dark:text-blue-400 block">Học Sinh Dẫn Đầu ({classComparisonData.classA.name})</span>
-            <span className="text-sm font-black text-slate-900 dark:text-white block">
+            <span className="text-xs font-black uppercase text-blue-600 dark:text-blue-400 block">Học Sinh Dẫn Đầu ({classComparisonData.classA.name})</span>
+            <span className="text-base font-extrabold text-slate-900 dark:text-white block">
               {classComparisonData.classA.topStudent ? classComparisonData.classA.topStudent.full_name : 'Chưa có'}
             </span>
           </div>
           {classComparisonData.classA.topStudent && (
-            <span className="text-xs font-mono font-black px-2.5 py-1 rounded-lg bg-blue-500/15 text-blue-700 dark:text-blue-300 border border-blue-500/30">
+            <span className="text-sm font-mono font-black px-2.5 py-1 rounded-lg bg-blue-500/15 text-blue-700 dark:text-blue-300 border border-blue-500/30">
               EMA {format1Dec(Number(classComparisonData.classA.topStudent.ema_level || 0))}
             </span>
           )}
         </div>
 
         {/* Class B Top Student */}
-        <div className="p-4 rounded-2xl bg-white dark:bg-[#0e1322] border border-slate-200/90 dark:border-[#1e2744] flex items-center gap-3.5 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.06),0_1px_3px_-1px_rgba(0,0,0,0.06)] hover:shadow-md transition-shadow">
+        <div className="p-4 rounded-2xl bg-slate-50/70 dark:bg-[#0e1322] border border-slate-300/80 dark:border-[#1e2744] flex items-center gap-3.5 shadow-xs hover:shadow-md transition-shadow">
           {classComparisonData.classB.topStudent ? (
             <img
               src={getStudentTier(Number(classComparisonData.classB.topStudent.ema_level || 0)).badge}
               alt="Rank"
-              className="w-10 h-10 object-contain shrink-0"
+              className="w-11 h-11 object-contain shrink-0"
             />
           ) : (
             <Award size={28} className="text-slate-400 dark:text-slate-500" />
           )}
           <div className="flex-1">
-            <span className="text-[10px] font-black uppercase text-cyan-600 dark:text-cyan-400 block">Học Sinh Dẫn Đầu ({classComparisonData.classB.name})</span>
-            <span className="text-sm font-black text-slate-900 dark:text-white block">
+            <span className="text-xs font-black uppercase text-cyan-600 dark:text-cyan-400 block">Học Sinh Dẫn Đầu ({classComparisonData.classB.name})</span>
+            <span className="text-base font-extrabold text-slate-900 dark:text-white block">
               {classComparisonData.classB.topStudent ? classComparisonData.classB.topStudent.full_name : 'Chưa có'}
             </span>
           </div>
           {classComparisonData.classB.topStudent && (
-            <span className="text-xs font-mono font-black px-2.5 py-1 rounded-lg bg-cyan-500/15 text-cyan-700 dark:text-cyan-300 border border-cyan-500/30">
+            <span className="text-sm font-mono font-black px-2.5 py-1 rounded-lg bg-cyan-500/15 text-cyan-700 dark:text-cyan-300 border border-cyan-500/30">
               EMA {format1Dec(Number(classComparisonData.classB.topStudent.ema_level || 0))}
             </span>
           )}

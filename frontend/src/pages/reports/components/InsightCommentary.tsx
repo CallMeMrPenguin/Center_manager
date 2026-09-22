@@ -114,7 +114,7 @@ export const InsightCommentary: React.FC<InsightCommentaryProps> = React.memo(({
                   onClick={() => setActiveTooltipId(isTooltipActive ? null : item.id)}
                   className={`p-1.5 rounded-lg transition cursor-pointer ${
                     isTooltipActive
-                      ? 'bg-indigo-600 text-white shadow-[0_0_10px_rgba(99,102,241,0.6)]'
+                      ? 'bg-blue-600 text-white shadow-sm'
                       : 'text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10'
                   }`}
                   title={`Giải thích chi tiết về ${item.label}`}
@@ -125,7 +125,7 @@ export const InsightCommentary: React.FC<InsightCommentaryProps> = React.memo(({
                 {/* Floating Popover Card */}
                 {isTooltipActive && (
                   <div className="absolute right-0 top-full mt-2 z-50 w-72 sm:w-80 p-3.5 rounded-xl bg-white dark:bg-[#141417] border border-slate-300 dark:border-[#27272a] text-xs shadow-2xl space-y-2 animate-in fade-in zoom-in-95 duration-150">
-                    <div className="flex items-center justify-between text-indigo-600 dark:text-indigo-300 font-bold border-b border-slate-200 dark:border-white/10 pb-1.5">
+                    <div className="flex items-center justify-between text-blue-600 dark:text-blue-300 font-bold border-b border-slate-200 dark:border-white/10 pb-1.5">
                       <span className="uppercase text-[10px] tracking-wider">
                         Ý Nghĩa: {item.tooltipTitle}
                       </span>

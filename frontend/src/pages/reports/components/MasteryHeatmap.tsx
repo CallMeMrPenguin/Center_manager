@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
 import { DataTable } from '../../../components/DataTable';
+import { SegmentedControl } from '../../../components/SegmentedControl';
 import { LayoutGrid } from 'lucide-react';
 import { trunc1Dec } from '../../../utils';
 
@@ -120,16 +121,16 @@ export const MasteryHeatmap: React.FC<MasteryHeatmapProps> = ({
         minSize: 160,
         cell: ({ row }) => (
           <div className="flex flex-col gap-1 py-1">
-            <span className="font-bold text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-300 transition text-xs">
+            <span className="font-extrabold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-300 transition text-sm sm:text-base">
               {row.original.student_name}
             </span>
             <div className="flex items-center gap-1.5 flex-wrap">
               {row.original.nickname && (
-                <span className="text-[10px] font-extrabold text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-500/15 px-1.5 py-0.2 rounded border border-indigo-200 dark:border-indigo-500/20">
+                <span className="text-xs font-extrabold text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-500/15 px-1.5 py-0.5 rounded border border-blue-200 dark:border-blue-500/20">
                   {row.original.nickname}
                 </span>
               )}
-              <span className="text-[10px] text-slate-600 dark:text-slate-400 font-semibold bg-slate-100 dark:bg-[#121626] px-1.5 py-0.2 rounded border border-slate-200 dark:border-white/5">
+              <span className="text-xs text-slate-600 dark:text-slate-400 font-semibold bg-slate-100 dark:bg-[#121626] px-1.5 py-0.5 rounded border border-slate-200 dark:border-white/5">
                 {row.original.class_name || 'Lớp học'}
               </span>
             </div>
@@ -143,8 +144,8 @@ export const MasteryHeatmap: React.FC<MasteryHeatmapProps> = ({
       return {
         id: `unit_${colKey}`,
         header: () => (
-          <div className="text-center py-1 select-none">
-            <div className="text-xs font-black text-slate-900 dark:text-white truncate max-w-[130px]" title={u.unit_key}>
+          <div className="flex flex-col items-center justify-center py-1 select-none">
+            <div className="text-xs font-extrabold text-slate-900 dark:text-white truncate max-w-[120px]" title={u.unit_key}>
               {u.unit_key}
             </div>
             <div className="flex items-center justify-center gap-1.5 mt-1">
@@ -195,42 +196,17 @@ export const MasteryHeatmap: React.FC<MasteryHeatmapProps> = ({
   }, [filteredUnits]);
 
   const toolbarLeft = (
-    <div className="relative flex bg-slate-100 dark:bg-[#0d1018] p-1 rounded-xl border border-slate-200 dark:border-white/10 text-xs font-bold shrink-0 w-64 shadow-[inset_0_1px_2px_rgba(0,0,0,0.05)] select-none">
-      <div
-        className="absolute top-1 bottom-1 rounded-lg bg-[#5c36f5] shadow-[0_0_14px_rgba(92,54,245,0.5)] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] pointer-events-none"
-        style={{
-          left: skillFilter === 'all'
-            ? '4px'
-            : skillFilter === 'vocab'
-              ? 'calc((100% / 3) + 1px)'
-              : 'calc(((100% / 3) * 2) + 1px)',
-          width: 'calc((100% / 3) - 4px)',
-        }}
+    <div className="w-64">
+      <SegmentedControl
+        value={skillFilter}
+        onChange={(val) => setSkillFilter(val as any)}
+        options={[
+          { value: 'all', label: 'Tất Cả' },
+          { value: 'vocab', label: 'Từ Vựng' },
+          { value: 'grammar', label: 'Ngữ Pháp' },
+        ]}
+        size="sm"
       />
-      <button
-        onClick={() => setSkillFilter('all')}
-        className={`flex-1 relative z-10 py-1 text-center transition cursor-pointer ${
-          skillFilter === 'all' ? 'text-white font-black' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-        }`}
-      >
-        Tất Cả
-      </button>
-      <button
-        onClick={() => setSkillFilter('vocab')}
-        className={`flex-1 relative z-10 py-1 text-center transition cursor-pointer ${
-          skillFilter === 'vocab' ? 'text-white font-black' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-        }`}
-      >
-        Từ Vựng
-      </button>
-      <button
-        onClick={() => setSkillFilter('grammar')}
-        className={`flex-1 relative z-10 py-1 text-center transition cursor-pointer ${
-          skillFilter === 'grammar' ? 'text-white font-black' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-        }`}
-      >
-        Ngữ Pháp
-      </button>
     </div>
   );
 
@@ -239,7 +215,7 @@ export const MasteryHeatmap: React.FC<MasteryHeatmapProps> = ({
       {/* Title Bar */}
       <div className="border-b border-slate-200 dark:border-white/5 pb-3">
         <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
-          <LayoutGrid size={16} className="text-indigo-600 dark:text-indigo-400" />
+          <LayoutGrid size={16} className="text-blue-600 dark:text-blue-400" />
           Ma Trận Nắm Vững Kiến Thức (Mastery Heatmap)
         </h3>
         <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">

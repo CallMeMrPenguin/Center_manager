@@ -110,10 +110,10 @@ export function SegmentedControl<T extends string = string>({
   const isFluid = fullWidth || fit === 'fluid' || className.includes('w-full') || className.includes('flex-1');
 
   const sizeClasses = {
-    xs: 'text-[11px] py-1 px-2.5 gap-1.5 min-h-[28px]',
-    sm: 'text-xs py-1.5 px-3 gap-1.5 min-h-[32px]',
-    md: 'text-xs py-2 px-3.5 gap-2 min-h-[36px]',
-    lg: 'text-sm py-2.5 px-4.5 gap-2.5 min-h-[42px]',
+    xs: 'text-[11px] py-1 px-2.5 gap-1 min-h-[26px]',
+    sm: 'text-xs py-1 px-3 gap-1.5 min-h-[28px]',
+    md: 'text-xs py-1.5 px-3.5 gap-1.5 min-h-[32px]',
+    lg: 'text-sm py-2 px-4 gap-2 min-h-[38px]',
   }[size];
 
   const iconSizes = {
@@ -128,14 +128,14 @@ export function SegmentedControl<T extends string = string>({
       ref={containerRef}
       role="group"
       onMouseLeave={() => setHoveredIndex(null)}
-      className={`relative flex items-center bg-slate-200/90 dark:bg-[#090c15] p-1 rounded-xl border border-slate-300 dark:border-[#1b233d] shadow-[inset_0_1px_3px_rgba(0,0,0,0.12)] select-none shrink-0 transition-colors duration-200 ${
+      className={`relative flex items-center bg-slate-200/90 dark:bg-[#090c15] p-0.5 rounded-lg border border-slate-300 dark:border-[#1b233d] shadow-[inset_0_1px_2px_rgba(0,0,0,0.08)] select-none shrink-0 transition-colors duration-200 ${
         isFluid ? 'w-full' : 'inline-flex w-fit'
       } ${className}`}
     >
       {/* 1. Gliding Spring Hover Indicator */}
       <motion.div
         aria-hidden="true"
-        className="absolute top-1 bottom-1 rounded-lg bg-white/90 dark:bg-white/15 shadow-sm border border-slate-300/80 dark:border-white/10 pointer-events-none z-0"
+        className="absolute top-0.5 bottom-0.5 rounded-md bg-white/90 dark:bg-white/15 shadow-sm border border-slate-300/80 dark:border-white/10 pointer-events-none z-0"
         initial={false}
         animate={{
           left: hoverStyle.left,
@@ -152,9 +152,9 @@ export function SegmentedControl<T extends string = string>({
       {/* 2. Tactile Spring Active Indicator Pill with Bevel Shadows */}
       <motion.div
         aria-hidden="true"
-        className={`absolute top-1 bottom-1 rounded-lg pointer-events-none z-0 ${
+        className={`absolute top-0.5 bottom-0.5 rounded-md pointer-events-none z-0 ${
           activeColor ||
-          'bg-gradient-to-b from-[#5c36f5] to-[#4722dc] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.4),inset_0_-1px_0_0_rgba(0,0,0,0.25),0_4px_14px_rgba(92,54,245,0.45)] border border-indigo-400/40 dark:border-white/20'
+          'bg-blue-600 shadow-sm border border-blue-500/60'
         }`}
         initial={false}
         animate={{

@@ -38,12 +38,12 @@ export const AssignmentTypeConfigSelector: React.FC<AssignmentTypeConfigSelector
         </label>
 
         {/* Sliding Pill Segmented Control */}
-        <div className="relative flex bg-slate-100 dark:bg-[#0d1018] p-1 rounded-xl border border-slate-200 dark:border-white/10 text-xs shrink-0 font-bold select-none shadow-[inset_0_1px_2px_rgba(0,0,0,0.05)]">
+        <div className="relative flex bg-slate-100 dark:bg-[#0d1018] p-0.5 rounded-lg border border-slate-200 dark:border-white/10 text-xs shrink-0 font-bold select-none shadow-[inset_0_1px_2px_rgba(0,0,0,0.05)]">
           <div
-            className="absolute top-1 bottom-1 rounded-lg bg-[#5c36f5] shadow-[0_0_14px_rgba(92,54,245,0.5)] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] pointer-events-none"
+            className="absolute top-0.5 bottom-0.5 rounded-md bg-blue-600 shadow-sm border border-blue-500/60 transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] pointer-events-none"
             style={{
-              left: `calc((100% / 3) * ${activeIndex} + 2px)`,
-              width: 'calc((100% / 3) - 4px)',
+              left: `calc((100% / 3) * ${activeIndex} + 1px)`,
+              width: 'calc((100% / 3) - 2px)',
             }}
           />
           {TYPE_OPTIONS.map((opt) => {
@@ -110,7 +110,7 @@ export const AssignmentTypeConfigSelector: React.FC<AssignmentTypeConfigSelector
                 type="checkbox"
                 checked={proctoringEnabled}
                 onChange={(e) => onChangeProctoring(e.target.checked)}
-                className="w-4 h-4 rounded border-slate-300 dark:border-white/20 accent-[#5c36f5] cursor-pointer"
+                className="w-4 h-4 rounded border-slate-300 dark:border-white/20 accent-blue-600 cursor-pointer"
               />
               <span>Theo dõi màn hình</span>
             </label>

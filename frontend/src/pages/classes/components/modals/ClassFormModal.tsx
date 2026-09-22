@@ -202,7 +202,7 @@ export const ClassFormModal: React.FC<ClassFormModalProps> = ({
 
           {/* MULTI-DAY SCHEDULE SELECTOR */}
           <div className="space-y-2 border-t border-slate-200 dark:border-white/10 pt-3">
-            <label className="block text-[11px] font-extrabold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider mb-2">
+            <label className="block text-[11px] font-extrabold text-blue-600 dark:text-blue-400 uppercase tracking-wider mb-2">
               Lịch Học Theo Thứ (Cấu hình giờ & thời lượng riêng từng thứ)
             </label>
             <div className="space-y-2 bg-slate-50 dark:bg-[#141928] p-3 rounded-xl border border-slate-200 dark:border-white/10">
@@ -214,7 +214,7 @@ export const ClassFormModal: React.FC<ClassFormModalProps> = ({
                       type="button"
                       onClick={() => setClassDayConfigs((p) => ({ ...p, [day]: { ...p[day], checked: !p[day]?.checked } }))}
                       className={`shrink-0 h-5 w-5 rounded-lg border-2 flex items-center justify-center text-[9px] font-black transition cursor-pointer ${
-                        cfg.checked ? 'bg-indigo-600 border-indigo-500 text-white' : 'bg-transparent border-slate-300 dark:border-white/20 text-transparent'
+                        cfg.checked ? 'bg-blue-600 border-blue-500 text-white' : 'bg-transparent border-slate-300 dark:border-white/20 text-transparent'
                       }`}
                     >
                       ✓
@@ -225,7 +225,7 @@ export const ClassFormModal: React.FC<ClassFormModalProps> = ({
                       value={cfg.time}
                       disabled={!cfg.checked}
                       onChange={(e) => setClassDayConfigs((p) => ({ ...p, [day]: { ...p[day], time: e.target.value } }))}
-                      className={`flex-1 bg-white dark:bg-[#0d1018] border border-slate-300 dark:border-white/10 rounded-lg px-2 py-1 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500 ${
+                      className={`flex-1 bg-white dark:bg-[#0d1018] border border-slate-300 dark:border-white/10 rounded-lg px-2 py-1 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 ${
                         !cfg.checked ? 'opacity-30' : ''
                       }`}
                     />
