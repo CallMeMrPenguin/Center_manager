@@ -108,7 +108,7 @@ export const DeskCard: React.FC<DeskCardProps> = ({
   };
 
   return (
-    <div className="bg-white dark:bg-[#11162a] border border-slate-300 dark:border-[#222e4d] p-3 rounded-2xl shadow-sm dark:shadow-md hover:shadow-md transition-shadow w-64 flex flex-col gap-2.5">
+    <div className="bg-white dark:bg-[#11162a] p-3 rounded-2xl shadow-[0_4px_16px_rgba(0,0,0,0.08)] dark:shadow-[0_8px_24px_rgba(0,0,0,0.4)] hover:shadow-lg transition-all w-64 flex flex-col gap-2.5">
       {/* Desk Title Plaque */}
       <div className="flex items-center justify-between border-b border-slate-200 dark:border-white/5 pb-1.5 px-0.5">
         <span className="text-[10px] font-black uppercase tracking-wider text-slate-600 dark:text-slate-400">

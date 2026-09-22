@@ -1018,7 +1018,7 @@ export function DataTable<TData>({
 
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
-    <div className="flex flex-col min-h-0 w-full h-full font-sans">
+    <div className="flex flex-col min-h-0 w-full h-full font-sans rounded-2xl overflow-hidden">
 
       {/* ── TOOLBAR ─────────────────────────────────────────────────────────── */}
       {(enableGlobalSearch || enableColumnVisibility || enableExport || toolbarLeft || toolbarRight) && (
@@ -1261,8 +1261,8 @@ export function DataTable<TData>({
                             ${row.getIsSelected()
                               ? 'bg-indigo-500/15 hover:bg-indigo-500/25 dark:bg-indigo-500/20 dark:hover:bg-indigo-500/30'
                               : rowIdx % 2 === 0
-                              ? 'bg-white dark:bg-[#0d1018] hover:bg-indigo-50/80 dark:hover:bg-[#131928]'
-                              : 'bg-slate-100/90 dark:bg-[#0b0f1c] hover:bg-indigo-50/80 dark:hover:bg-[#131928]'}
+                              ? 'bg-white dark:bg-[#0d1018] hover:bg-indigo-50/80 dark:hover:bg-indigo-950/40'
+                              : 'bg-[#edf2f7] dark:bg-[#131828] hover:bg-indigo-50/80 dark:hover:bg-indigo-950/40'}
                           `}
                           onClick={() => onRowClick?.(row.original)}
                         >

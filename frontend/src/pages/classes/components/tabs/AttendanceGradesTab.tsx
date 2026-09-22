@@ -269,14 +269,16 @@ export const AttendanceGradesTab: React.FC<AttendanceGradesTabProps> = ({
       />
 
       {/* 2. UNIFIED ATTENDANCE & GRADES DATATABLE (Client-side Excel export respects toggled visible columns) */}
-      <DataTable
-        tableId="classes-attendance-table"
-        data={attendanceRecords}
-        columns={attendanceColumns}
-        pageSize={20}
-        exportFilename={`diem_danh_${selectedClass?.class_name || ''}_${attendanceDate}`}
-        onExportDocx={onExportDocx}
-      />
+      <div className="bg-white dark:bg-[#0d1018] rounded-2xl overflow-hidden shadow-[0_4px_24px_rgba(0,0,0,0.08)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.5)]">
+        <DataTable
+          tableId="classes-attendance-table"
+          data={attendanceRecords}
+          columns={attendanceColumns}
+          pageSize={20}
+          exportFilename={`diem_danh_${selectedClass?.class_name || ''}_${attendanceDate}`}
+          onExportDocx={onExportDocx}
+        />
+      </div>
     </div>
   );
 };

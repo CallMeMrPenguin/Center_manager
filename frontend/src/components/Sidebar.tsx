@@ -113,9 +113,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
           return (
             <React.Fragment key={section.id}>
-              {/* Section Divider in Collapsed State */}
-              {!isSidebarExpanded && sIdx > 0 && (
-                <div className="w-6 h-[1px] bg-white/10 mx-auto my-1.5 shrink-0" />
+              {/* Section Divider in Collapsed & Expanded State */}
+              {sIdx > 0 && (
+                isSidebarExpanded ? (
+                  <div className="h-[1px] bg-slate-200 dark:bg-white/10 mx-2 my-1.5 shrink-0" />
+                ) : (
+                  <div className="w-7 h-[1.5px] bg-slate-300 dark:bg-white/20 mx-auto my-2 shrink-0 rounded-full" />
+                )
               )}
 
               <div className="flex flex-col gap-0.5 shrink-0">

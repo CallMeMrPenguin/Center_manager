@@ -24,17 +24,14 @@ export const ClassCard: React.FC<ClassCardProps> = ({
     <div
       onClick={() => onSelect(cls)}
       style={{
-        borderColor: borderColor,
         boxShadow: glowShadow,
       }}
-      className="bg-white dark:bg-[#0a0d1a] border rounded-[28px] p-6 space-y-5 cursor-pointer transition-all duration-300 group relative overflow-hidden hover:-translate-y-1 hover:brightness-105 shadow-sm dark:shadow-none"
+      className="bg-white dark:bg-[#0a0d1a] rounded-[28px] p-6 space-y-5 cursor-pointer transition-all duration-300 group relative overflow-hidden hover:-translate-y-1 hover:brightness-105"
       onMouseEnter={(e) => {
         e.currentTarget.style.boxShadow = hoverGlowShadow;
-        e.currentTarget.style.borderColor = hexToRGBA(cardColor, 0.6);
       }}
       onMouseLeave={(e) => {
         e.currentTarget.style.boxShadow = glowShadow;
-        e.currentTarget.style.borderColor = borderColor;
       }}
     >
       {/* Top Header: Grade Pill + Circular Edit Pencil Button */}

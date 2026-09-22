@@ -16,7 +16,7 @@ export const TeacherDetailCard: React.FC<TeacherDetailCardProps> = ({ teacher, o
   const accountRole = teacher.account_role || teacher.role || 'Giáo viên';
 
   return (
-    <div className="bg-white dark:bg-[#0b0f1d] border border-slate-200 dark:border-[#1e2746] rounded-2xl p-5 shadow-md dark:shadow-2xl space-y-4 font-sans">
+    <div className="bg-white dark:bg-[#0b0f1d] rounded-2xl p-5 shadow-[0_4px_24px_rgba(0,0,0,0.08)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.5)] space-y-4 font-sans">
       {/* Top Header Strip */}
       <div className="flex flex-wrap items-center justify-between gap-4 pb-3 border-b border-slate-200 dark:border-white/10">
         <div className="flex items-center gap-3.5">
