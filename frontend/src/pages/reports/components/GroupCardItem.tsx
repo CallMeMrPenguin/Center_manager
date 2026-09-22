@@ -25,9 +25,8 @@ export const GroupCardItem: React.FC<GroupCardItemProps> = ({
 
         <div className="flex items-center justify-between text-[11px] text-slate-700 dark:text-slate-300 font-bold">
           <span>{group.subtitle}</span>
-          <div className="flex items-center gap-2 font-mono text-[10px]">
+          <div className="flex items-center gap-3 font-mono text-[10px]">
             <span>EMA: <strong className="text-slate-900 dark:text-white">{group.avgEma}</strong></span>
-            <span>|</span>
             <span>σ: <strong className="text-slate-900 dark:text-white">{group.groupSd}</strong></span>
           </div>
         </div>
@@ -67,20 +66,20 @@ export const GroupCardItem: React.FC<GroupCardItemProps> = ({
 
               <div className="flex items-center gap-1.5 shrink-0">
                 {/* Trend Slope Badge */}
-                <span className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-mono font-black ${isUp ? 'bg-emerald-500/20 text-emerald-400' : isDown ? 'bg-rose-500/20 text-rose-400' : 'bg-slate-500/20 text-slate-400'}`}>
+                <span className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-mono font-black ${isUp ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400' : isDown ? 'bg-rose-500/15 text-rose-700 dark:text-rose-400' : 'bg-slate-500/15 text-slate-700 dark:text-slate-400'}`}>
                   {isUp ? <TrendingUp size={10} /> : isDown ? <TrendingDown size={10} /> : <Minus size={10} />}
                   <span>{slope > 0 ? `+${format1Dec(slope)}` : format1Dec(slope)}</span>
                 </span>
 
                 {/* Performance Index (PI) */}
                 {pi !== null && pi > 0 && (
-                  <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                  <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-purple-500/15 text-purple-700 dark:text-purple-300 border border-purple-500/30">
                     PI {format1Dec(pi)}
                   </span>
                 )}
 
                 {/* EMA Score */}
-                <span className={`text-[11px] font-mono font-black px-2 py-0.5 rounded-lg bg-black/40 border border-white/10 ${tier.text}`}>
+                <span className={`text-[11px] font-mono font-black px-2 py-0.5 rounded-lg bg-slate-100 dark:bg-black/40 border border-slate-300 dark:border-white/10 ${tier.text}`}>
                   {format1Dec(ema)}
                 </span>
               </div>

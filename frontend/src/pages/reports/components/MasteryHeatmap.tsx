@@ -235,14 +235,14 @@ export const MasteryHeatmap: React.FC<MasteryHeatmapProps> = ({
   );
 
   return (
-    <div className="bg-[#0c0f1d] border border-white/10 rounded-2xl p-5 space-y-4 select-none shadow-lg">
+    <div className="bg-white dark:bg-[#0c0f1d] border border-slate-300 dark:border-white/10 rounded-2xl p-5 space-y-4 select-none shadow-sm dark:shadow-lg">
       {/* Title Bar */}
-      <div className="border-b border-white/5 pb-3">
-        <h3 className="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2">
-          <LayoutGrid size={16} className="text-indigo-400" />
+      <div className="border-b border-slate-200 dark:border-white/5 pb-3">
+        <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
+          <LayoutGrid size={16} className="text-indigo-600 dark:text-indigo-400" />
           Ma Trận Nắm Vững Kiến Thức (Mastery Heatmap)
         </h3>
-        <p className="text-xs text-slate-400 mt-0.5">
+        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
           Bảng màu trực quan theo thang đo 4 mức (Đỏ &lt; 5.0, Cam 5.0-6.4, Vàng 6.5-7.9, Xanh &ge; 8.0).
         </p>
       </div>

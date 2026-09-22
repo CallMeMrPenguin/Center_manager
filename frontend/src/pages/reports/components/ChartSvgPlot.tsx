@@ -317,24 +317,47 @@ export const ChartSvgPlot: React.FC<ChartSvgPlotProps> = React.memo(({
         })()}
       </g>
 
-      {/* X-axis labels */}
-      {sessionChartData.map((d, i) => {
-        const x = getSvgX(i, sessionChartData.length);
-        if (x < paddingLeft - 20 || x > chartWidth - paddingRight + 20) return null;
-        return (
-          <text
-            key={`xlabel-${selectedStudentId || selectedClassId || 'all'}-${timeView}-${i}`}
-            x={x}
-            y={chartHeight - 12}
-            fill={hoveredPoint?.index === i ? (isDark ? "#ffffff" : "#0f172a") : (isDark ? "#94a3b8" : "#64748b")}
-            fontSize="11"
-            fontWeight="extrabold"
-            textAnchor="middle"
-          >
-            {d.sessionName}
-          </text>
-        );
-      })}
+      {/* X-axis labels with dynamic interval stepping to prevent overlap on small screens */}
+      {(() => {
+        const total = sessionChartData.length;
+        if (total === 0) return null;
+        const availableWidth = chartWidth - paddingLeft - paddingRight;
+        const minGap = 55; // minimum px between adjacent session labels
+        const maxLabels = Math.max(2, Math.floor(availableWidth / minGap));
+        const step = Math.max(1, Math.ceil(total / maxLabels));
+
+        return sessionChartData.map((d, i) => {
+          const x = getSvgX(i, total);
+          if (x < paddingLeft - 20 || x > chartWidth - paddingRight + 20) return null;
+
+          // Always show first and last. For intermediate labels, show if i % step === 0
+          // and not too close to the last label.
+          const isFirst = i === 0;
+          const isLast = i === total - 1;
+          const isStepped = i % step === 0;
+          const isHovered = hoveredPoint?.index === i;
+
+          // Don't render intermediate label if it's within minGap of last label
+          const distToLast = Math.abs(getSvgX(total - 1, total) - x);
+          if (!isFirst && !isLast && !isHovered) {
+            if (!isStepped || distToLast < minGap * 0.85) return null;
+          }
+
+          return (
+            <text
+              key={`xlabel-${selectedStudentId || selectedClassId || 'all'}-${timeView}-${i}`}
+              x={x}
+              y={chartHeight - 12}
+              fill={isHovered ? (isDark ? "#ffffff" : "#0f172a") : (isDark ? "#94a3b8" : "#475569")}
+              fontSize="11"
+              fontWeight={isHovered ? "900" : "700"}
+              textAnchor="middle"
+            >
+              {d.sessionName}
+            </text>
+          );
+        });
+      })()}
     </svg>
   );
 });

@@ -49,7 +49,7 @@ export const DeepAnalysisTab: React.FC<DeepAnalysisTabProps> = ({
   return (
     <div className="flex flex-col gap-6 mb-8 select-none">
       {/* 1. INTERNAL SUB-TAB SELECTOR (SLIDING PILL INDICATOR) */}
-      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-white/5 pb-2">
+      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 dark:border-white/5 pb-2">
         <SegmentedControl<'warnings' | 'pedagogy'>
           value={activeSubTab}
           onChange={setActiveSubTab}

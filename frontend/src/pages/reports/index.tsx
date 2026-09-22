@@ -8,6 +8,7 @@ import { EditGradeModal } from './components/EditGradeModal';
 import { ResetGradesModal } from './components/ResetGradesModal';
 import { TimePhaseModal } from './components/TimePhaseModal';
 import { SegmentedControl } from '../../components/SegmentedControl';
+import { VercelTabs } from '../../components/VercelTabs';
 import { useReportsData } from './hooks/useReportsData';
 import { getStudentTier } from './types';
 import { generateAcademicYears, getCurrentAcademicYear, computeStudentOverallScore } from './utils';
@@ -134,33 +135,19 @@ export const ReportsPage: React.FC = () => {
         onOpenResetModal={() => setResetModalOpen(true)}
       />
 
-      {/* 2. REPORT MODE TAB SWITCHER (4 TABS) */}
-      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-300/80 dark:border-[#181f36]">
-        <div className="flex items-center gap-1 -mb-px overflow-x-auto scrollbar-none">
-          {[
-            { id: 'overview', label: 'Tổng Quan Học Lực' },
-            { id: 'deep', label: 'Thống Kê Sâu' },
-            { id: 'skills', label: 'Phân Tích Kỹ Năng & Unit' },
-            { id: 'benchmark', label: 'So Sánh Giữa Các Lớp' },
-          ].map((tab) => {
-            const isActive = activeReportTab === tab.id;
-            return (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => handleTabChange(tab.id as any)}
-                className={`px-4 py-2.5 text-sm transition-all cursor-pointer flex items-center gap-2 border-b-2 font-black ${
-                  isActive
-                    ? 'border-blue-600 text-blue-600 dark:border-blue-400 dark:text-blue-400'
-                    : 'border-transparent text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
-                }`}
-              >
-                <span>{tab.label}</span>
-              </button>
-            );
-          })}
-        </div>
-      </div>
+      {/* 2. REPORT MODE TAB SWITCHER (4 TABS WITH VERCEL TABS EFFECT) */}
+      <VercelTabs<'overview' | 'deep' | 'skills' | 'benchmark'>
+        value={activeReportTab}
+        onChange={(tabId) => handleTabChange(tabId)}
+        tabs={[
+          { value: 'overview', label: 'Tổng Quan Học Lực' },
+          { value: 'deep', label: 'Thống Kê Sâu' },
+          { value: 'skills', label: 'Phân Tích Kỹ Năng & Unit' },
+          { value: 'benchmark', label: 'So Sánh Giữa Các Lớp' },
+        ]}
+        size="md"
+        className="w-full mb-2"
+      />
 
       {/* 3. ACTIVE SUB-TAB CONTAINER */}
       <div key={activeReportTab} className="space-y-6">

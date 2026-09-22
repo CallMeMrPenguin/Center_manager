@@ -3,6 +3,7 @@ import { Layers } from 'lucide-react';
 import { SegmentedControl } from '../../../components/SegmentedControl';
 import { DistributionStats, DistributionScoreBin } from '../utils/distributionAnalytics';
 import { HistogramTooltip } from './HistogramTooltip';
+import { useTheme } from '../../../context/ThemeContext';
 
 export type GranularityMode = '10bins' | 'tiers';
 
@@ -21,6 +22,7 @@ export const Histogram3DChart: React.FC<Histogram3DChartProps> = ({
   selectedBin,
   onSelectBin,
 }) => {
+  const { isDark } = useTheme();
   const containerRef = useRef<HTMLDivElement>(null);
   const [svgWidth, setSvgWidth] = useState(1050);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
@@ -100,22 +102,22 @@ export const Histogram3DChart: React.FC<Histogram3DChartProps> = ({
   return (
     <div
       ref={containerRef}
-      className="bg-[#090c17] border border-[#1e2746] rounded-2xl p-5 shadow-2xl relative flex flex-col gap-4 overflow-hidden select-none"
+      className="bg-white dark:bg-[#090c17] border border-slate-300 dark:border-[#1e2746] rounded-2xl p-5 shadow-sm dark:shadow-2xl relative flex flex-col gap-4 overflow-hidden select-none"
     >
       {/* 1. Header Toolbar with Title, Granularity Mode & Active Selection */}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-3">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 dark:border-white/10 pb-3">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-xl bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400">
+          <div className="w-8 h-8 rounded-xl bg-indigo-500/15 border border-indigo-500/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
             <Layers size={18} />
           </div>
           <div>
-            <h3 className="text-sm font-black uppercase tracking-wider text-white flex items-center gap-2">
+            <h3 className="text-sm font-black uppercase tracking-wider text-slate-900 dark:text-white flex items-center gap-2">
               <span>Phổ Điểm Đa Tầng 3D</span>
-              <span className="text-xs font-mono font-bold text-indigo-300">
+              <span className="text-xs font-mono font-bold text-indigo-600 dark:text-indigo-300">
                 (N = {stats.n} học sinh)
               </span>
             </h3>
-            <p className="text-xs text-slate-400 mt-0.5">
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
               Phân bố điểm theo mức {stats.evaluation?.skillName || 'Điểm Số'} - Bấm vào cột để lọc danh sách
             </p>
           </div>
@@ -196,7 +198,7 @@ export const Histogram3DChart: React.FC<Histogram3DChartProps> = ({
                   y1={y}
                   x2={svgWidth - paddingX + depthX + 10}
                   y2={y}
-                  stroke="rgba(255,255,255,0.06)"
+                  stroke={isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.08)"}
                   strokeDasharray="4 4"
                   strokeWidth={1}
                 />
@@ -204,7 +206,7 @@ export const Histogram3DChart: React.FC<Histogram3DChartProps> = ({
                   x={paddingX - 16}
                   y={y + 4}
                   textAnchor="end"
-                  className="font-mono text-xs font-extrabold fill-slate-400 select-none"
+                  className="font-mono text-xs font-extrabold fill-slate-500 dark:fill-slate-400 select-none"
                 >
                   {tick}
                 </text>
@@ -218,7 +220,7 @@ export const Histogram3DChart: React.FC<Histogram3DChartProps> = ({
             y1={baseY}
             x2={svgWidth - paddingX + depthX + 10}
             y2={baseY}
-            stroke="rgba(255,255,255,0.2)"
+            stroke={isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.18)"}
             strokeWidth={1.5}
           />
 
@@ -296,8 +298,8 @@ export const Histogram3DChart: React.FC<Histogram3DChartProps> = ({
                 {/* 3. Top Cap */}
                 <polygon
                   points={topPoints}
-                  fill={count > 0 ? topGrad : 'rgba(255,255,255,0.08)'}
-                  stroke={isSelected ? '#ffffff' : 'rgba(255,255,255,0.4)'}
+                  fill={count > 0 ? topGrad : (isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)')}
+                  stroke={isSelected ? '#ffffff' : (isDark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.2)')}
                   strokeWidth={isSelected ? 1.5 : 0.5}
                 />
 
@@ -306,12 +308,12 @@ export const Histogram3DChart: React.FC<Histogram3DChartProps> = ({
                   x={topCenterX}
                   y={topCenterY - 10}
                   textAnchor="middle"
-                  className={`font-mono font-black select-none fill-white ${
+                  className={`font-mono font-black select-none ${isDark ? 'fill-white' : 'fill-slate-900'} ${
                     isSelected ? 'text-lg sm:text-xl' : isHovered ? 'text-base sm:text-lg' : 'text-sm sm:text-base'
                   }`}
                   style={{
                     opacity: colP > 0.15 ? Math.min(1, (colP - 0.15) / 0.4) : 0,
-                    filter: isHovered || isSelected ? 'drop-shadow(0 0 6px rgba(255,255,255,0.9))' : 'none',
+                    filter: isHovered || isSelected ? (isDark ? 'drop-shadow(0 0 6px rgba(255,255,255,0.9))' : 'drop-shadow(0 0 4px rgba(0,0,0,0.2))') : 'none',
                   }}
                 >
                   {count}
@@ -324,10 +326,10 @@ export const Histogram3DChart: React.FC<Histogram3DChartProps> = ({
                   textAnchor="middle"
                   className={`font-mono select-none ${
                     isSelected
-                      ? 'fill-indigo-300 font-black text-sm sm:text-base'
+                      ? (isDark ? 'fill-indigo-300 font-black text-sm sm:text-base' : 'fill-indigo-600 font-black text-sm sm:text-base')
                       : isHovered
-                      ? 'fill-white font-black text-sm sm:text-base'
-                      : 'fill-slate-300 font-bold text-xs sm:text-sm'
+                      ? (isDark ? 'fill-white font-black text-sm sm:text-base' : 'fill-slate-900 font-black text-sm sm:text-base')
+                      : (isDark ? 'fill-slate-300 font-bold text-xs sm:text-sm' : 'fill-slate-600 font-bold text-xs sm:text-sm')
                   }`}
                 >
                   {bin.label}

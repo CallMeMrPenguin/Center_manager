@@ -1022,7 +1022,7 @@ export function DataTable<TData>({
 
       {/* ── TOOLBAR ─────────────────────────────────────────────────────────── */}
       {(enableGlobalSearch || enableColumnVisibility || enableExport || toolbarLeft || toolbarRight) && (
-        <div className="flex flex-wrap items-center gap-2 px-3 py-2.5 border-b border-slate-200 dark:border-[#1e2740] bg-slate-50 dark:bg-[#0b0e1a] shrink-0">
+        <div className="flex flex-wrap items-center gap-2 px-3 py-2.5 border-b border-slate-300 dark:border-[#1e2740] bg-slate-100/80 dark:bg-[#0b0e1a] shrink-0">
           {/* Left */}
           <div className="flex flex-wrap items-center gap-2 flex-1 min-w-0">
             {enableGlobalSearch && (
@@ -1044,7 +1044,7 @@ export function DataTable<TData>({
                   onBlur={() => setSearchFocused(false)}
                   onChange={e => setGlobalFilter(e.target.value)}
                   placeholder={searchPlaceholder}
-                  className="w-full bg-white dark:bg-[#13192c] border border-slate-200 dark:border-[#253050] text-slate-900 dark:text-white text-xs rounded-xl pl-8 pr-8 py-1.5 focus:outline-none focus:border-[#5c36f5] focus:ring-2 focus:ring-[#5c36f5]/20 placeholder:text-slate-500 dark:placeholder:text-slate-400 font-semibold transition shadow-sm dark:shadow-inner"
+                  className="w-full bg-white dark:bg-[#13192c] border border-slate-300 dark:border-[#253050] text-slate-900 dark:text-white text-xs rounded-xl pl-8 pr-8 py-1.5 focus:outline-none focus:border-[#5c36f5] focus:ring-2 focus:ring-[#5c36f5]/20 placeholder:text-slate-500 dark:placeholder:text-slate-400 font-semibold transition shadow-sm dark:shadow-inner"
                 />
                 <AnimatePresence>
                   {globalFilter && (
@@ -1193,7 +1193,7 @@ export function DataTable<TData>({
                   </colgroup>
 
                   {/* ── THEAD (All headers centered by default) ────────────────── */}
-                  <thead className={`bg-slate-100 dark:bg-[#111827] border-b border-slate-200 dark:border-[#1e2740] ${stickyHeader ? 'sticky top-0 z-20' : ''}`}>
+                  <thead className={`bg-slate-200/90 dark:bg-[#111827] border-b border-slate-300 dark:border-[#1e2740] ${stickyHeader ? 'sticky top-0 z-20' : ''}`}>
                     {table.getHeaderGroups().map(headerGroup => (
                       <tr key={headerGroup.id}>
                         {headerGroup.headers.map(header => {
@@ -1245,8 +1245,8 @@ export function DataTable<TData>({
                     ))}
                   </thead>
 
-                  {/* ── TBODY ─────────────────────────────────────────────── */}
-                  <tbody className="bg-white dark:bg-[#0d1018]">
+                  {/* ── TBODY ─────────────────────────────────────────────────── */}
+                  <tbody className="divide-y-0">
                     {/* Virtual padding top */}
                     {useVirt && paddingTop > 0 && (
                       <tr><td style={{ height: paddingTop }} colSpan={allColumns.length} /></tr>
@@ -1261,8 +1261,8 @@ export function DataTable<TData>({
                             ${row.getIsSelected()
                               ? 'bg-indigo-500/15 hover:bg-indigo-500/25 dark:bg-indigo-500/20 dark:hover:bg-indigo-500/30'
                               : rowIdx % 2 === 0
-                              ? 'bg-white dark:bg-[#0d1018] hover:bg-blue-100/70 dark:hover:bg-[#131928]'
-                              : 'bg-slate-100/85 dark:bg-[#0b0f1c] hover:bg-blue-100/70 dark:hover:bg-[#131928]'}
+                              ? 'bg-white dark:bg-[#0d1018] hover:bg-indigo-50/80 dark:hover:bg-[#131928]'
+                              : 'bg-slate-100/90 dark:bg-[#0b0f1c] hover:bg-indigo-50/80 dark:hover:bg-[#131928]'}
                           `}
                           onClick={() => onRowClick?.(row.original)}
                         >
@@ -1279,7 +1279,7 @@ export function DataTable<TData>({
                                 key={cell.id}
                                 className={`
                                   py-3.5 ${isSelectCol ? 'px-1' : 'px-4'} font-bold text-slate-900 dark:text-slate-100 text-base
-                                  border-b border-slate-200 dark:border-[#161e30] overflow-hidden
+                                  border-b border-slate-300/85 dark:border-[#161e30] overflow-hidden
                                   ${isCentered ? 'text-center' : 'text-left'}
                                   ${isPinned ? 'bg-inherit' : ''}
                                   ${isLastRow && isFirstCell ? 'rounded-bl-xl' : ''}
@@ -1322,7 +1322,7 @@ export function DataTable<TData>({
 
           {/* ── PAGINATION ──────────────────────────────────────────────────── */}
           {showPagination && pageCount > 0 && !useVirt && (
-            <div className="shrink-0 px-4 py-2.5 bg-slate-50 dark:bg-[#090c16] border-t border-slate-200 dark:border-[#1a2236] flex flex-wrap items-center justify-between gap-3 text-xs text-slate-600 dark:text-slate-400 font-bold">
+            <div className="shrink-0 px-4 py-2.5 bg-slate-100/90 dark:bg-[#090c16] border-t border-slate-300 dark:border-[#1a2236] flex flex-wrap items-center justify-between gap-3 text-xs text-slate-700 dark:text-slate-400 font-bold">
               {/* Left info */}
               <div className="flex items-center gap-3 flex-wrap">
                 <span>
@@ -1335,11 +1335,11 @@ export function DataTable<TData>({
               {/* Right nav */}
               <div className="flex items-center gap-1">
                 <button type="button" onClick={() => table.setPageIndex(0)} disabled={!table.getCanPreviousPage()}
-                  className="p-1.5 rounded-lg bg-white dark:bg-[#141c2e] hover:bg-slate-100 dark:hover:bg-[#1e2a42] text-slate-700 dark:text-slate-300 disabled:opacity-30 border border-slate-200 dark:border-white/10 transition cursor-pointer disabled:cursor-not-allowed" title="Trang đầu">
+                  className="p-1.5 rounded-lg bg-white dark:bg-[#141c2e] hover:bg-slate-100 dark:hover:bg-[#1e2a42] text-slate-700 dark:text-slate-300 disabled:opacity-30 border border-slate-300 dark:border-white/10 transition cursor-pointer disabled:cursor-not-allowed" title="Trang đầu">
                   <ChevronsLeft size={13} />
                 </button>
                 <button type="button" onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()}
-                  className="px-2.5 py-1.5 rounded-lg bg-white dark:bg-[#141c2e] hover:bg-slate-100 dark:hover:bg-[#1e2a42] text-slate-700 dark:text-slate-300 disabled:opacity-30 border border-slate-200 dark:border-white/10 transition flex items-center gap-1 cursor-pointer disabled:cursor-not-allowed">
+                  className="px-2.5 py-1.5 rounded-lg bg-white dark:bg-[#141c2e] hover:bg-slate-100 dark:hover:bg-[#1e2a42] text-slate-700 dark:text-slate-300 disabled:opacity-30 border border-slate-300 dark:border-white/10 transition flex items-center gap-1 cursor-pointer disabled:cursor-not-allowed">
                   <ChevronLeft size={13} /><span>Trước</span>
                 </button>
 

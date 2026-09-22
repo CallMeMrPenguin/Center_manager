@@ -178,30 +178,19 @@ export const SmartGroupingSection: React.FC<SmartGroupingSectionProps> = ({
           {/* Scope, Algorithm & Export Toolbar */}
           <div className="flex flex-wrap items-center justify-between gap-4 bg-slate-50 dark:bg-[#0e1322] p-4 rounded-xl border border-slate-200 dark:border-[#1e2744]">
             <div className="flex flex-wrap items-center gap-4">
-              {/* Scope Selector */}
-              <div className="flex items-center gap-1.5 bg-[#090d16] p-1 rounded-xl border border-[#182236] text-xs font-bold">
-                <span className="text-[10px] uppercase font-black text-slate-400 px-2">Phạm Vi:</span>
-                <button
-                  type="button"
-                  onClick={() => setGroupingScope('current')}
-                  className={`px-2.5 py-1 rounded-lg transition cursor-pointer ${groupingScope === 'current' ? 'bg-indigo-600 text-white shadow' : 'text-slate-400 hover:text-white'}`}
-                >
-                  Lớp Hiện Tại
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setGroupingScope('grade')}
-                  className={`px-2.5 py-1 rounded-lg transition cursor-pointer ${groupingScope === 'grade' ? 'bg-indigo-600 text-white shadow' : 'text-slate-400 hover:text-white'}`}
-                >
-                  Toàn Bộ Khối
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setGroupingScope('all')}
-                  className={`px-2.5 py-1 rounded-lg transition cursor-pointer ${groupingScope === 'all' ? 'bg-indigo-600 text-white shadow' : 'text-slate-400 hover:text-white'}`}
-                >
-                  Toàn Trung Tâm
-                </button>
+              {/* Scope Selector with Sliding Indicator */}
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] uppercase font-black text-slate-500 dark:text-slate-400">Phạm Vi:</span>
+                <SegmentedControl<'current' | 'grade' | 'all'>
+                  value={groupingScope}
+                  onChange={setGroupingScope}
+                  options={[
+                    { value: 'current', label: 'Lớp Hiện Tại' },
+                    { value: 'grade', label: 'Toàn Bộ Khối' },
+                    { value: 'all', label: 'Toàn Trung Tâm' },
+                  ]}
+                  size="xs"
+                />
               </div>
 
               {/* Grade Selector when groupingScope === 'grade' */}
@@ -217,7 +206,7 @@ export const SmartGroupingSection: React.FC<SmartGroupingSectionProps> = ({
 
               {/* Algorithm Mode */}
               <div className="flex items-center gap-2">
-                <span className="text-[10px] uppercase font-black text-slate-400">Thuật Toán:</span>
+                <span className="text-[10px] uppercase font-black text-slate-500 dark:text-slate-400">Thuật Toán:</span>
                 <SegmentedControl<'tier' | 'kmeans'>
                   value={groupingMode}
                   onChange={setGroupingMode}
@@ -248,15 +237,15 @@ export const SmartGroupingSection: React.FC<SmartGroupingSectionProps> = ({
               <button
                 type="button"
                 onClick={handleCopyGrouping}
-                className="px-3 py-1.5 rounded-lg bg-[#1a233a] hover:bg-[#253252] text-slate-200 border border-[#2d3d66] text-xs font-bold transition cursor-pointer flex items-center gap-1.5"
+                className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-[#1a233a] dark:hover:bg-[#253252] text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-[#2d3d66] text-xs font-bold transition cursor-pointer flex items-center gap-1.5"
               >
-                {copiedGroupText ? <Check size={13} className="text-emerald-400" /> : <Copy size={13} />}
+                {copiedGroupText ? <Check size={13} className="text-emerald-500 dark:text-emerald-400" /> : <Copy size={13} />}
                 <span>{copiedGroupText ? 'Đã chép' : 'Sao chép'}</span>
               </button>
               <button
                 type="button"
                 onClick={handleExportGroupingExcel}
-                className="px-3 py-1.5 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 text-xs font-bold transition cursor-pointer flex items-center gap-1.5"
+                className="px-3 py-1.5 rounded-lg bg-emerald-600/10 hover:bg-emerald-600/20 dark:bg-emerald-600/20 dark:hover:bg-emerald-600/30 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 text-xs font-bold transition cursor-pointer flex items-center gap-1.5"
               >
                 <FileSpreadsheet size={13} />
                 <span>Xuất Excel</span>
