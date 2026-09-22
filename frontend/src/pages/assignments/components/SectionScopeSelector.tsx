@@ -31,12 +31,12 @@ export const SectionScopeSelector: React.FC<SectionScopeSelectorProps> = ({
   const totalQuestions = sections.reduce((sum, s) => sum + (s.questionCount || 0), 0);
 
   return (
-    <div className="space-y-2.5 p-3.5 rounded-2xl bg-[#0d1018] border border-[#212c4b]">
+    <div className="space-y-2.5 p-3.5 rounded-2xl bg-white border border-slate-200">
       <div className="flex items-center justify-between gap-2 flex-wrap">
         <div className="flex items-center gap-2 flex-wrap">
-          <Layers size={14} className="text-indigo-400 shrink-0" />
-          <span className="text-xs font-bold text-slate-200">Phạm Vi Giao Bài (Từng Phần / Bài Tập)</span>
-          <span className="px-2 py-0.5 rounded-md text-[11px] font-black bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+          <Layers size={14} className="text-indigo-600 shrink-0" />
+          <span className="text-xs font-bold text-slate-800">Phạm Vi Giao Bài (Từng Phần / Bài Tập)</span>
+          <span className="px-2 py-0.5 rounded-md text-[11px] font-black bg-indigo-50 text-indigo-700 border border-indigo-200">
             Đã chọn {selectedSectionIds.length}/{totalSections} bài ({selectedQuestionCount}/{totalQuestions} câu)
           </span>
         </div>
@@ -46,16 +46,16 @@ export const SectionScopeSelector: React.FC<SectionScopeSelectorProps> = ({
             type="button"
             onClick={onSelectAll}
             disabled={isAllSelected}
-            className="text-[11px] font-bold text-indigo-400 hover:text-indigo-300 transition cursor-pointer disabled:opacity-40"
+            className="text-[11px] font-bold text-indigo-600 hover:text-indigo-800 transition cursor-pointer disabled:opacity-40"
           >
             Chọn tất cả
           </button>
-          <span className="text-slate-600 text-xs">|</span>
+          <span className="text-slate-300 text-xs">/</span>
           <button
             type="button"
             onClick={onDeselectAll}
             disabled={isNoneSelected}
-            className="text-[11px] font-bold text-slate-400 hover:text-slate-200 transition cursor-pointer disabled:opacity-40"
+            className="text-[11px] font-bold text-slate-500 hover:text-slate-800 transition cursor-pointer disabled:opacity-40"
           >
             Bỏ chọn
           </button>
@@ -75,30 +75,30 @@ export const SectionScopeSelector: React.FC<SectionScopeSelectorProps> = ({
               onClick={() => onToggleSection(sec.id)}
               className={`flex items-start gap-2.5 p-3 rounded-xl border transition cursor-pointer select-none ${
                 isChecked
-                  ? 'bg-indigo-950/50 border-indigo-500/50 text-white shadow-md'
-                  : 'bg-[#121626]/70 border-white/10 text-slate-400 hover:border-white/20 hover:text-slate-300'
+                  ? 'bg-indigo-50/80 border-indigo-300 text-indigo-950 shadow-xs'
+                  : 'bg-slate-50 border-slate-200 text-slate-700 hover:border-slate-300 hover:bg-slate-100'
               }`}
             >
-              <div className="mt-0.5 shrink-0 text-indigo-400">
+              <div className="mt-0.5 shrink-0 text-indigo-600">
                 {isChecked ? <CheckSquare size={16} /> : <Square size={16} />}
               </div>
               <div className="flex-1 min-w-0 space-y-1">
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className={`text-[11px] font-black uppercase px-2 py-0.5 rounded ${
-                    isChecked ? 'bg-indigo-500/25 text-indigo-200 border border-indigo-500/40' : 'bg-white/5 text-slate-400 border border-white/10'
+                    isChecked ? 'bg-indigo-100 text-indigo-800 border border-indigo-200' : 'bg-white text-slate-700 border border-slate-200'
                   }`}>
                     Bài {sec.id}
                   </span>
                   {qRangeStr && (
-                    <span className="text-[11px] font-mono font-bold text-amber-300/90">
+                    <span className="text-[11px] font-mono font-bold text-amber-700">
                       {qRangeStr}
                     </span>
                   )}
-                  <span className="text-[11px] font-medium text-slate-400">
+                  <span className="text-[11px] font-medium text-slate-500">
                     ({sec.questionCount} câu)
                   </span>
                 </div>
-                <div className={`text-xs font-medium leading-relaxed break-words ${isChecked ? 'text-slate-100' : 'text-slate-400'}`}>
+                <div className={`text-xs font-medium leading-relaxed break-words ${isChecked ? 'text-slate-900' : 'text-slate-600'}`}>
                   {sec.title}
                 </div>
               </div>

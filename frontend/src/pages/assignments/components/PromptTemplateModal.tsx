@@ -28,20 +28,20 @@ export const PromptTemplateModal: React.FC<PromptTemplateModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-black/85 select-none animate-fade-in">
-      <div className="bg-[#0c0f1e] border border-[#212c4b] rounded-2xl w-full max-w-2xl shadow-[0_20px_60px_rgba(0,0,0,0.9)] overflow-hidden flex flex-col max-h-[90vh]">
+    <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-black/60 select-none animate-fade-in">
+      <div className="bg-white border border-slate-200 rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-white/10 shrink-0">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200 shrink-0 bg-slate-50">
           <div className="flex items-center gap-2">
-            <Sparkles size={18} className="text-indigo-400" />
-            <h3 className="text-sm font-black text-white uppercase tracking-wider">
+            <Sparkles size={18} className="text-blue-600" />
+            <h3 className="text-sm font-black text-slate-900 uppercase tracking-wider">
               Mẫu Prompt Chuẩn Trích Xuất & Sinh Đề (ULN DSL)
             </h3>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="w-7 h-7 rounded-xl bg-white/5 hover:bg-white/10 flex items-center justify-center text-slate-400 hover:text-white transition cursor-pointer"
+            className="w-7 h-7 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 hover:text-slate-800 transition cursor-pointer"
           >
             <X size={15} />
           </button>
@@ -63,7 +63,7 @@ export const PromptTemplateModal: React.FC<PromptTemplateModalProps> = ({
 
         {/* Body */}
         <div className="p-5 flex-1 overflow-y-auto space-y-3">
-          <div className="flex items-center justify-between text-xs text-slate-400">
+          <div className="flex items-center justify-between text-xs text-slate-600">
             <span>
               {activeTab === 'ocr'
                 ? 'Dùng prompt này cho Gemini/ChatGPT kèm ảnh hoặc văn bản đề thi để xuất ra mã ULN chuẩn 100%:'
@@ -72,24 +72,24 @@ export const PromptTemplateModal: React.FC<PromptTemplateModalProps> = ({
             <button
               type="button"
               onClick={handleCopy}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-black transition cursor-pointer active:scale-95 shadow-md shrink-0"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-black transition cursor-pointer active:scale-95 shadow-md shrink-0"
             >
               {copied ? <Check size={13} /> : <Copy size={13} />}
               <span>{copied ? 'Đã sao chép' : 'Sao chép Prompt'}</span>
             </button>
           </div>
 
-          <pre className="w-full bg-[#080b14] border border-[#1e2742] rounded-xl p-4 font-mono text-[11px] text-slate-300 overflow-x-auto whitespace-pre-wrap leading-relaxed">
+          <pre className="w-full bg-slate-50 border border-slate-300 rounded-xl p-4 font-mono text-[11px] text-slate-800 overflow-x-auto whitespace-pre-wrap leading-relaxed">
             {currentPrompt}
           </pre>
         </div>
 
         {/* Footer */}
-        <div className="px-5 py-3 border-t border-white/10 flex justify-end shrink-0">
+        <div className="px-5 py-3 border-t border-slate-200 flex justify-end shrink-0 bg-slate-50">
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-bold transition cursor-pointer"
+            className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition cursor-pointer"
           >
             Đóng
           </button>

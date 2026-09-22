@@ -193,24 +193,24 @@ export const TestConfigModal: React.FC<TestConfigModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-4 select-none animate-mac-backdrop">
-      <div className="bg-[#0c0f1d] border border-white/10 w-full max-w-xl rounded-2xl shadow-2xl overflow-visible flex flex-col animate-mac-modal relative max-h-[90vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 select-none animate-mac-backdrop">
+      <div className="bg-white border border-slate-200 w-full max-w-xl rounded-2xl shadow-2xl overflow-visible flex flex-col animate-mac-modal relative max-h-[90vh]">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-white/10 bg-[#121626] rounded-t-2xl">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 bg-slate-50 rounded-t-2xl">
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-xl bg-indigo-500/15 text-indigo-400 border border-indigo-500/20">
+            <div className="p-2 rounded-xl bg-indigo-50 text-indigo-600 border border-indigo-200">
               <Layers size={18} />
             </div>
             <div>
-              <h2 className="text-sm font-black text-white">Cấu Hình Bài Kiểm Tra Buổi Học</h2>
-              <div className="flex items-center gap-2 mt-0.5 text-xs text-slate-400">
-                <span>Ngày: <strong className="text-indigo-300">{date}</strong></span>
-                <span className="text-slate-600">/</span>
-                <span>Khối: <strong className="text-white">{grade || 'Chưa phân khối'}</strong></span>
+              <h2 className="text-sm font-black text-slate-900">Cấu Hình Bài Kiểm Tra Buổi Học</h2>
+              <div className="flex items-center gap-2 mt-0.5 text-xs text-slate-500">
+                <span>Ngày: <strong className="text-indigo-600">{date}</strong></span>
+                <span className="text-slate-300">/</span>
+                <span>Khối: <strong className="text-slate-800">{grade || 'Chưa phân khối'}</strong></span>
               </div>
             </div>
           </div>
-          <button onClick={onClose} className="text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-white/5 transition cursor-pointer">
+          <button onClick={onClose} className="text-slate-400 hover:text-slate-700 p-1.5 rounded-lg hover:bg-slate-100 transition cursor-pointer">
             <X size={18} />
           </button>
         </div>
@@ -218,20 +218,20 @@ export const TestConfigModal: React.FC<TestConfigModalProps> = ({
         {/* Body */}
         <div className="p-6 space-y-5 overflow-y-auto max-h-[calc(90vh-140px)]">
           {loading ? (
-            <div className="py-12 text-center text-slate-400 text-xs font-bold">
+            <div className="py-12 text-center text-slate-500 text-xs font-bold">
               Đang tải danh sách bài học & cấu hình...
             </div>
           ) : (
             <>
               {/* CHECK 1 */}
-              <div className="bg-[#121626] border border-white/5 rounded-xl p-4 space-y-3 relative">
-                <div className="flex items-center justify-between border-b border-white/5 pb-2">
-                  <span className="text-xs font-black uppercase tracking-wider text-blue-400">Cấu Hình Check 1</span>
-                  <span className="text-[11px] text-slate-400 font-medium">Bài Kiểm Tra 1</span>
+              <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-3 relative">
+                <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+                  <span className="text-xs font-black uppercase tracking-wider text-blue-600">Cấu Hình Check 1</span>
+                  <span className="text-[11px] text-slate-500 font-medium">Bài Kiểm Tra 1</span>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="text-[11px] font-bold text-slate-300 block mb-1">Kỹ Năng Đánh Giá</label>
+                    <label className="text-[11px] font-bold text-slate-700 block mb-1">Kỹ Năng Đánh Giá</label>
                     <CustomSelect
                       value={config.check_1.skill}
                       onChange={(val) => handleSkillChange('check_1', String(val))}
@@ -241,10 +241,10 @@ export const TestConfigModal: React.FC<TestConfigModalProps> = ({
                     />
                   </div>
                   <div>
-                    <label className="text-[11px] font-bold text-slate-300 block mb-1 flex items-center justify-between">
+                    <label className="text-[11px] font-bold text-slate-700 block mb-1 flex items-center justify-between">
                       <span>Bài Học (Unit)</span>
                       {config.check_1.skill === 'mock_test' && (
-                        <span className="text-[10px] text-amber-400 font-normal">Không bắt buộc</span>
+                        <span className="text-[10px] text-amber-600 font-normal">Không bắt buộc</span>
                       )}
                     </label>
                     <CustomMultiSelect
@@ -267,14 +267,14 @@ export const TestConfigModal: React.FC<TestConfigModalProps> = ({
               </div>
 
               {/* CHECK 2 */}
-              <div className="bg-[#121626] border border-white/5 rounded-xl p-4 space-y-3 relative">
-                <div className="flex items-center justify-between border-b border-white/5 pb-2">
-                  <span className="text-xs font-black uppercase tracking-wider text-purple-400">Cấu Hình Check 2</span>
-                  <span className="text-[11px] text-slate-400 font-medium">Bài Kiểm Tra 2</span>
+              <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-3 relative">
+                <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+                  <span className="text-xs font-black uppercase tracking-wider text-purple-600">Cấu Hình Check 2</span>
+                  <span className="text-[11px] text-slate-500 font-medium">Bài Kiểm Tra 2</span>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="text-[11px] font-bold text-slate-300 block mb-1">Kỹ Năng Đánh Giá</label>
+                    <label className="text-[11px] font-bold text-slate-700 block mb-1">Kỹ Năng Đánh Giá</label>
                     <CustomSelect
                       value={config.check_2.skill}
                       onChange={(val) => handleSkillChange('check_2', String(val))}
@@ -284,10 +284,10 @@ export const TestConfigModal: React.FC<TestConfigModalProps> = ({
                     />
                   </div>
                   <div>
-                    <label className="text-[11px] font-bold text-slate-300 block mb-1 flex items-center justify-between">
+                    <label className="text-[11px] font-bold text-slate-700 block mb-1 flex items-center justify-between">
                       <span>Bài Học (Unit)</span>
                       {config.check_2.skill === 'mock_test' && (
-                        <span className="text-[10px] text-amber-400 font-normal">Không bắt buộc</span>
+                        <span className="text-[10px] text-amber-600 font-normal">Không bắt buộc</span>
                       )}
                     </label>
                     <CustomMultiSelect
@@ -313,17 +313,17 @@ export const TestConfigModal: React.FC<TestConfigModalProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between px-6 py-4 border-t border-white/10 bg-[#121626] rounded-b-2xl">
-          <div className="text-[11px] text-slate-400 font-medium">Đồng bộ tự động với ma trận kỹ năng & bài học.</div>
+        <div className="flex items-center justify-between px-6 py-4 border-t border-slate-200 bg-slate-50 rounded-b-2xl">
+          <div className="text-[11px] text-slate-500 font-medium">Đồng bộ tự động với ma trận kỹ năng & bài học.</div>
           <div className="flex items-center gap-3">
-            <button type="button" onClick={onClose} className="px-4 py-2 rounded-xl text-xs font-bold text-slate-300 hover:text-white hover:bg-white/5 transition cursor-pointer">
+            <button type="button" onClick={onClose} className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:text-slate-900 hover:bg-slate-200 transition cursor-pointer">
               Hủy
             </button>
             <button
               type="button"
               onClick={handleSave}
               disabled={saving || loading}
-              className="px-5 py-2 rounded-xl bg-[#5c36f5] hover:bg-[#7351f7] text-white text-xs font-black shadow-md transition flex items-center gap-1.5 disabled:opacity-50 cursor-pointer"
+              className="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-black shadow-md transition flex items-center gap-1.5 disabled:opacity-50 cursor-pointer"
             >
               <Save size={14} />
               <span>{saving ? 'Đang Lưu...' : 'Lưu Cấu Hình'}</span>

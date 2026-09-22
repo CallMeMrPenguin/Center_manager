@@ -272,14 +272,14 @@ export const DrawingCorrectionCanvas: React.FC<DrawingCorrectionCanvasProps> = m
   return (
     <>
       {/* 1. Fixed Floating Annotation Toolbar at Top Center */}
-      <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-[#0c0f1e]/95 border border-[#263152] rounded-2xl px-4 py-2 shadow-[0_10px_35px_rgba(0,0,0,0.8)] flex items-center gap-3 select-none animate-fade-in text-white text-xs backdrop-blur-none">
+      <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-white/95 border border-slate-200 rounded-2xl px-4 py-2 shadow-xl flex items-center gap-3 select-none animate-fade-in text-slate-800 text-xs backdrop-blur-none">
         {/* Tool Mode: Pen / Eraser */}
-        <div className="flex items-center gap-1 bg-white/5 p-1 rounded-xl border border-white/10">
+        <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200">
           <button
             type="button"
             onClick={() => setIsEraser(false)}
             className={`flex items-center gap-1.5 px-3 py-1 rounded-lg font-bold transition cursor-pointer ${
-              !isEraser ? 'bg-[#5c36f5] text-white shadow-sm' : 'text-slate-400 hover:text-white'
+              !isEraser ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-600 hover:text-slate-900'
             }`}
           >
             <Pen size={13} />
@@ -289,7 +289,7 @@ export const DrawingCorrectionCanvas: React.FC<DrawingCorrectionCanvasProps> = m
             type="button"
             onClick={() => setIsEraser(true)}
             className={`flex items-center gap-1.5 px-3 py-1 rounded-lg font-bold transition cursor-pointer ${
-              isEraser ? 'bg-[#5c36f5] text-white shadow-sm' : 'text-slate-400 hover:text-white'
+              isEraser ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-600 hover:text-slate-900'
             }`}
           >
             <Eraser size={13} />
@@ -299,7 +299,7 @@ export const DrawingCorrectionCanvas: React.FC<DrawingCorrectionCanvasProps> = m
 
         {/* Color Palette */}
         {!isEraser && (
-          <div className="flex items-center gap-1.5 px-2 border-l border-white/10">
+          <div className="flex items-center gap-1.5 px-2 border-l border-slate-200">
             {COLORS.map((c) => (
               <button
                 key={c.value}
@@ -307,7 +307,7 @@ export const DrawingCorrectionCanvas: React.FC<DrawingCorrectionCanvasProps> = m
                 onClick={() => setColor(c.value)}
                 style={{ backgroundColor: c.value }}
                 className={`w-5 h-5 rounded-full transition cursor-pointer flex items-center justify-center ${
-                  color === c.value ? 'ring-2 ring-white scale-110' : 'opacity-70 hover:opacity-100'
+                  color === c.value ? 'ring-2 ring-slate-800 scale-110' : 'opacity-70 hover:opacity-100'
                 }`}
                 title={c.label}
               >
@@ -318,14 +318,14 @@ export const DrawingCorrectionCanvas: React.FC<DrawingCorrectionCanvasProps> = m
         )}
 
         {/* Stroke Size */}
-        <div className="flex items-center gap-1 px-2 border-l border-white/10">
+        <div className="flex items-center gap-1 px-2 border-l border-slate-200">
           {SIZES.map((s) => (
             <button
               key={s}
               type="button"
               onClick={() => setSize(s)}
               className={`w-6 h-6 rounded-lg flex items-center justify-center font-bold text-xs transition cursor-pointer ${
-                size === s ? 'bg-white/20 text-white' : 'text-slate-400 hover:text-white'
+                size === s ? 'bg-slate-200 text-slate-900' : 'text-slate-400 hover:text-slate-700'
               }`}
             >
               <div
@@ -337,12 +337,12 @@ export const DrawingCorrectionCanvas: React.FC<DrawingCorrectionCanvasProps> = m
         </div>
 
         {/* Actions: Undo, Clear */}
-        <div className="flex items-center gap-1 pl-2 border-l border-white/10">
+        <div className="flex items-center gap-1 pl-2 border-l border-slate-200">
           <button
             type="button"
             onClick={handleUndo}
             disabled={paths.length === 0}
-            className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white disabled:opacity-40 transition cursor-pointer"
+            className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 disabled:opacity-40 transition cursor-pointer"
             title="Hoàn tác nét vẽ"
           >
             <RotateCcw size={13} />
@@ -351,7 +351,7 @@ export const DrawingCorrectionCanvas: React.FC<DrawingCorrectionCanvasProps> = m
             type="button"
             onClick={handleClear}
             disabled={paths.length === 0}
-            className="p-1.5 rounded-lg bg-rose-500/15 text-rose-400 hover:bg-rose-500/25 disabled:opacity-40 transition cursor-pointer"
+            className="p-1.5 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 disabled:opacity-40 transition cursor-pointer border border-rose-200"
             title="Xóa toàn bộ nét vẽ"
           >
             <Trash2 size={13} />

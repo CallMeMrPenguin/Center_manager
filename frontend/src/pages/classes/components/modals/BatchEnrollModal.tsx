@@ -223,7 +223,7 @@ export const BatchEnrollModal: React.FC<BatchEnrollModalProps> = ({
             {/* STUDENT CHECKBOX LIST */}
             <div className="flex-1 overflow-y-auto space-y-1.5 pr-1 min-h-[200px] max-h-[320px]">
               {availableStudentsForEnrollment.length === 0 ? (
-                <div className="py-12 text-center text-xs text-slate-500 font-bold bg-[#121624] rounded-xl border border-white/5">
+                <div className="py-12 text-center text-xs text-slate-500 font-bold bg-slate-50 rounded-xl border border-slate-200">
                   Không tìm thấy học sinh phù hợp chưa ghi danh.
                 </div>
               ) : (
@@ -235,14 +235,14 @@ export const BatchEnrollModal: React.FC<BatchEnrollModalProps> = ({
                       onClick={() => toggleSelectStudentToEnroll(s.id)}
                       className={`p-3 rounded-xl border flex items-center justify-between text-xs cursor-pointer transition ${
                         isChecked
-                          ? 'bg-indigo-500/15 border-indigo-500/40 text-white shadow-sm'
-                          : 'bg-[#121624] border-white/5 text-slate-300 hover:bg-white/[0.04]'
+                          ? 'bg-blue-50/80 border-blue-300 text-blue-950 shadow-xs'
+                          : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
                       }`}
                     >
                       <div className="flex items-center gap-3">
                         <div
                           className={`w-5 h-5 rounded-md border flex items-center justify-center transition ${
-                            isChecked ? 'bg-indigo-600 border-indigo-400 text-white' : 'border-white/20 bg-white/5'
+                            isChecked ? 'bg-blue-600 border-blue-600 text-white' : 'border-slate-300 bg-white'
                           }`}
                         >
                           {isChecked && <span className="text-xs font-black">✓</span>}
@@ -318,7 +318,7 @@ export const BatchEnrollModal: React.FC<BatchEnrollModalProps> = ({
             {/* ENROLLED STUDENT LIST */}
             <div className="flex-1 overflow-y-auto space-y-1.5 pr-1 min-h-[200px] max-h-[320px]">
               {filteredEnrolledStudents.length === 0 ? (
-                <div className="py-12 text-center text-xs text-slate-500 font-bold bg-[#121624] rounded-xl border border-white/5">
+                <div className="py-12 text-center text-xs text-slate-500 font-bold bg-slate-50 rounded-xl border border-slate-200">
                   Không tìm thấy học sinh nào trong lớp.
                 </div>
               ) : (
@@ -327,20 +327,20 @@ export const BatchEnrollModal: React.FC<BatchEnrollModalProps> = ({
                   return (
                     <div
                       key={s.id}
-                      className="p-3 rounded-xl border border-white/5 bg-[#121624] hover:bg-white/[0.04] flex items-center justify-between text-xs transition"
+                      className="p-3 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 flex items-center justify-between text-xs transition"
                     >
                       <div className="flex items-center gap-3">
-                        <span className="w-6 text-center text-xs font-bold text-slate-500">
+                        <span className="w-6 text-center text-xs font-bold text-slate-400">
                           {idx + 1}
                         </span>
                         <div>
                           <div className="flex items-center gap-2">
-                            <span className="font-extrabold text-sm text-white">{s.full_name}</span>
-                            {s.nickname && <span className="text-xs text-indigo-300 font-bold">({s.nickname})</span>}
+                            <span className="font-extrabold text-sm text-slate-900">{s.full_name}</span>
+                            {s.nickname && <span className="text-xs text-indigo-600 font-bold">({s.nickname})</span>}
                           </div>
-                          <div className="flex items-center gap-1.5 mt-1 text-[11px] font-medium text-slate-400">
-                            {s.grade && <span className="bg-white/5 px-1.5 py-0.5 rounded text-slate-300">{s.grade}</span>}
-                            {s.school && <span className="bg-white/5 px-1.5 py-0.5 rounded text-slate-400">{s.school}</span>}
+                          <div className="flex items-center gap-1.5 mt-1 text-[11px] font-medium text-slate-500">
+                            {s.grade && <span className="bg-slate-100 px-1.5 py-0.5 rounded text-slate-700">{s.grade}</span>}
+                            {s.school && <span className="bg-slate-100 px-1.5 py-0.5 rounded text-slate-600">{s.school}</span>}
                           </div>
                         </div>
                       </div>

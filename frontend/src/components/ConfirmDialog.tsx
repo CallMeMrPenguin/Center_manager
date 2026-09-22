@@ -68,13 +68,13 @@ export function ConfirmProvider({ children }: ConfirmProviderProps) {
           onClick={handleCancel}
         >
           <div 
-            className={`bg-[#0f1320] border ${
+            className={`bg-white border ${
               isDanger 
-                ? 'border-rose-500/30 shadow-[0_0_25px_rgba(239,68,68,0.2)]' 
+                ? 'border-rose-200 shadow-[0_10px_30px_rgba(239,68,68,0.15)]' 
                 : isWarning 
-                ? 'border-amber-500/30 shadow-[0_0_25px_rgba(245,158,11,0.2)]' 
-                : 'border-white/15 shadow-[0_25px_60px_rgba(0,0,0,0.9)]'
-            } rounded-2xl w-full max-w-sm p-6 flex flex-col gap-4 text-slate-100 animate-mac-modal`}
+                ? 'border-amber-200 shadow-[0_10px_30px_rgba(245,158,11,0.15)]' 
+                : 'border-slate-200 shadow-2xl'
+            } rounded-2xl w-full max-w-sm p-6 flex flex-col gap-4 text-slate-800 animate-mac-modal`}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
@@ -82,10 +82,10 @@ export function ConfirmProvider({ children }: ConfirmProviderProps) {
               <div className="flex items-center gap-3">
                 <div className={`p-2.5 rounded-xl ${
                   isDanger 
-                    ? 'bg-rose-500/15 text-rose-400 border border-rose-500/25' 
+                    ? 'bg-rose-50 text-rose-600 border border-rose-200' 
                     : isWarning 
-                    ? 'bg-amber-500/15 text-amber-400 border border-amber-500/25' 
-                    : 'bg-indigo-500/15 text-indigo-400 border border-indigo-500/25'
+                    ? 'bg-amber-50 text-amber-600 border border-amber-200' 
+                    : 'bg-indigo-50 text-indigo-600 border border-indigo-200'
                 }`}>
                   {isDanger || isWarning ? (
                     <AlertTriangle size={18} />
@@ -93,28 +93,28 @@ export function ConfirmProvider({ children }: ConfirmProviderProps) {
                     <HelpCircle size={18} />
                   )}
                 </div>
-                <h3 className="text-sm font-black uppercase tracking-wider text-white">
+                <h3 className="text-sm font-black uppercase tracking-wider text-slate-900">
                   {options?.title || "Xác nhận"}
                 </h3>
               </div>
               <button
                 onClick={handleCancel}
-                className="text-slate-500 hover:text-white transition cursor-pointer p-1 rounded-xl hover:bg-white/5"
+                className="text-slate-400 hover:text-slate-700 transition cursor-pointer p-1 rounded-xl hover:bg-slate-100"
               >
                 <X size={16} />
               </button>
             </div>
 
             {/* Message Body */}
-            <p className="text-xs text-slate-300 font-semibold leading-relaxed">
+            <p className="text-xs text-slate-600 font-medium leading-relaxed">
               {options?.message}
             </p>
 
             {/* Actions */}
-            <div className="flex justify-end gap-3 pt-3 border-t border-white/5 mt-1">
+            <div className="flex justify-end gap-3 pt-3 border-t border-slate-100 mt-1">
               <button
                 onClick={handleCancel}
-                className="bg-[#181d2f] hover:bg-[#22283f] text-slate-300 font-bold text-xs uppercase tracking-wider rounded-xl border border-white/5 transition-all py-2.5 px-4 cursor-pointer active:scale-95"
+                className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs uppercase tracking-wider rounded-xl border border-slate-200 transition-all py-2.5 px-4 cursor-pointer active:scale-95"
               >
                 {options?.cancelText || "Hủy bỏ"}
               </button>
@@ -122,10 +122,10 @@ export function ConfirmProvider({ children }: ConfirmProviderProps) {
                 onClick={handleConfirm}
                 className={`text-white font-black text-xs uppercase tracking-wider rounded-xl transition-all cursor-pointer py-2.5 px-4 active:scale-95 ${
                   isDanger 
-                    ? 'bg-rose-500 hover:bg-rose-600 shadow-[0_0_15px_rgba(239,68,68,0.4)] border border-rose-400/30' 
+                    ? 'bg-rose-600 hover:bg-rose-700 shadow-md border border-rose-500' 
                     : isWarning 
-                    ? 'bg-amber-500 hover:bg-amber-600 shadow-[0_0_15px_rgba(245,158,11,0.4)] border border-amber-400/30'
-                    : 'bg-[#5c36f5] hover:bg-[#7351f7] shadow-[0_4px_12px_rgba(92,54,245,0.3)] border border-white/10'
+                    ? 'bg-amber-600 hover:bg-amber-700 shadow-md border border-amber-500'
+                    : 'bg-blue-600 hover:bg-blue-700 shadow-md border border-blue-500'
                 }`}
               >
                 {options?.confirmText || (isDanger ? "Xóa" : "Xác nhận")}

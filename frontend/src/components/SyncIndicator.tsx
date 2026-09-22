@@ -76,18 +76,18 @@ export const SyncIndicator: React.FC = () => {
       }
       className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold border transition-all duration-200 cursor-pointer select-none ${
         status === 'offline'
-          ? 'bg-[#181318] text-rose-400 border-rose-500/30 hover:bg-rose-950/40'
+          ? 'bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100'
           : isSyncing
-          ? 'bg-[#121626] text-amber-300 border-amber-500/30 hover:bg-amber-950/30'
-          : 'bg-[#0d1520] text-emerald-400 border-emerald-500/30 hover:bg-emerald-950/30 hover:border-emerald-500/50'
+          ? 'bg-amber-50 text-amber-800 border-amber-200 hover:bg-amber-100'
+          : 'bg-emerald-50 text-emerald-800 border-emerald-200 hover:bg-emerald-100'
       }`}
     >
       {isSyncing ? (
-        <RefreshCw className="w-3.5 h-3.5 animate-spin text-amber-300 shrink-0" />
+        <RefreshCw className="w-3.5 h-3.5 animate-spin text-amber-600 shrink-0" />
       ) : status === 'offline' ? (
-        <CloudOff className="w-3.5 h-3.5 text-rose-400 shrink-0" />
+        <CloudOff className="w-3.5 h-3.5 text-rose-600 shrink-0" />
       ) : (
-        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
       )}
       <span className="hidden sm:inline">
         {isSyncing ? 'Đang đồng bộ' : status === 'offline' ? 'Ngoại tuyến' : 'Đã đồng bộ'}

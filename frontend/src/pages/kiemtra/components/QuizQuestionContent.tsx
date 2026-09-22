@@ -125,7 +125,7 @@ export const QuizQuestionContent: React.FC<QuizQuestionContentProps> = ({
             value={userAnswer}
             onChange={(e) => onAnswerSelect(question.id, e.target.value)}
             placeholder="Nhập câu trả lời của bạn..."
-            className="w-full bg-[#161a29] border border-white/20 text-white text-xl sm:text-2xl md:text-3xl font-bold rounded-2xl px-5 py-3 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 shadow-inner"
+            className="w-full bg-white border border-slate-300 text-slate-900 text-xl sm:text-2xl md:text-3xl font-bold rounded-2xl px-5 py-3 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500 shadow-sm"
           />
         </div>
       )}

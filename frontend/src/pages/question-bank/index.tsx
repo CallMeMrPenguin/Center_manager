@@ -155,10 +155,10 @@ const ColumnHeaderFilter = ({
     <div ref={containerRef} className="inline-block text-left header-filter-container" onClick={(e) => e.stopPropagation()}>
       <button
         onClick={() => onToggleOpen(isOpen ? null : (columnKey as any))}
-        className={`p-1 rounded hover:bg-slate-800 transition cursor-pointer ${
+        className={`p-1 rounded hover:bg-slate-100 transition cursor-pointer ${
           isFiltered || isSorted
-            ? 'text-blue-400 bg-blue-500/10'
-            : 'text-slate-500 hover:text-slate-350'
+            ? 'text-blue-600 bg-blue-50'
+            : 'text-slate-500 hover:text-slate-800'
         }`}
         title={`Lọc/Sắp xếp cột ${columnLabel}`}
       >
@@ -322,7 +322,7 @@ const ColumnHeaderFilter = ({
                 setLocalSearch('');
                 setSearchText('');
               }}
-              className="w-full py-1 bg-slate-900 hover:bg-slate-850 border border-slate-850 hover:border-slate-800 text-[0.66rem] text-slate-450 hover:text-white font-bold rounded-lg transition"
+              className="w-full py-1 bg-slate-100 hover:bg-slate-200 border border-slate-200 text-[0.66rem] text-slate-600 hover:text-slate-900 font-bold rounded-lg transition cursor-pointer"
             >
               Xóa bộ lọc cột
             </button>
@@ -1840,7 +1840,7 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
                             </button>
                             <button
                               onClick={() => setEditingId(null)}
-                              className="p-1.5 rounded-lg bg-slate-900 border border-slate-850 hover:bg-slate-800 text-slate-400 hover:text-white transition cursor-pointer"
+                              className="p-1.5 rounded-lg bg-slate-100 border border-slate-200 hover:bg-slate-200 text-slate-600 hover:text-slate-900 transition cursor-pointer"
                               title="Hủy"
                             >
                               <X size={13} />
@@ -2047,50 +2047,50 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
 
       {/* CSV IMPORT VALIDATION DUPLICATE REPORT DIALOG */}
       {csvPreviewModal.show && (
-        <div className="fixed inset-0 bg-black/85 z-50 flex items-center justify-center p-6">
-          <div className="bg-[#111827] border border-slate-850 rounded-3xl w-full max-w-4xl h-[80vh] flex flex-col overflow-hidden shadow-2xl animate-fade-in">
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-6">
+          <div className="bg-white border border-slate-200 rounded-3xl w-full max-w-4xl h-[80vh] flex flex-col overflow-hidden shadow-2xl animate-fade-in">
             {/* Header */}
-            <div className="h-14 border-b border-slate-900 bg-[#0A0D1A]/50 flex items-center justify-between px-6 shrink-0">
-              <span className="text-xs font-bold text-white flex items-center gap-2">
+            <div className="h-14 border-b border-slate-200 bg-slate-50 flex items-center justify-between px-6 shrink-0">
+              <span className="text-xs font-bold text-slate-900 flex items-center gap-2">
                 <AlertTriangle className="text-amber-500 animate-pulse" size={16} />
                 Báo cáo kiểm tra trùng lặp CSV: {csvPreviewModal.fileName}
               </span>
               <button
                 onClick={() => setCsvPreviewModal({ show: false, items: [], fileName: '' })}
-                className="p-1.5 rounded-lg bg-slate-900/60 hover:bg-slate-800 text-slate-400 hover:text-white transition cursor-pointer"
+                className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-900 transition cursor-pointer"
               >
                 <X size={14} />
               </button>
             </div>
 
             {/* Validation Statistics Bar */}
-            <div className="bg-[#151f32]/40 border-b border-slate-900/60 p-5 shrink-0 grid grid-cols-4 gap-4 text-center">
-              <div className="bg-slate-950/40 border border-slate-850/60 rounded-xl p-3">
+            <div className="bg-slate-50/80 border-b border-slate-200 p-5 shrink-0 grid grid-cols-4 gap-4 text-center">
+              <div className="bg-white border border-slate-200 rounded-xl p-3 shadow-xs">
                 <p className="text-[0.66rem] font-bold text-slate-500 uppercase">Tổng dòng</p>
-                <p className="text-xl font-black text-white mt-1">{csvPreviewModal.items.length}</p>
+                <p className="text-xl font-black text-slate-900 mt-1">{csvPreviewModal.items.length}</p>
               </div>
-              <div className="bg-emerald-500/5 border border-emerald-500/15 rounded-xl p-3">
-                <p className="text-[0.66rem] font-bold text-emerald-500 uppercase">Dòng mới hợp lệ</p>
-                <p className="text-xl font-black text-emerald-400 mt-1">
+              <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-3">
+                <p className="text-[0.66rem] font-bold text-emerald-600 uppercase">Dòng mới hợp lệ</p>
+                <p className="text-xl font-black text-emerald-600 mt-1">
                   {csvPreviewModal.items.filter(x => !x.is_duplicate && !x.is_similar).length}
                 </p>
               </div>
-              <div className="bg-amber-500/5 border border-amber-500/15 rounded-xl p-3">
-                <p className="text-[0.66rem] font-bold text-amber-500 uppercase">Tương đồng (&gt;75%)</p>
-                <p className="text-xl font-black text-amber-400 mt-1">
+              <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-3">
+                <p className="text-[0.66rem] font-bold text-amber-600 uppercase">Tương đồng (&gt;75%)</p>
+                <p className="text-xl font-black text-amber-600 mt-1">
                   {csvPreviewModal.items.filter(x => x.is_similar && !x.is_duplicate).length}
                 </p>
               </div>
-              <div className="bg-rose-500/5 border border-rose-500/15 rounded-xl p-3">
-                <p className="text-[0.66rem] font-bold text-rose-500 uppercase">Dòng trùng lặp</p>
-                <p className="text-xl font-black text-rose-450 mt-1">
+              <div className="bg-rose-500/10 border border-rose-500/20 rounded-xl p-3">
+                <p className="text-[0.66rem] font-bold text-rose-600 uppercase">Dòng trùng lặp</p>
+                <p className="text-xl font-black text-rose-600 mt-1">
                   {csvPreviewModal.items.filter(x => x.is_duplicate).length}
                 </p>
               </div>
             </div>
 
             {/* Items scrollable list */}
-            <div className="flex-1 overflow-auto bg-slate-950/20 flex flex-col">
+            <div className="flex-1 overflow-auto bg-slate-50/40 flex flex-col">
               <DataTable
                 tableId="question-bank-csv-preview-table"
                 exportFilename="bao_cao_kiem_tra_trung_lap_cau_hoi"
@@ -2101,7 +2101,7 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
             </div>
 
             {/* Footer actions */}
-            <div className="h-16 border-t border-slate-900 bg-[#0A0D1A]/50 flex items-center justify-between px-6 shrink-0">
+            <div className="h-16 border-t border-slate-200 bg-slate-50 flex items-center justify-between px-6 shrink-0">
               <p className="text-[0.66rem] text-slate-500 font-bold max-w-lg leading-normal">
                 Nhấn "Bắt đầu nạp" sẽ bỏ qua kiểm tra và ghi toàn bộ dữ liệu ở trên vào Cơ sở dữ liệu local.
               </p>
@@ -2109,7 +2109,7 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
               <div className="flex gap-3">
                 <button
                   onClick={() => setCsvPreviewModal({ show: false, items: [], fileName: '' })}
-                  className="px-4.5 py-2 hover:bg-slate-800 text-slate-400 text-xs font-bold rounded-xl transition cursor-pointer"
+                  className="px-4.5 py-2 hover:bg-slate-200 text-slate-600 text-xs font-bold rounded-xl transition cursor-pointer"
                 >
                   Hủy bỏ
                 </button>
@@ -2127,16 +2127,16 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
 
       {/* COMPARISON MODAL FOR SIMILAR / DUPLICATE QUESTIONS */}
       {activeCompareQuestion && (
-        <div className="fixed inset-0 bg-black/85 z-[60] flex items-center justify-center p-4">
-          <div className="bg-[#111827] border border-slate-800 rounded-3xl w-full max-w-2xl p-6 flex flex-col gap-4 text-slate-200 shadow-2xl animate-fade-in">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-              <h3 className="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2">
+        <div className="fixed inset-0 bg-black/60 z-[60] flex items-center justify-center p-4">
+          <div className="bg-white border border-slate-200 rounded-3xl w-full max-w-2xl p-6 flex flex-col gap-4 text-slate-800 shadow-2xl animate-fade-in">
+            <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+              <h3 className="text-sm font-black text-slate-900 uppercase tracking-wider flex items-center gap-2">
                 <AlertTriangle className={activeCompareQuestion.isDuplicate ? "text-rose-500" : "text-amber-500"} size={16} />
                 Chi tiết đối chiếu {activeCompareQuestion.isDuplicate ? "Trùng lặp 100%" : `Tương đồng ${Math.round((activeCompareQuestion.similarityRatio || 0) * 100)}%`}
               </h3>
               <button
                 onClick={() => setActiveCompareQuestion(null)}
-                className="text-slate-500 hover:text-white transition cursor-pointer"
+                className="text-slate-400 hover:text-slate-700 transition cursor-pointer"
               >
                 <X size={16} />
               </button>
@@ -2144,41 +2144,41 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
 
             <div className="flex flex-col gap-4 text-xs">
               {/* Question 1: From CSV file */}
-              <div className="flex flex-col gap-1.5 bg-[#080b12] border border-blue-500/30 p-4 rounded-2xl">
-                <span className="text-[10px] font-bold text-blue-400 uppercase tracking-wider">
+              <div className="flex flex-col gap-1.5 bg-blue-50/50 border border-blue-200 p-4 rounded-2xl">
+                <span className="text-[10px] font-bold text-blue-600 uppercase tracking-wider">
                   1. Nội dung câu hỏi trong file nạp (CSV):
                 </span>
-                <p className="text-slate-200 font-semibold leading-relaxed">
+                <p className="text-slate-800 font-semibold leading-relaxed">
                   {activeCompareQuestion.importedText}
                 </p>
               </div>
 
               {/* Question 2: Matched question in DB */}
-              <div className={`flex flex-col gap-1.5 bg-[#080b12] border p-4 rounded-2xl ${
-                activeCompareQuestion.isDuplicate ? 'border-rose-500/30' : 'border-amber-500/30'
+              <div className={`flex flex-col gap-1.5 p-4 rounded-2xl border ${
+                activeCompareQuestion.isDuplicate ? 'bg-rose-50/50 border-rose-200' : 'bg-amber-50/50 border-amber-200'
               }`}>
                 <span className={`text-[10px] font-bold uppercase tracking-wider ${
-                  activeCompareQuestion.isDuplicate ? 'text-rose-400' : 'text-amber-400'
+                  activeCompareQuestion.isDuplicate ? 'text-rose-600' : 'text-amber-600'
                 }`}>
                   2. Câu hỏi tương ứng trong CSDL:
                 </span>
-                <p className="text-slate-200 font-semibold leading-relaxed">
+                <p className="text-slate-800 font-semibold leading-relaxed">
                   {activeCompareQuestion.matchedText}
                 </p>
               </div>
 
               {/* Reason / Info banner */}
               {activeCompareQuestion.reason && (
-                <div className="p-3 bg-slate-900 border border-slate-800 rounded-xl text-[11px] text-slate-400">
+                <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl text-[11px] text-slate-600">
                   <strong>Ghi chú kiểm tra:</strong> {activeCompareQuestion.reason}
                 </div>
               )}
             </div>
 
-            <div className="flex justify-end pt-2 border-t border-slate-900 mt-1">
+            <div className="flex justify-end pt-2 border-t border-slate-200 mt-1">
               <button
                 onClick={() => setActiveCompareQuestion(null)}
-                className="px-5 py-2 bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold rounded-xl transition cursor-pointer"
+                className="px-5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition cursor-pointer"
               >
                 Đóng
               </button>
@@ -2189,23 +2189,23 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
 
       {/* Scoped Delete Modal */}
       {deleteModal.show && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-in p-4">
-          <div className="w-full max-w-md filter-dropdown-menu p-6 flex flex-col gap-4 text-slate-200">
-            <div className="flex items-center justify-between border-b border-slate-900 pb-3">
-              <h3 className="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 animate-fade-in p-4">
+          <div className="w-full max-w-md bg-white border border-slate-200 rounded-2xl shadow-xl p-6 flex flex-col gap-4 text-slate-800">
+            <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+              <h3 className="text-sm font-black text-slate-900 uppercase tracking-wider flex items-center gap-2">
                 <Trash2 size={16} className="text-rose-500" />
                 Xóa dữ liệu câu hỏi
               </h3>
               <button
                 onClick={() => setDeleteModal(prev => ({ ...prev, show: false }))}
-                className="text-slate-500 hover:text-white transition"
+                className="text-slate-400 hover:text-slate-700 transition"
               >
                 <X size={16} />
               </button>
             </div>
 
             <div className="flex flex-col gap-3">
-              <label className="text-xs font-bold text-slate-400">Chọn phạm vi muốn xóa:</label>
+              <label className="text-xs font-bold text-slate-600">Chọn phạm vi muốn xóa:</label>
               
               <div className="grid grid-cols-3 gap-2">
                 <button
@@ -2213,8 +2213,8 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
                   onClick={() => setDeleteModal(prev => ({ ...prev, scope: 'all' }))}
                   className={`py-2 px-3 rounded-xl text-xs font-bold transition border ${
                     deleteModal.scope === 'all'
-                      ? 'bg-rose-600/10 text-rose-400 border-rose-550'
-                      : 'bg-[#151f32]/30 text-slate-400 border-slate-850 hover:bg-[#151f32]/60'
+                      ? 'bg-rose-50 text-rose-600 border-rose-300'
+                      : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
                   }`}
                 >
                   Toàn bộ
@@ -2224,8 +2224,8 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
                   onClick={() => setDeleteModal(prev => ({ ...prev, scope: 'grade' }))}
                   className={`py-2 px-3 rounded-xl text-xs font-bold transition border ${
                     deleteModal.scope === 'grade'
-                      ? 'bg-rose-600/10 text-rose-400 border-rose-550'
-                      : 'bg-[#151f32]/30 text-slate-400 border-slate-850 hover:bg-[#151f32]/60'
+                      ? 'bg-rose-50 text-rose-600 border-rose-300'
+                      : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
                   }`}
                 >
                   Theo Lớp
@@ -2235,8 +2235,8 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
                   onClick={() => setDeleteModal(prev => ({ ...prev, scope: 'unit' }))}
                   className={`py-2 px-3 rounded-xl text-xs font-bold transition border ${
                     deleteModal.scope === 'unit'
-                      ? 'bg-rose-600/10 text-rose-400 border-rose-550'
-                      : 'bg-[#151f32]/30 text-slate-400 border-slate-850 hover:bg-[#151f32]/60'
+                      ? 'bg-rose-50 text-rose-600 border-rose-300'
+                      : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
                   }`}
                 >
                   Lớp & Unit
@@ -2244,13 +2244,13 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
               </div>
 
               {deleteModal.scope !== 'all' && (
-                <div className="flex flex-col gap-3.5 bg-[#151f32]/10 border border-slate-900/60 p-3.5 rounded-xl mt-1.5">
+                <div className="flex flex-col gap-3.5 bg-slate-50 border border-slate-200 p-3.5 rounded-xl mt-1.5">
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-[10px] font-bold text-slate-450 uppercase">Chọn Khối lớp:</label>
+                    <label className="text-[10px] font-bold text-slate-500 uppercase">Chọn Khối lớp:</label>
                     <select
                       value={deleteModal.grade}
                       onChange={(e) => setDeleteModal(prev => ({ ...prev, grade: e.target.value }))}
-                      className="bg-[#080b12] border border-slate-850 px-3 py-2 rounded-xl text-xs text-white cursor-pointer w-full"
+                      className="bg-white border border-slate-300 px-3 py-2 rounded-xl text-xs text-slate-900 cursor-pointer w-full"
                     >
                       <option value="">-- Chọn lớp --</option>
                       {availableGrades.map(g => (
@@ -2261,38 +2261,38 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
 
                   {deleteModal.scope === 'unit' && (
                     <div className="flex flex-col gap-1.5">
-                      <label className="text-[10px] font-bold text-slate-450 uppercase">Nhập số Unit (Ví dụ: 1 hoặc 2):</label>
+                      <label className="text-[10px] font-bold text-slate-500 uppercase">Nhập số Unit (Ví dụ: 1 hoặc 2):</label>
                       <input
                         type="text"
                         value={deleteModal.unit}
                         onChange={(e) => setDeleteModal(prev => ({ ...prev, unit: e.target.value }))}
                         placeholder="Số Unit"
-                        className="bg-[#080b12] border border-slate-850 px-3 py-2 rounded-xl text-xs text-white focus:outline-none focus:border-slate-700 w-full"
+                        className="bg-white border border-slate-300 px-3 py-2 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-blue-500 w-full"
                       />
                     </div>
                   )}
                 </div>
               )}
 
-              <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl text-[10px] text-amber-400 leading-relaxed mt-1 flex gap-2">
-                <AlertTriangle size={14} className="shrink-0 mt-0.5" />
+              <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-[10px] text-amber-700 leading-relaxed mt-1 flex gap-2">
+                <AlertTriangle size={14} className="shrink-0 mt-0.5 text-amber-600" />
                 <span>
                   <strong>Lưu ý:</strong> Hành động xóa dữ liệu này là vĩnh viễn và không thể khôi phục lại. Bạn nên xuất file dự phòng trước khi xóa.
                 </span>
               </div>
             </div>
 
-            <div className="flex justify-end gap-3 pt-3 border-t border-slate-900 mt-2">
+            <div className="flex justify-end gap-3 pt-3 border-t border-slate-200 mt-2">
               <button
                 onClick={() => setDeleteModal(prev => ({ ...prev, show: false }))}
-                className="px-4 py-2 hover:bg-slate-800 text-slate-400 text-xs font-bold rounded-xl transition cursor-pointer"
+                className="px-4 py-2 hover:bg-slate-100 text-slate-600 text-xs font-bold rounded-xl transition cursor-pointer"
               >
                 Hủy
               </button>
               <button
                 onClick={handleScopedDelete}
                 disabled={loading}
-                className="px-5 py-2 bg-rose-600 hover:bg-rose-500 text-white text-xs font-black rounded-xl shadow-md shadow-rose-500/10 transition cursor-pointer"
+                className="px-5 py-2 bg-rose-600 hover:bg-rose-500 text-white text-xs font-black rounded-xl shadow-md transition cursor-pointer"
               >
                 Xác Nhận Xóa
               </button>
@@ -2303,16 +2303,16 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
 
       {/* Unified Test Creation Modal */}
       {showCreateTestModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-none animate-fade-in p-4">
-          <div className="w-full max-w-xl bg-[#111827] border border-slate-800 rounded-3xl p-6 flex flex-col gap-4 text-slate-200 max-h-[90vh] overflow-y-auto shadow-2xl">
-            <div className="flex items-center justify-between border-b border-slate-900 pb-3">
-              <h3 className="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 animate-fade-in p-4">
+          <div className="w-full max-w-xl bg-white border border-slate-200 rounded-3xl p-6 flex flex-col gap-4 text-slate-800 max-h-[90vh] overflow-y-auto shadow-2xl">
+            <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+              <h3 className="text-sm font-black text-slate-900 uppercase tracking-wider flex items-center gap-2">
                 <Sparkles className="text-blue-500" size={16} />
                 Cấu hình Tạo Đề Thi
               </h3>
               <button
                 onClick={() => setShowCreateTestModal(false)}
-                className="text-slate-500 hover:text-white transition cursor-pointer"
+                className="text-slate-400 hover:text-slate-700 transition cursor-pointer"
               >
                 <X size={16} />
               </button>
@@ -2321,7 +2321,7 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
             <div className="flex flex-col gap-4">
               {/* Question Source Selection */}
               <div className="flex flex-col gap-1.5">
-                <label className="text-[10px] font-bold text-slate-450 uppercase">Nguồn câu hỏi:</label>
+                <label className="text-[10px] font-bold text-slate-500 uppercase">Nguồn câu hỏi:</label>
                 <div className="grid grid-cols-2 gap-2">
                   <button
                     type="button"
@@ -2329,10 +2329,10 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
                     disabled={selectedIds.length === 0}
                     className={`px-3 py-2.5 rounded-xl text-xs font-bold transition border cursor-pointer ${
                       createTestConfig.source === 'selected'
-                        ? 'bg-blue-600/15 border-blue-500/40 text-blue-450 font-extrabold'
+                        ? 'bg-blue-50 border-blue-400 text-blue-600 font-extrabold'
                         : selectedIds.length === 0
-                        ? 'bg-slate-950 border-slate-900 text-slate-600 cursor-not-allowed opacity-50'
-                        : 'bg-[#080b12] border-slate-850 text-slate-400 hover:text-slate-200 hover:bg-slate-900'
+                        ? 'bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed opacity-50'
+                        : 'bg-slate-50 border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-100'
                     }`}
                   >
                     Đã tích chọn ({selectedIds.length} câu)
@@ -2342,8 +2342,8 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
                     onClick={() => setCreateTestConfig(prev => ({ ...prev, source: 'bank' }))}
                     className={`px-3 py-2.5 rounded-xl text-xs font-bold transition border cursor-pointer ${
                       createTestConfig.source === 'bank'
-                        ? 'bg-blue-600/15 border-blue-500/40 text-blue-450 font-extrabold'
-                        : 'bg-[#080b12] border-slate-850 text-slate-400 hover:text-slate-200 hover:bg-slate-900'
+                        ? 'bg-blue-50 border-blue-400 text-blue-600 font-extrabold'
+                        : 'bg-slate-50 border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-100'
                     }`}
                   >
                     Lọc từ Ngân Hàng
@@ -2352,8 +2352,8 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
               </div>
 
               {/* Number of Versions Input */}
-              <div className="flex flex-col gap-1.5 bg-[#080b12] border border-slate-855 p-4 rounded-2xl">
-                <label className="text-[10px] font-bold text-slate-450 uppercase">Số lượng đề cần tạo (Versions):</label>
+              <div className="flex flex-col gap-1.5 bg-slate-50 border border-slate-200 p-4 rounded-2xl">
+                <label className="text-[10px] font-bold text-slate-500 uppercase">Số lượng đề cần tạo (Versions):</label>
                 <input
                   type="number"
                   min={1}
@@ -2363,19 +2363,19 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
                     const val = parseInt(e.target.value) || 1;
                     setCreateTestConfig(prev => ({ ...prev, numVersions: val }));
                   }}
-                  className="bg-white dark:bg-[#070b14] border border-slate-300 dark:border-slate-800 px-3.5 py-2.5 rounded-xl text-xs text-slate-900 dark:text-white focus:outline-none font-bold shadow-xs"
+                  className="bg-white border border-slate-300 px-3.5 py-2.5 rounded-xl text-xs text-slate-900 focus:outline-none font-bold shadow-xs"
                 />
               </div>
 
               {/* Filters (Active if source is 'bank') */}
               {createTestConfig.source !== 'selected' && (
-                <div className="bg-slate-50 dark:bg-[#080b12] border border-slate-200 dark:border-slate-855 p-4 rounded-2xl grid grid-cols-3 gap-3 animate-fade-in">
+                <div className="bg-slate-50 border border-slate-200 p-4 rounded-2xl grid grid-cols-3 gap-3 animate-fade-in">
                   <div className="flex flex-col gap-1.5">
                     <label className="text-[10px] font-bold text-slate-500 uppercase">Khối lớp:</label>
                     <select
                       value={createTestConfig.grade}
                       onChange={(e) => setCreateTestConfig(prev => ({ ...prev, grade: e.target.value }))}
-                      className="bg-white dark:bg-[#070b14] border border-slate-300 dark:border-slate-800 px-3 py-2 rounded-xl text-xs text-slate-900 dark:text-white focus:outline-none cursor-pointer shadow-xs"
+                      className="bg-white border border-slate-300 px-3 py-2 rounded-xl text-xs text-slate-900 focus:outline-none cursor-pointer shadow-xs"
                     >
                       <option value="">Tất cả</option>
                       {availableGrades.map(g => (
@@ -2391,7 +2391,7 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
                       value={createTestConfig.unit}
                       onChange={(e) => setCreateTestConfig(prev => ({ ...prev, unit: e.target.value }))}
                       placeholder="Ví dụ: 1 hoặc 2"
-                      className="bg-white dark:bg-[#070b14] border border-slate-300 dark:border-slate-800 px-3 py-2 rounded-xl text-xs text-slate-900 dark:text-white focus:outline-none shadow-xs"
+                      className="bg-white border border-slate-300 px-3 py-2 rounded-xl text-xs text-slate-900 focus:outline-none shadow-xs"
                     />
                   </div>
 
@@ -2408,7 +2408,7 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
                           targetDifficulty: val || "NHẬN BIẾT"
                         }));
                       }}
-                      className="bg-white dark:bg-[#070b14] border border-slate-300 dark:border-slate-800 px-3 py-2 rounded-xl text-xs text-slate-900 dark:text-white focus:outline-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shadow-xs"
+                      className="bg-white border border-slate-300 px-3 py-2 rounded-xl text-xs text-slate-900 focus:outline-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shadow-xs"
                     >
                       <option value="">Tất cả</option>
                       {levelsList.map(lvl => (
@@ -2423,20 +2423,20 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
               {createTestConfig.source !== 'selected' && (
                 <div className="flex flex-col gap-3">
                   <div className="flex items-center justify-between">
-                    <label className="text-[10px] font-bold text-slate-450 uppercase tracking-wider">Cấu hình số câu & độ khó:</label>
+                    <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Cấu hình số câu & độ khó:</label>
                     <div className="flex items-center gap-4">
                       <div className="flex items-center gap-2 select-none">
                         <button
                           type="button"
                           onClick={() => setCreateTestConfig(prev => ({ ...prev, useTypeDistribution: !prev.useTypeDistribution }))}
-                          className="text-slate-400 hover:text-white cursor-pointer flex items-center"
+                          className="text-slate-600 hover:text-slate-900 cursor-pointer flex items-center"
                         >
                           {createTestConfig.useTypeDistribution ? (
                             <CheckSquare size={16} className="text-blue-500 mr-1.5" />
                           ) : (
                             <Square size={16} className="mr-1.5" />
                           )}
-                          <span className="text-xs text-slate-300 font-bold">Phân bổ theo dạng</span>
+                          <span className="text-xs text-slate-700 font-bold">Phân bổ theo dạng</span>
                         </button>
                       </div>
 
@@ -2444,26 +2444,26 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
                         <button
                           type="button"
                           onClick={() => setCreateTestConfig(prev => ({ ...prev, useDifficultyDistribution: !prev.useDifficultyDistribution }))}
-                          className="text-slate-400 hover:text-white cursor-pointer flex items-center"
+                          className="text-slate-600 hover:text-slate-900 cursor-pointer flex items-center"
                         >
                           {createTestConfig.useDifficultyDistribution ? (
                             <CheckSquare size={16} className="text-blue-500 mr-1.5" />
                           ) : (
                             <Square size={16} className="mr-1.5" />
                           )}
-                          <span className="text-xs text-slate-300 font-bold">Phân bổ theo độ khó</span>
+                          <span className="text-xs text-slate-700 font-bold">Phân bổ độ khó</span>
                         </button>
                       </div>
                     </div>
                   </div>
 
                   {createTestConfig.useDifficultyDistribution && (
-                    <div className="bg-[#080b12] border border-slate-855 p-4 rounded-2xl flex flex-col gap-3 animate-fade-in">
-                      <div className="flex items-center justify-between border-b border-slate-900 pb-2">
-                        <span className="text-xs font-bold text-slate-300">Tỷ lệ độ khó (%)</span>
+                    <div className="bg-slate-50 border border-slate-200 p-4 rounded-2xl flex flex-col gap-3 animate-fade-in">
+                      <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+                        <span className="text-xs font-bold text-slate-700">Tỷ lệ độ khó (%)</span>
                         <span className={`text-[10px] font-bold ${
                           (createTestConfig.difficultyPctNhanBiet + createTestConfig.difficultyPctThongHieu + createTestConfig.difficultyPctVanDung === 100)
-                            ? 'text-emerald-500'
+                            ? 'text-emerald-600'
                             : 'text-rose-500 animate-pulse'
                         }`}>
                           Tổng: {createTestConfig.difficultyPctNhanBiet + createTestConfig.difficultyPctThongHieu + createTestConfig.difficultyPctVanDung}% 
@@ -2472,7 +2472,7 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
                       </div>
                       <div className="grid grid-cols-3 gap-3">
                         <div className="flex flex-col gap-1">
-                          <label className="text-[9px] font-bold text-slate-450 uppercase">Nhận biết:</label>
+                          <label className="text-[9px] font-bold text-slate-500 uppercase">Nhận biết:</label>
                           <input
                             type="number"
                             min={0}
@@ -2482,11 +2482,11 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
                               const val = Math.max(0, Math.min(100, parseInt(e.target.value) || 0));
                               setCreateTestConfig(prev => ({ ...prev, difficultyPctNhanBiet: val }));
                             }}
-                            className="bg-white dark:bg-[#070b14] border border-slate-300 dark:border-slate-850 px-2.5 py-1.5 rounded-xl text-xs text-slate-900 dark:text-white font-bold text-center focus:outline-none shadow-xs"
+                            className="bg-white border border-slate-300 px-2.5 py-1.5 rounded-xl text-xs text-slate-900 font-bold text-center focus:outline-none shadow-xs"
                           />
                         </div>
                         <div className="flex flex-col gap-1">
-                          <label className="text-[9px] font-bold text-slate-450 uppercase">Thông hiểu:</label>
+                          <label className="text-[9px] font-bold text-slate-500 uppercase">Thông hiểu:</label>
                           <input
                             type="number"
                             min={0}
@@ -2496,11 +2496,11 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
                               const val = Math.max(0, Math.min(100, parseInt(e.target.value) || 0));
                               setCreateTestConfig(prev => ({ ...prev, difficultyPctThongHieu: val }));
                             }}
-                            className="bg-white dark:bg-[#070b14] border border-slate-300 dark:border-slate-850 px-2.5 py-1.5 rounded-xl text-xs text-slate-900 dark:text-white font-bold text-center focus:outline-none shadow-xs"
+                            className="bg-white border border-slate-300 px-2.5 py-1.5 rounded-xl text-xs text-slate-900 font-bold text-center focus:outline-none shadow-xs"
                           />
                         </div>
                         <div className="flex flex-col gap-1">
-                          <label className="text-[9px] font-bold text-slate-450 uppercase">Vận dụng:</label>
+                          <label className="text-[9px] font-bold text-slate-500 uppercase">Vận dụng:</label>
                           <input
                             type="number"
                             min={0}
@@ -2510,7 +2510,7 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
                               const val = Math.max(0, Math.min(100, parseInt(e.target.value) || 0));
                               setCreateTestConfig(prev => ({ ...prev, difficultyPctVanDung: val }));
                             }}
-                            className="bg-white dark:bg-[#070b14] border border-slate-300 dark:border-slate-850 px-2.5 py-1.5 rounded-xl text-xs text-slate-900 dark:text-white font-bold text-center focus:outline-none shadow-xs"
+                            className="bg-white border border-slate-300 px-2.5 py-1.5 rounded-xl text-xs text-slate-900 font-bold text-center focus:outline-none shadow-xs"
                           />
                         </div>
                       </div>
@@ -2529,24 +2529,24 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
                           const val = parseInt(e.target.value) || 0;
                           setCreateTestConfig(prev => ({ ...prev, totalCount: val }));
                         }}
-                        className="bg-[#080b12] border border-slate-855 px-3.5 py-2.5 rounded-xl text-xs text-white font-bold"
+                        className="bg-slate-50 border border-slate-200 px-3.5 py-2.5 rounded-xl text-xs text-slate-900 font-bold"
                       />
-                      <div className="text-[9px] text-slate-450 font-bold mt-0.5">
-                        Tổng số câu lấy từ ngân hàng: <span className="text-blue-450">{createTestConfig.totalCount * createTestConfig.numVersions}</span>
+                      <div className="text-[9px] text-slate-500 font-bold mt-0.5">
+                        Tổng số câu lấy từ ngân hàng: <span className="text-blue-600">{createTestConfig.totalCount * createTestConfig.numVersions}</span>
                       </div>
                     </div>
                   ) : (
-                    <div className="bg-[#080b12] border border-slate-855 p-4 rounded-2xl flex flex-col gap-3 animate-fade-in text-xs">
-                      <div className="flex flex-col gap-2 max-h-[300px] overflow-y-auto pr-1">
+                    <div className="bg-slate-50 border border-slate-200 p-3.5 rounded-2xl flex flex-col gap-3 animate-fade-in">
+                      <div className="flex flex-col gap-2 max-h-56 overflow-y-auto pr-1">
                         {createTestConfig.typeOrder.length === 0 ? (
-                          <p className="text-[10px] text-slate-500 text-center italic py-4">
-                            Không tìm thấy dạng câu hỏi nào trong CSDL để phân bổ
-                          </p>
+                          <div className="text-center text-slate-400 text-xs py-4">
+                            Không có câu hỏi phù hợp với bộ lọc hiện tại.
+                          </div>
                         ) : (
                           createTestConfig.typeOrder.map((t, idx) => {
                             const isIncluded = createTestConfig.includedTypes.includes(t);
-                            const countInType = createTestConfig.typeCounts[t] || 0;
                             const available = typeAvailableMap[t] || 0;
+                            const countInType = createTestConfig.typeCounts[t] || 0;
                             const numVersions = createTestConfig.numVersions;
                             
                             const suggested = Math.floor(available / numVersions);
@@ -2555,8 +2555,8 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
                             const diff = available - totalNeeded;
                             
                             return (
-                              <div key={t} className={`flex flex-col gap-2 bg-[#111827]/40 border p-3 rounded-xl transition ${
-                                isIncluded ? 'border-slate-800' : 'border-slate-900 opacity-60'
+                              <div key={t} className={`flex flex-col gap-2 bg-white border p-3 rounded-xl transition ${
+                                isIncluded ? 'border-slate-200 shadow-xs' : 'border-slate-200 opacity-60'
                               }`}>
                                 <div className="flex items-center justify-between gap-2">
                                   <div className="flex items-center gap-2">
@@ -2569,7 +2569,7 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
                                           : [...createTestConfig.includedTypes, t];
                                         setCreateTestConfig(prev => ({ ...prev, includedTypes: newIncluded }));
                                       }}
-                                      className="text-slate-400 hover:text-white cursor-pointer"
+                                      className="text-slate-400 hover:text-slate-700 cursor-pointer"
                                     >
                                       {isIncluded ? (
                                         <CheckSquare size={15} className="text-blue-500" />
@@ -2577,10 +2577,10 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
                                         <Square size={15} />
                                       )}
                                     </button>
-                                    <span className="text-[11px] font-extrabold text-slate-200 truncate max-w-[120px]" title={TYPE_MAP[t] || t}>
+                                    <span className="text-[11px] font-extrabold text-slate-800 truncate max-w-[120px]" title={TYPE_MAP[t] || t}>
                                       {TYPE_MAP[t] || t}
                                     </span>
-                                    <span className="text-[10px] text-slate-450 font-bold bg-slate-950 px-2 py-0.5 rounded border border-slate-900">
+                                    <span className="text-[10px] text-slate-600 font-bold bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
                                       Có {available} câu
                                     </span>
                                   </div>
@@ -2591,7 +2591,7 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
                                       type="button"
                                       disabled={idx === 0}
                                       onClick={() => handleMoveType(idx, -1)}
-                                      className="w-5 h-5 flex items-center justify-center rounded bg-slate-900 border border-slate-800 hover:border-slate-600 text-slate-400 hover:text-white disabled:opacity-30 disabled:hover:border-slate-800 disabled:cursor-not-allowed text-[10px] font-bold cursor-pointer"
+                                      className="w-5 h-5 flex items-center justify-center rounded bg-slate-100 border border-slate-300 hover:bg-slate-200 text-slate-600 hover:text-slate-900 disabled:opacity-30 disabled:cursor-not-allowed text-[10px] font-bold cursor-pointer"
                                       title="Di chuyển lên"
                                     >
                                       ↑
@@ -2600,7 +2600,7 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
                                       type="button"
                                       disabled={idx === createTestConfig.typeOrder.length - 1}
                                       onClick={() => handleMoveType(idx, 1)}
-                                      className="w-5 h-5 flex items-center justify-center rounded bg-slate-900 border border-slate-800 hover:border-slate-600 text-slate-400 hover:text-white disabled:opacity-30 disabled:hover:border-slate-800 disabled:cursor-not-allowed text-[10px] font-bold cursor-pointer"
+                                      className="w-5 h-5 flex items-center justify-center rounded bg-slate-100 border border-slate-300 hover:bg-slate-200 text-slate-600 hover:text-slate-900 disabled:opacity-30 disabled:cursor-not-allowed text-[10px] font-bold cursor-pointer"
                                       title="Di chuyển xuống"
                                     >
                                       ↓
@@ -2609,12 +2609,12 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
                                 </div>
 
                                 {isIncluded && (
-                                  <div className="flex items-center justify-between gap-3 bg-slate-950/40 p-2 rounded-lg border border-slate-900/60 mt-1">
+                                  <div className="flex items-center justify-between gap-3 bg-slate-50 p-2 rounded-lg border border-slate-200 mt-1">
                                     <div className="flex flex-col gap-0.5">
-                                      <div className="flex items-center gap-1.5 text-[9px] font-bold text-slate-400">
+                                      <div className="flex items-center gap-1.5 text-[9px] font-bold text-slate-500">
                                         <span>Gợi ý: {suggested} câu/đề</span>
                                         {remainder > 0 && (
-                                          <span className="px-1 py-0.2 rounded bg-amber-500/10 border border-amber-500/20 text-amber-500 text-[8px]">
+                                          <span className="px-1 py-0.2 rounded bg-amber-500/10 border border-amber-500/20 text-amber-600 text-[8px]">
                                             Lẻ (Dư {remainder})
                                           </span>
                                         )}
@@ -2624,13 +2624,13 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
                                         {diff < 0 ? (
                                           <span className="text-red-500 font-black">Thiếu {Math.abs(diff)} câu!</span>
                                         ) : (
-                                          <span className="text-emerald-500 font-extrabold">Dư {diff} câu</span>
+                                          <span className="text-emerald-600 font-extrabold">Dư {diff} câu</span>
                                         )}
                                       </div>
                                     </div>
 
                                     <div className="flex items-center gap-2">
-                                      <span className="text-[10px] text-slate-400 font-semibold">Số câu mỗi đề:</span>
+                                      <span className="text-[10px] text-slate-500 font-semibold">Số câu mỗi đề:</span>
                                       <input
                                         type="number"
                                         min={0}
@@ -2646,7 +2646,7 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
                                             }
                                           }));
                                         }}
-                                        className="w-14 bg-[#070b14] border border-slate-800 text-right px-2 py-1 rounded text-xs font-bold text-blue-450 focus:outline-none"
+                                        className="w-14 bg-white border border-slate-300 text-right px-2 py-1 rounded text-xs font-bold text-blue-600 focus:outline-none"
                                       />
                                     </div>
                                   </div>
@@ -2657,9 +2657,9 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
                         )}
                       </div>
                       
-                      <div className="bg-slate-950 border border-slate-900 p-2.5 rounded-xl flex items-center justify-between text-xs mt-1">
-                        <span className="text-slate-450 font-bold">Tổng số câu / đề:</span>
-                        <span className="font-black text-blue-450 text-sm">
+                      <div className="bg-white border border-slate-200 p-2.5 rounded-xl flex items-center justify-between text-xs mt-1">
+                        <span className="text-slate-600 font-bold">Tổng số câu / đề:</span>
+                        <span className="font-black text-blue-600 text-sm">
                           {createTestConfig.typeOrder.reduce((sum, t) => {
                             if (!createTestConfig.includedTypes.includes(t)) return sum;
                             return sum + (createTestConfig.typeCounts[t] || 0);
@@ -2671,24 +2671,24 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
                 </div>
               )}
 
-              <div className="p-3 bg-blue-500/10 border border-blue-500/20 rounded-xl text-[10px] text-blue-400 leading-relaxed flex gap-2">
-                <Sparkles size={14} className="shrink-0 mt-0.5" />
+              <div className="p-3 bg-blue-50 border border-blue-200 rounded-xl text-[10px] text-blue-700 leading-relaxed flex gap-2">
+                <Sparkles size={14} className="shrink-0 mt-0.5 text-blue-600" />
                 <span>
                   <strong>Thông tin:</strong> Câu hỏi sau khi tạo/lọc sẽ được chuyển thẳng sang dạng JSON ở tab **Trình tạo đề thi**. Bạn có thể cấu hình số lượng mã đề và định dạng xuất (Word/Excel/CSV) tại đó.
                 </span>
               </div>
             </div>
 
-            <div className="flex justify-end gap-3 pt-3 border-t border-slate-900 mt-2">
+            <div className="flex justify-end gap-3 pt-3 border-t border-slate-200 mt-2">
               <button
                 onClick={() => setShowCreateTestModal(false)}
-                className="px-4 py-2 hover:bg-slate-800 text-slate-400 text-xs font-bold rounded-xl transition cursor-pointer"
+                className="px-4 py-2 hover:bg-slate-100 text-slate-600 text-xs font-bold rounded-xl transition cursor-pointer"
               >
                 Hủy
               </button>
               <button
                 onClick={handleRunCreateTest}
-                className="px-5 py-2 bg-gradient-to-tr from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-black rounded-xl shadow-md shadow-blue-500/10 transition cursor-pointer"
+                className="px-5 py-2 bg-gradient-to-tr from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-black rounded-xl shadow-md transition cursor-pointer"
               >
                 Tạo Đề Thi
               </button>
@@ -2699,10 +2699,10 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
 
       {/* CSV Unified Import Modal */}
       {showImportModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 animate-fade-in p-4">
-          <div className="w-full max-w-lg bg-[#111827] border border-slate-800 rounded-3xl p-6 flex flex-col gap-4 text-slate-200 max-h-[90vh] shadow-2xl">
-            <div className="flex items-center justify-between border-b border-slate-900 pb-3">
-              <h3 className="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 animate-fade-in p-4">
+          <div className="w-full max-w-lg bg-white border border-slate-200 rounded-3xl p-6 flex flex-col gap-4 text-slate-800 max-h-[90vh] shadow-2xl">
+            <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+              <h3 className="text-sm font-black text-slate-900 uppercase tracking-wider flex items-center gap-2">
                 <Upload className="text-blue-500" size={16} />
                 Nhập câu hỏi từ CSV / DOCX
               </h3>
@@ -2712,7 +2712,7 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
                   if (csvTextAreaRef.current) csvTextAreaRef.current.value = '';
                   setSelectedCsvFile(null);
                 }}
-                className="text-slate-500 hover:text-white transition cursor-pointer"
+                className="text-slate-400 hover:text-slate-700 transition cursor-pointer"
               >
                 <X size={16} />
               </button>
@@ -2720,10 +2720,10 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
 
             <div className="flex flex-col gap-4 overflow-y-auto pr-1">
               {/* Option 1: File selection */}
-              <div className="flex flex-col gap-1.5 bg-[#080b12] border border-slate-855 p-4 rounded-2xl">
-                <label className="text-[10px] font-bold text-slate-450 uppercase">Cách 1: Chọn tệp CSV hoặc DOCX từ máy tính</label>
+              <div className="flex flex-col gap-1.5 bg-slate-50 border border-slate-200 p-4 rounded-2xl">
+                <label className="text-[10px] font-bold text-slate-500 uppercase">Cách 1: Chọn tệp CSV hoặc DOCX từ máy tính</label>
                 <div className="flex items-center gap-3 mt-1">
-                  <label className="px-4 py-2 bg-slate-900 border border-slate-800 hover:border-slate-750 text-slate-250 hover:text-white text-xs font-bold rounded-xl cursor-pointer transition flex items-center gap-2">
+                  <label className="px-4 py-2 bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 hover:text-slate-900 text-xs font-bold rounded-xl cursor-pointer transition flex items-center gap-2 shadow-xs">
                     <Upload size={14} />
                     <span>Chọn tệp CSV / DOCX</span>
                     <input
@@ -2740,14 +2740,14 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
                       }}
                     />
                   </label>
-                  <span className="text-xs text-slate-400 truncate">
+                  <span className="text-xs text-slate-500 truncate">
                     {selectedCsvFile ? selectedCsvFile.name : "Chưa chọn tệp"}
                   </span>
                   {selectedCsvFile && (
                     <button
                       type="button"
                       onClick={() => setSelectedCsvFile(null)}
-                      className="text-rose-500 hover:text-rose-400 text-xs font-semibold"
+                      className="text-rose-500 hover:text-rose-600 text-xs font-semibold"
                     >
                       Xóa
                     </button>
@@ -2756,8 +2756,8 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
               </div>
 
               {/* Option 2: Raw pasting */}
-              <div className="flex flex-col gap-1.5 bg-[#080b12] border border-slate-855 p-4 rounded-2xl">
-                <label className="text-[10px] font-bold text-slate-450 uppercase">Cách 2: Dán trực tiếp nội dung CSV</label>
+              <div className="flex flex-col gap-1.5 bg-slate-50 border border-slate-200 p-4 rounded-2xl">
+                <label className="text-[10px] font-bold text-slate-500 uppercase">Cách 2: Dán trực tiếp nội dung CSV</label>
                 <textarea
                   ref={csvTextAreaRef}
                   onChange={(e) => {
@@ -2767,33 +2767,33 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
                   }}
                   placeholder="Dán nội dung CSV tại đây..."
                   rows={6}
-                  className="bg-white dark:bg-[#070b14] border border-slate-300 dark:border-slate-800 focus:border-blue-500 p-3 rounded-xl text-xs text-slate-900 dark:text-slate-200 outline-none placeholder-slate-400 dark:placeholder-slate-600 font-mono mt-1 w-full resize-y shadow-xs"
+                  className="bg-white border border-slate-300 focus:border-blue-500 p-3 rounded-xl text-xs text-slate-900 outline-none placeholder-slate-400 font-mono mt-1 w-full resize-y shadow-xs"
                 />
               </div>
 
-              <div className="p-3 bg-blue-500/10 border border-blue-500/20 rounded-xl text-[10px] text-blue-450 leading-normal flex gap-2">
-                <HelpCircle size={14} className="shrink-0 mt-0.5 text-blue-400" />
-                <span className="text-slate-350">
-                  File CSV phải bao gồm tiêu đề tương ứng với các cột: <strong className="text-blue-400">No., GRADE, UNIT, TEST_TYPE, QUESTIONS, QUESTION_TYPE, OPTION 1, OPTION 2, OPTION 3, OPTION 4, ANSWER, LEVEL</strong>.
+              <div className="p-3 bg-blue-50 border border-blue-200 rounded-xl text-[10px] text-blue-700 leading-normal flex gap-2">
+                <HelpCircle size={14} className="shrink-0 mt-0.5 text-blue-600" />
+                <span className="text-slate-600">
+                  File CSV phải bao gồm tiêu đề tương ứng với các cột: <strong className="text-blue-600">No., GRADE, UNIT, TEST_TYPE, QUESTIONS, QUESTION_TYPE, OPTION 1, OPTION 2, OPTION 3, OPTION 4, ANSWER, LEVEL</strong>.
                 </span>
               </div>
             </div>
 
-            <div className="flex justify-end gap-3 pt-3 border-t border-slate-900 mt-2">
+            <div className="flex justify-end gap-3 pt-3 border-t border-slate-200 mt-2">
               <button
                 onClick={() => {
                   setShowImportModal(false);
                   if (csvTextAreaRef.current) csvTextAreaRef.current.value = '';
                   setSelectedCsvFile(null);
                 }}
-                className="px-4 py-2 hover:bg-slate-800 text-slate-400 text-xs font-bold rounded-xl transition cursor-pointer"
+                className="px-4 py-2 hover:bg-slate-100 text-slate-600 text-xs font-bold rounded-xl transition cursor-pointer"
               >
                 Hủy
               </button>
               <button
                 onClick={handleSubmitImport}
                 disabled={loading}
-                className="px-5 py-2 bg-gradient-to-tr from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 disabled:from-slate-850 disabled:to-slate-850 disabled:text-slate-500 disabled:cursor-not-allowed text-white text-xs font-black rounded-xl shadow-md shadow-blue-500/10 transition cursor-pointer"
+                className="px-5 py-2 bg-gradient-to-tr from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-black rounded-xl shadow-md transition cursor-pointer"
               >
                 Bắt đầu kiểm tra
               </button>

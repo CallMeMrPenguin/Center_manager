@@ -293,25 +293,25 @@ export const AssignmentModal: React.FC<AssignmentModalProps> = ({
 
   return (
     <>
-      <div className="fixed inset-0 z-[100] bg-black/85 flex items-center justify-center p-4 select-none font-sans">
-        <div className="bg-[#0c0f1e] border border-[#212c4b] rounded-3xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-[0_25px_60px_rgba(0,0,0,0.9)] overflow-hidden">
+      <div className="fixed inset-0 z-[100] bg-black/60 flex items-center justify-center p-4 select-none font-sans">
+        <div className="bg-white border border-slate-200 rounded-3xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
           {/* Header */}
-          <div className="p-5 border-b border-white/10 flex items-center justify-between shrink-0">
+          <div className="p-5 border-b border-slate-200 flex items-center justify-between shrink-0 bg-slate-50">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-indigo-500/15 border border-indigo-500/30 flex items-center justify-center text-indigo-400">
+              <div className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-600">
                 <BookOpen size={20} />
               </div>
               <div>
-                <h2 className="text-base font-black text-white">
+                <h2 className="text-base font-black text-slate-900">
                   {assignment ? 'Chỉnh Sửa Bài Tập' : 'Giao Bài Tập Mới'}
                 </h2>
-                <p className="text-xs text-slate-400 mt-0.5">Quản lý nội dung đề, kiểu bài, phạm vi giao và lớp áp dụng</p>
+                <p className="text-xs text-slate-500 mt-0.5">Quản lý nội dung đề, kiểu bài, phạm vi giao và lớp áp dụng</p>
               </div>
             </div>
             <button
               type="button"
               onClick={onClose}
-              className="w-8 h-8 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white flex items-center justify-center transition cursor-pointer"
+              className="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center transition cursor-pointer"
             >
               <X size={16} />
             </button>
@@ -322,8 +322,8 @@ export const AssignmentModal: React.FC<AssignmentModalProps> = ({
             {/* Class & Max Score */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div className="sm:col-span-2 space-y-1.5">
-                <label className="text-xs font-bold text-slate-300">
-                  Lớp Học Áp Dụng <span className="text-rose-400">*</span>
+                <label className="text-xs font-bold text-slate-700">
+                  Lớp Học Áp Dụng <span className="text-rose-500">*</span>
                 </label>
                 <CustomSelect
                   value={classId}
@@ -334,29 +334,29 @@ export const AssignmentModal: React.FC<AssignmentModalProps> = ({
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-300">Thang Điểm</label>
+                <label className="text-xs font-bold text-slate-700">Thang Điểm</label>
                 <input
                   type="number"
                   min="1"
                   max="100"
                   value={maxScore}
                   onChange={(e) => setMaxScore(Number(e.target.value) || 10)}
-                  className="w-full bg-[#121626] border border-[#263152] focus:border-indigo-500 focus:outline-none rounded-xl px-3.5 py-2 text-xs font-bold text-white shadow-inner"
+                  className="w-full bg-white border border-slate-300 focus:border-blue-600 focus:outline-none rounded-xl px-3.5 py-2 text-xs font-bold text-slate-900"
                 />
               </div>
             </div>
 
             {/* Title */}
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-300">
-                Tiêu Đề Bài Tập / Đề Thi <span className="text-rose-400">*</span>
+              <label className="text-xs font-bold text-slate-700">
+                Tiêu Đề Bài Tập / Đề Thi <span className="text-rose-500">*</span>
               </label>
               <input
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="VD: Phiếu Bài Tập Unit 12: English-Speaking Countries"
-                className="w-full bg-[#121626] border border-[#263152] focus:border-indigo-500 focus:outline-none rounded-xl px-3.5 py-2 text-xs font-bold text-white shadow-inner"
+                className="w-full bg-white border border-slate-300 focus:border-blue-600 focus:outline-none rounded-xl px-3.5 py-2 text-xs font-bold text-slate-900"
               />
             </div>
 
@@ -373,14 +373,14 @@ export const AssignmentModal: React.FC<AssignmentModalProps> = ({
             />
 
             {/* Content ULN / Textarea */}
-            <div className="space-y-2 pt-2 border-t border-white/10">
+            <div className="space-y-2 pt-2 border-t border-slate-200">
               <div className="flex items-center justify-between gap-2 flex-wrap">
-                <label className="text-xs font-bold text-slate-300">Nội Dung Đề Bài (ULN Format)</label>
+                <label className="text-xs font-bold text-slate-700">Nội Dung Đề Bài (ULN Format)</label>
                 <div className="flex items-center gap-3">
                   <button
                     type="button"
                     onClick={() => setShowPromptModal(true)}
-                    className="flex items-center gap-1 text-[11px] font-bold text-amber-400 hover:text-amber-300 transition cursor-pointer"
+                    className="flex items-center gap-1 text-[11px] font-bold text-amber-600 hover:text-amber-700 transition cursor-pointer"
                   >
                     <FileText size={12} />
                     <span>Mẫu Prompt AI</span>
@@ -388,7 +388,7 @@ export const AssignmentModal: React.FC<AssignmentModalProps> = ({
                   <button
                     type="button"
                     onClick={handleLoadSample}
-                    className="flex items-center gap-1 text-[11px] font-bold text-indigo-400 hover:text-indigo-300 transition cursor-pointer"
+                    className="flex items-center gap-1 text-[11px] font-bold text-blue-600 hover:text-blue-700 transition cursor-pointer"
                   >
                     <Sparkles size={12} />
                     <span>Nạp Đề Mẫu</span>
@@ -401,18 +401,18 @@ export const AssignmentModal: React.FC<AssignmentModalProps> = ({
                 value={contentJson}
                 onChange={(e) => handleTextareaChange(e.target.value)}
                 placeholder="Dán nội dung đề định dạng ULN hoặc Text vào đây..."
-                className="w-full bg-[#0d1018] border border-[#263152] focus:border-indigo-500 focus:outline-none rounded-xl p-3 font-mono text-xs text-slate-200 resize-y leading-relaxed"
+                className="w-full bg-slate-50 border border-slate-300 focus:border-blue-600 focus:outline-none rounded-xl p-3 font-mono text-xs text-slate-900 resize-y leading-relaxed"
               />
 
               <div className="flex items-center justify-between gap-2 flex-wrap">
-                <label className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-dashed border-white/20 text-slate-300 hover:text-white text-xs font-bold transition cursor-pointer">
+                <label className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 border border-dashed border-slate-300 text-slate-700 hover:text-slate-900 text-xs font-bold transition cursor-pointer">
                   <Upload size={13} />
                   <span>{uploading ? 'Đang đọc...' : 'Tải File Đề (.txt, .json, .uln)'}</span>
                   <input type="file" accept=".txt,.json,.uln" onChange={handleFileUpload} className="hidden" />
                 </label>
 
                 {questionCount > 0 && (
-                  <div className="flex items-center gap-1.5 text-xs text-emerald-400 font-bold bg-emerald-500/10 px-2.5 py-1 rounded-lg border border-emerald-500/20">
+                  <div className="flex items-center gap-1.5 text-xs text-emerald-700 font-bold bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200">
                     <CheckCircle size={13} />
                     <span>Đã nhận diện {questionCount} câu hỏi ({sections.length} bài)</span>
                   </div>
@@ -434,21 +434,21 @@ export const AssignmentModal: React.FC<AssignmentModalProps> = ({
             {/* Dates */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-300">
-                  Ngày Giao <span className="text-rose-400">*</span>
+                <label className="text-xs font-bold text-slate-700">
+                  Ngày Giao <span className="text-rose-500">*</span>
                 </label>
                 <CustomDatePicker value={assignedDate} onChange={setAssignedDate} placeholder="Chọn ngày giao..." />
               </div>
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-300">
-                  Hạn Nộp <span className="text-rose-400">*</span>
+                <label className="text-xs font-bold text-slate-700">
+                  Hạn Nộp <span className="text-rose-500">*</span>
                 </label>
                 <CustomDatePicker value={dueDate} onChange={setDueDate} placeholder="Chọn hạn nộp..." />
 
                 {/* Quick Session Due Date Presets */}
                 {upcomingSessions.length > 0 && (
                   <div className="flex items-center gap-1.5 flex-wrap pt-1">
-                    <span className="text-[10px] text-slate-400 font-semibold">Chọn nhanh:</span>
+                    <span className="text-[10px] text-slate-500 font-semibold">Chọn nhanh:</span>
                     {upcomingSessions.map((preset, pIdx) => {
                       const isSelected = dueDate === preset.date;
                       return (
@@ -458,8 +458,8 @@ export const AssignmentModal: React.FC<AssignmentModalProps> = ({
                           onClick={() => setDueDate(preset.date)}
                           className={`px-2 py-0.5 rounded-lg text-[11px] font-bold transition cursor-pointer border ${
                             isSelected
-                              ? 'bg-indigo-500/25 border-indigo-500/50 text-indigo-300 shadow-xs'
-                              : 'bg-white/5 hover:bg-white/10 text-slate-300 border-white/10 hover:text-white'
+                              ? 'bg-blue-50 border-blue-300 text-blue-700 shadow-xs'
+                              : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-200'
                           }`}
                         >
                           {preset.label}
@@ -472,24 +472,24 @@ export const AssignmentModal: React.FC<AssignmentModalProps> = ({
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-300">Mô Tả / Hướng Dẫn</label>
+              <label className="text-xs font-bold text-slate-700">Mô Tả / Hướng Dẫn</label>
               <textarea
                 rows={2}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Hướng dẫn cho học sinh khi làm bài..."
-                className="w-full bg-[#121626] border border-[#263152] focus:border-indigo-500 focus:outline-none rounded-xl p-3 text-xs font-medium text-white shadow-inner resize-none"
+                className="w-full bg-white border border-slate-300 focus:border-blue-600 focus:outline-none rounded-xl p-3 text-xs font-medium text-slate-900 resize-none"
               />
             </div>
 
             {/* Actions */}
-            <div className="flex items-center justify-between gap-3 pt-3 border-t border-white/10">
+            <div className="flex items-center justify-between gap-3 pt-3 border-t border-slate-200">
               {assignment ? (
                 <button
                   type="button"
                   onClick={handleDelete}
                   disabled={deleting}
-                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-xs font-bold border border-rose-500/30 transition cursor-pointer"
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-bold border border-rose-200 transition cursor-pointer"
                 >
                   <Trash2 size={14} />
                   <span>{deleting ? 'Đang xóa...' : 'Xóa'}</span>
@@ -500,14 +500,14 @@ export const AssignmentModal: React.FC<AssignmentModalProps> = ({
                 <button
                   type="button"
                   onClick={onClose}
-                  className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-bold transition cursor-pointer"
+                  className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition cursor-pointer"
                 >
                   Hủy
                 </button>
                 <button
                   type="submit"
                   disabled={saving}
-                  className="flex items-center gap-1.5 px-5 py-2 rounded-xl bg-[#5c36f5] hover:bg-[#6c48f7] text-white text-xs font-black shadow-[0_0_15px_rgba(92,54,245,0.4)] transition cursor-pointer active:scale-95 disabled:opacity-50"
+                  className="flex items-center gap-1.5 px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-black shadow-md shadow-blue-500/20 transition cursor-pointer active:scale-95 disabled:opacity-50"
                 >
                   <Save size={14} />
                   <span>{saving ? 'Đang lưu...' : 'Lưu Bài Tập'}</span>

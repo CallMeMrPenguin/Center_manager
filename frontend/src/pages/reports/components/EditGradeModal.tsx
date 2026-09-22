@@ -73,16 +73,16 @@ export const EditGradeModal: React.FC<EditGradeModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 animate-mac-dropdown">
-      <div className="bg-[#0f1320] border border-indigo-500/30 rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-white/10 bg-[#141828]">
-          <h2 className="text-sm font-black uppercase text-indigo-300 flex items-center gap-2">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 animate-mac-dropdown">
+      <div className="bg-white border border-slate-200 rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 bg-slate-50">
+          <h2 className="text-sm font-black uppercase text-indigo-700 flex items-center gap-2">
             <Edit3 className="h-4 w-4" />
             Sửa Điểm Số Buổi Học
           </h2>
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-white transition cursor-pointer"
+            className="text-slate-400 hover:text-slate-700 transition cursor-pointer"
           >
             ✕
           </button>
@@ -90,32 +90,32 @@ export const EditGradeModal: React.FC<EditGradeModalProps> = ({
 
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           <div>
-            <label className="block text-[11px] font-extrabold text-slate-300 uppercase tracking-wider mb-1">
+            <label className="block text-[11px] font-extrabold text-slate-700 uppercase tracking-wider mb-1">
               Học Sinh
             </label>
             <input
               type="text"
               disabled
               value={record.student_name || 'Học sinh'}
-              className="w-full bg-[#181d2e] border border-white/10 rounded-xl px-3.5 py-2 text-xs font-bold text-slate-300 cursor-not-allowed"
+              className="w-full bg-slate-100 border border-slate-200 rounded-xl px-3.5 py-2 text-xs font-bold text-slate-600 cursor-not-allowed"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-[11px] font-extrabold text-slate-300 uppercase tracking-wider mb-1">
+              <label className="block text-[11px] font-extrabold text-slate-700 uppercase tracking-wider mb-1">
                 Ngày Học
               </label>
               <input
                 type="text"
                 disabled
                 value={formatFullDate(record.date)}
-                className="w-full bg-[#181d2e] border border-white/10 rounded-xl px-3.5 py-2 text-xs font-mono font-bold text-indigo-300 cursor-not-allowed"
+                className="w-full bg-slate-100 border border-slate-200 rounded-xl px-3.5 py-2 text-xs font-mono font-bold text-indigo-600 cursor-not-allowed"
               />
             </div>
 
             <div>
-              <label className="block text-[11px] font-extrabold text-slate-300 uppercase tracking-wider mb-1">
+              <label className="block text-[11px] font-extrabold text-slate-700 uppercase tracking-wider mb-1">
                 Điểm Danh
               </label>
               <CustomSelect
@@ -132,7 +132,7 @@ export const EditGradeModal: React.FC<EditGradeModalProps> = ({
 
           <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
             <div>
-              <label className="block text-[11px] font-extrabold text-blue-400 uppercase tracking-wider mb-1">
+              <label className="block text-[11px] font-extrabold text-blue-600 uppercase tracking-wider mb-1">
                 {record.check_1_skill === 'grammar' ? 'Check 1 (NP)' : record.check_1_skill === 'vocab' ? 'Check 1 (TV)' : 'Check 1'}
               </label>
               <input
@@ -140,12 +140,12 @@ export const EditGradeModal: React.FC<EditGradeModalProps> = ({
                 placeholder="0.0"
                 value={editCheck1}
                 onChange={(e) => setEditCheck1(e.target.value)}
-                className="w-full bg-[#161c30] border border-blue-500/30 rounded-xl px-3 py-2 text-xs font-mono font-extrabold text-white focus:outline-none focus:border-blue-400"
+                className="w-full bg-white border border-blue-200 rounded-xl px-3 py-2 text-xs font-mono font-extrabold text-slate-900 focus:outline-none focus:border-blue-500"
               />
             </div>
 
             <div>
-              <label className="block text-[11px] font-extrabold text-purple-400 uppercase tracking-wider mb-1">
+              <label className="block text-[11px] font-extrabold text-purple-600 uppercase tracking-wider mb-1">
                 {record.check_2_skill === 'vocab' ? 'Check 2 (TV)' : record.check_2_skill === 'grammar' ? 'Check 2 (NP)' : 'Check 2'}
               </label>
               <input
@@ -153,12 +153,12 @@ export const EditGradeModal: React.FC<EditGradeModalProps> = ({
                 placeholder="0.0"
                 value={editCheck2}
                 onChange={(e) => setEditCheck2(e.target.value)}
-                className="w-full bg-[#161c30] border border-purple-500/30 rounded-xl px-3 py-2 text-xs font-mono font-extrabold text-white focus:outline-none focus:border-purple-400"
+                className="w-full bg-white border border-purple-200 rounded-xl px-3 py-2 text-xs font-mono font-extrabold text-slate-900 focus:outline-none focus:border-purple-500"
               />
             </div>
 
             <div>
-              <label className="block text-[11px] font-extrabold text-emerald-400 uppercase tracking-wider mb-1">
+              <label className="block text-[11px] font-extrabold text-emerald-600 uppercase tracking-wider mb-1">
                 BTVN 1
               </label>
               <input
@@ -166,12 +166,12 @@ export const EditGradeModal: React.FC<EditGradeModalProps> = ({
                 placeholder="0.0"
                 value={editHomework}
                 onChange={(e) => setEditHomework(e.target.value)}
-                className="w-full bg-[#161c30] border border-emerald-500/30 rounded-xl px-3 py-2 text-xs font-mono font-extrabold text-white focus:outline-none focus:border-emerald-400"
+                className="w-full bg-white border border-emerald-200 rounded-xl px-3 py-2 text-xs font-mono font-extrabold text-slate-900 focus:outline-none focus:border-emerald-500"
               />
             </div>
 
             <div>
-              <label className="block text-[11px] font-extrabold text-teal-400 uppercase tracking-wider mb-1">
+              <label className="block text-[11px] font-extrabold text-teal-600 uppercase tracking-wider mb-1">
                 BTVN 2
               </label>
               <input
@@ -179,12 +179,12 @@ export const EditGradeModal: React.FC<EditGradeModalProps> = ({
                 placeholder="0.0"
                 value={editHomework2}
                 onChange={(e) => setEditHomework2(e.target.value)}
-                className="w-full bg-[#161c30] border border-teal-500/30 rounded-xl px-3 py-2 text-xs font-mono font-extrabold text-white focus:outline-none focus:border-teal-400"
+                className="w-full bg-white border border-teal-200 rounded-xl px-3 py-2 text-xs font-mono font-extrabold text-slate-900 focus:outline-none focus:border-teal-500"
               />
             </div>
 
             <div>
-              <label className="block text-[11px] font-extrabold text-amber-400 uppercase tracking-wider mb-1">
+              <label className="block text-[11px] font-extrabold text-amber-600 uppercase tracking-wider mb-1">
                 Luyện Đề
               </label>
               <input
@@ -192,13 +192,13 @@ export const EditGradeModal: React.FC<EditGradeModalProps> = ({
                 placeholder="0.0"
                 value={editMockTest}
                 onChange={(e) => setEditMockTest(e.target.value)}
-                className="w-full bg-[#161c30] border border-amber-500/30 rounded-xl px-3 py-2 text-xs font-mono font-extrabold text-white focus:outline-none focus:border-amber-400"
+                className="w-full bg-white border border-amber-200 rounded-xl px-3 py-2 text-xs font-mono font-extrabold text-slate-900 focus:outline-none focus:border-amber-500"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-[11px] font-extrabold text-slate-300 uppercase tracking-wider mb-1">
+            <label className="block text-[11px] font-extrabold text-slate-700 uppercase tracking-wider mb-1">
               Ghi Chú (Notes)
             </label>
             <input
@@ -206,7 +206,7 @@ export const EditGradeModal: React.FC<EditGradeModalProps> = ({
               placeholder="Nhập ghi chú cho buổi học..."
               value={editNotes}
               onChange={(e) => setEditNotes(e.target.value)}
-              className="w-full bg-[#161c30] border border-white/10 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-indigo-400"
+              className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2 text-xs text-slate-900 focus:outline-none focus:border-indigo-500 placeholder-slate-400"
             />
           </div>
 
@@ -214,7 +214,7 @@ export const EditGradeModal: React.FC<EditGradeModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-xl bg-[#181d2e] hover:bg-[#252c42] text-slate-300 text-xs font-bold border border-white/10 transition cursor-pointer"
+              className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold border border-slate-200 transition cursor-pointer"
             >
               Hủy bỏ
             </button>
@@ -222,7 +222,7 @@ export const EditGradeModal: React.FC<EditGradeModalProps> = ({
             <button
               type="submit"
               disabled={saving}
-              className="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-extrabold border border-white/20 transition cursor-pointer shadow-md flex items-center gap-1.5 disabled:opacity-50"
+              className="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-extrabold border border-indigo-700 transition cursor-pointer shadow-md flex items-center gap-1.5 disabled:opacity-50"
             >
               <Save size={13} />
               <span>{saving ? 'Đang lưu...' : 'Lưu Điểm Số'}</span>

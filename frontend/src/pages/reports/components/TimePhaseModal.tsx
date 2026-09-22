@@ -138,24 +138,24 @@ export const TimePhaseModal: React.FC<TimePhaseModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-4 animate-mac-dropdown">
-      <div className="bg-[#0e1222] border border-[#232d4e] rounded-2xl w-full max-w-2xl shadow-2xl overflow-visible relative max-h-[90vh] flex flex-col">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 animate-mac-dropdown">
+      <div className="bg-white border border-slate-200 rounded-2xl w-full max-w-2xl shadow-2xl overflow-visible relative max-h-[90vh] flex flex-col">
         {/* Header */}
-        <div className="px-6 py-4 border-b border-[#1c243f] flex items-center justify-between bg-[#141828] rounded-t-2xl shrink-0">
+        <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between bg-slate-50 rounded-t-2xl shrink-0">
           <div className="flex items-center gap-2.5">
-            <Clock className="text-indigo-400" size={18} />
+            <Clock className="text-blue-600" size={18} />
             <div>
-              <h3 className="text-sm font-black uppercase text-white tracking-wider">
+              <h3 className="text-sm font-black uppercase text-slate-900 tracking-wider">
                 Quản Lý & Chỉnh Sửa Giai Đoạn (Database SQLite)
               </h3>
-              <span className="text-[11px] text-indigo-300 font-bold block">
+              <span className="text-[11px] text-blue-600 font-bold block">
                 Năm học: {selectedAcademicYear} (01/06 → 31/05)
               </span>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition cursor-pointer"
+            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition cursor-pointer"
           >
             <X size={18} />
           </button>
@@ -164,16 +164,16 @@ export const TimePhaseModal: React.FC<TimePhaseModalProps> = ({
         {/* Scrollable Content */}
         <div className="overflow-y-auto p-6 space-y-6 scrollbar-thin">
           {/* Edit / Add Form */}
-          <form onSubmit={handleSavePhaseSubmit} className="p-4 rounded-xl bg-[#141a2e] border border-[#232d4e] space-y-4">
-            <div className="flex items-center justify-between border-b border-white/5 pb-2">
-              <span className="text-xs font-black uppercase tracking-wider text-indigo-300">
+          <form onSubmit={handleSavePhaseSubmit} className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+              <span className="text-xs font-black uppercase tracking-wider text-blue-600">
                 {editingPhaseId ? 'Chỉnh Sửa Giai Đoạn (Lưu Database)' : 'Thêm Giai Đoạn Tùy Chỉnh (Lưu Database)'}
               </span>
               {editingPhaseId && (
                 <button
                   type="button"
                   onClick={handleCancelEdit}
-                  className="text-[10px] font-bold text-slate-400 hover:text-rose-300 cursor-pointer"
+                  className="text-[10px] font-bold text-slate-500 hover:text-rose-600 cursor-pointer"
                 >
                   Hủy chỉnh sửa
                 </button>
@@ -181,7 +181,7 @@ export const TimePhaseModal: React.FC<TimePhaseModalProps> = ({
             </div>
 
             <div>
-              <label className="block text-[11px] font-black uppercase tracking-wider text-slate-300 mb-1.5">
+              <label className="block text-[11px] font-black uppercase tracking-wider text-slate-700 mb-1.5">
                 Tên Giai Đoạn:
               </label>
               <input
@@ -189,14 +189,14 @@ export const TimePhaseModal: React.FC<TimePhaseModalProps> = ({
                 placeholder="Ví dụ: Học Kỳ I, Ôn tập Giữa kỳ 1, Luyện đề Chuyên sâu..."
                 value={phaseNameInput}
                 onChange={(e) => setPhaseNameInput(e.target.value)}
-                className="w-full bg-[#0d1222] border border-[#232d4e] rounded-xl px-3.5 py-2 text-xs text-white font-semibold focus:outline-none focus:border-indigo-500 transition"
+                className="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2 text-xs text-slate-900 font-semibold focus:outline-none focus:border-blue-600 transition"
                 required
               />
             </div>
 
             <div className="grid grid-cols-2 gap-4 relative z-30">
               <div className="relative">
-                <label className="block text-[11px] font-black uppercase tracking-wider text-slate-300 mb-1.5">
+                <label className="block text-[11px] font-black uppercase tracking-wider text-slate-700 mb-1.5">
                   Ngày Bắt Đầu:
                 </label>
                 <CustomDatePicker
@@ -207,7 +207,7 @@ export const TimePhaseModal: React.FC<TimePhaseModalProps> = ({
                 />
               </div>
               <div className="relative">
-                <label className="block text-[11px] font-black uppercase tracking-wider text-slate-300 mb-1.5">
+                <label className="block text-[11px] font-black uppercase tracking-wider text-slate-700 mb-1.5">
                   Ngày Kết Thúc:
                 </label>
                 <CustomDatePicker
@@ -220,7 +220,7 @@ export const TimePhaseModal: React.FC<TimePhaseModalProps> = ({
             </div>
 
             <div className="relative z-20">
-              <label className="block text-[11px] font-black uppercase tracking-wider text-slate-300 mb-1.5">
+              <label className="block text-[11px] font-black uppercase tracking-wider text-slate-700 mb-1.5">
                 Áp Dụng Cho Lớp:
               </label>
               <CustomSelect
@@ -238,7 +238,7 @@ export const TimePhaseModal: React.FC<TimePhaseModalProps> = ({
                 <button
                   type="button"
                   onClick={handleCancelEdit}
-                  className="px-4 py-2 rounded-xl bg-[#0d1222] text-slate-300 hover:text-white border border-[#232d4e] text-xs font-bold transition cursor-pointer"
+                  className="px-4 py-2 rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-300 text-xs font-bold transition cursor-pointer"
                 >
                   Hủy
                 </button>
@@ -246,7 +246,7 @@ export const TimePhaseModal: React.FC<TimePhaseModalProps> = ({
               <button
                 type="submit"
                 disabled={savingPhase}
-                className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition cursor-pointer shadow-lg shadow-indigo-600/30 flex items-center gap-1.5 disabled:opacity-50"
+                className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition cursor-pointer shadow-md shadow-blue-500/20 flex items-center gap-1.5 disabled:opacity-50"
               >
                 {editingPhaseId ? <Check size={14} /> : <Plus size={14} />}
                 <span>{savingPhase ? 'Đang lưu DB...' : editingPhaseId ? 'Lưu Vào Database' : 'Thêm Vào Database'}</span>
@@ -256,26 +256,26 @@ export const TimePhaseModal: React.FC<TimePhaseModalProps> = ({
 
           {/* Standard MOET Phases List */}
           <div className="space-y-2.5">
-            <h4 className="text-[11px] font-black uppercase tracking-wider text-indigo-300 flex items-center justify-between">
+            <h4 className="text-[11px] font-black uppercase tracking-wider text-slate-700 flex items-center justify-between">
               <span>Giai Đoạn Chuẩn Bộ GD&ĐT ({mergedPhases.length})</span>
-              <span className="text-[10px] text-slate-400 font-normal">Bấm ✏️ để sửa tên & ngày lưu vào DB</span>
+              <span className="text-[10px] text-slate-500 font-normal">Bấm ✏️ để sửa tên & ngày lưu vào DB</span>
             </h4>
             <div className="space-y-2">
               {mergedPhases.map(p => (
                 <div
                   key={p.id}
-                  className={`p-3 rounded-xl bg-[#141a2e] border transition flex items-center justify-between gap-3 text-xs ${editingPhaseId === String(p.id) ? 'border-indigo-500 bg-indigo-950/20' : 'border-[#232d4e] hover:border-indigo-500/40'}`}
+                  className={`p-3 rounded-xl bg-white border transition flex items-center justify-between gap-3 text-xs ${editingPhaseId === String(p.id) ? 'border-blue-500 ring-2 ring-blue-500/20' : 'border-slate-200 hover:border-blue-400'}`}
                 >
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
-                      <span className="font-black text-white">{p.phase_name}</span>
+                      <span className="font-black text-slate-900">{p.phase_name}</span>
                       {p.db_id && (
-                        <span className="px-1.5 py-0.5 rounded-md bg-emerald-500/10 text-emerald-300 text-[9px] font-bold border border-emerald-500/20">
+                        <span className="px-1.5 py-0.5 rounded-md bg-emerald-50 text-emerald-700 text-[9px] font-bold border border-emerald-200">
                           Đã lưu DB
                         </span>
                       )}
                     </div>
-                    <span className="text-[11px] text-indigo-300 font-mono font-bold block mt-0.5">
+                    <span className="text-[11px] text-blue-600 font-mono font-bold block mt-0.5">
                       {formatSessionDate(p.from_date)} → {formatSessionDate(p.to_date)}
                     </span>
                   </div>
@@ -283,7 +283,7 @@ export const TimePhaseModal: React.FC<TimePhaseModalProps> = ({
                     <button
                       type="button"
                       onClick={() => handleStartEdit(p)}
-                      className="p-1.5 rounded-lg bg-[#0d1222] hover:bg-indigo-600/30 text-indigo-300 hover:text-white border border-[#232d4e] transition cursor-pointer flex items-center gap-1 text-[11px] font-bold"
+                      className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition cursor-pointer flex items-center gap-1 text-[11px] font-bold"
                       title="Chỉnh sửa tên và ngày tháng"
                     >
                       <Edit3 size={13} />
@@ -297,19 +297,19 @@ export const TimePhaseModal: React.FC<TimePhaseModalProps> = ({
 
           {/* Custom Time Phases List */}
           {customOnlyPhases.length > 0 && (
-            <div className="space-y-2.5 pt-2 border-t border-[#1c243f]">
-              <h4 className="text-[11px] font-black uppercase tracking-wider text-slate-400">
+            <div className="space-y-2.5 pt-2 border-t border-slate-200">
+              <h4 className="text-[11px] font-black uppercase tracking-wider text-slate-700">
                 Giai Đoạn Tùy Chỉnh Khác ({customOnlyPhases.length})
               </h4>
               <div className="space-y-2">
                 {customOnlyPhases.map(p => (
                   <div
                     key={p.id}
-                    className="p-3 rounded-xl bg-[#141a2e] border border-[#232d4e] flex items-center justify-between gap-3 text-xs"
+                    className="p-3 rounded-xl bg-white border border-slate-200 flex items-center justify-between gap-3 text-xs"
                   >
                     <div>
-                      <span className="font-bold text-white block">{p.phase_name}</span>
-                      <span className="text-[10px] text-slate-400 font-mono">
+                      <span className="font-bold text-slate-900 block">{p.phase_name}</span>
+                      <span className="text-[10px] text-slate-500 font-mono">
                         {formatSessionDate(p.from_date)} → {formatSessionDate(p.to_date)}
                       </span>
                     </div>
@@ -317,7 +317,7 @@ export const TimePhaseModal: React.FC<TimePhaseModalProps> = ({
                       <button
                         type="button"
                         onClick={() => handleStartEdit(p)}
-                        className="p-1.5 rounded-lg bg-[#0d1222] hover:bg-indigo-600/30 text-indigo-300 hover:text-white border border-[#232d4e] transition cursor-pointer"
+                        className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition cursor-pointer"
                         title="Chỉnh sửa giai đoạn này"
                       >
                         <Edit3 size={13} />
@@ -325,7 +325,7 @@ export const TimePhaseModal: React.FC<TimePhaseModalProps> = ({
                       <button
                         type="button"
                         onClick={() => handleDeletePhase(p.id)}
-                        className="p-1.5 rounded-lg bg-[#0d1222] hover:bg-rose-500/20 text-slate-400 hover:text-rose-400 border border-[#232d4e] transition cursor-pointer"
+                        className="p-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 transition cursor-pointer"
                         title="Xóa giai đoạn này"
                       >
                         <Trash2 size={13} />

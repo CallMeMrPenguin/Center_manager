@@ -243,7 +243,7 @@ export const UlnDocumentRenderer: React.FC<UlnDocumentRendererProps> = memo(({
                               disabled={isSubmitted || !isAssigned}
                               onClick={() => handleTableCheck(rIdx, cIdx)}
                               className={`w-5 h-5 rounded border-2 flex items-center justify-center mx-auto transition cursor-pointer font-bold text-xs ${
-                                tableChecks[`${rIdx}`] === cIdx ? 'bg-slate-950 border-slate-950 text-white' : 'border-slate-700 hover:border-slate-900 bg-white text-transparent'
+                                tableChecks[`${rIdx}`] === cIdx ? 'bg-blue-600 border-blue-600 text-white' : 'border-slate-300 hover:border-blue-500 bg-white text-transparent'
                               }`}
                             >✓</button>
                           )}

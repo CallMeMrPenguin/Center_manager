@@ -203,22 +203,22 @@ export default function PromptManager({ storageKey, tabTitle, defaultPrompts }: 
       {/* Prompt Action Trigger Button */}
       <button
         onClick={() => setIsOpen(true)}
-        className="group flex items-center gap-0 hover:gap-1.5 px-3 py-2 bg-[#181d2f] border border-white/5 hover:bg-[#22283f] hover:border-indigo-500/40 text-slate-300 hover:text-white text-xs font-bold rounded-xl cursor-pointer transition-all duration-300 shadow-sm active:scale-95"
+        className="group flex items-center gap-0 hover:gap-1.5 px-3 py-2 bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 hover:text-slate-900 text-xs font-bold rounded-xl cursor-pointer transition-all duration-300 shadow-sm active:scale-95"
         title={`Xem danh sách Prompt cho ${tabTitle}`}
       >
-        <Terminal size={14} className="text-indigo-400 group-hover:animate-pulse" />
+        <Terminal size={14} className="text-blue-600 group-hover:animate-pulse" />
         <span className="max-w-0 overflow-hidden group-hover:max-w-[100px] transition-all duration-300 whitespace-nowrap block">Prompt</span>
       </button>
 
       {/* Prompts Dialog Overlay */}
       {isOpen && createPortal(
-        <div className="fixed inset-0 z-[999999] flex items-center justify-center bg-black/85 p-4 transition-opacity duration-150">
-          <div className="w-full max-w-xl bg-[#0f1320] border border-white/15 rounded-2xl p-6 flex flex-col gap-4 text-slate-100 max-h-[85vh] shadow-[0_25px_60px_rgba(0,0,0,0.9)] transform-gpu transition-all duration-150 scale-100">
+        <div className="fixed inset-0 z-[999999] flex items-center justify-center bg-black/60 p-4 transition-opacity duration-150">
+          <div className="w-full max-w-xl bg-white border border-slate-200 rounded-2xl p-6 flex flex-col gap-4 text-slate-800 max-h-[85vh] shadow-2xl transform-gpu transition-all duration-150 scale-100">
             
             {/* Modal Header */}
-            <div className="flex items-center justify-between border-b border-white/5 pb-3 shrink-0">
-              <h3 className="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2.5">
-                <Terminal size={16} className="text-indigo-400" />
+            <div className="flex items-center justify-between border-b border-slate-200 pb-3 shrink-0">
+              <h3 className="text-sm font-black text-slate-900 uppercase tracking-wider flex items-center gap-2.5">
+                <Terminal size={16} className="text-blue-600" />
                 <span>Kho Prompt - {tabTitle}</span>
               </h3>
               <button
@@ -227,7 +227,7 @@ export default function PromptManager({ storageKey, tabTitle, defaultPrompts }: 
                   setIsAdding(false);
                   setEditingId(null);
                 }}
-                className="text-slate-500 hover:text-white transition cursor-pointer p-1 rounded-xl hover:bg-white/5"
+                className="text-slate-400 hover:text-slate-700 transition cursor-pointer p-1 rounded-xl hover:bg-slate-100"
               >
                 <X size={16} />
               </button>
@@ -240,19 +240,19 @@ export default function PromptManager({ storageKey, tabTitle, defaultPrompts }: 
               {!isAdding && editingId === null && (
                 <button
                   onClick={() => setIsAdding(true)}
-                  className="flex items-center justify-center gap-1.5 py-2.5 px-4 rounded-xl border border-dashed border-white/10 hover:border-indigo-400 hover:bg-indigo-500/10 text-slate-300 hover:text-white text-xs font-bold transition cursor-pointer active:scale-95"
+                  className="flex items-center justify-center gap-1.5 py-2.5 px-4 rounded-xl border border-dashed border-slate-300 hover:border-blue-500 hover:bg-blue-50/50 text-slate-600 hover:text-slate-900 text-xs font-bold transition cursor-pointer active:scale-95"
                 >
-                  <Plus size={14} className="text-indigo-400" />
+                  <Plus size={14} className="text-blue-600" />
                   <span>Thêm Prompt Mới</span>
                 </button>
               )}
 
               {/* Add Prompt Form */}
               {isAdding && (
-                <div className="bg-[#0d1018] border border-white/10 p-4 rounded-2xl flex flex-col gap-3 animate-mac-dropdown">
-                  <div className="flex items-center justify-between border-b border-white/5 pb-2">
-                    <span className="text-xs font-black text-indigo-400 uppercase">Thêm prompt mới</span>
-                    <button onClick={() => setIsAdding(false)} className="text-slate-500 hover:text-rose-400 transition">
+                <div className="bg-slate-50 border border-slate-200 p-4 rounded-2xl flex flex-col gap-3 animate-mac-dropdown">
+                  <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+                    <span className="text-xs font-black text-blue-600 uppercase">Thêm prompt mới</span>
+                    <button onClick={() => setIsAdding(false)} className="text-slate-400 hover:text-rose-500 transition">
                       <X size={14} />
                     </button>
                   </div>
@@ -263,7 +263,7 @@ export default function PromptManager({ storageKey, tabTitle, defaultPrompts }: 
                       placeholder="Ví dụ: Prompt dịch câu tự động"
                       value={newTitle}
                       onChange={(e) => setNewTitle(e.target.value)}
-                      className="bg-[#06070a] border border-white/[0.08] px-3 py-2 rounded-xl text-xs text-white focus:outline-none focus:border-indigo-500/60 font-bold"
+                      className="bg-white border border-slate-300 px-3 py-2 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-blue-500 font-bold"
                     />
                   </div>
                   <div className="flex flex-col gap-1">
@@ -273,19 +273,19 @@ export default function PromptManager({ storageKey, tabTitle, defaultPrompts }: 
                       placeholder="Nhập nội dung chi tiết của prompt..."
                       value={newContent}
                       onChange={(e) => setNewContent(e.target.value)}
-                      className="bg-[#06070a] border border-white/[0.08] px-3 py-2.5 rounded-xl text-xs text-slate-200 font-mono focus:outline-none focus:border-indigo-500/60 leading-relaxed resize-y"
+                      className="bg-white border border-slate-300 px-3 py-2.5 rounded-xl text-xs text-slate-900 font-mono focus:outline-none focus:border-blue-500 leading-relaxed resize-y"
                     />
                   </div>
                   <div className="flex justify-end gap-2.5 pt-1">
                     <button
                       onClick={() => setIsAdding(false)}
-                      className="bg-[#181d2f] hover:bg-[#22283f] text-slate-300 font-bold text-xs uppercase tracking-wider rounded-xl border border-white/5 transition-all py-2 px-3.5 cursor-pointer active:scale-95"
+                      className="bg-white hover:bg-slate-100 text-slate-700 font-bold text-xs uppercase tracking-wider rounded-xl border border-slate-300 transition-all py-2 px-3.5 cursor-pointer active:scale-95"
                     >
                       Hủy
                     </button>
                     <button
                       onClick={handleAddPrompt}
-                      className="px-4 py-1.5 bg-blue-600 hover:bg-blue-500 text-white text-[11px] font-black rounded-lg shadow-md transition flex items-center gap-1.5"
+                      className="px-4 py-1.5 bg-blue-600 hover:bg-blue-500 text-white text-[11px] font-black rounded-lg shadow-md transition flex items-center gap-1.5 cursor-pointer"
                     >
                       <Save size={12} />
                       Lưu prompt
@@ -297,45 +297,45 @@ export default function PromptManager({ storageKey, tabTitle, defaultPrompts }: 
               {/* Prompts list */}
               <div className="flex flex-col gap-3.5">
                 {prompts.length === 0 ? (
-                  <div className="text-center text-slate-500 italic py-8 text-xs">
+                  <div className="text-center text-slate-400 italic py-8 text-xs">
                     Chưa có prompt nào được lưu cho tab này.
                   </div>
                 ) : (
                   prompts.map(p => {
                     const isEditing = editingId === p.id;
                     return (
-                      <div key={p.id} className={`bg-[#080b12] border border-slate-855 rounded-2xl flex flex-col shadow-inner transition-all ${isEditing ? 'p-4 gap-3' : 'p-3.5 gap-0'}`}>
+                      <div key={p.id} className={`bg-white border border-slate-200 rounded-2xl flex flex-col shadow-xs transition-all ${isEditing ? 'p-4 gap-3' : 'p-3.5 gap-0'}`}>
                         {isEditing ? (
                           // Edit Form Mode
                           <div className="flex flex-col gap-3 animate-fade-in">
                             <div className="flex flex-col gap-1">
-                              <label className="text-[9px] font-bold text-slate-450 uppercase">Tiêu đề:</label>
+                              <label className="text-[9px] font-bold text-slate-500 uppercase">Tiêu đề:</label>
                               <input
                                 type="text"
                                 value={editTitle}
                                 onChange={(e) => setEditTitle(e.target.value)}
-                                className="bg-[#070b14] border border-slate-800 px-3 py-2 rounded-xl text-xs text-white focus:outline-none focus:border-slate-700 font-bold"
+                                className="bg-white border border-slate-300 px-3 py-2 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-blue-500 font-bold"
                               />
                             </div>
                             <div className="flex flex-col gap-1">
-                              <label className="text-[9px] font-bold text-slate-450 uppercase">Nội dung prompt:</label>
+                              <label className="text-[9px] font-bold text-slate-500 uppercase">Nội dung prompt:</label>
                               <textarea
                                 rows={4}
                                 value={editContent}
                                 onChange={(e) => setEditContent(e.target.value)}
-                                className="bg-[#070b14] border border-slate-800 px-3 py-2.5 rounded-xl text-xs text-slate-350 font-mono focus:outline-none focus:border-slate-700 leading-relaxed resize-y"
+                                className="bg-white border border-slate-300 px-3 py-2.5 rounded-xl text-xs text-slate-900 font-mono focus:outline-none focus:border-blue-500 leading-relaxed resize-y"
                               />
                             </div>
                             <div className="flex justify-end gap-2.5 pt-1">
                               <button
                                 onClick={() => setEditingId(null)}
-                                className="px-3.5 py-1.5 hover:bg-slate-800 text-slate-400 text-[11px] font-bold rounded-lg transition"
+                                className="px-3.5 py-1.5 hover:bg-slate-100 text-slate-600 text-[11px] font-bold rounded-lg transition"
                               >
                                 Hủy
                               </button>
                               <button
                                 onClick={() => handleSaveEdit(p.id)}
-                                className="px-4 py-1.5 bg-blue-600 hover:bg-blue-500 text-white text-[11px] font-black rounded-lg shadow-md transition flex items-center gap-1.5"
+                                className="px-4 py-1.5 bg-blue-600 hover:bg-blue-500 text-white text-[11px] font-black rounded-lg shadow-md transition flex items-center gap-1.5 cursor-pointer"
                               >
                                 <Save size={12} />
                                 Lưu thay đổi
@@ -345,27 +345,27 @@ export default function PromptManager({ storageKey, tabTitle, defaultPrompts }: 
                         ) : (
                           // Standard View Mode
                           <div className="flex items-center justify-between gap-3">
-                            <span className="text-xs font-black text-slate-200 tracking-wide truncate" title={p.title}>
+                            <span className="text-xs font-black text-slate-800 tracking-wide truncate" title={p.title}>
                               {p.title}
                             </span>
                             <div className="flex items-center gap-1.5 shrink-0">
                               <button
                                 onClick={() => handleCopy(p.id, p.content)}
-                                className="p-1.5 rounded-lg bg-[#111827] border border-slate-800 hover:border-slate-600 text-slate-400 hover:text-white transition cursor-pointer"
+                                className="p-1.5 rounded-lg bg-slate-50 border border-slate-200 hover:bg-slate-100 text-slate-600 hover:text-slate-900 transition cursor-pointer"
                                 title="Sao chép prompt"
                               >
-                                {copiedId === p.id ? <Check size={13} className="text-emerald-500" /> : <Copy size={13} />}
+                                {copiedId === p.id ? <Check size={13} className="text-emerald-600" /> : <Copy size={13} />}
                               </button>
                               <button
                                 onClick={() => handleStartEdit(p)}
-                                className="p-1.5 rounded-lg bg-[#111827] border border-slate-800 hover:border-slate-600 text-slate-400 hover:text-white transition cursor-pointer"
+                                className="p-1.5 rounded-lg bg-slate-50 border border-slate-200 hover:bg-slate-100 text-slate-600 hover:text-slate-900 transition cursor-pointer"
                                 title="Sửa prompt"
                               >
                                 <Edit3 size={13} />
                               </button>
                               <button
                                 onClick={() => handleDelete(p.id)}
-                                className="p-1.5 rounded-lg bg-[#111827] border border-slate-800 hover:border-rose-900/50 hover:bg-rose-950/20 text-slate-400 hover:text-rose-500 transition cursor-pointer"
+                                className="p-1.5 rounded-lg bg-slate-50 border border-slate-200 hover:border-rose-300 hover:bg-rose-50 text-slate-600 hover:text-rose-600 transition cursor-pointer"
                                 title="Xóa prompt"
                               >
                                 <Trash2 size={13} />

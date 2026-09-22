@@ -230,22 +230,22 @@ export const AnswerKeyModal: React.FC<AnswerKeyModalProps> = ({
   }).filter((g) => g.questions.length > 0);
 
   return (
-    <div className="fixed inset-0 z-[110] bg-black/85 flex items-center justify-center p-3 sm:p-4 select-none font-sans">
-      <div className="bg-[#0c0f1e] border border-[#212c4b] rounded-3xl w-full max-w-3xl max-h-[92vh] flex flex-col shadow-[0_25px_60px_rgba(0,0,0,0.9)] overflow-hidden">
+    <div className="fixed inset-0 z-[110] bg-black/60 flex items-center justify-center p-3 sm:p-4 select-none font-sans">
+      <div className="bg-white border border-slate-200 rounded-3xl w-full max-w-3xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden">
         {/* Header */}
-        <div className="p-5 border-b border-white/10 flex items-center justify-between shrink-0 bg-[#0d1122]">
+        <div className="p-5 border-b border-slate-200 flex items-center justify-between shrink-0 bg-slate-50">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400">
+            <div className="w-10 h-10 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-600">
               <KeyRound size={20} />
             </div>
             <div>
               <div className="flex items-center gap-2 flex-wrap">
-                <h2 className="text-base font-black text-white">Chỉnh Sửa Đáp Án & Chấm Lại</h2>
-                <span className="text-xs font-mono font-bold px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30">
+                <h2 className="text-base font-black text-slate-900">Chỉnh Sửa Đáp Án & Chấm Lại</h2>
+                <span className="text-xs font-mono font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
                   {totalKeysFilled}/{totalQuestions} câu có đáp án
                 </span>
               </div>
-              <p className="text-xs text-slate-400 mt-0.5 truncate max-w-md">
+              <p className="text-xs text-slate-500 mt-0.5 truncate max-w-md">
                 {assignment.title} — Phân loại rõ từng bài tập, câu hỏi và tự động chấm lại
               </p>
             </div>
@@ -253,18 +253,18 @@ export const AnswerKeyModal: React.FC<AnswerKeyModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="w-8 h-8 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white flex items-center justify-center transition cursor-pointer"
+            className="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center transition cursor-pointer"
           >
             <X size={16} />
           </button>
         </div>
 
         {/* Tip & Search Bar */}
-        <div className="px-5 py-3 bg-[#121626] border-b border-white/5 flex flex-wrap items-center justify-between gap-3 shrink-0">
-          <div className="flex items-center gap-2 text-xs text-slate-300">
-            <AlertCircle size={14} className="text-indigo-400 shrink-0" />
+        <div className="px-5 py-3 bg-slate-50 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3 shrink-0">
+          <div className="flex items-center gap-2 text-xs text-slate-600">
+            <AlertCircle size={14} className="text-blue-600 shrink-0" />
             <span>
-              Dùng dấu <strong className="text-amber-400 font-mono">|</strong> để thêm nhiều phương án đúng (VD: <span className="font-mono text-emerald-400">A | B</span>).
+              Dùng dấu <strong className="text-amber-600 font-mono">|</strong> để thêm nhiều phương án đúng (VD: <span className="font-mono text-emerald-600">A | B</span>).
             </span>
           </div>
 
@@ -273,7 +273,7 @@ export const AnswerKeyModal: React.FC<AnswerKeyModalProps> = ({
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Tìm theo số câu hoặc nội dung..."
-            className="bg-[#080b14] border border-white/10 focus:border-indigo-500 rounded-lg px-3 py-1 text-xs text-white placeholder:text-slate-500 outline-none w-56 font-medium"
+            className="bg-white border border-slate-300 focus:border-blue-600 rounded-lg px-3 py-1 text-xs text-slate-900 placeholder:text-slate-400 outline-none w-56 font-medium"
           />
         </div>
 
@@ -284,25 +284,25 @@ export const AnswerKeyModal: React.FC<AnswerKeyModalProps> = ({
             return (
               <div
                 key={group.sectionId}
-                className="rounded-2xl bg-[#0d1018] border border-[#212c4b] overflow-hidden shadow-sm"
+                className="rounded-2xl bg-white border border-slate-200 overflow-hidden shadow-sm"
               >
                 {/* Section Header Card */}
                 <div
                   onClick={() => toggleSectionCollapse(group.sectionId)}
-                  className="p-3.5 bg-[#121626] border-b border-white/5 flex items-center justify-between gap-2 cursor-pointer select-none hover:bg-[#161c30] transition"
+                  className="p-3.5 bg-slate-50 border-b border-slate-200 flex items-center justify-between gap-2 cursor-pointer select-none hover:bg-slate-100 transition"
                 >
                   <div className="flex items-center gap-2.5 min-w-0">
-                    <span className="text-indigo-400">
+                    <span className="text-blue-600">
                       {isCollapsed ? <ChevronRight size={16} /> : <ChevronDown size={16} />}
                     </span>
-                    <span className="text-xs font-black uppercase px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 shrink-0">
+                    <span className="text-xs font-black uppercase px-2 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200 shrink-0">
                       Bài {group.sectionId}
                     </span>
-                    <span className="text-xs font-bold text-slate-200 truncate">
+                    <span className="text-xs font-bold text-slate-800 truncate">
                       {group.sectionTitle}
                     </span>
                   </div>
-                  <span className="text-[11px] font-mono font-bold text-slate-400 shrink-0">
+                  <span className="text-[11px] font-mono font-bold text-slate-500 shrink-0">
                     {group.questions.filter((q) => q.key.trim()).length}/{group.questions.length} câu
                   </span>
                 </div>
@@ -315,15 +315,15 @@ export const AnswerKeyModal: React.FC<AnswerKeyModalProps> = ({
                       return (
                         <div
                           key={q.id}
-                          className="flex flex-col sm:flex-row items-start sm:items-center gap-2.5 p-2.5 bg-[#121626]/70 border border-white/5 hover:border-white/15 rounded-xl transition"
+                          className="flex flex-col sm:flex-row items-start sm:items-center gap-2.5 p-2.5 bg-slate-50 border border-slate-200 hover:border-blue-300 rounded-xl transition"
                         >
                           {/* Question Number & Snippet */}
                           <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                            <div className="w-9 h-8 rounded-lg bg-rose-500/15 border border-rose-500/30 flex items-center justify-center font-mono font-black text-rose-300 text-xs shrink-0">
+                            <div className="w-9 h-8 rounded-lg bg-rose-50 border border-rose-200 flex items-center justify-center font-mono font-black text-rose-600 text-xs shrink-0">
                               #{q.qNum}
                             </div>
                             <div className="min-w-0 flex-1">
-                              <p className="text-xs text-slate-200 line-clamp-1 font-medium">
+                              <p className="text-xs text-slate-800 line-clamp-1 font-medium">
                                 {q.text || `Câu hỏi số ${q.qNum}`}
                               </p>
                             </div>
@@ -344,8 +344,8 @@ export const AnswerKeyModal: React.FC<AnswerKeyModalProps> = ({
                                     onClick={() => handleQuickOptionSelect(group.sectionId, q.id, letter)}
                                     className={`w-7 h-7 rounded-lg text-xs font-black font-mono transition cursor-pointer border flex items-center justify-center ${
                                       isCurrent
-                                        ? 'bg-[#2563eb] text-white border-blue-400 shadow-sm'
-                                        : 'bg-white/5 hover:bg-white/10 text-slate-300 border-white/10'
+                                        ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
+                                        : 'bg-white hover:bg-slate-100 text-slate-700 border-slate-300'
                                     }`}
                                     title={cleanOptionPrefix(opt)}
                                   >
@@ -362,7 +362,7 @@ export const AnswerKeyModal: React.FC<AnswerKeyModalProps> = ({
                             value={q.key}
                             onChange={(e) => handleKeyChange(group.sectionId, q.id, e.target.value)}
                             placeholder="Đáp án (VD: A hoặc text1 | text2)..."
-                            className="w-full sm:w-56 bg-[#080b14] border border-white/10 focus:border-indigo-500 rounded-lg px-3 py-1.5 text-xs text-white placeholder:text-slate-500 outline-none font-medium font-mono"
+                            className="w-full sm:w-56 bg-white border border-slate-300 focus:border-blue-600 rounded-lg px-3 py-1.5 text-xs text-slate-900 placeholder:text-slate-400 outline-none font-medium font-mono"
                           />
                         </div>
                       );
@@ -375,9 +375,9 @@ export const AnswerKeyModal: React.FC<AnswerKeyModalProps> = ({
         </div>
 
         {/* Footer Actions */}
-        <div className="p-4 border-t border-white/10 flex items-center justify-between gap-3 shrink-0 bg-[#0c0f1e]">
-          <div className="flex items-center gap-2 text-xs text-slate-400">
-            <Check size={14} className="text-emerald-400" />
+        <div className="p-4 border-t border-slate-200 flex items-center justify-between gap-3 shrink-0 bg-slate-50">
+          <div className="flex items-center gap-2 text-xs text-slate-600">
+            <Check size={14} className="text-emerald-600" />
             <span>
               Sẵn sàng chấm điểm cho <strong>{totalKeysFilled}</strong> câu hỏi
             </span>
@@ -387,7 +387,7 @@ export const AnswerKeyModal: React.FC<AnswerKeyModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-bold transition cursor-pointer"
+              className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition cursor-pointer"
             >
               Hủy
             </button>
@@ -395,7 +395,7 @@ export const AnswerKeyModal: React.FC<AnswerKeyModalProps> = ({
               type="button"
               onClick={handleSaveAndRegrade}
               disabled={saving}
-              className="flex items-center gap-1.5 px-5 py-2 rounded-xl bg-[#5c36f5] hover:bg-[#6c48f7] text-white text-xs font-black shadow-[0_0_15px_rgba(92,54,245,0.4)] transition cursor-pointer active:scale-95 disabled:opacity-50"
+              className="flex items-center gap-1.5 px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-black shadow-md shadow-blue-500/20 transition cursor-pointer active:scale-95 disabled:opacity-50"
             >
               {saving ? <RefreshCw size={14} className="animate-spin" /> : <Save size={14} />}
               <span>{saving ? 'Đang chấm lại...' : 'Lưu Đáp Án & Chấm Lại'}</span>

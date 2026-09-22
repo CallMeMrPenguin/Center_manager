@@ -26,51 +26,51 @@ export const ExamWarningModal: React.FC<ExamWarningModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[200] bg-black/85 flex items-center justify-center p-4 select-none font-sans">
-      <div className="bg-[#0f1322] border-2 border-rose-500/80 rounded-3xl w-full max-w-md p-6 shadow-[0_0_60px_rgba(244,63,94,0.4)] text-center space-y-5 relative">
+    <div className="fixed inset-0 z-[200] bg-black/60 flex items-center justify-center p-4 select-none font-sans">
+      <div className="bg-white border-2 border-rose-300 rounded-3xl w-full max-w-md p-6 shadow-2xl text-center space-y-5 relative">
         <button
           type="button"
           onClick={onDismiss}
-          className="absolute top-4 right-4 p-1.5 rounded-xl bg-white/5 hover:bg-white/15 text-slate-400 hover:text-white transition cursor-pointer"
+          className="absolute top-4 right-4 p-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-400 hover:text-slate-700 transition cursor-pointer"
           title="Đóng cảnh báo (Esc)"
         >
           <X size={18} />
         </button>
 
-        <div className="w-16 h-16 rounded-2xl bg-rose-500/20 border border-rose-500/40 flex items-center justify-center mx-auto text-rose-400 animate-pulse">
+        <div className="w-16 h-16 rounded-2xl bg-rose-50 border border-rose-200 flex items-center justify-center mx-auto text-rose-600 animate-pulse">
           <ShieldAlert size={36} />
         </div>
 
         <div className="space-y-2">
-          <span className="text-[11px] font-black uppercase tracking-widest text-rose-400 px-3 py-1 rounded-full bg-rose-500/10 border border-rose-500/20 inline-block">
+          <span className="text-[11px] font-black uppercase tracking-widest text-rose-700 px-3 py-1 rounded-full bg-rose-50 border border-rose-200 inline-block">
             Cảnh Báo Vi Phạm Phòng Thi
           </span>
-          <h3 className="text-lg font-black text-white">
+          <h3 className="text-lg font-black text-slate-900">
             Phát Hiện Rời Khỏi Màn Hình Làm Bài!
           </h3>
-          <p className="text-xs text-slate-300 leading-relaxed">
-            Hệ thống đã ghi nhận hành động: <strong className="text-rose-300">{reason || 'Rời khỏi trang thi'}</strong>.
+          <p className="text-xs text-slate-600 leading-relaxed">
+            Hệ thống đã ghi nhận hành động: <strong className="text-rose-600">{reason || 'Rời khỏi trang thi'}</strong>.
           </p>
         </div>
 
-        <div className="bg-rose-950/40 border border-rose-500/30 rounded-2xl p-3.5 flex items-center justify-between text-xs">
-          <div className="flex items-center gap-2 text-rose-300 font-bold">
+        <div className="bg-rose-50 border border-rose-200 rounded-2xl p-3.5 flex items-center justify-between text-xs">
+          <div className="flex items-center gap-2 text-rose-800 font-bold">
             <AlertTriangle size={16} />
             <span>Tổng số lần vi phạm:</span>
           </div>
-          <span className="font-mono text-base font-black text-rose-400 bg-rose-500/20 px-3 py-0.5 rounded-lg border border-rose-500/40">
+          <span className="font-mono text-base font-black text-rose-700 bg-rose-100 px-3 py-0.5 rounded-lg border border-rose-300">
             {violationCount} lần
           </span>
         </div>
 
-        <p className="text-[11px] text-slate-400 italic">
+        <p className="text-[11px] text-slate-500 italic">
           Lưu ý: Mọi lần chuyển tab hoặc rời màn hình đều được lưu vào báo cáo bài làm của học sinh.
         </p>
 
         <button
           type="button"
           onClick={onDismiss}
-          className="w-full py-3 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-black shadow-[0_0_20px_rgba(244,63,94,0.5)] transition cursor-pointer active:scale-98"
+          className="w-full py-3 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-black shadow-md transition cursor-pointer active:scale-98"
         >
           Tôi Đã Hiểu & Tiếp Tục Làm Bài
         </button>

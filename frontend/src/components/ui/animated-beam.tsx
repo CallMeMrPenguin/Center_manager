@@ -11,7 +11,7 @@ export const BeamNode = forwardRef<HTMLDivElement, BeamNodeProps>(
     return (
       <div
         ref={ref}
-        className={`relative z-10 flex items-center justify-center rounded-2xl border border-white/15 bg-[#0e1326] p-3.5 shadow-[0_8px_24px_rgba(0,0,0,0.6)] ${className}`}
+        className={`relative z-10 flex items-center justify-center rounded-2xl border border-slate-200 bg-white p-3.5 shadow-md ${className}`}
         {...props}
       >
         {children}
@@ -31,7 +31,7 @@ export const BeamContainer = forwardRef<HTMLDivElement, BeamContainerProps>(
     return (
       <div
         ref={ref}
-        className={`relative flex w-full items-center justify-center overflow-hidden rounded-2xl border border-[#1e2744] bg-[#070a14] p-8 select-none ${className}`}
+        className={`relative flex w-full items-center justify-center overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 p-8 select-none ${className}`}
         {...props}
       >
         {children}

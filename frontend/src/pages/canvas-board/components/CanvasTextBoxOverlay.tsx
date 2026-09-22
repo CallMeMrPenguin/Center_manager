@@ -124,7 +124,7 @@ export const CanvasTextBoxOverlay: React.FC<CanvasTextBoxOverlayProps> = ({
             {isSelected && (
               <div
                 onPointerDown={(e) => e.stopPropagation()}
-                className="absolute -top-11 left-0 flex items-center gap-1.5 bg-[#0c0f1e] border border-[#212c4b] px-2 py-1 rounded-xl shadow-2xl z-50 select-none whitespace-nowrap"
+                className="absolute -top-11 left-0 flex items-center gap-1.5 bg-white border border-slate-200 px-2 py-1 rounded-xl shadow-xl z-50 select-none whitespace-nowrap"
                 style={{
                   transform: `scale(${Math.max(0.65, 1 / zoom)})`,
                   transformOrigin: 'bottom left',
@@ -137,24 +137,24 @@ export const CanvasTextBoxOverlay: React.FC<CanvasTextBoxOverlayProps> = ({
                     e.stopPropagation();
                     onUpdate({ ...tb, fontFamily: e.target.value });
                   }}
-                  className="bg-[#141829] border border-white/20 text-white rounded-lg px-2 py-0.5 text-xs font-semibold focus:outline-none cursor-pointer"
+                  className="bg-slate-50 border border-slate-200 text-slate-800 rounded-lg px-2 py-0.5 text-xs font-semibold focus:outline-none cursor-pointer"
                 >
                   {FONT_FAMILIES.map(f => (
-                    <option key={f.value} value={f.value} className="bg-[#0c0f1e] text-white">{f.label}</option>
+                    <option key={f.value} value={f.value} className="bg-white text-slate-800">{f.label}</option>
                   ))}
                 </select>
 
                 {/* Font Size Controls */}
-                <div className="flex items-center gap-1 bg-[#141829] border border-white/10 px-1.5 py-0.5 rounded-lg">
+                <div className="flex items-center gap-1 bg-slate-50 border border-slate-200 px-1.5 py-0.5 rounded-lg">
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
                       onUpdate({ ...tb, fontSize: Math.max(8, (tb.fontSize || 20) - 2) });
                     }}
-                    className="text-slate-300 hover:text-white font-bold text-xs px-1 cursor-pointer"
+                    className="text-slate-600 hover:text-slate-900 font-bold text-xs px-1 cursor-pointer"
                     title="Giảm cỡ chữ"
                   >-</button>
-                  <span className="text-xs font-mono font-bold text-indigo-300 min-w-[20px] text-center">
+                  <span className="text-xs font-mono font-bold text-indigo-600 min-w-[20px] text-center">
                     {tb.fontSize || 20}
                   </span>
                   <button
@@ -162,7 +162,7 @@ export const CanvasTextBoxOverlay: React.FC<CanvasTextBoxOverlayProps> = ({
                       e.stopPropagation();
                       onUpdate({ ...tb, fontSize: Math.min(96, (tb.fontSize || 20) + 2) });
                     }}
-                    className="text-slate-300 hover:text-white font-bold text-xs px-1 cursor-pointer"
+                    className="text-slate-600 hover:text-slate-900 font-bold text-xs px-1 cursor-pointer"
                     title="Tăng cỡ chữ"
                   >+</button>
                 </div>
@@ -174,7 +174,7 @@ export const CanvasTextBoxOverlay: React.FC<CanvasTextBoxOverlayProps> = ({
                     onUpdate({ ...tb, fontWeight: tb.fontWeight === 'bold' ? 'normal' : 'bold' });
                   }}
                   className={`px-1.5 py-0.5 rounded-lg text-xs font-black transition cursor-pointer border ${
-                    tb.fontWeight === 'bold' ? 'bg-[#5c36f5] text-white border-indigo-400' : 'bg-transparent text-slate-300 border-white/10 hover:text-white'
+                    tb.fontWeight === 'bold' ? 'bg-blue-600 text-white border-blue-600' : 'bg-transparent text-slate-700 border-slate-200 hover:bg-slate-100'
                   }`}
                   title="In đậm (Bold)"
                 >
@@ -188,7 +188,7 @@ export const CanvasTextBoxOverlay: React.FC<CanvasTextBoxOverlayProps> = ({
                     onUpdate({ ...tb, fontStyle: tb.fontStyle === 'italic' ? 'normal' : 'italic' });
                   }}
                   className={`px-1.5 py-0.5 rounded-lg text-xs font-serif italic transition cursor-pointer border ${
-                    tb.fontStyle === 'italic' ? 'bg-[#5c36f5] text-white border-indigo-400' : 'bg-transparent text-slate-300 border-white/10 hover:text-white'
+                    tb.fontStyle === 'italic' ? 'bg-blue-600 text-white border-blue-600' : 'bg-transparent text-slate-700 border-slate-200 hover:bg-slate-100'
                   }`}
                   title="In nghiêng (Italic)"
                 >
@@ -196,7 +196,7 @@ export const CanvasTextBoxOverlay: React.FC<CanvasTextBoxOverlayProps> = ({
                 </button>
 
                 {/* Color Input */}
-                <label className="relative cursor-pointer flex items-center p-0.5 rounded-lg border border-white/15 hover:border-white/40" title="Đổi màu chữ">
+                <label className="relative cursor-pointer flex items-center p-0.5 rounded-lg border border-slate-200 hover:border-slate-400 bg-white" title="Đổi màu chữ">
                   <input
                     type="color"
                     value={tb.color || '#ff3344'}
@@ -216,7 +216,7 @@ export const CanvasTextBoxOverlay: React.FC<CanvasTextBoxOverlayProps> = ({
                     onUpdate({ ...tb, bgColor: isTrans ? '#ffffff' : 'transparent' });
                   }}
                   className={`px-1.5 py-0.5 rounded-lg text-[10px] font-bold border transition cursor-pointer ${
-                    tb.bgColor && tb.bgColor !== 'transparent' ? 'bg-white text-black border-slate-300' : 'text-slate-400 border-white/10 hover:text-white'
+                    tb.bgColor && tb.bgColor !== 'transparent' ? 'bg-slate-100 text-slate-900 border-slate-300' : 'text-slate-600 border-slate-200 hover:bg-slate-100'
                   }`}
                   title="Bật/Tắt nền trắng"
                 >
@@ -230,7 +230,7 @@ export const CanvasTextBoxOverlay: React.FC<CanvasTextBoxOverlayProps> = ({
                       e.stopPropagation();
                       onDelete(tb.id);
                     }}
-                    className="p-1 text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition cursor-pointer ml-0.5"
+                    className="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition cursor-pointer ml-0.5"
                     title="Xóa Text Box"
                   >
                     <Trash2 size={12} />

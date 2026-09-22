@@ -114,10 +114,10 @@ const ColumnHeaderFilter = ({
     <div ref={containerRef} className="inline-block text-left header-filter-container" onClick={(e) => e.stopPropagation()}>
       <button
         onClick={() => onToggleOpen(isOpen ? null : (columnKey as any))}
-        className={`p-1 rounded hover:bg-slate-800 transition cursor-pointer ${
+        className={`p-1 rounded hover:bg-slate-100 transition cursor-pointer ${
           isFiltered || isSorted
-            ? 'text-blue-400 bg-blue-500/10'
-            : 'text-slate-500 hover:text-slate-350'
+            ? 'text-blue-600 bg-blue-50'
+            : 'text-slate-500 hover:text-slate-800'
         }`}
         title={`Lọc/Sắp xếp cột ${columnLabel}`}
       >
@@ -281,7 +281,7 @@ const ColumnHeaderFilter = ({
                 setLocalSearch('');
                 setSearchText('');
               }}
-              className="w-full py-1 bg-slate-900 hover:bg-slate-850 border border-slate-850 hover:border-slate-800 text-[0.66rem] text-slate-450 hover:text-white font-bold rounded-lg transition"
+              className="w-full py-1 bg-slate-100 hover:bg-slate-200 border border-slate-200 text-[0.66rem] text-slate-600 hover:text-slate-900 font-bold rounded-lg transition cursor-pointer"
             >
               Xóa bộ lọc cột
             </button>
@@ -1038,35 +1038,35 @@ export default function VocabularyBank({ isActive }: { isActive?: boolean }) {
 
       {/* BANNER TO OPEN EXPORTED FILE */}
       {lastExportedFile && (
-        <div className="bg-[#101B2E] border border-blue-900/40 px-6 py-3.5 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-3 mb-6 shadow-xl animate-slide-up">
+        <div className="bg-blue-50/80 border border-blue-200 px-6 py-3.5 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-3 mb-6 shadow-sm animate-slide-up">
           <div className="flex items-center gap-2.5">
-            <div className="p-2 bg-emerald-500/10 text-emerald-450 rounded-xl">
+            <div className="p-2 bg-emerald-500/10 text-emerald-600 rounded-xl">
               <FileText size={16} />
             </div>
             <div>
-              <h4 className="text-xs font-bold text-white">Đã xuất bản từ vựng thành công!</h4>
-              <p className="text-[0.66rem] text-slate-400 font-semibold mt-0.5 font-mono">{lastExportedFile}</p>
+              <h4 className="text-xs font-bold text-slate-900">Đã xuất bản từ vựng thành công!</h4>
+              <p className="text-[0.66rem] text-slate-600 font-semibold mt-0.5 font-mono">{lastExportedFile}</p>
             </div>
           </div>
           
           <div className="flex items-center gap-2">
             <button
               onClick={handleOpenFile}
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-500 active:scale-95 text-white font-extrabold text-[0.66rem] rounded-xl flex items-center gap-1.5 shadow-md shadow-blue-500/15 transition cursor-pointer"
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-500 active:scale-95 text-white font-extrabold text-[0.66rem] rounded-xl flex items-center gap-1.5 shadow-md transition cursor-pointer"
             >
               <Sparkles size={11} />
               <span>MỞ FILE WORD</span>
             </button>
             <button
               onClick={handleOpenFolder}
-              className="px-4 py-2 bg-[#0B0F19] hover:bg-slate-900 border border-slate-800 text-slate-350 hover:text-white font-extrabold text-[0.66rem] rounded-xl flex items-center gap-1.5 transition cursor-pointer"
+              className="px-4 py-2 bg-white hover:bg-slate-100 border border-slate-300 text-slate-700 hover:text-slate-900 font-extrabold text-[0.66rem] rounded-xl flex items-center gap-1.5 transition cursor-pointer shadow-xs"
             >
               <FolderOpen size={11} />
               <span>MỞ THƯ MỤC</span>
             </button>
             <button 
               onClick={() => setLastExportedFile(null)}
-              className="p-2 text-slate-500 hover:text-slate-350 transition"
+              className="p-2 text-slate-400 hover:text-slate-700 transition cursor-pointer"
             >
               <X size={12} />
             </button>
@@ -1398,7 +1398,7 @@ export default function VocabularyBank({ isActive }: { isActive?: boolean }) {
                             </button>
                             <button
                               onClick={() => setEditingId(null)}
-                              className="p-1.5 rounded-lg bg-slate-900 border border-slate-850 hover:bg-slate-800 text-slate-400 hover:text-white transition cursor-pointer"
+                              className="p-1.5 rounded-lg bg-slate-100 border border-slate-200 hover:bg-slate-200 text-slate-600 hover:text-slate-900 transition cursor-pointer"
                               title="Hủy"
                             >
                               <X size={13} />
@@ -1582,44 +1582,44 @@ export default function VocabularyBank({ isActive }: { isActive?: boolean }) {
 
       {/* CSV IMPORT VALIDATION DUPLICATE REPORT DIALOG */}
       {csvPreviewModal.show && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-6">
-          <div className="bg-[#111827] border border-slate-855 rounded-3xl w-full max-w-4xl h-[80vh] flex flex-col overflow-hidden shadow-2xl animate-fade-in">
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-6">
+          <div className="bg-white border border-slate-200 rounded-3xl w-full max-w-4xl h-[80vh] flex flex-col overflow-hidden shadow-2xl animate-fade-in">
             {/* Header */}
-            <div className="h-14 border-b border-slate-900 bg-[#0A0D1A]/50 flex items-center justify-between px-6 shrink-0">
-              <span className="text-xs font-bold text-white flex items-center gap-2">
+            <div className="h-14 border-b border-slate-200 bg-slate-50 flex items-center justify-between px-6 shrink-0">
+              <span className="text-xs font-bold text-slate-900 flex items-center gap-2">
                 <AlertTriangle className="text-amber-500 animate-pulse" size={16} />
                 Báo cáo kiểm tra trùng lặp CSV Từ Vựng: {csvPreviewModal.fileName}
               </span>
               <button
                 onClick={() => setCsvPreviewModal({ show: false, items: [], fileName: '' })}
-                className="p-1.5 rounded-lg bg-slate-900/60 hover:bg-slate-800 text-slate-400 hover:text-white transition cursor-pointer"
+                className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-900 transition cursor-pointer"
               >
                 <X size={14} />
               </button>
             </div>
 
             {/* Stats */}
-            <div className="bg-[#151f32]/40 border-b border-slate-900/60 p-5 shrink-0 grid grid-cols-3 gap-4 text-center">
-              <div className="bg-slate-950/40 border border-slate-850/60 rounded-xl p-3">
+            <div className="bg-slate-50/80 border-b border-slate-200 p-5 shrink-0 grid grid-cols-3 gap-4 text-center">
+              <div className="bg-white border border-slate-200 rounded-xl p-3 shadow-xs">
                 <p className="text-[0.66rem] font-bold text-slate-500 uppercase">Tổng từ vựng</p>
-                <p className="text-xl font-black text-white mt-1">{csvPreviewModal.items.length}</p>
+                <p className="text-xl font-black text-slate-900 mt-1">{csvPreviewModal.items.length}</p>
               </div>
-              <div className="bg-emerald-500/5 border border-emerald-500/15 rounded-xl p-3">
-                <p className="text-[0.66rem] font-bold text-emerald-500 uppercase">Từ vựng mới hợp lệ</p>
-                <p className="text-xl font-black text-emerald-400 mt-1">
+              <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-3">
+                <p className="text-[0.66rem] font-bold text-emerald-600 uppercase">Từ vựng mới hợp lệ</p>
+                <p className="text-xl font-black text-emerald-600 mt-1">
                   {csvPreviewModal.items.filter(x => !x.is_duplicate).length}
                 </p>
               </div>
-              <div className="bg-rose-500/5 border border-rose-500/15 rounded-xl p-3">
-                <p className="text-[0.66rem] font-bold text-rose-500 uppercase">Từ vựng trùng lặp</p>
-                <p className="text-xl font-black text-rose-450 mt-1">
+              <div className="bg-rose-500/10 border border-rose-500/20 rounded-xl p-3">
+                <p className="text-[0.66rem] font-bold text-rose-600 uppercase">Từ vựng trùng lặp</p>
+                <p className="text-xl font-black text-rose-600 mt-1">
                   {csvPreviewModal.items.filter(x => x.is_duplicate).length}
                 </p>
               </div>
             </div>
 
             {/* List */}
-            <div className="flex-1 overflow-auto bg-slate-950/20 flex flex-col">
+            <div className="flex-1 overflow-auto bg-slate-50/40 flex flex-col">
               {(() => {
                 const csvPreviewColumns: ColumnDef<any>[] = [
                   {
@@ -1635,12 +1635,12 @@ export default function VocabularyBank({ isActive }: { isActive?: boolean }) {
                   {
                     accessorKey: 'vocabulary',
                     header: 'Từ vựng',
-                    cell: (info) => <span className="font-semibold text-blue-400">{info.getValue<string>()}</span>,
+                    cell: (info) => <span className="font-semibold text-blue-600">{info.getValue<string>()}</span>,
                   },
                   {
                     accessorKey: 'meaning',
                     header: 'Dịch nghĩa',
-                    cell: (info) => <span className="truncate max-w-sm block">{info.getValue<string>()}</span>,
+                    cell: (info) => <span className="truncate max-w-sm block text-slate-800">{info.getValue<string>()}</span>,
                   },
                   {
                     id: 'status',
@@ -1648,12 +1648,12 @@ export default function VocabularyBank({ isActive }: { isActive?: boolean }) {
                     cell: ({ row }) => {
                       const item = row.original;
                       return item.is_duplicate ? (
-                        <span className="flex items-center gap-1.5 text-rose-450 text-[0.66rem] bg-rose-500/10 px-2 py-0.5 rounded border border-rose-500/20" title={item.duplicate_reason}>
+                        <span className="flex items-center gap-1.5 text-rose-600 text-[0.66rem] bg-rose-500/10 px-2 py-0.5 rounded border border-rose-500/20" title={item.duplicate_reason}>
                           <AlertTriangle size={12} />
                           <span>Trùng lặp</span>
                         </span>
                       ) : (
-                        <span className="flex items-center gap-1.5 text-emerald-400 text-[0.66rem] bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+                        <span className="flex items-center gap-1.5 text-emerald-600 text-[0.66rem] bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
                           <CheckCircle2 size={12} />
                           <span>Hợp lệ</span>
                         </span>
@@ -1675,7 +1675,7 @@ export default function VocabularyBank({ isActive }: { isActive?: boolean }) {
             </div>
 
             {/* Actions */}
-            <div className="h-16 border-t border-slate-900 bg-[#0A0D1A]/50 flex items-center justify-between px-6 shrink-0">
+            <div className="h-16 border-t border-slate-200 bg-slate-50 flex items-center justify-between px-6 shrink-0">
               <p className="text-[0.66rem] text-slate-500 font-bold max-w-lg leading-normal">
                 Nhấn "Bắt đầu nạp" sẽ bỏ qua kiểm tra trùng và ghi toàn bộ dữ liệu ở trên vào Cơ sở dữ liệu local.
               </p>
@@ -1683,7 +1683,7 @@ export default function VocabularyBank({ isActive }: { isActive?: boolean }) {
               <div className="flex gap-3">
                 <button
                   onClick={() => setCsvPreviewModal({ show: false, items: [], fileName: '' })}
-                  className="px-4.5 py-2 hover:bg-slate-800 text-slate-400 text-xs font-bold rounded-xl transition cursor-pointer"
+                  className="px-4.5 py-2 hover:bg-slate-200 text-slate-600 text-xs font-bold rounded-xl transition cursor-pointer"
                 >
                   Hủy bỏ
                 </button>
@@ -1701,23 +1701,23 @@ export default function VocabularyBank({ isActive }: { isActive?: boolean }) {
 
       {/* Scoped Delete Modal */}
       {deleteModal.show && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-in p-4">
-          <div className="w-full max-w-md filter-dropdown-menu p-6 flex flex-col gap-4 text-slate-200">
-            <div className="flex items-center justify-between border-b border-slate-900 pb-3">
-              <h3 className="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 animate-fade-in p-4">
+          <div className="w-full max-w-md bg-white border border-slate-200 rounded-2xl shadow-xl p-6 flex flex-col gap-4 text-slate-800">
+            <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+              <h3 className="text-sm font-black text-slate-900 uppercase tracking-wider flex items-center gap-2">
                 <Trash2 size={16} className="text-rose-500" />
                 Xóa dữ liệu từ vựng
               </h3>
               <button
                 onClick={() => setDeleteModal(prev => ({ ...prev, show: false }))}
-                className="text-slate-500 hover:text-white transition"
+                className="text-slate-400 hover:text-slate-700 transition"
               >
                 <X size={16} />
               </button>
             </div>
 
             <div className="flex flex-col gap-3">
-              <label className="text-xs font-bold text-slate-400">Chọn phạm vi muốn xóa:</label>
+              <label className="text-xs font-bold text-slate-600">Chọn phạm vi muốn xóa:</label>
               
               <SegmentedControl<'all' | 'grade' | 'unit'>
                 value={deleteModal.scope}
@@ -1732,13 +1732,13 @@ export default function VocabularyBank({ isActive }: { isActive?: boolean }) {
               />
 
               {deleteModal.scope !== 'all' && (
-                <div className="flex flex-col gap-3.5 bg-[#151f32]/10 border border-slate-900/60 p-3.5 rounded-xl mt-1.5">
+                <div className="flex flex-col gap-3.5 bg-slate-50 border border-slate-200 p-3.5 rounded-xl mt-1.5">
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-[10px] font-bold text-slate-450 uppercase">Chọn Khối lớp:</label>
+                    <label className="text-[10px] font-bold text-slate-500 uppercase">Chọn Khối lớp:</label>
                     <select
                       value={deleteModal.grade}
                       onChange={(e) => setDeleteModal(prev => ({ ...prev, grade: e.target.value }))}
-                      className="bg-[#080b12] border border-slate-850 px-3 py-2 rounded-xl text-xs text-white cursor-pointer w-full"
+                      className="bg-white border border-slate-300 px-3 py-2 rounded-xl text-xs text-slate-900 cursor-pointer w-full"
                     >
                       <option value="">-- Chọn lớp --</option>
                       {availableGrades.map(g => (
@@ -1749,38 +1749,38 @@ export default function VocabularyBank({ isActive }: { isActive?: boolean }) {
 
                   {deleteModal.scope === 'unit' && (
                     <div className="flex flex-col gap-1.5">
-                      <label className="text-[10px] font-bold text-slate-450 uppercase">Nhập số Unit (Ví dụ: 1 hoặc 2):</label>
+                      <label className="text-[10px] font-bold text-slate-500 uppercase">Nhập số Unit (Ví dụ: 1 hoặc 2):</label>
                       <input
                         type="text"
                         value={deleteModal.unit}
                         onChange={(e) => setDeleteModal(prev => ({ ...prev, unit: e.target.value }))}
                         placeholder="Số Unit"
-                        className="bg-[#080b12] border border-slate-850 px-3 py-2 rounded-xl text-xs text-white focus:outline-none focus:border-slate-700 w-full"
+                        className="bg-white border border-slate-300 px-3 py-2 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-blue-500 w-full"
                       />
                     </div>
                   )}
                 </div>
               )}
 
-              <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl text-[10px] text-amber-400 leading-relaxed mt-1 flex gap-2">
-                <AlertTriangle size={14} className="shrink-0 mt-0.5" />
+              <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-[10px] text-amber-700 leading-relaxed mt-1 flex gap-2">
+                <AlertTriangle size={14} className="shrink-0 mt-0.5 text-amber-600" />
                 <span>
                   <strong>Lưu ý:</strong> Hành động xóa dữ liệu này là vĩnh viễn và không thể khôi phục lại. Bạn nên xuất file dự phòng trước khi xóa.
                 </span>
               </div>
             </div>
 
-            <div className="flex justify-end gap-3 pt-3 border-t border-slate-900 mt-2">
+            <div className="flex justify-end gap-3 pt-3 border-t border-slate-200 mt-2">
               <button
                 onClick={() => setDeleteModal(prev => ({ ...prev, show: false }))}
-                className="px-4 py-2 hover:bg-slate-800 text-slate-400 text-xs font-bold rounded-xl transition cursor-pointer"
+                className="px-4 py-2 hover:bg-slate-100 text-slate-600 text-xs font-bold rounded-xl transition cursor-pointer"
               >
                 Hủy
               </button>
               <button
                 onClick={handleScopedDelete}
                 disabled={loading}
-                className="px-5 py-2 bg-rose-600 hover:bg-rose-500 text-white text-xs font-black rounded-xl shadow-md shadow-rose-500/10 transition cursor-pointer"
+                className="px-5 py-2 bg-rose-600 hover:bg-rose-500 text-white text-xs font-black rounded-xl shadow-md transition cursor-pointer"
               >
                 Xác Nhận Xóa
               </button>
@@ -1791,17 +1791,17 @@ export default function VocabularyBank({ isActive }: { isActive?: boolean }) {
 
       {/* EXPORT MODAL SELECTOR */}
       {showExportModal && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-6 animate-fade-in">
-          <div className="bg-[#111827] border border-slate-800 rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl">
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-6 animate-fade-in">
+          <div className="bg-white border border-slate-200 rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl">
             {/* Header */}
-            <div className="h-14 border-b border-slate-900 bg-[#0A0D1A]/50 flex items-center justify-between px-6">
-              <span className="text-xs font-black text-white flex items-center gap-2">
+            <div className="h-14 border-b border-slate-200 bg-slate-50 flex items-center justify-between px-6">
+              <span className="text-xs font-black text-slate-900 flex items-center gap-2">
                 <Download className="text-blue-500" size={15} />
                 CẤU HÌNH XUẤT TỪ VỰNG
               </span>
               <button
                 onClick={() => setShowExportModal(false)}
-                className="p-1.5 rounded-lg bg-slate-900/60 hover:bg-slate-800 text-slate-400 hover:text-white transition cursor-pointer"
+                className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-900 transition cursor-pointer"
               >
                 <X size={14} />
               </button>
@@ -1814,7 +1814,7 @@ export default function VocabularyBank({ isActive }: { isActive?: boolean }) {
                 <select
                   value={exportGrade}
                   onChange={(e) => setExportGrade(e.target.value)}
-                  className="w-full px-3.5 py-2.5 bg-white dark:bg-[#080c14] border border-slate-300 dark:border-slate-800 text-xs rounded-xl text-slate-900 dark:text-slate-300 outline-none font-bold cursor-pointer shadow-xs"
+                  className="w-full px-3.5 py-2.5 bg-white border border-slate-300 text-xs rounded-xl text-slate-900 outline-none font-bold cursor-pointer shadow-xs"
                 >
                   {gradesList.map(g => (
                     <option key={g} value={g}>Lớp {g}</option>
@@ -1829,17 +1829,17 @@ export default function VocabularyBank({ isActive }: { isActive?: boolean }) {
                   value={exportUnit}
                   onChange={(e) => setExportUnit(e.target.value)}
                   placeholder="e.g. 1, 2, 3..."
-                  className="w-full px-3.5 py-2.5 bg-white dark:bg-[#080c14] border border-slate-300 dark:border-slate-800 text-xs rounded-xl text-slate-900 dark:text-slate-200 outline-none font-bold shadow-xs"
+                  className="w-full px-3.5 py-2.5 bg-white border border-slate-300 text-xs rounded-xl text-slate-900 outline-none font-bold shadow-xs"
                 />
               </div>
 
               {/* Save to Documents checkbox */}
-              <label className="flex items-center gap-2 mt-2 px-1 text-slate-600 dark:text-slate-350 text-xs font-bold cursor-pointer select-none hover:text-slate-900 dark:hover:text-white transition">
+              <label className="flex items-center gap-2 mt-2 px-1 text-slate-700 text-xs font-bold cursor-pointer select-none hover:text-slate-900 transition">
                 <input 
                   type="checkbox" 
                   checked={saveToDocs} 
                   onChange={(e) => setSaveToDocs(e.target.checked)} 
-                  className="rounded border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-blue-655 focus:ring-blue-500 cursor-pointer"
+                  className="rounded border-slate-300 bg-white text-blue-600 focus:ring-blue-500 cursor-pointer"
                 />
                 <span>Lưu vào Tài liệu (Documents)</span>
               </label>
@@ -1850,7 +1850,7 @@ export default function VocabularyBank({ isActive }: { isActive?: boolean }) {
                   <select
                     value={saveFolderId}
                     onChange={(e) => setSaveFolderId(e.target.value)}
-                    className="w-full px-3.5 py-2.5 bg-white dark:bg-[#080c14] border border-slate-300 dark:border-slate-800 text-xs text-slate-900 dark:text-slate-300 rounded-xl outline-none cursor-pointer transition font-bold shadow-xs"
+                    className="w-full px-3.5 py-2.5 bg-white border border-slate-300 text-xs text-slate-900 rounded-xl outline-none cursor-pointer transition font-bold shadow-xs"
                   >
                     <option value="">📁 Trang chủ (Cấp cao nhất)</option>
                     {folderOptions.map(opt => (
@@ -1866,21 +1866,21 @@ export default function VocabularyBank({ isActive }: { isActive?: boolean }) {
                 <button
                   type="button"
                   onClick={handleExportDocx}
-                  className="py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-black text-xs transition cursor-pointer shadow-md shadow-blue-500/10 text-center"
+                  className="py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-black text-xs transition cursor-pointer shadow-md transition text-center"
                 >
                   Xuất Word
                 </button>
                 <button
                   type="button"
                   onClick={handleExportCsv}
-                  className="py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-black text-xs transition cursor-pointer shadow-md shadow-emerald-500/10 text-center"
+                  className="py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-black text-xs transition cursor-pointer shadow-md transition text-center"
                 >
                   Xuất CSV
                 </button>
                 <button
                   type="button"
                   onClick={() => setShowExportModal(false)}
-                  className="col-span-2 py-2 bg-slate-900 hover:bg-slate-850 border border-slate-800 text-slate-400 rounded-xl font-bold text-xs transition cursor-pointer text-center"
+                  className="col-span-2 py-2 bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-700 rounded-xl font-bold text-xs transition cursor-pointer text-center"
                 >
                   Hủy
                 </button>
@@ -1892,10 +1892,10 @@ export default function VocabularyBank({ isActive }: { isActive?: boolean }) {
 
       {/* CSV Unified Import Modal */}
       {showImportModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm animate-fade-in p-4">
-          <div className="w-full max-w-lg bg-[#111827] border border-slate-800 rounded-3xl p-6 flex flex-col gap-4 text-slate-200 max-h-[90vh] shadow-2xl">
-            <div className="flex items-center justify-between border-b border-slate-900 pb-3">
-              <h3 className="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 animate-fade-in p-4">
+          <div className="w-full max-w-lg bg-white border border-slate-200 rounded-3xl p-6 flex flex-col gap-4 text-slate-800 max-h-[90vh] shadow-2xl">
+            <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+              <h3 className="text-sm font-black text-slate-900 uppercase tracking-wider flex items-center gap-2">
                 <Upload className="text-blue-500" size={16} />
                 Nhập từ vựng từ CSV
               </h3>
@@ -1905,7 +1905,7 @@ export default function VocabularyBank({ isActive }: { isActive?: boolean }) {
                   setPastedCsv('');
                   setSelectedCsvFile(null);
                 }}
-                className="text-slate-500 hover:text-white transition cursor-pointer"
+                className="text-slate-400 hover:text-slate-700 transition cursor-pointer"
               >
                 <X size={16} />
               </button>
@@ -1913,10 +1913,10 @@ export default function VocabularyBank({ isActive }: { isActive?: boolean }) {
 
             <div className="flex flex-col gap-4 overflow-y-auto pr-1">
               {/* Option 1: File selection */}
-              <div className="flex flex-col gap-1.5 bg-[#080b12] border border-slate-855 p-4 rounded-2xl">
-                <label className="text-[10px] font-bold text-slate-450 uppercase">Cách 1: Chọn tệp CSV từ máy tính</label>
+              <div className="flex flex-col gap-1.5 bg-slate-50 border border-slate-200 p-4 rounded-2xl">
+                <label className="text-[10px] font-bold text-slate-500 uppercase">Cách 1: Chọn tệp CSV từ máy tính</label>
                 <div className="flex items-center gap-3 mt-1">
-                  <label className="px-4 py-2 bg-slate-900 border border-slate-800 hover:border-slate-750 text-slate-250 hover:text-white text-xs font-bold rounded-xl cursor-pointer transition flex items-center gap-2">
+                  <label className="px-4 py-2 bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 hover:text-slate-900 text-xs font-bold rounded-xl cursor-pointer transition flex items-center gap-2 shadow-xs">
                     <Upload size={14} />
                     <span>Chọn tệp CSV</span>
                     <input
@@ -1933,14 +1933,14 @@ export default function VocabularyBank({ isActive }: { isActive?: boolean }) {
                       }}
                     />
                   </label>
-                  <span className="text-xs text-slate-400 truncate">
+                  <span className="text-xs text-slate-500 truncate">
                     {selectedCsvFile ? selectedCsvFile.name : "Chưa chọn tệp"}
                   </span>
                   {selectedCsvFile && (
                     <button
                       type="button"
                       onClick={() => setSelectedCsvFile(null)}
-                      className="text-rose-500 hover:text-rose-400 text-xs font-semibold"
+                      className="text-rose-500 hover:text-rose-600 text-xs font-semibold"
                     >
                       Xóa
                     </button>
@@ -1949,8 +1949,8 @@ export default function VocabularyBank({ isActive }: { isActive?: boolean }) {
               </div>
 
               {/* Option 2: Raw pasting */}
-              <div className="flex flex-col gap-1.5 bg-[#080b12] border border-slate-855 p-4 rounded-2xl">
-                <label className="text-[10px] font-bold text-slate-450 uppercase">Cách 2: Dán trực tiếp nội dung CSV</label>
+              <div className="flex flex-col gap-1.5 bg-slate-50 border border-slate-200 p-4 rounded-2xl">
+                <label className="text-[10px] font-bold text-slate-500 uppercase">Cách 2: Dán trực tiếp nội dung CSV</label>
                 <textarea
                   value={pastedCsv}
                   onChange={(e) => {
@@ -1961,33 +1961,33 @@ export default function VocabularyBank({ isActive }: { isActive?: boolean }) {
                   }}
                   placeholder="Dán nội dung CSV tại đây..."
                   rows={6}
-                  className="bg-white dark:bg-[#070b14] border border-slate-300 dark:border-slate-800 focus:border-blue-500 p-3 rounded-xl text-xs text-slate-900 dark:text-slate-200 outline-none placeholder-slate-400 dark:placeholder-slate-600 transition font-mono mt-1 shadow-xs"
+                  className="bg-white border border-slate-300 focus:border-blue-500 p-3 rounded-xl text-xs text-slate-900 outline-none placeholder-slate-400 transition font-mono mt-1 shadow-xs"
                 />
               </div>
 
-              <div className="p-3 bg-blue-500/10 border border-blue-500/20 rounded-xl text-[10px] text-blue-450 leading-normal flex gap-2">
-                <HelpCircle size={14} className="shrink-0 mt-0.5 text-blue-400" />
-                <span className="text-slate-350">
-                  File CSV phải bao gồm tiêu đề tương ứng với các cột: <strong className="text-blue-400">No., Grade, Unit, Vocabulary, POS, IPA, Meaning, Difficulty, Root Word</strong>.
+              <div className="p-3 bg-blue-50 border border-blue-200 rounded-xl text-[10px] text-blue-700 leading-normal flex gap-2">
+                <HelpCircle size={14} className="shrink-0 mt-0.5 text-blue-600" />
+                <span className="text-slate-600">
+                  File CSV phải bao gồm tiêu đề tương ứng với các cột: <strong className="text-blue-600">No., Grade, Unit, Vocabulary, POS, IPA, Meaning, Difficulty, Root Word</strong>.
                 </span>
               </div>
             </div>
 
-            <div className="flex justify-end gap-3 pt-3 border-t border-slate-900 mt-2">
+            <div className="flex justify-end gap-3 pt-3 border-t border-slate-200 mt-2">
               <button
                 onClick={() => {
                   setShowImportModal(false);
                   setPastedCsv('');
                   setSelectedCsvFile(null);
                 }}
-                className="px-4 py-2 hover:bg-slate-800 text-slate-400 text-xs font-bold rounded-xl transition cursor-pointer"
+                className="px-4 py-2 hover:bg-slate-100 text-slate-600 text-xs font-bold rounded-xl transition cursor-pointer"
               >
                 Hủy
               </button>
               <button
                 onClick={handleSubmitImport}
                 disabled={loading || (!selectedCsvFile && !pastedCsv.trim())}
-                className="px-5 py-2 bg-gradient-to-tr from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 disabled:from-slate-850 disabled:to-slate-850 disabled:text-slate-500 disabled:cursor-not-allowed text-white text-xs font-black rounded-xl shadow-md shadow-blue-500/10 transition cursor-pointer"
+                className="px-5 py-2 bg-gradient-to-tr from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-black rounded-xl shadow-md transition cursor-pointer"
               >
                 Bắt đầu kiểm tra
               </button>

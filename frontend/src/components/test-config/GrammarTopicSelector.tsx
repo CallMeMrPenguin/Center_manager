@@ -32,7 +32,7 @@ export const GrammarTopicSelector: React.FC<GrammarTopicSelectorProps> = ({
                 className={`px-2.5 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1 cursor-pointer ${
                   isSelected
                     ? 'bg-purple-600 text-white shadow-[0_0_10px_rgba(168,85,247,0.4)] border border-purple-400'
-                    : 'bg-[#151a2e] text-slate-300 hover:text-white border border-[#212c4b] hover:border-purple-500/50'
+                    : 'bg-slate-100 text-slate-700 hover:text-slate-900 border border-slate-200 hover:border-purple-300'
                 }`}
               >
                 {isSelected && <Check size={11} className="stroke-[3]" />}
@@ -47,7 +47,7 @@ export const GrammarTopicSelector: React.FC<GrammarTopicSelectorProps> = ({
               className={`px-2 py-1 rounded-lg text-[11px] font-semibold transition cursor-pointer ${
                 currentTopic === availableTopics.join(' , ')
                   ? 'bg-indigo-600 text-white border border-indigo-400'
-                  : 'bg-white/5 text-slate-400 hover:text-white'
+                  : 'bg-slate-100 text-slate-600 hover:text-slate-900 border border-slate-200'
               }`}
             >
               Tất cả ({availableTopics.length}) chủ đề
@@ -60,7 +60,7 @@ export const GrammarTopicSelector: React.FC<GrammarTopicSelectorProps> = ({
         value={currentTopic}
         onChange={(e) => onChange(e.target.value)}
         placeholder="Tên chủ đề ngữ pháp..."
-        className="w-full px-3 py-1.5 bg-[#0a0d17] border border-purple-500/30 focus:border-purple-500 rounded-lg text-xs text-white placeholder-slate-500 focus:outline-none"
+        className="w-full px-3 py-1.5 bg-white border border-purple-200 focus:border-purple-500 rounded-lg text-xs text-slate-800 placeholder-slate-400 focus:outline-none shadow-xs"
       />
     </div>
   );

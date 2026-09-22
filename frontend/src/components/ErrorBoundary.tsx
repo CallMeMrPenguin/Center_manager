@@ -26,10 +26,10 @@ export class ErrorBoundary extends Component<Props, State> {
   public render() {
     if (this.state.hasError) {
       return (
-        <div className="h-screen w-screen bg-[#08090e] text-white flex flex-col items-center justify-center p-6 text-center">
-          <div className="max-w-md bg-[#141824] border border-red-500/30 p-8 rounded-2xl shadow-2xl">
-            <h2 className="text-xl font-bold text-red-400 mb-2">Đã Xảy Ra Lỗi Hệ Thống</h2>
-            <p className="text-xs text-slate-300 mb-4 font-mono bg-black/40 p-3 rounded-lg overflow-x-auto text-left">
+        <div className="h-screen w-screen bg-slate-100 text-slate-800 flex flex-col items-center justify-center p-6 text-center">
+          <div className="max-w-md bg-white border border-red-200 p-8 rounded-2xl shadow-xl">
+            <h2 className="text-xl font-bold text-red-600 mb-2">Đã Xảy Ra Lỗi Hệ Thống</h2>
+            <p className="text-xs text-slate-700 mb-4 font-mono bg-slate-50 border border-slate-200 p-3 rounded-lg overflow-x-auto text-left">
               {this.state.error?.toString()}
             </p>
             <button

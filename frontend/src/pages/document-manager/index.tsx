@@ -94,11 +94,11 @@ function TagSelector({ selectedTags, onChange, availableTags, placeholder = "Ch�
   return (
     <div className="relative" ref={containerRef}>
       <div 
-        className="w-full min-h-[38px] p-1.5 bg-[#070b14] border border-slate-800 focus-within:border-blue-500/50 rounded-xl flex flex-wrap gap-1 items-center cursor-text"
+        className="w-full min-h-[38px] p-1.5 bg-white border border-slate-200 focus-within:border-blue-500 rounded-xl flex flex-wrap gap-1 items-center cursor-text shadow-xs"
         onClick={() => setIsOpen(true)}
       >
         {selectedTags.map(tag => (
-          <span key={tag} className="bg-blue-600/20 text-blue-450 text-[10px] font-bold px-2 py-0.5 rounded-lg flex items-center gap-1">
+          <span key={tag} className="bg-blue-50 text-blue-700 border border-blue-200 text-[10px] font-bold px-2 py-0.5 rounded-lg flex items-center gap-1">
             {tag}
             <button 
               type="button" 
@@ -106,7 +106,7 @@ function TagSelector({ selectedTags, onChange, availableTags, placeholder = "Ch�
                 e.stopPropagation();
                 onChange(selectedTags.filter(t => t !== tag));
               }}
-              className="hover:text-red-405 transition cursor-pointer"
+              className="hover:text-red-500 transition cursor-pointer"
             >
               <X size={10} />
             </button>
@@ -118,12 +118,12 @@ function TagSelector({ selectedTags, onChange, availableTags, placeholder = "Ch�
           onChange={(e) => { setInputValue(e.target.value); setIsOpen(true); }}
           onKeyDown={handleKeyDown}
           placeholder={selectedTags.length === 0 ? placeholder : ''}
-          className="flex-1 min-w-[80px] bg-transparent border-none outline-none text-xs text-white placeholder-slate-655"
+          className="flex-1 min-w-[80px] bg-transparent border-none outline-none text-xs text-slate-800 placeholder-slate-400"
         />
       </div>
 
       {isOpen && (filteredTags.length > 0 || inputValue.trim()) && (
-        <div className="absolute left-0 right-0 mt-1 max-h-48 overflow-y-auto bg-[#0c1222] border border-slate-800 rounded-xl shadow-2xl z-[60] p-1 flex flex-col gap-0.5">
+        <div className="absolute left-0 right-0 mt-1 max-h-48 overflow-y-auto bg-white border border-slate-200 rounded-xl shadow-xl z-[60] p-1 flex flex-col gap-0.5">
           {inputValue.trim() && !availableTags.includes(inputValue.trim()) && (
             <button
               type="button"
@@ -132,7 +132,7 @@ function TagSelector({ selectedTags, onChange, availableTags, placeholder = "Ch�
                 onChange([...selectedTags, newTag]);
                 setInputValue('');
               }}
-              className="w-full text-left px-2.5 py-1.5 rounded-lg text-xs text-blue-400 hover:bg-slate-850 font-bold transition flex items-center gap-1.5 cursor-pointer"
+              className="w-full text-left px-2.5 py-1.5 rounded-lg text-xs text-blue-600 hover:bg-slate-50 font-bold transition flex items-center gap-1.5 cursor-pointer"
             >
               <Plus size={12} />
               Thêm nhãn "{inputValue.trim()}"
@@ -143,7 +143,7 @@ function TagSelector({ selectedTags, onChange, availableTags, placeholder = "Ch�
               key={tag}
               type="button"
               onClick={() => handleSelectTag(tag)}
-              className="w-full text-left px-2.5 py-1.5 rounded-lg text-xs text-slate-300 hover:bg-slate-855 transition cursor-pointer"
+              className="w-full text-left px-2.5 py-1.5 rounded-lg text-xs text-slate-700 hover:bg-slate-50 transition cursor-pointer"
             >
               {tag}
             </button>
@@ -761,8 +761,8 @@ export default function DocumentManager() {
             onClick={() => { setSelectedFolderId(String(node.id)); setSelectedTag(''); }}
             className={`w-full text-left px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center justify-between transition cursor-pointer ${
               isSelected
-                ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20' 
-                : 'text-slate-355 hover:bg-slate-800/40 hover:text-white border border-transparent'
+                ? 'bg-blue-50 text-blue-700 border border-blue-200' 
+                : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 border border-transparent'
             }`}
           >
             <span className="flex items-center gap-1.5 truncate pr-6">
@@ -770,7 +770,7 @@ export default function DocumentManager() {
                 <button
                   type="button"
                   onClick={(e) => toggleFolderExpand(node.id, e)}
-                  className="p-0.5 hover:bg-slate-850 rounded text-slate-500 hover:text-slate-350 transition cursor-pointer"
+                  className="p-0.5 hover:bg-slate-200 rounded text-slate-400 hover:text-slate-700 transition cursor-pointer"
                 >
                   <ChevronRight 
                     size={10} 
@@ -794,7 +794,7 @@ export default function DocumentManager() {
         </div>
         
         {hasChildren && isExpanded && (
-          <div className="flex flex-col mt-0.5 ml-2 border-l border-slate-850/40 pl-2">
+          <div className="flex flex-col mt-0.5 ml-2 border-l border-slate-200 pl-2">
             {node.children.map(child => renderFolderNode(child, level + 1))}
           </div>
         )}
@@ -818,7 +818,7 @@ export default function DocumentManager() {
       <button
         key={node.id}
         onClick={() => handleMoveDocument(String(node.id))}
-        className="w-full text-left px-3 py-2 bg-slate-900/30 hover:bg-slate-850 text-xs font-bold rounded-xl text-slate-300 border border-slate-850 hover:border-slate-750 transition cursor-pointer flex items-center gap-1.5"
+        className="w-full text-left px-3 py-2 bg-slate-50 hover:bg-slate-100 text-xs font-bold rounded-xl text-slate-700 border border-slate-200 hover:border-slate-300 transition cursor-pointer flex items-center gap-1.5"
       >
         <span>{"\u00A0\u00A0".repeat(depth) + "📁"}</span>
         <span>{node.name}</span>
@@ -832,7 +832,7 @@ export default function DocumentManager() {
       <button
         key={node.id}
         onClick={() => handleBatchMove(String(node.id))}
-        className="w-full text-left px-3 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-900/30 dark:hover:bg-slate-850 text-xs font-bold rounded-xl text-slate-800 dark:text-slate-300 border border-slate-300 dark:border-slate-855 hover:border-slate-400 transition cursor-pointer flex items-center gap-1.5"
+        className="w-full text-left px-3 py-2 bg-slate-50 hover:bg-slate-100 text-xs font-bold rounded-xl text-slate-700 border border-slate-200 hover:border-slate-300 transition cursor-pointer flex items-center gap-1.5"
       >
         <span>{"\u00A0\u00A0".repeat(depth) + "📁"}</span>
         <span>{node.name}</span>
@@ -1385,13 +1385,13 @@ export default function DocumentManager() {
 
       {/* Floating Media Player */}
       {activeMediaPlayer && (
-        <div className="fixed bottom-6 right-6 z-[100] bg-[#0c1222] border border-slate-705 rounded-2xl shadow-2xl p-4 w-96 flex flex-col gap-3">
-          <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+        <div className="fixed bottom-6 right-6 z-[100] bg-white border border-slate-200 rounded-2xl shadow-2xl p-4 w-96 flex flex-col gap-3">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-2">
             <div className="flex items-center gap-2 truncate">
               {activeMediaPlayer.type === 'audio' ? <Music size={14} className="text-blue-500" /> : <Video size={14} className="text-purple-500" />}
-              <span className="text-[10px] font-bold text-slate-200 truncate">{activeMediaPlayer.name}</span>
+              <span className="text-[10px] font-bold text-slate-800 truncate">{activeMediaPlayer.name}</span>
             </div>
-            <button onClick={() => setActiveMediaPlayer(null)} className="text-slate-455 hover:text-white transition">
+            <button onClick={() => setActiveMediaPlayer(null)} className="text-slate-400 hover:text-slate-700 transition cursor-pointer">
               <X size={14} />
             </button>
           </div>
@@ -1408,32 +1408,32 @@ export default function DocumentManager() {
       {activeDocForAttachments && (
         <div className="fixed inset-0 z-50 overflow-hidden flex justify-end">
           <div 
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity" 
+            className="absolute inset-0 bg-black/60 transition-opacity" 
             onClick={() => setActiveDocForAttachments(null)}
           ></div>
           
-          <div className="relative w-full max-w-md h-full bg-[#070b14] border-l border-slate-800 shadow-2xl flex flex-col justify-between z-10">
+          <div className="relative w-full max-w-md h-full bg-white border-l border-slate-200 shadow-2xl flex flex-col justify-between z-10">
             <div className="flex flex-col gap-6 p-6 overflow-y-auto flex-1">
               
               {/* Drawer Header */}
-              <div className="flex items-start justify-between border-b border-slate-900 pb-4">
+              <div className="flex items-start justify-between border-b border-slate-100 pb-4">
                 <div>
-                  <h3 className="text-sm font-bold text-white pr-6 line-clamp-2">{activeDocForAttachments.name}</h3>
-                  <p className="text-[9px] text-slate-505 font-mono mt-1 flex items-center gap-1">
+                  <h3 className="text-sm font-bold text-slate-900 pr-6 line-clamp-2">{activeDocForAttachments.name}</h3>
+                  <p className="text-[9px] text-slate-500 font-mono mt-1 flex items-center gap-1">
                     Tệp gốc: {activeDocForAttachments.filename}
                   </p>
                 </div>
                 <button 
                   onClick={() => setActiveDocForAttachments(null)}
-                  className="p-1 rounded-lg text-slate-555 hover:text-white hover:bg-slate-855 transition cursor-pointer"
+                  className="p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition cursor-pointer"
                 >
                   <X size={16} />
                 </button>
               </div>
 
               {/* Upload New Attachment Zone */}
-              <div className="bg-slate-900/30 border border-slate-800 p-4 rounded-2xl flex flex-col gap-3">
-                <h4 className="text-[10px] font-bold text-slate-355 uppercase tracking-wider flex items-center gap-1.5">
+              <div className="bg-slate-50 border border-slate-200 p-4 rounded-2xl flex flex-col gap-3">
+                <h4 className="text-[10px] font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
                   <Upload size={12} className="text-blue-500" />
                   Đính Kèm Tệp Mới
                 </h4>
@@ -1451,10 +1451,10 @@ export default function DocumentManager() {
                   />
                   <label
                     htmlFor="attachment-file-input"
-                    className="w-full py-4 border border-dashed border-slate-805 hover:border-blue-500/50 rounded-xl flex flex-col items-center justify-center gap-2 cursor-pointer bg-slate-900/10 hover:bg-slate-900/40 transition"
+                    className="w-full py-4 border border-dashed border-slate-300 hover:border-blue-500 rounded-xl flex flex-col items-center justify-center gap-2 cursor-pointer bg-white hover:bg-blue-50/50 transition"
                   >
-                    <Plus size={16} className="text-slate-500" />
-                    <span className="text-[10px] text-slate-400 font-bold">
+                    <Plus size={16} className="text-slate-400" />
+                    <span className="text-[10px] text-slate-600 font-bold">
                       {attachmentFile ? attachmentFile.name : "Chọn tệp MP3, MP4, PDF, Đáp án..."}
                     </span>
                   </label>
@@ -1463,13 +1463,13 @@ export default function DocumentManager() {
                     <div className="flex gap-2">
                       <button
                         onClick={() => setAttachmentFile(null)}
-                        className="flex-1 py-2 bg-slate-855 hover:bg-slate-800 text-[10px] text-slate-300 font-bold rounded-lg border border-slate-700/60 transition cursor-pointer"
+                        className="flex-1 py-2 bg-slate-100 hover:bg-slate-200 text-[10px] text-slate-700 font-bold rounded-lg border border-slate-200 transition cursor-pointer"
                       >
                         Hủy
                       </button>
                       <button
                         onClick={handleUploadAttachment}
-                        className="flex-1 py-2 bg-blue-600 hover:bg-blue-500 text-[10px] text-white font-extrabold rounded-lg transition cursor-pointer"
+                        className="flex-1 py-2 bg-blue-600 hover:bg-blue-700 text-[10px] text-white font-extrabold rounded-lg transition cursor-pointer"
                       >
                         Tải lên
                       </button>
@@ -1480,11 +1480,11 @@ export default function DocumentManager() {
 
               {/* Attachments List */}
               <div className="flex flex-col gap-3">
-                <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Danh sách đính kèm</h4>
+                <h4 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-1">Danh sách đính kèm</h4>
                 
                 {!activeDocForAttachments.attachments || activeDocForAttachments.attachments.length === 0 ? (
-                  <div className="text-center py-10 text-slate-555 border border-dashed border-slate-850 rounded-2xl">
-                    <Info size={24} className="mx-auto text-slate-755 mb-2" />
+                  <div className="text-center py-10 text-slate-400 border border-dashed border-slate-200 rounded-2xl">
+                    <Info size={24} className="mx-auto text-slate-300 mb-2" />
                     <p className="text-[10px]">Chưa có tệp đính kèm nào</p>
                   </div>
                 ) : (
@@ -1492,22 +1492,22 @@ export default function DocumentManager() {
                     {activeDocForAttachments.attachments.map(att => (
                       <div 
                         key={att.id} 
-                        className="bg-slate-900/40 border border-slate-800 p-3 rounded-xl flex items-center justify-between gap-3 group/item"
+                        className="bg-slate-50 border border-slate-200 p-3 rounded-xl flex items-center justify-between gap-3 group/item"
                       >
                         <div className="flex items-center gap-2.5 min-w-0">
-                          <div className="p-2 bg-slate-850 rounded-lg">
+                          <div className="p-2 bg-slate-100 rounded-lg">
                             {getFileIcon(att.file_type)}
                           </div>
                           
                           <div className="min-w-0">
                             <span 
                               onClick={() => handleOpenFileNative(att.filepath)}
-                              className="text-[10px] font-semibold text-slate-200 hover:text-blue-400 cursor-pointer truncate block"
+                              className="text-[10px] font-semibold text-slate-800 hover:text-blue-600 cursor-pointer truncate block"
                               title={att.filename}
                             >
                               {att.filename}
                             </span>
-                            <span className="text-[8px] text-slate-505 font-mono">
+                            <span className="text-[8px] text-slate-400 font-mono">
                               {formatBytes(att.file_size)}
                             </span>
                           </div>
@@ -1526,7 +1526,7 @@ export default function DocumentManager() {
                                   name: att.filename
                                 });
                               }}
-                              className="p-1.5 hover:bg-blue-500/10 text-blue-500 hover:text-blue-455 rounded-lg transition cursor-pointer"
+                              className="p-1.5 hover:bg-blue-50 text-blue-600 rounded-lg transition cursor-pointer"
                               title="Phát nhạc/video trực tiếp"
                             >
                               <Play size={10} />
@@ -1535,7 +1535,7 @@ export default function DocumentManager() {
                           
                           <button
                             onClick={() => handleOpenFileNative(att.filepath)}
-                            className="p-1.5 hover:bg-slate-800 text-slate-405 hover:text-white rounded-lg transition cursor-pointer"
+                            className="p-1.5 hover:bg-slate-200 text-slate-500 hover:text-slate-800 rounded-lg transition cursor-pointer"
                             title="Xem nhanh tệp tin"
                           >
                             <Eye size={10} />
@@ -1544,7 +1544,7 @@ export default function DocumentManager() {
                           <a
                             href={api.downloadAttachmentUrl(att.id)}
                             download={att.filename}
-                            className="p-1.5 hover:bg-slate-800 text-slate-405 hover:text-white rounded-lg transition cursor-pointer"
+                            className="p-1.5 hover:bg-slate-200 text-slate-500 hover:text-slate-800 rounded-lg transition cursor-pointer"
                             title="Tải đính kèm"
                           >
                             <Download size={10} />
@@ -1552,7 +1552,7 @@ export default function DocumentManager() {
 
                           <button
                             onClick={() => handleDeleteAttachment(att)}
-                            className="p-1.5 hover:bg-slate-800 text-slate-455 hover:text-red-400 rounded-lg transition cursor-pointer"
+                            className="p-1.5 hover:bg-rose-50 text-slate-400 hover:text-rose-600 rounded-lg transition cursor-pointer"
                             title="Xóa đính kèm"
                           >
                             <Trash2 size={10} />
@@ -1572,37 +1572,37 @@ export default function DocumentManager() {
       {/* Modal: Create Folder */}
       {showFolderModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowFolderModal(false)}></div>
-          <div className="relative bg-[#0c1222] border border-slate-800 rounded-2xl shadow-xl w-full max-w-sm p-6 flex flex-col gap-4 animate-scale-up">
-            <div className="flex items-center justify-between pb-2 border-b border-slate-850">
-              <h3 className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+          <div className="absolute inset-0 bg-black/60" onClick={() => setShowFolderModal(false)}></div>
+          <div className="relative bg-white border border-slate-200 rounded-2xl shadow-2xl w-full max-w-sm p-6 flex flex-col gap-4 animate-scale-up">
+            <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+              <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
                 <FolderPlus size={14} className="text-blue-500" />
                 Tạo Thư Mục Mới
               </h3>
-              <button onClick={() => setShowFolderModal(false)} className="text-slate-455 hover:text-white transition">
+              <button onClick={() => setShowFolderModal(false)} className="text-slate-400 hover:text-slate-700 transition cursor-pointer">
                 <X size={14} />
               </button>
             </div>
             
             <div className="flex flex-col gap-3">
               <div className="flex flex-col gap-1.5">
-                <label className="text-[9px] font-bold text-slate-455 uppercase">Tên thư mục:</label>
+                <label className="text-[9px] font-bold text-slate-500 uppercase">Tên thư mục:</label>
                 <input
                   type="text"
                   placeholder="Nhập tên thư mục..."
                   value={newFolderName}
                   onChange={(e) => setNewFolderName(e.target.value)}
-                  className="w-full px-3 py-2 bg-[#070b14] border border-slate-800 focus:border-blue-500/50 rounded-xl text-xs text-white placeholder-slate-655 outline-none transition"
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 focus:border-blue-500 rounded-xl text-xs text-slate-800 placeholder-slate-400 outline-none transition"
                   autoFocus
                 />
               </div>
 
               <div className="flex flex-col gap-1.5">
-                <label className="text-[9px] font-bold text-slate-455 uppercase">Thư mục cha:</label>
+                <label className="text-[9px] font-bold text-slate-500 uppercase">Thư mục cha:</label>
                 <select
                   value={newFolderParentId}
                   onChange={(e) => setNewFolderParentId(e.target.value)}
-                  className="w-full px-3 py-2 bg-[#070b14] border border-slate-805 text-xs text-slate-300 rounded-xl outline-none cursor-pointer"
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 text-xs text-slate-800 rounded-xl outline-none cursor-pointer"
                 >
                   <option value="">Trang chủ (Không có cha)</option>
                   {renderFolderOptions(folderTree)}
@@ -1613,13 +1613,13 @@ export default function DocumentManager() {
             <div className="flex gap-2.5 pt-2">
               <button
                 onClick={() => setShowFolderModal(false)}
-                className="flex-1 py-2 bg-slate-855 hover:bg-slate-800 text-xs text-slate-300 font-bold rounded-xl border border-slate-700/60 transition cursor-pointer"
+                className="flex-1 py-2 bg-slate-100 hover:bg-slate-200 text-xs text-slate-700 font-bold rounded-xl border border-slate-200 transition cursor-pointer"
               >
                 Hủy
               </button>
               <button
                 onClick={handleCreateFolder}
-                className="flex-1 py-2 bg-blue-600 hover:bg-blue-500 text-xs text-white font-extrabold rounded-xl transition cursor-pointer"
+                className="flex-1 py-2 bg-blue-600 hover:bg-blue-700 text-xs text-white font-extrabold rounded-xl transition cursor-pointer shadow-sm"
               >
                 Tạo Thư Mục
               </button>
@@ -1631,14 +1631,14 @@ export default function DocumentManager() {
       {/* Modal: Manual File Upload */}
       {showUploadModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowUploadModal(false)}></div>
-          <div className="relative bg-[#0c1222] border border-slate-800 rounded-2xl shadow-xl w-full max-w-md p-6 flex flex-col gap-4 animate-scale-up">
-            <div className="flex items-center justify-between pb-2 border-b border-slate-855">
-              <h3 className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+          <div className="absolute inset-0 bg-black/60" onClick={() => setShowUploadModal(false)}></div>
+          <div className="relative bg-white border border-slate-200 rounded-2xl shadow-2xl w-full max-w-md p-6 flex flex-col gap-4 animate-scale-up">
+            <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+              <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
                 <Upload size={14} className="text-blue-500" />
                 Tải Lên Tài Liệu Mới
               </h3>
-              <button onClick={() => setShowUploadModal(false)} className="text-slate-455 hover:text-white transition">
+              <button onClick={() => setShowUploadModal(false)} className="text-slate-400 hover:text-slate-700 transition cursor-pointer">
                 <X size={14} />
               </button>
             </div>
@@ -1646,7 +1646,7 @@ export default function DocumentManager() {
             {/* Selector */}
             <div className="flex flex-col gap-3">
               <div className="flex flex-col gap-1.5">
-                <label className="text-[9px] font-bold text-slate-455 uppercase">Chọn tệp tin (Giữ Ctrl để chọn nhiều):</label>
+                <label className="text-[9px] font-bold text-slate-500 uppercase">Chọn tệp tin (Giữ Ctrl để chọn nhiều):</label>
                 <input
                   type="file"
                   id="doc-upload-input"
@@ -1660,10 +1660,10 @@ export default function DocumentManager() {
                 />
                 <label
                   htmlFor="doc-upload-input"
-                  className="w-full py-6 border border-dashed border-slate-805 hover:border-blue-500/50 rounded-xl flex flex-col items-center justify-center gap-2 cursor-pointer bg-slate-900/10 hover:bg-slate-900/40 transition"
+                  className="w-full py-6 border border-dashed border-slate-300 hover:border-blue-500 rounded-xl flex flex-col items-center justify-center gap-2 cursor-pointer bg-slate-50 hover:bg-blue-50/50 transition"
                 >
-                  <Plus size={18} className="text-slate-505" />
-                  <span className="text-xs text-slate-400 font-bold text-center px-4">
+                  <Plus size={18} className="text-slate-400" />
+                  <span className="text-xs text-slate-600 font-bold text-center px-4">
                     {uploadFiles.length > 0 
                       ? `Đã chọn ${uploadFiles.length} tệp tin` 
                       : "Kéo thả hoặc nhấp chọn tệp tin"
@@ -1674,15 +1674,15 @@ export default function DocumentManager() {
 
               {/* Show Staged Files list if multiple */}
               {uploadFiles.length > 0 && (
-                <div className="flex flex-col gap-1.5 max-h-36 overflow-y-auto border border-slate-800 p-2 rounded-xl bg-[#070b14]/50 font-mono">
+                <div className="flex flex-col gap-1.5 max-h-36 overflow-y-auto border border-slate-200 p-2 rounded-xl bg-slate-50 font-mono">
                   <label className="text-[8px] font-bold text-slate-500 uppercase px-1">Danh sách tệp tin ({uploadFiles.length}):</label>
                   {uploadFiles.map((file, idx) => (
-                    <div key={idx} className="flex items-center justify-between text-[10px] text-slate-305 bg-slate-900/50 px-2 py-1.5 rounded-lg border border-slate-850/50">
+                    <div key={idx} className="flex items-center justify-between text-[10px] text-slate-700 bg-white px-2 py-1.5 rounded-lg border border-slate-200">
                       <span className="truncate pr-4">{file.name}</span>
                       <button
                         type="button"
                         onClick={() => setUploadFiles(uploadFiles.filter((_, i) => i !== idx))}
-                        className="text-slate-500 hover:text-red-405 transition cursor-pointer"
+                        className="text-slate-400 hover:text-red-500 transition cursor-pointer"
                       >
                         <X size={12} />
                       </button>
@@ -1692,11 +1692,11 @@ export default function DocumentManager() {
               )}
 
               <div className="flex flex-col gap-1.5">
-                <label className="text-[9px] font-bold text-slate-455 uppercase">Thư mục lưu trữ:</label>
+                <label className="text-[9px] font-bold text-slate-500 uppercase">Thư mục lưu trữ:</label>
                 <select
                   value={uploadFolderId}
                   onChange={(e) => setUploadFolderId(e.target.value)}
-                  className="bg-[#070b14] border border-slate-800 px-3 py-2 rounded-xl text-xs text-white outline-none cursor-pointer"
+                  className="bg-slate-50 border border-slate-200 px-3 py-2 rounded-xl text-xs text-slate-800 outline-none cursor-pointer"
                 >
                   <option value="">Trang chủ (Không có cha)</option>
                   {renderFolderOptions(folderTree)}
@@ -1704,7 +1704,7 @@ export default function DocumentManager() {
               </div>
 
               <div className="flex flex-col gap-1.5">
-                <label className="text-[9px] font-bold text-slate-455 uppercase">Nhãn dán (Chọn từ Dropbox hoặc nhập mới):</label>
+                <label className="text-[9px] font-bold text-slate-500 uppercase">Nhãn dán (Chọn từ Dropbox hoặc nhập mới):</label>
                 <TagSelector 
                   selectedTags={uploadTags} 
                   onChange={setUploadTags} 
@@ -1721,14 +1721,14 @@ export default function DocumentManager() {
                   setUploadTags([]);
                   setShowUploadModal(false);
                 }}
-                className="flex-1 py-2 bg-slate-855 hover:bg-slate-800 text-xs text-slate-300 font-bold rounded-xl border border-slate-700/60 transition cursor-pointer"
+                className="flex-1 py-2 bg-slate-100 hover:bg-slate-200 text-xs text-slate-700 font-bold rounded-xl border border-slate-200 transition cursor-pointer"
               >
                 Hủy
               </button>
               <button
                 onClick={handleUploadDocuments}
                 disabled={loading || uploadFiles.length === 0}
-                className="flex-1 py-2 bg-blue-600 hover:bg-blue-500 disabled:bg-blue-800 disabled:text-slate-400 text-xs text-white font-extrabold rounded-xl transition cursor-pointer flex items-center justify-center gap-1.5"
+                className="flex-1 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-xs text-white font-extrabold rounded-xl transition cursor-pointer flex items-center justify-center gap-1.5 shadow-sm"
               >
                 {loading ? "Đang tải lên..." : `Tải Lên (${uploadFiles.length})`}
               </button>
@@ -1740,26 +1740,26 @@ export default function DocumentManager() {
       {/* Modal: Move Single Document */}
       {movingDoc && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setMovingDoc(null)}></div>
-          <div className="relative bg-[#0c1222] border border-slate-800 rounded-2xl shadow-xl w-full max-w-sm p-6 flex flex-col gap-4 animate-scale-up">
-            <div className="flex items-center justify-between pb-2 border-b border-slate-850">
-              <h3 className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+          <div className="absolute inset-0 bg-black/60" onClick={() => setMovingDoc(null)}></div>
+          <div className="relative bg-white border border-slate-200 rounded-2xl shadow-2xl w-full max-w-sm p-6 flex flex-col gap-4 animate-scale-up">
+            <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+              <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
                 <Move size={14} className="text-blue-500" />
                 Di Chuyển Thư Mục
               </h3>
-              <button onClick={() => setMovingDoc(null)} className="text-slate-455 hover:text-white transition">
+              <button onClick={() => setMovingDoc(null)} className="text-slate-400 hover:text-slate-700 transition cursor-pointer">
                 <X size={14} />
               </button>
             </div>
 
-            <p className="text-[10px] text-slate-450 leading-relaxed">
+            <p className="text-[10px] text-slate-600 leading-relaxed">
               Chọn thư mục đích cho tài liệu <strong>{movingDoc.name}</strong>.
             </p>
 
             <div className="flex flex-col gap-2 max-h-60 overflow-y-auto pr-1">
               <button
                 onClick={() => handleMoveDocument(null)}
-                className="w-full text-left px-3 py-2.5 bg-slate-900/30 hover:bg-slate-850 text-xs font-bold rounded-xl text-slate-300 border border-slate-850 hover:border-slate-700 transition cursor-pointer"
+                className="w-full text-left px-3 py-2.5 bg-slate-50 hover:bg-slate-100 text-xs font-bold rounded-xl text-slate-700 border border-slate-200 hover:border-slate-300 transition cursor-pointer"
               >
                 📁 Trang chủ
               </button>
@@ -1772,20 +1772,20 @@ export default function DocumentManager() {
       {/* Modal: Edit Single Document Tags */}
       {editingTagsDoc && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setEditingTagsDoc(null)}></div>
-          <div className="relative bg-[#0c1222] border border-slate-800 rounded-2xl shadow-xl w-full max-w-sm p-6 flex flex-col gap-4 animate-scale-up">
-            <div className="flex items-center justify-between pb-2 border-b border-slate-850">
-              <h3 className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+          <div className="absolute inset-0 bg-black/60" onClick={() => setEditingTagsDoc(null)}></div>
+          <div className="relative bg-white border border-slate-200 rounded-2xl shadow-2xl w-full max-w-sm p-6 flex flex-col gap-4 animate-scale-up">
+            <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+              <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
                 <Tag size={14} className="text-blue-500" />
                 Sửa Nhãn Dán (Tags)
               </h3>
-              <button onClick={() => setEditingTagsDoc(null)} className="text-slate-455 hover:text-white transition">
+              <button onClick={() => setEditingTagsDoc(null)} className="text-slate-400 hover:text-slate-700 transition cursor-pointer">
                 <X size={14} />
               </button>
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <label className="text-[9px] font-bold text-slate-455 uppercase">Các nhãn (Chọn từ Dropbox hoặc nhập mới):</label>
+              <label className="text-[9px] font-bold text-slate-500 uppercase">Các nhãn (Chọn từ Dropbox hoặc nhập mới):</label>
               <TagSelector 
                 selectedTags={tempTags} 
                 onChange={setTempTags} 
@@ -1797,13 +1797,13 @@ export default function DocumentManager() {
             <div className="flex gap-2.5 pt-2">
               <button
                 onClick={() => setEditingTagsDoc(null)}
-                className="flex-1 py-2 bg-slate-855 hover:bg-slate-800 text-xs text-slate-300 font-bold rounded-xl border border-slate-700/60 transition cursor-pointer"
+                className="flex-1 py-2 bg-slate-100 hover:bg-slate-200 text-xs text-slate-700 font-bold rounded-xl border border-slate-200 transition cursor-pointer"
               >
                 Hủy
               </button>
               <button
                 onClick={handleUpdateTags}
-                className="flex-1 py-2 bg-blue-600 hover:bg-blue-500 text-xs text-white font-extrabold rounded-xl transition cursor-pointer"
+                className="flex-1 py-2 bg-blue-600 hover:bg-blue-700 text-xs text-white font-extrabold rounded-xl transition cursor-pointer shadow-sm"
               >
                 Lưu Thay Đổi
               </button>
@@ -1815,26 +1815,26 @@ export default function DocumentManager() {
       {/* Modal: Batch Move Selected Documents */}
       {showBatchMoveModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowBatchMoveModal(false)}></div>
-          <div className="relative bg-[#0c1222] border border-slate-800 rounded-2xl shadow-xl w-full max-w-sm p-6 flex flex-col gap-4 animate-scale-up">
-            <div className="flex items-center justify-between pb-2 border-b border-slate-850">
-              <h3 className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+          <div className="absolute inset-0 bg-black/60" onClick={() => setShowBatchMoveModal(false)}></div>
+          <div className="relative bg-white border border-slate-200 rounded-2xl shadow-2xl w-full max-w-sm p-6 flex flex-col gap-4 animate-scale-up">
+            <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+              <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
                 <Move size={14} className="text-blue-500" />
                 Di Chuyển Hàng Loạt
               </h3>
-              <button onClick={() => setShowBatchMoveModal(false)} className="text-slate-455 hover:text-white transition">
+              <button onClick={() => setShowBatchMoveModal(false)} className="text-slate-400 hover:text-slate-700 transition cursor-pointer">
                 <X size={14} />
               </button>
             </div>
 
-            <p className="text-[10px] text-slate-455 leading-relaxed">
+            <p className="text-[10px] text-slate-600 leading-relaxed">
               Chọn thư mục điểm đến cho <strong>{selectedDocIds.length}</strong> tài liệu đã chọn.
             </p>
 
             <div className="flex flex-col gap-2 max-h-60 overflow-y-auto pr-1">
               <button
                 onClick={() => handleBatchMove(null)}
-                className="w-full text-left px-3 py-2.5 bg-slate-900/30 hover:bg-slate-850 text-xs font-bold rounded-xl text-slate-300 border border-slate-850 hover:border-slate-700 transition cursor-pointer"
+                className="w-full text-left px-3 py-2.5 bg-slate-50 hover:bg-slate-100 text-xs font-bold rounded-xl text-slate-700 border border-slate-200 hover:border-slate-300 transition cursor-pointer"
               >
                 📁 Trang chủ
               </button>
@@ -1847,24 +1847,24 @@ export default function DocumentManager() {
       {/* Modal: Batch Update Tags */}
       {showBatchTagsModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowBatchTagsModal(false)}></div>
-          <div className="relative bg-[#0c1222] border border-slate-800 rounded-2xl shadow-xl w-full max-w-sm p-6 flex flex-col gap-4 animate-scale-up">
-            <div className="flex items-center justify-between pb-2 border-b border-slate-850">
-              <h3 className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+          <div className="absolute inset-0 bg-black/60" onClick={() => setShowBatchTagsModal(false)}></div>
+          <div className="relative bg-white border border-slate-200 rounded-2xl shadow-2xl w-full max-w-sm p-6 flex flex-col gap-4 animate-scale-up">
+            <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+              <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
                 <Tag size={14} className="text-blue-500" />
                 Gắn Nhãn Đồng Loạt
               </h3>
-              <button onClick={() => setShowBatchTagsModal(false)} className="text-slate-455 hover:text-white transition">
+              <button onClick={() => setShowBatchTagsModal(false)} className="text-slate-400 hover:text-slate-700 transition cursor-pointer">
                 <X size={14} />
               </button>
             </div>
 
-            <p className="text-[10px] text-slate-455 leading-relaxed">
+            <p className="text-[10px] text-slate-600 leading-relaxed">
               Thiết lập các nhãn dán chung sẽ áp dụng cho <strong>{selectedDocIds.length}</strong> tài liệu đang chọn.
             </p>
 
             <div className="flex flex-col gap-1.5">
-              <label className="text-[9px] font-bold text-slate-455 uppercase">Nhãn dán (Chọn từ Dropbox hoặc nhập mới):</label>
+              <label className="text-[9px] font-bold text-slate-500 uppercase">Nhãn dán (Chọn từ Dropbox hoặc nhập mới):</label>
               <TagSelector 
                 selectedTags={batchTags} 
                 onChange={setBatchTags} 
@@ -1879,13 +1879,13 @@ export default function DocumentManager() {
                   setBatchTags([]);
                   setShowBatchTagsModal(false);
                 }}
-                className="flex-1 py-2 bg-slate-855 hover:bg-slate-800 text-xs text-slate-300 font-bold rounded-xl border border-slate-700/60 transition cursor-pointer"
+                className="flex-1 py-2 bg-slate-100 hover:bg-slate-200 text-xs text-slate-700 font-bold rounded-xl border border-slate-200 transition cursor-pointer"
               >
                 Hủy
               </button>
               <button
                 onClick={handleBatchUpdateTags}
-                className="flex-1 py-2 bg-blue-600 hover:bg-blue-500 text-xs text-white font-extrabold rounded-xl transition cursor-pointer"
+                className="flex-1 py-2 bg-blue-600 hover:bg-blue-700 text-xs text-white font-extrabold rounded-xl transition cursor-pointer shadow-sm"
               >
                 Gắn Nhãn
               </button>

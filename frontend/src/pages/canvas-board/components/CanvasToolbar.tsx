@@ -194,17 +194,17 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
                 setShowColorPopover(!showColorPopover);
                 setShowSizePopover(false);
               }}
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition cursor-pointer text-xs text-slate-300"
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 transition cursor-pointer text-xs text-slate-700"
             >
-              <div className="w-3.5 h-3.5 rounded-full border border-white/40 shadow-sm" style={{ backgroundColor: selectedColor }} />
+              <div className="w-3.5 h-3.5 rounded-full border border-slate-300 shadow-xs" style={{ backgroundColor: selectedColor }} />
               <Palette size={12} />
             </button>
 
             {showColorPopover && (
-              <div className="absolute top-full right-0 mt-2 bg-[#0c0f1e] border border-[#212c4b] p-3 rounded-2xl shadow-2xl z-50 space-y-3 min-w-[220px]">
+              <div className="absolute top-full right-0 mt-2 bg-white border border-slate-200 p-3 rounded-2xl shadow-2xl z-50 space-y-3 min-w-[220px]">
                 {/* Ink Color */}
                 <div className="space-y-1.5">
-                  <div className="text-[11px] font-bold text-slate-300">Màu chữ / Nét vẽ</div>
+                  <div className="text-[11px] font-bold text-slate-700">Màu chữ / Nét vẽ</div>
                   <div className="flex flex-wrap gap-2">
                     {PRESET_COLORS.map(c => (
                       <button
@@ -214,7 +214,7 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
                           if (activeTool !== 'text') setShowColorPopover(false);
                         }}
                         className={`w-6 h-6 rounded-full transition cursor-pointer transform hover:scale-110 border ${
-                          selectedColor === c.value ? 'ring-2 ring-indigo-400 scale-110 border-white' : 'border-transparent'
+                          selectedColor === c.value ? 'ring-2 ring-blue-500 scale-110 border-white' : 'border-transparent'
                         }`}
                         style={{ backgroundColor: c.value }}
                         title={c.label}
@@ -225,17 +225,17 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
 
                 {/* Background color for Text Box */}
                 {activeTool === 'text' && (
-                  <div className="space-y-1.5 pt-2 border-t border-white/10">
-                    <div className="text-[11px] font-bold text-slate-300">Màu nền Text Box</div>
+                  <div className="space-y-1.5 pt-2 border-t border-slate-200">
+                    <div className="text-[11px] font-bold text-slate-700">Màu nền Text Box</div>
                     <div className="flex flex-wrap gap-2">
                       {PRESET_BG_COLORS.map(c => (
                         <button
                           key={c.value}
                           onClick={() => setSelectedBgColor(c.value)}
                           className={`w-6 h-6 rounded-lg transition cursor-pointer transform hover:scale-110 border ${
-                            selectedBgColor === c.value ? 'ring-2 ring-indigo-400 scale-110 border-white' : 'border-white/20'
+                            selectedBgColor === c.value ? 'ring-2 ring-blue-500 scale-110 border-white' : 'border-slate-300'
                           }`}
-                          style={{ backgroundColor: c.value === 'transparent' ? '#182038' : c.value }}
+                          style={{ backgroundColor: c.value === 'transparent' ? '#f1f5f9' : c.value }}
                           title={c.label}
                         />
                       ))}
@@ -243,16 +243,16 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
                   </div>
                 )}
 
-                <div className="pt-2 border-t border-white/10 flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-400">Màu tự chọn:</span>
-                  <label className="relative cursor-pointer flex items-center gap-2 px-2 py-1 bg-white/5 hover:bg-white/10 rounded-lg border border-white/10">
+                <div className="pt-2 border-t border-slate-200 flex items-center justify-between">
+                  <span className="text-[11px] font-bold text-slate-500">Màu tự chọn:</span>
+                  <label className="relative cursor-pointer flex items-center gap-2 px-2 py-1 bg-slate-50 hover:bg-slate-100 rounded-lg border border-slate-200">
                     <input
                       type="color"
                       value={selectedColor}
                       onChange={(e) => setSelectedColor(e.target.value)}
                       className="w-5 h-5 rounded-full cursor-pointer bg-transparent border-0"
                     />
-                    <span className="text-[10px] font-mono font-bold text-slate-300 uppercase">{selectedColor}</span>
+                    <span className="text-[10px] font-mono font-bold text-slate-700 uppercase">{selectedColor}</span>
                   </label>
                 </div>
               </div>
@@ -268,15 +268,15 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
                 setShowSizePopover(!showSizePopover);
                 setShowColorPopover(false);
               }}
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition cursor-pointer text-xs font-bold text-slate-300"
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 transition cursor-pointer text-xs font-bold text-slate-700"
             >
               <Sliders size={12} />
               <span>{activeTool === 'text' ? (textSize || 20) : currentSize}px</span>
             </button>
 
             {showSizePopover && (
-              <div className="absolute top-full right-0 mt-2 bg-[#0c0f1e] border border-[#212c4b] p-3 rounded-2xl shadow-2xl z-50 space-y-2.5 min-w-[230px]">
-                <div className="flex items-center justify-between text-[11px] font-bold text-slate-300">
+              <div className="absolute top-full right-0 mt-2 bg-white border border-slate-200 p-3 rounded-2xl shadow-2xl z-50 space-y-2.5 min-w-[230px]">
+                <div className="flex items-center justify-between text-[11px] font-bold text-slate-700">
                   <span>{activeTool === 'eraser' ? 'Kích thước tẩy' : activeTool === 'text' ? 'Cỡ chữ' : 'Độ dày nét'}</span>
                   <div className="flex items-center gap-1">
                     <input
@@ -292,7 +292,7 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
                         else if (activeTool === 'eraser') setEraserSize(val);
                         else setShapeSize(val);
                       }}
-                      className="w-14 bg-[#141829] border border-white/20 text-white rounded-lg px-2 py-0.5 text-xs font-mono font-bold text-center focus:outline-none focus:border-indigo-400"
+                      className="w-14 bg-slate-50 border border-slate-200 text-slate-900 rounded-lg px-2 py-0.5 text-xs font-mono font-bold text-center focus:outline-none focus:border-blue-500"
                     />
                     <span className="text-[10px] text-slate-400 font-mono">px</span>
                   </div>
@@ -311,7 +311,7 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
                       else if (activeTool === 'eraser') setEraserSize(val);
                       else setShapeSize(val);
                     }}
-                    className="flex-1 h-1.5 bg-white/10 rounded-lg appearance-none cursor-pointer accent-[#5c36f5]"
+                    className="flex-1 h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
                   />
                   <div
                     className="rounded-full shrink-0 border border-white/40"

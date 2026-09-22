@@ -86,12 +86,12 @@ export const DrawingToolbar: React.FC<DrawingToolbarProps> = ({
     <div
       ref={toolbarRef}
       style={toolbarPos ? { transform: `translate3d(${toolbarPos.x}px, ${toolbarPos.y}px, 0)` } : {}}
-      className="fixed top-20 right-8 z-[100] pointer-events-auto flex items-center bg-[#12162a] border-2 border-[#5c36f5]/70 p-1.5 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.6),0_0_20px_rgba(92,54,245,0.35)] select-none ring-1 ring-white/15 overflow-visible"
+      className="fixed top-20 right-8 z-[100] pointer-events-auto flex items-center bg-white border border-slate-200 p-1.5 rounded-2xl shadow-xl select-none overflow-visible"
     >
       {/* Draggable Grip Handle */}
       <div
         onMouseDown={onMouseDown}
-        className="p-1 text-indigo-400 hover:text-indigo-200 cursor-move shrink-0"
+        className="p-1 text-slate-400 hover:text-slate-600 cursor-move shrink-0"
         title="Kéo thả để di chuyển thanh công cụ vẽ"
       >
         <GripVertical size={14} />
@@ -105,13 +105,13 @@ export const DrawingToolbar: React.FC<DrawingToolbarProps> = ({
       >
         <button
           onClick={() => setIsCollapsed(false)}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#5c36f5] hover:bg-[#7351f7] text-white text-xs font-black transition cursor-pointer shadow-[0_0_12px_rgba(92,54,245,0.6)] shrink-0"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-black transition cursor-pointer shadow-md shrink-0"
           title="Mở rộng thanh vẽ"
         >
           {activeTool === 'eraser' ? (
-            <Eraser size={14} className="text-rose-300" />
+            <Eraser size={14} className="text-rose-200" />
           ) : activeTool === 'highlighter' ? (
-            <Highlighter size={14} className="text-amber-300" />
+            <Highlighter size={14} className="text-amber-200" />
           ) : activeTool === 'pen' ? (
             <Pen size={14} className="text-indigo-200" />
           ) : (
@@ -132,8 +132,8 @@ export const DrawingToolbar: React.FC<DrawingToolbarProps> = ({
           onClick={(e) => { e.stopPropagation(); setActiveTool('none'); setShowColorPopover(false); setShowSizePopover(false); }}
           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black transition cursor-pointer shrink-0 ${
             activeTool === 'none'
-              ? 'bg-[#5c36f5] text-white shadow-[0_0_12px_rgba(92,54,245,0.7)]'
-              : 'text-slate-300 hover:text-white hover:bg-white/10'
+              ? 'bg-blue-600 text-white shadow-xs'
+              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
           }`}
           title="Chế độ con trỏ chuột (Phím 1)"
         >
@@ -146,8 +146,8 @@ export const DrawingToolbar: React.FC<DrawingToolbarProps> = ({
           onClick={(e) => { e.stopPropagation(); setActiveTool('pen'); setShowColorPopover(false); setShowSizePopover(false); }}
           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black transition cursor-pointer shrink-0 ${
             activeTool === 'pen'
-              ? 'bg-indigo-500 text-white shadow-[0_0_12px_rgba(99,102,241,0.7)]'
-              : 'text-slate-300 hover:text-white hover:bg-white/10'
+              ? 'bg-indigo-600 text-white shadow-xs'
+              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
           }`}
           title="Bút vẽ (Phím 2 | Giữ Shift kẻ đường thẳng)"
         >
@@ -160,8 +160,8 @@ export const DrawingToolbar: React.FC<DrawingToolbarProps> = ({
           onClick={(e) => { e.stopPropagation(); setActiveTool('highlighter'); setShowColorPopover(false); setShowSizePopover(false); }}
           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black transition cursor-pointer shrink-0 ${
             activeTool === 'highlighter'
-              ? 'bg-amber-500 text-black shadow-[0_0_12px_rgba(245,158,11,0.7)]'
-              : 'text-amber-400 hover:text-amber-200 hover:bg-amber-500/10'
+              ? 'bg-amber-500 text-white shadow-xs'
+              : 'text-amber-700 hover:bg-amber-50'
           }`}
           title="Dạ quang (Phím 3 | Giữ Shift gạch thẳng dòng)"
         >
@@ -174,8 +174,8 @@ export const DrawingToolbar: React.FC<DrawingToolbarProps> = ({
           onClick={(e) => { e.stopPropagation(); setActiveTool('eraser'); setShowColorPopover(false); setShowSizePopover(false); }}
           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black transition cursor-pointer shrink-0 ${
             activeTool === 'eraser'
-              ? 'bg-rose-600 text-white shadow-[0_0_12px_rgba(225,29,72,0.7)]'
-              : 'text-rose-400 hover:text-rose-200 hover:bg-rose-500/10'
+              ? 'bg-rose-600 text-white shadow-xs'
+              : 'text-rose-700 hover:bg-rose-50'
           }`}
           title="Tẩy xóa nét vẽ (Phím 4)"
         >
@@ -188,20 +188,20 @@ export const DrawingToolbar: React.FC<DrawingToolbarProps> = ({
             <button
               type="button"
               onClick={(e) => { e.stopPropagation(); setShowColorPopover(!showColorPopover); setShowSizePopover(false); }}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-[#1c2242] hover:bg-[#252d58] transition cursor-pointer border border-indigo-500/40 shadow-sm"
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 transition cursor-pointer border border-slate-200 shadow-xs"
               title="Chọn màu mực vẽ"
             >
-              <div className="w-4 h-4 rounded-full border-2 border-white shadow-[0_0_8px_rgba(255,255,255,0.5)] shrink-0" style={{ backgroundColor: selectedColor }} />
-              <Palette size={13} className="text-slate-300" />
+              <div className="w-4 h-4 rounded-full border-2 border-white shadow-xs shrink-0" style={{ backgroundColor: selectedColor }} />
+              <Palette size={13} className="text-slate-600" />
             </button>
 
             {showColorPopover && (
               <div
                 onMouseDown={(e) => e.stopPropagation()}
                 onClick={(e) => e.stopPropagation()}
-                className="absolute top-full right-0 mt-2 bg-[#101428] border-2 border-[#5c36f5]/70 p-3 rounded-2xl shadow-[0_12px_36px_rgba(0,0,0,0.8)] z-[200] space-y-3 min-w-[220px]"
+                className="absolute top-full right-0 mt-2 bg-white border border-slate-200 p-3 rounded-2xl shadow-2xl z-[200] space-y-3 min-w-[220px]"
               >
-                <div className="text-[11px] font-black uppercase text-indigo-300 tracking-wider">Bảng màu gợi ý</div>
+                <div className="text-[11px] font-black uppercase text-slate-900 tracking-wider">Bảng màu gợi ý</div>
                 <div className="flex flex-wrap gap-2.5">
                   {PRESET_COLORS.map(c => (
                     <button
@@ -213,7 +213,7 @@ export const DrawingToolbar: React.FC<DrawingToolbarProps> = ({
                         setShowColorPopover(false);
                       }}
                       className={`w-7 h-7 rounded-full transition-all cursor-pointer transform hover:scale-115 active:scale-95 border-2 ${
-                        selectedColor.toLowerCase() === c.value.toLowerCase() ? 'ring-2 ring-white scale-110 border-white shadow-[0_0_10px_rgba(255,255,255,0.6)]' : 'border-black/30'
+                        selectedColor.toLowerCase() === c.value.toLowerCase() ? 'ring-2 ring-slate-800 scale-110 border-white shadow-sm' : 'border-slate-300'
                       }`}
                       style={{ backgroundColor: c.value }}
                       title={c.label}
@@ -222,17 +222,17 @@ export const DrawingToolbar: React.FC<DrawingToolbarProps> = ({
                 </div>
 
                 {/* Custom Color Input */}
-                <div className="pt-2 border-t border-white/10 flex items-center justify-between gap-2">
-                  <span className="text-[11px] font-bold text-slate-300">Tùy chỉnh:</span>
+                <div className="pt-2 border-t border-slate-100 flex items-center justify-between gap-2">
+                  <span className="text-[11px] font-bold text-slate-600">Tùy chỉnh:</span>
                   <div className="flex items-center gap-2">
                     <input
                       type="color"
                       value={selectedColor}
                       onChange={(e) => setSelectedColor(e.target.value)}
-                      className="w-7 h-7 rounded-lg cursor-pointer bg-transparent border border-white/20 p-0"
+                      className="w-7 h-7 rounded-lg cursor-pointer bg-transparent border border-slate-300 p-0"
                       title="Chọn màu tự do"
                     />
-                    <span className="font-mono text-[10px] font-bold text-indigo-300 uppercase">{selectedColor}</span>
+                    <span className="font-mono text-[10px] font-bold text-indigo-600 uppercase">{selectedColor}</span>
                   </div>
                 </div>
               </div>
@@ -245,10 +245,10 @@ export const DrawingToolbar: React.FC<DrawingToolbarProps> = ({
             <button
               type="button"
               onClick={(e) => { e.stopPropagation(); setShowSizePopover(!showSizePopover); setShowColorPopover(false); }}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-[#1c2242] hover:bg-[#252d58] transition cursor-pointer border border-indigo-500/40 text-xs font-black text-indigo-300 shadow-sm"
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 transition cursor-pointer border border-slate-200 text-xs font-black text-indigo-600 shadow-xs"
               title="Chỉnh độ dày"
             >
-              <Sliders size={13} className="text-indigo-400" />
+              <Sliders size={13} className="text-indigo-600" />
               <span>{currentSize}px</span>
             </button>
 
@@ -256,11 +256,11 @@ export const DrawingToolbar: React.FC<DrawingToolbarProps> = ({
               <div
                 onMouseDown={(e) => e.stopPropagation()}
                 onClick={(e) => e.stopPropagation()}
-                className="absolute top-full right-0 mt-2 bg-[#101428] border-2 border-[#5c36f5]/70 p-3 rounded-2xl shadow-[0_12px_36px_rgba(0,0,0,0.8)] z-[200] space-y-2.5 min-w-[200px]"
+                className="absolute top-full right-0 mt-2 bg-white border border-slate-200 p-3 rounded-2xl shadow-2xl z-[200] space-y-2.5 min-w-[200px]"
               >
-                <div className="flex items-center justify-between text-[11px] font-black uppercase text-indigo-300 tracking-wider">
+                <div className="flex items-center justify-between text-[11px] font-black uppercase text-slate-900 tracking-wider">
                   <span>{activeTool === 'eraser' ? 'Kích thước tẩy' : 'Độ dày nét'}</span>
-                  <span className="font-mono text-white font-black">{currentSize}px</span>
+                  <span className="font-mono text-slate-900 font-black">{currentSize}px</span>
                 </div>
                 <input
                   type="range"
@@ -273,7 +273,7 @@ export const DrawingToolbar: React.FC<DrawingToolbarProps> = ({
                     else if (activeTool === 'highlighter') setHlSize(val);
                     else setEraserSize(val);
                   }}
-                  className="w-full h-2 bg-white/15 rounded-lg appearance-none cursor-pointer accent-[#5c36f5]"
+                  className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
                 />
               </div>
             )}
@@ -283,7 +283,7 @@ export const DrawingToolbar: React.FC<DrawingToolbarProps> = ({
         <button
           onClick={onUndo}
           disabled={!canUndo}
-          className="p-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-white/10 transition cursor-pointer disabled:opacity-30 shrink-0"
+          className="p-1.5 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition cursor-pointer disabled:opacity-30 shrink-0"
           title="Hoàn tác (Ctrl + Z)"
         >
           <Undo2 size={13} />
@@ -292,7 +292,7 @@ export const DrawingToolbar: React.FC<DrawingToolbarProps> = ({
         <button
           onClick={onRedo}
           disabled={!canRedo}
-          className="p-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-white/10 transition cursor-pointer disabled:opacity-30 shrink-0"
+          className="p-1.5 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition cursor-pointer disabled:opacity-30 shrink-0"
           title="Làm lại (Ctrl + Y)"
         >
           <Redo2 size={13} />
@@ -300,7 +300,7 @@ export const DrawingToolbar: React.FC<DrawingToolbarProps> = ({
 
         <button
           onClick={onClearAll}
-          className="p-1.5 rounded-lg text-slate-300 hover:text-rose-400 hover:bg-rose-500/20 transition cursor-pointer shrink-0"
+          className="p-1.5 rounded-lg text-slate-600 hover:text-rose-600 hover:bg-rose-50 transition cursor-pointer shrink-0"
           title="Xóa toàn bộ nét vẽ"
         >
           <Trash2 size={13} />
@@ -309,7 +309,7 @@ export const DrawingToolbar: React.FC<DrawingToolbarProps> = ({
         {/* COLLAPSE TOGGLE BUTTON */}
         <button
           onClick={() => setIsCollapsed(true)}
-          className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition cursor-pointer border-l border-white/10 ml-0.5 shrink-0"
+          className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition cursor-pointer border-l border-slate-200 ml-0.5 shrink-0"
           title="Thu gọn thanh vẽ"
         >
           <ChevronRight size={14} />

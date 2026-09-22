@@ -191,8 +191,8 @@ export const ClassFormModal: React.FC<ClassFormModalProps> = ({
                   key={hex}
                   type="button"
                   onClick={() => setClassForm({ ...classForm, color: hex })}
-                  className={`w-6 h-6 rounded-full border-2 transition cursor-pointer ${
-                    (classForm.color || '#7c3aed') === hex ? 'border-slate-800 dark:border-white scale-110 shadow-lg' : 'border-transparent opacity-60 hover:opacity-100'
+                  className={`w-6 h-6 rounded-full transition cursor-pointer ${
+                    (classForm.color || '#7c3aed') === hex ? 'ring-2 ring-offset-2 ring-indigo-600 scale-110 shadow-md' : 'opacity-60 hover:opacity-100'
                   }`}
                   style={{ backgroundColor: hex }}
                 />
