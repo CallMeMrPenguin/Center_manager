@@ -235,14 +235,6 @@ export default function ClassesPage() {
                   }
                 : undefined
             }
-            onOpenTestConfigModal={
-              activeSubTab === 'grades'
-                ? async () => {
-                    await flushSaveAttendance();
-                    setTestConfigModalOpen(true);
-                  }
-                : undefined
-            }
             onOpenEnrollModal={
               activeSubTab === 'grades'
                 ? async () => {
@@ -251,8 +243,6 @@ export default function ClassesPage() {
                   }
                 : undefined
             }
-            onSaveAttendance={activeSubTab === 'grades' ? handleSaveAttendance : undefined}
-            savingAttendance={savingAttendance}
           />
 
           {/* TAB 1: ATTENDANCE & GRADES */}
@@ -277,6 +267,12 @@ export default function ClassesPage() {
                 await flushSaveAttendance();
                 handleExportDocx();
               }}
+              onOpenTestConfigModal={async () => {
+                await flushSaveAttendance();
+                setTestConfigModalOpen(true);
+              }}
+              onSaveAttendance={handleSaveAttendance}
+              savingAttendance={savingAttendance}
             />
           )}
 

@@ -45,7 +45,7 @@ export const DeskCard: React.FC<DeskCardProps> = ({
           onDragStart={() => onDragStartSeat({ colIdx, deskIdx, posIdx })}
           onDragOver={(e) => e.preventDefault()}
           onDrop={() => onDropOnSeat(colIdx, deskIdx, posIdx)}
-          className={`group/seat relative p-2.5 rounded-xl border flex items-center gap-2.5 min-h-[58px] cursor-grab active:cursor-grabbing transition-all select-none shadow-xs ${
+          className={`group/seat relative p-2 rounded-xl border flex items-center gap-2 min-h-[56px] cursor-grab active:cursor-grabbing transition-all select-none shadow-xs ${
             isAbsent
               ? 'bg-rose-50/80 dark:bg-rose-500/15 border-rose-300 dark:border-rose-500/40 text-rose-800 dark:text-rose-200 hover:border-rose-400'
               : 'bg-indigo-50/70 dark:bg-indigo-500/15 border-indigo-200 dark:border-indigo-500/35 text-slate-900 dark:text-white hover:border-indigo-400 hover:shadow-sm'
@@ -65,19 +65,22 @@ export const DeskCard: React.FC<DeskCardProps> = ({
           </button>
 
           {/* Student Avatar Icon/Initials */}
-          <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-black shrink-0 font-mono shadow-xs ${
+          <div className={`w-7 h-7 rounded-lg flex items-center justify-center text-[11px] font-black shrink-0 font-mono shadow-xs ${
             isAbsent
               ? 'bg-rose-200 text-rose-800 dark:bg-rose-500/30 dark:text-rose-300'
               : 'bg-indigo-600 text-white dark:bg-indigo-500/30 dark:text-indigo-300'
           }`}>
-            {initials || <User size={13} />}
+            {initials || <User size={12} />}
           </div>
 
           {/* Student Name and Status */}
-          <div className="min-w-0 flex-1">
-            <span className={`text-xs font-black truncate block leading-tight ${
-              isAbsent ? 'line-through text-rose-700 dark:text-rose-300 opacity-90' : 'text-slate-900 dark:text-white'
-            }`}>
+          <div className="min-w-0 flex-1 py-0.5 overflow-hidden">
+            <span
+              className={`text-xs font-black block leading-snug break-words line-clamp-2 ${
+                isAbsent ? 'line-through text-rose-700 dark:text-rose-300 opacity-90' : 'text-slate-900 dark:text-white'
+              }`}
+              title={seat.student_name}
+            >
               {seat.student_name}
             </span>
             {isAbsent && (
@@ -95,9 +98,9 @@ export const DeskCard: React.FC<DeskCardProps> = ({
       <div
         onDragOver={(e) => e.preventDefault()}
         onDrop={() => onDropOnSeat(colIdx, deskIdx, posIdx)}
-        className="group/drop relative p-2.5 rounded-xl border-2 border-dashed border-slate-300 dark:border-white/10 hover:border-indigo-400 dark:hover:border-indigo-400/60 bg-slate-50/80 dark:bg-white/[0.02] hover:bg-indigo-50/50 dark:hover:bg-indigo-500/10 flex items-center justify-center gap-2 min-h-[58px] text-center transition-all cursor-pointer"
+        className="group/drop relative p-2 rounded-xl border-2 border-dashed border-slate-300 dark:border-white/10 hover:border-indigo-400 dark:hover:border-indigo-400/60 bg-slate-50/80 dark:bg-white/[0.02] hover:bg-indigo-50/50 dark:hover:bg-indigo-500/10 flex items-center justify-center gap-1.5 min-h-[56px] text-center transition-all cursor-pointer"
       >
-        <div className="w-6 h-6 rounded-md bg-slate-200 dark:bg-white/5 group-hover/drop:bg-indigo-500/20 text-slate-400 dark:text-slate-500 group-hover/drop:text-indigo-500 flex items-center justify-center transition-colors">
+        <div className="w-6 h-6 rounded-md bg-slate-200 dark:bg-white/5 group-hover/drop:bg-indigo-500/20 text-slate-400 dark:text-slate-500 group-hover/drop:text-indigo-500 flex items-center justify-center transition-colors shrink-0">
           <UserPlus size={13} />
         </div>
         <span className="text-[11px] font-bold text-slate-400 dark:text-slate-500 group-hover/drop:text-indigo-600 dark:group-hover/drop:text-indigo-400 transition-colors">
@@ -108,7 +111,7 @@ export const DeskCard: React.FC<DeskCardProps> = ({
   };
 
   return (
-    <div className="bg-white dark:bg-[#11162a] p-3 rounded-2xl shadow-[0_4px_16px_rgba(0,0,0,0.08)] dark:shadow-[0_8px_24px_rgba(0,0,0,0.4)] hover:shadow-lg transition-all w-64 flex flex-col gap-2.5">
+    <div className="bg-white dark:bg-[#11162a] p-3 rounded-2xl shadow-[0_4px_16px_rgba(0,0,0,0.08)] dark:shadow-[0_8px_24px_rgba(0,0,0,0.4)] hover:shadow-lg transition-all w-[310px] flex flex-col gap-2.5">
       {/* Desk Title Plaque */}
       <div className="flex items-center justify-between border-b border-slate-200 dark:border-white/5 pb-1.5 px-0.5">
         <span className="text-[10px] font-black uppercase tracking-wider text-slate-600 dark:text-slate-400">

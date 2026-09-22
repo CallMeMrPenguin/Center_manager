@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
-import { Edit3 } from 'lucide-react';
+import { Edit3, Layers, Save } from 'lucide-react';
 import { ClassItem, EnrolledStudent, AttendanceRecord } from '../../types';
 import { DataTable } from '../../../../components/DataTable';
 import { CheckScoreInput } from '../CheckScoreInput';
@@ -18,6 +18,9 @@ interface AttendanceGradesTabProps {
   onOpenStudentActionModal: (student: EnrolledStudent) => void;
   onExportExcel: () => void;
   onExportDocx: () => void;
+  onOpenTestConfigModal?: () => void;
+  onSaveAttendance?: () => void;
+  savingAttendance?: boolean;
 }
 
 export const AttendanceGradesTab: React.FC<AttendanceGradesTabProps> = ({
@@ -30,6 +33,9 @@ export const AttendanceGradesTab: React.FC<AttendanceGradesTabProps> = ({
   onOpenStudentActionModal,
   onExportExcel,
   onExportDocx,
+  onOpenTestConfigModal,
+  onSaveAttendance,
+  savingAttendance = false,
 }) => {
   const attendanceColumns = useMemo<ColumnDef<any>[]>(
     () => [
@@ -277,6 +283,34 @@ export const AttendanceGradesTab: React.FC<AttendanceGradesTabProps> = ({
           pageSize={20}
           exportFilename={`diem_danh_${selectedClass?.class_name || ''}_${attendanceDate}`}
           onExportDocx={onExportDocx}
+          toolbarRight={
+            <div className="flex items-center gap-2">
+              {onOpenTestConfigModal && (
+                <button
+                  type="button"
+                  onClick={onOpenTestConfigModal}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-50 hover:bg-blue-100 dark:bg-blue-500/15 dark:hover:bg-blue-500/25 text-blue-600 hover:text-blue-700 dark:text-blue-300 dark:hover:text-white border border-blue-300/80 dark:border-blue-500/30 text-xs font-bold transition cursor-pointer shadow-xs"
+                  title="Cấu Hình Bài Kiểm Tra (Check 1 & Check 2)"
+                >
+                  <Layers size={13} className="text-blue-500 dark:text-blue-400 shrink-0" />
+                  <span className="hidden sm:inline">Cấu Hình Kiểm Tra</span>
+                </button>
+              )}
+
+              {onSaveAttendance && (
+                <button
+                  type="button"
+                  onClick={onSaveAttendance}
+                  disabled={savingAttendance}
+                  className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[#5c36f5] hover:bg-[#7351f7] text-white text-xs font-black shadow-[0_2px_10px_rgba(92,54,245,0.4)] transition cursor-pointer border border-white/20 disabled:opacity-50"
+                  title="Lưu Bảng Điểm Danh & Điểm Số"
+                >
+                  <Save size={13} className="shrink-0" />
+                  <span>{savingAttendance ? 'Đang lưu...' : 'Lưu Bảng Điểm'}</span>
+                </button>
+              )}
+            </div>
+          }
         />
       </div>
     </div>

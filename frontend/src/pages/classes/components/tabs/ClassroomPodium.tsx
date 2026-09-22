@@ -22,7 +22,7 @@ export const ClassroomPodium: React.FC<ClassroomPodiumProps> = ({
         return (
           <div
             key={colIdx}
-            className="w-64 flex justify-center items-center"
+            className="w-[310px] flex justify-center items-center"
             onDragOver={(e) => {
               e.preventDefault();
               e.dataTransfer.dropEffect = 'move';

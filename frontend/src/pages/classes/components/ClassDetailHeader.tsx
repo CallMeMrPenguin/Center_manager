@@ -4,9 +4,7 @@ import {
   Edit3,
   Calendar,
   Trash2,
-  Layers,
   UserPlus,
-  Save,
   BookOpen,
   User,
   MapPin,
@@ -27,10 +25,7 @@ interface ClassDetailHeaderProps {
   onBack: () => void;
   onOpenEditClass: (cls: ClassItem) => void;
   onDeleteAttendanceDate?: () => void;
-  onOpenTestConfigModal?: () => void;
   onOpenEnrollModal?: () => void;
-  onSaveAttendance?: () => void;
-  savingAttendance?: boolean;
 }
 
 export const ClassDetailHeader: React.FC<ClassDetailHeaderProps> = ({
@@ -44,10 +39,7 @@ export const ClassDetailHeader: React.FC<ClassDetailHeaderProps> = ({
   onBack,
   onOpenEditClass,
   onDeleteAttendanceDate,
-  onOpenTestConfigModal,
   onOpenEnrollModal,
-  onSaveAttendance,
-  savingAttendance,
 }) => {
   return (
     <div className="bg-white dark:bg-[#0c0f1e] rounded-2xl p-4 shadow-[0_4px_24px_rgba(0,0,0,0.08)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.45)] space-y-4">
@@ -160,20 +152,6 @@ export const ClassDetailHeader: React.FC<ClassDetailHeaderProps> = ({
 
         {/* RIGHT: ACTION BUTTONS */}
         <div className="flex items-center gap-2">
-          {onOpenTestConfigModal && (
-            <button
-              type="button"
-              onClick={onOpenTestConfigModal}
-              className="group flex items-center gap-0 hover:gap-1.5 bg-blue-50 dark:bg-blue-500/15 hover:bg-blue-100 dark:hover:bg-blue-500/25 text-blue-600 dark:text-blue-300 border border-blue-200 dark:border-blue-500/30 px-3.5 py-1.5 rounded-xl font-bold text-xs transition-all duration-300 cursor-pointer"
-              title="Cấu Hình Bài Kiểm Tra (Check 1 & Check 2)"
-            >
-              <Layers size={14} className="shrink-0" />
-              <span className="max-w-0 opacity-0 group-hover:max-w-[180px] group-hover:opacity-100 transition-all duration-300 ease-in-out whitespace-nowrap overflow-hidden block">
-                Cấu Hình Bài Kiểm Tra
-              </span>
-            </button>
-          )}
-
           {onOpenEnrollModal && (
             <button
               type="button"
@@ -184,21 +162,6 @@ export const ClassDetailHeader: React.FC<ClassDetailHeaderProps> = ({
               <UserPlus size={14} className="shrink-0" />
               <span className="max-w-0 opacity-0 group-hover:max-w-[160px] group-hover:opacity-100 transition-all duration-300 ease-in-out whitespace-nowrap overflow-hidden block">
                 Ghi Danh Học Sinh
-              </span>
-            </button>
-          )}
-
-          {onSaveAttendance && (
-            <button
-              type="button"
-              onClick={onSaveAttendance}
-              disabled={savingAttendance}
-              className="group flex items-center gap-0 hover:gap-1.5 bg-[#5c36f5] hover:bg-[#7351f7] text-white px-3.5 py-1.5 rounded-xl font-extrabold text-xs shadow-[0_4px_12px_rgba(92,54,245,0.4)] transition-all duration-300 cursor-pointer border border-white/20"
-              title="Lưu Bảng Điểm Danh & Điểm Số"
-            >
-              <Save size={14} className="shrink-0" />
-              <span className="max-w-0 opacity-0 group-hover:max-w-[140px] group-hover:opacity-100 transition-all duration-300 ease-in-out whitespace-nowrap overflow-hidden block">
-                {savingAttendance ? 'Đang lưu...' : 'Lưu Bảng Điểm'}
               </span>
             </button>
           )}
