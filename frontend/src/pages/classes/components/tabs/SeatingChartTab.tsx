@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   ChevronLeft, ChevronRight, Shuffle, RefreshCw,
   FileCheck2, Save, Move, Minus, Plus, Search,
@@ -8,6 +8,7 @@ import { ClassroomPodium } from './ClassroomPodium';
 import { DeskCard } from './DeskCard';
 
 interface SeatingChartTabProps {
+  classId?: number;
   seatingGrid: SeatingCol[];
   numCols: number;
   desksPerCol: number;
@@ -32,6 +33,7 @@ interface SeatingChartTabProps {
 }
 
 export const SeatingChartTab: React.FC<SeatingChartTabProps> = ({
+  classId,
   seatingGrid,
   numCols,
   desksPerCol,
@@ -63,6 +65,40 @@ export const SeatingChartTab: React.FC<SeatingChartTabProps> = ({
       (s) => s.full_name?.toLowerCase().includes(q) || s.nickname?.toLowerCase().includes(q)
     );
   }, [unassignedStudents, searchQuery]);
+
+  const [teacherDeskCol, setTeacherDeskCol] = useState<number>(() => {
+    try {
+      const key = classId ? `center_mgr_teacher_desk_col_${classId}` : 'center_mgr_teacher_desk_col';
+      const saved = localStorage.getItem(key);
+      return saved !== null ? parseInt(saved, 10) : 0;
+    } catch {
+      return 0;
+    }
+  });
+
+  useEffect(() => {
+    if (!classId) return;
+    try {
+      const saved = localStorage.getItem(`center_mgr_teacher_desk_col_${classId}`);
+      if (saved !== null) {
+        setTeacherDeskCol(parseInt(saved, 10));
+      } else {
+        setTeacherDeskCol(0);
+      }
+    } catch {
+      // ignore
+    }
+  }, [classId]);
+
+  const handleSelectTeacherCol = (colIdx: number) => {
+    setTeacherDeskCol(colIdx);
+    try {
+      const key = classId ? `center_mgr_teacher_desk_col_${classId}` : 'center_mgr_teacher_desk_col';
+      localStorage.setItem(key, colIdx.toString());
+    } catch {
+      // ignore
+    }
+  };
 
   return (
     <div className="space-y-4 font-sans select-none">
@@ -243,12 +279,28 @@ export const SeatingChartTab: React.FC<SeatingChartTabProps> = ({
           } bg-[#e2e8f0]/80 dark:bg-[#080a10] border border-slate-300 dark:border-white/10 rounded-2xl p-6 overflow-x-auto min-h-[460px] flex flex-col items-center gap-6 transition-all shadow-inner`}
         >
           {/* BÀN GIÁO VIÊN (CLASSROOM FRONT REFERENCE) */}
-          <ClassroomPodium />
+          <ClassroomPodium
+            colsCount={seatingGrid.length || numCols}
+            activeCol={teacherDeskCol}
+            onSelectCol={handleSelectTeacherCol}
+          />
 
           {/* COLUMNS / DÃY BÀN HỌC */}
-          <div className="flex justify-center items-start gap-8 w-full">
+          <div className="flex justify-center items-start gap-8 w-full min-w-max">
             {seatingGrid.map((col, colIdx) => (
-              <div key={colIdx} className="flex flex-col items-center gap-4">
+              <div
+                key={colIdx}
+                className="flex flex-col items-center gap-4"
+                onDragOver={(e) => {
+                  e.preventDefault();
+                }}
+                onDrop={(e) => {
+                  const data = e.dataTransfer.getData('text/plain');
+                  if (data === 'teacher-desk') {
+                    handleSelectTeacherCol(colIdx);
+                  }
+                }}
+              >
                 {/* COLUMN HEADER PILL */}
                 <div className="flex items-center gap-2 bg-white dark:bg-[#121624] border border-slate-300 dark:border-white/10 px-3 py-1.5 rounded-xl text-xs font-black text-slate-800 dark:text-slate-200 shadow-sm">
                   <span className="text-[11px] uppercase tracking-wider text-indigo-600 dark:text-indigo-400 font-black">

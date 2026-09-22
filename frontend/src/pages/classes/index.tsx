@@ -283,6 +283,7 @@ export default function ClassesPage() {
           {/* TAB 2: SEATING CHART */}
           {activeSubTab === 'seating' && (
             <SeatingChartTab
+              classId={selectedClass?.id}
               seatingGrid={seatingGrid}
               numCols={numCols}
               desksPerCol={desksPerCol}
