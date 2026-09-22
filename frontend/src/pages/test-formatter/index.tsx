@@ -193,7 +193,7 @@ const FastJsonEditor = React.memo(({
       onChange={(e) => setLocalText(e.target.value)}
       spellCheck={false}
       placeholder="Nhập mảng câu hỏi JSON tại đây..."
-      className="code-editor-textarea flex-1 w-full p-4 font-mono text-xs text-slate-100 resize-none shadow-inner leading-relaxed select-text"
+      className="code-editor-textarea flex-1 w-full p-4 font-mono text-xs text-slate-900 dark:text-slate-100 resize-none shadow-inner leading-relaxed select-text"
     />
   );
 });
@@ -750,19 +750,19 @@ export default function TestFormatter({
                 </button>
 
                 {showExportMenu && (
-                  <div className="absolute right-0 mt-2 w-56 bg-[#161b2e] border border-white/10 rounded-xl z-30 py-2 px-2 flex flex-col gap-1 shadow-2xl animate-mac-dropdown text-[0.66rem]">
+                  <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-[#161b2e] border border-slate-300 dark:border-white/10 rounded-xl z-30 py-2 px-2 flex flex-col gap-1 shadow-2xl animate-mac-dropdown text-[0.66rem]">
                     <button
                       onClick={() => { setShowExportMenu(false); handleCompileAndDownload(); }}
-                      className="flex items-center gap-2 px-2.5 py-2 rounded-lg text-xs font-bold text-slate-200 hover:text-white hover:bg-white/10 transition w-full text-left cursor-pointer"
+                      className="flex items-center gap-2 px-2.5 py-2 rounded-lg text-xs font-bold text-slate-700 dark:text-slate-200 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10 transition w-full text-left cursor-pointer"
                     >
-                      <FileText size={13} className="text-indigo-400" />
+                      <FileText size={13} className="text-indigo-600 dark:text-indigo-400" />
                       <span>Tập tin Word (.docx)</span>
                     </button>
                     <button
                       onClick={() => { setShowExportMenu(false); setShowExportModal(true); }}
-                      className="flex items-center gap-2 px-2.5 py-2 rounded-lg text-xs font-bold text-slate-200 hover:text-white hover:bg-white/10 transition w-full text-left cursor-pointer"
+                      className="flex items-center gap-2 px-2.5 py-2 rounded-lg text-xs font-bold text-slate-700 dark:text-slate-200 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10 transition w-full text-left cursor-pointer"
                     >
-                      <FileCode size={13} className="text-emerald-400" />
+                      <FileCode size={13} className="text-emerald-600 dark:text-emerald-400" />
                       <span>Bảng tính Excel / CSV</span>
                     </button>
                   </div>
@@ -940,14 +940,14 @@ export default function TestFormatter({
       
       {/* Spreadsheet Export Modal */}
       {showExportModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm animate-mac-dropdown p-4">
-          <div className="w-full max-w-md bg-[#121629] border border-white/10 rounded-2xl p-6 flex flex-col gap-4 text-slate-200 shadow-2xl">
-            <div className="flex items-center justify-between border-b border-white/10 pb-3">
-              <h3 className="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2">
-                <FileCode size={16} className="text-indigo-400" />
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 animate-mac-dropdown p-4">
+          <div className="w-full max-w-md bg-white dark:bg-[#121629] border border-slate-300 dark:border-white/10 rounded-2xl p-6 flex flex-col gap-4 text-slate-900 dark:text-slate-200 shadow-2xl">
+            <div className="flex items-center justify-between border-b border-slate-200 dark:border-white/10 pb-3">
+              <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
+                <FileCode size={16} className="text-indigo-600 dark:text-indigo-400" />
                 Cấu hình xuất bảng tính
               </h3>
-              <button onClick={() => setShowExportModal(false)} className="text-slate-400 hover:text-white cursor-pointer">
+              <button onClick={() => setShowExportModal(false)} className="text-slate-400 hover:text-slate-900 dark:hover:text-white cursor-pointer">
                 <X size={16} />
               </button>
             </div>
