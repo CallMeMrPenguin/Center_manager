@@ -65,16 +65,18 @@ export const SessionOverviewBanner: React.FC<SessionOverviewBannerProps> = ({
         {/* RIGHT: CLASS AVERAGE STATS & EXPAND TOGGLE */}
         <div className="flex items-center gap-2">
           {/* Average metrics pills */}
-          <div className="hidden sm:flex items-center gap-2.5 bg-slate-50 dark:bg-[#121626] px-3 py-1.5 rounded-xl border border-slate-200 dark:border-white/10 shadow-2xs text-xs font-bold">
+          <div className="hidden sm:flex items-center gap-3 bg-slate-100 dark:bg-[#141829] px-3.5 py-1.5 rounded-xl shadow-2xs text-xs font-bold">
             <div className="flex items-center gap-1">
               <span className="text-slate-500 dark:text-slate-400">TB Check 1:</span>
               <span className="text-blue-600 dark:text-blue-400 font-black font-mono">{trunc1Dec(stats.avgC1)}</span>
             </div>
-            <div className="flex items-center gap-1 pl-2.5 border-l border-slate-200 dark:border-white/10">
+            <span className="w-px h-3 bg-slate-300 dark:bg-white/10" />
+            <div className="flex items-center gap-1">
               <span className="text-slate-500 dark:text-slate-400">TB Check 2:</span>
               <span className="text-purple-600 dark:text-purple-400 font-extrabold">{trunc1Dec(stats.avgC2)}</span>
             </div>
-            <div className="flex items-center gap-1 pl-2.5 border-l border-slate-200 dark:border-white/10">
+            <span className="w-px h-3 bg-slate-300 dark:bg-white/10" />
+            <div className="flex items-center gap-1">
               <span className="text-slate-500 dark:text-slate-400">TB BTVN:</span>
               <span className="text-emerald-600 dark:text-emerald-400 font-extrabold">{trunc1Dec(stats.avgHw)}</span>
             </div>
@@ -83,7 +85,7 @@ export const SessionOverviewBanner: React.FC<SessionOverviewBannerProps> = ({
           <button
             type="button"
             onClick={() => setIsExpanded((prev) => !prev)}
-            className="p-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition border border-slate-200 dark:border-white/5 cursor-pointer"
+            className="p-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-white/10 dark:hover:bg-white/15 text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition cursor-pointer"
             title={isExpanded ? 'Thu gọn tổng quan' : 'Mở rộng tổng quan'}
           >
             {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
