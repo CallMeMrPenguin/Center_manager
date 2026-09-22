@@ -1361,11 +1361,11 @@ export function DataTable<TData>({
               {/* Right nav */}
               <div className="flex items-center gap-1">
                 <button type="button" onClick={() => table.setPageIndex(0)} disabled={!table.getCanPreviousPage()}
-                  className="p-1.5 rounded-lg bg-slate-200 hover:bg-slate-300 dark:bg-[#202538] dark:hover:bg-[#2a3149] text-slate-700 dark:text-slate-300 disabled:opacity-30 border-0 shadow-2xs transition cursor-pointer disabled:cursor-not-allowed" title="Trang đầu">
+                  className="p-1.5 rounded-lg btn-neutral text-slate-700 dark:text-slate-300 disabled:opacity-30 border-0 shadow-2xs transition cursor-pointer disabled:cursor-not-allowed" title="Trang đầu">
                   <ChevronsLeft size={13} />
                 </button>
                 <button type="button" onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()}
-                  className="px-2.5 py-1.5 rounded-lg bg-slate-200 hover:bg-slate-300 dark:bg-[#202538] dark:hover:bg-[#2a3149] text-slate-700 dark:text-slate-300 disabled:opacity-30 border-0 shadow-2xs transition flex items-center gap-1 cursor-pointer disabled:cursor-not-allowed">
+                  className="px-2.5 py-1.5 rounded-lg btn-neutral text-slate-700 dark:text-slate-300 disabled:opacity-30 border-0 shadow-2xs transition flex items-center gap-1 cursor-pointer disabled:cursor-not-allowed">
                   <ChevronLeft size={13} /><span>Trước</span>
                 </button>
 
@@ -1384,7 +1384,7 @@ export function DataTable<TData>({
                         className={`w-7 h-7 rounded-lg text-[11px] font-extrabold border-0 shadow-2xs transition cursor-pointer ${
                           pageNum === pageIndex
                             ? 'bg-[#2563eb] text-white shadow-[0_0_8px_rgba(37,99,235,0.4)]'
-                            : 'bg-slate-200 hover:bg-slate-300 dark:bg-[#202538] dark:hover:bg-[#2a3149] text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
+                            : 'btn-neutral text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
                         }`}
                       >
                         {pageNum + 1}
@@ -1394,11 +1394,11 @@ export function DataTable<TData>({
                 </div>
 
                 <button type="button" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}
-                  className="px-2.5 py-1.5 rounded-lg bg-slate-200 hover:bg-slate-300 dark:bg-[#202538] dark:hover:bg-[#2a3149] text-slate-700 dark:text-slate-300 disabled:opacity-30 border-0 shadow-2xs transition flex items-center gap-1 cursor-pointer disabled:cursor-not-allowed">
+                  className="px-2.5 py-1.5 rounded-lg btn-neutral text-slate-700 dark:text-slate-300 disabled:opacity-30 border-0 shadow-2xs transition flex items-center gap-1 cursor-pointer disabled:cursor-not-allowed">
                   <span>Sau</span><ChevronRight size={13} />
                 </button>
                 <button type="button" onClick={() => table.setPageIndex(pageCount - 1)} disabled={!table.getCanNextPage()}
-                  className="p-1.5 rounded-lg bg-slate-200 hover:bg-slate-300 dark:bg-[#202538] dark:hover:bg-[#2a3149] text-slate-700 dark:text-slate-300 disabled:opacity-30 border-0 shadow-2xs transition cursor-pointer disabled:cursor-not-allowed" title="Trang cuối">
+                  className="p-1.5 rounded-lg btn-neutral text-slate-700 dark:text-slate-300 disabled:opacity-30 border-0 shadow-2xs transition cursor-pointer disabled:cursor-not-allowed" title="Trang cuối">
                   <ChevronsRight size={13} />
                 </button>
               </div>

@@ -152,14 +152,14 @@ export function SegmentedControl<T extends string = string>({
       ref={containerRef}
       role="group"
       onMouseLeave={() => setHoveredIndex(null)}
-      className={`relative inline-flex items-center justify-start bg-slate-200/70 dark:bg-[#0c0f1e] p-0 rounded-full border-0 select-none shrink-0 transition-colors ${
+      className={`relative inline-flex items-center justify-start bg-slate-200/50 dark:bg-[#0c0f1e] p-0 rounded-full border-0 select-none shrink-0 transition-colors ${
         isFluid ? 'w-full' : 'w-fit'
       } ${className}`}
     >
-      {/* 1. Full-width Initial Hover Background that Collapses onto Hovered Item */}
+      {/* 1. Full-width Initial Hover Background that Collapses onto Hovered Item (Softened Highlight) */}
       <motion.div
         aria-hidden="true"
-        className="absolute top-0 bottom-0 rounded-full bg-slate-300 dark:bg-white/20 pointer-events-none z-0"
+        className="absolute top-0 bottom-0 rounded-full bg-slate-200/70 dark:bg-white/10 pointer-events-none z-0"
         animate={{
           left: hoverStyle.left,
           width: hoverStyle.width,
@@ -211,7 +211,7 @@ export function SegmentedControl<T extends string = string>({
                 ? 'opacity-35 cursor-not-allowed text-slate-400 dark:text-slate-500'
                 : isActive
                 ? 'text-white drop-shadow-xs font-black'
-                : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white font-bold'
+                : 'text-slate-700 dark:text-slate-100/90 hover:text-slate-950 dark:hover:text-white font-bold'
             }`}
           >
             {/* Optional Icon */}

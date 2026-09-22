@@ -207,11 +207,11 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
 
   return (
     <div className={`relative inline-block ${className}`} ref={containerRef}>
-      {/* TRIGGER BUTTON (Slightly darker slate, zero border) */}
+      {/* TRIGGER BUTTON (Softer shade, zero border) */}
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between gap-2 px-3.5 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 dark:bg-[#202538] dark:hover:bg-[#2a3149] text-slate-900 dark:text-white text-xs font-bold transition-all cursor-pointer shadow-xs hover:shadow-sm border-0 outline-none"
+        className="w-full flex items-center justify-between gap-2 px-3.5 py-2 rounded-xl btn-neutral text-slate-900 dark:text-white text-xs font-bold transition-all cursor-pointer shadow-xs hover:shadow-sm border-0 outline-none"
       >
         <div className="flex items-center gap-2 truncate">
           <CalendarIcon size={14} className="text-blue-600 dark:text-blue-400 shrink-0 font-bold" />
@@ -230,7 +230,7 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
         )}
       </button>
 
-      {/* ANIMATED POPOVER CARD (Matching button background, zero border) */}
+      {/* ANIMATED POPOVER CARD (Matching softer button background, zero border) */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -238,7 +238,7 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: -6 }}
             transition={{ type: 'spring', stiffness: 450, damping: 30 }}
-            className={`absolute top-full ${align === 'right' ? 'right-0 origin-top-right' : 'left-0 origin-top-left'} mt-2 z-[9999] w-80 p-4 bg-slate-200 dark:bg-[#202538] rounded-2xl shadow-[0_20px_50px_rgba(15,23,42,0.25)] dark:shadow-[0_24px_64px_rgba(0,0,0,0.9)] border-0 outline-none select-none space-y-3`}
+            className={`absolute top-full ${align === 'right' ? 'right-0 origin-top-right' : 'left-0 origin-top-left'} mt-2 z-[9999] w-80 p-4 bg-[var(--btn-neutral-bg,#f1f5f9)] dark:bg-[var(--btn-neutral-dark-bg,#181d2e)] rounded-2xl shadow-[0_20px_50px_rgba(15,23,42,0.18)] dark:shadow-[0_24px_64px_rgba(0,0,0,0.9)] border-0 outline-none select-none space-y-3`}
           >
             {mode === 'month' ? (
               <MonthGridPicker
@@ -265,14 +265,14 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
                     <button
                       type="button"
                       onClick={handlePrevMonth}
-                      className="p-1.5 rounded-xl text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-300/60 dark:hover:bg-[#1c1c21] transition cursor-pointer font-bold border-0"
+                      className="p-1.5 rounded-xl text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-[var(--btn-neutral-hover,#e2e8f0)] dark:hover:bg-[#1c1c21] transition cursor-pointer font-bold border-0"
                     >
                       <ChevronLeft size={15} />
                     </button>
                     <button
                       type="button"
                       onClick={handleNextMonth}
-                      className="p-1.5 rounded-xl text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-300/60 dark:hover:bg-[#1c1c21] transition cursor-pointer font-bold border-0"
+                      className="p-1.5 rounded-xl text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-[var(--btn-neutral-hover,#e2e8f0)] dark:hover:bg-[#1c1c21] transition cursor-pointer font-bold border-0"
                     >
                       <ChevronRight size={15} />
                     </button>
@@ -317,8 +317,8 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
                               : item.isCurrentMonth
                               ? item.isStudyDay
                                 ? 'text-blue-600 dark:text-blue-300 font-black hover:bg-blue-100 dark:hover:bg-blue-500/20'
-                                : 'text-slate-900 dark:text-slate-100 font-extrabold hover:bg-slate-300/60 dark:hover:bg-[#1c1c21] hover:text-black dark:hover:text-white'
-                              : 'text-slate-400 dark:text-slate-600 hover:bg-slate-300/40 dark:hover:bg-white/5'
+                                : 'text-slate-900 dark:text-slate-100 font-extrabold hover:bg-[var(--btn-neutral-hover,#e2e8f0)] dark:hover:bg-[#1c1c21] hover:text-black dark:hover:text-white'
+                              : 'text-slate-400 dark:text-slate-500 hover:bg-[var(--btn-neutral-hover,#e2e8f0)]/50 dark:hover:bg-white/5'
                           }`}
                           title={item.isStudyDay ? `Ngày học của lớp (${item.dayNumber}/${currentMonth + 1}/${currentYear})` : undefined}
                         >
@@ -346,7 +346,7 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
                 </div>
 
                 {/* Quick Actions Footer - No icon beside 'Hôm nay' */}
-                <div className="pt-2 flex items-center justify-between text-xs border-t border-slate-300/50 dark:border-white/5">
+                <div className="pt-2 flex items-center justify-between text-xs border-t border-slate-200/80 dark:border-white/5">
                   <button
                     type="button"
                     onClick={handleSelectToday}

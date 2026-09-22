@@ -151,7 +151,6 @@ export const ChartControls: React.FC<ChartControlsProps> = ({
                     })),
                   ]}
                   placeholder="Giai đoạn..."
-                  icon={<Clock size={13} className="text-blue-400" />}
                 />
               </div>
             )}

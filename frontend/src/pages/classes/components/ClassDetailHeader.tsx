@@ -50,7 +50,7 @@ export const ClassDetailHeader: React.FC<ClassDetailHeaderProps> = ({
           <button
             type="button"
             onClick={onBack}
-            className="p-2 rounded-xl bg-slate-200 hover:bg-slate-300 dark:bg-white/10 dark:hover:bg-white/15 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition cursor-pointer border-0 shadow-xs shrink-0"
+            className="p-2 rounded-xl btn-neutral text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition cursor-pointer border-0 shadow-xs shrink-0"
             title="Quay lại danh sách lớp"
           >
             <ChevronLeft size={18} />

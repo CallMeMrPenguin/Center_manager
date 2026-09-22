@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Upload, Code, RefreshCw, FileText } from 'lucide-react';
 import { showToast } from '../../../components/Toast';
+import { SegmentedControl } from '../../../components/SegmentedControl';
 import { cleanOptionPrefix } from '../../../utils';
 import { Question, TestData } from '../types';
 
@@ -91,27 +92,25 @@ export const QuizImportView: React.FC<QuizImportViewProps> = ({
 
   return (
     <div className="space-y-6 max-w-4xl mx-auto w-full flex-1 flex flex-col justify-center">
-      {/* TAB MODE TOGGLE */}
-      <div className="flex items-center justify-center gap-2 p-1.5 bg-slate-100 dark:bg-[#0c0f1d] border border-slate-200 dark:border-white/10 rounded-2xl w-fit mx-auto shadow-sm dark:shadow-lg">
-        <button
-          onClick={() => setImportTab('file')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black transition cursor-pointer ${
-            importTab === 'file' ? 'bg-[#2563eb] text-white shadow-md' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200 dark:text-slate-400 dark:hover:text-white dark:hover:bg-white/5'
-          }`}
-        >
-          <Upload size={15} />
-          <span>Tải File Word (.DOCX)</span>
-        </button>
-
-        <button
-          onClick={() => setImportTab('json')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black transition cursor-pointer ${
-            importTab === 'json' ? 'bg-[#2563eb] text-white shadow-md' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200 dark:text-slate-400 dark:hover:text-white dark:hover:bg-white/5'
-          }`}
-        >
-          <Code size={15} />
-          <span>Dán Cấu Trúc JSON</span>
-        </button>
+      {/* TAB MODE TOGGLE (Segmented Button) */}
+      <div className="flex items-center justify-center mx-auto">
+        <SegmentedControl<'file' | 'json'>
+          value={importTab}
+          onChange={(val) => setImportTab(val)}
+          options={[
+            {
+              value: 'file',
+              label: 'Tải File Word (.DOCX)',
+              icon: <Upload size={14} />,
+            },
+            {
+              value: 'json',
+              label: 'Dán Cấu Trúc JSON',
+              icon: <Code size={14} />,
+            },
+          ]}
+          size="md"
+        />
       </div>
 
       {importTab === 'file' ? (

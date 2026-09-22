@@ -80,6 +80,27 @@
   transition: background-color 150ms ease, border-color 150ms ease, box-shadow 150ms ease, transform 150ms ease;
 }
 
+.btn-neutral {
+  background-color: var(--btn-neutral-bg, #f1f5f9);
+  color: inherit;
+  border: 0;
+  outline: none;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  transition: background-color 150ms ease, box-shadow 150ms ease, color 150ms ease;
+}
+.btn-neutral:hover {
+  background-color: var(--btn-neutral-hover, #e2e8f0);
+}
+.dark .btn-neutral,
+:root[class~="dark"] .btn-neutral {
+  background-color: var(--btn-neutral-dark-bg, #181d2e);
+  color: #f8fafc;
+}
+.dark .btn-neutral:hover,
+:root[class~="dark"] .btn-neutral:hover {
+  background-color: var(--btn-neutral-dark-hover, #222b44);
+}
+
 body {
   margin: 0;
   background-color: var(--background);

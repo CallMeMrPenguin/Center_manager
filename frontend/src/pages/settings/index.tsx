@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { showToast } from '../../components/Toast';
 import { useConfirm } from '../../components/ConfirmDialog';
+import { AppearanceSettingsCard } from './components/AppearanceSettingsCard';
 
 export default function Settings() {
   const confirm = useConfirm();
@@ -270,9 +271,12 @@ export default function Settings() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
-        {/* Left Column: Diagnostics and Directory Config */}
+        {/* Left Column: Diagnostics, Appearance, and Directory Config */}
         <div className="lg:col-span-2 flex flex-col gap-6">
           
+          {/* Appearance & Button Shade Settings */}
+          <AppearanceSettingsCard />
+
           {/* System Diagnostics Box */}
           <div className="bg-white dark:bg-[#141417] rounded-2xl p-6 flex flex-col gap-4 shadow-sm dark:shadow-none border border-slate-200 dark:border-[#27272a]">
             <div className="flex justify-between items-center border-b border-slate-200 dark:border-white/10 pb-3">
