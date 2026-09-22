@@ -80,7 +80,7 @@ export const ChartControls: React.FC<ChartControlsProps> = ({
               { value: 'timeline', label: 'Tiến Trình Thời Gian' },
               { value: 'distribution', label: 'Phổ Điểm & Histogram' },
             ]}
-            activeColor="bg-[#2563eb] shadow-[0_0_12px_rgba(37,99,235,0.5)]"
+            activeColor="bg-[#2563eb]"
             size="sm"
           />
         )}
@@ -92,36 +92,30 @@ export const ChartControls: React.FC<ChartControlsProps> = ({
           {/* Legend with Predictions */}
           <div className="flex flex-wrap items-center gap-3 text-[11px] font-bold">
             <span
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg border font-extrabold"
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg border-0 shadow-2xs font-extrabold"
               style={{
                 color: c1Color,
                 backgroundColor: `${c1Color}18`,
-                borderColor: `${c1Color}35`,
               }}
             >
-              <span className="w-2 h-2 rounded-full shadow-xs" style={{ backgroundColor: c1Color }} />
               {c1Label} (Dự đoán: {format1Dec(engine?.pred_c1 ?? 0)})
             </span>
             <span
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg border font-extrabold"
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg border-0 shadow-2xs font-extrabold"
               style={{
                 color: c2Color,
                 backgroundColor: `${c2Color}18`,
-                borderColor: `${c2Color}35`,
               }}
             >
-              <span className="w-2 h-2 rounded-full shadow-xs" style={{ backgroundColor: c2Color }} />
               {c2Label} (Dự đoán: {format1Dec(engine?.pred_c2 ?? 0)})
             </span>
             <span
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg border font-extrabold"
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg border-0 shadow-2xs font-extrabold"
               style={{
                 color: hwColor,
                 backgroundColor: `${hwColor}18`,
-                borderColor: `${hwColor}35`,
               }}
             >
-              <span className="w-2 h-2 rounded-full shadow-xs" style={{ backgroundColor: hwColor }} />
               {hwLabel} (Dự đoán: {format1Dec(engine?.pred_hw ?? 0)})
             </span>
           </div>
@@ -138,7 +132,7 @@ export const ChartControls: React.FC<ChartControlsProps> = ({
                   { value: '3m', label: '3T' },
                   { value: 'all', label: 'Tất cả' },
                 ]}
-                activeColor="bg-[#2563eb] shadow-[0_0_12px_rgba(37,99,235,0.4)]"
+                activeColor="bg-[#2563eb]"
                 size="sm"
               />
             </div>

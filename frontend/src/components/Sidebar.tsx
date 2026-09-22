@@ -61,7 +61,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       <button
         type="button"
         onClick={toggleSidebar}
-        className="absolute -right-3 top-6 w-6 h-6 rounded-full bg-white dark:bg-[#1c1c21] hover:bg-[#2563eb] text-slate-600 dark:text-slate-300 hover:text-white border border-slate-300 dark:border-[#27272a] shadow-md flex items-center justify-center transition-all duration-200 hover:scale-110 cursor-pointer z-50 active:scale-95 opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto"
+        className="absolute -right-3 top-6 w-6 h-6 rounded-full bg-white dark:bg-[#1c1c21] hover:bg-[#2563eb] text-slate-600 dark:text-slate-300 hover:text-white border-0 shadow-md flex items-center justify-center transition-all duration-200 hover:scale-110 cursor-pointer z-50 active:scale-95 opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto"
         title={isSidebarExpanded ? 'Thu gọn thanh điều hướng' : 'Mở rộng thanh điều hướng'}
       >
         {isSidebarExpanded ? (
@@ -281,10 +281,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
             onClick={() => setProfileOpen((prev) => !prev)}
             className={`${
               isSidebarExpanded ? 'w-full px-2 py-1.5 justify-start gap-2.5' : 'w-10 h-10 mx-auto p-0 justify-center'
-            } flex items-center rounded-xl hover:bg-slate-100 text-slate-700 hover:text-slate-900 transition cursor-pointer border border-transparent hover:border-slate-200`}
+            } flex items-center rounded-xl hover:bg-slate-100 text-slate-700 hover:text-slate-900 transition cursor-pointer border-0`}
             title={currentUser ? `${currentUser.name} (${currentUser.role})` : 'Tài khoản người dùng'}
           >
-            <div className="w-7 h-7 rounded-lg bg-blue-500/15 text-blue-600 border border-blue-500/25 flex items-center justify-center font-black text-xs shrink-0">
+            <div className="w-7 h-7 rounded-lg bg-blue-500/15 text-blue-600 border-0 shadow-2xs flex items-center justify-center font-black text-xs shrink-0">
               {currentUser?.name ? currentUser.name.slice(0, 2).toUpperCase() : 'CM'}
             </div>
             {isSidebarExpanded && (

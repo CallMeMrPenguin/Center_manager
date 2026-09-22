@@ -37,7 +37,7 @@ export const SessionOverviewBanner: React.FC<SessionOverviewBannerProps> = ({
   } = useSessionOverview(attendanceRecords);
 
   return (
-    <div className="bg-white dark:bg-[#0c0f1e] rounded-2xl p-4 border border-slate-200/80 dark:border-white/10 shadow-[0_4px_24px_rgba(0,0,0,0.06)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.45)] transition-all">
+    <div className="bg-white dark:bg-[#0c0f1e] rounded-2xl p-4 border-0 shadow-[0_4px_24px_rgba(0,0,0,0.06)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.45)] transition-all">
       {/* 1. MASTER HEADER STRIP */}
       <div className="flex flex-wrap items-center justify-between gap-3 select-none">
         <div>
@@ -85,7 +85,7 @@ export const SessionOverviewBanner: React.FC<SessionOverviewBannerProps> = ({
           <button
             type="button"
             onClick={() => setIsExpanded((prev) => !prev)}
-            className="p-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-white/10 dark:hover:bg-white/15 text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition cursor-pointer"
+            className="p-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-white/10 dark:hover:bg-white/15 text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition cursor-pointer border-0 shadow-xs hover:shadow-sm"
             title={isExpanded ? 'Thu gọn tổng quan' : 'Mở rộng tổng quan'}
           >
             {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}

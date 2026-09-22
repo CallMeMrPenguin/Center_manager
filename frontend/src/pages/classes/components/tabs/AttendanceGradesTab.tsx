@@ -72,10 +72,10 @@ export const AttendanceGradesTab: React.FC<AttendanceGradesTabProps> = ({
                   const newStatus = isAbsent ? 'Có mặt' : 'Vắng mặt';
                   onUpdateRecord(rec.student_id, 'status', newStatus);
                 }}
-                className={`px-3 py-1.5 rounded-xl font-black text-xs transition cursor-pointer border flex items-center justify-center ${
+                className={`px-3 py-1.5 rounded-xl font-black text-xs transition cursor-pointer border-0 shadow-2xs hover:shadow-xs flex items-center justify-center ${
                   isAbsent
-                    ? 'bg-rose-500/20 border-rose-500/50 text-rose-700 dark:text-rose-300 hover:bg-rose-500/30'
-                    : 'bg-emerald-500/20 border-emerald-500/50 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-500/30'
+                    ? 'bg-rose-500/20 text-rose-700 dark:text-rose-300 hover:bg-rose-500/30'
+                    : 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-500/30'
                 }`}
               >
                 <span>{rec.status || 'Có mặt'}</span>

@@ -92,7 +92,7 @@ export const StudentProfileHeader: React.FC<StudentProfileHeaderProps> = ({
   const evaluation = getEvaluation(scoreNum, tier);
 
   return (
-    <div className="select-none relative bg-white dark:bg-[#0e1222] border border-slate-300/80 dark:border-[#1e2744] p-5 sm:p-6 rounded-2xl shadow-[0_4px_20px_-4px_rgba(15,23,42,0.08),0_2px_4px_-1px_rgba(15,23,42,0.05)] dark:shadow-xl space-y-5 transition-colors">
+    <div className="select-none relative bg-white dark:bg-[#0e1222] border-0 p-5 sm:p-6 rounded-2xl shadow-[0_4px_20px_-4px_rgba(15,23,42,0.08),0_2px_4px_-1px_rgba(15,23,42,0.05)] dark:shadow-xl space-y-5 transition-colors">
       {/* Top-Right Deselect Button (X icon only) */}
       <button
         onClick={onClearStudent}

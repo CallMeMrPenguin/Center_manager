@@ -61,7 +61,7 @@ export const UsersRolesPage: React.FC = () => {
             { value: 'permissions', label: 'Phân Quyền Vai Trò' },
             { value: 'system', label: 'Hệ Thống & Đồng Bộ' },
           ]}
-          activeColor="bg-[#2563eb] shadow-[0_0_14px_rgba(37,99,235,0.4)]"
+          activeColor="bg-[#2563eb]"
           size="md"
         />
       </div>

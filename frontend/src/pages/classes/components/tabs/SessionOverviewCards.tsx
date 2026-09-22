@@ -14,21 +14,21 @@ interface BelowThresholdCardProps {
 
 const THEME_STYLES = {
   blue: {
-    cardBg: 'bg-blue-100/75 dark:bg-[#0c1838] shadow-xs hover:shadow-md',
+    cardBg: 'bg-blue-100 dark:bg-[#0c1838] shadow-xs hover:shadow-md',
     title: 'text-blue-800 dark:text-blue-300',
     lt: 'text-blue-800 dark:text-blue-400',
     inputBox: 'bg-white dark:bg-[#121626] shadow-2xs',
     input: 'text-blue-900 dark:text-blue-100',
   },
   purple: {
-    cardBg: 'bg-purple-100/75 dark:bg-[#1e103c] shadow-xs hover:shadow-md',
+    cardBg: 'bg-purple-100 dark:bg-[#1e103c] shadow-xs hover:shadow-md',
     title: 'text-purple-800 dark:text-purple-300',
     lt: 'text-purple-800 dark:text-purple-400',
     inputBox: 'bg-white dark:bg-[#121626] shadow-2xs',
     input: 'text-purple-900 dark:text-purple-100',
   },
   emerald: {
-    cardBg: 'bg-emerald-100/75 dark:bg-[#0b241c] shadow-xs hover:shadow-md',
+    cardBg: 'bg-emerald-100 dark:bg-[#0b241c] shadow-xs hover:shadow-md',
     title: 'text-emerald-800 dark:text-emerald-300',
     lt: 'text-emerald-800 dark:text-emerald-400',
     inputBox: 'bg-white dark:bg-[#121626] shadow-2xs',
@@ -68,7 +68,6 @@ export const BelowThresholdCard: React.FC<BelowThresholdCardProps> = ({
                 className={`w-10 bg-transparent ${styles.input} font-black font-mono text-xs text-center focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none`}
                 title={`Nhập điểm lọc cho ${title} (mặc định theo TB)`}
               />
-              <span className="text-[10px] text-slate-500 font-bold select-none">đ</span>
             </div>
           </div>
           <span
@@ -92,7 +91,7 @@ export const BelowThresholdCard: React.FC<BelowThresholdCardProps> = ({
                 title="Bấm để sao chép tên tìm kiếm"
               >
                 <span>{s.student_name}</span>
-                <span className="px-1.5 py-0.5 rounded-md bg-rose-100 text-rose-700 dark:bg-rose-950/80 dark:text-rose-300 font-mono font-black text-[11px]">
+                <span className="font-mono font-extrabold text-[11px] text-rose-600 dark:text-rose-400">
                   ({format1Dec(s.score)})
                 </span>
               </button>
@@ -122,7 +121,7 @@ export const DivergenceCard: React.FC<DivergenceCardProps> = ({
   onFilterStudent,
 }) => {
   return (
-    <div className="bg-amber-100/75 dark:bg-[#281a09] shadow-xs hover:shadow-md rounded-2xl p-3.5 flex flex-col justify-between min-h-[140px] transition-all">
+    <div className="bg-amber-100 dark:bg-[#281a09] shadow-xs hover:shadow-md rounded-2xl p-3.5 flex flex-col justify-between min-h-[140px] transition-all">
       <div>
         <div className="flex items-center justify-between mb-2.5 gap-2">
           <div className="flex items-center gap-1.5 min-w-0">
@@ -139,9 +138,8 @@ export const DivergenceCard: React.FC<DivergenceCardProps> = ({
                 value={threshInput}
                 onChange={(e) => onThreshChange(e.target.value)}
                 className="w-10 bg-transparent text-amber-900 dark:text-amber-100 font-black font-mono text-xs text-center focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                title="Nhập ngưỡng độ lệch BTVN > Check (mặc định 1.5đ)"
+                title="Nhập ngưỡng độ lệch BTVN > Check (mặc định 1.5)"
               />
-              <span className="text-[10px] text-slate-500 font-bold select-none">đ</span>
             </div>
           </div>
           <span
@@ -162,11 +160,11 @@ export const DivergenceCard: React.FC<DivergenceCardProps> = ({
                 type="button"
                 onClick={() => onFilterStudent?.(s.student_name)}
                 className="px-2.5 py-1 rounded-xl bg-white dark:bg-[#141724] hover:bg-slate-50 dark:hover:bg-[#1c2033] shadow-xs hover:shadow-md text-xs font-bold flex items-center gap-1.5 transition cursor-pointer text-slate-900 dark:text-slate-100"
-                title={`BTVN: ${format1Dec(s.homework)}, TB Check: ${format1Dec(s.checkAvg)} (Lệch: ${format1Dec(s.diff)} đ). Bấm để sao chép.`}
+                title={`BTVN: ${format1Dec(s.homework)}, TB Check: ${format1Dec(s.checkAvg)} (Lệch: ${format1Dec(s.diff)}). Bấm để sao chép.`}
               >
                 <span>{s.student_name}</span>
-                <span className="px-1.5 py-0.5 rounded-md bg-amber-100 text-amber-900 dark:bg-amber-950/80 dark:text-amber-300 font-mono font-black text-[11px]">
-                  ({format1Dec(s.diff)}đ)
+                <span className="font-mono font-extrabold text-[11px] text-amber-700 dark:text-amber-400">
+                  ({format1Dec(s.diff)})
                 </span>
               </button>
             ))}

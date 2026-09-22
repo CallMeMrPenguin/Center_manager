@@ -142,7 +142,7 @@ export const StudentProfileHeader: React.FC<StudentProfileHeaderProps> = ({
   const rankDisplay = stats?.rank && stats.rank !== '-' ? String(stats.rank) : '';
 
   return (
-    <div className="select-none relative bg-white dark:bg-[#0e1222] border border-slate-200 dark:border-[#1e2744] p-5 sm:p-6 rounded-2xl shadow-sm dark:shadow-xl space-y-5">
+    <div className="select-none relative bg-white dark:bg-[#0e1222] border-0 p-5 sm:p-6 rounded-2xl shadow-sm dark:shadow-xl space-y-5">
       {/* 1. TOP FILTER BAR (Admin / Teacher Only) */}
       {!isStudentMode && (
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 dark:border-white/10 pb-4">
@@ -175,7 +175,7 @@ export const StudentProfileHeader: React.FC<StudentProfileHeaderProps> = ({
             type="button"
             onClick={onRefresh}
             disabled={loading}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-[#151a2e] dark:hover:bg-[#1e2642] text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white text-xs font-bold border border-slate-200 dark:border-white/10 transition-all cursor-pointer active:scale-95 disabled:opacity-50"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-[#151a2e] dark:hover:bg-[#1e2642] text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white text-xs font-bold border-0 shadow-xs hover:shadow-sm transition-all cursor-pointer active:scale-95 disabled:opacity-50"
             title="Tải lại dữ liệu"
           >
             <RefreshCw size={13} className={loading ? 'animate-spin text-indigo-400' : 'text-slate-400'} />

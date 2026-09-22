@@ -108,7 +108,7 @@ export const CustomMultiSelect: React.FC<CustomMultiSelectProps> = ({
         type="button"
         disabled={disabled}
         onClick={() => setIsOpen(!isOpen)}
-        className={`w-full min-h-[38px] flex items-center justify-between bg-white dark:bg-[#101426] border-2 border-slate-300 dark:border-[#2a375f] hover:border-blue-500 rounded-xl px-3.5 py-1.5 text-xs font-extrabold text-slate-900 dark:text-white transition-all cursor-pointer shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+        className={`w-full min-h-[38px] flex items-center justify-between bg-slate-200/80 hover:bg-slate-200 dark:bg-[#1c202c] dark:hover:bg-[#252a3a] border-0 rounded-xl px-3.5 py-1.5 text-xs font-extrabold text-slate-900 dark:text-white transition-all cursor-pointer shadow-xs hover:shadow-sm outline-none ${
           disabled ? 'opacity-40 cursor-not-allowed' : ''
         }`}
       >
@@ -119,7 +119,7 @@ export const CustomMultiSelect: React.FC<CustomMultiSelectProps> = ({
             selectedOptions.map((opt) => (
               <span
                 key={opt.value}
-                className="inline-flex items-center gap-1 bg-blue-50 dark:bg-blue-500/25 border border-blue-200 dark:border-blue-500/40 text-blue-800 dark:text-blue-200 px-2 py-0.5 rounded-lg text-[11px] font-black"
+                className="inline-flex items-center gap-1 bg-blue-100 dark:bg-blue-500/25 border-0 shadow-2xs text-blue-800 dark:text-blue-200 px-2 py-0.5 rounded-lg text-[11px] font-black"
               >
                 <span>{opt.value}</span>
                 <span
@@ -156,7 +156,7 @@ export const CustomMultiSelect: React.FC<CustomMultiSelectProps> = ({
         <div
           className={`absolute left-0 right-0 ${
             openUpwards ? 'bottom-full mb-2' : 'top-full mt-2'
-          } z-[9999] bg-white dark:bg-[#161d36] border-2 border-slate-300 dark:border-[#3b4d82] rounded-2xl shadow-[0_20px_50px_rgba(15,23,42,0.25)] dark:shadow-[0_24px_64px_rgba(0,0,0,0.95)] ring-1 ring-black/5 dark:ring-white/10 p-2.5 space-y-2 max-h-64 flex flex-col select-none animate-slide-up`}
+          } z-[9999] bg-white dark:bg-[#161d36] border-0 rounded-2xl shadow-[0_20px_50px_rgba(15,23,42,0.25)] dark:shadow-[0_24px_64px_rgba(0,0,0,0.95)] p-2.5 space-y-2 max-h-64 flex flex-col select-none animate-slide-up outline-none`}
         >
           {/* Search Input */}
           <div className="relative">
@@ -167,7 +167,7 @@ export const CustomMultiSelect: React.FC<CustomMultiSelectProps> = ({
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder={searchPlaceholder}
-              className="w-full bg-slate-100 dark:bg-[#0c1020] border-2 border-slate-300 dark:border-[#2a375f] text-slate-900 dark:text-white placeholder:text-slate-500 font-bold text-xs rounded-xl pl-8 pr-2.5 py-1.5 focus:outline-none focus:border-blue-500"
+              className="w-full bg-slate-100 dark:bg-[#0c1020] border-0 text-slate-900 dark:text-white placeholder:text-slate-500 font-bold text-xs rounded-xl pl-8 pr-2.5 py-1.5 focus:outline-none"
             />
           </div>
 

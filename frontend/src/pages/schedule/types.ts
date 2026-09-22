@@ -63,13 +63,13 @@ export function getPremiumStyle(status: string, hexColor = '#2563eb', isDarkPara
   const isDone = status === 'Đã học';
   const sat = isDone ? Math.max(25, Math.round(iS * 0.55)) : Math.min(85, Math.max(60, iS));
   const lightness = isDone ? 50 : Math.min(75, Math.max(50, iL));
-  const alphaBg = isDark ? (isDone ? '0.12' : '0.18') : (isDone ? '0.14' : '0.20');
+  const alphaBg = isDark ? (isDone ? '0.22' : '0.30') : (isDone ? '0.26' : '0.34');
   const bg = `hsla(${h},${sat}%,${lightness}%,${alphaBg})`;
-  const border = isDark ? `hsla(${h},${sat}%,${lightness}%,0.65)` : `hsla(${h},${sat}%,45%,0.55)`;
+  const border = 'transparent';
   const color = isDark ? `hsla(${h},95%,92%,0.98)` : `hsla(${h},95%,28%,0.98)`;
   // Clean enterprise card shadow (zero radioactive glow)
   const shadow = isDark ? '0 2px 6px rgba(0,0,0,0.35)' : '0 1px 3px rgba(0,0,0,0.08)';
-  return { bg, border, innerBorder: isDark ? `hsla(${h},${sat}%,${lightness}%,0.35)` : `hsla(${h},${sat}%,45%,0.3)`, color, shadow };
+  return { bg, border, innerBorder: 'transparent', color, shadow };
 }
 
 export function getSessionColor(sess: ClassSession): string {

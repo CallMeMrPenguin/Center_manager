@@ -222,13 +222,13 @@ export const EarlyWarningSection: React.FC<EarlyWarningSectionProps> = ({
         <div className="flex items-center gap-2">
           <button
             onClick={(e) => { e.stopPropagation(); setShowWarningSettings(!showWarningSettings); }}
-            className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-[#1e1322] dark:hover:bg-rose-500/20 text-rose-600 dark:text-rose-300 border border-rose-200 dark:border-rose-500/30 text-xs font-bold transition cursor-pointer flex items-center gap-1"
+            className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-[#1e1322] dark:hover:bg-rose-500/20 text-rose-600 dark:text-rose-300 border-0 shadow-xs hover:shadow-sm text-xs font-bold transition cursor-pointer flex items-center gap-1"
           >
             <SlidersHorizontal size={13} />
             <span className="text-[11px]">Ngưỡng</span>
           </button>
-          <div className="p-1 rounded-lg text-slate-400 hover:text-slate-900 dark:hover:text-white">
-            {isWarningSectionOpen ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+          <div className="p-1.5 rounded-lg bg-slate-200/80 hover:bg-slate-200 dark:bg-[#1c202c] dark:hover:bg-[#252a3a] text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white border-0 shadow-xs hover:shadow-sm transition cursor-pointer flex items-center justify-center">
+            {isWarningSectionOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
           </div>
         </div>
       </div>

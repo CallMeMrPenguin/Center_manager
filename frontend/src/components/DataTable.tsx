@@ -291,7 +291,7 @@ function ColumnVisibilityDropdown<TData>({
               { value: 'order', label: 'Thứ Tự' },
               { value: 'align', label: 'Căn Chỉnh' },
             ]}
-            activeColor="bg-[#2563eb] shadow-[0_0_14px_rgba(37,99,235,0.5)]"
+            activeColor="bg-[#2563eb]"
             fit="fluid"
             size="xs"
           />

@@ -105,20 +105,20 @@ export const StudentRankingsTable: React.FC<StudentRankingsTableProps> = React.m
 
         let pctColor = 'text-emerald-700 dark:text-emerald-400';
         let subColor = 'text-emerald-800 dark:text-emerald-300';
-        let badgeBg = 'bg-emerald-500/15 border-emerald-500/30';
+        let badgeBg = 'bg-emerald-500/15';
         if (total > 0) {
           if (pct < 50) {
             pctColor = 'text-rose-700 dark:text-rose-400';
             subColor = 'text-rose-800 dark:text-rose-300';
-            badgeBg = 'bg-rose-500/15 border-rose-500/30';
+            badgeBg = 'bg-rose-500/15';
           } else if (pct < 75) {
             pctColor = 'text-orange-700 dark:text-orange-400';
             subColor = 'text-orange-800 dark:text-orange-300';
-            badgeBg = 'bg-orange-500/15 border-orange-500/30';
+            badgeBg = 'bg-orange-500/15';
           } else if (pct < 90) {
             pctColor = 'text-amber-700 dark:text-amber-400';
             subColor = 'text-amber-800 dark:text-amber-300';
-            badgeBg = 'bg-amber-500/15 border-amber-500/30';
+            badgeBg = 'bg-amber-500/15';
           }
         }
 
@@ -127,7 +127,7 @@ export const StudentRankingsTable: React.FC<StudentRankingsTableProps> = React.m
             <div className={`font-mono font-extrabold text-base leading-tight ${pctColor}`}>
               {pct}%
             </div>
-            <div className={`text-[10px] font-mono font-bold mt-1 px-2 py-0.5 rounded-md border ${badgeBg} ${subColor}`}>
+            <div className={`text-[10px] font-mono font-bold mt-1 px-2 py-0.5 rounded-md border-0 shadow-2xs ${badgeBg} ${subColor}`}>
               {present}/{total} buổi
             </div>
           </div>
@@ -148,11 +148,11 @@ export const StudentRankingsTable: React.FC<StudentRankingsTableProps> = React.m
               {val > 0 ? format1Dec(val) : '-'}
             </span>
             {pred > 0 && (
-              <div className={`text-[10px] font-mono font-bold mt-1 px-1.5 py-0.5 rounded border inline-flex items-center gap-0.5 leading-none ${
-                pred >= 8.0 ? 'text-emerald-800 dark:text-emerald-300 bg-emerald-500/15 border-emerald-500/30' :
-                pred >= 6.5 ? 'text-cyan-800 dark:text-cyan-300 bg-cyan-500/15 border-cyan-500/30' :
-                pred >= 5.0 ? 'text-amber-800 dark:text-amber-300 bg-amber-500/15 border-amber-500/30' :
-                'text-rose-800 dark:text-rose-300 bg-rose-500/15 border-rose-500/30'
+              <div className={`text-[10px] font-mono font-bold mt-1 px-1.5 py-0.5 rounded border-0 shadow-2xs inline-flex items-center gap-0.5 leading-none ${
+                pred >= 8.0 ? 'text-emerald-800 dark:text-emerald-300 bg-emerald-500/15' :
+                pred >= 6.5 ? 'text-cyan-800 dark:text-cyan-300 bg-cyan-500/15' :
+                pred >= 5.0 ? 'text-amber-800 dark:text-amber-300 bg-amber-500/15' :
+                'text-rose-800 dark:text-rose-300 bg-rose-500/15'
               }`}>
                 <span>PD: {format1Dec(pred)}</span>
               </div>
@@ -175,11 +175,11 @@ export const StudentRankingsTable: React.FC<StudentRankingsTableProps> = React.m
               {val > 0 ? format1Dec(val) : '-'}
             </span>
             {pred > 0 && (
-              <div className={`text-[10px] font-mono font-bold mt-1 px-1.5 py-0.5 rounded border inline-flex items-center gap-0.5 leading-none ${
-                pred >= 8.0 ? 'text-emerald-800 dark:text-emerald-300 bg-emerald-500/15 border-emerald-500/30' :
-                pred >= 6.5 ? 'text-cyan-800 dark:text-cyan-300 bg-cyan-500/15 border-cyan-500/30' :
-                pred >= 5.0 ? 'text-amber-800 dark:text-amber-300 bg-amber-500/15 border-amber-500/30' :
-                'text-rose-800 dark:text-rose-300 bg-rose-500/15 border-rose-500/30'
+              <div className={`text-[10px] font-mono font-bold mt-1 px-1.5 py-0.5 rounded border-0 shadow-2xs inline-flex items-center gap-0.5 leading-none ${
+                pred >= 8.0 ? 'text-emerald-800 dark:text-emerald-300 bg-emerald-500/15' :
+                pred >= 6.5 ? 'text-cyan-800 dark:text-cyan-300 bg-cyan-500/15' :
+                pred >= 5.0 ? 'text-amber-800 dark:text-amber-300 bg-amber-500/15' :
+                'text-rose-800 dark:text-rose-300 bg-rose-500/15'
               }`}>
                 <span>PD: {format1Dec(pred)}</span>
               </div>
@@ -201,11 +201,11 @@ export const StudentRankingsTable: React.FC<StudentRankingsTableProps> = React.m
               {val > 0 ? format1Dec(val) : '-'}
             </span>
             {pred > 0 && (
-              <div className={`text-[10px] font-mono font-bold mt-1 px-1.5 py-0.5 rounded border inline-flex items-center gap-0.5 leading-none ${
-                pred >= 8.0 ? 'text-emerald-800 dark:text-emerald-300 bg-emerald-500/15 border-emerald-500/30' :
-                pred >= 6.5 ? 'text-cyan-800 dark:text-cyan-300 bg-cyan-500/15 border-cyan-500/30' :
-                pred >= 5.0 ? 'text-amber-800 dark:text-amber-300 bg-amber-500/15 border-amber-500/30' :
-                'text-rose-800 dark:text-rose-300 bg-rose-500/15 border-rose-500/30'
+              <div className={`text-[10px] font-mono font-bold mt-1 px-1.5 py-0.5 rounded border-0 shadow-2xs inline-flex items-center gap-0.5 leading-none ${
+                pred >= 8.0 ? 'text-emerald-800 dark:text-emerald-300 bg-emerald-500/15' :
+                pred >= 6.5 ? 'text-cyan-800 dark:text-cyan-300 bg-cyan-500/15' :
+                pred >= 5.0 ? 'text-amber-800 dark:text-amber-300 bg-amber-500/15' :
+                'text-rose-800 dark:text-rose-300 bg-rose-500/15'
               }`}>
                 <span>PD: {format1Dec(pred)}</span>
               </div>
@@ -255,7 +255,7 @@ export const StudentRankingsTable: React.FC<StudentRankingsTableProps> = React.m
         if (avg === 0) {
           return (
             <div className="text-center">
-              <span className="inline-block px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-500/10 text-slate-400 border border-slate-500/30">Chưa xếp hạng</span>
+              <span className="inline-block px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-500/10 text-slate-400 border-0 shadow-2xs">Chưa xếp hạng</span>
             </div>
           );
         }
@@ -271,7 +271,7 @@ export const StudentRankingsTable: React.FC<StudentRankingsTableProps> = React.m
             </div>
             <div className="text-left">
               <span className={`text-base font-black font-sans block leading-tight ${tier.text}`}>{tier.name}</span>
-              <span className="text-xs text-slate-400 font-bold">{tier.title}</span>
+              <span className={`text-xs font-bold leading-tight ${tier.text} opacity-75`}>{tier.title}</span>
             </div>
           </div>
         );
@@ -296,7 +296,7 @@ export const StudentRankingsTable: React.FC<StudentRankingsTableProps> = React.m
           return (
             <div className="text-center py-0.5 flex flex-col items-center justify-center">
               <span className="font-mono font-extrabold text-slate-500 text-sm sm:text-base">-</span>
-              <div className="text-[10px] font-mono font-bold mt-1 px-1.5 py-0.5 rounded border inline-flex items-center gap-0.5 leading-none bg-slate-500/10 text-slate-400 border-slate-500/30">
+              <div className="text-[10px] font-mono font-bold mt-1 px-1.5 py-0.5 rounded border-0 shadow-2xs inline-flex items-center gap-0.5 leading-none bg-slate-500/10 text-slate-400">
                 <span>Chưa có điểm</span>
               </div>
             </div>
@@ -308,7 +308,7 @@ export const StudentRankingsTable: React.FC<StudentRankingsTableProps> = React.m
             <span className={`font-mono font-extrabold text-sm sm:text-base ${tier.text}`}>
               {format1Dec(avg)}
             </span>
-            <div className={`text-[10px] font-mono font-bold mt-1 px-2 py-0.5 rounded border inline-flex items-center gap-0.5 leading-none ${tier.bg} ${tier.border} ${tier.text}`}>
+            <div className={`text-[10px] font-mono font-bold mt-1 px-2 py-0.5 rounded border-0 shadow-2xs inline-flex items-center gap-0.5 leading-none ${tier.bg} ${tier.text}`}>
               <span>{tier.title}</span>
             </div>
           </div>
@@ -342,7 +342,7 @@ export const StudentRankingsTable: React.FC<StudentRankingsTableProps> = React.m
 
       {/* Active Histogram Score Bin Filter Bar */}
       {selectedScoreBin && (
-        <div className="mx-5 my-3 flex items-center justify-between bg-blue-950/70 border border-blue-500/40 px-4 py-2.5 rounded-xl text-xs font-bold text-blue-200 shadow-lg">
+        <div className="mx-5 my-3 flex items-center justify-between bg-blue-950/70 border-0 px-4 py-2.5 rounded-xl text-xs font-bold text-blue-200 shadow-xs">
           <div className="flex items-center gap-2.5">
             <span className="w-2.5 h-2.5 rounded-full bg-blue-400 animate-pulse" />
             <span>
@@ -352,7 +352,7 @@ export const StudentRankingsTable: React.FC<StudentRankingsTableProps> = React.m
           <button
             type="button"
             onClick={onClearScoreBin}
-            className="px-3 py-1 rounded-lg bg-blue-600/40 hover:bg-blue-600/70 text-white font-bold transition cursor-pointer border border-blue-400/30"
+            className="px-3 py-1 rounded-lg bg-blue-600/40 hover:bg-blue-600/70 text-white font-bold transition cursor-pointer border-0 shadow-2xs hover:shadow-xs"
           >
             ✕ Bỏ lọc phổ điểm
           </button>

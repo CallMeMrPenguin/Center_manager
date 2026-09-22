@@ -48,8 +48,8 @@ export const LearningBottlenecksSection: React.FC<LearningBottlenecksSectionProp
             </p>
           </div>
         </div>
-        <div className="p-1 rounded-lg text-slate-400 hover:text-slate-900 dark:hover:text-white">
-          {isBottlenecksSectionOpen ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+        <div className="p-1.5 rounded-lg bg-slate-200/80 hover:bg-slate-200 dark:bg-[#1c202c] dark:hover:bg-[#252a3a] text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white border-0 shadow-xs hover:shadow-sm transition cursor-pointer flex items-center justify-center">
+          {isBottlenecksSectionOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
         </div>
       </div>
 

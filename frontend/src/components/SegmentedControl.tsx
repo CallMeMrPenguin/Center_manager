@@ -134,10 +134,10 @@ export function SegmentedControl<T extends string = string>({
   const isFluid = fullWidth || fit === 'fluid' || className.includes('w-full') || className.includes('flex-1');
 
   const sizeClasses = {
-    xs: 'text-[11px] py-1 px-2.5 gap-1 min-h-[26px]',
-    sm: 'text-xs py-1 px-3 gap-1.5 min-h-[28px]',
-    md: 'text-xs py-1.5 px-3.5 gap-1.5 min-h-[32px]',
-    lg: 'text-sm py-2 px-4 gap-2 min-h-[38px]',
+    xs: 'text-[11px] py-1 px-3 gap-1 min-h-[26px]',
+    sm: 'text-xs py-1.5 px-3.5 gap-1.5 min-h-[30px]',
+    md: 'text-xs py-2 px-4 gap-1.5 min-h-[34px]',
+    lg: 'text-sm py-2.5 px-5 gap-2 min-h-[40px]',
   }[size];
 
   const iconSizes = {
@@ -152,14 +152,14 @@ export function SegmentedControl<T extends string = string>({
       ref={containerRef}
       role="group"
       onMouseLeave={() => setHoveredIndex(null)}
-      className={`relative inline-flex items-center justify-start bg-slate-100/90 dark:bg-[#0c0f1e] p-1 rounded-full border-0 select-none shrink-0 transition-colors ${
+      className={`relative inline-flex items-center justify-start bg-slate-200/70 dark:bg-[#0c0f1e] p-0 rounded-full border-0 select-none shrink-0 transition-colors ${
         isFluid ? 'w-full' : 'w-fit'
       } ${className}`}
     >
       {/* 1. Full-width Initial Hover Background that Collapses onto Hovered Item */}
       <motion.div
         aria-hidden="true"
-        className="absolute top-1 bottom-1 rounded-full bg-slate-200/80 dark:bg-white/10 pointer-events-none z-0"
+        className="absolute top-0 bottom-0 rounded-full bg-slate-300 dark:bg-white/20 pointer-events-none z-0"
         animate={{
           left: hoverStyle.left,
           width: hoverStyle.width,
@@ -171,12 +171,11 @@ export function SegmentedControl<T extends string = string>({
         }}
       />
 
-      {/* 2. Tactile Active Indicator Pill (Matches App Indigo Theme) */}
+      {/* 2. Tactile Active Indicator Pill (Matches App Blue Theme, No Glow) */}
       <motion.div
         aria-hidden="true"
-        className={`absolute top-1 bottom-1 rounded-full pointer-events-none z-0 ${
-          activeColor ||
-          'bg-[#5c36f5] dark:bg-[#5c36f5] shadow-[0_2px_14px_rgba(92,54,245,0.45)]'
+        className={`absolute top-0 bottom-0 rounded-full pointer-events-none z-0 ${
+          activeColor || 'bg-[#2563eb] dark:bg-[#2563eb]'
         }`}
         animate={{
           left: indicatorStyle.left,

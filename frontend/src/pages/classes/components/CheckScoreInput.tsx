@@ -222,7 +222,7 @@ export const CheckScoreInput: React.FC<CheckScoreInputProps> = React.memo(({
         }}
         onKeyDown={handleKeyDown}
         placeholder="0-10"
-        className="w-20 bg-white dark:bg-[#161a29] border-2 border-slate-300 dark:border-[#2a375f] rounded-lg px-2 py-1 text-slate-900 dark:text-white font-extrabold text-xs focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-500/40 text-center transition selection:bg-blue-600 selection:text-white caret-slate-900 dark:caret-white shadow-xs"
+        className="w-20 bg-slate-100 dark:bg-[#161a29] border-0 rounded-lg px-2 py-1 text-slate-900 dark:text-white font-extrabold text-xs focus:outline-none focus:ring-2 focus:ring-blue-500/40 text-center transition selection:bg-blue-600 selection:text-white caret-slate-900 dark:caret-white shadow-xs focus:shadow-sm"
       />
 
       {/* Prediction indicator below input */}
@@ -231,12 +231,12 @@ export const CheckScoreInput: React.FC<CheckScoreInputProps> = React.memo(({
           const num = Number(rawPred);
           const theme =
             num >= 8.0
-              ? 'text-emerald-800 dark:text-emerald-300 bg-emerald-500/15 border-emerald-500/30 hover:bg-emerald-500/25'
+              ? 'text-emerald-800 dark:text-emerald-300 bg-emerald-500/20 hover:bg-emerald-500/30'
               : num >= 6.5
-              ? 'text-cyan-800 dark:text-cyan-300 bg-cyan-500/15 border-cyan-500/30 hover:bg-cyan-500/25'
+              ? 'text-cyan-800 dark:text-cyan-300 bg-cyan-500/20 hover:bg-cyan-500/30'
               : num >= 5.0
-              ? 'text-amber-800 dark:text-amber-300 bg-amber-500/15 border-amber-500/30 hover:bg-amber-500/25'
-              : 'text-rose-800 dark:text-rose-300 bg-rose-500/15 border-rose-500/30 hover:bg-rose-500/25';
+              ? 'text-amber-800 dark:text-amber-300 bg-amber-500/20 hover:bg-amber-500/30'
+              : 'text-rose-800 dark:text-rose-300 bg-rose-500/20 hover:bg-rose-500/30';
 
           return (
             <button
@@ -247,7 +247,7 @@ export const CheckScoreInput: React.FC<CheckScoreInputProps> = React.memo(({
                 commitValue(formattedPred);
               }}
               title={`Điểm dự đoán: ${formattedPred} (Nhấn để áp dụng)`}
-              className={`px-1.5 py-0.2 rounded border font-mono font-black text-[11px] transition cursor-pointer active:scale-95 select-none ${theme}`}
+              className={`px-1.5 py-0.2 rounded font-mono font-black text-[11px] transition cursor-pointer active:scale-95 select-none border-0 shadow-2xs ${theme}`}
             >
               {formattedPred}
             </button>

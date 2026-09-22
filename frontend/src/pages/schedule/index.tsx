@@ -8,6 +8,7 @@ import { api } from '../../api';
 import { showToast } from '../../components/Toast';
 import { useConfirm } from '../../components/ConfirmDialog';
 import { CustomSelect } from '../../components/CustomSelect';
+import { CustomDatePicker } from '../../components/CustomDatePicker';
 import { DataTable } from '../../components/DataTable';
 import { SegmentedControl } from '../../components/SegmentedControl';
 import { getLocalDateStr } from '../../utils';
@@ -399,43 +400,46 @@ export default function SchedulePage() {
 
       {/* KPI Cards */}
       <div className="grid grid-cols-3 gap-4 shrink-0">
-        <div className="bg-white dark:bg-[#141417] border border-slate-200 dark:border-[#27272a] p-4.5 flex items-center justify-between rounded-2xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.06),0_2px_6px_-2px_rgba(0,0,0,0.04)] dark:shadow-none transition-colors duration-200">
+        <div className="bg-white dark:bg-[#141417] border-0 p-4.5 flex items-center justify-between rounded-2xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.06),0_2px_6px_-2px_rgba(0,0,0,0.04)] dark:shadow-none transition-colors duration-200">
           <div>
             <p className="text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">Trong Tháng</p>
             <p className="text-2xl font-black text-slate-900 dark:text-white">{total}</p>
           </div>
-          <div className="p-2.5 bg-blue-500/10 border border-blue-500/20 rounded-xl text-blue-600 dark:text-blue-400">
+          <div className="p-2.5 bg-blue-500/10 border-0 rounded-xl text-blue-600 dark:text-blue-400">
             <CalendarIcon size={18} />
           </div>
         </div>
-        <div className="bg-white dark:bg-[#141417] border border-slate-200 dark:border-[#27272a] p-4.5 flex items-center justify-between rounded-2xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.06),0_2px_6px_-2px_rgba(0,0,0,0.04)] dark:shadow-none transition-colors duration-200">
+        <div className="bg-white dark:bg-[#141417] border-0 p-4.5 flex items-center justify-between rounded-2xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.06),0_2px_6px_-2px_rgba(0,0,0,0.04)] dark:shadow-none transition-colors duration-200">
           <div>
             <p className="text-[9px] font-black uppercase tracking-widest text-emerald-600 dark:text-emerald-400">Đã Hoàn Thành</p>
             <p className="text-2xl font-black text-emerald-600 dark:text-emerald-400">{done}</p>
           </div>
-          <div className="p-2.5 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-emerald-600 dark:text-emerald-400">
+          <div className="p-2.5 bg-emerald-500/10 border-0 rounded-xl text-emerald-600 dark:text-emerald-400">
             <CheckCircle2 size={18} />
           </div>
         </div>
-        <div className="bg-white dark:bg-[#141417] border border-slate-200 dark:border-[#27272a] p-4.5 flex items-center justify-between rounded-2xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.06),0_2px_6px_-2px_rgba(0,0,0,0.04)] dark:shadow-none transition-colors duration-200">
+        <div className="bg-white dark:bg-[#141417] border-0 p-4.5 flex items-center justify-between rounded-2xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.06),0_2px_6px_-2px_rgba(0,0,0,0.04)] dark:shadow-none transition-colors duration-200">
           <div>
             <p className="text-[9px] font-black uppercase tracking-widest text-cyan-600 dark:text-cyan-400">Sắp Diễn Ra</p>
             <p className="text-2xl font-black text-cyan-600 dark:text-cyan-400">{upcoming}</p>
           </div>
-          <div className="p-2.5 bg-cyan-500/10 border border-cyan-500/20 rounded-xl text-cyan-600 dark:text-cyan-400">
+          <div className="p-2.5 bg-cyan-500/10 border-0 rounded-xl text-cyan-600 dark:text-cyan-400">
             <Clock size={18} />
           </div>
         </div>
       </div>
 
       {/* Toolbar */}
-      <div className="flex flex-wrap items-center justify-between gap-3 bg-white dark:bg-[#141417] border border-slate-200 dark:border-[#27272a] p-3 rounded-2xl shrink-0 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.06),0_2px_6px_-2px_rgba(0,0,0,0.04)] dark:shadow-none transition-colors duration-200">
+      <div className="flex flex-wrap items-center justify-between gap-3 bg-white dark:bg-[#141417] border-0 p-3 rounded-2xl shrink-0 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.06),0_2px_6px_-2px_rgba(0,0,0,0.04)] dark:shadow-none transition-colors duration-200">
         <div className="flex items-center gap-2">
-          <input
-            type="month"
+          <CustomDatePicker
+            mode="month"
             value={selectedMonth}
-            onChange={(e) => setSelectedMonth(e.target.value)}
-            className="bg-slate-50 dark:bg-[#1c1c21] border border-slate-200 dark:border-[#27272a] text-slate-900 dark:text-white text-xs font-bold rounded-xl px-3 py-2 focus:outline-none focus:border-blue-500 cursor-pointer"
+            onChange={(val) => {
+              if (val) setSelectedMonth(val.slice(0, 7));
+            }}
+            placeholder="Chọn tháng..."
+            className="w-48"
           />
           <CustomSelect
             value={classFilter}

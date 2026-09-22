@@ -1,5 +1,5 @@
 import React from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Clock } from 'lucide-react';
 import { 
   ClassSession, DAY_HDRS, getSessionColor, getPremiumStyle, calcEndTime 
 } from '../types';
@@ -58,34 +58,44 @@ export const ScheduleCalendarView: React.FC<ScheduleCalendarViewProps> = ({
             ))}
           </div>
         </div>
-        <div className="overflow-auto max-h-[calc(100vh-360px)] bg-slate-300 dark:bg-[#283556]">
-          <div className="grid grid-cols-7 gap-[1.5px] bg-slate-300 dark:bg-[#283556]">
-            {Array.from({ length: totalCells }).map((_, i) => {
-              const dayNum = i - startOff + 1;
-              const inMonth = dayNum > 0 && dayNum <= daysInMonth;
-              if (!inMonth) return <div key={`e-${i}`} className="bg-slate-100/60 dark:bg-[#0c101a] min-h-[140px]" />;
+        <div className="p-2 overflow-y-auto max-h-[calc(100vh-290px)]">
+          <div className="grid grid-cols-7 gap-2 auto-rows-fr">
+            {Array.from({ length: totalCells }).map((_, idx) => {
+              const dayNum = idx - startOff + 1;
+              const isCurr = dayNum > 0 && dayNum <= daysInMonth;
+              if (!isCurr) {
+                return (
+                  <div
+                    key={idx}
+                    className="min-h-[110px] rounded-2xl bg-slate-50/50 dark:bg-[#0c101c]/40 p-2.5 opacity-30 select-none border-0"
+                  />
+                );
+              }
+
               const dateStr = `${yr}-${String(mo).padStart(2, '0')}-${String(dayNum).padStart(2, '0')}`;
+              const isToday = dateStr === today;
+              const isWknd = (idx % 7) >= 5;
               const daySess = sessions
                 .filter((s) => s.date === dateStr)
                 .sort((a, b) => a.start_time.localeCompare(b.start_time));
-              const isToday = dateStr === today;
-              const isWknd = i % 7 >= 5;
 
               return (
                 <div
-                  key={dayNum}
+                  key={idx}
+                  onClick={() => openAdd(dateStr)}
                   onContextMenu={(e) => {
                     e.preventDefault();
                     setCtxMenu({ x: e.clientX, y: e.clientY, dateStr });
                   }}
-                  onClick={() => openAdd(dateStr)}
-                  className={`min-h-[140px] p-2 flex flex-col gap-1.5 transition-all cursor-pointer ${
+                  className={`min-h-[110px] rounded-2xl p-2 flex flex-col gap-1.5 transition-all cursor-pointer border-0 shadow-2xs ${
                     isToday
-                      ? 'bg-blue-50/70 dark:bg-[#141b2f] z-10 border border-blue-500/50 shadow-sm'
-                      : `${isWknd ? 'bg-slate-50/70 dark:bg-[#0f1422]' : 'bg-white dark:bg-[#111728]'} hover:bg-blue-50/30 dark:hover:bg-[#161f36]`
+                      ? 'bg-blue-50/70 dark:bg-[#131a30] shadow-sm'
+                      : isWknd
+                      ? 'bg-slate-50/80 dark:bg-[#0e1322] hover:bg-slate-100 dark:hover:bg-[#131b30]'
+                      : 'bg-white dark:bg-[#111728] hover:bg-slate-50 dark:hover:bg-[#131b30]'
                   }`}
                 >
-                  <div className="flex justify-between items-center shrink-0">
+                  <div className="flex items-center justify-between">
                     <span
                       className={`text-[12px] font-black flex items-center justify-center h-6 w-6 rounded-full ${
                         isToday
@@ -98,7 +108,7 @@ export const ScheduleCalendarView: React.FC<ScheduleCalendarViewProps> = ({
                       {dayNum}
                     </span>
                     {daySess.length > 0 && (
-                      <span className="text-[9px] font-extrabold text-blue-600 dark:text-blue-300 bg-blue-500/15 border border-blue-500/30 px-1.5 py-0.5 rounded-full">
+                      <span className="text-[9px] font-extrabold text-blue-600 dark:text-blue-300 bg-blue-500/15 px-1.5 py-0.5 rounded-full border-0">
                         {daySess.length}
                       </span>
                     )}
@@ -114,22 +124,23 @@ export const ScheduleCalendarView: React.FC<ScheduleCalendarViewProps> = ({
                             e.stopPropagation();
                             openEdit(s);
                           }}
-                          className="flex rounded-xl cursor-pointer transition-all active:scale-[0.98] min-h-[46px] border border-solid event-float overflow-hidden"
-                          style={{ backgroundColor: vs.bg, borderColor: vs.border, boxShadow: vs.shadow }}
+                          className="p-1.5 rounded-xl cursor-pointer transition-all hover:scale-[1.02] active:scale-[0.98] border-0 shadow-xs hover:shadow-sm flex flex-col gap-0.5 overflow-hidden"
+                          style={{ backgroundColor: vs.bg }}
                         >
-                          <div
-                            className="flex flex-col justify-center items-center px-1.5 py-1 text-[9px] font-black w-[42px] shrink-0 text-center border-r border-solid"
-                            style={{ borderColor: vs.innerBorder, color: vs.color }}
-                          >
-                            <span className="leading-none">{s.start_time}</span>
-                            <span className="text-[7px] my-0.5 opacity-50">↓</span>
-                            <span className="leading-none">{calcEndTime(s.start_time, s.duration)}</span>
-                          </div>
-                          <div className="flex-grow p-1.5 flex flex-col justify-center overflow-hidden">
-                            <h4 className="text-[11px] font-black truncate text-slate-900 dark:text-white">{s.class_name}</h4>
-                            <div className="text-[9px] font-bold mt-0.5 leading-none" style={{ color: vs.color }}>
+                          <div className="flex items-center justify-between gap-1">
+                            <h4 className="text-[11px] font-black truncate text-slate-900 dark:text-white leading-tight">
+                              {s.class_name}
+                            </h4>
+                            <span
+                              className="text-[9px] font-black px-1.5 py-0.5 rounded-md shrink-0 leading-none"
+                              style={{ color: vs.color, backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)' }}
+                            >
                               {s.status}
-                            </div>
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-1 text-[10px] font-bold font-mono" style={{ color: vs.color }}>
+                            <Clock size={10} className="shrink-0" />
+                            <span>{s.start_time} - {calcEndTime(s.start_time, s.duration)}</span>
                           </div>
                         </div>
                       );
@@ -245,22 +256,30 @@ export const ScheduleCalendarView: React.FC<ScheduleCalendarViewProps> = ({
                         e.stopPropagation();
                         openEdit(s);
                       }}
-                      className="flex rounded-xl cursor-pointer transition-all active:scale-[0.98] min-h-[52px] border border-solid event-float overflow-hidden"
-                      style={{ backgroundColor: vs.bg, borderColor: vs.border, boxShadow: vs.shadow }}
+                      className="p-2 rounded-xl cursor-pointer transition-all hover:scale-[1.02] active:scale-[0.98] border-0 shadow-xs hover:shadow-sm flex flex-col gap-1 overflow-hidden"
+                      style={{ backgroundColor: vs.bg }}
                     >
-                      <div
-                        className="flex flex-col justify-center items-center px-1.5 py-1 text-[9px] font-black w-[42px] shrink-0 text-center border-r"
-                        style={{ borderColor: vs.innerBorder, color: vs.color }}
-                      >
-                        <span className="leading-none">{s.start_time}</span>
-                        <span className="text-[7px] my-0.5 opacity-60">↓</span>
-                        <span className="leading-none">{calcEndTime(s.start_time, s.duration)}</span>
+                      <div className="flex items-center justify-between gap-1">
+                        <h4 className="text-[11px] font-black truncate text-slate-900 dark:text-white leading-tight">
+                          {s.class_name}
+                        </h4>
+                        <span
+                          className="text-[9px] font-black px-1.5 py-0.5 rounded-md shrink-0 leading-none"
+                          style={{ color: vs.color, backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)' }}
+                        >
+                          {s.status}
+                        </span>
                       </div>
-                      <div className="flex-grow p-1.5 flex flex-col justify-center overflow-hidden">
-                        <h4 className="text-[11px] font-black truncate text-slate-900 dark:text-white">{s.class_name}</h4>
-                        <div className="text-[9px] font-bold mt-0.5" style={{ color: vs.color }}>
-                          {s.teacher_name || 'GV'}
+                      <div className="flex items-center justify-between text-[10px] font-bold font-mono" style={{ color: vs.color }}>
+                        <div className="flex items-center gap-1">
+                          <Clock size={10} className="shrink-0" />
+                          <span>{s.start_time} - {calcEndTime(s.start_time, s.duration)}</span>
                         </div>
+                        {s.teacher_name && (
+                          <span className="text-[9px] font-sans truncate max-w-[70px] opacity-80" title={s.teacher_name}>
+                            {s.teacher_name}
+                          </span>
+                        )}
                       </div>
                     </div>
                   );

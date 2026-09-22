@@ -3,12 +3,13 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Sparkles, X } from 'lucide-react';
 
 interface CustomDatePickerProps {
-  value: string; // 'YYYY-MM-DD'
+  value: string; // 'YYYY-MM-DD' or 'YYYY-MM'
   onChange: (val: string) => void;
   placeholder?: string;
   className?: string;
   required?: boolean;
   align?: 'left' | 'right';
+  mode?: 'date' | 'month';
   highlightDaysOfWeek?: number[]; // e.g. [1, 3, 5] for Mon, Wed, Fri (0 = Sunday)
   highlightDates?: string[]; // e.g. ['2026-07-28', '2026-07-30']
   maxHighlightDate?: string; // default today 'YYYY-MM-DD'
@@ -31,6 +32,12 @@ const parseLocalDate = (val: string | null | undefined): Date | null => {
     if (!isNaN(y) && !isNaN(m) && !isNaN(d)) {
       return new Date(y, m, d);
     }
+  } else if (parts.length === 2) {
+    const y = parseInt(parts[0], 10);
+    const m = parseInt(parts[1], 10) - 1;
+    if (!isNaN(y) && !isNaN(m)) {
+      return new Date(y, m, 1);
+    }
   }
   const parsed = new Date(val);
   return isNaN(parsed.getTime()) ? null : parsed;
@@ -49,6 +56,7 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
   placeholder = 'Chọn ngày...',
   className = '',
   align = 'left',
+  mode = 'date',
   highlightDaysOfWeek = [],
   highlightDates = [],
   maxHighlightDate,
@@ -196,9 +204,15 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
   const handleSelectToday = (e: React.MouseEvent) => {
     e.stopPropagation();
     const today = new Date();
-    const iso = formatToISODate(today);
+    if (mode === 'month') {
+      const y = today.getFullYear();
+      const m = String(today.getMonth() + 1).padStart(2, '0');
+      onChange(`${y}-${m}`);
+    } else {
+      const iso = formatToISODate(today);
+      onChange(iso);
+    }
     setViewDate(today);
-    onChange(iso);
     setIsOpen(false);
   };
 
@@ -211,11 +225,14 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
   const displayFormatted = useMemo(() => {
     if (!value) return '';
     const parts = value.split('-');
+    if (mode === 'month' && parts.length >= 2) {
+      return `Tháng ${parseInt(parts[1], 10)}/${parts[0]}`;
+    }
     if (parts.length === 3) {
       return `${parts[2]}/${parts[1]}/${parts[0]}`;
     }
     return value;
-  }, [value]);
+  }, [value, mode]);
 
   return (
     <div className={`relative inline-block ${className}`} ref={containerRef}>
@@ -223,7 +240,7 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between gap-2 px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200/80 dark:bg-[#181a20] dark:hover:bg-[#20232b] text-slate-900 dark:text-white text-xs font-bold transition-all cursor-pointer shadow-xs hover:shadow-sm border-0 outline-none"
+        className="w-full flex items-center justify-between gap-2 px-3.5 py-2 rounded-xl bg-slate-200/80 hover:bg-slate-200 dark:bg-[#1c202c] dark:hover:bg-[#252a3a] text-slate-900 dark:text-white text-xs font-bold transition-all cursor-pointer shadow-xs hover:shadow-sm border-0 outline-none"
       >
         <div className="flex items-center gap-2 truncate">
           <CalendarIcon size={14} className="text-blue-600 dark:text-blue-400 shrink-0 font-bold" />
@@ -252,30 +269,78 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
             transition={{ type: 'spring', stiffness: 450, damping: 30 }}
             className={`absolute top-full ${align === 'right' ? 'right-0 origin-top-right' : 'left-0 origin-top-left'} mt-2 z-[9999] w-80 p-4 bg-white dark:bg-[#181a20] rounded-2xl shadow-[0_20px_50px_rgba(15,23,42,0.22)] dark:shadow-[0_24px_64px_rgba(0,0,0,0.9)] border-0 outline-none select-none space-y-3`}
           >
-            {/* Header: Month/Year Nav */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-black text-slate-900 dark:text-white">{MONTH_NAMES[currentMonth]}</span>
-                <span className="text-xs font-bold text-slate-600 dark:text-slate-400">{currentYear}</span>
-              </div>
+            {mode === 'month' ? (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between pb-1 border-b border-slate-100 dark:border-white/5">
+                  <span className="text-sm font-black text-slate-900 dark:text-white">Năm {currentYear}</span>
+                  <div className="flex items-center gap-1">
+                    <button
+                      type="button"
+                      onClick={() => setViewDate(new Date(currentYear - 1, currentMonth, 1))}
+                      className="p-1.5 rounded-xl text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#1c1c21] transition cursor-pointer font-bold"
+                    >
+                      <ChevronLeft size={15} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setViewDate(new Date(currentYear + 1, currentMonth, 1))}
+                      className="p-1.5 rounded-xl text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#1c1c21] transition cursor-pointer font-bold"
+                    >
+                      <ChevronRight size={15} />
+                    </button>
+                  </div>
+                </div>
 
-              <div className="flex items-center gap-1">
-                <button
-                  type="button"
-                  onClick={handlePrevMonth}
-                  className="p-1.5 rounded-xl text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#1c1c21] transition cursor-pointer font-bold"
-                >
-                  <ChevronLeft size={15} />
-                </button>
-                <button
-                  type="button"
-                  onClick={handleNextMonth}
-                  className="p-1.5 rounded-xl text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#1c1c21] transition cursor-pointer font-bold"
-                >
-                  <ChevronRight size={15} />
-                </button>
+                <div className="grid grid-cols-3 gap-2">
+                  {MONTH_NAMES.map((name, idx) => {
+                    const monthStr = `${currentYear}-${String(idx + 1).padStart(2, '0')}`;
+                    const isSelected = value.startsWith(monthStr);
+                    return (
+                      <button
+                        key={name}
+                        type="button"
+                        onClick={() => {
+                          onChange(monthStr);
+                          setIsOpen(false);
+                        }}
+                        className={`py-2.5 px-2 rounded-xl text-xs font-black transition cursor-pointer border-0 outline-none ${
+                          isSelected
+                            ? 'bg-[#2563eb] text-white shadow-xs'
+                            : 'bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 text-slate-800 dark:text-slate-200'
+                        }`}
+                      >
+                        {name}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
+            ) : (
+              <>
+                {/* Header: Month/Year Nav */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-black text-slate-900 dark:text-white">{MONTH_NAMES[currentMonth]}</span>
+                    <span className="text-xs font-bold text-slate-600 dark:text-slate-400">{currentYear}</span>
+                  </div>
+
+                  <div className="flex items-center gap-1">
+                    <button
+                      type="button"
+                      onClick={handlePrevMonth}
+                      className="p-1.5 rounded-xl text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#1c1c21] transition cursor-pointer font-bold"
+                    >
+                      <ChevronLeft size={15} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleNextMonth}
+                      className="p-1.5 rounded-xl text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#1c1c21] transition cursor-pointer font-bold"
+                    >
+                      <ChevronRight size={15} />
+                    </button>
+                  </div>
+                </div>
 
             {/* Weekdays */}
             <div className="grid grid-cols-7 gap-1 text-center px-1">
@@ -320,12 +385,12 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
                       }`}
                       title={item.isStudyDay ? `Ngày học của lớp (${item.dayNumber}/${currentMonth + 1}/${currentYear})` : undefined}
                     >
-                      {/* Selected Spring Pill Indicator with safe bounds */}
+              {/* Selected Spring Pill Indicator with safe bounds */}
                       {item.isSelected && (
                         <motion.div
                           layoutId="custom-datepicker-selected"
                           transition={{ type: 'spring', stiffness: 500, damping: 35 }}
-                          className="absolute inset-0 rounded-xl bg-[#2563eb] shadow-[0_0_12px_rgba(37,99,235,0.7)] z-0"
+                          className="absolute inset-0 rounded-xl bg-[#2563eb] shadow-xs z-0"
                         />
                       )}
 
@@ -359,6 +424,8 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
                 </span>
               )}
             </div>
+            </>
+            )}
           </motion.div>
         )}
       </AnimatePresence>
