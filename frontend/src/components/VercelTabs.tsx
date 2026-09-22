@@ -1,16 +1,17 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { motion } from 'framer-motion';
 
 export interface VercelTabItem<T extends string = string> {
   value: T;
   label: string;
   icon?: React.ReactNode;
   badge?: string | number;
+  content?: React.ReactNode;
 }
 
 export interface VercelTabsProps<T extends string = string> {
   tabs: VercelTabItem<T>[];
   value?: T;
+  defaultTab?: T;
   defaultValue?: T;
   onChange?: (val: T) => void;
   className?: string;
@@ -21,47 +22,68 @@ export interface VercelTabsProps<T extends string = string> {
 export function VercelTabs<T extends string = string>({
   tabs,
   value: controlledValue,
+  defaultTab,
   defaultValue,
   onChange,
   className = '',
   indicatorColor,
   size = 'md',
 }: VercelTabsProps<T>) {
-  const [internalValue, setInternalValue] = useState<T>(defaultValue || tabs[0]?.value);
+  const [internalValue, setInternalValue] = useState<T>(
+    defaultTab || defaultValue || tabs[0]?.value
+  );
   const activeTab = controlledValue !== undefined ? controlledValue : internalValue;
 
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
-  const [indicatorStyle, setIndicatorStyle] = useState<{ left: number; width: number }>({ left: 0, width: 0 });
+  const [hoverStyle, setHoverStyle] = useState<{ left?: string; width?: string }>({});
+  const [activeStyle, setActiveStyle] = useState<{ left: string; width: string }>({
+    left: '0px',
+    width: '0px',
+  });
   const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
   const activeIndex = tabs.findIndex((tab) => tab.value === activeTab);
-  const targetIndex =
-    hoveredIndex !== null && hoveredIndex >= 0 && hoveredIndex < tabs.length
-      ? hoveredIndex
-      : activeIndex >= 0
-      ? activeIndex
-      : 0;
 
-  const updateIndicatorPosition = useCallback(() => {
-    const targetElement = tabRefs.current[targetIndex];
-    if (targetElement) {
-      setIndicatorStyle({
-        left: targetElement.offsetLeft,
-        width: targetElement.offsetWidth,
-      });
+  useEffect(() => {
+    if (hoveredIndex !== null) {
+      const hoveredElement = tabRefs.current[hoveredIndex];
+      if (hoveredElement) {
+        const { offsetLeft, offsetWidth } = hoveredElement;
+        setHoverStyle({
+          left: `${offsetLeft}px`,
+          width: `${offsetWidth}px`,
+        });
+      }
     }
-  }, [targetIndex]);
+  }, [hoveredIndex]);
+
+  const updateActivePosition = useCallback(() => {
+    if (activeIndex >= 0) {
+      const activeElement = tabRefs.current[activeIndex];
+      if (activeElement) {
+        const { offsetLeft, offsetWidth } = activeElement;
+        setActiveStyle({
+          left: `${offsetLeft}px`,
+          width: `${offsetWidth}px`,
+        });
+      }
+    }
+  }, [activeIndex]);
 
   useEffect(() => {
-    updateIndicatorPosition();
-    const frameId = requestAnimationFrame(updateIndicatorPosition);
-    return () => cancelAnimationFrame(frameId);
-  }, [updateIndicatorPosition]);
+    updateActivePosition();
+  }, [updateActivePosition]);
 
   useEffect(() => {
-    window.addEventListener('resize', updateIndicatorPosition);
-    return () => window.removeEventListener('resize', updateIndicatorPosition);
-  }, [updateIndicatorPosition]);
+    requestAnimationFrame(() => {
+      updateActivePosition();
+    });
+  }, [updateActivePosition]);
+
+  useEffect(() => {
+    window.addEventListener('resize', updateActivePosition);
+    return () => window.removeEventListener('resize', updateActivePosition);
+  }, [updateActivePosition]);
 
   const handleSelect = (tabValue: T) => {
     if (controlledValue === undefined) {
@@ -70,81 +92,87 @@ export function VercelTabs<T extends string = string>({
     onChange?.(tabValue);
   };
 
-  const sizeStyles = {
-    sm: 'h-[32px] px-3 text-xs gap-1.5',
-    md: 'h-[38px] px-4 text-sm gap-2',
-    lg: 'h-[44px] px-5 text-base gap-2.5',
-  }[size];
+  const hasContent = tabs.some((t) => t.content !== undefined);
 
   return (
-    <div
-      role="tablist"
-      onMouseLeave={() => setHoveredIndex(null)}
-      className={`relative flex items-center bg-slate-200/90 dark:bg-[#090c15] p-1 rounded-2xl border border-slate-300 dark:border-[#1b233d] shadow-[inset_0_1px_2px_rgba(0,0,0,0.08)] select-none shrink-0 overflow-x-auto scrollbar-none transition-colors duration-200 ${className}`}
-    >
-      {/* 1. Fluid Gliding Highlight Pill (Always active, glides to hovered item, returns to active) */}
-      <motion.div
-        aria-hidden="true"
-        className={`absolute top-1 bottom-1 rounded-xl pointer-events-none z-0 ${
-          indicatorColor ||
-          'bg-blue-600 dark:bg-blue-600 shadow-[0_0_14px_rgba(37,99,235,0.45)]'
-        }`}
-        initial={false}
-        animate={{
-          left: indicatorStyle.left,
-          width: indicatorStyle.width,
-          opacity: indicatorStyle.width > 0 ? 1 : 0,
-        }}
-        transition={{
-          type: 'spring',
-          stiffness: 450,
-          damping: 32,
-        }}
-      />
+    <div className={`flex w-full flex-col ${className}`}>
+      <div
+        role="tablist"
+        className="relative flex items-center h-auto select-none gap-[6px] bg-transparent p-0 border-b border-slate-200 dark:border-white/10"
+      >
+        {/* Hover Highlight */}
+        <div
+          aria-hidden="true"
+          className="absolute top-0 left-0 flex h-[32px] items-center rounded-[6px] bg-[#0e0f1114] transition-all duration-300 ease-out dark:bg-[#ffffff1a] pointer-events-none"
+          style={{
+            ...hoverStyle,
+            opacity: hoveredIndex !== null ? 1 : 0,
+          }}
+        />
 
-      {/* 2. Tab Buttons */}
-      {tabs.map((tab, index) => {
-        const isActive = activeTab === tab.value;
-        const isHovered = hoveredIndex === index;
-        const isTarget = hoveredIndex !== null ? isHovered : isActive;
+        {/* Active Indicator */}
+        <div
+          aria-hidden="true"
+          className={`absolute bottom-[-1px] h-[2.5px] rounded-full transition-all duration-300 ease-out pointer-events-none ${
+            indicatorColor || 'bg-blue-600 dark:bg-white'
+          }`}
+          style={activeStyle}
+        />
 
-        return (
-          <button
-            key={tab.value}
-            ref={(el) => {
-              tabRefs.current[index] = el;
-            }}
-            type="button"
-            role="tab"
-            aria-selected={isActive}
-            onClick={() => handleSelect(tab.value)}
-            onMouseEnter={() => setHoveredIndex(index)}
-            className={`z-10 relative flex-1 flex items-center justify-center cursor-pointer rounded-xl border-0 bg-transparent outline-none transition-colors duration-200 font-black whitespace-nowrap ${sizeStyles} ${
-              isTarget
-                ? 'text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.35)]'
-                : isActive
-                ? 'text-blue-600 dark:text-blue-400 font-black'
-                : 'text-slate-800 dark:text-neutral-200 hover:text-black dark:hover:text-white'
-            }`}
-          >
-            {tab.icon && <span className="shrink-0">{tab.icon}</span>}
-            <span>{tab.label}</span>
-            {tab.badge !== undefined && (
-              <span
-                className={`ml-1.5 px-2 py-0.5 rounded-full text-[10px] font-mono font-bold transition-colors ${
-                  isTarget
-                    ? 'bg-white/25 text-white shadow-xs'
-                    : isActive
-                    ? 'bg-blue-600/15 text-blue-600 dark:bg-blue-400/20 dark:text-blue-300'
-                    : 'bg-slate-300 dark:bg-white/10 text-slate-800 dark:text-slate-300'
-                }`}
-              >
-                {tab.badge}
+        {tabs.map((tab, index) => {
+          const isActive = activeTab === tab.value;
+
+          return (
+            <button
+              key={tab.value}
+              ref={(el) => {
+                tabRefs.current[index] = el;
+              }}
+              type="button"
+              role="tab"
+              aria-selected={isActive}
+              onClick={() => handleSelect(tab.value)}
+              onMouseEnter={() => setHoveredIndex(index)}
+              onMouseLeave={() => setHoveredIndex(null)}
+              className={`z-10 h-[32px] cursor-pointer rounded-md border-0 bg-transparent px-3 py-1.5 outline-none transition-colors duration-300 flex items-center gap-1.5 select-none ${
+                isActive
+                  ? 'text-blue-600 dark:text-white font-black'
+                  : 'text-[#0e0f1199] dark:text-[#ffffff99] hover:text-[#0e0e10] dark:hover:text-white font-bold'
+              }`}
+            >
+              {tab.icon && <span className="shrink-0">{tab.icon}</span>}
+              <span className="whitespace-nowrap text-sm leading-5">
+                {tab.label}
               </span>
-            )}
-          </button>
-        );
-      })}
+              {tab.badge !== undefined && (
+                <span
+                  className={`ml-1 px-1.5 py-0.2 rounded-full text-[10px] font-mono font-bold ${
+                    isActive
+                      ? 'bg-blue-600/15 text-blue-600 dark:bg-blue-400/20 dark:text-blue-300'
+                      : 'bg-slate-200 text-slate-700 dark:bg-white/10 dark:text-slate-400'
+                  }`}
+                >
+                  {tab.badge}
+                </span>
+              )}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Optional Content Area if tabs provide content */}
+      {hasContent && (
+        <div className="mt-6 w-full">
+          {tabs.map((tab) => {
+            if (!tab.content || tab.value !== activeTab) return null;
+            return (
+              <div key={tab.value} className="fade-in-50 w-full animate-in duration-300">
+                {tab.content}
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }

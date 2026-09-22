@@ -9,6 +9,13 @@ interface ChartHoverTooltipProps {
   gradeTypesList?: any[];
 }
 
+const getScoreTierColor = (score: number) => {
+  if (score >= 8.0) return 'text-emerald-600 dark:text-emerald-400';
+  if (score >= 6.5) return 'text-blue-600 dark:text-blue-400';
+  if (score >= 5.0) return 'text-amber-600 dark:text-amber-400';
+  return 'text-rose-600 dark:text-rose-400';
+};
+
 export const ChartHoverTooltip: React.FC<ChartHoverTooltipProps> = ({
   hoveredPoint,
   chartWidth,
@@ -103,11 +110,11 @@ export const ChartHoverTooltip: React.FC<ChartHoverTooltipProps> = ({
               </span>
             </div>
             <div className="flex items-center gap-1.5">
-              <span className="font-mono font-black text-slate-900 dark:text-white">
+              <span className={`font-mono font-black ${hoveredPoint.check1 > 0 ? getScoreTierColor(hoveredPoint.check1) : 'text-slate-400 dark:text-slate-500'}`}>
                 {hoveredPoint.check1 > 0 ? format1Dec(hoveredPoint.check1) : '-'}
               </span>
               {hoveredPoint.check1 > 0 && hoveredPoint.fittedC1 !== null && (
-                <span className="text-[10px] font-mono text-slate-400">
+                <span className={`text-[10px] font-mono font-semibold ${getScoreTierColor(hoveredPoint.fittedC1)} opacity-75`}>
                   ({format1Dec(hoveredPoint.fittedC1)})
                 </span>
               )}
@@ -126,11 +133,11 @@ export const ChartHoverTooltip: React.FC<ChartHoverTooltipProps> = ({
               </span>
             </div>
             <div className="flex items-center gap-1.5">
-              <span className="font-mono font-black text-slate-900 dark:text-white">
+              <span className={`font-mono font-black ${hoveredPoint.check2 > 0 ? getScoreTierColor(hoveredPoint.check2) : 'text-slate-400 dark:text-slate-500'}`}>
                 {hoveredPoint.check2 > 0 ? format1Dec(hoveredPoint.check2) : '-'}
               </span>
               {hoveredPoint.check2 > 0 && hoveredPoint.fittedC2 !== null && (
-                <span className="text-[10px] font-mono text-slate-400">
+                <span className={`text-[10px] font-mono font-semibold ${getScoreTierColor(hoveredPoint.fittedC2)} opacity-75`}>
                   ({format1Dec(hoveredPoint.fittedC2)})
                 </span>
               )}
@@ -149,11 +156,11 @@ export const ChartHoverTooltip: React.FC<ChartHoverTooltipProps> = ({
               </span>
             </div>
             <div className="flex items-center gap-1.5">
-              <span className="font-mono font-black text-slate-900 dark:text-white">
+              <span className={`font-mono font-black ${hoveredPoint.homework > 0 ? getScoreTierColor(hoveredPoint.homework) : 'text-slate-400 dark:text-slate-500'}`}>
                 {hoveredPoint.homework > 0 ? format1Dec(hoveredPoint.homework) : '-'}
               </span>
               {hoveredPoint.homework > 0 && hoveredPoint.fittedHw !== null && (
-                <span className="text-[10px] font-mono text-slate-400">
+                <span className={`text-[10px] font-mono font-semibold ${getScoreTierColor(hoveredPoint.fittedHw)} opacity-75`}>
                   ({format1Dec(hoveredPoint.fittedHw)})
                 </span>
               )}
@@ -163,7 +170,7 @@ export const ChartHoverTooltip: React.FC<ChartHoverTooltipProps> = ({
           {/* Average */}
           <div className="border-t border-slate-200 dark:border-white/10 pt-1.5 flex items-center justify-between gap-4">
             <span className="text-slate-700 dark:text-slate-300 font-extrabold">Điểm TB Buổi:</span>
-            <span className="font-mono font-black text-blue-600 dark:text-blue-400 text-sm">
+            <span className={`font-mono font-black text-sm ${avgVal > 0 ? getScoreTierColor(avgVal) : 'text-slate-400 dark:text-slate-500'}`}>
               {avgVal > 0 ? format1Dec(avgVal) : '-'}
             </span>
           </div>

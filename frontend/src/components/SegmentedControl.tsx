@@ -56,40 +56,72 @@ export function SegmentedControl<T extends string = string>({
 
   const [indicatorStyle, setIndicatorStyle] = useState<{ left: number; width: number }>({ left: 0, width: 0 });
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const [hoverStyle, setHoverStyle] = useState<{ left: number; width: number }>({ left: 0, width: 0 });
 
   const buttonRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const updateIndicator = useCallback(() => {
+  useEffect(() => {
     const activeIndex = items.findIndex((btn) => (btn.value ?? btn.id) === activeVal);
-    const targetIndex =
-      hoveredIndex !== null && hoveredIndex >= 0 && hoveredIndex < items.length
-        ? hoveredIndex
-        : activeIndex >= 0
-        ? activeIndex
-        : 0;
+    const activeElement = buttonRefs.current[activeIndex];
 
-    const targetElement = buttonRefs.current[targetIndex];
-    if (targetElement) {
+    if (activeElement) {
       setIndicatorStyle({
-        left: targetElement.offsetLeft,
-        width: targetElement.offsetWidth,
+        left: activeElement.offsetLeft,
+        width: activeElement.offsetWidth,
       });
     }
-  }, [activeVal, hoveredIndex, items]);
+  }, [activeVal, items]);
 
   useEffect(() => {
-    updateIndicator();
-  }, [updateIndicator]);
+    if (hoveredIndex !== null) {
+      const hoveredElement = buttonRefs.current[hoveredIndex];
+      if (hoveredElement) {
+        setHoverStyle({
+          left: hoveredElement.offsetLeft,
+          width: hoveredElement.offsetWidth,
+        });
+      }
+    } else {
+      if (containerRef.current) {
+        setHoverStyle({
+          left: 0,
+          width: containerRef.current.offsetWidth,
+        });
+      }
+    }
+  }, [hoveredIndex]);
+
+  useEffect(() => {
+    if (containerRef.current) {
+      setHoverStyle({
+        left: 0,
+        width: containerRef.current.offsetWidth,
+      });
+    }
+  }, [items]);
 
   // Recalculate on window resize or tab switch
   useEffect(() => {
     const handleResize = () => {
-      updateIndicator();
+      const activeIndex = items.findIndex((btn) => (btn.value ?? btn.id) === activeVal);
+      const activeElement = buttonRefs.current[activeIndex];
+      if (activeElement) {
+        setIndicatorStyle({
+          left: activeElement.offsetLeft,
+          width: activeElement.offsetWidth,
+        });
+      }
+      if (hoveredIndex === null && containerRef.current) {
+        setHoverStyle({
+          left: 0,
+          width: containerRef.current.offsetWidth,
+        });
+      }
     };
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
-  }, [updateIndicator]);
+  }, [activeVal, hoveredIndex, items]);
 
   const handleButtonClick = (buttonVal: T, disabled?: boolean) => {
     if (disabled) return;
@@ -120,36 +152,47 @@ export function SegmentedControl<T extends string = string>({
       ref={containerRef}
       role="group"
       onMouseLeave={() => setHoveredIndex(null)}
-      className={`relative flex items-center bg-slate-200/90 dark:bg-[#090c15] p-0.5 rounded-lg border border-slate-300 dark:border-[#1b233d] shadow-[inset_0_1px_2px_rgba(0,0,0,0.08)] select-none shrink-0 transition-colors duration-200 ${
-        isFluid ? 'w-full' : 'inline-flex w-fit'
+      className={`relative inline-flex items-center justify-start rounded-full select-none shrink-0 transition-colors ${
+        isFluid ? 'w-full' : 'w-fit'
       } ${className}`}
     >
-      {/* 1. Fluid Gliding Highlight Pill (Always active, glides to hovered item, returns to active) */}
+      {/* 1. Full-width Initial Hover Background that Collapses onto Hovered Item */}
       <motion.div
         aria-hidden="true"
-        className={`absolute top-0.5 bottom-0.5 rounded-md pointer-events-none z-0 ${
-          activeColor ||
-          'bg-blue-600 shadow-sm border border-blue-500/60'
-        }`}
-        initial={false}
+        className="absolute top-0 bottom-0 rounded-full bg-black/10 dark:bg-white/15 pointer-events-none z-0"
         animate={{
-          left: indicatorStyle.left,
-          width: indicatorStyle.width,
-          opacity: indicatorStyle.width > 0 ? 1 : 0,
+          left: hoverStyle.left,
+          width: hoverStyle.width,
         }}
         transition={{
           type: 'spring',
-          stiffness: 450,
-          damping: 32,
+          stiffness: 400,
+          damping: 30,
         }}
       />
 
-      {/* 2. Button Items */}
+      {/* 2. Tactile Active Indicator Pill */}
+      <motion.div
+        aria-hidden="true"
+        className={`absolute top-0 bottom-0 rounded-full pointer-events-none z-0 ${
+          activeColor ||
+          'bg-gradient-to-b from-[#A8A8A8] to-[#D3D3D3] shadow-[inset_0_1px_0_0_rgba(0,0,0,0.15),inset_0_-1px_0_0_rgba(255,255,255,0.30),inset_0_0_0_1px_rgba(0,0,0,0.10),inset_0_-6px_10.5px_0_rgba(0,0,0,0.08)] dark:from-[#D3D3D3] dark:to-[#A8A8A8] dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.30),inset_0_-1px_0_0_rgba(255,255,255,0.60),inset_0_0_0_1px_rgba(255,255,255,0.30),inset_0_-6px_10.5px_0_rgba(255,255,255,0.13)]'
+        }`}
+        animate={{
+          left: indicatorStyle.left,
+          width: indicatorStyle.width,
+        }}
+        transition={{
+          type: 'spring',
+          stiffness: 400,
+          damping: 30,
+        }}
+      />
+
+      {/* 3. Button Items */}
       {items.map((item, index) => {
         const itemVal = (item.value ?? item.id) as T;
         const isActive = itemVal === activeVal;
-        const isHovered = hoveredIndex === index;
-        const isTarget = hoveredIndex !== null ? isHovered : isActive;
         const Icon = item.icon;
 
         return (
@@ -162,15 +205,15 @@ export function SegmentedControl<T extends string = string>({
             disabled={item.disabled}
             onClick={() => handleButtonClick(itemVal, item.disabled)}
             onMouseEnter={() => setHoveredIndex(index)}
-            className={`relative z-10 flex items-center justify-center font-black transition-colors cursor-pointer select-none ${
+            className={`relative z-10 flex items-center justify-center font-black rounded-full transition-colors cursor-pointer select-none ${
               isFluid ? 'flex-1' : 'shrink-0'
             } ${sizeClasses} ${
               item.disabled
                 ? 'opacity-35 cursor-not-allowed text-slate-400 dark:text-slate-500'
-                : isTarget
-                ? 'text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.35)]'
                 : isActive
-                ? 'text-blue-600 dark:text-blue-400 font-black'
+                ? activeColor
+                  ? 'text-white drop-shadow-xs'
+                  : 'text-black [text-shadow:_0px_1px_0px_rgb(255_255_255_/_0.65)] dark:text-black/80'
                 : 'text-slate-800 dark:text-neutral-200 hover:text-black dark:hover:text-white'
             }`}
           >
@@ -194,7 +237,7 @@ export function SegmentedControl<T extends string = string>({
               <span
                 className={`relative z-10 ml-0.5 px-1.5 py-0.2 rounded-full text-[10px] font-black shrink-0 transition-colors font-mono ${
                   isActive
-                    ? 'bg-white/25 text-white shadow-sm'
+                    ? 'bg-white/30 text-black dark:text-black shadow-xs'
                     : 'bg-slate-300 dark:bg-white/10 text-slate-800 dark:text-slate-300'
                 }`}
               >
