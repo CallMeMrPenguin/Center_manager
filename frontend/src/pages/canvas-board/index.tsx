@@ -570,8 +570,8 @@ export default function CanvasBoardPage() {
   };
 
   const mainContent = (
-    <div className={`h-full flex flex-col bg-slate-100 dark:bg-[#070913] ${isFullscreen ? 'fixed inset-0 z-[99999] p-2' : 'p-6 space-y-4 overflow-hidden'}`}>
-      <div className="flex items-center justify-between bg-white dark:bg-[#0c0f1e] border border-slate-200 dark:border-[#1d2744] px-5 py-3 rounded-2xl shadow-xl shrink-0">
+    <div className={`h-full flex flex-col bg-[#e2e8f0] dark:bg-[#070913] ${isFullscreen ? 'fixed inset-0 z-[99999] p-2' : 'p-6 space-y-4 overflow-hidden'}`}>
+      <div className="flex items-center justify-between bg-white dark:bg-[#0c0f1e] px-5 py-3.5 rounded-2xl shadow-[0_4px_20px_rgba(0,0,0,0.08)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.45)] shrink-0">
         <div className="flex items-center gap-3">
           <div className="p-2 rounded-xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-500 dark:text-indigo-400"><Palette size={18} /></div>
           <div>
@@ -615,7 +615,7 @@ export default function CanvasBoardPage() {
         </div>
       </div>
 
-      <div className="flex-1 flex flex-col bg-white dark:bg-[#0c0f1e] border border-slate-200 dark:border-[#1d2744] rounded-2xl overflow-hidden shadow-2xl relative select-none">
+      <div className="flex-1 flex flex-col bg-white dark:bg-[#0c0f1e] rounded-2xl overflow-hidden shadow-[0_6px_28px_rgba(0,0,0,0.09)] dark:shadow-[0_12px_40px_rgba(0,0,0,0.55)] relative select-none">
         <CanvasToolbar
           activeTool={activeTool} setActiveTool={setActiveTool}
           selectedColor={selectedColor} setSelectedColor={setSelectedColor}

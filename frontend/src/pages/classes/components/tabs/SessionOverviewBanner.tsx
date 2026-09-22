@@ -44,7 +44,7 @@ export const SessionOverviewBanner: React.FC<SessionOverviewBannerProps> = ({
   } = useSessionOverview(attendanceRecords);
 
   return (
-    <div className="bg-white dark:bg-[#0c0f1e] border border-slate-200 dark:border-[#1e2742] rounded-2xl p-4 shadow-sm dark:shadow-xl transition-all">
+    <div className="bg-white dark:bg-[#0c0f1e] rounded-2xl p-4 shadow-[0_4px_24px_rgba(0,0,0,0.08)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.45)] transition-all">
       {/* 1. MASTER HEADER STRIP (No medal icon per user request) */}
       <div className="flex flex-wrap items-center justify-between gap-3 select-none">
         <div>

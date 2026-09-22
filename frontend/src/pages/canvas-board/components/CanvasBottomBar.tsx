@@ -36,7 +36,7 @@ export const CanvasBottomBar: React.FC<CanvasBottomBarProps> = ({
     <div className="absolute bottom-4 right-4 z-30 flex items-center gap-2 select-none">
       {/* Page Navigation for Multi-page PDF */}
       {totalPages > 1 && (
-        <div className="flex items-center gap-1.5 bg-white dark:bg-[#0c0f1e] border border-slate-200 dark:border-[#212c4b] px-3 py-1.5 rounded-xl shadow-xl">
+        <div className="flex items-center gap-1.5 bg-white dark:bg-[#0c0f1e] px-3 py-1.5 rounded-xl shadow-[0_4px_16px_rgba(0,0,0,0.12)] dark:shadow-[0_8px_24px_rgba(0,0,0,0.6)]">
           <button
             disabled={currentPage === 1}
             onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
@@ -60,7 +60,7 @@ export const CanvasBottomBar: React.FC<CanvasBottomBarProps> = ({
       )}
 
       {/* Grid Pattern Toggle */}
-      <div className="flex items-center bg-white dark:bg-[#0c0f1e] border border-slate-200 dark:border-[#212c4b] p-1 rounded-xl shadow-xl gap-0.5">
+      <div className="flex items-center bg-white dark:bg-[#0c0f1e] p-1 rounded-xl shadow-[0_4px_16px_rgba(0,0,0,0.12)] dark:shadow-[0_8px_24px_rgba(0,0,0,0.6)] gap-0.5">
         <button
           onClick={() => setGridType(gridType === 'none' ? 'dots' : gridType === 'dots' ? 'grid' : gridType === 'grid' ? 'lines' : 'none')}
           className={`flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-bold transition cursor-pointer ${
@@ -74,7 +74,7 @@ export const CanvasBottomBar: React.FC<CanvasBottomBarProps> = ({
       </div>
 
       {/* Zoom Controls */}
-      <div className="flex items-center bg-white dark:bg-[#0c0f1e] border border-slate-200 dark:border-[#212c4b] p-1 rounded-xl shadow-xl gap-1">
+      <div className="flex items-center bg-white dark:bg-[#0c0f1e] p-1 rounded-xl shadow-[0_4px_16px_rgba(0,0,0,0.12)] dark:shadow-[0_8px_24px_rgba(0,0,0,0.6)] gap-1">
         <button
           onClick={() => setZoom(z => Math.max(0.01, z / 1.25))}
           className="p-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10 transition cursor-pointer"

@@ -103,7 +103,7 @@ export const SeatingChartTab: React.FC<SeatingChartTabProps> = ({
   return (
     <div className="space-y-4 font-sans select-none">
       {/* 1. TOP CLASSROOM ACTION TOOLBAR */}
-      <div className="flex flex-wrap items-center justify-between gap-3 bg-white dark:bg-[#0d1018] border border-slate-300 dark:border-white/10 p-3.5 rounded-2xl shadow-sm transition-colors">
+      <div className="flex flex-wrap items-center justify-between gap-3 bg-white dark:bg-[#0d1018] p-3.5 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.08)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.45)] transition-colors">
         <div className="flex flex-wrap items-center gap-3 text-xs font-bold text-slate-700 dark:text-slate-300">
           {/* Column Count Controller */}
           <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-[#121624] border border-slate-300 dark:border-white/10 px-3 py-1 rounded-xl shadow-xs">
@@ -200,7 +200,7 @@ export const SeatingChartTab: React.FC<SeatingChartTabProps> = ({
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 transition-all duration-300">
         {/* UNASSIGNED STUDENTS ROSTER PANEL */}
         {showUnassignedPanel && (
-          <div className="bg-white dark:bg-[#0d1018] border border-slate-300 dark:border-white/10 p-4 rounded-2xl space-y-3 shadow-sm transition-all flex flex-col">
+          <div className="bg-white dark:bg-[#0d1018] p-4 rounded-2xl space-y-3 shadow-[0_4px_24px_rgba(0,0,0,0.08)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.45)] transition-all flex flex-col">
             <div className="flex items-center justify-between">
               <h4 className="text-xs font-black uppercase tracking-wider text-slate-900 dark:text-slate-200 flex items-center gap-2">
                 <span>Chưa Xếp Chỗ</span>
@@ -276,7 +276,7 @@ export const SeatingChartTab: React.FC<SeatingChartTabProps> = ({
         <div
           className={`${
             showUnassignedPanel ? 'md:col-span-3' : 'md:col-span-4'
-          } bg-[#e2e8f0]/80 dark:bg-[#080a10] border border-slate-300 dark:border-white/10 rounded-2xl p-6 overflow-x-auto min-h-[460px] flex flex-col items-center gap-6 transition-all shadow-inner`}
+          } bg-[#cbd5e1]/50 dark:bg-[#080a10] rounded-2xl p-6 overflow-x-auto min-h-[460px] flex flex-col items-center gap-6 transition-all shadow-inner`}
         >
           {/* BÀN GIÁO VIÊN (CLASSROOM FRONT REFERENCE) */}
           <ClassroomPodium

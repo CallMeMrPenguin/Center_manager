@@ -258,7 +258,7 @@ export function StudentsPage() {
   );
 
   return (
-    <div className="h-full w-full flex flex-col p-6 space-y-4 bg-slate-100 dark:bg-[#080b14] text-slate-800 dark:text-slate-100 select-none font-sans overflow-hidden">
+    <div className="h-full w-full flex flex-col p-6 space-y-4 bg-[#e2e8f0] dark:bg-[#080b14] text-slate-800 dark:text-slate-100 select-none font-sans overflow-hidden">
       {/* Top Header Toolbar */}
       <div className="flex flex-wrap items-center justify-between gap-4 shrink-0">
         <div className="flex items-center gap-3">
@@ -301,7 +301,7 @@ export function StudentsPage() {
       </div>
 
       {/* Main Table */}
-      <div className="flex-1 min-h-0 bg-white dark:bg-[#0d1018] rounded-2xl border border-slate-200 dark:border-[#1b2444] overflow-hidden shadow-sm dark:shadow-xl">
+      <div className="flex-1 min-h-0 bg-white dark:bg-[#0d1018] rounded-2xl overflow-hidden shadow-[0_4px_24px_rgba(0,0,0,0.08)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.5)]">
         <DataTable<Student>
           data={students}
           columns={columns}

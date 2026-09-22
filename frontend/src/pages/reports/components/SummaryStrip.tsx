@@ -58,7 +58,7 @@ export const SummaryStrip: React.FC<SummaryStripProps> = React.memo(({
     : { color: 'text-emerald-400', label: 'Xuất Sắc (Vững Vàng)', sub: 'text-emerald-400 font-bold' };
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 bg-white dark:bg-[#0c0f1e] border border-slate-300/80 dark:border-[#1e2746] rounded-xl text-center items-center relative shadow-[0_4px_20px_-4px_rgba(15,23,42,0.08),0_2px_4px_-1px_rgba(15,23,42,0.04)] dark:shadow-md divide-y sm:divide-y-0 sm:divide-x divide-slate-200 dark:divide-[#1e2746]">
+    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 bg-white dark:bg-[#0c0f1e] rounded-xl text-center items-center relative shadow-[0_4px_24px_rgba(0,0,0,0.08)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.45)] divide-y sm:divide-y-0 sm:divide-x divide-slate-200 dark:divide-[#1e2746]">
       {/* 1. Next Session Prediction */}
       <div
         className="relative group p-2.5 animate-cascade-1 cursor-pointer transition-colors hover:bg-slate-50 dark:hover:bg-white/[0.02]"

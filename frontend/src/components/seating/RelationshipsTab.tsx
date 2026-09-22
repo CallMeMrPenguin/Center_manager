@@ -300,7 +300,7 @@ export default function RelationshipsTab({ classId, enrolledStudents, onRefreshC
   return (
     <div className="space-y-6 pb-8 font-sans">
       {/* SECTION 1: FRIEND GROUPS */}
-      <div className="bg-white dark:bg-[#0d1018] border border-slate-200 dark:border-white/10 p-5 rounded-2xl space-y-4 shadow-sm dark:shadow-none transition-colors">
+      <div className="bg-white dark:bg-[#0d1018] p-5 rounded-2xl space-y-4 shadow-[0_4px_24px_rgba(0,0,0,0.08)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.45)] transition-colors">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
             <h3 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
@@ -433,7 +433,7 @@ export default function RelationshipsTab({ classId, enrolledStudents, onRefreshC
       </div>
 
       {/* SECTION 2: CONFLICT GROUPS */}
-      <div className="bg-white dark:bg-[#0d1018] border border-slate-200 dark:border-white/10 p-5 rounded-2xl space-y-4 shadow-sm dark:shadow-none transition-colors">
+      <div className="bg-white dark:bg-[#0d1018] p-5 rounded-2xl space-y-4 shadow-[0_4px_24px_rgba(0,0,0,0.08)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.45)] transition-colors">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
             <h3 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
@@ -566,7 +566,7 @@ export default function RelationshipsTab({ classId, enrolledStudents, onRefreshC
       </div>
 
       {/* SECTION 3: TRUSTED SWAP INDIVIDUALS */}
-      <div className="bg-white dark:bg-[#0d1018] border border-slate-200 dark:border-white/10 p-5 rounded-2xl space-y-4 shadow-sm dark:shadow-none transition-colors">
+      <div className="bg-white dark:bg-[#0d1018] p-5 rounded-2xl space-y-4 shadow-[0_4px_24px_rgba(0,0,0,0.08)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.45)] transition-colors">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
             <h3 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
