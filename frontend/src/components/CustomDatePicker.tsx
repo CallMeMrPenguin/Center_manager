@@ -223,7 +223,7 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between gap-2 px-3.5 py-2 rounded-xl bg-white dark:bg-[#141417] border-2 border-slate-300 dark:border-[#27272a] hover:border-blue-500 text-slate-900 dark:text-white text-xs font-extrabold transition-all cursor-pointer shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+        className="w-full flex items-center justify-between gap-2 px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200/80 dark:bg-[#181a20] dark:hover:bg-[#20232b] text-slate-900 dark:text-white text-xs font-bold transition-all cursor-pointer shadow-xs hover:shadow-sm border-0 outline-none"
       >
         <div className="flex items-center gap-2 truncate">
           <CalendarIcon size={14} className="text-blue-600 dark:text-blue-400 shrink-0 font-bold" />
@@ -242,7 +242,7 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
         )}
       </button>
 
-      {/* ANIMATED POPOVER CARD */}
+      {/* ANIMATED POPOVER CARD (ZERO BORDERS) */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -250,7 +250,7 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: -6 }}
             transition={{ type: 'spring', stiffness: 450, damping: 30 }}
-            className={`absolute top-full ${align === 'right' ? 'right-0 origin-top-right' : 'left-0 origin-top-left'} mt-2 z-[9999] w-80 p-4 bg-white dark:bg-[#141417] border-2 border-slate-300 dark:border-[#27272a] rounded-2xl shadow-[0_20px_50px_rgba(15,23,42,0.25)] dark:shadow-[0_24px_64px_rgba(0,0,0,0.95)] ring-1 ring-black/5 dark:ring-white/10 select-none space-y-3`}
+            className={`absolute top-full ${align === 'right' ? 'right-0 origin-top-right' : 'left-0 origin-top-left'} mt-2 z-[9999] w-80 p-4 bg-white dark:bg-[#181a20] rounded-2xl shadow-[0_20px_50px_rgba(15,23,42,0.22)] dark:shadow-[0_24px_64px_rgba(0,0,0,0.9)] border-0 outline-none select-none space-y-3`}
           >
             {/* Header: Month/Year Nav */}
             <div className="flex items-center justify-between">
@@ -307,11 +307,11 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
                       key={idx}
                       type="button"
                       onClick={() => handleSelectDate(item.isoStr)}
-                      className={`h-8 w-full rounded-xl text-xs font-bold relative flex items-center justify-center cursor-pointer transition-colors ${
+                      className={`h-8 w-full rounded-xl text-xs font-bold relative flex items-center justify-center cursor-pointer transition-colors border-0 outline-none ${
                         item.isSelected
                           ? 'text-white font-black z-10'
                           : item.isToday
-                          ? 'text-blue-600 dark:text-white font-extrabold border-2 border-blue-500'
+                          ? 'text-blue-600 dark:text-blue-400 font-extrabold bg-blue-500/15'
                           : item.isCurrentMonth
                           ? item.isStudyDay
                             ? 'text-blue-600 dark:text-blue-300 font-black hover:bg-blue-50 dark:hover:bg-blue-500/20'
@@ -344,7 +344,7 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
             </div>
 
             {/* Quick Actions Footer */}
-            <div className="pt-2 border-t border-slate-100 dark:border-white/10 flex items-center justify-between text-xs">
+            <div className="pt-2 flex items-center justify-between text-xs">
               <button
                 type="button"
                 onClick={handleSelectToday}

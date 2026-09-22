@@ -152,14 +152,14 @@ export function SegmentedControl<T extends string = string>({
       ref={containerRef}
       role="group"
       onMouseLeave={() => setHoveredIndex(null)}
-      className={`relative inline-flex items-center justify-start rounded-full select-none shrink-0 transition-colors ${
+      className={`relative inline-flex items-center justify-start bg-slate-100/90 dark:bg-[#0c0f1e] p-1 rounded-full border-0 select-none shrink-0 transition-colors ${
         isFluid ? 'w-full' : 'w-fit'
       } ${className}`}
     >
       {/* 1. Full-width Initial Hover Background that Collapses onto Hovered Item */}
       <motion.div
         aria-hidden="true"
-        className="absolute top-0 bottom-0 rounded-full bg-black/10 dark:bg-white/15 pointer-events-none z-0"
+        className="absolute top-1 bottom-1 rounded-full bg-slate-200/80 dark:bg-white/10 pointer-events-none z-0"
         animate={{
           left: hoverStyle.left,
           width: hoverStyle.width,
@@ -171,12 +171,12 @@ export function SegmentedControl<T extends string = string>({
         }}
       />
 
-      {/* 2. Tactile Active Indicator Pill */}
+      {/* 2. Tactile Active Indicator Pill (Matches App Indigo Theme) */}
       <motion.div
         aria-hidden="true"
-        className={`absolute top-0 bottom-0 rounded-full pointer-events-none z-0 ${
+        className={`absolute top-1 bottom-1 rounded-full pointer-events-none z-0 ${
           activeColor ||
-          'bg-gradient-to-b from-[#A8A8A8] to-[#D3D3D3] shadow-[inset_0_1px_0_0_rgba(0,0,0,0.15),inset_0_-1px_0_0_rgba(255,255,255,0.30),inset_0_0_0_1px_rgba(0,0,0,0.10),inset_0_-6px_10.5px_0_rgba(0,0,0,0.08)] dark:from-[#D3D3D3] dark:to-[#A8A8A8] dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.30),inset_0_-1px_0_0_rgba(255,255,255,0.60),inset_0_0_0_1px_rgba(255,255,255,0.30),inset_0_-6px_10.5px_0_rgba(255,255,255,0.13)]'
+          'bg-[#5c36f5] dark:bg-[#5c36f5] shadow-[0_2px_14px_rgba(92,54,245,0.45)]'
         }`}
         animate={{
           left: indicatorStyle.left,
@@ -205,16 +205,14 @@ export function SegmentedControl<T extends string = string>({
             disabled={item.disabled}
             onClick={() => handleButtonClick(itemVal, item.disabled)}
             onMouseEnter={() => setHoveredIndex(index)}
-            className={`relative z-10 flex items-center justify-center font-black rounded-full transition-colors cursor-pointer select-none ${
+            className={`relative z-10 flex items-center justify-center font-black rounded-full transition-colors cursor-pointer select-none border-0 outline-none ${
               isFluid ? 'flex-1' : 'shrink-0'
             } ${sizeClasses} ${
               item.disabled
                 ? 'opacity-35 cursor-not-allowed text-slate-400 dark:text-slate-500'
                 : isActive
-                ? activeColor
-                  ? 'text-white drop-shadow-xs'
-                  : 'text-black [text-shadow:_0px_1px_0px_rgb(255_255_255_/_0.65)] dark:text-black/80'
-                : 'text-slate-800 dark:text-neutral-200 hover:text-black dark:hover:text-white'
+                ? 'text-white drop-shadow-xs font-black'
+                : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white font-bold'
             }`}
           >
             {/* Optional Icon */}
@@ -235,10 +233,10 @@ export function SegmentedControl<T extends string = string>({
             {/* Optional Badge */}
             {item.badge !== undefined && (
               <span
-                className={`relative z-10 ml-0.5 px-1.5 py-0.2 rounded-full text-[10px] font-black shrink-0 transition-colors font-mono ${
+                className={`relative z-10 ml-1 px-1.5 py-0.2 rounded-full text-[10px] font-black shrink-0 transition-colors font-mono ${
                   isActive
-                    ? 'bg-white/30 text-black dark:text-black shadow-xs'
-                    : 'bg-slate-300 dark:bg-white/10 text-slate-800 dark:text-slate-300'
+                    ? 'bg-white/25 text-white shadow-xs'
+                    : 'bg-slate-200 dark:bg-white/10 text-slate-700 dark:text-slate-300'
                 }`}
               >
                 {item.badge}

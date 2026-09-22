@@ -272,7 +272,7 @@ function ColumnVisibilityDropdown<TData>({
       <button
         type="button"
         onClick={() => setOpen(v => !v)}
-        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-[#1c1c21] dark:hover:bg-[#27272f] text-slate-700 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white border border-slate-300 dark:border-[#27272a] text-xs font-bold transition cursor-pointer"
+        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200/80 dark:bg-[#181a20] dark:hover:bg-[#20232b] text-slate-700 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white text-xs font-bold transition cursor-pointer shadow-xs border-0 outline-none"
         title="Hiển thị, Thứ tự & Căn chỉnh cột"
       >
         <SlidersHorizontal size={13} className="text-indigo-500 dark:text-indigo-400" />
@@ -281,7 +281,7 @@ function ColumnVisibilityDropdown<TData>({
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full mt-2 z-[60] w-72 bg-white dark:bg-[#141417] border-2 border-slate-300 dark:border-[#27272a] rounded-2xl shadow-[0_16px_48px_rgba(15,23,42,0.22)] dark:shadow-[0_24px_64px_rgba(0,0,0,0.95)] ring-1 ring-black/5 dark:ring-white/10 p-3 space-y-2 animate-mac-dropdown">
+        <div className="absolute right-0 top-full mt-2 z-[60] w-72 bg-white dark:bg-[#181a20] rounded-2xl shadow-[0_16px_48px_rgba(15,23,42,0.22)] dark:shadow-[0_24px_64px_rgba(0,0,0,0.95)] border-0 outline-none p-3 space-y-2 animate-mac-dropdown">
           {/* TAB SWITCHER WITH SLIDING PILL */}
           <SegmentedControl<'visibility' | 'order' | 'align'>
             value={activeTab}
@@ -606,7 +606,7 @@ function ExportDropdown<TData>({
       <button
         type="button"
         onClick={() => setOpen(v => !v)}
-        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-[#1c1c21] dark:hover:bg-[#27272f] text-slate-700 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white border border-slate-300 dark:border-[#27272a] text-xs font-bold transition cursor-pointer"
+        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200/80 dark:bg-[#181a20] dark:hover:bg-[#20232b] text-slate-700 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white text-xs font-bold transition cursor-pointer shadow-xs border-0 outline-none"
         title="Xuất dữ liệu"
       >
         <Download size={13} className="text-emerald-500 dark:text-emerald-400" />
@@ -615,7 +615,7 @@ function ExportDropdown<TData>({
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full mt-2 z-[60] w-48 bg-white dark:bg-[#141417] border-2 border-slate-300 dark:border-[#27272a] rounded-2xl shadow-[0_16px_48px_rgba(15,23,42,0.22)] dark:shadow-[0_24px_64px_rgba(0,0,0,0.95)] ring-1 ring-black/5 dark:ring-white/10 p-2 space-y-1 animate-mac-dropdown">
+        <div className="absolute right-0 top-full mt-2 z-[60] w-48 bg-white dark:bg-[#181a20] rounded-2xl shadow-[0_16px_48px_rgba(15,23,42,0.22)] dark:shadow-[0_24px_64px_rgba(0,0,0,0.95)] border-0 outline-none p-2 space-y-1 animate-mac-dropdown">
           <button
             type="button"
             onClick={exportExcel}

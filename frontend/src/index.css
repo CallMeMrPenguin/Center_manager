@@ -731,13 +731,21 @@ textarea::placeholder {
 .filter-dropdown-menu {
   background-color: #ffffff !important;
   background: #ffffff !important;
-  border: 2px solid #94a3b8 !important;
-  box-shadow: 0 20px 48px rgba(15, 23, 42, 0.22), 0 0 0 1px rgba(0, 0, 0, 0.05) !important;
+  border: none !important;
+  box-shadow: 0 20px 48px rgba(15, 23, 42, 0.22) !important;
   border-radius: 16px !important;
   opacity: 1 !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
   color: #0f172a !important;
+}
+
+.dark .filter-dropdown-menu {
+  background-color: #141417 !important;
+  background: #141417 !important;
+  border: none !important;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.95) !important;
+  color: #ffffff !important;
 }
 
 .filter-dropdown-menu .hover\:bg-slate-900:hover,
@@ -747,26 +755,172 @@ textarea::placeholder {
   color: #0f172a !important;
 }
 
+.dark .filter-dropdown-menu .hover\:bg-slate-900:hover,
+.dark .filter-dropdown-menu button:hover,
+.dark .filter-dropdown-menu label:hover {
+  background-color: #1c1c21 !important;
+  color: #ffffff !important;
+}
+
 .filter-dropdown-menu input[type="checkbox"] {
-  background-color: #ffffff !important;
-  border-color: #94a3b8 !important;
+  background-color: #f1f5f9 !important;
+  border: none !important;
 }
 
 .filter-dropdown-menu input[type="text"],
 .filter-dropdown-menu input {
-  background-color: #ffffff !important;
-  border-color: #cbd5e1 !important;
+  background-color: #f1f5f9 !important;
+  border: none !important;
   color: #0f172a !important;
 }
 
-/* Light mode tooltips & popovers override */
+.dark .filter-dropdown-menu input[type="text"],
+.dark .filter-dropdown-menu input {
+  background-color: #1c1c21 !important;
+  border: none !important;
+  color: #ffffff !important;
+}
+
+/* Tooltips & Popovers — Clean borderless standard with high-contrast shadow */
 [role="tooltip"],
 .custom-tooltip,
 .recharts-default-tooltip {
   background-color: #ffffff !important;
-  border: 1px solid #cbd5e1 !important;
+  border: none !important;
   color: #0f172a !important;
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12) !important;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15) !important;
+}
+
+.dark [role="tooltip"],
+.dark .custom-tooltip,
+.dark .recharts-default-tooltip {
+  background-color: #141417 !important;
+  border: none !important;
+  color: #ffffff !important;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.85) !important;
+}
+
+/* Universal Dropdown & Popover Border/Outline Removal Standard */
+.dropdown-menu,
+.popover-menu,
+.filter-dropdown-menu,
+[role="menu"],
+[role="listbox"],
+.animate-mac-dropdown {
+  border: none !important;
+  outline: none !important;
+}
+
+/* ==========================================================================
+   UNIFIED BUTTON TIERS & LEVEL STANDARD
+   Strictly zero outline, high contrast background, subtle shadow.
+   ========================================================================== */
+button,
+input[type="button"],
+input[type="submit"],
+input[type="reset"] {
+  outline: none !important;
+}
+
+button:focus,
+button:focus-visible {
+  outline: none !important;
+}
+
+/* Level 1: Primary Action Button (Brand CTA) */
+.btn-primary,
+button.btn-primary {
+  background-color: #2563eb !important;
+  color: #ffffff !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: 0 3px 12px rgba(37, 99, 235, 0.35) !important;
+  font-weight: 700 !important;
+  border-radius: 14px !important;
+  transition: all 180ms cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+.btn-primary:hover,
+button.btn-primary:hover {
+  background-color: #1d4ed8 !important;
+  box-shadow: 0 5px 18px rgba(37, 99, 235, 0.45) !important;
+  transform: translateY(-1px);
+}
+.btn-primary:active,
+button.btn-primary:active {
+  transform: translateY(0);
+}
+
+/* Level 2: Secondary / Surface Button (Toolbars, Filters, Cancels, Secondary Actions) */
+.btn-secondary,
+button.btn-secondary {
+  background-color: #f1f5f9 !important;
+  color: #0f172a !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06) !important;
+  font-weight: 700 !important;
+  border-radius: 12px !important;
+  transition: all 180ms cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+.dark .btn-secondary,
+.dark button.btn-secondary {
+  background-color: #181a20 !important;
+  color: #ffffff !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4) !important;
+}
+.btn-secondary:hover,
+button.btn-secondary:hover {
+  background-color: #e2e8f0 !important;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.09) !important;
+}
+.dark .btn-secondary:hover,
+.dark button.btn-secondary:hover {
+  background-color: #22252e !important;
+}
+
+/* Level 3: Tertiary / Ghost Button (Icon actions, close buttons, inline tools) */
+.btn-ghost,
+button.btn-ghost {
+  background-color: transparent !important;
+  color: #475569 !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  font-weight: 600 !important;
+  border-radius: 10px !important;
+  transition: all 150ms ease !important;
+}
+.dark .btn-ghost,
+.dark button.btn-ghost {
+  color: #cbd5e1 !important;
+}
+.btn-ghost:hover,
+button.btn-ghost:hover {
+  background-color: #f1f5f9 !important;
+  color: #0f172a !important;
+}
+.dark .btn-ghost:hover,
+.dark button.btn-ghost:hover {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+  color: #ffffff !important;
+}
+
+/* Level 4: Destructive / Danger Button */
+.btn-danger,
+button.btn-danger {
+  background-color: #ef4444 !important;
+  color: #ffffff !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: 0 3px 12px rgba(239, 68, 68, 0.3) !important;
+  font-weight: 700 !important;
+  border-radius: 14px !important;
+  transition: all 180ms cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+.btn-danger:hover,
+button.btn-danger:hover {
+  background-color: #dc2626 !important;
+  box-shadow: 0 5px 18px rgba(239, 68, 68, 0.45) !important;
 }
 
 @keyframes sheen {

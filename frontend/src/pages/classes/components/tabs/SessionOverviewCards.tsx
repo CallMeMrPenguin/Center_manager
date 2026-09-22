@@ -14,31 +14,25 @@ interface BelowThresholdCardProps {
 
 const THEME_STYLES = {
   blue: {
-    cardBg: 'bg-blue-50/80 dark:bg-[#0c1838] shadow-xs hover:shadow-md',
-    title: 'text-blue-700 dark:text-blue-300',
-    lt: 'text-blue-700 dark:text-blue-400',
+    cardBg: 'bg-blue-100/75 dark:bg-[#0c1838] shadow-xs hover:shadow-md',
+    title: 'text-blue-800 dark:text-blue-300',
+    lt: 'text-blue-800 dark:text-blue-400',
     inputBox: 'bg-white dark:bg-[#121626] shadow-2xs',
     input: 'text-blue-900 dark:text-blue-100',
-    chipBg: 'bg-blue-200/80 hover:bg-blue-300/90 text-blue-950 dark:bg-blue-900/60 dark:hover:bg-blue-900/90 dark:text-blue-100',
-    scoreBadge: 'bg-white/95 dark:bg-black/40 text-rose-700 dark:text-rose-300',
   },
   purple: {
-    cardBg: 'bg-purple-50/80 dark:bg-[#1e103c] shadow-xs hover:shadow-md',
-    title: 'text-purple-700 dark:text-purple-300',
-    lt: 'text-purple-700 dark:text-purple-400',
+    cardBg: 'bg-purple-100/75 dark:bg-[#1e103c] shadow-xs hover:shadow-md',
+    title: 'text-purple-800 dark:text-purple-300',
+    lt: 'text-purple-800 dark:text-purple-400',
     inputBox: 'bg-white dark:bg-[#121626] shadow-2xs',
     input: 'text-purple-900 dark:text-purple-100',
-    chipBg: 'bg-purple-200/80 hover:bg-purple-300/90 text-purple-950 dark:bg-purple-900/60 dark:hover:bg-purple-900/90 dark:text-purple-100',
-    scoreBadge: 'bg-white/95 dark:bg-black/40 text-rose-700 dark:text-rose-300',
   },
   emerald: {
-    cardBg: 'bg-emerald-50/80 dark:bg-[#0b241c] shadow-xs hover:shadow-md',
-    title: 'text-emerald-700 dark:text-emerald-300',
-    lt: 'text-emerald-700 dark:text-emerald-400',
+    cardBg: 'bg-emerald-100/75 dark:bg-[#0b241c] shadow-xs hover:shadow-md',
+    title: 'text-emerald-800 dark:text-emerald-300',
+    lt: 'text-emerald-800 dark:text-emerald-400',
     inputBox: 'bg-white dark:bg-[#121626] shadow-2xs',
     input: 'text-emerald-900 dark:text-emerald-100',
-    chipBg: 'bg-emerald-200/80 hover:bg-emerald-300/90 text-emerald-950 dark:bg-emerald-900/60 dark:hover:bg-emerald-900/90 dark:text-emerald-100',
-    scoreBadge: 'bg-white/95 dark:bg-black/40 text-rose-700 dark:text-rose-300',
   },
 };
 
@@ -94,11 +88,11 @@ export const BelowThresholdCard: React.FC<BelowThresholdCardProps> = ({
                 key={s.student_id}
                 type="button"
                 onClick={() => onFilterStudent?.(s.student_name)}
-                className={`px-2.5 py-1 rounded-xl ${styles.chipBg} shadow-xs hover:shadow-md text-xs font-bold flex items-center gap-1.5 transition cursor-pointer`}
+                className="px-2.5 py-1 rounded-xl bg-white dark:bg-[#141724] hover:bg-slate-50 dark:hover:bg-[#1c2033] shadow-xs hover:shadow-md text-xs font-bold flex items-center gap-1.5 transition cursor-pointer text-slate-900 dark:text-slate-100"
                 title="Bấm để sao chép tên tìm kiếm"
               >
                 <span>{s.student_name}</span>
-                <span className={`px-1.5 py-0.5 rounded-md ${styles.scoreBadge} font-mono font-black text-[11px]`}>
+                <span className="px-1.5 py-0.5 rounded-md bg-rose-100 text-rose-700 dark:bg-rose-950/80 dark:text-rose-300 font-mono font-black text-[11px]">
                   ({format1Dec(s.score)})
                 </span>
               </button>
@@ -128,7 +122,7 @@ export const DivergenceCard: React.FC<DivergenceCardProps> = ({
   onFilterStudent,
 }) => {
   return (
-    <div className="bg-amber-50/80 dark:bg-[#281a09] shadow-xs hover:shadow-md rounded-2xl p-3.5 flex flex-col justify-between min-h-[140px] transition-all">
+    <div className="bg-amber-100/75 dark:bg-[#281a09] shadow-xs hover:shadow-md rounded-2xl p-3.5 flex flex-col justify-between min-h-[140px] transition-all">
       <div>
         <div className="flex items-center justify-between mb-2.5 gap-2">
           <div className="flex items-center gap-1.5 min-w-0">
@@ -167,11 +161,11 @@ export const DivergenceCard: React.FC<DivergenceCardProps> = ({
                 key={s.student_id}
                 type="button"
                 onClick={() => onFilterStudent?.(s.student_name)}
-                className="px-2.5 py-1 rounded-xl bg-amber-200/80 hover:bg-amber-300/90 text-amber-950 dark:bg-amber-900/60 dark:hover:bg-amber-900/90 dark:text-amber-100 shadow-xs hover:shadow-md text-xs font-bold flex items-center gap-1.5 transition cursor-pointer"
+                className="px-2.5 py-1 rounded-xl bg-white dark:bg-[#141724] hover:bg-slate-50 dark:hover:bg-[#1c2033] shadow-xs hover:shadow-md text-xs font-bold flex items-center gap-1.5 transition cursor-pointer text-slate-900 dark:text-slate-100"
                 title={`BTVN: ${format1Dec(s.homework)}, TB Check: ${format1Dec(s.checkAvg)} (Lệch: ${format1Dec(s.diff)} đ). Bấm để sao chép.`}
               >
                 <span>{s.student_name}</span>
-                <span className="px-1.5 py-0.5 rounded-md bg-white/95 dark:bg-black/40 text-amber-800 dark:text-amber-300 font-mono font-black text-[11px]">
+                <span className="px-1.5 py-0.5 rounded-md bg-amber-100 text-amber-900 dark:bg-amber-950/80 dark:text-amber-300 font-mono font-black text-[11px]">
                   ({format1Dec(s.diff)}đ)
                 </span>
               </button>
