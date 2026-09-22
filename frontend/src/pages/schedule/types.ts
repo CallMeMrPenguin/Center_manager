@@ -48,7 +48,7 @@ export function hexToHSL(hex: string) {
   return { h: Math.round(h * 360), s: Math.round(s * 100), l: Math.round(l * 100) };
 }
 
-export function getPremiumStyle(status: string, hexColor = '#2563eb') {
+export function getPremiumStyle(status: string, hexColor = '#2563eb', isDarkParam?: boolean) {
   if (status === 'Hủy') {
     return {
       bg: 'rgba(148,163,184,0.08)',
@@ -58,7 +58,7 @@ export function getPremiumStyle(status: string, hexColor = '#2563eb') {
       shadow: '0 1px 3px rgba(0,0,0,0.3)',
     };
   }
-  const isDark = typeof document !== 'undefined' ? document.documentElement.classList.contains('dark') : true;
+  const isDark = isDarkParam !== undefined ? isDarkParam : (typeof document !== 'undefined' ? document.documentElement.classList.contains('dark') : true);
   const { h, s: iS, l: iL } = hexToHSL(hexColor);
   const isDone = status === 'Đã học';
   const sat = isDone ? Math.max(25, Math.round(iS * 0.55)) : Math.min(85, Math.max(60, iS));

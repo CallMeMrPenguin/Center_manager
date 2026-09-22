@@ -3,6 +3,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { 
   ClassSession, DAY_HDRS, getSessionColor, getPremiumStyle, calcEndTime 
 } from '../types';
+import { useTheme } from '../../../context/ThemeContext';
 
 interface ScheduleCalendarViewProps {
   viewMode: 'month' | 'week';
@@ -38,6 +39,8 @@ export const ScheduleCalendarView: React.FC<ScheduleCalendarViewProps> = ({
   openEdit,
   setCtxMenu,
 }) => {
+  const { isDark } = useTheme();
+
   if (viewMode === 'month') {
     return (
       <div className="calendar-container-depth flex-1 min-h-0 select-none">
@@ -103,7 +106,7 @@ export const ScheduleCalendarView: React.FC<ScheduleCalendarViewProps> = ({
                   <div className="flex-grow flex flex-col gap-1.5">
                     {daySess.map((s) => {
                       const hex = getSessionColor(s);
-                      const vs = getPremiumStyle(s.status, hex);
+                      const vs = getPremiumStyle(s.status, hex, isDark);
                       return (
                         <div
                           key={s.id}
@@ -234,7 +237,7 @@ export const ScheduleCalendarView: React.FC<ScheduleCalendarViewProps> = ({
               >
                 {daySess.map((s) => {
                   const hex = getSessionColor(s);
-                  const vs = getPremiumStyle(s.status, hex);
+                  const vs = getPremiumStyle(s.status, hex, isDark);
                   return (
                     <div
                       key={s.id}

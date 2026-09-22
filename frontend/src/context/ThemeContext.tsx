@@ -21,22 +21,22 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     applyTheme(initial);
     return initial;
   });
+  const themeRef = React.useRef(theme);
+  themeRef.current = theme;
 
   const setTheme = useCallback((mode: ThemeMode) => {
-    // 1. Instant synchronous DOM update - zero latency, zero frame lag
+    themeRef.current = mode;
     applyTheme(mode);
     setStoredTheme(mode);
     setThemeState(mode);
   }, []);
 
   const toggleTheme = useCallback(() => {
-    setThemeState((prev) => {
-      const next = prev === 'dark' ? 'light' : 'dark';
-      // Instant synchronous DOM update
-      applyTheme(next);
-      setStoredTheme(next);
-      return next;
-    });
+    const next = themeRef.current === 'dark' ? 'light' : 'dark';
+    themeRef.current = next;
+    applyTheme(next);
+    setStoredTheme(next);
+    setThemeState(next);
   }, []);
 
   const contextValue = useMemo(

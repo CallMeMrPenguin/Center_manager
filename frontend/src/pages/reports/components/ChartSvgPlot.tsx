@@ -1,6 +1,7 @@
 import React, { useId } from 'react';
 import { ChartSessionItem, HoveredChartPoint } from '../types';
 import { format1Dec } from '../../../utils';
+import { useTheme } from '../../../context/ThemeContext';
 
 interface ChartSvgPlotProps {
   chartWidth: number;
@@ -57,7 +58,7 @@ export const ChartSvgPlot: React.FC<ChartSvgPlotProps> = React.memo(({
   const gradBlue = `area_grad_blue_${uid}`;
   const gradPurple = `area_grad_purple_${uid}`;
   const gradEmerald = `area_grad_emerald_${uid}`;
-  const isDark = typeof document !== 'undefined' ? document.documentElement.classList.contains('dark') : true;
+  const { isDark } = useTheme();
   const animKey = `${selectedStudentId || selectedClassId || 'all'}-${timeView}-${sessionChartData.length}`;
 
   return (

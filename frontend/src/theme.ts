@@ -198,7 +198,27 @@ export const applyTheme = (mode?: ThemeMode, customTheme?: any) => {
   const tokens = currentMode === 'light' ? LIGHT_THEME_COLORS : DARK_THEME_COLORS;
   const root = document.documentElement;
 
-  // Toggle class and color-scheme on root element
+  // 1. Temporarily disable ALL CSS transitions & animations across the DOM
+  // This guarantees 100% instant, simultaneous theme switching with zero staggered/sequential transitions
+  if (typeof document !== 'undefined') {
+    let styleEl = document.getElementById('theme-transition-killer') as HTMLStyleElement | null;
+    if (!styleEl) {
+      styleEl = document.createElement('style');
+      styleEl.id = 'theme-transition-killer';
+      styleEl.textContent = `*, *::before, *::after {
+        -webkit-transition: none !important;
+        -moz-transition: none !important;
+        -o-transition: none !important;
+        -ms-transition: none !important;
+        transition: none !important;
+        -webkit-animation-duration: 0s !important;
+        animation-duration: 0s !important;
+      }`;
+      document.head.appendChild(styleEl);
+    }
+  }
+
+  // 2. Toggle class and color-scheme on root element
   if (currentMode === 'light') {
     root.classList.remove('dark');
     root.classList.add('light');
@@ -209,25 +229,22 @@ export const applyTheme = (mode?: ThemeMode, customTheme?: any) => {
     root.style.colorScheme = 'dark';
   }
 
-  // 1. Core Surfaces & Backgrounds
+  // 3. Update CSS variables
   root.style.setProperty('--background', tokens.appBackground);
   root.style.setProperty('--surface', tokens.cardBackground);
   root.style.setProperty('--surface-nav', tokens.navBackground);
   root.style.setProperty('--surface-raised', tokens.cardBackgroundRaised);
   root.style.setProperty('--surface-highlight', tokens.cardBackgroundHighlight);
 
-  // 2. Borders
   root.style.setProperty('--border-color', tokens.borderPrimary);
   root.style.setProperty('--border-subtle', tokens.borderSubtle);
   root.style.setProperty('--border-active', tokens.borderActive);
 
-  // 3. Typography
   root.style.setProperty('--foreground', tokens.textPrimary);
   root.style.setProperty('--text-main', tokens.textPrimary);
   root.style.setProperty('--text-muted', tokens.textMuted);
   root.style.setProperty('--text-subtle', tokens.textSubtle);
 
-  // 4. Accent & Brand
   root.style.setProperty('--primary', tokens.primary);
   root.style.setProperty('--primary-hover', tokens.primaryHover);
   root.style.setProperty('--primary-glow', tokens.primaryGlow);
@@ -236,7 +253,6 @@ export const applyTheme = (mode?: ThemeMode, customTheme?: any) => {
   root.style.setProperty('--indigo', tokens.indigo);
   root.style.setProperty('--indigo-glow', tokens.indigoGlow);
 
-  // 5. Semantic Status
   root.style.setProperty('--success', tokens.success);
   root.style.setProperty('--success-bg', tokens.successBg);
   root.style.setProperty('--warning', tokens.warning);
@@ -246,6 +262,23 @@ export const applyTheme = (mode?: ThemeMode, customTheme?: any) => {
   root.style.setProperty('--info', tokens.info);
   root.style.setProperty('--purple', tokens.purple);
 
-  // 6. Theme Mode flag for CSS
+  // Theme Mode flag for CSS
   root.style.setProperty('--theme-mode', currentMode);
+
+  // 4. Force synchronous reflow to ensure the browser commits all new colors in one paint without transitions
+  if (typeof window !== 'undefined' && document.body) {
+    window.getComputedStyle(document.body).opacity;
+  }
+
+  // 5. Remove the transition disabler after the new theme has painted, restoring normal hover effects
+  if (typeof window !== 'undefined') {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        const el = document.getElementById('theme-transition-killer');
+        if (el && el.parentNode) {
+          el.parentNode.removeChild(el);
+        }
+      });
+    });
+  }
 };
