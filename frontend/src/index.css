@@ -101,6 +101,24 @@
   background-color: var(--btn-neutral-dark-hover, #222b44);
 }
 
+.segmented-control-container {
+  background-color: var(--segmented-bg, rgba(203, 213, 225, 0.45));
+  transition: background-color 150ms ease;
+}
+.dark .segmented-control-container,
+:root[class~="dark"] .segmented-control-container {
+  background-color: var(--segmented-dark-bg, #0c0f1e);
+}
+
+.segmented-hover-pill {
+  background-color: var(--segmented-highlight-bg, rgba(148, 163, 184, 0.28));
+  transition: background-color 150ms ease;
+}
+.dark .segmented-hover-pill,
+:root[class~="dark"] .segmented-hover-pill {
+  background-color: var(--segmented-highlight-dark-bg, rgba(255, 255, 255, 0.12));
+}
+
 body {
   margin: 0;
   background-color: var(--background);

@@ -152,14 +152,14 @@ export function SegmentedControl<T extends string = string>({
       ref={containerRef}
       role="group"
       onMouseLeave={() => setHoveredIndex(null)}
-      className={`relative inline-flex items-center justify-start bg-slate-200/50 dark:bg-[#0c0f1e] p-0 rounded-full border-0 select-none shrink-0 transition-colors ${
+      className={`relative inline-flex items-center justify-start segmented-control-container p-0 rounded-full border-0 select-none shrink-0 transition-colors ${
         isFluid ? 'w-full' : 'w-fit'
       } ${className}`}
     >
-      {/* 1. Full-width Initial Hover Background that Collapses onto Hovered Item (Softened Highlight) */}
+      {/* 1. Full-width Initial Hover Background that Collapses onto Hovered Item (Dynamic Highlight) */}
       <motion.div
         aria-hidden="true"
-        className="absolute top-0 bottom-0 rounded-full bg-slate-200/70 dark:bg-white/10 pointer-events-none z-0"
+        className="absolute top-0 bottom-0 rounded-full segmented-hover-pill pointer-events-none z-0"
         animate={{
           left: hoverStyle.left,
           width: hoverStyle.width,

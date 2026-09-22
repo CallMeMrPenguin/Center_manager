@@ -5,7 +5,7 @@
  * CSS variables, chart palettes, and real-time document styling.
  */
 
-import { getStoredButtonShade, applyButtonShade } from './utils/buttonShade';
+import { applyButtonShade } from './utils/buttonShade';
 
 export type ThemeMode = 'dark' | 'light';
 
@@ -240,7 +240,7 @@ export const applyTheme = (mode?: ThemeMode, customTheme?: any) => {
   root.style.setProperty('--theme-mode', 'light');
 
   // Apply customizable button shade
-  applyButtonShade(getStoredButtonShade());
+  applyButtonShade();
 
   // 4. Force synchronous reflow to ensure the browser commits all new colors in one paint without transitions
   if (typeof window !== 'undefined' && document.body) {
