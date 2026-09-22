@@ -1023,4 +1023,20 @@ button.btn-danger:hover {
 .animate-liquid-rotate-wave-back {
   animation: liquidRotateWaveReverse 6.5s linear infinite;
 }
+
+/* ── Universal Data Table Row Hover Highlight ────────────────────────────── */
+table.data-table-main tbody tr:not([data-selected='true']):hover > td {
+  background-color: #dbeafe !important;
+}
+.dark table.data-table-main tbody tr:not([data-selected='true']):hover > td,
+[data-theme='dark'] table.data-table-main tbody tr:not([data-selected='true']):hover > td {
+  background-color: #1e284a !important;
+}
+table.data-table-main tbody tr[data-selected='true']:hover > td {
+  background-color: #bfdbfe !important;
+}
+.dark table.data-table-main tbody tr[data-selected='true']:hover > td,
+[data-theme='dark'] table.data-table-main tbody tr[data-selected='true']:hover > td {
+  background-color: #24325e !important;
+}
 

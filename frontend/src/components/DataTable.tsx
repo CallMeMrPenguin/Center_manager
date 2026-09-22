@@ -1199,7 +1199,7 @@ export function DataTable<TData>({
             <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
               <SortableContext items={orderedHeaderIds} strategy={horizontalListSortingStrategy}>
                 <table
-                  className="text-left text-sm w-full min-w-full"
+                  className="text-left text-sm w-full min-w-full data-table-main"
                   style={{
                     tableLayout: 'fixed',
                     borderCollapse: 'separate',
@@ -1281,14 +1281,15 @@ export function DataTable<TData>({
                     {(useVirt ? virtualRows!.map(vr => allRows[vr.index]) : allRows).map((row, rowIdx) => (
                       <Fragment key={row.id}>
                         <tr
+                          data-selected={row.getIsSelected() ? 'true' : undefined}
                           className={`
                             group transition-colors duration-150 animate-row-enter
                             ${onRowClick ? 'cursor-pointer' : ''}
                             ${row.getIsSelected()
                               ? 'bg-blue-500/15 hover:bg-blue-500/25 dark:bg-blue-500/20 dark:hover:bg-blue-500/30'
                               : rowIdx % 2 === 0
-                              ? 'bg-white dark:bg-[#141417] hover:bg-blue-50/90 dark:hover:bg-[#20273c]'
-                              : 'bg-slate-100/70 dark:bg-[#18181c] hover:bg-blue-50/90 dark:hover:bg-[#20273c]'}
+                              ? 'bg-white dark:bg-[#141417] hover:bg-[#dbeafe] dark:hover:bg-[#1e284a]'
+                              : 'bg-slate-100/70 dark:bg-[#18181c] hover:bg-[#dbeafe] dark:hover:bg-[#1e284a]'}
                           `}
                           onClick={() => onRowClick?.(row.original)}
                         >
@@ -1305,11 +1306,13 @@ export function DataTable<TData>({
                                 key={cell.id}
                                 className={`
                                   py-3.5 ${isSelectCol ? 'px-1' : 'px-4'} font-bold text-slate-900 dark:text-slate-100 text-base
-                                  border-b border-slate-300 dark:border-[#27272a] overflow-hidden
+                                  border-b border-slate-300 dark:border-[#27272a] overflow-hidden relative
                                   ${isCentered ? 'text-center' : 'text-left'}
                                   ${isPinned ? 'bg-inherit' : ''}
                                   ${isLastRow && isFirstCell ? 'rounded-bl-xl' : ''}
                                   ${isLastRow && isLastCell ? 'rounded-br-xl' : ''}
+                                  group-hover:bg-[#dbeafe] dark:group-hover:bg-[#1e284a] transition-colors duration-150
+                                  ${isFirstCell ? 'before:absolute before:left-0 before:top-0 before:bottom-0 before:w-1.5 before:bg-blue-600 dark:before:bg-blue-400 before:opacity-0 group-hover:before:opacity-100 before:transition-opacity' : ''}
                                 `}
                                 style={{
                                   boxSizing: 'border-box',

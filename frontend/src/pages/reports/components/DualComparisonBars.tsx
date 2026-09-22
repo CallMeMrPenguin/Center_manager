@@ -20,7 +20,7 @@ export const DualComparisonBars: React.FC<DualComparisonBarsProps> = ({
   return (
     <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 pt-1 animate-cascade-3 min-w-0">
       {/* Left: Dual Progress Bars for each metric */}
-      <div className="p-5 rounded-2xl bg-white dark:bg-[#0c101d] border border-slate-200/90 dark:border-white/10 shadow-sm hover:shadow-md transition-shadow min-w-0 overflow-hidden space-y-4">
+      <div className="p-5 rounded-2xl bg-white dark:bg-[#111728] border-0 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.06),0_2px_6px_-2px_rgba(0,0,0,0.04)] hover:shadow-md transition-shadow min-w-0 overflow-hidden space-y-4">
         <div className="flex items-center justify-between border-b border-slate-200 dark:border-white/5 pb-3">
           <span className="text-sm font-black uppercase tracking-wider text-slate-900 dark:text-white">
             SO SÁNH THÀNH PHẦN ĐIỂM
@@ -141,7 +141,7 @@ export const DualComparisonBars: React.FC<DualComparisonBarsProps> = ({
       </div>
 
       {/* Right: 6-Tier Academic Rank Distribution Duel — Symmetrical Tug-of-War Comparative Ladder */}
-      <div className="p-5 rounded-2xl bg-white dark:bg-[#0c101d] border border-slate-200/90 dark:border-white/10 shadow-sm hover:shadow-md transition-shadow min-w-0 overflow-hidden space-y-4">
+      <div className="p-5 rounded-2xl bg-white dark:bg-[#111728] border-0 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.06),0_2px_6px_-2px_rgba(0,0,0,0.04)] hover:shadow-md transition-shadow min-w-0 overflow-hidden space-y-4">
         <div className="flex flex-wrap items-center justify-between border-b border-slate-200 dark:border-white/5 pb-3 gap-2">
           <span className="text-sm font-black uppercase tracking-wider text-slate-900 dark:text-white flex items-center gap-2">
             <Award size={18} className="text-amber-500" />
