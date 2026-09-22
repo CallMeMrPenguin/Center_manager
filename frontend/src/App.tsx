@@ -184,7 +184,7 @@ function AppContent() {
     : TAB_DEFINITIONS;
 
   return (
-    <div className="relative flex flex-col h-screen w-screen bg-[#e2e8f0] dark:bg-[#07090e] text-slate-900 dark:text-slate-50 overflow-hidden font-sans select-none">
+    <div className="relative flex flex-col h-screen w-screen bg-[#e2e8f0] dark:bg-[#080b14] text-slate-900 dark:text-slate-50 overflow-hidden font-sans select-none">
       <div className="relative flex flex-row flex-1 overflow-hidden z-10">
         {/* SIDEBAR NAVIGATION */}
         <Sidebar

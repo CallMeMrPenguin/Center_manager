@@ -6,7 +6,7 @@
 :root {
   color-scheme: dark;
   --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-  --background: #07090e;
+  --background: #080b14;
   --foreground: #ffffff;
   --surface: #0c0f1e;
   --surface-nav: #090d16;
@@ -73,7 +73,7 @@
 
 :root.dark, html.dark {
   color-scheme: dark;
-  --background: #07090e;
+  --background: #080b14;
   --foreground: #ffffff;
   --surface: #0c0f1e;
   --surface-nav: #090d16;
@@ -275,11 +275,7 @@ input[type="month"] {
 }
 
 .ambient-bg-dark {
-  background-color: #07090e;
-  background-image:
-    radial-gradient(ellipse 60% 40% at 50% 0%, rgba(37, 99, 235, 0.08), transparent 70%),
-    radial-gradient(ellipse 50% 35% at 85% 85%, rgba(15, 23, 42, 0.5), transparent 70%);
-  background-attachment: fixed;
+  background-color: #080b14;
 }
 
 .gradient-border-card {
@@ -366,65 +362,65 @@ input[type="month"] {
 /* Light mode defaults for KPI cards */
 .kpi-card-green {
   position: relative;
-  border: 1.5px solid rgba(16, 185, 129, 0.5) !important;
+  border: none !important;
   background: #ffffff !important;
   border-radius: 20px;
-  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.12), 0 2px 6px rgba(15, 23, 42, 0.05) !important;
+  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.07), 0 1px 3px rgba(15, 23, 42, 0.04) !important;
 }
 .dark .kpi-card-green {
-  border: 1px solid rgba(16, 185, 129, 0.25) !important;
+  border: none !important;
   background: #0d161a !important;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
 }
 
 .kpi-card-red {
   position: relative;
-  border: 1.5px solid rgba(239, 68, 68, 0.5) !important;
+  border: none !important;
   background: #ffffff !important;
   border-radius: 20px;
-  box-shadow: 0 6px 20px rgba(239, 68, 68, 0.12), 0 2px 6px rgba(15, 23, 42, 0.05) !important;
+  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.07), 0 1px 3px rgba(15, 23, 42, 0.04) !important;
 }
 .dark .kpi-card-red {
-  border: 1px solid rgba(239, 68, 68, 0.25) !important;
+  border: none !important;
   background: #190e14 !important;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
 }
 
 .kpi-card-blue {
   position: relative;
-  border: 1.5px solid rgba(37, 99, 235, 0.5) !important;
+  border: none !important;
   background: #ffffff !important;
   border-radius: 20px;
-  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.12), 0 2px 6px rgba(15, 23, 42, 0.05) !important;
+  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.07), 0 1px 3px rgba(15, 23, 42, 0.04) !important;
 }
 .dark .kpi-card-blue {
-  border: 1px solid rgba(37, 99, 235, 0.25) !important;
+  border: none !important;
   background: #0d1222 !important;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
 }
 
 .kpi-card-purple {
   position: relative;
-  border: 1.5px solid rgba(168, 85, 247, 0.5) !important;
+  border: none !important;
   background: #ffffff !important;
   border-radius: 20px;
-  box-shadow: 0 6px 20px rgba(168, 85, 247, 0.12), 0 2px 6px rgba(15, 23, 42, 0.05) !important;
+  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.07), 0 1px 3px rgba(15, 23, 42, 0.04) !important;
 }
 .dark .kpi-card-purple {
-  border: 1px solid rgba(168, 85, 247, 0.25) !important;
+  border: none !important;
   background: #140e20 !important;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
 }
 
 .kpi-card-amber {
   position: relative;
-  border: 1.5px solid rgba(245, 158, 11, 0.5) !important;
+  border: none !important;
   background: #ffffff !important;
   border-radius: 20px;
-  box-shadow: 0 6px 20px rgba(245, 158, 11, 0.12), 0 2px 6px rgba(15, 23, 42, 0.05) !important;
+  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.07), 0 1px 3px rgba(15, 23, 42, 0.04) !important;
 }
 .dark .kpi-card-amber {
-  border: 1px solid rgba(245, 158, 11, 0.25) !important;
+  border: none !important;
   background: #18130d !important;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
 }

@@ -258,7 +258,7 @@ export default function Settings() {
   };
 
   return (
-    <div className="h-full w-full bg-transparent overflow-y-auto px-8 py-6 select-none text-slate-200 flex flex-col gap-6">
+    <div className="h-full w-full bg-[#e2e8f0] dark:bg-[#080b14] overflow-y-auto px-8 py-6 select-none text-slate-800 dark:text-slate-200 flex flex-col gap-6">
       
       {/* Page Title */}
       <div className="pb-2">

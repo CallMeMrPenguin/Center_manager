@@ -185,7 +185,7 @@ export default function ClassesPage() {
   };
 
   return (
-    <div className="h-full flex flex-col p-6 space-y-6 overflow-y-auto">
+    <div className="h-full flex flex-col p-6 space-y-6 overflow-y-auto bg-[#e2e8f0] dark:bg-[#080b14]">
       {/* 1. CLASS LIST VIEW (NO CLASS SELECTED) */}
       {!selectedClass ? (
         <ClassListView

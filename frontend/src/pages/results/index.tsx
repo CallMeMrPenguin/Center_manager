@@ -53,7 +53,7 @@ export const ResultsPage: React.FC = () => {
   };
 
   return (
-    <div className="h-full w-full overflow-y-auto p-6 space-y-6 bg-slate-100 dark:bg-[#080b14] text-slate-900 dark:text-slate-100 select-none font-sans scrollbar-thin">
+    <div className="h-full w-full overflow-y-auto p-6 space-y-6 bg-[#e2e8f0] dark:bg-[#080b14] text-slate-900 dark:text-slate-100 select-none font-sans scrollbar-thin">
       {/* 1. Header Filter Bar & Student ID Card (Identical to Reports standard) */}
       <StudentProfileHeader
         students={students}

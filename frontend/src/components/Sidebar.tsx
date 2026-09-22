@@ -62,7 +62,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     <aside
       className={`group relative ${
         isSidebarExpanded ? 'w-56' : 'w-16'
-      } bg-white dark:bg-[#0c0f1e] border-r-2 border-slate-300 dark:border-[#212c4b] flex flex-col transition-all duration-300 select-none shrink-0 z-30 shadow-[6px_0_30px_rgba(15,23,42,0.1)] dark:shadow-[6px_0_30px_rgba(0,0,0,0.6)] overflow-visible`}
+      } bg-white dark:bg-[#0c0f1e] border-r-2 border-slate-300 dark:border-[#212c4b] flex flex-col transition-all duration-300 select-none shrink-0 z-30 overflow-visible`}
     >
       {/* Floating Collapse / Expand Button */}
       <button

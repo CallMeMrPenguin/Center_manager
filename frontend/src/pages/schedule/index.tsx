@@ -367,7 +367,7 @@ export default function SchedulePage() {
   ], []);
 
   return (
-    <div className="h-full flex flex-col p-5 gap-5 overflow-y-auto bg-[#e2e8f0] dark:bg-[#090d16] text-slate-800 dark:text-slate-100 font-sans">
+    <div className="h-full flex flex-col p-5 gap-5 overflow-y-auto bg-[#e2e8f0] dark:bg-[#080b14] text-slate-800 dark:text-slate-100 font-sans">
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>

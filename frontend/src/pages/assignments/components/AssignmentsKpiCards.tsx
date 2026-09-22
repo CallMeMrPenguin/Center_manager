@@ -51,7 +51,7 @@ export const AssignmentsKpiCards: React.FC<AssignmentsKpiCardsProps> = ({ kpis }
       {cards.map((card, idx) => (
         <div
           key={idx}
-          className={`${card.cardClass} bg-white dark:bg-[#0c0f1e] border border-slate-200 dark:border-white/10 rounded-2xl p-4 flex flex-col justify-between shadow-sm dark:shadow-md relative overflow-hidden transition-all duration-200 hover:border-slate-300 dark:hover:border-white/20`}
+          className={`${card.cardClass} bg-white dark:bg-[#0c0f1e] rounded-2xl p-4 flex flex-col justify-between shadow-[0_4px_20px_rgba(15,23,42,0.07)] dark:shadow-md relative overflow-hidden transition-all duration-200`}
         >
           <div className="flex items-center justify-between gap-2 mb-2">
             <span className="text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">
