@@ -303,6 +303,7 @@ export default function ClassesPage() {
               onDropOnSeat={handleDropOnSeat}
               onDragStartSeat={setDraggedSeat}
               onDragStartUnassigned={setDraggedUnassigned}
+              teacherName={selectedClass?.teacher_name}
             />
           )}
 

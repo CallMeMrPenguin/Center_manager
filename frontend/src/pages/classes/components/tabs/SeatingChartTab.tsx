@@ -28,6 +28,7 @@ interface SeatingChartTabProps {
   onDropOnSeat: (targetColIdx: number, targetDeskIdx: number, targetPosIdx: number) => void;
   onDragStartSeat: (seatPos: { colIdx: number; deskIdx: number; posIdx: number }) => void;
   onDragStartUnassigned: (student: EnrolledStudent) => void;
+  teacherName?: string;
 }
 
 export const SeatingChartTab: React.FC<SeatingChartTabProps> = ({
@@ -38,6 +39,7 @@ export const SeatingChartTab: React.FC<SeatingChartTabProps> = ({
   unassignedStudents,
   showUnassignedPanel,
   mixingGA,
+  teacherName,
   onToggleUnassignedPanel,
   onAddColumn,
   onRemoveColumn,
@@ -258,6 +260,7 @@ export const SeatingChartTab: React.FC<SeatingChartTabProps> = ({
             totalOccupied={totalOccupied}
             totalSeats={totalSeats}
             occupancyPct={occupancyPct}
+            teacherName={teacherName}
           />
 
           {/* COLUMNS / DÃY BÀN HỌC */}
