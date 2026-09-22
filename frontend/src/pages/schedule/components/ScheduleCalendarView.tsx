@@ -44,13 +44,13 @@ export const ScheduleCalendarView: React.FC<ScheduleCalendarViewProps> = ({
   if (viewMode === 'month') {
     return (
       <div className="calendar-container-depth flex-1 min-h-0 select-none">
-        <div className="overflow-hidden bg-slate-100 dark:bg-[#161c2c] border-b border-slate-200 dark:border-[#242f48]">
+        <div className="overflow-hidden bg-slate-100 dark:bg-[#111728] border-b-2 border-slate-300 dark:border-[#283556]">
           <div className="grid grid-cols-7">
             {DAY_HDRS.map((d, i) => (
               <div
                 key={d}
-                className={`py-3 text-center text-[10px] font-extrabold uppercase tracking-widest ${
-                  i >= 5 ? 'text-rose-500 dark:text-rose-400 bg-rose-500/[0.03]' : 'text-slate-600 dark:text-slate-400'
+                className={`py-3 text-center text-[10px] font-black uppercase tracking-widest ${
+                  i >= 5 ? 'text-rose-500 dark:text-rose-400 bg-rose-500/[0.04]' : 'text-slate-700 dark:text-slate-300'
                 }`}
               >
                 {d}
@@ -58,8 +58,8 @@ export const ScheduleCalendarView: React.FC<ScheduleCalendarViewProps> = ({
             ))}
           </div>
         </div>
-        <div className="overflow-auto max-h-[calc(100vh-360px)] bg-slate-200 dark:bg-[#0c101a]">
-          <div className="grid grid-cols-7 gap-[1px] bg-slate-200 dark:bg-[#1e273e]">
+        <div className="overflow-auto max-h-[calc(100vh-360px)] bg-slate-300 dark:bg-[#283556]">
+          <div className="grid grid-cols-7 gap-[1.5px] bg-slate-300 dark:bg-[#283556]">
             {Array.from({ length: totalCells }).map((_, i) => {
               const dayNum = i - startOff + 1;
               const inMonth = dayNum > 0 && dayNum <= daysInMonth;
@@ -182,7 +182,7 @@ export const ScheduleCalendarView: React.FC<ScheduleCalendarViewProps> = ({
         </button>
       </div>
 
-      <div className="overflow-hidden bg-slate-100 dark:bg-[#161c2c] border-b border-slate-200 dark:border-[#242f48] shrink-0">
+      <div className="overflow-hidden bg-slate-100 dark:bg-[#111728] border-b-2 border-slate-300 dark:border-[#283556] shrink-0">
         <div className="grid grid-cols-7">
           {weekDays.map((wd, idx) => {
             const isToday = wd.dateStr === today;
@@ -190,13 +190,13 @@ export const ScheduleCalendarView: React.FC<ScheduleCalendarViewProps> = ({
             return (
               <div
                 key={wd.dateStr}
-                className={`py-2.5 text-center flex flex-col items-center gap-0.5 border-r border-slate-200 dark:border-[#242f48] last:border-r-0 transition-all ${
+                className={`py-2.5 text-center flex flex-col items-center gap-0.5 border-r border-slate-300 dark:border-[#283556] last:border-r-0 transition-all ${
                   isToday ? 'border-t-2 border-t-blue-500 bg-blue-500/[0.05]' : ''
                 }`}
               >
                 <span
-                  className={`text-[10px] font-extrabold uppercase tracking-widest ${
-                    isToday ? 'text-blue-600 dark:text-blue-400 font-black' : isWknd ? 'text-rose-500 dark:text-rose-400' : 'text-slate-600 dark:text-slate-400'
+                  className={`text-[10px] font-black uppercase tracking-widest ${
+                    isToday ? 'text-blue-600 dark:text-blue-400 font-black' : isWknd ? 'text-rose-500 dark:text-rose-400' : 'text-slate-700 dark:text-slate-300'
                   }`}
                 >
                   {wd.header}
@@ -214,8 +214,8 @@ export const ScheduleCalendarView: React.FC<ScheduleCalendarViewProps> = ({
         </div>
       </div>
 
-      <div className="overflow-auto flex-1 bg-slate-100 dark:bg-[#0c101a]">
-        <div className="grid grid-cols-7 gap-[1px] bg-slate-200 dark:bg-[#1e273e] min-h-[300px]">
+      <div className="overflow-auto flex-1 bg-slate-300 dark:bg-[#283556]">
+        <div className="grid grid-cols-7 gap-[1.5px] bg-slate-300 dark:bg-[#283556] min-h-[300px]">
           {weekDays.map((wd, idx) => {
             const daySess = sessions
               .filter((s) => s.date === wd.dateStr)

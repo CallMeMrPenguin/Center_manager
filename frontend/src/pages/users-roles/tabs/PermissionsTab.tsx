@@ -112,7 +112,7 @@ export const PermissionsTab: React.FC<PermissionsTabProps> = ({
         <div className="overflow-x-auto scrollbar-thin">
           <table className="w-full text-left border-collapse select-none">
             <thead>
-              <tr className="bg-slate-50 dark:bg-[#11162a] border-b border-slate-200 dark:border-white/10 text-xs font-black uppercase text-slate-700 dark:text-slate-300">
+              <tr className="bg-slate-200 dark:bg-[#0b0e1a] border-b-2 border-slate-300 dark:border-[#212c4b] text-xs font-black uppercase text-slate-900 dark:text-white">
                 <th className="py-3.5 px-4 min-w-[200px]">Tính Năng / Tab</th>
                 {ROLES.map((role) => (
                   <th key={role} className="py-3.5 px-4 text-center min-w-[140px]">
@@ -124,13 +124,15 @@ export const PermissionsTab: React.FC<PermissionsTabProps> = ({
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-white/5 text-xs">
-              {TAB_DEFINITIONS.map((tab) => {
+            <tbody className="divide-y divide-slate-300 dark:divide-[#212c4b] text-xs">
+              {TAB_DEFINITIONS.map((tab, idx) => {
                 const Icon = tab.icon;
                 return (
                   <tr
                     key={tab.id}
-                    className="hover:bg-slate-50/80 dark:hover:bg-white/[0.02] transition-colors"
+                    className={`${
+                      idx % 2 === 0 ? 'bg-white dark:bg-[#0f1528]' : 'bg-[#e2e8f0] dark:bg-[#151e38]'
+                    } hover:bg-indigo-50/80 dark:hover:bg-indigo-950/40 transition-colors`}
                   >
                     {/* Tab Name & Icon */}
                     <td className="py-3 px-4 font-bold text-slate-800 dark:text-slate-200">

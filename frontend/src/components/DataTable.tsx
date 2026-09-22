@@ -1219,7 +1219,7 @@ export function DataTable<TData>({
                   </colgroup>
 
                   {/* ── THEAD (All headers centered by default) ────────────────── */}
-                  <thead className={`bg-slate-200/90 dark:bg-[#111827] border-b border-slate-300 dark:border-[#1e2740] ${stickyHeader ? 'sticky top-0 z-20' : ''}`}>
+                  <thead className={`bg-slate-200 dark:bg-[#0b0e1a] border-b-2 border-slate-300 dark:border-[#212c4b] ${stickyHeader ? 'sticky top-0 z-20' : ''}`}>
                     {table.getHeaderGroups().map(headerGroup => (
                       <tr key={headerGroup.id}>
                         {headerGroup.headers.map(header => {
@@ -1287,8 +1287,8 @@ export function DataTable<TData>({
                             ${row.getIsSelected()
                               ? 'bg-indigo-500/15 hover:bg-indigo-500/25 dark:bg-indigo-500/20 dark:hover:bg-indigo-500/30'
                               : rowIdx % 2 === 0
-                              ? 'bg-white dark:bg-[#0d1018] hover:bg-indigo-50/80 dark:hover:bg-indigo-950/40'
-                              : 'bg-[#edf2f7] dark:bg-[#131828] hover:bg-indigo-50/80 dark:hover:bg-indigo-950/40'}
+                              ? 'bg-white dark:bg-[#0f1528] hover:bg-indigo-50/90 dark:hover:bg-indigo-950/40'
+                              : 'bg-[#e2e8f0] dark:bg-[#151e38] hover:bg-indigo-50/90 dark:hover:bg-indigo-950/40'}
                           `}
                           onClick={() => onRowClick?.(row.original)}
                         >
@@ -1305,7 +1305,7 @@ export function DataTable<TData>({
                                 key={cell.id}
                                 className={`
                                   py-3.5 ${isSelectCol ? 'px-1' : 'px-4'} font-bold text-slate-900 dark:text-slate-100 text-base
-                                  border-b border-slate-300/85 dark:border-[#161e30] overflow-hidden
+                                  border-b border-slate-300 dark:border-[#212c4b] overflow-hidden
                                   ${isCentered ? 'text-center' : 'text-left'}
                                   ${isPinned ? 'bg-inherit' : ''}
                                   ${isLastRow && isFirstCell ? 'rounded-bl-xl' : ''}

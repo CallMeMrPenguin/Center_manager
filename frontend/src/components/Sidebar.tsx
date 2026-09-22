@@ -196,22 +196,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     return (
                       <DockItem
                         key={item.id}
+                        isActive={isActive}
                         onClick={() => setActiveTab(item.id)}
-                        className={`rounded-xl transition-colors ${
-                          isActive
-                            ? 'bg-blue-600 dark:bg-blue-600 text-white font-black shadow-md shadow-blue-500/30'
-                            : 'bg-white hover:bg-slate-100 dark:bg-white/[0.04] dark:hover:bg-white/[0.1] text-slate-700 dark:text-slate-300 border border-slate-200/80 dark:border-white/10'
-                        }`}
                       >
-                        <DockIcon>
-                          <Icon
-                            size={18}
-                            className={
-                              isActive
-                                ? 'text-white drop-shadow-sm'
-                                : 'text-slate-500 dark:text-slate-400 group-hover:text-slate-900 dark:group-hover:text-white'
-                            }
-                          />
+                        <DockIcon isActive={isActive}>
+                          <Icon size={18} />
                         </DockIcon>
                         <DockLabel>{item.label}</DockLabel>
                       </DockItem>

@@ -56,16 +56,16 @@ export const Dock: React.FC<DockProps> = ({
   );
 };
 
-export interface DockItemProps {
+export const DockItem: React.FC<{
   children: React.ReactNode;
   className?: string;
   onClick?: () => void;
-}
-
-export const DockItem: React.FC<DockItemProps> = ({
+  isActive?: boolean;
+}> = ({
   children,
   className = '',
   onClick,
+  isActive = false,
 }) => {
   const context = useContext(DockContext);
   const ref = useRef<HTMLDivElement>(null);
@@ -84,24 +84,36 @@ export const DockItem: React.FC<DockItemProps> = ({
   const sizeSync = useTransform(distanceCalc, [-distance, 0, distance], [40, magnification, 40]);
   const size = useSpring(sizeSync, { mass: 0.1, stiffness: 200, damping: 14 });
 
+  const activeStyles = '!bg-[#5c36f5] !text-white !border-[#5c36f5] shadow-[0_0_14px_rgba(92,54,245,0.6)]';
+  const inactiveStyles = 'bg-white hover:bg-slate-100 dark:bg-[#13192c] dark:hover:bg-[#1c2540] border border-slate-200 dark:border-[#212c4b] text-slate-700 dark:text-slate-300 shadow-xs';
+
   return (
     <motion.div
       ref={ref}
       style={{ width: size, height: size }}
       onClick={onClick}
-      className={`relative group flex items-center justify-center cursor-pointer rounded-xl bg-slate-100 hover:bg-indigo-50 dark:bg-white/[0.04] dark:hover:bg-indigo-500/20 border border-slate-200 hover:border-indigo-400 dark:border-white/10 dark:hover:border-indigo-400/60 shadow-sm dark:shadow-lg transition-colors ${className}`}
+      className={`relative group flex items-center justify-center cursor-pointer rounded-xl transition-all duration-150 ${
+        isActive ? activeStyles : inactiveStyles
+      } ${className}`}
     >
       {children}
     </motion.div>
   );
 };
 
-export const DockIcon: React.FC<{ children: React.ReactNode; className?: string }> = ({
+export const DockIcon: React.FC<{ children: React.ReactNode; className?: string; isActive?: boolean }> = ({
   children,
   className = '',
+  isActive = false,
 }) => {
   return (
-    <div className={`w-full h-full flex items-center justify-center text-slate-600 group-hover:text-slate-900 dark:text-slate-300 dark:group-hover:text-white transition-colors [&>svg]:w-1/2 [&>svg]:h-1/2 ${className}`}>
+    <div
+      className={`w-full h-full flex items-center justify-center transition-colors [&>svg]:w-1/2 [&>svg]:h-1/2 ${
+        isActive
+          ? '!text-white'
+          : 'text-slate-600 group-hover:text-slate-900 dark:text-slate-300 dark:group-hover:text-white'
+      } ${className}`}
+    >
       {children}
     </div>
   );

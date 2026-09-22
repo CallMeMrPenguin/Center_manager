@@ -1263,7 +1263,7 @@ export default function VocabularyBank({ isActive }: { isActive?: boolean }) {
                     <th className="py-4 px-3 w-24 text-center whitespace-nowrap">Hành động</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-900/40 text-xs">
+                <tbody className="divide-y divide-slate-200 dark:divide-[#1e2746] text-xs">
                   {paginatedVocab.length === 0 && (
                     <tr>
                       <td 
@@ -1280,7 +1280,7 @@ export default function VocabularyBank({ isActive }: { isActive?: boolean }) {
                     
                     if (isEditing) {
                       return (
-                        <tr key={v.id} className="bg-blue-600/5 border-b border-slate-900 text-xs">
+                        <tr key={v.id} className="bg-blue-600/5 border-b border-slate-200 dark:border-[#1e2746] text-xs">
                           {/* Checkbox Placeholder */}
                           <td className="py-3 px-5 text-center"></td>
                           

@@ -286,7 +286,7 @@ def get_class_sessions(class_id: int, month_year: str = "") -> List[Dict[str, An
             return explicit_sessions
             
         _, num_days = calendar.monthrange(year, month)
-        explicit_keys = {(s["class_id"], s["date"], s["start_time"]) for s in explicit_sessions}
+        explicit_class_date_keys = {(s["class_id"], s["date"]) for s in explicit_sessions}
         
         virtual_sessions = []
         for day in range(1, num_days + 1):
@@ -298,7 +298,7 @@ def get_class_sessions(class_id: int, month_year: str = "") -> List[Dict[str, An
                 if slot["day_of_week"] == day_name:
                     slot_cid = slot["class_id"]
                     start_time = slot["start_time"]
-                    if (slot_cid, date_str, start_time) not in explicit_keys:
+                    if (slot_cid, date_str) not in explicit_class_date_keys:
                         virtual_sessions.append({
                             "id": -slot["id"] - (day * 1000) - (slot_cid * 100000),
                             "class_id": slot_cid,

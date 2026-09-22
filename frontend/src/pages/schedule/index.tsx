@@ -399,7 +399,7 @@ export default function SchedulePage() {
 
       {/* KPI Cards */}
       <div className="grid grid-cols-3 gap-4 shrink-0">
-        <div className="bg-white dark:bg-[#0e1322] border border-slate-200 dark:border-[#1e2742] p-4 flex items-center justify-between rounded-2xl shadow-sm dark:shadow-none">
+        <div className="bg-white dark:bg-[#0f1528] p-4.5 flex items-center justify-between rounded-2xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.06),0_2px_6px_-2px_rgba(0,0,0,0.04)] dark:shadow-none transition-colors duration-200">
           <div>
             <p className="text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">Trong Tháng</p>
             <p className="text-2xl font-black text-slate-900 dark:text-white">{total}</p>
@@ -408,7 +408,7 @@ export default function SchedulePage() {
             <CalendarIcon size={18} />
           </div>
         </div>
-        <div className="bg-white dark:bg-[#0e1322] border border-slate-200 dark:border-[#1e2742] p-4 flex items-center justify-between rounded-2xl shadow-sm dark:shadow-none">
+        <div className="bg-white dark:bg-[#0f1528] p-4.5 flex items-center justify-between rounded-2xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.06),0_2px_6px_-2px_rgba(0,0,0,0.04)] dark:shadow-none transition-colors duration-200">
           <div>
             <p className="text-[9px] font-black uppercase tracking-widest text-emerald-600 dark:text-emerald-400">Đã Hoàn Thành</p>
             <p className="text-2xl font-black text-emerald-600 dark:text-emerald-400">{done}</p>
@@ -417,7 +417,7 @@ export default function SchedulePage() {
             <CheckCircle2 size={18} />
           </div>
         </div>
-        <div className="bg-white dark:bg-[#0e1322] border border-slate-200 dark:border-[#1e2742] p-4 flex items-center justify-between rounded-2xl shadow-sm dark:shadow-none">
+        <div className="bg-white dark:bg-[#0f1528] p-4.5 flex items-center justify-between rounded-2xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.06),0_2px_6px_-2px_rgba(0,0,0,0.04)] dark:shadow-none transition-colors duration-200">
           <div>
             <p className="text-[9px] font-black uppercase tracking-widest text-cyan-600 dark:text-cyan-400">Sắp Diễn Ra</p>
             <p className="text-2xl font-black text-cyan-600 dark:text-cyan-400">{upcoming}</p>
@@ -429,7 +429,7 @@ export default function SchedulePage() {
       </div>
 
       {/* Toolbar */}
-      <div className="flex flex-wrap items-center justify-between gap-3 bg-white dark:bg-[#0e1322] border border-slate-200 dark:border-[#1e2742] p-3 rounded-2xl shrink-0 shadow-sm dark:shadow-none">
+      <div className="flex flex-wrap items-center justify-between gap-3 bg-white dark:bg-[#0f1528] p-3 rounded-2xl shrink-0 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.06),0_2px_6px_-2px_rgba(0,0,0,0.04)] dark:shadow-none transition-colors duration-200">
         <div className="flex items-center gap-2">
           <input
             type="month"

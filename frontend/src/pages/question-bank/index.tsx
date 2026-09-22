@@ -1691,7 +1691,7 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
                     <th className="py-4 px-3 w-24 text-center">Hành động</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-900/40 text-xs">
+                <tbody className="divide-y divide-slate-200 dark:divide-[#1e2746] text-xs">
                   {paginatedQuestions.length === 0 && (
                     <tr>
                       <td 
@@ -1708,7 +1708,7 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
                     
                     if (isEditing) {
                       return (
-                        <tr key={q.id} className="bg-blue-600/5 border-b border-slate-900 text-xs">
+                        <tr key={q.id} className="bg-blue-600/5 border-b border-slate-200 dark:border-[#1e2746] text-xs">
                           {/* Checkbox Placeholder */}
                           <td className="py-3 px-5 text-center"></td>
                           

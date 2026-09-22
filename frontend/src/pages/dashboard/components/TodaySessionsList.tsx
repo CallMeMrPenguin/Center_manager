@@ -31,8 +31,8 @@ export const TodaySessionsList: React.FC<TodaySessionsListProps> = ({ sessions, 
   };
 
   return (
-    <div className="bg-white dark:bg-[#0e1322] border border-slate-300 dark:border-[#1e2742] rounded-2xl p-5 flex flex-col shadow-sm dark:shadow-none transition-colors duration-200">
-      <div className="flex items-center justify-between pb-3.5 mb-4 border-b border-slate-300 dark:border-[#1c2438]">
+    <div className="bg-white dark:bg-[#0f1528] rounded-2xl p-5 flex flex-col shadow-[0_4px_20px_-4px_rgba(0,0,0,0.06),0_2px_6px_-2px_rgba(0,0,0,0.04)] dark:shadow-none transition-colors duration-200">
+      <div className="flex items-center justify-between pb-3.5 mb-4 border-b border-slate-200 dark:border-[#1c2438]">
         <div className="flex items-center gap-2.5">
           <div className="p-1.5 rounded-lg bg-blue-500/15 text-blue-500 dark:text-blue-400">
             <Clock size={16} />

@@ -58,9 +58,6 @@ export const HeadToHeadDuel: React.FC<HeadToHeadDuelProps> = ({
             <h3 className="text-base font-black text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
               SO SÁNH ĐỐI ĐẦU 2 LỚP HỌC
             </h3>
-            <p className="text-xs text-slate-600 dark:text-slate-400 font-semibold mt-0.5">
-              Chọn 2 lớp học để so sánh trực diện các chỉ số học lực, chuyên cần, phân bố 6 hạng bậc và đà phát triển.
-            </p>
           </div>
         </div>
 
@@ -71,7 +68,6 @@ export const HeadToHeadDuel: React.FC<HeadToHeadDuelProps> = ({
               className="w-2.5 h-2.5 rounded-full shrink-0"
               style={{ backgroundColor: getClassColor(compareClassAId, 0), boxShadow: `0 0 8px ${getClassColor(compareClassAId, 0)}80` }}
             />
-            <span className="text-xs font-black text-blue-600 dark:text-blue-400 whitespace-nowrap shrink-0">Lớp A:</span>
             <div className="w-48 shrink-0">
               <CustomSelect
                 value={compareClassAId}
@@ -90,7 +86,6 @@ export const HeadToHeadDuel: React.FC<HeadToHeadDuelProps> = ({
               className="w-2.5 h-2.5 rounded-full shrink-0"
               style={{ backgroundColor: getClassColor(compareClassBId, 1), boxShadow: `0 0 8px ${getClassColor(compareClassBId, 1)}80` }}
             />
-            <span className="text-xs font-black text-cyan-600 dark:text-cyan-400 whitespace-nowrap shrink-0">Lớp B:</span>
             <div className="w-48 shrink-0">
               <CustomSelect
                 value={compareClassBId}

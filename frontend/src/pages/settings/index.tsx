@@ -274,15 +274,15 @@ export default function Settings() {
         <div className="lg:col-span-2 flex flex-col gap-6">
           
           {/* System Diagnostics Box */}
-          <div className="glass-panel rounded-2xl p-6 flex flex-col gap-4">
-            <div className="flex justify-between items-center border-b border-slate-900/60 pb-3">
-              <h3 className="text-xs font-extrabold text-white uppercase tracking-wider flex items-center gap-2">
-                <Cpu size={14} className="text-blue-400" /> Chẩn đoán môi trường chạy máy tính
+          <div className="bg-white dark:bg-[#0f1528] rounded-2xl p-6 flex flex-col gap-4 shadow-sm dark:shadow-none border border-slate-200 dark:border-[#1e2746]">
+            <div className="flex justify-between items-center border-b border-slate-200 dark:border-white/10 pb-3">
+              <h3 className="text-xs font-extrabold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
+                <Cpu size={14} className="text-blue-500 dark:text-blue-400" /> Chẩn đoán môi trường chạy máy tính
               </h3>
               <button
                 onClick={runDiagnostics}
                 disabled={loadingDiagnostics}
-                className="group p-1.5 bg-[#0b0f19] border border-slate-850 hover:bg-gradient-to-tr hover:from-blue-600/10 hover:to-indigo-600/10 hover:border-blue-500/30 rounded-lg text-slate-400 hover:text-white transition-all duration-300 flex items-center gap-0 hover:gap-1 text-[10px] font-bold cursor-pointer"
+                className="group p-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-[#151d36] dark:hover:bg-[#1d2748] border border-slate-300 dark:border-[#212c4b] rounded-xl text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-all duration-300 flex items-center gap-0 hover:gap-1 text-[10px] font-bold cursor-pointer"
               >
                 <RefreshCw size={10} className={loadingDiagnostics ? "animate-spin" : ""} />
                 <span className="max-w-0 overflow-hidden group-hover:max-w-[100px] transition-all duration-300 whitespace-nowrap block">Kiểm tra lại</span>
@@ -293,25 +293,25 @@ export default function Settings() {
               <div className="flex flex-col gap-4">
                 
                 {/* Word status indicator */}
-                <div className="flex items-start gap-3 p-4 rounded-xl bg-[#0b0f19]/60 border border-slate-900/50">
+                <div className="flex items-start gap-3 p-4 rounded-xl bg-slate-50 dark:bg-[#0b0f19]/60 border border-slate-200 dark:border-[#1e2746]">
                   {systemCheck.word_installed ? (
-                    <div className="p-2 bg-emerald-500/10 text-emerald-400 rounded-xl mt-0.5">
+                    <div className="p-2 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-xl mt-0.5">
                       <CheckCircle2 size={18} />
                     </div>
                   ) : (
-                    <div className="p-2 bg-rose-500/10 text-rose-450 rounded-xl mt-0.5">
+                    <div className="p-2 bg-rose-500/10 text-rose-600 dark:text-rose-400 rounded-xl mt-0.5">
                       <AlertTriangle size={18} />
                     </div>
                   )}
                   <div className="flex-1">
-                    <h4 className="text-xs font-bold text-white">Kết nối Microsoft Word (COM API)</h4>
-                    <p className="text-[10px] text-slate-400 mt-1 leading-relaxed">
+                    <h4 className="text-xs font-bold text-slate-900 dark:text-white">Kết nối Microsoft Word (COM API)</h4>
+                    <p className="text-[10px] text-slate-600 dark:text-slate-400 mt-1 leading-relaxed">
                       {systemCheck.word_installed 
                         ? "Đã phát hiện thấy Microsoft Word trên hệ điều hành của bạn. Chế độ xuất PDF xem trước và gộp từ vựng hoạt động đầy đủ."
                         : "Không tìm thấy Microsoft Word hoặc COM Dispatch API bị lỗi. Bạn vẫn có thể biên dịch đề thi Word .docx bình thường nhưng tính năng xuất PDF xem trước trực tiếp sẽ tạm thời bị vô hiệu."}
                     </p>
                     {systemCheck.win32_com_error && (
-                      <div className="mt-2.5 p-2.5 rounded-lg bg-rose-950/20 border border-rose-900/30 text-[10px] text-rose-400 font-mono overflow-x-auto max-w-full">
+                      <div className="mt-2.5 p-2.5 rounded-lg bg-rose-50 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-900/30 text-[10px] text-rose-600 dark:text-rose-400 font-mono overflow-x-auto max-w-full">
                         Details: {systemCheck.win32_com_error}
                       </div>
                     )}
@@ -319,14 +319,14 @@ export default function Settings() {
                 </div>
 
                 {/* System technical stats */}
-                <div className="grid grid-cols-2 gap-4 text-xs font-semibold text-slate-300 pl-2">
+                <div className="grid grid-cols-2 gap-4 text-xs font-semibold text-slate-700 dark:text-slate-300 pl-2">
                   <div className="flex flex-col gap-1">
                     <span className="text-[10px] text-slate-500 font-bold uppercase">Môi trường Python</span>
                     <span className="truncate">{systemCheck.python_version ? systemCheck.python_version.split(" ")[0] : "Python 3.13"}</span>
                   </div>
                   <div className="flex flex-col gap-1">
                     <span className="text-[10px] text-slate-500 font-bold uppercase">Thư viện python-docx</span>
-                    <span className="text-emerald-400 flex items-center gap-1">
+                    <span className="text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
                       <CheckCircle2 size={12} /> Đã sẵn sàng
                     </span>
                   </div>
@@ -339,16 +339,16 @@ export default function Settings() {
           </div>
 
           {/* Directory Configuration Box */}
-          <div className="glass-panel rounded-2xl p-6 flex flex-col gap-4">
-            <h3 className="text-xs font-extrabold text-white uppercase tracking-wider border-b border-slate-900/60 pb-3 flex items-center gap-2">
-              <HardDrive size={14} className="text-blue-400" /> Thiết lập hệ thống tệp tin
+          <div className="bg-white dark:bg-[#0f1528] rounded-2xl p-6 flex flex-col gap-4 shadow-sm dark:shadow-none border border-slate-200 dark:border-[#1e2746]">
+            <h3 className="text-xs font-extrabold text-slate-900 dark:text-white uppercase tracking-wider border-b border-slate-200 dark:border-white/10 pb-3 flex items-center gap-2">
+              <HardDrive size={14} className="text-blue-500 dark:text-blue-400" /> Thiết lập hệ thống tệp tin
             </h3>
 
             <div className="flex flex-col gap-4">
               
               {/* Files dir input */}
               <div className="flex flex-col gap-1.5">
-                <label className="text-[10px] font-bold text-slate-450 uppercase">Đường dẫn thư mục quản lý tệp</label>
+                <label className="text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase">Đường dẫn thư mục quản lý tệp</label>
                 <div className="flex gap-2">
                   <input
                     type="text"
@@ -360,12 +360,12 @@ export default function Settings() {
                       }
                     }}
                     placeholder="Workspace Files Directory Path..."
-                    className="bg-[#0b0f19] border border-slate-850 px-3.5 py-2 rounded-xl text-xs text-white focus:outline-none focus:border-slate-700 flex-1 font-mono"
+                    className="bg-slate-50 dark:bg-[#0b0f19] border border-slate-300 dark:border-[#212c4b] px-3.5 py-2 rounded-xl text-xs text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500 flex-1 font-mono"
                   />
                   <button
                     type="button"
                     onClick={handleBrowseDirectory}
-                    className="px-4 py-2 bg-slate-900 border border-slate-850 hover:border-slate-700 text-slate-350 hover:text-white font-extrabold text-[10px] rounded-xl cursor-pointer transition whitespace-nowrap"
+                    className="px-4 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-[#151d36] dark:hover:bg-[#1d2748] border border-slate-300 dark:border-[#212c4b] text-slate-800 dark:text-slate-200 font-extrabold text-[10px] rounded-xl cursor-pointer transition whitespace-nowrap"
                   >
                     Duyệt...
                   </button>
@@ -373,14 +373,14 @@ export default function Settings() {
                 <p className="text-[9px] text-slate-500">Thư mục dùng để lưu trữ tệp đề JSON, file word docx hoàn thiện.</p>
               </div>
 
-              <div className="border-t border-slate-900/60 pt-4 flex justify-between items-center">
+              <div className="border-t border-slate-200 dark:border-white/10 pt-4 flex justify-between items-center">
                 <span className="text-[10px] text-slate-500 font-mono">ID thiết bị máy chủ: {settings?.machine_id || 'LOCAL_HOST'}</span>
                 <button
                   onClick={handleSaveSettings}
-                  className="group px-3.5 py-2 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-xs transition-all duration-300 flex items-center gap-0 hover:gap-1.5 cursor-pointer shadow-md shadow-blue-500/10"
+                  className="group px-3.5 py-2 rounded-xl bg-[#5c36f5] hover:bg-[#4f2ce0] text-white font-bold text-xs transition-all duration-300 flex items-center gap-1.5 cursor-pointer shadow-sm shadow-indigo-500/20"
                 >
                   <Save size={13} />
-                  <span className="max-w-0 overflow-hidden group-hover:max-w-[150px] transition-all duration-300 whitespace-nowrap block">Lưu cấu hình hệ thống</span>
+                  <span>Lưu cấu hình</span>
                 </button>
               </div>
 
@@ -388,23 +388,23 @@ export default function Settings() {
           </div>
 
           {/* Dynamic Grade Types & Proportions Box */}
-          <div className="glass-panel rounded-2xl p-6 flex flex-col gap-4">
-            <div className="flex flex-wrap justify-between items-center border-b border-slate-900/60 pb-3 gap-2">
-              <h3 className="text-xs font-extrabold text-white uppercase tracking-wider flex items-center gap-2">
-                <SettingsIcon size={14} className="text-indigo-400" /> Quản Lý Loại Điểm & Trọng Số (%)
+          <div className="bg-white dark:bg-[#0f1528] rounded-2xl p-6 flex flex-col gap-4 shadow-sm dark:shadow-none border border-slate-200 dark:border-[#1e2746]">
+            <div className="flex flex-wrap justify-between items-center border-b border-slate-200 dark:border-white/10 pb-3 gap-2">
+              <h3 className="text-xs font-extrabold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
+                <SettingsIcon size={14} className="text-indigo-500 dark:text-indigo-400" /> Quản Lý Loại Điểm & Trọng Số (%)
               </h3>
               <div className="flex items-center gap-2">
                 <span className={`text-xs font-bold px-2.5 py-1 rounded-lg ${
                   Math.abs(gradeTypes.reduce((acc, c) => acc + (Number(c.weight) || 0), 0) - 100) < 0.1
-                    ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                    : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
+                    ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20'
+                    : 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20'
                 }`}>
                   Tổng: {gradeTypes.reduce((acc, c) => acc + (Number(c.weight) || 0), 0).toFixed(1)}%
                 </span>
                 <button
                   type="button"
                   onClick={handleAutoRebalance}
-                  className="px-2.5 py-1 rounded-lg bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/20 text-xs font-bold transition flex items-center gap-1 cursor-pointer"
+                  className="px-2.5 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-500/15 hover:bg-indigo-100 dark:hover:bg-indigo-500/25 text-indigo-600 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-500/30 text-xs font-bold transition flex items-center gap-1 cursor-pointer"
                   title="Tự động chia đều trọng số cho tất cả loại điểm"
                 >
                   <Scale size={12} />
@@ -413,13 +413,13 @@ export default function Settings() {
               </div>
             </div>
 
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-slate-600 dark:text-slate-400">
               Thêm, xóa hoặc chỉnh sửa trọng số % của các loại điểm. Hệ thống tự động đồng bộ trọng số để tính <b>Điểm Đánh Giá</b> và <b>Dự Đoán Học Tập</b>.
             </p>
 
             <div className="flex flex-col gap-3">
               {gradeTypes.map((gt, idx) => (
-                <div key={gt.id || idx} className="flex items-center gap-3 bg-[#0b0f19] p-3 rounded-xl border border-slate-850">
+                <div key={gt.id || idx} className="flex items-center gap-3 bg-slate-50 dark:bg-[#0b0f19] p-3 rounded-xl border border-slate-200 dark:border-[#212c4b]">
                   <div 
                     className="w-3 h-8 rounded-lg shrink-0" 
                     style={{ backgroundColor: gt.color || '#5c36f5' }} 
@@ -434,7 +434,7 @@ export default function Settings() {
                           const val = e.target.value;
                           setGradeTypes(prev => prev.map((item, i) => i === idx ? { ...item, label: val } : item));
                         }}
-                        className="bg-[#121626] border border-slate-700 px-3 py-1.5 rounded-lg text-xs text-white font-bold focus:outline-none focus:border-indigo-500 w-full"
+                        className="bg-white dark:bg-[#121626] border border-slate-300 dark:border-[#283558] px-3 py-1.5 rounded-lg text-xs text-slate-900 dark:text-white font-bold focus:outline-none focus:border-indigo-500 w-full"
                       />
                     </div>
                     <div>
@@ -449,14 +449,14 @@ export default function Settings() {
                           const val = parseFloat(e.target.value) || 0;
                           setGradeTypes(prev => prev.map((item, i) => i === idx ? { ...item, weight: val } : item));
                         }}
-                        className="bg-[#121626] border border-slate-700 px-3 py-1.5 rounded-lg text-xs text-white font-bold focus:outline-none focus:border-indigo-500 w-full"
+                        className="bg-white dark:bg-[#121626] border border-slate-300 dark:border-[#283558] px-3 py-1.5 rounded-lg text-xs text-slate-900 dark:text-white font-bold focus:outline-none focus:border-indigo-500 w-full"
                       />
                     </div>
                   </div>
                   <button
                     type="button"
                     onClick={() => handleRemoveGradeType(gt.id)}
-                    className="p-2 bg-rose-500/10 hover:bg-rose-500/20 text-rose-450 rounded-lg transition border border-rose-500/20 shrink-0 cursor-pointer"
+                    className="p-2 bg-rose-50 hover:bg-rose-100 dark:bg-rose-500/10 dark:hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 rounded-lg transition border border-rose-200 dark:border-rose-500/25 shrink-0 cursor-pointer"
                     title="Xóa loại điểm này"
                   >
                     <Trash2 size={14} />
@@ -466,27 +466,27 @@ export default function Settings() {
             </div>
 
             {showAddModal ? (
-              <div className="flex items-center gap-2 bg-[#0d1222] p-3 rounded-xl border border-indigo-500/30">
+              <div className="flex items-center gap-2 bg-slate-50 dark:bg-[#0d1222] p-3 rounded-xl border border-indigo-500/30">
                 <input
                   type="text"
                   placeholder="Nhập tên loại điểm mới (VD: Speaking, Listening...)"
                   value={newGradeLabel}
                   onChange={(e) => setNewGradeLabel(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleAddGradeType()}
-                  className="bg-[#121626] border border-slate-700 px-3 py-2 rounded-lg text-xs text-white font-bold focus:outline-none focus:border-indigo-500 flex-1"
+                  className="bg-white dark:bg-[#121626] border border-slate-300 dark:border-[#283558] px-3 py-2 rounded-lg text-xs text-slate-900 dark:text-white font-bold focus:outline-none focus:border-indigo-500 flex-1"
                   autoFocus
                 />
                 <button
                   type="button"
                   onClick={handleAddGradeType}
-                  className="px-3 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-lg transition"
+                  className="px-3 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-lg transition cursor-pointer"
                 >
                   Xác Nhận
                 </button>
                 <button
                   type="button"
                   onClick={() => setShowAddModal(false)}
-                  className="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs rounded-lg transition"
+                  className="px-3 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold text-xs rounded-lg transition cursor-pointer"
                 >
                   Hủy
                 </button>
@@ -495,18 +495,18 @@ export default function Settings() {
               <button
                 type="button"
                 onClick={() => setShowAddModal(true)}
-                className="w-full py-2.5 border border-dashed border-slate-800 hover:border-indigo-500/40 bg-[#0b0f19]/50 hover:bg-indigo-500/5 text-slate-400 hover:text-indigo-300 font-bold text-xs rounded-xl transition flex items-center justify-center gap-1.5 cursor-pointer"
+                className="w-full py-2.5 border border-dashed border-slate-300 dark:border-slate-800 hover:border-indigo-500/50 bg-slate-50/50 dark:bg-[#0b0f19]/50 hover:bg-indigo-500/5 text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-300 font-bold text-xs rounded-xl transition flex items-center justify-center gap-1.5 cursor-pointer"
               >
                 <Plus size={14} />
                 <span>+ Thêm Loại Điểm Mới</span>
               </button>
             )}
 
-            <div className="flex justify-end pt-2 border-t border-slate-900/60">
+            <div className="flex justify-end pt-2 border-t border-slate-200 dark:border-white/10">
               <button
                 type="button"
                 onClick={handleSaveGradeTypes}
-                className="group px-4 py-2 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-xs transition-all duration-300 flex items-center gap-1.5 cursor-pointer shadow-md shadow-blue-500/10"
+                className="px-4 py-2 rounded-xl bg-[#5c36f5] hover:bg-[#4f2ce0] text-white font-bold text-xs transition-all duration-300 flex items-center gap-1.5 cursor-pointer shadow-sm shadow-indigo-500/20"
               >
                 <Save size={14} />
                 <span>Lưu Trọng Số Điểm</span>
@@ -518,9 +518,9 @@ export default function Settings() {
         </div>
 
         {/* Right Column: Profiles CRUD List */}
-        <div className="glass-panel rounded-2xl p-6 flex flex-col gap-4 self-start">
-          <h3 className="text-xs font-extrabold text-white uppercase tracking-wider border-b border-slate-900/60 pb-3 flex items-center gap-2">
-            <ShieldCheck size={14} className="text-blue-400" /> Hồ sơ định dạng đã lưu
+        <div className="bg-white dark:bg-[#0f1528] rounded-2xl p-6 flex flex-col gap-4 shadow-sm dark:shadow-none border border-slate-200 dark:border-[#1e2746] self-start">
+          <h3 className="text-xs font-extrabold text-slate-900 dark:text-white uppercase tracking-wider border-b border-slate-200 dark:border-white/10 pb-3 flex items-center gap-2">
+            <ShieldCheck size={14} className="text-blue-500 dark:text-blue-400" /> Hồ sơ định dạng đã lưu
           </h3>
 
           <div className="flex flex-col gap-2.5 max-h-[480px] overflow-y-auto">
@@ -532,19 +532,19 @@ export default function Settings() {
                 return (
                   <div 
                     key={name} 
-                    className="flex justify-between items-center p-3 rounded-xl bg-[#0b0f19]/50 border border-slate-900/50 hover:border-slate-800 transition"
+                    className="flex justify-between items-center p-3 rounded-xl bg-slate-50 dark:bg-[#0b0f19]/50 border border-slate-200 dark:border-[#1e2746] hover:border-indigo-400/50 transition"
                   >
-                    <span className="text-xs font-bold text-slate-300 truncate max-w-[160px]">{name}</span>
+                    <span className="text-xs font-bold text-slate-800 dark:text-slate-300 truncate max-w-[160px]">{name}</span>
                     {!isDefault ? (
                       <button
                         onClick={() => handleDeleteProfile(name)}
-                        className="p-1.5 text-slate-500 hover:text-rose-500 transition cursor-pointer"
+                        className="p-1.5 text-slate-400 hover:text-rose-500 transition cursor-pointer"
                         title="Xóa hồ sơ này"
                       >
                         <Trash2 size={12} />
                       </button>
                     ) : (
-                      <span className="text-[9px] font-bold text-slate-500 bg-[#0b0f19] px-2 py-0.5 rounded border border-slate-900">Mặc định</span>
+                      <span className="text-[9px] font-bold text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-[#0b0f19] px-2 py-0.5 rounded border border-slate-200 dark:border-slate-800">Mặc định</span>
                     )}
                   </div>
                 );
@@ -556,15 +556,15 @@ export default function Settings() {
       </div>
 
       {/* Update Section — full width below grid */}
-      <div className="glass-panel rounded-2xl p-6 flex flex-col gap-4">
-        <div className="flex justify-between items-center border-b border-slate-900/60 pb-3">
-          <h3 className="text-xs font-extrabold text-white uppercase tracking-wider flex items-center gap-2">
-            <ArrowUpCircle size={14} className="text-blue-400" /> Cập Nhật Ứng Dụng
+      <div className="bg-white dark:bg-[#0f1528] rounded-2xl p-6 flex flex-col gap-4 shadow-sm dark:shadow-none border border-slate-200 dark:border-[#1e2746]">
+        <div className="flex justify-between items-center border-b border-slate-200 dark:border-white/10 pb-3">
+          <h3 className="text-xs font-extrabold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
+            <ArrowUpCircle size={14} className="text-blue-500 dark:text-blue-400" /> Cập Nhật Ứng Dụng
           </h3>
           <div className="flex items-center gap-2">
             {/* Version badge */}
-            <span className="flex items-center gap-1 text-[10px] font-bold text-slate-400 bg-[#0b0f19] border border-slate-900 px-2.5 py-1 rounded-lg">
-              <GitBranch size={10} className="text-indigo-400" />
+            <span className="flex items-center gap-1 text-[10px] font-bold text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-[#0b0f19] border border-slate-200 dark:border-slate-800 px-2.5 py-1 rounded-lg">
+              <GitBranch size={10} className="text-indigo-500 dark:text-indigo-400" />
               v{updateState?.current_version ?? '1.0.0'}
             </span>
           </div>
@@ -572,22 +572,22 @@ export default function Settings() {
 
         <div className="flex flex-col gap-4">
           {/* Status Row */}
-          <div className="flex items-center gap-4 p-4 rounded-xl bg-[#0b0f19]/60 border border-slate-900/50">
+          <div className="flex items-center gap-4 p-4 rounded-xl bg-slate-50 dark:bg-[#0b0f19]/60 border border-slate-200 dark:border-[#1e2746]">
             {applyingUpdate ? (
-              <div className="p-2 bg-amber-500/10 text-amber-400 rounded-xl shrink-0">
+              <div className="p-2 bg-amber-500/10 text-amber-600 dark:text-amber-400 rounded-xl shrink-0">
                 <Loader2 size={18} className="animate-spin" />
               </div>
             ) : updateState?.has_update ? (
-              <div className="p-2 bg-blue-500/10 text-blue-400 rounded-xl shrink-0">
+              <div className="p-2 bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-xl shrink-0">
                 <Download size={18} />
               </div>
             ) : (
-              <div className="p-2 bg-emerald-500/10 text-emerald-400 rounded-xl shrink-0">
+              <div className="p-2 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-xl shrink-0">
                 <CheckCircle2 size={18} />
               </div>
             )}
             <div className="flex-1 min-w-0">
-              <h4 className="text-xs font-bold text-white">
+              <h4 className="text-xs font-bold text-slate-900 dark:text-white">
                 {applyingUpdate
                   ? 'Đang cài đặt bản cập nhật...'
                   : updateState?.has_update
@@ -596,7 +596,7 @@ export default function Settings() {
                   ? 'Không thể kiểm tra cập nhật'
                   : 'Ứng dụng đang dùng phiên bản mới nhất'}
               </h4>
-              <p className="text-[10px] text-slate-400 mt-0.5">
+              <p className="text-[10px] text-slate-600 dark:text-slate-400 mt-0.5">
                 {applyingUpdate
                   ? (updateState?.progress ?? 'Đang xử lý...')
                   : updateState?.last_checked
@@ -604,7 +604,7 @@ export default function Settings() {
                   : 'Nhấn "Kiểm Tra Cập Nhật" để kiểm tra phiên bản mới.'}
               </p>
               {updateState?.error && !applyingUpdate && (
-                <p className="text-[10px] text-rose-400 mt-1 font-mono">{updateState.error}</p>
+                <p className="text-[10px] text-rose-600 dark:text-rose-400 mt-1 font-mono">{updateState.error}</p>
               )}
             </div>
 
@@ -613,7 +613,7 @@ export default function Settings() {
               {updateState?.has_update && !applyingUpdate && (
                 <button
                   onClick={handleApplyUpdate}
-                  className="flex items-center gap-1.5 px-3.5 py-2 bg-gradient-to-tr from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-extrabold text-[10px] rounded-xl transition-all duration-300 cursor-pointer shadow-md shadow-blue-500/20"
+                  className="flex items-center gap-1.5 px-3.5 py-2 bg-[#5c36f5] hover:bg-[#4f2ce0] text-white font-extrabold text-[10px] rounded-xl transition-all duration-300 cursor-pointer shadow-sm shadow-indigo-500/20"
                 >
                   <Download size={12} />
                   Cài Đặt Ngay
@@ -622,7 +622,7 @@ export default function Settings() {
               <button
                 onClick={handleCheckUpdate}
                 disabled={checkingUpdate || applyingUpdate}
-                className="group flex items-center gap-0 hover:gap-1.5 p-2 bg-[#0b0f19] border border-slate-850 hover:bg-gradient-to-tr hover:from-blue-600/10 hover:to-indigo-600/10 hover:border-blue-500/30 rounded-xl text-slate-400 hover:text-white transition-all duration-300 cursor-pointer disabled:opacity-40"
+                className="group flex items-center gap-0 hover:gap-1.5 p-2 bg-slate-100 hover:bg-slate-200 dark:bg-[#151d36] dark:hover:bg-[#1d2748] border border-slate-300 dark:border-[#212c4b] rounded-xl text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-all duration-300 cursor-pointer disabled:opacity-40"
                 title="Kiểm tra bản cập nhật"
               >
                 <RefreshCw size={13} className={checkingUpdate ? "animate-spin" : ""} />
@@ -633,12 +633,12 @@ export default function Settings() {
 
           {/* Progress bar when applying */}
           {applyingUpdate && (
-            <div className="w-full bg-[#0b0f19] rounded-full h-1.5 border border-slate-900 overflow-hidden">
+            <div className="w-full bg-slate-200 dark:bg-[#0b0f19] rounded-full h-1.5 border border-slate-300 dark:border-slate-800 overflow-hidden">
               <div className="bg-gradient-to-r from-blue-500 to-indigo-500 h-full rounded-full animate-pulse w-2/3" />
             </div>
           )}
 
-          <p className="text-[9px] text-slate-600 leading-relaxed">
+          <p className="text-[9px] text-slate-500 leading-relaxed">
             Cập nhật được phân phối qua GitHub Releases. Dữ liệu người dùng (cơ sở dữ liệu, cấu hình, thư mục tệp) sẽ được bảo toàn trong quá trình cập nhật.
           </p>
         </div>

@@ -80,15 +80,33 @@ export function getSessionColor(sess: ClassSession): string {
   return PALETTE_20[(cid * 3 + 1) % PALETTE_20.length];
 }
 
+export function parseTimeToMinutes(t: string): number {
+  if (!t) return 0;
+  const str = t.trim().toLowerCase();
+  const isPM = str.includes('pm') || str.includes('ch');
+  const isAM = str.includes('am') || str.includes('sa');
+  const clean = str.replace(/[^0-9:]/g, '');
+  const parts = clean.split(':').map(Number);
+  let h = parts[0] || 0;
+  const m = parts[1] || 0;
+  if (isPM && h < 12) h += 12;
+  if (isAM && h === 12) h = 0;
+  return h * 60 + m;
+}
+
+export function formatMinutesToTime(mins: number): string {
+  const h = Math.floor(mins / 60) % 24;
+  const m = mins % 60;
+  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+}
+
 export function calcEndTime(start: string, mins: number): string {
-  const [h, m] = start.split(':').map(Number);
-  const t = h * 60 + m + mins;
-  return `${String(Math.floor(t / 60)).padStart(2, '0')}:${String(t % 60).padStart(2, '0')}`;
+  const startMin = parseTimeToMinutes(start);
+  return formatMinutesToTime(startMin + mins);
 }
 
 export function timeToMin(t: string): number {
-  const [h, m] = t.split(':').map(Number);
-  return h * 60 + (m || 0);
+  return parseTimeToMinutes(t);
 }
 
 export const DAYS = ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7', 'Chủ nhật'];

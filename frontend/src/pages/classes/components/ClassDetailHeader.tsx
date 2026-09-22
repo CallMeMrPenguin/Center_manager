@@ -124,11 +124,7 @@ export const ClassDetailHeader: React.FC<ClassDetailHeaderProps> = ({
       {/* ROW 2: INTEGRATED ACTION TOOLBAR (DATE PICKER & ACTIONS) */}
       <div className="pt-3 border-t border-slate-200 dark:border-white/5 flex flex-wrap items-center justify-between gap-3 select-none">
         {/* LEFT: DATE PICKER & DELETE DATE BUTTON */}
-        <div className="flex items-center gap-3">
-          <span className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
-            <Calendar size={15} className="text-indigo-500 dark:text-indigo-400" />
-            <span>Ngày học:</span>
-          </span>
+        <div className="flex items-center gap-2">
           <CustomDatePicker
             value={attendanceDate}
             onChange={onDateChange}

@@ -9,7 +9,7 @@ interface DashboardStatsGridProps {
 export const DashboardStatsGrid: React.FC<DashboardStatsGridProps> = ({ stats }) => {
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-      <div className="bg-white dark:bg-[#0e1322] border border-slate-300 dark:border-[#1e2742] rounded-2xl p-4.5 flex flex-col justify-between shadow-sm dark:shadow-none transition-colors duration-200">
+      <div className="bg-white dark:bg-[#0f1528] rounded-2xl p-4.5 flex flex-col justify-between shadow-[0_4px_20px_-4px_rgba(0,0,0,0.06),0_2px_6px_-2px_rgba(0,0,0,0.04)] dark:shadow-none transition-colors duration-200">
         <div className="flex items-center justify-between">
           <span className="text-xs font-extrabold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Học sinh đang học</span>
           <div className="p-2 rounded-xl bg-blue-500/10 text-blue-500 dark:text-blue-400 border border-blue-500/20">
@@ -22,7 +22,7 @@ export const DashboardStatsGrid: React.FC<DashboardStatsGridProps> = ({ stats })
         </div>
       </div>
 
-      <div className="bg-white dark:bg-[#0e1322] border border-slate-300 dark:border-[#1e2742] rounded-2xl p-4.5 flex flex-col justify-between shadow-sm dark:shadow-none transition-colors duration-200">
+      <div className="bg-white dark:bg-[#0f1528] rounded-2xl p-4.5 flex flex-col justify-between shadow-[0_4px_20px_-4px_rgba(0,0,0,0.06),0_2px_6px_-2px_rgba(0,0,0,0.04)] dark:shadow-none transition-colors duration-200">
         <div className="flex items-center justify-between">
           <span className="text-xs font-extrabold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Lớp học hoạt động</span>
           <div className="p-2 rounded-xl bg-indigo-500/10 text-indigo-500 dark:text-indigo-400 border border-indigo-500/20">
@@ -35,7 +35,7 @@ export const DashboardStatsGrid: React.FC<DashboardStatsGridProps> = ({ stats })
         </div>
       </div>
 
-      <div className="bg-white dark:bg-[#0e1322] border border-slate-300 dark:border-[#1e2742] rounded-2xl p-4.5 flex flex-col justify-between shadow-sm dark:shadow-none transition-colors duration-200">
+      <div className="bg-white dark:bg-[#0f1528] rounded-2xl p-4.5 flex flex-col justify-between shadow-[0_4px_20px_-4px_rgba(0,0,0,0.06),0_2px_6px_-2px_rgba(0,0,0,0.04)] dark:shadow-none transition-colors duration-200">
         <div className="flex items-center justify-between">
           <span className="text-xs font-extrabold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Điểm danh hôm nay</span>
           <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-500 dark:text-emerald-400 border border-emerald-500/20">
@@ -50,7 +50,7 @@ export const DashboardStatsGrid: React.FC<DashboardStatsGridProps> = ({ stats })
         </div>
       </div>
 
-      <div className="bg-white dark:bg-[#0e1322] border border-slate-300 dark:border-[#1e2742] rounded-2xl p-4.5 flex flex-col justify-between shadow-sm dark:shadow-none transition-colors duration-200">
+      <div className="bg-white dark:bg-[#0f1528] rounded-2xl p-4.5 flex flex-col justify-between shadow-[0_4px_20px_-4px_rgba(0,0,0,0.06),0_2px_6px_-2px_rgba(0,0,0,0.04)] dark:shadow-none transition-colors duration-200">
         <div className="flex items-center justify-between">
           <span className="text-xs font-extrabold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Đội ngũ giáo viên</span>
           <div className="p-2 rounded-xl bg-amber-500/10 text-amber-500 dark:text-amber-400 border border-amber-500/20">
