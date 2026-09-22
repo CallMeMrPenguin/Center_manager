@@ -184,7 +184,7 @@ function AppContent() {
     : TAB_DEFINITIONS;
 
   return (
-    <div className="relative flex flex-col h-screen w-screen bg-[#f1f5f9] dark:bg-[#07090e] text-slate-900 dark:text-slate-50 overflow-hidden font-sans select-none">
+    <div className="relative flex flex-col h-screen w-screen bg-[#e2e8f0] dark:bg-[#07090e] text-slate-900 dark:text-slate-50 overflow-hidden font-sans select-none">
       <div className="relative flex flex-row flex-1 overflow-hidden z-10">
         {/* SIDEBAR NAVIGATION */}
         <Sidebar
@@ -207,7 +207,7 @@ function AppContent() {
 
         {/* MAIN BODY SKELETON */}
         <div className="flex-1 flex flex-col overflow-hidden bg-transparent">
-          <main className="flex-1 overflow-hidden bg-[#f1f5f9] dark:bg-[#080b14] relative">
+          <main className="flex-1 overflow-hidden bg-[#e2e8f0] dark:bg-[#080b14] relative">
             {visibleTabs.map((tab) => {
               const isActive = activeTab === tab.id;
               const isVisited = visitedTabIds.has(tab.id);

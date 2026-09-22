@@ -335,11 +335,10 @@ export const ChartSvgPlot: React.FC<ChartSvgPlotProps> = React.memo(({
           const isFirst = i === 0;
           const isLast = i === total - 1;
           const isStepped = i % step === 0;
-          const isHovered = hoveredPoint?.index === i;
 
           // Don't render intermediate label if it's within minGap of last label
           const distToLast = Math.abs(getSvgX(total - 1, total) - x);
-          if (!isFirst && !isLast && !isHovered) {
+          if (!isFirst && !isLast) {
             if (!isStepped || distToLast < minGap * 0.85) return null;
           }
 
@@ -348,9 +347,9 @@ export const ChartSvgPlot: React.FC<ChartSvgPlotProps> = React.memo(({
               key={`xlabel-${selectedStudentId || selectedClassId || 'all'}-${timeView}-${i}`}
               x={x}
               y={chartHeight - 12}
-              fill={isHovered ? (isDark ? "#ffffff" : "#0f172a") : (isDark ? "#94a3b8" : "#475569")}
+              fill={isDark ? "#94a3b8" : "#475569"}
               fontSize="11"
-              fontWeight={isHovered ? "900" : "700"}
+              fontWeight="700"
               textAnchor="middle"
             >
               {d.sessionName}

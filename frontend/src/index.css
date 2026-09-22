@@ -42,12 +42,12 @@
 
 :root.light, html.light {
   color-scheme: light;
-  --background: #edf2f7;
+  --background: #e2e8f0;
   --foreground: #0f172a;
   --surface: #ffffff;
-  --surface-nav: #edf2f7;
-  --surface-raised: #e2e8f0;
-  --surface-highlight: #cbd5e1;
+  --surface-nav: #e2e8f0;
+  --surface-raised: #cbd5e1;
+  --surface-highlight: #94a3b8;
   --border-color: #cbd5e1;
   --border-subtle: #e2e8f0;
   --border-active: #2563eb;

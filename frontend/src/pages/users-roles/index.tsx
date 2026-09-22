@@ -38,7 +38,7 @@ export const UsersRolesPage: React.FC = () => {
   };
 
   return (
-    <div className="h-full w-full overflow-y-auto p-6 space-y-6 bg-slate-50 dark:bg-[#080b14] text-slate-900 dark:text-slate-100 select-none font-sans scrollbar-thin">
+    <div className="h-full w-full overflow-y-auto p-6 space-y-6 bg-[#e2e8f0] dark:bg-[#080b14] text-slate-900 dark:text-slate-100 select-none font-sans scrollbar-thin">
       {/* 1. Header Banner */}
       <div className="bg-white dark:bg-[#0c0f1e] border border-slate-200/90 dark:border-[#1e2742] rounded-2xl p-5 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.06),0_1px_3px_-1px_rgba(0,0,0,0.06)] flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-3">
