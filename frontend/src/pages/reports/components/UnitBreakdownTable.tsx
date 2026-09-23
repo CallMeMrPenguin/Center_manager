@@ -146,7 +146,7 @@ export const UnitBreakdownTable: React.FC<UnitBreakdownTableProps> = ({ data }) 
   );
 
   return (
-    <div className="bg-white dark:bg-[#0c0f1d] border border-slate-300 dark:border-white/10 rounded-2xl p-5 space-y-4 select-none shadow-sm dark:shadow-lg animate-cascade-3">
+    <div className="bg-white dark:bg-[#0c0f1d] rounded-2xl p-5 space-y-4 select-none shadow-sm dark:shadow-lg animate-cascade-3">
       <div>
         <h3 className="text-base font-black text-slate-900 dark:text-white">
           Thống Kê Chi Tiết Từng Unit & Chủ Đề
@@ -164,6 +164,7 @@ export const UnitBreakdownTable: React.FC<UnitBreakdownTableProps> = ({ data }) 
         searchPlaceholder="Tìm theo bài học, kỹ năng..."
         emptyMessage="Chưa có dữ liệu bài học nào."
         exportFilename="thong_ke_ky_nang_unit"
+        borderless={true}
         initialSorting={[{ id: 'avg_score', desc: false }]}
       />
     </div>

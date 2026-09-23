@@ -150,9 +150,9 @@ export const SmartGroupingSection: React.FC<SmartGroupingSectionProps> = ({
   }, [smartGroups, classes, selectedClassId]);
 
   return (
-    <div className="bg-white dark:bg-[#0b0f19] border border-slate-300/80 dark:border-[#1b253b] rounded-2xl p-6 shadow-[0_4px_20px_-4px_rgba(15,23,42,0.08),0_2px_4px_-1px_rgba(15,23,42,0.04)] dark:shadow-xl space-y-6 animate-cascade-3">
+    <div className="bg-white dark:bg-[#0b0f19] rounded-2xl p-6 shadow-[0_4px_20px_-4px_rgba(15,23,42,0.08),0_2px_4px_-1px_rgba(15,23,42,0.04)] dark:shadow-xl space-y-6 animate-cascade-3">
       {/* Header Bar */}
-      <div onClick={() => setIsGroupingSectionOpen(!isGroupingSectionOpen)} className="flex flex-wrap items-center justify-between gap-4 cursor-pointer select-none border-b border-slate-200 dark:border-[#161f33] pb-4">
+      <div onClick={() => setIsGroupingSectionOpen(!isGroupingSectionOpen)} className="flex flex-wrap items-center justify-between gap-4 cursor-pointer select-none pb-2">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-500 dark:text-purple-400 shrink-0">
             <FolderTree size={20} />
@@ -237,7 +237,7 @@ export const SmartGroupingSection: React.FC<SmartGroupingSectionProps> = ({
               <button
                 type="button"
                 onClick={handleCopyGrouping}
-                className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-[#1a233a] dark:hover:bg-[#253252] text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-[#2d3d66] text-xs font-bold transition cursor-pointer flex items-center gap-1.5"
+                className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-[#1a233a] dark:hover:bg-[#253252] text-slate-700 dark:text-slate-200 text-xs font-bold transition cursor-pointer flex items-center gap-1.5"
               >
                 {copiedGroupText ? <Check size={13} className="text-emerald-500 dark:text-emerald-400" /> : <Copy size={13} />}
                 <span>{copiedGroupText ? 'Đã chép' : 'Sao chép'}</span>
@@ -245,7 +245,7 @@ export const SmartGroupingSection: React.FC<SmartGroupingSectionProps> = ({
               <button
                 type="button"
                 onClick={handleExportGroupingExcel}
-                className="px-3 py-1.5 rounded-lg bg-emerald-600/10 hover:bg-emerald-600/20 dark:bg-emerald-600/20 dark:hover:bg-emerald-600/30 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 text-xs font-bold transition cursor-pointer flex items-center gap-1.5"
+                className="px-3 py-1.5 rounded-lg bg-emerald-600/10 hover:bg-emerald-600/20 dark:bg-emerald-600/20 dark:hover:bg-emerald-600/30 text-emerald-700 dark:text-emerald-300 text-xs font-bold transition cursor-pointer flex items-center gap-1.5"
               >
                 <FileSpreadsheet size={13} />
                 <span>Xuất Excel</span>

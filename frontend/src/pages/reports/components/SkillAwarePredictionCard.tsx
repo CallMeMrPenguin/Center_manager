@@ -44,13 +44,13 @@ export const SkillAwarePredictionCard: React.FC<SkillAwarePredictionProps> = ({
 }) => {
   if (!prediction || !prediction.has_upcoming_config) {
     return (
-      <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm select-none">
+      <div className="bg-white dark:bg-[#0c101c] rounded-2xl p-5 shadow-sm select-none">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-sm font-black text-slate-900 uppercase tracking-wider">
+            <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider">
               Dự Báo Năng Lực Buổi Học Tiếp Theo
             </h3>
-            <p className="text-xs text-slate-600 mt-1">
+            <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">
               Chưa thiết lập cấu hình kiểm tra cho buổi học tiếp theo. Hãy cấu hình chủ đề trong phần Cài Đặt Buổi Học.
             </p>
           </div>
@@ -63,33 +63,33 @@ export const SkillAwarePredictionCard: React.FC<SkillAwarePredictionProps> = ({
   const overview = prediction.class_overview;
 
   return (
-    <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-5 select-none relative overflow-hidden">
+    <div className="bg-white dark:bg-[#0c101c] rounded-2xl p-5 shadow-sm space-y-5 select-none relative overflow-hidden">
       {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 pb-4">
+      <div className="flex flex-wrap items-center justify-between gap-4 pb-2">
         <div>
           <div className="flex items-center gap-2">
-            <h3 className="text-base font-black text-slate-900 flex items-center gap-2">
+            <h3 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
               <Sparkles size={18} className="text-indigo-600" />
               Dự Báo Năng Lực Buổi Học Sắp Tới
             </h3>
-            <span className="text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">
+            <span className="text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300">
               {prediction.session_date}
             </span>
           </div>
-          <p className="text-xs text-slate-600 mt-0.5">{prediction.summary}</p>
+          <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">{prediction.summary}</p>
         </div>
 
         {/* Content Badges */}
         <div className="flex flex-wrap items-center gap-2 text-xs">
-          <div className="bg-blue-50/60 border border-blue-200 px-3 py-1.5 rounded-xl flex items-center gap-2">
-            <span className="text-[10px] font-black uppercase text-blue-700">Từ Vựng:</span>
-            <span className="text-slate-800 font-bold">
+          <div className="bg-blue-500/10 px-3 py-1.5 rounded-xl flex items-center gap-2">
+            <span className="text-[10px] font-black uppercase text-blue-700 dark:text-blue-400">Từ Vựng:</span>
+            <span className="text-slate-800 dark:text-slate-200 font-bold">
               {prediction.check_1_info?.units?.join(', ') || 'Chung'}
             </span>
           </div>
-          <div className="bg-purple-50/60 border border-purple-200 px-3 py-1.5 rounded-xl flex items-center gap-2">
-            <span className="text-[10px] font-black uppercase text-purple-700">Ngữ Pháp:</span>
-            <span className="text-slate-800 font-bold">
+          <div className="bg-purple-500/10 px-3 py-1.5 rounded-xl flex items-center gap-2">
+            <span className="text-[10px] font-black uppercase text-purple-700 dark:text-purple-400">Ngữ Pháp:</span>
+            <span className="text-slate-800 dark:text-slate-200 font-bold">
               {prediction.check_2_info?.topic || prediction.check_2_info?.units?.join(', ') || 'Chung'}
             </span>
           </div>
@@ -98,7 +98,7 @@ export const SkillAwarePredictionCard: React.FC<SkillAwarePredictionProps> = ({
 
       {/* Class Readiness Overview KPI Strip */}
       {overview && (
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-slate-50 border border-slate-200 p-3.5 rounded-xl">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-slate-50 dark:bg-[#121626] p-3.5 rounded-xl">
           <div className="space-y-1">
             <span className="text-[10px] font-bold uppercase text-slate-500 flex items-center gap-1.5">
               <CheckCircle2 size={12} className="text-emerald-600" />
@@ -156,7 +156,7 @@ export const SkillAwarePredictionCard: React.FC<SkillAwarePredictionProps> = ({
       {/* At-Risk Students Grid */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <span className="text-xs font-black uppercase text-slate-700 tracking-wider">
+          <span className="text-xs font-black uppercase text-slate-700 dark:text-slate-300 tracking-wider">
             Học Sinh Có Nguy Cơ Cần Phụ Đạo Trước ({atRisk.length} học sinh)
           </span>
           {atRisk.length === 0 && (
@@ -173,29 +173,29 @@ export const SkillAwarePredictionCard: React.FC<SkillAwarePredictionProps> = ({
               <div
                 key={st.student_id}
                 onClick={() => onSelectStudent && onSelectStudent(st.student_id)}
-                className="bg-slate-50 border border-amber-200 hover:border-amber-400 hover:bg-amber-50/30 p-3.5 rounded-xl space-y-2 cursor-pointer transition group active:scale-[0.99]"
+                className="bg-slate-50 dark:bg-[#121626] hover:bg-amber-50/30 dark:hover:bg-amber-500/10 p-3.5 rounded-xl space-y-2 cursor-pointer transition group active:scale-[0.99]"
               >
                 <div className="flex items-center justify-between">
-                  <span className="font-bold text-slate-900 group-hover:text-indigo-600 transition text-xs">
+                  <span className="font-bold text-slate-900 dark:text-white group-hover:text-indigo-600 transition text-xs">
                     {st.student_name}
                   </span>
                   <div className="flex gap-1.5 text-[11px] font-extrabold font-mono">
-                    <span className="text-blue-700 bg-blue-100/70 px-1.5 py-0.5 rounded">
+                    <span className="text-blue-700 dark:text-blue-300 bg-blue-100/70 dark:bg-blue-500/20 px-1.5 py-0.5 rounded">
                       Từ Vựng: {trunc1Dec(st.pred_c1)}
                     </span>
-                    <span className="text-purple-700 bg-purple-100/70 px-1.5 py-0.5 rounded">
+                    <span className="text-purple-700 dark:text-purple-300 bg-purple-100/70 dark:bg-purple-500/20 px-1.5 py-0.5 rounded">
                       Ngữ Pháp: {trunc1Dec(st.pred_c2)}
                     </span>
                   </div>
                 </div>
-                <p className="text-[11px] text-slate-600 leading-relaxed italic">
+                <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-relaxed italic">
                   {st.reason}
                 </p>
               </div>
             ))}
           </div>
         ) : (
-          <div className="bg-emerald-50/60 border border-emerald-200 p-4 rounded-xl text-xs text-emerald-900 flex items-center gap-2">
+          <div className="bg-emerald-50/60 dark:bg-emerald-500/10 p-4 rounded-xl text-xs text-emerald-900 dark:text-emerald-300 flex items-center gap-2">
             <CheckCircle2 size={16} className="text-emerald-600 shrink-0" />
             <span>
               Dựa trên dữ liệu lịch sử, các học sinh trong lớp đều có điểm EMA &ge; 6.5 đối với các chủ đề sẽ kiểm tra trong buổi học tiếp theo.

@@ -13,9 +13,9 @@ export const GroupCardItem: React.FC<GroupCardItemProps> = ({
   onSelectRankingStudent,
 }) => {
   return (
-    <div className={`rounded-2xl border ${group.borderCls} bg-white dark:bg-[#0c101c] overflow-hidden flex flex-col justify-between shadow-sm dark:shadow-xl`}>
+    <div className="rounded-2xl bg-white dark:bg-[#0c101c] overflow-hidden flex flex-col justify-between shadow-sm dark:shadow-xl">
       {/* Group Header */}
-      <div className={`p-4 ${group.headerBg} border-b border-slate-200 dark:border-white/5 space-y-2`}>
+      <div className={`p-4 ${group.headerBg} space-y-2`}>
         <div className="flex items-center justify-between">
           <h4 className="text-sm font-black text-slate-900 dark:text-white">{group.title}</h4>
           <span className={`text-[10px] font-mono font-black px-2.5 py-0.5 rounded-full ${group.badgeCls}`}>

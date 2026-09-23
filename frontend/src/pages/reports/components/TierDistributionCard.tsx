@@ -45,13 +45,13 @@ export const TierDistributionCard: React.FC<TierDistributionCardProps> = ({
   }, [studentRankings, selectedClassId]);
 
   return (
-    <div className="bg-white dark:bg-[#0b0f19] border border-slate-300 dark:border-[#1b253b] p-6 rounded-2xl shadow-sm dark:shadow-xl flex flex-col gap-5 animate-cascade-1">
-      <div className="flex items-center justify-between gap-2 border-b border-slate-200 dark:border-[#161f33] pb-4">
+    <div className="bg-white dark:bg-[#0b0f19] p-6 rounded-2xl shadow-sm dark:shadow-xl flex flex-col gap-5 animate-cascade-1">
+      <div className="flex items-center justify-between gap-2 pb-2">
         <div className="flex items-center gap-2">
           <h4 className="text-sm font-black uppercase text-slate-900 dark:text-white tracking-wider">PHÂN BỐ HẠNG BẬC HỌC LỰC</h4>
           <div className="group relative">
             <Info size={14} className="text-slate-400 hover:text-slate-900 dark:hover:text-white cursor-pointer transition-colors" />
-            <div className="absolute left-0 top-full mt-1.5 hidden group-hover:block z-50 w-64 p-2.5 rounded-xl bg-white dark:bg-[#131929] border border-slate-300 dark:border-[#28334e] text-[11px] text-slate-800 dark:text-slate-300 shadow-xl pointer-events-none">
+            <div className="absolute left-0 top-full mt-1.5 hidden group-hover:block z-50 w-64 p-2.5 rounded-xl bg-white dark:bg-[#131929] text-[11px] text-slate-800 dark:text-slate-300 shadow-xl pointer-events-none">
               Phân bố học sinh theo 8 cấp bậc danh hiệu học lực. Nhấp vào từng bậc để lọc danh sách học sinh.
             </div>
           </div>
@@ -60,7 +60,7 @@ export const TierDistributionCard: React.FC<TierDistributionCardProps> = ({
           {selectedDistFilter !== 'all' && (
             <button
               onClick={() => setSelectedDistFilter('all')}
-              className="text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline bg-blue-500/10 px-2.5 py-1 rounded-lg border border-blue-500/30 transition cursor-pointer mr-2"
+              className="text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline bg-blue-500/15 px-2.5 py-1 rounded-lg transition cursor-pointer mr-2"
             >
               Bỏ Lọc Hạng
             </button>

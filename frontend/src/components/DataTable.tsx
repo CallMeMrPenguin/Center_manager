@@ -132,6 +132,7 @@ export interface DataTableProps<TData> {
   // Export & Storage
   exportFilename?: string;
   tableId?: string;
+  borderless?: boolean;
 }
 
 function IndeterminateCheckbox({
@@ -684,6 +685,7 @@ export function DataTable<TData>({
   searchPlaceholder = 'Tìm kiếm...',
   exportFilename = 'export',
   tableId,
+  borderless = false,
 }: DataTableProps<TData>) {
 
   // ── Unified Layout State Persistence (Width + Visibility + Order + Alignment)
@@ -1036,7 +1038,7 @@ export function DataTable<TData>({
 
       {/* ── TOOLBAR ─────────────────────────────────────────────────────────── */}
       {(enableGlobalSearch || enableColumnVisibility || enableExport || toolbarLeft || toolbarRight) && (
-        <div className="flex flex-wrap items-center gap-2 px-3 py-2.5 border-b border-slate-300 dark:border-[#27272a] bg-slate-100/80 dark:bg-[#141417] shrink-0">
+        <div className={`flex flex-wrap items-center gap-2 px-3 py-2.5 ${borderless ? 'bg-transparent border-b-0' : 'border-b border-slate-300 dark:border-[#27272a] bg-slate-100/80 dark:bg-[#141417]'} shrink-0`}>
           {/* Left */}
           <div className="flex flex-wrap items-center gap-2 flex-1 min-w-0">
             {enableGlobalSearch && (
@@ -1065,10 +1067,10 @@ export function DataTable<TData>({
                   onBlur={() => setSearchFocused(false)}
                   onChange={e => setGlobalFilter(e.target.value)}
                   placeholder={searchPlaceholder}
-                  className="w-full bg-white dark:bg-[#1c1c21] border border-slate-300 dark:border-[#27272a] text-slate-900 dark:text-white text-xs rounded-xl pl-8 pr-8 py-1.5 focus:outline-none focus:border-[#2563eb] focus:ring-2 focus:ring-[#2563eb]/25 placeholder:text-slate-400 dark:placeholder:text-slate-500 font-semibold transition shadow-sm dark:shadow-inner"
+                  className={`w-full ${borderless ? 'bg-slate-100/90 dark:bg-white/5 border-0 shadow-none' : 'bg-white dark:bg-[#1c1c21] border border-slate-300 dark:border-[#27272a] shadow-sm dark:shadow-inner'} text-slate-900 dark:text-white text-xs rounded-xl pl-8 pr-8 py-1.5 focus:outline-none focus:border-[#2563eb] focus:ring-2 focus:ring-[#2563eb]/25 placeholder:text-slate-400 dark:placeholder:text-slate-500 font-semibold transition`}
                 />
                 {!globalFilter && !searchFocused && (
-                  <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] font-mono font-bold text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-white/10 px-1.5 py-0.5 rounded border border-slate-200 dark:border-white/10 pointer-events-none select-none">
+                  <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] font-mono font-bold text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-white/10 px-1.5 py-0.5 rounded border-0 pointer-events-none select-none">
                     /
                   </span>
                 )}
@@ -1219,7 +1221,7 @@ export function DataTable<TData>({
                   </colgroup>
 
                   {/* ── THEAD (All headers centered by default) ────────────────── */}
-                  <thead className={`bg-slate-200 dark:bg-[#18181b] border-b-2 border-slate-300 dark:border-[#27272a] ${stickyHeader ? 'sticky top-0 z-20' : ''}`}>
+                  <thead className={`${borderless ? 'bg-slate-100/80 dark:bg-white/5 border-b-0' : 'bg-slate-200 dark:bg-[#18181b] border-b-2 border-slate-300 dark:border-[#27272a]'} ${stickyHeader ? 'sticky top-0 z-20' : ''}`}>
                     {table.getHeaderGroups().map(headerGroup => (
                       <tr key={headerGroup.id}>
                         {headerGroup.headers.map(header => {
@@ -1306,7 +1308,7 @@ export function DataTable<TData>({
                                 key={cell.id}
                                 className={`
                                   py-3.5 ${isSelectCol ? 'px-1' : 'px-4'} font-bold text-slate-900 dark:text-slate-100 text-base
-                                  border-b border-slate-300 dark:border-[#27272a] overflow-hidden relative
+                                  ${borderless ? 'border-b-0' : 'border-b border-slate-300 dark:border-[#27272a]'} overflow-hidden relative
                                   ${isCentered ? 'text-center' : 'text-left'}
                                   ${isPinned ? 'bg-inherit' : ''}
                                   ${isLastRow && isFirstCell ? 'rounded-bl-xl' : ''}
@@ -1351,7 +1353,7 @@ export function DataTable<TData>({
 
           {/* ── PAGINATION ──────────────────────────────────────────────────── */}
           {showPagination && pageCount > 0 && !useVirt && (
-            <div className="shrink-0 px-4 py-2.5 bg-slate-100/90 dark:bg-[#141417] border-t border-slate-300 dark:border-[#27272a] flex flex-wrap items-center justify-between gap-3 text-xs text-slate-700 dark:text-slate-400 font-bold">
+            <div className={`shrink-0 px-4 py-2.5 ${borderless ? 'bg-transparent border-t-0' : 'bg-slate-100/90 dark:bg-[#141417] border-t border-slate-300 dark:border-[#27272a]'} flex flex-wrap items-center justify-between gap-3 text-xs text-slate-700 dark:text-slate-400 font-bold`}>
               {/* Left info */}
               <div className="flex items-center gap-3 flex-wrap">
                 <span>

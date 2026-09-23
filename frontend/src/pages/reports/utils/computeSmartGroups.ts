@@ -79,9 +79,9 @@ export function computeSmartGroups({
         title: 'Nhóm 1: Bứt Phá & Nâng Cao',
         subtitle: 'Năng Lực Vượt Trội (Mastery)',
         pedagogyAdvice: 'Tập trung luyện đề phân hóa, chuyên đề khó và giao bài tập tư duy mức độ 4. Khuyến khích làm bài tập mở rộng.',
-        borderCls: 'border-emerald-500/40',
+        borderCls: '',
         headerBg: 'bg-emerald-500/10 dark:bg-[#102419]',
-        badgeCls: 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/30',
+        badgeCls: 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300',
         ...calcGroupStats(g1Students),
         students: g1Students,
       },
@@ -90,9 +90,9 @@ export function computeSmartGroups({
         title: 'Nhóm 2: Củng Cố & Chuẩn Hóa',
         subtitle: 'Đạt Chuẩn Tiến Độ (Standard)',
         pedagogyAdvice: 'Tăng cường tốc độ làm bài & kỹ năng trình bày. Hướng dẫn sửa các lỗi sai cơ bản thường gặp ở câu thông hiểu.',
-        borderCls: 'border-blue-500/40',
+        borderCls: '',
         headerBg: 'bg-blue-500/10 dark:bg-[#101b2e]',
-        badgeCls: 'bg-blue-500/15 text-blue-700 dark:text-blue-300 border-blue-500/30',
+        badgeCls: 'bg-blue-500/15 text-blue-700 dark:text-blue-300',
         ...calcGroupStats(g2Students),
         students: g2Students,
       },
@@ -101,9 +101,9 @@ export function computeSmartGroups({
         title: 'Nhóm 3: Phụ Đạo & Nền Tảng',
         subtitle: 'Cần Hỗ Trợ Trọng Tâm (Support)',
         pedagogyAdvice: 'Hổng kiến thức nền hoặc phong độ giảm sút. Cần giảng lại lý thuyết căn bản, chia nhỏ bài tập & phụ đạo 1-1.',
-        borderCls: 'border-amber-500/40',
+        borderCls: '',
         headerBg: 'bg-amber-500/10 dark:bg-[#201810]',
-        badgeCls: 'bg-amber-500/15 text-amber-700 dark:text-amber-300 border-amber-500/30',
+        badgeCls: 'bg-amber-500/15 text-amber-700 dark:text-amber-300',
         ...calcGroupStats(g3Students),
         students: g3Students,
       },
@@ -152,10 +152,10 @@ export function computeSmartGroups({
     })).sort((a, b) => b.centroid - a.centroid);
 
     const metaConfig = [
-      { title: 'Nhóm 1: Dẫn Đầu (Top Tier)', subtitle: 'Cụm Điểm Cao Nhất', pedagogy: 'Nhóm học sinh tiếp thu vượt trội trong lớp. Giao bài tập mở rộng & thử thách tư duy.', borderCls: 'border-purple-500/40', headerBg: 'bg-purple-500/10 dark:bg-[#18142a]', badgeCls: 'bg-purple-500/15 text-purple-700 dark:text-purple-300 border-purple-500/30' },
-      { title: 'Nhóm 2: Trung Tâm (Core Tier)', subtitle: 'Cụm Điểm Trung Bình Khá', pedagogy: 'Lực lượng nòng cốt của lớp. Rèn luyện phương pháp làm bài & củng cố kiến thức để tiến vào nhóm dẫn đầu.', borderCls: 'border-blue-500/40', headerBg: 'bg-blue-500/10 dark:bg-[#10182c]', badgeCls: 'bg-blue-500/15 text-blue-700 dark:text-blue-300 border-blue-500/30' },
-      { title: 'Nhóm 3: Cần Hỗ Trợ (Focus Tier)', subtitle: 'Cụm Cần Củng Cố Nền Tảng', pedagogy: 'Cụm học sinh cần sự quan tâm đặc biệt. Ôn tập kiến thức cơ bản, sửa lỗi sai thường gặp & kèm cặp sát sao.', borderCls: 'border-amber-500/40', headerBg: 'bg-amber-500/10 dark:bg-[#201810]', badgeCls: 'bg-amber-500/15 text-amber-700 dark:text-amber-300 border-amber-500/30' },
-      { title: 'Nhóm 4: Phụ Đạo Tăng Cường (Intensive Tier)', subtitle: 'Cụm Phụ Đạo 1-1', pedagogy: 'Hổng kiến thức nặng. Cần giáo viên hoặc trợ giảng hỗ trợ trực tiếp từng buổi học.', borderCls: 'border-rose-500/40', headerBg: 'bg-rose-500/10 dark:bg-[#241216]', badgeCls: 'bg-rose-500/15 text-rose-700 dark:text-rose-300 border-rose-500/30' },
+      { title: 'Nhóm 1: Dẫn Đầu (Top Tier)', subtitle: 'Cụm Điểm Cao Nhất', pedagogy: 'Nhóm học sinh tiếp thu vượt trội trong lớp. Giao bài tập mở rộng & thử thách tư duy.', borderCls: '', headerBg: 'bg-purple-500/10 dark:bg-[#18142a]', badgeCls: 'bg-purple-500/15 text-purple-700 dark:text-purple-300' },
+      { title: 'Nhóm 2: Trung Tâm (Core Tier)', subtitle: 'Cụm Điểm Trung Bình Khá', pedagogy: 'Lực lượng nòng cốt của lớp. Rèn luyện phương pháp làm bài & củng cố kiến thức để tiến vào nhóm dẫn đầu.', borderCls: '', headerBg: 'bg-blue-500/10 dark:bg-[#10182c]', badgeCls: 'bg-blue-500/15 text-blue-700 dark:text-blue-300' },
+      { title: 'Nhóm 3: Cần Hỗ Trợ (Focus Tier)', subtitle: 'Cụm Cần Củng Cố Nền Tảng', pedagogy: 'Cụm học sinh cần sự quan tâm đặc biệt. Ôn tập kiến thức cơ bản, sửa lỗi sai thường gặp & kèm cặp sát sao.', borderCls: '', headerBg: 'bg-amber-500/10 dark:bg-[#201810]', badgeCls: 'bg-amber-500/15 text-amber-700 dark:text-amber-300' },
+      { title: 'Nhóm 4: Phụ Đạo Tăng Cường (Intensive Tier)', subtitle: 'Cụm Phụ Đạo 1-1', pedagogy: 'Hổng kiến thức nặng. Cần giáo viên hoặc trợ giảng hỗ trợ trực tiếp từng buổi học.', borderCls: '', headerBg: 'bg-rose-500/10 dark:bg-[#241216]', badgeCls: 'bg-rose-500/15 text-rose-700 dark:text-rose-300' },
     ];
 
     return pairedClusters.map((pc, idx) => {

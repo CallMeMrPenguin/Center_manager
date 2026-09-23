@@ -259,9 +259,9 @@ export const StudentWeaknessDiagnosisCard: React.FC<StudentWeaknessDiagnosisCard
   );
 
   return (
-    <div className="bg-white dark:bg-[#0c0f1d] border border-slate-300 dark:border-white/10 rounded-2xl p-5 shadow-sm dark:shadow-xl space-y-4 select-none">
+    <div className="bg-white dark:bg-[#0c0f1d] rounded-2xl p-5 shadow-sm dark:shadow-xl space-y-4 select-none">
       {/* 1. Header with Stats & Filter Pills */}
-      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 dark:border-white/5 pb-4">
+      <div className="flex flex-wrap items-center justify-between gap-4 pb-2">
         <div>
           <div className="flex items-center gap-2">
             <h3 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
@@ -382,6 +382,7 @@ export const StudentWeaknessDiagnosisCard: React.FC<StudentWeaknessDiagnosisCard
         searchPlaceholder="Tìm học sinh cần phụ đạo theo tên..."
         emptyMessage="Không có học sinh nào bị hổng kiến thức trong phạm vi này."
         pageSize={10}
+        borderless={true}
         onRowClick={(row) => onSelectStudent?.(row.student_id)}
       />
     </div>

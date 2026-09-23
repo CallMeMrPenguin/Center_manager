@@ -73,7 +73,7 @@ export const SkillBreakdownTab: React.FC<SkillBreakdownTabProps> = ({
   // If viewing all classes ("Tất cả lớp học"), prompt the user to pick a specific class with inline selector
   if (!selectedClassId) {
     return (
-      <div className="py-16 px-6 rounded-2xl bg-white dark:bg-[#090d16] border border-slate-200 dark:border-[#1b253b] text-center flex flex-col items-center justify-center gap-4 select-none animate-cascade-1 shadow-sm dark:shadow-lg max-w-2xl mx-auto">
+      <div className="py-16 px-6 rounded-2xl bg-white dark:bg-[#090d16] text-center flex flex-col items-center justify-center gap-4 select-none animate-cascade-1 shadow-sm dark:shadow-lg max-w-2xl mx-auto">
         <div className="w-14 h-14 rounded-2xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center shadow-[0_0_20px_rgba(59,130,246,0.15)]">
           <GraduationCap size={28} />
         </div>
@@ -165,7 +165,7 @@ export const SkillBreakdownTab: React.FC<SkillBreakdownTabProps> = ({
       )}
 
       {/* 1. INTERNAL SUB-TAB SELECTOR (SLIDING PILL INDICATOR) */}
-      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 dark:border-white/5 pb-2">
+      <div className="flex flex-wrap items-center justify-between gap-4 pb-1">
         <SegmentedControl<'diagnosis' | 'heatmap' | 'units'>
           value={activeSubTab}
           onChange={setActiveSubTab}

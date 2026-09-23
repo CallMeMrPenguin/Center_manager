@@ -129,7 +129,7 @@ export const EarlyWarningSection: React.FC<EarlyWarningSectionProps> = ({
       header: 'Lớp Học',
       meta: { headerText: 'Lớp Học', exportValue: (r: any) => r.class_name || 'Lớp học' },
       cell: (info) => (
-        <span className="inline-block px-2.5 py-0.5 rounded-lg text-xs font-black bg-rose-500/15 text-rose-700 dark:text-rose-300 border border-rose-500/30">
+        <span className="inline-block px-2.5 py-0.5 rounded-lg text-xs font-black bg-rose-500/15 text-rose-700 dark:text-rose-300">
           {info.getValue<string>() || 'Lớp học'}
         </span>
       ),
@@ -142,7 +142,7 @@ export const EarlyWarningSection: React.FC<EarlyWarningSectionProps> = ({
         const isUrgent = getValue<boolean>();
         return (
           <div className="text-center">
-            <span className={`inline-block px-2.5 py-0.5 rounded-lg text-xs font-black border ${isUrgent ? 'bg-rose-500/15 text-rose-700 dark:text-rose-400 border-rose-500/30' : 'bg-amber-500/15 text-amber-700 dark:text-amber-400 border-amber-500/30'}`}>
+            <span className={`inline-block px-2.5 py-0.5 rounded-lg text-xs font-black ${isUrgent ? 'bg-rose-500/15 text-rose-700 dark:text-rose-400' : 'bg-amber-500/15 text-amber-700 dark:text-amber-400'}`}>
               {isUrgent ? 'Nguy Cơ Cao' : 'Cần Theo Dõi'}
             </span>
           </div>
@@ -193,7 +193,7 @@ export const EarlyWarningSection: React.FC<EarlyWarningSectionProps> = ({
   ], [onSelectRankingStudent]);
 
   return (
-    <div className="bg-white dark:bg-[#120d18] border border-rose-200 dark:border-rose-500/30 rounded-2xl p-4 sm:p-5 shadow-sm dark:shadow-2xl transition-all animate-cascade-2">
+    <div className="bg-white dark:bg-[#120d18] rounded-2xl p-4 sm:p-5 shadow-sm dark:shadow-2xl transition-all animate-cascade-2">
       <div onClick={() => setIsWarningSectionOpen(!isWarningSectionOpen)} className="flex flex-wrap items-center justify-between gap-4 cursor-pointer select-none">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-xl bg-rose-500/20 flex items-center justify-center text-rose-500 dark:text-rose-400 shrink-0">
@@ -234,7 +234,7 @@ export const EarlyWarningSection: React.FC<EarlyWarningSectionProps> = ({
       </div>
 
       {isWarningSectionOpen && (
-        <div className="mt-4 pt-4 border-t border-rose-200 dark:border-rose-500/20 space-y-4">
+        <div className="mt-4 pt-2 space-y-4">
           {showWarningSettings && (
             <div className="p-4 rounded-xl bg-slate-50 dark:bg-[#180e1e] grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
@@ -243,7 +243,7 @@ export const EarlyWarningSection: React.FC<EarlyWarningSectionProps> = ({
                   type="number"
                   value={warningAbsentPct}
                   onChange={(e) => onUpdateWarningSettings({ absentPct: Number(e.target.value) || 0 })}
-                  className="w-full bg-white dark:bg-[#120a16] border border-rose-200 dark:border-rose-500/30 rounded-lg px-2.5 py-1.5 text-xs text-slate-900 dark:text-white font-mono"
+                  className="w-full bg-slate-100 dark:bg-[#120a16] border-0 rounded-lg px-2.5 py-1.5 text-xs text-slate-900 dark:text-white font-mono"
                 />
               </div>
               <div>
@@ -252,7 +252,7 @@ export const EarlyWarningSection: React.FC<EarlyWarningSectionProps> = ({
                   type="number"
                   value={warningConsecutiveAbsent}
                   onChange={(e) => onUpdateWarningSettings({ consecutiveAbsent: Number(e.target.value) || 0 })}
-                  className="w-full bg-white dark:bg-[#120a16] border border-rose-200 dark:border-rose-500/30 rounded-lg px-2.5 py-1.5 text-xs text-slate-900 dark:text-white font-mono"
+                  className="w-full bg-slate-100 dark:bg-[#120a16] border-0 rounded-lg px-2.5 py-1.5 text-xs text-slate-900 dark:text-white font-mono"
                 />
               </div>
               <div>
@@ -262,7 +262,7 @@ export const EarlyWarningSection: React.FC<EarlyWarningSectionProps> = ({
                   step="0.05"
                   value={warningTrendThreshold}
                   onChange={(e) => onUpdateWarningSettings({ trendThreshold: Number(e.target.value) || 0 })}
-                  className="w-full bg-white dark:bg-[#120a16] border border-rose-200 dark:border-rose-500/30 rounded-lg px-2.5 py-1.5 text-xs text-slate-900 dark:text-white font-mono"
+                  className="w-full bg-slate-100 dark:bg-[#120a16] border-0 rounded-lg px-2.5 py-1.5 text-xs text-slate-900 dark:text-white font-mono"
                 />
               </div>
             </div>
@@ -277,6 +277,7 @@ export const EarlyWarningSection: React.FC<EarlyWarningSectionProps> = ({
             searchPlaceholder="Tìm học sinh nguy cơ..."
             emptyMessage="Không có học sinh nào nằm trong danh sách nguy cơ!"
             pageSize={10}
+            borderless={true}
             onRowClick={(r: any) => onSelectRankingStudent(r.student_id)}
           />
         </div>

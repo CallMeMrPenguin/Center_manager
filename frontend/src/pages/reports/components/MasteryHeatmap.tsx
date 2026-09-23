@@ -211,9 +211,9 @@ export const MasteryHeatmap: React.FC<MasteryHeatmapProps> = ({
   );
 
   return (
-    <div className="bg-white dark:bg-[#0c0f1d] border border-slate-300 dark:border-white/10 rounded-2xl p-5 space-y-4 select-none shadow-sm dark:shadow-lg">
+    <div className="bg-white dark:bg-[#0c0f1d] rounded-2xl p-5 space-y-4 select-none shadow-sm dark:shadow-lg">
       {/* Title Bar */}
-      <div className="border-b border-slate-200 dark:border-white/5 pb-3">
+      <div className="pb-1">
         <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
           <LayoutGrid size={16} className="text-blue-600 dark:text-blue-400" />
           Ma Trận Nắm Vững Kiến Thức (Mastery Heatmap)
@@ -233,28 +233,29 @@ export const MasteryHeatmap: React.FC<MasteryHeatmapProps> = ({
         emptyMessage="Chưa có dữ liệu bài kiểm tra nào."
         toolbarLeft={toolbarLeft}
         exportFilename="ma_tran_nam_vung_kien_thuc"
+        borderless={true}
         onRowClick={(row) => onSelectStudent && onSelectStudent(row.student_id)}
         initialSorting={[{ id: 'student_name', desc: false }]}
       />
 
       {/* 4-Color Scale Legend */}
-      <div className="flex flex-wrap items-center justify-between gap-4 pt-3 border-t border-slate-200 dark:border-white/5 text-[11px] text-slate-600 dark:text-slate-400">
+      <div className="flex flex-wrap items-center justify-between gap-4 pt-2 text-[11px] text-slate-600 dark:text-slate-400">
         <div className="flex flex-wrap items-center gap-4">
           <span className="font-bold text-slate-800 dark:text-slate-300">Thang Điểm 4 Mức:</span>
           <div className="flex items-center gap-1.5">
-            <span className="w-3 h-3 rounded bg-emerald-500/30 border border-emerald-500/60 block" />
+            <span className="w-3 h-3 rounded bg-emerald-500 block" />
             <span className="text-emerald-700 dark:text-emerald-300 font-bold">Xanh: Nắm Vững (&ge; 8.0)</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="w-3 h-3 rounded bg-amber-500/30 border border-amber-500/60 block" />
+            <span className="w-3 h-3 rounded bg-amber-500 block" />
             <span className="text-amber-700 dark:text-amber-300 font-bold">Vàng: Đang Tiến Bộ (6.5 – 7.9)</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="w-3 h-3 rounded bg-orange-500/30 border border-orange-500/60 block" />
+            <span className="w-3 h-3 rounded bg-orange-500 block" />
             <span className="text-orange-700 dark:text-orange-300 font-bold">Cam: Cần Củng Cố (5.0 – 6.4)</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="w-3 h-3 rounded bg-rose-500/30 border border-rose-500/60 block" />
+            <span className="w-3 h-3 rounded bg-rose-500 block" />
             <span className="text-rose-700 dark:text-rose-300 font-bold">Đỏ: Chưa Đạt (&lt; 5.0)</span>
           </div>
         </div>
@@ -273,15 +274,15 @@ export const MasteryHeatmap: React.FC<MasteryHeatmapProps> = ({
             top: hoveredCell.y,
             transform: hoveredCell.showBelow ? 'translate(-50%, 0)' : 'translate(-50%, -100%)',
           }}
-          className="z-50 pointer-events-none bg-white dark:bg-[#0e1224] border-2 border-indigo-400 dark:border-indigo-500/60 rounded-2xl p-4 shadow-xl dark:shadow-[0_15px_35px_rgba(0,0,0,0.85)] text-xs text-slate-900 dark:text-white space-y-2.5 min-w-[240px] select-none"
+          className="z-50 pointer-events-none bg-white dark:bg-[#0e1224] rounded-2xl p-4 shadow-xl dark:shadow-[0_15px_35px_rgba(0,0,0,0.85)] text-xs text-slate-900 dark:text-white space-y-2.5 min-w-[240px] select-none"
         >
           {/* Header */}
-          <div className="flex items-center justify-between border-b border-slate-200 dark:border-white/10 pb-2">
+          <div className="flex items-center justify-between pb-1">
             <span className="font-black text-slate-900 dark:text-white text-sm">{hoveredCell.studentName}</span>
-            <span className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full border ${
+            <span className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full ${
               hoveredCell.data.skill === 'vocab'
-                ? 'bg-blue-500/15 text-blue-700 dark:text-blue-300 border-blue-500/40'
-                : 'bg-purple-500/15 text-purple-700 dark:text-purple-300 border-purple-500/40'
+                ? 'bg-blue-500/15 text-blue-700 dark:text-blue-300'
+                : 'bg-purple-500/15 text-purple-700 dark:text-purple-300'
             }`}>
               {hoveredCell.data.skill === 'vocab' ? 'Từ Vựng' : 'Ngữ Pháp'}
             </span>
