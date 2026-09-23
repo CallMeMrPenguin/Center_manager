@@ -180,12 +180,12 @@ def calculate_performance_analytics(session_records: List[Dict[str, Any]]) -> Di
     slope_hw, pred_hw = smart_predict(hw_list) if hw_list else (0.0, 0.0)
 
     _N = len(valid_overall)
-    if _N < 5:
-        prediction_model = "EMA"
+    if _N < 3:
+        prediction_model = "Bayes Shrinkage"
     elif _N < 20:
-        prediction_model = "Weighted OLS"
+        prediction_model = "Decay Weighted"
     else:
-        prediction_model = "Holt-Winters"
+        prediction_model = "Damped Holt"
 
     def _fitted_ema(vals: List[float]) -> List[float]:
         if not vals:
@@ -231,7 +231,7 @@ def calculate_performance_analytics(session_records: List[Dict[str, Any]]) -> Di
 
     def get_fitted_values(vals: List[float]) -> List[float]:
         N = len(vals)
-        if N < 5:
+        if N < 3:
             return _fitted_ema(vals)
         elif N < 20:
             return _fitted_wols(vals)

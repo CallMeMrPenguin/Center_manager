@@ -4,67 +4,80 @@ from database.connection import get_connection
 from database.utils import trunc_1_dec, get_grade_weights
 
 # ── Module-Level Tiered Prediction Engine ─────────────────────────────────────
-def _ema_predict(vals: List[float]) -> Tuple[float, float]:
-    """EMA predictor for very short histories (< 5 data points)."""
+def _bayes_shrinkage_predict(vals: List[float], class_mean: float = 7.5) -> Tuple[float, float]:
+    """Empirical Bayes Shrinkage predictor for very short histories (N < 3 data points).
+    Shrinks individual sample mean toward class prior to prevent extreme outlier shocks.
+    """
     N = len(vals)
     if N == 0:
         return 0.0, 0.0
     if N == 1:
-        return 0.0, trunc_1_dec(vals[0])
-    alpha = 0.5
-    ema = vals[0]
-    for v in vals[1:]:
-        ema = alpha * v + (1 - alpha) * ema
-    slope = (vals[-1] - vals[0]) / (N - 1)
-    predicted = max(0.0, min(10.0, ema))
+        # Shrinkage factor w = 1 / (1 + 2.0) = 0.333
+        w = 1.0 / 3.0
+        predicted = w * vals[0] + (1.0 - w) * class_mean
+        return 0.0, trunc_1_dec(max(0.0, min(10.0, predicted)))
+    # N == 2: w = 2 / (2 + 2.0) = 0.50
+    w = 0.5
+    avg_v = (vals[0] + vals[1]) / 2.0
+    predicted = w * avg_v + (1.0 - w) * class_mean
+    slope = (vals[1] - vals[0]) * 0.1
+    return slope, trunc_1_dec(max(0.0, min(10.0, predicted)))
+
+def _decay_weighted_damped_predict(vals: List[float], decay: float = 0.88, damping: float = 0.15) -> Tuple[float, float]:
+    """Exponential Decay Weighted Average with Damped Trend for moderate histories (3-19 data points).
+    Weights recent sessions higher (decay=0.88) and bounds trend slope with a damping factor (0.15).
+    """
+    N = len(vals)
+    if N < 3:
+        return _bayes_shrinkage_predict(vals)
+    weights = [decay ** (N - 1 - i) for i in range(N)]
+    w_sum = sum(weights)
+    level = sum(w * y for w, y in zip(weights, vals)) / w_sum
+
+    # Local slope over the last 3 sessions (or all if N < 3)
+    recent_k = min(3, N)
+    diffs = [vals[N - 1 - i] - vals[N - 2 - i] for i in range(recent_k - 1)]
+    raw_slope = sum(diffs) / len(diffs) if diffs else 0.0
+    slope = max(-1.5, min(1.5, raw_slope))
+
+    predicted = max(0.0, min(10.0, level + damping * slope))
     return slope, trunc_1_dec(predicted)
 
-def _weighted_ols_predict(vals: List[float]) -> Tuple[float, float]:
-    """Weighted OLS for moderate histories (5-19 data points)."""
+def _damped_holt_predict(vals: List[float], alpha: float = 0.30, beta: float = 0.10, phi: float = 0.80) -> Tuple[float, float]:
+    """Damped Holt's Linear Trend (Gardner & McKenzie) for longer histories (N >= 20).
+    Applies autoregressive trend damping (phi=0.80) to eliminate runaway extrapolation on bounded [0, 10] grades.
+    """
     N = len(vals)
-    if N < 2:
-        return _ema_predict(vals)
-    x_vals = list(range(1, N + 1))
-    weights = list(range(1, N + 1))  # session 1 -> weight 1, latest -> weight N
-    w_total = float(sum(weights))
-    mean_x = sum(w * x for w, x in zip(weights, x_vals)) / w_total
-    mean_y = sum(w * y for w, y in zip(weights, vals)) / w_total
-    num = sum(weights[i] * (x_vals[i] - mean_x) * (vals[i] - mean_y) for i in range(N))
-    den = sum(weights[i] * (x_vals[i] - mean_x) ** 2 for i in range(N))
-    slope = num / den if den != 0 else 0.0
-    intercept = mean_y - slope * mean_x
-    raw_pred = slope * (N + 1) + intercept
-    predicted = max(0.0, min(10.0, raw_pred))
-    return slope, trunc_1_dec(predicted)
-
-def _holtwinters_predict(vals: List[float]) -> Tuple[float, float]:
-    """Holt's Linear Trend Exponential Smoothing (ultra-fast pure Python 0.001ms)."""
-    N = len(vals)
-    if N < 2:
-        return _ema_predict(vals)
-    alpha = 0.35
-    beta = 0.15
+    if N < 3:
+        return _bayes_shrinkage_predict(vals)
+    if N < 20:
+        return _decay_weighted_damped_predict(vals)
     level = vals[0]
-    trend = vals[1] - vals[0] if N > 1 else 0.0
+    trend = (vals[1] - vals[0]) * 0.5 if N > 1 else 0.0
     for v in vals[1:]:
         last_level = level
-        level = alpha * v + (1 - alpha) * (level + trend)
-        trend = beta * (level - last_level) + (1 - beta) * trend
-    raw_pred = level + trend
+        level = alpha * v + (1.0 - alpha) * (level + phi * trend)
+        trend = beta * (level - last_level) + (1.0 - beta) * phi * trend
+    raw_pred = level + phi * trend
     predicted = max(0.0, min(10.0, raw_pred))
     return trend, trunc_1_dec(predicted)
 
-def smart_predict(vals: List[float]) -> Tuple[float, float]:
-    """Dispatch to the appropriate prediction model based on data volume."""
+def smart_predict(vals: List[float], class_mean: float = 7.5) -> Tuple[float, float]:
+    """Dispatch to the optimal prediction model based on data volume."""
     N = len(vals)
     if N == 0:
         return 0.0, 0.0
-    elif N < 5:
-        return _ema_predict(vals)
+    elif N < 3:
+        return _bayes_shrinkage_predict(vals, class_mean=class_mean)
     elif N < 20:
-        return _weighted_ols_predict(vals)
+        return _decay_weighted_damped_predict(vals)
     else:
-        return _holtwinters_predict(vals)
+        return _damped_holt_predict(vals)
+
+# Backward-compatible aliases for legacy imports
+_ema_predict = _bayes_shrinkage_predict
+_weighted_ols_predict = _decay_weighted_damped_predict
+_holtwinters_predict = _damped_holt_predict
 
 def get_class_student_predictions(class_id: int, target_date: Optional[str] = None) -> Dict[int, Dict[str, Any]]:
     """Calculates granular smart predictions for each student in a class up to target_date."""
@@ -128,6 +141,8 @@ def get_class_student_predictions(class_id: int, target_date: Optional[str] = No
     w_mt = gw.get("mock_test", 0.0)
 
     predictions: Dict[int, Dict[str, Any]] = {}
+    all_class_scores = [float(r["check_1"]) for r in rows if r.get("check_1") is not None]
+    class_mean = sum(all_class_scores) / len(all_class_scores) if all_class_scores else 7.5
 
     for sid, all_recs in records_by_student.items():
         # Select historical records before target_date if available
@@ -226,17 +241,17 @@ def get_class_student_predictions(class_id: int, target_date: Optional[str] = No
                 overall_session_scores.append(w_sum / w_tot)
 
         _N_overall = len(overall_session_scores)
-        if _N_overall < 5:
-            _model_name = "EMA"
+        if _N_overall < 3:
+            _model_name = "Bayes Shrinkage"
         elif _N_overall < 20:
-            _model_name = "Weighted OLS"
+            _model_name = "Decay Weighted"
         else:
-            _model_name = "Holt-Winters"
+            _model_name = "Damped Holt"
 
         def _pred_opt(vals: List[float]) -> Optional[float]:
             if not vals:
                 return None
-            _, pv = smart_predict(vals)
+            _, pv = smart_predict(vals, class_mean=class_mean)
             return trunc_1_dec(pv)
 
         # Predict based on configured skill type (entire vocab or grammar history, or both of same type)
