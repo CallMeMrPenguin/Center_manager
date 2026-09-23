@@ -10,6 +10,7 @@ import { ClassModalsContainer } from './components/modals/ClassModalsContainer';
 import RelationshipsTab from '../../components/seating/RelationshipsTab';
 import { useConfirm } from '../../components/ConfirmDialog';
 import { ClassItem, EnrolledStudent } from './types';
+import { VercelTabs } from '../../components/VercelTabs';
 import { notifyDataChanged } from '../../utils';
 import { getUrlParam, setUrlParams, useUrlSync } from '../../utils/navigation';
 
@@ -202,12 +203,10 @@ export default function ClassesPage() {
       ) : (
         /* 2. CLASS DETAIL VIEW (UNIFIED MASTER HEADER + SELECTED TAB) */
         <div className="space-y-6">
-          {/* UNIFIED MASTER HEADER (Single visual boundary per Rule 5) */}
+          {/* UNIFIED MASTER HEADER */}
           <ClassDetailHeader
             selectedClass={selectedClass}
             activeSubTab={activeSubTab}
-            onChangeSubTab={handleChangeSubTab}
-            enrolledCount={enrolledStudents.length}
             attendanceDate={attendanceDate}
             onDateChange={setAttendanceDate}
             selectedClassWeeklyDays={selectedClassWeeklyDays}
@@ -243,6 +242,19 @@ export default function ClassesPage() {
                   }
                 : undefined
             }
+          />
+
+          {/* HORIZONTAL TAB MENU (MATCHING REPORTS PAGE) */}
+          <VercelTabs<'grades' | 'seating' | 'relationships'>
+            value={activeSubTab}
+            onChange={handleChangeSubTab}
+            tabs={[
+              { value: 'grades', label: 'Điểm Danh & Điểm', badge: enrolledStudents.length },
+              { value: 'seating', label: 'Sơ Đồ Lớp' },
+              { value: 'relationships', label: 'Nhóm Bạn & Xung Đột' },
+            ]}
+            size="md"
+            className="w-full"
           />
 
           {/* TAB 1: ATTENDANCE & GRADES */}
