@@ -156,7 +156,7 @@ export const SeatingChartTab: React.FC<SeatingChartTabProps> = ({
           <button
             type="button"
             onClick={onAutoMixSeating}
-            className="group flex items-center gap-1.5 bg-indigo-50 dark:bg-indigo-500/20 hover:bg-indigo-100 dark:hover:bg-indigo-500/30 text-indigo-700 dark:text-indigo-300 border-0 px-3 py-1.5 rounded-xl font-bold text-xs transition cursor-pointer shadow-2xs"
+            className="group flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200/80 dark:bg-white/10 dark:hover:bg-white/15 text-slate-700 hover:text-slate-900 dark:text-slate-200 dark:hover:text-white border-0 px-3 py-1.5 rounded-xl font-bold text-xs transition cursor-pointer shadow-xs"
             title="Trộn ngẫu nhiên vị trí ngồi"
           >
             <Shuffle size={14} className="shrink-0 text-indigo-600 dark:text-indigo-400" />
@@ -167,7 +167,7 @@ export const SeatingChartTab: React.FC<SeatingChartTabProps> = ({
             type="button"
             onClick={onGeneticMixSeating}
             disabled={mixingGA}
-            className="group flex items-center gap-1.5 bg-cyan-50 dark:bg-cyan-500/20 hover:bg-cyan-100 dark:hover:bg-cyan-500/30 text-cyan-700 dark:text-cyan-300 border-0 px-3 py-1.5 rounded-xl font-bold text-xs transition cursor-pointer disabled:opacity-50 shadow-2xs"
+            className="group flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200/80 dark:bg-white/10 dark:hover:bg-white/15 text-slate-700 hover:text-slate-900 dark:text-slate-200 dark:hover:text-white border-0 px-3 py-1.5 rounded-xl font-bold text-xs transition cursor-pointer disabled:opacity-50 shadow-xs"
             title="Trộn thông minh tối ưu học lực"
           >
             <RefreshCw size={14} className={`shrink-0 text-cyan-600 dark:text-cyan-400 ${mixingGA ? 'animate-spin' : ''}`} />
@@ -177,11 +177,11 @@ export const SeatingChartTab: React.FC<SeatingChartTabProps> = ({
           <button
             type="button"
             onClick={onBlossomSwap}
-            className="group flex items-center gap-1.5 bg-purple-50 dark:bg-purple-500/20 hover:bg-purple-100 dark:hover:bg-purple-500/30 text-purple-700 dark:text-purple-300 border-0 px-3 py-1.5 rounded-xl font-bold text-xs transition cursor-pointer shadow-2xs"
-            title="Đổi bài chấm chéo"
+            className="group flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200/80 dark:bg-white/10 dark:hover:bg-white/15 text-slate-700 hover:text-slate-900 dark:text-slate-200 dark:hover:text-white border-0 px-3 py-1.5 rounded-xl font-bold text-xs transition cursor-pointer shadow-xs"
+            title="Sơ đồ chuyển bài"
           >
             <FileCheck2 size={14} className="shrink-0 text-purple-600 dark:text-purple-400" />
-            <span>Đổi Bài Chéo</span>
+            <span>Sơ Đồ Chuyển Bài</span>
           </button>
 
           <button

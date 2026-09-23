@@ -39,16 +39,16 @@ export const BelowThresholdCard: React.FC<BelowThresholdCardProps> = ({
   return (
     <div className="bg-white dark:bg-[#121626] rounded-2xl p-4 border border-slate-200/80 dark:border-white/10 shadow-xs hover:shadow-sm flex flex-col justify-between min-h-[135px] transition-all">
       <div>
-        {/* Top Header: Title on Left, Controls cleanly separated on Right */}
+        {/* Top Header: Title on Left, Controls cleanly separated on Right with ZERO nested background cards */}
         <div className="flex items-center justify-between mb-3 gap-2">
           <span className={`text-xs font-black ${styles.title} uppercase tracking-wider shrink-0`}>
             {title}
           </span>
 
-          <div className="flex items-center gap-1.5 shrink-0">
-            {/* Threshold pill */}
-            <div className="flex items-center gap-1 bg-slate-100 dark:bg-white/5 px-2 py-0.5 rounded-lg border border-slate-200/80 dark:border-white/10 text-xs font-bold">
-              <span className="text-slate-400 dark:text-slate-500 select-none">&lt;</span>
+          <div className="flex items-center gap-2 shrink-0">
+            {/* Direct input with no outer pill wrapper */}
+            <div className="flex items-center gap-1">
+              <span className="text-slate-400 dark:text-slate-500 select-none font-bold text-xs">&lt;</span>
               <input
                 type="number"
                 step="0.1"
@@ -56,17 +56,17 @@ export const BelowThresholdCard: React.FC<BelowThresholdCardProps> = ({
                 max="10"
                 value={threshInput}
                 onChange={(e) => onThreshChange(e.target.value)}
-                className="w-8 text-center font-mono font-black text-slate-800 dark:text-slate-100 bg-transparent focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none text-xs"
+                className="w-9 px-1 py-0.5 text-center font-mono font-black text-slate-800 dark:text-slate-100 bg-transparent border-b border-slate-300 dark:border-slate-600 focus:border-indigo-500 outline-none text-xs [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 title={`Nhập điểm lọc cho ${title} (mặc định theo TB)`}
               />
             </div>
 
-            {/* Student Count Badge */}
+            {/* Direct student count with pure typography (no background pill) */}
             <span
-              className={`px-2 py-0.5 rounded-lg font-black text-xs shrink-0 ${
+              className={`font-black text-xs shrink-0 select-none ${
                 students.length > 0
-                  ? 'bg-rose-500 text-white dark:bg-rose-600 shadow-2xs'
-                  : 'bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-400 border border-slate-200/80 dark:border-white/10'
+                  ? 'text-rose-600 dark:text-rose-400 font-extrabold'
+                  : 'text-slate-400 dark:text-slate-500'
               }`}
             >
               {students.length} HS
@@ -82,7 +82,7 @@ export const BelowThresholdCard: React.FC<BelowThresholdCardProps> = ({
                 key={s.student_id}
                 type="button"
                 onClick={() => onFilterStudent?.(s.student_name)}
-                className="px-2.5 py-1 rounded-xl bg-slate-50 dark:bg-white/5 hover:bg-slate-100 dark:hover:bg-white/10 border border-slate-200/80 dark:border-white/10 shadow-2xs text-xs font-bold flex items-center gap-1.5 transition cursor-pointer text-slate-800 dark:text-slate-100"
+                className="px-2.5 py-1 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-white/10 dark:hover:bg-white/15 text-xs font-bold flex items-center gap-1.5 transition cursor-pointer text-slate-800 dark:text-slate-100 border-0 shadow-2xs"
                 title="Bấm để sao chép tên tìm kiếm"
               >
                 <span>{s.student_name}</span>
@@ -118,16 +118,16 @@ export const DivergenceCard: React.FC<DivergenceCardProps> = ({
   return (
     <div className="bg-white dark:bg-[#121626] rounded-2xl p-4 border border-slate-200/80 dark:border-white/10 shadow-xs hover:shadow-sm flex flex-col justify-between min-h-[135px] transition-all">
       <div>
-        {/* Top Header: Title on Left, Controls cleanly separated on Right */}
+        {/* Top Header: Title on Left, Controls cleanly separated on Right with ZERO nested background cards */}
         <div className="flex items-center justify-between mb-3 gap-2">
           <span className="text-xs font-black text-amber-600 dark:text-amber-400 uppercase tracking-wider shrink-0">
             Độ Lệch
           </span>
 
-          <div className="flex items-center gap-1.5 shrink-0">
-            {/* Threshold pill */}
-            <div className="flex items-center gap-1 bg-slate-100 dark:bg-white/5 px-2 py-0.5 rounded-lg border border-slate-200/80 dark:border-white/10 text-xs font-bold">
-              <span className="text-slate-400 dark:text-slate-500 select-none font-bold">&gt;</span>
+          <div className="flex items-center gap-2 shrink-0">
+            {/* Direct input with no outer pill wrapper */}
+            <div className="flex items-center gap-1">
+              <span className="text-slate-400 dark:text-slate-500 select-none font-bold text-xs">&gt;</span>
               <input
                 type="number"
                 step="0.1"
@@ -135,17 +135,17 @@ export const DivergenceCard: React.FC<DivergenceCardProps> = ({
                 max="10"
                 value={threshInput}
                 onChange={(e) => onThreshChange(e.target.value)}
-                className="w-8 text-center font-mono font-black text-slate-800 dark:text-slate-100 bg-transparent focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none text-xs"
+                className="w-9 px-1 py-0.5 text-center font-mono font-black text-slate-800 dark:text-slate-100 bg-transparent border-b border-slate-300 dark:border-slate-600 focus:border-amber-500 outline-none text-xs [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 title="Nhập ngưỡng độ lệch BTVN > Check (mặc định 1.5)"
               />
             </div>
 
-            {/* Student Count Badge */}
+            {/* Direct student count with pure typography (no background pill) */}
             <span
-              className={`px-2 py-0.5 rounded-lg font-black text-xs shrink-0 ${
+              className={`font-black text-xs shrink-0 select-none ${
                 students.length > 0
-                  ? 'bg-amber-500 text-white dark:bg-amber-600 shadow-2xs'
-                  : 'bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-400 border border-slate-200/80 dark:border-white/10'
+                  ? 'text-amber-600 dark:text-amber-400 font-extrabold'
+                  : 'text-slate-400 dark:text-slate-500'
               }`}
             >
               {students.length} HS
@@ -161,7 +161,7 @@ export const DivergenceCard: React.FC<DivergenceCardProps> = ({
                 key={s.student_id}
                 type="button"
                 onClick={() => onFilterStudent?.(s.student_name)}
-                className="px-2.5 py-1 rounded-xl bg-slate-50 dark:bg-white/5 hover:bg-slate-100 dark:hover:bg-white/10 border border-slate-200/80 dark:border-white/10 shadow-2xs text-xs font-bold flex items-center gap-1.5 transition cursor-pointer text-slate-800 dark:text-slate-100"
+                className="px-2.5 py-1 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-white/10 dark:hover:bg-white/15 text-xs font-bold flex items-center gap-1.5 transition cursor-pointer text-slate-800 dark:text-slate-100 border-0 shadow-2xs"
                 title={`BTVN: ${format1Dec(s.homework)}, TB Check: ${format1Dec(s.checkAvg)} (Lệch: ${format1Dec(s.diff)}). Bấm để sao chép.`}
               >
                 <span>{s.student_name}</span>

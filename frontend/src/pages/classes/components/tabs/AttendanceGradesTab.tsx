@@ -307,11 +307,11 @@ export const AttendanceGradesTab: React.FC<AttendanceGradesTabProps> = ({
                   type="button"
                   onClick={onCircularSwap}
                   className="group flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200/80 dark:bg-[#181a20] dark:hover:bg-[#20232b] text-slate-700 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white border-0 text-xs font-bold transition-all duration-200 cursor-pointer shadow-xs outline-none shrink-0"
-                  title="Đổi bài chấm chéo vòng tròn giữa các học sinh"
+                  title="Sơ đồ chuyển bài giữa các học sinh"
                 >
                   <FileCheck2 size={13} className="text-purple-500 dark:text-purple-400 shrink-0" />
-                  <span className="max-w-0 opacity-0 group-hover:max-w-[120px] group-hover:opacity-100 xl:max-w-none xl:opacity-100 transition-all duration-200 ease-in-out whitespace-nowrap overflow-hidden inline-block">
-                    Đổi Bài Chéo
+                  <span className="max-w-0 opacity-0 group-hover:max-w-[150px] group-hover:opacity-100 xl:max-w-none xl:opacity-100 transition-all duration-200 ease-in-out whitespace-nowrap overflow-hidden inline-block">
+                    Sơ Đồ Chuyển Bài
                   </span>
                 </button>
               )}

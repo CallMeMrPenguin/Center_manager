@@ -103,102 +103,88 @@ export default function BlossomResultModal({ isOpen, onClose, pairs, unmatched =
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 animate-mac-dropdown">
-      <div className="bg-white dark:bg-[#121624] border border-slate-200/80 dark:border-white/10 rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl flex flex-col max-h-[85vh]">
+      <div className="bg-white dark:bg-[#121624] border border-slate-200/80 dark:border-white/10 rounded-2xl w-full max-w-xl overflow-hidden shadow-2xl flex flex-col max-h-[85vh]">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 sm:p-5 border-b border-slate-200/80 dark:border-white/10 bg-slate-50 dark:bg-[#161c30]">
+        <div className="flex items-center justify-between p-4 sm:p-5 border-b border-slate-200/80 dark:border-white/10 bg-white dark:bg-[#121624]">
           <div className="flex items-center gap-2.5">
             <div className="p-2 bg-indigo-500/10 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 rounded-xl">
               <FileCheck2 className="h-5 w-5" />
             </div>
             <div>
               <h3 className="text-base font-black text-slate-900 dark:text-white">
-                Phân Công Đổi Bài Chấm Vòng Tròn
+                Sơ Đồ Chuyển Bài
               </h3>
               <p className="text-xs text-slate-500 dark:text-slate-400 font-semibold">
-                Chu trình khép kín: A ➔ B ➔ C ➔ ... ➔ A ({orderedChain.length} học sinh)
+                Chu trình khép kín ({orderedChain.length} học sinh)
               </p>
             </div>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 rounded-xl hover:bg-slate-200 dark:hover:bg-white/10 text-slate-400 hover:text-slate-700 dark:hover:text-white transition cursor-pointer"
+            className="p-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-white/10 text-slate-400 hover:text-slate-700 dark:hover:text-white transition cursor-pointer"
           >
             <X size={16} />
           </button>
         </div>
 
-        {/* Content */}
+        {/* Content: No Card-in-Card, directly on modal background */}
         <div className="p-4 sm:p-6 space-y-4 overflow-y-auto flex-1">
           {orderedChain.length === 0 ? (
-            <div className="p-6 rounded-2xl bg-slate-50 dark:bg-[#161c30] text-center text-xs text-slate-500 dark:text-slate-400 font-medium">
-              Chưa có phân công đổi bài nào.
+            <div className="py-8 text-center text-xs text-slate-400 font-medium">
+              Chưa có phân công chuyển bài nào.
             </div>
           ) : (
             <>
-              {/* Visual Circular Flow Banner */}
-              <div className="p-3.5 bg-slate-50 dark:bg-[#161c30] rounded-2xl border border-slate-200/80 dark:border-white/10 space-y-2">
-                <div className="flex items-center justify-between select-none">
-                  <span className="text-[11px] font-black uppercase text-indigo-600 dark:text-indigo-400 tracking-wider">
-                    Sơ Đồ Chuyền Bài Vòng Tròn
-                  </span>
-                  <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-black bg-emerald-500/10 px-2 py-0.5 rounded-full flex items-center gap-1">
-                    <RotateCw size={10} /> Khép vòng 100%
-                  </span>
-                </div>
-
-                <div className="flex flex-wrap items-center gap-1.5 py-1">
-                  {orderedChain.map((node, idx) => (
-                    <React.Fragment key={idx}>
-                      <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-white dark:bg-[#1f2640] border border-slate-200/80 dark:border-white/10 shadow-2xs text-xs font-bold text-slate-800 dark:text-slate-100">
-                        <span className="w-4 h-4 rounded-md bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 text-[10px] font-black flex items-center justify-center shrink-0">
-                          {idx + 1}
-                        </span>
-                        <span className="font-extrabold">{node.name}</span>
-                      </div>
-                      <ArrowRight size={13} className="text-indigo-500 dark:text-indigo-400 shrink-0" />
-                    </React.Fragment>
-                  ))}
-                  {/* Loopback indicator */}
-                  {orderedChain.length > 0 && (
-                    <div className="flex items-center gap-1 px-2.5 py-1 rounded-xl bg-indigo-50 dark:bg-indigo-500/20 border border-indigo-200 dark:border-indigo-500/30 text-indigo-700 dark:text-indigo-300 text-xs font-black shadow-2xs">
-                      <span>Khép về {orderedChain[0]?.name}</span>
+              {/* Flow ribbon directly on modal background */}
+              <div className="flex flex-wrap items-center gap-1.5 py-1 select-none">
+                {orderedChain.map((node, idx) => (
+                  <React.Fragment key={idx}>
+                    <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-slate-100 dark:bg-white/5 text-xs font-bold text-slate-800 dark:text-slate-100">
+                      <span className="text-[10px] font-mono font-black text-indigo-600 dark:text-indigo-400">
+                        {idx + 1}.
+                      </span>
+                      <span>{node.name}</span>
                     </div>
-                  )}
-                </div>
+                    <ArrowRight size={13} className="text-indigo-500 dark:text-indigo-400 shrink-0" />
+                  </React.Fragment>
+                ))}
+                {/* Loopback indicator */}
+                {orderedChain.length > 0 && (
+                  <div className="flex items-center gap-1 px-2.5 py-1 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-xs font-black">
+                    <RotateCw size={11} />
+                    <span>Khép về {orderedChain[0]?.name}</span>
+                  </div>
+                )}
               </div>
 
-              {/* Compact 2-Column Student Assignment List */}
-              <div className="space-y-1.5">
-                <span className="text-[11px] font-black uppercase text-slate-500 dark:text-slate-400 tracking-wider block px-1">
-                  Chi Tiết Ghép Cặp Chấm Bài
-                </span>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {/* Minimal 2-Column List with clean dividers, zero card-in-card */}
+              <div className="pt-3 border-t border-slate-100 dark:border-white/5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2">
                   {orderedChain.map((item, idx) => {
                     const isLast = idx === orderedChain.length - 1;
                     return (
                       <div
                         key={idx}
-                        className="flex items-center justify-between p-2.5 rounded-xl bg-white dark:bg-[#161c30] border border-slate-200/80 dark:border-white/10 text-xs font-bold shadow-2xs hover:border-indigo-300 dark:hover:border-indigo-500/40 transition"
+                        className="flex items-center justify-between py-1.5 border-b border-slate-100 dark:border-white/5 text-xs"
                       >
-                        <div className="flex items-center gap-2 min-w-0">
-                          <span className="w-5 h-5 rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-[10px] font-black flex items-center justify-center shrink-0">
-                            {idx + 1}
+                        <div className="flex items-center gap-1.5 min-w-0">
+                          <span className="font-mono text-[11px] font-bold text-slate-400 w-5">
+                            {idx + 1}.
                           </span>
-                          <span className="font-extrabold text-slate-900 dark:text-white truncate">
+                          <span className="font-bold text-slate-800 dark:text-slate-200 truncate">
                             {item.name}
                           </span>
                         </div>
 
-                        <ArrowRight size={13} className="text-slate-400 dark:text-slate-500 shrink-0 mx-2" />
-
-                        <div className="flex items-center gap-1.5 min-w-0 justify-end">
-                          <span className="font-extrabold text-indigo-600 dark:text-indigo-400 truncate">
+                        <div className="flex items-center gap-2 shrink-0">
+                          <ArrowRight size={12} className="text-indigo-400 dark:text-indigo-500" />
+                          <span className="font-bold text-indigo-600 dark:text-indigo-400">
                             {item.targetName}
                           </span>
                           {isLast && (
-                            <span className="text-[9px] px-1.5 py-0.5 rounded bg-indigo-50 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 font-bold shrink-0">
-                              Khép vòng
+                            <span className="text-[9px] font-bold text-emerald-600 dark:text-emerald-400">
+                              (Khép vòng)
                             </span>
                           )}
                         </div>
@@ -212,20 +198,17 @@ export default function BlossomResultModal({ isOpen, onClose, pairs, unmatched =
 
           {/* Unmatched Students */}
           {unmatched.length > 0 && (
-            <div className="space-y-2 pt-2 border-t border-slate-200/80 dark:border-white/10">
-              <h4 className="text-[11px] font-black uppercase text-amber-600 dark:text-amber-400 tracking-wider flex items-center gap-1.5">
+            <div className="space-y-1.5 pt-3 border-t border-slate-100 dark:border-white/5">
+              <h4 className="text-xs font-black uppercase text-amber-600 dark:text-amber-400 tracking-wider flex items-center gap-1.5">
                 <UserX size={14} />
-                Học sinh không tham gia chấm ({unmatched.length})
+                Không tham gia chấm ({unmatched.length})
               </h4>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <div className="space-y-1">
                 {unmatched.map((u, idx) => (
-                  <div
-                    key={idx}
-                    className="p-2.5 rounded-xl bg-amber-50/70 dark:bg-amber-500/10 border border-amber-200/60 dark:border-amber-500/20 shadow-2xs flex items-center justify-between text-xs"
-                  >
-                    <span className="font-extrabold text-slate-900 dark:text-white">{u.name}</span>
-                    <span className="text-[11px] text-amber-700 dark:text-amber-400 font-bold">{u.reason}</span>
+                  <div key={idx} className="flex items-center justify-between text-xs py-1 text-slate-600 dark:text-slate-400">
+                    <span className="font-bold text-slate-800 dark:text-slate-200">{u.name}</span>
+                    <span className="text-amber-600 dark:text-amber-400 font-medium">{u.reason}</span>
                   </div>
                 ))}
               </div>
@@ -234,12 +217,12 @@ export default function BlossomResultModal({ isOpen, onClose, pairs, unmatched =
         </div>
 
         {/* Footer */}
-        <div className="p-4 border-t border-slate-200/80 dark:border-white/10 flex items-center justify-between bg-slate-50 dark:bg-[#161c30]">
+        <div className="p-4 border-t border-slate-200/80 dark:border-white/10 flex items-center justify-between bg-white dark:bg-[#121624]">
           <button
             type="button"
             onClick={handleCopy}
             disabled={orderedChain.length === 0}
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-white/10 dark:hover:bg-white/20 text-slate-700 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white text-xs font-bold transition cursor-pointer border border-slate-200/80 dark:border-white/10 disabled:opacity-50"
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-white/10 dark:hover:bg-white/20 text-slate-700 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white text-xs font-bold transition cursor-pointer border-0 disabled:opacity-50"
           >
             {copied ? <Check size={14} className="text-emerald-500" /> : <Copy size={14} />}
             <span>{copied ? 'Đã sao chép' : 'Sao chép sơ đồ'}</span>
