@@ -127,10 +127,10 @@ export default function BlossomResultModal({ isOpen, onClose, pairs, unmatched =
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 animate-mac-dropdown">
-      <div className="bg-white dark:bg-[#121624] border border-slate-200/80 dark:border-white/10 rounded-3xl w-full max-w-5xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 animate-mac-dropdown">
+      <div className="bg-white dark:bg-[#121624] border border-slate-200/80 dark:border-white/10 rounded-3xl w-full max-w-5xl xl:max-w-6xl overflow-hidden shadow-2xl flex flex-col max-h-[92vh]">
         {/* Header */}
-        <div className="flex items-center justify-between p-5 border-b border-slate-200/80 dark:border-white/10 bg-white dark:bg-[#121624]">
+        <div className="flex items-center justify-between p-4 sm:p-5 border-b border-slate-200/80 dark:border-white/10 bg-white dark:bg-[#121624]">
           <div className="flex items-center gap-3.5">
             <div className="w-12 h-12 rounded-2xl bg-blue-500/10 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0 border border-blue-500/20">
               <FileCheck2 className="h-6 w-6" />
@@ -151,7 +151,7 @@ export default function BlossomResultModal({ isOpen, onClose, pairs, unmatched =
         </div>
 
         {/* Content Body */}
-        <div className="p-5 sm:p-6 space-y-5 overflow-y-auto flex-1">
+        <div className="p-4 sm:p-5 space-y-4 overflow-y-auto flex-1">
           {/* Subheader Banner */}
           <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-200/80 dark:border-white/10 text-xs font-semibold text-slate-700 dark:text-slate-300">
             <div className="p-1 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 shrink-0">
