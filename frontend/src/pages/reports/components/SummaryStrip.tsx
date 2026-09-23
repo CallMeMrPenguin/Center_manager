@@ -4,6 +4,7 @@ import { GradeTypeItem } from '../../../types';
 import { SummaryTooltipCard } from './SummaryTooltipCard';
 import { DistributionSummaryStrip } from './DistributionSummaryStrip';
 import { DistributionStats } from '../utils/distributionAnalytics';
+import { trunc1Dec, format1Dec } from '../../../utils';
 
 interface SummaryStripProps {
   engine: any;
@@ -50,12 +51,12 @@ export const SummaryStrip: React.FC<SummaryStripProps> = React.memo(({
   }
 
   const pi = safeEngine.performance_index;
-  const piInfo = pi < 35 ? { color: 'text-rose-500', label: 'Kém (Cần Phụ Đạo)', sub: 'text-rose-400 font-extrabold' }
-    : pi < 50 ? { color: 'text-orange-400', label: 'Yếu (Hổng Kiến Thức)', sub: 'text-orange-400 font-bold' }
-    : pi < 65 ? { color: 'text-amber-400', label: 'Trung Bình (Cần Củng Cố)', sub: 'text-amber-400 font-bold' }
-    : pi < 80 ? { color: 'text-cyan-400', label: 'Khá (Đang Tiến Bộ)', sub: 'text-cyan-400 font-bold' }
-    : pi < 90 ? { color: 'text-blue-400', label: 'Giỏi / Rất Tốt', sub: 'text-blue-400 font-bold' }
-    : { color: 'text-emerald-400', label: 'Xuất Sắc (Vững Vàng)', sub: 'text-emerald-400 font-bold' };
+  const piInfo = pi < 35 ? { color: 'text-rose-500', label: 'Mức Kém (<35)', sub: 'text-rose-400 font-extrabold' }
+    : pi < 50 ? { color: 'text-orange-400', label: 'Mức Yếu (35-49)', sub: 'text-orange-400 font-bold' }
+    : pi < 65 ? { color: 'text-amber-400', label: 'Mức Trung Bình (50-64)', sub: 'text-amber-400 font-bold' }
+    : pi < 80 ? { color: 'text-cyan-400', label: 'Mức Khá (65-79)', sub: 'text-cyan-400 font-bold' }
+    : pi < 90 ? { color: 'text-blue-400', label: 'Mức Giỏi (80-89)', sub: 'text-blue-400 font-bold' }
+    : { color: 'text-emerald-400', label: 'Mức Xuất Sắc (≥90)', sub: 'text-emerald-400 font-bold' };
 
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 bg-white dark:bg-[#0c0f1e] rounded-xl text-center items-center relative shadow-[0_4px_24px_rgba(0,0,0,0.08)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.45)] divide-y sm:divide-y-0 sm:divide-x sm:divide-x-[1.5px] divide-slate-300 dark:divide-slate-700/80">
@@ -90,9 +91,9 @@ export const SummaryStrip: React.FC<SummaryStripProps> = React.memo(({
               <div className="space-y-1">
                 <span className="font-bold text-slate-300 block">Mô hình tính toán ({safeEngine.prediction_model}):</span>
                 <div className="flex flex-wrap items-center gap-1 text-[9.5px]">
-                  <span className="px-1.5 py-0.5 rounded bg-white/5 text-slate-300 font-mono border border-white/5">&lt;5 buổi: EMA</span>
-                  <span className="px-1.5 py-0.5 rounded bg-white/5 text-slate-300 font-mono border border-white/5">5-19 buổi: Weighted OLS</span>
-                  <span className="px-1.5 py-0.5 rounded bg-white/5 text-slate-300 font-mono border border-white/5">20+ buổi: Holt-Winters</span>
+                  <span className="px-1.5 py-0.5 rounded bg-white/5 text-slate-300 font-mono border border-white/5">&lt;3 buổi: Bayes Shrinkage</span>
+                  <span className="px-1.5 py-0.5 rounded bg-white/5 text-slate-300 font-mono border border-white/5">3-19 buổi: Decay Weighted</span>
+                  <span className="px-1.5 py-0.5 rounded bg-white/5 text-slate-300 font-mono border border-white/5">≥20 buổi: Damped Holt</span>
                 </div>
               </div>
             }
@@ -176,7 +177,7 @@ export const SummaryStrip: React.FC<SummaryStripProps> = React.memo(({
         <span className={`text-base font-black font-mono ${safeEngine.std_dev > 2.0 ? 'text-rose-700 dark:text-rose-400' :
           safeEngine.std_dev > 1.0 ? 'text-amber-700 dark:text-amber-400' :
             safeEngine.std_dev < 0.5 ? 'text-emerald-700 dark:text-emerald-400' : 'text-cyan-700 dark:text-cyan-400'
-          }`}>σ = {safeEngine.std_dev}</span>
+          }`}>σ = {trunc1Dec(safeEngine.std_dev)}</span>
         <span className={`text-[10px] font-bold block truncate ${safeEngine.consistency_label?.includes('mạnh') ? 'text-rose-700 dark:text-rose-400 font-extrabold' :
           safeEngine.consistency_label?.includes('Biến động') ? 'text-amber-700 dark:text-amber-400 font-bold' :
             safeEngine.consistency_label?.includes('Rất ổn định') ? 'text-emerald-700 dark:text-emerald-400 font-bold' : 'text-slate-700 dark:text-slate-300'
@@ -203,7 +204,7 @@ export const SummaryStrip: React.FC<SummaryStripProps> = React.memo(({
               {gradeTypesList.map(gt => (
                 <div key={gt.id} className="flex items-center justify-between font-extrabold" style={{ color: gt.color || '#2563eb' }}>
                   <span>{gt.label} ({gt.weight}%):</span>
-                  <span className="font-black">σ = {((safeEngine as any)[`std_dev_${gt.id}`] ?? safeEngine.std_dev ?? 0)}</span>
+                  <span className="font-black">σ = {trunc1Dec(Number((safeEngine as any)[`std_dev_${gt.id}`] ?? safeEngine.std_dev ?? 0))}</span>
                 </div>
               ))}
             </div>
@@ -228,7 +229,7 @@ export const SummaryStrip: React.FC<SummaryStripProps> = React.memo(({
             <Info size={11} />
           </button>
         </div>
-        <span className="text-base font-black text-purple-700 dark:text-purple-400 font-mono">{safeEngine.trend_slope > 0 ? `+${safeEngine.trend_slope}` : safeEngine.trend_slope}/buổi</span>
+        <span className="text-base font-black text-purple-700 dark:text-purple-400 font-mono">{safeEngine.trend_slope > 0 ? `+${trunc1Dec(safeEngine.trend_slope)}` : `${trunc1Dec(safeEngine.trend_slope)}`}/buổi</span>
         <span className={`text-[10px] font-bold block truncate ${safeEngine.trend_label?.includes('Giảm') || safeEngine.trend_label?.includes('Suy giảm') ? 'text-rose-700 dark:text-rose-400' :
           safeEngine.trend_label?.includes('Ổn định') ? 'text-slate-700 dark:text-slate-300' : 'text-emerald-700 dark:text-emerald-400'
           }`}>{safeEngine.trend_label}</span>
@@ -253,7 +254,7 @@ export const SummaryStrip: React.FC<SummaryStripProps> = React.memo(({
               <div className="text-slate-700 dark:text-slate-400 font-bold border-b border-slate-200 dark:border-white/5 pb-1">Hệ số góc a: y = ax + b</div>
               <div className="flex items-center justify-between text-purple-700 dark:text-purple-300 font-extrabold">
                 <span>Tốc độ thay đổi:</span>
-                <span>{safeEngine.trend_slope > 0 ? `+${safeEngine.trend_slope}` : safeEngine.trend_slope} đ/buổi</span>
+                <span>{safeEngine.trend_slope > 0 ? `+${trunc1Dec(safeEngine.trend_slope)}` : `${trunc1Dec(safeEngine.trend_slope)}`} đ/buổi</span>
               </div>
             </div>
           </SummaryTooltipCard>
@@ -292,6 +293,8 @@ export const SummaryStrip: React.FC<SummaryStripProps> = React.memo(({
                 <span className="text-emerald-700 dark:text-emerald-400">≥ 90: Xuất Sắc</span>
                 <span className="text-blue-700 dark:text-blue-400">80 - 89: Giỏi</span>
                 <span className="text-cyan-700 dark:text-cyan-400">65 - 79: Khá</span>
+                <span className="text-amber-700 dark:text-amber-400">50 - 64: Trung Bình</span>
+                <span className="text-orange-700 dark:text-orange-400">35 - 49: Yếu</span>
                 <span className="text-rose-700 dark:text-rose-400">&lt; 35: Kém</span>
               </div>
             }

@@ -49,11 +49,12 @@ export const ClassBenchmarkTable: React.FC<ClassBenchmarkTableProps> = ({
       const avgEma = emaScores.length > 0 ? trunc1Dec(emaScores.reduce((a, b) => a + b, 0) / emaScores.length) : 0;
 
       const cSessionRecords = sessionRecords.filter(r => String(r.class_id) === String(c.id));
-      const classSd = classAnalyticsMap[String(c.id)]?.std_dev !== undefined
+      const rawClassSd = classAnalyticsMap[String(c.id)]?.std_dev !== undefined
         ? classAnalyticsMap[String(c.id)].std_dev
         : (selectedClassId === String(c.id) && analyticsSummary?.std_dev !== undefined)
           ? analyticsSummary.std_dev
           : computeClassAnalyticsSd(cSessionRecords);
+      const classSd = trunc1Dec(Number(rawClassSd || 0));
 
       let totalPresent = 0, totalSessions = 0;
       cStudents.forEach(s => {
@@ -141,7 +142,7 @@ export const ClassBenchmarkTable: React.FC<ClassBenchmarkTableProps> = ({
       accessorKey: 'classSd',
       header: () => <div className="text-center w-full">Độ Lệch Chuẩn (σ)</div>,
       meta: { headerText: 'Độ Lệch Chuẩn (σ)' },
-      cell: ({ getValue }) => <div className="text-center font-mono font-black text-cyan-700 dark:text-cyan-400 text-base">σ = {getValue<number>()}</div>,
+      cell: ({ getValue }) => <div className="text-center font-mono font-black text-cyan-700 dark:text-cyan-400 text-base">σ = {format1Dec(getValue<number>())}</div>,
     },
     {
       accessorKey: 'evaluation',

@@ -168,7 +168,7 @@ export const HeadToHeadDuel: React.FC<HeadToHeadDuelProps> = ({
                 Độ Lệch SD
               </span>
               <span className="text-lg font-black font-mono text-amber-600 dark:text-amber-400">
-                {classComparisonData.classA.classSd}
+                {format1Dec(Number(classComparisonData.classA.classSd || 0))}
               </span>
             </div>
           </div>
@@ -269,7 +269,7 @@ export const HeadToHeadDuel: React.FC<HeadToHeadDuelProps> = ({
                 Độ Lệch SD
               </span>
               <span className="text-lg font-black font-mono text-yellow-600 dark:text-yellow-400">
-                {classComparisonData.classB.classSd}
+                {format1Dec(Number(classComparisonData.classB.classSd || 0))}
               </span>
             </div>
           </div>

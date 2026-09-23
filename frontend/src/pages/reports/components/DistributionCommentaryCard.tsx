@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Info, BookOpen, X } from 'lucide-react';
+import { Info, X } from 'lucide-react';
 import { DistributionDetailedEvaluation } from '../utils/distributionAnalytics';
 
 interface DistributionCommentaryCardProps {
@@ -28,16 +28,13 @@ export const DistributionCommentaryCard: React.FC<DistributionCommentaryCardProp
   return (
     <div
       ref={containerRef}
-      className="bg-white dark:bg-[#0b0f19] border border-slate-300/80 dark:border-[#1b253b] rounded-2xl p-6 shadow-[0_4px_20px_-4px_rgba(15,23,42,0.08),0_2px_4px_-1px_rgba(15,23,42,0.04)] dark:shadow-xl space-y-6 select-none relative animate-cascade-3 font-sans transition-colors"
+      className="pt-6 border-t border-slate-200 dark:border-white/10 space-y-5 select-none relative animate-cascade-3 font-sans transition-colors"
     >
       {/* 1. HEADER TITLE & RATING BADGE */}
-      <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-white/10">
-        <div className="flex items-center gap-2.5">
-          <BookOpen size={16} className="text-indigo-500 dark:text-indigo-400" />
-          <h4 className="text-sm font-black uppercase text-slate-900 dark:text-white tracking-wider">
-            {evaluation.subjectTitle}
-          </h4>
-        </div>
+      <div className="flex flex-wrap items-center justify-between gap-3 pb-2">
+        <h4 className="text-sm font-black uppercase text-slate-900 dark:text-white tracking-wider">
+          {evaluation.subjectTitle}
+        </h4>
         <span className="px-3 py-1 rounded-lg text-xs font-black bg-indigo-500/10 dark:bg-indigo-500/15 text-indigo-600 dark:text-indigo-300 border border-indigo-500/20 dark:border-indigo-500/30">
           {distributionRating}
         </span>

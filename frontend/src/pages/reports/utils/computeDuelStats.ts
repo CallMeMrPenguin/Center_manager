@@ -64,11 +64,12 @@ export function computeDuelStats({
     const avgHw = hwScores.length > 0 ? trunc1Dec(hwScores.reduce((a, b) => a + b, 0) / hwScores.length) : 0;
 
     const cSessionRecords = sessionRecords.filter(r => String(r.class_id) === String(cObj.id));
-    const classSd = classAnalyticsMap[String(cObj.id)]?.std_dev !== undefined
+    const rawClassSd = classAnalyticsMap[String(cObj.id)]?.std_dev !== undefined
       ? classAnalyticsMap[String(cObj.id)].std_dev
       : (selectedClassId === String(cObj.id) && analyticsSummary?.std_dev !== undefined)
         ? analyticsSummary.std_dev
         : computeClassAnalyticsSd(cSessionRecords);
+    const classSd = trunc1Dec(Number(rawClassSd || 0));
 
     let totalPresent = 0, totalSessions = 0;
     cStudents.forEach(s => {

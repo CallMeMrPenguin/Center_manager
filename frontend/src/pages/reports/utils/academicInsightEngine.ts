@@ -40,8 +40,8 @@ export function generateAcademicInsights(params: {
   const [c1, c2, hw, overall] = [n(stats?.c1), n(stats?.c2), n(stats?.hw), n(stats?.overall)];
   const [attPct, sessions] = [stats?.attendancePct ?? 100, stats?.sessionCount ?? 0];
   const [ema, emaC1, emaC2, emaHw] = [n(engine?.ema_level), n(engine?.ema_c1), n(engine?.ema_c2), n(engine?.ema_hw)];
-  const [trend, trendLabel] = [n(engine?.trend_slope), engine?.trend_label ?? 'Ổn định'];
-  const [sd, consistencyLabel] = [n(engine?.std_dev), engine?.consistency_label ?? 'Ổn định'];
+  const [trend, trendLabel] = [trunc1Dec(n(engine?.trend_slope)), engine?.trend_label ?? 'Ổn định'];
+  const [sd, consistencyLabel] = [trunc1Dec(n(engine?.std_dev)), engine?.consistency_label ?? 'Ổn định'];
   const pi = n(engine?.performance_index) || (overall > 0 ? trunc1Dec(overall * 10) : 80);
   const [predNext, predModel] = [n(engine?.predicted_next), engine?.prediction_model ?? 'Smart Predict'];
   const [predC1, predC2, predHw] = [n(engine?.pred_c1), n(engine?.pred_c2), n(engine?.pred_hw)];
@@ -77,7 +77,7 @@ export function generateAcademicInsights(params: {
     });
 
     // Metric 2: Cân bằng kỹ năng Từ vựng vs Ngữ pháp
-    const skillGap = Math.abs(c1 - c2);
+    const skillGap = trunc1Dec(Math.abs(c1 - c2));
     let skillBalanceText = 'Đang cập nhật thêm dữ liệu điểm thành phần kỹ năng.';
     let skillDotColor = '#10b981';
     if (c1 > 0 && c2 > 0) {
@@ -85,12 +85,12 @@ export function generateAcademicInsights(params: {
         skillDotColor = '#f59e0b';
         const [strong, weak] = c1 > c2 ? ['Từ Vựng', 'Ngữ Pháp'] : ['Ngữ Pháp', 'Từ Vựng'];
         const [sScore, wScore] = c1 > c2 ? [c1, c2] : [c2, c1];
-        skillBalanceText = `Mất cân bằng kỹ năng rõ rệt: ${strong} (${sScore} đ) vượt trội hơn ${weak} (${wScore} đ) tới ${skillGap.toFixed(1)} đ. Cần ưu tiên tăng cường luyện tập ${weak}.`;
+        skillBalanceText = `Mất cân bằng kỹ năng rõ rệt: ${strong} (${sScore} đ) vượt trội hơn ${weak} (${wScore} đ) tới ${skillGap} đ. Cần ưu tiên tăng cường luyện tập ${weak}.`;
       } else if (skillGap >= 0.8) {
         skillDotColor = '#3b82f6';
-        skillBalanceText = `Có độ chênh lệch nhẹ: Từ Vựng đạt ${c1} đ so với Ngữ Pháp đạt ${c2} đ (chênh lệch ${skillGap.toFixed(1)} đ), mức độ phân hóa vẫn trong tầm kiểm soát.`;
+        skillBalanceText = `Có độ chênh lệch nhẹ: Từ Vựng đạt ${c1} đ so với Ngữ Pháp đạt ${c2} đ (chênh lệch ${skillGap} đ), mức độ phân hóa vẫn trong tầm kiểm soát.`;
       } else {
-        skillBalanceText = `Từ Vựng (${c1} đ) và Ngữ Pháp (${c2} đ) phát triển rất đồng đều (độ lệch chỉ ${skillGap.toFixed(1)} đ), tạo nền tảng vững chắc cho phản xạ toàn diện.`;
+        skillBalanceText = `Từ Vựng (${c1} đ) và Ngữ Pháp (${c2} đ) phát triển rất đồng đều (độ lệch chỉ ${skillGap} đ), tạo nền tảng vững chắc cho phản xạ toàn diện.`;
       }
     }
 
@@ -292,7 +292,7 @@ export function generateAcademicInsights(params: {
       tooltipImpact: 'Giúp điều chỉnh trọng tâm giảng dạy vào kỹ năng lớp đang còn yếu.',
     });
 
-    const classSd = dist?.stdDev ?? sd;
+    const classSd = trunc1Dec(dist?.stdDev ?? sd);
     const isDispersed = classSd > 1.4;
 
     metrics.push({

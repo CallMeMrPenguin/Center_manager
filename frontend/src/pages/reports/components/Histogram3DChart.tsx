@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { Layers } from 'lucide-react';
 import { SegmentedControl } from '../../../components/SegmentedControl';
 import { DistributionStats, DistributionScoreBin } from '../utils/distributionAnalytics';
 import { HistogramTooltip } from './HistogramTooltip';
@@ -102,25 +101,20 @@ export const Histogram3DChart: React.FC<Histogram3DChartProps> = ({
   return (
     <div
       ref={containerRef}
-      className="bg-white dark:bg-[#090c17] border border-slate-300 dark:border-[#1e2746] rounded-2xl p-5 shadow-sm dark:shadow-2xl relative flex flex-col gap-4 overflow-hidden select-none"
+      className="relative flex flex-col gap-4 select-none"
     >
       {/* 1. Header Toolbar with Title, Granularity Mode & Active Selection */}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 dark:border-white/10 pb-3">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-xl bg-indigo-500/15 border border-indigo-500/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
-            <Layers size={18} />
-          </div>
-          <div>
-            <h3 className="text-sm font-black uppercase tracking-wider text-slate-900 dark:text-white flex items-center gap-2">
-              <span>Phổ Điểm Đa Tầng 3D</span>
-              <span className="text-xs font-mono font-bold text-indigo-600 dark:text-indigo-300">
-                (N = {stats.n} học sinh)
-              </span>
-            </h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-              Phân bố điểm theo mức {stats.evaluation?.skillName || 'Điểm Số'} - Bấm vào cột để lọc danh sách
-            </p>
-          </div>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h3 className="text-sm font-black uppercase tracking-wider text-slate-900 dark:text-white flex items-center gap-2">
+            <span>Phổ Điểm Đa Tầng 3D</span>
+            <span className="text-xs font-mono font-bold text-indigo-600 dark:text-indigo-400">
+              (N = {stats.n} học sinh)
+            </span>
+          </h3>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+            Phân bố điểm theo mức {stats.evaluation?.skillName || 'Điểm Số'} - Bấm vào cột để lọc danh sách
+          </p>
         </div>
 
         {/* Segmented Pill for Granularity (2 Views: Chi Tiết & Tổng Quan) */}

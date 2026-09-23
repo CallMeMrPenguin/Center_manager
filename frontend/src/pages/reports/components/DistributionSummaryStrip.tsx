@@ -233,7 +233,7 @@ export const DistributionSummaryStrip: React.FC<DistributionSummaryStripProps> =
           {distributionStats.distributionRating}
         </span>
         <span className="text-[10px] text-slate-600 dark:text-slate-400 font-semibold block truncate">
-          {distributionStats.distributionShape}
+          Dạng: {distributionStats.distributionShape}
         </span>
 
         {activeTooltip === 'dist-rating' && (
