@@ -243,7 +243,7 @@ def calculate_performance_analytics(session_records: List[Dict[str, Any]]) -> Di
     fitted_hw = get_fitted_values(hw_list) if hw_list else []
 
     if slope_overall > 0.3:
-        trend_label = "Tăng trưởng mạnh ↗"
+        trend_label = "Tăng trưởng mạnh"
     elif slope_overall >= 0.1:
         trend_label = "Đang cải thiện"
     elif slope_overall >= -0.1:
@@ -348,14 +348,13 @@ def calculate_performance_analytics(session_records: List[Dict[str, Any]]) -> Di
     if hw_list and avg_hw < 7.0:
         recs.append("Khuyên dùng: Cho học sinh luyện tập thêm bài tập về nhà để củng cố kiến thức căn bản.")
     if att_pct < 85:
-        recs.append(f"Cảnh báo: Tỷ lệ vắng mặt cao ({att_pct:.0f}%), ảnh hưởng đến khả năng tiếp thu.")
+        absent_pct = 100.0 - att_pct
+        recs.append(f"Cảnh báo: Tỷ lệ chuyên cần thấp (chỉ đạt {att_pct:.0f}%), vắng {absent_pct:.0f}% số buổi học.")
 
-    if std_dev >= 4.0:
-        recs.append(f"Cảnh báo phân cực cực độ: Lớp học có sự chênh lệch trình độ rất lớn (SD = {std_dev:.1f}). Cần khẩn cấp chia nhóm phụ đạo riêng biệt hoặc áp dụng bài tập phân hóa.")
-    elif std_dev >= 2.2:
-        recs.append(f"Cảnh báo phân hóa mạnh: Khoảng cách học lực trong lớp khá cao (SD = {std_dev:.1f}). Giáo viên nên giao bài mở rộng cho nhóm giỏi và bài củng cố cho nhóm dưới.")
+    if std_dev >= 2.5:
+        recs.append(f"Cảnh báo phong độ: Điểm số qua các buổi có độ trồi sụt lớn (SD = {std_dev:.1f}), tâm lý làm bài chưa ổn định.")
     elif std_dev >= 1.2:
-        recs.append(f"Khuyên dùng: Điểm số có sự trồi sụt so với xu hướng (SD = {std_dev:.1f}), cần theo dõi sát sao từng buổi học.")
+        recs.append(f"Lưu ý: Điểm số có sự dao động qua các buổi kiểm tra (SD = {std_dev:.1f}), cần duy trì ôn tập đều đặn.")
     elif slope_overall > 0.2:
         recs.append("Khen ngợi: Đang có sự tiến bộ vượt bậc và duy trì phong độ rất tốt!")
 

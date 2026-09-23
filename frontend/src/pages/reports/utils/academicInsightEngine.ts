@@ -37,27 +37,14 @@ export function generateAcademicInsights(params: {
 }): AcademicInsightReport {
   const { stats, engine, hasSelectedStudent, selectedStudentObj, selectedClassId, classes = [], filteredRankings = [], distributionStats } = params;
 
-  const c1 = n(stats?.c1);
-  const c2 = n(stats?.c2);
-  const hw = n(stats?.hw);
-  const mockTest = n(stats?.mockTest);
-  const overall = n(stats?.overall);
-  const attPct = stats?.attendancePct ?? 100;
-  const sessions = stats?.sessionCount ?? 0;
-  const ema = n(engine?.ema_level);
-  const emaC1 = n(engine?.ema_c1);
-  const emaC2 = n(engine?.ema_c2);
-  const emaHw = n(engine?.ema_hw);
-  const trend = n(engine?.trend_slope);
-  const trendLabel = engine?.trend_label ?? 'Ổn định';
-  const sd = n(engine?.std_dev);
-  const consistencyLabel = engine?.consistency_label ?? 'Ổn định';
+  const [c1, c2, hw, overall] = [n(stats?.c1), n(stats?.c2), n(stats?.hw), n(stats?.overall)];
+  const [attPct, sessions] = [stats?.attendancePct ?? 100, stats?.sessionCount ?? 0];
+  const [ema, emaC1, emaC2, emaHw] = [n(engine?.ema_level), n(engine?.ema_c1), n(engine?.ema_c2), n(engine?.ema_hw)];
+  const [trend, trendLabel] = [n(engine?.trend_slope), engine?.trend_label ?? 'Ổn định'];
+  const [sd, consistencyLabel] = [n(engine?.std_dev), engine?.consistency_label ?? 'Ổn định'];
   const pi = n(engine?.performance_index) || (overall > 0 ? trunc1Dec(overall * 10) : 80);
-  const predNext = n(engine?.predicted_next);
-  const predModel = engine?.prediction_model ?? 'Smart Predict';
-  const predC1 = n(engine?.pred_c1);
-  const predC2 = n(engine?.pred_c2);
-  const predHw = n(engine?.pred_hw);
+  const [predNext, predModel] = [n(engine?.predicted_next), engine?.prediction_model ?? 'Smart Predict'];
+  const [predC1, predC2, predHw] = [n(engine?.pred_c1), n(engine?.pred_c2), n(engine?.pred_hw)];
   const selectedClass = classes.find((c) => String(c.id) === String(selectedClassId));
   const className = selectedClass?.class_name ?? 'Lớp Học';
 
@@ -91,15 +78,13 @@ export function generateAcademicInsights(params: {
 
     // Metric 2: Cân bằng kỹ năng Từ vựng vs Ngữ pháp
     const skillGap = Math.abs(c1 - c2);
-    let skillBalanceText = '';
+    let skillBalanceText = 'Đang cập nhật thêm dữ liệu điểm thành phần kỹ năng.';
     let skillDotColor = '#10b981';
     if (c1 > 0 && c2 > 0) {
       if (skillGap >= 1.5) {
         skillDotColor = '#f59e0b';
-        const strong = c1 > c2 ? 'Từ Vựng' : 'Ngữ Pháp';
-        const weak = c1 > c2 ? 'Ngữ Pháp' : 'Từ Vựng';
-        const sScore = c1 > c2 ? c1 : c2;
-        const wScore = c1 > c2 ? c2 : c1;
+        const [strong, weak] = c1 > c2 ? ['Từ Vựng', 'Ngữ Pháp'] : ['Ngữ Pháp', 'Từ Vựng'];
+        const [sScore, wScore] = c1 > c2 ? [c1, c2] : [c2, c1];
         skillBalanceText = `Mất cân bằng kỹ năng rõ rệt: ${strong} (${sScore} đ) vượt trội hơn ${weak} (${wScore} đ) tới ${skillGap.toFixed(1)} đ. Cần ưu tiên tăng cường luyện tập ${weak}.`;
       } else if (skillGap >= 0.8) {
         skillDotColor = '#3b82f6';
@@ -107,8 +92,6 @@ export function generateAcademicInsights(params: {
       } else {
         skillBalanceText = `Từ Vựng (${c1} đ) và Ngữ Pháp (${c2} đ) phát triển rất đồng đều (độ lệch chỉ ${skillGap.toFixed(1)} đ), tạo nền tảng vững chắc cho phản xạ toàn diện.`;
       }
-    } else {
-      skillBalanceText = `Đang cập nhật thêm dữ liệu điểm thành phần kỹ năng.`;
     }
 
     metrics.push({
@@ -125,10 +108,12 @@ export function generateAcademicInsights(params: {
     // Metric 3: Ý thức làm BTVN vs Điểm kiểm tra
     if (hw > 0 && overall > 0) {
       const hwGap = trunc1Dec(hw - overall);
-      const hwDot = hw < 6.0 ? '#f97316' : hwGap >= 1.5 ? '#3b82f6' : '#10b981';
+      const hwDot = hw < 6.0 || hwGap <= -1.5 ? '#f97316' : hwGap >= 1.5 ? '#3b82f6' : '#10b981';
       const hwText =
         hw < 6.0
           ? `Điểm BTVN trung bình thấp (${hw} đ < chuẩn 7.0 đ): Học sinh chưa đầu tư thời gian tự học đầy đủ tại nhà, làm hạn chế củng cố bài giảng.`
+          : hwGap <= -1.5
+          ? `BTVN đạt ${hw} đ thấp hơn rõ rệt so với điểm kiểm tra tại lớp (${overall} đ): Học sinh có năng lực tốt nhưng chưa chăm chỉ làm bài ở nhà, cần nhắc nhở hoàn thiện đầy đủ.`
           : hwGap >= 1.5
           ? `BTVN đạt ${hw} đ cao hơn điểm kiểm tra trực tiếp (${overall} đ) là +${hwGap} đ: Cần tăng cường kiểm tra độc lập tại lớp để đảm bảo hiểu sâu.`
           : `Điểm BTVN (${hw} đ) phản ánh đúng thực lực kiểm tra tại lớp (${overall} đ): Học sinh duy trì thái độ tự học nghiêm túc và thực chất.`;
@@ -147,7 +132,9 @@ export function generateAcademicInsights(params: {
 
     // Metric 4: Tốc độ tăng trưởng
     const trendText =
-      trend > 0.3
+      sessions < 3
+        ? `Đang trong giai đoạn khởi đầu (${sessions} buổi học): Cần thêm dữ liệu để xác định rõ quỹ đạo tăng trưởng.`
+        : trend > 0.3
         ? `Tốc độ tiến bộ vượt bậc (+${trend} đ/buổi, ${trendLabel}): Học sinh tiếp thu bài rất nhanh và có sự bứt phá mạnh mẽ qua từng buổi.`
         : trend > 0.1
         ? `Quỹ đạo tiến bộ đều đặn (+${trend} đ/buổi, ${trendLabel}): Học sinh đang đi đúng hướng theo lộ trình giảng dạy.`
@@ -160,7 +147,7 @@ export function generateAcademicInsights(params: {
     metrics.push({
       id: 'growth_trajectory',
       label: 'Tốc Độ Tăng Trưởng',
-      dotColor: trend > 0.1 ? '#10b981' : trend >= -0.1 ? '#8b5cf6' : '#ef4444',
+      dotColor: sessions < 3 ? '#64748b' : trend > 0.1 ? '#10b981' : trend >= -0.1 ? '#8b5cf6' : '#ef4444',
       text: trendText,
       tooltipTitle: 'Tốc Độ Tăng Trưởng (Trend Rate)',
       tooltipDesc: 'Hệ số góc của đường hồi quy biểu diễn mức thay đổi điểm số trung bình sau mỗi buổi học.',
@@ -170,7 +157,9 @@ export function generateAcademicInsights(params: {
 
     // Metric 5: Độ ổn định SD
     const sdText =
-      sd < 0.5
+      sessions < 3
+        ? `Dữ liệu ban đầu (${sessions} bài kiểm tra): Đang trong giai đoạn theo dõi tích lũy phong độ (cần tối thiểu 3 bài để phân tích độ ổn định).`
+        : sd < 0.5
         ? `Độ lệch chuẩn cực thấp (σ = ${sd}, ${consistencyLabel}): Học sinh làm bài rất đều tay, phong độ vững vàng trong mọi bài kiểm tra.`
         : sd <= 1.2
         ? `Độ ổn định tốt (σ = ${sd}, ${consistencyLabel}): Sự dao động điểm số nằm trong biên độ tự nhiên cho phép.`
@@ -181,7 +170,7 @@ export function generateAcademicInsights(params: {
     metrics.push({
       id: 'score_consistency',
       label: 'Độ Ổn Định & Phong Độ',
-      dotColor: sd <= 1.2 ? '#06b6d4' : sd <= 2.0 ? '#f59e0b' : '#ef4444',
+      dotColor: sessions < 3 ? '#64748b' : sd <= 1.2 ? '#06b6d4' : sd <= 2.0 ? '#f59e0b' : '#ef4444',
       text: sdText,
       tooltipTitle: 'Độ Lệch Chuẩn Điểm Số (SD - σ)',
       tooltipDesc: 'Đo lường mức độ phân tán của các điểm số xung quanh giá trị trung bình.',
@@ -205,7 +194,13 @@ export function generateAcademicInsights(params: {
     const totalStudents = filteredRankings.length;
     const rankNum = parseInt(stats.rank?.replace('#', '') || '1') || 1;
     const pct = totalStudents > 0 ? Math.round((rankNum / totalStudents) * 100) : 100;
-    const rankText = stats.rank && stats.rank !== '#-' ? `Xếp hạng ${stats.rank}/${totalStudents} học sinh trong lớp (nhóm Top ${pct}%). ` : '';
+    const rankTierText =
+      pct <= 30
+        ? `nhóm Top ${pct}% dẫn đầu lớp`
+        : pct <= 70
+        ? `nhóm trung vị của lớp (phân vị ${pct}%)`
+        : `nhóm cần bứt phá cải thiện thứ hạng (phân vị ${pct}%)`;
+    const rankText = stats.rank && stats.rank !== '#-' ? `Xếp hạng ${stats.rank}/${totalStudents} học sinh trong lớp (${rankTierText}). ` : '';
     const attText =
       attPct >= 95
         ? `Chuyên cần đạt ${attPct}% (${sessions} buổi học) — chuyên cần xuất sắc.`
@@ -238,16 +233,16 @@ export function generateAcademicInsights(params: {
           ? `Học sinh ${studentName} có học lực Khá vững (PI ${pi}/100, Hạng ${tier.name}), có tiềm năng bứt phá lên nhóm Cao Thủ / Quán Quân nếu khắc phục các điểm nghẽn kỹ năng.`
           : `Học sinh ${studentName} hiện đang ở nhóm Cần Hỗ Trợ (Hạng ${tier.name}, PI ${pi}/100), cần sự quan tâm sát sao từ giáo viên và gia đình.`,
         riskAlert: isGood
-          ? skillGap >= 1.2
-            ? `Lưu ý cân bằng giữa ${c1 < c2 ? 'Từ Vựng' : 'Ngữ Pháp'} để không bị mất điểm ở các câu phân loại cao cấp.`
-            : `Cần giữ vững phong độ ổn định và tính cẩn thận, tránh chủ quan khi gặp các bài tập nâng cao.`
+          ? (skillGap >= 1.2 ? `Lưu ý cân bằng giữa ${c1 < c2 ? 'Từ Vựng' : 'Ngữ Pháp'} để không bị mất điểm ở các câu phân loại cao cấp.` : `Cần giữ vững phong độ ổn định và tính cẩn thận, tránh chủ quan khi gặp các bài tập nâng cao.`)
           : isMedium
-          ? c1 < 6.5
-            ? `Điểm Từ Vựng (${c1} đ) đang là rào cản chính cần được cải thiện gấp.`
-            : c2 < 6.5
-            ? `Điểm Ngữ Pháp (${c2} đ) chưa thật sự chắc chắn, cần ôn tập lại các cấu trúc trọng điểm.`
-            : `Cần cải thiện độ ổn định và giảm biên độ dao động điểm số qua các buổi kiểm tra.`
-          : `Hổng kiến thức nền tảng ở cả Từ Vựng (${c1} đ) và Ngữ Pháp (${c2} đ), nguy cơ không theo kịp tiến độ các bài học kế tiếp.`,
+          ? (c1 < 6.5 && c2 < 6.5 ? `Cần củng cố đồng đều cả Từ Vựng (${c1} đ) và Ngữ Pháp (${c2} đ) để bứt phá lên nhóm giỏi.` : c1 < 6.5 ? `Điểm Từ Vựng (${c1} đ) đang là rào cản chính cần được cải thiện gấp.` : `Điểm Ngữ Pháp (${c2} đ) chưa thật sự chắc chắn, cần ôn tập lại các cấu trúc trọng điểm.`)
+          : c1 >= 6.5 && c2 < 5.0
+          ? `Nắm khá tốt Từ Vựng (${c1} đ) nhưng Ngữ Pháp (${c2} đ) bị hổng nhiều, cần tập trung ôn luyện cấu trúc câu.`
+          : c2 >= 6.5 && c1 < 5.0
+          ? `Ngữ Pháp đạt chuẩn (${c2} đ) nhưng vốn Từ Vựng (${c1} đ) còn yếu, cần tăng cường học từ mới hàng ngày.`
+          : c1 < 5.0 && c2 < 5.0
+          ? `Hổng kiến thức nền tảng ở cả Từ Vựng (${c1} đ) và Ngữ Pháp (${c2} đ), nguy cơ không theo kịp tiến độ các bài học kế tiếp.`
+          : `Cần có kế hoạch phụ đạo tăng cường cho kỹ năng còn yếu để theo kịp tiến độ cả lớp.`,
       },
     };
   }
@@ -279,16 +274,18 @@ export function generateAcademicInsights(params: {
     });
 
     const gap = Math.abs(c1 - c2);
-    const dominantSkill = c1 >= c2 ? 'Từ Vựng' : 'Ngữ Pháp';
-    const subSkill = c1 >= c2 ? 'Ngữ Pháp' : 'Từ Vựng';
-    const dominantScore = c1 >= c2 ? c1 : c2;
-    const subScore = c1 >= c2 ? c2 : c1;
+    const [dominantSkill, subSkill] = c1 >= c2 ? ['Từ Vựng', 'Ngữ Pháp'] : ['Ngữ Pháp', 'Từ Vựng'];
+    const [dominantScore, subScore] = c1 >= c2 ? [c1, c2] : [c2, c1];
+    const skillText =
+      gap < 0.3
+        ? `Mặt bằng chung lớp tiếp thu đồng đều ở cả hai kỹ năng Từ Vựng (${c1} đ) và Ngữ Pháp (${c2} đ).`
+        : `Lớp có xu hướng mạnh về ${dominantSkill} (${dominantScore} đ) hơn ${subSkill} (${subScore} đ), độ chênh lệch bình quân ${gap.toFixed(1)} đ. ${gap >= 1.0 ? `Cần phân bổ thêm thời lượng bài giảng cho các tiết luyện tập ${subSkill}.` : `Hai kỹ năng đang được phát triển cân đối.`}`;
 
     metrics.push({
       id: 'class_skill_comparison',
       label: 'Cơ Cấu Kỹ Năng Toàn Lớp',
       dotColor: gap >= 1.0 ? '#f59e0b' : '#10b981',
-      text: `Lớp có xu hướng mạnh về ${dominantSkill} (${dominantScore} đ) hơn ${subSkill} (${subScore} đ), độ chênh lệch bình quân ${gap.toFixed(1)} đ. ${gap >= 1.0 ? `Cần phân bổ thêm thời lượng bài giảng cho các tiết luyện tập ${subSkill}.` : `Hai kỹ năng đang được phát triển cân đối.`}`,
+      text: skillText,
       tooltipTitle: 'Phân Tích Kỹ Năng Tập Thể',
       tooltipDesc: 'So sánh điểm trung bình giữa Từ Vựng và Ngữ Pháp trên quy mô toàn lớp.',
       tooltipFormula: 'Độ lệch = abs(TB Từ Vựng - TB Ngữ Pháp)',
