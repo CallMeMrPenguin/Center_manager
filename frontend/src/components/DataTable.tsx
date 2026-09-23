@@ -269,16 +269,18 @@ function ColumnVisibilityDropdown<TData>({
   const allCols = table.getAllLeafColumns().filter(c => c.id !== 'select' && c.id !== '_expander');
 
   return (
-    <div className="relative" ref={ref}>
+    <div className="relative shrink-0" ref={ref}>
       <button
         type="button"
         onClick={() => setOpen(v => !v)}
-        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200/80 dark:bg-[#181a20] dark:hover:bg-[#20232b] text-slate-700 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white text-xs font-bold transition cursor-pointer shadow-xs border-0 outline-none"
+        className="group flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200/80 dark:bg-[#181a20] dark:hover:bg-[#20232b] text-slate-700 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white text-xs font-bold transition-all duration-200 cursor-pointer shadow-xs border-0 outline-none shrink-0"
         title="Hiển thị, Thứ tự & Căn chỉnh cột"
       >
-        <SlidersHorizontal size={13} className="text-indigo-500 dark:text-indigo-400" />
-        <span className="hidden sm:inline">Cột</span>
-        {open ? <ChevronUp size={11} /> : <ChevronDown size={11} />}
+        <SlidersHorizontal size={13} className="text-indigo-500 dark:text-indigo-400 shrink-0" />
+        <span className="max-w-0 opacity-0 group-hover:max-w-[80px] group-hover:opacity-100 xl:max-w-none xl:opacity-100 transition-all duration-200 ease-in-out whitespace-nowrap overflow-hidden inline-block">
+          Cột
+        </span>
+        {open ? <ChevronUp size={11} className="shrink-0" /> : <ChevronDown size={11} className="shrink-0" />}
       </button>
 
       {open && (
@@ -603,16 +605,18 @@ function ExportDropdown<TData>({
   };
 
   return (
-    <div className="relative" ref={ref}>
+    <div className="relative shrink-0" ref={ref}>
       <button
         type="button"
         onClick={() => setOpen(v => !v)}
-        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200/80 dark:bg-[#181a20] dark:hover:bg-[#20232b] text-slate-700 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white text-xs font-bold transition cursor-pointer shadow-xs border-0 outline-none"
+        className="group flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200/80 dark:bg-[#181a20] dark:hover:bg-[#20232b] text-slate-700 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white text-xs font-bold transition-all duration-200 cursor-pointer shadow-xs border-0 outline-none shrink-0"
         title="Xuất dữ liệu"
       >
-        <Download size={13} className="text-emerald-500 dark:text-emerald-400" />
-        <span className="hidden sm:inline">Xuất</span>
-        {open ? <ChevronUp size={11} /> : <ChevronDown size={11} />}
+        <Download size={13} className="text-emerald-500 dark:text-emerald-400 shrink-0" />
+        <span className="max-w-0 opacity-0 group-hover:max-w-[80px] group-hover:opacity-100 xl:max-w-none xl:opacity-100 transition-all duration-200 ease-in-out whitespace-nowrap overflow-hidden inline-block">
+          Xuất
+        </span>
+        {open ? <ChevronUp size={11} className="shrink-0" /> : <ChevronDown size={11} className="shrink-0" />}
       </button>
 
       {open && (
@@ -1043,9 +1047,9 @@ export function DataTable<TData>({
           <div className="flex flex-wrap items-center gap-2 flex-1 min-w-0">
             {enableGlobalSearch && (
               <motion.div
-                animate={{ width: searchFocused ? 340 : 220 }}
+                animate={{ width: searchFocused ? 320 : 200 }}
                 transition={{ type: 'spring', stiffness: 350, damping: 26 }}
-                className="relative min-w-[180px]"
+                className="relative min-w-[130px] sm:min-w-[180px] max-w-full"
               >
                 <motion.div
                   animate={{ scale: searchFocused ? 1.15 : 1 }}

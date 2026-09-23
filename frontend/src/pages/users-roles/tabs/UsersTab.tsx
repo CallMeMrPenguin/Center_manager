@@ -143,26 +143,31 @@ export const UsersTab: React.FC<UsersTabProps> = ({
         exportFilename="danh_sach_tai_khoan"
         searchPlaceholder="Tìm kiếm tài khoản theo tên, vai trò..."
         toolbarRight={
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             {onSyncStudents && (
               <button
                 type="button"
                 onClick={onSyncStudents}
                 disabled={syncing}
-                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold border-0 shadow-xs transition cursor-pointer active:scale-95 disabled:opacity-50"
+                className="group flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3.5 py-1.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold border-0 shadow-xs transition-all duration-200 cursor-pointer active:scale-95 disabled:opacity-50 shrink-0"
                 title="Tự động tạo hoặc đồng bộ tài khoản cho toàn bộ học sinh"
               >
-                <RefreshCw size={13} className={syncing ? 'animate-spin' : ''} />
-                <span>{syncing ? 'Đang đồng bộ...' : 'Tạo TK Cho Toàn Bộ HS'}</span>
+                <RefreshCw size={13} className={`${syncing ? 'animate-spin' : ''} shrink-0`} />
+                <span className="max-w-0 opacity-0 group-hover:max-w-[180px] group-hover:opacity-100 xl:max-w-none xl:opacity-100 transition-all duration-200 ease-in-out whitespace-nowrap overflow-hidden inline-block">
+                  {syncing ? 'Đang đồng bộ...' : 'Tạo TK Cho Toàn Bộ HS'}
+                </span>
               </button>
             )}
             <button
               type="button"
               onClick={onOpenCreateModal}
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-black shadow-xs border-0 transition-all cursor-pointer active:scale-95 shrink-0"
+              className="group flex items-center gap-1 sm:gap-1.5 px-3 sm:px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-black shadow-xs border-0 transition-all duration-200 cursor-pointer active:scale-95 shrink-0"
+              title="Thêm tài khoản mới"
             >
-              <Plus size={14} />
-              <span>Thêm Tài Khoản</span>
+              <Plus size={14} className="shrink-0" />
+              <span className="max-w-0 opacity-0 group-hover:max-w-[140px] group-hover:opacity-100 lg:max-w-none lg:opacity-100 transition-all duration-200 ease-in-out whitespace-nowrap overflow-hidden inline-block">
+                Thêm Tài Khoản
+              </span>
             </button>
           </div>
         }
