@@ -2,6 +2,7 @@ import React from 'react';
 import { ColumnDef } from '@tanstack/react-table';
 import { Edit3 } from 'lucide-react';
 import { Student } from '../../../types';
+import { vietnameseNameSortingFn } from '../../../utils/vietnameseSort';
 
 export const createStudentColumns = (
   handleOpenEdit: (student: Student) => void
@@ -20,6 +21,7 @@ export const createStudentColumns = (
     id: 'name',
     accessorKey: 'full_name',
     header: 'Họ và Tên',
+    sortingFn: vietnameseNameSortingFn,
     cell: ({ row }) => {
       const st = row.original;
       const initial = st.full_name?.trim() ? st.full_name.trim().charAt(0).toUpperCase() : 'H';

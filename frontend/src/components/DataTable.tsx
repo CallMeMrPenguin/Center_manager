@@ -52,6 +52,7 @@ import {
 } from 'lucide-react';
 import { SegmentedControl } from './SegmentedControl';
 import { filterWithNearMatchFallback } from '../utils/fuzzySearch';
+import { vietnameseNameSortingFn, isNameColumn } from '../utils/vietnameseSort';
 
 // ─── Header Text Extractor Helper ───────────────────────────────────────────
 function getTextFromReactNode(node: any): string {
@@ -856,7 +857,17 @@ export function DataTable<TData>({
       });
     }
 
-    cols.push(...columns);
+    const enhancedColumns = columns.map(col => {
+      if (isNameColumn(col) && !col.sortingFn) {
+        return {
+          ...col,
+          sortingFn: vietnameseNameSortingFn,
+        };
+      }
+      return col;
+    });
+
+    cols.push(...enhancedColumns);
     return cols;
   }, [columns, enableRowSelection, enableRowExpansion, renderSubComponent]);
 
@@ -884,6 +895,9 @@ export function DataTable<TData>({
   const table = useReactTable<TData>({
     data: processedData,
     columns: allColumns,
+    sortingFns: {
+      vietnameseName: vietnameseNameSortingFn,
+    },
     getRowId: (row: any, index: number) => String(row?.id ?? row?.student_id ?? row?._id ?? row?.key ?? index),
     columnResizeMode,
     autoResetPageIndex: false,

@@ -12,6 +12,7 @@ import { notifyDataChanged } from '../../utils';
 import { TeacherDetailCard } from './components/TeacherDetailCard';
 import { TeacherModal } from './components/TeacherModal';
 import { dataCache } from '../../utils/dataCache';
+import { vietnameseNameSortingFn } from '../../utils/vietnameseSort';
 
 export function TeachersPage() {
   const confirm = useConfirm();
@@ -168,6 +169,7 @@ export function TeachersPage() {
       id: 'name',
       accessorKey: 'full_name',
       header: 'Họ và Tên',
+      sortingFn: vietnameseNameSortingFn,
       cell: ({ row }) => {
         const t = row.original;
         const initial = t.full_name?.trim() ? t.full_name.trim().charAt(0).toUpperCase() : 'G';
