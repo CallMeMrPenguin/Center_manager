@@ -53,6 +53,7 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = ({
   gradeTypesList,
 }) => {
   const chartWrapperRef = useRef<HTMLDivElement>(null);
+  const timelineRef = useRef<HTMLDivElement>(null);
   const [hoveredPoint, setHoveredPoint] = useState<HoveredChartPoint | null>(null);
   const [zoomLevel, setZoomLevel] = useState(1.0);
   const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
@@ -71,8 +72,12 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = ({
   useEffect(() => {
     let animId: number;
     const updateDimensions = () => {
-      if (chartWrapperRef.current) {
-        const w = Math.max(600, Math.round(chartWrapperRef.current.clientWidth));
+      const el = timelineRef.current || chartWrapperRef.current;
+      if (el) {
+        // When measuring timelineRef, clientWidth is exact; if falling back to chartWrapperRef, subtract 48px padding (p-6)
+        const w = el === timelineRef.current
+          ? Math.max(500, Math.round(el.clientWidth))
+          : Math.max(500, Math.round(el.clientWidth) - 48);
         setChartWidth((prev) => (Math.abs(prev - w) > 3 ? w : prev));
       }
     };
@@ -81,12 +86,16 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = ({
       cancelAnimationFrame(animId);
       animId = requestAnimationFrame(updateDimensions);
     });
-    if (chartWrapperRef.current) observer.observe(chartWrapperRef.current);
+    if (timelineRef.current) {
+      observer.observe(timelineRef.current);
+    } else if (chartWrapperRef.current) {
+      observer.observe(chartWrapperRef.current);
+    }
     return () => {
       cancelAnimationFrame(animId);
       observer.disconnect();
     };
-  }, []);
+  }, [chartViewMode]);
 
   const clampPanOffset = useCallback(
     (x: number, y: number, z: number) => {
@@ -230,6 +239,7 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = ({
       {/* VIEW 1: TIMELINE LINE CHART */}
       {chartViewMode === 'timeline' ? (
         <div
+          ref={timelineRef}
           className={`relative overflow-hidden cursor-${
             isDragging ? 'grabbing' : zoomLevel > 1.0 ? 'grab' : 'default'
           } select-none rounded-2xl bg-white dark:bg-[#1c1c21] border-0`}
