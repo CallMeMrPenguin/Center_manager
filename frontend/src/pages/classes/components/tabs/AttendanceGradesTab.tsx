@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
-import { Edit3, Layers, Save } from 'lucide-react';
+import { Edit3, Layers, Save, FileCheck2 } from 'lucide-react';
 import { ClassItem, EnrolledStudent, AttendanceRecord } from '../../types';
 import { DataTable } from '../../../../components/DataTable';
 import { CheckScoreInput } from '../CheckScoreInput';
@@ -19,6 +19,7 @@ interface AttendanceGradesTabProps {
   onExportExcel: () => void;
   onExportDocx: () => void;
   onOpenTestConfigModal?: () => void;
+  onCircularSwap?: () => void;
   onSaveAttendance?: () => void;
   savingAttendance?: boolean;
 }
@@ -34,6 +35,7 @@ export const AttendanceGradesTab: React.FC<AttendanceGradesTabProps> = ({
   onExportExcel,
   onExportDocx,
   onOpenTestConfigModal,
+  onCircularSwap,
   onSaveAttendance,
   savingAttendance = false,
 }) => {
@@ -290,11 +292,23 @@ export const AttendanceGradesTab: React.FC<AttendanceGradesTabProps> = ({
                 <button
                   type="button"
                   onClick={onOpenTestConfigModal}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white hover:bg-blue-50 dark:bg-[#1a2238] dark:hover:bg-[#202b48] text-blue-600 hover:text-blue-700 dark:text-blue-300 dark:hover:text-white border-0 text-xs font-bold transition cursor-pointer shadow-xs hover:shadow-sm"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200/80 dark:bg-[#181a20] dark:hover:bg-[#20232b] text-slate-700 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white border-0 text-xs font-bold transition cursor-pointer shadow-xs outline-none"
                   title="Cấu Hình Bài Kiểm Tra (Check 1 & Check 2)"
                 >
                   <Layers size={13} className="text-blue-500 dark:text-blue-400 shrink-0" />
                   <span className="hidden sm:inline">Cấu Hình Kiểm Tra</span>
+                </button>
+              )}
+
+              {onCircularSwap && (
+                <button
+                  type="button"
+                  onClick={onCircularSwap}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200/80 dark:bg-[#181a20] dark:hover:bg-[#20232b] text-slate-700 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white border-0 text-xs font-bold transition cursor-pointer shadow-xs outline-none"
+                  title="Đổi bài chấm chéo vòng tròn giữa các học sinh"
+                >
+                  <FileCheck2 size={13} className="text-purple-500 dark:text-purple-400 shrink-0" />
+                  <span className="hidden sm:inline">Đổi Bài Chéo</span>
                 </button>
               )}
 

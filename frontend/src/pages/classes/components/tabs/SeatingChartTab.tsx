@@ -106,12 +106,12 @@ export const SeatingChartTab: React.FC<SeatingChartTabProps> = ({
       <div className="flex flex-wrap items-center justify-between gap-3 bg-white dark:bg-[#0d1018] p-3.5 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.08)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.45)] transition-colors">
         <div className="flex flex-wrap items-center gap-3 text-xs font-bold text-slate-700 dark:text-slate-300">
           {/* Column Count Controller */}
-          <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-[#121624] border border-slate-300 dark:border-white/10 px-3 py-1 rounded-xl shadow-xs">
+          <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-[#121624] border-0 px-3 py-1 rounded-xl shadow-xs">
             <span className="text-[11px] font-bold text-slate-600 dark:text-slate-400">Số Dãy:</span>
             <button
               type="button"
               onClick={onRemoveColumn}
-              className="w-5 h-5 rounded bg-white dark:bg-white/10 hover:bg-slate-200 dark:hover:bg-white/20 text-slate-800 dark:text-white font-black flex items-center justify-center cursor-pointer border border-slate-300 dark:border-transparent transition-all"
+              className="w-5 h-5 rounded bg-white dark:bg-white/10 hover:bg-slate-200 dark:hover:bg-white/20 text-slate-800 dark:text-white font-black flex items-center justify-center cursor-pointer border-0 shadow-2xs transition-all"
               title="Xóa 1 dãy bàn"
             >
               -
@@ -122,7 +122,7 @@ export const SeatingChartTab: React.FC<SeatingChartTabProps> = ({
             <button
               type="button"
               onClick={onAddColumn}
-              className="w-5 h-5 rounded bg-white dark:bg-white/10 hover:bg-slate-200 dark:hover:bg-white/20 text-slate-800 dark:text-white font-black flex items-center justify-center cursor-pointer border border-slate-300 dark:border-transparent transition-all"
+              className="w-5 h-5 rounded bg-white dark:bg-white/10 hover:bg-slate-200 dark:hover:bg-white/20 text-slate-800 dark:text-white font-black flex items-center justify-center cursor-pointer border-0 shadow-2xs transition-all"
               title="Thêm 1 dãy bàn"
             >
               +
@@ -131,7 +131,7 @@ export const SeatingChartTab: React.FC<SeatingChartTabProps> = ({
 
           {/* Absent Students Badge */}
           {absentStudentIds.size > 0 && (
-            <span className="flex items-center gap-1.5 bg-rose-50 dark:bg-rose-500/20 text-rose-700 dark:text-rose-300 border border-rose-300 dark:border-rose-500/30 px-3 py-1 rounded-xl text-xs font-bold">
+            <span className="flex items-center gap-1.5 bg-rose-50 dark:bg-rose-500/20 text-rose-700 dark:text-rose-300 border-0 px-3 py-1 rounded-xl text-xs font-bold shadow-2xs">
               <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
               <span>Vắng mặt: {absentStudentIds.size} học sinh</span>
             </span>
@@ -142,7 +142,7 @@ export const SeatingChartTab: React.FC<SeatingChartTabProps> = ({
             <button
               type="button"
               onClick={() => onToggleUnassignedPanel(true)}
-              className="flex items-center gap-1.5 bg-indigo-50 dark:bg-indigo-500/20 hover:bg-indigo-100 dark:hover:bg-indigo-500/30 text-indigo-700 dark:text-indigo-300 border border-indigo-300 dark:border-indigo-500/40 px-3 py-1.5 rounded-xl font-black text-xs transition cursor-pointer"
+              className="flex items-center gap-1.5 bg-indigo-50 dark:bg-indigo-500/20 hover:bg-indigo-100 dark:hover:bg-indigo-500/30 text-indigo-700 dark:text-indigo-300 border-0 px-3 py-1.5 rounded-xl font-black text-xs transition cursor-pointer shadow-2xs"
               title="Hiện danh sách học sinh chưa xếp chỗ"
             >
               <ChevronRight size={14} />
@@ -156,7 +156,7 @@ export const SeatingChartTab: React.FC<SeatingChartTabProps> = ({
           <button
             type="button"
             onClick={onAutoMixSeating}
-            className="group flex items-center gap-1.5 bg-indigo-50 dark:bg-indigo-500/20 hover:bg-indigo-100 dark:hover:bg-indigo-500/30 text-indigo-700 dark:text-indigo-300 border border-indigo-300 dark:border-indigo-500/40 px-3 py-1.5 rounded-xl font-bold text-xs transition cursor-pointer"
+            className="group flex items-center gap-1.5 bg-indigo-50 dark:bg-indigo-500/20 hover:bg-indigo-100 dark:hover:bg-indigo-500/30 text-indigo-700 dark:text-indigo-300 border-0 px-3 py-1.5 rounded-xl font-bold text-xs transition cursor-pointer shadow-2xs"
             title="Trộn ngẫu nhiên vị trí ngồi"
           >
             <Shuffle size={14} className="shrink-0 text-indigo-600 dark:text-indigo-400" />
@@ -167,7 +167,7 @@ export const SeatingChartTab: React.FC<SeatingChartTabProps> = ({
             type="button"
             onClick={onGeneticMixSeating}
             disabled={mixingGA}
-            className="group flex items-center gap-1.5 bg-cyan-50 dark:bg-cyan-500/20 hover:bg-cyan-100 dark:hover:bg-cyan-500/30 text-cyan-700 dark:text-cyan-300 border border-cyan-300 dark:border-cyan-500/40 px-3 py-1.5 rounded-xl font-bold text-xs transition cursor-pointer disabled:opacity-50"
+            className="group flex items-center gap-1.5 bg-cyan-50 dark:bg-cyan-500/20 hover:bg-cyan-100 dark:hover:bg-cyan-500/30 text-cyan-700 dark:text-cyan-300 border-0 px-3 py-1.5 rounded-xl font-bold text-xs transition cursor-pointer disabled:opacity-50 shadow-2xs"
             title="Trộn thông minh tối ưu học lực"
           >
             <RefreshCw size={14} className={`shrink-0 text-cyan-600 dark:text-cyan-400 ${mixingGA ? 'animate-spin' : ''}`} />
@@ -177,7 +177,7 @@ export const SeatingChartTab: React.FC<SeatingChartTabProps> = ({
           <button
             type="button"
             onClick={onBlossomSwap}
-            className="group flex items-center gap-1.5 bg-purple-50 dark:bg-purple-500/20 hover:bg-purple-100 dark:hover:bg-purple-500/30 text-purple-700 dark:text-purple-300 border border-purple-300 dark:border-purple-500/40 px-3 py-1.5 rounded-xl font-bold text-xs transition cursor-pointer"
+            className="group flex items-center gap-1.5 bg-purple-50 dark:bg-purple-500/20 hover:bg-purple-100 dark:hover:bg-purple-500/30 text-purple-700 dark:text-purple-300 border-0 px-3 py-1.5 rounded-xl font-bold text-xs transition cursor-pointer shadow-2xs"
             title="Đổi bài chấm chéo"
           >
             <FileCheck2 size={14} className="shrink-0 text-purple-600 dark:text-purple-400" />
@@ -187,7 +187,7 @@ export const SeatingChartTab: React.FC<SeatingChartTabProps> = ({
           <button
             type="button"
             onClick={onSaveSeating}
-            className="group flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white px-3.5 py-1.5 rounded-xl font-black text-xs shadow-sm transition cursor-pointer border border-emerald-500/40"
+            className="group flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white px-3.5 py-1.5 rounded-xl font-black text-xs shadow-sm transition cursor-pointer border-0"
             title="Lưu cấu hình sơ đồ chỗ ngồi"
           >
             <Save size={14} className="shrink-0" />
@@ -226,7 +226,7 @@ export const SeatingChartTab: React.FC<SeatingChartTabProps> = ({
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Tìm học sinh..."
-                className="w-full pl-8 pr-3 py-1.5 text-xs rounded-xl bg-slate-50 dark:bg-[#121624] border border-slate-300 dark:border-white/10 text-slate-900 dark:text-white placeholder:text-slate-400 font-semibold focus:outline-none focus:border-indigo-500"
+                className="w-full pl-8 pr-3 py-1.5 text-xs rounded-xl bg-slate-50 dark:bg-[#121624] border-0 text-slate-900 dark:text-white placeholder:text-slate-400 font-semibold focus:outline-none shadow-2xs"
               />
             </div>
 
@@ -243,10 +243,10 @@ export const SeatingChartTab: React.FC<SeatingChartTabProps> = ({
                     key={st.id}
                     draggable
                     onDragStart={() => onDragStartUnassigned(st)}
-                    className={`p-2 rounded-xl border cursor-grab active:cursor-grabbing text-xs font-bold flex items-center justify-between shadow-2xs transition ${
+                    className={`p-2 rounded-xl border-0 cursor-grab active:cursor-grabbing text-xs font-bold flex items-center justify-between shadow-2xs transition ${
                       isStAbsent
-                        ? 'bg-rose-50 dark:bg-rose-500/10 border-rose-300 dark:border-rose-500/30 text-rose-800 dark:text-rose-300 hover:border-rose-400'
-                        : 'bg-slate-50 dark:bg-[#14192b] border-slate-200 dark:border-white/10 text-slate-900 dark:text-white hover:border-indigo-400 dark:hover:border-indigo-500/60'
+                        ? 'bg-rose-50 dark:bg-rose-500/10 text-rose-800 dark:text-rose-300'
+                        : 'bg-slate-50 dark:bg-[#14192b] text-slate-900 dark:text-white hover:bg-slate-100 dark:hover:bg-[#1a2138]'
                     }`}
                   >
                     <div className="flex items-center gap-2 truncate">
@@ -256,7 +256,7 @@ export const SeatingChartTab: React.FC<SeatingChartTabProps> = ({
                       </span>
                     </div>
                     {isStAbsent && (
-                      <span className="text-[9px] font-black px-1.5 py-0.2 rounded bg-rose-100 dark:bg-rose-500/25 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-500/40 shrink-0">
+                      <span className="text-[9px] font-black px-1.5 py-0.2 rounded bg-rose-100 dark:bg-rose-500/25 text-rose-700 dark:text-rose-300 border-0 shrink-0">
                         Vắng
                       </span>
                     )}
@@ -302,11 +302,11 @@ export const SeatingChartTab: React.FC<SeatingChartTabProps> = ({
                 }}
               >
                 {/* COLUMN HEADER PILL */}
-                <div className="flex items-center gap-2 bg-white dark:bg-[#121624] border border-slate-300 dark:border-white/10 px-3 py-1.5 rounded-xl text-xs font-black text-slate-800 dark:text-slate-200 shadow-sm">
+                <div className="flex items-center gap-2 bg-white dark:bg-[#121624] border-0 px-3 py-1.5 rounded-xl text-xs font-black text-slate-800 dark:text-slate-200 shadow-sm">
                   <span className="text-[11px] uppercase tracking-wider text-indigo-600 dark:text-indigo-400 font-black">
                     Dãy {colIdx + 1}
                   </span>
-                  <div className="flex items-center gap-1 bg-slate-100 dark:bg-white/5 rounded-lg p-0.5 border border-slate-200 dark:border-transparent">
+                  <div className="flex items-center gap-1 bg-slate-100 dark:bg-white/5 rounded-lg p-0.5 border-0">
                     <button
                       type="button"
                       onClick={() => onRemoveDeskFromCol(colIdx)}

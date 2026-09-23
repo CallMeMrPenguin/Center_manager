@@ -271,6 +271,7 @@ export default function ClassesPage() {
                 await flushSaveAttendance();
                 setTestConfigModalOpen(true);
               }}
+              onCircularSwap={handleBlossomSwap}
               onSaveAttendance={handleSaveAttendance}
               savingAttendance={savingAttendance}
             />

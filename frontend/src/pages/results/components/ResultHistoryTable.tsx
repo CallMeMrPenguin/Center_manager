@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
+import { History } from 'lucide-react';
 import { DataTable } from '../../../components/DataTable';
 import { StudentResultRecord } from '../types';
 import { trunc1Dec } from '../hooks/useStudentResults';
@@ -38,10 +39,10 @@ export const ResultHistoryTable: React.FC<ResultHistoryTableProps> = ({ records,
           const isPresent = status === 'Có mặt';
           return (
             <span
-              className={`px-2.5 py-0.5 rounded-full text-xs font-black inline-flex items-center justify-center border ${
+              className={`px-2.5 py-0.5 rounded-full text-xs font-black inline-flex items-center justify-center border-0 shadow-2xs ${
                 isPresent
-                  ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-emerald-500/30'
-                  : 'bg-rose-500/15 text-rose-700 dark:text-rose-400 border-rose-500/30'
+                  ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400'
+                  : 'bg-rose-500/15 text-rose-700 dark:text-rose-400'
               }`}
             >
               {status || 'Có mặt'}
@@ -67,8 +68,8 @@ export const ResultHistoryTable: React.FC<ResultHistoryTableProps> = ({ records,
                   <span className={`text-[10px] ${isGrammar ? 'text-purple-700 dark:text-purple-300' : 'text-blue-700 dark:text-blue-300'} font-semibold truncate max-w-[130px] block`} title={topic}>
                     {topic}
                   </span>
-                  <span className={`text-[9px] px-1.5 py-0.2 rounded border font-bold mt-0.5 ${
-                    isGrammar ? 'bg-purple-500/15 text-purple-800 dark:text-purple-300 border-purple-500/30' : 'bg-blue-500/15 text-blue-800 dark:text-blue-300 border-blue-500/30'
+                  <span className={`text-[9px] px-1.5 py-0.2 rounded border-0 shadow-2xs font-bold mt-0.5 ${
+                    isGrammar ? 'bg-purple-500/15 text-purple-800 dark:text-purple-300' : 'bg-blue-500/15 text-blue-800 dark:text-blue-300'
                   }`}>
                     {isGrammar ? 'Ngữ Pháp' : 'Từ Vựng'}
                   </span>
@@ -96,8 +97,8 @@ export const ResultHistoryTable: React.FC<ResultHistoryTableProps> = ({ records,
                   <span className={`text-[10px] ${isGrammar ? 'text-purple-700 dark:text-purple-300' : 'text-blue-700 dark:text-blue-300'} font-semibold truncate max-w-[130px] block`} title={topic}>
                     {topic}
                   </span>
-                  <span className={`text-[9px] px-1.5 py-0.2 rounded border font-bold mt-0.5 ${
-                    isGrammar ? 'bg-purple-500/15 text-purple-800 dark:text-purple-300 border-purple-500/30' : 'bg-blue-500/15 text-blue-800 dark:text-blue-300 border-blue-500/30'
+                  <span className={`text-[9px] px-1.5 py-0.2 rounded border-0 shadow-2xs font-bold mt-0.5 ${
+                    isGrammar ? 'bg-purple-500/15 text-purple-800 dark:text-purple-300' : 'bg-blue-500/15 text-blue-800 dark:text-blue-300'
                   }`}>
                     {isGrammar ? 'Ngữ Pháp' : 'Từ Vựng'}
                   </span>
@@ -145,12 +146,18 @@ export const ResultHistoryTable: React.FC<ResultHistoryTableProps> = ({ records,
   );
 
   return (
-    <div className="space-y-2">
-      <h3 className="text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300">
-        Lịch Sử Điểm Từng Buổi Học
-      </h3>
+    <div className="bg-white dark:bg-[#141417] border border-slate-200 dark:border-[#27272a] rounded-2xl flex flex-col shadow-sm dark:shadow-xl mb-8 overflow-hidden">
+      <div className="px-5 py-4 border-b border-slate-200 dark:border-[#27272a] flex flex-wrap items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <History size={18} className="text-indigo-500 dark:text-indigo-400" />
+          <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider">
+            Lịch Sử Điểm Từng Buổi Học
+          </h3>
+        </div>
+      </div>
 
       <DataTable<StudentResultRecord>
+        tableId="student-results-history-table"
         data={records}
         columns={columns}
         loading={loading}

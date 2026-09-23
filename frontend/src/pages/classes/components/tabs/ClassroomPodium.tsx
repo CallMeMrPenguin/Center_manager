@@ -39,7 +39,7 @@ export const ClassroomPodium: React.FC<ClassroomPodiumProps> = ({
                   e.dataTransfer.setData('text/plain', 'teacher-desk');
                   e.dataTransfer.effectAllowed = 'move';
                 }}
-                className="w-full flex items-center justify-between gap-2 bg-white dark:bg-[#12162a] border-2 border-indigo-500 dark:border-indigo-400/80 rounded-2xl py-2 px-3 shadow-md transition-all cursor-grab active:cursor-grabbing hover:border-indigo-400 select-none group"
+                className="w-full flex items-center justify-between gap-2 bg-white dark:bg-[#12162a] border-0 rounded-2xl py-2 px-3 shadow-md transition-all cursor-grab active:cursor-grabbing select-none group"
                 title="Kéo thả hoặc dùng mũi tên để dời bàn giáo viên thẳng dãy bất kỳ"
               >
                 {/* Move Left */}
@@ -84,7 +84,7 @@ export const ClassroomPodium: React.FC<ClassroomPodiumProps> = ({
               <button
                 type="button"
                 onClick={() => onSelectCol(colIdx)}
-                className="w-full py-2 px-3 rounded-2xl border border-dashed border-slate-300/70 dark:border-white/10 hover:border-indigo-400 dark:hover:border-indigo-400/60 hover:bg-indigo-50/50 dark:hover:bg-indigo-500/10 flex items-center justify-center gap-1.5 transition-all cursor-pointer opacity-30 hover:opacity-100 text-slate-400 dark:text-slate-500 hover:text-indigo-600 dark:hover:text-indigo-400"
+                className="w-full py-2 px-3 rounded-2xl border-0 bg-slate-200/50 dark:bg-white/5 hover:bg-indigo-50/80 dark:hover:bg-indigo-500/15 flex items-center justify-center gap-1.5 transition-all cursor-pointer opacity-40 hover:opacity-100 text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 shadow-2xs"
                 title={`Đặt bàn giáo viên thẳng Dãy ${colIdx + 1}`}
               >
                 <MoveHorizontal size={12} className="shrink-0" />

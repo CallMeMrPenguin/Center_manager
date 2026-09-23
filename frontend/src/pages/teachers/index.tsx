@@ -173,7 +173,7 @@ export function TeachersPage() {
         const initial = t.full_name?.trim() ? t.full_name.trim().charAt(0).toUpperCase() : 'G';
         return (
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-indigo-50 border border-indigo-200 text-indigo-700 dark:bg-[#1e2540] dark:border-[#343e68] dark:text-[#a5b4fc] flex items-center justify-center font-black text-xs shrink-0 shadow-inner">
+            <div className="w-8 h-8 rounded-full bg-indigo-50 border-0 text-indigo-700 dark:bg-[#1e2540] dark:text-[#a5b4fc] flex items-center justify-center font-black text-xs shrink-0 shadow-2xs">
               {initial}
             </div>
             <span className="font-extrabold text-slate-900 dark:text-white text-base">{t.full_name}</span>
@@ -189,10 +189,10 @@ export function TeachersPage() {
       cell: (info) => {
         const val = info.getValue<string>();
         return (
-          <span className={`inline-block px-3 py-1 rounded-xl text-xs font-black border ${
+          <span className={`inline-block px-3 py-1 rounded-xl text-xs font-black border-0 shadow-2xs ${
             val === 'Giáo viên'
-              ? 'bg-indigo-50 border-indigo-200 text-indigo-800 dark:bg-[#1e2540] dark:border-[#343e68] dark:text-[#a5b4fc]'
-              : 'bg-emerald-50 border-emerald-200 text-emerald-800 dark:bg-[#132a22] dark:border-[#059669] dark:text-[#34d399]'
+              ? 'bg-indigo-50 text-indigo-800 dark:bg-[#1e2540] dark:text-[#a5b4fc]'
+              : 'bg-emerald-50 text-emerald-800 dark:bg-[#132a22] dark:text-[#34d399]'
           }`}>
             {val}
           </span>
@@ -206,7 +206,7 @@ export function TeachersPage() {
         const t = row.original;
         const username = t.account_username || `gv_${String(t.id || 0).padStart(4, '0')}`;
         return (
-          <span className="font-mono text-xs font-black text-indigo-800 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-500/15 px-2.5 py-1 rounded-lg border border-indigo-200 dark:border-indigo-500/25">
+          <span className="font-mono text-xs font-black text-indigo-800 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-500/15 px-2.5 py-1 rounded-lg border-0 shadow-2xs">
             {username}
           </span>
         );
@@ -242,10 +242,10 @@ export function TeachersPage() {
         const status = row.original.account_status || 'Hoạt động';
         return (
           <div className="text-center">
-            <span className={`inline-block px-2.5 py-1 rounded-full text-xs font-black border ${
+            <span className={`inline-block px-2.5 py-1 rounded-full text-xs font-black border-0 shadow-2xs ${
               status === 'Hoạt động'
-                ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-emerald-500/30'
-                : 'bg-rose-500/15 text-rose-700 dark:text-rose-400 border-rose-500/30'
+                ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400'
+                : 'bg-rose-500/15 text-rose-700 dark:text-rose-400'
             }`}>
               {status}
             </span>

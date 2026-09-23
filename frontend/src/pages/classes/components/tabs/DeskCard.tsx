@@ -45,10 +45,10 @@ export const DeskCard: React.FC<DeskCardProps> = ({
           onDragStart={() => onDragStartSeat({ colIdx, deskIdx, posIdx })}
           onDragOver={(e) => e.preventDefault()}
           onDrop={() => onDropOnSeat(colIdx, deskIdx, posIdx)}
-          className={`group/seat relative p-2 rounded-xl border flex items-center gap-2 min-h-[56px] cursor-grab active:cursor-grabbing transition-all select-none shadow-xs ${
+          className={`group/seat relative p-2 rounded-xl border-0 flex items-center gap-2 min-h-[56px] cursor-grab active:cursor-grabbing transition-all select-none shadow-xs ${
             isAbsent
-              ? 'bg-rose-50/80 dark:bg-rose-500/15 border-rose-300 dark:border-rose-500/40 text-rose-800 dark:text-rose-200 hover:border-rose-400'
-              : 'bg-indigo-50/70 dark:bg-indigo-500/15 border-indigo-200 dark:border-indigo-500/35 text-slate-900 dark:text-white hover:border-indigo-400 hover:shadow-sm'
+              ? 'bg-rose-100/70 dark:bg-rose-500/20 text-rose-800 dark:text-rose-200'
+              : 'bg-indigo-100/70 dark:bg-indigo-500/20 text-slate-900 dark:text-white hover:shadow-sm'
           }`}
         >
           {/* Quick Clear Button */}
@@ -98,7 +98,7 @@ export const DeskCard: React.FC<DeskCardProps> = ({
       <div
         onDragOver={(e) => e.preventDefault()}
         onDrop={() => onDropOnSeat(colIdx, deskIdx, posIdx)}
-        className="group/drop relative p-2 rounded-xl border-2 border-dashed border-slate-300 dark:border-white/10 hover:border-indigo-400 dark:hover:border-indigo-400/60 bg-slate-50/80 dark:bg-white/[0.02] hover:bg-indigo-50/50 dark:hover:bg-indigo-500/10 flex items-center justify-center gap-1.5 min-h-[56px] text-center transition-all cursor-pointer"
+        className="group/drop relative p-2 rounded-xl border-0 bg-slate-100/80 dark:bg-white/[0.04] hover:bg-indigo-50/80 dark:hover:bg-indigo-500/15 flex items-center justify-center gap-1.5 min-h-[56px] text-center transition-all cursor-pointer shadow-2xs"
       >
         <div className="w-6 h-6 rounded-md bg-slate-200 dark:bg-white/5 group-hover/drop:bg-indigo-500/20 text-slate-400 dark:text-slate-500 group-hover/drop:text-indigo-500 flex items-center justify-center transition-colors shrink-0">
           <UserPlus size={13} />
@@ -113,7 +113,7 @@ export const DeskCard: React.FC<DeskCardProps> = ({
   return (
     <div className="bg-white dark:bg-[#11162a] p-3 rounded-2xl shadow-[0_4px_16px_rgba(0,0,0,0.08)] dark:shadow-[0_8px_24px_rgba(0,0,0,0.4)] hover:shadow-lg transition-all w-[310px] flex flex-col gap-2.5">
       {/* Desk Title Plaque */}
-      <div className="flex items-center justify-between border-b border-slate-200 dark:border-white/5 pb-1.5 px-0.5">
+      <div className="flex items-center justify-between pb-1 px-0.5">
         <span className="text-[10px] font-black uppercase tracking-wider text-slate-600 dark:text-slate-400">
           Bàn {deskIdx + 1}
         </span>

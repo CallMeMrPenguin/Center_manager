@@ -193,7 +193,7 @@ const FastJsonEditor = React.memo(({
       onChange={(e) => setLocalText(e.target.value)}
       spellCheck={false}
       placeholder="Nhập mảng câu hỏi JSON tại đây..."
-      className="code-editor-textarea flex-1 w-full p-4 font-mono text-xs text-slate-900 dark:text-slate-100 resize-none shadow-inner leading-relaxed select-text"
+      className="code-editor-textarea flex-1 w-full h-full p-5 font-mono text-xs text-slate-900 dark:text-slate-100 resize-none border-0 outline-none leading-relaxed select-text bg-transparent"
     />
   );
 });
@@ -598,7 +598,7 @@ export default function TestFormatter({
 
           {/* Margins */}
           <h3 className="text-[0.66rem] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1 mt-2">Căn lề trang (cm)</h3>
-          <div className="grid grid-cols-2 gap-2 bg-slate-50 dark:bg-[#181f36] p-2.5 rounded-xl border border-slate-200 dark:border-[#252e4e]">
+          <div className="grid grid-cols-2 gap-2 bg-slate-50 dark:bg-[#181f36] p-2.5 rounded-xl border-0 shadow-2xs">
             {renderSettingInput("Lề trên", "margin_top", 0.5, 5, 0.1)}
             {renderSettingInput("Lề dưới", "margin_bottom", 0.5, 5, 0.1)}
             {renderSettingInput("Lề trái", "margin_left", 0.5, 5, 0.1)}
@@ -607,7 +607,7 @@ export default function TestFormatter({
 
           {/* Typography */}
           <h3 className="text-[0.66rem] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mt-4 mb-1">Typography & Font</h3>
-          <div className="flex flex-col gap-2 bg-slate-50 dark:bg-[#181f36] p-2.5 rounded-xl border border-slate-200 dark:border-[#252e4e]">
+          <div className="flex flex-col gap-2 bg-slate-50 dark:bg-[#181f36] p-2.5 rounded-xl border-0 shadow-2xs">
             <div className="flex flex-col gap-1">
               <label className="text-[0.6rem] text-slate-500 dark:text-slate-400 font-bold">Phông chữ</label>
               <select
@@ -627,7 +627,7 @@ export default function TestFormatter({
 
           {/* Mix Options Option */}
           <h3 className="text-[0.66rem] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mt-4 mb-1">Cấu hình Đề thi</h3>
-          <div className="flex flex-col gap-2.5 bg-slate-50 dark:bg-[#181f36] p-2.5 rounded-xl border border-slate-200 dark:border-[#252e4e] mt-1">
+          <div className="flex flex-col gap-2.5 bg-slate-50 dark:bg-[#181f36] p-2.5 rounded-xl border-0 shadow-2xs mt-1">
             <div className="flex items-center gap-2.5">
               <input 
                 type="checkbox" 
@@ -691,10 +691,10 @@ export default function TestFormatter({
             <div className="flex items-center gap-3 group/left-toolbar">
               <button 
                 onClick={() => setShowConfig(!showConfig)}
-                className={`p-2.5 rounded-xl border transition-all duration-300 flex items-center text-xs font-bold cursor-pointer ${
+                className={`p-2.5 rounded-xl border-0 transition-all duration-300 flex items-center text-xs font-bold cursor-pointer ${
                   showConfig 
-                    ? 'bg-blue-600 text-white border-transparent px-3 shadow-sm' 
-                    : 'bg-slate-100 dark:bg-[#181f36] text-slate-700 dark:text-slate-300 border-slate-200 dark:border-[#283354] hover:bg-slate-200 dark:hover:bg-[#222a46] hover:text-slate-900 dark:hover:text-white shadow-sm'
+                    ? 'bg-blue-600 text-white px-3 shadow-sm' 
+                    : 'bg-slate-100 dark:bg-[#181f36] text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-[#222a46] hover:text-slate-900 dark:hover:text-white shadow-2xs'
                 }`}
                 title={showConfig ? "Ẩn cấu hình lề và cỡ chữ" : "Hiện cấu hình lề và cỡ chữ"}
               >
@@ -712,19 +712,19 @@ export default function TestFormatter({
                 defaultPrompts={DEFAULT_TEST_FORMATTER_PROMPTS} 
               />
 
-              <label className="group px-3 py-2 rounded-xl bg-slate-100 dark:bg-[#181f36] border border-slate-200 dark:border-[#283354] hover:bg-slate-200 dark:hover:bg-[#222a46] text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white text-xs font-bold transition-all flex items-center cursor-pointer shadow-sm" title="Nạp dữ liệu từ file JSON">
+              <label className="group px-3 py-2 rounded-xl bg-slate-100 dark:bg-[#181f36] border-0 hover:bg-slate-200 dark:hover:bg-[#222a46] text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white text-xs font-bold transition-all flex items-center cursor-pointer shadow-2xs" title="Nạp dữ liệu từ file JSON">
                 <Upload size={14} className="shrink-0" />
                 <span className="max-w-0 opacity-0 group-hover:max-w-xs group-hover:opacity-100 group-hover:ml-1.5 transition-all duration-300 whitespace-nowrap overflow-hidden inline-block">Nạp JSON</span>
                 <input type="file" accept=".json" onChange={handleDirectFileUpload} className="hidden" />
               </label>
 
-              <label className="group px-3 py-2 rounded-xl bg-slate-100 dark:bg-[#181f36] border border-slate-200 dark:border-[#283354] hover:bg-slate-200 dark:hover:bg-[#222a46] text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white text-xs font-bold transition-all flex items-center cursor-pointer shadow-sm" title="Chuyển đổi file Word (.docx) sang JSON">
+              <label className="group px-3 py-2 rounded-xl bg-slate-100 dark:bg-[#181f36] border-0 hover:bg-slate-200 dark:hover:bg-[#222a46] text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white text-xs font-bold transition-all flex items-center cursor-pointer shadow-2xs" title="Chuyển đổi file Word (.docx) sang JSON">
                 <Upload size={14} className="text-amber-500 dark:text-amber-400 shrink-0" />
                 <span className="max-w-0 opacity-0 group-hover:max-w-xs group-hover:opacity-100 group-hover:ml-1.5 transition-all duration-300 whitespace-nowrap overflow-hidden inline-block">Nhập từ DOCX</span>
                 <input type="file" accept=".docx" onChange={handleDocxFileUpload} className="hidden" />
               </label>
 
-              <label className="group flex items-center px-3 py-2 rounded-xl bg-slate-100 dark:bg-[#181f36] border border-slate-200 dark:border-[#283354] text-slate-700 dark:text-slate-300 text-xs font-bold cursor-pointer select-none hover:text-slate-900 dark:hover:text-white transition shadow-sm" title="Lưu vào quản lý Tài liệu">
+              <label className="group flex items-center px-3 py-2 rounded-xl bg-slate-100 dark:bg-[#181f36] border-0 text-slate-700 dark:text-slate-300 text-xs font-bold cursor-pointer select-none hover:text-slate-900 dark:hover:text-white transition shadow-2xs" title="Lưu vào quản lý Tài liệu">
                 <input 
                   type="checkbox" 
                   checked={saveToDocs} 
@@ -739,7 +739,7 @@ export default function TestFormatter({
                 <button
                   onClick={() => setShowExportMenu(!showExportMenu)}
                   disabled={compiling}
-                  className="group px-3 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-xs font-black transition-all flex items-center cursor-pointer shadow-sm border border-white/20"
+                  className="group px-3 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-xs font-black transition-all flex items-center cursor-pointer shadow-sm border-0"
                   title="Xuất đề thi ra Word / Excel"
                 >
                   <Download size={14} className={`shrink-0 ${compiling ? "animate-spin" : ""}`} />
@@ -771,15 +771,15 @@ export default function TestFormatter({
             </div>
           </div>
 
-          {/* Text Area Content - Uncontrolled Isolated Editor to eliminate 60FPS typing lag */}
-          <div className="flex-1 relative p-4 bg-slate-100 dark:bg-[#0f1322] flex flex-col gap-4">
+          {/* Text Area Content - Clean Edge-to-Edge Editor */}
+          <div className="flex-1 relative flex flex-col min-h-0 bg-white dark:bg-[#0f1322] overflow-hidden">
             <FastJsonEditor
               initialValue={jsonText}
               onParsedDataChange={handleParsedDataChange}
             />
 
             {/* Validation Info Overlay */}
-            <div className="absolute bottom-8 right-8 flex items-center gap-2 select-none">
+            <div className="absolute bottom-6 right-6 flex items-center gap-2 select-none z-10">
               {jsonError ? (
                 <div className="flex items-center gap-1.5 text-rose-600 dark:text-rose-300 font-bold text-[0.66rem] bg-rose-50 dark:bg-rose-500/20 border border-rose-200 dark:border-rose-500/40 px-3 py-1.5 rounded-xl shadow-lg">
                   <AlertCircle size={12} />

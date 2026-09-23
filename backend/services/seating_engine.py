@@ -82,7 +82,10 @@ def can_sit_adjacent(a: Student, b: Student, rel: RelationshipData) -> bool:
 
 def generate_swap_pairs(students: List[Student], relationships: RelationshipData, seed: Optional[int] = None) -> Dict[str, Any]:
     """
-    Runs Edmonds' Blossom Matching on the student compatibility graph (with greedy fallback).
+    Arranges all present students into an optimal closed circular directed grading cycle:
+    A grades B, B grades C, ..., and the last student grades A.
+    This guarantees 100% of students have test papers to grade and receive grades,
+    completely eliminating odd-numbered leftovers.
     """
     if seed is not None:
         random.seed(seed)
@@ -95,60 +98,75 @@ def generate_swap_pairs(students: List[Student], relationships: RelationshipData
             "unmatched": [{"id": s.id, "name": s.name, "group": s.group_name or "N/A", "reason": "Vắng mặt (Không đi học)"} for s in absent]
         }
 
-    # Shuffle student iteration order to avoid repetitive matching outputs
-    shuffled_present = list(present)
-    random.shuffle(shuffled_present)
+    if len(present) == 1:
+        s = present[0]
+        unmatched = [{"id": s.id, "name": s.name, "group": s.group_name or "N/A", "reason": "Chỉ có 1 học sinh đi học, không thể đổi bài"}]
+        for a in absent:
+            unmatched.append({"id": a.id, "name": a.name, "group": a.group_name or "N/A", "reason": "Vắng mặt (Không đi học)"})
+        return {"pairs": [], "unmatched": unmatched}
 
-    matching = set()
-    if nx is not None:
-        G = nx.Graph()
-        for s in shuffled_present:
-            G.add_node(s.id, name=s.name, gender=s.gender)
+    # Evaluate penalty for directed edge u -> v (u grades v's test)
+    def directed_edge_penalty(u: Student, v: Student) -> float:
+        penalty = 0.0
+        if relationships.is_conflict(u.id, v.id):
+            penalty += 1000.0
+        if relationships.same_group(u, v) or relationships.is_friend_group(u.id, v.id):
+            penalty += 500.0
+        if u.gender == v.gender and not relationships.is_trusted_swap(u.id, v.id):
+            penalty += 100.0
+        # Random jitter to ensure variety across runs
+        penalty += random.uniform(0.01, 1.0)
+        return penalty
 
-        for i in range(len(shuffled_present)):
-            for j in range(i + 1, len(shuffled_present)):
-                a, b = shuffled_present[i], shuffled_present[j]
-                if can_swap(a, b, relationships):
-                    weight = 1.0
-                    if a.gender != b.gender:
-                        weight += 2.0
-                    if not relationships.same_group(a, b):
-                        weight += 1.0
-                    # Add random weight jitter to produce varied optimal pairings on each run
-                    weight += random.uniform(0.01, 0.5)
-                    G.add_edge(a.id, b.id, weight=weight)
+    n = len(present)
+    cost_map: Dict[Tuple[int, int], float] = {}
+    for u in present:
+        for v in present:
+            if u.id != v.id:
+                cost_map[(u.id, v.id)] = directed_edge_penalty(u, v)
 
-        matching = nx.max_weight_matching(G, maxcardinality=True, weight='weight')
-    else:
-        # Fallback greedy weighted matching if networkx is unavailable
-        candidate_edges = []
-        for i in range(len(shuffled_present)):
-            for j in range(i + 1, len(shuffled_present)):
-                a, b = shuffled_present[i], shuffled_present[j]
-                if can_swap(a, b, relationships):
-                    weight = 1.0
-                    if a.gender != b.gender:
-                        weight += 2.0
-                    if not relationships.same_group(a, b):
-                        weight += 1.0
-                    weight += random.uniform(0.01, 0.5)
-                    candidate_edges.append((weight, a.id, b.id))
-        candidate_edges.sort(key=lambda x: x[0], reverse=True)
-        used_ids = set()
-        for _, u, v in candidate_edges:
-            if u not in used_ids and v not in used_ids:
-                used_ids.add(u)
-                used_ids.add(v)
-                matching.add((u, v))
+    def total_cycle_cost(order: List[Student]) -> float:
+        return sum(cost_map.get((order[i].id, order[(i + 1) % n].id), 0.0) for i in range(n))
 
-    student_map = {s.id: s for s in present}
-    matched_ids = set()
+    # Fast 2-opt / swap local search to find conflict-free circular order
+    best_order = list(present)
+    random.shuffle(best_order)
+    best_cost = total_cycle_cost(best_order)
+
+    improved = True
+    iterations = 0
+    while improved and iterations < 1500:
+        improved = False
+        iterations += 1
+        for i in range(n):
+            for j in range(i + 1, n):
+                # 2-opt segment reversal
+                cand_order = best_order[:i] + best_order[i:j+1][::-1] + best_order[j+1:]
+                cand_cost = total_cycle_cost(cand_order)
+                if cand_cost < best_cost - 1e-4:
+                    best_order = cand_order
+                    best_cost = cand_cost
+                    improved = True
+                    break
+                # Pair swap
+                cand_swap = list(best_order)
+                cand_swap[i], cand_swap[j] = cand_swap[j], cand_swap[i]
+                cand_cost = total_cycle_cost(cand_swap)
+                if cand_cost < best_cost - 1e-4:
+                    best_order = cand_swap
+                    best_cost = cand_cost
+                    improved = True
+                    break
+            if improved:
+                break
+
     pairs = []
-
-    for id1, id2 in matching:
-        s1, s2 = student_map[id1], student_map[id2]
+    for i in range(n):
+        s1 = best_order[i]                   # Grader (Người chấm)
+        s2 = best_order[(i + 1) % n]         # Owner (Chủ bài thi)
         is_trusted = relationships.is_trusted_swap(s1.id, s2.id)
         same_group = relationships.same_group(s1, s2)
+        has_conflict = relationships.is_conflict(s1.id, s2.id)
         pairs.append({
             "student1_id": s1.id,
             "student1_name": s1.name,
@@ -156,35 +174,20 @@ def generate_swap_pairs(students: List[Student], relationships: RelationshipData
             "student2_id": s2.id,
             "student2_name": s2.name,
             "student2_group": s2.group_name or "N/A",
-            "same_group_conflict": same_group,
-            "is_trusted": is_trusted,
-            # Legacy fields for UI compatibility
+            "grader_id": s1.id,
             "grader_name": s1.name,
+            "grader_group": s1.group_name or "N/A",
+            "owner_id": s2.id,
             "owner_name": s2.name,
-            "grader_group": s1.group_name,
-            "owner_group": s2.group_name
+            "owner_group": s2.group_name or "N/A",
+            "same_group_conflict": same_group or has_conflict,
+            "is_trusted": is_trusted,
+            "is_circular": True,
+            "step": i + 1,
+            "total": n
         })
-        matched_ids.update([id1, id2])
 
-    unmatched = []
-    for s in absent:
-        unmatched.append({
-            "id": s.id,
-            "name": s.name,
-            "group": s.group_name or "N/A",
-            "reason": "Vắng mặt (Không đi học)"
-        })
-    for s in present:
-        if s.id not in matched_ids:
-            compatible = [other for other in present if other.id != s.id and can_swap(s, other, relationships)]
-            reason = "Không có học sinh tương thích" if not compatible else "Bị loại do cấu trúc ghép cặp tối ưu (số lượng lẻ hoặc cạnh độc lập)"
-            unmatched.append({
-                "id": s.id,
-                "name": s.name,
-                "group": s.group_name or "N/A",
-                "reason": reason
-            })
-
+    unmatched = [{"id": s.id, "name": s.name, "group": s.group_name or "N/A", "reason": "Vắng mặt (Không đi học)"} for s in absent]
     return {"pairs": pairs, "unmatched": unmatched}
 
 def order_crossover(p1: List[Optional[int]], p2: List[Optional[int]]) -> List[Optional[int]]:

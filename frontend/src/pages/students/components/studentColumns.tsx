@@ -25,7 +25,7 @@ export const createStudentColumns = (
       const initial = st.full_name?.trim() ? st.full_name.trim().charAt(0).toUpperCase() : 'H';
       return (
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-indigo-50 border border-indigo-200 text-indigo-700 dark:bg-[#1b2344] dark:border-[#2d3b6f] dark:text-[#a5b4fc] flex items-center justify-center font-black text-xs shrink-0 shadow-inner">
+          <div className="w-8 h-8 rounded-full bg-indigo-50 border-0 text-indigo-700 dark:bg-[#1b2344] dark:text-[#a5b4fc] flex items-center justify-center font-black text-xs shrink-0 shadow-2xs">
             {initial}
           </div>
           <div className="font-extrabold text-slate-900 dark:text-white text-base">
@@ -45,7 +45,7 @@ export const createStudentColumns = (
       const st = row.original;
       const username = st.account_username || `hs_${String(st.id || 0).padStart(4, '0')}`;
       return (
-        <span className="font-mono text-xs font-black text-indigo-800 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-500/15 px-2.5 py-1 rounded-lg border border-indigo-200 dark:border-indigo-500/25">
+        <span className="font-mono text-xs font-black text-indigo-800 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-500/15 px-2.5 py-1 rounded-lg border-0 shadow-2xs">
           {username}
         </span>
       );
@@ -58,7 +58,7 @@ export const createStudentColumns = (
     cell: ({ row }) => {
       const classes = row.original.enrolled_classes;
       return classes ? (
-        <span className="inline-block px-2.5 py-1 rounded-lg text-xs font-black bg-indigo-50 dark:bg-indigo-500/20 text-indigo-800 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-500/30">
+        <span className="inline-block px-2.5 py-1 rounded-lg text-xs font-black bg-indigo-50 dark:bg-indigo-500/20 text-indigo-800 dark:text-indigo-300 border-0 shadow-2xs">
           {classes}
         </span>
       ) : (
@@ -72,7 +72,7 @@ export const createStudentColumns = (
     header: 'Khối',
     size: 80,
     cell: ({ row }) => (
-      <span className="inline-block px-2.5 py-0.5 rounded-lg text-xs font-black bg-slate-100 dark:bg-[#222b48] text-slate-800 dark:text-indigo-300 border border-slate-300 dark:border-indigo-500/20">
+      <span className="inline-block px-2.5 py-0.5 rounded-lg text-xs font-black bg-slate-100 dark:bg-[#222b48] text-slate-800 dark:text-indigo-300 border-0 shadow-2xs">
         {row.original.grade || 'Lớp 6'}
       </span>
     ),
@@ -121,10 +121,10 @@ export const createStudentColumns = (
       const st = info.getValue<string>();
       return (
         <div className="text-center">
-          <span className={`inline-block px-2.5 py-1 rounded-full text-xs font-black border ${
+          <span className={`inline-block px-2.5 py-1 rounded-full text-xs font-black border-0 shadow-2xs ${
             st === 'Đang học'
-              ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-emerald-500/30'
-              : 'bg-rose-500/15 text-rose-700 dark:text-rose-400 border-rose-500/30'
+              ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400'
+              : 'bg-rose-500/15 text-rose-700 dark:text-rose-400'
           }`}>
             {st || 'Đang học'}
           </span>
