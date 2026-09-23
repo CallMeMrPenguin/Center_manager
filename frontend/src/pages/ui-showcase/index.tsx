@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import {
   Calendar, Compass, Sparkles, Layers,
   MousePointerClick, FolderTree, Table as TableIcon, BellRing, Droplets,
-  Activity, SunMoon, Wand2, LayoutGrid, Trophy
+  Activity, SunMoon, Wand2, LayoutGrid
 } from 'lucide-react';
 import { AnimatedCalendar } from '../../components/ui/calender';
 import { SegmentedButton } from '../../components/ui/segmented-button';
@@ -21,9 +21,8 @@ import { sampleTreeData, samplePreviewData, tableSampleData, tableColumns, UserD
 import { LiquidButtonDemo } from './components/LiquidButtonDemo';
 import { BeamDatabaseStatusDemo } from './components/BeamDatabaseStatusDemo';
 import { AnimatedThemeToggleDemo } from '../../components/ui/animated-theme-toggle';
-import { RankUpRevealDemo } from './components/RankUpRevealDemo';
 
-type SubTabId = 'beam' | 'toggle' | 'liquid' | 'dock' | 'hover' | 'rank' | 'calendar' | 'segmented' | 'tree' | 'toast' | 'table';
+type SubTabId = 'beam' | 'toggle' | 'liquid' | 'dock' | 'hover' | 'calendar' | 'segmented' | 'tree' | 'toast' | 'table';
 
 const FX_BUTTONS = [
   { id: 'beam', label: 'Animated Beam', icon: Activity },
@@ -31,7 +30,6 @@ const FX_BUTTONS = [
   { id: 'liquid', label: 'Liquid Button', icon: Droplets },
   { id: 'dock', label: 'Dock', icon: Compass },
   { id: 'hover', label: 'Hover Preview', icon: MousePointerClick },
-  { id: 'rank', label: 'Rank Reveal', icon: Trophy },
 ];
 
 const COMPONENT_BUTTONS = [
@@ -278,9 +276,6 @@ export default function UIShowcasePage() {
           </div>
         </HoverPreviewProvider>
       )}
-
-      {/* RANK UP REVEAL SHOWCASE TAB */}
-      {activeSubTab === 'rank' && <RankUpRevealDemo />}
 
       {/* 9. STACKED TOAST TAB */}
       {activeSubTab === 'toast' && (

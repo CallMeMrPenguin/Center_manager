@@ -1039,14 +1039,4 @@ table.data-table-main tbody tr[data-selected='true']:hover > td {
 [data-theme='dark'] table.data-table-main tbody tr[data-selected='true']:hover > td {
   background-color: #24325e !important;
 }
-
-/* ── Rank-Up Reveal Camera Shake Keyframes ───────────────────────────────── */
-@keyframes rankShake {
-  0% { transform: translate3d(0, 0, 0); }
-  10%, 90% { transform: translate3d(-6px, -4px, 0); }
-  20%, 80% { transform: translate3d(8px, 6px, 0); }
-  30%, 50%, 70% { transform: translate3d(-8px, -6px, 0); }
-  40%, 60% { transform: translate3d(8px, 5px, 0); }
-  100% { transform: translate3d(0, 0, 0); }
-}
 
