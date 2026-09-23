@@ -195,6 +195,8 @@ def get_analytics_reports(class_id: Optional[int] = None, student_id: Optional[i
             sr["pred_c2"] = s_analytics.get("pred_c2", 0.0)
             sr["pred_hw"] = s_analytics.get("pred_hw", 0.0)
             sr["std_dev"] = s_analytics.get("std_dev", 0.0)
+            sr["prediction_model"] = s_analytics.get("prediction_model", "None")
+            sr["model_used"] = s_analytics.get("model_used", "None")
         else:
             sr["ema_level"] = 0.0
             sr["trend_slope"] = 0.0
@@ -207,6 +209,8 @@ def get_analytics_reports(class_id: Optional[int] = None, student_id: Optional[i
             sr["pred_c2"] = 0.0
             sr["pred_hw"] = 0.0
             sr["std_dev"] = 0.0
+            sr["prediction_model"] = "None"
+            sr["model_used"] = "None"
         enriched_rankings.append(sr)
 
     enriched_rankings.sort(key=lambda x: (x.get("overall_avg", 0.0), x.get("present_count", 0)), reverse=True)

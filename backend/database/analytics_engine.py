@@ -48,6 +48,39 @@ def calculate_performance_analytics(session_records: List[Dict[str, Any]]) -> Di
             "recommendations": ["Chưa có dữ liệu buổi học để phân tích."]
         }
 
+    # If session_records contains records for multiple students (class or center-level dataset),
+    # aggregate them chronologically by date so each date represents exactly ONE session of the class.
+    student_ids = {r.get("student_id") for r in session_records if r.get("student_id") is not None}
+    if len(student_ids) > 1:
+        date_groups: Dict[str, List[Dict[str, Any]]] = {}
+        for r in session_records:
+            d = r.get("date")
+            if d:
+                date_groups.setdefault(d, []).append(r)
+
+        aggregated_records: List[Dict[str, Any]] = []
+        for d in sorted(date_groups.keys()):
+            d_rows = [x for x in date_groups[d] if x.get("status") not in ("Vắng mặt", "Nghỉ học")]
+            if not d_rows:
+                continue
+
+            c1_vals = [float(x.get("check_1")) for x in d_rows if x.get("check_1") is not None and float(x.get("check_1")) > 0]
+            c2_vals = [float(x.get("check_2")) for x in d_rows if x.get("check_2") is not None and float(x.get("check_2")) > 0]
+            hw_vals = [float(x.get("homework")) for x in d_rows if x.get("homework") is not None and float(x.get("homework")) > 0]
+
+            first = d_rows[0]
+            aggregated_records.append({
+                "date": d,
+                "status": "Có mặt",
+                "check_1": sum(c1_vals) / len(c1_vals) if c1_vals else None,
+                "check_2": sum(c2_vals) / len(c2_vals) if c2_vals else None,
+                "homework": sum(hw_vals) / len(hw_vals) if hw_vals else None,
+                "check_1_skill": first.get("check_1_skill", "vocab"),
+                "check_2_skill": first.get("check_2_skill", "grammar"),
+                "topic": first.get("topic", ""),
+            })
+        session_records = aggregated_records
+
     vocab_list, grammar_list, hw_list = [], [], []
     overall_session_scores = []
     present_count = 0

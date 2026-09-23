@@ -226,29 +226,42 @@ export function useReportsData() {
 
   // Analytics Engine math
   const engine = useMemo(() => {
-    const raw = analyticsSummary || {
-      academic_score: 0.0,
-      trend_slope: 0.0,
-      trend_label: "Chưa có dữ liệu",
-      consistency_score: 100.0,
-      std_dev: 0.0,
-      std_dev_c1: 0.0,
-      std_dev_c2: 0.0,
-      std_dev_hw: 0.0,
-      consistency_label: "Ổn định",
-      ema_level: 0.0,
-      ema_c1: 0.0,
-      ema_c2: 0.0,
-      ema_hw: 0.0,
-      predicted_next: 0.0,
-      pred_c1: 0.0,
-      pred_c2: 0.0,
-      pred_hw: 0.0,
-      attendance_pct: 100.0,
-      performance_index: 0.0,
-      rating_label: "Chưa có dữ liệu",
-      recommendations: ["Chưa có dữ liệu thống kê."]
-    };
+    let raw = analyticsSummary;
+    if (selectedStudentId && studentRankings.length > 0) {
+      const matched = studentRankings.find(
+        (s: any) => String(s.student_id || s.id) === selectedStudentId
+      );
+      if (matched && matched.prediction_model && matched.prediction_model !== "None") {
+        raw = { ...analyticsSummary, ...matched };
+      }
+    }
+
+    if (!raw) {
+      raw = {
+        academic_score: 0.0,
+        trend_slope: 0.0,
+        trend_label: "Chưa có dữ liệu",
+        consistency_score: 100.0,
+        std_dev: 0.0,
+        std_dev_c1: 0.0,
+        std_dev_c2: 0.0,
+        std_dev_hw: 0.0,
+        consistency_label: "Ổn định",
+        ema_level: 0.0,
+        ema_c1: 0.0,
+        ema_c2: 0.0,
+        ema_hw: 0.0,
+        predicted_next: 0.0,
+        pred_c1: 0.0,
+        pred_c2: 0.0,
+        pred_hw: 0.0,
+        attendance_pct: 100.0,
+        performance_index: 0.0,
+        rating_label: "Chưa có dữ liệu",
+        prediction_model: "Weighted OLS",
+        recommendations: ["Chưa có dữ liệu thống kê."]
+      };
+    }
 
     const c1 = Math.min(10.0, Math.max(0.0, trunc1Dec(raw.pred_c1 ?? 0.0)));
     const c2 = Math.min(10.0, Math.max(0.0, trunc1Dec(raw.pred_c2 ?? 0.0)));
@@ -262,7 +275,7 @@ export function useReportsData() {
       pred_hw: hw,
       predicted_next: predNext
     };
-  }, [analyticsSummary]);
+  }, [analyticsSummary, selectedStudentId, studentRankings]);
 
   // Map student_id to sorted list of session records
   const studentSessionsMap = useMemo(() => {
