@@ -36,7 +36,7 @@ export const LearningBottlenecksSection: React.FC<LearningBottlenecksSectionProp
     <div className="bg-white dark:bg-[#0b0f19] border border-slate-300/80 dark:border-[#1b253b] rounded-2xl p-6 shadow-[0_4px_20px_-4px_rgba(15,23,42,0.08),0_2px_4px_-1px_rgba(15,23,42,0.04)] dark:shadow-xl space-y-6 animate-cascade-5">
       <div onClick={() => setIsBottlenecksSectionOpen(!isBottlenecksSectionOpen)} className="flex flex-wrap items-center justify-between gap-4 cursor-pointer select-none border-b border-slate-200 dark:border-[#161f33] pb-4">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-500 dark:text-amber-400 shrink-0">
+          <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-500 dark:text-amber-400 shrink-0">
             <HelpCircle size={20} />
           </div>
           <div>
@@ -55,14 +55,14 @@ export const LearningBottlenecksSection: React.FC<LearningBottlenecksSectionProp
 
       {isBottlenecksSectionOpen && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="p-4 rounded-xl bg-amber-500/5 dark:bg-[#14121a] border border-amber-500/20 dark:border-amber-500/30 space-y-3">
+          <div className="p-4 rounded-xl bg-amber-500/5 dark:bg-[#14121a] space-y-3">
             <h4 className="text-xs font-black uppercase text-amber-600 dark:text-amber-400 flex items-center gap-2">
               <Flame size={14} /> BTVN Cao - Kiểm Tra Lớp Thấp ({learningBottlenecks.type1.length})
             </h4>
             <p className="text-[11px] text-slate-500 dark:text-slate-400">Nguy cơ nhờ người làm hộ BTVN hoặc áp lực tâm lý phòng thi.</p>
             <div className="space-y-1.5 max-h-48 overflow-y-auto scrollbar-thin">
               {learningBottlenecks.type1.map((s, i) => (
-                <div key={i} className="flex items-center justify-between text-xs py-1 px-2 rounded bg-slate-50 dark:bg-black/30 border border-slate-200/50 dark:border-transparent">
+                <div key={i} className="flex items-center justify-between text-xs py-1 px-2 rounded bg-slate-50 dark:bg-black/30">
                   <span className="font-bold text-slate-800 dark:text-slate-200">{s.full_name}</span>
                   <span className="text-amber-600 dark:text-amber-400 font-mono">BTVN: {s.hw} | Lớp: {s.inClass} (Chênh: {s.gap})</span>
                 </div>
@@ -71,14 +71,14 @@ export const LearningBottlenecksSection: React.FC<LearningBottlenecksSectionProp
             </div>
           </div>
 
-          <div className="p-4 rounded-xl bg-blue-500/5 dark:bg-[#0e1622] border border-blue-500/20 dark:border-cyan-500/30 space-y-3">
+          <div className="p-4 rounded-xl bg-blue-500/5 dark:bg-[#0e1622] space-y-3">
             <h4 className="text-xs font-black uppercase text-cyan-600 dark:text-cyan-400 flex items-center gap-2">
               <Zap size={14} /> Kiểm Tra Lớp Cao - BTVN Thấp ({learningBottlenecks.type2.length})
             </h4>
             <p className="text-[11px] text-slate-500 dark:text-slate-400">Học sinh có tố chất nhưng lười làm bài tập hoặc thiếu kỷ luật.</p>
             <div className="space-y-1.5 max-h-48 overflow-y-auto scrollbar-thin">
               {learningBottlenecks.type2.map((s, i) => (
-                <div key={i} className="flex items-center justify-between text-xs py-1 px-2 rounded bg-slate-50 dark:bg-black/30 border border-slate-200/50 dark:border-transparent">
+                <div key={i} className="flex items-center justify-between text-xs py-1 px-2 rounded bg-slate-50 dark:bg-black/30">
                   <span className="font-bold text-slate-800 dark:text-slate-200">{s.full_name}</span>
                   <span className="text-cyan-600 dark:text-cyan-400 font-mono">Lớp: {s.inClass} | BTVN: {s.hw} (Chênh: {s.gap})</span>
                 </div>

@@ -66,25 +66,25 @@ export const MasteryHeatmap: React.FC<MasteryHeatmapProps> = ({
     const score = Number(ema);
     if (score >= 8.0) {
       return {
-        badgeClass: 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 hover:bg-emerald-500/25 hover:scale-105 font-black',
+        badgeClass: 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-500/25 hover:scale-105 font-black',
         label: trunc1Dec(score),
       };
     }
     if (score >= 6.5) {
       return {
-        badgeClass: 'bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30 hover:bg-amber-500/25 hover:scale-105 font-bold',
+        badgeClass: 'bg-amber-500/15 text-amber-700 dark:text-amber-300 hover:bg-amber-500/25 hover:scale-105 font-bold',
         label: trunc1Dec(score),
       };
     }
     if (score >= 5.0) {
       return {
-        badgeClass: 'bg-orange-500/15 text-orange-700 dark:text-orange-300 border border-orange-500/30 hover:bg-orange-500/25 hover:scale-105 font-bold',
+        badgeClass: 'bg-orange-500/15 text-orange-700 dark:text-orange-300 hover:bg-orange-500/25 hover:scale-105 font-bold',
         label: trunc1Dec(score),
       };
     }
     // Score < 5.0: Rose/Red
     return {
-      badgeClass: 'bg-rose-500/15 text-rose-700 dark:text-rose-300 border border-rose-500/30 hover:bg-rose-500/25 hover:scale-105 font-black',
+      badgeClass: 'bg-rose-500/15 text-rose-700 dark:text-rose-300 hover:bg-rose-500/25 hover:scale-105 font-black',
       label: trunc1Dec(score),
     };
   };
@@ -126,11 +126,11 @@ export const MasteryHeatmap: React.FC<MasteryHeatmapProps> = ({
             </span>
             <div className="flex items-center gap-1.5 flex-wrap">
               {row.original.nickname && (
-                <span className="text-xs font-extrabold text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-500/15 px-1.5 py-0.5 rounded border border-blue-200 dark:border-blue-500/20">
+                <span className="text-xs font-extrabold text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-500/15 px-1.5 py-0.5 rounded">
                   {row.original.nickname}
                 </span>
               )}
-              <span className="text-xs text-slate-600 dark:text-slate-400 font-semibold bg-slate-100 dark:bg-[#121626] px-1.5 py-0.5 rounded border border-slate-200 dark:border-white/5">
+              <span className="text-xs text-slate-600 dark:text-slate-400 font-semibold bg-slate-100 dark:bg-[#121626] px-1.5 py-0.5 rounded">
                 {row.original.class_name || 'Lớp học'}
               </span>
             </div>
@@ -152,8 +152,8 @@ export const MasteryHeatmap: React.FC<MasteryHeatmapProps> = ({
               <span
                 className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-full ${
                   u.skill === 'vocab'
-                    ? 'bg-blue-500/15 text-blue-700 dark:text-blue-300 border border-blue-500/30'
-                    : 'bg-purple-500/15 text-purple-700 dark:text-purple-300 border border-purple-500/30'
+                    ? 'bg-blue-500/15 text-blue-700 dark:text-blue-300'
+                    : 'bg-purple-500/15 text-purple-700 dark:text-purple-300'
                 }`}
               >
                 {u.skill === 'vocab' ? 'Từ Vựng' : 'Ngữ Pháp'}

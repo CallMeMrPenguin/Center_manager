@@ -74,7 +74,7 @@ export const SkillBreakdownTab: React.FC<SkillBreakdownTabProps> = ({
   if (!selectedClassId) {
     return (
       <div className="py-16 px-6 rounded-2xl bg-white dark:bg-[#090d16] border border-slate-200 dark:border-[#1b253b] text-center flex flex-col items-center justify-center gap-4 select-none animate-cascade-1 shadow-sm dark:shadow-lg max-w-2xl mx-auto">
-        <div className="w-14 h-14 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-blue-600 dark:text-blue-400 flex items-center justify-center shadow-[0_0_20px_rgba(59,130,246,0.15)]">
+        <div className="w-14 h-14 rounded-2xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center shadow-[0_0_20px_rgba(59,130,246,0.15)]">
           <GraduationCap size={28} />
         </div>
         <div className="space-y-1.5">
@@ -105,7 +105,7 @@ export const SkillBreakdownTab: React.FC<SkillBreakdownTabProps> = ({
                   key={c.id}
                   type="button"
                   onClick={() => onSelectClass?.(String(c.id))}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-[#141a2e] hover:bg-blue-50 dark:hover:bg-blue-600/20 text-slate-700 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-300 border border-slate-200 dark:border-[#233052] text-xs font-bold transition cursor-pointer"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-[#141a2e] hover:bg-blue-50 dark:hover:bg-blue-600/20 text-slate-700 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-300 text-xs font-bold transition cursor-pointer"
                 >
                   <span>{c.class_name}</span>
                   <ArrowRight size={11} />
@@ -137,9 +137,9 @@ export const SkillBreakdownTab: React.FC<SkillBreakdownTabProps> = ({
     <div className="flex flex-col gap-6 mb-8 select-none">
       {/* 0. ACTIVE STUDENT FILTER BANNER */}
       {selectedStudent && (
-        <div className="bg-white dark:bg-[#101528] border border-indigo-200 dark:border-indigo-500/40 p-4 rounded-2xl flex items-center justify-between gap-4 shadow-sm dark:shadow-lg animate-cascade-1">
+        <div className="bg-white dark:bg-[#101528] p-4 rounded-2xl flex items-center justify-between gap-4 shadow-sm dark:shadow-lg animate-cascade-1">
           <div className="flex items-center gap-3.5">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-indigo-600 to-purple-600 text-white font-black text-sm flex items-center justify-center border border-white/20">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-indigo-600 to-purple-600 text-white font-black text-sm flex items-center justify-center">
               {selectedStudent.full_name.slice(0, 2).toUpperCase()}
             </div>
             <div>
@@ -150,14 +150,14 @@ export const SkillBreakdownTab: React.FC<SkillBreakdownTabProps> = ({
                 <h3 className="text-base font-black text-slate-900 dark:text-white">
                   {selectedStudent.full_name} {selectedStudent.nickname && <span className="text-indigo-600 dark:text-indigo-300 font-bold">({selectedStudent.nickname})</span>}
                 </h3>
-                <span className="text-xs px-2 py-0.5 rounded-md bg-indigo-50 dark:bg-[#1e2748] text-indigo-700 dark:text-indigo-300 font-bold border border-indigo-200 dark:border-indigo-500/20">{selectedStudent.class_name}</span>
+                <span className="text-xs px-2 py-0.5 rounded-md bg-indigo-50 dark:bg-[#1e2748] text-indigo-700 dark:text-indigo-300 font-bold">{selectedStudent.class_name}</span>
               </div>
             </div>
           </div>
           <button
             type="button"
             onClick={() => onSelectRankingStudent(0)}
-            className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-rose-50 dark:bg-[#1c2442] dark:hover:bg-rose-500/20 text-slate-600 hover:text-rose-600 dark:text-slate-300 dark:hover:text-rose-300 border border-slate-200 dark:border-white/10 text-xs font-bold transition cursor-pointer"
+            className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-rose-50 dark:bg-[#1c2442] dark:hover:bg-rose-500/20 text-slate-600 hover:text-rose-600 dark:text-slate-300 dark:hover:text-rose-300 text-xs font-bold transition cursor-pointer"
           >
             Bỏ Lọc Học Sinh ✕
           </button>

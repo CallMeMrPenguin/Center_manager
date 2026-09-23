@@ -39,12 +39,12 @@ export const UnitBreakdownTable: React.FC<UnitBreakdownTableProps> = ({ data }) 
           const isGrammar = val === 'grammar';
           return (
             <span
-              className={`text-xs font-black uppercase px-2.5 py-1 rounded-full border ${
+              className={`text-xs font-black uppercase px-2.5 py-1 rounded-full ${
                 isVocab
-                  ? 'text-blue-700 dark:text-blue-400 bg-blue-500/15 border-blue-500/30'
+                  ? 'text-blue-700 dark:text-blue-400 bg-blue-500/15'
                   : isGrammar
-                  ? 'text-purple-700 dark:text-purple-400 bg-purple-500/15 border-purple-500/30'
-                  : 'text-indigo-700 dark:text-indigo-400 bg-indigo-500/15 border-indigo-500/30'
+                  ? 'text-purple-700 dark:text-purple-400 bg-purple-500/15'
+                  : 'text-indigo-700 dark:text-indigo-400 bg-indigo-500/15'
               }`}
             >
               {isVocab ? 'Từ Vựng' : isGrammar ? 'Ngữ Pháp' : 'Tổng Hợp'}
@@ -126,7 +126,7 @@ export const UnitBreakdownTable: React.FC<UnitBreakdownTableProps> = ({ data }) 
             return <span className="text-sm text-emerald-700 dark:text-emerald-400 font-extrabold font-mono">0 học sinh</span>;
           }
           return (
-            <span className="text-sm font-extrabold text-amber-700 dark:text-amber-400 bg-amber-500/15 px-2.5 py-0.5 rounded-md border border-amber-500/30 font-mono">
+            <span className="text-sm font-extrabold text-amber-700 dark:text-amber-400 bg-amber-500/15 px-2.5 py-0.5 rounded-md font-mono">
               {count} học sinh
             </span>
           );

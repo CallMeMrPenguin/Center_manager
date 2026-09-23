@@ -141,7 +141,7 @@ export const ScoreFluctuationsSection: React.FC<ScoreFluctuationsSectionProps> =
       header: 'Lớp Học',
       meta: { headerText: 'Lớp Học', exportValue: (r: any) => r.class_name || 'Lớp học' },
       cell: (info) => (
-        <span className="inline-block px-2.5 py-0.5 rounded-lg text-xs font-black bg-indigo-50 dark:bg-[#1c2442] text-indigo-600 dark:text-indigo-300 border border-indigo-200 dark:border-[#303d68]">
+        <span className="inline-block px-2.5 py-0.5 rounded-lg text-xs font-black bg-indigo-50 dark:bg-[#1c2442] text-indigo-600 dark:text-indigo-300">
           {info.getValue<string>() || 'Lớp học'}
         </span>
       ),
@@ -168,9 +168,9 @@ export const ScoreFluctuationsSection: React.FC<ScoreFluctuationsSectionProps> =
         const isDown = delta < -0.05;
         return (
           <div className="text-center">
-            <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-xs font-mono font-black border ${isUp ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30' :
-              isDown ? 'bg-rose-500/15 text-rose-400 border-rose-500/30' :
-                'bg-slate-500/15 text-slate-300 border-slate-500/30'
+            <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-xs font-mono font-black ${isUp ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400' :
+              isDown ? 'bg-rose-500/15 text-rose-600 dark:text-rose-400' :
+                'bg-slate-500/15 text-slate-700 dark:text-slate-300'
               }`}>
               {isUp ? <TrendingUp size={13} /> : isDown ? <TrendingDown size={13} /> : <Minus size={13} />}
               <span>{delta > 0 ? `+${format1Dec(delta)}` : format1Dec(delta)}</span>
@@ -187,15 +187,15 @@ export const ScoreFluctuationsSection: React.FC<ScoreFluctuationsSectionProps> =
         const type = row.original.statusType;
         const label = row.original.statusLabel;
         const cls =
-          type === 'breakthrough' ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40' :
-            type === 'improving' ? 'bg-teal-500/15 text-teal-300 border-teal-500/30' :
-              type === 'declining' ? 'bg-amber-500/15 text-amber-300 border-amber-500/30' :
-                type === 'critical' ? 'bg-rose-500/20 text-rose-300 border-rose-500/40' :
-                  'bg-indigo-500/10 text-indigo-300 border-indigo-500/20';
+          type === 'breakthrough' ? 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300' :
+            type === 'improving' ? 'bg-teal-500/15 text-teal-700 dark:text-teal-300' :
+              type === 'declining' ? 'bg-amber-500/15 text-amber-700 dark:text-amber-300' :
+                type === 'critical' ? 'bg-rose-500/20 text-rose-700 dark:text-rose-300' :
+                  'bg-indigo-500/10 text-indigo-700 dark:text-indigo-300';
 
         return (
           <div className="text-center">
-            <span className={`inline-block px-2.5 py-0.5 rounded-lg text-[10px] font-black border ${cls}`}>{label}</span>
+            <span className={`inline-block px-2.5 py-0.5 rounded-lg text-[10px] font-black ${cls}`}>{label}</span>
           </div>
         );
       },
@@ -203,8 +203,8 @@ export const ScoreFluctuationsSection: React.FC<ScoreFluctuationsSectionProps> =
     {
       accessorKey: 'sessionCount',
       header: () => <div className="text-center w-full">Số Buổi Đã Học</div>,
-      meta: { headerText: 'Số Buổi Đã Học', exportValue: (r: any) => `${r.sessionCount} buổi` },
-      cell: ({ getValue }) => <div className="text-center font-mono font-bold text-slate-400 text-xs">{getValue<number>()} buổi</div>,
+      meta: { headerText: 'Số Buổi', exportValue: (r: any) => r.sessionCount },
+      cell: ({ getValue }) => <div className="text-center font-mono font-bold text-slate-700 dark:text-slate-300 text-sm">{getValue<number>()} buổi</div>,
     },
     {
       id: 'actions',
@@ -216,7 +216,7 @@ export const ScoreFluctuationsSection: React.FC<ScoreFluctuationsSectionProps> =
         <div className="text-center">
           <button
             onClick={(e) => { e.stopPropagation(); onSelectRankingStudent(row.original.student_id); }}
-            className="px-2.5 py-1 rounded-lg bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 hover:text-indigo-300 transition cursor-pointer border border-indigo-500/20 inline-flex items-center text-[11px] font-bold"
+            className="px-2.5 py-1 rounded-lg bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition cursor-pointer inline-flex items-center text-[11px] font-bold"
           >
             <span>Xem chi tiết</span>
           </button>
@@ -229,7 +229,7 @@ export const ScoreFluctuationsSection: React.FC<ScoreFluctuationsSectionProps> =
     <div className="bg-white dark:bg-[#0b0f19] border border-slate-300/80 dark:border-[#1b253b] rounded-2xl p-6 shadow-[0_4px_20px_-4px_rgba(15,23,42,0.08),0_2px_4px_-1px_rgba(15,23,42,0.04)] dark:shadow-xl space-y-6 animate-cascade-4">
       <div onClick={() => setIsGrowthSectionOpen(!isGrowthSectionOpen)} className="flex flex-wrap items-center justify-between gap-4 cursor-pointer select-none border-b border-slate-200 dark:border-[#161f33] pb-4">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-500 dark:text-cyan-400 shrink-0">
+          <div className="w-10 h-10 rounded-xl bg-cyan-500/10 flex items-center justify-center text-cyan-500 dark:text-cyan-400 shrink-0">
             <Activity size={20} />
           </div>
           <div>

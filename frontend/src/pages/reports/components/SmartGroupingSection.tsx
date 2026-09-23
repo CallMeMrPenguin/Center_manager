@@ -154,7 +154,7 @@ export const SmartGroupingSection: React.FC<SmartGroupingSectionProps> = ({
       {/* Header Bar */}
       <div onClick={() => setIsGroupingSectionOpen(!isGroupingSectionOpen)} className="flex flex-wrap items-center justify-between gap-4 cursor-pointer select-none border-b border-slate-200 dark:border-[#161f33] pb-4">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-500 dark:text-purple-400 shrink-0">
+          <div className="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-500 dark:text-purple-400 shrink-0">
             <FolderTree size={20} />
           </div>
           <div>
@@ -176,7 +176,7 @@ export const SmartGroupingSection: React.FC<SmartGroupingSectionProps> = ({
       {isGroupingSectionOpen && (
         <div className="space-y-6">
           {/* Scope, Algorithm & Export Toolbar */}
-          <div className="flex flex-wrap items-center justify-between gap-4 bg-slate-50 dark:bg-[#0e1322] p-4 rounded-xl border border-slate-200 dark:border-[#1e2744]">
+          <div className="flex flex-wrap items-center justify-between gap-4 bg-slate-50 dark:bg-[#0e1322] p-4 rounded-xl">
             <div className="flex flex-wrap items-center gap-4">
               {/* Scope Selector with Sliding Indicator */}
               <div className="flex items-center gap-2">

@@ -140,10 +140,10 @@ export const StudentWeaknessDiagnosisCard: React.FC<StudentWeaknessDiagnosisCard
           return (
             <div className="text-center">
               <span
-                className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-black border ${
+                className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-black ${
                   isUrgent
-                    ? 'bg-rose-500/15 text-rose-700 dark:text-rose-300 border-rose-500/40 animate-pulse'
-                    : 'bg-amber-500/15 text-amber-700 dark:text-amber-300 border-amber-500/40'
+                    ? 'bg-rose-500/15 text-rose-700 dark:text-rose-300 animate-pulse'
+                    : 'bg-amber-500/15 text-amber-700 dark:text-amber-300'
                 }`}
               >
                 {isUrgent && <AlertTriangle size={12} className="text-rose-500" />}
@@ -183,12 +183,12 @@ export const StudentWeaknessDiagnosisCard: React.FC<StudentWeaknessDiagnosisCard
                 return (
                   <span
                     key={`${u.unit_key}-${i}`}
-                    className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-bold border ${
+                    className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-bold ${
                       isUrgent
-                        ? 'bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/60 dark:border-rose-500/50 dark:text-rose-200'
+                        ? 'bg-rose-500/15 text-rose-700 dark:text-rose-200'
                         : isGrammar
-                        ? 'bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950/50 dark:border-purple-500/40 dark:text-purple-200'
-                        : 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/50 dark:border-blue-500/40 dark:text-blue-200'
+                        ? 'bg-purple-500/15 text-purple-700 dark:text-purple-200'
+                        : 'bg-blue-500/15 text-blue-700 dark:text-blue-200'
                     }`}
                   >
                     <span
@@ -276,7 +276,7 @@ export const StudentWeaknessDiagnosisCard: React.FC<StudentWeaknessDiagnosisCard
         </div>
 
         {/* Filter Pills */}
-        <div className="flex items-center gap-1 bg-slate-100 dark:bg-[#121626] border border-slate-200 dark:border-white/10 p-0.5 rounded-lg text-xs font-bold">
+        <div className="flex items-center gap-1 bg-slate-100 dark:bg-[#121626] p-0.5 rounded-lg text-xs font-bold">
           <button
             type="button"
             onClick={() => setSkillFilter('all')}
@@ -315,7 +315,7 @@ export const StudentWeaknessDiagnosisCard: React.FC<StudentWeaknessDiagnosisCard
 
       {/* 2. Overview Strip */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-        <div className="bg-slate-50 dark:bg-[#121626] border border-slate-200 dark:border-white/5 p-3 rounded-xl">
+        <div className="bg-slate-50 dark:bg-[#121626] p-3 rounded-xl">
           <span className="text-slate-500 dark:text-slate-400 block text-[10px] uppercase font-bold">
             {skillFilter === 'grammar'
               ? 'Học Sinh Hổng Ngữ Pháp'
@@ -332,7 +332,7 @@ export const StudentWeaknessDiagnosisCard: React.FC<StudentWeaknessDiagnosisCard
             em
           </span>
         </div>
-        <div className="bg-slate-50 dark:bg-[#121626] border border-rose-200 dark:border-rose-500/20 p-3 rounded-xl">
+        <div className="bg-slate-50 dark:bg-[#121626] p-3 rounded-xl">
           <span className="text-rose-500 dark:text-rose-400 block text-[10px] uppercase font-bold">
             Cần Phụ Đạo Gấp (&lt;5đ)
           </span>
@@ -347,8 +347,8 @@ export const StudentWeaknessDiagnosisCard: React.FC<StudentWeaknessDiagnosisCard
         </div>
         <div
           onClick={() => setSkillFilter('grammar')}
-          className={`bg-slate-50 dark:bg-[#121626] border p-3 rounded-xl cursor-pointer transition-all ${
-            skillFilter === 'grammar' ? 'border-purple-500 ring-1 ring-purple-500/50' : 'border-purple-200 dark:border-purple-500/20 hover:border-purple-400 dark:hover:border-purple-500/40'
+          className={`p-3 rounded-xl cursor-pointer transition-all ${
+            skillFilter === 'grammar' ? 'bg-purple-500/15' : 'bg-slate-50 dark:bg-[#121626] hover:bg-purple-500/10'
           }`}
         >
           <span className="text-purple-600 dark:text-purple-400 block text-[10px] uppercase font-bold">
@@ -360,8 +360,8 @@ export const StudentWeaknessDiagnosisCard: React.FC<StudentWeaknessDiagnosisCard
         </div>
         <div
           onClick={() => setSkillFilter('vocab')}
-          className={`bg-slate-50 dark:bg-[#121626] border p-3 rounded-xl cursor-pointer transition-all ${
-            skillFilter === 'vocab' ? 'border-blue-500 ring-1 ring-blue-500/50' : 'border-blue-200 dark:border-blue-500/20 hover:border-blue-400 dark:hover:border-blue-500/40'
+          className={`p-3 rounded-xl cursor-pointer transition-all ${
+            skillFilter === 'vocab' ? 'bg-blue-500/15' : 'bg-slate-50 dark:bg-[#121626] hover:bg-blue-500/10'
           }`}
         >
           <span className="text-blue-600 dark:text-blue-400 block text-[10px] uppercase font-bold">

@@ -158,7 +158,7 @@ export const EarlyWarningSection: React.FC<EarlyWarningSectionProps> = ({
         return (
           <div className="flex flex-wrap gap-1.5">
             {tags.map((tag: string, idx: number) => (
-              <span key={idx} className="text-[10px] font-extrabold px-2 py-0.5 rounded bg-rose-50 dark:bg-black/40 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-500/30">{tag}</span>
+              <span key={idx} className="text-[10px] font-extrabold px-2 py-0.5 rounded bg-rose-500/15 text-rose-700 dark:text-rose-300">{tag}</span>
             ))}
           </div>
         );
@@ -183,7 +183,7 @@ export const EarlyWarningSection: React.FC<EarlyWarningSectionProps> = ({
         <div className="text-center">
           <button
             onClick={(e) => { e.stopPropagation(); onSelectRankingStudent(row.original.student_id); }}
-            className="px-2.5 py-1 rounded-lg bg-rose-500/15 hover:bg-rose-500/25 text-rose-700 dark:text-rose-300 hover:text-rose-800 dark:hover:text-white transition cursor-pointer border border-rose-500/30 text-[11px] font-black inline-flex items-center"
+            className="px-2.5 py-1 rounded-lg bg-rose-500/15 hover:bg-rose-500/25 text-rose-700 dark:text-rose-300 hover:text-rose-800 dark:hover:text-white transition cursor-pointer text-[11px] font-black inline-flex items-center"
           >
             <span>Xem chi tiết</span>
           </button>
@@ -196,7 +196,7 @@ export const EarlyWarningSection: React.FC<EarlyWarningSectionProps> = ({
     <div className="bg-white dark:bg-[#120d18] border border-rose-200 dark:border-rose-500/30 rounded-2xl p-4 sm:p-5 shadow-sm dark:shadow-2xl transition-all animate-cascade-2">
       <div onClick={() => setIsWarningSectionOpen(!isWarningSectionOpen)} className="flex flex-wrap items-center justify-between gap-4 cursor-pointer select-none">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-rose-500/20 border border-rose-500/40 flex items-center justify-center text-rose-500 dark:text-rose-400 shadow-md shadow-rose-500/10 shrink-0">
+          <div className="w-9 h-9 rounded-xl bg-rose-500/20 flex items-center justify-center text-rose-500 dark:text-rose-400 shrink-0">
             <BellRing size={18} />
           </div>
           <div>
@@ -209,7 +209,7 @@ export const EarlyWarningSection: React.FC<EarlyWarningSectionProps> = ({
                   {atRiskStudents.length} CẦN LƯU Ý
                 </span>
               ) : (
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-600 dark:text-emerald-300 border border-emerald-500/30">
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-600 dark:text-emerald-300">
                   An Toàn
                 </span>
               )}
@@ -236,7 +236,7 @@ export const EarlyWarningSection: React.FC<EarlyWarningSectionProps> = ({
       {isWarningSectionOpen && (
         <div className="mt-4 pt-4 border-t border-rose-200 dark:border-rose-500/20 space-y-4">
           {showWarningSettings && (
-            <div className="p-4 rounded-xl bg-slate-50 dark:bg-[#180e1e] border border-rose-200 dark:border-rose-500/30 grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="p-4 rounded-xl bg-slate-50 dark:bg-[#180e1e] grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
                 <label className="block text-[10px] font-black uppercase text-slate-700 dark:text-slate-300 mb-1">Tỷ lệ vắng tối đa (%)</label>
                 <input
