@@ -1,6 +1,7 @@
-import React, { useMemo, useState, useEffect } from 'react';
-import { FileCheck2, X, ArrowRight, ArrowLeft, UserX, Copy, Check, RotateCw, RotateCcw } from 'lucide-react';
+import { useMemo, useState, useEffect } from 'react';
+import { FileCheck2, X, UserX, Copy, Check, RotateCw, RotateCcw } from 'lucide-react';
 import { showToast } from '../Toast';
+import SnakeFlowDiagram from './SnakeFlowDiagram';
 
 interface SwapPair {
   student1_id?: number;
@@ -29,8 +30,6 @@ interface BlossomResultModalProps {
   pairs: SwapPair[];
   unmatched?: UnmatchedStudent[];
 }
-
-const COLS = 5;
 
 export default function BlossomResultModal({ isOpen, onClose, pairs, unmatched = [] }: BlossomResultModalProps) {
   const [copied, setCopied] = useState(false);
@@ -83,22 +82,6 @@ export default function BlossomResultModal({ isOpen, onClose, pairs, unmatched =
     }));
   }, [activeNodes]);
 
-  const snakeRows = useMemo(() => {
-    if (activeNodes.length < 2) return [];
-    const items = activeNodes.map((n, i) => ({
-      name: n.name,
-      group: n.group,
-      idx: i + 1,
-      isFirst: i === 0,
-      isLoopback: false,
-    }));
-    items.push({ name: 'Khép vòng', group: '', idx: 0, isFirst: false, isLoopback: true });
-
-    const rows: (typeof items)[] = [];
-    for (let i = 0; i < items.length; i += COLS) rows.push(items.slice(i, i + COLS));
-    return rows;
-  }, [activeNodes]);
-
   const handleExclude = (name: string) => {
     setExcludedNames((prev) => new Set([...prev, name]));
     showToast(`Đã loại ${name} khỏi sơ đồ (tự động chuyển cho bạn kế tiếp)`, 'info');
@@ -142,9 +125,6 @@ export default function BlossomResultModal({ isOpen, onClose, pairs, unmatched =
       setTimeout(() => setCopied(false), 2000);
     }
   };
-
-  const totalRows = snakeRows.length;
-  const loopbackSpineH = totalRows > 1 ? (totalRows - 1) * 80 : 0;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 animate-mac-dropdown">
@@ -192,106 +172,7 @@ export default function BlossomResultModal({ isOpen, onClose, pairs, unmatched =
               )}
             </div>
           ) : (
-            /* Snake Flow Diagram Workspace */
-            <div className="overflow-x-auto py-2">
-              <div className="min-w-[860px] mx-auto relative pl-12 pr-12 py-3 select-none">
-                {/* Green Loopback Spine Line from Khép Vòng back to Node 1 */}
-                {totalRows > 1 && (
-                  <svg className="absolute -left-3 top-[32px] pointer-events-none text-emerald-500 dark:text-emerald-400" style={{ height: `${loopbackSpineH}px`, width: '40px' }} viewBox={`0 0 40 ${loopbackSpineH}`} fill="none">
-                    <path d={`M 40 ${loopbackSpineH} L 18 ${loopbackSpineH} A 10 10 0 0 1 8 ${loopbackSpineH - 10} L 8 10 A 10 10 0 0 1 18 0 L 36 0`} stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
-                    <polygon points="36,0 28,-4 28,4" fill="currentColor" />
-                  </svg>
-                )}
-
-                {/* Rows Stack */}
-                <div className="space-y-[28px]">
-                  {snakeRows.map((row, rIdx) => {
-                    const isRtl = rIdx % 2 === 1;
-                    const isLastRow = rIdx === totalRows - 1;
-
-                    return (
-                      <div key={rIdx} className="relative">
-                        {/* Connecting U-Turn curve to next row */}
-                        {!isLastRow && !isRtl && (
-                          <div className="absolute -right-9 top-[26px] w-9 h-[80px] pointer-events-none">
-                            <svg className="w-full h-full text-blue-400 dark:text-blue-500" viewBox="0 0 36 80" fill="none">
-                              <path d="M 0 0 C 32 0, 32 80, 0 80" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
-                              <polygon points="2,80 10,75 10,85" fill="currentColor" />
-                            </svg>
-                          </div>
-                        )}
-                        {!isLastRow && isRtl && (
-                          <div className="absolute -left-9 top-[26px] w-9 h-[80px] pointer-events-none">
-                            <svg className="w-full h-full text-blue-400 dark:text-blue-500" viewBox="0 0 36 80" fill="none">
-                              <path d="M 36 0 C 4 0, 4 80, 36 80" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
-                              <polygon points="34,80 26,75 26,85" fill="currentColor" />
-                            </svg>
-                          </div>
-                        )}
-
-                        {/* Row Elements */}
-                        <div className={`flex items-center gap-2.5 ${isRtl ? 'flex-row-reverse justify-start' : 'flex-row justify-start'}`}>
-                          {row.map((item, cIdx) => {
-                            const isRowEnd = cIdx === row.length - 1;
-                            if (item.isLoopback) {
-                              return (
-                                <div key="loopback" className="flex items-center gap-1.5 px-4 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs shadow-md shrink-0 border border-emerald-500/40 transition select-none">
-                                  <RotateCw size={13} className="shrink-0" />
-                                  <span>Khép vòng</span>
-                                </div>
-                              );
-                            }
-
-                            return (
-                              <React.Fragment key={item.name}>
-                                {/* Student Card */}
-                                <div
-                                  onClick={() => handleExclude(item.name)}
-                                  className={`group relative flex items-center justify-between w-[150px] sm:w-[158px] h-[52px] px-3.5 rounded-2xl transition-all duration-150 cursor-pointer ${
-                                    item.isFirst
-                                      ? 'border-2 border-emerald-500 bg-emerald-50/60 dark:bg-emerald-500/10 shadow-[0_0_14px_rgba(16,185,129,0.2)]'
-                                      : 'border border-blue-200/80 dark:border-white/10 bg-white dark:bg-[#161c30] shadow-2xs hover:border-rose-400 hover:bg-rose-50/30 dark:hover:bg-rose-500/10 hover:shadow-xs'
-                                  }`}
-                                  title={`Bấm để loại ${item.name} khỏi sơ đồ (không nộp BTVN)`}
-                                >
-                                  <div className="flex items-center gap-2 min-w-0 flex-1">
-                                    <span className={`w-6 h-6 rounded-full font-black text-xs flex items-center justify-center shrink-0 shadow-2xs ${item.isFirst ? 'bg-emerald-600 text-white' : 'bg-blue-500 text-white'}`}>
-                                      {item.idx}
-                                    </span>
-                                    <span className="font-bold text-xs sm:text-[13px] text-slate-800 dark:text-slate-100 truncate">
-                                      {item.name}
-                                    </span>
-                                  </div>
-                                  <button
-                                    type="button"
-                                    onClick={(e) => { e.stopPropagation(); handleExclude(item.name); }}
-                                    className="opacity-0 group-hover:opacity-100 p-1 rounded-md text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-500/10 transition cursor-pointer border-0 shrink-0"
-                                    title="Loại học sinh này"
-                                  >
-                                    <X size={12} />
-                                  </button>
-                                </div>
-
-                                {/* Horizontal Directional Arrow */}
-                                {!isRowEnd && (
-                                  <div className="shrink-0 flex items-center justify-center">
-                                    {isRtl ? (
-                                      <ArrowLeft size={16} className="text-blue-500 dark:text-blue-400" strokeWidth={2.5} />
-                                    ) : (
-                                      <ArrowRight size={16} className="text-blue-500 dark:text-blue-400" strokeWidth={2.5} />
-                                    )}
-                                  </div>
-                                )}
-                              </React.Fragment>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
+            <SnakeFlowDiagram activeNodes={activeNodes} onExclude={handleExclude} />
           )}
 
           {/* Unmatched / Excluded Section */}
