@@ -554,7 +554,7 @@ export default function TestFormatter({
   };
 
   return (
-    <div className="h-full w-full bg-[#e2e8f0] dark:bg-[#09090b] flex relative overflow-hidden select-none">
+    <div className="h-full w-full bg-[#f1f5f9] dark:bg-[#09090b] flex relative overflow-hidden select-none">
       
       {/* 1. SLIDING CONFIGS PANEL (SLIDEBAR) */}
       <aside className={`w-80 bg-white dark:bg-[#141417] border-r border-slate-200 dark:border-[#27272a] p-5 flex flex-col justify-between overflow-y-auto shrink-0 transition-all duration-300 absolute lg:relative z-20 h-full ${

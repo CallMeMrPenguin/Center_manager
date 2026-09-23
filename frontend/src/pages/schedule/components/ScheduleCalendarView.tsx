@@ -58,8 +58,8 @@ export const ScheduleCalendarView: React.FC<ScheduleCalendarViewProps> = ({
             ))}
           </div>
         </div>
-        <div className="p-3 overflow-y-auto max-h-[calc(100vh-270px)]">
-          <div className="grid grid-cols-7 gap-1.5 auto-rows-fr">
+        <div className="overflow-y-auto max-h-[calc(100vh-270px)] bg-slate-200/80 dark:bg-white/10">
+          <div className="grid grid-cols-7 gap-px bg-slate-200/80 dark:bg-white/10 auto-rows-fr">
             {Array.from({ length: totalCells }).map((_, idx) => {
               const dayNum = idx - startOff + 1;
               const isCurr = dayNum > 0 && dayNum <= daysInMonth;
@@ -72,9 +72,9 @@ export const ScheduleCalendarView: React.FC<ScheduleCalendarViewProps> = ({
                 return (
                   <div
                     key={idx}
-                    className="min-h-[115px] rounded-xl bg-slate-100/35 dark:bg-[#090d18]/30 p-2.5 opacity-35 select-none border border-dashed border-slate-300/60 dark:border-white/5 pointer-events-none flex flex-col justify-between"
+                    className="min-h-[115px] bg-slate-50/70 dark:bg-[#090d18]/50 p-2 select-none pointer-events-none flex flex-col justify-between"
                   >
-                    <span className="text-[11px] font-bold text-slate-400 dark:text-slate-600">
+                    <span className="text-[11px] font-bold text-slate-400/80 dark:text-slate-600">
                       {trailingDayNum}
                     </span>
                   </div>
@@ -95,19 +95,19 @@ export const ScheduleCalendarView: React.FC<ScheduleCalendarViewProps> = ({
                     e.preventDefault();
                     setCtxMenu({ x: e.clientX, y: e.clientY, dateStr });
                   }}
-                  className={`min-h-[115px] rounded-xl p-2.5 flex flex-col gap-2 transition-all cursor-pointer border shadow-2xs hover:shadow-xs ${
+                  className={`min-h-[115px] p-2 flex flex-col gap-1.5 transition-colors cursor-pointer ${
                     isToday
-                      ? 'bg-blue-50/80 dark:bg-[#131b32] border-blue-500 dark:border-blue-400 shadow-xs'
+                      ? 'bg-blue-50/70 dark:bg-[#131b32]'
                       : isWknd
-                      ? 'bg-rose-50/50 dark:bg-[#19111e] border-rose-200 dark:border-rose-500/25 hover:border-rose-300 dark:hover:border-rose-500/40 hover:bg-rose-100/50 dark:hover:bg-[#201528]'
-                      : 'bg-white dark:bg-[#111728] border-slate-300 dark:border-[#27324d] hover:border-blue-300 dark:hover:border-blue-500/30 hover:bg-blue-50/20 dark:hover:bg-[#131b30]'
+                      ? 'bg-rose-50/30 dark:bg-[#19111e] hover:bg-rose-50/60 dark:hover:bg-[#201528]'
+                      : 'bg-white dark:bg-[#111728] hover:bg-blue-50/30 dark:hover:bg-[#131b30]'
                   }`}
                 >
                   <div className="flex items-center justify-between">
                     <span
-                      className={`text-[12px] font-black flex items-center justify-center h-6 w-6 rounded-lg ${
+                      className={`text-[12px] font-black flex items-center justify-center h-6 w-6 rounded-full transition-transform ${
                         isToday
-                          ? 'bg-blue-600 text-white font-black'
+                          ? 'bg-blue-600 text-white font-black shadow-xs'
                           : isWknd
                           ? 'text-rose-600 dark:text-rose-400 font-black'
                           : 'text-slate-800 dark:text-slate-200'
@@ -116,12 +116,12 @@ export const ScheduleCalendarView: React.FC<ScheduleCalendarViewProps> = ({
                       {dayNum}
                     </span>
                     {daySess.length > 0 && (
-                      <span className="text-[9px] font-extrabold text-blue-600 dark:text-blue-300 bg-blue-500/15 px-2 py-0.5 rounded-md border-0">
+                      <span className="text-[9px] font-extrabold text-blue-600 dark:text-blue-300 bg-blue-500/15 px-1.5 py-0.5 rounded-md border-0">
                         {daySess.length}
                       </span>
                     )}
                   </div>
-                  <div className="flex-grow flex flex-col gap-1.5">
+                  <div className="flex-grow flex flex-col gap-1">
                     {daySess.map((s) => {
                       const hex = getSessionColor(s);
                       const vs = getPremiumStyle(s.status, hex, isDark);
@@ -132,7 +132,7 @@ export const ScheduleCalendarView: React.FC<ScheduleCalendarViewProps> = ({
                             e.stopPropagation();
                             openEdit(s);
                           }}
-                          className="px-2.5 py-1.5 rounded-xl cursor-pointer transition-all hover:scale-[1.02] active:scale-[0.98] border-0 shadow-2xs hover:shadow-xs flex flex-col gap-1 overflow-hidden"
+                          className="px-2.5 py-1.5 rounded-lg cursor-pointer transition-all hover:scale-[1.01] active:scale-[0.99] border-0 shadow-2xs hover:shadow-xs flex flex-col gap-1 overflow-hidden"
                           style={{ backgroundColor: vs.bg }}
                         >
                           <div className="flex items-center justify-between gap-1.5">
@@ -264,7 +264,7 @@ export const ScheduleCalendarView: React.FC<ScheduleCalendarViewProps> = ({
                         e.stopPropagation();
                         openEdit(s);
                       }}
-                      className="px-2.5 py-2 rounded-xl cursor-pointer transition-all hover:scale-[1.02] active:scale-[0.98] border-0 shadow-2xs hover:shadow-xs flex flex-col gap-1 overflow-hidden"
+                      className="px-2.5 py-2 rounded-lg cursor-pointer transition-all hover:scale-[1.01] active:scale-[0.99] border-0 shadow-2xs hover:shadow-xs flex flex-col gap-1 overflow-hidden"
                       style={{ backgroundColor: vs.bg }}
                     >
                       <div className="flex items-center justify-between gap-1.5">

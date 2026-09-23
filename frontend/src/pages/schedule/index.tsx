@@ -186,7 +186,7 @@ export default function SchedulePage() {
   const sessionColumns = useScheduleColumns(openEdit);
 
   return (
-    <div className="h-full flex flex-col p-5 gap-5 overflow-y-auto bg-[#e2e8f0] dark:bg-[#09090b] text-slate-800 dark:text-slate-100 font-sans">
+    <div className="h-full flex flex-col p-5 gap-5 overflow-y-auto bg-[#f1f5f9] dark:bg-[#09090b] text-slate-800 dark:text-slate-100 font-sans">
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>

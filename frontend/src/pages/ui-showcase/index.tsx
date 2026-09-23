@@ -88,7 +88,7 @@ export default function UIShowcasePage() {
   const currentButtons = category === 'fx' ? FX_BUTTONS : COMPONENT_BUTTONS;
 
   return (
-    <div className="h-full flex flex-col p-6 space-y-6 overflow-y-auto select-none bg-[#e2e8f0] dark:bg-[#09090b] text-slate-800 dark:text-slate-100">
+    <div className="h-full flex flex-col p-6 space-y-6 overflow-y-auto select-none bg-[#f1f5f9] dark:bg-[#09090b] text-slate-800 dark:text-slate-100">
       {/* HEADER WITH CATEGORY SELECTOR & COMPACT SEGMENTED PILLS */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-white dark:bg-[#141417] border border-slate-200/90 dark:border-[#27272a] p-5 rounded-2xl shadow-sm">
         <div className="flex items-center gap-3">

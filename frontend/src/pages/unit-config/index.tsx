@@ -243,7 +243,7 @@ export default function UnitConfig() {
   );
 
   return (
-    <div className="h-full w-full bg-[#e2e8f0] dark:bg-[#09090b] overflow-y-auto p-6 select-none text-slate-800 dark:text-slate-100 flex flex-col gap-6">
+    <div className="h-full w-full bg-[#f1f5f9] dark:bg-[#09090b] overflow-y-auto p-6 select-none text-slate-800 dark:text-slate-100 flex flex-col gap-6">
       {/* Page Title */}
       <div className="pb-3 border-b border-slate-200 dark:border-[#27272a] flex flex-wrap justify-between items-center gap-4">
         <div>

@@ -570,7 +570,7 @@ export default function CanvasBoardPage() {
   };
 
   const mainContent = (
-    <div className={`h-full flex flex-col bg-[#e2e8f0] dark:bg-[#070913] ${isFullscreen ? 'fixed inset-0 z-[99999] p-2' : 'p-6 space-y-4 overflow-hidden'}`}>
+    <div className={`h-full flex flex-col bg-[#f1f5f9] dark:bg-[#070913] ${isFullscreen ? 'fixed inset-0 z-[99999] p-2' : 'p-6 space-y-4 overflow-hidden'}`}>
       <div className="flex items-center justify-between bg-white dark:bg-[#0c0f1e] px-5 py-3.5 rounded-2xl shadow-[0_4px_20px_rgba(0,0,0,0.08)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.45)] shrink-0">
         <div className="flex items-center gap-3">
           <div className="p-2 rounded-xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-500 dark:text-indigo-400"><Palette size={18} /></div>

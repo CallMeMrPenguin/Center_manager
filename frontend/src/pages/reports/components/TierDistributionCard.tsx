@@ -78,13 +78,15 @@ export const TierDistributionCard: React.FC<TierDistributionCardProps> = ({
             <div
               key={t.tier}
               onClick={() => setSelectedDistFilter(prev => prev === t.tier ? 'all' : t.tier)}
-              className={`flex items-center justify-between gap-4 py-2 px-3 rounded-xl transition-all cursor-pointer select-none ${isSelected ? 'bg-blue-50 dark:bg-white/10 ring-1 ring-blue-300 dark:ring-white/20' : 'hover:bg-slate-50 dark:hover:bg-white/5'}`}
+              className={`flex items-center justify-between gap-4 py-2.5 px-3.5 rounded-xl transition-all cursor-pointer select-none ${isSelected ? 'bg-blue-50 dark:bg-white/10 ring-1 ring-blue-300 dark:ring-white/20' : 'hover:bg-slate-50 dark:hover:bg-white/5'}`}
             >
-              <div className="flex items-center gap-3 w-40 shrink-0">
-                <img src={t.badge} alt={t.name} className="w-10 h-10 object-contain shrink-0" />
-                <span className="text-sm sm:text-base font-extrabold text-slate-800 dark:text-slate-100">{t.name}</span>
+              <div className="flex items-center gap-3.5 w-44 sm:w-48 shrink-0">
+                <div className="w-12 h-12 flex items-center justify-center shrink-0">
+                  <img src={t.badge} alt={t.name} className={`w-12 h-12 object-contain shrink-0 drop-shadow-sm transition-transform ${t.scale || ''}`} />
+                </div>
+                <span className="text-base font-black text-slate-800 dark:text-slate-100">{t.name}</span>
               </div>
-              <div className="flex-1 h-4 bg-slate-200/80 dark:bg-[#0e1424] rounded-full overflow-hidden p-0.5 border border-slate-300/80 dark:border-white/10 mx-2">
+              <div className="flex-1 h-3.5 sm:h-4 bg-slate-100 dark:bg-white/5 rounded-full overflow-hidden mx-3">
                 <AnimatedProgressBar
                   key={`deep-tier-${selectedClassId}-${t.tier}-${t.pct}`}
                   pct={t.pct}
@@ -92,8 +94,8 @@ export const TierDistributionCard: React.FC<TierDistributionCardProps> = ({
                   delayMs={750 + (8 - t.tier) * 60}
                 />
               </div>
-              <span className="text-base font-black text-slate-900 dark:text-white font-mono w-12 text-right shrink-0">{t.count}</span>
-              <span className="text-base font-black font-mono w-16 text-right shrink-0" style={{ color: t.color }}>{t.pct}%</span>
+              <span className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white font-mono w-14 text-right shrink-0">{t.count}</span>
+              <span className="text-xl sm:text-2xl font-black font-mono w-20 text-right shrink-0" style={{ color: t.color }}>{t.pct}%</span>
             </div>
           );
         })}

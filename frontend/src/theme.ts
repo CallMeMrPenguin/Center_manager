@@ -94,12 +94,12 @@ export const DARK_THEME_COLORS = {
 
 export const LIGHT_THEME_COLORS = {
   // ─── 1. SURFACES & BACKGROUNDS (Pro Anti-Glare Slate) ────────────────────
-  appBackground: '#edf2f7', // Slate 100/200 - High Contrast Canvas
+  appBackground: '#f1f5f9', // Slate 100 - Clean Light Canvas
   sidebarBackground: '#ffffff',
   cardBackground: '#ffffff',
-  cardBackgroundRaised: '#e2e8f0', // Slate 200
-  cardBackgroundHighlight: '#cbd5e1', // Slate 300
-  navBackground: '#edf2f7',
+  cardBackgroundRaised: '#f8fafc', // Slate 50
+  cardBackgroundHighlight: '#e2e8f0', // Slate 200
+  navBackground: '#f1f5f9',
   modalBackdrop: 'rgba(15, 23, 42, 0.65)',
 
   // ─── 2. BORDERS ─────────────────────────────────────────────────────────
