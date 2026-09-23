@@ -57,7 +57,28 @@ class RelationshipData:
             return True
         return False
 
-def can_swap(a: Student, b: Student, rel: RelationshipData) -> bool:
+def build_seat_position_map(layout: Optional[List[Dict[str, Any]]]) -> Dict[int, Tuple[int, int, int]]:
+    """Builds student_id -> (col_rank, desk_index, position_index) map."""
+    seat_pos: Dict[int, Tuple[int, int, int]] = {}
+    if not layout or not isinstance(layout, list):
+        return seat_pos
+    ordered_cols = sorted(layout, key=lambda c: c.get("col_index", 0))
+    for col_rank, col in enumerate(ordered_cols):
+        for s in col.get("seats", []):
+            sid = s.get("student_id")
+            if sid is not None:
+                try:
+                    seat_pos[int(sid)] = (col_rank, int(s.get("desk", 0)), int(s.get("position", 0)))
+                except (ValueError, TypeError):
+                    pass
+    return seat_pos
+
+def can_swap(
+    a: Student,
+    b: Student,
+    rel: RelationshipData,
+    seat_pos: Optional[Dict[int, Tuple[int, int, int]]] = None
+) -> bool:
     """Returns True if A and B are allowed to swap test papers."""
     if a.id == b.id:
         return False
@@ -68,8 +89,20 @@ def can_swap(a: Student, b: Student, rel: RelationshipData) -> bool:
     if rel.same_group(a, b) or rel.is_friend_group(a.id, b.id):
         return False
     # RULE 3: Same gender swap requires trusted swap permission (AND must NOT be close friends)
-    if a.gender == b.gender:
-        return rel.is_trusted_swap(a.id, b.id)
+    if a.gender == b.gender and not rel.is_trusted_swap(a.id, b.id):
+        return False
+    # RULE 4: Seating layout row rule
+    if seat_pos and a.id in seat_pos and b.id in seat_pos:
+        ca, da, pa = seat_pos[a.id]
+        cb, db, pb = seat_pos[b.id]
+        if da == db:
+            is_adjacent = abs((ca * 2 + pa) - (cb * 2 + pb)) <= 1
+            a_t = a.id in rel.trusted_swap_students
+            b_t = b.id in rel.trusted_swap_students
+            pair_t = frozenset((a.id, b.id)) in rel.trusted_swap_pairs
+            is_trusted = (a_t and b_t) or pair_t
+            if is_adjacent or not is_trusted:
+                return False
     return True
 
 def can_sit_adjacent(a: Student, b: Student, rel: RelationshipData) -> bool:
@@ -80,12 +113,17 @@ def can_sit_adjacent(a: Student, b: Student, rel: RelationshipData) -> bool:
         return False
     return True
 
-def generate_swap_pairs(students: List[Student], relationships: RelationshipData, seed: Optional[int] = None) -> Dict[str, Any]:
+def generate_swap_pairs(
+    students: List[Student],
+    relationships: RelationshipData,
+    seating_layout: Optional[List[Dict[str, Any]]] = None,
+    seed: Optional[int] = None
+) -> Dict[str, Any]:
     """
     Arranges all present students into an optimal closed circular directed grading cycle:
     A grades B, B grades C, ..., and the last student grades A.
-    This guarantees 100% of students have test papers to grade and receive grades,
-    completely eliminating odd-numbered leftovers.
+    Considers conflict groups, friend groups, gender rules, and seating chart layout:
+    Individuals in the same row cannot swap UNLESS they belong to trusted and are not adjacent.
     """
     if seed is not None:
         random.seed(seed)
@@ -105,15 +143,38 @@ def generate_swap_pairs(students: List[Student], relationships: RelationshipData
             unmatched.append({"id": a.id, "name": a.name, "group": a.group_name or "N/A", "reason": "Vắng mặt (Không đi học)"})
         return {"pairs": [], "unmatched": unmatched}
 
+    seat_pos = build_seat_position_map(seating_layout)
+
     # Evaluate penalty for directed edge u -> v (u grades v's test)
     def directed_edge_penalty(u: Student, v: Student) -> float:
         penalty = 0.0
         if relationships.is_conflict(u.id, v.id):
-            penalty += 1000.0
+            penalty += 10000.0
         if relationships.same_group(u, v) or relationships.is_friend_group(u.id, v.id):
-            penalty += 500.0
+            penalty += 10000.0
         if u.gender == v.gender and not relationships.is_trusted_swap(u.id, v.id):
             penalty += 100.0
+
+        # Seating row & adjacency check
+        if u.id in seat_pos and v.id in seat_pos:
+            cu, du, pu = seat_pos[u.id]
+            cv, dv, pv = seat_pos[v.id]
+            if du == dv:  # Same row
+                is_adjacent = abs((cu * 2 + pu) - (cv * 2 + pv)) <= 1
+                u_t = u.id in relationships.trusted_swap_students
+                v_t = v.id in relationships.trusted_swap_students
+                pair_t = frozenset((u.id, v.id)) in relationships.trusted_swap_pairs
+                
+                if is_adjacent:
+                    penalty += 10000.0  # Adjacent in same row strictly forbidden
+                elif not (u_t or v_t or pair_t):
+                    penalty += 10000.0  # Neither trusted strictly forbidden
+                elif not ((u_t and v_t) or pair_t):
+                    penalty += 5000.0   # Only one trusted strongly avoided
+                else:
+                    # Trusted and not adjacent: allowed exception!
+                    penalty += 30.0
+
         # Random jitter to ensure variety across runs
         penalty += random.uniform(0.01, 1.0)
         return penalty
@@ -167,6 +228,20 @@ def generate_swap_pairs(students: List[Student], relationships: RelationshipData
         is_trusted = relationships.is_trusted_swap(s1.id, s2.id)
         same_group = relationships.same_group(s1, s2)
         has_conflict = relationships.is_conflict(s1.id, s2.id)
+
+        # Check seating conflict
+        seating_conflict = False
+        if s1.id in seat_pos and s2.id in seat_pos:
+            c1, d1, p1 = seat_pos[s1.id]
+            c2, d2, p2 = seat_pos[s2.id]
+            if d1 == d2:
+                is_adj = abs((c1 * 2 + p1) - (c2 * 2 + p2)) <= 1
+                u_t = s1.id in relationships.trusted_swap_students
+                v_t = s2.id in relationships.trusted_swap_students
+                pair_t = frozenset((s1.id, s2.id)) in relationships.trusted_swap_pairs
+                if is_adj or not ((u_t and v_t) or pair_t):
+                    seating_conflict = True
+
         pairs.append({
             "student1_id": s1.id,
             "student1_name": s1.name,
@@ -180,7 +255,7 @@ def generate_swap_pairs(students: List[Student], relationships: RelationshipData
             "owner_id": s2.id,
             "owner_name": s2.name,
             "owner_group": s2.group_name or "N/A",
-            "same_group_conflict": same_group or has_conflict,
+            "same_group_conflict": same_group or has_conflict or seating_conflict,
             "is_trusted": is_trusted,
             "is_circular": True,
             "step": i + 1,
@@ -190,44 +265,6 @@ def generate_swap_pairs(students: List[Student], relationships: RelationshipData
     unmatched = [{"id": s.id, "name": s.name, "group": s.group_name or "N/A", "reason": "Vắng mặt (Không đi học)"} for s in absent]
     return {"pairs": pairs, "unmatched": unmatched}
 
-def order_crossover(p1: List[Optional[int]], p2: List[Optional[int]]) -> List[Optional[int]]:
-    """OX (Order Crossover) for permutation chromosome with None paddings."""
-    length = len(p1)
-    c1, c2 = sorted(random.sample(range(length), 2))
-    
-    child = [None] * length
-    # Copy segment from p1
-    child[c1:c2+1] = p1[c1:c2+1]
-    
-    # Fill remaining from p2 in order
-    p2_pos = (c2 + 1) % length
-    child_pos = (c2 + 1) % length
-    
-    in_child = set(x for x in child[c1:c2+1] if x is not None)
-    # Count of None values in segment
-    none_in_segment = sum(1 for x in child[c1:c2+1] if x is None)
-    none_filled = 0
-    none_total = sum(1 for x in p1 if x is None)
-    
-    while None in child:
-        val = p2[p2_pos]
-        p2_pos = (p2_pos + 1) % length
-        
-        if val is not None:
-            if val not in in_child:
-                child[child_pos] = val
-                in_child.add(val)
-                child_pos = (child_pos + 1) % length
-        else:
-            # Handle None padding items
-            total_nones_placed = sum(1 for x in child if x is None)
-            if total_nones_placed > 0:
-                # Place None if we still need None slots
-                if child[child_pos] is None and child_pos < c1 or child_pos > c2:
-                    child[child_pos] = None
-                    child_pos = (child_pos + 1) % length
-
-    return child
 
 def fitness(chromosome: List[Optional[int]], rows: int, cols: int, relationships: RelationshipData, students_map: Dict[int, Student]) -> float:
     score = 0.0

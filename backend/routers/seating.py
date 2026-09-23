@@ -236,4 +236,21 @@ def api_blossom_swap(class_id: int, payload: Optional[Dict[str, Any]] = None):
 
     students = load_class_student_objects(class_id, absent_ids)
     rel = load_class_relationship_data(class_id)
-    return generate_swap_pairs(students, rel, seed=seed)
+
+    # Load seating layout from payload if passed, else fallback to database
+    layout = payload.get("layout")
+    if not layout:
+        seating_data = get_class_seating(class_id)
+        layout_str = seating_data.get("layout_json")
+        if layout_str and layout_str != "[]":
+            try:
+                layout = json.loads(layout_str)
+            except Exception:
+                layout = []
+    elif isinstance(layout, str):
+        try:
+            layout = json.loads(layout)
+        except Exception:
+            layout = []
+
+    return generate_swap_pairs(students, rel, seating_layout=layout, seed=seed)

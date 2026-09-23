@@ -281,7 +281,10 @@ export function useSeatingLayout(
   const handleBlossomSwap = async () => {
     if (!selectedClass) return;
     try {
-      const res = await api.blossomSwapPairs(selectedClass.id, { date: attendanceDate });
+      const res = await api.blossomSwapPairs(selectedClass.id, {
+        date: attendanceDate,
+        layout: seatingGrid,
+      });
       setBlossomPairs(res.pairs || []);
       setBlossomUnmatched(res.unmatched || []);
       setBlossomModalOpen(true);
