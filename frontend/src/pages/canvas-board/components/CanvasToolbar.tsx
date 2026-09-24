@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import {
   MousePointer, Type, Pen, Highlighter, Eraser, Minus, ArrowUpRight,
-  Square, Circle, Palette, Sliders, Undo2, Redo2, Trash2
+  Square, Circle, Palette, Sliders, Undo2, Redo2, Trash2,
+  Upload, RotateCcw, Download, Maximize2, Minimize2
 } from 'lucide-react';
 import { CanvasTool, PRESET_COLORS, PRESET_BG_COLORS, FONT_FAMILIES } from '../types';
 
@@ -29,6 +30,12 @@ interface CanvasToolbarProps {
   onUndo: () => void;
   onRedo: () => void;
   onClearPage: () => void;
+  fileInputRef?: React.RefObject<HTMLInputElement | null>;
+  handleFileInputChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onNewBoard?: () => void;
+  onExportPNG?: () => void;
+  isFullscreen?: boolean;
+  toggleFullscreen?: () => void;
 }
 
 export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
@@ -55,6 +62,12 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
   onUndo,
   onRedo,
   onClearPage,
+  fileInputRef,
+  handleFileInputChange,
+  onNewBoard,
+  onExportPNG,
+  isFullscreen,
+  toggleFullscreen,
 }) => {
   const [showColorPopover, setShowColorPopover] = useState(false);
   const [showSizePopover, setShowSizePopover] = useState(false);
@@ -352,6 +365,48 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
         >
           <Trash2 size={14} />
         </button>
+
+        {/* Merged Navigation Controls */}
+        {(fileInputRef || onNewBoard || onExportPNG || toggleFullscreen) && (
+          <div className="flex items-center gap-1.5 pl-1.5 border-l border-slate-300 dark:border-white/10">
+            {fileInputRef && (
+              <label className="flex items-center gap-1 px-2.5 py-1 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition cursor-pointer shadow-xs">
+                <Upload size={12} />
+                <span className="hidden sm:inline">Import</span>
+                <input ref={fileInputRef} type="file" accept=".pdf,image/*" multiple onChange={handleFileInputChange} className="hidden" />
+              </label>
+            )}
+            {onNewBoard && (
+              <button
+                onClick={onNewBoard}
+                className="flex items-center gap-1 px-2.5 py-1 rounded-xl bg-slate-200 hover:bg-slate-300 dark:bg-[#202538] dark:hover:bg-[#2a3149] text-slate-700 dark:text-slate-300 text-xs font-bold transition cursor-pointer"
+                title="Tạo bảng vẽ mới"
+              >
+                <RotateCcw size={12} />
+                <span className="hidden sm:inline">Bảng mới</span>
+              </button>
+            )}
+            {onExportPNG && (
+              <button
+                onClick={onExportPNG}
+                className="flex items-center gap-1 px-2.5 py-1 rounded-xl bg-slate-200 hover:bg-slate-300 dark:bg-[#202538] dark:hover:bg-[#2a3149] text-slate-700 dark:text-slate-300 text-xs font-bold transition cursor-pointer"
+                title="Tải ảnh PNG"
+              >
+                <Download size={12} />
+                <span className="hidden sm:inline">Tải ảnh</span>
+              </button>
+            )}
+            {toggleFullscreen && (
+              <button
+                onClick={toggleFullscreen}
+                className="p-1.5 rounded-xl bg-slate-200 hover:bg-slate-300 dark:bg-[#202538] dark:hover:bg-[#2a3149] text-slate-700 dark:text-slate-300 transition cursor-pointer"
+                title={isFullscreen ? 'Thu nhỏ' : 'Toàn màn hình'}
+              >
+                {isFullscreen ? <Minimize2 size={13} /> : <Maximize2 size={13} />}
+              </button>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

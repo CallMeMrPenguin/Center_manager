@@ -112,7 +112,7 @@ export default function WordEditorPage() {
   // If a document is selected, render full-featured MS Word editor
   if (selectedDoc) {
     return (
-      <div className="h-[calc(100vh-64px)] w-full -m-6 sm:-m-8">
+      <div className="h-[calc(100vh-64px)] w-full -m-6 overflow-hidden">
         <WordDocumentEditor
           document={selectedDoc}
           onBackToList={() => {
@@ -127,7 +127,7 @@ export default function WordEditorPage() {
 
   // Otherwise render document list
   return (
-    <div className="p-4 sm:p-6 max-w-7xl mx-auto">
+    <div className="h-full w-full flex flex-col p-6 space-y-4 bg-[#f1f5f9] dark:bg-[#09090b] text-slate-800 dark:text-slate-100 select-none font-sans overflow-hidden">
       <WordDocumentList
         documents={documents}
         loading={loading}
@@ -140,7 +140,6 @@ export default function WordEditorPage() {
           }
         }}
         onCreateNew={handleCreateNew}
-        onCreateFromTemplate={handleCreateFromTemplate}
         onDuplicate={handleDuplicate}
         onDelete={handleDelete}
         onImportDocx={handleImportDocx}

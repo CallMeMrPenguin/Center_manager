@@ -123,7 +123,7 @@ export const WordDocumentEditor: React.FC<WordDocumentEditorProps> = ({
   const paperMinHeightPx = orientation === 'landscape' ? 750 : 1123;
 
   return (
-    <div className="flex flex-col h-full w-full bg-[#080b14] overflow-hidden select-text">
+    <div className="flex flex-col h-full w-full bg-[#f1f5f9] dark:bg-[#080b14] overflow-hidden select-text">
       {/* 1. MS Word Ribbon Toolbar */}
       <WordRibbonToolbar
         editor={editor}
@@ -146,13 +146,13 @@ export const WordDocumentEditor: React.FC<WordDocumentEditorProps> = ({
       />
 
       {/* 2. Horizontal Ruler & Contextual Table Controls */}
-      <div className="bg-[#0b0e1b] border-b border-white/5 px-4 flex flex-col items-center gap-1 shrink-0">
+      <div className="bg-slate-100 dark:bg-[#0b0e1b] border-b border-slate-200 dark:border-white/5 px-4 flex flex-col items-center gap-1 shrink-0">
         {viewMode === 'page' && <WordRuler margins={margins} paperWidthMm={orientation === 'landscape' ? 297 : 210} />}
         <WordTableControls editor={editor} />
       </div>
 
       {/* 3. Main Editor Workspace Container */}
-      <main className="flex-1 overflow-auto p-4 sm:p-8 flex justify-center bg-[#060810] relative">
+      <main className="flex-1 overflow-auto p-4 sm:p-8 flex justify-center bg-slate-200/70 dark:bg-[#060810] relative">
         <div
           style={{
             transform: `scale(${zoomLevel / 100})`,
@@ -163,8 +163,8 @@ export const WordDocumentEditor: React.FC<WordDocumentEditorProps> = ({
         >
           {/* A4 Paper Sheet */}
           <div
-            className={`bg-white text-slate-900 rounded-sm shadow-2xl transition-all ${
-              viewMode === 'page' ? 'border border-slate-200 shadow-black/80' : 'w-full max-w-5xl'
+            className={`bg-white text-slate-900 rounded-sm shadow-xl transition-all ${
+              viewMode === 'page' ? 'border border-slate-300 dark:border-slate-700 shadow-slate-400/25 dark:shadow-black/80' : 'w-full max-w-5xl'
             }`}
             style={{
               width: viewMode === 'page' ? `${paperWidthPx}px` : '100%',

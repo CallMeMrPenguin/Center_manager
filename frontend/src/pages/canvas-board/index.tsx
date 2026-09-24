@@ -569,53 +569,22 @@ export default function CanvasBoardPage() {
     }
   };
 
+  const handleNewBoard = () => {
+    setPdfDoc(null);
+    setCanvasImages([]);
+    setCanvasTextBoxes([]);
+    setSelectedId(null);
+    setTotalPages(1);
+    setCurrentPage(1);
+    setDocName('Bảng vẽ trắng (Canvas)');
+    setPageStrokes({});
+    setZoom(1.0);
+    setPan({ x: 100, y: 80 });
+  };
+
   const mainContent = (
-    <div className={`h-full flex flex-col bg-[#f1f5f9] dark:bg-[#070913] ${isFullscreen ? 'fixed inset-0 z-[99999] p-2' : 'p-6 space-y-4 overflow-hidden'}`}>
-      <div className="flex items-center justify-between bg-white dark:bg-[#0c0f1e] px-5 py-3.5 rounded-2xl shadow-[0_4px_20px_rgba(0,0,0,0.08)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.45)] shrink-0">
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded-xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-500 dark:text-indigo-400"><Palette size={18} /></div>
-          <div>
-            <h1 className="text-sm font-black text-slate-900 dark:text-white flex items-center gap-2">
-              <span>Canvas Bảng Vẽ Trắng</span>
-              <span className="text-[10px] text-amber-500 dark:text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-lg border border-amber-500/20 font-bold">Scratchpad</span>
-            </h1>
-            <p className="text-[11px] text-slate-500 dark:text-slate-400 font-semibold truncate max-w-sm">{docName}</p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <label className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-black transition cursor-pointer border border-white/20 shadow-sm">
-            <Upload size={13} />
-            <span>Import</span>
-            <input ref={fileInputRef} type="file" accept=".pdf,image/*" multiple onChange={handleFileInputChange} className="hidden" />
-          </label>
-          <button
-            onClick={() => {
-              setPdfDoc(null);
-              setCanvasImages([]);
-              setCanvasTextBoxes([]);
-              setSelectedId(null);
-              setTotalPages(1);
-              setCurrentPage(1);
-              setDocName('Bảng vẽ trắng (Canvas)');
-              setPageStrokes({});
-              setZoom(1.0);
-              setPan({ x: 100, y: 80 });
-            }}
-            className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-slate-200 hover:bg-slate-300 dark:bg-[#202538] dark:hover:bg-[#2a3149] text-slate-700 dark:text-slate-300 text-xs font-bold border-0 shadow-2xs transition cursor-pointer"
-          >
-            <RotateCcw size={13} /> <span className="hidden sm:inline">Bảng mới</span>
-          </button>
-          <button onClick={handleExportPNG} className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-slate-200 hover:bg-slate-300 dark:bg-[#202538] dark:hover:bg-[#2a3149] text-slate-700 dark:text-slate-300 text-xs font-bold border-0 shadow-2xs transition cursor-pointer">
-            <Download size={13} /> <span className="hidden sm:inline">Tải ảnh</span>
-          </button>
-          <button onClick={toggleFullscreen} className="p-2 rounded-xl bg-slate-200 hover:bg-slate-300 dark:bg-[#202538] dark:hover:bg-[#2a3149] text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white border-0 shadow-2xs transition cursor-pointer">
-            {isFullscreen ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
-          </button>
-        </div>
-      </div>
-
-      <div className="flex-1 flex flex-col bg-white dark:bg-[#0c0f1e] rounded-2xl overflow-hidden shadow-[0_6px_28px_rgba(0,0,0,0.09)] dark:shadow-[0_12px_40px_rgba(0,0,0,0.55)] relative select-none">
+    <div className={`h-full flex flex-col bg-[#f1f5f9] dark:bg-[#070913] ${isFullscreen ? 'fixed inset-0 z-[99999] p-0' : 'p-3 sm:p-4 overflow-hidden'}`}>
+      <div className="flex-1 flex flex-col bg-white dark:bg-[#0c0f1e] rounded-2xl overflow-hidden shadow-[0_6px_28px_rgba(0,0,0,0.09)] dark:shadow-[0_12px_40px_rgba(0,0,0,0.55)] border border-slate-200/80 dark:border-white/10 relative select-none">
         <CanvasToolbar
           activeTool={activeTool} setActiveTool={setActiveTool}
           selectedColor={selectedColor} setSelectedColor={setSelectedColor}
@@ -626,6 +595,12 @@ export default function CanvasBoardPage() {
           penSize={penSize} setPenSize={setPenSize} hlSize={hlSize} setHlSize={setHlSize} eraserSize={eraserSize} setEraserSize={setEraserSize} setShapeSize={setShapeSize}
           undoStackLength={undoStackLength} redoStackLength={redoStackLength} onUndo={handleUndo} onRedo={handleRedo}
           onClearPage={() => { pushHistorySnapshot(); setPageStrokes(prev => ({ ...prev, [currentPage]: [] })); }}
+          fileInputRef={fileInputRef}
+          handleFileInputChange={handleFileInputChange}
+          onNewBoard={handleNewBoard}
+          onExportPNG={handleExportPNG}
+          isFullscreen={isFullscreen}
+          toggleFullscreen={toggleFullscreen}
         />
 
         <div
