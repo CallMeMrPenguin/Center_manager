@@ -4,49 +4,63 @@ import { MarginConfig } from '../types';
 interface WordRulerProps {
   margins: MarginConfig;
   paperWidthMm?: number;
+  paperWidthPx: number;
 }
 
 export const WordRuler: React.FC<WordRulerProps> = ({
   margins,
   paperWidthMm = 210, // A4 standard width in mm
+  paperWidthPx,
 }) => {
-  // Generate markings every 1cm (10mm)
   const totalCm = Math.floor(paperWidthMm / 10);
-  const leftMarginCm = margins.left / 10;
-  const rightMarginCm = margins.right / 10;
+  const leftPct = (margins.left / paperWidthMm) * 100;
+  const rightPct = (margins.right / paperWidthMm) * 100;
 
   return (
-    <div className="w-full flex justify-center py-1 select-none pointer-events-none">
+    <div 
+      className="relative h-6 bg-slate-100 dark:bg-[#0f1423] border-t border-x border-slate-300 dark:border-white/15 text-[9px] font-mono text-slate-500 dark:text-slate-400 select-none pointer-events-none rounded-t-[2px] shadow-xs"
+      style={{ width: `${paperWidthPx}px` }}
+    >
+      {/* 1. Left Non-printable Margin Shading */}
       <div 
-        className="relative h-5 bg-white dark:bg-[#0f1423] border border-slate-300 dark:border-white/10 rounded text-[9px] font-mono text-slate-500 dark:text-slate-400 flex items-end shadow-xs"
-        style={{ width: '800px', maxWidth: '100%' }}
+        className="absolute top-0 bottom-0 left-0 bg-slate-200/90 dark:bg-white/5 border-r border-blue-500/50"
+        style={{ width: `${leftPct}%` }}
       >
-        {/* Left Margin Shading */}
-        <div 
-          className="absolute top-0 bottom-0 left-0 bg-blue-500/15 border-r border-blue-500/40"
-          style={{ width: `${(margins.left / paperWidthMm) * 100}%` }}
-        />
+        {/* Margin downward indicator marker */}
+        <div className="absolute right-[-4px] bottom-0 w-0 h-0 border-l-[4px] border-l-transparent border-r-[4px] border-r-transparent border-b-[5px] border-b-blue-600 dark:border-b-blue-400" />
+      </div>
 
-        {/* Right Margin Shading */}
-        <div 
-          className="absolute top-0 bottom-0 right-0 bg-blue-500/15 border-l border-blue-500/40"
-          style={{ width: `${(margins.right / paperWidthMm) * 100}%` }}
-        />
+      {/* 2. White Printable Core Body */}
+      <div 
+        className="absolute top-0 bottom-0 bg-white dark:bg-[#121626]"
+        style={{ 
+          left: `${leftPct}%`, 
+          right: `${rightPct}%` 
+        }}
+      />
 
-        {/* Ruler tick marks */}
-        <div className="w-full h-full flex justify-between px-1 relative z-10 items-end pb-0.5">
-          {Array.from({ length: totalCm + 1 }).map((_, i) => {
-            const isZero = Math.abs(i - leftMarginCm) < 0.5;
-            return (
-              <div key={i} className="flex flex-col items-center">
-                <span className={`text-[8px] leading-none ${isZero ? 'text-blue-600 dark:text-blue-400 font-bold' : 'text-slate-400 dark:text-slate-500'}`}>
-                  {i}
-                </span>
-                <div className={`w-[1px] ${i % 5 === 0 ? 'h-2 bg-slate-400' : 'h-1 bg-slate-300 dark:bg-slate-600'}`} />
-              </div>
-            );
-          })}
-        </div>
+      {/* 3. Right Non-printable Margin Shading */}
+      <div 
+        className="absolute top-0 bottom-0 right-0 bg-slate-200/90 dark:bg-white/5 border-l border-blue-500/50"
+        style={{ width: `${rightPct}%` }}
+      >
+        {/* Margin downward indicator marker */}
+        <div className="absolute left-[-4px] bottom-0 w-0 h-0 border-l-[4px] border-l-transparent border-r-[4px] border-r-transparent border-b-[5px] border-b-blue-600 dark:border-b-blue-400" />
+      </div>
+
+      {/* 4. Measurement Centimeter Marks */}
+      <div className="w-full h-full flex justify-between px-1 relative z-10 items-end pb-0.5">
+        {Array.from({ length: totalCm + 1 }).map((_, i) => {
+          const isMajor = i % 5 === 0;
+          return (
+            <div key={i} className="flex flex-col items-center">
+              <span className={`text-[8px] leading-none mb-0.5 ${isMajor ? 'font-bold text-slate-600 dark:text-slate-300' : 'text-slate-400 dark:text-slate-500'}`}>
+                {i}
+              </span>
+              <div className={`w-[1px] ${isMajor ? 'h-2 bg-slate-400 dark:bg-slate-500' : 'h-1 bg-slate-300 dark:bg-slate-600'}`} />
+            </div>
+          );
+        })}
       </div>
     </div>
   );

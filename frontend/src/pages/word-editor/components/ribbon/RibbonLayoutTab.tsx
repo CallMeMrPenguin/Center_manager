@@ -23,14 +23,28 @@ export const RibbonLayoutTab: React.FC<RibbonLayoutTabProps> = ({
       {/* Paper Size */}
       <div className="flex items-center gap-2">
         <span className="text-slate-500 dark:text-slate-400 font-semibold">Khổ giấy:</span>
-        <select
-          value={paperSize}
-          onChange={(e) => onPaperSizeChange(e.target.value as PaperSize)}
-          className="bg-slate-100 dark:bg-[#121626] border border-slate-300 dark:border-white/10 rounded px-2.5 py-1 text-xs text-slate-900 dark:text-white focus:outline-none cursor-pointer font-medium"
+        <button
+          type="button"
+          onClick={() => onPaperSizeChange('A4')}
+          className={`px-2.5 py-1 rounded-md transition-colors cursor-pointer font-medium ${
+            paperSize === 'A4'
+              ? 'bg-[#2563eb] text-white shadow-xs font-bold'
+              : 'bg-slate-100 dark:bg-[#121626] text-slate-700 dark:text-slate-400 hover:bg-slate-200/80 dark:hover:bg-white/10'
+          }`}
         >
-          <option value="A4">A4 (210 x 297 mm)</option>
-          <option value="Letter">Letter (8.5 x 11 in)</option>
-        </select>
+          A4 (210 x 297 mm)
+        </button>
+        <button
+          type="button"
+          onClick={() => onPaperSizeChange('Letter')}
+          className={`px-2.5 py-1 rounded-md transition-colors cursor-pointer font-medium ${
+            paperSize === 'Letter'
+              ? 'bg-[#2563eb] text-white shadow-xs font-bold'
+              : 'bg-slate-100 dark:bg-[#121626] text-slate-700 dark:text-slate-400 hover:bg-slate-200/80 dark:hover:bg-white/10'
+          }`}
+        >
+          Letter
+        </button>
       </div>
 
       {/* Orientation */}

@@ -14,6 +14,7 @@ import { TableCell } from '@tiptap/extension-table-cell';
 import Image from '@tiptap/extension-image';
 import Link from '@tiptap/extension-link';
 import { FontFamily } from '@tiptap/extension-font-family';
+import Placeholder from '@tiptap/extension-placeholder';
 
 interface UseWordEditorProps {
   initialContent: string;
@@ -51,6 +52,10 @@ export function useWordEditor({ initialContent, onUpdate }: UseWordEditorProps) 
         openOnClick: false,
       }),
       FontFamily,
+      Placeholder.configure({
+        placeholder: 'Nhập nội dung văn bản tại đây...',
+        emptyEditorClass: 'is-editor-empty',
+      }),
     ],
     content: initialContent,
     onUpdate: ({ editor }) => {
@@ -60,7 +65,7 @@ export function useWordEditor({ initialContent, onUpdate }: UseWordEditorProps) 
     },
     editorProps: {
       attributes: {
-        class: 'word-editor-content focus:outline-none min-h-[900px] text-slate-800 leading-relaxed',
+        class: 'word-editor-content focus:outline-none min-h-[920px] text-slate-900 leading-[1.75] text-[15px]',
         spellcheck: 'false',
       },
     },

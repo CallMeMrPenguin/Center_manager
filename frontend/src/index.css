@@ -1051,6 +1051,13 @@ table.data-table-main tbody tr[data-selected='true']:hover > td {
 .word-editor-content p {
   margin-bottom: 0.6em;
 }
+.word-editor-content p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: #94a3b8;
+  pointer-events: none;
+  height: 0;
+}
 .word-editor-content h1 {
   font-size: 1.85em;
   font-weight: 700;

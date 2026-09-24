@@ -112,7 +112,7 @@ export default function WordEditorPage() {
   // If a document is selected, render full-featured MS Word editor
   if (selectedDoc) {
     return (
-      <div className="h-[calc(100vh-64px)] w-full -m-6 overflow-hidden">
+      <div className="h-full w-full overflow-hidden flex flex-col">
         <WordDocumentEditor
           document={selectedDoc}
           onBackToList={() => {

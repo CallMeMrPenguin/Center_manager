@@ -145,26 +145,38 @@ export const WordDocumentEditor: React.FC<WordDocumentEditorProps> = ({
         onOpenMergeModal={() => setIsMergeModalOpen(true)}
       />
 
-      {/* 2. Horizontal Ruler & Contextual Table Controls */}
-      <div className="bg-slate-100 dark:bg-[#0b0e1b] border-b border-slate-200 dark:border-white/5 px-4 flex flex-col items-center gap-1 shrink-0">
-        {viewMode === 'page' && <WordRuler margins={margins} paperWidthMm={orientation === 'landscape' ? 297 : 210} />}
-        <WordTableControls editor={editor} />
-      </div>
+      {/* 2. Contextual Table Controls Floating Bar (only visible when cursor is in a table) */}
+      {editor?.can().deleteTable() && (
+        <div className="bg-slate-50 dark:bg-[#0c0f1e] border-b border-blue-500/30 px-4 py-1 flex justify-center shrink-0 z-20">
+          <WordTableControls editor={editor} />
+        </div>
+      )}
 
       {/* 3. Main Editor Workspace Container */}
-      <main className="flex-1 overflow-auto p-4 sm:p-8 flex justify-center bg-slate-200/70 dark:bg-[#060810] relative">
+      <main className="flex-1 overflow-auto p-4 sm:p-8 flex justify-center bg-[#e8ecef] dark:bg-[#060810] relative scrollbar-thin">
         <div
           style={{
             transform: `scale(${zoomLevel / 100})`,
             transformOrigin: 'top center',
             transition: 'transform 0.15s ease-out',
           }}
-          className="pb-16"
+          className="pb-20 flex flex-col items-center"
         >
-          {/* A4 Paper Sheet */}
+          {/* Authentic Document Ruler (attached flush directly onto paper top) */}
+          {viewMode === 'page' && (
+            <WordRuler
+              margins={margins}
+              paperWidthMm={orientation === 'landscape' ? 297 : 210}
+              paperWidthPx={paperWidthPx}
+            />
+          )}
+
+          {/* Authentic A4 Paper Sheet */}
           <div
-            className={`bg-white text-slate-900 rounded-sm shadow-xl transition-all ${
-              viewMode === 'page' ? 'border border-slate-300 dark:border-slate-700 shadow-slate-400/25 dark:shadow-black/80' : 'w-full max-w-5xl'
+            className={`bg-white text-slate-900 transition-all ${
+              viewMode === 'page'
+                ? 'border-x border-b border-slate-300 dark:border-white/10 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.06),0_20px_40px_-4px_rgba(15,23,42,0.16),0_0_0_1px_rgba(15,23,42,0.05)] rounded-b-[2px]'
+                : 'w-full max-w-5xl rounded-lg shadow-lg border border-slate-300 dark:border-white/10'
             }`}
             style={{
               width: viewMode === 'page' ? `${paperWidthPx}px` : '100%',

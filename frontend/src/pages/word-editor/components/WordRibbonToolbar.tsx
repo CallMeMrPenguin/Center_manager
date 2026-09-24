@@ -50,41 +50,52 @@ export const WordRibbonToolbar: React.FC<WordRibbonToolbarProps> = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   return (
-    <header className="bg-white dark:bg-[#0c0f1e] border-b border-slate-200 dark:border-white/10 text-slate-800 dark:text-white shrink-0 select-none shadow-xs">
-      {/* 1. Quick Access Title Bar */}
-      <div className="flex items-center justify-between px-3 py-1.5 border-b border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-[#080b14] text-xs">
-        <div className="flex items-center gap-2 flex-1 max-w-xl">
+    <header className="bg-white dark:bg-[#0c0f1e] border-b border-slate-200 dark:border-white/10 text-slate-800 dark:text-white shrink-0 select-none shadow-xs z-30">
+      {/* 1. Quick Access Title & Actions Bar */}
+      <div className="flex items-center justify-between px-3 py-1.5 border-b border-slate-200/80 dark:border-white/5 bg-slate-50/80 dark:bg-[#080b14] text-xs gap-3">
+        {/* Left: Navigation, Word Icon & Editable Document Title */}
+        <div className="flex items-center gap-2 min-w-0 flex-1 max-w-xl">
           <button
+            type="button"
             onClick={onBackToList}
-            className="flex items-center gap-1 px-2.5 py-1 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/70 dark:hover:bg-white/10 rounded-lg transition-colors cursor-pointer font-bold"
+            className="flex items-center gap-1 px-2.5 py-1 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/70 dark:hover:bg-white/10 rounded-lg transition-colors cursor-pointer font-bold shrink-0"
             title="Quay lại danh sách văn bản"
           >
             <ChevronLeft className="w-4 h-4" />
             <span className="hidden sm:inline">Danh sách</span>
           </button>
 
-          <div className="h-4 w-[1px] bg-slate-300 dark:bg-white/10" />
+          <div className="h-4 w-[1px] bg-slate-300 dark:bg-white/10 shrink-0" />
 
-          {/* Quick save button */}
+          {/* Word App Icon */}
+          <div className="w-6 h-6 rounded bg-[#2563eb] text-white flex items-center justify-center font-black text-[11px] shrink-0 shadow-xs">
+            W
+          </div>
+
+          {/* Quick Save */}
           <button
+            type="button"
             onClick={onSaveNow}
-            className="p-1.5 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-500/10 rounded-lg transition-colors cursor-pointer"
+            className="p-1.5 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-500/10 rounded-lg transition-colors cursor-pointer shrink-0"
             title="Lưu ngay (Ctrl+S)"
           >
-            <Save className="w-4 h-4" />
+            <Save className="w-3.5 h-3.5" />
           </button>
 
-          <input
-            type="text"
-            value={title}
-            onChange={(e) => onTitleChange(e.target.value)}
-            className="flex-1 bg-transparent hover:bg-slate-200/50 dark:hover:bg-white/5 focus:bg-white dark:focus:bg-[#121626] border border-transparent focus:border-blue-500/50 rounded-lg px-2 py-1 font-bold text-slate-900 dark:text-white focus:outline-none transition-all truncate"
-            placeholder="Tên văn bản..."
-          />
+          {/* Document Title Input */}
+          <div className="relative flex-1 min-w-[120px] max-w-md">
+            <input
+              type="text"
+              value={title}
+              onChange={(e) => onTitleChange(e.target.value)}
+              className="w-full bg-transparent hover:bg-white dark:hover:bg-white/5 focus:bg-white dark:focus:bg-[#121626] border border-transparent hover:border-slate-300 dark:hover:border-white/10 focus:border-blue-500 rounded-lg px-2.5 py-1 font-bold text-sm text-slate-900 dark:text-white focus:outline-none transition-all truncate shadow-none focus:shadow-xs"
+              placeholder="Tên văn bản..."
+            />
+          </div>
         </div>
 
-        {/* Action Buttons: Import, Export, Print */}
-        <div className="flex items-center gap-1.5">
+        {/* Right: Unclipped Action Buttons */}
+        <div className="flex items-center gap-1.5 shrink-0">
           <input
             ref={fileInputRef}
             type="file"
@@ -92,9 +103,11 @@ export const WordRibbonToolbar: React.FC<WordRibbonToolbarProps> = ({
             onChange={onImportDocx}
             className="hidden"
           />
+
           <button
+            type="button"
             onClick={() => fileInputRef.current?.click()}
-            className="flex items-center gap-1 px-2.5 py-1 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/70 dark:hover:bg-white/10 rounded-lg transition-colors cursor-pointer font-medium"
+            className="flex items-center gap-1.5 px-2.5 py-1.5 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10 border border-slate-200 dark:border-white/10 rounded-lg transition-colors cursor-pointer font-semibold text-xs shrink-0"
             title="Mở file Word (.docx) từ máy tính"
           >
             <FolderOpen className="w-3.5 h-3.5 text-amber-500" />
@@ -102,27 +115,39 @@ export const WordRibbonToolbar: React.FC<WordRibbonToolbarProps> = ({
           </button>
 
           <button
-            onClick={onExportDocx}
-            className="flex items-center gap-1 px-2.5 py-1 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-bold transition-colors cursor-pointer shadow-xs shadow-blue-500/20"
-            title="Tải văn bản về dạng file Microsoft Word (.docx)"
+            type="button"
+            onClick={onOpenMergeModal}
+            className="flex items-center gap-1.5 px-2.5 py-1.5 text-purple-700 dark:text-purple-300 bg-purple-50 hover:bg-purple-100 dark:bg-purple-500/10 dark:hover:bg-purple-500/20 border border-purple-200 dark:border-purple-500/30 rounded-lg transition-colors cursor-pointer font-bold text-xs shrink-0"
+            title="Trộn thư và điền tự động dữ liệu học sinh"
           >
-            <Download className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Tải .docx</span>
+            <Sparkles className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
+            <span className="hidden sm:inline">Trộn thư</span>
           </button>
 
           <button
+            type="button"
             onClick={onPrint}
-            className="flex items-center gap-1 px-2.5 py-1 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/70 dark:hover:bg-white/10 rounded-lg transition-colors cursor-pointer font-medium"
-            title="In hoặc Xuất PDF"
+            className="flex items-center gap-1.5 px-2.5 py-1.5 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10 border border-slate-200 dark:border-white/10 rounded-lg transition-colors cursor-pointer font-semibold text-xs shrink-0"
+            title="In hoặc Xuất PDF (Ctrl+P)"
           >
-            <Printer className="w-3.5 h-3.5" />
-            <span className="hidden md:inline">In / PDF</span>
+            <Printer className="w-3.5 h-3.5 text-slate-600 dark:text-slate-400" />
+            <span className="hidden lg:inline">In / PDF</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={onExportDocx}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#2563eb] hover:bg-blue-700 text-white rounded-lg font-bold transition-colors cursor-pointer shadow-xs text-xs shrink-0"
+            title="Tải văn bản về dạng file Microsoft Word (.docx)"
+          >
+            <Download className="w-3.5 h-3.5" />
+            <span>Tải .docx</span>
           </button>
         </div>
       </div>
 
       {/* 2. Ribbon Tabs */}
-      <div className="flex items-center px-3 bg-slate-100/70 dark:bg-[#080b14]/70 border-b border-slate-200 dark:border-white/5 text-xs font-semibold gap-1">
+      <div className="flex items-center px-3 bg-slate-100/80 dark:bg-[#080b14]/80 border-b border-slate-200/90 dark:border-white/5 text-xs font-semibold gap-0.5">
         {(['home', 'insert', 'layout', 'merge'] as RibbonTab[]).map((tab) => {
           const labels: Record<RibbonTab, string> = {
             home: 'Trang Đầu',
@@ -130,14 +155,16 @@ export const WordRibbonToolbar: React.FC<WordRibbonToolbarProps> = ({
             layout: 'Bố Trí Trang',
             merge: 'Trộn Thư & Dữ Liệu',
           };
+          const isActive = activeTab === tab;
           return (
             <button
               key={tab}
+              type="button"
               onClick={() => onTabChange(tab)}
-              className={`px-3 py-1.5 border-b-2 transition-all cursor-pointer ${
-                activeTab === tab
-                  ? 'border-[#5c36f5] text-blue-600 dark:text-white bg-blue-500/10 dark:bg-[#5c36f5]/10 font-bold'
-                  : 'border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+              className={`px-3.5 py-1.5 transition-all cursor-pointer font-bold border-b-2 text-xs ${
+                isActive
+                  ? 'border-[#2563eb] text-[#2563eb] dark:text-white bg-white dark:bg-[#0c0f1e] rounded-t-md shadow-xs'
+                  : 'border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-white/5'
               }`}
             >
               {labels[tab]}
@@ -146,8 +173,8 @@ export const WordRibbonToolbar: React.FC<WordRibbonToolbarProps> = ({
         })}
       </div>
 
-      {/* 3. Ribbon Toolbar Controls per Tab */}
-      <div className="p-2 min-h-[48px] flex items-center gap-2 overflow-x-auto text-xs bg-white dark:bg-[#0c0f1e]">
+      {/* 3. Ribbon Controls Bar */}
+      <div className="px-3 py-1.5 min-h-[46px] flex items-center gap-2 overflow-x-auto text-xs bg-white dark:bg-[#0c0f1e] scrollbar-thin">
         {activeTab === 'home' && <RibbonHomeTab editor={editor} />}
         {activeTab === 'insert' && (
           <RibbonInsertTab editor={editor} onOpenMergeModal={onOpenMergeModal} />
@@ -167,13 +194,13 @@ export const WordRibbonToolbar: React.FC<WordRibbonToolbarProps> = ({
             <button
               type="button"
               onClick={onOpenMergeModal}
-              className="flex items-center gap-2 px-3 py-1.5 bg-[#5c36f5] hover:bg-[#4d2ee0] text-white rounded-lg font-bold transition-colors cursor-pointer shadow-xs"
+              className="flex items-center gap-2 px-3 py-1.5 bg-[#2563eb] hover:bg-blue-700 text-white rounded-lg font-bold transition-colors cursor-pointer shadow-xs"
             >
               <Sparkles className="w-4 h-4" />
               <span>Mở bảng trộn thư &amp; điền tự động dữ liệu học sinh</span>
             </button>
             <span className="text-slate-500 dark:text-slate-400 text-xs">
-              Tự động thay thế các thẻ {'{{ten_hoc_sinh}}'}, {'{{lop_hoc}}'} bằng hồ sơ trung tâm.
+              Tự động thay thế các thẻ {'{{ten_hoc_sinh}}'}, {'{{lop_hoc}}'} bằng dữ liệu hồ sơ trung tâm.
             </span>
           </div>
         )}
