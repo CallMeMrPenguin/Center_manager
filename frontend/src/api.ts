@@ -245,8 +245,8 @@ export const api = {
   getClassSeating: (classId: number) => request<any>(`/api/classes/${classId}/seating`, { tags: ['seating'] }),
   saveClassSeating: (classId: number, numRows: number, layoutJson: string) =>
     request<any>(`/api/classes/${classId}/seating`, { method: 'PUT', body: JSON.stringify({ num_rows: numRows, layout_json: layoutJson }), tags: ['seating'] }),
-  mixClassSeating: (classId: number, numCols: number, desksPerCol: number, colsConfig?: any[], date?: string) =>
-    request<any>(`/api/classes/${classId}/seating/mix`, { method: 'POST', body: JSON.stringify({ num_cols: numCols, desks_per_col: desksPerCol, cols_config: colsConfig, date }), tags: ['seating'] }),
+  mixClassSeating: (classId: number, numCols: number, desksPerCol: number, colsConfig?: any[], date?: string, absentStudentIds?: number[]) =>
+    request<any>(`/api/classes/${classId}/seating/mix`, { method: 'POST', body: JSON.stringify({ num_cols: numCols, desks_per_col: desksPerCol, cols_config: colsConfig, date, absent_student_ids: absentStudentIds || [] }), tags: ['seating'] }),
   getClassAttendance: (classId: number, date: string, forceRefresh = true) =>
     request<{ date: string; records: any[] }>(`/api/classes/${classId}/attendance?date=${encodeURIComponent(date)}`, { tags: ['attendance'], forceRefresh }),
   saveClassAttendance: (classId: number, date: string, records: any[]) =>

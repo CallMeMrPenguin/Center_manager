@@ -50,35 +50,15 @@ export default function ClassesPage() {
   } = useClassDetail(selectedClass);
 
   const {
-    numCols,
-    desksPerCol,
-    seatingGrid,
-    draggedSeat,
-    setDraggedSeat,
-    draggedUnassigned,
-    setDraggedUnassigned,
-    absentStudentIds,
-    unassignedStudents,
-    showUnassignedPanel,
-    setShowUnassignedPanel,
-    blossomModalOpen,
-    setBlossomModalOpen,
-    blossomPairs,
-    blossomUnmatched,
-    mixingGA,
-    gradingPairsModal,
-    setGradingPairsModal,
-    gradingPairs,
-    handleAddColumn,
-    handleRemoveColumn,
-    handleAddDeskToCol,
-    handleRemoveDeskFromCol,
-    handleSaveSeating,
-    handleClearSeat,
-    handleDropOnSeat,
-    handleAutoMixSeating,
-    handleGeneticMixSeating,
-    handleBlossomSwap,
+    numCols, desksPerCol, seatingGrid,
+    draggedSeat, setDraggedSeat, draggedUnassigned, setDraggedUnassigned,
+    absentStudentIds, hasAbsentInGrid, unassignedStudents,
+    showUnassignedPanel, setShowUnassignedPanel,
+    blossomModalOpen, setBlossomModalOpen, blossomPairs, blossomUnmatched,
+    mixingGA, gradingPairsModal, setGradingPairsModal, gradingPairs,
+    handleAddColumn, handleRemoveColumn, handleAddDeskToCol, handleRemoveDeskFromCol,
+    handleSaveSeating, handleClearSeat, handleClearAbsentSeats, handleDropOnSeat,
+    handleAutoMixSeating, handleGeneticMixSeating, handleBlossomSwap,
   } = useSeatingLayout(selectedClass, enrolledStudents, attendanceRecords, attendanceDate);
 
   // Sub-tabs & modal local states with deep link initialization
@@ -297,6 +277,7 @@ export default function ClassesPage() {
               numCols={numCols}
               desksPerCol={desksPerCol}
               absentStudentIds={absentStudentIds}
+              hasAbsentInGrid={hasAbsentInGrid}
               unassignedStudents={unassignedStudents}
               showUnassignedPanel={showUnassignedPanel}
               mixingGA={mixingGA}
@@ -310,6 +291,7 @@ export default function ClassesPage() {
               onBlossomSwap={handleBlossomSwap}
               onSaveSeating={handleSaveSeating}
               onClearSeat={handleClearSeat}
+              onClearAbsentSeats={handleClearAbsentSeats}
               onDropOnSeat={handleDropOnSeat}
               onDragStartSeat={setDraggedSeat}
               onDragStartUnassigned={setDraggedUnassigned}

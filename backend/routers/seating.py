@@ -197,13 +197,19 @@ def api_genetic_mix(class_id: int, payload: Dict[str, Any]):
     max_gen = payload.get("max_generations", 300)
     mut_rate = payload.get("mutation_rate", 0.15)
     seed = payload.get("seed")
-    absent_ids = set(payload.get("absent_student_ids", []))
-    date_str = payload.get("date")
+    absent_ids = set()
+    for x in payload.get("absent_student_ids") or []:
+        try:
+            absent_ids.add(int(x))
+        except (ValueError, TypeError):
+            pass
 
+    date_str = payload.get("date")
     if date_str:
         att = get_class_attendance_grades(class_id, date_str)
         for r in att:
-            if r.get("status") == "Vắng mặt":
+            st = (r.get("status") or "").strip().lower()
+            if st in ("vắng mặt", "nghỉ học", "nghỉ", "vắng", "có phép"):
                 absent_ids.add(r.get("student_id"))
 
     students = load_class_student_objects(class_id, absent_ids)
@@ -225,13 +231,19 @@ def api_genetic_mix(class_id: int, payload: Dict[str, Any]):
 def api_blossom_swap(class_id: int, payload: Optional[Dict[str, Any]] = None):
     payload = payload or {}
     seed = payload.get("seed")
-    absent_ids = set(payload.get("absent_student_ids", []))
-    date_str = payload.get("date")
+    absent_ids = set()
+    for x in payload.get("absent_student_ids") or []:
+        try:
+            absent_ids.add(int(x))
+        except (ValueError, TypeError):
+            pass
 
+    date_str = payload.get("date")
     if date_str:
         att = get_class_attendance_grades(class_id, date_str)
         for r in att:
-            if r.get("status") == "Vắng mặt":
+            st = (r.get("status") or "").strip().lower()
+            if st in ("vắng mặt", "nghỉ học", "nghỉ", "vắng", "có phép"):
                 absent_ids.add(r.get("student_id"))
 
     students = load_class_student_objects(class_id, absent_ids)

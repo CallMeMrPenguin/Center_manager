@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import {
   ChevronLeft, ChevronRight, Shuffle, RefreshCw,
-  FileCheck2, Save, Move, Minus, Plus, Search,
+  FileCheck2, Save, Move, Minus, Plus, Search, UserMinus,
 } from 'lucide-react';
 import { EnrolledStudent, SeatingCol } from '../../types';
 import { ClassroomPodium } from './ClassroomPodium';
@@ -13,6 +13,7 @@ interface SeatingChartTabProps {
   numCols: number;
   desksPerCol: number;
   absentStudentIds: Set<number>;
+  hasAbsentInGrid?: boolean;
   unassignedStudents: EnrolledStudent[];
   showUnassignedPanel: boolean;
   mixingGA: boolean;
@@ -26,6 +27,7 @@ interface SeatingChartTabProps {
   onBlossomSwap: () => void;
   onSaveSeating: () => void;
   onClearSeat: (colIdx: number, deskIdx: number, posIdx: number) => void;
+  onClearAbsentSeats?: () => void;
   onDropOnSeat: (targetColIdx: number, targetDeskIdx: number, targetPosIdx: number) => void;
   onDragStartSeat: (seatPos: { colIdx: number; deskIdx: number; posIdx: number }) => void;
   onDragStartUnassigned: (student: EnrolledStudent) => void;
@@ -38,6 +40,7 @@ export const SeatingChartTab: React.FC<SeatingChartTabProps> = ({
   numCols,
   desksPerCol,
   absentStudentIds,
+  hasAbsentInGrid,
   unassignedStudents,
   showUnassignedPanel,
   mixingGA,
@@ -52,6 +55,7 @@ export const SeatingChartTab: React.FC<SeatingChartTabProps> = ({
   onBlossomSwap,
   onSaveSeating,
   onClearSeat,
+  onClearAbsentSeats,
   onDropOnSeat,
   onDragStartSeat,
   onDragStartUnassigned,
@@ -129,12 +133,25 @@ export const SeatingChartTab: React.FC<SeatingChartTabProps> = ({
             </button>
           </div>
 
-          {/* Absent Students Badge */}
+          {/* Absent Students Badge & Action */}
           {absentStudentIds.size > 0 && (
-            <span className="flex items-center gap-1.5 bg-rose-50 dark:bg-rose-500/20 text-rose-700 dark:text-rose-300 border-0 px-3 py-1 rounded-xl text-xs font-bold shadow-2xs">
-              <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
-              <span>Vắng mặt: {absentStudentIds.size} học sinh</span>
-            </span>
+            <div className="flex items-center gap-1.5">
+              <span className="flex items-center gap-1.5 bg-rose-50 dark:bg-rose-500/20 text-rose-700 dark:text-rose-300 border-0 px-3 py-1 rounded-xl text-xs font-bold shadow-2xs">
+                <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
+                <span>Vắng mặt: {absentStudentIds.size}</span>
+              </span>
+              {hasAbsentInGrid && onClearAbsentSeats && (
+                <button
+                  type="button"
+                  onClick={onClearAbsentSeats}
+                  className="flex items-center gap-1 bg-rose-100 hover:bg-rose-200 dark:bg-rose-500/25 dark:hover:bg-rose-500/35 text-rose-800 dark:text-rose-200 px-2.5 py-1 rounded-xl text-xs font-bold transition cursor-pointer border-0 shadow-2xs"
+                  title="Dọn trống ghế của học sinh vắng mặt"
+                >
+                  <UserMinus size={13} />
+                  <span>Dọn chỗ vắng</span>
+                </button>
+              )}
+            </div>
           )}
 
           {/* Open Unassigned Panel Button (if collapsed) */}

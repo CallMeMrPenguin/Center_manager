@@ -109,7 +109,8 @@ export function useSeatingLayout(
   const absentStudentIds = useMemo(() => {
     const set = new Set<number>();
     attendanceRecords.forEach((r: any) => {
-      if (r.status === 'Vắng mặt') {
+      const st = (r.status || '').trim().toLowerCase();
+      if (st === 'vắng mặt' || st === 'nghỉ học' || st === 'nghỉ' || st === 'vắng' || st === 'có phép') {
         set.add(r.student_id);
       }
     });
@@ -236,6 +237,30 @@ export function useSeatingLayout(
     }
   };
 
+  const hasAbsentInGrid = useMemo(() => {
+    if (absentStudentIds.size === 0) return false;
+    return seatingGrid.some((col) => col.seats?.some((seat) => seat.student_id && absentStudentIds.has(seat.student_id)));
+  }, [seatingGrid, absentStudentIds]);
+
+  const handleClearAbsentSeats = useCallback(() => {
+    if (absentStudentIds.size === 0) return;
+    const newGrid: SeatingCol[] = JSON.parse(JSON.stringify(seatingGrid));
+    let clearedCount = 0;
+    newGrid.forEach((col) => {
+      col.seats?.forEach((seat) => {
+        if (seat.student_id && absentStudentIds.has(seat.student_id)) {
+          seat.student_id = null;
+          seat.student_name = null;
+          clearedCount++;
+        }
+      });
+    });
+    if (clearedCount > 0) {
+      setSeatingGrid(newGrid);
+      showToast(`Đã dọn trống chỗ của ${clearedCount} học sinh vắng mặt!`, 'success');
+    }
+  }, [seatingGrid, absentStudentIds]);
+
   const handleAutoMixSeating = async () => {
     if (!selectedClass) return;
     try {
@@ -243,7 +268,14 @@ export function useSeatingLayout(
         col_index: col.col_index,
         desks_in_col: col.desks_in_col || desksPerCol,
       }));
-      const res = await api.mixClassSeating(selectedClass.id, numCols, desksPerCol, colsConfig, attendanceDate);
+      const res = await api.mixClassSeating(
+        selectedClass.id,
+        numCols,
+        desksPerCol,
+        colsConfig,
+        attendanceDate,
+        Array.from(absentStudentIds)
+      );
       if (res.layout) {
         setSeatingGrid(res.layout);
         showToast('Đã trộn ngẫu nhiên sơ đồ lớp!', 'success');
@@ -266,6 +298,7 @@ export function useSeatingLayout(
         desks_per_col: desksPerCol,
         cols_config: colsConfig,
         date: attendanceDate,
+        absent_student_ids: Array.from(absentStudentIds),
       });
       if (res.layout) {
         setSeatingGrid(res.layout);
@@ -284,6 +317,7 @@ export function useSeatingLayout(
       const res = await api.blossomSwapPairs(selectedClass.id, {
         date: attendanceDate,
         layout: seatingGrid,
+        absent_student_ids: Array.from(absentStudentIds),
       });
       setBlossomPairs(res.pairs || []);
       setBlossomUnmatched(res.unmatched || []);
@@ -302,6 +336,7 @@ export function useSeatingLayout(
     draggedUnassigned,
     setDraggedUnassigned,
     absentStudentIds,
+    hasAbsentInGrid,
     unassignedStudents,
     showUnassignedPanel,
     setShowUnassignedPanel,
@@ -319,6 +354,7 @@ export function useSeatingLayout(
     handleRemoveDeskFromCol,
     handleSaveSeating,
     handleClearSeat,
+    handleClearAbsentSeats,
     handleDropOnSeat,
     handleAutoMixSeating,
     handleGeneticMixSeating,
