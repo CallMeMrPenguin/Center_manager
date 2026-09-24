@@ -3,7 +3,7 @@ import {
   FileCode, Database, BookOpen, Settings as SettingsIcon, FolderOpen, LucideIcon,
   LayoutDashboard, Users, UserCheck, Briefcase, ClipboardList, Award, 
   CreditCard, Receipt, BarChart3, CalendarCheck, UserCog, FileCheck, GraduationCap,
-  PenTool, Sparkles
+  PenTool, Sparkles, FileText
 } from 'lucide-react';
 import TestFormatter from '../pages/test-formatter';
 import QuestionBank from '../pages/question-bank';
@@ -12,6 +12,7 @@ import UnitConfig from '../pages/unit-config';
 import Settings from '../pages/settings';
 import DocumentManager from '../pages/document-manager';
 import CanvasBoardPage from '../pages/canvas-board';
+import WordEditorPage from '../pages/word-editor';
 import WaitingForDevelopment from '../components/WaitingForDevelopment';
 import DashboardPage from '../pages/dashboard';
 import StudentsPage from '../pages/students';
@@ -170,6 +171,13 @@ export const TAB_DEFINITIONS: TabDefinition[] = [
       render: () => <DocumentManager />
     },
   ] : []),
+  {
+    id: 'word-editor',
+    label: 'Soạn Thảo Văn Bản',
+    icon: FileText,
+    section: 'resources',
+    render: () => <WordEditorPage />
+  },
   {
     id: 'canvas-board',
     label: 'Canvas',

@@ -21,7 +21,8 @@ from routers import (
     seating,
     skill_analytics,
     assignments,
-    users
+    users,
+    word_documents
 )
 
 # Initialize SQLite Database only in local desktop mode
@@ -65,6 +66,7 @@ app.include_router(seating.router)
 app.include_router(skill_analytics.router)
 app.include_router(assignments.router)
 app.include_router(users.router)
+app.include_router(word_documents.router)
 
 # Mount Local-Only Routers & Background Tasks (Only active in local desktop mode)
 if APP_MODE != "web":

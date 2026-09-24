@@ -387,9 +387,33 @@ def create_all_tables(cursor: sqlite3.Cursor):
     )
     """)
 
+    # 29. Word Documents table (Word-like document editor)
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS word_documents (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        title TEXT NOT NULL,
+        content_html TEXT NOT NULL DEFAULT '',
+        content_json TEXT DEFAULT '',
+        category TEXT DEFAULT 'Chung',
+        description TEXT DEFAULT '',
+        tags TEXT DEFAULT '',
+        paper_size TEXT DEFAULT 'A4',
+        orientation TEXT DEFAULT 'portrait',
+        margins TEXT DEFAULT '{"top":20,"bottom":20,"left":25,"right":20}',
+        is_template INTEGER DEFAULT 0,
+        created_by INTEGER DEFAULT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        is_deleted INTEGER DEFAULT 0,
+        deleted_at TIMESTAMP DEFAULT NULL
+    )
+    """)
+
 
 def create_all_indexes(cursor: sqlite3.Cursor):
     """Creates database indexes for optimized query performance."""
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_word_docs_category_deleted ON word_documents(category, is_deleted);")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_word_docs_template_deleted ON word_documents(is_template, is_deleted);")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_question_bank_grade_unit ON question_bank(grade, unit);")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_question_bank_type ON question_bank(question_type);")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_vocabulary_list_grade_unit ON vocabulary_list(grade, unit);")

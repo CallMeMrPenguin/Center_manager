@@ -1039,4 +1039,96 @@ table.data-table-main tbody tr[data-selected='true']:hover > td {
 [data-theme='dark'] table.data-table-main tbody tr[data-selected='true']:hover > td {
   background-color: #24325e !important;
 }
+
+/* ── MS Word Document Editor Styles ────────────────────────────── */
+.word-editor-content {
+  color: #0f172a;
+  font-family: Arial, "Times New Roman", Calibri, sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+  outline: none;
+}
+.word-editor-content p {
+  margin-bottom: 0.6em;
+}
+.word-editor-content h1 {
+  font-size: 1.85em;
+  font-weight: 700;
+  margin-top: 0.8em;
+  margin-bottom: 0.4em;
+  color: #0f172a;
+}
+.word-editor-content h2 {
+  font-size: 1.5em;
+  font-weight: 700;
+  margin-top: 0.7em;
+  margin-bottom: 0.35em;
+  color: #1e293b;
+}
+.word-editor-content h3 {
+  font-size: 1.25em;
+  font-weight: 600;
+  margin-top: 0.6em;
+  margin-bottom: 0.3em;
+  color: #334155;
+}
+.word-editor-content table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1em 0;
+}
+.word-editor-content table td,
+.word-editor-content table th {
+  border: 1px solid #cbd5e1;
+  padding: 8px 12px;
+  vertical-align: top;
+  position: relative;
+}
+.word-editor-content table th {
+  background-color: #f1f5f9;
+  font-weight: 600;
+}
+.word-editor-content table .selectedCell:after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(59, 130, 246, 0.15);
+  pointer-events: none;
+}
+.word-editor-content ul {
+  list-style-type: disc;
+  padding-left: 1.5em;
+  margin-bottom: 0.6em;
+}
+.word-editor-content ol {
+  list-style-type: decimal;
+  padding-left: 1.5em;
+  margin-bottom: 0.6em;
+}
+.word-editor-content hr {
+  border: none;
+  border-top: 1.5px solid #cbd5e1;
+  margin: 1.5em 0;
+}
+.word-editor-content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 4px;
+}
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .word-editor-content, .word-editor-content * {
+    visibility: visible;
+  }
+  .word-editor-content {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+}
 

@@ -407,6 +407,24 @@ ALTER TABLE public.question_bank ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.vocabulary_list ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.document_folders ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.documents ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.document_attachments ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.app_settings ENABLE ROW LEVEL SECURITY;
+CREATE TABLE IF NOT EXISTS public.word_documents (
+    id BIGSERIAL PRIMARY KEY,
+    title TEXT NOT NULL,
+    content_html TEXT NOT NULL DEFAULT '',
+    content_json TEXT DEFAULT '',
+    category TEXT DEFAULT 'Chung',
+    description TEXT DEFAULT '',
+    tags TEXT DEFAULT '',
+    paper_size TEXT DEFAULT 'A4',
+    orientation TEXT DEFAULT 'portrait',
+    margins TEXT DEFAULT '{"top":20,"bottom":20,"left":25,"right":20}',
+    is_template INTEGER DEFAULT 0,
+    created_by BIGINT REFERENCES public.app_users(id) ON DELETE SET NULL,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW(),
+    is_deleted INTEGER DEFAULT 0,
+    deleted_at TIMESTAMPTZ DEFAULT NULL
+);
+
+ALTER TABLE public.word_documents ENABLE ROW LEVEL SECURITY;
 

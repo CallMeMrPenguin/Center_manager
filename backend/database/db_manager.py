@@ -64,6 +64,18 @@ from database.crud_documents import (
     update_folder_parent,
 )
 
+# Word Documents
+from database.crud_word_documents import (
+    create_word_documents_table,
+    insert_word_document,
+    get_word_documents,
+    get_word_document,
+    update_word_document,
+    delete_word_document,
+    duplicate_word_document,
+    seed_default_word_templates,
+)
+
 # Students & Teachers
 from database.crud_students_teachers import (
     get_students,
@@ -225,6 +237,15 @@ __all__ = [
     "get_attachment",
     "delete_attachment",
     "update_folder_parent",
+    # Word Documents
+    "create_word_documents_table",
+    "insert_word_document",
+    "get_word_documents",
+    "get_word_document",
+    "update_word_document",
+    "delete_word_document",
+    "duplicate_word_document",
+    "seed_default_word_templates",
     # Students & Teachers
     "get_students",
     "create_student",
