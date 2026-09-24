@@ -1,9 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { EditorContent } from '@tiptap/react';
-import { WordDocument } from '../../../api/wordDocumentsApi';
 import { RibbonTab, PaperSize, Orientation, MarginConfig } from '../types';
 import { useWordEditor } from '../hooks/useWordEditor';
-import { useAutoSave } from '../hooks/useAutoSave';
 import { WordRibbonToolbar } from './WordRibbonToolbar';
 import { WordStatusBar } from './WordStatusBar';
 import { WordRuler } from './WordRuler';
@@ -13,61 +11,67 @@ import { exportToDocx, importFromDocx, printDocument } from '../exportUtils';
 import { showToast } from '../../../components/Toast';
 
 interface WordDocumentEditorProps {
-  document: WordDocument;
-  onBackToList: () => void;
-  onSaved?: (docId: number) => void;
+  initialContent?: string;
 }
 
 export const WordDocumentEditor: React.FC<WordDocumentEditorProps> = ({
-  document: initialDoc,
-  onBackToList,
-  onSaved,
+  initialContent = '<p>Bắt đầu soạn thảo văn bản tại đây...</p>',
 }) => {
-  const [title, setTitle] = useState(initialDoc.title);
-  const [category] = useState(initialDoc.category || 'Chung');
+  const [title, setTitle] = useState<string>('Văn bản 1');
   const [activeTab, setActiveTab] = useState<RibbonTab>('home');
-  const [paperSize, setPaperSize] = useState<PaperSize>((initialDoc.paper_size as PaperSize) || 'A4');
-  const [orientation, setOrientation] = useState<Orientation>((initialDoc.orientation as Orientation) || 'portrait');
-  const [margins, setMargins] = useState<MarginConfig>(() => {
+
+  // Persist only settings in localStorage as requested
+  const [paperSize, setPaperSizeState] = useState<PaperSize>(() => {
+    return (localStorage.getItem('word_paper_size') as PaperSize) || 'A4';
+  });
+  const setPaperSize = (size: PaperSize) => {
+    setPaperSizeState(size);
+    localStorage.setItem('word_paper_size', size);
+  };
+
+  const [orientation, setOrientationState] = useState<Orientation>(() => {
+    return (localStorage.getItem('word_orientation') as Orientation) || 'portrait';
+  });
+  const setOrientation = (ori: Orientation) => {
+    setOrientationState(ori);
+    localStorage.setItem('word_orientation', ori);
+  };
+
+  const [margins, setMarginsState] = useState<MarginConfig>(() => {
     try {
-      return initialDoc.margins ? JSON.parse(initialDoc.margins) : { top: 20, bottom: 20, left: 25, right: 20 };
+      const saved = localStorage.getItem('word_margins');
+      return saved ? JSON.parse(saved) : { top: 20, bottom: 20, left: 25, right: 20 };
     } catch {
       return { top: 20, bottom: 20, left: 25, right: 20 };
     }
   });
+  const setMargins = (m: MarginConfig) => {
+    setMarginsState(m);
+    localStorage.setItem('word_margins', JSON.stringify(m));
+  };
 
-  const [zoomLevel, setZoomLevel] = useState<number>(100);
+  const [zoomLevel, setZoomLevelState] = useState<number>(() => {
+    const saved = localStorage.getItem('word_zoom');
+    return saved ? Number(saved) : 100;
+  });
+  const setZoomLevel = (z: number) => {
+    setZoomLevelState(z);
+    localStorage.setItem('word_zoom', String(z));
+  };
+
   const [viewMode, setViewMode] = useState<'page' | 'full'>('page');
   const [isMergeModalOpen, setIsMergeModalOpen] = useState(false);
-  const [contentHtml, setContentHtml] = useState(initialDoc.content_html || '');
+  const [contentHtml, setContentHtml] = useState<string>(initialContent);
 
-  // 1. TipTap Editor setup
+  // TipTap Editor setup
   const { editor, getWordCount, insertMergeField } = useWordEditor({
-    initialContent: initialDoc.content_html || '',
+    initialContent,
     onUpdate: (html) => setContentHtml(html),
   });
 
-  // 2. Debounced auto-save hook
-  const { saveStatus, lastSavedAt, saveNow } = useAutoSave({
-    docId: initialDoc.id,
-    title,
-    contentHtml,
-    category,
-    margins,
-    orientation,
-    paperSize,
-    onSaved,
-  });
-
-  // 3. Hotkeys: Ctrl+S to save, Ctrl+P to print
+  // Hotkeys: Ctrl+P to print
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
-        e.preventDefault();
-        saveNow().then((ok) => {
-          if (ok) showToast('Đã lưu văn bản thành công', 'success');
-        });
-      }
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'p') {
         e.preventDefault();
         printDocument();
@@ -75,7 +79,17 @@ export const WordDocumentEditor: React.FC<WordDocumentEditorProps> = ({
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [saveNow]);
+  }, []);
+
+  // New Blank Document
+  const handleNewDocument = () => {
+    if (editor) {
+      editor.commands.setContent('<p></p>');
+      setContentHtml('<p></p>');
+      setTitle('Văn bản mới');
+      showToast('Đã mở trang văn bản mới', 'info');
+    }
+  };
 
   // Export to .docx
   const handleExportDocx = async () => {
@@ -99,6 +113,7 @@ export const WordDocumentEditor: React.FC<WordDocumentEditorProps> = ({
       if (editor) {
         editor.commands.setContent(html);
         setContentHtml(html);
+        setTitle(file.name.replace(/\.docx$/i, ''));
       }
       showToast(`Đã mở file "${file.name}"`, 'success');
     } catch (err) {
@@ -123,8 +138,8 @@ export const WordDocumentEditor: React.FC<WordDocumentEditorProps> = ({
   const paperMinHeightPx = orientation === 'landscape' ? 750 : 1123;
 
   return (
-    <div className="flex flex-col h-full w-full bg-[#f1f5f9] dark:bg-[#080b14] overflow-hidden select-text">
-      {/* 1. MS Word Ribbon Toolbar */}
+    <div className="flex flex-col h-full w-full bg-[#f1f5f9] dark:bg-[#080b14] overflow-hidden select-text relative">
+      {/* 1. Authentic MS Word Desktop Ribbon Toolbar */}
       <WordRibbonToolbar
         editor={editor}
         title={title}
@@ -137,17 +152,16 @@ export const WordDocumentEditor: React.FC<WordDocumentEditorProps> = ({
         onOrientationChange={setOrientation}
         margins={margins}
         onMarginsChange={setMargins}
-        onSaveNow={() => saveNow().then((ok) => ok && showToast('Đã lưu văn bản', 'success'))}
+        onNewDocument={handleNewDocument}
         onExportDocx={handleExportDocx}
         onPrint={printDocument}
         onImportDocx={handleImportDocx}
-        onBackToList={onBackToList}
         onOpenMergeModal={() => setIsMergeModalOpen(true)}
       />
 
-      {/* 2. Contextual Table Controls Floating Bar (only visible when cursor is in a table) */}
+      {/* 2. Contextual Table Controls Floating Bar (only visible when in table) */}
       {editor?.can().deleteTable() && (
-        <div className="bg-slate-50 dark:bg-[#0c0f1e] border-b border-blue-500/30 px-4 py-1 flex justify-center shrink-0 z-20">
+        <div className="bg-slate-50 dark:bg-[#0c0f1e] border-b border-blue-500/30 px-4 py-1 flex justify-center shrink-0 relative z-20">
           <WordTableControls editor={editor} />
         </div>
       )}
@@ -162,7 +176,7 @@ export const WordDocumentEditor: React.FC<WordDocumentEditorProps> = ({
           }}
           className="pb-20 flex flex-col items-center"
         >
-          {/* Authentic Document Ruler (attached flush directly onto paper top) */}
+          {/* Authentic Document Ruler (flush directly onto paper top) */}
           {viewMode === 'page' && (
             <WordRuler
               margins={margins}
@@ -195,13 +209,10 @@ export const WordDocumentEditor: React.FC<WordDocumentEditorProps> = ({
       {/* 4. Bottom Status Bar */}
       <WordStatusBar
         wordCount={getWordCount()}
-        saveStatus={saveStatus}
-        lastSavedAt={lastSavedAt}
         zoomLevel={zoomLevel}
         onZoomChange={setZoomLevel}
         viewMode={viewMode}
         onToggleViewMode={() => setViewMode(viewMode === 'page' ? 'full' : 'page')}
-        onSaveNow={() => saveNow().then((ok) => ok && showToast('Đã lưu văn bản', 'success'))}
       />
 
       {/* 5. Merge Field Modal */}

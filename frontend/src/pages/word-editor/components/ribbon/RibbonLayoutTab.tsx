@@ -19,17 +19,17 @@ export const RibbonLayoutTab: React.FC<RibbonLayoutTabProps> = ({
   onMarginsChange,
 }) => {
   return (
-    <div className="flex items-center gap-4 text-xs">
-      {/* Paper Size */}
-      <div className="flex items-center gap-2">
-        <span className="text-slate-500 dark:text-slate-400 font-semibold">Khổ giấy:</span>
+    <div className="flex items-center gap-1 text-xs select-none">
+      {/* 1. Paper Size Group */}
+      <div className="flex items-center gap-1">
+        <span className="text-slate-500 dark:text-slate-400 font-medium text-[11px] pr-1">Khổ giấy:</span>
         <button
           type="button"
           onClick={() => onPaperSizeChange('A4')}
-          className={`px-2.5 py-1 rounded-md transition-colors cursor-pointer font-medium ${
+          className={`h-6 px-2 rounded-[2px] transition-colors cursor-pointer text-xs ${
             paperSize === 'A4'
-              ? 'bg-[#2563eb] text-white shadow-xs font-bold'
-              : 'bg-slate-100 dark:bg-[#121626] text-slate-700 dark:text-slate-400 hover:bg-slate-200/80 dark:hover:bg-white/10'
+              ? 'bg-[#cde4f7] dark:bg-blue-600/30 text-blue-800 dark:text-blue-300 border border-[#7fbae9] dark:border-blue-500/50 font-bold'
+              : 'hover:bg-slate-200/80 dark:hover:bg-white/10 text-slate-700 dark:text-slate-300 border border-transparent'
           }`}
         >
           A4 (210 x 297 mm)
@@ -37,26 +37,28 @@ export const RibbonLayoutTab: React.FC<RibbonLayoutTabProps> = ({
         <button
           type="button"
           onClick={() => onPaperSizeChange('Letter')}
-          className={`px-2.5 py-1 rounded-md transition-colors cursor-pointer font-medium ${
+          className={`h-6 px-2 rounded-[2px] transition-colors cursor-pointer text-xs ${
             paperSize === 'Letter'
-              ? 'bg-[#2563eb] text-white shadow-xs font-bold'
-              : 'bg-slate-100 dark:bg-[#121626] text-slate-700 dark:text-slate-400 hover:bg-slate-200/80 dark:hover:bg-white/10'
+              ? 'bg-[#cde4f7] dark:bg-blue-600/30 text-blue-800 dark:text-blue-300 border border-[#7fbae9] dark:border-blue-500/50 font-bold'
+              : 'hover:bg-slate-200/80 dark:hover:bg-white/10 text-slate-700 dark:text-slate-300 border border-transparent'
           }`}
         >
           Letter
         </button>
       </div>
 
-      {/* Orientation */}
-      <div className="flex items-center gap-2">
-        <span className="text-slate-500 dark:text-slate-400 font-semibold">Hướng giấy:</span>
+      <div className="h-6 w-[1px] bg-slate-300 dark:bg-white/10 mx-1.5 shrink-0" />
+
+      {/* 2. Orientation Group */}
+      <div className="flex items-center gap-1">
+        <span className="text-slate-500 dark:text-slate-400 font-medium text-[11px] pr-1">Hướng giấy:</span>
         <button
           type="button"
           onClick={() => onOrientationChange('portrait')}
-          className={`px-2.5 py-1 rounded transition-colors cursor-pointer font-medium ${
+          className={`h-6 px-2 rounded-[2px] transition-colors cursor-pointer text-xs ${
             orientation === 'portrait'
-              ? 'bg-blue-600 text-white shadow-xs'
-              : 'bg-slate-100 dark:bg-[#121626] text-slate-700 dark:text-slate-400 hover:bg-slate-200'
+              ? 'bg-[#cde4f7] dark:bg-blue-600/30 text-blue-800 dark:text-blue-300 border border-[#7fbae9] dark:border-blue-500/50 font-bold'
+              : 'hover:bg-slate-200/80 dark:hover:bg-white/10 text-slate-700 dark:text-slate-300 border border-transparent'
           }`}
         >
           Dọc
@@ -64,37 +66,50 @@ export const RibbonLayoutTab: React.FC<RibbonLayoutTabProps> = ({
         <button
           type="button"
           onClick={() => onOrientationChange('landscape')}
-          className={`px-2.5 py-1 rounded transition-colors cursor-pointer font-medium ${
+          className={`h-6 px-2 rounded-[2px] transition-colors cursor-pointer text-xs ${
             orientation === 'landscape'
-              ? 'bg-blue-600 text-white shadow-xs'
-              : 'bg-slate-100 dark:bg-[#121626] text-slate-700 dark:text-slate-400 hover:bg-slate-200'
+              ? 'bg-[#cde4f7] dark:bg-blue-600/30 text-blue-800 dark:text-blue-300 border border-[#7fbae9] dark:border-blue-500/50 font-bold'
+              : 'hover:bg-slate-200/80 dark:hover:bg-white/10 text-slate-700 dark:text-slate-300 border border-transparent'
           }`}
         >
           Ngang
         </button>
       </div>
 
-      {/* Margins */}
-      <div className="flex items-center gap-2">
-        <span className="text-slate-500 dark:text-slate-400 font-semibold">Lề:</span>
+      <div className="h-6 w-[1px] bg-slate-300 dark:bg-white/10 mx-1.5 shrink-0" />
+
+      {/* 3. Margins Group */}
+      <div className="flex items-center gap-1">
+        <span className="text-slate-500 dark:text-slate-400 font-medium text-[11px] pr-1">Lề:</span>
         <button
           type="button"
           onClick={() => onMarginsChange({ top: 20, bottom: 20, left: 25, right: 20 })}
-          className={`px-2.5 py-1 rounded transition-colors cursor-pointer font-medium ${
+          className={`h-6 px-2 rounded-[2px] transition-colors cursor-pointer text-xs ${
             margins.left === 25
-              ? 'bg-blue-600 text-white shadow-xs'
-              : 'bg-slate-100 dark:bg-[#121626] text-slate-700 dark:text-slate-400 hover:bg-slate-200'
+              ? 'bg-[#cde4f7] dark:bg-blue-600/30 text-blue-800 dark:text-blue-300 border border-[#7fbae9] dark:border-blue-500/50 font-bold'
+              : 'hover:bg-slate-200/80 dark:hover:bg-white/10 text-slate-700 dark:text-slate-300 border border-transparent'
           }`}
         >
           Chuẩn (2.5cm)
         </button>
         <button
           type="button"
+          onClick={() => onMarginsChange({ top: 20, bottom: 20, left: 20, right: 20 })}
+          className={`h-6 px-2 rounded-[2px] transition-colors cursor-pointer text-xs ${
+            margins.left === 20
+              ? 'bg-[#cde4f7] dark:bg-blue-600/30 text-blue-800 dark:text-blue-300 border border-[#7fbae9] dark:border-blue-500/50 font-bold'
+              : 'hover:bg-slate-200/80 dark:hover:bg-white/10 text-slate-700 dark:text-slate-300 border border-transparent'
+          }`}
+        >
+          Vừa (2.0cm)
+        </button>
+        <button
+          type="button"
           onClick={() => onMarginsChange({ top: 12.7, bottom: 12.7, left: 12.7, right: 12.7 })}
-          className={`px-2.5 py-1 rounded transition-colors cursor-pointer font-medium ${
+          className={`h-6 px-2 rounded-[2px] transition-colors cursor-pointer text-xs ${
             margins.left === 12.7
-              ? 'bg-blue-600 text-white shadow-xs'
-              : 'bg-slate-100 dark:bg-[#121626] text-slate-700 dark:text-slate-400 hover:bg-slate-200'
+              ? 'bg-[#cde4f7] dark:bg-blue-600/30 text-blue-800 dark:text-blue-300 border border-[#7fbae9] dark:border-blue-500/50 font-bold'
+              : 'hover:bg-slate-200/80 dark:hover:bg-white/10 text-slate-700 dark:text-slate-300 border border-transparent'
           }`}
         >
           Hẹp (1.27cm)
