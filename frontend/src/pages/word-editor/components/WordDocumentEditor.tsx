@@ -153,7 +153,7 @@ export const WordDocumentEditor: React.FC<WordDocumentEditorProps> = ({
       )}
 
       {/* 3. Main Editor Workspace Container */}
-      <main className="flex-1 overflow-auto p-4 sm:p-8 flex justify-center bg-[#e8ecef] dark:bg-[#060810] relative scrollbar-thin">
+      <main className="flex-1 overflow-auto p-4 sm:p-8 flex justify-center bg-[#e8ecef] dark:bg-[#060810] relative z-10 scrollbar-thin">
         <div
           style={{
             transform: `scale(${zoomLevel / 100})`,

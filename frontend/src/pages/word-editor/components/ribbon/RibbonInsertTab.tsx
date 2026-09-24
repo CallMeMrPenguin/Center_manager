@@ -32,7 +32,7 @@ export const RibbonInsertTab: React.FC<RibbonInsertTabProps> = ({
           <span>Bảng ({tableHover.r}x{tableHover.c})</span>
         </button>
         {showTablePicker && (
-          <div className="absolute top-full left-0 mt-1 p-2 bg-white dark:bg-[#0c0f1e] border border-slate-300 dark:border-white/15 rounded-xl shadow-2xl z-50">
+          <div className="absolute top-full left-0 mt-1 p-2 bg-white dark:bg-[#0c0f1e] border border-slate-300 dark:border-white/15 rounded-xl shadow-2xl z-[9999]">
             <div className="grid grid-cols-6 gap-1 mb-2">
               {Array.from({ length: 6 }).map((_, r) =>
                 Array.from({ length: 6 }).map((_, c) => (

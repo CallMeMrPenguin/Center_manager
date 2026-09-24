@@ -56,7 +56,7 @@ export const ColorPickers: React.FC<ColorPickersProps> = ({ editor }) => {
           <span className="w-3.5 h-1 rounded-full mt-0.5" style={{ backgroundColor: currentColor }} />
         </button>
         {colorOpen && (
-          <div className="absolute top-full left-0 mt-1 p-2 bg-white dark:bg-[#121626] border border-slate-200 dark:border-white/15 rounded-xl shadow-xl z-50 w-44 animate-in fade-in zoom-in-95 duration-100">
+          <div className="absolute top-full left-0 mt-1 p-2 bg-white dark:bg-[#121626] border border-slate-200 dark:border-white/15 rounded-xl shadow-2xl z-[9999] w-44 animate-in fade-in zoom-in-95 duration-100">
             <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Màu chữ</div>
             <div className="grid grid-cols-4 gap-1.5 mb-2">
               {TEXT_COLORS.map((tc) => (
@@ -90,7 +90,7 @@ export const ColorPickers: React.FC<ColorPickersProps> = ({ editor }) => {
           <ChevronDown className="w-2.5 h-2.5 text-slate-400" />
         </button>
         {highlightOpen && (
-          <div className="absolute top-full left-0 mt-1 p-2 bg-white dark:bg-[#121626] border border-slate-200 dark:border-white/15 rounded-xl shadow-xl z-50 w-44 animate-in fade-in zoom-in-95 duration-100">
+          <div className="absolute top-full left-0 mt-1 p-2 bg-white dark:bg-[#121626] border border-slate-200 dark:border-white/15 rounded-xl shadow-2xl z-[9999] w-44 animate-in fade-in zoom-in-95 duration-100">
             <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Bút dạ quang</div>
             <div className="flex items-center gap-1.5 mb-2">
               {HIGHLIGHT_COLORS.map((hc) => (

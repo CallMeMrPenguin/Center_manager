@@ -50,7 +50,7 @@ export const WordRibbonToolbar: React.FC<WordRibbonToolbarProps> = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   return (
-    <header className="bg-white dark:bg-[#0c0f1e] border-b border-slate-200 dark:border-white/10 text-slate-800 dark:text-white shrink-0 select-none shadow-xs z-30">
+    <header className="relative z-30 bg-white dark:bg-[#0c0f1e] border-b border-slate-200 dark:border-white/10 text-slate-800 dark:text-white shrink-0 select-none shadow-xs">
       {/* 1. Quick Access Title & Actions Bar */}
       <div className="flex items-center justify-between px-3 py-1.5 border-b border-slate-200/80 dark:border-white/5 bg-slate-50/80 dark:bg-[#080b14] text-xs gap-3">
         {/* Left: Navigation, Word Icon & Editable Document Title */}
@@ -174,7 +174,7 @@ export const WordRibbonToolbar: React.FC<WordRibbonToolbarProps> = ({
       </div>
 
       {/* 3. Ribbon Controls Bar */}
-      <div className="px-3 py-1.5 min-h-[46px] flex items-center gap-2 overflow-x-auto text-xs bg-white dark:bg-[#0c0f1e] scrollbar-thin">
+      <div className="px-3 py-1.5 min-h-[46px] flex items-center gap-2 text-xs bg-white dark:bg-[#0c0f1e] relative z-40">
         {activeTab === 'home' && <RibbonHomeTab editor={editor} />}
         {activeTab === 'insert' && (
           <RibbonInsertTab editor={editor} onOpenMergeModal={onOpenMergeModal} />

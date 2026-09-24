@@ -91,7 +91,7 @@ export const RibbonHomeTab: React.FC<RibbonHomeTabProps> = ({ editor }) => {
           <ChevronDown className={`w-3 h-3 text-slate-500 transition-transform ${fontOpen ? 'rotate-180' : ''}`} />
         </button>
         {fontOpen && (
-          <div className="absolute top-full left-0 mt-1 w-48 bg-white dark:bg-[#121626] border border-slate-200 dark:border-white/15 rounded-xl shadow-xl py-1 z-50 animate-in fade-in zoom-in-95 duration-100">
+          <div className="absolute top-full left-0 mt-1 w-48 bg-white dark:bg-[#121626] border border-slate-200 dark:border-white/15 rounded-xl shadow-2xl py-1 z-[9999] animate-in fade-in zoom-in-95 duration-100">
             {FONT_FAMILIES.map((f) => (
               <button
                 key={f.value}
@@ -122,7 +122,7 @@ export const RibbonHomeTab: React.FC<RibbonHomeTabProps> = ({ editor }) => {
           <ChevronDown className={`w-3 h-3 text-slate-500 transition-transform ${headingOpen ? 'rotate-180' : ''}`} />
         </button>
         {headingOpen && (
-          <div className="absolute top-full left-0 mt-1 w-44 bg-white dark:bg-[#121626] border border-slate-200 dark:border-white/15 rounded-xl shadow-xl py-1 z-50 animate-in fade-in zoom-in-95 duration-100">
+          <div className="absolute top-full left-0 mt-1 w-44 bg-white dark:bg-[#121626] border border-slate-200 dark:border-white/15 rounded-xl shadow-2xl py-1 z-[9999] animate-in fade-in zoom-in-95 duration-100">
             {HEADING_OPTIONS.map((h) => {
               const isSelected = currentHeadingValue === h.value;
               return (
