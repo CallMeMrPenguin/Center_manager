@@ -93,6 +93,7 @@ export const ReportsHeader: React.FC<ReportsHeaderProps> = ({
             onChange={(val) => setSelectedAcademicYear(String(val))}
             options={academicYears.map(y => ({ value: y, label: `Năm học ${y}` }))}
             className="w-40 shrink-0"
+            triggerClassName="!bg-white hover:!bg-slate-50 dark:!bg-[#141417] dark:hover:!bg-[#1c1c21] text-slate-900 dark:text-white shadow-xs hover:shadow-sm"
           />
 
           {/* Class Selector (or Cross-class indicator on Benchmark tab) */}
@@ -106,6 +107,7 @@ export const ReportsHeader: React.FC<ReportsHeaderProps> = ({
                 ...classes.map(c => ({ value: String(c.id), label: c.class_name }))
               ]}
               className="w-44 shrink-0"
+              triggerClassName="!bg-white hover:!bg-slate-50 dark:!bg-[#141417] dark:hover:!bg-[#1c1c21] text-slate-900 dark:text-white shadow-xs hover:shadow-sm"
             />
           ) : (
             <div className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-300 text-xs font-bold shrink-0 border-0 shadow-2xs">

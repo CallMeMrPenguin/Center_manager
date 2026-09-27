@@ -19,6 +19,7 @@ interface CustomSelectProps {
   searchable?: boolean;
   searchPlaceholder?: string;
   placement?: 'auto' | 'top' | 'bottom';
+  triggerClassName?: string;
 }
 
 export const CustomSelect: React.FC<CustomSelectProps> = ({
@@ -32,6 +33,7 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
   searchable = false,
   searchPlaceholder = 'Tìm kiếm...',
   placement = 'auto',
+  triggerClassName = '',
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [openUpwards, setOpenUpwards] = useState(false);
@@ -97,7 +99,9 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
         type="button"
         disabled={disabled}
         onClick={() => setIsOpen(!isOpen)}
-        className={`w-full flex items-center justify-between btn-neutral rounded-xl px-3.5 py-2 text-xs font-bold text-slate-900 dark:text-white transition-all cursor-pointer shadow-xs hover:shadow-sm border-0 outline-none ${
+        className={`w-full flex items-center justify-between rounded-xl px-3.5 py-2 text-xs font-bold transition-all cursor-pointer shadow-xs hover:shadow-sm border-0 outline-none ${
+          triggerClassName || 'btn-neutral text-slate-900 dark:text-white'
+        } ${
           disabled ? 'opacity-40 cursor-not-allowed' : ''
         }`}
       >

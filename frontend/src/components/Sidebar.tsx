@@ -53,6 +53,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 }) => {
   return (
     <aside
+      style={{ overscrollBehaviorX: 'contain' }}
       className={`group relative ${
         isSidebarExpanded ? 'w-56' : 'w-16'
       } bg-white dark:bg-[#0c0c0e] border-r border-slate-200 dark:border-[#27272a] flex flex-col transition-all duration-300 select-none shrink-0 z-30 overflow-visible`}

@@ -132,16 +132,19 @@ export const ScheduleCalendarView: React.FC<ScheduleCalendarViewProps> = ({
                             e.stopPropagation();
                             openEdit(s);
                           }}
-                          className="px-2.5 py-1.5 rounded-[5px] cursor-pointer transition-all hover:scale-[1.01] active:scale-[0.99] border-0 shadow-2xs hover:shadow-xs flex flex-col gap-1 overflow-hidden"
-                          style={{ backgroundColor: vs.bg }}
+                          className="px-2.5 py-1.5 rounded-lg cursor-pointer transition-all hover:scale-[1.01] active:scale-[0.99] border-0 border-l-[3.5px] shadow-2xs hover:shadow-xs flex flex-col gap-1 overflow-hidden"
+                          style={{ backgroundColor: vs.bg, borderLeftColor: vs.accent }}
                         >
                           <div className="flex items-center justify-between gap-1.5">
-                            <h4 className="text-[11px] font-black truncate text-slate-900 dark:text-white leading-tight">
+                            <h4
+                              className="text-[11px] font-black truncate leading-tight"
+                              style={{ color: vs.titleColor }}
+                            >
                               {s.class_name}
                             </h4>
                             <span
                               className="text-[9px] font-black px-1.5 py-0.5 rounded-md shrink-0 leading-none"
-                              style={{ color: vs.color, backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.06)' }}
+                              style={{ backgroundColor: vs.badgeBg, color: vs.badgeColor }}
                             >
                               {s.status}
                             </span>
@@ -264,16 +267,19 @@ export const ScheduleCalendarView: React.FC<ScheduleCalendarViewProps> = ({
                         e.stopPropagation();
                         openEdit(s);
                       }}
-                      className="px-2.5 py-2 rounded-[5px] cursor-pointer transition-all hover:scale-[1.01] active:scale-[0.99] border-0 shadow-2xs hover:shadow-xs flex flex-col gap-1 overflow-hidden"
-                      style={{ backgroundColor: vs.bg }}
+                      className="px-2.5 py-2 rounded-lg cursor-pointer transition-all hover:scale-[1.01] active:scale-[0.99] border-0 border-l-[3.5px] shadow-2xs hover:shadow-xs flex flex-col gap-1 overflow-hidden"
+                      style={{ backgroundColor: vs.bg, borderLeftColor: vs.accent }}
                     >
                       <div className="flex items-center justify-between gap-1.5">
-                        <h4 className="text-[11px] font-black truncate text-slate-900 dark:text-white leading-tight">
+                        <h4
+                          className="text-[11px] font-black truncate leading-tight"
+                          style={{ color: vs.titleColor }}
+                        >
                           {s.class_name}
                         </h4>
                         <span
                           className="text-[9px] font-black px-1.5 py-0.5 rounded-md shrink-0 leading-none"
-                          style={{ color: vs.color, backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.06)' }}
+                          style={{ backgroundColor: vs.badgeBg, color: vs.badgeColor }}
                         >
                           {s.status}
                         </span>

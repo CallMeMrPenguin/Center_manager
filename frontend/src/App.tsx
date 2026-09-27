@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Database } from 'lucide-react';
+import { Database, ChevronLeft, ChevronRight } from 'lucide-react';
 import { TAB_DEFINITIONS } from './config/tabs';
 import { Sidebar } from './components/Sidebar';
 import { showToast, AnimatedToastProvider } from './components/Toast';
@@ -45,10 +45,24 @@ function AppContent() {
     return new Set([getInitialTab()]);
   });
 
+  const [navIndicator, setNavIndicator] = useState<'back' | 'forward' | null>(null);
+  const historyIndexRef = useRef<number>(0);
+  const navTimerRef = useRef<any>(null);
+
   // Keep URL pathname in sync with browser navigation (Back/Forward buttons)
   useEffect(() => {
-    const handlePopState = () => {
+    const handlePopState = (e: PopStateEvent) => {
       const path = window.location.pathname.replace(/^\//, '').split('/')[0].trim();
+      const prevStep = historyIndexRef.current;
+      const newStep = e.state?.step ?? (prevStep > 0 ? prevStep - 1 : 0);
+      historyIndexRef.current = newStep;
+
+      // Trigger flush edge navigation indicator
+      const direction: 'back' | 'forward' = newStep <= prevStep ? 'back' : 'forward';
+      setNavIndicator(direction);
+      if (navTimerRef.current) clearTimeout(navTimerRef.current);
+      navTimerRef.current = setTimeout(() => setNavIndicator(null), 500);
+
       if (path && TAB_DEFINITIONS.some((t) => t.id === path)) {
         if (currentUser?.role === 'student' && path !== 'assignments' && path !== 'results') {
           return;
@@ -64,16 +78,20 @@ function AppContent() {
     const expectedPath = `/${activeTab}`;
     if (currentPath !== expectedPath || window.location.hash) {
       const target = `${expectedPath}${window.location.search || ''}`;
-      window.history.replaceState({ tabId: activeTab }, '', target);
+      window.history.replaceState({ tabId: activeTab, step: historyIndexRef.current }, '', target);
     }
 
-    return () => window.removeEventListener('popstate', handlePopState);
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+      if (navTimerRef.current) clearTimeout(navTimerRef.current);
+    };
   }, [currentUser, activeTab]);
 
   const handleSelectTab = (tabId: string) => {
     const targetPath = `/${tabId}`;
     if (window.location.pathname !== targetPath) {
-      window.history.pushState({ tabId }, '', targetPath);
+      historyIndexRef.current += 1;
+      window.history.pushState({ tabId, step: historyIndexRef.current }, '', targetPath);
     }
     setActiveTab(tabId);
     setVisitedTabIds((prev) => {
@@ -183,7 +201,7 @@ function AppContent() {
     : TAB_DEFINITIONS;
 
   return (
-    <div className="relative flex flex-col h-screen w-screen bg-[#f1f5f9] dark:bg-[#09090b] text-slate-900 dark:text-slate-50 overflow-hidden font-sans select-none">
+    <div className="relative flex flex-col h-full w-full bg-[#f1f5f9] dark:bg-[#09090b] text-slate-900 dark:text-slate-50 overflow-hidden font-sans select-none">
       <div className="relative flex flex-row flex-1 overflow-hidden z-10">
         {/* SIDEBAR NAVIGATION */}
         <Sidebar
@@ -207,6 +225,23 @@ function AppContent() {
         {/* MAIN BODY SKELETON */}
         <div className="flex-1 flex flex-col overflow-hidden bg-transparent">
           <main className="flex-1 overflow-hidden bg-[#f1f5f9] dark:bg-[#09090b] relative">
+            {/* FLUSH MARGIN NAVIGATION ARROW INDICATOR (SÁT LỀ TAB) */}
+            {navIndicator === 'back' && (
+              <div
+                className="absolute left-2.5 top-1/2 -translate-y-1/2 z-50 flex items-center justify-center w-10 h-10 rounded-full bg-white/95 dark:bg-[#181a20]/95 text-blue-600 dark:text-blue-400 shadow-xl border-0 ring-1 ring-black/5 dark:ring-white/10 pointer-events-none transition-all duration-200 animate-in fade-in zoom-in-90"
+                title="Quay lại tab trước"
+              >
+                <ChevronLeft size={22} strokeWidth={2.8} />
+              </div>
+            )}
+            {navIndicator === 'forward' && (
+              <div
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 z-50 flex items-center justify-center w-10 h-10 rounded-full bg-white/95 dark:bg-[#181a20]/95 text-blue-600 dark:text-blue-400 shadow-xl border-0 ring-1 ring-black/5 dark:ring-white/10 pointer-events-none transition-all duration-200 animate-in fade-in zoom-in-90"
+                title="Tiến tới tab sau"
+              >
+                <ChevronRight size={22} strokeWidth={2.8} />
+              </div>
+            )}
             {visibleTabs.map((tab) => {
               const isActive = activeTab === tab.id;
               const isVisited = visitedTabIds.has(tab.id);

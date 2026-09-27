@@ -64,10 +64,10 @@ export const InsightCommentary: React.FC<InsightCommentaryProps> = React.memo(({
   return (
     <div
       ref={containerRef}
-      className="bg-white dark:bg-[#141417] border border-slate-300/80 dark:border-[#27272a] rounded-2xl p-6 shadow-sm dark:shadow-xl space-y-6 select-none relative animate-cascade-3 font-sans transition-colors duration-200"
+      className="bg-white dark:bg-[#141417] border-0 rounded-2xl p-6 shadow-sm dark:shadow-xl space-y-6 select-none relative animate-cascade-3 font-sans transition-colors duration-200"
     >
       {/* 1. HEADER TITLE & RATING BADGE */}
-      <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-200 dark:border-white/10">
+      <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-white/5">
         <div className="flex items-center gap-2.5">
           <BookOpen size={16} className="text-indigo-500 dark:text-indigo-400" />
           <h4 className="text-sm font-black uppercase text-slate-900 dark:text-white tracking-wider">
@@ -77,11 +77,10 @@ export const InsightCommentary: React.FC<InsightCommentaryProps> = React.memo(({
         {/* Rating Badge (Hidden when viewing All Classes) */}
         {report.overallBadge && selectedClassId !== 'all' && Boolean(selectedClassId) && (
           <span
-            className="px-3 py-1 rounded-lg text-xs font-black border"
+            className="px-3 py-1 rounded-lg text-xs font-black border-0 shadow-2xs"
             style={{
               backgroundColor: `${report.badgeColor}15`,
               color: report.badgeColor,
-              borderColor: `${report.badgeColor}40`,
             }}
           >
             {report.overallBadge}

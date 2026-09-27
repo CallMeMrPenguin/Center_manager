@@ -49,27 +49,47 @@ export function hexToHSL(hex: string) {
 }
 
 export function getPremiumStyle(status: string, hexColor = '#2563eb', isDarkParam?: boolean) {
+  const isDark = isDarkParam !== undefined ? isDarkParam : (typeof document !== 'undefined' ? document.documentElement.classList.contains('dark') : false);
+
   if (status === 'Hủy') {
     return {
-      bg: 'rgba(148,163,184,0.08)',
-      border: 'rgba(148,163,184,0.25)',
-      innerBorder: 'rgba(148,163,184,0.15)',
-      color: '#94a3b8',
-      shadow: '0 1px 3px rgba(0,0,0,0.3)',
+      bg: isDark ? 'rgba(148,163,184,0.08)' : '#f8fafc',
+      accent: '#94a3b8',
+      border: 'transparent',
+      innerBorder: 'transparent',
+      color: '#64748b',
+      titleColor: isDark ? '#94a3b8' : '#64748b',
+      badgeBg: isDark ? 'rgba(148,163,184,0.15)' : '#e2e8f0',
+      badgeColor: isDark ? '#cbd5e1' : '#475569',
+      shadow: '0 1px 3px rgba(0,0,0,0.06)',
     };
   }
-  const isDark = isDarkParam !== undefined ? isDarkParam : (typeof document !== 'undefined' ? document.documentElement.classList.contains('dark') : true);
-  const { h, s: iS, l: iL } = hexToHSL(hexColor);
+
+  const { h, s: iS } = hexToHSL(hexColor);
   const isDone = status === 'Đã học';
-  const sat = isDone ? Math.max(25, Math.round(iS * 0.55)) : Math.min(85, Math.max(60, iS));
-  const lightness = isDone ? 50 : Math.min(75, Math.max(50, iL));
-  const alphaBg = isDark ? (isDone ? '0.22' : '0.30') : (isDone ? '0.26' : '0.34');
-  const bg = `hsla(${h},${sat}%,${lightness}%,${alphaBg})`;
-  const border = 'transparent';
-  const color = isDark ? `hsla(${h},95%,92%,0.98)` : `hsla(${h},95%,28%,0.98)`;
-  // Clean enterprise card shadow (zero radioactive glow)
-  const shadow = isDark ? '0 2px 6px rgba(0,0,0,0.35)' : '0 1px 3px rgba(0,0,0,0.08)';
-  return { bg, border, innerBorder: 'transparent', color, shadow };
+
+  if (isDark) {
+    const sat = isDone ? 30 : Math.min(80, Math.max(50, iS));
+    const bg = isDone ? 'rgba(255,255,255,0.04)' : `hsla(${h},${sat}%,13%,0.92)`;
+    const accent = isDone ? '#64748b' : hexColor;
+    const color = isDone ? '#94a3b8' : `hsla(${h},90%,88%,0.98)`;
+    const titleColor = '#ffffff';
+    const badgeBg = isDone ? 'rgba(255,255,255,0.08)' : `hsla(${h},80%,60%,0.18)`;
+    const badgeColor = isDone ? '#cbd5e1' : `hsla(${h},95%,85%,0.98)`;
+    const shadow = '0 2px 6px rgba(0,0,0,0.35)';
+    return { bg, accent, border: 'transparent', innerBorder: 'transparent', color, titleColor, badgeBg, badgeColor, shadow };
+  } else {
+    // Crisp, elegant, modern light theme styling
+    const sat = isDone ? 25 : Math.min(85, Math.max(65, iS));
+    const bg = isDone ? '#f8fafc' : `hsla(${h},${sat}%,96%,0.98)`;
+    const accent = isDone ? '#94a3b8' : hexColor;
+    const color = isDone ? '#64748b' : `hsla(${h},90%,32%,0.98)`;
+    const titleColor = '#0f172a';
+    const badgeBg = isDone ? '#e2e8f0' : `hsla(${h},85%,90%,0.95)`;
+    const badgeColor = isDone ? '#475569' : `hsla(${h},90%,28%,0.98)`;
+    const shadow = '0 1px 3px rgba(0,0,0,0.06)';
+    return { bg, accent, border: 'transparent', innerBorder: 'transparent', color, titleColor, badgeBg, badgeColor, shadow };
+  }
 }
 
 export function getSessionColor(sess: ClassSession): string {
