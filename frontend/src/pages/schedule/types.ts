@@ -53,42 +53,38 @@ export function getPremiumStyle(status: string, hexColor = '#2563eb', isDarkPara
 
   if (status === 'Hủy') {
     return {
-      bg: isDark ? 'rgba(148,163,184,0.08)' : '#f8fafc',
-      accent: '#94a3b8',
-      border: 'transparent',
-      innerBorder: 'transparent',
+      bg: isDark ? 'rgba(148,163,184,0.1)' : '#f1f5f9',
+      borderColor: isDark ? '#334155' : '#cbd5e1',
       color: '#64748b',
       titleColor: isDark ? '#94a3b8' : '#64748b',
-      badgeBg: isDark ? 'rgba(148,163,184,0.15)' : '#e2e8f0',
+      badgeBg: isDark ? '#1e293b' : '#e2e8f0',
       badgeColor: isDark ? '#cbd5e1' : '#475569',
       shadow: '0 1px 3px rgba(0,0,0,0.06)',
     };
   }
 
-  const { h, s: iS } = hexToHSL(hexColor);
+  const { h } = hexToHSL(hexColor);
   const isDone = status === 'Đã học';
 
   if (isDark) {
-    const sat = isDone ? 30 : Math.min(80, Math.max(50, iS));
-    const bg = isDone ? 'rgba(255,255,255,0.04)' : `hsla(${h},${sat}%,13%,0.92)`;
-    const accent = isDone ? '#64748b' : hexColor;
-    const color = isDone ? '#94a3b8' : `hsla(${h},90%,88%,0.98)`;
+    const bg = isDone ? `hsla(${h},45%,13%,0.95)` : `hsla(${h},55%,16%,0.95)`;
+    const borderColor = isDone ? `hsla(${h},40%,28%,0.9)` : `hsla(${h},60%,36%,0.95)`;
+    const color = isDone ? `hsla(${h},75%,80%,0.95)` : `hsla(${h},85%,88%,0.98)`;
     const titleColor = '#ffffff';
-    const badgeBg = isDone ? 'rgba(255,255,255,0.08)' : `hsla(${h},80%,60%,0.18)`;
-    const badgeColor = isDone ? '#cbd5e1' : `hsla(${h},95%,85%,0.98)`;
+    const badgeBg = isDone ? `hsla(${h},40%,22%,0.8)` : `hsla(${h},70%,26%,0.85)`;
+    const badgeColor = isDone ? `hsla(${h},70%,85%,0.98)` : `hsla(${h},95%,88%,0.98)`;
     const shadow = '0 2px 6px rgba(0,0,0,0.35)';
-    return { bg, accent, border: 'transparent', innerBorder: 'transparent', color, titleColor, badgeBg, badgeColor, shadow };
+    return { bg, borderColor, color, titleColor, badgeBg, badgeColor, shadow };
   } else {
-    // Crisp, elegant, modern light theme styling
-    const sat = isDone ? 25 : Math.min(85, Math.max(65, iS));
-    const bg = isDone ? '#f8fafc' : `hsla(${h},${sat}%,96%,0.98)`;
-    const accent = isDone ? '#94a3b8' : hexColor;
-    const color = isDone ? '#64748b' : `hsla(${h},90%,32%,0.98)`;
+    // Rich, consistent pastel colors by class, distinct from white background
+    const bg = isDone ? `hsla(${h},70%,94.5%,1)` : `hsla(${h},85%,92%,1)`;
+    const borderColor = isDone ? `hsla(${h},45%,78%,1)` : `hsla(${h},65%,72%,1)`;
+    const color = isDone ? `hsla(${h},70%,32%,0.98)` : `hsla(${h},90%,28%,0.98)`;
     const titleColor = '#0f172a';
-    const badgeBg = isDone ? '#e2e8f0' : `hsla(${h},85%,90%,0.95)`;
-    const badgeColor = isDone ? '#475569' : `hsla(${h},90%,28%,0.98)`;
-    const shadow = '0 1px 3px rgba(0,0,0,0.06)';
-    return { bg, accent, border: 'transparent', innerBorder: 'transparent', color, titleColor, badgeBg, badgeColor, shadow };
+    const badgeBg = isDone ? `hsla(${h},45%,85%,0.95)` : `hsla(${h},80%,83%,0.95)`;
+    const badgeColor = isDone ? `hsla(${h},75%,24%,0.98)` : `hsla(${h},95%,20%,0.98)`;
+    const shadow = '0 1px 3px rgba(0,0,0,0.05)';
+    return { bg, borderColor, color, titleColor, badgeBg, badgeColor, shadow };
   }
 }
 

@@ -132,8 +132,8 @@ export const ScheduleCalendarView: React.FC<ScheduleCalendarViewProps> = ({
                             e.stopPropagation();
                             openEdit(s);
                           }}
-                          className="px-2.5 py-1.5 rounded-lg cursor-pointer transition-all hover:scale-[1.01] active:scale-[0.99] border-0 border-l-[3.5px] shadow-2xs hover:shadow-xs flex flex-col gap-1 overflow-hidden"
-                          style={{ backgroundColor: vs.bg, borderLeftColor: vs.accent }}
+                          className="px-2.5 py-1.5 rounded-lg cursor-pointer transition-all hover:scale-[1.01] active:scale-[0.99] border shadow-2xs hover:shadow-xs flex flex-col gap-1 overflow-hidden"
+                          style={{ backgroundColor: vs.bg, borderColor: vs.borderColor }}
                         >
                           <div className="flex items-center justify-between gap-1.5">
                             <h4
@@ -267,8 +267,8 @@ export const ScheduleCalendarView: React.FC<ScheduleCalendarViewProps> = ({
                         e.stopPropagation();
                         openEdit(s);
                       }}
-                      className="px-2.5 py-2 rounded-lg cursor-pointer transition-all hover:scale-[1.01] active:scale-[0.99] border-0 border-l-[3.5px] shadow-2xs hover:shadow-xs flex flex-col gap-1 overflow-hidden"
-                      style={{ backgroundColor: vs.bg, borderLeftColor: vs.accent }}
+                      className="px-2.5 py-2 rounded-lg cursor-pointer transition-all hover:scale-[1.01] active:scale-[0.99] border shadow-2xs hover:shadow-xs flex flex-col gap-1 overflow-hidden"
+                      style={{ backgroundColor: vs.bg, borderColor: vs.borderColor }}
                     >
                       <div className="flex items-center justify-between gap-1.5">
                         <h4
