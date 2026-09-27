@@ -21,6 +21,7 @@ interface SessionModalProps {
   selectedMonth: string;
   onSave: (e: React.FormEvent) => void;
   onDelete: (sess: ClassSession) => void;
+  onApplyClassSchedule?: (cid: number, targetDateStr?: string) => Promise<void>;
 }
 
 export const SessionModal: React.FC<SessionModalProps> = ({
@@ -39,6 +40,7 @@ export const SessionModal: React.FC<SessionModalProps> = ({
   selectedMonth,
   onSave,
   onDelete,
+  onApplyClassSchedule,
 }) => {
   if (!isOpen) return null;
 
@@ -69,9 +71,12 @@ export const SessionModal: React.FC<SessionModalProps> = ({
               onChange={(val) => {
                 const cid = Number(val);
                 const selectedCls = classesList.find((c) => c.id === cid);
-                setForm({ ...form, class_id: cid });
+                setForm((prev) => ({ ...prev, class_id: cid }));
                 if (selectedCls?.color) {
                   setColor(selectedCls.color);
+                }
+                if (cid && onApplyClassSchedule) {
+                  onApplyClassSchedule(cid, form.date);
                 }
               }}
               options={[
@@ -125,9 +130,20 @@ export const SessionModal: React.FC<SessionModalProps> = ({
 
           {!editing && mode === 'weekdays' && (
             <div>
-              <label className="block text-[10px] font-extrabold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-2">
-                Cấu Hình Theo Thứ — Tháng {selectedMonth}
-              </label>
+              <div className="flex items-center justify-between mb-2">
+                <label className="block text-[10px] font-extrabold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
+                  Cấu Hình Theo Thứ — Tháng {selectedMonth}
+                </label>
+                {form.class_id && onApplyClassSchedule && (
+                  <button
+                    type="button"
+                    onClick={() => onApplyClassSchedule(form.class_id!)}
+                    className="text-[10px] text-blue-500 hover:text-blue-400 font-bold underline cursor-pointer"
+                  >
+                    Nạp lịch chuẩn của lớp
+                  </button>
+                )}
+              </div>
               <div className="space-y-2 bg-slate-50 dark:bg-[#141928] p-3 rounded-xl border border-slate-200 dark:border-white/10">
                 {DAYS.map((day) => {
                   const cfg = dayCfgs[day];

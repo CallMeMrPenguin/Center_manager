@@ -29,3 +29,29 @@ def get_grade_weights() -> Dict[str, float]:
         return {"check_1": 0.55, "check_2": 0.35, "homework": 0.10, "mock_test": 0.0}
 
 _get_grade_weights = get_grade_weights
+
+def _sync_cloud_delete(sql_pg: str, params: tuple):
+    import threading
+    def _task():
+        _sync_cloud_delete_sync(sql_pg, params)
+    threading.Thread(target=_task, daemon=True).start()
+
+def _sync_cloud_delete_sync(sql_pg: str, params: tuple):
+    try:
+        import os
+        if os.environ.get("APP_MODE") in ("web", "vps", "server"):
+            return
+        from database.connection import get_target_db_url
+        import psycopg2
+        target_url = get_target_db_url()
+        if not target_url:
+            return
+        pconn = psycopg2.connect(target_url, connect_timeout=5)
+        try:
+            with pconn.cursor() as pcur:
+                pcur.execute(sql_pg, params)
+            pconn.commit()
+        finally:
+            pconn.close()
+    except Exception:
+        pass

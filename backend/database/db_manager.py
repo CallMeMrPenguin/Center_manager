@@ -107,6 +107,7 @@ from database.crud_classes_sessions import (
     delete_class_session,
     get_class_seating,
     save_class_seating,
+    sync_class_sessions_with_weekly_schedule,
 )
 
 # Courses, Scores & Attendance
@@ -273,6 +274,7 @@ __all__ = [
     "delete_class_session",
     "get_class_seating",
     "save_class_seating",
+    "sync_class_sessions_with_weekly_schedule",
     # Courses, Scores & Attendance
     "get_courses",
     "create_course",

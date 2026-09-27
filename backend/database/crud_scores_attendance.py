@@ -174,13 +174,47 @@ def upsert_class_attendance_grades(class_id: int, date_str: str, records: List[D
         cursor = conn.cursor()
 
         # Ensure class_sessions record exists for this date with valid status 'Đã học'
-        cursor.execute("SELECT id FROM class_sessions WHERE class_id = ? AND date = ?", (class_id, date_str))
-        if not cursor.fetchone():
+        cursor.execute("SELECT id, start_time, duration FROM class_sessions WHERE class_id = ? AND date = ?", (class_id, date_str))
+        existing_sess = cursor.fetchone()
+        
+        # Look up class's configured weekly slot for this weekday
+        s_time = '18:00'
+        s_dur = 90
+        try:
+            w_map = {0: "Thứ 2", 1: "Thứ 3", 2: "Thứ 4", 3: "Thứ 5", 4: "Thứ 6", 5: "Thứ 7", 6: "Chủ nhật"}
+            dt_val = datetime.strptime(date_str, "%Y-%m-%d")
+            d_name = w_map.get(dt_val.weekday())
+            if d_name:
+                cursor.execute("""
+                    SELECT start_time, duration FROM class_schedule_weekly
+                    WHERE class_id = ? AND day_of_week = ?
+                    LIMIT 1
+                """, (class_id, d_name))
+                slot_row = cursor.fetchone()
+                if slot_row:
+                    s_time = slot_row[0] if isinstance(slot_row, (list, tuple)) else slot_row["start_time"]
+                    s_dur = slot_row[1] if isinstance(slot_row, (list, tuple)) else slot_row["duration"]
+        except Exception:
+            pass
+
+        if not existing_sess:
             try:
                 cursor.execute("""
                     INSERT INTO class_sessions (class_id, date, start_time, duration, status)
-                    VALUES (?, ?, '18:00', 90, 'Đã học')
-                """, (class_id, date_str))
+                    VALUES (?, ?, ?, ?, 'Đã học')
+                """, (class_id, date_str, s_time, s_dur))
+            except Exception:
+                pass
+        else:
+            try:
+                sess_id = existing_sess[0] if isinstance(existing_sess, (list, tuple)) else existing_sess["id"]
+                cursor.execute("""
+                    UPDATE class_sessions
+                    SET status = 'Đã học',
+                        start_time = CASE WHEN start_time = '18:00' AND duration = 90 THEN ? ELSE start_time END,
+                        duration = CASE WHEN start_time = '18:00' AND duration = 90 THEN ? ELSE duration END
+                    WHERE id = ?
+                """, (s_time, s_dur, sess_id))
             except Exception:
                 pass
 

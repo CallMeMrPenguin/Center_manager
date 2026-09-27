@@ -26,6 +26,7 @@ from database.db_manager import (
     get_class_students, enroll_student_to_class, unenroll_student_from_class, update_class_student_groups,
     get_class_weekly_schedule, add_class_weekly_slot, delete_class_weekly_slot,
     get_class_sessions, add_class_session, update_class_session, delete_class_session,
+    sync_class_sessions_with_weekly_schedule,
     get_courses, create_course, update_course, delete_course,
     get_student_scores, upsert_student_score, delete_student_score,
     get_class_attendance_grades, upsert_class_attendance_grades, delete_class_attendance_date, get_class_attendance_with_predictions,
@@ -220,9 +221,15 @@ def api_replace_weekly_slots(class_id: int, payload: List[WeeklySlotPayload]):
                 VALUES (?, ?, ?, ?, ?)
             """, (class_id, slot.day_of_week, slot.start_time, slot.duration, slot.notes or ""))
         conn.commit()
-        return {"status": "success"}
     finally:
         conn.close()
+    sync_class_sessions_with_weekly_schedule(class_id)
+    return {"status": "success"}
+
+@router.post("/api/classes/{class_id}/schedule/sync")
+def api_sync_schedule(class_id: int):
+    target = None if class_id <= 0 else class_id
+    return sync_class_sessions_with_weekly_schedule(target)
 
 @router.delete("/api/classes/{class_id}/schedule/weekly/{slot_id}")
 def api_delete_weekly(slot_id: int):

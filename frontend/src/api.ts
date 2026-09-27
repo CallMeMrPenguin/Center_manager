@@ -237,6 +237,7 @@ export const api = {
   getClassWeeklySchedule: (classId: number) => request<any[]>(`/api/classes/${classId}/schedule/weekly`, { tags: ['schedule'] }),
   addClassWeeklySlot: (classId: number, data: any) => request<any>(`/api/classes/${classId}/schedule/weekly`, { method: 'POST', body: JSON.stringify(data), tags: ['schedule'] }),
   replaceClassWeeklySlots: (classId: number, slots: any[]) => request<any>(`/api/classes/${classId}/schedule/weekly/replace`, { method: 'POST', body: JSON.stringify(slots), tags: ['schedule'] }),
+  syncClassSchedule: (classId = 0) => request<any>(`/api/classes/${classId}/schedule/sync`, { method: 'POST', tags: ['schedule', 'sessions'] }),
   deleteClassWeeklySlot: (slotId: number) => request<any>(`/api/classes/0/schedule/weekly/${slotId}`, { method: 'DELETE', tags: ['schedule'] }),
   getClassSessions: (classId: number, month = '') => request<any[]>(`/api/classes/${classId}/schedule/sessions?month=${encodeURIComponent(month)}`, { tags: ['schedule', 'sessions'] }),
   addClassSession: (classId: number, data: any) => request<any>(`/api/classes/${classId}/schedule/sessions`, { method: 'POST', body: JSON.stringify(data), tags: ['schedule', 'sessions'] }),

@@ -124,7 +124,8 @@ def export_class_excel(class_id: int, date_str: Optional[str] = None, records: O
     
     wb = openpyxl.Workbook()
     ws = wb.active
-    ws.title     ws.merge_cells("A1:J1")
+    ws.title = "DiemDanh"
+    ws.merge_cells("A1:J1")
     ws["A1"] = f"BÁO CÁO ĐIỂM DANH & ĐIỂM BÀI HỌC - {class_name.upper()} ({date_str})"
     ws["A1"].font = Font(size=14, bold=True, color="FFFFFF")
     ws["A1"].fill = PatternFill(start_color="1E1B4B", end_color="1E1B4B", fill_type="solid")

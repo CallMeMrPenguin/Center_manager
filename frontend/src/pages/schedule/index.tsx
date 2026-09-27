@@ -10,7 +10,7 @@ import { DataTable } from '../../components/DataTable';
 import { SegmentedControl } from '../../components/SegmentedControl';
 import { getLocalDateStr } from '../../utils';
 import {
-  ClassSession, DayCfg, PALETTE_20, DAY_HDRS, DAYS,
+  ClassSession, DayCfg, PALETTE_20, DAY_HDRS, DAYS, DAY_NUM,
   getSessionColor
 } from './types';
 import { SessionModal } from './components/SessionModal';
@@ -18,38 +18,27 @@ import { ScheduleCalendarView } from './components/ScheduleCalendarView';
 import { ScheduleKpiCards } from './components/ScheduleKpiCards';
 import { useScheduleColumns } from './hooks/useScheduleColumns';
 import { useScheduleActions } from './hooks/useScheduleActions';
-import { getUrlParam, setUrlParams, useUrlSync } from '../../utils/navigation';
+import { useScheduleCalendar } from './hooks/useScheduleCalendar';
 
 export default function SchedulePage() {
   const [loading, setLoading] = useState(true);
-  const [viewMode, setViewMode] = useState<'month' | 'week' | 'list'>(() => {
-    const v = getUrlParam('view');
-    if (v === 'month' || v === 'week' || v === 'list') return v;
-    return 'month';
-  });
-
-  const handleChangeViewMode = (mode: 'month' | 'week' | 'list') => {
-    setViewMode(mode);
-    setUrlParams({ view: mode });
-  };
-
-  useUrlSync(() => {
-    const v = getUrlParam('view');
-    if (v === 'month' || v === 'week' || v === 'list') {
-      setViewMode(v);
-    }
-  });
-  const [selectedMonth, setSelectedMonth] = useState(() => {
-    const d = new Date();
-    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-  });
-  const [weekStart, setWeekStart] = useState(() => {
-    const d = new Date();
-    const day = d.getDay();
-    const n = new Date(d);
-    n.setDate(d.getDate() - day + (day === 0 ? -6 : 1));
-    return n;
-  });
+  const {
+    viewMode,
+    handleChangeViewMode,
+    selectedMonth,
+    setSelectedMonth,
+    weekStart,
+    setWeekStart,
+    today,
+    yr,
+    mo,
+    firstDay,
+    daysInMonth,
+    startOff,
+    totalCells,
+    weekDays,
+    changeWeek,
+  } = useScheduleCalendar();
   const [classesList, setClassesList] = useState<any[]>([]);
   const [classFilter, setClassFilter] = useState('');
   const [sessions, setSessions] = useState<ClassSession[]>([]);
@@ -117,42 +106,75 @@ export default function SchedulePage() {
     return () => window.removeEventListener('click', close);
   }, []);
 
-  const today = getLocalDateStr();
-  const [yr, mo] = selectedMonth.split('-').map(Number);
-  const firstDay = new Date(yr, mo - 1, 1);
-  const daysInMonth = new Date(yr, mo, 0).getDate();
-  const startOff = firstDay.getDay() === 0 ? 6 : firstDay.getDay() - 1;
-  const totalCells = Math.ceil((startOff + daysInMonth) / 7) * 7;
 
-  const weekDays = Array.from({ length: 7 }, (_, i) => {
-    const d = new Date(weekStart);
-    d.setDate(weekStart.getDate() + i);
-    return { header: DAY_HDRS[i], dateStr: getLocalDateStr(d), dayNum: d.getDate() };
-  });
+  const applyClassSchedule = async (cid: number, targetDateStr?: string) => {
+    try {
+      const slots = await api.getClassWeeklySchedule(cid);
+      const newCfgs: Record<string, DayCfg> = DAYS.reduce((acc, d) => {
+        acc[d] = { checked: false, time: '18:00', duration: 90 };
+        return acc;
+      }, {} as Record<string, DayCfg>);
 
-  const changeWeek = (dir: number) => {
-    const n = new Date(weekStart);
-    n.setDate(weekStart.getDate() + dir * 7);
-    setWeekStart(n);
+      let matchedTime = '18:00';
+      let matchedDur = 90;
+
+      if (slots && slots.length > 0) {
+        slots.forEach((s: any) => {
+          if (newCfgs[s.day_of_week]) {
+            newCfgs[s.day_of_week] = {
+              checked: true,
+              time: s.start_time || '18:00',
+              duration: s.duration || 90,
+            };
+          }
+        });
+
+        if (targetDateStr) {
+          const dt = new Date(targetDateStr);
+          const dayName = DAYS.find((k) => DAY_NUM[k] === dt.getDay());
+          const found = slots.find((s: any) => s.day_of_week === dayName);
+          matchedTime = (found || slots[0]).start_time;
+          matchedDur = (found || slots[0]).duration;
+        } else {
+          matchedTime = slots[0].start_time;
+          matchedDur = slots[0].duration;
+        }
+      } else {
+        newCfgs['Thứ 2'] = { checked: true, time: '18:00', duration: 90 };
+        newCfgs['Thứ 4'] = { checked: true, time: '18:00', duration: 90 };
+      }
+
+      setDayCfgs(newCfgs);
+      setForm((prev) => ({
+        ...prev,
+        start_time: matchedTime,
+        duration: matchedDur,
+      }));
+    } catch {
+      // Ignore errors fetching class schedule
+    }
   };
 
-  const openAdd = (dateStr?: string) => {
+  const openAdd = async (dateStr?: string) => {
     setEditing(null);
     setMode(dateStr ? 'single' : 'weekdays');
-    const firstCls = classesList[0];
-    const firstCid = firstCls?.id || 1;
-    const initialColor = firstCls?.color || PALETTE_20[(firstCid * 3 + 1) % PALETTE_20.length];
+    const selectedCid = (classFilter && Number(classFilter) > 0) ? Number(classFilter) : (classesList[0]?.id || 1);
+    const targetCls = classesList.find((c) => c.id === selectedCid) || classesList[0];
+    const initialColor = targetCls?.color || PALETTE_20[(selectedCid * 3 + 1) % PALETTE_20.length];
     setColor(initialColor);
+    const dStr = dateStr || today;
     setForm({
-      class_id: firstCid,
-      date: dateStr || today,
+      class_id: selectedCid,
+      date: dStr,
       start_time: '18:00',
       duration: 90,
       status: 'Sắp diễn ra',
       notes: '',
     });
-    setDayCfgs(defaultDayCfgs());
     setModalOpen(true);
+    if (selectedCid) {
+      await applyClassSchedule(selectedCid, dStr);
+    }
   };
 
   const openEdit = (sess: ClassSession) => {
@@ -196,6 +218,27 @@ export default function SchedulePage() {
           </h1>
         </div>
         <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={async () => {
+              try {
+                setLoading(true);
+                const targetCid = classFilter ? Number(classFilter) : 0;
+                await api.syncClassSchedule(targetCid);
+                showToast('Đã đồng bộ lịch học theo cài đặt của lớp!', 'success');
+                await loadData(true);
+              } catch (e: any) {
+                showToast('Lỗi khi đồng bộ: ' + e.message, 'error');
+              } finally {
+                setLoading(false);
+              }
+            }}
+            className="flex items-center gap-1.5 px-3 py-2.5 rounded-xl bg-white hover:bg-slate-50 dark:bg-[#141417] dark:hover:bg-[#1c1c21] text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white border-0 transition cursor-pointer text-xs font-bold shadow-xs hover:shadow-sm"
+            title="Đồng bộ lại toàn bộ lịch học theo cài đặt các lớp"
+          >
+            <RefreshCw size={13} className={loading ? 'animate-spin text-blue-500' : 'text-blue-500'} />
+            <span className="hidden sm:inline">Đồng Bộ Lịch</span>
+          </button>
           <button
             type="button"
             onClick={loadData}
@@ -333,6 +376,7 @@ export default function SchedulePage() {
         selectedMonth={selectedMonth}
         onSave={save}
         onDelete={del}
+        onApplyClassSchedule={applyClassSchedule}
       />
     </div>
   );

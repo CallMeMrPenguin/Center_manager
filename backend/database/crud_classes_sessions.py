@@ -4,6 +4,7 @@ import threading
 from datetime import datetime
 from typing import List, Dict, Any, Optional
 from database.connection import get_connection
+from database.utils import _sync_cloud_delete, _sync_cloud_delete_sync
 
 # ----------------------------------------------------
 # CENTER MANAGER — CLASSES CRUD & SEATING / SCHEDULE
@@ -285,6 +286,18 @@ def get_class_sessions(class_id: int, month_year: str = "") -> List[Dict[str, An
         except Exception:
             return explicit_sessions
             
+        slot_map = {(w["class_id"], w["day_of_week"]): w for w in weekly_slots}
+        for s in explicit_sessions:
+            try:
+                s_dt = datetime.strptime(s["date"], "%Y-%m-%d")
+                s_day = weekday_map.get(s_dt.weekday())
+                w_slot = slot_map.get((s["class_id"], s_day))
+                if w_slot and s.get("start_time") == "18:00" and s.get("duration") == 90:
+                    s["start_time"] = w_slot["start_time"]
+                    s["duration"] = w_slot["duration"]
+            except Exception:
+                pass
+
         _, num_days = calendar.monthrange(year, month)
         explicit_class_date_keys = {(s["class_id"], s["date"]) for s in explicit_sessions}
         
@@ -397,31 +410,6 @@ def update_class_session(session_id: int, data: Dict[str, Any], class_id: int = 
     finally:
         conn.close()
 
-def _sync_cloud_delete(sql_pg: str, params: tuple):
-    def _task():
-        _sync_cloud_delete_sync(sql_pg, params)
-    threading.Thread(target=_task, daemon=True).start()
-
-def _sync_cloud_delete_sync(sql_pg: str, params: tuple):
-    try:
-        import os
-        if os.environ.get("APP_MODE") in ("web", "vps", "server"):
-            return
-        from database.connection import get_target_db_url
-        import psycopg2
-        target_url = get_target_db_url()
-        if not target_url:
-            return
-        pconn = psycopg2.connect(target_url, connect_timeout=5)
-        try:
-            with pconn.cursor() as pcur:
-                pcur.execute(sql_pg, params)
-            pconn.commit()
-        finally:
-            pconn.close()
-    except Exception:
-        pass
-
 def delete_class_session(session_id: int):
     conn = get_connection()
     target_cid = None
@@ -446,48 +434,60 @@ def delete_class_session(session_id: int):
         if target_cid and target_date:
             _sync_cloud_delete("DELETE FROM class_attendance_grades WHERE class_id = %s AND date = %s", (target_cid, target_date))
 
-def get_class_seating(class_id: int) -> Dict[str, Any]:
+def sync_class_sessions_with_weekly_schedule(class_id: Optional[int] = None) -> Dict[str, Any]:
+    weekday_map = {0: "Thứ 2", 1: "Thứ 3", 2: "Thứ 4", 3: "Thứ 5", 4: "Thứ 6", 5: "Thứ 7", 6: "Chủ nhật"}
     conn = get_connection()
+    updated_cnt = 0
+    deleted_cnt = 0
     try:
         cursor = conn.cursor()
-        cursor.execute("SELECT * FROM class_seating WHERE class_id = ?", (class_id,))
-        row = cursor.fetchone()
-        if not row:
-            return {"class_id": class_id, "num_rows": 4, "layout_json": "[]"}
-        res = dict(row)
-        layout_str = res.get("layout_json")
-        if layout_str and layout_str != "[]":
-            try:
-                cursor.execute("SELECT student_id FROM class_students WHERE class_id = ?", (class_id,))
-                active_ids = {r[0] if isinstance(r, (list, tuple)) else r["student_id"] for r in cursor.fetchall()}
-                grid = json.loads(layout_str)
-                changed = False
-                for col in grid:
-                    for s in col.get("seats", []):
-                        if s.get("student_id") and s["student_id"] not in active_ids:
-                            s["student_id"] = None
-                            s["student_name"] = None
-                            changed = True
-                if changed:
-                    res["layout_json"] = json.dumps(grid, ensure_ascii=False)
-            except Exception:
-                pass
-        return res
-    finally:
-        conn.close()
+        if class_id and int(class_id) > 0:
+            cursor.execute("SELECT id FROM classes WHERE id = ?", (class_id,))
+        else:
+            cursor.execute("SELECT id FROM classes")
+        target_cids = [r[0] if isinstance(r, (list, tuple)) else r["id"] for r in cursor.fetchall()]
 
-def save_class_seating(class_id: int, num_rows: int, layout_json: str):
-    conn = get_connection()
-    try:
-        cursor = conn.cursor()
-        cursor.execute("""
-            INSERT INTO class_seating (class_id, num_rows, layout_json)
-            VALUES (?, ?, ?)
-            ON CONFLICT(class_id) DO UPDATE SET
-                num_rows = EXCLUDED.num_rows,
-                layout_json = EXCLUDED.layout_json,
-                updated_at = CURRENT_TIMESTAMP
-        """, (class_id, num_rows, layout_json))
+        for cid in target_cids:
+            cursor.execute("SELECT * FROM class_schedule_weekly WHERE class_id = ?", (cid,))
+            weekly_slots = [dict(r) for r in cursor.fetchall()]
+            slot_map = {w["day_of_week"]: w for w in weekly_slots}
+
+            cursor.execute("SELECT id, date, start_time, duration, status FROM class_sessions WHERE class_id = ?", (cid,))
+            sessions = [dict(r) for r in cursor.fetchall()]
+
+            for sess in sessions:
+                sid = sess["id"]
+                date_str = sess["date"]
+                try:
+                    s_dt = datetime.strptime(date_str, "%Y-%m-%d")
+                    day_name = weekday_map[s_dt.weekday()]
+                except Exception:
+                    continue
+
+                if day_name in slot_map:
+                    slot = slot_map[day_name]
+                    t_time, t_dur = slot["start_time"], slot["duration"]
+                    if sess["start_time"] != t_time or sess["duration"] != t_dur:
+                        cursor.execute("UPDATE class_sessions SET start_time = ?, duration = ? WHERE id = ?", (t_time, t_dur, sid))
+                        updated_cnt += 1
+                elif slot_map:
+                    cursor.execute("SELECT COUNT(*) FROM class_attendance_grades WHERE class_id = ? AND date = ?", (cid, date_str))
+                    att_row = cursor.fetchone()
+                    att_cnt = att_row[0] if isinstance(att_row, (list, tuple)) else (att_row["COUNT(*)"] if "COUNT(*)" in att_row.keys() else 0)
+                    if att_cnt == 0 and sess.get("status") in ("Sắp diễn ra", ""):
+                        cursor.execute("DELETE FROM class_sessions WHERE id = ?", (sid,))
+                        deleted_cnt += 1
+
         conn.commit()
     finally:
         conn.close()
+
+    try:
+        from services.sync_worker import trigger_instant_sync
+        trigger_instant_sync()
+    except Exception:
+        pass
+
+    return {"status": "success", "updated": updated_cnt, "deleted": deleted_cnt}
+
+from .crud_seating import get_class_seating, save_class_seating
