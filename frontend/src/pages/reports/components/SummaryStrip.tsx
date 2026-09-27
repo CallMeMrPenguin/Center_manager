@@ -14,6 +14,22 @@ interface SummaryStripProps {
   distributionStats?: DistributionStats;
 }
 
+const getGtMetric = (engine: any, prefix: 'std_dev' | 'ema', gtId: string, fallback: number): number => {
+  const v = engine[`${prefix}_${gtId}`];
+  if (v != null && !isNaN(Number(v))) return Number(v);
+  if (gtId === 'check_1' || gtId === 'c1' || gtId === 'vocab') {
+    const val = engine[`${prefix}_c1`] ?? engine[`${prefix}_check_1`] ?? (prefix === 'ema' ? engine.ema_vocab : null);
+    if (val != null && !isNaN(Number(val))) return Number(val);
+  } else if (gtId === 'check_2' || gtId === 'c2' || gtId === 'grammar') {
+    const val = engine[`${prefix}_c2`] ?? engine[`${prefix}_check_2`] ?? (prefix === 'ema' ? engine.ema_grammar : null);
+    if (val != null && !isNaN(Number(val))) return Number(val);
+  } else if (gtId === 'homework' || gtId === 'hw') {
+    const val = engine[`${prefix}_hw`] ?? engine[`${prefix}_homework`];
+    if (val != null && !isNaN(Number(val))) return Number(val);
+  }
+  return fallback;
+};
+
 export const SummaryStrip: React.FC<SummaryStripProps> = React.memo(({
   engine,
   gradeTypesList,
@@ -33,10 +49,19 @@ export const SummaryStrip: React.FC<SummaryStripProps> = React.memo(({
       pred_c2: e.pred_c2 ?? 8.5,
       pred_hw: e.pred_hw ?? 9.0,
       ema_level: e.ema_level != null ? Number(e.ema_level) : 8.2,
-      ema_c1: e.ema_c1 ?? 8.2,
-      ema_c2: e.ema_c2 ?? 8.2,
-      ema_hw: e.ema_hw ?? 9.0,
+      ema_c1: e.ema_c1 ?? e.ema_check_1 ?? 8.2,
+      ema_c2: e.ema_c2 ?? e.ema_check_2 ?? 8.2,
+      ema_hw: e.ema_hw ?? e.ema_homework ?? 9.0,
+      ema_check_1: e.ema_check_1 ?? e.ema_c1 ?? 8.2,
+      ema_check_2: e.ema_check_2 ?? e.ema_c2 ?? 8.2,
+      ema_homework: e.ema_homework ?? e.ema_hw ?? 9.0,
       std_dev: e.std_dev != null ? Number(e.std_dev) : 0.45,
+      std_dev_c1: e.std_dev_c1 ?? e.std_dev_check_1,
+      std_dev_c2: e.std_dev_c2 ?? e.std_dev_check_2,
+      std_dev_hw: e.std_dev_hw ?? e.std_dev_homework,
+      std_dev_check_1: e.std_dev_check_1 ?? e.std_dev_c1,
+      std_dev_check_2: e.std_dev_check_2 ?? e.std_dev_c2,
+      std_dev_homework: e.std_dev_homework ?? e.std_dev_hw,
       consistency_label: e.consistency_label || 'Ổn định',
       trend_slope: e.trend_slope != null ? Number(e.trend_slope) : 0.15,
       trend_label: e.trend_label || 'Đang cải thiện tiến bộ',
@@ -149,9 +174,12 @@ export const SummaryStrip: React.FC<SummaryStripProps> = React.memo(({
           >
             <div className="bg-slate-50 dark:bg-[#0d1120] p-2.5 rounded-lg border border-slate-300 dark:border-[#202948] space-y-1 font-mono text-[10px]">
               <div className="text-slate-700 dark:text-slate-400 font-bold border-b border-slate-200 dark:border-white/5 pb-1">EMA = 0.5 × Mới + 0.5 × Cũ</div>
-              <div className="flex items-center justify-between text-blue-700 dark:text-blue-400 font-extrabold"><span>Từ Vựng EMA:</span><span className="font-black">{safeEngine.ema_c1} đ</span></div>
-              <div className="flex items-center justify-between text-purple-700 dark:text-purple-400 font-extrabold"><span>Ngữ Pháp EMA:</span><span className="font-black">{safeEngine.ema_c2} đ</span></div>
-              <div className="flex items-center justify-between text-emerald-700 dark:text-emerald-400 font-extrabold"><span>BTVN EMA:</span><span className="font-black">{safeEngine.ema_hw} đ</span></div>
+              {gradeTypesList.map(gt => (
+                <div key={gt.id} className="flex items-center justify-between font-extrabold" style={{ color: gt.color || '#2563eb' }}>
+                  <span>{gt.label} EMA:</span>
+                  <span className="font-black">{trunc1Dec(getGtMetric(safeEngine, 'ema', gt.id, safeEngine.ema_level ?? 0))} đ</span>
+                </div>
+              ))}
             </div>
           </SummaryTooltipCard>
         )}
@@ -204,7 +232,7 @@ export const SummaryStrip: React.FC<SummaryStripProps> = React.memo(({
               {gradeTypesList.map(gt => (
                 <div key={gt.id} className="flex items-center justify-between font-extrabold" style={{ color: gt.color || '#2563eb' }}>
                   <span>{gt.label} ({gt.weight}%):</span>
-                  <span className="font-black">σ = {trunc1Dec(Number((safeEngine as any)[`std_dev_${gt.id}`] ?? safeEngine.std_dev ?? 0))}</span>
+                  <span className="font-black">σ = {trunc1Dec(getGtMetric(safeEngine, 'std_dev', gt.id, safeEngine.std_dev ?? 0))}</span>
                 </div>
               ))}
             </div>
