@@ -214,8 +214,8 @@ export const BatchEnrollModal: React.FC<BatchEnrollModalProps> = ({
                 <span>{isAllSelected ? 'Bỏ chọn tất cả' : 'Chọn tất cả danh sách'}</span>
               </button>
 
-              <span className="text-xs font-extrabold text-slate-300 bg-white/5 px-2.5 py-1 rounded-lg border border-white/5">
-                Đã chọn: <span className="text-indigo-400">{selectedStudentIdsToEnroll.length}</span> /{' '}
+              <span className="text-xs font-extrabold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-white/5 px-2.5 py-1 rounded-lg border border-slate-200 dark:border-white/5">
+                Đã chọn: <span className="text-indigo-600 dark:text-indigo-400">{selectedStudentIdsToEnroll.length}</span> /{' '}
                 {availableStudentsForEnrollment.length} học sinh
               </span>
             </div>
@@ -223,7 +223,7 @@ export const BatchEnrollModal: React.FC<BatchEnrollModalProps> = ({
             {/* STUDENT CHECKBOX LIST */}
             <div className="flex-1 overflow-y-auto space-y-1.5 pr-1 min-h-[200px] max-h-[320px]">
               {availableStudentsForEnrollment.length === 0 ? (
-                <div className="py-12 text-center text-xs text-slate-500 font-bold bg-slate-50 rounded-xl border border-slate-200">
+                <div className="py-12 text-center text-xs text-slate-500 dark:text-slate-400 font-bold bg-slate-50 dark:bg-[#141928] rounded-xl border border-slate-200 dark:border-white/5">
                   Không tìm thấy học sinh phù hợp chưa ghi danh.
                 </div>
               ) : (
@@ -235,32 +235,32 @@ export const BatchEnrollModal: React.FC<BatchEnrollModalProps> = ({
                       onClick={() => toggleSelectStudentToEnroll(s.id)}
                       className={`p-3 rounded-xl border flex items-center justify-between text-xs cursor-pointer transition ${
                         isChecked
-                          ? 'bg-blue-50/80 border-blue-300 text-blue-950 shadow-xs'
-                          : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
+                          ? 'bg-blue-50/90 dark:bg-blue-950/40 border-blue-400 dark:border-blue-500/50 shadow-xs'
+                          : 'bg-slate-50 dark:bg-[#141928] border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-[#1a2136]'
                       }`}
                     >
                       <div className="flex items-center gap-3">
                         <div
-                          className={`w-5 h-5 rounded-md border flex items-center justify-center transition ${
-                            isChecked ? 'bg-blue-600 border-blue-600 text-white' : 'border-slate-300 bg-white'
+                          className={`w-5 h-5 rounded-md border flex items-center justify-center transition shrink-0 ${
+                            isChecked ? 'bg-blue-600 border-blue-600 text-white' : 'border-slate-300 dark:border-white/20 bg-white dark:bg-[#0d1018]'
                           }`}
                         >
                           {isChecked && <span className="text-xs font-black">✓</span>}
                         </div>
                         <div>
                           <div className="flex items-center gap-2">
-                            <span className="font-extrabold text-sm text-white">{s.full_name}</span>
-                            {s.nickname && <span className="text-xs text-indigo-300 font-bold">({s.nickname})</span>}
+                            <span className="font-extrabold text-sm text-slate-900 dark:text-white">{s.full_name}</span>
+                            {s.nickname && <span className="text-xs text-indigo-600 dark:text-indigo-400 font-bold">({s.nickname})</span>}
                             {s.status && s.status !== 'Đang học' && (
-                              <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                              <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30">
                                 {s.status} (kích hoạt lại)
                               </span>
                             )}
                           </div>
                           <div className="flex items-center gap-1.5 mt-1 text-[11px] font-medium">
-                            <span className="bg-white/5 px-1.5 py-0.5 rounded text-slate-300">{s.grade || 'Lớp 6'}</span>
-                            {s.school && <span className="bg-white/5 px-1.5 py-0.5 rounded text-slate-400">{s.school}</span>}
-                            {s.gender && <span className="bg-white/5 px-1.5 py-0.5 rounded text-slate-400">{s.gender}</span>}
+                            <span className="bg-slate-200/70 dark:bg-white/5 px-2 py-0.5 rounded text-slate-700 dark:text-slate-300 border border-slate-300/40 dark:border-white/5">{s.grade || 'Lớp 6'}</span>
+                            {s.school && <span className="bg-slate-200/70 dark:bg-white/5 px-2 py-0.5 rounded text-slate-600 dark:text-slate-400 border border-slate-300/40 dark:border-white/5">{s.school}</span>}
+                            {s.gender && <span className="bg-slate-200/70 dark:bg-white/5 px-2 py-0.5 rounded text-slate-600 dark:text-slate-400 border border-slate-300/40 dark:border-white/5">{s.gender}</span>}
                           </div>
                         </div>
                       </div>
@@ -271,11 +271,11 @@ export const BatchEnrollModal: React.FC<BatchEnrollModalProps> = ({
             </div>
 
             {/* ACTION FOOTER */}
-            <div className="flex items-center justify-end gap-3 pt-3 border-t border-white/10">
+            <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-200 dark:border-white/10">
               <button
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2 rounded-xl bg-white/5 text-slate-300 text-xs font-bold hover:bg-white/10 transition cursor-pointer"
+                className="px-4 py-2 rounded-xl bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-slate-300 text-xs font-bold hover:bg-slate-200 dark:hover:bg-white/10 transition cursor-pointer"
               >
                 Đóng
               </button>
@@ -307,18 +307,18 @@ export const BatchEnrollModal: React.FC<BatchEnrollModalProps> = ({
 
             {/* ENROLLED COUNTER */}
             <div className="flex items-center justify-between px-1">
-              <span className="text-xs text-slate-400 font-medium">
+              <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">
                 Danh sách học sinh đang theo học trong lớp
               </span>
-              <span className="text-xs font-extrabold text-slate-300 bg-white/5 px-2.5 py-1 rounded-lg border border-white/5">
-                Tổng số: <span className="text-indigo-400">{filteredEnrolledStudents.length}</span> học sinh
+              <span className="text-xs font-extrabold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-white/5 px-2.5 py-1 rounded-lg border border-slate-200 dark:border-white/5">
+                Tổng số: <span className="text-indigo-600 dark:text-indigo-400">{filteredEnrolledStudents.length}</span> học sinh
               </span>
             </div>
 
             {/* ENROLLED STUDENT LIST */}
             <div className="flex-1 overflow-y-auto space-y-1.5 pr-1 min-h-[200px] max-h-[320px]">
               {filteredEnrolledStudents.length === 0 ? (
-                <div className="py-12 text-center text-xs text-slate-500 font-bold bg-slate-50 rounded-xl border border-slate-200">
+                <div className="py-12 text-center text-xs text-slate-500 dark:text-slate-400 font-bold bg-slate-50 dark:bg-[#141928] rounded-xl border border-slate-200 dark:border-white/5">
                   Không tìm thấy học sinh nào trong lớp.
                 </div>
               ) : (
@@ -327,20 +327,20 @@ export const BatchEnrollModal: React.FC<BatchEnrollModalProps> = ({
                   return (
                     <div
                       key={s.id}
-                      className="p-3 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 flex items-center justify-between text-xs transition"
+                      className="p-3 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#141928] hover:bg-slate-100 dark:hover:bg-[#1a2136] flex items-center justify-between text-xs transition"
                     >
                       <div className="flex items-center gap-3">
-                        <span className="w-6 text-center text-xs font-bold text-slate-400">
+                        <span className="w-6 text-center text-xs font-bold text-slate-400 dark:text-slate-500">
                           {idx + 1}
                         </span>
                         <div>
                           <div className="flex items-center gap-2">
-                            <span className="font-extrabold text-sm text-slate-900">{s.full_name}</span>
-                            {s.nickname && <span className="text-xs text-indigo-600 font-bold">({s.nickname})</span>}
+                            <span className="font-extrabold text-sm text-slate-900 dark:text-white">{s.full_name}</span>
+                            {s.nickname && <span className="text-xs text-indigo-600 dark:text-indigo-400 font-bold">({s.nickname})</span>}
                           </div>
-                          <div className="flex items-center gap-1.5 mt-1 text-[11px] font-medium text-slate-500">
-                            {s.grade && <span className="bg-slate-100 px-1.5 py-0.5 rounded text-slate-700">{s.grade}</span>}
-                            {s.school && <span className="bg-slate-100 px-1.5 py-0.5 rounded text-slate-600">{s.school}</span>}
+                          <div className="flex items-center gap-1.5 mt-1 text-[11px] font-medium text-slate-500 dark:text-slate-400">
+                            {s.grade && <span className="bg-slate-200/70 dark:bg-white/5 px-2 py-0.5 rounded text-slate-700 dark:text-slate-300 border border-slate-300/40 dark:border-white/5">{s.grade}</span>}
+                            {s.school && <span className="bg-slate-200/70 dark:bg-white/5 px-2 py-0.5 rounded text-slate-600 dark:text-slate-400 border border-slate-300/40 dark:border-white/5">{s.school}</span>}
                           </div>
                         </div>
                       </div>
@@ -349,7 +349,7 @@ export const BatchEnrollModal: React.FC<BatchEnrollModalProps> = ({
                         type="button"
                         disabled={isBusy}
                         onClick={() => handleUnenrollStudentFromModal(s.id, s.full_name)}
-                        className="px-3 py-1.5 rounded-xl bg-rose-500/15 hover:bg-rose-500/30 text-rose-300 border border-rose-500/30 text-xs font-bold flex items-center gap-1.5 transition cursor-pointer disabled:opacity-50 shrink-0"
+                        className="px-3 py-1.5 rounded-xl bg-rose-500/15 hover:bg-rose-500/30 text-rose-600 dark:text-rose-300 border border-rose-500/30 text-xs font-bold flex items-center gap-1.5 transition cursor-pointer disabled:opacity-50 shrink-0"
                         title={`Bỏ học sinh ${s.full_name} khỏi lớp`}
                       >
                         <Trash2 size={13} />
@@ -362,11 +362,11 @@ export const BatchEnrollModal: React.FC<BatchEnrollModalProps> = ({
             </div>
 
             {/* FOOTER */}
-            <div className="flex items-center justify-end pt-3 border-t border-white/10">
+            <div className="flex items-center justify-end pt-3 border-t border-slate-200 dark:border-white/10">
               <button
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2 rounded-xl bg-white/5 text-slate-300 text-xs font-bold hover:bg-white/10 transition cursor-pointer"
+                className="px-4 py-2 rounded-xl bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-slate-300 text-xs font-bold hover:bg-slate-200 dark:hover:bg-white/10 transition cursor-pointer"
               >
                 Đóng
               </button>
