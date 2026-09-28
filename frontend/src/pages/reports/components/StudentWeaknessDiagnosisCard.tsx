@@ -178,30 +178,26 @@ export const StudentWeaknessDiagnosisCard: React.FC<StudentWeaknessDiagnosisCard
           return (
             <div className="flex flex-wrap items-center gap-1.5 py-1">
               {units.map((u, i) => {
-                const isUrgent = u.avg_score < 5.0;
                 const isGrammar = u.skill === 'grammar';
                 return (
                   <span
                     key={`${u.unit_key}-${i}`}
-                    className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-bold ${
-                      isUrgent
-                        ? 'bg-rose-500/15 text-rose-700 dark:text-rose-200'
-                        : isGrammar
-                        ? 'bg-purple-500/15 text-purple-700 dark:text-purple-200'
-                        : 'bg-blue-500/15 text-blue-700 dark:text-blue-200'
+                    className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold border transition-colors ${
+                      isGrammar
+                        ? 'bg-purple-500/10 dark:bg-purple-500/15 text-purple-700 dark:text-purple-200 border-purple-500/20'
+                        : 'bg-blue-500/10 dark:bg-blue-500/15 text-blue-700 dark:text-blue-200 border-blue-500/20'
                     }`}
                   >
-                    <span
-                      className={`w-1.5 h-1.5 rounded-full ${
-                        isUrgent ? 'bg-rose-500' : isGrammar ? 'bg-purple-500' : 'bg-blue-500'
-                      }`}
-                    />
-                    <span className="truncate max-w-[180px]" title={u.topic_name}>
+                    <span className="truncate max-w-[190px]" title={u.topic_name}>
                       {u.topic_name}
                     </span>
                     <span
-                      className={`font-mono font-black ${
-                        isUrgent ? 'text-rose-600 dark:text-rose-300' : 'text-slate-700 dark:text-slate-300'
+                      className={`font-mono font-black px-1.5 py-0.5 rounded text-[11px] ${
+                        u.avg_score < 5.0
+                          ? 'bg-rose-500/20 text-rose-700 dark:text-rose-300'
+                          : u.avg_score < 6.5
+                          ? 'bg-amber-500/20 text-amber-700 dark:text-amber-300'
+                          : 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300'
                       }`}
                     >
                       {format1Dec(u.avg_score)}đ
@@ -381,7 +377,7 @@ export const StudentWeaknessDiagnosisCard: React.FC<StudentWeaknessDiagnosisCard
         columns={columns}
         searchPlaceholder="Tìm học sinh cần phụ đạo theo tên..."
         emptyMessage="Không có học sinh nào bị hổng kiến thức trong phạm vi này."
-        pageSize={10}
+        pageSize={20}
         borderless={true}
         onRowClick={(row) => onSelectStudent?.(row.student_id)}
       />

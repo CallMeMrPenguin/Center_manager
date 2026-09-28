@@ -134,18 +134,33 @@ def get_skill_breakdown_report(conn, class_id: Optional[int] = None, student_id:
         st_count = len(items)
         m_pct = trunc_1_dec((m_cnt / st_count * 100)) if st_count > 0 else 0.0
 
-        if m_pct >= 75:
-            rec = "Lớp nắm vững tốt, sẵn sàng chuyển sang bài học tiếp theo."
-        elif m_pct >= 50:
-            rec = "Khá ổn định, nên giao thêm bài tập mở rộng cho nhóm dưới."
-        elif r_cnt > 0:
-            rec = "Phát hiện học sinh giảm sút phong độ, cần kiểm tra ôn tập lại."
-        else:
-            rec = "Tỷ lệ nắm vững còn thấp, khuyến nghị 1 buổi phụ đạo củng cố."
-
         item_grade = items[0].get("grade") if items else None
         item_cid = items[0].get("class_id") if items else None
         u_name = resolve_unit_name(ukey, cl_id=class_id or item_cid, gr_str=item_grade)
+
+        name_display = u_name or ukey
+        skill_label = "Ngữ pháp" if skill == "grammar" else "Từ vựng"
+
+        if m_pct >= 75.0 or (avg_score >= 8.0 and w_cnt == 0):
+            rec = f"Lớp làm chủ {skill_label} '{name_display}' rất tốt (TB {avg_score}, {m_pct}% nắm vững). Sẵn sàng chuyển giao bài học mới."
+        elif avg_score < 5.0 or w_cnt >= max(3, int(st_count * 0.4)):
+            if skill == "grammar":
+                rec = f"Hổng cấu trúc diện rộng ({w_cnt}/{st_count} HS < 5đ, TB {avg_score}). Cần 1 buổi giảng lại quy tắc cốt lõi của '{name_display}' và luyện bài tập nhận biết."
+            else:
+                rec = f"Quên từ vựng nhiều ({w_cnt}/{st_count} HS < 5đ, TB {avg_score}). Nên tổ chức 15 phút flashcard đầu giờ và giao mini-test phản xạ từ vựng '{name_display}'."
+        elif r_cnt > 0:
+            rec = f"Phát hiện {r_cnt} HS từng đạt nhưng bị giảm sút ({w_cnt} HS cần kèm). Nên áp dụng bài tập xoắn ốc (spiral review) để ôn tập củng cố lại '{name_display}'."
+        elif m_cnt >= 2 and w_cnt >= 2:
+            rec = f"Lớp phân hóa mạnh ({m_cnt} HS đạt giỏi nhưng {w_cnt} HS dưới 5đ). Khuyến nghị chia đôi bạn kèm nhau hoặc giao bài tập phân hóa theo mức độ cho '{name_display}'."
+        elif avg_score < 6.5 or w_cnt > 0:
+            if skill == "grammar":
+                rec = f"Khá nhiều học sinh vấp lỗi khi làm bài tập vận dụng ({w_cnt} HS cần phụ đạo, TB {avg_score}). Dành 10-15 phút chữa các bẫy đề điển hình của '{name_display}'."
+            else:
+                rec = f"Tốc độ phản xạ từ vựng chưa đồng đều ({w_cnt} HS cần phụ đạo, TB {avg_score}). Tăng cường bài tập điền từ theo ngữ cảnh câu thực tế cho '{name_display}'."
+        elif m_pct >= 50.0 or avg_score >= 6.5:
+            rec = f"Đa số học sinh tiếp thu khá ổn ({m_cnt + p_cnt}/{st_count} HS đạt, TB {avg_score}). Giao bài tập mở rộng cho nhóm trên và bổ trợ nhanh cho {w_cnt} em còn yếu."
+        else:
+            rec = f"Tỷ lệ nắm vững đạt {m_pct}% (TB {avg_score}). Khuyến nghị 1 buổi ôn tập củng cố trọng tâm '{name_display}' cho {w_cnt} học sinh nhóm dưới."
 
         unit_breakdown.append({
             "skill": skill,

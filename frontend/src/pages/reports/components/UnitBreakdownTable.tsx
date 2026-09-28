@@ -145,8 +145,10 @@ export const UnitBreakdownTable: React.FC<UnitBreakdownTableProps> = ({ data }) 
       {
         accessorKey: 'recommendation',
         header: 'Định Hướng Sư Phạm',
+        size: 340,
+        minSize: 260,
         cell: ({ getValue }) => (
-          <span className="text-sm text-slate-700 dark:text-slate-300 font-medium">
+          <span className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 font-medium leading-relaxed block py-1">
             {getValue<string>()}
           </span>
         ),
@@ -170,7 +172,7 @@ export const UnitBreakdownTable: React.FC<UnitBreakdownTableProps> = ({ data }) 
         tableId="unit-breakdown-table"
         data={data}
         columns={columns}
-        pageSize={10}
+        pageSize={20}
         searchPlaceholder="Tìm theo bài học, kỹ năng..."
         emptyMessage="Chưa có dữ liệu bài học nào."
         exportFilename="thong_ke_ky_nang_unit"
