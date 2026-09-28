@@ -6,6 +6,7 @@ import { trunc1Dec } from '../../../utils';
 export interface UnitBreakdownItem {
   skill: string;
   unit_key: string;
+  unit_name?: string;
   avg_score: number;
   student_count: number;
   mastered_count: number;
@@ -27,7 +28,16 @@ export const UnitBreakdownTable: React.FC<UnitBreakdownTableProps> = ({ data }) 
         accessorKey: 'unit_key',
         header: 'Bài Học / Chủ Đề',
         cell: ({ row }) => (
-          <span className="font-extrabold text-slate-900 dark:text-white text-sm sm:text-base">{row.original.unit_key}</span>
+          <div className="flex flex-col py-0.5">
+            <span className="font-extrabold text-slate-900 dark:text-white text-sm sm:text-base">
+              {row.original.unit_key}
+            </span>
+            {row.original.unit_name && (
+              <span className="text-xs text-indigo-600 dark:text-indigo-400 font-semibold">
+                {row.original.unit_name}
+              </span>
+            )}
+          </div>
         ),
       },
       {

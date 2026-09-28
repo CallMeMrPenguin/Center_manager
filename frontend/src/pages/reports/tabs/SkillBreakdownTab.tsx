@@ -70,6 +70,11 @@ export const SkillBreakdownTab: React.FC<SkillBreakdownTabProps> = ({
     return studentRankings.find(s => String(s.student_id) === String(selectedStudentId)) || null;
   }, [selectedStudentId, studentRankings]);
 
+  const selectedClass = useMemo(() => {
+    if (!selectedClassId) return null;
+    return classes.find(c => String(c.id) === String(selectedClassId)) || null;
+  }, [selectedClassId, classes]);
+
   // If viewing all classes ("Tất cả lớp học"), prompt the user to pick a specific class with inline selector
   if (!selectedClassId) {
     return (
@@ -208,6 +213,7 @@ export const SkillBreakdownTab: React.FC<SkillBreakdownTabProps> = ({
             units={heatmapUnits}
             students={heatmapStudents}
             onSelectStudent={onSelectRankingStudent}
+            grade={selectedClass?.grade}
           />
         </div>
       )}

@@ -80,6 +80,49 @@ def get_skill_breakdown_report(conn, class_id: Optional[int] = None, student_id:
         k = (r["skill"], display_ukey)
         unit_map.setdefault(k, []).append({**r, "_display_unit_key": display_ukey})
 
+    # Build unit name map from session test configs and unit_config
+    session_topics: Dict[str, str] = {}
+    try:
+        cursor.execute("SELECT class_id, test_config_json FROM class_sessions WHERE test_config_json IS NOT NULL")
+        for sc_cid, sc_tc in cursor.fetchall():
+            tc_data = parse_test_config(sc_tc)
+            if not tc_data:
+                continue
+            for chk in ["check_1", "check_2"]:
+                c_item = tc_data.get(chk) or {}
+                top = str(c_item.get("topic") or "").strip()
+                for u in c_item.get("units") or []:
+                    u_clean = str(u).strip()
+                    if top and u_clean:
+                        session_topics[f"{sc_cid}_{u_clean}"] = top
+                        if u_clean not in session_topics:
+                            session_topics[u_clean] = top
+    except Exception:
+        pass
+
+    try:
+        from config.unit_config import load_unit_config
+        unit_cfg_all = load_unit_config()
+    except Exception:
+        unit_cfg_all = {}
+
+    import re
+    def resolve_unit_name(u_key: str, cl_id: Optional[int] = None, gr_str: Optional[str] = None) -> str:
+        clean_u = re.sub(r'\[K?\d+\]\s*', '', str(u_key)).strip()
+        if cl_id and f"{cl_id}_{clean_u}" in session_topics:
+            return session_topics[f"{cl_id}_{clean_u}"]
+        if clean_u in session_topics:
+            return session_topics[clean_u]
+        g_match = re.search(r'\[K?(\d+)\]', str(u_key))
+        g_val = g_match.group(1) if g_match else (re.search(r'(\d+)', str(gr_str)).group(1) if gr_str and re.search(r'(\d+)', str(gr_str)) else "6")
+        u_match = re.search(r'(?:Unit|Bài)\s*(\d+)', clean_u, re.IGNORECASE)
+        if u_match and g_val in unit_cfg_all:
+            u_num = u_match.group(1)
+            if u_num in unit_cfg_all[g_val]:
+                entry = unit_cfg_all[g_val][u_num]
+                return entry.get("name", "") if isinstance(entry, dict) else str(entry)
+        return ""
+
     unit_breakdown = []
     for (skill, ukey), items in unit_map.items():
         scores = [it["ema_score"] for it in items if it.get("ema_score") is not None]
@@ -100,9 +143,14 @@ def get_skill_breakdown_report(conn, class_id: Optional[int] = None, student_id:
         else:
             rec = "Tỷ lệ nắm vững còn thấp, khuyến nghị 1 buổi phụ đạo củng cố."
 
+        item_grade = items[0].get("grade") if items else None
+        item_cid = items[0].get("class_id") if items else None
+        u_name = resolve_unit_name(ukey, cl_id=class_id or item_cid, gr_str=item_grade)
+
         unit_breakdown.append({
             "skill": skill,
             "unit_key": ukey,
+            "unit_name": u_name,
             "avg_score": avg_score,
             "student_count": st_count,
             "mastered_count": m_cnt,
@@ -124,9 +172,13 @@ def get_skill_breakdown_report(conn, class_id: Optional[int] = None, student_id:
             seen_units.add(k)
             unique_units.append({
                 "unit_key": ub["unit_key"],
+                "unit_name": ub.get("unit_name", ""),
                 "skill": ub["skill"],
                 "unit_id": f"{ub['unit_key']}__{ub['skill']}",
-                "avg_score": ub["avg_score"]
+                "avg_score": ub["avg_score"],
+                "mastery_pct": ub.get("mastery_pct", 0.0),
+                "mastered_count": ub.get("mastered_count", 0),
+                "student_count": ub.get("student_count", 0)
             })
 
     student_map: Dict[int, Dict[str, Any]] = {}
@@ -147,8 +199,10 @@ def get_skill_breakdown_report(conn, class_id: Optional[int] = None, student_id:
                 "units": {}
             }
         
+        u_name = resolve_unit_name(display_ukey, cl_id=r.get("class_id"), gr_str=r.get("grade"))
         unit_data = {
             "unit_key": display_ukey,
+            "unit_name": u_name,
             "skill": r["skill"],
             "ema_score": r["ema_score"],
             "last_score": r.get("last_score"),
