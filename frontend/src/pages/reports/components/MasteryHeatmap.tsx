@@ -42,14 +42,10 @@ export const MasteryHeatmap: React.FC<MasteryHeatmapProps> = ({
 
   const handleHeaderMouseMove = (e: React.MouseEvent, unit: HeatmapUnit) => {
     setHoveredCell(null);
-    const x = e.clientX;
-    const y = e.clientY;
-    const showBelow = y < 240;
     setHoveredCol({
       unit,
-      x: Math.min(window.innerWidth - 180, Math.max(180, x)),
-      y: showBelow ? y + 20 : y - 20,
-      showBelow,
+      x: e.clientX,
+      y: e.clientY,
       grade,
     });
   };
@@ -65,16 +61,12 @@ export const MasteryHeatmap: React.FC<MasteryHeatmapProps> = ({
     data?: StudentUnitData
   ) => {
     setHoveredCol(null);
-    const x = e.clientX;
-    const y = e.clientY;
-    const showBelow = y < 240;
     setHoveredCell({
       student,
       unit,
       data,
-      x: Math.min(window.innerWidth - 180, Math.max(180, x)),
-      y: showBelow ? y + 20 : y - 20,
-      showBelow,
+      x: e.clientX,
+      y: e.clientY,
       grade: student.grade || grade,
     });
   };
