@@ -1,4 +1,5 @@
 import React from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   HeatmapUnit,
@@ -10,10 +11,17 @@ import {
 } from './heatmapUtils';
 import { trunc1Dec } from '../../../utils';
 
+export interface TargetRect {
+  left: number;
+  top: number;
+  width: number;
+  height: number;
+  bottom: number;
+}
+
 export interface HoveredColState {
   unit: HeatmapUnit;
-  x: number;
-  y: number;
+  targetRect: TargetRect;
   grade?: string;
 }
 
@@ -21,8 +29,7 @@ export interface HoveredCellState {
   student: HeatmapStudent;
   unit: HeatmapUnit;
   data?: StudentUnitData;
-  x: number;
-  y: number;
+  targetRect: TargetRect;
   grade?: string;
 }
 
@@ -35,36 +42,34 @@ export const MasteryTooltip: React.FC<MasteryTooltipProps> = ({
   hoveredCol,
   hoveredCell,
 }) => {
-  const cardWidth = 290;
-  const colCardHeight = 190;
-  const cellCardHeight = 240;
+  if (typeof document === 'undefined') return null;
 
-  // 1. Column Header Tooltip (Aligned offset like graph hover, never blocking cursor or header)
+  // 1. Column Header Tooltip
   if (hoveredCol) {
-    const { unit, x, y, grade } = hoveredCol;
+    const { unit, targetRect, grade } = hoveredCol;
     const unitInfo = resolveFullUnitInfo(unit.unit_key, unit.unit_name, grade);
     const scoreStyle = getBadgeStyle(unit.avg_score);
 
-    // Smart horizontal placement: 16px to the right of cursor; flip to left if near right viewport edge
-    let left = x + 16;
-    if (left + cardWidth > window.innerWidth - 16) {
-      left = Math.max(12, x - cardWidth - 16);
+    const cardWidth = 270;
+    const cardHeight = 165;
+
+    // Center horizontally over the target element, clamped to viewport edges
+    let left = targetRect.left + targetRect.width / 2 - cardWidth / 2;
+    left = Math.max(12, Math.min(window.innerWidth - cardWidth - 12, left));
+
+    // Place directly above the header by default; flip below if too close to top edge
+    let top = targetRect.top - cardHeight - 10;
+    if (top < 10) {
+      top = targetRect.bottom + 10;
     }
 
-    // Smart vertical placement: offset from cursor and clamped within viewport bounds
-    let top = y - 16;
-    if (top + colCardHeight > window.innerHeight - 16) {
-      top = Math.max(12, window.innerHeight - colCardHeight - 16);
-    }
-    if (top < 12) top = 12;
-
-    return (
+    return createPortal(
       <AnimatePresence>
         <motion.div
           key={`col-${unit.unit_id || unit.unit_key}`}
-          initial={{ opacity: 0, scale: 0.96, y: 4 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.96 }}
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.95 }}
           transition={{ duration: 0.12, ease: 'easeOut' }}
           style={{
             position: 'fixed',
@@ -72,10 +77,10 @@ export const MasteryTooltip: React.FC<MasteryTooltipProps> = ({
             top: `${top}px`,
             width: `${cardWidth}px`,
           }}
-          className="z-50 pointer-events-none bg-white dark:bg-[#0e1224] rounded-2xl p-4 shadow-xl dark:shadow-[0_16px_40px_rgba(0,0,0,0.85)] border border-slate-200 dark:border-white/10 text-xs text-slate-900 dark:text-white space-y-3 select-none"
+          className="z-50 pointer-events-none bg-white dark:bg-[#0e1224] rounded-2xl p-3.5 shadow-xl dark:shadow-[0_16px_40px_rgba(0,0,0,0.95)] border border-slate-200 dark:border-white/10 text-xs text-slate-900 dark:text-white space-y-2.5 select-none"
         >
           {/* Header: Unit Key & Skill */}
-          <div className="flex items-center justify-between gap-2 pb-1 border-b border-slate-100 dark:border-white/10">
+          <div className="flex items-center justify-between gap-2 pb-1.5 border-b border-slate-100 dark:border-white/10">
             <span className="font-black text-slate-900 dark:text-white text-sm">
               {unit.unit_key}
             </span>
@@ -91,9 +96,9 @@ export const MasteryTooltip: React.FC<MasteryTooltipProps> = ({
           </div>
 
           {/* Unit Full Name & Vietnamese Title */}
-          <div className="space-y-1">
+          <div className="space-y-0.5">
             {unitInfo.unitName && (
-              <div className="text-sm font-extrabold text-indigo-600 dark:text-indigo-300 leading-snug">
+              <div className="text-xs font-extrabold text-indigo-600 dark:text-indigo-300 leading-snug">
                 {unitInfo.unitName}
               </div>
             )}
@@ -105,12 +110,12 @@ export const MasteryTooltip: React.FC<MasteryTooltipProps> = ({
           </div>
 
           {/* Class Average Score & Stats */}
-          <div className="bg-slate-50 dark:bg-[#080b16] p-3 rounded-xl border border-slate-200 dark:border-white/5 space-y-2 font-mono text-[11px]">
+          <div className="bg-slate-50 dark:bg-[#080b16] p-2.5 rounded-xl border border-slate-200 dark:border-white/5 space-y-1.5 font-mono text-[11px]">
             <div className="flex justify-between items-center">
               <span className="text-slate-600 dark:text-slate-400 font-sans font-medium">
-                Điểm Trung Bình Cả Lớp:
+                Điểm TB Cả Lớp:
               </span>
-              <span className={`font-black text-base ${scoreStyle.textColor}`}>
+              <span className={`font-black text-sm ${scoreStyle.textColor}`}>
                 TB {trunc1Dec(unit.avg_score)} / 10
               </span>
             </div>
@@ -134,41 +139,42 @@ export const MasteryTooltip: React.FC<MasteryTooltipProps> = ({
 
           {/* Footer Hint */}
           <div className="text-[10px] text-slate-500 italic text-center">
-            Rê chuột vào điểm của từng học sinh để xem chi tiết
+            Rê chuột vào điểm học sinh để xem chi tiết
           </div>
         </motion.div>
-      </AnimatePresence>
+      </AnimatePresence>,
+      document.body
     );
   }
 
-  // 2. Student Cell Tooltip (Aligned offset like graph hover, never blocking cursor or student cell)
+  // 2. Student Cell Tooltip
   if (hoveredCell) {
-    const { student, unit, data, x, y, grade } = hoveredCell;
+    const { student, unit, data, targetRect, grade } = hoveredCell;
     const unitInfo = resolveFullUnitInfo(unit.unit_key, unit.unit_name || data?.unit_name, grade || student.grade);
     const hasData = Boolean(data && data.ema_score !== undefined && data.ema_score >= 0);
     const scoreStyle = hasData ? getBadgeStyle(data?.ema_score) : null;
     const statusInfo = getStatusBadge(data?.mastery_status, data?.ema_score);
 
-    // Smart horizontal placement: 16px to the right of cursor; flip to left if near right viewport edge
-    let left = x + 16;
-    if (left + cardWidth > window.innerWidth - 16) {
-      left = Math.max(12, x - cardWidth - 16);
+    const cardWidth = 270;
+    const cardHeight = 225;
+
+    // Center horizontally over the target cell, clamped to viewport edges
+    let left = targetRect.left + targetRect.width / 2 - cardWidth / 2;
+    left = Math.max(12, Math.min(window.innerWidth - cardWidth - 12, left));
+
+    // Place directly above the cell by default; flip below if too close to top edge
+    let top = targetRect.top - cardHeight - 10;
+    if (top < 10) {
+      top = targetRect.bottom + 10;
     }
 
-    // Smart vertical placement: centered relative to cursor and clamped within viewport bounds
-    let top = y - 28;
-    if (top + cellCardHeight > window.innerHeight - 16) {
-      top = Math.max(12, window.innerHeight - cellCardHeight - 16);
-    }
-    if (top < 12) top = 12;
-
-    return (
+    return createPortal(
       <AnimatePresence>
         <motion.div
           key={`cell-${student.student_id}-${unit.unit_id || unit.unit_key}`}
-          initial={{ opacity: 0, scale: 0.96, y: 4 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.96 }}
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.95 }}
           transition={{ duration: 0.12, ease: 'easeOut' }}
           style={{
             position: 'fixed',
@@ -176,12 +182,12 @@ export const MasteryTooltip: React.FC<MasteryTooltipProps> = ({
             top: `${top}px`,
             width: `${cardWidth}px`,
           }}
-          className="z-50 pointer-events-none bg-white dark:bg-[#0e1224] rounded-2xl p-4 shadow-xl dark:shadow-[0_16px_40px_rgba(0,0,0,0.85)] border border-slate-200 dark:border-white/10 text-xs text-slate-900 dark:text-white space-y-3 select-none"
+          className="z-50 pointer-events-none bg-white dark:bg-[#0e1224] rounded-2xl p-3.5 shadow-xl dark:shadow-[0_16px_40px_rgba(0,0,0,0.95)] border border-slate-200 dark:border-white/10 text-xs text-slate-900 dark:text-white space-y-2.5 select-none"
         >
           {/* Header: Student Name & Skill Badge */}
-          <div className="flex items-center justify-between gap-2 pb-1 border-b border-slate-100 dark:border-white/10">
-            <div className="flex flex-col">
-              <span className="font-black text-slate-900 dark:text-white text-sm">
+          <div className="flex items-center justify-between gap-2 pb-1.5 border-b border-slate-100 dark:border-white/10">
+            <div className="flex flex-col min-w-0">
+              <span className="font-black text-slate-900 dark:text-white text-sm truncate">
                 {student.student_name}
               </span>
               <div className="flex items-center gap-1.5 mt-0.5">
@@ -190,7 +196,7 @@ export const MasteryTooltip: React.FC<MasteryTooltipProps> = ({
                     {student.nickname}
                   </span>
                 )}
-                <span className="text-[10px] text-slate-500 dark:text-slate-400 font-semibold">
+                <span className="text-[10px] text-slate-500 dark:text-slate-400 font-semibold truncate">
                   {student.class_name}
                 </span>
               </div>
@@ -209,23 +215,23 @@ export const MasteryTooltip: React.FC<MasteryTooltipProps> = ({
 
           {/* Unit Info: Key, Full Name & Vietnamese Title */}
           <div className="space-y-0.5">
-            <div className="text-[11px] font-bold text-slate-500 dark:text-slate-400">
+            <div className="text-[10px] font-bold text-slate-500 dark:text-slate-400">
               {unit.unit_key}
             </div>
             {unitInfo.unitName && (
-              <div className="text-sm font-extrabold text-indigo-600 dark:text-indigo-300 leading-snug">
+              <div className="text-xs font-extrabold text-indigo-600 dark:text-indigo-300 leading-snug">
                 {unitInfo.unitName}
               </div>
             )}
             {unitInfo.vietnameseTitle && (
-              <div className="text-[11px] font-semibold text-slate-600 dark:text-slate-400">
+              <div className="text-[10px] font-semibold text-slate-600 dark:text-slate-400">
                 {unitInfo.vietnameseTitle}
               </div>
             )}
           </div>
 
           {/* Score Stats */}
-          <div className="space-y-2 bg-slate-50 dark:bg-[#080b16] p-3 rounded-xl border border-slate-200 dark:border-white/5 font-mono text-[11px]">
+          <div className="space-y-1.5 bg-slate-50 dark:bg-[#080b16] p-2.5 rounded-xl border border-slate-200 dark:border-white/5 font-mono text-[11px]">
             {hasData && data ? (
               <>
                 <div className="flex justify-between items-center">
@@ -260,7 +266,7 @@ export const MasteryTooltip: React.FC<MasteryTooltipProps> = ({
                 {data.last_tested && (
                   <div className="flex justify-between items-center text-slate-700 dark:text-slate-300">
                     <span className="text-slate-600 dark:text-slate-400 font-sans font-medium">
-                      Ngày Test Gần Nhất:
+                      Ngày Test:
                     </span>
                     <span className="font-semibold text-slate-500">
                       {data.last_tested}
@@ -270,12 +276,12 @@ export const MasteryTooltip: React.FC<MasteryTooltipProps> = ({
               </>
             ) : (
               <div className="text-slate-500 text-center py-1 font-sans">
-                Học sinh chưa có bài kiểm tra cho bài học này
+                Chưa có bài kiểm tra cho bài học này
               </div>
             )}
 
             {/* Class Average Info on Student Tooltip */}
-            <div className="flex justify-between items-center pt-1.5 border-t border-slate-200 dark:border-white/5">
+            <div className="flex justify-between items-center pt-1 border-t border-slate-200 dark:border-white/5">
               <span className="text-slate-600 dark:text-slate-400 font-sans font-medium">
                 Điểm TB Cả Lớp:
               </span>
@@ -295,7 +301,8 @@ export const MasteryTooltip: React.FC<MasteryTooltipProps> = ({
             </span>
           </div>
         </motion.div>
-      </AnimatePresence>
+      </AnimatePresence>,
+      document.body
     );
   }
 

@@ -40,12 +40,18 @@ export const MasteryHeatmap: React.FC<MasteryHeatmapProps> = ({
     return units.filter((u) => u.skill === skillFilter);
   }, [units, skillFilter]);
 
-  const handleHeaderMouseMove = (e: React.MouseEvent, unit: HeatmapUnit) => {
+  const handleHeaderMouseEnter = (e: React.MouseEvent<HTMLElement>, unit: HeatmapUnit) => {
+    const rect = e.currentTarget.getBoundingClientRect();
     setHoveredCell(null);
     setHoveredCol({
       unit,
-      x: e.clientX,
-      y: e.clientY,
+      targetRect: {
+        left: rect.left,
+        top: rect.top,
+        width: rect.width,
+        height: rect.height,
+        bottom: rect.bottom,
+      },
       grade,
     });
   };
@@ -54,19 +60,25 @@ export const MasteryHeatmap: React.FC<MasteryHeatmapProps> = ({
     setHoveredCol(null);
   };
 
-  const handleCellMouseMove = (
-    e: React.MouseEvent,
+  const handleCellMouseEnter = (
+    e: React.MouseEvent<HTMLElement>,
     student: HeatmapStudent,
     unit: HeatmapUnit,
     data?: StudentUnitData
   ) => {
+    const rect = e.currentTarget.getBoundingClientRect();
     setHoveredCol(null);
     setHoveredCell({
       student,
       unit,
       data,
-      x: e.clientX,
-      y: e.clientY,
+      targetRect: {
+        left: rect.left,
+        top: rect.top,
+        width: rect.width,
+        height: rect.height,
+        bottom: rect.bottom,
+      },
       grade: student.grade || grade,
     });
   };
@@ -123,7 +135,7 @@ export const MasteryHeatmap: React.FC<MasteryHeatmapProps> = ({
         id: `unit_${colKey}`,
         header: () => (
           <div
-            onMouseMove={(e) => handleHeaderMouseMove(e, u)}
+            onMouseEnter={(e) => handleHeaderMouseEnter(e, u)}
             onMouseLeave={handleHeaderMouseLeave}
             className="flex flex-col items-center justify-center w-full py-1 cursor-pointer select-none group/unit-hdr"
             title={unitInfo.fullTitle}
@@ -166,7 +178,7 @@ export const MasteryHeatmap: React.FC<MasteryHeatmapProps> = ({
           return (
             <div className="flex items-center justify-center py-0.5">
               <span
-                onMouseMove={(e) => handleCellMouseMove(e, row.original, u, uData)}
+                onMouseEnter={(e) => handleCellMouseEnter(e, row.original, u, uData)}
                 onMouseLeave={handleCellMouseLeave}
                 className={`inline-flex items-center justify-center w-14 h-7 rounded-lg text-xs font-mono transition-all duration-150 cursor-pointer ${style.badgeClass}`}
               >
