@@ -356,13 +356,10 @@ def export_class_excel(
     # Blank spacing row
     ws.row_dimensions[avg_row_idx + 1].height = 12
 
-    # Summary rows (Below Average Lists)
-    c1_sum_label = f"Check 1 ({c1_content})" if c1_content else "Check 1"
-    c2_sum_label = f"Check 2 ({c2_content})" if c2_content else "Check 2"
-
+    # Summary rows (Below Average Lists) - concise labels (Check 1, Check 2, BTVN)
     candidate_labels = [
-        (c1_sum_label, 4, "D", t_c1),
-        (c2_sum_label, 5, "E", t_c2),
+        ("Check 1", 4, "D", t_c1),
+        ("Check 2", 5, "E", t_c2),
         ("BTVN", 6, "F", t_hw1),
     ]
     if t_hw2 > 0 or len(hw2_vals) > 0:
@@ -393,7 +390,7 @@ def export_class_excel(
             value=f'=_xlfn.TEXTJOIN(", ", TRUE, _xlfn.FILTER(B{start_row}:B{end_row}, (ISNUMBER({col_let}{start_row}:{col_let}{end_row}))*({col_let}{start_row}:{col_let}{end_row}>0)*({col_let}{start_row}:{col_let}{end_row}<{col_let}${avg_row_idx})*(C{start_row}:C{end_row}<>"Vắng mặt"), "Không có (Tất cả đạt)"))' if len(attendance) > 0 else "Không có (Tất cả đạt)"
         )
         val_cell.font = Font(name="Times New Roman", bold=True, color="1E1E2F", size=12)
-        val_cell.alignment = Alignment(horizontal="left", vertical="center")
+        val_cell.alignment = Alignment(horizontal="left", vertical="center", wrap_text=True)
         for cn in range(3, 11):
             ws.cell(row=r_idx, column=cn).border = thin_border
 

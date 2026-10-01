@@ -95,12 +95,38 @@ export async function exportClassReportPng({
   });
 
   const summaryRows = [
-    { label: c1Topic ? `Check 1 (${c1Topic})` : 'Check 1', thresh: tC1, students: bC1 },
-    { label: c2Topic ? `Check 2 (${c2Topic})` : 'Check 2', thresh: tC2, students: bC2 },
+    { label: 'Check 1', thresh: tC1, students: bC1 },
+    { label: 'Check 2', thresh: tC2, students: bC2 },
     { label: 'BTVN', thresh: tHw1, students: bH1 },
   ];
   if (tHw2 > 0 || bH2.length > 0) summaryRows.push({ label: 'BTVN 2', thresh: tHw2, students: bH2 });
   if (tMt > 0 || bMt.length > 0) summaryRows.push({ label: 'Luyện Đề', thresh: tMt, students: bMt });
+
+  // Wrap student names cleanly by comma to prevent any text overflow
+  function wrapStudentNames(names: string[], maxChars: number = 95): string[] {
+    if (names.length === 0) return ['Không có (Tất cả đạt)'];
+    const lines: string[] = [];
+    let current = '';
+    for (const name of names) {
+      const test = current ? `${current}, ${name}` : name;
+      if (test.length > maxChars && current) {
+        lines.push(current);
+        current = name;
+      } else {
+        current = test;
+      }
+    }
+    if (current) lines.push(current);
+    return lines;
+  }
+
+  let totalSummaryH = 0;
+  const preparedSummary = summaryRows.map((s) => {
+    const lines = wrapStudentNames(s.students, 95);
+    const rowH = Math.max(34, lines.length * 20 + 12);
+    totalSummaryH += rowH;
+    return { ...s, lines, rowH };
+  });
 
   // 2. Direct Canvas 2D Rendering
   const scale = 2, width = 1200;
@@ -109,8 +135,8 @@ export async function exportClassReportPng({
   for (let i = 0; i < colW.length; i++) colX.push(colX[i] + colW[i]);
 
   const titleH = 46, hasTopic = Boolean(c1Topic || c2Topic), topicH = hasTopic ? 32 : 0;
-  const headerH = 52, rowH = 32, avgH = 34, gapH = 14, summaryH = 34, bottomPad = 16;
-  const totalH = titleH + topicH + headerH + records.length * rowH + avgH + gapH + summaryRows.length * summaryH + bottomPad;
+  const headerH = 52, rowH = 32, avgH = 34, gapH = 14, bottomPad = 16;
+  const totalH = titleH + topicH + headerH + records.length * rowH + avgH + gapH + totalSummaryH + bottomPad;
 
   const canvas = document.createElement('canvas');
   canvas.width = Math.round(width * scale);
@@ -163,12 +189,20 @@ export async function exportClassReportPng({
       ctx.font = `bold 12px ${fontSerif}`;
       ctx.fillText('Check 1', x + w / 2, currentY + 18);
       ctx.font = `normal 10.5px ${fontSerif}`;
-      ctx.fillText(`(${c1Topic.length > 25 ? c1Topic.substring(0, 23) + '..' : c1Topic})`, x + w / 2, currentY + 34);
+      let disp = c1Topic;
+      while (disp.length > 4 && ctx.measureText(`(${disp}..)`).width > w - 10) {
+        disp = disp.substring(0, disp.length - 1);
+      }
+      ctx.fillText(`(${disp !== c1Topic ? disp + '..' : disp})`, x + w / 2, currentY + 34);
     } else if (c === 4 && c2Topic) {
       ctx.font = `bold 12px ${fontSerif}`;
       ctx.fillText('Check 2', x + w / 2, currentY + 18);
       ctx.font = `normal 10.5px ${fontSerif}`;
-      ctx.fillText(`(${c2Topic.length > 25 ? c2Topic.substring(0, 23) + '..' : c2Topic})`, x + w / 2, currentY + 34);
+      let disp = c2Topic;
+      while (disp.length > 4 && ctx.measureText(`(${disp}..)`).width > w - 10) {
+        disp = disp.substring(0, disp.length - 1);
+      }
+      ctx.fillText(`(${disp !== c2Topic ? disp + '..' : disp})`, x + w / 2, currentY + 34);
     } else {
       ctx.font = `bold 12px ${fontSerif}`;
       ctx.fillText(hdrs[c], x + w / 2, currentY + headerH / 2);
@@ -214,18 +248,27 @@ export async function exportClassReportPng({
       ctx.strokeStyle = '#CBD5E1';
       ctx.strokeRect(x, currentY, w, rowH);
 
-      if (c === 9) {
+      const isStatusCol = c === 9;
+      const isNameCol = c === 1;
+      if (isStatusCol) {
         ctx.fillStyle = isAbsent ? '#64748B' : (fails.length > 0 ? '#B91C1C' : '#15803D');
-        ctx.font = `bold 12px ${fontSerif}`;
-      } else if (c === 1) {
+      } else if (isNameCol) {
         ctx.fillStyle = '#0F172A';
-        ctx.font = `bold 12px ${fontSerif}`;
       } else {
         ctx.fillStyle = '#1E293B';
-        ctx.font = `normal 12px ${fontSerif}`;
       }
+
+      let fontSize = 12;
+      const weight = isStatusCol || isNameCol ? 'bold' : 'normal';
+      ctx.font = `${weight} ${fontSize}px ${fontSerif}`;
+      const textVal = rVals[c];
+      while (fontSize > 9 && ctx.measureText(textVal).width > w - 8) {
+        fontSize -= 0.5;
+        ctx.font = `${weight} ${fontSize}px ${fontSerif}`;
+      }
+
       ctx.textAlign = 'center';
-      ctx.fillText(rVals[c], x + w / 2, currentY + rowH / 2);
+      ctx.fillText(textVal, x + w / 2, currentY + rowH / 2);
     }
     currentY += rowH;
   });
@@ -235,9 +278,16 @@ export async function exportClassReportPng({
   ctx.fillRect(0, currentY, width, avgH);
   ctx.fillStyle = '#92400E';
   ctx.font = `bold 12px ${fontSerif}`;
+  ctx.strokeStyle = '#CBD5E1';
+
+  // Merged columns 0-2 (STT + Họ tên + Điểm danh) for Average label matching Excel
+  const avgLabelW = colX[3]; // 310px
+  ctx.strokeRect(0, currentY, avgLabelW, avgH);
+  ctx.textAlign = 'center';
+  ctx.fillText('Điểm trung bình (Average)', avgLabelW / 2, currentY + avgH / 2);
 
   const aVals = [
-    '', 'Điểm trung bình (Average)', '',
+    '', '', '',
     tC1 > 0 ? format1Dec(tC1) : '-',
     tC2 > 0 ? format1Dec(tC2) : '-',
     tHw1 > 0 ? format1Dec(tHw1) : '-',
@@ -247,33 +297,41 @@ export async function exportClassReportPng({
     'Đã tính TB lớp'
   ];
 
-  for (let c = 0; c < 10; c++) {
+  // Remaining columns 3-9
+  for (let c = 3; c < 10; c++) {
     const x = colX[c], w = colW[c];
-    ctx.strokeStyle = '#CBD5E1';
     ctx.strokeRect(x, currentY, w, avgH);
-    ctx.textAlign = 'center';
     ctx.fillText(aVals[c], x + w / 2, currentY + avgH / 2);
   }
   currentY += avgH + gapH;
 
   // Summary Rows
-  const leftW = colX[2], rightW = width - leftW;
-  summaryRows.forEach((s) => {
+  const leftW = colX[3]; // 310px (merges col 0, 1, 2)
+  const rightW = width - leftW; // 890px (merges col 3-9)
+
+  preparedSummary.forEach((s) => {
     ctx.fillStyle = '#FFFFFF';
-    ctx.fillRect(0, currentY, width, summaryH);
+    ctx.fillRect(0, currentY, width, s.rowH);
     ctx.strokeStyle = '#CBD5E1';
-    ctx.strokeRect(0, currentY, leftW, summaryH);
-    ctx.strokeRect(leftW, currentY, rightW, summaryH);
+    ctx.strokeRect(0, currentY, leftW, s.rowH);
+    ctx.strokeRect(leftW, currentY, rightW, s.rowH);
 
     ctx.fillStyle = '#7F1D1D';
     ctx.font = `bold 12px ${fontSerif}`;
     ctx.textAlign = 'left';
-    ctx.fillText(`${s.label} dưới TB (< ${s.thresh > 0 ? format1Dec(s.thresh) : '-'})`, 12, currentY + summaryH / 2);
+    ctx.fillText(`${s.label} dưới TB (< ${s.thresh > 0 ? format1Dec(s.thresh) : '-'})`, 14, currentY + s.rowH / 2);
 
     ctx.fillStyle = '#1E1E2F';
     ctx.font = `bold 12px ${fontSerif}`;
-    ctx.fillText(s.students.length > 0 ? s.students.join(', ') : 'Không có (Tất cả đạt)', leftW + 12, currentY + summaryH / 2);
-    currentY += summaryH;
+    if (s.lines.length === 1) {
+      ctx.fillText(s.lines[0], leftW + 14, currentY + s.rowH / 2);
+    } else {
+      const startY = currentY + 18;
+      s.lines.forEach((line, lIdx) => {
+        ctx.fillText(line, leftW + 14, startY + lIdx * 20);
+      });
+    }
+    currentY += s.rowH;
   });
 
   // Border outline
