@@ -209,27 +209,27 @@ def export_class_excel(
         c2_c.font = name_font
         ws.cell(row=curr_row, column=3, value=status_val)
 
-        c1_cell = ws.cell(row=curr_row, column=4, value=c1 if c1 > 0 else "")
-        c2_cell = ws.cell(row=curr_row, column=5, value=c2 if c2 > 0 else "")
-        hw1_cell = ws.cell(row=curr_row, column=6, value=hw1 if hw1 > 0 else "")
-        hw2_cell = ws.cell(row=curr_row, column=7, value=hw2 if hw2 > 0 else "")
-        mt_cell = ws.cell(row=curr_row, column=8, value=mt if mt > 0 else "")
+        c1_cell = ws.cell(row=curr_row, column=4, value=c1 if c1 > 0 else "-")
+        c2_cell = ws.cell(row=curr_row, column=5, value=c2 if c2 > 0 else "-")
+        hw1_cell = ws.cell(row=curr_row, column=6, value=hw1 if hw1 > 0 else "-")
+        hw2_cell = ws.cell(row=curr_row, column=7, value=hw2 if hw2 > 0 else "-")
+        mt_cell = ws.cell(row=curr_row, column=8, value=mt if mt > 0 else "-")
 
-        c1_cell.number_format = '0.0'
-        c2_cell.number_format = '0.0'
-        hw1_cell.number_format = '0.0'
-        hw2_cell.number_format = '0.0'
-        mt_cell.number_format = '0.0'
+        if c1 > 0: c1_cell.number_format = '0.0'
+        if c2 > 0: c2_cell.number_format = '0.0'
+        if hw1 > 0: hw1_cell.number_format = '0.0'
+        if hw2 > 0: hw2_cell.number_format = '0.0'
+        if mt > 0: mt_cell.number_format = '0.0'
 
         # Formula: |BTVN - Average(Check 1, Check 2)|
         c9_cell = ws.cell(
             row=curr_row,
             column=9,
             value=(
-                f'=IF(F{curr_row}>0, '
-                f'IF(AND(D{curr_row}>0, E{curr_row}>0), ROUND(ABS(F{curr_row}-AVERAGE(D{curr_row},E{curr_row})), 1), '
-                f'IF(D{curr_row}>0, ROUND(ABS(F{curr_row}-D{curr_row}), 1), '
-                f'IF(E{curr_row}>0, ROUND(ABS(F{curr_row}-E{curr_row}), 1), ""))), "")'
+                f'=IF(AND(ISNUMBER(F{curr_row}), F{curr_row}>0), '
+                f'IF(AND(ISNUMBER(D{curr_row}), D{curr_row}>0, ISNUMBER(E{curr_row}), E{curr_row}>0), ROUND(ABS(F{curr_row}-AVERAGE(D{curr_row},E{curr_row})), 1), '
+                f'IF(AND(ISNUMBER(D{curr_row}), D{curr_row}>0), ROUND(ABS(F{curr_row}-D{curr_row}), 1), '
+                f'IF(AND(ISNUMBER(E{curr_row}), E{curr_row}>0), ROUND(ABS(F{curr_row}-E{curr_row}), 1), "-"))), "-")'
             )
         )
         c9_cell.number_format = '0.0'
@@ -241,18 +241,18 @@ def export_class_excel(
             value=(
                 f'=IF(C{curr_row}="Vắng mặt", "Vắng mặt", '
                 f'IF(_xlfn.TEXTJOIN(", ", TRUE, '
-                f'IF(AND(D{curr_row}>0, D{curr_row}<D${avg_row_idx}), "Check 1", ""), '
-                f'IF(AND(E{curr_row}>0, E{curr_row}<E${avg_row_idx}), "Check 2", ""), '
-                f'IF(AND(F{curr_row}>0, F{curr_row}<F${avg_row_idx}), "BTVN 1", ""), '
-                f'IF(AND(G{curr_row}>0, G{curr_row}<G${avg_row_idx}), "BTVN 2", ""), '
-                f'IF(AND(H{curr_row}>0, H{curr_row}<H${avg_row_idx}), "Luyện Đề", "")'
+                f'IF(AND(ISNUMBER(D{curr_row}), D{curr_row}>0, ISNUMBER(D${avg_row_idx}), D{curr_row}<D${avg_row_idx}), "Check 1", ""), '
+                f'IF(AND(ISNUMBER(E{curr_row}), E{curr_row}>0, ISNUMBER(E${avg_row_idx}), E{curr_row}<E${avg_row_idx}), "Check 2", ""), '
+                f'IF(AND(ISNUMBER(F{curr_row}), F{curr_row}>0, ISNUMBER(F${avg_row_idx}), F{curr_row}<F${avg_row_idx}), "BTVN 1", ""), '
+                f'IF(AND(ISNUMBER(G{curr_row}), G{curr_row}>0, ISNUMBER(G${avg_row_idx}), G{curr_row}<G${avg_row_idx}), "BTVN 2", ""), '
+                f'IF(AND(ISNUMBER(H{curr_row}), H{curr_row}>0, ISNUMBER(H${avg_row_idx}), H{curr_row}<H${avg_row_idx}), "Luyện Đề", "")'
                 f')="", "Đạt yêu cầu", '
                 f'"Cần cố gắng (" & _xlfn.TEXTJOIN(", ", TRUE, '
-                f'IF(AND(D{curr_row}>0, D{curr_row}<D${avg_row_idx}), "Check 1", ""), '
-                f'IF(AND(E{curr_row}>0, E{curr_row}<E${avg_row_idx}), "Check 2", ""), '
-                f'IF(AND(F{curr_row}>0, F{curr_row}<F${avg_row_idx}), "BTVN 1", ""), '
-                f'IF(AND(G{curr_row}>0, G{curr_row}<G${avg_row_idx}), "BTVN 2", ""), '
-                f'IF(AND(H{curr_row}>0, H{curr_row}<H${avg_row_idx}), "Luyện Đề", "")'
+                f'IF(AND(ISNUMBER(D{curr_row}), D{curr_row}>0, ISNUMBER(D${avg_row_idx}), D{curr_row}<D${avg_row_idx}), "Check 1", ""), '
+                f'IF(AND(ISNUMBER(E{curr_row}), E{curr_row}>0, ISNUMBER(E${avg_row_idx}), E{curr_row}<E${avg_row_idx}), "Check 2", ""), '
+                f'IF(AND(ISNUMBER(F{curr_row}), F{curr_row}>0, ISNUMBER(F${avg_row_idx}), F{curr_row}<F${avg_row_idx}), "BTVN 1", ""), '
+                f'IF(AND(ISNUMBER(G{curr_row}), G{curr_row}>0, ISNUMBER(G${avg_row_idx}), G{curr_row}<G${avg_row_idx}), "BTVN 2", ""), '
+                f'IF(AND(ISNUMBER(H{curr_row}), H{curr_row}>0, ISNUMBER(H${avg_row_idx}), H{curr_row}<H${avg_row_idx}), "Luyện Đề", "")'
                 f') & ")"))'
             )
         )
@@ -323,24 +323,24 @@ def export_class_excel(
     t_hw2 = _pick_thresh("homework_2", calc_avg_hw2)
     t_mt = _pick_thresh("mock_test", calc_avg_mt)
 
-    c1_avg_cell = ws.cell(row=avg_row_idx, column=4, value=t_c1 if t_c1 > 0 else "")
-    c2_avg_cell = ws.cell(row=avg_row_idx, column=5, value=t_c2 if t_c2 > 0 else "")
-    hw1_avg_cell = ws.cell(row=avg_row_idx, column=6, value=t_hw1 if t_hw1 > 0 else "")
-    hw2_avg_cell = ws.cell(row=avg_row_idx, column=7, value=t_hw2 if t_hw2 > 0 else "")
-    mt_avg_cell = ws.cell(row=avg_row_idx, column=8, value=t_mt if t_mt > 0 else "")
+    c1_avg_cell = ws.cell(row=avg_row_idx, column=4, value=t_c1 if t_c1 > 0 else "-")
+    c2_avg_cell = ws.cell(row=avg_row_idx, column=5, value=t_c2 if t_c2 > 0 else "-")
+    hw1_avg_cell = ws.cell(row=avg_row_idx, column=6, value=t_hw1 if t_hw1 > 0 else "-")
+    hw2_avg_cell = ws.cell(row=avg_row_idx, column=7, value=t_hw2 if t_hw2 > 0 else "-")
+    mt_avg_cell = ws.cell(row=avg_row_idx, column=8, value=t_mt if t_mt > 0 else "-")
 
-    c1_avg_cell.number_format = '0.0'
-    c2_avg_cell.number_format = '0.0'
-    hw1_avg_cell.number_format = '0.0'
-    hw2_avg_cell.number_format = '0.0'
-    mt_avg_cell.number_format = '0.0'
+    if t_c1 > 0: c1_avg_cell.number_format = '0.0'
+    if t_c2 > 0: c2_avg_cell.number_format = '0.0'
+    if t_hw1 > 0: hw1_avg_cell.number_format = '0.0'
+    if t_hw2 > 0: hw2_avg_cell.number_format = '0.0'
+    if t_mt > 0: mt_avg_cell.number_format = '0.0'
 
     check_avgs = [a for a in (t_c1, t_c2) if a > 0]
     check_combined = sum(check_avgs) / len(check_avgs) if check_avgs else 0.0
     diff_val = trunc_1_dec(abs(t_hw1 - check_combined)) if (t_hw1 > 0 and check_combined > 0) else 0.0
 
-    c9_avg_cell = ws.cell(row=avg_row_idx, column=9, value=diff_val if diff_val > 0 else "")
-    c9_avg_cell.number_format = '0.0'
+    c9_avg_cell = ws.cell(row=avg_row_idx, column=9, value=diff_val if diff_val > 0 else "-")
+    if diff_val > 0: c9_avg_cell.number_format = '0.0'
     ws.cell(row=avg_row_idx, column=10, value="Đã tính TB lớp")
 
     avg_fill = PatternFill(start_color="FEF3C7", end_color="FEF3C7", fill_type="solid")
@@ -379,7 +379,7 @@ def export_class_excel(
         sum_title = ws.cell(
             row=r_idx,
             column=1,
-            value=f'="{m_label_clean} dưới TB (< " & TEXT({col_let}${avg_row_idx}, "0.0") & ")"'
+            value=f'=IF(AND(ISNUMBER({col_let}${avg_row_idx}), {col_let}${avg_row_idx}>0), "{m_label_clean} dưới TB (< " & TEXT({col_let}${avg_row_idx}, "0.0") & ")", "{m_label_clean}")'
         )
         sum_title.font = Font(name="Times New Roman", bold=True, color="7F1D1D", size=12)
         sum_title.alignment = Alignment(horizontal="left", vertical="center", wrap_text=True)
@@ -390,7 +390,7 @@ def export_class_excel(
         val_cell = ws.cell(
             row=r_idx,
             column=3,
-            value=f'=_xlfn.TEXTJOIN(", ", TRUE, _xlfn.FILTER(B{start_row}:B{end_row}, ({col_let}{start_row}:{col_let}{end_row}>0)*({col_let}{start_row}:{col_let}{end_row}<{col_let}${avg_row_idx})*(C{start_row}:C{end_row}<>"Vắng mặt"), "Không có (Tất cả đạt)"))' if len(attendance) > 0 else "Không có (Tất cả đạt)"
+            value=f'=_xlfn.TEXTJOIN(", ", TRUE, _xlfn.FILTER(B{start_row}:B{end_row}, (ISNUMBER({col_let}{start_row}:{col_let}{end_row}))*({col_let}{start_row}:{col_let}{end_row}>0)*({col_let}{start_row}:{col_let}{end_row}<{col_let}${avg_row_idx})*(C{start_row}:C{end_row}<>"Vắng mặt"), "Không có (Tất cả đạt)"))' if len(attendance) > 0 else "Không có (Tất cả đạt)"
         )
         val_cell.font = Font(name="Times New Roman", bold=True, color="1E1E2F", size=12)
         val_cell.alignment = Alignment(horizontal="left", vertical="center")

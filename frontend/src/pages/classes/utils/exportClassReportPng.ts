@@ -1,4 +1,3 @@
-import { toPng } from 'html-to-image';
 import { api } from '../../../api';
 import { showToast } from '../../../components/Toast';
 import { ClassItem, AttendanceRecord } from '../types';
@@ -22,23 +21,15 @@ export interface ExportClassReportPngParams {
 function formatTopicString(cfg: any): string {
   if (!cfg || typeof cfg !== 'object') return '';
   const skillLabels: Record<string, string> = {
-    vocab: 'Từ vựng',
-    grammar: 'Ngữ pháp',
-    mixed: 'Tổng hợp',
-    mock_test: 'Luyện đề',
-    reading: 'Đọc hiểu',
-    listening: 'Nghe',
-    speaking: 'Nói',
-    writing: 'Viết',
+    vocab: 'Từ vựng', grammar: 'Ngữ pháp', mixed: 'Tổng hợp',
+    mock_test: 'Luyện đề', reading: 'Đọc hiểu', listening: 'Nghe',
+    speaking: 'Nói', writing: 'Viết',
   };
   const skillName = skillLabels[cfg.skill] || (cfg.skill ? String(cfg.skill) : '');
   const units = Array.isArray(cfg.units) ? cfg.units.join(', ') : (cfg.units || '');
   const topic = (cfg.topic || cfg.grammar_topic || '').replace(/\|/g, '-').trim();
-
-  const parts = [units, topic].filter(Boolean);
-  const detail = parts.join(' - ');
-  if (skillName && detail) return `${skillName}: ${detail}`;
-  return detail || skillName;
+  const detail = [units, topic].filter(Boolean).join(' - ');
+  return (skillName && detail) ? `${skillName}: ${detail}` : (detail || skillName);
 }
 
 export async function exportClassReportPng({
@@ -63,248 +54,275 @@ export async function exportClassReportPng({
   const c1Topic = formatTopicString(cfg?.check_1);
   const c2Topic = formatTopicString(cfg?.check_2);
 
-  // 1. Calculate class statistics
-  let sumC1 = 0, countC1 = 0;
-  let sumC2 = 0, countC2 = 0;
-  let sumHw1 = 0, countHw1 = 0;
-  let sumHw2 = 0, countHw2 = 0;
-  let sumMt = 0, countMt = 0;
-
+  // 1. Calculate statistics
+  let sC1 = 0, cC1 = 0, sC2 = 0, cC2 = 0, sH1 = 0, cH1 = 0, sH2 = 0, cH2 = 0, sMt = 0, cMt = 0;
   records.forEach((r) => {
     if (r.status === 'Vắng mặt') return;
-    const nC1 = Number(r.check_1);
-    if (!isNaN(nC1) && nC1 > 0) { sumC1 += nC1; countC1++; }
-    const nC2 = Number(r.check_2);
-    if (!isNaN(nC2) && nC2 > 0) { sumC2 += nC2; countC2++; }
-    const nHw1 = Number(r.homework);
-    if (!isNaN(nHw1) && nHw1 > 0) { sumHw1 += nHw1; countHw1++; }
-    const nHw2 = Number(r.homework_2);
-    if (!isNaN(nHw2) && nHw2 > 0) { sumHw2 += nHw2; countHw2++; }
-    const nMt = Number(r.mock_test);
-    if (!isNaN(nMt) && nMt > 0) { sumMt += nMt; countMt++; }
+    const vC1 = Number(r.check_1), vC2 = Number(r.check_2), vH1 = Number(r.homework), vH2 = Number(r.homework_2), vMt = Number(r.mock_test);
+    if (!isNaN(vC1) && vC1 > 0) { sC1 += vC1; cC1++; }
+    if (!isNaN(vC2) && vC2 > 0) { sC2 += vC2; cC2++; }
+    if (!isNaN(vH1) && vH1 > 0) { sH1 += vH1; cH1++; }
+    if (!isNaN(vH2) && vH2 > 0) { sH2 += vH2; cH2++; }
+    if (!isNaN(vMt) && vMt > 0) { sMt += vMt; cMt++; }
   });
 
-  const avgC1 = countC1 > 0 ? trunc1Dec(sumC1 / countC1) : 0;
-  const avgC2 = countC2 > 0 ? trunc1Dec(sumC2 / countC2) : 0;
-  const avgHw1 = countHw1 > 0 ? trunc1Dec(sumHw1 / countHw1) : 0;
-  const avgHw2 = countHw2 > 0 ? trunc1Dec(sumHw2 / countHw2) : 0;
-  const avgMt = countMt > 0 ? trunc1Dec(sumMt / countMt) : 0;
+  const aC1 = cC1 > 0 ? trunc1Dec(sC1 / cC1) : 0;
+  const aC2 = cC2 > 0 ? trunc1Dec(sC2 / cC2) : 0;
+  const aH1 = cH1 > 0 ? trunc1Dec(sH1 / cH1) : 0;
+  const aH2 = cH2 > 0 ? trunc1Dec(sH2 / cH2) : 0;
+  const aMt = cMt > 0 ? trunc1Dec(sMt / cMt) : 0;
 
-  // Thresholds prioritize UI settings
-  const tC1 = (thresholds.check_1 !== undefined && thresholds.check_1 > 0) ? trunc1Dec(thresholds.check_1) : avgC1;
-  const tC2 = (thresholds.check_2 !== undefined && thresholds.check_2 > 0) ? trunc1Dec(thresholds.check_2) : avgC2;
-  const tHw1 = (thresholds.homework !== undefined && thresholds.homework > 0) ? trunc1Dec(thresholds.homework) : avgHw1;
-  const tHw2 = (thresholds.homework_2 !== undefined && thresholds.homework_2 > 0) ? trunc1Dec(thresholds.homework_2) : avgHw2;
-  const tMt = (thresholds.mock_test !== undefined && thresholds.mock_test > 0) ? trunc1Dec(thresholds.mock_test) : avgMt;
+  const tC1 = (thresholds.check_1 !== undefined && thresholds.check_1 > 0) ? trunc1Dec(thresholds.check_1) : aC1;
+  const tC2 = (thresholds.check_2 !== undefined && thresholds.check_2 > 0) ? trunc1Dec(thresholds.check_2) : aC2;
+  const tHw1 = (thresholds.homework !== undefined && thresholds.homework > 0) ? trunc1Dec(thresholds.homework) : aH1;
+  const tHw2 = (thresholds.homework_2 !== undefined && thresholds.homework_2 > 0) ? trunc1Dec(thresholds.homework_2) : aH2;
+  const tMt = (thresholds.mock_test !== undefined && thresholds.mock_test > 0) ? trunc1Dec(thresholds.mock_test) : aMt;
 
   const validAvgs = [tC1, tC2].filter((v) => v > 0);
   const checkComb = validAvgs.length > 0 ? validAvgs.reduce((a, b) => a + b, 0) / validAvgs.length : 0;
   const diffHw = (tHw1 > 0 && checkComb > 0) ? trunc1Dec(Math.abs(tHw1 - checkComb)) : 0;
 
-  // 2. Identify failing students per category
-  const belowC1: string[] = [];
-  const belowC2: string[] = [];
-  const belowHw1: string[] = [];
-  const belowHw2: string[] = [];
-  const belowMt: string[] = [];
-
+  // Failing students
+  const bC1: string[] = [], bC2: string[] = [], bH1: string[] = [], bH2: string[] = [], bMt: string[] = [];
   records.forEach((r) => {
     if (r.status === 'Vắng mặt') return;
-    const nC1 = Number(r.check_1);
-    if (!isNaN(nC1) && nC1 > 0 && tC1 > 0 && nC1 < tC1) belowC1.push(r.student_name);
-    const nC2 = Number(r.check_2);
-    if (!isNaN(nC2) && nC2 > 0 && tC2 > 0 && nC2 < tC2) belowC2.push(r.student_name);
-    const nHw1 = Number(r.homework);
-    if (!isNaN(nHw1) && nHw1 > 0 && tHw1 > 0 && nHw1 < tHw1) belowHw1.push(r.student_name);
-    const nHw2 = Number(r.homework_2);
-    if (!isNaN(nHw2) && nHw2 > 0 && tHw2 > 0 && nHw2 < tHw2) belowHw2.push(r.student_name);
-    const nMt = Number(r.mock_test);
-    if (!isNaN(nMt) && nMt > 0 && tMt > 0 && nMt < tMt) belowMt.push(r.student_name);
+    const nC1 = Number(r.check_1), nC2 = Number(r.check_2), nH1 = Number(r.homework), nH2 = Number(r.homework_2), nMt = Number(r.mock_test);
+    if (!isNaN(nC1) && nC1 > 0 && tC1 > 0 && nC1 < tC1) bC1.push(r.student_name);
+    if (!isNaN(nC2) && nC2 > 0 && tC2 > 0 && nC2 < tC2) bC2.push(r.student_name);
+    if (!isNaN(nH1) && nH1 > 0 && tHw1 > 0 && nH1 < tHw1) bH1.push(r.student_name);
+    if (!isNaN(nH2) && nH2 > 0 && tHw2 > 0 && nH2 < tHw2) bH2.push(r.student_name);
+    if (!isNaN(nMt) && nMt > 0 && tMt > 0 && nMt < tMt) bMt.push(r.student_name);
   });
 
-  // 3. Construct pristine DOM container
-  const container = document.createElement('div');
-  container.style.position = 'fixed';
-  container.style.left = '-9999px';
-  container.style.top = '0';
-  container.style.width = '1260px';
-  container.style.backgroundColor = '#ffffff';
-  container.style.fontFamily = "'Times New Roman', Times, serif";
-  container.style.color = '#0f172a';
-  container.style.boxSizing = 'border-box';
-  container.style.padding = '0';
-  container.style.margin = '0';
-
-  const rowsHtml = records
-    .map((r, idx) => {
-      const isAbsent = r.status === 'Vắng mặt';
-      const nC1 = Number(r.check_1);
-      const nC2 = Number(r.check_2);
-      const nHw1 = Number(r.homework);
-      const nHw2 = Number(r.homework_2);
-      const nMt = Number(r.mock_test);
-
-      // Diff
-      let diffStr = '-';
-      if (!isAbsent && !isNaN(nHw1) && nHw1 > 0) {
-        const vC1 = !isNaN(nC1) && nC1 > 0;
-        const vC2 = !isNaN(nC2) && nC2 > 0;
-        if (vC1 && vC2) diffStr = format1Dec(Math.abs(nHw1 - (nC1 + nC2) / 2));
-        else if (vC1) diffStr = format1Dec(Math.abs(nHw1 - nC1));
-        else if (vC2) diffStr = format1Dec(Math.abs(nHw1 - nC2));
-      }
-
-      // Status
-      let statusHtml = '';
-      if (isAbsent) {
-        statusHtml = '<span style="color: #64748b; font-weight: bold;">Vắng mặt</span>';
-      } else {
-        const fails: string[] = [];
-        if (!isNaN(nC1) && nC1 > 0 && tC1 > 0 && nC1 < tC1) fails.push('Check 1');
-        if (!isNaN(nC2) && nC2 > 0 && tC2 > 0 && nC2 < tC2) fails.push('Check 2');
-        if (!isNaN(nHw1) && nHw1 > 0 && tHw1 > 0 && nHw1 < tHw1) fails.push('BTVN 1');
-        if (!isNaN(nHw2) && nHw2 > 0 && tHw2 > 0 && nHw2 < tHw2) fails.push('BTVN 2');
-        if (!isNaN(nMt) && nMt > 0 && tMt > 0 && nMt < tMt) fails.push('Luyện Đề');
-
-        if (fails.length > 0) {
-          statusHtml = `<span style="color: #b91c1c; font-weight: bold;">Cần cố gắng (${fails.join(', ')})</span>`;
-        } else {
-          statusHtml = '<span style="color: #15803d; font-weight: bold;">Đạt yêu cầu</span>';
-        }
-      }
-
-      const rowBg = idx % 2 === 1 ? '#f8fafc' : '#ffffff';
-      return `
-        <tr style="background-color: ${rowBg}; text-align: center; height: 32px; font-size: 13px;">
-          <td style="border: 1px solid #cbd5e1; padding: 6px 4px; font-weight: bold;">${idx + 1}</td>
-          <td style="border: 1px solid #cbd5e1; padding: 6px 8px; font-weight: bold; color: #0f172a;">${r.student_name}</td>
-          <td style="border: 1px solid #cbd5e1; padding: 6px 4px;">${r.status || 'Có mặt'}</td>
-          <td style="border: 1px solid #cbd5e1; padding: 6px 4px; font-family: monospace; font-size: 13px;">${!isNaN(nC1) && nC1 > 0 ? format1Dec(nC1) : '-'}</td>
-          <td style="border: 1px solid #cbd5e1; padding: 6px 4px; font-family: monospace; font-size: 13px;">${!isNaN(nC2) && nC2 > 0 ? format1Dec(nC2) : '-'}</td>
-          <td style="border: 1px solid #cbd5e1; padding: 6px 4px; font-family: monospace; font-size: 13px;">${!isNaN(nHw1) && nHw1 > 0 ? format1Dec(nHw1) : '-'}</td>
-          <td style="border: 1px solid #cbd5e1; padding: 6px 4px; font-family: monospace; font-size: 13px;">${!isNaN(nHw2) && nHw2 > 0 ? format1Dec(nHw2) : '-'}</td>
-          <td style="border: 1px solid #cbd5e1; padding: 6px 4px; font-family: monospace; font-size: 13px;">${!isNaN(nMt) && nMt > 0 ? format1Dec(nMt) : '-'}</td>
-          <td style="border: 1px solid #cbd5e1; padding: 6px 4px; font-family: monospace; font-size: 13px;">${diffStr}</td>
-          <td style="border: 1px solid #cbd5e1; padding: 6px 8px; text-align: center;">${statusHtml}</td>
-        </tr>
-      `;
-    })
-    .join('');
-
-  // Summary sections
-  const summaryRows: { label: string; thresh: number; students: string[] }[] = [
-    { label: c1Topic ? `Check 1 (${c1Topic})` : 'Check 1', thresh: tC1, students: belowC1 },
-    { label: c2Topic ? `Check 2 (${c2Topic})` : 'Check 2', thresh: tC2, students: belowC2 },
-    { label: 'BTVN', thresh: tHw1, students: belowHw1 },
+  const summaryRows = [
+    { label: c1Topic ? `Check 1 (${c1Topic})` : 'Check 1', thresh: tC1, students: bC1 },
+    { label: c2Topic ? `Check 2 (${c2Topic})` : 'Check 2', thresh: tC2, students: bC2 },
+    { label: 'BTVN', thresh: tHw1, students: bH1 },
   ];
-  if (tHw2 > 0 || belowHw2.length > 0) summaryRows.push({ label: 'BTVN 2', thresh: tHw2, students: belowHw2 });
-  if (tMt > 0 || belowMt.length > 0) summaryRows.push({ label: 'Luyện Đề', thresh: tMt, students: belowMt });
+  if (tHw2 > 0 || bH2.length > 0) summaryRows.push({ label: 'BTVN 2', thresh: tHw2, students: bH2 });
+  if (tMt > 0 || bMt.length > 0) summaryRows.push({ label: 'Luyện Đề', thresh: tMt, students: bMt });
 
-  const summaryHtml = summaryRows
-    .map(
-      (s) => `
-      <tr style="height: 34px; font-size: 13px;">
-        <td colspan="2" style="border: 1px solid #cbd5e1; background-color: #ffffff; color: #7f1d1d; font-weight: bold; padding: 6px 12px; text-align: left; width: 34%;">
-          ${s.label} dưới TB (&lt; ${format1Dec(s.thresh)})
-        </td>
-        <td colspan="8" style="border: 1px solid #cbd5e1; background-color: #ffffff; color: #1e1e2f; font-weight: bold; padding: 6px 12px; text-align: left;">
-          ${s.students.length > 0 ? s.students.join(', ') : 'Không có (Tất cả đạt)'}
-        </td>
-      </tr>
-    `
-    )
-    .join('');
+  // 2. Direct Canvas 2D Rendering
+  const scale = 2, width = 1200;
+  const colW = [45, 175, 90, 155, 155, 75, 75, 80, 80, 270];
+  const colX: number[] = [0];
+  for (let i = 0; i < colW.length; i++) colX.push(colX[i] + colW[i]);
 
-  container.innerHTML = `
-    <div style="width: 100%; border: 2px solid #312e81; background: #ffffff;">
-      <!-- ROW 1: HEADER BANNER -->
-      <div style="background-color: #1e1b4b; color: #ffffff; font-size: 17px; font-weight: bold; text-align: center; padding: 14px 10px; text-transform: uppercase; letter-spacing: 0.5px;">
-        BÁO CÁO ĐIỂM DANH &amp; ĐIỂM BÀI HỌC - ${className.toUpperCase()} (${attendanceDate})
-      </div>
+  const titleH = 46, hasTopic = Boolean(c1Topic || c2Topic), topicH = hasTopic ? 32 : 0;
+  const headerH = 52, rowH = 32, avgH = 34, gapH = 14, summaryH = 34, bottomPad = 16;
+  const totalH = titleH + topicH + headerH + records.length * rowH + avgH + gapH + summaryRows.length * summaryH + bottomPad;
 
-      <!-- ROW 2: TEST TOPIC STRIP -->
-      ${
-        c1Topic || c2Topic
-          ? `<div style="background-color: #eef2ff; color: #312e81; font-size: 12.5px; font-weight: bold; text-align: center; padding: 8px 10px; border-bottom: 1px solid #cbd5e1;">
-              Nội dung kiểm tra: ${c1Topic ? `Check 1: ${c1Topic}` : ''} ${c1Topic && c2Topic ? ' — ' : ''} ${c2Topic ? `Check 2: ${c2Topic}` : ''}
-            </div>`
-          : ''
-      }
+  const canvas = document.createElement('canvas');
+  canvas.width = Math.round(width * scale);
+  canvas.height = Math.round(totalH * scale);
+  const ctx = canvas.getContext('2d');
+  if (!ctx) {
+    showToast('Trình duyệt không hỗ trợ Canvas để xuất ảnh', 'error');
+    return;
+  }
+  ctx.scale(scale, scale);
 
-      <!-- TABLE -->
-      <table style="width: 100%; border-collapse: collapse; border: none;">
-        <thead>
-          <tr style="background-color: #312e81; color: #ffffff; font-size: 13px; font-weight: bold; text-align: center; height: 50px;">
-            <th style="border: 1px solid #cbd5e1; width: 44px; padding: 4px;">STT</th>
-            <th style="border: 1px solid #cbd5e1; width: 170px; padding: 4px;">Họ và Tên</th>
-            <th style="border: 1px solid #cbd5e1; width: 90px; padding: 4px;">Điểm Danh</th>
-            <th style="border: 1px solid #cbd5e1; width: 140px; padding: 4px;">Check 1${c1Topic ? `<br/><span style="font-size: 11px; font-weight: normal; opacity: 0.9;">(${c1Topic})</span>` : ''}</th>
-            <th style="border: 1px solid #cbd5e1; width: 140px; padding: 4px;">Check 2${c2Topic ? `<br/><span style="font-size: 11px; font-weight: normal; opacity: 0.9;">(${c2Topic})</span>` : ''}</th>
-            <th style="border: 1px solid #cbd5e1; width: 70px; padding: 4px;">BTVN 1</th>
-            <th style="border: 1px solid #cbd5e1; width: 70px; padding: 4px;">BTVN 2</th>
-            <th style="border: 1px solid #cbd5e1; width: 75px; padding: 4px;">Luyện Đề</th>
-            <th style="border: 1px solid #cbd5e1; width: 75px; padding: 4px;">Độ Lệch</th>
-            <th style="border: 1px solid #cbd5e1; width: 220px; padding: 4px;">Cần Cố Gắng (Dưới TB)</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${rowsHtml}
-          <!-- AVERAGE ROW -->
-          <tr style="background-color: #fef3c7; color: #92400e; font-weight: bold; text-align: center; height: 34px; font-size: 13px;">
-            <td style="border: 1px solid #cbd5e1;"></td>
-            <td style="border: 1px solid #cbd5e1; text-align: center;">Điểm trung bình (Average)</td>
-            <td style="border: 1px solid #cbd5e1;"></td>
-            <td style="border: 1px solid #cbd5e1; font-family: monospace;">${tC1 > 0 ? format1Dec(tC1) : '-'}</td>
-            <td style="border: 1px solid #cbd5e1; font-family: monospace;">${tC2 > 0 ? format1Dec(tC2) : '-'}</td>
-            <td style="border: 1px solid #cbd5e1; font-family: monospace;">${tHw1 > 0 ? format1Dec(tHw1) : '-'}</td>
-            <td style="border: 1px solid #cbd5e1; font-family: monospace;">${tHw2 > 0 ? format1Dec(tHw2) : '-'}</td>
-            <td style="border: 1px solid #cbd5e1; font-family: monospace;">${tMt > 0 ? format1Dec(tMt) : '-'}</td>
-            <td style="border: 1px solid #cbd5e1; font-family: monospace;">${diffHw > 0 ? format1Dec(diffHw) : '-'}</td>
-            <td style="border: 1px solid #cbd5e1; text-align: center;">Đã tính TB lớp</td>
-          </tr>
-          <!-- SPACING ROW -->
-          <tr style="height: 14px; background-color: #ffffff;"><td colspan="10" style="border: none;"></td></tr>
-          <!-- SUMMARY ROWS -->
-          ${summaryHtml}
-        </tbody>
-      </table>
-    </div>
-  `;
+  ctx.fillStyle = '#FFFFFF';
+  ctx.fillRect(0, 0, width, totalH);
+  const fontSerif = "'Times New Roman', Times, serif";
 
-  document.body.appendChild(container);
+  // Banner
+  ctx.fillStyle = '#1E1B4B';
+  ctx.fillRect(0, 0, width, titleH);
+  ctx.fillStyle = '#FFFFFF';
+  ctx.font = `bold 16px ${fontSerif}`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(`BÁO CÁO ĐIỂM DANH & ĐIỂM BÀI HỌC - ${className.toUpperCase()} (${attendanceDate})`, width / 2, titleH / 2);
 
-  try {
-    const dataUrl = await toPng(container, {
-      pixelRatio: 2.2,
-      cacheBust: true,
-      backgroundColor: '#ffffff',
-    });
+  let currentY = titleH;
+  if (hasTopic) {
+    ctx.fillStyle = '#EEF2FF';
+    ctx.fillRect(0, currentY, width, topicH);
+    ctx.strokeStyle = '#CBD5E1';
+    ctx.strokeRect(0, currentY, width, topicH);
+    ctx.fillStyle = '#312E81';
+    ctx.font = `bold 12px ${fontSerif}`;
+    const tParts = [c1Topic ? `Check 1: ${c1Topic}` : '', c2Topic ? `Check 2: ${c2Topic}` : ''].filter(Boolean);
+    ctx.fillText(`Nội dung kiểm tra: ${tParts.join('   —   ')}`, width / 2, currentY + topicH / 2);
+    currentY += topicH;
+  }
 
-    // 4. Download file in browser
-    const link = document.createElement('a');
-    const now = new Date();
-    const pad = (n: number) => String(n).padStart(2, '0');
-    const ts = `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}_${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
-    const filename = `ClassReport_${className}_${attendanceDate}_${ts}.png`;
-    link.download = filename;
-    link.href = dataUrl;
-    link.click();
+  // Headers
+  const hdrs = ['STT', 'Họ và Tên', 'Điểm Danh', 'Check 1', 'Check 2', 'BTVN 1', 'BTVN 2', 'Luyện Đề', 'Độ Lệch', 'Cần Cố Gắng (Dưới TB)'];
+  ctx.fillStyle = '#312E81';
+  ctx.fillRect(0, currentY, width, headerH);
+  ctx.strokeStyle = '#CBD5E1';
 
-    // 5. Save to backend for native desktop file opening
-    try {
-      const res = await api.saveExportPng(classItem.id, attendanceDate, dataUrl);
-      const savedName = res?.filename || filename;
-      showToast(`Đã xuất ảnh PNG: ${savedName}`, 'success', 'MỞ ẢNH', () => {
-        api.openLocalFile(savedName);
-      });
-    } catch {
-      showToast(`Đã xuất ảnh PNG: ${filename}`, 'success');
-    }
-  } catch (err: any) {
-    showToast('Xuất ảnh PNG thất bại: ' + (err?.message || String(err)), 'error');
-  } finally {
-    if (document.body.contains(container)) {
-      document.body.removeChild(container);
+  for (let c = 0; c < 10; c++) {
+    const x = colX[c], w = colW[c];
+    ctx.strokeRect(x, currentY, w, headerH);
+    ctx.fillStyle = '#FFFFFF';
+    ctx.textAlign = 'center';
+    if (c === 3 && c1Topic) {
+      ctx.font = `bold 12px ${fontSerif}`;
+      ctx.fillText('Check 1', x + w / 2, currentY + 18);
+      ctx.font = `normal 10.5px ${fontSerif}`;
+      ctx.fillText(`(${c1Topic.length > 25 ? c1Topic.substring(0, 23) + '..' : c1Topic})`, x + w / 2, currentY + 34);
+    } else if (c === 4 && c2Topic) {
+      ctx.font = `bold 12px ${fontSerif}`;
+      ctx.fillText('Check 2', x + w / 2, currentY + 18);
+      ctx.font = `normal 10.5px ${fontSerif}`;
+      ctx.fillText(`(${c2Topic.length > 25 ? c2Topic.substring(0, 23) + '..' : c2Topic})`, x + w / 2, currentY + 34);
+    } else {
+      ctx.font = `bold 12px ${fontSerif}`;
+      ctx.fillText(hdrs[c], x + w / 2, currentY + headerH / 2);
     }
   }
+  currentY += headerH;
+
+  // Student Rows
+  records.forEach((r, idx) => {
+    const isAbsent = r.status === 'Vắng mặt';
+    const nC1 = Number(r.check_1), nC2 = Number(r.check_2), nH1 = Number(r.homework), nH2 = Number(r.homework_2), nMt = Number(r.mock_test);
+    let diffStr = '-';
+    if (!isAbsent && !isNaN(nH1) && nH1 > 0) {
+      const vC1 = !isNaN(nC1) && nC1 > 0, vC2 = !isNaN(nC2) && nC2 > 0;
+      if (vC1 && vC2) diffStr = format1Dec(Math.abs(nH1 - (nC1 + nC2) / 2));
+      else if (vC1) diffStr = format1Dec(Math.abs(nH1 - nC1));
+      else if (vC2) diffStr = format1Dec(Math.abs(nH1 - nC2));
+    }
+
+    const fails: string[] = [];
+    if (!isNaN(nC1) && nC1 > 0 && tC1 > 0 && nC1 < tC1) fails.push('Check 1');
+    if (!isNaN(nC2) && nC2 > 0 && tC2 > 0 && nC2 < tC2) fails.push('Check 2');
+    if (!isNaN(nH1) && nH1 > 0 && tHw1 > 0 && nH1 < tHw1) fails.push('BTVN 1');
+    if (!isNaN(nH2) && nH2 > 0 && tHw2 > 0 && nH2 < tHw2) fails.push('BTVN 2');
+    if (!isNaN(nMt) && nMt > 0 && tMt > 0 && nMt < tMt) fails.push('Luyện Đề');
+
+    ctx.fillStyle = idx % 2 === 1 ? '#F8FAFC' : '#FFFFFF';
+    ctx.fillRect(0, currentY, width, rowH);
+
+    const rVals = [
+      String(idx + 1), r.student_name, r.status || 'Có mặt',
+      !isNaN(nC1) && nC1 > 0 ? format1Dec(nC1) : '-',
+      !isNaN(nC2) && nC2 > 0 ? format1Dec(nC2) : '-',
+      !isNaN(nH1) && nH1 > 0 ? format1Dec(nH1) : '-',
+      !isNaN(nH2) && nH2 > 0 ? format1Dec(nH2) : '-',
+      !isNaN(nMt) && nMt > 0 ? format1Dec(nMt) : '-',
+      diffStr,
+      isAbsent ? 'Vắng mặt' : (fails.length > 0 ? `Cần cố gắng (${fails.join(', ')})` : 'Đạt yêu cầu'),
+    ];
+
+    for (let c = 0; c < 10; c++) {
+      const x = colX[c], w = colW[c];
+      ctx.strokeStyle = '#CBD5E1';
+      ctx.strokeRect(x, currentY, w, rowH);
+
+      if (c === 9) {
+        ctx.fillStyle = isAbsent ? '#64748B' : (fails.length > 0 ? '#B91C1C' : '#15803D');
+        ctx.font = `bold 12px ${fontSerif}`;
+      } else if (c === 1) {
+        ctx.fillStyle = '#0F172A';
+        ctx.font = `bold 12px ${fontSerif}`;
+      } else {
+        ctx.fillStyle = '#1E293B';
+        ctx.font = `normal 12px ${fontSerif}`;
+      }
+      ctx.textAlign = 'center';
+      ctx.fillText(rVals[c], x + w / 2, currentY + rowH / 2);
+    }
+    currentY += rowH;
+  });
+
+  // Average Row
+  ctx.fillStyle = '#FEF3C7';
+  ctx.fillRect(0, currentY, width, avgH);
+  ctx.fillStyle = '#92400E';
+  ctx.font = `bold 12px ${fontSerif}`;
+
+  const aVals = [
+    '', 'Điểm trung bình (Average)', '',
+    tC1 > 0 ? format1Dec(tC1) : '-',
+    tC2 > 0 ? format1Dec(tC2) : '-',
+    tHw1 > 0 ? format1Dec(tHw1) : '-',
+    tHw2 > 0 ? format1Dec(tHw2) : '-',
+    tMt > 0 ? format1Dec(tMt) : '-',
+    diffHw > 0 ? format1Dec(diffHw) : '-',
+    'Đã tính TB lớp'
+  ];
+
+  for (let c = 0; c < 10; c++) {
+    const x = colX[c], w = colW[c];
+    ctx.strokeStyle = '#CBD5E1';
+    ctx.strokeRect(x, currentY, w, avgH);
+    ctx.textAlign = 'center';
+    ctx.fillText(aVals[c], x + w / 2, currentY + avgH / 2);
+  }
+  currentY += avgH + gapH;
+
+  // Summary Rows
+  const leftW = colX[2], rightW = width - leftW;
+  summaryRows.forEach((s) => {
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(0, currentY, width, summaryH);
+    ctx.strokeStyle = '#CBD5E1';
+    ctx.strokeRect(0, currentY, leftW, summaryH);
+    ctx.strokeRect(leftW, currentY, rightW, summaryH);
+
+    ctx.fillStyle = '#7F1D1D';
+    ctx.font = `bold 12px ${fontSerif}`;
+    ctx.textAlign = 'left';
+    ctx.fillText(`${s.label} dưới TB (< ${s.thresh > 0 ? format1Dec(s.thresh) : '-'})`, 12, currentY + summaryH / 2);
+
+    ctx.fillStyle = '#1E1E2F';
+    ctx.font = `bold 12px ${fontSerif}`;
+    ctx.fillText(s.students.length > 0 ? s.students.join(', ') : 'Không có (Tất cả đạt)', leftW + 12, currentY + summaryH / 2);
+    currentY += summaryH;
+  });
+
+  // Border outline
+  ctx.strokeStyle = '#312E81';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(0, 0, width, currentY);
+
+  // 3. Export: Download + Desktop Save + Clipboard Copy
+  const dataUrl = canvas.toDataURL('image/png');
+  const now = new Date();
+  const pad = (n: number) => String(n).padStart(2, '0');
+  const ts = `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}_${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
+  const filename = `ClassReport_${className}_${attendanceDate}_${ts}.png`;
+
+  const link = document.createElement('a');
+  link.download = filename;
+  link.href = dataUrl;
+  link.click();
+
+  let savedName = filename;
+  try {
+    const res = await api.saveExportPng(classItem.id, attendanceDate, dataUrl);
+    if (res?.filename) savedName = res.filename;
+  } catch (err) {
+    console.warn('Could not save PNG to workspace_files:', err);
+  }
+
+  // Copy to clipboard immediately
+  let clipboardSuccess = false;
+  if (navigator.clipboard && (window as any).ClipboardItem) {
+    try {
+      const parts = dataUrl.split(';base64,');
+      const raw = window.atob(parts[1]);
+      const uInt8Array = new Uint8Array(raw.length);
+      for (let i = 0; i < raw.length; ++i) {
+        uInt8Array[i] = raw.charCodeAt(i);
+      }
+      const blob = new Blob([uInt8Array], { type: 'image/png' });
+      await navigator.clipboard.write([
+        new (window as any).ClipboardItem({ 'image/png': blob }),
+      ]);
+      clipboardSuccess = true;
+    } catch (clipErr) {
+      console.warn('Clipboard write error:', clipErr);
+    }
+  }
+
+  const clipMsg = clipboardSuccess ? ' và đã lưu vào bộ nhớ tạm (Ctrl+V để dán)' : '';
+  showToast(`Đã xuất ảnh PNG${clipMsg}: ${savedName}`, 'success', 'MỞ ẢNH', () => {
+    api.openLocalFile(savedName);
+  });
 }

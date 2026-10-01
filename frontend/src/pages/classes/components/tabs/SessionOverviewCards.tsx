@@ -78,7 +78,7 @@ export const BelowThresholdCard: React.FC<BelowThresholdCardProps> = ({
 
         {/* Student List or Empty State */}
         {students.length > 0 ? (
-          <div className={`flex flex-wrap gap-1.5 ${isExpanded ? 'max-h-none overflow-visible pr-6 pb-2' : 'max-h-28 overflow-y-auto pr-6'}`}>
+          <div className={`flex flex-wrap gap-1.5 ${isExpanded ? 'max-h-none overflow-visible pb-3' : 'max-h-24 overflow-y-auto pr-1 mb-2'}`}>
             {students.map((s) => (
               <button
                 key={s.student_id}
@@ -106,11 +106,11 @@ export const BelowThresholdCard: React.FC<BelowThresholdCardProps> = ({
         <button
           type="button"
           onClick={() => setIsExpanded((prev) => !prev)}
-          className="absolute bottom-2.5 right-2.5 p-1 rounded-md text-slate-400 hover:text-slate-700 dark:text-slate-500 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-white/10 transition-colors cursor-pointer select-none"
+          className="absolute bottom-1 right-1.5 z-10 p-0.5 rounded text-slate-400 hover:text-slate-700 dark:text-slate-500 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-white/10 transition-colors cursor-pointer select-none"
           title={isExpanded ? 'Thu gọn danh sách' : 'Mở rộng xem toàn bộ (chụp ảnh màn hình)'}
           aria-label={isExpanded ? 'Thu gọn' : 'Mở rộng'}
         >
-          {isExpanded ? <Minimize2 size={13} /> : <Maximize2 size={13} />}
+          {isExpanded ? <Minimize2 size={10} strokeWidth={2.5} /> : <Maximize2 size={10} strokeWidth={2.5} />}
         </button>
       )}
     </div>
@@ -172,7 +172,7 @@ export const DivergenceCard: React.FC<DivergenceCardProps> = ({
 
         {/* Student List or Empty State */}
         {students.length > 0 ? (
-          <div className={`flex flex-wrap gap-1.5 ${isExpanded ? 'max-h-none overflow-visible pr-6 pb-2' : 'max-h-28 overflow-y-auto pr-6'}`}>
+          <div className={`flex flex-wrap gap-1.5 ${isExpanded ? 'max-h-none overflow-visible pb-3' : 'max-h-24 overflow-y-auto pr-1 mb-2'}`}>
             {students.map((s) => (
               <button
                 key={s.student_id}
@@ -200,11 +200,11 @@ export const DivergenceCard: React.FC<DivergenceCardProps> = ({
         <button
           type="button"
           onClick={() => setIsExpanded((prev) => !prev)}
-          className="absolute bottom-2.5 right-2.5 p-1 rounded-md text-slate-400 hover:text-slate-700 dark:text-slate-500 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-white/10 transition-colors cursor-pointer select-none"
+          className="absolute bottom-1 right-1.5 z-10 p-0.5 rounded text-slate-400 hover:text-slate-700 dark:text-slate-500 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-white/10 transition-colors cursor-pointer select-none"
           title={isExpanded ? 'Thu gọn danh sách' : 'Mở rộng xem toàn bộ (chụp ảnh màn hình)'}
           aria-label={isExpanded ? 'Thu gọn' : 'Mở rộng'}
         >
-          {isExpanded ? <Minimize2 size={13} /> : <Maximize2 size={13} />}
+          {isExpanded ? <Minimize2 size={10} strokeWidth={2.5} /> : <Maximize2 size={10} strokeWidth={2.5} />}
         </button>
       )}
     </div>
