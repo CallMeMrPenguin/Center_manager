@@ -254,8 +254,10 @@ export const api = {
     request<any>(`/api/classes/${classId}/attendance`, { method: 'POST', body: JSON.stringify({ date, records }), tags: ['attendance', 'reports', 'analytics'] }),
   deleteClassAttendance: (classId: number, date: string) =>
     request<{ status: string; deleted_grades: number; deleted_sessions: number }>(`/api/classes/${classId}/attendance?date=${encodeURIComponent(date)}`, { method: 'DELETE', tags: ['attendance', 'schedule', 'sessions', 'reports', 'analytics', 'classes'] }),
-  exportClassExcel: (classId: number, date: string, records?: any[]) =>
-    request<{ filename: string; status: string }>(`/api/classes/${classId}/export/excel`, { method: 'POST', body: JSON.stringify({ date, records }) }),
+  exportClassExcel: (classId: number, date: string, records?: any[], thresholds?: any, testConfig?: any) =>
+    request<{ filename: string; status: string }>(`/api/classes/${classId}/export/excel`, { method: 'POST', body: JSON.stringify({ date, records, thresholds, test_config: testConfig }) }),
+  saveExportPng: (classId: number, date: string, imageBase64: string) =>
+    request<{ filename: string; status: string }>(`/api/classes/${classId}/export/png`, { method: 'POST', body: JSON.stringify({ date, image_base64: imageBase64 }) }),
   exportClassDocx: (classId: number, date: string, records?: any[]) =>
     request<{ filename: string; status: string }>(`/api/classes/${classId}/export/docx`, { method: 'POST', body: JSON.stringify({ date, records }) }),
 

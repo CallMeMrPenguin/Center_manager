@@ -268,11 +268,11 @@ export function useClassDetail(selectedClass: ClassItem | null) {
     }
   };
 
-  const handleExportExcel = async () => {
+  const handleExportExcel = async (thresholds?: any) => {
     if (!selectedClass) return;
     try {
       const recordsToExport = attendanceRecordsRef.current.length > 0 ? attendanceRecordsRef.current : attendanceRecords;
-      const res = await api.exportClassExcel(selectedClass.id, attendanceDate, recordsToExport);
+      const res = await api.exportClassExcel(selectedClass.id, attendanceDate, recordsToExport, thresholds);
       if (res && res.filename) {
         showToast(`Đã xuất file Excel: ${res.filename}`, 'success', 'MỞ FILE', () => {
           api.openLocalFile(res.filename);

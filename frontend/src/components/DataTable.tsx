@@ -48,7 +48,7 @@ import {
   FileText, ChevronsLeft, ChevronsRight, Columns,
   AlignLeft, AlignCenter, AlignRight, GripVertical, CheckSquare, Square,
   Layers, ChevronRight as ChevronRightIcon, Plus, Trash2, Pin, PinOff,
-  RotateCcw, Zap
+  RotateCcw, Zap, Image as ImageIcon
 } from 'lucide-react';
 import { SegmentedControl } from './SegmentedControl';
 import { filterWithNearMatchFallback } from '../utils/fuzzySearch';
@@ -124,6 +124,7 @@ export interface DataTableProps<TData> {
   onExportExcel?: () => void;
   onExportDocx?: () => void;
   onExportPdf?: () => void;
+  onExportPng?: () => void;
 
   // Toolbar slots
   toolbarLeft?: React.ReactNode;
@@ -432,12 +433,14 @@ function ExportDropdown<TData>({
   onExportExcel,
   onExportPdf,
   onExportDocx,
+  onExportPng,
 }: {
   table: ReturnType<typeof useReactTable<TData>>;
   filename: string;
   onExportExcel?: () => void;
   onExportPdf?: () => void;
   onExportDocx?: () => void;
+  onExportPng?: () => void;
 }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -630,6 +633,16 @@ function ExportDropdown<TData>({
             <FileSpreadsheet size={14} className="text-emerald-600 dark:text-emerald-400 shrink-0" />
             <span>Excel (.xlsx)</span>
           </button>
+          {onExportPng && (
+            <button
+              type="button"
+              onClick={() => { onExportPng(); setOpen(false); }}
+              className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-black text-slate-900 dark:text-slate-100 hover:text-cyan-700 dark:hover:text-cyan-400 hover:bg-cyan-500/15 transition cursor-pointer"
+            >
+              <ImageIcon size={14} className="text-cyan-600 dark:text-cyan-400 shrink-0" />
+              <span>Ảnh PNG (.png)</span>
+            </button>
+          )}
           {onExportDocx && (
             <button
               type="button"
@@ -685,6 +698,7 @@ export function DataTable<TData>({
   onExportExcel,
   onExportDocx,
   onExportPdf,
+  onExportPng,
   toolbarLeft,
   toolbarRight,
   searchPlaceholder = 'Tìm kiếm...',
@@ -1172,6 +1186,7 @@ export function DataTable<TData>({
                 onExportExcel={onExportExcel}
                 onExportPdf={onExportPdf}
                 onExportDocx={onExportDocx}
+                onExportPng={onExportPng}
               />
             )}
             {enableColumnVisibility && (

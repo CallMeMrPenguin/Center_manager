@@ -10,14 +10,10 @@ from config.settings import get_setting, BASE_DIR
 try:
     from services.csv_parser import parse_question_bank_csv
     from services.docx_parser import convert_docx_to_json
-    from services.export_service import export_class_excel, export_class_docx
+    from services.export_service import export_class_excel, export_class_docx, save_export_png
     from routers.questions import flatten_docx_to_questions
 except Exception as _e:
-    parse_question_bank_csv = None
-    convert_docx_to_json = None
-    export_class_excel = None
-    export_class_docx = None
-    flatten_docx_to_questions = None
+    parse_question_bank_csv = convert_docx_to_json = export_class_excel = export_class_docx = save_export_png = flatten_docx_to_questions = None
 from database.db_manager import (
     get_connection,
     get_students, create_student, update_student, delete_student,
@@ -282,15 +278,15 @@ def api_delete_attendance(class_id: int, date: str):
 
 @router.post("/api/classes/{class_id}/export/excel")
 def api_export_class_excel(class_id: int, payload: Dict[str, Any]):
-    date_str = payload.get("date")
-    records = payload.get("records")
-    return export_class_excel(class_id, date_str, records)
+    return export_class_excel(class_id, payload.get("date"), payload.get("records"), payload.get("thresholds"), payload.get("test_config"))
+
+@router.post("/api/classes/{class_id}/export/png")
+def api_export_class_png(class_id: int, payload: Dict[str, Any]):
+    return save_export_png(class_id, payload.get("date"), payload.get("image_base64", ""))
 
 @router.post("/api/classes/{class_id}/export/docx")
 def api_export_class_docx(class_id: int, payload: Dict[str, Any]):
-    date_str = payload.get("date")
-    records = payload.get("records")
-    return export_class_docx(class_id, date_str, records)
+    return export_class_docx(class_id, payload.get("date"), payload.get("records"))
 
 @router.get("/api/courses")
 def api_get_courses(search: str = "", status: str = ""):

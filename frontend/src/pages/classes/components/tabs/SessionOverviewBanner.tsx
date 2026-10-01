@@ -13,14 +13,17 @@ interface SessionOverviewBannerProps {
   attendanceRecords: AttendanceRecord[];
   attendanceDate: string;
   onFilterStudent?: (studentName: string) => void;
+  overview?: ReturnType<typeof useSessionOverview>;
 }
 
 export const SessionOverviewBanner: React.FC<SessionOverviewBannerProps> = ({
   attendanceRecords,
   attendanceDate,
   onFilterStudent,
+  overview: propsOverview,
 }) => {
   const [isExpanded, setIsExpanded] = useState(true);
+  const internalOverview = useSessionOverview(attendanceRecords);
   const {
     stats,
     belowAvgData,
@@ -34,7 +37,7 @@ export const SessionOverviewBanner: React.FC<SessionOverviewBannerProps> = ({
     handleC1Change,
     handleC2Change,
     handleHwChange,
-  } = useSessionOverview(attendanceRecords);
+  } = propsOverview || internalOverview;
 
   return (
     <div className="space-y-3">

@@ -251,9 +251,9 @@ export default function ClassesPage() {
                 setSelectedStudentForAction(st);
                 setActionModalOpen(true);
               }}
-              onExportExcel={async () => {
+              onExportExcel={async (thresholds?: any) => {
                 await flushSaveAttendance();
-                handleExportExcel();
+                handleExportExcel(thresholds);
               }}
               onExportDocx={async () => {
                 await flushSaveAttendance();

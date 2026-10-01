@@ -5,6 +5,8 @@ import { ClassItem, EnrolledStudent, AttendanceRecord } from '../../types';
 import { DataTable } from '../../../../components/DataTable';
 import { CheckScoreInput } from '../CheckScoreInput';
 import { SessionOverviewBanner } from './SessionOverviewBanner';
+import { useSessionOverview } from './useSessionOverview';
+import { exportClassReportPng } from '../../utils/exportClassReportPng';
 import { showToast } from '../../../../components/Toast';
 import { format1Dec } from '../../../../utils';
 
@@ -16,7 +18,7 @@ interface AttendanceGradesTabProps {
   onUpdateRecord: (studentId: number, field: string, value: any) => void;
   parseAndFormatScore: (val: any) => string;
   onOpenStudentActionModal: (student: EnrolledStudent) => void;
-  onExportExcel: () => void;
+  onExportExcel: (thresholds?: any) => void;
   onExportDocx: () => void;
   onOpenTestConfigModal?: () => void;
   onCircularSwap?: () => void;
@@ -39,6 +41,8 @@ export const AttendanceGradesTab: React.FC<AttendanceGradesTabProps> = ({
   onSaveAttendance,
   savingAttendance = false,
 }) => {
+  const sessionOverview = useSessionOverview(attendanceRecords);
+
   const attendanceColumns = useMemo<ColumnDef<any>[]>(
     () => [
       {
@@ -268,6 +272,32 @@ export const AttendanceGradesTab: React.FC<AttendanceGradesTabProps> = ({
     }
   };
 
+  const handleExportExcelWithThresholds = () => {
+    onExportExcel({
+      check_1: sessionOverview.threshC1,
+      check_2: sessionOverview.threshC2,
+      homework: sessionOverview.threshHw,
+      divergence: sessionOverview.divergenceMin,
+    });
+  };
+
+  const handleExportPng = async () => {
+    if (onSaveAttendance) {
+      await onSaveAttendance();
+    }
+    await exportClassReportPng({
+      classItem: selectedClass,
+      attendanceDate,
+      records: attendanceRecords,
+      thresholds: {
+        check_1: sessionOverview.threshC1,
+        check_2: sessionOverview.threshC2,
+        homework: sessionOverview.threshHw,
+        divergence: sessionOverview.divergenceMin,
+      },
+    });
+  };
+
   return (
     <div className="space-y-4">
       {/* 1. SESSION OVERVIEW BANNER (NEW REQUIREMENT) */}
@@ -275,9 +305,10 @@ export const AttendanceGradesTab: React.FC<AttendanceGradesTabProps> = ({
         attendanceRecords={attendanceRecords}
         attendanceDate={attendanceDate}
         onFilterStudent={handleFilterStudentChip}
+        overview={sessionOverview}
       />
 
-      {/* 2. UNIFIED ATTENDANCE & GRADES DATATABLE (Client-side Excel export respects toggled visible columns) */}
+      {/* 2. UNIFIED ATTENDANCE & GRADES DATATABLE */}
       <div className="bg-white dark:bg-[#0d1018] rounded-2xl overflow-hidden shadow-[0_4px_24px_rgba(0,0,0,0.08)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.5)]">
         <DataTable
           tableId="classes-attendance-table"
@@ -285,6 +316,8 @@ export const AttendanceGradesTab: React.FC<AttendanceGradesTabProps> = ({
           columns={attendanceColumns}
           pageSize={20}
           exportFilename={`diem_danh_${selectedClass?.class_name || ''}_${attendanceDate}`}
+          onExportExcel={handleExportExcelWithThresholds}
+          onExportPng={handleExportPng}
           onExportDocx={onExportDocx}
           toolbarRight={
             <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">

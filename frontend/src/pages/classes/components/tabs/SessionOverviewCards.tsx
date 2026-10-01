@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { Maximize2, Minimize2 } from 'lucide-react';
 import { format1Dec } from '../../../../utils';
 import { DiscrepancyStudent } from './useSessionOverview';
 
@@ -34,10 +35,11 @@ export const BelowThresholdCard: React.FC<BelowThresholdCardProps> = ({
   students,
   onFilterStudent,
 }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
   const styles = THEME_STYLES[theme];
 
   return (
-    <div className="bg-white dark:bg-[#121626] rounded-2xl p-4 border border-slate-200/80 dark:border-white/10 shadow-xs hover:shadow-sm flex flex-col justify-between min-h-[135px] transition-all">
+    <div className="relative bg-white dark:bg-[#121626] rounded-2xl p-4 border border-slate-200/80 dark:border-white/10 shadow-xs hover:shadow-sm flex flex-col justify-between min-h-[135px] transition-all">
       <div>
         {/* Top Header: Title on Left, Controls cleanly separated on Right with ZERO nested background cards */}
         <div className="flex items-center justify-between mb-3 gap-2">
@@ -76,7 +78,7 @@ export const BelowThresholdCard: React.FC<BelowThresholdCardProps> = ({
 
         {/* Student List or Empty State */}
         {students.length > 0 ? (
-          <div className="flex flex-wrap gap-1.5 max-h-28 overflow-y-auto pr-1">
+          <div className={`flex flex-wrap gap-1.5 ${isExpanded ? 'max-h-none overflow-visible pr-6 pb-2' : 'max-h-28 overflow-y-auto pr-6'}`}>
             {students.map((s) => (
               <button
                 key={s.student_id}
@@ -98,6 +100,19 @@ export const BelowThresholdCard: React.FC<BelowThresholdCardProps> = ({
           </p>
         )}
       </div>
+
+      {/* Minimalist expand/collapse button in the bottom right corner */}
+      {students.length > 0 && (
+        <button
+          type="button"
+          onClick={() => setIsExpanded((prev) => !prev)}
+          className="absolute bottom-2.5 right-2.5 p-1 rounded-md text-slate-400 hover:text-slate-700 dark:text-slate-500 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-white/10 transition-colors cursor-pointer select-none"
+          title={isExpanded ? 'Thu gọn danh sách' : 'Mở rộng xem toàn bộ (chụp ảnh màn hình)'}
+          aria-label={isExpanded ? 'Thu gọn' : 'Mở rộng'}
+        >
+          {isExpanded ? <Minimize2 size={13} /> : <Maximize2 size={13} />}
+        </button>
+      )}
     </div>
   );
 };
@@ -115,8 +130,10 @@ export const DivergenceCard: React.FC<DivergenceCardProps> = ({
   students,
   onFilterStudent,
 }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+
   return (
-    <div className="bg-white dark:bg-[#121626] rounded-2xl p-4 border border-slate-200/80 dark:border-white/10 shadow-xs hover:shadow-sm flex flex-col justify-between min-h-[135px] transition-all">
+    <div className="relative bg-white dark:bg-[#121626] rounded-2xl p-4 border border-slate-200/80 dark:border-white/10 shadow-xs hover:shadow-sm flex flex-col justify-between min-h-[135px] transition-all">
       <div>
         {/* Top Header: Title on Left, Controls cleanly separated on Right with ZERO nested background cards */}
         <div className="flex items-center justify-between mb-3 gap-2">
@@ -155,7 +172,7 @@ export const DivergenceCard: React.FC<DivergenceCardProps> = ({
 
         {/* Student List or Empty State */}
         {students.length > 0 ? (
-          <div className="flex flex-wrap gap-1.5 max-h-28 overflow-y-auto pr-1">
+          <div className={`flex flex-wrap gap-1.5 ${isExpanded ? 'max-h-none overflow-visible pr-6 pb-2' : 'max-h-28 overflow-y-auto pr-6'}`}>
             {students.map((s) => (
               <button
                 key={s.student_id}
@@ -177,6 +194,20 @@ export const DivergenceCard: React.FC<DivergenceCardProps> = ({
           </p>
         )}
       </div>
+
+      {/* Minimalist expand/collapse button in the bottom right corner */}
+      {students.length > 0 && (
+        <button
+          type="button"
+          onClick={() => setIsExpanded((prev) => !prev)}
+          className="absolute bottom-2.5 right-2.5 p-1 rounded-md text-slate-400 hover:text-slate-700 dark:text-slate-500 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-white/10 transition-colors cursor-pointer select-none"
+          title={isExpanded ? 'Thu gọn danh sách' : 'Mở rộng xem toàn bộ (chụp ảnh màn hình)'}
+          aria-label={isExpanded ? 'Thu gọn' : 'Mở rộng'}
+        >
+          {isExpanded ? <Minimize2 size={13} /> : <Maximize2 size={13} />}
+        </button>
+      )}
     </div>
   );
 };
+

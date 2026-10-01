@@ -220,5 +220,9 @@ export function useSessionOverview(attendanceRecords: AttendanceRecord[]) {
     handleC1Change,
     handleC2Change,
     handleHwChange,
+    threshC1,
+    threshC2,
+    threshHw,
+    divergenceMin,
   };
 }
