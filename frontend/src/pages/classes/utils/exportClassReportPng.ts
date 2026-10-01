@@ -55,22 +55,18 @@ export async function exportClassReportPng({
   const c2Topic = formatTopicString(cfg?.check_2);
 
   // 1. Calculate statistics
-  let sC1 = 0, cC1 = 0, sC2 = 0, cC2 = 0, sH1 = 0, cH1 = 0, sH2 = 0, cH2 = 0, sMt = 0, cMt = 0;
-  records.forEach((r) => {
-    if (r.status === 'Vắng mặt') return;
-    const vC1 = Number(r.check_1), vC2 = Number(r.check_2), vH1 = Number(r.homework), vH2 = Number(r.homework_2), vMt = Number(r.mock_test);
-    if (!isNaN(vC1) && vC1 > 0) { sC1 += vC1; cC1++; }
-    if (!isNaN(vC2) && vC2 > 0) { sC2 += vC2; cC2++; }
-    if (!isNaN(vH1) && vH1 > 0) { sH1 += vH1; cH1++; }
-    if (!isNaN(vH2) && vH2 > 0) { sH2 += vH2; cH2++; }
-    if (!isNaN(vMt) && vMt > 0) { sMt += vMt; cMt++; }
-  });
+  const sumScores = (key: keyof AttendanceRecord) => {
+    let sum = 0, count = 0;
+    records.forEach((r) => {
+      if (r.status === 'Vắng mặt') return;
+      const v = Number(r[key]);
+      if (!isNaN(v) && v > 0) { sum += v; count++; }
+    });
+    return count > 0 ? trunc1Dec(sum / count) : 0;
+  };
 
-  const aC1 = cC1 > 0 ? trunc1Dec(sC1 / cC1) : 0;
-  const aC2 = cC2 > 0 ? trunc1Dec(sC2 / cC2) : 0;
-  const aH1 = cH1 > 0 ? trunc1Dec(sH1 / cH1) : 0;
-  const aH2 = cH2 > 0 ? trunc1Dec(sH2 / cH2) : 0;
-  const aMt = cMt > 0 ? trunc1Dec(sMt / cMt) : 0;
+  const aC1 = sumScores('check_1'), aC2 = sumScores('check_2');
+  const aH1 = sumScores('homework'), aH2 = sumScores('homework_2'), aMt = sumScores('mock_test');
 
   const tC1 = (thresholds.check_1 !== undefined && thresholds.check_1 > 0) ? trunc1Dec(thresholds.check_1) : aC1;
   const tC2 = (thresholds.check_2 !== undefined && thresholds.check_2 > 0) ? trunc1Dec(thresholds.check_2) : aC2;
@@ -83,16 +79,11 @@ export async function exportClassReportPng({
   const diffHw = (tHw1 > 0 && checkComb > 0) ? trunc1Dec(Math.abs(tHw1 - checkComb)) : 0;
 
   // Failing students
-  const bC1: string[] = [], bC2: string[] = [], bH1: string[] = [], bH2: string[] = [], bMt: string[] = [];
-  records.forEach((r) => {
-    if (r.status === 'Vắng mặt') return;
-    const nC1 = Number(r.check_1), nC2 = Number(r.check_2), nH1 = Number(r.homework), nH2 = Number(r.homework_2), nMt = Number(r.mock_test);
-    if (!isNaN(nC1) && nC1 > 0 && tC1 > 0 && nC1 < tC1) bC1.push(r.student_name);
-    if (!isNaN(nC2) && nC2 > 0 && tC2 > 0 && nC2 < tC2) bC2.push(r.student_name);
-    if (!isNaN(nH1) && nH1 > 0 && tHw1 > 0 && nH1 < tHw1) bH1.push(r.student_name);
-    if (!isNaN(nH2) && nH2 > 0 && tHw2 > 0 && nH2 < tHw2) bH2.push(r.student_name);
-    if (!isNaN(nMt) && nMt > 0 && tMt > 0 && nMt < tMt) bMt.push(r.student_name);
-  });
+  const getFails = (key: keyof AttendanceRecord, thresh: number) =>
+    records.filter((r) => r.status !== 'Vắng mặt' && Number(r[key]) > 0 && thresh > 0 && Number(r[key]) < thresh).map((r) => r.student_name);
+
+  const bC1 = getFails('check_1', tC1), bC2 = getFails('check_2', tC2), bH1 = getFails('homework', tHw1);
+  const bH2 = getFails('homework_2', tHw2), bMt = getFails('mock_test', tMt);
 
   const summaryRows = [
     { label: 'Check 1', thresh: tC1, students: bC1 },
@@ -104,19 +95,15 @@ export async function exportClassReportPng({
 
   // Wrap student names cleanly by comma to prevent any text overflow
   function wrapStudentNames(names: string[], maxChars: number = 95): string[] {
-    if (names.length === 0) return ['Không có (Tất cả đạt)'];
+    if (!names.length) return ['Không có (Tất cả đạt)'];
     const lines: string[] = [];
-    let current = '';
+    let cur = '';
     for (const name of names) {
-      const test = current ? `${current}, ${name}` : name;
-      if (test.length > maxChars && current) {
-        lines.push(current);
-        current = name;
-      } else {
-        current = test;
-      }
+      const test = cur ? `${cur}, ${name}` : name;
+      if (test.length > maxChars && cur) { lines.push(cur); cur = name; }
+      else { cur = test; }
     }
-    if (current) lines.push(current);
+    if (cur) lines.push(cur);
     return lines;
   }
 
@@ -128,14 +115,32 @@ export async function exportClassReportPng({
     return { ...s, lines, rowH };
   });
 
+  // Wrap header topics into clean multi-line text without cutting off with dots
+  function wrapHeaderTopic(text: string, maxChars: number = 24): string[] {
+    if (!text) return [];
+    const lines: string[] = [];
+    let cur = '';
+    for (const w of text.split(' ')) {
+      const test = cur ? `${cur} ${w}` : w;
+      if (test.length > maxChars && cur) { lines.push(cur); cur = w; }
+      else { cur = test; }
+    }
+    if (cur) lines.push(cur);
+    return lines.length === 1 ? [`(${lines[0]})`] : lines.map((l, i) => (i === 0 ? `(${l}` : (i === lines.length - 1 ? `${l})` : l)));
+  }
+
+  const c1Lines = wrapHeaderTopic(c1Topic, 24);
+  const c2Lines = wrapHeaderTopic(c2Topic, 24);
+  const maxTopicLines = Math.max(c1Lines.length, c2Lines.length);
+
   // 2. Direct Canvas 2D Rendering
   const scale = 2, width = 1200;
-  const colW = [45, 175, 90, 155, 155, 75, 75, 80, 80, 270];
+  const colW = [45, 170, 80, 165, 165, 70, 70, 75, 75, 285];
   const colX: number[] = [0];
   for (let i = 0; i < colW.length; i++) colX.push(colX[i] + colW[i]);
 
   const titleH = 46, hasTopic = Boolean(c1Topic || c2Topic), topicH = hasTopic ? 32 : 0;
-  const headerH = 52, rowH = 32, avgH = 34, gapH = 14, bottomPad = 16;
+  const headerH = maxTopicLines >= 2 ? 66 : 52, rowH = 32, avgH = 34, gapH = 14, bottomPad = 16;
   const totalH = titleH + topicH + headerH + records.length * rowH + avgH + gapH + totalSummaryH + bottomPad;
 
   const canvas = document.createElement('canvas');
@@ -185,24 +190,26 @@ export async function exportClassReportPng({
     ctx.strokeRect(x, currentY, w, headerH);
     ctx.fillStyle = '#FFFFFF';
     ctx.textAlign = 'center';
-    if (c === 3 && c1Topic) {
+    if (c === 3 && c1Lines.length > 0) {
+      const totalBlockH = 14 + c1Lines.length * 13;
+      let textY = currentY + (headerH - totalBlockH) / 2 + 10;
       ctx.font = `bold 12px ${fontSerif}`;
-      ctx.fillText('Check 1', x + w / 2, currentY + 18);
-      ctx.font = `normal 10.5px ${fontSerif}`;
-      let disp = c1Topic;
-      while (disp.length > 4 && ctx.measureText(`(${disp}..)`).width > w - 10) {
-        disp = disp.substring(0, disp.length - 1);
+      ctx.fillText('Check 1', x + w / 2, textY);
+      ctx.font = `normal 10px ${fontSerif}`;
+      for (const line of c1Lines) {
+        textY += 13;
+        ctx.fillText(line, x + w / 2, textY);
       }
-      ctx.fillText(`(${disp !== c1Topic ? disp + '..' : disp})`, x + w / 2, currentY + 34);
-    } else if (c === 4 && c2Topic) {
+    } else if (c === 4 && c2Lines.length > 0) {
+      const totalBlockH = 14 + c2Lines.length * 13;
+      let textY = currentY + (headerH - totalBlockH) / 2 + 10;
       ctx.font = `bold 12px ${fontSerif}`;
-      ctx.fillText('Check 2', x + w / 2, currentY + 18);
-      ctx.font = `normal 10.5px ${fontSerif}`;
-      let disp = c2Topic;
-      while (disp.length > 4 && ctx.measureText(`(${disp}..)`).width > w - 10) {
-        disp = disp.substring(0, disp.length - 1);
+      ctx.fillText('Check 2', x + w / 2, textY);
+      ctx.font = `normal 10px ${fontSerif}`;
+      for (const line of c2Lines) {
+        textY += 13;
+        ctx.fillText(line, x + w / 2, textY);
       }
-      ctx.fillText(`(${disp !== c2Topic ? disp + '..' : disp})`, x + w / 2, currentY + 34);
     } else {
       ctx.font = `bold 12px ${fontSerif}`;
       ctx.fillText(hdrs[c], x + w / 2, currentY + headerH / 2);
@@ -341,14 +348,10 @@ export async function exportClassReportPng({
 
   // 3. Export: Download + Desktop Save + Clipboard Copy
   const dataUrl = canvas.toDataURL('image/png');
-  const now = new Date();
-  const pad = (n: number) => String(n).padStart(2, '0');
-  const ts = `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}_${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
+  const ts = new Date().toISOString().replace(/[-:T.]/g, '').slice(0, 14);
   const filename = `ClassReport_${className}_${attendanceDate}_${ts}.png`;
 
-  const link = document.createElement('a');
-  link.download = filename;
-  link.href = dataUrl;
+  const link = Object.assign(document.createElement('a'), { download: filename, href: dataUrl });
   link.click();
 
   let savedName = filename;
@@ -363,16 +366,10 @@ export async function exportClassReportPng({
   let clipboardSuccess = false;
   if (navigator.clipboard && (window as any).ClipboardItem) {
     try {
-      const parts = dataUrl.split(';base64,');
-      const raw = window.atob(parts[1]);
-      const uInt8Array = new Uint8Array(raw.length);
-      for (let i = 0; i < raw.length; ++i) {
-        uInt8Array[i] = raw.charCodeAt(i);
-      }
-      const blob = new Blob([uInt8Array], { type: 'image/png' });
-      await navigator.clipboard.write([
-        new (window as any).ClipboardItem({ 'image/png': blob }),
-      ]);
+      const byteStr = window.atob(dataUrl.split(',')[1]);
+      const bytes = new Uint8Array(byteStr.length);
+      for (let i = 0; i < byteStr.length; i++) bytes[i] = byteStr.charCodeAt(i);
+      await navigator.clipboard.write([new (window as any).ClipboardItem({ 'image/png': new Blob([bytes], { type: 'image/png' }) })]);
       clipboardSuccess = true;
     } catch (clipErr) {
       console.warn('Clipboard write error:', clipErr);
