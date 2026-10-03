@@ -24,6 +24,7 @@ interface AttendanceGradesTabProps {
   onCircularSwap?: () => void;
   onSaveAttendance?: () => void;
   savingAttendance?: boolean;
+  autoSaveStatus?: 'idle' | 'saving' | 'saved';
 }
 
 export const AttendanceGradesTab: React.FC<AttendanceGradesTabProps> = ({
@@ -40,6 +41,7 @@ export const AttendanceGradesTab: React.FC<AttendanceGradesTabProps> = ({
   onCircularSwap,
   onSaveAttendance,
   savingAttendance = false,
+  autoSaveStatus = 'idle',
 }) => {
   const sessionOverview = useSessionOverview(attendanceRecords);
 
@@ -347,6 +349,20 @@ export const AttendanceGradesTab: React.FC<AttendanceGradesTabProps> = ({
                     Sơ Đồ Chuyển Bài
                   </span>
                 </button>
+              )}
+
+              {autoSaveStatus === 'saving' && (
+                <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 text-[11px] font-bold shrink-0">
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+                  <span className="hidden sm:inline">Đang lưu...</span>
+                </div>
+              )}
+
+              {autoSaveStatus === 'saved' && (
+                <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[11px] font-bold shrink-0">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                  <span className="hidden sm:inline">Đã tự động lưu</span>
+                </div>
               )}
 
               {onSaveAttendance && (

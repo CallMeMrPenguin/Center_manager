@@ -5,7 +5,7 @@ interface CheckScoreInputProps {
   rec: any;
   rowIndex?: number;
   field: 'check_1' | 'check_2' | 'homework' | 'homework_2' | 'mock_test';
-  onUpdateRecord: (studentId: number, field: string, value: any) => void;
+  onUpdateRecord: (studentId: number, field: string, value: any, immediate?: boolean) => void;
   parseAndFormatScore: (val: any) => string;
 }
 
@@ -93,17 +93,14 @@ export const CheckScoreInput: React.FC<CheckScoreInputProps> = React.memo(({
       setVal(propVal);
       lastCommittedRef.current = propVal;
     }
-  }, [rec[field]]);
+  }, [rec[field], rec.student_id]);
 
   const commitValue = useCallback((rawVal: string) => {
     const formatted = parseAndFormatScore(rawVal);
     setVal(formatted);
-    const currentProp = rec[field] !== null && rec[field] !== undefined ? String(rec[field]) : '';
-    if (formatted !== currentProp || formatted !== lastCommittedRef.current) {
-      lastCommittedRef.current = formatted;
-      onUpdateRecord(rec.student_id, field, formatted);
-    }
-  }, [field, onUpdateRecord, parseAndFormatScore, rec]);
+    lastCommittedRef.current = formatted;
+    onUpdateRecord(rec.student_id, field, formatted, true);
+  }, [field, onUpdateRecord, parseAndFormatScore, rec.student_id]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     // 1. Enter or ArrowDown -> Move down to same score column of next student (Shift+Enter moves up)
@@ -206,7 +203,7 @@ export const CheckScoreInput: React.FC<CheckScoreInputProps> = React.memo(({
           setVal(raw);
           const parsed = parseAndFormatScore(raw);
           lastCommittedRef.current = parsed !== '' ? parsed : raw;
-          onUpdateRecord(rec.student_id, field, parsed !== '' ? parsed : raw);
+          onUpdateRecord(rec.student_id, field, parsed !== '' ? parsed : raw, false);
         }}
         onFocus={(e) => {
           isFocusedRef.current = true;

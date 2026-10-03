@@ -3,6 +3,7 @@ import { ClassItem, EnrolledStudent, AttendanceRecord } from '../types';
 import { api } from '../../../api';
 import { showToast } from '../../../components/Toast';
 import { getLocalDateStr, notifyDataChanged } from '../../../utils';
+import { parseAndFormatScore, applyAutoAttendanceStatus } from '../utils/attendanceHelpers';
 
 export function useClassDetail(selectedClass: ClassItem | null) {
   const [enrolledStudents, setEnrolledStudents] = useState<EnrolledStudent[]>([]);
@@ -12,11 +13,14 @@ export function useClassDetail(selectedClass: ClassItem | null) {
   const [attendanceRecords, setAttendanceRecords] = useState<AttendanceRecord[]>([]);
   const attendanceRecordsRef = useRef<AttendanceRecord[]>([]);
   const [savingAttendance, setSavingAttendance] = useState(false);
+  const [autoSaveStatus, setAutoSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
   const [selectedClassWeeklyDays, setSelectedClassWeeklyDays] = useState<number[]>([]);
 
   const isDirtyRef = useRef(false);
   const currentClassIdRef = useRef<number | null>(selectedClass?.id ?? null);
   const currentDateRef = useRef<string>(attendanceDate);
+  const stateUpdateTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     currentClassIdRef.current = selectedClass?.id ?? null;
@@ -35,11 +39,23 @@ export function useClassDetail(selectedClass: ClassItem | null) {
         api.getClassWeeklySchedule(clsId).catch(() => [])
       ]);
 
-      const recs = attData?.records || [];
+      let recs = attData?.records || [];
+      // Restore unsaved draft from sessionStorage if available
+      try {
+        const savedDraft = sessionStorage.getItem(`cm_draft_${clsId}_${dateStr}`);
+        if (savedDraft) {
+          const parsedDraft = JSON.parse(savedDraft);
+          if (Array.isArray(parsedDraft) && parsedDraft.length > 0) {
+            recs = parsedDraft;
+            isDirtyRef.current = true;
+          }
+        }
+      } catch (_) {}
+
       attendanceRecordsRef.current = recs;
       setAttendanceRecords(recs);
       setEnrolledStudents(enrolled || []);
-      isDirtyRef.current = false;
+      if (!isDirtyRef.current) isDirtyRef.current = false;
 
       if (slots && Array.isArray(slots)) {
         const dayMap: Record<string, number> = {
@@ -91,72 +107,23 @@ export function useClassDetail(selectedClass: ClassItem | null) {
     }
   }, []);
 
-  const parseAndFormatScore = useCallback((val: any): string => {
-    if (val === undefined || val === null || val === '') return '';
-    let valStr = String(val).trim().replace(',', '.');
-    if (!valStr) return '';
-    if (isNaN(Number(valStr))) return '';
-
-    let numVal = parseFloat(valStr);
-    if (numVal < 0) return '';
-    if (numVal > 10) {
-      if (valStr.startsWith('10')) {
-        numVal = 10;
-      } else {
-        const digits = valStr.replace('.', '').replace('-', '');
-        if (digits.length >= 2) {
-          numVal = parseFloat(`${digits[0]}.${digits[1]}`);
-        } else if (digits.length === 1) {
-          numVal = parseFloat(digits[0]);
-        } else {
-          return '';
-        }
-      }
-    }
-    if (numVal > 10) numVal = 10;
-    // 1-decimal truncation per Rule 17
-    const truncated = Math.floor(numVal * 10 + 0.0000001) / 10;
-    return truncated % 1 === 0 ? String(truncated.toFixed(0)) : truncated.toFixed(1);
-  }, []);
-
-  const applyAutoAttendanceStatus = useCallback((records: AttendanceRecord[]) => {
-    const newRecords = records.map((rec) => {
-      const isAbsent = rec.status === 'Vắng mặt' || rec.status === 'Nghỉ học';
-
-      const formatScoreField = (val: any) => {
-        if (isAbsent) {
-          return val !== null && val !== undefined && val !== '' ? String(val) : null;
-        }
-        // Missing / empty score should remain null, never default to '0' per Rule 8
-        if (val === null || val === undefined || val === '') return null;
-        return String(val);
-      };
-
-      const status = rec.status || 'Có mặt';
-      return {
-        ...rec,
-        status,
-        check_1: formatScoreField(rec.check_1),
-        check_2: formatScoreField(rec.check_2),
-        homework: formatScoreField(rec.homework),
-        homework_2: formatScoreField(rec.homework_2),
-        mock_test: formatScoreField(rec.mock_test),
-      };
-    });
-    return { records: newRecords };
-  }, []);
-
   // Save changes silently to backend DB and invalidate caches (on tab change, unmount, etc.)
   const flushSaveAttendance = useCallback(async (silent = true) => {
     const classId = currentClassIdRef.current;
     const dateStr = currentDateRef.current;
     if (!isDirtyRef.current || !classId || !dateStr) return;
 
+    if (autoSaveTimerRef.current) {
+      clearTimeout(autoSaveTimerRef.current);
+      autoSaveTimerRef.current = null;
+    }
+
     try {
       const currentRecords = attendanceRecordsRef.current.length > 0 ? attendanceRecordsRef.current : attendanceRecords;
       const { records: finalRecords } = applyAutoAttendanceStatus(currentRecords);
       isDirtyRef.current = false;
       await api.saveClassAttendance(classId, dateStr, finalRecords);
+      sessionStorage.removeItem(`cm_draft_${classId}_${dateStr}`);
       if (!silent) {
         showToast('Đã tự động lưu bảng điểm!', 'success');
       }
@@ -208,7 +175,7 @@ export function useClassDetail(selectedClass: ClassItem | null) {
   }, [applyAutoAttendanceStatus, flushSaveAttendance]);
 
   const handleUpdateRecord = useCallback(
-    (studentId: number, field: string, value: any) => {
+    (studentId: number, field: string, value: any, immediate = false) => {
       const prev = attendanceRecordsRef.current;
       const newRecs = prev.map((rec) => {
         if (rec.student_id !== studentId) return rec;
@@ -228,12 +195,54 @@ export function useClassDetail(selectedClass: ClassItem | null) {
       attendanceRecordsRef.current = newRecs;
       isDirtyRef.current = true;
 
-      // Status buttons require immediate UI feedback
-      if (field === 'status') {
-        setAttendanceRecords(newRecs);
+      // Fail-safe draft in sessionStorage
+      const cid = currentClassIdRef.current;
+      const cdate = currentDateRef.current;
+      if (cid && cdate) {
+        try {
+          sessionStorage.setItem(`cm_draft_${cid}_${cdate}`, JSON.stringify(newRecs));
+        } catch (_) {}
       }
+
+      // Synchronize React state: immediate on status change, blur, or key navigation; debounced 200ms when typing
+      if (field === 'status' || immediate) {
+        if (stateUpdateTimerRef.current) {
+          clearTimeout(stateUpdateTimerRef.current);
+          stateUpdateTimerRef.current = null;
+        }
+        setAttendanceRecords(newRecs);
+      } else {
+        if (stateUpdateTimerRef.current) clearTimeout(stateUpdateTimerRef.current);
+        stateUpdateTimerRef.current = setTimeout(() => {
+          setAttendanceRecords(attendanceRecordsRef.current);
+        }, 200);
+      }
+
+      // Debounced background auto-save to database (1500ms after last keystroke)
+      if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
+      setAutoSaveStatus('saving');
+      autoSaveTimerRef.current = setTimeout(async () => {
+        const classId = currentClassIdRef.current;
+        const dateStr = currentDateRef.current;
+        if (!isDirtyRef.current || !classId || !dateStr) {
+          setAutoSaveStatus('idle');
+          return;
+        }
+        try {
+          const { records: finalRecords } = applyAutoAttendanceStatus(attendanceRecordsRef.current);
+          isDirtyRef.current = false;
+          await api.saveClassAttendance(classId, dateStr, finalRecords);
+          sessionStorage.removeItem(`cm_draft_${classId}_${dateStr}`);
+          setAutoSaveStatus('saved');
+          notifyDataChanged(['attendance', 'reports', 'analytics']);
+          setTimeout(() => setAutoSaveStatus('idle'), 2500);
+        } catch (e) {
+          console.error('Tự động lưu bảng điểm thất bại:', e);
+          setAutoSaveStatus('idle');
+        }
+      }, 1500);
     },
-    []
+    [applyAutoAttendanceStatus]
   );
 
   const handleDateChange = useCallback(async (newDate: string) => {
@@ -241,6 +250,7 @@ export function useClassDetail(selectedClass: ClassItem | null) {
     if (isDirtyRef.current && selectedClass) {
       try {
         await api.saveClassAttendance(selectedClass.id, attendanceDate, attendanceRecordsRef.current);
+        sessionStorage.removeItem(`cm_draft_${selectedClass.id}_${attendanceDate}`);
         isDirtyRef.current = false;
         notifyDataChanged(['attendance', 'reports', 'analytics']);
       } catch (e) {}
@@ -251,6 +261,10 @@ export function useClassDetail(selectedClass: ClassItem | null) {
 
   const handleSaveAttendance = async () => {
     if (!selectedClass) return;
+    if (autoSaveTimerRef.current) {
+      clearTimeout(autoSaveTimerRef.current);
+      autoSaveTimerRef.current = null;
+    }
     setSavingAttendance(true);
     try {
       const currentRecords = attendanceRecordsRef.current.length > 0 ? attendanceRecordsRef.current : attendanceRecords;
@@ -259,8 +273,11 @@ export function useClassDetail(selectedClass: ClassItem | null) {
       setAttendanceRecords(finalRecords);
       isDirtyRef.current = false;
       await api.saveClassAttendance(selectedClass.id, attendanceDate, finalRecords);
+      sessionStorage.removeItem(`cm_draft_${selectedClass.id}_${attendanceDate}`);
+      setAutoSaveStatus('saved');
       showToast('Đã lưu bảng điểm danh và điểm học sinh vào cơ sở dữ liệu!', 'success');
       notifyDataChanged(['attendance', 'reports', 'analytics']);
+      setTimeout(() => setAutoSaveStatus('idle'), 2500);
     } catch (err: any) {
       showToast('Lưu thất bại: ' + err.message, 'error');
     } finally {
@@ -340,6 +357,7 @@ export function useClassDetail(selectedClass: ClassItem | null) {
     setAttendanceDate: handleDateChange,
     attendanceRecords,
     savingAttendance,
+    autoSaveStatus,
     selectedClassWeeklyDays,
     loadAttendanceData,
     loadEnrolledStudents,

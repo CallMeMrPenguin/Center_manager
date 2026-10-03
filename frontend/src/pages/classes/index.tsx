@@ -36,6 +36,7 @@ export default function ClassesPage() {
     setAttendanceDate,
     attendanceRecords,
     savingAttendance,
+    autoSaveStatus,
     selectedClassWeeklyDays,
     loadAttendanceData,
     loadEnrolledStudents,
@@ -244,6 +245,7 @@ export default function ClassesPage() {
               enrolledStudents={enrolledStudents}
               attendanceDate={attendanceDate}
               attendanceRecords={attendanceRecords}
+              autoSaveStatus={autoSaveStatus}
               onUpdateRecord={handleUpdateRecord}
               parseAndFormatScore={parseAndFormatScore}
               onOpenStudentActionModal={async (st) => {
