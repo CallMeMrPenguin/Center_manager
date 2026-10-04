@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
 import { DataTable } from '../../../components/DataTable';
 import { SegmentedControl } from '../../../components/SegmentedControl';
@@ -9,7 +9,6 @@ import {
   StudentUnitData,
   resolveFullUnitInfo,
   getBadgeStyle,
-  getMasteryRateStyle,
   useMasteryRateColors,
 } from './heatmapUtils';
 import {
@@ -39,6 +38,16 @@ export const MasteryHeatmap: React.FC<MasteryHeatmapProps> = ({
   const [hoveredCell, setHoveredCell] = useState<HoveredCellState | null>(null);
   const [isColorModalOpen, setIsColorModalOpen] = useState(false);
   const masteryColorConfig = useMasteryRateColors();
+
+  // Dismiss tooltip on scroll so it never hangs over scrolling content
+  useEffect(() => {
+    const handleScroll = () => {
+      setHoveredCol(null);
+      setHoveredCell(null);
+    };
+    window.addEventListener('scroll', handleScroll, true);
+    return () => window.removeEventListener('scroll', handleScroll, true);
+  }, []);
 
   const filteredUnits = useMemo(() => {
     if (skillFilter === 'all') return units;
@@ -148,8 +157,6 @@ export const MasteryHeatmap: React.FC<MasteryHeatmapProps> = ({
       if (!grammarTopicName && isGrammar) {
         grammarTopicName = unitInfo.grammarTopic || unitInfo.grammarSummaryVi || '';
       }
-      const rateStyle = getMasteryRateStyle(u.mastery_pct, masteryColorConfig);
-
       return {
         id: `unit_${colKey}`,
         header: () => (
@@ -157,7 +164,6 @@ export const MasteryHeatmap: React.FC<MasteryHeatmapProps> = ({
             onMouseEnter={(e) => handleHeaderMouseEnter(e, u)}
             onMouseLeave={handleHeaderMouseLeave}
             className="flex flex-col items-center justify-center w-full py-1.5 cursor-pointer select-none group/unit-hdr"
-            title={unitInfo.fullTitle}
           >
             {/* Unit Key */}
             <div className="text-xs font-black text-slate-900 dark:text-white tracking-tight leading-snug text-center">
@@ -180,33 +186,15 @@ export const MasteryHeatmap: React.FC<MasteryHeatmapProps> = ({
             {/* Prominent Grammar Topic for Grammar / Unit Topic for Vocab */}
             <div className="mt-1 px-0.5 w-full text-center">
               {isGrammar ? (
-                <div
-                  className="text-[11px] font-black text-purple-700 dark:text-purple-300 leading-snug break-words text-center bg-purple-500/10 dark:bg-purple-500/15 px-2 py-1 rounded-md border border-purple-500/20 shadow-2xs"
-                  title={`Ngữ pháp: ${grammarTopicName}`}
-                >
+                <div className="text-[11px] font-black text-purple-700 dark:text-purple-300 leading-snug break-words text-center bg-purple-500/10 dark:bg-purple-500/15 px-2 py-1 rounded-md border border-purple-500/20 shadow-2xs">
                   {grammarTopicName || 'Ngữ pháp'}
                 </div>
               ) : (
-                <div
-                  className="text-[11px] font-bold text-slate-700 dark:text-slate-300 leading-snug break-words text-center px-1"
-                  title={`Chủ đề: ${unitInfo.unitName}`}
-                >
+                <div className="text-[11px] font-bold text-slate-700 dark:text-slate-300 leading-snug break-words text-center px-1">
                   {unitInfo.unitName || 'Từ vựng'}
                 </div>
               )}
             </div>
-
-            {/* Tỷ Lệ Nắm Vững with custom level color */}
-            {u.mastery_pct !== undefined && (
-              <div className="mt-1 flex items-center justify-center">
-                <span
-                  className={`text-[10px] font-mono font-black px-1.5 py-0.5 rounded-md transition-all ${rateStyle.badgeClass}`}
-                  title={`Tỷ lệ nắm vững cả lớp: ${u.mastery_pct}% (${u.mastered_count ?? 0}/${u.student_count ?? 0} HS) - ${rateStyle.label}`}
-                >
-                  {u.mastery_pct}%
-                </span>
-              </div>
-            )}
           </div>
         ),
         accessorFn: (row) => {
@@ -354,7 +342,11 @@ export const MasteryHeatmap: React.FC<MasteryHeatmapProps> = ({
       </div>
 
       {/* Dynamic Hover Tooltip for Column Headers & Student Cells */}
-      <MasteryTooltip hoveredCol={hoveredCol} hoveredCell={hoveredCell} />
+      <MasteryTooltip
+        hoveredCol={hoveredCol}
+        hoveredCell={hoveredCell}
+        masteryColorConfig={masteryColorConfig}
+      />
 
       {/* Custom Color Settings Modal */}
       <MasteryColorModal
