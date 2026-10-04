@@ -2,19 +2,22 @@ import React, { useState, useMemo } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
 import { DataTable } from '../../../components/DataTable';
 import { SegmentedControl } from '../../../components/SegmentedControl';
-import { LayoutGrid } from 'lucide-react';
+import { LayoutGrid, Palette } from 'lucide-react';
 import {
   HeatmapUnit,
   HeatmapStudent,
   StudentUnitData,
   resolveFullUnitInfo,
   getBadgeStyle,
+  getMasteryRateStyle,
+  useMasteryRateColors,
 } from './heatmapUtils';
 import {
   MasteryTooltip,
   HoveredColState,
   HoveredCellState,
 } from './MasteryTooltip';
+import { MasteryColorModal } from './MasteryColorModal';
 
 export * from './heatmapUtils';
 
@@ -34,6 +37,8 @@ export const MasteryHeatmap: React.FC<MasteryHeatmapProps> = ({
   const [skillFilter, setSkillFilter] = useState<'all' | 'vocab' | 'grammar'>('all');
   const [hoveredCol, setHoveredCol] = useState<HoveredColState | null>(null);
   const [hoveredCell, setHoveredCell] = useState<HoveredCellState | null>(null);
+  const [isColorModalOpen, setIsColorModalOpen] = useState(false);
+  const masteryColorConfig = useMasteryRateColors();
 
   const filteredUnits = useMemo(() => {
     if (skillFilter === 'all') return units;
@@ -129,7 +134,10 @@ export const MasteryHeatmap: React.FC<MasteryHeatmapProps> = ({
 
     const unitCols: ColumnDef<HeatmapStudent>[] = filteredUnits.map((u) => {
       const colKey = u.unit_id || `${u.unit_key}__${u.skill}`;
-      const unitInfo = resolveFullUnitInfo(u.unit_key, u.unit_name, grade);
+      const unitInfo = resolveFullUnitInfo(u.unit_key, u.unit_name, grade, u.skill, u.grammar_topic);
+      const isGrammar = u.skill === 'grammar';
+      const grammarTopic = unitInfo.grammarTopic || unitInfo.grammarSummaryVi || (unitInfo.grammarTopics && unitInfo.grammarTopics[0]);
+      const rateStyle = getMasteryRateStyle(u.mastery_pct, masteryColorConfig);
 
       return {
         id: `unit_${colKey}`,
@@ -140,22 +148,54 @@ export const MasteryHeatmap: React.FC<MasteryHeatmapProps> = ({
             className="flex flex-col items-center justify-center w-full py-1 cursor-pointer select-none group/unit-hdr"
             title={unitInfo.fullTitle}
           >
-            {/* Unit Key without being truncated or covered */}
+            {/* Unit Key */}
             <div className="text-xs font-black text-slate-900 dark:text-white tracking-tight leading-snug text-center whitespace-normal break-words px-1 max-w-[130px]">
               {u.unit_key}
             </div>
-            {/* Skill badge - average removed from heading text and visible on hover */}
-            <div className="mt-1">
+
+            {/* Skill badge */}
+            <div className="mt-1 flex items-center justify-center">
               <span
                 className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-full inline-block transition-transform duration-150 group-hover/unit-hdr:scale-105 ${
-                  u.skill === 'vocab'
-                    ? 'bg-blue-500/15 text-blue-700 dark:text-blue-300'
-                    : 'bg-purple-500/15 text-purple-700 dark:text-purple-300'
+                  isGrammar
+                    ? 'bg-purple-500/15 text-purple-700 dark:text-purple-300'
+                    : 'bg-blue-500/15 text-blue-700 dark:text-blue-300'
                 }`}
               >
-                {u.skill === 'vocab' ? 'Từ Vựng' : 'Ngữ Pháp'}
+                {isGrammar ? 'Ngữ Pháp' : 'Từ Vựng'}
               </span>
             </div>
+
+            {/* Specific Grammar Topic for Grammar / Unit Topic for Vocab */}
+            <div className="mt-1 px-1 w-full text-center">
+              {isGrammar ? (
+                <div
+                  className="text-[10px] font-extrabold text-purple-700 dark:text-purple-300 truncate max-w-[125px] mx-auto bg-purple-500/10 px-1.5 py-0.5 rounded"
+                  title={`Ngữ pháp: ${grammarTopic || 'Cốt lõi'}`}
+                >
+                  {grammarTopic || 'Ngữ pháp Unit'}
+                </div>
+              ) : (
+                <div
+                  className="text-[10px] font-bold text-slate-600 dark:text-slate-400 truncate max-w-[125px] mx-auto px-0.5"
+                  title={`Chủ đề: ${unitInfo.unitName}`}
+                >
+                  {unitInfo.unitName || 'Từ vựng Unit'}
+                </div>
+              )}
+            </div>
+
+            {/* Tỷ Lệ Nắm Vững with custom level color */}
+            {u.mastery_pct !== undefined && (
+              <div className="mt-1 flex items-center justify-center">
+                <span
+                  className={`text-[10px] font-mono font-black px-1.5 py-0.5 rounded-md transition-all ${rateStyle.badgeClass}`}
+                  title={`Tỷ lệ nắm vững cả lớp: ${u.mastery_pct}% (${u.mastered_count ?? 0}/${u.student_count ?? 0} HS) - ${rateStyle.label}`}
+                >
+                  {u.mastery_pct}%
+                </span>
+              </div>
+            )}
           </div>
         ),
         accessorFn: (row) => {
@@ -164,8 +204,8 @@ export const MasteryHeatmap: React.FC<MasteryHeatmapProps> = ({
             (row.units?.[u.unit_key]?.skill === u.skill ? row.units?.[u.unit_key] : undefined);
           return uData?.ema_score ?? -1;
         },
-        size: 130,
-        minSize: 110,
+        size: 135,
+        minSize: 115,
         cell: ({ row }) => {
           const uData =
             row.original.units?.[colKey] ||
@@ -191,7 +231,7 @@ export const MasteryHeatmap: React.FC<MasteryHeatmapProps> = ({
     });
 
     return [...baseCols, ...unitCols];
-  }, [filteredUnits, grade]);
+  }, [filteredUnits, grade, masteryColorConfig]);
 
   const toolbarLeft = (
     <div className="w-64">
@@ -217,7 +257,7 @@ export const MasteryHeatmap: React.FC<MasteryHeatmapProps> = ({
           Ma Trận Nắm Vững Kiến Thức (Mastery Heatmap)
         </h3>
         <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-          Bảng màu trực quan theo thang đo 4 mức. Rê chuột vào tiêu đề cột hoặc ô điểm từng học sinh để xem tên Unit và điểm trung bình.
+          Bảng màu trực quan theo thang đo 4 mức. Cột ngữ pháp hiển thị rõ chủ điểm ngữ pháp và tỷ lệ nắm vững theo màu từng cấp độ.
         </p>
       </div>
 
@@ -238,35 +278,83 @@ export const MasteryHeatmap: React.FC<MasteryHeatmapProps> = ({
         initialSorting={[{ id: 'student_name', desc: false }]}
       />
 
-      {/* 4-Color Scale Legend */}
-      <div className="flex flex-wrap items-center justify-between gap-4 pt-2 text-[11px] text-slate-600 dark:text-slate-400">
-        <div className="flex flex-wrap items-center gap-4">
-          <span className="font-bold text-slate-800 dark:text-slate-300">Thang Điểm 4 Mức:</span>
-          <div className="flex items-center gap-1.5">
-            <span className="w-3 h-3 rounded bg-emerald-500 block" />
-            <span className="text-emerald-700 dark:text-emerald-300 font-bold">Xanh: Nắm Vững (&ge; 8.0)</span>
+      {/* 4-Color Scale Legend & Custom Mastery Rate Level Scale */}
+      <div className="space-y-2.5 pt-2 border-t border-slate-100 dark:border-white/5 text-[11px] text-slate-600 dark:text-slate-400">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-wrap items-center gap-4">
+            <span className="font-bold text-slate-800 dark:text-slate-300">Thang Điểm EMA (4 Mức):</span>
+            <div className="flex items-center gap-1.5">
+              <span className="w-3 h-3 rounded bg-emerald-500 block" />
+              <span className="text-emerald-700 dark:text-emerald-300 font-bold">Nắm Vững (&ge; 8.0)</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="w-3 h-3 rounded bg-amber-500 block" />
+              <span className="text-amber-700 dark:text-amber-300 font-bold">Đang Tiến Bộ (6.5 – 7.9)</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="w-3 h-3 rounded bg-orange-500 block" />
+              <span className="text-orange-700 dark:text-orange-300 font-bold">Cần Củng Cố (5.0 – 6.4)</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="w-3 h-3 rounded bg-rose-500 block" />
+              <span className="text-rose-700 dark:text-rose-300 font-bold">Chưa Đạt (&lt; 5.0)</span>
+            </div>
           </div>
-          <div className="flex items-center gap-1.5">
-            <span className="w-3 h-3 rounded bg-amber-500 block" />
-            <span className="text-amber-700 dark:text-amber-300 font-bold">Vàng: Đang Tiến Bộ (6.5 – 7.9)</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <span className="w-3 h-3 rounded bg-orange-500 block" />
-            <span className="text-orange-700 dark:text-orange-300 font-bold">Cam: Cần Củng Cố (5.0 – 6.4)</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <span className="w-3 h-3 rounded bg-rose-500 block" />
-            <span className="text-rose-700 dark:text-rose-300 font-bold">Đỏ: Chưa Đạt (&lt; 5.0)</span>
-          </div>
+
+          <span className="text-slate-500 italic text-[10px]">
+            Điểm EMA tích lũy qua các buổi kiểm tra của từng học sinh
+          </span>
         </div>
 
-        <span className="text-slate-500 italic text-[10px]">
-          Điểm số là điểm EMA tích lũy của học sinh đối với từng bài học
-        </span>
+        {/* Thang Tỷ Lệ Nắm Vững (Mastery Rate) with Active Custom Colors */}
+        <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="font-bold text-slate-800 dark:text-slate-300">Thang Tỷ Lệ Nắm Vững:</span>
+            <div className="flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded-full block" style={{ backgroundColor: masteryColorConfig.tiers.level_4.hex }} />
+              <span className="font-extrabold text-slate-700 dark:text-slate-300">
+                {masteryColorConfig.tiers.level_4.label} (&ge; {masteryColorConfig.tiers.level_4.minPct}%)
+              </span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded-full block" style={{ backgroundColor: masteryColorConfig.tiers.level_3.hex }} />
+              <span className="font-extrabold text-slate-700 dark:text-slate-300">
+                {masteryColorConfig.tiers.level_3.label} (&ge; {masteryColorConfig.tiers.level_3.minPct}%)
+              </span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded-full block" style={{ backgroundColor: masteryColorConfig.tiers.level_2.hex }} />
+              <span className="font-extrabold text-slate-700 dark:text-slate-300">
+                {masteryColorConfig.tiers.level_2.label} (&ge; {masteryColorConfig.tiers.level_2.minPct}%)
+              </span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded-full block" style={{ backgroundColor: masteryColorConfig.tiers.level_1.hex }} />
+              <span className="font-extrabold text-slate-700 dark:text-slate-300">
+                {masteryColorConfig.tiers.level_1.label} (&lt; {masteryColorConfig.tiers.level_2.minPct}%)
+              </span>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setIsColorModalOpen(true)}
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-950/40 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 font-bold transition cursor-pointer text-xs"
+          >
+            <Palette size={13} />
+            <span>Tùy Chỉnh Màu Thang Đo</span>
+          </button>
+        </div>
       </div>
 
       {/* Dynamic Hover Tooltip for Column Headers & Student Cells */}
       <MasteryTooltip hoveredCol={hoveredCol} hoveredCell={hoveredCell} />
+
+      {/* Custom Color Settings Modal */}
+      <MasteryColorModal
+        isOpen={isColorModalOpen}
+        onClose={() => setIsColorModalOpen(false)}
+      />
     </div>
   );
 };

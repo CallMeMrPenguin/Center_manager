@@ -1,5 +1,6 @@
 import React from 'react';
 import { trunc1Dec } from '../../../utils';
+import { getMasteryRateStyle, useMasteryRateColors } from './heatmapUtils';
 
 interface SkillStats {
   vocab_avg: number;
@@ -18,6 +19,9 @@ interface SkillOverviewCardsProps {
 }
 
 export const SkillOverviewCards: React.FC<SkillOverviewCardsProps> = ({ stats }) => {
+  const masteryColorConfig = useMasteryRateColors();
+  const masteryRateStyle = getMasteryRateStyle(stats.mastery_rate, masteryColorConfig);
+
   const getScoreBadge = (score: number) => {
     if (score >= 8.0) return { label: 'Vững Vàng', color: 'text-emerald-700 bg-emerald-500/15' };
     if (score >= 6.5) return { label: 'Khá Ổn Định', color: 'text-blue-700 bg-blue-500/15' };
@@ -89,11 +93,11 @@ export const SkillOverviewCards: React.FC<SkillOverviewCardsProps> = ({ stats })
         </div>
 
         <div className="flex items-baseline justify-between">
-          <div className="text-3xl font-black text-slate-900 dark:text-white tracking-tight font-mono">
+          <div className={`text-3xl font-black tracking-tight font-mono ${masteryRateStyle.textColor}`}>
             {stats.mastery_rate}%
           </div>
-          <span className="text-[10px] font-extrabold px-2.5 py-1 rounded-full bg-emerald-500/15 text-emerald-700 dark:text-emerald-300">
-            {stats.mastered_count} Lượt Đạt Chuẩn
+          <span className={`text-[10px] font-extrabold px-2.5 py-1 rounded-full ${masteryRateStyle.badgeClass}`}>
+            {stats.mastered_count} Lượt ({masteryRateStyle.label})
           </span>
         </div>
 

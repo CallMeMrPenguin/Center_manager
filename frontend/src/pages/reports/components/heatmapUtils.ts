@@ -1,9 +1,12 @@
 import { getUnitCurriculum } from '../../../config/moetCurriculum';
 import { trunc1Dec } from '../../../utils';
 
+export * from './masteryRateColorConfig';
+
 export interface HeatmapUnit {
   unit_key: string;
   unit_name?: string;
+  grammar_topic?: string;
   skill: string;
   unit_id?: string;
   avg_score: number;
@@ -15,6 +18,7 @@ export interface HeatmapUnit {
 export interface StudentUnitData {
   skill: string;
   unit_name?: string;
+  grammar_topic?: string;
   ema_score: number;
   last_score?: number;
   test_count: number;
@@ -37,16 +41,22 @@ export interface FormattedUnitInfo {
   vietnameseTitle: string;
   displayTitle: string;
   fullTitle: string;
+  grammarTopic: string;
+  grammarTopics: string[];
+  grammarSummaryVi: string;
+  vocabularyTheme: string;
 }
 
 /**
- * Resolves full unit title, English name, and Vietnamese title
- * from unitKey, backend unit_name, and class grade.
+ * Resolves full unit title, English name, specific grammar topic,
+ * and Vietnamese title from unitKey, curriculum, and grade.
  */
 export function resolveFullUnitInfo(
   unitKey: string,
   backendUnitName?: string,
-  grade?: number | string
+  grade?: number | string,
+  skill?: string,
+  backendGrammarTopic?: string
 ): FormattedUnitInfo {
   const uMatch = unitKey.match(/(?:Unit|Bài)\s*(\d+)/i);
   const uNum = uMatch ? parseInt(uMatch[1], 10) : 0;
@@ -59,16 +69,26 @@ export function resolveFullUnitInfo(
   const unitName = backendUnitName || curr?.title || '';
   const vietnameseTitle = curr?.vietnameseTitle || '';
 
+  const grammarTopic = backendGrammarTopic || curr?.grammarTopics?.[0] || curr?.grammarSummaryVi || '';
+  const grammarTopics = curr?.grammarTopics || (grammarTopic ? [grammarTopic] : []);
+  const grammarSummaryVi = curr?.grammarSummaryVi || grammarTopic || '';
+  const vocabularyTheme = curr?.vocabularyTheme || unitName || '';
+
   // Clean key without [K6] for cleaner inline reading
   const cleanKey = unitKey.replace(/\[K?\d+\]\s*/i, '').trim();
 
   let displayTitle = cleanKey;
-  if (unitName && !cleanKey.toLowerCase().includes(unitName.toLowerCase())) {
+  if (skill === 'grammar' && grammarTopic) {
+    displayTitle = `${cleanKey}: ${grammarTopic}`;
+  } else if (unitName && !cleanKey.toLowerCase().includes(unitName.toLowerCase())) {
     displayTitle = `${cleanKey}: ${unitName}`;
   }
 
   let fullTitle = displayTitle;
-  if (vietnameseTitle && !displayTitle.toLowerCase().includes(vietnameseTitle.toLowerCase())) {
+  if (skill === 'grammar') {
+    const detailGrammar = grammarTopic || grammarSummaryVi;
+    fullTitle = `${cleanKey} [Ngữ pháp: ${detailGrammar || 'Cốt lõi'}]${vietnameseTitle ? ` (${vietnameseTitle})` : ''}`;
+  } else if (vietnameseTitle && !displayTitle.toLowerCase().includes(vietnameseTitle.toLowerCase())) {
     fullTitle = `${displayTitle} (${vietnameseTitle})`;
   }
 
@@ -78,6 +98,10 @@ export function resolveFullUnitInfo(
     vietnameseTitle,
     displayTitle,
     fullTitle,
+    grammarTopic,
+    grammarTopics,
+    grammarSummaryVi,
+    vocabularyTheme,
   };
 }
 

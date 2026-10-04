@@ -2,11 +2,13 @@ import React, { useMemo } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
 import { DataTable } from '../../../components/DataTable';
 import { trunc1Dec } from '../../../utils';
+import { getMasteryRateStyle, useMasteryRateColors } from './heatmapUtils';
 
 export interface UnitBreakdownItem {
   skill: string;
   unit_key: string;
   unit_name?: string;
+  grammar_topic?: string;
   avg_score: number;
   student_count: number;
   mastered_count: number;
@@ -22,6 +24,8 @@ interface UnitBreakdownTableProps {
 }
 
 export const UnitBreakdownTable: React.FC<UnitBreakdownTableProps> = ({ data }) => {
+  const masteryColorConfig = useMasteryRateColors();
+
   const columns = useMemo<ColumnDef<UnitBreakdownItem>[]>(
     () => [
       {
@@ -32,11 +36,15 @@ export const UnitBreakdownTable: React.FC<UnitBreakdownTableProps> = ({ data }) 
             <span className="font-extrabold text-slate-900 dark:text-white text-sm sm:text-base">
               {row.original.unit_key}
             </span>
-            {row.original.unit_name && (
+            {row.original.skill === 'grammar' && row.original.grammar_topic ? (
+              <span className="text-xs text-purple-600 dark:text-purple-400 font-extrabold">
+                Ngữ pháp: {row.original.grammar_topic}
+              </span>
+            ) : row.original.unit_name ? (
               <span className="text-xs text-indigo-600 dark:text-indigo-400 font-semibold">
                 {row.original.unit_name}
               </span>
-            )}
+            ) : null}
           </div>
         ),
       },
@@ -101,26 +109,20 @@ export const UnitBreakdownTable: React.FC<UnitBreakdownTableProps> = ({ data }) 
           const pct = row.original.mastery_pct;
           const mastered = row.original.mastered_count;
           const total = row.original.student_count;
+          const rateStyle = getMasteryRateStyle(pct, masteryColorConfig);
+
           return (
             <div className="min-w-[130px] max-w-[160px] space-y-1.5 py-0.5">
               <div className="flex items-center justify-between gap-2 text-sm">
-                <span className="font-black text-slate-900 dark:text-white font-mono shrink-0">{pct}%</span>
+                <span className={`font-black font-mono shrink-0 ${rateStyle.textColor}`}>{pct}%</span>
                 <span className="text-xs text-slate-600 dark:text-slate-400 font-mono shrink-0 font-bold">
                   {mastered}/{total} HS
                 </span>
               </div>
               <div className="w-full bg-slate-200 dark:bg-[#1e2744] h-2 rounded-full overflow-hidden">
                 <div
-                  className={`h-full rounded-full ${
-                    pct >= 75
-                      ? 'bg-emerald-500'
-                      : pct >= 50
-                      ? 'bg-blue-500'
-                      : pct >= 25
-                      ? 'bg-amber-500'
-                      : 'bg-rose-500'
-                  }`}
-                  style={{ width: `${pct}%` }}
+                  className={`h-full rounded-full transition-all duration-300 ${rateStyle.barColor}`}
+                  style={{ width: `${Math.min(100, Math.max(0, pct))}%` }}
                 />
               </div>
             </div>
@@ -154,7 +156,7 @@ export const UnitBreakdownTable: React.FC<UnitBreakdownTableProps> = ({ data }) 
         ),
       },
     ],
-    []
+    [masteryColorConfig]
   );
 
   return (
