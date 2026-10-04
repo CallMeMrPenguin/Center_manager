@@ -182,22 +182,22 @@ export const StudentWeaknessDiagnosisCard: React.FC<StudentWeaknessDiagnosisCard
                 return (
                   <span
                     key={`${u.unit_key}-${i}`}
-                    className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold border transition-colors ${
+                    className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold transition-colors ${
                       isGrammar
-                        ? 'bg-purple-500/10 dark:bg-purple-500/15 text-purple-700 dark:text-purple-200 border-purple-500/20'
-                        : 'bg-blue-500/10 dark:bg-blue-500/15 text-blue-700 dark:text-blue-200 border-blue-500/20'
+                        ? 'bg-purple-500/10 dark:bg-purple-500/15 text-purple-700 dark:text-purple-200'
+                        : 'bg-blue-500/10 dark:bg-blue-500/15 text-blue-700 dark:text-blue-200'
                     }`}
                   >
-                    <span className="truncate max-w-[190px]" title={u.topic_name}>
+                    <span className="truncate max-w-[190px]">
                       {u.topic_name}
                     </span>
                     <span
-                      className={`font-mono font-black px-1.5 py-0.5 rounded text-[11px] ${
+                      className={`font-mono font-black text-xs ${
                         u.avg_score < 5.0
-                          ? 'bg-rose-500/20 text-rose-700 dark:text-rose-300'
+                          ? 'text-rose-600 dark:text-rose-400'
                           : u.avg_score < 6.5
-                          ? 'bg-amber-500/20 text-amber-700 dark:text-amber-300'
-                          : 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300'
+                          ? 'text-amber-600 dark:text-amber-400'
+                          : 'text-emerald-600 dark:text-emerald-400'
                       }`}
                     >
                       {format1Dec(u.avg_score)}đ
@@ -227,23 +227,23 @@ export const StudentWeaknessDiagnosisCard: React.FC<StudentWeaknessDiagnosisCard
           if (skillFilter === 'grammar') {
             return (
               <div className="text-center font-mono font-bold text-xs">
-                <span className="text-purple-400 font-extrabold">{r.weak_units.length}</span>{' '}
-                <span className="text-slate-500">chuyên đề NP</span>
+                <span className="text-purple-600 dark:text-purple-400 font-extrabold text-sm">{r.weak_units.length}</span>{' '}
+                <span className="text-slate-600 dark:text-slate-400">chuyên đề NP</span>
               </div>
             );
           }
           if (skillFilter === 'vocab') {
             return (
               <div className="text-center font-mono font-bold text-xs">
-                <span className="text-blue-400 font-extrabold">{r.weak_units.length}</span>{' '}
-                <span className="text-slate-500">chuyên đề TV</span>
+                <span className="text-blue-600 dark:text-blue-400 font-extrabold text-sm">{r.weak_units.length}</span>{' '}
+                <span className="text-slate-600 dark:text-slate-400">chuyên đề TV</span>
               </div>
             );
           }
           return (
             <div className="text-center font-mono font-bold text-xs space-x-1">
-              <span className="text-white font-extrabold">{r.total_weak_count}</span>
-              <span className="text-slate-500">
+              <span className="text-slate-900 dark:text-white font-extrabold text-sm">{r.total_weak_count}</span>
+              <span className="text-slate-600 dark:text-slate-400">
                 ({r.grammar_count} NP, {r.vocab_count} TV)
               </span>
             </div>
