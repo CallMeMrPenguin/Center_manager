@@ -116,6 +116,7 @@ export interface DataTableProps<TData> {
   initialSorting?: SortingState;
   initialColumnVisibility?: VisibilityState;
   initialColumnPinning?: ColumnPinningState;
+  initialColumnAlignments?: Record<string, 'center' | 'left'>;
 
   // Callbacks
   onRowClick?: (row: TData) => void;
@@ -205,7 +206,7 @@ function DraggableHeader({
       <div
         {...(enableReorder ? { ...attributes, ...listeners } : {})}
         style={{ touchAction: enableReorder ? 'none' : 'auto' }}
-        className={`group flex items-center justify-center text-center gap-1.5 w-full py-3 px-2.5 overflow-hidden text-slate-900 dark:text-slate-100 text-sm sm:text-base font-black uppercase tracking-wider whitespace-nowrap ${
+        className={`group flex items-center ${align === 'left' ? 'justify-start text-left' : 'justify-center text-center'} gap-1.5 w-full py-3 px-2.5 overflow-hidden text-slate-900 dark:text-slate-100 text-sm sm:text-base font-black uppercase tracking-wider whitespace-nowrap ${
           enableReorder ? 'cursor-grab active:cursor-grabbing hover:text-blue-600 dark:hover:text-white transition-colors' : ''
         }`}
         title={enableReorder ? 'Giữ chuột và kéo để thay đổi thứ tự cột' : undefined}
@@ -378,7 +379,11 @@ function ColumnVisibilityDropdown<TData>({
               </div>
               <div className="max-h-60 overflow-y-auto space-y-0.5 scrollbar-thin pr-1">
                 {allCols.map(col => {
-                  const isCentered = columnAlignments[col.id] !== 'left';
+                  const colMetaAlign = (col.columnDef as any)?.meta?.align;
+                  const colAlign = columnAlignments[col.id]
+                    || colMetaAlign
+                    || (['student_name', 'full_name', 'name', 'title', 'subject'].includes(col.id) ? 'left' : 'center');
+                  const isCentered = colAlign !== 'left';
                   const colName = getColumnHeaderText(col, table);
                   return (
                     <label key={col.id} className="flex items-center justify-between gap-2 text-xs text-slate-700 dark:text-slate-200 cursor-pointer hover:text-slate-900 dark:hover:text-white px-1.5 py-1 rounded-lg hover:bg-slate-100 dark:hover:bg-[#1c1c21] transition">
@@ -692,6 +697,7 @@ export function DataTable<TData>({
   initialSorting = [],
   initialColumnVisibility = {},
   initialColumnPinning = {},
+  initialColumnAlignments = {},
   onRowClick,
   onSelectionChange,
   renderSubComponent,
@@ -732,7 +738,16 @@ export function DataTable<TData>({
     return baseVis;
   });
   const [columnOrder, setColumnOrder] = useState<ColumnOrderState>(() => savedLayout?.order || []);
-  const [columnAlignments, setColumnAlignments] = useState<Record<string, 'center' | 'left'>>(() => savedLayout?.alignments || {});
+  const [columnAlignments, setColumnAlignments] = useState<Record<string, 'center' | 'left'>>(() => {
+    const baseAlign: Record<string, 'center' | 'left'> = { ...(initialColumnAlignments || {}) };
+    columns.forEach((col: any) => {
+      const id = col.id || col.accessorKey;
+      if (id && col.meta?.align && !baseAlign[id]) {
+        baseAlign[id] = col.meta.align;
+      }
+    });
+    return { ...baseAlign, ...(savedLayout?.alignments || {}) };
+  });
 
   // Re-sync layout state ONLY when switching tables (storageKey changes)
   useEffect(() => {
@@ -750,31 +765,48 @@ export function DataTable<TData>({
       });
       setColumnVisibility(baseVis);
       setColumnOrder(layout?.order || []);
-      setColumnAlignments(layout?.alignments || {});
+      const baseAlign: Record<string, 'center' | 'left'> = { ...(initialColumnAlignments || {}) };
+      columns.forEach((col: any) => {
+        const id = col.id || col.accessorKey;
+        if (id && col.meta?.align && !baseAlign[id]) {
+          baseAlign[id] = col.meta.align;
+        }
+      });
+      setColumnAlignments({ ...baseAlign, ...(layout?.alignments || {}) });
     } catch (e) {}
-  }, [storageKey]);
-
-
+  }, [storageKey, initialColumnVisibility, initialColumnAlignments, columns]);
 
   const handleToggleAlignment = useCallback((colId: string) => {
     setColumnAlignments(prev => {
-      const current = prev[colId] ?? 'center';
+      const col = columns.find((c: any) => (c.id || c.accessorKey) === colId);
+      const colMetaAlign = (col as any)?.meta?.align;
+      const defaultAlign = initialColumnAlignments?.[colId] || colMetaAlign || (
+        ['student_name', 'full_name', 'name', 'title', 'subject'].includes(colId) ? 'left' : 'center'
+      );
+      const current = prev[colId] ?? defaultAlign;
       const next = current === 'center' ? 'left' : 'center';
       return { ...prev, [colId]: next };
     });
-  }, []);
+  }, [columns, initialColumnAlignments]);
 
   const handleResetColumnWidths = useCallback(() => {
     setColumnSizing({});
     setColumnVisibility(initialColumnVisibility);
     setColumnOrder([]);
-    setColumnAlignments({});
+    const baseAlign: Record<string, 'center' | 'left'> = { ...(initialColumnAlignments || {}) };
+    columns.forEach((col: any) => {
+      const id = col.id || col.accessorKey;
+      if (id && col.meta?.align && !baseAlign[id]) {
+        baseAlign[id] = col.meta.align;
+      }
+    });
+    setColumnAlignments(baseAlign);
     if (storageKey) {
       try {
         localStorage.removeItem(storageKey);
       } catch (e) {}
     }
-  }, [initialColumnVisibility, storageKey]);
+  }, [initialColumnVisibility, initialColumnAlignments, columns, storageKey]);
 
   const [globalFilter, setGlobalFilter] = useState('');
   const [searchFocused, setSearchFocused] = useState(false);
@@ -1259,7 +1291,12 @@ export function DataTable<TData>({
                       <tr key={headerGroup.id}>
                         {headerGroup.headers.map(header => {
                           const isSelectCol = header.column.id === 'select' || header.column.id === '_expander';
-                          const align = isSelectCol ? 'center' : (columnAlignments[header.column.id] || 'left');
+                          const colMetaAlign = (header.column.columnDef as any)?.meta?.align;
+                          const colAlign = columnAlignments[header.column.id]
+                            || initialColumnAlignments?.[header.column.id]
+                            || colMetaAlign
+                            || (['student_name', 'full_name', 'name', 'title', 'subject'].includes(header.column.id) ? 'left' : 'center');
+                          const align = isSelectCol ? 'center' : colAlign;
                           const isAnyColumnResizing = table.getState().columnSizingInfo.isResizingColumn !== false;
 
                           return (
@@ -1334,7 +1371,12 @@ export function DataTable<TData>({
                             const isFirstCell = cellIdx === 0;
                             const isLastCell = cellIdx === row.getVisibleCells().length - 1;
                             const isSelectCol = cell.column.id === 'select' || cell.column.id === '_expander';
-                            const isCentered = isSelectCol || columnAlignments[cell.column.id] !== 'left';
+                            const colMetaAlign = (cell.column.columnDef as any)?.meta?.align;
+                            const colAlign = columnAlignments[cell.column.id]
+                              || initialColumnAlignments?.[cell.column.id]
+                              || colMetaAlign
+                              || (['student_name', 'full_name', 'name', 'title', 'subject'].includes(cell.column.id) ? 'left' : 'center');
+                            const isCentered = isSelectCol || colAlign !== 'left';
 
                             return (
                               <td

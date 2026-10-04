@@ -112,12 +112,13 @@ export const MasteryHeatmap: React.FC<MasteryHeatmapProps> = ({
         header: 'Học Sinh',
         size: 190,
         minSize: 160,
+        meta: { align: 'left' },
         cell: ({ row }) => (
-          <div className="flex flex-col gap-1 py-1">
-            <span className="font-extrabold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-300 transition text-sm sm:text-base">
+          <div className="flex flex-col items-start justify-start text-left gap-1 py-1 w-full">
+            <span className="font-extrabold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-300 transition text-sm sm:text-base text-left">
               {row.original.student_name}
             </span>
-            <div className="flex items-center gap-1.5 flex-wrap">
+            <div className="flex items-center justify-start gap-1.5 flex-wrap text-left">
               {row.original.nickname && (
                 <span className="text-xs font-extrabold text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-500/15 px-1.5 py-0.5 rounded">
                   {row.original.nickname}
@@ -276,6 +277,7 @@ export const MasteryHeatmap: React.FC<MasteryHeatmapProps> = ({
         borderless={true}
         onRowClick={(row) => onSelectStudent && onSelectStudent(row.student_id)}
         initialSorting={[{ id: 'student_name', desc: false }]}
+        initialColumnAlignments={{ student_name: 'left' }}
       />
 
       {/* 4-Color Scale Legend & Custom Mastery Rate Level Scale */}
