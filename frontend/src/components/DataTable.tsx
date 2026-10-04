@@ -203,22 +203,29 @@ function DraggableHeader({
       }`}
     >
       {/* Draggable Title Area with dedicated touchAction none & grab cursor */}
-      <div
-        {...(enableReorder ? { ...attributes, ...listeners } : {})}
-        style={{ touchAction: enableReorder ? 'none' : 'auto' }}
-        className={`group flex items-center ${align === 'left' ? 'justify-start text-left' : 'justify-center text-center'} gap-1.5 w-full py-3 px-2.5 overflow-hidden text-slate-900 dark:text-slate-100 text-sm sm:text-base font-black uppercase tracking-wider whitespace-nowrap ${
-          enableReorder ? 'cursor-grab active:cursor-grabbing hover:text-blue-600 dark:hover:text-white transition-colors' : ''
-        }`}
-        title={enableReorder ? 'Giữ chuột và kéo để thay đổi thứ tự cột' : undefined}
-      >
-        {enableReorder && (
-          <GripVertical
-            size={13}
-            className="text-slate-400 dark:text-slate-600 group-hover:text-indigo-500 dark:group-hover:text-indigo-400 cursor-grab active:cursor-grabbing shrink-0 transition-colors"
-          />
-        )}
-        {children}
-      </div>
+      {(() => {
+        const isCustomHeader = typeof header.column.columnDef.header === 'function';
+        return (
+          <div
+            {...(enableReorder ? { ...attributes, ...listeners } : {})}
+            style={{ touchAction: enableReorder ? 'none' : 'auto' }}
+            className={`group flex items-center ${align === 'left' ? 'justify-start text-left' : 'justify-center text-center'} gap-1.5 w-full py-2 px-1 text-slate-900 dark:text-slate-100 ${
+              isCustomHeader
+                ? 'font-normal overflow-visible'
+                : 'text-sm sm:text-base font-black uppercase tracking-wider whitespace-nowrap overflow-hidden'
+            } ${enableReorder ? 'cursor-grab active:cursor-grabbing hover:text-blue-600 dark:hover:text-white transition-colors' : ''}`}
+            title={enableReorder ? 'Giữ chuột và kéo để thay đổi thứ tự cột' : undefined}
+          >
+            {enableReorder && (
+              <GripVertical
+                size={13}
+                className="text-slate-400 dark:text-slate-600 group-hover:text-indigo-500 dark:group-hover:text-indigo-400 cursor-grab active:cursor-grabbing shrink-0 transition-colors"
+              />
+            )}
+            {children}
+          </div>
+        );
+      })()}
 
       {/* Resize handle — completely isolated from dnd listeners */}
       {enableColumnResizing && header.column.getCanResize() && (
@@ -1309,14 +1316,20 @@ export function DataTable<TData>({
                               isAnyColumnResizing={isAnyColumnResizing}
                             >
                               <div
-                                className={`inline-flex items-center justify-center gap-1.5 max-w-full ${
+                                className={`inline-flex items-center justify-center gap-1.5 w-full max-w-full ${
                                   header.column.getCanSort() ? 'cursor-pointer select-none hover:text-slate-900 dark:hover:text-white transition-colors' : ''
                                 }`}
                                 onClick={header.column.getCanSort() ? header.column.getToggleSortingHandler() : undefined}
                               >
-                                <span className="truncate">
-                                  {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
-                                </span>
+                                {header.isPlaceholder ? null : typeof header.column.columnDef.header === 'function' ? (
+                                  <div className="w-full flex items-center justify-center">
+                                    {flexRender(header.column.columnDef.header, header.getContext())}
+                                  </div>
+                                ) : (
+                                  <span className="truncate">
+                                    {flexRender(header.column.columnDef.header, header.getContext())}
+                                  </span>
+                                )}
 
                                 {header.column.getCanSort() && (
                                   <span className="shrink-0 inline-flex items-center">

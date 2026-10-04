@@ -1,7 +1,26 @@
 import json
 import math
+import re
 from typing import Dict, Any, List, Optional
 from datetime import datetime
+
+
+def parse_grammar_topics(raw_gt: str) -> List[str]:
+    """Extracts distinct grammar topics without breaking compound sentence names."""
+    if not raw_gt:
+        return []
+    protected = raw_gt.replace("Simple, Compound, and Complex Sentences", "__SCC__")
+    parts = re.split(r'[&,]+', protected)
+    seen = set()
+    deduped = []
+    for p in parts:
+        clean = p.replace("__SCC__", "Simple, Compound, and Complex Sentences").strip()
+        clean = re.sub(r'^[,\s]+|[,\s]+$', '', clean).strip()
+        low = clean.lower()
+        if clean and low not in seen:
+            seen.add(low)
+            deduped.append(clean)
+    return deduped
 
 
 def init_skill_mastery_db(conn):
@@ -220,47 +239,52 @@ def compute_skill_mastery_from_records(conn, class_id: Optional[int] = None, stu
         c1_score = float(g.get("check_1") or 0.0) if g.get("check_1") is not None else None
         c2_score = float(g.get("check_2") or 0.0) if g.get("check_2") is not None else None
 
-        # Check 1 processing
-        c1_cfg = cfg.get("check_1") or {}
-        if c1_score is not None and c1_score > 0 and c1_cfg:
-            skill = c1_cfg.get("skill") or "vocab"
-            units = c1_cfg.get("units") or []
-            topic = c1_cfg.get("topic") or c1_cfg.get("grammar_topic") or ""
+        # Process Check 1 and Check 2 separately
+        for chk_key, score_val in [("check_1", c1_score), ("check_2", c2_score)]:
+            if score_val is None or score_val <= 0:
+                continue
+            c_cfg = cfg.get(chk_key) or {}
+            if not c_cfg:
+                continue
+
+            skill = c_cfg.get("skill") or ("grammar" if chk_key == "check_2" else "vocab")
+            units = c_cfg.get("units") or []
+            raw_gt = str(c_cfg.get("grammar_topic") or "").strip()
+            topic = str(c_cfg.get("topic") or "").strip()
 
             target_keys = []
-            if units:
-                target_keys.extend(units)
-            elif topic:
-                target_keys.append(topic)
-            else:
-                target_keys.append("Chung")
+            if skill == "grammar":
+                gt_topics = parse_grammar_topics(raw_gt)
+                if not gt_topics and topic and topic != "Luyện đề tổng hợp":
+                    gt_topics = parse_grammar_topics(topic)
 
-            for ukey in target_keys:
-                clean_key = str(ukey).strip()
+                if units:
+                    for u in units:
+                        clean_u = str(u).strip()
+                        if not clean_u:
+                            continue
+                        if gt_topics:
+                            for t in gt_topics:
+                                target_keys.append(f"{clean_u}: {t}")
+                        else:
+                            target_keys.append(clean_u)
+                elif gt_topics:
+                    for t in gt_topics:
+                        target_keys.append(t)
+                else:
+                    target_keys.append("Chung")
+            else:
+                if units:
+                    target_keys.extend([str(u).strip() for u in units if str(u).strip()])
+                elif topic:
+                    target_keys.append(topic)
+                else:
+                    target_keys.append("Chung")
+
+            for clean_key in target_keys:
                 if clean_key:
                     k = (sid, cid, skill, clean_key)
-                    student_unit_series.setdefault(k, []).append((dt, c1_score))
-
-        # Check 2 processing
-        c2_cfg = cfg.get("check_2") or {}
-        if c2_score is not None and c2_score > 0 and c2_cfg:
-            skill = c2_cfg.get("skill") or "grammar"
-            units = c2_cfg.get("units") or []
-            topic = c2_cfg.get("topic") or c2_cfg.get("grammar_topic") or ""
-
-            target_keys = []
-            if units:
-                target_keys.extend(units)
-            elif topic:
-                target_keys.append(topic)
-            else:
-                target_keys.append("Chung")
-
-            for ukey in target_keys:
-                clean_key = str(ukey).strip()
-                if clean_key:
-                    k = (sid, cid, skill, clean_key)
-                    student_unit_series.setdefault(k, []).append((dt, c2_score))
+                    student_unit_series.setdefault(k, []).append((dt, score_val))
 
     # Compute and persist in skill_mastery table
     now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -292,6 +316,13 @@ def compute_skill_mastery_from_records(conn, class_id: Optional[int] = None, stu
         })
 
     if batch_params:
+        if class_id:
+            cursor.execute("DELETE FROM skill_mastery WHERE class_id = ?", (class_id,))
+        elif student_id:
+            cursor.execute("DELETE FROM skill_mastery WHERE student_id = ?", (student_id,))
+        else:
+            cursor.execute("DELETE FROM skill_mastery")
+
         cursor.executemany("""
             INSERT INTO skill_mastery (
                 student_id, class_id, skill, unit_key, ema_score, last_score, test_count, mastery_status, last_tested, updated_at

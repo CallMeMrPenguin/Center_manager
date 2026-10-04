@@ -137,7 +137,17 @@ export const MasteryHeatmap: React.FC<MasteryHeatmapProps> = ({
       const colKey = u.unit_id || `${u.unit_key}__${u.skill}`;
       const unitInfo = resolveFullUnitInfo(u.unit_key, u.unit_name, grade, u.skill, u.grammar_topic);
       const isGrammar = u.skill === 'grammar';
-      const grammarTopic = unitInfo.grammarTopic || unitInfo.grammarSummaryVi || (unitInfo.grammarTopics && unitInfo.grammarTopics[0]);
+      const cleanKey = u.unit_key.replace(/\[K?\d+\]\s*/i, '').trim();
+      let unitLabel = cleanKey;
+      let grammarTopicName = u.grammar_topic || '';
+      if (cleanKey.includes(':')) {
+        const [uPart, gPart] = cleanKey.split(':');
+        unitLabel = uPart.trim();
+        if (!grammarTopicName) grammarTopicName = gPart.trim();
+      }
+      if (!grammarTopicName && isGrammar) {
+        grammarTopicName = unitInfo.grammarTopic || unitInfo.grammarSummaryVi || '';
+      }
       const rateStyle = getMasteryRateStyle(u.mastery_pct, masteryColorConfig);
 
       return {
@@ -146,12 +156,12 @@ export const MasteryHeatmap: React.FC<MasteryHeatmapProps> = ({
           <div
             onMouseEnter={(e) => handleHeaderMouseEnter(e, u)}
             onMouseLeave={handleHeaderMouseLeave}
-            className="flex flex-col items-center justify-center w-full py-1 cursor-pointer select-none group/unit-hdr"
+            className="flex flex-col items-center justify-center w-full py-1.5 cursor-pointer select-none group/unit-hdr"
             title={unitInfo.fullTitle}
           >
             {/* Unit Key */}
-            <div className="text-xs font-black text-slate-900 dark:text-white tracking-tight leading-snug text-center whitespace-normal break-words px-1 max-w-[130px]">
-              {u.unit_key}
+            <div className="text-xs font-black text-slate-900 dark:text-white tracking-tight leading-snug text-center">
+              {unitLabel}
             </div>
 
             {/* Skill badge */}
@@ -159,29 +169,29 @@ export const MasteryHeatmap: React.FC<MasteryHeatmapProps> = ({
               <span
                 className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-full inline-block transition-transform duration-150 group-hover/unit-hdr:scale-105 ${
                   isGrammar
-                    ? 'bg-purple-500/15 text-purple-700 dark:text-purple-300'
-                    : 'bg-blue-500/15 text-blue-700 dark:text-blue-300'
+                    ? 'bg-purple-500/15 text-purple-700 dark:text-purple-300 border border-purple-500/25'
+                    : 'bg-blue-500/15 text-blue-700 dark:text-blue-300 border border-blue-500/25'
                 }`}
               >
                 {isGrammar ? 'Ngữ Pháp' : 'Từ Vựng'}
               </span>
             </div>
 
-            {/* Specific Grammar Topic for Grammar / Unit Topic for Vocab */}
-            <div className="mt-1 px-1 w-full text-center">
+            {/* Prominent Grammar Topic for Grammar / Unit Topic for Vocab */}
+            <div className="mt-1 px-0.5 w-full text-center">
               {isGrammar ? (
                 <div
-                  className="text-[10px] font-extrabold text-purple-700 dark:text-purple-300 truncate max-w-[125px] mx-auto bg-purple-500/10 px-1.5 py-0.5 rounded"
-                  title={`Ngữ pháp: ${grammarTopic || 'Cốt lõi'}`}
+                  className="text-[11px] font-black text-purple-700 dark:text-purple-300 leading-snug break-words text-center bg-purple-500/10 dark:bg-purple-500/15 px-2 py-1 rounded-md border border-purple-500/20 shadow-2xs"
+                  title={`Ngữ pháp: ${grammarTopicName}`}
                 >
-                  {grammarTopic || 'Ngữ pháp Unit'}
+                  {grammarTopicName || 'Ngữ pháp'}
                 </div>
               ) : (
                 <div
-                  className="text-[10px] font-bold text-slate-600 dark:text-slate-400 truncate max-w-[125px] mx-auto px-0.5"
+                  className="text-[11px] font-bold text-slate-700 dark:text-slate-300 leading-snug break-words text-center px-1"
                   title={`Chủ đề: ${unitInfo.unitName}`}
                 >
-                  {unitInfo.unitName || 'Từ vựng Unit'}
+                  {unitInfo.unitName || 'Từ vựng'}
                 </div>
               )}
             </div>
@@ -200,19 +210,13 @@ export const MasteryHeatmap: React.FC<MasteryHeatmapProps> = ({
           </div>
         ),
         accessorFn: (row) => {
-          const uData =
-            row.units?.[colKey] ||
-            (row.units?.[u.unit_key]?.skill === u.skill ? row.units?.[u.unit_key] : undefined);
+          const uData = row.units?.[colKey] || row.units?.[u.unit_key];
           return uData?.ema_score ?? -1;
         },
-        size: 135,
-        minSize: 115,
+        size: isGrammar ? 160 : 135,
+        minSize: isGrammar ? 140 : 115,
         cell: ({ row }) => {
-          const uData =
-            row.original.units?.[colKey] ||
-            (row.original.units?.[u.unit_key]?.skill === u.skill
-              ? row.original.units?.[u.unit_key]
-              : undefined);
+          const uData = row.original.units?.[colKey] || row.original.units?.[u.unit_key];
           const ema = uData?.ema_score;
           const style = getBadgeStyle(ema);
 

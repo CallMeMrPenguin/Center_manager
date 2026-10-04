@@ -166,8 +166,15 @@ def get_skill_breakdown_report(conn, class_id: Optional[int] = None, student_id:
 
         item_grade = items[0].get("grade") if items else None
         item_cid = items[0].get("class_id") if items else None
-        u_name = resolve_unit_name(ukey, cl_id=class_id or item_cid, gr_str=item_grade)
-        u_grammar = resolve_unit_grammar(ukey, cl_id=class_id or item_cid, gr_str=item_grade)
+
+        clean_ukey = re.sub(r'\[K?\d+\]\s*', '', str(ukey)).strip()
+        if ":" in clean_ukey and skill == "grammar":
+            u_part, g_part = clean_ukey.split(":", 1)
+            u_name = resolve_unit_name(u_part.strip(), cl_id=class_id or item_cid, gr_str=item_grade)
+            u_grammar = g_part.strip()
+        else:
+            u_name = resolve_unit_name(clean_ukey, cl_id=class_id or item_cid, gr_str=item_grade)
+            u_grammar = resolve_unit_grammar(clean_ukey, cl_id=class_id or item_cid, gr_str=item_grade)
 
         name_display = u_grammar if (skill == "grammar" and u_grammar) else (u_name or ukey)
         skill_label = "Ngữ pháp" if skill == "grammar" else "Từ vựng"
@@ -229,6 +236,16 @@ def get_skill_breakdown_report(conn, class_id: Optional[int] = None, student_id:
                 "student_count": ub.get("student_count", 0)
             })
 
+    def get_unit_sort_tuple(item: Dict[str, Any]) -> tuple:
+        uk = str(item.get("unit_key") or "")
+        sk = str(item.get("skill") or "")
+        m = re.search(r'(?:Unit|Bài)\s*(\d+)', uk, re.IGNORECASE)
+        num = int(m.group(1)) if m else 999
+        sk_order = 0 if sk == "vocab" else 1
+        return (num, sk_order, uk)
+
+    unique_units.sort(key=get_unit_sort_tuple)
+
     student_map: Dict[int, Dict[str, Any]] = {}
     for r in mastery_rows:
         sid = r["student_id"]
@@ -247,8 +264,15 @@ def get_skill_breakdown_report(conn, class_id: Optional[int] = None, student_id:
                 "units": {}
             }
         
-        u_name = resolve_unit_name(display_ukey, cl_id=r.get("class_id"), gr_str=r.get("grade"))
-        u_grammar = resolve_unit_grammar(display_ukey, cl_id=r.get("class_id"), gr_str=r.get("grade"))
+        clean_ukey = re.sub(r'\[K?\d+\]\s*', '', str(r['unit_key'])).strip()
+        if ":" in clean_ukey and r["skill"] == "grammar":
+            u_part, g_part = clean_ukey.split(":", 1)
+            u_name = resolve_unit_name(u_part.strip(), cl_id=r.get("class_id"), gr_str=r.get("grade"))
+            u_grammar = g_part.strip()
+        else:
+            u_name = resolve_unit_name(display_ukey, cl_id=r.get("class_id"), gr_str=r.get("grade"))
+            u_grammar = resolve_unit_grammar(display_ukey, cl_id=r.get("class_id"), gr_str=r.get("grade"))
+
         unit_data = {
             "unit_key": display_ukey,
             "unit_name": u_name,
