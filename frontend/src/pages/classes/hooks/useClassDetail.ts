@@ -232,6 +232,7 @@ export function useClassDetail(selectedClass: ClassItem | null) {
           await api.saveClassAttendance(classId, dateStr, finalRecords);
           sessionStorage.removeItem(`cm_draft_${classId}_${dateStr}`);
           setAutoSaveStatus('saved');
+          setAttendanceRecords(finalRecords);
           notifyDataChanged(['attendance', 'reports', 'analytics']);
           setTimeout(() => setAutoSaveStatus('idle'), 2500);
         } catch (e) {

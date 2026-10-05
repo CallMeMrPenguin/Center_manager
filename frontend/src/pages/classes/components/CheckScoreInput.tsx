@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useLayoutEffect, useRef, useCallback } from 'react';
 import { format1Dec } from '../../../utils';
 
 interface CheckScoreInputProps {
@@ -95,24 +95,30 @@ export const CheckScoreInput: React.FC<CheckScoreInputProps> = React.memo(({
     }
   }, [rec[field], rec.student_id]);
 
-  const commitValue = useCallback((rawVal: string) => {
+  useLayoutEffect(() => {
+    if (isFocusedRef.current && inputRef.current && document.activeElement !== inputRef.current) {
+      inputRef.current.focus({ preventScroll: true });
+    }
+  });
+
+  const commitValue = useCallback((rawVal: string, immediate = false) => {
     const formatted = parseAndFormatScore(rawVal);
     setVal(formatted);
     lastCommittedRef.current = formatted;
-    onUpdateRecord(rec.student_id, field, formatted, true);
+    onUpdateRecord(rec.student_id, field, formatted, immediate);
   }, [field, onUpdateRecord, parseAndFormatScore, rec.student_id]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     // 1. Enter or ArrowDown -> Move down to same score column of next student (Shift+Enter moves up)
     if (e.key === 'Enter') {
       e.preventDefault();
-      commitValue(e.currentTarget.value);
+      commitValue(e.currentTarget.value, false);
       navigateVerticalScoreInputs(e.currentTarget, field, e.shiftKey ? -1 : 1);
       return;
     }
     if (e.key === 'ArrowDown') {
       e.preventDefault();
-      commitValue(e.currentTarget.value);
+      commitValue(e.currentTarget.value, false);
       navigateVerticalScoreInputs(e.currentTarget, field, 1);
       return;
     }
@@ -120,7 +126,7 @@ export const CheckScoreInput: React.FC<CheckScoreInputProps> = React.memo(({
     // 2. ArrowUp -> Move up to same score column of previous student
     if (e.key === 'ArrowUp') {
       e.preventDefault();
-      commitValue(e.currentTarget.value);
+      commitValue(e.currentTarget.value, false);
       navigateVerticalScoreInputs(e.currentTarget, field, -1);
       return;
     }
@@ -129,39 +135,39 @@ export const CheckScoreInput: React.FC<CheckScoreInputProps> = React.memo(({
     if (e.key === 'Escape') {
       e.preventDefault();
       setVal(lastCommittedRef.current);
-      onUpdateRecord(rec.student_id, field, lastCommittedRef.current);
+      onUpdateRecord(rec.student_id, field, lastCommittedRef.current, false);
       return;
     }
 
     // 4. Tab Navigation -> Smoothly cycle ONLY between all score inputs
     if (e.key === 'Tab') {
       e.preventDefault();
-      commitValue(e.currentTarget.value);
+      commitValue(e.currentTarget.value, false);
       navigateScoreInputs(e.currentTarget, e.shiftKey);
       return;
     }
 
-    // 4. ArrowRight at end of selection/caret or empty -> Move to next input
+    // 5. ArrowRight at end of selection/caret or empty -> Move to next input
     if (e.key === 'ArrowRight') {
       const input = e.currentTarget;
       const isAtEnd = input.selectionStart === input.value.length && input.selectionEnd === input.value.length;
       const isAllSelected = input.selectionStart === 0 && input.selectionEnd === input.value.length;
       if (isAtEnd || isAllSelected || input.value === '') {
         e.preventDefault();
-        commitValue(input.value);
+        commitValue(input.value, false);
         navigateScoreInputs(input, false);
       }
       return;
     }
 
-    // 5. ArrowLeft at start of selection/caret or empty -> Move to previous input
+    // 6. ArrowLeft at start of selection/caret or empty -> Move to previous input
     if (e.key === 'ArrowLeft') {
       const input = e.currentTarget;
       const isAtStart = input.selectionStart === 0 && input.selectionEnd === 0;
       const isAllSelected = input.selectionStart === 0 && input.selectionEnd === input.value.length;
       if (isAtStart || isAllSelected || input.value === '') {
         e.preventDefault();
-        commitValue(input.value);
+        commitValue(input.value, false);
         navigateScoreInputs(input, true);
       }
       return;
@@ -206,18 +212,16 @@ export const CheckScoreInput: React.FC<CheckScoreInputProps> = React.memo(({
           onUpdateRecord(rec.student_id, field, parsed !== '' ? parsed : raw, false);
         }}
         onFocus={(e) => {
-          if (!isFocusedRef.current) {
-            isFocusedRef.current = true;
-            if (e.currentTarget.value && e.currentTarget.value.trim().length > 0) {
-              e.currentTarget.select();
-            } else {
-              e.currentTarget.setSelectionRange(0, 0);
-            }
+          isFocusedRef.current = true;
+          if (e.currentTarget.value && e.currentTarget.value.trim().length > 0) {
+            e.currentTarget.select();
+          } else {
+            e.currentTarget.setSelectionRange(0, 0);
           }
         }}
         onBlur={(e) => {
           isFocusedRef.current = false;
-          commitValue(e.target.value);
+          commitValue(e.target.value, false);
         }}
         onKeyDown={handleKeyDown}
         placeholder="0-10"
