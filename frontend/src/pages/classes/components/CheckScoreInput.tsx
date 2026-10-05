@@ -206,11 +206,13 @@ export const CheckScoreInput: React.FC<CheckScoreInputProps> = React.memo(({
           onUpdateRecord(rec.student_id, field, parsed !== '' ? parsed : raw, false);
         }}
         onFocus={(e) => {
-          isFocusedRef.current = true;
-          if (e.currentTarget.value && e.currentTarget.value.trim().length > 0) {
-            e.currentTarget.select();
-          } else {
-            e.currentTarget.setSelectionRange(0, 0);
+          if (!isFocusedRef.current) {
+            isFocusedRef.current = true;
+            if (e.currentTarget.value && e.currentTarget.value.trim().length > 0) {
+              e.currentTarget.select();
+            } else {
+              e.currentTarget.setSelectionRange(0, 0);
+            }
           }
         }}
         onBlur={(e) => {

@@ -204,23 +204,20 @@ export function useClassDetail(selectedClass: ClassItem | null) {
         } catch (_) {}
       }
 
-      // Synchronize React state: immediate on status change, blur, or key navigation; debounced 200ms when typing
+      // Synchronize React state: immediate on status change, blur, or key navigation.
+      // When typing (immediate === false), we update attendanceRecordsRef.current and sessionStorage draft immediately,
+      // avoiding unneeded full-table re-renders while the user is actively typing in a cell.
+      if (stateUpdateTimerRef.current) {
+        clearTimeout(stateUpdateTimerRef.current);
+        stateUpdateTimerRef.current = null;
+      }
       if (field === 'status' || immediate) {
-        if (stateUpdateTimerRef.current) {
-          clearTimeout(stateUpdateTimerRef.current);
-          stateUpdateTimerRef.current = null;
-        }
         setAttendanceRecords(newRecs);
-      } else {
-        if (stateUpdateTimerRef.current) clearTimeout(stateUpdateTimerRef.current);
-        stateUpdateTimerRef.current = setTimeout(() => {
-          setAttendanceRecords(attendanceRecordsRef.current);
-        }, 200);
       }
 
       // Debounced background auto-save to database (1500ms after last keystroke)
       if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
-      setAutoSaveStatus('saving');
+      // NOTE: Do NOT setAutoSaveStatus('saving') here; user is still actively editing!
       autoSaveTimerRef.current = setTimeout(async () => {
         const classId = currentClassIdRef.current;
         const dateStr = currentDateRef.current;
@@ -228,6 +225,7 @@ export function useClassDetail(selectedClass: ClassItem | null) {
           setAutoSaveStatus('idle');
           return;
         }
+        setAutoSaveStatus('saving');
         try {
           const { records: finalRecords } = applyAutoAttendanceStatus(attendanceRecordsRef.current);
           isDirtyRef.current = false;

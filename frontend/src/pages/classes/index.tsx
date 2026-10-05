@@ -90,6 +90,27 @@ export default function ClassesPage() {
     setEnrollModalOpen(true);
   };
 
+  const handleOpenStudentActionModal = useCallback(async (st: EnrolledStudent) => {
+    await flushSaveAttendance();
+    setSelectedStudentForAction(st);
+    setActionModalOpen(true);
+  }, [flushSaveAttendance]);
+
+  const handleExportExcelWithFlush = useCallback(async (thresholds?: any) => {
+    await flushSaveAttendance();
+    handleExportExcel(thresholds);
+  }, [flushSaveAttendance, handleExportExcel]);
+
+  const handleExportDocxWithFlush = useCallback(async () => {
+    await flushSaveAttendance();
+    handleExportDocx();
+  }, [flushSaveAttendance, handleExportDocx]);
+
+  const handleOpenTestConfigModalWithFlush = useCallback(async () => {
+    await flushSaveAttendance();
+    setTestConfigModalOpen(true);
+  }, [flushSaveAttendance]);
+
   // Sync state from URL (Browser Back/Forward or direct links)
   const syncFromUrl = useCallback(() => {
     const urlClassId = getUrlParam('id') || getUrlParam('classId');
@@ -248,23 +269,10 @@ export default function ClassesPage() {
               autoSaveStatus={autoSaveStatus}
               onUpdateRecord={handleUpdateRecord}
               parseAndFormatScore={parseAndFormatScore}
-              onOpenStudentActionModal={async (st) => {
-                await flushSaveAttendance();
-                setSelectedStudentForAction(st);
-                setActionModalOpen(true);
-              }}
-              onExportExcel={async (thresholds?: any) => {
-                await flushSaveAttendance();
-                handleExportExcel(thresholds);
-              }}
-              onExportDocx={async () => {
-                await flushSaveAttendance();
-                handleExportDocx();
-              }}
-              onOpenTestConfigModal={async () => {
-                await flushSaveAttendance();
-                setTestConfigModalOpen(true);
-              }}
+              onOpenStudentActionModal={handleOpenStudentActionModal}
+              onExportExcel={handleExportExcelWithFlush}
+              onExportDocx={handleExportDocxWithFlush}
+              onOpenTestConfigModal={handleOpenTestConfigModalWithFlush}
               onCircularSwap={handleBlossomSwap}
               onSaveAttendance={handleSaveAttendance}
               savingAttendance={savingAttendance}

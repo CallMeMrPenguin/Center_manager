@@ -757,8 +757,13 @@ export function DataTable<TData>({
   });
 
   // Re-sync layout state ONLY when switching tables (storageKey changes)
+  const prevStorageKeyRef = useRef<string>(storageKey);
   useEffect(() => {
     if (!storageKey) return;
+    if (prevStorageKeyRef.current === storageKey) {
+      return;
+    }
+    prevStorageKeyRef.current = storageKey;
     try {
       const item = localStorage.getItem(storageKey);
       const layout = item ? JSON.parse(item) : null;
@@ -951,7 +956,7 @@ export function DataTable<TData>({
     sortingFns: {
       vietnameseName: vietnameseNameSortingFn,
     },
-    getRowId: (row: any, index: number) => String(row?.id ?? row?.student_id ?? row?._id ?? row?.key ?? index),
+    getRowId: (row: any, index: number) => String(row?.student_id ?? row?.id ?? row?._id ?? row?.key ?? index),
     columnResizeMode,
     autoResetPageIndex: false,
     autoResetExpanded: false,
@@ -1368,7 +1373,7 @@ export function DataTable<TData>({
                         <tr
                           data-selected={row.getIsSelected() ? 'true' : undefined}
                           className={`
-                            group transition-colors duration-150 animate-row-enter
+                            group transition-colors duration-150
                             ${onRowClick ? 'cursor-pointer' : ''}
                             ${row.getIsSelected()
                               ? 'bg-blue-500/15 hover:bg-blue-500/25 dark:bg-blue-500/20 dark:hover:bg-blue-500/30'
