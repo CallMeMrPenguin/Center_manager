@@ -37,6 +37,14 @@ def _worker_loop():
         _sync_trigger.wait(timeout=30.0)
         _sync_trigger.clear()
 
+        from database.connection import get_target_db_url
+        if not get_target_db_url():
+            with _lock:
+                _sync_state["status"] = "synced"
+                _sync_state["syncing"] = False
+                _sync_state["last_error"] = None
+            continue
+
         with _lock:
             _sync_state["syncing"] = True
             _sync_state["status"] = "syncing"

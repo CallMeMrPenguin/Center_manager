@@ -2,13 +2,16 @@ import os
 import re
 import sqlite3
 
-DEFAULT_POSTGRES_URL = os.environ.get("DATABASE_URL") or os.environ.get("POSTGRES_URL") or "postgresql://postgres:postgres@localhost:5432/center_manager"
+DEFAULT_POSTGRES_URL = os.environ.get("DATABASE_URL") or os.environ.get("POSTGRES_URL") or ""
 
-def get_target_db_url() -> str:
-    raw_url = os.environ.get("DATABASE_URL") or os.environ.get("POSTGRES_URL") or DEFAULT_POSTGRES_URL
-    if raw_url and raw_url.startswith("postgres://"):
-        raw_url = "postgresql://" + raw_url[len("postgres://"):]
-    return raw_url
+def get_target_db_url():
+    raw_url = os.environ.get("DATABASE_URL") or os.environ.get("POSTGRES_URL")
+    if not raw_url or not str(raw_url).strip():
+        return None
+    clean_url = str(raw_url).strip()
+    if clean_url.startswith("postgres://"):
+        clean_url = "postgresql://" + clean_url[len("postgres://"):]
+    return clean_url
 
 DATABASE_URL = get_target_db_url()
 

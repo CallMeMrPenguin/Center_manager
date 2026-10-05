@@ -30,28 +30,36 @@ def get_grade_weights() -> Dict[str, float]:
 
 _get_grade_weights = get_grade_weights
 
-def _sync_cloud_delete(sql_pg: str, params: tuple):
-    import threading
-    def _task():
-        _sync_cloud_delete_sync(sql_pg, params)
-    threading.Thread(target=_task, daemon=True).start()
-
-def _sync_cloud_delete_sync(sql_pg: str, params: tuple):
+def _sync_cloud_delete_statements(statements: list, timeout: int = 3):
+    """
+    Executes multiple SQL delete statements against remote PostgreSQL in a SINGLE connection & transaction.
+    If no remote database is configured, returns immediately in 0ms without network overhead.
+    """
     try:
         import os
         if os.environ.get("APP_MODE") in ("web", "vps", "server"):
             return
         from database.connection import get_target_db_url
-        import psycopg2
         target_url = get_target_db_url()
         if not target_url:
             return
-        pconn = psycopg2.connect(target_url, connect_timeout=5)
+        import psycopg2
+        pconn = psycopg2.connect(target_url, connect_timeout=timeout)
         try:
             with pconn.cursor() as pcur:
-                pcur.execute(sql_pg, params)
+                for sql_pg, params in statements:
+                    pcur.execute(sql_pg, params)
             pconn.commit()
         finally:
             pconn.close()
     except Exception:
         pass
+
+def _sync_cloud_delete(sql_pg: str, params: tuple):
+    import threading
+    def _task():
+        _sync_cloud_delete_statements([(sql_pg, params)])
+    threading.Thread(target=_task, daemon=True).start()
+
+def _sync_cloud_delete_sync(sql_pg: str, params: tuple):
+    _sync_cloud_delete_statements([(sql_pg, params)])

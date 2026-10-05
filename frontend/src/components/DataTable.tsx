@@ -212,7 +212,7 @@ function DraggableHeader({
             className={`group flex items-center ${align === 'left' ? 'justify-start text-left' : 'justify-center text-center'} gap-1.5 w-full py-2 px-1 text-slate-900 dark:text-slate-100 ${
               isCustomHeader
                 ? 'font-normal overflow-visible'
-                : 'text-sm sm:text-base font-black uppercase tracking-wider whitespace-nowrap overflow-hidden'
+                : 'text-xs sm:text-sm font-semibold tracking-normal whitespace-nowrap overflow-hidden'
             } ${enableReorder ? 'cursor-grab active:cursor-grabbing hover:text-blue-600 dark:hover:text-white transition-colors' : ''}`}
             title={enableReorder ? 'Giữ chuột và kéo để thay đổi thứ tự cột' : undefined}
           >

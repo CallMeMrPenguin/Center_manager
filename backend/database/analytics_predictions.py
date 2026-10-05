@@ -312,7 +312,15 @@ def get_class_attendance_with_predictions(class_id: int, date_str: str) -> Dict[
             WHERE cs.class_id = ?
             ORDER BY s.full_name ASC
         """, (date_str, date_str, class_id))
-        rows = [dict(r) for r in cursor.fetchall()]
+        raw_rows = cursor.fetchall()
+        seen_sids = set()
+        rows = []
+        for r in raw_rows:
+            d = dict(r)
+            sid = d.get("student_id")
+            if sid not in seen_sids:
+                seen_sids.add(sid)
+                rows.append(d)
     finally:
         conn.close()
 

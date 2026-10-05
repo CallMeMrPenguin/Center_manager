@@ -225,8 +225,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 {currentUser?.name || 'Center Manager'}
               </p>
               {currentUser?.username && (
-                <p className="text-[10px] font-mono text-indigo-600 dark:text-indigo-400 mt-0.5">
-                  @{currentUser.username} {currentUser.className ? `• ${currentUser.className}` : ''}
+                <p className="text-[10px] font-mono text-indigo-600 dark:text-indigo-400 mt-0.5 flex items-center gap-1.5">
+                  <span>@{currentUser.username}</span>
+                  {currentUser.className && (
+                    <span className="px-1.5 py-0.2 rounded bg-indigo-50 dark:bg-indigo-950/60 text-[9px] font-bold">
+                      {currentUser.className}
+                    </span>
+                  )}
                 </p>
               )}
             </div>
@@ -294,7 +299,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   {currentUser?.name || 'Center Manager'}
                 </span>
                 <span className="text-[10px] font-semibold text-blue-600 truncate">
-                  {currentUser?.rawRole || (currentUser?.role === 'admin' ? 'Quản trị' : 'Học sinh')}
+                  {currentUser?.name && currentUser.name.trim().toLowerCase().startsWith('quản trị') && currentUser.username
+                    ? `@${currentUser.username}`
+                    : (currentUser?.rawRole || (currentUser?.role === 'admin' ? 'Quản trị viên' : 'Học sinh'))}
                 </span>
               </div>
             )}

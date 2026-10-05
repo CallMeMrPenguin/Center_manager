@@ -317,17 +317,24 @@ export function useClassDetail(selectedClass: ClassItem | null) {
 
   const handleUnenrollStudent = async (stId: number) => {
     if (!selectedClass) return;
+    if (autoSaveTimerRef.current) {
+      clearTimeout(autoSaveTimerRef.current);
+      autoSaveTimerRef.current = null;
+    }
+    isDirtyRef.current = false;
+    try {
+      sessionStorage.removeItem(`cm_draft_${selectedClass.id}_${attendanceDate}`);
+    } catch (_) {}
+
+    // Optimistically update enrolled students and attendance records immediately for 0ms lag
+    setEnrolledStudents((prev) => prev.filter((s) => s.id !== stId));
+    const nextRecs = attendanceRecordsRef.current.filter((r) => r.student_id !== stId);
+    attendanceRecordsRef.current = nextRecs;
+    setAttendanceRecords(nextRecs);
+
     try {
       await api.unenrollStudent(selectedClass.id, stId);
       showToast('Đã xoá học sinh khỏi lớp!', 'success');
-      isDirtyRef.current = false;
-      // Optimistically update enrolled students and attendance records immediately
-      setEnrolledStudents((prev) => prev.filter((s) => s.id !== stId));
-      const nextRecs = attendanceRecordsRef.current.filter((r) => r.student_id !== stId);
-      attendanceRecordsRef.current = nextRecs;
-      setAttendanceRecords(nextRecs);
-
-      // Re-fetch fresh state from server
       await Promise.all([
         loadEnrolledStudents(selectedClass.id),
         loadAttendanceData(selectedClass.id, attendanceDate),
@@ -335,6 +342,9 @@ export function useClassDetail(selectedClass: ClassItem | null) {
       notifyDataChanged(['classes', 'students', 'attendance', 'seating']);
     } catch (err: any) {
       showToast('Không thể bỏ ghi danh: ' + err.message, 'error');
+      // Rollback on failure
+      loadEnrolledStudents(selectedClass.id);
+      loadAttendanceData(selectedClass.id, attendanceDate);
     }
   };
 

@@ -4,7 +4,7 @@ import threading
 from datetime import datetime
 from typing import List, Dict, Any, Optional
 from database.connection import get_connection
-from database.utils import _sync_cloud_delete, _sync_cloud_delete_sync
+from database.utils import _sync_cloud_delete, _sync_cloud_delete_sync, _sync_cloud_delete_statements
 
 # ----------------------------------------------------
 # CENTER MANAGER — CLASSES CRUD & SEATING / SCHEDULE
@@ -104,7 +104,15 @@ def get_class_students(class_id: int) -> List[Dict[str, Any]]:
             ORDER BY s.full_name ASC
         """, (class_id,))
         rows = cursor.fetchall()
-        return [dict(r) for r in rows]
+        seen_ids = set()
+        unique_students = []
+        for r in rows:
+            d = dict(r)
+            sid = d.get("id")
+            if sid not in seen_ids:
+                seen_ids.add(sid)
+                unique_students.append(d)
+        return unique_students
     finally:
         conn.close()
 
@@ -138,13 +146,10 @@ def unenroll_student_from_class(class_id: int, student_id: int):
     conn = get_connection()
     try:
         cursor = conn.cursor()
-        cursor.execute("DELETE FROM class_students WHERE class_id = ? AND student_id = ?", (class_id, student_id))
-        cursor.execute("DELETE FROM friend_group_members WHERE class_id = ? AND student_id = ?", (class_id, student_id))
-        cursor.execute("DELETE FROM conflict_group_members WHERE class_id = ? AND student_id = ?", (class_id, student_id))
-        cursor.execute("DELETE FROM trusted_swap_students WHERE class_id = ? AND student_id = ?", (class_id, student_id))
+        for tbl in ("class_students", "friend_group_members", "conflict_group_members", "trusted_swap_students", "class_attendance_grades"):
+            cursor.execute(f"DELETE FROM {tbl} WHERE class_id = ? AND student_id = ?", (class_id, student_id))
         cursor.execute("DELETE FROM conflict_relationships WHERE class_id = ? AND (student_id1 = ? OR student_id2 = ?)", (class_id, student_id, student_id))
         cursor.execute("DELETE FROM trusted_swap_relationships WHERE class_id = ? AND (student_id1 = ? OR student_id2 = ?)", (class_id, student_id, student_id))
-        cursor.execute("DELETE FROM class_attendance_grades WHERE class_id = ? AND student_id = ?", (class_id, student_id))
 
         # Clear from class_seating layout
         try:
@@ -158,10 +163,7 @@ def unenroll_student_from_class(class_id: int, student_id: int):
                     for col in layout:
                         for seat in col.get("seats", []):
                             if seat.get("student_id") == student_id:
-                                seat["student_id"] = None
-                                seat["student_name"] = None
-                                seat["seat_color"] = None
-                                seat["grade_group"] = None
+                                seat["student_id"] = seat["student_name"] = seat["seat_color"] = seat["grade_group"] = None
                                 modified = True
                     if modified:
                         sid = s_row[0] if isinstance(s_row, (tuple, list)) else s_row["id"]
@@ -174,13 +176,15 @@ def unenroll_student_from_class(class_id: int, student_id: int):
         conn.close()
 
     # Synchronously delete from remote PostgreSQL so bidirectional sync does not resurrect the student
-    _sync_cloud_delete_sync("DELETE FROM class_students WHERE class_id = %s AND student_id = %s", (class_id, student_id))
-    _sync_cloud_delete_sync("DELETE FROM friend_group_members WHERE class_id = %s AND student_id = %s", (class_id, student_id))
-    _sync_cloud_delete_sync("DELETE FROM conflict_group_members WHERE class_id = %s AND student_id = %s", (class_id, student_id))
-    _sync_cloud_delete_sync("DELETE FROM trusted_swap_students WHERE class_id = %s AND student_id = %s", (class_id, student_id))
-    _sync_cloud_delete_sync("DELETE FROM conflict_relationships WHERE class_id = %s AND (student_id1 = %s OR student_id2 = %s)", (class_id, student_id, student_id))
-    _sync_cloud_delete_sync("DELETE FROM trusted_swap_relationships WHERE class_id = %s AND (student_id1 = %s OR student_id2 = %s)", (class_id, student_id, student_id))
-    _sync_cloud_delete_sync("DELETE FROM class_attendance_grades WHERE class_id = %s AND student_id = %s", (class_id, student_id))
+    _sync_cloud_delete_statements([
+        ("DELETE FROM class_students WHERE class_id = %s AND student_id = %s", (class_id, student_id)),
+        ("DELETE FROM friend_group_members WHERE class_id = %s AND student_id = %s", (class_id, student_id)),
+        ("DELETE FROM conflict_group_members WHERE class_id = %s AND student_id = %s", (class_id, student_id)),
+        ("DELETE FROM trusted_swap_students WHERE class_id = %s AND student_id = %s", (class_id, student_id)),
+        ("DELETE FROM conflict_relationships WHERE class_id = %s AND (student_id1 = %s OR student_id2 = %s)", (class_id, student_id, student_id)),
+        ("DELETE FROM trusted_swap_relationships WHERE class_id = %s AND (student_id1 = %s OR student_id2 = %s)", (class_id, student_id, student_id)),
+        ("DELETE FROM class_attendance_grades WHERE class_id = %s AND student_id = %s", (class_id, student_id)),
+    ])
 
 def update_class_student_groups(class_id: int, student_id: int, seat_color: str, grade_group: str):
     conn = get_connection()
