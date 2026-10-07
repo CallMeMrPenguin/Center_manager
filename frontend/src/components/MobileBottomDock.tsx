@@ -1,5 +1,4 @@
-import React, { useRef, useEffect, useCallback, useMemo } from 'react';
-import { motion } from 'framer-motion';
+import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { TAB_DEFINITIONS } from '../config/tabs';
 import { SECTIONS } from './Sidebar';
 
@@ -8,31 +7,6 @@ interface MobileBottomDockProps {
   setActiveTab: (id: string) => void;
   orderedTabIds: string[];
 }
-
-// Concise 1-2 word labels for mobile tabbar to prevent awkward ellipsis truncation
-const MOBILE_SHORT_LABELS: Record<string, string> = {
-  reports: 'Báo Cáo',
-  dashboard: 'Tổng Quan',
-  students: 'Học Sinh',
-  classes: 'Lớp Học',
-  schedule: 'Lịch Học',
-  teachers: 'Nhân Sự',
-  courses: 'Khóa Học',
-  kiemtra: 'Kiểm Tra',
-  formatter: 'Soạn Đề',
-  'question-bank': 'Ngân Hàng',
-  assignments: 'Bài Tập',
-  results: 'Kết Quả',
-  'vocab-bank': 'Từ Vựng',
-  'unit-config': 'Cấu Hình',
-  'file-manager': 'Tài Liệu',
-  'word-editor': 'Văn Bản',
-  'canvas-board': 'Canvas',
-  payments: 'Thanh Toán',
-  invoices: 'Hóa Đơn',
-  'users-roles': 'Tài Khoản',
-  settings: 'Cài Đặt',
-};
 
 // Canonical tab order matching the desktop visual SECTIONS hierarchy
 export function getVisualTabOrder(orderedTabIds: string[]): string[] {
@@ -60,6 +34,12 @@ export const MobileBottomDock: React.FC<MobileBottomDockProps> = ({
   orderedTabIds,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const [isIdle, setIsIdle] = useState(false);
+  const idleTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const rafIdRef = useRef<number | null>(null);
+
+  // Track the tab currently closest to screen center in real time as user scrolls
+  const [scrolledCenterTabId, setScrolledCenterTabId] = useState<string>(activeTab);
 
   // Reorder tabs to strictly match desktop visual SECTIONS order
   const canonicalTabs = useMemo(() => {
@@ -68,6 +48,34 @@ export const MobileBottomDock: React.FC<MobileBottomDockProps> = ({
       .map((id) => TAB_DEFINITIONS.find((t) => t.id === id))
       .filter(Boolean) as typeof TAB_DEFINITIONS;
   }, [orderedTabIds]);
+
+  const activeIndex = canonicalTabs.findIndex((t) => t.id === activeTab);
+  const displayedTab =
+    canonicalTabs.find((t) => t.id === scrolledCenterTabId) ||
+    canonicalTabs[activeIndex] ||
+    TAB_DEFINITIONS.find((t) => t.id === activeTab);
+
+  // Keep scrolled center in sync when activeTab changes from outside
+  useEffect(() => {
+    setScrolledCenterTabId(activeTab);
+  }, [activeTab]);
+
+  // Idle timer management (dims to translucent and shrinks dock when inactive for 2.5s)
+  const resetIdleTimer = useCallback(() => {
+    setIsIdle(false);
+    if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
+    idleTimerRef.current = setTimeout(() => {
+      setIsIdle(true);
+    }, 2500);
+  }, []);
+
+  useEffect(() => {
+    resetIdleTimer();
+    return () => {
+      if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
+      if (rafIdRef.current) cancelAnimationFrame(rafIdRef.current);
+    };
+  }, [resetIdleTimer]);
 
   // Center the active tab icon smoothly in the scroll view
   const centerTab = useCallback((tabId: string, smooth = true) => {
@@ -82,32 +90,94 @@ export const MobileBottomDock: React.FC<MobileBottomDockProps> = ({
     }
   }, []);
 
-  // Auto-center active tab on mount or external activeTab change
+  // When activeTab changes, auto-center it
   useEffect(() => {
     centerTab(activeTab, true);
   }, [activeTab, centerTab]);
 
-  const isFewTabs = canonicalTabs.length <= 4;
+  // Find the tab closest to center in real time during scroll
+  const findClosestTabToCenter = useCallback(() => {
+    if (!containerRef.current) return;
+    const containerRect = containerRef.current.getBoundingClientRect();
+    const centerX = containerRect.left + containerRect.width / 2;
+    const buttons = Array.from(
+      containerRef.current.querySelectorAll<HTMLButtonElement>('[data-dock-tab]')
+    );
+
+    let closestId: string | null = null;
+    let minDistance = Infinity;
+
+    for (let i = 0; i < buttons.length; i++) {
+      const btn = buttons[i];
+      const rect = btn.getBoundingClientRect();
+      const btnCenter = rect.left + rect.width / 2;
+      const dist = Math.abs(btnCenter - centerX);
+      if (dist < minDistance) {
+        minDistance = dist;
+        closestId = btn.getAttribute('data-dock-tab');
+      }
+    }
+
+    if (closestId && closestId !== scrolledCenterTabId) {
+      setScrolledCenterTabId(closestId);
+    }
+  }, [scrolledCenterTabId]);
+
+  // Real-time 60fps scroll listener: updates name pill LIVE while swiping without auto-switching tabs
+  const handleScroll = useCallback(() => {
+    resetIdleTimer();
+    if (rafIdRef.current) cancelAnimationFrame(rafIdRef.current);
+    rafIdRef.current = requestAnimationFrame(() => {
+      findClosestTabToCenter();
+    });
+  }, [findClosestTabToCenter, resetIdleTimer]);
 
   return (
-    <nav
-      aria-label="Thanh điều hướng chính mobile"
-      className="fixed bottom-0 inset-x-0 z-40 md:hidden select-none h-[88px] pointer-events-none"
+    <div
+      className="fixed bottom-2 inset-x-0 z-40 flex flex-col items-center pointer-events-none md:hidden select-none"
+      onTouchStart={resetIdleTimer}
+      onTouchMove={resetIdleTimer}
+      onPointerDown={resetIdleTimer}
+      onMouseEnter={resetIdleTimer}
     >
-      {/* 1. Solid Bottom Bar Surface */}
-      <div className="absolute bottom-0 inset-x-0 h-16 bg-white dark:bg-[#0c0f1e] border-t border-slate-200/90 dark:border-white/10 shadow-[0_-4px_24px_rgba(0,0,0,0.06)] dark:shadow-[0_-6px_28px_rgba(0,0,0,0.55)] pointer-events-auto" />
+      {/* Floating Active Tab Label Pill: Updates LIVE as user scrolls */}
+      {displayedTab && (
+        <div
+          className={`pointer-events-none mb-1 px-3 py-0.5 rounded-full bg-white/95 dark:bg-[#0c0f1e]/95 text-slate-800 dark:text-white font-black text-[11px] shadow-md border border-slate-200/90 dark:border-white/10 transition-all duration-200 ease-out ${
+            isIdle
+              ? 'opacity-0 -translate-y-1 scale-90'
+              : 'opacity-100 translate-y-0 scale-100'
+          }`}
+        >
+          <span>{displayedTab.label}</span>
+        </div>
+      )}
 
-      {/* 2. Scrollable Tabs Track with Headroom for Popped-Up Dome */}
+      {/* Fisheye Dock Carousel Row (No Background on Container, merges over main view) */}
       <div
         ref={containerRef}
-        className={`relative z-10 w-full h-full overflow-x-auto overflow-y-visible no-scrollbar pt-6 flex items-center pointer-events-auto ${
-          isFewTabs ? 'justify-around px-3' : 'justify-start px-3 gap-1'
+        onScroll={handleScroll}
+        className={`w-full max-w-full overflow-x-auto no-scrollbar scroll-smooth flex items-center py-1.5 px-[calc(50vw-22px)] gap-3.5 snap-x snap-mandatory pointer-events-auto bg-transparent transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${
+          isIdle
+            ? 'opacity-35 scale-90 translate-y-1'
+            : 'opacity-100 scale-100 translate-y-0'
         }`}
+        style={{ overscrollBehaviorX: 'contain' }}
       >
-        {canonicalTabs.map((tab) => {
+        {canonicalTabs.map((tab, idx) => {
           const Icon = tab.icon;
           const isSelected = tab.id === activeTab;
-          const displayLabel = MOBILE_SHORT_LABELS[tab.id] || tab.label;
+          const distance = Math.abs(idx - activeIndex);
+
+          // Fisheye scale factor: Center / selected is largest, neighbors shrink smoothly
+          let scaleClass = 'scale-80 opacity-70';
+          if (isSelected) {
+            scaleClass = 'scale-120 opacity-100 z-20';
+          } else if (distance === 1) {
+            scaleClass = 'scale-100 opacity-90 z-10';
+          } else if (distance === 2) {
+            scaleClass = 'scale-90 opacity-80 z-0';
+          }
 
           return (
             <button
@@ -115,67 +185,27 @@ export const MobileBottomDock: React.FC<MobileBottomDockProps> = ({
               data-dock-tab={tab.id}
               type="button"
               onClick={() => {
+                resetIdleTimer();
                 setActiveTab(tab.id);
                 centerTab(tab.id, true);
               }}
-              className="relative shrink-0 w-[72px] h-16 flex flex-col items-center justify-center cursor-pointer select-none transition-transform active:scale-95"
+              className={`snap-center shrink-0 w-11 h-11 rounded-full flex items-center justify-center transition-all duration-200 ease-out cursor-pointer active:scale-95 ${scaleClass} ${
+                isSelected
+                  ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30 ring-2 ring-blue-500/40 font-bold'
+                  : 'bg-white/90 dark:bg-[#141724]/90 text-slate-700 dark:text-slate-300 border border-slate-200/80 dark:border-white/10 shadow-md shadow-black/15 hover:text-blue-600 dark:hover:text-white'
+              }`}
               title={tab.label}
               aria-label={tab.label}
             >
-              {isSelected ? (
-                /* ACTIVE ITEM: Wide Organic Dome + Snugly Nested Pop-up Circle */
-                <motion.div
-                  layoutId="activeCurvedDomeIndicator"
-                  transition={{ type: 'spring', stiffness: 450, damping: 32 }}
-                  className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none"
-                >
-                  {/* Wide Organic Curved Dome SVG (116px wide, seamlessly hugs the circle) */}
-                  <div className="absolute -top-[23px] left-1/2 -translate-x-1/2 w-[116px] h-[25px] pointer-events-none z-10 overflow-visible">
-                    <svg
-                      viewBox="0 0 116 25"
-                      className="w-full h-full block text-white dark:text-[#0c0f1e]"
-                    >
-                      {/* Solid dome background fill - overlaps 2px into bar for seamless fusion */}
-                      <path
-                        d="M 0 24 C 24 24, 34 13, 44 5 C 52 -1, 64 -1, 72 5 C 82 13, 92 24, 116 24 L 116 26 L 0 26 Z"
-                        fill="currentColor"
-                      />
-                      {/* Seamless hair-line stroke matching bar's top border */}
-                      <path
-                        d="M 0 24 C 24 24, 34 13, 44 5 C 52 -1, 64 -1, 72 5 C 82 13, 92 24, 116 24"
-                        fill="none"
-                        stroke="rgba(226, 232, 240, 0.9)"
-                        className="dark:stroke-white/10"
-                        strokeWidth="1.1"
-                      />
-                    </svg>
-                  </div>
-
-                  {/* Popped-Up Circle nested harmoniously half-in half-out */}
-                  <motion.div
-                    initial={{ scale: 0.6, y: 8 }}
-                    animate={{ scale: 1, y: 0 }}
-                    transition={{ type: 'spring', stiffness: 500, damping: 24 }}
-                    className="absolute -top-4.5 left-1/2 -translate-x-1/2 z-20 w-[48px] h-[48px] rounded-full bg-blue-600 flex items-center justify-center text-white ring-4 ring-white dark:ring-[#0c0f1e] shadow-md shadow-blue-600/30"
-                  >
-                    <Icon size={22} strokeWidth={2.6} />
-                  </motion.div>
-
-                  {/* Active Text Label - Short & Crisp, never truncated */}
-                  <span className="text-[10.5px] font-black text-blue-600 dark:text-blue-400 mt-6 tracking-tight truncate max-w-[68px] text-center select-none">
-                    {displayLabel}
-                  </span>
-                </motion.div>
-              ) : (
-                /* INACTIVE ITEM: Clean minimalist icon sitting on the bar */
-                <div className="flex items-center justify-center text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-200 transition-colors">
-                  <Icon size={21} strokeWidth={2} />
-                </div>
-              )}
+              <Icon
+                size={isSelected ? 20 : 18}
+                strokeWidth={isSelected ? 2.5 : 2}
+                className="shrink-0 transition-transform duration-200"
+              />
             </button>
           );
         })}
       </div>
-    </nav>
+    </div>
   );
 };
