@@ -53,39 +53,41 @@ export function getPremiumStyle(status: string, hexColor = '#2563eb', isDarkPara
 
   if (status === 'Hủy') {
     return {
-      bg: isDark ? 'rgba(148,163,184,0.1)' : '#f1f5f9',
-      borderColor: isDark ? '#334155' : '#cbd5e1',
-      color: '#64748b',
-      titleColor: isDark ? '#94a3b8' : '#64748b',
-      badgeBg: isDark ? '#1e293b' : '#e2e8f0',
-      badgeColor: isDark ? '#cbd5e1' : '#475569',
-      shadow: '0 1px 3px rgba(0,0,0,0.06)',
+      bg: '#141824',
+      borderColor: '#2e384d',
+      accentColor: '#64748b',
+      color: '#94a3b8',
+      titleColor: '#cbd5e1',
+      badgeBg: '#222938',
+      badgeColor: '#94a3b8',
+      shadow: '0 2px 6px rgba(0,0,0,0.2)',
     };
   }
 
   const { h } = hexToHSL(hexColor);
   const isDone = status === 'Đã học';
 
-  if (isDark) {
-    const bg = isDone ? `hsla(${h},45%,13%,0.95)` : `hsla(${h},55%,16%,0.95)`;
-    const borderColor = isDone ? `hsla(${h},40%,28%,0.9)` : `hsla(${h},60%,36%,0.95)`;
-    const color = isDone ? `hsla(${h},75%,80%,0.95)` : `hsla(${h},85%,88%,0.98)`;
-    const titleColor = '#ffffff';
-    const badgeBg = isDone ? `hsla(${h},40%,22%,0.8)` : `hsla(${h},70%,26%,0.85)`;
-    const badgeColor = isDone ? `hsla(${h},70%,85%,0.98)` : `hsla(${h},95%,88%,0.98)`;
-    const shadow = '0 2px 6px rgba(0,0,0,0.35)';
-    return { bg, borderColor, color, titleColor, badgeBg, badgeColor, shadow };
-  } else {
-    // Rich, consistent pastel colors by class, distinct from white background
-    const bg = isDone ? `hsla(${h},70%,94.5%,1)` : `hsla(${h},85%,92%,1)`;
-    const borderColor = isDone ? `hsla(${h},45%,78%,1)` : `hsla(${h},65%,72%,1)`;
-    const color = isDone ? `hsla(${h},70%,32%,0.98)` : `hsla(${h},90%,28%,0.98)`;
-    const titleColor = '#0f172a';
-    const badgeBg = isDone ? `hsla(${h},45%,85%,0.95)` : `hsla(${h},80%,83%,0.95)`;
-    const badgeColor = isDone ? `hsla(${h},75%,24%,0.98)` : `hsla(${h},95%,20%,0.98)`;
-    const shadow = '0 1px 3px rgba(0,0,0,0.05)';
-    return { bg, borderColor, color, titleColor, badgeBg, badgeColor, shadow };
-  }
+  // Palette tối ưu cho UI tối: Nền tối có chiều sâu, tương phản cao, chữ trắng sắc nét
+  const bg = isDone 
+    ? `hsla(${h}, 35%, 14%, 0.98)` 
+    : `hsla(${h}, 42%, 16%, 0.98)`;
+  const borderColor = isDone 
+    ? `hsla(${h}, 40%, 30%, 0.75)` 
+    : `hsla(${h}, 55%, 38%, 0.85)`;
+  const accentColor = `hsl(${h}, 80%, 58%)`;
+  const color = isDone 
+    ? `hsla(${h}, 60%, 82%, 0.95)` 
+    : `hsla(${h}, 75%, 86%, 0.98)`;
+  const titleColor = '#ffffff';
+  const badgeBg = isDone 
+    ? `hsla(${h}, 40%, 25%, 0.95)` 
+    : `hsla(${h}, 65%, 28%, 0.95)`;
+  const badgeColor = isDone 
+    ? `hsla(${h}, 75%, 88%, 1)` 
+    : `hsla(${h}, 95%, 90%, 1)`;
+  const shadow = '0 2px 8px rgba(0,0,0,0.25)';
+
+  return { bg, borderColor, accentColor, color, titleColor, badgeBg, badgeColor, shadow };
 }
 
 export function getSessionColor(sess: ClassSession): string {

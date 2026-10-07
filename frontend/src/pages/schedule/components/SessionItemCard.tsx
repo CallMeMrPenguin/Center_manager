@@ -21,20 +21,25 @@ export const SessionItemCard: React.FC<SessionItemCardProps> = ({
   return (
     <div
       onClick={onClick}
-      className={`rounded-lg cursor-pointer transition-all hover:scale-[1.01] active:scale-[0.99] border shadow-2xs hover:shadow-xs flex flex-col gap-1 overflow-hidden ${
+      className={`rounded-[6px] cursor-pointer transition-all hover:scale-[1.01] active:scale-[0.99] border border-l-[3.5px] flex flex-col gap-1 overflow-hidden select-none ${
         compact ? 'px-2 py-1' : 'px-2.5 py-1.5'
       }`}
-      style={{ backgroundColor: vs.bg, borderColor: vs.borderColor }}
+      style={{
+        backgroundColor: vs.bg,
+        borderColor: vs.borderColor,
+        borderLeftColor: (vs as any).accentColor || vs.borderColor,
+        boxShadow: vs.shadow,
+      }}
     >
       <div className="flex items-center justify-between gap-1.5">
         <h4
-          className="text-[11px] font-black truncate leading-tight"
+          className="text-[11px] font-black truncate leading-tight tracking-tight"
           style={{ color: vs.titleColor }}
         >
           {session.class_name}
         </h4>
         <span
-          className="text-[9px] font-black px-1.5 py-0.5 rounded-md shrink-0 leading-none"
+          className="text-[9px] font-black px-1.5 py-0.5 rounded-[4px] shrink-0 leading-none"
           style={{ backgroundColor: vs.badgeBg, color: vs.badgeColor }}
         >
           {session.status}
