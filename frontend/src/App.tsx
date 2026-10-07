@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Database, ChevronLeft, ChevronRight } from 'lucide-react';
 import { TAB_DEFINITIONS } from './config/tabs';
 import { Sidebar } from './components/Sidebar';
+import { MobileNavBar } from './components/MobileNavBar';
 import { showToast, AnimatedToastProvider } from './components/Toast';
 import { ConfirmProvider } from './components/ConfirmDialog';
 import { LoginPage } from './pages/auth/LoginPage';
@@ -202,29 +203,40 @@ function AppContent() {
 
   return (
     <div className="relative flex flex-col h-full w-full bg-[#f1f5f9] dark:bg-[#09090b] text-slate-900 dark:text-slate-50 overflow-hidden font-sans select-none">
-      <div className="relative flex flex-row flex-1 overflow-hidden z-10">
-        {/* SIDEBAR NAVIGATION */}
-        <Sidebar
-          isSidebarExpanded={isSidebarExpanded}
-          toggleSidebar={toggleSidebar}
-          activeTab={activeTab}
-          setActiveTab={handleSelectTab}
-          orderedTabIds={visibleTabIds}
-          handleDragStart={handleDragStart}
-          handleDragOver={handleDragOver}
-          handleDrop={handleDrop}
-          draggedIndex={draggedIndex}
-          setDraggedIndex={setDraggedIndex}
-          profileOpen={profileOpen}
-          setProfileOpen={setProfileOpen}
-          profileRef={profileRef}
-          currentUser={currentUser}
-          onLogout={handleLogout}
-        />
+      {/* MOBILE TOP NAVIGATION BAR (HORIZONTAL FOR SMARTPHONES) */}
+      <MobileNavBar
+        activeTab={activeTab}
+        setActiveTab={handleSelectTab}
+        orderedTabIds={visibleTabIds}
+        currentUser={currentUser}
+        onLogout={handleLogout}
+      />
+
+      <div className="relative flex flex-row flex-1 overflow-hidden z-10 w-full min-w-0">
+        {/* DESKTOP SIDEBAR NAVIGATION (HIDDEN ON MOBILE) */}
+        <div className="hidden md:flex h-full shrink-0">
+          <Sidebar
+            isSidebarExpanded={isSidebarExpanded}
+            toggleSidebar={toggleSidebar}
+            activeTab={activeTab}
+            setActiveTab={handleSelectTab}
+            orderedTabIds={visibleTabIds}
+            handleDragStart={handleDragStart}
+            handleDragOver={handleDragOver}
+            handleDrop={handleDrop}
+            draggedIndex={draggedIndex}
+            setDraggedIndex={setDraggedIndex}
+            profileOpen={profileOpen}
+            setProfileOpen={setProfileOpen}
+            profileRef={profileRef}
+            currentUser={currentUser}
+            onLogout={handleLogout}
+          />
+        </div>
 
         {/* MAIN BODY SKELETON */}
-        <div className="flex-1 flex flex-col overflow-hidden bg-transparent">
-          <main className="flex-1 overflow-hidden bg-[#f1f5f9] dark:bg-[#09090b] relative">
+        <div className="flex-1 flex flex-col overflow-hidden bg-transparent w-full min-w-0">
+          <main className="flex-1 overflow-hidden bg-[#f1f5f9] dark:bg-[#09090b] relative w-full min-w-0">
             {/* FLUSH MARGIN NAVIGATION ARROW INDICATOR (SÁT LỀ TAB) */}
             {navIndicator === 'back' && (
               <div
@@ -275,12 +287,12 @@ function AppContent() {
       </div>
 
       {/* STATUS BAR */}
-      <footer className="h-8 bg-white dark:bg-[#06070a] flex items-center justify-between px-6 text-[11px] text-slate-500 dark:text-slate-400 select-none shrink-0 font-semibold z-10 border-t border-slate-200 dark:border-white/[0.04]">
-        <div className="flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block" />
-          <span className="hidden md:inline text-slate-500 dark:text-slate-400">Center Manager Desktop</span>
+      <footer className="h-7 sm:h-8 bg-white dark:bg-[#06070a] flex items-center justify-between px-3 sm:px-6 text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 select-none shrink-0 font-semibold z-10 border-t border-slate-200 dark:border-white/[0.04]">
+        <div className="flex items-center gap-1.5 sm:gap-2">
+          <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block shrink-0" />
+          <span className="hidden sm:inline text-slate-500 dark:text-slate-400">Center Manager Desktop</span>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2">
           <span className="text-slate-400 dark:text-slate-500">Đang đăng nhập:</span>
           {(() => {
             const roleLabel = isStudent ? 'Học sinh' : (currentUser.rawRole || (currentUser.role === 'admin' ? 'Quản trị viên' : 'Giáo viên'));

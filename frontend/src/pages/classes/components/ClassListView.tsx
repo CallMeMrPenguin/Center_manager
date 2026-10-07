@@ -30,20 +30,20 @@ export const ClassListView: React.FC<ClassListViewProps> = ({
   const [searchFocused, setSearchFocused] = useState(false);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* HEADER SECTION */}
-      <div className="flex flex-wrap items-center justify-between gap-4">
+      <div className="flex flex-wrap items-center justify-between gap-3 sm:gap-4">
         <div>
-          <h1 className="text-2xl font-black tracking-tight text-slate-900 dark:text-white flex items-center gap-3">
-            <BookOpen className="h-7 w-7 text-indigo-500 dark:text-indigo-400" />
-            Quản Lý Lớp Học & Sơ Đồ Chỗ Ngồi
+          <h1 className="text-lg sm:text-2xl font-black tracking-tight text-slate-900 dark:text-white flex items-center gap-2.5 sm:gap-3">
+            <BookOpen className="h-5 w-5 sm:h-7 sm:w-7 text-indigo-500 dark:text-indigo-400 shrink-0" />
+            <span>Quản Lý Lớp Học & Sơ Đồ Chỗ Ngồi</span>
           </h1>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           <button
             onClick={onRefresh}
-            className="p-2.5 rounded-xl bg-slate-200 hover:bg-slate-300 dark:bg-white/10 dark:hover:bg-white/20 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white border-0 shadow-xs transition cursor-pointer"
+            className="p-2 sm:p-2.5 rounded-xl bg-slate-200 hover:bg-slate-300 dark:bg-white/10 dark:hover:bg-white/20 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white border-0 shadow-xs transition cursor-pointer"
             title="Làm mới danh sách lớp"
           >
             <RefreshCw size={14} className={loading ? 'animate-spin text-indigo-500 dark:text-indigo-400' : ''} />
@@ -51,24 +51,18 @@ export const ClassListView: React.FC<ClassListViewProps> = ({
 
           <button
             onClick={onCreateClass}
-            className="group flex items-center gap-0 hover:gap-2 bg-[#2563eb] hover:bg-[#1d4ed8] text-white px-3.5 py-2.5 rounded-xl font-bold text-xs border-0 shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer active:scale-95"
+            className="flex items-center gap-1.5 bg-[#2563eb] hover:bg-[#1d4ed8] text-white px-3 sm:px-3.5 py-2 sm:py-2.5 rounded-xl font-bold text-xs border-0 shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer active:scale-95 shrink-0"
             title="Tạo Lớp Học Mới"
           >
-            <Plus size={16} className="shrink-0" />
-            <span className="max-w-0 opacity-0 group-hover:max-w-[200px] group-hover:opacity-100 transition-all duration-300 ease-in-out whitespace-nowrap overflow-hidden block">
-              Tạo Lớp Học Mới
-            </span>
+            <Plus size={15} className="shrink-0" />
+            <span>Tạo Lớp</span>
           </button>
         </div>
       </div>
 
       {/* SEARCH & FILTER */}
-      <div className="flex items-center justify-between bg-white dark:bg-[#141417] border border-slate-200 dark:border-[#27272a] p-3.5 rounded-2xl shadow-sm">
-        <motion.div
-          animate={{ width: searchFocused ? 420 : 300 }}
-          transition={{ type: 'spring', stiffness: 350, damping: 26 }}
-          className="relative min-w-[220px]"
-        >
+      <div className="flex items-center justify-between bg-white dark:bg-[#141417] border border-slate-200 dark:border-[#27272a] p-2.5 sm:p-3.5 rounded-xl sm:rounded-2xl shadow-xs">
+        <div className="relative w-full max-w-full sm:max-w-md">
           <motion.div
             animate={{ scale: searchFocused ? 1.15 : 1 }}
             transition={{ type: 'spring', stiffness: 400, damping: 25 }}
@@ -104,7 +98,7 @@ export const ClassListView: React.FC<ClassListViewProps> = ({
               </motion.button>
             )}
           </AnimatePresence>
-        </motion.div>
+        </div>
       </div>
 
       {/* CLASS GRID LIST */}

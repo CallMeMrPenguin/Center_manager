@@ -98,7 +98,7 @@ export function VercelTabs<T extends string = string>({
     <div className={`flex w-full flex-col ${className}`}>
       <div
         role="tablist"
-        className="relative flex items-center h-auto select-none gap-[6px] bg-transparent p-0 border-b border-slate-200 dark:border-white/10"
+        className="relative flex items-center h-auto select-none gap-[6px] bg-transparent p-0 border-b border-slate-200 dark:border-white/10 overflow-x-auto no-scrollbar scroll-smooth"
       >
         {/* Hover Highlight */}
         <div
@@ -134,7 +134,7 @@ export function VercelTabs<T extends string = string>({
               onClick={() => handleSelect(tab.value)}
               onMouseEnter={() => setHoveredIndex(index)}
               onMouseLeave={() => setHoveredIndex(null)}
-              className={`z-10 h-[32px] cursor-pointer rounded-md border-0 bg-transparent px-3 py-1.5 outline-none transition-colors duration-300 flex items-center gap-1.5 select-none ${
+              className={`z-10 h-[32px] cursor-pointer rounded-md border-0 bg-transparent px-2.5 sm:px-3 py-1.5 outline-none transition-colors duration-300 flex items-center gap-1.5 select-none shrink-0 whitespace-nowrap text-xs sm:text-sm ${
                 isActive
                   ? 'text-blue-600 dark:text-white font-black'
                   : 'text-[#0e0f1199] dark:text-[#ffffff99] hover:text-[#0e0e10] dark:hover:text-white font-bold'
