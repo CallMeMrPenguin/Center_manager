@@ -79,9 +79,27 @@ apt-get clean > /dev/null 2>&1 || true
 docker system prune -f > /dev/null 2>&1 || true
 
 echo "[6/6] Khởi động lại Docker Compose với cấu hình PostgreSQL & FastAPI tối ưu..."
+APP_DIR=""
 if [ -f "docker-compose.yml" ]; then
+    APP_DIR="$(pwd)"
+elif [ -f "/root/Center_manager/docker-compose.yml" ]; then
+    APP_DIR="/root/Center_manager"
+elif [ -f "/var/www/center_manager/docker-compose.yml" ]; then
+    APP_DIR="/var/www/center_manager"
+else
+    FOUND=$(find /root /var/www /home -maxdepth 3 -name "docker-compose.yml" 2>/dev/null | head -n 1)
+    if [ -n "$FOUND" ]; then
+        APP_DIR="$(dirname "$FOUND")"
+    fi
+fi
+
+if [ -n "$APP_DIR" ]; then
+    echo " -> Đang áp dụng tại thư mục app: $APP_DIR"
+    cd "$APP_DIR"
     docker compose down || true
     docker compose up -d --build
+else
+    echo " [!] Chú ý: Không tìm thấy docker-compose.yml tự động. Vui lòng cd vào thư mục dự án và chạy: docker compose up -d --build"
 fi
 
 echo ""
