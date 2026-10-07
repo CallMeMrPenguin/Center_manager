@@ -1,11 +1,29 @@
 version: '3.8'
 
 services:
-  # 1. Self-hosted PostgreSQL 16
+  # 1. Self-hosted PostgreSQL 16 (Optimized for Low-RAM VPS)
   postgres:
     image: postgres:16-alpine
     container_name: center_manager_db
     restart: unless-stopped
+    command:
+      - "postgres"
+      - "-c"
+      - "shared_buffers=48MB"
+      - "-c"
+      - "max_connections=30"
+      - "-c"
+      - "work_mem=2MB"
+      - "-c"
+      - "maintenance_work_mem=16MB"
+      - "-c"
+      - "effective_cache_size=96MB"
+      - "-c"
+      - "wal_buffers=4MB"
+      - "-c"
+      - "min_wal_size=32MB"
+      - "-c"
+      - "max_wal_size=128MB"
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-center_user}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-center_secure_pass_2026}
@@ -15,13 +33,19 @@ services:
       - ./backend/database/postgres_schema.sql:/docker-entrypoint-initdb.d/init.sql:ro
     ports:
       - "127.0.0.1:5432:5432"
+    mem_limit: 256m
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-center_user} -d ${POSTGRES_DB:-center_manager}"]
       interval: 10s
       timeout: 5s
       retries: 5
 
-  # 2. FastAPI Backend API
+  # 2. FastAPI Backend API (Optimized memory allocation)
   backend:
     build:
       context: .
@@ -35,8 +59,16 @@ services:
       - APP_MODE=web
       - DATABASE_URL=postgresql://${POSTGRES_USER:-center_user}:${POSTGRES_PASSWORD:-center_secure_pass_2026}@postgres:5432/${POSTGRES_DB:-center_manager}
       - ALLOWED_ORIGINS=*
+      - MALLOC_ARENA_MAX=2
+      - PYTHONUNBUFFERED=1
     ports:
       - "8000:8000"
+    mem_limit: 384m
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
     volumes:
       - app_files:/app/backend/files
 

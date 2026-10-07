@@ -17,6 +17,7 @@ RUN pip install --no-cache-dir -r requirements.txt psycopg2-binary>=2.9.9
 COPY backend/ ./backend/
 
 ENV PYTHONUNBUFFERED=1
+ENV MALLOC_ARENA_MAX=2
 ENV APP_MODE=web
 ENV PORT=8000
 

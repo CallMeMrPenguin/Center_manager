@@ -11,18 +11,40 @@ from pydantic import BaseModel
 from typing import List, Dict, Any, Optional
 
 from config.settings import load_settings, save_settings, get_setting, BASE_DIR
-try:
-    from services.compiler import WordDocumentCompiler
-    from services.combine_and_format import process_grade
-    from services.format_vocabulary import format_vocabulary_file
-    from services.csv_parser import parse_question_bank_csv
-    from services.docx_parser import convert_docx_to_json
-except Exception as _e:
-    WordDocumentCompiler = None
-    process_grade = None
-    format_vocabulary_file = None
-    parse_question_bank_csv = None
-    convert_docx_to_json = None
+def get_compiler():
+    try:
+        from services.compiler import WordDocumentCompiler
+        return WordDocumentCompiler
+    except Exception:
+        return None
+
+def get_process_grade():
+    try:
+        from services.combine_and_format import process_grade
+        return process_grade
+    except Exception:
+        return None
+
+def get_format_vocabulary_file():
+    try:
+        from services.format_vocabulary import format_vocabulary_file
+        return format_vocabulary_file
+    except Exception:
+        return None
+
+def get_csv_parser():
+    try:
+        from services.csv_parser import parse_question_bank_csv
+        return parse_question_bank_csv
+    except Exception:
+        return None
+
+def get_docx_parser():
+    try:
+        from services.docx_parser import convert_docx_to_json
+        return convert_docx_to_json
+    except Exception:
+        return None
 
 # Import updater (lives at project root, BASE_DIR)
 try:
@@ -182,7 +204,10 @@ def api_compile_test(req: CompileModel):
             if os.path.exists(sub_dir):
                 target_dir = sub_dir
 
-        compiler = WordDocumentCompiler(req.settings)
+        compiler_cls = get_compiler()
+        if not compiler_cls:
+            raise HTTPException(status_code=500, detail="WordDocumentCompiler not available")
+        compiler = compiler_cls(req.settings)
         filename, filepath, files_list = compiler.compile_test_versions(
             req.exercises,
             num_versions=req.num_versions or 1,
@@ -198,7 +223,10 @@ def api_compile_test(req: CompileModel):
 @router.post("/api/test/preview-pdf")
 def api_preview_pdf(req: CompileModel):
     try:
-        compiler = WordDocumentCompiler(req.settings)
+        compiler_cls = get_compiler()
+        if not compiler_cls:
+            raise HTTPException(status_code=500, detail="WordDocumentCompiler not available")
+        compiler = compiler_cls(req.settings)
         docx_filename, docx_path, _ = compiler.compile_test_versions(
             req.exercises,
             num_versions=1,
@@ -347,7 +375,10 @@ def api_preview_pdf_file(filename: str):
     pdf_filename = os.path.splitext(os.path.basename(filename))[0] + ".pdf"
     pdf_path = os.path.join(pdf_dir, pdf_filename)
 
-    compiler = WordDocumentCompiler()
+    compiler_cls = get_compiler()
+    if not compiler_cls:
+        raise HTTPException(status_code=500, detail="WordDocumentCompiler not available")
+    compiler = compiler_cls()
     success = compiler.convert_docx_to_pdf_soffice(filepath, pdf_path)
     if not success or not os.path.exists(pdf_path):
         raise HTTPException(status_code=500, detail="Không thể tạo bản xem trước PDF")
@@ -366,15 +397,21 @@ def api_compile_file(req: CompileFileRequest):
     profiles = load_profiles()
     settings = profiles.get(req.profile_name, profiles.get("Default Settings"))
 
-    compiler = WordDocumentCompiler(settings)
+    compiler_cls = get_compiler()
+    if not compiler_cls:
+        raise HTTPException(status_code=500, detail="WordDocumentCompiler not available")
+    compiler = compiler_cls(settings)
     out_filename, out_filepath, _ = compiler.compile_test_versions(exercises, num_versions=1, mix_options=True)
     return {"success": True, "filename": out_filename, "filepath": out_filepath}
 
 @router.post("/api/files/merge-vocabulary")
 def api_merge_vocabulary(req: MergeRequest):
     files_dir = get_setting("files_dir")
+    process_func = get_process_grade()
+    if not process_func:
+        raise HTTPException(status_code=500, detail="process_grade service not available")
     try:
-        filename, filepath = process_grade(req.grade, files_dir)
+        filename, filepath = process_func(req.grade, files_dir)
         return {"success": True, "filename": filename, "filepath": filepath}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -385,8 +422,11 @@ def api_format_vocabulary(req: FormatVocabRequest):
     filepath = get_file_path(files_dir, req.filename)
     if not os.path.exists(filepath):
         raise HTTPException(status_code=404, detail="File not found")
+    format_func = get_format_vocabulary_file()
+    if not format_func:
+        raise HTTPException(status_code=500, detail="format_vocabulary service not available")
     try:
-        out_filename, out_filepath = format_vocabulary_file(filepath, files_dir)
+        out_filename, out_filepath = format_func(filepath, files_dir)
         return {"success": True, "filename": out_filename, "filepath": out_filepath}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -397,8 +437,11 @@ def api_convert_csv(req: ConvertCsvRequest):
     filepath = get_file_path(files_dir, req.filename)
     if not os.path.exists(filepath):
         raise HTTPException(status_code=404, detail="File not found")
+    parse_csv = get_csv_parser()
+    if not parse_csv:
+        raise HTTPException(status_code=500, detail="parse_question_bank_csv service not available")
     try:
-        q = parse_question_bank_csv(filepath)
+        q = parse_csv(filepath)
         out_filename = os.path.splitext(req.filename)[0] + ".json"
         out_filepath = get_file_path(files_dir, out_filename)
         with open(out_filepath, "w", encoding="utf-8") as f:
@@ -413,8 +456,11 @@ def api_convert_docx(req: ConvertDocxRequest):
     filepath = get_file_path(files_dir, req.filename)
     if not os.path.exists(filepath):
         raise HTTPException(status_code=404, detail="File not found")
+    convert_docx = get_docx_parser()
+    if not convert_docx:
+        raise HTTPException(status_code=500, detail="convert_docx_to_json service not available")
     try:
-        result = convert_docx_to_json(filepath)
+        result = convert_docx(filepath)
         out_filename = os.path.splitext(req.filename)[0] + ".json"
         out_filepath = get_file_path(files_dir, out_filename)
         with open(out_filepath, "w", encoding="utf-8") as f:
