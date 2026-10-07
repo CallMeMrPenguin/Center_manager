@@ -1,8 +1,22 @@
 #!/usr/bin/env bash
 set -e
 
+echo "=== [0/4] Checking and activating 2GB Swap RAM ==="
+if ! swapon --show | grep -q '/swapfile'; then
+    echo "Creating 2GB Swap file for RAM optimization..."
+    if [ ! -f /swapfile ]; then
+        fallocate -l 2G /swapfile 2>/dev/null || dd if=/dev/zero of=/swapfile bs=1M count=2048
+        chmod 600 /swapfile
+        mkswap /swapfile
+    fi
+    swapon /swapfile || true
+    grep -q '/swapfile' /etc/fstab || echo '/swapfile none swap sw 0 0' >> /etc/fstab
+    echo "2GB Swap RAM activated successfully!"
+fi
+
 echo "=== [1/4] Syncing database records into PostgreSQL ==="
 if [ -f "backend/database/init_data.sql" ]; then
+    docker compose up -d --build
     docker exec -i center_manager_db psql -U center_user -d center_manager < backend/database/init_data.sql || true
     docker restart center_manager_backend || true
 fi

@@ -1,6 +1,7 @@
 -- Auto-generated SQLite to PostgreSQL Data Sync
 ALTER TABLE IF EXISTS public.class_sessions ADD COLUMN IF NOT EXISTS test_config_json TEXT DEFAULT NULL;
 ALTER TABLE IF EXISTS public.class_attendance_grades ADD COLUMN IF NOT EXISTS homework_2 REAL DEFAULT NULL;
+ALTER USER center_user WITH PASSWORD 'Center_Db_2026_SecureP@ss';
 
 -- Table: app_settings (2 rows)
 INSERT INTO public.app_settings ("setting_key", "setting_value", "updated_at") VALUES
@@ -10,7 +11,9 @@ ON CONFLICT DO NOTHING;
 
 -- Table: app_users (42 rows)
 INSERT INTO public.app_users ("id", "display_name", "username", "password_hash", "role", "status", "created_at", "last_login") VALUES
-(1, 'Quản Trị Viên', 'admin', '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9', 'Quản trị viên', 'Hoạt động', '2026-08-26 02:36:03.094958+00:00', '2026-08-31 23:26:26'),
+(1, 'Quản Trị Viên', 'admin', '412d0a2ac30655e23950acec834ec22e137abcf76f69574e3320cb3fb81d6d65', 'Quản trị viên', 'Hoạt động', '2026-08-26 02:36:03.094958+00:00', '2026-08-31 23:26:26')
+ON CONFLICT (id) DO UPDATE SET password_hash = EXCLUDED.password_hash;
+UPDATE public.app_users SET password_hash = '412d0a2ac30655e23950acec834ec22e137abcf76f69574e3320cb3fb81d6d65' WHERE username = 'admin';
 (2, 'Top', 'hs_0004', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Học sinh', 'Hoạt động', '2026-08-25 08:50:32+00:00', '2026-08-26 10:37:30+00:00'),
 (3, 'Cheetah', 'hs_0005', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Học sinh', 'Hoạt động', '2026-08-25 08:50:32+00:00', '2026-08-26 12:24:09+00:00'),
 (4, 'Vinh', 'hs_0006', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Học sinh', 'Hoạt động', '2026-08-25 08:50:32+00:00', NULL),
