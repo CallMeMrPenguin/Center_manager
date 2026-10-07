@@ -222,7 +222,10 @@ export const UserModal: React.FC<UserModalProps> = ({
                   type="button"
                   onClick={async () => {
                     const clean = newCustomRole.trim();
-                    if (!clean) return;
+                    if (!clean) {
+                      showToast('Vui lòng nhập tên vai trò mới', 'warning');
+                      return;
+                    }
                     if (roleList.includes(clean)) {
                       setRole(clean);
                       setIsAddingNewRole(false);

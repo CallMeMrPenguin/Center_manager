@@ -1,16 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Shield, Save, Check, Lock, Plus, Trash2 } from 'lucide-react';
 import { TAB_DEFINITIONS } from '../../../config/tabs';
 import { RolePermission } from '../types';
 import { api } from '../../../api';
 import { showToast } from '../../../components/Toast';
 import { useConfirm } from '../../../components/ConfirmDialog';
+import { AddRoleModal } from '../components/AddRoleModal';
 
 interface PermissionsTabProps {
   permissions: RolePermission[];
   saving: boolean;
   onSave: (updated: RolePermission[]) => void;
   onRolesChanged?: () => void;
+  onOpenAddRoleModal?: () => void;
+  newlyCreatedRole?: string | null;
+  onClearNewlyCreatedRole?: () => void;
 }
 
 interface RoleItem {
@@ -33,13 +37,18 @@ export const PermissionsTab: React.FC<PermissionsTabProps> = ({
   saving,
   onSave,
   onRolesChanged,
+  onOpenAddRoleModal,
+  newlyCreatedRole,
+  onClearNewlyCreatedRole,
 }) => {
   const confirm = useConfirm();
+  const tableContainerRef = useRef<HTMLDivElement>(null);
   const [roles, setRoles] = useState<string[]>(DEFAULT_SYSTEM_ROLES);
   const [roleItems, setRoleItems] = useState<RoleItem[]>([]);
-  const [newRoleName, setNewRoleName] = useState('');
   const [localMap, setLocalMap] = useState<Record<string, boolean>>({});
   const [isDirty, setIsDirty] = useState(false);
+  const [isInternalModalOpen, setIsInternalModalOpen] = useState(false);
+  const [highlightedRole, setHighlightedRole] = useState<string | null>(null);
 
   const loadRoles = async () => {
     try {
@@ -57,6 +66,27 @@ export const PermissionsTab: React.FC<PermissionsTabProps> = ({
   useEffect(() => {
     loadRoles();
   }, []);
+
+  // Handle external or internal new role creation highlight & auto scroll
+  useEffect(() => {
+    if (newlyCreatedRole) {
+      setHighlightedRole(newlyCreatedRole);
+      loadRoles();
+      setTimeout(() => {
+        if (tableContainerRef.current) {
+          tableContainerRef.current.scrollTo({
+            left: tableContainerRef.current.scrollWidth,
+            behavior: 'smooth',
+          });
+        }
+      }, 150);
+      const timer = setTimeout(() => {
+        setHighlightedRole(null);
+        onClearNewlyCreatedRole?.();
+      }, 3500);
+      return () => clearTimeout(timer);
+    }
+  }, [newlyCreatedRole, onClearNewlyCreatedRole]);
 
   // Initialize permission matrix from DB or sensible defaults
   useEffect(() => {
@@ -114,31 +144,29 @@ export const PermissionsTab: React.FC<PermissionsTabProps> = ({
     setIsDirty(false);
   };
 
-  const handleAddRole = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const clean = newRoleName.trim();
-    if (!clean) return;
-    if (roles.includes(clean)) {
-      showToast('Vai trò này đã tồn tại!', 'warning');
-      return;
+  const handleOpenAddModal = () => {
+    if (onOpenAddRoleModal) {
+      onOpenAddRoleModal();
+    } else {
+      setIsInternalModalOpen(true);
     }
-    try {
-      await api.createRole(clean, clean);
-      showToast(`Đã thêm vai trò "${clean}" thành công!`, 'success');
-      setNewRoleName('');
-      await loadRoles();
-      onRolesChanged?.();
-      setLocalMap((prev) => {
-        const next = { ...prev };
-        TAB_DEFINITIONS.forEach((tab) => {
-          next[`${clean}__${tab.id}`] = ['dashboard', 'students', 'classes', 'schedule', 'reports'].includes(tab.id);
+  };
+
+  const handleInternalRoleSuccess = async (createdName: string) => {
+    await loadRoles();
+    onRolesChanged?.();
+    setHighlightedRole(createdName);
+    setTimeout(() => {
+      if (tableContainerRef.current) {
+        tableContainerRef.current.scrollTo({
+          left: tableContainerRef.current.scrollWidth,
+          behavior: 'smooth',
         });
-        return next;
-      });
-      setIsDirty(true);
-    } catch (err: any) {
-      showToast('Không thể tạo vai trò: ' + err.message, 'error');
-    }
+      }
+    }, 150);
+    setTimeout(() => {
+      setHighlightedRole(null);
+    }, 3500);
   };
 
   const handleDeleteRole = async (roleName: string) => {
@@ -182,19 +210,30 @@ export const PermissionsTab: React.FC<PermissionsTabProps> = ({
           </p>
         </div>
 
-        <button
-          type="button"
-          onClick={handleSave}
-          disabled={saving}
-          className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-black shadow-xs transition cursor-pointer active:scale-95 disabled:opacity-50 border-0 ${
-            isDirty
-              ? 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-500/30 animate-pulse'
-              : 'bg-blue-600 hover:bg-blue-500 text-white shadow-blue-500/30'
-          }`}
-        >
-          <Save size={14} />
-          <span>{saving ? 'Đang lưu...' : isDirty ? 'Lưu Phân Quyền *' : 'Lưu Thay Đổi'}</span>
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={handleOpenAddModal}
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-black bg-blue-600 hover:bg-blue-500 text-white shadow-xs transition cursor-pointer active:scale-95 border-0"
+          >
+            <Plus size={14} />
+            <span>Thêm Role</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={handleSave}
+            disabled={saving}
+            className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-black shadow-xs transition cursor-pointer active:scale-95 disabled:opacity-50 border-0 ${
+              isDirty
+                ? 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-500/30 animate-pulse'
+                : 'bg-slate-700 hover:bg-slate-600 text-white shadow-xs'
+            }`}
+          >
+            <Save size={14} />
+            <span>{saving ? 'Đang lưu...' : isDirty ? 'Lưu Phân Quyền *' : 'Lưu Thay Đổi'}</span>
+          </button>
+        </div>
       </div>
 
       {/* Role Management Card (Add & Delete Roles) */}
@@ -205,10 +244,15 @@ export const PermissionsTab: React.FC<PermissionsTabProps> = ({
             {roles.map((r) => {
               const item = roleItems.find((x) => x.role_name === r);
               const isSystem = item ? item.is_system === 1 : DEFAULT_SYSTEM_ROLES.includes(r);
+              const isThisHighlighted = highlightedRole === r;
               return (
                 <span
                   key={r}
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-100 dark:bg-white/5 text-slate-800 dark:text-slate-200"
+                  className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${
+                    isThisHighlighted
+                      ? 'bg-amber-500/20 text-amber-300 ring-2 ring-amber-400'
+                      : 'bg-slate-100 dark:bg-white/5 text-slate-800 dark:text-slate-200'
+                  }`}
                 >
                   {isSystem && <Lock size={11} className="text-purple-500" />}
                   <span>{r}</span>
@@ -227,40 +271,45 @@ export const PermissionsTab: React.FC<PermissionsTabProps> = ({
             })}
           </div>
 
-          <form onSubmit={handleAddRole} className="flex items-center gap-2">
-            <input
-              type="text"
-              value={newRoleName}
-              onChange={(e) => setNewRoleName(e.target.value)}
-              placeholder="Tên vai trò mới..."
-              className="bg-slate-50 dark:bg-[#0c0f1e] border border-slate-300 dark:border-[#212c4b] rounded-xl px-3 py-1.5 text-xs text-slate-900 dark:text-white placeholder:text-slate-400 font-bold focus:outline-none focus:border-blue-600"
-            />
-            <button
-              type="submit"
-              className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition cursor-pointer shadow-xs"
-            >
-              <Plus size={13} />
-              <span>Thêm Role</span>
-            </button>
-          </form>
+          <button
+            type="button"
+            onClick={handleOpenAddModal}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-black transition cursor-pointer shadow-xs active:scale-95"
+          >
+            <Plus size={13} />
+            <span>Thêm Role</span>
+          </button>
         </div>
       </div>
 
       {/* Permission Matrix Table */}
       <div className="bg-white dark:bg-[#111728] border-0 rounded-2xl overflow-hidden shadow-sm">
-        <div className="overflow-x-auto scrollbar-thin">
+        <div ref={tableContainerRef} className="overflow-x-auto scrollbar-thin">
           <table className="w-full text-left border-collapse select-none">
             <thead>
               <tr className="bg-slate-100 dark:bg-[#161d30] border-b border-slate-200 dark:border-white/10 text-xs font-black uppercase text-slate-900 dark:text-white">
                 <th className="py-3.5 px-4 min-w-[200px]">Tính Năng / Tab</th>
-                {roles.map((role) => (
-                  <th key={role} className="py-3.5 px-4 text-center min-w-[130px]">
-                    <span className="inline-flex items-center gap-1">
-                      {role === 'Quản trị viên' && <Lock size={12} className="text-purple-500 dark:text-purple-400" />}
-                      <span>{role}</span>
-                    </span>
-                  </th>
-                ))}
+                {roles.map((role) => {
+                  const isThisHighlighted = highlightedRole === role;
+                  return (
+                    <th
+                      key={role}
+                      className={`py-3.5 px-4 text-center min-w-[130px] transition-all duration-300 ${
+                        isThisHighlighted ? 'bg-amber-500/20 text-amber-300 ring-2 ring-amber-400' : ''
+                      }`}
+                    >
+                      <span className="inline-flex items-center gap-1">
+                        {role === 'Quản trị viên' && <Lock size={12} className="text-purple-500 dark:text-purple-400" />}
+                        <span>{role}</span>
+                        {isThisHighlighted && (
+                          <span className="text-[10px] px-1 py-0.2 rounded bg-amber-400 text-black font-black uppercase">
+                            MỚI
+                          </span>
+                        )}
+                      </span>
+                    </th>
+                  );
+                })}
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200 dark:divide-white/5 text-xs">
@@ -286,9 +335,15 @@ export const PermissionsTab: React.FC<PermissionsTabProps> = ({
                       const key = `${role}__${tab.id}`;
                       const isChecked = !!localMap[key];
                       const isAdmin = role === 'Quản trị viên';
+                      const isThisHighlighted = highlightedRole === role;
 
                       return (
-                        <td key={role} className="py-3 px-4 text-center">
+                        <td
+                          key={role}
+                          className={`py-3 px-4 text-center transition-all duration-300 ${
+                            isThisHighlighted ? 'bg-amber-500/10' : ''
+                          }`}
+                        >
                           <button
                             type="button"
                             onClick={() => handleToggle(role, tab.id)}
@@ -313,6 +368,14 @@ export const PermissionsTab: React.FC<PermissionsTabProps> = ({
           </table>
         </div>
       </div>
+
+      {/* Internal Add Role Modal fallback */}
+      <AddRoleModal
+        isOpen={isInternalModalOpen}
+        onClose={() => setIsInternalModalOpen(false)}
+        existingRoles={roles}
+        onSuccess={handleInternalRoleSuccess}
+      />
     </div>
   );
 };

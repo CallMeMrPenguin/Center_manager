@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { SegmentedControl } from '../../components/SegmentedControl';
 import { useUsersData } from './hooks/useUsersData';
 import { UsersTab } from './tabs/UsersTab';
 import { PermissionsTab } from './tabs/PermissionsTab';
 import { SystemSettingsTab } from './tabs/SystemSettingsTab';
 import { UserModal } from './components/UserModal';
+import { AddRoleModal } from './components/AddRoleModal';
 import { AppUser } from './types';
 
 export const UsersRolesPage: React.FC = () => {
@@ -21,11 +22,15 @@ export const UsersRolesPage: React.FC = () => {
     editingUser,
     setEditingUser,
     loadUsers,
+    loadPermissions,
     availableRoles,
     loadRoles,
     handleSyncStudents,
     handleSavePermissions,
   } = useUsersData();
+
+  const [isAddRoleModalOpen, setIsAddRoleModalOpen] = useState(false);
+  const [newlyCreatedRole, setNewlyCreatedRole] = useState<string | null>(null);
 
   const handleOpenCreateModal = () => {
     setEditingUser(null);
@@ -35,6 +40,12 @@ export const UsersRolesPage: React.FC = () => {
   const handleOpenEditModal = (user: AppUser) => {
     setEditingUser(user);
     setIsModalOpen(true);
+  };
+
+  const handleRoleCreated = async (newRole: string) => {
+    await loadRoles();
+    await loadPermissions();
+    setNewlyCreatedRole(newRole);
   };
 
   return (
@@ -71,13 +82,20 @@ export const UsersRolesPage: React.FC = () => {
             onSyncStudents={handleSyncStudents}
             onEditUser={handleOpenEditModal}
             onOpenCreateModal={handleOpenCreateModal}
+            onOpenAddRoleModal={() => setIsAddRoleModalOpen(true)}
           />
         ) : activeTab === 'permissions' ? (
           <PermissionsTab
             permissions={permissions}
             saving={savingPermissions}
             onSave={handleSavePermissions}
-            onRolesChanged={loadRoles}
+            onRolesChanged={() => {
+              loadRoles();
+              loadPermissions();
+            }}
+            onOpenAddRoleModal={() => setIsAddRoleModalOpen(true)}
+            newlyCreatedRole={newlyCreatedRole}
+            onClearNewlyCreatedRole={() => setNewlyCreatedRole(null)}
           />
         ) : (
           <SystemSettingsTab />
@@ -91,6 +109,14 @@ export const UsersRolesPage: React.FC = () => {
         user={editingUser}
         availableRoles={availableRoles}
         onSuccess={loadUsers}
+      />
+
+      {/* 4. Add Role & Assign Permissions Modal */}
+      <AddRoleModal
+        isOpen={isAddRoleModalOpen}
+        onClose={() => setIsAddRoleModalOpen(false)}
+        existingRoles={availableRoles}
+        onSuccess={handleRoleCreated}
       />
     </div>
   );

@@ -341,7 +341,7 @@ export const api = {
   getRoles: () => request<any[]>('/api/roles', { tags: ['roles'], forceRefresh: true }),
   createRole: (role_name: string, description?: string) => request<any>('/api/roles', { method: 'POST', body: JSON.stringify({ role_name, description }), tags: ['roles'] }),
   deleteRole: (role_name: string) => request<any>(`/api/roles/${encodeURIComponent(role_name)}`, { method: 'DELETE', tags: ['roles'] }),
-  getRolePermissions: () => request<any[]>('/api/roles/permissions', { tags: ['roles'] }),
+  getRolePermissions: () => request<any[]>('/api/roles/permissions', { tags: ['roles'], forceRefresh: true }),
   saveRolePermissions: (permissions: any[]) => request<any>('/api/roles/permissions', { method: 'PUT', body: JSON.stringify({ permissions }), tags: ['roles'] }),
   syncStudentAccounts: () => request<any>('/api/users/sync-students', { method: 'POST', tags: ['users', 'students'] }),
 

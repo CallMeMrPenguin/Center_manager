@@ -11,6 +11,7 @@ interface UsersTabProps {
   onSyncStudents?: () => void;
   onEditUser: (user: AppUser) => void;
   onOpenCreateModal: () => void;
+  onOpenAddRoleModal?: () => void;
 }
 
 export const UsersTab: React.FC<UsersTabProps> = ({
@@ -20,6 +21,7 @@ export const UsersTab: React.FC<UsersTabProps> = ({
   onSyncStudents,
   onEditUser,
   onOpenCreateModal,
+  onOpenAddRoleModal,
 }) => {
   const [visiblePasswords, setVisiblePasswords] = useState<Record<number, boolean>>({});
 
@@ -180,6 +182,19 @@ export const UsersTab: React.FC<UsersTabProps> = ({
                 <RefreshCw size={13} className={`${syncing ? 'animate-spin' : ''} shrink-0`} />
                 <span className="max-w-0 opacity-0 group-hover:max-w-[180px] group-hover:opacity-100 xl:max-w-none xl:opacity-100 transition-all duration-200 ease-in-out whitespace-nowrap overflow-hidden inline-block">
                   {syncing ? 'Đang đồng bộ...' : 'Tạo TK Cho Toàn Bộ HS'}
+                </span>
+              </button>
+            )}
+            {onOpenAddRoleModal && (
+              <button
+                type="button"
+                onClick={onOpenAddRoleModal}
+                className="group flex items-center gap-1 sm:gap-1.5 px-3 sm:px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-black shadow-xs border-0 transition-all duration-200 cursor-pointer active:scale-95 shrink-0"
+                title="Thêm vai trò mới và phân quyền"
+              >
+                <Shield size={14} className="shrink-0" />
+                <span className="max-w-0 opacity-0 group-hover:max-w-[140px] group-hover:opacity-100 lg:max-w-none lg:opacity-100 transition-all duration-200 ease-in-out whitespace-nowrap overflow-hidden inline-block">
+                  Thêm Vai Trò
                 </span>
               </button>
             )}
