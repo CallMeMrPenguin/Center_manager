@@ -1,7 +1,8 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Database, ChevronLeft, ChevronRight } from 'lucide-react';
 import { TAB_DEFINITIONS } from './config/tabs';
+import { api } from './api';
 import { Sidebar } from './components/Sidebar';
 import { MobileTopBar } from './components/MobileTopBar';
 import { MobileBottomDock } from './components/MobileBottomDock';
@@ -11,6 +12,7 @@ import { LoginPage } from './pages/auth/LoginPage';
 import { AuthUser, getCurrentUser, clearAuthUser } from './utils/authUtils';
 import { useAutoDeploymentRefresh } from './hooks/useAutoDeploymentRefresh';
 import { useWarmupDataCache } from './hooks/useWarmupDataCache';
+import { useUserRolePermissions } from './hooks/useUserRolePermissions';
 import { ThemeProvider } from './context/ThemeContext';
 import { FpsOverlay } from './components/FpsOverlay';
 import { isRealMobileDevice } from './utils/deviceUtils';
@@ -191,19 +193,26 @@ function AppContent() {
     window.history.pushState({ tabId: targetTab }, '', `/${targetTab}`);
   };
 
+  const { isAdmin, isStudent, allowedTabIds } = useUserRolePermissions(currentUser);
+
   // If user is not logged in, show LoginPage
   if (!currentUser) {
     return <LoginPage onLogin={handleLogin} />;
   }
 
-  const isStudent = currentUser.role === 'student';
-  const visibleTabIds = isStudent
-    ? orderedTabIds.filter((id) => id === 'assignments' || id === 'results')
-    : orderedTabIds;
+  const visibleTabIds = orderedTabIds.filter((id) => allowedTabIds.includes(id));
+  const visibleTabs = TAB_DEFINITIONS.filter((t) => allowedTabIds.includes(t.id));
 
-  const visibleTabs = isStudent
-    ? TAB_DEFINITIONS.filter((t) => t.id === 'assignments' || t.id === 'results')
-    : TAB_DEFINITIONS;
+  // Redirect if currently active tab is not permitted for this role
+  useEffect(() => {
+    if (!currentUser || isAdmin || allowedTabIds.length === 0) return;
+    if (!allowedTabIds.includes(activeTab)) {
+      const fallbackTab = allowedTabIds[0] || (isStudent ? 'assignments' : 'dashboard');
+      setActiveTab(fallbackTab);
+      setVisitedTabIds(new Set([fallbackTab]));
+      window.history.replaceState({ tabId: fallbackTab }, '', `/${fallbackTab}`);
+    }
+  }, [currentUser, isAdmin, allowedTabIds, activeTab, isStudent]);
 
   const isMobile = isRealMobileDevice();
 

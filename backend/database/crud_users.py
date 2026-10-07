@@ -78,17 +78,20 @@ def authenticate_user(username: str, raw_password: str) -> Dict[str, Any]:
             pass
 
         # Normalize role for frontend
-        raw_role = (user_dict.get("role") or "").lower()
-        if "quản trị" in raw_role or "admin" in raw_role:
+        raw_role = (user_dict.get("role") or "").strip()
+        raw_lower = raw_role.lower()
+        if "quản trị" in raw_lower or "admin" in raw_lower:
             norm_role = "admin"
-        elif "học sinh" in raw_role or "student" in raw_role:
+        elif "học sinh" in raw_lower or "student" in raw_lower:
             norm_role = "student"
-        elif "trợ giảng" in raw_role or "assistant" in raw_role:
+        elif "trợ giảng" in raw_lower or "assistant" in raw_lower:
             norm_role = "assistant"
-        elif "kế toán" in raw_role or "accountant" in raw_role:
+        elif "kế toán" in raw_lower or "accountant" in raw_lower:
             norm_role = "accountant"
-        else:
+        elif "giáo viên" in raw_lower or "teacher" in raw_lower:
             norm_role = "teacher"
+        else:
+            norm_role = "staff"
 
         result = {
             "id": str(user_dict["id"]),
@@ -372,8 +375,23 @@ def create_role(role_name: str, description: str = "") -> int:
         if cursor.fetchone():
             raise ValueError(f"Vai trò '{clean_name}' đã tồn tại")
         cursor.execute("INSERT INTO app_roles (role_name, description, is_system) VALUES (?, ?, 0)", (clean_name, description.strip()))
+        rid = cursor.lastrowid
+        default_allowed = {'dashboard', 'students', 'classes', 'schedule', 'reports', 'assignments', 'results', 'word-editor', 'canvas-board'}
+        all_tabs = [
+            'dashboard', 'teachers', 'students', 'classes', 'courses', 'seating',
+            'schedule', 'kiemtra', 'question-bank', 'assignments', 'results',
+            'vocab-bank', 'unit-config', 'file-manager', 'word-editor', 'canvas-board',
+            'payments', 'invoices', 'reports', 'users-roles'
+        ]
+        for t_id in all_tabs:
+            can_acc = 1 if t_id in default_allowed else 0
+            cursor.execute("""
+                INSERT INTO role_permissions (role, tab_id, can_access)
+                VALUES (?, ?, ?)
+                ON CONFLICT(role, tab_id) DO UPDATE SET can_access = EXCLUDED.can_access
+            """, (clean_name, t_id, can_acc))
         conn.commit()
-        return cursor.lastrowid
+        return rid
     finally:
         conn.close()
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Trash2, Save, UserCheck, Shield } from 'lucide-react';
+import { X, Trash2, Save, UserCheck, Shield, Plus } from 'lucide-react';
 import { api } from '../../../api';
 import { showToast } from '../../../components/Toast';
 import { CustomSelect, SelectOption } from '../../../components/CustomSelect';
@@ -28,6 +28,9 @@ export const UserModal: React.FC<UserModalProps> = ({
   const [status, setStatus] = useState('Hoạt động');
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [isAddingNewRole, setIsAddingNewRole] = useState(false);
+  const [newCustomRole, setNewCustomRole] = useState('');
+  const [addingRoleLoading, setAddingRoleLoading] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -189,15 +192,81 @@ export const UserModal: React.FC<UserModalProps> = ({
 
           {/* Role */}
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-              Vai Trò & Quyền Hạn
-            </label>
-            <CustomSelect
-              value={role}
-              onChange={(val) => setRole(String(val))}
-              options={roleOptions}
-              icon={<Shield size={14} className="text-indigo-500 dark:text-indigo-400" />}
-            />
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                Vai Trò & Quyền Hạn
+              </label>
+              {!isAddingNewRole && (
+                <button
+                  type="button"
+                  onClick={() => setIsAddingNewRole(true)}
+                  className="text-[11px] font-bold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1 cursor-pointer"
+                >
+                  <Plus size={11} />
+                  <span>Thêm vai trò mới</span>
+                </button>
+              )}
+            </div>
+
+            {isAddingNewRole ? (
+              <div className="flex items-center gap-2 p-2 bg-slate-50 dark:bg-[#151a2d] border border-blue-500/40 rounded-xl">
+                <input
+                  type="text"
+                  value={newCustomRole}
+                  onChange={(e) => setNewCustomRole(e.target.value)}
+                  placeholder="Nhập tên vai trò mới..."
+                  className="flex-1 bg-white dark:bg-[#0c0f1e] border border-slate-300 dark:border-[#212c4b] rounded-lg px-2.5 py-1 text-xs font-bold text-slate-900 dark:text-white focus:outline-none"
+                  autoFocus
+                />
+                <button
+                  type="button"
+                  onClick={async () => {
+                    const clean = newCustomRole.trim();
+                    if (!clean) return;
+                    if (roleList.includes(clean)) {
+                      setRole(clean);
+                      setIsAddingNewRole(false);
+                      setNewCustomRole('');
+                      return;
+                    }
+                    try {
+                      setAddingRoleLoading(true);
+                      await api.createRole(clean, clean);
+                      showToast(`Đã thêm vai trò "${clean}" thành công!`, 'success');
+                      setRole(clean);
+                      setIsAddingNewRole(false);
+                      setNewCustomRole('');
+                      onSuccess();
+                    } catch (err: any) {
+                      showToast('Không thể tạo vai trò: ' + err.message, 'error');
+                    } finally {
+                      setAddingRoleLoading(false);
+                    }
+                  }}
+                  disabled={addingRoleLoading}
+                  className="px-2.5 py-1 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-bold cursor-pointer transition disabled:opacity-50"
+                >
+                  {addingRoleLoading ? 'Lưu...' : 'Lưu'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsAddingNewRole(false);
+                    setNewCustomRole('');
+                  }}
+                  className="px-2 py-1 text-slate-400 hover:text-slate-600 dark:hover:text-white text-xs font-bold cursor-pointer"
+                >
+                  Hủy
+                </button>
+              </div>
+            ) : (
+              <CustomSelect
+                value={role}
+                onChange={(val) => setRole(String(val))}
+                options={roleOptions}
+                icon={<Shield size={14} className="text-indigo-500 dark:text-indigo-400" />}
+              />
+            )}
           </div>
 
           {/* Status */}
