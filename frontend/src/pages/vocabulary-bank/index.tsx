@@ -1091,11 +1091,11 @@ export default function VocabularyBank({ isActive }: { isActive?: boolean }) {
             </p>
           </div>
         ) : (
-          <div className="flex-auto flex flex-col overflow-hidden relative min-h-0">
+          <div className="flex-auto flex flex-col overflow-hidden relative min-h-0 bg-white dark:bg-[#111728] border border-slate-200/90 dark:border-white/10 rounded-2xl shadow-xs">
             <div className="overflow-auto table-scroll-container">
               <table className="w-full border-collapse text-left">
                 <thead>
-                  <tr className="bg-slate-100 dark:bg-[#121626] border-b border-slate-300 dark:border-slate-800 text-[0.66rem] text-slate-800 dark:text-slate-300 font-black uppercase tracking-wider sticky top-0 z-10 opacity-100">
+                  <tr className="bg-slate-50 dark:bg-[#121626] border-b-2 border-slate-200 dark:border-white/10 text-[0.66rem] text-slate-800 dark:text-slate-300 font-black uppercase tracking-wider sticky top-0 z-10 opacity-100">
                     <th className="py-4 px-5 w-12 text-center">
                       <button
                         onClick={handleSelectAllOnPage}
@@ -1411,12 +1411,12 @@ export default function VocabularyBank({ isActive }: { isActive?: boolean }) {
                       <tr 
                         key={v.id}
                         onClick={() => handleSelectRow(v.id)}
-                        className={`transition cursor-pointer ${
+                        className={`transition cursor-pointer border-b border-slate-200 dark:border-white/10 ${
                           isSelected 
                             ? 'bg-blue-100/90 dark:bg-blue-600/15' 
                             : idx % 2 === 0 
-                            ? 'bg-white dark:bg-[#0d1018] hover:bg-blue-100/70 dark:hover:bg-[#131928]' 
-                            : 'bg-slate-100/85 dark:bg-[#0b0f1c] hover:bg-blue-100/70 dark:hover:bg-[#131928]'
+                            ? 'bg-white dark:bg-[#0d1018] hover:bg-blue-50/80 dark:hover:bg-[#131928]' 
+                            : 'bg-slate-50/50 dark:bg-[#0b0f1c] hover:bg-blue-50/80 dark:hover:bg-[#131928]'
                         }`}
                       >
                         {/* Checkbox */}

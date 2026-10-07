@@ -197,7 +197,7 @@ export function AnimatedTable<T extends { id?: string | number }>({
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-slate-100 dark:bg-[#0e1325] border-b border-slate-200 dark:border-white/10 text-[11px] font-black text-slate-600 dark:text-slate-400 uppercase tracking-wider">
+              <tr className="bg-slate-50 dark:bg-[#0e1325] border-b-2 border-slate-200 dark:border-white/10 text-[11px] font-black text-slate-700 dark:text-slate-300 uppercase tracking-wider">
                 {expandable && <th className="w-8 px-3 py-3" />}
                 {selectable && (
                   <th className="w-10 px-3 py-3 text-center">

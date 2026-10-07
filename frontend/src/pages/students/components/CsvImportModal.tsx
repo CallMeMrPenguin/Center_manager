@@ -105,7 +105,7 @@ export const CsvImportModal: React.FC<CsvImportModalProps> = ({
                       <th className="p-2">SĐT</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100 font-semibold text-slate-700">
+                  <tbody className="divide-y divide-slate-200 font-semibold text-slate-700">
                     {csvPreview.slice(0, 50).map((row, idx) => (
                       <tr key={idx} className="hover:bg-slate-50">
                         <td className="p-2 text-slate-400">{idx + 1}</td>

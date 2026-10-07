@@ -270,11 +270,11 @@ export const PermissionsTab: React.FC<PermissionsTabProps> = ({
       </div>
 
       {/* Permission Matrix Table */}
-      <div className="bg-white dark:bg-[#111728] border-0 rounded-2xl overflow-hidden shadow-sm">
+      <div className="bg-white dark:bg-[#111728] border border-slate-200/90 dark:border-white/10 rounded-2xl overflow-hidden shadow-xs">
         <div ref={tableContainerRef} className="overflow-x-auto scrollbar-thin">
           <table className="w-full text-left border-collapse select-none">
             <thead>
-              <tr className="bg-slate-100 dark:bg-[#161d30] border-b border-slate-200 dark:border-white/10 text-xs font-black uppercase text-slate-900 dark:text-white">
+              <tr className="bg-slate-50 dark:bg-[#161d30] border-b-2 border-slate-200 dark:border-white/10 text-xs font-black uppercase text-slate-800 dark:text-white">
                 <th className="py-3.5 px-4 min-w-[200px]">Tính Năng / Tab</th>
                 {roles.map((role) => {
                   const isThisHighlighted = highlightedRole === role;
@@ -306,8 +306,8 @@ export const PermissionsTab: React.FC<PermissionsTabProps> = ({
                   <tr
                     key={tab.id}
                     className={`${
-                      idx % 2 === 0 ? 'bg-white dark:bg-[#111728]' : 'bg-slate-50/70 dark:bg-[#141b2e]'
-                    } hover:bg-blue-100/70 dark:hover:bg-blue-950/40 transition-colors`}
+                      idx % 2 === 0 ? 'bg-white dark:bg-[#111728]' : 'bg-slate-50/50 dark:bg-[#141b2e]'
+                    } hover:bg-blue-50/80 dark:hover:bg-blue-950/40 transition-colors`}
                   >
                     <td className="py-3 px-4 font-bold text-slate-800 dark:text-slate-200">
                       <div className="flex items-center gap-2.5">

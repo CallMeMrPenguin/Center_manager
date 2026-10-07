@@ -199,8 +199,8 @@ function DraggableHeader({
     <th
       ref={setNodeRef}
       style={style}
-      className={`select-none relative border-b-2 border-slate-300 dark:border-[#27272a] bg-slate-100 dark:bg-[#18181b] font-bold sm:font-extrabold text-slate-900 dark:text-slate-100 ${
-        isPinned ? 'bg-slate-100 dark:bg-[#18181b]' : ''
+      className={`select-none relative border-b-2 border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#151c2e] font-bold sm:font-extrabold text-slate-800 dark:text-slate-100 ${
+        isPinned ? 'bg-slate-50 dark:bg-[#151c2e]' : ''
       }`}
     >
       {/* Draggable Title Area with dedicated touchAction none & grab cursor */}
@@ -1112,11 +1112,11 @@ export function DataTable<TData>({
 
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
-    <div className="flex flex-col min-h-0 w-full h-full font-sans rounded-2xl overflow-hidden">
+    <div className="flex flex-col min-h-0 w-full h-full font-sans rounded-2xl overflow-hidden bg-white dark:bg-[#111728] border border-slate-200/90 dark:border-white/10 shadow-xs">
 
       {/* ── TOOLBAR ─────────────────────────────────────────────────────────── */}
       {(enableGlobalSearch || enableColumnVisibility || enableExport || toolbarLeft || toolbarRight) && (
-        <div className={`flex flex-wrap items-center gap-2 px-3 py-2.5 ${borderless ? 'bg-transparent border-b-0' : 'border-b border-slate-300 dark:border-[#27272a] bg-slate-100/80 dark:bg-[#141417]'} shrink-0`}>
+        <div className={`flex flex-wrap items-center gap-2 px-3.5 py-2.5 ${borderless ? 'bg-transparent border-b-0' : 'border-b border-slate-200 dark:border-white/10 bg-white dark:bg-[#111728]'} shrink-0`}>
           {/* Left */}
           <div className="flex flex-wrap items-center gap-2 flex-1 min-w-0">
             {enableGlobalSearch && (
@@ -1145,7 +1145,7 @@ export function DataTable<TData>({
                   onBlur={() => setSearchFocused(false)}
                   onChange={e => setGlobalFilter(e.target.value)}
                   placeholder={searchPlaceholder}
-                  className={`w-full ${borderless ? 'bg-slate-100/90 dark:bg-white/5 border-0 shadow-none' : 'bg-white dark:bg-[#1c1c21] border border-slate-300 dark:border-[#27272a] shadow-sm dark:shadow-inner'} text-slate-900 dark:text-white text-xs rounded-xl pl-8 pr-8 py-1.5 focus:outline-none focus:border-[#2563eb] focus:ring-2 focus:ring-[#2563eb]/25 placeholder:text-slate-400 dark:placeholder:text-slate-500 font-semibold transition`}
+                  className={`w-full ${borderless ? 'bg-slate-100/90 dark:bg-white/5 border-0 shadow-none' : 'bg-slate-50 dark:bg-[#1c1c21] border border-slate-200 dark:border-white/10 shadow-2xs'} text-slate-900 dark:text-white text-xs rounded-xl pl-8 pr-8 py-1.5 focus:outline-none focus:border-[#2563eb] focus:bg-white focus:ring-2 focus:ring-[#2563eb]/25 placeholder:text-slate-400 dark:placeholder:text-slate-500 font-semibold transition`}
                 />
                 {!globalFilter && !searchFocused && (
                   <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] font-mono font-bold text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-white/10 px-1.5 py-0.5 rounded border-0 pointer-events-none select-none">
@@ -1300,7 +1300,7 @@ export function DataTable<TData>({
                   </colgroup>
 
                   {/* ── THEAD (All headers centered by default) ────────────────── */}
-                  <thead className={`${borderless ? 'bg-slate-100/80 dark:bg-white/5 border-b-0' : 'bg-slate-200 dark:bg-[#18181b] border-b-2 border-slate-300 dark:border-[#27272a]'} font-bold sm:font-extrabold text-slate-900 dark:text-slate-100 ${stickyHeader ? 'sticky top-0 z-20' : ''}`}>
+                  <thead className={`${borderless ? 'bg-slate-100/80 dark:bg-white/5 border-b-0' : 'bg-slate-50 dark:bg-[#151c2e] border-b-2 border-slate-200 dark:border-white/10'} font-bold sm:font-extrabold text-slate-800 dark:text-slate-100 ${stickyHeader ? 'sticky top-0 z-20' : ''}`}>
                     {table.getHeaderGroups().map(headerGroup => (
                       <tr key={headerGroup.id}>
                         {headerGroup.headers.map(header => {
@@ -1385,8 +1385,8 @@ export function DataTable<TData>({
                               row.getIsSelected()
                                 ? 'bg-blue-500/15 hover:bg-blue-500/25 dark:bg-blue-500/20 dark:hover:bg-blue-500/30'
                                 : rowIdx % 2 === 0
-                                ? 'bg-white dark:bg-[#141417] hover:bg-[#dbeafe] dark:hover:bg-[#1e284a]'
-                                : 'bg-slate-100/70 dark:bg-[#18181c] hover:bg-[#dbeafe] dark:hover:bg-[#1e284a]'
+                                ? 'bg-white dark:bg-[#111728] hover:bg-blue-50/80 dark:hover:bg-[#1e284a]'
+                                : 'bg-slate-50/50 dark:bg-[#141b2e] hover:bg-blue-50/80 dark:hover:bg-[#1e284a]'
                             )}
                           `}
                           onClick={() => onRowClick?.(row.original)}
@@ -1409,12 +1409,12 @@ export function DataTable<TData>({
                                 key={cell.id}
                                 className={`
                                   py-3.5 ${isSelectCol ? 'px-1' : 'px-4'} font-bold text-slate-900 dark:text-slate-100 text-base
-                                  ${borderless ? 'border-b-0' : 'border-b border-slate-300 dark:border-[#27272a]'} overflow-hidden relative
+                                  ${borderless ? 'border-b-0' : 'border-b border-slate-200 dark:border-white/10'} overflow-hidden relative
                                   ${isCentered ? 'text-center' : 'text-left'}
                                   ${isPinned ? 'bg-inherit' : ''}
                                   ${isLastRow && isFirstCell ? 'rounded-bl-xl' : ''}
                                   ${isLastRow && isLastCell ? 'rounded-br-xl' : ''}
-                                  group-hover:bg-[#dbeafe] dark:group-hover:bg-[#1e284a] transition-colors duration-150
+                                  group-hover:bg-blue-50/80 dark:group-hover:bg-[#1e284a] transition-colors duration-150
                                   ${isFirstCell ? `before:absolute before:left-0 before:top-0 before:bottom-0 before:w-1.5 ${isCustomHighlighted ? 'before:bg-blue-600 dark:before:bg-blue-400 before:opacity-100' : 'before:bg-blue-600 dark:before:bg-blue-400 before:opacity-0 group-hover:before:opacity-100'} before:transition-opacity` : ''}
                                 `}
                                 style={{
@@ -1433,7 +1433,7 @@ export function DataTable<TData>({
 
                         {/* Expanded sub-row */}
                         {row.getIsExpanded() && renderSubComponent && (
-                          <tr className="bg-slate-50/60 dark:bg-[#0c1020]/90 border-b border-slate-200 dark:border-[#212c4b]">
+                          <tr className="bg-slate-50/70 dark:bg-[#0c1020]/90 border-b border-slate-200 dark:border-white/10">
                             <td colSpan={row.getVisibleCells().length} className="p-0">
                               {renderSubComponent({ row })}
                             </td>
@@ -1455,7 +1455,7 @@ export function DataTable<TData>({
 
           {/* ── PAGINATION ──────────────────────────────────────────────────── */}
           {showPagination && pageCount > 0 && !useVirt && (
-            <div className={`shrink-0 px-4 py-2.5 ${borderless ? 'bg-transparent border-t-0' : 'bg-slate-100/90 dark:bg-[#141417] border-t border-slate-300 dark:border-[#27272a]'} flex flex-wrap items-center justify-between gap-3 text-xs text-slate-700 dark:text-slate-400 font-bold`}>
+            <div className={`shrink-0 px-4 py-2.5 ${borderless ? 'bg-transparent border-t-0' : 'bg-slate-50/80 dark:bg-[#111728] border-t border-slate-200 dark:border-white/10'} flex flex-wrap items-center justify-between gap-3 text-xs text-slate-700 dark:text-slate-400 font-bold`}>
               {/* Left info */}
               <div className="flex items-center gap-3 flex-wrap">
                 <span>

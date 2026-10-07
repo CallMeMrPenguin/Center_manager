@@ -1034,7 +1034,7 @@ button.btn-danger:hover {
 
 /* ── Universal Data Table Row Hover Highlight ────────────────────────────── */
 table.data-table-main tbody tr:not([data-selected='true']):hover > td {
-  background-color: #dbeafe !important;
+  background-color: #eff6ff !important;
 }
 .dark table.data-table-main tbody tr:not([data-selected='true']):hover > td,
 [data-theme='dark'] table.data-table-main tbody tr:not([data-selected='true']):hover > td {
