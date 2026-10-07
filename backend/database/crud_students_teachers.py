@@ -19,6 +19,7 @@ def get_students(search: str = "", status: str = "") -> List[Dict[str, Any]]:
             SELECT s.*, 
                    GROUP_CONCAT(DISTINCT c.class_name) as enrolled_classes,
                    MAX(u.username) as account_username,
+                   MAX(u.plain_password) as account_plain_password,
                    MAX(u.status) as account_status,
                    MAX(u.role) as account_role,
                    MAX(u.last_login) as account_last_login
@@ -100,13 +101,14 @@ def create_student(data: Dict[str, Any]) -> int:
             user_status = data.get("account_status") or ("Hoạt động" if data.get("status") != "Đã nghỉ" else "Tạm khóa")
             try:
                 cursor.execute("""
-                    INSERT INTO app_users (display_name, username, password_hash, role, status)
-                    VALUES (?, ?, ?, 'Học sinh', ?)
+                    INSERT INTO app_users (display_name, username, password_hash, role, status, plain_password)
+                    VALUES (?, ?, ?, 'Học sinh', ?, ?)
                     ON CONFLICT(username) DO UPDATE SET 
                         display_name = EXCLUDED.display_name, 
                         password_hash = EXCLUDED.password_hash,
+                        plain_password = EXCLUDED.plain_password,
                         status = EXCLUDED.status
-                """, (full_name, username, pwd_hash, user_status))
+                """, (full_name, username, pwd_hash, user_status, raw_pwd))
                 conn.commit()
             except Exception as e:
                 print(f"[Student CRUD] Auto create user notice: {e}")
@@ -162,13 +164,14 @@ def update_student(student_id: int, data: Dict[str, Any]):
                 if raw_pwd:
                     pwd_hash = hash_password(raw_pwd)
                     cursor.execute("""
-                        INSERT INTO app_users (display_name, username, password_hash, role, status)
-                        VALUES (?, ?, ?, 'Học sinh', ?)
+                        INSERT INTO app_users (display_name, username, password_hash, role, status, plain_password)
+                        VALUES (?, ?, ?, 'Học sinh', ?, ?)
                         ON CONFLICT(username) DO UPDATE SET 
                             display_name = EXCLUDED.display_name,
                             password_hash = EXCLUDED.password_hash,
+                            plain_password = EXCLUDED.plain_password,
                             status = EXCLUDED.status
-                    """, (new_full_name, username, pwd_hash, user_status))
+                    """, (new_full_name, username, pwd_hash, user_status, raw_pwd))
                 else:
                     cursor.execute("""
                         INSERT INTO app_users (display_name, username, password_hash, role, status)
@@ -259,7 +262,8 @@ def get_teachers_cm(search: str = "", role: str = "") -> List[Dict[str, Any]]:
                    MAX(u.username) as account_username,
                    MAX(u.status) as account_status,
                    MAX(u.role) as account_role,
-                   MAX(u.last_login) as account_last_login
+                   MAX(u.last_login) as account_last_login,
+                   MAX(u.plain_password) as account_plain_password
             FROM teachers_cm t
             LEFT JOIN app_users u ON (
                 LOWER(u.username) = LOWER('gv_' || printf('%04d', t.id))
@@ -313,19 +317,18 @@ def create_teacher_cm(data: Dict[str, Any]) -> int:
 
             try:
                 cursor.execute("""
-                    INSERT INTO app_users (display_name, username, password_hash, role, status)
-                    VALUES (?, ?, ?, ?, ?)
+                    INSERT INTO app_users (display_name, username, password_hash, role, status, plain_password)
+                    VALUES (?, ?, ?, ?, ?, ?)
                     ON CONFLICT(username) DO UPDATE SET 
                         display_name = EXCLUDED.display_name,
                         password_hash = EXCLUDED.password_hash,
                         role = EXCLUDED.role,
-                        status = EXCLUDED.status
-                """, (full_name, username, pwd_hash, account_role, user_status))
+                        status = EXCLUDED.status,
+                        plain_password = EXCLUDED.plain_password
+                """, (full_name, username, pwd_hash, account_role, user_status, raw_pwd))
                 conn.commit()
             except Exception as e:
                 print(f"[Teacher CRUD] Auto create user notice: {e}")
-
-
 
         cache_invalidate("teachers")
         return new_id
@@ -351,6 +354,7 @@ def update_teacher_cm(teacher_id: int, data: Dict[str, Any]):
         conn.commit()
 
         # Update corresponding app_user account
+        old_username = str(data.get("old_username") or "").strip()
         custom_user = str(data.get("account_username") or "").strip()
         default_user = f"gv_{teacher_id:04d}"
         username = custom_user if custom_user else default_user
@@ -359,17 +363,22 @@ def update_teacher_cm(teacher_id: int, data: Dict[str, Any]):
         account_role = data.get("account_role") or role
 
         try:
+            if old_username and old_username != username:
+                cursor.execute("UPDATE app_users SET username = ? WHERE username = ?", (username, old_username))
+                conn.commit()
+
             if raw_pwd:
                 pwd_hash = hash_password(raw_pwd)
                 cursor.execute("""
-                    INSERT INTO app_users (display_name, username, password_hash, role, status)
-                    VALUES (?, ?, ?, ?, ?)
+                    INSERT INTO app_users (display_name, username, password_hash, role, status, plain_password)
+                    VALUES (?, ?, ?, ?, ?, ?)
                     ON CONFLICT(username) DO UPDATE SET 
                         display_name = EXCLUDED.display_name,
                         password_hash = EXCLUDED.password_hash,
                         role = EXCLUDED.role,
-                        status = EXCLUDED.status
-                """, (full_name, username, pwd_hash, account_role, user_status))
+                        status = EXCLUDED.status,
+                        plain_password = EXCLUDED.plain_password
+                """, (full_name, username, pwd_hash, account_role, user_status, raw_pwd))
             else:
                 cursor.execute("""
                     INSERT INTO app_users (display_name, username, password_hash, role, status)

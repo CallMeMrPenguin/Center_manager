@@ -3,9 +3,10 @@ import { RefreshCw } from 'lucide-react';
 import { api } from '../../api';
 import { getLocalDateStr } from '../../utils';
 import { showToast } from '../../components/Toast';
-import { DashboardStats, TodaySessionItem, StudentAlertItem } from './types';
+import { DashboardStats, TodaySessionItem, StudentAlertItem, ActiveClassItem } from './types';
 import { DashboardStatsGrid } from './components/DashboardStatsGrid';
 import { TodaySessionsList } from './components/TodaySessionsList';
+import { ActiveClassesOverview } from './components/ActiveClassesOverview';
 import { DashboardSidebar } from './components/DashboardSidebar';
 
 export default function DashboardPage() {
@@ -18,6 +19,7 @@ export default function DashboardPage() {
     attendanceCompletedCount: 0,
   });
   const [todaySessions, setTodaySessions] = useState<TodaySessionItem[]>([]);
+  const [activeClasses, setActiveClasses] = useState<ActiveClassItem[]>([]);
   const [studentAlerts, setStudentAlerts] = useState<StudentAlertItem[]>([]);
 
   const todayStr = getLocalDateStr();
@@ -97,10 +99,24 @@ export default function DashboardPage() {
         }
       });
 
+      const activeList: ActiveClassItem[] = classes
+        .filter((c: any) => c.status !== 'Đã kết thúc')
+        .map((c: any) => ({
+          id: c.id,
+          class_name: c.class_name,
+          teacher_name: c.teacher_name,
+          grade: c.grade,
+          subject: c.subject,
+          room: c.room,
+          student_count: c.student_count || 0,
+          status: c.status || 'Đang hoạt động',
+        }));
+      setActiveClasses(activeList);
+
       setStats({
         totalStudents: students.filter((s: any) => s.status !== 'Đã nghỉ').length,
         totalTeachers: teachers.length,
-        activeClasses: classes.filter((c: any) => c.status !== 'Đã kết thúc').length,
+        activeClasses: activeList.length,
         todaySessionsCount: allTodaySessions.length,
         attendanceCompletedCount: completedAttendanceCount,
       });
@@ -151,12 +167,13 @@ export default function DashboardPage() {
       {/* 2. Top Stats Overview Grid */}
       <DashboardStatsGrid stats={stats} />
 
-      {/* 3. Main Operational Split (Calendar on Left, Actions on Right) */}
+      {/* 3. Main Operational Split (Calendar & Active Classes on Left, Actions on Right) */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-2 space-y-6">
           <TodaySessionsList sessions={todaySessions} onNavigate={navigateTo} />
+          <ActiveClassesOverview classes={activeClasses} onNavigate={navigateTo} />
         </div>
-        <div>
+        <div className="lg:col-span-1">
           <DashboardSidebar alerts={studentAlerts} onNavigate={navigateTo} />
         </div>
       </div>

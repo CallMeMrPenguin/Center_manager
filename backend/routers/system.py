@@ -353,12 +353,20 @@ def api_download_file(filename: str):
         os.path.join(BASE_DIR, "backend", "temp_compiled", fname)
     ]
 
+    import mimetypes
+    media_type, _ = mimetypes.guess_type(fname)
+    if not media_type:
+        if fname.endswith(".xlsx"): media_type = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        elif fname.endswith(".docx"): media_type = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        elif fname.endswith(".png"): media_type = "image/png"
+        else: media_type = "application/octet-stream"
+
     for candidate in candidates:
         if candidate and os.path.exists(candidate):
             return FileResponse(
                 candidate, 
                 filename=fname, 
-                media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                media_type=media_type
             )
         
     raise HTTPException(status_code=404, detail=f"File '{fname}' not found")

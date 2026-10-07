@@ -63,16 +63,16 @@ export const TodaySessionsList: React.FC<TodaySessionsListProps> = ({ sessions, 
           <span className="text-xs text-slate-500 dark:text-slate-400 mt-1 font-medium">Các buổi học tiếp theo sẽ hiển thị tại đây</span>
         </div>
       ) : (
-        <div className="space-y-2.5 overflow-y-auto max-h-[380px] pr-1">
+        <div className="divide-y divide-slate-100 dark:divide-[#222228] overflow-y-auto max-h-[380px] pr-1">
           {sessions.map((sess) => {
             const timing = getSessionTiming(sess.start_time, sess.duration);
             return (
               <div
                 key={sess.id}
-                className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-xl bg-slate-50 dark:bg-[#1c1c21] border border-slate-300 dark:border-[#27272a] hover:border-blue-500/40 transition"
+                className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 py-3 px-2 rounded-xl hover:bg-slate-50 dark:hover:bg-[#18181f] transition"
               >
                 <div className="flex items-start sm:items-center gap-3">
-                  <div className="px-2.5 py-1 rounded-lg bg-blue-500/10 border border-blue-500/20 text-blue-600 dark:text-blue-400 font-mono text-xs font-black shrink-0">
+                  <div className="px-2.5 py-1 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 font-mono text-xs font-black shrink-0">
                     {sess.start_time}
                   </div>
                   <div>
@@ -80,16 +80,16 @@ export const TodaySessionsList: React.FC<TodaySessionsListProps> = ({ sessions, 
                       <span className="font-extrabold text-slate-900 dark:text-white text-sm">
                         {sess.class_name}
                       </span>
-                      <span className={`text-[10px] font-black px-2 py-0.5 rounded-full border ${timing.badgeCls}`}>
+                      <span className={`text-[10px] font-black px-2 py-0.5 rounded-full ${timing.badgeCls}`}>
                         {timing.text}
                       </span>
                       {sess.isAttendanceRecorded ? (
-                        <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-300 border border-emerald-500/30 flex items-center gap-1">
+                        <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-300 flex items-center gap-1">
                           <CheckCircle size={10} />
                           Đã điểm danh
                         </span>
                       ) : (
-                        <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-300 border border-amber-500/30 flex items-center gap-1">
+                        <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-300 flex items-center gap-1">
                           <AlertCircle size={10} />
                           Chưa điểm danh
                         </span>
@@ -105,7 +105,7 @@ export const TodaySessionsList: React.FC<TodaySessionsListProps> = ({ sessions, 
                 <button
                   type="button"
                   onClick={() => onNavigate('classes', { classId: sess.class_id })}
-                  className="self-end sm:self-auto px-3.5 py-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-600 border border-blue-200 dark:bg-blue-600/20 dark:hover:bg-blue-600/30 dark:text-blue-300 dark:border-blue-500/30 text-xs font-bold transition cursor-pointer shrink-0"
+                  className="self-end sm:self-auto px-3.5 py-1.5 rounded-lg bg-[#5c36f5] hover:bg-[#4d2cd0] text-white text-xs font-bold transition cursor-pointer shrink-0 shadow-sm"
                 >
                   Điểm danh ngay
                 </button>

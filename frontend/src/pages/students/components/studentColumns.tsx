@@ -134,21 +134,4 @@ export const createStudentColumns = (
       );
     },
   },
-  {
-    id: 'actions',
-    header: () => <div className="text-center w-full">Thao Tác</div>,
-    size: 80,
-    cell: ({ row }) => (
-      <div className="flex items-center justify-center">
-          <button
-            type="button"
-            onClick={() => handleOpenEdit(row.original)}
-            className="p-1.5 rounded-xl bg-slate-200 hover:bg-slate-300 dark:bg-white/10 dark:hover:bg-white/20 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white border-0 shadow-2xs hover:shadow-xs transition cursor-pointer"
-            title="Sửa thông tin học sinh"
-          >
-          <Edit3 size={15} />
-        </button>
-      </div>
-    ),
-  },
 ];

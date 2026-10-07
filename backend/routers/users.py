@@ -9,6 +9,10 @@ from database.crud_users import (
     authenticate_user,
     get_role_permissions,
     save_role_permissions,
+    change_user_password,
+    get_roles_list,
+    create_role,
+    delete_role,
 )
 
 router = APIRouter(prefix="/api", tags=["Users & Permissions"])
@@ -33,6 +37,17 @@ class UserUpdate(BaseModel):
 
 class RolePermissionsBatch(BaseModel):
     permissions: List[Dict[str, Any]]
+
+class ChangePasswordRequest(BaseModel):
+    username: str
+    old_password: Optional[str] = ""
+    new_password: str
+    confirm_password: str
+    is_admin: Optional[bool] = False
+
+class RoleCreate(BaseModel):
+    role_name: str
+    description: Optional[str] = ""
 
 from services.auth_security import create_access_token
 
@@ -91,8 +106,51 @@ def sync_students():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-# --- Role Permissions Endpoints ---
+@router.post("/users/change-password")
+def api_change_password(payload: ChangePasswordRequest):
+    try:
+        change_user_password(
+            username=payload.username,
+            old_password=payload.old_password or "",
+            new_password=payload.new_password,
+            confirm_password=payload.confirm_password,
+            is_admin=payload.is_admin or False,
+        )
+        return {"success": True, "message": "Đổi mật khẩu thành công"}
+    except ValueError as ve:
+        raise HTTPException(status_code=400, detail=str(ve))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
+# --- Roles Endpoints ---
+@router.get("/roles")
+def list_roles():
+    try:
+        return get_roles_list()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/roles")
+def add_role(payload: RoleCreate):
+    try:
+        rid = create_role(payload.role_name, payload.description or "")
+        return {"success": True, "id": rid}
+    except ValueError as ve:
+        raise HTTPException(status_code=400, detail=str(ve))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.delete("/roles/{role_name}")
+def remove_role(role_name: str):
+    try:
+        delete_role(role_name)
+        return {"success": True}
+    except ValueError as ve:
+        raise HTTPException(status_code=400, detail=str(ve))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+# --- Role Permissions Endpoints ---
 @router.get("/roles/permissions")
 def list_role_permissions():
     try:

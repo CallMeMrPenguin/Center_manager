@@ -141,7 +141,7 @@ export const ReportsPage: React.FC = () => {
         onChange={(tabId) => handleTabChange(tabId)}
         tabs={[
           { value: 'overview', label: 'Tổng Quan Học Lực' },
-          { value: 'deep', label: 'Thống Kê Sâu' },
+          { value: 'deep', label: 'Phân nhóm và Biến động' },
           { value: 'skills', label: 'Phân Tích Kỹ Năng & Unit' },
           { value: 'benchmark', label: 'So Sánh Giữa Các Lớp' },
         ]}
@@ -184,14 +184,6 @@ export const ReportsPage: React.FC = () => {
             studentRankings={studentRankings}
             sessionRecords={sessionRecords}
             filteredRankings={filteredRankings}
-            selectedDistFilter={selectedDistFilter}
-            setSelectedDistFilter={setSelectedDistFilter}
-            warningAbsentPct={warningAbsentPct}
-            warningConsecutiveAbsent={warningConsecutiveAbsent}
-            warningTrendThreshold={warningTrendThreshold}
-            showWarningSettings={showWarningSettings}
-            setShowWarningSettings={setShowWarningSettings}
-            onUpdateWarningSettings={handleUpdateWarningSettings}
             onSelectRankingStudent={handleSelectRankingStudent}
           />
         ) : (

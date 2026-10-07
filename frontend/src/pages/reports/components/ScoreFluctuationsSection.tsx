@@ -21,8 +21,6 @@ export const ScoreFluctuationsSection: React.FC<ScoreFluctuationsSectionProps> =
   selectedStudentId,
   onSelectRankingStudent,
 }) => {
-  const [isGrowthSectionOpen, setIsGrowthSectionOpen] = useState(false);
-
   const scoreFluctuations = useMemo(() => {
     const rawList = selectedClassId ? studentRankings.filter(r => String(r.class_id) === selectedClassId) : studentRankings;
     if (!rawList || rawList.length === 0) return [];
@@ -225,44 +223,34 @@ export const ScoreFluctuationsSection: React.FC<ScoreFluctuationsSectionProps> =
 
   return (
     <div className="bg-white dark:bg-[#0b0f19] rounded-2xl p-6 shadow-[0_4px_20px_-4px_rgba(15,23,42,0.08),0_2px_4px_-1px_rgba(15,23,42,0.04)] dark:shadow-xl space-y-6 animate-cascade-4">
-      <div onClick={() => setIsGrowthSectionOpen(!isGrowthSectionOpen)} className="flex flex-wrap items-center justify-between gap-4 cursor-pointer select-none pb-2">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-cyan-500/10 flex items-center justify-center text-cyan-500 dark:text-cyan-400 shrink-0">
-            <Activity size={20} />
-          </div>
-          <div>
-            <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider">
-              THEO DÕI BIẾN ĐỘNG & ĐÀ BỨT PHÁ ĐIỂM SỐ
-            </h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400 font-semibold mt-0.5">
-              So sánh mức điểm 3 buổi đầu vào so với 3 buổi học gần nhất của từng học sinh.
-            </p>
-          </div>
-        </div>
-        <div className="p-1.5 rounded-lg bg-slate-200/80 hover:bg-slate-200 dark:bg-[#1c202c] dark:hover:bg-[#252a3a] text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white border-0 shadow-xs hover:shadow-sm transition cursor-pointer flex items-center justify-center">
-          {isGrowthSectionOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+      <div className="flex flex-wrap items-center justify-between gap-4 select-none pb-1">
+        <div>
+          <h3 className="text-base font-black text-slate-900 dark:text-white uppercase tracking-wider">
+            Biến Động Điểm Số
+          </h3>
+          <p className="text-xs text-slate-500 dark:text-slate-400 font-semibold mt-0.5">
+            So sánh mức điểm 3 buổi đầu vào so với 3 buổi học gần nhất của từng học sinh.
+          </p>
         </div>
       </div>
 
-      {isGrowthSectionOpen && (
-        <DataTable
-          tableId="reports-fluctuations-table"
-          exportFilename="bien_dong_diem_so"
-          data={scoreFluctuations}
-          columns={fluctuationColumns}
-          loading={loading}
-          searchPlaceholder="Tìm học sinh theo tên..."
-          emptyMessage="Không có dữ liệu biến động điểm số."
-          pageSize={10}
-          borderless={true}
-          onRowClick={(r: any) => onSelectRankingStudent(r.student_id)}
-          getRowClassName={(row: any) =>
-            String(row.student_id) === String(selectedStudentId)
-              ? '!bg-blue-500/15 dark:!bg-blue-600/25 hover:!bg-blue-500/25 dark:hover:!bg-blue-600/35 font-black ring-1 ring-inset ring-blue-500/50 shadow-inner'
-              : ''
-          }
-        />
-      )}
+      <DataTable
+        tableId="reports-fluctuations-table"
+        exportFilename="bien_dong_diem_so"
+        data={scoreFluctuations}
+        columns={fluctuationColumns}
+        loading={loading}
+        searchPlaceholder="Tìm học sinh theo tên..."
+        emptyMessage="Không có dữ liệu biến động điểm số."
+        pageSize={10}
+        borderless={true}
+        onRowClick={(r: any) => onSelectRankingStudent(r.student_id)}
+        getRowClassName={(row: any) =>
+          String(row.student_id) === String(selectedStudentId)
+            ? '!bg-blue-500/15 dark:!bg-blue-600/25 hover:!bg-blue-500/25 dark:hover:!bg-blue-600/35 font-black ring-1 ring-inset ring-blue-500/50 shadow-inner'
+            : ''
+        }
+      />
     </div>
   );
 };

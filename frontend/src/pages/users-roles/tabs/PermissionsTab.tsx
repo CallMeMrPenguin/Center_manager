@@ -1,8 +1,10 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { Shield, Save, Check, Lock, RotateCcw } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Shield, Save, Check, Lock, Plus, Trash2 } from 'lucide-react';
 import { TAB_DEFINITIONS } from '../../../config/tabs';
 import { RolePermission } from '../types';
-import { ROLES } from '../hooks/useUsersData';
+import { api } from '../../../api';
+import { showToast } from '../../../components/Toast';
+import { useConfirm } from '../../../components/ConfirmDialog';
 
 interface PermissionsTabProps {
   permissions: RolePermission[];
@@ -10,20 +12,54 @@ interface PermissionsTabProps {
   onSave: (updated: RolePermission[]) => void;
 }
 
+interface RoleItem {
+  id?: number;
+  role_name: string;
+  display_name: string;
+  is_system?: number;
+}
+
+const DEFAULT_SYSTEM_ROLES = [
+  'Quản trị viên',
+  'Giáo viên',
+  'Trợ giảng',
+  'Học sinh',
+  'Kế toán',
+];
+
 export const PermissionsTab: React.FC<PermissionsTabProps> = ({
   permissions,
   saving,
   onSave,
 }) => {
-  // Map of permissions: `${role}__${tabId}` -> boolean
+  const confirm = useConfirm();
+  const [roles, setRoles] = useState<string[]>(DEFAULT_SYSTEM_ROLES);
+  const [roleItems, setRoleItems] = useState<RoleItem[]>([]);
+  const [newRoleName, setNewRoleName] = useState('');
   const [localMap, setLocalMap] = useState<Record<string, boolean>>({});
   const [isDirty, setIsDirty] = useState(false);
+
+  const loadRoles = async () => {
+    try {
+      const data = await api.getRoles();
+      if (Array.isArray(data) && data.length > 0) {
+        setRoleItems(data);
+        const names = data.map((r: any) => r.role_name);
+        setRoles(names);
+      }
+    } catch {
+      // Fallback to default system roles
+    }
+  };
+
+  useEffect(() => {
+    loadRoles();
+  }, []);
 
   // Initialize permission matrix from DB or sensible defaults
   useEffect(() => {
     const map: Record<string, boolean> = {};
 
-    // 1. Sensible default permissions for all roles
     TAB_DEFINITIONS.forEach((tab) => {
       // Admin: always true
       map[`Quản trị viên__${tab.id}`] = true;
@@ -41,7 +77,7 @@ export const PermissionsTab: React.FC<PermissionsTabProps> = ({
       map[`Kế toán__${tab.id}`] = accountantAllowed.includes(tab.id);
     });
 
-    // 2. Override with saved DB permissions
+    // Override with saved DB permissions
     permissions.forEach((p) => {
       map[`${p.role}__${p.tab_id}`] = p.can_access === 1;
     });
@@ -51,7 +87,7 @@ export const PermissionsTab: React.FC<PermissionsTabProps> = ({
   }, [permissions]);
 
   const handleToggle = (role: string, tabId: string) => {
-    if (role === 'Quản trị viên') return; // Admin always has full access
+    if (role === 'Quản trị viên') return;
     const key = `${role}__${tabId}`;
     setLocalMap((prev) => ({
       ...prev,
@@ -62,7 +98,7 @@ export const PermissionsTab: React.FC<PermissionsTabProps> = ({
 
   const handleSave = () => {
     const list: RolePermission[] = [];
-    ROLES.forEach((role) => {
+    roles.forEach((role) => {
       TAB_DEFINITIONS.forEach((tab) => {
         const key = `${role}__${tab.id}`;
         list.push({
@@ -76,10 +112,45 @@ export const PermissionsTab: React.FC<PermissionsTabProps> = ({
     setIsDirty(false);
   };
 
+  const handleAddRole = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const clean = newRoleName.trim();
+    if (!clean) return;
+    if (roles.includes(clean)) {
+      showToast('Vai trò này đã tồn tại!', 'warning');
+      return;
+    }
+    try {
+      await api.createRole(clean, clean);
+      showToast(`Đã thêm vai trò "${clean}" thành công!`, 'success');
+      setNewRoleName('');
+      loadRoles();
+    } catch (err: any) {
+      showToast('Không thể tạo vai trò: ' + err.message, 'error');
+    }
+  };
+
+  const handleDeleteRole = async (roleName: string) => {
+    const ok = await confirm({
+      title: 'Xóa vai trò',
+      message: `Bạn có chắc muốn xóa vai trò "${roleName}"? Toàn bộ phân quyền của vai trò này sẽ bị gỡ bỏ.`,
+      confirmText: 'Xóa vai trò',
+      type: 'danger',
+    });
+    if (!ok) return;
+    try {
+      await api.deleteRole(roleName);
+      showToast(`Đã xóa vai trò "${roleName}"!`, 'success');
+      loadRoles();
+    } catch (err: any) {
+      showToast('Không thể xóa: ' + err.message, 'error');
+    }
+  };
+
   return (
     <div className="space-y-4">
       {/* Top Header Card */}
-      <div className="bg-white dark:bg-[#111728] border-0 rounded-2xl p-5 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.06),0_2px_6px_-2px_rgba(0,0,0,0.04)] flex flex-wrap items-center justify-between gap-3">
+      <div className="bg-white dark:bg-[#111728] border-0 rounded-2xl p-5 shadow-sm flex flex-wrap items-center justify-between gap-3">
         <div>
           <div className="flex items-center gap-2">
             <Shield size={18} className="text-blue-600 dark:text-blue-400" />
@@ -107,15 +178,64 @@ export const PermissionsTab: React.FC<PermissionsTabProps> = ({
         </button>
       </div>
 
+      {/* Role Management Card (Add & Delete Roles) */}
+      <div className="bg-white dark:bg-[#111728] border-0 rounded-2xl p-4 shadow-sm space-y-3">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-xs font-bold text-slate-700 dark:text-slate-300">Danh sách vai trò:</span>
+            {roles.map((r) => {
+              const item = roleItems.find((x) => x.role_name === r);
+              const isSystem = item ? item.is_system === 1 : DEFAULT_SYSTEM_ROLES.includes(r);
+              return (
+                <span
+                  key={r}
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-100 dark:bg-white/5 text-slate-800 dark:text-slate-200"
+                >
+                  {isSystem && <Lock size={11} className="text-purple-500" />}
+                  <span>{r}</span>
+                  {!isSystem && (
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteRole(r)}
+                      className="text-slate-400 hover:text-rose-500 transition cursor-pointer p-0.5"
+                      title={`Xóa vai trò ${r}`}
+                    >
+                      <Trash2 size={12} />
+                    </button>
+                  )}
+                </span>
+              );
+            })}
+          </div>
+
+          <form onSubmit={handleAddRole} className="flex items-center gap-2">
+            <input
+              type="text"
+              value={newRoleName}
+              onChange={(e) => setNewRoleName(e.target.value)}
+              placeholder="Tên vai trò mới..."
+              className="bg-slate-50 dark:bg-[#0c0f1e] border border-slate-300 dark:border-[#212c4b] rounded-xl px-3 py-1.5 text-xs text-slate-900 dark:text-white placeholder:text-slate-400 font-bold focus:outline-none focus:border-blue-600"
+            />
+            <button
+              type="submit"
+              className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition cursor-pointer shadow-xs"
+            >
+              <Plus size={13} />
+              <span>Thêm Role</span>
+            </button>
+          </form>
+        </div>
+      </div>
+
       {/* Permission Matrix Table */}
-      <div className="bg-white dark:bg-[#111728] border-0 rounded-2xl overflow-hidden shadow-[0_4px_20px_-4px_rgba(0,0,0,0.06),0_2px_6px_-2px_rgba(0,0,0,0.04)]">
+      <div className="bg-white dark:bg-[#111728] border-0 rounded-2xl overflow-hidden shadow-sm">
         <div className="overflow-x-auto scrollbar-thin">
           <table className="w-full text-left border-collapse select-none">
             <thead>
               <tr className="bg-slate-100 dark:bg-[#161d30] border-b border-slate-200 dark:border-white/10 text-xs font-black uppercase text-slate-900 dark:text-white">
                 <th className="py-3.5 px-4 min-w-[200px]">Tính Năng / Tab</th>
-                {ROLES.map((role) => (
-                  <th key={role} className="py-3.5 px-4 text-center min-w-[140px]">
+                {roles.map((role) => (
+                  <th key={role} className="py-3.5 px-4 text-center min-w-[130px]">
                     <span className="inline-flex items-center gap-1">
                       {role === 'Quản trị viên' && <Lock size={12} className="text-purple-500 dark:text-purple-400" />}
                       <span>{role}</span>
@@ -134,7 +254,6 @@ export const PermissionsTab: React.FC<PermissionsTabProps> = ({
                       idx % 2 === 0 ? 'bg-white dark:bg-[#111728]' : 'bg-slate-50/70 dark:bg-[#141b2e]'
                     } hover:bg-blue-100/70 dark:hover:bg-blue-950/40 transition-colors`}
                   >
-                    {/* Tab Name & Icon */}
                     <td className="py-3 px-4 font-bold text-slate-800 dark:text-slate-200">
                       <div className="flex items-center gap-2.5">
                         <div className="w-7 h-7 rounded-lg bg-slate-100 dark:bg-white/5 flex items-center justify-center text-slate-600 dark:text-slate-400 shrink-0">
@@ -144,8 +263,7 @@ export const PermissionsTab: React.FC<PermissionsTabProps> = ({
                       </div>
                     </td>
 
-                    {/* Checkboxes per Role */}
-                    {ROLES.map((role) => {
+                    {roles.map((role) => {
                       const key = `${role}__${tab.id}`;
                       const isChecked = !!localMap[key];
                       const isAdmin = role === 'Quản trị viên';

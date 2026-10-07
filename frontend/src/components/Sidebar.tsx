@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { ChevronLeft, ChevronRight, Settings as SettingsIcon, FolderOpen, LogOut, User } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Settings as SettingsIcon, FolderOpen, LogOut, User, KeyRound } from 'lucide-react';
 import { TAB_DEFINITIONS } from '../config/tabs';
 import { api } from '../api';
 import { showToast } from './Toast';
 import { AuthUser } from '../utils/authUtils';
 import { Dock, DockItem, DockIcon, DockLabel } from './ui/dock';
+import { ChangePasswordModal } from './ChangePasswordModal';
 
 export const SECTIONS = [
   { id: 'none', label: '' },
@@ -51,6 +52,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   currentUser,
   onLogout,
 }) => {
+  const [changePasswordOpen, setChangePasswordOpen] = useState(false);
   return (
     <aside
       style={{ overscrollBehaviorX: 'contain' }}
@@ -267,6 +269,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
               </button>
             )}
 
+            <button
+              onClick={() => {
+                setProfileOpen(false);
+                setChangePasswordOpen(true);
+              }}
+              className="w-full flex items-center gap-2 px-2.5 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/[0.05] hover:text-slate-900 dark:hover:text-white rounded-xl transition cursor-pointer text-left"
+            >
+              <KeyRound className="h-4 w-4 text-slate-400 shrink-0" />
+              <span>Đổi mật khẩu</span>
+            </button>
+
             {onLogout && (
               <button
                 onClick={() => {
@@ -281,6 +294,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
             )}
           </div>
         )}
+
+        <ChangePasswordModal
+          isOpen={changePasswordOpen}
+          onClose={() => setChangePasswordOpen(false)}
+        />
 
         <div className="flex items-center w-full">
           <button

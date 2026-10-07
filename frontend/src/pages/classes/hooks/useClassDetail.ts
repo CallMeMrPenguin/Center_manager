@@ -297,9 +297,13 @@ export function useClassDetail(selectedClass: ClassItem | null) {
       const recordsToExport = attendanceRecordsRef.current.length > 0 ? attendanceRecordsRef.current : attendanceRecords;
       const res = await api.exportClassExcel(selectedClass.id, attendanceDate, recordsToExport, thresholds);
       if (res && res.filename) {
-        showToast(`Đã xuất file Excel: ${res.filename}`, 'success', 'MỞ FILE', () => {
-          api.openLocalFile(res.filename);
-        });
+        const link = document.createElement('a');
+        link.href = `/api/files/download/${encodeURIComponent(res.filename)}`;
+        link.download = res.filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        showToast(`Đã xuất và tải xuống file Excel: ${res.filename}`, 'success');
       }
     } catch (err: any) {
       showToast('Xuất Excel thất bại: ' + err.message, 'error');
@@ -312,9 +316,13 @@ export function useClassDetail(selectedClass: ClassItem | null) {
       const recordsToExport = attendanceRecordsRef.current.length > 0 ? attendanceRecordsRef.current : attendanceRecords;
       const res = await api.exportClassDocx(selectedClass.id, attendanceDate, recordsToExport);
       if (res && res.filename) {
-        showToast(`Đã xuất file Word: ${res.filename}`, 'success', 'MỞ FILE', () => {
-          api.openLocalFile(res.filename);
-        });
+        const link = document.createElement('a');
+        link.href = `/api/files/download/${encodeURIComponent(res.filename)}`;
+        link.download = res.filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        showToast(`Đã xuất và tải xuống file Word: ${res.filename}`, 'success');
       }
     } catch (err: any) {
       showToast('Xuất Word thất bại: ' + err.message, 'error');

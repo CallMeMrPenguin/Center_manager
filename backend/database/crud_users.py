@@ -9,17 +9,23 @@ def hash_password(password: str) -> str:
     return hashlib.sha256(password.encode("utf-8")).hexdigest()
 
 def get_users() -> List[Dict[str, Any]]:
-    """Returns list of app_users without revealing password hash."""
+    """Returns list of app_users with plain_password for admin view."""
     conn = get_connection()
     try:
         cursor = conn.cursor()
         cursor.execute("""
-            SELECT id, display_name, username, role, status, created_at, last_login
+            SELECT id, display_name, username, role, status, created_at, last_login, plain_password
             FROM app_users
             ORDER BY id ASC
         """)
         rows = cursor.fetchall()
-        return [dict(r) for r in rows]
+        result = []
+        for r in rows:
+            d = dict(r)
+            if not d.get("plain_password"):
+                d["plain_password"] = "admin123" if (d.get("username") or "").lower() == "admin" else "123456"
+            result.append(d)
+        return result
     finally:
         conn.close()
 
@@ -171,9 +177,9 @@ def update_user(user_id: int, data: Dict[str, Any]):
             pwd_hash = hash_password(raw_password.strip())
             cursor.execute("""
                 UPDATE app_users
-                SET display_name = ?, username = ?, role = ?, status = ?, password_hash = ?
+                SET display_name = ?, username = ?, role = ?, status = ?, password_hash = ?, plain_password = ?
                 WHERE id = ?
-            """, (display_name, username, role, status, pwd_hash, user_id))
+            """, (display_name, username, role, status, pwd_hash, raw_password.strip(), user_id))
         else:
             cursor.execute("""
                 UPDATE app_users
@@ -287,6 +293,79 @@ def save_role_permissions(permissions: List[Dict[str, Any]]):
                 VALUES (?, ?, ?)
                 ON CONFLICT(role, tab_id) DO UPDATE SET can_access = EXCLUDED.can_access
             """, batch_data)
+        conn.commit()
+    finally:
+        conn.close()
+
+def change_user_password(username: str, old_password: str, new_password: str, confirm_password: str, is_admin: bool = False):
+    clean_username = username.strip()
+    if new_password != confirm_password:
+        raise ValueError("Mật khẩu mới và xác nhận mật khẩu không khớp")
+    if len(new_password) < 4:
+        raise ValueError("Mật khẩu mới phải có ít nhất 4 ký tự")
+
+    conn = get_connection()
+    try:
+        cursor = conn.cursor()
+        cursor.execute("SELECT id, username, password_hash, plain_password FROM app_users WHERE LOWER(username) = LOWER(?)", (clean_username,))
+        row = cursor.fetchone()
+        if not row:
+            raise ValueError(f"Tài khoản '{clean_username}' không tồn tại")
+        user = dict(row)
+
+        if not is_admin:
+            if not old_password:
+                raise ValueError("Vui lòng nhập mật khẩu cũ")
+            old_hash = hash_password(old_password)
+            if old_hash != user.get("password_hash") and old_password != (user.get("plain_password") or ""):
+                raise ValueError("Mật khẩu cũ không chính xác")
+
+        new_hash = hash_password(new_password)
+        cursor.execute("UPDATE app_users SET password_hash = ?, plain_password = ? WHERE id = ?", (new_hash, new_password, user["id"]))
+        conn.commit()
+    finally:
+        conn.close()
+
+def get_roles_list() -> List[Dict[str, Any]]:
+    conn = get_connection()
+    try:
+        cursor = conn.cursor()
+        cursor.execute("SELECT id, role_name, description, is_system FROM app_roles ORDER BY id ASC")
+        rows = cursor.fetchall()
+        if rows:
+            return [dict(r) for r in rows]
+        return [
+            {"id": 1, "role_name": "Quản trị viên", "description": "Quản trị toàn quyền", "is_system": 1},
+            {"id": 2, "role_name": "Giáo viên", "description": "Giảng dạy & chấm điểm", "is_system": 1},
+            {"id": 3, "role_name": "Trợ giảng", "description": "Điểm danh & hỗ trợ lớp", "is_system": 1},
+            {"id": 4, "role_name": "Học sinh", "description": "Xem kết quả & làm bài", "is_system": 1},
+            {"id": 5, "role_name": "Kế toán", "description": "Học phí & tài chính", "is_system": 1},
+        ]
+    finally:
+        conn.close()
+
+def create_role(role_name: str, description: str = "") -> int:
+    clean_name = role_name.strip()
+    if not clean_name:
+        raise ValueError("Tên vai trò không được để trống")
+    conn = get_connection()
+    try:
+        cursor = conn.cursor()
+        cursor.execute("INSERT INTO app_roles (role_name, description, is_system) VALUES (?, ?, 0)", (clean_name, description.strip()))
+        conn.commit()
+        return cursor.lastrowid
+    finally:
+        conn.close()
+
+def delete_role(role_name: str):
+    clean_name = role_name.strip()
+    if clean_name in ("Quản trị viên", "Giáo viên", "Trợ giảng", "Học sinh", "Kế toán"):
+        raise ValueError("Không thể xóa vai trò mặc định của hệ thống")
+    conn = get_connection()
+    try:
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM app_roles WHERE role_name = ?", (clean_name,))
+        cursor.execute("DELETE FROM role_permissions WHERE role = ?", (clean_name,))
         conn.commit()
     finally:
         conn.close()

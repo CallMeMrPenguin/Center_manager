@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   X, User, Phone, Home, GraduationCap, Calendar, 
-  KeyRound, Shield, Trash2, CheckCircle2, AlertCircle, Sparkles
+  KeyRound, Shield, Trash2, CheckCircle2, AlertCircle, Sparkles, Eye, EyeOff
 } from 'lucide-react';
 import { VietnameseInput } from '../../../components/VietnameseInput';
 import { CustomDatePicker } from '../../../components/CustomDatePicker';
@@ -29,6 +29,7 @@ export const StudentModal: React.FC<StudentModalProps> = ({
   onDelete,
   highlightMissingFields = false,
 }) => {
+  const [showPassword, setShowPassword] = useState(false);
   if (!isOpen) return null;
 
   return (
@@ -251,13 +252,23 @@ export const StudentModal: React.FC<StudentModalProps> = ({
                 <label className="block text-[11px] font-bold text-slate-700 mb-1">
                   {editingStudent ? 'Mật khẩu mới (Nếu đổi):' : 'Mật khẩu khởi tạo:'}
                 </label>
-                <input
-                  type="password"
-                  value={formData.account_password || ''}
-                  onChange={(e) => setFormData((p) => ({ ...p, account_password: e.target.value }))}
-                  placeholder={editingStudent ? 'Để trống nếu giữ nguyên' : 'Mặc định: 123456'}
-                  className="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2 text-xs text-slate-900 font-mono font-bold focus:outline-none focus:border-blue-600"
-                />
+                <div className="relative">
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    value={formData.account_password || ''}
+                    onChange={(e) => setFormData((p) => ({ ...p, account_password: e.target.value }))}
+                    placeholder={editingStudent ? 'Để trống nếu giữ nguyên' : 'Mặc định: 123456'}
+                    className="w-full bg-white border border-slate-300 rounded-xl pl-3.5 pr-9 py-2 text-xs text-slate-900 font-mono font-bold focus:outline-none focus:border-blue-600"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition cursor-pointer"
+                    title={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
+                  >
+                    {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
+                  </button>
+                </div>
               </div>
 
               <div>

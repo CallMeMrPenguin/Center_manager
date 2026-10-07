@@ -1433,8 +1433,8 @@ export function DataTable<TData>({
 
                         {/* Expanded sub-row */}
                         {row.getIsExpanded() && renderSubComponent && (
-                          <tr className="bg-slate-50 dark:bg-[#141417] border-b border-slate-200 dark:border-[#27272a]">
-                            <td colSpan={row.getVisibleCells().length} className="px-5 py-4">
+                          <tr className="bg-slate-50/60 dark:bg-[#0c1020]/90 border-b border-slate-200 dark:border-[#212c4b]">
+                            <td colSpan={row.getVisibleCells().length} className="p-0">
                               {renderSubComponent({ row })}
                             </td>
                           </tr>

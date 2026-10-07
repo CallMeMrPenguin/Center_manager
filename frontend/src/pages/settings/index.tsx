@@ -8,6 +8,7 @@ import { SystemDiagnosticsCard } from './components/SystemDiagnosticsCard';
 import { GradeTypesCard } from './components/GradeTypesCard';
 import { SystemUpdateCard } from './components/SystemUpdateCard';
 import { ProfilesListCard } from './components/ProfilesListCard';
+import { DebugSettingsCard } from './components/DebugSettingsCard';
 
 export default function Settings() {
   const confirm = useConfirm();
@@ -188,6 +189,7 @@ export default function Settings() {
         {/* Left Column: Diagnostics, Appearance, and Grade Types Config */}
         <div className="lg:col-span-2 flex flex-col gap-6">
           <AppearanceSettingsCard />
+          <DebugSettingsCard />
           <SystemDiagnosticsCard
             systemCheck={systemCheck}
             loadingDiagnostics={loadingDiagnostics}

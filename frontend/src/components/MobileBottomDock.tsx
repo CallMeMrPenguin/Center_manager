@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { TAB_DEFINITIONS } from '../config/tabs';
 import { SECTIONS } from './Sidebar';
+import { isRealMobileDevice } from '../utils/deviceUtils';
 
 interface MobileBottomDockProps {
   activeTab: string;
@@ -33,6 +34,8 @@ export const MobileBottomDock: React.FC<MobileBottomDockProps> = ({
   setActiveTab,
   orderedTabIds,
 }) => {
+  if (!isRealMobileDevice()) return null;
+
   const containerRef = useRef<HTMLDivElement>(null);
   const [isIdle, setIsIdle] = useState(false);
   const idleTimerRef = useRef<NodeJS.Timeout | null>(null);

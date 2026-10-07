@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { LogOut, ChevronDown } from 'lucide-react';
 import { TAB_DEFINITIONS } from '../config/tabs';
 import { AuthUser } from '../utils/authUtils';
+import { isRealMobileDevice } from '../utils/deviceUtils';
 
 interface MobileTopBarProps {
   activeTab: string;
@@ -16,6 +17,8 @@ export const MobileTopBar: React.FC<MobileTopBarProps> = ({
 }) => {
   const [profileOpen, setProfileOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
+
+  if (!isRealMobileDevice()) return null;
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {

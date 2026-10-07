@@ -4,6 +4,7 @@ export interface AppUser {
   username: string;
   role: string;
   status: 'Hoạt động' | 'Tạm khóa' | string;
+  plain_password?: string;
   created_at?: string;
   last_login?: string | null;
 }

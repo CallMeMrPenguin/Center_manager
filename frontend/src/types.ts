@@ -107,6 +107,7 @@ export interface Student {
   notes?: string;
   account_username?: string;
   account_password?: string;
+  account_plain_password?: string;
   account_status?: string;
   account_role?: string;
   account_last_login?: string;
@@ -121,6 +122,7 @@ export interface TeacherCM {
   notes?: string;
   account_username?: string;
   account_password?: string;
+  account_plain_password?: string;
   account_status?: string;
   account_role?: string;
   account_last_login?: string;

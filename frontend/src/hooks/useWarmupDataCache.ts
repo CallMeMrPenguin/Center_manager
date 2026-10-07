@@ -3,55 +3,84 @@ import { api } from '../api';
 import { AuthUser } from '../utils/authUtils';
 
 /**
- * Background data prefetcher & cache warmup hook.
- * Pre-populates memory cache in parallel on app startup, ensuring 0ms instant tab switching.
+ * High-performance background data prefetcher & progressive cache warmup hook.
+ * 
+ * Instead of firing 20 concurrent requests at startup (which stalls the event loop and drops frames),
+ * it schedules staged non-blocking requests during browser idle time (requestIdleCallback)
+ * after initial UI hydration has settled.
  */
 export function useWarmupDataCache(currentUser: AuthUser | null) {
   useEffect(() => {
     if (!currentUser) return;
 
     const isStudent = currentUser.role === 'student';
+    let isCancelled = false;
+    const timers: Array<ReturnType<typeof setTimeout>> = [];
+    const idleCallbacks: number[] = [];
 
-    // Warm up core datasets in non-blocking background threads
-    const warmup = async () => {
-      try {
-        if (isStudent) {
-          // Student role warmup
-          await Promise.allSettled([
-            api.getAssignments(),
-          ]);
+    const runIdle = (task: () => Promise<any>, delayMs: number) => {
+      const t = setTimeout(() => {
+        if (isCancelled) return;
+        if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+          const id = (window as any).requestIdleCallback(
+            async () => {
+              if (!isCancelled) {
+                try {
+                  await task();
+                } catch {}
+              }
+            },
+            { timeout: 3000 }
+          );
+          idleCallbacks.push(id);
         } else {
-          // Teacher / Admin role warmup
-          const results = await Promise.allSettled([
-            api.getClasses(),
-            api.getStudents(),
-            api.getTeachersCM(),
-            api.getCourses(),
-            api.getSettings(),
-            api.getActiveGrades(),
-            api.getUnitConfig(),
-            api.getAssignments(),
-          ]);
-
-          // Preload active class details so clicking into any class is 0ms instant even on remote server
-          const classResult = results[0];
-          if (classResult.status === 'fulfilled' && Array.isArray(classResult.value)) {
-            const activeClasses = classResult.value.slice(0, 6);
-            await Promise.allSettled(
-              activeClasses.flatMap((cls: any) => [
-                api.getClassStudents(cls.id),
-                api.getClassWeeklySchedule(cls.id).catch(() => []),
-              ])
-            );
-          }
+          task().catch(() => {});
         }
-      } catch (err) {
-        console.warn('Background cache warmup notice:', err);
-      }
+      }, delayMs);
+      timers.push(t);
     };
 
-    // Trigger immediately to populate cache
-    const timer = setTimeout(warmup, 50);
-    return () => clearTimeout(timer);
+    if (isStudent) {
+      // Student role: lightweight preload of assignments & results
+      runIdle(async () => {
+        await api.getAssignments();
+      }, 800);
+    } else {
+      // Teacher / Admin: 3-stage progressive warmup
+
+      // Stage 1 (800ms): Lightweight core configs
+      runIdle(async () => {
+        await Promise.allSettled([
+          api.getSettings(),
+          api.getActiveGrades(),
+          api.getClasses(),
+        ]);
+      }, 800);
+
+      // Stage 2 (2200ms): Courses & Teachers
+      runIdle(async () => {
+        await Promise.allSettled([
+          api.getCourses(),
+          api.getTeachersCM(),
+          api.getUnitConfig(),
+        ]);
+      }, 2200);
+
+      // Stage 3 (4000ms): Students & Assignments
+      runIdle(async () => {
+        await Promise.allSettled([
+          api.getStudents(),
+          api.getAssignments(),
+        ]);
+      }, 4000);
+    }
+
+    return () => {
+      isCancelled = true;
+      timers.forEach((t) => clearTimeout(t));
+      if (typeof window !== 'undefined' && 'cancelIdleCallback' in window) {
+        idleCallbacks.forEach((id) => (window as any).cancelIdleCallback(id));
+      }
+    };
   }, [currentUser]);
 }

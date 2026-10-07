@@ -25,3 +25,14 @@ export interface StudentAlertItem {
   issue: string;
   severity: 'high' | 'medium';
 }
+
+export interface ActiveClassItem {
+  id: number;
+  class_name: string;
+  teacher_name?: string;
+  grade?: string;
+  subject?: string;
+  room?: string;
+  student_count?: number;
+  status: string;
+}

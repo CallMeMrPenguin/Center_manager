@@ -22,7 +22,6 @@ export const SmartGroupingSection: React.FC<SmartGroupingSectionProps> = ({
   selectedClassId,
   onSelectRankingStudent,
 }) => {
-  const [isGroupingSectionOpen, setIsGroupingSectionOpen] = useState(false);
   const [groupingScope, setGroupingScope] = useState<'current' | 'grade' | 'all'>('current');
   const [groupingGradeFilter, setGroupingGradeFilter] = useState('');
   const [groupingMode, setGroupingMode] = useState<'tier' | 'kmeans'>('tier');
@@ -152,29 +151,18 @@ export const SmartGroupingSection: React.FC<SmartGroupingSectionProps> = ({
   return (
     <div className="bg-white dark:bg-[#0b0f19] rounded-2xl p-6 shadow-[0_4px_20px_-4px_rgba(15,23,42,0.08),0_2px_4px_-1px_rgba(15,23,42,0.04)] dark:shadow-xl space-y-6 animate-cascade-3">
       {/* Header Bar */}
-      <div onClick={() => setIsGroupingSectionOpen(!isGroupingSectionOpen)} className="flex flex-wrap items-center justify-between gap-4 cursor-pointer select-none pb-2">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-500 dark:text-purple-400 shrink-0">
-            <FolderTree size={20} />
-          </div>
-          <div>
-            <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
-              GỢI Ý PHÂN NHÓM HỌC TẬP THÔNG MINH
-            </h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400 font-semibold mt-0.5">
-              Tự động chia học sinh thành các nhóm năng lực để giảng dạy phân hóa và giao bài tập phù hợp.
-            </p>
-          </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="p-1.5 rounded-lg bg-slate-200/80 hover:bg-slate-200 dark:bg-[#1c202c] dark:hover:bg-[#252a3a] text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white border-0 shadow-xs hover:shadow-sm transition cursor-pointer flex items-center justify-center">
-            {isGroupingSectionOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-          </div>
+      <div className="flex flex-wrap items-center justify-between gap-4 select-none pb-1">
+        <div>
+          <h3 className="text-base font-black text-slate-900 dark:text-white uppercase tracking-wider">
+            Phân Nhóm Thông Minh
+          </h3>
+          <p className="text-xs text-slate-500 dark:text-slate-400 font-semibold mt-0.5">
+            Tự động chia học sinh thành các nhóm năng lực để giảng dạy phân hóa và giao bài tập phù hợp.
+          </p>
         </div>
       </div>
 
-      {isGroupingSectionOpen && (
-        <div className="space-y-6">
+      <div className="space-y-6">
           {/* Scope, Algorithm & Export Toolbar */}
           <div className="flex flex-wrap items-center justify-between gap-4 bg-slate-50 dark:bg-[#0e1322] p-4 rounded-xl">
             <div className="flex flex-wrap items-center gap-4">
@@ -264,7 +252,6 @@ export const SmartGroupingSection: React.FC<SmartGroupingSectionProps> = ({
             ))}
           </div>
         </div>
-      )}
     </div>
   );
 };

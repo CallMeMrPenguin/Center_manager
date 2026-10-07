@@ -54,6 +54,11 @@ class TeacherCMPayload(BaseModel):
     date_of_birth: Optional[str] = None
     phone: Optional[str] = None
     notes: Optional[str] = None
+    account_username: Optional[str] = None
+    account_password: Optional[str] = None
+    account_role: Optional[str] = None
+    account_status: Optional[str] = None
+    old_username: Optional[str] = None
 
 class ClassPayload(BaseModel):
     class_name: str

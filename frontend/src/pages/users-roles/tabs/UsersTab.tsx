@@ -1,6 +1,6 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
-import { Edit3, Plus, Shield, User, CheckCircle2, Lock, UserPlus, RefreshCw } from 'lucide-react';
+import { Edit3, Plus, Shield, User, CheckCircle2, Lock, UserPlus, RefreshCw, Eye, EyeOff } from 'lucide-react';
 import { DataTable } from '../../../components/DataTable';
 import { AppUser } from '../types';
 
@@ -21,6 +21,7 @@ export const UsersTab: React.FC<UsersTabProps> = ({
   onEditUser,
   onOpenCreateModal,
 }) => {
+  const [visiblePasswords, setVisiblePasswords] = useState<Record<number, boolean>>({});
 
   const columns = useMemo<ColumnDef<AppUser>[]>(
     () => [
@@ -46,6 +47,30 @@ export const UsersTab: React.FC<UsersTabProps> = ({
             @{info.getValue<string>()}
           </span>
         ),
+      },
+      {
+        id: 'password',
+        header: 'Mật Khẩu',
+        cell: ({ row }) => {
+          const u = row.original;
+          const isVisible = !!visiblePasswords[u.id];
+          const pwd = u.plain_password || '123456';
+          return (
+            <div className="flex items-center gap-1.5 font-mono text-xs">
+              <span className="font-bold text-slate-800 dark:text-slate-200">
+                {isVisible ? pwd : '••••••'}
+              </span>
+              <button
+                type="button"
+                onClick={() => setVisiblePasswords((prev) => ({ ...prev, [u.id]: !prev[u.id] }))}
+                className="p-1 rounded text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition cursor-pointer"
+                title={isVisible ? 'Ẩn mật khẩu' : 'Xem mật khẩu'}
+              >
+                {isVisible ? <EyeOff size={13} /> : <Eye size={13} />}
+              </button>
+            </div>
+          );
+        },
       },
       {
         accessorKey: 'role',

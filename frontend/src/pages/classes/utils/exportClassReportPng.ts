@@ -362,7 +362,5 @@ export async function exportClassReportPng({
   }
 
   const clipMsg = clipboardSuccess ? ' và đã lưu vào bộ nhớ tạm (Ctrl+V để dán)' : '';
-  showToast(`Đã xuất ảnh PNG${clipMsg}: ${savedName}`, 'success', 'MỞ ẢNH', () => {
-    api.openLocalFile(savedName);
-  });
+  showToast(`Đã xuất và tải xuống ảnh PNG${clipMsg}: ${savedName}`, 'success');
 }

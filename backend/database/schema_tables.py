@@ -363,11 +363,41 @@ def create_all_tables(cursor: sqlite3.Cursor):
         role TEXT NOT NULL DEFAULT 'Giáo viên',
         status TEXT CHECK(status IN ('Hoạt động', 'Tạm khóa')) DEFAULT 'Hoạt động',
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        last_login TIMESTAMP DEFAULT NULL
+        last_login TIMESTAMP DEFAULT NULL,
+        plain_password TEXT DEFAULT NULL
     )
     """)
 
-    # 27. Role Permissions table
+    try:
+        cursor.execute("ALTER TABLE app_users ADD COLUMN plain_password TEXT DEFAULT NULL;")
+    except Exception:
+        pass
+
+    # 27. App Roles & Permissions table
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS app_roles (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        role_name TEXT UNIQUE NOT NULL,
+        description TEXT DEFAULT '',
+        is_system INTEGER DEFAULT 0
+    )
+    """)
+    try:
+        cursor.execute("SELECT COUNT(*) FROM app_roles")
+        if cursor.fetchone()[0] == 0:
+            cursor.executemany("""
+                INSERT OR IGNORE INTO app_roles (role_name, description, is_system)
+                VALUES (?, ?, 1)
+            """, [
+                ("Quản trị viên", "Quản trị toàn quyền", 1),
+                ("Giáo viên", "Giảng dạy & chấm điểm", 1),
+                ("Trợ giảng", "Điểm danh & hỗ trợ lớp", 1),
+                ("Học sinh", "Xem kết quả & làm bài", 1),
+                ("Kế toán", "Học phí & tài chính", 1),
+            ])
+    except Exception:
+        pass
+
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS role_permissions (
         id INTEGER PRIMARY KEY AUTOINCREMENT,

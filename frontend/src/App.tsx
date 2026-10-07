@@ -12,6 +12,8 @@ import { AuthUser, getCurrentUser, clearAuthUser } from './utils/authUtils';
 import { useAutoDeploymentRefresh } from './hooks/useAutoDeploymentRefresh';
 import { useWarmupDataCache } from './hooks/useWarmupDataCache';
 import { ThemeProvider } from './context/ThemeContext';
+import { FpsOverlay } from './components/FpsOverlay';
+import { isRealMobileDevice } from './utils/deviceUtils';
 
 function AppContent() {
   // Auto-detect and reload on new deployment
@@ -203,8 +205,13 @@ function AppContent() {
     ? TAB_DEFINITIONS.filter((t) => t.id === 'assignments' || t.id === 'results')
     : TAB_DEFINITIONS;
 
+  const isMobile = isRealMobileDevice();
+
   return (
     <div className="relative flex flex-col h-full w-full bg-[#f1f5f9] dark:bg-[#09090b] text-slate-900 dark:text-slate-50 overflow-hidden font-sans select-none">
+      {/* Real-time FPS Debug Counter Overlay */}
+      <FpsOverlay />
+
       {/* GLOBAL VIEWPORT NAVIGATION ARROW INDICATOR (SÁT CẠNH MÀN HÌNH CHUẨN XÁC) */}
       <AnimatePresence>
         {navIndicator === 'back' && (
@@ -241,8 +248,8 @@ function AppContent() {
       />
 
       <div className="relative flex flex-row flex-1 overflow-hidden z-10 w-full min-w-0">
-        {/* DESKTOP SIDEBAR NAVIGATION (HIDDEN ON MOBILE) */}
-        <div className="hidden md:flex h-full shrink-0">
+        {/* DESKTOP SIDEBAR NAVIGATION (ALWAYS ON DESKTOP, HIDDEN ON REAL MOBILE) */}
+        <div className={`${isMobile ? 'hidden md:flex' : 'flex'} h-full shrink-0`}>
           <Sidebar
             isSidebarExpanded={isSidebarExpanded}
             toggleSidebar={toggleSidebar}
@@ -305,7 +312,7 @@ function AppContent() {
       />
 
       {/* STATUS BAR (DESKTOP ONLY) */}
-      <footer className="hidden md:flex h-7 sm:h-8 bg-white dark:bg-[#06070a] items-center justify-between px-3 sm:px-6 text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 select-none shrink-0 font-semibold z-10 border-t border-slate-200 dark:border-white/[0.04]">
+      <footer className={`${isMobile ? 'hidden md:flex' : 'flex'} h-7 sm:h-8 bg-white dark:bg-[#06070a] items-center justify-between px-3 sm:px-6 text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 select-none shrink-0 font-semibold z-10 border-t border-slate-200 dark:border-white/[0.04]`}>
         <div className="flex items-center gap-1.5 sm:gap-2">
           <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block shrink-0" />
           <span className="hidden sm:inline text-slate-500 dark:text-slate-400">Center Manager Desktop</span>

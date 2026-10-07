@@ -96,7 +96,10 @@ export function TeachersPage() {
     }
     try {
       if (editingTeacher?.id) {
-        await api.updateTeacherCM(editingTeacher.id, formData);
+        await api.updateTeacherCM(editingTeacher.id, {
+          ...formData,
+          old_username: editingTeacher.account_username || `gv_${String(editingTeacher.id).padStart(4, '0')}`,
+        });
         showToast('Đã cập nhật thông tin và tài khoản giáo viên!', 'success');
       } else {
         await api.createTeacherCM(formData);
@@ -255,24 +258,7 @@ export function TeachersPage() {
         );
       },
     },
-    {
-      id: 'actions',
-      header: () => <div className="text-center w-full">Thao Tác</div>,
-      size: 80,
-      cell: ({ row }) => (
-        <div className="flex items-center justify-center">
-          <button
-            type="button"
-            onClick={() => handleOpenEdit(row.original)}
-            className="p-1.5 rounded-xl bg-slate-200 hover:bg-slate-300 dark:bg-white/10 dark:hover:bg-white/20 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white border-0 shadow-2xs hover:shadow-xs transition cursor-pointer"
-            title="Sửa thông tin giáo viên"
-          >
-            <Edit3 size={15} />
-          </button>
-        </div>
-      ),
-    },
-  ], [handleOpenEdit]);
+  ], []);
 
   const teacherCount = teachers.filter((t) => t.role === 'Giáo viên').length;
   const assistantCount = teachers.filter((t) => t.role === 'Trợ giảng').length;
