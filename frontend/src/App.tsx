@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Database, ChevronLeft, ChevronRight } from 'lucide-react';
 import { TAB_DEFINITIONS } from './config/tabs';
 import { Sidebar } from './components/Sidebar';
@@ -204,6 +205,34 @@ function AppContent() {
 
   return (
     <div className="relative flex flex-col h-full w-full bg-[#f1f5f9] dark:bg-[#09090b] text-slate-900 dark:text-slate-50 overflow-hidden font-sans select-none">
+      {/* GLOBAL VIEWPORT NAVIGATION ARROW INDICATOR (SÁT CẠNH MÀN HÌNH CHUẨN XÁC) */}
+      <AnimatePresence>
+        {navIndicator === 'back' && (
+          <motion.div
+            initial={{ opacity: 0, x: -16, scale: 0.8 }}
+            animate={{ opacity: 1, x: 0, scale: 1 }}
+            exit={{ opacity: 0, x: -16, scale: 0.8 }}
+            transition={{ duration: 0.18, ease: 'easeOut' }}
+            className="fixed left-3 md:left-68 top-1/2 -translate-y-1/2 z-[9999] flex items-center justify-center w-11 h-11 rounded-full bg-white/95 dark:bg-[#121626]/95 text-blue-600 dark:text-blue-400 shadow-2xl border border-slate-200/90 dark:border-white/10 ring-2 ring-blue-500/25 pointer-events-none"
+            title="Quay lại tab trước"
+          >
+            <ChevronLeft size={24} strokeWidth={2.8} />
+          </motion.div>
+        )}
+        {navIndicator === 'forward' && (
+          <motion.div
+            initial={{ opacity: 0, x: 16, scale: 0.8 }}
+            animate={{ opacity: 1, x: 0, scale: 1 }}
+            exit={{ opacity: 0, x: 16, scale: 0.8 }}
+            transition={{ duration: 0.18, ease: 'easeOut' }}
+            className="fixed right-3 md:right-5 top-1/2 -translate-y-1/2 z-[9999] flex items-center justify-center w-11 h-11 rounded-full bg-white/95 dark:bg-[#121626]/95 text-blue-600 dark:text-blue-400 shadow-2xl border border-slate-200/90 dark:border-white/10 ring-2 ring-blue-500/25 pointer-events-none"
+            title="Tiến tới tab sau"
+          >
+            <ChevronRight size={24} strokeWidth={2.8} />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* MOBILE TOP APP BAR (LOGO & PROFILE MENU) */}
       <MobileTopBar
         activeTab={activeTab}
@@ -236,23 +265,6 @@ function AppContent() {
         {/* MAIN BODY SKELETON */}
         <div className="flex-1 flex flex-col overflow-hidden bg-transparent w-full min-w-0">
           <main className="flex-1 overflow-hidden bg-[#f1f5f9] dark:bg-[#09090b] relative w-full min-w-0 pb-0">
-            {/* FLUSH MARGIN NAVIGATION ARROW INDICATOR (SÁT LỀ TAB) */}
-            {navIndicator === 'back' && (
-              <div
-                className="absolute left-2.5 top-1/2 -translate-y-1/2 z-50 flex items-center justify-center w-10 h-10 rounded-full bg-white/95 dark:bg-[#181a20]/95 text-blue-600 dark:text-blue-400 shadow-xl border-0 ring-1 ring-black/5 dark:ring-white/10 pointer-events-none transition-all duration-200 animate-in fade-in zoom-in-90"
-                title="Quay lại tab trước"
-              >
-                <ChevronLeft size={22} strokeWidth={2.8} />
-              </div>
-            )}
-            {navIndicator === 'forward' && (
-              <div
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 z-50 flex items-center justify-center w-10 h-10 rounded-full bg-white/95 dark:bg-[#181a20]/95 text-blue-600 dark:text-blue-400 shadow-xl border-0 ring-1 ring-black/5 dark:ring-white/10 pointer-events-none transition-all duration-200 animate-in fade-in zoom-in-90"
-                title="Tiến tới tab sau"
-              >
-                <ChevronRight size={22} strokeWidth={2.8} />
-              </div>
-            )}
             {visibleTabs.map((tab) => {
               const isActive = activeTab === tab.id;
               const isVisited = visitedTabIds.has(tab.id);
