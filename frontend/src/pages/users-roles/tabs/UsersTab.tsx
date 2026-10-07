@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
-import { Edit3, Plus, CheckCircle2, Lock, RefreshCw, Eye, EyeOff, Users, GraduationCap, Filter } from 'lucide-react';
+import { Edit3, Plus, Eye, EyeOff } from 'lucide-react';
 import { DataTable } from '../../../components/DataTable';
 import { CustomSelect, SelectOption } from '../../../components/CustomSelect';
 import { SegmentedControl } from '../../../components/SegmentedControl';
@@ -9,8 +9,6 @@ import { AppUser } from '../types';
 interface UsersTabProps {
   users: AppUser[];
   loading: boolean;
-  syncing?: boolean;
-  onSyncStudents?: () => void;
   onEditUser: (user: AppUser) => void;
   onOpenCreateModal: () => void;
 }
@@ -18,8 +16,6 @@ interface UsersTabProps {
 export const UsersTab: React.FC<UsersTabProps> = ({
   users,
   loading,
-  syncing = false,
-  onSyncStudents,
   onEditUser,
   onOpenCreateModal,
 }) => {
@@ -28,7 +24,7 @@ export const UsersTab: React.FC<UsersTabProps> = ({
   const [selectedGrade, setSelectedGrade] = useState<string>('all');
   const [selectedClass, setSelectedClass] = useState<string>('all');
 
-  // Split users into Staff/Teachers vs Students
+  // Split users into Staff vs Students
   const staffUsers = useMemo(() => {
     return users.filter(
       (u) => u.role !== 'Học sinh' && !u.username.toLowerCase().startsWith('hs_')
@@ -134,20 +130,20 @@ export const UsersTab: React.FC<UsersTabProps> = ({
         header: 'Vai Trò',
         cell: (info) => {
           const role = info.getValue<string>();
-          let badgeClass = 'bg-slate-100 text-slate-800 border-slate-200 dark:bg-slate-500/20 dark:text-slate-300 dark:border-slate-500/30';
+          let badgeClass = 'bg-slate-100 text-slate-800 dark:bg-slate-500/20 dark:text-slate-300';
           if (role === 'Quản trị viên') {
-            badgeClass = 'bg-purple-100 text-purple-800 border-purple-200 dark:bg-purple-500/20 dark:text-purple-300 dark:border-purple-500/30';
+            badgeClass = 'bg-purple-100 text-purple-800 dark:bg-purple-500/20 dark:text-purple-300';
           } else if (role === 'Giáo viên') {
-            badgeClass = 'bg-indigo-100 text-indigo-800 border-indigo-200 dark:bg-indigo-500/20 dark:text-indigo-300 dark:border-indigo-500/30';
+            badgeClass = 'bg-indigo-100 text-indigo-800 dark:bg-indigo-500/20 dark:text-indigo-300';
           } else if (role === 'Trợ giảng') {
-            badgeClass = 'bg-sky-100 text-sky-800 border-sky-200 dark:bg-sky-500/20 dark:text-sky-300 dark:border-sky-500/30';
+            badgeClass = 'bg-sky-100 text-sky-800 dark:bg-sky-500/20 dark:text-sky-300';
           } else if (role === 'Kế toán') {
-            badgeClass = 'bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-500/20 dark:text-emerald-300 dark:border-emerald-500/30';
+            badgeClass = 'bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-300';
           } else {
-            badgeClass = 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-500/20 dark:text-blue-300 dark:border-blue-500/30';
+            badgeClass = 'bg-blue-100 text-blue-800 dark:bg-blue-500/20 dark:text-blue-300';
           }
           return (
-            <span className={`text-xs px-2.5 py-0.5 rounded-full font-black border inline-block ${badgeClass}`}>
+            <span className={`text-xs px-2.5 py-0.5 rounded-full font-bold border-0 inline-block ${badgeClass}`}>
               {role}
             </span>
           );
@@ -161,14 +157,13 @@ export const UsersTab: React.FC<UsersTabProps> = ({
           const isActive = status === 'Hoạt động';
           return (
             <span
-              className={`px-2.5 py-0.5 rounded-full text-xs font-black inline-flex items-center gap-1 border ${
+              className={`px-2.5 py-0.5 rounded-full text-xs font-bold border-0 inline-block ${
                 isActive
-                  ? 'bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-500/20 dark:text-emerald-300 dark:border-emerald-500/30'
-                  : 'bg-rose-100 text-rose-800 border-rose-200 dark:bg-rose-500/20 dark:text-rose-300 dark:border-rose-500/30'
+                  ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-300'
+                  : 'bg-rose-100 text-rose-800 dark:bg-rose-500/20 dark:text-rose-300'
               }`}
             >
-              {isActive ? <CheckCircle2 size={12} /> : <Lock size={12} />}
-              <span>{status || 'Hoạt động'}</span>
+              {status || 'Hoạt động'}
             </span>
           );
         },
@@ -263,7 +258,7 @@ export const UsersTab: React.FC<UsersTabProps> = ({
         cell: (info) => {
           const val = info.getValue<string>();
           return val ? (
-            <span className="text-xs px-2.5 py-0.5 rounded-lg font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 dark:bg-indigo-500/15 dark:text-indigo-300 dark:border-indigo-500/30">
+            <span className="text-xs px-2.5 py-0.5 rounded-lg font-bold bg-indigo-50 text-indigo-700 dark:bg-indigo-500/15 dark:text-indigo-300 border-0">
               {val}
             </span>
           ) : (
@@ -277,7 +272,7 @@ export const UsersTab: React.FC<UsersTabProps> = ({
         cell: (info) => {
           const val = info.getValue<string>();
           return val ? (
-            <span className="text-xs px-2.5 py-0.5 rounded-lg font-bold bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-500/15 dark:text-amber-300 dark:border-amber-500/30">
+            <span className="text-xs px-2.5 py-0.5 rounded-lg font-bold bg-amber-50 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300 border-0">
               {val}
             </span>
           ) : (
@@ -293,14 +288,13 @@ export const UsersTab: React.FC<UsersTabProps> = ({
           const isActive = status === 'Hoạt động';
           return (
             <span
-              className={`px-2.5 py-0.5 rounded-full text-xs font-black inline-flex items-center gap-1 border ${
+              className={`px-2.5 py-0.5 rounded-full text-xs font-bold border-0 inline-block ${
                 isActive
-                  ? 'bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-500/20 dark:text-emerald-300 dark:border-emerald-500/30'
-                  : 'bg-rose-100 text-rose-800 border-rose-200 dark:bg-rose-500/20 dark:text-rose-300 dark:border-rose-500/30'
+                  ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-300'
+                  : 'bg-rose-100 text-rose-800 dark:bg-rose-500/20 dark:text-rose-300'
               }`}
             >
-              {isActive ? <CheckCircle2 size={12} /> : <Lock size={12} />}
-              <span>{status || 'Hoạt động'}</span>
+              {status || 'Hoạt động'}
             </span>
           );
         },
@@ -328,53 +322,66 @@ export const UsersTab: React.FC<UsersTabProps> = ({
   );
 
   return (
-    <div className="space-y-4">
-      {/* Category Toggle: Giáo Viên & Nhân Sự vs Học Sinh */}
-      <div className="bg-white dark:bg-[#111728] border-0 rounded-2xl p-4 shadow-sm flex flex-wrap items-center justify-between gap-3">
-        <SegmentedControl<'staff' | 'student'>
-          value={subTab}
-          onChange={setSubTab}
-          options={[
-            {
-              value: 'staff',
-              label: `Giáo Viên & Nhân Sự (${staffUsers.length})`,
-              icon: Users,
-            },
-            {
-              value: 'student',
-              label: `Học Sinh (${studentUsers.length})`,
-              icon: GraduationCap,
-            },
-          ]}
-          activeColor="bg-[#2563eb]"
-          size="sm"
-        />
+    <div className="space-y-3.5">
+      {/* Unified Compact Control Bar (No stacked horizontal bars) */}
+      <div className="bg-white dark:bg-[#111728] border-0 rounded-2xl p-3 shadow-xs flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center gap-2.5">
+          <SegmentedControl<'staff' | 'student'>
+            value={subTab}
+            onChange={setSubTab}
+            options={[
+              { value: 'staff', label: `Nhân Sự (${staffUsers.length})` },
+              { value: 'student', label: `Học Sinh (${studentUsers.length})` },
+            ]}
+            activeColor="bg-[#2563eb]"
+            size="sm"
+          />
 
-        {/* Action button on right */}
-        <div className="flex items-center gap-2">
-          {subTab === 'student' && onSyncStudents && (
-            <button
-              type="button"
-              onClick={onSyncStudents}
-              disabled={syncing}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold border-0 shadow-xs transition cursor-pointer active:scale-95 disabled:opacity-50"
-              title="Tự động tạo hoặc đồng bộ tài khoản cho toàn bộ học sinh"
-            >
-              <RefreshCw size={13} className={syncing ? 'animate-spin' : ''} />
-              <span>{syncing ? 'Đang đồng bộ...' : 'Tạo TK Cho Toàn Bộ HS'}</span>
-            </button>
+          {subTab === 'student' && (
+            <div className="flex items-center gap-2">
+              <div className="w-36 sm:w-44">
+                <CustomSelect
+                  value={selectedGrade}
+                  onChange={(val) => setSelectedGrade(String(val))}
+                  options={gradeOptions}
+                  placeholder="Khối lớp"
+                />
+              </div>
+
+              <div className="w-36 sm:w-44">
+                <CustomSelect
+                  value={selectedClass}
+                  onChange={(val) => setSelectedClass(String(val))}
+                  options={classOptions}
+                  placeholder="Lớp học"
+                />
+              </div>
+
+              {(selectedGrade !== 'all' || selectedClass !== 'all') && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedGrade('all');
+                    setSelectedClass('all');
+                  }}
+                  className="text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline cursor-pointer ml-1"
+                >
+                  Đặt lại
+                </button>
+              )}
+            </div>
           )}
-
-          <button
-            type="button"
-            onClick={onOpenCreateModal}
-            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-black shadow-xs border-0 transition cursor-pointer active:scale-95"
-            title="Thêm tài khoản mới"
-          >
-            <Plus size={14} />
-            <span>Thêm Tài Khoản</span>
-          </button>
         </div>
+
+        <button
+          type="button"
+          onClick={onOpenCreateModal}
+          className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-black shadow-xs border-0 transition cursor-pointer active:scale-95 shrink-0"
+          title="Thêm tài khoản mới"
+        >
+          <Plus size={14} />
+          <span>Thêm Tài Khoản</span>
+        </button>
       </div>
 
       {/* Sub-view: Staff Table */}
@@ -394,66 +401,21 @@ export const UsersTab: React.FC<UsersTabProps> = ({
           searchPlaceholder="Tìm nhân sự theo tên, vai trò..."
         />
       ) : (
-        /* Sub-view: Student Table with Grade and Class Filters */
-        <div className="space-y-3">
-          {/* Filters Bar for Students */}
-          <div className="bg-white dark:bg-[#111728] border-0 rounded-2xl p-3 shadow-sm flex flex-wrap items-center gap-3">
-            <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700 dark:text-slate-300 shrink-0">
-              <Filter size={13} className="text-blue-500" />
-              <span>Bộ lọc học sinh:</span>
-            </div>
-
-            <div className="w-48">
-              <CustomSelect
-                value={selectedGrade}
-                onChange={(val) => setSelectedGrade(String(val))}
-                options={gradeOptions}
-                placeholder="Chọn khối lớp"
-              />
-            </div>
-
-            <div className="w-52">
-              <CustomSelect
-                value={selectedClass}
-                onChange={(val) => setSelectedClass(String(val))}
-                options={classOptions}
-                placeholder="Chọn lớp học"
-              />
-            </div>
-
-            {(selectedGrade !== 'all' || selectedClass !== 'all') && (
-              <button
-                type="button"
-                onClick={() => {
-                  setSelectedGrade('all');
-                  setSelectedClass('all');
-                }}
-                className="text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline cursor-pointer"
-              >
-                Đặt lại bộ lọc
-              </button>
-            )}
-
-            <div className="ml-auto text-xs text-slate-500 dark:text-slate-400 font-bold">
-              Hiển thị: <span className="text-slate-900 dark:text-white">{filteredStudents.length}</span> / {studentUsers.length} học sinh
-            </div>
-          </div>
-
-          <DataTable<AppUser>
-            data={filteredStudents}
-            columns={studentColumns}
-            loading={loading}
-            loadingMessage="Đang tải danh sách tài khoản học sinh..."
-            emptyMessage="Không tìm thấy học sinh phù hợp với bộ lọc"
-            pageSize={20}
-            showPagination={true}
-            enableGlobalSearch={true}
-            enableColumnVisibility={true}
-            enableExport={true}
-            exportFilename="tai_khoan_hoc_sinh"
-            searchPlaceholder="Tìm học sinh theo tên, lớp..."
-          />
-        </div>
+        /* Sub-view: Student Table */
+        <DataTable<AppUser>
+          data={filteredStudents}
+          columns={studentColumns}
+          loading={loading}
+          loadingMessage="Đang tải danh sách tài khoản học sinh..."
+          emptyMessage="Không tìm thấy học sinh phù hợp với bộ lọc"
+          pageSize={20}
+          showPagination={true}
+          enableGlobalSearch={true}
+          enableColumnVisibility={true}
+          enableExport={true}
+          exportFilename="tai_khoan_hoc_sinh"
+          searchPlaceholder="Tìm học sinh theo tên, lớp..."
+        />
       )}
     </div>
   );

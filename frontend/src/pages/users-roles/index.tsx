@@ -78,8 +78,6 @@ export const UsersRolesPage: React.FC = () => {
           <UsersTab
             users={users}
             loading={loading}
-            syncing={syncingStudents}
-            onSyncStudents={handleSyncStudents}
             onEditUser={handleOpenEditModal}
             onOpenCreateModal={handleOpenCreateModal}
           />

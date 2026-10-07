@@ -19,8 +19,10 @@ def get_users() -> List[Dict[str, Any]]:
                    GROUP_CONCAT(DISTINCT c.class_name) AS class_name
             FROM app_users u
             LEFT JOIN students s ON (
-                (u.username LIKE 'hs_%' AND s.id = CAST(SUBSTR(u.username, 4) AS INTEGER))
-                OR LOWER(TRIM(u.display_name)) = LOWER(TRIM(s.full_name))
+                CASE
+                    WHEN u.username LIKE 'hs_%' THEN s.id = CAST(SUBSTR(u.username, 4) AS INTEGER)
+                    ELSE LOWER(TRIM(u.display_name)) = LOWER(TRIM(s.full_name))
+                END
             )
             LEFT JOIN class_students cs ON cs.student_id = s.id
             LEFT JOIN classes c ON c.id = cs.class_id
