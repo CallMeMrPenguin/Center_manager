@@ -33,7 +33,11 @@ except Exception as e:
 
 app = FastAPI(title="Center Manager & Test Formatter API")
 
+from starlette.middleware.gzip import GZipMiddleware
 from middlewares.security_middleware import SecurityGuardMiddleware
+
+# High-performance GZip compression for responses > 1KB (shrinks WAN payload by ~80%)
+app.add_middleware(GZipMiddleware, minimum_size=1024)
 
 # Configure CORS (Supports mobile, LAN, and remote web domains seamlessly)
 app.add_middleware(

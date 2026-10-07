@@ -1,12 +1,17 @@
-import threading
 from datetime import datetime
 from typing import List, Dict, Any, Optional
 from database.connection import get_connection
+from services.cache_service import cache_get, cache_set, cache_invalidate
 
 # ----------------------------------------------------
 # CENTER MANAGER — COURSES CRUD
 # ----------------------------------------------------
 def get_courses(search: str = "", status: str = "") -> List[Dict[str, Any]]:
+    cache_key = f"courses:{search}:{status}"
+    cached = cache_get(cache_key)
+    if cached is not None:
+        return cached
+
     conn = get_connection()
     try:
         cursor = conn.cursor()
@@ -22,7 +27,9 @@ def get_courses(search: str = "", status: str = "") -> List[Dict[str, Any]]:
         query += " ORDER BY id DESC"
         cursor.execute(query, params)
         rows = cursor.fetchall()
-        return [dict(r) for r in rows]
+        result = [dict(r) for r in rows]
+        cache_set(cache_key, result, 4.0)
+        return result
     finally:
         conn.close()
 
@@ -38,6 +45,7 @@ def create_course(data: Dict[str, Any]) -> int:
             data.get("duration_weeks"), data.get("status", "Đang mở")
         ))
         conn.commit()
+        cache_invalidate("courses")
         return cursor.lastrowid
     finally:
         conn.close()
@@ -55,6 +63,7 @@ def update_course(course_id: int, data: Dict[str, Any]):
             data.get("duration_weeks"), data.get("status"), course_id
         ))
         conn.commit()
+        cache_invalidate("courses")
     finally:
         conn.close()
 
@@ -64,6 +73,7 @@ def delete_course(course_id: int):
         cursor = conn.cursor()
         cursor.execute("DELETE FROM courses WHERE id = ?", (course_id,))
         conn.commit()
+        cache_invalidate("courses")
     finally:
         conn.close()
 

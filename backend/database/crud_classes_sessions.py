@@ -5,11 +5,17 @@ from datetime import datetime
 from typing import List, Dict, Any, Optional
 from database.connection import get_connection
 from database.utils import _sync_cloud_delete, _sync_cloud_delete_sync, _sync_cloud_delete_statements
+from services.cache_service import cache_get, cache_set, cache_invalidate
 
 # ----------------------------------------------------
 # CENTER MANAGER — CLASSES CRUD & SEATING / SCHEDULE
 # ----------------------------------------------------
 def get_classes(search: str = "") -> List[Dict[str, Any]]:
+    cache_key = f"classes:{search}"
+    cached = cache_get(cache_key)
+    if cached is not None:
+        return cached
+
     conn = get_connection()
     try:
         cursor = conn.cursor()
@@ -28,7 +34,9 @@ def get_classes(search: str = "") -> List[Dict[str, Any]]:
         query += " ORDER BY c.id DESC"
         cursor.execute(query, params)
         rows = cursor.fetchall()
-        return [dict(r) for r in rows]
+        result = [dict(r) for r in rows]
+        cache_set(cache_key, result, 4.0)
+        return result
     finally:
         conn.close()
 
@@ -36,12 +44,7 @@ def create_class(data: Dict[str, Any]) -> int:
     conn = get_connection()
     try:
         cursor = conn.cursor()
-        palette = [
-            '#7c3aed', '#0ea5e9', '#10b981', '#f59e0b', '#ec4899',
-            '#06b6d4', '#f97316', '#84cc16', '#a78bfa', '#fb7185',
-            '#6366f1', '#8b5cf6', '#14b8a6', '#eab308', '#22c55e',
-            '#60a5fa', '#c084fc', '#f472b6', '#38bdf8', '#e879f9'
-        ]
+        palette = ['#7c3aed', '#0ea5e9', '#10b981', '#f59e0b', '#ec4899', '#06b6d4', '#f97316', '#84cc16', '#a78bfa', '#fb7185', '#6366f1', '#8b5cf6', '#14b8a6', '#eab308', '#22c55e', '#60a5fa', '#c084fc', '#f472b6', '#38bdf8', '#e879f9']
         cursor.execute("SELECT COUNT(*) FROM classes")
         cls_cnt = cursor.fetchone()[0]
         auto_color = palette[(cls_cnt * 3 + 1) % len(palette)]
@@ -55,6 +58,7 @@ def create_class(data: Dict[str, Any]) -> int:
             data.get("room"), data.get("status", "Đang hoạt động"), chosen_color, data.get("notes")
         ))
         conn.commit()
+        cache_invalidate("classes")
         return cursor.lastrowid
     finally:
         conn.close()
@@ -76,6 +80,7 @@ def update_class(class_id: int, data: Dict[str, Any]):
         if new_color:
             cursor.execute("UPDATE class_sessions SET color = ? WHERE class_id = ?", (new_color, class_id))
         conn.commit()
+        cache_invalidate("classes")
     finally:
         conn.close()
 
@@ -85,6 +90,7 @@ def delete_class(class_id: int):
         cursor = conn.cursor()
         cursor.execute("DELETE FROM classes WHERE id = ?", (class_id,))
         conn.commit()
+        cache_invalidate("classes")
     finally:
         conn.close()
     _sync_cloud_delete_sync("DELETE FROM classes WHERE id = %s", (class_id,))
@@ -176,15 +182,13 @@ def unenroll_student_from_class(class_id: int, student_id: int):
         conn.close()
 
     # Synchronously delete from remote PostgreSQL so bidirectional sync does not resurrect the student
-    _sync_cloud_delete_statements([
-        ("DELETE FROM class_students WHERE class_id = %s AND student_id = %s", (class_id, student_id)),
-        ("DELETE FROM friend_group_members WHERE class_id = %s AND student_id = %s", (class_id, student_id)),
-        ("DELETE FROM conflict_group_members WHERE class_id = %s AND student_id = %s", (class_id, student_id)),
-        ("DELETE FROM trusted_swap_students WHERE class_id = %s AND student_id = %s", (class_id, student_id)),
-        ("DELETE FROM conflict_relationships WHERE class_id = %s AND (student_id1 = %s OR student_id2 = %s)", (class_id, student_id, student_id)),
-        ("DELETE FROM trusted_swap_relationships WHERE class_id = %s AND (student_id1 = %s OR student_id2 = %s)", (class_id, student_id, student_id)),
-        ("DELETE FROM class_attendance_grades WHERE class_id = %s AND student_id = %s", (class_id, student_id)),
-    ])
+    _sync_cloud_delete_statements(
+        [(f"DELETE FROM {tbl} WHERE class_id = %s AND student_id = %s", (class_id, student_id)) for tbl in ("class_students", "friend_group_members", "conflict_group_members", "trusted_swap_students", "class_attendance_grades")]
+        + [
+            ("DELETE FROM conflict_relationships WHERE class_id = %s AND (student_id1 = %s OR student_id2 = %s)", (class_id, student_id, student_id)),
+            ("DELETE FROM trusted_swap_relationships WHERE class_id = %s AND (student_id1 = %s OR student_id2 = %s)", (class_id, student_id, student_id)),
+        ]
+    )
 
 def update_class_student_groups(class_id: int, student_id: int, seat_color: str, grade_group: str):
     conn = get_connection()
@@ -485,13 +489,11 @@ def sync_class_sessions_with_weekly_schedule(class_id: Optional[int] = None) -> 
         conn.commit()
     finally:
         conn.close()
-
     try:
         from services.sync_worker import trigger_instant_sync
         trigger_instant_sync()
     except Exception:
         pass
-
     return {"status": "success", "updated": updated_cnt, "deleted": deleted_cnt}
 
 from .crud_seating import get_class_seating, save_class_seating

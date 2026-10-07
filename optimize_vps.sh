@@ -57,6 +57,13 @@ vm.vfs_cache_pressure=50
 # Giảm ngưỡng ghi buffer bẩn ra đĩa
 vm.dirty_background_ratio=5
 vm.dirty_ratio=10
+
+# Tối ưu hóa TCP Network Stack cho High Concurrency & Low Latency (Giảm giật lag mạng)
+net.core.somaxconn=2048
+net.ipv4.tcp_max_syn_backlog=2048
+net.ipv4.tcp_slow_start_after_idle=0
+net.ipv4.tcp_tw_reuse=1
+net.ipv4.tcp_fin_timeout=15
 EOF
 sysctl --system > /dev/null 2>&1 || true
 

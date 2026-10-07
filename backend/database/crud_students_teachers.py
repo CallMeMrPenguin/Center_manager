@@ -1,11 +1,17 @@
 from typing import List, Dict, Any, Optional
 from database.connection import get_connection
 from database.crud_users import hash_password
+from services.cache_service import cache_get, cache_set, cache_invalidate
 
 # ----------------------------------------------------
 # CENTER MANAGER — STUDENTS CRUD
 # ----------------------------------------------------
 def get_students(search: str = "", status: str = "") -> List[Dict[str, Any]]:
+    cache_key = f"students:{search}:{status}"
+    cached = cache_get(cache_key)
+    if cached is not None:
+        return cached
+
     conn = get_connection()
     try:
         cursor = conn.cursor()
@@ -36,7 +42,9 @@ def get_students(search: str = "", status: str = "") -> List[Dict[str, Any]]:
         query += " GROUP BY s.id ORDER BY s.id DESC"
         cursor.execute(query, params)
         rows = cursor.fetchall()
-        return [dict(r) for r in rows]
+        result = [dict(r) for r in rows]
+        cache_set(cache_key, result, 4.0)
+        return result
     finally:
         conn.close()
 
@@ -105,6 +113,7 @@ def create_student(data: Dict[str, Any]) -> int:
 
 
 
+        cache_invalidate("students")
         return new_id
     finally:
         conn.close()
@@ -173,6 +182,7 @@ def update_student(student_id: int, data: Dict[str, Any]):
                 print(f"[Student CRUD] Auto update user notice: {e}")
 
 
+        cache_invalidate("students")
     finally:
         conn.close()
 
@@ -228,6 +238,7 @@ def delete_student(student_id: int):
         conn.commit()
 
 
+        cache_invalidate("students")
     finally:
         conn.close()
 
@@ -235,6 +246,11 @@ def delete_student(student_id: int):
 # CENTER MANAGER — TEACHERS CRUD
 # ----------------------------------------------------
 def get_teachers_cm(search: str = "", role: str = "") -> List[Dict[str, Any]]:
+    cache_key = f"teachers:{search}:{role}"
+    cached = cache_get(cache_key)
+    if cached is not None:
+        return cached
+
     conn = get_connection()
     try:
         cursor = conn.cursor()
@@ -263,7 +279,9 @@ def get_teachers_cm(search: str = "", role: str = "") -> List[Dict[str, Any]]:
         query += " GROUP BY t.id ORDER BY t.id DESC"
         cursor.execute(query, params)
         rows = cursor.fetchall()
-        return [dict(r) for r in rows]
+        result = [dict(r) for r in rows]
+        cache_set(cache_key, result, 4.0)
+        return result
     finally:
         conn.close()
 
@@ -309,6 +327,7 @@ def create_teacher_cm(data: Dict[str, Any]) -> int:
 
 
 
+        cache_invalidate("teachers")
         return new_id
     finally:
         conn.close()
@@ -365,6 +384,7 @@ def update_teacher_cm(teacher_id: int, data: Dict[str, Any]):
             print(f"[Teacher CRUD] Auto update user notice: {e}")
 
 
+        cache_invalidate("teachers")
     finally:
         conn.close()
 
@@ -378,6 +398,7 @@ def delete_teacher_cm(teacher_id: int):
             cursor.execute("DELETE FROM app_users WHERE username = ?", (username,))
         except Exception:
             pass
+        cache_invalidate("teachers")
         conn.commit()
     finally:
         conn.close()

@@ -39,14 +39,37 @@ mkdir -p /etc/caddy/conf.d
 
 cat << 'EOF' > /etc/caddy/conf.d/center_manager.caddy
 upkidscentermanager.io.vn, www.upkidscentermanager.io.vn {
+    encode zstd gzip
+
     handle /api/* {
-        reverse_proxy localhost:8000
+        reverse_proxy localhost:8000 {
+            transport http {
+                keepalive 30s
+                keepalive_idle_conns 100
+            }
+        }
     }
     handle /auth/* {
-        reverse_proxy localhost:8000
+        reverse_proxy localhost:8000 {
+            transport http {
+                keepalive 30s
+                keepalive_idle_conns 100
+            }
+        }
     }
     handle /users/* {
-        reverse_proxy localhost:8000
+        reverse_proxy localhost:8000 {
+            transport http {
+                keepalive 30s
+                keepalive_idle_conns 100
+            }
+        }
+    }
+
+    handle /assets/* {
+        root * /var/www/center_manager/dist
+        header Cache-Control "public, max-age=31536000, immutable"
+        file_server
     }
 
     handle {

@@ -354,7 +354,15 @@ CREATE TABLE IF NOT EXISTS public.document_attachments (
 -- PERFORMANCE INDEXES
 -- -------------------------------------------------------------------------
 CREATE INDEX IF NOT EXISTS idx_class_sessions_class_date ON public.class_sessions(class_id, date);
+CREATE INDEX IF NOT EXISTS idx_class_sessions_date ON public.class_sessions(date);
 CREATE INDEX IF NOT EXISTS idx_attendance_class_student_date ON public.class_attendance_grades(class_id, student_id, date);
+CREATE INDEX IF NOT EXISTS idx_attendance_student_id ON public.class_attendance_grades(student_id);
+CREATE INDEX IF NOT EXISTS idx_class_students_student_id ON public.class_students(student_id);
+CREATE INDEX IF NOT EXISTS idx_class_students_class_id ON public.class_students(class_id);
+CREATE INDEX IF NOT EXISTS idx_students_status ON public.students(status);
+CREATE INDEX IF NOT EXISTS idx_classes_status ON public.classes(status);
+CREATE INDEX IF NOT EXISTS idx_courses_status ON public.courses(status);
+CREATE INDEX IF NOT EXISTS idx_teachers_cm_role ON public.teachers_cm(role);
 CREATE INDEX IF NOT EXISTS idx_custom_time_phases_class_dates ON public.custom_time_phases(class_id, from_date, to_date);
 CREATE INDEX IF NOT EXISTS idx_assignments_class_date ON public.assignments(class_id, assigned_date);
 CREATE INDEX IF NOT EXISTS idx_submissions_assign_student ON public.assignment_submissions(assignment_id, student_id);

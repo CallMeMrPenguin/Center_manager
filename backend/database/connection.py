@@ -21,71 +21,77 @@ DB_PATH = os.path.join(
     "test_formatter.db"
 )
 
+import functools
+
+@functools.lru_cache(maxsize=1024)
+def adapt_sql_for_pg(sql: str) -> str:
+    if not sql:
+        return sql
+    # 1. Translate parameter placeholder '?' -> '%s'
+    adapted = sql.replace("?", "%s")
+    # 2. Translate GROUP_CONCAT to STRING_AGG for PostgreSQL
+    adapted = re.sub(
+        r'GROUP_CONCAT\s*\(\s*DISTINCT\s+([^,\)]+)(?:,\s*[\'"][^\'"]*[\'"])?\s*\)',
+        r"STRING_AGG(DISTINCT \1, ', ')",
+        adapted,
+        flags=re.IGNORECASE
+    )
+    adapted = re.sub(
+        r'GROUP_CONCAT\s*\(\s*([^,\)]+)(?:,\s*[\'"][^\'"]*[\'"])?\s*\)',
+        r"STRING_AGG(\1, ', ')",
+        adapted,
+        flags=re.IGNORECASE
+    )
+    # 3. Translate SQLite printf('%04d', id) -> LPAD(CAST(id AS TEXT), 4, '0')
+    adapted = re.sub(
+        r"printf\s*\(\s*'%0(\d+)d'\s*,\s*([^\)]+)\)",
+        r"LPAD(CAST(\2 AS TEXT), \1, '0')",
+        adapted,
+        flags=re.IGNORECASE
+    )
+    # 4. Translate SQLite AUTOINCREMENT -> BIGSERIAL PRIMARY KEY
+    adapted = re.sub(
+        r'INTEGER\s+PRIMARY\s+KEY\s+AUTOINCREMENT',
+        'BIGSERIAL PRIMARY KEY',
+        adapted,
+        flags=re.IGNORECASE
+    )
+    # 5. Translate ALTER TABLE ... ADD COLUMN ... -> ADD COLUMN IF NOT EXISTS
+    adapted = re.sub(
+        r'ALTER\s+TABLE\s+([^\s]+)\s+ADD\s+COLUMN\s+(?!IF\s+NOT\s+EXISTS)',
+        r'ALTER TABLE \1 ADD COLUMN IF NOT EXISTS ',
+        adapted,
+        flags=re.IGNORECASE
+    )
+    # 6. Translate CAST(... AS INTEGER) for PostgreSQL safe cast
+    adapted = re.sub(
+        r'CAST\s*\(\s*([a-zA-Z0-9_\.]+)\s+AS\s+INTEGER\s*\)',
+        r"COALESCE(NULLIF(regexp_replace(CAST(\1 AS TEXT), '[^0-9]', '', 'g'), '')::integer, 0)",
+        adapted,
+        flags=re.IGNORECASE
+    )
+    # 7. Translate SQLite datetime('now', '-N days') -> (NOW() - INTERVAL 'N days')
+    adapted = re.sub(
+        r"datetime\s*\(\s*'now'\s*,\s*'-(\d+)\s+days'\s*\)",
+        r"(NOW() - INTERVAL '\1 days')",
+        adapted,
+        flags=re.IGNORECASE
+    )
+    adapted = re.sub(
+        r"datetime\s*\(\s*'now'\s*\)",
+        r"NOW()",
+        adapted,
+        flags=re.IGNORECASE
+    )
+    return adapted
+
 class PgCursorWrapper:
     def __init__(self, raw_cursor):
         self._cursor = raw_cursor
         self._last_insert_id = None
 
     def _adapt_sql(self, sql: str) -> str:
-        if not sql:
-            return sql
-        # 1. Translate parameter placeholder '?' -> '%s'
-        adapted = sql.replace("?", "%s")
-        # 2. Translate GROUP_CONCAT to STRING_AGG for PostgreSQL
-        adapted = re.sub(
-            r'GROUP_CONCAT\s*\(\s*DISTINCT\s+([^,\)]+)(?:,\s*[\'"][^\'"]*[\'"])?\s*\)',
-            r"STRING_AGG(DISTINCT \1, ', ')",
-            adapted,
-            flags=re.IGNORECASE
-        )
-        adapted = re.sub(
-            r'GROUP_CONCAT\s*\(\s*([^,\)]+)(?:,\s*[\'"][^\'"]*[\'"])?\s*\)',
-            r"STRING_AGG(\1, ', ')",
-            adapted,
-            flags=re.IGNORECASE
-        )
-        # 3. Translate SQLite printf('%04d', id) -> LPAD(CAST(id AS TEXT), 4, '0')
-        adapted = re.sub(
-            r"printf\s*\(\s*'%0(\d+)d'\s*,\s*([^\)]+)\)",
-            r"LPAD(CAST(\2 AS TEXT), \1, '0')",
-            adapted,
-            flags=re.IGNORECASE
-        )
-        # 4. Translate SQLite AUTOINCREMENT -> BIGSERIAL PRIMARY KEY
-        adapted = re.sub(
-            r'INTEGER\s+PRIMARY\s+KEY\s+AUTOINCREMENT',
-            'BIGSERIAL PRIMARY KEY',
-            adapted,
-            flags=re.IGNORECASE
-        )
-        # 5. Translate ALTER TABLE ... ADD COLUMN ... -> ADD COLUMN IF NOT EXISTS
-        adapted = re.sub(
-            r'ALTER\s+TABLE\s+([^\s]+)\s+ADD\s+COLUMN\s+(?!IF\s+NOT\s+EXISTS)',
-            r'ALTER TABLE \1 ADD COLUMN IF NOT EXISTS ',
-            adapted,
-            flags=re.IGNORECASE
-        )
-        # 6. Translate CAST(... AS INTEGER) for PostgreSQL safe cast
-        adapted = re.sub(
-            r'CAST\s*\(\s*([a-zA-Z0-9_\.]+)\s+AS\s+INTEGER\s*\)',
-            r"COALESCE(NULLIF(regexp_replace(CAST(\1 AS TEXT), '[^0-9]', '', 'g'), '')::integer, 0)",
-            adapted,
-            flags=re.IGNORECASE
-        )
-        # 7. Translate SQLite datetime('now', '-N days') -> (NOW() - INTERVAL 'N days')
-        adapted = re.sub(
-            r"datetime\s*\(\s*'now'\s*,\s*'-(\d+)\s+days'\s*\)",
-            r"(NOW() - INTERVAL '\1 days')",
-            adapted,
-            flags=re.IGNORECASE
-        )
-        adapted = re.sub(
-            r"datetime\s*\(\s*'now'\s*\)",
-            r"NOW()",
-            adapted,
-            flags=re.IGNORECASE
-        )
-        return adapted
+        return adapt_sql_for_pg(sql)
 
     def execute(self, sql: str, params=None):
         adapted_sql = self._adapt_sql(sql)
@@ -252,6 +258,62 @@ class FastPgPool:
         except Exception:
             pass
 
+class FastPsycopg2Pool:
+    def __init__(self, minconn=4, maxconn=30):
+        self.minconn = minconn
+        self.maxconn = maxconn
+        self._pool = None
+        self._lock = threading.Lock()
+        self._target_url = None
+
+    def get_conn(self, url: str):
+        import psycopg2
+        import psycopg2.pool
+        with self._lock:
+            if self._pool is None or self._target_url != url:
+                try:
+                    if self._pool:
+                        self._pool.closeall()
+                except Exception:
+                    pass
+                self._target_url = url
+                self._pool = psycopg2.pool.ThreadedConnectionPool(
+                    self.minconn,
+                    self.maxconn,
+                    dsn=url,
+                    connect_timeout=10
+                )
+        try:
+            conn = self._pool.getconn()
+            if getattr(conn, 'closed', False):
+                self._pool.putconn(conn, close=True)
+                conn = self._pool.getconn()
+            return conn
+        except Exception:
+            return psycopg2.connect(url, connect_timeout=10)
+
+    def putconn(self, raw_conn, close=False):
+        if not raw_conn:
+            return
+        try:
+            try:
+                raw_conn.rollback()
+            except Exception:
+                pass
+            if self._pool and not getattr(raw_conn, 'closed', False):
+                self._pool.putconn(raw_conn, close=close)
+            else:
+                try:
+                    raw_conn.close()
+                except Exception:
+                    pass
+        except Exception:
+            try:
+                raw_conn.close()
+            except Exception:
+                pass
+
+_global_psycopg2_pool = FastPsycopg2Pool()
 _global_pg_pool = FastPgPool()
 
 
@@ -268,6 +330,8 @@ class PgConnectionWrapper:
                 target_url = get_target_db_url()
                 if self._is_pg8000:
                     self._conn = _global_pg_pool.get_conn(target_url)
+                elif self._pool:
+                    self._conn = self._pool.get_conn(target_url)
                 else:
                     import psycopg2
                     self._conn = psycopg2.connect(target_url, connect_timeout=10)
@@ -340,18 +404,17 @@ def get_connection():
     if is_postgres_target:
         target_url = get_target_db_url()
         if target_url:
-            # 1. First try psycopg2 for native C-accelerated VPS connections
+            # 1. First try psycopg2 with high-performance connection pool (sub-millisecond latency)
             try:
-                import psycopg2
-                raw_conn = psycopg2.connect(target_url, connect_timeout=10)
-                return PgConnectionWrapper(raw_conn, is_pg8000=False)
+                raw_conn = _global_psycopg2_pool.get_conn(target_url)
+                return PgConnectionWrapper(raw_conn, pool=_global_psycopg2_pool, is_pg8000=False)
             except Exception:
                 pass
 
             # 2. Fallback to pg8000 connection pooler (pure Python, zero C dependencies)
             try:
                 raw_conn = _global_pg_pool.get_conn(target_url)
-                return PgConnectionWrapper(raw_conn, is_pg8000=True)
+                return PgConnectionWrapper(raw_conn, pool=_global_pg_pool, is_pg8000=True)
             except Exception as e_pg8000:
                 print("[DB Connection] pg8000 connection attempt note:", e_pg8000)
 
