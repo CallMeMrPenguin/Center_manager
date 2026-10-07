@@ -76,7 +76,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
             Hệ Thống Quản Lý Trung Tâm
           </h1>
           <p className="text-xs text-slate-500 dark:text-slate-400 max-w-xs mx-auto">
-            EduPlatform — Đăng nhập tài khoản để tiếp tục
+            Đăng nhập tài khoản để tiếp tục
           </p>
         </div>
 
@@ -95,7 +95,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
                 type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                placeholder="Nhập tên đăng nhập (admin, hs_0001...)"
+                placeholder="Nhập tên đăng nhập..."
                 disabled={loading}
                 autoFocus={!username}
                 autoCapitalize="none"
@@ -167,11 +167,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
             )}
           </button>
         </form>
-
-        {/* Footer info */}
-        <div className="text-center pt-2 border-t border-slate-200 dark:border-white/5 text-[11px] text-slate-400 dark:text-slate-500 font-medium">
-          Hệ Thống Trực Tuyến Đám Mây & Ngoại Tuyến Kết Hợp — Phiên bản 1.0.0
-        </div>
       </div>
     </div>
   );
