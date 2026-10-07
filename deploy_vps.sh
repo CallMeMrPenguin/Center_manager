@@ -72,10 +72,6 @@ chmod -R 755 /var/www/center_manager
 
 cat << 'EOF' > /etc/caddy/Caddyfile
 upkidscentermanager.io.vn, www.upkidscentermanager.io.vn, :80 {
-    root * /var/www/center_manager/dist
-    file_server
-    try_files {path} /index.html
-
     handle /api/* {
         reverse_proxy localhost:8000
     }
@@ -84,6 +80,12 @@ upkidscentermanager.io.vn, www.upkidscentermanager.io.vn, :80 {
     }
     handle /users/* {
         reverse_proxy localhost:8000
+    }
+
+    handle {
+        root * /var/www/center_manager/dist
+        try_files {path} /index.html
+        file_server
     }
 }
 EOF
