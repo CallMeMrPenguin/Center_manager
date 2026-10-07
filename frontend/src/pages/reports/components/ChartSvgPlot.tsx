@@ -102,23 +102,23 @@ export const ChartSvgPlot: React.FC<ChartSvgPlotProps> = React.memo(({
         </clipPath>
 
         <linearGradient id={gradC1} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor={c1Color} stopOpacity="0.45" />
-          <stop offset="35%" stopColor={c1Color} stopOpacity="0.20" />
-          <stop offset="75%" stopColor={c1Color} stopOpacity="0.05" />
+          <stop offset="0%" stopColor={c1Color} stopOpacity={isDark ? "0.45" : "0.22"} />
+          <stop offset="35%" stopColor={c1Color} stopOpacity={isDark ? "0.20" : "0.08"} />
+          <stop offset="75%" stopColor={c1Color} stopOpacity={isDark ? "0.05" : "0.02"} />
           <stop offset="100%" stopColor={c1Color} stopOpacity="0.0" />
         </linearGradient>
 
         <linearGradient id={gradC2} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor={c2Color} stopOpacity="0.45" />
-          <stop offset="35%" stopColor={c2Color} stopOpacity="0.20" />
-          <stop offset="75%" stopColor={c2Color} stopOpacity="0.05" />
+          <stop offset="0%" stopColor={c2Color} stopOpacity={isDark ? "0.45" : "0.22"} />
+          <stop offset="35%" stopColor={c2Color} stopOpacity={isDark ? "0.20" : "0.08"} />
+          <stop offset="75%" stopColor={c2Color} stopOpacity={isDark ? "0.05" : "0.02"} />
           <stop offset="100%" stopColor={c2Color} stopOpacity="0.0" />
         </linearGradient>
 
         <linearGradient id={gradHw} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor={hwColor} stopOpacity="0.45" />
-          <stop offset="35%" stopColor={hwColor} stopOpacity="0.20" />
-          <stop offset="75%" stopColor={hwColor} stopOpacity="0.05" />
+          <stop offset="0%" stopColor={hwColor} stopOpacity={isDark ? "0.45" : "0.22"} />
+          <stop offset="35%" stopColor={hwColor} stopOpacity={isDark ? "0.20" : "0.08"} />
+          <stop offset="75%" stopColor={hwColor} stopOpacity={isDark ? "0.05" : "0.02"} />
           <stop offset="100%" stopColor={hwColor} stopOpacity="0.0" />
         </linearGradient>
       </defs>

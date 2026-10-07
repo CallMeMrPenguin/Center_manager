@@ -143,7 +143,7 @@ export const MobileBottomDock: React.FC<MobileBottomDockProps> = ({
       {/* Floating Active Tab Label Pill: Updates LIVE as user scrolls */}
       {displayedTab && (
         <div
-          className={`pointer-events-none mb-1 px-3 py-0.5 rounded-full bg-slate-900/90 dark:bg-black/90 text-white font-extrabold text-[11px] shadow-lg border border-white/10 transition-all duration-200 ease-out ${
+          className={`pointer-events-none mb-1 px-3 py-0.5 rounded-full bg-white/95 dark:bg-[#0c0f1e]/95 text-slate-800 dark:text-white font-black text-[11px] shadow-md border border-slate-200/90 dark:border-white/10 transition-all duration-200 ease-out ${
             isIdle
               ? 'opacity-0 -translate-y-1 scale-90'
               : 'opacity-100 translate-y-0 scale-100'

@@ -44,20 +44,26 @@ export const ChartHoverTooltip: React.FC<ChartHoverTooltipProps> = ({
 
   if (isMobile) {
     return (
-      <div className="sticky top-2 left-2 right-2 mx-2 z-40 pointer-events-none bg-slate-900/95 dark:bg-[#101422]/95 border border-white/10 px-3 py-1.5 rounded-xl shadow-lg flex flex-wrap items-center justify-between gap-1.5 text-[11px] animate-in fade-in duration-150">
+      <div className="sticky top-2 left-2 right-2 mx-2 z-40 pointer-events-none bg-white/95 dark:bg-[#101422]/95 border border-slate-200/90 dark:border-white/10 px-3 py-1.5 rounded-xl shadow-md dark:shadow-xl flex flex-wrap items-center justify-between gap-1.5 text-[11px] animate-in fade-in duration-150">
         <div className="flex items-center gap-1.5 min-w-0">
-          <span className="font-extrabold text-blue-400 truncate">{hoveredPoint.sessionName}</span>
-          <span className="text-[10px] text-slate-400 font-mono">({hoveredPoint.fullDate})</span>
+          <span className="font-black text-blue-600 dark:text-blue-400 truncate">{hoveredPoint.sessionName}</span>
+          <span className="text-[10px] text-slate-500 dark:text-slate-400 font-mono">({hoveredPoint.fullDate})</span>
         </div>
-        <div className="flex items-center gap-2 shrink-0 font-extrabold font-mono text-[11px]">
+        <div className="flex items-center gap-1.5 shrink-0 font-black font-mono text-[11px]">
           {hoveredPoint.check1 > 0 && (
-            <span style={{ color: c1Color }}>{c1Label}: {format1Dec(hoveredPoint.check1)}</span>
+            <span className="px-1.5 py-0.5 rounded-md bg-slate-100 dark:bg-white/5" style={{ color: c1Color }}>
+              {c1Label}: {format1Dec(hoveredPoint.check1)}
+            </span>
           )}
           {hoveredPoint.check2 > 0 && (
-            <span style={{ color: c2Color }}>{c2Label}: {format1Dec(hoveredPoint.check2)}</span>
+            <span className="px-1.5 py-0.5 rounded-md bg-slate-100 dark:bg-white/5" style={{ color: c2Color }}>
+              {c2Label}: {format1Dec(hoveredPoint.check2)}
+            </span>
           )}
           {hoveredPoint.homework > 0 && (
-            <span style={{ color: hwColor }}>{hwLabel}: {format1Dec(hoveredPoint.homework)}</span>
+            <span className="px-1.5 py-0.5 rounded-md bg-slate-100 dark:bg-white/5" style={{ color: hwColor }}>
+              {hwLabel}: {format1Dec(hoveredPoint.homework)}
+            </span>
           )}
         </div>
       </div>
