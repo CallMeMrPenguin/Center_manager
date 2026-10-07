@@ -20,6 +20,7 @@ interface CustomDatePickerProps {
   highlightDaysOfWeek?: number[]; // e.g. [1, 3, 5] for Mon, Wed, Fri (0 = Sunday)
   highlightDates?: string[]; // e.g. ['2026-07-28', '2026-07-30']
   maxHighlightDate?: string; // default today 'YYYY-MM-DD'
+  triggerClassName?: string;
 }
 
 export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
@@ -32,6 +33,7 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
   highlightDaysOfWeek = [],
   highlightDates = [],
   maxHighlightDate,
+  triggerClassName,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [direction, setDirection] = useState<number>(0);
@@ -207,11 +209,13 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
 
   return (
     <div className={`relative inline-block ${className}`} ref={containerRef}>
-      {/* TRIGGER BUTTON (Synced with button shade setting via btn-neutral) */}
+      {/* TRIGGER BUTTON (Synced with button shade setting via btn-neutral or custom triggerClassName) */}
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between gap-2 px-3.5 py-2 rounded-xl btn-neutral text-slate-900 dark:text-white text-xs font-bold transition-all cursor-pointer shadow-xs hover:shadow-sm border-0 outline-none"
+        className={`w-full flex items-center justify-between gap-2 px-3.5 py-2 rounded-xl text-slate-900 dark:text-white text-xs font-bold transition-all cursor-pointer shadow-xs hover:shadow-sm outline-none ${
+          triggerClassName || 'btn-neutral border-0'
+        }`}
       >
         <div className="flex items-center gap-2 truncate">
           <CalendarIcon size={14} className="text-blue-600 dark:text-blue-400 shrink-0 font-bold" />

@@ -7,7 +7,6 @@ import { PromptTemplateModal } from './PromptTemplateModal';
 import { AssignmentTypeConfigSelector } from './AssignmentTypeConfigSelector';
 import { SectionScopeSelector } from './SectionScopeSelector';
 import { AssignmentContentField } from './AssignmentContentField';
-import { useUpcomingClassSessions } from '../hooks/useUpcomingClassSessions';
 import { useAssignmentForm } from '../hooks/useAssignmentForm';
 
 interface AssignmentModalProps {
@@ -73,8 +72,6 @@ export const AssignmentModal: React.FC<AssignmentModalProps> = ({
     onSuccess,
     onClose,
   });
-
-  const upcomingSessions = useUpcomingClassSessions(classId, assignedDate);
 
   if (!isOpen) return null;
 
@@ -186,37 +183,23 @@ export const AssignmentModal: React.FC<AssignmentModalProps> = ({
                 <label className="text-xs font-bold text-slate-700">
                   Ngày giao <span className="text-rose-500">*</span>
                 </label>
-                <CustomDatePicker value={assignedDate} onChange={setAssignedDate} placeholder="Chọn ngày giao..." />
+                <CustomDatePicker
+                  value={assignedDate}
+                  onChange={setAssignedDate}
+                  placeholder="Chọn ngày giao..."
+                  triggerClassName="bg-white border border-slate-300 focus:border-blue-600 text-slate-900"
+                />
               </div>
               <div className="space-y-1.5">
                 <label className="text-xs font-bold text-slate-700">
                   Hạn nộp <span className="text-rose-500">*</span>
                 </label>
-                <CustomDatePicker value={dueDate} onChange={setDueDate} placeholder="Chọn hạn nộp..." />
-
-                {/* Quick Session Due Date Presets */}
-                {upcomingSessions.length > 0 && (
-                  <div className="flex items-center gap-1.5 flex-wrap pt-1">
-                    <span className="text-[10px] text-slate-500 font-semibold">Chọn nhanh:</span>
-                    {upcomingSessions.map((preset, pIdx) => {
-                      const isSelected = dueDate === preset.date;
-                      return (
-                        <button
-                          key={pIdx}
-                          type="button"
-                          onClick={() => setDueDate(preset.date)}
-                          className={`px-2 py-0.5 rounded-md text-[11px] font-semibold transition cursor-pointer border ${
-                            isSelected
-                              ? 'bg-blue-50 border-blue-300 text-blue-700'
-                              : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-200'
-                          }`}
-                        >
-                          {preset.label}
-                        </button>
-                      );
-                    })}
-                  </div>
-                )}
+                <CustomDatePicker
+                  value={dueDate}
+                  onChange={setDueDate}
+                  placeholder="Chọn hạn nộp..."
+                  triggerClassName="bg-white border border-slate-300 focus:border-blue-600 text-slate-900"
+                />
               </div>
             </div>
 
