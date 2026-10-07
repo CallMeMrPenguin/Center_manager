@@ -10,6 +10,7 @@ interface UserModalProps {
   isOpen: boolean;
   onClose: () => void;
   user: AppUser | null;
+  availableRoles?: string[];
   onSuccess: () => void;
 }
 
@@ -17,6 +18,7 @@ export const UserModal: React.FC<UserModalProps> = ({
   isOpen,
   onClose,
   user,
+  availableRoles,
   onSuccess,
 }) => {
   const [displayName, setDisplayName] = useState('');
@@ -45,7 +47,8 @@ export const UserModal: React.FC<UserModalProps> = ({
 
   if (!isOpen) return null;
 
-  const roleOptions: SelectOption[] = ROLES.map((r) => ({
+  const roleList = availableRoles && availableRoles.length > 0 ? availableRoles : ROLES;
+  const roleOptions: SelectOption[] = roleList.map((r) => ({
     value: r,
     label: r,
   }));

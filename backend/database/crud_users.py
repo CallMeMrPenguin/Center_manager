@@ -326,21 +326,37 @@ def change_user_password(username: str, old_password: str, new_password: str, co
     finally:
         conn.close()
 
+SYSTEM_ROLES = [
+    ("Quản trị viên", "Quản trị toàn quyền", 1),
+    ("Giáo viên", "Giảng dạy & chấm điểm", 1),
+    ("Trợ giảng", "Điểm danh & hỗ trợ lớp", 1),
+    ("Học sinh", "Xem kết quả & làm bài", 1),
+    ("Kế toán", "Học phí & tài chính", 1),
+]
+
+def _ensure_app_roles_table(conn, cursor):
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS app_roles (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        role_name TEXT UNIQUE NOT NULL,
+        description TEXT DEFAULT '',
+        is_system INTEGER DEFAULT 0
+    )
+    """)
+    for r_name, r_desc, r_sys in SYSTEM_ROLES:
+        cursor.execute("SELECT id FROM app_roles WHERE role_name = ?", (r_name,))
+        if not cursor.fetchone():
+            cursor.execute("INSERT OR IGNORE INTO app_roles (role_name, description, is_system) VALUES (?, ?, ?)", (r_name, r_desc, r_sys))
+    conn.commit()
+
 def get_roles_list() -> List[Dict[str, Any]]:
     conn = get_connection()
     try:
         cursor = conn.cursor()
+        _ensure_app_roles_table(conn, cursor)
         cursor.execute("SELECT id, role_name, description, is_system FROM app_roles ORDER BY id ASC")
         rows = cursor.fetchall()
-        if rows:
-            return [dict(r) for r in rows]
-        return [
-            {"id": 1, "role_name": "Quản trị viên", "description": "Quản trị toàn quyền", "is_system": 1},
-            {"id": 2, "role_name": "Giáo viên", "description": "Giảng dạy & chấm điểm", "is_system": 1},
-            {"id": 3, "role_name": "Trợ giảng", "description": "Điểm danh & hỗ trợ lớp", "is_system": 1},
-            {"id": 4, "role_name": "Học sinh", "description": "Xem kết quả & làm bài", "is_system": 1},
-            {"id": 5, "role_name": "Kế toán", "description": "Học phí & tài chính", "is_system": 1},
-        ]
+        return [dict(r) for r in rows]
     finally:
         conn.close()
 
@@ -351,6 +367,10 @@ def create_role(role_name: str, description: str = "") -> int:
     conn = get_connection()
     try:
         cursor = conn.cursor()
+        _ensure_app_roles_table(conn, cursor)
+        cursor.execute("SELECT id FROM app_roles WHERE LOWER(role_name) = LOWER(?)", (clean_name,))
+        if cursor.fetchone():
+            raise ValueError(f"Vai trò '{clean_name}' đã tồn tại")
         cursor.execute("INSERT INTO app_roles (role_name, description, is_system) VALUES (?, ?, 0)", (clean_name, description.strip()))
         conn.commit()
         return cursor.lastrowid
@@ -359,11 +379,12 @@ def create_role(role_name: str, description: str = "") -> int:
 
 def delete_role(role_name: str):
     clean_name = role_name.strip()
-    if clean_name in ("Quản trị viên", "Giáo viên", "Trợ giảng", "Học sinh", "Kế toán"):
+    if clean_name in [r[0] for r in SYSTEM_ROLES]:
         raise ValueError("Không thể xóa vai trò mặc định của hệ thống")
     conn = get_connection()
     try:
         cursor = conn.cursor()
+        _ensure_app_roles_table(conn, cursor)
         cursor.execute("DELETE FROM app_roles WHERE role_name = ?", (clean_name,))
         cursor.execute("DELETE FROM role_permissions WHERE role = ?", (clean_name,))
         conn.commit()

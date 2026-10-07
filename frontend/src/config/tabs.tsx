@@ -213,13 +213,15 @@ export const TAB_DEFINITIONS: TabDefinition[] = [
     section: 'settings',
     render: () => <UsersRolesPage />
   },
-  {
-    id: 'ui-showcase',
-    label: 'UI Showcase',
-    icon: Sparkles,
-    section: 'settings',
-    render: () => <UIShowcasePage />
-  },
+  ...(isLocalMode ? [
+    {
+      id: 'ui-showcase',
+      label: 'UI Showcase',
+      icon: Sparkles,
+      section: 'settings' as const,
+      render: () => <UIShowcasePage />
+    }
+  ] : []),
   {
     id: 'settings',
     label: 'Cấu Hình Hệ Thống',

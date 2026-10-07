@@ -21,10 +21,11 @@ export const UsersRolesPage: React.FC = () => {
     editingUser,
     setEditingUser,
     loadUsers,
+    availableRoles,
+    loadRoles,
     handleSyncStudents,
     handleSavePermissions,
   } = useUsersData();
-
 
   const handleOpenCreateModal = () => {
     setEditingUser(null);
@@ -72,11 +73,11 @@ export const UsersRolesPage: React.FC = () => {
             onOpenCreateModal={handleOpenCreateModal}
           />
         ) : activeTab === 'permissions' ? (
-
           <PermissionsTab
             permissions={permissions}
             saving={savingPermissions}
             onSave={handleSavePermissions}
+            onRolesChanged={loadRoles}
           />
         ) : (
           <SystemSettingsTab />
@@ -88,6 +89,7 @@ export const UsersRolesPage: React.FC = () => {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         user={editingUser}
+        availableRoles={availableRoles}
         onSuccess={loadUsers}
       />
     </div>

@@ -10,6 +10,7 @@ interface PermissionsTabProps {
   permissions: RolePermission[];
   saving: boolean;
   onSave: (updated: RolePermission[]) => void;
+  onRolesChanged?: () => void;
 }
 
 interface RoleItem {
@@ -31,6 +32,7 @@ export const PermissionsTab: React.FC<PermissionsTabProps> = ({
   permissions,
   saving,
   onSave,
+  onRolesChanged,
 }) => {
   const confirm = useConfirm();
   const [roles, setRoles] = useState<string[]>(DEFAULT_SYSTEM_ROLES);
@@ -124,7 +126,16 @@ export const PermissionsTab: React.FC<PermissionsTabProps> = ({
       await api.createRole(clean, clean);
       showToast(`Đã thêm vai trò "${clean}" thành công!`, 'success');
       setNewRoleName('');
-      loadRoles();
+      await loadRoles();
+      onRolesChanged?.();
+      setLocalMap((prev) => {
+        const next = { ...prev };
+        TAB_DEFINITIONS.forEach((tab) => {
+          next[`${clean}__${tab.id}`] = ['dashboard', 'students', 'classes', 'schedule', 'reports'].includes(tab.id);
+        });
+        return next;
+      });
+      setIsDirty(true);
     } catch (err: any) {
       showToast('Không thể tạo vai trò: ' + err.message, 'error');
     }
@@ -141,7 +152,15 @@ export const PermissionsTab: React.FC<PermissionsTabProps> = ({
     try {
       await api.deleteRole(roleName);
       showToast(`Đã xóa vai trò "${roleName}"!`, 'success');
-      loadRoles();
+      await loadRoles();
+      onRolesChanged?.();
+      setLocalMap((prev) => {
+        const next = { ...prev };
+        TAB_DEFINITIONS.forEach((tab) => {
+          delete next[`${roleName}__${tab.id}`];
+        });
+        return next;
+      });
     } catch (err: any) {
       showToast('Không thể xóa: ' + err.message, 'error');
     }

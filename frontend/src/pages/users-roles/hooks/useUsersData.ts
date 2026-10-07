@@ -60,10 +60,25 @@ export function useUsersData() {
     }
   }, []);
 
+  // Roles state
+  const [availableRoles, setAvailableRoles] = useState<string[]>(ROLES);
+
+  const loadRoles = useCallback(async () => {
+    try {
+      const data = await api.getRoles();
+      if (Array.isArray(data) && data.length > 0) {
+        setAvailableRoles(data.map((r: any) => r.role_name));
+      }
+    } catch (err) {
+      console.error('Failed to load roles:', err);
+    }
+  }, []);
+
   useEffect(() => {
     loadUsers();
     loadPermissions();
-  }, [loadUsers, loadPermissions]);
+    loadRoles();
+  }, [loadUsers, loadPermissions, loadRoles]);
 
   // Sync accounts for all students
   const handleSyncStudents = async () => {
@@ -109,6 +124,8 @@ export function useUsersData() {
     setEditingUser,
     loadUsers,
     loadPermissions,
+    availableRoles,
+    loadRoles,
     handleSyncStudents,
     handleSavePermissions,
   };

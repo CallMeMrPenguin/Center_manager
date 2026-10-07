@@ -268,11 +268,28 @@ CREATE TABLE IF NOT EXISTS public.app_users (
     display_name TEXT NOT NULL,
     username TEXT UNIQUE NOT NULL,
     password_hash TEXT NOT NULL,
+    plain_password TEXT DEFAULT '123456',
     role TEXT NOT NULL DEFAULT 'Giáo viên',
     status TEXT CHECK(status IN ('Hoạt động', 'Tạm khóa')) DEFAULT 'Hoạt động',
     created_at TIMESTAMPTZ DEFAULT NOW(),
     last_login TIMESTAMPTZ DEFAULT NULL
 );
+
+CREATE TABLE IF NOT EXISTS public.app_roles (
+    id BIGSERIAL PRIMARY KEY,
+    role_name TEXT UNIQUE NOT NULL,
+    description TEXT DEFAULT '',
+    is_system INTEGER DEFAULT 0
+);
+
+INSERT INTO public.app_roles (role_name, description, is_system)
+VALUES 
+    ('Quản trị viên', 'Quản trị toàn quyền', 1),
+    ('Giáo viên', 'Giảng dạy & chấm điểm', 1),
+    ('Trợ giảng', 'Điểm danh & hỗ trợ lớp', 1),
+    ('Học sinh', 'Xem kết quả & làm bài', 1),
+    ('Kế toán', 'Học phí & tài chính', 1)
+ON CONFLICT (role_name) DO NOTHING;
 
 CREATE TABLE IF NOT EXISTS public.role_permissions (
     id BIGSERIAL PRIMARY KEY,
