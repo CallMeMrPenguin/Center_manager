@@ -428,3 +428,33 @@ CREATE TABLE IF NOT EXISTS public.word_documents (
 
 ALTER TABLE public.word_documents ENABLE ROW LEVEL SECURITY;
 
+-- -------------------------------------------------------------------------
+-- 15. SKILL MASTERY TABLE & INDEXES
+-- -------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS public.skill_mastery (
+    id BIGSERIAL PRIMARY KEY,
+    student_id BIGINT REFERENCES public.students(id) ON DELETE CASCADE,
+    class_id BIGINT REFERENCES public.classes(id) ON DELETE CASCADE,
+    skill TEXT NOT NULL,
+    unit_key TEXT NOT NULL,
+    ema_score REAL,
+    last_score REAL,
+    test_count INTEGER DEFAULT 0,
+    mastery_status TEXT,
+    last_tested TEXT,
+    updated_at TIMESTAMPTZ DEFAULT NOW(),
+    UNIQUE(student_id, class_id, skill, unit_key)
+);
+ALTER TABLE public.skill_mastery ENABLE ROW LEVEL SECURITY;
+CREATE INDEX IF NOT EXISTS idx_skill_mastery_lookup ON public.skill_mastery(student_id, class_id, skill, unit_key);
+
+-- Schema Migrations & Safe Column Additions
+ALTER TABLE IF EXISTS public.class_sessions ADD COLUMN IF NOT EXISTS test_config_json TEXT DEFAULT NULL;
+ALTER TABLE IF EXISTS public.class_attendance_grades ADD COLUMN IF NOT EXISTS homework_2 REAL DEFAULT NULL;
+ALTER TABLE IF EXISTS public.class_seating ADD COLUMN IF NOT EXISTS rows INTEGER DEFAULT 4;
+ALTER TABLE IF EXISTS public.assignment_submissions ADD COLUMN IF NOT EXISTS attempts_count INTEGER DEFAULT 1;
+ALTER TABLE IF EXISTS public.assignment_submissions ADD COLUMN IF NOT EXISTS max_score REAL DEFAULT NULL;
+ALTER TABLE IF EXISTS public.assignment_submissions ADD COLUMN IF NOT EXISTS min_score REAL DEFAULT NULL;
+ALTER TABLE IF EXISTS public.assignment_submissions ADD COLUMN IF NOT EXISTS avg_score REAL DEFAULT NULL;
+
+

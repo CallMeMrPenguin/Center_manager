@@ -15,8 +15,9 @@ if ! swapon --show | grep -q '/swapfile'; then
 fi
 
 echo "=== [1/4] Syncing database records into PostgreSQL ==="
+docker compose up -d
 if [ -f "backend/database/init_data.sql" ]; then
-    docker compose up -d --build
+    docker exec -i center_manager_db psql -U center_user -d center_manager -c "ALTER USER center_user WITH PASSWORD 'center_secure_pass_2026';" || true
     docker exec -i center_manager_db psql -U center_user -d center_manager < backend/database/init_data.sql || true
     docker restart center_manager_backend || true
 fi

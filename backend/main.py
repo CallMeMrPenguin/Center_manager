@@ -25,12 +25,11 @@ from routers import (
     word_documents
 )
 
-# Initialize SQLite Database only in local desktop mode
-if APP_MODE != "web":
-    try:
-        init_db()
-    except Exception as e:
-        print("Local init_db notice:", e)
+# Initialize Database schema, tables, migrations, and performance indexes
+try:
+    init_db()
+except Exception as e:
+    print("Database init / migration notice:", e)
 
 app = FastAPI(title="Center Manager & Test Formatter API")
 

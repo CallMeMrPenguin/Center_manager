@@ -1,7 +1,25 @@
 -- Auto-generated SQLite to PostgreSQL Data Sync
+CREATE TABLE IF NOT EXISTS public.skill_mastery (
+    id BIGSERIAL PRIMARY KEY,
+    student_id BIGINT REFERENCES public.students(id) ON DELETE CASCADE,
+    class_id BIGINT REFERENCES public.classes(id) ON DELETE CASCADE,
+    skill TEXT NOT NULL,
+    unit_key TEXT NOT NULL,
+    ema_score REAL,
+    last_score REAL,
+    test_count INTEGER DEFAULT 0,
+    mastery_status TEXT,
+    last_tested TEXT,
+    updated_at TIMESTAMPTZ DEFAULT NOW(),
+    UNIQUE(student_id, class_id, skill, unit_key)
+);
 ALTER TABLE IF EXISTS public.class_sessions ADD COLUMN IF NOT EXISTS test_config_json TEXT DEFAULT NULL;
 ALTER TABLE IF EXISTS public.class_attendance_grades ADD COLUMN IF NOT EXISTS homework_2 REAL DEFAULT NULL;
-ALTER USER center_user WITH PASSWORD 'Center_Db_2026_SecureP@ss';
+ALTER TABLE IF EXISTS public.class_seating ADD COLUMN IF NOT EXISTS rows INTEGER DEFAULT 4;
+ALTER TABLE IF EXISTS public.assignment_submissions ADD COLUMN IF NOT EXISTS attempts_count INTEGER DEFAULT 1;
+ALTER TABLE IF EXISTS public.assignment_submissions ADD COLUMN IF NOT EXISTS max_score REAL DEFAULT NULL;
+ALTER TABLE IF EXISTS public.assignment_submissions ADD COLUMN IF NOT EXISTS min_score REAL DEFAULT NULL;
+ALTER TABLE IF EXISTS public.assignment_submissions ADD COLUMN IF NOT EXISTS avg_score REAL DEFAULT NULL;
 
 -- Table: app_settings (2 rows)
 INSERT INTO public.app_settings ("setting_key", "setting_value", "updated_at") VALUES
@@ -11,9 +29,7 @@ ON CONFLICT DO NOTHING;
 
 -- Table: app_users (42 rows)
 INSERT INTO public.app_users ("id", "display_name", "username", "password_hash", "role", "status", "created_at", "last_login") VALUES
-(1, 'Quản Trị Viên', 'admin', '412d0a2ac30655e23950acec834ec22e137abcf76f69574e3320cb3fb81d6d65', 'Quản trị viên', 'Hoạt động', '2026-08-26 02:36:03.094958+00:00', '2026-08-31 23:26:26')
-ON CONFLICT (id) DO UPDATE SET password_hash = EXCLUDED.password_hash;
-UPDATE public.app_users SET password_hash = '412d0a2ac30655e23950acec834ec22e137abcf76f69574e3320cb3fb81d6d65' WHERE username = 'admin';
+(1, 'Quản Trị Viên', 'admin', '412d0a2ac30655e23950acec834ec22e137abcf76f69574e3320cb3fb81d6d65', 'Quản trị viên', 'Hoạt động', '2026-08-26 02:36:03.094958+00:00', '2026-08-31 23:26:26'),
 (2, 'Top', 'hs_0004', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Học sinh', 'Hoạt động', '2026-08-25 08:50:32+00:00', '2026-08-26 10:37:30+00:00'),
 (3, 'Cheetah', 'hs_0005', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Học sinh', 'Hoạt động', '2026-08-25 08:50:32+00:00', '2026-08-26 12:24:09+00:00'),
 (4, 'Vinh', 'hs_0006', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Học sinh', 'Hoạt động', '2026-08-25 08:50:32+00:00', NULL),
@@ -10826,3 +10842,5 @@ INSERT INTO public.word_documents ("id", "title", "content_html", "content_json"
 (6, 'Văn bản mới', '<p>Bắt đầu soạn thảo nội dung tại đây... {{ten_hoc_sinh}}  {{ma_hoc_sinh}}  {{lop_hoc}}  {{khoa_hoc}}  {{ten_hoc_sinh}} </p>', '', 'Chung', '', '', 'A4', 'portrait', '{"top":20,"bottom":20,"left":25,"right":20}', 0, NULL, '2026-09-24 15:33:21', '2026-09-24 15:40:41', 0, NULL)
 ON CONFLICT DO NOTHING;
 SELECT setval(pg_get_serial_sequence('public.word_documents', 'id'), COALESCE((SELECT MAX(id) FROM public.word_documents), 1), true);
+
+UPDATE public.app_users SET password_hash = '412d0a2ac30655e23950acec834ec22e137abcf76f69574e3320cb3fb81d6d65' WHERE username = 'admin';

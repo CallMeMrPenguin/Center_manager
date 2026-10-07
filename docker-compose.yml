@@ -8,7 +8,7 @@ services:
     restart: unless-stopped
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-center_user}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-Center_Db_2026_SecureP@ss}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-center_secure_pass_2026}
       POSTGRES_DB: ${POSTGRES_DB:-center_manager}
     volumes:
       - postgres_data:/var/lib/postgresql/data
@@ -33,7 +33,7 @@ services:
         condition: service_healthy
     environment:
       - APP_MODE=web
-      - DATABASE_URL=postgresql://${POSTGRES_USER:-center_user}:${POSTGRES_PASSWORD:-Center_Db_2026_SecureP@ss}@postgres:5432/${POSTGRES_DB:-center_manager}
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-center_user}:${POSTGRES_PASSWORD:-center_secure_pass_2026}@postgres:5432/${POSTGRES_DB:-center_manager}
       - ALLOWED_ORIGINS=*
     ports:
       - "8000:8000"
