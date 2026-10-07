@@ -228,11 +228,18 @@ export function useClassDetail(selectedClass: ClassItem | null) {
         setAutoSaveStatus('saving');
         try {
           const { records: finalRecords } = applyAutoAttendanceStatus(attendanceRecordsRef.current);
+          attendanceRecordsRef.current = finalRecords;
           isDirtyRef.current = false;
           await api.saveClassAttendance(classId, dateStr, finalRecords);
           sessionStorage.removeItem(`cm_draft_${classId}_${dateStr}`);
+          // If user is actively typing in a score input, don't swap React state array
+          // to prevent table re-render / cursor blur.
+          const activeEl = typeof document !== 'undefined' ? (document.activeElement as HTMLElement | null) : null;
+          const isTypingScore = activeEl?.getAttribute('data-score-input') === 'true';
+          if (!isTypingScore) {
+            setAttendanceRecords(finalRecords);
+          }
           setAutoSaveStatus('saved');
-          setAttendanceRecords(finalRecords);
           notifyDataChanged(['attendance', 'reports', 'analytics']);
           setTimeout(() => setAutoSaveStatus('idle'), 2500);
         } catch (e) {

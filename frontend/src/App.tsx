@@ -2,7 +2,8 @@ import { useState, useEffect, useRef } from 'react';
 import { Database, ChevronLeft, ChevronRight } from 'lucide-react';
 import { TAB_DEFINITIONS } from './config/tabs';
 import { Sidebar } from './components/Sidebar';
-import { MobileNavBar } from './components/MobileNavBar';
+import { MobileTopBar } from './components/MobileTopBar';
+import { MobileBottomDock } from './components/MobileBottomDock';
 import { showToast, AnimatedToastProvider } from './components/Toast';
 import { ConfirmProvider } from './components/ConfirmDialog';
 import { LoginPage } from './pages/auth/LoginPage';
@@ -203,11 +204,9 @@ function AppContent() {
 
   return (
     <div className="relative flex flex-col h-full w-full bg-[#f1f5f9] dark:bg-[#09090b] text-slate-900 dark:text-slate-50 overflow-hidden font-sans select-none">
-      {/* MOBILE TOP NAVIGATION BAR (HORIZONTAL FOR SMARTPHONES) */}
-      <MobileNavBar
+      {/* MOBILE TOP APP BAR (LOGO & PROFILE MENU) */}
+      <MobileTopBar
         activeTab={activeTab}
-        setActiveTab={handleSelectTab}
-        orderedTabIds={visibleTabIds}
         currentUser={currentUser}
         onLogout={handleLogout}
       />
@@ -236,7 +235,7 @@ function AppContent() {
 
         {/* MAIN BODY SKELETON */}
         <div className="flex-1 flex flex-col overflow-hidden bg-transparent w-full min-w-0">
-          <main className="flex-1 overflow-hidden bg-[#f1f5f9] dark:bg-[#09090b] relative w-full min-w-0">
+          <main className="flex-1 overflow-hidden bg-[#f1f5f9] dark:bg-[#09090b] relative w-full min-w-0 pb-20 md:pb-0">
             {/* FLUSH MARGIN NAVIGATION ARROW INDICATOR (SÁT LỀ TAB) */}
             {navIndicator === 'back' && (
               <div
@@ -286,8 +285,15 @@ function AppContent() {
         </div>
       </div>
 
-      {/* STATUS BAR */}
-      <footer className="h-7 sm:h-8 bg-white dark:bg-[#06070a] flex items-center justify-between px-3 sm:px-6 text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 select-none shrink-0 font-semibold z-10 border-t border-slate-200 dark:border-white/[0.04]">
+      {/* MOBILE BOTTOM DOCK (TRANSPARENT, CIRCULAR ICONS, FISHEYE CAROUSEL) */}
+      <MobileBottomDock
+        activeTab={activeTab}
+        setActiveTab={handleSelectTab}
+        orderedTabIds={visibleTabIds}
+      />
+
+      {/* STATUS BAR (DESKTOP ONLY) */}
+      <footer className="hidden md:flex h-7 sm:h-8 bg-white dark:bg-[#06070a] items-center justify-between px-3 sm:px-6 text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 select-none shrink-0 font-semibold z-10 border-t border-slate-200 dark:border-white/[0.04]">
         <div className="flex items-center gap-1.5 sm:gap-2">
           <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block shrink-0" />
           <span className="hidden sm:inline text-slate-500 dark:text-slate-400">Center Manager Desktop</span>

@@ -74,6 +74,15 @@ const navigateVerticalScoreInputs = (currentInput: HTMLInputElement, field: stri
   focusTarget(columnInputs[targetIndex]);
 };
 
+const isMobileDevice = () => {
+  if (typeof window === 'undefined') return false;
+  return (
+    window.innerWidth < 768 ||
+    'ontouchstart' in window ||
+    (typeof navigator !== 'undefined' && navigator.maxTouchPoints > 0)
+  );
+};
+
 export const CheckScoreInput: React.FC<CheckScoreInputProps> = React.memo(({
   rec,
   rowIndex = 0,
@@ -96,8 +105,18 @@ export const CheckScoreInput: React.FC<CheckScoreInputProps> = React.memo(({
   }, [rec[field], rec.student_id]);
 
   useLayoutEffect(() => {
-    if (isFocusedRef.current && inputRef.current && document.activeElement !== inputRef.current) {
+    const active = (window as any).__activeScoreField;
+    const shouldBeFocused =
+      isFocusedRef.current ||
+      (active && active.studentId === rec.student_id && active.field === field);
+
+    if (shouldBeFocused && inputRef.current && document.activeElement !== inputRef.current) {
+      isFocusedRef.current = true;
       inputRef.current.focus({ preventScroll: true });
+      const caret = active?.caret ?? inputRef.current.value.length;
+      try {
+        inputRef.current.setSelectionRange(caret, caret);
+      } catch (_) {}
     }
   });
 
@@ -109,11 +128,16 @@ export const CheckScoreInput: React.FC<CheckScoreInputProps> = React.memo(({
   }, [field, onUpdateRecord, parseAndFormatScore, rec.student_id]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    // 1. Enter or ArrowDown -> Move down to same score column of next student (Shift+Enter moves up)
+    // 1. Enter: On mobile / touch, jump HORIZONTALLY to the next score cell.
+    // On desktop, jump vertically down to the same score column of next student.
     if (e.key === 'Enter') {
       e.preventDefault();
       commitValue(e.currentTarget.value, false);
-      navigateVerticalScoreInputs(e.currentTarget, field, e.shiftKey ? -1 : 1);
+      if (isMobileDevice()) {
+        navigateScoreInputs(e.currentTarget, e.shiftKey);
+      } else {
+        navigateVerticalScoreInputs(e.currentTarget, field, e.shiftKey ? -1 : 1);
+      }
       return;
     }
     if (e.key === 'ArrowDown') {
@@ -209,10 +233,18 @@ export const CheckScoreInput: React.FC<CheckScoreInputProps> = React.memo(({
           setVal(raw);
           const parsed = parseAndFormatScore(raw);
           lastCommittedRef.current = parsed !== '' ? parsed : raw;
+          if ((window as any).__activeScoreField) {
+            (window as any).__activeScoreField.caret = e.target.selectionStart ?? raw.length;
+          }
           onUpdateRecord(rec.student_id, field, parsed !== '' ? parsed : raw, false);
         }}
         onFocus={(e) => {
           isFocusedRef.current = true;
+          (window as any).__activeScoreField = {
+            studentId: rec.student_id,
+            field,
+            caret: e.currentTarget.selectionStart ?? e.currentTarget.value.length,
+          };
           if (e.currentTarget.value && e.currentTarget.value.trim().length > 0) {
             e.currentTarget.select();
           } else {
@@ -220,7 +252,24 @@ export const CheckScoreInput: React.FC<CheckScoreInputProps> = React.memo(({
           }
         }}
         onBlur={(e) => {
-          isFocusedRef.current = false;
+          const related = e.relatedTarget as HTMLElement | null;
+          const isAnotherScoreInput = related?.getAttribute('data-score-input') === 'true';
+          if (isAnotherScoreInput) {
+            isFocusedRef.current = false;
+          } else {
+            // Guard against background auto-save or React update causing inadvertent blur
+            setTimeout(() => {
+              if (document.activeElement !== inputRef.current) {
+                isFocusedRef.current = false;
+                if (
+                  (window as any).__activeScoreField?.studentId === rec.student_id &&
+                  (window as any).__activeScoreField?.field === field
+                ) {
+                  (window as any).__activeScoreField = null;
+                }
+              }
+            }, 80);
+          }
           commitValue(e.target.value, false);
         }}
         onKeyDown={handleKeyDown}
