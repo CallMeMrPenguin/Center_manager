@@ -76,7 +76,11 @@ export const ChartSvgPlot: React.FC<ChartSvgPlotProps> = React.memo(({
   const hwLabel = hwItem?.label || 'BTVN';
 
   return (
-    <svg viewBox={`0 0 ${chartWidth} ${chartHeight}`} className="w-full h-[750px] overflow-visible">
+    <svg
+      viewBox={`0 0 ${chartWidth} ${chartHeight}`}
+      style={{ height: `${chartHeight}px`, width: `${chartWidth}px` }}
+      className="overflow-visible block"
+    >
       <defs>
         <clipPath id={clipId}>
           <rect x={paddingLeft - 10} y={paddingTop - 20} width={plotAreaWidth + paddingRight + 40} height={plotAreaHeight + 40} />
@@ -269,23 +273,32 @@ export const ChartSvgPlot: React.FC<ChartSvgPlotProps> = React.memo(({
                       onMouseLeave={() => setHoveredPoint(null)}
                     >
                       <rect x={x - 25} y={paddingTop} width={50} height={plotAreaHeight} fill="transparent" />
-                      <line x1={x} y1={paddingTop} x2={x} y2={chartHeight - paddingBottom} stroke="#2563eb" strokeWidth="1.5" strokeDasharray="3 3" className="opacity-0 group-hover:opacity-100 transition-opacity" />
+                      <line
+                        x1={x}
+                        y1={paddingTop}
+                        x2={x}
+                        y2={chartHeight - paddingBottom}
+                        stroke="#2563eb"
+                        strokeWidth="2"
+                        strokeDasharray="4 4"
+                        className={hoveredPoint?.index === i ? "opacity-100" : "opacity-0 group-hover:opacity-100 transition-opacity"}
+                      />
                       {d.check1 > 0 && (
                         <g className="animate-point-pop" style={{ animationDelay: `${pointDelay}s` }}>
-                          <circle cx={x} cy={y1} r="7" fill={c1Color} style={{ transformBox: 'fill-box', transformOrigin: 'center' }} className="transition-transform duration-150 group-hover:scale-125" />
-                          <circle cx={x} cy={y1} r="3.5" fill="#ffffff" style={{ transformBox: 'fill-box', transformOrigin: 'center' }} className="transition-transform duration-150 group-hover:scale-125" />
+                          <circle cx={x} cy={y1} r="7" fill={c1Color} style={{ transformBox: 'fill-box', transformOrigin: 'center' }} className={`transition-transform duration-150 ${hoveredPoint?.index === i ? 'scale-125' : 'group-hover:scale-125'}`} />
+                          <circle cx={x} cy={y1} r="3.5" fill="#ffffff" style={{ transformBox: 'fill-box', transformOrigin: 'center' }} className={`transition-transform duration-150 ${hoveredPoint?.index === i ? 'scale-125' : 'group-hover:scale-125'}`} />
                         </g>
                       )}
                       {d.check2 > 0 && (
                         <g className="animate-point-pop" style={{ animationDelay: `${pointDelay}s` }}>
-                          <circle cx={x} cy={y2} r="7" fill={c2Color} style={{ transformBox: 'fill-box', transformOrigin: 'center' }} className="transition-transform duration-150 group-hover:scale-125" />
-                          <circle cx={x} cy={y2} r="3.5" fill="#ffffff" style={{ transformBox: 'fill-box', transformOrigin: 'center' }} className="transition-transform duration-150 group-hover:scale-125" />
+                          <circle cx={x} cy={y2} r="7" fill={c2Color} style={{ transformBox: 'fill-box', transformOrigin: 'center' }} className={`transition-transform duration-150 ${hoveredPoint?.index === i ? 'scale-125' : 'group-hover:scale-125'}`} />
+                          <circle cx={x} cy={y2} r="3.5" fill="#ffffff" style={{ transformBox: 'fill-box', transformOrigin: 'center' }} className={`transition-transform duration-150 ${hoveredPoint?.index === i ? 'scale-125' : 'group-hover:scale-125'}`} />
                         </g>
                       )}
                       {d.homework > 0 && (
                         <g className="animate-point-pop" style={{ animationDelay: `${pointDelay}s` }}>
-                          <circle cx={x} cy={yHw} r="7" fill={hwColor} style={{ transformBox: 'fill-box', transformOrigin: 'center' }} className="transition-transform duration-150 group-hover:scale-125" />
-                          <circle cx={x} cy={yHw} r="3.5" fill="#ffffff" style={{ transformBox: 'fill-box', transformOrigin: 'center' }} className="transition-transform duration-150 group-hover:scale-125" />
+                          <circle cx={x} cy={yHw} r="7" fill={hwColor} style={{ transformBox: 'fill-box', transformOrigin: 'center' }} className={`transition-transform duration-150 ${hoveredPoint?.index === i ? 'scale-125' : 'group-hover:scale-125'}`} />
+                          <circle cx={x} cy={yHw} r="3.5" fill="#ffffff" style={{ transformBox: 'fill-box', transformOrigin: 'center' }} className={`transition-transform duration-150 ${hoveredPoint?.index === i ? 'scale-125' : 'group-hover:scale-125'}`} />
                         </g>
                       )}
                       {i === sessionChartData.length - 1 && (() => {

@@ -54,7 +54,12 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
   onOpenEditModal,
   onSelectRankingStudent,
 }) => {
-  const [timeView, setTimeView] = useState<'1m' | '2m' | '3m' | 'all'>('all');
+  const [timeView, setTimeView] = useState<'1m' | '2m' | '3m' | 'all'>(() => {
+    if (typeof window !== 'undefined' && window.innerWidth < 768) {
+      return '1m';
+    }
+    return 'all';
+  });
   const [chartViewMode, setChartViewMode] = useState<'timeline' | 'distribution'>('timeline');
   const [selectedGradeTypeFilter, setSelectedGradeTypeFilter] = useState<GradeTypeFilterKey>('overall');
   const [selectedScoreBin, setSelectedScoreBin] = useState<DistributionScoreBin | null>(null);

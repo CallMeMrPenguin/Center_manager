@@ -61,11 +61,21 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = ({
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [chartWidth, setChartWidth] = useState(1050);
 
-  const chartHeight = 750;
-  const paddingLeft = 60;
-  const paddingRight = 100;
-  const paddingTop = 45;
-  const paddingBottom = 45;
+  const [isMobile, setIsMobile] = useState(() => {
+    return typeof window !== 'undefined' && window.innerWidth < 768;
+  });
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  const chartHeight = isMobile ? 380 : 750;
+  const paddingLeft = isMobile ? 38 : 60;
+  const paddingRight = isMobile ? 50 : 100;
+  const paddingTop = isMobile ? 26 : 45;
+  const paddingBottom = isMobile ? 32 : 45;
   const plotAreaWidth = Math.max(100, chartWidth - paddingLeft - paddingRight);
   const plotAreaHeight = Math.max(100, chartHeight - paddingTop - paddingBottom);
 
@@ -74,11 +84,19 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = ({
     const updateDimensions = () => {
       const el = timelineRef.current || chartWrapperRef.current;
       if (el) {
-        // When measuring timelineRef, clientWidth is exact; if falling back to chartWrapperRef, subtract 48px padding (p-6)
-        const w = el === timelineRef.current
-          ? Math.max(500, Math.round(el.clientWidth))
-          : Math.max(500, Math.round(el.clientWidth) - 48);
-        setChartWidth((prev) => (Math.abs(prev - w) > 3 ? w : prev));
+        const clientW = el === timelineRef.current
+          ? Math.round(el.clientWidth)
+          : Math.max(320, Math.round(el.clientWidth) - (isMobile ? 24 : 48));
+
+        if (isMobile) {
+          // On mobile: allocate at least 48px per session so points are never crammed
+          const neededWidth = paddingLeft + paddingRight + Math.max(1, sessionChartData.length) * 48;
+          const w = Math.max(clientW, neededWidth);
+          setChartWidth(w);
+        } else {
+          const w = Math.max(500, clientW);
+          setChartWidth((prev) => (Math.abs(prev - w) > 3 ? w : prev));
+        }
       }
     };
     updateDimensions();
@@ -95,7 +113,7 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = ({
       cancelAnimationFrame(animId);
       observer.disconnect();
     };
-  }, [chartViewMode]);
+  }, [chartViewMode, isMobile, sessionChartData.length, paddingLeft, paddingRight]);
 
   const clampPanOffset = useCallback(
     (x: number, y: number, z: number) => {
@@ -213,10 +231,70 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = ({
     [sessionChartData, getSvgX, getSvgY, makeBezierPath, chartHeight, paddingBottom]
   );
 
+  // Auto-scroll to the latest sessions on the right when mounted or timeView changes on mobile
+  useEffect(() => {
+    if (isMobile && timelineRef.current) {
+      const el = timelineRef.current;
+      requestAnimationFrame(() => {
+        el.scrollLeft = el.scrollWidth;
+      });
+    }
+  }, [isMobile, sessionChartData.length, timeView]);
+
+  // Touch scrubber: tracks finger coordinates across the chart canvas
+  const handleTouch = useCallback(
+    (clientX: number) => {
+      if (!timelineRef.current || sessionChartData.length === 0) return;
+      const rect = timelineRef.current.getBoundingClientRect();
+      const scrollLeft = timelineRef.current.scrollLeft;
+      const relX = clientX - rect.left + scrollLeft;
+
+      let closestIdx = 0;
+      let minDiff = Infinity;
+      sessionChartData.forEach((d, i) => {
+        const x = getSvgX(i, sessionChartData.length);
+        const diff = Math.abs(x - relX);
+        if (diff < minDiff) {
+          minDiff = diff;
+          closestIdx = i;
+        }
+      });
+
+      const d = sessionChartData[closestIdx];
+      if (d) {
+        const x = getSvgX(closestIdx, sessionChartData.length);
+        const y1 = getSvgY(d.check1);
+        const y2 = getSvgY(d.check2);
+        const yHw = getSvgY(d.homework);
+        const validYs: number[] = [];
+        if (d.check1 > 0) validYs.push(y1);
+        if (d.check2 > 0) validYs.push(y2);
+        if (d.homework > 0) validYs.push(yHw);
+        const highestY = validYs.length > 0 ? Math.min(...validYs) : paddingTop + plotAreaHeight / 2;
+
+        setHoveredPoint({
+          index: closestIdx,
+          sessionName: d.sessionName,
+          fullDate: d.fullDate,
+          check1: d.check1,
+          check2: d.check2,
+          homework: d.homework,
+          x,
+          y: highestY,
+          fittedC1: fittedLookup.c1[closestIdx] ?? null,
+          fittedC2: fittedLookup.c2[closestIdx] ?? null,
+          fittedHw: fittedLookup.hw[closestIdx] ?? null,
+          predModel: 'EMA',
+        });
+      }
+    },
+    [sessionChartData, getSvgX, getSvgY, fittedLookup, paddingTop, plotAreaHeight]
+  );
+
   return (
     <div
       ref={chartWrapperRef}
-      className="bg-white dark:bg-[#141417] border-0 p-6 rounded-2xl shadow-sm dark:shadow-xl flex flex-col gap-6 relative select-none animate-cascade-2 transition-colors"
+      className="bg-white dark:bg-[#141417] border-0 p-3 sm:p-6 rounded-2xl shadow-sm dark:shadow-xl flex flex-col gap-4 sm:gap-6 relative select-none animate-cascade-2 transition-colors"
     >
       <ChartControls
         engine={engine}
@@ -240,9 +318,19 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = ({
       {chartViewMode === 'timeline' ? (
         <div
           ref={timelineRef}
-          className={`relative overflow-hidden cursor-${
+          className={`relative overflow-x-auto overflow-y-hidden no-scrollbar cursor-${
             isDragging ? 'grabbing' : zoomLevel > 1.0 ? 'grab' : 'default'
           } select-none rounded-2xl bg-white dark:bg-[#1c1c21] border-0`}
+          style={{
+            WebkitOverflowScrolling: 'touch',
+            overscrollBehaviorX: 'contain',
+          }}
+          onTouchStart={(e) => {
+            if (e.touches[0]) handleTouch(e.touches[0].clientX);
+          }}
+          onTouchMove={(e) => {
+            if (e.touches[0]) handleTouch(e.touches[0].clientX);
+          }}
           onMouseDown={(e) => {
             if (zoomLevel > 1.0 && e.button === 0) {
               setIsDragging(true);
