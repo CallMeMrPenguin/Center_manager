@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, startTransition } from 'react';
 import { ClassItem, EnrolledStudent, AttendanceRecord } from '../types';
 import { api } from '../../../api';
 import { showToast } from '../../../components/Toast';
@@ -17,6 +17,9 @@ export function useClassDetail(selectedClass: ClassItem | null) {
   const [selectedClassWeeklyDays, setSelectedClassWeeklyDays] = useState<number[]>([]);
 
   const isDirtyRef = useRef(false);
+  const revisionRef = useRef(0);
+  const lastSavedRevRef = useRef(0);
+  const isSavingRef = useRef(false);
   const currentClassIdRef = useRef<number | null>(selectedClass?.id ?? null);
   const currentDateRef = useRef<string>(attendanceDate);
   const stateUpdateTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -122,6 +125,7 @@ export function useClassDetail(selectedClass: ClassItem | null) {
       const currentRecords = attendanceRecordsRef.current.length > 0 ? attendanceRecordsRef.current : attendanceRecords;
       const { records: finalRecords } = applyAutoAttendanceStatus(currentRecords);
       isDirtyRef.current = false;
+      lastSavedRevRef.current = revisionRef.current;
       await api.saveClassAttendance(classId, dateStr, finalRecords);
       sessionStorage.removeItem(`cm_draft_${classId}_${dateStr}`);
       if (!silent) {
@@ -192,10 +196,11 @@ export function useClassDetail(selectedClass: ClassItem | null) {
         return updated;
       });
 
+      revisionRef.current += 1;
       attendanceRecordsRef.current = newRecs;
       isDirtyRef.current = true;
 
-      // Fail-safe draft in sessionStorage
+      // Fail-safe draft in sessionStorage checkpoint
       const cid = currentClassIdRef.current;
       const cdate = currentDateRef.current;
       if (cid && cdate) {
@@ -204,9 +209,6 @@ export function useClassDetail(selectedClass: ClassItem | null) {
         } catch (_) {}
       }
 
-      // Synchronize React state: immediate on status change, blur, or key navigation.
-      // When typing (immediate === false), we update attendanceRecordsRef.current and sessionStorage draft immediately,
-      // avoiding unneeded full-table re-renders while the user is actively typing in a cell.
       if (stateUpdateTimerRef.current) {
         clearTimeout(stateUpdateTimerRef.current);
         stateUpdateTimerRef.current = null;
@@ -215,38 +217,35 @@ export function useClassDetail(selectedClass: ClassItem | null) {
         setAttendanceRecords(newRecs);
       }
 
-      // Debounced background auto-save to database (1500ms after last keystroke)
+      // Zero-Jank Background Auto-Save (Snapshot Queue Pattern)
       if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
-      // NOTE: Do NOT setAutoSaveStatus('saving') here; user is still actively editing!
       autoSaveTimerRef.current = setTimeout(async () => {
         const classId = currentClassIdRef.current;
         const dateStr = currentDateRef.current;
-        if (!isDirtyRef.current || !classId || !dateStr) {
-          setAutoSaveStatus('idle');
-          return;
-        }
-        setAutoSaveStatus('saving');
+        if (!isDirtyRef.current || !classId || !dateStr || isSavingRef.current) return;
+
+        const revToSave = revisionRef.current;
+        if (revToSave <= lastSavedRevRef.current) return;
+
+        const { records: snapshotRecords } = applyAutoAttendanceStatus([...attendanceRecordsRef.current]);
+        isSavingRef.current = true;
         try {
-          const { records: finalRecords } = applyAutoAttendanceStatus(attendanceRecordsRef.current);
-          attendanceRecordsRef.current = finalRecords;
-          isDirtyRef.current = false;
-          await api.saveClassAttendance(classId, dateStr, finalRecords);
-          sessionStorage.removeItem(`cm_draft_${classId}_${dateStr}`);
-          // If user is actively typing in a score input, don't swap React state array
-          // to prevent table re-render / cursor blur.
-          const activeEl = typeof document !== 'undefined' ? (document.activeElement as HTMLElement | null) : null;
-          const isTypingScore = activeEl?.getAttribute('data-score-input') === 'true';
-          if (!isTypingScore) {
-            setAttendanceRecords(finalRecords);
+          await api.saveClassAttendance(classId, dateStr, snapshotRecords);
+          lastSavedRevRef.current = revToSave;
+          if (revisionRef.current === revToSave) {
+            isDirtyRef.current = false;
+            try { sessionStorage.removeItem(`cm_draft_${classId}_${dateStr}`); } catch (_) {}
+            startTransition(() => setAutoSaveStatus('saved'));
+            setTimeout(() => {
+              startTransition(() => setAutoSaveStatus((c) => (c === 'saved' ? 'idle' : c)));
+            }, 2000);
           }
-          setAutoSaveStatus('saved');
-          notifyDataChanged(['attendance', 'reports', 'analytics']);
-          setTimeout(() => setAutoSaveStatus('idle'), 2500);
         } catch (e) {
           console.error('Tự động lưu bảng điểm thất bại:', e);
-          setAutoSaveStatus('idle');
+        } finally {
+          isSavingRef.current = false;
         }
-      }, 1500);
+      }, 1200);
     },
     [applyAutoAttendanceStatus]
   );
@@ -278,9 +277,10 @@ export function useClassDetail(selectedClass: ClassItem | null) {
       attendanceRecordsRef.current = finalRecords;
       setAttendanceRecords(finalRecords);
       isDirtyRef.current = false;
+      lastSavedRevRef.current = revisionRef.current;
       await api.saveClassAttendance(selectedClass.id, attendanceDate, finalRecords);
       sessionStorage.removeItem(`cm_draft_${selectedClass.id}_${attendanceDate}`);
-      setAutoSaveStatus('saved');
+      startTransition(() => setAutoSaveStatus('saved'));
       showToast('Đã lưu bảng điểm danh và điểm học sinh vào cơ sở dữ liệu!', 'success');
       notifyDataChanged(['attendance', 'reports', 'analytics']);
       setTimeout(() => setAutoSaveStatus('idle'), 2500);

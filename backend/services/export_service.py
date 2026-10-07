@@ -7,7 +7,7 @@ from typing import Dict, Any, List, Optional
 import openpyxl
 from openpyxl.styles import Font, Alignment, PatternFill, Border, Side
 from openpyxl.worksheet.table import Table, TableStyleInfo
-from openpyxl.formatting.rule import FormulaRule
+from openpyxl.formatting.rule import FormulaRule, CellIsRule
 
 from config.settings import get_setting
 from database.db_manager import get_classes, get_class_attendance_grades
@@ -193,6 +193,14 @@ def export_class_excel(
 
     zebra_fill = PatternFill(start_color="F8FAFC", end_color="F8FAFC", fill_type="solid")
     white_fill = PatternFill(start_color="FFFFFF", end_color="FFFFFF", fill_type="solid")
+    fill_8 = PatternFill(start_color="DCFCE7", end_color="DCFCE7", fill_type="solid")
+    font_8 = Font(name="Times New Roman", size=12, color="15803D", bold=True)
+    fill_65 = PatternFill(start_color="E0F2FE", end_color="E0F2FE", fill_type="solid")
+    font_65 = Font(name="Times New Roman", size=12, color="0369A1", bold=True)
+    fill_5 = PatternFill(start_color="FEF3C7", end_color="FEF3C7", fill_type="solid")
+    font_5 = Font(name="Times New Roman", size=12, color="B45309", bold=True)
+    fill_under5 = PatternFill(start_color="FFE4E6", end_color="FFE4E6", fill_type="solid")
+    font_under5 = Font(name="Times New Roman", size=12, color="BE123C", bold=True)
 
     for idx, r in enumerate(attendance, 1):
         curr_row = start_row + idx - 1
@@ -261,11 +269,21 @@ def export_class_excel(
         ws.row_dimensions[curr_row].height = 24
         for col_num in range(1, 11):
             c_cell = ws.cell(row=curr_row, column=col_num)
+            c_cell.fill = row_fill
             if col_num != 2:
                 c_cell.font = data_font
-            c_cell.fill = row_fill
             c_cell.border = thin_border
             c_cell.alignment = Alignment(horizontal="center", vertical="center")
+            if col_num in (4, 5, 6, 7, 8):
+                val = (c1, c2, hw1, hw2, mt)[col_num - 4]
+                if val >= 8.0:
+                    c_cell.fill, c_cell.font = fill_8, font_8
+                elif val >= 6.5:
+                    c_cell.fill, c_cell.font = fill_65, font_65
+                elif val >= 5.0:
+                    c_cell.fill, c_cell.font = fill_5, font_5
+                elif val > 0:
+                    c_cell.fill, c_cell.font = fill_under5, font_under5
 
     ts = datetime.now().strftime("%Y%m%d_%H%M%S")
     if len(attendance) > 0:
@@ -280,13 +298,16 @@ def export_class_excel(
         )
         ws.add_table(tab)
 
-        red_font = Font(name="Times New Roman", size=12, color="B91C1C", bold=True)
-        green_font = Font(name="Times New Roman", size=12, color="15803D", bold=True)
-        grey_font = Font(name="Times New Roman", size=12, color="64748B", bold=True)
+        ws.conditional_formatting.add(f"D4:H{end_row}", CellIsRule(operator='greaterThanOrEqual', formula=['8.0'], fill=fill_8, font=font_8))
+        ws.conditional_formatting.add(f"D4:H{end_row}", CellIsRule(operator='between', formula=['6.5', '7.99'], fill=fill_65, font=font_65))
+        ws.conditional_formatting.add(f"D4:H{end_row}", CellIsRule(operator='between', formula=['5.0', '6.49'], fill=fill_5, font=font_5))
+        ws.conditional_formatting.add(f"D4:H{end_row}", CellIsRule(operator='between', formula=['0.01', '4.99'], fill=fill_under5, font=font_under5))
 
-        ws.conditional_formatting.add(f"J4:J{end_row}", FormulaRule(formula=['NOT(ISERROR(SEARCH("Cần cố gắng", J4)))'], font=red_font))
-        ws.conditional_formatting.add(f"J4:J{end_row}", FormulaRule(formula=['NOT(ISERROR(SEARCH("Đạt yêu cầu", J4)))'], font=green_font))
-        ws.conditional_formatting.add(f"J4:J{end_row}", FormulaRule(formula=['NOT(ISERROR(SEARCH("Vắng mặt", J4)))'], font=grey_font))
+        fill_abs = PatternFill(start_color="F1F5F9", end_color="F1F5F9", fill_type="solid")
+        font_abs = Font(name="Times New Roman", size=12, color="64748B", bold=True)
+        ws.conditional_formatting.add(f"J4:J{end_row}", FormulaRule(formula=['NOT(ISERROR(SEARCH("Cần cố gắng", J4)))'], font=font_under5, fill=fill_under5))
+        ws.conditional_formatting.add(f"J4:J{end_row}", FormulaRule(formula=['NOT(ISERROR(SEARCH("Đạt yêu cầu", J4)))'], font=font_8, fill=fill_8))
+        ws.conditional_formatting.add(f"J4:J{end_row}", FormulaRule(formula=['NOT(ISERROR(SEARCH("Vắng mặt", J4)))'], font=font_abs, fill=fill_abs))
 
     # Average / Threshold Row
     ws.cell(row=avg_row_idx, column=1, value="")
