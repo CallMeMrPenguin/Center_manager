@@ -264,7 +264,7 @@ function AppContent() {
 
         {/* MAIN BODY SKELETON */}
         <div className="flex-1 flex flex-col overflow-hidden bg-transparent w-full min-w-0">
-          <main className="flex-1 overflow-hidden bg-[#f1f5f9] dark:bg-[#09090b] relative w-full min-w-0 pb-0">
+          <main className="flex-1 overflow-hidden bg-[#f1f5f9] dark:bg-[#09090b] relative w-full min-w-0 pb-16 md:pb-0">
             {visibleTabs.map((tab) => {
               const isActive = activeTab === tab.id;
               const isVisited = visitedTabIds.has(tab.id);
