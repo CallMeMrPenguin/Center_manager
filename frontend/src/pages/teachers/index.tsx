@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
 import { 
-  UserCheck, UserPlus, Edit3, Trash2, Phone, Calendar, RefreshCw 
+  UserPlus, Edit3, Trash2, Phone, Calendar 
 } from 'lucide-react';
 import { api } from '../../api';
 import { showToast } from '../../components/Toast';
@@ -281,21 +281,16 @@ export function TeachersPage() {
     <div className="h-full w-full flex flex-col p-6 space-y-4 bg-[#f1f5f9] dark:bg-[#09090b] text-slate-800 dark:text-slate-100 select-none font-sans overflow-hidden">
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-4 shrink-0">
-        <div className="flex items-center gap-3">
-          <div className="p-3 bg-blue-500/15 text-blue-600 dark:text-blue-400 rounded-2xl border-0 shadow-xs">
-            <UserCheck size={22} />
-          </div>
-          <div>
-            <h1 className="text-lg font-black text-slate-900 dark:text-white">Quản Lý Nhân Sự & Giáo Viên</h1>
-            <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 font-semibold mt-0.5">
-              <span>Tổng số: <strong className="text-slate-900 dark:text-white">{teachers.length}</strong></span>
-              <span className="px-2 py-0.5 rounded-md bg-blue-500/10 text-blue-600 dark:text-blue-300 border-0 shadow-2xs font-bold">
-                Giáo viên: {teacherCount}
-              </span>
-              <span className="px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-0 shadow-2xs font-bold">
-                Trợ giảng: {assistantCount}
-              </span>
-            </div>
+        <div>
+          <h1 className="text-lg font-black text-slate-900 dark:text-white">Quản Lý Nhân Sự & Giáo Viên</h1>
+          <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 font-semibold mt-0.5">
+            <span>Tổng số: <strong className="text-slate-900 dark:text-white">{teachers.length}</strong></span>
+            <span className="px-2 py-0.5 rounded-md bg-blue-500/10 text-blue-600 dark:text-blue-300 border-0 shadow-2xs font-bold">
+              Giáo viên: {teacherCount}
+            </span>
+            <span className="px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-0 shadow-2xs font-bold">
+              Trợ giảng: {assistantCount}
+            </span>
           </div>
         </div>
 

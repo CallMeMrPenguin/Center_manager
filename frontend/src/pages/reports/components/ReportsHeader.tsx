@@ -1,13 +1,10 @@
 import React, { useMemo } from 'react';
 import {
   ChevronRight,
-  BarChart3,
-  Layers,
   GraduationCap,
   GitCompare,
   Calendar,
   RotateCcw,
-  RefreshCw,
 } from 'lucide-react';
 import { CustomSelect } from '../../../components/CustomSelect';
 
@@ -44,26 +41,22 @@ export const ReportsHeader: React.FC<ReportsHeaderProps> = ({
         return {
           breadcrumb: 'THỐNG KÊ SÂU & RỦI RO',
           title: 'Thống Kê Sâu & Cảnh Báo Sớm',
-          icon: <Layers className="h-7 w-7 text-indigo-400" />,
         };
       case 'skills':
         return {
           breadcrumb: 'KỸ NĂNG & THEO DÕI UNIT',
           title: 'Phân Tích Kỹ Năng & Lỗ Hổng Unit',
-          icon: <GraduationCap className="h-7 w-7 text-indigo-400" />,
         };
       case 'benchmark':
         return {
           breadcrumb: 'SO SÁNH GIỮA CÁC LỚP',
           title: 'So Sánh Tương Quan Giữa Các Lớp',
-          icon: <GitCompare className="h-7 w-7 text-indigo-400" />,
         };
       case 'overview':
       default:
         return {
           breadcrumb: 'TỔNG QUAN HIỆU SUẤT',
           title: 'Báo Cáo Hiệu Suất Học Tập',
-          icon: <BarChart3 className="h-7 w-7 text-indigo-400" />,
         };
     }
   }, [activeReportTab]);
@@ -78,9 +71,8 @@ export const ReportsHeader: React.FC<ReportsHeaderProps> = ({
             <ChevronRight size={12} className="text-slate-400 dark:text-slate-500" />
             <span className="text-slate-900 dark:text-white transition-colors duration-200">{tabMeta.breadcrumb}</span>
           </div>
-          <h1 className="text-2xl font-black text-slate-900 dark:text-white mt-1 tracking-tight flex items-center gap-3">
-            {tabMeta.icon}
-            <span>{tabMeta.title}</span>
+          <h1 className="text-2xl font-black text-slate-900 dark:text-white mt-1 tracking-tight">
+            {tabMeta.title}
           </h1>
         </div>
 
@@ -125,14 +117,6 @@ export const ReportsHeader: React.FC<ReportsHeaderProps> = ({
             <span className="max-w-0 opacity-0 group-hover:max-w-[140px] group-hover:opacity-100 transition-all duration-300 ease-in-out whitespace-nowrap overflow-hidden block">
               Đặt Lại Điểm Số
             </span>
-          </button>
-
-          <button
-            onClick={() => loadAnalyticsData()}
-            className="p-2.5 rounded-xl bg-white hover:bg-slate-50 dark:bg-[#181d2e] dark:hover:bg-white/10 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white border-0 shadow-xs hover:shadow-sm transition cursor-pointer shrink-0"
-            title="Làm mới báo cáo"
-          >
-            <RefreshCw size={14} className={loading ? "animate-spin text-indigo-500 dark:text-indigo-400" : ""} />
           </button>
         </div>
       </div>

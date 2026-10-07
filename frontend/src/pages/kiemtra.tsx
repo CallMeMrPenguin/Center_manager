@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import ReactDOM from 'react-dom';
 import { api } from '../api';
-import { FileCheck, Maximize2, Minimize2 } from 'lucide-react';
+import { Maximize2, Minimize2 } from 'lucide-react';
 import { trunc1Dec, cleanOptionPrefix } from '../utils';
 import { showToast } from '../components/Toast';
 import { Question, TestData, TimerMode } from './kiemtra/types';
@@ -263,19 +263,14 @@ export default function KiemTraPage() {
     }`}>
       {/* PERSISTENT HEADER BAR */}
       {step !== 'running' && (
-        <div className="flex items-center justify-between bg-white dark:bg-[#10172c] border border-slate-200 dark:border-white/10 px-6 py-3.5 rounded-2xl shadow-sm dark:shadow-2xl shrink-0">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-xl bg-blue-500/10 border border-blue-500/30 text-blue-500 dark:text-blue-400">
-              <FileCheck size={20} />
-            </div>
-            <div>
-              <h1 className="text-base font-black tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
-                Kiểm Tra & Quiz Runner
-              </h1>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400 font-semibold">
-                {testData?.title || 'Đánh giá năng lực học sinh'}
-              </p>
-            </div>
+        <div className="flex items-center justify-between bg-white dark:bg-[#10172c] border-0 px-6 py-3.5 rounded-2xl shadow-sm dark:shadow-2xl shrink-0">
+          <div>
+            <h1 className="text-base font-black tracking-tight text-slate-900 dark:text-white">
+              Kiểm Tra & Quiz Runner
+            </h1>
+            <p className="text-[11px] text-slate-500 dark:text-slate-400 font-semibold">
+              {testData?.title || 'Đánh giá năng lực học sinh'}
+            </p>
           </div>
 
           <div className="flex items-center gap-3">

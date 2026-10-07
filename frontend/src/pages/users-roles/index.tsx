@@ -1,5 +1,4 @@
 import React from 'react';
-import { UserCog } from 'lucide-react';
 import { SegmentedControl } from '../../components/SegmentedControl';
 import { useUsersData } from './hooks/useUsersData';
 import { UsersTab } from './tabs/UsersTab';
@@ -41,15 +40,10 @@ export const UsersRolesPage: React.FC = () => {
     <div className="h-full w-full overflow-y-auto p-6 space-y-6 bg-[var(--background)] text-slate-900 dark:text-slate-100 select-none font-sans scrollbar-thin">
       {/* 1. Header Banner */}
       <div className="bg-white dark:bg-[#111728] border-0 rounded-2xl p-5 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.06),0_2px_6px_-2px_rgba(0,0,0,0.04)] flex flex-wrap items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-blue-500/20 text-blue-600 dark:text-blue-400 border border-blue-500/30 flex items-center justify-center font-black shrink-0 shadow-[0_0_15px_rgba(37,99,235,0.3)]">
-            <UserCog size={20} />
-          </div>
-          <div>
-            <h2 className="text-base font-black text-slate-900 dark:text-white tracking-wide">
-              Quản Lý Tài Khoản & Phân Quyền Vai Trò
-            </h2>
-          </div>
+        <div>
+          <h2 className="text-base font-black text-slate-900 dark:text-white tracking-wide">
+            Quản Lý Tài Khoản & Phân Quyền Vai Trò
+          </h2>
         </div>
 
         {/* Segmented Control */}

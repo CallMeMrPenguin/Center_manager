@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
 import { 
-  Briefcase, Plus, Edit3, DollarSign, Clock, RefreshCw, X
+  Plus, Edit3, DollarSign, Clock, X
 } from 'lucide-react';
 import { api } from '../api';
 import { showToast } from '../components/Toast';
@@ -193,28 +193,15 @@ export default function CoursesPage() {
   return (
     <div className="p-6 h-full flex flex-col gap-5 text-slate-800 dark:text-slate-200">
       {/* HEADER BAR */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-[#141417] border border-slate-200 dark:border-[#27272a] p-5 rounded-2xl shadow-sm dark:shadow-xl">
-        <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
-            <Briefcase size={22} />
-          </div>
-          <div>
-            <h1 className="text-lg font-black text-slate-900 dark:text-white tracking-wide">Quản Lý Khóa Học</h1>
-          </div>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 shrink-0">
+        <div>
+          <h1 className="text-lg font-black text-slate-900 dark:text-white tracking-wide">Quản Lý Khóa Học</h1>
         </div>
 
         <div className="flex items-center gap-3 shrink-0">
           <button
-            onClick={loadData}
-            className="p-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-[#1c1c21] dark:hover:bg-[#27272f] text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-[#27272a] transition cursor-pointer shadow-sm"
-            title="Tải lại danh sách khóa học"
-          >
-            <RefreshCw size={14} className={loading ? 'animate-spin text-blue-500 dark:text-blue-400' : ''} />
-          </button>
-
-          <button
             onClick={handleOpenAdd}
-            className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-xs font-extrabold shadow-[0_4px_16px_rgba(37,99,235,0.4)] border border-white/20 transition cursor-pointer"
+            className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-xs font-extrabold shadow-[0_4px_16px_rgba(37,99,235,0.4)] border-0 transition cursor-pointer"
           >
             <Plus size={15} />
             <span>Tạo Khóa Học Mới</span>
@@ -223,7 +210,7 @@ export default function CoursesPage() {
       </div>
 
       {/* TABLE */}
-      <div className="flex-1 min-h-[380px] bg-white dark:bg-[#141417] border border-slate-200 dark:border-[#27272a] rounded-2xl overflow-hidden flex flex-col">
+      <div className="flex-1 min-h-[380px] bg-white dark:bg-[#141417] rounded-2xl overflow-hidden flex flex-col shadow-[0_4px_24px_rgba(0,0,0,0.08)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.5)]">
         <DataTable
           tableId="courses-table"
           exportFilename="danh_sach_khoa_hoc"
@@ -242,9 +229,8 @@ export default function CoursesPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 animate-mac-backdrop">
           <div className="bg-white dark:bg-[#141417] border border-slate-200 dark:border-[#27272a] rounded-2xl w-full max-w-md overflow-hidden shadow-2xl dark:shadow-[0_24px_80px_rgba(0,0,0,0.8)]">
             <div className="flex items-center justify-between p-5 border-b border-slate-200 dark:border-[#27272a] bg-slate-100 dark:bg-[#1c1c21]">
-              <h3 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
-                <Briefcase className="h-5 w-5 text-blue-500 dark:text-blue-400" />
-                <span>{editingCourse ? 'Cập Nhật Khóa Học' : 'Tạo Khóa Học Mới'}</span>
+              <h3 className="text-base font-black text-slate-900 dark:text-white">
+                {editingCourse ? 'Cập Nhật Khóa Học' : 'Tạo Khóa Học Mới'}
               </h3>
               <button
                 onClick={() => setModalOpen(false)}

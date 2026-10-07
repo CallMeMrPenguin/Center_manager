@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
 import { 
-  Users, UserPlus, Edit3, Trash2, CheckCircle2, 
-  Upload, RefreshCw, Download, KeyRound, Shield
+  UserPlus, Edit3, Trash2, CheckCircle2, 
+  Upload, Download, KeyRound, Shield
 } from 'lucide-react';
 import { api } from '../../api';
 import { showToast } from '../../components/Toast';
@@ -261,21 +261,16 @@ export function StudentsPage() {
     <div className="h-full w-full flex flex-col p-3 sm:p-6 space-y-3 sm:space-y-4 bg-[#f1f5f9] dark:bg-[#09090b] text-slate-800 dark:text-slate-100 select-none font-sans overflow-hidden">
       {/* Top Header Toolbar */}
       <div className="flex flex-wrap items-center justify-between gap-4 shrink-0">
-        <div className="flex items-center gap-3">
-          <div className="p-3 bg-blue-500/15 text-blue-600 dark:text-blue-400 rounded-2xl border border-blue-500/25 shadow-sm">
-            <Users size={22} />
-          </div>
-          <div>
-            <h1 className="text-lg font-black text-slate-900 dark:text-white">Quản Lý Hồ Sơ Học Sinh</h1>
-            <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 font-semibold mt-0.5">
-              <span>Tổng số: <strong className="text-slate-900 dark:text-white">{students.length}</strong></span>
-              <span className="px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 font-bold">
-                Đang học: {totalActive}
-              </span>
-              <span className="px-2 py-0.5 rounded-md bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20 font-bold">
-                Đã nghỉ: {totalQuit}
-              </span>
-            </div>
+        <div>
+          <h1 className="text-lg font-black text-slate-900 dark:text-white">Quản Lý Hồ Sơ Học Sinh</h1>
+          <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 font-semibold mt-0.5">
+            <span>Tổng số: <strong className="text-slate-900 dark:text-white">{students.length}</strong></span>
+            <span className="px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-0 shadow-2xs font-bold">
+              Đang học: {totalActive}
+            </span>
+            <span className="px-2 py-0.5 rounded-md bg-rose-500/10 text-rose-600 dark:text-rose-400 border-0 shadow-2xs font-bold">
+              Đã nghỉ: {totalQuit}
+            </span>
           </div>
         </div>
 

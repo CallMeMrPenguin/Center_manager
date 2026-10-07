@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
 import { api } from '../../api';
-import { Settings, Save, RefreshCw, BookOpen, FileText } from 'lucide-react';
+import { Save, BookOpen, FileText } from 'lucide-react';
 import { showToast } from '../../components/Toast';
 import { DataTable } from '../../components/DataTable';
 import { SegmentedControl } from '../../components/SegmentedControl';
@@ -247,23 +247,10 @@ export default function UnitConfig() {
       {/* Page Title */}
       <div className="pb-3 border-b border-slate-200 dark:border-[#27272a] flex flex-wrap justify-between items-center gap-4">
         <div>
-          <h1 className="text-xl font-black tracking-tight text-slate-900 dark:text-white mb-1 flex items-center gap-2">
-            <Settings size={22} className="text-indigo-500 dark:text-indigo-400" />
-            <span>Cấu Hình Tên Unit & Ngữ Pháp Theo Khối Lớp</span>
+          <h1 className="text-xl font-black tracking-tight text-slate-900 dark:text-white mb-1">
+            Cấu Hình Tên Unit & Ngữ Pháp Theo Khối Lớp
           </h1>
         </div>
-        <button
-          onClick={() => {
-            fetchConfig();
-            fetchExerciseConfig();
-          }}
-          disabled={loading}
-          className="group flex items-center gap-1.5 px-3.5 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-[#121626] border border-slate-200 dark:border-[#202842] hover:border-indigo-500 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white rounded-xl transition text-xs font-bold cursor-pointer"
-          title="Làm mới"
-        >
-          <RefreshCw size={13} className={loading ? "animate-spin text-indigo-500 dark:text-indigo-400" : ""} />
-          <span>Làm mới</span>
-        </button>
       </div>
 
       {/* Sub-tabs Flat Tabs without Outer Box */}

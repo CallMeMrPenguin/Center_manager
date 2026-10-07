@@ -844,10 +844,9 @@ export default function DocumentManager() {
   return (
     <div className="flex flex-col gap-6 h-full p-1">
       {/* Header Panel */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white dark:bg-[#0f1528] p-5 rounded-2xl border border-slate-300 dark:border-slate-800 shadow-sm">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white dark:bg-[#0f1528] p-5 rounded-2xl border-0 shadow-sm">
         <div>
-          <h1 className="text-xl font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
-            <FolderOpen className="text-blue-500" size={22} />
+          <h1 className="text-xl font-extrabold text-slate-900 dark:text-white">
             Quản Lý Tài Liệu
           </h1>
         </div>

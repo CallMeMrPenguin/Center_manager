@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { User, BookOpen, RefreshCw } from 'lucide-react';
+import { User, BookOpen } from 'lucide-react';
 import { CustomSelect, SelectOption } from '../../../components/CustomSelect';
 import { StudentProfileSummary } from '../types';
 import { getStudentTier, StudentTier } from '../../reports/types';
@@ -170,17 +170,6 @@ export const StudentProfileHeader: React.FC<StudentProfileHeaderProps> = ({
               />
             </div>
           </div>
-
-          <button
-            type="button"
-            onClick={onRefresh}
-            disabled={loading}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-[#151a2e] dark:hover:bg-[#1e2642] text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white text-xs font-bold border-0 shadow-xs hover:shadow-sm transition-all cursor-pointer active:scale-95 disabled:opacity-50"
-            title="Tải lại dữ liệu"
-          >
-            <RefreshCw size={13} className={loading ? 'animate-spin text-indigo-400' : 'text-slate-400'} />
-            <span>Làm mới</span>
-          </button>
         </div>
       )}
 

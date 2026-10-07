@@ -40,6 +40,7 @@ export const MobileBottomDock: React.FC<MobileBottomDockProps> = ({
 
   // Track the tab currently closest to screen center in real time as user scrolls
   const [scrolledCenterTabId, setScrolledCenterTabId] = useState<string>(activeTab);
+  const scrollSettleTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Reorder tabs to strictly match desktop visual SECTIONS order
   const canonicalTabs = useMemo(() => {
@@ -73,6 +74,7 @@ export const MobileBottomDock: React.FC<MobileBottomDockProps> = ({
     resetIdleTimer();
     return () => {
       if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
+      if (scrollSettleTimerRef.current) clearTimeout(scrollSettleTimerRef.current);
       if (rafIdRef.current) cancelAnimationFrame(rafIdRef.current);
     };
   }, [resetIdleTimer]);
@@ -123,14 +125,23 @@ export const MobileBottomDock: React.FC<MobileBottomDockProps> = ({
     }
   }, [scrolledCenterTabId]);
 
-  // Real-time 60fps scroll listener: updates name pill LIVE while swiping without auto-switching tabs
+  // Real-time 60fps scroll listener:
+  // - Highlights & shifts up the icon closest to center while user scrolls
+  // - If user stops scrolling without selecting, automatically returns dock to active tab after 1.2s
   const handleScroll = useCallback(() => {
     resetIdleTimer();
     if (rafIdRef.current) cancelAnimationFrame(rafIdRef.current);
     rafIdRef.current = requestAnimationFrame(() => {
       findClosestTabToCenter();
     });
-  }, [findClosestTabToCenter, resetIdleTimer]);
+
+    if (scrollSettleTimerRef.current) clearTimeout(scrollSettleTimerRef.current);
+    scrollSettleTimerRef.current = setTimeout(() => {
+      // Revert preview back to active tab and smooth scroll back to selected tab
+      setScrolledCenterTabId(activeTab);
+      centerTab(activeTab, true);
+    }, 1200);
+  }, [activeTab, centerTab, findClosestTabToCenter, resetIdleTimer]);
 
   return (
     <div
@@ -143,7 +154,7 @@ export const MobileBottomDock: React.FC<MobileBottomDockProps> = ({
       {/* Floating Active Tab Label Pill: Updates LIVE as user scrolls */}
       {displayedTab && (
         <div
-          className={`pointer-events-none mb-1 px-3 py-0.5 rounded-full bg-white/95 dark:bg-[#0c0f1e]/95 text-slate-800 dark:text-white font-black text-[11px] shadow-md border border-slate-200/90 dark:border-white/10 transition-all duration-200 ease-out ${
+          className={`pointer-events-none mb-1 px-3 py-0.5 rounded-full bg-white/95 dark:bg-[#0c0f1e]/95 text-slate-800 dark:text-white font-black text-[11px] shadow-md border-0 transition-all duration-200 ease-out ${
             isIdle
               ? 'opacity-0 -translate-y-1 scale-90'
               : 'opacity-100 translate-y-0 scale-100'
@@ -164,19 +175,18 @@ export const MobileBottomDock: React.FC<MobileBottomDockProps> = ({
         }`}
         style={{ overscrollBehaviorX: 'contain' }}
       >
-        {canonicalTabs.map((tab, idx) => {
+        {canonicalTabs.map((tab) => {
           const Icon = tab.icon;
           const isSelected = tab.id === activeTab;
-          const distance = Math.abs(idx - activeIndex);
+          const isCenterPreview = !isSelected && tab.id === scrolledCenterTabId;
 
-          // Fisheye scale factor: Center / selected is largest, neighbors shrink smoothly
-          let scaleClass = 'scale-80 opacity-70';
+          // Only the selected tab is the largest icon.
+          // Centered preview icon shifts up slightly while scrolling.
+          let transformClasses = 'scale-95 opacity-80 translate-y-0';
           if (isSelected) {
-            scaleClass = 'scale-120 opacity-100 z-20';
-          } else if (distance === 1) {
-            scaleClass = 'scale-100 opacity-90 z-10';
-          } else if (distance === 2) {
-            scaleClass = 'scale-90 opacity-80 z-0';
+            transformClasses = 'scale-120 opacity-100 z-20 translate-y-0';
+          } else if (isCenterPreview) {
+            transformClasses = 'scale-100 opacity-95 z-10 -translate-y-2';
           }
 
           return (
@@ -185,14 +195,16 @@ export const MobileBottomDock: React.FC<MobileBottomDockProps> = ({
               data-dock-tab={tab.id}
               type="button"
               onClick={() => {
+                if (scrollSettleTimerRef.current) clearTimeout(scrollSettleTimerRef.current);
                 resetIdleTimer();
                 setActiveTab(tab.id);
+                setScrolledCenterTabId(tab.id);
                 centerTab(tab.id, true);
               }}
-              className={`snap-center shrink-0 w-11 h-11 rounded-full flex items-center justify-center transition-all duration-200 ease-out cursor-pointer active:scale-95 ${scaleClass} ${
+              className={`snap-center shrink-0 w-11 h-11 rounded-full flex items-center justify-center transition-all duration-200 ease-out cursor-pointer active:scale-95 border-0 ${transformClasses} ${
                 isSelected
-                  ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30 ring-2 ring-blue-500/40 font-bold'
-                  : 'bg-white/90 dark:bg-[#141724]/90 text-slate-700 dark:text-slate-300 border border-slate-200/80 dark:border-white/10 shadow-md shadow-black/15 hover:text-blue-600 dark:hover:text-white'
+                  ? 'bg-blue-600 text-white shadow-xl shadow-blue-600/35 font-bold'
+                  : 'bg-white/95 dark:bg-[#141724]/95 text-slate-700 dark:text-slate-300 shadow-md shadow-black/15 hover:text-blue-600 dark:hover:text-white'
               }`}
               title={tab.label}
               aria-label={tab.label}

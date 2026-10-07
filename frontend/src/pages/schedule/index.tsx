@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Calendar as CalendarIcon, Plus, RefreshCw,
+  Plus, RefreshCw,
 } from 'lucide-react';
 import { api } from '../../api';
 import { showToast } from '../../components/Toast';
@@ -208,12 +208,11 @@ export default function SchedulePage() {
   const sessionColumns = useScheduleColumns(openEdit);
 
   return (
-    <div className="h-full flex flex-col p-5 gap-5 overflow-y-auto bg-[#f1f5f9] dark:bg-[#09090b] text-slate-800 dark:text-slate-100 font-sans">
+    <div className="h-full flex flex-col p-3 sm:p-5 pb-28 sm:pb-5 gap-4 sm:gap-5 overflow-y-auto bg-[#f1f5f9] dark:bg-[#09090b] text-slate-800 dark:text-slate-100 font-sans">
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-xl font-black text-slate-900 dark:text-white flex items-center gap-2.5">
-            <CalendarIcon className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+          <h1 className="text-xl font-black text-slate-900 dark:text-white">
             BẢNG LỊCH HỌC
           </h1>
         </div>
@@ -238,14 +237,6 @@ export default function SchedulePage() {
           >
             <RefreshCw size={13} className={loading ? 'animate-spin text-blue-500' : 'text-blue-500'} />
             <span className="hidden sm:inline">Đồng Bộ Lịch</span>
-          </button>
-          <button
-            type="button"
-            onClick={loadData}
-            className="p-2.5 rounded-xl bg-white hover:bg-slate-50 dark:bg-[#141417] dark:hover:bg-[#1c1c21] text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white border-0 transition cursor-pointer shadow-xs hover:shadow-sm"
-            title="Tải lại lịch học"
-          >
-            <RefreshCw size={14} className={loading ? 'animate-spin text-blue-500 dark:text-blue-400' : ''} />
           </button>
           <button
             type="button"

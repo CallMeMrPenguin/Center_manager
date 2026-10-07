@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { BookOpen, Plus, Search, RefreshCw, AlertCircle, X } from 'lucide-react';
+import { Plus, Search, RefreshCw, AlertCircle, X } from 'lucide-react';
 import { ClassItem } from '../types';
 import { ClassCard } from './ClassCard';
 
@@ -34,21 +34,12 @@ export const ClassListView: React.FC<ClassListViewProps> = ({
       {/* HEADER SECTION */}
       <div className="flex flex-wrap items-center justify-between gap-3 sm:gap-4">
         <div>
-          <h1 className="text-lg sm:text-2xl font-black tracking-tight text-slate-900 dark:text-white flex items-center gap-2.5 sm:gap-3">
-            <BookOpen className="h-5 w-5 sm:h-7 sm:w-7 text-indigo-500 dark:text-indigo-400 shrink-0" />
-            <span>Quản Lý Lớp Học & Sơ Đồ Chỗ Ngồi</span>
+          <h1 className="text-lg sm:text-2xl font-black tracking-tight text-slate-900 dark:text-white">
+            Quản Lý Lớp Học & Sơ Đồ Chỗ Ngồi
           </h1>
         </div>
 
         <div className="flex items-center gap-2 sm:gap-3">
-          <button
-            onClick={onRefresh}
-            className="p-2 sm:p-2.5 rounded-xl bg-slate-200 hover:bg-slate-300 dark:bg-white/10 dark:hover:bg-white/20 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white border-0 shadow-xs transition cursor-pointer"
-            title="Làm mới danh sách lớp"
-          >
-            <RefreshCw size={14} className={loading ? 'animate-spin text-indigo-500 dark:text-indigo-400' : ''} />
-          </button>
-
           <button
             onClick={onCreateClass}
             className="flex items-center gap-1.5 bg-[#2563eb] hover:bg-[#1d4ed8] text-white px-3 sm:px-3.5 py-2 sm:py-2.5 rounded-xl font-bold text-xs border-0 shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer active:scale-95 shrink-0"
@@ -60,8 +51,8 @@ export const ClassListView: React.FC<ClassListViewProps> = ({
         </div>
       </div>
 
-      {/* SEARCH & FILTER */}
-      <div className="flex items-center justify-between bg-white dark:bg-[#141417] border border-slate-200 dark:border-[#27272a] p-2.5 sm:p-3.5 rounded-xl sm:rounded-2xl shadow-xs">
+      {/* SEARCH & FILTER (Clean single boundary, no box-in-box) */}
+      <div className="flex items-center justify-between gap-3">
         <div className="relative w-full max-w-full sm:max-w-md">
           <motion.div
             animate={{ scale: searchFocused ? 1.15 : 1 }}
@@ -82,7 +73,7 @@ export const ClassListView: React.FC<ClassListViewProps> = ({
             onBlur={() => setSearchFocused(false)}
             onChange={(e) => onSearchChange(e.target.value)}
             placeholder="Tìm lớp học theo tên lớp, giáo viên, phòng..."
-            className="w-full bg-slate-50 dark:bg-[#1c1c21] border border-slate-200 dark:border-[#27272a] text-slate-900 dark:text-white text-xs rounded-xl pl-10 pr-8 py-2 focus:outline-none focus:border-[#2563eb] focus:ring-2 focus:ring-[#2563eb]/25 placeholder:text-slate-400 dark:placeholder:text-slate-500 font-medium transition shadow-inner"
+            className="w-full bg-white dark:bg-[#141417] border border-slate-200 dark:border-[#27272a] text-slate-900 dark:text-white text-xs rounded-xl pl-10 pr-8 py-2.5 focus:outline-none focus:border-[#2563eb] focus:ring-2 focus:ring-[#2563eb]/25 placeholder:text-slate-400 dark:placeholder:text-slate-500 font-medium transition shadow-xs"
           />
           <AnimatePresence>
             {search && (
