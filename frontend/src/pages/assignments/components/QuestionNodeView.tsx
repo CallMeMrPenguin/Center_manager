@@ -134,28 +134,28 @@ export const QuestionNodeView: React.FC<QuestionNodeViewProps> = memo(({
                     : checkAnswerCorrect(cleanText, keyForThisQ) || checkAnswerCorrect(optLetter, keyForThisQ)
                   : false;
 
-                let optClass = 'bg-slate-200/70 hover:bg-slate-300/80 dark:bg-white/10 dark:hover:bg-white/15 text-slate-900 dark:text-white shadow-2xs hover:shadow-xs';
-                let circleClass = 'text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-900/40 group-hover:bg-blue-200 dark:group-hover:bg-blue-900/60';
+                let optClass = 'bg-transparent hover:bg-slate-100/70 dark:hover:bg-white/5 text-slate-800 dark:text-slate-200';
+                let circleClass = 'border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 bg-white dark:bg-[#121626] group-hover:border-blue-500 group-hover:text-blue-600';
                 let badgeLabel: React.ReactNode = null;
 
                 if (isSubmitted && showAnswerKeys && isAssigned) {
                   if (isSelected && isKey) {
-                    optClass = 'bg-emerald-600 text-white font-bold shadow-sm';
-                    circleClass = 'bg-white text-emerald-700 font-black';
-                    badgeLabel = <span className="ml-auto text-[10px] font-black px-2 py-0.5 rounded bg-emerald-800 text-white shrink-0">✓ Đúng</span>;
+                    optClass = 'bg-transparent text-emerald-700 dark:text-emerald-400 font-semibold';
+                    circleClass = 'bg-emerald-600 text-white border border-emerald-600 font-bold';
+                    badgeLabel = <span className="ml-auto text-[11px] font-bold text-emerald-600 dark:text-emerald-400 shrink-0">Đúng</span>;
                   } else if (isSelected && !isKey) {
-                    optClass = 'bg-rose-600 text-white font-bold shadow-sm';
-                    circleClass = 'bg-white text-rose-700 font-black';
-                    badgeLabel = <span className="ml-auto text-[10px] font-black px-2 py-0.5 rounded bg-rose-800 text-white shrink-0">✗ Sai</span>;
+                    optClass = 'bg-transparent text-rose-700 dark:text-rose-400 font-semibold';
+                    circleClass = 'bg-rose-600 text-white border border-rose-600 font-bold';
+                    badgeLabel = <span className="ml-auto text-[11px] font-bold text-rose-600 dark:text-rose-400 shrink-0">Sai</span>;
                   } else if (!isSelected && isKey) {
-                    optClass = 'bg-emerald-100 text-emerald-950 font-bold shadow-xs';
-                    circleClass = 'bg-emerald-200 text-emerald-900 font-black';
-                    badgeLabel = <span className="ml-auto text-[10px] font-black px-2 py-0.5 rounded bg-emerald-700 text-white shrink-0">★ Key</span>;
+                    optClass = 'bg-transparent text-emerald-700 dark:text-emerald-400 font-semibold';
+                    circleClass = 'border-2 border-emerald-600 text-emerald-600 dark:text-emerald-400 font-bold bg-white dark:bg-[#121626]';
+                    badgeLabel = <span className="ml-auto text-[11px] font-bold text-emerald-600 dark:text-emerald-400 shrink-0">Đáp án</span>;
                   }
                 } else if (isSelected) {
-                  // User selected state: Vivid blue background with crisp pure white text
-                  optClass = 'bg-[#2563eb] text-white font-bold shadow-xs';
-                  circleClass = 'bg-white text-[#2563eb] font-black';
+                  // Clean selected state: filled letter circle, highlighted option text, zero bulky pill background
+                  optClass = 'bg-transparent text-blue-600 dark:text-blue-400 font-semibold';
+                  circleClass = 'bg-blue-600 text-white border border-blue-600 font-bold';
                 }
 
                 return (
@@ -164,7 +164,7 @@ export const QuestionNodeView: React.FC<QuestionNodeViewProps> = memo(({
                     type="button"
                     disabled={isDisabled}
                     onClick={() => onSelectOption(qKey, optLetter)}
-                    className={`text-left flex items-center gap-2 transition cursor-pointer py-2 px-3 rounded-xl border-0 text-xs sm:text-sm group ${optClass}`}
+                    className={`text-left flex items-center gap-2.5 transition cursor-pointer py-1.5 px-2 rounded-lg border-0 text-xs sm:text-sm group ${optClass}`}
                   >
                     <span
                       className={`w-6 h-6 min-w-[24px] rounded-full flex items-center justify-center font-bold text-xs transition-colors shrink-0 ${circleClass}`}

@@ -93,30 +93,30 @@ export const ExerciseItemView: React.FC<ExerciseItemViewProps> = ({
                       key={optIdx}
                       type="button"
                       onClick={() => onSelectOption(exercise.id, opt)}
-                      className={`p-2.5 rounded-xl text-left border-0 shadow-2xs hover:shadow-xs flex items-center gap-2.5 transition cursor-pointer text-xs select-none ${
+                      className={`py-1.5 px-2 rounded-lg text-left border-0 flex items-center gap-2.5 transition cursor-pointer text-xs sm:text-sm select-none group ${
                         isOptCorrect
-                          ? 'bg-emerald-100 text-emerald-950 font-bold shadow-sm'
+                          ? 'bg-transparent text-emerald-700 dark:text-emerald-400 font-semibold'
                           : isOptWrong
-                          ? 'bg-rose-100 text-rose-950 font-bold line-through'
+                          ? 'bg-transparent text-rose-700 dark:text-rose-400 font-semibold line-through'
                           : isSelected
-                          ? 'bg-[#2563eb] text-white font-black shadow-sm'
-                          : 'bg-slate-100 hover:bg-slate-200 dark:bg-white/10 dark:hover:bg-white/15 text-slate-800 dark:text-slate-100'
+                          ? 'bg-transparent text-blue-600 dark:text-blue-400 font-semibold'
+                          : 'bg-transparent hover:bg-slate-100/70 dark:hover:bg-white/5 text-slate-800 dark:text-slate-200'
                       }`}
                     >
                       <span
-                        className={`w-5 h-5 rounded-lg flex items-center justify-center text-[10px] font-black shrink-0 ${
+                        className={`w-6 h-6 min-w-[24px] rounded-full flex items-center justify-center text-xs font-bold shrink-0 transition-colors ${
                           isOptCorrect
-                            ? 'bg-emerald-600 text-white'
+                            ? 'bg-emerald-600 text-white border border-emerald-600'
                             : isOptWrong
-                            ? 'bg-rose-600 text-white'
+                            ? 'bg-rose-600 text-white border border-rose-600'
                             : isSelected
-                            ? 'bg-indigo-600 text-white'
-                            : 'bg-slate-200 text-slate-700'
+                            ? 'bg-blue-600 text-white border border-blue-600'
+                            : 'border border-slate-300 dark:border-slate-600 bg-white dark:bg-[#121626] text-slate-700 dark:text-slate-300 group-hover:border-blue-500 group-hover:text-blue-600'
                         }`}
                       >
                         {optLetter}
                       </span>
-                      <span className="flex-1">
+                      <span className="flex-1 break-words">
                         {renderFormattedText(opt)}
                       </span>
                     </button>

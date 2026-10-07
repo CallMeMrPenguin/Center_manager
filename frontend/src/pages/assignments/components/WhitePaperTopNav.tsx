@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowLeft, Award, Save, Maximize2, Minimize2, PenTool, KeyRound, RefreshCw, Layers } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { Assignment, AssignmentQuizConfig } from '../types';
 import { ExamTimerHeader } from './ExamTimerHeader';
 
@@ -51,7 +51,7 @@ export const WhitePaperTopNav: React.FC<WhitePaperTopNavProps> = ({
   onSubmit,
 }) => {
   return (
-    <div className="sticky top-0 z-40 bg-white dark:bg-[#10172c] border-b border-slate-200 dark:border-[#1e2742] px-6 py-3 flex flex-wrap items-center justify-between gap-3 shadow-sm dark:shadow-lg -mx-6 -mt-6 mb-6 before:absolute before:-top-40 before:inset-x-0 before:h-40 before:bg-white dark:before:bg-[#10172c] before:pointer-events-none">
+    <div className="sticky top-0 z-40 bg-white dark:bg-[#10172c] border-b border-slate-200 dark:border-[#1e2742] px-6 py-3 flex flex-wrap items-center justify-between gap-3 shadow-xs -mx-6 -mt-6 mb-6 before:absolute before:-top-40 before:inset-x-0 before:h-40 before:bg-white dark:before:bg-[#10172c] before:pointer-events-none">
       <div className="flex items-center gap-3 min-w-0">
         <button
           type="button"
@@ -63,29 +63,23 @@ export const WhitePaperTopNav: React.FC<WhitePaperTopNavProps> = ({
         </button>
         <div className="min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <h3 className="text-sm font-black text-slate-900 dark:text-white truncate max-w-[240px] sm:max-w-md">
+            <h3 className="text-sm font-bold text-slate-900 dark:text-white truncate max-w-[240px] sm:max-w-md">
               {assignment.title}
             </h3>
             {assignmentType === 'practice' && (
-              <span className="text-[10px] uppercase font-black px-2 py-0.5 rounded-full bg-cyan-500/15 text-cyan-600 dark:text-cyan-300 border border-cyan-500/30">
-                Bài Ôn Luyện
+              <span className="text-[11px] font-bold px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 dark:bg-white/10 dark:text-slate-300">
+                Ôn luyện
               </span>
             )}
             {assignmentType === 'homework_2' && (
-              <span className="text-[10px] uppercase font-black px-2 py-0.5 rounded-full bg-rose-500/15 text-rose-600 dark:text-rose-300 border border-rose-500/30">
-                Bài Kiểm Tra (HW2)
-              </span>
-            )}
-            {quizConfig.assigned_sections && quizConfig.assigned_sections.length > 0 && (
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-500/15 text-blue-600 dark:text-blue-300 border border-blue-500/30 flex items-center gap-1">
-                <Layers size={10} />
-                <span>Giao {quizConfig.assigned_sections.length} bài</span>
+              <span className="text-[11px] font-bold px-2 py-0.5 rounded-md bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300">
+                Kiểm tra
               </span>
             )}
           </div>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-            Học sinh: <strong className="text-slate-800 dark:text-slate-200">{studentName}</strong> | Trạng thái:{' '}
-            <strong className="text-blue-600 dark:text-blue-300">
+            Học sinh: <strong className="text-slate-800 dark:text-slate-200">{studentName}</strong> • Trạng thái:{' '}
+            <strong className="text-blue-600 dark:text-blue-400 font-semibold">
               {isSubmitted ? `Đã nộp (${submissionCount} lần)` : 'Đang làm bài'}
             </strong>
           </p>
@@ -106,14 +100,13 @@ export const WhitePaperTopNav: React.FC<WhitePaperTopNavProps> = ({
           <button
             type="button"
             onClick={onToggleRetryWrong}
-            className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition cursor-pointer border ${
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer border ${
               retryWrongOnly
-                ? 'bg-amber-500/20 text-amber-700 dark:text-amber-300 border-amber-500/40 shadow-[0_0_10px_rgba(245,158,11,0.2)]'
-                : 'bg-slate-100 hover:bg-slate-200 dark:bg-white/5 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-white/10 hover:text-slate-900 dark:hover:text-white'
+                ? 'bg-amber-500/15 text-amber-700 dark:text-amber-300 border-amber-500/30'
+                : 'bg-slate-100 hover:bg-slate-200 dark:bg-white/5 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-white/10'
             }`}
           >
-            <RefreshCw size={13} className={retryWrongOnly ? 'animate-spin' : ''} />
-            <span>{retryWrongOnly ? 'Đang làm lại câu sai' : 'Làm lại câu sai'}</span>
+            {retryWrongOnly ? 'Đang làm lại câu sai' : 'Làm lại câu sai'}
           </button>
         )}
 
@@ -121,39 +114,35 @@ export const WhitePaperTopNav: React.FC<WhitePaperTopNavProps> = ({
           <button
             type="button"
             onClick={() => onEditAnswerKey(assignment)}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition cursor-pointer border bg-blue-500/15 hover:bg-blue-500/25 text-blue-600 dark:text-blue-300 border-blue-500/30 active:scale-95"
+            className="px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer border border-blue-200 dark:border-blue-900 bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/50"
           >
-            <KeyRound size={14} className="text-blue-500 dark:text-blue-400" />
-            <span>Sửa Đáp Án</span>
+            Sửa đáp án
           </button>
         )}
 
         <button
           type="button"
           onClick={onToggleCorrection}
-          className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition cursor-pointer border ${
+          className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer border ${
             isCorrectionMode
-              ? 'bg-amber-500/20 text-amber-700 dark:text-amber-300 border-amber-500/40 shadow-[0_0_10px_rgba(245,158,11,0.2)]'
-              : 'bg-slate-100 hover:bg-slate-200 dark:bg-white/5 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-white/10 hover:text-slate-900 dark:hover:text-white'
+              ? 'bg-amber-500/15 text-amber-700 dark:text-amber-300 border-amber-500/30'
+              : 'bg-slate-100 hover:bg-slate-200 dark:bg-white/5 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-white/10'
           }`}
         >
-          <PenTool size={14} />
-          <span>Bút Chấm</span>
+          Bút chấm
         </button>
 
         <button
           type="button"
           onClick={onToggleFullscreen}
-          className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 text-slate-700 dark:text-slate-200 text-xs font-bold border border-slate-200 dark:border-white/10 transition cursor-pointer active:scale-95"
+          className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 text-slate-700 dark:text-slate-200 text-xs font-semibold border border-slate-200 dark:border-white/10 transition cursor-pointer"
         >
-          {isFullscreen ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
-          <span>{isFullscreen ? 'Thu nhỏ' : 'Toàn màn hình'}</span>
+          {isFullscreen ? 'Thu nhỏ' : 'Toàn màn hình'}
         </button>
 
         {isSubmitted && (
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 text-xs font-black">
-            <Award size={15} />
-            <span>Điểm: {finalScore}/10.0</span>
+          <div className="px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 text-xs font-bold">
+            Điểm: {finalScore}/10.0
           </div>
         )}
 
@@ -162,10 +151,9 @@ export const WhitePaperTopNav: React.FC<WhitePaperTopNavProps> = ({
             type="button"
             onClick={onSubmit}
             disabled={isMaxAttemptsReached}
-            className="flex items-center gap-1.5 px-5 py-2 rounded-xl bg-[#2563eb] hover:bg-[#1d4ed8] disabled:opacity-40 text-white text-xs font-black shadow-[0_0_15px_rgba(37,99,235,0.4)] transition cursor-pointer active:scale-95"
+            className="px-4 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 disabled:opacity-40 text-white text-xs font-bold transition cursor-pointer"
           >
-            <Save size={14} />
-            <span>Nộp Bài</span>
+            Nộp bài
           </button>
         )}
       </div>

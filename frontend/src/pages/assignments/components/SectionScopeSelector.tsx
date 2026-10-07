@@ -1,5 +1,4 @@
 import React from 'react';
-import { Layers, CheckSquare, Square } from 'lucide-react';
 import { UlnSectionItem } from '../types';
 
 interface SectionScopeSelectorProps {
@@ -31,12 +30,11 @@ export const SectionScopeSelector: React.FC<SectionScopeSelectorProps> = ({
   const totalQuestions = sections.reduce((sum, s) => sum + (s.questionCount || 0), 0);
 
   return (
-    <div className="space-y-2.5 p-3.5 rounded-2xl bg-white border border-slate-200">
+    <div className="space-y-2.5 p-3.5 rounded-xl bg-white border border-slate-200">
       <div className="flex items-center justify-between gap-2 flex-wrap">
         <div className="flex items-center gap-2 flex-wrap">
-          <Layers size={14} className="text-indigo-600 shrink-0" />
-          <span className="text-xs font-bold text-slate-800">Phạm Vi Giao Bài (Từng Phần / Bài Tập)</span>
-          <span className="px-2 py-0.5 rounded-md text-[11px] font-black bg-indigo-50 text-indigo-700 border border-indigo-200">
+          <span className="text-xs font-bold text-slate-800">Phạm vi giao bài</span>
+          <span className="px-2 py-0.5 rounded-md text-[11px] font-semibold bg-slate-100 text-slate-700 border border-slate-200">
             Đã chọn {selectedSectionIds.length}/{totalSections} bài ({selectedQuestionCount}/{totalQuestions} câu)
           </span>
         </div>
@@ -46,7 +44,7 @@ export const SectionScopeSelector: React.FC<SectionScopeSelectorProps> = ({
             type="button"
             onClick={onSelectAll}
             disabled={isAllSelected}
-            className="text-[11px] font-bold text-indigo-600 hover:text-indigo-800 transition cursor-pointer disabled:opacity-40"
+            className="text-[11px] font-semibold text-blue-600 hover:text-blue-700 transition cursor-pointer disabled:opacity-40"
           >
             Chọn tất cả
           </button>
@@ -55,7 +53,7 @@ export const SectionScopeSelector: React.FC<SectionScopeSelectorProps> = ({
             type="button"
             onClick={onDeselectAll}
             disabled={isNoneSelected}
-            className="text-[11px] font-bold text-slate-500 hover:text-slate-800 transition cursor-pointer disabled:opacity-40"
+            className="text-[11px] font-semibold text-slate-500 hover:text-slate-700 transition cursor-pointer disabled:opacity-40"
           >
             Bỏ chọn
           </button>
@@ -73,24 +71,27 @@ export const SectionScopeSelector: React.FC<SectionScopeSelectorProps> = ({
             <div
               key={sec.id}
               onClick={() => onToggleSection(sec.id)}
-              className={`flex items-start gap-2.5 p-3 rounded-xl border transition cursor-pointer select-none ${
+              className={`flex items-start gap-2.5 p-3 rounded-lg border transition cursor-pointer select-none ${
                 isChecked
-                  ? 'bg-indigo-50/80 border-indigo-300 text-indigo-950 shadow-xs'
+                  ? 'bg-blue-50/60 border-blue-200 text-slate-900'
                   : 'bg-slate-50 border-slate-200 text-slate-700 hover:border-slate-300 hover:bg-slate-100'
               }`}
             >
-              <div className="mt-0.5 shrink-0 text-indigo-600">
-                {isChecked ? <CheckSquare size={16} /> : <Square size={16} />}
-              </div>
+              <input
+                type="checkbox"
+                checked={isChecked}
+                readOnly
+                className="mt-0.5 w-4 h-4 rounded text-blue-600 accent-blue-600 shrink-0 pointer-events-none"
+              />
               <div className="flex-1 min-w-0 space-y-1">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <span className={`text-[11px] font-black uppercase px-2 py-0.5 rounded ${
-                    isChecked ? 'bg-indigo-100 text-indigo-800 border border-indigo-200' : 'bg-white text-slate-700 border border-slate-200'
+                  <span className={`text-[11px] font-bold uppercase px-2 py-0.5 rounded ${
+                    isChecked ? 'bg-blue-100 text-blue-800 border border-blue-200' : 'bg-white text-slate-700 border border-slate-200'
                   }`}>
                     Bài {sec.id}
                   </span>
                   {qRangeStr && (
-                    <span className="text-[11px] font-mono font-bold text-amber-700">
+                    <span className="text-[11px] font-medium text-slate-600">
                       {qRangeStr}
                     </span>
                   )}

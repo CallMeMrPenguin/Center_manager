@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { X, KeyRound, Save, RefreshCw, AlertCircle, ChevronDown, ChevronRight, Check } from 'lucide-react';
+import { X, ChevronDown, ChevronRight } from 'lucide-react';
 import { Assignment } from '../types';
 import {
   extractAnswerKeysFromUln,
@@ -233,40 +233,27 @@ export const AnswerKeyModal: React.FC<AnswerKeyModalProps> = ({
     <div className="fixed inset-0 z-[110] bg-black/60 flex items-center justify-center p-3 sm:p-4 select-none font-sans">
       <div className="bg-white border border-slate-200 rounded-3xl w-full max-w-3xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden">
         {/* Header */}
-        <div className="p-5 border-b border-slate-200 flex items-center justify-between shrink-0 bg-slate-50">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-600">
-              <KeyRound size={20} />
-            </div>
-            <div>
-              <div className="flex items-center gap-2 flex-wrap">
-                <h2 className="text-base font-black text-slate-900">Chỉnh Sửa Đáp Án & Chấm Lại</h2>
-                <span className="text-xs font-mono font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
-                  {totalKeysFilled}/{totalQuestions} câu có đáp án
-                </span>
-              </div>
-              <p className="text-xs text-slate-500 mt-0.5 truncate max-w-md">
-                {assignment.title} — Phân loại rõ từng bài tập, câu hỏi và tự động chấm lại
-              </p>
-            </div>
+        <div className="px-5 py-4 border-b border-slate-200 flex items-center justify-between shrink-0 bg-slate-50">
+          <div className="flex items-center gap-2.5 flex-wrap">
+            <h2 className="text-sm font-bold text-slate-900">Chỉnh sửa đáp án</h2>
+            <span className="text-xs font-mono font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
+              {totalKeysFilled}/{totalQuestions} câu có đáp án
+            </span>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center transition cursor-pointer"
+            className="w-7 h-7 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center transition cursor-pointer"
           >
-            <X size={16} />
+            <X size={15} />
           </button>
         </div>
 
         {/* Tip & Search Bar */}
-        <div className="px-5 py-3 bg-slate-50 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3 shrink-0">
-          <div className="flex items-center gap-2 text-xs text-slate-600">
-            <AlertCircle size={14} className="text-blue-600 shrink-0" />
-            <span>
-              Dùng dấu <strong className="text-amber-600 font-mono">|</strong> để thêm nhiều phương án đúng (VD: <span className="font-mono text-emerald-600">A | B</span>).
-            </span>
-          </div>
+        <div className="px-5 py-2.5 bg-slate-50 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3 shrink-0">
+          <span className="text-xs text-slate-600">
+            Dùng dấu <strong className="text-slate-900 font-mono">|</strong> để thêm nhiều đáp án (VD: <span className="font-mono text-blue-600">A | B</span>)
+          </span>
 
           <input
             type="text"
@@ -376,18 +363,15 @@ export const AnswerKeyModal: React.FC<AnswerKeyModalProps> = ({
 
         {/* Footer Actions */}
         <div className="p-4 border-t border-slate-200 flex items-center justify-between gap-3 shrink-0 bg-slate-50">
-          <div className="flex items-center gap-2 text-xs text-slate-600">
-            <Check size={14} className="text-emerald-600" />
-            <span>
-              Sẵn sàng chấm điểm cho <strong>{totalKeysFilled}</strong> câu hỏi
-            </span>
-          </div>
+          <span className="text-xs text-slate-600 font-medium">
+            Sẵn sàng chấm điểm cho <strong>{totalKeysFilled}</strong> câu hỏi
+          </span>
 
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition cursor-pointer"
+              className="px-4 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition cursor-pointer"
             >
               Hủy
             </button>
@@ -395,10 +379,9 @@ export const AnswerKeyModal: React.FC<AnswerKeyModalProps> = ({
               type="button"
               onClick={handleSaveAndRegrade}
               disabled={saving}
-              className="flex items-center gap-1.5 px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-black shadow-md shadow-blue-500/20 transition cursor-pointer active:scale-95 disabled:opacity-50"
+              className="px-4 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition cursor-pointer disabled:opacity-50"
             >
-              {saving ? <RefreshCw size={14} className="animate-spin" /> : <Save size={14} />}
-              <span>{saving ? 'Đang chấm lại...' : 'Lưu Đáp Án & Chấm Lại'}</span>
+              {saving ? 'Đang chấm lại...' : 'Lưu và chấm lại'}
             </button>
           </div>
         </div>

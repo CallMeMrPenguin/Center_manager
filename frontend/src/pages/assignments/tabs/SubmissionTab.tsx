@@ -318,25 +318,24 @@ export const SubmissionTab: React.FC<SubmissionTabProps> = ({
             <button
               type="button"
               onClick={() => onEditAnswerKey(assignment)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 text-xs font-bold border border-amber-500/30 transition cursor-pointer"
+              className="px-3 py-1.5 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 text-xs font-semibold border border-amber-500/30 transition cursor-pointer"
               title="Chỉnh sửa đáp án & tự động tính lại điểm"
             >
-              <KeyRound size={14} />
-              <span>Sửa Đáp Án & Chấm Lại</span>
+              Sửa đáp án & chấm lại
             </button>
           )}
 
           <button
             type="button"
             onClick={() => handleMarkAll(1)}
-            className="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-bold transition cursor-pointer"
+            className="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-semibold transition cursor-pointer"
           >
             Tất cả đã nộp
           </button>
           <button
             type="button"
             onClick={() => handleMarkAll(0)}
-            className="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-bold transition cursor-pointer"
+            className="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-semibold transition cursor-pointer"
           >
             Hủy tất cả
           </button>
@@ -344,14 +343,13 @@ export const SubmissionTab: React.FC<SubmissionTabProps> = ({
             type="button"
             onClick={() => onSaveSubmissions(localList)}
             disabled={!isDirty}
-            className={`flex items-center gap-1.5 px-4 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
+            className={`px-4 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
               isDirty
-                ? 'bg-blue-600 hover:bg-blue-500 text-white shadow-sm'
+                ? 'bg-blue-600 hover:bg-blue-500 text-white shadow-xs'
                 : 'bg-white/5 text-slate-500 cursor-not-allowed'
             }`}
           >
-            <Save size={14} />
-            <span>Lưu Thay Đổi</span>
+            Lưu thay đổi
           </button>
         </div>
       </div>

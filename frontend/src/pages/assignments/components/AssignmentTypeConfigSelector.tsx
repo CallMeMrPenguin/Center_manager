@@ -12,10 +12,10 @@ interface AssignmentTypeConfigSelectorProps {
   onChangeProctoring: (enabled: boolean) => void;
 }
 
-const TYPE_OPTIONS: { id: AssignmentType; label: string; desc: string }[] = [
-  { id: 'practice', label: '1. Bài Ôn Luyện', desc: 'Không giới hạn thời gian / lần làm, xem đáp án tức thì & làm lại câu sai.' },
-  { id: 'homework_1', label: '2. Bài Về Nhà (HW1)', desc: 'Có hạn nộp, tự động ghi nhận điểm vào cột Homework 1 buổi tới.' },
-  { id: 'homework_2', label: '3. Bài Kiểm Tra (HW2)', desc: 'Giới hạn thời gian & số lần, theo dõi màn hình, điểm ghi vào cột Homework 2.' },
+const TYPE_OPTIONS: { id: AssignmentType; label: string }[] = [
+  { id: 'practice', label: 'Ôn luyện' },
+  { id: 'homework_1', label: 'Bài về nhà' },
+  { id: 'homework_2', label: 'Bài kiểm tra' },
 ];
 
 export const AssignmentTypeConfigSelector: React.FC<AssignmentTypeConfigSelectorProps> = ({
@@ -34,13 +34,13 @@ export const AssignmentTypeConfigSelector: React.FC<AssignmentTypeConfigSelector
     <div className="space-y-3 pt-2 border-t border-slate-100 dark:border-white/10">
       <div className="space-y-1.5">
         <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-          Kiểu Bài Giao <span className="text-rose-500 dark:text-rose-400">*</span>
+          Loại bài tập <span className="text-rose-500 dark:text-rose-400">*</span>
         </label>
 
         {/* Sliding Pill Segmented Control */}
         <div className="relative flex bg-slate-100 dark:bg-[#0d1018] p-0.5 rounded-lg border border-slate-200 dark:border-white/10 text-xs shrink-0 font-bold select-none shadow-[inset_0_1px_2px_rgba(0,0,0,0.05)]">
           <div
-            className="absolute top-0.5 bottom-0.5 rounded-md bg-blue-600 shadow-sm border border-blue-500/60 transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] pointer-events-none"
+            className="absolute top-0.5 bottom-0.5 rounded-md bg-blue-600 shadow-xs transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] pointer-events-none"
             style={{
               left: `calc((100% / 3) * ${activeIndex} + 1px)`,
               width: 'calc((100% / 3) - 2px)',
@@ -54,7 +54,7 @@ export const AssignmentTypeConfigSelector: React.FC<AssignmentTypeConfigSelector
                 type="button"
                 onClick={() => onChangeAssignmentType(opt.id)}
                 className={`flex-1 relative z-10 py-1.5 text-center transition-colors cursor-pointer text-xs ${
-                  active ? 'text-white font-black' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                  active ? 'text-white font-bold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                 }`}
               >
                 {opt.label}
@@ -62,10 +62,6 @@ export const AssignmentTypeConfigSelector: React.FC<AssignmentTypeConfigSelector
             );
           })}
         </div>
-
-        <p className="text-[11px] text-indigo-600 dark:text-indigo-300/80 px-1 font-medium">
-          {TYPE_OPTIONS[activeIndex]?.desc}
-        </p>
       </div>
 
       {/* Extra Config for Homework 2 */}
