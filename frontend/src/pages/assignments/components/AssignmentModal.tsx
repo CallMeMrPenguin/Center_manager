@@ -198,6 +198,7 @@ export const AssignmentModal: React.FC<AssignmentModalProps> = ({
                   value={dueDate}
                   onChange={setDueDate}
                   placeholder="Chọn hạn nộp..."
+                  align="right"
                   triggerClassName="bg-white border border-slate-300 focus:border-blue-600 text-slate-900"
                 />
               </div>

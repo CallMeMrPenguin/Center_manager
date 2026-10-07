@@ -35,7 +35,7 @@ export const DistributionCommentaryCard: React.FC<DistributionCommentaryCardProp
         <h4 className="text-sm font-black uppercase text-slate-900 dark:text-white tracking-wider">
           {evaluation.subjectTitle}
         </h4>
-        <span className="px-3 py-1 rounded-lg text-xs font-black bg-indigo-500/10 dark:bg-indigo-500/15 text-indigo-600 dark:text-indigo-300 border border-indigo-500/20 dark:border-indigo-500/30">
+        <span className="px-3 py-1 rounded-lg text-xs font-black bg-blue-500/10 dark:bg-blue-500/15 text-blue-600 dark:text-blue-300 border border-blue-500/20 dark:border-blue-500/30">
           {distributionRating}
         </span>
       </div>

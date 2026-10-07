@@ -6,6 +6,7 @@ import {
   WEEKDAY_NAMES,
   parseLocalDate,
   formatToISODate,
+  buildMonthCalendarDays,
 } from './datepicker/datePickerUtils';
 import { MonthGridPicker } from './datepicker/MonthGridPicker';
 
@@ -37,10 +38,34 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [direction, setDirection] = useState<number>(0);
+  const [autoAlign, setAutoAlign] = useState<'left' | 'right'>(align === 'right' ? 'right' : 'left');
+  const [openUpwards, setOpenUpwards] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const selectedDate = useMemo(() => parseLocalDate(value), [value]);
   const [viewDate, setViewDate] = useState<Date>(() => selectedDate || new Date());
+
+  useEffect(() => {
+    if (isOpen && containerRef.current) {
+      const rect = containerRef.current.getBoundingClientRect();
+      const scrollParent = containerRef.current.closest('.overflow-y-auto, .overflow-hidden, .fixed, [role="dialog"]');
+      const parentRect = scrollParent ? scrollParent.getBoundingClientRect() : null;
+
+      const boundaryRight = parentRect ? Math.min(window.innerWidth, parentRect.right) : window.innerWidth;
+      const spaceRight = boundaryRight - rect.left;
+
+      if (align === 'right' || spaceRight < 330) {
+        setAutoAlign('right');
+      } else {
+        setAutoAlign('left');
+      }
+
+      const boundaryBottom = parentRect ? Math.min(window.innerHeight, parentRect.bottom) : window.innerHeight;
+      const spaceBelow = boundaryBottom - rect.bottom;
+      const spaceAbove = rect.top - (parentRect ? parentRect.top : 0);
+      setOpenUpwards(spaceBelow < 340 && spaceAbove > 340);
+    }
+  }, [isOpen, align]);
 
   useEffect(() => {
     if (value) {
@@ -82,91 +107,15 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
   const cutoffDateStr = maxHighlightDate || todayISO;
 
   const daysInMonth = useMemo(() => {
-    const firstDay = new Date(currentYear, currentMonth, 1).getDay();
-    const totalDays = new Date(currentYear, currentMonth + 1, 0).getDate();
-    const prevMonthDays = new Date(currentYear, currentMonth, 0).getDate();
-
-    const days: Array<{
-      date: Date;
-      isoStr: string;
-      dayNumber: number;
-      isCurrentMonth: boolean;
-      isToday: boolean;
-      isSelected: boolean;
-      isStudyDay: boolean;
-    }> = [];
-
-    // Previous month overflow days
-    for (let i = firstDay - 1; i >= 0; i--) {
-      const d = new Date(currentYear, currentMonth - 1, prevMonthDays - i);
-      d.setHours(0, 0, 0, 0);
-      const iso = formatToISODate(d);
-      const dayOfWeek = d.getDay();
-      const isPastOrToday = iso <= cutoffDateStr;
-      const isStudyDay = isPastOrToday && (
-        highlightDaysOfWeek.includes(dayOfWeek) ||
-        highlightDates.includes(iso)
-      );
-
-      days.push({
-        date: d,
-        isoStr: iso,
-        dayNumber: prevMonthDays - i,
-        isCurrentMonth: false,
-        isToday: iso === todayISO,
-        isSelected: value === iso,
-        isStudyDay,
-      });
-    }
-
-    // Current month days
-    for (let i = 1; i <= totalDays; i++) {
-      const d = new Date(currentYear, currentMonth, i);
-      d.setHours(0, 0, 0, 0);
-      const iso = formatToISODate(d);
-      const dayOfWeek = d.getDay();
-      const isPastOrToday = iso <= cutoffDateStr;
-      const isStudyDay = isPastOrToday && (
-        highlightDaysOfWeek.includes(dayOfWeek) ||
-        highlightDates.includes(iso)
-      );
-
-      days.push({
-        date: d,
-        isoStr: iso,
-        dayNumber: i,
-        isCurrentMonth: true,
-        isToday: iso === todayISO,
-        isSelected: value === iso,
-        isStudyDay,
-      });
-    }
-
-    // Next month overflow days
-    const remainingDays = 42 - days.length;
-    for (let i = 1; i <= remainingDays; i++) {
-      const d = new Date(currentYear, currentMonth + 1, i);
-      d.setHours(0, 0, 0, 0);
-      const iso = formatToISODate(d);
-      const dayOfWeek = d.getDay();
-      const isPastOrToday = iso <= cutoffDateStr;
-      const isStudyDay = isPastOrToday && (
-        highlightDaysOfWeek.includes(dayOfWeek) ||
-        highlightDates.includes(iso)
-      );
-
-      days.push({
-        date: d,
-        isoStr: iso,
-        dayNumber: i,
-        isCurrentMonth: false,
-        isToday: iso === todayISO,
-        isSelected: value === iso,
-        isStudyDay,
-      });
-    }
-
-    return days;
+    return buildMonthCalendarDays({
+      currentYear,
+      currentMonth,
+      value,
+      todayISO,
+      cutoffDateStr,
+      highlightDaysOfWeek,
+      highlightDates,
+    });
   }, [currentYear, currentMonth, value, highlightDaysOfWeek, highlightDates, cutoffDateStr, todayISO]);
 
   const handleSelectDate = (isoStr: string) => {
@@ -238,11 +187,15 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: -8 }}
+            initial={{ opacity: 0, scale: 0.95, y: openUpwards ? 8 : -8 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: -6 }}
+            exit={{ opacity: 0, scale: 0.95, y: openUpwards ? 6 : -6 }}
             transition={{ type: 'spring', stiffness: 450, damping: 30 }}
-            className={`absolute top-full ${align === 'right' ? 'right-0 origin-top-right' : 'left-0 origin-top-left'} mt-2 z-[9999] w-80 p-4 bg-white dark:bg-[#181d2e] rounded-2xl shadow-[0_20px_50px_rgba(15,23,42,0.18)] dark:shadow-[0_24px_64px_rgba(0,0,0,0.9)] border-0 outline-none select-none space-y-3`}
+            className={`absolute ${openUpwards ? 'bottom-full mb-2' : 'top-full mt-2'} ${autoAlign === 'right' ? 'right-0' : 'left-0'} ${
+              openUpwards
+                ? autoAlign === 'right' ? 'origin-bottom-right' : 'origin-bottom-left'
+                : autoAlign === 'right' ? 'origin-top-right' : 'origin-top-left'
+            } z-[9999] w-80 p-4 bg-white dark:bg-[#181d2e] rounded-2xl shadow-[0_20px_50px_rgba(15,23,42,0.18)] dark:shadow-[0_24px_64px_rgba(0,0,0,0.9)] border-0 outline-none select-none space-y-3`}
           >
             {mode === 'month' ? (
               <MonthGridPicker

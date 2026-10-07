@@ -234,7 +234,7 @@ export const StudentGradeHistoryTable: React.FC<StudentGradeHistoryTableProps> =
         <div className="text-center">
           <button
             onClick={(e) => { e.stopPropagation(); onOpenEditModal(row.original); }}
-            className="px-2.5 py-1 rounded-lg bg-indigo-500/15 hover:bg-indigo-500/25 text-indigo-700 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 transition cursor-pointer border border-indigo-500/30 inline-flex items-center gap-1 text-[11px] font-black"
+            className="px-2.5 py-1 rounded-lg bg-blue-500/15 hover:bg-blue-500/25 text-blue-700 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition cursor-pointer border border-blue-500/30 inline-flex items-center gap-1 text-[11px] font-black"
             title="Sửa điểm buổi học này"
           >
             <Edit3 size={12} />
@@ -249,7 +249,7 @@ export const StudentGradeHistoryTable: React.FC<StudentGradeHistoryTableProps> =
     <div className={`bg-white dark:bg-[#141417] border-0 rounded-2xl flex flex-col shadow-sm dark:shadow-xl mb-8 transition-colors ${hasSelectedStudent ? 'animate-cascade-5' : 'animate-cascade-4'}`}>
       <div className="px-5 py-4 border-b border-slate-100 dark:border-white/5 flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <History size={18} className="text-indigo-500 dark:text-indigo-400" />
+          <History size={18} className="text-blue-500 dark:text-blue-400" />
           <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider">
             {selectedStudentObj
               ? `LỊCH SỬ ĐIỂM SỐ & ĐIỂM DANH — HỌC SINH: ${selectedStudentObj.full_name.toUpperCase()}`
@@ -258,7 +258,7 @@ export const StudentGradeHistoryTable: React.FC<StudentGradeHistoryTableProps> =
           </h3>
         </div>
         {selectedStudentObj && (
-          <span className="text-xs font-extrabold text-indigo-300 bg-indigo-500/10 px-3 py-1 rounded-xl border border-indigo-500/20">
+          <span className="text-xs font-extrabold text-blue-700 dark:text-blue-300 bg-blue-500/10 px-3 py-1 rounded-xl border border-blue-500/20">
             Tổng cộng: {sessionRecords.length} buổi học ({stats.sessionCount} có mặt, {sessionRecords.length - stats.sessionCount} vắng mặt)
           </span>
         )}

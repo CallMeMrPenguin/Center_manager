@@ -319,13 +319,13 @@ export const StudentRankingsTable: React.FC<StudentRankingsTableProps> = React.m
     <div className={`bg-white dark:bg-[#141417] border-0 rounded-2xl flex flex-col shadow-sm dark:shadow-xl mb-8 transition-colors ${hasSelectedStudent ? 'animate-cascade-4' : 'animate-cascade-3'}`}>
       <div className="px-5 py-4 border-b border-slate-100 dark:border-white/5 flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <GraduationCap size={18} className="text-indigo-500 dark:text-indigo-400" />
+          <GraduationCap size={18} className="text-blue-500 dark:text-blue-400" />
           <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider">
             BẢNG XẾP HẠNG VÀ CHI TIẾT ĐIỂM SỐ HỌC SINH
           </h3>
         </div>
         <div className="flex items-center gap-2">
-          <GraduationCap size={15} className="text-indigo-400 shrink-0" />
+          <GraduationCap size={15} className="text-blue-400 shrink-0" />
           <CustomSelect
             value={selectedClassId}
             onChange={(val) => { setSelectedClassId(String(val)); setSelectedStudentId(''); }}
@@ -371,7 +371,7 @@ export const StudentRankingsTable: React.FC<StudentRankingsTableProps> = React.m
         onExportExcel={handleExportRankingsExcel}
         getRowClassName={(row: any) =>
           String(row.student_id) === String(selectedStudentId)
-            ? '!bg-indigo-500/20 dark:!bg-indigo-600/30 hover:!bg-indigo-500/30 dark:hover:!bg-indigo-600/40 font-black ring-1 ring-inset ring-indigo-500/60 shadow-inner'
+            ? '!bg-blue-500/15 dark:!bg-blue-600/25 hover:!bg-blue-500/25 dark:hover:!bg-blue-600/35 font-black ring-1 ring-inset ring-blue-500/50 shadow-inner'
             : ''
         }
       />

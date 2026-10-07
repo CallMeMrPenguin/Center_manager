@@ -107,14 +107,14 @@ export const StudentProfileHeader: React.FC<StudentProfileHeaderProps> = ({
         {/* Left: Profile Pic & Info */}
         <div className="flex items-center gap-4 min-w-0">
           {/* Avatar */}
-          <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-br from-indigo-600 to-purple-600 text-white font-black text-xl sm:text-2xl flex items-center justify-center shadow-lg shrink-0">
+          <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white font-black text-xl sm:text-2xl flex items-center justify-center shadow-lg shrink-0">
             {student.full_name?.slice(0, 2)?.toUpperCase() || 'HS'}
           </div>
 
           {/* Identity Info */}
           <div className="min-w-0 space-y-1">
             <div className="flex flex-wrap items-center gap-3">
-              <span className="font-mono text-xs font-bold text-indigo-600 dark:text-indigo-400">
+              <span className="font-mono text-xs font-bold text-blue-600 dark:text-blue-400">
                 ID: HS-{studentIdStr}
               </span>
               <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
@@ -128,7 +128,7 @@ export const StudentProfileHeader: React.FC<StudentProfileHeaderProps> = ({
                 {student.full_name}
               </h2>
               {student.nickname && (
-                <span className="text-lg font-bold text-indigo-600 dark:text-indigo-300">
+                <span className="text-lg font-bold text-blue-600 dark:text-blue-300">
                   ({student.nickname})
                 </span>
               )}

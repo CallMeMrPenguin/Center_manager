@@ -32,3 +32,109 @@ export const formatToISODate = (d: Date): string => {
   const day = String(d.getDate()).padStart(2, '0');
   return `${y}-${m}-${day}`;
 };
+
+export interface CalendarDayItem {
+  date: Date;
+  isoStr: string;
+  dayNumber: number;
+  isCurrentMonth: boolean;
+  isToday: boolean;
+  isSelected: boolean;
+  isStudyDay: boolean;
+}
+
+export function buildMonthCalendarDays({
+  currentYear,
+  currentMonth,
+  value,
+  todayISO,
+  cutoffDateStr,
+  highlightDaysOfWeek,
+  highlightDates,
+}: {
+  currentYear: number;
+  currentMonth: number;
+  value: string;
+  todayISO: string;
+  cutoffDateStr: string;
+  highlightDaysOfWeek: number[];
+  highlightDates: string[];
+}): CalendarDayItem[] {
+  const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+  const totalDays = new Date(currentYear, currentMonth + 1, 0).getDate();
+  const prevMonthDays = new Date(currentYear, currentMonth, 0).getDate();
+
+  const days: CalendarDayItem[] = [];
+
+  // Previous month overflow days
+  for (let i = firstDay - 1; i >= 0; i--) {
+    const d = new Date(currentYear, currentMonth - 1, prevMonthDays - i);
+    d.setHours(0, 0, 0, 0);
+    const iso = formatToISODate(d);
+    const dayOfWeek = d.getDay();
+    const isPastOrToday = iso <= cutoffDateStr;
+    const isStudyDay = isPastOrToday && (
+      highlightDaysOfWeek.includes(dayOfWeek) ||
+      highlightDates.includes(iso)
+    );
+
+    days.push({
+      date: d,
+      isoStr: iso,
+      dayNumber: prevMonthDays - i,
+      isCurrentMonth: false,
+      isToday: iso === todayISO,
+      isSelected: iso === value,
+      isStudyDay,
+    });
+  }
+
+  // Current month days
+  for (let dayNum = 1; dayNum <= totalDays; dayNum++) {
+    const d = new Date(currentYear, currentMonth, dayNum);
+    d.setHours(0, 0, 0, 0);
+    const iso = formatToISODate(d);
+    const dayOfWeek = d.getDay();
+    const isPastOrToday = iso <= cutoffDateStr;
+    const isStudyDay = isPastOrToday && (
+      highlightDaysOfWeek.includes(dayOfWeek) ||
+      highlightDates.includes(iso)
+    );
+
+    days.push({
+      date: d,
+      isoStr: iso,
+      dayNumber: dayNum,
+      isCurrentMonth: true,
+      isToday: iso === todayISO,
+      isSelected: iso === value,
+      isStudyDay,
+    });
+  }
+
+  // Next month overflow days (fill to 35 or 42 cells)
+  const remainingCells = (7 - (days.length % 7)) % 7;
+  for (let i = 1; i <= remainingCells; i++) {
+    const d = new Date(currentYear, currentMonth + 1, i);
+    d.setHours(0, 0, 0, 0);
+    const iso = formatToISODate(d);
+    const dayOfWeek = d.getDay();
+    const isPastOrToday = iso <= cutoffDateStr;
+    const isStudyDay = isPastOrToday && (
+      highlightDaysOfWeek.includes(dayOfWeek) ||
+      highlightDates.includes(iso)
+    );
+
+    days.push({
+      date: d,
+      isoStr: iso,
+      dayNumber: i,
+      isCurrentMonth: false,
+      isToday: iso === todayISO,
+      isSelected: iso === value,
+      isStudyDay,
+    });
+  }
+
+  return days;
+}

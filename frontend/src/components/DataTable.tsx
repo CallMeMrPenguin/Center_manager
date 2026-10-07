@@ -1415,7 +1415,7 @@ export function DataTable<TData>({
                                   ${isLastRow && isFirstCell ? 'rounded-bl-xl' : ''}
                                   ${isLastRow && isLastCell ? 'rounded-br-xl' : ''}
                                   group-hover:bg-[#dbeafe] dark:group-hover:bg-[#1e284a] transition-colors duration-150
-                                  ${isFirstCell ? `before:absolute before:left-0 before:top-0 before:bottom-0 before:w-1.5 ${isCustomHighlighted ? 'before:bg-indigo-600 dark:before:bg-indigo-400 before:opacity-100' : 'before:bg-blue-600 dark:before:bg-blue-400 before:opacity-0 group-hover:before:opacity-100'} before:transition-opacity` : ''}
+                                  ${isFirstCell ? `before:absolute before:left-0 before:top-0 before:bottom-0 before:w-1.5 ${isCustomHighlighted ? 'before:bg-blue-600 dark:before:bg-blue-400 before:opacity-100' : 'before:bg-blue-600 dark:before:bg-blue-400 before:opacity-0 group-hover:before:opacity-100'} before:transition-opacity` : ''}
                                 `}
                                 style={{
                                   boxSizing: 'border-box',

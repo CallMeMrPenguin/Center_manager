@@ -258,7 +258,7 @@ export const ScoreFluctuationsSection: React.FC<ScoreFluctuationsSectionProps> =
           onRowClick={(r: any) => onSelectRankingStudent(r.student_id)}
           getRowClassName={(row: any) =>
             String(row.student_id) === String(selectedStudentId)
-              ? '!bg-indigo-500/20 dark:!bg-indigo-600/30 hover:!bg-indigo-500/30 dark:hover:!bg-indigo-600/40 font-black ring-1 ring-inset ring-indigo-500/60 shadow-inner'
+              ? '!bg-blue-500/15 dark:!bg-blue-600/25 hover:!bg-blue-500/25 dark:hover:!bg-blue-600/35 font-black ring-1 ring-inset ring-blue-500/50 shadow-inner'
               : ''
           }
         />
