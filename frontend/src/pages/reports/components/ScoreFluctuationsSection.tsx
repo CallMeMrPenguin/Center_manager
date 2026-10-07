@@ -127,11 +127,9 @@ export const ScoreFluctuationsSection: React.FC<ScoreFluctuationsSectionProps> =
       meta: { headerText: 'Họ và Tên', exportValue: (r: any) => `${r.full_name}${r.nickname ? ` (${r.nickname})` : ''}` },
       cell: ({ row }) => {
         const r = row.original;
-        const isSelected = String(r.student_id) === selectedStudentId;
         return (
           <div className="font-extrabold text-slate-900 dark:text-white text-sm flex items-center justify-between gap-2">
             <span>{r.full_name}{r.nickname ? ` - ${r.nickname}` : ''}</span>
-            {isSelected && <span className="text-[10px] text-indigo-500 dark:text-indigo-400 bg-indigo-500/10 dark:bg-indigo-500/20 px-2 py-0.5 rounded font-mono font-bold">Đang chọn</span>}
           </div>
         );
       },
@@ -258,6 +256,11 @@ export const ScoreFluctuationsSection: React.FC<ScoreFluctuationsSectionProps> =
           pageSize={10}
           borderless={true}
           onRowClick={(r: any) => onSelectRankingStudent(r.student_id)}
+          getRowClassName={(row: any) =>
+            String(row.student_id) === String(selectedStudentId)
+              ? '!bg-indigo-500/20 dark:!bg-indigo-600/30 hover:!bg-indigo-500/30 dark:hover:!bg-indigo-600/40 font-black ring-1 ring-inset ring-indigo-500/60 shadow-inner'
+              : ''
+          }
         />
       )}
     </div>

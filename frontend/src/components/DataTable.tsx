@@ -136,6 +136,7 @@ export interface DataTableProps<TData> {
   exportFilename?: string;
   tableId?: string;
   borderless?: boolean;
+  getRowClassName?: (row: TData, index: number) => string | undefined;
 }
 
 function IndeterminateCheckbox({
@@ -198,7 +199,7 @@ function DraggableHeader({
     <th
       ref={setNodeRef}
       style={style}
-      className={`select-none relative border-b-2 border-slate-300 dark:border-[#27272a] bg-slate-100 dark:bg-[#18181b] ${
+      className={`select-none relative border-b-2 border-slate-300 dark:border-[#27272a] bg-slate-100 dark:bg-[#18181b] font-bold sm:font-extrabold text-slate-900 dark:text-slate-100 ${
         isPinned ? 'bg-slate-100 dark:bg-[#18181b]' : ''
       }`}
     >
@@ -209,10 +210,10 @@ function DraggableHeader({
           <div
             {...(enableReorder ? { ...attributes, ...listeners } : {})}
             style={{ touchAction: enableReorder ? 'none' : 'auto' }}
-            className={`group flex items-center ${align === 'left' ? 'justify-start text-left' : 'justify-center text-center'} gap-1.5 w-full py-2 px-1 text-slate-900 dark:text-slate-100 ${
+            className={`group flex items-center ${align === 'left' ? 'justify-start text-left' : 'justify-center text-center'} gap-1.5 w-full py-2 px-1 text-slate-900 dark:text-slate-100 font-bold sm:font-extrabold text-xs sm:text-sm ${
               isCustomHeader
-                ? 'font-normal overflow-visible'
-                : 'text-xs sm:text-sm font-semibold tracking-normal whitespace-nowrap overflow-hidden'
+                ? 'overflow-visible'
+                : 'tracking-normal whitespace-nowrap overflow-hidden'
             } ${enableReorder ? 'cursor-grab active:cursor-grabbing hover:text-blue-600 dark:hover:text-white transition-colors' : ''}`}
             title={enableReorder ? 'Giữ chuột và kéo để thay đổi thứ tự cột' : undefined}
           >
@@ -718,6 +719,7 @@ export function DataTable<TData>({
   exportFilename = 'export',
   tableId,
   borderless = false,
+  getRowClassName,
 }: DataTableProps<TData>) {
 
   // ── Unified Layout State Persistence (Width + Visibility + Order + Alignment)
@@ -1298,7 +1300,7 @@ export function DataTable<TData>({
                   </colgroup>
 
                   {/* ── THEAD (All headers centered by default) ────────────────── */}
-                  <thead className={`${borderless ? 'bg-slate-100/80 dark:bg-white/5 border-b-0' : 'bg-slate-200 dark:bg-[#18181b] border-b-2 border-slate-300 dark:border-[#27272a]'} ${stickyHeader ? 'sticky top-0 z-20' : ''}`}>
+                  <thead className={`${borderless ? 'bg-slate-100/80 dark:bg-white/5 border-b-0' : 'bg-slate-200 dark:bg-[#18181b] border-b-2 border-slate-300 dark:border-[#27272a]'} font-bold sm:font-extrabold text-slate-900 dark:text-slate-100 ${stickyHeader ? 'sticky top-0 z-20' : ''}`}>
                     {table.getHeaderGroups().map(headerGroup => (
                       <tr key={headerGroup.id}>
                         {headerGroup.headers.map(header => {
@@ -1321,7 +1323,7 @@ export function DataTable<TData>({
                               isAnyColumnResizing={isAnyColumnResizing}
                             >
                               <div
-                                className={`inline-flex items-center justify-center gap-1.5 w-full max-w-full ${
+                                className={`inline-flex items-center justify-center gap-1.5 w-full max-w-full font-bold sm:font-extrabold text-slate-900 dark:text-slate-100 ${
                                   header.column.getCanSort() ? 'cursor-pointer select-none hover:text-slate-900 dark:hover:text-white transition-colors' : ''
                                 }`}
                                 onClick={header.column.getCanSort() ? header.column.getToggleSortingHandler() : undefined}
@@ -1368,18 +1370,24 @@ export function DataTable<TData>({
                       <tr><td style={{ height: paddingTop }} colSpan={allColumns.length} /></tr>
                     )}
 
-                    {(useVirt ? virtualRows!.map(vr => allRows[vr.index]) : allRows).map((row, rowIdx) => (
+                    {(useVirt ? virtualRows!.map(vr => allRows[vr.index]) : allRows).map((row, rowIdx) => {
+                      const customRowClass = getRowClassName ? (getRowClassName(row.original, rowIdx) || '') : '';
+                      const isCustomHighlighted = Boolean(customRowClass);
+
+                      return (
                       <Fragment key={row.id}>
                         <tr
-                          data-selected={row.getIsSelected() ? 'true' : undefined}
+                          data-selected={row.getIsSelected() || (isCustomHighlighted ? 'true' : undefined)}
                           className={`
                             group transition-colors duration-150
                             ${onRowClick ? 'cursor-pointer' : ''}
-                            ${row.getIsSelected()
-                              ? 'bg-blue-500/15 hover:bg-blue-500/25 dark:bg-blue-500/20 dark:hover:bg-blue-500/30'
-                              : rowIdx % 2 === 0
-                              ? 'bg-white dark:bg-[#141417] hover:bg-[#dbeafe] dark:hover:bg-[#1e284a]'
-                              : 'bg-slate-100/70 dark:bg-[#18181c] hover:bg-[#dbeafe] dark:hover:bg-[#1e284a]'}
+                            ${customRowClass ? customRowClass : (
+                              row.getIsSelected()
+                                ? 'bg-blue-500/15 hover:bg-blue-500/25 dark:bg-blue-500/20 dark:hover:bg-blue-500/30'
+                                : rowIdx % 2 === 0
+                                ? 'bg-white dark:bg-[#141417] hover:bg-[#dbeafe] dark:hover:bg-[#1e284a]'
+                                : 'bg-slate-100/70 dark:bg-[#18181c] hover:bg-[#dbeafe] dark:hover:bg-[#1e284a]'
+                            )}
                           `}
                           onClick={() => onRowClick?.(row.original)}
                         >
@@ -1407,7 +1415,7 @@ export function DataTable<TData>({
                                   ${isLastRow && isFirstCell ? 'rounded-bl-xl' : ''}
                                   ${isLastRow && isLastCell ? 'rounded-br-xl' : ''}
                                   group-hover:bg-[#dbeafe] dark:group-hover:bg-[#1e284a] transition-colors duration-150
-                                  ${isFirstCell ? 'before:absolute before:left-0 before:top-0 before:bottom-0 before:w-1.5 before:bg-blue-600 dark:before:bg-blue-400 before:opacity-0 group-hover:before:opacity-100 before:transition-opacity' : ''}
+                                  ${isFirstCell ? `before:absolute before:left-0 before:top-0 before:bottom-0 before:w-1.5 ${isCustomHighlighted ? 'before:bg-indigo-600 dark:before:bg-indigo-400 before:opacity-100' : 'before:bg-blue-600 dark:before:bg-blue-400 before:opacity-0 group-hover:before:opacity-100'} before:transition-opacity` : ''}
                                 `}
                                 style={{
                                   boxSizing: 'border-box',
@@ -1432,7 +1440,8 @@ export function DataTable<TData>({
                           </tr>
                         )}
                       </Fragment>
-                    ))}
+                      );
+                    })}
 
                     {/* Virtual padding bottom */}
                     {useVirt && paddingBottom > 0 && (

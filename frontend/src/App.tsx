@@ -284,18 +284,22 @@ function AppContent() {
           <span className="text-slate-400 dark:text-slate-500">Đang đăng nhập:</span>
           {(() => {
             const roleLabel = isStudent ? 'Học sinh' : (currentUser.rawRole || (currentUser.role === 'admin' ? 'Quản trị viên' : 'Giáo viên'));
-            const isNameSameAsRole = currentUser.name?.trim().toLowerCase() === roleLabel.trim().toLowerCase();
-            const displayName = isNameSameAsRole && currentUser.username ? `@${currentUser.username}` : (currentUser.name || 'Người dùng');
-            const showBadge = !isNameSameAsRole || Boolean(currentUser.username);
+            const isNameSameAsRole = (currentUser.name || '').trim().toLowerCase() === roleLabel.trim().toLowerCase();
+            const isAdmin = currentUser.role === 'admin' || currentUser.username === 'admin';
+
+            if (isAdmin || isNameSameAsRole) {
+              const adminName = currentUser.name && currentUser.name.toLowerCase() !== 'admin' ? currentUser.name : 'Quản Trị Viên';
+              return (
+                <strong className="text-indigo-600 dark:text-indigo-300 font-bold">{adminName}</strong>
+              );
+            }
 
             return (
               <>
-                <strong className="text-indigo-600 dark:text-indigo-300 font-bold">{displayName}</strong>
-                {showBadge && (
-                  <span className={`text-[10px] px-2 py-0.5 rounded-full font-black ${isStudent ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300' : 'bg-indigo-500/15 text-indigo-700 dark:text-indigo-300'}`}>
-                    {roleLabel}
-                  </span>
-                )}
+                <strong className="text-indigo-600 dark:text-indigo-300 font-bold">{currentUser.name || currentUser.username || 'Người dùng'}</strong>
+                <span className={`text-[10px] px-2 py-0.5 rounded-full font-black ${isStudent ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300' : 'bg-indigo-500/15 text-indigo-700 dark:text-indigo-300'}`}>
+                  {roleLabel}
+                </span>
               </>
             );
           })()}

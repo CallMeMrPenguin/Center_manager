@@ -35,8 +35,10 @@ chown -R caddy:caddy /var/www/center_manager || true
 chmod -R 755 /var/www/center_manager
 
 echo "=== [4/4] Updating and reloading Caddy Web Server ==="
-cat << 'EOF' > /etc/caddy/Caddyfile
-upkidscentermanager.io.vn, www.upkidscentermanager.io.vn, :80 {
+mkdir -p /etc/caddy/conf.d
+
+cat << 'EOF' > /etc/caddy/conf.d/center_manager.caddy
+upkidscentermanager.io.vn, www.upkidscentermanager.io.vn {
     handle /api/* {
         reverse_proxy localhost:8000
     }
@@ -55,7 +57,19 @@ upkidscentermanager.io.vn, www.upkidscentermanager.io.vn, :80 {
 }
 EOF
 
-systemctl restart caddy
+# Ensure /etc/caddy/Caddyfile imports /etc/caddy/conf.d/*.caddy without overwriting other sites
+if [ ! -f /etc/caddy/Caddyfile ]; then
+    echo "import /etc/caddy/conf.d/*.caddy" > /etc/caddy/Caddyfile
+elif ! grep -q "conf.d" /etc/caddy/Caddyfile 2>/dev/null; then
+    # If Caddyfile already has direct config, migrate safely
+    if grep -q "upkidscentermanager.io.vn" /etc/caddy/Caddyfile 2>/dev/null; then
+        echo "import /etc/caddy/conf.d/*.caddy" > /etc/caddy/Caddyfile
+    else
+        echo -e "\nimport /etc/caddy/conf.d/*.caddy" >> /etc/caddy/Caddyfile
+    fi
+fi
+
+systemctl reload caddy || systemctl restart caddy
 
 # Setup persistent background Auto-Pull systemd daemon
 PROJECT_DIR=$(pwd)

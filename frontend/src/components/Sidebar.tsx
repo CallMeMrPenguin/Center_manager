@@ -296,12 +296,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
             {isSidebarExpanded && (
               <div className="flex flex-col text-left overflow-hidden min-w-0">
                 <span className="text-xs font-black text-slate-900 truncate leading-tight">
-                  {currentUser?.name || 'Center Manager'}
+                  {currentUser?.name && currentUser.name.toLowerCase() !== 'admin' ? currentUser.name : 'Quản Trị Viên'}
                 </span>
                 <span className="text-[10px] font-semibold text-blue-600 truncate">
-                  {currentUser?.name && currentUser.name.trim().toLowerCase().startsWith('quản trị') && currentUser.username
-                    ? `@${currentUser.username}`
-                    : (currentUser?.rawRole || (currentUser?.role === 'admin' ? 'Quản trị viên' : 'Học sinh'))}
+                  {currentUser?.role === 'admin' || (currentUser?.name && currentUser.name.trim().toLowerCase().startsWith('quản trị'))
+                    ? 'Quản trị hệ thống'
+                    : (currentUser?.rawRole || 'Học sinh')}
                 </span>
               </div>
             )}
