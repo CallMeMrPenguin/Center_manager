@@ -57,13 +57,29 @@ EOF
 
 systemctl restart caddy
 
-# Setup post-merge hook so future 'git pull' automatically runs this!
-mkdir -p .git/hooks
-cat << 'HOOK' > .git/hooks/post-merge
-#!/usr/bin/env bash
-bash update.sh
-HOOK
-chmod +x .git/hooks/post-merge
+# Setup persistent background Auto-Pull systemd daemon
+PROJECT_DIR=$(pwd)
+cat << EOF > /etc/systemd/system/center-autopull.service
+[Unit]
+Description=Center Manager Auto-Pull Service
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=${PROJECT_DIR}
+ExecStart=/bin/bash ${PROJECT_DIR}/auto_pull.sh
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+systemctl daemon-reload
+systemctl enable center-autopull.service
+systemctl restart center-autopull.service
+echo "Background Auto-Pull daemon activated! (Checks GitHub every 60s)"
 
 echo "=========================================================="
 echo " ALL DATA IMPORTED & UI UPDATED SUCCESSFULLY!"
