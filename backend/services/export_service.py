@@ -12,7 +12,10 @@ from openpyxl.formatting.rule import FormulaRule, CellIsRule
 from config.settings import get_setting
 from database.db_manager import get_classes, get_class_attendance_grades
 from database.utils import trunc_1_dec
-from backend.services.export_docx_service import export_class_docx as _export_class_docx_impl
+try:
+    from services.export_docx_service import export_class_docx as _export_class_docx_impl
+except ImportError:
+    from backend.services.export_docx_service import export_class_docx as _export_class_docx_impl
 
 def get_session_test_config(class_id: int, date_str: str) -> Optional[Dict[str, Any]]:
     try:
@@ -112,6 +115,7 @@ def export_class_excel(
 ) -> Dict[str, Any]:
     if not date_str:
         date_str = datetime.now().strftime("%Y-%m-%d")
+    ts = datetime.now().strftime("%Y%m%d_%H%M%S")
 
     cls_list = get_classes()
     cls_info = next((c for c in cls_list if c["id"] == class_id), None)
@@ -191,129 +195,7 @@ def export_class_excel(
     end_row = start_row + len(attendance) - 1 if len(attendance) > 0 else start_row
     avg_row_idx = end_row + 1
 
-    zebra_fill = PatternFill(start_color="F8FAFC", end_color="F8FAFC", fill_type="solid")
-    white_fill = PatternFill(start_color="FFFFFF", end_color="FFFFFF", fill_type="solid")
-    fill_8 = PatternFill(start_color="DCFCE7", end_color="DCFCE7", fill_type="solid")
-    font_8 = Font(name="Times New Roman", size=12, color="15803D", bold=True)
-    fill_65 = PatternFill(start_color="E0F2FE", end_color="E0F2FE", fill_type="solid")
-    font_65 = Font(name="Times New Roman", size=12, color="0369A1", bold=True)
-    fill_5 = PatternFill(start_color="FEF3C7", end_color="FEF3C7", fill_type="solid")
-    font_5 = Font(name="Times New Roman", size=12, color="B45309", bold=True)
-    fill_under5 = PatternFill(start_color="FFE4E6", end_color="FFE4E6", fill_type="solid")
-    font_under5 = Font(name="Times New Roman", size=12, color="BE123C", bold=True)
-
-    for idx, r in enumerate(attendance, 1):
-        curr_row = start_row + idx - 1
-        st_name = str(r.get("student_name", ""))
-        status_val = str(r.get("status", "Có mặt"))
-        c1 = clean_num(r.get("check_1"))
-        c2 = clean_num(r.get("check_2"))
-        hw1 = clean_num(r.get("homework"))
-        hw2 = clean_num(r.get("homework_2"))
-        mt = clean_num(r.get("mock_test"))
-
-        ws.cell(row=curr_row, column=1, value=f"=ROW()-3")
-        c2_c = ws.cell(row=curr_row, column=2, value=st_name)
-        c2_c.font = name_font
-        ws.cell(row=curr_row, column=3, value=status_val)
-
-        c1_cell = ws.cell(row=curr_row, column=4, value=c1 if c1 > 0 else "-")
-        c2_cell = ws.cell(row=curr_row, column=5, value=c2 if c2 > 0 else "-")
-        hw1_cell = ws.cell(row=curr_row, column=6, value=hw1 if hw1 > 0 else "-")
-        hw2_cell = ws.cell(row=curr_row, column=7, value=hw2 if hw2 > 0 else "-")
-        mt_cell = ws.cell(row=curr_row, column=8, value=mt if mt > 0 else "-")
-
-        if c1 > 0: c1_cell.number_format = '0.0'
-        if c2 > 0: c2_cell.number_format = '0.0'
-        if hw1 > 0: hw1_cell.number_format = '0.0'
-        if hw2 > 0: hw2_cell.number_format = '0.0'
-        if mt > 0: mt_cell.number_format = '0.0'
-
-        # Formula: |BTVN - Average(Check 1, Check 2)|
-        c9_cell = ws.cell(
-            row=curr_row,
-            column=9,
-            value=(
-                f'=IF(AND(ISNUMBER(F{curr_row}), F{curr_row}>0), '
-                f'IF(AND(ISNUMBER(D{curr_row}), D{curr_row}>0, ISNUMBER(E{curr_row}), E{curr_row}>0), ROUND(ABS(F{curr_row}-AVERAGE(D{curr_row},E{curr_row})), 1), '
-                f'IF(AND(ISNUMBER(D{curr_row}), D{curr_row}>0), ROUND(ABS(F{curr_row}-D{curr_row}), 1), '
-                f'IF(AND(ISNUMBER(E{curr_row}), E{curr_row}>0), ROUND(ABS(F{curr_row}-E{curr_row}), 1), "-"))), "-")'
-            )
-        )
-        c9_cell.number_format = '0.0'
-
-        # Formula: Below threshold check comparing dynamically against D$avg_row_idx, E$avg_row_idx...
-        ws.cell(
-            row=curr_row,
-            column=10,
-            value=(
-                f'=IF(C{curr_row}="Vắng mặt", "Vắng mặt", '
-                f'IF(_xlfn.TEXTJOIN(", ", TRUE, '
-                f'IF(AND(ISNUMBER(D{curr_row}), D{curr_row}>0, ISNUMBER(D${avg_row_idx}), D{curr_row}<D${avg_row_idx}), "Check 1", ""), '
-                f'IF(AND(ISNUMBER(E{curr_row}), E{curr_row}>0, ISNUMBER(E${avg_row_idx}), E{curr_row}<E${avg_row_idx}), "Check 2", ""), '
-                f'IF(AND(ISNUMBER(F{curr_row}), F{curr_row}>0, ISNUMBER(F${avg_row_idx}), F{curr_row}<F${avg_row_idx}), "BTVN 1", ""), '
-                f'IF(AND(ISNUMBER(G{curr_row}), G{curr_row}>0, ISNUMBER(G${avg_row_idx}), G{curr_row}<G${avg_row_idx}), "BTVN 2", ""), '
-                f'IF(AND(ISNUMBER(H{curr_row}), H{curr_row}>0, ISNUMBER(H${avg_row_idx}), H{curr_row}<H${avg_row_idx}), "Luyện Đề", "")'
-                f')="", "Đạt yêu cầu", '
-                f'"Cần cố gắng (" & _xlfn.TEXTJOIN(", ", TRUE, '
-                f'IF(AND(ISNUMBER(D{curr_row}), D{curr_row}>0, ISNUMBER(D${avg_row_idx}), D{curr_row}<D${avg_row_idx}), "Check 1", ""), '
-                f'IF(AND(ISNUMBER(E{curr_row}), E{curr_row}>0, ISNUMBER(E${avg_row_idx}), E{curr_row}<E${avg_row_idx}), "Check 2", ""), '
-                f'IF(AND(ISNUMBER(F{curr_row}), F{curr_row}>0, ISNUMBER(F${avg_row_idx}), F{curr_row}<F${avg_row_idx}), "BTVN 1", ""), '
-                f'IF(AND(ISNUMBER(G{curr_row}), G{curr_row}>0, ISNUMBER(G${avg_row_idx}), G{curr_row}<G${avg_row_idx}), "BTVN 2", ""), '
-                f'IF(AND(ISNUMBER(H{curr_row}), H{curr_row}>0, ISNUMBER(H${avg_row_idx}), H{curr_row}<H${avg_row_idx}), "Luyện Đề", "")'
-                f') & ")"))'
-            )
-        )
-
-        row_fill = white_fill if (idx % 2 == 1) else zebra_fill
-        ws.row_dimensions[curr_row].height = 24
-        for col_num in range(1, 11):
-            c_cell = ws.cell(row=curr_row, column=col_num)
-            c_cell.fill = row_fill
-            if col_num != 2:
-                c_cell.font = data_font
-            c_cell.border = thin_border
-            c_cell.alignment = Alignment(horizontal="center", vertical="center")
-            if col_num in (4, 5, 6, 7, 8):
-                val = (c1, c2, hw1, hw2, mt)[col_num - 4]
-                if val >= 8.0:
-                    c_cell.fill, c_cell.font = fill_8, font_8
-                elif val >= 6.5:
-                    c_cell.fill, c_cell.font = fill_65, font_65
-                elif val >= 5.0:
-                    c_cell.fill, c_cell.font = fill_5, font_5
-                elif val > 0:
-                    c_cell.fill, c_cell.font = fill_under5, font_under5
-
-    ts = datetime.now().strftime("%Y%m%d_%H%M%S")
-    if len(attendance) > 0:
-        table_ref = f"A3:J{end_row}"
-        tab = Table(displayName=f"ClassTable_{ts}", ref=table_ref)
-        tab.tableStyleInfo = TableStyleInfo(
-            name="TableStyleMedium9",
-            showFirstColumn=False,
-            showLastColumn=False,
-            showRowStripes=True,
-            showColumnStripes=False
-        )
-        ws.add_table(tab)
-
-        ws.conditional_formatting.add(f"D4:H{end_row}", CellIsRule(operator='greaterThanOrEqual', formula=['8.0'], fill=fill_8, font=font_8))
-        ws.conditional_formatting.add(f"D4:H{end_row}", CellIsRule(operator='between', formula=['6.5', '7.99'], fill=fill_65, font=font_65))
-        ws.conditional_formatting.add(f"D4:H{end_row}", CellIsRule(operator='between', formula=['5.0', '6.49'], fill=fill_5, font=font_5))
-        ws.conditional_formatting.add(f"D4:H{end_row}", CellIsRule(operator='between', formula=['0.01', '4.99'], fill=fill_under5, font=font_under5))
-
-        fill_abs = PatternFill(start_color="F1F5F9", end_color="F1F5F9", fill_type="solid")
-        font_abs = Font(name="Times New Roman", size=12, color="64748B", bold=True)
-        ws.conditional_formatting.add(f"J4:J{end_row}", FormulaRule(formula=['NOT(ISERROR(SEARCH("Cần cố gắng", J4)))'], font=font_under5, fill=fill_under5))
-        ws.conditional_formatting.add(f"J4:J{end_row}", FormulaRule(formula=['NOT(ISERROR(SEARCH("Đạt yêu cầu", J4)))'], font=font_8, fill=fill_8))
-        ws.conditional_formatting.add(f"J4:J{end_row}", FormulaRule(formula=['NOT(ISERROR(SEARCH("Vắng mặt", J4)))'], font=font_abs, fill=fill_abs))
-
-    # Average / Threshold Row
-    ws.cell(row=avg_row_idx, column=1, value="")
-    ws.cell(row=avg_row_idx, column=2, value="Điểm trung bình (Average)")
-    ws.cell(row=avg_row_idx, column=3, value="")
-
+    # 1. Pre-calculate class averages and thresholds
     c1_vals = [clean_num(r.get("check_1")) for r in attendance if clean_num(r.get("check_1")) > 0 and str(r.get("status")) != "Vắng mặt"]
     c2_vals = [clean_num(r.get("check_2")) for r in attendance if clean_num(r.get("check_2")) > 0 and str(r.get("status")) != "Vắng mặt"]
     hw1_vals = [clean_num(r.get("homework")) for r in attendance if clean_num(r.get("homework")) > 0 and str(r.get("status")) != "Vắng mặt"]
@@ -326,7 +208,6 @@ def export_class_excel(
     calc_avg_hw2 = trunc_1_dec(sum(hw2_vals) / len(hw2_vals)) if hw2_vals else 0.0
     calc_avg_mt = trunc_1_dec(sum(mt_vals) / len(mt_vals)) if mt_vals else 0.0
 
-    # Prioritize preset thresholds passed from UI if available
     th = thresholds or {}
     def _pick_thresh(key: str, calc_val: float) -> float:
         if key in th and th[key] is not None and str(th[key]).strip() != '':
@@ -344,72 +225,199 @@ def export_class_excel(
     t_hw2 = _pick_thresh("homework_2", calc_avg_hw2)
     t_mt = _pick_thresh("mock_test", calc_avg_mt)
 
-    c1_avg_cell = ws.cell(row=avg_row_idx, column=4, value=t_c1 if t_c1 > 0 else "-")
-    c2_avg_cell = ws.cell(row=avg_row_idx, column=5, value=t_c2 if t_c2 > 0 else "-")
-    hw1_avg_cell = ws.cell(row=avg_row_idx, column=6, value=t_hw1 if t_hw1 > 0 else "-")
-    hw2_avg_cell = ws.cell(row=avg_row_idx, column=7, value=t_hw2 if t_hw2 > 0 else "-")
-    mt_avg_cell = ws.cell(row=avg_row_idx, column=8, value=t_mt if t_mt > 0 else "-")
+    # 2. Color palettes & Fonts
+    zebra_fill = PatternFill(start_color="F8FAFC", end_color="F8FAFC", fill_type="solid")
+    white_fill = PatternFill(start_color="FFFFFF", end_color="FFFFFF", fill_type="solid")
+    fill_8 = PatternFill(start_color="DCFCE7", end_color="DCFCE7", fill_type="solid")
+    font_8 = Font(name="Times New Roman", size=12, color="15803D", bold=True)
+    fill_65 = PatternFill(start_color="E0F2FE", end_color="E0F2FE", fill_type="solid")
+    font_65 = Font(name="Times New Roman", size=12, color="0369A1", bold=True)
+    fill_5 = PatternFill(start_color="FEF3C7", end_color="FEF3C7", fill_type="solid")
+    font_5 = Font(name="Times New Roman", size=12, color="B45309", bold=True)
+    fill_under5 = PatternFill(start_color="FFE4E6", end_color="FFE4E6", fill_type="solid")
+    font_under5 = Font(name="Times New Roman", size=12, color="BE123C", bold=True)
+    fill_abs = PatternFill(start_color="F1F5F9", end_color="F1F5F9", fill_type="solid")
+    font_abs = Font(name="Times New Roman", size=12, color="64748B", bold=True)
 
-    if t_c1 > 0: c1_avg_cell.number_format = '0.0'
-    if t_c2 > 0: c2_avg_cell.number_format = '0.0'
-    if t_hw1 > 0: hw1_avg_cell.number_format = '0.0'
-    if t_hw2 > 0: hw2_avg_cell.number_format = '0.0'
-    if t_mt > 0: mt_avg_cell.number_format = '0.0'
+    # 3. Render Student Rows
+    for idx, r in enumerate(attendance, 1):
+        curr_row = start_row + idx - 1
+        st_name = str(r.get("student_name", ""))
+        status_val = str(r.get("status", "Có mặt"))
+        c1 = clean_num(r.get("check_1"))
+        c2 = clean_num(r.get("check_2"))
+        hw1 = clean_num(r.get("homework"))
+        hw2 = clean_num(r.get("homework_2"))
+        mt = clean_num(r.get("mock_test"))
 
-    check_avgs = [a for a in (t_c1, t_c2) if a > 0]
-    check_combined = sum(check_avgs) / len(check_avgs) if check_avgs else 0.0
-    diff_val = trunc_1_dec(abs(t_hw1 - check_combined)) if (t_hw1 > 0 and check_combined > 0) else 0.0
+        ws.row_dimensions[curr_row].height = 24
+        row_bg = white_fill if (idx % 2 == 1) else zebra_fill
 
-    c9_avg_cell = ws.cell(row=avg_row_idx, column=9, value=diff_val if diff_val > 0 else "-")
-    if diff_val > 0: c9_avg_cell.number_format = '0.0'
-    ws.cell(row=avg_row_idx, column=10, value="Đã tính TB lớp")
+        # Col 1: STT
+        c1_c = ws.cell(row=curr_row, column=1, value=idx)
+        c1_c.font = data_font
+        c1_c.fill = row_bg
+        c1_c.border = thin_border
+        c1_c.alignment = Alignment(horizontal="center", vertical="center")
 
+        # Col 2: Họ và Tên
+        c2_c = ws.cell(row=curr_row, column=2, value=st_name)
+        c2_c.font = name_font
+        c2_c.fill = row_bg
+        c2_c.border = thin_border
+        c2_c.alignment = Alignment(horizontal="center", vertical="center")
+
+        # Col 3: Điểm Danh
+        c3_c = ws.cell(row=curr_row, column=3, value=status_val)
+        c3_c.font = data_font
+        c3_c.fill = row_bg
+        c3_c.border = thin_border
+        c3_c.alignment = Alignment(horizontal="center", vertical="center")
+
+        # Cols 4-8: Scores (Check 1, Check 2, BTVN 1, BTVN 2, Luyện Đề)
+        score_tuples = [(4, c1), (5, c2), (6, hw1), (7, hw2), (8, mt)]
+        for col_num, val in score_tuples:
+            sc_cell = ws.cell(row=curr_row, column=col_num)
+            sc_cell.border = thin_border
+            sc_cell.alignment = Alignment(horizontal="center", vertical="center")
+            if val > 0:
+                sc_cell.value = val
+                sc_cell.number_format = '0.0'
+                if val >= 8.0:
+                    sc_cell.fill, sc_cell.font = fill_8, font_8
+                elif val >= 6.5:
+                    sc_cell.fill, sc_cell.font = fill_65, font_65
+                elif val >= 5.0:
+                    sc_cell.fill, sc_cell.font = fill_5, font_5
+                else:
+                    sc_cell.fill, sc_cell.font = fill_under5, font_under5
+            else:
+                sc_cell.value = "-"
+                sc_cell.font = data_font
+                sc_cell.fill = row_bg
+
+        # Col 9: Độ Lệch |BTVN - Average(Check 1, Check 2)|
+        c9_cell = ws.cell(row=curr_row, column=9)
+        c9_cell.border = thin_border
+        c9_cell.alignment = Alignment(horizontal="center", vertical="center")
+        diff_val = None
+        if status_val != "Vắng mặt" and hw1 > 0:
+            c_scores = [s for s in (c1, c2) if s > 0]
+            if c_scores:
+                c_avg = sum(c_scores) / len(c_scores)
+                diff_val = trunc_1_dec(abs(hw1 - c_avg))
+
+        if diff_val is not None:
+            c9_cell.value = diff_val
+            c9_cell.number_format = '0.0'
+            if diff_val >= 2.0:
+                c9_cell.fill, c9_cell.font = fill_under5, font_under5
+            elif diff_val >= 1.0:
+                c9_cell.fill, c9_cell.font = fill_5, font_5
+            else:
+                c9_cell.fill, c9_cell.font = fill_8, font_8
+        else:
+            c9_cell.value = "-"
+            c9_cell.font = data_font
+            c9_cell.fill = row_bg
+
+        # Col 10: Cần Cố Gắng (Dưới TB)
+        c10_cell = ws.cell(row=curr_row, column=10)
+        c10_cell.border = thin_border
+        c10_cell.alignment = Alignment(horizontal="center", vertical="center")
+        if status_val == "Vắng mặt":
+            c10_cell.value = "Vắng mặt"
+            c10_cell.fill, c10_cell.font = fill_abs, font_abs
+        else:
+            below_subs = []
+            if c1 > 0 and t_c1 > 0 and c1 < t_c1:
+                below_subs.append("Check 1")
+            if c2 > 0 and t_c2 > 0 and c2 < t_c2:
+                below_subs.append("Check 2")
+            if hw1 > 0 and t_hw1 > 0 and hw1 < t_hw1:
+                below_subs.append("BTVN 1")
+            if hw2 > 0 and t_hw2 > 0 and hw2 < t_hw2:
+                below_subs.append("BTVN 2")
+            if mt > 0 and t_mt > 0 and mt < t_mt:
+                below_subs.append("Luyện Đề")
+
+            if below_subs:
+                c10_cell.value = f"Cần cố gắng ({', '.join(below_subs)})"
+                c10_cell.fill, c10_cell.font = fill_under5, font_under5
+            else:
+                c10_cell.value = "Đạt yêu cầu"
+                c10_cell.fill, c10_cell.font = fill_8, font_8
+
+    # 4. Auto Filter on Header (Row 3)
+    if len(attendance) > 0:
+        ws.auto_filter.ref = f"A3:J{end_row}"
+
+    # 5. Average / Threshold Row
     avg_fill = PatternFill(start_color="FEF3C7", end_color="FEF3C7", fill_type="solid")
     avg_font = Font(name="Times New Roman", bold=True, size=12, color="92400E")
     ws.row_dimensions[avg_row_idx].height = 26
-    for col_num in range(1, 11):
-        c_cell = ws.cell(row=avg_row_idx, column=col_num)
-        c_cell.font = avg_font
-        c_cell.fill = avg_fill
-        c_cell.border = thin_border
-        c_cell.alignment = Alignment(horizontal="center", vertical="center")
+
+    avg_cells_data = [
+        (1, ""),
+        (2, "Điểm trung bình (Average)"),
+        (3, ""),
+        (4, t_c1 if t_c1 > 0 else "-"),
+        (5, t_c2 if t_c2 > 0 else "-"),
+        (6, t_hw1 if t_hw1 > 0 else "-"),
+        (7, t_hw2 if t_hw2 > 0 else "-"),
+        (8, t_mt if t_mt > 0 else "-"),
+    ]
+    for c_idx, val in avg_cells_data:
+        cell = ws.cell(row=avg_row_idx, column=c_idx, value=val)
+        if isinstance(val, (int, float)) and val > 0:
+            cell.number_format = '0.0'
+        cell.font = avg_font
+        cell.fill = avg_fill
+        cell.border = thin_border
+        cell.alignment = Alignment(horizontal="center", vertical="center")
+
+    check_avgs = [a for a in (t_c1, t_c2) if a > 0]
+    check_combined = sum(check_avgs) / len(check_avgs) if check_avgs else 0.0
+    avg_diff = trunc_1_dec(abs(t_hw1 - check_combined)) if (t_hw1 > 0 and check_combined > 0) else 0.0
+
+    c9_avg = ws.cell(row=avg_row_idx, column=9, value=avg_diff if avg_diff > 0 else "-")
+    if avg_diff > 0: c9_avg.number_format = '0.0'
+    c9_avg.font, c9_avg.fill, c9_avg.border = avg_font, avg_fill, thin_border
+    c9_avg.alignment = Alignment(horizontal="center", vertical="center")
+
+    c10_avg = ws.cell(row=avg_row_idx, column=10, value="Đã tính TB lớp")
+    c10_avg.font, c10_avg.fill, c10_avg.border = avg_font, avg_fill, thin_border
+    c10_avg.alignment = Alignment(horizontal="center", vertical="center")
 
     # Blank spacing row
     ws.row_dimensions[avg_row_idx + 1].height = 12
 
-    # Summary rows (Below Average Lists) - concise labels (Check 1, Check 2, BTVN)
+    # 6. Summary rows (Below Average Lists with actual text of student names)
     candidate_labels = [
-        ("Check 1", 4, "D", t_c1),
-        ("Check 2", 5, "E", t_c2),
-        ("BTVN", 6, "F", t_hw1),
+        ("Check 1", t_c1, [r.get("student_name") for r in attendance if clean_num(r.get("check_1")) > 0 and clean_num(r.get("check_1")) < t_c1 and str(r.get("status")) != "Vắng mặt"]),
+        ("Check 2", t_c2, [r.get("student_name") for r in attendance if clean_num(r.get("check_2")) > 0 and clean_num(r.get("check_2")) < t_c2 and str(r.get("status")) != "Vắng mặt"]),
+        ("BTVN", t_hw1, [r.get("student_name") for r in attendance if clean_num(r.get("homework")) > 0 and clean_num(r.get("homework")) < t_hw1 and str(r.get("status")) != "Vắng mặt"]),
     ]
     if t_hw2 > 0 or len(hw2_vals) > 0:
-        candidate_labels.append(("BTVN 2", 7, "G", t_hw2))
+        candidate_labels.append(("BTVN 2", t_hw2, [r.get("student_name") for r in attendance if clean_num(r.get("homework_2")) > 0 and clean_num(r.get("homework_2")) < t_hw2 and str(r.get("status")) != "Vắng mặt"]))
     if t_mt > 0 or len(mt_vals) > 0:
-        candidate_labels.append(("Luyện Đề", 8, "H", t_mt))
+        candidate_labels.append(("Luyện Đề", t_mt, [r.get("student_name") for r in attendance if clean_num(r.get("mock_test")) > 0 and clean_num(r.get("mock_test")) < t_mt and str(r.get("status")) != "Vắng mặt"]))
 
-    for idx, (m_label, col_num, col_let, thresh_val) in enumerate(candidate_labels):
+    for idx, (m_label, thresh_val, below_list) in enumerate(candidate_labels):
         r_idx = avg_row_idx + 2 + idx
         ws.row_dimensions[r_idx].height = 28
         ws.merge_cells(f"A{r_idx}:B{r_idx}")
 
-        m_label_clean = m_label.replace('"', '""')
-        sum_title = ws.cell(
-            row=r_idx,
-            column=1,
-            value=f'=IF(AND(ISNUMBER({col_let}${avg_row_idx}), {col_let}${avg_row_idx}>0), "{m_label_clean} dưới TB (< " & TEXT({col_let}${avg_row_idx}, "0.0") & ")", "{m_label_clean}")'
-        )
+        title_text = f"{m_label} dưới TB (< {thresh_val})" if thresh_val > 0 else m_label
+        sum_title = ws.cell(row=r_idx, column=1, value=title_text)
         sum_title.font = Font(name="Times New Roman", bold=True, color="7F1D1D", size=12)
         sum_title.alignment = Alignment(horizontal="left", vertical="center", wrap_text=True)
         sum_title.border = thin_border
         ws.cell(row=r_idx, column=2).border = thin_border
 
         ws.merge_cells(f"C{r_idx}:J{r_idx}")
-        val_cell = ws.cell(
-            row=r_idx,
-            column=3,
-            value=f'=_xlfn.TEXTJOIN(", ", TRUE, _xlfn.FILTER(B{start_row}:B{end_row}, (ISNUMBER({col_let}{start_row}:{col_let}{end_row}))*({col_let}{start_row}:{col_let}{end_row}>0)*({col_let}{start_row}:{col_let}{end_row}<{col_let}${avg_row_idx})*(C{start_row}:C{end_row}<>"Vắng mặt"), "Không có (Tất cả đạt)"))' if len(attendance) > 0 else "Không có (Tất cả đạt)"
-        )
+        names_text = ", ".join([str(n) for n in below_list if n]) if below_list else "Không có (Tất cả đạt)"
+        val_cell = ws.cell(row=r_idx, column=3, value=names_text)
         val_cell.font = Font(name="Times New Roman", bold=True, color="1E1E2F", size=12)
         val_cell.alignment = Alignment(horizontal="left", vertical="center", wrap_text=True)
         for cn in range(3, 11):
