@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Shield, Save, Check, Lock, Plus, Trash2 } from 'lucide-react';
+import { Save, Check, Lock, Plus, Trash2 } from 'lucide-react';
 import { TAB_DEFINITIONS } from '../../../config/tabs';
 import { RolePermission } from '../types';
 import { api } from '../../../api';
@@ -199,17 +199,15 @@ export const PermissionsTab: React.FC<PermissionsTabProps> = ({
       {/* Top Header Card */}
       <div className="bg-white dark:bg-[#111728] border-0 rounded-2xl p-5 shadow-sm flex flex-wrap items-center justify-between gap-3">
         <div>
-          <div className="flex items-center gap-2">
-            <Shield size={18} className="text-blue-600 dark:text-blue-400" />
-            <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider">
-              Ma Trận Phân Quyền Truy Cập Tab
-            </h3>
-          </div>
+          <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider">
+            Ma Trận Phân Quyền Truy Cập Tab
+          </h3>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 font-medium">
             Cấu hình các tab được phép hiển thị và truy cập cho từng vai trò người dùng trong hệ thống.
           </p>
         </div>
 
+        {/* Single Add Role button and Save Changes button */}
         <div className="flex items-center gap-2">
           <button
             type="button"
@@ -217,17 +215,17 @@ export const PermissionsTab: React.FC<PermissionsTabProps> = ({
             className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-black bg-blue-600 hover:bg-blue-500 text-white shadow-xs transition cursor-pointer active:scale-95 border-0"
           >
             <Plus size={14} />
-            <span>Thêm Role</span>
+            <span>Thêm Vai Trò</span>
           </button>
 
           <button
             type="button"
             onClick={handleSave}
             disabled={saving}
-            className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-black shadow-xs transition cursor-pointer active:scale-95 disabled:opacity-50 border-0 ${
+            className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-black shadow-xs transition cursor-pointer active:scale-95 disabled:opacity-50 border ${
               isDirty
-                ? 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-500/30 animate-pulse'
-                : 'bg-slate-700 hover:bg-slate-600 text-white shadow-xs'
+                ? 'bg-emerald-600 hover:bg-emerald-500 text-white border-emerald-500 shadow-emerald-500/30 animate-pulse'
+                : 'bg-white hover:bg-slate-50 dark:bg-white/5 dark:hover:bg-white/10 text-slate-700 dark:text-slate-200 border-slate-300 dark:border-white/10'
             }`}
           >
             <Save size={14} />
@@ -236,49 +234,38 @@ export const PermissionsTab: React.FC<PermissionsTabProps> = ({
         </div>
       </div>
 
-      {/* Role Management Card (Add & Delete Roles) */}
-      <div className="bg-white dark:bg-[#111728] border-0 rounded-2xl p-4 shadow-sm space-y-3">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-xs font-bold text-slate-700 dark:text-slate-300">Danh sách vai trò:</span>
-            {roles.map((r) => {
-              const item = roleItems.find((x) => x.role_name === r);
-              const isSystem = item ? item.is_system === 1 : DEFAULT_SYSTEM_ROLES.includes(r);
-              const isThisHighlighted = highlightedRole === r;
-              return (
-                <span
-                  key={r}
-                  className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${
-                    isThisHighlighted
-                      ? 'bg-amber-500/20 text-amber-300 ring-2 ring-amber-400'
-                      : 'bg-slate-100 dark:bg-white/5 text-slate-800 dark:text-slate-200'
-                  }`}
-                >
-                  {isSystem && <Lock size={11} className="text-purple-500" />}
-                  <span>{r}</span>
-                  {!isSystem && (
-                    <button
-                      type="button"
-                      onClick={() => handleDeleteRole(r)}
-                      className="text-slate-400 hover:text-rose-500 transition cursor-pointer p-0.5"
-                      title={`Xóa vai trò ${r}`}
-                    >
-                      <Trash2 size={12} />
-                    </button>
-                  )}
-                </span>
-              );
-            })}
-          </div>
-
-          <button
-            type="button"
-            onClick={handleOpenAddModal}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-black transition cursor-pointer shadow-xs active:scale-95"
-          >
-            <Plus size={13} />
-            <span>Thêm Role</span>
-          </button>
+      {/* Role Management Card (Delete Roles) - Single button kept in header only */}
+      <div className="bg-white dark:bg-[#111728] border-0 rounded-2xl p-4 shadow-sm">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-xs font-bold text-slate-700 dark:text-slate-300">Danh sách vai trò:</span>
+          {roles.map((r) => {
+            const item = roleItems.find((x) => x.role_name === r);
+            const isSystem = item ? item.is_system === 1 : DEFAULT_SYSTEM_ROLES.includes(r);
+            const isThisHighlighted = highlightedRole === r;
+            return (
+              <span
+                key={r}
+                className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${
+                  isThisHighlighted
+                    ? 'bg-amber-500/20 text-amber-300 ring-2 ring-amber-400'
+                    : 'bg-slate-100 dark:bg-white/5 text-slate-800 dark:text-slate-200'
+                }`}
+              >
+                {isSystem && <Lock size={11} className="text-purple-500" />}
+                <span>{r}</span>
+                {!isSystem && (
+                  <button
+                    type="button"
+                    onClick={() => handleDeleteRole(r)}
+                    className="text-slate-400 hover:text-rose-500 transition cursor-pointer p-0.5"
+                    title={`Xóa vai trò ${r}`}
+                  >
+                    <Trash2 size={12} />
+                  </button>
+                )}
+              </span>
+            );
+          })}
         </div>
       </div>
 

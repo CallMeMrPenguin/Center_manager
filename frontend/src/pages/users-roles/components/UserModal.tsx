@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Trash2, Save, UserCheck, Shield, Plus } from 'lucide-react';
+import { X, Trash2, Save, UserCheck, Plus } from 'lucide-react';
 import { api } from '../../../api';
 import { showToast } from '../../../components/Toast';
 import { CustomSelect, SelectOption } from '../../../components/CustomSelect';
@@ -267,7 +267,6 @@ export const UserModal: React.FC<UserModalProps> = ({
                 value={role}
                 onChange={(val) => setRole(String(val))}
                 options={roleOptions}
-                icon={<Shield size={14} className="text-indigo-500 dark:text-indigo-400" />}
               />
             )}
           </div>

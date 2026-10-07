@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Shield, Plus, X, Check, CheckSquare, Square, AlertCircle } from 'lucide-react';
+import { Plus, X, CheckSquare, Square, AlertCircle } from 'lucide-react';
 import { TAB_DEFINITIONS } from '../../../config/tabs';
 import { api } from '../../../api';
 import { showToast } from '../../../components/Toast';
@@ -84,23 +84,19 @@ export const AddRoleModal: React.FC<AddRoleModalProps> = ({
       setIsSubmitting(true);
       setErrorMessage('');
 
-      // 1. Create role in backend
       await api.createRole(cleanName, description.trim());
 
-      // 2. Prepare permissions list
       const permissionsList = TAB_DEFINITIONS.map((t) => ({
         role: cleanName,
         tab_id: t.id,
         can_access: selectedTabs[t.id] ? 1 : 0,
       }));
 
-      // 3. Save initial permissions
       await api.saveRolePermissions(permissionsList);
 
       const count = Object.values(selectedTabs).filter(Boolean).length;
       showToast(`Đã tạo vai trò "${cleanName}" và cấp quyền ${count} tính năng!`, 'success');
 
-      // Reset form
       setRoleName('');
       setDescription('');
       onSuccess(cleanName);
@@ -121,27 +117,22 @@ export const AddRoleModal: React.FC<AddRoleModalProps> = ({
   const selectedCount = Object.values(selectedTabs).filter(Boolean).length;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85">
-      <div className="bg-[#111728] border border-[#212c4b] rounded-2xl w-full max-w-xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60">
+      <div className="bg-white dark:bg-[#111728] border border-slate-200 dark:border-[#212c4b] rounded-2xl w-full max-w-xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
         {/* Header */}
-        <div className="p-4 sm:p-5 border-b border-white/10 flex items-center justify-between bg-[#161d30]">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-blue-600/20 text-blue-400 flex items-center justify-center shrink-0">
-              <Shield size={18} />
-            </div>
-            <div>
-              <h3 className="text-sm font-black text-white uppercase tracking-wider">
-                Thêm Vai Trò Mới & Phân Quyền
-              </h3>
-              <p className="text-xs text-slate-400 font-medium">
-                Tạo vai trò và chỉ định ngay các tính năng được phép truy cập
-              </p>
-            </div>
+        <div className="p-4 sm:p-5 border-b border-slate-200 dark:border-white/10 flex items-center justify-between bg-slate-50/80 dark:bg-[#161d30]">
+          <div>
+            <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider">
+              Thêm Vai Trò Mới
+            </h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5">
+              Tạo vai trò và phân quyền các tính năng được phép truy cập
+            </p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition cursor-pointer"
+            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5 transition cursor-pointer"
           >
             <X size={18} />
           </button>
@@ -151,7 +142,7 @@ export const AddRoleModal: React.FC<AddRoleModalProps> = ({
         <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4 scrollbar-thin">
           {/* Error Banner */}
           {errorMessage && (
-            <div className="flex items-center gap-2 p-3 rounded-xl bg-rose-500/15 border border-rose-500/30 text-rose-400 text-xs font-bold">
+            <div className="flex items-center gap-2 p-3 rounded-xl bg-rose-50 dark:bg-rose-500/15 border border-rose-200 dark:border-rose-500/30 text-rose-600 dark:text-rose-400 text-xs font-bold">
               <AlertCircle size={15} className="shrink-0" />
               <span>{errorMessage}</span>
             </div>
@@ -159,8 +150,8 @@ export const AddRoleModal: React.FC<AddRoleModalProps> = ({
 
           {/* Role Name */}
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-slate-300">
-              Tên Vai Trò <span className="text-rose-400">*</span>
+            <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+              Tên Vai Trò <span className="text-rose-500 dark:text-rose-400">*</span>
             </label>
             <input
               type="text"
@@ -170,7 +161,7 @@ export const AddRoleModal: React.FC<AddRoleModalProps> = ({
                 if (errorMessage) setErrorMessage('');
               }}
               placeholder="Ví dụ: Tư vấn viên, Quản lý học vụ, Trưởng bộ môn..."
-              className="w-full bg-[#0c0f1e] border border-[#212c4b] focus:border-blue-500 focus:outline-none rounded-xl px-3.5 py-2 text-xs font-bold text-white shadow-xs"
+              className="w-full bg-slate-50 dark:bg-[#0c0f1e] border border-slate-300 dark:border-[#212c4b] focus:border-blue-500 focus:outline-none rounded-xl px-3.5 py-2 text-xs font-bold text-slate-900 dark:text-white shadow-xs"
               autoFocus
               required
             />
@@ -178,7 +169,7 @@ export const AddRoleModal: React.FC<AddRoleModalProps> = ({
 
           {/* Description */}
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-slate-300">
+            <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
               Mô Tả Vai Trò (Tùy chọn)
             </label>
             <input
@@ -186,18 +177,18 @@ export const AddRoleModal: React.FC<AddRoleModalProps> = ({
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Ví dụ: Tiếp nhận học sinh mới và theo dõi học phí"
-              className="w-full bg-[#0c0f1e] border border-[#212c4b] focus:border-blue-500 focus:outline-none rounded-xl px-3.5 py-2 text-xs font-bold text-white shadow-xs"
+              className="w-full bg-slate-50 dark:bg-[#0c0f1e] border border-slate-300 dark:border-[#212c4b] focus:border-blue-500 focus:outline-none rounded-xl px-3.5 py-2 text-xs font-bold text-slate-900 dark:text-white shadow-xs"
             />
           </div>
 
           {/* Permission Assignment Section */}
-          <div className="space-y-2.5 pt-2 border-t border-white/5">
+          <div className="space-y-2.5 pt-2 border-t border-slate-200 dark:border-white/5">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div>
-                <span className="text-xs font-black text-white uppercase tracking-wider">
+                <span className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-wider">
                   Cấp Quyền Truy Cập Tab ({selectedCount}/{TAB_DEFINITIONS.length})
                 </span>
-                <p className="text-[11px] text-slate-400">
+                <p className="text-[11px] text-slate-500 dark:text-slate-400">
                   Chọn các tab mà vai trò này được phép nhìn thấy trên menu
                 </p>
               </div>
@@ -207,14 +198,14 @@ export const AddRoleModal: React.FC<AddRoleModalProps> = ({
                 <button
                   type="button"
                   onClick={() => handleSelectAll(true)}
-                  className="px-2 py-1 rounded-md bg-white/5 hover:bg-white/10 text-slate-300 font-bold transition cursor-pointer"
+                  className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 text-slate-700 dark:text-slate-300 font-bold transition cursor-pointer"
                 >
                   Tất cả
                 </button>
                 <button
                   type="button"
                   onClick={() => handleSelectAll(false)}
-                  className="px-2 py-1 rounded-md bg-white/5 hover:bg-white/10 text-slate-400 font-bold transition cursor-pointer"
+                  className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 text-slate-500 dark:text-slate-400 font-bold transition cursor-pointer"
                 >
                   Bỏ chọn
                 </button>
@@ -223,25 +214,25 @@ export const AddRoleModal: React.FC<AddRoleModalProps> = ({
 
             {/* Template Presets */}
             <div className="flex flex-wrap items-center gap-1.5 text-[11px]">
-              <span className="text-slate-400 font-bold">Mẫu nhanh:</span>
+              <span className="text-slate-500 dark:text-slate-400 font-bold">Mẫu nhanh:</span>
               <button
                 type="button"
                 onClick={() => handleApplyTemplate('teacher')}
-                className="px-2 py-0.5 rounded-md bg-indigo-500/15 text-indigo-300 hover:bg-indigo-500/25 border border-indigo-500/30 font-bold transition cursor-pointer"
+                className="px-2.5 py-1 rounded-lg bg-indigo-50 text-indigo-700 hover:bg-indigo-100 dark:bg-indigo-500/15 dark:text-indigo-300 dark:hover:bg-indigo-500/25 border border-indigo-200 dark:border-indigo-500/30 font-bold transition cursor-pointer"
               >
                 Giống Giáo viên
               </button>
               <button
                 type="button"
                 onClick={() => handleApplyTemplate('assistant')}
-                className="px-2 py-0.5 rounded-md bg-sky-500/15 text-sky-300 hover:bg-sky-500/25 border border-sky-500/30 font-bold transition cursor-pointer"
+                className="px-2.5 py-1 rounded-lg bg-sky-50 text-sky-700 hover:bg-sky-100 dark:bg-sky-500/15 dark:text-sky-300 dark:hover:bg-sky-500/25 border border-sky-200 dark:border-sky-500/30 font-bold transition cursor-pointer"
               >
                 Giống Trợ giảng
               </button>
               <button
                 type="button"
                 onClick={() => handleApplyTemplate('accountant')}
-                className="px-2 py-0.5 rounded-md bg-emerald-500/15 text-emerald-300 hover:bg-emerald-500/25 border border-emerald-500/30 font-bold transition cursor-pointer"
+                className="px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-500/15 dark:text-emerald-300 dark:hover:bg-emerald-500/25 border border-emerald-200 dark:border-emerald-500/30 font-bold transition cursor-pointer"
               >
                 Giống Kế toán
               </button>
@@ -260,18 +251,18 @@ export const AddRoleModal: React.FC<AddRoleModalProps> = ({
                     onClick={() => toggleTab(tab.id)}
                     className={`flex items-center gap-2.5 p-2 rounded-xl border text-left transition cursor-pointer ${
                       isChecked
-                        ? 'bg-blue-600/15 border-blue-500/40 text-white'
-                        : 'bg-[#0c0f1e] border-[#212c4b] text-slate-400 hover:border-slate-600'
+                        ? 'bg-blue-50 dark:bg-blue-600/15 border-blue-400 dark:border-blue-500/40 text-blue-900 dark:text-white shadow-xs'
+                        : 'bg-slate-50 dark:bg-[#0c0f1e] border-slate-200 dark:border-[#212c4b] text-slate-700 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-600'
                     }`}
                   >
                     <div className="shrink-0">
                       {isChecked ? (
-                        <CheckSquare size={15} className="text-blue-400" />
+                        <CheckSquare size={15} className="text-blue-600 dark:text-blue-400" />
                       ) : (
-                        <Square size={15} className="text-slate-600" />
+                        <Square size={15} className="text-slate-400 dark:text-slate-600" />
                       )}
                     </div>
-                    <div className="w-5 h-5 rounded-md bg-white/5 flex items-center justify-center shrink-0 text-slate-300">
+                    <div className="w-5 h-5 rounded-md bg-slate-200/60 dark:bg-white/5 flex items-center justify-center shrink-0 text-slate-700 dark:text-slate-300">
                       <Icon size={12} />
                     </div>
                     <span className="text-xs font-bold truncate flex-1">{tab.label}</span>
@@ -282,19 +273,19 @@ export const AddRoleModal: React.FC<AddRoleModalProps> = ({
           </div>
 
           {/* Footer Buttons */}
-          <div className="pt-3 border-t border-white/10 flex items-center justify-end gap-2">
+          <div className="pt-3 border-t border-slate-200 dark:border-white/10 flex items-center justify-end gap-2">
             <button
               type="button"
               onClick={onClose}
               disabled={isSubmitting}
-              className="px-3.5 py-2 rounded-xl text-xs font-bold text-slate-400 hover:text-white hover:bg-white/5 transition cursor-pointer disabled:opacity-50"
+              className="px-3.5 py-2 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5 transition cursor-pointer disabled:opacity-50"
             >
               Hủy
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-black transition cursor-pointer shadow-md disabled:opacity-50"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-black transition cursor-pointer shadow-sm disabled:opacity-50"
             >
               <Plus size={14} />
               <span>{isSubmitting ? 'Đang tạo & cấp quyền...' : 'Tạo Vai Trò & Cấp Quyền'}</span>

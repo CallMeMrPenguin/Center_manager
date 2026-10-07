@@ -7,6 +7,8 @@ export interface AppUser {
   plain_password?: string;
   created_at?: string;
   last_login?: string | null;
+  grade?: string;
+  class_name?: string;
 }
 
 export interface RolePermission {

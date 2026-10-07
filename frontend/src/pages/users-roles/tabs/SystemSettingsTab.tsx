@@ -1,5 +1,5 @@
 import React from 'react';
-import { Database, Cloud, ShieldCheck, KeyRound } from 'lucide-react';
+import { Database, Cloud, CheckCircle2, KeyRound } from 'lucide-react';
 
 export const SystemSettingsTab: React.FC = () => {
   return (
@@ -41,7 +41,7 @@ export const SystemSettingsTab: React.FC = () => {
               Tự Động Sao Lưu
             </span>
             <div className="flex items-center gap-1.5 text-blue-600 dark:text-blue-400 font-bold text-xs">
-              <ShieldCheck size={13} />
+              <CheckCircle2 size={13} />
               <span>Cục bộ tự động</span>
             </div>
           </div>

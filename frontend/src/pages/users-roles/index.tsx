@@ -82,7 +82,6 @@ export const UsersRolesPage: React.FC = () => {
             onSyncStudents={handleSyncStudents}
             onEditUser={handleOpenEditModal}
             onOpenCreateModal={handleOpenCreateModal}
-            onOpenAddRoleModal={() => setIsAddRoleModalOpen(true)}
           />
         ) : activeTab === 'permissions' ? (
           <PermissionsTab
