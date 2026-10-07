@@ -63,10 +63,16 @@ if ! command -v caddy &> /dev/null; then
     apt-get install -y caddy
 fi
 
-PROJECT_DIR=$(pwd)
-cat << EOF > /etc/caddy/Caddyfile
+# Ensure web directory permissions
+mkdir -p /var/www/center_manager
+rm -rf /var/www/center_manager/dist
+cp -r frontend/dist /var/www/center_manager/
+chown -R caddy:caddy /var/www/center_manager || true
+chmod -R 755 /var/www/center_manager
+
+cat << 'EOF' > /etc/caddy/Caddyfile
 upkidscentermanager.io.vn, www.upkidscentermanager.io.vn, :80 {
-    root * \${PROJECT_DIR}/frontend/dist
+    root * /var/www/center_manager/dist
     file_server
     try_files {path} /index.html
 

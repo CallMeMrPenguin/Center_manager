@@ -23,4 +23,9 @@ jobs:
             cd frontend
             npm install
             npm run build
+            cd ..
+            mkdir -p /var/www/center_manager
+            rm -rf /var/www/center_manager/dist
+            cp -r frontend/dist /var/www/center_manager/
+            chmod -R 755 /var/www/center_manager
             systemctl reload caddy
