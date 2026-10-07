@@ -9,6 +9,31 @@ interface MobileBottomDockProps {
   orderedTabIds: string[];
 }
 
+// Concise 1-2 word labels for mobile tabbar to prevent awkward ellipsis truncation
+const MOBILE_SHORT_LABELS: Record<string, string> = {
+  reports: 'Báo Cáo',
+  dashboard: 'Tổng Quan',
+  students: 'Học Sinh',
+  classes: 'Lớp Học',
+  schedule: 'Lịch Học',
+  teachers: 'Nhân Sự',
+  courses: 'Khóa Học',
+  kiemtra: 'Kiểm Tra',
+  formatter: 'Soạn Đề',
+  'question-bank': 'Ngân Hàng',
+  assignments: 'Bài Tập',
+  results: 'Kết Quả',
+  'vocab-bank': 'Từ Vựng',
+  'unit-config': 'Cấu Hình',
+  'file-manager': 'Tài Liệu',
+  'word-editor': 'Văn Bản',
+  'canvas-board': 'Canvas',
+  payments: 'Thanh Toán',
+  invoices: 'Hóa Đơn',
+  'users-roles': 'Tài Khoản',
+  settings: 'Cài Đặt',
+};
+
 // Canonical tab order matching the desktop visual SECTIONS hierarchy
 export function getVisualTabOrder(orderedTabIds: string[]): string[] {
   const result: string[] = [];
@@ -76,12 +101,13 @@ export const MobileBottomDock: React.FC<MobileBottomDockProps> = ({
       <div
         ref={containerRef}
         className={`relative z-10 w-full h-full overflow-x-auto overflow-y-visible no-scrollbar pt-6 flex items-center pointer-events-auto ${
-          isFewTabs ? 'justify-around px-3' : 'justify-start px-4 gap-1.5'
+          isFewTabs ? 'justify-around px-3' : 'justify-start px-3 gap-1'
         }`}
       >
         {canonicalTabs.map((tab) => {
           const Icon = tab.icon;
           const isSelected = tab.id === activeTab;
+          const displayLabel = MOBILE_SHORT_LABELS[tab.id] || tab.label;
 
           return (
             <button
@@ -92,52 +118,52 @@ export const MobileBottomDock: React.FC<MobileBottomDockProps> = ({
                 setActiveTab(tab.id);
                 centerTab(tab.id, true);
               }}
-              className="relative shrink-0 w-16 h-16 flex flex-col items-center justify-center cursor-pointer select-none transition-transform active:scale-95"
+              className="relative shrink-0 w-[72px] h-16 flex flex-col items-center justify-center cursor-pointer select-none transition-transform active:scale-95"
               title={tab.label}
               aria-label={tab.label}
             >
               {isSelected ? (
-                /* ACTIVE ITEM: Curved Dome Notch Background + Popped Up Elevated Circle Icon */
+                /* ACTIVE ITEM: Wide Organic Dome + Snugly Nested Pop-up Circle */
                 <motion.div
                   layoutId="activeCurvedDomeIndicator"
                   transition={{ type: 'spring', stiffness: 450, damping: 32 }}
                   className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none"
                 >
-                  {/* Curved Dome SVG Background popping up from the bar */}
-                  <div className="absolute -top-[24px] left-1/2 -translate-x-1/2 w-[76px] h-[25px] pointer-events-none z-10 overflow-visible">
+                  {/* Wide Organic Curved Dome SVG (116px wide, seamlessly hugs the circle) */}
+                  <div className="absolute -top-[23px] left-1/2 -translate-x-1/2 w-[116px] h-[25px] pointer-events-none z-10 overflow-visible">
                     <svg
-                      viewBox="0 0 76 25"
+                      viewBox="0 0 116 25"
                       className="w-full h-full block text-white dark:text-[#0c0f1e]"
                     >
-                      {/* Solid dome background fill */}
+                      {/* Solid dome background fill - overlaps 2px into bar for seamless fusion */}
                       <path
-                        d="M 0 24 C 10 24, 14 12, 22 5 C 30 -2, 46 -2, 54 5 C 62 12, 66 24, 76 24 L 76 25 L 0 25 Z"
+                        d="M 0 24 C 24 24, 34 13, 44 5 C 52 -1, 64 -1, 72 5 C 82 13, 92 24, 116 24 L 116 26 L 0 26 Z"
                         fill="currentColor"
                       />
-                      {/* Top curved border stroke matching bar's border-t */}
+                      {/* Seamless hair-line stroke matching bar's top border */}
                       <path
-                        d="M 0 24 C 10 24, 14 12, 22 5 C 30 -2, 46 -2, 54 5 C 62 12, 66 24, 76 24"
+                        d="M 0 24 C 24 24, 34 13, 44 5 C 52 -1, 64 -1, 72 5 C 82 13, 92 24, 116 24"
                         fill="none"
-                        stroke="#cbd5e1"
+                        stroke="rgba(226, 232, 240, 0.9)"
                         className="dark:stroke-white/10"
-                        strokeWidth="1.2"
+                        strokeWidth="1.1"
                       />
                     </svg>
                   </div>
 
-                  {/* Popped-Up Circle with White Ring */}
+                  {/* Popped-Up Circle nested harmoniously half-in half-out */}
                   <motion.div
-                    initial={{ scale: 0.6, y: 10 }}
+                    initial={{ scale: 0.6, y: 8 }}
                     animate={{ scale: 1, y: 0 }}
                     transition={{ type: 'spring', stiffness: 500, damping: 24 }}
-                    className="absolute -top-5.5 left-1/2 -translate-x-1/2 z-20 w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center text-white ring-4 ring-white dark:ring-[#0c0f1e] shadow-lg shadow-blue-600/35"
+                    className="absolute -top-4.5 left-1/2 -translate-x-1/2 z-20 w-[48px] h-[48px] rounded-full bg-blue-600 flex items-center justify-center text-white ring-4 ring-white dark:ring-[#0c0f1e] shadow-md shadow-blue-600/30"
                   >
                     <Icon size={22} strokeWidth={2.6} />
                   </motion.div>
 
-                  {/* Active Text Label */}
-                  <span className="text-[10px] font-black text-blue-600 dark:text-blue-400 mt-6 tracking-tight truncate max-w-[64px] text-center select-none">
-                    {tab.label}
+                  {/* Active Text Label - Short & Crisp, never truncated */}
+                  <span className="text-[10.5px] font-black text-blue-600 dark:text-blue-400 mt-6 tracking-tight truncate max-w-[68px] text-center select-none">
+                    {displayLabel}
                   </span>
                 </motion.div>
               ) : (
