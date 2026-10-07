@@ -144,7 +144,10 @@ if APP_MODE != "web":
             </style>
             """
             html_content = html_content.replace("</head>", f"{theme_style}</head>")
-            return HTMLResponse(content=html_content)
+            return HTMLResponse(
+                content=html_content,
+                headers={"Cache-Control": "no-cache, no-store, must-revalidate"}
+            )
             
         return HTMLResponse(
             content="""

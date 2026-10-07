@@ -24,6 +24,6 @@ while true; do
         echo "[$(date '+%Y-%m-%d %H:%M:%S')] Auto deployment completed successfully!"
     fi
 
-    # Wait 60 seconds before next check
-    sleep 60
+    # Wait 15 seconds before next check for near-instant auto deployment
+    sleep 15
 done

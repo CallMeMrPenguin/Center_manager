@@ -72,6 +72,7 @@ services:
         max-file: "3"
     volumes:
       - app_files:/app/backend/files
+      - ./backend:/app/backend
 
 volumes:
   postgres_data:

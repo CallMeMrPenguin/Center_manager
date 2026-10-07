@@ -19,8 +19,8 @@ docker compose up -d
 if [ -f "backend/database/init_data.sql" ]; then
     docker exec -i center_manager_db psql -U center_user -d center_manager -c "ALTER USER center_user WITH PASSWORD 'center_secure_pass_2026';" || true
     docker exec -i center_manager_db psql -U center_user -d center_manager < backend/database/init_data.sql || true
-    docker restart center_manager_backend || true
 fi
+docker restart center_manager_backend || true
 
 echo "=== [2/4] Building latest Frontend UI ==="
 cd frontend
@@ -72,9 +72,16 @@ upkidscentermanager.io.vn, www.upkidscentermanager.io.vn {
         file_server
     }
 
+    handle /version.json {
+        root * /var/www/center_manager/dist
+        header Cache-Control "no-cache, no-store, must-revalidate"
+        file_server
+    }
+
     handle {
         root * /var/www/center_manager/dist
         try_files {path} /index.html
+        header Cache-Control "no-cache, no-store, must-revalidate"
         file_server
     }
 }

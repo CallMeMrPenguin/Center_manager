@@ -22,7 +22,7 @@ export function useAutoDeploymentRefresh() {
       try {
         const res = await fetch(`/version.json?_t=${Date.now()}`, {
           cache: 'no-store',
-          headers: { 'Cache-Control': 'no-cache' }
+          headers: { 'Cache-Control': 'no-cache, no-store, must-revalidate' }
         });
         if (!res.ok) return;
 
@@ -33,7 +33,7 @@ export function useAutoDeploymentRefresh() {
             showToast('Đã có bản cập nhật mới! Đang tự động làm mới...', 'success');
             setTimeout(() => {
               window.location.reload();
-            }, 1200);
+            }, 800);
           }
         }
       } catch {
@@ -41,21 +41,31 @@ export function useAutoDeploymentRefresh() {
       }
     };
 
-    // Check when user switches back to this browser tab
+    // Check when user switches back to this browser tab or window focuses
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
         checkNewVersion();
       }
     };
 
-    document.addEventListener('visibilitychange', handleVisibilityChange);
+    const handleWindowFocus = () => {
+      checkNewVersion();
+    };
 
-    // Check periodically every 60 seconds
-    const interval = setInterval(checkNewVersion, 60000);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', handleWindowFocus);
+
+    // Initial check after 2 seconds
+    const initTimer = setTimeout(checkNewVersion, 2000);
+
+    // Check periodically every 15 seconds
+    const interval = setInterval(checkNewVersion, 15000);
 
     return () => {
       window.removeEventListener('vite:preloadError', handlePreloadError);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handleWindowFocus);
+      clearTimeout(initTimer);
       clearInterval(interval);
     };
   }, []);
