@@ -235,7 +235,7 @@ function AppContent() {
 
         {/* MAIN BODY SKELETON */}
         <div className="flex-1 flex flex-col overflow-hidden bg-transparent w-full min-w-0">
-          <main className="flex-1 overflow-hidden bg-[#f1f5f9] dark:bg-[#09090b] relative w-full min-w-0 pb-20 md:pb-0">
+          <main className="flex-1 overflow-hidden bg-[#f1f5f9] dark:bg-[#09090b] relative w-full min-w-0 pb-0">
             {/* FLUSH MARGIN NAVIGATION ARROW INDICATOR (SÁT LỀ TAB) */}
             {navIndicator === 'back' && (
               <div
