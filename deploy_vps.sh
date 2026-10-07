@@ -65,8 +65,8 @@ fi
 
 PROJECT_DIR=$(pwd)
 cat << EOF > /etc/caddy/Caddyfile
-:80 {
-    root * ${PROJECT_DIR}/frontend/dist
+upkidscentermanager.io.vn, www.upkidscentermanager.io.vn, :80 {
+    root * \${PROJECT_DIR}/frontend/dist
     file_server
     try_files {path} /index.html
 
