@@ -93,13 +93,13 @@ export async function exportClassReportPng({
     return { ...s, lines, rowH };
   });
 
-  const c1Lines = wrapHeaderTopic(c1Topic, 24);
-  const c2Lines = wrapHeaderTopic(c2Topic, 24);
+  const c1Lines = wrapHeaderTopic(c1Topic, 28);
+  const c2Lines = wrapHeaderTopic(c2Topic, 28);
   const maxTopicLines = Math.max(c1Lines.length, c2Lines.length);
 
   // 2. Direct Canvas 2D Rendering
-  const scale = 2, width = 1200;
-  const colW = [45, 170, 80, 165, 165, 70, 70, 75, 75, 285];
+  const scale = 2, width = 1300;
+  const colW = [45, 180, 85, 175, 175, 75, 75, 80, 80, 330];
   const colX: number[] = [0];
   for (let i = 0; i < colW.length; i++) colX.push(colX[i] + colW[i]);
 
@@ -122,7 +122,7 @@ export async function exportClassReportPng({
   const fontSerif = "'Times New Roman', Times, serif";
 
   // Banner
-  ctx.fillStyle = '#1E1B4B';
+  ctx.fillStyle = '#1D4ED8';
   ctx.fillRect(0, 0, width, titleH);
   ctx.fillStyle = '#FFFFFF';
   ctx.font = `bold 16px ${fontSerif}`;
@@ -132,11 +132,11 @@ export async function exportClassReportPng({
 
   let currentY = titleH;
   if (hasTopic) {
-    ctx.fillStyle = '#EEF2FF';
+    ctx.fillStyle = '#EFF6FF';
     ctx.fillRect(0, currentY, width, topicH);
-    ctx.strokeStyle = '#CBD5E1';
+    ctx.strokeStyle = '#BFDBFE';
     ctx.strokeRect(0, currentY, width, topicH);
-    ctx.fillStyle = '#312E81';
+    ctx.fillStyle = '#1E40AF';
     ctx.font = `bold 12px ${fontSerif}`;
     const tParts = [c1Topic ? `Check 1: ${c1Topic}` : '', c2Topic ? `Check 2: ${c2Topic}` : ''].filter(Boolean);
     ctx.fillText(`Nội dung kiểm tra: ${tParts.join('   —   ')}`, width / 2, currentY + topicH / 2);
@@ -145,9 +145,9 @@ export async function exportClassReportPng({
 
   // Headers
   const hdrs = ['STT', 'Họ và Tên', 'Điểm Danh', 'Check 1', 'Check 2', 'BTVN 1', 'BTVN 2', 'Luyện Đề', 'Độ Lệch', 'Cần Cố Gắng (Dưới TB)'];
-  ctx.fillStyle = '#312E81';
+  ctx.fillStyle = '#2563EB';
   ctx.fillRect(0, currentY, width, headerH);
-  ctx.strokeStyle = '#CBD5E1';
+  ctx.strokeStyle = '#1D4ED8';
 
   for (let c = 0; c < 10; c++) {
     const x = colX[c], w = colW[c];

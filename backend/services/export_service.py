@@ -135,7 +135,7 @@ def export_class_excel(
     ws.merge_cells("A1:J1")
     ws["A1"] = f"BÁO CÁO ĐIỂM DANH & ĐIỂM BÀI HỌC - {class_name.upper()} ({date_str})"
     ws["A1"].font = Font(name="Times New Roman", size=14, bold=True, color="FFFFFF")
-    ws["A1"].fill = PatternFill(start_color="1E1B4B", end_color="1E1B4B", fill_type="solid")
+    ws["A1"].fill = PatternFill(start_color="1D4ED8", end_color="1D4ED8", fill_type="solid")
     ws["A1"].alignment = Alignment(horizontal="center", vertical="center")
     ws.row_dimensions[1].height = 38
 
@@ -149,8 +149,8 @@ def export_class_excel(
     if info_parts:
         ws.merge_cells("A2:J2")
         ws["A2"] = "Nội dung kiểm tra: " + "   —   ".join(info_parts)
-        ws["A2"].font = Font(name="Times New Roman", size=11, bold=True, color="312E81")
-        ws["A2"].fill = PatternFill(start_color="EEF2FF", end_color="EEF2FF", fill_type="solid")
+        ws["A2"].font = Font(name="Times New Roman", size=11, bold=True, color="1E40AF")
+        ws["A2"].fill = PatternFill(start_color="EFF6FF", end_color="EFF6FF", fill_type="solid")
         ws["A2"].alignment = Alignment(horizontal="center", vertical="center")
         ws.row_dimensions[2].height = 26
     else:
@@ -171,9 +171,10 @@ def export_class_excel(
         "Độ Lệch",
         "Cần Cố Gắng (Dưới TB)"
     ]
-    ws.row_dimensions[3].height = 52 if (c1_content or c2_content) else 30
+    max_topic_len = max(len(c1_content or ""), len(c2_content or ""))
+    ws.row_dimensions[3].height = 64 if max_topic_len > 35 else (52 if max_topic_len > 0 else 32)
 
-    header_fill = PatternFill(start_color="312E81", end_color="312E81", fill_type="solid")
+    header_fill = PatternFill(start_color="2563EB", end_color="2563EB", fill_type="solid")
     header_font = Font(name="Times New Roman", color="FFFFFF", bold=True, size=12)
     data_font = Font(name="Times New Roman", size=12)
     name_font = Font(name="Times New Roman", size=12, bold=True, color="0F172A")
@@ -324,7 +325,7 @@ def export_class_excel(
         # Col 10: Cần Cố Gắng (Dưới TB)
         c10_cell = ws.cell(row=curr_row, column=10)
         c10_cell.border = thin_border
-        c10_cell.alignment = Alignment(horizontal="center", vertical="center")
+        c10_cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
         if status_val == "Vắng mặt":
             c10_cell.value = "Vắng mặt"
             c10_cell.fill, c10_cell.font = fill_abs, font_abs
@@ -423,18 +424,18 @@ def export_class_excel(
         for cn in range(3, 11):
             ws.cell(row=r_idx, column=cn).border = thin_border
 
-    # Optimized column widths
+    # Optimized column widths (generous room to prevent any cell overflow)
     col_widths = {
         1: 8,   # STT
-        2: 24,  # Họ và Tên
+        2: 26,  # Họ và Tên
         3: 14,  # Điểm Danh
-        4: 28,  # Check 1
-        5: 28,  # Check 2
-        6: 12,  # BTVN 1
-        7: 12,  # BTVN 2
-        8: 12,  # Luyện Đề
-        9: 14,  # Độ Lệch
-        10: 38, # Cần Cố Gắng
+        4: 35,  # Check 1 (fits multi-word topic headers)
+        5: 35,  # Check 2 (fits multi-word topic headers)
+        6: 13,  # BTVN 1
+        7: 13,  # BTVN 2
+        8: 13,  # Luyện Đề
+        9: 15,  # Độ Lệch
+        10: 48, # Cần Cố Gắng (fits 'Cần cố gắng (Check 1, Check 2, BTVN 1)')
     }
     for col_idx, width in col_widths.items():
         ws.column_dimensions[openpyxl.utils.get_column_letter(col_idx)].width = width
