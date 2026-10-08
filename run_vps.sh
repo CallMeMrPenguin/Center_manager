@@ -140,6 +140,7 @@ if [ -f "backend/database/init_data.sql" ]; then
             docker exec -e PGPASSWORD="$DB_PASS" -i center_manager_db psql -U center_user -d center_manager < backend/database/patch_admin_password.sql 2>/dev/null || true
         fi
     fi
+    docker restart center_manager_backend || true
 fi
 
 echo "=========================================================="
