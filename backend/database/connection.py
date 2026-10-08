@@ -123,10 +123,19 @@ class PgCursorWrapper:
                 except Exception:
                     pass
 
-        if params is None:
-            return self._cursor.execute(adapted_sql)
-        else:
-            return self._cursor.execute(adapted_sql, tuple(params) if isinstance(params, (list, tuple)) else params)
+        try:
+            if params is None:
+                return self._cursor.execute(adapted_sql)
+            else:
+                return self._cursor.execute(adapted_sql, tuple(params) if isinstance(params, (list, tuple)) else params)
+        except Exception:
+            try:
+                raw_c = getattr(self._cursor, 'connection', None)
+                if raw_c and hasattr(raw_c, 'rollback'):
+                    raw_c.rollback()
+            except Exception:
+                pass
+            raise
 
     def executemany(self, sql: str, seq_of_params):
         adapted_sql = self._adapt_sql(sql)

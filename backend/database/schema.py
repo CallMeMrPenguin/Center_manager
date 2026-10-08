@@ -42,8 +42,12 @@ def run_migrations(cursor: sqlite3.Cursor, conn: sqlite3.Connection):
     for table, col_def in safe_columns:
         try:
             cursor.execute(f"ALTER TABLE {table} ADD COLUMN {col_def}")
+            conn.commit()
         except Exception:
-            pass
+            try:
+                conn.rollback()
+            except Exception:
+                pass
 
     try:
         from datetime import datetime
@@ -62,8 +66,12 @@ def run_migrations(cursor: sqlite3.Cursor, conn: sqlite3.Connection):
             )
         """, (now_str,))
         conn.commit()
-    except Exception:
-        pass
+    except Exception as e:
+        print("[Migration app_users notice]:", e)
+        try:
+            conn.rollback()
+        except Exception:
+            pass
 
     # Ensure sync tombstones table exists for conflict-free deletion propagation
     try:
