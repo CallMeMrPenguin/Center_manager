@@ -272,6 +272,7 @@ CREATE TABLE IF NOT EXISTS public.app_users (
     role TEXT NOT NULL DEFAULT 'Giáo viên',
     status TEXT CHECK(status IN ('Hoạt động', 'Tạm khóa')) DEFAULT 'Hoạt động',
     created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW(),
     last_login TIMESTAMPTZ DEFAULT NULL
 );
 

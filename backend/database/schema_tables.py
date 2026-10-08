@@ -363,6 +363,7 @@ def create_all_tables(cursor: sqlite3.Cursor):
         role TEXT NOT NULL DEFAULT 'Giáo viên',
         status TEXT CHECK(status IN ('Hoạt động', 'Tạm khóa')) DEFAULT 'Hoạt động',
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         last_login TIMESTAMP DEFAULT NULL,
         plain_password TEXT DEFAULT NULL
     )
@@ -370,6 +371,10 @@ def create_all_tables(cursor: sqlite3.Cursor):
 
     try:
         cursor.execute("ALTER TABLE app_users ADD COLUMN plain_password TEXT DEFAULT NULL;")
+    except Exception:
+        pass
+    try:
+        cursor.execute("ALTER TABLE app_users ADD COLUMN updated_at TIMESTAMP DEFAULT NULL;")
     except Exception:
         pass
 

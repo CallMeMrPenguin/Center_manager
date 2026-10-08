@@ -190,14 +190,20 @@ def api_sync_exchange(req: SyncExchangeRequest):
                     continue
                 pks = pk_lookup[table]
 
-                # Check if table exists
+                # Check if table exists and retrieve actual table columns
                 try:
                     if is_postgres():
-                        cursor.execute("SELECT 1 FROM information_schema.tables WHERE table_name = %s", (table,))
+                        cursor.execute("SELECT column_name FROM information_schema.columns WHERE table_name = %s", (table,))
+                        rows_cols = cursor.fetchall()
+                        if not rows_cols:
+                            continue
+                        table_cols = set(r["column_name"] if isinstance(r, dict) else r[0] for r in rows_cols)
                     else:
                         cursor.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name=?", (table,))
-                    if not cursor.fetchone():
-                        continue
+                        if not cursor.fetchone():
+                            continue
+                        cursor.execute(f"PRAGMA table_info({table})")
+                        table_cols = set(r[1] for r in cursor.fetchall())
                 except Exception:
                     continue
 
@@ -224,7 +230,8 @@ def api_sync_exchange(req: SyncExchangeRequest):
                     if not should_update:
                         continue
 
-                    cols = list(row_dict.keys())
+                    # Filter incoming columns to only those existing on target table
+                    cols = [c for c in row_dict.keys() if not table_cols or c in table_cols]
                     if existing:
                         # Update existing row
                         update_cols = [c for c in cols if c not in pks]
@@ -235,8 +242,8 @@ def api_sync_exchange(req: SyncExchangeRequest):
                             try:
                                 cursor.execute(update_sql, tuple(update_vals))
                                 pushed_count += 1
-                            except Exception:
-                                pass
+                            except Exception as e:
+                                print(f"[Sync Exchange] Update error on {table}:", e)
                     else:
                         # Insert new row
                         # If composite key and id is autoincrement, let sequence assign id

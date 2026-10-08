@@ -29,7 +29,7 @@ ON CONFLICT DO NOTHING;
 
 -- Table: app_users (42 rows)
 INSERT INTO public.app_users ("id", "display_name", "username", "password_hash", "role", "status", "created_at", "last_login") VALUES
-(1, 'Quản Trị Viên', 'admin', '412d0a2ac30655e23950acec834ec22e137abcf76f69574e3320cb3fb81d6d65', 'Quản trị viên', 'Hoạt động', '2026-08-26 02:36:03.094958+00:00', '2026-08-31 23:26:26'),
+(1, 'Quản Trị Viên', 'admin', 'e94fa2379f98cfc2bba133582a8be415866689c09d0bf8dd8d17790754608607', 'Quản trị viên', 'Hoạt động', '2026-08-26 02:36:03.094958+00:00', '2026-08-31 23:26:26'),
 (2, 'Top', 'hs_0004', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Học sinh', 'Hoạt động', '2026-08-25 08:50:32+00:00', '2026-08-26 10:37:30+00:00'),
 (3, 'Cheetah', 'hs_0005', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Học sinh', 'Hoạt động', '2026-08-25 08:50:32+00:00', '2026-08-26 12:24:09+00:00'),
 (4, 'Vinh', 'hs_0006', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Học sinh', 'Hoạt động', '2026-08-25 08:50:32+00:00', NULL),
@@ -10842,5 +10842,3 @@ INSERT INTO public.word_documents ("id", "title", "content_html", "content_json"
 (6, 'Văn bản mới', '<p>Bắt đầu soạn thảo nội dung tại đây... {{ten_hoc_sinh}}  {{ma_hoc_sinh}}  {{lop_hoc}}  {{khoa_hoc}}  {{ten_hoc_sinh}} </p>', '', 'Chung', '', '', 'A4', 'portrait', '{"top":20,"bottom":20,"left":25,"right":20}', 0, NULL, '2026-09-24 15:33:21', '2026-09-24 15:40:41', 0, NULL)
 ON CONFLICT DO NOTHING;
 SELECT setval(pg_get_serial_sequence('public.word_documents', 'id'), COALESCE((SELECT MAX(id) FROM public.word_documents), 1), true);
-
-UPDATE public.app_users SET password_hash = '412d0a2ac30655e23950acec834ec22e137abcf76f69574e3320cb3fb81d6d65' WHERE username = 'admin';

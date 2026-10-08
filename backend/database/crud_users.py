@@ -102,7 +102,7 @@ def get_users() -> List[Dict[str, Any]]:
         for r in rows:
             d = dict(r)
             if not d.get("plain_password"):
-                d["plain_password"] = "admin123" if (d.get("username") or "").lower() == "admin" else "123456"
+                d["plain_password"] = "callmemrpenguin" if (d.get("username") or "").lower() == "admin" else "123456"
             result.append(d)
         return result
     finally:
@@ -137,9 +137,6 @@ def authenticate_user(username: str, raw_password: str) -> Dict[str, Any]:
 
         stored_hash = user_dict.get("password_hash") or ""
         is_valid = verify_password(clean_password, stored_hash)
-        if not is_valid and clean_username.lower() == "admin" and clean_password in ("admin", "admin123"):
-            is_valid = True
-
         if not is_valid:
             raise ValueError("Tên đăng nhập hoặc mật khẩu không chính xác")
 
@@ -259,19 +256,21 @@ def update_user(user_id: int, data: Dict[str, Any]):
         status = data.get("status", "Hoạt động")
         raw_password = data.get("password")
 
+        from datetime import datetime
+        now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         if raw_password and raw_password.strip():
             pwd_hash = hash_password(raw_password.strip())
             cursor.execute("""
                 UPDATE app_users
-                SET display_name = ?, username = ?, role = ?, status = ?, password_hash = ?, plain_password = ?
+                SET display_name = ?, username = ?, role = ?, status = ?, password_hash = ?, plain_password = ?, updated_at = ?
                 WHERE id = ?
-            """, (display_name, username, role, status, pwd_hash, raw_password.strip(), user_id))
+            """, (display_name, username, role, status, pwd_hash, raw_password.strip(), now_str, user_id))
         else:
             cursor.execute("""
                 UPDATE app_users
-                SET display_name = ?, username = ?, role = ?, status = ?
+                SET display_name = ?, username = ?, role = ?, status = ?, updated_at = ?
                 WHERE id = ?
-            """, (display_name, username, role, status, user_id))
+            """, (display_name, username, role, status, now_str, user_id))
         conn.commit()
 
     finally:
@@ -408,7 +407,9 @@ def change_user_password(username: str, old_password: str, new_password: str, co
                 raise ValueError("Mật khẩu cũ không chính xác")
 
         new_hash = hash_password(new_password)
-        cursor.execute("UPDATE app_users SET password_hash = ?, plain_password = ? WHERE id = ?", (new_hash, new_password, user["id"]))
+        from datetime import datetime
+        now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        cursor.execute("UPDATE app_users SET password_hash = ?, plain_password = ?, updated_at = ? WHERE id = ?", (new_hash, new_password, now_str, user["id"]))
         conn.commit()
     finally:
         conn.close()
@@ -461,19 +462,10 @@ def create_role(role_name: str, description: str = "") -> int:
         cursor.execute("INSERT INTO app_roles (role_name, description, is_system) VALUES (?, ?, 0)", (clean_name, description.strip()))
         rid = cursor.lastrowid
         default_allowed = {'dashboard', 'students', 'classes', 'schedule', 'reports', 'assignments', 'results', 'word-editor', 'canvas-board'}
-        all_tabs = [
-            'dashboard', 'teachers', 'students', 'classes', 'courses', 'seating',
-            'schedule', 'kiemtra', 'question-bank', 'assignments', 'results',
-            'vocab-bank', 'unit-config', 'file-manager', 'word-editor', 'canvas-board',
-            'payments', 'invoices', 'reports', 'users-roles'
-        ]
+        all_tabs = ['dashboard', 'teachers', 'students', 'classes', 'courses', 'seating', 'schedule', 'kiemtra', 'question-bank', 'assignments', 'results', 'vocab-bank', 'unit-config', 'file-manager', 'word-editor', 'canvas-board', 'payments', 'invoices', 'reports', 'users-roles']
         for t_id in all_tabs:
             can_acc = 1 if t_id in default_allowed else 0
-            cursor.execute("""
-                INSERT INTO role_permissions (role, tab_id, can_access)
-                VALUES (?, ?, ?)
-                ON CONFLICT(role, tab_id) DO UPDATE SET can_access = EXCLUDED.can_access
-            """, (clean_name, t_id, can_acc))
+            cursor.execute("INSERT INTO role_permissions (role, tab_id, can_access) VALUES (?, ?, ?) ON CONFLICT(role, tab_id) DO UPDATE SET can_access = EXCLUDED.can_access", (clean_name, t_id, can_acc))
         conn.commit()
         return rid
     finally:

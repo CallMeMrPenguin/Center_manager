@@ -126,14 +126,17 @@ systemctl enable docker
 docker compose down 2>/dev/null || true
 docker compose up -d --build
 
-# Đồng bộ dữ liệu SQL khởi tạo nếu có
+# Khởi tạo dữ liệu ban đầu cho PostgreSQL nếu database chưa có người dùng
 if [ -f "backend/database/init_data.sql" ]; then
-    echo " -> Đồng bộ dữ liệu PostgreSQL..."
-    # Đợi PostgreSQL sẵn sàng
     sleep 3
-    docker exec -i center_manager_db psql -U center_user -d center_manager -c "ALTER USER center_user WITH PASSWORD 'center_secure_pass_2026';" || true
-    docker exec -i center_manager_db psql -U center_user -d center_manager < backend/database/init_data.sql || true
-    docker restart center_manager_backend || true
+    USER_COUNT=$(docker exec -i center_manager_db psql -U center_user -d center_manager -tAc "SELECT COUNT(*) FROM app_users;" 2>/dev/null || echo "0")
+    if [ "$USER_COUNT" = "0" ] || [ -z "$USER_COUNT" ]; then
+        echo " -> Khởi tạo dữ liệu PostgreSQL ban đầu..."
+        docker exec -i center_manager_db psql -U center_user -d center_manager < backend/database/init_data.sql || true
+        docker restart center_manager_backend || true
+    else
+        echo " -> PostgreSQL đã có dữ liệu ($USER_COUNT users). Bỏ qua nạp init_data.sql để bảo toàn mật khẩu & dữ liệu live."
+    fi
 fi
 
 echo "=========================================================="
