@@ -47,11 +47,11 @@ export const UsersRolesPage: React.FC = () => {
 
   return (
     <div className="h-full w-full overflow-y-auto p-6 space-y-6 bg-[var(--background)] text-slate-900 dark:text-slate-100 select-none font-sans scrollbar-thin">
-      {/* 1. Header Banner */}
-      <div className="bg-white dark:bg-[#111728] border-0 rounded-2xl p-5 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.06),0_2px_6px_-2px_rgba(0,0,0,0.04)] flex flex-wrap items-center justify-between gap-4">
+      {/* 1. Transparent Hero Header */}
+      <div className="flex flex-wrap items-center justify-between gap-4 py-1">
         <div>
-          <h2 className="text-base font-black text-slate-900 dark:text-white tracking-wide">
-            Quản Lý Tài Khoản & Phân Quyền Vai Trò
+          <h2 className="text-lg font-black text-slate-900 dark:text-white tracking-tight">
+            Quản Lý Tài Khoản & Phân Quyền
           </h2>
         </div>
 

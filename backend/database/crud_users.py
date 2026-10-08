@@ -457,8 +457,8 @@ def create_role(role_name: str, description: str = "") -> int:
 
 def delete_role(role_name: str):
     clean_name = role_name.strip()
-    if clean_name in [r[0] for r in SYSTEM_ROLES]:
-        raise ValueError("Không thể xóa vai trò mặc định của hệ thống")
+    if clean_name.lower() in ["quản trị viên", "admin", "administrator"]:
+        raise ValueError("Không thể xóa vai trò Quản trị viên hệ thống")
     conn = get_connection()
     try:
         cursor = conn.cursor()
