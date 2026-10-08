@@ -254,9 +254,11 @@ StandardError=journal
 WantedBy=multi-user.target
 EOF
 
-systemctl daemon-reload
-systemctl enable center-autopull.service
-systemctl restart center-autopull.service
+if [ -z "$INVOKED_BY_AUTOPULL" ]; then
+    systemctl daemon-reload
+    systemctl enable center-autopull.service
+    systemctl restart center-autopull.service
+fi
 
 echo "=========================================================="
 echo " [8/8] ĐẢM BẢO TỰ KHỞI ĐỘNG KHI VPS REBOOT & KIỂM TRA TRẠNG THÁI"

@@ -39,6 +39,7 @@ BOOT_REMOTE=$(git rev-parse origin/main 2>/dev/null || echo "")
 if [ -n "$BOOT_LOCAL" ] && [ -n "$BOOT_REMOTE" ] && [ "$BOOT_LOCAL" != "$BOOT_REMOTE" ]; then
     echo "[$(date '+%Y-%m-%d %H:%M:%S')] New update detected on startup ($BOOT_LOCAL -> $BOOT_REMOTE). Applying update..."
     git reset --hard origin/main
+    export INVOKED_BY_AUTOPULL=1
     if [ -f "$PROJECT_DIR/run_vps.sh" ]; then
         bash "$PROJECT_DIR/run_vps.sh"
     elif [ -f "$PROJECT_DIR/update.sh" ]; then
@@ -59,6 +60,7 @@ while true; do
     if [ -n "$LOCAL_HASH" ] && [ -n "$REMOTE_HASH" ] && [ "$LOCAL_HASH" != "$REMOTE_HASH" ]; then
         echo "[$(date '+%Y-%m-%d %H:%M:%S')] New commit detected on GitHub ($LOCAL_HASH -> $REMOTE_HASH). Auto pulling..."
         git reset --hard origin/main
+        export INVOKED_BY_AUTOPULL=1
         if [ -f "$PROJECT_DIR/run_vps.sh" ]; then
             bash "$PROJECT_DIR/run_vps.sh"
         elif [ -f "$PROJECT_DIR/update.sh" ]; then
