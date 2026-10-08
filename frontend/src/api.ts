@@ -344,6 +344,7 @@ export const api = {
   getRolePermissions: () => request<any[]>('/api/roles/permissions', { tags: ['roles'], forceRefresh: true }),
   saveRolePermissions: (permissions: any[]) => request<any>('/api/roles/permissions', { method: 'PUT', body: JSON.stringify({ permissions }), tags: ['roles'] }),
   syncStudentAccounts: () => request<any>('/api/users/sync-students', { method: 'POST', tags: ['users', 'students'] }),
+  syncStaffAccounts: () => request<any>('/api/users/sync-staff', { method: 'POST', tags: ['users', 'teachers'] }),
 
   // Update & Sync API
   checkUpdate: () => request<any>('/api/system/update-check'),

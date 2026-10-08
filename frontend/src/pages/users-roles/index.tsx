@@ -3,7 +3,6 @@ import { SegmentedControl } from '../../components/SegmentedControl';
 import { useUsersData } from './hooks/useUsersData';
 import { UsersTab } from './tabs/UsersTab';
 import { PermissionsTab } from './tabs/PermissionsTab';
-import { SystemSettingsTab } from './tabs/SystemSettingsTab';
 import { UserModal } from './components/UserModal';
 import { AddRoleModal } from './components/AddRoleModal';
 import { AppUser } from './types';
@@ -14,7 +13,6 @@ export const UsersRolesPage: React.FC = () => {
     permissions,
     loading,
     savingPermissions,
-    syncingStudents,
     activeTab,
     setActiveTab,
     isModalOpen,
@@ -25,7 +23,6 @@ export const UsersRolesPage: React.FC = () => {
     loadPermissions,
     availableRoles,
     loadRoles,
-    handleSyncStudents,
     handleSavePermissions,
   } = useUsersData();
 
@@ -59,13 +56,12 @@ export const UsersRolesPage: React.FC = () => {
         </div>
 
         {/* Segmented Control */}
-        <SegmentedControl<'users' | 'permissions' | 'system'>
+        <SegmentedControl<'users' | 'permissions'>
           value={activeTab}
           onChange={setActiveTab}
           options={[
             { value: 'users', label: 'Tài Khoản Người Dùng' },
             { value: 'permissions', label: 'Phân Quyền Vai Trò' },
-            { value: 'system', label: 'Hệ Thống & Đồng Bộ' },
           ]}
           activeColor="bg-[#2563eb]"
           size="md"
@@ -81,7 +77,7 @@ export const UsersRolesPage: React.FC = () => {
             onEditUser={handleOpenEditModal}
             onOpenCreateModal={handleOpenCreateModal}
           />
-        ) : activeTab === 'permissions' ? (
+        ) : (
           <PermissionsTab
             permissions={permissions}
             saving={savingPermissions}
@@ -94,8 +90,6 @@ export const UsersRolesPage: React.FC = () => {
             newlyCreatedRole={newlyCreatedRole}
             onClearNewlyCreatedRole={() => setNewlyCreatedRole(null)}
           />
-        ) : (
-          <SystemSettingsTab />
         )}
       </div>
 

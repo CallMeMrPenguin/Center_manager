@@ -13,21 +13,21 @@ export function useUsersData() {
   const [savingPermissions, setSavingPermissions] = useState<boolean>(false);
   const [syncingStudents, setSyncingStudents] = useState<boolean>(false);
 
-  // Active view: 'users' | 'permissions' | 'system'
-  const [activeTab, setActiveTabState] = useState<'users' | 'permissions' | 'system'>(() => {
+  // Active view: 'users' | 'permissions'
+  const [activeTab, setActiveTabState] = useState<'users' | 'permissions'>(() => {
     const tab = getUrlParam('tab');
-    if (tab === 'permissions' || tab === 'system' || tab === 'users') return tab;
+    if (tab === 'permissions') return 'permissions';
     return 'users';
   });
 
-  const setActiveTab = useCallback((tab: 'users' | 'permissions' | 'system') => {
+  const setActiveTab = useCallback((tab: 'users' | 'permissions') => {
     setActiveTabState(tab);
     setUrlParams({ tab });
   }, []);
 
   useUrlSync(() => {
     const tab = getUrlParam('tab');
-    if (tab === 'permissions' || tab === 'system' || tab === 'users') {
+    if (tab === 'permissions' || tab === 'users') {
       setActiveTabState(tab);
     }
   });
@@ -95,6 +95,18 @@ export function useUsersData() {
     }
   };
 
+  // Sync accounts for all teachers & staff
+  const handleSyncStaff = async () => {
+    try {
+      const res = await api.syncStaffAccounts();
+      showToast(`Đã đồng bộ tài khoản cho ${res.total_teachers || 0} nhân sự!`, 'success');
+      loadUsers();
+    } catch (err) {
+      console.error('Failed to sync staff accounts:', err);
+      showToast('Lỗi khi đồng bộ tài khoản nhân sự: ' + err, 'error');
+    }
+  };
+
   // Save role permissions batch
   const handleSavePermissions = async (updatedList: RolePermission[]) => {
     try {
@@ -127,6 +139,7 @@ export function useUsersData() {
     availableRoles,
     loadRoles,
     handleSyncStudents,
+    handleSyncStaff,
     handleSavePermissions,
   };
 }

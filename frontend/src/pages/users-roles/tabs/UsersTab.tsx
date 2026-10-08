@@ -53,10 +53,16 @@ export const UsersTab: React.FC<UsersTabProps> = ({
   }, [studentUsers]);
 
   const classOptions = useMemo<SelectOption[]>(() => {
-    const rawClasses = Array.from(
-      new Set(studentUsers.map((s) => s.class_name).filter(Boolean))
-    ) as string[];
-    rawClasses.sort();
+    const rawSet = new Set<string>();
+    studentUsers.forEach((s) => {
+      if (s.class_name) {
+        s.class_name.split(',').forEach((c) => {
+          const trimmed = c.trim();
+          if (trimmed) rawSet.add(trimmed);
+        });
+      }
+    });
+    const rawClasses = Array.from(rawSet).sort();
     return [
       { value: 'all', label: 'Tất cả các lớp' },
       ...rawClasses.map((c) => ({
@@ -70,7 +76,10 @@ export const UsersTab: React.FC<UsersTabProps> = ({
   const filteredStudents = useMemo(() => {
     return studentUsers.filter((s) => {
       if (selectedGrade !== 'all' && s.grade !== selectedGrade) return false;
-      if (selectedClass !== 'all' && s.class_name !== selectedClass) return false;
+      if (selectedClass !== 'all') {
+        const classes = (s.class_name || '').split(',').map((c) => c.trim());
+        if (!classes.includes(selectedClass)) return false;
+      }
       return true;
     });
   }, [studentUsers, selectedGrade, selectedClass]);
@@ -124,16 +133,19 @@ export const UsersTab: React.FC<UsersTabProps> = ({
       {
         accessorKey: 'display_name',
         header: 'Tên Hiển Thị',
-        cell: ({ row }) => (
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300 flex items-center justify-center font-black text-xs shrink-0 shadow-2xs">
-              {row.original.display_name.charAt(0).toUpperCase()}
+        cell: ({ row }) => {
+          const name = row.original.display_name || row.original.username || '?';
+          return (
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-xl bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300 flex items-center justify-center font-black text-xs shrink-0 shadow-2xs">
+                {name.charAt(0).toUpperCase()}
+              </div>
+              <span className="font-extrabold text-slate-900 dark:text-white text-sm">
+                {name}
+              </span>
             </div>
-            <span className="font-extrabold text-slate-900 dark:text-white text-sm">
-              {row.original.display_name}
-            </span>
-          </div>
-        ),
+          );
+        },
       },
       {
         accessorKey: 'username',
@@ -198,16 +210,19 @@ export const UsersTab: React.FC<UsersTabProps> = ({
       {
         accessorKey: 'display_name',
         header: 'Học Sinh',
-        cell: ({ row }) => (
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-teal-100 text-teal-700 dark:bg-teal-500/20 dark:text-teal-300 flex items-center justify-center font-black text-xs shrink-0 shadow-2xs">
-              {row.original.display_name.charAt(0).toUpperCase()}
+        cell: ({ row }) => {
+          const name = row.original.display_name || row.original.username || '?';
+          return (
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-xl bg-teal-100 text-teal-700 dark:bg-teal-500/20 dark:text-teal-300 flex items-center justify-center font-black text-xs shrink-0 shadow-2xs">
+                {name.charAt(0).toUpperCase()}
+              </div>
+              <span className="font-extrabold text-slate-900 dark:text-white text-sm">
+                {name}
+              </span>
             </div>
-            <span className="font-extrabold text-slate-900 dark:text-white text-sm">
-              {row.original.display_name}
-            </span>
-          </div>
-        ),
+          );
+        },
       },
       {
         accessorKey: 'username',

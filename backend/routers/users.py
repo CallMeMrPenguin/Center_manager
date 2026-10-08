@@ -106,6 +106,14 @@ def sync_students():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@router.post("/users/sync-staff")
+def sync_staff():
+    try:
+        from database.crud_users import sync_staff_accounts
+        return sync_staff_accounts()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 @router.post("/users/change-password")
 def api_change_password(payload: ChangePasswordRequest):
     try:

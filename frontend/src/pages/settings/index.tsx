@@ -9,6 +9,7 @@ import { GradeTypesCard } from './components/GradeTypesCard';
 import { SystemUpdateCard } from './components/SystemUpdateCard';
 import { ProfilesListCard } from './components/ProfilesListCard';
 import { DebugSettingsCard } from './components/DebugSettingsCard';
+import { SystemSyncSettingsCard } from './components/SystemSyncSettingsCard';
 
 export default function Settings() {
   const confirm = useConfirm();
@@ -205,6 +206,9 @@ export default function Settings() {
         {/* Right Column: Profiles CRUD List */}
         <ProfilesListCard profiles={profiles} onDeleteProfile={handleDeleteProfile} />
       </div>
+
+      {/* System DB & VPS Sync Section */}
+      <SystemSyncSettingsCard />
 
       {/* Update Section — full width below grid */}
       <SystemUpdateCard

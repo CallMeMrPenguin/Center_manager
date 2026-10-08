@@ -8,25 +8,73 @@ def hash_password(password: str) -> str:
         return ""
     return hashlib.sha256(password.encode("utf-8")).hexdigest()
 
+def sync_staff_accounts() -> Dict[str, Any]:
+    """
+    Auto-generates or syncs accounts for all teachers/staff in teachers_cm into app_users.
+    Default username: phone if provided, else gv_{id:04d}, Default password: '123456'
+    """
+    conn = get_connection()
+    try:
+        cursor = conn.cursor()
+        cursor.execute("SELECT id, full_name, role, phone FROM teachers_cm")
+        teachers = cursor.fetchall()
+        default_pwd_hash = hash_password("123456")
+
+        cursor.execute("SELECT LOWER(username) as username, LOWER(display_name) as display_name FROM app_users")
+        existing_users = cursor.fetchall()
+        existing_usernames = {r["username"] for r in existing_users}
+        existing_names = {r["display_name"] for r in existing_users}
+
+        to_insert = []
+        for t in teachers:
+            tid = t["id"]
+            name = (t["full_name"] or "").strip()
+            if not name:
+                continue
+            role = t["role"] or "Giáo viên"
+            default_user = f"gv_{tid:04d}"
+            phone_user = (t["phone"] or "").strip()
+            username = phone_user if phone_user and phone_user.lower() not in existing_usernames else default_user
+
+            if username.lower() not in existing_usernames and name.lower() not in existing_names:
+                to_insert.append((name, username, default_pwd_hash, role, "Hoạt động", "123456"))
+
+        if to_insert:
+            cursor.executemany("""
+                INSERT INTO app_users (display_name, username, password_hash, role, status, plain_password)
+                VALUES (?, ?, ?, ?, ?, ?)
+            """, to_insert)
+            conn.commit()
+
+        return {"success": True, "created": len(to_insert), "total_teachers": len(teachers)}
+    except Exception as e:
+        print("[sync_staff_accounts notice]:", e)
+        return {"success": False, "error": str(e)}
+    finally:
+        conn.close()
+
 def get_users() -> List[Dict[str, Any]]:
     """Returns list of app_users with plain_password and student grade/class for admin view."""
+    try:
+        sync_staff_accounts()
+    except Exception:
+        pass
+
     conn = get_connection()
     try:
         cursor = conn.cursor()
         cursor.execute("""
             SELECT u.id, u.display_name, u.username, u.role, u.status, u.created_at, u.last_login, u.plain_password,
-                   s.grade AS grade,
+                   MAX(s.grade) AS grade,
                    GROUP_CONCAT(DISTINCT c.class_name) AS class_name
             FROM app_users u
             LEFT JOIN students s ON (
-                CASE
-                    WHEN u.username LIKE 'hs_%' THEN s.id = CAST(SUBSTR(u.username, 4) AS INTEGER)
-                    ELSE LOWER(TRIM(u.display_name)) = LOWER(TRIM(s.full_name))
-                END
+                LOWER(u.username) = 'hs_' || printf('%04d', s.id)
+                OR (NOT (u.username LIKE 'hs_%') AND LOWER(TRIM(u.display_name)) = LOWER(TRIM(s.full_name)))
             )
             LEFT JOIN class_students cs ON cs.student_id = s.id
             LEFT JOIN classes c ON c.id = cs.class_id
-            GROUP BY u.id
+            GROUP BY u.id, u.display_name, u.username, u.role, u.status, u.created_at, u.last_login, u.plain_password
             ORDER BY u.id ASC
         """)
         rows = cursor.fetchall()
@@ -251,8 +299,8 @@ def sync_student_accounts() -> Dict[str, Any]:
 
         if to_insert:
             cursor.executemany("""
-                INSERT INTO app_users (display_name, username, password_hash, role, status)
-                VALUES (?, ?, ?, 'Học sinh', ?)
+                INSERT INTO app_users (display_name, username, password_hash, role, status, plain_password)
+                VALUES (?, ?, ?, 'Học sinh', ?, '123456')
             """, to_insert)
 
         if to_update:
