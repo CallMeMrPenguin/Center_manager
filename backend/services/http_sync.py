@@ -124,10 +124,17 @@ def handle_sync_exchange(payload: Dict[str, Any], token: Optional[str] = None) -
             if not rows:
                 continue
 
+            target_cols = set()
+            try:
+                cur.execute(f"SELECT column_name FROM information_schema.columns WHERE table_name = '{table}';")
+                target_cols = {tr["column_name"] if isinstance(tr, dict) else tr[0] for tr in cur.fetchall()}
+            except Exception:
+                pass
+
             for r in rows:
                 if not isinstance(r, dict) or not r:
                     continue
-                cols = list(r.keys())
+                cols = [c for c in r.keys() if not target_cols or c in target_cols]
                 if not cols:
                     continue
 
@@ -220,26 +227,19 @@ def handle_sync_exchange(payload: Dict[str, Any], token: Optional[str] = None) -
                     server_rows[table] = fetched
                     total_server_rows += len(fetched)
 
-                try:
-                    cur.execute("RELEASE SAVEPOINT tbl_sp;")
-                except Exception:
-                    pass
+                try: cur.execute("RELEASE SAVEPOINT tbl_sp;")
+                except Exception: pass
             except Exception:
-                try:
-                    cur.execute("ROLLBACK TO SAVEPOINT tbl_sp;")
-                except Exception:
-                    pass
+                try: cur.execute("ROLLBACK TO SAVEPOINT tbl_sp;")
+                except Exception: pass
 
         # 4. Gather server tombstones
         server_tombstones = []
         try:
-            if since:
-                cur.execute("SELECT table_name, record_id, deleted_at FROM _sync_tombstones WHERE deleted_at > ?", (since,))
-            else:
-                cur.execute("SELECT table_name, record_id, deleted_at FROM _sync_tombstones")
+            if since: cur.execute("SELECT table_name, record_id, deleted_at FROM _sync_tombstones WHERE deleted_at > ?", (since,))
+            else: cur.execute("SELECT table_name, record_id, deleted_at FROM _sync_tombstones")
             server_tombstones = [_clean_row(dict(r)) for r in cur.fetchall()]
-        except Exception:
-            pass
+        except Exception: pass
 
         return {
             "success": True,
@@ -423,11 +423,14 @@ def run_http_bidirectional_sync(force_full: bool = False) -> Dict[str, Any]:
             if not rows:
                 continue
 
+            scur.execute(f"PRAGMA table_info({table})")
+            target_cols = {cr[1] for cr in scur.fetchall()}
+
             for r in rows:
                 if not isinstance(r, dict) or not r:
                     continue
 
-                cols = list(r.keys())
+                cols = [c for c in r.keys() if c in target_cols]
                 if not cols:
                     continue
 
