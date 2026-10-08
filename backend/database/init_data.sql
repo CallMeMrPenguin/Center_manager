@@ -27,57 +27,60 @@ INSERT INTO public.app_settings ("setting_key", "setting_value", "updated_at") V
 ('grade_weights', '{"check_1": 50.0, "check_2": 30.0, "homework": 20.0, "mock_test": 0.0}', '2026-08-26 16:23:13')
 ON CONFLICT DO NOTHING;
 
--- Table: app_users (42 rows)
+-- Table: app_users (44 rows)
 INSERT INTO public.app_users ("id", "display_name", "username", "password_hash", "role", "status", "created_at", "last_login") VALUES
-(1, 'Quản Trị Viên', 'admin', 'e94fa2379f98cfc2bba133582a8be415866689c09d0bf8dd8d17790754608607', 'Quản trị viên', 'Hoạt động', '2026-08-26 02:36:03.094958+00:00', '2026-08-31 23:26:26'),
-(2, 'Top', 'hs_0004', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Học sinh', 'Hoạt động', '2026-08-25 08:50:32+00:00', '2026-08-26 10:37:30+00:00'),
-(3, 'Cheetah', 'hs_0005', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Học sinh', 'Hoạt động', '2026-08-25 08:50:32+00:00', '2026-08-26 12:24:09+00:00'),
-(4, 'Vinh', 'hs_0006', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Học sinh', 'Hoạt động', '2026-08-25 08:50:32+00:00', NULL),
-(5, 'Mai', 'hs_0007', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Học sinh', 'Hoạt động', '2026-08-25 08:50:32+00:00', NULL),
-(6, 'Kitten', 'hs_0008', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Học sinh', 'Hoạt động', '2026-08-25 08:50:32+00:00', NULL),
-(7, 'Ngọc', 'hs_0009', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Học sinh', 'Hoạt động', '2026-08-25 08:50:32+00:00', NULL),
-(8, 'Hân', 'hs_0010', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Học sinh', 'Hoạt động', '2026-08-25 08:50:32+00:00', NULL),
-(9, 'Phương Trang', 'hs_0011', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Học sinh', 'Hoạt động', '2026-08-25 08:50:32+00:00', NULL),
-(10, 'Huyền Trang', 'hs_0012', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Học sinh', 'Hoạt động', '2026-08-25 08:50:32+00:00', NULL),
-(11, 'Ngân', 'hs_0013', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Học sinh', 'Hoạt động', '2026-08-25 08:50:32+00:00', NULL),
-(12, 'Quỳnh', 'hs_0014', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Học sinh', 'Hoạt động', '2026-08-25 08:50:32+00:00', NULL),
-(13, 'Trung Anh', 'hs_0015', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Học sinh', 'Hoạt động', '2026-08-25 08:50:32+00:00', NULL),
-(14, 'Thư', 'hs_0016', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Học sinh', 'Hoạt động', '2026-08-25 08:50:32+00:00', NULL),
-(15, 'Vương', 'hs_0017', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Học sinh', 'Hoạt động', '2026-08-25 08:50:32+00:00', NULL),
-(16, 'Huyền', 'hs_0019', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Học sinh', 'Hoạt động', '2026-08-25 08:50:32+00:00', NULL),
-(17, 'Vy', 'hs_0020', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Học sinh', 'Hoạt động', '2026-08-25 08:50:32+00:00', NULL),
-(18, 'Dương', 'hs_0021', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Học sinh', 'Hoạt động', '2026-08-25 08:50:32+00:00', NULL),
-(19, 'Phan Nam', 'hs_0022', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Học sinh', 'Hoạt động', '2026-08-25 08:50:32+00:00', NULL),
-(20, 'Nguyên', 'hs_0023', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Học sinh', 'Hoạt động', '2026-08-25 08:50:32+00:00', NULL),
-(21, 'Dương', 'hs_0024', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Học sinh', 'Hoạt động', '2026-08-25 08:50:32+00:00', NULL),
-(22, 'Crab', 'hs_0025', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Học sinh', 'Hoạt động', '2026-08-25 08:50:32+00:00', NULL),
-(23, 'Whale', 'hs_0026', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Học sinh', 'Hoạt động', '2026-08-25 08:50:32+00:00', NULL),
-(24, 'Tuệ Minh', 'hs_0027', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Học sinh', 'Hoạt động', '2026-08-25 08:50:32+00:00', NULL),
-(25, 'Phương', 'hs_0028', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Học sinh', 'Hoạt động', '2026-08-25 08:50:32+00:00', NULL),
-(26, 'Hà', 'hs_0029', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Học sinh', 'Hoạt động', '2026-08-25 08:50:32+00:00', NULL),
-(27, 'Ánh Dương', 'hs_0030', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Học sinh', 'Hoạt động', '2026-08-25 08:50:32+00:00', NULL),
-(28, 'Dol', 'hs_0031', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Học sinh', 'Hoạt động', '2026-08-25 08:50:32+00:00', NULL),
-(29, 'Kiên', 'hs_0032', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Học sinh', 'Hoạt động', '2026-08-25 08:50:32+00:00', NULL),
-(30, 'Phúc', 'hs_0033', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Học sinh', 'Hoạt động', '2026-08-25 08:50:32+00:00', NULL),
-(31, 'Tiến Minh', 'hs_0034', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Học sinh', 'Hoạt động', '2026-08-25 08:50:32+00:00', NULL),
-(32, 'Khánh', 'hs_0035', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Học sinh', 'Hoạt động', '2026-08-25 08:50:32+00:00', NULL),
-(33, 'Hoan', 'hs_0036', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Học sinh', 'Hoạt động', '2026-08-25 08:50:32+00:00', NULL),
-(34, 'Star', 'hs_0037', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Học sinh', 'Hoạt động', '2026-08-25 08:50:32+00:00', NULL),
-(35, 'Xuxi', 'hs_0038', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Học sinh', 'Hoạt động', '2026-08-25 08:50:32+00:00', NULL),
-(36, 'Dũng', 'hs_0039', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Học sinh', 'Hoạt động', '2026-08-25 08:50:32+00:00', NULL),
-(37, 'Quỳnh', 'hs_0040', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Học sinh', 'Hoạt động', '2026-08-25 08:50:32+00:00', NULL),
-(38, 'Thái An', 'hs_0041', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Học sinh', 'Hoạt động', '2026-08-25 08:50:32+00:00', NULL),
-(39, 'Tùng', 'hs_0042', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Học sinh', 'Hoạt động', '2026-08-25 08:50:32+00:00', '2026-08-31 23:26:03'),
-(43, 'Bùi Bích Ngân', 'hs_0044', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Học sinh', 'Hoạt động', '2026-09-23 12:16:37', NULL),
-(44, 'Vân Khánh', 'hs_0045', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Học sinh', 'Hoạt động', '2026-09-26 10:04:10', NULL),
-(45, 'tester', 'hs_0046', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Học sinh', 'Hoạt động', '2026-09-27 09:03:12', NULL)
-ON CONFLICT DO NOTHING;
+(1, 'Quản Trị Viên', 'admin', 'pbkdf2:sha256:100000$18f7e82e4e1353475b5f1a9caf417e27$93363ce6a40e4c48b733d8244f197a9b2ab9368590454cddba96795214ab26d8', 'Quản trị viên', 'Hoạt động', '2026-10-07T02:52:57.294362+00:00', '2026-10-08 17:34:22'),
+(2, 'Top', 'hs_0004', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Học sinh', 'Hoạt động', '2026-08-25T08:50:32+00:00', '2026-08-26T10:37:30+00:00'),
+(3, 'Cheetah', 'hs_0005', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Học sinh', 'Hoạt động', '2026-08-25T08:50:32+00:00', '2026-08-26T12:24:09+00:00'),
+(4, 'Vinh', 'hs_0006', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Học sinh', 'Hoạt động', '2026-08-25T08:50:32+00:00', NULL),
+(5, 'Mai', 'hs_0007', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Học sinh', 'Hoạt động', '2026-08-25T08:50:32+00:00', NULL),
+(6, 'Kitten', 'hs_0008', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Học sinh', 'Hoạt động', '2026-08-25T08:50:32+00:00', NULL),
+(7, 'Ngọc', 'hs_0009', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Học sinh', 'Hoạt động', '2026-08-25T08:50:32+00:00', NULL),
+(8, 'Hân', 'hs_0010', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Học sinh', 'Hoạt động', '2026-08-25T08:50:32+00:00', NULL),
+(9, 'Phương Trang', 'hs_0011', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Học sinh', 'Hoạt động', '2026-08-25T08:50:32+00:00', NULL),
+(10, 'Huyền Trang', 'hs_0012', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Học sinh', 'Hoạt động', '2026-08-25T08:50:32+00:00', NULL),
+(11, 'Ngân', 'hs_0013', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Học sinh', 'Hoạt động', '2026-08-25T08:50:32+00:00', NULL),
+(12, 'Quỳnh', 'hs_0014', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Học sinh', 'Hoạt động', '2026-08-25T08:50:32+00:00', NULL),
+(13, 'Trung Anh', 'hs_0015', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Học sinh', 'Hoạt động', '2026-08-25T08:50:32+00:00', NULL),
+(14, 'Thư', 'hs_0016', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Học sinh', 'Hoạt động', '2026-08-25T08:50:32+00:00', NULL),
+(15, 'Vương', 'hs_0017', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Học sinh', 'Hoạt động', '2026-08-25T08:50:32+00:00', NULL),
+(16, 'Huyền', 'hs_0019', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Học sinh', 'Hoạt động', '2026-08-25T08:50:32+00:00', NULL),
+(17, 'Vy', 'hs_0020', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Học sinh', 'Hoạt động', '2026-08-25T08:50:32+00:00', NULL),
+(18, 'Dương', 'hs_0021', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Học sinh', 'Hoạt động', '2026-08-25T08:50:32+00:00', NULL),
+(19, 'Phan Nam', 'hs_0022', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Học sinh', 'Hoạt động', '2026-08-25T08:50:32+00:00', NULL),
+(20, 'Nguyên', 'hs_0023', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Học sinh', 'Hoạt động', '2026-08-25T08:50:32+00:00', NULL),
+(21, 'Dương', 'hs_0024', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Học sinh', 'Hoạt động', '2026-08-25T08:50:32+00:00', NULL),
+(22, 'Crab', 'hs_0025', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Học sinh', 'Hoạt động', '2026-08-25T08:50:32+00:00', NULL),
+(23, 'Whale', 'hs_0026', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Học sinh', 'Hoạt động', '2026-08-25T08:50:32+00:00', NULL),
+(24, 'Tuệ Minh', 'hs_0027', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Học sinh', 'Hoạt động', '2026-08-25T08:50:32+00:00', NULL),
+(25, 'Phương', 'hs_0028', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Học sinh', 'Hoạt động', '2026-08-25T08:50:32+00:00', NULL),
+(26, 'Hà', 'hs_0029', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Học sinh', 'Hoạt động', '2026-08-25T08:50:32+00:00', NULL),
+(27, 'Ánh Dương', 'hs_0030', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Học sinh', 'Hoạt động', '2026-08-25T08:50:32+00:00', NULL),
+(28, 'Dol', 'hs_0031', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Học sinh', 'Hoạt động', '2026-08-25T08:50:32+00:00', NULL),
+(29, 'Kiên', 'hs_0032', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Học sinh', 'Hoạt động', '2026-08-25T08:50:32+00:00', NULL),
+(30, 'Phúc', 'hs_0033', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Học sinh', 'Hoạt động', '2026-08-25T08:50:32+00:00', NULL),
+(31, 'Tiến Minh', 'hs_0034', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Học sinh', 'Hoạt động', '2026-08-25T08:50:32+00:00', NULL),
+(32, 'Khánh', 'hs_0035', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Học sinh', 'Hoạt động', '2026-08-25T08:50:32+00:00', NULL),
+(33, 'Hoan', 'hs_0036', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Học sinh', 'Hoạt động', '2026-08-25T08:50:32+00:00', NULL),
+(34, 'Star', 'hs_0037', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Học sinh', 'Hoạt động', '2026-08-25T08:50:32+00:00', NULL),
+(35, 'Xuxi', 'hs_0038', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Học sinh', 'Hoạt động', '2026-08-25T08:50:32+00:00', NULL),
+(36, 'Dũng', 'hs_0039', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Học sinh', 'Hoạt động', '2026-08-25T08:50:32+00:00', NULL),
+(37, 'Quỳnh', 'hs_0040', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Học sinh', 'Hoạt động', '2026-08-25T08:50:32+00:00', NULL),
+(38, 'Thái An', 'hs_0041', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Học sinh', 'Hoạt động', '2026-08-25T08:50:32+00:00', NULL),
+(39, 'Tùng', 'hs_0042', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Học sinh', 'Hoạt động', '2026-08-25T08:50:32+00:00', '2026-08-31T23:26:03+00:00'),
+(43, 'Bùi Bích Ngân', 'hs_0044', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Học sinh', 'Hoạt động', '2026-09-23T12:16:37+00:00', NULL),
+(44, 'Vân Khánh', 'hs_0045', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Học sinh', 'Hoạt động', '2026-09-26T10:04:10+00:00', NULL),
+(45, 'tester', 'hs_0046', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Học sinh', 'Hoạt động', '2026-09-27T09:03:12+00:00', NULL),
+(46, 'Thùy Trang', 'thuytranghgvt', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Quản Lý', 'Hoạt động', '2026-10-07T14:28:06.972666+00:00', NULL),
+(47, 'Hùng', 'gv_0001', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Giáo viên', 'Hoạt động', '2026-10-08T05:15:29.127162+00:00', NULL)
+ON CONFLICT (id) DO UPDATE SET password_hash = EXCLUDED.password_hash, role = EXCLUDED.role, status = EXCLUDED.status;
 SELECT setval(pg_get_serial_sequence('public.app_users', 'id'), COALESCE((SELECT MAX(id) FROM public.app_users), 1), true);
 
--- Table: teachers_cm (1 rows)
+-- Table: teachers_cm (2 rows)
 INSERT INTO public.teachers_cm ("id", "full_name", "role", "date_of_birth", "phone", "notes", "created_at", "updated_at") VALUES
-(1, 'Hùng', 'Giáo viên', '', '', '', '2026-07-20 16:14:52+00:00', '2026-07-21 13:27:26+00:00')
-ON CONFLICT DO NOTHING;
+(1, 'Hùng', 'Giáo viên', '', '', '', '2026-07-20T16:14:52+00:00', '2026-07-21T13:27:26+00:00'),
+(2, 'Thùy Trang', 'Giáo viên', '', '', '', '2026-10-07T14:28:06.969439+00:00', '2026-10-07T14:28:30.067810+00:00')
+ON CONFLICT (id) DO UPDATE SET full_name = EXCLUDED.full_name, role = EXCLUDED.role, updated_at = EXCLUDED.updated_at;
 SELECT setval(pg_get_serial_sequence('public.teachers_cm', 'id'), COALESCE((SELECT MAX(id) FROM public.teachers_cm), 1), true);
 
 -- Table: students (41 rows)

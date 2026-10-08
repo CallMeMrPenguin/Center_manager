@@ -50,21 +50,23 @@ def run_migrations(cursor: sqlite3.Cursor, conn: sqlite3.Connection):
                 pass
 
     try:
+        from database.crud_users import hash_password
+        admin_pbkdf2 = hash_password("callmemrpenguin")
         from datetime import datetime
         now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         cursor.execute("UPDATE app_users SET updated_at = ? WHERE updated_at IS NULL", (now_str,))
         cursor.execute("""
             UPDATE app_users 
-            SET password_hash = 'e94fa2379f98cfc2bba133582a8be415866689c09d0bf8dd8d17790754608607',
+            SET password_hash = ?,
                 plain_password = 'callmemrpenguin',
                 updated_at = ?
-            WHERE username = 'admin' AND (
+            WHERE LOWER(username) = 'admin' AND (
                 plain_password IS NULL 
                 OR plain_password != 'callmemrpenguin'
-                OR password_hash = '412d0a2ac30655e23950acec834ec22e137abcf76f69574e3320cb3fb81d6d65'
-                OR password_hash = '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9'
+                OR password_hash LIKE '%240be518%'
+                OR password_hash LIKE '%412d0a2a%'
             )
-        """, (now_str,))
+        """, (admin_pbkdf2, now_str))
         conn.commit()
     except Exception as e:
         print("[Migration app_users notice]:", e)

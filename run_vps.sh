@@ -123,21 +123,31 @@ systemctl start docker
 systemctl enable docker
 
 # Khởi động PostgreSQL 16 & FastAPI Backend với volume live code
-docker compose down 2>/dev/null || true
-docker compose up -d --build
+docker compose up -d
 
-# Khởi tạo dữ liệu ban đầu cho PostgreSQL nếu database chưa có người dùng
+# Đợi PostgreSQL sẵn sàng (tối đa 30s)
+echo " -> Đang kiểm tra trạng thái PostgreSQL..."
+for i in {1..30}; do
+    if docker exec -i center_manager_db pg_isready -U center_user -d center_manager &>/dev/null; then
+        echo " -> PostgreSQL đã sẵn sàng!"
+        break
+    fi
+    sleep 1
+done
+
+# Khởi tạo dữ liệu ban đầu cho PostgreSQL nếu database CHƯA CÓ người dùng
 if [ -f "backend/database/init_data.sql" ]; then
-    sleep 3
     USER_COUNT=$(docker exec -i center_manager_db psql -U center_user -d center_manager -tAc "SELECT COUNT(*) FROM app_users;" 2>/dev/null || echo "0")
     if [ "$USER_COUNT" = "0" ] || [ -z "$USER_COUNT" ]; then
-        echo " -> Khởi tạo dữ liệu PostgreSQL ban đầu..."
+        echo " -> Database trống. Khởi tạo dữ liệu PostgreSQL ban đầu..."
         docker exec -i center_manager_db psql -U center_user -d center_manager < backend/database/init_data.sql || true
-        docker restart center_manager_backend || true
     else
         echo " -> PostgreSQL đã có dữ liệu ($USER_COUNT users). Bỏ qua nạp init_data.sql để bảo toàn mật khẩu & dữ liệu live."
     fi
 fi
+
+# Tái khởi động backend container để áp dụng code Python mới nhất từ volume live
+docker restart center_manager_backend || docker compose up -d --build backend
 
 echo "=========================================================="
 echo " [5/8] BUILD FRONTEND REACT UI MỚI NHẤT"
@@ -252,7 +262,9 @@ EOF
 
 systemctl daemon-reload
 systemctl enable center-autopull.service
-systemctl restart center-autopull.service
+if ! systemctl is-active --quiet center-autopull.service; then
+    systemctl start center-autopull.service
+fi
 
 echo "=========================================================="
 echo " [8/8] ĐẢM BẢO TỰ KHỞI ĐỘNG KHI VPS REBOOT & KIỂM TRA TRẠNG THÁI"

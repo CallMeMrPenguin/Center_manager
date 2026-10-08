@@ -61,6 +61,17 @@ export async function request<T>(path: string, options?: RequestOptions): Promis
   });
 
   if (!response.ok) {
+    if (response.status === 401 && !path.includes('/auth/login') && !path.includes('/users/login')) {
+      if (token) {
+        try {
+          localStorage.removeItem('auth_token');
+          sessionStorage.removeItem('auth_token');
+          localStorage.removeItem('auth_user');
+          sessionStorage.removeItem('auth_user');
+          window.dispatchEvent(new Event('auth:unauthorized'));
+        } catch {}
+      }
+    }
     const errText = await response.text();
     throw new Error(errText || response.statusText);
   }
