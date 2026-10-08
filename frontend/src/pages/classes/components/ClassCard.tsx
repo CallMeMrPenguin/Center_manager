@@ -1,5 +1,5 @@
 import React from 'react';
-import { Pencil, User, MapPin, Users } from 'lucide-react';
+import { Edit3, User, MapPin, Users, ArrowRight } from 'lucide-react';
 import { ClassItem, getClassColor, hexToRGBA } from '../types';
 
 interface ClassCardProps {
@@ -16,137 +16,72 @@ export const ClassCard: React.FC<ClassCardProps> = ({
   onEdit,
 }) => {
   const cardColor = getClassColor(cls, index);
-  const glowShadow = `0 0 24px ${hexToRGBA(cardColor, 0.15)}`;
-  const hoverGlowShadow = `0 0 32px ${hexToRGBA(cardColor, 0.3)}`;
 
   return (
     <div
       onClick={() => onSelect(cls)}
-      style={{
-        boxShadow: glowShadow,
-      }}
-      className="bg-white dark:bg-[#141417] rounded-2xl sm:rounded-[28px] p-4 sm:p-6 space-y-3.5 sm:space-y-5 cursor-pointer transition-all duration-300 group relative overflow-hidden hover:-translate-y-1 hover:brightness-105"
-      onMouseEnter={(e) => {
-        e.currentTarget.style.boxShadow = hoverGlowShadow;
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.boxShadow = glowShadow;
-      }}
+      className="bg-white dark:bg-[#111728] border border-slate-200/90 dark:border-white/10 rounded-2xl p-4 flex flex-col justify-between cursor-pointer transition-all duration-200 hover:-translate-y-1 hover:shadow-md hover:border-blue-400/50 dark:hover:border-blue-500/40 group relative overflow-hidden select-none"
     >
-      {/* Top Header: Grade Pill + Circular Edit Pencil Button */}
-      <div className="flex items-center justify-between">
-        <span
-          style={{
-            backgroundColor: cardColor,
-            boxShadow: `0 4px 14px ${hexToRGBA(cardColor, 0.35)}`,
-          }}
-          className="text-xs font-black uppercase px-3.5 py-1 sm:px-4 sm:py-1.5 rounded-full tracking-wider text-white shadow-md"
-        >
-          {cls.grade || 'LỚP 8'}
-        </span>
+      {/* Top Color Accent Line */}
+      <div
+        className="absolute top-0 left-0 right-0 h-1"
+        style={{ backgroundColor: cardColor }}
+      />
 
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onEdit(cls);
-          }}
-          style={{
-            backgroundColor: hexToRGBA(cardColor, 0.18),
-            color: cardColor,
-          }}
-          className="w-9 h-9 sm:w-11 sm:h-11 rounded-full flex items-center justify-center transition-all cursor-pointer active:scale-95 hover:brightness-115"
-          title="Chỉnh sửa hoặc xóa lớp"
-        >
-          <Pencil size={15} />
-        </button>
+      {/* 1. Header: Grade Pill + Title + Single Pen Edit */}
+      <div className="space-y-1.5 pt-0.5">
+        <div className="flex items-center justify-between gap-2">
+          <span
+            style={{
+              backgroundColor: hexToRGBA(cardColor, 0.15),
+              color: cardColor,
+            }}
+            className="text-[10.5px] font-black uppercase px-2.5 py-0.5 rounded-md tracking-wider shrink-0"
+          >
+            {cls.grade || 'Lớp học'}
+          </span>
+
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onEdit(cls);
+            }}
+            className="w-7 h-7 rounded-lg text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-100 dark:hover:bg-white/5 flex items-center justify-center transition cursor-pointer shrink-0"
+            title="Chỉnh sửa lớp học"
+          >
+            <Edit3 size={13} />
+          </button>
+        </div>
+
+        <h3 className="text-base font-black text-slate-900 dark:text-white tracking-tight truncate group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+          {cls.class_name}
+        </h3>
       </div>
 
-      {/* Class Title */}
-      <h3 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight group-hover:text-indigo-600 dark:group-hover:text-slate-100 transition-colors">
-        {cls.class_name}
-      </h3>
-
-      {/* 3 Detail Info Rows */}
-      <div className="space-y-2 sm:space-y-2.5">
-        {/* Teacher */}
-        <div
-          style={{
-            backgroundColor: hexToRGBA(cardColor, 0.14),
-          }}
-          className="flex items-center gap-2.5 sm:gap-3.5 p-2 sm:p-3 rounded-xl sm:rounded-2xl transition-all duration-200 hover:brightness-95 dark:hover:brightness-125"
-        >
-          <div
-            style={{
-              backgroundColor: hexToRGBA(cardColor, 0.26),
-              color: cardColor,
-            }}
-            className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl flex items-center justify-center shrink-0 shadow-2xs"
-          >
-            <User size={16} strokeWidth={2.5} />
-          </div>
-          <div className="min-w-0 flex-1">
-            <span className="text-[10.5px] font-bold text-slate-600 dark:text-slate-300 block leading-tight">Giáo viên</span>
-            <span className="text-xs sm:text-sm font-black text-slate-900 dark:text-white block truncate">{cls.teacher_name || 'Chưa phân công'}</span>
-          </div>
+      {/* 2. Metadata (Clean layout, single boundary - NO nested card-in-card) */}
+      <div className="my-3 space-y-1.5 text-xs">
+        <div className="flex items-center gap-2 text-slate-600 dark:text-slate-300">
+          <User size={13} className="text-slate-400 shrink-0" />
+          <span className="truncate font-semibold">{cls.teacher_name || 'Chưa phân công'}</span>
         </div>
 
-        {/* Room */}
-        <div
-          style={{
-            backgroundColor: hexToRGBA(cardColor, 0.14),
-          }}
-          className="flex items-center gap-2.5 sm:gap-3.5 p-2 sm:p-3 rounded-xl sm:rounded-2xl transition-all duration-200 hover:brightness-95 dark:hover:brightness-125"
-        >
-          <div
-            style={{
-              backgroundColor: hexToRGBA(cardColor, 0.26),
-              color: cardColor,
-            }}
-            className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl flex items-center justify-center shrink-0 shadow-2xs"
-          >
-            <MapPin size={16} strokeWidth={2.5} />
+        <div className="flex items-center justify-between gap-2 text-slate-500 dark:text-slate-400">
+          <div className="flex items-center gap-2 truncate">
+            <MapPin size={13} className="text-slate-400 shrink-0" />
+            <span className="truncate">{cls.room || 'Chưa xếp phòng'}</span>
           </div>
-          <div className="min-w-0 flex-1">
-            <span className="text-[10.5px] font-bold text-slate-600 dark:text-slate-300 block leading-tight">Phòng</span>
-            <span className="text-xs sm:text-sm font-black text-slate-900 dark:text-white block truncate">{cls.room || 'Chưa xếp'}</span>
-          </div>
-        </div>
-
-        {/* Students */}
-        <div
-          style={{
-            backgroundColor: hexToRGBA(cardColor, 0.14),
-          }}
-          className="flex items-center gap-2.5 sm:gap-3.5 p-2 sm:p-3 rounded-xl sm:rounded-2xl transition-all duration-200 hover:brightness-95 dark:hover:brightness-125"
-        >
-          <div
-            style={{
-              backgroundColor: hexToRGBA(cardColor, 0.26),
-              color: cardColor,
-            }}
-            className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl flex items-center justify-center shrink-0 shadow-2xs"
-          >
-            <Users size={16} strokeWidth={2.5} />
-          </div>
-          <div className="min-w-0 flex-1">
-            <span className="text-[10.5px] font-bold text-slate-600 dark:text-slate-300 block leading-tight">Học sinh</span>
-            <span className="text-xs sm:text-sm font-black text-slate-900 dark:text-white block font-mono">{cls.student_count || 0} học sinh</span>
+          <div className="flex items-center gap-1.5 shrink-0 font-mono font-bold text-slate-700 dark:text-slate-300">
+            <Users size={12} className="text-slate-400" />
+            <span>{cls.student_count || 0} HS</span>
           </div>
         </div>
       </div>
 
-      {/* Action Button: Vào lớp */}
-      <div className="pt-1">
-        <button
-          onClick={() => onSelect(cls)}
-          style={{
-            backgroundColor: cardColor,
-            boxShadow: `0 4px 20px ${hexToRGBA(cardColor, 0.4)}`,
-          }}
-          className="w-full py-3.5 px-6 rounded-2xl font-bold text-base text-white shadow-lg transition-all duration-300 cursor-pointer text-center active:scale-98 hover:brightness-110 flex items-center justify-center"
-        >
-          Vào lớp
-        </button>
+      {/* 3. Action Footer */}
+      <div className="pt-2 border-t border-slate-100 dark:border-white/5 flex items-center justify-between text-xs font-bold text-blue-600 dark:text-blue-400 group-hover:text-blue-700 dark:group-hover:text-blue-300">
+        <span>Vào lớp học</span>
+        <ArrowRight size={13} className="transition-transform group-hover:translate-x-1" />
       </div>
     </div>
   );
