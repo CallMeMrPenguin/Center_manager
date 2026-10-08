@@ -15,11 +15,19 @@ def get_target_db_url():
 
 DATABASE_URL = get_target_db_url()
 
-# Local SQLite Database Path
-DB_PATH = os.path.join(
-    os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
-    "test_formatter.db"
-)
+# Local SQLite Database Path (data/ folder with backward-compatible root fallback)
+def _resolve_db_path() -> str:
+    root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    data_p = os.path.join(root, "data", "test_formatter.db")
+    if os.path.exists(data_p):
+        return data_p
+    old_p = os.path.join(root, "test_formatter.db")
+    if os.path.exists(old_p):
+        return old_p
+    os.makedirs(os.path.join(root, "data"), exist_ok=True)
+    return data_p
+
+DB_PATH = _resolve_db_path()
 
 import functools
 

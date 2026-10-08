@@ -89,10 +89,10 @@ def create_update_zip():
     with zipfile.ZipFile(memory_file, 'w', zipfile.ZIP_DEFLATED) as zip_file:
         for root, dirs, files in os.walk(root_dir):
             # Prune directories we don't want to crawl/zip
-            dirs[:] = [d for d in dirs if d not in ('__pycache__', '.git', 'node_modules', 'dist', 'avatars')]
+            dirs[:] = [d for d in dirs if d not in ('__pycache__', '.git', 'node_modules', 'dist', 'avatars', 'data')]
             
             for file in files:
-                if file in ('center_manager.db', 'config.json', 'update.zip', 'GG_Sheet_API.json') or file.endswith('.pyc'):
+                if file in ('center_manager.db', 'test_formatter.db', 'config.json', 'update.zip', 'GG_Sheet_API.json') or file.endswith('.pyc') or file.endswith('.db'):
                     continue
                 file_path = os.path.join(root, file)
                 rel_path = os.path.relpath(file_path, root_dir)

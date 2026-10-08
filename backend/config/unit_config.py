@@ -2,7 +2,17 @@ import os
 import json
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-UNIT_CONFIG_FILE = os.path.join(BASE_DIR, "unit_config.json")
+def _resolve_unit_config() -> str:
+    new_p = os.path.join(BASE_DIR, "configs", "unit_config.json")
+    if os.path.exists(new_p):
+        return new_p
+    old_p = os.path.join(BASE_DIR, "unit_config.json")
+    if os.path.exists(old_p):
+        return old_p
+    os.makedirs(os.path.join(BASE_DIR, "configs"), exist_ok=True)
+    return new_p
+
+UNIT_CONFIG_FILE = _resolve_unit_config()
 
 DEFAULT_UNIT_DATA = {
     "6": {

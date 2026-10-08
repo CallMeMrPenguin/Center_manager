@@ -71,8 +71,15 @@ INSTRUCTION_MAP_NON_MCQ = {
 def cm_to_pt(cm: float) -> float:
     return float(cm) * 28.346456692913385
 
+def _find_root_config(filename: str) -> str:
+    root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    new_p = os.path.join(root, "configs", filename)
+    if os.path.exists(new_p): return new_p
+    old_p = os.path.join(root, filename)
+    return old_p if os.path.exists(old_p) else new_p
+
 def get_instruction_map():
-    config_file = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "exercise_config.json")
+    config_file = _find_root_config("exercise_config.json")
     if os.path.exists(config_file):
         try:
             with open(config_file, "r", encoding="utf-8") as f:
@@ -83,7 +90,7 @@ def get_instruction_map():
     return INSTRUCTION_MAP_MCQ
 
 def get_instruction_text(ex_type: str, is_mcq: bool = True) -> str:
-    config_file = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "exercise_config.json")
+    config_file = _find_root_config("exercise_config.json")
     if os.path.exists(config_file):
         try:
             with open(config_file, "r", encoding="utf-8") as f:
@@ -234,9 +241,7 @@ def set_cell_border(cell, **kwargs):
                 element.set(qn('w:{}'.format(key)), str(val))
 
 def get_unit_name(grade: str, unit: str) -> str:
-    config_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "unit_config.json")
-    if not os.path.exists(config_path):
-        config_path = os.path.join(os.getcwd(), "unit_config.json")
+    config_path = _find_root_config("unit_config.json")
     if os.path.exists(config_path):
         try:
             with open(config_path, "r", encoding="utf-8") as f:

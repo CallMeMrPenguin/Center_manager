@@ -58,11 +58,17 @@ except Exception:
 router = APIRouter()
 
 SERVER_BOOT_TIME = time.time()
-CONFIG_PROFILES_FILE = os.path.join(BASE_DIR, "saved_configs.json")
-FILES_DIR = get_setting("files_dir")
-UNIT_CONFIG_FILE = os.path.join(BASE_DIR, "unit_config.json")
-EXERCISE_CONFIG_FILE = os.path.join(BASE_DIR, "exercise_config.json")
-PROMPTS_FILE = os.path.join(BASE_DIR, "prompts.json")
+def _resolve_cfg(filename: str) -> str:
+    new_p = os.path.join(BASE_DIR, "configs", filename)
+    if os.path.exists(new_p): return new_p
+    old_p = os.path.join(BASE_DIR, filename)
+    return old_p if os.path.exists(old_p) else new_p
+
+CONFIG_PROFILES_FILE = _resolve_cfg("saved_configs.json")
+
+UNIT_CONFIG_FILE = _resolve_cfg("unit_config.json")
+EXERCISE_CONFIG_FILE = _resolve_cfg("exercise_config.json")
+PROMPTS_FILE = _resolve_cfg("prompts.json")
 
 DEFAULT_LAYOUT_SETTINGS = {
     "margin_top": 2.0, "margin_bottom": 2.0, "margin_left": 3.0, "margin_right": 1.5,

@@ -22,6 +22,8 @@ ROOT = os.path.dirname(os.path.abspath(__file__))
 
 # Files/folders to preserve during update (user data)
 PRESERVE_PATHS = [
+    "configs",
+    "data",
     "config.json",
     "workspace_files",
     "test_formatter.db",
@@ -29,6 +31,7 @@ PRESERVE_PATHS = [
     "prompts.json",
     "unit_config.json",
     "exercise_config.json",
+    "vps_config.json",
     "GG_Sheet_API.json",
 ]
 

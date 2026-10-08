@@ -6,7 +6,17 @@ import uuid
 # Base directory of the application (root folder)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-CONFIG_FILE = os.path.join(BASE_DIR, "config.json")
+def _resolve_config_file() -> str:
+    new_p = os.path.join(BASE_DIR, "configs", "config.json")
+    if os.path.exists(new_p):
+        return new_p
+    old_p = os.path.join(BASE_DIR, "config.json")
+    if os.path.exists(old_p):
+        return old_p
+    os.makedirs(os.path.join(BASE_DIR, "configs"), exist_ok=True)
+    return new_p
+
+CONFIG_FILE = _resolve_config_file()
 
 DEFAULT_SETTINGS = {
     "files_dir": os.path.join(BASE_DIR, "workspace_files"),
