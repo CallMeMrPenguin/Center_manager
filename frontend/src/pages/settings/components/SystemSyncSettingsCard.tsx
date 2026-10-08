@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Database, Cloud, RefreshCw, KeyRound, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Database, Cloud, RefreshCw, KeyRound, CheckCircle2, AlertCircle, Globe, Save } from 'lucide-react';
 import { api } from '../../../api';
 import { showToast } from '../../../components/Toast';
 
@@ -9,8 +9,13 @@ export const SystemSyncSettingsCard: React.FC = () => {
     last_synced_at: string | null;
     syncing: boolean;
     last_error?: string | null;
+    remote_url?: string;
+    pushed_count?: number;
+    pulled_count?: number;
   } | null>(null);
 
+  const [remoteUrl, setRemoteUrl] = useState<string>('https://upkidscentermanager.io.vn');
+  const [savingUrl, setSavingUrl] = useState(false);
   const [triggering, setTriggering] = useState(false);
   const [syncingFull, setSyncingFull] = useState(false);
   const [syncingAccounts, setSyncingAccounts] = useState(false);
@@ -19,23 +24,55 @@ export const SystemSyncSettingsCard: React.FC = () => {
     try {
       const data = await api.getSyncStatus();
       setSyncStatus(data);
+      if (data.remote_url && !remoteUrl) {
+        setRemoteUrl(data.remote_url);
+      }
     } catch {
       setSyncStatus({ status: 'offline', last_synced_at: null, syncing: false });
     }
   };
 
+  const fetchConfig = async () => {
+    try {
+      const cfg = await api.getSyncConfig();
+      if (cfg?.remote_sync_url) {
+        setRemoteUrl(cfg.remote_sync_url);
+      }
+    } catch {
+      // ignore
+    }
+  };
+
   useEffect(() => {
     fetchStatus();
-    const interval = setInterval(fetchStatus, 30000);
+    fetchConfig();
+    const interval = setInterval(fetchStatus, 15000);
     return () => clearInterval(interval);
   }, []);
+
+  const handleSaveUrl = async () => {
+    if (!remoteUrl.trim()) {
+      showToast('Vui lòng nhập địa chỉ máy chủ hợp lệ', 'error');
+      return;
+    }
+    setSavingUrl(true);
+    try {
+      await api.saveSyncConfig(remoteUrl.trim());
+      showToast('Đã lưu cấu hình địa chỉ máy chủ VPS!', 'success');
+      await fetchStatus();
+    } catch (e: any) {
+      showToast('Lỗi khi lưu cấu hình: ' + (e.message || e), 'error');
+    } finally {
+      setSavingUrl(false);
+    }
+  };
 
   const handleTriggerSync = async () => {
     setTriggering(true);
     try {
       await api.triggerSync();
-      showToast('Đã bắt đầu đồng bộ hóa dữ liệu với máy chủ VPS!', 'success');
-      await fetchStatus();
+      showToast('Đã kích hoạt đồng bộ hóa tức thì với VPS!', 'success');
+      setTimeout(fetchStatus, 1500);
     } catch (e: any) {
       showToast('Lỗi khi đồng bộ dữ liệu: ' + (e.message || e), 'error');
     } finally {
@@ -46,8 +83,10 @@ export const SystemSyncSettingsCard: React.FC = () => {
   const handleFullSync = async () => {
     setSyncingFull(true);
     try {
-      await api.runFullSync();
-      showToast('Đồng bộ toàn diện 2 chiều hoàn tất thành công!', 'success');
+      const res = await api.runFullSync();
+      const pulled = res?.pulled_records ?? 0;
+      const pushed = res?.pushed_records ?? 0;
+      showToast(`Đồng bộ 2 chiều hoàn tất! Đã nhận ${pulled} bản ghi, gửi ${pushed} bản ghi.`, 'success');
       await fetchStatus();
     } catch (e: any) {
       showToast('Lỗi đồng bộ toàn diện: ' + (e.message || e), 'error');
@@ -119,10 +158,10 @@ export const SystemSyncSettingsCard: React.FC = () => {
           </span>
           <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-bold text-xs">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span>SQLite Offline-First (Đang kết nối)</span>
+            <span>SQLite Offline-First (Sẵn sàng)</span>
           </div>
           <p className="text-[11px] text-slate-500 dark:text-slate-400">
-            Truy xuất siêu tốc 0ms, tự động lưu trên máy chủ và thiết bị cục bộ.
+            Truy xuất siêu tốc 0ms, tự động ghi nhận thay đổi và đồng bộ ngầm lên đám mây.
           </p>
         </div>
 
@@ -135,7 +174,7 @@ export const SystemSyncSettingsCard: React.FC = () => {
             <span>Mã hóa SHA-256</span>
           </div>
           <p className="text-[11px] text-slate-500 dark:text-slate-400">
-            Mật khẩu và phiên đăng nhập được băm an toàn theo tiêu chuẩn quân sự.
+            Mật khẩu và phiên đăng nhập được băm an toàn theo tiêu chuẩn bảo mật cao.
           </p>
         </div>
 
@@ -157,15 +196,51 @@ export const SystemSyncSettingsCard: React.FC = () => {
             ) : (
               <span className="flex items-center gap-1.5 text-amber-600 dark:text-amber-400">
                 <AlertCircle size={14} />
-                <span>Chế độ ngoại tuyến / Cục bộ</span>
+                <span>Ngoại tuyến ({syncStatus?.last_error || 'Chưa kết nối'})</span>
               </span>
             )}
           </div>
-          <p className="text-[11px] text-slate-500 dark:text-slate-400">
-            {syncStatus?.last_synced_at
-              ? `Lần cuối: ${syncStatus.last_synced_at.slice(0, 19).replace('T', ' ')}`
-              : 'Sẵn sàng tự động đồng bộ khi có kết nối mạng.'}
-          </p>
+          <div className="flex flex-wrap gap-2 text-[10px] text-slate-500 dark:text-slate-400 pt-0.5">
+            {syncStatus?.last_synced_at && (
+              <span>Lần cuối: {syncStatus.last_synced_at.slice(0, 19).replace('T', ' ')}</span>
+            )}
+            {typeof syncStatus?.pulled_count === 'number' && syncStatus.pulled_count > 0 && (
+              <span className="text-emerald-600 dark:text-emerald-400 font-bold">
+                Đã nhận {syncStatus.pulled_count} bản ghi
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Remote VPS Server URL Configuration */}
+      <div className="bg-slate-50 dark:bg-[#151c30] rounded-xl p-4 space-y-3">
+        <div className="flex items-center gap-2">
+          <Globe size={15} className="text-indigo-500" />
+          <h3 className="text-xs font-bold text-slate-900 dark:text-white">
+            Địa Chỉ Máy Chủ Đám Mây VPS (Remote Cloud Sync)
+          </h3>
+        </div>
+        <p className="text-[11px] text-slate-500 dark:text-slate-400">
+          Kết nối HTTPS an toàn giữa máy tính bàn (Desktop SQLite) và hệ thống máy chủ đám mây (VPS PostgreSQL).
+        </p>
+        <div className="flex flex-wrap items-center gap-2 max-w-xl">
+          <input
+            type="text"
+            value={remoteUrl}
+            onChange={(e) => setRemoteUrl(e.target.value)}
+            placeholder="https://upkidscentermanager.io.vn"
+            className="flex-1 min-w-[240px] px-3.5 py-1.5 text-xs rounded-xl bg-white dark:bg-[#0c0f1e] border border-slate-300 dark:border-[#212c4b] text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500"
+          />
+          <button
+            type="button"
+            onClick={handleSaveUrl}
+            disabled={savingUrl}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-900 hover:bg-slate-800 text-white dark:bg-indigo-600 dark:hover:bg-indigo-700 transition cursor-pointer disabled:opacity-50"
+          >
+            <Save size={13} />
+            <span>{savingUrl ? 'Đang lưu...' : 'Lưu URL'}</span>
+          </button>
         </div>
       </div>
 

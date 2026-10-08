@@ -1,3 +1,4 @@
+import os
 import time
 import threading
 from typing import Dict, Any
@@ -37,8 +38,8 @@ def _worker_loop():
         _sync_trigger.wait(timeout=30.0)
         _sync_trigger.clear()
 
-        from database.connection import get_target_db_url
-        if not get_target_db_url():
+        # If server mode, worker stays dormant
+        if os.environ.get("APP_MODE") in ("web", "vps", "server"):
             with _lock:
                 _sync_state["status"] = "synced"
                 _sync_state["syncing"] = False

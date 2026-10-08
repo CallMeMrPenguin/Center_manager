@@ -393,15 +393,17 @@ class PgConnectionWrapper:
         self.close()
 
 
-def get_connection():
-    # If running on VPS / web / Docker with PostgreSQL (via DATABASE_URL, POSTGRES_URL, DB_ENGINE=postgres or APP_MODE=web)
-    is_postgres_target = bool(
+def is_postgres() -> bool:
+    return bool(
         os.environ.get("DATABASE_URL")
         or os.environ.get("POSTGRES_URL")
         or os.environ.get("DB_ENGINE") == "postgres"
         or os.environ.get("APP_MODE") in ("web", "vps", "server")
     )
-    if is_postgres_target:
+
+def get_connection():
+    # If running on VPS / web / Docker with PostgreSQL (via DATABASE_URL, POSTGRES_URL, DB_ENGINE=postgres or APP_MODE=web)
+    if is_postgres():
         target_url = get_target_db_url()
         if target_url:
             # 1. First try psycopg2 with high-performance connection pool (sub-millisecond latency)

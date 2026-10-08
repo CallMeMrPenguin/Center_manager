@@ -17,6 +17,7 @@ APP_MODE = os.environ.get("APP_MODE", "local")
 # Core Routers
 from routers import (
     system,
+    sync,
     center_manager,
     seating,
     skill_analytics,
@@ -64,6 +65,7 @@ async def global_exception_handler(request, exc):
 
 # Mount Core Routers (Always available on both Web and Local)
 app.include_router(system.router)
+app.include_router(sync.router)
 app.include_router(center_manager.router)
 app.include_router(seating.router)
 app.include_router(skill_analytics.router)

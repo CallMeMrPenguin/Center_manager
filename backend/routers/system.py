@@ -270,38 +270,6 @@ def api_save_settings(settings: Dict[str, Any]):
         save_settings(settings)
         return {"success": True}
 
-@router.get("/api/sync/status")
-def api_get_sync_status():
-    if os.environ.get("APP_MODE") in ("web", "vps", "server"):
-        return {"status": "synced", "last_synced_at": "Trực tuyến (PostgreSQL Live)", "syncing": False}
-    try:
-        from services.sync_worker import get_sync_status
-        return get_sync_status()
-    except Exception as e:
-        return {"status": "synced", "last_synced_at": None, "syncing": False, "error": str(e)}
-
-@router.post("/api/sync/trigger")
-def api_trigger_sync():
-    if os.environ.get("APP_MODE") in ("web", "vps", "server"):
-        return {"success": True, "message": "Đang kết nối trực tiếp máy chủ PostgreSQL"}
-    try:
-        from services.sync_worker import trigger_instant_sync
-        trigger_instant_sync()
-        return {"success": True, "message": "Sync triggered"}
-    except Exception as e:
-        return {"success": False, "error": str(e)}
-
-@router.post("/api/sync/bidirectional")
-def api_run_sync(force_full: bool = False):
-    try:
-        from services.sync_service import run_bidirectional_sync
-        result = run_bidirectional_sync(force_full=force_full)
-        if not result.get("success"):
-            raise HTTPException(status_code=500, detail=result.get("error", "Sync failed"))
-        return result
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
 @router.get("/api/files")
 def api_get_files():
     result = []

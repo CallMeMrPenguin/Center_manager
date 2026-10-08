@@ -350,7 +350,17 @@ export const api = {
   checkUpdate: () => request<any>('/api/system/update-check'),
   getUpdateStatus: () => request<any>('/api/system/update-status'),
   applyUpdate: () => request<any>('/api/system/update-apply', { method: 'POST' }),
-  getSyncStatus: () => request<{ status: 'synced' | 'syncing' | 'offline'; last_synced_at: string | null; syncing: boolean; last_error?: string | null }>('/api/sync/status', { forceRefresh: true }),
+  getSyncStatus: () => request<{
+    status: 'synced' | 'syncing' | 'offline';
+    last_synced_at: string | null;
+    syncing: boolean;
+    last_error?: string | null;
+    remote_url?: string;
+    pushed_count?: number;
+    pulled_count?: number;
+  }>('/api/sync/status', { forceRefresh: true }),
   triggerSync: () => request<any>('/api/sync/trigger', { method: 'POST' }),
   runFullSync: () => request<any>('/api/sync/bidirectional?force_full=true', { method: 'POST' }),
+  getSyncConfig: () => request<{ remote_sync_url: string }>('/api/sync/config'),
+  saveSyncConfig: (remote_sync_url: string) => request<any>('/api/sync/config', { method: 'POST', body: JSON.stringify({ remote_sync_url }) }),
 };
