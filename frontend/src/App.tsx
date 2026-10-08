@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useRef, useMemo, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Database, ChevronLeft, ChevronRight } from 'lucide-react';
 import { TAB_DEFINITIONS } from './config/tabs';
@@ -286,26 +286,37 @@ function AppContent() {
               const isVisited = visitedTabIds.has(tab.id);
               return (
                 <div key={tab.id} className={`h-full w-full ${isActive ? 'animate-tab-enter' : 'hidden'}`}>
-                  {isVisited && tab.render({
-                    isActive,
-                    preloadedQuestions,
-                    preloadedVersions,
-                    preloadedGrade,
-                    preloadedUnit,
-                    clearPreloadedQuestions: () => {
-                      setPreloadedQuestions(null);
-                      setPreloadedVersions(null);
-                      setPreloadedGrade(null);
-                      setPreloadedUnit(null);
-                    },
-                    onCreateTest: (questions, numVersions, grade, unit) => {
-                      setPreloadedQuestions(questions);
-                      if (numVersions) setPreloadedVersions(numVersions);
-                      setPreloadedGrade(grade || null);
-                      setPreloadedUnit(unit || null);
-                      handleSelectTab('formatter');
-                    },
-                  })}
+                  {isVisited && (
+                    <Suspense fallback={
+                      <div className="flex items-center justify-center h-full w-full bg-[#080b14] text-slate-400">
+                        <div className="flex flex-col items-center gap-2">
+                          <div className="w-5 h-5 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+                          <span className="text-[11px] font-medium text-slate-400">Đang tải...</span>
+                        </div>
+                      </div>
+                    }>
+                      {tab.render({
+                        isActive,
+                        preloadedQuestions,
+                        preloadedVersions,
+                        preloadedGrade,
+                        preloadedUnit,
+                        clearPreloadedQuestions: () => {
+                          setPreloadedQuestions(null);
+                          setPreloadedVersions(null);
+                          setPreloadedGrade(null);
+                          setPreloadedUnit(null);
+                        },
+                        onCreateTest: (questions, numVersions, grade, unit) => {
+                          setPreloadedQuestions(questions);
+                          if (numVersions) setPreloadedVersions(numVersions);
+                          setPreloadedGrade(grade || null);
+                          setPreloadedUnit(unit || null);
+                          handleSelectTab('formatter');
+                        },
+                      })}
+                    </Suspense>
+                  )}
                 </div>
               );
             })}

@@ -1,31 +1,33 @@
-import React from 'react';
+import React, { lazy } from 'react';
 import { 
   FileCode, Database, BookOpen, Settings as SettingsIcon, FolderOpen, LucideIcon,
   LayoutDashboard, Users, UserCheck, Briefcase, ClipboardList, Award, 
   CreditCard, Receipt, BarChart3, CalendarCheck, UserCog, FileCheck, GraduationCap,
   PenTool, Sparkles, FileText
 } from 'lucide-react';
-import TestFormatter from '../pages/test-formatter';
-import QuestionBank from '../pages/question-bank';
-import VocabularyBank from '../pages/vocabulary-bank';
-import UnitConfig from '../pages/unit-config';
-import Settings from '../pages/settings';
-import DocumentManager from '../pages/document-manager';
-import CanvasBoardPage from '../pages/canvas-board';
-import WordEditorPage from '../pages/word-editor';
+
 import WaitingForDevelopment from '../components/WaitingForDevelopment';
-import DashboardPage from '../pages/dashboard';
-import StudentsPage from '../pages/students';
-import TeachersPage from '../pages/teachers';
-import ClassesPage from '../pages/classes';
-import CoursesPage from '../pages/courses';
-import KiemTraPage from '../pages/kiemtra';
-import SchedulePage from '../pages/schedule';
-import ReportsPage from '../pages/reports';
-import UIShowcasePage from '../pages/ui-showcase';
-import ResultsPage from '../pages/results';
-import AssignmentsPage from '../pages/assignments';
-import UsersRolesPage from '../pages/users-roles';
+
+const TestFormatter = lazy(() => import('../pages/test-formatter'));
+const QuestionBank = lazy(() => import('../pages/question-bank'));
+const VocabularyBank = lazy(() => import('../pages/vocabulary-bank'));
+const UnitConfig = lazy(() => import('../pages/unit-config'));
+const Settings = lazy(() => import('../pages/settings'));
+const DocumentManager = lazy(() => import('../pages/document-manager'));
+const CanvasBoardPage = lazy(() => import('../pages/canvas-board'));
+const WordEditorPage = lazy(() => import('../pages/word-editor'));
+const DashboardPage = lazy(() => import('../pages/dashboard'));
+const StudentsPage = lazy(() => import('../pages/students'));
+const TeachersPage = lazy(() => import('../pages/teachers'));
+const ClassesPage = lazy(() => import('../pages/classes'));
+const CoursesPage = lazy(() => import('../pages/courses'));
+const KiemTraPage = lazy(() => import('../pages/kiemtra'));
+const SchedulePage = lazy(() => import('../pages/schedule'));
+const ReportsPage = lazy(() => import('../pages/reports'));
+const UIShowcasePage = lazy(() => import('../pages/ui-showcase'));
+const ResultsPage = lazy(() => import('../pages/results'));
+const AssignmentsPage = lazy(() => import('../pages/assignments'));
+const UsersRolesPage = lazy(() => import('../pages/users-roles'));
 
 
 export interface TabDefinition {
