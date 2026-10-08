@@ -44,6 +44,9 @@ def _worker_loop():
 
         try:
             res = run_bidirectional_sync(force_full=False)
+            if not res.get("success"):
+                time.sleep(3)
+                res = run_bidirectional_sync(force_full=False)
             with _lock:
                 if res.get("success"):
                     _sync_state["status"] = "synced"

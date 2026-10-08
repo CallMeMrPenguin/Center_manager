@@ -1,6 +1,7 @@
 import os
 import sys
 import json
+import time
 import sqlite3
 import urllib.request
 import urllib.error
@@ -183,14 +184,18 @@ def handle_sync_exchange(payload: Dict[str, Any], token: Optional[str] = None) -
                 has_created = "created_at" in cols_check if cols_check else True
 
                 if since and (has_updated or has_created):
+                    since_ts = _parse_ts(since)
+                    since_dt = datetime.fromtimestamp(since_ts, timezone.utc)
+                    since_iso = since_dt.isoformat()
+                    since_plain = since_dt.strftime("%Y-%m-%d %H:%M:%S")
                     conds = []
                     params = []
                     if has_updated:
-                        conds.append("updated_at > ?")
-                        params.append(since)
+                        conds.append("(updated_at > ? OR updated_at > ?)")
+                        params.extend([since_iso, since_plain])
                     if has_created:
-                        conds.append("created_at > ?")
-                        params.append(since)
+                        conds.append("(created_at > ? OR created_at > ?)")
+                        params.extend([since_iso, since_plain])
                     sql = f"SELECT * FROM {table} WHERE " + " OR ".join(conds)
                     cur.execute(sql, tuple(params))
                 else:
@@ -282,14 +287,16 @@ def run_http_bidirectional_sync(force_full: bool = False) -> Dict[str, Any]:
                 has_created = "created_at" in cols
 
                 if last_synced_at and (has_updated or has_created):
+                    sync_ts = _parse_ts(last_synced_at)
+                    sync_dt_plain = datetime.fromtimestamp(sync_ts, timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
                     conds = []
                     params = []
                     if has_updated:
                         conds.append("(updated_at IS NOT NULL AND datetime(updated_at) > datetime(?))")
-                        params.append(last_synced_at)
+                        params.append(sync_dt_plain)
                     if has_created:
                         conds.append("(created_at IS NOT NULL AND datetime(created_at) > datetime(?))")
-                        params.append(last_synced_at)
+                        params.append(sync_dt_plain)
                     sql = f"SELECT * FROM {table} WHERE " + " OR ".join(conds)
                     scur.execute(sql, tuple(params))
                 else:
@@ -343,15 +350,30 @@ def run_http_bidirectional_sync(force_full: bool = False) -> Dict[str, Any]:
 
         req = urllib.request.Request(exchange_url, data=payload_data, headers=headers, method="POST")
 
-        try:
-            with urllib.request.urlopen(req, context=ctx, timeout=25) as response:
-                resp_text = response.read().decode("utf-8")
-                res_data = json.loads(resp_text)
-        except urllib.error.HTTPError as he:
-            err_body = he.read().decode("utf-8", errors="ignore")
-            return {"success": False, "error": f"VPS HTTP {he.code}: {err_body[:200]}"}
-        except Exception as e:
-            return {"success": False, "error": f"Không thể kết nối đến máy chủ VPS: {str(e)}"}
+        res_data = None
+        last_err = ""
+        for attempt in range(3):
+            try:
+                with urllib.request.urlopen(req, context=ctx, timeout=25) as response:
+                    resp_text = response.read().decode("utf-8")
+                    res_data = json.loads(resp_text)
+                    break
+            except urllib.error.HTTPError as he:
+                err_body = he.read().decode("utf-8", errors="ignore")
+                last_err = f"VPS HTTP {he.code}: {err_body[:200]}"
+                if he.code in (502, 503, 504) and attempt < 2:
+                    time.sleep(2)
+                    continue
+                return {"success": False, "error": last_err}
+            except Exception as e:
+                last_err = f"Không thể kết nối đến máy chủ VPS: {str(e)}"
+                if attempt < 2:
+                    time.sleep(2)
+                    continue
+                return {"success": False, "error": last_err}
+
+        if not res_data:
+            return {"success": False, "error": last_err or "VPS connection timeout"}
 
         if not res_data.get("success"):
             return {"success": False, "error": res_data.get("error", "Sync exchange failed on VPS")}
@@ -384,6 +406,21 @@ def run_http_bidirectional_sync(force_full: bool = False) -> Dict[str, Any]:
                 if not cols:
                     continue
 
+                # Check if local record exists and is newer
+                pk_where = " AND ".join([f"{k} = ?" for k in pks])
+                pk_vals = [r.get(k) for k in pks]
+                try:
+                    scur.execute(f"SELECT * FROM {table} WHERE {pk_where} LIMIT 1", pk_vals)
+                    local_ex = scur.fetchone()
+                    if local_ex:
+                        local_dict = dict(local_ex)
+                        local_ts = _parse_ts(local_dict.get("updated_at") or local_dict.get("created_at"))
+                        srv_ts = _parse_ts(r.get("updated_at") or r.get("created_at"))
+                        if local_ts > srv_ts:
+                            continue
+                except Exception:
+                    pass
+
                 col_names = ", ".join(cols)
                 placeholders = ", ".join(["?" for _ in cols])
                 pk_names = ", ".join(pks)
@@ -404,13 +441,13 @@ def run_http_bidirectional_sync(force_full: bool = False) -> Dict[str, Any]:
         sconn.commit()
 
         # 6. Save checkpoint in _local_sync_meta
-        now_local = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        checkpoint_val = server_time or now_local
+        now_utc = datetime.now(timezone.utc).isoformat()
+        checkpoint_val = server_time or now_utc
         scur.execute("""
             INSERT INTO _local_sync_meta (key, val, updated_at)
-            VALUES ('last_synced_at', ?, ?)
-            ON CONFLICT (key) DO UPDATE SET val = EXCLUDED.val, updated_at = EXCLUDED.updated_at
-        """, (checkpoint_val, now_local))
+            VALUES ('last_synced_at', ?, CURRENT_TIMESTAMP)
+            ON CONFLICT (key) DO UPDATE SET val = EXCLUDED.val, updated_at = CURRENT_TIMESTAMP
+        """, (checkpoint_val,))
         sconn.commit()
 
         # 7. Invalidate local backend caches
@@ -424,7 +461,7 @@ def run_http_bidirectional_sync(force_full: bool = False) -> Dict[str, Any]:
             "success": True,
             "pushed_records": res_data.get("pushed_accepted", res_data.get("pushed_count", 0)),
             "pulled_records": pulled_total,
-            "synced_at": now_local,
+            "synced_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             "mode": "http_delta"
         }
 
