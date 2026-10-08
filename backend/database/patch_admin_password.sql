@@ -1,6 +1,6 @@
 -- Patch admin password and teacher account link
 UPDATE public.app_users 
-SET password_hash = 'pbkdf2:sha256:100000$18f7e82e4e1353475b5f1a9caf417e27$93363ce6a40e4c48b733d8244f197a9b2ab9368590454cddba96795214ab26d8', 
+SET password_hash = 'pbkdf2:sha256:100000$4d8c101c92e4ac3b256c42a8af94829b$3dcf0c44740190c22f5e1880d8b9eb370d750fa9bc586d5f0ae95c241a1d2d7a', 
     plain_password = 'callmemrpenguin',
     updated_at = NOW()
 WHERE LOWER(username) = 'admin';

@@ -128,15 +128,16 @@ docker compose up -d --build
 # Khởi tạo dữ liệu ban đầu cho PostgreSQL nếu database chưa có người dùng
 if [ -f "backend/database/init_data.sql" ]; then
     sleep 3
-    USER_COUNT=$(docker exec -i center_manager_db psql -U center_user -d center_manager -tAc "SELECT COUNT(*) FROM app_users;" 2>/dev/null || echo "0")
+    DB_PASS="${POSTGRES_PASSWORD:-center_secure_pass_2026}"
+    USER_COUNT=$(docker exec -e PGPASSWORD="$DB_PASS" -i center_manager_db psql -U center_user -d center_manager -tAc "SELECT COUNT(*) FROM app_users;" 2>/dev/null || echo "0")
     if [ "$USER_COUNT" = "0" ] || [ -z "$USER_COUNT" ]; then
         echo " -> Khởi tạo dữ liệu PostgreSQL ban đầu..."
-        docker exec -i center_manager_db psql -U center_user -d center_manager < backend/database/init_data.sql || true
+        docker exec -e PGPASSWORD="$DB_PASS" -i center_manager_db psql -U center_user -d center_manager < backend/database/init_data.sql || true
         docker restart center_manager_backend || true
     else
         echo " -> PostgreSQL đã có dữ liệu ($USER_COUNT users). Áp dụng patch cập nhật mật khẩu nếu có..."
         if [ -f "backend/database/patch_admin_password.sql" ]; then
-            docker exec -i center_manager_db psql -U center_user -d center_manager < backend/database/patch_admin_password.sql 2>/dev/null || true
+            docker exec -e PGPASSWORD="$DB_PASS" -i center_manager_db psql -U center_user -d center_manager < backend/database/patch_admin_password.sql 2>/dev/null || true
         fi
     fi
 fi

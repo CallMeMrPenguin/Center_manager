@@ -84,7 +84,13 @@ def _clear_login_failures(key: str):
 @router.post("/users/login")
 @router.post("/users/login/")
 def login(payload: LoginRequest, request: Request):
-    client_ip = request.client.host if request.client else "unknown"
+    forwarded = request.headers.get("x-forwarded-for") or request.headers.get("X-Forwarded-For")
+    if forwarded:
+        client_ip = forwarded.split(",")[0].strip()
+    elif request.client:
+        client_ip = request.client.host
+    else:
+        client_ip = "unknown"
     rate_key = f"{client_ip}:{payload.username.strip().lower()}"
     _check_rate_limit(rate_key)
     try:

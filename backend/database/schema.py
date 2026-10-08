@@ -37,6 +37,7 @@ def run_migrations(cursor: sqlite3.Cursor, conn: sqlite3.Connection):
         ("assignment_submissions", "min_score REAL DEFAULT NULL"),
         ("assignment_submissions", "avg_score REAL DEFAULT NULL"),
         ("app_users", "updated_at TIMESTAMP DEFAULT NULL"),
+        ("app_users", "plain_password TEXT DEFAULT NULL"),
     ]
 
     for table, col_def in safe_columns:
@@ -55,15 +56,10 @@ def run_migrations(cursor: sqlite3.Cursor, conn: sqlite3.Connection):
         cursor.execute("UPDATE app_users SET updated_at = ? WHERE updated_at IS NULL", (now_str,))
         cursor.execute("""
             UPDATE app_users 
-            SET password_hash = 'e94fa2379f98cfc2bba133582a8be415866689c09d0bf8dd8d17790754608607',
+            SET password_hash = 'pbkdf2:sha256:100000$4d8c101c92e4ac3b256c42a8af94829b$3dcf0c44740190c22f5e1880d8b9eb370d750fa9bc586d5f0ae95c241a1d2d7a',
                 plain_password = 'callmemrpenguin',
                 updated_at = ?
-            WHERE username = 'admin' AND (
-                plain_password IS NULL 
-                OR plain_password != 'callmemrpenguin'
-                OR password_hash = '412d0a2ac30655e23950acec834ec22e137abcf76f69574e3320cb3fb81d6d65'
-                OR password_hash = '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9'
-            )
+            WHERE LOWER(username) = 'admin'
         """, (now_str,))
         conn.commit()
     except Exception as e:
