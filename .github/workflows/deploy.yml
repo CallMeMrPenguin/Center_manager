@@ -18,7 +18,8 @@ jobs:
           port: ${{ secrets.VPS_PORT || 22 }}
           script: |
             cd /root/Center_manager
-            git pull origin main
+            git fetch origin main
+            git reset --hard origin/main
             docker compose up -d --build backend
             docker restart center_manager_backend || true
             cd frontend
