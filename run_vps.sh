@@ -142,13 +142,18 @@ if [ -f "backend/database/init_data.sql" ]; then
         echo " -> Database trống. Khởi tạo dữ liệu PostgreSQL ban đầu..."
         docker exec -i center_manager_db psql -U center_user -d center_manager < backend/database/init_data.sql || true
     else
-        echo " -> PostgreSQL đã có dữ liệu ($USER_COUNT users). Đồng bộ mật khẩu admin sang callmemrpenguin..."
-        docker exec -i -e PGPASSWORD=Center_Db_2026_SecureP@ss center_manager_db psql -U center_user -d center_manager -c "UPDATE app_users SET password_hash = 'pbkdf2:sha256:100000\$18f7e82e4e1353475b5f1a9caf417e27\$93363ce6a40e4c48b733d8244f197a9b2ab9368590454cddba96795214ab26d8', plain_password = 'callmemrpenguin' WHERE LOWER(username) = 'admin';" 2>/dev/null || docker exec -i center_manager_db psql -U postgres -d center_manager -c "UPDATE app_users SET password_hash = 'pbkdf2:sha256:100000\$18f7e82e4e1353475b5f1a9caf417e27\$93363ce6a40e4c48b733d8244f197a9b2ab9368590454cddba96795214ab26d8', plain_password = 'callmemrpenguin' WHERE LOWER(username) = 'admin';" 2>/dev/null || true
+        echo " -> PostgreSQL đã có dữ liệu ($USER_COUNT users). Áp dụng patch cập nhật mật khẩu admin..."
+        if [ -f "backend/database/patch_admin_password.sql" ]; then
+            docker exec -i -e PGPASSWORD=Center_Db_2026_SecureP@ss center_manager_db psql -U center_user -d center_manager < backend/database/patch_admin_password.sql 2>/dev/null || docker exec -i center_manager_db psql -U postgres -d center_manager < backend/database/patch_admin_password.sql 2>/dev/null || true
+        fi
     fi
 fi
 
-# Tái build & khởi động backend container để áp dụng code Python mới nhất
-docker compose up -d --build backend
+# Dọn dẹp cache bytecode cũ & rebuild backend container không dùng cache cũ
+find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
+find . -name "*.pyc" -delete 2>/dev/null || true
+docker compose build --no-cache backend
+docker compose up -d backend
 
 echo "=========================================================="
 echo " [5/8] BUILD FRONTEND REACT UI MỚI NHẤT"
