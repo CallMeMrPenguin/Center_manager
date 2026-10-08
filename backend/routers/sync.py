@@ -309,10 +309,10 @@ def api_sync_exchange(req: SyncExchangeRequest):
                     cols = [r[1] for r in cursor.fetchall()]
 
                 if req.last_synced_at and not req.force_full and "updated_at" in cols:
-                    q = f"SELECT * FROM {table} WHERE updated_at >= %s" if is_postgres() else f"SELECT * FROM {table} WHERE updated_at >= ?"
+                    q = f"SELECT * FROM {table} WHERE updated_at >= (%s::timestamptz - interval '5 seconds')" if is_postgres() else f"SELECT * FROM {table} WHERE datetime(REPLACE(SUBSTR(updated_at, 1, 19), 'T', ' ')) >= datetime(REPLACE(SUBSTR(?, 1, 19), 'T', ' '))"
                     cursor.execute(q, (req.last_synced_at,))
                 elif req.last_synced_at and not req.force_full and "created_at" in cols:
-                    q = f"SELECT * FROM {table} WHERE created_at >= %s" if is_postgres() else f"SELECT * FROM {table} WHERE created_at >= ?"
+                    q = f"SELECT * FROM {table} WHERE created_at >= (%s::timestamptz - interval '5 seconds')" if is_postgres() else f"SELECT * FROM {table} WHERE datetime(REPLACE(SUBSTR(created_at, 1, 19), 'T', ' ')) >= datetime(REPLACE(SUBSTR(?, 1, 19), 'T', ' '))"
                     cursor.execute(q, (req.last_synced_at,))
                 else:
                     cursor.execute(f"SELECT * FROM {table}")

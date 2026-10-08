@@ -328,11 +328,11 @@ def sync_via_http_exchange(remote_url: str, force_full: bool = False) -> Dict[st
             cols = _get_table_columns(cur, table)
             if "updated_at" in cols and last_synced_at and not force_full:
                 if "created_at" in cols:
-                    cur.execute(f"SELECT * FROM {table} WHERE updated_at >= ? OR created_at >= ?", (last_synced_at, last_synced_at))
+                    cur.execute(f"SELECT * FROM {table} WHERE datetime(REPLACE(SUBSTR(updated_at, 1, 19), 'T', ' ')) >= datetime(REPLACE(SUBSTR(?, 1, 19), 'T', ' ')) OR datetime(REPLACE(SUBSTR(created_at, 1, 19), 'T', ' ')) >= datetime(REPLACE(SUBSTR(?, 1, 19), 'T', ' '))", (last_synced_at, last_synced_at))
                 else:
-                    cur.execute(f"SELECT * FROM {table} WHERE updated_at >= ?", (last_synced_at,))
+                    cur.execute(f"SELECT * FROM {table} WHERE datetime(REPLACE(SUBSTR(updated_at, 1, 19), 'T', ' ')) >= datetime(REPLACE(SUBSTR(?, 1, 19), 'T', ' '))", (last_synced_at,))
             elif "created_at" in cols and last_synced_at and not force_full:
-                cur.execute(f"SELECT * FROM {table} WHERE created_at >= ?", (last_synced_at,))
+                cur.execute(f"SELECT * FROM {table} WHERE datetime(REPLACE(SUBSTR(created_at, 1, 19), 'T', ' ')) >= datetime(REPLACE(SUBSTR(?, 1, 19), 'T', ' '))", (last_synced_at,))
             else:
                 cur.execute(f"SELECT * FROM {table}")
 
