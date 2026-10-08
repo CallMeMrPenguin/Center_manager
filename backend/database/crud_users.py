@@ -264,7 +264,8 @@ def delete_user(user_id: int):
 
         cursor.execute("DELETE FROM app_users WHERE id = ?", (user_id,))
         conn.commit()
-
+        from database.utils import record_tombstone
+        record_tombstone("app_users", user_id)
     finally:
         conn.close()
 

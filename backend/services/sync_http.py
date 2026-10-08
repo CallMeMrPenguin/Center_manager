@@ -65,14 +65,17 @@ def set_remote_sync_url(url: str) -> bool:
             pass
     return True
 
+SYNC_SECRET_KEY = os.environ.get("SYNC_SECRET_KEY", "cm_sync_secret_vps_center_manager_2026")
+
 def _make_http_request(url: str, method: str = "GET", data: Optional[Dict[str, Any]] = None, timeout: int = 15) -> Tuple[int, Any]:
     """
-    Executes an HTTP/HTTPS request with robust SSL handling.
+    Executes an HTTP/HTTPS request with robust SSL handling and X-Sync-Key header.
     Gracefully handles local clock discrepancies (e.g. year 2026) by falling back to unverified SSL context.
     """
     headers = {
         "User-Agent": "CenterManager-Sync/1.0",
         "Accept": "application/json",
+        "X-Sync-Key": SYNC_SECRET_KEY,
     }
     encoded_data = None
     if data is not None:
@@ -122,13 +125,16 @@ def _get_table_columns(cursor: sqlite3.Cursor, table: str) -> List[str]:
     except Exception:
         return []
 
-def _upsert_rows_sqlite(cursor: sqlite3.Cursor, table: str, rows: List[Dict[str, Any]]) -> int:
-    """Inserts or replaces rows into a local SQLite table safely."""
+def _upsert_rows_sqlite(cursor: sqlite3.Cursor, table: str, rows: List[Dict[str, Any]], pks: Optional[List[str]] = None) -> int:
+    """Inserts or updates rows into a local SQLite table safely without cascade deletion risks."""
     if not rows:
         return 0
     table_cols = _get_table_columns(cursor, table)
     if not table_cols:
         return 0
+
+    from services.sync_service import _parse_ts
+    active_pks = pks or ["id"]
 
     count = 0
     for row in rows:
@@ -143,16 +149,42 @@ def _upsert_rows_sqlite(cursor: sqlite3.Cursor, table: str, rows: List[Dict[str,
         cols = [col for col in table_cols if col in row_dict]
         if not cols:
             continue
-        placeholders = ", ".join(["?" for _ in cols])
-        col_names = ", ".join(cols)
-        sql = f"INSERT OR REPLACE INTO {table} ({col_names}) VALUES ({placeholders})"
-        vals = [row_dict.get(c) for c in cols]
-        try:
-            cursor.execute(sql, vals)
-            count += 1
-        except Exception as e:
-            continue
+
+        # Check existing row
+        pk_conds = [f"{pk} = ?" for pk in active_pks]
+        pk_vals = [row_dict.get(pk) for pk in active_pks]
+        where_clause = " AND ".join(pk_conds)
+        cursor.execute(f"SELECT * FROM {table} WHERE {where_clause}", tuple(pk_vals))
+        existing = cursor.fetchone()
+
+        if existing:
+            existing_dict = dict(existing)
+            r_ts = _parse_ts(row_dict.get("updated_at") or row_dict.get("created_at"))
+            l_ts = _parse_ts(existing_dict.get("updated_at") or existing_dict.get("created_at"))
+            # Last-Write-Wins: only update if remote is newer or equal
+            if l_ts > r_ts:
+                continue
+
+            update_cols = [c for c in cols if c not in active_pks]
+            if update_cols:
+                set_clause = ", ".join([f"{c} = ?" for c in update_cols])
+                vals = [row_dict.get(c) for c in update_cols] + pk_vals
+                try:
+                    cursor.execute(f"UPDATE {table} SET {set_clause} WHERE {where_clause}", vals)
+                    count += 1
+                except Exception:
+                    continue
+        else:
+            placeholders = ", ".join(["?" for _ in cols])
+            col_names = ", ".join(cols)
+            vals = [row_dict.get(c) for c in cols]
+            try:
+                cursor.execute(f"INSERT INTO {table} ({col_names}) VALUES ({placeholders})", vals)
+                count += 1
+            except Exception:
+                continue
     return count
+
 
 def sync_via_rest_fallback(remote_url: str) -> Dict[str, Any]:
     """
@@ -242,6 +274,8 @@ def sync_via_http_exchange(remote_url: str, force_full: bool = False) -> Dict[st
     cur = conn.cursor()
 
     try:
+        pk_lookup = {item["table"]: item["pk"] for item in FAST_SYNC_TABLES + HEAVY_STATIC_TABLES}
+
         # Checkpoint table
         cur.execute("""
             CREATE TABLE IF NOT EXISTS _local_sync_meta (
@@ -251,12 +285,35 @@ def sync_via_http_exchange(remote_url: str, force_full: bool = False) -> Dict[st
             )
         """)
 
+        # Ensure tombstones table exists
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS _sync_tombstones (
+                table_name TEXT NOT NULL,
+                record_id TEXT NOT NULL,
+                deleted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                PRIMARY KEY (table_name, record_id)
+            )
+        """)
+
         last_synced_at = None
         if not force_full:
             cur.execute("SELECT val FROM _local_sync_meta WHERE key = 'last_synced_at'")
             row = cur.fetchone()
             if row:
                 last_synced_at = row["val"]
+
+        # Collect local tombstones (deletions)
+        local_tombstones = []
+        if last_synced_at and not force_full:
+            cur.execute("SELECT table_name, record_id, deleted_at FROM _sync_tombstones WHERE deleted_at >= ?", (last_synced_at,))
+        else:
+            cur.execute("SELECT table_name, record_id, deleted_at FROM _sync_tombstones")
+        for r in cur.fetchall():
+            local_tombstones.append({
+                "table": r["table_name"],
+                "id": r["record_id"],
+                "deleted_at": r["deleted_at"]
+            })
 
         # Collect local changes to push
         tables_to_sync = FAST_SYNC_TABLES + (HEAVY_STATIC_TABLES if force_full or not last_synced_at else [])
@@ -289,6 +346,7 @@ def sync_via_http_exchange(remote_url: str, force_full: bool = False) -> Dict[st
             "last_synced_at": last_synced_at,
             "force_full": force_full,
             "pushed_records": local_changes,
+            "tombstones": local_tombstones,
         }
 
         # Send HTTP exchange request
@@ -307,24 +365,54 @@ def sync_via_http_exchange(remote_url: str, force_full: bool = False) -> Dict[st
                 return fallback_res
             return {"success": False, "error": f"Remote sync error: {err_msg}"}
 
-        # Apply pulled records from remote server
+        # Apply pulled records & tombstones with cascade-safe constraints
         pulled_records = resp.get("pulled_records", {})
+        server_tombstones = resp.get("tombstones", [])
         pulled_total = 0
         synced_tables = []
 
-        for table, rows in pulled_records.items():
-            if rows and isinstance(rows, list):
-                # Ensure SQLite table exists before inserting
-                cur.execute(f"SELECT name FROM sqlite_master WHERE type='table' AND name=?", (table,))
-                if not cur.fetchone():
+        cur.execute("PRAGMA foreign_keys = OFF;")
+        try:
+            # 1. Apply server tombstones
+            for t_item in server_tombstones:
+                t_tbl = t_item.get("table")
+                t_id = t_item.get("id")
+                t_del = t_item.get("deleted_at")
+                if not t_tbl or not t_id or t_tbl not in pk_lookup:
                     continue
-                c = _upsert_rows_sqlite(cur, table, rows)
-                pulled_total += c
-                synced_tables.append(table)
+                pks = pk_lookup[t_tbl]
+                try:
+                    if len(pks) == 1:
+                        cur.execute(f"DELETE FROM {t_tbl} WHERE {pks[0]} = ?", (t_id,))
+                    elif ":" in str(t_id):
+                        parts = str(t_id).split(":")
+                        if len(parts) == len(pks):
+                            conds = [f"{pk} = ?" for pk in pks]
+                            cur.execute(f"DELETE FROM {t_tbl} WHERE " + " AND ".join(conds), tuple(parts))
+                    cur.execute("""
+                        INSERT INTO _sync_tombstones (table_name, record_id, deleted_at)
+                        VALUES (?, ?, ?)
+                        ON CONFLICT (table_name, record_id) DO UPDATE SET deleted_at = ?;
+                    """, (t_tbl, str(t_id), t_del or datetime.now().strftime("%Y-%m-%d %H:%M:%S"), t_del or datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
+                except Exception:
+                    continue
+
+            # 2. Apply pulled records in dependency order
+            for table, rows in pulled_records.items():
+                if rows and isinstance(rows, list):
+                    cur.execute(f"SELECT name FROM sqlite_master WHERE type='table' AND name=?", (table,))
+                    if not cur.fetchone():
+                        continue
+                    pks = pk_lookup.get(table, ["id"])
+                    c = _upsert_rows_sqlite(cur, table, rows, pks=pks)
+                    pulled_total += c
+                    synced_tables.append(table)
+        finally:
+            cur.execute("PRAGMA foreign_keys = ON;")
 
         conn.commit()
 
-        # Update last_synced_at checkpoint
+        # Update last_synced_at checkpoint to authoritative server clock
         server_time = resp.get("server_time") or datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         cur.execute("""
             INSERT INTO _local_sync_meta (key, val, updated_at)
@@ -345,3 +433,4 @@ def sync_via_http_exchange(remote_url: str, force_full: bool = False) -> Dict[st
         return {"success": False, "error": str(e)}
     finally:
         conn.close()
+

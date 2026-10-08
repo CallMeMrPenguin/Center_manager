@@ -335,8 +335,10 @@ def delete_word_document(doc_id: int, permanent: bool = False) -> bool:
         create_word_documents_table(cursor)
         if permanent:
             cursor.execute("DELETE FROM word_documents WHERE id = ?", (doc_id,))
+            from database.utils import record_tombstone
+            record_tombstone("word_documents", doc_id)
         else:
-            cursor.execute("UPDATE word_documents SET is_deleted = 1, deleted_at = CURRENT_TIMESTAMP WHERE id = ?", (doc_id,))
+            cursor.execute("UPDATE word_documents SET is_deleted = 1, deleted_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP WHERE id = ?", (doc_id,))
         conn.commit()
         return cursor.rowcount > 0
     finally:

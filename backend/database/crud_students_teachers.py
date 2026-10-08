@@ -240,6 +240,8 @@ def delete_student(student_id: int):
             pass
         conn.commit()
 
+        from database.utils import record_tombstone
+        record_tombstone("students", student_id)
 
         cache_invalidate("students")
     finally:
@@ -409,5 +411,9 @@ def delete_teacher_cm(teacher_id: int):
             pass
         cache_invalidate("teachers")
         conn.commit()
+
+        from database.utils import record_tombstone
+        record_tombstone("teachers_cm", teacher_id)
     finally:
         conn.close()
+

@@ -482,4 +482,15 @@ ALTER TABLE IF EXISTS public.assignment_submissions ADD COLUMN IF NOT EXISTS max
 ALTER TABLE IF EXISTS public.assignment_submissions ADD COLUMN IF NOT EXISTS min_score REAL DEFAULT NULL;
 ALTER TABLE IF EXISTS public.assignment_submissions ADD COLUMN IF NOT EXISTS avg_score REAL DEFAULT NULL;
 
+-- 16. SYNC TOMBSTONES (Conflict-free deletion tracking between Local and VPS)
+CREATE TABLE IF NOT EXISTS public._sync_tombstones (
+    table_name TEXT NOT NULL,
+    record_id TEXT NOT NULL,
+    deleted_at TIMESTAMPTZ DEFAULT NOW(),
+    PRIMARY KEY (table_name, record_id)
+);
+ALTER TABLE public._sync_tombstones ENABLE ROW LEVEL SECURITY;
+CREATE INDEX IF NOT EXISTS idx_sync_tombstones_del_at ON public._sync_tombstones(deleted_at);
+
+
 

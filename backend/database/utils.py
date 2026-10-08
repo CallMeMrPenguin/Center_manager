@@ -63,3 +63,63 @@ def _sync_cloud_delete(sql_pg: str, params: tuple):
 
 def _sync_cloud_delete_sync(sql_pg: str, params: tuple):
     _sync_cloud_delete_statements([(sql_pg, params)])
+
+def record_tombstone(table_name: str, record_id: Any):
+    """
+    Records an entity deletion tombstone in _sync_tombstones to prevent zombie resurrection
+    across bidirectional local <-> VPS synchronization.
+    """
+    if not table_name or record_id is None:
+        return
+    import os
+    rec_str = str(record_id).strip()
+    if not rec_str:
+        return
+
+    try:
+        from database.connection import get_connection, is_postgres
+        conn = get_connection()
+        try:
+            cur = conn.cursor()
+            if is_postgres():
+                cur.execute("""
+                    CREATE TABLE IF NOT EXISTS public._sync_tombstones (
+                        table_name TEXT NOT NULL,
+                        record_id TEXT NOT NULL,
+                        deleted_at TIMESTAMPTZ DEFAULT NOW(),
+                        PRIMARY KEY (table_name, record_id)
+                    );
+                """)
+                cur.execute("""
+                    INSERT INTO public._sync_tombstones (table_name, record_id, deleted_at)
+                    VALUES (%s, %s, NOW())
+                    ON CONFLICT (table_name, record_id) DO UPDATE SET deleted_at = EXCLUDED.deleted_at;
+                """, (table_name, rec_str))
+            else:
+                cur.execute("""
+                    CREATE TABLE IF NOT EXISTS _sync_tombstones (
+                        table_name TEXT NOT NULL,
+                        record_id TEXT NOT NULL,
+                        deleted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        PRIMARY KEY (table_name, record_id)
+                    );
+                """)
+                cur.execute("""
+                    INSERT INTO _sync_tombstones (table_name, record_id, deleted_at)
+                    VALUES (?, ?, datetime('now'))
+                    ON CONFLICT (table_name, record_id) DO UPDATE SET deleted_at = datetime('now');
+                """, (table_name, rec_str))
+            conn.commit()
+        finally:
+            conn.close()
+    except Exception:
+        pass
+
+    # In local desktop mode, trigger instant sync worker
+    if os.environ.get("APP_MODE") not in ("web", "vps", "server"):
+        try:
+            from services.sync_worker import trigger_instant_sync
+            trigger_instant_sync()
+        except Exception:
+            pass
+

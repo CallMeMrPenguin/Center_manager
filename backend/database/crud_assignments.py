@@ -139,6 +139,8 @@ def delete_assignment(assignment_id: int):
         cursor = conn.cursor()
         cursor.execute("DELETE FROM assignments WHERE id = ?", (assignment_id,))
         conn.commit()
+        from database.utils import record_tombstone
+        record_tombstone("assignments", assignment_id)
     finally:
         conn.close()
 

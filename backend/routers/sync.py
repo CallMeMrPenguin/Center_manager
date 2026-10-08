@@ -96,26 +96,89 @@ def api_run_bidirectional_sync(force_full: bool = False):
 @router.post("/api/sync/exchange")
 def api_sync_exchange(req: SyncExchangeRequest):
     """
-    Cloud Server endpoint on VPS PostgreSQL.
-    Accepts client delta changes, performs conflict-free Last-Write-Wins upserts,
-    and returns newer server records since client's last_synced_at.
+    Cloud Server endpoint on VPS PostgreSQL (or local fallback).
+    Accepts client delta changes & tombstones, performs conflict-free Last-Write-Wins updates,
+    advances PostgreSQL sequence counters to prevent ID collisions,
+    and returns newer server records & tombstones since client's last_synced_at.
     """
     conn = get_connection()
     try:
         cursor = conn.cursor()
         pushed_count = 0
         server_now = datetime.now(timezone.utc).isoformat()
+        pk_lookup = {item["table"]: item["pk"] for item in FAST_SYNC_TABLES + HEAVY_STATIC_TABLES}
 
-        # 1. Apply client pushed changes if any
-        if req.pushed_records:
-            pk_lookup = {item["table"]: item["pk"] for item in FAST_SYNC_TABLES + HEAVY_STATIC_TABLES}
+        # Ensure server _sync_tombstones table exists
+        try:
+            if is_postgres():
+                cursor.execute("""
+                    CREATE TABLE IF NOT EXISTS public._sync_tombstones (
+                        table_name TEXT NOT NULL,
+                        record_id TEXT NOT NULL,
+                        deleted_at TIMESTAMPTZ DEFAULT NOW(),
+                        PRIMARY KEY (table_name, record_id)
+                    );
+                """)
+            else:
+                cursor.execute("""
+                    CREATE TABLE IF NOT EXISTS _sync_tombstones (
+                        table_name TEXT NOT NULL,
+                        record_id TEXT NOT NULL,
+                        deleted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        PRIMARY KEY (table_name, record_id)
+                    );
+                """)
+            conn.commit()
+        except Exception:
+            pass
 
-            for table, rows in req.pushed_records.items():
-                if not rows:
+        # 1. Apply client tombstones (deletions from client)
+        if req.tombstones:
+            for item in req.tombstones:
+                t_table = item.get("table")
+                t_id = item.get("id")
+                t_del_at = item.get("deleted_at") or server_now
+                if not t_table or not t_id or t_table not in pk_lookup:
                     continue
-                pks = pk_lookup.get(table, ["id"])
 
-                # Check if table exists in PostgreSQL
+                pks = pk_lookup[t_table]
+                try:
+                    if len(pks) == 1:
+                        pk_col = pks[0]
+                        del_q = f"DELETE FROM {t_table} WHERE {pk_col} = %s" if is_postgres() else f"DELETE FROM {t_table} WHERE {pk_col} = ?"
+                        cursor.execute(del_q, (t_id,))
+                    elif ":" in str(t_id):
+                        parts = str(t_id).split(":")
+                        if len(parts) == len(pks):
+                            conds = [f"{pk} = %s" if is_postgres() else f"{pk} = ?" for pk in pks]
+                            del_q = f"DELETE FROM {t_table} WHERE " + " AND ".join(conds)
+                            cursor.execute(del_q, tuple(parts))
+
+                    # Record tombstone on server so other clients also receive the deletion
+                    if is_postgres():
+                        cursor.execute("""
+                            INSERT INTO public._sync_tombstones (table_name, record_id, deleted_at)
+                            VALUES (%s, %s, %s)
+                            ON CONFLICT (table_name, record_id) DO UPDATE SET deleted_at = EXCLUDED.deleted_at;
+                        """, (t_table, str(t_id), t_del_at))
+                    else:
+                        cursor.execute("""
+                            INSERT INTO _sync_tombstones (table_name, record_id, deleted_at)
+                            VALUES (?, ?, ?)
+                            ON CONFLICT (table_name, record_id) DO UPDATE SET deleted_at = ?;
+                        """, (t_table, str(t_id), t_del_at, t_del_at))
+                except Exception:
+                    continue
+            conn.commit()
+
+        # 2. Apply client pushed changes (Upserts with Last-Write-Wins)
+        if req.pushed_records:
+            for table, rows in req.pushed_records.items():
+                if not rows or table not in pk_lookup:
+                    continue
+                pks = pk_lookup[table]
+
+                # Check if table exists
                 try:
                     if is_postgres():
                         cursor.execute("SELECT 1 FROM information_schema.tables WHERE table_name = %s", (table,))
@@ -128,7 +191,6 @@ def api_sync_exchange(req: SyncExchangeRequest):
 
                 for row in rows:
                     row_dict = dict(row)
-                    # Check existing record for conflict resolution
                     pk_conditions = []
                     pk_values = []
                     for pk in pks:
@@ -144,46 +206,76 @@ def api_sync_exchange(req: SyncExchangeRequest):
                         existing_dict = dict(existing)
                         c_ts = _parse_ts(row_dict.get("updated_at") or row_dict.get("created_at"))
                         s_ts = _parse_ts(existing_dict.get("updated_at") or existing_dict.get("created_at"))
-                        # Last-Write-Wins: only update if client is newer or equal
                         if s_ts > c_ts:
                             should_update = False
 
                     if not should_update:
                         continue
 
-                    # Upsert row
                     cols = list(row_dict.keys())
-                    col_names = ", ".join(cols)
-                    if is_postgres():
-                        placeholders = ", ".join(["%s" for _ in cols])
-                        pk_names = ", ".join(pks)
-                        update_cols = [c for c in cols if c not in pks and c != "id"]
+                    if existing:
+                        # Update existing row
+                        update_cols = [c for c in cols if c not in pks]
                         if update_cols:
-                            update_clause = ", ".join([f"{c} = EXCLUDED.{c}" for c in update_cols])
-                            sql = f"INSERT INTO {table} ({col_names}) VALUES ({placeholders}) ON CONFLICT ({pk_names}) DO UPDATE SET {update_clause}"
-                        else:
-                            sql = f"INSERT INTO {table} ({col_names}) VALUES ({placeholders}) ON CONFLICT ({pk_names}) DO NOTHING"
+                            set_clause = ", ".join([f"{c} = %s" if is_postgres() else f"{c} = ?" for c in update_cols])
+                            update_sql = f"UPDATE {table} SET {set_clause} WHERE {where_clause}"
+                            update_vals = [row_dict.get(c) for c in update_cols] + pk_values
+                            try:
+                                cursor.execute(update_sql, tuple(update_vals))
+                                pushed_count += 1
+                            except Exception:
+                                pass
                     else:
-                        placeholders = ", ".join(["?" for _ in cols])
-                        sql = f"INSERT OR REPLACE INTO {table} ({col_names}) VALUES ({placeholders})"
+                        # Insert new row
+                        # If composite key and id is autoincrement, let sequence assign id
+                        insert_cols = cols
+                        if pks != ["id"] and "id" in insert_cols and is_postgres():
+                            insert_cols = [c for c in cols if c != "id"]
 
-                    vals = [row_dict.get(c) for c in cols]
-                    try:
-                        cursor.execute(sql, tuple(vals))
-                        pushed_count += 1
-                    except Exception:
-                        continue
+                        col_names = ", ".join(insert_cols)
+                        placeholders = ", ".join(["%s" if is_postgres() else "?" for _ in insert_cols])
+                        vals = [row_dict.get(c) for c in insert_cols]
+                        insert_sql = f"INSERT INTO {table} ({col_names}) VALUES ({placeholders})"
+                        try:
+                            cursor.execute(insert_sql, tuple(vals))
+                            pushed_count += 1
+                        except Exception:
+                            pass
 
-                # Advance PostgreSQL sequence if integer primary key
+                # Advance PostgreSQL sequence to avoid primary key collision with future web mutations
                 if is_postgres() and "id" in pks:
                     try:
-                        cursor.execute(f"SELECT setval('{table}_id_seq', (SELECT COALESCE(MAX(id), 1) FROM {table}));")
+                        cursor.execute(f"SELECT setval(pg_get_serial_sequence('{table}', 'id'), COALESCE(MAX(id), 1)) FROM {table};")
                     except Exception:
-                        pass
+                        try:
+                            cursor.execute(f"SELECT setval('{table}_id_seq', (SELECT COALESCE(MAX(id), 1) FROM {table}));")
+                        except Exception:
+                            pass
 
             conn.commit()
 
-        # 2. Collect server changes to send back to client
+        # 3. Collect server tombstones since client's last_synced_at
+        server_tombstones = []
+        try:
+            if req.last_synced_at and not req.force_full:
+                tomb_q = "SELECT table_name, record_id, deleted_at FROM _sync_tombstones WHERE deleted_at >= %s" if is_postgres() else "SELECT table_name, record_id, deleted_at FROM _sync_tombstones WHERE deleted_at >= ?"
+                cursor.execute(tomb_q, (req.last_synced_at,))
+            else:
+                cursor.execute("SELECT table_name, record_id, deleted_at FROM _sync_tombstones" if not is_postgres() else "SELECT table_name, record_id, deleted_at FROM public._sync_tombstones")
+            for r in cursor.fetchall():
+                rd = dict(r)
+                del_at_val = rd.get("deleted_at")
+                if isinstance(del_at_val, datetime):
+                    del_at_val = del_at_val.isoformat()
+                server_tombstones.append({
+                    "table": rd.get("table_name"),
+                    "id": rd.get("record_id"),
+                    "deleted_at": str(del_at_val)
+                })
+        except Exception:
+            pass
+
+        # 4. Collect server changes to send back to client
         tables_to_return = FAST_SYNC_TABLES + (HEAVY_STATIC_TABLES if req.force_full or not req.last_synced_at else [])
         pulled_records: Dict[str, List[Dict[str, Any]]] = {}
 
@@ -206,6 +298,9 @@ def api_sync_exchange(req: SyncExchangeRequest):
 
                 if req.last_synced_at and not req.force_full and "updated_at" in cols:
                     q = f"SELECT * FROM {table} WHERE updated_at >= %s" if is_postgres() else f"SELECT * FROM {table} WHERE updated_at >= ?"
+                    cursor.execute(q, (req.last_synced_at,))
+                elif req.last_synced_at and not req.force_full and "created_at" in cols:
+                    q = f"SELECT * FROM {table} WHERE created_at >= %s" if is_postgres() else f"SELECT * FROM {table} WHERE created_at >= ?"
                     cursor.execute(q, (req.last_synced_at,))
                 else:
                     cursor.execute(f"SELECT * FROM {table}")
@@ -232,9 +327,11 @@ def api_sync_exchange(req: SyncExchangeRequest):
             "success": True,
             "server_time": server_now,
             "pushed_count": pushed_count,
-            "pulled_records": pulled_records
+            "pulled_records": pulled_records,
+            "tombstones": server_tombstones
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
     finally:
         conn.close()
+

@@ -73,6 +73,8 @@ def delete_course(course_id: int):
         cursor = conn.cursor()
         cursor.execute("DELETE FROM courses WHERE id = ?", (course_id,))
         conn.commit()
+        from database.utils import record_tombstone
+        record_tombstone("courses", course_id)
         cache_invalidate("courses")
     finally:
         conn.close()
@@ -135,6 +137,8 @@ def delete_student_score(score_id: int):
         cursor = conn.cursor()
         cursor.execute("DELETE FROM student_scores WHERE id = ?", (score_id,))
         conn.commit()
+        from database.utils import record_tombstone
+        record_tombstone("student_scores", score_id)
     finally:
         conn.close()
 
@@ -338,11 +342,12 @@ def delete_class_attendance_date(class_id: int, date_str: str) -> Dict[str, Any]
     finally:
         conn.close()
 
-    # Propagate delete to cloud database to avoid pull re-insertion
-    _sync_cloud_delete("DELETE FROM class_attendance_grades WHERE class_id = %s AND date = %s", (class_id, date_str))
-    _sync_cloud_delete("DELETE FROM class_sessions WHERE class_id = %s AND date = %s", (class_id, date_str))
+    from database.utils import record_tombstone
+    record_tombstone("class_attendance_grades", f"{class_id}:{date_str}")
+    record_tombstone("class_sessions", f"{class_id}:{date_str}")
 
     return {
+
         "status": "success",
         "class_id": class_id,
         "date": date_str,

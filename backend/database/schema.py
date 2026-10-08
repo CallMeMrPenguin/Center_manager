@@ -44,6 +44,21 @@ def run_migrations(cursor: sqlite3.Cursor, conn: sqlite3.Connection):
         except sqlite3.OperationalError:
             pass
 
+    # Ensure sync tombstones table exists for conflict-free deletion propagation
+    try:
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS _sync_tombstones (
+            table_name TEXT NOT NULL,
+            record_id TEXT NOT NULL,
+            deleted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY (table_name, record_id)
+        );
+        """)
+        conn.commit()
+    except Exception:
+        pass
+
+
     # Auto-assign distinct colors to existing classes with default #7c3aed color
     palette = [
         '#7c3aed', '#0ea5e9', '#10b981', '#f59e0b', '#ec4899',

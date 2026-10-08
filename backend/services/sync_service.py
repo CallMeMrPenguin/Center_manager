@@ -14,6 +14,7 @@ from database.connection import DB_PATH, get_target_db_url
 
 FAST_SYNC_TABLES = [
     # Level 0 (Master / Standalone)
+    {"table": "app_roles", "pk": ["role_name"]},
     {"table": "app_settings", "pk": ["setting_key"]},
     {"table": "role_permissions", "pk": ["role", "tab_id"]},
     {"table": "app_users", "pk": ["id"]},
@@ -28,12 +29,15 @@ FAST_SYNC_TABLES = [
     {"table": "custom_time_phases", "pk": ["id"]},
     {"table": "friend_groups", "pk": ["id"]},
     {"table": "conflict_groups", "pk": ["id"]},
+    {"table": "word_documents", "pk": ["id"]},
     # Level 2 (Junction / Details)
     {"table": "class_students", "pk": ["class_id", "student_id"]},
     {"table": "class_schedule_weekly", "pk": ["id"]},
     {"table": "class_sessions", "pk": ["id"]},
+    {"table": "class_seating", "pk": ["class_id"]},
     {"table": "class_attendance_grades", "pk": ["class_id", "student_id", "date"]},
     {"table": "assignment_submissions", "pk": ["assignment_id", "student_id"]},
+    {"table": "skill_mastery", "pk": ["student_id", "class_id", "skill", "unit_key"]},
     {"table": "friend_group_members", "pk": ["class_id", "student_id"]},
     {"table": "conflict_group_members", "pk": ["class_id", "student_id"]},
     {"table": "conflict_relationships", "pk": ["class_id", "student_id1", "student_id2"]},
@@ -41,6 +45,7 @@ FAST_SYNC_TABLES = [
     {"table": "trusted_swap_students", "pk": ["class_id", "student_id"]},
     {"table": "student_scores", "pk": ["student_id", "class_id", "score_type"]},
 ]
+
 
 HEAVY_STATIC_TABLES = [
     {"table": "question_bank", "pk": ["id"]},

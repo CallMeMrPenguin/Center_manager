@@ -93,7 +93,9 @@ def delete_class(class_id: int):
         cache_invalidate("classes")
     finally:
         conn.close()
-    _sync_cloud_delete_sync("DELETE FROM classes WHERE id = %s", (class_id,))
+    from database.utils import record_tombstone
+    record_tombstone("classes", class_id)
+
 
 def get_class_students(class_id: int) -> List[Dict[str, Any]]:
     conn = get_connection()
@@ -180,15 +182,9 @@ def unenroll_student_from_class(class_id: int, student_id: int):
         conn.commit()
     finally:
         conn.close()
+    from database.utils import record_tombstone
+    record_tombstone("class_students", f"{class_id}:{student_id}")
 
-    # Synchronously delete from remote PostgreSQL so bidirectional sync does not resurrect the student
-    _sync_cloud_delete_statements(
-        [(f"DELETE FROM {tbl} WHERE class_id = %s AND student_id = %s", (class_id, student_id)) for tbl in ("class_students", "friend_group_members", "conflict_group_members", "trusted_swap_students", "class_attendance_grades")]
-        + [
-            ("DELETE FROM conflict_relationships WHERE class_id = %s AND (student_id1 = %s OR student_id2 = %s)", (class_id, student_id, student_id)),
-            ("DELETE FROM trusted_swap_relationships WHERE class_id = %s AND (student_id1 = %s OR student_id2 = %s)", (class_id, student_id, student_id)),
-        ]
-    )
 
 def update_class_student_groups(class_id: int, student_id: int, seat_color: str, grade_group: str):
     conn = get_connection()
@@ -438,9 +434,11 @@ def delete_class_session(session_id: int):
         conn.close()
 
     if session_id > 0:
-        _sync_cloud_delete("DELETE FROM class_sessions WHERE id = %s", (session_id,))
+        from database.utils import record_tombstone
+        record_tombstone("class_sessions", session_id)
         if target_cid and target_date:
-            _sync_cloud_delete("DELETE FROM class_attendance_grades WHERE class_id = %s AND date = %s", (target_cid, target_date))
+            record_tombstone("class_attendance_grades", f"{target_cid}:{target_date}")
+
 
 def sync_class_sessions_with_weekly_schedule(class_id: Optional[int] = None) -> Dict[str, Any]:
     weekday_map = {0: "Thứ 2", 1: "Thứ 3", 2: "Thứ 4", 3: "Thứ 5", 4: "Thứ 6", 5: "Thứ 7", 6: "Chủ nhật"}
