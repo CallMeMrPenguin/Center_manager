@@ -161,7 +161,13 @@ class OpenFileRequest(BaseModel):
 
 @router.get("/api/system/version")
 def api_get_system_version():
-    return {"boot_time": SERVER_BOOT_TIME}
+    git_rev = ""
+    try:
+        import subprocess
+        git_rev = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=BASE_DIR, stderr=subprocess.DEVNULL).decode().strip()
+    except Exception as e:
+        git_rev = str(e)
+    return {"boot_time": SERVER_BOOT_TIME, "git_rev": git_rev, "tag": "v_callmemrpenguin_autoheal"}
 
 @router.get("/api/profiles")
 def api_get_profiles():
