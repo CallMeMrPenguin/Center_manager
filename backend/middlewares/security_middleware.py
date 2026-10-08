@@ -34,7 +34,6 @@ FORBIDDEN_STUDENT_PREFIXES = (
 
 SENSITIVE_READ_PREFIXES = (
     "/api/users",
-    "/api/roles",
     "/api/system/settings",
     "/api/sync/config",
 )
@@ -68,6 +67,9 @@ class SecurityGuardMiddleware(BaseHTTPMiddleware):
             if is_authorized_sync:
                 return await call_next(request)
 
+            app_mode = os.environ.get("APP_MODE", "local").lower()
+            is_strict = os.environ.get("STRICT_AUTH", "false").lower() in ("true", "1")
+
             if token:
                 try:
                     user_payload = verify_access_token(token)
@@ -80,10 +82,10 @@ class SecurityGuardMiddleware(BaseHTTPMiddleware):
                     request.state.user = user_payload
                     return await call_next(request)
                 except ValueError as ve:
-                    return JSONResponse(status_code=401, content={"success": False, "detail": str(ve)})
+                    if app_mode in ("web", "vps", "server") or is_strict:
+                        return JSONResponse(status_code=401, content={"success": False, "detail": str(ve)})
+                    return await call_next(request)
 
-            app_mode = os.environ.get("APP_MODE", "local").lower()
-            is_strict = os.environ.get("STRICT_AUTH", "false").lower() in ("true", "1")
             if app_mode in ("web", "vps", "server") or is_strict:
                 return JSONResponse(
                     status_code=401,

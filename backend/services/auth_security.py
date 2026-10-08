@@ -71,6 +71,8 @@ def create_access_token(user_data: Dict[str, Any], expires_in: int = 7 * 86400) 
     
     return f"{payload_b64}.{sig_b64}"
 
+LEGACY_SECRET_KEY = b"cm_secret_key_vps_center_manager_2026_secure"
+
 def verify_access_token(token: str) -> Dict[str, Any]:
     """
     Verifies the HMAC-SHA256 signature and expiry of the token.
@@ -88,8 +90,14 @@ def verify_access_token(token: str) -> Dict[str, Any]:
     expected_sig = hmac.new(SECRET_KEY, payload_b64.encode("utf-8"), hashlib.sha256).digest()
     expected_sig_b64 = _b64url_encode(expected_sig)
     
+    is_valid_sig = hmac.compare_digest(sig_b64, expected_sig_b64)
+    if not is_valid_sig and LEGACY_SECRET_KEY:
+        legacy_sig = hmac.new(LEGACY_SECRET_KEY, payload_b64.encode("utf-8"), hashlib.sha256).digest()
+        legacy_sig_b64 = _b64url_encode(legacy_sig)
+        is_valid_sig = hmac.compare_digest(sig_b64, legacy_sig_b64)
+    
     # Constant-time comparison against timing attacks
-    if not hmac.compare_digest(sig_b64, expected_sig_b64):
+    if not is_valid_sig:
         raise ValueError("Chữ ký token không hợp lệ hoặc đã bị can thiệp")
     
     try:
