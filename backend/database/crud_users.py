@@ -1,12 +1,32 @@
 import hashlib
+import secrets
 from typing import List, Dict, Any, Optional
 from database.connection import get_connection
 
 def hash_password(password: str) -> str:
-    """Returns SHA-256 hash of password string."""
+    """Returns salted PBKDF2-HMAC-SHA256 password hash (100,000 iterations)."""
     if not password:
         return ""
-    return hashlib.sha256(password.encode("utf-8")).hexdigest()
+    salt = secrets.token_hex(16)
+    dk = hashlib.pbkdf2_hmac("sha256", password.encode("utf-8"), salt.encode("utf-8"), 100000)
+    return f"pbkdf2:sha256:100000${salt}${dk.hex()}"
+
+def verify_password(plain: str, stored_hash: str) -> bool:
+    """Verifies plain password against PBKDF2 or legacy plain SHA-256."""
+    if not plain or not stored_hash:
+        return False
+    if stored_hash.startswith("pbkdf2:sha256:"):
+        try:
+            parts = stored_hash.split("$")
+            if len(parts) == 3:
+                iters = int(parts[0].split(":")[2])
+                salt, h = parts[1], parts[2]
+                dk = hashlib.pbkdf2_hmac("sha256", plain.encode("utf-8"), salt.encode("utf-8"), iters)
+                return secrets.compare_digest(dk.hex(), h)
+        except Exception:
+            return False
+    legacy = hashlib.sha256(plain.encode("utf-8")).hexdigest()
+    return secrets.compare_digest(legacy, stored_hash)
 
 def sync_staff_accounts() -> Dict[str, Any]:
     """
@@ -115,17 +135,21 @@ def authenticate_user(username: str, raw_password: str) -> Dict[str, Any]:
         if user_dict.get("status") == "Tạm khóa":
             raise ValueError("Tài khoản của bạn đang bị tạm khóa. Vui lòng liên hệ quản trị viên.")
 
-        is_valid = (user_dict.get("password_hash") == pwd_hash)
+        stored_hash = user_dict.get("password_hash") or ""
+        is_valid = verify_password(clean_password, stored_hash)
         if not is_valid and clean_username.lower() == "admin" and clean_password in ("admin", "admin123"):
             is_valid = True
-            try:
-                cursor.execute("UPDATE app_users SET password_hash = ? WHERE id = ?", (pwd_hash, user_dict["id"]))
-                conn.commit()
-            except Exception:
-                pass
 
         if not is_valid:
             raise ValueError("Tên đăng nhập hoặc mật khẩu không chính xác")
+
+        if not stored_hash.startswith("pbkdf2:sha256:"):
+            try:
+                new_h = hash_password(clean_password)
+                cursor.execute("UPDATE app_users SET password_hash = ? WHERE id = ?", (new_h, user_dict["id"]))
+                conn.commit()
+            except Exception:
+                pass
 
         # Update last_login
         from datetime import datetime
@@ -379,8 +403,8 @@ def change_user_password(username: str, old_password: str, new_password: str, co
         if not is_admin:
             if not old_password:
                 raise ValueError("Vui lòng nhập mật khẩu cũ")
-            old_hash = hash_password(old_password)
-            if old_hash != user.get("password_hash") and old_password != (user.get("plain_password") or ""):
+            stored_h = user.get("password_hash") or ""
+            if not verify_password(old_password, stored_h) and old_password != (user.get("plain_password") or ""):
                 raise ValueError("Mật khẩu cũ không chính xác")
 
         new_hash = hash_password(new_password)

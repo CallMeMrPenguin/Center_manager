@@ -41,14 +41,27 @@ from middlewares.security_middleware import SecurityGuardMiddleware
 # High-performance GZip compression for responses > 1KB (shrinks WAN payload by ~80%)
 app.add_middleware(GZipMiddleware, minimum_size=1024)
 
-# Configure CORS (Supports mobile, LAN, and remote web domains seamlessly)
-app.add_middleware(
-    CORSMiddleware,
-    allow_origin_regex=".*",
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# Configure hardened CORS (Safe localhost, LAN IP regex, and explicit ALLOWED_ORIGINS)
+allowed_origins_env = os.environ.get("ALLOWED_ORIGINS", "").strip()
+cors_origins = [o.strip() for o in allowed_origins_env.split(",") if o.strip() and o.strip() != "*"]
+cors_origin_regex = None if cors_origins else r"^https?:\/\/(localhost|127\.0\.0\.1|192\.168\.\d{1,3}\.\d{1,3}|10\.\d{1,3}\.\d{1,3}\.\d{1,3}|172\.(1[6-9]|2\d|3[01])\.\d{1,3}\.\d{1,3})(:\d+)?$"
+
+if cors_origins:
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=cors_origins,
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+else:
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origin_regex=cors_origin_regex,
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
 # Anti-tampering & authentication security guard
 app.add_middleware(SecurityGuardMiddleware)
 

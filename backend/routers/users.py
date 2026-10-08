@@ -1,4 +1,5 @@
-from fastapi import APIRouter, HTTPException
+import time
+from fastapi import APIRouter, HTTPException, Request
 from typing import Optional, List, Dict, Any
 from pydantic import BaseModel
 from database.crud_users import (
@@ -51,19 +52,51 @@ class RoleCreate(BaseModel):
 
 from services.auth_security import create_access_token
 
+# In-memory sliding window rate limiter against brute-force password attacks
+_FAILED_LOGINS: Dict[str, List[float]] = {}
+MAX_LOGIN_ATTEMPTS = 5
+LOCKOUT_WINDOW_SECONDS = 300  # 5 minutes
+
+def _check_rate_limit(key: str):
+    now = time.time()
+    attempts = _FAILED_LOGINS.get(key, [])
+    valid_attempts = [t for t in attempts if now - t < LOCKOUT_WINDOW_SECONDS]
+    _FAILED_LOGINS[key] = valid_attempts
+    if len(valid_attempts) >= MAX_LOGIN_ATTEMPTS:
+        remaining = int(LOCKOUT_WINDOW_SECONDS - (now - valid_attempts[0]))
+        raise HTTPException(
+            status_code=429,
+            detail=f"Quá nhiều lần thử đăng nhập không thành công. Vui lòng thử lại sau {max(1, remaining)} giây."
+        )
+
+def _record_login_failure(key: str):
+    now = time.time()
+    attempts = _FAILED_LOGINS.get(key, [])
+    attempts.append(now)
+    _FAILED_LOGINS[key] = [t for t in attempts if now - t < LOCKOUT_WINDOW_SECONDS]
+
+def _clear_login_failures(key: str):
+    _FAILED_LOGINS.pop(key, None)
+
 # --- Auth Endpoints ---
 @router.post("/auth/login")
 @router.post("/auth/login/")
 @router.post("/users/login")
 @router.post("/users/login/")
-def login(payload: LoginRequest):
+def login(payload: LoginRequest, request: Request):
+    client_ip = request.client.host if request.client else "unknown"
+    rate_key = f"{client_ip}:{payload.username.strip().lower()}"
+    _check_rate_limit(rate_key)
     try:
         user = authenticate_user(payload.username, payload.password)
+        _clear_login_failures(rate_key)
         token = create_access_token(user)
         return {"success": True, "user": user, "token": token}
     except ValueError as ve:
+        _record_login_failure(rate_key)
         raise HTTPException(status_code=401, detail=str(ve))
     except Exception as e:
+        _record_login_failure(rate_key)
         raise HTTPException(status_code=500, detail=f"Lỗi đăng nhập hệ thống: {e}")
 
 # --- Users Endpoints ---

@@ -9,9 +9,36 @@ import json
 import hmac
 import hashlib
 import base64
+import secrets
 from typing import Dict, Any, Optional
 
-SECRET_KEY = os.environ.get("AUTH_SECRET_KEY", "cm_secret_key_vps_center_manager_2026_secure").encode("utf-8")
+try:
+    from config.settings import BASE_DIR
+except Exception:
+    BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+def _load_or_create_secret() -> bytes:
+    env_key = os.environ.get("AUTH_SECRET_KEY", "").strip()
+    if env_key:
+        return env_key.encode("utf-8")
+    
+    secret_file = os.path.join(BASE_DIR, ".auth_secret")
+    try:
+        if os.path.exists(secret_file):
+            with open(secret_file, "r", encoding="utf-8") as f:
+                content = f.read().strip()
+                if content:
+                    return content.encode("utf-8")
+        
+        # Generate persistent machine-specific 256-bit secure key
+        generated = secrets.token_hex(32)
+        with open(secret_file, "w", encoding="utf-8") as f:
+            f.write(generated)
+        return generated.encode("utf-8")
+    except Exception:
+        return b"cm_sec_key_persistent_2026_default_fallback"
+
+SECRET_KEY = _load_or_create_secret()
 
 def _b64url_encode(data: bytes) -> str:
     return base64.urlsafe_b64encode(data).decode("utf-8").rstrip("=")

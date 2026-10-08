@@ -1,6 +1,7 @@
 # Secrets & Credentials
 GG_Sheet_API.json
 *.json.key
+.auth_secret
 
 # Databases & local user files
 *.db

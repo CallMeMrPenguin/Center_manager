@@ -75,25 +75,41 @@ DEFAULT_LAYOUT_SETTINGS = {
     "notice_left_indent": 1.0
 }
 
+def is_safe_path(base_dir: str, target_path: str) -> bool:
+    try:
+        resolved_base = os.path.realpath(base_dir)
+        resolved_target = os.path.realpath(target_path)
+        return resolved_target.startswith(resolved_base)
+    except Exception:
+        return False
+
 def get_file_path(files_dir: str, filename: str) -> str:
     if not files_dir or not os.path.exists(files_dir):
         files_dir = os.path.join(BASE_DIR, "workspace_files")
     os.makedirs(files_dir, exist_ok=True)
 
-    if filename.lower().endswith(".json") or filename.startswith("json/"):
+    # Sanitize and prevent directory traversal
+    clean_filename = os.path.normpath(filename).lstrip("/\\")
+    if ".." in clean_filename.split(os.path.sep):
+        clean_filename = os.path.basename(filename)
+
+    if clean_filename.lower().endswith(".json") or clean_filename.startswith("json" + os.path.sep):
         json_dir = os.path.join(files_dir, "json")
         os.makedirs(json_dir, exist_ok=True)
-        clean_name = filename[5:] if filename.startswith("json/") else filename
-        return os.path.join(json_dir, clean_name)
+        clean_name = clean_filename[5:] if clean_filename.startswith("json" + os.path.sep) else clean_filename
+        p = os.path.join(json_dir, clean_name)
+        return p if is_safe_path(files_dir, p) else os.path.join(json_dir, os.path.basename(clean_name))
 
-    direct_path = os.path.join(files_dir, filename)
-    if os.path.exists(direct_path):
+    direct_path = os.path.join(files_dir, clean_filename)
+    if is_safe_path(files_dir, direct_path) and os.path.exists(direct_path):
         return direct_path
 
     fname = os.path.basename(filename)
     for root, _, files in os.walk(files_dir):
         if fname in files:
-            return os.path.join(root, fname)
+            found_path = os.path.join(root, fname)
+            if is_safe_path(files_dir, found_path):
+                return found_path
 
     return direct_path
 
@@ -292,8 +308,11 @@ def api_get_files():
 @router.post("/api/files/upload")
 async def api_upload_file(file: UploadFile = File(...)):
     files_dir = get_setting("files_dir")
-    filename = file.filename
+    filename = os.path.basename(file.filename)
+    safe_base = files_dir if files_dir and os.path.exists(files_dir) else os.path.join(BASE_DIR, "workspace_files")
     target_path = get_file_path(files_dir, filename)
+    if not is_safe_path(safe_base, target_path):
+        raise HTTPException(status_code=403, detail="Invalid file path")
     contents = await file.read()
     with open(target_path, "wb") as f:
         f.write(contents)
@@ -302,7 +321,10 @@ async def api_upload_file(file: UploadFile = File(...)):
 @router.delete("/api/files/{filename:path}")
 def api_delete_file(filename: str):
     files_dir = get_setting("files_dir")
+    safe_base = files_dir if files_dir and os.path.exists(files_dir) else os.path.join(BASE_DIR, "workspace_files")
     filepath = get_file_path(files_dir, filename)
+    if not is_safe_path(safe_base, filepath):
+        raise HTTPException(status_code=403, detail="Invalid file path")
     if os.path.exists(filepath):
         os.remove(filepath)
         return {"success": True}
@@ -312,6 +334,7 @@ def api_delete_file(filename: str):
 def api_download_file(filename: str):
     fname = os.path.basename(filename)
     files_dir = get_setting("files_dir")
+    safe_base = files_dir if files_dir and os.path.exists(files_dir) else os.path.join(BASE_DIR, "workspace_files")
     
     candidates = [
         get_file_path(files_dir, filename),
@@ -331,19 +354,21 @@ def api_download_file(filename: str):
 
     for candidate in candidates:
         if candidate and os.path.exists(candidate):
-            return FileResponse(
-                candidate, 
-                filename=fname, 
-                media_type=media_type
-            )
+            if is_safe_path(safe_base, candidate) or is_safe_path(BASE_DIR, candidate):
+                return FileResponse(
+                    candidate, 
+                    filename=fname, 
+                    media_type=media_type
+                )
         
     raise HTTPException(status_code=404, detail=f"File '{fname}' not found")
 
 @router.get("/api/files/preview-pdf/{filename:path}")
 def api_preview_pdf_file(filename: str):
     files_dir = get_setting("files_dir")
+    safe_base = files_dir if files_dir and os.path.exists(files_dir) else os.path.join(BASE_DIR, "workspace_files")
     filepath = get_file_path(files_dir, filename)
-    if not os.path.exists(filepath):
+    if not is_safe_path(safe_base, filepath) or not os.path.exists(filepath):
         raise HTTPException(status_code=404, detail="File not found")
     
     pdf_dir = os.path.join(BASE_DIR, "backend", "temp_pdf_previews")
@@ -363,8 +388,9 @@ def api_preview_pdf_file(filename: str):
 @router.post("/api/files/compile")
 def api_compile_file(req: CompileFileRequest):
     files_dir = get_setting("files_dir")
+    safe_base = files_dir if files_dir and os.path.exists(files_dir) else os.path.join(BASE_DIR, "workspace_files")
     filepath = get_file_path(files_dir, req.filename)
-    if not os.path.exists(filepath):
+    if not is_safe_path(safe_base, filepath) or not os.path.exists(filepath):
         raise HTTPException(status_code=404, detail="File not found")
     with open(filepath, "r", encoding="utf-8") as f:
         data = json.load(f)

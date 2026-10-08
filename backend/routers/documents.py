@@ -5,7 +5,7 @@ from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from typing import List, Dict, Any, Optional
 
-from config.settings import get_setting
+from config.settings import get_setting, BASE_DIR
 from database.db_manager import (
     get_documents, get_document, get_folders, insert_folder, delete_folder,
     insert_document, delete_document, restore_document, restore_folder,
@@ -13,6 +13,14 @@ from database.db_manager import (
     update_document_tags, update_document_folder, update_folder_parent,
     insert_attachment, get_attachments, delete_attachment, get_attachment
 )
+
+def is_safe_path(base_dir: str, target_path: str) -> bool:
+    try:
+        resolved_base = os.path.realpath(base_dir)
+        resolved_target = os.path.realpath(target_path)
+        return resolved_target.startswith(resolved_base)
+    except Exception:
+        return False
 
 router = APIRouter()
 
@@ -124,22 +132,26 @@ def api_delete_attachment(att_id: int):
 @router.get("/api/documents/download/{doc_id}")
 def api_download_document(doc_id: int):
     files_dir = get_setting("files_dir")
+    safe_base = files_dir if files_dir and os.path.exists(files_dir) else os.path.join(BASE_DIR, "workspace_files")
     doc = get_document(doc_id)
     if not doc:
         raise HTTPException(status_code=404, detail="Document not found")
-    filepath = os.path.join(files_dir, doc["filepath"])
-    if not os.path.exists(filepath):
+    clean_rel = os.path.normpath(doc["filepath"]).lstrip("/\\")
+    filepath = os.path.join(safe_base, clean_rel)
+    if not is_safe_path(safe_base, filepath) or not os.path.exists(filepath):
         raise HTTPException(status_code=404, detail="File on disk not found")
     return FileResponse(filepath, filename=doc["name"])
 
 @router.get("/api/documents/attachments/download/{att_id}")
 def api_download_attachment(att_id: int):
     files_dir = get_setting("files_dir")
+    safe_base = files_dir if files_dir and os.path.exists(files_dir) else os.path.join(BASE_DIR, "workspace_files")
     att = get_attachment(att_id)
     if not att:
         raise HTTPException(status_code=404, detail="Attachment not found")
-    filepath = os.path.join(files_dir, att["filepath"])
-    if not os.path.exists(filepath):
+    clean_rel = os.path.normpath(att["filepath"]).lstrip("/\\")
+    filepath = os.path.join(safe_base, clean_rel)
+    if not is_safe_path(safe_base, filepath) or not os.path.exists(filepath):
         raise HTTPException(status_code=404, detail="File on disk not found")
     return FileResponse(filepath, filename=att["filename"])
 
