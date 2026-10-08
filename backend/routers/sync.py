@@ -35,6 +35,17 @@ def _parse_ts(val: Any) -> float:
         return val.replace(tzinfo=timezone.utc).timestamp()
     if isinstance(val, str):
         val = val.strip()
+        if not val:
+            return 0.0
+        try:
+            clean_str = val.replace("Z", "+00:00")
+            dt = datetime.fromisoformat(clean_str)
+            if dt.tzinfo is not None:
+                return dt.timestamp()
+            return dt.replace(tzinfo=timezone.utc).timestamp()
+        except Exception:
+            pass
+
         for fmt in ("%Y-%m-%d %H:%M:%S", "%Y-%m-%d %H:%M:%S.%f", "%Y-%m-%d"):
             try:
                 dt = datetime.strptime(val, fmt)
@@ -45,6 +56,7 @@ def _parse_ts(val: Any) -> float:
         return float(val)
     except Exception:
         return 0.0
+
 
 @router.get("/api/sync/status")
 def api_get_sync_status():
