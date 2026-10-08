@@ -270,7 +270,7 @@ def get_teachers_cm(search: str = "", role: str = "") -> List[Dict[str, Any]]:
             LEFT JOIN app_users u ON (
                 LOWER(u.username) = LOWER('gv_' || printf('%04d', t.id))
                 OR (t.phone IS NOT NULL AND t.phone != '' AND LOWER(u.username) = LOWER(t.phone))
-                OR (u.role NOT IN ('Học sinh') AND LOWER(TRIM(u.display_name)) = LOWER(TRIM(t.full_name)))
+                OR (u.role IN ('Giáo viên', 'Trợ giảng', 'Quản trị viên') AND LOWER(TRIM(u.display_name)) = LOWER(TRIM(t.full_name)))
             )
             WHERE 1=1
         """

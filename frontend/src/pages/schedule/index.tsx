@@ -90,7 +90,7 @@ export default function SchedulePage() {
       // Background sync holidays for the selected year
       const [yearStr] = selectedMonth.split('-');
       const year = parseInt(yearStr) || new Date().getFullYear();
-      api.getHolidays(year, true).then((holidays) => {
+      api.getHolidays(year, true).then((holidays: any[]) => {
         if (holidays && Array.isArray(holidays)) {
           registerGoogleHolidays(holidays);
         }

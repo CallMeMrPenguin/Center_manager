@@ -17,14 +17,13 @@ APP_MODE = os.environ.get("APP_MODE", "local")
 # Core Routers
 from routers import (
     system,
-    sync,
     center_manager,
     seating,
     skill_analytics,
     assignments,
     users,
     word_documents,
-    holidays
+    sync
 )
 
 # Initialize Database schema, tables, migrations, and performance indexes
@@ -41,27 +40,14 @@ from middlewares.security_middleware import SecurityGuardMiddleware
 # High-performance GZip compression for responses > 1KB (shrinks WAN payload by ~80%)
 app.add_middleware(GZipMiddleware, minimum_size=1024)
 
-# Configure hardened CORS (Safe localhost, LAN IP regex, and explicit ALLOWED_ORIGINS)
-allowed_origins_env = os.environ.get("ALLOWED_ORIGINS", "").strip()
-cors_origins = [o.strip() for o in allowed_origins_env.split(",") if o.strip() and o.strip() != "*"]
-cors_origin_regex = None if cors_origins else r"^https?:\/\/(localhost|127\.0\.0\.1|192\.168\.\d{1,3}\.\d{1,3}|10\.\d{1,3}\.\d{1,3}\.\d{1,3}|172\.(1[6-9]|2\d|3[01])\.\d{1,3}\.\d{1,3})(:\d+)?$"
-
-if cors_origins:
-    app.add_middleware(
-        CORSMiddleware,
-        allow_origins=cors_origins,
-        allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
-    )
-else:
-    app.add_middleware(
-        CORSMiddleware,
-        allow_origin_regex=cors_origin_regex,
-        allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
-    )
+# Configure CORS (Supports mobile, LAN, and remote web domains seamlessly)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origin_regex=".*",
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 # Anti-tampering & authentication security guard
 app.add_middleware(SecurityGuardMiddleware)
 
@@ -79,14 +65,13 @@ async def global_exception_handler(request, exc):
 
 # Mount Core Routers (Always available on both Web and Local)
 app.include_router(system.router)
-app.include_router(sync.router)
 app.include_router(center_manager.router)
 app.include_router(seating.router)
 app.include_router(skill_analytics.router)
 app.include_router(assignments.router)
 app.include_router(users.router)
 app.include_router(word_documents.router)
-app.include_router(holidays.router)
+app.include_router(sync.router)
 
 # Mount Local-Only Routers & Background Tasks (Only active in local desktop mode)
 if APP_MODE != "web":
@@ -120,13 +105,7 @@ if APP_MODE != "web":
     frontend_dist = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "frontend", "dist")
     frontend_assets = os.path.join(frontend_dist, "assets")
     if os.path.exists(frontend_assets):
-        class CachedStaticFiles(StaticFiles):
-            async def get_response(self, path: str, scope):
-                resp = await super().get_response(path, scope)
-                if resp.status_code == 200:
-                    resp.headers["Cache-Control"] = "public, max-age=31536000, immutable"
-                return resp
-        app.mount("/assets", CachedStaticFiles(directory=frontend_assets), name="assets")
+        app.mount("/assets", StaticFiles(directory=frontend_assets), name="assets")
 
     @app.get("/{full_path:path}", response_class=HTMLResponse)
     def serve_frontend(full_path: str):

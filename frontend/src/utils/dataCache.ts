@@ -12,7 +12,7 @@ type CacheEntry<T> = {
 
 class DataCacheManager {
   private cache = new Map<string, CacheEntry<any>>();
-  private defaultTTL = 4 * 60 * 1000; // 4 minutes
+  private defaultTTL = 45 * 1000; // 45 seconds (stale after 22.5s for fast background revalidation)
 
   /**
    * Generates a unique cache key from an endpoint and params

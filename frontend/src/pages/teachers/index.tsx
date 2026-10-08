@@ -35,12 +35,12 @@ export function TeachersPage() {
     account_status: 'Hoạt động',
   });
 
-  const loadData = async (silent = false) => {
+  const loadData = async (silent = false, forceRefresh = true) => {
     const hasData = teachers.length > 0 || (cachedTeachers && cachedTeachers.length > 0);
     const isSilent = silent || hasData;
     if (!isSilent) setLoading(true);
     try {
-      const data = await api.getTeachersCM();
+      const data = await api.getTeachersCM('', '', forceRefresh);
       setTeachers(data || []);
     } catch (err: any) {
       if (!isSilent) showToast('Không thể tải danh sách giáo viên: ' + err.message, 'error');
@@ -50,8 +50,8 @@ export function TeachersPage() {
   };
 
   useEffect(() => {
-    loadData();
-    const handleDataChanged = () => loadData(true);
+    loadData(false, true);
+    const handleDataChanged = () => loadData(true, true);
     window.addEventListener('data-changed', handleDataChanged);
     window.addEventListener('data-invalidated', handleDataChanged);
     return () => {

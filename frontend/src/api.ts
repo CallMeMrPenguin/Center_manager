@@ -208,21 +208,21 @@ export const api = {
   permanentlyDeleteDocumentFolder: (folderId: number) => request<{ success: boolean }>(`/api/documents/folders/${folderId}/permanent`, { method: 'DELETE', tags: ['documents'] }),
 
   // Students API
-  getStudents: (search = '', status = '') =>
-    request<any[]>(`/api/students?search=${encodeURIComponent(search)}&status=${encodeURIComponent(status)}`, { tags: ['students'] }),
+  getStudents: (search = '', status = '', forceRefresh = false) =>
+    request<any[]>(`/api/students?search=${encodeURIComponent(search)}&status=${encodeURIComponent(status)}`, { tags: ['students'], forceRefresh }),
   createStudent: (data: any) => request<any>('/api/students', { method: 'POST', body: JSON.stringify(data), tags: ['students', 'attendance', 'reports'] }),
   updateStudent: (id: number, data: any) => request<any>(`/api/students/${id}`, { method: 'PUT', body: JSON.stringify(data), tags: ['students', 'attendance', 'reports'] }),
   deleteStudent: (id: number) => request<any>(`/api/students/${id}`, { method: 'DELETE', tags: ['students', 'attendance', 'reports'] }),
 
   // Teachers CM API
-  getTeachersCM: (search = '', role = '') =>
-    request<any[]>(`/api/teachers_cm?search=${encodeURIComponent(search)}&role=${encodeURIComponent(role)}`, { tags: ['teachers'] }),
+  getTeachersCM: (search = '', role = '', forceRefresh = false) =>
+    request<any[]>(`/api/teachers_cm?search=${encodeURIComponent(search)}&role=${encodeURIComponent(role)}`, { tags: ['teachers'], forceRefresh }),
   createTeacherCM: (data: any) => request<any>('/api/teachers_cm', { method: 'POST', body: JSON.stringify(data), tags: ['teachers', 'classes'] }),
   updateTeacherCM: (id: number, data: any) => request<any>(`/api/teachers_cm/${id}`, { method: 'PUT', body: JSON.stringify(data), tags: ['teachers', 'classes'] }),
   deleteTeacherCM: (id: number) => request<any>(`/api/teachers_cm/${id}`, { method: 'DELETE', tags: ['teachers', 'classes'] }),
 
   // Classes API
-  getClasses: (search = '') => request<any[]>(`/api/classes?search=${encodeURIComponent(search)}`, { tags: ['classes'] }),
+  getClasses: (search = '', forceRefresh = false) => request<any[]>(`/api/classes?search=${encodeURIComponent(search)}`, { tags: ['classes'], forceRefresh }),
   createClass: (data: any) => request<any>('/api/classes', { method: 'POST', body: JSON.stringify(data), tags: ['classes', 'schedule'] }),
   updateClass: (id: number, data: any) => request<any>(`/api/classes/${id}`, { method: 'PUT', body: JSON.stringify(data), tags: ['classes', 'schedule'] }),
   deleteClass: (id: number) => request<any>(`/api/classes/${id}`, { method: 'DELETE', tags: ['classes', 'schedule'] }),
@@ -350,18 +350,9 @@ export const api = {
   checkUpdate: () => request<any>('/api/system/update-check'),
   getUpdateStatus: () => request<any>('/api/system/update-status'),
   applyUpdate: () => request<any>('/api/system/update-apply', { method: 'POST' }),
-  getSyncStatus: () => request<{
-    status: 'synced' | 'syncing' | 'offline';
-    last_synced_at: string | null;
-    syncing: boolean;
-    last_error?: string | null;
-    remote_url?: string;
-    pushed_count?: number;
-    pulled_count?: number;
-  }>('/api/sync/status', { forceRefresh: true }),
+  getSyncStatus: () => request<{ status: 'synced' | 'syncing' | 'offline'; last_synced_at: string | null; syncing: boolean; last_error?: string | null }>('/api/sync/status', { forceRefresh: true }),
   triggerSync: () => request<any>('/api/sync/trigger', { method: 'POST' }),
   runFullSync: () => request<any>('/api/sync/bidirectional?force_full=true', { method: 'POST' }),
-  getSyncConfig: () => request<{ remote_sync_url: string }>('/api/sync/config'),
-  saveSyncConfig: (remote_sync_url: string) => request<any>('/api/sync/config', { method: 'POST', body: JSON.stringify({ remote_sync_url }) }),
-  getHolidays: (year?: number, syncGoogle = false) => request<any[]>(`/api/center/holidays?${year ? `year=${year}&` : ''}sync_google=${syncGoogle}`),
+  getHolidays: (year?: number, syncGoogle = false) =>
+    request<any[]>(`/api/center/holidays?${year ? `year=${year}&` : ''}sync_google=${syncGoogle}`, { tags: ['holidays'] }),
 };

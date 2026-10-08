@@ -99,10 +99,6 @@ def login(payload: LoginRequest, request: Request):
         _record_login_failure(rate_key)
         raise HTTPException(status_code=500, detail=f"Lỗi đăng nhập hệ thống: {e}")
 
-@router.get("/system/build-check")
-def build_check():
-    return {"version": "v1.0.2_debug_active", "time": time.time()}
-
 # --- Users Endpoints ---
 @router.get("/users")
 def list_users():

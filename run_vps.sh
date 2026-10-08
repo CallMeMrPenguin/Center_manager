@@ -122,38 +122,21 @@ echo "=========================================================="
 systemctl start docker
 systemctl enable docker
 
-# Khởi động PostgreSQL 16 & FastAPI Backend với volume live code
-docker compose up -d
+# Khởi động PostgreSQL 16 & FastAPI Backend với volume live code (Zero-downtime rebuild)
+docker compose up -d --build
 
-# Đợi PostgreSQL sẵn sàng (tối đa 30s)
-echo " -> Đang kiểm tra trạng thái PostgreSQL..."
-for i in {1..30}; do
-    if docker exec -i center_manager_db pg_isready -U center_user -d center_manager &>/dev/null; then
-        echo " -> PostgreSQL đã sẵn sàng!"
-        break
-    fi
-    sleep 1
-done
-
-# Khởi tạo dữ liệu ban đầu cho PostgreSQL nếu database CHƯA CÓ người dùng
+# Khởi tạo dữ liệu ban đầu cho PostgreSQL nếu database chưa có người dùng
 if [ -f "backend/database/init_data.sql" ]; then
+    sleep 3
     USER_COUNT=$(docker exec -i center_manager_db psql -U center_user -d center_manager -tAc "SELECT COUNT(*) FROM app_users;" 2>/dev/null || echo "0")
     if [ "$USER_COUNT" = "0" ] || [ -z "$USER_COUNT" ]; then
-        echo " -> Database trống. Khởi tạo dữ liệu PostgreSQL ban đầu..."
+        echo " -> Khởi tạo dữ liệu PostgreSQL ban đầu..."
         docker exec -i center_manager_db psql -U center_user -d center_manager < backend/database/init_data.sql || true
+        docker restart center_manager_backend || true
     else
-        echo " -> PostgreSQL đã có dữ liệu ($USER_COUNT users). Áp dụng patch cập nhật mật khẩu admin..."
-        if [ -f "backend/database/patch_admin_password.sql" ]; then
-            docker exec -i -e PGPASSWORD=Center_Db_2026_SecureP@ss center_manager_db psql -U center_user -d center_manager < backend/database/patch_admin_password.sql 2>/dev/null || docker exec -i center_manager_db psql -U postgres -d center_manager < backend/database/patch_admin_password.sql 2>/dev/null || true
-        fi
+        echo " -> PostgreSQL đã có dữ liệu ($USER_COUNT users). Bỏ qua nạp init_data.sql để bảo toàn mật khẩu & dữ liệu live."
     fi
 fi
-
-# Dọn dẹp cache bytecode cũ & rebuild backend container không dùng cache cũ
-find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
-find . -name "*.pyc" -delete 2>/dev/null || true
-docker compose build --no-cache backend
-docker compose up -d backend
 
 echo "=========================================================="
 echo " [5/8] BUILD FRONTEND REACT UI MỚI NHẤT"
@@ -268,9 +251,7 @@ EOF
 
 systemctl daemon-reload
 systemctl enable center-autopull.service
-if ! systemctl is-active --quiet center-autopull.service; then
-    systemctl start center-autopull.service
-fi
+systemctl restart center-autopull.service
 
 echo "=========================================================="
 echo " [8/8] ĐẢM BẢO TỰ KHỞI ĐỘNG KHI VPS REBOOT & KIỂM TRA TRẠNG THÁI"

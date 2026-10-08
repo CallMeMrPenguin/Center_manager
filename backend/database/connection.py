@@ -123,19 +123,10 @@ class PgCursorWrapper:
                 except Exception:
                     pass
 
-        try:
-            if params is None:
-                return self._cursor.execute(adapted_sql)
-            else:
-                return self._cursor.execute(adapted_sql, tuple(params) if isinstance(params, (list, tuple)) else params)
-        except Exception:
-            try:
-                raw_c = getattr(self._cursor, 'connection', None)
-                if raw_c and hasattr(raw_c, 'rollback'):
-                    raw_c.rollback()
-            except Exception:
-                pass
-            raise
+        if params is None:
+            return self._cursor.execute(adapted_sql)
+        else:
+            return self._cursor.execute(adapted_sql, tuple(params) if isinstance(params, (list, tuple)) else params)
 
     def executemany(self, sql: str, seq_of_params):
         adapted_sql = self._adapt_sql(sql)
@@ -402,17 +393,15 @@ class PgConnectionWrapper:
         self.close()
 
 
-def is_postgres() -> bool:
-    return bool(
+def get_connection():
+    # If running on VPS / web / Docker with PostgreSQL (via DATABASE_URL, POSTGRES_URL, DB_ENGINE=postgres or APP_MODE=web)
+    is_postgres_target = bool(
         os.environ.get("DATABASE_URL")
         or os.environ.get("POSTGRES_URL")
         or os.environ.get("DB_ENGINE") == "postgres"
         or os.environ.get("APP_MODE") in ("web", "vps", "server")
     )
-
-def get_connection():
-    # If running on VPS / web / Docker with PostgreSQL (via DATABASE_URL, POSTGRES_URL, DB_ENGINE=postgres or APP_MODE=web)
-    if is_postgres():
+    if is_postgres_target:
         target_url = get_target_db_url()
         if target_url:
             # 1. First try psycopg2 with high-performance connection pool (sub-millisecond latency)
@@ -433,15 +422,12 @@ def get_connection():
     conn = sqlite3.connect(DB_PATH, check_same_thread=False, timeout=20)
     conn.row_factory = sqlite3.Row
     try:
-        conn.executescript("""
-            PRAGMA foreign_keys=ON;
-            PRAGMA journal_mode=WAL;
-            PRAGMA synchronous=NORMAL;
-            PRAGMA temp_store=MEMORY;
-            PRAGMA cache_size=-32000;
-            PRAGMA mmap_size=268435456;
-            PRAGMA busy_timeout=5000;
-        """)
+        conn.execute("PRAGMA foreign_keys=ON;")
+        conn.execute("PRAGMA journal_mode=WAL;")
+        conn.execute("PRAGMA synchronous=NORMAL;")
+        conn.execute("PRAGMA temp_store=MEMORY;")
+        conn.execute("PRAGMA cache_size=-16000;")
+        conn.execute("PRAGMA busy_timeout=5000;")
     except Exception:
         pass
     return conn

@@ -56,7 +56,7 @@ export function useClassesData() {
     loadClasses();
     const handleDataChanged = (e: any) => {
       const tags = e?.detail?.tags;
-      if (!tags || tags.length === 0 || tags.includes('classes')) {
+      if (!tags || tags.length === 0 || tags.includes('classes') || tags.includes('teachers')) {
         loadClasses(true);
       }
     };

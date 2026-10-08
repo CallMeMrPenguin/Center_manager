@@ -24,15 +24,6 @@ function AppContent() {
   // Persistent Login session (auto-restores user on refresh / app reopening)
   const [currentUser, setCurrentUser] = useState<AuthUser | null>(() => getCurrentUser());
 
-  useEffect(() => {
-    const handleUnauthorized = () => {
-      setCurrentUser(null);
-      showToast('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.', 'warning');
-    };
-    window.addEventListener('auth:unauthorized', handleUnauthorized);
-    return () => window.removeEventListener('auth:unauthorized', handleUnauthorized);
-  }, []);
-
   // Background data cache warmup for 0ms instant tab switching
   useWarmupDataCache(currentUser);
   // Helper to parse current URL path into valid tabId
