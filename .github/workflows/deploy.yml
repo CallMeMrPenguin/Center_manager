@@ -20,6 +20,7 @@ jobs:
             cd /root/Center_manager
             git pull origin main
             docker compose up -d --build backend
+            docker restart center_manager_backend || true
             cd frontend
             npm install
             npm run build
