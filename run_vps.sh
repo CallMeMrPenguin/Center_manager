@@ -134,7 +134,10 @@ if [ -f "backend/database/init_data.sql" ]; then
         docker exec -i center_manager_db psql -U center_user -d center_manager < backend/database/init_data.sql || true
         docker restart center_manager_backend || true
     else
-        echo " -> PostgreSQL đã có dữ liệu ($USER_COUNT users). Bỏ qua nạp init_data.sql để bảo toàn mật khẩu & dữ liệu live."
+        echo " -> PostgreSQL đã có dữ liệu ($USER_COUNT users). Áp dụng patch cập nhật mật khẩu nếu có..."
+        if [ -f "backend/database/patch_admin_password.sql" ]; then
+            docker exec -i center_manager_db psql -U center_user -d center_manager < backend/database/patch_admin_password.sql 2>/dev/null || true
+        fi
     fi
 fi
 

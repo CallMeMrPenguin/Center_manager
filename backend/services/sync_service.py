@@ -58,8 +58,21 @@ def _parse_ts(val: Any) -> float:
         if val.tzinfo is not None:
             return val.timestamp()
         return val.replace(tzinfo=timezone.utc).timestamp()
+    if hasattr(val, "isoformat") and not isinstance(val, str):
+        try:
+            dt = datetime.combine(val, datetime.min.time())
+            return dt.replace(tzinfo=timezone.utc).timestamp()
+        except Exception:
+            pass
     if isinstance(val, str):
         val = val.strip()
+        try:
+            dt = datetime.fromisoformat(val.replace("Z", "+00:00"))
+            if dt.tzinfo is not None:
+                return dt.timestamp()
+            return dt.replace(tzinfo=timezone.utc).timestamp()
+        except Exception:
+            pass
         for fmt in ("%Y-%m-%d %H:%M:%S", "%Y-%m-%d %H:%M:%S.%f", "%Y-%m-%d"):
             try:
                 dt = datetime.strptime(val, fmt)

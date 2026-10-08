@@ -6,7 +6,7 @@ import urllib.request
 import urllib.error
 import ssl
 from typing import Dict, Any, List, Optional
-from datetime import datetime, timezone
+from datetime import datetime, date, timezone
 
 from config.settings import BASE_DIR, load_settings
 from database.connection import get_connection, DB_PATH
@@ -14,8 +14,23 @@ from services.sync_service import FAST_SYNC_TABLES, _parse_ts
 
 DEFAULT_REMOTE_URL = "https://upkidscentermanager.io.vn"
 
+def _clean_val(v: Any) -> Any:
+    """Converts datatypes to JSON-safe primitives (handles date, datetime, Decimal, bytes)."""
+    if v is None:
+        return None
+    if isinstance(v, (datetime, date)):
+        return v.isoformat()
+    if hasattr(v, "__float__") and not isinstance(v, (int, float)):
+        return float(v)
+    if isinstance(v, (bytes, bytearray)):
+        return v.decode("utf-8", errors="ignore")
+    return v
+
+def _clean_row(d: Dict[str, Any]) -> Dict[str, Any]:
+    return {k: _clean_val(v) for k, v in d.items()}
+
 def get_sync_token() -> str:
-    """Returns the persistent 256-bit sync secret shared between local and VPS."""
+    """Returns persistent sync secret shared between local and VPS."""
     secret_file = os.path.join(BASE_DIR, ".auth_secret")
     try:
         if os.path.exists(secret_file):
@@ -43,7 +58,7 @@ def get_remote_vps_url() -> str:
 def handle_sync_exchange(payload: Dict[str, Any], token: Optional[str] = None) -> Dict[str, Any]:
     """
     Executes on the server (VPS or local receiver) to idempotently merge changes and return updates.
-    Uses Last-Write-Wins based on updated_at/created_at timestamps.
+    Uses Last-Write-Wins based on timestamps with savepoints for zero-crash stability.
     """
     expected_tokens = {
         get_sync_token(),
@@ -52,7 +67,6 @@ def handle_sync_exchange(payload: Dict[str, Any], token: Optional[str] = None) -
     }
     clean_token = (token or "").replace("Bearer ", "").strip()
     if clean_token not in expected_tokens:
-        # Also allow valid admin tokens if provided
         try:
             from services.auth_security import verify_access_token
             decoded = verify_access_token(clean_token)
@@ -61,8 +75,8 @@ def handle_sync_exchange(payload: Dict[str, Any], token: Optional[str] = None) -
         except Exception:
             return {"success": False, "error": "Unauthorized sync token"}
 
-    since = payload.get("since")
-    client_dirty = payload.get("dirty_rows", {})
+    since = payload.get("since") or payload.get("last_synced_at")
+    client_dirty = payload.get("dirty_rows") or payload.get("pushed_records") or {}
     client_tombstones = payload.get("tombstones", [])
     now_utc = datetime.now(timezone.utc).isoformat()
 
@@ -73,8 +87,8 @@ def handle_sync_exchange(payload: Dict[str, Any], token: Optional[str] = None) -
 
         # 1. Apply client tombstones (deletions)
         for ts in client_tombstones:
-            tbl = ts.get("table_name")
-            rec_id = ts.get("record_id")
+            tbl = ts.get("table") or ts.get("table_name")
+            rec_id = ts.get("id") or ts.get("record_id")
             if tbl and rec_id is not None:
                 try:
                     cur.execute(f"DELETE FROM {tbl} WHERE id = ?", (rec_id,))
@@ -83,7 +97,7 @@ def handle_sync_exchange(payload: Dict[str, Any], token: Optional[str] = None) -
                 except Exception:
                     pass
 
-        # 2. Ingest client dirty rows using Last-Write-Wins
+        # 2. Ingest client dirty rows using Last-Write-Wins (protected by savepoints)
         for t_info in FAST_SYNC_TABLES:
             table = t_info["table"]
             pks = t_info["pk"]
@@ -98,41 +112,50 @@ def handle_sync_exchange(payload: Dict[str, Any], token: Optional[str] = None) -
                 if not cols:
                     continue
 
-                # Check if record already exists to compare timestamps
-                pk_where = " AND ".join([f"{k} = ?" for k in pks])
-                pk_vals = [r.get(k) for k in pks]
-                existing_row = None
                 try:
+                    try:
+                        cur.execute("SAVEPOINT row_sp;")
+                    except Exception:
+                        pass
+
+                    pk_where = " AND ".join([f"{k} = ?" for k in pks])
+                    pk_vals = [r.get(k) for k in pks]
                     cur.execute(f"SELECT * FROM {table} WHERE {pk_where} LIMIT 1", pk_vals)
                     existing_row = cur.fetchone()
-                except Exception:
-                    pass
 
-                should_apply = True
-                if existing_row:
-                    ex_dict = dict(existing_row)
-                    client_ts = _parse_ts(r.get("updated_at") or r.get("created_at"))
-                    server_ts = _parse_ts(ex_dict.get("updated_at") or ex_dict.get("created_at"))
-                    if server_ts > client_ts:
-                        should_apply = False  # Server version is newer; client will receive it back
+                    should_apply = True
+                    if existing_row:
+                        ex_dict = dict(existing_row)
+                        client_ts = _parse_ts(r.get("updated_at") or r.get("created_at"))
+                        server_ts = _parse_ts(ex_dict.get("updated_at") or ex_dict.get("created_at"))
+                        if server_ts > client_ts:
+                            should_apply = False
 
-                if should_apply:
-                    col_str = ", ".join(cols)
-                    ph_str = ", ".join(["?" for _ in cols])
-                    pk_str = ", ".join(pks)
-                    upd_cols = [c for c in cols if c not in pks and c != "id"]
+                    if should_apply:
+                        col_str = ", ".join(cols)
+                        ph_str = ", ".join(["?" for _ in cols])
+                        pk_str = ", ".join(pks)
+                        upd_cols = [c for c in cols if c not in pks and c != "id"]
 
-                    if upd_cols:
-                        upd_clause = ", ".join([f"{c} = EXCLUDED.{c}" for c in upd_cols])
-                        sql = f"INSERT INTO {table} ({col_str}) VALUES ({ph_str}) ON CONFLICT ({pk_str}) DO UPDATE SET {upd_clause}"
-                    else:
-                        sql = f"INSERT INTO {table} ({col_str}) VALUES ({ph_str}) ON CONFLICT ({pk_str}) DO NOTHING"
+                        if upd_cols:
+                            upd_clause = ", ".join([f"{c} = EXCLUDED.{c}" for c in upd_cols])
+                            sql = f"INSERT INTO {table} ({col_str}) VALUES ({ph_str}) ON CONFLICT ({pk_str}) DO UPDATE SET {upd_clause}"
+                        else:
+                            sql = f"INSERT INTO {table} ({col_str}) VALUES ({ph_str}) ON CONFLICT ({pk_str}) DO NOTHING"
 
-                    try:
                         cur.execute(sql, [r.get(c) for c in cols])
                         pushed_accepted += 1
-                    except Exception as e:
-                        print(f"[Sync Ingest Notice on {table}]:", e)
+
+                    try:
+                        cur.execute("RELEASE SAVEPOINT row_sp;")
+                    except Exception:
+                        pass
+                except Exception as e:
+                    try:
+                        cur.execute("ROLLBACK TO SAVEPOINT row_sp;")
+                    except Exception:
+                        pass
+                    print(f"[Sync Ingest Notice on {table}]:", e)
 
         conn.commit()
 
@@ -143,29 +166,48 @@ def handle_sync_exchange(payload: Dict[str, Any], token: Optional[str] = None) -
         for t_info in FAST_SYNC_TABLES:
             table = t_info["table"]
             try:
-                if since:
-                    # Query records modified or created after 'since'
-                    sql = f"SELECT * FROM {table} WHERE (updated_at IS NOT NULL AND updated_at > ?) OR (created_at IS NOT NULL AND created_at > ?)"
-                    cur.execute(sql, (since, since))
-                    fetched = [dict(r) for r in cur.fetchall()]
-                    # Fallback for tables without timestamps
-                    if not fetched and table in ("role_permissions", "app_settings", "friend_group_members", "conflict_group_members"):
-                        cur.execute(f"SELECT * FROM {table}")
-                        fetched = [dict(r) for r in cur.fetchall()]
+                try:
+                    cur.execute(f"SAVEPOINT tbl_sp;")
+                except Exception:
+                    pass
+
+                # Inspect columns in table
+                cols_check = set()
+                try:
+                    cur.execute(f"SELECT column_name FROM information_schema.columns WHERE table_name = '{table}';")
+                    cols_check = {r["column_name"] if isinstance(r, dict) else r[0] for r in cur.fetchall()}
+                except Exception:
+                    pass
+
+                has_updated = "updated_at" in cols_check if cols_check else True
+                has_created = "created_at" in cols_check if cols_check else True
+
+                if since and (has_updated or has_created):
+                    conds = []
+                    params = []
+                    if has_updated:
+                        conds.append("updated_at > ?")
+                        params.append(since)
+                    if has_created:
+                        conds.append("created_at > ?")
+                        params.append(since)
+                    sql = f"SELECT * FROM {table} WHERE " + " OR ".join(conds)
+                    cur.execute(sql, tuple(params))
                 else:
                     cur.execute(f"SELECT * FROM {table}")
-                    fetched = [dict(r) for r in cur.fetchall()]
 
+                fetched = [_clean_row(dict(r)) for r in cur.fetchall()]
                 if fetched:
                     server_rows[table] = fetched
                     total_server_rows += len(fetched)
+
+                try:
+                    cur.execute(f"RELEASE SAVEPOINT tbl_sp;")
+                except Exception:
+                    pass
             except Exception:
                 try:
-                    cur.execute(f"SELECT * FROM {table}")
-                    fetched = [dict(r) for r in cur.fetchall()]
-                    if fetched:
-                        server_rows[table] = fetched
-                        total_server_rows += len(fetched)
+                    cur.execute(f"ROLLBACK TO SAVEPOINT tbl_sp;")
                 except Exception:
                     pass
 
@@ -176,7 +218,7 @@ def handle_sync_exchange(payload: Dict[str, Any], token: Optional[str] = None) -
                 cur.execute("SELECT table_name, record_id, deleted_at FROM _sync_tombstones WHERE deleted_at > ?", (since,))
             else:
                 cur.execute("SELECT table_name, record_id, deleted_at FROM _sync_tombstones")
-            server_tombstones = [dict(r) for r in cur.fetchall()]
+            server_tombstones = [_clean_row(dict(r)) for r in cur.fetchall()]
         except Exception:
             pass
 
@@ -184,8 +226,10 @@ def handle_sync_exchange(payload: Dict[str, Any], token: Optional[str] = None) -
             "success": True,
             "server_time": now_utc,
             "server_rows": server_rows,
+            "pulled_records": server_rows,
             "tombstones": server_tombstones,
             "pushed_accepted": pushed_accepted,
+            "pushed_count": pushed_accepted,
             "pulled_count": total_server_rows
         }
     finally:
@@ -223,7 +267,7 @@ def run_http_bidirectional_sync(force_full: bool = False) -> Dict[str, Any]:
             if row:
                 last_synced_at = row["val"]
 
-        # 1. Collect local dirty rows
+        # 1. Collect local dirty rows with SQLite datetime comparison
         client_dirty = {}
         for t_info in FAST_SYNC_TABLES:
             table = t_info["table"]
@@ -232,18 +276,31 @@ def run_http_bidirectional_sync(force_full: bool = False) -> Dict[str, Any]:
                 continue
 
             try:
-                if last_synced_at:
-                    sql = f"SELECT * FROM {table} WHERE (updated_at IS NOT NULL AND updated_at > ?) OR (created_at IS NOT NULL AND created_at > ?)"
-                    scur.execute(sql, (last_synced_at, last_synced_at))
+                scur.execute(f"PRAGMA table_info({table})")
+                cols = {r[1] for r in scur.fetchall()}
+                has_updated = "updated_at" in cols
+                has_created = "created_at" in cols
+
+                if last_synced_at and (has_updated or has_created):
+                    conds = []
+                    params = []
+                    if has_updated:
+                        conds.append("(updated_at IS NOT NULL AND datetime(updated_at) > datetime(?))")
+                        params.append(last_synced_at)
+                    if has_created:
+                        conds.append("(created_at IS NOT NULL AND datetime(created_at) > datetime(?))")
+                        params.append(last_synced_at)
+                    sql = f"SELECT * FROM {table} WHERE " + " OR ".join(conds)
+                    scur.execute(sql, tuple(params))
                 else:
                     scur.execute(f"SELECT * FROM {table}")
-                rows = [dict(r) for r in scur.fetchall()]
+                rows = [_clean_row(dict(r)) for r in scur.fetchall()]
                 if rows:
                     client_dirty[table] = rows
             except Exception:
                 try:
                     scur.execute(f"SELECT * FROM {table}")
-                    rows = [dict(r) for r in scur.fetchall()]
+                    rows = [_clean_row(dict(r)) for r in scur.fetchall()]
                     if rows:
                         client_dirty[table] = rows
                 except Exception:
@@ -253,10 +310,10 @@ def run_http_bidirectional_sync(force_full: bool = False) -> Dict[str, Any]:
         client_tombstones = []
         try:
             if last_synced_at:
-                scur.execute("SELECT table_name, record_id, deleted_at FROM _sync_tombstones WHERE deleted_at > ?", (last_synced_at,))
+                scur.execute("SELECT table_name, record_id, deleted_at FROM _sync_tombstones WHERE datetime(deleted_at) > datetime(?)", (last_synced_at,))
             else:
                 scur.execute("SELECT table_name, record_id, deleted_at FROM _sync_tombstones")
-            client_tombstones = [dict(r) for r in scur.fetchall()]
+            client_tombstones = [_clean_row(dict(r)) for r in scur.fetchall()]
         except Exception:
             pass
 
@@ -266,6 +323,7 @@ def run_http_bidirectional_sync(force_full: bool = False) -> Dict[str, Any]:
         payload_data = json.dumps({
             "client_time": now_str,
             "last_synced_at": last_synced_at,
+            "since": last_synced_at,
             "force_full": force_full,
             "pushed_records": client_dirty,
             "dirty_rows": client_dirty,
@@ -299,7 +357,7 @@ def run_http_bidirectional_sync(force_full: bool = False) -> Dict[str, Any]:
             return {"success": False, "error": res_data.get("error", "Sync exchange failed on VPS")}
 
         server_time = res_data.get("server_time")
-        server_rows = res_data.get("pulled_records") or res_data.get("server_rows") or {}
+        server_rows = res_data.get("server_rows") or res_data.get("pulled_records") or {}
         server_tombstones = res_data.get("tombstones", [])
         pulled_total = 0
 
@@ -313,7 +371,7 @@ def run_http_bidirectional_sync(force_full: bool = False) -> Dict[str, Any]:
                 except Exception:
                     pass
 
-        # 5. Ingest server rows into local SQLite
+        # 5. Ingest server rows into local SQLite with Last-Write-Wins
         for t_info in FAST_SYNC_TABLES:
             table = t_info["table"]
             pks = t_info["pk"]
@@ -346,13 +404,13 @@ def run_http_bidirectional_sync(force_full: bool = False) -> Dict[str, Any]:
         sconn.commit()
 
         # 6. Save checkpoint in _local_sync_meta
-        now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        checkpoint_val = server_time or now_str
+        now_local = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        checkpoint_val = server_time or now_local
         scur.execute("""
             INSERT INTO _local_sync_meta (key, val, updated_at)
             VALUES ('last_synced_at', ?, ?)
             ON CONFLICT (key) DO UPDATE SET val = EXCLUDED.val, updated_at = EXCLUDED.updated_at
-        """, (checkpoint_val, now_str))
+        """, (checkpoint_val, now_local))
         sconn.commit()
 
         # 7. Invalidate local backend caches
@@ -364,9 +422,9 @@ def run_http_bidirectional_sync(force_full: bool = False) -> Dict[str, Any]:
 
         return {
             "success": True,
-            "pushed_records": res_data.get("pushed_accepted", 0),
+            "pushed_records": res_data.get("pushed_accepted", res_data.get("pushed_count", 0)),
             "pulled_records": pulled_total,
-            "synced_at": now_str,
+            "synced_at": now_local,
             "mode": "http_delta"
         }
 
