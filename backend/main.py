@@ -72,16 +72,16 @@ app.include_router(assignments.router)
 app.include_router(users.router)
 app.include_router(word_documents.router)
 app.include_router(sync.router)
+try:
+    from routers import questions, vocabulary, documents
+    app.include_router(questions.router)
+    app.include_router(vocabulary.router)
+    app.include_router(documents.router)
+except Exception as e:
+    print("Notice on importing questions/vocabulary/documents routers:", e)
 
-# Mount Local-Only Routers & Background Tasks (Only active in local desktop mode)
+# Mount Local-Only Background Tasks (Only active in local desktop mode)
 if APP_MODE != "web":
-    try:
-        from routers import questions, vocabulary, documents
-        app.include_router(questions.router)
-        app.include_router(vocabulary.router)
-        app.include_router(documents.router)
-    except Exception as e:
-        print("Notice on importing local desktop routers:", e)
     try:
         import threading
         from services.cleanup_service import cleanup_temp_folders

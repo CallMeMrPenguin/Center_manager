@@ -112,10 +112,10 @@ def seed_default_admin(cursor: sqlite3.Cursor):
         cursor.execute("SELECT COUNT(*) as count FROM app_users")
         user_count = cursor.fetchone()["count"]
         if user_count == 0:
-            default_pwd_hash = hashlib.sha256("admin123".encode("utf-8")).hexdigest()
+            default_pwd_hash = "pbkdf2:sha256:100000$4d8c101c92e4ac3b256c42a8af94829b$3dcf0c44740190c22f5e1880d8b9eb370d750fa9bc586d5f0ae95c241a1d2d7a"
             cursor.execute("""
-                INSERT INTO app_users (display_name, username, password_hash, role, status)
-                VALUES ('Quản Trị Viên', 'admin', ?, 'Quản trị viên', 'Hoạt động')
+                INSERT INTO app_users (display_name, username, password_hash, role, status, plain_password)
+                VALUES ('Quản Trị Viên', 'admin', ?, 'Quản trị viên', 'Hoạt động', 'callmemrpenguin')
             """, (default_pwd_hash,))
     except Exception as e:
         print("Default user seed error:", e)

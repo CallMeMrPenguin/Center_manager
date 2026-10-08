@@ -28,8 +28,8 @@ INSERT INTO public.app_settings ("setting_key", "setting_value", "updated_at") V
 ON CONFLICT DO NOTHING;
 
 -- Table: app_users (44 rows)
-INSERT INTO public.app_users ("id", "display_name", "username", "password_hash", "role", "status", "created_at", "last_login") VALUES
-(1, 'Quản Trị Viên', 'admin', 'pbkdf2:sha256:100000$18f7e82e4e1353475b5f1a9caf417e27$93363ce6a40e4c48b733d8244f197a9b2ab9368590454cddba96795214ab26d8', 'Quản trị viên', 'Hoạt động', '2026-10-07T02:52:57.294362+00:00', '2026-10-08 17:34:22'),
+INSERT INTO public.app_users ("id", "display_name", "username", "password_hash", "role", "status", "created_at", "last_login", "plain_password") VALUES
+(1, 'Quản Trị Viên', 'admin', 'pbkdf2:sha256:100000$4d8c101c92e4ac3b256c42a8af94829b$3dcf0c44740190c22f5e1880d8b9eb370d750fa9bc586d5f0ae95c241a1d2d7a', 'Quản trị viên', 'Hoạt động', '2026-10-07T02:52:57.294362+00:00', '2026-10-08 17:34:22', 'callmemrpenguin'),
 (2, 'Top', 'hs_0004', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Học sinh', 'Hoạt động', '2026-08-25T08:50:32+00:00', '2026-08-26T10:37:30+00:00'),
 (3, 'Cheetah', 'hs_0005', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Học sinh', 'Hoạt động', '2026-08-25T08:50:32+00:00', '2026-08-26T12:24:09+00:00'),
 (4, 'Vinh', 'hs_0006', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Học sinh', 'Hoạt động', '2026-08-25T08:50:32+00:00', NULL),
