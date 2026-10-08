@@ -38,6 +38,8 @@ def run_migrations(cursor: sqlite3.Cursor, conn: sqlite3.Connection):
         ("assignment_submissions", "avg_score REAL DEFAULT NULL"),
         ("app_users", "updated_at TIMESTAMP DEFAULT NULL"),
         ("app_users", "plain_password TEXT DEFAULT NULL"),
+        ("class_sessions", "updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP"),
+        ("class_students", "updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP"),
     ]
 
     for table, col_def in safe_columns:

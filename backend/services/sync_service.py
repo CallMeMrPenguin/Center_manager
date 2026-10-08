@@ -57,11 +57,11 @@ def _parse_ts(val: Any) -> float:
     if isinstance(val, datetime):
         if val.tzinfo is not None:
             return val.timestamp()
-        return val.astimezone().timestamp()
+        return val.replace(tzinfo=timezone.utc).timestamp()
     if hasattr(val, "isoformat") and not isinstance(val, str):
         try:
-            dt = datetime.combine(val, datetime.min.time())
-            return dt.astimezone().timestamp()
+            dt = datetime.combine(val, datetime.min.time(), tzinfo=timezone.utc)
+            return dt.timestamp()
         except Exception:
             pass
     if isinstance(val, str):
@@ -70,13 +70,13 @@ def _parse_ts(val: Any) -> float:
             dt = datetime.fromisoformat(val.replace("Z", "+00:00"))
             if dt.tzinfo is not None:
                 return dt.timestamp()
-            return dt.astimezone().timestamp()
+            return dt.replace(tzinfo=timezone.utc).timestamp()
         except Exception:
             pass
         for fmt in ("%Y-%m-%d %H:%M:%S", "%Y-%m-%d %H:%M:%S.%f", "%Y-%m-%d"):
             try:
-                dt = datetime.strptime(val, fmt)
-                return dt.astimezone().timestamp()
+                dt = datetime.strptime(val, fmt).replace(tzinfo=timezone.utc)
+                return dt.timestamp()
             except ValueError:
                 continue
     try:

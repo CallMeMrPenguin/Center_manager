@@ -291,8 +291,8 @@ def upsert_class_attendance_grades(class_id: int, date_str: str, records: List[D
 
         if batch_data:
             cursor.executemany("""
-                INSERT INTO class_attendance_grades (class_id, student_id, date, status, check_1, check_2, homework, homework_2, mock_test, notes)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO class_attendance_grades (class_id, student_id, date, status, check_1, check_2, homework, homework_2, mock_test, notes, updated_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
                 ON CONFLICT(class_id, student_id, date) DO UPDATE SET
                     status = EXCLUDED.status,
                     check_1 = EXCLUDED.check_1,
