@@ -23,7 +23,8 @@ from routers import (
     skill_analytics,
     assignments,
     users,
-    word_documents
+    word_documents,
+    holidays
 )
 
 # Initialize Database schema, tables, migrations, and performance indexes
@@ -72,6 +73,7 @@ app.include_router(skill_analytics.router)
 app.include_router(assignments.router)
 app.include_router(users.router)
 app.include_router(word_documents.router)
+app.include_router(holidays.router)
 
 # Mount Local-Only Routers & Background Tasks (Only active in local desktop mode)
 if APP_MODE != "web":

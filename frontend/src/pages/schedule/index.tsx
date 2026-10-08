@@ -7,6 +7,7 @@ import { CustomDatePicker } from '../../components/CustomDatePicker';
 import { DataTable } from '../../components/DataTable';
 import { SegmentedControl } from '../../components/SegmentedControl';
 import { getLocalDateStr } from '../../utils';
+import { registerGoogleHolidays } from '../../utils/vietnamHolidays';
 import {
   ClassSession, DayCfg, PALETTE_20, DAY_HDRS, DAYS, DAY_NUM,
   getSessionColor, getDynamicSessionInfo
@@ -85,6 +86,15 @@ export default function SchedulePage() {
       }
       all.sort((a, b) => (a.date + a.start_time).localeCompare(b.date + b.start_time));
       setSessions(all);
+
+      // Background sync holidays for the selected year
+      const [yearStr] = selectedMonth.split('-');
+      const year = parseInt(yearStr) || new Date().getFullYear();
+      api.getHolidays(year, true).then((holidays) => {
+        if (holidays && Array.isArray(holidays)) {
+          registerGoogleHolidays(holidays);
+        }
+      }).catch(() => {});
     } catch (e: any) {
       if (!isSilent) showToast('Không thể tải lịch học: ' + e.message, 'error');
     } finally {

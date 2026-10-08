@@ -1,21 +1,16 @@
 import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
-import { ZoomIn, ZoomOut, RotateCcw, ChevronLeft, ChevronRight, Plus } from 'lucide-react';
-import { ClassSession, parseTimeToMinutes, DAY_NUM, DAYS } from '../types';
+import { ZoomIn, ZoomOut, ChevronLeft, ChevronRight, Plus } from 'lucide-react';
+import { ClassSession } from '../types';
 import { useTheme } from '../../../context/ThemeContext';
 import { HorizontalTimelineSessionCard } from './HorizontalTimelineSessionCard';
+import { getVietnamHoliday } from '../../../utils/vietnamHolidays';
+import {
+  DayRowData,
+  computeDynamicHourRange,
+  computeDayTrackLayouts,
+} from './timelineHelpers';
 
-const START_HOUR = 7;
-const END_HOUR = 22;
-const TOTAL_HOURS = END_HOUR - START_HOUR; // 15 hours: 07:00 to 22:00
-const HOURS = Array.from({ length: TOTAL_HOURS + 1 }, (_, i) => START_HOUR + i);
-
-interface DayRowData {
-  header: string; // e.g. "Thứ 2"
-  dateStr: string; // "YYYY-MM-DD"
-  subText: string; // "12/10"
-  isToday: boolean;
-  isWeekend: boolean;
-}
+export type { DayRowData };
 
 interface HorizontalTimelineGridProps {
   viewMode: 'month' | 'week';
@@ -43,7 +38,8 @@ export const HorizontalTimelineGrid: React.FC<HorizontalTimelineGridProps> = ({
   setCtxMenu,
 }) => {
   const { isDark } = useTheme();
-  const [hourWidth, setHourWidth] = useState<number>(100); // 100px per hour
+  // Default hour column width increased to 140px for generous spacing and readability
+  const [hourWidth, setHourWidth] = useState<number>(140);
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Mouse Free-Pan Drag State
@@ -52,23 +48,28 @@ export const HorizontalTimelineGrid: React.FC<HorizontalTimelineGridProps> = ({
   const scrollPosRef = useRef({ left: 0, top: 0 });
   const hasMovedRef = useRef(false);
 
+  // Dynamic Hour Range based on visible sessions
+  const { startHour, hours, totalHours } = useMemo(
+    () => computeDynamicHourRange(sessions),
+    [sessions]
+  );
+
   // Zoom handlers
   const handleZoomIn = useCallback(() => {
-    setHourWidth((prev) => Math.min(180, prev + 15));
+    setHourWidth((prev) => Math.min(240, prev + 15));
   }, []);
 
   const handleZoomOut = useCallback(() => {
-    setHourWidth((prev) => Math.max(55, prev - 15));
+    setHourWidth((prev) => Math.max(75, prev - 15));
   }, []);
 
   const handleResetZoom = useCallback(() => {
-    setHourWidth(100);
+    setHourWidth(140);
   }, []);
 
-  // Keyboard zoom shortcut (+ and -)
+  // Keyboard zoom shortcuts (+ and -)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Don't trigger if user is typing in an input
       if (['INPUT', 'TEXTAREA', 'SELECT'].includes((e.target as HTMLElement)?.tagName)) return;
       if (e.key === '+' || e.key === '=') {
         e.preventDefault();
@@ -84,7 +85,7 @@ export const HorizontalTimelineGrid: React.FC<HorizontalTimelineGridProps> = ({
 
   // Mouse drag pan event listeners
   const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (e.button !== 0) return; // Only left mouse button
+    if (e.button !== 0) return;
     const container = containerRef.current;
     if (!container) return;
 
@@ -116,7 +117,7 @@ export const HorizontalTimelineGrid: React.FC<HorizontalTimelineGridProps> = ({
     }
   };
 
-  // Group and layout sessions per day
+  // Group sessions per day
   const sessionsByDay = useMemo(() => {
     const map: Record<string, ClassSession[]> = {};
     for (const s of sessions) {
@@ -126,16 +127,7 @@ export const HorizontalTimelineGrid: React.FC<HorizontalTimelineGridProps> = ({
     return map;
   }, [sessions]);
 
-  // Current time marker position (if today is rendered)
-  const currentTimeLeft = useMemo(() => {
-    const now = new Date();
-    const curH = now.getHours();
-    const curM = now.getMinutes();
-    if (curH < START_HOUR || curH > END_HOUR) return null;
-    return (((curH - START_HOUR) * 60 + curM) / 60) * hourWidth;
-  }, [hourWidth]);
-
-  const timelineTrackWidth = TOTAL_HOURS * hourWidth;
+  const timelineTrackWidth = totalHours * hourWidth;
 
   return (
     <div className="flex-1 min-h-0 flex flex-col select-none bg-slate-100 dark:bg-[#0c101d]">
@@ -186,7 +178,7 @@ export const HorizontalTimelineGrid: React.FC<HorizontalTimelineGridProps> = ({
             <button
               type="button"
               onClick={handleZoomOut}
-              disabled={hourWidth <= 55}
+              disabled={hourWidth <= 75}
               className="p-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-100 dark:hover:bg-white/5 disabled:opacity-30 disabled:cursor-not-allowed transition cursor-pointer"
               title="Thu nhỏ tỉ lệ giờ (Phím -)"
             >
@@ -196,15 +188,15 @@ export const HorizontalTimelineGrid: React.FC<HorizontalTimelineGridProps> = ({
             <span
               onClick={handleResetZoom}
               className="px-2 text-[10.5px] font-mono font-bold text-slate-700 dark:text-slate-300 cursor-pointer hover:text-blue-600 transition"
-              title="Đặt lại mức chuẩn 100%"
+              title="Đặt lại mức chuẩn 140px"
             >
-              {Math.round((hourWidth / 100) * 100)}%
+              {Math.round((hourWidth / 140) * 100)}%
             </span>
 
             <button
               type="button"
               onClick={handleZoomIn}
-              disabled={hourWidth >= 180}
+              disabled={hourWidth >= 240}
               className="p-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-100 dark:hover:bg-white/5 disabled:opacity-30 disabled:cursor-not-allowed transition cursor-pointer"
               title="Phóng to tỉ lệ giờ (Phím +)"
             >
@@ -244,7 +236,7 @@ export const HorizontalTimelineGrid: React.FC<HorizontalTimelineGridProps> = ({
 
             {/* Hour Markers */}
             <div className="flex relative" style={{ width: `${timelineTrackWidth}px` }}>
-              {HOURS.slice(0, TOTAL_HOURS).map((h) => (
+              {hours.slice(0, totalHours).map((h) => (
                 <div
                   key={h}
                   style={{ width: `${hourWidth}px` }}
@@ -261,24 +253,8 @@ export const HorizontalTimelineGrid: React.FC<HorizontalTimelineGridProps> = ({
             {days.map((d) => {
               const daySess = sessionsByDay[d.dateStr] || [];
               const isToday = d.dateStr === today;
-
-              // Calculate overlapping tracks for proper height
-              const sorted = [...daySess].sort((a, b) => a.start_time.localeCompare(b.start_time));
-              const tracks: Array<{ endMinutes: number }> = [];
-              const layouts = sorted.map((s) => {
-                const sMin = parseTimeToMinutes(s.start_time);
-                const eMin = sMin + (s.duration || 90);
-                let trackIdx = tracks.findIndex((t) => t.endMinutes <= sMin);
-                if (trackIdx === -1) {
-                  trackIdx = tracks.length;
-                  tracks.push({ endMinutes: eMin });
-                } else {
-                  tracks[trackIdx].endMinutes = eMin;
-                }
-                return { session: s, trackIdx };
-              });
-              const trackCount = Math.max(1, tracks.length);
-              const rowHeight = trackCount * 76 + 12;
+              const holiday = getVietnamHoliday(d.dateStr);
+              const { layouts, rowHeight } = computeDayTrackLayouts(daySess);
 
               return (
                 <div
@@ -287,11 +263,13 @@ export const HorizontalTimelineGrid: React.FC<HorizontalTimelineGridProps> = ({
                   className={`flex relative transition-colors ${
                     isToday
                       ? 'bg-blue-50/40 dark:bg-[#131b32]/60'
+                      : holiday?.isPublicHoliday
+                      ? 'bg-rose-50/30 dark:bg-[#20121a]/50'
                       : d.isWeekend
-                      ? 'bg-rose-50/20 dark:bg-[#19111e]/40'
+                      ? 'bg-rose-50/15 dark:bg-[#19111e]/30'
                       : 'bg-white dark:bg-[#0c101d]'
                   }`}
-                  onDoubleClick={(e) => {
+                  onDoubleClick={() => {
                     if (hasMovedRef.current) return;
                     openAdd(d.dateStr);
                   }}
@@ -304,30 +282,55 @@ export const HorizontalTimelineGrid: React.FC<HorizontalTimelineGridProps> = ({
                 >
                   {/* Sticky Left Day Header */}
                   <div
-                    className={`sticky left-0 z-20 w-[140px] shrink-0 p-2.5 border-r border-slate-200 dark:border-white/10 flex flex-col justify-between ${
+                    className={`sticky left-0 z-20 w-[140px] shrink-0 p-2 border-r border-slate-200 dark:border-white/10 flex flex-col justify-between ${
                       isToday
                         ? 'bg-blue-100/90 dark:bg-[#152042]'
+                        : holiday?.isPublicHoliday
+                        ? 'bg-rose-100/70 dark:bg-[#24131d]'
                         : d.isWeekend
                         ? 'bg-rose-50/80 dark:bg-[#1c1322]'
                         : 'bg-slate-50/90 dark:bg-[#0f1424]'
                     }`}
                   >
-                    <div className="flex items-center justify-between gap-1">
-                      <span
-                        className={`text-[11px] font-black uppercase tracking-wider ${
-                          isToday
-                            ? 'text-blue-600 dark:text-blue-400'
-                            : d.isWeekend
-                            ? 'text-rose-500 dark:text-rose-400'
-                            : 'text-slate-800 dark:text-slate-200'
-                        }`}
-                      >
-                        {d.header}
-                      </span>
-                      {isToday && (
-                        <span className="text-[8.5px] font-black uppercase bg-blue-600 text-white px-1.5 py-0.2 rounded shrink-0">
-                          Nay
+                    <div>
+                      <div className="flex items-center justify-between gap-1">
+                        <span
+                          className={`text-[11px] font-black uppercase tracking-wider ${
+                            isToday
+                              ? 'text-blue-600 dark:text-blue-400'
+                              : holiday?.isPublicHoliday
+                              ? 'text-rose-600 dark:text-rose-400'
+                              : d.isWeekend
+                              ? 'text-rose-500 dark:text-rose-400'
+                              : 'text-slate-800 dark:text-slate-200'
+                          }`}
+                        >
+                          {d.header}
                         </span>
+                        {isToday && (
+                          <span className="text-[8.5px] font-black uppercase bg-blue-600 text-white px-1.5 py-0.2 rounded shrink-0">
+                            Nay
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Holiday Badge (Tết, 30/4, 1/5, 2/9, Giỗ Tổ, etc.) */}
+                      {holiday && (
+                        <div
+                          className={`mt-0.5 text-[8.5px] font-bold px-1.5 py-0.5 rounded flex items-center justify-between gap-1 truncate ${
+                            holiday.isPublicHoliday
+                              ? 'bg-rose-500/20 text-rose-600 dark:text-rose-300'
+                              : 'bg-amber-500/20 text-amber-600 dark:text-amber-300'
+                          }`}
+                          title={holiday.name}
+                        >
+                          <span className="truncate">{holiday.shortName || holiday.name}</span>
+                          {holiday.isPublicHoliday && (
+                            <span className="shrink-0 text-[7.5px] font-black uppercase tracking-tight">
+                              Nghỉ
+                            </span>
+                          )}
+                        </div>
                       )}
                     </div>
 
@@ -347,7 +350,7 @@ export const HorizontalTimelineGrid: React.FC<HorizontalTimelineGridProps> = ({
                     className="relative shrink-0 flex"
                   >
                     {/* Hour Vertical Grid Lines */}
-                    {HOURS.slice(0, TOTAL_HOURS).map((h) => (
+                    {hours.slice(0, totalHours).map((h) => (
                       <div
                         key={h}
                         style={{ width: `${hourWidth}px` }}
@@ -358,23 +361,13 @@ export const HorizontalTimelineGrid: React.FC<HorizontalTimelineGridProps> = ({
                       </div>
                     ))}
 
-                    {/* Today Red Current Time Needle */}
-                    {isToday && currentTimeLeft !== null && (
-                      <div
-                        style={{ left: `${currentTimeLeft}px` }}
-                        className="absolute top-0 bottom-0 w-0.5 bg-rose-500 z-20 pointer-events-none shadow-[0_0_8px_rgba(244,63,94,0.6)]"
-                      >
-                        <div className="w-2 h-2 rounded-full bg-rose-500 -ml-[3px] -mt-1 shadow" />
-                      </div>
-                    )}
-
                     {/* Render Session Cards for this day */}
                     {layouts.map(({ session, trackIdx }) => (
                       <HorizontalTimelineSessionCard
                         key={session.id}
                         session={session}
                         hourWidth={hourWidth}
-                        startHour={START_HOUR}
+                        startHour={startHour}
                         isDark={isDark}
                         topOffset={6 + trackIdx * 76}
                         height={68}

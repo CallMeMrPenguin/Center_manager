@@ -5,7 +5,7 @@ import { SegmentedControl } from '../../../components/SegmentedControl';
 import { GroupCardItem } from './GroupCardItem';
 import { computeSmartGroups } from '../utils/computeSmartGroups';
 import { showToast } from '../../../components/Toast';
-import { format1Dec } from '../../../utils';
+import { format1Dec, formatExportTimestamp } from '../../../utils';
 
 interface SmartGroupingSectionProps {
   filteredRankings: any[];
@@ -136,7 +136,7 @@ export const SmartGroupingSection: React.FC<SmartGroupingSectionProps> = ({
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `phan_nhom_hoc_tap_${safeClassName}.xlsx`;
+        a.download = `phan_nhom_hoc_tap_${safeClassName}_${formatExportTimestamp()}.xlsx`;
         document.body.appendChild(a);
         a.click();
         window.URL.revokeObjectURL(url);

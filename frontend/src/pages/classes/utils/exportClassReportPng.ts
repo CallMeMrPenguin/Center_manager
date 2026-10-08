@@ -1,7 +1,7 @@
 import { api } from '../../../api';
 import { showToast } from '../../../components/Toast';
 import { ClassItem, AttendanceRecord } from '../types';
-import { trunc1Dec, format1Dec } from '../../../utils';
+import { trunc1Dec, format1Dec, formatExportTimestamp } from '../../../utils';
 import {
   formatTopicString,
   getScoreStyle,
@@ -333,7 +333,7 @@ export async function exportClassReportPng({
 
   // 3. Export: Download + Desktop Save + Clipboard Copy
   const dataUrl = canvas.toDataURL('image/png');
-  const ts = new Date().toISOString().replace(/[-:T.]/g, '').slice(0, 14);
+  const ts = formatExportTimestamp();
   const filename = `ClassReport_${className}_${attendanceDate}_${ts}.png`;
 
   const link = Object.assign(document.createElement('a'), { download: filename, href: dataUrl });

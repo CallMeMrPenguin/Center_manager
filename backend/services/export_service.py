@@ -115,7 +115,7 @@ def export_class_excel(
 ) -> Dict[str, Any]:
     if not date_str:
         date_str = datetime.now().strftime("%Y-%m-%d")
-    ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+    ts = datetime.now().strftime("%S-%M-%H -%d=%m-%y")
 
     cls_list = get_classes()
     cls_info = next((c for c in cls_list if c["id"] == class_id), None)
@@ -462,7 +462,7 @@ def save_export_png(class_id: int, date_str: str, image_base64: str) -> Dict[str
         files_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "workspace_files")
     os.makedirs(files_dir, exist_ok=True)
 
-    ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+    ts = datetime.now().strftime("%S-%M-%H -%d=%m-%y")
     filename = f"ClassReport_{class_name}_{date_str}_{ts}.png"
     filepath = os.path.join(files_dir, filename)
 

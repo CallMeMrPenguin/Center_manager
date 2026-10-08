@@ -15,6 +15,7 @@ import {
   PageOrientation,
 } from 'docx';
 import { MarginConfig, Orientation } from './types';
+import { formatExportTimestamp } from '../../utils';
 
 /**
  * Import a .docx file and convert its content into HTML for TipTap
@@ -243,7 +244,7 @@ export async function exportToDocx(
 
   const blob = await Packer.toBlob(doc);
   const cleanTitle = (title.trim() || 'Van_ban').replace(/[/\\?%*:|"<>]/g, '_');
-  const filename = `${cleanTitle}.docx`;
+  const filename = `${cleanTitle}_${formatExportTimestamp()}.docx`;
 
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');

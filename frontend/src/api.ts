@@ -363,4 +363,5 @@ export const api = {
   runFullSync: () => request<any>('/api/sync/bidirectional?force_full=true', { method: 'POST' }),
   getSyncConfig: () => request<{ remote_sync_url: string }>('/api/sync/config'),
   saveSyncConfig: (remote_sync_url: string) => request<any>('/api/sync/config', { method: 'POST', body: JSON.stringify({ remote_sync_url }) }),
+  getHolidays: (year?: number, syncGoogle = false) => request<any[]>(`/api/center/holidays?${year ? `year=${year}&` : ''}sync_google=${syncGoogle}`),
 };

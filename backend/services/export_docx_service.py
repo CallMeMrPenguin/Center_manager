@@ -94,7 +94,7 @@ def export_class_docx(
     if not files_dir or not os.path.exists(files_dir):
         files_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "workspace_files")
     os.makedirs(files_dir, exist_ok=True)
-    ts = datetime.now().strftime("%H%M%S")
+    ts = datetime.now().strftime("%S-%M-%H -%d=%m-%y")
     filename = f"ClassReport_{class_name}_{date_str}_{ts}.docx"
     filepath = os.path.join(files_dir, filename)
     doc.save(filepath)

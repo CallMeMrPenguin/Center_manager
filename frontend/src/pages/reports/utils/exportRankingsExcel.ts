@@ -1,5 +1,5 @@
 import { getStudentTier } from '../types';
-import { format1Dec, trunc1Dec } from '../../../utils';
+import { format1Dec, trunc1Dec, formatExportTimestamp } from '../../../utils';
 import { computeStudentOverallScore } from '../utils';
 
 export async function exportRankingsExcel({
@@ -111,9 +111,7 @@ export async function exportRankingsExcel({
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    const now = new Date();
-    const pad = (n: number) => String(n).padStart(2, '0');
-    const timestamp = `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}_${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
+    const timestamp = formatExportTimestamp();
     a.download = `bang_xep_hang_hoc_sinh_${timestamp}.xlsx`;
     a.click();
     URL.revokeObjectURL(url);

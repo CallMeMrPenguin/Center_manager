@@ -41,6 +41,7 @@ import { CSS } from '@dnd-kit/utilities';
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { formatExportTimestamp } from '../utils';
 import {
   ChevronLeft, ChevronRight, RefreshCw, AlertCircle,
   ArrowUp, ArrowDown, ArrowUpDown, Search, ChevronDown, ChevronUp,
@@ -577,10 +578,8 @@ function ExportDropdown<TData>({
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        const now = new Date();
-        const pad = (n: number) => String(n).padStart(2, '0');
-        const timestamp = `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}_${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
-        const finalFilename = filename.includes('_202') ? filename : `${filename}_${timestamp}`;
+        const timestamp = formatExportTimestamp();
+        const finalFilename = `${filename}_${timestamp}`;
         a.download = `${finalFilename}.xlsx`;
         a.click();
         URL.revokeObjectURL(url);
@@ -590,9 +589,7 @@ function ExportDropdown<TData>({
       const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, 'Data');
-      const now = new Date();
-      const pad = (n: number) => String(n).padStart(2, '0');
-      const timestamp = `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}_${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
+      const timestamp = formatExportTimestamp();
       XLSX.writeFile(wb, `${filename}_${timestamp}.xlsx`);
     }
     setOpen(false);
