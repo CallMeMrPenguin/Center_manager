@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {
-  Plus, RefreshCw,
-} from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { api } from '../../api';
 import { showToast } from '../../components/Toast';
 import { CustomSelect } from '../../components/CustomSelect';
@@ -11,7 +9,7 @@ import { SegmentedControl } from '../../components/SegmentedControl';
 import { getLocalDateStr } from '../../utils';
 import {
   ClassSession, DayCfg, PALETTE_20, DAY_HDRS, DAYS, DAY_NUM,
-  getSessionColor
+  getSessionColor, getDynamicSessionInfo
 } from './types';
 import { SessionModal } from './components/SessionModal';
 import { ScheduleCalendarView } from './components/ScheduleCalendarView';
@@ -78,8 +76,9 @@ export default function SchedulePage() {
             ss.map((s: any) => ({
               ...s,
               class_name: c.class_name,
-              teacher_name: c.teacher_name,
-              room: c.room,
+              teacher_name: s.teacher_name || c.teacher_name,
+              room: s.room || c.room,
+              student_count: s.student_count !== undefined ? s.student_count : (c.student_count || 0),
             }))
           );
         }
@@ -202,8 +201,8 @@ export default function SchedulePage() {
   });
 
   const total = sessions.length;
-  const done = sessions.filter((s) => s.status === 'Đã học').length;
-  const upcoming = sessions.filter((s) => s.status === 'Sắp diễn ra').length;
+  const done = sessions.filter((s) => getDynamicSessionInfo(s).status === 'Đã học').length;
+  const upcoming = sessions.filter((s) => getDynamicSessionInfo(s).status === 'Sắp diễn ra').length;
 
   const sessionColumns = useScheduleColumns(openEdit);
 
@@ -219,29 +218,8 @@ export default function SchedulePage() {
         <div className="flex items-center gap-2">
           <button
             type="button"
-            onClick={async () => {
-              try {
-                setLoading(true);
-                const targetCid = classFilter ? Number(classFilter) : 0;
-                await api.syncClassSchedule(targetCid);
-                showToast('Đã đồng bộ lịch học theo cài đặt của lớp!', 'success');
-                await loadData(true);
-              } catch (e: any) {
-                showToast('Lỗi khi đồng bộ: ' + e.message, 'error');
-              } finally {
-                setLoading(false);
-              }
-            }}
-            className="flex items-center gap-1.5 px-3 py-2.5 rounded-xl bg-white hover:bg-slate-50 dark:bg-[#141417] dark:hover:bg-[#1c1c21] text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white border-0 transition cursor-pointer text-xs font-bold shadow-xs hover:shadow-sm"
-            title="Đồng bộ lại toàn bộ lịch học theo cài đặt các lớp"
-          >
-            <RefreshCw size={13} className={loading ? 'animate-spin text-blue-500' : 'text-blue-500'} />
-            <span className="hidden sm:inline">Đồng Bộ Lịch</span>
-          </button>
-          <button
-            type="button"
             onClick={() => openAdd()}
-            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white px-3.5 py-2.5 rounded-xl font-extrabold text-xs transition cursor-pointer border-0 shadow-xs hover:shadow-sm"
+            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white px-4 py-2.5 rounded-xl font-extrabold text-xs transition cursor-pointer border-0 shadow-xs hover:shadow-sm"
             title="Thêm Lịch Học"
           >
             <Plus size={14} />
@@ -254,7 +232,7 @@ export default function SchedulePage() {
       <ScheduleKpiCards total={total} done={done} upcoming={upcoming} />
 
       {/* UNIFIED CONTAINER: Integrated Toolbar + Calendar / List */}
-      <div className="calendar-container-depth flex-1 min-h-0 select-none flex flex-col">
+      <div className="bg-white dark:bg-[#111728] border border-slate-200 dark:border-white/10 rounded-2xl overflow-hidden shadow-xs flex-1 min-h-0 select-none flex flex-col">
         {/* Integrated Top Toolbar */}
         <div className="flex flex-wrap items-center justify-between gap-3 bg-white dark:bg-[#111728] border-b border-slate-200 dark:border-white/10 px-4 py-3 shrink-0">
           <div className="flex items-center gap-2">

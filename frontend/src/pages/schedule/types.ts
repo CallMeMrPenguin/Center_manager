@@ -11,6 +11,9 @@ export interface ClassSession {
   notes?: string;
   color?: string;
   room?: string;
+  student_count?: number;
+  attended_count?: number;
+  attendance_total?: number;
 }
 
 export interface DayCfg {
@@ -148,3 +151,86 @@ export const DAY_NUM: Record<string, number> = {
   'Thứ 7': 6,
   'Chủ nhật': 0,
 };
+
+export function getDynamicSessionInfo(sess: ClassSession): {
+  status: 'Sắp diễn ra' | 'Đang học' | 'Đã học' | 'Nghỉ';
+  statusColor: string;
+  studentDisplay: string;
+  isLive: boolean;
+} {
+  const rawStatus = (sess.status || '').trim();
+  if (rawStatus === 'Nghỉ' || rawStatus === 'Hủy' || rawStatus === 'Nghỉ học') {
+    return {
+      status: 'Nghỉ',
+      statusColor: '#ef4444',
+      studentDisplay: `${sess.student_count || 0} HS`,
+      isLive: false,
+    };
+  }
+
+  const hasAttendance = (sess.attendance_total ?? 0) > 0 || (sess.attended_count ?? 0) > 0 || rawStatus === 'Đã học';
+  if (hasAttendance && (sess.attended_count ?? 0) > 0) {
+    return {
+      status: 'Đã học',
+      statusColor: '#10b981',
+      studentDisplay: `${sess.attended_count} HS có mặt`,
+      isLive: false,
+    };
+  }
+
+  const now = new Date();
+  const nowYear = now.getFullYear();
+  const nowMonth = String(now.getMonth() + 1).padStart(2, '0');
+  const nowDay = String(now.getDate()).padStart(2, '0');
+  const todayStr = `${nowYear}-${nowMonth}-${nowDay}`;
+  const nowMinutes = now.getHours() * 60 + now.getMinutes();
+
+  const sessDate = sess.date;
+  const startMin = parseTimeToMinutes(sess.start_time);
+  const endMin = startMin + (sess.duration || 90);
+
+  if (sessDate < todayStr) {
+    return {
+      status: 'Đã học',
+      statusColor: '#10b981',
+      studentDisplay: sess.attended_count !== undefined && sess.attended_count > 0 ? `${sess.attended_count} HS có mặt` : `${sess.student_count || 0} HS`,
+      isLive: false,
+    };
+  }
+
+  if (sessDate > todayStr) {
+    return {
+      status: 'Sắp diễn ra',
+      statusColor: '#0ea5e9',
+      studentDisplay: `${sess.student_count || 0} HS`,
+      isLive: false,
+    };
+  }
+
+  // Today
+  if (nowMinutes >= startMin && nowMinutes <= endMin) {
+    return {
+      status: 'Đang học',
+      statusColor: '#f59e0b',
+      studentDisplay: sess.attended_count !== undefined && sess.attended_count > 0 ? `${sess.attended_count} HS có mặt` : `${sess.student_count || 0} HS`,
+      isLive: true,
+    };
+  }
+
+  if (nowMinutes > endMin) {
+    return {
+      status: 'Đã học',
+      statusColor: '#10b981',
+      studentDisplay: sess.attended_count !== undefined && sess.attended_count > 0 ? `${sess.attended_count} HS có mặt` : `${sess.student_count || 0} HS`,
+      isLive: false,
+    };
+  }
+
+  return {
+    status: 'Sắp diễn ra',
+    statusColor: '#0ea5e9',
+    studentDisplay: `${sess.student_count || 0} HS`,
+    isLive: false,
+  };
+}
+

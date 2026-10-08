@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
-import { Edit3, ArrowRight, User } from 'lucide-react';
+import { Edit3, User } from 'lucide-react';
 import { DataTable } from '../../../components/DataTable';
 import { ClassItem, getClassColor, hexToRGBA } from '../types';
 
@@ -57,18 +57,6 @@ export const ClassTableView: React.FC<ClassTableViewProps> = ({
         },
       },
       {
-        accessorKey: 'grade',
-        header: 'Khối Lớp',
-        cell: (info) => {
-          const val = info.getValue<string>();
-          return (
-            <span className="px-2.5 py-0.5 rounded-md text-xs font-bold bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-slate-300">
-              {val || 'Chưa phân khối'}
-            </span>
-          );
-        },
-      },
-      {
         accessorKey: 'teacher_name',
         header: 'Giáo Viên Phụ Trách',
         cell: (info) => {
@@ -110,27 +98,18 @@ export const ClassTableView: React.FC<ClassTableViewProps> = ({
         header: 'Thao Tác',
         enableSorting: false,
         enableGlobalFilter: false,
+        size: 70,
         cell: ({ row }) => {
           const cls = row.original;
           return (
-            <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
-              <button
-                type="button"
-                onClick={() => onSelectClass(cls)}
-                className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white transition cursor-pointer active:scale-95"
-                title="Vào lớp học"
-              >
-                <span>Vào lớp</span>
-                <ArrowRight size={12} />
-              </button>
-
+            <div className="flex items-center justify-center" onClick={(e) => e.stopPropagation()}>
               <button
                 type="button"
                 onClick={() => onEditClass(cls)}
                 className="p-1.5 rounded-lg text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-100 dark:hover:bg-white/5 transition cursor-pointer active:scale-95"
                 title="Chỉnh sửa lớp học"
               >
-                <Edit3 size={13} />
+                <Edit3 size={14} />
               </button>
             </div>
           );

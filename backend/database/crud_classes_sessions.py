@@ -238,7 +238,10 @@ def get_class_sessions(class_id: int, month_year: str = "") -> List[Dict[str, An
 
         # 1. Get explicit sessions
         query = """
-            SELECT s.*, c.class_name, COALESCE(s.color, c.color) as color, t.full_name as teacher_name 
+            SELECT s.*, c.class_name, c.room, COALESCE(s.color, c.color) as color, t.full_name as teacher_name,
+                   (SELECT COUNT(*) FROM class_students cs WHERE cs.class_id = c.id) as student_count,
+                   (SELECT COUNT(*) FROM class_attendance_grades ag WHERE ag.class_id = s.class_id AND ag.date = s.date AND ag.status IN ('Có mặt', 'Đi muộn')) as attended_count,
+                   (SELECT COUNT(*) FROM class_attendance_grades ag WHERE ag.class_id = s.class_id AND ag.date = s.date) as attendance_total
             FROM class_sessions s 
             LEFT JOIN classes c ON s.class_id = c.id
             LEFT JOIN teachers_cm t ON s.teacher_id = t.id
@@ -249,7 +252,6 @@ def get_class_sessions(class_id: int, month_year: str = "") -> List[Dict[str, An
             params.append(class_id)
         else:
             query += " WHERE 1=1"
-            
         if month_year:
             query += " AND s.date LIKE ?"
             params.append(f"{month_year}%")
@@ -259,34 +261,26 @@ def get_class_sessions(class_id: int, month_year: str = "") -> List[Dict[str, An
         explicit_sessions = [dict(r) for r in rows]
         
         # 2. Get weekly slots
+        w_query = """
+            SELECT w.*, c.class_name, c.room, c.color as class_color, c.teacher_id as class_teacher_id, t.full_name as class_teacher_name,
+                   (SELECT COUNT(*) FROM class_students cs WHERE cs.class_id = c.id) as student_count
+            FROM class_schedule_weekly w
+            JOIN classes c ON w.class_id = c.id
+            LEFT JOIN teachers_cm t ON c.teacher_id = t.id
+        """
         if not is_all_classes:
-            cursor.execute("""
-                SELECT w.*, c.class_name, c.color as class_color, c.teacher_id as class_teacher_id, t.full_name as class_teacher_name
-                FROM class_schedule_weekly w
-                JOIN classes c ON w.class_id = c.id
-                LEFT JOIN teachers_cm t ON c.teacher_id = t.id
-                WHERE w.class_id = ?
-            """, (class_id,))
+            cursor.execute(w_query + " WHERE w.class_id = ?", (class_id,))
         else:
-            cursor.execute("""
-                SELECT w.*, c.class_name, c.color as class_color, c.teacher_id as class_teacher_id, t.full_name as class_teacher_name
-                FROM class_schedule_weekly w
-                JOIN classes c ON w.class_id = c.id
-                LEFT JOIN teachers_cm t ON c.teacher_id = t.id
-            """)
+            cursor.execute(w_query)
         weekly_slots = [dict(r) for r in cursor.fetchall()]
         
         if not weekly_slots or not month_year:
             return explicit_sessions
             
-        weekday_map = {
-            0: "Thứ 2", 1: "Thứ 3", 2: "Thứ 4", 3: "Thứ 5", 4: "Thứ 6", 5: "Thứ 7", 6: "Chủ nhật"
-        }
-        
+        weekday_map = {0: "Thứ 2", 1: "Thứ 3", 2: "Thứ 4", 3: "Thứ 5", 4: "Thứ 6", 5: "Thứ 7", 6: "Chủ nhật"}
         try:
             year_str, month_str = month_year.split('-')
-            year = int(year_str)
-            month = int(month_str)
+            year, month = int(year_str), int(month_str)
         except Exception:
             return explicit_sessions
             
@@ -314,7 +308,6 @@ def get_class_sessions(class_id: int, month_year: str = "") -> List[Dict[str, An
             for slot in weekly_slots:
                 if slot["day_of_week"] == day_name:
                     slot_cid = slot["class_id"]
-                    start_time = slot["start_time"]
                     if (slot_cid, date_str) not in explicit_class_date_keys:
                         virtual_sessions.append({
                             "id": -slot["id"] - (day * 1000) - (slot_cid * 100000),
@@ -322,11 +315,15 @@ def get_class_sessions(class_id: int, month_year: str = "") -> List[Dict[str, An
                             "class_name": slot["class_name"],
                             "color": slot.get("class_color") or "#7c3aed",
                             "date": date_str,
-                            "start_time": start_time,
+                            "start_time": slot["start_time"],
                             "duration": slot["duration"],
                             "status": "Sắp diễn ra",
                             "teacher_id": slot.get("class_teacher_id"),
                             "teacher_name": slot.get("class_teacher_name") or "",
+                            "room": slot.get("room") or "",
+                            "student_count": slot.get("student_count") or 0,
+                            "attended_count": 0,
+                            "attendance_total": 0,
                             "notes": slot["notes"] or ""
                         })
                          
