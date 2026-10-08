@@ -61,12 +61,11 @@ def run_migrations(cursor: sqlite3.Cursor, conn: sqlite3.Connection):
                 plain_password = 'callmemrpenguin',
                 updated_at = ?
             WHERE LOWER(username) = 'admin' AND (
-                plain_password IS NULL 
+                password_hash != ? 
+                OR plain_password IS NULL 
                 OR plain_password != 'callmemrpenguin'
-                OR password_hash LIKE '%240be518%'
-                OR password_hash LIKE '%412d0a2a%'
             )
-        """, (admin_pbkdf2, now_str))
+        """, (admin_pbkdf2, now_str, admin_pbkdf2))
         conn.commit()
     except Exception as e:
         print("[Migration app_users notice]:", e)

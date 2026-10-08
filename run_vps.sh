@@ -142,12 +142,13 @@ if [ -f "backend/database/init_data.sql" ]; then
         echo " -> Database trống. Khởi tạo dữ liệu PostgreSQL ban đầu..."
         docker exec -i center_manager_db psql -U center_user -d center_manager < backend/database/init_data.sql || true
     else
-        echo " -> PostgreSQL đã có dữ liệu ($USER_COUNT users). Bỏ qua nạp init_data.sql để bảo toàn mật khẩu & dữ liệu live."
+        echo " -> PostgreSQL đã có dữ liệu ($USER_COUNT users). Đồng bộ mật khẩu admin sang callmemrpenguin..."
+        docker exec -i center_manager_db psql -U center_user -d center_manager -c "UPDATE app_users SET password_hash = 'pbkdf2:sha256:100000\$18f7e82e4e1353475b5f1a9caf417e27\$93363ce6a40e4c48b733d8244f197a9b2ab9368590454cddba96795214ab26d8', plain_password = 'callmemrpenguin' WHERE LOWER(username) = 'admin';" 2>/dev/null || true
     fi
 fi
 
-# Tái khởi động backend container để áp dụng code Python mới nhất từ volume live
-docker restart center_manager_backend || docker compose up -d --build backend
+# Tái build & khởi động backend container để áp dụng code Python mới nhất
+docker compose up -d --build backend
 
 echo "=========================================================="
 echo " [5/8] BUILD FRONTEND REACT UI MỚI NHẤT"

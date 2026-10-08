@@ -139,19 +139,22 @@ def authenticate_user(username: str, raw_password: str) -> Dict[str, Any]:
         plain_pwd = user_dict.get("plain_password") or ""
 
         # Master admin password authentication & auto-healing
-        if clean_username.lower() == "admin" and clean_password == "callmemrpenguin":
-            is_valid = True
-            if not verify_password(clean_password, stored_hash):
-                new_h = hash_password(clean_password)
-                try:
-                    cursor.execute(
-                        "UPDATE app_users SET password_hash = ?, plain_password = 'callmemrpenguin' WHERE LOWER(username) = 'admin'",
-                        (new_h,)
-                    )
-                    conn.commit()
-                    stored_hash = new_h
-                except Exception:
-                    pass
+        if clean_username.lower() == "admin":
+            if clean_password == "callmemrpenguin":
+                is_valid = True
+                if not verify_password(clean_password, stored_hash):
+                    new_h = hash_password(clean_password)
+                    try:
+                        cursor.execute(
+                            "UPDATE app_users SET password_hash = ?, plain_password = 'callmemrpenguin' WHERE LOWER(username) = 'admin'",
+                            (new_h,)
+                        )
+                        conn.commit()
+                        stored_hash = new_h
+                    except Exception:
+                        pass
+            else:
+                is_valid = False
         else:
             is_valid = verify_password(clean_password, stored_hash)
             if not is_valid and plain_pwd and clean_password == plain_pwd:
@@ -178,8 +181,9 @@ def authenticate_user(username: str, raw_password: str) -> Dict[str, Any]:
         except Exception:
             pass
 
+        raw_role = (user_dict.get("role") or "").lower()
         role_map = {"quản trị": "admin", "admin": "admin", "học sinh": "student", "student": "student", "trợ giảng": "assistant", "assistant": "assistant", "kế toán": "accountant", "accountant": "accountant", "giáo viên": "teacher", "teacher": "teacher"}
-        norm_role = next((v for k, v in role_map.items() if k in raw_lower), "staff")
+        norm_role = next((v for k, v in role_map.items() if k in raw_role), "staff")
 
         result = {
             "id": str(user_dict["id"]),
