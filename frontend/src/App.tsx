@@ -195,14 +195,6 @@ function AppContent() {
 
   const { isAdmin, isStudent, allowedTabIds } = useUserRolePermissions(currentUser);
 
-  // If user is not logged in, show LoginPage
-  if (!currentUser) {
-    return <LoginPage onLogin={handleLogin} />;
-  }
-
-  const visibleTabIds = orderedTabIds.filter((id) => allowedTabIds.includes(id));
-  const visibleTabs = TAB_DEFINITIONS.filter((t) => allowedTabIds.includes(t.id));
-
   // Redirect if currently active tab is not permitted for this role
   useEffect(() => {
     if (!currentUser || isAdmin || allowedTabIds.length === 0) return;
@@ -213,6 +205,14 @@ function AppContent() {
       window.history.replaceState({ tabId: fallbackTab }, '', `/${fallbackTab}`);
     }
   }, [currentUser, isAdmin, allowedTabIds, activeTab, isStudent]);
+
+  // If user is not logged in, show LoginPage
+  if (!currentUser) {
+    return <LoginPage onLogin={handleLogin} />;
+  }
+
+  const visibleTabIds = orderedTabIds.filter((id) => allowedTabIds.includes(id));
+  const visibleTabs = TAB_DEFINITIONS.filter((t) => allowedTabIds.includes(t.id));
 
   const isMobile = isRealMobileDevice();
 

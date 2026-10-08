@@ -52,7 +52,7 @@ export const DashboardStatsGrid: React.FC<DashboardStatsGridProps> = ({ stats })
 
       <div className="bg-white dark:bg-[#141417] border border-slate-200 dark:border-[#27272a] rounded-2xl p-4.5 flex flex-col justify-between shadow-[0_4px_20px_-4px_rgba(0,0,0,0.06),0_2px_6px_-2px_rgba(0,0,0,0.04)] dark:shadow-none transition-colors duration-200">
         <div className="flex items-center justify-between">
-          <span className="text-[11px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Đội ngũ giáo viên</span>
+          <span className="text-[11px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Nhân sự</span>
           <div className="p-2 rounded-xl bg-amber-500/10 text-amber-500 dark:text-amber-400">
             <UserCheck size={16} />
           </div>
