@@ -53,11 +53,15 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
       }
     } catch (err: any) {
       const errMsg = err?.message || String(err);
-      try {
-        const parsed = JSON.parse(errMsg);
-        showToast(parsed.detail || 'Tên đăng nhập hoặc mật khẩu không chính xác', 'error');
-      } catch {
-        showToast(errMsg.replace('Error: ', '') || 'Tên đăng nhập hoặc mật khẩu không chính xác', 'error');
+      if (errMsg.includes('<') && errMsg.includes('>')) {
+        showToast('Máy chủ đang khởi động lại hoặc tạm thời gián đoạn. Vui lòng thử lại sau giây lát.', 'error');
+      } else {
+        try {
+          const parsed = JSON.parse(errMsg);
+          showToast(parsed.detail || 'Tên đăng nhập hoặc mật khẩu không chính xác', 'error');
+        } catch {
+          showToast(errMsg.replace(/^Error:\s*/i, '') || 'Tên đăng nhập hoặc mật khẩu không chính xác', 'error');
+        }
       }
     } finally {
       setLoading(false);

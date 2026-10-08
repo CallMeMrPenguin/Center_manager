@@ -67,6 +67,12 @@ export async function request<T>(path: string, options?: RequestOptions): Promis
 
   if (!response.ok) {
     const errText = await response.text();
+    if (errText.trim().startsWith('<') || errText.includes('<!DOCTYPE') || errText.includes('<html')) {
+      if (response.status === 502 || response.status === 503 || response.status === 504) {
+        throw new Error('Máy chủ đang khởi động lại hoặc tạm thời gián đoạn (Mã ' + response.status + '). Vui lòng thử lại sau giây lát.');
+      }
+      throw new Error(`Lỗi kết nối máy chủ (${response.status}: ${response.statusText || 'Lỗi mạng'})`);
+    }
     throw new Error(errText || response.statusText);
   }
 

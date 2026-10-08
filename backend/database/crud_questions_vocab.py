@@ -319,7 +319,12 @@ def get_active_grades() -> List[str]:
             UNION
             SELECT DISTINCT grade FROM vocabulary_list WHERE grade IS NOT NULL AND grade != ''
         """)
-        grades = [str(r[0]) for r in cursor.fetchall()]
+        rows = cursor.fetchall()
+        grades = []
+        for r in rows:
+            val = r.get("grade") if isinstance(r, dict) or hasattr(r, "get") else (r[0] if len(r) > 0 else "")
+            if val:
+                grades.append(str(val))
         
         digits = []
         others = []
