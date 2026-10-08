@@ -67,23 +67,23 @@ export default function SchedulePage() {
     const isSilent = silent === true;
     if (!isSilent) setLoading(true);
     try {
-      const cls = await api.getClasses();
+      const targetClassId = classFilter ? Number(classFilter) : 0;
+      const [cls, ss] = await Promise.all([
+        api.getClasses().catch(() => []),
+        api.getClassSessions(targetClassId, selectedMonth).catch(() => []),
+      ]);
       setClassesList(cls);
-      let all: ClassSession[] = [];
-      for (const c of cls) {
-        if (!classFilter || String(c.id) === classFilter) {
-          const ss = await api.getClassSessions(c.id, selectedMonth);
-          all = all.concat(
-            ss.map((s: any) => ({
-              ...s,
-              class_name: c.class_name,
-              teacher_name: s.teacher_name || c.teacher_name,
-              room: s.room || c.room,
-              student_count: s.student_count !== undefined ? s.student_count : (c.student_count || 0),
-            }))
-          );
-        }
-      }
+
+      const all: ClassSession[] = (ss || []).map((s: any) => {
+        const matchedClass = cls.find((c: any) => c.id === s.class_id);
+        return {
+          ...s,
+          class_name: s.class_name || matchedClass?.class_name || '',
+          teacher_name: s.teacher_name || matchedClass?.teacher_name || '',
+          room: s.room || matchedClass?.room || '',
+          student_count: s.student_count !== undefined ? s.student_count : (matchedClass?.student_count || 0),
+        };
+      });
       all.sort((a, b) => (a.date + a.start_time).localeCompare(b.date + b.start_time));
       setSessions(all);
 

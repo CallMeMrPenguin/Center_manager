@@ -27,61 +27,36 @@ export default function DashboardPage() {
   const loadDashboardData = async () => {
     setLoading(true);
     try {
-      const [studentsRes, teachersRes, classesRes] = await Promise.all([
+      const [studentsRes, teachersRes, classesRes, allSessionsRes] = await Promise.all([
         api.getStudents().catch(() => []),
         api.getTeachersCM().catch(() => []),
         api.getClasses().catch(() => []),
+        api.getClassSessions(0, todayStr.slice(0, 7)).catch(() => []),
       ]);
 
       const students = Array.isArray(studentsRes) ? studentsRes : [];
       const teachers = Array.isArray(teachersRes) ? teachersRes : [];
       const classes = Array.isArray(classesRes) ? classesRes : [];
+      const rawSessions = Array.isArray(allSessionsRes) ? allSessionsRes : [];
 
-      let allTodaySessions: TodaySessionItem[] = [];
       let completedAttendanceCount = 0;
+      const todayClsSessions = rawSessions.filter((s: any) => s.date === todayStr);
 
-      const sessionsPromises = classes.slice(0, 20).map(async (c: any) => {
-        try {
-          const sessions = await api.getClassSessions(c.id);
-          if (Array.isArray(sessions)) {
-            const todayClsSessions = sessions.filter((s: any) => s.date === todayStr);
-            if (todayClsSessions.length === 0) return [];
-
-            let hasAttendance = false;
-            try {
-              const attData = await api.getClassAttendance(c.id, todayStr);
-              if (attData && attData.records && attData.records.length > 0) {
-                hasAttendance = attData.records.some(
-                  (r: any) => r.present !== null || r.check1 !== null || r.check2 !== null
-                );
-              }
-            } catch {
-              hasAttendance = false;
-            }
-
-            if (hasAttendance) completedAttendanceCount += todayClsSessions.length;
-
-            return todayClsSessions.map((s: any) => ({
-              id: s.id,
-              class_id: c.id,
-              class_name: c.class_name,
-              start_time: s.start_time || '00:00',
-              duration: s.duration || 90,
-              teacher_name: s.teacher_name || c.teacher_name || 'Chưa phân công',
-              room: s.room || c.room || 'Phòng học',
-              status: s.status || 'Sắp diễn ra',
-              isAttendanceRecorded: hasAttendance,
-            }));
-          }
-        } catch {
-          return [];
-        }
-        return [];
-      });
-
-      const sessionResults = await Promise.all(sessionsPromises);
-      sessionResults.forEach((arr) => {
-        if (arr && arr.length > 0) allTodaySessions = allTodaySessions.concat(arr);
+      const allTodaySessions: TodaySessionItem[] = todayClsSessions.map((s: any) => {
+        const hasAttendance = Boolean((s.attendance_total && s.attendance_total > 0) || (s.attended_count && s.attended_count > 0));
+        if (hasAttendance) completedAttendanceCount++;
+        const matchedClass = classes.find((c: any) => c.id === s.class_id);
+        return {
+          id: s.id,
+          class_id: s.class_id,
+          class_name: s.class_name || matchedClass?.class_name || 'Lớp học',
+          start_time: s.start_time || '00:00',
+          duration: s.duration || 90,
+          teacher_name: s.teacher_name || matchedClass?.teacher_name || 'Chưa phân công',
+          room: s.room || matchedClass?.room || 'Phòng học',
+          status: s.status || 'Sắp diễn ra',
+          isAttendanceRecorded: hasAttendance,
+        };
       });
 
       allTodaySessions.sort((a, b) => a.start_time.localeCompare(b.start_time));

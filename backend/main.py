@@ -120,7 +120,13 @@ if APP_MODE != "web":
     frontend_dist = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "frontend", "dist")
     frontend_assets = os.path.join(frontend_dist, "assets")
     if os.path.exists(frontend_assets):
-        app.mount("/assets", StaticFiles(directory=frontend_assets), name="assets")
+        class CachedStaticFiles(StaticFiles):
+            async def get_response(self, path: str, scope):
+                resp = await super().get_response(path, scope)
+                if resp.status_code == 200:
+                    resp.headers["Cache-Control"] = "public, max-age=31536000, immutable"
+                return resp
+        app.mount("/assets", CachedStaticFiles(directory=frontend_assets), name="assets")
 
     @app.get("/{full_path:path}", response_class=HTMLResponse)
     def serve_frontend(full_path: str):
