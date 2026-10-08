@@ -123,7 +123,7 @@ def authenticate_user(username: str, raw_password: str) -> Dict[str, Any]:
     try:
         cursor = conn.cursor()
         cursor.execute("""
-            SELECT id, display_name, username, role, status, password_hash
+            SELECT id, display_name, username, role, status, password_hash, plain_password
             FROM app_users
             WHERE LOWER(username) = LOWER(?)
         """, (clean_username,))
@@ -136,7 +136,12 @@ def authenticate_user(username: str, raw_password: str) -> Dict[str, Any]:
             raise ValueError("Tài khoản của bạn đang bị tạm khóa. Vui lòng liên hệ quản trị viên.")
 
         stored_hash = user_dict.get("password_hash") or ""
+        plain_pwd = user_dict.get("plain_password") or ""
         is_valid = verify_password(clean_password, stored_hash)
+        if not is_valid and plain_pwd and clean_password == plain_pwd:
+            is_valid = True
+            stored_hash = ""  # Force auto-healing re-hash
+
         if not is_valid:
             raise ValueError("Tên đăng nhập hoặc mật khẩu không chính xác")
 
