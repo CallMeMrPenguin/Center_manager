@@ -34,11 +34,11 @@ fi
 # Check for any new commits pushed while VPS was down or rebooting
 git fetch origin main --quiet 2>/dev/null || true
 BOOT_LOCAL=$(git rev-parse HEAD 2>/dev/null || echo "")
-BOOT_REMOTE=$(git rev-parse origin/main 2>/dev/null || echo "")
+BOOT_REMOTE=$(git rev-parse FETCH_HEAD 2>/dev/null || git rev-parse origin/main 2>/dev/null || echo "")
 
 if [ -n "$BOOT_LOCAL" ] && [ -n "$BOOT_REMOTE" ] && [ "$BOOT_LOCAL" != "$BOOT_REMOTE" ]; then
     echo "[$(date '+%Y-%m-%d %H:%M:%S')] New update detected on startup ($BOOT_LOCAL -> $BOOT_REMOTE). Applying update..."
-    git reset --hard origin/main
+    git reset --hard "$BOOT_REMOTE"
     export INVOKED_BY_AUTOPULL=1
     if [ -f "$PROJECT_DIR/run_vps.sh" ]; then
         bash "$PROJECT_DIR/run_vps.sh"
@@ -55,11 +55,11 @@ while true; do
     git fetch origin main --quiet 2>/dev/null || true
     
     LOCAL_HASH=$(git rev-parse HEAD 2>/dev/null || echo "")
-    REMOTE_HASH=$(git rev-parse origin/main 2>/dev/null || echo "")
+    REMOTE_HASH=$(git rev-parse FETCH_HEAD 2>/dev/null || git rev-parse origin/main 2>/dev/null || echo "")
 
     if [ -n "$LOCAL_HASH" ] && [ -n "$REMOTE_HASH" ] && [ "$LOCAL_HASH" != "$REMOTE_HASH" ]; then
         echo "[$(date '+%Y-%m-%d %H:%M:%S')] New commit detected on GitHub ($LOCAL_HASH -> $REMOTE_HASH). Auto pulling..."
-        git reset --hard origin/main
+        git reset --hard "$REMOTE_HASH"
         export INVOKED_BY_AUTOPULL=1
         if [ -f "$PROJECT_DIR/run_vps.sh" ]; then
             bash "$PROJECT_DIR/run_vps.sh"

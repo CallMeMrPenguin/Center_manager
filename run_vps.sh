@@ -122,8 +122,8 @@ echo "=========================================================="
 systemctl start docker
 systemctl enable docker
 
-# Khởi động PostgreSQL 16 & FastAPI Backend với volume live code (Zero-downtime rebuild)
-docker compose up -d --build
+# Khởi động PostgreSQL 16 & FastAPI Backend với volume live code (Zero-downtime reload)
+docker compose up -d
 
 # Khởi tạo dữ liệu ban đầu cho PostgreSQL nếu database chưa có người dùng
 if [ -f "backend/database/init_data.sql" ]; then
