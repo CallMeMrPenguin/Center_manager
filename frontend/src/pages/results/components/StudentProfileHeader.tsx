@@ -276,7 +276,7 @@ export const StudentProfileHeader: React.FC<StudentProfileHeaderProps> = ({
 
               <div className="flex items-center justify-between py-2.5 border-b border-slate-200 dark:border-white/10 text-sm">
                 <span className="text-slate-500 dark:text-slate-400 font-medium">Điện thoại:</span>
-                <span className="font-semibold text-slate-800 dark:text-slate-200 font-mono">
+                <span className="font-semibold text-slate-800 dark:text-slate-200">
                   {summary.father_phone || summary.mother_phone || 'Chưa cập nhật'}
                 </span>
               </div>
@@ -301,7 +301,7 @@ export const StudentProfileHeader: React.FC<StudentProfileHeaderProps> = ({
               {/* Điểm Tổng Kết */}
               <div className="flex items-center justify-between py-2.5 border-b border-slate-200 dark:border-white/10 text-sm">
                 <span className="text-slate-700 dark:text-slate-300 font-bold">Điểm Tổng Kết</span>
-                <span className="text-xl sm:text-2xl font-black text-emerald-500 dark:text-emerald-400 font-mono">
+                <span className="text-xl sm:text-2xl font-black text-emerald-500 dark:text-emerald-400 tabular-nums">
                   {overallDisplay}
                 </span>
               </div>
@@ -310,7 +310,7 @@ export const StudentProfileHeader: React.FC<StudentProfileHeaderProps> = ({
               <div className="flex items-center justify-between py-2.5 border-b border-slate-200 dark:border-white/10 text-sm">
                 <span className="text-slate-700 dark:text-slate-300 font-bold">Chỉ Số PI (Hiệu Suất)</span>
                 <div className="flex items-baseline gap-1">
-                  <span className="text-lg sm:text-xl font-black text-cyan-600 dark:text-cyan-400 font-mono">
+                  <span className="text-lg sm:text-xl font-black text-cyan-600 dark:text-cyan-400 tabular-nums">
                     {piScore}
                   </span>
                   <span className="text-xs text-slate-500 dark:text-slate-400 font-bold">/ 100</span>
@@ -328,7 +328,7 @@ export const StudentProfileHeader: React.FC<StudentProfileHeaderProps> = ({
               {/* Từ Vựng */}
               <div className="flex items-center justify-between py-2.5 border-b border-slate-200 dark:border-white/10 text-sm">
                 <span className="text-slate-500 dark:text-slate-400 font-medium">Từ Vựng</span>
-                <span className="text-base sm:text-lg font-black text-blue-500 dark:text-blue-400 font-mono">
+                <span className="text-base sm:text-lg font-black text-blue-500 dark:text-blue-400 tabular-nums">
                   {c1Display}
                 </span>
               </div>
@@ -336,7 +336,7 @@ export const StudentProfileHeader: React.FC<StudentProfileHeaderProps> = ({
               {/* Ngữ Pháp */}
               <div className="flex items-center justify-between py-2.5 border-b border-slate-200 dark:border-white/10 text-sm">
                 <span className="text-slate-500 dark:text-slate-400 font-medium">Ngữ Pháp</span>
-                <span className="text-base sm:text-lg font-black text-purple-500 dark:text-purple-400 font-mono">
+                <span className="text-base sm:text-lg font-black text-purple-500 dark:text-purple-400 tabular-nums">
                   {c2Display}
                 </span>
               </div>
@@ -344,7 +344,7 @@ export const StudentProfileHeader: React.FC<StudentProfileHeaderProps> = ({
               {/* BTVN */}
               <div className="flex items-center justify-between py-2.5 border-b border-slate-200 dark:border-white/10 text-sm">
                 <span className="text-slate-500 dark:text-slate-400 font-medium">BTVN</span>
-                <span className="text-base sm:text-lg font-black text-amber-500 dark:text-amber-400 font-mono">
+                <span className="text-base sm:text-lg font-black text-amber-500 dark:text-amber-400 tabular-nums">
                   {hwDisplay}
                 </span>
               </div>
@@ -358,7 +358,7 @@ export const StudentProfileHeader: React.FC<StudentProfileHeaderProps> = ({
                       ({sessionCountDisplay} buổi)
                     </span>
                   )}
-                  <span className="text-base sm:text-lg font-black text-sky-500 dark:text-sky-400 font-mono">
+                  <span className="text-base sm:text-lg font-black text-sky-500 dark:text-sky-400 tabular-nums">
                     {attendanceDisplay}%
                   </span>
                 </div>

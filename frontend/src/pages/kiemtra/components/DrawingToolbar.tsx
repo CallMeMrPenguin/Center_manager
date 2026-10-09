@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import {
-  Pen,
+  Paintbrush,
   Highlighter,
   Eraser,
   Trash2,
@@ -116,7 +116,7 @@ export const DrawingToolbar: React.FC<DrawingToolbarProps> = ({
           ) : activeTool === 'highlighter' ? (
             <Highlighter size={14} className="text-amber-200" />
           ) : activeTool === 'pen' ? (
-            <Pen size={14} className="text-indigo-200" />
+            <Paintbrush size={14} className="text-indigo-200" />
           ) : (
             <MousePointer size={14} />
           )}
@@ -152,10 +152,10 @@ export const DrawingToolbar: React.FC<DrawingToolbarProps> = ({
               ? 'bg-blue-600 text-white shadow-xs'
               : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
           }`}
-          title="Bút vẽ (Phím 2 | Giữ Shift kẻ đường thẳng)"
+          title="Cọ vẽ (Phím 2 | Giữ Shift kẻ đường thẳng)"
         >
-          <Pen size={13} />
-          <span className="hidden sm:inline">Bút</span>
+          <Paintbrush size={13} />
+          <span className="hidden sm:inline">Cọ vẽ</span>
         </button>
 
         <button

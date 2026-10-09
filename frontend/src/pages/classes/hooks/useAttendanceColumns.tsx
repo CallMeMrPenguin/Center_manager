@@ -71,23 +71,25 @@ export function useAttendanceColumns({
       },
       {
         accessorKey: 'student_name',
-        header: 'Họ tên',
+        header: () => <span className="font-extrabold min-w-[130px] inline-block text-left">Họ tên</span>,
         meta: { headerText: 'Họ tên', exportValue: (r: any) => r.student_name },
         cell: ({ row }) => (
-          <span className="font-extrabold text-slate-900 dark:text-white text-base block truncate">
-            {row.original.student_name}
-          </span>
+          <div className="min-w-[130px] pr-2">
+            <span className="font-extrabold text-slate-900 dark:text-white text-sm sm:text-base whitespace-nowrap">
+              {row.original.student_name}
+            </span>
+          </div>
         ),
       },
       {
         accessorKey: 'status',
-        header: 'Điểm Danh',
+        header: () => <span className="font-extrabold min-w-[90px] inline-block text-center">Điểm Danh</span>,
         meta: { headerText: 'Điểm Danh', exportValue: (r: any) => r.status || 'Có mặt' },
         cell: ({ row }) => {
           const rec = row.original;
           const isAbsent = rec.status === 'Vắng mặt';
           return (
-            <div className="flex items-center justify-center">
+            <div className="flex items-center justify-center min-w-[90px]">
               <button
                 type="button"
                 tabIndex={-1}
@@ -95,7 +97,7 @@ export function useAttendanceColumns({
                   const newStatus = isAbsent ? 'Có mặt' : 'Vắng mặt';
                   onUpdateRecord(rec.student_id, 'status', newStatus);
                 }}
-                className={`px-3 py-1.5 rounded-xl font-black text-xs transition cursor-pointer border-0 shadow-2xs hover:shadow-xs flex items-center justify-center ${
+                className={`px-3 py-1.5 rounded-xl font-black text-xs transition cursor-pointer border-0 shadow-2xs hover:shadow-xs whitespace-nowrap flex items-center justify-center ${
                   isAbsent
                     ? 'bg-rose-500/20 text-rose-700 dark:text-rose-300 hover:bg-rose-500/30'
                     : 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-500/30'
@@ -110,116 +112,116 @@ export function useAttendanceColumns({
       {
         accessorKey: 'check_1',
         header: () => (
-          <div className="flex flex-col items-center leading-tight py-0.5">
-            <span>Check 1</span>
-            {colAverages.c1 !== null && (
-              <span className="text-[10px] font-mono font-bold text-blue-600 dark:text-blue-400">
-                TB {colAverages.c1}
-              </span>
-            )}
+          <div className="flex flex-col items-center justify-center leading-tight py-0.5 min-w-[75px]">
+            <span className="font-extrabold text-xs sm:text-sm">Check 1</span>
+            <span className="text-[11px] font-bold text-blue-600 dark:text-blue-400 mt-0.5">
+              {colAverages.c1 !== null ? colAverages.c1 : '-'}
+            </span>
           </div>
         ),
         meta: { headerText: 'Check 1', exportValue: (r: any) => Number(r.check_1) > 0 ? format1Dec(Number(r.check_1)) : '-' },
         cell: ({ row }) => (
-          <CheckScoreInput
-            rec={row.original}
-            rowIndex={row.index}
-            field="check_1"
-            onUpdateRecord={onUpdateRecord}
-            parseAndFormatScore={parseAndFormatScore}
-          />
+          <div className="min-w-[80px] flex justify-center">
+            <CheckScoreInput
+              rec={row.original}
+              rowIndex={row.index}
+              field="check_1"
+              onUpdateRecord={onUpdateRecord}
+              parseAndFormatScore={parseAndFormatScore}
+            />
+          </div>
         ),
       },
       {
         accessorKey: 'check_2',
         header: () => (
-          <div className="flex flex-col items-center leading-tight py-0.5">
-            <span>Check 2</span>
-            {colAverages.c2 !== null && (
-              <span className="text-[10px] font-mono font-bold text-purple-600 dark:text-purple-400">
-                TB {colAverages.c2}
-              </span>
-            )}
+          <div className="flex flex-col items-center justify-center leading-tight py-0.5 min-w-[75px]">
+            <span className="font-extrabold text-xs sm:text-sm">Check 2</span>
+            <span className="text-[11px] font-bold text-purple-600 dark:text-purple-400 mt-0.5">
+              {colAverages.c2 !== null ? colAverages.c2 : '-'}
+            </span>
           </div>
         ),
         meta: { headerText: 'Check 2', exportValue: (r: any) => Number(r.check_2) > 0 ? format1Dec(Number(r.check_2)) : '-' },
         cell: ({ row }) => (
-          <CheckScoreInput
-            rec={row.original}
-            rowIndex={row.index}
-            field="check_2"
-            onUpdateRecord={onUpdateRecord}
-            parseAndFormatScore={parseAndFormatScore}
-          />
+          <div className="min-w-[80px] flex justify-center">
+            <CheckScoreInput
+              rec={row.original}
+              rowIndex={row.index}
+              field="check_2"
+              onUpdateRecord={onUpdateRecord}
+              parseAndFormatScore={parseAndFormatScore}
+            />
+          </div>
         ),
       },
       {
         accessorKey: 'homework',
         header: () => (
-          <div className="flex flex-col items-center leading-tight py-0.5">
-            <span>BTVN 1</span>
-            {colAverages.hw1 !== null && (
-              <span className="text-[10px] font-mono font-bold text-emerald-600 dark:text-emerald-400">
-                TB {colAverages.hw1}
-              </span>
-            )}
+          <div className="flex flex-col items-center justify-center leading-tight py-0.5 min-w-[75px]">
+            <span className="font-extrabold text-xs sm:text-sm">BTVN 1</span>
+            <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">
+              {colAverages.hw1 !== null ? colAverages.hw1 : '-'}
+            </span>
           </div>
         ),
         meta: { headerText: 'BTVN 1', exportValue: (r: any) => Number(r.homework) > 0 ? format1Dec(Number(r.homework)) : '-' },
         cell: ({ row }) => (
-          <CheckScoreInput
-            rec={row.original}
-            rowIndex={row.index}
-            field="homework"
-            onUpdateRecord={onUpdateRecord}
-            parseAndFormatScore={parseAndFormatScore}
-          />
+          <div className="min-w-[80px] flex justify-center">
+            <CheckScoreInput
+              rec={row.original}
+              rowIndex={row.index}
+              field="homework"
+              onUpdateRecord={onUpdateRecord}
+              parseAndFormatScore={parseAndFormatScore}
+            />
+          </div>
         ),
       },
       {
         accessorKey: 'homework_2',
         header: () => (
-          <div className="flex flex-col items-center leading-tight py-0.5">
-            <span>BTVN 2</span>
-            {colAverages.hw2 !== null && (
-              <span className="text-[10px] font-mono font-bold text-emerald-600 dark:text-emerald-400">
-                TB {colAverages.hw2}
-              </span>
-            )}
+          <div className="flex flex-col items-center justify-center leading-tight py-0.5 min-w-[75px]">
+            <span className="font-extrabold text-xs sm:text-sm">BTVN 2</span>
+            <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">
+              {colAverages.hw2 !== null ? colAverages.hw2 : '-'}
+            </span>
           </div>
         ),
         meta: { headerText: 'BTVN 2', exportValue: (r: any) => Number(r.homework_2) > 0 ? format1Dec(Number(r.homework_2)) : '-' },
         cell: ({ row }) => (
-          <CheckScoreInput
-            rec={row.original}
-            rowIndex={row.index}
-            field="homework_2"
-            onUpdateRecord={onUpdateRecord}
-            parseAndFormatScore={parseAndFormatScore}
-          />
+          <div className="min-w-[80px] flex justify-center">
+            <CheckScoreInput
+              rec={row.original}
+              rowIndex={row.index}
+              field="homework_2"
+              onUpdateRecord={onUpdateRecord}
+              parseAndFormatScore={parseAndFormatScore}
+            />
+          </div>
         ),
       },
       {
         accessorKey: 'mock_test',
         header: () => (
-          <div className="flex flex-col items-center leading-tight py-0.5">
-            <span>Luyện Đề</span>
-            {colAverages.mock !== null && (
-              <span className="text-[10px] font-mono font-bold text-amber-600 dark:text-amber-400">
-                TB {colAverages.mock}
-              </span>
-            )}
+          <div className="flex flex-col items-center justify-center leading-tight py-0.5 min-w-[75px]">
+            <span className="font-extrabold text-xs sm:text-sm">Luyện Đề</span>
+            <span className="text-[11px] font-bold text-amber-600 dark:text-amber-400 mt-0.5">
+              {colAverages.mock !== null ? colAverages.mock : '-'}
+            </span>
           </div>
         ),
         meta: { headerText: 'Luyện Đề', exportValue: (r: any) => Number(r.mock_test) > 0 ? format1Dec(Number(r.mock_test)) : '-' },
         cell: ({ row }) => (
-          <CheckScoreInput
-            rec={row.original}
-            rowIndex={row.index}
-            field="mock_test"
-            onUpdateRecord={onUpdateRecord}
-            parseAndFormatScore={parseAndFormatScore}
-          />
+          <div className="min-w-[80px] flex justify-center">
+            <CheckScoreInput
+              rec={row.original}
+              rowIndex={row.index}
+              field="mock_test"
+              onUpdateRecord={onUpdateRecord}
+              parseAndFormatScore={parseAndFormatScore}
+            />
+          </div>
         ),
       },
       {

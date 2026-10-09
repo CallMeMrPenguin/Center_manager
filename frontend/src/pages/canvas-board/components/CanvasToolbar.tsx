@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import {
-  MousePointer, Type, Pen, Highlighter, Eraser, Minus, ArrowUpRight,
+  MousePointer, Type, Paintbrush, Highlighter, Eraser, Minus, ArrowUpRight,
   Square, Circle, Palette, Sliders, Undo2, Redo2, Trash2,
   Upload, RotateCcw, Download, Maximize2, Minimize2
 } from 'lucide-react';
@@ -103,15 +103,15 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
 
         <div className="h-5 w-px bg-slate-200 dark:bg-white/10 mx-0.5" />
 
-        {/* Pen */}
+        {/* Paintbrush */}
         <button
           onClick={() => setActiveTool('pen')}
           className={`p-2 rounded-xl transition cursor-pointer ${
             activeTool === 'pen' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-white/5'
           }`}
-          title="Bút vẽ"
+          title="Cọ vẽ"
         >
-          <Pen size={15} />
+          <Paintbrush size={15} />
         </button>
 
         {/* Highlighter (Bút dạ quang) */}

@@ -118,7 +118,7 @@ export default function DashboardPage() {
 
   return (
     <div className="h-full w-full overflow-y-auto p-4 sm:p-6 bg-[#f1f5f9] dark:bg-[#09090b] text-slate-800 dark:text-slate-100 select-none font-sans scrollbar-thin">
-      <div className="max-w-7xl mx-auto space-y-5 sm:space-y-6">
+      <div className="w-full space-y-5 sm:space-y-6">
         {/* 1. Top Executive Status Bar */}
         <div className="flex items-center justify-between gap-4 pb-3 border-b border-slate-300 dark:border-[#27272a]">
           <div>

@@ -302,14 +302,16 @@ export const HorizontalTimelineGrid: React.FC<HorizontalTimelineGridProps> = ({
                       {/* Holiday Badge (Tết, 30/4, 1/5, 2/9, Giỗ Tổ, etc.) */}
                       {holiday && (
                         <div
-                          className={`mt-0.5 text-[9px] font-bold px-1.5 py-0.5 rounded flex items-center justify-between gap-1 truncate ${
+                          className={`mt-0.5 text-[9px] font-bold px-1.5 py-0.5 rounded flex items-center justify-between gap-1 max-w-full overflow-hidden ${
                             holiday.isPublicHoliday
                               ? 'bg-rose-500/20 text-rose-600 dark:text-rose-300'
                               : 'bg-amber-500/20 text-amber-600 dark:text-amber-300'
                           }`}
                           title={holiday.name}
                         >
-                          <span className="truncate">{holiday.name}</span>
+                          <span className="truncate block max-w-full leading-tight select-none" title={holiday.name}>
+                            {holiday.name}
+                          </span>
                           {holiday.isPublicHoliday && (
                             <span className="shrink-0 text-[7.5px] font-black uppercase tracking-tight">
                               Nghỉ

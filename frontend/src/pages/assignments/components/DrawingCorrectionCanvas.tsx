@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect, useCallback, useMemo, memo } from 'react';
-import { Pen, Eraser, RotateCcw, Trash2, Check } from 'lucide-react';
+import { Paintbrush, Eraser, RotateCcw, Trash2, Check } from 'lucide-react';
 
 interface Point {
   x: number;
@@ -282,8 +282,8 @@ export const DrawingCorrectionCanvas: React.FC<DrawingCorrectionCanvasProps> = m
               !isEraser ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-600 hover:text-slate-900'
             }`}
           >
-            <Pen size={13} />
-            <span>Bút vẽ</span>
+            <Paintbrush size={13} />
+            <span>Cọ vẽ</span>
           </button>
           <button
             type="button"
