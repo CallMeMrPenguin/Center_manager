@@ -1,6 +1,7 @@
 import React from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { isNameColumn } from '../../utils/vietnameseSort';
 
 interface DraggableHeaderProps {
   header: any;
@@ -31,7 +32,8 @@ export function DraggableHeader({
   const isPinned = header.column.getIsPinned();
   const isResizing = header.column.getIsResizing();
   const colDef = header.column.columnDef;
-  const colWidth = width || (typeof colDef?.size === 'number' ? colDef.size : undefined);
+  const isFlexCol = isNameColumn(colDef) || ['student_name', 'full_name', 'name'].includes(String(header.column.id).toLowerCase());
+  const colWidth = width || (isFlexCol && !colDef?.maxSize ? undefined : (typeof colDef?.size === 'number' ? colDef.size : undefined));
   const colMinWidth = typeof colDef?.minSize === 'number' ? colDef.minSize : undefined;
   const colMaxWidth = typeof colDef?.maxSize === 'number' ? colDef.maxSize : undefined;
 

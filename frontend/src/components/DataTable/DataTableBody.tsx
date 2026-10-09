@@ -70,7 +70,7 @@ export function DataTableBody<TData>({
                   (isPersonName ? 'left' : 'center');
                 const isCentered = isSelectCol ? true : colAlign === 'center';
                 const colDef = cell.column.columnDef;
-                const colWidth = columnSizing?.[cell.column.id] || (typeof colDef?.size === 'number' ? colDef.size : undefined);
+                const colWidth = columnSizing?.[cell.column.id] || (isPersonName && !colDef?.maxSize ? undefined : (typeof colDef?.size === 'number' ? colDef.size : undefined));
                 const colMinWidth = typeof colDef?.minSize === 'number' ? colDef.minSize : undefined;
                 const colMaxWidth = typeof colDef?.maxSize === 'number' ? colDef.maxSize : undefined;
 

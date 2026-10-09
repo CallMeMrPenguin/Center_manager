@@ -64,7 +64,9 @@ export function DataTableHeader({
                 width={columnSizing?.[header.column.id]}
               >
                 <div
-                  className={`inline-flex items-center justify-center gap-1.5 w-full max-w-full font-bold sm:font-extrabold text-slate-900 dark:text-slate-100 ${
+                  className={`inline-flex items-center ${
+                    align === 'left' ? 'justify-start' : 'justify-center'
+                  } gap-1 max-w-full font-bold sm:font-extrabold text-slate-900 dark:text-slate-100 ${
                     header.column.getCanSort()
                       ? 'cursor-pointer select-none hover:text-slate-900 dark:hover:text-white transition-colors'
                       : ''
@@ -72,9 +74,7 @@ export function DataTableHeader({
                   onClick={header.column.getCanSort() ? header.column.getToggleSortingHandler() : undefined}
                 >
                   {header.isPlaceholder ? null : typeof header.column.columnDef.header === 'function' ? (
-                    <div className="w-full flex items-center justify-center">
-                      {flexRender(header.column.columnDef.header, header.getContext())}
-                    </div>
+                    flexRender(header.column.columnDef.header, header.getContext())
                   ) : (
                     <span className="whitespace-nowrap">
                       {flexRender(header.column.columnDef.header, header.getContext())}
@@ -82,13 +82,13 @@ export function DataTableHeader({
                   )}
 
                   {header.column.getCanSort() && (
-                    <span className="shrink-0 inline-flex items-center">
+                    <span className="shrink-0 inline-flex items-center ml-0.5">
                       {header.column.getIsSorted() === 'asc' ? (
-                        <ArrowUp size={12} className="text-indigo-500" />
+                        <ArrowUp size={11} className="text-indigo-500" />
                       ) : header.column.getIsSorted() === 'desc' ? (
-                        <ArrowDown size={12} className="text-indigo-500" />
+                        <ArrowDown size={11} className="text-indigo-500" />
                       ) : (
-                        <ArrowUpDown size={12} className="text-slate-400 hover:text-slate-600 transition" />
+                        <ArrowUpDown size={11} className="text-slate-400 hover:text-slate-600 transition" />
                       )}
                     </span>
                   )}

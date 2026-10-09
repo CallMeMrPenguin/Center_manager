@@ -27,11 +27,25 @@ export function useDataTableLayout<TData>({
     if (!storageKey) return null;
     try {
       const item = localStorage.getItem(storageKey);
-      return item ? JSON.parse(item) : null;
+      if (!item) return null;
+      const parsed = JSON.parse(item);
+      if (parsed?.sizing) {
+        const cleanSizing: Record<string, number> = {};
+        Object.entries(parsed.sizing).forEach(([k, v]) => {
+          const num = Number(v);
+          const matchedCol = columns.find((c: any) => (c.id || c.accessorKey) === k) as any;
+          const max = typeof matchedCol?.maxSize === 'number' ? matchedCol.maxSize : 350;
+          if (!isNaN(num) && num > 30) {
+            cleanSizing[k] = Math.min(num, max);
+          }
+        });
+        parsed.sizing = cleanSizing;
+      }
+      return parsed;
     } catch (e) {
       return null;
     }
-  }, [storageKey]);
+  }, [storageKey, columns]);
 
   const [columnSizing, setColumnSizing] = useState<Record<string, number>>(() => savedLayout?.sizing || {});
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(() => {
@@ -89,19 +103,24 @@ export function useDataTableLayout<TData>({
       const newSizing: Record<string, number> = {};
       visibleFlatColumns.forEach((col) => {
         const cells = Array.from(tableEl.querySelectorAll(`[data-col-id="${col.id}"]`));
-        let maxW = 50;
+        let maxW = 40;
         cells.forEach((cell) => {
+          const innerEl = cell.firstElementChild as HTMLElement | null;
+          const contentW = innerEl ? Math.max(innerEl.scrollWidth || 0, innerEl.offsetWidth || 0) : 0;
           const textLen = (cell.textContent || '').trim().length;
-          const estimated = Math.max(cell.scrollWidth || 0, textLen * 9 + 32);
+          const estimated = Math.max(contentW, textLen * 8.5 + 20);
           if (estimated > maxW) maxW = estimated;
         });
-        newSizing[col.id] = Math.min(Math.max(maxW + 12, 60), 400);
+        const matchedCol = columns.find((c: any) => (c.id || c.accessorKey) === col.id) as any;
+        const maxLimit = typeof matchedCol?.maxSize === 'number' ? matchedCol.maxSize : 250;
+        const minLimit = typeof matchedCol?.minSize === 'number' ? matchedCol.minSize : 45;
+        newSizing[col.id] = Math.min(Math.max(maxW + 10, minLimit), maxLimit);
       });
       setColumnSizing(newSizing);
       saveLayoutToStorage(newSizing, columnVisibility, columnOrder, columnAlignments);
       showToast('Đã tự căn chỉnh kích thước các cột vừa nội dung', 'success');
     },
-    [tableScrollRef, columnVisibility, columnOrder, columnAlignments, saveLayoutToStorage]
+    [tableScrollRef, columns, columnVisibility, columnOrder, columnAlignments, saveLayoutToStorage]
   );
 
   const handleResetColumnWidths = useCallback(() => {

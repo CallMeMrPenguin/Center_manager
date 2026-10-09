@@ -20,43 +20,16 @@ import { DataTableBody } from './DataTableBody';
 import { useDataTableLayout } from './useDataTableLayout';
 
 export function DataTable<TData>({
-  data,
-  columns,
-  loading = false,
-  loadingMessage = 'Đang tải dữ liệu...',
-  emptyMessage = 'Không tìm thấy dữ liệu phù hợp.',
-  pageSize = 20,
-  showPagination = true,
-  enableGlobalSearch = true,
-  enableColumnVisibility = true,
-  enableRowSelection = false,
-  enableColumnResizing = true,
-  enableColumnReorder = true,
-  enableGrouping = false,
-  enableRowExpansion = false,
-  enableColumnPinning = false,
-  enableMultiSort = true,
-  enableVirtualization,
-  enableExport = true,
-  stickyHeader = true,
-  stickyFirstColumn = false,
-  initialSorting = [],
-  initialColumnVisibility = {},
-  initialColumnPinning = {},
-  initialColumnAlignments = {},
-  onRowClick,
-  onSelectionChange,
-  renderSubComponent,
-  onExportExcel,
-  onExportDocx,
-  onExportPdf,
-  onExportPng,
-  toolbarLeft,
-  toolbarRight,
-  searchPlaceholder = 'Tìm kiếm...',
-  exportFilename = 'export',
-  tableId,
-  borderless = false,
+  data, columns, loading = false, loadingMessage = 'Đang tải dữ liệu...',
+  emptyMessage = 'Không tìm thấy dữ liệu phù hợp.', pageSize = 20, showPagination = true,
+  enableGlobalSearch = true, enableColumnVisibility = true, enableRowSelection = false,
+  enableColumnResizing = true, enableColumnReorder = true, enableGrouping = false,
+  enableRowExpansion = false, enableColumnPinning = false, enableMultiSort = true,
+  enableVirtualization, enableExport = true, stickyHeader = true, stickyFirstColumn = false,
+  initialSorting = [], initialColumnVisibility = {}, initialColumnPinning = {},
+  initialColumnAlignments = {}, onRowClick, onSelectionChange, renderSubComponent,
+  onExportExcel, onExportDocx, onExportPdf, onExportPng, toolbarLeft, toolbarRight,
+  searchPlaceholder = 'Tìm kiếm...', exportFilename = 'export', tableId, borderless = false,
   getRowClassName,
 }: DataTableProps<TData>) {
   const tableScrollRef = useRef<HTMLDivElement>(null);
@@ -346,7 +319,14 @@ export function DataTable<TData>({
                 >
                   <colgroup>
                     {table.getVisibleFlatColumns().map((col: any) => {
-                      const manualWidth = columnSizing[col.id] || (typeof col.columnDef?.size === 'number' ? col.columnDef.size : undefined);
+                      if (columnSizing[col.id]) {
+                        return <col key={col.id} style={{ width: `${columnSizing[col.id]}px` }} />;
+                      }
+                      const isFlexCol = isNameColumn(col.columnDef) || ['student_name', 'full_name', 'name'].includes(String(col.id).toLowerCase());
+                      if (isFlexCol && !col.columnDef?.maxSize) {
+                        return <col key={col.id} style={{ minWidth: `${col.columnDef?.minSize || 130}px` }} />;
+                      }
+                      const manualWidth = typeof col.columnDef?.size === 'number' ? col.columnDef.size : undefined;
                       return <col key={col.id} style={manualWidth ? { width: `${manualWidth}px` } : undefined} />;
                     })}
                   </colgroup>
