@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, List, Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Plus, List, Calendar } from 'lucide-react';
 import { api } from '../../api';
 import { showToast } from '../../components/Toast';
 import { CustomSelect } from '../../components/CustomSelect';
@@ -41,17 +41,6 @@ export default function SchedulePage() {
     changeWeek,
   } = useScheduleCalendar();
   const [scheduleScope, setScheduleScope] = useState<'all' | 'week'>('all');
-
-  const changeMonth = (delta: number) => {
-    const nextDate = new Date(yr, mo - 1 + delta, 1);
-    const newMo = `${nextDate.getFullYear()}-${String(nextDate.getMonth() + 1).padStart(2, '0')}`;
-    setSelectedMonth(newMo);
-    const d = nextDate.getDay();
-    const monOffset = d === 0 ? 6 : d - 1;
-    const mon = new Date(nextDate);
-    mon.setDate(nextDate.getDate() - monOffset);
-    setWeekStart(mon);
-  };
   const cachedClasses = dataCache.get<any[]>('/api/classes?search=')?.data;
   const [classesList, setClassesList] = useState<any[]>(() => cachedClasses || []);
   const [classFilter, setClassFilter] = useState('');
@@ -265,46 +254,16 @@ export default function SchedulePage() {
         {/* Integrated Top Toolbar */}
         <div className="flex flex-wrap items-center justify-between gap-3 bg-white dark:bg-[#111728] border-b border-slate-200 dark:border-white/10 px-4 py-2.5 shrink-0">
           <div className="flex items-center gap-2 flex-wrap">
-            {/* Merged Date & Scope Navigation */}
-            <div className="flex items-center gap-1 bg-slate-100 dark:bg-white/5 p-1 rounded-xl">
-              <button
-                type="button"
-                onClick={() => {
-                  if (scheduleScope === 'all') {
-                    changeMonth(-1);
-                  } else {
-                    changeWeek(-1);
-                  }
-                }}
-                className="p-1.5 rounded-lg hover:bg-slate-200 dark:hover:bg-white/10 text-slate-700 dark:text-white transition cursor-pointer border-0"
-                title={scheduleScope === 'all' ? 'Tháng trước' : 'Tuần trước'}
-              >
-                <ChevronLeft size={14} />
-              </button>
-              <ScheduleDatePicker
-                selectedMonth={selectedMonth}
-                onSelectMonth={setSelectedMonth}
-                scope={scheduleScope}
-                onSelectScope={setScheduleScope}
-                weekStart={weekStart}
-                onSelectWeekStart={setWeekStart}
-                today={today}
-              />
-              <button
-                type="button"
-                onClick={() => {
-                  if (scheduleScope === 'all') {
-                    changeMonth(1);
-                  } else {
-                    changeWeek(1);
-                  }
-                }}
-                className="p-1.5 rounded-lg hover:bg-slate-200 dark:hover:bg-white/10 text-slate-700 dark:text-white transition cursor-pointer border-0"
-                title={scheduleScope === 'all' ? 'Tháng sau' : 'Tuần sau'}
-              >
-                <ChevronRight size={14} />
-              </button>
-            </div>
+            {/* Datepicker */}
+            <ScheduleDatePicker
+              selectedMonth={selectedMonth}
+              onSelectMonth={setSelectedMonth}
+              scope={scheduleScope}
+              onSelectScope={setScheduleScope}
+              weekStart={weekStart}
+              onSelectWeekStart={setWeekStart}
+              today={today}
+            />
 
             <CustomSelect
               value={classFilter}

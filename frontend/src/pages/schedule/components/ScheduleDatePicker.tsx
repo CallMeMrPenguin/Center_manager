@@ -165,7 +165,7 @@ export const ScheduleDatePicker: React.FC<ScheduleDatePickerProps> = ({
   // Trigger button label
   const triggerLabel = useMemo(() => {
     if (scope === 'all') {
-      return `Tháng ${mo}/${yr} (Cả tháng)`;
+      return `Tháng ${mo}/${yr}`;
     }
     if (activeWeek) {
       return `Tuần ${activeWeek.index} (${activeWeek.rangeLabel})`;
@@ -190,7 +190,7 @@ export const ScheduleDatePicker: React.FC<ScheduleDatePickerProps> = ({
       {/* Popover Card: Calendar on Left, Tabs on Right */}
       {open && (
         <div className="absolute left-0 sm:left-auto top-full mt-2 z-50 bg-white dark:bg-[#151c2e] border border-slate-200 dark:border-white/10 rounded-2xl shadow-[0_16px_48px_rgba(15,23,42,0.2)] dark:shadow-[0_24px_64px_rgba(0,0,0,0.95)] overflow-hidden flex flex-col sm:flex-row select-none animate-mac-dropdown">
-          {/* ── LEFT COLUMN: Interactive Month Calendar Grid ── */}
+          {/* ── LEFT COLUMN: Interactive Month Calendar Grid (Phần lịch tổng) ── */}
           <div className="p-3.5 w-72 sm:w-80 flex flex-col shrink-0">
             {/* Header: Tháng M YYYY + Prev / Next */}
             <div className="flex items-center justify-between mb-2.5 px-1">
@@ -293,23 +293,34 @@ export const ScheduleDatePicker: React.FC<ScheduleDatePickerProps> = ({
               })}
             </div>
 
-            {/* Bottom info: selection summary */}
-            <div className="mt-3 pt-2 border-t border-slate-100 dark:border-white/5 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
-              <span>Đang chọn:</span>
-              <span className="font-extrabold text-blue-600 dark:text-blue-400">
-                {scope === 'all' ? `Cả tháng (${weeks.length} tuần)` : `Tuần ${activeWeek?.index}`}
-              </span>
+            {/* Bottom Actions: 2 góc cuối phần lịch tổng (Đặt lại góc trái, Hôm nay góc phải) */}
+            <div className="mt-3 pt-2.5 border-t border-slate-100 dark:border-white/5 flex items-center justify-between">
+              <button
+                type="button"
+                onClick={handleReset}
+                className="text-xs font-semibold text-slate-500 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400 transition flex items-center gap-1.5 cursor-pointer border-0 bg-transparent py-1 px-1 rounded-lg"
+              >
+                <RotateCcw size={11} />
+                <span>Đặt lại</span>
+              </button>
+              <button
+                type="button"
+                onClick={handleJumpToday}
+                className="text-xs font-bold text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition cursor-pointer border-0 bg-transparent py-1 px-1 rounded-lg"
+              >
+                Hôm nay
+              </button>
             </div>
           </div>
 
-          {/* ── RIGHT COLUMN: Preset Tabs Panel (Tab bên phải theo yêu cầu) ── */}
-          <div className="w-full sm:w-48 border-t sm:border-t-0 sm:border-l border-slate-200 dark:border-white/10 p-2.5 space-y-1 bg-slate-50/70 dark:bg-[#0f1424] shrink-0 flex flex-col justify-between">
+          {/* ── RIGHT COLUMN: Preset Tabs Panel (Tất cả + Tuần 1-5) ── */}
+          <div className="w-full sm:w-44 border-t sm:border-t-0 sm:border-l border-slate-200 dark:border-white/10 p-2.5 space-y-1 bg-slate-50/70 dark:bg-[#0f1424] shrink-0 flex flex-col">
             <div className="space-y-1">
               <div className="text-[10px] font-black tracking-wider text-slate-400 uppercase px-2 py-1">
                 Khoảng thời gian
               </div>
 
-              {/* Option: Cả tháng (4 tuần) - MẶC ĐỊNH */}
+              {/* Option: Tất cả - MẶC ĐỊNH */}
               <button
                 type="button"
                 onClick={() => {
@@ -322,7 +333,7 @@ export const ScheduleDatePicker: React.FC<ScheduleDatePickerProps> = ({
                     : 'text-slate-700 dark:text-slate-300 hover:bg-slate-200/70 dark:hover:bg-white/10'
                 }`}
               >
-                <span>Cả tháng (4 tuần)</span>
+                <span>Tất cả</span>
                 {scope === 'all' && <span className="w-1.5 h-1.5 rounded-full bg-white shrink-0" />}
               </button>
 
@@ -351,25 +362,6 @@ export const ScheduleDatePicker: React.FC<ScheduleDatePickerProps> = ({
                   </button>
                 );
               })}
-            </div>
-
-            {/* Bottom Actions: Hôm nay + Đặt lại */}
-            <div className="pt-2 border-t border-slate-200 dark:border-white/10 space-y-1">
-              <button
-                type="button"
-                onClick={handleJumpToday}
-                className="w-full text-left px-2.5 py-1.5 rounded-xl text-xs font-bold text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-500/10 transition cursor-pointer border-0"
-              >
-                Hôm nay
-              </button>
-              <button
-                type="button"
-                onClick={handleReset}
-                className="w-full text-left px-2.5 py-1 rounded-xl text-[11px] font-semibold text-slate-500 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-white/5 transition flex items-center gap-1.5 cursor-pointer border-0"
-              >
-                <RotateCcw size={11} />
-                <span>Đặt lại</span>
-              </button>
             </div>
           </div>
         </div>
