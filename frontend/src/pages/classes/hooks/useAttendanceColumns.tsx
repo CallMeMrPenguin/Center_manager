@@ -74,11 +74,12 @@ export function useAttendanceColumns({
       },
       {
         accessorKey: 'student_name',
-        header: () => <span className="font-extrabold min-w-[130px] inline-block text-left">Họ tên</span>,
-        meta: { headerText: 'Họ tên', exportValue: (r: any) => r.student_name },
+        header: 'Họ tên',
+        size: 150,
         minSize: 130,
+        meta: { headerText: 'Họ tên', exportValue: (r: any) => r.student_name },
         cell: ({ row }) => (
-          <div className="min-w-[130px] pr-2">
+          <div className="pr-2">
             <span className="font-extrabold text-slate-900 dark:text-white text-sm sm:text-base whitespace-nowrap">
               {row.original.student_name}
             </span>
@@ -87,7 +88,7 @@ export function useAttendanceColumns({
       },
       {
         accessorKey: 'status',
-        header: () => <span className="font-extrabold min-w-[90px] inline-block text-center">Điểm Danh</span>,
+        header: 'Điểm Danh',
         size: 105,
         minSize: 95,
         maxSize: 115,
@@ -96,7 +97,7 @@ export function useAttendanceColumns({
           const rec = row.original;
           const isAbsent = rec.status === 'Vắng mặt';
           return (
-            <div className="flex items-center justify-center min-w-[90px]">
+            <div className="flex items-center justify-center">
               <button
                 type="button"
                 tabIndex={-1}
@@ -119,10 +120,10 @@ export function useAttendanceColumns({
       {
         accessorKey: 'check_1',
         size: 90,
-        minSize: 80,
+        minSize: 85,
         maxSize: 100,
         header: () => (
-          <div className="flex flex-col items-center justify-center leading-tight py-0.5 min-w-[75px]">
+          <div className="flex flex-col items-center justify-center leading-tight py-0.5">
             <span className="font-extrabold text-xs sm:text-sm">Check 1</span>
             <span className="text-[11px] font-bold text-blue-600 dark:text-blue-400 mt-0.5">
               {colAverages.c1 !== null ? colAverages.c1 : '-'}
@@ -131,7 +132,7 @@ export function useAttendanceColumns({
         ),
         meta: { headerText: 'Check 1', exportValue: (r: any) => Number(r.check_1) > 0 ? format1Dec(Number(r.check_1)) : '-' },
         cell: ({ row }) => (
-          <div className="min-w-[80px] flex justify-center">
+          <div className="flex justify-center">
             <CheckScoreInput
               rec={row.original}
               rowIndex={row.index}
@@ -145,10 +146,10 @@ export function useAttendanceColumns({
       {
         accessorKey: 'check_2',
         size: 90,
-        minSize: 80,
+        minSize: 85,
         maxSize: 100,
         header: () => (
-          <div className="flex flex-col items-center justify-center leading-tight py-0.5 min-w-[75px]">
+          <div className="flex flex-col items-center justify-center leading-tight py-0.5">
             <span className="font-extrabold text-xs sm:text-sm">Check 2</span>
             <span className="text-[11px] font-bold text-purple-600 dark:text-purple-400 mt-0.5">
               {colAverages.c2 !== null ? colAverages.c2 : '-'}
@@ -157,7 +158,7 @@ export function useAttendanceColumns({
         ),
         meta: { headerText: 'Check 2', exportValue: (r: any) => Number(r.check_2) > 0 ? format1Dec(Number(r.check_2)) : '-' },
         cell: ({ row }) => (
-          <div className="min-w-[80px] flex justify-center">
+          <div className="flex justify-center">
             <CheckScoreInput
               rec={row.original}
               rowIndex={row.index}
@@ -171,10 +172,10 @@ export function useAttendanceColumns({
       {
         accessorKey: 'homework',
         size: 90,
-        minSize: 80,
+        minSize: 85,
         maxSize: 100,
         header: () => (
-          <div className="flex flex-col items-center justify-center leading-tight py-0.5 min-w-[75px]">
+          <div className="flex flex-col items-center justify-center leading-tight py-0.5">
             <span className="font-extrabold text-xs sm:text-sm">BTVN 1</span>
             <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">
               {colAverages.hw1 !== null ? colAverages.hw1 : '-'}
@@ -183,7 +184,7 @@ export function useAttendanceColumns({
         ),
         meta: { headerText: 'BTVN 1', exportValue: (r: any) => Number(r.homework) > 0 ? format1Dec(Number(r.homework)) : '-' },
         cell: ({ row }) => (
-          <div className="min-w-[80px] flex justify-center">
+          <div className="flex justify-center">
             <CheckScoreInput
               rec={row.original}
               rowIndex={row.index}
@@ -197,10 +198,10 @@ export function useAttendanceColumns({
       {
         accessorKey: 'homework_2',
         size: 90,
-        minSize: 80,
+        minSize: 85,
         maxSize: 100,
         header: () => (
-          <div className="flex flex-col items-center justify-center leading-tight py-0.5 min-w-[75px]">
+          <div className="flex flex-col items-center justify-center leading-tight py-0.5">
             <span className="font-extrabold text-xs sm:text-sm">BTVN 2</span>
             <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">
               {colAverages.hw2 !== null ? colAverages.hw2 : '-'}
@@ -209,7 +210,7 @@ export function useAttendanceColumns({
         ),
         meta: { headerText: 'BTVN 2', exportValue: (r: any) => Number(r.homework_2) > 0 ? format1Dec(Number(r.homework_2)) : '-' },
         cell: ({ row }) => (
-          <div className="min-w-[80px] flex justify-center">
+          <div className="flex justify-center">
             <CheckScoreInput
               rec={row.original}
               rowIndex={row.index}
@@ -223,10 +224,10 @@ export function useAttendanceColumns({
       {
         accessorKey: 'mock_test',
         size: 90,
-        minSize: 80,
+        minSize: 85,
         maxSize: 100,
         header: () => (
-          <div className="flex flex-col items-center justify-center leading-tight py-0.5 min-w-[75px]">
+          <div className="flex flex-col items-center justify-center leading-tight py-0.5">
             <span className="font-extrabold text-xs sm:text-sm">Luyện Đề</span>
             <span className="text-[11px] font-bold text-amber-600 dark:text-amber-400 mt-0.5">
               {colAverages.mock !== null ? colAverages.mock : '-'}
@@ -235,7 +236,7 @@ export function useAttendanceColumns({
         ),
         meta: { headerText: 'Luyện Đề', exportValue: (r: any) => Number(r.mock_test) > 0 ? format1Dec(Number(r.mock_test)) : '-' },
         cell: ({ row }) => (
-          <div className="min-w-[80px] flex justify-center">
+          <div className="flex justify-center">
             <CheckScoreInput
               rec={row.original}
               rowIndex={row.index}

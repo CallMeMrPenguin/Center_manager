@@ -236,6 +236,13 @@ export function DataTable<TData>({
   const hasActiveFilter = globalFilter !== '' || columnFilters.length > 0;
   const selectedCount = Object.keys(rowSelection).filter((k) => rowSelection[k]).length;
 
+  const totalMinTableWidth = useMemo(() => {
+    return table.getVisibleFlatColumns().reduce((acc: number, col: any) => {
+      const d = col.columnDef;
+      return acc + (columnSizing[col.id] || (typeof d?.size === 'number' ? d.size : typeof d?.minSize === 'number' ? d.minSize : 100));
+    }, 0);
+  }, [table, columnSizing]);
+
   return (
     <div className={`flex flex-col w-full h-full min-h-0 bg-white dark:bg-[#0c0f1e] ${borderless ? '' : 'rounded-2xl border border-slate-200 dark:border-white/10 overflow-hidden shadow-xs'}`}>
       <DataTableToolbar
@@ -315,7 +322,7 @@ export function DataTable<TData>({
           <div
             ref={tableScrollRef}
             className={`w-full overflow-x-auto relative ${useVirt ? 'overflow-y-auto flex-1 min-h-0' : 'overflow-y-visible'}`}
-            style={{ overscrollBehaviorX: 'contain' }}
+            style={{ overscrollBehaviorX: 'contain', WebkitOverflowScrolling: 'touch' }}
           >
             <DndContext
               sensors={sensors}
@@ -324,13 +331,15 @@ export function DataTable<TData>({
             >
               <SortableContext items={orderedHeaderIds} strategy={horizontalListSortingStrategy}>
                 <table
-                  className="text-left text-sm w-full min-w-full data-table-main"
+                  className="text-left text-sm data-table-main"
                   style={{
                     tableLayout:
                       Object.keys(columnSizing).length > 0 ||
                       table.getVisibleFlatColumns().some((c: any) => typeof c.columnDef?.size === 'number')
                         ? 'fixed'
                         : 'auto',
+                    minWidth: totalMinTableWidth ? `${totalMinTableWidth}px` : '100%',
+                    width: '100%',
                     borderCollapse: 'separate',
                     borderSpacing: 0,
                   }}
