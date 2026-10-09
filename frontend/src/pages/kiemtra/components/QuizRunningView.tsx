@@ -60,7 +60,10 @@ export const QuizRunningView: React.FC<QuizRunningViewProps> = ({
   onExitToImport,
   renderFormattedText,
 }) => {
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(isFullscreen);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
+    if (typeof window !== 'undefined' && window.innerWidth < 768) return true;
+    return isFullscreen;
+  });
   const [eliminatedOptions, setEliminatedOptions] = useState<Record<number, string[]>>({});
   const [drawings, setDrawings] = useState<Record<number, string>>({});
 
@@ -160,7 +163,7 @@ export const QuizRunningView: React.FC<QuizRunningViewProps> = ({
   if (!q) return null;
 
   return (
-    <div className="flex-1 flex gap-6 overflow-hidden min-h-0 relative">
+    <div className="flex-1 flex gap-4 md:gap-6 overflow-hidden min-h-0 relative">
       {/* LEFT QUESTION GRID SIDEBAR */}
       <QuizSidebar
         activeQuestions={activeQuestions}
@@ -169,6 +172,7 @@ export const QuizRunningView: React.FC<QuizRunningViewProps> = ({
         userAnswers={userAnswers}
         bookmarkedQuestions={bookmarkedQuestions}
         isSidebarCollapsed={isSidebarCollapsed}
+        onToggleSidebar={() => setIsSidebarCollapsed(p => !p)}
         timerMode={timerMode}
         perQuestionSeconds={perQuestionSeconds}
         setQuestionTimer={setQuestionTimer}
@@ -176,7 +180,7 @@ export const QuizRunningView: React.FC<QuizRunningViewProps> = ({
       />
 
       {/* MAIN QUESTION DISPLAY AREA WITH INTERACTIVE DRAWING CANVAS */}
-      <div className="flex-1 flex flex-col bg-white dark:bg-[#10172c] border border-slate-200 dark:border-white/10 rounded-2xl p-6 sm:p-8 shadow-sm dark:shadow-2xl overflow-y-auto justify-between relative">
+      <div className="flex-1 flex flex-col bg-white dark:bg-[#10172c] border border-slate-200 dark:border-white/10 rounded-2xl p-4 sm:p-6 md:p-8 shadow-sm dark:shadow-2xl overflow-y-auto justify-between relative">
         <DrawingCanvas
           questionId={q.id}
           drawings={drawings}

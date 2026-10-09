@@ -354,6 +354,35 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
     window.addEventListener('mouseup', onUp);
   };
 
+  const handleToolbarTouchStart = (e: React.TouchEvent) => {
+    if (e.touches.length === 0) return;
+    isDraggingToolbarRef.current = true;
+    const touch = e.touches[0];
+    const currentX = toolbarPos ? toolbarPos.x : 0;
+    const currentY = toolbarPos ? toolbarPos.y : 0;
+    toolbarDragOffsetRef.current = { x: touch.clientX - currentX, y: touch.clientY - currentY };
+
+    const onTouchMove = (moveEvt: TouchEvent) => {
+      if (!isDraggingToolbarRef.current || moveEvt.touches.length === 0) return;
+      const t = moveEvt.touches[0];
+      setToolbarPos({
+        x: t.clientX - toolbarDragOffsetRef.current.x,
+        y: t.clientY - toolbarDragOffsetRef.current.y,
+      });
+    };
+
+    const onTouchEnd = () => {
+      isDraggingToolbarRef.current = false;
+      window.removeEventListener('touchmove', onTouchMove);
+      window.removeEventListener('touchend', onTouchEnd);
+      window.removeEventListener('touchcancel', onTouchEnd);
+    };
+
+    window.addEventListener('touchmove', onTouchMove, { passive: true });
+    window.addEventListener('touchend', onTouchEnd);
+    window.addEventListener('touchcancel', onTouchEnd);
+  };
+
   return (
     <div ref={containerRef} className="absolute inset-0 z-30 pointer-events-none overflow-hidden min-h-full min-w-full">
       <canvas
@@ -389,7 +418,7 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
         penSize={penSize} setPenSize={setPenSize} hlSize={hlSize} setHlSize={setHlSize} eraserSize={eraserSize} setEraserSize={setEraserSize}
         canUndo={undoStack.length > 0} canRedo={redoStack.length > 0}
         onUndo={handleUndo} onRedo={handleRedo} onClearAll={handleClearAll}
-        toolbarPos={toolbarPos} onMouseDown={handleToolbarMouseDown}
+        toolbarPos={toolbarPos} onMouseDown={handleToolbarMouseDown} onTouchStart={handleToolbarTouchStart}
       />
     </div>
   );

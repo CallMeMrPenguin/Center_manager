@@ -1,7 +1,5 @@
 import React, { useState, useMemo, useCallback } from 'react';
-import { FolderTree, ChevronDown, ChevronUp, Copy, Check, FileSpreadsheet } from 'lucide-react';
-import { CustomSelect } from '../../../components/CustomSelect';
-import { SegmentedControl } from '../../../components/SegmentedControl';
+import { Copy, Check, FileSpreadsheet } from 'lucide-react';
 import { GroupCardItem } from './GroupCardItem';
 import { computeSmartGroups } from '../utils/computeSmartGroups';
 import { showToast } from '../../../components/Toast';
@@ -22,29 +20,14 @@ export const SmartGroupingSection: React.FC<SmartGroupingSectionProps> = ({
   selectedClassId,
   onSelectRankingStudent,
 }) => {
-  const [groupingScope, setGroupingScope] = useState<'current' | 'grade' | 'all'>('current');
-  const [groupingGradeFilter, setGroupingGradeFilter] = useState('');
-  const [groupingMode, setGroupingMode] = useState<'tier' | 'kmeans'>('tier');
-  const [kmeansK, setKmeansK] = useState(3);
   const [copiedGroupText, setCopiedGroupText] = useState(false);
-
-  const availableGrades = useMemo(() => {
-    const gradesSet = new Set<string>();
-    classes.forEach(c => { if (c.grade) gradesSet.add(c.grade); });
-    return Array.from(gradesSet).sort();
-  }, [classes]);
 
   const smartGroups = useMemo(() => {
     return computeSmartGroups({
       studentRankings,
       selectedClassId,
-      groupingScope,
-      groupingGradeFilter,
-      classes,
-      groupingMode,
-      kmeansK,
     });
-  }, [studentRankings, selectedClassId, groupingScope, groupingGradeFilter, classes, groupingMode, kmeansK]);
+  }, [studentRankings, selectedClassId]);
 
   const handleCopyGrouping = useCallback(() => {
     if (!smartGroups || smartGroups.length === 0) {
@@ -53,8 +36,7 @@ export const SmartGroupingSection: React.FC<SmartGroupingSectionProps> = ({
     }
     const currentClass = classes.find(c => String(c.id) === selectedClassId);
     const className = currentClass ? currentClass.class_name : 'Tất Cả Lớp';
-    const modeName = groupingMode === 'tier' ? 'Theo Chuẩn Học Lực' : `Tự Động Phân Cụm K-Means (${kmeansK} Nhóm)`;
-    let text = `=== KẾT QUẢ GỢI Ý PHÂN NHÓM HỌC TẬP ===\nLớp: ${className} | Tổng số: ${filteredRankings.length} học sinh\nPhương pháp: ${modeName}\n\n`;
+    let text = `=== KẾT QUẢ GỢI Ý PHÂN NHÓM HỌC TẬP ===\nLớp: ${className} | Tổng số: ${filteredRankings.length} học sinh\nPhương pháp: Theo Học Lực\n\n`;
     smartGroups.forEach(g => {
       text += `[${g.title.toUpperCase()}] (${g.students.length} học sinh | EMA TB: ${g.avgEma} | SD: ${g.groupSd})\nMục tiêu: ${g.pedagogyAdvice}\n`;
       if (g.students.length === 0) text += `  (Chưa có học sinh)\n`;
@@ -73,7 +55,7 @@ export const SmartGroupingSection: React.FC<SmartGroupingSectionProps> = ({
       showToast('Đã sao chép danh sách phân nhóm vào clipboard!', 'success');
       setTimeout(() => setCopiedGroupText(false), 2500);
     }).catch(() => showToast('Không thể sao chép vào clipboard', 'error'));
-  }, [smartGroups, classes, selectedClassId, groupingMode, kmeansK, filteredRankings]);
+  }, [smartGroups, classes, selectedClassId, filteredRankings]);
 
   const handleExportGroupingExcel = useCallback(async () => {
     if (!smartGroups || smartGroups.length === 0) {
@@ -149,109 +131,46 @@ export const SmartGroupingSection: React.FC<SmartGroupingSectionProps> = ({
   }, [smartGroups, classes, selectedClassId]);
 
   return (
-    <div className="bg-white dark:bg-[#0b0f19] rounded-2xl p-6 shadow-[0_4px_20px_-4px_rgba(15,23,42,0.08),0_2px_4px_-1px_rgba(15,23,42,0.04)] dark:shadow-xl space-y-6 animate-cascade-3">
+    <div className="bg-white dark:bg-[#0b0f19] rounded-2xl p-6 shadow-sm dark:shadow-xl space-y-5 animate-cascade-3">
       {/* Header Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-4 select-none pb-1">
+      <div className="flex flex-wrap items-center justify-between gap-4 select-none pb-1 border-b border-slate-100 dark:border-white/5">
         <div>
           <h3 className="text-base font-black text-slate-900 dark:text-white uppercase tracking-wider">
-            Phân Nhóm Thông Minh
+            Phân Nhóm
           </h3>
-          <p className="text-xs text-slate-500 dark:text-slate-400 font-semibold mt-0.5">
-            Tự động chia học sinh thành các nhóm năng lực để giảng dạy phân hóa và giao bài tập phù hợp.
-          </p>
+        </div>
+
+        {/* Export Actions */}
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={handleCopyGrouping}
+            className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-[#1a233a] dark:hover:bg-[#253252] text-slate-700 dark:text-slate-200 text-xs font-bold transition cursor-pointer flex items-center gap-1.5"
+          >
+            {copiedGroupText ? <Check size={13} className="text-emerald-500 dark:text-emerald-400" /> : <Copy size={13} />}
+            <span>{copiedGroupText ? 'Đã chép' : 'Sao chép'}</span>
+          </button>
+          <button
+            type="button"
+            onClick={handleExportGroupingExcel}
+            className="px-3 py-1.5 rounded-lg bg-emerald-600/10 hover:bg-emerald-600/20 dark:bg-emerald-600/20 dark:hover:bg-emerald-600/30 text-emerald-700 dark:text-emerald-300 text-xs font-bold transition cursor-pointer flex items-center gap-1.5"
+          >
+            <FileSpreadsheet size={13} />
+            <span>Xuất Excel</span>
+          </button>
         </div>
       </div>
 
-      <div className="space-y-6">
-          {/* Scope, Algorithm & Export Toolbar */}
-          <div className="flex flex-wrap items-center justify-between gap-4 bg-slate-50 dark:bg-[#0e1322] p-4 rounded-xl">
-            <div className="flex flex-wrap items-center gap-4">
-              {/* Scope Selector with Sliding Indicator */}
-              <div className="flex items-center gap-2">
-                <span className="text-[10px] uppercase font-black text-slate-500 dark:text-slate-400">Phạm Vi:</span>
-                <SegmentedControl<'current' | 'grade' | 'all'>
-                  value={groupingScope}
-                  onChange={setGroupingScope}
-                  options={[
-                    { value: 'current', label: 'Lớp Hiện Tại' },
-                    { value: 'grade', label: 'Toàn Bộ Khối' },
-                    { value: 'all', label: 'Toàn Trung Tâm' },
-                  ]}
-                  size="xs"
-                />
-              </div>
-
-              {/* Grade Selector when groupingScope === 'grade' */}
-              {groupingScope === 'grade' && availableGrades.length > 0 && (
-                <div className="w-36">
-                  <CustomSelect
-                    value={groupingGradeFilter}
-                    onChange={(val) => setGroupingGradeFilter(String(val))}
-                    options={availableGrades.map(g => ({ value: g, label: g }))}
-                  />
-                </div>
-              )}
-
-              {/* Algorithm Mode */}
-              <div className="flex items-center gap-2">
-                <span className="text-[10px] uppercase font-black text-slate-500 dark:text-slate-400">Thuật Toán:</span>
-                <SegmentedControl<'tier' | 'kmeans'>
-                  value={groupingMode}
-                  onChange={setGroupingMode}
-                  options={[
-                    { value: 'tier', label: 'Theo Chuẩn Học Lực (3 Nhóm)' },
-                    { value: 'kmeans', label: 'Tự Động K-Means' },
-                  ]}
-                  size="xs"
-                />
-
-                {groupingMode === 'kmeans' && (
-                  <SegmentedControl<string>
-                    value={String(kmeansK)}
-                    onChange={(val) => setKmeansK(Number(val))}
-                    options={[
-                      { value: '2', label: '2k' },
-                      { value: '3', label: '3k' },
-                      { value: '4', label: '4k' },
-                    ]}
-                    size="xs"
-                  />
-                )}
-              </div>
-            </div>
-
-            {/* Export Actions */}
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={handleCopyGrouping}
-                className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-[#1a233a] dark:hover:bg-[#253252] text-slate-700 dark:text-slate-200 text-xs font-bold transition cursor-pointer flex items-center gap-1.5"
-              >
-                {copiedGroupText ? <Check size={13} className="text-emerald-500 dark:text-emerald-400" /> : <Copy size={13} />}
-                <span>{copiedGroupText ? 'Đã chép' : 'Sao chép'}</span>
-              </button>
-              <button
-                type="button"
-                onClick={handleExportGroupingExcel}
-                className="px-3 py-1.5 rounded-lg bg-emerald-600/10 hover:bg-emerald-600/20 dark:bg-emerald-600/20 dark:hover:bg-emerald-600/30 text-emerald-700 dark:text-emerald-300 text-xs font-bold transition cursor-pointer flex items-center gap-1.5"
-              >
-                <FileSpreadsheet size={13} />
-                <span>Xuất Excel</span>
-              </button>
-            </div>
-          </div>
-
-          {/* Group Cards Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-            {smartGroups.map(g => (
-              <GroupCardItem
-                key={g.id}
-                group={g}
-                onSelectRankingStudent={onSelectRankingStudent}
-              />
-            ))}
-          </div>
-        </div>
+      {/* 4 Group Cards Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {smartGroups.map(g => (
+          <GroupCardItem
+            key={g.id}
+            group={g}
+            onSelectRankingStudent={onSelectRankingStudent}
+          />
+        ))}
+      </div>
     </div>
   );
 };

@@ -140,10 +140,10 @@ export const ReportsPage: React.FC = () => {
         value={activeReportTab}
         onChange={(tabId) => handleTabChange(tabId)}
         tabs={[
-          { value: 'overview', label: 'Tổng Quan Học Lực' },
-          { value: 'deep', label: 'Phân nhóm và Biến động' },
-          { value: 'skills', label: 'Phân Tích Kỹ Năng & Unit' },
-          { value: 'benchmark', label: 'So Sánh Giữa Các Lớp' },
+          { value: 'overview', label: 'Tổng quan' },
+          { value: 'deep', label: 'Phân nhóm' },
+          { value: 'skills', label: 'Kỹ năng & Unit' },
+          { value: 'benchmark', label: 'So sánh lớp' },
         ]}
         size="md"
         className="w-full mb-2"

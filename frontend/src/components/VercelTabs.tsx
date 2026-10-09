@@ -57,27 +57,50 @@ export function VercelTabs<T extends string = string>({
     }
   }, [hoveredIndex]);
 
+  const tablistRef = useRef<HTMLDivElement>(null);
+
   const updateActivePosition = useCallback(() => {
     if (activeIndex >= 0) {
       const activeElement = tabRefs.current[activeIndex];
       if (activeElement) {
         const { offsetLeft, offsetWidth } = activeElement;
-        setActiveStyle({
-          left: `${offsetLeft}px`,
-          width: `${offsetWidth}px`,
-        });
+        if (offsetWidth > 0) {
+          setActiveStyle({
+            left: `${offsetLeft}px`,
+            width: `${offsetWidth}px`,
+          });
+        } else {
+          requestAnimationFrame(() => {
+            const el = tabRefs.current[activeIndex];
+            if (el && el.offsetWidth > 0) {
+              setActiveStyle({
+                left: `${el.offsetLeft}px`,
+                width: `${el.offsetWidth}px`,
+              });
+            }
+          });
+        }
       }
     }
   }, [activeIndex]);
 
   useEffect(() => {
     updateActivePosition();
-  }, [updateActivePosition]);
+    const t1 = setTimeout(updateActivePosition, 50);
+    const t2 = setTimeout(updateActivePosition, 200);
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+    };
+  }, [updateActivePosition, activeIndex, tabs]);
 
   useEffect(() => {
-    requestAnimationFrame(() => {
+    if (!tablistRef.current) return;
+    const ro = new ResizeObserver(() => {
       updateActivePosition();
     });
+    ro.observe(tablistRef.current);
+    return () => ro.disconnect();
   }, [updateActivePosition]);
 
   useEffect(() => {
@@ -86,6 +109,20 @@ export function VercelTabs<T extends string = string>({
   }, [updateActivePosition]);
 
   const handleSelect = (tabValue: T) => {
+    const targetIdx = tabs.findIndex((tab) => tab.value === tabValue);
+    if (targetIdx >= 0) {
+      const activeElement = tabRefs.current[targetIdx];
+      if (activeElement) {
+        const { offsetLeft, offsetWidth } = activeElement;
+        setActiveStyle({
+          left: `${offsetLeft}px`,
+          width: `${offsetWidth}px`,
+        });
+        try {
+          activeElement.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        } catch (e) {}
+      }
+    }
     if (controlledValue === undefined) {
       setInternalValue(tabValue);
     }
@@ -97,8 +134,9 @@ export function VercelTabs<T extends string = string>({
   return (
     <div className={`flex w-full flex-col ${className}`}>
       <div
+        ref={tablistRef}
         role="tablist"
-        className="relative flex items-center h-auto select-none gap-[6px] bg-transparent p-0 border-b border-slate-200 dark:border-white/10 overflow-x-auto no-scrollbar scroll-smooth"
+        className="relative flex items-center h-auto select-none gap-[6px] bg-transparent p-0 border-b border-slate-200 dark:border-white/10 overflow-x-auto scroll-smooth [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
       >
         {/* Hover Highlight */}
         <div

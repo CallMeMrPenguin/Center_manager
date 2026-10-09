@@ -38,8 +38,9 @@ export const HorizontalTimelineGrid: React.FC<HorizontalTimelineGridProps> = ({
   setCtxMenu,
 }) => {
   const { isDark } = useTheme();
-  // Default hour column width increased to 140px for generous spacing and readability
-  const [hourWidth, setHourWidth] = useState<number>(140);
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+  // Default hour column width: 70px on mobile (50%), 140px on desktop (100%)
+  const [hourWidth, setHourWidth] = useState<number>(() => (isMobile ? 70 : 140));
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Mouse Free-Pan Drag State
@@ -54,18 +55,18 @@ export const HorizontalTimelineGrid: React.FC<HorizontalTimelineGridProps> = ({
     [sessions]
   );
 
-  // Zoom handlers
+  // Zoom handlers: min 50% (70px), max 200% (280px)
   const handleZoomIn = useCallback(() => {
-    setHourWidth((prev) => Math.min(240, prev + 15));
+    setHourWidth((prev) => Math.min(280, prev + 15));
   }, []);
 
   const handleZoomOut = useCallback(() => {
-    setHourWidth((prev) => Math.max(75, prev - 15));
+    setHourWidth((prev) => Math.max(70, prev - 15));
   }, []);
 
   const handleResetZoom = useCallback(() => {
-    setHourWidth(140);
-  }, []);
+    setHourWidth(isMobile ? 70 : 140);
+  }, [isMobile]);
 
   // Keyboard zoom shortcuts (+ and -)
   useEffect(() => {
@@ -196,23 +197,13 @@ export const HorizontalTimelineGrid: React.FC<HorizontalTimelineGridProps> = ({
             <button
               type="button"
               onClick={handleZoomIn}
-              disabled={hourWidth >= 240}
+              disabled={hourWidth >= 280}
               className="p-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-100 dark:hover:bg-white/5 disabled:opacity-30 disabled:cursor-not-allowed transition cursor-pointer"
               title="Phóng to tỉ lệ giờ (Phím +)"
             >
               <ZoomIn size={13} />
             </button>
           </div>
-
-          <button
-            type="button"
-            onClick={() => openAdd()}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition shadow-xs cursor-pointer"
-            title="Thêm buổi học mới"
-          >
-            <Plus size={13} />
-            <span>Thêm Buổi</span>
-          </button>
         </div>
       </div>
 
@@ -227,10 +218,10 @@ export const HorizontalTimelineGrid: React.FC<HorizontalTimelineGridProps> = ({
         style={{ scrollBehavior: 'auto' }}
       >
         <div style={{ minWidth: `${140 + timelineTrackWidth}px` }} className="relative flex flex-col">
-          {/* Sticky Top Header: Hour Scale */}
-          <div className="sticky top-0 z-30 flex bg-slate-200/90 dark:bg-[#111728] border-b border-slate-300 dark:border-white/10 backdrop-blur-none">
+          {/* Sticky Top Header: Hour Scale (Solid 100% Opaque, No Transparency) */}
+          <div className="sticky top-0 z-30 flex bg-slate-200 dark:bg-[#111728] border-b border-slate-300 dark:border-white/10">
             {/* Corner Cell: Y-Axis Label */}
-            <div className="sticky left-0 z-40 w-[140px] shrink-0 p-2 text-center text-[10px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 bg-slate-200/95 dark:bg-[#111728] border-r border-slate-300 dark:border-white/10 flex items-center justify-center">
+            <div className="sticky left-0 z-40 w-[140px] shrink-0 p-2 text-center text-[10px] font-black uppercase tracking-wider text-slate-700 dark:text-slate-300 bg-slate-200 dark:bg-[#111728] border-r border-slate-300 dark:border-white/10 flex items-center justify-center">
               THỨ / NGÀY
             </div>
 
@@ -280,16 +271,16 @@ export const HorizontalTimelineGrid: React.FC<HorizontalTimelineGridProps> = ({
                     }
                   }}
                 >
-                  {/* Sticky Left Day Header */}
+                  {/* Sticky Left Day Header (Solid 100% Opaque, No Transparency) */}
                   <div
-                    className={`sticky left-0 z-20 w-[140px] shrink-0 p-2 border-r border-slate-200 dark:border-white/10 flex flex-col justify-between ${
+                    className={`sticky left-0 z-20 w-[140px] shrink-0 p-2 border-r border-slate-300 dark:border-white/10 flex flex-col justify-between ${
                       isToday
-                        ? 'bg-blue-100/90 dark:bg-[#152042]'
+                        ? 'bg-blue-100 dark:bg-[#152042]'
                         : holiday?.isPublicHoliday
-                        ? 'bg-rose-100/70 dark:bg-[#24131d]'
+                        ? 'bg-rose-100 dark:bg-[#24131d]'
                         : d.isWeekend
-                        ? 'bg-rose-50/80 dark:bg-[#1c1322]'
-                        : 'bg-slate-50/90 dark:bg-[#0f1424]'
+                        ? 'bg-rose-50 dark:bg-[#1c1322]'
+                        : 'bg-slate-100 dark:bg-[#0f1424]'
                     }`}
                   >
                     <div>

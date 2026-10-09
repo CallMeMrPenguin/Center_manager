@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Plus } from 'lucide-react';
+import { Plus, List, Calendar } from 'lucide-react';
 import { api } from '../../api';
 import { showToast } from '../../components/Toast';
 import { CustomSelect } from '../../components/CustomSelect';
 import { CustomDatePicker } from '../../components/CustomDatePicker';
 import { DataTable } from '../../components/DataTable';
-import { SegmentedControl } from '../../components/SegmentedControl';
 import { getLocalDateStr } from '../../utils';
 import { registerGoogleHolidays } from '../../utils/vietnamHolidays';
 import {
@@ -256,7 +255,7 @@ export default function SchedulePage() {
                 if (val) setSelectedMonth(val.slice(0, 7));
               }}
               placeholder="Chọn tháng..."
-              className="w-48"
+              className="w-36 sm:w-44"
             />
             <CustomSelect
               value={classFilter}
@@ -265,28 +264,25 @@ export default function SchedulePage() {
                 { value: '', label: 'Tất cả lớp học' },
                 ...classesList.map((c) => ({ value: String(c.id), label: c.class_name })),
               ]}
-              className="w-48"
+              className="w-36 sm:w-44"
             />
           </div>
           <div className="flex items-center gap-2">
-            <SegmentedControl<'month' | 'week' | 'list'>
-              value={viewMode}
-              onChange={handleChangeViewMode}
-              options={[
-                { value: 'month', label: 'LỊCH THÁNG' },
-                { value: 'week', label: 'LỊCH TUẦN' },
-                { value: 'list', label: 'DANH SÁCH' },
-              ]}
-              activeColor="bg-[#2563eb]"
-              size="sm"
-            />
+            <button
+              type="button"
+              onClick={() => handleChangeViewMode(viewMode === 'week' ? 'list' : 'week')}
+              className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 text-slate-700 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition cursor-pointer shadow-xs border-0"
+              title={viewMode === 'week' ? 'Chuyển sang chế độ danh sách' : 'Chuyển sang chế độ lịch tuần'}
+            >
+              {viewMode === 'week' ? <List size={16} /> : <Calendar size={16} />}
+            </button>
           </div>
         </div>
 
-        {/* MONTH / WEEK VIEW */}
-        {(viewMode === 'month' || viewMode === 'week') && (
+        {/* WEEK TIMELINE VIEW */}
+        {viewMode === 'week' && (
           <ScheduleCalendarView
-            viewMode={viewMode}
+            viewMode="week"
             selectedMonth={selectedMonth}
             totalCells={totalCells}
             startOff={startOff}

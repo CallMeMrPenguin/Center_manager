@@ -34,6 +34,7 @@ interface DrawingToolbarProps {
   onClearAll: () => void;
   toolbarPos: { x: number; y: number } | null;
   onMouseDown: (e: React.MouseEvent) => void;
+  onTouchStart?: (e: React.TouchEvent) => void;
 }
 
 const PRESET_COLORS = [
@@ -65,6 +66,7 @@ export const DrawingToolbar: React.FC<DrawingToolbarProps> = ({
   onClearAll,
   toolbarPos,
   onMouseDown,
+  onTouchStart,
 }) => {
   const [isCollapsed, setIsCollapsed] = useState<boolean>(false);
   const [showColorPopover, setShowColorPopover] = useState<boolean>(false);
@@ -91,7 +93,8 @@ export const DrawingToolbar: React.FC<DrawingToolbarProps> = ({
       {/* Draggable Grip Handle */}
       <div
         onMouseDown={onMouseDown}
-        className="p-1 text-slate-400 hover:text-slate-600 cursor-move shrink-0"
+        onTouchStart={onTouchStart}
+        className="p-1 text-slate-400 hover:text-slate-600 cursor-move shrink-0 touch-none"
         title="Kéo thả để di chuyển thanh công cụ vẽ"
       >
         <GripVertical size={14} />

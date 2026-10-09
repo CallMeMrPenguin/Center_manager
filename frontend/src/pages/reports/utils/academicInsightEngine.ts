@@ -222,7 +222,7 @@ export function generateAcademicInsights(params: {
     const isGood = overall >= 8.0;
     const isMedium = overall >= 6.5;
     return {
-      subjectTitle: `ĐÁNH GIÁ CHI TIẾT HỌC SINH: ${studentName.toUpperCase()}`,
+      subjectTitle: 'ĐÁNH GIÁ',
       overallBadge: `HẠNG ${tier.name.toUpperCase()} (PI ${pi})`,
       badgeColor: tier.color,
       metrics,
@@ -320,7 +320,7 @@ export function generateAcademicInsights(params: {
     });
 
     return {
-      subjectTitle: `TỔNG KẾT HỌC THUẬT LỚP: ${className.toUpperCase()} (${totalStudents} HỌC SINH)`,
+      subjectTitle: 'ĐÁNH GIÁ',
       overallBadge: `${goodRate >= 50 ? 'LỚP CHẤT LƯỢNG TỐT' : 'LỚP CẦN NÂNG CAO'} (ĐIỂM TB ${overall})`,
       badgeColor: overall >= 7.0 ? '#10b981' : '#6366f1',
       metrics,
@@ -382,7 +382,7 @@ export function generateAcademicInsights(params: {
   });
 
   return {
-    subjectTitle: `TỔNG QUAN HỌC LỰC TOÀN TRUNG TÂM (${totalStudents} HỌC SINH - ${totalClasses} LỚP)`,
+    subjectTitle: 'ĐÁNH GIÁ',
     overallBadge: `CHẤT LƯỢNG TOÀN DIỆN (ĐIỂM TB ${overall})`,
     badgeColor: '#10b981',
     metrics,

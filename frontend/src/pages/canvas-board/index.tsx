@@ -41,17 +41,35 @@ export default function CanvasBoardPage() {
 
   const { zoom, setZoom, pan, setPan, isPanningRef, lastMousePosRef, isShiftPressedRef } = useCanvasViewport();
 
-  const [gridType, setGridType] = useState<GridType>('grid');
-  const [activeTool, setActiveTool] = useState<CanvasTool>('pen');
-  const [selectedColor, setSelectedColor] = useState<string>('#ff3344');
-  const [selectedBgColor, setSelectedBgColor] = useState<string>('#ffffff');
-  const [selectedFontFamily, setSelectedFontFamily] = useState<string>('"Times New Roman", Times, serif');
-  const [textSize, setTextSize] = useState<number>(20);
-  const [penSize, setPenSize] = useState<number>(4);
-  const [hlSize, setHlSize] = useState<number>(24);
-  const [eraserSize, setEraserSize] = useState<number>(50);
-  const [shapeSize, setShapeSize] = useState<number>(3);
+  const [initialSettings] = useState(() => {
+    try {
+      const raw = localStorage.getItem('canvas_settings');
+      return raw ? JSON.parse(raw) : {};
+    } catch {
+      return {};
+    }
+  });
+
+  const [gridType, setGridType] = useState<GridType>(initialSettings.gridType || 'grid');
+  const [activeTool, setActiveTool] = useState<CanvasTool>(initialSettings.activeTool || 'pen');
+  const [selectedColor, setSelectedColor] = useState<string>(initialSettings.selectedColor || '#ff3344');
+  const [selectedBgColor, setSelectedBgColor] = useState<string>(initialSettings.selectedBgColor || '#ffffff');
+  const [selectedFontFamily, setSelectedFontFamily] = useState<string>(initialSettings.selectedFontFamily || '"Times New Roman", Times, serif');
+  const [textSize, setTextSize] = useState<number>(initialSettings.textSize || 20);
+  const [penSize, setPenSize] = useState<number>(initialSettings.penSize || 4);
+  const [hlSize, setHlSize] = useState<number>(initialSettings.hlSize || 24);
+  const [eraserSize, setEraserSize] = useState<number>(initialSettings.eraserSize || 50);
+  const [shapeSize, setShapeSize] = useState<number>(initialSettings.shapeSize || 3);
   const [isFullscreen, setIsFullscreen] = useState(false);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('canvas_settings', JSON.stringify({
+        gridType, activeTool, selectedColor, selectedBgColor,
+        selectedFontFamily, textSize, penSize, hlSize, eraserSize, shapeSize
+      }));
+    } catch {}
+  }, [gridType, activeTool, selectedColor, selectedBgColor, selectedFontFamily, textSize, penSize, hlSize, eraserSize, shapeSize]);
 
   const [pageStrokes, setPageStrokes] = useState<Record<number, StrokeRecord[]>>({});
   const pageStrokesRef = useRef<Record<number, StrokeRecord[]>>(pageStrokes);

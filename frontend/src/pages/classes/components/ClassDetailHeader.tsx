@@ -95,14 +95,14 @@ export const ClassDetailHeader: React.FC<ClassDetailHeaderProps> = ({
       </div>
 
       {/* RIGHT: ACTIONS (DATE PICKER & ENROLL BUTTON) */}
-      <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+      <div className="w-full sm:w-auto flex flex-wrap items-center justify-between sm:justify-end gap-2 shrink-0">
         {activeSubTab === 'grades' && (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2">
             <CustomDatePicker
               value={attendanceDate}
               onChange={onDateChange}
               highlightDaysOfWeek={selectedClassWeeklyDays}
-              className="w-44"
+              className="w-36 sm:w-44"
             />
             {onDeleteAttendanceDate && (
               <button
@@ -124,11 +124,11 @@ export const ClassDetailHeader: React.FC<ClassDetailHeaderProps> = ({
           <button
             type="button"
             onClick={onOpenEnrollModal}
-            className="group flex items-center gap-1.5 bg-blue-600 hover:bg-blue-500 text-white px-3.5 py-2 rounded-xl font-black text-xs shadow-xs hover:shadow-sm transition-all duration-200 cursor-pointer border-0 shrink-0"
+            className="group flex items-center gap-1.5 bg-blue-600 hover:bg-blue-500 text-white px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-xl font-black text-xs shadow-xs hover:shadow-sm transition-all duration-200 cursor-pointer border-0 shrink-0"
             title="Ghi Danh Học Sinh Vào Lớp"
           >
             <UserPlus size={14} className="shrink-0" />
-            <span>Ghi Danh Học Sinh</span>
+            <span>Ghi Danh</span>
           </button>
         )}
       </div>

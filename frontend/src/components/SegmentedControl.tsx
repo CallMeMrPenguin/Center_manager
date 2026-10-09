@@ -63,15 +63,46 @@ export function SegmentedControl<T extends string = string>({
 
   const activeIndex = items.findIndex((btn) => (btn.value ?? btn.id) === activeVal);
 
-  useEffect(() => {
+  const updateIndicator = useCallback(() => {
     const activeElement = buttonRefs.current[activeIndex];
     if (activeElement) {
-      setIndicatorStyle({
-        left: activeElement.offsetLeft,
-        width: activeElement.offsetWidth,
-      });
+      if (activeElement.offsetWidth > 0) {
+        setIndicatorStyle({
+          left: activeElement.offsetLeft,
+          width: activeElement.offsetWidth,
+        });
+      } else {
+        requestAnimationFrame(() => {
+          const el = buttonRefs.current[activeIndex];
+          if (el && el.offsetWidth > 0) {
+            setIndicatorStyle({
+              left: el.offsetLeft,
+              width: el.offsetWidth,
+            });
+          }
+        });
+      }
     }
-  }, [activeIndex, items]);
+  }, [activeIndex]);
+
+  useEffect(() => {
+    updateIndicator();
+    const timer = setTimeout(updateIndicator, 50);
+    const timer2 = setTimeout(updateIndicator, 200);
+    return () => {
+      clearTimeout(timer);
+      clearTimeout(timer2);
+    };
+  }, [updateIndicator, activeIndex, items]);
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+    const ro = new ResizeObserver(() => {
+      updateIndicator();
+    });
+    ro.observe(containerRef.current);
+    return () => ro.disconnect();
+  }, [updateIndicator]);
 
   useEffect(() => {
     if (hoveredIndex !== null && hoveredIndex !== activeIndex) {
@@ -85,23 +116,24 @@ export function SegmentedControl<T extends string = string>({
     }
   }, [hoveredIndex, activeIndex]);
 
-  // Recalculate on window resize or tab switch
+  // Recalculate on window resize
   useEffect(() => {
-    const handleResize = () => {
-      const activeElement = buttonRefs.current[activeIndex];
-      if (activeElement) {
-        setIndicatorStyle({
-          left: activeElement.offsetLeft,
-          width: activeElement.offsetWidth,
-        });
-      }
-    };
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, [activeIndex]);
+    window.addEventListener('resize', updateIndicator);
+    return () => window.removeEventListener('resize', updateIndicator);
+  }, [updateIndicator]);
 
   const handleButtonClick = (buttonVal: T, disabled?: boolean) => {
     if (disabled) return;
+    const targetIdx = items.findIndex((btn) => (btn.value ?? btn.id) === buttonVal);
+    if (targetIdx !== -1 && buttonRefs.current[targetIdx]) {
+      const el = buttonRefs.current[targetIdx]!;
+      if (el.offsetWidth > 0) {
+        setIndicatorStyle({
+          left: el.offsetLeft,
+          width: el.offsetWidth,
+        });
+      }
+    }
     if (controlledValue === undefined && controlledActiveId === undefined) {
       setInternalVal(buttonVal);
     }

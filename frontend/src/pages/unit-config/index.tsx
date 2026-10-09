@@ -247,14 +247,14 @@ export default function UnitConfig() {
       {/* Page Title */}
       <div className="pb-3 border-b border-slate-200 dark:border-[#27272a] flex flex-wrap justify-between items-center gap-4">
         <div>
-          <h1 className="text-xl font-black tracking-tight text-slate-900 dark:text-white mb-1">
-            Cấu Hình Tên Unit & Ngữ Pháp Theo Khối Lớp
+          <h1 className="text-lg font-black tracking-tight text-slate-900 dark:text-white">
+            Cấu Hình Unit
           </h1>
         </div>
       </div>
 
       {/* Sub-tabs Flat Tabs without Outer Box */}
-      <div className="flex items-center gap-6 border-b border-slate-300 dark:border-slate-800">
+      <div className="flex items-center gap-6 border-b border-slate-200 dark:border-white/10">
         <button
           onClick={() => setActiveTab('units')}
           className={`pb-3 text-xs font-black flex items-center gap-2 transition-colors relative cursor-pointer ${
@@ -289,10 +289,10 @@ export default function UnitConfig() {
       {activeTab === 'units' ? (
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
           {/* Left: Grade Selector */}
-          <div className="flex flex-col gap-2 bg-white dark:bg-[#0c0f1d] border border-slate-300 dark:border-slate-800 p-4 rounded-2xl shadow-sm">
-            <h3 className="text-xs font-black text-blue-600 dark:text-blue-400 uppercase tracking-wider px-2 mb-2 border-b border-slate-200 dark:border-slate-800 pb-2 flex items-center gap-1.5">
+          <div className="flex flex-col gap-2 bg-white dark:bg-[#0c0f1d] border-0 p-4 rounded-2xl shadow-sm">
+            <h3 className="text-xs font-black text-blue-600 dark:text-blue-400 uppercase tracking-wider px-2 mb-2 border-b border-slate-100 dark:border-white/5 pb-2 flex items-center gap-1.5">
               <BookOpen size={13} />
-              <span>Chọn Khối Lớp</span>
+              <span>Khối Lớp</span>
             </h3>
             {activeGrades.map((g) => {
               const uCount = Object.keys(config[g] || {}).length;
@@ -305,12 +305,12 @@ export default function UnitConfig() {
                   }}
                   className={`w-full px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-between cursor-pointer ${
                     selectedGrade === g
-                      ? 'bg-blue-50 dark:bg-blue-600/25 border border-blue-400 dark:border-blue-500 text-blue-700 dark:text-white font-black shadow-sm'
+                      ? 'bg-blue-50 dark:bg-blue-600/25 text-blue-700 dark:text-white font-black shadow-sm'
                       : 'text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5'
                   }`}
                 >
                   <span>Khối Lớp {g}</span>
-                  <span className="text-[11px] bg-slate-100 dark:bg-[#121626] border border-slate-300 dark:border-[#202842] px-2 py-0.5 rounded-md text-slate-700 dark:text-slate-300 font-mono">
+                  <span className="text-[11px] bg-slate-100 dark:bg-[#121626] px-2 py-0.5 rounded-md text-slate-700 dark:text-slate-300 font-mono">
                     {uCount} Unit
                   </span>
                 </button>
@@ -319,17 +319,14 @@ export default function UnitConfig() {
           </div>
 
           {/* Right: Unit Table */}
-          <div className="lg:col-span-3 flex flex-col gap-4 bg-white dark:bg-[#0c0f1d] border border-slate-300 dark:border-slate-800 p-5 rounded-2xl shadow-sm">
-            <div className="flex justify-between items-center border-b border-slate-200 dark:border-slate-800 pb-3">
+          <div className="lg:col-span-3 flex flex-col gap-4 bg-white dark:bg-[#0c0f1d] border-0 p-5 rounded-2xl shadow-sm">
+            <div className="flex justify-between items-center border-b border-slate-100 dark:border-white/5 pb-3">
               <div>
                 <h3 className="text-sm font-black text-slate-900 dark:text-white">
                   Danh Sách Unit Khối Lớp {selectedGrade}
                 </h3>
-                <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">
-                  Bấm "Chỉnh sửa" để đổi tên chủ đề bài học hoặc cập nhật chủ đề ngữ pháp cho từng Unit.
-                </p>
               </div>
-              <span className="text-xs bg-slate-100 dark:bg-[#121626] border border-slate-300 dark:border-[#202842] px-3 py-1 rounded-xl text-blue-700 dark:text-blue-300 font-bold">
+              <span className="text-xs bg-slate-100 dark:bg-[#121626] px-3 py-1 rounded-xl text-blue-700 dark:text-blue-300 font-bold">
                 {rows.length} Bài Học
               </span>
             </div>

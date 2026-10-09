@@ -33,7 +33,6 @@ export const GroupCardItem: React.FC<GroupCardItemProps> = ({
 
         {/* Pedagogy Focus Box */}
         <div className="p-2.5 rounded-xl bg-slate-100 dark:bg-black/40 text-[11px] text-slate-700 dark:text-slate-300">
-          <span className="text-[10px] font-black uppercase text-slate-500 dark:text-slate-400 block mb-0.5">Định Hướng Sư Phạm:</span>
           {group.pedagogyAdvice}
         </div>
       </div>

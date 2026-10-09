@@ -61,8 +61,8 @@ export const StudentRankingsTable: React.FC<StudentRankingsTableProps> = React.m
     },
     {
       accessorKey: 'full_name',
-      header: 'Họ và Tên',
-      meta: { headerText: 'Họ và Tên', exportValue: (r: any) => `${r.full_name}${r.nickname ? ` (${r.nickname})` : ''}` },
+      header: 'Họ tên',
+      meta: { headerText: 'Họ tên', exportValue: (r: any) => `${r.full_name}${r.nickname ? ` (${r.nickname})` : ''}` },
       cell: ({ row }) => {
         const r = row.original;
         return (
@@ -318,14 +318,12 @@ export const StudentRankingsTable: React.FC<StudentRankingsTableProps> = React.m
   return (
     <div className={`bg-white dark:bg-[#141417] border-0 rounded-2xl flex flex-col shadow-sm dark:shadow-xl mb-8 transition-colors ${hasSelectedStudent ? 'animate-cascade-4' : 'animate-cascade-3'}`}>
       <div className="px-5 py-4 border-b border-slate-100 dark:border-white/5 flex flex-wrap items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <GraduationCap size={18} className="text-blue-500 dark:text-blue-400" />
+        <div>
           <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider">
-            BẢNG XẾP HẠNG VÀ CHI TIẾT ĐIỂM SỐ HỌC SINH
+            BẢNG XẾP HẠNG
           </h3>
         </div>
         <div className="flex items-center gap-2">
-          <GraduationCap size={15} className="text-blue-400 shrink-0" />
           <CustomSelect
             value={selectedClassId}
             onChange={(val) => { setSelectedClassId(String(val)); setSelectedStudentId(''); }}
@@ -333,7 +331,7 @@ export const StudentRankingsTable: React.FC<StudentRankingsTableProps> = React.m
               { value: '', label: 'Tất cả lớp học' },
               ...classes.map(c => ({ value: String(c.id), label: c.class_name }))
             ]}
-            className="w-52"
+            className="w-44"
           />
         </div>
       </div>

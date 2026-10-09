@@ -1,6 +1,5 @@
 import React from 'react';
 import { HeadToHeadDuel } from '../components/HeadToHeadDuel';
-import { ClassBenchmarkTable } from '../components/ClassBenchmarkTable';
 
 interface BenchmarkTabProps {
   loading: boolean;
@@ -17,7 +16,6 @@ interface BenchmarkTabProps {
 }
 
 export const BenchmarkTab: React.FC<BenchmarkTabProps> = ({
-  loading,
   classes,
   studentRankings,
   sessionRecords,
@@ -31,7 +29,7 @@ export const BenchmarkTab: React.FC<BenchmarkTabProps> = ({
 }) => {
   return (
     <div className="space-y-6 mb-8">
-      {/* 1. 2-CLASS HEAD-TO-HEAD COMPARISON DUEL */}
+      {/* 2-CLASS HEAD-TO-HEAD COMPARISON DUEL */}
       <div className="animate-cascade-1">
         <HeadToHeadDuel
           classes={classes}
@@ -41,19 +39,6 @@ export const BenchmarkTab: React.FC<BenchmarkTabProps> = ({
           setCompareClassAId={setCompareClassAId}
           compareClassBId={compareClassBId}
           setCompareClassBId={setCompareClassBId}
-          selectedClassId={selectedClassId}
-          analyticsSummary={analyticsSummary}
-          classAnalyticsMap={classAnalyticsMap}
-        />
-      </div>
-
-      {/* 2. CROSS-CLASS BENCHMARK OVERVIEW TABLE */}
-      <div className="animate-cascade-2">
-        <ClassBenchmarkTable
-          loading={loading}
-          classes={classes}
-          studentRankings={studentRankings}
-          sessionRecords={sessionRecords}
           selectedClassId={selectedClassId}
           analyticsSummary={analyticsSummary}
           classAnalyticsMap={classAnalyticsMap}

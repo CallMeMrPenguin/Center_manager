@@ -245,13 +245,9 @@ export const MasteryHeatmap: React.FC<MasteryHeatmapProps> = ({
     <div className="bg-white dark:bg-[#0c0f1d] rounded-2xl p-5 space-y-4 select-none shadow-sm dark:shadow-lg">
       {/* Title Bar */}
       <div className="pb-1">
-        <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
-          <LayoutGrid size={16} className="text-blue-600 dark:text-blue-400" />
-          Ma Trận Nắm Vững Kiến Thức (Mastery Heatmap)
+        <h3 className="text-base font-black text-slate-900 dark:text-white uppercase tracking-wider">
+          Ma Trận
         </h3>
-        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-          Bảng màu trực quan theo thang đo 4 mức. Cột ngữ pháp hiển thị rõ chủ điểm ngữ pháp và tỷ lệ nắm vững theo màu từng cấp độ.
-        </p>
       </div>
 
       {/* TanStack DataTable with Clean Layout */}

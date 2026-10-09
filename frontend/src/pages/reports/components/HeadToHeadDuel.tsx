@@ -48,51 +48,28 @@ export const HeadToHeadDuel: React.FC<HeadToHeadDuelProps> = ({
 
   return (
     <div className="space-y-5 animate-cascade-1">
-      {/* 1. Header & Dual Class Selector — Standalone White Card */}
-      <div className="bg-white dark:bg-[#111728] border-0 rounded-2xl p-5 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.06),0_2px_6px_-2px_rgba(0,0,0,0.04)] flex flex-wrap items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-600 dark:text-blue-400 shrink-0">
-            <GitCompare size={20} />
-          </div>
-          <div>
-            <h3 className="text-base font-black text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
-              SO SÁNH 2 LỚP HỌC
-            </h3>
-          </div>
-        </div>
-
-        {/* Dual Class Selector Bar */}
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="flex items-center gap-2 shrink-0">
-            <span
-              className="w-2.5 h-2.5 rounded-full shrink-0"
-              style={{ backgroundColor: getClassColor(compareClassAId, 0), boxShadow: `0 0 8px ${getClassColor(compareClassAId, 0)}80` }}
+      {/* 1. Dual Class Selector — Clean Symmetrical Header */}
+      <div className="bg-white dark:bg-[#111728] border-0 rounded-2xl p-5 shadow-sm dark:shadow-xl flex items-center justify-center">
+        {/* Dual Class Selector Bar (2 rows on mobile, 1 row on sm+) */}
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 w-full max-w-2xl">
+          <div className="w-full sm:w-64">
+            <CustomSelect
+              value={compareClassAId}
+              onChange={(val) => setCompareClassAId(String(val))}
+              options={classes.map((c) => ({ value: String(c.id), label: c.class_name }))}
             />
-            <div className="w-48 shrink-0">
-              <CustomSelect
-                value={compareClassAId}
-                onChange={(val) => setCompareClassAId(String(val))}
-                options={classes.map((c) => ({ value: String(c.id), label: c.class_name }))}
-              />
-            </div>
           </div>
 
-          <div className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-[#181d2e] border-0 shadow-2xs font-mono font-black text-xs text-blue-600 dark:text-blue-300 uppercase tracking-wider shrink-0">
+          <div className="px-3 py-1 rounded-xl bg-slate-100 dark:bg-[#181d2e] font-mono font-black text-xs text-blue-600 dark:text-blue-300 uppercase tracking-wider shrink-0">
             VS
           </div>
 
-          <div className="flex items-center gap-2 shrink-0">
-            <span
-              className="w-2.5 h-2.5 rounded-full shrink-0"
-              style={{ backgroundColor: getClassColor(compareClassBId, 1), boxShadow: `0 0 8px ${getClassColor(compareClassBId, 1)}80` }}
+          <div className="w-full sm:w-64">
+            <CustomSelect
+              value={compareClassBId}
+              onChange={(val) => setCompareClassBId(String(val))}
+              options={classes.map((c) => ({ value: String(c.id), label: c.class_name }))}
             />
-            <div className="w-48 shrink-0">
-              <CustomSelect
-                value={compareClassBId}
-                onChange={(val) => setCompareClassBId(String(val))}
-                options={classes.map((c) => ({ value: String(c.id), label: c.class_name }))}
-              />
-            </div>
           </div>
         </div>
       </div>
@@ -100,17 +77,11 @@ export const HeadToHeadDuel: React.FC<HeadToHeadDuelProps> = ({
       {/* 2. Dual Class Champion Overview Arena — 2 Standalone Symmetrical Cards */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 animate-cascade-2">
         {/* Class A Champion Card */}
-        <div className="bg-white dark:bg-[#111728] border-0 rounded-2xl p-6 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.06),0_2px_6px_-2px_rgba(0,0,0,0.04)] hover:shadow-md transition-shadow flex flex-col justify-between gap-5">
+        <div className="bg-white dark:bg-[#111728] border-0 rounded-2xl p-6 shadow-sm dark:shadow-xl hover:shadow-md transition-shadow flex flex-col justify-between gap-5">
           <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/5 pb-4">
-            <div className="flex items-center gap-2.5 min-w-0">
-              <span
-                className="w-3.5 h-3.5 rounded-full shrink-0 shadow-sm"
-                style={{ backgroundColor: getClassColor(compareClassAId, 0) }}
-              />
-              <span className="text-lg font-black text-blue-600 dark:text-blue-400 truncate">
-                {classComparisonData.classA.name}
-              </span>
-            </div>
+            <span className="text-lg font-black text-blue-600 dark:text-blue-400 truncate">
+              {classComparisonData.classA.name}
+            </span>
             <span className="text-xs font-bold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-white/5 px-3 py-1 rounded-xl shrink-0">
               {classComparisonData.classA.studentCount} Học Sinh
             </span>
@@ -201,17 +172,11 @@ export const HeadToHeadDuel: React.FC<HeadToHeadDuelProps> = ({
         </div>
 
         {/* Class B Champion Card */}
-        <div className="bg-white dark:bg-[#111728] border-0 rounded-2xl p-6 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.06),0_2px_6px_-2px_rgba(0,0,0,0.04)] hover:shadow-md transition-shadow flex flex-col justify-between gap-5">
+        <div className="bg-white dark:bg-[#111728] border-0 rounded-2xl p-6 shadow-sm dark:shadow-xl hover:shadow-md transition-shadow flex flex-col justify-between gap-5">
           <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/5 pb-4">
-            <div className="flex items-center gap-2.5 min-w-0">
-              <span
-                className="w-3.5 h-3.5 rounded-full shrink-0 shadow-sm"
-                style={{ backgroundColor: getClassColor(compareClassBId, 1) }}
-              />
-              <span className="text-lg font-black text-cyan-600 dark:text-cyan-400 truncate">
-                {classComparisonData.classB.name}
-              </span>
-            </div>
+            <span className="text-lg font-black text-cyan-600 dark:text-cyan-400 truncate">
+              {classComparisonData.classB.name}
+            </span>
             <span className="text-xs font-bold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-white/5 px-3 py-1 rounded-xl shrink-0">
               {classComparisonData.classB.studentCount} Học Sinh
             </span>

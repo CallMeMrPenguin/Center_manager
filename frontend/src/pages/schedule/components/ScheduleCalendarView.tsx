@@ -3,13 +3,13 @@ import { ClassSession } from '../types';
 import { HorizontalTimelineGrid } from './HorizontalTimelineGrid';
 
 interface ScheduleCalendarViewProps {
-  viewMode: 'month' | 'week';
+  viewMode?: 'week';
   selectedMonth: string;
-  totalCells: number;
-  startOff: number;
-  daysInMonth: number;
-  yr: number;
-  mo: number;
+  totalCells?: number;
+  startOff?: number;
+  daysInMonth?: number;
+  yr?: number;
+  mo?: number;
   today: string;
   sessions: ClassSession[];
   weekDays: Array<{ header: string; dateStr: string; dayNum: number }>;
@@ -21,10 +21,6 @@ interface ScheduleCalendarViewProps {
 }
 
 export const ScheduleCalendarView: React.FC<ScheduleCalendarViewProps> = ({
-  viewMode,
-  daysInMonth,
-  yr,
-  mo,
   today,
   sessions,
   weekDays,
@@ -45,25 +41,6 @@ export const ScheduleCalendarView: React.FC<ScheduleCalendarViewProps> = ({
     }));
   }, [weekDays, today]);
 
-  // Month view row items (every day of the month as a horizontal row)
-  const monthDayRows = useMemo(() => {
-    const weekdayNames = ['Chủ nhật', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'];
-    const list = [];
-    for (let d = 1; d <= daysInMonth; d++) {
-      const dStr = `${yr}-${String(mo).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-      const dateObj = new Date(yr, mo - 1, d);
-      const dayOfWeek = dateObj.getDay();
-      list.push({
-        header: weekdayNames[dayOfWeek],
-        dateStr: dStr,
-        subText: `${String(d).padStart(2, '0')}/${String(mo).padStart(2, '0')}`,
-        isToday: dStr === today,
-        isWeekend: dayOfWeek === 0 || dayOfWeek === 6,
-      });
-    }
-    return list;
-  }, [yr, mo, daysInMonth, today]);
-
   const handleSetWeekToday = () => {
     const d = new Date();
     const day = d.getDay();
@@ -76,12 +53,12 @@ export const ScheduleCalendarView: React.FC<ScheduleCalendarViewProps> = ({
 
   return (
     <HorizontalTimelineGrid
-      viewMode={viewMode}
-      days={viewMode === 'week' ? weekDayRows : monthDayRows}
+      viewMode="week"
+      days={weekDayRows}
       sessions={sessions}
       today={today}
-      changeWeek={viewMode === 'week' ? changeWeek : undefined}
-      setWeekStartToday={viewMode === 'week' ? handleSetWeekToday : undefined}
+      changeWeek={changeWeek}
+      setWeekStartToday={handleSetWeekToday}
       weekRangeText={weekRangeText}
       openAdd={openAdd}
       openEdit={openEdit}

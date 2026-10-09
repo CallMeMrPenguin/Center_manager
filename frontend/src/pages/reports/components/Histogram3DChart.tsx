@@ -107,14 +107,11 @@ export const Histogram3DChart: React.FC<Histogram3DChartProps> = ({
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h3 className="text-sm font-black uppercase tracking-wider text-slate-900 dark:text-white flex items-center gap-2">
-            <span>Phổ Điểm Đa Tầng 3D</span>
+            <span>Phổ điểm</span>
             <span className="text-xs font-mono font-bold text-indigo-600 dark:text-indigo-400">
               (N = {stats.n} học sinh)
             </span>
           </h3>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-            Phân bố điểm theo mức {stats.evaluation?.skillName || 'Điểm Số'} - Bấm vào cột để lọc danh sách
-          </p>
         </div>
 
         {/* Segmented Pill for Granularity (2 Views: Chi Tiết & Tổng Quan) */}

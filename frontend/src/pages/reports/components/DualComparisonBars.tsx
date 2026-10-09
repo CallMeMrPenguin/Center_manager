@@ -1,7 +1,5 @@
 import React from 'react';
-import { Award } from 'lucide-react';
 import { AnimatedProgressBar } from './AnimatedProgressBar';
-import { TIERS_CONFIG } from '../types';
 import { format1Dec } from '../../../utils';
 
 interface DualComparisonBarsProps {
@@ -140,83 +138,116 @@ export const DualComparisonBars: React.FC<DualComparisonBarsProps> = ({
         </div>
       </div>
 
-      {/* Right: 6-Tier Academic Rank Distribution Duel — Clean Borderless Rows */}
-      <div className="p-5 rounded-2xl bg-white dark:bg-[#111728] border-0 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.06),0_2px_6px_-2px_rgba(0,0,0,0.04)] hover:shadow-md transition-shadow min-w-0 overflow-hidden space-y-4">
+      {/* Right: 6-Tier Academic Distribution as a Grouped Column Chart */}
+      <div className="p-5 rounded-2xl bg-white dark:bg-[#111728] border-0 shadow-sm dark:shadow-xl hover:shadow-md transition-shadow min-w-0 overflow-hidden space-y-4">
         <div className="flex flex-wrap items-center justify-between border-b border-slate-200 dark:border-white/5 pb-3 gap-2">
-          <span className="text-sm font-black uppercase tracking-wider text-slate-900 dark:text-white flex items-center gap-2">
-            <Award size={18} className="text-amber-500" />
-            Phân Bố 6 Hạng Bậc Học Lực
+          <span className="text-sm font-black uppercase tracking-wider text-slate-900 dark:text-white">
+            Học Lực
           </span>
-          <div className="flex items-center gap-4 text-sm font-extrabold">
+          <div className="flex items-center gap-4 text-xs font-extrabold">
             <div className="flex items-center gap-1.5 text-blue-600 dark:text-blue-400">
-              <span className="w-2.5 h-2.5 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.8)]"></span>
+              <span className="w-2.5 h-2.5 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.8)]" />
               <span>{classA.name} ({classA.studentCount} HS)</span>
             </div>
             <span className="text-slate-400 dark:text-slate-600 font-bold">VS</span>
             <div className="flex items-center gap-1.5 text-cyan-600 dark:text-cyan-400">
-              <span className="w-2.5 h-2.5 rounded-full bg-cyan-500 shadow-[0_0_8px_rgba(6,182,212,0.8)]"></span>
+              <span className="w-2.5 h-2.5 rounded-full bg-cyan-500 shadow-[0_0_8px_rgba(6,182,212,0.8)]" />
               <span>{classB.name} ({classB.studentCount} HS)</span>
             </div>
           </div>
         </div>
 
-        {/* Clean Symmetrical Comparison Ladder (No Nested Boxes) */}
-        <div className="space-y-1 pt-1">
-          {TIERS_CONFIG.slice().reverse().map((tier, tierIdx) => {
-            const countA = classA.tierDistribution.find((t: any) => t.tier === tier.tier)?.count || 0;
-            const pctA = classA.tierDistribution.find((t: any) => t.tier === tier.tier)?.pct || 0;
-            const countB = classB.tierDistribution.find((t: any) => t.tier === tier.tier)?.count || 0;
-            const pctB = classB.tierDistribution.find((t: any) => t.tier === tier.tier)?.pct || 0;
+        {/* 6-Milestone Dual Column Histogram */}
+        {(() => {
+          const milestones = [
+            { id: 'xs', name: 'Xuất sắc', range: '≥ 9.0đ', min: 9.0, max: 10.0 },
+            { id: 'gioi', name: 'Giỏi', range: '8.0 – 8.9đ', min: 8.0, max: 8.99 },
+            { id: 'kha', name: 'Khá', range: '6.5 – 7.9đ', min: 6.5, max: 7.99 },
+            { id: 'tb', name: 'Trung bình', range: '5.0 – 6.4đ', min: 5.0, max: 6.49 },
+            { id: 'yeu', name: 'Yếu', range: '3.5 – 4.9đ', min: 3.5, max: 4.99 },
+            { id: 'kem', name: 'Kém', range: '< 3.5đ', min: 0, max: 3.49 },
+          ];
 
-            return (
-              <div
-                key={tier.tier}
-                className="hover:bg-slate-50/80 dark:hover:bg-white/5 py-2 px-2.5 rounded-xl transition-all duration-150 flex items-center justify-between gap-3 min-w-0"
-              >
-                {/* LEFT: Class A Bar & Percentage */}
-                <div className="flex-1 flex items-center justify-end gap-2.5 min-w-0">
-                  <span className="text-xs font-mono font-black text-blue-600 dark:text-blue-400 shrink-0">
-                    {countA} HS <span className="text-[11px] text-slate-500 dark:text-slate-400 font-bold">({pctA}%)</span>
-                  </span>
-                  <div className="flex-1 h-3.5 bg-slate-100 dark:bg-[#161d30] rounded-full overflow-hidden flex justify-end p-0.5 min-w-[32px]">
-                    <AnimatedProgressBar
-                      key={`bench-a-${compareClassAId}-${compareClassBId}-${tier.tier}-${pctA}`}
-                      pct={pctA}
-                      gradientClass="bg-gradient-to-l from-blue-500 to-blue-600 shadow-[0_0_10px_rgba(59,130,246,0.6)]"
-                      delayMs={750 + tierIdx * 60}
-                    />
-                  </div>
-                </div>
+          const statsList = milestones.map(m => {
+            const countA = (classA.students || []).filter((s: any) => {
+              const sc = Number(s.ema_level || s.overallAvg || 0);
+              return sc >= m.min && sc <= m.max;
+            }).length;
+            const pctA = classA.studentCount > 0 ? Math.round((countA / classA.studentCount) * 100) : 0;
 
-                {/* CENTER: Tier Badge & Name (Clean, Borderless) */}
-                <div className="flex items-center justify-center gap-1.5 w-32 shrink-0 py-1 px-2 rounded-lg bg-slate-100/70 dark:bg-white/5">
-                  <div className="w-6 h-6 flex items-center justify-center shrink-0">
-                    <img src={tier.badge} alt={tier.name} className={`w-full h-full object-contain ${tier.scale || 'scale-100'}`} />
-                  </div>
-                  <div className="text-center min-w-0">
-                    <span className={`text-xs font-black block leading-tight truncate ${tier.text}`}>{tier.name}</span>
-                    <span className="text-[10px] text-slate-500 dark:text-slate-400 font-mono font-bold leading-none">{tier.minScore}-{tier.maxScore}đ</span>
-                  </div>
-                </div>
+            const countB = (classB.students || []).filter((s: any) => {
+              const sc = Number(s.ema_level || s.overallAvg || 0);
+              return sc >= m.min && sc <= m.max;
+            }).length;
+            const pctB = classB.studentCount > 0 ? Math.round((countB / classB.studentCount) * 100) : 0;
 
-                {/* RIGHT: Class B Bar & Percentage */}
-                <div className="flex-1 flex items-center justify-start gap-2.5 min-w-0">
-                  <div className="flex-1 h-3.5 bg-slate-100 dark:bg-[#161d30] rounded-full overflow-hidden p-0.5 min-w-[32px]">
-                    <AnimatedProgressBar
-                      key={`bench-b-${compareClassAId}-${compareClassBId}-${tier.tier}-${pctB}`}
-                      pct={pctB}
-                      gradientClass="bg-gradient-to-r from-cyan-500 to-cyan-400 shadow-[0_0_10px_rgba(6,182,212,0.6)]"
-                      delayMs={750 + tierIdx * 80}
-                    />
-                  </div>
-                  <span className="text-xs font-mono font-black text-cyan-600 dark:text-cyan-400 shrink-0">
-                    {countB} HS <span className="text-[11px] text-slate-500 dark:text-slate-400 font-bold">({pctB}%)</span>
-                  </span>
-                </div>
+            return { ...m, countA, pctA, countB, pctB };
+          });
+
+          const maxPct = Math.max(1, ...statsList.map(s => Math.max(s.pctA, s.pctB)));
+
+          return (
+            <div className="pt-2 space-y-2">
+              <div className="grid grid-cols-6 gap-2 sm:gap-3 items-end h-48 border-b border-slate-100 dark:border-white/5 pb-2">
+                {statsList.map((m) => {
+                  const hA = m.countA > 0 ? Math.max(10, Math.round((m.pctA / maxPct) * 100)) : 0;
+                  const hB = m.countB > 0 ? Math.max(10, Math.round((m.pctB / maxPct) * 100)) : 0;
+
+                  return (
+                    <div key={m.id} className="flex flex-col items-center justify-end h-full gap-1">
+                      {/* Dual Bar Container */}
+                      <div className="flex items-end justify-center gap-1 sm:gap-1.5 w-full h-36">
+                        {/* Class A Bar */}
+                        <div className="flex-1 flex flex-col items-center justify-end h-full">
+                          <span className={`text-[10px] font-mono font-bold leading-none mb-1 ${m.countA > 0 ? 'text-blue-600 dark:text-blue-400' : 'text-slate-300 dark:text-slate-700'}`}>
+                            {m.countA}
+                          </span>
+                          <div
+                            style={{ height: `${hA}%` }}
+                            className={`w-full rounded-t-md transition-all duration-500 ${
+                              m.countA > 0
+                                ? 'bg-gradient-to-t from-blue-600 to-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]'
+                                : 'bg-slate-100 dark:bg-white/5 h-1'
+                            }`}
+                          />
+                        </div>
+
+                        {/* Class B Bar */}
+                        <div className="flex-1 flex flex-col items-center justify-end h-full">
+                          <span className={`text-[10px] font-mono font-bold leading-none mb-1 ${m.countB > 0 ? 'text-cyan-600 dark:text-cyan-400' : 'text-slate-300 dark:text-slate-700'}`}>
+                            {m.countB}
+                          </span>
+                          <div
+                            style={{ height: `${hB}%` }}
+                            className={`w-full rounded-t-md transition-all duration-500 ${
+                              m.countB > 0
+                                ? 'bg-gradient-to-t from-cyan-600 to-cyan-400 shadow-[0_0_8px_rgba(6,182,212,0.5)]'
+                                : 'bg-slate-100 dark:bg-white/5 h-1'
+                            }`}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
-            );
-          })}
-        </div>
+
+              {/* Milestone Labels Grid */}
+              <div className="grid grid-cols-6 gap-2 sm:gap-3 text-center">
+                {statsList.map((m) => (
+                  <div key={m.id} className="min-w-0">
+                    <span className="text-[11px] font-black text-slate-800 dark:text-slate-200 block truncate leading-tight">
+                      {m.name}
+                    </span>
+                    <span className="text-[9px] text-slate-400 dark:text-slate-500 font-mono block leading-tight">
+                      {m.range}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        })()}
       </div>
     </div>
   );

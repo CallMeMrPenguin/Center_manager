@@ -4,20 +4,20 @@ import { getLocalDateStr } from '../../../utils';
 import { DAY_HDRS } from '../types';
 
 export function useScheduleCalendar() {
-  const [viewMode, setViewMode] = useState<'month' | 'week' | 'list'>(() => {
+  const [viewMode, setViewMode] = useState<'week' | 'list'>(() => {
     const v = getUrlParam('view');
-    if (v === 'month' || v === 'week' || v === 'list') return v;
-    return 'month';
+    if (v === 'week' || v === 'list') return v;
+    return 'week';
   });
 
-  const handleChangeViewMode = (mode: 'month' | 'week' | 'list') => {
+  const handleChangeViewMode = (mode: 'week' | 'list') => {
     setViewMode(mode);
     setUrlParams({ view: mode });
   };
 
   useUrlSync(() => {
     const v = getUrlParam('view');
-    if (v === 'month' || v === 'week' || v === 'list') {
+    if (v === 'week' || v === 'list') {
       setViewMode(v);
     }
   });
@@ -52,13 +52,27 @@ export function useScheduleCalendar() {
     const n = new Date(weekStart);
     n.setDate(weekStart.getDate() + dir * 7);
     setWeekStart(n);
+    const newMoStr = `${n.getFullYear()}-${String(n.getMonth() + 1).padStart(2, '0')}`;
+    setSelectedMonth(newMoStr);
+  };
+
+  const handleSetSelectedMonth = (moStr: string) => {
+    setSelectedMonth(moStr);
+    const [y, m] = moStr.split('-').map(Number);
+    if (y && m) {
+      const first = new Date(y, m - 1, 1);
+      const day = first.getDay();
+      const n = new Date(first);
+      n.setDate(first.getDate() - day + (day === 0 ? -6 : 1));
+      setWeekStart(n);
+    }
   };
 
   return {
     viewMode,
     handleChangeViewMode,
     selectedMonth,
-    setSelectedMonth,
+    setSelectedMonth: handleSetSelectedMonth,
     weekStart,
     setWeekStart,
     today,

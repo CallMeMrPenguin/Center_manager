@@ -1,15 +1,17 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Info, X } from 'lucide-react';
-import { DistributionDetailedEvaluation } from '../utils/distributionAnalytics';
+import { DistributionDetailedEvaluation, DistributionBand } from '../utils/distributionAnalytics';
 
 interface DistributionCommentaryCardProps {
   evaluation: DistributionDetailedEvaluation;
   distributionRating: string;
+  bands?: DistributionBand[];
 }
 
 export const DistributionCommentaryCard: React.FC<DistributionCommentaryCardProps> = ({
   evaluation,
   distributionRating,
+  bands,
 }) => {
   const [activeTooltipId, setActiveTooltipId] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -28,19 +30,37 @@ export const DistributionCommentaryCard: React.FC<DistributionCommentaryCardProp
   return (
     <div
       ref={containerRef}
-      className="pt-6 border-t border-slate-200 dark:border-white/10 space-y-5 select-none relative animate-cascade-3 font-sans transition-colors"
+      className="pt-6 border-t border-slate-200 dark:border-white/10 space-y-5 select-none relative font-sans transition-colors"
     >
-      {/* 1. HEADER TITLE & RATING BADGE */}
-      <div className="flex flex-wrap items-center justify-between gap-3 pb-2">
-        <h4 className="text-sm font-black uppercase text-slate-900 dark:text-white tracking-wider">
-          {evaluation.subjectTitle}
+      {/* 1. SECTION TITLE & RATING BADGE */}
+      <div className="flex flex-wrap items-center justify-between gap-3 pb-1">
+        <h4 className="text-base font-black uppercase text-slate-900 dark:text-white tracking-wider">
+          Đánh giá
         </h4>
         <span className="px-3 py-1 rounded-lg text-xs font-black bg-blue-500/10 dark:bg-blue-500/15 text-blue-600 dark:text-blue-300 border border-blue-500/20 dark:border-blue-500/30">
           {distributionRating}
         </span>
       </div>
 
-      {/* 2. POINT-BY-POINT METRIC BREAKDOWN (Zero emojis, clean divide-y, glowing indicator dots) */}
+      {/* 2. SCORE TIER CARDS (OUTSIDE CARD, NO BULLET DOTS) */}
+      {bands && bands.length >= 4 && (
+        <div className="flex flex-wrap items-center gap-2.5 text-xs font-bold">
+          <span className="px-3 py-1.5 rounded-xl text-rose-600 dark:text-rose-400 bg-rose-500/10 font-bold">
+            Yếu &lt;5.0 ({bands[0].pct}%)
+          </span>
+          <span className="px-3 py-1.5 rounded-xl text-amber-600 dark:text-amber-400 bg-amber-500/10 font-bold">
+            TB 5.0-6.4 ({bands[1].pct}%)
+          </span>
+          <span className="px-3 py-1.5 rounded-xl text-cyan-600 dark:text-cyan-400 bg-cyan-500/10 font-bold">
+            Khá 6.5-7.9 ({bands[2].pct}%)
+          </span>
+          <span className="px-3 py-1.5 rounded-xl text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 font-bold">
+            Giỏi ≥8.0 ({bands[3].pct}%)
+          </span>
+        </div>
+      )}
+
+      {/* 3. POINT-BY-POINT METRICS (NO BULLET DOTS) */}
       <div className="space-y-0.5 divide-y divide-slate-100 dark:divide-white/5">
         {evaluation.metrics.map((item) => {
           const isTooltipActive = activeTooltipId === item.id;
@@ -50,12 +70,7 @@ export const DistributionCommentaryCard: React.FC<DistributionCommentaryCardProp
               key={item.id}
               className="py-2.5 flex items-start justify-between gap-3 relative group"
             >
-              <div className="flex items-start gap-3 min-w-0 pr-2">
-                {/* Glowing Indicator Dot */}
-                <span
-                  className="w-2 h-2 rounded-full shrink-0 mt-1.5 shadow-[0_0_8px_rgba(0,0,0,0.1)] dark:shadow-[0_0_8px_rgba(255,255,255,0.4)]"
-                  style={{ backgroundColor: item.color }}
-                />
+              <div className="min-w-0 pr-2">
                 <p className="text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-200 leading-relaxed">
                   {item.text}
                 </p>
@@ -110,21 +125,27 @@ export const DistributionCommentaryCard: React.FC<DistributionCommentaryCardProp
         })}
       </div>
 
-      {/* 3. KẾT LUẬN PHÂN TÍCH PHỔ ĐIỂM */}
-      <div className="space-y-3 pt-2">
-        <div className="flex items-center gap-2">
-          <span className="text-xs font-black uppercase tracking-wider text-amber-600 dark:text-amber-400">
-            KẾT LUẬN
+      {/* 4. NHẬN XÉT CHUNG & CẦN CỦNG CỐ (OUTSIDE CARD, LARGE TEXT, DISTINCT COLOR) */}
+      <div className="space-y-4 pt-4 border-t border-slate-200 dark:border-white/10">
+        <div>
+          <span className="text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 block mb-1">
+            Nhận xét chung
           </span>
+          <p className="text-base sm:text-lg font-bold text-slate-900 dark:text-white leading-snug">
+            {evaluation.conclusion.overviewSummary}
+          </p>
         </div>
 
-        <p className="text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-200 leading-relaxed">
-          {evaluation.conclusion.overviewSummary}
-        </p>
-
-        <p className="text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-300 leading-relaxed border-l-2 border-indigo-500/80 pl-3.5 py-0.5">
-          {evaluation.conclusion.dispersionWarning}
-        </p>
+        {evaluation.conclusion.dispersionWarning && (
+          <div>
+            <span className="text-xs font-black uppercase tracking-wider text-amber-600 dark:text-amber-400 block mb-1">
+              Cần củng cố
+            </span>
+            <p className="text-base sm:text-lg font-bold text-amber-600 dark:text-amber-400 leading-snug">
+              {evaluation.conclusion.dispersionWarning}
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );

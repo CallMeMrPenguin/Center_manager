@@ -5,6 +5,9 @@ import {
   Upload, RotateCcw, Download, Maximize2, Minimize2
 } from 'lucide-react';
 import { CanvasTool, PRESET_COLORS, PRESET_BG_COLORS, FONT_FAMILIES } from '../types';
+import { ChiselHighlighterIcon } from './CanvasIcons';
+
+export { ChiselHighlighterIcon };
 
 interface CanvasToolbarProps {
   activeTool: CanvasTool;
@@ -74,116 +77,89 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
 
   return (
     <div className="p-2 bg-slate-50 dark:bg-[#0a0d18] border-b border-slate-200 dark:border-white/10 flex items-center justify-between flex-wrap gap-2 shrink-0 z-30 select-none">
-      {/* Tool Buttons */}
+      {/* Tool Buttons (Icons Only) */}
       <div className="flex items-center gap-1">
         {/* Select */}
         <button
           onClick={() => setActiveTool('select')}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
+          className={`p-2 rounded-xl transition cursor-pointer ${
             activeTool === 'select' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-white/5'
           }`}
-          title="Chọn, di chuyển ảnh/chữ (Double-click ảnh để cắt kiểu Word)"
+          title="Chọn, di chuyển ảnh/chữ"
         >
-          <MousePointer size={13} />
-          <span>Chọn</span>
+          <MousePointer size={15} />
         </button>
 
         {/* Text Box */}
         <button
           onClick={() => setActiveTool('text')}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
+          className={`p-2 rounded-xl transition cursor-pointer ${
             activeTool === 'text' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-white/5'
           }`}
-          title="Thêm Text Box (Font Times New Roman, nền trắng, chữ đỏ mặc định)"
+          title="Chèn chữ (Text Box)"
         >
-          <Type size={13} />
-          <span>Chèn chữ</span>
+          <Type size={15} />
         </button>
 
-        <div className="h-5 w-px bg-slate-200 dark:bg-white/10 mx-1" />
+        <div className="h-5 w-px bg-slate-200 dark:bg-white/10 mx-0.5" />
 
         {/* Pen */}
         <button
           onClick={() => setActiveTool('pen')}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
+          className={`p-2 rounded-xl transition cursor-pointer ${
             activeTool === 'pen' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-white/5'
           }`}
-          title="Bút vẽ (Giữ Shift để vẽ đường thẳng)"
+          title="Bút vẽ"
         >
-          <Pen size={13} />
-          <span>Bút</span>
+          <Pen size={15} />
         </button>
 
-        {/* Highlighter */}
+        {/* Highlighter (Bút dạ quang) */}
         <button
           onClick={() => setActiveTool('highlighter')}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
+          className={`p-2 rounded-xl transition cursor-pointer ${
             activeTool === 'highlighter' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-white/5'
           }`}
-          title="Dạ quang highlight"
+          title="Bút dạ quang (Highlighter)"
         >
-          <Highlighter size={13} />
-          <span>Dạ quang</span>
+          <ChiselHighlighterIcon size={15} />
         </button>
 
         {/* Eraser */}
         <button
           onClick={() => setActiveTool('eraser')}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
+          className={`p-2 rounded-xl transition cursor-pointer ${
             activeTool === 'eraser' ? 'bg-rose-600 text-white shadow-md' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-white/5'
           }`}
           title="Tẩy xóa nét vẽ"
         >
-          <Eraser size={13} />
-          <span>Tẩy</span>
+          <Eraser size={15} />
         </button>
 
-        <div className="h-5 w-px bg-slate-200 dark:bg-white/10 mx-1" />
+        <div className="h-5 w-px bg-slate-200 dark:bg-white/10 mx-0.5" />
 
         {/* Shapes */}
-        <button
-          onClick={() => setActiveTool('line')}
-          className={`p-1.5 rounded-xl transition cursor-pointer ${
-            activeTool === 'line' ? 'bg-blue-600 text-white' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-white/5'
-          }`}
-          title="Đường thẳng (Giữ Shift để căn thẳng 45°)"
-        >
-          <Minus size={14} />
-        </button>
-
-        <button
-          onClick={() => setActiveTool('arrow')}
-          className={`p-1.5 rounded-xl transition cursor-pointer ${
-            activeTool === 'arrow' ? 'bg-blue-600 text-white' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-white/5'
-          }`}
-          title="Mũi tên"
-        >
-          <ArrowUpRight size={14} />
-        </button>
-
-        <button
-          onClick={() => setActiveTool('rect')}
-          className={`p-1.5 rounded-xl transition cursor-pointer ${
-            activeTool === 'rect' ? 'bg-blue-600 text-white' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-white/5'
-          }`}
-          title="Hình chữ nhật"
-        >
-          <Square size={14} />
-        </button>
-
-        <button
-          onClick={() => setActiveTool('circle')}
-          className={`p-1.5 rounded-xl transition cursor-pointer ${
-            activeTool === 'circle' ? 'bg-blue-600 text-white' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-white/5'
-          }`}
-          title="Hình tròn"
-        >
-          <Circle size={14} />
-        </button>
+        {[
+          { tool: 'line' as CanvasTool, icon: <Minus size={14} />, title: 'Đường thẳng (Shift: 45°)' },
+          { tool: 'arrow' as CanvasTool, icon: <ArrowUpRight size={14} />, title: 'Mũi tên' },
+          { tool: 'rect' as CanvasTool, icon: <Square size={14} />, title: 'Hình chữ nhật' },
+          { tool: 'circle' as CanvasTool, icon: <Circle size={14} />, title: 'Hình tròn' },
+        ].map(s => (
+          <button
+            key={s.tool}
+            onClick={() => setActiveTool(s.tool)}
+            className={`p-1.5 rounded-xl transition cursor-pointer ${
+              activeTool === s.tool ? 'bg-blue-600 text-white' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-white/5'
+            }`}
+            title={s.title}
+          >
+            {s.icon}
+          </button>
+        ))}
         {/* Font Family selector for Text tool */}
         {activeTool === 'text' && setSelectedFontFamily && (
-          <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-[#141829] border border-slate-200 dark:border-white/15 px-2 py-1 rounded-xl ml-1">
-            <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400">Kiểu:</span>
+          <div className="flex items-center gap-1 bg-slate-100 dark:bg-[#141829] border border-slate-200 dark:border-white/15 px-2 py-1 rounded-xl ml-1">
+            <Type size={12} className="text-slate-500" />
             <select
               value={selectedFontFamily}
               onChange={(e) => setSelectedFontFamily(e.target.value)}
@@ -366,34 +342,34 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
           <Trash2 size={14} />
         </button>
 
-        {/* Merged Navigation Controls */}
+        {/* Merged Navigation Controls (Icons Only) */}
         {(fileInputRef || onNewBoard || onExportPNG || toggleFullscreen) && (
-          <div className="flex items-center gap-1.5 pl-1.5 border-l border-slate-300 dark:border-white/10">
+          <div className="flex items-center gap-1 pl-1.5 border-l border-slate-300 dark:border-white/10">
             {fileInputRef && (
-              <label className="flex items-center gap-1 px-2.5 py-1 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition cursor-pointer shadow-xs">
-                <Upload size={12} />
-                <span className="hidden sm:inline">Import</span>
+              <label
+                className="p-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white transition cursor-pointer shadow-xs"
+                title="Import tài liệu / ảnh"
+              >
+                <Upload size={13} />
                 <input ref={fileInputRef} type="file" accept=".pdf,image/*" multiple onChange={handleFileInputChange} className="hidden" />
               </label>
             )}
             {onNewBoard && (
               <button
                 onClick={onNewBoard}
-                className="flex items-center gap-1 px-2.5 py-1 rounded-xl bg-slate-200 hover:bg-slate-300 dark:bg-[#202538] dark:hover:bg-[#2a3149] text-slate-700 dark:text-slate-300 text-xs font-bold transition cursor-pointer"
+                className="p-1.5 rounded-xl bg-slate-200 hover:bg-slate-300 dark:bg-[#202538] dark:hover:bg-[#2a3149] text-slate-700 dark:text-slate-300 transition cursor-pointer"
                 title="Tạo bảng vẽ mới"
               >
-                <RotateCcw size={12} />
-                <span className="hidden sm:inline">Bảng mới</span>
+                <RotateCcw size={13} />
               </button>
             )}
             {onExportPNG && (
               <button
                 onClick={onExportPNG}
-                className="flex items-center gap-1 px-2.5 py-1 rounded-xl bg-slate-200 hover:bg-slate-300 dark:bg-[#202538] dark:hover:bg-[#2a3149] text-slate-700 dark:text-slate-300 text-xs font-bold transition cursor-pointer"
+                className="p-1.5 rounded-xl bg-slate-200 hover:bg-slate-300 dark:bg-[#202538] dark:hover:bg-[#2a3149] text-slate-700 dark:text-slate-300 transition cursor-pointer"
                 title="Tải ảnh PNG"
               >
-                <Download size={12} />
-                <span className="hidden sm:inline">Tải ảnh</span>
+                <Download size={13} />
               </button>
             )}
             {toggleFullscreen && (

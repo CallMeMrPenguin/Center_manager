@@ -21,12 +21,12 @@ export function useScheduleColumns(onEdit: (sess: ClassSession) => void) {
     },
     {
       id: 'time',
-      header: 'Giờ / Thời Lượng',
+      header: 'Thời gian',
       cell: ({ row }) => {
         const s = row.original;
         return (
           <span className="text-slate-800 dark:text-slate-200 text-base font-semibold">
-            {s.start_time} – {calcEndTime(s.start_time, s.duration)} ({s.duration}p)
+            {s.start_time} – {calcEndTime(s.start_time, s.duration)}
           </span>
         );
       },

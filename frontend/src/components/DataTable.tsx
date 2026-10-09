@@ -49,7 +49,7 @@ import {
   FileText, ChevronsLeft, ChevronsRight, Columns,
   AlignLeft, AlignCenter, AlignRight, GripVertical, CheckSquare, Square,
   Layers, ChevronRight as ChevronRightIcon, Plus, Trash2, Pin, PinOff,
-  RotateCcw, Zap, Image as ImageIcon
+  RotateCcw, Zap, Image as ImageIcon, Maximize2
 } from 'lucide-react';
 import { SegmentedControl } from './SegmentedControl';
 import { filterWithNearMatchFallback } from '../utils/fuzzySearch';
@@ -257,12 +257,14 @@ function ColumnVisibilityDropdown<TData>({
   table,
   columnAlignments,
   onToggleAlignment,
+  onAutoFitColumnWidths,
   onResetColumnWidths,
   onMoveColumn,
 }: {
   table: ReturnType<typeof useReactTable<TData>>;
   columnAlignments: Record<string, 'center' | 'left'>;
   onToggleAlignment: (colId: string) => void;
+  onAutoFitColumnWidths?: () => void;
   onResetColumnWidths?: () => void;
   onMoveColumn?: (colId: string, direction: 'up' | 'down') => void;
 }) {
@@ -388,10 +390,11 @@ function ColumnVisibilityDropdown<TData>({
               </div>
               <div className="max-h-60 overflow-y-auto space-y-0.5 scrollbar-thin pr-1">
                 {allCols.map(col => {
+                  const isPersonName = isNameColumn(col.columnDef) || ['student_name', 'full_name', 'name', 'ho_ten', 'hoten'].includes(String(col.id || '').toLowerCase());
                   const colMetaAlign = (col.columnDef as any)?.meta?.align;
                   const colAlign = columnAlignments[col.id]
                     || colMetaAlign
-                    || (['student_name', 'full_name', 'name', 'title', 'subject'].includes(col.id) ? 'left' : 'center');
+                    || (isPersonName ? 'left' : 'center');
                   const isCentered = colAlign !== 'left';
                   const colName = getColumnHeaderText(col, table);
                   return (
@@ -417,23 +420,37 @@ function ColumnVisibilityDropdown<TData>({
             </div>
           )}
 
-          {/* RESET BUTTON */}
-          {onResetColumnWidths && (
-            <div className="pt-2 border-t border-slate-200 dark:border-white/10 mt-1">
+          {/* AUTO-FIT & RESET BUTTONS */}
+          <div className="pt-2 border-t border-slate-200 dark:border-white/10 mt-1 space-y-1">
+            {onAutoFitColumnWidths && (
+              <button
+                type="button"
+                onClick={() => {
+                  onAutoFitColumnWidths();
+                  setOpen(false);
+                }}
+                className="w-full flex items-center justify-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-blue-500/15 hover:bg-blue-500/25 text-blue-600 dark:text-blue-300 border-0 shadow-2xs text-xs font-extrabold transition cursor-pointer"
+                title="Tự động căn chỉnh kích thước các cột theo nội dung"
+              >
+                <Maximize2 size={12} />
+                <span>Tự căn chỉnh kích thước cột</span>
+              </button>
+            )}
+            {onResetColumnWidths && (
               <button
                 type="button"
                 onClick={() => {
                   onResetColumnWidths();
                   setOpen(false);
                 }}
-                className="w-full flex items-center justify-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-indigo-500/15 hover:bg-indigo-500/25 text-indigo-600 dark:text-indigo-300 border-0 shadow-2xs text-xs font-extrabold transition cursor-pointer"
+                className="w-full flex items-center justify-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 text-slate-700 dark:text-slate-300 border-0 shadow-2xs text-xs font-extrabold transition cursor-pointer"
                 title="Đặt lại độ rộng, thứ tự, căn chỉnh và hiển thị cột về mặc định"
               >
                 <RotateCcw size={12} />
                 <span>Đặt lại giao diện cột</span>
               </button>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       )}
     </div>
@@ -790,15 +807,30 @@ export function DataTable<TData>({
   const handleToggleAlignment = useCallback((colId: string) => {
     setColumnAlignments(prev => {
       const col = columns.find((c: any) => (c.id || c.accessorKey) === colId);
+      const isPersonName = col ? (isNameColumn(col as any) || ['student_name', 'full_name', 'name', 'ho_ten', 'hoten'].includes(String(colId || '').toLowerCase())) : false;
       const colMetaAlign = (col as any)?.meta?.align;
       const defaultAlign = initialColumnAlignments?.[colId] || colMetaAlign || (
-        ['student_name', 'full_name', 'name', 'title', 'subject'].includes(colId) ? 'left' : 'center'
+        isPersonName ? 'left' : 'center'
       );
       const current = prev[colId] ?? defaultAlign;
       const next = current === 'center' ? 'left' : 'center';
       return { ...prev, [colId]: next };
     });
   }, [columns, initialColumnAlignments]);
+
+  const handleAutoFitColumnWidths = useCallback(() => {
+    setColumnSizing({});
+    if (storageKey) {
+      try {
+        const item = localStorage.getItem(storageKey);
+        if (item) {
+          const layout = JSON.parse(item);
+          delete layout.sizing;
+          localStorage.setItem(storageKey, JSON.stringify(layout));
+        }
+      } catch (e) {}
+    }
+  }, [storageKey]);
 
   const handleResetColumnWidths = useCallback(() => {
     setColumnSizing({});
@@ -915,13 +947,20 @@ export function DataTable<TData>({
     }
 
     const enhancedColumns = columns.map(col => {
-      if (isNameColumn(col) && !col.sortingFn) {
+      let updatedCol = { ...col };
+      if (typeof updatedCol.header === 'string') {
+        const trimmed = updatedCol.header.trim();
+        if (/^họ\s+(và\s+)?tên(\s+học\s+sinh)?$/i.test(trimmed)) {
+          updatedCol.header = 'Họ tên';
+        }
+      }
+      if (isNameColumn(updatedCol) && !updatedCol.sortingFn) {
         return {
-          ...col,
+          ...updatedCol,
           sortingFn: vietnameseNameSortingFn,
         };
       }
-      return col;
+      return updatedCol;
     });
 
     cols.push(...enhancedColumns);
@@ -1237,6 +1276,7 @@ export function DataTable<TData>({
                 table={table}
                 columnAlignments={columnAlignments}
                 onToggleAlignment={handleToggleAlignment}
+                onAutoFitColumnWidths={handleAutoFitColumnWidths}
                 onResetColumnWidths={handleResetColumnWidths}
                 onMoveColumn={handleMoveColumn}
               />
@@ -1302,11 +1342,12 @@ export function DataTable<TData>({
                       <tr key={headerGroup.id}>
                         {headerGroup.headers.map(header => {
                           const isSelectCol = header.column.id === 'select' || header.column.id === '_expander';
+                          const isPersonName = isNameColumn(header.column.columnDef) || ['student_name', 'full_name', 'name', 'ho_ten', 'hoten'].includes(String(header.column.id || '').toLowerCase());
                           const colMetaAlign = (header.column.columnDef as any)?.meta?.align;
                           const colAlign = columnAlignments[header.column.id]
                             || initialColumnAlignments?.[header.column.id]
                             || colMetaAlign
-                            || (['student_name', 'full_name', 'name', 'title', 'subject'].includes(header.column.id) ? 'left' : 'center');
+                            || (isPersonName ? 'left' : 'center');
                           const align = isSelectCol ? 'center' : colAlign;
                           const isAnyColumnResizing = table.getState().columnSizingInfo.isResizingColumn !== false;
 
@@ -1394,11 +1435,12 @@ export function DataTable<TData>({
                             const isFirstCell = cellIdx === 0;
                             const isLastCell = cellIdx === row.getVisibleCells().length - 1;
                             const isSelectCol = cell.column.id === 'select' || cell.column.id === '_expander';
+                            const isPersonName = isNameColumn(cell.column.columnDef) || ['student_name', 'full_name', 'name', 'ho_ten', 'hoten'].includes(String(cell.column.id || '').toLowerCase());
                             const colMetaAlign = (cell.column.columnDef as any)?.meta?.align;
                             const colAlign = columnAlignments[cell.column.id]
                               || initialColumnAlignments?.[cell.column.id]
                               || colMetaAlign
-                              || (['student_name', 'full_name', 'name', 'title', 'subject'].includes(cell.column.id) ? 'left' : 'center');
+                              || (isPersonName ? 'left' : 'center');
                             const isCentered = isSelectCol || colAlign !== 'left';
 
                             return (

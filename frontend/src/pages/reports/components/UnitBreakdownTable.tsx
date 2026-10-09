@@ -30,42 +30,42 @@ export const UnitBreakdownTable: React.FC<UnitBreakdownTableProps> = ({ data }) 
     () => [
       {
         accessorKey: 'unit_key',
-        header: 'Bài Học / Chủ Đề',
-        cell: ({ row }) => (
-          <div className="flex flex-col py-0.5">
-            <span className="font-extrabold text-slate-900 dark:text-white text-sm sm:text-base">
-              {row.original.unit_key}
-            </span>
-            {row.original.skill === 'grammar' && row.original.grammar_topic ? (
-              <span className="text-xs text-purple-600 dark:text-purple-400 font-extrabold">
-                Ngữ pháp: {row.original.grammar_topic}
+        header: 'Đề',
+        cell: ({ row }) => {
+          const isGrammar = row.original.skill === 'grammar';
+          const colorClass = isGrammar ? 'text-purple-600 dark:text-purple-400' : 'text-blue-600 dark:text-blue-400';
+          const unitDisplayName = row.original.unit_name || (isGrammar && row.original.grammar_topic ? row.original.grammar_topic : '');
+          return (
+            <div className="flex flex-col py-0.5">
+              <span className="font-extrabold text-slate-900 dark:text-white text-sm sm:text-base">
+                {row.original.unit_key}
               </span>
-            ) : row.original.unit_name ? (
-              <span className="text-xs text-indigo-600 dark:text-indigo-400 font-semibold">
-                {row.original.unit_name}
-              </span>
-            ) : null}
-          </div>
-        ),
+              {unitDisplayName && (
+                <span className={`text-xs font-bold ${colorClass}`}>
+                  {unitDisplayName}
+                </span>
+              )}
+            </div>
+          );
+        },
       },
       {
         accessorKey: 'skill',
         header: 'Kỹ Năng',
-        cell: ({ getValue }) => {
-          const val = getValue<string>();
-          const isVocab = val === 'vocab';
-          const isGrammar = val === 'grammar';
+        cell: ({ row }) => {
+          const isGrammar = row.original.skill === 'grammar';
+          const isVocab = row.original.skill === 'vocab';
+          const label = isGrammar && row.original.grammar_topic
+            ? row.original.grammar_topic
+            : isVocab
+            ? 'Từ vựng'
+            : isGrammar
+            ? 'Ngữ pháp'
+            : 'Tổng hợp';
+          const colorClass = isGrammar ? 'text-purple-600 dark:text-purple-400' : 'text-blue-600 dark:text-blue-400';
           return (
-            <span
-              className={`text-xs font-black uppercase px-2.5 py-1 rounded-full ${
-                isVocab
-                  ? 'text-blue-700 dark:text-blue-400 bg-blue-500/15'
-                  : isGrammar
-                  ? 'text-purple-700 dark:text-purple-400 bg-purple-500/15'
-                  : 'text-indigo-700 dark:text-indigo-400 bg-indigo-500/15'
-              }`}
-            >
-              {isVocab ? 'Từ Vựng' : isGrammar ? 'Ngữ Pháp' : 'Tổng Hợp'}
+            <span className={`text-xs font-extrabold ${colorClass}`}>
+              {label}
             </span>
           );
         },

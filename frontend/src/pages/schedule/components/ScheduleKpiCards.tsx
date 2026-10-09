@@ -1,56 +1,30 @@
 import React from 'react';
-import { Calendar as CalendarIcon, CheckCircle2, Clock, XCircle } from 'lucide-react';
 
 interface ScheduleKpiCardsProps {
   total: number;
   done: number;
-  upcoming: number;
+  upcoming?: number;
   off?: number;
 }
 
 export const ScheduleKpiCards: React.FC<ScheduleKpiCardsProps> = ({
   total,
   done,
-  upcoming,
   off = 0,
 }) => {
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 shrink-0">
-      <div className="bg-white dark:bg-[#141417] border-0 p-4.5 flex items-center justify-between rounded-2xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.06),0_2px_6px_-2px_rgba(0,0,0,0.04)] dark:shadow-none transition-colors duration-200">
-        <div>
-          <p className="text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">Trong Tháng</p>
-          <p className="text-2xl font-black text-slate-900 dark:text-white">{total}</p>
-        </div>
-        <div className="p-2.5 bg-blue-500/10 border-0 rounded-xl text-blue-600 dark:text-blue-400">
-          <CalendarIcon size={18} />
-        </div>
+    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 sm:gap-4 shrink-0">
+      <div className="bg-white dark:bg-[#141417] border border-slate-200 dark:border-[#27272a] p-4.5 rounded-2xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.06),0_2px_6px_-2px_rgba(0,0,0,0.04)] dark:shadow-none transition-colors duration-200">
+        <p className="text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">Tổng ca</p>
+        <p className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white mt-3">{total}</p>
       </div>
-      <div className="bg-white dark:bg-[#141417] border-0 p-4.5 flex items-center justify-between rounded-2xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.06),0_2px_6px_-2px_rgba(0,0,0,0.04)] dark:shadow-none transition-colors duration-200">
-        <div>
-          <p className="text-[9px] font-black uppercase tracking-widest text-emerald-600 dark:text-emerald-400">Đã Hoàn Thành</p>
-          <p className="text-2xl font-black text-emerald-600 dark:text-emerald-400">{done}</p>
-        </div>
-        <div className="p-2.5 bg-emerald-500/10 border-0 rounded-xl text-emerald-600 dark:text-emerald-400">
-          <CheckCircle2 size={18} />
-        </div>
+      <div className="bg-white dark:bg-[#141417] border border-slate-200 dark:border-[#27272a] p-4.5 rounded-2xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.06),0_2px_6px_-2px_rgba(0,0,0,0.04)] dark:shadow-none transition-colors duration-200">
+        <p className="text-xs font-black uppercase tracking-wider text-emerald-600 dark:text-emerald-400">Hoàn thành</p>
+        <p className="text-2xl sm:text-3xl font-black text-emerald-600 dark:text-emerald-400 mt-3">{done}</p>
       </div>
-      <div className="bg-white dark:bg-[#141417] border-0 p-4.5 flex items-center justify-between rounded-2xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.06),0_2px_6px_-2px_rgba(0,0,0,0.04)] dark:shadow-none transition-colors duration-200">
-        <div>
-          <p className="text-[9px] font-black uppercase tracking-widest text-cyan-600 dark:text-cyan-400">Sắp Diễn Ra</p>
-          <p className="text-2xl font-black text-cyan-600 dark:text-cyan-400">{upcoming}</p>
-        </div>
-        <div className="p-2.5 bg-cyan-500/10 border-0 rounded-xl text-cyan-600 dark:text-cyan-400">
-          <Clock size={18} />
-        </div>
-      </div>
-      <div className="bg-white dark:bg-[#141417] border-0 p-4.5 flex items-center justify-between rounded-2xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.06),0_2px_6px_-2px_rgba(0,0,0,0.04)] dark:shadow-none transition-colors duration-200">
-        <div>
-          <p className="text-[9px] font-black uppercase tracking-widest text-rose-600 dark:text-rose-400">Nghỉ / Nghỉ Lễ</p>
-          <p className="text-2xl font-black text-rose-600 dark:text-rose-400">{off}</p>
-        </div>
-        <div className="p-2.5 bg-rose-500/10 border-0 rounded-xl text-rose-600 dark:text-rose-400">
-          <XCircle size={18} />
-        </div>
+      <div className="bg-white dark:bg-[#141417] border border-slate-200 dark:border-[#27272a] p-4.5 rounded-2xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.06),0_2px_6px_-2px_rgba(0,0,0,0.04)] dark:shadow-none transition-colors duration-200">
+        <p className="text-xs font-black uppercase tracking-wider text-rose-600 dark:text-rose-400">Hủy</p>
+        <p className="text-2xl sm:text-3xl font-black text-rose-600 dark:text-rose-400 mt-3">{off}</p>
       </div>
     </div>
   );

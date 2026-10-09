@@ -26,11 +26,11 @@ export const KPICards: React.FC<KPICardsProps> = React.memo(({ stats }) => {
 
   return (
     <div className={`grid grid-cols-1 sm:grid-cols-2 ${hasMockTest ? 'lg:grid-cols-5' : 'lg:grid-cols-4'} gap-4 select-none`}>
-      {/* 1. TỪ VỰNG TRUNG BÌNH */}
-      <div className="kpi-card-blue p-5 flex flex-col justify-between transition-all duration-200 min-h-[105px] animate-cascade-1">
+      {/* 1. TỪ VỰNG */}
+      <div className="kpi-card-blue p-5 flex flex-col justify-between transition-all duration-200 min-h-[105px]">
         <div>
           <span className="text-[10px] font-black uppercase tracking-wider text-blue-700 dark:text-blue-400 block mb-1">
-            TỪ VỰNG TRUNG BÌNH
+            TỪ VỰNG
           </span>
           <div className="flex items-baseline gap-1.5">
             <span className="text-3xl font-black text-slate-900 dark:text-white font-mono">{stats.c1}</span>
@@ -42,11 +42,11 @@ export const KPICards: React.FC<KPICardsProps> = React.memo(({ stats }) => {
         </div>
       </div>
 
-      {/* 2. NGỮ PHÁP TRUNG BÌNH */}
-      <div className="kpi-card-cyan p-5 flex flex-col justify-between transition-all duration-200 min-h-[105px] animate-cascade-2">
+      {/* 2. NGỮ PHÁP */}
+      <div className="kpi-card-cyan p-5 flex flex-col justify-between transition-all duration-200 min-h-[105px]">
         <div>
           <span className="text-[10px] font-black uppercase tracking-wider text-cyan-700 dark:text-cyan-400 block mb-1">
-            NGỮ PHÁP TRUNG BÌNH
+            NGỮ PHÁP
           </span>
           <div className="flex items-baseline gap-1.5">
             <span className="text-3xl font-black text-slate-900 dark:text-white font-mono">{stats.c2}</span>
@@ -58,11 +58,11 @@ export const KPICards: React.FC<KPICardsProps> = React.memo(({ stats }) => {
         </div>
       </div>
 
-      {/* 3. BTVN TRUNG BÌNH */}
-      <div className="kpi-card-green p-5 flex flex-col justify-between transition-all duration-200 min-h-[105px] animate-cascade-3">
+      {/* 3. BTVN */}
+      <div className="kpi-card-green p-5 flex flex-col justify-between transition-all duration-200 min-h-[105px]">
         <div>
           <span className="text-[10px] font-black uppercase tracking-wider text-emerald-700 dark:text-emerald-400 block mb-1">
-            BTVN TRUNG BÌNH
+            BTVN
           </span>
           <div className="flex items-baseline gap-1.5">
             <span className="text-3xl font-black text-slate-900 dark:text-white font-mono">{stats.hw}</span>
@@ -76,7 +76,7 @@ export const KPICards: React.FC<KPICardsProps> = React.memo(({ stats }) => {
 
       {/* 4. LUYỆN ĐỀ */}
       {hasMockTest && (
-        <div className="kpi-card-blue p-5 flex flex-col justify-between transition-all duration-200 min-h-[105px] animate-cascade-4">
+        <div className="kpi-card-blue p-5 flex flex-col justify-between transition-all duration-200 min-h-[105px]">
           <div>
             <span className="text-[10px] font-black uppercase tracking-wider text-amber-700 dark:text-amber-400 block mb-1">
               LUYỆN ĐỀ
@@ -92,11 +92,11 @@ export const KPICards: React.FC<KPICardsProps> = React.memo(({ stats }) => {
         </div>
       )}
 
-      {/* 5. TỔNG ĐIỂM TRUNG BÌNH */}
-      <div className={`kpi-card-amber p-5 flex flex-col justify-between transition-all duration-200 min-h-[105px] ${hasMockTest ? 'animate-cascade-5' : 'animate-cascade-4'}`}>
+      {/* 5. TỔNG ĐIỂM */}
+      <div className="kpi-card-amber p-5 flex flex-col justify-between transition-all duration-200 min-h-[105px]">
         <div>
           <span className="text-[10px] font-black uppercase tracking-wider text-amber-700 dark:text-amber-400 block mb-1">
-            TỔNG ĐIỂM TRUNG BÌNH
+            TỔNG ĐIỂM
           </span>
           <div className="flex items-baseline gap-1.5">
             <span className="text-3xl font-black text-slate-900 dark:text-white font-mono">{stats.overall}</span>

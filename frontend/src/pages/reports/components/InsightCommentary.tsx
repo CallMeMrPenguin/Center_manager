@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
-import { BookOpen, Info, X } from 'lucide-react';
+import { Info, X } from 'lucide-react';
 import { generateAcademicInsights } from '../utils/academicInsightEngine';
 
 interface InsightCommentaryProps {
@@ -68,12 +68,9 @@ export const InsightCommentary: React.FC<InsightCommentaryProps> = React.memo(({
     >
       {/* 1. HEADER TITLE & RATING BADGE */}
       <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-white/5">
-        <div className="flex items-center gap-2.5">
-          <BookOpen size={16} className="text-indigo-500 dark:text-indigo-400" />
-          <h4 className="text-sm font-black uppercase text-slate-900 dark:text-white tracking-wider">
-            {report.subjectTitle}
-          </h4>
-        </div>
+        <h4 className="text-sm font-black uppercase text-slate-900 dark:text-white tracking-wider">
+          ĐÁNH GIÁ
+        </h4>
         {/* Rating Badge (Hidden when viewing All Classes) */}
         {report.overallBadge && selectedClassId !== 'all' && Boolean(selectedClassId) && (
           <span

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { GraduationCap, ArrowRight, RefreshCw } from 'lucide-react';
+import { GraduationCap, ArrowRight, RefreshCw, X } from 'lucide-react';
 import { api } from '../../../api';
 import { MasteryHeatmap } from '../components/MasteryHeatmap';
 import { UnitBreakdownTable } from '../components/UnitBreakdownTable';
@@ -148,10 +148,7 @@ export const SkillBreakdownTab: React.FC<SkillBreakdownTabProps> = ({
               {selectedStudent.full_name.slice(0, 2).toUpperCase()}
             </div>
             <div>
-              <span className="text-[10px] font-black uppercase text-indigo-600 dark:text-indigo-400 block tracking-wider">
-                ĐANG PHÂN TÍCH KỸ NĂNG HỌC SINH
-              </span>
-              <div className="flex items-center gap-2 mt-0.5">
+              <div className="flex items-center gap-2">
                 <h3 className="text-base font-black text-slate-900 dark:text-white">
                   {selectedStudent.full_name} {selectedStudent.nickname && <span className="text-indigo-600 dark:text-indigo-300 font-bold">({selectedStudent.nickname})</span>}
                 </h3>
@@ -162,9 +159,10 @@ export const SkillBreakdownTab: React.FC<SkillBreakdownTabProps> = ({
           <button
             type="button"
             onClick={() => onSelectRankingStudent(0)}
-            className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-rose-50 dark:bg-[#1c2442] dark:hover:bg-rose-500/20 text-slate-600 hover:text-rose-600 dark:text-slate-300 dark:hover:text-rose-300 text-xs font-bold transition cursor-pointer"
+            className="p-2 rounded-xl bg-slate-100 hover:bg-rose-50 dark:bg-[#1c2442] dark:hover:bg-rose-500/20 text-slate-500 hover:text-rose-600 dark:text-slate-400 dark:hover:text-rose-300 transition cursor-pointer"
+            title="Bỏ lọc học sinh"
           >
-            Bỏ Lọc Học Sinh ✕
+            <X size={15} />
           </button>
         </div>
       )}
@@ -175,9 +173,9 @@ export const SkillBreakdownTab: React.FC<SkillBreakdownTabProps> = ({
           value={activeSubTab}
           onChange={setActiveSubTab}
           options={[
-            { value: 'diagnosis', label: 'Học Sinh Cần Phụ Đạo' },
-            { value: 'heatmap', label: 'Ma Trận Nắm Vững' },
-            { value: 'units', label: 'Thống Kê Theo Unit' },
+            { value: 'diagnosis', label: 'Phụ Đạo' },
+            { value: 'heatmap', label: 'Ma Trận' },
+            { value: 'units', label: 'Unit' },
           ]}
           size="md"
         />

@@ -57,32 +57,23 @@ export const ChartControls: React.FC<ChartControlsProps> = ({
     <div className="flex flex-col gap-3.5 border-b border-slate-200 dark:border-[#181f36] pb-3">
       {/* 1. TOP HEADER: View Mode Toggle & Mode Title */}
       <div className="flex flex-wrap items-center justify-between gap-4">
-        {/* Title */}
-        <div className="flex items-center gap-3">
-          {chartViewMode === 'timeline' ? (
-            <TrendingUp size={18} className="text-blue-500 dark:text-blue-400" />
-          ) : (
-            <BarChart2 size={18} className="text-cyan-500 dark:text-cyan-400" />
-          )}
+        {/* Title without icon */}
+        <div>
           <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider">
-            {chartViewMode === 'timeline'
-              ? 'TIẾN ĐỘ HỌC TẬP QUA CÁC KỲ & DỰ ĐOÁN XU HƯỚNG'
-              : 'PHỔ ĐIỂM HỌC LỰC & PHÂN PHỐI NĂNG LỰC'}
+            {chartViewMode === 'timeline' ? 'TIẾN ĐỘ HỌC TẬP' : 'PHỔ ĐIỂM'}
           </h3>
         </div>
 
-        {/* Sliding Pill Indicator for View Mode Switcher (Hidden in student mode) */}
+        {/* Single Icon Toggle Button for View Mode Switcher */}
         {!hideDistributionToggle && (
-          <SegmentedControl<'timeline' | 'distribution'>
-            value={chartViewMode}
-            onChange={setChartViewMode}
-            options={[
-              { value: 'timeline', label: 'Tiến Trình Thời Gian' },
-              { value: 'distribution', label: 'Phổ Điểm & Histogram' },
-            ]}
-            activeColor="bg-[#2563eb]"
-            size="sm"
-          />
+          <button
+            type="button"
+            onClick={() => setChartViewMode(chartViewMode === 'timeline' ? 'distribution' : 'timeline')}
+            className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 text-slate-700 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition cursor-pointer shadow-xs border-0"
+            title={chartViewMode === 'timeline' ? 'Chuyển sang xem phổ điểm' : 'Chuyển sang xem tiến độ học tập'}
+          >
+            {chartViewMode === 'timeline' ? <BarChart2 size={16} /> : <TrendingUp size={16} />}
+          </button>
         )}
       </div>
 

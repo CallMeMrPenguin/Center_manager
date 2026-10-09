@@ -1,4 +1,5 @@
 import React from 'react';
+import { X } from 'lucide-react';
 import { Question, TimerMode } from '../types';
 
 interface QuizSidebarProps {
@@ -8,6 +9,7 @@ interface QuizSidebarProps {
   userAnswers: Record<number, string>;
   bookmarkedQuestions: Record<number, boolean>;
   isSidebarCollapsed: boolean;
+  onToggleSidebar?: () => void;
   timerMode: TimerMode;
   perQuestionSeconds: number;
   setQuestionTimer: (s: number | ((prev: number) => number)) => void;
@@ -21,6 +23,7 @@ export const QuizSidebar: React.FC<QuizSidebarProps> = ({
   userAnswers,
   bookmarkedQuestions,
   isSidebarCollapsed,
+  onToggleSidebar,
   timerMode,
   perQuestionSeconds,
   setQuestionTimer,
@@ -29,18 +32,36 @@ export const QuizSidebar: React.FC<QuizSidebarProps> = ({
   const totalQuestions = activeQuestions.length;
   const answeredCount = Object.keys(userAnswers).length;
 
+  if (isSidebarCollapsed) return null;
+
   return (
-    <div
-      className={`transition-all duration-300 flex flex-col bg-white dark:bg-[#10172c] border border-slate-200 dark:border-white/10 rounded-2xl p-4 shadow-sm dark:shadow-xl shrink-0 ${
-        isSidebarCollapsed ? 'w-0 p-0 border-0 opacity-0 overflow-hidden pointer-events-none' : 'w-72'
-      }`}
-    >
-      <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-white/10 shrink-0">
-        <div className="text-xs font-black uppercase text-slate-900 dark:text-white tracking-wider">Danh Sách Câu Hỏi</div>
-        <span className="text-[11px] font-extrabold text-blue-600 dark:text-blue-400 font-mono">
-          {answeredCount}/{totalQuestions} đã làm
-        </span>
-      </div>
+    <>
+      {/* Mobile Backdrop Overlay */}
+      <div
+        onClick={onToggleSidebar}
+        className="fixed inset-0 bg-black/60 z-40 md:hidden transition-opacity"
+      />
+
+      <div
+        className="fixed inset-y-0 left-0 z-50 w-72 md:static md:z-auto transition-all duration-300 flex flex-col bg-white dark:bg-[#10172c] border-r md:border border-slate-200 dark:border-white/10 md:rounded-2xl p-4 shadow-xl md:shadow-sm shrink-0"
+      >
+        <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-white/10 shrink-0">
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-black uppercase text-slate-900 dark:text-white tracking-wider">Câu Hỏi</span>
+            <span className="text-[11px] font-extrabold text-blue-600 dark:text-blue-400 font-mono">
+              ({answeredCount}/{totalQuestions})
+            </span>
+          </div>
+          {onToggleSidebar && (
+            <button
+              onClick={onToggleSidebar}
+              className="p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 text-slate-500 hover:text-slate-800 dark:hover:text-white transition cursor-pointer"
+              title="Đóng danh sách câu hỏi"
+            >
+              <X size={16} />
+            </button>
+          )}
+        </div>
 
       <div className="grid grid-cols-5 gap-2 py-3 overflow-y-auto flex-1 content-start pr-1">
         {activeQuestions.map((item, idx) => {
@@ -80,6 +101,7 @@ export const QuizSidebar: React.FC<QuizSidebarProps> = ({
           Nộp Bài Sớm
         </button>
       </div>
-    </div>
+      </div>
+    </>
   );
 };

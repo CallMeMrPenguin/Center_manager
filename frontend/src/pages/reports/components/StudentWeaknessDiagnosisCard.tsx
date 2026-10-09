@@ -182,10 +182,10 @@ export const StudentWeaknessDiagnosisCard: React.FC<StudentWeaknessDiagnosisCard
                 return (
                   <span
                     key={`${u.unit_key}-${i}`}
-                    className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold transition-colors ${
+                    className={`inline-flex items-center gap-1 text-xs font-bold transition-colors ${
                       isGrammar
-                        ? 'bg-purple-500/10 dark:bg-purple-500/15 text-purple-700 dark:text-purple-200'
-                        : 'bg-blue-500/10 dark:bg-blue-500/15 text-blue-700 dark:text-blue-200'
+                        ? 'text-purple-700 dark:text-purple-300'
+                        : 'text-blue-700 dark:text-blue-300'
                     }`}
                   >
                     <span className="truncate max-w-[190px]">
@@ -200,7 +200,7 @@ export const StudentWeaknessDiagnosisCard: React.FC<StudentWeaknessDiagnosisCard
                           : 'text-emerald-600 dark:text-emerald-400'
                       }`}
                     >
-                      {format1Dec(u.avg_score)}đ
+                      ({format1Dec(u.avg_score)}đ)
                     </span>
                   </span>
                 );
@@ -257,18 +257,11 @@ export const StudentWeaknessDiagnosisCard: React.FC<StudentWeaknessDiagnosisCard
   return (
     <div className="bg-white dark:bg-[#0c0f1d] rounded-2xl p-5 shadow-sm dark:shadow-xl space-y-4 select-none">
       {/* 1. Header with Stats & Filter Pills */}
-      <div className="flex flex-wrap items-center justify-between gap-4 pb-2">
+      <div className="flex flex-wrap items-center justify-between gap-4 pb-2 border-b border-slate-100 dark:border-white/5">
         <div>
-          <div className="flex items-center gap-2">
-            <h3 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
-              <AlertTriangle size={18} className="text-amber-500 dark:text-amber-400" />
-              Chẩn Đoán Lỗ Hổng Kiến Thức & Danh Sách Cần Phụ Đạo
-            </h3>
-          </div>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-            Tổng hợp các Unit/chuyên đề có điểm EMA dưới 6.5đ để giáo viên lên lộ trình bổ trợ cá
-            nhân hóa
-          </p>
+          <h3 className="text-base font-black text-slate-900 dark:text-white uppercase tracking-wider">
+            Cần Phụ Đạo
+          </h3>
         </div>
 
         {/* Filter Pills */}
