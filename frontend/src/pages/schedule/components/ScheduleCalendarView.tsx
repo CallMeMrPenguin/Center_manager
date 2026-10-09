@@ -3,6 +3,7 @@ import { ClassSession } from '../types';
 import { HorizontalTimelineGrid } from './HorizontalTimelineGrid';
 
 interface ScheduleCalendarViewProps {
+  scope?: 'all' | 'week';
   viewMode?: 'week';
   selectedMonth: string;
   totalCells?: number;
@@ -22,6 +23,10 @@ interface ScheduleCalendarViewProps {
 }
 
 export const ScheduleCalendarView: React.FC<ScheduleCalendarViewProps> = ({
+  scope = 'all',
+  daysInMonth,
+  yr,
+  mo,
   today,
   sessions,
   weekDays,
@@ -31,7 +36,7 @@ export const ScheduleCalendarView: React.FC<ScheduleCalendarViewProps> = ({
   openEdit,
   setCtxMenu,
 }) => {
-  // Week view row items
+  // 1. Week view row items (7 days)
   const weekDayRows = useMemo(() => {
     return weekDays.map((wd, idx) => ({
       header: wd.header,
@@ -42,12 +47,35 @@ export const ScheduleCalendarView: React.FC<ScheduleCalendarViewProps> = ({
     }));
   }, [weekDays, today]);
 
+  // 2. Month view row items (All days in month: 1 to daysInMonth)
+  const monthDayRows = useMemo(() => {
+    if (!daysInMonth || !yr || !mo) return [];
+    const rows = [];
+    for (let d = 1; d <= daysInMonth; d++) {
+      const dateObj = new Date(yr, mo - 1, d);
+      const dateStr = `${yr}-${String(mo).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+      const dayOfWeek = dateObj.getDay();
+      const dayName = dayOfWeek === 0 ? 'Chủ Nhật' : `Thứ ${dayOfWeek + 1}`;
+      const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+      rows.push({
+        header: dayName,
+        dateStr,
+        subText: `${String(d).padStart(2, '0')}/${String(mo).padStart(2, '0')}`,
+        isToday: dateStr === today,
+        isWeekend,
+      });
+    }
+    return rows;
+  }, [daysInMonth, yr, mo, today]);
+
+  const daysToRender = scope === 'all' ? monthDayRows : weekDayRows;
+  const viewModeToRender = scope === 'all' ? 'month' : 'week';
   const weekRangeText = weekDays.length >= 7 ? `${weekDays[0].dateStr} - ${weekDays[6].dateStr}` : '';
 
   return (
     <HorizontalTimelineGrid
-      viewMode="week"
-      days={weekDayRows}
+      viewMode={viewModeToRender}
+      days={daysToRender}
       sessions={sessions}
       today={today}
       changeWeek={changeWeek}

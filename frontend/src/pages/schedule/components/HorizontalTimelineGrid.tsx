@@ -134,44 +134,11 @@ export const HorizontalTimelineGrid: React.FC<HorizontalTimelineGridProps> = ({
     <div className="flex-1 min-h-0 flex flex-col select-none bg-slate-100 dark:bg-[#0c101d]">
       {/* ── TIMELINE TOOLBAR (Week Nav + Zoom Controls +/-) ──────────────── */}
       <div className="bg-slate-50 dark:bg-[#131a2c] border-b border-slate-200 dark:border-white/10 px-4 py-2 flex flex-wrap items-center justify-between gap-3 shrink-0">
-        {/* Left: Week Navigation (if in week mode) */}
-        {viewMode === 'week' && changeWeek && weekRangeText ? (
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => changeWeek(-1)}
-              className="p-1.5 rounded-xl bg-slate-200/70 dark:bg-white/5 hover:bg-slate-300/70 dark:hover:bg-white/10 text-slate-700 dark:text-white transition cursor-pointer border-0 shadow-2xs"
-              title="Tuần trước"
-            >
-              <ChevronLeft size={14} />
-            </button>
-            <span className="text-xs font-black text-slate-900 dark:text-white min-w-[150px] text-center font-mono">
-              {weekRangeText}
-            </span>
-            <button
-              type="button"
-              onClick={() => changeWeek(1)}
-              className="p-1.5 rounded-xl bg-slate-200/70 dark:bg-white/5 hover:bg-slate-300/70 dark:hover:bg-white/10 text-slate-700 dark:text-white transition cursor-pointer border-0 shadow-2xs"
-              title="Tuần sau"
-            >
-              <ChevronRight size={14} />
-            </button>
-            {setWeekStartToday && (
-              <button
-                type="button"
-                onClick={setWeekStartToday}
-                className="px-2.5 py-1 rounded-lg bg-blue-500/15 text-blue-600 dark:text-blue-300 text-[11px] font-extrabold hover:bg-blue-500/25 transition cursor-pointer border-0 ml-1"
-              >
-                Hôm Nay
-              </button>
-            )}
-          </div>
-        ) : (
-          <div className="text-xs font-black text-slate-700 dark:text-slate-300 flex items-center gap-2">
-            <span>LỊCH NGANG THEO THÁNG</span>
-            <span className="text-[10px] text-slate-400 font-bold">({days.length} ngày)</span>
-          </div>
-        )}
+        {/* Left: Timeline title */}
+        <div className="text-xs font-black text-slate-700 dark:text-slate-300 flex items-center gap-2">
+          <span>{viewMode === 'week' ? 'LỊCH HỌC THEO TUẦN' : 'LỊCH HỌC THEO THÁNG'}</span>
+          <span className="text-[11px] text-slate-400 font-bold font-mono">({days.length} ngày)</span>
+        </div>
 
         {/* Right: Zoom Controls (+ and -) */}
         <div className="flex items-center gap-2">
