@@ -24,10 +24,10 @@ export const DualComparisonBars: React.FC<DualComparisonBarsProps> = ({
           <span className="text-sm font-black uppercase tracking-wider text-slate-900 dark:text-white">
             SO SÁNH THÀNH PHẦN ĐIỂM
           </span>
-          <div className="flex items-center gap-4 text-sm font-extrabold">
-            <span className="text-blue-600 dark:text-blue-400">{classA.name}</span>
-            <span className="text-slate-400 dark:text-slate-600 font-bold">VS</span>
-            <span className="text-cyan-600 dark:text-cyan-400">{classB.name}</span>
+          <div className="flex items-center gap-3">
+            <span className="text-base sm:text-lg font-black text-blue-600 dark:text-blue-400">{classA.name}</span>
+            <span className="text-slate-400 dark:text-slate-600 font-bold text-xs">VS</span>
+            <span className="text-base sm:text-lg font-black text-cyan-600 dark:text-cyan-400">{classB.name}</span>
           </div>
         </div>
 
@@ -39,7 +39,7 @@ export const DualComparisonBars: React.FC<DualComparisonBarsProps> = ({
             </div>
             <div className="space-y-2">
               <div className="flex items-center gap-3 min-w-0">
-                <span className="text-xs sm:text-sm font-extrabold text-blue-600 dark:text-blue-400 w-24 sm:w-28 truncate shrink-0">{classA.name}:</span>
+                <span className="text-base sm:text-lg font-black text-blue-600 dark:text-blue-400 w-28 sm:w-36 truncate shrink-0">{classA.name}:</span>
                 <div className="flex-1 h-4 bg-slate-100 dark:bg-[#161d30] rounded-full overflow-hidden p-0.5 min-w-[50px]">
                   <AnimatedProgressBar
                     key={`comp-c1-a-${compareClassAId}-${compareClassBId}-${classA.avgCheck1}`}
@@ -51,7 +51,7 @@ export const DualComparisonBars: React.FC<DualComparisonBarsProps> = ({
                 <span className="text-sm font-mono font-black text-blue-600 dark:text-blue-400 w-16 text-right shrink-0">{format1Dec(classA.avgCheck1)} đ</span>
               </div>
               <div className="flex items-center gap-3 min-w-0">
-                <span className="text-xs sm:text-sm font-extrabold text-cyan-600 dark:text-cyan-400 w-24 sm:w-28 truncate shrink-0">{classB.name}:</span>
+                <span className="text-base sm:text-lg font-black text-cyan-600 dark:text-cyan-400 w-28 sm:w-36 truncate shrink-0">{classB.name}:</span>
                 <div className="flex-1 h-4 bg-slate-100 dark:bg-[#161d30] rounded-full overflow-hidden p-0.5 min-w-[50px]">
                   <AnimatedProgressBar
                     key={`comp-c1-b-${compareClassAId}-${compareClassBId}-${classA.avgCheck1}`}
@@ -72,7 +72,7 @@ export const DualComparisonBars: React.FC<DualComparisonBarsProps> = ({
             </div>
             <div className="space-y-2">
               <div className="flex items-center gap-3 min-w-0">
-                <span className="text-xs sm:text-sm font-extrabold text-blue-600 dark:text-blue-400 w-24 sm:w-28 truncate shrink-0">{classA.name}:</span>
+                <span className="text-base sm:text-lg font-black text-blue-600 dark:text-blue-400 w-28 sm:w-36 truncate shrink-0">{classA.name}:</span>
                 <div className="flex-1 h-4 bg-slate-100 dark:bg-[#161d30] rounded-full overflow-hidden p-0.5 min-w-[50px]">
                   <AnimatedProgressBar
                     key={`comp-c2-a-${compareClassAId}-${compareClassBId}-${classA.avgCheck2}`}
@@ -84,7 +84,7 @@ export const DualComparisonBars: React.FC<DualComparisonBarsProps> = ({
                 <span className="text-sm font-mono font-black text-blue-600 dark:text-blue-400 w-16 text-right shrink-0">{format1Dec(classA.avgCheck2)} đ</span>
               </div>
               <div className="flex items-center gap-3 min-w-0">
-                <span className="text-xs sm:text-sm font-extrabold text-cyan-600 dark:text-cyan-400 w-24 sm:w-28 truncate shrink-0">{classB.name}:</span>
+                <span className="text-base sm:text-lg font-black text-cyan-600 dark:text-cyan-400 w-28 sm:w-36 truncate shrink-0">{classB.name}:</span>
                 <div className="flex-1 h-4 bg-slate-100 dark:bg-[#161d30] rounded-full overflow-hidden p-0.5 min-w-[50px]">
                   <AnimatedProgressBar
                     key={`comp-c2-b-${compareClassAId}-${compareClassBId}-${classA.avgCheck2}`}
@@ -105,7 +105,7 @@ export const DualComparisonBars: React.FC<DualComparisonBarsProps> = ({
             </div>
             <div className="space-y-2">
               <div className="flex items-center gap-3 min-w-0">
-                <span className="text-xs sm:text-sm font-extrabold text-blue-600 dark:text-blue-400 w-24 sm:w-28 truncate shrink-0">{classA.name}:</span>
+                <span className="text-base sm:text-lg font-black text-blue-600 dark:text-blue-400 w-28 sm:w-36 truncate shrink-0">{classA.name}:</span>
                 <div className="flex-1 h-4 bg-slate-100 dark:bg-[#161d30] rounded-full overflow-hidden p-0.5 min-w-[50px]">
                   <AnimatedProgressBar
                     key={`comp-hw-a-${compareClassAId}-${compareClassBId}-${classA.avgHomework}`}
@@ -117,7 +117,7 @@ export const DualComparisonBars: React.FC<DualComparisonBarsProps> = ({
                 <span className="text-sm font-mono font-black text-blue-600 dark:text-blue-400 w-16 text-right shrink-0">{format1Dec(classA.avgHomework)} đ</span>
               </div>
               <div className="flex items-center gap-3 min-w-0">
-                <span className="text-xs sm:text-sm font-extrabold text-cyan-600 dark:text-cyan-400 w-24 sm:w-28 truncate shrink-0">{classB.name}:</span>
+                <span className="text-base sm:text-lg font-black text-cyan-600 dark:text-cyan-400 w-28 sm:w-36 truncate shrink-0">{classB.name}:</span>
                 <div className="flex-1 h-4 bg-slate-100 dark:bg-[#161d30] rounded-full overflow-hidden p-0.5 min-w-[50px]">
                   <AnimatedProgressBar
                     key={`comp-hw-b-${compareClassAId}-${compareClassBId}-${classA.avgHomework}`}
@@ -139,10 +139,14 @@ export const DualComparisonBars: React.FC<DualComparisonBarsProps> = ({
           <span className="text-sm font-black uppercase tracking-wider text-slate-900 dark:text-white">
             Học Lực
           </span>
-          <div className="flex items-center gap-4 text-xs font-extrabold">
-            <span className="text-blue-600 dark:text-blue-400">{classA.name} ({classA.studentCount} HS)</span>
-            <span className="text-slate-400 dark:text-slate-600 font-bold">VS</span>
-            <span className="text-cyan-600 dark:text-cyan-400">{classB.name} ({classB.studentCount} HS)</span>
+          <div className="flex items-center gap-3">
+            <span className="text-base sm:text-lg font-black text-blue-600 dark:text-blue-400">
+              {classA.name} <span className="text-xs font-bold text-slate-400 dark:text-slate-500">({classA.studentCount} HS)</span>
+            </span>
+            <span className="text-slate-400 dark:text-slate-600 font-bold text-xs">VS</span>
+            <span className="text-base sm:text-lg font-black text-cyan-600 dark:text-cyan-400">
+              {classB.name} <span className="text-xs font-bold text-slate-400 dark:text-slate-500">({classB.studentCount} HS)</span>
+            </span>
           </div>
         </div>
 

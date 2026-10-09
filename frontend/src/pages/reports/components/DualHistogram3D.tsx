@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useTheme } from '../../../context/ThemeContext';
 
 interface DualHistogram3DProps {
@@ -12,6 +12,7 @@ interface MilestoneStat {
   range: string;
   min: number;
   max: number;
+  color: string;
   countA: number;
   pctA: number;
   countB: number;
@@ -20,22 +21,16 @@ interface MilestoneStat {
 
 export const DualHistogram3D: React.FC<DualHistogram3DProps> = ({ classA, classB }) => {
   const { isDark } = useTheme();
-  const [hoveredInfo, setHoveredInfo] = useState<{
-    milestone: string;
-    classLabel: string;
-    count: number;
-    pct: number;
-    range: string;
-    color: string;
-  } | null>(null);
 
+  // Milestones in ascending order (từ bé đến lớn: Kém -> Yếu -> Trung Bình -> Khá -> Giỏi -> Xuất Sắc)
+  // Each milestone has its unique distinct color applied to the X-axis
   const milestones = [
-    { id: 'xs', name: 'Xuất Sắc', range: '≥ 9.0đ', min: 9.0, max: 10.0 },
-    { id: 'gioi', name: 'Giỏi', range: '8.0 – 8.9đ', min: 8.0, max: 8.99 },
-    { id: 'kha', name: 'Khá', range: '6.5 – 7.9đ', min: 6.5, max: 7.99 },
-    { id: 'tb', name: 'Trung Bình', range: '5.0 – 6.4đ', min: 5.0, max: 6.49 },
-    { id: 'yeu', name: 'Yếu', range: '3.5 – 4.9đ', min: 3.5, max: 4.99 },
-    { id: 'kem', name: 'Kém', range: '< 3.5đ', min: 0, max: 3.49 },
+    { id: 'kem', name: 'Kém', range: '< 3.5đ', min: 0, max: 3.49, color: '#f43f5e' },
+    { id: 'yeu', name: 'Yếu', range: '3.5 – 4.9đ', min: 3.5, max: 4.99, color: '#fb923c' },
+    { id: 'tb', name: 'Trung Bình', range: '5.0 – 6.4đ', min: 5.0, max: 6.49, color: '#f59e0b' },
+    { id: 'kha', name: 'Khá', range: '6.5 – 7.9đ', min: 6.5, max: 7.99, color: '#06b6d4' },
+    { id: 'gioi', name: 'Giỏi', range: '8.0 – 8.9đ', min: 8.0, max: 8.99, color: '#6366f1' },
+    { id: 'xs', name: 'Xuất Sắc', range: '≥ 9.0đ', min: 9.0, max: 10.0, color: '#10b981' },
   ];
 
   const getStudentScore = (s: any) => {
@@ -80,7 +75,7 @@ export const DualHistogram3D: React.FC<DualHistogram3DProps> = ({ classA, classB
   const depthX = 10;
   const depthY = 8;
 
-  // Grid steps
+  // Grid steps for Y-axis
   const steps = 4;
   const yTicks: number[] = [];
   for (let i = 0; i <= steps; i++) {
@@ -94,7 +89,6 @@ export const DualHistogram3D: React.FC<DualHistogram3DProps> = ({ classA, classB
         <svg
           viewBox={`0 0 ${svgWidth} ${svgHeight}`}
           className="w-full h-auto min-w-[500px] overflow-visible block"
-          onMouseLeave={() => setHoveredInfo(null)}
         >
           <defs>
             {/* Class A (Blue) Gradients */}
@@ -144,7 +138,7 @@ export const DualHistogram3D: React.FC<DualHistogram3DProps> = ({ classA, classB
             );
           })}
 
-          {/* Base Grid Line */}
+          {/* Base Platform Line */}
           <line
             x1={paddingX - 10}
             y1={baseY}
@@ -190,19 +184,7 @@ export const DualHistogram3D: React.FC<DualHistogram3DProps> = ({ classA, classB
             return (
               <g key={m.id} className="transition-all duration-300">
                 {/* ── CLASS A 3D COLUMN ── */}
-                <g
-                  className="cursor-pointer transition-opacity"
-                  onMouseEnter={() =>
-                    setHoveredInfo({
-                      milestone: m.name,
-                      classLabel: classA.name,
-                      count: m.countA,
-                      pct: m.pctA,
-                      range: m.range,
-                      color: '#3b82f6',
-                    })
-                  }
-                >
+                <g>
                   {m.countA > 0 ? (
                     <>
                       {/* Right Side */}
@@ -236,19 +218,7 @@ export const DualHistogram3D: React.FC<DualHistogram3DProps> = ({ classA, classB
                 </g>
 
                 {/* ── CLASS B 3D COLUMN ── */}
-                <g
-                  className="cursor-pointer transition-opacity"
-                  onMouseEnter={() =>
-                    setHoveredInfo({
-                      milestone: m.name,
-                      classLabel: classB.name,
-                      count: m.countB,
-                      pct: m.pctB,
-                      range: m.range,
-                      color: '#06b6d4',
-                    })
-                  }
-                >
+                <g>
                   {m.countB > 0 ? (
                     <>
                       {/* Right Side */}
@@ -281,12 +251,13 @@ export const DualHistogram3D: React.FC<DualHistogram3DProps> = ({ classA, classB
                   </text>
                 </g>
 
-                {/* Category Title & Range */}
+                {/* Category Title with unique milestone color & Range */}
                 <text
                   x={slotCenterX + depthX / 2}
                   y={baseY + 18}
                   textAnchor="middle"
-                  className="font-black text-xs fill-slate-800 dark:fill-slate-200 select-none"
+                  fill={m.color}
+                  className="font-black text-xs select-none"
                 >
                   {m.name}
                 </text>
@@ -303,23 +274,6 @@ export const DualHistogram3D: React.FC<DualHistogram3DProps> = ({ classA, classB
           })}
         </svg>
       </div>
-
-      {/* Interactive Tooltip Card at Bottom Right */}
-      {hoveredInfo && (
-        <div className="mt-2 py-1.5 px-3 rounded-xl bg-slate-900/90 text-white border border-white/10 flex items-center justify-between text-xs animate-in fade-in duration-150">
-          <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: hoveredInfo.color }} />
-            <span className="font-extrabold">{hoveredInfo.classLabel}</span>
-            <span className="text-slate-400">·</span>
-            <span className="font-bold text-slate-300">
-              {hoveredInfo.milestone} ({hoveredInfo.range})
-            </span>
-          </div>
-          <div className="font-mono font-black text-white">
-            {hoveredInfo.count} học sinh ({hoveredInfo.pct}%)
-          </div>
-        </div>
-      )}
     </div>
   );
 };
