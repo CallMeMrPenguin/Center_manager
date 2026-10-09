@@ -33,6 +33,7 @@ interface SidebarProps {
   profileRef: React.RefObject<HTMLDivElement | null>;
   currentUser: AuthUser | null;
   onLogout?: () => void;
+  onPrefetchTab?: (id: string) => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -51,6 +52,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   profileRef,
   currentUser,
   onLogout,
+  onPrefetchTab,
 }) => {
   const [changePasswordOpen, setChangePasswordOpen] = useState(false);
   return (
@@ -133,6 +135,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
                         onDragOver={handleDragOver}
                         onDragEnd={() => setDraggedIndex(null)}
                         onDrop={() => handleDrop(idx)}
+                        onMouseEnter={() => onPrefetchTab?.(item.id)}
+                        onTouchStart={() => onPrefetchTab?.(item.id)}
                         onClick={() => setActiveTab(item.id)}
                         className={`flex items-center w-full h-9 px-2.5 rounded-xl justify-start transition-all duration-150 ease-out relative group/item cursor-pointer shrink-0 active:scale-95 ${
                           isActive
@@ -199,6 +203,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       <DockItem
                         key={item.id}
                         isActive={isActive}
+                        onMouseEnter={() => onPrefetchTab?.(item.id)}
+                        onTouchStart={() => onPrefetchTab?.(item.id)}
                         onClick={() => setActiveTab(item.id)}
                       >
                         <DockIcon isActive={isActive}>

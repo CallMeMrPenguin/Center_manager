@@ -8,26 +8,28 @@ import {
 
 import WaitingForDevelopment from '../components/WaitingForDevelopment';
 
-const TestFormatter = lazy(() => import('../pages/test-formatter'));
-const QuestionBank = lazy(() => import('../pages/question-bank'));
-const VocabularyBank = lazy(() => import('../pages/vocabulary-bank'));
-const UnitConfig = lazy(() => import('../pages/unit-config'));
-const Settings = lazy(() => import('../pages/settings'));
-const DocumentManager = lazy(() => import('../pages/document-manager'));
-const CanvasBoardPage = lazy(() => import('../pages/canvas-board'));
-const WordEditorPage = lazy(() => import('../pages/word-editor'));
-const DashboardPage = lazy(() => import('../pages/dashboard'));
-const StudentsPage = lazy(() => import('../pages/students'));
-const TeachersPage = lazy(() => import('../pages/teachers'));
-const ClassesPage = lazy(() => import('../pages/classes'));
-const CoursesPage = lazy(() => import('../pages/courses'));
-const KiemTraPage = lazy(() => import('../pages/kiemtra'));
-const SchedulePage = lazy(() => import('../pages/schedule'));
-const ReportsPage = lazy(() => import('../pages/reports'));
-const UIShowcasePage = lazy(() => import('../pages/ui-showcase'));
-const ResultsPage = lazy(() => import('../pages/results'));
-const AssignmentsPage = lazy(() => import('../pages/assignments'));
-const UsersRolesPage = lazy(() => import('../pages/users-roles'));
+import { TAB_MODULE_LOADERS } from '../utils/tabPreloader';
+
+const TestFormatter = lazy(TAB_MODULE_LOADERS['formatter']);
+const QuestionBank = lazy(TAB_MODULE_LOADERS['question-bank']);
+const VocabularyBank = lazy(TAB_MODULE_LOADERS['vocab-bank']);
+const UnitConfig = lazy(TAB_MODULE_LOADERS['unit-config']);
+const Settings = lazy(TAB_MODULE_LOADERS['settings']);
+const DocumentManager = lazy(TAB_MODULE_LOADERS['file-manager']);
+const CanvasBoardPage = lazy(TAB_MODULE_LOADERS['canvas-board']);
+const WordEditorPage = lazy(TAB_MODULE_LOADERS['word-editor']);
+const DashboardPage = lazy(TAB_MODULE_LOADERS['dashboard']);
+const StudentsPage = lazy(TAB_MODULE_LOADERS['students']);
+const TeachersPage = lazy(TAB_MODULE_LOADERS['teachers']);
+const ClassesPage = lazy(TAB_MODULE_LOADERS['classes']);
+const CoursesPage = lazy(TAB_MODULE_LOADERS['courses']);
+const KiemTraPage = lazy(TAB_MODULE_LOADERS['kiemtra']);
+const SchedulePage = lazy(TAB_MODULE_LOADERS['schedule']);
+const ReportsPage = lazy(TAB_MODULE_LOADERS['reports']);
+const UIShowcasePage = lazy(TAB_MODULE_LOADERS['ui-showcase']);
+const ResultsPage = lazy(TAB_MODULE_LOADERS['results']);
+const AssignmentsPage = lazy(TAB_MODULE_LOADERS['assignments']);
+const UsersRolesPage = lazy(TAB_MODULE_LOADERS['users-roles']);
 
 
 export interface TabDefinition {

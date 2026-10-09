@@ -12,6 +12,7 @@ import { LoginPage } from './pages/auth/LoginPage';
 import { AuthUser, getCurrentUser, clearAuthUser } from './utils/authUtils';
 import { useAutoDeploymentRefresh } from './hooks/useAutoDeploymentRefresh';
 import { useWarmupDataCache } from './hooks/useWarmupDataCache';
+import { useTabIdleWarmup } from './hooks/useTabIdleWarmup';
 import { useUserRolePermissions } from './hooks/useUserRolePermissions';
 import { ThemeProvider } from './context/ThemeContext';
 import { FpsOverlay } from './components/FpsOverlay';
@@ -195,6 +196,14 @@ function AppContent() {
 
   const { isAdmin, isStudent, allowedTabIds } = useUserRolePermissions(currentUser);
 
+  // Progressive tab chunk prefetching & idle background warmup
+  const { prefetchTab } = useTabIdleWarmup({
+    currentUser,
+    allowedTabIds,
+    visitedTabIds,
+    setVisitedTabIds,
+  });
+
   // Redirect if currently active tab is not permitted for this role
   useEffect(() => {
     if (!currentUser || isAdmin || allowedTabIds.length === 0) return;
@@ -275,6 +284,7 @@ function AppContent() {
             profileRef={profileRef}
             currentUser={currentUser}
             onLogout={handleLogout}
+            onPrefetchTab={prefetchTab}
           />
         </div>
 
@@ -322,6 +332,7 @@ function AppContent() {
         activeTab={activeTab}
         setActiveTab={handleSelectTab}
         orderedTabIds={visibleTabIds}
+        onPrefetchTab={prefetchTab}
       />
 
       {/* STATUS BAR (DESKTOP ONLY) */}

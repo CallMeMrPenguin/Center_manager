@@ -7,6 +7,7 @@ interface MobileBottomDockProps {
   activeTab: string;
   setActiveTab: (id: string) => void;
   orderedTabIds: string[];
+  onPrefetchTab?: (id: string) => void;
 }
 
 // Canonical tab order matching the desktop visual SECTIONS hierarchy
@@ -33,6 +34,7 @@ export const MobileBottomDock: React.FC<MobileBottomDockProps> = ({
   activeTab,
   setActiveTab,
   orderedTabIds,
+  onPrefetchTab,
 }) => {
   if (!isRealMobileDevice()) return null;
 
@@ -197,6 +199,8 @@ export const MobileBottomDock: React.FC<MobileBottomDockProps> = ({
               key={tab.id}
               data-dock-tab={tab.id}
               type="button"
+              onTouchStart={() => onPrefetchTab?.(tab.id)}
+              onMouseEnter={() => onPrefetchTab?.(tab.id)}
               onClick={() => {
                 if (scrollSettleTimerRef.current) clearTimeout(scrollSettleTimerRef.current);
                 resetIdleTimer();

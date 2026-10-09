@@ -71,11 +71,15 @@ export const DockItem: React.FC<{
   children: React.ReactNode;
   className?: string;
   onClick?: () => void;
+  onMouseEnter?: () => void;
+  onTouchStart?: () => void;
   isActive?: boolean;
 }> = ({
   children,
   className = '',
   onClick,
+  onMouseEnter,
+  onTouchStart,
   isActive = false,
 }) => {
   const context = useContext(DockContext);
@@ -118,6 +122,7 @@ export const DockItem: React.FC<{
       });
     }
     setIsHovered(true);
+    onMouseEnter?.();
   };
 
   const handleMouseLeave = () => {
@@ -132,6 +137,7 @@ export const DockItem: React.FC<{
         onClick={onClick}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
+        onTouchStart={onTouchStart}
         className={`relative flex items-center justify-center w-10 h-10 mx-auto rounded-xl cursor-pointer shrink-0 ${
           isActive ? activeStyles : inactiveStyles
         } ${className}`}

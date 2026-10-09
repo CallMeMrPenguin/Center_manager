@@ -18,6 +18,7 @@ import { ScheduleKpiCards } from './components/ScheduleKpiCards';
 import { useScheduleColumns } from './hooks/useScheduleColumns';
 import { useScheduleActions } from './hooks/useScheduleActions';
 import { useScheduleCalendar } from './hooks/useScheduleCalendar';
+import { dataCache } from '../../utils/dataCache';
 
 export default function SchedulePage() {
   const [loading, setLoading] = useState(true);
@@ -38,7 +39,8 @@ export default function SchedulePage() {
     weekDays,
     changeWeek,
   } = useScheduleCalendar();
-  const [classesList, setClassesList] = useState<any[]>([]);
+  const cachedClasses = dataCache.get<any[]>('/api/classes?search=')?.data;
+  const [classesList, setClassesList] = useState<any[]>(() => cachedClasses || []);
   const [classFilter, setClassFilter] = useState('');
   const [sessions, setSessions] = useState<ClassSession[]>([]);
   const [ctxMenu, setCtxMenu] = useState<{ x: number; y: number; dateStr: string } | null>(null);

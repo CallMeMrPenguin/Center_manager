@@ -22,10 +22,13 @@ function formatVND(amount: number) {
   return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
 }
 
+import { dataCache } from '../utils/dataCache';
+
 export default function CoursesPage() {
   const confirm = useConfirm();
-  const [courses, setCourses] = useState<Course[]>([]);
-  const [loading, setLoading] = useState(true);
+  const cachedCourses = dataCache.get<Course[]>('/api/courses?search=&status=')?.data;
+  const [courses, setCourses] = useState<Course[]>(() => cachedCourses || []);
+  const [loading, setLoading] = useState(() => !cachedCourses || cachedCourses.length === 0);
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editingCourse, setEditingCourse] = useState<Course | null>(null);
@@ -37,8 +40,10 @@ export default function CoursesPage() {
     status: 'Đang mở'
   });
 
-  const loadData = async () => {
-    setLoading(true);
+  const loadData = async (silent = false) => {
+    if (!silent && (!cachedCourses || cachedCourses.length === 0)) {
+      setLoading(true);
+    }
     try {
       const data = await api.getCourses();
       setCourses(data);
