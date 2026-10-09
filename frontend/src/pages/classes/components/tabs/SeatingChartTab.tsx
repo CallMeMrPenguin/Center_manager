@@ -327,18 +327,20 @@ export const SeatingChartTab: React.FC<SeatingChartTabProps> = ({
               </div>
             ))}
 
-            {/* THÊM DÃY BÀN BUTTON TRỰC TIẾP TRONG SƠ ĐỒ */}
-            <button
-              type="button"
-              onClick={onAddColumn}
-              className="flex flex-col items-center justify-center gap-2 p-6 rounded-2xl border-2 border-dashed border-slate-300 dark:border-white/10 hover:border-indigo-400 dark:hover:border-indigo-500 text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 min-h-[220px] w-28 transition cursor-pointer group shrink-0"
-              title="Bấm để thêm 1 dãy bàn học"
-            >
-              <div className="w-9 h-9 rounded-full bg-white dark:bg-white/5 flex items-center justify-center shadow-xs group-hover:scale-110 transition-transform">
-                <Plus size={18} />
-              </div>
-              <span className="text-xs font-bold">Thêm dãy</span>
-            </button>
+            {/* THÊM DÃY BÀN BUTTON TRỰC TIẾP TRONG SƠ ĐỒ (RỘNG VÀ CAO BẰNG 1 BÀN, BỎ CHỮ THÊM DÃY) */}
+            <div className="flex flex-col items-center gap-4 shrink-0">
+              <div className="h-[28px]" />
+              <button
+                type="button"
+                onClick={onAddColumn}
+                className="w-[310px] h-[106px] rounded-2xl border-2 border-dashed border-slate-300 dark:border-white/15 hover:border-indigo-500 text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 flex items-center justify-center transition cursor-pointer group shrink-0 bg-transparent hover:bg-indigo-50/40 dark:hover:bg-indigo-500/10"
+                title="Thêm dãy bàn học"
+              >
+                <div className="w-9 h-9 rounded-full bg-white dark:bg-white/10 flex items-center justify-center shadow-xs group-hover:scale-110 transition-transform text-slate-500 dark:text-slate-300 group-hover:text-indigo-600 dark:group-hover:text-indigo-400">
+                  <Plus size={20} strokeWidth={2.5} />
+                </div>
+              </button>
+            </div>
           </div>
         </div>
       </div>

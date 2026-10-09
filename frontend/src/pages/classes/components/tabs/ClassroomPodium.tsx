@@ -1,16 +1,18 @@
 import React from 'react';
-import { GraduationCap, ChevronLeft, ChevronRight, MoveHorizontal } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface ClassroomPodiumProps {
   colsCount: number;
   activeCol: number;
   onSelectCol: (colIdx: number) => void;
+  showAddColSpacer?: boolean;
 }
 
 export const ClassroomPodium: React.FC<ClassroomPodiumProps> = ({
   colsCount,
   activeCol,
   onSelectCol,
+  showAddColSpacer = true,
 }) => {
   const safeActiveCol = Math.max(0, Math.min(colsCount - 1, activeCol));
 
@@ -22,7 +24,7 @@ export const ClassroomPodium: React.FC<ClassroomPodiumProps> = ({
         return (
           <div
             key={colIdx}
-            className="w-[310px] flex justify-center items-center"
+            className="w-[310px] shrink-0 flex justify-center items-center"
             onDragOver={(e) => {
               e.preventDefault();
               e.dataTransfer.dropEffect = 'move';
@@ -56,11 +58,8 @@ export const ClassroomPodium: React.FC<ClassroomPodiumProps> = ({
                   <ChevronLeft size={14} strokeWidth={2.5} />
                 </button>
 
-                {/* Desk Label & Icon */}
-                <div className="flex items-center gap-2 min-w-0">
-                  <div className="w-6 h-6 rounded-lg bg-indigo-600 dark:bg-indigo-500 text-white flex items-center justify-center shadow-xs shrink-0">
-                    <GraduationCap size={14} />
-                  </div>
+                {/* Desk Label (Icon removed) */}
+                <div className="flex items-center justify-center flex-1 min-w-0">
                   <span className="text-xs font-black uppercase tracking-wider text-slate-900 dark:text-white truncate">
                     Bàn Giáo Viên
                   </span>
@@ -84,10 +83,9 @@ export const ClassroomPodium: React.FC<ClassroomPodiumProps> = ({
               <button
                 type="button"
                 onClick={() => onSelectCol(colIdx)}
-                className="w-full py-2 px-3 rounded-2xl border-0 bg-slate-200/50 dark:bg-white/5 hover:bg-indigo-50/80 dark:hover:bg-indigo-500/15 flex items-center justify-center gap-1.5 transition-all cursor-pointer opacity-40 hover:opacity-100 text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 shadow-2xs"
+                className="w-full py-2 px-3 rounded-2xl border-2 border-dashed border-slate-300 dark:border-white/15 hover:border-indigo-400 dark:hover:border-indigo-500 bg-transparent hover:bg-indigo-50/50 dark:hover:bg-indigo-500/10 flex items-center justify-center gap-1.5 transition-all cursor-pointer text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400"
                 title={`Đặt bàn giáo viên thẳng Dãy ${colIdx + 1}`}
               >
-                <MoveHorizontal size={12} className="shrink-0" />
                 <span className="text-[10px] font-bold uppercase tracking-wider">
                   Đặt bàn GV thẳng Dãy {colIdx + 1}
                 </span>
@@ -96,6 +94,8 @@ export const ClassroomPodium: React.FC<ClassroomPodiumProps> = ({
           </div>
         );
       })}
+      {/* Spacer to align with the "+ Thêm dãy" card in the columns row */}
+      {showAddColSpacer && <div className="w-[310px] shrink-0 pointer-events-none" />}
     </div>
   );
 };

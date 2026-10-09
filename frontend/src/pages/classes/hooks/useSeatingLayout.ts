@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { ClassItem, EnrolledStudent, SeatingCol, AttendanceRecord, GradingPair } from '../types';
 import { api } from '../../../api';
 import { showToast } from '../../../components/Toast';
@@ -12,6 +12,7 @@ export function useSeatingLayout(
   const [numCols, setNumCols] = useState(3);
   const [desksPerCol, setDesksPerCol] = useState(3);
   const [seatingGrid, setSeatingGrid] = useState<SeatingCol[]>([]);
+  const loadedClassIdRef = useRef<number | null>(null);
 
   // Drag & drop state
   const [draggedSeat, setDraggedSeat] = useState<{ colIdx: number; deskIdx: number; posIdx: number } | null>(null);
@@ -61,49 +62,76 @@ export function useSeatingLayout(
 
   const loadSeating = useCallback(async (clsId: number, studentsList: EnrolledStudent[]) => {
     try {
-      const seating = await api.getClassSeating(clsId);
+      const seating = await api.getClassSeating(clsId, true);
+      let parsed: SeatingCol[] | null = null;
       if (seating && seating.layout_json && seating.layout_json !== '[]') {
         try {
-          const parsed: SeatingCol[] = JSON.parse(seating.layout_json);
-          const validStudentMap = new Map(studentsList.map((s) => [s.id, s.full_name]));
+          parsed = JSON.parse(seating.layout_json);
+        } catch (e) {}
+      }
+
+      if (!parsed || parsed.length === 0) {
+        try {
+          const backup = localStorage.getItem(`center_mgr_seating_backup_${clsId}`);
+          if (backup) {
+            parsed = JSON.parse(backup);
+          }
+        } catch (e) {}
+      }
+
+      if (parsed && Array.isArray(parsed) && parsed.length > 0) {
+        if (studentsList && studentsList.length > 0) {
+          const validStudentMap = new Map(studentsList.map((s) => [Number(s.id), s.full_name]));
           parsed.forEach((col) => {
             if (col.seats) {
               col.seats.forEach((seat) => {
-                if (seat.student_id) {
-                  if (!validStudentMap.has(seat.student_id)) {
-                    seat.student_id = null;
-                    seat.student_name = null;
-                  } else {
-                    seat.student_name = validStudentMap.get(seat.student_id) || seat.student_name;
+                if (seat.student_id !== null && seat.student_id !== undefined) {
+                  const numId = Number(seat.student_id);
+                  if (validStudentMap.has(numId)) {
+                    seat.student_name = validStudentMap.get(numId) || seat.student_name;
                   }
                 }
               });
             }
           });
-          setSeatingGrid(parsed);
-          setNumCols(parsed.length || 3);
-          if (parsed.length > 0 && parsed[0].desks_in_col) {
-            setDesksPerCol(parsed[0].desks_in_col);
-          }
-        } catch (e) {
-          initEmptySeating(3, 3, studentsList);
         }
+        setSeatingGrid(parsed);
+        setNumCols(parsed.length || 3);
+        if (parsed.length > 0 && parsed[0]?.desks_in_col) {
+          setDesksPerCol(parsed[0].desks_in_col);
+        }
+        try {
+          localStorage.setItem(`center_mgr_seating_backup_${clsId}`, JSON.stringify(parsed));
+        } catch (e) {}
       } else {
         initEmptySeating(3, 3, studentsList);
       }
     } catch (err: any) {
       console.error('Lỗi khi tải sơ đồ lớp:', err);
+      try {
+        const backup = localStorage.getItem(`center_mgr_seating_backup_${clsId}`);
+        if (backup) {
+          const parsed = JSON.parse(backup);
+          setSeatingGrid(parsed);
+          setNumCols(parsed.length || 3);
+          return;
+        }
+      } catch (e) {}
       initEmptySeating(3, 3, studentsList);
     }
   }, [initEmptySeating]);
 
   useEffect(() => {
     if (selectedClass) {
-      loadSeating(selectedClass.id, enrolledStudents);
+      if (loadedClassIdRef.current !== selectedClass.id || seatingGrid.length === 0) {
+        loadedClassIdRef.current = selectedClass.id;
+        loadSeating(selectedClass.id, enrolledStudents);
+      }
     } else {
+      loadedClassIdRef.current = null;
       setSeatingGrid([]);
     }
-  }, [selectedClass?.id, enrolledStudents, loadSeating]);
+  }, [selectedClass?.id, loadSeating]);
 
   // Absent students lookup
   const absentStudentIds = useMemo(() => {
@@ -188,7 +216,11 @@ export function useSeatingLayout(
   const handleSaveSeating = async () => {
     if (!selectedClass) return;
     try {
-      await api.saveClassSeating(selectedClass.id, desksPerCol, JSON.stringify(seatingGrid));
+      const jsonStr = JSON.stringify(seatingGrid);
+      await api.saveClassSeating(selectedClass.id, desksPerCol, jsonStr);
+      try {
+        localStorage.setItem(`center_mgr_seating_backup_${selectedClass.id}`, jsonStr);
+      } catch (e) {}
       showToast('Đã lưu sơ đồ lớp học thành công!', 'success');
     } catch (err: any) {
       showToast('Không thể lưu sơ đồ: ' + err.message, 'error');

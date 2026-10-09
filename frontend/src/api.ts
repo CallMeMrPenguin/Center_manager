@@ -243,7 +243,7 @@ export const api = {
   addClassSession: (classId: number, data: any) => request<any>(`/api/classes/${classId}/schedule/sessions`, { method: 'POST', body: JSON.stringify(data), tags: ['schedule', 'sessions'] }),
   updateClassSession: (classId: number, sessionId: number, data: any) => request<any>(`/api/classes/${classId}/schedule/sessions/${sessionId}`, { method: 'PUT', body: JSON.stringify(data), tags: ['schedule', 'sessions'] }),
   deleteClassSession: (sessionId: number) => request<any>(`/api/classes/0/schedule/sessions/${sessionId}`, { method: 'DELETE', tags: ['schedule', 'sessions'] }),
-  getClassSeating: (classId: number) => request<any>(`/api/classes/${classId}/seating`, { tags: ['seating'] }),
+  getClassSeating: (classId: number, forceRefresh = true) => request<any>(`/api/classes/${classId}/seating`, { tags: ['seating'], forceRefresh }),
   saveClassSeating: (classId: number, numRows: number, layoutJson: string) =>
     request<any>(`/api/classes/${classId}/seating`, { method: 'PUT', body: JSON.stringify({ num_rows: numRows, layout_json: layoutJson }), tags: ['seating'] }),
   mixClassSeating: (classId: number, numCols: number, desksPerCol: number, colsConfig?: any[], date?: string, absentStudentIds?: number[]) =>
