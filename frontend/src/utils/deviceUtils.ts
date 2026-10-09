@@ -4,6 +4,18 @@
  */
 export function isRealMobileDevice(): boolean {
   if (typeof window === 'undefined') return false;
+
+  // Allow quick override via URL parameter (e.g. ?mobile=true or ?view=mobile)
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const mobileParam = params.get('mobile') || params.get('view');
+    if (mobileParam === 'true' || mobileParam === 'mobile' || mobileParam === '1') {
+      return true;
+    }
+    if (mobileParam === 'false' || mobileParam === 'desktop' || mobileParam === '0') {
+      return false;
+    }
+  } catch {}
   
   const userAgent = navigator.userAgent || navigator.vendor || (window as any).opera || '';
   // Check for common mobile OS identifiers in User-Agent
