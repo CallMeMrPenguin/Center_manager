@@ -13,6 +13,7 @@ interface DataTableHeaderProps {
   isResizingColumn: boolean;
   columnAlignments: Record<string, 'center' | 'left'>;
   onAutoFitColumn: (colId: string) => void;
+  columnSizing?: Record<string, number>;
 }
 
 export function DataTableHeader({
@@ -24,6 +25,7 @@ export function DataTableHeader({
   isResizingColumn,
   columnAlignments,
   onAutoFitColumn,
+  columnSizing,
 }: DataTableHeaderProps) {
   return (
     <thead
@@ -59,6 +61,7 @@ export function DataTableHeader({
                 align={align}
                 isAnyColumnResizing={isResizingColumn}
                 onAutoFitColumn={onAutoFitColumn}
+                width={columnSizing?.[header.column.id]}
               >
                 <div
                   className={`inline-flex items-center justify-center gap-1.5 w-full max-w-full font-bold sm:font-extrabold text-slate-900 dark:text-slate-100 ${

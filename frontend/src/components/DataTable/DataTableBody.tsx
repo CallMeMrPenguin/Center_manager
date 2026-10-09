@@ -13,6 +13,7 @@ interface DataTableBodyProps<TData> {
   onRowClick?: (row: TData) => void;
   renderSubComponent?: (props: { row: Row<TData> }) => React.ReactNode;
   getRowClassName?: (row: TData, index: number) => string | undefined;
+  columnSizing?: Record<string, number>;
 }
 
 export function DataTableBody<TData>({
@@ -26,6 +27,7 @@ export function DataTableBody<TData>({
   onRowClick,
   renderSubComponent,
   getRowClassName,
+  columnSizing,
 }: DataTableBodyProps<TData>) {
   const renderedRows = useVirt && virtualItems
     ? virtualItems.map((vi) => allRows[vi.index])
@@ -67,11 +69,20 @@ export function DataTableBody<TData>({
                   (cell.column.columnDef as any)?.meta?.align ||
                   (isPersonName ? 'left' : 'center');
                 const isCentered = isSelectCol ? true : colAlign === 'center';
+                const colDef = cell.column.columnDef;
+                const colWidth = columnSizing?.[cell.column.id] || (typeof colDef?.size === 'number' ? colDef.size : undefined);
+                const colMinWidth = typeof colDef?.minSize === 'number' ? colDef.minSize : undefined;
+                const colMaxWidth = typeof colDef?.maxSize === 'number' ? colDef.maxSize : undefined;
 
                 return (
                   <td
                     key={cell.id}
                     data-col-id={cell.column.id}
+                    style={{
+                      width: colWidth ? `${colWidth}px` : undefined,
+                      minWidth: colMinWidth ? `${colMinWidth}px` : undefined,
+                      maxWidth: colMaxWidth ? `${colMaxWidth}px` : undefined,
+                    }}
                     className={`py-3 px-2 sm:px-3 text-slate-800 dark:text-slate-200 text-xs sm:text-sm font-semibold transition-colors duration-150 ${
                       cell.column.getIsPinned() ? 'sticky bg-inherit z-10' : ''
                     }`}

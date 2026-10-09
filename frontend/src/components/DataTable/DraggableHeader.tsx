@@ -10,6 +10,7 @@ interface DraggableHeaderProps {
   align?: 'center' | 'left';
   isAnyColumnResizing?: boolean;
   onAutoFitColumn?: (colId: string) => void;
+  width?: number;
 }
 
 export function DraggableHeader({
@@ -20,6 +21,7 @@ export function DraggableHeader({
   align = 'center',
   isAnyColumnResizing = false,
   onAutoFitColumn,
+  width,
 }: DraggableHeaderProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: header.id,
@@ -28,6 +30,10 @@ export function DraggableHeader({
 
   const isPinned = header.column.getIsPinned();
   const isResizing = header.column.getIsResizing();
+  const colDef = header.column.columnDef;
+  const colWidth = width || (typeof colDef?.size === 'number' ? colDef.size : undefined);
+  const colMinWidth = typeof colDef?.minSize === 'number' ? colDef.minSize : undefined;
+  const colMaxWidth = typeof colDef?.maxSize === 'number' ? colDef.maxSize : undefined;
 
   const style: React.CSSProperties = {
     transform: CSS.Transform.toString(transform),
@@ -35,6 +41,9 @@ export function DraggableHeader({
     opacity: isDragging ? 0.6 : 1,
     zIndex: isDragging ? 100 : undefined,
     position: 'relative',
+    width: colWidth ? `${colWidth}px` : undefined,
+    minWidth: colMinWidth ? `${colMinWidth}px` : undefined,
+    maxWidth: colMaxWidth ? `${colMaxWidth}px` : undefined,
     ...(isPinned === 'left'
       ? {
           position: 'sticky',

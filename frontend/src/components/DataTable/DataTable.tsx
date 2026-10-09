@@ -1,31 +1,12 @@
 import React, { useState, useRef, useCallback, useMemo } from 'react';
 import {
-  useReactTable,
-  getCoreRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
-  getFilteredRowModel,
-  getGroupedRowModel,
-  getExpandedRowModel,
-  ColumnDef,
-  SortingState,
-  ColumnFiltersState,
-  RowSelectionState,
-  GroupingState,
-  ExpandedState,
-  ColumnPinningState,
-  ColumnOrderState,
-  PaginationState,
-  Table,
+  useReactTable, getCoreRowModel, getPaginationRowModel, getSortedRowModel,
+  getFilteredRowModel, getGroupedRowModel, getExpandedRowModel, ColumnDef,
+  SortingState, ColumnFiltersState, RowSelectionState, GroupingState,
+  ExpandedState, ColumnPinningState, ColumnOrderState, PaginationState, Table,
 } from '@tanstack/react-table';
 import { useVirtualizer } from '@tanstack/react-virtual';
-import {
-  DndContext,
-  closestCenter,
-  PointerSensor,
-  useSensor,
-  useSensors,
-} from '@dnd-kit/core';
+import { DndContext, closestCenter, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { SortableContext, horizontalListSortingStrategy } from '@dnd-kit/sortable';
 import { RefreshCw, AlertCircle } from 'lucide-react';
 import { filterWithNearMatchFallback } from '../../utils/fuzzySearch';
@@ -345,14 +326,18 @@ export function DataTable<TData>({
                 <table
                   className="text-left text-sm w-full min-w-full data-table-main"
                   style={{
-                    tableLayout: Object.keys(columnSizing).length > 0 ? 'fixed' : 'auto',
+                    tableLayout:
+                      Object.keys(columnSizing).length > 0 ||
+                      table.getVisibleFlatColumns().some((c: any) => typeof c.columnDef?.size === 'number')
+                        ? 'fixed'
+                        : 'auto',
                     borderCollapse: 'separate',
                     borderSpacing: 0,
                   }}
                 >
                   <colgroup>
                     {table.getVisibleFlatColumns().map((col: any) => {
-                      const manualWidth = columnSizing[col.id];
+                      const manualWidth = columnSizing[col.id] || (typeof col.columnDef?.size === 'number' ? col.columnDef.size : undefined);
                       return <col key={col.id} style={manualWidth ? { width: `${manualWidth}px` } : undefined} />;
                     })}
                   </colgroup>
@@ -366,6 +351,7 @@ export function DataTable<TData>({
                     isResizingColumn={table.getState().columnSizingInfo.isResizingColumn !== false}
                     columnAlignments={columnAlignments}
                     onAutoFitColumn={handleAutoFitSingleColumn}
+                    columnSizing={columnSizing}
                   />
 
                   <DataTableBody<TData>
@@ -379,6 +365,7 @@ export function DataTable<TData>({
                     onRowClick={onRowClick}
                     renderSubComponent={renderSubComponent}
                     getRowClassName={getRowClassName}
+                    columnSizing={columnSizing}
                   />
                 </table>
               </SortableContext>

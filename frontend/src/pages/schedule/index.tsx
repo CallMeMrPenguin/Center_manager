@@ -3,7 +3,7 @@ import { Plus, List, Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
 import { api } from '../../api';
 import { showToast } from '../../components/Toast';
 import { CustomSelect } from '../../components/CustomSelect';
-import { ScheduleWeekRangePicker } from './components/ScheduleWeekRangePicker';
+import { CustomDatePicker } from '../../components/CustomDatePicker';
 import { DataTable } from '../../components/DataTable';
 import { getLocalDateStr } from '../../utils';
 import { registerGoogleHolidays } from '../../utils/vietnamHolidays';
@@ -263,13 +263,12 @@ export default function SchedulePage() {
               >
                 <ChevronLeft size={14} />
               </button>
-              <ScheduleWeekRangePicker
-                currentWeekStart={weekStart}
-                onSelectWeek={(newMonday) => {
-                  setWeekStart(newMonday);
-                  const moStr = `${newMonday.getFullYear()}-${String(newMonday.getMonth() + 1).padStart(2, '0')}`;
-                  setSelectedMonth(moStr);
+              <CustomDatePicker
+                value={weekDays[0]?.dateStr || today}
+                onChange={(val) => {
+                  if (val) jumpToDate(val);
                 }}
+                className="w-32 sm:w-36"
               />
               <button
                 type="button"
