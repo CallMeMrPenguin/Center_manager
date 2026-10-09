@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
 import { Edit3 } from 'lucide-react';
-import { ClassSession, getSessionColor, calcEndTime } from '../types';
+import { ClassSession, getSessionColor, calcEndTime, getDynamicSessionInfo } from '../types';
 
 export function useScheduleColumns(onEdit: (sess: ClassSession) => void) {
   return useMemo<ColumnDef<ClassSession>[]>(() => [
@@ -39,14 +39,17 @@ export function useScheduleColumns(onEdit: (sess: ClassSession) => void) {
     {
       accessorKey: 'status',
       header: 'Trạng Thái',
-      cell: (info) => {
-        const st = info.getValue<string>();
+      cell: ({ row }) => {
+        const dynamicInfo = getDynamicSessionInfo(row.original);
+        const st = dynamicInfo.status;
         return (
           <span className={`inline-block px-2.5 py-0.5 rounded-xl text-xs font-black border-0 shadow-2xs ${
             st === 'Đã học'
               ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400'
-              : st === 'Hủy'
+              : st === 'Nghỉ'
               ? 'bg-rose-500/15 text-rose-600 dark:text-rose-400'
+              : st === 'Đang học'
+              ? 'bg-amber-500/15 text-amber-600 dark:text-amber-400'
               : 'bg-blue-500/15 text-blue-600 dark:text-blue-400'
           }`}>
             {st}

@@ -211,12 +211,15 @@ def upsert_class_attendance_grades(class_id: int, date_str: str, records: List[D
         except Exception:
             pass
 
+        attended_count = sum(1 for rec in records if str(rec.get("status") or "").strip() in ("Có mặt", "Đi muộn"))
+        sess_status = "Đã học" if attended_count > 0 else "Hủy"
+
         if not existing_sess:
             try:
                 cursor.execute("""
                     INSERT INTO class_sessions (class_id, date, start_time, duration, status)
-                    VALUES (?, ?, ?, ?, 'Đã học')
-                """, (class_id, date_str, s_time, s_dur))
+                    VALUES (?, ?, ?, ?, ?)
+                """, (class_id, date_str, s_time, s_dur, sess_status))
             except Exception:
                 pass
         else:
@@ -224,11 +227,11 @@ def upsert_class_attendance_grades(class_id: int, date_str: str, records: List[D
                 sess_id = existing_sess[0] if isinstance(existing_sess, (list, tuple)) else existing_sess["id"]
                 cursor.execute("""
                     UPDATE class_sessions
-                    SET status = 'Đã học',
+                    SET status = ?,
                         start_time = CASE WHEN start_time = '18:00' AND duration = 90 THEN ? ELSE start_time END,
                         duration = CASE WHEN start_time = '18:00' AND duration = 90 THEN ? ELSE duration END
                     WHERE id = ?
-                """, (s_time, s_dur, sess_id))
+                """, (sess_status, s_time, s_dur, sess_id))
             except Exception:
                 pass
 

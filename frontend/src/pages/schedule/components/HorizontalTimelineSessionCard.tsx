@@ -39,17 +39,16 @@ export const HorizontalTimelineSessionCard: React.FC<HorizontalTimelineSessionCa
   const width = Math.max(130, rawWidth);
 
   const hexColor = getSessionColor(session);
-  const vs = getPremiumStyle(session.status, hexColor, isDark);
   const { status, isLive } = getDynamicSessionInfo(session);
+  const vs = getPremiumStyle(status, hexColor, isDark);
   const endTime = calcEndTime(session.start_time, duration);
 
-  // 1. Sĩ số rút gọn: SS: 20/20 hoặc SS: 18/20
+  // 1. Sĩ số rút gọn: SS: 18/20, SS: 0/19 (Nghỉ), hoặc [N] HS (Sắp diễn ra)
   const totalStudents = session.student_count || session.attendance_total || 20;
-  const attendedStudents =
-    session.attended_count !== undefined && session.attended_count !== null
-      ? session.attended_count
-      : totalStudents;
-  const ssDisplay = `SS: ${attendedStudents}/${totalStudents}`;
+  const attendedStudents = session.attended_count ?? 0;
+  const ssDisplay = status === 'Sắp diễn ra'
+    ? `${totalStudents} HS`
+    : `SS: ${attendedStudents}/${totalStudents}`;
 
   // 2. Giáo viên & Trợ giảng: "GV: [Tên]" và "TG: [Tên]" (nếu có trợ giảng, nếu không có thì bỏ TG)
   const teacherName = session.teacher_name?.trim() || '';
@@ -86,7 +85,7 @@ export const HorizontalTimelineSessionCard: React.FC<HorizontalTimelineSessionCa
       className={`absolute z-10 rounded-xl border border-l-[4px] p-2 flex flex-col justify-between cursor-pointer transition-all duration-150 shadow-xs hover:shadow-md hover:z-20 hover:scale-[1.01] select-none group overflow-hidden ${
         isLive ? 'ring-2 ring-amber-500/80 animate-pulse' : ''
       }`}
-      title={`${session.class_name || 'Lớp học'} | ${teacherText}${assistantText ? ` | ${assistantText}` : ''} | ${ssDisplay} | ${session.start_time}-${endTime} | ${session.room || 'Phòng'}`}
+      title={`${session.class_name || 'Lớp học'}, ${teacherText}${assistantText ? `, ${assistantText}` : ''}, ${ssDisplay}, ${session.start_time}-${endTime}, ${session.room || 'Phòng'}`}
     >
       {/* 1. Header: Class Name + Dynamic Status Badge */}
       <div className="flex items-center justify-between gap-1.5 min-w-0">

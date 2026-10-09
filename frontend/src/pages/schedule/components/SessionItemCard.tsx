@@ -1,6 +1,6 @@
 import React from 'react';
 import { Clock } from 'lucide-react';
-import { ClassSession, getSessionColor, getPremiumStyle, calcEndTime } from '../types';
+import { ClassSession, getSessionColor, getPremiumStyle, calcEndTime, getDynamicSessionInfo } from '../types';
 
 interface SessionItemCardProps {
   session: ClassSession;
@@ -16,7 +16,8 @@ export const SessionItemCard: React.FC<SessionItemCardProps> = ({
   compact = false,
 }) => {
   const hex = getSessionColor(session);
-  const vs = getPremiumStyle(session.status, hex, isDark);
+  const { status } = getDynamicSessionInfo(session);
+  const vs = getPremiumStyle(status, hex, isDark);
 
   return (
     <div
@@ -42,7 +43,7 @@ export const SessionItemCard: React.FC<SessionItemCardProps> = ({
           className="text-[9px] font-black px-1.5 py-0.5 rounded-[4px] shrink-0 leading-none"
           style={{ backgroundColor: vs.badgeBg, color: vs.badgeColor }}
         >
-          {session.status}
+          {status}
         </span>
       </div>
       <div

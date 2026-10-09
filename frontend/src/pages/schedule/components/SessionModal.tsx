@@ -251,6 +251,7 @@ export const SessionModal: React.FC<SessionModalProps> = ({
               options={[
                 { value: 'Sắp diễn ra', label: 'Sắp diễn ra' },
                 { value: 'Đã học', label: 'Đã học' },
+                { value: 'Nghỉ', label: 'Nghỉ' },
                 { value: 'Hủy', label: 'Hủy' },
               ]}
             />

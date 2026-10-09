@@ -1,19 +1,21 @@
 import React from 'react';
-import { Calendar as CalendarIcon, CheckCircle2, Clock } from 'lucide-react';
+import { Calendar as CalendarIcon, CheckCircle2, Clock, XCircle } from 'lucide-react';
 
 interface ScheduleKpiCardsProps {
   total: number;
   done: number;
   upcoming: number;
+  off?: number;
 }
 
 export const ScheduleKpiCards: React.FC<ScheduleKpiCardsProps> = ({
   total,
   done,
   upcoming,
+  off = 0,
 }) => {
   return (
-    <div className="grid grid-cols-3 gap-4 shrink-0">
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 shrink-0">
       <div className="bg-white dark:bg-[#141417] border-0 p-4.5 flex items-center justify-between rounded-2xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.06),0_2px_6px_-2px_rgba(0,0,0,0.04)] dark:shadow-none transition-colors duration-200">
         <div>
           <p className="text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">Trong Tháng</p>
@@ -39,6 +41,15 @@ export const ScheduleKpiCards: React.FC<ScheduleKpiCardsProps> = ({
         </div>
         <div className="p-2.5 bg-cyan-500/10 border-0 rounded-xl text-cyan-600 dark:text-cyan-400">
           <Clock size={18} />
+        </div>
+      </div>
+      <div className="bg-white dark:bg-[#141417] border-0 p-4.5 flex items-center justify-between rounded-2xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.06),0_2px_6px_-2px_rgba(0,0,0,0.04)] dark:shadow-none transition-colors duration-200">
+        <div>
+          <p className="text-[9px] font-black uppercase tracking-widest text-rose-600 dark:text-rose-400">Nghỉ / Nghỉ Lễ</p>
+          <p className="text-2xl font-black text-rose-600 dark:text-rose-400">{off}</p>
+        </div>
+        <div className="p-2.5 bg-rose-500/10 border-0 rounded-xl text-rose-600 dark:text-rose-400">
+          <XCircle size={18} />
         </div>
       </div>
     </div>

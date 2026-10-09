@@ -213,6 +213,7 @@ export default function SchedulePage() {
   const total = sessions.length;
   const done = sessions.filter((s) => getDynamicSessionInfo(s).status === 'Đã học').length;
   const upcoming = sessions.filter((s) => getDynamicSessionInfo(s).status === 'Sắp diễn ra').length;
+  const off = sessions.filter((s) => getDynamicSessionInfo(s).status === 'Nghỉ').length;
 
   const sessionColumns = useScheduleColumns(openEdit);
 
@@ -239,7 +240,7 @@ export default function SchedulePage() {
       </div>
 
       {/* KPI Cards */}
-      <ScheduleKpiCards total={total} done={done} upcoming={upcoming} />
+      <ScheduleKpiCards total={total} done={done} upcoming={upcoming} off={off} />
 
       {/* UNIFIED CONTAINER: Integrated Toolbar + Calendar / List */}
       <div className="bg-white dark:bg-[#111728] border border-slate-200 dark:border-white/10 rounded-2xl overflow-hidden shadow-xs flex-1 min-h-0 select-none flex flex-col">

@@ -236,7 +236,6 @@ def get_class_sessions(class_id: int, month_year: str = "") -> List[Dict[str, An
         cursor = conn.cursor()
         is_all_classes = (not class_id or int(class_id) == 0)
 
-        # 1. Get explicit sessions
         query = """
             SELECT s.*, c.class_name, c.room, COALESCE(s.color, c.color) as color, t.full_name as teacher_name,
                    (SELECT COUNT(*) FROM class_students cs WHERE cs.class_id = c.id) as student_count,
@@ -247,18 +246,15 @@ def get_class_sessions(class_id: int, month_year: str = "") -> List[Dict[str, An
             LEFT JOIN teachers_cm t ON s.teacher_id = t.id
         """
         params = []
+        query += (" WHERE s.class_id = ?" if not is_all_classes else " WHERE 1=1")
         if not is_all_classes:
-            query += " WHERE s.class_id = ?"
             params.append(class_id)
-        else:
-            query += " WHERE 1=1"
         if month_year:
             query += " AND s.date LIKE ?"
             params.append(f"{month_year}%")
         query += " ORDER BY s.date ASC, s.start_time ASC"
         cursor.execute(query, params)
-        rows = cursor.fetchall()
-        explicit_sessions = [dict(r) for r in rows]
+        explicit_sessions = [dict(r) for r in cursor.fetchall()]
         
         # 2. Get weekly slots
         w_query = """
@@ -268,12 +264,8 @@ def get_class_sessions(class_id: int, month_year: str = "") -> List[Dict[str, An
             JOIN classes c ON w.class_id = c.id
             LEFT JOIN teachers_cm t ON c.teacher_id = t.id
         """
-        if not is_all_classes:
-            cursor.execute(w_query + " WHERE w.class_id = ?", (class_id,))
-        else:
-            cursor.execute(w_query)
+        cursor.execute(w_query + (" WHERE w.class_id = ?" if not is_all_classes else ""), (class_id,) if not is_all_classes else ())
         weekly_slots = [dict(r) for r in cursor.fetchall()]
-        
         if not weekly_slots or not month_year:
             return explicit_sessions
             
@@ -291,42 +283,52 @@ def get_class_sessions(class_id: int, month_year: str = "") -> List[Dict[str, An
                 s_day = weekday_map.get(s_dt.weekday())
                 w_slot = slot_map.get((s["class_id"], s_day))
                 if w_slot and s.get("start_time") == "18:00" and s.get("duration") == 90:
-                    s["start_time"] = w_slot["start_time"]
-                    s["duration"] = w_slot["duration"]
+                    s["start_time"], s["duration"] = w_slot["start_time"], w_slot["duration"]
             except Exception:
                 pass
 
+        today_str = datetime.now().strftime("%Y-%m-%d")
+        try:
+            from routers.holidays import OFFICIAL_VN_HOLIDAYS
+            holiday_dates = {h["date"] for h in OFFICIAL_VN_HOLIDAYS if h.get("is_public")}
+        except Exception:
+            holiday_dates = set()
+
+        for s in explicit_sessions:
+            att = s.get("attended_count") or 0
+            if att > 0 and s["date"] <= today_str:
+                s["status"] = "Đã học"
+            elif s.get("status") in ("Nghỉ", "Hủy", "Nghỉ học") or s["date"] in holiday_dates or (s["date"] < today_str and (s.get("attendance_total") or 0) > 0):
+                s["status"] = "Nghỉ"
+
         _, num_days = calendar.monthrange(year, month)
         explicit_class_date_keys = {(s["class_id"], s["date"]) for s in explicit_sessions}
-        
         virtual_sessions = []
         for day in range(1, num_days + 1):
             dt = datetime(year, month, day)
             day_name = weekday_map[dt.weekday()]
             date_str = f"{year:04d}-{month:02d}-{day:02d}"
-            
             for slot in weekly_slots:
-                if slot["day_of_week"] == day_name:
+                if slot["day_of_week"] == day_name and (slot["class_id"], date_str) not in explicit_class_date_keys:
                     slot_cid = slot["class_id"]
-                    if (slot_cid, date_str) not in explicit_class_date_keys:
-                        virtual_sessions.append({
-                            "id": -slot["id"] - (day * 1000) - (slot_cid * 100000),
-                            "class_id": slot_cid,
-                            "class_name": slot["class_name"],
-                            "color": slot.get("class_color") or "#7c3aed",
-                            "date": date_str,
-                            "start_time": slot["start_time"],
-                            "duration": slot["duration"],
-                            "status": "Sắp diễn ra",
-                            "teacher_id": slot.get("class_teacher_id"),
-                            "teacher_name": slot.get("class_teacher_name") or "",
-                            "room": slot.get("room") or "",
-                            "student_count": slot.get("student_count") or 0,
-                            "attended_count": 0,
-                            "attendance_total": 0,
-                            "notes": slot["notes"] or ""
-                        })
-                         
+                    is_off = (date_str in holiday_dates) or (date_str < today_str)
+                    virtual_sessions.append({
+                        "id": -slot["id"] - (day * 1000) - (slot_cid * 100000),
+                        "class_id": slot_cid,
+                        "class_name": slot["class_name"],
+                        "color": slot.get("class_color") or "#7c3aed",
+                        "date": date_str,
+                        "start_time": slot["start_time"],
+                        "duration": slot["duration"],
+                        "status": "Nghỉ" if is_off else "Sắp diễn ra",
+                        "teacher_id": slot.get("class_teacher_id"),
+                        "teacher_name": slot.get("class_teacher_name") or "",
+                        "room": slot.get("room") or "",
+                        "student_count": slot.get("student_count") or 0,
+                        "attended_count": 0,
+                        "attendance_total": 0,
+                        "notes": slot["notes"] or ""
+                    })
         all_sessions = explicit_sessions + virtual_sessions
         all_sessions.sort(key=lambda s: (s["date"], s["start_time"]))
         return all_sessions

@@ -1,3 +1,5 @@
+import { getVietnamHoliday } from '../../utils/vietnamHolidays';
+
 export interface ClassSession {
   id: number;
   class_id: number;
@@ -54,17 +56,30 @@ export function hexToHSL(hex: string) {
 export function getPremiumStyle(status: string, hexColor = '#2563eb', isDarkParam?: boolean) {
   const isDark = isDarkParam !== undefined ? isDarkParam : (typeof document !== 'undefined' ? document.documentElement.classList.contains('dark') : false);
 
-  if (status === 'Hủy') {
-    return {
-      bg: isDark ? 'rgba(148,163,184,0.1)' : '#f1f5f9',
-      borderColor: isDark ? '#334155' : '#cbd5e1',
-      accentColor: '#94a3b8',
-      color: '#64748b',
-      titleColor: isDark ? '#94a3b8' : '#64748b',
-      badgeBg: isDark ? '#1e293b' : '#e2e8f0',
-      badgeColor: isDark ? '#cbd5e1' : '#475569',
-      shadow: '0 1px 3px rgba(0,0,0,0.05)',
-    };
+  if (status === 'Hủy' || status === 'Nghỉ') {
+    if (isDark) {
+      return {
+        bg: 'rgba(239, 68, 68, 0.08)',
+        borderColor: 'rgba(239, 68, 68, 0.25)',
+        accentColor: '#ef4444',
+        color: '#fca5a5',
+        titleColor: '#fda4af',
+        badgeBg: 'rgba(239, 68, 68, 0.2)',
+        badgeColor: '#f87171',
+        shadow: '0 1px 3px rgba(0,0,0,0.2)',
+      };
+    } else {
+      return {
+        bg: '#fef2f2',
+        borderColor: '#fecaca',
+        accentColor: '#ef4444',
+        color: '#b91c1c',
+        titleColor: '#991b1b',
+        badgeBg: '#fee2e2',
+        badgeColor: '#dc2626',
+        shadow: '0 1px 3px rgba(15, 23, 42, 0.05)',
+      };
+    }
   }
 
   const { h } = hexToHSL(hexColor);
@@ -163,20 +178,16 @@ export function getDynamicSessionInfo(sess: ClassSession): {
     return {
       status: 'Nghỉ',
       statusColor: '#ef4444',
-      studentDisplay: `${sess.student_count || 0} HS`,
+      studentDisplay: `${sess.student_count || 0} HS (Nghỉ)`,
       isLive: false,
     };
   }
 
-  const hasAttendance = (sess.attendance_total ?? 0) > 0 || (sess.attended_count ?? 0) > 0 || rawStatus === 'Đã học';
-  if (hasAttendance && (sess.attended_count ?? 0) > 0) {
-    return {
-      status: 'Đã học',
-      statusColor: '#10b981',
-      studentDisplay: `${sess.attended_count} HS có mặt`,
-      isLive: false,
-    };
-  }
+  const holiday = getVietnamHoliday(sess.date);
+  const isPublicHoliday = Boolean(holiday?.isPublicHoliday);
+
+  const attendedCount = sess.attended_count ?? 0;
+  const hasActualAttendance = attendedCount > 0;
 
   const now = new Date();
   const nowYear = now.getFullYear();
@@ -189,43 +200,63 @@ export function getDynamicSessionInfo(sess: ClassSession): {
   const startMin = parseTimeToMinutes(sess.start_time);
   const endMin = startMin + (sess.duration || 90);
 
-  if (sessDate < todayStr) {
+  // 1. Uu tien si so thuc te: Neu co hoc sinh di hoc (attendedCount > 0), buoi hoc da/dang dien ra (ke ca ngay le)
+  if (hasActualAttendance) {
+    if (sessDate < todayStr || (sessDate === todayStr && nowMinutes > endMin)) {
+      return {
+        status: 'Đã học',
+        statusColor: '#10b981',
+        studentDisplay: `${attendedCount} HS có mặt`,
+        isLive: false,
+      };
+    }
+    if (sessDate === todayStr && nowMinutes >= startMin && nowMinutes <= endMin) {
+      return {
+        status: 'Đang học',
+        statusColor: '#f59e0b',
+        studentDisplay: `${attendedCount} HS có mặt`,
+        isLive: true,
+      };
+    }
     return {
       status: 'Đã học',
       statusColor: '#10b981',
-      studentDisplay: sess.attended_count !== undefined && sess.attended_count > 0 ? `${sess.attended_count} HS có mặt` : `${sess.student_count || 0} HS`,
+      studentDisplay: `${attendedCount} HS có mặt`,
       isLive: false,
     };
   }
 
-  if (sessDate > todayStr) {
+  // 2. Lich bao nghi le & khong co hoc sinh di hoc (si so = 0) -> Nghi
+  if (isPublicHoliday) {
     return {
-      status: 'Sắp diễn ra',
-      statusColor: '#0ea5e9',
-      studentDisplay: `${sess.student_count || 0} HS`,
+      status: 'Nghỉ',
+      statusColor: '#ef4444',
+      studentDisplay: holiday?.shortName ? `Nghỉ ${holiday.shortName}` : 'Nghỉ lễ',
       isLive: false,
     };
   }
 
-  // Today
-  if (nowMinutes >= startMin && nowMinutes <= endMin) {
+  // 3. Qua khu hoac da het gio hom nay nhung si so 0/xx (khong ai di hoc) -> Nghi
+  if (sessDate < todayStr || (sessDate === todayStr && nowMinutes > endMin)) {
+    return {
+      status: 'Nghỉ',
+      statusColor: '#ef4444',
+      studentDisplay: `0/${sess.student_count || sess.attendance_total || 0} HS`,
+      isLive: false,
+    };
+  }
+
+  // 4. Hom nay - Dang trong gio hoc
+  if (sessDate === todayStr && nowMinutes >= startMin && nowMinutes <= endMin) {
     return {
       status: 'Đang học',
       statusColor: '#f59e0b',
-      studentDisplay: sess.attended_count !== undefined && sess.attended_count > 0 ? `${sess.attended_count} HS có mặt` : `${sess.student_count || 0} HS`,
+      studentDisplay: `${sess.student_count || 0} HS`,
       isLive: true,
     };
   }
 
-  if (nowMinutes > endMin) {
-    return {
-      status: 'Đã học',
-      statusColor: '#10b981',
-      studentDisplay: sess.attended_count !== undefined && sess.attended_count > 0 ? `${sess.attended_count} HS có mặt` : `${sess.student_count || 0} HS`,
-      isLive: false,
-    };
-  }
-
+  // 5. Tuong lai hoac chua toi gio hom nay -> Sap dien ra
   return {
     status: 'Sắp diễn ra',
     statusColor: '#0ea5e9',
