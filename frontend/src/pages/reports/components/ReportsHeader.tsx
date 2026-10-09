@@ -50,12 +50,12 @@ export const ReportsHeader: React.FC<ReportsHeaderProps> = ({
       case 'benchmark':
         return {
           breadcrumb: 'SO SÁNH GIỮA CÁC LỚP',
-          title: 'So Sánh Tương Quan Giữa Các Lớp',
+          title: 'So Sánh Giữa Các Lớp',
         };
       case 'overview':
       default:
         return {
-          breadcrumb: 'TỔNG QUAN HIỆU SUẤT',
+          breadcrumb: 'TỔNG QUAN',
           title: 'Báo Cáo Hiệu Suất Học Tập',
         };
     }
@@ -88,8 +88,8 @@ export const ReportsHeader: React.FC<ReportsHeaderProps> = ({
             triggerClassName="!bg-white hover:!bg-slate-50 dark:!bg-[#141417] dark:hover:!bg-[#1c1c21] text-slate-900 dark:text-white shadow-xs hover:shadow-sm"
           />
 
-          {/* Class Selector (or Cross-class indicator on Benchmark tab) */}
-          {activeReportTab !== 'benchmark' ? (
+          {/* Class Selector (not needed on Benchmark tab) */}
+          {activeReportTab !== 'benchmark' && (
             <CustomSelect
               icon={<GraduationCap size={14} className="text-indigo-500 dark:text-indigo-400" />}
               value={selectedClassId}
@@ -101,11 +101,6 @@ export const ReportsHeader: React.FC<ReportsHeaderProps> = ({
               className="w-44 shrink-0"
               triggerClassName="!bg-white hover:!bg-slate-50 dark:!bg-[#141417] dark:hover:!bg-[#1c1c21] text-slate-900 dark:text-white shadow-xs hover:shadow-sm"
             />
-          ) : (
-            <div className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-300 text-xs font-bold shrink-0 border-0 shadow-2xs">
-              <GitCompare size={14} className="text-blue-500 dark:text-blue-400" />
-              <span>Chế độ so sánh tất cả lớp</span>
-            </div>
           )}
 
           <button

@@ -108,31 +108,7 @@ export const SeatingChartTab: React.FC<SeatingChartTabProps> = ({
     <div className="space-y-4 font-sans select-none">
       {/* 1. TOP CLASSROOM ACTION TOOLBAR */}
       <div className="flex flex-wrap items-center justify-between gap-3 bg-white dark:bg-[#0d1018] p-3.5 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.08)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.45)] transition-colors">
-        <div className="flex flex-wrap items-center gap-3 text-xs font-bold text-slate-700 dark:text-slate-300">
-          {/* Column Count Controller */}
-          <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-[#121624] border-0 px-3 py-1 rounded-xl shadow-xs">
-            <span className="text-[11px] font-bold text-slate-600 dark:text-slate-400">Số Dãy:</span>
-            <button
-              type="button"
-              onClick={onRemoveColumn}
-              className="w-5 h-5 rounded bg-white dark:bg-white/10 hover:bg-slate-200 dark:hover:bg-white/20 text-slate-800 dark:text-white font-black flex items-center justify-center cursor-pointer border-0 shadow-2xs transition-all"
-              title="Xóa 1 dãy bàn"
-            >
-              -
-            </button>
-            <span className="font-mono font-black text-indigo-600 dark:text-indigo-400 px-1.5">
-              {seatingGrid.length || numCols}
-            </span>
-            <button
-              type="button"
-              onClick={onAddColumn}
-              className="w-5 h-5 rounded bg-white dark:bg-white/10 hover:bg-slate-200 dark:hover:bg-white/20 text-slate-800 dark:text-white font-black flex items-center justify-center cursor-pointer border-0 shadow-2xs transition-all"
-              title="Thêm 1 dãy bàn"
-            >
-              +
-            </button>
-          </div>
-
+        <div className="flex items-center gap-2">
           {/* Absent Students Badge & Action */}
           {absentStudentIds.size > 0 && (
             <div className="flex items-center gap-1.5">
@@ -168,47 +144,27 @@ export const SeatingChartTab: React.FC<SeatingChartTabProps> = ({
           )}
         </div>
 
-        {/* Action Buttons: Mix, AI, Swap, Save */}
-        <div className="flex items-center gap-2 flex-wrap">
-          <button
-            type="button"
-            onClick={onAutoMixSeating}
-            className="group flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200/80 dark:bg-white/10 dark:hover:bg-white/15 text-slate-700 hover:text-slate-900 dark:text-slate-200 dark:hover:text-white border-0 px-3 py-1.5 rounded-xl font-bold text-xs transition cursor-pointer shadow-xs"
-            title="Trộn ngẫu nhiên vị trí ngồi"
-          >
-            <Shuffle size={14} className="shrink-0 text-indigo-600 dark:text-indigo-400" />
-            <span>Trộn Ngẫu Nhiên</span>
-          </button>
-
+        {/* Action Buttons: Mix AI & Save */}
+        <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={onGeneticMixSeating}
             disabled={mixingGA}
-            className="group flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200/80 dark:bg-white/10 dark:hover:bg-white/15 text-slate-700 hover:text-slate-900 dark:text-slate-200 dark:hover:text-white border-0 px-3 py-1.5 rounded-xl font-bold text-xs transition cursor-pointer disabled:opacity-50 shadow-xs"
+            className="group flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200/80 dark:bg-white/10 dark:hover:bg-white/15 text-slate-700 hover:text-slate-900 dark:text-slate-200 dark:hover:text-white border-0 px-3.5 py-1.5 rounded-xl font-bold text-xs transition cursor-pointer disabled:opacity-50 shadow-xs"
             title="Trộn thông minh tối ưu học lực"
           >
             <RefreshCw size={14} className={`shrink-0 text-cyan-600 dark:text-cyan-400 ${mixingGA ? 'animate-spin' : ''}`} />
-            <span>{mixingGA ? 'Đang chạy GA...' : 'Trộn Thông Minh'}</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={onBlossomSwap}
-            className="group flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200/80 dark:bg-white/10 dark:hover:bg-white/15 text-slate-700 hover:text-slate-900 dark:text-slate-200 dark:hover:text-white border-0 px-3 py-1.5 rounded-xl font-bold text-xs transition cursor-pointer shadow-xs"
-            title="Sơ đồ chuyển bài"
-          >
-            <FileCheck2 size={14} className="shrink-0 text-purple-600 dark:text-purple-400" />
-            <span>Sơ Đồ Chuyển Bài</span>
+            <span>{mixingGA ? 'Đang chạy...' : 'Trộn Thông Minh'}</span>
           </button>
 
           <button
             type="button"
             onClick={onSaveSeating}
-            className="group flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white px-3.5 py-1.5 rounded-xl font-black text-xs shadow-sm transition cursor-pointer border-0"
+            className="group flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-1.5 rounded-xl font-black text-xs shadow-sm transition cursor-pointer border-0"
             title="Lưu cấu hình sơ đồ chỗ ngồi"
           >
             <Save size={14} className="shrink-0" />
-            <span>Lưu Sơ Đồ</span>
+            <span>Lưu</span>
           </button>
         </div>
       </div>
@@ -370,6 +326,19 @@ export const SeatingChartTab: React.FC<SeatingChartTabProps> = ({
                 })}
               </div>
             ))}
+
+            {/* THÊM DÃY BÀN BUTTON TRỰC TIẾP TRONG SƠ ĐỒ */}
+            <button
+              type="button"
+              onClick={onAddColumn}
+              className="flex flex-col items-center justify-center gap-2 p-6 rounded-2xl border-2 border-dashed border-slate-300 dark:border-white/10 hover:border-indigo-400 dark:hover:border-indigo-500 text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 min-h-[220px] w-28 transition cursor-pointer group shrink-0"
+              title="Bấm để thêm 1 dãy bàn học"
+            >
+              <div className="w-9 h-9 rounded-full bg-white dark:bg-white/5 flex items-center justify-center shadow-xs group-hover:scale-110 transition-transform">
+                <Plus size={18} />
+              </div>
+              <span className="text-xs font-bold">Thêm dãy</span>
+            </button>
           </div>
         </div>
       </div>

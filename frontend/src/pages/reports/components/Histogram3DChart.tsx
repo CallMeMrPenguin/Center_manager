@@ -103,30 +103,22 @@ export const Histogram3DChart: React.FC<Histogram3DChartProps> = ({
       ref={containerRef}
       className="relative flex flex-col gap-4 select-none"
     >
-      {/* 1. Header Toolbar with Title, Granularity Mode & Active Selection */}
+      {/* 1. Header Toolbar with Sample Count & Granularity Mode */}
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h3 className="text-sm font-black uppercase tracking-wider text-slate-900 dark:text-white flex items-center gap-2">
-            <span>Phổ điểm</span>
-            <span className="text-xs font-mono font-bold text-indigo-600 dark:text-indigo-400">
-              (N = {stats.n} học sinh)
-            </span>
-          </h3>
+        <div className="text-xs font-mono font-bold text-slate-500 dark:text-slate-400">
+          N = {stats.n} học sinh
         </div>
 
         {/* Segmented Pill for Granularity (2 Views: Chi Tiết & Tổng Quan) */}
-        <div className="flex items-center gap-2">
-          <SegmentedControl<GranularityMode>
-            value={granularity}
-            onChange={setGranularity}
-            options={[
-              { value: '10bins', label: 'Chi Tiết' },
-              { value: 'tiers', label: 'Tổng Quan' },
-            ]}
-            size="xs"
-            className="min-w-[170px]"
-          />
-        </div>
+        <SegmentedControl<GranularityMode>
+          value={granularity}
+          onChange={setGranularity}
+          options={[
+            { value: '10bins', label: 'Chi Tiết' },
+            { value: 'tiers', label: 'Tổng Quan' },
+          ]}
+          size="xs"
+        />
       </div>
 
       {/* Filter Active Notice Banner */}

@@ -117,7 +117,8 @@ export function computeDuelStats({
       classSd,
       tierDistribution,
       topStudent,
-      atRiskCount
+      atRiskCount,
+      students: cStudents,
     };
   };
 

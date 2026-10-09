@@ -228,9 +228,6 @@ export const ScoreFluctuationsSection: React.FC<ScoreFluctuationsSectionProps> =
           <h3 className="text-base font-black text-slate-900 dark:text-white uppercase tracking-wider">
             Biến Động Điểm Số
           </h3>
-          <p className="text-xs text-slate-500 dark:text-slate-400 font-semibold mt-0.5">
-            So sánh mức điểm 3 buổi đầu vào so với 3 buổi học gần nhất của từng học sinh.
-          </p>
         </div>
       </div>
 

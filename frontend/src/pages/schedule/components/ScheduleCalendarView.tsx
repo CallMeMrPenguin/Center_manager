@@ -14,10 +14,11 @@ interface ScheduleCalendarViewProps {
   sessions: ClassSession[];
   weekDays: Array<{ header: string; dateStr: string; dayNum: number }>;
   changeWeek: (dir: number) => void;
-  setWeekStart: (d: Date) => void;
+  setWeekStart?: (d: Date) => void;
+  setWeekStartToday?: () => void;
   openAdd: (dateStr?: string) => void;
   openEdit: (sess: ClassSession) => void;
-  setCtxMenu: (menu: { x: number; y: number; dateStr: string } | null) => void;
+  setCtxMenu?: (menu: { x: number; y: number; dateStr: string } | null) => void;
 }
 
 export const ScheduleCalendarView: React.FC<ScheduleCalendarViewProps> = ({
@@ -25,7 +26,7 @@ export const ScheduleCalendarView: React.FC<ScheduleCalendarViewProps> = ({
   sessions,
   weekDays,
   changeWeek,
-  setWeekStart,
+  setWeekStartToday,
   openAdd,
   openEdit,
   setCtxMenu,
@@ -41,14 +42,6 @@ export const ScheduleCalendarView: React.FC<ScheduleCalendarViewProps> = ({
     }));
   }, [weekDays, today]);
 
-  const handleSetWeekToday = () => {
-    const d = new Date();
-    const day = d.getDay();
-    const n = new Date(d);
-    n.setDate(d.getDate() - day + (day === 0 ? -6 : 1));
-    setWeekStart(n);
-  };
-
   const weekRangeText = weekDays.length >= 7 ? `${weekDays[0].dateStr} - ${weekDays[6].dateStr}` : '';
 
   return (
@@ -58,7 +51,7 @@ export const ScheduleCalendarView: React.FC<ScheduleCalendarViewProps> = ({
       sessions={sessions}
       today={today}
       changeWeek={changeWeek}
-      setWeekStartToday={handleSetWeekToday}
+      setWeekStartToday={setWeekStartToday}
       weekRangeText={weekRangeText}
       openAdd={openAdd}
       openEdit={openEdit}

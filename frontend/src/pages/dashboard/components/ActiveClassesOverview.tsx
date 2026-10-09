@@ -11,18 +11,13 @@ export const ActiveClassesOverview: React.FC<ActiveClassesOverviewProps> = ({ cl
   return (
     <div className="bg-white dark:bg-[#141417] border border-slate-200 dark:border-[#27272a] rounded-2xl p-5 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.06),0_2px_6px_-2px_rgba(0,0,0,0.04)] dark:shadow-none transition-colors duration-200">
       <div className="flex items-center justify-between pb-3.5 mb-2 border-b border-slate-200 dark:border-[#27272a]">
-        <div className="flex items-center gap-2.5">
-          <div className="p-1.5 rounded-lg bg-indigo-500/15 text-indigo-500 dark:text-indigo-400">
-            <GraduationCap size={16} />
-          </div>
-          <div>
-            <h2 className="text-sm font-extrabold text-slate-900 dark:text-white tracking-wide">
-              Lớp Học Đang Hoạt Động
-            </h2>
-            <span className="text-[11px] text-slate-600 dark:text-slate-400 font-semibold">
-              {classes.length} lớp học trong kỳ hiện tại
-            </span>
-          </div>
+        <div>
+          <h2 className="text-sm font-black text-slate-900 dark:text-white tracking-wide">
+            Lớp Đang Học
+          </h2>
+          <span className="text-[11px] text-slate-600 dark:text-slate-400 font-semibold">
+            {classes.length} lớp học trong kỳ
+          </span>
         </div>
         <button
           type="button"

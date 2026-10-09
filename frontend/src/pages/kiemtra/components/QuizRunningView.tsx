@@ -272,13 +272,12 @@ export const QuizRunningView: React.FC<QuizRunningViewProps> = ({
 
               <button
                 onClick={onToggleFullscreen}
-                className={`flex items-center gap-1.5 px-3 py-1 rounded-xl border text-xs font-black transition cursor-pointer ${
+                className={`p-1.5 rounded-xl border text-xs font-black transition cursor-pointer ${
                   isFullscreen ? 'bg-blue-600 text-white border-blue-500 shadow-md' : 'bg-slate-100 dark:bg-[#121626] text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white border-slate-200 dark:border-[#263152]'
                 }`}
                 title={isFullscreen ? "Thoát toàn màn hình (Esc)" : "Toàn màn hình"}
               >
-                {isFullscreen ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
-                <span className="hidden sm:inline">{isFullscreen ? 'Thoát' : 'Toàn Màn Hình'}</span>
+                {isFullscreen ? <Minimize2 size={15} /> : <Maximize2 size={15} />}
               </button>
 
               <button

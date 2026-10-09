@@ -52,6 +52,7 @@ import {
   RotateCcw, Zap, Image as ImageIcon, Maximize2
 } from 'lucide-react';
 import { SegmentedControl } from './SegmentedControl';
+import { showToast } from './Toast';
 import { filterWithNearMatchFallback } from '../utils/fuzzySearch';
 import { vietnameseNameSortingFn, isNameColumn } from '../utils/vietnameseSort';
 
@@ -169,6 +170,7 @@ function DraggableHeader({
   enableColumnResizing,
   align = 'center',
   isAnyColumnResizing = false,
+  onAutoFitColumn,
 }: {
   header: any;
   children: React.ReactNode;
@@ -176,6 +178,7 @@ function DraggableHeader({
   enableColumnResizing: boolean;
   align?: 'center' | 'left';
   isAnyColumnResizing?: boolean;
+  onAutoFitColumn?: (colId: string) => void;
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: header.id,
@@ -218,12 +221,6 @@ function DraggableHeader({
             } ${enableReorder ? 'cursor-grab active:cursor-grabbing hover:text-blue-600 dark:hover:text-white transition-colors' : ''}`}
             title={enableReorder ? 'Giữ chuột và kéo để thay đổi thứ tự cột' : undefined}
           >
-            {enableReorder && (
-              <GripVertical
-                size={13}
-                className="text-slate-400 dark:text-slate-600 group-hover:text-indigo-500 dark:group-hover:text-indigo-400 cursor-grab active:cursor-grabbing shrink-0 transition-colors"
-              />
-            )}
             {children}
           </div>
         );
@@ -240,7 +237,11 @@ function DraggableHeader({
             e.stopPropagation();
             header.getResizeHandler()(e);
           }}
-          title="Kéo để thay đổi độ rộng cột"
+          onDoubleClick={(e) => {
+            e.stopPropagation();
+            onAutoFitColumn?.(header.column.id);
+          }}
+          title="Kéo để thay đổi độ rộng | Nhấp đúp để tự vừa nội dung"
           className="absolute right-0 top-0 bottom-0 w-3 cursor-col-resize select-none touch-none z-30 flex items-center justify-center group/resize"
         >
           <div className={`w-1 h-full transition-colors ${
@@ -818,20 +819,6 @@ export function DataTable<TData>({
     });
   }, [columns, initialColumnAlignments]);
 
-  const handleAutoFitColumnWidths = useCallback(() => {
-    setColumnSizing({});
-    if (storageKey) {
-      try {
-        const item = localStorage.getItem(storageKey);
-        if (item) {
-          const layout = JSON.parse(item);
-          delete layout.sizing;
-          localStorage.setItem(storageKey, JSON.stringify(layout));
-        }
-      } catch (e) {}
-    }
-  }, [storageKey]);
-
   const handleResetColumnWidths = useCallback(() => {
     setColumnSizing({});
     setColumnVisibility(initialColumnVisibility);
@@ -1092,6 +1079,53 @@ export function DataTable<TData>({
     ? totalSize - (virtualRows[virtualRows.length - 1]?.end ?? 0)
     : 0;
 
+  const handleAutoFitColumnWidths = useCallback(() => {
+    const tableEl = tableScrollRef.current?.querySelector('table');
+    if (tableEl) {
+      const headerThs = tableEl.querySelectorAll('thead th');
+      const newSizing: Record<string, number> = {};
+      const visibleCols = table.getVisibleFlatColumns();
+
+      visibleCols.forEach((col, idx) => {
+        if (col.id === 'select' || col.id === '_expander') return;
+        let maxW = 75;
+        const th = headerThs[idx] as HTMLElement;
+        if (th) {
+          maxW = Math.max(maxW, th.scrollWidth + 24);
+        }
+        const tds = tableEl.querySelectorAll(`tbody tr td:nth-child(${idx + 1})`);
+        tds.forEach((td) => {
+          maxW = Math.max(maxW, (td as HTMLElement).scrollWidth + 32);
+        });
+        newSizing[col.id] = Math.min(450, Math.max(75, maxW));
+      });
+      setColumnSizing(newSizing);
+      showToast('Đã tự động căn chỉnh kích thước theo nội dung', 'success');
+    } else {
+      setColumnSizing({});
+    }
+  }, [table]);
+
+  const handleAutoFitSingleColumn = useCallback((colId: string) => {
+    const tableEl = tableScrollRef.current?.querySelector('table');
+    if (!tableEl) return;
+    const visibleCols = table.getVisibleFlatColumns();
+    const colIdx = visibleCols.findIndex(c => c.id === colId);
+    if (colIdx === -1) return;
+
+    const headerThs = tableEl.querySelectorAll('thead th');
+    const th = headerThs[colIdx] as HTMLElement;
+    let maxW = th ? th.scrollWidth + 24 : 75;
+    const tds = tableEl.querySelectorAll(`tbody tr td:nth-child(${colIdx + 1})`);
+    tds.forEach((td) => {
+      maxW = Math.max(maxW, (td as HTMLElement).scrollWidth + 32);
+    });
+    setColumnSizing(prev => ({
+      ...prev,
+      [colId]: Math.min(450, Math.max(75, maxW)),
+    }));
+  }, [table]);
+
   // ── DnD sensors ────────────────────────────────────────────────────────────
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
@@ -1319,21 +1353,22 @@ export function DataTable<TData>({
                 <table
                   className="text-left text-sm w-full min-w-full data-table-main"
                   style={{
-                    tableLayout: 'fixed',
+                    tableLayout: Object.keys(columnSizing).length > 0 ? 'fixed' : 'auto',
                     borderCollapse: 'separate',
                     borderSpacing: 0,
                   }}
                 >
                   {/* ── COLGROUP for instant, jitter-free column widths ── */}
                   <colgroup>
-                    {table.getVisibleFlatColumns().map(col => (
-                      <col
-                        key={col.id}
-                        style={{
-                          width: col.getSize(),
-                        }}
-                      />
-                    ))}
+                    {table.getVisibleFlatColumns().map(col => {
+                      const manualWidth = columnSizing[col.id];
+                      return (
+                        <col
+                          key={col.id}
+                          style={manualWidth ? { width: `${manualWidth}px` } : undefined}
+                        />
+                      );
+                    })}
                   </colgroup>
 
                   {/* ── THEAD (All headers centered by default) ────────────────── */}
@@ -1359,6 +1394,7 @@ export function DataTable<TData>({
                               enableColumnResizing={enableColumnResizing}
                               align={align}
                               isAnyColumnResizing={isAnyColumnResizing}
+                              onAutoFitColumn={handleAutoFitSingleColumn}
                             >
                               <div
                                 className={`inline-flex items-center justify-center gap-1.5 w-full max-w-full font-bold sm:font-extrabold text-slate-900 dark:text-slate-100 ${

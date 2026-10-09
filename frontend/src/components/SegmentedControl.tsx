@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useCallback, useId } from 'react';
+import React, { useRef, useState, useId } from 'react';
 import { motion } from 'framer-motion';
 
 export interface SegmentOption<T extends string = string> {
@@ -38,6 +38,7 @@ export function SegmentedControl<T extends string = string>({
   size = 'md',
   fit = 'content',
   fullWidth,
+  layoutId,
 }: SegmentedControlProps<T>) {
   const items = options || buttons || [];
   const initialVal =
@@ -54,91 +55,18 @@ export function SegmentedControl<T extends string = string>({
       ? controlledActiveId
       : internalVal;
 
-  const [indicatorStyle, setIndicatorStyle] = useState<{ left: number; width: number }>({ left: 0, width: 0 });
-  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
-  const [hoverStyle, setHoverStyle] = useState<{ left: number; width: number }>({ left: 0, width: 0 });
-
-  const buttonRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
-
-  const activeIndex = items.findIndex((btn) => (btn.value ?? btn.id) === activeVal);
-
-  const updateIndicator = useCallback(() => {
-    const activeElement = buttonRefs.current[activeIndex];
-    if (activeElement) {
-      if (activeElement.offsetWidth > 0) {
-        setIndicatorStyle({
-          left: activeElement.offsetLeft,
-          width: activeElement.offsetWidth,
-        });
-      } else {
-        requestAnimationFrame(() => {
-          const el = buttonRefs.current[activeIndex];
-          if (el && el.offsetWidth > 0) {
-            setIndicatorStyle({
-              left: el.offsetLeft,
-              width: el.offsetWidth,
-            });
-          }
-        });
-      }
-    }
-  }, [activeIndex]);
-
-  useEffect(() => {
-    updateIndicator();
-    const timer = setTimeout(updateIndicator, 50);
-    const timer2 = setTimeout(updateIndicator, 200);
-    return () => {
-      clearTimeout(timer);
-      clearTimeout(timer2);
-    };
-  }, [updateIndicator, activeIndex, items]);
-
-  useEffect(() => {
-    if (!containerRef.current) return;
-    const ro = new ResizeObserver(() => {
-      updateIndicator();
-    });
-    ro.observe(containerRef.current);
-    return () => ro.disconnect();
-  }, [updateIndicator]);
-
-  useEffect(() => {
-    if (hoveredIndex !== null && hoveredIndex !== activeIndex) {
-      const hoveredElement = buttonRefs.current[hoveredIndex];
-      if (hoveredElement) {
-        setHoverStyle({
-          left: hoveredElement.offsetLeft,
-          width: hoveredElement.offsetWidth,
-        });
-      }
-    }
-  }, [hoveredIndex, activeIndex]);
-
-  // Recalculate on window resize
-  useEffect(() => {
-    window.addEventListener('resize', updateIndicator);
-    return () => window.removeEventListener('resize', updateIndicator);
-  }, [updateIndicator]);
 
   const handleButtonClick = (buttonVal: T, disabled?: boolean) => {
     if (disabled) return;
-    const targetIdx = items.findIndex((btn) => (btn.value ?? btn.id) === buttonVal);
-    if (targetIdx !== -1 && buttonRefs.current[targetIdx]) {
-      const el = buttonRefs.current[targetIdx]!;
-      if (el.offsetWidth > 0) {
-        setIndicatorStyle({
-          left: el.offsetLeft,
-          width: el.offsetWidth,
-        });
-      }
-    }
     if (controlledValue === undefined && controlledActiveId === undefined) {
       setInternalVal(buttonVal);
     }
     onChange?.(buttonVal);
   };
+
+  const generatedId = useId();
+  const activeLayoutId = layoutId || `segmented-pill-${generatedId.replace(/:/g, '')}`;
 
   const isFluid = fullWidth || fit === 'fluid' || className.includes('w-full') || className.includes('flex-1');
 
@@ -156,53 +84,16 @@ export function SegmentedControl<T extends string = string>({
     lg: 16,
   }[size];
 
-  const isHoverPillVisible = hoveredIndex !== null && hoveredIndex !== activeIndex;
-
   return (
     <div
       ref={containerRef}
       role="group"
-      onMouseLeave={() => setHoveredIndex(null)}
-      className={`relative inline-flex items-center justify-start segmented-control-container p-0 rounded-full border-0 select-none shrink-0 transition-colors ${
+      className={`relative inline-flex items-center justify-start segmented-control-container p-0.5 rounded-full border-0 select-none shrink-0 transition-colors ${
         isFluid ? 'w-full' : 'w-fit'
       } ${className}`}
     >
-      {/* 1. Subtle Hover Background only on Hovered Inactive Item (Fades in/out) */}
-      <motion.div
-        aria-hidden="true"
-        className="absolute top-0 bottom-0 rounded-full segmented-hover-pill pointer-events-none z-0"
-        initial={false}
-        animate={{
-          left: hoverStyle.left,
-          width: hoverStyle.width,
-          opacity: isHoverPillVisible ? 1 : 0,
-        }}
-        transition={{
-          left: { type: 'spring', stiffness: 450, damping: 35 },
-          width: { type: 'spring', stiffness: 450, damping: 35 },
-          opacity: { duration: 0.15 },
-        }}
-      />
-
-      {/* 2. Tactile Active Indicator Pill (Matches App Blue Theme, No Glow) */}
-      <motion.div
-        aria-hidden="true"
-        className={`absolute top-0 bottom-0 rounded-full pointer-events-none z-0 ${
-          activeColor || 'bg-[#2563eb] dark:bg-[#2563eb]'
-        }`}
-        animate={{
-          left: indicatorStyle.left,
-          width: indicatorStyle.width,
-        }}
-        transition={{
-          type: 'spring',
-          stiffness: 400,
-          damping: 30,
-        }}
-      />
-
-      {/* 3. Button Items */}
-      {items.map((item, index) => {
+      {/* Button Items */}
+      {items.map((item) => {
         const itemVal = (item.value ?? item.id) as T;
         const isActive = itemVal === activeVal;
         const Icon = item.icon;
@@ -210,13 +101,9 @@ export function SegmentedControl<T extends string = string>({
         return (
           <button
             key={String(itemVal)}
-            ref={(el) => {
-              buttonRefs.current[index] = el;
-            }}
             type="button"
             disabled={item.disabled}
             onClick={() => handleButtonClick(itemVal, item.disabled)}
-            onMouseEnter={() => setHoveredIndex(index)}
             className={`relative z-10 flex items-center justify-center font-black rounded-full transition-colors cursor-pointer select-none border-0 outline-none ${
               isFluid ? 'flex-1' : 'shrink-0'
             } ${sizeClasses} ${
@@ -224,9 +111,23 @@ export function SegmentedControl<T extends string = string>({
                 ? 'opacity-35 cursor-not-allowed text-slate-400 dark:text-slate-500'
                 : isActive
                 ? 'text-white drop-shadow-xs font-black'
-                : 'text-slate-700 dark:text-slate-100/90 hover:text-slate-950 dark:hover:text-white font-bold'
+                : 'text-slate-700 dark:text-slate-200 hover:text-slate-950 dark:hover:text-white font-bold'
             }`}
           >
+            {/* Tactile Active Indicator Pill via Framer Motion layoutId */}
+            {isActive && (
+              <motion.div
+                layoutId={activeLayoutId}
+                className={`absolute inset-0 rounded-full z-0 ${
+                  activeColor || 'bg-[#2563eb] dark:bg-[#2563eb]'
+                }`}
+                transition={{
+                  type: 'spring',
+                  stiffness: 500,
+                  damping: 36,
+                }}
+              />
+            )}
             {/* Optional Icon */}
             {Icon && (
               <span className="relative z-10 shrink-0 flex items-center justify-center">

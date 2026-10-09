@@ -113,7 +113,7 @@ export const ChartControls: React.FC<ChartControlsProps> = ({
 
           <div className="flex flex-wrap items-center gap-2.5">
             {/* Time View Filter (1M, 2M, 3M, ALL) */}
-            <div className="w-48">
+            <div className="w-fit">
               <SegmentedControl<'1m' | '2m' | '3m' | 'all'>
                 value={timeView}
                 onChange={setTimeView}
@@ -178,13 +178,7 @@ export const ChartControls: React.FC<ChartControlsProps> = ({
             </div>
           </div>
         </div>
-      ) : (
-        <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-200 dark:border-white/5 text-xs">
-          <div className="text-xs text-slate-500 dark:text-slate-400 font-semibold">
-            Biểu đồ phân phối phổ điểm học lực & tỷ lệ phân bố toàn lớp
-          </div>
-        </div>
-      )}
+      ) : null}
     </div>
   );
 };

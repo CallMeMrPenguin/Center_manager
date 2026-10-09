@@ -75,52 +75,11 @@ export const SkillBreakdownTab: React.FC<SkillBreakdownTabProps> = ({
     return classes.find(c => String(c.id) === String(selectedClassId)) || null;
   }, [selectedClassId, classes]);
 
-  // If viewing all classes ("Tất cả lớp học"), prompt the user to pick a specific class with inline selector
-  if (!selectedClassId) {
+  // If viewing all classes ("Tất cả lớp học"), prompt the user to pick a specific class
+  if (!selectedClassId || selectedClassId === 'all') {
     return (
-      <div className="py-16 px-6 rounded-2xl bg-white dark:bg-[#090d16] text-center flex flex-col items-center justify-center gap-4 select-none animate-cascade-1 shadow-sm dark:shadow-lg max-w-2xl mx-auto">
-        <div className="w-14 h-14 rounded-2xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center shadow-[0_0_20px_rgba(59,130,246,0.15)]">
-          <GraduationCap size={28} />
-        </div>
-        <div className="space-y-1.5">
-          <h4 className="text-base font-black text-slate-900 dark:text-white uppercase tracking-wider">
-            Chọn lớp học để phân tích kỹ năng & Unit
-          </h4>
-          <p className="text-xs text-slate-600 dark:text-slate-400 max-w-md mx-auto leading-relaxed">
-            Chương trình học và danh mục Unit khác nhau giữa các khối lớp. Chọn nhanh lớp học bên dưới để mở ngay Ma trận Nắm vững, Thống kê Unit và Danh sách Học sinh cần phụ đạo:
-          </p>
-        </div>
-
-        {classes && classes.length > 0 ? (
-          <div className="w-full max-w-xs space-y-3 pt-2">
-            <CustomSelect
-              icon={<GraduationCap size={15} className="text-indigo-500 dark:text-indigo-400" />}
-              value=""
-              placeholder="-- Chọn lớp học --"
-              onChange={(val) => onSelectClass?.(String(val))}
-              options={classes.map((c) => ({
-                value: String(c.id),
-                label: c.class_name,
-              }))}
-            />
-
-            <div className="flex flex-wrap gap-2 justify-center">
-              {classes.slice(0, 4).map((c) => (
-                <button
-                  key={c.id}
-                  type="button"
-                  onClick={() => onSelectClass?.(String(c.id))}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-[#141a2e] hover:bg-blue-50 dark:hover:bg-blue-600/20 text-slate-700 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-300 text-xs font-bold transition cursor-pointer"
-                >
-                  <span>{c.class_name}</span>
-                  <ArrowRight size={11} />
-                </button>
-              ))}
-            </div>
-          </div>
-        ) : (
-          <p className="text-xs text-amber-500 font-bold">Chưa có lớp học nào trong hệ thống.</p>
-        )}
+      <div className="py-24 text-center text-sm font-semibold text-slate-500 dark:text-slate-400">
+        Yêu cầu chọn lớp
       </div>
     );
   }

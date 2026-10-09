@@ -24,15 +24,9 @@ export const DualComparisonBars: React.FC<DualComparisonBarsProps> = ({
             SO SÁNH THÀNH PHẦN ĐIỂM
           </span>
           <div className="flex items-center gap-4 text-sm font-extrabold">
-            <div className="flex items-center gap-1.5 text-blue-600 dark:text-blue-400">
-              <span className="w-2.5 h-2.5 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.8)]"></span>
-              <span>{classA.name}</span>
-            </div>
+            <span className="text-blue-600 dark:text-blue-400">{classA.name}</span>
             <span className="text-slate-400 dark:text-slate-600 font-bold">VS</span>
-            <div className="flex items-center gap-1.5 text-cyan-600 dark:text-cyan-400">
-              <span className="w-2.5 h-2.5 rounded-full bg-cyan-500 shadow-[0_0_8px_rgba(6,182,212,0.8)]"></span>
-              <span>{classB.name}</span>
-            </div>
+            <span className="text-cyan-600 dark:text-cyan-400">{classB.name}</span>
           </div>
         </div>
 
@@ -145,15 +139,9 @@ export const DualComparisonBars: React.FC<DualComparisonBarsProps> = ({
             Học Lực
           </span>
           <div className="flex items-center gap-4 text-xs font-extrabold">
-            <div className="flex items-center gap-1.5 text-blue-600 dark:text-blue-400">
-              <span className="w-2.5 h-2.5 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.8)]" />
-              <span>{classA.name} ({classA.studentCount} HS)</span>
-            </div>
+            <span className="text-blue-600 dark:text-blue-400">{classA.name} ({classA.studentCount} HS)</span>
             <span className="text-slate-400 dark:text-slate-600 font-bold">VS</span>
-            <div className="flex items-center gap-1.5 text-cyan-600 dark:text-cyan-400">
-              <span className="w-2.5 h-2.5 rounded-full bg-cyan-500 shadow-[0_0_8px_rgba(6,182,212,0.8)]" />
-              <span>{classB.name} ({classB.studentCount} HS)</span>
-            </div>
+            <span className="text-cyan-600 dark:text-cyan-400">{classB.name} ({classB.studentCount} HS)</span>
           </div>
         </div>
 
@@ -168,15 +156,24 @@ export const DualComparisonBars: React.FC<DualComparisonBarsProps> = ({
             { id: 'kem', name: 'Kém', range: '< 3.5đ', min: 0, max: 3.49 },
           ];
 
+          const getStudentScore = (s: any) => {
+            if (s.ema_level && Number(s.ema_level) > 0) return Number(s.ema_level);
+            const c1 = Number(s.avg_check_1 || 0);
+            const c2 = Number(s.avg_check_2 || 0);
+            const hw = Number(s.avg_homework || 0);
+            const valid = [c1, c2, hw].filter(v => v > 0);
+            return valid.length > 0 ? valid.reduce((a, b) => a + b, 0) / valid.length : 0;
+          };
+
           const statsList = milestones.map(m => {
             const countA = (classA.students || []).filter((s: any) => {
-              const sc = Number(s.ema_level || s.overallAvg || 0);
+              const sc = getStudentScore(s);
               return sc >= m.min && sc <= m.max;
             }).length;
             const pctA = classA.studentCount > 0 ? Math.round((countA / classA.studentCount) * 100) : 0;
 
             const countB = (classB.students || []).filter((s: any) => {
-              const sc = Number(s.ema_level || s.overallAvg || 0);
+              const sc = getStudentScore(s);
               return sc >= m.min && sc <= m.max;
             }).length;
             const pctB = classB.studentCount > 0 ? Math.round((countB / classB.studentCount) * 100) : 0;

@@ -44,19 +44,22 @@ export function computeSmartGroups({
   const gKha: any[] = [];
   const gTB: any[] = [];
   const gYeu: any[] = [];
+  const gKem: any[] = [];
 
   pool.forEach(s => {
     const score = getStudentScore(s);
     if (score >= 8.0) gGioi.push(s);
     else if (score >= 6.5) gKha.push(s);
     else if (score >= 5.0) gTB.push(s);
-    else gYeu.push(s);
+    else if (score >= 3.5) gYeu.push(s);
+    else gKem.push(s);
   });
 
   gGioi.sort((a, b) => getStudentScore(b) - getStudentScore(a));
   gKha.sort((a, b) => getStudentScore(b) - getStudentScore(a));
   gTB.sort((a, b) => getStudentScore(b) - getStudentScore(a));
   gYeu.sort((a, b) => getStudentScore(b) - getStudentScore(a));
+  gKem.sort((a, b) => getStudentScore(b) - getStudentScore(a));
 
   return [
     {
@@ -95,13 +98,24 @@ export function computeSmartGroups({
     {
       id: 'tier-yeu',
       title: 'Yếu',
-      subtitle: 'Cần Hỗ Trợ Gấp (< 5.0đ)',
+      subtitle: 'Cần Hỗ Trợ (3.5 – 4.9đ)',
       pedagogyAdvice: 'Giảng lại lý thuyết căn bản & phụ đạo sát sao 1-1.',
+      borderCls: '',
+      headerBg: 'bg-orange-500/10 dark:bg-[#241712]',
+      badgeCls: 'bg-orange-500/15 text-orange-700 dark:text-orange-300',
+      ...calcGroupStats(gYeu),
+      students: gYeu,
+    },
+    {
+      id: 'tier-kem',
+      title: 'Kém',
+      subtitle: 'Báo Động (< 3.5đ)',
+      pedagogyAdvice: 'Liên hệ phụ huynh & xây dựng kế hoạch bổ sung kiến thức khẩn cấp.',
       borderCls: '',
       headerBg: 'bg-rose-500/10 dark:bg-[#241216]',
       badgeCls: 'bg-rose-500/15 text-rose-700 dark:text-rose-300',
-      ...calcGroupStats(gYeu),
-      students: gYeu,
+      ...calcGroupStats(gKem),
+      students: gKem,
     },
   ];
 }

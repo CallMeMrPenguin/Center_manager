@@ -264,12 +264,6 @@ export const HorizontalTimelineGrid: React.FC<HorizontalTimelineGridProps> = ({
                     if (hasMovedRef.current) return;
                     openAdd(d.dateStr);
                   }}
-                  onContextMenu={(e) => {
-                    e.preventDefault();
-                    if (setCtxMenu) {
-                      setCtxMenu({ x: e.clientX, y: e.clientY, dateStr: d.dateStr });
-                    }
-                  }}
                 >
                   {/* Sticky Left Day Header (Solid 100% Opaque, No Transparency) */}
                   <div
@@ -300,7 +294,7 @@ export const HorizontalTimelineGrid: React.FC<HorizontalTimelineGridProps> = ({
                         </span>
                         {isToday && (
                           <span className="text-[8.5px] font-black uppercase bg-blue-600 text-white px-1.5 py-0.2 rounded shrink-0">
-                            Nay
+                            Hôm nay
                           </span>
                         )}
                       </div>
@@ -308,14 +302,14 @@ export const HorizontalTimelineGrid: React.FC<HorizontalTimelineGridProps> = ({
                       {/* Holiday Badge (Tết, 30/4, 1/5, 2/9, Giỗ Tổ, etc.) */}
                       {holiday && (
                         <div
-                          className={`mt-0.5 text-[8.5px] font-bold px-1.5 py-0.5 rounded flex items-center justify-between gap-1 truncate ${
+                          className={`mt-0.5 text-[9px] font-bold px-1.5 py-0.5 rounded flex items-center justify-between gap-1 truncate ${
                             holiday.isPublicHoliday
                               ? 'bg-rose-500/20 text-rose-600 dark:text-rose-300'
                               : 'bg-amber-500/20 text-amber-600 dark:text-amber-300'
                           }`}
                           title={holiday.name}
                         >
-                          <span className="truncate">{holiday.shortName || holiday.name}</span>
+                          <span className="truncate">{holiday.name}</span>
                           {holiday.isPublicHoliday && (
                             <span className="shrink-0 text-[7.5px] font-black uppercase tracking-tight">
                               Nghỉ
@@ -363,11 +357,6 @@ export const HorizontalTimelineGrid: React.FC<HorizontalTimelineGridProps> = ({
                         topOffset={6 + trackIdx * 76}
                         height={68}
                         onClick={() => openEdit(session)}
-                        onContextMenu={(e) => {
-                          if (setCtxMenu) {
-                            setCtxMenu({ x: e.clientX, y: e.clientY, dateStr: d.dateStr });
-                          }
-                        }}
                       />
                     ))}
                   </div>

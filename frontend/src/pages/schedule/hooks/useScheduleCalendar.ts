@@ -56,14 +56,38 @@ export function useScheduleCalendar() {
     setSelectedMonth(newMoStr);
   };
 
+  const setWeekStartToday = () => {
+    const d = new Date();
+    const day = d.getDay();
+    const n = new Date(d);
+    n.setDate(d.getDate() - day + (day === 0 ? -6 : 1));
+    setWeekStart(n);
+    const moStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+    setSelectedMonth(moStr);
+  };
+
+  const jumpToDate = (dateStr: string) => {
+    if (!dateStr) return;
+    const parts = dateStr.split('-').map(Number);
+    if (parts.length >= 2) {
+      const d = new Date(parts[0], parts[1] - 1, parts[2] || 1);
+      const day = d.getDay();
+      const n = new Date(d);
+      n.setDate(d.getDate() - day + (day === 0 ? -6 : 1));
+      setWeekStart(n);
+      const moStr = `${parts[0]}-${String(parts[1]).padStart(2, '0')}`;
+      setSelectedMonth(moStr);
+    }
+  };
+
   const handleSetSelectedMonth = (moStr: string) => {
     setSelectedMonth(moStr);
     const [y, m] = moStr.split('-').map(Number);
     if (y && m) {
-      const first = new Date(y, m - 1, 1);
-      const day = first.getDay();
-      const n = new Date(first);
-      n.setDate(first.getDate() - day + (day === 0 ? -6 : 1));
+      const d = new Date(y, m - 1, 1);
+      const day = d.getDay();
+      const n = new Date(d);
+      n.setDate(d.getDate() - day + (day === 0 ? -6 : 1));
       setWeekStart(n);
     }
   };
@@ -75,6 +99,8 @@ export function useScheduleCalendar() {
     setSelectedMonth: handleSetSelectedMonth,
     weekStart,
     setWeekStart,
+    setWeekStartToday,
+    jumpToDate,
     today,
     yr,
     mo,

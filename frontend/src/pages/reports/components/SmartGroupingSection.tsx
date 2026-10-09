@@ -130,6 +130,14 @@ export const SmartGroupingSection: React.FC<SmartGroupingSectionProps> = ({
     }
   }, [smartGroups, classes, selectedClassId]);
 
+  if (!selectedClassId || selectedClassId === 'all') {
+    return (
+      <div className="py-24 text-center text-sm font-semibold text-slate-500 dark:text-slate-400">
+        Yêu cầu chọn lớp
+      </div>
+    );
+  }
+
   return (
     <div className="bg-white dark:bg-[#0b0f19] rounded-2xl p-6 shadow-sm dark:shadow-xl space-y-5 animate-cascade-3">
       {/* Header Bar */}
@@ -161,8 +169,8 @@ export const SmartGroupingSection: React.FC<SmartGroupingSectionProps> = ({
         </div>
       </div>
 
-      {/* 4 Group Cards Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* 5 Group Cards Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3.5">
         {smartGroups.map(g => (
           <GroupCardItem
             key={g.id}

@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Maximize2, Minimize2 } from 'lucide-react';
 import { Assignment, AssignmentQuizConfig } from '../types';
 import { ExamTimerHeader } from './ExamTimerHeader';
 
@@ -77,11 +77,9 @@ export const WhitePaperTopNav: React.FC<WhitePaperTopNavProps> = ({
               </span>
             )}
           </div>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-            Học sinh: <strong className="text-slate-800 dark:text-slate-200">{studentName}</strong> • Trạng thái:{' '}
-            <strong className="text-blue-600 dark:text-blue-400 font-semibold">
-              {isSubmitted ? `Đã nộp (${submissionCount} lần)` : 'Đang làm bài'}
-            </strong>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 flex items-center gap-2">
+            <span>Học sinh: <strong className="text-slate-800 dark:text-slate-200">{studentName}</strong></span>
+            <span>Trạng thái: <strong className="text-blue-600 dark:text-blue-400 font-semibold">{isSubmitted ? `Đã nộp (${submissionCount} lần)` : 'Đang làm bài'}</strong></span>
           </p>
         </div>
       </div>
@@ -129,15 +127,16 @@ export const WhitePaperTopNav: React.FC<WhitePaperTopNavProps> = ({
               : 'bg-slate-100 hover:bg-slate-200 dark:bg-white/5 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-white/10'
           }`}
         >
-          Bút chấm
+          Canvas
         </button>
 
         <button
           type="button"
           onClick={onToggleFullscreen}
-          className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 text-slate-700 dark:text-slate-200 text-xs font-semibold border border-slate-200 dark:border-white/10 transition cursor-pointer"
+          className="p-2 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 text-slate-700 dark:text-slate-200 text-xs font-semibold border border-slate-200 dark:border-white/10 transition cursor-pointer"
+          title={isFullscreen ? 'Thu nhỏ (Esc)' : 'Toàn màn hình'}
         >
-          {isFullscreen ? 'Thu nhỏ' : 'Toàn màn hình'}
+          {isFullscreen ? <Minimize2 size={15} /> : <Maximize2 size={15} />}
         </button>
 
         {isSubmitted && (

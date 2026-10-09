@@ -117,27 +117,29 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="h-full w-full overflow-y-auto p-6 space-y-6 bg-[#f1f5f9] dark:bg-[#09090b] text-slate-800 dark:text-slate-100 select-none font-sans scrollbar-thin">
-      {/* 1. Top Executive Status Bar */}
-      <div className="flex items-center justify-between gap-4 pb-4 border-b border-slate-300 dark:border-[#27272a]">
-        <div>
-          <h1 className="text-xl font-black text-slate-900 dark:text-white tracking-tight uppercase">
-            Bảng Điều Khiển Trung Tâm
-          </h1>
+    <div className="h-full w-full overflow-y-auto p-4 sm:p-6 bg-[#f1f5f9] dark:bg-[#09090b] text-slate-800 dark:text-slate-100 select-none font-sans scrollbar-thin">
+      <div className="max-w-7xl mx-auto space-y-5 sm:space-y-6">
+        {/* 1. Top Executive Status Bar */}
+        <div className="flex items-center justify-between gap-4 pb-3 border-b border-slate-300 dark:border-[#27272a]">
+          <div>
+            <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+              Bảng Điều Khiển
+            </h1>
+          </div>
         </div>
-      </div>
 
-      {/* 2. Top Stats Overview Grid */}
-      <DashboardStatsGrid stats={stats} />
+        {/* 2. Top Stats Overview Grid */}
+        <DashboardStatsGrid stats={stats} />
 
-      {/* 3. Main Operational Split (Calendar & Active Classes on Left, Actions on Right) */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-        <div className="lg:col-span-2 space-y-6">
-          <TodaySessionsList sessions={todaySessions} onNavigate={navigateTo} />
-          <ActiveClassesOverview classes={activeClasses} onNavigate={navigateTo} />
-        </div>
-        <div className="lg:col-span-1">
-          <DashboardSidebar alerts={studentAlerts} onNavigate={navigateTo} />
+        {/* 3. Main Operational Split (Calendar & Active Classes on Left, Actions on Right) */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 sm:gap-6 items-start">
+          <div className="lg:col-span-2 space-y-5 sm:space-y-6">
+            <TodaySessionsList sessions={todaySessions} onNavigate={navigateTo} />
+            <ActiveClassesOverview classes={activeClasses} onNavigate={navigateTo} />
+          </div>
+          <div className="lg:col-span-1">
+            <DashboardSidebar alerts={studentAlerts} onNavigate={navigateTo} />
+          </div>
         </div>
       </div>
     </div>

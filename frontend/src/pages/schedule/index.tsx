@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, List, Calendar } from 'lucide-react';
+import { Plus, List, Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
 import { api } from '../../api';
 import { showToast } from '../../components/Toast';
 import { CustomSelect } from '../../components/CustomSelect';
@@ -28,6 +28,8 @@ export default function SchedulePage() {
     setSelectedMonth,
     weekStart,
     setWeekStart,
+    setWeekStartToday,
+    jumpToDate,
     today,
     yr,
     mo,
@@ -42,7 +44,6 @@ export default function SchedulePage() {
   const [classesList, setClassesList] = useState<any[]>(() => cachedClasses || []);
   const [classFilter, setClassFilter] = useState('');
   const [sessions, setSessions] = useState<ClassSession[]>([]);
-  const [ctxMenu, setCtxMenu] = useState<{ x: number; y: number; dateStr: string } | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<ClassSession | null>(null);
   const [mode, setMode] = useState<'single' | 'weekdays'>('weekdays');
@@ -69,13 +70,23 @@ export default function SchedulePage() {
     if (!isSilent) setLoading(true);
     try {
       const targetClassId = classFilter ? Number(classFilter) : 0;
-      const [cls, ss] = await Promise.all([
+      const m1 = weekDays[0]?.dateStr?.slice(0, 7) || selectedMonth;
+      const m2 = weekDays[6]?.dateStr?.slice(0, 7) || selectedMonth;
+      const monthsToFetch = Array.from(new Set([m1, m2, selectedMonth]));
+
+      const [cls, ...sessionArrays] = await Promise.all([
         api.getClasses().catch(() => []),
-        api.getClassSessions(targetClassId, selectedMonth).catch(() => []),
+        ...monthsToFetch.map(m => api.getClassSessions(targetClassId, m).catch(() => [])),
       ]);
       setClassesList(cls);
 
-      const all: ClassSession[] = (ss || []).map((s: any) => {
+      const sessionMap = new Map<number, any>();
+      sessionArrays.flat().forEach((s: any) => {
+        if (s?.id) sessionMap.set(s.id, s);
+      });
+      const ss = Array.from(sessionMap.values());
+
+      const all: ClassSession[] = ss.map((s: any) => {
         const matchedClass = cls.find((c: any) => c.id === s.class_id);
         return {
           ...s,
@@ -108,13 +119,7 @@ export default function SchedulePage() {
     const h = () => loadData(true);
     window.addEventListener('data-changed', h);
     return () => window.removeEventListener('data-changed', h);
-  }, [selectedMonth, classFilter]);
-
-  useEffect(() => {
-    const close = () => setCtxMenu(null);
-    window.addEventListener('click', close);
-    return () => window.removeEventListener('click', close);
-  }, []);
+  }, [selectedMonth, classFilter, weekDays[0]?.dateStr]);
 
 
   const applyClassSchedule = async (cid: number, targetDateStr?: string) => {
@@ -246,17 +251,42 @@ export default function SchedulePage() {
       {/* UNIFIED CONTAINER: Integrated Toolbar + Calendar / List */}
       <div className="bg-white dark:bg-[#111728] border border-slate-200 dark:border-white/10 rounded-2xl overflow-hidden shadow-xs flex-1 min-h-0 select-none flex flex-col">
         {/* Integrated Top Toolbar */}
-        <div className="flex flex-wrap items-center justify-between gap-3 bg-white dark:bg-[#111728] border-b border-slate-200 dark:border-white/10 px-4 py-3 shrink-0">
-          <div className="flex items-center gap-2">
-            <CustomDatePicker
-              mode="month"
-              value={selectedMonth}
-              onChange={(val) => {
-                if (val) setSelectedMonth(val.slice(0, 7));
-              }}
-              placeholder="Chọn tháng..."
-              className="w-36 sm:w-44"
-            />
+        <div className="flex flex-wrap items-center justify-between gap-3 bg-white dark:bg-[#111728] border-b border-slate-200 dark:border-white/10 px-4 py-2.5 shrink-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            {/* Merged Date & Week Navigation */}
+            <div className="flex items-center gap-1 bg-slate-100 dark:bg-white/5 p-1 rounded-xl">
+              <button
+                type="button"
+                onClick={() => changeWeek(-1)}
+                className="p-1.5 rounded-lg hover:bg-slate-200 dark:hover:bg-white/10 text-slate-700 dark:text-white transition cursor-pointer border-0"
+                title="Tuần trước"
+              >
+                <ChevronLeft size={14} />
+              </button>
+              <CustomDatePicker
+                value={weekDays[0]?.dateStr || today}
+                onChange={(val) => {
+                  if (val) jumpToDate(val);
+                }}
+                className="w-32 sm:w-36"
+              />
+              <button
+                type="button"
+                onClick={() => changeWeek(1)}
+                className="p-1.5 rounded-lg hover:bg-slate-200 dark:hover:bg-white/10 text-slate-700 dark:text-white transition cursor-pointer border-0"
+                title="Tuần sau"
+              >
+                <ChevronRight size={14} />
+              </button>
+              <button
+                type="button"
+                onClick={setWeekStartToday}
+                className="px-2.5 py-1.5 rounded-lg bg-blue-500/15 text-blue-600 dark:text-blue-300 text-xs font-bold hover:bg-blue-500/25 transition cursor-pointer border-0 ml-0.5"
+              >
+                Hôm nay
+              </button>
+            </div>
+
             <CustomSelect
               value={classFilter}
               onChange={(val) => setClassFilter(val)}
@@ -267,6 +297,7 @@ export default function SchedulePage() {
               className="w-36 sm:w-44"
             />
           </div>
+
           <div className="flex items-center gap-2">
             <button
               type="button"
@@ -293,10 +324,9 @@ export default function SchedulePage() {
             sessions={sessions}
             weekDays={weekDays}
             changeWeek={changeWeek}
-            setWeekStart={setWeekStart}
+            setWeekStartToday={setWeekStartToday}
             openAdd={openAdd}
             openEdit={openEdit}
-            setCtxMenu={setCtxMenu}
           />
         )}
 
@@ -316,26 +346,6 @@ export default function SchedulePage() {
           </div>
         )}
       </div>
-
-      {/* CONTEXT MENU */}
-      {ctxMenu && (
-        <div
-          style={{ top: ctxMenu.y, left: ctxMenu.x }}
-          className="fixed z-[999] bg-white dark:bg-[#141417] border border-slate-300 dark:border-[#27272a] rounded-2xl shadow-[0_20px_50px_rgba(15,23,42,0.25)] dark:shadow-[0_24px_64px_rgba(0,0,0,0.95)] ring-1 ring-black/5 dark:ring-white/10 py-2 min-w-[170px] animate-mac-dropdown select-none"
-        >
-          <button
-            type="button"
-            onClick={() => {
-              openAdd(ctxMenu.dateStr);
-              setCtxMenu(null);
-            }}
-            className="w-full text-left px-4 py-2 text-xs font-black text-slate-900 dark:text-white hover:bg-indigo-50 dark:hover:bg-white/10 transition flex items-center gap-2 cursor-pointer"
-          >
-            <Plus className="h-3.5 w-3.5 text-indigo-600 dark:text-indigo-400" />
-            <span>Thêm buổi học</span>
-          </button>
-        </div>
-      )}
 
       {/* MODAL */}
       <SessionModal
