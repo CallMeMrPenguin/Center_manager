@@ -322,9 +322,10 @@ export function DataTable<TData>({
                       if (columnSizing[col.id]) {
                         return <col key={col.id} style={{ width: `${columnSizing[col.id]}px` }} />;
                       }
-                      const isFlexCol = isNameColumn(col.columnDef) || ['student_name', 'full_name', 'name'].includes(String(col.id).toLowerCase());
-                      if (isFlexCol && !col.columnDef?.maxSize) {
-                        return <col key={col.id} style={{ minWidth: `${col.columnDef?.minSize || 130}px` }} />;
+                      const isSTT = col.id === 'stt' || col.columnDef?.id === 'stt';
+                      if (isSTT) {
+                        const sttWidth = typeof col.columnDef?.size === 'number' ? col.columnDef.size : 48;
+                        return <col key={col.id} style={{ width: `${sttWidth}px`, maxWidth: `${sttWidth + 4}px` }} />;
                       }
                       const manualWidth = typeof col.columnDef?.size === 'number' ? col.columnDef.size : undefined;
                       return <col key={col.id} style={manualWidth ? { width: `${manualWidth}px` } : undefined} />;

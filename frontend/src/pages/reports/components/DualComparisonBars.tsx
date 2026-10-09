@@ -1,5 +1,6 @@
 import React from 'react';
 import { AnimatedProgressBar } from './AnimatedProgressBar';
+import { DualHistogram3D } from './DualHistogram3D';
 import { format1Dec } from '../../../utils';
 
 interface DualComparisonBarsProps {
@@ -132,7 +133,7 @@ export const DualComparisonBars: React.FC<DualComparisonBarsProps> = ({
         </div>
       </div>
 
-      {/* Right: 6-Tier Academic Distribution as a Grouped Column Chart */}
+      {/* Right: 6-Tier Academic Distribution as a True 3D Isometric Histogram */}
       <div className="p-5 rounded-2xl bg-white dark:bg-[#111728] border-0 shadow-sm dark:shadow-xl hover:shadow-md transition-shadow min-w-0 overflow-hidden space-y-4">
         <div className="flex flex-wrap items-center justify-between border-b border-slate-200 dark:border-white/5 pb-3 gap-2">
           <span className="text-sm font-black uppercase tracking-wider text-slate-900 dark:text-white">
@@ -145,106 +146,8 @@ export const DualComparisonBars: React.FC<DualComparisonBarsProps> = ({
           </div>
         </div>
 
-        {/* 6-Milestone Dual Column Histogram */}
-        {(() => {
-          const milestones = [
-            { id: 'xs', name: 'Xuất sắc', range: '≥ 9.0đ', min: 9.0, max: 10.0 },
-            { id: 'gioi', name: 'Giỏi', range: '8.0 – 8.9đ', min: 8.0, max: 8.99 },
-            { id: 'kha', name: 'Khá', range: '6.5 – 7.9đ', min: 6.5, max: 7.99 },
-            { id: 'tb', name: 'Trung bình', range: '5.0 – 6.4đ', min: 5.0, max: 6.49 },
-            { id: 'yeu', name: 'Yếu', range: '3.5 – 4.9đ', min: 3.5, max: 4.99 },
-            { id: 'kem', name: 'Kém', range: '< 3.5đ', min: 0, max: 3.49 },
-          ];
-
-          const getStudentScore = (s: any) => {
-            if (s.ema_level && Number(s.ema_level) > 0) return Number(s.ema_level);
-            const c1 = Number(s.avg_check_1 || 0);
-            const c2 = Number(s.avg_check_2 || 0);
-            const hw = Number(s.avg_homework || 0);
-            const valid = [c1, c2, hw].filter(v => v > 0);
-            return valid.length > 0 ? valid.reduce((a, b) => a + b, 0) / valid.length : 0;
-          };
-
-          const statsList = milestones.map(m => {
-            const countA = (classA.students || []).filter((s: any) => {
-              const sc = getStudentScore(s);
-              return sc >= m.min && sc <= m.max;
-            }).length;
-            const pctA = classA.studentCount > 0 ? Math.round((countA / classA.studentCount) * 100) : 0;
-
-            const countB = (classB.students || []).filter((s: any) => {
-              const sc = getStudentScore(s);
-              return sc >= m.min && sc <= m.max;
-            }).length;
-            const pctB = classB.studentCount > 0 ? Math.round((countB / classB.studentCount) * 100) : 0;
-
-            return { ...m, countA, pctA, countB, pctB };
-          });
-
-          const maxPct = Math.max(1, ...statsList.map(s => Math.max(s.pctA, s.pctB)));
-
-          return (
-            <div className="pt-2 space-y-2">
-              <div className="grid grid-cols-6 gap-2 sm:gap-3 items-end h-48 border-b border-slate-100 dark:border-white/5 pb-2">
-                {statsList.map((m) => {
-                  const hA = m.countA > 0 ? Math.max(10, Math.round((m.pctA / maxPct) * 100)) : 0;
-                  const hB = m.countB > 0 ? Math.max(10, Math.round((m.pctB / maxPct) * 100)) : 0;
-
-                  return (
-                    <div key={m.id} className="flex flex-col items-center justify-end h-full gap-1">
-                      {/* Dual Bar Container */}
-                      <div className="flex items-end justify-center gap-1 sm:gap-1.5 w-full h-36">
-                        {/* Class A Bar */}
-                        <div className="flex-1 flex flex-col items-center justify-end h-full">
-                          <span className={`text-[10px] font-mono font-bold leading-none mb-1 ${m.countA > 0 ? 'text-blue-600 dark:text-blue-400' : 'text-slate-300 dark:text-slate-700'}`}>
-                            {m.countA}
-                          </span>
-                          <div
-                            style={{ height: `${hA}%` }}
-                            className={`w-full rounded-t-md transition-all duration-500 ${
-                              m.countA > 0
-                                ? 'bg-gradient-to-t from-blue-600 to-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]'
-                                : 'bg-slate-100 dark:bg-white/5 h-1'
-                            }`}
-                          />
-                        </div>
-
-                        {/* Class B Bar */}
-                        <div className="flex-1 flex flex-col items-center justify-end h-full">
-                          <span className={`text-[10px] font-mono font-bold leading-none mb-1 ${m.countB > 0 ? 'text-cyan-600 dark:text-cyan-400' : 'text-slate-300 dark:text-slate-700'}`}>
-                            {m.countB}
-                          </span>
-                          <div
-                            style={{ height: `${hB}%` }}
-                            className={`w-full rounded-t-md transition-all duration-500 ${
-                              m.countB > 0
-                                ? 'bg-gradient-to-t from-cyan-600 to-cyan-400 shadow-[0_0_8px_rgba(6,182,212,0.5)]'
-                                : 'bg-slate-100 dark:bg-white/5 h-1'
-                            }`}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-
-              {/* Milestone Labels Grid */}
-              <div className="grid grid-cols-6 gap-2 sm:gap-3 text-center">
-                {statsList.map((m) => (
-                  <div key={m.id} className="min-w-0">
-                    <span className="text-[11px] font-black text-slate-800 dark:text-slate-200 block truncate leading-tight">
-                      {m.name}
-                    </span>
-                    <span className="text-[9px] text-slate-400 dark:text-slate-500 font-mono block leading-tight">
-                      {m.range}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          );
-        })()}
+        {/* 6-Milestone Dual 3D Isometric Histogram */}
+        <DualHistogram3D classA={classA} classB={classB} />
       </div>
     </div>
   );

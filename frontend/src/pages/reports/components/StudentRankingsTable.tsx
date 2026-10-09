@@ -61,8 +61,8 @@ export const StudentRankingsTable: React.FC<StudentRankingsTableProps> = React.m
     },
     {
       accessorKey: 'full_name',
-      header: 'Họ tên',
-      meta: { headerText: 'Họ tên', exportValue: (r: any) => `${r.full_name}${r.nickname ? ` (${r.nickname})` : ''}` },
+      header: 'Họ và Tên',
+      meta: { headerText: 'Họ và Tên', exportValue: (r: any) => `${r.full_name}${r.nickname ? ` (${r.nickname})` : ''}` },
       cell: ({ row }) => {
         const r = row.original;
         return (

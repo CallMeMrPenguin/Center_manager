@@ -65,18 +65,18 @@ export function useAttendanceColumns({
       {
         id: 'stt',
         header: 'STT',
-        size: 45,
-        minSize: 40,
-        maxSize: 50,
+        size: 48,
+        minSize: 45,
+        maxSize: 52,
         meta: { headerText: 'STT', exportValue: (_: any, idx: number) => idx + 1 },
         enableSorting: false,
         cell: ({ row }) => <div className="text-center font-extrabold text-slate-700 dark:text-slate-300 text-sm sm:text-base">{row.index + 1}</div>,
       },
       {
         accessorKey: 'student_name',
-        header: 'Họ tên',
-        minSize: 130,
-        meta: { headerText: 'Họ tên', exportValue: (r: any) => r.student_name },
+        header: 'Họ và Tên',
+        minSize: 110,
+        meta: { headerText: 'Họ và Tên', exportValue: (r: any) => r.student_name },
         cell: ({ row }) => (
           <div className="pr-2">
             <span className="font-extrabold text-slate-900 dark:text-white text-sm sm:text-base whitespace-nowrap">
@@ -88,9 +88,7 @@ export function useAttendanceColumns({
       {
         accessorKey: 'status',
         header: 'Điểm Danh',
-        size: 95,
         minSize: 90,
-        maxSize: 105,
         meta: { headerText: 'Điểm Danh', exportValue: (r: any) => r.status || 'Có mặt' },
         cell: ({ row }) => {
           const rec = row.original;
@@ -118,9 +116,7 @@ export function useAttendanceColumns({
       },
       {
         accessorKey: 'check_1',
-        size: 85,
         minSize: 80,
-        maxSize: 95,
         header: () => (
           <div className="flex flex-col items-center justify-center leading-tight py-0.5">
             <span className="font-extrabold text-xs sm:text-sm">Check 1</span>
@@ -144,9 +140,7 @@ export function useAttendanceColumns({
       },
       {
         accessorKey: 'check_2',
-        size: 85,
         minSize: 80,
-        maxSize: 95,
         header: () => (
           <div className="flex flex-col items-center justify-center leading-tight py-0.5">
             <span className="font-extrabold text-xs sm:text-sm">Check 2</span>
@@ -170,9 +164,7 @@ export function useAttendanceColumns({
       },
       {
         accessorKey: 'homework',
-        size: 85,
         minSize: 80,
-        maxSize: 95,
         header: () => (
           <div className="flex flex-col items-center justify-center leading-tight py-0.5">
             <span className="font-extrabold text-xs sm:text-sm">BTVN 1</span>
@@ -196,9 +188,7 @@ export function useAttendanceColumns({
       },
       {
         accessorKey: 'homework_2',
-        size: 85,
         minSize: 80,
-        maxSize: 95,
         header: () => (
           <div className="flex flex-col items-center justify-center leading-tight py-0.5">
             <span className="font-extrabold text-xs sm:text-sm">BTVN 2</span>
@@ -222,9 +212,7 @@ export function useAttendanceColumns({
       },
       {
         accessorKey: 'mock_test',
-        size: 85,
         minSize: 80,
-        maxSize: 95,
         header: () => (
           <div className="flex flex-col items-center justify-center leading-tight py-0.5">
             <span className="font-extrabold text-xs sm:text-sm">Luyện Đề</span>
@@ -249,9 +237,7 @@ export function useAttendanceColumns({
       {
         id: 'score_discrepancy',
         header: 'Độ Lệch',
-        size: 80,
         minSize: 75,
-        maxSize: 90,
         meta: {
           headerText: 'Độ Lệch',
           exportValue: (rec: any) => {
@@ -326,9 +312,7 @@ export function useAttendanceColumns({
       {
         id: 'actions',
         header: 'Thao Tác',
-        size: 55,
-        minSize: 50,
-        maxSize: 65,
+        minSize: 55,
         enableSorting: false,
         enableGlobalFilter: false,
         cell: ({ row }) => {
