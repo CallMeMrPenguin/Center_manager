@@ -1,6 +1,7 @@
-import React, { useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { ClassSession } from '../types';
 import { HorizontalTimelineGrid } from './HorizontalTimelineGrid';
+import { VerticalTimelineGrid } from './VerticalTimelineGrid';
 import { getLocalDateStr } from '../../../utils';
 
 interface ScheduleCalendarViewProps {
@@ -41,6 +42,9 @@ export const ScheduleCalendarView: React.FC<ScheduleCalendarViewProps> = ({
   setCtxMenu,
   viewModeToggle,
 }) => {
+  // Default to vertical (Columns=Days, Rows=Hours) so all days fit side-by-side on laptop screens
+  const [orientation, setOrientation] = useState<'vertical' | 'horizontal'>('vertical');
+
   // 1. Week view row items (Supports 1 or multiple weeks)
   const weekDayRows = useMemo(() => {
     if (selectedWeekStarts && selectedWeekStarts.length > 0) {
@@ -108,6 +112,25 @@ export const ScheduleCalendarView: React.FC<ScheduleCalendarViewProps> = ({
   const viewModeToRender = scope === 'all' ? 'month' : 'week';
   const weekRangeText = daysToRender.length > 0 ? `${daysToRender[0].dateStr} - ${daysToRender[daysToRender.length - 1].dateStr}` : '';
 
+  if (orientation === 'vertical') {
+    return (
+      <VerticalTimelineGrid
+        viewMode={viewModeToRender}
+        days={daysToRender}
+        sessions={sessions}
+        today={today}
+        changeWeek={changeWeek}
+        setWeekStartToday={setWeekStartToday}
+        weekRangeText={weekRangeText}
+        openAdd={openAdd}
+        openEdit={openEdit}
+        setCtxMenu={setCtxMenu}
+        viewModeToggle={viewModeToggle}
+        onToggleOrientation={() => setOrientation('horizontal')}
+      />
+    );
+  }
+
   return (
     <HorizontalTimelineGrid
       viewMode={viewModeToRender}
@@ -121,6 +144,7 @@ export const ScheduleCalendarView: React.FC<ScheduleCalendarViewProps> = ({
       openEdit={openEdit}
       setCtxMenu={setCtxMenu}
       viewModeToggle={viewModeToggle}
+      onToggleOrientation={() => setOrientation('vertical')}
     />
   );
 };
