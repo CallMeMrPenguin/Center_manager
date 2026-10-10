@@ -176,7 +176,7 @@ export const UnitBreakdownTable: React.FC<UnitBreakdownTableProps> = ({ data }) 
         columns={columns}
         pageSize={20}
         searchPlaceholder="Tìm theo bài học, kỹ năng..."
-        emptyMessage="Chưa có dữ liệu bài học nào."
+        emptyMessage={data.length === 0 ? "Vui lòng chọn lớp học để xem thống kê chi tiết bài học." : "Chưa có dữ liệu bài học nào."}
         exportFilename="thong_ke_ky_nang_unit"
         borderless={true}
         initialSorting={[{ id: 'avg_score', desc: false }]}

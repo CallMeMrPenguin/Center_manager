@@ -21,11 +21,10 @@ export const ScoreFluctuationsSection: React.FC<ScoreFluctuationsSectionProps> =
   selectedStudentId,
   onSelectRankingStudent,
 }) => {
-  if (!selectedClassId || selectedClassId === 'all') {
-    return null;
-  }
+  const isNoClass = !selectedClassId || selectedClassId === 'all';
 
   const scoreFluctuations = useMemo(() => {
+    if (isNoClass) return [];
     const rawList = selectedClassId ? studentRankings.filter(r => String(r.class_id) === selectedClassId) : studentRankings;
     if (!rawList || rawList.length === 0) return [];
 
@@ -228,10 +227,15 @@ export const ScoreFluctuationsSection: React.FC<ScoreFluctuationsSectionProps> =
   return (
     <div className="bg-white dark:bg-[#0b0f19] rounded-2xl p-6 shadow-[0_4px_20px_-4px_rgba(15,23,42,0.08),0_2px_4px_-1px_rgba(15,23,42,0.04)] dark:shadow-xl space-y-6 animate-cascade-4">
       <div className="flex flex-wrap items-center justify-between gap-4 select-none pb-1">
-        <div>
+        <div className="flex items-center gap-2">
           <h3 className="text-base font-black text-slate-900 dark:text-white uppercase tracking-wider">
             Biến Động Điểm Số
           </h3>
+          {isNoClass && (
+            <span className="text-xs font-medium text-slate-400 dark:text-slate-500">
+              (Chưa chọn lớp học)
+            </span>
+          )}
         </div>
       </div>
 
@@ -242,7 +246,7 @@ export const ScoreFluctuationsSection: React.FC<ScoreFluctuationsSectionProps> =
         columns={fluctuationColumns}
         loading={loading}
         searchPlaceholder="Tìm học sinh theo tên..."
-        emptyMessage="Không có dữ liệu biến động điểm số."
+        emptyMessage={isNoClass ? "Vui lòng chọn lớp học để xem biến động điểm số." : "Không có dữ liệu biến động điểm số."}
         pageSize={20}
         borderless={true}
         onRowClick={(r: any) => onSelectRankingStudent(r.student_id)}

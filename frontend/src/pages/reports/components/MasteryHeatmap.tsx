@@ -259,7 +259,7 @@ export const MasteryHeatmap: React.FC<MasteryHeatmapProps> = ({
         enableColumnReorder={false}
         enableColumnResizing={true}
         searchPlaceholder="Tìm kiếm học sinh..."
-        emptyMessage="Chưa có dữ liệu bài kiểm tra nào."
+        emptyMessage={students.length === 0 ? "Vui lòng chọn lớp học để xem ma trận kỹ năng." : "Chưa có dữ liệu bài kiểm tra nào."}
         toolbarLeft={toolbarLeft}
         exportFilename="ma_tran_nam_vung_kien_thuc"
         borderless={true}

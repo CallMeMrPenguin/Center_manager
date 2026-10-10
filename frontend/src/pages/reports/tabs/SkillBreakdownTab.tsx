@@ -6,7 +6,6 @@ import { UnitBreakdownTable } from '../components/UnitBreakdownTable';
 import { StudentWeaknessDiagnosisCard } from '../components/StudentWeaknessDiagnosisCard';
 import { SegmentedControl } from '../../../components/SegmentedControl';
 import { CustomSelect } from '../../../components/CustomSelect';
-import { RequireClassSelectionPrompt } from '../components/RequireClassSelectionPrompt';
 
 interface SkillBreakdownTabProps {
   selectedClassId: string;
@@ -35,7 +34,10 @@ export const SkillBreakdownTab: React.FC<SkillBreakdownTabProps> = ({
   const cacheKey = `${selectedClassId}_${selectedStudentId || 'all'}`;
 
   const fetchSkillData = useCallback(async (force = false) => {
-    if (!selectedClassId) return;
+    if (!selectedClassId || selectedClassId === 'all') {
+      setApiReportData(null);
+      return;
+    }
 
     // Check cache first for 0ms instantaneous display
     if (!force && cacheRef.current.has(cacheKey)) {
@@ -62,7 +64,7 @@ export const SkillBreakdownTab: React.FC<SkillBreakdownTabProps> = ({
   }, [fetchSkillData]);
 
   const reportData = useMemo(() => {
-    if (!selectedClassId) return null;
+    if (!selectedClassId || selectedClassId === 'all') return null;
     return apiReportData || (cacheRef.current.has(cacheKey) ? cacheRef.current.get(cacheKey) : null);
   }, [selectedClassId, apiReportData, cacheKey]);
 
@@ -72,16 +74,11 @@ export const SkillBreakdownTab: React.FC<SkillBreakdownTabProps> = ({
   }, [selectedStudentId, studentRankings]);
 
   const selectedClass = useMemo(() => {
-    if (!selectedClassId) return null;
+    if (!selectedClassId || selectedClassId === 'all') return null;
     return classes.find(c => String(c.id) === String(selectedClassId)) || null;
   }, [selectedClassId, classes]);
 
-  // If viewing all classes ("Tất cả lớp học"), prompt the user to pick a specific class
-  if (!selectedClassId || selectedClassId === 'all') {
-    return <RequireClassSelectionPrompt />;
-  }
-
-  if (loading && !reportData) {
+  if (loading && !reportData && selectedClassId && selectedClassId !== 'all') {
     return (
       <div className="py-24 text-center text-slate-500 dark:text-slate-400 text-xs font-bold flex flex-col items-center justify-center gap-3">
         <RefreshCw size={24} className="text-indigo-500 dark:text-indigo-400 animate-spin" />

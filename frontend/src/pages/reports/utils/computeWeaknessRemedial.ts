@@ -34,6 +34,10 @@ export function computeWeaknessRemedialList({
   selectedClassId: string;
   selectedStudentId?: string;
 }): StudentRemedialSummaryRow[] {
+  if (!selectedClassId || selectedClassId === 'all') {
+    return [];
+  }
+
   if (heatmapStudents && heatmapStudents.length > 0) {
     const rows: StudentRemedialSummaryRow[] = [];
 

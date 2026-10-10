@@ -9,13 +9,12 @@ export function computeSmartGroups({
   [key: string]: any;
 }) {
   let pool = studentRankings || [];
-  if (pool.length === 0) return [];
-
-  if (selectedClassId && selectedClassId !== 'all') {
+  const hasSpecificClass = Boolean(selectedClassId && selectedClassId !== 'all');
+  if (!hasSpecificClass) {
+    pool = [];
+  } else {
     pool = pool.filter(s => String(s.class_id) === selectedClassId);
   }
-
-  if (pool.length === 0) return [];
 
   const getStudentScore = (s: any) => {
     if (s.ema_level && Number(s.ema_level) > 0) return Number(s.ema_level);

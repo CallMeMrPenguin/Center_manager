@@ -30,8 +30,8 @@ export const SmartGroupingSection: React.FC<SmartGroupingSectionProps> = ({
   }, [studentRankings, selectedClassId]);
 
   const handleCopyGrouping = useCallback(() => {
-    if (!smartGroups || smartGroups.length === 0) {
-      showToast('Không có dữ liệu học sinh để phân nhóm', 'warning');
+    if (!smartGroups || smartGroups.length === 0 || smartGroups.every(g => g.students.length === 0)) {
+      showToast('Vui lòng chọn lớp học để xem và sao chép phân nhóm', 'warning');
       return;
     }
     const currentClass = classes.find(c => String(c.id) === selectedClassId);
@@ -58,8 +58,8 @@ export const SmartGroupingSection: React.FC<SmartGroupingSectionProps> = ({
   }, [smartGroups, classes, selectedClassId, filteredRankings]);
 
   const handleExportGroupingExcel = useCallback(async () => {
-    if (!smartGroups || smartGroups.length === 0) {
-      showToast('Không có dữ liệu để xuất Excel', 'warning');
+    if (!smartGroups || smartGroups.length === 0 || smartGroups.every(g => g.students.length === 0)) {
+      showToast('Vui lòng chọn lớp học để xuất Excel phân nhóm', 'warning');
       return;
     }
     try {
@@ -130,18 +130,21 @@ export const SmartGroupingSection: React.FC<SmartGroupingSectionProps> = ({
     }
   }, [smartGroups, classes, selectedClassId]);
 
-  if (!selectedClassId || selectedClassId === 'all') {
-    return null;
-  }
+  const isNoClass = !selectedClassId || selectedClassId === 'all';
 
   return (
     <div className="bg-white dark:bg-[#0b0f19] rounded-2xl p-6 shadow-sm dark:shadow-xl space-y-5 animate-cascade-3">
       {/* Header Bar */}
       <div className="flex flex-wrap items-center justify-between gap-4 select-none pb-1 border-b border-slate-100 dark:border-white/5">
-        <div>
+        <div className="flex items-center gap-2">
           <h3 className="text-base font-black text-slate-900 dark:text-white uppercase tracking-wider">
             Phân Nhóm
           </h3>
+          {isNoClass && (
+            <span className="text-xs font-medium text-slate-400 dark:text-slate-500">
+              (Chưa chọn lớp học)
+            </span>
+          )}
         </div>
 
         {/* Export Actions */}

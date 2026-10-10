@@ -1,6 +1,5 @@
 import { SmartGroupingSection } from '../components/SmartGroupingSection';
 import { ScoreFluctuationsSection } from '../components/ScoreFluctuationsSection';
-import { RequireClassSelectionPrompt } from '../components/RequireClassSelectionPrompt';
 
 interface DeepAnalysisTabProps {
   loading: boolean;
@@ -25,10 +24,6 @@ export const DeepAnalysisTab: React.FC<DeepAnalysisTabProps> = ({
   onSelectRankingStudent,
   onSelectClass,
 }) => {
-  if (!selectedClassId || selectedClassId === 'all') {
-    return <RequireClassSelectionPrompt />;
-  }
-
   return (
     <div className="flex flex-col gap-6 mb-8 select-none">
       {/* 1. SMART PEDAGOGICAL LEVEL GROUPING */}
