@@ -1,5 +1,4 @@
 import React from 'react';
-import { motion } from 'framer-motion';
 import { WeekDayItem, DateRangeSegment } from './scheduleDatePickerHelper';
 
 interface ScheduleDatePickerDayCellProps {
@@ -40,9 +39,9 @@ export const ScheduleDatePickerDayCell: React.FC<ScheduleDatePickerDayCellProps>
   // Check if this day is currently hovered while picking the end date
   const isHoveredTarget = isPicking && !!hoverDate && day.dateStr === hoverDate && day.dateStr !== pickingStart;
 
-  // Ribbon connectors (matching ngxsmk-datepicker range-background styling)
-  const hasLeftConnector = inRange && !isSingleDayRange && (!isStartEndpoint || (isStartEndpoint && isEndEndpoint));
-  const hasRightConnector = inRange && !isSingleDayRange && (!isEndEndpoint || (isStartEndpoint && isEndEndpoint));
+  // Ribbon connectors (clean solid ribbons without blur)
+  const hasLeftConnector = inRange && !isSingleDayRange && !isStartEndpoint;
+  const hasRightConnector = inRange && !isSingleDayRange && !isEndEndpoint;
 
   // Row edge rounding for Monday & Sunday
   const rowEdgeRounding = isFirstCol ? 'rounded-l-full' : isLastCol ? 'rounded-r-full' : '';
@@ -66,12 +65,12 @@ export const ScheduleDatePickerDayCell: React.FC<ScheduleDatePickerDayCellProps>
         onDayClick(day.dateStr);
       }}
       onMouseEnter={() => onDayHover(day.dateStr)}
-      className="relative flex items-center justify-center h-8 sm:h-8.5 select-none group cursor-pointer"
+      className="relative flex items-center justify-center h-7 sm:h-7.5 select-none group cursor-pointer"
     >
       {/* 1. Left range connector ribbon */}
       {hasLeftConnector && (
         <div
-          className={`absolute left-0 top-1 bottom-1 w-1/2 bg-blue-100/90 dark:bg-[#5c36f5]/25 pointer-events-none transition-all duration-150 ease-out ${
+          className={`absolute left-0 top-0.5 bottom-0.5 w-1/2 bg-blue-100/90 dark:bg-[#5c36f5]/25 pointer-events-none transition-colors duration-150 ${
             isFirstCol ? 'rounded-l-full' : ''
           }`}
         />
@@ -80,7 +79,7 @@ export const ScheduleDatePickerDayCell: React.FC<ScheduleDatePickerDayCellProps>
       {/* 2. Right range connector ribbon */}
       {hasRightConnector && (
         <div
-          className={`absolute right-0 top-1 bottom-1 w-1/2 bg-blue-100/90 dark:bg-[#5c36f5]/25 pointer-events-none transition-all duration-150 ease-out ${
+          className={`absolute right-0 top-0.5 bottom-0.5 w-1/2 bg-blue-100/90 dark:bg-[#5c36f5]/25 pointer-events-none transition-colors duration-150 ${
             isLastCol ? 'rounded-r-full' : ''
           }`}
         />
@@ -89,42 +88,23 @@ export const ScheduleDatePickerDayCell: React.FC<ScheduleDatePickerDayCellProps>
       {/* 3. Center ribbon fill for interior days */}
       {isInterior && (
         <div
-          className={`absolute inset-x-0 top-1 bottom-1 bg-blue-100/90 dark:bg-[#5c36f5]/25 pointer-events-none transition-all duration-150 ease-out ${rowEdgeRounding}`}
+          className={`absolute inset-x-0 top-0.5 bottom-0.5 bg-blue-100/90 dark:bg-[#5c36f5]/25 pointer-events-none transition-colors duration-150 ${rowEdgeRounding}`}
         />
       )}
 
-      {/* 4. Unselected Day hover circle pill (matching ngxsmk-datepicker scale3d(1.1) hover) */}
-      {!isEndpoint && !isHoveredTarget && (
-        <div
-          className="absolute w-7 h-7 sm:w-7.5 sm:h-7.5 rounded-full bg-slate-100/80 dark:bg-white/10 opacity-0 group-hover:opacity-100 scale-90 group-hover:scale-105 transition-all duration-150 ease-out pointer-events-none"
-        />
-      )}
-
-      {/* 5. Live target preview indicator (when dragging/hovering to pick end date) */}
+      {/* 4. Live target preview indicator (when picking end date) */}
       {isHoveredTarget && (
-        <div className="absolute z-10 w-7 h-7 sm:w-7.5 sm:h-7.5 rounded-full border-2 border-dashed border-blue-500 dark:border-blue-400 bg-blue-500/15 dark:bg-blue-400/20 scale-105 animate-pulse pointer-events-none" />
+        <div className="absolute z-10 w-6.5 h-6.5 sm:w-7 sm:h-7 rounded-full border border-blue-500 dark:border-blue-400 bg-blue-500/15 pointer-events-none" />
       )}
 
-      {/* 6. Solid Primary Endpoint Badge (Start / End Date) */}
-      {isStartEndpoint && (
-        <motion.div
-          layoutId={isSingleDayRange ? 'schedule-range-single' : 'schedule-range-start'}
-          transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-          className="absolute z-10 w-7 h-7 sm:w-7.5 sm:h-7.5 rounded-full bg-blue-600 dark:bg-[#5c36f5] shadow-[0_0_12px_rgba(92,54,245,0.45)] dark:shadow-[0_0_14px_rgba(92,54,245,0.6)] pointer-events-none"
-        />
+      {/* 5. Crisp Solid Primary Endpoint Badge (Start / End Date) - No blurry glow, renders reliably across all segments */}
+      {isEndpoint && (
+        <div className="absolute z-10 w-6.5 h-6.5 sm:w-7 sm:h-7 rounded-full bg-blue-600 dark:bg-[#5c36f5] shadow-xs pointer-events-none transition-transform duration-150 group-hover:scale-105" />
       )}
 
-      {isEndEndpoint && !isStartEndpoint && (
-        <motion.div
-          layoutId="schedule-range-end"
-          transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-          className="absolute z-10 w-7 h-7 sm:w-7.5 sm:h-7.5 rounded-full bg-blue-600 dark:bg-[#5c36f5] shadow-[0_0_12px_rgba(92,54,245,0.45)] dark:shadow-[0_0_14px_rgba(92,54,245,0.6)] pointer-events-none"
-        />
-      )}
-
-      {/* 7. Day Number & Today Dot Indicator */}
-      <div className={`relative z-20 flex flex-col items-center justify-center transition-all duration-150 text-xs ${textStyle}`}>
-        <span className="leading-none transition-transform duration-150 group-hover:scale-110">
+      {/* 6. Day Number & Today Dot Indicator */}
+      <div className={`relative z-20 flex flex-col items-center justify-center transition-colors duration-150 text-xs ${textStyle}`}>
+        <span className="leading-none select-none">
           {day.dayNum}
         </span>
         {day.isToday && (

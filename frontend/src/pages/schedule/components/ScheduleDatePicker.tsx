@@ -45,21 +45,19 @@ export const ScheduleDatePicker: React.FC<ScheduleDatePickerProps> = ({
   const [pickingStart, setPickingStart] = useState<string | null>(null);
   const [hoverDate, setHoverDate] = useState<string | null>(null);
   const [customRange, setCustomRange] = useState<{ startStr: string; endStr: string } | null>(null);
-  const [isTwoMonthsSelected, setIsTwoMonthsSelected] = useState(false);
 
-  // Month 1 (Primary)
+  // Month 1 (Primary / Current Month)
   const [yr, mo] = useMemo(() => {
     const parts = (selectedMonth || getLocalDateStr().slice(0, 7)).split('-').map(Number);
     return [parts[0] || 2026, parts[1] || 10];
   }, [selectedMonth]);
 
   // Month 2 (Always simultaneous adjacent next month)
-  const { yr: yr2, mo: mo2, monthStr: month2Str } = useMemo(() => {
+  const { yr: yr2, mo: mo2 } = useMemo(() => {
     return getAdjacentMonth(yr, mo, 1);
   }, [yr, mo]);
 
   const daysInMonth1 = useMemo(() => new Date(yr, mo, 0).getDate(), [yr, mo]);
-  const daysInMonth2 = useMemo(() => new Date(yr2, mo2, 0).getDate(), [yr2, mo2]);
 
   // Close when clicking outside
   useEffect(() => {
@@ -103,7 +101,7 @@ export const ScheduleDatePicker: React.FC<ScheduleDatePickerProps> = ({
     });
   }, [selectedWeeksList]);
 
-  // Contiguous island segments for range highlight across both months
+  // Contiguous island segments for range highlight
   const segments = useMemo<DateRangeSegment[]>(() => {
     // 1. Live picking in progress (dragging mouse over days)
     if (pickingStart && hoverDate) {
@@ -117,20 +115,16 @@ export const ScheduleDatePicker: React.FC<ScheduleDatePickerProps> = ({
       return [{ startStr: customRange.startStr, endStr: customRange.endStr }];
     }
 
-    // 3. Whole month / 2 months mode
+    // 3. Whole month (Tất cả): chỉ highlight toàn bộ tháng hiện tại (Tháng 1)
     if (scope === 'all') {
       const firstDay1 = `${yr}-${String(mo).padStart(2, '0')}-01`;
-      if (isTwoMonthsSelected) {
-        const lastDay2 = `${yr2}-${String(mo2).padStart(2, '0')}-${String(daysInMonth2).padStart(2, '0')}`;
-        return [{ startStr: firstDay1, endStr: lastDay2 }];
-      }
       const lastDay1 = `${yr}-${String(mo).padStart(2, '0')}-${String(daysInMonth1).padStart(2, '0')}`;
       return [{ startStr: firstDay1, endStr: lastDay1 }];
     }
 
     // 4. Week mode: partition selected weeks into contiguous segments
     return computeSegmentsFromWeeks(selectedWeeksList);
-  }, [pickingStart, hoverDate, customRange, scope, yr, mo, daysInMonth1, yr2, mo2, daysInMonth2, isTwoMonthsSelected, selectedWeeksList]);
+  }, [pickingStart, hoverDate, customRange, scope, yr, mo, daysInMonth1, selectedWeeksList]);
 
   const handleDayClick = (dateStr: string) => {
     if (!pickingStart) {
@@ -150,7 +144,6 @@ export const ScheduleDatePicker: React.FC<ScheduleDatePickerProps> = ({
       }
 
       setCustomRange({ startStr: minStr, endStr: maxStr });
-      setIsTwoMonthsSelected(false);
       setPickingStart(null);
       setHoverDate(null);
     }
@@ -174,7 +167,6 @@ export const ScheduleDatePicker: React.FC<ScheduleDatePickerProps> = ({
     setPickingStart(null);
     setHoverDate(null);
     setCustomRange(null);
-    setIsTwoMonthsSelected(false);
     const now = new Date();
     const d = now.getDay();
     const mon = new Date(now);
@@ -192,7 +184,6 @@ export const ScheduleDatePicker: React.FC<ScheduleDatePickerProps> = ({
     setPickingStart(null);
     setHoverDate(null);
     setCustomRange(null);
-    setIsTwoMonthsSelected(false);
     const nowMoStr = today.slice(0, 7);
     onSelectMonth(nowMoStr);
     onSelectScope('all');
@@ -200,19 +191,10 @@ export const ScheduleDatePicker: React.FC<ScheduleDatePickerProps> = ({
     setOpen(false);
   };
 
-  const handleSelectAllMonth1 = () => {
+  const handleSelectAll = () => {
     setPickingStart(null);
     setHoverDate(null);
     setCustomRange(null);
-    setIsTwoMonthsSelected(false);
-    onSelectScope('all');
-  };
-
-  const handleSelectTwoMonths = () => {
-    setPickingStart(null);
-    setHoverDate(null);
-    setCustomRange(null);
-    setIsTwoMonthsSelected(true);
     onSelectScope('all');
   };
 
@@ -221,7 +203,6 @@ export const ScheduleDatePicker: React.FC<ScheduleDatePickerProps> = ({
     setPickingStart(null);
     setHoverDate(null);
     setCustomRange(null);
-    setIsTwoMonthsSelected(false);
     let updated: string[];
 
     if (scope !== 'week') {
@@ -255,7 +236,6 @@ export const ScheduleDatePicker: React.FC<ScheduleDatePickerProps> = ({
     setPickingStart(null);
     setHoverDate(null);
     setCustomRange(null);
-    setIsTwoMonthsSelected(false);
     onSelectScope('week');
     onSelectWeekStarts?.([w.startStr]);
     onSelectWeekStart(w.start);
@@ -263,11 +243,8 @@ export const ScheduleDatePicker: React.FC<ScheduleDatePickerProps> = ({
   };
 
   const triggerLabel = useMemo(() => {
-    if (isTwoMonthsSelected) {
-      return `Tháng ${mo} - ${mo2}/${yr}`;
-    }
     return computeTriggerLabel(scope, mo, yr, selectedWeeksList, isConsecutiveWeeks, customRange);
-  }, [isTwoMonthsSelected, mo, mo2, yr, scope, selectedWeeksList, isConsecutiveWeeks, customRange]);
+  }, [mo, yr, scope, selectedWeeksList, isConsecutiveWeeks, customRange]);
 
   return (
     <div className="relative inline-block" ref={containerRef}>
@@ -275,7 +252,7 @@ export const ScheduleDatePicker: React.FC<ScheduleDatePickerProps> = ({
         type="button"
         onClick={() => setOpen((prev) => !prev)}
         className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200/80 dark:bg-white/5 dark:hover:bg-white/10 text-slate-800 dark:text-slate-100 text-xs font-bold transition-all cursor-pointer border-0 shadow-2xs outline-none"
-        title="Chọn thời gian xem lịch học (Hiển thị đồng thời 2 tháng)"
+        title="Chọn thời gian xem lịch học"
       >
         <Calendar size={14} className="text-blue-600 dark:text-[#5c36f5] shrink-0" />
         <span className="whitespace-nowrap font-extrabold">{triggerLabel}</span>
@@ -283,10 +260,10 @@ export const ScheduleDatePicker: React.FC<ScheduleDatePickerProps> = ({
       </button>
 
       {open && (
-        <div className="absolute left-0 sm:left-auto top-full mt-2 z-50 bg-white dark:bg-[#0c101d] border border-slate-200 dark:border-white/10 rounded-2xl shadow-[0_20px_60px_rgba(15,23,42,0.25)] dark:shadow-[0_24px_70px_rgba(0,0,0,0.95)] overflow-hidden flex flex-col sm:flex-row select-none animate-mac-dropdown">
+        <div className="absolute left-0 sm:left-auto top-full mt-1.5 z-50 bg-white dark:bg-[#0c101d] border border-slate-200 dark:border-white/10 rounded-2xl shadow-[0_16px_48px_rgba(15,23,42,0.22)] dark:shadow-[0_20px_60px_rgba(0,0,0,0.95)] max-h-[calc(100vh-100px)] overflow-y-auto overflow-x-hidden flex flex-col sm:flex-row select-none animate-mac-dropdown">
           {/* Dual Month Calendar View: Month 1 & Month 2 Side-by-Side */}
           <div
-            className="p-3.5 flex flex-col md:flex-row gap-5 md:gap-6 shrink-0"
+            className="p-2.5 sm:p-3 flex flex-col md:flex-row gap-3.5 md:gap-4 shrink-0"
             onMouseLeave={() => {
               if (!pickingStart) setHoverDate(null);
             }}
@@ -329,16 +306,12 @@ export const ScheduleDatePicker: React.FC<ScheduleDatePickerProps> = ({
             />
           </div>
 
-          {/* Right Column: Presets & Quick Filters */}
+          {/* Right Column: Presets with single 'Tất cả' button */}
           <ScheduleDatePickerPresets
             scope={scope}
-            mo1={mo}
-            mo2={mo2}
             weeks={weeks1}
             activeStarts={activeStarts}
-            isTwoMonthsSelected={isTwoMonthsSelected}
-            onSelectAllMonth1={handleSelectAllMonth1}
-            onSelectTwoMonths={handleSelectTwoMonths}
+            onSelectAll={handleSelectAll}
             onToggleWeek={handleToggleWeek}
             onDoubleClickWeek={handleDoubleClickWeek}
             onReset={handleReset}

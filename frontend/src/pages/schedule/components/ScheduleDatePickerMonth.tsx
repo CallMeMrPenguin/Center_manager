@@ -37,9 +37,9 @@ export const ScheduleDatePickerMonth: React.FC<ScheduleDatePickerMonthProps> = (
   showNext = false,
 }) => {
   return (
-    <div className="flex flex-col w-full sm:w-68 md:w-72 select-none">
+    <div className="flex flex-col w-full sm:w-64 md:w-68 select-none">
       {/* Month Header */}
-      <div className="flex items-center justify-between mb-2.5 px-1 h-7">
+      <div className="flex items-center justify-between mb-1 px-1 h-6">
         <div className="flex items-center gap-1">
           {showPrev ? (
             <button
@@ -48,14 +48,14 @@ export const ScheduleDatePickerMonth: React.FC<ScheduleDatePickerMonthProps> = (
               className="p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 text-slate-600 dark:text-slate-300 transition cursor-pointer border-0"
               title="Tháng trước"
             >
-              <ChevronLeft size={15} />
+              <ChevronLeft size={14} />
             </button>
           ) : (
-            <div className="w-6" />
+            <div className="w-5" />
           )}
         </div>
 
-        <span className="font-extrabold text-xs sm:text-sm text-slate-900 dark:text-white tracking-wide">
+        <span className="font-extrabold text-xs text-slate-900 dark:text-white tracking-wide">
           Tháng {month} <span className="font-semibold text-slate-500 dark:text-slate-400">{year}</span>
         </span>
 
@@ -67,16 +67,16 @@ export const ScheduleDatePickerMonth: React.FC<ScheduleDatePickerMonthProps> = (
               className="p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 text-slate-600 dark:text-slate-300 transition cursor-pointer border-0"
               title="Tháng sau"
             >
-              <ChevronRight size={15} />
+              <ChevronRight size={14} />
             </button>
           ) : (
-            <div className="w-6" />
+            <div className="w-5" />
           )}
         </div>
       </div>
 
       {/* Weekday Labels (T2, T3, T4, T5, T6, T7, CN) */}
-      <div className="grid grid-cols-7 text-center text-[10.5px] font-bold text-slate-400 dark:text-slate-500 mb-1">
+      <div className="grid grid-cols-7 text-center text-[10px] font-bold text-slate-400 dark:text-slate-500 mb-0.5">
         <span>T2</span>
         <span>T3</span>
         <span>T4</span>
