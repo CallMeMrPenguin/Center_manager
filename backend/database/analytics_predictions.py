@@ -336,3 +336,130 @@ def get_class_attendance_with_predictions(class_id: int, date_str: str) -> Dict[
         r["prediction_model"] = p.get("prediction_model")
 
     return {"date": date_str, "records": rows}
+
+
+def get_prediction_accuracy_stats() -> Dict[str, Any]:
+    """Calculates backtested prediction accuracy (exact <= 0.5, near <= 1.0) for each grade type."""
+    from collections import defaultdict
+    conn = get_connection()
+    try:
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT class_id, student_id, date, check_1, check_2, homework, status
+            FROM class_attendance_grades
+            ORDER BY student_id, date ASC
+        """)
+        rows = [dict(r) for r in cursor.fetchall()]
+    finally:
+        conn.close()
+
+    students_records = defaultdict(list)
+    for r in rows:
+        students_records[r["student_id"]].append(r)
+
+    results = {
+        "check_1": {"id": "check_1", "label": "Từ Vựng", "color": "#3b82f6", "total": 0, "exact": 0, "near": 0, "deviated": 0, "errors": []},
+        "check_2": {"id": "check_2", "label": "Ngữ Pháp", "color": "#a855f7", "total": 0, "exact": 0, "near": 0, "deviated": 0, "errors": []},
+        "homework": {"id": "homework", "label": "Bài Tập Về Nhà", "color": "#10b981", "total": 0, "exact": 0, "near": 0, "deviated": 0, "errors": []},
+        "overall": {"id": "overall", "label": "Điểm Tổng Buổi", "color": "#f59e0b", "total": 0, "exact": 0, "near": 0, "deviated": 0, "errors": []},
+    }
+
+    total_exact_all = 0
+    total_near_all = 0
+    total_eval_all = 0
+    total_errors_all: List[float] = []
+
+    for sid, recs in students_records.items():
+        history_c1: List[float] = []
+        history_c2: List[float] = []
+        history_hw: List[float] = []
+        history_ov: List[float] = []
+
+        for r in recs:
+            status = r.get("status", "Có mặt")
+            if status in ("Vắng mặt", "Nghỉ học"):
+                continue
+
+            c1 = float(r["check_1"]) if r.get("check_1") is not None else None
+            c2 = float(r["check_2"]) if r.get("check_2") is not None else None
+            hw = float(r["homework"]) if r.get("homework") is not None else None
+
+            # Actual session overall score
+            weights = []
+            if c1 is not None:
+                weights.append((c1, 0.55))
+            if c2 is not None:
+                weights.append((c2, 0.35))
+            if hw is not None and hw > 0:
+                weights.append((hw, 0.10))
+            actual_ov = sum(s * w for s, w in weights) / sum(w for _, w in weights) if weights else None
+
+            pairs = [
+                ("check_1", history_c1, c1),
+                ("check_2", history_c2, c2),
+                ("homework", history_hw, hw),
+                ("overall", history_ov, actual_ov),
+            ]
+
+            for key, hist, actual in pairs:
+                if hist and actual is not None and (key != "homework" or actual > 0):
+                    _, pred = smart_predict(hist)
+                    err = abs(pred - actual)
+                    item = results[key]
+                    item["total"] += 1
+                    item["errors"].append(err)
+                    total_eval_all += 1
+                    total_errors_all.append(err)
+
+                    if err <= 0.5:
+                        item["exact"] += 1
+                        total_exact_all += 1
+                    if err <= 1.0:
+                        item["near"] += 1
+                        total_near_all += 1
+                    else:
+                        item["deviated"] += 1
+
+            if c1 is not None:
+                history_c1.append(c1)
+            if c2 is not None:
+                history_c2.append(c2)
+            if hw is not None and hw > 0:
+                history_hw.append(hw)
+            if actual_ov is not None:
+                history_ov.append(actual_ov)
+
+    items = []
+    for k in ["check_1", "check_2", "homework", "overall"]:
+        v = results[k]
+        tot = v["total"]
+        exact_rate = trunc_1_dec(v["exact"] / tot * 100) if tot else 0.0
+        near_rate = trunc_1_dec(v["near"] / tot * 100) if tot else 0.0
+        dev_count = v["deviated"]
+        dev_rate = trunc_1_dec(dev_count / tot * 100) if tot else 0.0
+        mae = trunc_1_dec(sum(v["errors"]) / tot) if tot else 0.0
+
+        items.append({
+            "id": v["id"],
+            "label": v["label"],
+            "color": v["color"],
+            "total_evaluated": tot,
+            "exact_count": v["exact"],
+            "exact_rate": exact_rate,
+            "near_count": v["near"],
+            "near_rate": near_rate,
+            "deviated_count": dev_count,
+            "deviated_rate": dev_rate,
+            "mae": mae,
+        })
+
+    summary = {
+        "total_evaluated": total_eval_all,
+        "exact_rate": trunc_1_dec(total_exact_all / total_eval_all * 100) if total_eval_all else 0.0,
+        "near_rate": trunc_1_dec(total_near_all / total_eval_all * 100) if total_eval_all else 0.0,
+        "mae": trunc_1_dec(sum(total_errors_all) / total_eval_all) if total_eval_all else 0.0,
+        "models": ["Bayes Shrinkage", "Decay Weighted", "Damped Holt"],
+    }
+
+    return {"summary": summary, "items": items}
+

@@ -23,6 +23,7 @@ interface HorizontalTimelineGridProps {
   openAdd: (dateStr?: string) => void;
   openEdit: (sess: ClassSession) => void;
   setCtxMenu?: (menu: { x: number; y: number; dateStr: string } | null) => void;
+  viewModeToggle?: React.ReactNode;
 }
 
 export const HorizontalTimelineGrid: React.FC<HorizontalTimelineGridProps> = ({
@@ -36,6 +37,7 @@ export const HorizontalTimelineGrid: React.FC<HorizontalTimelineGridProps> = ({
   openAdd,
   openEdit,
   setCtxMenu,
+  viewModeToggle,
 }) => {
   const { isDark } = useTheme();
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
@@ -132,14 +134,8 @@ export const HorizontalTimelineGrid: React.FC<HorizontalTimelineGridProps> = ({
 
   return (
     <div className="flex-1 min-h-0 flex flex-col select-none bg-slate-100 dark:bg-[#0c101d]">
-      {/* ── TIMELINE TOOLBAR (Week Nav + Zoom Controls +/-) ──────────────── */}
-      <div className="bg-slate-50 dark:bg-[#131a2c] border-b border-slate-200 dark:border-white/10 px-4 py-2 flex flex-wrap items-center justify-between gap-3 shrink-0">
-        {/* Left: Timeline title */}
-        <div className="text-xs font-black text-slate-700 dark:text-slate-300 flex items-center gap-2">
-          <span>{viewMode === 'week' ? 'LỊCH HỌC THEO TUẦN' : 'LỊCH HỌC THEO THÁNG'}</span>
-          <span className="text-[11px] text-slate-400 font-bold font-mono">({days.length} ngày)</span>
-        </div>
-
+      {/* ── TIMELINE TOOLBAR (Zoom Controls +/- & View Mode) ──────────────── */}
+      <div className="bg-slate-50 dark:bg-[#131a2c] border-b border-slate-200 dark:border-white/10 px-4 py-2 flex items-center justify-end gap-2.5 shrink-0">
         {/* Right: Zoom Controls (+ and -) */}
         <div className="flex items-center gap-2">
           <div className="flex items-center bg-white dark:bg-[#111728] border border-slate-200 dark:border-white/10 rounded-xl p-0.5 shadow-2xs">
@@ -147,7 +143,7 @@ export const HorizontalTimelineGrid: React.FC<HorizontalTimelineGridProps> = ({
               type="button"
               onClick={handleZoomOut}
               disabled={hourWidth <= 75}
-              className="p-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-100 dark:hover:bg-white/5 disabled:opacity-30 disabled:cursor-not-allowed transition cursor-pointer"
+              className="p-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-100 dark:hover:bg-white/5 disabled:opacity-30 disabled:cursor-not-allowed transition cursor-pointer border-0"
               title="Thu nhỏ tỉ lệ giờ (Phím -)"
             >
               <ZoomOut size={13} />
@@ -165,14 +161,18 @@ export const HorizontalTimelineGrid: React.FC<HorizontalTimelineGridProps> = ({
               type="button"
               onClick={handleZoomIn}
               disabled={hourWidth >= 280}
-              className="p-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-100 dark:hover:bg-white/5 disabled:opacity-30 disabled:cursor-not-allowed transition cursor-pointer"
+              className="p-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-100 dark:hover:bg-white/5 disabled:opacity-30 disabled:cursor-not-allowed transition cursor-pointer border-0"
               title="Phóng to tỉ lệ giờ (Phím +)"
             >
               <ZoomIn size={13} />
             </button>
           </div>
         </div>
+
+        {/* View mode toggle on same line as zoom */}
+        {viewModeToggle}
       </div>
+
 
       {/* ── TIMELINE CANVAS (2D Drag Pan Viewport) ───────────────────────── */}
       <div

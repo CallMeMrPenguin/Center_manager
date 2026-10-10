@@ -41,6 +41,18 @@ export default function SchedulePage() {
     changeWeek,
   } = useScheduleCalendar();
   const [scheduleScope, setScheduleScope] = useState<'all' | 'week'>('all');
+  const [selectedWeekStarts, setSelectedWeekStarts] = useState<string[]>(() => [
+    getLocalDateStr(weekStart),
+  ]);
+
+  useEffect(() => {
+    const wsStr = getLocalDateStr(weekStart);
+    setSelectedWeekStarts((prev) => {
+      if (prev.length <= 1) return [wsStr];
+      return prev;
+    });
+  }, [weekStart]);
+
   const cachedClasses = dataCache.get<any[]>('/api/classes?search=')?.data;
   const [classesList, setClassesList] = useState<any[]>(() => cachedClasses || []);
   const [classFilter, setClassFilter] = useState('');
@@ -71,9 +83,16 @@ export default function SchedulePage() {
     if (!isSilent) setLoading(true);
     try {
       const targetClassId = classFilter ? Number(classFilter) : 0;
-      const m1 = weekDays[0]?.dateStr?.slice(0, 7) || selectedMonth;
-      const m2 = weekDays[6]?.dateStr?.slice(0, 7) || selectedMonth;
-      const monthsToFetch = Array.from(new Set([m1, m2, selectedMonth]));
+      const allMonths = new Set<string>();
+      allMonths.add(selectedMonth);
+      selectedWeekStarts.forEach((sStr) => {
+        allMonths.add(sStr.slice(0, 7));
+        const parts = sStr.split('-').map(Number);
+        const endD = new Date(parts[0], parts[1] - 1, parts[2] + 6);
+        allMonths.add(getLocalDateStr(endD).slice(0, 7));
+      });
+      const monthsToFetch = Array.from(allMonths);
+
 
       const [cls, ...sessionArrays] = await Promise.all([
         api.getClasses().catch(() => []),
@@ -120,7 +139,8 @@ export default function SchedulePage() {
     const h = () => loadData(true);
     window.addEventListener('data-changed', h);
     return () => window.removeEventListener('data-changed', h);
-  }, [selectedMonth, classFilter, weekDays[0]?.dateStr]);
+  }, [selectedMonth, classFilter, weekDays[0]?.dateStr, selectedWeekStarts.join(',')]);
+
 
 
   const applyClassSchedule = async (cid: number, targetDateStr?: string) => {
@@ -263,6 +283,8 @@ export default function SchedulePage() {
               weekStart={weekStart}
               onSelectWeekStart={setWeekStart}
               today={today}
+              selectedWeekStarts={selectedWeekStarts}
+              onSelectWeekStarts={setSelectedWeekStarts}
             />
 
             <CustomSelect
@@ -274,17 +296,6 @@ export default function SchedulePage() {
               ]}
               className="w-36 sm:w-44"
             />
-          </div>
-
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => handleChangeViewMode(viewMode === 'week' ? 'list' : 'week')}
-              className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 text-slate-700 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition cursor-pointer shadow-xs border-0"
-              title={viewMode === 'week' ? 'Chuyển sang chế độ danh sách' : 'Chuyển sang chế độ lịch tuần'}
-            >
-              {viewMode === 'week' ? <List size={16} /> : <Calendar size={16} />}
-            </button>
           </div>
         </div>
 
@@ -302,28 +313,54 @@ export default function SchedulePage() {
             today={today}
             sessions={sessions}
             weekDays={weekDays}
+            selectedWeekStarts={selectedWeekStarts}
             changeWeek={changeWeek}
             setWeekStartToday={setWeekStartToday}
             openAdd={openAdd}
             openEdit={openEdit}
+            viewModeToggle={
+              <button
+                type="button"
+                onClick={() => handleChangeViewMode('list')}
+                className="p-1 px-2.5 rounded-xl bg-white dark:bg-[#111728] hover:bg-slate-100 dark:hover:bg-white/10 text-slate-700 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition cursor-pointer shadow-2xs border border-slate-200 dark:border-white/10 flex items-center gap-1.5 text-xs font-bold"
+                title="Chuyển sang chế độ danh sách"
+              >
+                <List size={13} />
+                <span>Danh sách</span>
+              </button>
+            }
           />
         )}
 
         {/* LIST VIEW */}
         {viewMode === 'list' && (
-          <div className="p-4 flex-1 min-h-0 overflow-auto flex flex-col">
-            <DataTable
-              tableId="schedule-table"
-              exportFilename="lich_hoc"
-              data={sessions}
-              columns={sessionColumns}
-              loading={loading}
-              loadingMessage="Đang tải lịch học..."
-              emptyMessage="Không có buổi học nào."
-              pageSize={20}
-            />
+          <div className="flex flex-col flex-1 min-h-0">
+            <div className="bg-slate-50 dark:bg-[#131a2c] border-b border-slate-200 dark:border-white/10 px-4 py-2 flex items-center justify-end gap-2.5 shrink-0">
+              <button
+                type="button"
+                onClick={() => handleChangeViewMode('week')}
+                className="p-1 px-2.5 rounded-xl bg-white dark:bg-[#111728] hover:bg-slate-100 dark:hover:bg-white/10 text-slate-700 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition cursor-pointer shadow-2xs border border-slate-200 dark:border-white/10 flex items-center gap-1.5 text-xs font-bold"
+                title="Chuyển sang chế độ thời gian"
+              >
+                <Calendar size={13} />
+                <span>Lịch tuần</span>
+              </button>
+            </div>
+            <div className="p-4 flex-1 min-h-0 overflow-auto flex flex-col">
+              <DataTable
+                tableId="schedule-table"
+                exportFilename="lich_hoc"
+                data={sessions}
+                columns={sessionColumns}
+                loading={loading}
+                loadingMessage="Đang tải lịch học..."
+                emptyMessage="Không có buổi học nào."
+                pageSize={20}
+              />
+            </div>
           </div>
         )}
+
       </div>
 
       {/* MODAL */}

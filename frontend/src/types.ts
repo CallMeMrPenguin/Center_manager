@@ -127,3 +127,31 @@ export interface TeacherCM {
   account_role?: string;
   account_last_login?: string;
 }
+
+export interface PredictionAccuracyItem {
+  id: string;
+  label: string;
+  color: string;
+  total_evaluated: number;
+  exact_count: number;
+  exact_rate: number;
+  near_count: number;
+  near_rate: number;
+  deviated_count: number;
+  deviated_rate: number;
+  mae: number;
+}
+
+export interface PredictionAccuracySummary {
+  total_evaluated: number;
+  exact_rate: number;
+  near_rate: number;
+  mae: number;
+  models: string[];
+}
+
+export interface PredictionAccuracyResponse {
+  summary: PredictionAccuracySummary;
+  items: PredictionAccuracyItem[];
+}
+

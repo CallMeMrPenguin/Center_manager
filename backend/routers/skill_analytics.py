@@ -167,3 +167,11 @@ def api_get_unit_suggestions(grade: Optional[str] = None):
         "unit_name_map": unit_name_map,
         "grammar_topics": grammar_topics
     }
+
+
+@router.get("/api/settings/prediction-accuracy")
+def api_get_prediction_accuracy():
+    """Returns backtested prediction accuracy stats for each score type."""
+    from database.analytics_predictions import get_prediction_accuracy_stats
+    return get_prediction_accuracy_stats()
+

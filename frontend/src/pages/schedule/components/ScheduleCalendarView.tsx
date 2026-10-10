@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { ClassSession } from '../types';
 import { HorizontalTimelineGrid } from './HorizontalTimelineGrid';
+import { getLocalDateStr } from '../../../utils';
 
 interface ScheduleCalendarViewProps {
   scope?: 'all' | 'week';
@@ -14,12 +15,14 @@ interface ScheduleCalendarViewProps {
   today: string;
   sessions: ClassSession[];
   weekDays: Array<{ header: string; dateStr: string; dayNum: number }>;
+  selectedWeekStarts?: string[];
   changeWeek: (dir: number) => void;
   setWeekStart?: (d: Date) => void;
   setWeekStartToday?: () => void;
   openAdd: (dateStr?: string) => void;
   openEdit: (sess: ClassSession) => void;
   setCtxMenu?: (menu: { x: number; y: number; dateStr: string } | null) => void;
+  viewModeToggle?: React.ReactNode;
 }
 
 export const ScheduleCalendarView: React.FC<ScheduleCalendarViewProps> = ({
@@ -30,14 +33,47 @@ export const ScheduleCalendarView: React.FC<ScheduleCalendarViewProps> = ({
   today,
   sessions,
   weekDays,
+  selectedWeekStarts,
   changeWeek,
   setWeekStartToday,
   openAdd,
   openEdit,
   setCtxMenu,
+  viewModeToggle,
 }) => {
-  // 1. Week view row items (7 days)
+  // 1. Week view row items (Supports 1 or multiple weeks)
   const weekDayRows = useMemo(() => {
+    if (selectedWeekStarts && selectedWeekStarts.length > 0) {
+      const sortedStarts = [...selectedWeekStarts].sort();
+      const allDays: Array<{
+        header: string;
+        dateStr: string;
+        subText: string;
+        isToday: boolean;
+        isWeekend: boolean;
+      }> = [];
+
+      sortedStarts.forEach((sStr) => {
+        const parts = sStr.split('-').map(Number);
+        const mon = new Date(parts[0], parts[1] - 1, parts[2]);
+        for (let i = 0; i < 7; i++) {
+          const d = new Date(mon);
+          d.setDate(mon.getDate() + i);
+          const dStr = getLocalDateStr(d);
+          const dayOfWeek = d.getDay();
+          const dayName = dayOfWeek === 0 ? 'Chủ Nhật' : `Thứ ${dayOfWeek + 1}`;
+          allDays.push({
+            header: dayName,
+            dateStr: dStr,
+            subText: `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`,
+            isToday: dStr === today,
+            isWeekend: dayOfWeek === 0 || dayOfWeek === 6,
+          });
+        }
+      });
+      return allDays;
+    }
+
     return weekDays.map((wd, idx) => ({
       header: wd.header,
       dateStr: wd.dateStr,
@@ -45,7 +81,7 @@ export const ScheduleCalendarView: React.FC<ScheduleCalendarViewProps> = ({
       isToday: wd.dateStr === today,
       isWeekend: idx >= 5,
     }));
-  }, [weekDays, today]);
+  }, [selectedWeekStarts, weekDays, today]);
 
   // 2. Month view row items (All days in month: 1 to daysInMonth)
   const monthDayRows = useMemo(() => {
@@ -70,7 +106,7 @@ export const ScheduleCalendarView: React.FC<ScheduleCalendarViewProps> = ({
 
   const daysToRender = scope === 'all' ? monthDayRows : weekDayRows;
   const viewModeToRender = scope === 'all' ? 'month' : 'week';
-  const weekRangeText = weekDays.length >= 7 ? `${weekDays[0].dateStr} - ${weekDays[6].dateStr}` : '';
+  const weekRangeText = daysToRender.length > 0 ? `${daysToRender[0].dateStr} - ${daysToRender[daysToRender.length - 1].dateStr}` : '';
 
   return (
     <HorizontalTimelineGrid
@@ -84,6 +120,7 @@ export const ScheduleCalendarView: React.FC<ScheduleCalendarViewProps> = ({
       openAdd={openAdd}
       openEdit={openEdit}
       setCtxMenu={setCtxMenu}
+      viewModeToggle={viewModeToggle}
     />
   );
 };

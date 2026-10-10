@@ -10,6 +10,7 @@ import { SystemUpdateCard } from './components/SystemUpdateCard';
 import { ProfilesListCard } from './components/ProfilesListCard';
 import { DebugSettingsCard } from './components/DebugSettingsCard';
 import { SystemSyncSettingsCard } from './components/SystemSyncSettingsCard';
+import { PredictionAccuracyCard } from './components/PredictionAccuracyCard';
 
 export default function Settings() {
   const confirm = useConfirm();
@@ -201,7 +202,9 @@ export default function Settings() {
             setGradeTypes={setGradeTypes}
             onSave={handleSaveGradeTypes}
           />
+          <PredictionAccuracyCard />
         </div>
+
 
         {/* Right Column: Profiles CRUD List */}
         <ProfilesListCard profiles={profiles} onDeleteProfile={handleDeleteProfile} />

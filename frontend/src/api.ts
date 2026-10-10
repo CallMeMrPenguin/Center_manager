@@ -1,4 +1,4 @@
-import { AppFile, AppSettings, LayoutSettings, SystemCheck } from './types';
+import { AppFile, AppSettings, LayoutSettings, SystemCheck, PredictionAccuracyResponse } from './types';
 import { request, API_BASE, invalidateCache } from './api/client';
 
 export { API_BASE, invalidateCache };
@@ -120,7 +120,9 @@ export const api = {
   getSettings: () => request<AppSettings>('/api/settings', { tags: ['settings'] }),
   saveSettings: (settings: Partial<AppSettings>) =>
     request<any>('/api/settings', { method: 'POST', body: JSON.stringify(settings), tags: ['settings'] }),
+  getPredictionAccuracy: () => request<PredictionAccuracyResponse>('/api/settings/prediction-accuracy', { tags: ['settings'] }),
   selectDirectory: () =>
+
     request<{ success: boolean; directory: string | null }>('/api/system/select-directory', { method: 'POST' }),
 
   getPrompts: (storageKey: string) => request<any[]>(`/api/prompts/${encodeURIComponent(storageKey)}`),

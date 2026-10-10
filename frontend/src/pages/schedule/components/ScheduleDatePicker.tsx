@@ -1,6 +1,14 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
-import { Calendar, ChevronLeft, ChevronRight, ChevronDown, RotateCcw } from 'lucide-react';
+import { Calendar, ChevronLeft, ChevronRight, ChevronDown, RotateCcw, Check } from 'lucide-react';
 import { getLocalDateStr } from '../../../utils';
+import {
+  WeekInfo,
+  computeMonthWeeks,
+  computeTriggerLabel,
+} from './scheduleDatePickerHelper';
+import { ScheduleDatePickerDayCell } from './ScheduleDatePickerDayCell';
+
+export type { WeekInfo };
 
 interface ScheduleDatePickerProps {
   selectedMonth: string; // 'YYYY-MM'
@@ -10,22 +18,8 @@ interface ScheduleDatePickerProps {
   weekStart: Date;
   onSelectWeekStart: (newMonday: Date) => void;
   today: string; // 'YYYY-MM-DD'
-}
-
-interface WeekInfo {
-  index: number;
-  start: Date;
-  end: Date;
-  startStr: string;
-  endStr: string;
-  rangeLabel: string;
-  days: Array<{
-    date: Date;
-    dateStr: string;
-    dayNum: number;
-    isCurrentMonth: boolean;
-    isToday: boolean;
-  }>;
+  selectedWeekStarts?: string[];
+  onSelectWeekStarts?: (starts: string[]) => void;
 }
 
 export const ScheduleDatePicker: React.FC<ScheduleDatePickerProps> = ({
@@ -36,17 +30,19 @@ export const ScheduleDatePicker: React.FC<ScheduleDatePickerProps> = ({
   weekStart,
   onSelectWeekStart,
   today,
+  selectedWeekStarts,
+  onSelectWeekStarts,
 }) => {
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Parse Year and Month
   const [yr, mo] = useMemo(() => {
     const parts = (selectedMonth || getLocalDateStr().slice(0, 7)).split('-').map(Number);
     return [parts[0] || 2026, parts[1] || 10];
   }, [selectedMonth]);
 
-  // Click outside to close
+  const daysInMonth = useMemo(() => new Date(yr, mo, 0).getDate(), [yr, mo]);
+
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
@@ -59,123 +55,91 @@ export const ScheduleDatePicker: React.FC<ScheduleDatePickerProps> = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [open]);
 
-  // Compute weeks of current month
   const weeks = useMemo<WeekInfo[]>(() => {
-    const firstDay = new Date(yr, mo - 1, 1);
-    const dayOfWeek = firstDay.getDay();
-    const monOffset = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
-    const firstMon = new Date(yr, mo - 1, 1 - monOffset);
-
-    const result: WeekInfo[] = [];
-    let curMon = new Date(firstMon);
-    let idx = 1;
-
-    while (true) {
-      const weekEnd = new Date(curMon);
-      weekEnd.setDate(curMon.getDate() + 6);
-
-      const days = [];
-      for (let i = 0; i < 7; i++) {
-        const d = new Date(curMon);
-        d.setDate(curMon.getDate() + i);
-        const dStr = getLocalDateStr(d);
-        days.push({
-          date: d,
-          dateStr: dStr,
-          dayNum: d.getDate(),
-          isCurrentMonth: d.getFullYear() === yr && d.getMonth() === mo - 1,
-          isToday: dStr === today,
-        });
-      }
-
-      const sNum = curMon.getDate();
-      const sMo = curMon.getMonth() + 1;
-      const eNum = weekEnd.getDate();
-      const eMo = weekEnd.getMonth() + 1;
-      const rangeLabel = `${String(sNum).padStart(2, '0')}/${String(sMo).padStart(2, '0')} - ${String(eNum).padStart(2, '0')}/${String(eMo).padStart(2, '0')}`;
-
-      result.push({
-        index: idx,
-        start: new Date(curMon),
-        end: weekEnd,
-        startStr: getLocalDateStr(curMon),
-        endStr: getLocalDateStr(weekEnd),
-        rangeLabel,
-        days,
-      });
-
-      // Advance 7 days
-      curMon.setDate(curMon.getDate() + 7);
-      idx++;
-
-      // If next Monday is already in next month/year, stop
-      if (
-        curMon.getFullYear() > yr ||
-        (curMon.getFullYear() === yr && curMon.getMonth() > mo - 1)
-      ) {
-        break;
-      }
-      if (idx > 6) break;
-    }
-
-    return result;
+    return computeMonthWeeks(yr, mo, today);
   }, [yr, mo, today]);
 
-  // Active week matching weekStart
-  const weekStartStr = getLocalDateStr(weekStart);
-  const activeWeek = useMemo(() => {
-    return weeks.find((w) => w.startStr === weekStartStr) || weeks[0];
-  }, [weeks, weekStartStr]);
+  const currentWeekStartStr = getLocalDateStr(weekStart);
+  const activeStarts = useMemo(() => {
+    if (selectedWeekStarts && selectedWeekStarts.length > 0) {
+      return selectedWeekStarts;
+    }
+    return [currentWeekStartStr];
+  }, [selectedWeekStarts, currentWeekStartStr]);
 
-  // Navigate month in popover
+  const selectedWeeksList = useMemo(() => {
+    return weeks.filter((w) => activeStarts.includes(w.startStr)).sort((a, b) => a.index - b.index);
+  }, [weeks, activeStarts]);
+
+  const isConsecutiveWeeks = useMemo(() => {
+    if (selectedWeeksList.length <= 1) return true;
+    return selectedWeeksList.every((w, idx) => idx === 0 || w.index === selectedWeeksList[idx - 1].index + 1);
+  }, [selectedWeeksList]);
+
+  const minSelectedStartStr = selectedWeeksList[0]?.startStr || '';
+  const maxSelectedEndStr = selectedWeeksList[selectedWeeksList.length - 1]?.endStr || '';
+
   const changeMonth = (delta: number) => {
     const nextMoDate = new Date(yr, mo - 1 + delta, 1);
     const newMoStr = `${nextMoDate.getFullYear()}-${String(nextMoDate.getMonth() + 1).padStart(2, '0')}`;
     onSelectMonth(newMoStr);
   };
 
-  // Jump to today
   const handleJumpToday = () => {
     const now = new Date();
     const d = now.getDay();
     const mon = new Date(now);
     mon.setDate(now.getDate() - (d === 0 ? 6 : d - 1));
     const nowMoStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    const monStr = getLocalDateStr(mon);
     onSelectMonth(nowMoStr);
     onSelectWeekStart(mon);
+    onSelectWeekStarts?.([monStr]);
     onSelectScope('week');
     setOpen(false);
   };
 
-  // Reset to current month (Cả tháng)
   const handleReset = () => {
     const nowMoStr = today.slice(0, 7);
     onSelectMonth(nowMoStr);
     onSelectScope('all');
+    if (weeks[0]) onSelectWeekStarts?.([weeks[0].startStr]);
     setOpen(false);
   };
 
-  // Select week
-  const handleSelectWeek = (w: WeekInfo) => {
+  const handleSelectSingleWeek = (w: WeekInfo) => {
     onSelectWeekStart(w.start);
+    onSelectWeekStarts?.([w.startStr]);
     onSelectScope('week');
     setOpen(false);
   };
 
-  // Trigger button label
+  const handleToggleWeek = (w: WeekInfo, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    let updated: string[];
+    if (scope !== 'week') {
+      updated = [w.startStr];
+    } else if (activeStarts.includes(w.startStr)) {
+      if (activeStarts.length > 1) {
+        updated = activeStarts.filter((s) => s !== w.startStr);
+      } else {
+        updated = activeStarts;
+      }
+    } else {
+      updated = [...activeStarts, w.startStr].sort();
+    }
+    onSelectScope('week');
+    onSelectWeekStarts?.(updated);
+    const firstWeek = weeks.find((wk) => wk.startStr === updated[0]);
+    if (firstWeek) onSelectWeekStart(firstWeek.start);
+  };
+
   const triggerLabel = useMemo(() => {
-    if (scope === 'all') {
-      return `Tháng ${mo}/${yr}`;
-    }
-    if (activeWeek) {
-      return `Tuần ${activeWeek.index} (${activeWeek.rangeLabel})`;
-    }
-    return `Tháng ${mo}/${yr}`;
-  }, [scope, mo, yr, activeWeek]);
+    return computeTriggerLabel(scope, mo, yr, selectedWeeksList, isConsecutiveWeeks);
+  }, [scope, mo, yr, selectedWeeksList, isConsecutiveWeeks]);
 
   return (
     <div className="relative inline-block" ref={containerRef}>
-      {/* Trigger Button */}
       <button
         type="button"
         onClick={() => setOpen((prev) => !prev)}
@@ -187,12 +151,10 @@ export const ScheduleDatePicker: React.FC<ScheduleDatePickerProps> = ({
         <ChevronDown size={13} className={`text-slate-400 transition-transform duration-200 ${open ? 'rotate-180' : ''}`} />
       </button>
 
-      {/* Popover Card: Calendar on Left, Tabs on Right */}
       {open && (
         <div className="absolute left-0 sm:left-auto top-full mt-2 z-50 bg-white dark:bg-[#151c2e] border border-slate-200 dark:border-white/10 rounded-2xl shadow-[0_16px_48px_rgba(15,23,42,0.2)] dark:shadow-[0_24px_64px_rgba(0,0,0,0.95)] overflow-hidden flex flex-col sm:flex-row select-none animate-mac-dropdown">
-          {/* ── LEFT COLUMN: Interactive Month Calendar Grid (Phần lịch tổng) ── */}
+          {/* Left Column: Interactive Month Calendar Grid */}
           <div className="p-3.5 w-72 sm:w-80 flex flex-col shrink-0">
-            {/* Header: Tháng M YYYY + Prev / Next */}
             <div className="flex items-center justify-between mb-2.5 px-1">
               <span className="font-extrabold text-sm text-slate-900 dark:text-white">
                 Tháng {mo} {yr}
@@ -217,7 +179,6 @@ export const ScheduleDatePicker: React.FC<ScheduleDatePickerProps> = ({
               </div>
             </div>
 
-            {/* Weekdays row: T2 T3 T4 T5 T6 T7 CN */}
             <div className="grid grid-cols-7 text-center text-[11px] font-bold text-slate-400 dark:text-slate-500 mb-1.5">
               <span>T2</span>
               <span>T3</span>
@@ -231,69 +192,33 @@ export const ScheduleDatePicker: React.FC<ScheduleDatePickerProps> = ({
             {/* Week rows */}
             <div className="space-y-1">
               {weeks.map((w) => {
-                const isWeekSelected = scope === 'week' && w.startStr === weekStartStr;
+                const isWeekRowSelected = scope === 'week' && activeStarts.includes(w.startStr);
+
                 return (
                   <div
                     key={w.index}
-                    onClick={() => handleSelectWeek(w)}
+                    onClick={() => handleToggleWeek(w)}
                     className="grid grid-cols-7 relative cursor-pointer group rounded-full transition-colors"
                   >
-                    {w.days.map((d, dIdx) => {
-                      const isFirst = dIdx === 0;
-                      const isLast = dIdx === 6;
-
-                      // Full Month Highlight (scope === 'all')
-                      if (scope === 'all') {
-                        const bgCls = d.isCurrentMonth
-                          ? 'bg-blue-50/70 dark:bg-blue-950/25 text-blue-700 dark:text-blue-300 font-semibold'
-                          : 'text-slate-300 dark:text-slate-600';
-                        const roundCls = isFirst ? 'rounded-l-full' : isLast ? 'rounded-r-full' : '';
-                        return (
-                          <div key={d.dateStr} className={`relative flex flex-col items-center justify-center h-8 text-xs ${bgCls} ${roundCls}`}>
-                            <span className="leading-none">{d.dayNum}</span>
-                            {d.isToday && <span className="w-1 h-1 rounded-full mt-0.5 bg-rose-500" />}
-                          </div>
-                        );
-                      }
-
-                      // Single Week Highlight (Image 3 Ribbon Standard)
-                      if (isWeekSelected) {
-                        return (
-                          <div key={d.dateStr} className="relative flex items-center justify-center h-8">
-                            {isFirst && <div className="absolute right-0 top-0 bottom-0 w-1/2 bg-blue-100 dark:bg-blue-900/40" />}
-                            {isLast && <div className="absolute left-0 top-0 bottom-0 w-1/2 bg-blue-100 dark:bg-blue-900/40" />}
-                            {!isFirst && !isLast && <div className="absolute inset-0 bg-blue-100 dark:bg-blue-900/40" />}
-                            {isFirst || isLast ? (
-                              <div className="relative z-10 w-7 h-7 rounded-full bg-blue-600 text-white font-black flex flex-col items-center justify-center shadow-xs text-xs">
-                                <span className="leading-none">{d.dayNum}</span>
-                                {d.isToday && <span className="w-1 h-1 rounded-full bg-white mt-0.5" />}
-                              </div>
-                            ) : (
-                              <div className="relative z-10 text-xs font-bold text-blue-900 dark:text-blue-100 flex flex-col items-center">
-                                <span className="leading-none">{d.dayNum}</span>
-                                {d.isToday && <span className="w-1 h-1 rounded-full bg-rose-500 mt-0.5" />}
-                              </div>
-                            )}
-                          </div>
-                        );
-                      }
-
-                      // Default Inactive week row (with subtle hover)
-                      const textCls = d.isCurrentMonth ? 'text-slate-700 dark:text-slate-200 font-semibold' : 'text-slate-300 dark:text-slate-600';
-                      const cornerCls = isFirst ? 'rounded-l-full' : isLast ? 'rounded-r-full' : '';
-                      return (
-                        <div key={d.dateStr} className={`relative flex flex-col items-center justify-center h-8 text-xs group-hover:bg-slate-100 dark:group-hover:bg-white/5 ${textCls} ${cornerCls}`}>
-                          <span className="leading-none">{d.dayNum}</span>
-                          {d.isToday && <span className="w-1 h-1 rounded-full mt-0.5 bg-rose-500" />}
-                        </div>
-                      );
-                    })}
+                    {w.days.map((d, dIdx) => (
+                      <ScheduleDatePickerDayCell
+                        key={d.dateStr}
+                        day={d}
+                        dayIndex={dIdx}
+                        scope={scope}
+                        daysInMonth={daysInMonth}
+                        isConsecutiveWeeks={isConsecutiveWeeks}
+                        selectedWeeksList={selectedWeeksList}
+                        isWeekRowSelected={isWeekRowSelected}
+                        minSelectedStartStr={minSelectedStartStr}
+                        maxSelectedEndStr={maxSelectedEndStr}
+                      />
+                    ))}
                   </div>
                 );
               })}
             </div>
 
-            {/* Bottom Actions: 2 góc cuối phần lịch tổng (Đặt lại góc trái, Hôm nay góc phải) */}
             <div className="mt-3 pt-2.5 border-t border-slate-100 dark:border-white/5 flex items-center justify-between">
               <button
                 type="button"
@@ -313,14 +238,20 @@ export const ScheduleDatePicker: React.FC<ScheduleDatePickerProps> = ({
             </div>
           </div>
 
-          {/* ── RIGHT COLUMN: Preset Tabs Panel (Tất cả + Tuần 1-5) ── */}
-          <div className="w-full sm:w-44 border-t sm:border-t-0 sm:border-l border-slate-200 dark:border-white/10 p-2.5 space-y-1 bg-slate-50/70 dark:bg-[#0f1424] shrink-0 flex flex-col">
+          {/* Right Column: Preset Tabs Panel with Multi-Week Select */}
+          <div className="w-full sm:w-48 border-t sm:border-t-0 sm:border-l border-slate-200 dark:border-white/10 p-2.5 space-y-1 bg-slate-50/70 dark:bg-[#0f1424] shrink-0 flex flex-col justify-between">
             <div className="space-y-1">
-              <div className="text-[10px] font-black tracking-wider text-slate-400 uppercase px-2 py-1">
-                Khoảng thời gian
+              <div className="flex items-center justify-between px-2 py-1">
+                <span className="text-[10px] font-black tracking-wider text-slate-400 uppercase">
+                  Khoảng thời gian
+                </span>
+                {scope === 'week' && activeStarts.length > 1 && (
+                  <span className="text-[10px] font-bold text-blue-500">
+                    {activeStarts.length} tuần
+                  </span>
+                )}
               </div>
 
-              {/* Option: Tất cả - MẶC ĐỊNH */}
               <button
                 type="button"
                 onClick={() => {
@@ -339,30 +270,57 @@ export const ScheduleDatePicker: React.FC<ScheduleDatePickerProps> = ({
 
               <div className="my-1 border-t border-slate-200 dark:border-white/10" />
 
-              {/* Week items */}
               {weeks.map((w) => {
-                const isSelected = scope === 'week' && w.startStr === weekStartStr;
+                const isSelected = scope === 'week' && activeStarts.includes(w.startStr);
+
                 return (
-                  <button
+                  <div
                     key={w.index}
-                    type="button"
-                    onClick={() => handleSelectWeek(w)}
-                    className={`w-full text-left px-2.5 py-1.5 rounded-xl text-xs transition flex flex-col gap-0.5 cursor-pointer border-0 ${
+                    className={`w-full px-2 py-1.5 rounded-xl text-xs transition flex items-center gap-2 cursor-pointer ${
                       isSelected
-                        ? 'bg-blue-600 text-white font-extrabold shadow-xs'
-                        : 'text-slate-700 dark:text-slate-300 hover:bg-slate-200/70 dark:hover:bg-white/10 font-bold'
+                        ? 'bg-blue-500/15 text-blue-700 dark:text-blue-300 font-bold border border-blue-500/30'
+                        : 'text-slate-700 dark:text-slate-300 hover:bg-slate-200/70 dark:hover:bg-white/10'
                     }`}
                   >
-                    <div className="flex items-center justify-between w-full">
+                    <button
+                      type="button"
+                      onClick={(e) => handleToggleWeek(w, e)}
+                      className={`w-4 h-4 rounded flex items-center justify-center shrink-0 transition-colors border cursor-pointer ${
+                        isSelected
+                          ? 'bg-blue-600 border-blue-600 text-white'
+                          : 'border-slate-300 dark:border-white/20 hover:border-blue-400 bg-white dark:bg-[#111728]'
+                      }`}
+                      title="Chọn thêm hoặc bỏ bớt tuần này"
+                    >
+                      {isSelected && <Check size={11} strokeWidth={3} />}
+                    </button>
+
+                    <div
+                      onClick={() => handleSelectSingleWeek(w)}
+                      className="flex-1 min-w-0 flex items-center justify-between"
+                      title={`Xem riêng Tuần ${w.index}`}
+                    >
                       <span>Tuần {w.index}</span>
-                      <span className={`text-[10px] font-mono ${isSelected ? 'text-blue-100' : 'text-slate-400 dark:text-slate-500'}`}>
+                      <span className={`text-[10px] font-mono ${isSelected ? 'text-blue-600 dark:text-blue-400' : 'text-slate-400 dark:text-slate-500'}`}>
                         {w.rangeLabel}
                       </span>
                     </div>
-                  </button>
+                  </div>
                 );
               })}
             </div>
+
+            {scope === 'week' && (
+              <div className="pt-2 border-t border-slate-200 dark:border-white/10">
+                <button
+                  type="button"
+                  onClick={() => setOpen(false)}
+                  className="w-full py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition cursor-pointer border-0"
+                >
+                  Áp dụng
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}
