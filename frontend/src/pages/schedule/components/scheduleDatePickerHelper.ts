@@ -18,6 +18,11 @@ export interface WeekInfo {
   days: WeekDayItem[];
 }
 
+export interface DateRangeSegment {
+  startStr: string;
+  endStr: string;
+}
+
 export function computeMonthWeeks(yr: number, mo: number, today: string): WeekInfo[] {
   const firstDay = new Date(yr, mo - 1, 1);
   const dayOfWeek = firstDay.getDay();
@@ -72,6 +77,50 @@ export function computeMonthWeeks(yr: number, mo: number, today: string): WeekIn
   }
 
   return result;
+}
+
+/**
+ * Groups multiple selected weeks into contiguous island segments.
+ * For example: Week 1 + Week 3, 4, 5 => [Segment 1: Week 1], [Segment 2: Weeks 3-5].
+ */
+export function computeSegmentsFromWeeks(selectedWeeks: WeekInfo[]): DateRangeSegment[] {
+  if (selectedWeeks.length === 0) return [];
+  const sorted = [...selectedWeeks].sort((a, b) => a.startStr.localeCompare(b.startStr));
+  const segments: DateRangeSegment[] = [];
+  let currentSegment: DateRangeSegment = {
+    startStr: sorted[0].startStr,
+    endStr: sorted[0].endStr,
+  };
+
+  for (let i = 1; i < sorted.length; i++) {
+    const nextWk = sorted[i];
+    const prevEndDate = new Date(currentSegment.endStr);
+    prevEndDate.setDate(prevEndDate.getDate() + 1);
+    const expectedNextStart = getLocalDateStr(prevEndDate);
+
+    if (nextWk.startStr === expectedNextStart) {
+      currentSegment.endStr = nextWk.endStr;
+    } else {
+      segments.push(currentSegment);
+      currentSegment = {
+        startStr: nextWk.startStr,
+        endStr: nextWk.endStr,
+      };
+    }
+  }
+  segments.push(currentSegment);
+  return segments;
+}
+
+/**
+ * Finds all week starts intersecting a custom range [startStr, endStr].
+ */
+export function findWeeksIntersectingRange(weeks: WeekInfo[], startStr: string, endStr: string): string[] {
+  const minStr = startStr <= endStr ? startStr : endStr;
+  const maxStr = startStr <= endStr ? endStr : startStr;
+  return weeks
+    .filter((w) => w.startStr <= maxStr && w.endStr >= minStr)
+    .map((w) => w.startStr);
 }
 
 export function computeTriggerLabel(

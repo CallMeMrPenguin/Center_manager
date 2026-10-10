@@ -5,6 +5,9 @@ import {
   WeekInfo,
   computeMonthWeeks,
   computeTriggerLabel,
+  computeSegmentsFromWeeks,
+  findWeeksIntersectingRange,
+  DateRangeSegment,
 } from './scheduleDatePickerHelper';
 import { ScheduleDatePickerDayCell } from './ScheduleDatePickerDayCell';
 
@@ -36,6 +39,10 @@ export const ScheduleDatePicker: React.FC<ScheduleDatePickerProps> = ({
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
+  // Range picking states for standard range datepicker interaction
+  const [pickingStart, setPickingStart] = useState<string | null>(null);
+  const [hoverDate, setHoverDate] = useState<string | null>(null);
+
   const [yr, mo] = useMemo(() => {
     const parts = (selectedMonth || getLocalDateStr().slice(0, 7)).split('-').map(Number);
     return [parts[0] || 2026, parts[1] || 10];
@@ -47,6 +54,8 @@ export const ScheduleDatePicker: React.FC<ScheduleDatePickerProps> = ({
     const handleClickOutside = (e: MouseEvent) => {
       if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
         setOpen(false);
+        setPickingStart(null);
+        setHoverDate(null);
       }
     };
     if (open) {
@@ -76,16 +85,64 @@ export const ScheduleDatePicker: React.FC<ScheduleDatePickerProps> = ({
     return selectedWeeksList.every((w, idx) => idx === 0 || w.index === selectedWeeksList[idx - 1].index + 1);
   }, [selectedWeeksList]);
 
-  const minSelectedStartStr = selectedWeeksList[0]?.startStr || '';
-  const maxSelectedEndStr = selectedWeeksList[selectedWeeksList.length - 1]?.endStr || '';
+  // Contiguous island segments (each island has its own start & end endpoints)
+  const segments = useMemo<DateRangeSegment[]>(() => {
+    // If user is currently dragging/picking a range on the calendar
+    if (pickingStart && hoverDate) {
+      const sMin = pickingStart <= hoverDate ? pickingStart : hoverDate;
+      const sMax = pickingStart <= hoverDate ? hoverDate : pickingStart;
+      return [{ startStr: sMin, endStr: sMax }];
+    }
+
+    // Whole month
+    if (scope === 'all') {
+      const firstDayStr = `${yr}-${String(mo).padStart(2, '0')}-01`;
+      const lastDayStr = `${yr}-${String(mo).padStart(2, '0')}-${String(daysInMonth).padStart(2, '0')}`;
+      return [{ startStr: firstDayStr, endStr: lastDayStr }];
+    }
+
+    // Week mode: partition selected weeks into contiguous segments
+    return computeSegmentsFromWeeks(selectedWeeksList);
+  }, [pickingStart, hoverDate, scope, yr, mo, daysInMonth, selectedWeeksList]);
+
+  const handleDayClick = (dateStr: string) => {
+    if (!pickingStart) {
+      setPickingStart(dateStr);
+      setHoverDate(dateStr);
+    } else {
+      const minStr = pickingStart <= dateStr ? pickingStart : dateStr;
+      const maxStr = pickingStart <= dateStr ? dateStr : pickingStart;
+
+      const coveringWeekStarts = findWeeksIntersectingRange(weeks, minStr, maxStr);
+      if (coveringWeekStarts.length > 0) {
+        onSelectScope('week');
+        onSelectWeekStarts?.(coveringWeekStarts);
+        const firstWeek = weeks.find((w) => w.startStr === coveringWeekStarts[0]);
+        if (firstWeek) onSelectWeekStart(firstWeek.start);
+      }
+
+      setPickingStart(null);
+      setHoverDate(null);
+    }
+  };
+
+  const handleDayHover = (dateStr: string) => {
+    if (pickingStart) {
+      setHoverDate(dateStr);
+    }
+  };
 
   const changeMonth = (delta: number) => {
+    setPickingStart(null);
+    setHoverDate(null);
     const nextMoDate = new Date(yr, mo - 1 + delta, 1);
     const newMoStr = `${nextMoDate.getFullYear()}-${String(nextMoDate.getMonth() + 1).padStart(2, '0')}`;
     onSelectMonth(newMoStr);
   };
 
   const handleJumpToday = () => {
+    setPickingStart(null);
+    setHoverDate(null);
     const now = new Date();
     const d = now.getDay();
     const mon = new Date(now);
@@ -100,6 +157,8 @@ export const ScheduleDatePicker: React.FC<ScheduleDatePickerProps> = ({
   };
 
   const handleReset = () => {
+    setPickingStart(null);
+    setHoverDate(null);
     const nowMoStr = today.slice(0, 7);
     onSelectMonth(nowMoStr);
     onSelectScope('all');
@@ -108,11 +167,15 @@ export const ScheduleDatePicker: React.FC<ScheduleDatePickerProps> = ({
   };
 
   const handleSelectAll = () => {
+    setPickingStart(null);
+    setHoverDate(null);
     onSelectScope('all');
   };
 
   const handleToggleWeek = (w: WeekInfo, e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
+    setPickingStart(null);
+    setHoverDate(null);
     let updated: string[];
     if (scope !== 'week') {
       updated = [w.startStr];
@@ -145,6 +208,8 @@ export const ScheduleDatePicker: React.FC<ScheduleDatePickerProps> = ({
   };
 
   const handleDoubleClickWeek = (w: WeekInfo) => {
+    setPickingStart(null);
+    setHoverDate(null);
     onSelectScope('week');
     onSelectWeekStarts?.([w.startStr]);
     onSelectWeekStart(w.start);
@@ -207,34 +272,31 @@ export const ScheduleDatePicker: React.FC<ScheduleDatePickerProps> = ({
             </div>
 
             {/* Week rows in Calendar Grid */}
-            <div className="space-y-1">
-              {weeks.map((w) => {
-                const isWeekRowSelected = scope === 'week' && activeStarts.includes(w.startStr);
-
-                return (
-                  <div
-                    key={w.index}
-                    onClick={(e) => handleToggleWeek(w, e)}
-                    onDoubleClick={() => handleDoubleClickWeek(w)}
-                    className="grid grid-cols-7 relative cursor-pointer group rounded-full transition-colors"
-                  >
-                    {w.days.map((d, dIdx) => (
-                      <ScheduleDatePickerDayCell
-                        key={d.dateStr}
-                        day={d}
-                        dayIndex={dIdx}
-                        scope={scope}
-                        daysInMonth={daysInMonth}
-                        isConsecutiveWeeks={isConsecutiveWeeks}
-                        selectedWeeksList={selectedWeeksList}
-                        isWeekRowSelected={isWeekRowSelected}
-                        minSelectedStartStr={minSelectedStartStr}
-                        maxSelectedEndStr={maxSelectedEndStr}
-                      />
-                    ))}
-                  </div>
-                );
-              })}
+            <div
+              className="space-y-1"
+              onMouseLeave={() => {
+                if (!pickingStart) setHoverDate(null);
+              }}
+            >
+              {weeks.map((w) => (
+                <div
+                  key={w.index}
+                  onDoubleClick={() => handleDoubleClickWeek(w)}
+                  className="grid grid-cols-7 relative group rounded-full transition-colors"
+                >
+                  {w.days.map((d, dIdx) => (
+                    <ScheduleDatePickerDayCell
+                      key={d.dateStr}
+                      day={d}
+                      dayIndex={dIdx}
+                      segments={segments}
+                      isPicking={!!pickingStart}
+                      onDayClick={handleDayClick}
+                      onDayHover={handleDayHover}
+                    />
+                  ))}
+                </div>
+              ))}
             </div>
 
             <div className="mt-3 pt-2.5 border-t border-slate-100 dark:border-white/5 flex items-center justify-between">
@@ -256,7 +318,7 @@ export const ScheduleDatePicker: React.FC<ScheduleDatePickerProps> = ({
             </div>
           </div>
 
-          {/* Right Column: Preset Tabs Panel (NO CHECKBOXES - Original Clean Style) */}
+          {/* Right Column: Preset Tabs Panel */}
           <div className="w-full sm:w-48 border-t sm:border-t-0 sm:border-l border-slate-200 dark:border-white/10 p-2.5 space-y-1 bg-slate-50/70 dark:bg-[#0f1424] shrink-0 flex flex-col justify-between">
             <div className="space-y-1">
               <div className="flex items-center justify-between px-2 py-1">
@@ -285,7 +347,7 @@ export const ScheduleDatePicker: React.FC<ScheduleDatePickerProps> = ({
 
               <div className="my-1 border-t border-slate-200 dark:border-white/10" />
 
-              {/* Week items: Original Clean Button Style */}
+              {/* Week items */}
               {weeks.map((w) => {
                 const isSelected = scope === 'week' && activeStarts.includes(w.startStr);
 
