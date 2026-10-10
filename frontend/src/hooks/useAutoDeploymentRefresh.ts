@@ -3,6 +3,7 @@ import { showToast } from '../components/Toast';
 
 /**
  * Hook to detect new deployments on Web/VPS and auto-refresh smoothly.
+ * Includes throttling and error backoff to prevent triggering Cloudflare WAF rate limits.
  */
 export function useAutoDeploymentRefresh() {
   useEffect(() => {
@@ -14,16 +15,31 @@ export function useAutoDeploymentRefresh() {
 
     window.addEventListener('vite:preloadError', handlePreloadError);
 
-    // 2. Periodic version check & tab visibility check
+    // 2. Periodic version check with strict throttling to prevent 403 Rate Limiting
     let isReloading = false;
+    let lastCheckTime = 0;
+    let errorCooldownUntil = 0;
+    const MIN_INTERVAL_MS = 45000; // Cooldown 45s between version checks
 
     const checkNewVersion = async () => {
-      if (isReloading) return;
+      const now = Date.now();
+      if (isReloading || now < errorCooldownUntil || now - lastCheckTime < MIN_INTERVAL_MS) {
+        return;
+      }
+      lastCheckTime = now;
+
       try {
-        const res = await fetch(`/version.json?_t=${Date.now()}`, {
+        const res = await fetch(`/version.json?_t=${now}`, {
           cache: 'no-store',
           headers: { 'Cache-Control': 'no-cache, no-store, must-revalidate' }
         });
+
+        if (res.status === 403) {
+          // If server or Cloudflare WAF returns 403, back off for 2 minutes
+          errorCooldownUntil = Date.now() + 120000;
+          return;
+        }
+
         if (!res.ok) return;
 
         const data = await res.json();
@@ -37,34 +53,29 @@ export function useAutoDeploymentRefresh() {
           }
         }
       } catch {
-        // Silently ignore network errors
+        // Silently ignore network errors and back off 30s
+        errorCooldownUntil = Date.now() + 30000;
       }
     };
 
-    // Check when user switches back to this browser tab or window focuses
+    // Check when user switches back to this browser tab (throttled)
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
         checkNewVersion();
       }
     };
 
-    const handleWindowFocus = () => {
-      checkNewVersion();
-    };
-
     document.addEventListener('visibilitychange', handleVisibilityChange);
-    window.addEventListener('focus', handleWindowFocus);
 
-    // Initial check after 2 seconds
-    const initTimer = setTimeout(checkNewVersion, 2000);
+    // Initial check after 3 seconds
+    const initTimer = setTimeout(checkNewVersion, 3000);
 
-    // Check periodically every 15 seconds
-    const interval = setInterval(checkNewVersion, 15000);
+    // Periodic check every 60 seconds (safe interval avoiding Cloudflare WAF rate-limiting)
+    const interval = setInterval(checkNewVersion, 60000);
 
     return () => {
       window.removeEventListener('vite:preloadError', handlePreloadError);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
-      window.removeEventListener('focus', handleWindowFocus);
       clearTimeout(initTimer);
       clearInterval(interval);
     };

@@ -149,10 +149,23 @@ npm run build
 cd "$PROJECT_DIR"
 
 mkdir -p /var/www/center_manager
-rm -rf /var/www/center_manager/dist
-cp -r frontend/dist /var/www/center_manager/
-chown -R caddy:caddy /var/www/center_manager 2>/dev/null || chown -R www-data:www-data /var/www/center_manager 2>/dev/null || true
-chmod -R 755 /var/www/center_manager
+# Zero-Downtime Atomic Deployment: build into temp folder, set permissions, then atomic swap
+mkdir -p /var/www/center_manager/dist_temp
+cp -r frontend/dist/* /var/www/center_manager/dist_temp/
+chown -R caddy:caddy /var/www/center_manager/dist_temp 2>/dev/null || chown -R www-data:www-data /var/www/center_manager/dist_temp 2>/dev/null || true
+chmod -R 755 /var/www/center_manager/dist_temp
+
+if command -v rsync &>/dev/null; then
+    mkdir -p /var/www/center_manager/dist
+    rsync -a --delete /var/www/center_manager/dist_temp/ /var/www/center_manager/dist/
+    rm -rf /var/www/center_manager/dist_temp
+else
+    mv /var/www/center_manager/dist /var/www/center_manager/dist_old 2>/dev/null || true
+    mv /var/www/center_manager/dist_temp /var/www/center_manager/dist
+    rm -rf /var/www/center_manager/dist_old 2>/dev/null || true
+fi
+chown -R caddy:caddy /var/www/center_manager/dist 2>/dev/null || chown -R www-data:www-data /var/www/center_manager/dist 2>/dev/null || true
+chmod -R 755 /var/www/center_manager/dist
 
 echo "=========================================================="
 echo " [6/8] CẤU HÌNH CADDY SERVER (REVERSE PROXY & NO-CACHE)"
