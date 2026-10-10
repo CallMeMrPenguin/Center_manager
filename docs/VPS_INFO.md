@@ -46,6 +46,13 @@ Máy chủ đang dùng **Caddy Server** với cấu hình phân nhánh mô-đun:
 Tạo file `/etc/caddy/conf.d/<ten_du_an>.caddy`:
 ```caddy
 ten_du_an.upkidscentermanager.io.vn {
+    # Chuyển hướng các request POST từ Cloudflare Verification về GET để tránh 405 Blank Page:
+    @postSpa {
+        method POST
+        not path /api/*
+    }
+    redir @postSpa {uri} 303
+
     # Nếu có Backend API:
     handle /api/* {
         reverse_proxy localhost:<cong_backend_vd_8001>
@@ -56,6 +63,11 @@ ten_du_an.upkidscentermanager.io.vn {
         root * /var/www/<ten_du_an>/dist
         try_files {path} /index.html
         file_server
+    }
+
+    handle_errors {
+        @is405 expression `{err.status_code} == 405`
+        redir @is405 {uri} 303
     }
 }
 ```

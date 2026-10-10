@@ -22,9 +22,46 @@
         } catch (e) {}
       })();
     </script>
+    <script>
+      // Cloudflare clearance & module loading watchdog:
+      // Tự động tải lại trang nếu ứng dụng không khởi chạy được sau khi qua Cloudflare Verification
+      (function() {
+        var startTime = Date.now();
+        var checkMounted = function() {
+          var root = document.getElementById('root');
+          var loader = document.getElementById('initial-app-loader');
+          // Nếu root vẫn còn loader và chưa được React thay thế sau 3.8 giây
+          if (loader && root && root.contains(loader) && (Date.now() - startTime >= 3500)) {
+            console.warn('[Watchdog] Phao cứu sinh: Ứng dụng chưa mount sau xác thực Cloudflare. Đang tự động nạp lại...');
+            window.location.reload();
+          }
+        };
+        setTimeout(checkMounted, 3800);
+
+        // Bắt lỗi module chunk load thất bại để tự động reload
+        window.addEventListener('error', function(e) {
+          var msg = (e && e.message) ? e.message.toLowerCase() : '';
+          if (msg.indexOf('failed to fetch dynamically imported module') !== -1 ||
+              msg.indexOf('loading chunk') !== -1 ||
+              msg.indexOf('import call failed') !== -1) {
+            console.warn('[Watchdog] Lỗi tải chunk module, tự động làm mới trang...');
+            window.location.reload();
+          }
+        });
+      })();
+    </script>
   </head>
   <body class="h-full w-full m-0 p-0 overflow-hidden">
-    <div id="root" class="h-full w-full overflow-hidden"></div>
+    <div id="root" class="h-full w-full overflow-hidden">
+      <!-- Lightweight Instant Splash Placeholder -->
+      <div id="initial-app-loader" style="display:flex;height:100%;width:100%;align-items:center;justify-content:center;background-color:#f1f5f9;flex-direction:column;gap:12px;font-family:system-ui,-apple-system,sans-serif;color:#64748b;">
+        <div style="width:36px;height:36px;border:3px solid #cbd5e1;border-top-color:#2563eb;border-radius:50%;animation:initial-spin 0.8s linear infinite;"></div>
+        <span style="font-size:12px;font-weight:600;letter-spacing:0.02em;">Đang tải ứng dụng...</span>
+      </div>
+      <style>
+        @keyframes initial-spin { to { transform: rotate(360deg); } }
+      </style>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

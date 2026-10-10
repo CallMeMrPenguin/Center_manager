@@ -297,7 +297,14 @@ function AppContent() {
               return (
                 <div key={tab.id} className={`h-full w-full ${isActive ? 'animate-tab-enter' : 'hidden'}`}>
                   {isVisited && (
-                    <Suspense fallback={null}>
+                    <Suspense fallback={
+                      <div className="flex h-full w-full items-center justify-center bg-transparent">
+                        <div className="flex flex-col items-center gap-2">
+                          <div className="w-7 h-7 rounded-full border-2 border-slate-300 dark:border-white/10 border-t-blue-600 animate-spin" />
+                          <span className="text-xs font-semibold text-slate-400">Đang tải...</span>
+                        </div>
+                      </div>
+                    }>
                       {tab.render({
                         isActive,
                         preloadedQuestions,

@@ -74,6 +74,13 @@ chmod -R 755 /var/www/center_manager
 
 cat << 'EOF' > /etc/caddy/Caddyfile
 upkidscentermanager.io.vn, www.upkidscentermanager.io.vn, :80 {
+    # Chuyển hướng các request POST từ Cloudflare Verification về GET để tránh 405 Blank Page
+    @postChallenge {
+        method POST
+        not path /api/* /auth/* /users/*
+    }
+    redir @postChallenge {uri} 303
+
     handle /api/* {
         reverse_proxy localhost:8000
     }
@@ -88,6 +95,11 @@ upkidscentermanager.io.vn, www.upkidscentermanager.io.vn, :80 {
         root * /var/www/center_manager/dist
         try_files {path} /index.html
         file_server
+    }
+
+    handle_errors {
+        @is405 expression `{err.status_code} == 405`
+        redir @is405 {uri} 303
     }
 }
 EOF

@@ -176,6 +176,13 @@ cat << 'EOF' > /etc/caddy/conf.d/center_manager.caddy
 upkidscentermanager.io.vn, www.upkidscentermanager.io.vn {
     encode zstd gzip
 
+    # Chuyển hướng các request POST từ Cloudflare Verification về GET để tránh 405 Blank Page
+    @postChallenge {
+        method POST
+        not path /api/* /auth/* /users/*
+    }
+    redir @postChallenge {uri} 303
+
     handle /api/* {
         reverse_proxy localhost:8000 {
             transport http {
@@ -218,6 +225,11 @@ upkidscentermanager.io.vn, www.upkidscentermanager.io.vn {
         try_files {path} /index.html
         header Cache-Control "no-cache, no-store, must-revalidate"
         file_server
+    }
+
+    handle_errors {
+        @is405 expression `{err.status_code} == 405`
+        redir @is405 {uri} 303
     }
 }
 EOF

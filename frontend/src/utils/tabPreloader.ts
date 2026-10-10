@@ -1,32 +1,45 @@
 import React, { ComponentType } from 'react';
 
 /**
+ * Resilient module importer with exponential backoff retry.
+ * Handles transient network dropouts or Cloudflare clearance race conditions gracefully.
+ */
+function loadWithRetry<T>(importer: () => Promise<T>, retries = 2, delayMs = 800): Promise<T> {
+  return importer().catch((err) => {
+    if (retries <= 0) throw err;
+    return new Promise((resolve) => setTimeout(resolve, delayMs)).then(() =>
+      loadWithRetry(importer, retries - 1, Math.round(delayMs * 1.5))
+    );
+  });
+}
+
+/**
  * Registry of dynamic import module loaders for all application tabs.
  * Centralizing them enables both React.lazy() and background prefetching to share
  * the exact same module promise cache.
  */
 export const TAB_MODULE_LOADERS: Record<string, () => Promise<{ default: ComponentType<any> }>> = {
-  dashboard: () => import('../pages/dashboard'),
-  students: () => import('../pages/students'),
-  classes: () => import('../pages/classes'),
-  schedule: () => import('../pages/schedule'),
-  teachers: () => import('../pages/teachers'),
-  courses: () => import('../pages/courses'),
-  kiemtra: () => import('../pages/kiemtra'),
-  assignments: () => import('../pages/assignments'),
-  results: () => import('../pages/results'),
-  reports: () => import('../pages/reports'),
-  'users-roles': () => import('../pages/users-roles'),
-  settings: () => import('../pages/settings'),
+  dashboard: () => loadWithRetry(() => import('../pages/dashboard')),
+  students: () => loadWithRetry(() => import('../pages/students')),
+  classes: () => loadWithRetry(() => import('../pages/classes')),
+  schedule: () => loadWithRetry(() => import('../pages/schedule')),
+  teachers: () => loadWithRetry(() => import('../pages/teachers')),
+  courses: () => loadWithRetry(() => import('../pages/courses')),
+  kiemtra: () => loadWithRetry(() => import('../pages/kiemtra')),
+  assignments: () => loadWithRetry(() => import('../pages/assignments')),
+  results: () => loadWithRetry(() => import('../pages/results')),
+  reports: () => loadWithRetry(() => import('../pages/reports')),
+  'users-roles': () => loadWithRetry(() => import('../pages/users-roles')),
+  settings: () => loadWithRetry(() => import('../pages/settings')),
   // Local/Resource tools
-  formatter: () => import('../pages/test-formatter'),
-  'question-bank': () => import('../pages/question-bank'),
-  'vocab-bank': () => import('../pages/vocabulary-bank'),
-  'unit-config': () => import('../pages/unit-config'),
-  'file-manager': () => import('../pages/document-manager'),
-  'word-editor': () => import('../pages/word-editor'),
-  'canvas-board': () => import('../pages/canvas-board'),
-  'ui-showcase': () => import('../pages/ui-showcase'),
+  formatter: () => loadWithRetry(() => import('../pages/test-formatter')),
+  'question-bank': () => loadWithRetry(() => import('../pages/question-bank')),
+  'vocab-bank': () => loadWithRetry(() => import('../pages/vocabulary-bank')),
+  'unit-config': () => loadWithRetry(() => import('../pages/unit-config')),
+  'file-manager': () => loadWithRetry(() => import('../pages/document-manager')),
+  'word-editor': () => loadWithRetry(() => import('../pages/word-editor')),
+  'canvas-board': () => loadWithRetry(() => import('../pages/canvas-board')),
+  'ui-showcase': () => loadWithRetry(() => import('../pages/ui-showcase')),
 };
 
 /**
