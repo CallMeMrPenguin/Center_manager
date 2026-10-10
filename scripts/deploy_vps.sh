@@ -122,13 +122,25 @@ upkidscentermanager.io.vn, www.upkidscentermanager.io.vn, :80 {
 
     handle /favicon.* {
         root * /var/www/center_manager/dist
-        header Cache-Control "public, max-age=86400"
+        header Cache-Control "public, max-age=31536000, immutable"
         file_server
     }
 
     handle /logo.png {
         root * /var/www/center_manager/dist
-        header Cache-Control "public, max-age=86400"
+        header Cache-Control "public, max-age=31536000, immutable"
+        file_server
+    }
+
+    handle /icons.svg {
+        root * /var/www/center_manager/dist
+        header Cache-Control "public, max-age=31536000, immutable"
+        file_server
+    }
+
+    handle /ranks/* {
+        root * /var/www/center_manager/dist
+        header Cache-Control "public, max-age=31536000, immutable"
         file_server
     }
 
