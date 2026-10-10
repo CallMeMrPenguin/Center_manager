@@ -46,6 +46,10 @@ export const MobileBottomDock: React.FC<MobileBottomDockProps> = ({
   // Track the tab currently closest to screen center in real time as user scrolls
   const [scrolledCenterTabId, setScrolledCenterTabId] = useState<string>(activeTab);
   const scrollSettleTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const isProgrammaticScrollRef = useRef<boolean>(false);
+  const programmaticTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const [isUserDragging, setIsUserDragging] = useState<boolean>(false);
+  const isUserDraggingRef = useRef<boolean>(false);
 
   // Reorder tabs to strictly match desktop visual SECTIONS order
   const canonicalTabs = useMemo(() => {
@@ -56,10 +60,12 @@ export const MobileBottomDock: React.FC<MobileBottomDockProps> = ({
   }, [orderedTabIds]);
 
   const activeIndex = canonicalTabs.findIndex((t) => t.id === activeTab);
-  const displayedTab =
-    canonicalTabs.find((t) => t.id === scrolledCenterTabId) ||
-    canonicalTabs[activeIndex] ||
-    TAB_DEFINITIONS.find((t) => t.id === activeTab);
+  const activeTabObj = canonicalTabs[activeIndex] || TAB_DEFINITIONS.find((t) => t.id === activeTab);
+
+  // When not manually dragging, displayedTab is ALWAYS activeTab to prevent any flickering or jumping
+  const displayedTab = isUserDragging
+    ? canonicalTabs.find((t) => t.id === scrolledCenterTabId) || activeTabObj
+    : activeTabObj;
 
   // Keep scrolled center in sync when activeTab changes from outside
   useEffect(() => {
@@ -80,6 +86,7 @@ export const MobileBottomDock: React.FC<MobileBottomDockProps> = ({
     return () => {
       if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
       if (scrollSettleTimerRef.current) clearTimeout(scrollSettleTimerRef.current);
+      if (programmaticTimerRef.current) clearTimeout(programmaticTimerRef.current);
       if (rafIdRef.current) cancelAnimationFrame(rafIdRef.current);
     };
   }, [resetIdleTimer]);
@@ -89,6 +96,12 @@ export const MobileBottomDock: React.FC<MobileBottomDockProps> = ({
     if (!containerRef.current) return;
     const btn = containerRef.current.querySelector<HTMLButtonElement>(`[data-dock-tab="${tabId}"]`);
     if (btn) {
+      isProgrammaticScrollRef.current = true;
+      if (programmaticTimerRef.current) clearTimeout(programmaticTimerRef.current);
+      programmaticTimerRef.current = setTimeout(() => {
+        isProgrammaticScrollRef.current = false;
+      }, 600);
+
       btn.scrollIntoView({
         behavior: smooth ? 'smooth' : 'auto',
         inline: 'center',
@@ -102,7 +115,7 @@ export const MobileBottomDock: React.FC<MobileBottomDockProps> = ({
     centerTab(activeTab, true);
   }, [activeTab, centerTab]);
 
-  // Find the tab closest to center in real time during scroll
+  // Find the tab closest to center in real time during user manual scroll
   const findClosestTabToCenter = useCallback(() => {
     if (!containerRef.current) return;
     const containerRect = containerRef.current.getBoundingClientRect();
@@ -130,11 +143,13 @@ export const MobileBottomDock: React.FC<MobileBottomDockProps> = ({
     }
   }, [scrolledCenterTabId]);
 
-  // Real-time 60fps scroll listener:
-  // - Highlights & shifts up the icon closest to center while user scrolls
-  // - If user stops scrolling without selecting, automatically returns dock to active tab after 1.2s
+  // Scroll listener: only updates preview when the user is ACTUALLY dragging with touch
   const handleScroll = useCallback(() => {
     resetIdleTimer();
+    if (isProgrammaticScrollRef.current || !isUserDraggingRef.current) {
+      return;
+    }
+
     if (rafIdRef.current) cancelAnimationFrame(rafIdRef.current);
     rafIdRef.current = requestAnimationFrame(() => {
       findClosestTabToCenter();
@@ -142,11 +157,11 @@ export const MobileBottomDock: React.FC<MobileBottomDockProps> = ({
 
     if (scrollSettleTimerRef.current) clearTimeout(scrollSettleTimerRef.current);
     scrollSettleTimerRef.current = setTimeout(() => {
-      // Revert preview back to active tab and smooth scroll back to selected tab
       setScrolledCenterTabId(activeTab);
       centerTab(activeTab, true);
     }, 1200);
   }, [activeTab, centerTab, findClosestTabToCenter, resetIdleTimer]);
+
 
   return (
     <div
@@ -173,6 +188,21 @@ export const MobileBottomDock: React.FC<MobileBottomDockProps> = ({
       <div
         ref={containerRef}
         onScroll={handleScroll}
+        onTouchStart={() => {
+          resetIdleTimer();
+          isUserDraggingRef.current = true;
+          setIsUserDragging(true);
+        }}
+        onTouchEnd={() => {
+          setTimeout(() => {
+            isUserDraggingRef.current = false;
+            setIsUserDragging(false);
+          }, 400);
+        }}
+        onTouchCancel={() => {
+          isUserDraggingRef.current = false;
+          setIsUserDragging(false);
+        }}
         className={`w-full max-w-full overflow-x-auto no-scrollbar scroll-smooth flex items-center py-1.5 px-[calc(50vw-22px)] gap-3.5 snap-x snap-mandatory pointer-events-auto bg-transparent transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${
           isIdle
             ? 'opacity-35 scale-90 translate-y-1'
@@ -203,11 +233,14 @@ export const MobileBottomDock: React.FC<MobileBottomDockProps> = ({
               onMouseEnter={() => onPrefetchTab?.(tab.id)}
               onClick={() => {
                 if (scrollSettleTimerRef.current) clearTimeout(scrollSettleTimerRef.current);
+                isUserDraggingRef.current = false;
+                setIsUserDragging(false);
                 resetIdleTimer();
                 setActiveTab(tab.id);
                 setScrolledCenterTabId(tab.id);
                 centerTab(tab.id, true);
               }}
+
               className={`snap-center shrink-0 w-11 h-11 rounded-full flex items-center justify-center transition-all duration-200 ease-out cursor-pointer active:scale-95 border-0 ${transformClasses} ${
                 isSelected
                   ? 'bg-blue-600 text-white shadow-xl shadow-blue-600/35 font-bold'

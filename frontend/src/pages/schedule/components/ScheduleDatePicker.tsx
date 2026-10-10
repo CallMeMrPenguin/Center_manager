@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
-import { Calendar, ChevronLeft, ChevronRight, ChevronDown, RotateCcw, Check } from 'lucide-react';
+import { Calendar, ChevronLeft, ChevronRight, ChevronDown, RotateCcw } from 'lucide-react';
 import { getLocalDateStr } from '../../../utils';
 import {
   WeekInfo,
@@ -107,10 +107,8 @@ export const ScheduleDatePicker: React.FC<ScheduleDatePickerProps> = ({
     setOpen(false);
   };
 
-  const handleSelectSingleWeek = (w: WeekInfo) => {
-    onSelectWeekStart(w.start);
-    onSelectWeekStarts?.([w.startStr]);
-    onSelectScope('week');
+  const handleSelectAll = () => {
+    onSelectScope('all');
     setOpen(false);
   };
 
@@ -126,12 +124,32 @@ export const ScheduleDatePicker: React.FC<ScheduleDatePickerProps> = ({
         updated = activeStarts;
       }
     } else {
-      updated = [...activeStarts, w.startStr].sort();
+      if (e?.shiftKey && activeStarts.length > 0) {
+        const sortedWeeks = [...weeks].sort((a, b) => a.index - b.index);
+        const clickedIdx = w.index;
+        const currentIndices = weeks
+          .filter((wk) => activeStarts.includes(wk.startStr))
+          .map((wk) => wk.index);
+        const minIdx = Math.min(clickedIdx, ...currentIndices);
+        const maxIdx = Math.max(clickedIdx, ...currentIndices);
+        updated = sortedWeeks
+          .filter((wk) => wk.index >= minIdx && wk.index <= maxIdx)
+          .map((wk) => wk.startStr);
+      } else {
+        updated = [...activeStarts, w.startStr].sort();
+      }
     }
     onSelectScope('week');
     onSelectWeekStarts?.(updated);
     const firstWeek = weeks.find((wk) => wk.startStr === updated[0]);
     if (firstWeek) onSelectWeekStart(firstWeek.start);
+  };
+
+  const handleDoubleClickWeek = (w: WeekInfo) => {
+    onSelectScope('week');
+    onSelectWeekStarts?.([w.startStr]);
+    onSelectWeekStart(w.start);
+    setOpen(false);
   };
 
   const triggerLabel = useMemo(() => {
@@ -189,7 +207,7 @@ export const ScheduleDatePicker: React.FC<ScheduleDatePickerProps> = ({
               <span className="text-rose-500 dark:text-rose-400">CN</span>
             </div>
 
-            {/* Week rows */}
+            {/* Week rows in Calendar Grid */}
             <div className="space-y-1">
               {weeks.map((w) => {
                 const isWeekRowSelected = scope === 'week' && activeStarts.includes(w.startStr);
@@ -197,7 +215,8 @@ export const ScheduleDatePicker: React.FC<ScheduleDatePickerProps> = ({
                 return (
                   <div
                     key={w.index}
-                    onClick={() => handleToggleWeek(w)}
+                    onClick={(e) => handleToggleWeek(w, e)}
+                    onDoubleClick={() => handleDoubleClickWeek(w)}
                     className="grid grid-cols-7 relative cursor-pointer group rounded-full transition-colors"
                   >
                     {w.days.map((d, dIdx) => (
@@ -238,7 +257,7 @@ export const ScheduleDatePicker: React.FC<ScheduleDatePickerProps> = ({
             </div>
           </div>
 
-          {/* Right Column: Preset Tabs Panel with Multi-Week Select */}
+          {/* Right Column: Preset Tabs Panel (NO CHECKBOXES - Original Clean Style) */}
           <div className="w-full sm:w-48 border-t sm:border-t-0 sm:border-l border-slate-200 dark:border-white/10 p-2.5 space-y-1 bg-slate-50/70 dark:bg-[#0f1424] shrink-0 flex flex-col justify-between">
             <div className="space-y-1">
               <div className="flex items-center justify-between px-2 py-1">
@@ -252,12 +271,10 @@ export const ScheduleDatePicker: React.FC<ScheduleDatePickerProps> = ({
                 )}
               </div>
 
+              {/* Tất cả */}
               <button
                 type="button"
-                onClick={() => {
-                  onSelectScope('all');
-                  setOpen(false);
-                }}
+                onClick={handleSelectAll}
                 className={`w-full text-left px-2.5 py-1.5 rounded-xl text-xs font-extrabold transition flex items-center justify-between cursor-pointer border-0 ${
                   scope === 'all'
                     ? 'bg-blue-600 text-white shadow-xs'
@@ -270,57 +287,44 @@ export const ScheduleDatePicker: React.FC<ScheduleDatePickerProps> = ({
 
               <div className="my-1 border-t border-slate-200 dark:border-white/10" />
 
+              {/* Week items: Original Clean Button Style */}
               {weeks.map((w) => {
                 const isSelected = scope === 'week' && activeStarts.includes(w.startStr);
 
                 return (
-                  <div
+                  <button
                     key={w.index}
-                    className={`w-full px-2 py-1.5 rounded-xl text-xs transition flex items-center gap-2 cursor-pointer ${
+                    type="button"
+                    onClick={(e) => handleToggleWeek(w, e)}
+                    onDoubleClick={() => handleDoubleClickWeek(w)}
+                    className={`w-full text-left px-2.5 py-1.5 rounded-xl text-xs transition flex flex-col gap-0.5 cursor-pointer border-0 ${
                       isSelected
-                        ? 'bg-blue-500/15 text-blue-700 dark:text-blue-300 font-bold border border-blue-500/30'
-                        : 'text-slate-700 dark:text-slate-300 hover:bg-slate-200/70 dark:hover:bg-white/10'
+                        ? 'bg-blue-600 text-white font-extrabold shadow-xs'
+                        : 'text-slate-700 dark:text-slate-300 hover:bg-slate-200/70 dark:hover:bg-white/10 font-bold'
                     }`}
+                    title="Bấm để chọn/bỏ chọn tuần. Nhấp đúp để chọn riêng tuần này và đóng."
                   >
-                    <button
-                      type="button"
-                      onClick={(e) => handleToggleWeek(w, e)}
-                      className={`w-4 h-4 rounded flex items-center justify-center shrink-0 transition-colors border cursor-pointer ${
-                        isSelected
-                          ? 'bg-blue-600 border-blue-600 text-white'
-                          : 'border-slate-300 dark:border-white/20 hover:border-blue-400 bg-white dark:bg-[#111728]'
-                      }`}
-                      title="Chọn thêm hoặc bỏ bớt tuần này"
-                    >
-                      {isSelected && <Check size={11} strokeWidth={3} />}
-                    </button>
-
-                    <div
-                      onClick={() => handleSelectSingleWeek(w)}
-                      className="flex-1 min-w-0 flex items-center justify-between"
-                      title={`Xem riêng Tuần ${w.index}`}
-                    >
+                    <div className="flex items-center justify-between w-full">
                       <span>Tuần {w.index}</span>
-                      <span className={`text-[10px] font-mono ${isSelected ? 'text-blue-600 dark:text-blue-400' : 'text-slate-400 dark:text-slate-500'}`}>
+                      <span className={`text-[10px] font-mono ${isSelected ? 'text-blue-100' : 'text-slate-400 dark:text-slate-500'}`}>
                         {w.rangeLabel}
                       </span>
                     </div>
-                  </div>
+                  </button>
                 );
               })}
             </div>
 
-            {scope === 'week' && (
-              <div className="pt-2 border-t border-slate-200 dark:border-white/10">
-                <button
-                  type="button"
-                  onClick={() => setOpen(false)}
-                  className="w-full py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition cursor-pointer border-0"
-                >
-                  Áp dụng
-                </button>
-              </div>
-            )}
+            {/* Bottom Apply Button */}
+            <div className="pt-2 border-t border-slate-200 dark:border-white/10">
+              <button
+                type="button"
+                onClick={() => setOpen(false)}
+                className="w-full py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition cursor-pointer border-0 shadow-xs"
+              >
+                Áp dụng {scope === 'week' && activeStarts.length > 1 ? `(${activeStarts.length} tuần)` : ''}
+              </button>
+            </div>
           </div>
         </div>
       )}
