@@ -109,7 +109,6 @@ export const ScheduleDatePicker: React.FC<ScheduleDatePickerProps> = ({
 
   const handleSelectAll = () => {
     onSelectScope('all');
-    setOpen(false);
   };
 
   const handleToggleWeek = (w: WeekInfo, e?: React.MouseEvent) => {
@@ -282,7 +281,6 @@ export const ScheduleDatePicker: React.FC<ScheduleDatePickerProps> = ({
                 }`}
               >
                 <span>Tất cả</span>
-                {scope === 'all' && <span className="w-1.5 h-1.5 rounded-full bg-white shrink-0" />}
               </button>
 
               <div className="my-1 border-t border-slate-200 dark:border-white/10" />

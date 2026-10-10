@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 import { WeekDayItem, WeekInfo } from './scheduleDatePickerHelper';
 
 interface ScheduleDatePickerDayCellProps {
@@ -72,15 +73,15 @@ export const ScheduleDatePickerDayCell: React.FC<ScheduleDatePickerDayCellProps>
     : 'text-slate-300 dark:text-slate-600 font-normal';
 
   return (
-    <div className="relative flex items-center justify-center h-8 select-none">
-      {/* 1. Left connector ribbon bar with expand/collapse physics animation */}
+    <div className="relative flex items-center justify-center h-8 select-none group">
+      {/* 1. Left connector ribbon bar */}
       <div
         className={`absolute left-0 top-0 bottom-0 w-1/2 bg-blue-100 dark:bg-blue-900/40 pointer-events-none transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${
           hasLeftConnector ? 'opacity-100 scale-x-100 origin-left' : 'opacity-0 scale-x-0 origin-right'
         }`}
       />
 
-      {/* 2. Right connector ribbon bar with expand/collapse physics animation */}
+      {/* 2. Right connector ribbon bar */}
       <div
         className={`absolute right-0 top-0 bottom-0 w-1/2 bg-blue-100 dark:bg-blue-900/40 pointer-events-none transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${
           hasRightConnector ? 'opacity-100 scale-x-100 origin-right' : 'opacity-0 scale-x-0 origin-left'
@@ -94,21 +95,30 @@ export const ScheduleDatePickerDayCell: React.FC<ScheduleDatePickerDayCellProps>
         } ${rowEdgeRounding}`}
       />
 
-      {/* 4. Inactive day hover preview circle */}
-      {!inRange && (
-        <div className="absolute inset-0.5 rounded-full group-hover:bg-slate-100 dark:group-hover:bg-white/5 transition-colors duration-150 pointer-events-none" />
+      {/* 4. Subtle translucent hover pill (matches segmented button / horizontal menu in reports) */}
+      {!isEndpoint && (
+        <div className="absolute inset-0.5 rounded-xl bg-slate-200/60 dark:bg-white/10 opacity-0 group-hover:opacity-100 transition-all duration-200 ease-out pointer-events-none" />
       )}
 
-      {/* 5. Circular endpoint badge (smooth scale-in/scale-out animation) */}
-      <div
-        className={`absolute z-10 w-7 h-7 rounded-full bg-blue-600 shadow-xs pointer-events-none transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${
-          isEndpoint
-            ? 'opacity-100 scale-100 shadow-[0_0_12px_rgba(37,99,235,0.45)]'
-            : 'opacity-0 scale-40 pointer-events-none'
-        }`}
-      />
+      {/* 5. Start endpoint gliding pill badge (layoutId animation glides to destination cell) */}
+      {isStartEndpoint && (
+        <motion.div
+          layoutId="schedule-datepicker-start-point"
+          transition={{ type: 'spring', stiffness: 460, damping: 32 }}
+          className="absolute z-10 w-7 h-7 rounded-full bg-blue-600 shadow-[0_0_12px_rgba(37,99,235,0.45)] pointer-events-none"
+        />
+      )}
 
-      {/* 6. Day number text & today dot indicator */}
+      {/* 6. End endpoint gliding pill badge (layoutId animation glides to destination cell) */}
+      {isEndEndpoint && !isStartEndpoint && (
+        <motion.div
+          layoutId="schedule-datepicker-end-point"
+          transition={{ type: 'spring', stiffness: 460, damping: 32 }}
+          className="absolute z-10 w-7 h-7 rounded-full bg-blue-600 shadow-[0_0_12px_rgba(37,99,235,0.45)] pointer-events-none"
+        />
+      )}
+
+      {/* 7. Day number text & today dot indicator */}
       <div className={`relative z-20 flex flex-col items-center justify-center transition-colors duration-300 text-xs ${textStyle}`}>
         <span className="leading-none">{day.dayNum}</span>
         {day.isToday && (

@@ -266,19 +266,24 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
                           key={idx}
                           type="button"
                           onClick={() => handleSelectDate(item.isoStr)}
-                          className={`h-8 w-full rounded-xl text-xs font-bold relative flex items-center justify-center cursor-pointer transition-colors border-0 outline-none ${
+                          className={`h-8 w-full rounded-xl text-xs font-bold relative flex items-center justify-center cursor-pointer transition-colors border-0 outline-none group ${
                             item.isSelected
                               ? 'text-white font-black z-10'
                               : item.isToday
                               ? 'text-blue-600 dark:text-blue-400 font-extrabold bg-blue-500/20'
                               : item.isCurrentMonth
                               ? item.isStudyDay
-                                ? 'text-blue-600 dark:text-blue-300 font-black hover:bg-blue-100 dark:hover:bg-blue-500/20'
-                                : 'text-slate-900 dark:text-slate-100 font-extrabold hover:bg-[var(--btn-neutral-hover,#e2e8f0)] dark:hover:bg-[#1c1c21] hover:text-black dark:hover:text-white'
-                              : 'text-slate-400 dark:text-slate-500 hover:bg-[var(--btn-neutral-hover,#e2e8f0)]/50 dark:hover:bg-white/5'
+                                ? 'text-blue-600 dark:text-blue-300 font-black'
+                                : 'text-slate-900 dark:text-slate-100 font-extrabold'
+                              : 'text-slate-400 dark:text-slate-500'
                           }`}
                           title={item.isStudyDay ? `Ngày học của lớp (${item.dayNumber}/${currentMonth + 1}/${currentYear})` : undefined}
                         >
+                          {/* Hover Pill - subtle translucent backdrop matching segmented button / horizontal menu */}
+                          {!item.isSelected && (
+                            <div className="absolute inset-0.5 rounded-xl bg-slate-200/60 dark:bg-white/10 opacity-0 group-hover:opacity-100 transition-all duration-200 ease-out pointer-events-none" />
+                          )}
+
                           {/* Selected Spring Pill Indicator */}
                           {item.isSelected && (
                             <motion.div

@@ -49,6 +49,8 @@ export default defineConfig({
       output: {
         manualChunks(id) {
           if (id.includes('node_modules')) {
+            if (id.includes('framer-motion')) return 'motion';
+            if (id.includes('react') || id.includes('scheduler')) return 'react-vendor';
             if (id.includes('@tanstack') || id.includes('@dnd-kit')) return 'tanstack-and-dnd';
             if (id.includes('lucide-react')) return 'icons';
             if (id.includes('exceljs') || id.includes('jspdf') || id.includes('xlsx') || id.includes('html2canvas')) return 'export-tools';

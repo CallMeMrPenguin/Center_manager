@@ -74,7 +74,14 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
         {/* App Branding Header */}
         <div className="text-center space-y-2">
           <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 p-2.5 shadow-[0_0_25px_rgba(92,54,245,0.25)] mb-1">
-            <img src="/logo.png" alt="Center Manager Logo" className="h-full w-full object-contain" />
+            <img
+              src="/logo.png"
+              alt="Center Manager Logo"
+              width={56}
+              height={56}
+              decoding="async"
+              className="h-full w-full object-contain"
+            />
           </div>
           <h1 className="text-xl font-black text-slate-900 dark:text-white tracking-tight uppercase">
             Hệ Thống Quản Lý Trung Tâm
@@ -88,7 +95,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
         <form onSubmit={handleFormSubmit} className="space-y-4">
           {/* Username Field */}
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block">
+            <label htmlFor="login-username" className="text-xs font-bold text-slate-700 dark:text-slate-300 block">
               Tên đăng nhập
             </label>
             <div className="relative">
@@ -96,6 +103,8 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
                 <User size={16} />
               </div>
               <input
+                id="login-username"
+                name="username"
                 type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
@@ -113,7 +122,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
 
           {/* Password Field */}
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block">
+            <label htmlFor="login-password" className="text-xs font-bold text-slate-700 dark:text-slate-300 block">
               Mật khẩu
             </label>
             <div className="relative">
@@ -121,6 +130,8 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
                 <Lock size={16} />
               </div>
               <input
+                id="login-password"
+                name="password"
                 type={showPassword ? 'text' : 'password'}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -134,6 +145,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
               />
               <button
                 type="button"
+                aria-label={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-800 dark:hover:text-white transition cursor-pointer"
               >
@@ -159,6 +171,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
           <button
             type="submit"
             disabled={loading}
+            aria-label="Đăng nhập tài khoản"
             className="w-full py-3 px-4 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-extrabold text-xs tracking-wide uppercase transition-all duration-200 cursor-pointer shadow-md shadow-blue-500/30 flex items-center justify-center gap-2 active:scale-98 disabled:opacity-50 mt-2"
           >
             {loading ? (
