@@ -23,6 +23,25 @@ export interface DateRangeSegment {
   endStr: string;
 }
 
+export interface MonthData {
+  yr: number;
+  mo: number;
+  monthStr: string;
+  weeks: WeekInfo[];
+  daysInMonth: number;
+}
+
+export function getAdjacentMonth(yr: number, mo: number, delta = 1): { yr: number; mo: number; monthStr: string } {
+  const d = new Date(yr, mo - 1 + delta, 1);
+  const nextYr = d.getFullYear();
+  const nextMo = d.getMonth() + 1;
+  return {
+    yr: nextYr,
+    mo: nextMo,
+    monthStr: `${nextYr}-${String(nextMo).padStart(2, '0')}`,
+  };
+}
+
 export function computeMonthWeeks(yr: number, mo: number, today: string): WeekInfo[] {
   const firstDay = new Date(yr, mo - 1, 1);
   const dayOfWeek = firstDay.getDay();
@@ -81,7 +100,6 @@ export function computeMonthWeeks(yr: number, mo: number, today: string): WeekIn
 
 /**
  * Groups multiple selected weeks into contiguous island segments.
- * For example: Week 1 + Week 3, 4, 5 => [Segment 1: Week 1], [Segment 2: Weeks 3-5].
  */
 export function computeSegmentsFromWeeks(selectedWeeks: WeekInfo[]): DateRangeSegment[] {
   if (selectedWeeks.length === 0) return [];
@@ -123,13 +141,29 @@ export function findWeeksIntersectingRange(weeks: WeekInfo[], startStr: string, 
     .map((w) => w.startStr);
 }
 
+export function formatRangeDateDisplay(startStr: string, endStr: string): string {
+  const [sy, sm, sd] = startStr.split('-').map(Number);
+  const [ey, em, ed] = endStr.split('-').map(Number);
+  if (startStr === endStr) {
+    return `${String(sd).padStart(2, '0')}/${String(sm).padStart(2, '0')}/${sy}`;
+  }
+  if (sy === ey) {
+    return `${String(sd).padStart(2, '0')}/${String(sm).padStart(2, '0')} - ${String(ed).padStart(2, '0')}/${String(em).padStart(2, '0')}/${sy}`;
+  }
+  return `${String(sd).padStart(2, '0')}/${String(sm).padStart(2, '0')}/${sy} - ${String(ed).padStart(2, '0')}/${String(em).padStart(2, '0')}/${ey}`;
+}
+
 export function computeTriggerLabel(
   scope: 'all' | 'week',
   mo: number,
   yr: number,
   selectedWeeksList: WeekInfo[],
-  isConsecutiveWeeks: boolean
+  isConsecutiveWeeks: boolean,
+  customRange?: { startStr: string; endStr: string } | null
 ): string {
+  if (customRange && customRange.startStr && customRange.endStr) {
+    return formatRangeDateDisplay(customRange.startStr, customRange.endStr);
+  }
   if (scope === 'all') {
     return `Tháng ${mo}/${yr}`;
   }

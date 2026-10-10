@@ -85,6 +85,11 @@ export default function SchedulePage() {
       const targetClassId = classFilter ? Number(classFilter) : 0;
       const allMonths = new Set<string>();
       allMonths.add(selectedMonth);
+      const [y, m] = selectedMonth.split('-').map(Number);
+      if (y && m) {
+        const nextMoStr = `${m === 12 ? y + 1 : y}-${String(m === 12 ? 1 : m + 1).padStart(2, '0')}`;
+        allMonths.add(nextMoStr);
+      }
       selectedWeekStarts.forEach((sStr) => {
         allMonths.add(sStr.slice(0, 7));
         const parts = sStr.split('-').map(Number);
