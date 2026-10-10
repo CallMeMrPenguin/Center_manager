@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
-import { ZoomIn, ZoomOut, ArrowLeftRight } from 'lucide-react';
+import { ZoomIn, ZoomOut } from 'lucide-react';
 import { ClassSession } from '../types';
 import { useTheme } from '../../../context/ThemeContext';
 import { getVietnamHoliday } from '../../../utils/vietnamHolidays';
@@ -22,7 +22,6 @@ interface VerticalTimelineGridProps {
   openEdit: (sess: ClassSession) => void;
   setCtxMenu?: (menu: { x: number; y: number; dateStr: string } | null) => void;
   viewModeToggle?: React.ReactNode;
-  onToggleOrientation?: () => void;
 }
 
 export const VerticalTimelineGrid: React.FC<VerticalTimelineGridProps> = ({
@@ -32,7 +31,6 @@ export const VerticalTimelineGrid: React.FC<VerticalTimelineGridProps> = ({
   openAdd,
   openEdit,
   viewModeToggle,
-  onToggleOrientation,
 }) => {
   const { isDark } = useTheme();
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
@@ -130,24 +128,9 @@ export const VerticalTimelineGrid: React.FC<VerticalTimelineGridProps> = ({
 
   return (
     <div className="flex-1 min-h-0 flex flex-col select-none bg-slate-100 dark:bg-[#0c101d]">
-      {/* ── TOOLBAR: Orientation Switcher, Zoom Controls & View Mode ──────── */}
-      <div className="bg-slate-50 dark:bg-[#131a2c] border-b border-slate-200 dark:border-white/10 px-4 py-2 flex items-center justify-between gap-2.5 shrink-0">
-        {/* Left: Axis Orientation Switcher */}
-        <div className="flex items-center gap-2">
-          {onToggleOrientation && (
-            <button
-              type="button"
-              onClick={onToggleOrientation}
-              className="px-2.5 py-1.5 rounded-xl bg-white dark:bg-[#111728] hover:bg-slate-100 dark:hover:bg-white/10 text-blue-600 dark:text-blue-400 border border-slate-200 dark:border-white/10 text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-2xs"
-              title="Đổi lại chế độ: Trục ngang (Thứ theo hàng, Giờ theo cột)"
-            >
-              <ArrowLeftRight size={13} />
-              <span>Đổi trục (X ↔ Y)</span>
-            </button>
-          )}
-        </div>
-
-        {/* Right: Zoom Controls (+ and -) & View Mode */}
+      {/* ── TOOLBAR: Zoom Controls & View Mode ──────── */}
+      <div className="bg-slate-50 dark:bg-[#131a2c] border-b border-slate-200 dark:border-white/10 px-4 py-2 flex items-center justify-end gap-2.5 shrink-0">
+        {/* Zoom Controls (+ and -) */}
         <div className="flex items-center gap-2">
           <div className="flex items-center bg-white dark:bg-[#111728] border border-slate-200 dark:border-white/10 rounded-xl p-0.5 shadow-2xs">
             <button
@@ -244,26 +227,32 @@ export const VerticalTimelineGrid: React.FC<VerticalTimelineGridProps> = ({
                       )}
                     </div>
 
-                    {/* Holiday Badge (nếu có) */}
-                    {holiday && (
-                      <div
-                        className={`mt-0.5 text-[8.5px] font-bold px-1 py-0.2 rounded flex items-center justify-between gap-1 max-w-full overflow-hidden ${
-                          holiday.isPublicHoliday
-                            ? 'bg-rose-500/20 text-rose-600 dark:text-rose-300'
-                            : 'bg-amber-500/20 text-amber-600 dark:text-amber-300'
-                        }`}
-                        title={holiday.name}
-                      >
-                        <span className="truncate block max-w-full leading-tight">
-                          {holiday.name}
-                        </span>
-                        {holiday.isPublicHoliday && (
-                          <span className="shrink-0 text-[7px] font-black uppercase">
-                            Nghỉ
+                    {/* Holiday Badge (nếu có) - Wrap thoải mái & loại bỏ (date) thừa */}
+                    {holiday && (() => {
+                      const cleanHolidayName = holiday.name
+                        .replace(/\s*\(\s*\d+[\/-]\d+(\s*(?:AL|DL))?\s*\)/gi, '')
+                        .trim();
+
+                      return (
+                        <div
+                          className={`mt-1 text-[8.5px] font-bold px-1.5 py-0.5 rounded flex items-start justify-between gap-1 max-w-full ${
+                            holiday.isPublicHoliday
+                              ? 'bg-rose-500/20 text-rose-600 dark:text-rose-300'
+                              : 'bg-amber-500/20 text-amber-600 dark:text-amber-300'
+                          }`}
+                          title={holiday.name}
+                        >
+                          <span className="whitespace-normal break-words leading-tight flex-1">
+                            {cleanHolidayName}
                           </span>
-                        )}
-                      </div>
-                    )}
+                          {holiday.isPublicHoliday && (
+                            <span className="shrink-0 text-[7px] font-black uppercase px-1 py-0.2 rounded bg-rose-500/25 text-rose-600 dark:text-rose-200 mt-0.5">
+                              Nghỉ
+                            </span>
+                          )}
+                        </div>
+                      );
+                    })()}
 
                     <div className="flex items-center justify-between text-xs font-mono font-bold text-slate-500 dark:text-slate-400 mt-0.5">
                       <span>{d.subText}</span>

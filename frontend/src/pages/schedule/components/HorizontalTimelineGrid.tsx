@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
-import { ZoomIn, ZoomOut, ArrowLeftRight } from 'lucide-react';
+import { ZoomIn, ZoomOut } from 'lucide-react';
 import { ClassSession } from '../types';
 import { useTheme } from '../../../context/ThemeContext';
 import { HorizontalTimelineSessionCard } from './HorizontalTimelineSessionCard';
@@ -24,7 +24,6 @@ interface HorizontalTimelineGridProps {
   openEdit: (sess: ClassSession) => void;
   setCtxMenu?: (menu: { x: number; y: number; dateStr: string } | null) => void;
   viewModeToggle?: React.ReactNode;
-  onToggleOrientation?: () => void;
 }
 
 export const HorizontalTimelineGrid: React.FC<HorizontalTimelineGridProps> = ({
@@ -39,7 +38,6 @@ export const HorizontalTimelineGrid: React.FC<HorizontalTimelineGridProps> = ({
   openEdit,
   setCtxMenu,
   viewModeToggle,
-  onToggleOrientation,
 }) => {
   const { isDark } = useTheme();
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
@@ -137,22 +135,7 @@ export const HorizontalTimelineGrid: React.FC<HorizontalTimelineGridProps> = ({
   return (
     <div className="flex-1 min-h-0 flex flex-col select-none bg-slate-100 dark:bg-[#0c101d]">
       {/* ── TIMELINE TOOLBAR (Zoom Controls +/- & View Mode) ──────────────── */}
-      <div className="bg-slate-50 dark:bg-[#131a2c] border-b border-slate-200 dark:border-white/10 px-4 py-2 flex items-center justify-between gap-2.5 shrink-0">
-        {/* Left: Axis Orientation Switcher */}
-        <div className="flex items-center gap-2">
-          {onToggleOrientation && (
-            <button
-              type="button"
-              onClick={onToggleOrientation}
-              className="px-2.5 py-1.5 rounded-xl bg-white dark:bg-[#111728] hover:bg-slate-100 dark:hover:bg-white/10 text-blue-600 dark:text-blue-400 border border-slate-200 dark:border-white/10 text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-2xs"
-              title="Đổi lại chế độ: Trục dọc (Thứ theo cột, Giờ theo hàng)"
-            >
-              <ArrowLeftRight size={13} />
-              <span>Đổi trục (X ↔ Y)</span>
-            </button>
-          )}
-        </div>
-
+      <div className="bg-slate-50 dark:bg-[#131a2c] border-b border-slate-200 dark:border-white/10 px-4 py-2 flex items-center justify-end gap-2.5 shrink-0">
         {/* Right: Zoom Controls (+ and -) */}
         <div className="flex items-center gap-2">
           <div className="flex items-center bg-white dark:bg-[#111728] border border-slate-200 dark:border-white/10 rounded-xl p-0.5 shadow-2xs">
