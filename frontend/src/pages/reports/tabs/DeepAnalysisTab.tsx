@@ -1,6 +1,6 @@
-import React from 'react';
 import { SmartGroupingSection } from '../components/SmartGroupingSection';
 import { ScoreFluctuationsSection } from '../components/ScoreFluctuationsSection';
+import { RequireClassSelectionPrompt } from '../components/RequireClassSelectionPrompt';
 
 interface DeepAnalysisTabProps {
   loading: boolean;
@@ -11,6 +11,7 @@ interface DeepAnalysisTabProps {
   sessionRecords: any[];
   filteredRankings: any[];
   onSelectRankingStudent: (studentId: number) => void;
+  onSelectClass?: (classId: string) => void;
 }
 
 export const DeepAnalysisTab: React.FC<DeepAnalysisTabProps> = ({
@@ -22,7 +23,19 @@ export const DeepAnalysisTab: React.FC<DeepAnalysisTabProps> = ({
   sessionRecords,
   filteredRankings,
   onSelectRankingStudent,
+  onSelectClass,
 }) => {
+  if (!selectedClassId || selectedClassId === 'all') {
+    return (
+      <RequireClassSelectionPrompt
+        classes={classes}
+        onSelectClass={onSelectClass}
+        tabName="phân nhóm & biến động điểm"
+        description="Vui lòng chọn một lớp học cụ thể để xem gợi ý phân nhóm học tập theo học lực và bảng theo dõi biến động điểm số."
+      />
+    );
+  }
+
   return (
     <div className="flex flex-col gap-6 mb-8 select-none">
       {/* 1. SMART PEDAGOGICAL LEVEL GROUPING */}

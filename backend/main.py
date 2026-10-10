@@ -23,7 +23,8 @@ from routers import (
     assignments,
     users,
     word_documents,
-    sync
+    sync,
+    holidays
 )
 
 # Initialize Database schema, tables, migrations, and performance indexes
@@ -72,6 +73,7 @@ app.include_router(assignments.router)
 app.include_router(users.router)
 app.include_router(word_documents.router)
 app.include_router(sync.router)
+app.include_router(holidays.router)
 try:
     from routers import questions, vocabulary, documents
     app.include_router(questions.router)

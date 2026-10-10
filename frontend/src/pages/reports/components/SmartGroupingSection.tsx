@@ -131,11 +131,7 @@ export const SmartGroupingSection: React.FC<SmartGroupingSectionProps> = ({
   }, [smartGroups, classes, selectedClassId]);
 
   if (!selectedClassId || selectedClassId === 'all') {
-    return (
-      <div className="py-24 text-center text-sm font-semibold text-slate-500 dark:text-slate-400">
-        Yêu cầu chọn lớp
-      </div>
-    );
+    return null;
   }
 
   return (

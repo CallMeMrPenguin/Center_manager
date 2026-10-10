@@ -21,6 +21,10 @@ export const ScoreFluctuationsSection: React.FC<ScoreFluctuationsSectionProps> =
   selectedStudentId,
   onSelectRankingStudent,
 }) => {
+  if (!selectedClassId || selectedClassId === 'all') {
+    return null;
+  }
+
   const scoreFluctuations = useMemo(() => {
     const rawList = selectedClassId ? studentRankings.filter(r => String(r.class_id) === selectedClassId) : studentRankings;
     if (!rawList || rawList.length === 0) return [];
@@ -239,7 +243,7 @@ export const ScoreFluctuationsSection: React.FC<ScoreFluctuationsSectionProps> =
         loading={loading}
         searchPlaceholder="Tìm học sinh theo tên..."
         emptyMessage="Không có dữ liệu biến động điểm số."
-        pageSize={10}
+        pageSize={20}
         borderless={true}
         onRowClick={(r: any) => onSelectRankingStudent(r.student_id)}
         getRowClassName={(row: any) =>

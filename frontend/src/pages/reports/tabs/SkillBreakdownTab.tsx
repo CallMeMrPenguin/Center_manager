@@ -6,6 +6,7 @@ import { UnitBreakdownTable } from '../components/UnitBreakdownTable';
 import { StudentWeaknessDiagnosisCard } from '../components/StudentWeaknessDiagnosisCard';
 import { SegmentedControl } from '../../../components/SegmentedControl';
 import { CustomSelect } from '../../../components/CustomSelect';
+import { RequireClassSelectionPrompt } from '../components/RequireClassSelectionPrompt';
 
 interface SkillBreakdownTabProps {
   selectedClassId: string;
@@ -78,9 +79,12 @@ export const SkillBreakdownTab: React.FC<SkillBreakdownTabProps> = ({
   // If viewing all classes ("Tất cả lớp học"), prompt the user to pick a specific class
   if (!selectedClassId || selectedClassId === 'all') {
     return (
-      <div className="py-24 text-center text-sm font-semibold text-slate-500 dark:text-slate-400">
-        Yêu cầu chọn lớp
-      </div>
+      <RequireClassSelectionPrompt
+        classes={classes}
+        onSelectClass={onSelectClass}
+        tabName="kỹ năng & Bloom taxonomy"
+        description="Vui lòng chọn một lớp học cụ thể để xem ma trận thành thạo kỹ năng, chẩn đoán điểm yếu và phân tích chi tiết từng bài học."
+      />
     );
   }
 

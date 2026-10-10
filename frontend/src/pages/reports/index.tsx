@@ -185,6 +185,7 @@ export const ReportsPage: React.FC = () => {
             sessionRecords={sessionRecords}
             filteredRankings={filteredRankings}
             onSelectRankingStudent={handleSelectRankingStudent}
+            onSelectClass={setSelectedClassId}
           />
         ) : (
           <OverviewTab
