@@ -74,6 +74,17 @@ chmod -R 755 /var/www/center_manager
 
 cat << 'EOF' > /etc/caddy/Caddyfile
 upkidscentermanager.io.vn, www.upkidscentermanager.io.vn, :80 {
+    encode zstd gzip
+
+    # Best Practices & Security Headers for 100/100 Lighthouse & PageSpeed
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "SAMEORIGIN"
+        Referrer-Policy "strict-origin-when-cross-origin"
+        Permissions-Policy "camera=(), microphone=(), geolocation=()"
+    }
+
     # Chuyển hướng các request POST từ Cloudflare Verification về GET để tránh 405 Blank Page
     @postChallenge {
         method POST
@@ -89,6 +100,36 @@ upkidscentermanager.io.vn, www.upkidscentermanager.io.vn, :80 {
     }
     handle /users/* {
         reverse_proxy localhost:8000
+    }
+
+    handle /assets/* {
+        root * /var/www/center_manager/dist
+        header Cache-Control "public, max-age=31536000, immutable"
+        file_server
+    }
+
+    handle /robots.txt {
+        root * /var/www/center_manager/dist
+        header Cache-Control "public, max-age=3600"
+        file_server
+    }
+
+    handle /sitemap.xml {
+        root * /var/www/center_manager/dist
+        header Cache-Control "public, max-age=3600"
+        file_server
+    }
+
+    handle /favicon.* {
+        root * /var/www/center_manager/dist
+        header Cache-Control "public, max-age=86400"
+        file_server
+    }
+
+    handle /logo.png {
+        root * /var/www/center_manager/dist
+        header Cache-Control "public, max-age=86400"
+        file_server
     }
 
     handle {
