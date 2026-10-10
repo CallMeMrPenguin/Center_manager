@@ -178,9 +178,9 @@ export const VerticalTimelineGrid: React.FC<VerticalTimelineGridProps> = ({
       >
         <div className="min-w-full flex flex-col relative" style={{ minWidth: isFewDays ? '100%' : `${64 + days.length * 150}px` }}>
           {/* Sticky Top Header: Day Columns (100% Solid, No Transparency) */}
-          <div className="sticky top-0 z-30 flex bg-slate-200 dark:bg-[#111728] border-b border-slate-300 dark:border-white/10">
+          <div className="sticky top-0 z-40 flex bg-slate-200 dark:bg-[#111728] border-b border-slate-300 dark:border-white/10 shadow-xs">
             {/* Top-Left Corner Cell: Hour Axis Label */}
-            <div className="sticky left-0 z-40 w-[64px] shrink-0 p-2 text-center text-[10px] font-black uppercase tracking-wider text-slate-700 dark:text-slate-300 bg-slate-200 dark:bg-[#111728] border-r border-slate-300 dark:border-white/10 flex items-center justify-center">
+            <div className="sticky left-0 top-0 z-50 w-[64px] shrink-0 p-2 text-center text-[10px] font-black uppercase tracking-wider text-slate-700 dark:text-slate-300 bg-slate-200 dark:bg-[#111728] border-r border-slate-300 dark:border-white/10 flex items-center justify-center">
               GIỜ
             </div>
 
@@ -269,9 +269,9 @@ export const VerticalTimelineGrid: React.FC<VerticalTimelineGridProps> = ({
           </div>
 
           {/* Grid Body: Sticky Left Hours + Day Columns */}
-          <div className="flex relative" style={{ height: `${totalGridHeight}px` }}>
+          <div className="flex relative z-0" style={{ height: `${totalGridHeight}px` }}>
             {/* Sticky Left Hour Column (Solid 100% Opaque) */}
-            <div className="sticky left-0 z-20 w-[64px] shrink-0 bg-slate-100 dark:bg-[#111728] border-r border-slate-300 dark:border-white/10 flex flex-col">
+            <div className="sticky left-0 z-30 w-[64px] shrink-0 bg-slate-100 dark:bg-[#111728] border-r border-slate-300 dark:border-white/10 flex flex-col">
               {hours.slice(0, totalHours).map((h) => (
                 <div
                   key={h}

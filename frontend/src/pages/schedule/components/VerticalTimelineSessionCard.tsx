@@ -95,7 +95,7 @@ export const VerticalTimelineSessionCard: React.FC<VerticalTimelineSessionCardPr
           borderLeftColor: hexColor,
           boxShadow: vs.shadow,
         }}
-        className={`absolute z-10 rounded-xl border border-l-[3.5px] p-1.5 flex flex-col justify-between cursor-pointer transition-all duration-150 shadow-xs hover:shadow-md hover:z-30 hover:scale-[1.01] select-none group overflow-hidden ${
+        className={`absolute z-10 rounded-xl border border-l-[3.5px] p-1.5 flex flex-col justify-between cursor-pointer transition-all duration-150 shadow-xs hover:shadow-md hover:z-20 active:z-20 hover:scale-[1.01] select-none group overflow-hidden ${
           isLive ? 'ring-2 ring-amber-500/80 animate-pulse' : ''
         }`}
         title={`${session.class_name || 'Lớp học'}, ${teacherText}${assistantText ? `, ${assistantText}` : ''}, ${ssDisplay}, ${session.start_time}-${endTime}, ${session.room || 'Phòng'}`}
