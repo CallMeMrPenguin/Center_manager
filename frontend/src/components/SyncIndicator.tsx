@@ -2,6 +2,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { RefreshCw, CheckCircle2, CloudOff } from 'lucide-react';
 import { api } from '../api';
 
+import { isUserIdle, recordUserActivity } from '../utils/activityTracker';
+
 export const SyncIndicator: React.FC = () => {
   const [status, setStatus] = useState<'synced' | 'syncing' | 'offline'>('synced');
   const [lastSyncedAt, setLastSyncedAt] = useState<string | null>(null);
@@ -22,6 +24,7 @@ export const SyncIndicator: React.FC = () => {
   const handleTriggerSync = async () => {
     if (isManualSyncing) return;
     try {
+      recordUserActivity();
       setIsManualSyncing(true);
       setStatus('syncing');
       await api.triggerSync();
@@ -37,7 +40,13 @@ export const SyncIndicator: React.FC = () => {
 
   useEffect(() => {
     fetchStatus();
-    const interval = setInterval(fetchStatus, 15000);
+
+    // Poll periodically only when active to avoid 403 Cloudflare rate-limits
+    const interval = setInterval(() => {
+      if (!isUserIdle()) {
+        fetchStatus();
+      }
+    }, 45000);
 
     const handleOnline = () => {
       setStatus('syncing');
@@ -46,6 +55,7 @@ export const SyncIndicator: React.FC = () => {
     const handleOffline = () => setStatus('offline');
     const handleVisibility = () => {
       if (document.visibilityState === 'visible') {
+        recordUserActivity();
         fetchStatus();
       }
     };

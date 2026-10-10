@@ -232,7 +232,7 @@ export function ExportDropdown<TData>({
               className="w-full flex items-center gap-2 px-3 py-2 text-xs rounded-xl hover:bg-purple-50 dark:hover:bg-purple-500/10 text-purple-700 dark:text-purple-300 font-bold transition cursor-pointer"
             >
               <ImageIcon size={14} />
-              <span>Ảnh Báo Cáo (.png)</span>
+              <span>Ảnh Báo Cáo (.jpg)</span>
             </button>
           )}
 

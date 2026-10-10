@@ -186,7 +186,7 @@ upkidscentermanager.io.vn, www.upkidscentermanager.io.vn {
     handle /api/* {
         reverse_proxy localhost:8000 {
             transport http {
-                keepalive 30s
+                keepalive 300s
                 keepalive_idle_conns 100
             }
         }
@@ -194,7 +194,7 @@ upkidscentermanager.io.vn, www.upkidscentermanager.io.vn {
     handle /auth/* {
         reverse_proxy localhost:8000 {
             transport http {
-                keepalive 30s
+                keepalive 300s
                 keepalive_idle_conns 100
             }
         }
@@ -202,7 +202,7 @@ upkidscentermanager.io.vn, www.upkidscentermanager.io.vn {
     handle /users/* {
         reverse_proxy localhost:8000 {
             transport http {
-                keepalive 30s
+                keepalive 300s
                 keepalive_idle_conns 100
             }
         }

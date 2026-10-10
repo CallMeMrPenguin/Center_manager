@@ -15,7 +15,7 @@ import { useCanvasShortcuts } from './hooks/useCanvasShortcuts';
 import { useCanvasPdfLoader } from './hooks/useCanvasPdfLoader';
 import { useCanvasRedraw } from './hooks/useCanvasRedraw';
 import { getTransformedPoint } from '../../utils/drawingEngine';
-import { formatExportTimestamp } from '../../utils';
+import { exportCanvasJpg } from './utils/canvasExport';
 
 try {
   pdfjsLib.GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/build/pdf.worker.min.mjs', import.meta.url).toString();
@@ -257,13 +257,7 @@ export default function CanvasBoardPage() {
   }, [canvasImages, setZoom, setPan]);
 
   const handleExportPNG = () => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const a = document.createElement('a');
-    a.href = canvas.toDataURL('image/png');
-    a.download = `Canvas_${docName.replace(/\.[^/.]+$/, '')}_Trang${currentPage}_${formatExportTimestamp()}.png`;
-    a.click();
-    showToast('Đã tải ảnh xuất thành công', 'success');
+    exportCanvasJpg(canvasRef.current, docName, currentPage);
   };
 
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {

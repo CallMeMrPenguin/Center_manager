@@ -463,7 +463,8 @@ def save_export_png(class_id: int, date_str: str, image_base64: str) -> Dict[str
     os.makedirs(files_dir, exist_ok=True)
 
     ts = datetime.now().strftime("%S-%M-%H -%d=%m-%y")
-    filename = f"ClassReport_{class_name}_{date_str}_{ts}.png"
+    ext = "png" if "image/png" in image_base64 else "jpg"
+    filename = f"ClassReport_{class_name}_{date_str}_{ts}.{ext}"
     filepath = os.path.join(files_dir, filename)
 
     # Strip data URL header if present

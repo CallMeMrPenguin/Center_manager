@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { showToast } from '../components/Toast';
+import { isUserIdle } from '../utils/activityTracker';
 
 /**
  * Hook to detect new deployments on Web/VPS and auto-refresh smoothly.
@@ -23,7 +24,7 @@ export function useAutoDeploymentRefresh() {
 
     const checkNewVersion = async () => {
       const now = Date.now();
-      if (isReloading || now < errorCooldownUntil || now - lastCheckTime < MIN_INTERVAL_MS) {
+      if (isReloading || isUserIdle() || now < errorCooldownUntil || now - lastCheckTime < MIN_INTERVAL_MS) {
         return;
       }
       lastCheckTime = now;

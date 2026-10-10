@@ -46,7 +46,7 @@ export const SessionOverviewBanner: React.FC<SessionOverviewBannerProps> = ({
         <div>
           <div className="flex items-center gap-2">
             <h3 className="text-xs font-black text-slate-800 dark:text-slate-200 tracking-wider uppercase">
-              Tổng Quan Buổi Học
+              Tóm Tắt Buổi Học
             </h3>
             <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400">({attendanceDate})</span>
             {hasAlerts ? (

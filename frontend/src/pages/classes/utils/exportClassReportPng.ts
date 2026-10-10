@@ -332,9 +332,9 @@ export async function exportClassReportPng({
   ctx.strokeRect(0, 0, width, currentY);
 
   // 3. Export: Download + Desktop Save + Clipboard Copy
-  const dataUrl = canvas.toDataURL('image/png');
+  const dataUrl = canvas.toDataURL('image/jpeg', 0.95);
   const ts = formatExportTimestamp();
-  const filename = `ClassReport_${className}_${attendanceDate}_${ts}.png`;
+  const filename = `ClassReport_${className}_${attendanceDate}_${ts}.jpg`;
 
   const link = Object.assign(document.createElement('a'), { download: filename, href: dataUrl });
   link.click();
@@ -344,14 +344,15 @@ export async function exportClassReportPng({
     const res = await api.saveExportPng(classItem.id, attendanceDate, dataUrl);
     if (res?.filename) savedName = res.filename;
   } catch (err) {
-    console.warn('Could not save PNG to workspace_files:', err);
+    console.warn('Could not save JPG to workspace_files:', err);
   }
 
-  // Copy to clipboard immediately
+  // Copy to clipboard immediately (use standard PNG blob for clipboard compatibility)
   let clipboardSuccess = false;
   if (navigator.clipboard && (window as any).ClipboardItem) {
     try {
-      const byteStr = window.atob(dataUrl.split(',')[1]);
+      const pngDataUrl = canvas.toDataURL('image/png');
+      const byteStr = window.atob(pngDataUrl.split(',')[1]);
       const bytes = new Uint8Array(byteStr.length);
       for (let i = 0; i < byteStr.length; i++) bytes[i] = byteStr.charCodeAt(i);
       await navigator.clipboard.write([new (window as any).ClipboardItem({ 'image/png': new Blob([bytes], { type: 'image/png' }) })]);
@@ -362,5 +363,5 @@ export async function exportClassReportPng({
   }
 
   const clipMsg = clipboardSuccess ? ' và đã lưu vào bộ nhớ tạm (Ctrl+V để dán)' : '';
-  showToast(`Đã xuất và tải xuống ảnh PNG${clipMsg}: ${savedName}`, 'success');
+  showToast(`Đã xuất và tải xuống ảnh JPG${clipMsg}: ${savedName}`, 'success');
 }

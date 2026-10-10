@@ -5,6 +5,8 @@ import { DataTable } from '../../../../components/DataTable';
 import { useAttendanceColumns } from '../../hooks/useAttendanceColumns';
 import { useSessionOverview } from './useSessionOverview';
 import { exportClassReportPng } from '../../utils/exportClassReportPng';
+import { SessionOverviewBanner } from './SessionOverviewBanner';
+import { showToast } from '../../../../components/Toast';
 
 interface AttendanceGradesTabProps {
   selectedClass: ClassItem;
@@ -75,9 +77,24 @@ export const AttendanceGradesTab: React.FC<AttendanceGradesTabProps> = ({
     });
   };
 
+  const handleFilterStudentChip = (name: string) => {
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(name);
+      showToast(`Đã sao chép "${name}" để dán tìm kiếm`, 'info');
+    }
+  };
+
   return (
     <div className="space-y-4">
-      {/* UNIFIED ATTENDANCE & GRADES DATATABLE */}
+      {/* 1. TÓM TẮT & TỔNG QUAN BUỔI HỌC */}
+      <SessionOverviewBanner
+        attendanceRecords={attendanceRecords}
+        attendanceDate={attendanceDate}
+        onFilterStudent={handleFilterStudentChip}
+        overview={sessionOverview}
+      />
+
+      {/* 2. UNIFIED ATTENDANCE & GRADES DATATABLE */}
       <div className="bg-white dark:bg-[#0d1018] rounded-2xl overflow-hidden shadow-[0_4px_24px_rgba(0,0,0,0.08)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.5)]">
         <DataTable
           tableId="classes-attendance-table"

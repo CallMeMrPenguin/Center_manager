@@ -1,5 +1,6 @@
 import { dataCache } from '../utils/dataCache';
 import { getAuthToken } from '../utils/authUtils';
+import { recordUserActivity } from '../utils/activityTracker';
 
 export const API_BASE = import.meta.env.VITE_API_URL ?? '';
 
@@ -59,6 +60,7 @@ export async function request<T>(path: string, options?: RequestOptions): Promis
     }
   }
 
+  recordUserActivity();
   const url = `${API_BASE}${path}`;
   const response = await fetch(url, {
     ...options,
@@ -67,6 +69,26 @@ export async function request<T>(path: string, options?: RequestOptions): Promis
 
   if (!response.ok) {
     const errText = await response.text();
+    if (response.status === 403) {
+      const isCloudflareBlocked =
+        errText.includes('<!DOCTYPE') ||
+        errText.includes('<html') ||
+        errText.includes('cf-mitigated') ||
+        errText.includes('challenge') ||
+        errText.includes('Just a moment');
+
+      if (isCloudflareBlocked) {
+        if (typeof window !== 'undefined' && !(window as any).__reloading403) {
+          (window as any).__reloading403 = true;
+          setTimeout(() => {
+            window.location.reload();
+          }, 1500);
+        }
+        throw new Error('Phiên kết nối tạm thời gián đoạn do không hoạt động (Mã 403). Đang tự động làm mới để kết nối lại...');
+      }
+      throw new Error(errText || 'Quyền truy cập bị từ chối (403)');
+    }
+
     if (errText.trim().startsWith('<') || errText.includes('<!DOCTYPE') || errText.includes('<html')) {
       if (response.status === 502 || response.status === 503 || response.status === 504) {
         throw new Error('Máy chủ đang khởi động lại hoặc tạm thời gián đoạn (Mã ' + response.status + '). Vui lòng thử lại sau giây lát.');
