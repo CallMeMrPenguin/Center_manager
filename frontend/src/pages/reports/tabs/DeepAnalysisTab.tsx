@@ -26,14 +26,7 @@ export const DeepAnalysisTab: React.FC<DeepAnalysisTabProps> = ({
   onSelectClass,
 }) => {
   if (!selectedClassId || selectedClassId === 'all') {
-    return (
-      <RequireClassSelectionPrompt
-        classes={classes}
-        onSelectClass={onSelectClass}
-        tabName="phân nhóm & biến động điểm"
-        description="Vui lòng chọn một lớp học cụ thể để xem gợi ý phân nhóm học tập theo học lực và bảng theo dõi biến động điểm số."
-      />
-    );
+    return <RequireClassSelectionPrompt />;
   }
 
   return (

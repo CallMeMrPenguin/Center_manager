@@ -78,14 +78,7 @@ export const SkillBreakdownTab: React.FC<SkillBreakdownTabProps> = ({
 
   // If viewing all classes ("Tất cả lớp học"), prompt the user to pick a specific class
   if (!selectedClassId || selectedClassId === 'all') {
-    return (
-      <RequireClassSelectionPrompt
-        classes={classes}
-        onSelectClass={onSelectClass}
-        tabName="kỹ năng & Bloom taxonomy"
-        description="Vui lòng chọn một lớp học cụ thể để xem ma trận thành thạo kỹ năng, chẩn đoán điểm yếu và phân tích chi tiết từng bài học."
-      />
-    );
+    return <RequireClassSelectionPrompt />;
   }
 
   if (loading && !reportData) {
