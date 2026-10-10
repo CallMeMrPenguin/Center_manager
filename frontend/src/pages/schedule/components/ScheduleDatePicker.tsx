@@ -41,9 +41,10 @@ export const ScheduleDatePicker: React.FC<ScheduleDatePickerProps> = ({
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Range picking states for live hover & preview highlight
+  // Range picking & hover indicator states
   const [pickingStart, setPickingStart] = useState<string | null>(null);
   const [hoverDate, setHoverDate] = useState<string | null>(null);
+  const [activeHoverDay, setActiveHoverDay] = useState<string | null>(null);
   const [customRange, setCustomRange] = useState<{ startStr: string; endStr: string } | null>(null);
 
   // Month 1 (Primary / Current Month)
@@ -66,6 +67,7 @@ export const ScheduleDatePicker: React.FC<ScheduleDatePickerProps> = ({
         setOpen(false);
         setPickingStart(null);
         setHoverDate(null);
+        setActiveHoverDay(null);
       }
     };
     if (open) {
@@ -150,6 +152,7 @@ export const ScheduleDatePicker: React.FC<ScheduleDatePickerProps> = ({
   };
 
   const handleDayHover = (dateStr: string) => {
+    setActiveHoverDay(dateStr);
     if (pickingStart) {
       setHoverDate(dateStr);
     }
@@ -158,6 +161,7 @@ export const ScheduleDatePicker: React.FC<ScheduleDatePickerProps> = ({
   const changeMonth = (delta: number) => {
     setPickingStart(null);
     setHoverDate(null);
+    setActiveHoverDay(null);
     setCustomRange(null);
     const nextMo = getAdjacentMonth(yr, mo, delta);
     onSelectMonth(nextMo.monthStr);
@@ -166,6 +170,7 @@ export const ScheduleDatePicker: React.FC<ScheduleDatePickerProps> = ({
   const handleJumpToday = () => {
     setPickingStart(null);
     setHoverDate(null);
+    setActiveHoverDay(null);
     setCustomRange(null);
     const now = new Date();
     const d = now.getDay();
@@ -183,6 +188,7 @@ export const ScheduleDatePicker: React.FC<ScheduleDatePickerProps> = ({
   const handleReset = () => {
     setPickingStart(null);
     setHoverDate(null);
+    setActiveHoverDay(null);
     setCustomRange(null);
     const nowMoStr = today.slice(0, 7);
     onSelectMonth(nowMoStr);
@@ -194,6 +200,7 @@ export const ScheduleDatePicker: React.FC<ScheduleDatePickerProps> = ({
   const handleSelectAll = () => {
     setPickingStart(null);
     setHoverDate(null);
+    setActiveHoverDay(null);
     setCustomRange(null);
     onSelectScope('all');
   };
@@ -202,6 +209,7 @@ export const ScheduleDatePicker: React.FC<ScheduleDatePickerProps> = ({
     if (e) e.stopPropagation();
     setPickingStart(null);
     setHoverDate(null);
+    setActiveHoverDay(null);
     setCustomRange(null);
     let updated: string[];
 
@@ -235,6 +243,7 @@ export const ScheduleDatePicker: React.FC<ScheduleDatePickerProps> = ({
   const handleDoubleClickWeek = (w: WeekInfo) => {
     setPickingStart(null);
     setHoverDate(null);
+    setActiveHoverDay(null);
     setCustomRange(null);
     onSelectScope('week');
     onSelectWeekStarts?.([w.startStr]);
@@ -265,6 +274,7 @@ export const ScheduleDatePicker: React.FC<ScheduleDatePickerProps> = ({
           <div
             className="p-2.5 sm:p-3 flex flex-col md:flex-row gap-3.5 md:gap-4 shrink-0"
             onMouseLeave={() => {
+              setActiveHoverDay(null);
               if (!pickingStart) setHoverDate(null);
             }}
           >
@@ -277,6 +287,8 @@ export const ScheduleDatePicker: React.FC<ScheduleDatePickerProps> = ({
               isPicking={!!pickingStart}
               pickingStart={pickingStart}
               hoverDate={hoverDate}
+              activeHoverDay={activeHoverDay}
+              hoverLayoutId="schedule-datepicker-hover-pill"
               onDayClick={handleDayClick}
               onDayHover={handleDayHover}
               onDoubleClickWeek={handleDoubleClickWeek}
@@ -297,6 +309,8 @@ export const ScheduleDatePicker: React.FC<ScheduleDatePickerProps> = ({
               isPicking={!!pickingStart}
               pickingStart={pickingStart}
               hoverDate={hoverDate}
+              activeHoverDay={activeHoverDay}
+              hoverLayoutId="schedule-datepicker-hover-pill"
               onDayClick={handleDayClick}
               onDayHover={handleDayHover}
               onDoubleClickWeek={handleDoubleClickWeek}

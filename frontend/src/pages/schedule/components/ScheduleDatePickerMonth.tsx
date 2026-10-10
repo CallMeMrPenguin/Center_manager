@@ -11,6 +11,8 @@ interface ScheduleDatePickerMonthProps {
   isPicking: boolean;
   pickingStart?: string | null;
   hoverDate?: string | null;
+  activeHoverDay?: string | null;
+  hoverLayoutId?: string;
   onDayClick: (dateStr: string) => void;
   onDayHover: (dateStr: string) => void;
   onDoubleClickWeek?: (w: WeekInfo) => void;
@@ -28,6 +30,8 @@ export const ScheduleDatePickerMonth: React.FC<ScheduleDatePickerMonthProps> = (
   isPicking,
   pickingStart,
   hoverDate,
+  activeHoverDay,
+  hoverLayoutId = 'schedule-datepicker-hover-pill',
   onDayClick,
   onDayHover,
   onDoubleClickWeek,
@@ -103,6 +107,8 @@ export const ScheduleDatePickerMonth: React.FC<ScheduleDatePickerMonthProps> = (
                 isPicking={isPicking}
                 pickingStart={pickingStart}
                 hoverDate={hoverDate}
+                isHovered={activeHoverDay === d.dateStr}
+                hoverLayoutId={hoverLayoutId}
                 onDayClick={onDayClick}
                 onDayHover={onDayHover}
               />
