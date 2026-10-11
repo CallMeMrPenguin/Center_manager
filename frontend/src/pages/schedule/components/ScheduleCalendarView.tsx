@@ -16,6 +16,7 @@ interface ScheduleCalendarViewProps {
   sessions: ClassSession[];
   weekDays: Array<{ header: string; dateStr: string; dayNum: number }>;
   selectedWeekStarts?: string[];
+  customRange?: { startStr: string; endStr: string } | null;
   changeWeek: (dir: number) => void;
   setWeekStart?: (d: Date) => void;
   setWeekStartToday?: () => void;
@@ -34,6 +35,7 @@ export const ScheduleCalendarView: React.FC<ScheduleCalendarViewProps> = ({
   sessions,
   weekDays,
   selectedWeekStarts,
+  customRange,
   changeWeek,
   setWeekStartToday,
   openAdd,
@@ -104,7 +106,34 @@ export const ScheduleCalendarView: React.FC<ScheduleCalendarViewProps> = ({
     return rows;
   }, [daysInMonth, yr, mo, today]);
 
-  const daysToRender = scope === 'all' ? monthDayRows : weekDayRows;
+  // 3. Custom picked range row items
+  const rangeDayRows = useMemo(() => {
+    if (customRange && customRange.startStr && customRange.endStr) {
+      const partsStart = customRange.startStr.split('-').map(Number);
+      const partsEnd = customRange.endStr.split('-').map(Number);
+      const startD = new Date(partsStart[0], partsStart[1] - 1, partsStart[2]);
+      const endD = new Date(partsEnd[0], partsEnd[1] - 1, partsEnd[2]);
+      const rows = [];
+      const cur = new Date(startD);
+      while (cur <= endD) {
+        const dStr = getLocalDateStr(cur);
+        const dayOfWeek = cur.getDay();
+        const dayName = dayOfWeek === 0 ? 'Chủ Nhật' : `Thứ ${dayOfWeek + 1}`;
+        rows.push({
+          header: dayName,
+          dateStr: dStr,
+          subText: `${String(cur.getDate()).padStart(2, '0')}/${String(cur.getMonth() + 1).padStart(2, '0')}`,
+          isToday: dStr === today,
+          isWeekend: dayOfWeek === 0 || dayOfWeek === 6,
+        });
+        cur.setDate(cur.getDate() + 1);
+      }
+      return rows;
+    }
+    return null;
+  }, [customRange, today]);
+
+  const daysToRender = scope === 'all' ? monthDayRows : (rangeDayRows || weekDayRows);
   const viewModeToRender = scope === 'all' ? 'month' : 'week';
   const weekRangeText = daysToRender.length > 0 ? `${daysToRender[0].dateStr} - ${daysToRender[daysToRender.length - 1].dateStr}` : '';
 

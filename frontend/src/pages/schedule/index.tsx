@@ -18,6 +18,7 @@ import { useScheduleColumns } from './hooks/useScheduleColumns';
 import { useScheduleActions } from './hooks/useScheduleActions';
 import { useScheduleCalendar } from './hooks/useScheduleCalendar';
 import { dataCache } from '../../utils/dataCache';
+import { computeMonthsToFetch, filterInScopeSessions, CustomDateRange } from './scheduleScopeHelper';
 
 export default function SchedulePage() {
   const [loading, setLoading] = useState(true);
@@ -41,6 +42,7 @@ export default function SchedulePage() {
     changeWeek,
   } = useScheduleCalendar();
   const [scheduleScope, setScheduleScope] = useState<'all' | 'week'>('all');
+  const [customRange, setCustomRange] = useState<CustomDateRange | null>(null);
   const [selectedWeekStarts, setSelectedWeekStarts] = useState<string[]>(() => [
     getLocalDateStr(weekStart),
   ]);
@@ -51,6 +53,7 @@ export default function SchedulePage() {
       if (prev.length <= 1) return [wsStr];
       return prev;
     });
+    setCustomRange(null);
   }, [weekStart]);
 
   const cachedClasses = dataCache.get<any[]>('/api/classes?search=')?.data;
@@ -83,25 +86,11 @@ export default function SchedulePage() {
     if (!isSilent) setLoading(true);
     try {
       const targetClassId = classFilter ? Number(classFilter) : 0;
-      const allMonths = new Set<string>();
-      allMonths.add(selectedMonth);
-      const [y, m] = selectedMonth.split('-').map(Number);
-      if (y && m) {
-        const nextMoStr = `${m === 12 ? y + 1 : y}-${String(m === 12 ? 1 : m + 1).padStart(2, '0')}`;
-        allMonths.add(nextMoStr);
-      }
-      selectedWeekStarts.forEach((sStr) => {
-        allMonths.add(sStr.slice(0, 7));
-        const parts = sStr.split('-').map(Number);
-        const endD = new Date(parts[0], parts[1] - 1, parts[2] + 6);
-        allMonths.add(getLocalDateStr(endD).slice(0, 7));
-      });
-      const monthsToFetch = Array.from(allMonths);
-
+      const monthsToFetch = computeMonthsToFetch(scheduleScope, selectedMonth, selectedWeekStarts, customRange);
 
       const [cls, ...sessionArrays] = await Promise.all([
         api.getClasses().catch(() => []),
-        ...monthsToFetch.map(m => api.getClassSessions(targetClassId, m).catch(() => [])),
+        ...monthsToFetch.map((m) => api.getClassSessions(targetClassId, m).catch(() => [])),
       ]);
       setClassesList(cls);
 
@@ -109,9 +98,10 @@ export default function SchedulePage() {
       sessionArrays.flat().forEach((s: any) => {
         if (s?.id) sessionMap.set(s.id, s);
       });
-      const ss = Array.from(sessionMap.values());
+      const rawSessions = Array.from(sessionMap.values());
+      const inScope = filterInScopeSessions(rawSessions, scheduleScope, selectedMonth, selectedWeekStarts, customRange);
 
-      const all: ClassSession[] = ss.map((s: any) => {
+      const all: ClassSession[] = inScope.map((s: any) => {
         const matchedClass = cls.find((c: any) => c.id === s.class_id);
         return {
           ...s,
@@ -144,9 +134,7 @@ export default function SchedulePage() {
     const h = () => loadData(true);
     window.addEventListener('data-changed', h);
     return () => window.removeEventListener('data-changed', h);
-  }, [selectedMonth, classFilter, weekDays[0]?.dateStr, selectedWeekStarts.join(',')]);
-
-
+  }, [selectedMonth, classFilter, scheduleScope, selectedWeekStarts.join(','), customRange?.startStr, customRange?.endStr]);
 
   const applyClassSchedule = async (cid: number, targetDateStr?: string) => {
     try {
@@ -282,7 +270,10 @@ export default function SchedulePage() {
             {/* Datepicker */}
             <ScheduleDatePicker
               selectedMonth={selectedMonth}
-              onSelectMonth={setSelectedMonth}
+              onSelectMonth={(mStr) => {
+                setSelectedMonth(mStr);
+                setCustomRange(null);
+              }}
               scope={scheduleScope}
               onSelectScope={setScheduleScope}
               weekStart={weekStart}
@@ -290,6 +281,8 @@ export default function SchedulePage() {
               today={today}
               selectedWeekStarts={selectedWeekStarts}
               onSelectWeekStarts={setSelectedWeekStarts}
+              customRange={customRange}
+              onSelectCustomRange={setCustomRange}
             />
 
             <CustomSelect
@@ -319,8 +312,15 @@ export default function SchedulePage() {
             sessions={sessions}
             weekDays={weekDays}
             selectedWeekStarts={selectedWeekStarts}
-            changeWeek={changeWeek}
-            setWeekStartToday={setWeekStartToday}
+            customRange={customRange}
+            changeWeek={(dir) => {
+              setCustomRange(null);
+              changeWeek(dir);
+            }}
+            setWeekStartToday={() => {
+              setCustomRange(null);
+              setWeekStartToday();
+            }}
             openAdd={openAdd}
             openEdit={openEdit}
             viewModeToggle={

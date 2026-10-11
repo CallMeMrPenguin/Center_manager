@@ -25,6 +25,8 @@ interface ScheduleDatePickerProps {
   today: string; // 'YYYY-MM-DD'
   selectedWeekStarts?: string[];
   onSelectWeekStarts?: (starts: string[]) => void;
+  customRange?: { startStr: string; endStr: string } | null;
+  onSelectCustomRange?: (range: { startStr: string; endStr: string } | null) => void;
 }
 
 export const ScheduleDatePicker: React.FC<ScheduleDatePickerProps> = ({
@@ -37,6 +39,8 @@ export const ScheduleDatePicker: React.FC<ScheduleDatePickerProps> = ({
   today,
   selectedWeekStarts,
   onSelectWeekStarts,
+  customRange: customRangeProp,
+  onSelectCustomRange,
 }) => {
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -45,7 +49,15 @@ export const ScheduleDatePicker: React.FC<ScheduleDatePickerProps> = ({
   const [pickingStart, setPickingStart] = useState<string | null>(null);
   const [hoverDate, setHoverDate] = useState<string | null>(null);
   const [activeHoverDay, setActiveHoverDay] = useState<string | null>(null);
-  const [customRange, setCustomRange] = useState<{ startStr: string; endStr: string } | null>(null);
+  const [internalCustomRange, setInternalCustomRange] = useState<{ startStr: string; endStr: string } | null>(null);
+  const customRange = customRangeProp !== undefined ? customRangeProp : internalCustomRange;
+
+  const updateCustomRange = (r: { startStr: string; endStr: string } | null) => {
+    if (customRangeProp === undefined) {
+      setInternalCustomRange(r);
+    }
+    onSelectCustomRange?.(r);
+  };
 
   // Month 1 (Primary / Current Month)
   const [yr, mo] = useMemo(() => {
@@ -132,7 +144,7 @@ export const ScheduleDatePicker: React.FC<ScheduleDatePickerProps> = ({
     if (!pickingStart) {
       setPickingStart(dateStr);
       setHoverDate(dateStr);
-      setCustomRange(null);
+      updateCustomRange(null);
     } else {
       const minStr = pickingStart <= dateStr ? pickingStart : dateStr;
       const maxStr = pickingStart <= dateStr ? dateStr : pickingStart;
@@ -145,7 +157,7 @@ export const ScheduleDatePicker: React.FC<ScheduleDatePickerProps> = ({
         if (firstWeek) onSelectWeekStart(firstWeek.start);
       }
 
-      setCustomRange({ startStr: minStr, endStr: maxStr });
+      updateCustomRange({ startStr: minStr, endStr: maxStr });
       setPickingStart(null);
       setHoverDate(null);
     }
@@ -162,7 +174,7 @@ export const ScheduleDatePicker: React.FC<ScheduleDatePickerProps> = ({
     setPickingStart(null);
     setHoverDate(null);
     setActiveHoverDay(null);
-    setCustomRange(null);
+    updateCustomRange(null);
     const nextMo = getAdjacentMonth(yr, mo, delta);
     onSelectMonth(nextMo.monthStr);
   };
@@ -171,7 +183,7 @@ export const ScheduleDatePicker: React.FC<ScheduleDatePickerProps> = ({
     setPickingStart(null);
     setHoverDate(null);
     setActiveHoverDay(null);
-    setCustomRange(null);
+    updateCustomRange(null);
     const now = new Date();
     const d = now.getDay();
     const mon = new Date(now);
@@ -189,7 +201,7 @@ export const ScheduleDatePicker: React.FC<ScheduleDatePickerProps> = ({
     setPickingStart(null);
     setHoverDate(null);
     setActiveHoverDay(null);
-    setCustomRange(null);
+    updateCustomRange(null);
     const nowMoStr = today.slice(0, 7);
     onSelectMonth(nowMoStr);
     onSelectScope('all');
@@ -201,7 +213,7 @@ export const ScheduleDatePicker: React.FC<ScheduleDatePickerProps> = ({
     setPickingStart(null);
     setHoverDate(null);
     setActiveHoverDay(null);
-    setCustomRange(null);
+    updateCustomRange(null);
     onSelectScope('all');
   };
 
@@ -210,7 +222,7 @@ export const ScheduleDatePicker: React.FC<ScheduleDatePickerProps> = ({
     setPickingStart(null);
     setHoverDate(null);
     setActiveHoverDay(null);
-    setCustomRange(null);
+    updateCustomRange(null);
     let updated: string[];
 
     if (scope !== 'week') {
@@ -244,7 +256,7 @@ export const ScheduleDatePicker: React.FC<ScheduleDatePickerProps> = ({
     setPickingStart(null);
     setHoverDate(null);
     setActiveHoverDay(null);
-    setCustomRange(null);
+    updateCustomRange(null);
     onSelectScope('week');
     onSelectWeekStarts?.([w.startStr]);
     onSelectWeekStart(w.start);
