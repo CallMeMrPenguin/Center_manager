@@ -1,23 +1,32 @@
-import React, { useState } from 'react';
+import React, { memo } from 'react';
 import { Excalidraw } from '@excalidraw/excalidraw';
 import '@excalidraw/excalidraw/index.css';
 
-export default function CanvasBoardPage() {
-  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
-
+function CanvasBoardPage() {
   return (
-    <div className="h-full w-full overflow-hidden flex flex-col relative bg-[#121212]">
+    <div
+      className="h-full w-full overflow-hidden flex flex-col relative bg-[#f8f9fa]"
+      style={{
+        contain: 'strict',
+        isolation: 'isolate',
+      }}
+    >
       <Excalidraw
-        theme={theme}
+        theme="light"
         langCode="vi-VN"
+        gridModeEnabled={false}
+        zenModeEnabled={false}
         UIOptions={{
           canvasActions: {
             saveToActiveFile: false,
             loadScene: true,
             export: { saveFileToDisk: true },
+            toggleTheme: true,
           },
         }}
       />
     </div>
   );
 }
+
+export default memo(CanvasBoardPage);

@@ -44,6 +44,15 @@ REPOSITORIES = [
         "asset_prefix": "pdfcraft-web",
     },
     {
+        "id": "gridcraft",
+        "name": "GridCraft",
+        "repo_url": "https://github.com/storytold/gridcraft.git",
+        "api_releases": "https://api.github.com/repos/storytold/gridcraft/releases/latest",
+        "source_archive_url": "https://github.com/storytold/gridcraft/archive/refs/heads/main.zip",
+        "target_public_subdir": "gridcraft",
+        "asset_prefix": "gridcraft-web",
+    },
+    {
         "id": "excalidraw",
         "name": "Excalidraw",
         "repo_url": "https://github.com/excalidraw/excalidraw.git",

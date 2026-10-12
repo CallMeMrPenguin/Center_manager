@@ -142,9 +142,7 @@ echo "=========================================================="
 echo " [5/8] BUILD FRONTEND REACT UI MỚI NHẤT"
 echo "=========================================================="
 cd "$PROJECT_DIR/frontend"
-if [ ! -d "node_modules" ]; then
-    npm install
-fi
+npm install --prefer-offline --no-audit
 npm run build
 cd "$PROJECT_DIR"
 

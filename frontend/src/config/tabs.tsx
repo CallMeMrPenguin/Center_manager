@@ -3,10 +3,11 @@ import {
   FileCode, Database, BookOpen, Settings as SettingsIcon, FolderOpen, LucideIcon,
   LayoutDashboard, Users, UserCheck, Briefcase, ClipboardList, Award, 
   CreditCard, Receipt, BarChart3, CalendarCheck, UserCog, FileCheck, GraduationCap,
-  PenTool, Sparkles, FileText
+  PenTool, Sparkles, FileText, FileSpreadsheet
 } from 'lucide-react';
 
 import WaitingForDevelopment from '../components/WaitingForDevelopment';
+import { PdfIcon } from '../components/icons/PdfIcon';
 
 import { TAB_MODULE_LOADERS } from '../utils/tabPreloader';
 
@@ -19,6 +20,7 @@ const DocumentManager = lazy(TAB_MODULE_LOADERS['file-manager']);
 const CanvasBoardPage = lazy(TAB_MODULE_LOADERS['canvas-board']);
 const WordEditorPage = lazy(TAB_MODULE_LOADERS['word-editor']);
 const PDFEditorPage = lazy(TAB_MODULE_LOADERS['pdf-editor']);
+const GridEditorPage = lazy(TAB_MODULE_LOADERS['grid-editor']);
 const DashboardPage = lazy(TAB_MODULE_LOADERS['dashboard']);
 const StudentsPage = lazy(TAB_MODULE_LOADERS['students']);
 const TeachersPage = lazy(TAB_MODULE_LOADERS['teachers']);
@@ -36,7 +38,7 @@ const UsersRolesPage = lazy(TAB_MODULE_LOADERS['users-roles']);
 export interface TabDefinition {
   id: string;
   label: string;
-  icon: LucideIcon;
+  icon: LucideIcon | React.ComponentType<any>;
   section: 'none' | 'main' | 'assessments' | 'resources' | 'finance' | 'analytics' | 'settings';
   render: (props: {
     isActive?: boolean;
@@ -184,9 +186,16 @@ export const TAB_DEFINITIONS: TabDefinition[] = [
     render: () => <WordEditorPage />
   },
   {
+    id: 'grid-editor',
+    label: 'Bảng Tính (Excel)',
+    icon: FileSpreadsheet,
+    section: 'resources',
+    render: () => <GridEditorPage />
+  },
+  {
     id: 'pdf-editor',
     label: 'PDF Editor',
-    icon: FileCode,
+    icon: PdfIcon,
     section: 'resources',
     render: () => <PDFEditorPage />
   },

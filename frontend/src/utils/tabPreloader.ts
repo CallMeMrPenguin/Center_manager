@@ -39,6 +39,7 @@ export const TAB_MODULE_LOADERS: Record<string, () => Promise<{ default: Compone
   'file-manager': () => loadWithRetry(() => import('../pages/document-manager')),
   'word-editor': () => loadWithRetry(() => import('../pages/word-editor')),
   'pdf-editor': () => loadWithRetry(() => import('../pages/pdf-editor')),
+  'grid-editor': () => loadWithRetry(() => import('../pages/grid-editor')),
   'canvas-board': () => loadWithRetry(() => import('../pages/canvas-board')),
   'ui-showcase': () => loadWithRetry(() => import('../pages/ui-showcase')),
 };
@@ -66,6 +67,8 @@ export const CORE_PREMOUNT_TABS: string[] = [
 export const HEAVY_ISOLATED_TABS: string[] = [
   'canvas-board',
   'word-editor',
+  'pdf-editor',
+  'grid-editor',
   'formatter',
   'question-bank',
   'file-manager',
