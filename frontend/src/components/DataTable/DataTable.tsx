@@ -27,7 +27,7 @@ export function DataTable<TData>({
   enableRowExpansion = false, enableColumnPinning = false, enableMultiSort = true,
   enableVirtualization, enableExport = true, stickyHeader = true, stickyFirstColumn = false,
   initialSorting = [], initialColumnVisibility = {}, initialColumnPinning = {},
-  initialColumnAlignments = {}, onRowClick, onSelectionChange, renderSubComponent,
+  initialColumnAlignments = {}, onRowClick, onRowDoubleClick, onSelectionChange, renderSubComponent,
   onExportExcel, onExportDocx, onExportPdf, onExportPng, toolbarLeft, toolbarRight,
   searchPlaceholder = 'Tìm kiếm...', exportFilename = 'export', tableId, borderless = false,
   getRowClassName,
@@ -353,6 +353,7 @@ export function DataTable<TData>({
                     paddingBottom={paddingBottom}
                     columnAlignments={columnAlignments}
                     onRowClick={onRowClick}
+                    onRowDoubleClick={onRowDoubleClick}
                     renderSubComponent={renderSubComponent}
                     getRowClassName={getRowClassName}
                     columnSizing={columnSizing}

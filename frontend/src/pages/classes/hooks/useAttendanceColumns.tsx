@@ -1,6 +1,5 @@
 import React, { useMemo } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
-import { Edit3 } from 'lucide-react';
 import { EnrolledStudent, AttendanceRecord } from '../types';
 import { CheckScoreInput } from '../components/CheckScoreInput';
 import { format1Dec, trunc1Dec } from '../../../utils';
@@ -77,13 +76,25 @@ export function useAttendanceColumns({
         header: 'Họ và Tên',
         minSize: 110,
         meta: { headerText: 'Họ và Tên', exportValue: (r: any) => r.student_name },
-        cell: ({ row }) => (
-          <div className="pr-2">
-            <span className="font-extrabold text-slate-900 dark:text-white text-sm sm:text-base whitespace-nowrap">
-              {row.original.student_name}
-            </span>
-          </div>
-        ),
+        cell: ({ row }) => {
+          const rec = row.original;
+          const enrolledInfo = enrolledStudents.find((s) => s.id === rec.student_id);
+          return (
+            <div
+              className="pr-2 cursor-pointer select-none"
+              onDoubleClick={() => {
+                onOpenStudentActionModal(
+                  enrolledInfo || { id: rec.student_id, full_name: rec.student_name }
+                );
+              }}
+              title="Nhấp đúp để mở thông tin học sinh"
+            >
+              <span className="font-extrabold text-slate-900 dark:text-white text-sm sm:text-base whitespace-nowrap hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                {row.original.student_name}
+              </span>
+            </div>
+          );
+        },
       },
       {
         accessorKey: 'status',
@@ -305,34 +316,6 @@ export function useAttendanceColumns({
               >
                 {format1Dec(val)}
               </span>
-            </div>
-          );
-        },
-      },
-      {
-        id: 'actions',
-        header: 'Thao Tác',
-        minSize: 55,
-        enableSorting: false,
-        enableGlobalFilter: false,
-        cell: ({ row }) => {
-          const rec = row.original;
-          const enrolledInfo = enrolledStudents.find((s) => s.id === rec.student_id);
-          return (
-            <div className="flex items-center justify-center">
-              <button
-                type="button"
-                tabIndex={-1}
-                onClick={() => {
-                  onOpenStudentActionModal(
-                    enrolledInfo || { id: rec.student_id, full_name: rec.student_name }
-                  );
-                }}
-                className="p-1.5 rounded-xl bg-indigo-100 hover:bg-indigo-200 dark:bg-indigo-500/20 dark:hover:bg-indigo-500/30 text-indigo-700 dark:text-indigo-300 border-0 shadow-2xs hover:shadow-xs transition cursor-pointer"
-                title="Tùy chọn học sinh"
-              >
-                <Edit3 size={14} />
-              </button>
             </div>
           );
         },

@@ -31,6 +31,52 @@ const focusTarget = (target: HTMLInputElement | null | undefined) => {
 };
 
 const navigateScoreInputs = (currentInput: HTMLInputElement, isShift: boolean) => {
+  const isMobileMatrix = !!currentInput.closest('[data-mobile-matrix="true"]');
+  if (isMobileMatrix) {
+    const currentStudentId = currentInput.getAttribute('data-student-id');
+    const studentInputs = Array.from(
+      document.querySelectorAll<HTMLInputElement>(
+        `[data-mobile-matrix="true"] input[data-score-input="true"][data-student-id="${currentStudentId}"]:not([disabled])`
+      )
+    );
+    const currentIndex = studentInputs.indexOf(currentInput);
+    if (currentIndex !== -1) {
+      if (!isShift && currentIndex < studentInputs.length - 1) {
+        focusTarget(studentInputs[currentIndex + 1]);
+        return;
+      }
+      if (isShift && currentIndex > 0) {
+        focusTarget(studentInputs[currentIndex - 1]);
+        return;
+      }
+    }
+
+    const allStudentIds = Array.from(
+      new Set(
+        Array.from(document.querySelectorAll<HTMLInputElement>('[data-mobile-matrix="true"] input[data-score-input="true"]'))
+          .map((i) => i.getAttribute('data-student-id'))
+          .filter(Boolean)
+      )
+    );
+    const sIdx = allStudentIds.indexOf(currentStudentId);
+    if (sIdx !== -1) {
+      const nextSIdx = isShift ? sIdx - 1 : sIdx + 1;
+      if (nextSIdx >= 0 && nextSIdx < allStudentIds.length) {
+        const nextId = allStudentIds[nextSIdx];
+        const nextStudentInputs = Array.from(
+          document.querySelectorAll<HTMLInputElement>(
+            `[data-mobile-matrix="true"] input[data-score-input="true"][data-student-id="${nextId}"]:not([disabled])`
+          )
+        );
+        if (nextStudentInputs.length > 0) {
+          focusTarget(isShift ? nextStudentInputs[nextStudentInputs.length - 1] : nextStudentInputs[0]);
+          return;
+        }
+      }
+    }
+    return;
+  }
+
   const allScoreInputs = Array.from(
     document.querySelectorAll<HTMLInputElement>('input[data-score-input="true"]:not([disabled])')
   );
@@ -143,7 +189,11 @@ export const CheckScoreInput: React.FC<CheckScoreInputProps> = React.memo(({
     if (e.key === 'ArrowDown') {
       e.preventDefault();
       commitValue(e.currentTarget.value, false);
-      navigateVerticalScoreInputs(e.currentTarget, field, 1);
+      if (e.currentTarget.closest('[data-mobile-matrix="true"]')) {
+        navigateScoreInputs(e.currentTarget, false);
+      } else {
+        navigateVerticalScoreInputs(e.currentTarget, field, 1);
+      }
       return;
     }
 
@@ -151,7 +201,11 @@ export const CheckScoreInput: React.FC<CheckScoreInputProps> = React.memo(({
     if (e.key === 'ArrowUp') {
       e.preventDefault();
       commitValue(e.currentTarget.value, false);
-      navigateVerticalScoreInputs(e.currentTarget, field, -1);
+      if (e.currentTarget.closest('[data-mobile-matrix="true"]')) {
+        navigateScoreInputs(e.currentTarget, true);
+      } else {
+        navigateVerticalScoreInputs(e.currentTarget, field, -1);
+      }
       return;
     }
 
@@ -179,7 +233,11 @@ export const CheckScoreInput: React.FC<CheckScoreInputProps> = React.memo(({
       if (isAtEnd || isAllSelected || input.value === '') {
         e.preventDefault();
         commitValue(input.value, false);
-        navigateScoreInputs(input, false);
+        if (input.closest('[data-mobile-matrix="true"]')) {
+          navigateVerticalScoreInputs(input, field, 1);
+        } else {
+          navigateScoreInputs(input, false);
+        }
       }
       return;
     }
@@ -192,7 +250,11 @@ export const CheckScoreInput: React.FC<CheckScoreInputProps> = React.memo(({
       if (isAtStart || isAllSelected || input.value === '') {
         e.preventDefault();
         commitValue(input.value, false);
-        navigateScoreInputs(input, true);
+        if (input.closest('[data-mobile-matrix="true"]')) {
+          navigateVerticalScoreInputs(input, field, -1);
+        } else {
+          navigateScoreInputs(input, true);
+        }
       }
       return;
     }

@@ -112,6 +112,12 @@ export const AttendanceGradesTab: React.FC<AttendanceGradesTabProps> = ({
           tableId="classes-attendance-table"
           data={attendanceRecords}
           columns={attendanceColumns}
+          onRowDoubleClick={(row) => {
+            const enrolled = enrolledStudents.find((s) => s.id === row.student_id);
+            onOpenStudentActionModal(
+              enrolled || { id: row.student_id, full_name: row.student_name }
+            );
+          }}
           pageSize={20}
           exportFilename={`diem_danh_${selectedClass?.class_name || ''}_${attendanceDate}`}
           onExportExcel={handleExportExcelWithThresholds}

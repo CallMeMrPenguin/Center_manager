@@ -11,6 +11,7 @@ interface DataTableBodyProps<TData> {
   paddingBottom: number;
   columnAlignments: Record<string, 'center' | 'left'>;
   onRowClick?: (row: TData) => void;
+  onRowDoubleClick?: (row: TData) => void;
   renderSubComponent?: (props: { row: Row<TData> }) => React.ReactNode;
   getRowClassName?: (row: TData, index: number) => string | undefined;
   columnSizing?: Record<string, number>;
@@ -25,6 +26,7 @@ export function DataTableBody<TData>({
   paddingBottom,
   columnAlignments,
   onRowClick,
+  onRowDoubleClick,
   renderSubComponent,
   getRowClassName,
   columnSizing,
@@ -49,6 +51,7 @@ export function DataTableBody<TData>({
           <Fragment key={row.id}>
             <tr
               onClick={() => onRowClick?.(row.original)}
+              onDoubleClick={() => onRowDoubleClick?.(row.original)}
               className={`group transition-colors duration-150 ${
                 row.getIsSelected()
                   ? 'bg-blue-50/80 dark:bg-blue-950/30'
