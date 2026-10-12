@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { BookOpen, X, Trash2 } from 'lucide-react';
+import { X, Trash2 } from 'lucide-react';
 import { ClassItem, TeacherCM, ClassDayConfig, GRADE_LIST, WEEKDAYS } from '../../types';
+import { SCHEDULE_PALETTE_24 } from '../../../schedule/types';
 import { CustomSelect } from '../../../../components/CustomSelect';
 import { api } from '../../../../api';
 import { showToast } from '../../../../components/Toast';
@@ -115,9 +116,8 @@ export const ClassFormModal: React.FC<ClassFormModalProps> = ({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 animate-mac-dropdown">
       <div className="bg-white dark:bg-[#0f1528] border border-slate-200 dark:border-white/10 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl dark:shadow-[0_24px_80px_rgba(0,0,0,0.8)]">
         <div className="flex items-center justify-between p-5 border-b border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#14192b]">
-          <h3 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
-            <BookOpen className="h-5 w-5 text-indigo-500 dark:text-indigo-400" />
-            <span>{editingClass ? 'Cập Nhật Lớp Học' : 'Tạo Lớp Học Mới'}</span>
+          <h3 className="text-base font-black text-slate-900 dark:text-white">
+            {editingClass ? 'Cập Nhật Lớp Học' : 'Tạo Lớp Học Mới'}
           </h3>
           <button onClick={onClose} className="p-1.5 rounded-xl hover:bg-slate-200 dark:hover:bg-white/10 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition">
             <X size={16} />
@@ -185,14 +185,14 @@ export const ClassFormModal: React.FC<ClassFormModalProps> = ({
 
           <div>
             <label className="block text-[11px] font-extrabold text-slate-600 dark:text-slate-300 uppercase tracking-wider mb-1.5">Màu Sắc Lịch Trình</label>
-            <div className="flex items-center gap-2 flex-wrap bg-slate-50 dark:bg-[#141928] p-2.5 rounded-xl border border-slate-200 dark:border-white/10">
-              {['#7c3aed', '#0ea5e9', '#10b981', '#f59e0b', '#ec4899', '#06b6d4', '#f97316', '#84cc16', '#6366f1', '#fb7185'].map((hex) => (
+            <div className="flex items-center gap-1.5 flex-wrap bg-slate-50 dark:bg-[#141928] p-2.5 rounded-xl border border-slate-200 dark:border-white/10">
+              {SCHEDULE_PALETTE_24.map((hex) => (
                 <button
                   key={hex}
                   type="button"
                   onClick={() => setClassForm({ ...classForm, color: hex })}
-                  className={`w-6 h-6 rounded-full transition cursor-pointer ${
-                    (classForm.color || '#7c3aed') === hex ? 'ring-2 ring-offset-2 ring-indigo-600 scale-110 shadow-md' : 'opacity-60 hover:opacity-100'
+                  className={`w-6 h-6 rounded-full transition cursor-pointer border ${
+                    (classForm.color || '#7c3aed') === hex ? 'border-white scale-110 ring-2 ring-indigo-500 shadow-md' : 'border-transparent opacity-70 hover:opacity-100'
                   }`}
                   style={{ backgroundColor: hex }}
                 />
@@ -203,7 +203,7 @@ export const ClassFormModal: React.FC<ClassFormModalProps> = ({
           {/* MULTI-DAY SCHEDULE SELECTOR */}
           <div className="space-y-2 border-t border-slate-200 dark:border-white/10 pt-3">
             <label className="block text-[11px] font-extrabold text-blue-600 dark:text-blue-400 uppercase tracking-wider mb-2">
-              Lịch Học Theo Thứ (Cấu hình giờ & thời lượng riêng từng thứ)
+              Lịch Học
             </label>
             <div className="space-y-2 bg-slate-50 dark:bg-[#141928] p-3 rounded-xl border border-slate-200 dark:border-white/10">
               {WEEKDAYS.map((day) => {

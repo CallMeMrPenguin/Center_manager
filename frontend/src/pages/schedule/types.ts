@@ -24,12 +24,15 @@ export interface DayCfg {
   duration: number;
 }
 
-export const PALETTE_20 = [
-  '#2563eb', '#0ea5e9', '#10b981', '#f59e0b', '#ec4899',
-  '#06b6d4', '#f97316', '#84cc16', '#6366f1', '#fb7185',
-  '#3b82f6', '#8b5cf6', '#14b8a6', '#eab308', '#22c55e',
-  '#60a5fa', '#a855f7', '#f472b6', '#38bdf8', '#e879f9'
+export const SCHEDULE_PALETTE_24 = [
+  '#2563eb', '#0284c7', '#0d9488', '#059669', '#16a34a', '#65a30d',
+  '#ca8a04', '#d97706', '#ea580c', '#dc2626', '#e11d48', '#db2777',
+  '#c026d3', '#9333ea', '#7c3aed', '#4f46e5', '#0891b2', '#047857',
+  '#b45309', '#be123c', '#86198f', '#6d28d9', '#4338ca', '#1d4ed8',
+  '#0f766e', '#a21caf'
 ];
+
+export const PALETTE_20 = SCHEDULE_PALETTE_24;
 
 export function hexToHSL(hex: string) {
   if (!hex || typeof hex !== 'string') hex = '#2563eb';

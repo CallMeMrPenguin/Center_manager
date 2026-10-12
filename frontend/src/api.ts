@@ -335,6 +335,7 @@ export const api = {
 
   // Users & Permissions API (Quyền & Vai Trò)
   login: (username: string, password: string) => request<{ success: boolean; user: any; token?: string }>('/api/auth/login', { method: 'POST', body: JSON.stringify({ username, password }) }),
+  pingHeartbeat: (username: string) => request<{ success: boolean; online: boolean }>('/api/users/heartbeat', { method: 'POST', body: JSON.stringify({ username }) }),
   getUsers: () => request<any[]>('/api/users', { tags: ['users'] }),
   createUser: (data: any) => request<any>('/api/users', { method: 'POST', body: JSON.stringify(data), tags: ['users'] }),
   updateUser: (id: number, data: any) => request<any>(`/api/users/${id}`, { method: 'PUT', body: JSON.stringify(data), tags: ['users'] }),

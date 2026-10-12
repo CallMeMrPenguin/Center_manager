@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Upload, Code, RefreshCw, FileText } from 'lucide-react';
+import { Code, RefreshCw, FileText } from 'lucide-react';
 import { showToast } from '../../../components/Toast';
 import { SegmentedControl } from '../../../components/SegmentedControl';
 import { cleanOptionPrefix } from '../../../utils';
@@ -101,7 +101,6 @@ export const QuizImportView: React.FC<QuizImportViewProps> = ({
             {
               value: 'file',
               label: 'Tải File Word (.DOCX)',
-              icon: <Upload size={14} />,
             },
             {
               value: 'json',
@@ -115,10 +114,6 @@ export const QuizImportView: React.FC<QuizImportViewProps> = ({
 
       {importTab === 'file' ? (
         <div className="p-10 bg-white dark:bg-[#0d1018] border border-dashed border-slate-300 dark:border-white/20 rounded-2xl text-center space-y-5 shadow-sm dark:shadow-2xl">
-          <div className="h-20 w-20 rounded-2xl bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-blue-500 dark:text-blue-400 shadow-[0_0_30px_rgba(37,99,235,0.2)] mx-auto">
-            <Upload size={36} />
-          </div>
-
           <div className="space-y-1 max-w-md mx-auto">
             <h3 className="text-lg font-black text-slate-900 dark:text-white">Tải đề lên</h3>
             <p className="text-xs text-slate-500 dark:text-slate-400">
@@ -127,8 +122,8 @@ export const QuizImportView: React.FC<QuizImportViewProps> = ({
           </div>
 
           <label className="inline-flex items-center gap-2 bg-[#2563eb] hover:bg-[#1d4ed8] text-white px-6 py-3 rounded-xl font-extrabold text-xs shadow-[0_4px_16px_rgba(37,99,235,0.4)] transition cursor-pointer border border-white/20 active:scale-95">
-            {loading ? <RefreshCw className="animate-spin" size={16} /> : <Upload size={16} />}
-            <span>Chọn đề thi từ máy tính để import</span>
+            {loading && <RefreshCw className="animate-spin" size={16} />}
+            <span>Chọn Đề</span>
             <input type="file" accept=".docx" onChange={onFileUpload} className="hidden" />
           </label>
         </div>

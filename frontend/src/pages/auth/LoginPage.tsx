@@ -184,6 +184,39 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
             )}
           </button>
         </form>
+
+        {/* Semantic Internal Navigation Links */}
+        <nav
+          aria-label="Liên kết điều hướng nội bộ"
+          className="pt-3 border-t border-slate-200 dark:border-white/10 flex items-center justify-center gap-4 text-[11px] font-semibold text-slate-500 dark:text-slate-400"
+        >
+          <a
+            href="/"
+            className="hover:text-blue-600 dark:hover:text-blue-400 transition hover:underline cursor-pointer"
+          >
+            Trang Chủ
+          </a>
+          <a
+            href="#guide"
+            onClick={(e) => {
+              e.preventDefault();
+              showToast('Liên hệ quản trị viên để được cấp tài khoản.', 'info');
+            }}
+            className="hover:text-blue-600 dark:hover:text-blue-400 transition hover:underline cursor-pointer"
+          >
+            Hướng Dẫn
+          </a>
+          <a
+            href="#support"
+            onClick={(e) => {
+              e.preventDefault();
+              showToast('Hỗ trợ kỹ thuật: Hotline quản lý trung tâm', 'info');
+            }}
+            className="hover:text-blue-600 dark:hover:text-blue-400 transition hover:underline cursor-pointer"
+          >
+            Hỗ Trợ Kỹ Thuật
+          </a>
+        </nav>
       </div>
     </div>
   );

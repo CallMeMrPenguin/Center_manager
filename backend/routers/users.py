@@ -78,6 +78,12 @@ def _record_login_failure(key: str):
 def _clear_login_failures(key: str):
     _FAILED_LOGINS.pop(key, None)
 
+# In-memory user active activity tracking
+_USER_LAST_ACTIVE: Dict[str, float] = {}
+
+class HeartbeatPayload(BaseModel):
+    username: str
+
 # --- Auth Endpoints ---
 @router.post("/auth/login")
 @router.post("/auth/login/")
@@ -96,6 +102,7 @@ def login(payload: LoginRequest, request: Request):
     try:
         user = authenticate_user(payload.username, payload.password)
         _clear_login_failures(rate_key)
+        _USER_LAST_ACTIVE[payload.username.strip().lower()] = time.time()
         token = create_access_token(user)
         return {"success": True, "user": user, "token": token}
     except ValueError as ve:
@@ -105,11 +112,25 @@ def login(payload: LoginRequest, request: Request):
         _record_login_failure(rate_key)
         raise HTTPException(status_code=500, detail=f"Lỗi đăng nhập hệ thống: {e}")
 
+@router.post("/users/heartbeat")
+def heartbeat(payload: HeartbeatPayload):
+    u = payload.username.strip().lower()
+    if u:
+        _USER_LAST_ACTIVE[u] = time.time()
+    return {"success": True, "online": True}
+
 # --- Users Endpoints ---
 @router.get("/users")
 def list_users():
     try:
-        return get_users()
+        users = get_users()
+        now = time.time()
+        for u in users:
+            uname = (u.get("username") or "").strip().lower()
+            last_act = _USER_LAST_ACTIVE.get(uname, 0)
+            u["is_online"] = (now - last_act) < 180
+            u["last_active"] = last_act
+        return users
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

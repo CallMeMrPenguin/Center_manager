@@ -92,7 +92,7 @@ export const SessionModal: React.FC<SessionModalProps> = ({
               Màu Sắc Lịch Trình
             </label>
             <div className="flex items-center gap-1.5 flex-wrap bg-slate-50 dark:bg-[#141928] p-2.5 rounded-xl border border-slate-200 dark:border-white/10">
-              {PALETTE_20.slice(0, 10).map((c) => (
+              {PALETTE_20.map((c) => (
                 <button
                   key={c}
                   type="button"

@@ -184,79 +184,90 @@ export const MobileBottomDock: React.FC<MobileBottomDockProps> = ({
         </div>
       )}
 
-      {/* Fisheye Dock Carousel Row (No Background on Container, merges over main view) */}
-      <div
-        ref={containerRef}
-        onScroll={handleScroll}
-        onTouchStart={() => {
-          resetIdleTimer();
-          isUserDraggingRef.current = true;
-          setIsUserDragging(true);
-        }}
-        onTouchEnd={() => {
-          setTimeout(() => {
+      {/* Fisheye Dock Carousel Row (With Invisible Touch Buffer Zone to Prevent Browser Tab-Switch Swipes) */}
+      <div className="w-full relative pointer-events-auto py-2 touch-pan-x">
+        {/* Invisible Touch Shield Backdrop: Absorbs accidental edge swipes */}
+        <div
+          className="absolute inset-0 -top-3 -bottom-2 pointer-events-auto touch-pan-x"
+          onTouchStart={(e) => e.stopPropagation()}
+          onTouchMove={(e) => e.stopPropagation()}
+        />
+
+        <div
+          ref={containerRef}
+          onScroll={handleScroll}
+          onTouchStart={(e) => {
+            e.stopPropagation();
+            resetIdleTimer();
+            isUserDraggingRef.current = true;
+            setIsUserDragging(true);
+          }}
+          onTouchMove={(e) => {
+            e.stopPropagation();
+            resetIdleTimer();
+          }}
+          onTouchEnd={() => {
+            setTimeout(() => {
+              isUserDraggingRef.current = false;
+              setIsUserDragging(false);
+            }, 400);
+          }}
+          onTouchCancel={() => {
             isUserDraggingRef.current = false;
             setIsUserDragging(false);
-          }, 400);
-        }}
-        onTouchCancel={() => {
-          isUserDraggingRef.current = false;
-          setIsUserDragging(false);
-        }}
-        className={`w-full max-w-full overflow-x-auto no-scrollbar scroll-smooth flex items-center py-1.5 px-[calc(50vw-22px)] gap-3.5 snap-x snap-mandatory pointer-events-auto bg-transparent transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${
-          isIdle
-            ? 'opacity-35 scale-90 translate-y-1'
-            : 'opacity-100 scale-100 translate-y-0'
-        }`}
-        style={{ overscrollBehaviorX: 'contain' }}
-      >
-        {canonicalTabs.map((tab) => {
-          const Icon = tab.icon;
-          const isSelected = tab.id === activeTab;
-          const isCenterPreview = !isSelected && tab.id === scrolledCenterTabId;
+          }}
+          className={`relative z-10 w-full max-w-full overflow-x-auto no-scrollbar scroll-smooth flex items-center py-2 px-[calc(50vw-22px)] gap-3.5 snap-x snap-mandatory pointer-events-auto bg-transparent transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${
+            isIdle
+              ? 'opacity-35 scale-90 translate-y-1'
+              : 'opacity-100 scale-100 translate-y-0'
+          }`}
+          style={{ overscrollBehaviorX: 'contain', overscrollBehaviorY: 'contain', touchAction: 'pan-x' }}
+        >
+          {canonicalTabs.map((tab) => {
+            const Icon = tab.icon;
+            const isSelected = tab.id === activeTab;
+            const isCenterPreview = !isSelected && tab.id === scrolledCenterTabId;
 
-          // Only the selected tab is the largest icon.
-          // Centered preview icon shifts up slightly while scrolling.
-          let transformClasses = 'scale-95 opacity-80 translate-y-0';
-          if (isSelected) {
-            transformClasses = 'scale-120 opacity-100 z-20 translate-y-0';
-          } else if (isCenterPreview) {
-            transformClasses = 'scale-100 opacity-95 z-10 -translate-y-2';
-          }
+            let transformClasses = 'scale-95 opacity-80 translate-y-0';
+            if (isSelected) {
+              transformClasses = 'scale-120 opacity-100 z-20 translate-y-0';
+            } else if (isCenterPreview) {
+              transformClasses = 'scale-100 opacity-95 z-10 -translate-y-2';
+            }
 
-          return (
-            <button
-              key={tab.id}
-              data-dock-tab={tab.id}
-              type="button"
-              onTouchStart={() => onPrefetchTab?.(tab.id)}
-              onMouseEnter={() => onPrefetchTab?.(tab.id)}
-              onClick={() => {
-                if (scrollSettleTimerRef.current) clearTimeout(scrollSettleTimerRef.current);
-                isUserDraggingRef.current = false;
-                setIsUserDragging(false);
-                resetIdleTimer();
-                setActiveTab(tab.id);
-                setScrolledCenterTabId(tab.id);
-                centerTab(tab.id, true);
-              }}
-
-              className={`snap-center shrink-0 w-11 h-11 rounded-full flex items-center justify-center transition-all duration-200 ease-out cursor-pointer active:scale-95 border-0 ${transformClasses} ${
-                isSelected
-                  ? 'bg-blue-600 text-white shadow-xl shadow-blue-600/35 font-bold'
-                  : 'bg-white/95 dark:bg-[#141724]/95 text-slate-700 dark:text-slate-300 shadow-md shadow-black/15 hover:text-blue-600 dark:hover:text-white'
-              }`}
-              title={tab.label}
-              aria-label={tab.label}
-            >
-              <Icon
-                size={isSelected ? 20 : 18}
-                strokeWidth={isSelected ? 2.5 : 2}
-                className="shrink-0 transition-transform duration-200"
-              />
-            </button>
-          );
-        })}
+            return (
+              <button
+                key={tab.id}
+                data-dock-tab={tab.id}
+                type="button"
+                onTouchStart={() => onPrefetchTab?.(tab.id)}
+                onMouseEnter={() => onPrefetchTab?.(tab.id)}
+                onClick={() => {
+                  if (scrollSettleTimerRef.current) clearTimeout(scrollSettleTimerRef.current);
+                  isUserDraggingRef.current = false;
+                  setIsUserDragging(false);
+                  resetIdleTimer();
+                  setActiveTab(tab.id);
+                  setScrolledCenterTabId(tab.id);
+                  centerTab(tab.id, true);
+                }}
+                className={`relative snap-center shrink-0 w-11 h-11 rounded-full flex items-center justify-center transition-all duration-200 ease-out cursor-pointer active:scale-95 border-0 before:absolute before:-inset-3 before:content-[''] before:rounded-full before:z-0 touch-manipulation ${transformClasses} ${
+                  isSelected
+                    ? 'bg-blue-600 text-white shadow-xl shadow-blue-600/35 font-bold'
+                    : 'bg-white/95 dark:bg-[#141724]/95 text-slate-700 dark:text-slate-300 shadow-md shadow-black/15 hover:text-blue-600 dark:hover:text-white'
+                }`}
+                title={tab.label}
+                aria-label={tab.label}
+              >
+                <Icon
+                  size={isSelected ? 20 : 18}
+                  strokeWidth={isSelected ? 2.5 : 2}
+                  className="shrink-0 transition-transform duration-200 relative z-10 pointer-events-none"
+                />
+              </button>
+            );
+          })}
+        </div>
       </div>
     </div>
   );

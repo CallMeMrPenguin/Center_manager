@@ -220,6 +220,16 @@ function AppContent() {
     setVisitedTabIds,
   });
 
+  // Periodic user heartbeat ping for active online status
+  useEffect(() => {
+    const uname = currentUser?.username;
+    if (!uname) return;
+    const ping = () => { api.pingHeartbeat(uname).catch(() => {}); };
+    ping();
+    const timer = setInterval(ping, 30000);
+    return () => clearInterval(timer);
+  }, [currentUser?.username]);
+
   // Redirect if currently active tab is not permitted for this role
   useEffect(() => {
     if (!currentUser || isAdmin || allowedTabIds.length === 0) return;

@@ -6,6 +6,7 @@ import { useAttendanceColumns } from '../../hooks/useAttendanceColumns';
 import { useSessionOverview } from './useSessionOverview';
 import { exportClassReportPng } from '../../utils/exportClassReportPng';
 import { SessionOverviewBanner } from './SessionOverviewBanner';
+import { MobileAttendanceMatrix } from './MobileAttendanceMatrix';
 import { showToast } from '../../../../components/Toast';
 
 interface AttendanceGradesTabProps {
@@ -94,8 +95,19 @@ export const AttendanceGradesTab: React.FC<AttendanceGradesTabProps> = ({
         overview={sessionOverview}
       />
 
-      {/* 2. UNIFIED ATTENDANCE & GRADES DATATABLE */}
-      <div className="bg-white dark:bg-[#0d1018] rounded-2xl overflow-hidden shadow-[0_4px_24px_rgba(0,0,0,0.08)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.5)]">
+      {/* 2. MOBILE ONLY: TRANSPOSED MATRIX (X-AXIS = STUDENT NAMES, Y-AXIS = METRICS) */}
+      <div className="block md:hidden">
+        <MobileAttendanceMatrix
+          attendanceRecords={attendanceRecords}
+          enrolledStudents={enrolledStudents}
+          onUpdateRecord={onUpdateRecord}
+          parseAndFormatScore={parseAndFormatScore}
+          onOpenStudentActionModal={onOpenStudentActionModal}
+        />
+      </div>
+
+      {/* 3. DESKTOP ONLY: UNIFIED ATTENDANCE & GRADES DATATABLE */}
+      <div className="hidden md:block bg-white dark:bg-[#0d1018] rounded-2xl overflow-hidden shadow-[0_4px_24px_rgba(0,0,0,0.08)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.5)]">
         <DataTable
           tableId="classes-attendance-table"
           data={attendanceRecords}

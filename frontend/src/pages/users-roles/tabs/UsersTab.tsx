@@ -39,37 +39,17 @@ export const UsersTab: React.FC<UsersTabProps> = ({
 
   // Dynamic Grade & Class options for students
   const gradeOptions = useMemo<SelectOption[]>(() => {
-    const rawGrades = Array.from(
-      new Set(studentUsers.map((s) => s.grade).filter(Boolean))
-    ) as string[];
-    rawGrades.sort();
-    return [
-      { value: 'all', label: 'Tất cả các khối' },
-      ...rawGrades.map((g) => ({
-        value: g,
-        label: g.startsWith('Khối') || g.startsWith('Lớp') ? g : `Khối ${g}`,
-      })),
-    ];
+    const raw = Array.from(new Set(studentUsers.map((s) => s.grade).filter(Boolean))) as string[];
+    raw.sort();
+    return [{ value: 'all', label: 'Tất cả các khối' }, ...raw.map((g) => ({ value: g, label: g.startsWith('Khối') || g.startsWith('Lớp') ? g : `Khối ${g}` }))];
   }, [studentUsers]);
 
   const classOptions = useMemo<SelectOption[]>(() => {
     const rawSet = new Set<string>();
     studentUsers.forEach((s) => {
-      if (s.class_name) {
-        s.class_name.split(',').forEach((c) => {
-          const trimmed = c.trim();
-          if (trimmed) rawSet.add(trimmed);
-        });
-      }
+      if (s.class_name) s.class_name.split(',').forEach((c) => { const t = c.trim(); if (t) rawSet.add(t); });
     });
-    const rawClasses = Array.from(rawSet).sort();
-    return [
-      { value: 'all', label: 'Tất cả các lớp' },
-      ...rawClasses.map((c) => ({
-        value: c,
-        label: c,
-      })),
-    ];
+    return [{ value: 'all', label: 'Tất cả các lớp' }, ...Array.from(rawSet).sort().map((c) => ({ value: c, label: c }))];
   }, [studentUsers]);
 
   // Filtered students by Grade and Class
@@ -104,16 +84,24 @@ export const UsersTab: React.FC<UsersTabProps> = ({
     );
   };
 
-  const renderStatusBadge = (status: string) => (
-    <span
-      className={`px-2.5 py-0.5 rounded-full text-xs font-bold border-0 inline-block ${
-        status === 'Hoạt động'
-          ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-300'
-          : 'bg-rose-100 text-rose-800 dark:bg-rose-500/20 dark:text-rose-300'
-      }`}
-    >
-      {status || 'Hoạt động'}
-    </span>
+  const renderStatusBadge = (status: string, isOnline?: boolean) => (
+    <div className="flex items-center gap-1.5">
+      <span
+        className={`px-2 py-0.5 rounded-full text-xs font-bold inline-flex items-center gap-1.5 ${
+          isOnline
+            ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-300'
+            : 'bg-slate-100 text-slate-600 dark:bg-white/5 dark:text-slate-400'
+        }`}
+      >
+        <span className={`w-1.5 h-1.5 rounded-full ${isOnline ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400'}`} />
+        <span>{isOnline ? 'Online' : 'Offline'}</span>
+      </span>
+      {status === 'Tạm khóa' && (
+        <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-rose-100 text-rose-800 dark:bg-rose-500/20 dark:text-rose-300">
+          Khóa
+        </span>
+      )}
+    </div>
   );
 
   const renderActionBtn = (u: AppUser, title: string) => (
@@ -135,10 +123,19 @@ export const UsersTab: React.FC<UsersTabProps> = ({
         header: 'Tên Hiển Thị',
         cell: ({ row }) => {
           const name = row.original.display_name || row.original.username || '?';
+          const isOnline = !!row.original.is_online;
           return (
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-xl bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300 flex items-center justify-center font-black text-xs shrink-0 shadow-2xs">
-                {name.charAt(0).toUpperCase()}
+              <div className="relative">
+                <div className="w-8 h-8 rounded-xl bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300 flex items-center justify-center font-black text-xs shrink-0 shadow-2xs">
+                  {name.charAt(0).toUpperCase()}
+                </div>
+                <span
+                  title={isOnline ? 'Đang online' : 'Ngoại tuyến'}
+                  className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-white dark:border-[#0c0f1e] ${
+                    isOnline ? 'bg-emerald-500' : 'bg-slate-300 dark:bg-slate-600'
+                  }`}
+                />
               </div>
               <span className="font-extrabold text-slate-900 dark:text-white text-sm">
                 {name}
@@ -182,7 +179,7 @@ export const UsersTab: React.FC<UsersTabProps> = ({
       {
         accessorKey: 'status',
         header: 'Trạng Thái',
-        cell: (info) => renderStatusBadge(info.getValue<string>()),
+        cell: ({ row }) => renderStatusBadge(row.original.status, row.original.is_online),
       },
       {
         accessorKey: 'created_at',
@@ -212,10 +209,19 @@ export const UsersTab: React.FC<UsersTabProps> = ({
         header: 'Học Sinh',
         cell: ({ row }) => {
           const name = row.original.display_name || row.original.username || '?';
+          const isOnline = !!row.original.is_online;
           return (
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-xl bg-teal-100 text-teal-700 dark:bg-teal-500/20 dark:text-teal-300 flex items-center justify-center font-black text-xs shrink-0 shadow-2xs">
-                {name.charAt(0).toUpperCase()}
+              <div className="relative">
+                <div className="w-8 h-8 rounded-xl bg-teal-100 text-teal-700 dark:bg-teal-500/20 dark:text-teal-300 flex items-center justify-center font-black text-xs shrink-0 shadow-2xs">
+                  {name.charAt(0).toUpperCase()}
+                </div>
+                <span
+                  title={isOnline ? 'Đang online' : 'Ngoại tuyến'}
+                  className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-white dark:border-[#0c0f1e] ${
+                    isOnline ? 'bg-emerald-500' : 'bg-slate-300 dark:bg-slate-600'
+                  }`}
+                />
               </div>
               <span className="font-extrabold text-slate-900 dark:text-white text-sm">
                 {name}
@@ -269,7 +275,7 @@ export const UsersTab: React.FC<UsersTabProps> = ({
       {
         accessorKey: 'status',
         header: 'Trạng Thái',
-        cell: (info) => renderStatusBadge(info.getValue<string>()),
+        cell: ({ row }) => renderStatusBadge(row.original.status, row.original.is_online),
       },
       {
         id: 'actions',
