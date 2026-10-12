@@ -5,36 +5,81 @@
 
 ---
 
-## 🏗️ 1. Project Overview
+## 🏗️ 1. Project Overview & Architecture
 
-**Center Manager App** — A Vietnamese tutoring center management system.
+**Center Manager App** — Hệ thống quản lý trung tâm dạy học & luyện thi.
 - **Frontend**: React 19 + Vite + TypeScript + TailwindCSS v4
 - **Backend**: Python (FastAPI) + SQLite
 - **Remote**: `https://github.com/CallMeMrPenguin/Center_manager.git` (branch: `main`)
 
----
-
-## 📏 2. Strict File Size Limit & Modular Architecture Standard
-
-- **Frontend Files**: **Strict Maximum 400 Lines** per file. Any component, page, or view approaching 400 lines MUST be refactored and modularized into subcomponents, dedicated hooks, types, or tab sub-views.
-- **Backend Files**: **Strict Maximum 500 Lines** per file. Large routers or service files MUST be partitioned into modular domain routers, services, or utility modules.
-- **Strictly No Bloated Monoliths**: 1,000+ line files are strictly forbidden to ensure clean searchability, maintainability, fast code reviews, and minimal merge conflicts.
+### 📏 Giới Hạn Dung Lượng File & Kiến Trúc Module
+- **Frontend Files**: **Tối đa nghiêm ngặt 400 dòng** mỗi file. Mọi component, trang hoặc view tiệm cận 400 dòng BẮT BUỘC phải được tách nhỏ thành subcomponents, custom hooks, types hoặc tab sub-views.
+- **Backend Files**: **Tối đa nghiêm ngặt 500 dòng** mỗi file. Các router hoặc service lớn phải được phân tách thành các module nghiệp vụ riêng biệt.
+- **Nghiêm cấm file nguyên khối (Monolith)**: Tuyệt đối không viết file 800–1000+ dòng.
 
 ---
 
-## 📊 3. TanStack Table Standard — MANDATORY FOR ALL TABLES
+## 🎨 2. Triết Lý Thiết Kế: Light UI, Flat UI & Minimalism
 
-> **THIS IS A HARD RULE. ANY TABLE IN ANY PAGE OR COMPONENT MUST USE TANSTACK TABLE VIA THE `<DataTable />` WRAPPER. NO EXCEPTIONS.**
+Toàn bộ ứng dụng sử dụng giao diện **Light UI**, phong cách **Flat UI** và tinh thần **Tối giản (Minimalism)**:
 
-### 3.1 — Core Mandate
-1. **ALWAYS use `<DataTable />`** from `src/components/DataTable.tsx` for every data table. Never write a raw `<table>` with manual filtering, sorting, or pagination.
-2. The `DataTable` component is a **self-contained TanStack Table wrapper** with all 15 features built-in. Pages only define `data` and `columns`; they never manage table state.
-3. **Never add manual search state** (e.g. `const [search, setSearch] = useState('')`) in a page that uses `<DataTable />`. TanStack's `globalFilter` handles it internally.
-4. **Never add manual pagination state** (e.g. `currentPage`, `pageSize`) in a page that uses `<DataTable />`. TanStack's `getPaginationRowModel()` handles it internally. Default is strictly 20 rows/page.
-5. **Never add manual sort state** (e.g. `sortConfig`, `sortField`, `setSortDirection`) in a page that uses `<DataTable />`.
-6. **Never add manual column visibility state** in a page. The built-in `ColumnVisibilityDropdown` handles it.
+1. **Bảng màu Sáng & Tương phản cao**:
+   - Nền chính: `#ffffff` (trắng tinh) và `#f8fafc` / `#f1f5f9` (xám sáng dịu mắt).
+   - Viền: `#e2e8f0` / `#cbd5e1` sắc nét, mảnh và phẳng.
+   - Chữ: `#0f172a` / `#1e293b` (slate đậm, độ tương phản cao, dễ đọc tuyệt đối).
+2. **Phong cách Flat & Tối giản (Zero Bloat)**:
+   - Không dùng hiệu ứng neon glow, bóng đổ đậm, skeuomorphism hay màu mè phức tạp.
+   - Không dùng bộ lọc mờ CSS (`backdrop-blur-*`, `blur-*`) gây nghẽn GPU. Mọi bề mặt dùng nền solid phẳng và sạch.
+3. **Quy tắc "One Container, One Visual Boundary"**:
+   - **Tuyệt đối không lồng viền trong viền (Border-in-Border / Card-in-Card)**: Không bọc các phần tử có viền (input, select, picker) bên trong các thẻ card con cũng có viền bao quanh.
+   - Mỗi khối thông tin chỉ có **duy nhất một đường ranh giới hiển thị**. Các phần tử bên trong phân cách bằng khoảng cách (`gap-3`) hoặc đường kẻ đơn (`divide-x` / `divide-y`).
+4. **Dropdown & DatePicker Custom Đồng Bộ**:
+   - Dropdown BẮT BUỘC dùng `<CustomSelect />` giao diện sáng phẳng. Cấm dùng thẻ `<select>` gốc của trình duyệt.
+   - Chọn ngày BẮT BUỘC dùng `<CustomDatePicker />`. Cấm dùng `<input type="date">` gốc của trình duyệt.
+5. **Modal Overlays Gọn Nhẹ**:
+   - Lớp phủ nền modal dùng overlay phẳng tối giản (`bg-black/60` hoặc `bg-slate-900/50`), không dùng `backdrop-blur`.
 
-### 3.2 — Quick Usage Pattern
+---
+
+## 🚫 3. Quy Tắc Giữ Giao Diện Sạch Sẽ & Tối Giản Tuyệt Đối
+
+### 3.1. Tuyệt Đối Không Chèn Note / Chú Thích Tùy Tiện
+- **KHÔNG được tự ý chèn Note / Chú thích / Hướng dẫn** vào bảng, tiêu đề, thẻ card hay phản hồi trò chuyện trừ khi người dùng yêu cầu rõ ràng.
+- Tránh thêm các dòng chữ giải thích phụ, chú thích chân trang, ghi chú mẹo (`Tip:`, `Lưu ý:`, `#STT`, v.v.) gây rác giao diện. Giao diện chỉ tập trung 100% vào dữ liệu và chức năng chính.
+
+### 3.2. Nghiêm Cấm Lạm Dụng Icon
+- **Hạn chế tối đa icon**: Không gắn icon vào mọi tiêu đề, mọi tab, mọi cột hay mọi nút bấm.
+- Nút bấm và tab ưu tiên dùng chữ ngắn gọn, dứt khoát (ví dụ: `Chọn Đề`, `Lịch học`) thay vì trang trí bằng icon rườm rà.
+- Icon chỉ được dùng khi thật sự phục vụ chức năng cốt lõi (kính lúp tìm kiếm, dấu X đóng, bút sửa).
+
+### 3.3. Nghiêm Cấm Chèn Emoji Vào Giao Diện
+- Tuyệt đối không tự ý chèn Emoji (như `👉`, `✨`, `🎨`, `📌`, `🎯`, `📄`, `⚡`, v.v.) vào UI, parser hoặc bộ định dạng dữ liệu, trừ khi nội dung gốc của người dùng có chứa emoji đó.
+
+### 3.4. Cấm Dùng Ký Tự Ngăn Cách Dạng Pipe (`|`) Hoặc Dấu Chấm (`•`)
+- Không dùng dấu gạch đứng (`|`) hoặc dấu chấm tròn (`•`) để ngăn cách các trường dữ liệu trong chuỗi văn bản.
+- Phân tách thông tin bằng flex badges cấu trúc phẳng, phân cấp typography hoặc khoảng cách hợp lý.
+
+### 3.5. Một Nút Bút Sửa Duy Nhất (Single Pen Button)
+- Không đặt icon thùng rác bên cạnh icon bút sửa trên thẻ hoặc hàng.
+- Chỉ hiển thị một icon Bút Sửa (`<Edit3 />`). Chức năng xóa được đặt là nút Xóa màu đỏ bên trong modal chỉnh sửa.
+- Riêng bảng điểm danh/nhập điểm: Mở chi tiết học sinh bằng thao tác Double-click vào tên/hàng, loại bỏ hoàn toàn cột Thao Tác thừa thãi.
+
+---
+
+## 📊 4. Chuẩn TanStack Table — BẮT BUỘC CHO MỌI BẢNG DỮ LIỆU
+
+> **QUY TẮC BẮT BUỘC: MỌI BẢNG DỮ LIỆU ĐỀU PHẢI DÙNG `<DataTable />` TỪ `src/components/DataTable.tsx`. KHÔNG NGOẠI LỆ.**
+
+### 4.1. Nguyên Tắc Cốt Lõi
+1. **Luôn dùng `<DataTable />`**: Không bao giờ viết thẻ `<table>` HTML thủ công với phân trang hay sắp xếp tự chế.
+2. **Không quản lý state bảng ở cấp trang**: Không tạo `useState` cho search, pagination, sorting hay column visibility trong trang. Mọi thứ được xử lý nội bộ bởi TanStack Table.
+3. **Mặc định nghiêm ngặt 20 dòng / trang**: Phân trang chuẩn 20 dòng/trang, có nút `Trước`, `Trang X / Y`, `Sau`. Cấm dropdown chọn số dòng hiển thị.
+4. **Bộ Lọc Tiêu Đề Cột (Chuẩn Ngân Hàng Câu Hỏi)**:
+   - Icon lọc bên cạnh tiêu đề cột trong `<th>`. Khi có lọc/sắp xếp, icon sáng màu chủ đạo.
+   - Popover nổi gồm: Tiêu đề cột, Sắp xếp Tăng/Giảm (A-Z, Z-A), ô tìm kiếm giá trị, danh sách checkbox chọn nhiều giá trị, nút Xóa bộ lọc cột.
+5. **Double-click mở bản ghi**: Hỗ trợ prop `onRowDoubleClick` để xem chi tiết bản ghi, giữ bảng sạch sẽ không cần cột thao tác thừa.
+
+### 4.2. Mẫu Khai Báo Cột Chuẩn
 ```tsx
 import { DataTable } from '@/components/DataTable';
 import { ColumnDef } from '@tanstack/react-table';
@@ -44,14 +89,12 @@ const columns = useMemo<ColumnDef<Student>[]>(() => [
   {
     accessorKey: 'full_name',
     header: 'Họ và Tên',
-    cell: (info) => <span className="font-bold">{info.getValue<string>()}</span>,
+    cell: (info) => <span className="font-semibold text-slate-900">{info.getValue<string>()}</span>,
   },
   {
-    id: 'actions',
-    header: 'Thao Tác',
-    enableSorting: false,
-    enableGlobalFilter: false,
-    cell: ({ row }) => <ActionButtons row={row.original} />,
+    accessorKey: 'class_name',
+    header: 'Lớp Học',
+    cell: (info) => <span className="text-slate-600">{info.getValue<string>()}</span>,
   },
 ], []);
 
@@ -59,106 +102,85 @@ const columns = useMemo<ColumnDef<Student>[]>(() => [
   data={students}
   columns={columns}
   pageSize={20}
-  exportFilename="students_export"
+  exportFilename="students_list"
+  onRowDoubleClick={(row) => handleOpenDetail(row)}
 />
 ```
 
 ---
 
-## 🚀 4. Git Auto Quick-Commit, Version Bump & Push Standard
+## 🔢 5. Toàn Vẹn Dữ Liệu & Quy Chuẩn Tính Toán
 
-- **Automatic Sync to Remote Repository**:
-  - Remote Origin URL: `https://github.com/CallMeMrPenguin/Center_manager.git` (Branch: `main`).
-  - **Mandatory End-of-Task Action**: After making code updates or completing features in any coding session, the agent MUST automatically perform a quick-commit & push to GitHub:
-    ```bash
-    git add . ; git commit -m "feat/fix: [Brief summary of changes made]" ; git push origin main
-    ```
-- **Auto Push Update & Version Bump Standard**:
-  - Whenever asked to release an update, bump version, or publish changes:
-    1. Bump the version string in `VERSION` file (e.g., `1.0.0` → `1.0.1`).
-    2. Rebuild the frontend (`npm run build`) and Windows installer (`python installer/build_installer.py`).
-    3. Commit and push commits along with git tags:
-       ```bash
-       git add . ; git commit -m "release: v1.0.1" ; git tag v1.0.1 ; git push origin main --tags
-       ```
-    4. All installed user app instances will automatically detect the new tag via `updater.py` and update in-place without manual reinstall.
+1. **Không Mặc Định Điểm 0 (No Grade 0 Defaults)**:
+   - Điểm chưa nhập hoặc vắng mặt BẮT BUỘC lưu là `NULL`, tuyệt đối không lưu là số `0` hoặc `0.0` để tránh kéo tụt điểm trung bình thật của học sinh.
+2. **Cắt Gọn Đúng 1 Chữ Số Thập Phân (Single Decimal Truncation)**:
+   - Tất cả điểm số, điểm trung bình, dự đoán học lực BẮT BUỘC cắt đúng **1 chữ số sau dấu phẩy KHÔNG làm tròn lên/xuống** (`format1Dec` / `trunc1Dec`), ví dụ: `6.21` → `6.2`, `6.28` → `6.2`, `8.89` → `8.8`.
+3. **Tìm Kiếm Không Phân Biệt Hoa Thường**:
+   - Mọi bộ lọc tìm kiếm text phải luôn xử lý `.toLowerCase().trim()`.
+4. **Điều Hướng Nhập Điểm Trên Mobile (Student-First Navigation)**:
+   - Trên giao diện mobile chuyển vị (học sinh nằm theo trục X, các chỉ số điểm nằm theo trục Y): Nhấn Enter, Tab hoặc phím Mũi tên Xuống sẽ di chuyển dọc theo các đầu điểm của cùng học sinh đó trước khi nhảy sang học sinh tiếp theo.
 
 ---
 
-## 📐 5. "One Container, One Visual Boundary" UI Standard
+## 🚀 6. Chuẩn Tự Động Commit, Tăng Phiên Bản & Push Git
 
-- **Strictly No Border-in-Border / Card-in-Card**: Avoid wrapping bordered components (e.g. `<CustomSelect />`, `<CustomDatePicker />`, inputs, metric items) inside another bordered outer wrapper card.
-- **Single Visual Boundary**: Every card, section, or toolbar group should have **exactly one clean visual boundary**. Sub-elements should rely on clean layout spacing (`gap-3`), subtle background distinction, or single-line dividers (`divide-x` / `divide-y`) rather than nested wrapper boxes with borders.
+### 6.1. Tự Động Commit & Push Cuối Mỗi Task
+- Sau khi hoàn thành cập nhật code hoặc tính năng trong mỗi phiên làm việc, agent BẮT BUỘC tự động chạy:
+  ```bash
+  git add . ; git commit -m "feat/fix: [Tóm tắt ngắn gọn thay đổi]" ; git push origin main
+  ```
 
----
-
-## 🚫 6. Strictly No Pipe (`|`) or Bullet (`•`) Text Separators
-
-- **No Text Pipes or Bullet Dots**: Bullet dot characters (`•`) and vertical pipes (`|`) MUST NOT be used to separate text items or metadata fields in UI strings.
-- **Use Structured Elements**: Data items MUST be separated using clean structured flex badges, subtle typography hierarchy, or clean spacing.
-
----
-
-## 🎨 7. Custom Dark Theme & Zero-Blur GPU Performance
-
-- **Custom Dark Select Required (`<CustomSelect />`)**: Native HTML `<select>` elements are strictly forbidden. All dropdown selections MUST use `<CustomSelect />` matching the dark indigo space theme (`#0c0f1e` background, `#212c4b` border, `#5c36f5` highlight).
-- **Custom Dark DatePicker Required (`<CustomDatePicker />`)**: Native browser `<input type="date">` elements are strictly forbidden. All date selections MUST use `<CustomDatePicker />`.
-- **Zero-Blur GPU Performance**: CSS blur filters (`backdrop-blur-*`, `blur-*`) are strictly forbidden on scrollable lists, review cards, and large data tables. All elements MUST use crisp, solid high-contrast dark theme surfaces (`#080b14`, `#0c0f1e`, `#0d1120`, `#121626`).
-- **Solid Dark Backdrop Overlays**: Modals and context menus MUST NOT use `backdrop-blur-*`. All modal backdrops MUST use solid dark overlays (`bg-black/85`).
-- **Pure White Icons**: No icon or SVG may use black or near-black colors (`text-black`, `text-slate-900`). Calendar picker icons enforce pure white (`filter: invert(1) brightness(2) !important`).
-- **Strictly No Injected Emojis**: Emojis MUST NOT be injected by serializers, formatters, parsers, or UI components unless present in raw source content.
-- **Single Decimal Truncation (`format1Dec` / `trunc1Dec`)**: All calculated scores, session averages, academic predictions, quiz results, and Excel/PDF exports MUST be formatted/truncated to strictly **1 figure after the decimal point (`.`) without rounding up or down** (e.g. `6.21` -> `6.2`, `6.28` -> `6.2`, `8.86` -> `8.8`).
-- **Data Integrity**: Unentered or missing grades must NEVER be recorded as numeric `0` or `0.0`. Missing grades are recorded as `NULL`.
-- **Single Pen Action Button**: Cards/rows MUST NOT display a separate Trash Bin icon alongside an Edit Pen icon. Cards/rows feature a single clean Pen action button (`<Edit3 />`). Deletion is provided as a red Delete button inside the Edit modal popup.
+### 6.2. Quy Trình Phát Hành Bản Cập Nhật (Version Bump)
+Khi được yêu cầu phát hành bản cập nhật hoặc bump version:
+1. Tăng chuỗi phiên bản trong file `VERSION` (ví dụ: `1.0.0` → `1.0.1`).
+2. Build lại frontend (`npm run build`) và bộ cài đặt (`python installer/build_installer.py`).
+3. Commit và gắn git tag tương ứng:
+   ```bash
+   git add . ; git commit -m "release: v1.0.1" ; git tag v1.0.1 ; git push origin main --tags
+   ```
 
 ---
 
-## 💎 8. UI/UX Pro Max — Design Intelligence & Quality Guidelines
+## 📈 7. Chuẩn Biểu Đồ & Trực Quan Hóa Dữ Liệu
 
-*Follow this priority 1→10 checklist for all UI/UX design decisions, component building, and reviews:*
-
-| Priority | Category | Impact | Domain | Key Checks (Must Have) | Anti-Patterns (Avoid) |
-|----------|----------|--------|--------|------------------------|------------------------|
-| 1 | **Accessibility** | CRITICAL | `ux` | Contrast ≥ 4.5:1, Alt text, Keyboard navigation, Aria-labels | Removing focus rings, Icon-only buttons without accessible labels |
-| 2 | **Touch & Interaction** | CRITICAL | `ux` | Min touch target 44×44px, 8px+ spacing, Immediate loading feedback | Reliance on hover only, Instant 0ms state jumps |
-| 3 | **Performance** | HIGH | `ux` | Virtualization for 500+ rows, Zero layout thrashing, No CSS blur GPU bottlenecks | Massive DOM trees, Layout shifts, Unmemoized table rows |
-| 4 | **Style Consistency** | HIGH | `style` | Cohesive dark indigo palette, Crisp borders, Single visual boundary | Card-in-card nesting, Border-in-border, Emojis as icons |
-| 5 | **Layout & Responsive** | HIGH | `ux` | Flex/grid wrap, No horizontal page scroll, Collapsing labels on mobile | Fixed px container widths, Horizontal overflow |
-| 6 | **Typography & Color** | MEDIUM | `typography` | High-contrast text, Semantic color tokens, Inter/sans font stack | Gray-on-gray unreadable text, Text < 12px for body |
-| 7 | **Animation** | MEDIUM | `animation` | Smooth sequential reveal (0.35s ease-out, translateY(12px)->0), Staggered order | Jarring 95px jumps, Out-of-order flashing cards |
-| 8 | **Forms & Feedback** | MEDIUM | `ux` | Clear field labels, Inline validation near fields, Toast notifications | Errors shown only at top, Silent failure states |
-| 9 | **Navigation Patterns** | HIGH | `ux` | Predictable sliding tab pill indicators, Breadcrumb trails | Overloaded navigation, Inconsistent active states |
-| 10 | **Charts & Data** | LOW | `chart` | Tooltips on hover with exact values, Smooth SVG center scale origins, Legends | Color-only meaning, Square clipped glow filters |
+1. **Tọa độ Phóng To SVG Điểm Dữ Liệu**:
+   - Thẻ `<circle>` dữ liệu SVG khi hover phóng to phải có style: `style={{ transformBox: 'fill-box', transformOrigin: 'center' }}` để điểm nở đều từ tâm, không bị nhảy góc.
+2. **Tooltip Tương Tác**:
+   - Hover vào điểm dữ liệu trên đồ thị tiến độ bắt buộc hiển thị tooltip chi tiết giá trị số thực tế.
+3. **Chiều Cao Rộng Rãi**:
+   - Biểu đồ tiến trình cần duy trì chiều cao tối thiểu hợp lý để các đường lưới điểm số tách biệt rõ ràng, dễ nhìn.
 
 ---
 
-## 🚫 9. Forbidden Patterns Summary
+## 🚫 8. Bảng Tổng Hợp Các Hành Vi Bị Cấm (Anti-Patterns)
 
-| Forbidden | Required Instead |
+| Hành vi BỊ CẤM | Quy chuẩn BẮT BUỘC thay thế |
 |---|---|
-| Raw `<table>` with manual JS filtering | `<DataTable data={...} columns={...} />` |
-| `useState` for search/sort/page in a page with DataTable | Remove it — DataTable handles internally |
-| `useReactTable` called directly in a page | Only allowed inside `DataTable.tsx` component |
-| Bloated files (>400 lines frontend, >500 lines backend) | Modularize into subcomponents, hooks & tabs |
-| `backdrop-blur-*` CSS classes | Solid dark backgrounds only (`#080b14`, `#0c0f1e`, `#121626`) |
-| Native `<select>` dropdowns | `<CustomSelect />` component |
-| Native `<input type="date">` | `<CustomDatePicker />` component |
-| Separate trash bin icon on cards | Single edit pen + delete inside modal |
-| Pipe `|` or Bullet `•` text separators | Structured flex badges, typography & spacing |
-| Card-in-card / Border-in-border | 'One container, one visual boundary' & single dividers |
-| Grade `0` / `0.0` for unset scores | `NULL` for missing grades |
-| Text / numbers with 2+ decimal places | 1 decimal truncation via `format1Dec` / `trunc1Dec` |
+| Dùng Dark theme / Nền tối / Neon glow | Dùng **Light UI phẳng, tối giản, tương phản cao** (`#ffffff`, `#f8fafc`, text `#0f172a`) |
+| Tự ý chèn Note, chú thích, mẹo vặt thừa thãi | Không ghi note trừ khi được yêu cầu. Giữ UI tập trung vào dữ liệu |
+| Lạm dụng icon trên nút, tiêu đề, tab | Dùng chữ ngắn gọn; chỉ dùng icon khi thật sự cần thiết cho tính năng |
+| Thẻ `<table>` thủ công với state tự viết | Dùng `<DataTable data={...} columns={...} />` duy nhất |
+| `useState` cho search/sort/page ở cấp trang | DataTable tự quản lý bên trong, trang chỉ truyền data gốc |
+| File > 400 dòng (frontend) hoặc > 500 dòng (backend) | Tách nhỏ thành subcomponents, hooks, tabs, service modules |
+| Bộ lọc mờ `backdrop-blur-*` | Nền solid phẳng, độ tương phản cao, 0 lag GPU |
+| Dropdown `<select>` gốc của trình duyệt | Dùng `<CustomSelect />` light theme phẳng |
+| DatePicker `<input type="date">` gốc | Dùng `<CustomDatePicker />` light theme phẳng |
+| Icon thùng rác đứng cạnh bút sửa | Một icon Bút Sửa (`<Edit3 />`), nút Xóa đặt trong Modal |
+| Dấu phân cách Pipe `|` hoặc Chấm `•` | Dùng flex badges, spacing và typography |
+| Điểm chưa nhập lưu thành `0` hoặc `0.0` | Lưu thành `NULL` |
+| Làm tròn điểm số lên/xuống | Cắt gọn đúng 1 chữ số thập phân (`trunc1Dec`) |
+| Đổ code dài dòng (code dump) vào chat | Trả lời súc tích, chỉ trích dẫn dòng cần thiết, kèm link file |
 
 ---
 
-## 📁 10. Key Files Reference
+## 📁 9. Tham Chiếu Các File Quan Trọng
 
-| File | Purpose |
+| File / Đường dẫn | Vai trò |
 |---|---|
-| `frontend/src/components/DataTable.tsx` | **Shared TanStack Table wrapper — USE THIS FOR ALL TABLES** |
-| `frontend/src/components/CustomSelect.tsx` | Custom dark theme dropdown |
-| `frontend/src/components/CustomDatePicker.tsx` | Custom dark theme date picker |
-| `frontend/src/components/Toast.tsx` | Toast notifications |
-| `frontend/src/api.ts` | All API calls |
-| `frontend/src/pages/` | Page components (teachers, students, classes, courses, reports, schedule) |
-| `.agents/AGENTS.md` | **Central global rules & coding standards (this file)** |
+| `frontend/src/components/DataTable.tsx` | Component TanStack Table dùng chung cho toàn bộ ứng dụng |
+| `frontend/src/components/CustomSelect.tsx` | Dropdown tùy chỉnh Light UI phẳng |
+| `frontend/src/components/CustomDatePicker.tsx` | Bộ chọn ngày tùy chỉnh Light UI phẳng |
+| `frontend/src/components/Toast.tsx` | Thông báo Toast phản hồi thao tác |
+| `frontend/src/api.ts` | Tất cả API calls kết nối Backend |
+| `frontend/src/pages/` | Các trang chính (teachers, students, classes, courses, reports, schedule) |
+| `.agents/AGENTS.md` | Bộ quy chuẩn cốt lõi duy nhất của toàn bộ dự án |
