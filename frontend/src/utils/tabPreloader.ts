@@ -38,6 +38,7 @@ export const TAB_MODULE_LOADERS: Record<string, () => Promise<{ default: Compone
   'unit-config': () => loadWithRetry(() => import('../pages/unit-config')),
   'file-manager': () => loadWithRetry(() => import('../pages/document-manager')),
   'word-editor': () => loadWithRetry(() => import('../pages/word-editor')),
+  'pdf-editor': () => loadWithRetry(() => import('../pages/pdf-editor')),
   'canvas-board': () => loadWithRetry(() => import('../pages/canvas-board')),
   'ui-showcase': () => loadWithRetry(() => import('../pages/ui-showcase')),
 };

@@ -1,0 +1,29 @@
+{
+  "last_synced": "2026-10-12 15:10:22",
+  "repos": [
+    {
+      "id": "wordcraft",
+      "name": "WordCraft",
+      "repo_url": "https://github.com/storytold/wordcraft.git",
+      "source_backup_file": "wordcraft-source.zip",
+      "backup_size_bytes": 9101318,
+      "status": "backed_up"
+    },
+    {
+      "id": "pdfcraft",
+      "name": "PdfCraft",
+      "repo_url": "https://github.com/storytold/pdfcraft.git",
+      "source_backup_file": "pdfcraft-source.zip",
+      "backup_size_bytes": 14958387,
+      "status": "backed_up"
+    },
+    {
+      "id": "excalidraw",
+      "name": "Excalidraw",
+      "repo_url": "https://github.com/excalidraw/excalidraw.git",
+      "source_backup_file": "excalidraw-source.zip",
+      "backup_size_bytes": 36931041,
+      "status": "backed_up"
+    }
+  ]
+}

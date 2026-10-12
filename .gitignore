@@ -40,3 +40,7 @@ env/
 .idea/
 .DS_Store
 Thumbs.db
+
+# Upstream repo backup archives (stored locally)
+backups/repos/*.zip
+

@@ -18,6 +18,7 @@ const Settings = lazy(TAB_MODULE_LOADERS['settings']);
 const DocumentManager = lazy(TAB_MODULE_LOADERS['file-manager']);
 const CanvasBoardPage = lazy(TAB_MODULE_LOADERS['canvas-board']);
 const WordEditorPage = lazy(TAB_MODULE_LOADERS['word-editor']);
+const PDFEditorPage = lazy(TAB_MODULE_LOADERS['pdf-editor']);
 const DashboardPage = lazy(TAB_MODULE_LOADERS['dashboard']);
 const StudentsPage = lazy(TAB_MODULE_LOADERS['students']);
 const TeachersPage = lazy(TAB_MODULE_LOADERS['teachers']);
@@ -177,10 +178,17 @@ export const TAB_DEFINITIONS: TabDefinition[] = [
   ] : []),
   {
     id: 'word-editor',
-    label: 'Soạn Thảo Văn Bản',
+    label: 'Trình Soạn Thảo',
     icon: FileText,
     section: 'resources',
     render: () => <WordEditorPage />
+  },
+  {
+    id: 'pdf-editor',
+    label: 'PDF Editor',
+    icon: FileCode,
+    section: 'resources',
+    render: () => <PDFEditorPage />
   },
   {
     id: 'canvas-board',
