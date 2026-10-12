@@ -8,6 +8,7 @@ import {
 
 import WaitingForDevelopment from '../components/WaitingForDevelopment';
 import { PdfIcon } from '../components/icons/PdfIcon';
+import { WhiteboardIcon } from '../components/icons/WhiteboardIcon';
 
 import { TAB_MODULE_LOADERS } from '../utils/tabPreloader';
 
@@ -201,8 +202,8 @@ export const TAB_DEFINITIONS: TabDefinition[] = [
   },
   {
     id: 'canvas-board',
-    label: 'Canvas',
-    icon: PenTool,
+    label: 'Whiteboard',
+    icon: WhiteboardIcon,
     section: 'resources',
     render: () => <CanvasBoardPage />
   },

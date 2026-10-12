@@ -1,5 +1,5 @@
 {
-  "last_synced": "2026-10-12 15:31:07",
+  "last_synced": "2026-10-12 16:00:00",
   "repos": [
     {
       "id": "wordcraft",
@@ -23,14 +23,6 @@
       "repo_url": "https://github.com/storytold/gridcraft.git",
       "source_backup_file": "gridcraft-source.zip",
       "backup_size_bytes": 4231224,
-      "status": "backed_up"
-    },
-    {
-      "id": "excalidraw",
-      "name": "Excalidraw",
-      "repo_url": "https://github.com/excalidraw/excalidraw.git",
-      "source_backup_file": "excalidraw-source.zip",
-      "backup_size_bytes": 36931041,
       "status": "backed_up"
     }
   ]

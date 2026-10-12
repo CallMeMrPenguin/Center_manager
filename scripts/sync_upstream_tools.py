@@ -52,15 +52,6 @@ REPOSITORIES = [
         "target_public_subdir": "gridcraft",
         "asset_prefix": "gridcraft-web",
     },
-    {
-        "id": "excalidraw",
-        "name": "Excalidraw",
-        "repo_url": "https://github.com/excalidraw/excalidraw.git",
-        "api_releases": "https://api.github.com/repos/excalidraw/excalidraw/releases/latest",
-        "source_archive_url": "https://github.com/excalidraw/excalidraw/archive/refs/heads/master.zip",
-        "target_public_subdir": None,  # Built directly via npm
-        "asset_prefix": None,
-    },
 ]
 
 HEADERS = {

@@ -18,16 +18,39 @@ export function useSidebarStrokeSlider({
     if (!container) return;
 
     const syncSlider = () => {
-      // Find stroke width buttons container in Excalidraw's sidebar
-      const thinBtn = container.querySelector('button[data-testid="stroke-width-thin"]');
-      if (!thinBtn || !thinBtn.parentElement) return;
+      // Find the stroke width section in Excalidraw's left sidebar
+      const thinBtn = container.querySelector('[data-testid="strokeWidth-thin"]') as HTMLElement | null;
+      let targetFieldset: HTMLElement | null = null;
 
-      const parent = thinBtn.parentElement;
-      let existingSlider = parent.querySelector('.custom-sidebar-stroke-slider') as HTMLInputElement | null;
+      if (thinBtn) {
+        targetFieldset = thinBtn.closest('fieldset');
+      }
 
-      if (!existingSlider) {
-        const wrapper = document.createElement('div');
-        wrapper.className = 'custom-sidebar-stroke-slider w-full mt-1.5 flex items-center gap-2';
+      if (!targetFieldset) {
+        const fieldsets = Array.from(container.querySelectorAll('fieldset'));
+        targetFieldset = fieldsets.find((fs) => {
+          const text = (fs.querySelector('legend')?.textContent || '').toLowerCase();
+          return text.includes('stroke width') || text.includes('độ dày nét');
+        }) || null;
+      }
+
+      if (!targetFieldset) return;
+
+      // Find the container holding the 3 buttons
+      const buttonList = targetFieldset.querySelector('.buttonList') as HTMLElement | null
+        || thinBtn?.parentElement as HTMLElement | null;
+
+      if (buttonList && buttonList.style.display !== 'none') {
+        buttonList.style.display = 'none'; // Hide the 3 static buttons
+      }
+
+      let sliderWrapper = targetFieldset.querySelector('.custom-sidebar-stroke-slider') as HTMLElement | null;
+
+      if (!sliderWrapper) {
+        sliderWrapper = document.createElement('div');
+        sliderWrapper.className = 'custom-sidebar-stroke-slider';
+        sliderWrapper.style.cssText =
+          'display: flex; align-items: center; gap: 8px; width: 100%; padding-top: 4px; padding-bottom: 2px;';
 
         const slider = document.createElement('input');
         slider.type = 'range';
@@ -35,11 +58,14 @@ export function useSidebarStrokeSlider({
         slider.max = '24';
         slider.step = '0.5';
         slider.value = String(strokeWidth);
-        slider.className = 'w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600';
+        slider.style.cssText =
+          'flex: 1; height: 6px; border-radius: 9999px; accent-color: var(--color-primary, #6965db); cursor: pointer;';
         slider.title = `Độ dày nét: ${strokeWidth}px`;
 
         const label = document.createElement('span');
-        label.className = 'text-[10px] font-mono font-bold text-slate-700 dark:text-slate-300 min-w-[28px]';
+        label.className = 'stroke-width-label';
+        label.style.cssText =
+          'font-size: 11px; font-weight: 700; font-family: monospace; min-width: 34px; text-align: right; color: var(--color-text, currentColor);';
         label.textContent = `${strokeWidth}px`;
 
         slider.addEventListener('input', (e) => {
@@ -70,12 +96,12 @@ export function useSidebarStrokeSlider({
           }
         });
 
-        wrapper.appendChild(slider);
-        wrapper.appendChild(label);
-        parent.appendChild(wrapper);
+        sliderWrapper.appendChild(slider);
+        sliderWrapper.appendChild(label);
+        targetFieldset.appendChild(sliderWrapper);
       } else {
-        const sliderInput = existingSlider.querySelector('input') as HTMLInputElement | null;
-        const labelSpan = existingSlider.querySelector('span') as HTMLSpanElement | null;
+        const sliderInput = sliderWrapper.querySelector('input') as HTMLInputElement | null;
+        const labelSpan = sliderWrapper.querySelector('.stroke-width-label') as HTMLSpanElement | null;
         if (sliderInput && sliderInput.value !== String(strokeWidth)) {
           sliderInput.value = String(strokeWidth);
         }
