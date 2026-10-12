@@ -35,8 +35,6 @@ export function useSidebarStrokeSlider({
     const updateSliderVisual = (
       rangeInput: HTMLInputElement,
       bubbleEl: HTMLElement | null,
-      zeroEl: HTMLElement | null,
-      maxEl: HTMLElement | null,
       val: number
     ) => {
       const min = 1;
@@ -52,24 +50,7 @@ export function useSidebarStrokeSlider({
         const position = (pct / 100) * (inputWidth - thumbWidth) + thumbWidth / 2;
         bubbleEl.style.left = `${position}px`;
         bubbleEl.textContent = `${val}px`;
-
-        if (val <= 1.2) {
-          bubbleEl.style.display = 'none';
-          if (zeroEl) zeroEl.style.opacity = '1';
-          if (maxEl) maxEl.style.opacity = '1';
-        } else if (val <= 3) {
-          bubbleEl.style.display = 'block';
-          if (zeroEl) zeroEl.style.opacity = '0';
-          if (maxEl) maxEl.style.opacity = '1';
-        } else if (val >= 22) {
-          bubbleEl.style.display = 'block';
-          if (zeroEl) zeroEl.style.opacity = '1';
-          if (maxEl) maxEl.style.opacity = '0';
-        } else {
-          bubbleEl.style.display = 'block';
-          if (zeroEl) zeroEl.style.opacity = '1';
-          if (maxEl) maxEl.style.opacity = '1';
-        }
+        bubbleEl.style.display = 'block';
       }
     };
 
@@ -119,21 +100,7 @@ export function useSidebarStrokeSlider({
           'width: 100%; height: 4px; -webkit-appearance: none; border-radius: 2px; outline: none; cursor: pointer;';
         slider.title = `Độ dày nét: ${strokeWidthRef.current}px`;
 
-        // 1px unit label at bottom left, matching the '0' label of the opacity slider
-        const zeroLabel = document.createElement('div');
-        zeroLabel.className = 'zero-label';
-        zeroLabel.textContent = '1px';
-        zeroLabel.style.cssText =
-          'position: absolute; bottom: 0; left: 4px; font-size: 12px; color: var(--text-primary-color, currentColor); font-weight: 500; transition: opacity 0.15s ease;';
-
-        // 24px max label at bottom right
-        const maxLabel = document.createElement('div');
-        maxLabel.className = 'max-label';
-        maxLabel.textContent = '24px';
-        maxLabel.style.cssText =
-          'position: absolute; bottom: 0; right: 4px; font-size: 12px; color: var(--text-primary-color, currentColor); font-weight: 500; transition: opacity 0.15s ease;';
-
-        // Floating value bubble underneath the thumb, matching the value bubble of the opacity slider
+        // Floating value bubble underneath the thumb, tracking position dynamically
         const valueBubble = document.createElement('div');
         valueBubble.className = 'value-bubble';
         valueBubble.style.cssText =
@@ -142,7 +109,7 @@ export function useSidebarStrokeSlider({
         slider.addEventListener('input', (e) => {
           const val = parseFloat((e.target as HTMLInputElement).value) || 1;
           slider.title = `Độ dày nét: ${val}px`;
-          updateSliderVisual(slider, valueBubble, zeroLabel, maxLabel, val);
+          updateSliderVisual(slider, valueBubble, val);
           setStrokeWidthRef.current(val);
 
           const api = excalidrawAPIRef.current;
@@ -170,22 +137,23 @@ export function useSidebarStrokeSlider({
         });
 
         sliderWrapper.appendChild(slider);
-        sliderWrapper.appendChild(zeroLabel);
-        sliderWrapper.appendChild(maxLabel);
         sliderWrapper.appendChild(valueBubble);
         targetFieldset.appendChild(sliderWrapper);
 
         requestAnimationFrame(() => {
-          updateSliderVisual(slider, valueBubble, zeroLabel, maxLabel, strokeWidthRef.current);
+          updateSliderVisual(slider, valueBubble, strokeWidthRef.current);
         });
       } else {
         const sliderInput = sliderWrapper.querySelector('input') as HTMLInputElement | null;
         const valueBubble = sliderWrapper.querySelector('.value-bubble') as HTMLElement | null;
-        const zeroLabel = sliderWrapper.querySelector('.zero-label') as HTMLElement | null;
-        const maxLabel = sliderWrapper.querySelector('.max-label') as HTMLElement | null;
+        const oldZero = sliderWrapper.querySelector('.zero-label');
+        if (oldZero) oldZero.remove();
+        const oldMax = sliderWrapper.querySelector('.max-label');
+        if (oldMax) oldMax.remove();
+
         if (sliderInput && sliderInput.value !== String(strokeWidthRef.current)) {
           sliderInput.value = String(strokeWidthRef.current);
-          updateSliderVisual(sliderInput, valueBubble, zeroLabel, maxLabel, strokeWidthRef.current);
+          updateSliderVisual(sliderInput, valueBubble, strokeWidthRef.current);
         }
       }
     };
