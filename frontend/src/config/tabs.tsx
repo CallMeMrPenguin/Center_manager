@@ -184,28 +184,28 @@ export const TAB_DEFINITIONS: TabDefinition[] = [
     label: 'Trình Soạn Thảo',
     icon: FileText,
     section: 'resources',
-    render: () => <WordEditorPage />
+    render: (props) => <WordEditorPage isActive={props.isActive} />
   },
   {
     id: 'grid-editor',
     label: 'Bảng Tính (Excel)',
     icon: FileSpreadsheet,
     section: 'resources',
-    render: () => <GridEditorPage />
+    render: (props) => <GridEditorPage isActive={props.isActive} />
   },
   {
     id: 'pdf-editor',
     label: 'PDF Editor',
     icon: PdfIcon,
     section: 'resources',
-    render: () => <PDFEditorPage />
+    render: (props) => <PDFEditorPage isActive={props.isActive} />
   },
   {
     id: 'canvas-board',
     label: 'Whiteboard',
     icon: WhiteboardIcon,
     section: 'resources',
-    render: () => <CanvasBoardPage />
+    render: (props) => <CanvasBoardPage isActive={props.isActive} />
   },
   {
     id: 'payments',

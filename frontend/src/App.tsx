@@ -18,8 +18,6 @@ import { ThemeProvider } from './context/ThemeContext';
 import { FpsOverlay } from './components/FpsOverlay';
 import { isRealMobileDevice } from './utils/deviceUtils';
 
-const HEAVY_WASM_TABS = new Set(['word-editor', 'pdf-editor', 'grid-editor', 'canvas-board']);
-
 function AppContent() {
   // Auto-detect and reload on new deployment
   useAutoDeploymentRefresh();
@@ -295,21 +293,19 @@ function AppContent() {
           <main className="flex-1 overflow-hidden bg-[#f1f5f9] dark:bg-[#09090b] relative w-full min-w-0 pb-0">
             {visibleTabs.map((tab) => {
               const isActive = activeTab === tab.id;
-              const isHeavy = HEAVY_WASM_TABS.has(tab.id);
-              const shouldRender = isHeavy ? isActive : visitedTabIds.has(tab.id);
-
-              if (!shouldRender) return null;
+              if (!visitedTabIds.has(tab.id)) return null;
 
               return (
-                <div key={tab.id} className={`h-full w-full ${isActive ? 'animate-tab-enter' : 'hidden'}`}>
+                <div
+                  key={tab.id}
+                  className={`h-full w-full ${isActive ? 'relative z-10 animate-tab-enter' : 'absolute inset-0 z-0 pointer-events-none'}`}
+                  style={!isActive ? { visibility: 'hidden', contentVisibility: 'hidden', pointerEvents: 'none' } : undefined}
+                >
                   <Suspense fallback={
-                      <div className="flex h-full w-full items-center justify-center bg-transparent">
-                        <div className="flex flex-col items-center gap-2">
-                          <div className="w-7 h-7 rounded-full border-2 border-slate-300 dark:border-white/10 border-t-blue-600 animate-spin" />
-                          <span className="text-xs font-semibold text-slate-400">Đang tải...</span>
-                        </div>
-                      </div>
-                    }>
+                    <div className="flex h-full w-full items-center justify-center bg-transparent">
+                      <div className="w-7 h-7 rounded-full border-2 border-slate-300 dark:border-white/10 border-t-blue-600 animate-spin" />
+                    </div>
+                  }>
                       {tab.render({
                         isActive,
                         preloadedQuestions,

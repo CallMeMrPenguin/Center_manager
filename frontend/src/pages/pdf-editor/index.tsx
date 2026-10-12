@@ -1,12 +1,18 @@
 import React, { useState, memo } from 'react';
 
-function PDFEditorPage() {
+function PDFEditorPage({ isActive = true }: { isActive?: boolean }) {
   const [loading, setLoading] = useState(true);
 
   return (
     <div
       className="h-full w-full overflow-hidden flex flex-col bg-[#f1f1f3] relative"
-      style={{ contain: 'strict', isolation: 'isolate', transform: 'translateZ(0)' }}
+      style={{
+        contain: 'strict',
+        isolation: 'isolate',
+        transform: 'translateZ(0)',
+        contentVisibility: isActive ? 'visible' : 'hidden',
+        pointerEvents: isActive ? 'auto' : 'none',
+      }}
     >
       {loading && (
         <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-[#f1f1f3] text-slate-700 pointer-events-none">
@@ -27,7 +33,12 @@ function PDFEditorPage() {
         loading="lazy"
         allow="clipboard-read; clipboard-write; fullscreen"
         className="w-full h-full border-0 bg-[#f1f1f3]"
-        style={{ contain: 'strict', isolation: 'isolate', transform: 'translateZ(0)' }}
+        style={{
+          contain: 'strict',
+          isolation: 'isolate',
+          transform: 'translateZ(0)',
+          pointerEvents: isActive ? 'auto' : 'none',
+        }}
         onLoad={() => setLoading(false)}
       />
     </div>

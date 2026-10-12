@@ -5,7 +5,7 @@ import { useExcalidrawFileImporter } from './hooks/useExcalidrawFileImporter';
 import { useSidebarStrokeSlider } from './hooks/useSidebarStrokeSlider';
 import { UploadCloud } from 'lucide-react';
 
-function CanvasBoardPage() {
+function CanvasBoardPage({ isActive = true }: { isActive?: boolean }) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [excalidrawAPI, setExcalidrawAPI] = useState<any | null>(null);
@@ -123,6 +123,8 @@ function CanvasBoardPage() {
         contain: 'strict',
         isolation: 'isolate',
         transform: 'translateZ(0)',
+        contentVisibility: isActive ? 'visible' : 'hidden',
+        pointerEvents: isActive ? 'auto' : 'none',
       }}
     >
       {/* Hidden Multi-file input (supports multiple images & PDFs at once) */}
