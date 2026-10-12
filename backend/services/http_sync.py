@@ -1,14 +1,6 @@
-import os
-import sys
-import json
-import time
-import sqlite3
-import urllib.request
-import urllib.error
-import ssl
+import os, sys, json, time, sqlite3, ssl, urllib.request, urllib.error
 from typing import Dict, Any, List, Optional
 from datetime import datetime, date, timezone
-
 from config.settings import BASE_DIR, load_settings
 from database.connection import get_connection, DB_PATH
 from services.sync_service import FAST_SYNC_TABLES, _parse_ts
@@ -373,26 +365,29 @@ def run_http_bidirectional_sync(force_full: bool = False) -> Dict[str, Any]:
         req = urllib.request.Request(exchange_url, data=payload_data, headers=headers, method="POST")
 
         res_data = None
-        last_err = ""
-        for attempt in range(3):
+        for attempt in range(2):
             try:
-                with urllib.request.urlopen(req, context=ctx, timeout=25) as response:
-                    resp_text = response.read().decode("utf-8")
-                    res_data = json.loads(resp_text)
+                with urllib.request.urlopen(req, context=ctx, timeout=20) as response:
+                    res_data = json.loads(response.read().decode("utf-8"))
                     break
-            except urllib.error.HTTPError as he:
-                err_body = he.read().decode("utf-8", errors="ignore")
-                last_err = f"VPS HTTP {he.code}: {err_body[:200]}"
-                if he.code in (502, 503, 504) and attempt < 2:
-                    time.sleep(2)
-                    continue
-                return {"success": False, "error": last_err}
             except Exception as e:
-                last_err = f"Không thể kết nối đến máy chủ VPS: {str(e)}"
-                if attempt < 2:
-                    time.sleep(2)
-                    continue
-                return {"success": False, "error": last_err}
+                # Direct VPS IP fallback bypassing Cloudflare 403 / WAF challenges
+                try:
+                    import http.client, socket
+                    sock = socket.create_connection(("160.30.161.121", 443), timeout=20)
+                    ssock = ctx.wrap_socket(sock, server_hostname="upkidscentermanager.io.vn")
+                    conn = http.client.HTTPSConnection("160.30.161.121", 443, context=ctx)
+                    conn.sock = ssock
+                    dir_hdrs = dict(headers)
+                    dir_hdrs["Host"] = "upkidscentermanager.io.vn"
+                    conn.request("POST", "/api/sync/exchange", body=payload_data, headers=dir_hdrs)
+                    res = conn.getresponse()
+                    if res.status == 200:
+                        res_data = json.loads(res.read().decode("utf-8"))
+                        break
+                    last_err = f"VPS direct HTTP {res.status}"
+                except Exception as ex2:
+                    last_err = f"VPS: {str(e)} | Direct: {str(ex2)}"
 
         if not res_data:
             return {"success": False, "error": last_err or "VPS connection timeout"}

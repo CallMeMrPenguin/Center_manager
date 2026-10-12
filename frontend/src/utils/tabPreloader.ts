@@ -76,8 +76,6 @@ export const HEAVY_ISOLATED_TABS: string[] = [
   'vocab-bank',
   'unit-config',
   'ui-showcase',
-  'payments',
-  'invoices',
 ];
 
 const preloadedChunks = new Set<string>();

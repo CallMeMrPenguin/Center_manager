@@ -12,7 +12,6 @@ export const SECTIONS = [
   { id: 'main', label: 'Hệ thống' },
   { id: 'assessments', label: 'Đánh giá & Đề thi' },
   { id: 'resources', label: 'Tài nguyên' },
-  { id: 'finance', label: 'Tài chính' },
   { id: 'analytics', label: 'Phân tích' },
   { id: 'settings', label: 'Thiết lập' },
 ];

@@ -77,6 +77,10 @@ export function useExcalidrawFileImporter(excalidrawAPI: any | null) {
         return;
       }
 
+      validFiles.sort((a, b) =>
+        a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' })
+      );
+
       setIsImporting(true);
       showToast(`Đang nạp ${validFiles.length} tệp ảnh / PDF...`, 'info');
 
@@ -161,42 +165,46 @@ export function useExcalidrawFileImporter(excalidrawAPI: any | null) {
           return;
         }
 
-        // Calculate layout coordinates
+        // Calculate layout coordinates (Horizontal grid: 2 columns, wrapping cleanly)
         const appState = excalidrawAPI.getAppState();
         const zoom = appState.zoom?.value || 1;
         const centerX = -appState.scrollX + appState.width / (2 * zoom);
         const centerY = -appState.scrollY + appState.height / (2 * zoom);
 
-        const targetW = 560; // Max render width
+        const targetW = 560; // Max render width per column
         const gap = 32;
+        const cols = Math.min(extractedItems.length, 2);
 
-        const isVerticalStack = extractedItems.length <= 4;
-        const cols = isVerticalStack ? 1 : 2;
+        // Precompute rendered item sizes
+        const renderedMeta = extractedItems.map((item) => {
+          const ratio = item.width > 0 ? item.height / item.width : 0.75;
+          const renderW = Math.min(targetW, item.width);
+          const renderH = renderW * ratio;
+          return { item, renderW, renderH };
+        });
+
+        // Compute max height for each row
+        const rowMaxHeights: number[] = [];
+        renderedMeta.forEach((meta, idx) => {
+          const row = Math.floor(idx / cols);
+          rowMaxHeights[row] = Math.max(rowMaxHeights[row] || 0, meta.renderH);
+        });
+
+        // Compute starting Y offset for each row to prevent overlapping
+        const rowStartY: number[] = [centerY - 150];
+        for (let r = 1; r < rowMaxHeights.length; r++) {
+          rowStartY[r] = rowStartY[r - 1] + rowMaxHeights[r - 1] + gap;
+        }
 
         const binaryFiles: any[] = [];
         const newElements: any[] = [];
 
-        let currentY = centerY - 200;
-
-        extractedItems.forEach((item, idx) => {
-          const ratio = item.width > 0 ? item.height / item.width : 0.75;
-          const renderW = Math.min(targetW, item.width);
-          const renderH = renderW * ratio;
-
-          let posX: number;
-          let posY: number;
-
-          if (isVerticalStack) {
-            posX = centerX - renderW / 2;
-            posY = currentY;
-            currentY += renderH + gap;
-          } else {
-            const col = idx % cols;
-            const row = Math.floor(idx / cols);
-            const totalW = cols * renderW + (cols - 1) * gap;
-            posX = centerX - totalW / 2 + col * (renderW + gap);
-            posY = centerY - 150 + row * (renderH + gap);
-          }
+        renderedMeta.forEach(({ item, renderW, renderH }, idx) => {
+          const col = idx % cols;
+          const row = Math.floor(idx / cols);
+          const totalW = cols * targetW + (cols - 1) * gap;
+          const posX = centerX - totalW / 2 + col * (targetW + gap) + (targetW - renderW) / 2;
+          const posY = rowStartY[row];
 
           const fileId = `file_${Date.now()}_${idx}_${Math.random().toString(36).slice(2, 7)}`;
 

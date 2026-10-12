@@ -1,9 +1,14 @@
 import React, { useState, useRef, useEffect, memo } from 'react';
-import { Excalidraw } from '@excalidraw/excalidraw';
+import { Excalidraw, MainMenu } from '@excalidraw/excalidraw';
 import '@excalidraw/excalidraw/index.css';
+import './canvasBoardOverrides.css';
 import { useExcalidrawFileImporter } from './hooks/useExcalidrawFileImporter';
 import { useSidebarStrokeSlider } from './hooks/useSidebarStrokeSlider';
 import { useImageStrokeBinder } from './hooks/useImageStrokeBinder';
+import { useRightClickPan } from './hooks/useRightClickPan';
+import { useUniformPenPressure } from './hooks/useUniformPenPressure';
+import { useCustomEraser } from './hooks/useCustomEraser';
+import { useWhiteboardUIAdjustments } from './hooks/useWhiteboardUIAdjustments';
 import { UploadCloud } from 'lucide-react';
 
 function CanvasBoardPage({ isActive = true }: { isActive?: boolean }) {
@@ -13,9 +18,10 @@ function CanvasBoardPage({ isActive = true }: { isActive?: boolean }) {
   const [strokeWidth, setStrokeWidth] = useState<number>(2);
   const [isDragOver, setIsDragOver] = useState<boolean>(false);
 
+  // File import (Natural name sorting & 2-column wrapping layout)
   const { isImporting, processAndImportFiles } = useExcalidrawFileImporter(excalidrawAPI);
 
-  // Sync stroke slider inside Excalidraw's left sidebar settings window
+  // Smooth stroke width slider in left sidebar
   useSidebarStrokeSlider({
     containerRef,
     excalidrawAPI,
@@ -23,10 +29,36 @@ function CanvasBoardPage({ isActive = true }: { isActive?: boolean }) {
     setStrokeWidth,
   });
 
-  // Automatically bind strokes drawn over images so they move together
+  // Bind strokes drawn over images so they move together
   useImageStrokeBinder({
     containerRef,
     excalidrawAPI,
+  });
+
+  // Hold right-click to pan freely & suppress context menu
+  useRightClickPan({
+    containerRef,
+    excalidrawAPI,
+  });
+
+  // Uniform pen pressure (removes velocity distortion) and enforces Architect default (roughness 0)
+  useUniformPenPressure({
+    containerRef,
+    excalidrawAPI,
+  });
+
+  // Partial vector eraser ported from legacy canvas with adjustable size
+  const { eraserSize, setEraserSize, cursorPos, isEraserActive } = useCustomEraser({
+    containerRef,
+    excalidrawAPI,
+  });
+
+  // Tool customization panel toggle, big paint brush highlighter & UI cleanups
+  useWhiteboardUIAdjustments({
+    containerRef,
+    excalidrawAPI,
+    eraserSize,
+    setEraserSize,
   });
 
   // Intercept the native Image tool in Excalidraw's top toolbar to enable multi-file picker
@@ -38,7 +70,6 @@ function CanvasBoardPage({ isActive = true }: { isActive?: boolean }) {
       const target = e.target as HTMLElement | null;
       if (!target) return;
 
-      // Check if clicked element or its parent is the Image tool button
       const imageBtn = target.closest(
         '[data-testid="toolbar-image"], [data-testid="image"], input[value="image"], label[title*="Ảnh"], label[title*="Image"], button[aria-label*="Image"]'
       );
@@ -52,7 +83,6 @@ function CanvasBoardPage({ isActive = true }: { isActive?: boolean }) {
 
     container.addEventListener('click', handleToolbarClick, true);
 
-    // Also support hotkey '9' (default Excalidraw image shortcut)
     const handleKeyDown = (e: KeyboardEvent) => {
       const activeTag = document.activeElement?.tagName?.toLowerCase();
       if (activeTag === 'input' || activeTag === 'textarea') return;
@@ -125,7 +155,7 @@ function CanvasBoardPage({ isActive = true }: { isActive?: boolean }) {
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
-      className="h-full w-full overflow-hidden flex flex-col relative bg-[#f8f9fa]"
+      className="canvas-board-wrapper hide-properties-panel h-full w-full overflow-hidden flex flex-col relative bg-[#f8f9fa]"
       style={{
         contain: 'strict',
         isolation: 'isolate',
@@ -167,6 +197,19 @@ function CanvasBoardPage({ isActive = true }: { isActive?: boolean }) {
         </div>
       )}
 
+      {/* Custom Partial Vector Eraser visual circular cursor */}
+      {isEraserActive && cursorPos && (
+        <div
+          className="custom-eraser-circular-cursor"
+          style={{
+            left: cursorPos.x,
+            top: cursorPos.y,
+            width: eraserSize,
+            height: eraserSize,
+          }}
+        />
+      )}
+
       <Excalidraw
         excalidrawAPI={(api: any) => setExcalidrawAPI(api)}
         theme="light"
@@ -175,6 +218,18 @@ function CanvasBoardPage({ isActive = true }: { isActive?: boolean }) {
         zenModeEnabled={false}
         detectScroll={false}
         autoFocus={false}
+        initialData={{
+          appState: {
+            activeTool: {
+              type: 'freedraw',
+              customType: null,
+              locked: true,
+              lastActiveTool: null,
+            } as any,
+            currentItemRoughness: 0,
+            currentItemStrokeWidth: 2,
+          },
+        }}
         UIOptions={{
           canvasActions: {
             saveToActiveFile: false,
@@ -183,7 +238,16 @@ function CanvasBoardPage({ isActive = true }: { isActive?: boolean }) {
             toggleTheme: true,
           },
         }}
-      />
+      >
+        <MainMenu>
+          <MainMenu.DefaultItems.LoadScene />
+          <MainMenu.DefaultItems.SaveAsImage />
+          <MainMenu.DefaultItems.Export />
+          <MainMenu.DefaultItems.ClearCanvas />
+          <MainMenu.DefaultItems.ToggleTheme />
+          <MainMenu.DefaultItems.ChangeCanvasBackground />
+        </MainMenu>
+      </Excalidraw>
     </div>
   );
 }

@@ -207,20 +207,7 @@ export const TAB_DEFINITIONS: TabDefinition[] = [
     section: 'resources',
     render: (props) => <CanvasBoardPage isActive={props.isActive} />
   },
-  {
-    id: 'payments',
-    label: 'Thanh Toán',
-    icon: CreditCard,
-    section: 'finance',
-    render: () => <WaitingForDevelopment title="Quản Lý Thanh Toán" />
-  },
-  {
-    id: 'invoices',
-    label: 'Hóa Đơn',
-    icon: Receipt,
-    section: 'finance',
-    render: () => <WaitingForDevelopment title="Quản Lý Hóa Đơn" />
-  },
+
   {
     id: 'reports',
     label: 'Báo Cáo Thống Kê',

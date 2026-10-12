@@ -1,0 +1,81 @@
+/* ==============================================================================
+   Whiteboard (Excalidraw) UI Customizations & Overrides
+   ============================================================================== */
+
+/* 1. Hide unwanted toolbar items: Line, Rectangle, Lock, Library, Help */
+.canvas-board-wrapper [data-testid="toolbar-line"],
+.canvas-board-wrapper [data-testid="toolbar-rectangle"],
+.canvas-board-wrapper [data-testid="toolbar-lock"],
+.canvas-board-wrapper .ToolIcon__lock,
+.canvas-board-wrapper .default-sidebar-trigger,
+.canvas-board-wrapper .sidebar-trigger,
+.canvas-board-wrapper button.help-icon {
+  display: none !important;
+}
+
+/* 2. Hide Sloppiness section in properties panel (Always defaults to Architect = 0) */
+.canvas-board-wrapper fieldset:has([name="sloppiness"]),
+.canvas-board-wrapper fieldset:has([value="0"][name*="sloppiness"]) {
+  display: none !important;
+}
+
+/* 3. Hide Excalidraw social / promotional links in Main Menu */
+.canvas-board-wrapper a[href*="excalidraw.com"],
+.canvas-board-wrapper a[href*="github.com/excalidraw"],
+.canvas-board-wrapper a[href*="discord.gg"],
+.canvas-board-wrapper a[href*="twitter.com"],
+.canvas-board-wrapper [data-testid="socials"] {
+  display: none !important;
+}
+
+/* 4. Tool customization panel (App-menu__left): hidden by default unless toggled */
+.canvas-board-wrapper.hide-properties-panel .App-menu__left {
+  display: none !important;
+}
+
+/* 5. Custom Highlighter button in top toolbar matching native Excalidraw button styling */
+.custom-highlighter-tool-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  cursor: pointer;
+  border-radius: var(--border-radius-lg, 8px);
+  user-select: none;
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+
+.custom-highlighter-tool-btn .ToolIcon__icon {
+  width: var(--lg-button-size, 2.25rem);
+  height: var(--lg-button-size, 2.25rem);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--border-radius-lg, 8px);
+  color: var(--icon-fill-color, currentColor);
+  transition: background 120ms ease;
+}
+
+.custom-highlighter-tool-btn:hover .ToolIcon__icon {
+  background: var(--button-hover-bg, rgba(0, 0, 0, 0.05));
+}
+
+.custom-highlighter-tool-btn.active .ToolIcon__icon {
+  background: var(--color-surface-primary-container, #e0e7ff);
+  color: var(--color-on-primary-container, #3730a3);
+}
+
+/* 6. Partial Vector Eraser visual circular cursor */
+.custom-eraser-circular-cursor {
+  position: absolute;
+  pointer-events: none;
+  border-radius: 50%;
+  border: 2px solid #ef4444;
+  background: rgba(239, 68, 68, 0.2);
+  transform: translate(-50%, -50%);
+  z-index: 9999;
+  box-shadow: 0 0 6px rgba(239, 68, 68, 0.4);
+}
