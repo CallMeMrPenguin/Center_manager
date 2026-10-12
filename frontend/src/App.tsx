@@ -1,9 +1,10 @@
-import { useState, useEffect, useRef, useMemo, Suspense } from 'react';
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Database, ChevronLeft, ChevronRight } from 'lucide-react';
 import { TAB_DEFINITIONS } from './config/tabs';
 import { api } from './api';
 import { Sidebar } from './components/Sidebar';
+import { TabWrapper } from './components/TabWrapper';
 import { MobileTopBar } from './components/MobileTopBar';
 import { MobileBottomDock } from './components/MobileBottomDock';
 import { showToast, AnimatedToastProvider } from './components/Toast';
@@ -127,6 +128,21 @@ function AppContent() {
   const [preloadedVersions, setPreloadedVersions] = useState<number | null>(null);
   const [preloadedGrade, setPreloadedGrade] = useState<string | null>(null);
   const [preloadedUnit, setPreloadedUnit] = useState<string | null>(null);
+
+  const handleClearPreloadedQuestions = useCallback(() => {
+    setPreloadedQuestions(null);
+    setPreloadedVersions(null);
+    setPreloadedGrade(null);
+    setPreloadedUnit(null);
+  }, []);
+
+  const handleCreateTest = useCallback((questions: any[], numVersions?: number, grade?: string, unit?: string) => {
+    setPreloadedQuestions(questions);
+    if (numVersions) setPreloadedVersions(numVersions);
+    setPreloadedGrade(grade || null);
+    setPreloadedUnit(unit || null);
+    handleSelectTab('formatter');
+  }, []);
 
   const [isSidebarExpanded, setIsSidebarExpanded] = useState<boolean>(() => {
     const saved = localStorage.getItem('sidebar_expanded');
@@ -292,42 +308,20 @@ function AppContent() {
         <div className="flex-1 flex flex-col overflow-hidden bg-transparent w-full min-w-0">
           <main className="flex-1 overflow-hidden bg-[#f1f5f9] dark:bg-[#09090b] relative w-full min-w-0 pb-0">
             {visibleTabs.map((tab) => {
-              const isActive = activeTab === tab.id;
               if (!visitedTabIds.has(tab.id)) return null;
 
               return (
-                <div
+                <TabWrapper
                   key={tab.id}
-                  className={`h-full w-full ${isActive ? 'relative z-10 animate-tab-enter' : 'absolute inset-0 z-0 pointer-events-none'}`}
-                  style={!isActive ? { visibility: 'hidden', contentVisibility: 'hidden', pointerEvents: 'none' } : undefined}
-                >
-                  <Suspense fallback={
-                    <div className="flex h-full w-full items-center justify-center bg-transparent">
-                      <div className="w-7 h-7 rounded-full border-2 border-slate-300 dark:border-white/10 border-t-blue-600 animate-spin" />
-                    </div>
-                  }>
-                      {tab.render({
-                        isActive,
-                        preloadedQuestions,
-                        preloadedVersions,
-                        preloadedGrade,
-                        preloadedUnit,
-                        clearPreloadedQuestions: () => {
-                          setPreloadedQuestions(null);
-                          setPreloadedVersions(null);
-                          setPreloadedGrade(null);
-                          setPreloadedUnit(null);
-                        },
-                        onCreateTest: (questions, numVersions, grade, unit) => {
-                          setPreloadedQuestions(questions);
-                          if (numVersions) setPreloadedVersions(numVersions);
-                          setPreloadedGrade(grade || null);
-                          setPreloadedUnit(unit || null);
-                          handleSelectTab('formatter');
-                        },
-                      })}
-                    </Suspense>
-                </div>
+                  tab={tab}
+                  isActive={activeTab === tab.id}
+                  preloadedQuestions={preloadedQuestions}
+                  preloadedVersions={preloadedVersions}
+                  preloadedGrade={preloadedGrade}
+                  preloadedUnit={preloadedUnit}
+                  clearPreloadedQuestions={handleClearPreloadedQuestions}
+                  onCreateTest={handleCreateTest}
+                />
               );
             })}
           </main>

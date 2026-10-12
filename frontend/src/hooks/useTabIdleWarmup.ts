@@ -12,10 +12,9 @@ interface UseTabIdleWarmupOptions {
 /**
  * Enterprise-grade Progressive Tab Pre-warming Engine.
  * 
- * 1. Intent Prefetching: Downloads JS chunk immediately on hover/touch.
- * 2. Staggered Idle Pre-mount: Uses requestIdleCallback to quietly mount core tabs
- *    in <div className="hidden"> one by one during browser idle moments.
- * 3. Heavy Isolation: Never pre-mounts heavy tools (Canvas, Word, Parser) to preserve RAM.
+ * 1. Intent Prefetching: Pre-downloads JS chunk and mounts on menu hover/touch.
+ * 2. Idle Chunk Preloading: Silently caches JS bundles during browser idle moments (0 DOM overhead).
+ * 3. Lazy Mount on Demand: Tabs only mount into DOM when actually requested, preventing background DOM bloat.
  */
 export function useTabIdleWarmup({
   currentUser,
@@ -31,7 +30,7 @@ export function useTabIdleWarmup({
     // Always pre-download the JS chunk
     prefetchTabChunk(tabId);
 
-    // If it's a core tab and not yet in visitedTabIds, start mounting it immediately
+    // If it's a core tab and not yet in visitedTabIds, mount it on hover intent
     if (immediatePreMount && !HEAVY_ISOLATED_TABS.includes(tabId)) {
       setVisitedTabIds((prev) => {
         if (prev.has(tabId)) return prev;
@@ -49,52 +48,40 @@ export function useTabIdleWarmup({
     const timers: Array<ReturnType<typeof setTimeout>> = [];
     const idleIds: number[] = [];
 
-    // Filter candidate tabs to mount in order of priority
+    // Filter candidate tabs to preload JS bundles in order of priority
     const candidates = CORE_PREMOUNT_TABS.filter((id) => allowedTabIds.includes(id));
 
     const scheduleNext = (index: number) => {
       if (index >= candidates.length || isCancelled) return;
 
       const tabId = candidates[index];
-      // If already visited by user action, skip to next
-      if (visitedRef.current.has(tabId)) {
-        scheduleNext(index + 1);
-        return;
-      }
-
-      // Preload chunk first
-      prefetchTabChunk(tabId);
 
       const delayTimer = setTimeout(() => {
         if (isCancelled) return;
 
-        const executeMount = () => {
+        const executePreload = () => {
           if (isCancelled) return;
-          setVisitedTabIds((prev) => {
-            if (prev.has(tabId)) return prev;
-            const next = new Set(prev);
-            next.add(tabId);
-            return next;
-          });
-          // Stagger next tab by 1200ms
+          // Preload JS chunk only (zero DOM or API call overhead)
+          prefetchTabChunk(tabId);
+          // Stagger next tab chunk by 800ms
           scheduleNext(index + 1);
         };
 
         if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
-          const idleId = (window as any).requestIdleCallback(executeMount, { timeout: 2500 });
+          const idleId = (window as any).requestIdleCallback(executePreload, { timeout: 3000 });
           idleIds.push(idleId);
         } else {
-          executeMount();
+          executePreload();
         }
-      }, 1200);
+      }, 800);
 
       timers.push(delayTimer);
     };
 
-    // Begin warming 1200ms after initial page settles
+    // Begin preloading chunks 1500ms after initial page settles
     const initialTimer = setTimeout(() => {
       scheduleNext(0);
-    }, 1200);
+    }, 1500);
     timers.push(initialTimer);
 
     return () => {
@@ -104,7 +91,7 @@ export function useTabIdleWarmup({
         idleIds.forEach((id) => (window as any).cancelIdleCallback(id));
       }
     };
-  }, [currentUser, allowedTabIds, setVisitedTabIds]);
+  }, [currentUser, allowedTabIds]);
 
   return { prefetchTab };
 }
