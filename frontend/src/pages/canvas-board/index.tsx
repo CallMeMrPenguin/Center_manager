@@ -3,6 +3,7 @@ import { Excalidraw } from '@excalidraw/excalidraw';
 import '@excalidraw/excalidraw/index.css';
 import { useExcalidrawFileImporter } from './hooks/useExcalidrawFileImporter';
 import { useSidebarStrokeSlider } from './hooks/useSidebarStrokeSlider';
+import { useImageStrokeBinder } from './hooks/useImageStrokeBinder';
 import { UploadCloud } from 'lucide-react';
 
 function CanvasBoardPage({ isActive = true }: { isActive?: boolean }) {
@@ -20,6 +21,12 @@ function CanvasBoardPage({ isActive = true }: { isActive?: boolean }) {
     excalidrawAPI,
     strokeWidth,
     setStrokeWidth,
+  });
+
+  // Automatically bind strokes drawn over images so they move together
+  useImageStrokeBinder({
+    containerRef,
+    excalidrawAPI,
   });
 
   // Intercept the native Image tool in Excalidraw's top toolbar to enable multi-file picker
