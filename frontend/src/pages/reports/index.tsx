@@ -24,8 +24,8 @@ export const ReportsPage: React.FC = () => {
   });
   const [selectedAcademicYear, setSelectedAcademicYear] = useState<string>(getCurrentAcademicYear());
 
-  // Filter and modal states
   const [selectedDistFilter, setSelectedDistFilter] = useState<'all' | number>('all');
+  const [customRange, setCustomRange] = useState<{ startStr: string; endStr: string } | null>(null);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [editingRecord, setEditingRecord] = useState<any>(null);
   const [resetModalOpen, setResetModalOpen] = useState(false);
@@ -129,6 +129,8 @@ export const ReportsPage: React.FC = () => {
         timePhases={timePhases}
         selectedPhaseId={selectedPhaseId}
         setSelectedPhaseId={setSelectedPhaseId}
+        customRange={customRange}
+        setCustomRange={setCustomRange}
         onOpenPhaseModal={() => setPhaseModalOpen(true)}
         selectedClassId={selectedClassId}
         setSelectedClassId={setSelectedClassId}
@@ -210,6 +212,8 @@ export const ReportsPage: React.FC = () => {
             timePhases={timePhases}
             selectedPhaseId={selectedPhaseId}
             setSelectedPhaseId={setSelectedPhaseId}
+            customRange={customRange}
+            setCustomRange={setCustomRange}
             onOpenPhaseModal={() => setPhaseModalOpen(true)}
             onOpenEditModal={(rec) => { setEditingRecord(rec); setEditModalOpen(true); }}
             onSelectRankingStudent={handleSelectRankingStudent}

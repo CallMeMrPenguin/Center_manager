@@ -27,6 +27,8 @@ interface OverviewTabProps {
   timePhases: any[];
   selectedPhaseId: string;
   setSelectedPhaseId: (id: string) => void;
+  customRange?: { startStr: string; endStr: string } | null;
+  setCustomRange?: (r: { startStr: string; endStr: string } | null) => void;
   onOpenPhaseModal: () => void;
   onOpenEditModal: (rec: any) => void;
   onSelectRankingStudent: (studentId: number) => void;
@@ -50,6 +52,8 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
   timePhases,
   selectedPhaseId,
   setSelectedPhaseId,
+  customRange: customRangeProp,
+  setCustomRange: setCustomRangeProp,
   onOpenPhaseModal,
   onOpenEditModal,
   onSelectRankingStudent,
@@ -60,7 +64,9 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
     }
     return 'all';
   });
-  const [customRange, setCustomRange] = useState<{ startStr: string; endStr: string } | null>(null);
+  const [internalCustomRange, setInternalCustomRange] = useState<{ startStr: string; endStr: string } | null>(null);
+  const customRange = customRangeProp !== undefined ? customRangeProp : internalCustomRange;
+  const setCustomRange = setCustomRangeProp || setInternalCustomRange;
   const [chartViewMode, setChartViewMode] = useState<'timeline' | 'distribution'>('timeline');
   const [selectedGradeTypeFilter, setSelectedGradeTypeFilter] = useState<GradeTypeFilterKey>('overall');
   const [selectedScoreBin, setSelectedScoreBin] = useState<DistributionScoreBin | null>(null);

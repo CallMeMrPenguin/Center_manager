@@ -18,6 +18,8 @@ interface ReportsHeaderProps {
   timePhases?: any[];
   selectedPhaseId?: string;
   setSelectedPhaseId?: (id: string) => void;
+  customRange?: { startStr: string; endStr: string } | null;
+  setCustomRange?: (r: { startStr: string; endStr: string } | null) => void;
   onOpenPhaseModal?: () => void;
   selectedClassId: string;
   setSelectedClassId: (id: string) => void;
@@ -36,6 +38,8 @@ export const ReportsHeader: React.FC<ReportsHeaderProps> = ({
   timePhases = [],
   selectedPhaseId = '',
   setSelectedPhaseId = () => {},
+  customRange,
+  setCustomRange,
   onOpenPhaseModal,
   selectedClassId,
   setSelectedClassId,
@@ -88,7 +92,7 @@ export const ReportsHeader: React.FC<ReportsHeaderProps> = ({
 
         {/* Action Controls Bar */}
         <div className="flex items-center gap-2.5 flex-wrap">
-          {/* Integrated Academic Year & Phase Selector */}
+          {/* Integrated Academic Year & Phase Selector with DatePicker */}
           <AcademicYearPhaseSelect
             selectedAcademicYear={selectedAcademicYear}
             setSelectedAcademicYear={setSelectedAcademicYear}
@@ -96,6 +100,8 @@ export const ReportsHeader: React.FC<ReportsHeaderProps> = ({
             timePhases={timePhases}
             selectedPhaseId={selectedPhaseId}
             setSelectedPhaseId={setSelectedPhaseId}
+            customRange={customRange}
+            setCustomRange={setCustomRange}
             onOpenPhaseModal={onOpenPhaseModal}
           />
 

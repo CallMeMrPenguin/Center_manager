@@ -195,7 +195,7 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
               openUpwards
                 ? autoAlign === 'right' ? 'origin-bottom-right' : 'origin-bottom-left'
                 : autoAlign === 'right' ? 'origin-top-right' : 'origin-top-left'
-            } z-50 w-80 p-4 bg-white rounded-2xl shadow-xl border border-slate-200 outline-none select-none space-y-3`}
+            } z-[100] w-80 p-4 bg-white dark:bg-[#181a20] rounded-2xl shadow-2xl border-0 outline-none select-none space-y-3`}
           >
             {mode === 'month' ? (
               <MonthGridPicker
