@@ -9,6 +9,9 @@ interface UseSessionModalStateProps {
   mode: 'recurring' | 'temporary';
   setMode: (m: 'recurring' | 'temporary') => void;
   selectedMonth: string;
+  sessions?: ClassSession[];
+  setEditing?: React.Dispatch<React.SetStateAction<ClassSession | null>>;
+  setColor?: (c: string) => void;
 }
 
 export function useSessionModalState({
@@ -19,6 +22,9 @@ export function useSessionModalState({
   mode,
   setMode,
   selectedMonth,
+  sessions,
+  setEditing,
+  setColor,
 }: UseSessionModalStateProps) {
   const [calYear, setCalYear] = useState(() => {
     const [y] = selectedMonth.split('-').map(Number);
@@ -180,6 +186,32 @@ export function useSessionModalState({
 
   const handleToggleDate = (dateStr: string, dayOfWeek: number) => {
     if (editing) {
+      // If clicking a date where this class has an existing session, switch editing to that session
+      const matched = sessions?.find(
+        (s) => s.class_id === form.class_id && s.date === dateStr
+      );
+      if (matched) {
+        setEditing?.(matched);
+        setForm({ ...matched });
+        if (matched.color && setColor) setColor(matched.color);
+        const [my, mm, md] = dateStr.split('-').map(Number);
+        const mdt = new Date(my, mm - 1, md);
+        const mDayName = DAYS.find((k) => DAY_NUM[k] === mdt.getDay()) || 'Thứ 2';
+        setSelectedItems([
+          {
+            id: dateStr,
+            date: dateStr,
+            dayOfWeek: mdt.getDay(),
+            dayName: mDayName,
+            label: `${mDayName}, ${String(md).padStart(2, '0')}/${String(mm).padStart(2, '0')}/${my}`,
+            start_time: matched.start_time || '18:00',
+            duration: matched.duration || 90,
+          },
+        ]);
+        return;
+      }
+
+      // If clicked date has no existing session, adjust the date of current session
       const [y, m, d] = dateStr.split('-').map(Number);
       const dt = new Date(y, m - 1, d);
       const dayName = DAYS.find((k) => DAY_NUM[k] === dt.getDay()) || 'Thứ 2';

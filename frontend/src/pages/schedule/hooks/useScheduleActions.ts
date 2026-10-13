@@ -146,7 +146,18 @@ export function useScheduleActions({
 
         const pendingItems: Array<{ date: string; start_time: string; duration: number }> = [];
 
+        const recurringNotes = `#RECURRING #COLOR:${color} ${(form.notes || '').replace(/#RECURRING/g, '').replace(/#COLOR:#[0-9a-fA-F]{6}/g, '').trim()}`.trim();
+
         for (const item of recurringItems) {
+          try {
+            await api.addClassWeeklySlot(form.class_id, {
+              day_of_week: item.dayName,
+              start_time: item.start_time || '18:00',
+              duration: item.duration || 90,
+              notes: '',
+            });
+          } catch {}
+
           const targetDayNum = item.dayOfWeek ?? (item.date ? new Date(item.date).getDay() : DAY_NUM[item.dayName]);
           if (targetDayNum === undefined) continue;
 
@@ -171,10 +182,11 @@ export function useScheduleActions({
         for (const p of pendingItems) {
           await api.addClassSession(form.class_id, {
             ...form,
+            status: form.status === 'Hủy' ? 'Nghỉ' : (form.status || 'Sắp diễn ra'),
             date: p.date,
             start_time: p.start_time,
             duration: p.duration,
-            notes,
+            notes: recurringNotes,
             color,
           });
         }
@@ -191,20 +203,75 @@ export function useScheduleActions({
   };
 
   const del = async (sess: ClassSession) => {
-    const ok = await confirm({
-      title: 'Xóa Buổi Học',
-      message: `Bạn có chắc muốn xóa buổi học ngày ${sess.date} lớp ${sess.class_name}?`,
-      confirmText: 'Xóa',
-      type: 'danger',
-    });
-    if (ok) {
-      try {
-        await api.deleteClassSession(sess.id);
-        window.dispatchEvent(new CustomEvent('data-changed'));
-        loadData(true);
-        showToast('Đã xóa buổi học!', 'success');
-      } catch (e: any) {
-        showToast('Lỗi: ' + e.message, 'error');
+    const sDt = new Date(sess.date);
+    const dayName = DAYS[sDt.getDay()] || 'Thứ 2';
+
+    // Check if session belongs to a recurring schedule (Lịch Cố Định)
+    let matchingWeeklySlot: any = null;
+    try {
+      const weeklySlots = await api.getClassWeeklySchedule(sess.class_id);
+      matchingWeeklySlot = weeklySlots.find((w: any) => w.day_of_week === dayName);
+    } catch {}
+
+    const isRecurring =
+      sess.id < 0 ||
+      Boolean(sess.notes && sess.notes.includes('#RECURRING')) ||
+      Boolean(matchingWeeklySlot);
+
+    if (isRecurring) {
+      const ok = await confirm({
+        title: 'Xóa Lịch Cố Định',
+        message: `Buổi học này thuộc Lịch Cố Định (${dayName} hàng tuần). Xóa lịch này sẽ xóa tất cả các buổi học của lịch cố định này cho lớp ${sess.class_name}. Bạn có chắc muốn xóa không?`,
+        confirmText: 'Xóa Toàn Bộ',
+        type: 'danger',
+      });
+      if (ok) {
+        try {
+          if (matchingWeeklySlot) {
+            await api.deleteClassWeeklySlot(matchingWeeklySlot.id);
+          }
+          // Batch delete all sessions of this class on this weekday
+          for (const s of sessions) {
+            if (s.class_id === sess.class_id && s.id > 0) {
+              const dt = new Date(s.date);
+              if (DAYS[dt.getDay()] === dayName) {
+                try {
+                  await api.deleteClassSession(s.id);
+                } catch {}
+              }
+            }
+          }
+          try {
+            await api.syncClassSchedule(sess.class_id);
+          } catch {}
+
+          window.dispatchEvent(new CustomEvent('data-changed'));
+          setModalOpen(false);
+          loadData(true);
+          showToast(`Đã xóa toàn bộ lịch cố định (${dayName})!`, 'success');
+        } catch (e: any) {
+          showToast('Lỗi: ' + e.message, 'error');
+        }
+      }
+    } else {
+      const ok = await confirm({
+        title: 'Xóa Buổi Học',
+        message: `Bạn có chắc muốn xóa buổi học ngày ${sess.date} lớp ${sess.class_name}?`,
+        confirmText: 'Xóa',
+        type: 'danger',
+      });
+      if (ok) {
+        try {
+          if (sess.id > 0) {
+            await api.deleteClassSession(sess.id);
+          }
+          window.dispatchEvent(new CustomEvent('data-changed'));
+          setModalOpen(false);
+          loadData(true);
+          showToast('Đã xóa buổi học!', 'success');
+        } catch (e: any) {
+          showToast('Lỗi: ' + e.message, 'error');
+        }
       }
     }
   };

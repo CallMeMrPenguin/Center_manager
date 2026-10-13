@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export interface CustomTimePickerProps {
-  value: string; // 'HH:mm' 24-hour format (e.g. '18:00')
+  value: string; // 'HH:mm' 24h format (e.g. '18:00')
   onChange: (time24: string) => void;
   className?: string;
   inputClassName?: string;
@@ -11,12 +11,11 @@ export interface CustomTimePickerProps {
   placeholder?: string;
 }
 
-const ITEM_HEIGHT = 32; // px per item
+const ITEM_HEIGHT = 32;
 const HOURS = Array.from({ length: 12 }, (_, i) => i + 1); // 1 - 12
 const MINUTES = Array.from({ length: 60 }, (_, i) => i); // 0 - 59
 const PERIODS = ['AM', 'PM'] as const;
 
-// 24h ('18:00') -> { h12: 6, m: 0, period: 'PM', display: '06:00 PM' }
 function parse24to12(val: string) {
   if (!val || !val.includes(':')) {
     return { h12: 6, m: 0, period: 'PM' as const, display: '06:00 PM' };
@@ -27,11 +26,9 @@ function parse24to12(val: string) {
   if (isNaN(h24)) h24 = 18;
   const period: 'AM' | 'PM' = h24 >= 12 ? 'PM' : 'AM';
   const h12 = h24 % 12 === 0 ? 12 : h24 % 12;
-  const display = `${String(h12).padStart(2, '0')}:${String(m).padStart(2, '0')} ${period}`;
-  return { h12, m, period, display };
+  return { h12, m, period, display: `${String(h12).padStart(2, '0')}:${String(m).padStart(2, '0')} ${period}` };
 }
 
-// 12h -> 24h ('18:00')
 function convert12to24(h12: number, m: number, period: 'AM' | 'PM'): string {
   let h24 = h12;
   if (period === 'PM') {
@@ -42,7 +39,6 @@ function convert12to24(h12: number, m: number, period: 'AM' | 'PM'): string {
   return `${String(h24).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
 }
 
-// Parse user-typed string into 24h format
 function parseUserTypedString(str: string): string | null {
   const clean = str.trim().toLowerCase();
   const isPM = clean.includes('pm') || clean.includes('chiều') || clean.includes('tối');
@@ -53,21 +49,9 @@ function parseUserTypedString(str: string): string | null {
     let h = parseInt(match[1], 10);
     const m = Math.min(59, Math.max(0, parseInt(match[2], 10)));
     if (isNaN(h)) return null;
-
     if (isPM && h < 12) h += 12;
     if (isAM && h === 12) h = 0;
-    if (h >= 0 && h <= 23) {
-      return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
-    }
-  }
-
-  const singleNumMatch = clean.match(/^(\d{1,2})$/);
-  if (singleNumMatch) {
-    let h = parseInt(singleNumMatch[1], 10);
-    if (isPM && h < 12) h += 12;
-    if (h >= 0 && h <= 23) {
-      return `${String(h).padStart(2, '0')}:00`;
-    }
+    if (h >= 0 && h <= 23) return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
   }
   return null;
 }
@@ -82,6 +66,7 @@ export const CustomTimePicker: React.FC<CustomTimePickerProps> = ({
   placeholder = '06:00 PM',
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [openUpwards, setOpenUpwards] = useState(false);
   const parsed = parse24to12(value);
   const [inputText, setInputText] = useState(parsed.display);
 
@@ -91,118 +76,190 @@ export const CustomTimePicker: React.FC<CustomTimePickerProps> = ({
   const periodScrollRef = useRef<HTMLDivElement>(null);
   const isScrollingByCodeRef = useRef(false);
 
-  // Sync input text when external value changes
   useEffect(() => {
     setInputText(parse24to12(value).display);
   }, [value]);
 
-  // Scroll a specific column wheel to an index with smooth animation
   const scrollWheelToIndex = useCallback((ref: React.RefObject<HTMLDivElement | null>, index: number) => {
     if (!ref.current) return;
     isScrollingByCodeRef.current = true;
-    ref.current.scrollTo({
-      top: index * ITEM_HEIGHT,
-      behavior: 'smooth',
-    });
-    setTimeout(() => {
-      isScrollingByCodeRef.current = false;
-    }, 300);
+    ref.current.scrollTo({ top: index * ITEM_HEIGHT, behavior: 'smooth' });
+    setTimeout(() => { isScrollingByCodeRef.current = false; }, 250);
   }, []);
 
-  // Sync wheels to current value whenever popover opens or value changes
   const syncWheelsToValue = useCallback((valStr: string) => {
     const { h12, m, period } = parse24to12(valStr);
-    const hourIdx = HOURS.indexOf(h12);
-    const minIdx = MINUTES.indexOf(m);
-    const periodIdx = PERIODS.indexOf(period);
-
-    if (hourIdx >= 0) scrollWheelToIndex(hourScrollRef, hourIdx);
-    if (minIdx >= 0) scrollWheelToIndex(minScrollRef, minIdx);
-    if (periodIdx >= 0) scrollWheelToIndex(periodScrollRef, periodIdx);
+    const hIdx = HOURS.indexOf(h12);
+    const mIdx = MINUTES.indexOf(m);
+    const pIdx = PERIODS.indexOf(period);
+    if (hIdx >= 0) scrollWheelToIndex(hourScrollRef, hIdx);
+    if (mIdx >= 0) scrollWheelToIndex(minScrollRef, mIdx);
+    if (pIdx >= 0) scrollWheelToIndex(periodScrollRef, pIdx);
   }, [scrollWheelToIndex]);
 
   useEffect(() => {
     if (isOpen) {
-      setTimeout(() => {
-        syncWheelsToValue(value);
-      }, 50);
+      if (containerRef.current) {
+        const rect = containerRef.current.getBoundingClientRect();
+        setOpenUpwards(window.innerHeight - rect.bottom < 240 && rect.top > 240);
+      }
+      setTimeout(() => syncWheelsToValue(value), 50);
     }
   }, [isOpen, value, syncWheelsToValue]);
 
-  // Handle typing inside text input
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const text = e.target.value;
     setInputText(text);
-
-    const parsed24 = parseUserTypedString(text);
-    if (parsed24) {
-      onChange(parsed24);
-      syncWheelsToValue(parsed24);
+    const p24 = parseUserTypedString(text);
+    if (p24) {
+      onChange(p24);
+      syncWheelsToValue(p24);
     }
   };
 
   const handleInputBlur = () => {
-    const parsed24 = parseUserTypedString(inputText);
-    if (parsed24) {
-      onChange(parsed24);
-      setInputText(parse24to12(parsed24).display);
+    const p24 = parseUserTypedString(inputText);
+    if (p24) {
+      onChange(p24);
+      setInputText(parse24to12(p24).display);
     } else {
       setInputText(parse24to12(value).display);
     }
   };
 
-  // Wheel selection handlers
-  const handleSelectHour = (h: number) => {
-    const { m, period } = parse24to12(value);
-    const new24 = convert12to24(h, m, period);
-    onChange(new24);
+  const { h12: curH, m: curM, period: curP } = parse24to12(value);
+
+  const handleSelectH = useCallback((h: number) => {
+    onChange(convert12to24(h, curM, curP));
     scrollWheelToIndex(hourScrollRef, HOURS.indexOf(h));
-  };
+  }, [curM, curP, onChange, scrollWheelToIndex]);
 
-  const handleSelectMinute = (m: number) => {
-    const { h12, period } = parse24to12(value);
-    const new24 = convert12to24(h12, m, period);
-    onChange(new24);
+  const handleSelectM = useCallback((m: number) => {
+    onChange(convert12to24(curH, m, curP));
     scrollWheelToIndex(minScrollRef, MINUTES.indexOf(m));
-  };
+  }, [curH, curP, onChange, scrollWheelToIndex]);
 
-  const handleSelectPeriod = (p: 'AM' | 'PM') => {
-    const { h12, m } = parse24to12(value);
-    const new24 = convert12to24(h12, m, p);
-    onChange(new24);
+  const handleSelectP = useCallback((p: 'AM' | 'PM') => {
+    onChange(convert12to24(curH, curM, p));
     scrollWheelToIndex(periodScrollRef, PERIODS.indexOf(p));
+  }, [curH, curM, onChange, scrollWheelToIndex]);
+
+  // Non-passive wheel event listeners (strictly advances by 1 unit per tick)
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const onWheelHour = (e: WheelEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const step = e.deltaY > 0 ? 1 : -1;
+      const curIdx = HOURS.indexOf(curH);
+      const nextIdx = Math.max(0, Math.min(HOURS.length - 1, curIdx + step));
+      handleSelectH(HOURS[nextIdx]);
+    };
+
+    const onWheelMin = (e: WheelEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const step = e.deltaY > 0 ? 1 : -1;
+      const curIdx = MINUTES.indexOf(curM);
+      const nextIdx = Math.max(0, Math.min(MINUTES.length - 1, curIdx + step));
+      handleSelectM(MINUTES[nextIdx]);
+    };
+
+    const onWheelPeriod = (e: WheelEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const step = e.deltaY > 0 ? 1 : -1;
+      const curIdx = PERIODS.indexOf(curP);
+      const nextIdx = Math.max(0, Math.min(PERIODS.length - 1, curIdx + step));
+      handleSelectP(PERIODS[nextIdx]);
+    };
+
+    const hEl = hourScrollRef.current;
+    const mEl = minScrollRef.current;
+    const pEl = periodScrollRef.current;
+
+    hEl?.addEventListener('wheel', onWheelHour, { passive: false });
+    mEl?.addEventListener('wheel', onWheelMin, { passive: false });
+    pEl?.addEventListener('wheel', onWheelPeriod, { passive: false });
+
+    return () => {
+      hEl?.removeEventListener('wheel', onWheelHour);
+      mEl?.removeEventListener('wheel', onWheelMin);
+      pEl?.removeEventListener('wheel', onWheelPeriod);
+    };
+  }, [isOpen, curH, curM, curP, handleSelectH, handleSelectM, handleSelectP]);
+
+  // Mouse drag-and-drop scrolling handler (smooth drag to scroll with mouse)
+  const handleMouseDown = (
+    e: React.MouseEvent<HTMLDivElement>,
+    ref: React.RefObject<HTMLDivElement | null>,
+    type: 'hour' | 'min' | 'period'
+  ) => {
+    if (e.button !== 0) return;
+    const el = ref.current;
+    if (!el) return;
+    e.preventDefault();
+
+    const startY = e.clientY;
+    const startScroll = el.scrollTop;
+    let dragged = false;
+
+    // Temporarily disable snap during drag for 60fps smooth tracking
+    el.style.scrollSnapType = 'none';
+    el.style.scrollBehavior = 'auto';
+
+    const onMove = (me: MouseEvent) => {
+      const diff = me.clientY - startY;
+      if (Math.abs(diff) > 2) dragged = true;
+      el.scrollTop = startScroll - diff;
+    };
+
+    const onUp = () => {
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup', onUp);
+
+      el.style.scrollSnapType = 'y mandatory';
+      el.style.scrollBehavior = 'smooth';
+
+      if (dragged) {
+        const idx = Math.round(el.scrollTop / ITEM_HEIGHT);
+        if (type === 'hour') {
+          handleSelectH(HOURS[Math.max(0, Math.min(HOURS.length - 1, idx))]);
+        } else if (type === 'min') {
+          handleSelectM(MINUTES[Math.max(0, Math.min(MINUTES.length - 1, idx))]);
+        } else {
+          handleSelectP(PERIODS[Math.max(0, Math.min(PERIODS.length - 1, idx))]);
+        }
+      }
+    };
+
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
   };
 
-  // Close when clicking outside
+  // Click outside listener
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
         setIsOpen(false);
       }
     };
-    if (isOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
+    if (isOpen) document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isOpen]);
 
-  const [openUpwards, setOpenUpwards] = useState(false);
-
-  useEffect(() => {
-    if (isOpen && containerRef.current) {
-      const rect = containerRef.current.getBoundingClientRect();
-      const spaceBelow = window.innerHeight - rect.bottom;
-      setOpenUpwards(spaceBelow < 250 && rect.top > 250);
-    }
-  }, [isOpen]);
-
-  const { h12: currentH12, m: currentM, period: currentPeriod } = parse24to12(value);
+  const wheelColStyle: React.CSSProperties = {
+    paddingTop: ITEM_HEIGHT * 2,
+    paddingBottom: ITEM_HEIGHT * 2,
+    scrollbarWidth: 'none',
+    msOverflowStyle: 'none',
+    overflowX: 'hidden',
+    overflowY: 'auto',
+  };
 
   return (
-    <div ref={containerRef} className={`relative inline-block ${className}`}>
-      {/* 1. Main Direct-Editable Text Input (No clock icon) */}
+    <div ref={containerRef} className={`relative inline-flex items-center justify-center ${className}`}>
       <input
         type="text"
         disabled={disabled}
@@ -220,10 +277,9 @@ export const CustomTimePicker: React.FC<CustomTimePickerProps> = ({
           }
         }}
         placeholder={placeholder}
-        className={`bg-white dark:bg-[#181d2e] border-0 rounded-lg px-2.5 py-1 text-xs text-slate-900 dark:text-white font-black shadow-2xs focus:outline-none focus:ring-1.5 focus:ring-blue-500 w-24 text-center cursor-pointer transition select-none tracking-wide ${inputClassName}`}
+        className={`bg-white dark:bg-[#181d2e] border-0 rounded-lg px-2.5 py-1 text-xs text-slate-900 dark:text-white font-black shadow-[0_0_0_1px_rgba(15,23,42,0.08),0_0_6px_rgba(15,23,42,0.08),0_1px_3px_rgba(15,23,42,0.1)] focus:outline-none focus:ring-1.5 focus:ring-blue-500 w-24 text-center cursor-pointer transition select-none tracking-wide ${inputClassName}`}
       />
 
-      {/* 2. Interactive Time Wheel Popover */}
       <AnimatePresence>
         {isOpen && !disabled && (
           <motion.div
@@ -233,144 +289,105 @@ export const CustomTimePicker: React.FC<CustomTimePickerProps> = ({
             transition={{ type: 'spring', stiffness: 450, damping: 30 }}
             className={`absolute z-50 ${
               openUpwards ? 'bottom-full mb-1.5' : 'top-full mt-1.5'
-            } right-0 bg-white dark:bg-[#141928] rounded-2xl shadow-xl dark:shadow-[0_12px_40px_rgba(0,0,0,0.7)] p-3 border-0 w-60 select-none animate-in`}
+            } left-1/2 -translate-x-1/2 bg-white dark:bg-[#141928] rounded-2xl shadow-[0_16px_48px_rgba(0,0,0,0.18)] dark:shadow-[0_16px_48px_rgba(0,0,0,0.7)] p-3 border-0 w-60 select-none animate-in`}
           >
-            {/* Column Headers */}
             <div className="grid grid-cols-3 text-center pb-1 text-[10px] font-extrabold uppercase tracking-wider text-slate-400 dark:text-slate-500 border-b border-slate-100 dark:border-white/5">
               <span>Giờ</span>
               <span>Phút</span>
               <span>Buổi</span>
             </div>
 
-            {/* 3 Wheels Container with Center Highlight Lens */}
-            <div className="relative h-[160px] my-1">
-              {/* Apple / iOS Center Lens Indicator */}
+            <div className="relative h-[160px] my-1 overflow-hidden">
+              {/* Center Active Selection Band */}
               <div
                 className="absolute inset-x-0 rounded-xl bg-slate-100 dark:bg-white/10 pointer-events-none shadow-2xs z-0"
-                style={{
-                  top: ITEM_HEIGHT * 2, // 64px
-                  height: ITEM_HEIGHT, // 32px
-                }}
+                style={{ top: ITEM_HEIGHT * 2, height: ITEM_HEIGHT }}
               />
 
-              <div className="relative z-10 grid grid-cols-3 h-full divide-x divide-transparent">
-                {/* WHEEL 1: HOURS (01 - 12) */}
+              <div className="relative z-10 grid grid-cols-3 h-full divide-x divide-transparent overflow-hidden">
+                {/* HOURS */}
                 <div
                   ref={hourScrollRef}
-                  className="h-full overflow-y-auto scrollbar-none snap-y snap-mandatory scroll-smooth"
-                  style={{
-                    paddingTop: ITEM_HEIGHT * 2,
-                    paddingBottom: ITEM_HEIGHT * 2,
-                  }}
+                  style={wheelColStyle}
+                  onMouseDown={(e) => handleMouseDown(e, hourScrollRef, 'hour')}
+                  className="h-full overflow-y-auto overflow-x-hidden no-scrollbar [&::-webkit-scrollbar]:hidden snap-y snap-mandatory scroll-smooth cursor-grab active:cursor-grabbing select-none"
                   onScroll={(e) => {
                     if (isScrollingByCodeRef.current) return;
-                    const top = (e.target as HTMLDivElement).scrollTop;
-                    const idx = Math.round(top / ITEM_HEIGHT);
-                    const selectedH = HOURS[idx];
-                    if (selectedH && selectedH !== currentH12) {
-                      const new24 = convert12to24(selectedH, currentM, currentPeriod);
-                      onChange(new24);
-                    }
+                    const idx = Math.round((e.target as HTMLDivElement).scrollTop / ITEM_HEIGHT);
+                    const sel = HOURS[idx];
+                    if (sel && sel !== curH) onChange(convert12to24(sel, curM, curP));
                   }}
                 >
-                  {HOURS.map((h) => {
-                    const isSelected = h === currentH12;
-                    return (
-                      <div
-                        key={h}
-                        onClick={() => handleSelectHour(h)}
-                        style={{ height: ITEM_HEIGHT }}
-                        className={`snap-center flex items-center justify-center text-xs transition-all cursor-pointer font-bold ${
-                          isSelected
-                            ? 'text-blue-600 dark:text-blue-400 font-black scale-110'
-                            : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white opacity-70'
-                        }`}
-                      >
-                        {String(h).padStart(2, '0')}
-                      </div>
-                    );
-                  })}
+                  {HOURS.map((h) => (
+                    <div
+                      key={h}
+                      onClick={() => handleSelectH(h)}
+                      style={{ height: ITEM_HEIGHT }}
+                      className={`snap-center flex items-center justify-center text-xs transition-all cursor-pointer font-bold ${
+                        h === curH ? 'text-blue-600 dark:text-blue-400 font-black scale-110' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 opacity-60'
+                      }`}
+                    >
+                      {String(h).padStart(2, '0')}
+                    </div>
+                  ))}
                 </div>
 
-                {/* WHEEL 2: MINUTES (00 - 59) */}
+                {/* MINUTES */}
                 <div
                   ref={minScrollRef}
-                  className="h-full overflow-y-auto scrollbar-none snap-y snap-mandatory scroll-smooth"
-                  style={{
-                    paddingTop: ITEM_HEIGHT * 2,
-                    paddingBottom: ITEM_HEIGHT * 2,
-                  }}
+                  style={wheelColStyle}
+                  onMouseDown={(e) => handleMouseDown(e, minScrollRef, 'min')}
+                  className="h-full overflow-y-auto overflow-x-hidden no-scrollbar [&::-webkit-scrollbar]:hidden snap-y snap-mandatory scroll-smooth cursor-grab active:cursor-grabbing select-none"
                   onScroll={(e) => {
                     if (isScrollingByCodeRef.current) return;
-                    const top = (e.target as HTMLDivElement).scrollTop;
-                    const idx = Math.round(top / ITEM_HEIGHT);
-                    const selectedM = MINUTES[idx];
-                    if (selectedM !== undefined && selectedM !== currentM) {
-                      const new24 = convert12to24(currentH12, selectedM, currentPeriod);
-                      onChange(new24);
-                    }
+                    const idx = Math.round((e.target as HTMLDivElement).scrollTop / ITEM_HEIGHT);
+                    const sel = MINUTES[idx];
+                    if (sel !== undefined && sel !== curM) onChange(convert12to24(curH, sel, curP));
                   }}
                 >
-                  {MINUTES.map((m) => {
-                    const isSelected = m === currentM;
-                    return (
-                      <div
-                        key={m}
-                        onClick={() => handleSelectMinute(m)}
-                        style={{ height: ITEM_HEIGHT }}
-                        className={`snap-center flex items-center justify-center text-xs transition-all cursor-pointer font-bold ${
-                          isSelected
-                            ? 'text-blue-600 dark:text-blue-400 font-black scale-110'
-                            : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white opacity-70'
-                        }`}
-                      >
-                        {String(m).padStart(2, '0')}
-                      </div>
-                    );
-                  })}
+                  {MINUTES.map((m) => (
+                    <div
+                      key={m}
+                      onClick={() => handleSelectM(m)}
+                      style={{ height: ITEM_HEIGHT }}
+                      className={`snap-center flex items-center justify-center text-xs transition-all cursor-pointer font-bold ${
+                        m === curM ? 'text-blue-600 dark:text-blue-400 font-black scale-110' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 opacity-60'
+                      }`}
+                    >
+                      {String(m).padStart(2, '0')}
+                    </div>
+                  ))}
                 </div>
 
-                {/* WHEEL 3: AM / PM */}
+                {/* PERIODS */}
                 <div
                   ref={periodScrollRef}
-                  className="h-full overflow-y-auto scrollbar-none snap-y snap-mandatory scroll-smooth"
-                  style={{
-                    paddingTop: ITEM_HEIGHT * 2,
-                    paddingBottom: ITEM_HEIGHT * 2,
-                  }}
+                  style={wheelColStyle}
+                  onMouseDown={(e) => handleMouseDown(e, periodScrollRef, 'period')}
+                  className="h-full overflow-y-auto overflow-x-hidden no-scrollbar [&::-webkit-scrollbar]:hidden snap-y snap-mandatory scroll-smooth cursor-grab active:cursor-grabbing select-none"
                   onScroll={(e) => {
                     if (isScrollingByCodeRef.current) return;
-                    const top = (e.target as HTMLDivElement).scrollTop;
-                    const idx = Math.round(top / ITEM_HEIGHT);
-                    const selectedP = PERIODS[idx];
-                    if (selectedP && selectedP !== currentPeriod) {
-                      const new24 = convert12to24(currentH12, currentM, selectedP);
-                      onChange(new24);
-                    }
+                    const idx = Math.round((e.target as HTMLDivElement).scrollTop / ITEM_HEIGHT);
+                    const sel = PERIODS[idx];
+                    if (sel && sel !== curP) onChange(convert12to24(curH, curM, sel));
                   }}
                 >
-                  {PERIODS.map((p) => {
-                    const isSelected = p === currentPeriod;
-                    return (
-                      <div
-                        key={p}
-                        onClick={() => handleSelectPeriod(p)}
-                        style={{ height: ITEM_HEIGHT }}
-                        className={`snap-center flex items-center justify-center text-xs transition-all cursor-pointer font-bold ${
-                          isSelected
-                            ? 'text-blue-600 dark:text-blue-400 font-black scale-110'
-                            : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white opacity-70'
-                        }`}
-                      >
-                        {p}
-                      </div>
-                    );
-                  })}
+                  {PERIODS.map((p) => (
+                    <div
+                      key={p}
+                      onClick={() => handleSelectP(p)}
+                      style={{ height: ITEM_HEIGHT }}
+                      className={`snap-center flex items-center justify-center text-xs transition-all cursor-pointer font-bold ${
+                        p === curP ? 'text-blue-600 dark:text-blue-400 font-black scale-110' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 opacity-60'
+                      }`}
+                    >
+                      {p}
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
 
-            {/* Quick Actions Footer */}
             <div className="pt-2 flex items-center justify-between border-t border-slate-100 dark:border-white/5 text-[11px] font-bold">
               <button
                 type="button"

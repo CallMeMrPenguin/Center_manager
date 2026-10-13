@@ -23,6 +23,17 @@ interface SessionModalProps {
   selectedMonth: string;
   onSave: (e: React.FormEvent, items: SessionScheduleItem[]) => void;
   onDelete: (sess: ClassSession) => void;
+  sessions?: ClassSession[];
+  setEditing?: React.Dispatch<React.SetStateAction<ClassSession | null>>;
+}
+
+function formatSessionDateTitle(dateStr?: string) {
+  if (!dateStr) return '';
+  const [y, m, d] = dateStr.split('-').map(Number);
+  if (!y || !m || !d) return dateStr;
+  const dt = new Date(y, m - 1, d);
+  const dayNames = ['Chủ nhật', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'];
+  return `${dayNames[dt.getDay()]}, ${String(d).padStart(2, '0')}/${String(m).padStart(2, '0')}/${y}`;
 }
 
 export const SessionModal: React.FC<SessionModalProps> = ({
@@ -39,6 +50,8 @@ export const SessionModal: React.FC<SessionModalProps> = ({
   selectedMonth,
   onSave,
   onDelete,
+  sessions,
+  setEditing,
 }) => {
   const {
     calYear,
@@ -62,7 +75,15 @@ export const SessionModal: React.FC<SessionModalProps> = ({
     mode,
     setMode,
     selectedMonth,
+    sessions,
+    setEditing,
+    setColor,
   });
+
+  const highlightDates = React.useMemo(() => {
+    if (!form.class_id || !sessions) return [];
+    return sessions.filter((s) => s.class_id === form.class_id).map((s) => s.date);
+  }, [sessions, form.class_id]);
 
   if (!isOpen) return null;
 
@@ -73,7 +94,9 @@ export const SessionModal: React.FC<SessionModalProps> = ({
         <div className="flex items-center justify-between p-4 sm:p-5 border-b border-slate-200 dark:border-white/10 bg-slate-100 dark:bg-[#14192b] shrink-0">
           <h3 className="text-sm font-black text-slate-900 dark:text-white flex items-center gap-2">
             <CalendarIcon className="h-4 w-4 text-blue-500 dark:text-blue-400" />
-            {editing ? 'Cập Nhật Buổi Học' : 'Thêm Buổi Học Mới'}
+            {editing
+              ? `Cập Nhật Buổi Học ${formatSessionDateTitle(form.date || editing.date)}`
+              : 'Thêm Buổi Học Mới'}
           </h3>
           <button
             type="button"
@@ -165,6 +188,8 @@ export const SessionModal: React.FC<SessionModalProps> = ({
               mode={mode}
               selectedDates={selectedDatesList}
               selectedDaysOfWeek={selectedDaysOfWeekList}
+              highlightDates={highlightDates}
+              highlightColor={color}
               onToggleDate={handleToggleDate}
               onToggleDayOfWeek={handleToggleDayOfWeek}
               isSingleSelect={!!editing}
@@ -185,13 +210,12 @@ export const SessionModal: React.FC<SessionModalProps> = ({
               Trạng Thái
             </label>
             <CustomSelect
-              value={form.status || 'Sắp diễn ra'}
+              value={form.status === 'Hủy' ? 'Nghỉ' : (form.status || 'Sắp diễn ra')}
               onChange={(val) => setForm({ ...form, status: val })}
               options={[
                 { value: 'Sắp diễn ra', label: 'Sắp diễn ra' },
                 { value: 'Đã học', label: 'Đã học' },
                 { value: 'Nghỉ', label: 'Nghỉ' },
-                { value: 'Hủy', label: 'Hủy' },
               ]}
             />
           </div>

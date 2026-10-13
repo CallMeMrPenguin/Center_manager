@@ -363,6 +363,8 @@ export default function SchedulePage() {
         selectedMonth={selectedMonth}
         onSave={save}
         onDelete={del}
+        sessions={sessions}
+        setEditing={setEditing}
       />
     </div>
   );

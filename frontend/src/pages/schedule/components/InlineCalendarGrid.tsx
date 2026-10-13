@@ -11,6 +11,8 @@ interface InlineCalendarGridProps {
   mode: 'recurring' | 'temporary';
   selectedDates: string[]; // ['2026-10-14', ...]
   selectedDaysOfWeek: number[]; // [1, 3] (0 = Sunday, 1 = Monday, etc.)
+  highlightDates?: string[]; // Session dates of current class
+  highlightColor?: string;
   onToggleDate: (dateStr: string, dayOfWeek: number) => void;
   onToggleDayOfWeek: (dayOfWeek: number) => void;
   isSingleSelect?: boolean;
@@ -34,6 +36,8 @@ export const InlineCalendarGrid: React.FC<InlineCalendarGridProps> = ({
   mode,
   selectedDates,
   selectedDaysOfWeek,
+  highlightDates,
+  highlightColor,
   onToggleDate,
   onToggleDayOfWeek,
   isSingleSelect = false,
@@ -198,6 +202,7 @@ export const InlineCalendarGrid: React.FC<InlineCalendarGridProps> = ({
           }
 
           const isHovered = hoveredDate === c.dateStr;
+          const isHighlighted = highlightDates?.includes(c.dateStr);
 
           return (
             <button
@@ -205,9 +210,12 @@ export const InlineCalendarGrid: React.FC<InlineCalendarGridProps> = ({
               type="button"
               onClick={() => onToggleDate(c.dateStr, c.dayOfWeek)}
               onMouseEnter={() => setHoveredDate(c.dateStr)}
+              title={isHighlighted ? `Buổi học lớp này (${c.dateStr}) - Bấm để chuyển sang sửa` : undefined}
               className={`w-8 h-8 mx-auto rounded-full flex flex-col items-center justify-center text-xs font-bold transition-all duration-150 cursor-pointer relative border-0 ${
                 c.isSelected
                   ? 'text-white font-black'
+                  : isHighlighted
+                  ? 'text-blue-700 dark:text-blue-300 font-black ring-1.5 ring-blue-500/80 bg-blue-50/70 dark:bg-blue-950/40'
                   : c.isToday
                   ? 'ring-1.5 ring-blue-500 text-blue-600 dark:text-blue-400 font-extrabold'
                   : 'text-slate-800 dark:text-slate-100 font-bold'
@@ -230,8 +238,16 @@ export const InlineCalendarGrid: React.FC<InlineCalendarGridProps> = ({
               {/* Date Number */}
               <span className="relative z-20">{c.dayNumber}</span>
 
+              {/* Highlight dot indicator for class session */}
+              {isHighlighted && !c.isSelected && (
+                <span
+                  className="w-1.5 h-1.5 rounded-full absolute bottom-0.5 z-20 shadow-xs ring-1 ring-white dark:ring-slate-900"
+                  style={{ backgroundColor: highlightColor || '#2563eb' }}
+                />
+              )}
+
               {/* Today dot indicator */}
-              {c.isToday && !c.isSelected && (
+              {c.isToday && !c.isSelected && !isHighlighted && (
                 <span className="w-1 h-1 rounded-full bg-blue-500 absolute bottom-0.5 z-20" />
               )}
             </button>

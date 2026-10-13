@@ -92,16 +92,18 @@ html, body, #root {
   color: inherit;
   border: 0;
   outline: none;
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.08), 0 0 8px 0 rgba(15, 23, 42, 0.1), 0 2px 4px 0 rgba(15, 23, 42, 0.06);
   transition: background-color 150ms ease, box-shadow 150ms ease, color 150ms ease;
 }
 .btn-neutral:hover {
   background-color: var(--btn-neutral-hover, #e2e8f0);
+  box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.14), 0 0 12px 0 rgba(15, 23, 42, 0.15), 0 3px 8px 0 rgba(15, 23, 42, 0.1);
 }
 .dark .btn-neutral,
 :root[class~="dark"] .btn-neutral {
   background-color: var(--btn-neutral-dark-bg, #181d2e);
   color: #f8fafc;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.12), 0 0 8px 0 rgba(0, 0, 0, 0.6);
 }
 .dark .btn-neutral:hover,
 :root[class~="dark"] .btn-neutral:hover {
@@ -124,6 +126,27 @@ html, body, #root {
 .dark .segmented-hover-pill,
 :root[class~="dark"] .segmented-hover-pill {
   background-color: var(--segmented-highlight-dark-bg, rgba(255, 255, 255, 0.12));
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+.no-scrollbar::-webkit-scrollbar-button {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+.no-scrollbar::-webkit-scrollbar-thumb {
+  display: none !important;
+}
+.no-scrollbar::-webkit-scrollbar-track {
+  display: none !important;
+}
+.no-scrollbar {
+  -ms-overflow-style: none !important;
+  scrollbar-width: none !important;
 }
 
 body {
