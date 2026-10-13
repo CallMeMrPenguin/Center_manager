@@ -170,17 +170,49 @@ Khi được yêu cầu phát hành bản cập nhật hoặc bump version:
 | Điểm chưa nhập lưu thành `0` hoặc `0.0` | Lưu thành `NULL` |
 | Làm tròn điểm số lên/xuống | Cắt gọn đúng 1 chữ số thập phân (`trunc1Dec`) |
 | Đổ code dài dòng (code dump) vào chat | Trả lời súc tích, chỉ trích dẫn dòng cần thiết, kèm link file |
+| Viết thành phần UI/token phân tán, lặp style ở từng trang | Mỗi thành phần (màu, button, table, chart, select, datepicker) BẮT BUỘC có **thư mục riêng + `index.ts`**. Sửa 1 nơi cập nhật toàn bộ app |
 
 ---
 
-## 📁 9. Tham Chiếu Các File Quan Trọng
+## 📦 10. Kiến Trúc Thư Mục Thành Phần Riêng Biệt (Modular Component & Token Isolation)
+
+> **QUY TẮC CỐT LÕI: MỌI THÀNH PHẦN DÙNG CHUNG PHẢI CÓ THƯ MỤC RIÊNG VỚI BARREL EXPORT (`index.ts`). SỬA 1 NƠI — TỰ ĐỘNG CẬP NHẬT TOÀN BỘ ỨNG DỤNG.**
+
+### 10.1. Danh Mục Thư Mục Thành Phần Chuẩn
+1. **Màu Sắc & Tokens Hệ Thống (`src/theme/`)**:
+   - Quản lý tập trung toàn bộ token màu sắc (`tokens.ts`), màu nền, viền, chữ, palette biểu đồ và hàm áp dụng theme (`applyTheme.ts`).
+   - Khi cần đổi màu thương hiệu hay tone màu toàn app, CHỈ ĐƯỢC PHÉP sửa tại `src/theme/tokens.ts`.
+2. **Nút Bấm Chuẩn (`src/components/button/`)**:
+   - Quản lý `<Button />` (Primary, Secondary, Danger, Ghost, Outline) và `<SinglePenButton />` (nút Bút sửa duy nhất).
+   - Khi muốn đổi bo góc, độ đậm viền hoặc hiệu ứng hover của nút, chỉ sửa 1 nơi tại `src/components/button/`.
+3. **Bảng Dữ Liệu Chuẩn (`src/components/DataTable/` hoặc `src/components/table/`)**:
+   - Quản lý TanStack Table wrapper, header kéo thả, bộ lọc tiêu đề cột, thanh phân trang 20 dòng.
+4. **Biểu Đồ Chuẩn (`src/components/chart/`)**:
+   - Quản lý các thành phần biểu đồ dùng chung (`MiniTrendSparkline`, `ChartHoverTooltip`, `chartConfig.ts`), quy chuẩn SVG circular glow và center-origin transform.
+5. **Dropdown Select (`src/components/select/`)**:
+   - Quản lý `<CustomSelect />` và `<CustomMultiSelect />`.
+6. **Bộ Chọn Ngày (`src/components/datepicker/`)**:
+   - Quản lý `<CustomDatePicker />`, `<MonthGridPicker />`, và `datePickerUtils.ts`.
+
+### 10.2. Quy Tắc "Single Source of Truth & Zero Repetition"
+- **Không viết style ad-hoc**: Các trang BẮT BUỘC import thành phần trực tiếp từ thư mục đại diện (ví dụ: `import { Button } from '@/components/button'; import { CustomSelect } from '@/components/select'`).
+- **Tuyệt đối cấm viết lại thẻ `<button>` hoặc thẻ `<table>` thủ công** với hàng chục class Tailwind trùng lặp rải rác khắp các file.
+- **Tương thích ngược**: Mỗi thư mục luôn cung cấp `index.ts` để xuất khẩu gọn gàng và giữ file bridge ở vị trí cũ (nếu có) để tránh làm đứt gãy các import hiện hữu.
+
+---
+
+## 📁 11. Tham Chiếu Các File Quan Trọng
 
 | File / Đường dẫn | Vai trò |
 |---|---|
-| `frontend/src/components/DataTable.tsx` | Component TanStack Table dùng chung cho toàn bộ ứng dụng |
-| `frontend/src/components/CustomSelect.tsx` | Dropdown tùy chỉnh Light UI phẳng |
-| `frontend/src/components/CustomDatePicker.tsx` | Bộ chọn ngày tùy chỉnh Light UI phẳng |
+| `frontend/src/theme/` | Hệ thống màu sắc, tokens và theme tập trung |
+| `frontend/src/components/button/` | Chuẩn nút bấm (Button, SinglePenButton) dùng chung |
+| `frontend/src/components/DataTable/` | Chuẩn TanStack Table duy nhất cho mọi bảng dữ liệu |
+| `frontend/src/components/chart/` | Chuẩn biểu đồ, sparkline, tooltip và SVG bounds |
+| `frontend/src/components/select/` | Dropdown CustomSelect & CustomMultiSelect Light UI phẳng |
+| `frontend/src/components/datepicker/` | Bộ chọn ngày CustomDatePicker & MonthGridPicker |
 | `frontend/src/components/Toast.tsx` | Thông báo Toast phản hồi thao tác |
 | `frontend/src/api.ts` | Tất cả API calls kết nối Backend |
 | `frontend/src/pages/` | Các trang chính (teachers, students, classes, courses, reports, schedule) |
 | `.agents/AGENTS.md` | Bộ quy chuẩn cốt lõi duy nhất của toàn bộ dự án |
+
