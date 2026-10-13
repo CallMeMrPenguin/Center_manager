@@ -142,26 +142,16 @@ export function DataTable<TData>({
   const globalFuzzyFilterFn = useCallback((row: any, _columnId: string, filterValue: string): boolean => {
     if (!filterValue) return true;
     const values: string[] = Object.values(row.original || {}).map((v) => (v === null || v === undefined ? '' : String(v)));
-    const searchTarget = values.join(' ');
-    const res = filterWithNearMatchFallback([searchTarget], filterValue, (item) => item);
-    return res.results.length > 0;
+    return filterWithNearMatchFallback([values.join(' ')], filterValue, (item) => item).results.length > 0;
   }, []);
 
   const table: Table<TData> = useReactTable({
     data,
     columns: finalColumns,
     state: {
-      sorting,
-      columnFilters,
-      globalFilter,
-      columnVisibility,
-      rowSelection,
-      grouping,
-      expanded,
-      columnPinning,
-      columnOrder,
-      columnSizing,
-      pagination,
+      sorting, columnFilters, globalFilter, columnVisibility,
+      rowSelection, grouping, expanded, columnPinning,
+      columnOrder, columnSizing, pagination,
     },
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,

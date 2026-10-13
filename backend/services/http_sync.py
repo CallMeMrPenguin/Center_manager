@@ -3,17 +3,17 @@ from typing import Dict, Any, List, Optional
 from datetime import datetime, date, timezone
 from config.settings import BASE_DIR, load_settings
 from database.connection import get_connection, DB_PATH
-from services.sync_service import FAST_SYNC_TABLES, _parse_ts
+from services.sync_service import FAST_SYNC_TABLES, HEAVY_STATIC_TABLES, _parse_ts
+
+ALLOWED_SYNC_TABLES = {t["table"] for t in FAST_SYNC_TABLES} | {t["table"] for t in HEAVY_STATIC_TABLES}
 
 DEFAULT_REMOTE_URL = "https://upkidscentermanager.io.vn"
 
 def _clean_val(v: Any) -> Any:
-    """Converts datatypes to JSON-safe primitives (handles date, datetime, Decimal, bytes)."""
     if v is None: return None
     if isinstance(v, (datetime, date)): return v.isoformat()
     if hasattr(v, "__float__") and not isinstance(v, (int, float)): return float(v)
-    if isinstance(v, (bytes, bytearray)): return v.decode("utf-8", errors="ignore")
-    return v
+    return v.decode("utf-8", errors="ignore") if isinstance(v, (bytes, bytearray)) else v
 
 def _clean_row(d: Dict[str, Any]) -> Dict[str, Any]:
     return {k: _clean_val(v) for k, v in d.items()}
@@ -24,16 +24,23 @@ def get_sync_token() -> str:
     try:
         if os.path.exists(secret_file):
             with open(secret_file, "r", encoding="utf-8") as f:
-                content = f.read().strip()
-                if content: return content
+                c = f.read().strip()
+                if c: return c
     except Exception:
         pass
-    return os.environ.get("AUTH_SECRET_KEY", "5f54741078b525e23c8ffdca96bb7fbefd7f617c867f26891c3bc6a3537d0eba")
+    env_token = os.environ.get("AUTH_SECRET_KEY", "").strip()
+    if env_token: return env_token
+    try:
+        from services.auth_security import _load_or_create_secret
+        return _load_or_create_secret().decode("utf-8")
+    except Exception:
+        import secrets
+        return secrets.token_hex(32)
 
 def get_remote_vps_url() -> str:
     """Retrieves target remote VPS base URL."""
-    env_url = os.environ.get("REMOTE_VPS_URL")
-    if env_url and env_url.strip(): return env_url.strip().rstrip("/")
+    env_url = (os.environ.get("REMOTE_VPS_URL") or "").strip()
+    if env_url: return env_url.rstrip("/")
     try:
         st = load_settings()
         if st.get("remote_vps_url"): return str(st["remote_vps_url"]).strip().rstrip("/")
@@ -96,11 +103,11 @@ def handle_sync_exchange(payload: Dict[str, Any], token: Optional[str] = None) -
         cur = conn.cursor()
         pushed_accepted = 0
 
-        # 1. Apply client tombstones (deletions)
+        # 1. Apply client tombstones (deletions) with strict table whitelist validation
         for ts in client_tombstones:
             tbl = ts.get("table") or ts.get("table_name")
             rec_id = ts.get("id") or ts.get("record_id")
-            if tbl and rec_id is not None:
+            if tbl and tbl in ALLOWED_SYNC_TABLES and rec_id is not None:
                 try:
                     cur.execute(f"DELETE FROM {tbl} WHERE id = ?", (rec_id,))
                     from database.utils import record_tombstone

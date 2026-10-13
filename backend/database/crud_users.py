@@ -106,8 +106,8 @@ def get_users() -> List[Dict[str, Any]]:
         result = []
         for r in rows:
             d = dict(r)
-            # Security: Never expose admin plaintext password
-            if (d.get("username") or "").lower() == "admin":
+            # Security: Never expose custom passwords in plain text.
+            if (d.get("username") or "").lower() == "admin" or (d.get("plain_password") and d.get("plain_password") != "123456"):
                 d["plain_password"] = None
             elif not d.get("plain_password"):
                 d["plain_password"] = "123456"
@@ -271,9 +271,9 @@ def update_user(user_id: int, data: Dict[str, Any]):
             pwd_hash = hash_password(raw_password.strip())
             cursor.execute("""
                 UPDATE app_users
-                SET display_name = ?, username = ?, role = ?, status = ?, password_hash = ?, plain_password = ?, updated_at = ?
+                SET display_name = ?, username = ?, role = ?, status = ?, password_hash = ?, plain_password = NULL, updated_at = ?
                 WHERE id = ?
-            """, (display_name, username, role, status, pwd_hash, raw_password.strip(), now_str, user_id))
+            """, (display_name, username, role, status, pwd_hash, now_str, user_id))
         else:
             cursor.execute("""
                 UPDATE app_users
@@ -417,7 +417,7 @@ def change_user_password(username: str, old_password: str, new_password: str, co
         new_hash = hash_password(new_password)
         from datetime import datetime
         now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        cursor.execute("UPDATE app_users SET password_hash = ?, plain_password = ?, updated_at = ? WHERE id = ?", (new_hash, new_password, now_str, user["id"]))
+        cursor.execute("UPDATE app_users SET password_hash = ?, plain_password = NULL, updated_at = ? WHERE id = ?", (new_hash, now_str, user["id"]))
         conn.commit()
     finally:
         conn.close()

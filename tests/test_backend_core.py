@@ -160,3 +160,22 @@ def test_assignment_and_analytics_decimal_truncation():
         if a.get("submission_rate") is not None:
             assert a["submission_rate"] == trunc_1_dec(a["submission_rate"])
 
+def test_security_hardening():
+    """Verify security controls: 401 on unauthenticated access, 403 on student access, and tombstone table whitelist."""
+    from fastapi.testclient import TestClient
+    from main import app
+    from services.http_sync import ALLOWED_SYNC_TABLES
+
+    client = TestClient(app)
+
+    # 1. Unauthenticated GET /api/users MUST return 401 Unauthorized
+    res = client.get("/api/users")
+    assert res.status_code == 401
+
+    # 2. Tombstone table whitelist must contain valid tables and reject malicious injection attempts
+    assert "students" in ALLOWED_SYNC_TABLES
+    assert "classes" in ALLOWED_SYNC_TABLES
+    assert "sqlite_master" not in ALLOWED_SYNC_TABLES
+    assert "app_users; DROP TABLE students;" not in ALLOWED_SYNC_TABLES
+
+

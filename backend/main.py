@@ -77,9 +77,11 @@ async def global_exception_handler(request, exc):
     import traceback
     err_tb = traceback.format_exc()
     print(f"[Unhandled Exception on {request.url.path}]: {exc}\n{err_tb}")
+    app_mode = os.environ.get("APP_MODE", "local").lower()
+    detail_msg = str(exc) if app_mode == "local" else "Lỗi xử lý nội bộ trên máy chủ. Vui lòng liên hệ quản trị viên."
     return JSONResponse(
         status_code=500,
-        content={"success": False, "detail": str(exc), "path": request.url.path}
+        content={"success": False, "detail": detail_msg, "path": request.url.path}
     )
 
 # Mount Core Routers (Always available on both Web and Local)

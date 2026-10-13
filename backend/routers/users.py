@@ -123,18 +123,21 @@ def heartbeat(payload: HeartbeatPayload):
 @router.get("/users")
 def list_users(request: Request):
     auth_header = request.headers.get("Authorization") or request.headers.get("authorization")
-    if auth_header and auth_header.strip().startswith("Bearer "):
-        token = auth_header.strip()[7:].strip()
-        try:
-            from services.auth_security import verify_access_token
-            payload = verify_access_token(token)
-            role = str(payload.get("role") or "").strip().lower()
-            if role in ("học sinh", "student"):
-                raise HTTPException(status_code=403, detail="Tài khoản học sinh không có quyền xem danh sách tài khoản.")
-        except HTTPException:
-            raise
-        except Exception:
-            pass
+    if not auth_header or not auth_header.strip().startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Yêu cầu đăng nhập xác thực tài khoản để xem danh sách tài khoản.")
+    token = auth_header.strip()[7:].strip()
+    try:
+        from services.auth_security import verify_access_token
+        payload = verify_access_token(token)
+        role = str(payload.get("role") or "").strip().lower()
+        if role in ("học sinh", "student"):
+            raise HTTPException(status_code=403, detail="Tài khoản học sinh không có quyền xem danh sách tài khoản.")
+    except HTTPException:
+        raise
+    except ValueError as ve:
+        raise HTTPException(status_code=401, detail=str(ve))
+    except Exception:
+        raise HTTPException(status_code=401, detail="Phiên đăng nhập không hợp lệ hoặc đã hết hạn.")
 
     try:
         users = get_users()
