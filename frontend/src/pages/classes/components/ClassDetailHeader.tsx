@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { ClassItem } from '../types';
 import { CustomDatePicker } from '../../../components/CustomDatePicker';
+import { Button } from '../../../components/button';
 
 interface ClassDetailHeaderProps {
   selectedClass: ClassItem;
@@ -105,31 +106,35 @@ export const ClassDetailHeader: React.FC<ClassDetailHeaderProps> = ({
               className="w-36 sm:w-44"
             />
             {onDeleteAttendanceDate && (
-              <button
+              <Button
+                variant="danger"
+                size="sm"
                 type="button"
                 onClick={onDeleteAttendanceDate}
-                className="group flex items-center gap-0 hover:gap-1.5 bg-rose-50 dark:bg-rose-500/15 hover:bg-rose-100 dark:hover:bg-rose-500/25 text-rose-600 dark:text-rose-400 border-0 shadow-2xs hover:shadow-xs active:scale-[0.98] px-2.5 py-1.5 rounded-xl font-bold text-xs transition-all duration-200 cursor-pointer"
+                leftIcon={<Trash2 size={13} className="shrink-0" />}
+                className="group"
                 title={`Xóa buổi học và điểm danh ngày ${attendanceDate}`}
               >
-                <Trash2 size={13} className="shrink-0" />
                 <span className="max-w-0 opacity-0 group-hover:max-w-[130px] group-hover:opacity-100 transition-all duration-200 ease-in-out whitespace-nowrap overflow-hidden block">
                   Xóa Buổi Này
                 </span>
-              </button>
+              </Button>
             )}
           </div>
         )}
 
         {onOpenEnrollModal && (
-          <button
+          <Button
+            variant="primary"
+            size="sm"
             type="button"
             onClick={onOpenEnrollModal}
-            className="group flex items-center gap-1.5 bg-blue-600 hover:bg-blue-500 text-white px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-xl font-black text-xs shadow-2xs hover:shadow-xs active:scale-[0.98] transition-all duration-200 cursor-pointer border-0 shrink-0"
+            leftIcon={<UserPlus size={14} className="shrink-0" />}
+            className="group shrink-0"
             title="Ghi Danh Học Sinh Vào Lớp"
           >
-            <UserPlus size={14} className="shrink-0" />
             <span>Ghi Danh</span>
-          </button>
+          </Button>
         )}
       </div>
     </div>

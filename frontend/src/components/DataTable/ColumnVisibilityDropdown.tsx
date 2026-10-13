@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { Table } from '@tanstack/react-table';
 import { SegmentedControl } from '../SegmentedControl';
+import { Button } from '../button';
 import { getColumnHeaderText } from './types';
 
 interface ColumnVisibilityDropdownProps<TData> {
@@ -54,14 +55,15 @@ export function ColumnVisibilityDropdown<TData>({
 
   return (
     <div className="relative shrink-0" ref={ref}>
-      <button
+      <Button
+        variant="white"
+        size="icon-sm"
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="p-1.5 sm:p-2 rounded-xl bg-white hover:bg-slate-50 dark:bg-[#181a20] dark:hover:bg-[#20232b] text-slate-700 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition-all duration-200 cursor-pointer shadow-2xs hover:shadow-xs active:scale-[0.98] border-0 outline-none shrink-0 flex items-center justify-center"
         title={`Cài đặt cột (${visibleCount}/${allCols.length}): Hiện/ẩn, thứ tự, căn lề và độ rộng`}
       >
         <MoreVertical size={15} className="text-slate-600 dark:text-slate-400 shrink-0" />
-      </button>
+      </Button>
 
       {open && (
         <div className="absolute right-0 top-full mt-2 z-[60] w-72 bg-white dark:bg-[#181a20] rounded-2xl shadow-[0_16px_48px_rgba(15,23,42,0.22)] dark:shadow-[0_24px_64px_rgba(0,0,0,0.95)] border border-slate-200 dark:border-white/10 p-3 space-y-2 animate-mac-dropdown">

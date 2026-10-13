@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Download, FileSpreadsheet, FileText, ImageIcon } from 'lucide-react';
+import { Button } from '../button';
 import { Table } from '@tanstack/react-table';
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
@@ -185,17 +186,19 @@ export function ExportDropdown<TData>({
 
   return (
     <div className="relative shrink-0" ref={ref}>
-      <button
+      <Button
+        variant="white"
+        size="sm"
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="group flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-white hover:bg-slate-50 dark:bg-[#181a20] dark:hover:bg-[#20232b] text-slate-700 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white text-xs font-bold transition-all duration-200 cursor-pointer shadow-2xs hover:shadow-xs active:scale-[0.98] border-0 outline-none shrink-0"
+        leftIcon={<Download size={13} className="text-emerald-500 dark:text-emerald-400 shrink-0" />}
         title="Xuất dữ liệu"
+        className="group shrink-0"
       >
-        <Download size={13} className="text-emerald-500 dark:text-emerald-400 shrink-0" />
         <span className="max-w-0 opacity-0 group-hover:max-w-[80px] group-hover:opacity-100 xl:max-w-none xl:opacity-100 transition-all duration-200 ease-in-out whitespace-nowrap overflow-hidden inline-block">
           Xuất
         </span>
-      </button>
+      </Button>
 
       {open && (
         <div className="absolute right-0 top-full mt-2 z-50 w-44 bg-white dark:bg-[#181a20] rounded-2xl shadow-xl border border-slate-200 dark:border-white/10 p-1.5 space-y-1 animate-mac-dropdown">

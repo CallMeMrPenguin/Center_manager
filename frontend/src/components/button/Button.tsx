@@ -12,16 +12,21 @@ const variantStyles: Record<ButtonVariant, string> = {
   ghost:
     'bg-transparent hover:bg-slate-100 dark:hover:bg-white/10 text-slate-700 dark:text-slate-300 border-0 hover:shadow-2xs active:scale-[0.98]',
   outline:
-    'bg-white hover:bg-slate-50 dark:bg-white/5 dark:hover:bg-white/10 text-slate-800 dark:text-slate-200 border-0 shadow-2xs hover:shadow-xs active:scale-[0.98]',
+    'bg-white hover:bg-slate-50 dark:bg-[#181a20] dark:hover:bg-[#20232b] text-slate-800 dark:text-slate-100 border-0 shadow-2xs hover:shadow-xs active:scale-[0.98]',
+  white:
+    'bg-white hover:bg-slate-50 dark:bg-[#181a20] dark:hover:bg-[#20232b] text-slate-800 dark:text-slate-100 border-0 shadow-2xs hover:shadow-xs active:scale-[0.98]',
   success:
     'bg-emerald-600 hover:bg-emerald-500 text-white shadow-2xs hover:shadow-xs border-0 active:scale-[0.98]',
 };
 
 const sizeStyles: Record<ButtonSize, string> = {
-  sm: 'px-2.5 py-1.5 text-xs rounded-lg gap-1.5 font-bold',
-  md: 'px-3.5 py-2 text-xs rounded-lg gap-2 font-bold',
-  lg: 'px-5 py-2.5 text-sm rounded-lg gap-2.5 font-extrabold',
-  icon: 'p-2 rounded-lg justify-center text-xs',
+  xs: 'px-2 py-1 text-xs rounded-lg gap-1 font-bold',
+  sm: 'px-2.5 py-1.5 text-xs rounded-xl gap-1.5 font-bold',
+  md: 'px-3.5 py-2 text-xs rounded-xl gap-2 font-bold',
+  lg: 'px-5 py-2.5 text-sm rounded-xl gap-2.5 font-extrabold',
+  'icon-xs': 'p-1.5 rounded-lg justify-center text-xs shrink-0',
+  'icon-sm': 'p-1.5 sm:p-2 rounded-xl justify-center text-xs shrink-0',
+  icon: 'p-2 rounded-xl justify-center text-xs shrink-0',
 };
 
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(

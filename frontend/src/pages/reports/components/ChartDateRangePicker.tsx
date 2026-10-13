@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { Calendar, ChevronDown, RotateCcw } from 'lucide-react';
+import { Button } from '../../../components/button';
 import { getLocalDateStr } from '../../../utils';
 import { formatSessionDate } from '../utils';
 import {
@@ -175,19 +176,22 @@ export const ChartDateRangePicker: React.FC<ChartDateRangePickerProps> = ({
   return (
     <div className="relative inline-block" ref={containerRef}>
       {/* 2-in-1 Unified Trigger Button */}
-      <button
+      <Button
+        variant="white"
+        size="sm"
         type="button"
         onClick={() => setOpen((prev) => !prev)}
-        className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white hover:bg-slate-50 dark:bg-[#181a20] dark:hover:bg-[#20232b] text-slate-800 dark:text-slate-100 text-xs font-bold transition-all cursor-pointer border-0 shadow-2xs hover:shadow-xs active:scale-[0.98] outline-none"
+        leftIcon={<Calendar size={13} className="text-blue-600 dark:text-blue-400 shrink-0" />}
+        rightIcon={
+          <ChevronDown
+            size={12}
+            className={`text-slate-400 transition-transform duration-200 shrink-0 ${open ? 'rotate-180' : ''}`}
+          />
+        }
         title="Chọn thời gian hoặc giai đoạn xem tiến độ"
       >
-        <Calendar size={13} className="text-blue-600 dark:text-blue-400 shrink-0" />
         <span className="whitespace-nowrap font-extrabold">{triggerLabel}</span>
-        <ChevronDown
-          size={12}
-          className={`text-slate-400 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
-        />
-      </button>
+      </Button>
 
       {/* Popover Card */}
       {open && (

@@ -2,6 +2,7 @@ import React from 'react';
 import { Layers, Save, FileCheck2 } from 'lucide-react';
 import { ClassItem, EnrolledStudent, AttendanceRecord } from '../../types';
 import { DataTable } from '../../../../components/DataTable';
+import { Button } from '../../../../components/button';
 import { useAttendanceColumns } from '../../hooks/useAttendanceColumns';
 import { useSessionOverview } from './useSessionOverview';
 import { exportClassReportPng } from '../../utils/exportClassReportPng';
@@ -126,31 +127,35 @@ export const AttendanceGradesTab: React.FC<AttendanceGradesTabProps> = ({
           toolbarRight={
             <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
               {onOpenTestConfigModal && (
-                <button
+                <Button
+                  variant="white"
+                  size="sm"
                   type="button"
                   onClick={onOpenTestConfigModal}
-                  className="group flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-white hover:bg-slate-50 dark:bg-[#181a20] dark:hover:bg-[#20232b] text-slate-700 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white border-0 text-xs font-bold transition-all duration-200 cursor-pointer shadow-2xs hover:shadow-xs active:scale-[0.98] outline-none shrink-0"
+                  leftIcon={<Layers size={13} className="text-blue-500 dark:text-blue-400 shrink-0" />}
+                  className="group shrink-0"
                   title="Cấu Hình Điểm (Check 1 & Check 2)"
                 >
-                  <Layers size={13} className="text-blue-500 dark:text-blue-400 shrink-0" />
                   <span className="max-w-0 opacity-0 group-hover:max-w-[160px] group-hover:opacity-100 2xl:max-w-none 2xl:opacity-100 transition-all duration-200 ease-in-out whitespace-nowrap overflow-hidden inline-block">
                     Cấu Hình Điểm
                   </span>
-                </button>
+                </Button>
               )}
 
               {onCircularSwap && (
-                <button
+                <Button
+                  variant="white"
+                  size="sm"
                   type="button"
                   onClick={onCircularSwap}
-                  className="group flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-white hover:bg-slate-50 dark:bg-[#181a20] dark:hover:bg-[#20232b] text-slate-700 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white border-0 text-xs font-bold transition-all duration-200 cursor-pointer shadow-2xs hover:shadow-xs active:scale-[0.98] outline-none shrink-0"
+                  leftIcon={<FileCheck2 size={13} className="text-purple-500 dark:text-purple-400 shrink-0" />}
+                  className="group shrink-0"
                   title="Sơ đồ chấm bài giữa các học sinh"
                 >
-                  <FileCheck2 size={13} className="text-purple-500 dark:text-purple-400 shrink-0" />
                   <span className="max-w-0 opacity-0 group-hover:max-w-[150px] group-hover:opacity-100 xl:max-w-none xl:opacity-100 transition-all duration-200 ease-in-out whitespace-nowrap overflow-hidden inline-block">
                     Sơ Đồ Chấm Bài
                   </span>
-                </button>
+                </Button>
               )}
 
               {autoSaveStatus === 'saving' && (
@@ -168,18 +173,20 @@ export const AttendanceGradesTab: React.FC<AttendanceGradesTabProps> = ({
               )}
 
               {onSaveAttendance && (
-                <button
+                <Button
+                  variant="success"
+                  size="sm"
                   type="button"
                   onClick={onSaveAttendance}
                   disabled={savingAttendance}
-                  className="group flex items-center gap-1 sm:gap-1.5 px-3 sm:px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black shadow-2xs hover:shadow-xs active:scale-[0.98] transition-all duration-200 cursor-pointer border-0 disabled:opacity-50 shrink-0"
+                  leftIcon={<Save size={13} className="shrink-0" />}
+                  className="group shrink-0"
                   title="Lưu"
                 >
-                  <Save size={13} className="shrink-0" />
                   <span className="max-w-0 opacity-0 group-hover:max-w-[140px] group-hover:opacity-100 lg:max-w-none lg:opacity-100 transition-all duration-200 ease-in-out whitespace-nowrap overflow-hidden inline-block">
                     {savingAttendance ? 'Đang lưu...' : 'Lưu'}
                   </span>
-                </button>
+                </Button>
               )}
             </div>
           }

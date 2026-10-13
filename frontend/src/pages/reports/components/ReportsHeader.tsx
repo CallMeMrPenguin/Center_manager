@@ -7,7 +7,7 @@ import {
   RotateCcw,
 } from 'lucide-react';
 import { CustomSelect } from '../../../components/CustomSelect';
-
+import { Button } from '../../../components/button';
 import { AcademicYearPhaseSelect } from './AcademicYearPhaseSelect';
 
 interface ReportsHeaderProps {
@@ -114,16 +114,19 @@ export const ReportsHeader: React.FC<ReportsHeaderProps> = ({
             />
           )}
 
-          <button
+          <Button
+            variant="danger"
+            size="sm"
+            type="button"
             onClick={onOpenResetModal}
-            className="group flex items-center gap-0 hover:gap-1.5 px-3 py-2 rounded-xl bg-white hover:bg-rose-50 dark:bg-[#181d2e] dark:hover:bg-rose-500/20 text-rose-600 hover:text-rose-700 dark:text-rose-300 dark:hover:text-rose-200 border-0 shadow-xs hover:shadow-sm text-xs font-bold transition-all duration-300 cursor-pointer active:scale-95 shrink-0"
+            leftIcon={<RotateCcw size={14} className="shrink-0" />}
             title="Đặt Lại Điểm Số"
+            className="group shrink-0"
           >
-            <RotateCcw size={14} className="shrink-0" />
             <span className="max-w-0 opacity-0 group-hover:max-w-[140px] group-hover:opacity-100 transition-all duration-300 ease-in-out whitespace-nowrap overflow-hidden block">
               Đặt Lại Điểm Số
             </span>
-          </button>
+          </Button>
         </div>
       </div>
     </div>
