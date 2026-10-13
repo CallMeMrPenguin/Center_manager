@@ -230,7 +230,7 @@ export const QuizRunningView: React.FC<QuizRunningViewProps> = ({
                       onExitToImport();
                     }
                   }}
-                  className="px-3 py-1 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 text-slate-700 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white border-0 shadow-[0_1px_3px_rgba(15,23,42,0.12),0_1px_2px_rgba(15,23,42,0.08)] text-xs font-bold transition cursor-pointer"
+                  className="px-3 py-1 rounded-xl bg-white hover:bg-slate-50 dark:bg-[#181a20] dark:hover:bg-[#20232b] text-slate-700 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white border-0 shadow-[0_2px_10px_rgba(15,23,42,0.13),0_0_6px_rgba(15,23,42,0.07)] hover:shadow-[0_4px_16px_rgba(15,23,42,0.18),0_0_8px_rgba(15,23,42,0.09)] dark:shadow-[0_2px_12px_rgba(0,0,0,0.55),0_0_6px_rgba(0,0,0,0.35)] text-xs font-bold transition cursor-pointer"
                   title="Quay lại để chọn đề khác"
                 >
                   Đổi đề
@@ -312,7 +312,7 @@ export const QuizRunningView: React.FC<QuizRunningViewProps> = ({
               setCurrentIndex(p => Math.max(0, (typeof p === 'number' ? p : currentIndex) - 1));
               if (timerMode === 'per_question') setQuestionTimer(perQuestionSeconds);
             }}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 text-slate-700 dark:text-slate-300 text-xs font-bold disabled:opacity-30 cursor-pointer border-0 shadow-[0_1px_3px_rgba(15,23,42,0.12),0_1px_2px_rgba(15,23,42,0.08)] hover:shadow-[0_3px_8px_rgba(15,23,42,0.18)] transition"
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white hover:bg-slate-50 dark:bg-[#181a20] dark:hover:bg-[#20232b] text-slate-700 dark:text-slate-300 text-xs font-bold disabled:opacity-30 cursor-pointer border-0 shadow-[0_2px_10px_rgba(15,23,42,0.13),0_0_6px_rgba(15,23,42,0.07)] hover:shadow-[0_4px_16px_rgba(15,23,42,0.18),0_0_8px_rgba(15,23,42,0.09)] dark:shadow-[0_2px_12px_rgba(0,0,0,0.55),0_0_6px_rgba(0,0,0,0.35)] transition"
           >
             <ArrowLeft size={14} />
             <span>Câu trước</span>

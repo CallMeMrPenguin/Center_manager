@@ -276,8 +276,8 @@ export default function KiemTraPage() {
           <div className="flex items-center gap-3">
             <button
               onClick={toggleFullscreen}
-              className={`flex items-center gap-2 px-3.5 py-2 rounded-xl border-0 text-xs font-black transition cursor-pointer shadow-[0_1px_3px_rgba(15,23,42,0.12),0_1px_2px_rgba(15,23,42,0.08)] hover:shadow-[0_3px_8px_rgba(15,23,42,0.18)] ${
-                isFullscreen ? 'bg-[#2563eb] text-white shadow-md' : 'bg-slate-100 text-slate-700 hover:text-slate-900 dark:bg-[#121626] dark:text-slate-300 dark:hover:text-white'
+              className={`flex items-center gap-2 px-3.5 py-2 rounded-xl border-0 text-xs font-black transition cursor-pointer shadow-[0_2px_10px_rgba(15,23,42,0.13),0_0_6px_rgba(15,23,42,0.07)] hover:shadow-[0_4px_16px_rgba(15,23,42,0.18),0_0_8px_rgba(15,23,42,0.09)] dark:shadow-[0_2px_12px_rgba(0,0,0,0.55),0_0_6px_rgba(0,0,0,0.35)] ${
+                isFullscreen ? 'bg-[#2563eb] text-white' : 'bg-slate-100 text-slate-700 hover:text-slate-900 dark:bg-[#121626] dark:text-slate-300 dark:hover:text-white'
               }`}
               title={isFullscreen ? "Thoát toàn màn hình" : "Chế độ làm bài tập trung (Toàn màn hình)"}
             >

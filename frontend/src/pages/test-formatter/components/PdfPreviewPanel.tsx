@@ -37,28 +37,28 @@ export const PdfPreviewPanel: React.FC<PdfPreviewPanelProps> = ({
           </button>
           {pdfUrl && (
             <div className="flex items-center gap-2">
-              <div className="flex items-center bg-slate-100 rounded-xl border border-slate-200 p-1 shadow-inner gap-0.5">
+              <div className="flex items-center bg-white dark:bg-[#181a20] rounded-xl p-1 border-0 shadow-[0_2px_10px_rgba(15,23,42,0.13),0_0_6px_rgba(15,23,42,0.07)] hover:shadow-[0_4px_16px_rgba(15,23,42,0.18),0_0_8px_rgba(15,23,42,0.09)] dark:shadow-[0_2px_12px_rgba(0,0,0,0.55),0_0_6px_rgba(0,0,0,0.35)] gap-0.5">
                 <button
                   onClick={() => setPdfZoom((prev) => Math.max(prev - 10, 50))}
                   aria-label="Thu nhỏ"
-                  className="p-1 rounded-lg text-slate-500 hover:text-slate-900 cursor-pointer"
+                  className="p-1 rounded-lg text-slate-500 hover:text-slate-900 cursor-pointer border-0"
                 >
                   <ZoomOut size={13} />
                 </button>
-                <span className="px-2 text-xs font-bold text-slate-700 font-mono w-12 text-center select-none">
+                <span className="px-2 text-xs font-bold text-slate-700 dark:text-slate-200 font-mono w-12 text-center select-none">
                   {pdfZoom}%
                 </span>
                 <button
                   onClick={() => setPdfZoom((prev) => Math.min(prev + 10, 200))}
                   aria-label="Phóng to"
-                  className="p-1 rounded-lg text-slate-500 hover:text-slate-900 cursor-pointer"
+                  className="p-1 rounded-lg text-slate-500 hover:text-slate-900 cursor-pointer border-0"
                 >
                   <ZoomIn size={13} />
                 </button>
               </div>
               <button
                 onClick={() => window.open(pdfUrl, '_blank')}
-                className="p-2 rounded-xl bg-slate-100 border border-slate-200 text-slate-700 hover:text-slate-900 transition cursor-pointer text-xs font-bold shadow-sm"
+                className="p-2 rounded-xl bg-white hover:bg-slate-50 dark:bg-[#181a20] dark:hover:bg-[#20232b] text-slate-700 hover:text-slate-900 dark:text-slate-200 dark:hover:text-white border-0 shadow-[0_2px_10px_rgba(15,23,42,0.13),0_0_6px_rgba(15,23,42,0.07)] hover:shadow-[0_4px_16px_rgba(15,23,42,0.18),0_0_8px_rgba(15,23,42,0.09)] dark:shadow-[0_2px_12px_rgba(0,0,0,0.55),0_0_6px_rgba(0,0,0,0.35)] transition cursor-pointer text-xs font-bold"
               >
                 Mở tab mới
               </button>

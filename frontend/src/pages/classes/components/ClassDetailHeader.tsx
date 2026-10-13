@@ -40,14 +40,16 @@ export const ClassDetailHeader: React.FC<ClassDetailHeaderProps> = ({
     <div className="bg-white dark:bg-[#0c0f1e] rounded-2xl p-4 shadow-[0_4px_24px_rgba(0,0,0,0.08)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.45)] flex flex-wrap items-center justify-between gap-4">
       {/* LEFT: BACK BUTTON & CLASS INFO */}
       <div className="flex items-center gap-3 min-w-0">
-        <button
+        <Button
+          variant="white"
+          size="icon-sm"
           type="button"
           onClick={onBack}
-          className="p-2 rounded-xl btn-neutral text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition cursor-pointer border-0 shadow-xs shrink-0"
+          className="shrink-0"
           title="Quay lại danh sách lớp"
         >
           <ChevronLeft size={18} />
-        </button>
+        </Button>
 
         <div className="space-y-1 min-w-0">
           <div className="flex flex-wrap items-center gap-2">

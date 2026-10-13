@@ -138,7 +138,7 @@ export const HorizontalTimelineGrid: React.FC<HorizontalTimelineGridProps> = ({
       <div className="bg-slate-50 dark:bg-[#131a2c] border-b border-slate-200 dark:border-white/10 px-4 py-2 flex items-center justify-end gap-2.5 shrink-0">
         {/* Right: Zoom Controls (+ and -) */}
         <div className="flex items-center gap-2">
-          <div className="flex items-center bg-white dark:bg-[#111728] border border-slate-200 dark:border-white/10 rounded-xl p-0.5 shadow-2xs">
+          <div className="flex items-center bg-white dark:bg-[#111728] border-0 rounded-xl p-0.5 shadow-[0_2px_10px_rgba(15,23,42,0.13),0_0_6px_rgba(15,23,42,0.07)] hover:shadow-[0_4px_16px_rgba(15,23,42,0.18),0_0_8px_rgba(15,23,42,0.09)] dark:shadow-[0_2px_12px_rgba(0,0,0,0.55),0_0_6px_rgba(0,0,0,0.35)]">
             <button
               type="button"
               onClick={handleZoomOut}

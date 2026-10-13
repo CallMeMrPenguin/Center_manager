@@ -191,7 +191,7 @@ export const DrawingToolbar: React.FC<DrawingToolbarProps> = ({
             <button
               type="button"
               onClick={(e) => { e.stopPropagation(); setShowColorPopover(!showColorPopover); setShowSizePopover(false); }}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 transition cursor-pointer border-0 shadow-[0_1px_3px_rgba(15,23,42,0.12),0_1px_2px_rgba(15,23,42,0.08)]"
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-white hover:bg-slate-50 transition cursor-pointer border-0 shadow-[0_2px_10px_rgba(15,23,42,0.13),0_0_6px_rgba(15,23,42,0.07)] hover:shadow-[0_4px_16px_rgba(15,23,42,0.18),0_0_8px_rgba(15,23,42,0.09)]"
               title="Chọn màu mực vẽ"
             >
               <div className="w-4 h-4 rounded-full border-2 border-white shadow-xs shrink-0" style={{ backgroundColor: selectedColor }} />
@@ -248,7 +248,7 @@ export const DrawingToolbar: React.FC<DrawingToolbarProps> = ({
             <button
               type="button"
               onClick={(e) => { e.stopPropagation(); setShowSizePopover(!showSizePopover); setShowColorPopover(false); }}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 transition cursor-pointer border-0 text-xs font-black text-indigo-600 shadow-[0_1px_3px_rgba(15,23,42,0.12),0_1px_2px_rgba(15,23,42,0.08)]"
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-white hover:bg-slate-50 transition cursor-pointer border-0 text-xs font-black text-indigo-600 shadow-[0_2px_10px_rgba(15,23,42,0.13),0_0_6px_rgba(15,23,42,0.07)] hover:shadow-[0_4px_16px_rgba(15,23,42,0.18),0_0_8px_rgba(15,23,42,0.09)]"
               title="Chỉnh độ dày"
             >
               <Sliders size={13} className="text-indigo-600" />

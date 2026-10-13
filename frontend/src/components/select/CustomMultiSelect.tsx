@@ -94,7 +94,7 @@ export const CustomMultiSelect: React.FC<CustomMultiSelectProps> = ({
         type="button"
         disabled={disabled}
         onClick={() => setIsOpen(!isOpen)}
-        className={`w-full min-h-[38px] flex items-center justify-between bg-slate-100 hover:bg-slate-200 border border-slate-300 rounded-xl px-3.5 py-1.5 text-xs font-bold text-slate-800 transition-all cursor-pointer shadow-2xs outline-none ${
+        className={`w-full min-h-[38px] flex items-center justify-between bg-white hover:bg-slate-50 dark:bg-[#181a20] dark:hover:bg-[#20232b] border-0 rounded-xl px-3.5 py-1.5 text-xs font-bold text-slate-800 dark:text-slate-100 transition-all cursor-pointer shadow-[0_2px_10px_rgba(15,23,42,0.13),0_0_6px_rgba(15,23,42,0.07)] hover:shadow-[0_4px_16px_rgba(15,23,42,0.18),0_0_8px_rgba(15,23,42,0.09)] dark:shadow-[0_2px_12px_rgba(0,0,0,0.55),0_0_6px_rgba(0,0,0,0.35)] outline-none ${
           disabled ? 'opacity-40 cursor-not-allowed' : ''
         }`}
       >
