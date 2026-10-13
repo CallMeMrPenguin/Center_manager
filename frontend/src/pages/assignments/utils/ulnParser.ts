@@ -292,7 +292,7 @@ export function parseUlnText(ulnText: string): UlnNode[] {
     const qMatch = lineWithoutAlign.match(/^(?:\[P[0-9]\]\s*)?(?:(?:Question|Câu)\s+)?#?([0-9]+)\.\s*(.*)$/i);
     if (qMatch) {
       const qNum = qMatch[1];
-      let qText = qMatch[2].replace(/^#/, '').trim();
+      const qText = qMatch[2].replace(/^#/, '').trim();
       let subText: string | undefined;
       const subParagraphs: string[] = [];
       let bracketHint: string | undefined;

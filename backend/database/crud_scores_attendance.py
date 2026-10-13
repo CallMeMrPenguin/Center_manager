@@ -165,6 +165,8 @@ import math
 VALID_STATUSES = {"Có mặt", "Đi muộn", "Có phép", "Vắng mặt", "Nghỉ học", "Chưa học"}
 
 def _parse_score(val: Any, is_present: bool = True) -> Optional[float]:
+    if not is_present:
+        return None
     if val is None or val == "" or val == "null" or val == "undefined":
         return None
     try:

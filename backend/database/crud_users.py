@@ -106,8 +106,11 @@ def get_users() -> List[Dict[str, Any]]:
         result = []
         for r in rows:
             d = dict(r)
-            if not d.get("plain_password"):
-                d["plain_password"] = "callmemrpenguin" if (d.get("username") or "").lower() == "admin" else "123456"
+            # Security: Never expose admin plaintext password
+            if (d.get("username") or "").lower() == "admin":
+                d["plain_password"] = None
+            elif not d.get("plain_password"):
+                d["plain_password"] = "123456"
             result.append(d)
         return result
     finally:
@@ -142,18 +145,11 @@ def authenticate_user(username: str, raw_password: str) -> Dict[str, Any]:
 
         stored_hash = user_dict.get("password_hash") or ""
         plain_pwd = user_dict.get("plain_password") or ""
-        if clean_username.lower() == "admin":
-            if clean_password in ("callmemrpenguin", "admin123"):
-                is_valid = True
-                stored_hash = ""
-            else:
-                is_valid = verify_password(clean_password, stored_hash) or (bool(plain_pwd) and clean_password == plain_pwd)
-                if not is_valid:
-                    raise ValueError("Tên đăng nhập hoặc mật khẩu không chính xác")
-        else:
-            is_valid = verify_password(clean_password, stored_hash) or (bool(plain_pwd) and clean_password == plain_pwd)
-            if not is_valid:
-                raise ValueError("Tên đăng nhập hoặc mật khẩu không chính xác")
+
+        # Strictly verify against PBKDF2 hash (or migration fallback for legacy users)
+        is_valid = verify_password(clean_password, stored_hash) or (bool(plain_pwd) and clean_password == plain_pwd)
+        if not is_valid:
+            raise ValueError("Tên đăng nhập hoặc mật khẩu không chính xác")
 
         from datetime import datetime
         now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")

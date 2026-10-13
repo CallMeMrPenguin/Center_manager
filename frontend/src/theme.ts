@@ -244,7 +244,7 @@ export const applyTheme = (mode?: ThemeMode, customTheme?: any) => {
 
   // 4. Force synchronous reflow to ensure the browser commits all new colors in one paint without transitions
   if (typeof window !== 'undefined' && document.body) {
-    window.getComputedStyle(document.body).opacity;
+    void window.getComputedStyle(document.body).opacity;
   }
 
   // 5. Remove the transition disabler after the new theme has painted, restoring normal hover effects

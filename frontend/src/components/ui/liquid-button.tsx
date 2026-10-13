@@ -177,7 +177,7 @@ export const LiquidFillButton: React.FC<LiquidButtonProps> = ({
       slosh += (sloshTarget - slosh) * 0.06;
       sloshTarget *= 0.92;
 
-      let frontPoints: { x: number; y: number }[] = [];
+      const frontPoints: { x: number; y: number }[] = [];
 
       if (currentLevel > 0.05) {
         step += 0.03;

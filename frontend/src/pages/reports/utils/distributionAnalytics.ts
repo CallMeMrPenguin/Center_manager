@@ -339,7 +339,7 @@ export function computeDistributionStats(
   else if (sd > 2.0) sdLabel = 'Phân hóa rất mạnh (Chênh lệch lớn)';
 
   const iqrLabel = n > 0 ? `Vùng 50% học sinh: ${format1Dec(q1)} - ${format1Dec(q3)}đ` : 'Chưa có dữ liệu';
-  let distributionShape = n > 0 ? 'Phân phối chuẩn đối xứng' : 'Chưa có dữ liệu';
+  const distributionShape = n > 0 ? 'Phân phối chuẩn đối xứng' : 'Chưa có dữ liệu';
   let distributionRating = n > 0 ? 'Chất Lượng Tốt' : 'Chưa Có Dữ Liệu';
 
   if (n > 0) {

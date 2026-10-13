@@ -49,7 +49,7 @@ export function computeMonthWeeks(yr: number, mo: number, today: string): WeekIn
   const firstMon = new Date(yr, mo - 1, 1 - monOffset);
 
   const result: WeekInfo[] = [];
-  let curMon = new Date(firstMon);
+  const curMon = new Date(firstMon);
   let idx = 1;
 
   while (true) {

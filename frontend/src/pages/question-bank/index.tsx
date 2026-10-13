@@ -1219,8 +1219,8 @@ export default function QuestionBank({ onCreateTest, isActive }: QuestionBankPro
                 currentCounts[cat]++;
               });
 
-              let overrepresented: ('NHẬN BIẾT' | 'THÔNG HIỂU' | 'VẬN DỤNG')[] = [];
-              let underrepresented: ('NHẬN BIẾT' | 'THÔNG HIỂU' | 'VẬN DỤNG')[] = [];
+              const overrepresented: ('NHẬN BIẾT' | 'THÔNG HIỂU' | 'VẬN DỤNG')[] = [];
+              const underrepresented: ('NHẬN BIẾT' | 'THÔNG HIỂU' | 'VẬN DỤNG')[] = [];
 
               (['NHẬN BIẾT', 'THÔNG HIỂU', 'VẬN DỤNG'] as const).forEach(cat => {
                 if (currentCounts[cat] > targets[cat]) overrepresented.push(cat);

@@ -140,7 +140,7 @@ export function updateAnswerKeysInUln(
   ulnText: string,
   updatedKeys: Record<string, string>
 ): string {
-  let text = ulnText || '';
+  const text = ulnText || '';
 
   // Format new ANS block
   const lines: string[] = [];

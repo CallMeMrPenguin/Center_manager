@@ -2,7 +2,7 @@ import { AttendanceRecord } from '../types';
 
 export function parseAndFormatScore(val: any): string {
   if (val === undefined || val === null || val === '') return '';
-  let valStr = String(val).trim().replace(',', '.');
+  const valStr = String(val).trim().replace(',', '.');
   if (!valStr) return '';
   if (isNaN(Number(valStr))) return '';
 

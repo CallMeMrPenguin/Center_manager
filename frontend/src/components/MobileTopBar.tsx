@@ -18,8 +18,6 @@ export const MobileTopBar: React.FC<MobileTopBarProps> = ({
   const [profileOpen, setProfileOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
 
-  if (!isRealMobileDevice()) return null;
-
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
@@ -40,7 +38,9 @@ export const MobileTopBar: React.FC<MobileTopBarProps> = ({
   const roleLabel = isAdmin ? 'Quản trị hệ thống' : (currentUser?.rawRole || 'Học sinh');
   const displayName = currentUser?.name && currentUser.name.toLowerCase() !== 'admin'
     ? currentUser.name
-    : 'Quản Trị Viên';
+    : (isAdmin ? 'Admin' : 'Người dùng');
+
+  if (!isRealMobileDevice()) return null;
 
   return (
     <div className="flex md:hidden items-center justify-between h-11 px-3 bg-white/95 dark:bg-[#0c0c0e]/95 border-b border-slate-200 dark:border-[#27272a] shrink-0 z-30 select-none shadow-xs">

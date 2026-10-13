@@ -1,15 +1,15 @@
 import math
 from typing import Dict, Any, Optional
 
-def trunc_1_dec(val: Any) -> float:
+def trunc_1_dec(val: Any, allow_none: bool = False) -> Optional[float]:
     """Format/truncate to strictly 1 decimal place without rounding up or down."""
+    if val is None or val == "" or str(val).lower() in ("null", "undefined", "none", "nan"):
+        return None if allow_none else 0.0
     try:
-        if val is None or val == "" or val == "null" or val == "undefined":
-            return 0.0
         v = float(val)
-        return math.floor(v * 10.0) / 10.0
+        return math.floor(v * 10.0 + 1e-9) / 10.0
     except (ValueError, TypeError):
-        return 0.0
+        return None if allow_none else 0.0
 
 def clean_num(val: Any) -> float:
     """Safely extracts a numeric float value."""

@@ -36,8 +36,6 @@ export const MobileBottomDock: React.FC<MobileBottomDockProps> = ({
   orderedTabIds,
   onPrefetchTab,
 }) => {
-  if (!isRealMobileDevice()) return null;
-
   const containerRef = useRef<HTMLDivElement>(null);
   const [isIdle, setIsIdle] = useState(false);
   const idleTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -162,6 +160,8 @@ export const MobileBottomDock: React.FC<MobileBottomDockProps> = ({
     }, 1200);
   }, [activeTab, centerTab, findClosestTabToCenter, resetIdleTimer]);
 
+
+  if (!isRealMobileDevice()) return null;
 
   return (
     <div

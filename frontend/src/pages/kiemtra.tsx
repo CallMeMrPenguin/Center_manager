@@ -121,8 +121,8 @@ export default function KiemTraPage() {
   const handleStartTest = () => {
     if (!testData || !testData.questions.length) return;
 
-    let qList = testData.questions.map((q) => {
-      let opts = q.options ? [...q.options] : [];
+    const qList = testData.questions.map((q) => {
+      const opts = q.options ? [...q.options] : [];
       let resolvedAnswer = q.answer;
       if (q.options && q.options.length > 0) {
         const cleanAns = cleanOptionPrefix(q.answer.trim());

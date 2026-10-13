@@ -41,6 +41,6 @@ env/
 .DS_Store
 Thumbs.db
 
-# Upstream repo backup archives (stored locally)
-backups/repos/*.zip
+# Upstream repo backup archives and local pre-remediation snapshots
+backups/
 

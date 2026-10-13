@@ -36,7 +36,8 @@ def _load_or_create_secret() -> bytes:
             f.write(generated)
         return generated.encode("utf-8")
     except Exception:
-        return b"cm_sec_key_persistent_2026_default_fallback"
+        # Process-isolated cryptographically random fallback if disk is not writable
+        return secrets.token_bytes(32)
 
 SECRET_KEY = _load_or_create_secret()
 

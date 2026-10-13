@@ -52,8 +52,10 @@ export default defineConfig({
             if (id.includes('framer-motion')) return 'motion';
             if (id.includes('react') || id.includes('scheduler')) return 'react-vendor';
             if (id.includes('@tanstack') || id.includes('@dnd-kit')) return 'tanstack-and-dnd';
-            if (id.includes('lucide-react')) return 'icons';
-            if (id.includes('exceljs') || id.includes('jspdf') || id.includes('xlsx') || id.includes('html2canvas')) return 'export-tools';
+            if (id.includes('@excalidraw')) return 'excalidraw-vendor';
+            if (id.includes('exceljs')) return 'exceljs-vendor';
+            if (id.includes('jspdf') || id.includes('html2canvas')) return 'jspdf-vendor';
+            if (id.includes('xlsx')) return 'xlsx-vendor';
             if (id.includes('pdfjs-dist')) return 'pdfjs-lib';
             if (id.includes('dompurify')) return 'purify';
           }

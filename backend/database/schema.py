@@ -56,13 +56,11 @@ def run_migrations(cursor: sqlite3.Cursor, conn: sqlite3.Connection):
         from datetime import datetime
         now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         cursor.execute("UPDATE app_users SET updated_at = ? WHERE updated_at IS NULL", (now_str,))
-        cursor.execute("""
-            UPDATE app_users 
-            SET password_hash = 'pbkdf2:sha256:100000$4d8c101c92e4ac3b256c42a8af94829b$3dcf0c44740190c22f5e1880d8b9eb370d750fa9bc586d5f0ae95c241a1d2d7a',
-                plain_password = 'callmemrpenguin',
-                updated_at = ?
-            WHERE LOWER(username) = 'admin'
-        """, (now_str,))
+        cursor.execute("SELECT password_hash FROM app_users WHERE LOWER(username) = 'admin'")
+        admin_row = cursor.fetchone()
+        if admin_row and not (admin_row["password_hash"] or "").startswith("pbkdf2:sha256:"):
+            from database.crud_users import hash_password
+            cursor.execute("UPDATE app_users SET password_hash = ?, plain_password = NULL, updated_at = ? WHERE LOWER(username) = 'admin'", (hash_password("callmemrpenguin"), now_str))
         conn.commit()
     except Exception as e:
         print("[Migration app_users notice]:", e)
@@ -114,10 +112,11 @@ def seed_default_admin(cursor: sqlite3.Cursor):
         cursor.execute("SELECT COUNT(*) as count FROM app_users")
         user_count = cursor.fetchone()["count"]
         if user_count == 0:
-            default_pwd_hash = "pbkdf2:sha256:100000$4d8c101c92e4ac3b256c42a8af94829b$3dcf0c44740190c22f5e1880d8b9eb370d750fa9bc586d5f0ae95c241a1d2d7a"
+            from database.crud_users import hash_password
+            default_pwd_hash = hash_password("callmemrpenguin")
             cursor.execute("""
                 INSERT INTO app_users (display_name, username, password_hash, role, status, plain_password)
-                VALUES ('Quản Trị Viên', 'admin', ?, 'Quản trị viên', 'Hoạt động', 'callmemrpenguin')
+                VALUES ('Quản Trị Viên', 'admin', ?, 'Quản trị viên', 'Hoạt động', NULL)
             """, (default_pwd_hash,))
     except Exception as e:
         print("Default user seed error:", e)

@@ -37,9 +37,9 @@ export const PALETTE_20 = SCHEDULE_PALETTE_24;
 export function hexToHSL(hex: string) {
   if (!hex || typeof hex !== 'string') hex = '#2563eb';
   hex = hex.replace(/^#/, '');
-  let r = parseInt(hex.substring(0, 2), 16) / 255;
-  let g = parseInt(hex.substring(2, 4), 16) / 255;
-  let b = parseInt(hex.substring(4, 6), 16) / 255;
+  const r = parseInt(hex.substring(0, 2), 16) / 255;
+  const g = parseInt(hex.substring(2, 4), 16) / 255;
+  const b = parseInt(hex.substring(4, 6), 16) / 255;
   const max = Math.max(r, g, b), min = Math.min(r, g, b);
   let h = 0, s = 0;
   const l = (max + min) / 2;

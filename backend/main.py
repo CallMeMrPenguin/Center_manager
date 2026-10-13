@@ -41,10 +41,28 @@ from middlewares.security_middleware import SecurityGuardMiddleware
 # High-performance GZip compression for responses > 1KB (shrinks WAN payload by ~80%)
 app.add_middleware(GZipMiddleware, minimum_size=1024)
 
-# Configure CORS (Supports mobile, LAN, and remote web domains seamlessly)
+# Configure CORS: Restrict to explicit local origins, LAN, and configured domains (Security Hardening)
+cors_allowed_origins = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "http://localhost:8000",
+    "http://127.0.0.1:8000",
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "tauri://localhost",
+    "capacitor://localhost",
+]
+env_origins = os.environ.get("ALLOWED_ORIGINS", "")
+if env_origins:
+    cors_allowed_origins.extend([o.strip() for o in env_origins.split(",") if o.strip()])
+
+# Allow private LAN subnets safely without exposing to arbitrary public web domains
+LAN_ORIGIN_REGEX = r"^https?:\/\/(localhost|127\.0\.0\.1|192\.168\.\d{1,3}\.\d{1,3}|10\.\d{1,3}\.\d{1,3}\.\d{1,3}|172\.(1[6-9]|2\d|3[0-1])\.\d{1,3}\.\d{1,3})(:\d+)?$"
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origin_regex=".*",
+    allow_origins=cors_allowed_origins,
+    allow_origin_regex=LAN_ORIGIN_REGEX,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

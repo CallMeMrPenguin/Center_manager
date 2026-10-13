@@ -12,7 +12,7 @@ export const FpsOverlay: React.FC = () => {
 
   const [fps, setFps] = useState<number>(60);
   const frameCountRef = useRef(0);
-  const lastTimeRef = useRef(performance.now());
+  const lastTimeRef = useRef<number>(0);
   const rafIdRef = useRef<number | null>(null);
 
   useEffect(() => {
