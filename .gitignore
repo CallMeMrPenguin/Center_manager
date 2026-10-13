@@ -17,6 +17,7 @@ frontend/dist/
 dist/
 /public/
 build/
+/api/
 installer/build/
 installer/*.exe
 

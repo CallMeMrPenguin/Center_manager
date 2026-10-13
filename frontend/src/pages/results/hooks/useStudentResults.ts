@@ -234,7 +234,7 @@ export function useStudentResults() {
     const overall_avg = allScores.length > 0 ? allScores.reduce((a, b) => a + b, 0) / allScores.length : null;
 
     const tier = computeTier(overall_avg);
-    const performance_index = overall_avg !== null ? (overall_avg * 10).toFixed(1) : '0.0';
+    const performance_index = overall_avg !== null ? trunc1Dec(overall_avg * 10) : '0.0';
 
     return {
       student_id: currentStudent.id,

@@ -167,7 +167,7 @@ export const ExerciseConfigTab: React.FC<ExerciseConfigTabProps> = ({
         tableId="exercise-config-table"
         data={exerciseRows}
         columns={columns}
-        pageSize={10}
+        pageSize={20}
         searchPlaceholder="Tìm mã dạng, tên dạng bài..."
         exportFilename="cau_hinh_dang_bai"
       />

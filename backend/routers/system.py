@@ -89,14 +89,15 @@ def get_file_path(files_dir: str, filename: str) -> str:
     if filename.lower().endswith(".json") or filename.startswith("json/"):
         json_dir = os.path.join(files_dir, "json")
         os.makedirs(json_dir, exist_ok=True)
-        clean_name = filename[5:] if filename.startswith("json/") else filename
+        clean_name = os.path.basename(filename[5:] if filename.startswith("json/") else filename)
         return os.path.join(json_dir, clean_name)
 
-    direct_path = os.path.join(files_dir, filename)
+    clean_filename = os.path.basename(filename)
+    direct_path = os.path.abspath(os.path.join(files_dir, clean_filename))
     if os.path.exists(direct_path):
         return direct_path
 
-    fname = os.path.basename(filename)
+    fname = clean_filename
     for root, _, files in os.walk(files_dir):
         if fname in files:
             return os.path.join(root, fname)

@@ -99,7 +99,7 @@ export const QuestionCsvPreviewModal: React.FC<QuestionCsvPreviewModalProps> = (
           <DataTable
             data={items}
             columns={columns}
-            pageSize={10}
+            pageSize={20}
             exportFilename="xem_truoc_cau_hoi"
           />
         </div>

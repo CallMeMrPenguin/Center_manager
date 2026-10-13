@@ -132,7 +132,10 @@ if APP_MODE != "web":
         if full_path.startswith("api/"):
             raise HTTPException(status_code=404, detail="API route not found")
         
-        target_file = os.path.join(frontend_dist, full_path)
+        target_file = os.path.abspath(os.path.join(frontend_dist, full_path))
+        norm_dist = os.path.abspath(frontend_dist)
+        if not target_file.startswith(norm_dist):
+            raise HTTPException(status_code=403, detail="Access denied")
         if full_path and os.path.exists(target_file) and os.path.isfile(target_file):
             return FileResponse(target_file)
             

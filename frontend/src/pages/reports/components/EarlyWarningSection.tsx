@@ -276,7 +276,7 @@ export const EarlyWarningSection: React.FC<EarlyWarningSectionProps> = ({
             loading={loading}
             searchPlaceholder="Tìm học sinh nguy cơ..."
             emptyMessage="Không có học sinh nào nằm trong danh sách nguy cơ!"
-            pageSize={10}
+            pageSize={20}
             borderless={true}
             onRowClick={(r: any) => onSelectRankingStudent(r.student_id)}
           />

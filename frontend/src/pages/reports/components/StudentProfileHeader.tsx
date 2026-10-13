@@ -1,6 +1,7 @@
 import React from 'react';
 import { X } from 'lucide-react';
 import { getStudentTier, StudentTier } from '../types';
+import { format1Dec } from '../../../utils';
 
 interface StudentProfileHeaderProps {
   student: any;
@@ -72,7 +73,7 @@ export const StudentProfileHeader: React.FC<StudentProfileHeaderProps> = ({
   const rawPi = student?.performance_index != null
     ? Number(student.performance_index)
     : (scoreNum > 0 ? scoreNum * 10 : 0);
-  const piScore = rawPi > 0 ? rawPi.toFixed(1) : (scoreNum > 0 ? (scoreNum * 10).toFixed(1) : '0.0');
+  const piScore = rawPi > 0 ? format1Dec(rawPi) : (scoreNum > 0 ? format1Dec(scoreNum * 10) : '0.0');
 
   // Dynamic Evaluation based on Tier & Score
   const getEvaluation = (score: number, currentTier: StudentTier) => {

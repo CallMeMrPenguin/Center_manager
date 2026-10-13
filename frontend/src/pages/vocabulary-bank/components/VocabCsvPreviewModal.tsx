@@ -90,7 +90,7 @@ export const VocabCsvPreviewModal: React.FC<VocabCsvPreviewModalProps> = ({
           <DataTable
             data={items}
             columns={columns}
-            pageSize={10}
+            pageSize={20}
             exportFilename="xem_truoc_tu_vung"
           />
         </div>

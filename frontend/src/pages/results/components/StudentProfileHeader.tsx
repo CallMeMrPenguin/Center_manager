@@ -89,7 +89,7 @@ export const StudentProfileHeader: React.FC<StudentProfileHeaderProps> = ({
     : scoreNum > 0
     ? scoreNum * 10
     : 0;
-  const piScore = rawPi > 0 ? rawPi.toFixed(1) : (scoreNum > 0 ? (scoreNum * 10).toFixed(1) : '0.0');
+  const piScore = rawPi > 0 ? format1Dec(rawPi) : (scoreNum > 0 ? format1Dec(scoreNum * 10) : '0.0');
 
   const getEvaluation = (score: number, currentTier: StudentTier) => {
     if (score <= 0) return { text: 'Chưa Đánh Giá', color: 'text-slate-600 dark:text-slate-400 font-extrabold' };

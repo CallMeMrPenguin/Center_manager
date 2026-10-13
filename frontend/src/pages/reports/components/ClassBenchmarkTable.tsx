@@ -186,7 +186,7 @@ export const ClassBenchmarkTable: React.FC<ClassBenchmarkTableProps> = ({
         loading={loading}
         searchPlaceholder="Tìm kiếm lớp học..."
         emptyMessage="Chưa có dữ liệu lớp học để so sánh."
-        pageSize={10}
+        pageSize={20}
       />
     </div>
   );

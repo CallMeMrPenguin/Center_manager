@@ -84,12 +84,16 @@ def get_file_path(filename: str) -> Optional[str]:
     files_dir = get_setting('files_dir')
     if not files_dir or not os.path.exists(files_dir):
         files_dir = os.path.join(BASE_DIR, 'workspace_files')
-    p = os.path.join(files_dir, filename)
+    safe_base = os.path.abspath(files_dir)
+    p = os.path.abspath(os.path.join(files_dir, filename))
+    if not p.startswith(safe_base):
+        return None
     if os.path.exists(p):
         return p
+    fname = os.path.basename(filename)
     for root, _, files in os.walk(files_dir):
-        if filename in files:
-            return os.path.join(root, filename)
+        if fname in files:
+            return os.path.join(root, fname)
     return None
 
 @router.post("/api/test/compile")

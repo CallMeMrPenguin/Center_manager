@@ -3,6 +3,7 @@ import { ColumnDef } from '@tanstack/react-table';
 import { Edit3, Plus } from 'lucide-react';
 import { DataTable } from '../../../components/DataTable';
 import { Assignment } from '../types';
+import { format1Dec } from '../../../utils';
 
 interface AssignmentListTabProps {
   assignments: Assignment[];
@@ -135,7 +136,7 @@ export const AssignmentListTab: React.FC<AssignmentListTabProps> = ({
         header: 'Trung bình',
         cell: (info) => {
           const val = info.getValue<number | null>();
-          return <span className="font-mono font-black text-base text-indigo-700 dark:text-indigo-400">{val !== null && val !== undefined ? val.toFixed(1) : '-'}</span>;
+          return <span className="font-mono font-black text-base text-indigo-700 dark:text-indigo-400">{val !== null && val !== undefined ? format1Dec(val) : '-'}</span>;
         },
       },
       {
