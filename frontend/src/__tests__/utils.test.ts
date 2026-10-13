@@ -29,3 +29,23 @@ describe('Frontend Utils: cleanOptionPrefix', () => {
     expect(cleanOptionPrefix('Normal text')).toBe('Normal text');
   });
 });
+
+describe('Frontend Utils: authUtils Token Storage', () => {
+  it('saves, retrieves, and clears auth tokens reliably', () => {
+    const store: Record<string, string> = {};
+    const mockStorage = {
+      getItem: (k: string) => store[k] || null,
+      setItem: (k: string, v: string) => { store[k] = v; },
+      removeItem: (k: string) => { delete store[k]; },
+      clear: () => { for (const k of Object.keys(store)) delete store[k]; }
+    };
+    (globalThis as any).localStorage = mockStorage;
+    (globalThis as any).sessionStorage = mockStorage;
+
+    saveAuthToken('test-token-jwt-2026');
+    expect(getAuthToken()).toBe('test-token-jwt-2026');
+    clearAuthToken();
+    expect(getAuthToken()).toBe(null);
+  });
+});
+

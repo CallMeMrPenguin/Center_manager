@@ -1,6 +1,7 @@
 from typing import List, Dict, Any, Optional
 from datetime import datetime
 from database.connection import get_connection
+from database.utils import trunc_1_dec
 
 def get_assignments(class_id: Optional[int] = None, month: str = "") -> List[Dict[str, Any]]:
     """
@@ -49,8 +50,8 @@ def get_assignments(class_id: Optional[int] = None, month: str = "") -> List[Dic
             d = dict(r)
             total = d.get("total_enrolled", 0)
             submitted = d.get("submitted_count", 0)
-            d["submission_rate"] = round((submitted / total * 100), 1) if total > 0 else 0
-            d["avg_score"] = round(d["avg_score"], 1) if d.get("avg_score") is not None else None
+            d["submission_rate"] = trunc_1_dec(submitted / total * 100) if total > 0 else 0.0
+            d["avg_score"] = trunc_1_dec(d["avg_score"]) if d.get("avg_score") is not None else None
             result.append(d)
         return result
     finally:
@@ -276,7 +277,7 @@ def save_student_progress(assignment_id: int, student_id: int, answers_json: str
                 new_max = max(prev_max, score) if prev_max is not None else score
                 new_min = min(prev_min, score) if prev_min is not None else score
                 if prev_avg is not None:
-                    new_avg = round(((prev_avg * prev_attempts) + score) / new_attempts, 1)
+                    new_avg = trunc_1_dec(((prev_avg * prev_attempts) + score) / new_attempts)
                 else:
                     new_avg = score
             else:

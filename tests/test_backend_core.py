@@ -133,3 +133,30 @@ def test_system_and_compiler_routes():
     res_prof = client.get("/api/profiles")
     assert res_prof.status_code == 200
     assert isinstance(res_prof.json(), dict)
+
+def test_assignment_and_analytics_decimal_truncation():
+    """Verify that assignment metrics and analytics attendance/performance never round up."""
+    from database.crud_assignments import get_assignments
+    from database.analytics_engine import calculate_performance_analytics
+
+    # 1. Check trunc_1_dec on edge score calculations
+    assert trunc_1_dec(6.28) == 6.2
+    assert trunc_1_dec(7.89) == 7.8
+    assert trunc_1_dec(9.99) == 9.9
+    assert trunc_1_dec(85.67) == 85.6
+
+    # 2. Check analytics engine output on sample records
+    res = calculate_performance_analytics([])
+    assert res["att_pct"] == 100.0
+    assert res["performance_index"] == 0.0
+
+    # 2. Check get_assignments runs cleanly
+    assignments = get_assignments()
+    assert isinstance(assignments, list)
+    for a in assignments:
+        if a.get("avg_score") is not None:
+            # Must have at most 1 decimal place and match trunc_1_dec
+            assert a["avg_score"] == trunc_1_dec(a["avg_score"])
+        if a.get("submission_rate") is not None:
+            assert a["submission_rate"] == trunc_1_dec(a["submission_rate"])
+

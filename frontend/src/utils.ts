@@ -42,7 +42,7 @@ export function trunc1Dec(val: number): number {
 export function cleanOptionPrefix(opt: string): string {
   if (typeof opt !== 'string') return String(opt || '');
   const trimmed = opt.trim();
-  const cleaned = trimmed.replace(/^[A-Da-d0-9][.\):\-]\s*/, '').trim();
+  const cleaned = trimmed.replace(/^[A-Da-d0-9][.):-]\s*/, '').trim();
   return cleaned || trimmed;
 }
 

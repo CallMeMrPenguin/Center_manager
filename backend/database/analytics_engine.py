@@ -399,9 +399,9 @@ def calculate_performance_analytics(session_records: List[Dict[str, Any]]) -> Di
         "fitted_c1": fitted_c1,
         "fitted_c2": fitted_c2,
         "fitted_hw": fitted_hw,
-        "att_pct": round(att_pct, 1),
-        "attendance_pct": round(att_pct, 1),
-        "performance_index": round(performance_index, 1),
+        "att_pct": trunc_1_dec(att_pct),
+        "attendance_pct": trunc_1_dec(att_pct),
+        "performance_index": trunc_1_dec(performance_index),
         "rating_label": rating_label,
         "recommendations": recs
     }
