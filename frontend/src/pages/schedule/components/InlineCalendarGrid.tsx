@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { MONTH_NAMES } from '../../../components/datepicker/datePickerUtils';
 
@@ -54,6 +55,8 @@ export const InlineCalendarGrid: React.FC<InlineCalendarGridProps> = ({
     isToday: boolean;
     isSelected: boolean;
   }> = [];
+
+  const [hoveredDate, setHoveredDate] = useState<string | null>(null);
 
   // Previous month overflow
   for (let i = startOffset - 1; i >= 0; i--) {
@@ -178,7 +181,10 @@ export const InlineCalendarGrid: React.FC<InlineCalendarGridProps> = ({
       </div>
 
       {/* MONTH DAYS GRID */}
-      <div className="grid grid-cols-7 gap-y-1.5 gap-x-1 text-center">
+      <div
+        className="grid grid-cols-7 gap-y-1.5 gap-x-1 text-center"
+        onMouseLeave={() => setHoveredDate(null)}
+      >
         {cells.map((c, idx) => {
           if (!c.isCurrentMonth) {
             return (
@@ -191,26 +197,42 @@ export const InlineCalendarGrid: React.FC<InlineCalendarGridProps> = ({
             );
           }
 
-          const isWeekend = c.dayOfWeek === 0 || c.dayOfWeek === 6;
+          const isHovered = hoveredDate === c.dateStr;
 
           return (
             <button
               key={c.dateStr}
               type="button"
               onClick={() => onToggleDate(c.dateStr, c.dayOfWeek)}
+              onMouseEnter={() => setHoveredDate(c.dateStr)}
               className={`w-8 h-8 mx-auto rounded-full flex flex-col items-center justify-center text-xs font-bold transition-all duration-150 cursor-pointer relative border-0 ${
                 c.isSelected
-                  ? 'bg-blue-600 text-white font-black shadow-xs scale-100'
+                  ? 'text-white font-black'
                   : c.isToday
-                  ? 'ring-1.5 ring-blue-500 text-blue-600 dark:text-blue-400 font-extrabold hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:scale-105 active:scale-95'
-                  : isWeekend
-                  ? 'text-rose-500 dark:text-rose-400 font-bold hover:bg-rose-50 dark:hover:bg-rose-950/30 hover:scale-105 active:scale-95'
-                  : 'text-slate-800 dark:text-slate-100 hover:bg-slate-200/80 dark:hover:bg-white/15 hover:scale-105 active:scale-95'
+                  ? 'ring-1.5 ring-blue-500 text-blue-600 dark:text-blue-400 font-extrabold'
+                  : 'text-slate-800 dark:text-slate-100 font-bold'
               }`}
             >
-              <span>{c.dayNumber}</span>
+              {/* Sliding hover pill (matching range datepicker standard) */}
+              {isHovered && !c.isSelected && (
+                <motion.div
+                  layoutId="inline-cal-hover"
+                  className="absolute inset-0 rounded-full bg-slate-200/90 dark:bg-white/15 border border-slate-300/50 dark:border-white/20 shadow-xs pointer-events-none z-10"
+                  transition={{ type: 'spring', stiffness: 500, damping: 35 }}
+                />
+              )}
+
+              {/* Selected pill */}
+              {c.isSelected && (
+                <div className="absolute inset-0 rounded-full bg-blue-600 shadow-xs z-10" />
+              )}
+
+              {/* Date Number */}
+              <span className="relative z-20">{c.dayNumber}</span>
+
+              {/* Today dot indicator */}
               {c.isToday && !c.isSelected && (
-                <span className="w-1 h-1 rounded-full bg-blue-500 absolute bottom-0.5" />
+                <span className="w-1 h-1 rounded-full bg-blue-500 absolute bottom-0.5 z-20" />
               )}
             </button>
           );

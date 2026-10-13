@@ -6,6 +6,7 @@ import { CustomSelect } from '../../../../components/CustomSelect';
 import { api } from '../../../../api';
 import { showToast } from '../../../../components/Toast';
 import { Button } from '../../../../components/button';
+import { CustomTimePicker } from '../../../../components/timepicker';
 
 interface ClassFormModalProps {
   isOpen: boolean;
@@ -221,14 +222,11 @@ export const ClassFormModal: React.FC<ClassFormModalProps> = ({
                       ✓
                     </button>
                     <span className={`text-xs font-bold w-16 shrink-0 ${cfg.checked ? 'text-slate-900 dark:text-white' : 'text-slate-500 dark:text-slate-400'}`}>{day}</span>
-                    <input
-                      type="time"
+                    <CustomTimePicker
                       value={cfg.time}
                       disabled={!cfg.checked}
-                      onChange={(e) => setClassDayConfigs((p) => ({ ...p, [day]: { ...p[day], time: e.target.value } }))}
-                      className={`flex-1 bg-white dark:bg-[#0d1018] border border-slate-300 dark:border-white/10 rounded-lg px-2 py-1 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 ${
-                        !cfg.checked ? 'opacity-30' : ''
-                      }`}
+                      onChange={(newTime: string) => setClassDayConfigs((p) => ({ ...p, [day]: { ...p[day], time: newTime } }))}
+                      className={!cfg.checked ? 'opacity-30 pointer-events-none' : ''}
                     />
                     <input
                       type="number"

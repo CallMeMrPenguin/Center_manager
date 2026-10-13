@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
 import { DataTable } from '../../../components/DataTable';
+import { SegmentedControl } from '../../../components/tabs/SegmentedControl';
 import { AlertTriangle } from 'lucide-react';
 import { format1Dec } from '../../../utils';
 import {
@@ -270,41 +271,16 @@ export const StudentWeaknessDiagnosisCard: React.FC<StudentWeaknessDiagnosisCard
         </div>
 
         {/* Filter Pills */}
-        <div className="flex items-center gap-1 bg-slate-100 dark:bg-[#121626] p-0.5 rounded-lg text-xs font-bold">
-          <button
-            type="button"
-            onClick={() => setSkillFilter('all')}
-            className={`px-3 py-1 rounded-md transition-colors cursor-pointer ${
-              skillFilter === 'all'
-                ? 'bg-blue-600 text-white font-black shadow-sm'
-                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-            }`}
-          >
-            Tất Cả ({stats.totalStudents})
-          </button>
-          <button
-            type="button"
-            onClick={() => setSkillFilter('grammar')}
-            className={`px-3 py-1 rounded-md transition-colors cursor-pointer ${
-              skillFilter === 'grammar'
-                ? 'bg-blue-600 text-white font-black shadow-sm'
-                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-            }`}
-          >
-            Hổng Ngữ Pháp ({stats.grammarStudents})
-          </button>
-          <button
-            type="button"
-            onClick={() => setSkillFilter('vocab')}
-            className={`px-3 py-1 rounded-md transition-colors cursor-pointer ${
-              skillFilter === 'vocab'
-                ? 'bg-blue-600 text-white font-black shadow-sm'
-                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-            }`}
-          >
-            Hổng Từ Vựng ({stats.vocabStudents})
-          </button>
-        </div>
+        <SegmentedControl<'all' | 'grammar' | 'vocab'>
+          value={skillFilter}
+          onChange={(val) => setSkillFilter(val)}
+          options={[
+            { value: 'all', label: `Tất Cả (${stats.totalStudents})` },
+            { value: 'grammar', label: `Hổng Ngữ Pháp (${stats.grammarStudents})` },
+            { value: 'vocab', label: `Hổng Từ Vựng (${stats.vocabStudents})` },
+          ]}
+          size="sm"
+        />
       </div>
 
       {/* 2. Overview Strip */}

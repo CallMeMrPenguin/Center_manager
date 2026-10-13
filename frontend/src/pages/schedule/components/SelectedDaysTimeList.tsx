@@ -1,6 +1,7 @@
 import React from 'react';
-import { Clock, Trash2, Copy } from 'lucide-react';
+import { Trash2, Copy } from 'lucide-react';
 import { SessionScheduleItem } from '../types';
+import { CustomTimePicker } from '../../../components/timepicker';
 
 interface SelectedDaysTimeListProps {
   items: SessionScheduleItem[];
@@ -39,7 +40,7 @@ export const SelectedDaysTimeList: React.FC<SelectedDaysTimeListProps> = ({
         </div>
       )}
 
-      <div className="max-h-52 overflow-y-auto space-y-2 pr-0.5">
+      <div className="space-y-2">
         {items.map((item) => (
           <div
             key={item.id}
@@ -52,14 +53,11 @@ export const SelectedDaysTimeList: React.FC<SelectedDaysTimeListProps> = ({
             </div>
 
             <div className="flex items-center gap-2 shrink-0">
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-1.5">
                 <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400">Giờ:</span>
-                <input
-                  type="time"
-                  required
+                <CustomTimePicker
                   value={item.start_time}
-                  onChange={(e) => onChangeTime(item.id, e.target.value, item.duration)}
-                  className="bg-white dark:bg-[#181d2e] border-0 rounded-lg px-2 py-1 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-blue-500 shadow-2xs font-bold"
+                  onChange={(newTime: string) => onChangeTime(item.id, newTime, item.duration)}
                 />
               </div>
 

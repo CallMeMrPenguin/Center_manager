@@ -242,7 +242,7 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
                     <span
                       key={name}
                       className={`text-[10px] font-black uppercase py-1 ${
-                        idx === 0 ? 'text-rose-600' : 'text-slate-600'
+                        idx === 0 || idx === 6 ? 'text-rose-600' : 'text-slate-600'
                       }`}
                     >
                       {name}
