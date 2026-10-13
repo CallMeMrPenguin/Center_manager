@@ -148,16 +148,20 @@ export function useScheduleActions({
 
         const recurringNotes = `#RECURRING #COLOR:${color} ${(form.notes || '').replace(/#RECURRING/g, '').replace(/#COLOR:#[0-9a-fA-F]{6}/g, '').trim()}`.trim();
 
-        for (const item of recurringItems) {
-          try {
-            await api.addClassWeeklySlot(form.class_id, {
-              day_of_week: item.dayName,
-              start_time: item.start_time || '18:00',
-              duration: item.duration || 90,
-              notes: '',
-            });
-          } catch {}
+        const slotsPayload = recurringItems.map((item) => ({
+          day_of_week: item.dayName,
+          start_time: item.start_time || '18:00',
+          duration: item.duration || 90,
+          notes: '',
+        }));
 
+        try {
+          await api.replaceClassWeeklySlots(form.class_id, slotsPayload);
+        } catch (err: any) {
+          console.error('replaceClassWeeklySlots error:', err);
+        }
+
+        for (const item of recurringItems) {
           const targetDayNum = item.dayOfWeek ?? (item.date ? new Date(item.date).getDay() : DAY_NUM[item.dayName]);
           if (targetDayNum === undefined) continue;
 

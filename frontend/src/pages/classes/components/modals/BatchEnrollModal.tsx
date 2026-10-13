@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Users, X, Search, CheckSquare, Square, Trash2 } from 'lucide-react';
+import { X, Search, CheckSquare, Square, Trash2 } from 'lucide-react';
 import { ClassItem, EnrolledStudent } from '../../types';
 import { api } from '../../../../api';
 import { showToast } from '../../../../components/Toast';
@@ -39,9 +39,7 @@ export const BatchEnrollModal: React.FC<BatchEnrollModalProps> = ({
   const enrolledStudentIds = new Set(enrolledStudents.map((s) => s.id));
   const availableStudentsForEnrollment = allStudents.filter((s) => {
     if (enrolledStudentIds.has(s.id)) return false;
-    if (filterByClassGrade && selectedClass?.grade) {
-      if (s.grade !== selectedClass.grade) return false;
-    }
+    if (selectedClass?.grade && s.grade !== selectedClass.grade) return false;
     if (enrollSearch.trim()) {
       const q = enrollSearch.toLowerCase().trim();
       const matchName = s.full_name?.toLowerCase().includes(q);
@@ -127,16 +125,14 @@ export const BatchEnrollModal: React.FC<BatchEnrollModalProps> = ({
       <div className="bg-white dark:bg-[#0f1320] border-0 rounded-2xl w-full max-w-xl overflow-hidden shadow-[0_24px_80px_rgba(0,0,0,0.15)] dark:shadow-[0_24px_80px_rgba(0,0,0,0.8)] flex flex-col max-h-[85vh]">
         {/* MODAL HEADER */}
         <div className="flex items-center justify-between p-5 border-b border-slate-100 dark:border-white/10 bg-slate-50 dark:bg-[#14192b]">
-          <h3 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
-            <Users className="h-5 w-5 text-indigo-500 dark:text-indigo-400" />
-            <span>Quản Lý Học Sinh Lớp: {selectedClass.class_name}</span>
+          <h3 className="text-base font-black text-slate-900 dark:text-white">
+            Quản Lý Học Sinh Lớp: {selectedClass.class_name}
           </h3>
-          <button onClick={onClose} className="p-1.5 rounded-xl hover:bg-slate-200 dark:hover:bg-white/10 text-slate-400 hover:text-slate-900 dark:hover:text-white cursor-pointer">
+          <button onClick={onClose} className="p-1.5 rounded-xl hover:bg-slate-200 dark:hover:bg-white/10 text-slate-400 hover:text-slate-900 dark:hover:text-white cursor-pointer border-0">
             <X size={16} />
           </button>
         </div>
 
-        {/* SLIDING SEGMENTED CONTROL TAB PILL */}
         {/* SLIDING SEGMENTED CONTROL TAB PILL */}
         <div className="px-5 pt-4">
           <SegmentedControl
@@ -154,29 +150,16 @@ export const BatchEnrollModal: React.FC<BatchEnrollModalProps> = ({
         {/* TAB 1: ADD NEW STUDENTS */}
         {activeTab === 'available' && (
           <form onSubmit={handleBatchEnrollStudents} className="p-5 flex flex-col space-y-4 overflow-hidden flex-1">
-            {/* TOP CONTROLS: SEARCH & GRADE FILTER TOGGLE */}
-            <div className="flex items-center gap-2">
-              <div className="relative flex-1">
-                <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
-                <input
-                  type="text"
-                  value={enrollSearch}
-                  onChange={(e) => setEnrollSearch(e.target.value)}
-                  placeholder="Tìm theo tên học sinh, trường học..."
-                  className="w-full bg-slate-50 dark:bg-[#141928] border-0 text-slate-900 dark:text-white text-xs rounded-xl pl-9 pr-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 font-semibold shadow-[0_1px_3px_rgba(15,23,42,0.12),0_1px_2px_rgba(15,23,42,0.08)]"
-                />
-              </div>
-              <button
-                type="button"
-                onClick={() => setFilterByClassGrade(!filterByClassGrade)}
-                className={`px-3.5 py-2.5 rounded-xl text-xs font-bold transition border-0 cursor-pointer shadow-[0_1px_3px_rgba(15,23,42,0.12),0_1px_2px_rgba(15,23,42,0.08)] hover:shadow-[0_3px_8px_rgba(15,23,42,0.18)] shrink-0 ${
-                  filterByClassGrade
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-slate-100 dark:bg-[#181f36] text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-                }`}
-              >
-                {filterByClassGrade ? selectedClass.grade : 'Tất cả khối'}
-              </button>
+            {/* TOP CONTROLS: SEARCH */}
+            <div className="relative">
+              <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+              <input
+                type="text"
+                value={enrollSearch}
+                onChange={(e) => setEnrollSearch(e.target.value)}
+                placeholder="Tìm theo tên học sinh, trường học..."
+                className="w-full bg-slate-50 dark:bg-[#141928] border-0 text-slate-900 dark:text-white text-xs rounded-xl pl-9 pr-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 font-semibold shadow-[0_1px_3px_rgba(15,23,42,0.12),0_1px_2px_rgba(15,23,42,0.08)]"
+              />
             </div>
 
             {/* SELECTION BAR & COUNTER */}
@@ -184,7 +167,7 @@ export const BatchEnrollModal: React.FC<BatchEnrollModalProps> = ({
               <button
                 type="button"
                 onClick={toggleSelectAllCandidate}
-                className="flex items-center gap-1.5 text-xs font-bold text-blue-600 dark:text-blue-400 hover:text-blue-500 transition cursor-pointer"
+                className="flex items-center gap-1.5 text-xs font-bold text-blue-600 dark:text-blue-400 hover:text-blue-500 transition cursor-pointer border-0"
               >
                 {isAllSelected ? <CheckSquare size={16} /> : <Square size={16} />}
                 <span>{isAllSelected ? 'Bỏ chọn tất cả' : 'Chọn tất cả danh sách'}</span>
@@ -196,53 +179,60 @@ export const BatchEnrollModal: React.FC<BatchEnrollModalProps> = ({
               </span>
             </div>
 
-            {/* STUDENT CHECKBOX LIST */}
-            <div className="flex-1 overflow-y-auto space-y-1.5 pr-1 min-h-[200px] max-h-[320px]">
+            {/* STUDENT TABLE LIST */}
+            <div className="flex-1 overflow-y-auto border-0 rounded-xl bg-slate-50 dark:bg-[#141928] shadow-xs min-h-[220px] max-h-[340px]">
+              <div className="sticky top-0 bg-slate-100 dark:bg-[#181f36] px-3 py-2 flex items-center text-[11px] font-bold text-slate-600 dark:text-slate-400 border-b border-slate-200 dark:border-white/10 z-10">
+                <div className="w-8 shrink-0">
+                  <input
+                    type="checkbox"
+                    checked={isAllSelected}
+                    onChange={toggleSelectAllCandidate}
+                    className="rounded accent-blue-600 cursor-pointer"
+                  />
+                </div>
+                <div className="flex-1">Họ và tên</div>
+                <div className="w-16 text-center">Khối</div>
+                <div className="w-16 text-center">Giới tính</div>
+                <div className="w-28 text-right">Trường</div>
+              </div>
+
               {availableStudentsForEnrollment.length === 0 ? (
-                <div className="py-12 text-center text-xs text-slate-500 dark:text-slate-400 font-bold bg-slate-50 dark:bg-[#141928] rounded-xl border-0 shadow-xs">
+                <div className="py-12 text-center text-xs text-slate-500 dark:text-slate-400 font-bold">
                   Không tìm thấy học sinh phù hợp chưa ghi danh.
                 </div>
               ) : (
-                availableStudentsForEnrollment.map((s) => {
-                  const isChecked = selectedStudentIdsToEnroll.includes(s.id);
-                  return (
-                    <div
-                      key={s.id}
-                      onClick={() => toggleSelectStudentToEnroll(s.id)}
-                      className={`p-3 rounded-xl border-0 flex items-center justify-between text-xs cursor-pointer transition ${
-                        isChecked
-                          ? 'bg-blue-50/90 dark:bg-blue-950/40 shadow-xs ring-1 ring-blue-500/30'
-                          : 'bg-slate-50/80 dark:bg-[#141928] shadow-xs hover:shadow-sm hover:bg-slate-100 dark:hover:bg-[#1a2136]'
-                      }`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <div
-                          className={`w-5 h-5 rounded-md border-0 flex items-center justify-center transition shrink-0 ${
-                            isChecked ? 'bg-blue-600 text-white shadow-xs' : 'bg-white dark:bg-[#0d1018] shadow-2xs'
-                          }`}
-                        >
-                          {isChecked && <span className="text-xs font-black">✓</span>}
+                <div className="divide-y divide-slate-100 dark:divide-white/5">
+                  {availableStudentsForEnrollment.map((s) => {
+                    const isChecked = selectedStudentIdsToEnroll.includes(s.id);
+                    return (
+                      <div
+                        key={s.id}
+                        onClick={() => toggleSelectStudentToEnroll(s.id)}
+                        className={`px-3 py-2 flex items-center text-xs cursor-pointer transition ${
+                          isChecked
+                            ? 'bg-blue-50 dark:bg-blue-950/40 text-blue-900 dark:text-blue-200 font-semibold'
+                            : 'hover:bg-slate-100/70 dark:hover:bg-white/5 text-slate-800 dark:text-slate-200'
+                        }`}
+                      >
+                        <div className="w-8 shrink-0" onClick={(e) => e.stopPropagation()}>
+                          <input
+                            type="checkbox"
+                            checked={isChecked}
+                            onChange={() => toggleSelectStudentToEnroll(s.id)}
+                            className="rounded accent-blue-600 cursor-pointer"
+                          />
                         </div>
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <span className="font-extrabold text-sm text-slate-900 dark:text-white">{s.full_name}</span>
-                            {s.nickname && <span className="text-xs text-blue-600 dark:text-blue-400 font-bold">({s.nickname})</span>}
-                            {s.status && s.status !== 'Đang học' && (
-                              <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-700 dark:text-amber-300">
-                                {s.status}
-                              </span>
-                            )}
-                          </div>
-                          <div className="flex items-center gap-1.5 mt-1 text-[11px] font-medium">
-                            <span className="bg-slate-200/70 dark:bg-white/5 px-2 py-0.5 rounded text-slate-700 dark:text-slate-300">{s.grade || 'Lớp 6'}</span>
-                            {s.school && <span className="bg-slate-200/70 dark:bg-white/5 px-2 py-0.5 rounded text-slate-600 dark:text-slate-400">{s.school}</span>}
-                            {s.gender && <span className="bg-slate-200/70 dark:bg-white/5 px-2 py-0.5 rounded text-slate-600 dark:text-slate-400">{s.gender}</span>}
-                          </div>
+                        <div className="flex-1 font-bold truncate">
+                          {s.full_name}
+                          {s.nickname && <span className="text-blue-500 font-normal ml-1">({s.nickname})</span>}
                         </div>
+                        <div className="w-16 text-center text-[11px] text-slate-500 dark:text-slate-400">{s.grade || selectedClass.grade}</div>
+                        <div className="w-16 text-center text-[11px] text-slate-500 dark:text-slate-400">{s.gender || '—'}</div>
+                        <div className="w-28 text-right text-[11px] text-slate-400 truncate">{s.school || '—'}</div>
                       </div>
-                    </div>
-                  );
-                })
+                    );
+                  })}
+                </div>
               )}
             </div>
 
@@ -294,51 +284,53 @@ export const BatchEnrollModal: React.FC<BatchEnrollModalProps> = ({
               </span>
             </div>
 
-            {/* ENROLLED STUDENT LIST */}
-            <div className="flex-1 overflow-y-auto space-y-1.5 pr-1 min-h-[200px] max-h-[320px]">
+            {/* ENROLLED TABLE LIST */}
+            <div className="flex-1 overflow-y-auto border-0 rounded-xl bg-slate-50 dark:bg-[#141928] shadow-xs min-h-[220px] max-h-[340px]">
+              <div className="sticky top-0 bg-slate-100 dark:bg-[#181f36] px-3 py-2 flex items-center text-[11px] font-bold text-slate-600 dark:text-slate-400 border-b border-slate-200 dark:border-white/10 z-10">
+                <div className="w-8 shrink-0 text-center">#</div>
+                <div className="flex-1">Họ và tên</div>
+                <div className="w-16 text-center">Khối</div>
+                <div className="w-28 text-right">Trường</div>
+                <div className="w-16 text-right">Thao tác</div>
+              </div>
+
               {filteredEnrolledStudents.length === 0 ? (
-                <div className="py-12 text-center text-xs text-slate-500 dark:text-slate-400 font-bold bg-slate-50 dark:bg-[#141928] rounded-xl border-0 shadow-xs">
+                <div className="py-12 text-center text-xs text-slate-500 dark:text-slate-400 font-bold">
                   Không tìm thấy học sinh nào trong lớp.
                 </div>
               ) : (
-                filteredEnrolledStudents.map((s, idx) => {
-                  const isBusy = unenrollingId === s.id;
-                  return (
-                    <div
-                      key={s.id}
-                      className="p-3 rounded-xl border-0 bg-slate-50/80 dark:bg-[#141928] hover:bg-slate-100 dark:hover:bg-[#1a2136] shadow-xs hover:shadow-sm flex items-center justify-between text-xs transition"
-                    >
-                      <div className="flex items-center gap-3">
-                        <span className="w-6 text-center text-xs font-bold text-slate-400 dark:text-slate-500">
+                <div className="divide-y divide-slate-100 dark:divide-white/5">
+                  {filteredEnrolledStudents.map((s, idx) => {
+                    const isBusy = unenrollingId === s.id;
+                    return (
+                      <div
+                        key={s.id}
+                        className="px-3 py-2 flex items-center text-xs hover:bg-slate-100/70 dark:hover:bg-white/5 text-slate-800 dark:text-slate-200 transition"
+                      >
+                        <div className="w-8 shrink-0 text-center text-[11px] font-bold text-slate-400">
                           {idx + 1}
-                        </span>
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <span className="font-extrabold text-sm text-slate-900 dark:text-white">{s.full_name}</span>
-                            {s.nickname && <span className="text-xs text-blue-600 dark:text-blue-400 font-bold">({s.nickname})</span>}
-                          </div>
-                          <div className="flex items-center gap-1.5 mt-1 text-[11px] font-medium text-slate-500 dark:text-slate-400">
-                            {s.grade && <span className="bg-slate-200/70 dark:bg-white/5 px-2 py-0.5 rounded text-slate-700 dark:text-slate-300">{s.grade}</span>}
-                            {s.school && <span className="bg-slate-200/70 dark:bg-white/5 px-2 py-0.5 rounded text-slate-600 dark:text-slate-400">{s.school}</span>}
-                          </div>
+                        </div>
+                        <div className="flex-1 font-bold truncate">
+                          {s.full_name}
+                          {s.nickname && <span className="text-blue-500 font-normal ml-1">({s.nickname})</span>}
+                        </div>
+                        <div className="w-16 text-center text-[11px] text-slate-500 dark:text-slate-400">{s.grade || selectedClass.grade}</div>
+                        <div className="w-28 text-right text-[11px] text-slate-400 truncate">{s.school || '—'}</div>
+                        <div className="w-16 text-right">
+                          <button
+                            type="button"
+                            disabled={isBusy}
+                            onClick={() => handleUnenrollStudentFromModal(s.id, s.full_name)}
+                            className="p-1 text-rose-500 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded transition cursor-pointer border-0"
+                            title={`Bỏ học sinh ${s.full_name} khỏi lớp`}
+                          >
+                            <Trash2 size={13} />
+                          </button>
                         </div>
                       </div>
-
-                      <Button
-                        variant="danger"
-                        size="xs"
-                        type="button"
-                        disabled={isBusy}
-                        loading={isBusy}
-                        onClick={() => handleUnenrollStudentFromModal(s.id, s.full_name)}
-                        leftIcon={<Trash2 size={13} />}
-                        title={`Bỏ học sinh ${s.full_name} khỏi lớp`}
-                      >
-                        {isBusy ? 'Đang bỏ...' : 'Bỏ khỏi lớp'}
-                      </Button>
-                    </div>
-                  );
-                })
+                    );
+                  })}
+                </div>
               )}
             </div>
 

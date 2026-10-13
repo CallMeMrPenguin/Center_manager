@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
 import { 
-  UserPlus, Edit3, Trash2, Phone, Calendar 
+  Edit3, Trash2, Phone, Calendar 
 } from 'lucide-react';
 import { api } from '../../api';
 import { showToast } from '../../components/Toast';
@@ -269,7 +269,7 @@ export function TeachersPage() {
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-4 shrink-0">
         <div>
-          <h1 className="text-lg font-black text-slate-900 dark:text-white">Quản Lý Nhân Sự & Giáo Viên</h1>
+          <h1 className="text-lg font-black text-slate-900 dark:text-white">Quản Lý Nhân Sự</h1>
           <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 font-semibold mt-0.5">
             <span>Tổng số: <strong className="text-slate-900 dark:text-white">{teachers.length}</strong></span>
             <span className="px-2 py-0.5 rounded-md bg-blue-500/10 text-blue-600 dark:text-blue-300 border-0 shadow-2xs font-bold">
@@ -286,10 +286,9 @@ export function TeachersPage() {
           size="md"
           type="button"
           onClick={handleOpenAdd}
-          leftIcon={<UserPlus size={15} />}
-          title="Thêm Giáo Viên Mới"
+          title="Thêm Nhân Viên"
         >
-          Thêm Giáo Viên Mới
+          Thêm Nhân Viên
         </Button>
       </div>
 

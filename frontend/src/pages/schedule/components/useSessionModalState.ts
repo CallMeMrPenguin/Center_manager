@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { ClassSession, DAYS, DAY_NUM, SessionScheduleItem } from '../types';
+import { api } from '../../../api';
 
 interface UseSessionModalStateProps {
   isOpen: boolean;
@@ -74,16 +75,57 @@ export function useSessionModalState({
       const dayName = DAYS.find((k) => DAY_NUM[k] === dayNum) || 'Thứ 2';
 
       if (mode === 'recurring') {
-        setSelectedItems([
-          {
-            id: dayName,
-            dayOfWeek: dayNum,
-            dayName,
-            label: `${dayName} hàng tuần`,
-            start_time: form.start_time || '18:00',
-            duration: form.duration || 90,
-          },
-        ]);
+        if (form.class_id) {
+          api.getClassWeeklySchedule(form.class_id).then((weeklySlots) => {
+            if (weeklySlots && weeklySlots.length > 0) {
+              const items = weeklySlots.map((slot: any) => {
+                const dn = DAY_NUM[slot.day_of_week] ?? 1;
+                return {
+                  id: slot.day_of_week,
+                  dayOfWeek: dn,
+                  dayName: slot.day_of_week,
+                  label: `${slot.day_of_week} hàng tuần`,
+                  start_time: slot.start_time || '18:00',
+                  duration: slot.duration || 90,
+                };
+              });
+              setSelectedItems(items);
+              return;
+            }
+            setSelectedItems([
+              {
+                id: dayName,
+                dayOfWeek: dayNum,
+                dayName,
+                label: `${dayName} hàng tuần`,
+                start_time: form.start_time || '18:00',
+                duration: form.duration || 90,
+              },
+            ]);
+          }).catch(() => {
+            setSelectedItems([
+              {
+                id: dayName,
+                dayOfWeek: dayNum,
+                dayName,
+                label: `${dayName} hàng tuần`,
+                start_time: form.start_time || '18:00',
+                duration: form.duration || 90,
+              },
+            ]);
+          });
+        } else {
+          setSelectedItems([
+            {
+              id: dayName,
+              dayOfWeek: dayNum,
+              dayName,
+              label: `${dayName} hàng tuần`,
+              start_time: form.start_time || '18:00',
+              duration: form.duration || 90,
+            },
+          ]);
+        }
       } else {
         setSelectedItems([
           {
@@ -98,7 +140,7 @@ export function useSessionModalState({
         ]);
       }
     }
-  }, [isOpen, editing, selectedMonth]);
+  }, [isOpen, editing, selectedMonth, form.class_id, mode]);
 
   const handleModeChange = (newMode: 'recurring' | 'temporary') => {
     setMode(newMode);

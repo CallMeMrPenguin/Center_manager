@@ -1,7 +1,5 @@
 import React, { useState } from 'react';
-import { 
-  X, UserCheck, KeyRound, Trash2, CheckCircle2, Eye, EyeOff 
-} from 'lucide-react';
+import { X, Trash2, Eye, EyeOff } from 'lucide-react';
 import { CustomDatePicker } from '../../../components/CustomDatePicker';
 import { CustomSelect } from '../../../components/CustomSelect';
 import { VietnameseInput } from '../../../components/VietnameseInput';
@@ -35,23 +33,13 @@ export const TeacherModal: React.FC<TeacherModalProps> = ({
       <div className="bg-white dark:bg-[#0c0f1e] border-0 rounded-2xl w-full max-w-xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
         {/* Modal Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-white/10 shrink-0 bg-slate-50 dark:bg-[#101526]">
-          <div className="flex items-center gap-2.5">
-            <div className="p-2 bg-blue-50 dark:bg-blue-500/15 text-blue-600 dark:text-blue-400 rounded-xl border-0 shadow-2xs">
-              <UserCheck size={18} />
-            </div>
-            <div>
-              <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider">
-                {editingTeacher ? 'Cập Nhật Hồ Sơ Giáo Viên' : 'Thêm Giáo Viên / Trợ Giảng'}
-              </h3>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400 font-semibold mt-0.5">
-                {editingTeacher ? `Mã GV: gv_${(editingTeacher.id || 0).toString().padStart(4, '0')}` : 'Nhập thông tin nhân sự & cấp tài khoản đăng nhập'}
-              </p>
-            </div>
-          </div>
+          <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider">
+            {editingTeacher ? 'Cập Nhật Nhân Viên' : 'Thêm Nhân Viên'}
+          </h3>
           <button
             type="button"
             onClick={onClose}
-            className="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-white/10 dark:hover:bg-white/20 flex items-center justify-center text-slate-500 dark:text-slate-300 hover:text-slate-800 dark:hover:text-white transition cursor-pointer"
+            className="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-white/10 dark:hover:bg-white/20 flex items-center justify-center text-slate-500 dark:text-slate-300 hover:text-slate-800 dark:hover:text-white transition cursor-pointer border-0"
           >
             <X size={16} />
           </button>
@@ -61,9 +49,8 @@ export const TeacherModal: React.FC<TeacherModalProps> = ({
         <form onSubmit={onSave} className="flex-1 overflow-y-auto p-6 space-y-5 scrollbar-thin">
           {/* SECTION 1: THÔNG TIN NHÂN SỰ */}
           <div className="space-y-3.5">
-            <h4 className="text-xs font-black uppercase text-blue-600 dark:text-blue-400 tracking-wider flex items-center gap-1.5 pb-1 border-b border-slate-200 dark:border-white/10">
-              <UserCheck size={14} />
-              <span>1. Thông Tin Nhân Sự</span>
+            <h4 className="text-xs font-black uppercase text-blue-600 dark:text-blue-400 tracking-wider pb-1 border-b border-slate-200 dark:border-white/10">
+              1. THÔNG TIN NHÂN SỰ
             </h4>
 
             <div>
@@ -116,10 +103,9 @@ export const TeacherModal: React.FC<TeacherModalProps> = ({
           </div>
 
           {/* SECTION 2: TÀI KHOẢN HỆ THỐNG */}
-          <div className="space-y-3.5 bg-slate-50 dark:bg-[#101526] p-4 rounded-xl border border-slate-200 dark:border-white/10">
-            <h4 className="text-xs font-black uppercase text-emerald-600 dark:text-emerald-400 tracking-wider flex items-center gap-1.5 pb-1 border-b border-slate-200 dark:border-white/10">
-              <KeyRound size={14} />
-              <span>2. Tài Khoản Đăng Nhập Hệ Thống (Staff App Account)</span>
+          <div className="space-y-3.5">
+            <h4 className="text-xs font-black uppercase text-emerald-600 dark:text-emerald-400 tracking-wider pb-1 border-b border-slate-200 dark:border-white/10">
+              2. TÀI KHOẢN
             </h4>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
@@ -188,7 +174,7 @@ export const TeacherModal: React.FC<TeacherModalProps> = ({
 
           {/* SECTION 3: GHI CHÚ */}
           <div>
-            <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">Ghi chú thêm:</label>
+            <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">Ghi chú:</label>
             <textarea
               rows={2}
               value={formData.notes || ''}
@@ -208,7 +194,7 @@ export const TeacherModal: React.FC<TeacherModalProps> = ({
                 onClick={() => onDelete(editingTeacher)}
                 leftIcon={<Trash2 size={13} />}
               >
-                Xóa giáo viên
+                Xóa nhân viên
               </Button>
             ) : (
               <div />
@@ -227,9 +213,8 @@ export const TeacherModal: React.FC<TeacherModalProps> = ({
                 variant="primary"
                 size="sm"
                 type="submit"
-                leftIcon={<CheckCircle2 size={14} />}
               >
-                {editingTeacher ? 'Lưu Thay Đổi' : 'Thêm Giáo Viên'}
+                {editingTeacher ? 'Lưu Thay Đổi' : 'Thêm Nhân Viên'}
               </Button>
             </div>
           </div>

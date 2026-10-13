@@ -277,7 +277,7 @@ export const CustomTimePicker: React.FC<CustomTimePickerProps> = ({
           }
         }}
         placeholder={placeholder}
-        className={`bg-white dark:bg-[#181d2e] border-0 rounded-lg px-2.5 py-1 text-xs text-slate-900 dark:text-white font-black shadow-[0_0_0_1px_rgba(15,23,42,0.08),0_0_6px_rgba(15,23,42,0.08),0_1px_3px_rgba(15,23,42,0.1)] focus:outline-none focus:ring-1.5 focus:ring-blue-500 w-24 text-center cursor-pointer transition select-none tracking-wide ${inputClassName}`}
+        className={`bg-white dark:bg-[#181d2e] border-0 rounded-lg px-2.5 py-1 text-xs text-slate-900 dark:text-white font-black shadow-[0_2px_10px_rgba(15,23,42,0.08),0_0_6px_rgba(15,23,42,0.04)] hover:shadow-[0_4px_16px_rgba(15,23,42,0.12),0_0_8px_rgba(15,23,42,0.06)] focus:outline-none focus:ring-1.5 focus:ring-blue-500 w-24 text-center cursor-pointer transition select-none tracking-wide ${inputClassName}`}
       />
 
       <AnimatePresence>

@@ -1,8 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  X, User, Phone, Home, GraduationCap, Calendar, 
-  KeyRound, Shield, Trash2, CheckCircle2, AlertCircle, Sparkles, Eye, EyeOff
-} from 'lucide-react';
+import React, { useState } from 'react';
+import { X, Eye, EyeOff } from 'lucide-react';
 import { VietnameseInput } from '../../../components/VietnameseInput';
 import { CustomDatePicker } from '../../../components/CustomDatePicker';
 import { CustomSelect } from '../../../components/CustomSelect';
@@ -38,19 +35,9 @@ export const StudentModal: React.FC<StudentModalProps> = ({
       <div className="bg-white border-0 rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh] font-sans">
         {/* Modal Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 shrink-0 bg-slate-50">
-          <div className="flex items-center gap-2.5">
-            <div className="p-2 bg-blue-50 text-blue-600 rounded-xl border-0 shadow-2xs">
-              <User size={18} />
-            </div>
-            <div>
-              <h3 className="text-sm font-black text-slate-900 uppercase tracking-wider">
-                {editingStudent ? 'Cập Nhật Thông Tin Học Sinh' : 'Thêm Học Sinh Mới'}
-              </h3>
-              <p className="text-[11px] text-slate-500 font-semibold mt-0.5">
-                {editingStudent ? `Mã HS: hs_${(editingStudent.id || 0).toString().padStart(4, '0')}` : 'Nhập thông tin hồ sơ & tài khoản đăng nhập'}
-              </p>
-            </div>
-          </div>
+          <h3 className="text-sm font-black text-slate-900 uppercase tracking-wider">
+            {editingStudent ? 'Cập Nhật Thông Tin Học Sinh' : 'Thêm Học Sinh Mới'}
+          </h3>
           <button
             type="button"
             onClick={onClose}
@@ -64,9 +51,8 @@ export const StudentModal: React.FC<StudentModalProps> = ({
         <form onSubmit={onSave} className="flex-1 overflow-y-auto p-6 space-y-5 scrollbar-thin">
           {/* SECTION 1: HỌC SINH */}
           <div className="space-y-3.5">
-            <h4 className="text-xs font-black uppercase text-blue-600 tracking-wider flex items-center gap-1.5 pb-1 border-b border-slate-200">
-              <GraduationCap size={14} />
-              <span>1. Thông Tin Học Sinh & Trường Lớp</span>
+            <h4 className="text-xs font-black uppercase text-blue-600 tracking-wider pb-1 border-b border-slate-200">
+              1. THÔNG TIN HỌC SINH
             </h4>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
@@ -84,7 +70,7 @@ export const StudentModal: React.FC<StudentModalProps> = ({
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold text-slate-700 mb-1">Biệt danh (Nickname):</label>
+                <label className="block text-[11px] font-bold text-slate-700 mb-1">Biệt danh:</label>
                 <VietnameseInput
                   value={formData.nickname || ''}
                   onValueChange={(val) => setFormData((p) => ({ ...p, nickname: val }))}
@@ -170,9 +156,8 @@ export const StudentModal: React.FC<StudentModalProps> = ({
 
           {/* SECTION 2: PHỤ HUYNH */}
           <div className="space-y-3.5">
-            <h4 className="text-xs font-black uppercase text-sky-600 tracking-wider flex items-center gap-1.5 pb-1 border-b border-slate-200">
-              <Phone size={14} />
-              <span>2. Thông Tin Phụ Huynh & Liên Hệ</span>
+            <h4 className="text-xs font-black uppercase text-sky-600 tracking-wider pb-1 border-b border-slate-200">
+              2. THÔNG TIN PHỤ HUYNH
             </h4>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
@@ -231,10 +216,9 @@ export const StudentModal: React.FC<StudentModalProps> = ({
           </div>
 
           {/* SECTION 3: TÀI KHOẢN HỆ THỐNG */}
-          <div className="space-y-3.5 bg-slate-50 p-4 rounded-xl border border-slate-200">
-            <h4 className="text-xs font-black uppercase text-emerald-600 tracking-wider flex items-center gap-1.5 pb-1 border-b border-slate-200">
-              <KeyRound size={14} />
-              <span>3. Tài Khoản Đăng Nhập Hệ Thống (Student App Account)</span>
+          <div className="space-y-3.5">
+            <h4 className="text-xs font-black uppercase text-emerald-600 tracking-wider pb-1 border-b border-slate-200">
+              3. TÀI KHOẢN
             </h4>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
@@ -288,7 +272,7 @@ export const StudentModal: React.FC<StudentModalProps> = ({
 
           {/* SECTION 4: GHI CHÚ */}
           <div>
-            <label className="block text-[11px] font-bold text-slate-700 mb-1">Ghi chú thêm về học sinh:</label>
+            <label className="block text-[11px] font-bold text-slate-700 mb-1">Ghi chú:</label>
             <textarea
               rows={2}
               value={formData.notes || ''}
@@ -306,7 +290,6 @@ export const StudentModal: React.FC<StudentModalProps> = ({
                 size="sm"
                 type="button"
                 onClick={() => onDelete(editingStudent)}
-                leftIcon={<Trash2 size={13} />}
               >
                 Xóa học sinh
               </Button>
@@ -327,7 +310,6 @@ export const StudentModal: React.FC<StudentModalProps> = ({
                 variant="primary"
                 size="sm"
                 type="submit"
-                leftIcon={<CheckCircle2 size={14} />}
               >
                 {editingStudent ? 'Lưu Thay Đổi' : 'Thêm Học Sinh'}
               </Button>

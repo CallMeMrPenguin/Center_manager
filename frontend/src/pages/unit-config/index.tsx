@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
 import { api } from '../../api';
-import { Save, BookOpen, FileText } from 'lucide-react';
+import { BookOpen, FileText } from 'lucide-react';
 import { showToast } from '../../components/Toast';
 import { DataTable } from '../../components/DataTable';
 import { SegmentedControl } from '../../components/SegmentedControl';
@@ -146,7 +146,7 @@ export default function UnitConfig() {
       },
       {
         accessorKey: 'name',
-        header: 'Tên Bài Học / Từ Vựng (Topic)',
+        header: 'Chủ Đề',
         cell: ({ row }) => {
           const item = row.original;
           const isEditing = editingKey?.grade === item.grade && editingKey?.unit === item.unit;
@@ -156,7 +156,7 @@ export default function UnitConfig() {
               value={editName}
               onChange={(e) => setEditName(e.target.value)}
               placeholder="VD: My New School..."
-              className="w-full px-3 py-1.5 bg-slate-50 dark:bg-[#0c0f1d] border border-blue-500 rounded-lg focus:outline-none text-xs text-slate-900 dark:text-white"
+              className="w-full px-3 py-1.5 bg-slate-50 dark:bg-[#0c0f1d] border-0 rounded-lg focus:outline-none focus:ring-1.5 focus:ring-blue-500 text-xs text-slate-900 dark:text-white shadow-2xs"
               autoFocus
               onKeyDown={(e) => {
                 if (e.key === 'Enter') handleSave(item.grade, item.unit, editName, editGrammar);
@@ -170,7 +170,7 @@ export default function UnitConfig() {
       },
       {
         accessorKey: 'grammar',
-        header: 'Chủ Đề Ngữ Pháp (Nhiều chủ đề ngăn cách bằng dấu phẩy hoặc &)',
+        header: 'Ngữ Pháp',
         cell: ({ row }) => {
           const item = row.original;
           const isEditing = editingKey?.grade === item.grade && editingKey?.unit === item.unit;
@@ -181,59 +181,25 @@ export default function UnitConfig() {
                 value={editGrammar}
                 onChange={(e) => setEditGrammar(e.target.value)}
                 placeholder="VD: Present Simple, Adverbs of Frequency..."
-                className="w-full px-3 py-1.5 bg-slate-50 dark:bg-[#0c0f1d] border border-purple-500 rounded-lg focus:outline-none text-xs text-slate-900 dark:text-white"
+                className="w-full px-3 py-1.5 bg-slate-50 dark:bg-[#0c0f1d] border-0 rounded-lg focus:outline-none focus:ring-1.5 focus:ring-purple-500 text-xs text-slate-900 dark:text-white shadow-2xs"
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') handleSave(item.grade, item.unit, editName, editGrammar);
                   if (e.key === 'Escape') setEditingKey(null);
                 }}
               />
-              <span className="text-[10px] text-slate-500 block">Nhập nhiều chủ đề cách nhau bằng dấu phẩy (,) hoặc (&) để chọn riêng từng chủ đề khi kiểm tra</span>
+              <span className="text-[10px] text-slate-500 block">Nhấn Enter để lưu, Escape để hủy</span>
             </div>
           ) : (
             <div className="flex flex-wrap gap-1.5 items-center">
               {item.grammarTopics && item.grammarTopics.length > 0 ? (
                 item.grammarTopics.map((gt: string, idx: number) => (
-                  <span key={idx} className="inline-flex items-center px-2 py-0.5 rounded-md bg-purple-500/15 text-purple-700 dark:text-purple-300 border border-purple-500/30 text-xs font-semibold">
+                  <span key={idx} className="inline-flex items-center px-2 py-0.5 rounded-md bg-purple-500/15 text-purple-700 dark:text-purple-300 border-0 shadow-2xs text-xs font-semibold">
                     {gt}
                   </span>
                 ))
               ) : (
-                <span className="text-xs text-slate-400 dark:text-slate-600 font-normal">Chưa cấu hình</span>
+                <span className="text-xs text-slate-400 dark:text-slate-600 font-normal">—</span>
               )}
-            </div>
-          );
-        },
-      },
-      {
-        id: 'actions',
-        header: () => <div className="text-center w-full">Thao Tác</div>,
-        cell: ({ row }) => {
-          const item = row.original;
-          const isEditing = editingKey?.grade === item.grade && editingKey?.unit === item.unit;
-          return isEditing ? (
-            <div className="flex gap-2 justify-center">
-              <button
-                onClick={() => handleSave(item.grade, item.unit, editName, editGrammar)}
-                className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-bold text-xs flex items-center gap-1 cursor-pointer"
-              >
-                <Save size={12} />
-                <span>Lưu</span>
-              </button>
-              <button
-                onClick={() => setEditingKey(null)}
-                className="px-2.5 py-1 bg-slate-100 dark:bg-[#151f32] hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-lg font-bold text-xs cursor-pointer"
-              >
-                Hủy
-              </button>
-            </div>
-          ) : (
-            <div className="text-center">
-              <button
-                onClick={() => startEditing(item.grade, item.unit, item.name, item.grammar)}
-                className="px-3 py-1 bg-slate-100 hover:bg-slate-200 dark:bg-[#121626] border border-slate-200 dark:border-[#202842] hover:border-indigo-500 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white rounded-lg font-bold text-xs transition cursor-pointer"
-              >
-                Chỉnh sửa
-              </button>
             </div>
           );
         },
@@ -341,6 +307,7 @@ export default function UnitConfig() {
               emptyMessage={`Chưa có bài học nào cho Khối Lớp ${selectedGrade}.`}
               pageSize={20}
               searchPlaceholder="Tìm kiếm bài học, chủ đề ngữ pháp..."
+              onRowDoubleClick={(row) => startEditing(row.grade, row.unit, row.name, row.grammar)}
             />
           </div>
         </div>

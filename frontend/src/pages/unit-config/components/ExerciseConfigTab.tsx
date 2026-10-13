@@ -1,7 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
 import { DataTable } from '../../../components/DataTable';
-import { Save, RefreshCw } from 'lucide-react';
 import { api } from '../../../api';
 import { showToast } from '../../../components/Toast';
 
@@ -105,51 +104,13 @@ export const ExerciseConfigTab: React.FC<ExerciseConfigTabProps> = ({
           );
         },
       },
-      {
-        id: 'actions',
-        header: () => <div className="text-center w-full">Thao Tác</div>,
-        cell: ({ row }) => {
-          const item = row.original;
-          const isEditing = editingKey === item.code;
-          return isEditing ? (
-            <div className="flex gap-2 justify-center">
-              <button
-                onClick={() => handleSave(item.code, editValue)}
-                disabled={saving}
-                className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-bold text-xs flex items-center gap-1 cursor-pointer"
-              >
-                <Save size={12} />
-                <span>Lưu</span>
-              </button>
-              <button
-                onClick={() => setEditingKey(null)}
-                className="px-2.5 py-1 bg-slate-100 dark:bg-[#151f32] hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-lg font-bold text-xs cursor-pointer"
-              >
-                Hủy
-              </button>
-            </div>
-          ) : (
-            <div className="text-center">
-              <button
-                onClick={() => {
-                  setEditingKey(item.code);
-                  setEditValue(item.instruction);
-                }}
-                className="px-3 py-1 bg-slate-100 hover:bg-slate-200 dark:bg-[#121626] border border-slate-200 dark:border-[#202842] hover:border-indigo-500 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white rounded-lg font-bold text-xs transition cursor-pointer"
-              >
-                Chỉnh sửa
-              </button>
-            </div>
-          );
-        },
-      },
     ],
     [editingKey, editValue, saving, config]
   );
 
   return (
-    <div className="flex flex-col gap-4 bg-white dark:bg-[#0c0f1d] border border-slate-300 dark:border-slate-800 p-5 rounded-2xl w-full shadow-sm">
-      <div className="flex justify-between items-center border-b border-slate-200 dark:border-slate-800 pb-3">
+    <div className="flex flex-col gap-4 bg-white dark:bg-[#0c0f1d] border-0 p-5 rounded-2xl w-full shadow-sm">
+      <div className="flex justify-between items-center border-b border-slate-100 dark:border-white/5 pb-3">
         <div>
           <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider">
             Cấu Hình Tiêu Đề Hướng Dẫn Dạng Bài
@@ -158,7 +119,7 @@ export const ExerciseConfigTab: React.FC<ExerciseConfigTabProps> = ({
             Tiêu đề này sẽ được in ở đầu mỗi phần bài tập trong đề thi và tài liệu khi xuất file.
           </p>
         </div>
-        <span className="text-xs bg-slate-100 dark:bg-[#121626] border border-slate-300 dark:border-[#202842] px-3 py-1 rounded-xl text-slate-700 dark:text-slate-300 font-bold">
+        <span className="text-xs bg-slate-100 dark:bg-[#121626] border-0 shadow-2xs px-3 py-1 rounded-xl text-slate-700 dark:text-slate-300 font-bold">
           {Object.keys(EXERCISE_TYPE_LABELS).length} Dạng Bài
         </span>
       </div>
@@ -170,6 +131,10 @@ export const ExerciseConfigTab: React.FC<ExerciseConfigTabProps> = ({
         pageSize={20}
         searchPlaceholder="Tìm mã dạng, tên dạng bài..."
         exportFilename="cau_hinh_dang_bai"
+        onRowDoubleClick={(row) => {
+          setEditingKey(row.code);
+          setEditValue(row.instruction);
+        }}
       />
     </div>
   );

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
 import { 
-  UserPlus, Edit3, Trash2, CheckCircle2, 
+  Edit3, Trash2, CheckCircle2, 
   Download, KeyRound, Shield
 } from 'lucide-react';
 import { api } from '../../api';
@@ -239,10 +239,9 @@ export function StudentsPage() {
             size="md"
             type="button"
             onClick={handleOpenAdd}
-            leftIcon={<UserPlus size={15} />}
-            title="Thêm Học Sinh Mới"
+            title="Thêm Học Sinh"
           >
-            Thêm Học Sinh Mới
+            Thêm Học Sinh
           </Button>
         </div>
       </div>

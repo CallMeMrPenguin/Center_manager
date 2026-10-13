@@ -109,26 +109,42 @@ export const SessionModal: React.FC<SessionModalProps> = ({
 
         {/* FORM BODY */}
         <form onSubmit={(e) => onSave(e, selectedItems)} className="p-4 sm:p-5 space-y-4 overflow-y-auto flex-1">
-          {/* CLASS SELECTOR */}
-          <div>
-            <label className="block text-[10px] font-extrabold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1.5">
-              Lớp Học *
-            </label>
-            <CustomSelect
-              value={form.class_id || ''}
-              onChange={(val) => {
-                const cid = Number(val);
-                const selectedCls = classesList.find((c) => c.id === cid);
-                setForm((prev) => ({ ...prev, class_id: cid }));
-                if (cid) {
-                  setColor(getDeterministicClassColor(cid, selectedCls?.color, selectedCls?.notes));
-                }
-              }}
-              options={[
-                { value: '', label: '-- Chọn Lớp --' },
-                ...classesList.map((c) => ({ value: c.id, label: c.class_name })),
-              ]}
-            />
+          {/* CLASS AND STATUS SELECTOR */}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-[10px] font-extrabold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1.5">
+                Lớp
+              </label>
+              <CustomSelect
+                value={form.class_id || ''}
+                onChange={(val) => {
+                  const cid = Number(val);
+                  const selectedCls = classesList.find((c) => c.id === cid);
+                  setForm((prev) => ({ ...prev, class_id: cid }));
+                  if (cid) {
+                    setColor(getDeterministicClassColor(cid, selectedCls?.color, selectedCls?.notes));
+                  }
+                }}
+                options={[
+                  { value: '', label: '-- Chọn Lớp --' },
+                  ...classesList.map((c) => ({ value: c.id, label: c.class_name })),
+                ]}
+              />
+            </div>
+            <div>
+              <label className="block text-[10px] font-extrabold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1.5">
+                Trạng Thái
+              </label>
+              <CustomSelect
+                value={form.status === 'Hủy' ? 'Nghỉ' : (form.status || 'Sắp diễn ra')}
+                onChange={(val) => setForm((prev) => ({ ...prev, status: val }))}
+                options={[
+                  { value: 'Sắp diễn ra', label: 'Sắp diễn ra' },
+                  { value: 'Đã học', label: 'Đã học' },
+                  { value: 'Nghỉ', label: 'Nghỉ' },
+                ]}
+              />
+            </div>
           </div>
 
           {/* COLOR PALETTE */}
@@ -204,21 +220,7 @@ export const SessionModal: React.FC<SessionModalProps> = ({
             onSyncAllTimes={handleSyncAllTimes}
           />
 
-          {/* STATUS */}
-          <div>
-            <label className="block text-[10px] font-extrabold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1.5">
-              Trạng Thái
-            </label>
-            <CustomSelect
-              value={form.status === 'Hủy' ? 'Nghỉ' : (form.status || 'Sắp diễn ra')}
-              onChange={(val) => setForm({ ...form, status: val })}
-              options={[
-                { value: 'Sắp diễn ra', label: 'Sắp diễn ra' },
-                { value: 'Đã học', label: 'Đã học' },
-                { value: 'Nghỉ', label: 'Nghỉ' },
-              ]}
-            />
-          </div>
+
 
           {/* FOOTER ACTIONS */}
           <div className="flex items-center justify-between gap-3 pt-3 border-t border-slate-200 dark:border-white/10 shrink-0">

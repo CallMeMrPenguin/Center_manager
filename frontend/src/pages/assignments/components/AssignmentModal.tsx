@@ -80,16 +80,16 @@ export const AssignmentModal: React.FC<AssignmentModalProps> = ({
   return (
     <>
       <div className="fixed inset-0 z-[100] bg-black/60 flex items-center justify-center p-4 select-none font-sans">
-        <div className="bg-white border border-slate-200 rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+        <div className="bg-white border-0 rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
           {/* Header */}
           <div className="px-5 py-4 border-b border-slate-200 flex items-center justify-between shrink-0 bg-slate-50">
-            <h2 className="text-sm font-bold text-slate-900">
-              {assignment ? 'Chỉnh sửa bài tập' : 'Giao bài tập mới'}
+            <h2 className="text-sm font-black uppercase tracking-wider text-slate-900">
+              {assignment ? 'CHỈNH SỬA BÀI TẬP' : 'GIAO BÀI TẬP MỚI'}
             </h2>
             <button
               type="button"
               onClick={onClose}
-              className="w-7 h-7 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center transition cursor-pointer"
+              className="w-7 h-7 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center transition cursor-pointer border-0"
             >
               <X size={15} />
             </button>
@@ -100,8 +100,8 @@ export const AssignmentModal: React.FC<AssignmentModalProps> = ({
             {/* Class & Max Score */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div className="sm:col-span-2 space-y-1.5">
-                <label className="text-xs font-bold text-slate-700">
-                  Lớp học <span className="text-rose-500">*</span>
+                <label className="text-xs font-black uppercase tracking-wider text-slate-700">
+                  LỚP HỌC <span className="text-rose-500">*</span>
                 </label>
                 <CustomSelect
                   value={classId}
@@ -112,7 +112,7 @@ export const AssignmentModal: React.FC<AssignmentModalProps> = ({
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-700">Thang điểm</label>
+                <label className="text-xs font-black uppercase tracking-wider text-slate-700">THANG ĐIỂM</label>
                 <input
                   type="number"
                   min="1"
@@ -126,8 +126,8 @@ export const AssignmentModal: React.FC<AssignmentModalProps> = ({
 
             {/* Title */}
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-700">
-                Tiêu đề bài tập <span className="text-rose-500">*</span>
+              <label className="text-xs font-black uppercase tracking-wider text-slate-700">
+                TIÊU ĐỀ BÀI TẬP <span className="text-rose-500">*</span>
               </label>
               <input
                 type="text"
@@ -180,8 +180,8 @@ export const AssignmentModal: React.FC<AssignmentModalProps> = ({
             {/* Dates */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-700">
-                  Ngày giao <span className="text-rose-500">*</span>
+                <label className="text-xs font-black uppercase tracking-wider text-slate-700">
+                  NGÀY GIAO <span className="text-rose-500">*</span>
                 </label>
                 <CustomDatePicker
                   value={assignedDate}
@@ -191,8 +191,8 @@ export const AssignmentModal: React.FC<AssignmentModalProps> = ({
                 />
               </div>
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-700">
-                  Hạn nộp <span className="text-rose-500">*</span>
+                <label className="text-xs font-black uppercase tracking-wider text-slate-700">
+                  HẠN NỘP <span className="text-rose-500">*</span>
                 </label>
                 <CustomDatePicker
                   value={dueDate}
@@ -205,7 +205,7 @@ export const AssignmentModal: React.FC<AssignmentModalProps> = ({
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-700">Ghi chú / Hướng dẫn</label>
+              <label className="text-xs font-black uppercase tracking-wider text-slate-700">GHI CHÚ / HƯỚNG DẪN</label>
               <textarea
                 rows={2}
                 value={description}
