@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 
 export interface SegmentOption<T extends string = string> {
@@ -48,7 +48,6 @@ export function SegmentedControl<T extends string = string>({
     (items.length > 0 ? (items[0].value ?? items[0].id) : undefined);
 
   const [internalVal, setInternalVal] = useState<T | undefined>(initialVal);
-  const [hoveredVal, setHoveredVal] = useState<T | null>(null);
   const activeVal =
     controlledValue !== undefined
       ? controlledValue
@@ -56,7 +55,52 @@ export function SegmentedControl<T extends string = string>({
       ? controlledActiveId
       : internalVal;
 
+  const [indicatorStyle, setIndicatorStyle] = useState({ left: 0, width: 0 });
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const [hoverStyle, setHoverStyle] = useState({ left: 0, width: 0 });
+  const buttonRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  const activeIndex = items.findIndex(
+    (opt, idx) => (opt.value ?? opt.id ?? String(idx)) === activeVal
+  );
+
+  useEffect(() => {
+    const activeElement = buttonRefs.current[activeIndex];
+    if (activeElement) {
+      setIndicatorStyle({
+        left: activeElement.offsetLeft,
+        width: activeElement.offsetWidth,
+      });
+    }
+  }, [activeVal, activeIndex, items]);
+
+  useEffect(() => {
+    const updatePositions = () => {
+      const activeElement = buttonRefs.current[activeIndex];
+      if (activeElement) {
+        setIndicatorStyle({
+          left: activeElement.offsetLeft,
+          width: activeElement.offsetWidth,
+        });
+      }
+    };
+    updatePositions();
+    window.addEventListener('resize', updatePositions);
+    return () => window.removeEventListener('resize', updatePositions);
+  }, [activeIndex]);
+
+  useEffect(() => {
+    if (hoveredIndex !== null) {
+      const hoveredElement = buttonRefs.current[hoveredIndex];
+      if (hoveredElement) {
+        setHoverStyle({
+          left: hoveredElement.offsetLeft,
+          width: hoveredElement.offsetWidth,
+        });
+      }
+    }
+  }, [hoveredIndex]);
 
   const handleButtonClick = (buttonVal: T, disabled?: boolean) => {
     if (disabled) return;
@@ -83,11 +127,46 @@ export function SegmentedControl<T extends string = string>({
   return (
     <div
       ref={containerRef}
-      onMouseLeave={() => setHoveredVal(null)}
+      onMouseLeave={() => setHoveredIndex(null)}
       className={`relative inline-flex items-center rounded-xl bg-slate-200/70 dark:bg-white/10 border-0 select-none shadow-xs ${sizeClasses} ${
         fullWidth ? 'w-full' : ''
       } ${className}`}
+      role="group"
     >
+      {/* Sliding Hover Pill Background */}
+      <motion.div
+        className="absolute top-1 bottom-1 rounded-lg bg-black/10 dark:bg-white/15 pointer-events-none"
+        initial={false}
+        animate={{
+          left: hoverStyle.left,
+          width: hoverStyle.width,
+          opacity: hoveredIndex !== null && hoveredIndex !== activeIndex ? 1 : 0,
+        }}
+        transition={{
+          type: 'spring',
+          stiffness: 400,
+          damping: 30,
+        }}
+      />
+
+      {/* Sliding Active Pill Background */}
+      <motion.div
+        className={`absolute top-1 bottom-1 rounded-lg shadow-2xs pointer-events-none ${
+          activeColor || 'bg-[#2563eb]'
+        }`}
+        initial={false}
+        animate={{
+          left: indicatorStyle.left,
+          width: indicatorStyle.width,
+          opacity: indicatorStyle.width > 0 ? 1 : 0,
+        }}
+        transition={{
+          type: 'spring',
+          stiffness: 400,
+          damping: 30,
+        }}
+      />
+
       {items.map((opt, idx) => {
         const itemVal = (opt.value ?? opt.id ?? String(idx)) as T;
         const isActive = activeVal === itemVal;
@@ -108,38 +187,21 @@ export function SegmentedControl<T extends string = string>({
         return (
           <button
             key={itemVal}
+            ref={(el) => {
+              buttonRefs.current[idx] = el;
+            }}
             type="button"
             disabled={disabled}
             onClick={() => handleButtonClick(itemVal, disabled)}
-            onMouseEnter={() => setHoveredVal(itemVal)}
-            className={`relative flex items-center justify-center font-bold transition-colors duration-150 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed border-0 ${buttonSizeClasses} ${
+            onMouseEnter={() => setHoveredIndex(idx)}
+            className={`relative z-10 flex items-center justify-center font-bold transition-colors duration-150 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed border-0 ${buttonSizeClasses} ${
               fit === 'fluid' || fullWidth ? 'flex-1' : ''
             } ${
               isActive
-                ? 'text-white font-extrabold z-10'
-                : 'text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white z-10'
+                ? 'text-white font-extrabold'
+                : 'text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white'
             }`}
           >
-            {/* Sliding Hover Pill Background (matching schedule datepicker day hover) */}
-            {hoveredVal === itemVal && !isActive && (
-              <motion.div
-                layoutId={`${layoutId || 'segmented-control'}-hover`}
-                transition={{ type: 'spring', stiffness: 500, damping: 35 }}
-                className="absolute inset-0 rounded-lg bg-slate-300/70 dark:bg-white/15 shadow-[0_2px_8px_rgba(0,0,0,0.08)] dark:shadow-[0_0_12px_rgba(92,54,245,0.25)] pointer-events-none z-0"
-              />
-            )}
-
-            {/* Sliding Active Pill Background */}
-            {isActive && (
-              <motion.div
-                layoutId={layoutId || 'segmented-control-active'}
-                transition={{ type: 'spring', stiffness: 500, damping: 38 }}
-                className={`absolute inset-0 rounded-lg shadow-xs z-0 ${
-                  activeColor || 'bg-[#2563eb]'
-                }`}
-              />
-            )}
-
             <div className="relative z-10 flex items-center gap-1.5 truncate">
               {renderIcon()}
               {opt.label && <span className="truncate">{opt.label}</span>}

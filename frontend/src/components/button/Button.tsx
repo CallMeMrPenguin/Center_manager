@@ -13,6 +13,8 @@ const variantStyles: Record<ButtonVariant, string> = {
     'bg-transparent hover:bg-slate-100 dark:hover:bg-white/10 text-slate-700 dark:text-slate-300 border-0 hover:shadow-2xs active:scale-[0.98]',
   outline:
     'bg-white hover:bg-slate-50 dark:bg-white/5 dark:hover:bg-white/10 text-slate-800 dark:text-slate-200 border-0 shadow-2xs hover:shadow-xs active:scale-[0.98]',
+  success:
+    'bg-emerald-600 hover:bg-emerald-500 text-white shadow-2xs hover:shadow-xs border-0 active:scale-[0.98]',
 };
 
 const sizeStyles: Record<ButtonSize, string> = {

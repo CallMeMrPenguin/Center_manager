@@ -126,6 +126,10 @@ export const ReportsPage: React.FC = () => {
         selectedAcademicYear={selectedAcademicYear}
         setSelectedAcademicYear={setSelectedAcademicYear}
         academicYears={academicYears}
+        timePhases={timePhases}
+        selectedPhaseId={selectedPhaseId}
+        setSelectedPhaseId={setSelectedPhaseId}
+        onOpenPhaseModal={() => setPhaseModalOpen(true)}
         selectedClassId={selectedClassId}
         setSelectedClassId={setSelectedClassId}
         setSelectedStudentId={setSelectedStudentId}

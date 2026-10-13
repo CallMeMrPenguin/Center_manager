@@ -8,11 +8,17 @@ import {
 } from 'lucide-react';
 import { CustomSelect } from '../../../components/CustomSelect';
 
+import { AcademicYearPhaseSelect } from './AcademicYearPhaseSelect';
+
 interface ReportsHeaderProps {
   activeReportTab: 'overview' | 'deep' | 'skills' | 'benchmark';
   selectedAcademicYear: string;
   setSelectedAcademicYear: (y: string) => void;
   academicYears: string[];
+  timePhases?: any[];
+  selectedPhaseId?: string;
+  setSelectedPhaseId?: (id: string) => void;
+  onOpenPhaseModal?: () => void;
   selectedClassId: string;
   setSelectedClassId: (id: string) => void;
   setSelectedStudentId: (id: string) => void;
@@ -27,6 +33,10 @@ export const ReportsHeader: React.FC<ReportsHeaderProps> = ({
   selectedAcademicYear,
   setSelectedAcademicYear,
   academicYears,
+  timePhases = [],
+  selectedPhaseId = '',
+  setSelectedPhaseId = () => {},
+  onOpenPhaseModal,
   selectedClassId,
   setSelectedClassId,
   setSelectedStudentId,
@@ -78,14 +88,15 @@ export const ReportsHeader: React.FC<ReportsHeaderProps> = ({
 
         {/* Action Controls Bar */}
         <div className="flex items-center gap-2.5 flex-wrap">
-          {/* Academic Year Selector */}
-          <CustomSelect
-            icon={<Calendar size={14} className="text-indigo-500 dark:text-indigo-400" />}
-            value={selectedAcademicYear}
-            onChange={(val) => setSelectedAcademicYear(String(val))}
-            options={academicYears.map(y => ({ value: y, label: `Năm học ${y}` }))}
-            className="w-40 shrink-0"
-            triggerClassName="!bg-white hover:!bg-slate-50 dark:!bg-[#141417] dark:hover:!bg-[#1c1c21] text-slate-900 dark:text-white shadow-xs hover:shadow-sm"
+          {/* Integrated Academic Year & Phase Selector */}
+          <AcademicYearPhaseSelect
+            selectedAcademicYear={selectedAcademicYear}
+            setSelectedAcademicYear={setSelectedAcademicYear}
+            academicYears={academicYears}
+            timePhases={timePhases}
+            selectedPhaseId={selectedPhaseId}
+            setSelectedPhaseId={setSelectedPhaseId}
+            onOpenPhaseModal={onOpenPhaseModal}
           />
 
           {/* Class Selector (not needed on Benchmark tab) */}

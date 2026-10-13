@@ -35,10 +35,8 @@ export function VercelTabs<T extends string = string>({
   const activeTab = controlledValue !== undefined ? controlledValue : internalValue;
 
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
-  const [activeStyle, setActiveStyle] = useState<{ left: string; width: string }>({
-    left: '0px',
-    width: '0px',
-  });
+  const [hoverStyle, setHoverStyle] = useState<{ left: number; width: number }>({ left: 0, width: 0 });
+  const [activeStyle, setActiveStyle] = useState<{ left: number; width: number }>({ left: 0, width: 0 });
   const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
   const activeIndex = tabs.findIndex((tab) => tab.value === activeTab);
@@ -52,18 +50,8 @@ export function VercelTabs<T extends string = string>({
         const { offsetLeft, offsetWidth } = activeElement;
         if (offsetWidth > 0) {
           setActiveStyle({
-            left: `${offsetLeft}px`,
-            width: `${offsetWidth}px`,
-          });
-        } else {
-          requestAnimationFrame(() => {
-            const el = tabRefs.current[activeIndex];
-            if (el && el.offsetWidth > 0) {
-              setActiveStyle({
-                left: `${el.offsetLeft}px`,
-                width: `${el.offsetWidth}px`,
-              });
-            }
+            left: offsetLeft,
+            width: offsetWidth,
           });
         }
       }
@@ -94,15 +82,26 @@ export function VercelTabs<T extends string = string>({
     return () => window.removeEventListener('resize', updateActivePosition);
   }, [updateActivePosition]);
 
+  useEffect(() => {
+    if (hoveredIndex !== null) {
+      const hoveredElement = tabRefs.current[hoveredIndex];
+      if (hoveredElement) {
+        setHoverStyle({
+          left: hoveredElement.offsetLeft,
+          width: hoveredElement.offsetWidth,
+        });
+      }
+    }
+  }, [hoveredIndex]);
+
   const handleSelect = (tabValue: T) => {
     const targetIdx = tabs.findIndex((tab) => tab.value === tabValue);
     if (targetIdx >= 0) {
       const activeElement = tabRefs.current[targetIdx];
       if (activeElement) {
-        const { offsetLeft, offsetWidth } = activeElement;
         setActiveStyle({
-          left: `${offsetLeft}px`,
-          width: `${offsetWidth}px`,
+          left: activeElement.offsetLeft,
+          width: activeElement.offsetWidth,
         });
         try {
           activeElement.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
@@ -125,13 +124,38 @@ export function VercelTabs<T extends string = string>({
         onMouseLeave={() => setHoveredIndex(null)}
         className="relative flex items-center h-auto select-none gap-[6px] bg-transparent p-0 border-b border-slate-200 dark:border-white/10 overflow-x-auto scroll-smooth [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
       >
-        {/* Active Indicator */}
-        <div
-          aria-hidden="true"
-          className={`absolute bottom-[-1px] h-[2.5px] rounded-full transition-all duration-300 ease-out pointer-events-none ${
+        {/* Sliding Hover Rectangle: bo vuông 4 góc tròn (rounded-lg) */}
+        <motion.div
+          className="absolute top-0 h-[32px] rounded-lg bg-black/5 dark:bg-white/10 pointer-events-none"
+          initial={false}
+          animate={{
+            left: hoverStyle.left,
+            width: hoverStyle.width,
+            opacity: hoveredIndex !== null && hoveredIndex !== activeIndex ? 1 : 0,
+          }}
+          transition={{
+            type: 'spring',
+            stiffness: 400,
+            damping: 30,
+          }}
+        />
+
+        {/* Sliding Active Indicator Bar */}
+        <motion.div
+          className={`absolute bottom-[-1px] h-[2.5px] rounded-full pointer-events-none ${
             indicatorColor || 'bg-blue-600'
           }`}
-          style={activeStyle}
+          initial={false}
+          animate={{
+            left: activeStyle.left,
+            width: activeStyle.width,
+            opacity: activeStyle.width > 0 ? 1 : 0,
+          }}
+          transition={{
+            type: 'spring',
+            stiffness: 400,
+            damping: 30,
+          }}
         />
 
         {tabs.map((tab, index) => {
@@ -154,15 +178,6 @@ export function VercelTabs<T extends string = string>({
                   : 'text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white font-bold'
               }`}
             >
-              {/* Smooth spring hover highlight: bo vuông 4 góc tròn (rounded-lg) */}
-              {hoveredIndex === index && !isActive && (
-                <motion.div
-                  layoutId="vercel-tab-hover"
-                  transition={{ type: 'spring', stiffness: 500, damping: 35 }}
-                  className="absolute inset-0 rounded-lg bg-slate-200/80 dark:bg-white/10 shadow-2xs pointer-events-none z-0"
-                />
-              )}
-
               <span className="relative z-10 flex items-center gap-1.5">
                 {tab.icon && <span className="shrink-0">{tab.icon}</span>}
                 <span className="whitespace-nowrap text-sm leading-5">

@@ -129,7 +129,7 @@ export const AttendanceGradesTab: React.FC<AttendanceGradesTabProps> = ({
                 <button
                   type="button"
                   onClick={onOpenTestConfigModal}
-                  className="group flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200/80 dark:bg-[#181a20] dark:hover:bg-[#20232b] text-slate-700 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white border-0 text-xs font-bold transition-all duration-200 cursor-pointer shadow-xs outline-none shrink-0"
+                  className="group flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-white hover:bg-slate-50 dark:bg-[#181a20] dark:hover:bg-[#20232b] text-slate-700 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white border-0 text-xs font-bold transition-all duration-200 cursor-pointer shadow-2xs hover:shadow-xs active:scale-[0.98] outline-none shrink-0"
                   title="Cấu Hình Điểm (Check 1 & Check 2)"
                 >
                   <Layers size={13} className="text-blue-500 dark:text-blue-400 shrink-0" />
@@ -143,7 +143,7 @@ export const AttendanceGradesTab: React.FC<AttendanceGradesTabProps> = ({
                 <button
                   type="button"
                   onClick={onCircularSwap}
-                  className="group flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200/80 dark:bg-[#181a20] dark:hover:bg-[#20232b] text-slate-700 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white border-0 text-xs font-bold transition-all duration-200 cursor-pointer shadow-xs outline-none shrink-0"
+                  className="group flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-white hover:bg-slate-50 dark:bg-[#181a20] dark:hover:bg-[#20232b] text-slate-700 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white border-0 text-xs font-bold transition-all duration-200 cursor-pointer shadow-2xs hover:shadow-xs active:scale-[0.98] outline-none shrink-0"
                   title="Sơ đồ chấm bài giữa các học sinh"
                 >
                   <FileCheck2 size={13} className="text-purple-500 dark:text-purple-400 shrink-0" />
@@ -172,7 +172,7 @@ export const AttendanceGradesTab: React.FC<AttendanceGradesTabProps> = ({
                   type="button"
                   onClick={onSaveAttendance}
                   disabled={savingAttendance}
-                  className="group flex items-center gap-1 sm:gap-1.5 px-3 sm:px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black shadow-xs hover:shadow-sm transition-all duration-200 cursor-pointer border-0 disabled:opacity-50 shrink-0"
+                  className="group flex items-center gap-1 sm:gap-1.5 px-3 sm:px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black shadow-2xs hover:shadow-xs active:scale-[0.98] transition-all duration-200 cursor-pointer border-0 disabled:opacity-50 shrink-0"
                   title="Lưu"
                 >
                   <Save size={13} className="shrink-0" />

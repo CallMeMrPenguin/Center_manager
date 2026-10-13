@@ -188,7 +188,7 @@ export function ExportDropdown<TData>({
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="group flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200/80 dark:bg-[#181a20] dark:hover:bg-[#20232b] text-slate-700 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white text-xs font-bold transition-all duration-200 cursor-pointer shadow-xs border-0 outline-none shrink-0"
+        className="group flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-white hover:bg-slate-50 dark:bg-[#181a20] dark:hover:bg-[#20232b] text-slate-700 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white text-xs font-bold transition-all duration-200 cursor-pointer shadow-2xs hover:shadow-xs active:scale-[0.98] border-0 outline-none shrink-0"
         title="Xuất dữ liệu"
       >
         <Download size={13} className="text-emerald-500 dark:text-emerald-400 shrink-0" />

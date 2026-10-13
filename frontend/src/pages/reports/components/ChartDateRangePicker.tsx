@@ -178,7 +178,7 @@ export const ChartDateRangePicker: React.FC<ChartDateRangePickerProps> = ({
       <button
         type="button"
         onClick={() => setOpen((prev) => !prev)}
-        className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200/80 dark:bg-white/5 dark:hover:bg-white/10 text-slate-800 dark:text-slate-100 text-xs font-bold transition-all cursor-pointer border-0 shadow-2xs hover:shadow-xs active:scale-[0.98] outline-none"
+        className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white hover:bg-slate-50 dark:bg-[#181a20] dark:hover:bg-[#20232b] text-slate-800 dark:text-slate-100 text-xs font-bold transition-all cursor-pointer border-0 shadow-2xs hover:shadow-xs active:scale-[0.98] outline-none"
         title="Chọn thời gian hoặc giai đoạn xem tiến độ"
       >
         <Calendar size={13} className="text-blue-600 dark:text-blue-400 shrink-0" />

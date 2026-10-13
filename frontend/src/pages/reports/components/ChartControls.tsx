@@ -65,11 +65,11 @@ export const ChartControls: React.FC<ChartControlsProps> = ({
             />
 
             {/* Zoom controls */}
-            <div className="flex items-center gap-0.5 bg-slate-100 dark:bg-white/5 rounded-xl p-0.5 border-0 shadow-2xs">
+            <div className="flex items-center gap-0.5 bg-white dark:bg-[#181a20] rounded-xl p-0.5 border-0 shadow-2xs">
               <button
                 type="button"
                 onClick={() => setZoomLevel((z) => Math.min(2.5, z + 0.2))}
-                className="p-1.5 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-600 dark:text-slate-300 rounded-lg transition cursor-pointer border-0"
+                className="p-1.5 hover:bg-slate-100 dark:hover:bg-white/10 text-slate-600 dark:text-slate-300 rounded-lg transition cursor-pointer border-0 active:scale-95"
                 title="Phóng to biểu đồ"
               >
                 <ZoomIn size={13} />
@@ -77,7 +77,7 @@ export const ChartControls: React.FC<ChartControlsProps> = ({
               <button
                 type="button"
                 onClick={() => setZoomLevel((z) => Math.max(0.6, z - 0.2))}
-                className="p-1.5 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-600 dark:text-slate-300 rounded-lg transition cursor-pointer border-0"
+                className="p-1.5 hover:bg-slate-100 dark:hover:bg-white/10 text-slate-600 dark:text-slate-300 rounded-lg transition cursor-pointer border-0 active:scale-95"
                 title="Thu nhỏ biểu đồ"
               >
                 <ZoomOut size={13} />
@@ -88,7 +88,7 @@ export const ChartControls: React.FC<ChartControlsProps> = ({
                   setZoomLevel(1.0);
                   setPanOffset({ x: 0, y: 0 });
                 }}
-                className="p-1.5 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-600 dark:text-slate-300 rounded-lg transition cursor-pointer border-0"
+                className="p-1.5 hover:bg-slate-100 dark:hover:bg-white/10 text-slate-600 dark:text-slate-300 rounded-lg transition cursor-pointer border-0 active:scale-95"
                 title="Đặt lại góc nhìn ban đầu"
               >
                 <RotateCcw size={13} />
@@ -100,7 +100,7 @@ export const ChartControls: React.FC<ChartControlsProps> = ({
               <button
                 type="button"
                 onClick={() => setChartViewMode('distribution')}
-                className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 text-slate-700 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition cursor-pointer shadow-xs border-0"
+                className="p-2 rounded-xl bg-white hover:bg-slate-50 dark:bg-[#181a20] dark:hover:bg-[#20232b] text-slate-700 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition cursor-pointer shadow-2xs hover:shadow-xs active:scale-[0.98] border-0"
                 title="Chuyển sang xem phổ điểm"
               >
                 <BarChart2 size={16} />
@@ -136,7 +136,7 @@ export const ChartControls: React.FC<ChartControlsProps> = ({
               <button
                 type="button"
                 onClick={() => setChartViewMode('timeline')}
-                className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 text-slate-700 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition cursor-pointer shadow-xs border-0"
+                className="p-2 rounded-xl bg-white hover:bg-slate-50 dark:bg-[#181a20] dark:hover:bg-[#20232b] text-slate-700 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition cursor-pointer shadow-2xs hover:shadow-xs active:scale-[0.98] border-0"
                 title="Chuyển sang xem tiến độ học tập"
               >
                 <TrendingUp size={16} />
