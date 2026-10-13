@@ -11,6 +11,7 @@ import {
   ClassSession, DayCfg, PALETTE_20, DAY_HDRS, DAYS, DAY_NUM,
   getSessionColor, getDynamicSessionInfo
 } from './types';
+import { getDeterministicClassColor } from '../../theme';
 import { SessionModal } from './components/SessionModal';
 import { ScheduleCalendarView } from './components/ScheduleCalendarView';
 import { ScheduleKpiCards } from './components/ScheduleKpiCards';
@@ -189,7 +190,7 @@ export default function SchedulePage() {
     setMode(dateStr ? 'single' : 'weekdays');
     const selectedCid = (classFilter && Number(classFilter) > 0) ? Number(classFilter) : (classesList[0]?.id || 1);
     const targetCls = classesList.find((c) => c.id === selectedCid) || classesList[0];
-    const initialColor = targetCls?.color || PALETTE_20[(selectedCid * 3 + 1) % PALETTE_20.length];
+    const initialColor = getDeterministicClassColor(selectedCid, targetCls?.color, targetCls?.notes);
     setColor(initialColor);
     const dStr = dateStr || today;
     setForm({

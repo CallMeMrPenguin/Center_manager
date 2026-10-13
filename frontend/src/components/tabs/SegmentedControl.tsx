@@ -48,6 +48,7 @@ export function SegmentedControl<T extends string = string>({
     (items.length > 0 ? (items[0].value ?? items[0].id) : undefined);
 
   const [internalVal, setInternalVal] = useState<T | undefined>(initialVal);
+  const [hoveredVal, setHoveredVal] = useState<T | null>(null);
   const activeVal =
     controlledValue !== undefined
       ? controlledValue
@@ -82,7 +83,8 @@ export function SegmentedControl<T extends string = string>({
   return (
     <div
       ref={containerRef}
-      className={`relative inline-flex items-center rounded-xl bg-slate-200/70 border border-slate-300/80 select-none shadow-2xs ${sizeClasses} ${
+      onMouseLeave={() => setHoveredVal(null)}
+      className={`relative inline-flex items-center rounded-xl bg-slate-200/70 dark:bg-white/10 border-0 select-none shadow-xs ${sizeClasses} ${
         fullWidth ? 'w-full' : ''
       } ${className}`}
     >
@@ -109,26 +111,37 @@ export function SegmentedControl<T extends string = string>({
             type="button"
             disabled={disabled}
             onClick={() => handleButtonClick(itemVal, disabled)}
-            className={`relative flex items-center justify-center font-bold transition-colors duration-150 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed ${buttonSizeClasses} ${
+            onMouseEnter={() => setHoveredVal(itemVal)}
+            onMouseLeave={() => setHoveredVal((prev) => (prev === itemVal ? null : prev))}
+            className={`relative flex items-center justify-center font-bold transition-colors duration-150 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed border-0 ${buttonSizeClasses} ${
               fit === 'fluid' || fullWidth ? 'flex-1' : ''
             } ${
               isActive
                 ? 'text-white font-extrabold z-10'
-                : 'text-slate-600 hover:text-slate-900 z-10'
+                : 'text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white z-10'
             }`}
           >
+            {/* Sliding Hover Pill Background (matching schedule datepicker day hover) */}
+            {hoveredVal === itemVal && !isActive && (
+              <motion.div
+                layoutId={`${layoutId || 'segmented-control'}-hover`}
+                transition={{ type: 'spring', stiffness: 500, damping: 35 }}
+                className="absolute inset-0 rounded-lg bg-slate-300/70 dark:bg-white/15 shadow-[0_2px_8px_rgba(0,0,0,0.08)] dark:shadow-[0_0_12px_rgba(92,54,245,0.25)] pointer-events-none z-0"
+              />
+            )}
+
             {/* Sliding Active Pill Background */}
             {isActive && (
               <motion.div
                 layoutId={layoutId || 'segmented-control-active'}
                 transition={{ type: 'spring', stiffness: 500, damping: 38 }}
-                className={`absolute inset-0 rounded-lg shadow-xs z-[-1] ${
+                className={`absolute inset-0 rounded-lg shadow-xs z-0 ${
                   activeColor || 'bg-[#2563eb]'
                 }`}
               />
             )}
 
-            <div className="flex items-center gap-1.5 truncate">
+            <div className="relative z-10 flex items-center gap-1.5 truncate">
               {renderIcon()}
               {opt.label && <span className="truncate">{opt.label}</span>}
               {opt.badge !== undefined && (
@@ -136,7 +149,7 @@ export function SegmentedControl<T extends string = string>({
                   className={`px-1.5 py-0.2 rounded-md text-[10px] font-mono font-black ${
                     isActive
                       ? 'bg-white/20 text-white'
-                      : 'bg-slate-300 text-slate-700'
+                      : 'bg-slate-300 dark:bg-white/20 text-slate-700 dark:text-slate-200'
                   }`}
                 >
                   {opt.badge}

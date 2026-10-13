@@ -312,6 +312,8 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = ({
         distributionStats={distributionStats}
         hideDistributionToggle={hideDistributionToggle}
         gradeTypesList={gradeTypesList}
+        selectedGradeTypeFilter={selectedGradeTypeFilter}
+        setSelectedGradeTypeFilter={setSelectedGradeTypeFilter}
       />
 
       {/* VIEW 1: TIMELINE LINE CHART */}

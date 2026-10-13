@@ -121,12 +121,10 @@ export function getPremiumStyle(status: string, hexColor = '#2563eb', isDarkPara
   }
 }
 
+import { getDeterministicClassColor } from '../../theme';
+
 export function getSessionColor(sess: ClassSession): string {
-  if (sess.color && sess.color.startsWith('#')) return sess.color;
-  const match = (sess.notes || '').match(/#COLOR:(#[0-9a-fA-F]{6})/);
-  if (match) return match[1];
-  const cid = sess.class_id || 1;
-  return PALETTE_20[(cid * 3 + 1) % PALETTE_20.length];
+  return getDeterministicClassColor(sess.class_id, sess.color, sess.notes);
 }
 
 export function parseTimeToMinutes(t: string): number {

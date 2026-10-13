@@ -61,8 +61,22 @@ Toàn bộ ứng dụng sử dụng giao diện **Light UI**, phong cách **Flat
 
 ### 3.5. Một Nút Bút Sửa Duy Nhất (Single Pen Button)
 - Không đặt icon thùng rác bên cạnh icon bút sửa trên thẻ hoặc hàng.
-- Chỉ hiển thị một icon Bút Sửa (`<Edit3 />`). Chức năng xóa được đặt là nút Xóa màu đỏ bên trong modal chỉnh sửa.
+- Chỉ hiển thị một icon Bút Sửa (`<Edit3 />` / `SinglePenButton`). Chức năng xóa được đặt là nút Xóa màu đỏ bên trong modal chỉnh sửa.
+- Các icon và nút dùng chung BẮT BUỘC có file riêng trong `src/components/button/` hoặc thư mục chuyên biệt, không viết inline rời rạc.
 - Riêng bảng điểm danh/nhập điểm: Mở chi tiết học sinh bằng thao tác Double-click vào tên/hàng, loại bỏ hoàn toàn cột Thao Tác thừa thãi.
+
+### 3.6. Nghiêm Cấm Nút Có Viền & Card Có Viền (Borderless Flat UI With Subtle Shadow)
+- **Tất cả các nút (`Button`, `SegmentedControl`, action buttons) và thẻ Card BẮT BUỘC bỏ viền (`border-0`)**.
+- Tuyệt đối không dùng class `border border-slate-*` hay `border border-blue-*` trên nút hoặc thẻ card.
+- Sử dụng hiệu ứng đổ bóng nhẹ (`shadow-2xs`, `shadow-xs`, `shadow-sm`) thay thế viền để phần tử nổi nhẹ tự nhiên và thanh lịch trên nền.
+
+### 3.7. Chuẩn 1 Lớp — 1 Màu Duy Nhất (Single Class Color Standard)
+- Mỗi lớp học khi tạo sẽ được assign 1 ID và chỉ nhận **đúng 1 màu duy nhất** xuyên suốt toàn bộ ứng dụng.
+- Màu của lớp trong **Lịch Học (`schedule`)** và **Lớp Học (`classes`)** BẮT BUỘC phải khớp nhau 100% (sử dụng chung hàm `getDeterministicClassColor`).
+- Mọi buổi học của cùng một lớp trong lịch học phải hiển thị cùng một màu của lớp đó, không được có 2-3 màu khác nhau cho cùng một lớp.
+
+### 3.8. Đơn Giản Hóa Tab Học Sinh (Không Nhập CSV)
+- Tab Học Sinh loại bỏ hoàn toàn nút và modal Nhập CSV để giữ giao diện tinh gọn, tập trung vào quản lý danh sách và tài khoản học sinh.
 
 ---
 
@@ -170,6 +184,9 @@ Khi được yêu cầu phát hành bản cập nhật hoặc bump version:
 | Điểm chưa nhập lưu thành `0` hoặc `0.0` | Lưu thành `NULL` |
 | Làm tròn điểm số lên/xuống | Cắt gọn đúng 1 chữ số thập phân (`trunc1Dec`) |
 | Đổ code dài dòng (code dump) vào chat | Trả lời súc tích, chỉ trích dẫn dòng cần thiết, kèm link file |
+| Dùng nút có viền (`border-*`) hoặc card có viền | Bỏ viền (`border-0`), dùng đổ bóng nhẹ (`shadow-2xs`, `shadow-xs`, `shadow-sm`) tạo cảm giác nổi tự nhiên |
+| 1 lớp có nhiều màu khác nhau giữa lịch & lớp | Mỗi lớp có 1 ID và nhận 1 màu duy nhất xuyên suốt ứng dụng (`getDeterministicClassColor`) |
+| Chèn tính năng/nút Nhập CSV vào tab học sinh | Bỏ nút CSV, giữ tab học sinh tinh gọn tập trung vào dữ liệu và tài khoản |
 | Viết thành phần UI/token phân tán, lặp style ở từng trang | Mỗi thành phần (màu, button, table, chart, select, datepicker) BẮT BUỘC có **thư mục riêng + `index.ts`**. Sửa 1 nơi cập nhật toàn bộ app |
 
 ---

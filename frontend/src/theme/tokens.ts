@@ -175,3 +175,55 @@ export const LIGHT_THEME_COLORS = {
 
 export const THEME_COLORS = LIGHT_THEME_COLORS;
 export type ThemeColorsType = typeof LIGHT_THEME_COLORS;
+
+// ─── 8. UNIFIED CLASS PALETTE (24 HARMONIOUS COLORS) ────────────────────────
+export const CLASS_PALETTE_24 = [
+  '#2563eb', // Blue
+  '#7c3aed', // Purple
+  '#059669', // Emerald
+  '#d97706', // Amber
+  '#dc2626', // Red
+  '#0284c7', // Sky
+  '#db2777', // Pink
+  '#0d9488', // Teal
+  '#65a30d', // Lime
+  '#ea580c', // Orange
+  '#c026d3', // Fuchsia
+  '#4f46e5', // Indigo
+  '#0891b2', // Cyan
+  '#e11d48', // Rose
+  '#16a34a', // Green
+  '#9333ea', // Violet
+  '#b45309', // Warm Amber
+  '#047857', // Deep Emerald
+  '#be123c', // Deep Rose
+  '#6d28d9', // Deep Violet
+  '#4338ca', // Deep Indigo
+  '#0f766e', // Deep Teal
+  '#1d4ed8', // Deep Blue
+  '#a21caf', // Deep Fuchsia
+] as const;
+
+/**
+ * Resolves exactly 1 unique, deterministic color for any class.
+ * Enforces the "Single Class Color Standard":
+ * A class always has the exact same color in Schedule and Classes tabs.
+ */
+export function getDeterministicClassColor(
+  classId?: number | string | null,
+  customColor?: string | null,
+  notes?: string | null
+): string {
+  if (customColor && customColor.startsWith('#')) return customColor;
+  const match = (notes || '').match(/#COLOR:(#[0-9a-fA-F]{6})/);
+  if (match) return match[1];
+
+  if (classId !== undefined && classId !== null) {
+    const num =
+      typeof classId === 'number'
+        ? classId
+        : parseInt(String(classId).replace(/\D/g, ''), 10) || 0;
+    return CLASS_PALETTE_24[Math.abs(num) % CLASS_PALETTE_24.length];
+  }
+  return CLASS_PALETTE_24[0];
+}

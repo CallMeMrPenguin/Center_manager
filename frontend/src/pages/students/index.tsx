@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
 import { 
   UserPlus, Edit3, Trash2, CheckCircle2, 
-  Upload, Download, KeyRound, Shield
+  Download, KeyRound, Shield
 } from 'lucide-react';
 import { api } from '../../api';
 import { showToast } from '../../components/Toast';
@@ -12,7 +12,6 @@ import { DataTable } from '../../components/DataTable';
 import { getLocalDateStr, notifyDataChanged } from '../../utils';
 import { StudentDetailCard } from './components/StudentDetailCard';
 import { StudentModal } from './components/StudentModal';
-import { CsvImportModal } from './components/CsvImportModal';
 import { DuplicateWarningModal } from './components/DuplicateWarningModal';
 import { createStudentColumns } from './components/studentColumns';
 import { dataCache } from '../../utils/dataCache';
@@ -29,12 +28,6 @@ export function StudentsPage() {
   const [editingStudent, setEditingStudent] = useState<Student | null>(null);
   const [duplicateWarningMsg, setDuplicateWarningMsg] = useState<string | null>(null);
   const [highlightMissingFields, setHighlightMissingFields] = useState<boolean>(false);
-
-  // CSV Import State
-  const [csvModalOpen, setCsvModalOpen] = useState(false);
-  const [csvFile, setCsvFile] = useState<File | null>(null);
-  const [csvPreview, setCsvPreview] = useState<any[]>([]);
-  const [csvImporting, setCsvImporting] = useState(false);
 
   const [formData, setFormData] = useState<Partial<Student>>({
     full_name: '',
@@ -214,41 +207,6 @@ export function StudentsPage() {
     }
   };
 
-  const handleConfirmCsvImport = async () => {
-    if (csvPreview.length === 0) return;
-    try {
-      setCsvImporting(true);
-      let count = 0;
-      for (const row of csvPreview) {
-        const full_name = row['Họ và tên'] || row['full_name'] || row['Name'] || '';
-        if (full_name.trim()) {
-          await api.createStudent({
-            full_name: full_name.trim(),
-            nickname: row['Biệt danh'] || row['nickname'] || '',
-            grade: row['Khối'] || row['grade'] || 'Lớp 6',
-            gender: row['Giới tính'] || row['gender'] || 'Nam',
-            date_of_birth: row['Ngày sinh'] || row['date_of_birth'] || '',
-            school: row['Trường'] || row['school'] || '',
-            father_phone: row['SĐT'] || row['father_phone'] || '',
-            enroll_date: getLocalDateStr(),
-            status: 'Đang học',
-          });
-          count++;
-        }
-      }
-      showToast(`Đã nhập thành công ${count} học sinh từ CSV!`, 'success');
-      setCsvModalOpen(false);
-      setCsvFile(null);
-      setCsvPreview([]);
-      loadData(true);
-      notifyDataChanged();
-    } catch (err: any) {
-      showToast('Lỗi khi nhập CSV: ' + err.message, 'error');
-    } finally {
-      setCsvImporting(false);
-    }
-  };
-
   const totalActive = students.filter((s) => s.status === 'Đang học').length;
   const totalQuit = students.filter((s) => s.status === 'Đã nghỉ').length;
 
@@ -275,15 +233,6 @@ export function StudentsPage() {
         </div>
 
         <div className="flex items-center gap-2.5">
-          <button
-            type="button"
-            onClick={() => setCsvModalOpen(true)}
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white hover:bg-slate-50 dark:bg-white/5 dark:hover:bg-white/10 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white text-xs font-bold border-0 shadow-2xs transition cursor-pointer"
-          >
-            <Upload size={14} />
-            <span>Nhập CSV</span>
-          </button>
-
           <button
             type="button"
             onClick={handleOpenAdd}
@@ -335,17 +284,6 @@ export function StudentsPage() {
         onSave={handleSave}
         onDelete={handleDelete}
         highlightMissingFields={highlightMissingFields}
-      />
-
-      <CsvImportModal
-        isOpen={csvModalOpen}
-        onClose={() => setCsvModalOpen(false)}
-        csvFile={csvFile}
-        setCsvFile={setCsvFile}
-        csvPreview={csvPreview}
-        setCsvPreview={setCsvPreview}
-        csvImporting={csvImporting}
-        onConfirmImport={handleConfirmCsvImport}
       />
 
       <DuplicateWarningModal

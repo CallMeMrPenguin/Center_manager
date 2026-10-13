@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { Info, X } from 'lucide-react';
 import { generateAcademicInsights } from '../utils/academicInsightEngine';
+import { format1Dec } from '../../../utils';
 
 interface InsightCommentaryProps {
   stats: any;
@@ -68,20 +69,43 @@ export const InsightCommentary: React.FC<InsightCommentaryProps> = React.memo(({
     >
       {/* 1. HEADER TITLE & RATING BADGE */}
       <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-white/5">
-        <h4 className="text-sm font-black uppercase text-slate-900 dark:text-white tracking-wider">
-          ĐÁNH GIÁ
-        </h4>
-        {/* Rating Badge (Hidden when viewing All Classes) */}
-        {report.overallBadge && selectedClassId !== 'all' && Boolean(selectedClassId) && (
-          <span
-            className="px-3 py-1 rounded-lg text-xs font-black border-0 shadow-2xs"
-            style={{
-              backgroundColor: `${report.badgeColor}15`,
-              color: report.badgeColor,
-            }}
-          >
-            {report.overallBadge}
-          </span>
+        <div className="flex flex-wrap items-center gap-3">
+          <h4 className="text-sm font-black uppercase text-slate-900 dark:text-white tracking-wider">
+            ĐÁNH GIÁ
+          </h4>
+          {/* Rating Badge (Hidden when viewing All Classes) */}
+          {report.overallBadge && selectedClassId !== 'all' && Boolean(selectedClassId) && (
+            <span
+              className="px-3 py-1 rounded-lg text-xs font-black border-0 shadow-2xs"
+              style={{
+                backgroundColor: `${report.badgeColor}15`,
+                color: report.badgeColor,
+              }}
+            >
+              {report.overallBadge}
+            </span>
+          )}
+        </div>
+
+        {/* Prediction badges in Assessment section */}
+        {engine && (
+          <div className="flex flex-wrap items-center gap-2 text-xs">
+            {engine.pred_c1 !== undefined && (
+              <span className="px-2.5 py-1 rounded-lg bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-300 font-extrabold shadow-2xs border-0">
+                Dự đoán Từ vựng: {format1Dec(engine.pred_c1)}
+              </span>
+            )}
+            {engine.pred_c2 !== undefined && (
+              <span className="px-2.5 py-1 rounded-lg bg-purple-50 dark:bg-purple-500/10 text-purple-600 dark:text-purple-300 font-extrabold shadow-2xs border-0">
+                Dự đoán Ngữ pháp: {format1Dec(engine.pred_c2)}
+              </span>
+            )}
+            {engine.pred_hw !== undefined && (
+              <span className="px-2.5 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-extrabold shadow-2xs border-0">
+                Dự đoán BTVN: {format1Dec(engine.pred_hw)}
+              </span>
+            )}
+          </div>
         )}
       </div>
 

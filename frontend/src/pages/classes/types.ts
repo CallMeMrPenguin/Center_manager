@@ -95,15 +95,10 @@ export const DEFAULT_PALETTE = [
   '#f43f5e'  // Rose
 ];
 
+import { getDeterministicClassColor } from '../../theme';
+
 export function getClassColor(cls: ClassItem, index: number): string {
-  if (cls.color && cls.color.startsWith('#')) {
-    return cls.color;
-  }
-  const notesMatch = (cls.notes || '').match(/#COLOR:(#[0-9a-fA-F]{6})/);
-  if (notesMatch) {
-    return notesMatch[1];
-  }
-  return DEFAULT_PALETTE[(cls.id || index) % DEFAULT_PALETTE.length];
+  return getDeterministicClassColor(cls.id ?? index, cls.color, cls.notes);
 }
 
 export function hexToRGBA(hex: string, alpha: number): string {

@@ -4,6 +4,7 @@ import { CustomDatePicker } from '../../../components/CustomDatePicker';
 import { CustomSelect } from '../../../components/CustomSelect';
 import { SegmentedControl } from '../../../components/SegmentedControl';
 import { ClassSession, DayCfg, PALETTE_20, DAYS } from '../types';
+import { getDeterministicClassColor } from '../../../theme';
 
 interface SessionModalProps {
   isOpen: boolean;
@@ -72,8 +73,8 @@ export const SessionModal: React.FC<SessionModalProps> = ({
                 const cid = Number(val);
                 const selectedCls = classesList.find((c) => c.id === cid);
                 setForm((prev) => ({ ...prev, class_id: cid }));
-                if (selectedCls?.color) {
-                  setColor(selectedCls.color);
+                if (cid) {
+                  setColor(getDeterministicClassColor(cid, selectedCls?.color, selectedCls?.notes));
                 }
                 if (cid && onApplyClassSchedule) {
                   onApplyClassSchedule(cid, form.date);

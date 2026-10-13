@@ -140,7 +140,7 @@ export function VercelTabs<T extends string = string>({
         {/* Hover Highlight */}
         <div
           aria-hidden="true"
-          className="absolute top-0 left-0 flex h-[32px] items-center rounded-[6px] bg-slate-100 transition-all duration-300 ease-out pointer-events-none"
+          className="absolute top-0 left-0 flex h-[32px] items-center rounded-lg bg-slate-200/80 dark:bg-white/10 shadow-[0_2px_8px_rgba(0,0,0,0.06)] dark:shadow-[0_0_12px_rgba(92,54,245,0.25)] transition-all duration-200 ease-out pointer-events-none"
           style={{
             ...hoverStyle,
             opacity: hoveredIndex !== null ? 1 : 0,

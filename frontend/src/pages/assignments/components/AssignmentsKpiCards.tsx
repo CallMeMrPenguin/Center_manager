@@ -1,5 +1,4 @@
 import React from 'react';
-import { BookCheck, CalendarClock, CheckCircle, Trophy } from 'lucide-react';
 
 interface AssignmentsKpiCardsProps {
   kpis: {
@@ -16,33 +15,29 @@ export const AssignmentsKpiCards: React.FC<AssignmentsKpiCardsProps> = ({ kpis }
       title: 'Tổng Số Bài Tập',
       value: kpis.total,
       desc: 'Đã giao cho các lớp',
-      icon: <BookCheck size={18} className="text-blue-400" />,
       cardClass: 'kpi-card-blue',
-      textColor: 'text-blue-400',
+      textColor: 'text-blue-500 dark:text-blue-400',
     },
     {
       title: 'Đang Mở / Sắp Hết Hạn',
       value: kpis.dueUpcoming,
       desc: 'Bài tập còn hạn nộp',
-      icon: <CalendarClock size={18} className="text-purple-400" />,
       cardClass: 'kpi-card-purple',
-      textColor: 'text-purple-400',
+      textColor: 'text-purple-500 dark:text-purple-400',
     },
     {
       title: 'Tỷ Lệ Nộp Bài',
       value: `${kpis.avgRate}%`,
       desc: 'Trung bình toàn bộ bài tập',
-      icon: <CheckCircle size={18} className="text-emerald-400" />,
       cardClass: 'kpi-card-green',
-      textColor: 'text-emerald-400',
+      textColor: 'text-emerald-500 dark:text-emerald-400',
     },
     {
       title: 'Điểm BTVN Trung Bình',
       value: kpis.avgScore,
       desc: 'Thang điểm 10.0',
-      icon: <Trophy size={18} className="text-amber-400" />,
       cardClass: 'kpi-card-amber',
-      textColor: 'text-amber-400',
+      textColor: 'text-amber-500 dark:text-amber-400',
     },
   ];
 
@@ -51,15 +46,12 @@ export const AssignmentsKpiCards: React.FC<AssignmentsKpiCardsProps> = ({ kpis }
       {cards.map((card, idx) => (
         <div
           key={idx}
-          className={`${card.cardClass} bg-white dark:bg-[#0c0f1e] rounded-2xl p-4 flex flex-col justify-between shadow-[0_4px_20px_rgba(15,23,42,0.07)] dark:shadow-md relative overflow-hidden transition-all duration-200`}
+          className={`${card.cardClass} bg-white dark:bg-[#0c0f1e] rounded-2xl p-4 flex flex-col justify-between shadow-xs border-0 relative overflow-hidden transition-all duration-200`}
         >
-          <div className="flex items-center justify-between gap-2 mb-2">
+          <div className="mb-2">
             <span className="text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">
               {card.title}
             </span>
-            <div className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-white/5 flex items-center justify-center shrink-0 border border-slate-200 dark:border-white/5">
-              {card.icon}
-            </div>
           </div>
 
           <div className="space-y-1">
