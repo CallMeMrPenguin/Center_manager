@@ -1,7 +1,7 @@
 import { api } from '../../../api';
 import { showToast } from '../../../components/Toast';
 import { useConfirm } from '../../../components/ConfirmDialog';
-import { ClassSession, DAYS, DAY_NUM, calcEndTime, timeToMin } from '../types';
+import { ClassSession, DAYS, DAY_NUM, SessionScheduleItem, calcEndTime, timeToMin } from '../types';
 
 interface UseScheduleActionsProps {
   classesList: any[];
@@ -71,57 +71,95 @@ export function useScheduleActions({
     return null;
   };
 
-  const save = async (e: React.FormEvent) => {
+  const save = async (e: React.FormEvent, items?: SessionScheduleItem[]) => {
     e.preventDefault();
     if (!form.class_id) {
       showToast('Vui lòng chọn lớp học!', 'error');
-      return;
-    }
-    if (!form.date) {
-      showToast('Vui lòng chọn ngày học!', 'error');
       return;
     }
 
     const notes = `#COLOR:${color} ${(form.notes || '').replace(/#COLOR:#[0-9a-fA-F]{6}/g, '').trim()}`.trim();
 
     try {
-      if (editing || mode === 'temporary') {
+      if (editing) {
+        const item = items?.[0];
+        const dateToSave = item?.date || form.date!;
+        const startTimeToSave = item?.start_time || form.start_time || '18:00';
+        const durationToSave = item?.duration || form.duration || 90;
+
         const conflict = checkSingleConflict({
-          id: editing?.id,
+          id: editing.id,
           class_id: form.class_id,
-          date: form.date,
-          start_time: form.start_time || '18:00',
-          duration: form.duration || 90,
+          date: dateToSave,
+          start_time: startTimeToSave,
+          duration: durationToSave,
         });
         if (conflict?.error) {
           showToast(conflict.error, 'error');
           return;
         }
 
-        if (editing) {
-          await api.updateClassSession(form.class_id, editing.id, { ...form, notes, color });
-          showToast('Cập nhật buổi học thành công!', 'success');
-        } else {
-          await api.addClassSession(form.class_id, { ...form, notes, color });
-          showToast('Tạo buổi học thành công!', 'success');
+        await api.updateClassSession(form.class_id, editing.id, {
+          ...form,
+          date: dateToSave,
+          start_time: startTimeToSave,
+          duration: durationToSave,
+          notes,
+          color,
+        });
+        showToast('Cập nhật buổi học thành công!', 'success');
+      } else if (mode === 'temporary') {
+        const dateItems = items && items.length > 0
+          ? items
+          : [{ id: form.date!, date: form.date!, start_time: form.start_time || '18:00', duration: form.duration || 90, dayName: '', label: '' }];
+
+        let createdCount = 0;
+        for (const item of dateItems) {
+          if (!item.date) continue;
+          const conflict = checkSingleConflict({
+            class_id: form.class_id,
+            date: item.date,
+            start_time: item.start_time || '18:00',
+            duration: item.duration || 90,
+          });
+          if (conflict?.error) {
+            showToast(conflict.error, 'error');
+            return;
+          }
+
+          await api.addClassSession(form.class_id, {
+            ...form,
+            date: item.date,
+            start_time: item.start_time || '18:00',
+            duration: item.duration || 90,
+            notes,
+            color,
+          });
+          createdCount++;
         }
+        showToast(`Đã tạo thành công ${createdCount} buổi học!`, 'success');
       } else {
         // mode === 'recurring' (Lịch Cố Định)
-        const [y, m, d] = form.date.split('-').map(Number);
-        const targetDt = new Date(y, m - 1, d);
-        const targetDayNum = targetDt.getDay();
-        const dayName = DAYS.find((k) => DAY_NUM[k] === targetDayNum) || 'Thứ 2';
+        const recurringItems = items && items.length > 0
+          ? items
+          : [{ id: 'Thứ 2', dayOfWeek: 1, dayName: 'Thứ 2', start_time: form.start_time || '18:00', duration: form.duration || 90, label: '' }];
 
         const pendingItems: Array<{ date: string; start_time: string; duration: number }> = [];
-        for (let day = 1; day <= daysInMonth; day++) {
-          const dt = new Date(yr, mo - 1, day);
-          if (dt.getDay() === targetDayNum) {
-            const ds = `${yr}-${String(mo).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-            pendingItems.push({
-              date: ds,
-              start_time: form.start_time || '18:00',
-              duration: form.duration || 90,
-            });
+
+        for (const item of recurringItems) {
+          const targetDayNum = item.dayOfWeek ?? (item.date ? new Date(item.date).getDay() : DAY_NUM[item.dayName]);
+          if (targetDayNum === undefined) continue;
+
+          for (let day = 1; day <= daysInMonth; day++) {
+            const dt = new Date(yr, mo - 1, day);
+            if (dt.getDay() === targetDayNum) {
+              const ds = `${yr}-${String(mo).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+              pendingItems.push({
+                date: ds,
+                start_time: item.start_time || '18:00',
+                duration: item.duration || 90,
+              });
+            }
           }
         }
 
@@ -130,17 +168,18 @@ export function useScheduleActions({
           return;
         }
 
-        for (const item of pendingItems) {
+        for (const p of pendingItems) {
           await api.addClassSession(form.class_id, {
             ...form,
-            date: item.date,
-            start_time: item.start_time,
-            duration: item.duration,
+            date: p.date,
+            start_time: p.start_time,
+            duration: p.duration,
             notes,
             color,
           });
         }
-        showToast(`Đã tạo thành công ${pendingItems.length} buổi học (${dayName}) tháng ${selectedMonth}!`, 'success');
+        const dayNamesLabel = recurringItems.map((r) => r.dayName).join(', ');
+        showToast(`Đã tạo thành công ${pendingItems.length} buổi học (${dayNamesLabel}) tháng ${selectedMonth}!`, 'success');
       }
 
       window.dispatchEvent(new CustomEvent('data-changed'));

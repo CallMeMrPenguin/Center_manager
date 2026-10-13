@@ -24,6 +24,16 @@ export interface DayCfg {
   duration: number;
 }
 
+export interface SessionScheduleItem {
+  id: string;
+  date?: string;
+  dayOfWeek?: number;
+  dayName: string;
+  label: string;
+  start_time: string;
+  duration: number;
+}
+
 export const SCHEDULE_PALETTE_24 = [
   '#2563eb', '#0284c7', '#0d9488', '#059669', '#16a34a', '#65a30d',
   '#ca8a04', '#d97706', '#ea580c', '#dc2626', '#e11d48', '#db2777',

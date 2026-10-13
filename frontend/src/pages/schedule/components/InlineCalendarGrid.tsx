@@ -1,0 +1,213 @@
+import React from 'react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { MONTH_NAMES } from '../../../components/datepicker/datePickerUtils';
+
+interface InlineCalendarGridProps {
+  year: number;
+  month: number; // 1-12
+  onPrevMonth: () => void;
+  onNextMonth: () => void;
+  mode: 'recurring' | 'temporary';
+  selectedDates: string[]; // ['2026-10-14', ...]
+  selectedDaysOfWeek: number[]; // [1, 3] (0 = Sunday, 1 = Monday, etc.)
+  onToggleDate: (dateStr: string, dayOfWeek: number) => void;
+  onToggleDayOfWeek: (dayOfWeek: number) => void;
+  isSingleSelect?: boolean;
+}
+
+const WEEKDAYS = [
+  { label: 'T2', dayNum: 1 },
+  { label: 'T3', dayNum: 2 },
+  { label: 'T4', dayNum: 3 },
+  { label: 'T5', dayNum: 4 },
+  { label: 'T6', dayNum: 5 },
+  { label: 'T7', dayNum: 6 },
+  { label: 'CN', dayNum: 0 },
+];
+
+export const InlineCalendarGrid: React.FC<InlineCalendarGridProps> = ({
+  year,
+  month,
+  onPrevMonth,
+  onNextMonth,
+  mode,
+  selectedDates,
+  selectedDaysOfWeek,
+  onToggleDate,
+  onToggleDayOfWeek,
+  isSingleSelect = false,
+}) => {
+  const today = new Date();
+  const todayISO = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+
+  const firstDay = new Date(year, month - 1, 1).getDay();
+  // Monday-first offset: Mon(1)->0, Tue(2)->1, ..., Sun(0)->6
+  const startOffset = (firstDay + 6) % 7;
+  const daysInMonth = new Date(year, month, 0).getDate();
+  const prevMonthDays = new Date(year, month - 1, 0).getDate();
+
+  const cells: Array<{
+    dateStr: string;
+    dayNumber: number;
+    dayOfWeek: number;
+    isCurrentMonth: boolean;
+    isToday: boolean;
+    isSelected: boolean;
+  }> = [];
+
+  // Previous month overflow
+  for (let i = startOffset - 1; i >= 0; i--) {
+    const dNum = prevMonthDays - i;
+    const prevM = month === 1 ? 12 : month - 1;
+    const prevY = month === 1 ? year - 1 : year;
+    const dStr = `${prevY}-${String(prevM).padStart(2, '0')}-${String(dNum).padStart(2, '0')}`;
+    const dObj = new Date(prevY, prevM - 1, dNum);
+    cells.push({
+      dateStr: dStr,
+      dayNumber: dNum,
+      dayOfWeek: dObj.getDay(),
+      isCurrentMonth: false,
+      isToday: dStr === todayISO,
+      isSelected: false,
+    });
+  }
+
+  // Current month days
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dStr = `${year}-${String(month).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+    const dObj = new Date(year, month - 1, d);
+    const dayOfWeek = dObj.getDay();
+
+    let isSelected = false;
+    if (mode === 'recurring' && !isSingleSelect) {
+      isSelected = selectedDaysOfWeek.includes(dayOfWeek);
+    } else {
+      isSelected = selectedDates.includes(dStr);
+    }
+
+    cells.push({
+      dateStr: dStr,
+      dayNumber: d,
+      dayOfWeek,
+      isCurrentMonth: true,
+      isToday: dStr === todayISO,
+      isSelected,
+    });
+  }
+
+  // Fill up to multiple of 7
+  const remainder = cells.length % 7;
+  if (remainder !== 0) {
+    const nextFill = 7 - remainder;
+    for (let d = 1; d <= nextFill; d++) {
+      const nextM = month === 12 ? 1 : month + 1;
+      const nextY = month === 12 ? year + 1 : year;
+      const dStr = `${nextY}-${String(nextM).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+      const dObj = new Date(nextY, nextM - 1, d);
+      cells.push({
+        dateStr: dStr,
+        dayNumber: d,
+        dayOfWeek: dObj.getDay(),
+        isCurrentMonth: false,
+        isToday: dStr === todayISO,
+        isSelected: false,
+      });
+    }
+  }
+
+  return (
+    <div className="bg-slate-50/80 dark:bg-[#141928] rounded-2xl p-3 border-0 shadow-xs">
+      {/* HEADER: Month & Year Navigator */}
+      <div className="flex items-center justify-between mb-2 px-1">
+        <div className="flex items-center gap-1.5">
+          <span className="text-xs font-black text-slate-900 dark:text-white">
+            {MONTH_NAMES[month - 1]} {year}
+          </span>
+          <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 bg-slate-200/60 dark:bg-white/10 px-1.5 py-0.5 rounded-md">
+            {mode === 'recurring' && !isSingleSelect ? 'Lặp lại theo thứ' : 'Chọn ngày cụ thể'}
+          </span>
+        </div>
+        <div className="flex items-center gap-1">
+          <button
+            type="button"
+            onClick={onPrevMonth}
+            className="p-1 rounded-lg text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-white/10 cursor-pointer transition border-0"
+            title="Tháng trước"
+          >
+            <ChevronLeft size={14} />
+          </button>
+          <button
+            type="button"
+            onClick={onNextMonth}
+            className="p-1 rounded-lg text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-white/10 cursor-pointer transition border-0"
+            title="Tháng sau"
+          >
+            <ChevronRight size={14} />
+          </button>
+        </div>
+      </div>
+
+      {/* WEEKDAY COLUMN HEADERS */}
+      <div className="grid grid-cols-7 gap-1 mb-1 text-center">
+        {WEEKDAYS.map((w) => {
+          const isDayActive = mode === 'recurring' && !isSingleSelect && selectedDaysOfWeek.includes(w.dayNum);
+          return (
+            <button
+              key={w.dayNum}
+              type="button"
+              onClick={() => {
+                if (mode === 'recurring' && !isSingleSelect) {
+                  onToggleDayOfWeek(w.dayNum);
+                }
+              }}
+              className={`py-1 text-[11px] rounded-lg font-extrabold transition-all border-0 ${
+                mode === 'recurring' && !isSingleSelect ? 'cursor-pointer' : 'cursor-default'
+              } ${
+                isDayActive
+                  ? 'bg-blue-600 text-white shadow-xs scale-105'
+                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white'
+              }`}
+              title={mode === 'recurring' ? `Bấm để chọn/bỏ chọn tất cả các ngày ${w.label}` : w.label}
+            >
+              {w.label}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* MONTH DAYS GRID */}
+      <div className="grid grid-cols-7 gap-1 text-center">
+        {cells.map((c, idx) => {
+          if (!c.isCurrentMonth) {
+            return (
+              <div
+                key={`pad-${idx}`}
+                className="h-8 flex items-center justify-center text-[11px] font-medium text-slate-300 dark:text-slate-600 select-none"
+              >
+                {c.dayNumber}
+              </div>
+            );
+          }
+
+          return (
+            <button
+              key={c.dateStr}
+              type="button"
+              onClick={() => onToggleDate(c.dateStr, c.dayOfWeek)}
+              className={`h-8 rounded-xl flex flex-col items-center justify-center text-xs font-bold transition-all cursor-pointer relative border-0 ${
+                c.isSelected
+                  ? 'bg-blue-600 text-white font-black shadow-[0_2px_6px_rgba(37,99,235,0.3)] scale-[1.04]'
+                  : 'text-slate-700 dark:text-slate-200 hover:bg-slate-200/70 dark:hover:bg-white/10'
+              }`}
+            >
+              <span>{c.dayNumber}</span>
+              {c.isToday && !c.isSelected && (
+                <span className="w-1 h-1 rounded-full bg-blue-500 absolute bottom-1" />
+              )}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
