@@ -42,7 +42,7 @@ export function DataTablePagination<TData>({
           type="button"
           onClick={() => table.setPageIndex(0)}
           disabled={!table.getCanPreviousPage()}
-          className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 text-slate-700 dark:text-slate-300 disabled:opacity-30 border-0 shadow-xs hover:shadow-sm transition cursor-pointer disabled:cursor-not-allowed"
+          className="p-1.5 rounded-lg bg-white dark:bg-[#181a20] hover:bg-slate-50 dark:hover:bg-white/10 text-slate-700 dark:text-slate-300 disabled:opacity-30 border-0 shadow-[0_1px_3px_rgba(15,23,42,0.1),0_1px_2px_rgba(15,23,42,0.06)] hover:shadow-[0_2px_6px_rgba(15,23,42,0.14)] dark:shadow-[0_2px_6px_rgba(0,0,0,0.5)] transition cursor-pointer disabled:cursor-not-allowed"
           title="Trang đầu"
         >
           <ChevronsLeft size={13} />
@@ -52,7 +52,7 @@ export function DataTablePagination<TData>({
           type="button"
           onClick={() => table.previousPage()}
           disabled={!table.getCanPreviousPage()}
-          className="px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 text-slate-700 dark:text-slate-300 disabled:opacity-30 border-0 shadow-xs hover:shadow-sm transition flex items-center gap-1 cursor-pointer disabled:cursor-not-allowed"
+          className="px-2.5 py-1.5 rounded-lg bg-white dark:bg-[#181a20] hover:bg-slate-50 dark:hover:bg-white/10 text-slate-700 dark:text-slate-300 disabled:opacity-30 border-0 shadow-[0_1px_3px_rgba(15,23,42,0.1),0_1px_2px_rgba(15,23,42,0.06)] hover:shadow-[0_2px_6px_rgba(15,23,42,0.14)] dark:shadow-[0_2px_6px_rgba(0,0,0,0.5)] transition flex items-center gap-1 cursor-pointer disabled:cursor-not-allowed"
         >
           <ChevronLeft size={13} />
           <span>Trước</span>
@@ -72,10 +72,10 @@ export function DataTablePagination<TData>({
                 key={pageNum}
                 type="button"
                 onClick={() => table.setPageIndex(pageNum)}
-                className={`w-7 h-7 rounded-lg text-[11px] font-extrabold border-0 shadow-xs hover:shadow-sm transition cursor-pointer ${
+                className={`w-7 h-7 rounded-lg text-[11px] font-extrabold border-0 transition cursor-pointer ${
                   pageNum === pageIndex
-                    ? 'bg-[#2563eb] text-white shadow-[0_0_8px_rgba(37,99,235,0.4)]'
-                    : 'bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
+                    ? 'bg-[#2563eb] text-white shadow-[0_2px_6px_rgba(37,99,235,0.35)]'
+                    : 'bg-white dark:bg-[#181a20] hover:bg-slate-50 dark:hover:bg-white/10 text-slate-700 dark:text-slate-300 shadow-[0_1px_3px_rgba(15,23,42,0.1),0_1px_2px_rgba(15,23,42,0.06)] hover:shadow-[0_2px_6px_rgba(15,23,42,0.14)] dark:shadow-[0_2px_6px_rgba(0,0,0,0.5)] hover:text-slate-900 dark:hover:text-white'
                 }`}
               >
                 {pageNum + 1}
@@ -88,7 +88,7 @@ export function DataTablePagination<TData>({
           type="button"
           onClick={() => table.nextPage()}
           disabled={!table.getCanNextPage()}
-          className="px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 text-slate-700 dark:text-slate-300 disabled:opacity-30 border-0 shadow-xs hover:shadow-sm transition flex items-center gap-1 cursor-pointer disabled:cursor-not-allowed"
+          className="px-2.5 py-1.5 rounded-lg bg-white dark:bg-[#181a20] hover:bg-slate-50 dark:hover:bg-white/10 text-slate-700 dark:text-slate-300 disabled:opacity-30 border-0 shadow-[0_1px_3px_rgba(15,23,42,0.1),0_1px_2px_rgba(15,23,42,0.06)] hover:shadow-[0_2px_6px_rgba(15,23,42,0.14)] dark:shadow-[0_2px_6px_rgba(0,0,0,0.5)] transition flex items-center gap-1 cursor-pointer disabled:cursor-not-allowed"
         >
           <span>Sau</span>
           <ChevronRight size={13} />
@@ -98,7 +98,7 @@ export function DataTablePagination<TData>({
           type="button"
           onClick={() => table.setPageIndex(pageCount - 1)}
           disabled={!table.getCanNextPage()}
-          className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 text-slate-700 dark:text-slate-300 disabled:opacity-30 border-0 shadow-xs hover:shadow-sm transition cursor-pointer disabled:cursor-not-allowed"
+          className="p-1.5 rounded-lg bg-white dark:bg-[#181a20] hover:bg-slate-50 dark:hover:bg-white/10 text-slate-700 dark:text-slate-300 disabled:opacity-30 border-0 shadow-[0_1px_3px_rgba(15,23,42,0.1),0_1px_2px_rgba(15,23,42,0.06)] hover:shadow-[0_2px_6px_rgba(15,23,42,0.14)] dark:shadow-[0_2px_6px_rgba(0,0,0,0.5)] transition cursor-pointer disabled:cursor-not-allowed"
           title="Trang cuối"
         >
           <ChevronsRight size={13} />

@@ -2,10 +2,7 @@ import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { Calendar, ChevronDown } from 'lucide-react';
 import { Button } from '../../../components/button';
 import { formatSessionDate, getStandardMoetPhases } from '../utils';
-import {
-  AcademicYearPhasePopover,
-  getMonthRange,
-} from './AcademicYearPhasePopover';
+import { AcademicYearPhasePopover } from './AcademicYearPhasePopover';
 
 interface AcademicYearPhaseSelectProps {
   selectedAcademicYear: string;
@@ -33,18 +30,7 @@ export const AcademicYearPhaseSelect: React.FC<AcademicYearPhaseSelectProps> = (
   className = '',
 }) => {
   const [open, setOpen] = useState(false);
-  const [subTab, setSubTab] = useState<'phase' | 'month' | 'custom'>('phase');
   const containerRef = useRef<HTMLDivElement>(null);
-
-  const [tempStart, setTempStart] = useState<string>(customRange?.startStr || '');
-  const [tempEnd, setTempEnd] = useState<string>(customRange?.endStr || '');
-
-  useEffect(() => {
-    if (customRange) {
-      setTempStart(customRange.startStr);
-      setTempEnd(customRange.endStr);
-    }
-  }, [customRange]);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -91,18 +77,6 @@ export const AcademicYearPhaseSelect: React.FC<AcademicYearPhaseSelectProps> = (
     return merged;
   }, [selectedAcademicYear, timePhases]);
 
-  // Detect if customRange corresponds to a full calendar month
-  const activeMonth = useMemo(() => {
-    if (!customRange) return null;
-    for (let m = 1; m <= 12; m++) {
-      const range = getMonthRange(m, selectedAcademicYear);
-      if (range.startStr === customRange.startStr && range.endStr === customRange.endStr) {
-        return m;
-      }
-    }
-    return null;
-  }, [customRange, selectedAcademicYear]);
-
   const activePhase = useMemo(
     () => combinedPhases.find((p) => String(p.id) === String(selectedPhaseId)),
     [combinedPhases, selectedPhaseId]
@@ -128,9 +102,6 @@ export const AcademicYearPhaseSelect: React.FC<AcademicYearPhaseSelectProps> = (
   }, [academicYears, selectedAcademicYear]);
 
   const triggerLabel = useMemo(() => {
-    if (activeMonth) {
-      return `${selectedAcademicYear} · Tháng ${activeMonth}`;
-    }
     if (customRange) {
       return `${selectedAcademicYear} · ${formatSessionDate(customRange.startStr)} - ${formatSessionDate(customRange.endStr)}`;
     }
@@ -141,25 +112,7 @@ export const AcademicYearPhaseSelect: React.FC<AcademicYearPhaseSelectProps> = (
       return `${selectedAcademicYear} · ${activePhase.phase_name}`;
     }
     return `${selectedAcademicYear} · Cả năm`;
-  }, [selectedAcademicYear, activeMonth, customRange, activePhase]);
-
-  const handleApplyCustomDates = () => {
-    if (tempStart && tempEnd && setCustomRange) {
-      const minStr = tempStart <= tempEnd ? tempStart : tempEnd;
-      const maxStr = tempStart <= tempEnd ? tempEnd : tempStart;
-      setCustomRange({ startStr: minStr, endStr: maxStr });
-      setSelectedPhaseId('');
-      setOpen(false);
-    }
-  };
-
-  const handleClearCustomDates = () => {
-    setTempStart('');
-    setTempEnd('');
-    if (setCustomRange) setCustomRange(null);
-    setSelectedPhaseId('');
-    setOpen(false);
-  };
+  }, [selectedAcademicYear, customRange, activePhase]);
 
   return (
     <div className={`relative inline-block ${className}`} ref={containerRef}>
@@ -176,32 +129,23 @@ export const AcademicYearPhaseSelect: React.FC<AcademicYearPhaseSelectProps> = (
             className={`text-slate-400 transition-transform duration-200 shrink-0 ${open ? 'rotate-180' : ''}`}
           />
         }
-        title="Chọn năm học, giai đoạn (học kỳ), tháng hoặc khoảng ngày"
-        className="shrink-0 shadow-xs hover:shadow-sm"
+        title="Chọn năm học, giai đoạn (học kỳ), hoặc khoảng ngày trên lịch"
+        className="shrink-0"
       >
         <span className="whitespace-nowrap font-extrabold max-w-[220px] truncate">{triggerLabel}</span>
       </Button>
 
-      {/* 2-COLUMN SPLIT POPOVER CARD */}
+      {/* 3-PART SPLIT POPOVER CARD: NĂM HỌC · GIAI ĐOẠN · LỊCH HỌC DATEPICKER */}
       {open && (
         <AcademicYearPhasePopover
           effectiveYears={effectiveYears}
           selectedAcademicYear={selectedAcademicYear}
           setSelectedAcademicYear={setSelectedAcademicYear}
-          subTab={subTab}
-          setSubTab={setSubTab}
           combinedPhases={combinedPhases}
           selectedPhaseId={selectedPhaseId}
           setSelectedPhaseId={setSelectedPhaseId}
           customRange={customRange}
           setCustomRange={setCustomRange}
-          activeMonth={activeMonth}
-          tempStart={tempStart}
-          setTempStart={setTempStart}
-          tempEnd={tempEnd}
-          setTempEnd={setTempEnd}
-          handleApplyCustomDates={handleApplyCustomDates}
-          handleClearCustomDates={handleClearCustomDates}
           onOpenPhaseModal={onOpenPhaseModal}
           setOpen={setOpen}
         />

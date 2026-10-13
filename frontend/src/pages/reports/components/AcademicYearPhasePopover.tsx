@@ -1,54 +1,24 @@
-import React from 'react';
-import { Check, Settings2 } from 'lucide-react';
+import React, { useState, useMemo } from 'react';
+import { Check, Settings2, X } from 'lucide-react';
+import { getLocalDateStr } from '../../../utils';
+import { formatSessionDate } from '../utils';
+import {
+  computeMonthWeeks,
+  DateRangeSegment,
+  getAdjacentMonth,
+} from '../../schedule/components/scheduleDatePickerHelper';
+import { ScheduleDatePickerMonth } from '../../schedule/components/ScheduleDatePickerMonth';
 import { Button } from '../../../components/button';
-import { CustomDatePicker } from '../../../components/datepicker';
-
-export const SCHOOL_YEAR_MONTHS = [
-  { num: 9, label: 'Tháng 9' },
-  { num: 10, label: 'Tháng 10' },
-  { num: 11, label: 'Tháng 11' },
-  { num: 12, label: 'Tháng 12' },
-  { num: 1, label: 'Tháng 1' },
-  { num: 2, label: 'Tháng 2' },
-  { num: 3, label: 'Tháng 3' },
-  { num: 4, label: 'Tháng 4' },
-  { num: 5, label: 'Tháng 5' },
-  { num: 6, label: 'Tháng 6' },
-  { num: 7, label: 'Tháng 7' },
-  { num: 8, label: 'Tháng 8' },
-];
-
-export const getMonthRange = (monthNum: number, academicYear: string) => {
-  const parts = academicYear.split('-');
-  const startYear = parseInt(parts[0], 10) || 2026;
-  const endYear = parts.length > 1 ? parseInt(parts[1], 10) || startYear + 1 : startYear + 1;
-  const year = monthNum >= 8 ? startYear : endYear;
-  const mm = String(monthNum).padStart(2, '0');
-  const lastDay = new Date(year, monthNum, 0).getDate();
-  return {
-    startStr: `${year}-${mm}-01`,
-    endStr: `${year}-${mm}-${String(lastDay).padStart(2, '0')}`,
-  };
-};
 
 interface AcademicYearPhasePopoverProps {
   effectiveYears: string[];
   selectedAcademicYear: string;
   setSelectedAcademicYear: (y: string) => void;
-  subTab: 'phase' | 'month' | 'custom';
-  setSubTab: (t: 'phase' | 'month' | 'custom') => void;
   combinedPhases: any[];
   selectedPhaseId: string;
   setSelectedPhaseId: (id: string) => void;
   customRange?: { startStr: string; endStr: string } | null;
   setCustomRange?: (r: { startStr: string; endStr: string } | null) => void;
-  activeMonth: number | null;
-  tempStart: string;
-  setTempStart: (s: string) => void;
-  tempEnd: string;
-  setTempEnd: (s: string) => void;
-  handleApplyCustomDates: () => void;
-  handleClearCustomDates: () => void;
   onOpenPhaseModal?: () => void;
   setOpen: (o: boolean) => void;
 }
@@ -57,32 +27,103 @@ export const AcademicYearPhasePopover: React.FC<AcademicYearPhasePopoverProps> =
   effectiveYears,
   selectedAcademicYear,
   setSelectedAcademicYear,
-  subTab,
-  setSubTab,
   combinedPhases,
   selectedPhaseId,
   setSelectedPhaseId,
   customRange,
   setCustomRange,
-  activeMonth,
-  tempStart,
-  setTempStart,
-  tempEnd,
-  setTempEnd,
-  handleApplyCustomDates,
-  handleClearCustomDates,
   onOpenPhaseModal,
   setOpen,
 }) => {
+  const today = useMemo(() => getLocalDateStr(), []);
+
+  // Calendar year and month for the embedded ScheduleDatePickerMonth
+  const [calYear, setCalYear] = useState<number>(() => {
+    if (customRange?.startStr) {
+      return parseInt(customRange.startStr.split('-')[0], 10) || 2026;
+    }
+    const startYear = parseInt((selectedAcademicYear || '2026-2027').split('-')[0], 10) || 2026;
+    return startYear;
+  });
+
+  const [calMonth, setCalMonth] = useState<number>(() => {
+    if (customRange?.startStr) {
+      return parseInt(customRange.startStr.split('-')[1], 10) || 9;
+    }
+    return 9;
+  });
+
+  // Range picking states matching ScheduleDatePicker
+  const [pickingStart, setPickingStart] = useState<string | null>(null);
+  const [hoverDate, setHoverDate] = useState<string | null>(null);
+  const [activeHoverDay, setActiveHoverDay] = useState<string | null>(null);
+
+  const weeks = useMemo(
+    () => computeMonthWeeks(calYear, calMonth, today),
+    [calYear, calMonth, today]
+  );
+
+  const segments = useMemo<DateRangeSegment[]>(() => {
+    if (pickingStart && hoverDate) {
+      const minStr = pickingStart <= hoverDate ? pickingStart : hoverDate;
+      const maxStr = pickingStart <= hoverDate ? hoverDate : pickingStart;
+      return [{ startStr: minStr, endStr: maxStr }];
+    }
+    if (pickingStart) {
+      return [{ startStr: pickingStart, endStr: pickingStart }];
+    }
+    if (customRange) {
+      return [{ startStr: customRange.startStr, endStr: customRange.endStr }];
+    }
+    return [];
+  }, [pickingStart, hoverDate, customRange]);
+
+  const handleDayClick = (dateStr: string) => {
+    if (!pickingStart) {
+      setPickingStart(dateStr);
+      setHoverDate(null);
+    } else {
+      const minStr = dateStr <= pickingStart ? dateStr : pickingStart;
+      const maxStr = dateStr <= pickingStart ? pickingStart : dateStr;
+      setPickingStart(null);
+      setHoverDate(null);
+      if (setCustomRange) {
+        setCustomRange({ startStr: minStr, endStr: maxStr });
+      }
+      setSelectedPhaseId('');
+      setOpen(false);
+    }
+  };
+
+  const handleDayHover = (dateStr: string) => {
+    setActiveHoverDay(dateStr);
+    if (pickingStart) {
+      setHoverDate(dateStr);
+    }
+  };
+
+  const changeCalMonth = (delta: number) => {
+    const adj = getAdjacentMonth(calYear, calMonth, delta);
+    setCalYear(adj.yr);
+    setCalMonth(adj.mo);
+  };
+
+  const handleClearCustomRange = () => {
+    setPickingStart(null);
+    setHoverDate(null);
+    if (setCustomRange) setCustomRange(null);
+    setSelectedPhaseId('');
+  };
+
   return (
-    <div className="absolute left-0 sm:left-auto right-0 top-full mt-2 z-50 w-[380px] sm:w-[460px] bg-white dark:bg-[#141926] rounded-2xl shadow-xl dark:shadow-2xl border-0 p-3 select-none animate-mac-dropdown">
-      <div className="grid grid-cols-[130px_1fr] divide-x divide-slate-100 dark:divide-white/10 gap-x-3">
-        {/* CỘT TRÁI: NĂM HỌC */}
-        <div className="pr-1.5 space-y-1">
-          <div className="text-[10px] font-black tracking-wider text-slate-400 uppercase px-1 pb-1">
+    <div className="absolute left-0 sm:left-auto right-0 top-full mt-2 z-50 bg-white dark:bg-[#141926] rounded-2xl shadow-[0_16px_48px_rgba(15,23,42,0.18)] dark:shadow-[0_24px_60px_rgba(0,0,0,0.9)] border-0 p-3 select-none animate-mac-dropdown max-w-[95vw] overflow-x-auto">
+      <div className="flex flex-col sm:flex-row divide-y sm:divide-y-0 sm:divide-x divide-slate-100 dark:divide-white/10 gap-3">
+        {/* 1. CỘT NĂM HỌC */}
+        <div className="w-full sm:w-28 shrink-0 space-y-1.5 pr-0 sm:pr-1">
+          <div className="text-[10px] font-black tracking-wider text-slate-400 uppercase px-1 pb-0.5">
             Năm học
           </div>
-          <div className="space-y-1 max-h-72 overflow-y-auto pr-0.5 scrollbar-thin">
+          <div className="space-y-1 max-h-68 overflow-y-auto pr-0.5 scrollbar-thin">
             {effectiveYears.map((year) => {
               const isSelected = selectedAcademicYear.replace('–', '-') === year;
               return (
@@ -93,10 +134,15 @@ export const AcademicYearPhasePopover: React.FC<AcademicYearPhasePopoverProps> =
                     setSelectedAcademicYear(year);
                     setSelectedPhaseId('');
                     if (setCustomRange) setCustomRange(null);
+                    const [sy] = year.split('-').map(Number);
+                    if (sy) {
+                      setCalYear(sy);
+                      setCalMonth(9);
+                    }
                   }}
-                  className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer border-0 shadow-2xs ${
+                  className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer border-0 shadow-[0_1px_2px_rgba(0,0,0,0.06)] ${
                     isSelected
-                      ? 'bg-indigo-600 text-white font-black'
+                      ? 'bg-indigo-600 text-white font-black shadow-[0_2px_6px_rgba(79,70,229,0.35)]'
                       : 'hover:bg-slate-100 dark:hover:bg-white/5 text-slate-700 dark:text-slate-300'
                   }`}
                 >
@@ -108,178 +154,69 @@ export const AcademicYearPhasePopover: React.FC<AcademicYearPhasePopoverProps> =
           </div>
         </div>
 
-        {/* CỘT PHẢI: GIAI ĐOẠN / THÁNG / TÙY CHỌN */}
-        <div className="pl-1.5 flex flex-col justify-between min-h-[260px]">
+        {/* 2. CỘT GIAI ĐOẠN */}
+        <div className="w-full sm:w-44 shrink-0 flex flex-col justify-between pt-2 sm:pt-0 px-0 sm:px-2">
           <div>
-            {/* 3 SUB-TABS */}
-            <div className="flex items-center gap-1 p-0.5 bg-slate-100 dark:bg-white/5 rounded-xl border-0 mb-2.5">
-              <button
-                type="button"
-                onClick={() => setSubTab('phase')}
-                className={`flex-1 py-1 text-[11px] font-bold rounded-lg transition border-0 cursor-pointer ${
-                  subTab === 'phase'
-                    ? 'bg-white dark:bg-[#1f2538] text-indigo-600 dark:text-indigo-400 shadow-2xs font-black'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-                }`}
-              >
-                Giai đoạn
-              </button>
-              <button
-                type="button"
-                onClick={() => setSubTab('month')}
-                className={`flex-1 py-1 text-[11px] font-bold rounded-lg transition border-0 cursor-pointer ${
-                  subTab === 'month'
-                    ? 'bg-white dark:bg-[#1f2538] text-indigo-600 dark:text-indigo-400 shadow-2xs font-black'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-                }`}
-              >
-                Tháng
-              </button>
-              <button
-                type="button"
-                onClick={() => setSubTab('custom')}
-                className={`flex-1 py-1 text-[11px] font-bold rounded-lg transition border-0 cursor-pointer ${
-                  subTab === 'custom'
-                    ? 'bg-white dark:bg-[#1f2538] text-indigo-600 dark:text-indigo-400 shadow-2xs font-black'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-                }`}
-              >
-                Tùy chọn
-              </button>
+            <div className="text-[10px] font-black tracking-wider text-slate-400 uppercase px-1 pb-1">
+              Giai đoạn
             </div>
+            <div className="space-y-1 max-h-60 overflow-y-auto pr-0.5 scrollbar-thin">
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedPhaseId('');
+                  if (setCustomRange) setCustomRange(null);
+                  setOpen(false);
+                }}
+                className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer border-0 shadow-[0_1px_2px_rgba(0,0,0,0.06)] ${
+                  !selectedPhaseId && !customRange
+                    ? 'bg-indigo-50 dark:bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 font-black'
+                    : 'hover:bg-slate-100 dark:hover:bg-white/5 text-slate-700 dark:text-slate-300'
+                }`}
+              >
+                <span>Cả năm</span>
+                {!selectedPhaseId && !customRange && (
+                  <Check size={13} className="text-indigo-600 dark:text-indigo-400 shrink-0" />
+                )}
+              </button>
 
-            {/* VIEW 1: GIAI ĐOẠN (HỌC KỲ I, HỌC KỲ II, CẢ NĂM, SUB-PHASES) */}
-            {subTab === 'phase' && (
-              <div className="space-y-1 max-h-56 overflow-y-auto pr-0.5 scrollbar-thin">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSelectedPhaseId('');
-                    if (setCustomRange) setCustomRange(null);
-                    setOpen(false);
-                  }}
-                  className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer border-0 shadow-2xs ${
-                    !selectedPhaseId && !customRange
-                      ? 'bg-indigo-50 dark:bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 font-black'
-                      : 'hover:bg-slate-100 dark:hover:bg-white/5 text-slate-700 dark:text-slate-300'
-                  }`}
-                >
-                  <span>Cả năm</span>
-                  {!selectedPhaseId && !customRange && (
-                    <Check size={13} className="text-indigo-600 dark:text-indigo-400 shrink-0" />
-                  )}
-                </button>
-
-                {combinedPhases.map((phase) => {
-                  if (phase.id.startsWith('moet-full-')) return null;
-                  const isSelected = selectedPhaseId === String(phase.id) && !customRange;
-                  return (
-                    <button
-                      key={phase.id}
-                      type="button"
-                      onClick={() => {
-                        setSelectedPhaseId(String(phase.id));
-                        if (setCustomRange) setCustomRange(null);
-                        setOpen(false);
-                      }}
-                      className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer border-0 shadow-2xs ${
-                        isSelected
-                          ? 'bg-indigo-50 dark:bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 font-black'
-                          : 'hover:bg-slate-100 dark:hover:bg-white/5 text-slate-700 dark:text-slate-300'
-                      }`}
-                    >
-                      <span className="truncate mr-1">{phase.phase_name}</span>
-                      {isSelected && (
-                        <Check size={13} className="text-indigo-600 dark:text-indigo-400 shrink-0" />
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-            )}
-
-            {/* VIEW 2: THEO THÁNG (12 THÁNG TRONG NĂM HỌC) */}
-            {subTab === 'month' && (
-              <div className="grid grid-cols-3 gap-1.5 max-h-56 overflow-y-auto pr-0.5 scrollbar-thin">
-                {SCHOOL_YEAR_MONTHS.map((m) => {
-                  const isSelected = activeMonth === m.num;
-                  return (
-                    <button
-                      key={m.num}
-                      type="button"
-                      onClick={() => {
-                        const range = getMonthRange(m.num, selectedAcademicYear);
-                        if (setCustomRange) setCustomRange(range);
-                        setSelectedPhaseId('');
-                        setOpen(false);
-                      }}
-                      className={`py-2 px-1.5 rounded-xl text-xs font-bold transition cursor-pointer border-0 shadow-2xs text-center ${
-                        isSelected
-                          ? 'bg-indigo-600 text-white font-black'
-                          : 'bg-slate-50 dark:bg-white/5 hover:bg-slate-100 dark:hover:bg-white/10 text-slate-700 dark:text-slate-300'
-                      }`}
-                    >
-                      {m.label}
-                    </button>
-                  );
-                })}
-              </div>
-            )}
-
-            {/* VIEW 3: TÙY CHỌN KHOẢNG NGÀY */}
-            {subTab === 'custom' && (
-              <div className="space-y-2.5 pt-1">
-                <div className="grid grid-cols-2 gap-1.5">
-                  <div>
-                    <div className="text-[10px] font-bold text-slate-400 mb-1">Từ ngày</div>
-                    <CustomDatePicker
-                      value={tempStart}
-                      onChange={(d) => setTempStart(d)}
-                      placeholder="Từ ngày"
-                      className="w-full text-xs"
-                    />
-                  </div>
-                  <div>
-                    <div className="text-[10px] font-bold text-slate-400 mb-1">Đến ngày</div>
-                    <CustomDatePicker
-                      value={tempEnd}
-                      onChange={(d) => setTempEnd(d)}
-                      placeholder="Đến ngày"
-                      className="w-full text-xs"
-                    />
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-1.5 pt-1">
-                  <Button
-                    variant="primary"
-                    size="xs"
+              {combinedPhases.map((phase) => {
+                if (phase.id.startsWith('moet-full-')) return null;
+                const isSelected = selectedPhaseId === String(phase.id) && !customRange;
+                return (
+                  <button
+                    key={phase.id}
                     type="button"
-                    onClick={handleApplyCustomDates}
-                    disabled={!tempStart || !tempEnd}
-                    className="flex-1 font-black shadow-xs hover:shadow-sm"
+                    onClick={() => {
+                      setSelectedPhaseId(String(phase.id));
+                      if (setCustomRange) setCustomRange(null);
+                      if (phase.from_date) {
+                        const [py, pm] = phase.from_date.split('-').map(Number);
+                        if (py && pm) {
+                          setCalYear(py);
+                          setCalMonth(pm);
+                        }
+                      }
+                      setOpen(false);
+                    }}
+                    className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer border-0 shadow-[0_1px_2px_rgba(0,0,0,0.06)] ${
+                      isSelected
+                        ? 'bg-indigo-50 dark:bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 font-black'
+                        : 'hover:bg-slate-100 dark:hover:bg-white/5 text-slate-700 dark:text-slate-300'
+                    }`}
                   >
-                    Áp dụng
-                  </Button>
-                  {(customRange || tempStart || tempEnd) && (
-                    <Button
-                      variant="secondary"
-                      size="xs"
-                      type="button"
-                      onClick={handleClearCustomDates}
-                      className="font-bold shadow-2xs hover:shadow-xs"
-                    >
-                      Xóa
-                    </Button>
-                  )}
-                </div>
-              </div>
-            )}
+                    <span className="truncate mr-1">{phase.phase_name}</span>
+                    {isSelected && (
+                      <Check size={13} className="text-indigo-600 dark:text-indigo-400 shrink-0" />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
-          {/* Chân cột: Nút Cấu hình giai đoạn */}
           {onOpenPhaseModal && (
-            <div className="pt-2 mt-2 border-t border-slate-100 dark:border-white/10">
+            <div className="pt-2 border-t border-slate-100 dark:border-white/10 mt-1">
               <button
                 type="button"
                 onClick={() => {
@@ -294,7 +231,64 @@ export const AcademicYearPhasePopover: React.FC<AcademicYearPhasePopoverProps> =
             </div>
           )}
         </div>
+
+        {/* 3. CỘT DATE PICKER NHƯ TRONG LỊCH HỌC */}
+        <div className="w-full sm:w-68 shrink-0 pt-2 sm:pt-0 pl-0 sm:pl-2 flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between px-1 pb-1">
+              <span className="text-[10px] font-black tracking-wider text-slate-400 uppercase">
+                Chọn ngày
+              </span>
+              {customRange && (
+                <button
+                  type="button"
+                  onClick={handleClearCustomRange}
+                  className="text-[10px] text-rose-500 hover:text-rose-600 font-bold transition cursor-pointer border-0 bg-transparent flex items-center gap-0.5"
+                >
+                  <X size={10} />
+                  <span>Xóa</span>
+                </button>
+              )}
+            </div>
+
+            <div
+              onMouseLeave={() => {
+                setActiveHoverDay(null);
+                if (!pickingStart) setHoverDate(null);
+              }}
+            >
+              <ScheduleDatePickerMonth
+                year={calYear}
+                month={calMonth}
+                weeks={weeks}
+                segments={segments}
+                isPicking={!!pickingStart}
+                pickingStart={pickingStart}
+                hoverDate={hoverDate}
+                activeHoverDay={activeHoverDay}
+                hoverLayoutId="report-datepicker-hover-pill"
+                onDayClick={handleDayClick}
+                onDayHover={handleDayHover}
+                showPrev={true}
+                showNext={true}
+                onPrevMonth={() => changeCalMonth(-1)}
+                onNextMonth={() => changeCalMonth(1)}
+              />
+            </div>
+          </div>
+
+          {customRange && (
+            <div className="mt-2 pt-2 border-t border-slate-100 dark:border-white/10 flex items-center justify-between text-[11px] font-bold text-slate-600 dark:text-slate-300 px-1">
+              <span>Đang chọn:</span>
+              <span className="text-indigo-600 dark:text-indigo-400 font-black">
+                {formatSessionDate(customRange.startStr)} → {formatSessionDate(customRange.endStr)}
+              </span>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
 };
+
+export default AcademicYearPhasePopover;

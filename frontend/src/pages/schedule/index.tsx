@@ -105,8 +105,12 @@ export default function SchedulePage() {
 
       const all: ClassSession[] = inScope.map((s: any) => {
         const matchedClass = cls.find((c: any) => c.id === s.class_id);
+        const resolvedColor = matchedClass
+          ? getDeterministicClassColor(matchedClass.id, matchedClass.color, matchedClass.notes)
+          : getDeterministicClassColor(s.class_id);
         return {
           ...s,
+          color: resolvedColor,
           class_name: s.class_name || matchedClass?.class_name || '',
           teacher_name: s.teacher_name || matchedClass?.teacher_name || '',
           room: s.room || matchedClass?.room || '',
