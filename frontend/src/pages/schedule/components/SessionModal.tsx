@@ -155,9 +155,7 @@ export const SessionModal: React.FC<SessionModalProps> = ({
           {/* ALWAYS-VISIBLE INLINE CALENDAR */}
           <div>
             <label className="block text-[10px] font-extrabold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1.5">
-              {mode === 'recurring' && !editing
-                ? 'Lịch Tháng (Chọn Thứ Học Trong Tuần) *'
-                : 'Lịch Tháng (Bấm Để Chọn Nhiều Ngày) *'}
+              Lịch Tháng *
             </label>
             <InlineCalendarGrid
               year={calYear}

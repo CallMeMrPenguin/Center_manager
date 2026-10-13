@@ -25,12 +25,8 @@ export const SelectedDaysTimeList: React.FC<SelectedDaysTimeListProps> = ({
 
   return (
     <div className="space-y-2">
-      <div className="flex items-center justify-between px-1">
-        <label className="text-[10px] font-extrabold text-slate-600 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-          <Clock size={12} className="text-blue-500" />
-          <span>Giờ Học Từng Ngày ({items.length} ngày đã chọn)</span>
-        </label>
-        {items.length > 1 && (
+      {items.length > 1 && (
+        <div className="flex items-center justify-end px-1">
           <button
             type="button"
             onClick={onSyncAllTimes}
@@ -40,8 +36,8 @@ export const SelectedDaysTimeList: React.FC<SelectedDaysTimeListProps> = ({
             <Copy size={11} />
             <span>Áp dụng giờ cho tất cả</span>
           </button>
-        )}
-      </div>
+        </div>
+      )}
 
       <div className="max-h-52 overflow-y-auto space-y-2 pr-0.5">
         {items.map((item) => (

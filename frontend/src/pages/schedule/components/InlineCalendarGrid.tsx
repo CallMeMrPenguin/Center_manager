@@ -119,14 +119,9 @@ export const InlineCalendarGrid: React.FC<InlineCalendarGridProps> = ({
     <div className="bg-slate-50/80 dark:bg-[#141928] rounded-2xl p-3 border-0 shadow-xs">
       {/* HEADER: Month & Year Navigator */}
       <div className="flex items-center justify-between mb-2 px-1">
-        <div className="flex items-center gap-1.5">
-          <span className="text-xs font-black text-slate-900 dark:text-white">
-            {MONTH_NAMES[month - 1]} {year}
-          </span>
-          <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 bg-slate-200/60 dark:bg-white/10 px-1.5 py-0.5 rounded-md">
-            {mode === 'recurring' && !isSingleSelect ? 'Lặp lại theo thứ' : 'Chọn ngày cụ thể'}
-          </span>
-        </div>
+        <span className="text-xs font-black text-slate-900 dark:text-white">
+          {MONTH_NAMES[month - 1]} {year}
+        </span>
         <div className="flex items-center gap-1">
           <button
             type="button"
@@ -150,24 +145,31 @@ export const InlineCalendarGrid: React.FC<InlineCalendarGridProps> = ({
       {/* WEEKDAY COLUMN HEADERS */}
       <div className="grid grid-cols-7 gap-1 mb-1 text-center">
         {WEEKDAYS.map((w) => {
-          const isDayActive = mode === 'recurring' && !isSingleSelect && selectedDaysOfWeek.includes(w.dayNum);
+          const isWeekend = w.dayNum === 0 || w.dayNum === 6;
+          const isRecurring = mode === 'recurring' && !isSingleSelect;
+          const isDayActive = isRecurring && selectedDaysOfWeek.includes(w.dayNum);
+
           return (
             <button
               key={w.dayNum}
               type="button"
               onClick={() => {
-                if (mode === 'recurring' && !isSingleSelect) {
+                if (isRecurring) {
                   onToggleDayOfWeek(w.dayNum);
                 }
               }}
-              className={`py-1 text-[11px] rounded-lg font-extrabold transition-all border-0 ${
-                mode === 'recurring' && !isSingleSelect ? 'cursor-pointer' : 'cursor-default'
+              className={`w-8 h-8 mx-auto flex items-center justify-center rounded-full text-xs font-black transition-all border-0 ${
+                isRecurring ? 'cursor-pointer hover:scale-105 active:scale-95' : 'cursor-default'
               } ${
                 isDayActive
-                  ? 'bg-blue-600 text-white shadow-xs scale-105'
-                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white'
+                  ? isWeekend
+                    ? 'bg-rose-500 text-white shadow-xs'
+                    : 'bg-blue-600 text-white shadow-xs'
+                  : isWeekend
+                  ? 'text-rose-500 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30'
+                  : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200/60 dark:hover:bg-white/10'
               }`}
-              title={mode === 'recurring' ? `Bấm để chọn/bỏ chọn tất cả các ngày ${w.label}` : w.label}
+              title={isRecurring ? `Bấm để chọn/bỏ chọn ${w.label}` : w.label}
             >
               {w.label}
             </button>
@@ -176,33 +178,39 @@ export const InlineCalendarGrid: React.FC<InlineCalendarGridProps> = ({
       </div>
 
       {/* MONTH DAYS GRID */}
-      <div className="grid grid-cols-7 gap-1 text-center">
+      <div className="grid grid-cols-7 gap-y-1.5 gap-x-1 text-center">
         {cells.map((c, idx) => {
           if (!c.isCurrentMonth) {
             return (
               <div
                 key={`pad-${idx}`}
-                className="h-8 flex items-center justify-center text-[11px] font-medium text-slate-300 dark:text-slate-600 select-none"
+                className="w-8 h-8 mx-auto flex items-center justify-center text-xs font-medium text-slate-300 dark:text-slate-600 select-none"
               >
                 {c.dayNumber}
               </div>
             );
           }
 
+          const isWeekend = c.dayOfWeek === 0 || c.dayOfWeek === 6;
+
           return (
             <button
               key={c.dateStr}
               type="button"
               onClick={() => onToggleDate(c.dateStr, c.dayOfWeek)}
-              className={`h-8 rounded-xl flex flex-col items-center justify-center text-xs font-bold transition-all cursor-pointer relative border-0 ${
+              className={`w-8 h-8 mx-auto rounded-full flex flex-col items-center justify-center text-xs font-bold transition-all duration-150 cursor-pointer relative border-0 ${
                 c.isSelected
-                  ? 'bg-blue-600 text-white font-black shadow-[0_2px_6px_rgba(37,99,235,0.3)] scale-[1.04]'
-                  : 'text-slate-700 dark:text-slate-200 hover:bg-slate-200/70 dark:hover:bg-white/10'
+                  ? 'bg-blue-600 text-white font-black shadow-xs scale-100'
+                  : c.isToday
+                  ? 'ring-1.5 ring-blue-500 text-blue-600 dark:text-blue-400 font-extrabold hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:scale-105 active:scale-95'
+                  : isWeekend
+                  ? 'text-rose-500 dark:text-rose-400 font-bold hover:bg-rose-50 dark:hover:bg-rose-950/30 hover:scale-105 active:scale-95'
+                  : 'text-slate-800 dark:text-slate-100 hover:bg-slate-200/80 dark:hover:bg-white/15 hover:scale-105 active:scale-95'
               }`}
             >
               <span>{c.dayNumber}</span>
               {c.isToday && !c.isSelected && (
-                <span className="w-1 h-1 rounded-full bg-blue-500 absolute bottom-1" />
+                <span className="w-1 h-1 rounded-full bg-blue-500 absolute bottom-0.5" />
               )}
             </button>
           );

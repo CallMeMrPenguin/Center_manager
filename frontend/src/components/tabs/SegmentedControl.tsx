@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useLayoutEffect } from 'react';
 import { motion } from 'framer-motion';
 
 export interface SegmentOption<T extends string = string> {
@@ -38,7 +38,6 @@ export function SegmentedControl<T extends string = string>({
   size = 'md',
   fit = 'content',
   fullWidth,
-  layoutId,
 }: SegmentedControlProps<T>) {
   const items = options || buttons || [];
   const initialVal =
@@ -65,32 +64,18 @@ export function SegmentedControl<T extends string = string>({
     (opt, idx) => (opt.value ?? opt.id ?? String(idx)) === activeVal
   );
 
-  useEffect(() => {
+  const updateGeometry = () => {
+    if (!containerRef.current) return;
+    const container = containerRef.current;
     const activeElement = buttonRefs.current[activeIndex];
+
     if (activeElement) {
       setIndicatorStyle({
         left: activeElement.offsetLeft,
         width: activeElement.offsetWidth,
       });
     }
-  }, [activeVal, activeIndex, items]);
 
-  useEffect(() => {
-    const updatePositions = () => {
-      const activeElement = buttonRefs.current[activeIndex];
-      if (activeElement) {
-        setIndicatorStyle({
-          left: activeElement.offsetLeft,
-          width: activeElement.offsetWidth,
-        });
-      }
-    };
-    updatePositions();
-    window.addEventListener('resize', updatePositions);
-    return () => window.removeEventListener('resize', updatePositions);
-  }, [activeIndex]);
-
-  useEffect(() => {
     if (hoveredIndex !== null) {
       const hoveredElement = buttonRefs.current[hoveredIndex];
       if (hoveredElement) {
@@ -99,8 +84,31 @@ export function SegmentedControl<T extends string = string>({
           width: hoveredElement.offsetWidth,
         });
       }
+    } else {
+      setHoverStyle({
+        left: 0,
+        width: container.offsetWidth,
+      });
     }
-  }, [hoveredIndex]);
+  };
+
+  useLayoutEffect(() => {
+    updateGeometry();
+  }, [activeVal, activeIndex, hoveredIndex, items]);
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+    updateGeometry();
+    const ro = new ResizeObserver(() => {
+      updateGeometry();
+    });
+    ro.observe(containerRef.current);
+    window.addEventListener('resize', updateGeometry);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener('resize', updateGeometry);
+    };
+  }, [activeIndex, hoveredIndex]);
 
   const handleButtonClick = (buttonVal: T, disabled?: boolean) => {
     if (disabled) return;
@@ -111,36 +119,29 @@ export function SegmentedControl<T extends string = string>({
   };
 
   const sizeClasses = {
-    xs: 'p-0.5 text-[11px] gap-0.5',
-    sm: 'p-0.5 text-xs gap-1',
-    md: 'p-1 text-xs gap-1',
-    lg: 'p-1.5 text-sm gap-1.5',
+    xs: { height: 'h-6.5', padding: 'px-2.5 text-[11px]' },
+    sm: { height: 'h-7', padding: 'px-3 text-xs' },
+    md: { height: 'h-8', padding: 'px-3.5 text-xs' },
+    lg: { height: 'h-9', padding: 'px-4 text-sm' },
   }[size];
 
-  const buttonSizeClasses = {
-    xs: 'px-2 py-0.5 min-h-[24px]',
-    sm: 'px-2.5 py-1 min-h-[28px]',
-    md: 'px-3.5 py-1.5 min-h-[32px]',
-    lg: 'px-4.5 py-2 min-h-[38px]',
-  }[size];
+  const isFluid = fit === 'fluid' || fullWidth;
 
   return (
     <div
       ref={containerRef}
       onMouseLeave={() => setHoveredIndex(null)}
-      className={`relative inline-flex items-center rounded-xl bg-slate-200/70 dark:bg-white/10 border-0 select-none shadow-[0_1px_3px_rgba(15,23,42,0.1),0_1px_2px_rgba(15,23,42,0.06)] ${sizeClasses} ${
-        fullWidth ? 'w-full' : ''
-      } ${className}`}
+      className={`relative ${
+        isFluid ? 'flex w-full' : 'inline-flex'
+      } items-center rounded-full border-0 select-none ${sizeClasses.height} ${className}`}
       role="group"
     >
-      {/* Sliding Hover Pill Background */}
+      {/* 1. Mặc định cả nút được highlight nhẹ toàn cụm, khi hover vùng đó co lại chính xác tại nút con trỏ hover */}
       <motion.div
-        className="absolute top-1 bottom-1 rounded-lg bg-black/10 dark:bg-white/15 pointer-events-none"
-        initial={false}
+        className="absolute top-0 bottom-0 rounded-full bg-slate-200/70 dark:bg-white/10 pointer-events-none"
         animate={{
           left: hoverStyle.left,
           width: hoverStyle.width,
-          opacity: hoveredIndex !== null && hoveredIndex !== activeIndex ? 1 : 0,
         }}
         transition={{
           type: 'spring',
@@ -149,12 +150,11 @@ export function SegmentedControl<T extends string = string>({
         }}
       />
 
-      {/* Sliding Active Pill Background */}
+      {/* 2. Highlight active fit perfect 100% với nút đã chọn */}
       <motion.div
-        className={`absolute top-1 bottom-1 rounded-lg shadow-[0_1px_4px_rgba(0,0,0,0.2)] pointer-events-none ${
+        className={`absolute top-0 bottom-0 rounded-full shadow-[0_2px_8px_rgba(37,99,235,0.28)] pointer-events-none ${
           activeColor || 'bg-[#2563eb]'
         }`}
-        initial={false}
         animate={{
           left: indicatorStyle.left,
           width: indicatorStyle.width,
@@ -167,6 +167,7 @@ export function SegmentedControl<T extends string = string>({
         }}
       />
 
+      {/* 3. Danh sách button options */}
       {items.map((opt, idx) => {
         const itemVal = (opt.value ?? opt.id ?? String(idx)) as T;
         const isActive = activeVal === itemVal;
@@ -194,15 +195,15 @@ export function SegmentedControl<T extends string = string>({
             disabled={disabled}
             onClick={() => handleButtonClick(itemVal, disabled)}
             onMouseEnter={() => setHoveredIndex(idx)}
-            className={`relative z-10 flex items-center justify-center font-bold transition-colors duration-150 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed border-0 ${buttonSizeClasses} ${
-              fit === 'fluid' || fullWidth ? 'flex-1' : ''
-            } ${
+            className={`relative z-10 flex h-full items-center justify-center rounded-full font-bold transition-colors duration-150 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed border-0 ${
+              sizeClasses.padding
+            } ${isFluid ? 'flex-1 min-w-0' : ''} ${
               isActive
-                ? 'text-white font-extrabold'
+                ? 'text-white font-black'
                 : 'text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white'
             }`}
           >
-            <div className="relative z-10 flex items-center gap-1.5 truncate">
+            <div className="relative z-10 flex items-center justify-center gap-1.5 truncate">
               {renderIcon()}
               {opt.label && <span className="truncate">{opt.label}</span>}
               {opt.badge !== undefined && (
