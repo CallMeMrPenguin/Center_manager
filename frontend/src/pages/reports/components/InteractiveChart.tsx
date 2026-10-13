@@ -15,6 +15,8 @@ interface InteractiveChartProps {
   selectedClassId: string;
   timeView: '1m' | '2m' | '3m' | 'all';
   setTimeView: (v: '1m' | '2m' | '3m' | 'all') => void;
+  customRange?: { startStr: string; endStr: string } | null;
+  setCustomRange?: (r: { startStr: string; endStr: string } | null) => void;
   timePhases: any[];
   selectedPhaseId: string;
   setSelectedPhaseId: (id: string) => void;
@@ -38,6 +40,8 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = ({
   selectedClassId,
   timeView,
   setTimeView,
+  customRange,
+  setCustomRange,
   timePhases,
   selectedPhaseId,
   setSelectedPhaseId,
@@ -61,9 +65,7 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = ({
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [chartWidth, setChartWidth] = useState(1050);
 
-  const [isMobile, setIsMobile] = useState(() => {
-    return typeof window !== 'undefined' && window.innerWidth < 768;
-  });
+  const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.innerWidth < 768);
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -139,11 +141,10 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = ({
   useEffect(() => {
     setZoomLevel(1.0);
     setPanOffset({ x: 0, y: 0 });
-  }, [timeView, selectedPhaseId, sessionChartData.length]);
+  }, [timeView, selectedPhaseId, customRange, sessionChartData.length]);
 
   const yBounds = useMemo(() => {
-    let min = 10,
-      max = 0;
+    let min = 10, max = 0;
     sessionChartData.forEach((d) => {
       [d.check1, d.check2, d.homework].forEach((v) => {
         if (v > 0) {
@@ -152,10 +153,7 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = ({
         }
       });
     });
-    if (min > max) {
-      min = 0;
-      max = 10;
-    }
+    if (min > max) { min = 0; max = 10; }
     const minY = Math.max(0, Math.floor(min) - 1);
     const maxY = Math.min(10, Math.ceil(max) + 1);
     const ticks: number[] = [];
@@ -273,14 +271,9 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = ({
         const highestY = validYs.length > 0 ? Math.min(...validYs) : paddingTop + plotAreaHeight / 2;
 
         setHoveredPoint({
-          index: closestIdx,
-          sessionName: d.sessionName,
-          fullDate: d.fullDate,
-          check1: d.check1,
-          check2: d.check2,
-          homework: d.homework,
-          x,
-          y: highestY,
+          index: closestIdx, sessionName: d.sessionName, fullDate: d.fullDate,
+          check1: d.check1, check2: d.check2, homework: d.homework,
+          x, y: highestY,
           fittedC1: fittedLookup.c1[closestIdx] ?? null,
           fittedC2: fittedLookup.c2[closestIdx] ?? null,
           fittedHw: fittedLookup.hw[closestIdx] ?? null,
@@ -304,6 +297,8 @@ export const InteractiveChart: React.FC<InteractiveChartProps> = ({
         onOpenPhaseModal={onOpenPhaseModal}
         timeView={timeView}
         setTimeView={setTimeView}
+        customRange={customRange}
+        setCustomRange={setCustomRange}
         zoomLevel={zoomLevel}
         setZoomLevel={setZoomLevel}
         setPanOffset={setPanOffset}

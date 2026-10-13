@@ -1,8 +1,8 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { TrendingUp, BarChart2, ZoomIn, ZoomOut, RotateCcw, Calendar, ChevronDown } from 'lucide-react';
+import React from 'react';
+import { TrendingUp, BarChart2, ZoomIn, ZoomOut, RotateCcw } from 'lucide-react';
 import { SegmentedControl } from '../../../components/SegmentedControl';
-import { formatSessionDate } from '../utils';
 import { DistributionStats, GradeTypeFilterKey } from '../utils/distributionAnalytics';
+import { ChartDateRangePicker } from './ChartDateRangePicker';
 
 interface ChartControlsProps {
   engine: any;
@@ -12,6 +12,8 @@ interface ChartControlsProps {
   onOpenPhaseModal: () => void;
   timeView: '1m' | '2m' | '3m' | 'all';
   setTimeView: (v: '1m' | '2m' | '3m' | 'all') => void;
+  customRange?: { startStr: string; endStr: string } | null;
+  setCustomRange?: (r: { startStr: string; endStr: string } | null) => void;
   zoomLevel: number;
   setZoomLevel: React.Dispatch<React.SetStateAction<number>>;
   setPanOffset: React.Dispatch<React.SetStateAction<{ x: number; y: number }>>;
@@ -30,6 +32,8 @@ export const ChartControls: React.FC<ChartControlsProps> = ({
   setSelectedPhaseId,
   timeView,
   setTimeView,
+  customRange,
+  setCustomRange,
   zoomLevel,
   setZoomLevel,
   setPanOffset,
@@ -39,105 +43,26 @@ export const ChartControls: React.FC<ChartControlsProps> = ({
   selectedGradeTypeFilter,
   setSelectedGradeTypeFilter,
 }) => {
-  const [phaseDropdownOpen, setPhaseDropdownOpen] = useState(false);
-  const phaseRef = useRef<HTMLDivElement>(null);
-
-  const activePhase = timePhases.find((p) => p.id === selectedPhaseId);
-
-  useEffect(() => {
-    const handler = (e: MouseEvent) => {
-      if (phaseRef.current && !phaseRef.current.contains(e.target as Node)) {
-        setPhaseDropdownOpen(false);
-      }
-    };
-    if (phaseDropdownOpen) {
-      document.addEventListener('mousedown', handler);
-    }
-    return () => document.removeEventListener('mousedown', handler);
-  }, [phaseDropdownOpen]);
-
   return (
     <div className="flex flex-col gap-2 border-b border-slate-200 dark:border-[#181f36] pb-3">
       {chartViewMode === 'timeline' ? (
-        /* SINGLE-ROW HEADER: TIẾN ĐỘ HỌC TẬP + TIME VIEW + DATEPICKER + ZOOM + TOGGLE */
+        /* SINGLE-ROW HEADER: TIẾN ĐỘ HỌC TẬP + INTEGRATED DATEPICKER + ZOOM + TOGGLE */
         <div className="flex flex-wrap items-center justify-between gap-3 w-full">
           <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider shrink-0">
             TIẾN ĐỘ HỌC TẬP
           </h3>
 
           <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
-            {/* Time View Filter (1M, 2M, 3M, ALL) */}
-            <div className="w-fit">
-              <SegmentedControl<'1m' | '2m' | '3m' | 'all'>
-                value={timeView}
-                onChange={setTimeView}
-                options={[
-                  { value: '1m', label: '1T' },
-                  { value: '2m', label: '2T' },
-                  { value: '3m', label: '3T' },
-                  { value: 'all', label: 'Tất cả' },
-                ]}
-                activeColor="bg-[#2563eb]"
-                size="sm"
-              />
-            </div>
-
-            {/* Time Phase DatePicker Dropdown */}
-            {timePhases.length > 0 && (
-              <div className="relative" ref={phaseRef}>
-                <button
-                  type="button"
-                  onClick={() => setPhaseDropdownOpen(!phaseDropdownOpen)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200/80 dark:bg-white/5 dark:hover:bg-white/10 text-slate-800 dark:text-slate-200 text-xs font-bold border-0 shadow-2xs transition cursor-pointer"
-                  title="Chọn giai đoạn xem tiến độ"
-                >
-                  <Calendar size={13} className="text-blue-500 shrink-0" />
-                  <span className="truncate max-w-[130px] sm:max-w-[160px]">
-                    {activePhase ? activePhase.phase_name : 'Giai đoạn'}
-                  </span>
-                  <ChevronDown size={12} className="text-slate-400 shrink-0" />
-                </button>
-
-                {phaseDropdownOpen && (
-                  <div className="absolute right-0 top-full mt-1.5 z-50 w-64 bg-white dark:bg-[#141926] rounded-2xl shadow-xl border-0 p-1.5 space-y-1 animate-mac-dropdown">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setSelectedPhaseId('');
-                        setPhaseDropdownOpen(false);
-                      }}
-                      className={`w-full flex items-center justify-between px-3 py-2 text-xs rounded-xl font-bold transition cursor-pointer border-0 ${
-                        !selectedPhaseId
-                          ? 'bg-blue-50 dark:bg-blue-500/15 text-blue-600 dark:text-blue-400'
-                          : 'hover:bg-slate-100 dark:hover:bg-white/5 text-slate-700 dark:text-slate-300'
-                      }`}
-                    >
-                      <span>Tất cả giai đoạn</span>
-                    </button>
-                    {timePhases.map((p) => (
-                      <button
-                        key={p.id}
-                        type="button"
-                        onClick={() => {
-                          setSelectedPhaseId(p.id);
-                          setPhaseDropdownOpen(false);
-                        }}
-                        className={`w-full flex flex-col text-left px-3 py-2 text-xs rounded-xl font-bold transition cursor-pointer border-0 ${
-                          selectedPhaseId === p.id
-                            ? 'bg-blue-50 dark:bg-blue-500/15 text-blue-600 dark:text-blue-400'
-                            : 'hover:bg-slate-100 dark:hover:bg-white/5 text-slate-700 dark:text-slate-300'
-                        }`}
-                      >
-                        <span className="font-extrabold">{p.phase_name}</span>
-                        <span className="text-[10px] text-slate-400 font-normal">
-                          {formatSessionDate(p.start_date)} - {formatSessionDate(p.end_date)}
-                        </span>
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
+            {/* 2-in-1 Integrated Schedule DatePicker: Custom Range, Presets & Phases */}
+            <ChartDateRangePicker
+              timeView={timeView}
+              setTimeView={setTimeView}
+              timePhases={timePhases}
+              selectedPhaseId={selectedPhaseId}
+              setSelectedPhaseId={setSelectedPhaseId}
+              customRange={customRange}
+              setCustomRange={setCustomRange}
+            />
 
             {/* Zoom controls */}
             <div className="flex items-center gap-0.5 bg-slate-100 dark:bg-white/5 rounded-xl p-0.5 border-0 shadow-2xs">

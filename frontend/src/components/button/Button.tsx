@@ -4,15 +4,15 @@ import { ButtonProps, ButtonVariant, ButtonSize } from './types';
 
 const variantStyles: Record<ButtonVariant, string> = {
   primary:
-    'bg-[#2563eb] hover:bg-[#1d4ed8] text-white shadow-xs border-0 active:scale-[0.98]',
+    'bg-[#2563eb] hover:bg-[#1d4ed8] text-white shadow-2xs hover:shadow-xs border-0 active:scale-[0.98]',
   secondary:
-    'bg-slate-100 hover:bg-slate-200 text-slate-800 border-0 shadow-2xs active:scale-[0.98]',
+    'bg-slate-100 hover:bg-slate-200 dark:bg-white/10 dark:hover:bg-white/15 text-slate-800 dark:text-slate-100 border-0 shadow-2xs hover:shadow-xs active:scale-[0.98]',
   danger:
-    'bg-rose-50 hover:bg-rose-100 text-rose-600 border-0 shadow-2xs active:scale-[0.98]',
+    'bg-rose-50 hover:bg-rose-100 dark:bg-rose-500/15 dark:hover:bg-rose-500/25 text-rose-600 dark:text-rose-400 border-0 shadow-2xs hover:shadow-xs active:scale-[0.98]',
   ghost:
-    'hover:bg-slate-100 text-slate-700 border-0 active:scale-[0.98]',
+    'bg-transparent hover:bg-slate-100 dark:hover:bg-white/10 text-slate-700 dark:text-slate-300 border-0 hover:shadow-2xs active:scale-[0.98]',
   outline:
-    'border border-slate-300 bg-white text-slate-800 hover:bg-slate-50 shadow-2xs active:scale-[0.98]',
+    'bg-white hover:bg-slate-50 dark:bg-white/5 dark:hover:bg-white/10 text-slate-800 dark:text-slate-200 border-0 shadow-2xs hover:shadow-xs active:scale-[0.98]',
 };
 
 const sizeStyles: Record<ButtonSize, string> = {

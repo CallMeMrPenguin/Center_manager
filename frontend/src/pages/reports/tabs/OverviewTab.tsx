@@ -60,6 +60,7 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
     }
     return 'all';
   });
+  const [customRange, setCustomRange] = useState<{ startStr: string; endStr: string } | null>(null);
   const [chartViewMode, setChartViewMode] = useState<'timeline' | 'distribution'>('timeline');
   const [selectedGradeTypeFilter, setSelectedGradeTypeFilter] = useState<GradeTypeFilterKey>('overall');
   const [selectedScoreBin, setSelectedScoreBin] = useState<DistributionScoreBin | null>(null);
@@ -67,7 +68,7 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
   // Clear score bin filter whenever class or grade type filter changes
   useEffect(() => {
     setSelectedScoreBin(null);
-  }, [selectedClassId, selectedGradeTypeFilter, selectedPhaseId]);
+  }, [selectedClassId, selectedGradeTypeFilter, selectedPhaseId, customRange]);
 
   const handleSelectScoreBin = (bin: DistributionScoreBin) => {
     if (selectedScoreBin && selectedScoreBin.minScore === bin.minScore && selectedScoreBin.maxScore === bin.maxScore) {
@@ -97,6 +98,7 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
     timePhases,
     selectedPhaseId,
     timeView,
+    customRange,
     selectedGradeTypeFilter,
     selectedScoreBin,
   });
@@ -147,6 +149,8 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
           selectedClassId={selectedClassId}
           timeView={timeView}
           setTimeView={setTimeView}
+          customRange={customRange}
+          setCustomRange={setCustomRange}
           timePhases={combinedTimePhases}
           selectedPhaseId={selectedPhaseId}
           setSelectedPhaseId={setSelectedPhaseId}

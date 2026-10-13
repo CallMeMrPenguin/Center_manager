@@ -16,6 +16,7 @@ interface UseOverviewStatsParams {
   timePhases: any[];
   selectedPhaseId: string;
   timeView: '1m' | '2m' | '3m' | 'all';
+  customRange?: { startStr: string; endStr: string } | null;
   selectedGradeTypeFilter: GradeTypeFilterKey;
   selectedScoreBin: DistributionScoreBin | null;
 }
@@ -32,6 +33,7 @@ export const useOverviewStats = ({
   timePhases,
   selectedPhaseId,
   timeView,
+  customRange,
   selectedGradeTypeFilter,
   selectedScoreBin,
 }: UseOverviewStatsParams) => {
@@ -69,11 +71,13 @@ export const useOverviewStats = ({
     return merged;
   }, [selectedAcademicYear, timePhases]);
 
-  // Filter session records according to academic year and active phase
+  // Filter session records according to custom range, active phase, or academic year
   const activeSessionRecords = useMemo(() => {
     if (!sessionRecords || sessionRecords.length === 0) return [];
     let filtered = sessionRecords;
-    if (selectedPhaseId) {
+    if (customRange) {
+      filtered = filtered.filter(r => r.date && r.date >= customRange.startStr && r.date <= customRange.endStr);
+    } else if (selectedPhaseId) {
       const activePhase = combinedTimePhases.find(p => String(p.id) === selectedPhaseId);
       if (activePhase && activePhase.from_date && activePhase.to_date) {
         filtered = filtered.filter(r => r.date && r.date >= activePhase.from_date && r.date <= activePhase.to_date);
@@ -85,7 +89,7 @@ export const useOverviewStats = ({
       filtered = filtered.filter(r => r.date && r.date >= academicStart && r.date <= academicEnd);
     }
     return filtered;
-  }, [sessionRecords, selectedPhaseId, selectedAcademicYear, combinedTimePhases]);
+  }, [sessionRecords, customRange, selectedPhaseId, selectedAcademicYear, combinedTimePhases]);
 
   // Overall stats calculations on active session records
   const stats = useMemo(() => {
@@ -233,7 +237,9 @@ export const useOverviewStats = ({
       .sort();
 
     let selectedDates = dates;
-    if (!selectedPhaseId) {
+    if (customRange) {
+      selectedDates = dates.filter(d => d >= customRange.startStr && d <= customRange.endStr);
+    } else if (!selectedPhaseId) {
       let limit = dates.length;
       if (timeView === '1m') limit = Math.min(4, dates.length);
       if (timeView === '2m') limit = Math.min(8, dates.length);
@@ -278,7 +284,7 @@ export const useOverviewStats = ({
     });
 
     return result;
-  }, [activeSessionRecords, sessionRecords, timeView, gradeTypesList, selectedPhaseId]);
+  }, [activeSessionRecords, sessionRecords, timeView, customRange, gradeTypesList, selectedPhaseId]);
 
   // Fitted values computed client-side
   const fittedLookup = useMemo(() => {

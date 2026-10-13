@@ -112,7 +112,6 @@ export function SegmentedControl<T extends string = string>({
             disabled={disabled}
             onClick={() => handleButtonClick(itemVal, disabled)}
             onMouseEnter={() => setHoveredVal(itemVal)}
-            onMouseLeave={() => setHoveredVal((prev) => (prev === itemVal ? null : prev))}
             className={`relative flex items-center justify-center font-bold transition-colors duration-150 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed border-0 ${buttonSizeClasses} ${
               fit === 'fluid' || fullWidth ? 'flex-1' : ''
             } ${

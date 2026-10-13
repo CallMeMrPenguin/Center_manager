@@ -20,7 +20,7 @@ export const SinglePenButton: React.FC<SinglePenButtonProps> = ({
       onClick={onClick}
       disabled={disabled}
       title={title}
-      className={`p-1.5 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-blue-50 transition cursor-pointer border-0 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed ${className}`}
+      className={`p-1.5 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-500/15 transition cursor-pointer border-0 shadow-2xs hover:shadow-xs active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed ${className}`}
       {...props}
     >
       <Edit3 size={size} />

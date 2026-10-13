@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
+import { motion } from 'framer-motion';
 
 export interface VercelTabItem<T extends string = string> {
   value: T;
@@ -34,7 +35,6 @@ export function VercelTabs<T extends string = string>({
   const activeTab = controlledValue !== undefined ? controlledValue : internalValue;
 
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
-  const [hoverStyle, setHoverStyle] = useState<{ left?: string; width?: string }>({});
   const [activeStyle, setActiveStyle] = useState<{ left: string; width: string }>({
     left: '0px',
     width: '0px',
@@ -42,19 +42,6 @@ export function VercelTabs<T extends string = string>({
   const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
   const activeIndex = tabs.findIndex((tab) => tab.value === activeTab);
-
-  useEffect(() => {
-    if (hoveredIndex !== null) {
-      const hoveredElement = tabRefs.current[hoveredIndex];
-      if (hoveredElement) {
-        const { offsetLeft, offsetWidth } = hoveredElement;
-        setHoverStyle({
-          left: `${offsetLeft}px`,
-          width: `${offsetWidth}px`,
-        });
-      }
-    }
-  }, [hoveredIndex]);
 
   const tablistRef = useRef<HTMLDivElement>(null);
 
@@ -135,18 +122,9 @@ export function VercelTabs<T extends string = string>({
       <div
         ref={tablistRef}
         role="tablist"
-        className="relative flex items-center h-auto select-none gap-[6px] bg-transparent p-0 border-b border-slate-200 overflow-x-auto scroll-smooth [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+        onMouseLeave={() => setHoveredIndex(null)}
+        className="relative flex items-center h-auto select-none gap-[6px] bg-transparent p-0 border-b border-slate-200 dark:border-white/10 overflow-x-auto scroll-smooth [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
       >
-        {/* Hover Highlight */}
-        <div
-          aria-hidden="true"
-          className="absolute top-0 left-0 flex h-[32px] items-center rounded-lg bg-slate-200/80 dark:bg-white/10 shadow-[0_2px_8px_rgba(0,0,0,0.06)] dark:shadow-[0_0_12px_rgba(92,54,245,0.25)] transition-all duration-200 ease-out pointer-events-none"
-          style={{
-            ...hoverStyle,
-            opacity: hoveredIndex !== null ? 1 : 0,
-          }}
-        />
-
         {/* Active Indicator */}
         <div
           aria-hidden="true"
@@ -170,28 +148,38 @@ export function VercelTabs<T extends string = string>({
               aria-selected={isActive}
               onClick={() => handleSelect(tab.value)}
               onMouseEnter={() => setHoveredIndex(index)}
-              onMouseLeave={() => setHoveredIndex(null)}
-              className={`z-10 h-[32px] cursor-pointer rounded-md border-0 bg-transparent px-2.5 sm:px-3 py-1.5 outline-none transition-colors duration-300 flex items-center gap-1.5 select-none shrink-0 whitespace-nowrap text-xs sm:text-sm ${
+              className={`relative z-10 h-[32px] cursor-pointer rounded-lg border-0 bg-transparent px-2.5 sm:px-3 py-1.5 outline-none transition-colors duration-150 flex items-center gap-1.5 select-none shrink-0 whitespace-nowrap text-xs sm:text-sm ${
                 isActive
-                  ? 'text-blue-600 font-black'
-                  : 'text-slate-600 hover:text-slate-900 font-bold'
+                  ? 'text-blue-600 dark:text-blue-400 font-black'
+                  : 'text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white font-bold'
               }`}
             >
-              {tab.icon && <span className="shrink-0">{tab.icon}</span>}
-              <span className="whitespace-nowrap text-sm leading-5">
-                {tab.label}
-              </span>
-              {tab.badge !== undefined && (
-                <span
-                  className={`ml-1 px-1.5 py-0.2 rounded-full text-[10px] font-mono font-bold ${
-                    isActive
-                      ? 'bg-blue-50 text-blue-600'
-                      : 'bg-slate-200 text-slate-700'
-                  }`}
-                >
-                  {tab.badge}
-                </span>
+              {/* Smooth spring hover highlight: bo vuông 4 góc tròn (rounded-lg) */}
+              {hoveredIndex === index && !isActive && (
+                <motion.div
+                  layoutId="vercel-tab-hover"
+                  transition={{ type: 'spring', stiffness: 500, damping: 35 }}
+                  className="absolute inset-0 rounded-lg bg-slate-200/80 dark:bg-white/10 shadow-2xs pointer-events-none z-0"
+                />
               )}
+
+              <span className="relative z-10 flex items-center gap-1.5">
+                {tab.icon && <span className="shrink-0">{tab.icon}</span>}
+                <span className="whitespace-nowrap text-sm leading-5">
+                  {tab.label}
+                </span>
+                {tab.badge !== undefined && (
+                  <span
+                    className={`ml-1 px-1.5 py-0.2 rounded-md text-[10px] font-mono font-bold ${
+                      isActive
+                        ? 'bg-blue-50 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400'
+                        : 'bg-slate-200 dark:bg-white/20 text-slate-700 dark:text-slate-200'
+                    }`}
+                  >
+                    {tab.badge}
+                  </span>
+                )}
+              </span>
             </button>
           );
         })}
