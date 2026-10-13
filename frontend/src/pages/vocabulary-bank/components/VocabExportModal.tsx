@@ -1,6 +1,7 @@
 import React from 'react';
 import { Download, X } from 'lucide-react';
 import { CustomSelect } from '../../../components/CustomSelect';
+import { Button } from '../../../components/button';
 
 interface VocabExportModalProps {
   isOpen: boolean;
@@ -39,7 +40,7 @@ export const VocabExportModal: React.FC<VocabExportModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-6 animate-fade-in">
-      <div className="bg-white border border-slate-200 rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl">
+      <div className="bg-white border-0 rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl">
         <div className="h-14 border-b border-slate-200 bg-slate-50 flex items-center justify-between px-6">
           <span className="text-xs font-black text-slate-900 flex items-center gap-2">
             <Download className="text-blue-500" size={15} />
@@ -105,27 +106,30 @@ export const VocabExportModal: React.FC<VocabExportModalProps> = ({
           )}
 
           <div className="grid grid-cols-2 gap-2 pt-2">
-            <button
+            <Button
               type="button"
+              variant="primary"
               onClick={onExportDocx}
-              className="py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-black text-xs transition cursor-pointer shadow-md text-center"
+              className="py-2.5 text-center justify-center"
             >
               Xuất Word
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
+              variant="success"
               onClick={onExportCsv}
-              className="py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-black text-xs transition cursor-pointer shadow-md text-center"
+              className="py-2.5 text-center justify-center"
             >
               Xuất CSV
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
+              variant="secondary"
               onClick={onClose}
-              className="col-span-2 py-2 bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-700 rounded-xl font-bold text-xs transition cursor-pointer text-center"
+              className="col-span-2 py-2 text-center justify-center"
             >
               Hủy
-            </button>
+            </Button>
           </div>
         </div>
       </div>

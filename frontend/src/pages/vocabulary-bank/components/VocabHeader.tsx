@@ -1,6 +1,7 @@
 import React from 'react';
 import { Download, Upload, Trash2 } from 'lucide-react';
 import PromptManager from '../../../components/PromptManager';
+import { Button } from '../../../components/button';
 import { DEFAULT_VOCABULARY_BANK_PROMPTS } from '../constants';
 
 interface VocabHeaderProps {
@@ -38,41 +39,45 @@ export const VocabHeader: React.FC<VocabHeaderProps> = ({
           defaultPrompts={DEFAULT_VOCABULARY_BANK_PROMPTS}
         />
 
-        <button
+        <Button
+          variant="primary"
+          size="sm"
           onClick={onOpenExport}
-          className="flex items-center gap-1.5 px-3 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded-xl transition cursor-pointer shadow-xs"
+          leftIcon={<Download size={14} />}
         >
-          <Download size={14} />
-          <span>Xuất Tệp</span>
-        </button>
+          Xuất Tệp
+        </Button>
 
-        <button
+        <Button
+          variant="white"
+          size="sm"
           onClick={onOpenImport}
-          className="flex items-center gap-1.5 px-3 py-2 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 text-xs font-bold rounded-xl transition cursor-pointer shadow-xs"
+          leftIcon={<Upload size={14} className="text-blue-600" />}
         >
-          <Upload size={14} className="text-blue-600" />
-          <span>Nhập CSV</span>
-        </button>
+          Nhập CSV
+        </Button>
 
         {selectedCount > 0 && (
-          <button
+          <Button
+            variant="danger"
+            size="sm"
             onClick={onDeleteSelected}
             disabled={loading}
-            className="flex items-center gap-1.5 px-3 py-2 bg-rose-50 border border-rose-200 text-rose-600 text-xs font-bold rounded-xl transition cursor-pointer"
+            leftIcon={<Trash2 size={14} />}
           >
-            <Trash2 size={14} />
-            <span>Xóa ({selectedCount})</span>
-          </button>
+            Xóa ({selectedCount})
+          </Button>
         )}
 
-        <button
+        <Button
+          variant="white"
+          size="sm"
           onClick={onOpenDeleteModal}
           disabled={loading}
-          className="flex items-center gap-1.5 px-3 py-2 bg-white border border-slate-300 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 text-slate-700 text-xs font-bold rounded-xl transition cursor-pointer shadow-xs"
+          leftIcon={<Trash2 size={14} className="text-rose-500" />}
         >
-          <Trash2 size={14} className="text-rose-500" />
-          <span>Xóa Dữ Liệu</span>
-        </button>
+          Xóa Dữ Liệu
+        </Button>
       </div>
     </div>
   );

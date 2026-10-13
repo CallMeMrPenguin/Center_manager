@@ -3,6 +3,7 @@ import { Plus, X, CheckSquare, Square, AlertCircle } from 'lucide-react';
 import { TAB_DEFINITIONS } from '../../../config/tabs';
 import { api } from '../../../api';
 import { showToast } from '../../../components/Toast';
+import { Button } from '../../../components/button';
 
 interface AddRoleModalProps {
   isOpen: boolean;
@@ -118,7 +119,7 @@ export const AddRoleModal: React.FC<AddRoleModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60">
-      <div className="bg-white dark:bg-[#111728] border border-slate-200 dark:border-[#212c4b] rounded-2xl w-full max-w-xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+      <div className="bg-white dark:bg-[#111728] border-0 rounded-2xl w-full max-w-xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
         {/* Header */}
         <div className="p-4 sm:p-5 border-b border-slate-200 dark:border-white/10 flex items-center justify-between bg-slate-50/80 dark:bg-[#161d30]">
           <div>
@@ -218,21 +219,21 @@ export const AddRoleModal: React.FC<AddRoleModalProps> = ({
               <button
                 type="button"
                 onClick={() => handleApplyTemplate('teacher')}
-                className="px-2.5 py-1 rounded-lg bg-indigo-50 text-indigo-700 hover:bg-indigo-100 dark:bg-indigo-500/15 dark:text-indigo-300 dark:hover:bg-indigo-500/25 border border-indigo-200 dark:border-indigo-500/30 font-bold transition cursor-pointer"
+                className="px-2.5 py-1 rounded-lg bg-indigo-50 text-indigo-700 hover:bg-indigo-100 dark:bg-indigo-500/15 dark:text-indigo-300 dark:hover:bg-indigo-500/25 border-0 shadow-2xs font-bold transition cursor-pointer active:scale-95"
               >
                 Giống Giáo viên
               </button>
               <button
                 type="button"
                 onClick={() => handleApplyTemplate('assistant')}
-                className="px-2.5 py-1 rounded-lg bg-sky-50 text-sky-700 hover:bg-sky-100 dark:bg-sky-500/15 dark:text-sky-300 dark:hover:bg-sky-500/25 border border-sky-200 dark:border-sky-500/30 font-bold transition cursor-pointer"
+                className="px-2.5 py-1 rounded-lg bg-sky-50 text-sky-700 hover:bg-sky-100 dark:bg-sky-500/15 dark:text-sky-300 dark:hover:bg-sky-500/25 border-0 shadow-2xs font-bold transition cursor-pointer active:scale-95"
               >
                 Giống Trợ giảng
               </button>
               <button
                 type="button"
                 onClick={() => handleApplyTemplate('accountant')}
-                className="px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-500/15 dark:text-emerald-300 dark:hover:bg-emerald-500/25 border border-emerald-200 dark:border-emerald-500/30 font-bold transition cursor-pointer"
+                className="px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-500/15 dark:text-emerald-300 dark:hover:bg-emerald-500/25 border-0 shadow-2xs font-bold transition cursor-pointer active:scale-95"
               >
                 Giống Kế toán
               </button>
@@ -274,22 +275,25 @@ export const AddRoleModal: React.FC<AddRoleModalProps> = ({
 
           {/* Footer Buttons */}
           <div className="pt-3 border-t border-slate-200 dark:border-white/10 flex items-center justify-end gap-2">
-            <button
+            <Button
               type="button"
+              variant="secondary"
+              size="sm"
               onClick={onClose}
               disabled={isSubmitting}
-              className="px-3.5 py-2 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5 transition cursor-pointer disabled:opacity-50"
             >
               Hủy
-            </button>
-            <button
+            </Button>
+            <Button
               type="submit"
+              variant="primary"
+              size="sm"
               disabled={isSubmitting}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-black transition cursor-pointer shadow-sm disabled:opacity-50"
+              loading={isSubmitting}
+              leftIcon={<Plus size={14} />}
             >
-              <Plus size={14} />
-              <span>{isSubmitting ? 'Đang tạo & cấp quyền...' : 'Tạo Vai Trò & Cấp Quyền'}</span>
-            </button>
+              {isSubmitting ? 'Đang tạo & cấp quyền...' : 'Tạo Vai Trò & Cấp Quyền'}
+            </Button>
           </div>
         </form>
       </div>

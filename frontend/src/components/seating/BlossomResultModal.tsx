@@ -2,6 +2,7 @@ import { useMemo, useState, useEffect } from 'react';
 import { FileCheck2, X, UserX, Copy, Check, RotateCw, RotateCcw } from 'lucide-react';
 import { showToast } from '../Toast';
 import SnakeFlowDiagram from './SnakeFlowDiagram';
+import { Button } from '../button';
 
 interface SwapPair {
   student1_id?: number;
@@ -128,11 +129,11 @@ export default function BlossomResultModal({ isOpen, onClose, pairs, unmatched =
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 animate-mac-dropdown">
-      <div className="bg-white dark:bg-[#121624] border border-slate-200/80 dark:border-white/10 rounded-3xl w-full max-w-5xl xl:max-w-6xl overflow-hidden shadow-2xl flex flex-col max-h-[92vh]">
+      <div className="bg-white dark:bg-[#121624] border-0 rounded-3xl w-full max-w-5xl xl:max-w-6xl overflow-hidden shadow-2xl flex flex-col max-h-[92vh]">
         {/* Header */}
         <div className="flex items-center justify-between p-4 sm:p-5 border-b border-slate-200/80 dark:border-white/10 bg-white dark:bg-[#121624]">
           <div className="flex items-center gap-3.5">
-            <div className="w-12 h-12 rounded-2xl bg-blue-500/10 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0 border border-blue-500/20">
+            <div className="w-12 h-12 rounded-2xl bg-blue-500/10 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0 border-0 shadow-2xs">
               <FileCheck2 className="h-6 w-6" />
             </div>
             <div>
@@ -230,19 +231,25 @@ export default function BlossomResultModal({ isOpen, onClose, pairs, unmatched =
           ) : <div />}
 
           <div className="flex items-center gap-2.5">
-            <button
+            <Button
               type="button"
+              variant="secondary"
+              size="sm"
               onClick={handleCopy}
               disabled={orderedChain.length === 0}
-              className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl border border-slate-200/80 dark:border-white/10 bg-slate-50 hover:bg-slate-100 dark:bg-white/5 dark:hover:bg-white/10 text-slate-700 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white text-xs font-bold transition cursor-pointer disabled:opacity-50"
+              leftIcon={copied ? <Check size={14} className="text-emerald-500" /> : <Copy size={14} />}
             >
-              {copied ? <Check size={14} className="text-emerald-500" /> : <Copy size={14} />}
-              <span>{copied ? 'Đã sao chép' : 'Sao chép sơ đồ'}</span>
-            </button>
+              {copied ? 'Đã sao chép' : 'Sao chép sơ đồ'}
+            </Button>
 
-            <button type="button" onClick={onClose} className="px-6 py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-black rounded-xl transition cursor-pointer shadow-sm border-0">
+            <Button
+              type="button"
+              variant="primary"
+              size="sm"
+              onClick={onClose}
+            >
               Đóng
-            </button>
+            </Button>
           </div>
         </div>
       </div>

@@ -3,6 +3,7 @@ import { Calendar as CalendarIcon, X, Palette } from 'lucide-react';
 import { CustomDatePicker } from '../../../components/CustomDatePicker';
 import { CustomSelect } from '../../../components/CustomSelect';
 import { SegmentedControl } from '../../../components/SegmentedControl';
+import { Button } from '../../../components/button';
 import { ClassSession, DayCfg, PALETTE_20, DAYS } from '../types';
 import { getDeterministicClassColor } from '../../../theme';
 
@@ -47,7 +48,7 @@ export const SessionModal: React.FC<SessionModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 animate-mac-backdrop">
-      <div className="bg-white dark:bg-[#0f1320] border border-slate-200 dark:border-white/10 rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl dark:shadow-[0_24px_80px_rgba(0,0,0,0.8)] animate-mac-modal">
+      <div className="bg-white dark:bg-[#0f1320] border-0 rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl dark:shadow-[0_24px_80px_rgba(0,0,0,0.8)] animate-mac-modal">
         <div className="flex items-center justify-between p-5 border-b border-slate-200 dark:border-white/10 bg-slate-100 dark:bg-[#14192b]">
           <h3 className="text-sm font-black text-slate-900 dark:text-white flex items-center gap-2">
             <CalendarIcon className="h-4 w-4 text-blue-500 dark:text-blue-400" />
@@ -92,7 +93,7 @@ export const SessionModal: React.FC<SessionModalProps> = ({
               <Palette size={10} className="text-blue-500 dark:text-blue-400" />
               Màu Sắc Lịch Trình
             </label>
-            <div className="flex items-center gap-1.5 flex-wrap bg-slate-50 dark:bg-[#141928] p-2.5 rounded-xl border border-slate-200 dark:border-white/10">
+            <div className="flex items-center gap-1.5 flex-wrap bg-slate-50 dark:bg-[#141928] p-2.5 rounded-xl border-0 shadow-2xs">
               {PALETTE_20.map((c) => (
                 <button
                   key={c}
@@ -260,30 +261,33 @@ export const SessionModal: React.FC<SessionModalProps> = ({
 
           <div className="flex items-center justify-between gap-3 pt-3 border-t border-slate-200 dark:border-white/10">
             {editing ? (
-              <button
+              <Button
+                variant="danger"
+                size="sm"
                 type="button"
                 onClick={() => onDelete(editing)}
-                className="px-4 py-2 rounded-xl bg-rose-500/15 text-rose-600 dark:text-rose-300 text-xs font-bold hover:bg-rose-500/25 border border-rose-500/30 transition cursor-pointer"
               >
                 Xóa Buổi Học
-              </button>
+              </Button>
             ) : (
               <div />
             )}
             <div className="flex items-center gap-3">
-              <button
+              <Button
+                variant="secondary"
+                size="sm"
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 text-slate-700 dark:text-slate-300 text-xs font-bold transition cursor-pointer"
               >
                 Hủy
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="primary"
+                size="sm"
                 type="submit"
-                className="px-5 py-2 rounded-xl bg-blue-600 text-white text-xs font-extrabold border border-blue-400/30 hover:bg-blue-500 transition shadow-lg cursor-pointer"
               >
                 Lưu Buổi Học
-              </button>
+              </Button>
             </div>
           </div>
         </form>

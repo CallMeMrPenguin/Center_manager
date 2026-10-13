@@ -241,7 +241,7 @@ export default function VocabularyBank({ isActive }: { isActive?: boolean }) {
       />
 
       {exportState.lastExportedFile && (
-        <div className="bg-emerald-50 border border-emerald-200 px-5 py-3 rounded-2xl flex items-center justify-between mb-4 shadow-xs">
+        <div className="bg-emerald-50 border-0 px-5 py-3 rounded-2xl flex items-center justify-between mb-4 shadow-xs">
           <div className="flex items-center gap-2.5">
             <FileText size={16} className="text-emerald-600" />
             <span className="text-xs font-bold text-slate-800">
@@ -257,7 +257,7 @@ export default function VocabularyBank({ isActive }: { isActive?: boolean }) {
         </div>
       )}
 
-      <div className="flex-1 bg-white border border-slate-200 rounded-2xl p-4 shadow-xs">
+      <div className="flex-1 bg-white border-0 rounded-2xl p-4 shadow-xs">
         <DataTable<DbVocab>
           data={vocabList}
           columns={columns}

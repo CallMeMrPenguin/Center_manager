@@ -3,6 +3,7 @@ import { X, KeyRound, CheckCircle2, Eye, EyeOff } from 'lucide-react';
 import { api } from '../../api';
 import { showToast } from '../toast/index';
 import { getCurrentUser } from '../../utils/authUtils';
+import { Button } from '../button';
 
 export interface ChangePasswordModalProps {
   isOpen: boolean;
@@ -69,7 +70,7 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({ isOpen
 
   return (
     <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-black/85 select-none animate-fade-in font-sans">
-      <div className="bg-white border border-slate-200 rounded-2xl w-full max-w-md shadow-2xl overflow-hidden flex flex-col">
+      <div className="bg-white border-0 rounded-2xl w-full max-w-md shadow-2xl overflow-hidden flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 shrink-0 bg-slate-50">
           <div className="flex items-center gap-2.5">
@@ -166,22 +167,25 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({ isOpen
           </div>
 
           <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-200">
-            <button
+            <Button
               type="button"
+              variant="secondary"
+              size="sm"
               onClick={onClose}
               disabled={loading}
-              className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition cursor-pointer"
             >
               Hủy
-            </button>
-            <button
+            </Button>
+            <Button
               type="submit"
+              variant="primary"
+              size="sm"
               disabled={loading}
-              className="flex items-center gap-1.5 px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-black shadow-xs transition cursor-pointer disabled:opacity-50"
+              loading={loading}
+              leftIcon={<CheckCircle2 size={14} />}
             >
-              <CheckCircle2 size={14} />
-              <span>{loading ? 'Đang cập nhật...' : 'Cập Nhật Mật Khẩu'}</span>
-            </button>
+              {loading ? 'Đang cập nhật...' : 'Cập Nhật Mật Khẩu'}
+            </Button>
           </div>
         </form>
       </div>

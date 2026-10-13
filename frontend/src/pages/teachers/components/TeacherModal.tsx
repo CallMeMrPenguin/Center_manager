@@ -5,6 +5,7 @@ import {
 import { CustomDatePicker } from '../../../components/CustomDatePicker';
 import { CustomSelect } from '../../../components/CustomSelect';
 import { VietnameseInput } from '../../../components/VietnameseInput';
+import { Button } from '../../../components/button';
 import { TeacherCM } from '../../../types';
 
 interface TeacherModalProps {
@@ -31,11 +32,11 @@ export const TeacherModal: React.FC<TeacherModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-black/85 select-none animate-fade-in font-sans">
-      <div className="bg-white dark:bg-[#0c0f1e] border border-slate-200 dark:border-[#212c4b] rounded-2xl w-full max-w-xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+      <div className="bg-white dark:bg-[#0c0f1e] border-0 rounded-2xl w-full max-w-xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
         {/* Modal Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-white/10 shrink-0 bg-slate-50 dark:bg-[#101526]">
           <div className="flex items-center gap-2.5">
-            <div className="p-2 bg-blue-50 dark:bg-blue-500/15 text-blue-600 dark:text-blue-400 rounded-xl border border-blue-200 dark:border-blue-500/30">
+            <div className="p-2 bg-blue-50 dark:bg-blue-500/15 text-blue-600 dark:text-blue-400 rounded-xl border-0 shadow-2xs">
               <UserCheck size={18} />
             </div>
             <div>
@@ -200,33 +201,36 @@ export const TeacherModal: React.FC<TeacherModalProps> = ({
           {/* Modal Footer Controls */}
           <div className="flex items-center justify-between pt-3 border-t border-slate-200 dark:border-white/10">
             {editingTeacher && onDelete ? (
-              <button
+              <Button
+                variant="danger"
+                size="sm"
                 type="button"
                 onClick={() => onDelete(editingTeacher)}
-                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-rose-50 dark:bg-rose-500/15 hover:bg-rose-100 dark:hover:bg-rose-500/25 text-rose-600 dark:text-rose-400 text-xs font-black border-0 shadow-2xs transition cursor-pointer"
+                leftIcon={<Trash2 size={13} />}
               >
-                <Trash2 size={13} />
-                <span>Xóa giáo viên</span>
-              </button>
+                Xóa giáo viên
+              </Button>
             ) : (
               <div />
             )}
 
             <div className="flex items-center gap-2.5">
-              <button
+              <Button
+                variant="secondary"
+                size="sm"
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2 rounded-xl bg-slate-100 dark:bg-white/10 hover:bg-slate-200 dark:hover:bg-white/20 text-slate-700 dark:text-slate-300 text-xs font-bold transition cursor-pointer"
               >
                 Hủy
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="primary"
+                size="sm"
                 type="submit"
-                className="flex items-center gap-1.5 px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-black shadow-md shadow-blue-500/20 transition cursor-pointer"
+                leftIcon={<CheckCircle2 size={14} />}
               >
-                <CheckCircle2 size={14} />
-                <span>{editingTeacher ? 'Lưu Thay Đổi' : 'Thêm Giáo Viên'}</span>
-              </button>
+                {editingTeacher ? 'Lưu Thay Đổi' : 'Thêm Giáo Viên'}
+              </Button>
             </div>
           </div>
         </form>

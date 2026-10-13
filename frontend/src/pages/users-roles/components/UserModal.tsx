@@ -3,6 +3,7 @@ import { X, Trash2, Save, UserCheck, Plus } from 'lucide-react';
 import { api } from '../../../api';
 import { showToast } from '../../../components/Toast';
 import { CustomSelect, SelectOption } from '../../../components/CustomSelect';
+import { Button } from '../../../components/button';
 import { AppUser } from '../types';
 import { ROLES } from '../hooks/useUsersData';
 
@@ -126,7 +127,7 @@ export const UserModal: React.FC<UserModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/85 select-none animate-fade-in">
-      <div className="bg-white dark:bg-[#0c0f1e] border border-slate-200 dark:border-[#212c4b] rounded-2xl w-full max-w-md shadow-[0_20px_60px_rgba(0,0,0,0.15)] dark:shadow-[0_20px_60px_rgba(0,0,0,0.9)] overflow-hidden flex flex-col max-h-[90vh]">
+      <div className="bg-white dark:bg-[#0c0f1e] border-0 rounded-2xl w-full max-w-md shadow-2xl dark:shadow-[0_20px_60px_rgba(0,0,0,0.9)] overflow-hidden flex flex-col max-h-[90vh]">
         {/* Modal Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 dark:border-white/10 shrink-0">
           <div className="flex items-center gap-2">
@@ -287,35 +288,40 @@ export const UserModal: React.FC<UserModalProps> = ({
           <div className="flex items-center justify-between gap-3 pt-3 border-t border-slate-100 dark:border-white/10">
             {/* Merged Single Pen Action: Delete inside Edit Modal */}
             {user ? (
-              <button
+              <Button
+                variant="danger"
+                size="sm"
                 type="button"
                 onClick={handleDelete}
                 disabled={deleting || user.username === 'admin'}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 text-xs font-bold border border-rose-500/30 transition cursor-pointer active:scale-95 disabled:opacity-40"
+                loading={deleting}
+                leftIcon={<Trash2 size={14} />}
               >
-                <Trash2 size={14} />
-                <span>{deleting ? 'Đang xóa...' : 'Xóa tài khoản'}</span>
-              </button>
+                {deleting ? 'Đang xóa...' : 'Xóa tài khoản'}
+              </Button>
             ) : (
               <div />
             )}
 
             <div className="flex items-center gap-2">
-              <button
+              <Button
+                variant="secondary"
+                size="sm"
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 text-slate-700 dark:text-slate-300 text-xs font-bold transition cursor-pointer"
               >
                 Hủy
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="primary"
+                size="sm"
                 type="submit"
                 disabled={saving}
-                className="flex items-center gap-1.5 px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-black shadow-sm transition cursor-pointer active:scale-95 disabled:opacity-50"
+                loading={saving}
+                leftIcon={<Save size={14} />}
               >
-                <Save size={14} />
-                <span>{saving ? 'Đang lưu...' : 'Lưu tài khoản'}</span>
-              </button>
+                {saving ? 'Đang lưu...' : 'Lưu tài khoản'}
+              </Button>
             </div>
           </div>
         </form>

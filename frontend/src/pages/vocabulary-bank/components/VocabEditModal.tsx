@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, Trash2 } from 'lucide-react';
 import { DbVocab } from '../../../types';
 import { CustomSelect } from '../../../components/CustomSelect';
+import { Button } from '../../../components/button';
 
 interface VocabEditModalProps {
   vocab: DbVocab | null;
@@ -68,7 +69,7 @@ export const VocabEditModal: React.FC<VocabEditModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-      <div className="w-full max-w-lg bg-white border border-slate-200 rounded-3xl p-6 shadow-2xl flex flex-col gap-4 text-slate-800 animate-fade-in">
+      <div className="w-full max-w-lg bg-white border-0 rounded-3xl p-6 shadow-2xl flex flex-col gap-4 text-slate-800 animate-fade-in">
         <div className="flex items-center justify-between border-b border-slate-200 pb-3">
           <div>
             <h3 className="text-sm font-black text-slate-900 uppercase tracking-wider">
@@ -180,31 +181,35 @@ export const VocabEditModal: React.FC<VocabEditModalProps> = ({
           </div>
 
           <div className="flex items-center justify-between pt-3 border-t border-slate-200 mt-2">
-            <button
+            <Button
               type="button"
+              variant="danger"
+              size="sm"
               onClick={handleDelete}
               disabled={isSaving}
-              className="flex items-center gap-1.5 px-3 py-2 bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-bold rounded-xl transition cursor-pointer border border-rose-200"
+              leftIcon={<Trash2 size={13} />}
             >
-              <Trash2 size={13} />
-              <span>Xóa từ vựng này</span>
-            </button>
+              Xóa từ vựng này
+            </Button>
 
             <div className="flex gap-2">
-              <button
+              <Button
                 type="button"
+                variant="ghost"
+                size="sm"
                 onClick={onClose}
-                className="px-4 py-2 hover:bg-slate-100 text-slate-600 text-xs font-bold rounded-xl transition cursor-pointer"
               >
                 Hủy
-              </button>
-              <button
+              </Button>
+              <Button
                 type="submit"
+                variant="primary"
+                size="sm"
                 disabled={isSaving}
-                className="px-5 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-black rounded-xl shadow-md transition cursor-pointer disabled:opacity-50"
+                loading={isSaving}
               >
-                {isSaving ? 'Đang lưu...' : 'Lưu Thay Đổi'}
-              </button>
+                Lưu Thay Đổi
+              </Button>
             </div>
           </div>
         </form>

@@ -3,6 +3,7 @@ import { Users, X, Search, CheckSquare, Square, Trash2 } from 'lucide-react';
 import { ClassItem, EnrolledStudent } from '../../types';
 import { api } from '../../../../api';
 import { showToast } from '../../../../components/Toast';
+import { Button } from '../../../../components/button';
 
 interface BatchEnrollModalProps {
   isOpen: boolean;
@@ -122,7 +123,7 @@ export const BatchEnrollModal: React.FC<BatchEnrollModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 animate-mac-dropdown">
-      <div className="bg-white dark:bg-[#0f1320] border border-slate-200 dark:border-white/10 rounded-2xl w-full max-w-xl overflow-hidden shadow-[0_24px_80px_rgba(0,0,0,0.15)] dark:shadow-[0_24px_80px_rgba(0,0,0,0.8)] flex flex-col max-h-[85vh]">
+      <div className="bg-white dark:bg-[#0f1320] border-0 rounded-2xl w-full max-w-xl overflow-hidden shadow-[0_24px_80px_rgba(0,0,0,0.15)] dark:shadow-[0_24px_80px_rgba(0,0,0,0.8)] flex flex-col max-h-[85vh]">
         {/* MODAL HEADER */}
         <div className="flex items-center justify-between p-5 border-b border-slate-100 dark:border-white/10 bg-slate-50 dark:bg-[#14192b]">
           <h3 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
@@ -136,9 +137,9 @@ export const BatchEnrollModal: React.FC<BatchEnrollModalProps> = ({
 
         {/* SLIDING SEGMENTED CONTROL TAB PILL */}
         <div className="px-5 pt-4">
-          <div className="relative flex bg-slate-100 dark:bg-[#0d1018] p-0.5 rounded-lg border border-slate-200 dark:border-white/10 text-xs shrink-0 font-bold select-none shadow-[inset_0_1px_2px_rgba(0,0,0,0.05)]">
+          <div className="relative flex bg-slate-100 dark:bg-[#0d1018] p-0.5 rounded-lg border-0 text-xs shrink-0 font-bold select-none shadow-xs">
             <div
-              className="absolute top-0.5 bottom-0.5 rounded-md bg-blue-600 shadow-sm border border-blue-500/60 transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] pointer-events-none"
+              className="absolute top-0.5 bottom-0.5 rounded-md bg-blue-600 shadow-xs border-0 transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] pointer-events-none"
               style={{
                 left: activeTab === 'available' ? '2px' : 'calc(50% + 1px)',
                 width: 'calc(50% - 3px)',
@@ -272,20 +273,23 @@ export const BatchEnrollModal: React.FC<BatchEnrollModalProps> = ({
 
             {/* ACTION FOOTER */}
             <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-200 dark:border-white/10">
-              <button
+              <Button
+                variant="secondary"
+                size="sm"
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2 rounded-xl bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-slate-300 text-xs font-bold hover:bg-slate-200 dark:hover:bg-white/10 transition cursor-pointer"
               >
                 Đóng
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="primary"
+                size="sm"
                 type="submit"
                 disabled={selectedStudentIdsToEnroll.length === 0 || enrollingBatch}
-                className="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-xs font-extrabold border border-white/20 shadow-sm transition cursor-pointer"
+                loading={enrollingBatch}
               >
                 {enrollingBatch ? 'Đang thêm...' : `Thêm (${selectedStudentIdsToEnroll.length}) học sinh vào lớp`}
-              </button>
+              </Button>
             </div>
           </form>
         )}
@@ -345,16 +349,18 @@ export const BatchEnrollModal: React.FC<BatchEnrollModalProps> = ({
                         </div>
                       </div>
 
-                      <button
+                      <Button
+                        variant="danger"
+                        size="xs"
                         type="button"
                         disabled={isBusy}
+                        loading={isBusy}
                         onClick={() => handleUnenrollStudentFromModal(s.id, s.full_name)}
-                        className="px-3 py-1.5 rounded-xl bg-rose-500/15 hover:bg-rose-500/30 text-rose-600 dark:text-rose-300 border border-rose-500/30 text-xs font-bold flex items-center gap-1.5 transition cursor-pointer disabled:opacity-50 shrink-0"
+                        leftIcon={<Trash2 size={13} />}
                         title={`Bỏ học sinh ${s.full_name} khỏi lớp`}
                       >
-                        <Trash2 size={13} />
-                        <span>{isBusy ? 'Đang bỏ...' : 'Bỏ khỏi lớp'}</span>
-                      </button>
+                        {isBusy ? 'Đang bỏ...' : 'Bỏ khỏi lớp'}
+                      </Button>
                     </div>
                   );
                 })
@@ -363,13 +369,14 @@ export const BatchEnrollModal: React.FC<BatchEnrollModalProps> = ({
 
             {/* FOOTER */}
             <div className="flex items-center justify-end pt-3 border-t border-slate-200 dark:border-white/10">
-              <button
+              <Button
+                variant="secondary"
+                size="sm"
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2 rounded-xl bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-slate-300 text-xs font-bold hover:bg-slate-200 dark:hover:bg-white/10 transition cursor-pointer"
               >
                 Đóng
-              </button>
+              </Button>
             </div>
           </div>
         )}

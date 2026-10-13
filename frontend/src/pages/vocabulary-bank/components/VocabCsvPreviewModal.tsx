@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
 import { AlertTriangle, CheckCircle2, X } from 'lucide-react';
 import { DataTable } from '../../../components/DataTable';
+import { Button } from '../../../components/button';
 
 interface VocabCsvPreviewModalProps {
   isOpen: boolean;
@@ -65,7 +66,7 @@ export const VocabCsvPreviewModal: React.FC<VocabCsvPreviewModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 animate-fade-in">
-      <div className="w-full max-w-4xl bg-white border border-slate-200 rounded-3xl overflow-hidden flex flex-col max-h-[90vh] shadow-2xl">
+      <div className="w-full max-w-4xl bg-white border-0 rounded-3xl overflow-hidden flex flex-col max-h-[90vh] shadow-2xl">
         <div className="h-14 border-b border-slate-200 bg-slate-50 flex items-center justify-between px-6 shrink-0">
           <div className="flex items-center gap-3">
             <h3 className="text-sm font-black text-slate-900 uppercase tracking-wider">
@@ -101,19 +102,24 @@ export const VocabCsvPreviewModal: React.FC<VocabCsvPreviewModalProps> = ({
           </p>
 
           <div className="flex gap-3">
-            <button
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
               onClick={onClose}
-              className="px-4.5 py-2 hover:bg-slate-200 text-slate-600 text-xs font-bold rounded-xl transition cursor-pointer"
             >
               Hủy bỏ
-            </button>
-            <button
+            </Button>
+            <Button
+              type="button"
+              variant="primary"
+              size="sm"
               onClick={onConfirm}
               disabled={loading}
-              className="px-5 py-2 bg-blue-600 hover:bg-blue-500 active:scale-95 text-white text-xs font-black rounded-xl shadow-md transition cursor-pointer disabled:opacity-50"
+              loading={loading}
             >
               {loading ? 'Đang nạp...' : 'Bắt đầu nạp'}
-            </button>
+            </Button>
           </div>
         </div>
       </div>

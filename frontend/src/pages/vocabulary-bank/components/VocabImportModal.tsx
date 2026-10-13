@@ -1,5 +1,6 @@
 import React from 'react';
 import { Upload, X, HelpCircle } from 'lucide-react';
+import { Button } from '../../../components/button';
 
 interface VocabImportModalProps {
   isOpen: boolean;
@@ -26,7 +27,7 @@ export const VocabImportModal: React.FC<VocabImportModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 animate-fade-in">
-      <div className="w-full max-w-lg bg-white border border-slate-200 rounded-3xl p-6 flex flex-col gap-4 text-slate-800 max-h-[90vh] shadow-2xl">
+      <div className="w-full max-w-lg bg-white border-0 rounded-3xl p-6 flex flex-col gap-4 text-slate-800 max-h-[90vh] shadow-2xl">
         <div className="flex items-center justify-between border-b border-slate-200 pb-3">
           <h3 className="text-sm font-black text-slate-900 uppercase tracking-wider flex items-center gap-2">
             <Upload className="text-blue-500" size={16} />
@@ -103,19 +104,24 @@ export const VocabImportModal: React.FC<VocabImportModalProps> = ({
         </div>
 
         <div className="flex justify-end gap-3 pt-3 border-t border-slate-200 mt-2">
-          <button
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
             onClick={onClose}
-            className="px-4 py-2 hover:bg-slate-100 text-slate-600 text-xs font-bold rounded-xl transition cursor-pointer"
           >
             Hủy
-          </button>
-          <button
+          </Button>
+          <Button
+            type="button"
+            variant="primary"
+            size="sm"
             onClick={onSubmit}
             disabled={loading || (!selectedCsvFile && !pastedCsv.trim())}
-            className="px-5 py-2 bg-gradient-to-tr from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-black rounded-xl shadow-md transition cursor-pointer"
+            loading={loading}
           >
             {loading ? 'Đang kiểm tra...' : 'Bắt đầu kiểm tra'}
-          </button>
+          </Button>
         </div>
       </div>
     </div>

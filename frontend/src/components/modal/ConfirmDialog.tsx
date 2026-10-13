@@ -1,6 +1,7 @@
 import { useState, createContext, useContext, ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { AlertTriangle, HelpCircle, X } from 'lucide-react';
+import { Button } from '../button';
 
 export interface ConfirmOptions {
   title: string;
@@ -65,7 +66,7 @@ export function ConfirmProvider({ children }: ConfirmProviderProps) {
       {confirmState && createPortal(
         <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 animate-in fade-in duration-200">
           <div 
-            className="w-full max-w-md bg-white border border-slate-300 rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200"
+            className="w-full max-w-md bg-white border-0 rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200"
             role="dialog"
             aria-modal="true"
           >
@@ -102,26 +103,22 @@ export function ConfirmProvider({ children }: ConfirmProviderProps) {
 
             {/* Actions */}
             <div className="flex items-center justify-end gap-3 px-6 py-4 bg-slate-50 border-t border-slate-200">
-              <button
+              <Button
                 type="button"
+                variant="secondary"
+                size="sm"
                 onClick={handleCancel}
-                className="px-4 py-2 text-xs font-bold text-slate-700 bg-white border border-slate-300 hover:bg-slate-50 rounded-xl transition-all shadow-2xs cursor-pointer"
               >
                 {options?.cancelText || 'Hủy bỏ'}
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
+                variant={isDanger ? 'danger' : 'primary'}
+                size="sm"
                 onClick={handleConfirm}
-                className={`px-4 py-2 text-xs font-bold text-white rounded-xl transition-all shadow-2xs cursor-pointer ${
-                  isDanger
-                    ? 'bg-rose-600 hover:bg-rose-700'
-                    : isWarning
-                    ? 'bg-amber-600 hover:bg-amber-700'
-                    : 'bg-blue-600 hover:bg-blue-700'
-                }`}
               >
                 {options?.confirmText || 'Đồng ý'}
-              </button>
+              </Button>
             </div>
           </div>
         </div>,

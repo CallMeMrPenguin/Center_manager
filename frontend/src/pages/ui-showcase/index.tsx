@@ -301,10 +301,10 @@ export default function UIShowcasePage() {
           </div>
 
           <div className="flex flex-wrap gap-3 pt-4 border-t border-slate-100 dark:border-white/5">
-            <button type="button" onClick={() => setUndoToastOpen(true)} className="px-4 py-2 bg-indigo-500/20 border border-indigo-500/40 text-indigo-600 dark:text-indigo-300 rounded-xl font-bold text-xs hover:bg-indigo-500/30 cursor-pointer">
+            <button type="button" onClick={() => setUndoToastOpen(true)} className="px-4 py-2 bg-indigo-500/20 border-0 shadow-2xs text-indigo-600 dark:text-indigo-300 rounded-xl font-bold text-xs hover:bg-indigo-500/30 cursor-pointer">
               Mở Action Undo Toast
             </button>
-            <button type="button" onClick={handleTestPromise} className="px-4 py-2 bg-purple-500/20 border border-purple-500/40 text-purple-600 dark:text-purple-300 rounded-xl font-bold text-xs hover:bg-purple-500/30 cursor-pointer">
+            <button type="button" onClick={handleTestPromise} className="px-4 py-2 bg-purple-500/20 border-0 shadow-2xs text-purple-600 dark:text-purple-300 rounded-xl font-bold text-xs hover:bg-purple-500/30 cursor-pointer">
               Thử Promise Toast (2s)
             </button>
           </div>

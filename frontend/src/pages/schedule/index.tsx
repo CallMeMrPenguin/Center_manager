@@ -3,6 +3,7 @@ import { Plus, List, Calendar } from 'lucide-react';
 import { api } from '../../api';
 import { showToast } from '../../components/Toast';
 import { CustomSelect } from '../../components/CustomSelect';
+import { Button } from '../../components/button';
 import { ScheduleDatePicker } from './components/ScheduleDatePicker';
 import { DataTable } from '../../components/DataTable';
 import { getLocalDateStr } from '../../utils';
@@ -325,15 +326,16 @@ export default function SchedulePage() {
             openAdd={openAdd}
             openEdit={openEdit}
             viewModeToggle={
-              <button
+              <Button
+                variant="white"
+                size="xs"
                 type="button"
                 onClick={() => handleChangeViewMode('list')}
-                className="p-1 px-2.5 rounded-xl bg-white dark:bg-[#111728] hover:bg-slate-100 dark:hover:bg-white/10 text-slate-700 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition cursor-pointer shadow-2xs border border-slate-200 dark:border-white/10 flex items-center gap-1.5 text-xs font-bold"
                 title="Chuyển sang chế độ danh sách"
+                leftIcon={<List size={13} />}
               >
-                <List size={13} />
-                <span>Danh sách</span>
-              </button>
+                Danh sách
+              </Button>
             }
           />
         )}
@@ -342,15 +344,16 @@ export default function SchedulePage() {
         {viewMode === 'list' && (
           <div className="flex flex-col flex-1 min-h-0">
             <div className="bg-slate-50 dark:bg-[#131a2c] border-b border-slate-200 dark:border-white/10 px-4 py-2 flex items-center justify-end gap-2.5 shrink-0">
-              <button
+              <Button
+                variant="white"
+                size="xs"
                 type="button"
                 onClick={() => handleChangeViewMode('week')}
-                className="p-1 px-2.5 rounded-xl bg-white dark:bg-[#111728] hover:bg-slate-100 dark:hover:bg-white/10 text-slate-700 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition cursor-pointer shadow-2xs border border-slate-200 dark:border-white/10 flex items-center gap-1.5 text-xs font-bold"
                 title="Chuyển sang chế độ thời gian"
+                leftIcon={<Calendar size={13} />}
               >
-                <Calendar size={13} />
-                <span>Lịch tuần</span>
-              </button>
+                Lịch tuần
+              </Button>
             </div>
             <div className="p-4 flex-1 min-h-0 overflow-auto flex flex-col">
               <DataTable

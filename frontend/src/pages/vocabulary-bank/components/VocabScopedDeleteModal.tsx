@@ -2,6 +2,7 @@ import React from 'react';
 import { Trash2, X, AlertTriangle } from 'lucide-react';
 import { SegmentedControl } from '../../../components/SegmentedControl';
 import { CustomSelect } from '../../../components/CustomSelect';
+import { Button } from '../../../components/button';
 
 interface VocabScopedDeleteModalProps {
   isOpen: boolean;
@@ -34,7 +35,7 @@ export const VocabScopedDeleteModal: React.FC<VocabScopedDeleteModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 animate-fade-in p-4">
-      <div className="w-full max-w-md bg-white border border-slate-200 rounded-2xl shadow-xl p-6 flex flex-col gap-4 text-slate-800">
+      <div className="w-full max-w-md bg-white border-0 rounded-2xl shadow-xl p-6 flex flex-col gap-4 text-slate-800">
         <div className="flex items-center justify-between border-b border-slate-200 pb-3">
           <h3 className="text-sm font-black text-slate-900 uppercase tracking-wider flex items-center gap-2">
             <Trash2 size={16} className="text-rose-500" />
@@ -65,7 +66,7 @@ export const VocabScopedDeleteModal: React.FC<VocabScopedDeleteModalProps> = ({
           />
 
           {scope !== 'all' && (
-            <div className="flex flex-col gap-3.5 bg-slate-50 border border-slate-200 p-3.5 rounded-xl mt-1.5">
+            <div className="flex flex-col gap-3.5 bg-slate-50 border-0 rounded-xl p-3.5 mt-1.5 shadow-2xs">
               <div className="flex flex-col gap-1.5">
                 <label className="text-[10px] font-bold text-slate-500 uppercase">Chọn Khối lớp:</label>
                 <CustomSelect
@@ -94,7 +95,7 @@ export const VocabScopedDeleteModal: React.FC<VocabScopedDeleteModalProps> = ({
             </div>
           )}
 
-          <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-[10px] text-amber-700 leading-relaxed mt-1 flex gap-2">
+          <div className="p-3 bg-amber-50 border-0 rounded-xl text-[10px] text-amber-700 leading-relaxed mt-1 flex gap-2 shadow-2xs">
             <AlertTriangle size={14} className="shrink-0 mt-0.5 text-amber-600" />
             <span>
               <strong>Lưu ý:</strong> Hành động xóa dữ liệu này là vĩnh viễn và không thể khôi phục lại. Bạn nên xuất file dự phòng trước khi xóa.
@@ -103,19 +104,24 @@ export const VocabScopedDeleteModal: React.FC<VocabScopedDeleteModalProps> = ({
         </div>
 
         <div className="flex justify-end gap-3 pt-3 border-t border-slate-200 mt-2">
-          <button
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
             onClick={onClose}
-            className="px-4 py-2 hover:bg-slate-100 text-slate-600 text-xs font-bold rounded-xl transition cursor-pointer"
           >
             Hủy
-          </button>
-          <button
+          </Button>
+          <Button
+            type="button"
+            variant="danger"
+            size="sm"
             onClick={onConfirm}
             disabled={loading}
-            className="px-5 py-2 bg-rose-600 hover:bg-rose-500 text-white text-xs font-black rounded-xl shadow-md transition cursor-pointer disabled:opacity-50"
+            loading={loading}
           >
             {loading ? 'Đang xóa...' : 'Xác Nhận Xóa'}
-          </button>
+          </Button>
         </div>
       </div>
     </div>

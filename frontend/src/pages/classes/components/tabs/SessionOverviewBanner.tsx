@@ -8,6 +8,7 @@ import { AttendanceRecord } from '../../types';
 import { trunc1Dec } from '../../../../utils';
 import { useSessionOverview } from './useSessionOverview';
 import { BelowThresholdCard, DivergenceCard } from './SessionOverviewCards';
+import { Button } from '../../../../components/button';
 
 interface SessionOverviewBannerProps {
   attendanceRecords: AttendanceRecord[];
@@ -85,14 +86,15 @@ export const SessionOverviewBanner: React.FC<SessionOverviewBannerProps> = ({
             </div>
           </div>
 
-          <button
+          <Button
             type="button"
+            variant="white"
+            size="icon-xs"
             onClick={() => setIsExpanded((prev) => !prev)}
-            className="p-1.5 rounded-xl bg-white hover:bg-slate-100 dark:bg-[#121626] dark:hover:bg-white/10 text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition cursor-pointer border border-slate-200/80 dark:border-white/10 shadow-xs"
             title={isExpanded ? 'Thu gọn tổng quan' : 'Mở rộng tổng quan'}
           >
-            {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-          </button>
+            {isExpanded ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
+          </Button>
         </div>
       </div>
 
