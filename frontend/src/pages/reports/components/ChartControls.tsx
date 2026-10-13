@@ -2,7 +2,6 @@ import React from 'react';
 import { SegmentedControl } from '../../../components/SegmentedControl';
 import { ZoomButtonGroup, ViewModeButton } from '../../../components/button';
 import { DistributionStats, GradeTypeFilterKey } from '../utils/distributionAnalytics';
-import { ChartDateRangePicker } from './ChartDateRangePicker';
 
 interface ChartControlsProps {
   engine: any;
@@ -10,8 +9,8 @@ interface ChartControlsProps {
   selectedPhaseId?: string;
   setSelectedPhaseId?: (id: string) => void;
   onOpenPhaseModal?: () => void;
-  timeView: '1m' | '2m' | '3m' | 'all';
-  setTimeView: (v: '1m' | '2m' | '3m' | 'all') => void;
+  timeView?: '1m' | '2m' | '3m' | 'all';
+  setTimeView?: (v: '1m' | '2m' | '3m' | 'all') => void;
   customRange?: { startStr: string; endStr: string } | null;
   setCustomRange?: (r: { startStr: string; endStr: string } | null) => void;
   zoomLevel: number;
@@ -27,10 +26,6 @@ interface ChartControlsProps {
 }
 
 export const ChartControls: React.FC<ChartControlsProps> = ({
-  timeView,
-  setTimeView,
-  customRange,
-  setCustomRange,
   zoomLevel,
   setZoomLevel,
   setPanOffset,
@@ -43,21 +38,13 @@ export const ChartControls: React.FC<ChartControlsProps> = ({
   return (
     <div className="flex flex-col gap-2 border-b border-slate-200 dark:border-[#181f36] pb-3">
       {chartViewMode === 'timeline' ? (
-        /* SINGLE-ROW HEADER: TIẾN ĐỘ HỌC TẬP + DATEPICKER + ZOOM + TOGGLE */
+        /* SINGLE-ROW HEADER: TIẾN ĐỘ HỌC TẬP + ZOOM + TOGGLE */
         <div className="flex flex-wrap items-center justify-between gap-3 w-full">
           <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider shrink-0">
             TIẾN ĐỘ HỌC TẬP
           </h3>
 
-          <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
-            {/* Chart Date Range Picker: Presets & Custom Range */}
-            <ChartDateRangePicker
-              timeView={timeView}
-              setTimeView={setTimeView}
-              customRange={customRange}
-              setCustomRange={setCustomRange}
-            />
-
+          <div className="flex items-center gap-2 sm:gap-2.5">
             {/* Standard Zoom Button Group from src/components/button/ */}
             <ZoomButtonGroup
               zoomLevel={zoomLevel}

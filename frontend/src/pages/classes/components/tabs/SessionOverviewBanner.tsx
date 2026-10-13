@@ -8,7 +8,7 @@ import { AttendanceRecord } from '../../types';
 import { trunc1Dec } from '../../../../utils';
 import { useSessionOverview } from './useSessionOverview';
 import { BelowThresholdCard, DivergenceCard } from './SessionOverviewCards';
-import { Button } from '../../../../components/button';
+import { CollapseButton } from '../../../../components/button';
 
 interface SessionOverviewBannerProps {
   attendanceRecords: AttendanceRecord[];
@@ -86,15 +86,11 @@ export const SessionOverviewBanner: React.FC<SessionOverviewBannerProps> = ({
             </div>
           </div>
 
-          <Button
-            type="button"
-            variant="white"
-            size="icon-xs"
-            onClick={() => setIsExpanded((prev) => !prev)}
+          <CollapseButton
+            isCollapsed={!isExpanded}
+            onToggle={() => setIsExpanded((prev) => !prev)}
             title={isExpanded ? 'Thu gọn tổng quan' : 'Mở rộng tổng quan'}
-          >
-            {isExpanded ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
-          </Button>
+          />
         </div>
       </div>
 

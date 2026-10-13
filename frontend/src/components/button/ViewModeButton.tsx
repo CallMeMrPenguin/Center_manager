@@ -22,7 +22,7 @@ export const ViewModeButton: React.FC<ViewModeButtonProps> = ({
       type="button"
       onClick={() => onToggle(isTimeline ? 'distribution' : 'timeline')}
       title={isTimeline ? 'Chuyển sang xem phổ điểm' : 'Chuyển sang xem tiến độ học tập'}
-      className={className}
+      className={`shadow-xs hover:shadow-sm ${className}`}
     >
       {isTimeline ? <BarChart2 size={16} /> : <TrendingUp size={16} />}
     </Button>

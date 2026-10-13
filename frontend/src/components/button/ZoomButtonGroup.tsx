@@ -22,31 +22,33 @@ export const ZoomButtonGroup: React.FC<ZoomButtonGroupProps> = ({
 }) => {
   return (
     <div
-      className={`flex items-center gap-0.5 bg-white dark:bg-[#181a20] rounded-xl p-0.5 border-0 shadow-2xs ${className}`}
+      className={`flex items-center gap-1 bg-slate-100 dark:bg-[#181a20] rounded-xl p-1 border-0 shadow-xs ${className}`}
     >
       <Button
-        variant="ghost"
+        variant="white"
         size="icon-xs"
         type="button"
         onClick={() => setZoomLevel((z) => Math.min(maxZoom, Number((z + step).toFixed(2))))}
         title="Phóng to biểu đồ"
+        className="!p-1.5 shadow-xs hover:shadow-sm text-slate-700 dark:text-slate-200"
       >
-        <ZoomIn size={13} />
+        <ZoomIn size={14} />
       </Button>
 
       <Button
-        variant="ghost"
+        variant="white"
         size="icon-xs"
         type="button"
         onClick={() => setZoomLevel((z) => Math.max(minZoom, Number((z - step).toFixed(2))))}
         title="Thu nhỏ biểu đồ"
+        className="!p-1.5 shadow-xs hover:shadow-sm text-slate-700 dark:text-slate-200"
       >
-        <ZoomOut size={13} />
+        <ZoomOut size={14} />
       </Button>
 
       {setPanOffset && (
         <Button
-          variant="ghost"
+          variant="white"
           size="icon-xs"
           type="button"
           onClick={() => {
@@ -54,6 +56,7 @@ export const ZoomButtonGroup: React.FC<ZoomButtonGroupProps> = ({
             setPanOffset({ x: 0, y: 0 });
           }}
           title="Đặt lại góc nhìn ban đầu"
+          className="!p-1.5 shadow-xs hover:shadow-sm text-slate-700 dark:text-slate-200"
         >
           <RotateCcw size={13} />
         </Button>
